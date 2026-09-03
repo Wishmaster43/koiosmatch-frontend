@@ -26,6 +26,7 @@ import { escapeCsvCell } from '@/lib/csv'
 import { isUuid } from '@/lib/uuid'
 import { Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
+import SoftChip from '@/components/ui/SoftChip'
 import type { Id } from '@/types/common'
 
 // The Spatie {attributes, old} diff bag every entity's AuditsChanges trait sends.
@@ -42,6 +43,10 @@ export interface ChangelogEvent {
   event?: string
   log_name?: string
   subject_type?: string
+  // K-ACTLOG-SUBJECT-NAME-1: which record within subject_type — already on the
+  // wire (LogsEntityActivity::formatActivityEntry) — so a caller's `subjectLabel`
+  // can resolve an id→name lookup ("Vestiging · Eindhoven"), not only the type.
+  subject_id?: Id
   changes?: ChangelogDiffBag
   properties?: ChangelogDiffBag
   [k: string]: unknown
@@ -200,6 +205,7 @@ export default function EntityChangelogTab<E extends ChangelogEvent = ChangelogE
 
   const inputStyle = { padding: '6px 9px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', color: 'var(--text)', outline: 'none' } as const
   const boldSpan = { fontWeight: 600, color: 'var(--text)' } as const
+  const chipWrap = { display: 'inline-flex', verticalAlign: 'middle' } as const
 
   return (
     <>
@@ -249,7 +255,9 @@ export default function EntityChangelogTab<E extends ChangelogEvent = ChangelogE
             ) : (
               <>{' · '}{cd.who}{' · '}{cd.action}</>
             )}
-            {cd.subject && <> {' · '}<span style={boldSpan}>{cd.subject}</span></>}
+            {/* Child-entity chip (K-ACTLOG-ROLLUP-1): names which sub-entity a rolled-up
+                event in a mixed feed (e.g. the customer timeline) came from. */}
+            {cd.subject && <> {' · '}<span style={chipWrap}><SoftChip label={cd.subject} round /></span></>}
             {cd.field && <> {' · '}<span style={boldSpan}>{cd.field}</span></>}
           </Caption>
           {cd.line && <div style={{ fontSize: 12, color: 'var(--text)', marginTop: 5 }}>{cd.line}</div>}

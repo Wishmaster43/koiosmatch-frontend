@@ -56,4 +56,42 @@ describe('EntityChangelogTab · CHANGELOG-3 uuid guard', () => {
     expect(screen.getByText(nlCandidates.changelog.error)).toBeInTheDocument()
     expect(screen.queryByText(nlCandidates.changelog.empty)).not.toBeInTheDocument()
   })
+
+  // K-ACTLOG-ROLLUP-1: a mixed feed's `subjectLabel` renders as a real §4 soft chip
+  // (SoftChip), never a plain bold span — and stays visible next to its diff row.
+  it('renders the sub-entity label as a soft chip when `subjectLabel` is given', async () => {
+    const events: ChangelogEvent[] = [{
+      id: 'e3', causer_name: 'Danny Polak', created_at: '2026-08-01T10:00:00Z', event: 'updated',
+      subject_type: 'CustomerLocation',
+      changes: { attributes: { street: 'Nieuwe straat' }, old: { street: 'Oude straat' } },
+    }]
+    render(
+      <EntityChangelogTab
+        items={events} loading={false} error={false} namespace="candidates"
+        subjectLabel={ev => (ev.subject_type === 'CustomerLocation' ? 'Vestiging' : undefined)}
+      />,
+    )
+    const chip = await screen.findByText('Vestiging')
+    // SoftChip's own tinted background — proves it went through the shared
+    // chip component rather than a hand-rolled <span style={{fontWeight:600}}>.
+    expect(chip.closest('span')).toHaveStyle({ borderRadius: '99px' })
+  })
+
+  // K-ACTLOG-SUBJECT-NAME-1: subject_id (already on the wire, LogsEntityActivity)
+  // reaches the caller's subjectLabel so it can resolve WHICH sub-entity, not
+  // only its type — this locks in the typed field on the wire contract.
+  it('passes subject_id through to the subjectLabel callback', async () => {
+    const events: ChangelogEvent[] = [{
+      id: 'e4', causer_name: 'Danny Polak', created_at: '2026-08-01T10:00:00Z', event: 'updated',
+      subject_type: 'CustomerLocation', subject_id: 9,
+      changes: { attributes: { street: 'Nieuwe straat' }, old: { street: 'Oude straat' } },
+    }]
+    render(
+      <EntityChangelogTab
+        items={events} loading={false} error={false} namespace="candidates"
+        subjectLabel={ev => (ev.subject_type === 'CustomerLocation' ? `Vestiging · ${ev.subject_id}` : undefined)}
+      />,
+    )
+    expect(await screen.findByText('Vestiging · 9')).toBeInTheDocument()
+  })
 })

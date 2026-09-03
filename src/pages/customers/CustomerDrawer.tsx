@@ -6,7 +6,7 @@
  * The Planning tab is gated on the Planning module (same gate as the candidate
  * Planning tab); the Opportunities tab's flex-shift section is gated inside it.
  */
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Trash2, GitMerge } from 'lucide-react'
@@ -163,6 +163,22 @@ export default function CustomerDrawer({
   const departmentsApi = useCustomerDepartments(c?.id)
   const contactsApi    = useCustomerContacts(c?.id)
 
+  // Sub-entity id → name lookups for the changelog chip (K-ACTLOG-SUBJECT-NAME-1):
+  // these lists are already loaded here for the CRUD tabs, so the rolled-up
+  // changelog chip can name the exact location/department/contact, not only its type.
+  const locationNames = useMemo(
+    () => Object.fromEntries(locationsApi.locations.filter(l => l.id !== undefined).map(l => [String(l.id), l.name])),
+    [locationsApi.locations],
+  )
+  const departmentNames = useMemo(
+    () => Object.fromEntries(departmentsApi.departments.filter(d => d.id !== undefined).map(d => [String(d.id), d.name])),
+    [departmentsApi.departments],
+  )
+  const contactNames = useMemo(
+    () => Object.fromEntries(contactsApi.contacts.filter(ct => ct.id !== undefined).map(ct => [String(ct.id), ct.name])),
+    [contactsApi.contacts],
+  )
+
   // Header state, convert-phase, delete and merge wiring — extracted to its own
   // hook (see useCustomerDrawerActions.ts); called unconditionally (rules of
   // hooks), same as the useState calls it replaces, before the null check below.
@@ -247,7 +263,7 @@ export default function CustomerDrawer({
       case 'planning':      return <PlanningTab customerId={c.id ?? ''} />
       // TIJDLIJN-OVERAL (27-08): same content component the title-row changelog
       // popover uses (mixed customer + sub-entity feed).
-      case 'timeline':      return <ChangelogTab customerId={c.id} />
+      case 'timeline':      return <ChangelogTab customerId={c.id} locationNames={locationNames} departmentNames={departmentNames} contactNames={contactNames} />
       case 'statistics':    return <StatisticsTab c={c} onGoToVacancies={() => setActiveTab?.('vacancies')} />
       case 'priceAgreements': return <PriceAgreementsTab customerId={c.id} c={c} onSave={v => onUpdate?.(c.id, v)} />
       // DOCS-LOC-DEPT-1: the customer's own locations/departments enable the
@@ -343,7 +359,7 @@ export default function CustomerDrawer({
             {/* Danny 27-07: the shared house ChangelogPopover shell (§3A(d)) — was a
                 cramped 360px dropdown with no focus trap; now the same 900px centred
                 panel as the candidate drawer. */}
-            <ChangelogPopover><ChangelogTab customerId={c.id} /></ChangelogPopover>
+            <ChangelogPopover><ChangelogTab customerId={c.id} locationNames={locationNames} departmentNames={departmentNames} contactNames={contactNames} /></ChangelogPopover>
             {/* KLANT-SAMENVOEGEN-1: merge a duplicate into this record — same slot/style
                 as the candidate drawer's own merge icon (klok · samenvoegen · prullenbak),
                 permission-gated, hidden once already archived. */}
