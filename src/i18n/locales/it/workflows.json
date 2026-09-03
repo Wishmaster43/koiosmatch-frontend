@@ -343,7 +343,6 @@
     "newFolder": "Nuova cartella",
     "newFolderTitle": "Nuova cartella",
     "newFolderLabel": "Nome",
-    "folderNamePrompt": "Nome cartella:",
     "allWorkflows": "Tutte le workflow",
     "unassigned": "Non assegnato",
     "countWorkflows": "{{n}} workflow",

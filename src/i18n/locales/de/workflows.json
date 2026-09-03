@@ -282,7 +282,6 @@
     "newFolder": "Neuer Ordner",
     "newFolderTitle": "Neuer Ordner",
     "newFolderLabel": "Name",
-    "folderNamePrompt": "Ordnername:",
     "allWorkflows": "Alle Workflows",
     "unassigned": "Nicht zugewiesen",
     "countWorkflows": "{{n}} Workflows",

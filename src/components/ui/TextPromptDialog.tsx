@@ -4,11 +4,11 @@
  * Focus traps on open and returns on close. Enter submits; Escape closes. Colours are
  * tokens only (§4).
  */
-import { useEffect, useRef } from 'react'
+import { useEffect, useId, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import Button from '@/components/ui/Button'
-import { formLabelStyle } from '@/components/ui/typography'
+import { formLabelStyle, SectionTitle } from '@/components/ui/typography'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 
 export interface TextPromptDialogProps {
@@ -31,6 +31,11 @@ export default function TextPromptDialog({
 }: TextPromptDialogProps) {
   const { t } = useTranslation('common')
   const inputRef = useRef<HTMLInputElement>(null)
+  // Unique input id (never a hardcoded DOM id — two dialogs on one page would collide).
+  const inputId = useId()
+  // An empty (whitespace-only) value can never be confirmed — disables the button
+  // and short-circuits Enter, instead of silently closing the dialog as if confirmed.
+  const trimmedEmpty = value.trim().length === 0
 
   // Focus the input on open, select all text so typing replaces it.
   useEffect(() => {
@@ -40,9 +45,9 @@ export default function TextPromptDialog({
     }
   }, [open])
 
-  // Handle keyboard: Enter submits, Escape cancels (via FloatingPanel's onClose).
+  // Handle keyboard: Enter submits (unless the field is empty), Escape cancels (via FloatingPanel's onClose).
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !trimmedEmpty) {
       onConfirm()
     }
   }
@@ -63,18 +68,18 @@ export default function TextPromptDialog({
         flexDirection: 'column',
         gap: 14,
       }}
-      header={<div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', flex: 1 }}>{title}</div>}
+      header={<SectionTitle style={{ flex: 1 }}>{title}</SectionTitle>}
     >
       {/* Label + input in a vertical stack — the form kit's label identity and field face
           (fieldMetrics), so this dialog never paints its own input; the global
           :focus-visible rule draws the focus ring. */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <label htmlFor="text-prompt-input" style={formLabelStyle}>
+        <label htmlFor={inputId} style={formLabelStyle}>
           {label}
         </label>
         <input
           ref={inputRef}
-          id="text-prompt-input"
+          id={inputId}
           type="text"
           value={value}
           onChange={(e) => onValueChange(e.target.value)}
@@ -84,12 +89,12 @@ export default function TextPromptDialog({
         />
       </div>
 
-      {/* Buttons: Cancel (secondary) + Confirm (primary). */}
+      {/* Buttons: Cancel (secondary) + Confirm (primary, disabled while the field is empty). */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
         <Button variant="secondary" onClick={onCancel}>
           {t('cancel')}
         </Button>
-        <Button variant="primary" onClick={onConfirm}>
+        <Button variant="primary" onClick={onConfirm} disabled={trimmedEmpty}>
           {t('confirm')}
         </Button>
       </div>

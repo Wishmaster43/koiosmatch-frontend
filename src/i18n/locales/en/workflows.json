@@ -286,7 +286,6 @@
     "newFolder": "New folder",
     "newFolderTitle": "New folder",
     "newFolderLabel": "Name",
-    "folderNamePrompt": "Folder name:",
     "allWorkflows": "All workflows",
     "unassigned": "Unassigned",
     "countWorkflows": "{{n}} workflows",

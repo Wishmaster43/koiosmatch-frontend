@@ -282,7 +282,6 @@
     "newFolder": "Nouveau dossier",
     "newFolderTitle": "Nouveau dossier",
     "newFolderLabel": "Nom",
-    "folderNamePrompt": "Nom du dossier :",
     "allWorkflows": "Tous les workflows",
     "unassigned": "Non attribué",
     "countWorkflows": "{{n}} workflows",

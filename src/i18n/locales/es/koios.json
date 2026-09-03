@@ -124,7 +124,10 @@
       "monthlyBudget": "Presupuesto mensual",
       "warnAt": "Advertir en",
       "rateChat": "Límite de chat",
-      "rateOther": "Límite de otras acciones"
+      "rateOther": "Límite de otras acciones",
+      "perMinute": "{{count}} por minuto",
+      "perHour": "{{count}} por hora",
+      "perSecond": "{{count}} por segundo"
     },
     "surfaces": {
       "chat": "Chat",

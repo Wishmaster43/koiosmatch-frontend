@@ -11,6 +11,7 @@ import { interactive } from '@/lib/a11y'
 import { Zap, Folder, FolderPlus, Trash2 } from 'lucide-react'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import { useTextPrompt } from '@/hooks/useTextPrompt'
+import Button from '@/components/ui/Button'
 import type { WorkflowFolder, FolderId } from './hooks/useWorkflowsData'
 
 // One row in the folder sidebar (built-in "All"/"Unassigned" or a tenant folder).
@@ -44,7 +45,7 @@ function SidebarRow({ label, icon, active, isDragOver, onClick, onDragOver, onDr
         <button onClick={e => { e.stopPropagation(); onDelete() }}
           onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
           aria-label={t('common:delete')} title={t('common:delete')}
-          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- folder-tree row action: visibility is driven by the ROW's own hover/focus state (opacity/colour fade in on showDelete), a reveal Button's fixed chrome cannot express (§14 r7 boomrijen necessity)
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, display: 'flex', flexShrink: 0,
             color: showDelete ? 'var(--color-danger)' : 'transparent', opacity: showDelete ? 1 : 0 }}>
           <Trash2 size={11} />
@@ -84,13 +85,12 @@ export default function WorkflowFolderSidebar({
       <div style={{ padding: '16px 16px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>{t('page.folders')}</span>
         {canManageFolders && (
-          <button onClick={() => {
+          // Standalone header action, not a row/chip/trigger — the house Button (§4).
+          <Button variant="ghost" size="sm" iconOnly onClick={() => {
             prompt(t('workflows:page.newFolderTitle'), t('workflows:page.newFolderLabel'), (name) => createFolder(name))
-          }} title={t('page.newFolder')} aria-label={t('page.newFolder')}
-            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
+          }} title={t('page.newFolder')} aria-label={t('page.newFolder')}>
             <FolderPlus size={15} />
-          </button>
+          </Button>
         )}
       </div>
       <div style={{ flex: 1, overflowY: 'auto' }}>

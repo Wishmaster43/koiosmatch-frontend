@@ -167,6 +167,37 @@ describe('useTextPrompt', () => {
     expect(input2.value).toBe('')
   })
 
+  it('disables the Confirm button while the field is empty', () => {
+    render(<TestComponent />)
+
+    const openBtn = screen.getByRole('button', { name: /open prompt/i })
+    fireEvent.click(openBtn)
+
+    // Freshly opened, the input is empty — Confirm must be disabled, never a
+    // silent "confirmed" close on a blank field.
+    const confirmBtn = screen.getByRole('button', { name: /confirm/i })
+    expect(confirmBtn).toBeDisabled()
+
+    const input = screen.getByRole('textbox')
+    fireEvent.change(input, { target: { value: 'Something' } })
+    expect(confirmBtn).not.toBeDisabled()
+
+    fireEvent.change(input, { target: { value: '   ' } })
+    expect(confirmBtn).toBeDisabled()
+  })
+
+  it('wires the label to the input via a unique id, never a hardcoded DOM id', () => {
+    render(<TestComponent />)
+
+    const openBtn = screen.getByRole('button', { name: /open prompt/i })
+    fireEvent.click(openBtn)
+
+    const input = screen.getByRole('textbox') as HTMLInputElement
+    const label = screen.getByText('Test Label')
+    expect(label.getAttribute('for')).toBe(input.id)
+    expect(input.id).not.toBe('text-prompt-input')
+  })
+
   it('closes the dialog when cancelled', () => {
     const onSubmit = vi.fn()
 

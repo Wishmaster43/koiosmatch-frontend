@@ -343,7 +343,6 @@
     "newFolder": "Nieuwe folder",
     "newFolderTitle": "Nieuwe map",
     "newFolderLabel": "Naam",
-    "folderNamePrompt": "Mapnaam:",
     "allWorkflows": "Alle workflows",
     "unassigned": "Niet toegewezen",
     "countWorkflows": "{{n}} workflows",

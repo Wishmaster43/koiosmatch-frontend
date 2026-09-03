@@ -43,9 +43,11 @@ export function useTextPrompt() {
       onValueChange={setInputValue}
       onConfirm={() => {
         const trimmed = inputValue.trim()
-        if (trimmed) {
-          state?.onSubmit(trimmed)
-        }
+        // Guard here too (defence in depth): the dialog already disables Confirm
+        // and no-ops Enter on an empty field, but this must never close as if
+        // confirmed without actually submitting.
+        if (!trimmed) return
+        state?.onSubmit(trimmed)
         setState(null)
         setInputValue('')
       }}

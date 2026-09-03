@@ -1,8 +1,9 @@
 /**
  * KoiosCapabilityFacts.test.tsx — unit tests for the capability facts component.
  * Asserts: (1) surfaces render as soft chips with i18n labels;
- * (2) limits rows render formatted values; (3) absent data renders nothing;
- * (4) i18n keys are present in all locales.
+ * (2) limits rows render formatted values, including real zeros (never hidden by
+ * a falsy check); (3) absent data renders nothing; (4) rate-limit strings render
+ * as a localised phrase (nl included), falling back verbatim when unparseable.
  */
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -11,11 +12,13 @@ import i18next from 'i18next'
 import KoiosCapabilityFacts from './KoiosCapabilityFacts'
 import type { KoiosSurface, KoiosLimits } from '@/components/layout/koios/useKoiosToolCapabilities'
 
-// Mock i18n instance for testing — use real koios translation keys.
-const createI18nInstance = () => {
+// Mock i18n instance for testing — mirrors the real koios.json facts keys for
+// both 'en' (default) and 'nl' (so rate-limit and percent locale formatting can
+// be asserted against the actual house behaviour).
+const createI18nInstance = (lng: 'en' | 'nl' = 'en') => {
   const instance = i18next.createInstance()
   instance.init({
-    lng: 'en',
+    lng,
     ns: ['koios'],
     defaultNS: 'koios',
     resources: {
@@ -28,12 +31,30 @@ const createI18nInstance = () => {
           'capabilities.facts.warnAt': 'Warning at',
           'capabilities.facts.rateChat': 'Chat limit',
           'capabilities.facts.rateOther': 'Limit other actions',
+          'capabilities.facts.perMinute': '{{count}} per minute',
+          'capabilities.facts.perHour': '{{count}} per hour',
+          'capabilities.facts.perSecond': '{{count}} per second',
           'capabilities.surfaces.chat': 'Chat',
           'capabilities.surfaces.note_assist': 'Note assist',
           'capabilities.surfaces.generate': 'Generate text',
           'capabilities.surfaces.conversation_assist': 'Conversation assist',
           'capabilities.surfaces.report_advice': 'Report advice',
           'capabilities.surfaces.interview_flows': 'Interview flows',
+        },
+      },
+      nl: {
+        koios: {
+          'capabilities.facts.surfaces': 'Oppervlakken',
+          'capabilities.facts.limits': 'Limieten',
+          'capabilities.facts.maxTokens': 'Max. tokens per verzoek',
+          'capabilities.facts.monthlyBudget': 'Maandbudget',
+          'capabilities.facts.warnAt': 'Waarschuwing bij',
+          'capabilities.facts.rateChat': 'Limiet chat',
+          'capabilities.facts.rateOther': 'Limiet overige acties',
+          'capabilities.facts.perMinute': '{{count}} per minuut',
+          'capabilities.facts.perHour': '{{count}} per uur',
+          'capabilities.facts.perSecond': '{{count}} per seconde',
+          'capabilities.surfaces.chat': 'Chat',
         },
       },
     },
@@ -109,11 +130,12 @@ describe('KoiosCapabilityFacts', () => {
     expect(screen.getByText(/128.*000/)).toBeInTheDocument()
     // Check monthly budget (cents → euros via formatCurrency).
     expect(screen.getByText(/5.*000/)).toBeInTheDocument() // "€ 5,000" or "$5,000" depending on locale
-    // Check warn_at percentage.
+    // Check warn_at percentage (locale-formatted, via the house formatPercent).
     expect(screen.getByText('80%')).toBeInTheDocument()
-    // Check rate limits.
-    expect(screen.getByText('20/min')).toBeInTheDocument()
-    expect(screen.getByText('30/min')).toBeInTheDocument()
+    // Rate limits render as a translated phrase, not the raw backend string.
+    expect(screen.getByText('20 per minute')).toBeInTheDocument()
+    expect(screen.getByText('30 per minute')).toBeInTheDocument()
+    expect(screen.queryByText('20/min')).not.toBeInTheDocument()
   })
 
   it('renders limits when only some fields are present', () => {
@@ -131,14 +153,14 @@ describe('KoiosCapabilityFacts', () => {
     )
     // Check max tokens renders.
     expect(screen.getByText(/50.*000/)).toBeInTheDocument()
-    // Budget (0 cents = € 0,00) should render.
-    expect(screen.getByText(/0[.,]0+/)).toBeInTheDocument()
+    // Budget (0 cents = € 0.00 in en-GB) should render, never hidden by a truthy check.
+    expect(screen.getByText('€0.00')).toBeInTheDocument()
     // Warn_at (0%) should render.
     expect(screen.getByText('0%')).toBeInTheDocument()
-    // Chat limit renders.
-    expect(screen.getByText('10/min')).toBeInTheDocument()
-    // Empty other doesn't render.
-    expect(screen.queryByText(/30\/min/)).not.toBeInTheDocument()
+    // Chat limit renders as a translated phrase.
+    expect(screen.getByText('10 per minute')).toBeInTheDocument()
+    // Empty other is "not configured" — its whole row is absent.
+    expect(screen.queryByText('Limit other actions')).not.toBeInTheDocument()
   })
 
   it('renders both surfaces and limits together', () => {
@@ -160,7 +182,7 @@ describe('KoiosCapabilityFacts', () => {
     // Check both blocks are rendered.
     expect(screen.getByText('Chat')).toBeInTheDocument()
     expect(screen.getByText('75%')).toBeInTheDocument()
-    expect(screen.getByText('20/min')).toBeInTheDocument()
+    expect(screen.getByText('20 per minute')).toBeInTheDocument()
   })
 
   it('does not render limits block when limits is undefined', () => {
@@ -197,5 +219,75 @@ describe('KoiosCapabilityFacts', () => {
     // Check section labels are rendered.
     expect(screen.getByText('Surfaces')).toBeInTheDocument()
     expect(screen.getByText('Limits')).toBeInTheDocument()
+  })
+
+  it('renders a zero monthly budget instead of hiding it', () => {
+    const i18n = createI18nInstance()
+    const limits: KoiosLimits = {
+      max_tokens_per_request: 1000,
+      monthly_budget_cents: 0,
+      warn_at_pct: 50,
+      rate_limits: { chat: '', other: '' },
+    }
+    render(
+      <I18nextProvider i18n={i18n}>
+        <KoiosCapabilityFacts limits={limits} />
+      </I18nextProvider>,
+    )
+    // The label and a real "0" value both render — a falsy check would hide the whole row.
+    expect(screen.getByText('Monthly budget')).toBeInTheDocument()
+    expect(screen.getByText('€0.00')).toBeInTheDocument()
+  })
+
+  it('renders a parsed rate limit as a localised phrase in nl', () => {
+    const i18n = createI18nInstance('nl')
+    const limits: KoiosLimits = {
+      max_tokens_per_request: 1000,
+      monthly_budget_cents: 100,
+      warn_at_pct: 50,
+      rate_limits: { chat: '20/min', other: '' },
+    }
+    render(
+      <I18nextProvider i18n={i18n}>
+        <KoiosCapabilityFacts limits={limits} />
+      </I18nextProvider>,
+    )
+    // '20/min' from the backend renders as the translated Dutch phrase, not the English fragment.
+    expect(screen.getByText('20 per minuut')).toBeInTheDocument()
+    expect(screen.queryByText('20/min')).not.toBeInTheDocument()
+  })
+
+  it('formats warn_at_pct with the locale decimal separator under nl', () => {
+    const i18n = createI18nInstance('nl')
+    const limits: KoiosLimits = {
+      max_tokens_per_request: 1000,
+      monthly_budget_cents: 100,
+      warn_at_pct: 82.5,
+      rate_limits: { chat: '', other: '' },
+    }
+    render(
+      <I18nextProvider i18n={i18n}>
+        <KoiosCapabilityFacts limits={limits} />
+      </I18nextProvider>,
+    )
+    // nl-NL uses a comma decimal separator, via the house formatPercent helper.
+    expect(screen.getByText('82,5%')).toBeInTheDocument()
+  })
+
+  it('falls back to the raw string when a rate limit cannot be parsed', () => {
+    const i18n = createI18nInstance()
+    const limits: KoiosLimits = {
+      max_tokens_per_request: 1000,
+      monthly_budget_cents: 100,
+      warn_at_pct: 50,
+      rate_limits: { chat: 'unlimited', other: '' },
+    }
+    render(
+      <I18nextProvider i18n={i18n}>
+        <KoiosCapabilityFacts limits={limits} />
+      </I18nextProvider>,
+    )
+    // An unparseable rate-limit string still renders — honest fallback, never hidden.
+    expect(screen.getByText('unlimited')).toBeInTheDocument()
   })
 })

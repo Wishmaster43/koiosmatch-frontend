@@ -37,18 +37,44 @@ function SurfacesBlock({ surfaces }: { surfaces: KoiosSurface[] }) {
   )
 }
 
+// Rate-limit unit, parsed from the backend's compact string ("20/min", "30/hour").
+type RateUnit = 'perMinute' | 'perHour' | 'perSecond'
+
+// Maps the string's unit token onto the i18n key that renders it translated.
+const RATE_UNIT_KEY: Record<string, RateUnit> = {
+  min: 'perMinute', minute: 'perMinute',
+  hour: 'perHour', h: 'perHour',
+  s: 'perSecond', sec: 'perSecond',
+}
+
+// Tolerant parse of a backend rate-limit string ("20/min", "30 / hour") into a
+// count + unit pair; returns null when the shape is unrecognised so the caller
+// can fall back to the raw string — never hide a value we cannot parse.
+function parseRateLimit(raw: string): { count: number; unit: RateUnit } | null {
+  const match = raw.match(/^(\d+)\s*\/\s*(min|minute|hour|h|s|sec)$/i)
+  if (!match) return null
+  const unit = RATE_UNIT_KEY[match[2].toLowerCase()]
+  return unit ? { count: Number(match[1]), unit } : null
+}
+
 function LimitsBlock({ limits }: { limits?: KoiosLimits }) {
   const { t } = useTranslation('koios')
-  const { locale } = useNumberFormat()
+  const { locale, formatPercent } = useNumberFormat()
   if (!limits) return null
   const { max_tokens_per_request, monthly_budget_cents, warn_at_pct, rate_limits } = limits
 
-  // Format budget: cents → euros via formatCurrency.
-  const budgetEuro = monthly_budget_cents ? monthly_budget_cents / 100 : null
+  // Format budget: cents → euros via formatCurrency. `!= null` so a real 0-cent
+  // budget still renders — a truthy check hides it, same bug as the old rate check.
+  const budgetEuro = monthly_budget_cents != null ? monthly_budget_cents / 100 : null
   const budgetStr = budgetEuro !== null ? formatCurrency(budgetEuro, 'EUR', locale) : '—'
 
-  // Format warn_at as a percentage.
-  const warnAtStr = warn_at_pct !== null && warn_at_pct !== undefined ? `${warn_at_pct}%` : '—'
+  // Renders a "20/min" rate-limit string as a translated, locale-formatted phrase.
+  // An unparseable string still renders verbatim (honest fallback, never hides data).
+  const renderRate = (raw: string) => {
+    const parsed = parseRateLimit(raw)
+    if (!parsed) return raw
+    return t(`capabilities.facts.${parsed.unit}`, { count: new Intl.NumberFormat(locale).format(parsed.count) })
+  }
 
   return (
     <div style={sectionStyle}>
@@ -66,22 +92,23 @@ function LimitsBlock({ limits }: { limits?: KoiosLimits }) {
             <BodyText>{budgetStr}</BodyText>
           </div>
         )}
-        {warn_at_pct !== null && warn_at_pct !== undefined && (
+        {warn_at_pct != null && (
           <div style={rowStyle}>
             <Caption style={CANON_LABEL_STYLE}>{t('capabilities.facts.warnAt')}</Caption>
-            <BodyText>{warnAtStr}</BodyText>
+            <BodyText>{formatPercent(warn_at_pct)}</BodyText>
           </div>
         )}
-        {rate_limits?.chat && (
+        {/* Empty string means "not configured" (distinct from a real numeric 0 above). */}
+        {rate_limits?.chat != null && rate_limits.chat !== '' && (
           <div style={rowStyle}>
             <Caption style={CANON_LABEL_STYLE}>{t('capabilities.facts.rateChat')}</Caption>
-            <BodyText>{rate_limits.chat}</BodyText>
+            <BodyText>{renderRate(rate_limits.chat)}</BodyText>
           </div>
         )}
-        {rate_limits?.other && (
+        {rate_limits?.other != null && rate_limits.other !== '' && (
           <div style={rowStyle}>
             <Caption style={CANON_LABEL_STYLE}>{t('capabilities.facts.rateOther')}</Caption>
-            <BodyText>{rate_limits.other}</BodyText>
+            <BodyText>{renderRate(rate_limits.other)}</BodyText>
           </div>
         )}
       </div>

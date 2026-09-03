@@ -343,7 +343,6 @@
     "newFolder": "Nova pasta",
     "newFolderTitle": "Nova pasta",
     "newFolderLabel": "Nome",
-    "folderNamePrompt": "Nome da pasta:",
     "allWorkflows": "Todas as workflows",
     "unassigned": "Não atribuído",
     "countWorkflows": "{{n}} workflows",

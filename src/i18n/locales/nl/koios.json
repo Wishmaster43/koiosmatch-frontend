@@ -98,7 +98,10 @@
       "monthlyBudget": "Maandbudget",
       "warnAt": "Waarschuwing bij",
       "rateChat": "Limiet chat",
-      "rateOther": "Limiet overige acties"
+      "rateOther": "Limiet overige acties",
+      "perMinute": "{{count}} per minuut",
+      "perHour": "{{count}} per uur",
+      "perSecond": "{{count}} per seconde"
     },
     "surfaces": {
       "chat": "Chat",
