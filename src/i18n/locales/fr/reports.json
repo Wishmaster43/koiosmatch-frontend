@@ -291,6 +291,7 @@
     "search": "Rechercher par nom, objet, workflow…",
     "loading": "Chargement des messages…",
     "empty": "Aucun message trouvé",
+    "loadError": "Impossible de charger les messages.",
     "cols": {
       "sent": "Envoyé",
       "recipient": "Destinataire",
@@ -339,6 +340,7 @@
     "search": "Rechercher par workflow, déclencheur, erreur…",
     "loading": "Chargement des exécutions…",
     "empty": "Aucune exécution trouvée",
+    "loadError": "Impossible de charger les exécutions.",
     "editorTitle": "Exécutions",
     "editorEmpty": "Aucune exécution pour ce workflow",
     "editorCount_one": "{{count}} exécution",

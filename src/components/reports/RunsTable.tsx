@@ -55,7 +55,7 @@ export default function RunsTable() {
     return q ? `/workflow-runs?${q}` : '/workflow-runs'
   }, [workflowIdFilter, rangeFrom, rangeTo])
   // Data (fetch) lives in the shared hook (§3); this component only derives + renders.
-  const { rows, loading } = useReportList<RunRow>(runsUrl)
+  const { rows, loading, error } = useReportList<RunRow>(runsUrl)
   // App-wide active locale (§5) — never a hardcoded 'nl-NL' toLocale*String call.
   const { formatDate, formatTime } = useDateFormat()
   const [search,  setSearch]  = useState('')
@@ -218,7 +218,8 @@ export default function RunsTable() {
             onRowClick={setDrill}
             loading={loading}
             loadingText={t('runs.loading')}
-            emptyText={t('runs.empty')}
+            // A failed load is an ERROR state, not "no runs yet" (audit r2-ui-states-2).
+            emptyText={error ? t('runs.loadError') : t('runs.empty')}
             defaultSort={{ key: 'started_at', dir: 'desc' }}
           />
         </div>

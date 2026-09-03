@@ -291,6 +291,7 @@
     "search": "Zoek op naam, onderwerp, workflow…",
     "loading": "Berichten ophalen…",
     "empty": "Geen berichten gevonden",
+    "loadError": "Kon berichten niet laden.",
     "cols": {
       "sent": "Verstuurd",
       "recipient": "Ontvanger",
@@ -339,6 +340,7 @@
     "search": "Zoek op workflow, trigger, fout…",
     "loading": "Uitvoeringen ophalen…",
     "empty": "Geen uitvoeringen gevonden",
+    "loadError": "Kon uitvoeringen niet laden.",
     "editorTitle": "Uitvoeringen",
     "editorEmpty": "Nog geen uitvoeringen voor deze workflow",
     "editorCount_one": "{{count}} uitvoering",

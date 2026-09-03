@@ -21,7 +21,7 @@ const runs: RunRow[] = [
 // Data layer under test control (mirrors the other report-table tests) — a spy
 // so WEBHOOK-RUN-CORRELATION-1's request-url assertions can inspect its call args.
 vi.mock('./useReportList', () => ({
-  useReportList: vi.fn(() => ({ rows: runs, loading: false })),
+  useReportList: vi.fn(() => ({ rows: runs, loading: false, error: false })),
 }))
 
 // Panel spy: captures the registered group set so the range pin can drive its callbacks.
@@ -102,5 +102,15 @@ describe('RunsTable — WEBHOOK-RUN-CORRELATION-1 workflow_id filter', () => {
     act(() => range.onToChange('2026-08-28'))
     await waitFor(() => expect(vi.mocked(useReportList))
       .toHaveBeenCalledWith('/workflow-runs?from=2026-08-01&to=2026-08-28'))
+  })
+})
+
+// audit r2-ui-states-2: a failed load must read as an error, never as "no runs yet".
+describe('RunsTable — failed load is an error state', () => {
+  it('shows the load error copy and not the empty copy when the hook reports an error', () => {
+    vi.mocked(useReportList).mockReturnValueOnce({ rows: [], loading: false, error: true })
+    render(<RunsTable />)
+    expect(screen.getByText('Kon uitvoeringen niet laden.')).toBeInTheDocument()
+    expect(screen.queryByText('Geen uitvoeringen gevonden')).toBeNull()
   })
 })

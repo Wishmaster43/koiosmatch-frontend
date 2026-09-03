@@ -291,6 +291,7 @@
     "search": "Nach Name, Betreff, Workflow suchen…",
     "loading": "Nachrichten werden geladen…",
     "empty": "Keine Nachrichten gefunden",
+    "loadError": "Nachrichten konnten nicht geladen werden.",
     "cols": {
       "sent": "Gesendet",
       "recipient": "Empfänger",
@@ -339,6 +340,7 @@
     "search": "Nach Workflow, Trigger, Fehler suchen…",
     "loading": "Ausführungen werden geladen…",
     "empty": "Keine Ausführungen gefunden",
+    "loadError": "Ausführungen konnten nicht geladen werden.",
     "editorTitle": "Ausführungen",
     "editorEmpty": "Noch keine Ausführungen für diesen Workflow",
     "editorCount_one": "{{count}} Ausführung",

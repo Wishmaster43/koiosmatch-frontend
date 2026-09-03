@@ -291,6 +291,7 @@
     "search": "Search by name, subject, workflow…",
     "loading": "Loading messages…",
     "empty": "No messages found",
+    "loadError": "Could not load messages.",
     "cols": {
       "sent": "Sent",
       "recipient": "Recipient",
@@ -339,6 +340,7 @@
     "search": "Search by workflow, trigger, error…",
     "loading": "Loading runs…",
     "empty": "No runs found",
+    "loadError": "Could not load runs.",
     "editorTitle": "Runs",
     "editorEmpty": "No runs yet for this workflow",
     "editorCount_one": "{{count}} run",

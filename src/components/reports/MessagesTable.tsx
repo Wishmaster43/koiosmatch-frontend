@@ -33,7 +33,7 @@ export default function MessagesTable() {
   const { t } = useTranslation('reports')
   const COLS = COL_KEYS.map(c => ({ ...c, label: t(`messages.cols.${c.tKey}`) }))
   // Data (fetch) lives in the shared hook (§3); this component only derives + renders.
-  const { rows, loading } = useReportList<MessageRow>('/messages')
+  const { rows, loading, error } = useReportList<MessageRow>('/messages')
   // App-wide active locale (§5) — never a hardcoded 'nl-NL' toLocale*String call.
   const { formatDate, formatTime } = useDateFormat()
   const [search,  setSearch]  = useState('')
@@ -155,9 +155,10 @@ export default function MessagesTable() {
                   {t('messages.loading')}
                 </td></tr>
               )}
+              {/* A failed load is an ERROR state, never the empty copy (audit r2-ui-states-2). */}
               {!loading && sorted.length === 0 && (
-                <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
-                  {t('messages.empty')}
+                <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 40, color: error ? 'var(--color-danger-text)' : 'var(--text-muted)' }}>
+                  {error ? t('messages.loadError') : t('messages.empty')}
                 </td></tr>
               )}
               {!loading && paged.map((r, i) => (
