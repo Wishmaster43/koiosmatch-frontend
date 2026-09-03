@@ -9,8 +9,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import OrdersPanel from './OrdersPanel'
+import { useAuth } from '@/context/AuthContext'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { count?: number }) => opts?.count !== undefined ? `${k}:${opts.count}` : k }) }))
+// RIGHTS-GATE-OPENERS-1: wrapped in vi.fn() so the create-gate test below can
+// override hasPermission — defaults to true (every other test in this file
+// assumes the happy path, unrelated to the create gate).
+vi.mock('@/context/AuthContext', () => ({ useAuth: vi.fn(() => ({ hasPermission: () => true })) }))
 
 const mockOrders = vi.fn()
 const mockDelete = vi.fn()
@@ -92,5 +97,23 @@ describe('OrdersPanel · delete + honest 409', () => {
     await user.click(screen.getAllByRole('button', { name: 'common:delete' })[1])
     expect(await screen.findByText('Cannot delete an order with active shifts. Cancel its shifts first.')).toBeInTheDocument()
     expect(dialog).toBeInTheDocument()
+  })
+})
+
+// RIGHTS-GATE-OPENERS-1: the "+ order.addOrder" opener hides without
+// planning.create — never a dead button (§3).
+describe('OrdersPanel · create gate (RIGHTS-GATE-OPENERS-1)', () => {
+  it('hides the opener without planning.create', () => {
+    vi.mocked(useAuth).mockReturnValue({ hasPermission: () => false } as unknown as ReturnType<typeof useAuth>)
+    mockOrders.mockReturnValue({ orders: [], loading: false, error: false })
+    render(<OrdersPanel />)
+    expect(screen.queryByRole('button', { name: 'order.addOrder' })).toBeNull()
+  })
+
+  it('shows the opener with planning.create', () => {
+    vi.mocked(useAuth).mockReturnValue({ hasPermission: () => true } as unknown as ReturnType<typeof useAuth>)
+    mockOrders.mockReturnValue({ orders: [], loading: false, error: false })
+    render(<OrdersPanel />)
+    expect(screen.getByRole('button', { name: 'order.addOrder' })).toBeInTheDocument()
   })
 })

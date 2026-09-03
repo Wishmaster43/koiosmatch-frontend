@@ -12,6 +12,7 @@ import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import OutreachPage from './OutreachPage'
+import { notifyError } from '@/lib/notify'
 import type { Campaign } from './hooks/useOutreachCampaigns'
 
 const CAMPAIGNS: Campaign[] = [{ id: 'c1', name: 'Bellijst A', channel: 'call', status: 'active', targets_count: 3 }]
@@ -77,6 +78,9 @@ vi.mock('./OutreachBoard', () => ({ default: () => null }))
 let bulkBarProps: { canArchive?: boolean } | null = null
 vi.mock('./OutreachBulkBar', () => ({ default: (props: { canArchive?: boolean }) => { bulkBarProps = props; return <div data-testid="outreach-bulkbar-stub" /> } }))
 vi.mock('./OutreachDrawer', () => ({ default: () => null }))
+// RIGHTS-GATE-OPENERS-1: real notify() dispatches a window event with no
+// listener in this test — mocked so the forbidden-click test can assert it fired.
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
 beforeEach(() => { currentCampaigns = CAMPAIGNS; registerFilters.mockClear(); grantedPerms = 'all'; listProps = null; bulkBarProps = null })
 
@@ -122,6 +126,27 @@ describe('OutreachPage · + Bellijst opens a modal, not a full-page swap', () =>
     await user.keyboard('{Escape}')
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(screen.getByTestId('outreach-list-stub')).toBeInTheDocument()
+  })
+
+  // RIGHTS-GATE-OPENERS-1: the "+" button always renders (§3); an unauthorized
+  // click surfaces the forbidden toast instead of opening the modal.
+  it('blocks the modal and toasts the forbidden message without outreach.create', async () => {
+    grantedPerms = []
+    const user = userEvent.setup()
+    render(<OutreachPage />)
+    await user.click(screen.getByRole('button', { name: newButtonLabel }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(notifyError).toHaveBeenCalledWith(i18n.t('page.createForbidden', { ns: 'outreach' }))
+  })
+
+  it('opens the modal with outreach.create', async () => {
+    grantedPerms = ['outreach.create']
+    vi.mocked(notifyError).mockClear() // the previous test in this block left a call recorded
+    const user = userEvent.setup()
+    render(<OutreachPage />)
+    await user.click(screen.getByRole('button', { name: newButtonLabel }))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(notifyError).not.toHaveBeenCalled()
   })
 })
 

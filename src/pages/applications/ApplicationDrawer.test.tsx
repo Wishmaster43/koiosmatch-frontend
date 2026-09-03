@@ -14,6 +14,7 @@ import type { ComponentProps } from 'react'
 // removed badge rendered the literal "Actief" copy this test asserts against.
 import '@/i18n'
 import ApplicationDrawer from './ApplicationDrawer'
+import { useAuth } from '@/context/AuthContext'
 import type { ApplicationDetail } from '@/types/application'
 
 // ApplicationDrawer wires useApplicationCandidateEdit directly (the header
@@ -28,6 +29,10 @@ const renderDrawer = (props: ComponentProps<typeof ApplicationDrawer>) => {
 vi.mock('@/context/LookupsContext', () => ({
   useLookups: () => ({ funnelTypes: [{ value: 'invited', label: 'Uitgenodigd' }] }),
 }))
+// RIGHTS-GATE-OPENERS-1: wrapped in vi.fn() so the footer/action gate test below
+// can override hasPermission — defaults to true (the S21 header tests above never
+// exercise the footer, so this default is unused by them).
+vi.mock('@/context/AuthContext', () => ({ useAuth: vi.fn(() => ({ hasPermission: () => true })) }))
 vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: () => ({ fields: [] }) }))
 // The tab bodies pull in api/react-query dependencies irrelevant to the header —
 // stub every tab so only the header + tab bar actually mount (mirrors DetailsTab.test.tsx).
@@ -73,5 +78,30 @@ describe('ApplicationDrawer — header bucket badge removed (S21, Danny 21-07)',
     // unconditional, not just for 'active'.
     renderDrawer({ application: application({ bucket: 'rejected' }), onClose: vi.fn() })
     expect(screen.queryByText('Afgewezen')).not.toBeInTheDocument()
+  })
+})
+
+// RIGHTS-GATE-OPENERS-1: the footer's Afwijzen/Ontkoppelen and the header's
+// "Voorstellen aan klant" all read the applications.update permission via the
+// local canManageApplication check — hidden without it, never a dead button (§3).
+// canManage=true on the caller's own prop so the gate under test is specifically
+// the LOCAL permission check, not the pre-existing prop gate.
+describe('ApplicationDrawer · footer/action gate (RIGHTS-GATE-OPENERS-1)', () => {
+  const activeApp = application({ bucket: 'active', vacancyId: 'v1', candidateId: 'cand-1', customerId: 'cust-1' } as Partial<ApplicationDetail>)
+
+  it('hides Afwijzen, Ontkoppelen and Voorstellen aan klant without applications.update', () => {
+    vi.mocked(useAuth).mockReturnValue({ hasPermission: () => false } as unknown as ReturnType<typeof useAuth>)
+    renderDrawer({ application: activeApp, onClose: vi.fn(), canManage: true })
+    expect(screen.queryByRole('button', { name: 'Afwijzen' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Ontkoppelen' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Voorstellen aan klant' })).not.toBeInTheDocument()
+  })
+
+  it('shows Afwijzen, Ontkoppelen and Voorstellen aan klant with applications.update', () => {
+    vi.mocked(useAuth).mockReturnValue({ hasPermission: () => true } as unknown as ReturnType<typeof useAuth>)
+    renderDrawer({ application: activeApp, onClose: vi.fn(), canManage: true })
+    expect(screen.getByRole('button', { name: 'Afwijzen' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ontkoppelen' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Voorstellen aan klant' })).toBeInTheDocument()
   })
 })

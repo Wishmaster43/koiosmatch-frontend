@@ -58,8 +58,20 @@ vi.mock('@/lib/settings/useAllSettings', () => ({
 }))
 // user.branch_ids empty ⇒ unrestricted (every location offered) — the widest,
 // least-surprising default for a test that doesn't care about that narrowing.
+// RIGHTS-GATE-OPENERS-1: wrapped in vi.fn() so the create-permission test below
+// can override hasPermission without touching the other tests' default.
 vi.mock('@/context/AuthContext', () => ({
-  useAuth: () => ({ user: { branch_ids: [] }, hasPermission: () => true }),
+  useAuth: vi.fn(() => ({ user: { branch_ids: [] }, hasPermission: () => true })),
+}))
+import { useAuth } from '@/context/AuthContext'
+// Real notify() dispatches a window event with no listener in this test —
+// mocked so the forbidden-click test can assert it fired.
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
+import { notifyError } from '@/lib/notify'
+// Minimal stand-in so the create-gate test can prove the modal opened without
+// mounting the real form (its own lookups/API calls are a different file's scope).
+vi.mock('./AddOpportunityModal', () => ({
+  default: () => <div data-testid="add-opportunity-modal" />,
 }))
 // Capture the registered filter groups so the 'branch' group's onToggle can be
 // invoked directly — the real picker renders in DashboardLayout, not this page.
@@ -282,5 +294,36 @@ describe('OpportunitiesPage · cross-entity intent seam (DASH-FEEDS-V3)', () => 
     await waitFor(() => expect(apiGet).toHaveBeenCalled())
     // Clean up the module-level usePageMemory store for later tests.
     await act(async () => { capturedGroups.find(g => g.key === 'owner')?.onToggle('u1') })
+  })
+})
+
+// RIGHTS-GATE-OPENERS-1: the toolbar's "+ Nieuwe kans" button always renders
+// (§3); an unauthorized click toasts the forbidden message instead of opening
+// the create modal (there is no opportunities.create — the create route sits
+// in the opportunities.update permission group, same as matches).
+describe('OpportunitiesPage · create gate (RIGHTS-GATE-OPENERS-1)', () => {
+  it('blocks the create modal and toasts the forbidden message without opportunities.update', async () => {
+    useOpportunitiesDataMock.mockReturnValue(baseResult)
+    vi.mocked(useAuth).mockReturnValue({ user: { branch_ids: [] }, hasPermission: () => false } as unknown as ReturnType<typeof useAuth>)
+    const user = userEvent.setup()
+    render(<OpportunitiesPage />)
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+
+    await user.click(screen.getByRole('button', { name: `+ ${i18n.t('page.add', { ns: 'opportunities' })}` }))
+    expect(screen.queryByTestId('add-opportunity-modal')).toBeNull()
+    expect(notifyError).toHaveBeenCalledWith(i18n.t('page.createForbidden', { ns: 'opportunities' }))
+  })
+
+  it('opens the create modal with opportunities.update', async () => {
+    useOpportunitiesDataMock.mockReturnValue(baseResult)
+    vi.mocked(useAuth).mockReturnValue({ user: { branch_ids: [] }, hasPermission: () => true } as unknown as ReturnType<typeof useAuth>)
+    vi.mocked(notifyError).mockClear()
+    const user = userEvent.setup()
+    render(<OpportunitiesPage />)
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+
+    await user.click(screen.getByRole('button', { name: `+ ${i18n.t('page.add', { ns: 'opportunities' })}` }))
+    expect(screen.getByTestId('add-opportunity-modal')).toBeInTheDocument()
+    expect(notifyError).not.toHaveBeenCalled()
   })
 })
