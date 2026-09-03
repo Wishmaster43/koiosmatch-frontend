@@ -696,6 +696,11 @@ export const NAV_GROUPS = [
       { id: 'notif_calllists', icon: Bell, render: () => <NotificationsSettings context="calllists" /> },
       { id: 'notif_opportunities', icon: Bell, render: () => <NotificationsSettings context="opportunities" /> },
       { id: 'notif_appointments', icon: Bell, render: () => <NotificationsSettings context="appointments" /> },
+      // NOTIF-CONVERSATIE-1 (api Notifier.php TYPE_CONTEXT_MAP): unanswered-conversation
+      // nudges get their own switchable context, with real conversation.* Notifier::send()
+      // call sites backing it (SignalEscalation.php, WaWebReplyAttention.php) — a working
+      // toggle like its siblings, not listed in CONTEXTS_WITHOUT_EMITTER.
+      { id: 'notif_conversations', icon: Bell, render: () => <NotificationsSettings context="gesprekken" /> },
       // Escalation (item 11, 3b): per stall signal, an optional day-threshold + target (user/role).
       { id: 'notif_escalation', icon: Bell, component: EscalationSettings },
     ],

@@ -246,6 +246,7 @@
     "notif_calllists": "Listas de llamadas",
     "notif_opportunities": "Oportunidades",
     "notif_appointments": "Citas",
+    "notif_conversations": "Conversaciones",
     "notif_escalation": "Escalada",
     "koios_advice": "Umbrales de aviso",
     "notif_my": "Mis notificaciones",
@@ -821,6 +822,10 @@
       "appointments": {
         "title": "Citas",
         "desc": "Notificaciones sobre citas programadas para hoy."
+      },
+      "gesprekken": {
+        "title": "Conversaciones",
+        "desc": "Notificaciones sobre conversaciones sin responder."
       }
     },
     "my": {

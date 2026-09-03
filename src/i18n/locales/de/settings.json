@@ -246,6 +246,7 @@
     "notif_calllists": "Anruflisten",
     "notif_opportunities": "Chancen",
     "notif_appointments": "Termine",
+    "notif_conversations": "Gespräche",
     "notif_escalation": "Eskalation",
     "koios_advice": "Hinweis-Schwellenwerte",
     "notif_my": "Meine Benachrichtigungen",
@@ -821,6 +822,10 @@
       "appointments": {
         "title": "Termine",
         "desc": "Benachrichtigungen über heute geplante Termine."
+      },
+      "gesprekken": {
+        "title": "Gespräche",
+        "desc": "Benachrichtigungen über unbeantwortete Gespräche."
       }
     },
     "my": {
