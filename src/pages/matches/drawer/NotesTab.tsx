@@ -13,6 +13,7 @@ import SharedNotesTab from '@/components/drawer/tabs/NotesTab'
 import { useNoteTypes } from '@/lib/useNoteTypes'
 import { useEntityNotes } from '@/hooks/useEntityNotes'
 import { useAuth } from '@/context/AuthContext'
+import { initialsOf } from '@/lib/initials'
 import type { MatchRow } from '@/types/match'
 
 // Internal notes on a match (see file docblock above): fetches its own list on
@@ -32,7 +33,7 @@ export default function NotesTab({ match: m }: { match: MatchRow }) {
   const { notes, loading, error, fetchNotes, addNote, editNote, deleteNote } = useEntityNotes({ id: m.id, basePath: `/matches/${m.id}` })
   // Author avatar initials — the current user composing the note, not the match's owner.
   const auth = useAuth()
-  const initials = (auth?.user?.name || 'Koios').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+  const initials = initialsOf(auth?.user?.name, 'Koios')
 
   // Four UI states (§3): loading / error+retry (rendered by the SHARED tab, 04-08 —
   // `fetchNotes` doubles as the retry action) / empty (the shared tab's own

@@ -13,6 +13,7 @@ import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import SharedNotesTab from '@/components/drawer/tabs/NotesTab'
 import { useNoteTypes } from '@/lib/useNoteTypes'
+import { initialsOf } from '@/lib/initials'
 import { useAuth } from '@/context/AuthContext'
 import type { VacancyDetail } from '@/types/vacancy'
 
@@ -32,7 +33,7 @@ export default function NotesTab({ vacancy: v }: { vacancy: VacancyDetail }) {
   const currentUserName = auth?.user?.name || 'Koios'
 
   // Author avatar initials — the current user composing the note.
-  const initials = currentUserName.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+  const initials = initialsOf(currentUserName)
 
   // Optimistic add, then persist. OPTIMISTIC-REVERT-1 pattern (mirrors applications):
   // on failure the exact optimistic object is removed again and the server's own

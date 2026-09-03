@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
 import PopoutShell from './PopoutShell'
 import { useNoteTypes } from '@/lib/useNoteTypes'
+import { initialsOf } from '@/lib/initials'
 import { useAuth } from '@/context/AuthContext'
 import { useVacancyLite } from './hooks/useVacancyLite'
 import { usePopoutVacancyNotes } from './hooks/usePopoutVacancyNotes'
@@ -31,7 +32,7 @@ export default function VacancyNotesPopout({ id }: { id: string | undefined }) {
   const { notes, addNote, editNote, deleteNote } = usePopoutVacancyNotes(id, authorName)
   // Note categories from the tenant lookup, scoped to 'vacancy' (NOTE-TYPES-2/3).
   const { writableTypes: noteTypes } = useNoteTypes('vacancy')
-  const initials = authorName.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+  const initials = initialsOf(authorName)
 
   // Window title — restored on unmount so a reused/closed OS window slot never
   // keeps a stale title (mirrors CandidateNotesPopout).

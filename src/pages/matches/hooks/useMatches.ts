@@ -43,7 +43,7 @@ export function mapMatch(m: RawMatch): MatchRow {
     // NUMMER-1: human-readable reference number (M-00042).
     referenceNumber: m.reference_number ?? '',
     candidate:  name,
-    initials:   name && name !== '—' ? name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : '?',
+    initials:   initialsOf(name && name !== '—' ? name : null, '?'),
     vacancy:    m.vacancy_title ?? m.vacancy?.title ?? '—',
     client:     m.client_name ?? m.client?.name ?? m.customer?.name ?? '—',
     // Flat FKs (§3A cross-entity links) — the Relations tab hyperlinks candidate/

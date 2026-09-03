@@ -17,6 +17,7 @@ import { readableOn } from '@/hooks/useTenantTheme'
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 import Spinner from '@/components/ui/Spinner'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
+import { initialsOf } from '@/lib/initials'
 
 // Only a real 6-digit hex is safe to feed into readableOn's luminance maths.
 const isHexColor = (v: unknown): v is string => typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v)
@@ -27,8 +28,7 @@ const isHexColor = (v: unknown): v is string => typeof v === 'string' && /^#[0-9
 // eslint-disable-next-line no-restricted-syntax -- DATA: frozen snapshot of the app-default brand, must NOT resolve via the active tenant's CSS var
 const APP_DEFAULT_PRIMARY = '#19A5CA'
 
-const tenantInitials = (name?: string) =>
-  name ? name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : '??'
+const tenantInitials = (name?: string) => initialsOf(name, '??')
 
 // `domains` can be strings or Laravel-tenancy domain objects {domain, ...}.
 const tenantDomain = (tn?: Tenant & { domains?: Array<string | { domain?: string }> }) => {

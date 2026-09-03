@@ -14,6 +14,7 @@ import SharedNotesTab from '@/components/drawer/tabs/NotesTab'
 import { useNoteTypes } from '@/lib/useNoteTypes'
 import { useEntityNotes } from '@/hooks/useEntityNotes'
 import { useAuth } from '@/context/AuthContext'
+import { initialsOf } from '@/lib/initials'
 import type { TaskDetail } from '@/types/task'
 
 export default function NotesTab({ task }: { task: TaskDetail }) {
@@ -29,7 +30,7 @@ export default function NotesTab({ task }: { task: TaskDetail }) {
   const { notes, loading, error, fetchNotes, addNote, editNote, deleteNote } = useEntityNotes({ id: task.id, basePath: `/tasks/${task.id}` })
   // Author avatar initials — the current user composing the note, not the task's owner.
   const auth = useAuth()
-  const initials = (auth?.user?.name || 'Koios').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+  const initials = initialsOf(auth?.user?.name, 'Koios')
 
   // Four UI states (§3): loading / error+retry (rendered by the SHARED tab, 04-08 —
   // `fetchNotes` doubles as the retry action) / empty (the shared tab's own

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import SharedNotesTab from '@/components/drawer/tabs/NotesTab'
 import { useNoteTypes } from '@/lib/useNoteTypes'
+import { initialsOf } from '@/lib/initials'
 import { useApplicationNotes } from '../hooks/useApplicationNotes'
 import type { ApplicationDetail } from '@/types/application'
 
@@ -27,7 +28,7 @@ export default function NotesTab({ application: a }: { application: ApplicationD
   // drawer's own fallback: CommunicationTab passes the CANDIDATE's owner
   // initials, not the current viewer — this is a generic per-entity default,
   // not a claim about who wrote a given note).
-  const initials = (a.owner?.name ?? 'Koios').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+  const initials = initialsOf(a.owner?.name, 'Koios')
 
   return (
     <SharedNotesTab

@@ -25,6 +25,7 @@ import WorkTab from './drawer/WorkTab'
 import VacancySearchTab from './drawer/VacancySearchTab'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { useCustomFields } from '@/lib/useCustomFields'
+import { initialsOf } from '@/lib/initials'
 import PlanningPanel from './drawer/PlanningPanel'
 import { PreferencesTab, ZzpTab } from './drawer/PreferencesZzpTabs'
 import CommunicationTab from './drawer/CommunicationTab'
@@ -257,7 +258,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   // Owner picker options — a fallback entry ONLY when the current owner is not
   // in the selectable list (always prepending duplicated the owner — Danny 14/7),
   // and picking one PERSISTS (owner_id patch; it used to be local-only state).
-  const ownerInitialsOf = (name?: string) => name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() ?? '??'
+  const ownerInitialsOf = (name?: string) => initialsOf(name, '??')
   const currentOwnerId = recruiter?.id ?? c.ownerId
   const ownerInUsers = currentOwnerId != null && users.some(u => String(u.id) === String(currentOwnerId))
   const ownerOptions = [

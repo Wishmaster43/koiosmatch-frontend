@@ -138,7 +138,7 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
     const u = users.find(x => String(x.id) === String(ownerId))
     if (!u) return
     const before = applications.find(a => a.id === id) ?? wideRows.find(a => a.id === id)
-    const initials = u.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+    const initials = initialsOf(u.name)
     const owner = { id: ownerId, name: u.name, initials, color: null }
     setApplications(prev => prev.map(a => a.id === id ? { ...a, owner } : a))
     setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, owner } as ApplicationDetail) : prev))
