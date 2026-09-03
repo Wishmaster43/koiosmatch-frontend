@@ -720,7 +720,6 @@
     "Hyperlink-entiteit": "Hyperlink-entiteit",
     "ID veld naam": "ID veld naam",
     "Inclusief onderliggende locaties/afdelingen/contacten": "Inclusief onderliggende locaties/afdelingen/contacten",
-    "Ingangsdatum": "Ingangsdatum",
     "Ingeplande diensten": "Ingeplande diensten",
     "Inschrijfdatum": "Inschrijfdatum",
     "Inschrijfdatum (afgeleid)": "Inschrijfdatum (afgeleid)",
@@ -1246,7 +1245,9 @@
     "queue (standaard) = wachtrij, deze stap wacht niet sync = direct uitvoeren; de uitkomst van het kind komt terug in deze stap": "queue (standaard) = wachtrij, deze stap wacht niet. sync = direct uitvoeren; de uitkomst van het kind komt terug in deze stap.",
     "Alleen bij direct uitvoeren een mislukte kind-workflow laat deze stap mislukken Uit = doorgaan; de uitkomst staat in child_run_status": "Alleen bij direct uitvoeren: een mislukte kind-workflow laat deze stap mislukken. Uit = doorgaan; de uitkomst staat in child_run_status.",
     "Standaard aan de kandidaten/records van deze stap reizen mee als context van het kind": "Standaard aan: de kandidaten/records van deze stap reizen mee als context van het kind.",
-    "Extra sleutel/waarde-paren voor het kind ({{trigger*}} wordt hier al opgelost)": "Extra sleutel/waarde-paren voor het kind ({{trigger.*}} wordt hier al opgelost)."
+    "Extra sleutel/waarde-paren voor het kind ({{trigger*}} wordt hier al opgelost)": "Extra sleutel/waarde-paren voor het kind ({{trigger.*}} wordt hier al opgelost).",
+    "Alleen voor Niet beschikbaar, Ziek en Verlof": "Alleen voor Niet beschikbaar, Ziek en Verlof.",
+    "Verplicht wanneer de status Blacklist is": "Verplicht wanneer de status Blacklist is."
   },
   "triggers": {
     "events": {

@@ -685,7 +685,6 @@
     "Hyperlink-entiteit": "Hyperlink entity",
     "ID veld naam": "ID field name",
     "Inclusief onderliggende locaties/afdelingen/contacten": "Including child locations/departments/contacts",
-    "Ingangsdatum": "Effective date",
     "Ingeplande diensten": "Scheduled shifts",
     "Inschrijfdatum": "Registration date",
     "Inschrijfdatum (afgeleid)": "Registration date (derived)",
@@ -902,7 +901,9 @@
     "In wachtrij gezet": "Queued",
     "Direct uitgevoerd (sync)": "Ran directly (sync)",
     "Kind-run id": "Child run id",
-    "Uitkomst kind-run (sync)": "Child run outcome (sync)"
+    "Uitkomst kind-run (sync)": "Child run outcome (sync)",
+    "Weer beschikbaar vanaf": "Available again from",
+    "Blacklist-reden": "Blacklist reason"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (multiple bundles)",
@@ -1246,7 +1247,9 @@
     "queue (standaard) = wachtrij, deze stap wacht niet sync = direct uitvoeren; de uitkomst van het kind komt terug in deze stap": "queue (default) = queue, this step doesn't wait. sync = run directly; the child's outcome comes back into this step.",
     "Alleen bij direct uitvoeren een mislukte kind-workflow laat deze stap mislukken Uit = doorgaan; de uitkomst staat in child_run_status": "Only for direct execution: a failed child workflow fails this step. Off = continue; the outcome is in child_run_status.",
     "Standaard aan de kandidaten/records van deze stap reizen mee als context van het kind": "On by default: this step's candidates/records travel along as the child's context.",
-    "Extra sleutel/waarde-paren voor het kind ({{trigger*}} wordt hier al opgelost)": "Extra key/value pairs for the child ({{trigger.*}} is already resolved here)."
+    "Extra sleutel/waarde-paren voor het kind ({{trigger*}} wordt hier al opgelost)": "Extra key/value pairs for the child ({{trigger.*}} is already resolved here).",
+    "Alleen voor Niet beschikbaar, Ziek en Verlof": "Only for Unavailable, Sick and Leave.",
+    "Verplicht wanneer de status Blacklist is": "Required when status is Blacklist."
   },
   "triggers": {
     "events": {

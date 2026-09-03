@@ -71,7 +71,7 @@ const EXPECTED_SCHEMA_KEYS: Record<string, string[]> = {
   notification_send: ['title', 'body', 'recipients', 'role', 'user_ids', 'type', 'link_entity'],
   candidate_filter: ['ai_enabled', 'pools', 'positions', 'status', 'last_contact_days', 'last_worked_days', 'no_show_max'],
   // effective_from deliberately absent: declared by the engine schema but never read by execute() (fake affordance).
-  status_set: ['status', 'reason'],
+  status_set: ['status', 'reason', 'return_date', 'blacklist_reason'],
   pdok_geocode: ['entity', 'candidate_id', 'only_missing', 'all_records'],
   // WF-WAIT-NODE-FE-1: the ONE merged 'wait' node — mirrors WaitModule::configSchema.
   wait: ['until_field', 'days', 'hours', 'skip_weekends'],
@@ -99,6 +99,13 @@ describe('WF-BUILDER-VELDEN-1 · registry config-schema mirrors the engine exact
   it("notification_send's recipients options include 'users' (required for user_ids to be reachable)", () => {
     const recipients = (MODULE_SCHEMAS.notification_send ?? []).find(f => f.key === 'recipients')
     expect(recipients?.options).toContain('users')
+  })
+
+  it('neither candidates nor status_set schema carries effective_from (never read by execute)', () => {
+    const candidatesKeys = (MODULE_SCHEMAS.candidates ?? []).map(f => f.key)
+    expect(candidatesKeys).not.toContain('effective_from')
+    const statusSetKeys = (MODULE_SCHEMAS.status_set ?? []).map(f => f.key)
+    expect(statusSetKeys).not.toContain('effective_from')
   })
 })
 

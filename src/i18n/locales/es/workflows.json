@@ -596,6 +596,7 @@
     "Berichttekst (sessie)": "Texto del mensaje (sesión)",
     "Berichttype (classificatie)": "Tipo de mensaje (clasificación)",
     "Berichttype (prioriteit)": "Tipo de mensaje (prioridad)",
+    "Blacklist-reden": "Razón de lista negra",
     "Beschikbaarheid": "Disponibilidad",
     "Beschikbare diensten (ruwe Shiftmanager-response)": "Turnos disponibles (respuesta bruta de Shiftmanager)",
     "Body (JSON)": "Cuerpo (JSON)",
@@ -685,7 +686,6 @@
     "Hyperlink-entiteit": "Entidad del enlace",
     "ID veld naam": "Nombre del campo ID",
     "Inclusief onderliggende locaties/afdelingen/contacten": "Incluye ubicaciones/departamentos/contactos asociados",
-    "Ingangsdatum": "Fecha de entrada",
     "Ingeplande diensten": "Turnos programados",
     "Inschrijfdatum": "Fecha de registro",
     "Inschrijfdatum (afgeleid)": "Fecha de registro (derivada)",
@@ -872,6 +872,7 @@
     "Webhook": "Webhook",
     "Webhook Trigger": "Disparador webhook",
     "Weekend overslaan": "Omitir fines de semana",
+    "Weer beschikbaar vanaf": "Disponible a partir de",
     "Welke records?": "¿Qué registros?",
     "Welke vacatures": "Qué vacantes",
     "Werking": "Funcionamiento",
@@ -1246,7 +1247,9 @@
     "queue (standaard) = wachtrij, deze stap wacht niet sync = direct uitvoeren; de uitkomst van het kind komt terug in deze stap": "queue (por defecto) = cola, este paso no espera. sync = ejecución directa; el resultado del hijo vuelve a este paso.",
     "Alleen bij direct uitvoeren een mislukte kind-workflow laat deze stap mislukken Uit = doorgaan; de uitkomst staat in child_run_status": "Solo en ejecución directa: un workflow hijo fallido hace fallar este paso. Desactivado = continuar; el resultado está en child_run_status.",
     "Standaard aan de kandidaten/records van deze stap reizen mee als context van het kind": "Activado por defecto: los candidatos/registros de este paso viajan como contexto del hijo.",
-    "Extra sleutel/waarde-paren voor het kind ({{trigger*}} wordt hier al opgelost)": "Pares clave/valor adicionales para el hijo ({{trigger.*}} ya está resuelto aquí)."
+    "Extra sleutel/waarde-paren voor het kind ({{trigger*}} wordt hier al opgelost)": "Pares clave/valor adicionales para el hijo ({{trigger.*}} ya está resuelto aquí).",
+    "Alleen voor Niet beschikbaar, Ziek en Verlof": "Solo para No disponible, Enfermo y Licencia.",
+    "Verplicht wanneer de status Blacklist is": "Obligatorio cuando el estado es Lista negra."
   },
   "triggers": {
     "events": {

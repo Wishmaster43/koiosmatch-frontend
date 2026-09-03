@@ -24,5 +24,11 @@ export default {
     // Lands on candidates.status_reason (the drawer shows it) AND in the audit
     // trail (StatusSetModule::execute, backend 23-08).
     { key: 'reason', label: 'Reden', type: 'text' },
+    // Return date for deployability statuses that support it (Unavailable/Sick/Leave).
+    // Lands on candidates.status_return_date server-side.
+    { key: 'return_date', label: 'Weer beschikbaar vanaf', type: 'date', help: 'Alleen voor Niet beschikbaar, Ziek en Verlof.' },
+    // Blacklist reason: lookup-backed dropdown from /candidate-blacklist-reasons.
+    // Lands on candidates.blacklist_reason; required when status is Blacklist.
+    { key: 'blacklist_reason', label: 'Blacklist-reden', type: 'lookup_select', endpoint: '/candidate-blacklist-reasons', help: 'Verplicht wanneer de status Blacklist is.' },
   ],
 }
