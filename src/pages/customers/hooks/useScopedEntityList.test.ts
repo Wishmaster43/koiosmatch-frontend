@@ -4,7 +4,7 @@
  * combination (§13): VacancyQuery/MatchController validate `customer_department_id`/
  * `customer_location_id` as a SINGLE uuid, never the bracketed array form
  * `customer_id` uses — a wrong param name here is invisible in a way a 422 never
- * is (mirrors useCustomerVacancies.filter.test.ts's own reasoning). Also pins the
+ * is. Also pins the
  * ERROR state: an id outside the caller's branch grant 404s (LOC-DEPT-TAB-1
  * guard) and must surface as `error: true`, never a silently empty list.
  */

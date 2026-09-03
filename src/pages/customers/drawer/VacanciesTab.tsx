@@ -66,11 +66,10 @@ import Button from '@/components/ui/Button'
 // shape rather than widening the shared mapper for every OTHER caller of it.
 type PublishedVacancyRow = VacancyRow & { published: boolean }
 
-// This tab's own vacancy fetch (deliberately NOT `useCustomerVacancies`): it reuses the
-// shared `mapVacancyRow` for title/status/applications, then adds `published` on top —
-// the one field the shared mapper omits and this tab's default filter needs. Same
-// queryKey prefix (`['customers', customerId, 'vacancies', …]`) as before, so the
-// existing `queryClient.invalidateQueries` call below (on create) still hits it.
+// This tab fetches /vacancies itself so it can add `published` on top of the shared
+// `mapVacancyRow` — the one field that mapper omits and this tab's default filter
+// needs. `['customers', customerId, 'vacancies', params]` is this hook's sole key,
+// matched by the `queryClient.invalidateQueries` prefix call below (on create).
 function useCustomerVacanciesWithPublished(customerId?: Id, params?: Record<string, unknown>) {
   // isError surfaced alongside data/loading — a failed load must not read as "no vacancies" (R8).
   const { data = [], isLoading: loading, isError } = useQuery({

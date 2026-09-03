@@ -1,9 +1,8 @@
 /**
- * The customer's Matches tab must ask for THAT customer's matches — mirrors
- * useCustomerVacancies.filter.test.ts's own proof that the request carries
- * customer_id (a wrong-but-accepted filter name is invisible in a way a 422
- * never is, so the request shape itself is what this pins, not just "a
- * callback fired", §13).
+ * The customer's Matches tab must ask for THAT customer's matches — a
+ * wrong-but-accepted filter name is invisible in a way a 422 never is (the
+ * backend silently ignores an unknown param instead of rejecting it), so the
+ * request shape itself is what this pins, not just "a callback fired" (§13).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'

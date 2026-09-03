@@ -6,10 +6,10 @@
  * StatusFilterSelect (OpportunitiesTab does not, so "Kansen" carries no such
  * setting).
  *
- * K2-FE (13-08): the tab no longer calls `useCustomerVacancies` — it fetches
- * `/vacancies` itself (via `useCustomerVacanciesWithPublished`, so it can carry
- * `published` alongside the shared `mapVacancyRow` fields), so `/vacancies` is now
- * mocked directly through `api.get` below instead of stubbing the hooks module.
+ * K2-FE (13-08): the tab fetches `/vacancies` itself, via
+ * `useCustomerVacanciesWithPublished` (so it can carry `published` alongside the
+ * shared `mapVacancyRow` fields), so `/vacancies` is mocked directly through
+ * `api.get` below instead of stubbing a hooks module.
  */
 import type { ComponentProps } from 'react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
@@ -210,6 +210,21 @@ describe('VacanciesTab · tenant-configured default status filter (TENANT-DEFAUL
     const user = userEvent.setup()
     await user.click(screen.getByTitle('Ook niet-gepubliceerd'))
     await waitFor(() => expect(screen.getByText('Concept vacature')).toBeInTheDocument())
+  })
+})
+
+describe('VacanciesTab · customer_id regression (02-08)', () => {
+  it('requests /vacancies filtered by customer_id, never the old client_id name', async () => {
+    renderTab({ customerId: 'cust-1', customerName: 'Acme' })
+    await waitFor(() => expect(screen.getByText('Openstaande vacature')).toBeInTheDocument())
+
+    // It sent `client_id` until 02-08 and listed every vacancy of the bureau — VacancyQuery
+    // has no such filter and silently ignores an unknown one, so the request looked fine and
+    // the data was wrong. That is the failure this pins: a wrong-but-accepted parameter name
+    // is invisible in a way a 422 never is.
+    const call = vi.mocked(api.get).mock.calls.find(([url]) => url === '/vacancies')
+    expect(call?.[1]?.params).toMatchObject({ customer_id: 'cust-1' })
+    expect(call?.[1]?.params).not.toHaveProperty('client_id')
   })
 })
 

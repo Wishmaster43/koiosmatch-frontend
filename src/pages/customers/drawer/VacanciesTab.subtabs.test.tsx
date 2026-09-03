@@ -33,10 +33,10 @@ vi.mock('@tanstack/react-query', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@tanstack/react-query')>()
   return { ...actual, useQueryClient: () => ({ invalidateQueries: vi.fn() }) }
 })
-// K2-FE (13-08): the Vacatures sub-tab no longer goes through `useCustomerVacancies` —
-// it fetches `/vacancies` itself (see VacanciesTab.test.tsx's own docblock), which the
-// blanket `api.get` mock below already answers with an empty list, so no hooks-module
-// mock is needed here any more; `mapVacancyRow` stays the real (pure) implementation.
+// K2-FE (13-08): the Vacatures sub-tab fetches `/vacancies` itself via
+// `useCustomerVacanciesWithPublished` (see VacanciesTab.test.tsx's own docblock),
+// which the blanket `api.get` mock below already answers with an empty list — no
+// hooks-module mock needed; `mapVacancyRow` stays the real (pure) implementation.
 vi.mock('@/lib/api', () => ({
   default: { get: vi.fn(() => Promise.resolve({ data: { data: [] } })), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
   unwrapList: (r: { data?: { data?: unknown[] } }) => ({ rows: r?.data?.data ?? [], total: 0 }),
