@@ -60,12 +60,23 @@ export function useCandidateRecord() {
   // optional so this stays a drop-in replacement for callers that don't pass one yet.
   // Returns a promise that resolves TRUE only when the write actually landed, so a
   // caller can act on success (the text pop-out closes its window on it). Existing
-  // fire-and-forget callers simply ignore the return value.
-  const patchCandidate = (id: Id, patch: Record<string, unknown>, revert?: () => void): Promise<boolean> => {
+  // fire-and-forget callers simply ignore the return value. `onServerData` is an
+  // optional callback (REFRESH-FIX-2) receiving the PATCH response body mapped
+  // through mapCandidate, so a caller can adopt server-composed fields (e.g. a
+  // full name assembled server-side) instead of trusting only its own optimistic merge.
+  const patchCandidate = (
+    id: Id,
+    patch: Record<string, unknown>,
+    revert?: () => void,
+    onServerData?: (candidate: Candidate) => void,
+  ): Promise<boolean> => {
     const body = buildCandidatePatch(patch)
     if (!Object.keys(body).length) return Promise.resolve(true)
     return api.patch(`/candidates/${id}`, body)
-      .then(() => {
+      .then(r => {
+        // REFRESH-FIX-2: hand the server-mapped candidate back to the caller
+        // before invalidating, so it can reconcile fields it composes server-side.
+        onServerData?.(mapCandidate(unwrap(r)))
         // REFRESH-FIX-2: reconcile the applications cache — application rows
         // embed this candidate's joined name/function, which the caller's own
         // optimistic merge above never reaches.

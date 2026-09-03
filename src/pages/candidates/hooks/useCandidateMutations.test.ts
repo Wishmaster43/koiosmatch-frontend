@@ -112,4 +112,24 @@ describe('useCandidateRecord · patchCandidate', () => {
     const { result } = renderHook(() => useCandidateRecord(), { wrapper })
     await expect(result.current.patchCandidate('c1', { ownerId: 'gone' })).resolves.toBe(false)
   })
+
+  // REFRESH-FIX-2: on success, the mapped response body is handed to the caller
+  // so it can adopt server-composed fields (e.g. a name assembled server-side)
+  // instead of trusting only its own optimistic merge.
+  it('hands the mapped PATCH response to onServerData on success', async () => {
+    apiPatch.mockResolvedValue({ data: { data: { id: 'c1', name: 'Server Name' } } })
+    const onServerData = vi.fn()
+    const { result } = renderHook(() => useCandidateRecord(), { wrapper })
+    await result.current.patchCandidate('c1', { ownerId: 'u2' }, undefined, onServerData)
+    expect(onServerData).toHaveBeenCalledTimes(1)
+    expect(onServerData.mock.calls[0][0]).toMatchObject({ id: 'c1', name: 'Server Name' })
+  })
+
+  it('never calls onServerData when the PATCH fails', async () => {
+    apiPatch.mockRejectedValue({ response: { data: {} } })
+    const onServerData = vi.fn()
+    const { result } = renderHook(() => useCandidateRecord(), { wrapper })
+    await result.current.patchCandidate('c1', { ownerId: 'gone' }, undefined, onServerData)
+    expect(onServerData).not.toHaveBeenCalled()
+  })
 })

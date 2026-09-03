@@ -342,6 +342,18 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
       if (beforeRow) setCandidates(prev => prev.map(x => x.id === id ? { ...x, ...beforeRow } as Candidate : x))
       if (beforeSelected) setSelected(prev => (prev && prev.id === id ? { ...prev, ...beforeSelected } as Candidate : prev))
       if (beforeDetail) setDetail(prev => (prev && prev.id === id ? { ...prev, ...beforeDetail } as Candidate : prev))
+    }, serverCandidate => {
+      // REFRESH-FIX-2: adopt the server-composed values for the patched keys only
+      // (e.g. a name assembled server-side from first/last name), never the whole
+      // record — a parallel edit to another field must survive. Guarded with
+      // `k in server`: a patched key mapCandidate never produces (e.g. a UI-only
+      // key from useCandidatePlacedMatch) is skipped instead of writing `undefined`.
+      const server = serverCandidate as unknown as Record<string, unknown>
+      const fromServer: Record<string, unknown> = {}
+      keys.forEach(k => { if (k in server) fromServer[k] = server[k] })
+      setCandidates(prev => prev.map(x => x.id === id ? { ...x, ...fromServer } as Candidate : x))
+      setSelected(prev => (prev && prev.id === id ? { ...prev, ...fromServer } as Candidate : prev))
+      setDetail(prev => (prev && prev.id === id ? { ...prev, ...fromServer } as Candidate : prev))
     })
   }
 
