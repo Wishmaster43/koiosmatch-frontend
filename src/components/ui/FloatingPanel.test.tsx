@@ -1,8 +1,9 @@
 /**
- * FloatingPanel — the shared draggable/resizable dialog shell has no dedicated
- * test file yet; this covers the base open/close contract plus the NEW
- * NOTITIE-POPOUT-1 F5 `onPopOut` header button: renders only when the prop is
- * supplied, and clicking it fires the callback (never opens `onClose` too).
+ * FloatingPanel — the shared draggable/resizable dialog shell. Covers the
+ * base open/close contract. FLOATINGPANEL-ONPOPOUT-1: the `onPopOut` header
+ * button was removed as dead code (0 of 57 call sites ever passed it — the
+ * pop-out affordance moved into the note block itself, see NoteComposer.tsx)
+ * — no coverage for it here any more.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
@@ -93,24 +94,6 @@ describe('FloatingPanel · draggable by its header', () => {
     expect(dialog).not.toHaveAttribute('aria-modal')
     // A backdrop click cannot close a modeless window — the caller owns that rule.
     fireEvent.mouseDown(scrim)
-    expect(onClose).not.toHaveBeenCalled()
-  })
-})
-
-describe('FloatingPanel · onPopOut (NOTITIE-POPOUT-1 F5)', () => {
-  it('renders no pop-out button when the prop is omitted', () => {
-    render(<FloatingPanel open onClose={vi.fn()} title="Test">body</FloatingPanel>)
-    expect(screen.queryByLabelText('openSecondScreen')).toBeNull()
-  })
-
-  it('renders the pop-out button and fires the callback on click, without closing the panel', async () => {
-    const user = userEvent.setup()
-    const onPopOut = vi.fn()
-    const onClose = vi.fn()
-    render(<FloatingPanel open onClose={onClose} onPopOut={onPopOut} title="Test">body</FloatingPanel>)
-    const button = screen.getByLabelText('openSecondScreen')
-    await user.click(button)
-    expect(onPopOut).toHaveBeenCalledTimes(1)
     expect(onClose).not.toHaveBeenCalled()
   })
 })

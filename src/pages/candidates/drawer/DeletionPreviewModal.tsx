@@ -49,7 +49,7 @@ export default function DeletionPreviewModal({ candidateId, candidateName, onClo
     // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
     // SE-resize, remembered position; the danger-icon title moves into the drag handle.
     <FloatingPanel open onClose={onClose} ariaLabel={t('erase.confirmTitle')}
-      persistKey="deletion-preview" width={420} maxWidth="92vw" bodyStyle={{ padding: 22 }}
+      persistKey="candidate-deletion-preview" width={420} maxWidth="92vw" bodyStyle={{ padding: 22 }}
       header={
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center', background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}><AlertTriangle size={16} /></span>

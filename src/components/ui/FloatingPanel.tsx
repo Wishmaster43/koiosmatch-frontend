@@ -15,7 +15,7 @@
  */
 import { type CSSProperties, type ReactNode, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ExternalLink, Maximize2, Minimize2, X } from 'lucide-react'
+import { Maximize2, Minimize2, X } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useDraggablePanel } from '@/hooks/useDraggablePanel'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
@@ -53,14 +53,6 @@ export interface FloatingPanelProps {
    */
   scrollBody?: boolean
   /**
-   * NOTITIE-POPOUT-1 F5: when supplied, renders one extra header icon button that
-   * opens this panel's content as a REAL second browser window (Trap B — a
-   * draggable in-window panel can never reach a second monitor). Omitted (every
-   * panel today) → no button at all, zero behaviour change. The panel itself never
-   * decides WHAT opens; the caller wires the actual `window.open` (see lib/secondScreen.ts).
-   */
-  onPopOut?: () => void
-  /**
    * false = modeless: no dim scrim, the page underneath stays visible AND clickable
    * (the point of a draggable reference window). Default true = the classic modal.
    */
@@ -77,7 +69,7 @@ export interface FloatingPanelProps {
 }
 
 // The mounted panel body: focus trap plus drag/resize/maximize, mounted fresh per open by the exported wrapper below.
-function Panel({ onClose, ariaLabel, title, header, children, width, minWidth, maxWidth, persistKey, resizable, zIndex, bodyStyle, hideClose, scrollBody = true, onPopOut, overlay = true, closeOnBackdrop = true, maximizable = false }: Omit<FloatingPanelProps, 'open'>) {
+function Panel({ onClose, ariaLabel, title, header, children, width, minWidth, maxWidth, persistKey, resizable, zIndex, bodyStyle, hideClose, scrollBody = true, overlay = true, closeOnBackdrop = true, maximizable = false }: Omit<FloatingPanelProps, 'open'>) {
   const { t } = useTranslation('common')
   const panelTrapRef = useFocusTrap<HTMLDivElement>(onClose)
   const { panelRef, placement, dragging, onDragPointerDown, onResizePointerDown, onDragHandleDoubleClick } = useDraggablePanel(persistKey, resizable !== false)
@@ -159,14 +151,6 @@ function Panel({ onClose, ariaLabel, title, header, children, width, minWidth, m
               aria-label={maximized ? t('restoreWindow') : t('maximizeWindow')}
               title={maximized ? t('restoreWindow') : t('maximizeWindow')} style={{ flexShrink: 0 }}>
               {maximized ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
-            </Button>
-          )}
-          {/* Pop-out to a second browser window (NOTITIE-POPOUT-1 F5) — sits before the
-              close X, same 26x26 bordered icon-button footprint as the other header buttons. */}
-          {onPopOut && (
-            <Button variant="secondary" iconOnly type="button" onClick={onPopOut}
-              aria-label={t('openSecondScreen')} title={t('openSecondScreen')} style={{ flexShrink: 0 }}>
-              <ExternalLink size={13} />
             </Button>
           )}
           {!hideClose && (

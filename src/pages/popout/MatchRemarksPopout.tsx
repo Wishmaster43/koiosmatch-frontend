@@ -15,11 +15,15 @@ import RichTextEditor from '@/components/ui/RichTextEditor'
 import { GroupLabel } from '@/components/ui/typography'
 import { useTextPopoutSync } from '@/hooks/useTextPopoutSync'
 import { textPopoutTopic } from '@/lib/secondScreen'
+import { useCandidateLite } from './hooks/useCandidateLite'
 
 // See the file's top doc above; mirrors the draft over the shared channel and never offers its own save, since the real persistence is the opener form submit.
 export default function MatchRemarksPopout({ id }: { id: string | undefined }) {
   const { t } = useTranslation('candidates')
   const [text, setText] = useState('')
+  // Candidate name for the window title — POPOUT-TITLE-1: every pop-out window
+  // sets document.title, mirrors CandidateSummaryPopout's own effect below.
+  const { candidate } = useCandidateLite(id)
 
   // Continuous two-way mirror: both windows post 'draft' on every edit and
   // adopt whatever the peer last sent — there is no separate "saved" state
@@ -32,6 +36,15 @@ export default function MatchRemarksPopout({ id }: { id: string | undefined }) {
   // Announce this window so the opener replays its current draft into it.
   useEffect(() => { post({ kind: 'hello' }) }, [post])
   const change = (html: string) => { setText(html); post({ kind: 'draft', html }) }
+
+  // Window title — "Match remarks: <name>" while this popout is open; restored
+  // on unmount so a reused window slot never keeps a stale title.
+  useEffect(() => {
+    if (!candidate) return
+    const previous = document.title
+    document.title = t('popout.matchRemarksWindowTitle', { name: candidate.name })
+    return () => { document.title = previous }
+  }, [candidate, t])
 
   // No candidate id yet (opened before one was picked) — an honest notice
   // instead of a silently non-functional editor (§3).
