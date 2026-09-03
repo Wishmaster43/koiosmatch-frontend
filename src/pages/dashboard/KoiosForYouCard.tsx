@@ -31,10 +31,16 @@ import Button from '@/components/ui/Button'
 import DataTable from '@/components/ui/DataTable'
 import EntityLink, { buildEntityDeepLink } from '@/components/ui/EntityLink'
 import { GroupLabel, SectionTitle, Caption } from '@/components/ui/typography'
-
-// Preset period keys driving the from/to computation — 'thisWeek' is the
-// default (Monday through today), 'custom' opens the two date inputs.
-type PeriodPreset = 'thisWeek' | 'lastWeek' | 'last30' | 'custom'
+import {
+  CATEGORY_ORDER,
+  CREATED_ENTITY_PAGE,
+  KNOWN_ACTION_TYPES,
+  categoryOf,
+  humanizeKey,
+  resolveRange,
+  type Category,
+  type PeriodPreset,
+} from './koiosForYou/koiosForYouHelpers'
 
 // One created record referenced by an action row (K-174: `created`), or null
 // when the action created nothing resolvable.
@@ -67,99 +73,6 @@ interface KoiosForYouReport {
   per_source: Record<string, number>
   actions: KoiosForYouAction[]
   actions_truncated: boolean
-}
-
-// Turn a workflow template_key ("koios_create_task") into a readable label —
-// these are backend workflow identifiers, not app copy, so a display transform
-// (not a translation) is the right treatment, mirroring how slugs read elsewhere.
-function humanizeKey(key: string | null | undefined): string {
-  if (!key) return '—'
-  return key.replace(/^koios_/, '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-}
-
-// KOIOS-KAART-COMPACT-1/2: bucket every action type into one of eight display
-// categories. Measured real template_key values (BE Workflow model / seeded
-// native templates, koiosmatch-api database/): koios_create_task,
-// koios_send_whatsapp, koios_plan_appointment, koios_send_email,
-// koios_send_notification, koios_add_to_calllist. Rejection/application/
-// birthday automations don't have template keys yet but keep their own bucket
-// so a future one lands correctly without a code change; anything matching no
-// keyword falls into 'other' — an unknown type is NEVER dropped. (Source
-// buckets — note/conversation/chat — no longer render as their own column in
-// COMPACT-2's table; the action type + created record carry the row.)
-const CATEGORY_ORDER = ['tasks', 'whatsapp', 'appointments', 'emails', 'rejections', 'applications', 'birthdays', 'other'] as const
-type Category = (typeof CATEGORY_ORDER)[number]
-
-// Raw action-type keys (koios_ prefix stripped) that have a translated label —
-// anything outside this set gets the humanized fallback, never a raw i18n key
-// (never a raw i18n key rendered straight from the backend key).
-const KNOWN_ACTION_TYPES = ['create_task', 'send_whatsapp', 'plan_appointment', 'send_email', 'send_notification', 'add_to_calllist']
-
-// Keyword match on the normalized (prefix-stripped) key → category bucket.
-function categoryOf(rawKey: string | null | undefined): Category {
-  const k = (rawKey || '').replace(/^koios_/, '')
-  if (/task/.test(k)) return 'tasks'
-  if (/whatsapp/.test(k)) return 'whatsapp'
-  if (/appointment/.test(k)) return 'appointments'
-  if (/email/.test(k)) return 'emails'
-  if (/reject/.test(k)) return 'rejections'
-  if (/application|apply/.test(k)) return 'applications'
-  if (/birthday/.test(k)) return 'birthdays'
-  return 'other'
-}
-
-// K-174 `created.entity_type` → app-shell page key (mirrors NotificationBell's
-// ENTITY_PAGE, K-157 vocabulary — 'application': 'applications', 'candidate':
-// 'candidates' verified there). 'appointment' and 'whatsapp' have NO dedicated
-// page yet (grepped components/layout/appPages.tsx — no agenda/appointments or
-// whatsapp-thread route exists), so they stay unmapped on purpose: the row
-// renders as plain text rather than a link to nowhere. Extend this table,
-// never invent a route.
-const CREATED_ENTITY_PAGE: Record<string, string> = {
-  task: 'tasks',
-  calllist: 'outreach',
-  application: 'applications',
-  candidate: 'candidates',
-}
-
-// Local calendar-day 'YYYY-MM-DD' — never toISOString().slice(0,10), see
-// lib/datetime's own docblock on the UTC-rollback bug.
-function toIsoDay(d: Date): string {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
-
-// Monday of the week containing `d` (ISO week start).
-function mondayOf(d: Date): Date {
-  const copy = new Date(d)
-  const dow = copy.getDay() // 0=Sun..6=Sat
-  const diff = dow === 0 ? -6 : 1 - dow
-  copy.setDate(copy.getDate() + diff)
-  return copy
-}
-
-// Resolve a preset into a concrete { from, to } pair, given "now" (injectable
-// for tests). 'custom' resolves from the caller-supplied inputs.
-function resolveRange(preset: PeriodPreset, now: Date, customFrom: string, customTo: string): { from: string; to: string } {
-  if (preset === 'custom') return { from: customFrom, to: customTo }
-  if (preset === 'last30') {
-    const to = new Date(now)
-    const from = new Date(now)
-    from.setDate(from.getDate() - 29)
-    return { from: toIsoDay(from), to: toIsoDay(to) }
-  }
-  const thisMonday = mondayOf(now)
-  if (preset === 'lastWeek') {
-    const from = new Date(thisMonday)
-    from.setDate(from.getDate() - 7)
-    const to = new Date(thisMonday)
-    to.setDate(to.getDate() - 1)
-    return { from: toIsoDay(from), to: toIsoDay(to) }
-  }
-  // 'thisWeek' — default: Monday through today.
-  return { from: toIsoDay(thisMonday), to: toIsoDay(now) }
 }
 
 interface KoiosForYouCardProps {
