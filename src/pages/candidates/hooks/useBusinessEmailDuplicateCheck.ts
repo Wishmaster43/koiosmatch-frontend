@@ -23,7 +23,7 @@
  * Best-effort: a failed probe (network/permission) never blocks the save.
  */
 import { useRef } from 'react'
-import api, { unwrapList } from '@/lib/api'
+import api from '@/lib/api'
 import type { Id } from '@/types/common'
 import type { DuplicateMatch } from '../addmodal/useDuplicateProbe'
 
@@ -35,17 +35,19 @@ export function useBusinessEmailDuplicateCheck(excludeId: Id) {
   // Guards a double-click of Save from firing two overlapping probes.
   const inFlight = useRef(false)
 
-  // Search for the typed e-mail; the first hit that ISN'T this candidate itself
-  // is the duplicate signal (no `exclude` param exists on the backend, so the
-  // current record is filtered out client-side).
+  // audit privacy-1 (§7): the e-mail travels in the POST body, never in a query string
+  // (access logs, proxies, history). CMBE c5958192: check-duplicate matches
+  // `business_email` on the freelance profile and answers { exists, match }.
   const checkDuplicate = async (email: string): Promise<DuplicateMatch | null> => {
     if (inFlight.current) return null
     inFlight.current = true
     try {
-      const res = await api.get('/candidates', { params: { search: email, per_page: 5 } })
-      const rows = unwrapList<CandidateHit>(res).rows
-      const hit = rows.find(r => String(r.id) !== String(excludeId))
-      return hit ? { id: hit.id, name: hit.name ?? null, archived: hit.archived } : null
+      const res = await api.post('/candidates/check-duplicate', { business_email: email })
+      const data = res.data as { exists?: boolean; match?: CandidateHit | null }
+      const hit = data?.exists ? data.match ?? null : null
+      // The current record can match itself; that is not a duplicate.
+      if (!hit || String(hit.id) === String(excludeId)) return null
+      return { id: hit.id, name: hit.name ?? null, archived: hit.archived }
     } catch {
       return null
     } finally {
