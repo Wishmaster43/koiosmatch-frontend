@@ -194,16 +194,26 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const [addOpen, setAddOpen] = useState(false)
   // Read-only drill-down: the clicked row opens the MatchDrawer beside the table.
   const [selected, setSelected] = useState<MatchRow | null>(null)
-  // Seed the contract-form filter from a navigation intent (e.g. the ops
-  // dashboard donut's slice click) — mirrors CandidatesPage's intent effect.
+  // Seed filters from a navigation intent (e.g. the ops dashboard donut's slice click,
+  // or MATCH-APPROVAL-2 notification navigation) — mirrors CandidatesPage's intent effect.
   useEffect(() => {
-    const contractForm = (intent as { contract_form?: unknown } | undefined)?.contract_form
+    const i = intent as { contract_form?: unknown; contract_type?: unknown; pendingApprovalOnly?: unknown } | undefined
+    const contractForm = i?.contract_form
     if (contractForm != null) setContractFormFilter([String(contractForm)])
     // MATCH-AXIS-FIX: same seeding for the distinct contract-TYPE intent (e.g
     // the ops-dashboard MatchesByContractTypeDonut's slice click).
-    const contractType = (intent as { contract_type?: unknown } | undefined)?.contract_type
+    const contractType = i?.contract_type
     if (contractType != null) setContractTypeFilter([String(contractType)])
-  }, [intent, setContractFormFilter, setContractTypeFilter])
+    // MATCH-APPROVAL-2: a match.approval_pending notification lands with intent
+    // { pendingApprovalOnly: true }. Activate the pending-approval quick view,
+    // honesty-gated: absent entirely once the tenant's approval_mode is 'off'.
+    if (i?.pendingApprovalOnly === true && approvalReviewVisible) {
+      setPendingApprovalOnly(true)
+    }
+    // setContractFormFilter/setContractTypeFilter/setPendingApprovalOnly are
+    // usePageMemory setters (stable identity) — listed to satisfy exhaustive-deps,
+    // not because this effect should re-run on them.
+  }, [intent, setContractFormFilter, setContractTypeFilter, setPendingApprovalOnly, approvalReviewVisible])
 
   // Deep-link/intent open + URL mirror live in their own hook (§3 split).
   useMatchesDeepLink({ intent, rows, loading, selected, setSelected, t })

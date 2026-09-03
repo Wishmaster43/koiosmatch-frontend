@@ -14,7 +14,7 @@ export const ENTITY_PAGE: Record<string, string> = {
   opportunity: 'opportunities', customer: 'customers',
 }
 
-export interface NotificationTarget { page: string; id: string }
+export interface NotificationTarget { page: string; id: string; intent?: Record<string, unknown> }
 
 // NOTIF-PAYLOAD (CMBE 8f0fcdb8, app/Support/NotificationActionStatus.php): the only
 // action_status values a workflow-run notification ever carries — 'cancelled'/no-run
@@ -59,6 +59,10 @@ export const CUSTOM_TYPE_TARGETS: Record<string, (meta: Record<string, unknown>)
   // carries application_id (ProposalService::notifySendFailed) alongside the
   // generic meta.type/id pointer, so this is belt-and-braces with the generic path.
   'proposal.send_failed': (meta) => (meta.application_id != null ? { page: 'applications', id: String(meta.application_id) } : null),
+  // MATCH-APPROVAL-2: a match pending approval notification (MatchApprovalTasks.php)
+  // carries match_id in meta and navigates to the match drawer with the pending-approval
+  // quick view activated (intent: { pendingApprovalOnly: true }).
+  'match.approval_pending': (meta) => (meta.match_id != null ? { page: 'matches', id: String(meta.match_id), intent: { pendingApprovalOnly: true } } : null),
 }
 
 // Pure: resolve a notification into a navigable {page, id}, or null when nothing
@@ -105,9 +109,13 @@ export function resolveNotificationTarget(n: AppNotification): NotificationTarge
 // Impure: navigate to a resolved target via the shell's own hash-history
 // contract (mirrors DashboardLayout's goTo + useDrawerUrl's writeOpenId), so the
 // target page's own drawer-open effect (`?open=<id>`) picks it up unchanged.
+// When the target carries optional intent data (e.g., MATCH-APPROVAL-2's
+// pendingApprovalOnly), it is passed to DashboardLayout via the state so the
+// page receives it as the navIntent prop.
 export function navigateToNotificationTarget(target: NotificationTarget) {
   const hash = `#${target.page}?open=${encodeURIComponent(target.id)}`
-  const state = { kmPage: target.page, drawerOpen: target.id }
+  const state: Record<string, unknown> = { kmPage: target.page, drawerOpen: target.id }
+  if (target.intent != null) state.kmIntentData = target.intent
   window.history.pushState(state, '', hash)
   window.dispatchEvent(new PopStateEvent('popstate', { state: { ...state, kmSynthetic: true } }))
 }

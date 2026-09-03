@@ -88,15 +88,24 @@ export default function DashboardLayout() {
   // Back/forward: restore the page from our history state (hash as reload fallback).
   // Same '/'+'?' split as above — a NAV-BACK-1 drawer entry's `kmPage` is already
   // the bare page (see useDrawerUrl), but the hash fallback still carries `?open=`.
+  // MATCH-APPROVAL-2: notification events (synthetic popstate with kmIntentData)
+  // communicate a custom intent to the target page.
   useEffect(() => {
     // User pressed browser back/forward: resolve the target page from the pushed
     // history state, falling back to the hash for a hard reload.
     const onPop = (e: PopStateEvent) => {
+      const state = e.state as { kmSynthetic?: boolean; kmPage?: string; kmIntentData?: unknown } | null
+      // MATCH-APPROVAL-2: notification navigation carries kmIntentData in synthetic events.
+      // Apply it as navIntent so the target page receives it via the intent prop.
+      if (state?.kmSynthetic && state?.kmIntentData != null) {
+        setNavIntent(state.kmIntentData)
+        setActivePage(state.kmPage ?? window.location.hash.replace(/^#/, '').split(/[/?]/)[0])
+        return
+      }
       // Synthetic announcements (kmSynthetic) are for hash-derived listeners
       // only — they are not user navigation, so never reset intent on them.
-      if ((e.state as { kmSynthetic?: boolean } | null)?.kmSynthetic) return
-      const page = (e.state as { kmPage?: string } | null)?.kmPage
-        ?? window.location.hash.replace(/^#/, '').split(/[/?]/)[0]
+      if (state?.kmSynthetic) return
+      const page = state?.kmPage ?? window.location.hash.replace(/^#/, '').split(/[/?]/)[0]
       if (page && PAGE_TITLES[page]) { setNavIntent(null); setActivePage(page) }
     }
     window.addEventListener('popstate', onPop)

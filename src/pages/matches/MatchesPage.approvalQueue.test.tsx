@@ -99,4 +99,17 @@ describe('MatchesPage · "Te beoordelen" quick-view toggle + KPI (MATCH-APPROVAL
     expect(screen.queryByRole('button', { name: i18n.t('matches:quickView.pendingApproval') })).not.toBeInTheDocument()
     expect(lastKpis.some(k => k.key === 'pendingApproval')).toBe(false)
   })
+
+  // MATCH-APPROVAL-2: a match.approval_pending notification arrives with intent
+  // { pendingApprovalOnly: true } and should activate the quick view on arrival.
+  it('activates the pending-approval quick view when arriving with { pendingApprovalOnly } intent', async () => {
+    render(<MatchesPage intent={{ pendingApprovalOnly: true }} />)
+    await waitFor(() => expect(screen.getByTestId('table-rows')).toHaveTextContent(/^m-1$/))
+  })
+
+  it('ignores the { pendingApprovalOnly } intent once the tenant approval_mode is "off"', async () => {
+    mockApprovalMode.mockReturnValue({ approvalMode: 'off' })
+    render(<MatchesPage intent={{ pendingApprovalOnly: true }} />)
+    await waitFor(() => expect(screen.getByTestId('table-rows')).toHaveTextContent('m-1,m-2'))
+  })
 })

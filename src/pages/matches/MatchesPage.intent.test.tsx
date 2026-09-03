@@ -1,7 +1,7 @@
 /**
- * MatchesPage · contract_form intent seam (MATCH-SOORT-1 wave 1c). §13: asserts
- * the DESTINATION — the contractForm panel filter narrows the SAME rows the
- * table receives, mirroring the stage/owner assertions in MatchesPage.filterPanel.test.tsx.
+ * MatchesPage · intent seam (contract_form / contract_type / pendingApprovalOnly).
+ * §13: asserts the DESTINATION — intents narrow the same rows the table receives,
+ * mirroring the stage/owner assertions in MatchesPage.filterPanel.test.tsx.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
