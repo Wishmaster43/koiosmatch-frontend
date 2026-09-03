@@ -1891,7 +1891,8 @@
       "candidatesDocumentsManage": "Dokumente verwalten",
       "candidatesNotesManageAll": "Alle Notizen verwalten",
       "details": "Berichtsdetails (SM/KI)",
-      "import": "Importieren"
+      "import": "Importieren",
+      "export-financial": "Finanzexport"
     },
     "color": "Farbe",
     "icon": "Symbol",

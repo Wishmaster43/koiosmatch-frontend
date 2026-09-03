@@ -5,6 +5,9 @@
  * and actions via roles.actions.<key>, falling back to the RAW key when a
  * translation is missing (§5: a raw key on screen is a finding). This pins the
  * labels added in 066e1b5d so the fallback path can never silently return.
+ * Also pins `candidates.export-financial` (CAND-IMPORT-FE-1 residual,
+ * measured 03-09): the seeded permission reached the matrix with no
+ * roles.actions.export-financial key, so it rendered as the raw key.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
@@ -18,6 +21,12 @@ const GROUPS: PermissionGroups = [
   ['notes', [{ name: 'notes.export' }, { name: 'notes.import' }]],
   ['conversations', [{ name: 'conversations.export' }, { name: 'conversations.import' }]],
   ['documents', [{ name: 'documents.export' }, { name: 'documents.import' }]],
+]
+
+// The candidates group as GET /permissions serves it, carrying the seeded
+// `candidates.export-financial` right alongside the ordinary CRUD verbs.
+const CANDIDATES_GROUP: PermissionGroups = [
+  ['candidates', [{ name: 'candidates.view' }, { name: 'candidates.export-financial' }]],
 ]
 
 describe('PermissionMatrix — transfer-family groups', () => {
@@ -39,5 +48,15 @@ describe('PermissionMatrix — transfer-family groups', () => {
     fireEvent.click(screen.getByText('Notities'))
     expect(screen.getByText('Exporteren')).toBeInTheDocument()
     expect(screen.getByText('Importeren')).toBeInTheDocument()
+  })
+
+  it('shows the translated export-financial toggle, never the raw permission key', () => {
+    render(<PermissionMatrix groups={CANDIDATES_GROUP} hasPermission={() => true} onToggle={vi.fn()} />)
+
+    // Expand the Kandidaten group row to reveal the export-financial toggle.
+    fireEvent.click(screen.getByText('Kandidaten'))
+    expect(screen.getByText('Financiële export')).toBeInTheDocument()
+    expect(screen.queryByText('export-financial')).toBeNull()
+    expect(screen.queryByText('candidates.export-financial')).toBeNull()
   })
 })

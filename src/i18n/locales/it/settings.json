@@ -2137,7 +2137,8 @@
       "candidatesDocumentsManage": "Gestisci documenti",
       "candidatesNotesManageAll": "Gestisci tutte le note",
       "details": "Dettagli report (SM/IA)",
-      "import": "Importa"
+      "import": "Importa",
+      "export-financial": "Esportazione finanziaria"
     },
     "color": "Colore",
     "icon": "Icona",

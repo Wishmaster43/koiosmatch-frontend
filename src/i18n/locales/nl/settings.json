@@ -2137,7 +2137,8 @@
       "candidatesDocumentsManage": "Documenten beheren",
       "candidatesNotesManageAll": "Alle notities beheren",
       "details": "Rapportdetails (SM/AI)",
-      "import": "Importeren"
+      "import": "Importeren",
+      "export-financial": "Financiële export"
     },
     "color": "Kleur",
     "icon": "Icoon",

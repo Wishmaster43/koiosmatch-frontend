@@ -1891,7 +1891,8 @@
       "candidatesDocumentsManage": "Gérer les documents",
       "candidatesNotesManageAll": "Gérer toutes les notes",
       "details": "Détails du rapport (SM/IA)",
-      "import": "Importer"
+      "import": "Importer",
+      "export-financial": "Export financier"
     },
     "color": "Couleur",
     "icon": "Icône",
