@@ -36,6 +36,7 @@ import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { useMatchesDeepLink } from './hooks/useMatchesDeepLink'
 import { useMatches, MATCHES_MAX_PER_PAGE } from './hooks/useMatches'
+import { useMatchesStats } from './hooks/useMatchesStats'
 import type { MatchDateRange } from './data/matchFilterGroups'
 import { useMatchesBulkActions } from './hooks/useMatchesBulkActions'
 import { useMatchMutations } from './hooks/useMatchMutations'
@@ -65,8 +66,24 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // TRASH-OVERAL-2: the Prullenbak view (lifecycle pending_erase) — exclusive with
   // the archived view, mirrors the candidates page's three lifecycle views.
   const [showTrash, setShowTrash] = usePageMemory('matches.trash', false)
+  // MATCH-APPROVAL-QUEUE-1 (Danny: "geen lijst van te beoordelen matches" — the
+  // manager review queue): a client-side toggle over the already-loaded rows,
+  // exactly like kpiScored/kpiUnscored below, so the insights row, the donuts and
+  // the right-panel option lists keep counting the full server-wide set (the
+  // server-side variant narrowed `rows` and collapsed all of them — Opus 04-09).
+  // Only the KPI tile is server-side (GET /matches/stats.pending_approval).
+  const [pendingApprovalOnly, setPendingApprovalOnly] = usePageMemory('matches.pendingApproval', false)
+  // goedkeuring-badge-eerlijk (08-08, same honesty gate MatchApprovalBadge uses):
+  // with approval_mode 'uit' every match auto-approves and NOTHING can ever move
+  // it into 'pending', so a permanent "Te beoordelen" 0-tile would be noise.
+  const { approvalMode } = useMatchApprovalMode()
+  const approvalReviewVisible = approvalMode !== 'off'
   // Data (fetch + mapping) lives in the hook (§3); the page only derives + renders.
   const { rows, loading, error, updateMatch, reload } = useMatches(refQuery, showArchived || showTrash)
+  // MATCH-APPROVAL-QUICKVIEW: bumped alongside `reload()` so the /matches/stats
+  // KPI refetches whenever the row list does (create / archive / restore).
+  const [statsRefreshTick, setStatsRefreshTick] = useState(0)
+  const reloadAll = () => { reload(); setStatsRefreshTick(x => x + 1) }
   const { registerFilters, unregisterFilters } = useRightPanel()
   // Match statuses drive the board columns + donut (R-1b lookup; the funnel is
   // an APPLICATION axis — the match resource no longer carries a stage).
@@ -98,16 +115,6 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const { options: contractTypeLookupOptions } = useContractTypes()
   // Unscored complements kpiScored: both live in the right panel's one "score state" group.
   const [kpiUnscored, setKpiUnscored] = usePageMemory('matches.unscored', false)
-  // MATCH-APPROVAL-QUEUE-1 (Danny: "geen lijst van te beoordelen matches" — the
-  // manager review queue): client-side toggle over the already-loaded rows,
-  // exactly like kpiScored/kpiUnscored above. The tenant's approval_mode gates
-  // whether the affordance renders at all (see approvalReviewVisible below).
-  const [pendingApprovalOnly, setPendingApprovalOnly] = usePageMemory('matches.pendingApproval', false)
-  // goedkeuring-badge-eerlijk (08-08, same honesty gate MatchApprovalBadge uses):
-  // with approval_mode 'uit' every match auto-approves and NOTHING can ever move
-  // it into 'pending', so a permanent "Te beoordelen" 0-tile would be noise.
-  const { approvalMode } = useMatchApprovalMode()
-  const approvalReviewVisible = approvalMode !== 'off'
   // Match-date window (a single removable range, not multi-value).
   const [dateRange, setDateRange] = usePageMemory<MatchDateRange | null>('matches.dateRange', null)
   // Start of the current month, captured once (purity — feeds the "Nieuw" KPI).
@@ -119,6 +126,10 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const { toggleRow, toggleAll, bulkCoupleHelloFlex, bulkCoupleShiftmanager } =
     useMatchesBulkActions({ selectedIds, setSelectedIds, t })
 
+  // MATCH-APPROVAL-QUICKVIEW (bundle G): the 'Te beoordelen' KPI reads
+  // GET /matches/stats.pending_approval server-side, like every other server KPI.
+  const { pendingApproval: pendingApprovalCount } = useMatchesStats(showArchived || showTrash, statsRefreshTick)
+
   // Donut/KPI aggregation + right-panel filter-group wiring (§0.3 split).
   const {
     insightDonuts, insightKpis, anyFilterActive, clearAllFilters, searchEpoch,
@@ -129,7 +140,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
     contractTypeFilter, setContractTypeFilter, contractTypeLookupOptions,
     kpiScored, setKpiScored, kpiUnscored, setKpiUnscored,
     dateRange, setDateRange, showArchived, setShowArchived, showTrash, setShowTrash,
-    pendingApprovalOnly, setPendingApprovalOnly, approvalReviewVisible,
+    pendingApprovalOnly, setPendingApprovalOnly, approvalReviewVisible, pendingApprovalCount,
     registerFilters, unregisterFilters,
   })
 
@@ -229,7 +240,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
 
   // Archive + trash (Prullenbak) wiring, extracted (§0.3 split).
   const { archiveMatch, restoreMatch, archiveConfirmDialog, canArchive, trash, canMarkDeletion, openMarkDeletion } =
-    useMatchesTrash({ rows, selected, patchRow, reload, setSelected })
+    useMatchesTrash({ rows, selected, patchRow, reload: reloadAll, setSelected })
 
   // View toggle: table ⇄ board (planboard). Board columns = the tenant match
   // statuses (R-1b lookup + seed fallback) so there are always columns to drag.
@@ -357,7 +368,9 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
         onSetOwner={hasPermission('matches.update') ? (user) => { if (selected?.id != null) setOwner(selected.id, user) } : undefined}
         // Approval workflow (§7 — UI-only gate; the backend re-checks matches.update).
         canApprove={hasPermission('matches.update')}
-        onApprovalChange={patchRow}
+        // Approve/reject patches the row (the client predicate drops it from the queue
+        // at once) and refetches the server-side tile.
+        onApprovalChange={(id, patch) => { patchRow(id, patch); setStatsRefreshTick(x => x + 1) }}
         onUpdate={patchRow}
         onUpdateCustomFields={updateCustomFields}
         // ARCHIVE-1: per-id delete/restore (§7 — UI-only gate; the backend re-checks
@@ -378,7 +391,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
 
       {/* Direct-match creation: the full match form (rate proposal, contract,
           cost center) with a candidate picker; refetch so server-derived fields land. */}
-      {addOpen && <MatchModal onClose={() => setAddOpen(false)} onCreated={reload} />}
+      {addOpen && <MatchModal onClose={() => setAddOpen(false)} onCreated={reloadAll} />}
       {archiveConfirmDialog}
       {/* TRASH-OVERAL-2: the ONE shared "Definitief verwijderen" preview dialog.
           Matches carry no transferable owner (preview.transferable stays null),

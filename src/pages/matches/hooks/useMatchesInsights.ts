@@ -39,6 +39,10 @@ interface UseMatchesInsightsArgs {
   showTrash: boolean; setShowTrash: Dispatch<SetStateAction<boolean>>
   pendingApprovalOnly: boolean; setPendingApprovalOnly: Dispatch<SetStateAction<boolean>>
   approvalReviewVisible: boolean
+  // MATCH-APPROVAL-QUICKVIEW: server-aggregated count (GET /matches/stats.pending_approval)
+  // — no longer derived from the loaded rows, which now narrow to pending-only
+  // once the quick view itself is on (see useMatches' approvalStatus param).
+  pendingApprovalCount: number
   registerFilters: (key: string, groups: FilterGroup[]) => void
   unregisterFilters: (key: string) => void
 }
@@ -51,7 +55,7 @@ export function useMatchesInsights(args: UseMatchesInsightsArgs) {
     contractTypeFilter, setContractTypeFilter, contractTypeLookupOptions,
     kpiScored, setKpiScored, kpiUnscored, setKpiUnscored,
     dateRange, setDateRange, showArchived, setShowArchived, showTrash, setShowTrash,
-    pendingApprovalOnly, setPendingApprovalOnly, approvalReviewVisible,
+    pendingApprovalOnly, setPendingApprovalOnly, approvalReviewVisible, pendingApprovalCount,
     registerFilters, unregisterFilters,
   } = args
 
@@ -152,9 +156,8 @@ export function useMatchesInsights(args: UseMatchesInsightsArgs) {
   // New this month + matches still lacking a score (both derived from the rows).
   const newThisMonthCount = rows.filter(r => r.date && new Date(r.date).getTime() >= monthStart).length
   const unscoredCount     = rows.filter(r => typeof r.score !== 'number').length
-  // MATCH-APPROVAL-QUEUE-1: counted off the full server-wide row set, same as
-  // every other KPI above — never the paged/filtered slice.
-  const pendingApprovalCount = rows.filter(r => r.approval_status === 'pending').length
+  // MATCH-APPROVAL-QUICKVIEW: pendingApprovalCount now arrives as a prop (server
+  // stats), see the interface comment above — no longer derived from `rows`.
 
   // Donuts drive the stage/owner filters; each clears its own selection.
   const insightDonuts: DonutSpec[] = [

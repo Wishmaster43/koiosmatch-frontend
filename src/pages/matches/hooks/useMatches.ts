@@ -131,7 +131,10 @@ export function mapMatch(m: RawMatch): MatchRow {
 // fetches a single filtered page instead of the full paginated set.
 // `includeArchived` (MATCH-ARCHIVED-LIST-1): reveal soft-deleted matches alongside
 // the active set (?include_archived=1) — off by default.
-export function useMatches(ref: string | null = null, includeArchived: boolean = false) {
+// `approvalStatus` (MATCH-APPROVAL-QUICKVIEW): the 'Te beoordelen' quick view sends
+// `approval_status=pending` as a server param (MatchQuery.php:60,119) instead of
+// filtering the already-loaded rows client-side — undefined sends no filter.
+export function useMatches(ref: string | null = null, includeArchived: boolean = false, approvalStatus?: string) {
   const [rows,    setRows]    = useState<MatchRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(false)
@@ -152,11 +155,15 @@ export function useMatches(ref: string | null = null, includeArchived: boolean =
     // request (numeric 1, not a JS boolean).
     const base: Record<string, unknown> = { per_page: MATCHES_MAX_PER_PAGE }
     if (includeArchived) base.include_archived = 1
+    if (approvalStatus) base.approval_status = approvalStatus
     const loadAll = async () => {
       // A reference-number query (NUMMER-1) is an exact server-side lookup — one
       // request, no pagination loop; the server ignores other filters when `ref` is set.
       if (ref) {
-        const r = await api.get('/matches', { params: includeArchived ? { ref, include_archived: 1 } : { ref } })
+        const refParams: Record<string, unknown> = { ref }
+        if (includeArchived) refParams.include_archived = 1
+        if (approvalStatus) refParams.approval_status = approvalStatus
+        const r = await api.get('/matches', { params: refParams })
         return (r.data?.data ?? []) as RawMatch[]
       }
       const all: RawMatch[] = []
@@ -173,7 +180,7 @@ export function useMatches(ref: string | null = null, includeArchived: boolean =
       .catch(e => { if (alive && e?.response?.status && e.response.status !== 404) setError(true) })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
-  }, [refreshTick, ref, includeArchived])
+  }, [refreshTick, ref, includeArchived, approvalStatus])
 
   // Patch one match in place (optimistic board drag / stage change / archive flag).
   // ZZP-MERGE-1: deep-merge (never shallow-spread) so a patch touching only part of

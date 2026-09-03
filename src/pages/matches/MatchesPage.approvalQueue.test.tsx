@@ -1,12 +1,14 @@
 /**
- * MatchesPage · MATCH-APPROVAL-QUEUE-1 (Danny: managers had no list of matches
- * waiting on their own review — approval_status already rode on every row).
- * The "Te beoordelen" quick-view toggle + KPI tile both filter/count the
- * already-loaded rows CLIENT-SIDE (mirrors kpiScored/kpiUnscored — measured:
- * those two toggles never round-trip to the server on their own, `pageSize`
- * is the only thing that does), and both are honesty-gated on the tenant's
- * approval_mode setting (goedkeuring-badge-eerlijk) — absent entirely once
- * it is 'off', never a permanent 0-tile.
+ * MatchesPage · MATCH-APPROVAL-QUICKVIEW (04-09, supersedes MATCH-APPROVAL-QUEUE-1's
+ * client-side version): the 'Te beoordelen' quick view now sends
+ * `approval_status=pending` as a SERVER param (MatchQuery.php:60,119) instead of
+ * filtering the already-loaded rows client-side, and the KPI tile reads
+ * `GET /matches/stats.pending_approval` (MatchController.php:97 — the same
+ * MatchQuery-filtered base the list uses) instead of counting `rows`. Both stay
+ * honesty-gated on the tenant's approval_mode setting (goedkeuring-badge-eerlijk)
+ * — absent entirely once it is 'off', never a permanent 0-tile. Renders the REAL
+ * useMatches + useMatchesStats wiring (only axios and unrelated UI chrome are
+ * mocked) so the outgoing REQUEST is what's under test (§13).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { __resetPageMemoryForTests } from '@/lib/usePageMemory'
@@ -25,17 +27,32 @@ vi.mock('@/lib/useMatchStatuses', () => ({ useMatchStatuses: () => ({ statuses: 
 const mockApprovalMode = vi.fn()
 vi.mock('./hooks/useMatchApprovalMode', () => ({ useMatchApprovalMode: () => mockApprovalMode() }))
 
-// One pending, one already-approved row — enough to prove the toggle/KPI narrow
-// to exactly the pending one.
-const rows = [
-  { id: 'm-1', candidate: 'Jane Doe', vacancy: 'Verpleegkundige', client: 'Acme', owner: 'Jane', status: 'open', approval_status: 'pending', archived: false },
-  { id: 'm-2', candidate: 'John Roe', vacancy: 'Verzorgende IG', client: 'Beta', owner: 'John', status: 'open', approval_status: 'approved', archived: false },
+// Two server-side rows: the mocked GET /matches response changes ONLY with the
+// request's own approval_status param — proves the toggle narrows via the
+// REQUEST, never a client-side predicate over an already-loaded set.
+const allRows = [
+  { id: 'm-1', status: 'open', approval_status: 'pending' },
+  { id: 'm-2', status: 'open', approval_status: 'approved' },
 ]
-vi.mock('./hooks/useMatches', () => ({
-  useMatches: () => ({ rows, loading: false, error: false, updateMatch: vi.fn(), reload: vi.fn() }),
-  mapMatch: (r: unknown) => r,
-  MATCHES_MAX_PER_PAGE: 200,
-}))
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
+  return {
+    ...actual,
+    default: {
+      get: vi.fn((url: string, config?: { params?: Record<string, unknown> }) => {
+        if (url === '/matches/stats') {
+          return Promise.resolve({ data: { total: 2, pending_approval: 1, by_origin: { direct: 2, application: 0 } } })
+        }
+        const pending = config?.params?.approval_status === 'pending'
+        const data = pending ? allRows.filter(r => r.approval_status === 'pending') : allRows
+        return Promise.resolve({ data: { data, meta: { last_page: 1 } } })
+      }),
+    },
+  }
+})
+import api from '@/lib/api'
+const mockedGet = vi.mocked(api.get)
+
 vi.mock('./hooks/useMatchesBulkActions', () => ({
   useMatchesBulkActions: () => ({ toggleRow: vi.fn(), toggleAll: vi.fn(), bulkCoupleHelloFlex: vi.fn(), bulkCoupleShiftmanager: vi.fn() }),
 }))
@@ -68,10 +85,10 @@ vi.mock('./MatchesTable', () => ({
   ),
 }))
 
-beforeEach(() => { __resetPageMemoryForTests(); lastKpis = []; mockApprovalMode.mockReturnValue({ approvalMode: 'always' }) })
+beforeEach(() => { __resetPageMemoryForTests(); lastKpis = []; mockedGet.mockClear(); mockApprovalMode.mockReturnValue({ approvalMode: 'always' }) })
 
-describe('MatchesPage · "Te beoordelen" quick-view toggle + KPI (MATCH-APPROVAL-QUEUE-1)', () => {
-  it('shows the toggle, and clicking it narrows the table to the pending row only', async () => {
+describe('MatchesPage · "Te beoordelen" quick-view toggle + KPI (MATCH-APPROVAL-QUICKVIEW)', () => {
+  it('shows the toggle, and clicking it narrows the table CLIENT-SIDE (no approval_status param on GET /matches)', async () => {
     const user = userEvent.setup()
     render(<MatchesPage />)
     await waitFor(() => expect(screen.getByTestId('table-rows')).toHaveTextContent('m-1,m-2'))
@@ -79,16 +96,21 @@ describe('MatchesPage · "Te beoordelen" quick-view toggle + KPI (MATCH-APPROVAL
     const toggle = screen.getByRole('button', { name: i18n.t('matches:quickView.pendingApproval') })
     await user.click(toggle)
     await waitFor(() => expect(screen.getByTestId('table-rows')).toHaveTextContent(/^m-1$/))
+    // Request-level (§13): the list fetch carries NO server param — the queue narrows
+    // client-side so the insights row keeps counting the full set (Opus 04-09).
+    expect(mockedGet.mock.calls.some(([u, c]) => u === '/matches' && (c as { params?: Record<string, unknown> } | undefined)?.params?.approval_status === 'pending')).toBe(false)
   })
 
-  it('counts exactly the pending rows on the KPI tile, and its onClick filters the same way', async () => {
+  it('the KPI tile reads GET /matches/stats.pending_approval, and stays correct once the toggle narrows the rows', async () => {
     render(<MatchesPage />)
     await waitFor(() => expect(lastKpis.some(k => k.key === 'pendingApproval')).toBe(true))
-    const kpi = lastKpis.find(k => k.key === 'pendingApproval')!
-    expect(kpi.value).toBe(1)
+    expect(lastKpis.find(k => k.key === 'pendingApproval')!.value).toBe(1)
+    expect(mockedGet).toHaveBeenCalledWith('/matches/stats', expect.anything())
 
-    act(() => kpi.onClick?.())
+    act(() => lastKpis.find(k => k.key === 'pendingApproval')!.onClick?.())
     await waitFor(() => expect(screen.getByTestId('table-rows')).toHaveTextContent(/^m-1$/))
+    // Still 1 after toggling on — never derived from the now-narrowed `rows` array.
+    await waitFor(() => expect(lastKpis.find(k => k.key === 'pendingApproval')!.value).toBe(1))
   })
 
   it('is absent (toggle AND KPI) once the tenant approval_mode is "off" — never a permanent 0-tile', async () => {

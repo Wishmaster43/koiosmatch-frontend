@@ -171,6 +171,22 @@ describe('useMatches · MATCH-ARCHIVED-LIST-1', () => {
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(mockedGet).toHaveBeenCalledWith('/matches', { params: { ref: 'M-00042', include_archived: 1 } })
   })
+
+  // MATCH-APPROVAL-QUICKVIEW: the 'Te beoordelen' quick view sends approval_status
+  // as a server param — never sent at all when the toggle is off.
+  it('sends approval_status: pending when the quick view is on', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [], meta: { last_page: 1 } } })
+    const { result } = renderHook(() => useMatches(null, false, 'pending'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(mockedGet).toHaveBeenCalledWith('/matches', { params: expect.objectContaining({ approval_status: 'pending' }) })
+  })
+
+  it('never sends approval_status when the quick view is off', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [], meta: { last_page: 1 } } })
+    const { result } = renderHook(() => useMatches())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(mockedGet).toHaveBeenCalledWith('/matches', { params: expect.not.objectContaining({ approval_status: expect.anything() }) })
+  })
 })
 
 // §13 seam guard: GET /matches 422s above per_page=500 (MatchQuery::rules()) while

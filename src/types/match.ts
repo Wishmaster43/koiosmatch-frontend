@@ -204,3 +204,12 @@ export interface MatchRow {
   renewalCount?: number | null
   [k: string]: unknown
 }
+
+// MATCH-APPROVAL-QUICKVIEW: GET /matches/stats response shape (MatchController::stats,
+// aggregated over the same MatchQuery-filtered base the list uses). Hand-written —
+// api-generated.ts carries no 2xx schema for this route yet (§10).
+export interface MatchStats {
+  total: number
+  pending_approval: number
+  by_origin: { direct: number; application: number }
+}
