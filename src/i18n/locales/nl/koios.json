@@ -48,7 +48,9 @@
     "errorServiceNotAllowed": "Spraakherkenning is geblokkeerd door de browser. Service niet toegestaan",
     "errorAudioCapture": "Geen microfoon gevonden. Controleer je apparaat",
     "errorNetwork": "Netwerkfout tijdens spraakherkenning. Probeer het opnieuw",
-    "errorGeneric": "Spraakherkenning is mislukt. Probeer het opnieuw"
+    "errorGeneric": "Spraakherkenning is mislukt. Probeer het opnieuw",
+    "conversationMode": "Gespreksmodus",
+    "speaking": "Koios spreekt"
   },
   "tabs": {
     "overview": "Overzicht",

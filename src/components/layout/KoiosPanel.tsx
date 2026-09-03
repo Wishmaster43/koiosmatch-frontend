@@ -9,7 +9,7 @@
 import { useState, useRef, useEffect, useId } from 'react'
 import type { ChangeEvent, KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AtSign, ArrowUp, Sparkles, Lightbulb } from 'lucide-react'
+import { AtSign, ArrowUp, Sparkles, Lightbulb, Volume2 } from 'lucide-react'
 import { useLocale } from '@/lib/datetime'
 import { tint, TINT_BORDER } from '@/lib/tint'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
@@ -35,6 +35,7 @@ import type { KoiosEffort } from './koios/koiosTypes'
 import { useKoiosRadarCollapse } from './koios/useKoiosRadarCollapse'
 import KoiosAssistantBlock from './koios/KoiosAssistantBlock'
 import KoiosVoiceButton from './koios/KoiosVoiceButton'
+import { useKoiosConversationMode } from './koios/useKoiosConversationMode'
 import type { KoiosContextRef } from '@/types/koios'
 
 // ── Main panel ────────────────────────────────────────────────────────────────
@@ -50,10 +51,11 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
   initialContextRef?: KoiosContextRef
   onInitialQuestionConsumed?: () => void
 }) {
-  const { t } = useTranslation('common')
+  // 'koios' alongside 'common' (VOICE-MODE-1: t(key, {ns:'koios'}) calls) — 'common' stays the default ns.
+  const { t } = useTranslation(['common', 'koios'])
   const locale = useLocale()
   // All chat state + the synchronous /ai/koios/chat call live in the hook.
-  const { messages, loading, model, setModel, effort, setEffort, send, reset } = useKoiosChat()
+  const { messages, loading, model, setModel, effort, setEffort, voiceMode, setVoiceMode, send, reset } = useKoiosChat()
   // K-147: the effort picker's accessible name — an sr-only label the SelectMenu trigger points at.
   const effortLabelId = useId()
   // Landing state = no real conversation yet (only the intro bubble) — the Koios
@@ -139,6 +141,11 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
     closeMentionMenu()
     setTimeout(() => textareaRef.current?.focus(), 50)
   }
+
+  // VOICE-MODE-1: conversation-mode wiring (feature gate, auto-send-after-
+  // dictation, speak-the-latest-answer) — split into its own hook, see its docblock.
+  const { available: conversationModeAvailable, speaking: koiosSpeaking, onDictationEnd } =
+    useKoiosConversationMode({ voiceMode, open, locale, input, submit, messages })
 
   // Composer onChange: update the draft text, then let the mention hook decide
   // whether the "@" picker should open/update from the new value.
@@ -390,8 +397,17 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
 
             <div style={{ flex: 1 }} />
 
+            {/* Conversation mode (VOICE-MODE-1) — only when dictation + speech-synthesis both exist. */}
+            {conversationModeAvailable && (
+              <Button variant="ghost" iconOnly size="sm" aria-pressed={voiceMode} aria-busy={koiosSpeaking || undefined}
+                aria-label={t('voice.conversationMode', { ns: 'koios' })} onClick={() => setVoiceMode(!voiceMode)}
+                title={koiosSpeaking ? t('voice.speaking', { ns: 'koios' }) : t('voice.conversationMode', { ns: 'koios' })}>
+                <Volume2 size={14} color={voiceMode ? 'var(--color-primary)' : 'var(--sidebar-muted)'} />
+              </Button>
+            )}
+
             {/* Voice dictation (SPEECH-1) — renders nothing without browser support */}
-            <KoiosVoiceButton onText={appendVoiceText} t={t} />
+            <KoiosVoiceButton onText={appendVoiceText} t={t} onEnd={onDictationEnd} />
 
             {/* Send */}
             <button

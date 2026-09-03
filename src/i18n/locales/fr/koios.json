@@ -48,7 +48,9 @@
     "errorServiceNotAllowed": "La reconnaissance vocale a été bloquée par le navigateur. Service non autorisé",
     "errorAudioCapture": "Aucun microphone détecté. Vérifiez votre appareil",
     "errorNetwork": "Erreur réseau pendant la reconnaissance vocale. Veuillez réessayer",
-    "errorGeneric": "La reconnaissance vocale a échoué. Veuillez réessayer"
+    "errorGeneric": "La reconnaissance vocale a échoué. Veuillez réessayer",
+    "conversationMode": "Mode conversation",
+    "speaking": "Koios parle"
   },
   "tabs": {
     "overview": "Aperçu",

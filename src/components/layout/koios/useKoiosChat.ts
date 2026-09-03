@@ -36,6 +36,9 @@ export function useKoiosChat() {
   // Optional flavor and effort overrides; null = backend's tenant defaults.
   const [flavor, setFlavor]     = useState<string | null>(null)
   const [effort, setEffort]     = useState<KoiosEffort | null>(null)
+  // VOICE-MODE-1: conversation-mode toggle — sent to the backend as
+  // `voice_mode: true` only while on (see koiosApi.sendChat).
+  const [voiceMode, setVoiceMode] = useState(false)
 
   // Send a turn: optimistic user bubble, then map the reply into an assistant one.
   const send = useCallback(async (text: string, context?: KoiosContextRef[]) => {
@@ -44,7 +47,7 @@ export function useKoiosChat() {
     setMessages((prev) => [...prev, { role: 'user', content: trimmed }])
     setLoading(true)
     try {
-      const data = await sendChat(trimmed, model, context, flavor, effort)
+      const data = await sendChat(trimmed, model, context, flavor, effort, voiceMode)
       setMessages((prev) => [...prev, {
         role:       'assistant',
         answer:     data?.answer ?? '',
@@ -70,10 +73,13 @@ export function useKoiosChat() {
     } finally {
       setLoading(false)
     }
-  }, [loading, model, flavor, effort])
+  }, [loading, model, flavor, effort, voiceMode])
 
   // Start over with just the welcome bubble.
   const reset = useCallback(() => setMessages([welcomeMessage()]), [])
 
-  return { messages, loading, model, setModel, flavor, setFlavor, effort, setEffort, send, reset }
+  return {
+    messages, loading, model, setModel, flavor, setFlavor, effort, setEffort,
+    voiceMode, setVoiceMode, send, reset,
+  }
 }

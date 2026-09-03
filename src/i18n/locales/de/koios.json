@@ -48,7 +48,9 @@
     "errorServiceNotAllowed": "Die Spracherkennung wurde vom Browser blockiert. Dienst nicht erlaubt",
     "errorAudioCapture": "Kein Mikrofon gefunden. Überprüfen Sie Ihr Gerät",
     "errorNetwork": "Netzwerkfehler bei der Spracherkennung. Bitte versuchen Sie es erneut",
-    "errorGeneric": "Spracherkennung fehlgeschlagen. Bitte versuchen Sie es erneut"
+    "errorGeneric": "Spracherkennung fehlgeschlagen. Bitte versuchen Sie es erneut",
+    "conversationMode": "Gesprächsmodus",
+    "speaking": "Koios spricht"
   },
   "tabs": {
     "overview": "Übersicht",

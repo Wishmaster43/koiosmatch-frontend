@@ -265,7 +265,7 @@ describe('KoiosPanel — context chips (seam)', () => {
     await waitFor(() => expect(sendChat).toHaveBeenCalledWith('hello', null, expect.arrayContaining([
       expect.objectContaining({ type: 'candidate', id: 'c-1' }),
       expect.objectContaining({ type: 'candidate', id: '9' }),
-    ]), null, null))
+    ]), null, null, false))
   })
 
   // (d2) a manual @-mention of the SAME record as the ambient chip (c-1) dedupes
@@ -324,7 +324,7 @@ describe('KoiosPanel — context chips (seam)', () => {
     const textarea = screen.getByPlaceholderText('koios.taskPlaceholder')
     fireEvent.change(textarea, { target: { value: 'hello' } })
     fireEvent.keyDown(textarea, { key: 'Enter' })
-    await waitFor(() => expect(sendChat).toHaveBeenCalledWith('hello', null, [], null, null))
+    await waitFor(() => expect(sendChat).toHaveBeenCalledWith('hello', null, [], null, null, false))
   })
 })
 
@@ -516,7 +516,7 @@ describe('KoiosPanel · effort picker', () => {
     fireEvent.click(screen.getByRole('button', { name: 'koios.taskPlaceholder' }))
     await waitFor(() => expect(sendChat).toHaveBeenCalled())
     // Check the call carried effort: 'high'
-    expect(sendChat).toHaveBeenCalledWith('test', null, [], null, 'high')
+    expect(sendChat).toHaveBeenCalledWith('test', null, [], null, 'high', false)
   })
 
   it('does not send effort in the request body when set to default', async () => {
@@ -529,7 +529,7 @@ describe('KoiosPanel · effort picker', () => {
     fireEvent.click(screen.getByRole('button', { name: 'koios.taskPlaceholder' }))
     await waitFor(() => expect(sendChat).toHaveBeenCalled())
     // Check the call carried effort: null (5th arg after model/context/flavor)
-    expect(sendChat).toHaveBeenCalledWith('hello', null, [], null, null)
+    expect(sendChat).toHaveBeenCalledWith('hello', null, [], null, null, false)
   })
 
   it('the effort trigger is named by its label AND its current value (§6)', async () => {
@@ -537,6 +537,108 @@ describe('KoiosPanel · effort picker', () => {
     await screen.findByText('common:koios.radar.empty')
     const trigger = screen.getByRole('button', { name: /koios\.effort\.label.*koios\.effort\.default/ })
     expect(trigger).toHaveAttribute('aria-haspopup', 'listbox')
+  })
+})
+
+// VOICE-MODE-1: conversation mode (auto-send after dictation + spoken
+// answers). Every test stubs window.SpeechRecognition/speechSynthesis
+// (jsdom ships neither) and reuses the module-level sendChat mock — never a
+// live /ai/koios/* call (API-CREDITS-1).
+describe('KoiosPanel · conversation mode (VOICE-MODE-1)', () => {
+  // Minimal recognizer double — only needs to exist for the feature-detect
+  // check; no test here actually dictates.
+  class MockSpeechRecognition {
+    continuous = false
+    interimResults = false
+    lang = ''
+    onresult: (() => void) | null = null
+    onerror: (() => void) | null = null
+    onend: (() => void) | null = null
+    start = vi.fn()
+    stop = vi.fn()
+  }
+  // Minimal utterance double — captures text/lang so tests can assert on it.
+  class FakeUtterance {
+    text: string
+    lang = ''
+    onstart: (() => void) | null = null
+    onend: (() => void) | null = null
+    onerror: (() => void) | null = null
+    constructor(text: string) { this.text = text }
+  }
+  let speak: ReturnType<typeof vi.fn>
+  let cancel: ReturnType<typeof vi.fn>
+
+  // Stub both browser APIs the conversation-mode toggle gates on.
+  function stubVoiceApis() {
+    speak = vi.fn()
+    cancel = vi.fn()
+    ;(window as unknown as { SpeechRecognition: unknown }).SpeechRecognition = MockSpeechRecognition
+    ;(window as unknown as { speechSynthesis: unknown }).speechSynthesis = { speak, cancel }
+    ;(window as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance = FakeUtterance
+  }
+
+  afterEach(() => {
+    delete (window as { SpeechRecognition?: unknown }).SpeechRecognition
+    delete (window as { speechSynthesis?: unknown }).speechSynthesis
+    delete (window as { SpeechSynthesisUtterance?: unknown }).SpeechSynthesisUtterance
+    vi.mocked(sendChat).mockClear()
+  })
+
+  // (a) no browser support at all → the toggle is not offered.
+  it('does not render the conversation-mode toggle without speechSynthesis/SpeechRecognition support', async () => {
+    renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    await screen.findByText('common:koios.radar.empty')
+    expect(screen.queryByRole('button', { name: 'voice.conversationMode' })).toBeNull()
+  })
+
+  // (b) both APIs stubbed → the toggle renders with its accessible name.
+  it('renders the conversation-mode toggle once both dictation and speech-synthesis are supported', async () => {
+    stubVoiceApis()
+    renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    await screen.findByText('common:koios.radar.empty')
+    expect(screen.getByRole('button', { name: 'voice.conversationMode' })).toBeInTheDocument()
+  })
+
+  // (c) switching the toggle on and sending a message sends voice_mode: true.
+  it('sends voiceMode=true to sendChat once the toggle is switched on', async () => {
+    stubVoiceApis()
+    renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    await screen.findByText('common:koios.radar.empty')
+    fireEvent.click(screen.getByRole('button', { name: 'voice.conversationMode' }))
+    const textarea = screen.getByPlaceholderText('koios.taskPlaceholder')
+    fireEvent.change(textarea, { target: { value: 'hello' } })
+    fireEvent.click(screen.getByRole('button', { name: 'koios.taskPlaceholder' }))
+    await waitFor(() => expect(sendChat).toHaveBeenCalledWith('hello', null, [], null, null, true))
+  })
+
+  // (d) with the mode on, the reply is read aloud exactly once.
+  it('speaks the assistant reply once conversation mode is on', async () => {
+    stubVoiceApis()
+    vi.mocked(sendChat).mockResolvedValueOnce({ answer: 'Plain reply.', steps: [] })
+    renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    await screen.findByText('common:koios.radar.empty')
+    fireEvent.click(screen.getByRole('button', { name: 'voice.conversationMode' }))
+    const textarea = screen.getByPlaceholderText('koios.taskPlaceholder')
+    fireEvent.change(textarea, { target: { value: 'hello' } })
+    fireEvent.click(screen.getByRole('button', { name: 'koios.taskPlaceholder' }))
+    await screen.findByText('Plain reply.')
+    await waitFor(() => expect(speak).toHaveBeenCalledTimes(1))
+    const utterance = speak.mock.calls[0][0] as FakeUtterance
+    expect(utterance.text).toBe('Plain reply.')
+  })
+
+  // (e) with the mode off, the same reply is never spoken.
+  it('does not speak the assistant reply when conversation mode is off', async () => {
+    stubVoiceApis()
+    vi.mocked(sendChat).mockResolvedValueOnce({ answer: 'Silent reply.', steps: [] })
+    renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    await screen.findByText('common:koios.radar.empty')
+    const textarea = screen.getByPlaceholderText('koios.taskPlaceholder')
+    fireEvent.change(textarea, { target: { value: 'hello' } })
+    fireEvent.click(screen.getByRole('button', { name: 'koios.taskPlaceholder' }))
+    await screen.findByText('Silent reply.')
+    expect(speak).not.toHaveBeenCalled()
   })
 })
 

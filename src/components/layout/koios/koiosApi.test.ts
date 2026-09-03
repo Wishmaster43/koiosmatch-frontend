@@ -94,4 +94,22 @@ describe('sendChat', () => {
     const callBody = mockPost.mock.calls[0][1]
     expect(callBody.context).toEqual([{ type: 'candidate', id: 'c-1' }])
   })
+
+  // VOICE-MODE-1: voice_mode is only ever sent as `true` — never `false`/null.
+  it('includes voice_mode: true in body when voiceMode is true', async () => {
+    mockPost.mockResolvedValueOnce({ data: { answer: 'test', steps: [] } })
+    await sendChat('hello', null, [], null, null, true)
+    const callBody = mockPost.mock.calls[0][1]
+    expect(callBody).toEqual(expect.objectContaining({ message: 'hello', voice_mode: true }))
+  })
+
+  it('does not include voice_mode in body when voiceMode is false or unset', async () => {
+    mockPost.mockResolvedValueOnce({ data: { answer: 'test', steps: [] } })
+    await sendChat('hello', null, [], null, null, false)
+    expect(mockPost.mock.calls[0][1]).not.toHaveProperty('voice_mode')
+
+    mockPost.mockResolvedValueOnce({ data: { answer: 'test', steps: [] } })
+    await sendChat('hello')
+    expect(mockPost.mock.calls[1][1]).not.toHaveProperty('voice_mode')
+  })
 })

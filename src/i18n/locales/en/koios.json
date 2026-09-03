@@ -48,7 +48,9 @@
     "errorServiceNotAllowed": "Speech recognition was blocked by the browser. Service not allowed",
     "errorAudioCapture": "No microphone found. Check your device",
     "errorNetwork": "Network error during speech recognition. Please try again",
-    "errorGeneric": "Speech recognition failed. Please try again"
+    "errorGeneric": "Speech recognition failed. Please try again",
+    "conversationMode": "Conversation mode",
+    "speaking": "Koios is speaking"
   },
   "tabs": {
     "overview": "Overview",

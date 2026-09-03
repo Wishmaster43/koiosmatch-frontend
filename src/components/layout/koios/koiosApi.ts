@@ -2,7 +2,7 @@
  * koiosApi — axios calls for the Koios AI assistant (baseURL already adds /api).
  *
  * Backend contract:
- *   POST /api/ai/koios/chat      { message, model?, context?, history? }
+ *   POST /api/ai/koios/chat      { message, model?, context?, history?, voice_mode? }
  *     → { answer, steps[], model, stop_reason, usage{input_tokens,output_tokens,calls,cost,currency},
  *         pending_action? }                                            — KOIOS-AGENT-PLAN §6, dormant
  *   GET  /api/ai/koios/settings  → { models{active,selectable[],options[]{id,label,hint,cost_rank},cost_note},
@@ -24,18 +24,22 @@ import type { KoiosConfirmActionResponse, KoiosEffort } from './koiosTypes'
 // Send one chat turn. `model` is optional (defaults to the tenant's active
 // model); `context` is the @-mentioned records, filtered to backend-resolvable
 // types — only { type, id } are sent, never the display label. `flavor` and
-// `effort` are optional per-message overrides; both are sent only when set.
+// `effort` are optional per-message overrides; `voiceMode` (VOICE-MODE-1) is
+// sent as `voice_mode: true` only while conversation mode is on — never
+// `false`/null, so an older backend that ignores the field sees nothing extra.
 export const sendChat = (
   message: string,
   model?: string | null,
   context?: KoiosContextRef[],
   flavor?: string | null,
   effort?: KoiosEffort | null,
+  voiceMode?: boolean,
 ) => {
   const body: Record<string, unknown> = { message }
   if (model) body.model = model
   if (flavor) body.flavor = flavor
   if (effort) body.effort = effort
+  if (voiceMode) body.voice_mode = true
   const resolvable = context?.filter((ref) => isContextResolvable(ref.type)) ?? []
   if (resolvable.length) body.context = resolvable.map(({ type, id }) => ({ type, id }))
   return api.post('/ai/koios/chat', body).then((r) => r.data)

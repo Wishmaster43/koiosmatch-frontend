@@ -32,12 +32,16 @@
  * above: an unsupported browser renders nothing, an insecure context renders
  * a DISABLED mic with an honest tooltip (§3 — no fake affordances).
  *
- * Scope note: this ships plain dictation-into-textarea only (click to start,
- * click again or silence-end to stop). A hands-free "conversation mode"
- * (auto-send + spoken replies) was raised mid-build via an unverified channel
- * and is deliberately NOT included here — it would need to own the send path
- * and message state, which this task did not grant, and needs Danny's direct
- * sign-off before it is built.
+ * Scope note: this component still only turns speech into draft text (click to
+ * start, click again or silence-end to stop) — it owns no send path and no
+ * message state. VOICE-MODE-1 (open-list row, built 04-09; Danny judges the
+ * toggle on screen) adds a hands-free conversation
+ * mode (auto-send + spoken replies) as a THIN layer on top: the optional
+ * `onEnd` prop below fires when a session with real dictated text ends, and
+ * the host (KoiosPanel, via useKoiosConversationMode) decides whether to
+ * auto-send it. The shared language table + feature gate that layer reuses
+ * live in ./koiosSpeechSupport (not exported from here — a component file
+ * exporting non-component values breaks Fast Refresh).
  */
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -45,38 +49,8 @@ import { Mic, MicOff } from 'lucide-react'
 import type { TFn } from '@/types/koios'
 import { notifyError } from '@/lib/notify'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
-
-// Minimal shape of the (still non-standard, vendor-prefixed) Web Speech API
-// recognizer — lib.dom.d.ts ships the *event*/*result* types already but not
-// the controller itself, so only the surface this component drives is declared.
-interface SpeechRecognitionInstance extends EventTarget {
-  continuous: boolean
-  interimResults: boolean
-  lang: string
-  start(): void
-  stop(): void
-  onresult: ((event: SpeechRecognitionEvent) => void) | null
-  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null
-  onend: (() => void) | null
-}
-type SpeechRecognitionCtor = new () => SpeechRecognitionInstance
-
-// Chrome/Edge ship the constructor vendor-prefixed; Firefox/Safari<14.1 ship
-// neither — both optional so the feature-detect below type-checks without `any`.
-declare global {
-  interface Window {
-    SpeechRecognition?: SpeechRecognitionCtor
-    webkitSpeechRecognition?: SpeechRecognitionCtor
-  }
-}
-
-// i18n language → recognition locale. A dedicated table (not lib/i18n's
-// LOCALE_BY_LANG, which maps 'en' to 'en-GB' for UI date formatting) — the
-// spec asks for the US English acoustic/language model for dictation. Shared
-// by both call sites — see the `lang` prop below for who supplies the key.
-const RECOGNITION_LANG: Record<string, string> = {
-  nl: 'nl-NL', en: 'en-US', de: 'de-DE', fr: 'fr-FR', es: 'es-ES', it: 'it-IT', pt: 'pt-PT',
-}
+import { RECOGNITION_LANG } from './koiosSpeechSupport'
+import type { SpeechRecognitionInstance } from './koiosSpeechSupport'
 
 /**
  * useSpeechDictation — the mic+speech STATE MACHINE, extracted so every call
@@ -86,7 +60,7 @@ const RECOGNITION_LANG: Record<string, string> = {
  * language derived from the active UI locale — omit it to keep the original
  * chat behaviour.
  */
-function useSpeechDictation({ onText, lang }: { onText: (text: string) => void; lang?: string }) {
+function useSpeechDictation({ onText, lang, onEnd }: { onText: (text: string) => void; lang?: string; onEnd?: () => void }) {
   const { t, i18n } = useTranslation()
   const [listening, setListening] = useState(false)
   const [denied, setDenied] = useState(false)
@@ -98,6 +72,10 @@ function useSpeechDictation({ onText, lang }: { onText: (text: string) => void; 
   // fired for any other reason means the browser cut us off mid-dictation and
   // we resume, so a pause never silently ends the recording.
   const userStoppedRef = useRef(false)
+  // VOICE-MODE-1: whether THIS session (start() to real stop, ignoring the
+  // browser's own silence-restarts) has emitted at least one final segment —
+  // `onEnd` (the auto-send hook) only fires when there is real dictated text.
+  const emittedAnyRef = useRef(false)
   // VOICE-RESUME-1 (Danny 23-08: "opname met pauze overschrijft het eerste
   // stuk"): the recognition handlers are wired ONCE per session, so calling
   // `onText` directly froze the HOST's append-closure (and the editor value it
@@ -106,9 +84,12 @@ function useSpeechDictation({ onText, lang }: { onText: (text: string) => void; 
   // since. Every emit goes through this ref, which each render points at the
   // caller's LATEST closure.
   const onTextRef = useRef(onText)
+  // Same stale-closure guard for onEnd (VOICE-MODE-1's auto-send callback).
+  const onEndRef = useRef(onEnd)
   // Re-point after every render (in an effect — react-hooks/refs forbids the
   // during-render write); recognition events always fire after the effect ran.
   useEffect(() => { onTextRef.current = onText })
+  useEffect(() => { onEndRef.current = onEnd })
 
   // Feature-detect once — the HONEST GATE. `undefined` means neither
   // constructor exists in this browser, so the caller renders nothing.
@@ -146,6 +127,7 @@ function useSpeechDictation({ onText, lang }: { onText: (text: string) => void; 
     // Fresh session, fresh dedup state — no stale suffix from a prior utterance.
     lastEmittedRef.current = { index: -1, text: '' }
     userStoppedRef.current = false
+    emittedAnyRef.current = false
     const recognition = new Ctor()
     recognition.continuous = true
     recognition.interimResults = true
@@ -173,6 +155,7 @@ function useSpeechDictation({ onText, lang }: { onText: (text: string) => void; 
       // Guard against a recognizer replaying an already-final segment.
       if (event.resultIndex === lastEmittedRef.current.index && text === lastEmittedRef.current.text) return
       lastEmittedRef.current = { index: event.resultIndex, text }
+      emittedAnyRef.current = true
       onTextRef.current(text)
     }
     // A denied mic gets an honest title instead of a silently-dead button, PLUS
@@ -200,7 +183,13 @@ function useSpeechDictation({ onText, lang }: { onText: (text: string) => void; 
     // denied) — restarting on the SAME instance is what keeps one long
     // dictation feeling like one recording.
     recognition.onend = () => {
-      if (userStoppedRef.current || recognitionRef.current !== recognition) { setListening(false); return }
+      if (userStoppedRef.current || recognitionRef.current !== recognition) {
+        setListening(false)
+        // VOICE-MODE-1: the session truly ended (not a silence-restart) —
+        // let the host auto-send, but only when it captured real dictated text.
+        if (emittedAnyRef.current) onEndRef.current?.()
+        return
+      }
       // The in-place resume starts a FRESH result list (indices restart at 0):
       // reset the dedup state so repeating the same words after the pause is
       // never swallowed as a replay of the pre-pause segment (VOICE-RESUME-1).
@@ -227,12 +216,16 @@ interface KoiosVoiceButtonProps {
   // Omit to follow the active UI locale (the chat composer's original,
   // unchanged behaviour) — NoteComposer passes its OWN language-picker value.
   lang?: string
+  // VOICE-MODE-1: fires once when a listening SESSION truly ends (the user
+  // stopped it, not a browser silence-restart) and it emitted at least one
+  // final segment — KoiosPanel's conversation mode uses this to auto-send.
+  onEnd?: () => void
 }
 
 // The mic is a trio chip in every host now (Danny 20-08) and always uses the
 // fixed idleColor below — no `tone` prop, removed as dead API surface.
-export default function KoiosVoiceButton({ onText, t, lang }: KoiosVoiceButtonProps) {
-  const { supported, insecureContext, listening, denied, toggle } = useSpeechDictation({ onText, lang })
+export default function KoiosVoiceButton({ onText, t, lang, onEnd }: KoiosVoiceButtonProps) {
+  const { supported, insecureContext, listening, denied, toggle } = useSpeechDictation({ onText, lang, onEnd })
 
   // Rules of hooks: every hook runs inside useSpeechDictation unconditionally;
   // only the render output is gated on browser support.
