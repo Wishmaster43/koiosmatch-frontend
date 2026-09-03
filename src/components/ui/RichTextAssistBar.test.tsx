@@ -291,4 +291,20 @@ describe('RichTextAssistBar', () => {
     await waitFor(() => expect(screen.getByTestId('rte-assist-preview')).toBeInTheDocument())
     expect(screen.queryByTestId('koios-feedback-generate')).not.toBeInTheDocument()
   })
+
+  // KOIOS-FEEDBACK-FE-1: the mount is gated on mode === 'generate' — improve and
+  // summarize results also carry a server payload but have no vote surface of
+  // their own, so a completed 'improve' run must never render KoiosFeedback,
+  // even though the request/response shape is otherwise identical to generate's.
+  it('does NOT mount KoiosFeedback after a completed improve-mode assist', async () => {
+    const user = userEvent.setup()
+    post.mockResolvedValue({ data: { text: 'Nettere tekst', prompt_log_id: 'pl-improve-1' } })
+    render(<Host initial="<p>ruwe tekst</p>" />)
+
+    await user.click(screen.getByTestId('rte-assist-improve'))
+
+    await waitFor(() => expect(screen.getByTestId('rte-assist-preview')).toBeInTheDocument())
+    expect(screen.queryByTestId('koios-feedback-generate')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('koios-feedback-improve')).not.toBeInTheDocument()
+  })
 })

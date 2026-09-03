@@ -101,6 +101,22 @@ describe('WF-BUILDER-VELDEN-1 · registry config-schema mirrors the engine exact
     expect(recipients?.options).toContain('users')
   })
 
+  // A key-only check (the it.each above) survives a mutant that keeps the KEY
+  // but breaks its editor — e.g. return_date silently rendering as a plain text
+  // input, or blacklist_reason pointed at the wrong lookup endpoint. Pin the
+  // FULL field shape for status_set's two non-trivial fields, mirroring
+  // src/modules/status_set.ts exactly.
+  it("status_set's return_date field renders as a date picker", () => {
+    const field = (MODULE_SCHEMAS.status_set ?? []).find(f => f.key === 'return_date')
+    expect(field?.type).toBe('date')
+  })
+
+  it("status_set's blacklist_reason field is a lookup_select on /candidate-blacklist-reasons", () => {
+    const field = (MODULE_SCHEMAS.status_set ?? []).find(f => f.key === 'blacklist_reason')
+    expect(field?.type).toBe('lookup_select')
+    expect(field?.endpoint).toBe('/candidate-blacklist-reasons')
+  })
+
   it('neither candidates nor status_set schema carries effective_from (never read by execute)', () => {
     const candidatesKeys = (MODULE_SCHEMAS.candidates ?? []).map(f => f.key)
     expect(candidatesKeys).not.toContain('effective_from')

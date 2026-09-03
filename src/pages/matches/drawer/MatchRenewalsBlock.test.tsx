@@ -75,6 +75,27 @@ describe('MatchRenewalsBlock', () => {
     expect(screen.getByText('29-06-2026 · Alice Smith')).toBeInTheDocument()
   })
 
+  // DATUM-1 (CLAUDE.md §3B): a user must never see a raw ISO timestamp — the
+  // metadata line must render the created-at date as DD-MM-YYYY, and the raw
+  // ISO string must not leak into the DOM anywhere alongside the old→new pair.
+  it('renders the created-at metadata as DD-MM-YYYY, never the raw ISO timestamp', () => {
+    const renewals: MatchRenewal[] = [
+      {
+        id: 'r1',
+        sequence: 1,
+        old_end_date: '2026-06-30',
+        new_end_date: '2026-12-31',
+        created_by: 'u1',
+        created_at: '2026-08-12T09:15:00Z',
+      },
+    ]
+    const { container } = renderBlock(renewals)
+    expect(screen.getByText('30-06-2026 → 31-12-2026')).toBeInTheDocument()
+    expect(screen.getByText('12-08-2026 · Alice Smith')).toBeInTheDocument()
+    // No leftover ISO fragment anywhere in the rendered block.
+    expect(container.textContent).not.toContain('2026-08-12')
+  })
+
   it('resolves multiple users by ID', () => {
     const renewals: MatchRenewal[] = [
       {

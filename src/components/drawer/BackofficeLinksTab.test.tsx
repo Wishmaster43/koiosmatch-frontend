@@ -205,6 +205,21 @@ describe('BackofficeLinksTab · self-refresh after a mutation (KOPPELINGEN-REFRE
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/customers/42/locations/9'))
   })
 
+  it('falls back to /{entity}/{id} when refetchUrl is omitted, for a nested-entity token too', async () => {
+    mockPost.mockResolvedValue({ data: { link: { status: 'pending' } } })
+    mockGet.mockResolvedValue({
+      data: { backoffice_links: [{ system: 'helloflex', status: 'linked', external_id: '321' }] },
+    })
+    const user = userEvent.setup()
+    // 'locations' is normally nested (see the refetchUrl test above) — here no
+    // refetchUrl is passed at all, so the flat default `/${entity}/${id}` must fire.
+    render(<BackofficeLinksTab entity="locations" id="9" helloflexLink={null} shiftmanagerLink={null} canLink />)
+    const [helloflexBtn] = screen.getAllByRole('button', { name: /backofficeLinks.common.linkButton/ })
+    await user.click(helloflexBtn)
+    expect(mockPost).toHaveBeenCalledWith('/sync/locations/9', { system: 'helloflex' })
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/locations/9'))
+  })
+
   it('uses the refetchUrl prop for departments under customers too', async () => {
     mockPost.mockResolvedValue({ data: { link: { status: 'pending' } } })
     mockGet.mockResolvedValue({
