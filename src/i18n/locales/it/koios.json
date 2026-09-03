@@ -116,7 +116,24 @@
     "kindRead": "Lettura",
     "kindWrite": "Modifica",
     "searchPlaceholder": "Cerca uno strumento…",
-    "noResults": "Nessuno strumento trovato."
+    "noResults": "Nessuno strumento trovato.",
+    "facts": {
+      "surfaces": "Superfici",
+      "limits": "Limiti",
+      "maxTokens": "Max. token per richiesta",
+      "monthlyBudget": "Budget mensile",
+      "warnAt": "Avvisa a",
+      "rateChat": "Limite chat",
+      "rateOther": "Limite altre azioni"
+    },
+    "surfaces": {
+      "chat": "Chat",
+      "note_assist": "Assistente note",
+      "generate": "Generazione testo",
+      "conversation_assist": "Assistente conversazioni",
+      "report_advice": "Consigli sui report",
+      "interview_flows": "Flussi di intervista"
+    }
   },
   "feedbackAdmin": {
     "summaryTitle": "Riepilogo feedback",

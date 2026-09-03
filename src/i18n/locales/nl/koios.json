@@ -91,6 +91,23 @@
     "saveError": "Opslaan van de tool-instelling is niet gelukt.",
     "showMore": "Meer",
     "showLess": "Minder",
+    "facts": {
+      "surfaces": "Oppervlakken",
+      "limits": "Limieten",
+      "maxTokens": "Max. tokens per verzoek",
+      "monthlyBudget": "Maandbudget",
+      "warnAt": "Waarschuwing bij",
+      "rateChat": "Limiet chat",
+      "rateOther": "Limiet overige acties"
+    },
+    "surfaces": {
+      "chat": "Chat",
+      "note_assist": "Notitie-assistent",
+      "generate": "Teksten genereren",
+      "conversation_assist": "Gesprek-assistent",
+      "report_advice": "Rapportage-advies",
+      "interview_flows": "Interviewflows"
+    },
     "groups": {
       "candidates": "Kandidaten",
       "vacancies": "Vacatures",

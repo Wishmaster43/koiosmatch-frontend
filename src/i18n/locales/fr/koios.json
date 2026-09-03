@@ -116,7 +116,24 @@
     "kindRead": "Lecture",
     "kindWrite": "Écriture",
     "searchPlaceholder": "Rechercher un outil…",
-    "noResults": "Aucun outil trouvé."
+    "noResults": "Aucun outil trouvé.",
+    "facts": {
+      "surfaces": "Surfaces",
+      "limits": "Limites",
+      "maxTokens": "Max. tokens par demande",
+      "monthlyBudget": "Budget mensuel",
+      "warnAt": "Avertir à",
+      "rateChat": "Limite chat",
+      "rateOther": "Limite autres actions"
+    },
+    "surfaces": {
+      "chat": "Chat",
+      "note_assist": "Assistant de notes",
+      "generate": "Générer du texte",
+      "conversation_assist": "Assistant de conversation",
+      "report_advice": "Conseil de rapport",
+      "interview_flows": "Flux d'interview"
+    }
   },
   "feedbackAdmin": {
     "summaryTitle": "Résumé des retours",

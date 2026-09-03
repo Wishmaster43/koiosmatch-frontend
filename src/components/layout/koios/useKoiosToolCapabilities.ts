@@ -24,10 +24,28 @@ export interface KoiosCapabilityTool {
   connection: 'whatsapp' | 'shiftmanager' | 'helloflex' | 'pdok' | null
 }
 
+// One surface that Koios can assist on (chat, notes, reports, etc).
+export interface KoiosSurface {
+  key: string
+  label_nl: string
+  endpoint: string
+}
+
+// Rate limits (e.g., "20/min", "30/min").
+export interface KoiosLimits {
+  max_tokens_per_request: number
+  monthly_budget_cents: number
+  warn_at_pct: number
+  rate_limits: {
+    chat: string
+    other: string
+  }
+}
+
 export interface KoiosCapabilities {
-  surfaces: string[]
+  surfaces: KoiosSurface[]
   tools: KoiosCapabilityTool[]
-  limits: Record<string, unknown>
+  limits: KoiosLimits
   models: { active_flavor: string; flavors: string[] }
 }
 

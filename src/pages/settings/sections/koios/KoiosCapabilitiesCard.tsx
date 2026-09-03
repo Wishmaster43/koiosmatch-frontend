@@ -37,6 +37,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import { SectionTitle, GroupLabel, Caption, BodyText, bodyTextStyle } from '@/components/ui/typography'
+import KoiosCapabilityFacts from './KoiosCapabilityFacts'
 
 const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' }
 const row = { display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 0', borderTop: '1px solid var(--border)' } as const
@@ -179,6 +180,7 @@ export default function KoiosCapabilitiesCard() {
     <div style={card}>
       <SectionTitle style={{ marginBottom: 4 }}>{t('capabilities.title')}</SectionTitle>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>{t('capabilities.subtitle')}</div>
+      <KoiosCapabilityFacts surfaces={data?.surfaces} limits={data?.limits} />
       <HeaderSearch onSearch={setQuery} placeholder={t('capabilities.searchPlaceholder')}
         ariaLabel={t('capabilities.searchPlaceholder')} width="100%" />
       {searching ? (

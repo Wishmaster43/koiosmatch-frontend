@@ -116,7 +116,24 @@
     "kindRead": "Lesen",
     "kindWrite": "Bearbeiten",
     "searchPlaceholder": "Tool suchen…",
-    "noResults": "Keine Tools gefunden."
+    "noResults": "Keine Tools gefunden.",
+    "facts": {
+      "surfaces": "Oberflächen",
+      "limits": "Limits",
+      "maxTokens": "Max. Tokens pro Anfrage",
+      "monthlyBudget": "Monatliches Budget",
+      "warnAt": "Warnung bei",
+      "rateChat": "Chat-Limit",
+      "rateOther": "Limit für andere Aktionen"
+    },
+    "surfaces": {
+      "chat": "Chat",
+      "note_assist": "Notiz-Assistent",
+      "generate": "Text generieren",
+      "conversation_assist": "Gesprächsassistent",
+      "report_advice": "Berichtsempfehlung",
+      "interview_flows": "Interview-Flows"
+    }
   },
   "feedbackAdmin": {
     "summaryTitle": "Feedback-Zusammenfassung",

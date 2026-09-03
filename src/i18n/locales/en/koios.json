@@ -116,7 +116,24 @@
     "kindRead": "Read",
     "kindWrite": "Write",
     "searchPlaceholder": "Search a tool…",
-    "noResults": "No tools found."
+    "noResults": "No tools found.",
+    "facts": {
+      "surfaces": "Surfaces",
+      "limits": "Limits",
+      "maxTokens": "Max. tokens per request",
+      "monthlyBudget": "Monthly budget",
+      "warnAt": "Warning at",
+      "rateChat": "Chat limit",
+      "rateOther": "Limit other actions"
+    },
+    "surfaces": {
+      "chat": "Chat",
+      "note_assist": "Note assist",
+      "generate": "Generate text",
+      "conversation_assist": "Conversation assist",
+      "report_advice": "Report advice",
+      "interview_flows": "Interview flows"
+    }
   },
   "feedbackAdmin": {
     "summaryTitle": "Feedback summary",

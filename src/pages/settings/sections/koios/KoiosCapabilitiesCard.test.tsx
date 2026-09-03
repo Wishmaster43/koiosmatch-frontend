@@ -63,7 +63,7 @@ const st = (key: string) => {
 // applications (1), tasks (1), appointments (1), whatsapp (1, via `connection`
 // — kind stays "write" server-side, never a bespoke "messaging" value).
 const fixture = {
-  surfaces: ['chat'],
+  surfaces: [{ key: 'chat', label_nl: 'Chat', endpoint: 'https://example.com' }],
   tools: [
     { name: 'zoek_kandidaten', label_nl: 'Zoek kandidaten binnen de organisatie op naam, functie, plaats/regio, status, fase, vestiging, tags, beschikbaarheid, laatste contact, pool en/of contractvorm.', kind: 'read', confirm_required: false, enabled_for_me: true, enabled_for_tenant: true, default_enabled: true, connection_active: null, connection: null },
     // Synthetic divergence (see file header): the real payload has BOTH enabled_for_tenant
@@ -74,7 +74,7 @@ const fixture = {
     { name: 'zoek_afspraken', label_nl: 'Zoek afspraken binnen de organisatie op kandidaat, klant, periode en/of eigenaar.', kind: 'read', confirm_required: false, enabled_for_me: true, enabled_for_tenant: true, default_enabled: true, connection_active: null, connection: null },
     { name: 'stuur_whatsapp', label_nl: 'Stuur een WhatsApp-bericht naar een kandidaat.', kind: 'write', confirm_required: true, enabled_for_me: true, enabled_for_tenant: true, default_enabled: true, connection_active: false, connection: 'whatsapp' as const },
   ],
-  limits: {},
+  limits: { max_tokens_per_request: 128000, monthly_budget_cents: 500000, warn_at_pct: 80, rate_limits: { chat: '20/min', other: '30/min' } },
   models: { active_flavor: 'slim', flavors: ['snel', 'slim', 'max'] },
 }
 
