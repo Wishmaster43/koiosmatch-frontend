@@ -22,16 +22,20 @@ import { useCallback, useState } from 'react'
 import { sendChat } from './koiosApi'
 import { apiErrorKey } from '@/lib/extractApiError'
 import type { KoiosChatMessage, KoiosContextRef } from '@/types/koios'
+import type { KoiosEffort } from './koiosTypes'
 import './koiosTypes' // module augmentation: KoiosChatMessage.pendingAction, KoiosStep.refs
 
 const welcomeMessage = (): KoiosChatMessage => ({ role: 'assistant', kind: 'welcome' })
 
-// Owns the conversation state (messages, loading, model override) and the single synchronous send(); KoiosPanel stays presentational.
+// Owns the conversation state (messages, loading, model/flavor/effort overrides) and the single synchronous send(); KoiosPanel stays presentational.
 export function useKoiosChat() {
   const [messages, setMessages] = useState<KoiosChatMessage[]>([welcomeMessage()])
   const [loading, setLoading]   = useState(false)
   // Optional model override picked from settings; null = backend's active model.
   const [model, setModel]       = useState<string | null>(null)
+  // Optional flavor and effort overrides; null = backend's tenant defaults.
+  const [flavor, setFlavor]     = useState<string | null>(null)
+  const [effort, setEffort]     = useState<KoiosEffort | null>(null)
 
   // Send a turn: optimistic user bubble, then map the reply into an assistant one.
   const send = useCallback(async (text: string, context?: KoiosContextRef[]) => {
@@ -40,7 +44,7 @@ export function useKoiosChat() {
     setMessages((prev) => [...prev, { role: 'user', content: trimmed }])
     setLoading(true)
     try {
-      const data = await sendChat(trimmed, model, context)
+      const data = await sendChat(trimmed, model, context, flavor, effort)
       setMessages((prev) => [...prev, {
         role:       'assistant',
         answer:     data?.answer ?? '',
@@ -66,10 +70,10 @@ export function useKoiosChat() {
     } finally {
       setLoading(false)
     }
-  }, [loading, model])
+  }, [loading, model, flavor, effort])
 
   // Start over with just the welcome bubble.
   const reset = useCallback(() => setMessages([welcomeMessage()]), [])
 
-  return { messages, loading, model, setModel, send, reset }
+  return { messages, loading, model, setModel, flavor, setFlavor, effort, setEffort, send, reset }
 }

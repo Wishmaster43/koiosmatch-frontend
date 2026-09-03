@@ -19,14 +19,23 @@
 import api from '@/lib/api'
 import type { KoiosContextRef } from '@/types/koios'
 import { isContextResolvable } from './koiosContextTypes'
-import type { KoiosConfirmActionResponse } from './koiosTypes'
+import type { KoiosConfirmActionResponse, KoiosEffort } from './koiosTypes'
 
 // Send one chat turn. `model` is optional (defaults to the tenant's active
 // model); `context` is the @-mentioned records, filtered to backend-resolvable
-// types — only { type, id } are sent, never the display label.
-export const sendChat = (message: string, model?: string | null, context?: KoiosContextRef[]) => {
+// types — only { type, id } are sent, never the display label. `flavor` and
+// `effort` are optional per-message overrides; both are sent only when set.
+export const sendChat = (
+  message: string,
+  model?: string | null,
+  context?: KoiosContextRef[],
+  flavor?: string | null,
+  effort?: KoiosEffort | null,
+) => {
   const body: Record<string, unknown> = { message }
   if (model) body.model = model
+  if (flavor) body.flavor = flavor
+  if (effort) body.effort = effort
   const resolvable = context?.filter((ref) => isContextResolvable(ref.type)) ?? []
   if (resolvable.length) body.context = resolvable.map(({ type, id }) => ({ type, id }))
   return api.post('/ai/koios/chat', body).then((r) => r.data)

@@ -287,6 +287,15 @@
         "tone": "Toon",
         "other": "Anders"
       }
+    },
+    "effort": {
+      "label": "Inspanning",
+      "default": "Standaard",
+      "low": "Laag",
+      "medium": "Gemiddeld",
+      "high": "Hoog",
+      "xhigh": "Zeer hoog",
+      "max": "Maximaal"
     }
   },
   "actionRules": {

@@ -265,7 +265,7 @@ describe('KoiosPanel — context chips (seam)', () => {
     await waitFor(() => expect(sendChat).toHaveBeenCalledWith('hello', null, expect.arrayContaining([
       expect.objectContaining({ type: 'candidate', id: 'c-1' }),
       expect.objectContaining({ type: 'candidate', id: '9' }),
-    ])))
+    ]), null, null))
   })
 
   // (d2) a manual @-mention of the SAME record as the ambient chip (c-1) dedupes
@@ -324,7 +324,7 @@ describe('KoiosPanel — context chips (seam)', () => {
     const textarea = screen.getByPlaceholderText('koios.taskPlaceholder')
     fireEvent.change(textarea, { target: { value: 'hello' } })
     fireEvent.keyDown(textarea, { key: 'Enter' })
-    await waitFor(() => expect(sendChat).toHaveBeenCalledWith('hello', null, []))
+    await waitFor(() => expect(sendChat).toHaveBeenCalledWith('hello', null, [], null, null))
   })
 })
 
@@ -486,6 +486,57 @@ describe('KoiosPanel · mention polish (27-08)', () => {
     fireEvent.keyDown(textarea, { key: 'ArrowDown' })
     fireEvent.keyDown(textarea, { key: 'Tab' })
     expect((textarea as HTMLTextAreaElement).value).toContain('@Emma Dekker')
+  })
+})
+
+// K-147 (Danny 2026-09-02): per-message effort override.
+describe('KoiosPanel · effort picker', () => {
+  it('renders the effort selector in the toolbar', async () => {
+    renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    await screen.findByText('common:koios.radar.empty')
+    expect(screen.getByText('koios.effort.default')).toBeInTheDocument()
+  })
+
+  it('sends effort in the request body when set to a non-default value', async () => {
+    vi.mocked(sendChat).mockResolvedValueOnce({ answer: 'Reply at high effort.', steps: [] })
+    renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    await screen.findByText('common:koios.radar.empty')
+    const textarea = screen.getByPlaceholderText('koios.taskPlaceholder')
+    // Click the effort picker and select "Hoog" (high)
+    const effortButtons = screen.getAllByText('koios.effort.default')
+    const effortButton = effortButtons[effortButtons.length - 1]
+    fireEvent.click(effortButton)
+    await waitFor(() => {
+      const highOption = screen.getByText('koios.effort.high')
+      expect(highOption).toBeInTheDocument()
+      fireEvent.click(highOption)
+    })
+    // Now send a message
+    fireEvent.change(textarea, { target: { value: 'test' } })
+    fireEvent.click(screen.getByRole('button', { name: 'koios.taskPlaceholder' }))
+    await waitFor(() => expect(sendChat).toHaveBeenCalled())
+    // Check the call carried effort: 'high'
+    expect(sendChat).toHaveBeenCalledWith('test', null, [], null, 'high')
+  })
+
+  it('does not send effort in the request body when set to default', async () => {
+    vi.mocked(sendChat).mockResolvedValueOnce({ answer: 'Reply at default.', steps: [] })
+    renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    await screen.findByText('common:koios.radar.empty')
+    const textarea = screen.getByPlaceholderText('koios.taskPlaceholder')
+    // Keep effort at default (unset)
+    fireEvent.change(textarea, { target: { value: 'hello' } })
+    fireEvent.click(screen.getByRole('button', { name: 'koios.taskPlaceholder' }))
+    await waitFor(() => expect(sendChat).toHaveBeenCalled())
+    // Check the call carried effort: null (5th arg after model/context/flavor)
+    expect(sendChat).toHaveBeenCalledWith('hello', null, [], null, null)
+  })
+
+  it('the effort trigger is named by its label AND its current value (§6)', async () => {
+    renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    await screen.findByText('common:koios.radar.empty')
+    const trigger = screen.getByRole('button', { name: /koios\.effort\.label.*koios\.effort\.default/ })
+    expect(trigger).toHaveAttribute('aria-haspopup', 'listbox')
   })
 })
 

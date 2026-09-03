@@ -6,7 +6,7 @@
  * actual /ai/koios/chat call are split into the co-located koios/ hooks so
  * this file stays the composition layer, not the logic.
  */
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useId } from 'react'
 import type { ChangeEvent, KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AtSign, ArrowUp, Sparkles, Lightbulb } from 'lucide-react'
@@ -30,6 +30,8 @@ import KoiosHeader from './koios/KoiosHeader'
 import KoiosResizeHandle from './koios/KoiosResizeHandle'
 import KoiosRadar from './koios/KoiosRadar'
 import Button from '@/components/ui/Button'
+import SelectMenu from '@/components/ui/SelectMenu'
+import type { KoiosEffort } from './koios/koiosTypes'
 import { useKoiosRadarCollapse } from './koios/useKoiosRadarCollapse'
 import KoiosAssistantBlock from './koios/KoiosAssistantBlock'
 import KoiosVoiceButton from './koios/KoiosVoiceButton'
@@ -51,7 +53,9 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
   const { t } = useTranslation('common')
   const locale = useLocale()
   // All chat state + the synchronous /ai/koios/chat call live in the hook.
-  const { messages, loading, model, setModel, send, reset } = useKoiosChat()
+  const { messages, loading, model, setModel, effort, setEffort, send, reset } = useKoiosChat()
+  // K-147: the effort picker's accessible name — an sr-only label the SelectMenu trigger points at.
+  const effortLabelId = useId()
   // Landing state = no real conversation yet (only the intro bubble) — the Koios
   // Advies radar (Danny 21/7) REPLACES that welcome text, it doesn't sit beside it.
   const isLanding = messages.length === 1 && messages[0].kind === 'welcome'
@@ -362,6 +366,26 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
               value={model ?? settings?.models?.active}
               onChange={setModel}
               t={t}
+            />
+
+            {/* K-147: per-chat effort override — the shared searchable SelectMenu; the
+                explicit 'Standaard' option IS the clear (null = tenant default, nothing
+                sent). The sr-only span gives the trigger its name: "Inspanning: Hoog". */}
+            <span id={effortLabelId} className="sr-only">{t('koios.effort.label')}</span>
+            <SelectMenu
+              aria-labelledby={effortLabelId}
+              value={effort ?? ''}
+              options={[
+                { value: '', label: t('koios.effort.default') },
+                { value: 'low', label: t('koios.effort.low') },
+                { value: 'medium', label: t('koios.effort.medium') },
+                { value: 'high', label: t('koios.effort.high') },
+                { value: 'xhigh', label: t('koios.effort.xhigh') },
+                { value: 'max', label: t('koios.effort.max') },
+              ]}
+              onChange={(val) => setEffort(val === '' ? null : (val as KoiosEffort))}
+              menuWidth={140}
+              style={{ width: 'auto', maxWidth: 130 }}
             />
 
             <div style={{ flex: 1 }} />

@@ -287,6 +287,15 @@
         "tone": "Tom",
         "other": "Outro"
       }
+    },
+    "effort": {
+      "label": "Esforço",
+      "default": "Predefinido",
+      "low": "Baixo",
+      "medium": "Médio",
+      "high": "Alto",
+      "xhigh": "Muito alto",
+      "max": "Máximo"
     }
   },
   "actionRules": {

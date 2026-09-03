@@ -287,6 +287,15 @@
         "tone": "Tonfall",
         "other": "Sonstiges"
       }
+    },
+    "effort": {
+      "label": "Aufwand",
+      "default": "Standard",
+      "low": "Niedrig",
+      "medium": "Mittel",
+      "high": "Hoch",
+      "xhigh": "Sehr hoch",
+      "max": "Maximum"
     }
   },
   "actionRules": {

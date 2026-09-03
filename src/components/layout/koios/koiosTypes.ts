@@ -78,3 +78,6 @@ declare module '@/types/koios' {
     refs?: KoiosResultRef[]
   }
 }
+
+// K-147: the per-chat reasoning-effort override, the server's own scale (POST /ai/koios/chat `effort`).
+export type KoiosEffort = 'low' | 'medium' | 'high' | 'xhigh' | 'max'
