@@ -111,8 +111,9 @@ describe('useCandidatesData · sort request shape (CAND-SORT-1)', () => {
     vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
     heavyGetMock.mockResolvedValue({ data: { data: null } })
 
+    // 'status' stays a lookup-backed column (SORT-OFF-1) and has no backend sort mapping.
     renderHook(() => useCandidatesData({
-      filterParams: {}, page: 1, pageSize: 25, t, setActionMsg: vi.fn(), sort: { by: 'title', dir: 'asc' },
+      filterParams: {}, page: 1, pageSize: 25, t, setActionMsg: vi.fn(), sort: { by: 'status', dir: 'asc' },
     }), { wrapper })
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/candidates', expect.anything()))
@@ -122,11 +123,15 @@ describe('useCandidatesData · sort request shape (CAND-SORT-1)', () => {
     expect(params).not.toHaveProperty('sort_dir')
   })
 
-  it('maps every column the reference adoption wires (name/created/lastContact), one request per key', async () => {
+  it('maps every column the reference adoption wires (name/created/lastContact/referenceNumber/city/title), one request per key', async () => {
     const cases: Array<[string, string]> = [
       ['name', 'last_name'],
       ['created', 'created_at'],
       ['lastContact', 'last_contact_at'],
+      // CAND-SORT-KEYS: BE CandidateQuery.php:176 whitelisted these three.
+      ['referenceNumber', 'reference_number'],
+      ['city', 'city'],
+      ['title', 'function_title'],
     ]
     for (const [by, sortBy] of cases) {
       vi.clearAllMocks()

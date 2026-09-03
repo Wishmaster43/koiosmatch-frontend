@@ -162,17 +162,23 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
         // contortions; the copy affordance already lives in the drawer chip.
         key: 'referenceNumber', header: t('columns.referenceNumber'), nowrap: true,
         cellStyle: { color: 'var(--text-muted)', fontSize: 12, ...monoStyle, fontVariantNumeric: 'tabular-nums' },
-        sortable: true, sortValue: c => c.referenceNumber ?? '',
+        // CAND-SORT-KEYS: serverKey maps to CandidateQuery's reference_number sort.
+        sortable: true, sortValue: c => c.referenceNumber ?? '', serverKey: CANDIDATE_SORT_KEYS.referenceNumber,
         render: c => c.referenceNumber || '—',
       },
       {
         key: 'title', header: t('columns.function'), nowrap: true, cellStyle: { color: 'var(--text)', fontSize: 12 },
-        sortable: true, sortValue: c => c.title,
+        // CAND-SORT-KEYS: serverKey maps to CandidateQuery's function_title sort.
+        sortable: true, sortValue: c => c.title, serverKey: CANDIDATE_SORT_KEYS.title,
         // DEMO-TAAL-1: the stored function title renders translated while it still
         // matches the seeded default; a tenant-renamed function stays as typed.
         render: c => c.title ? seedLabel('functions', { label: c.title }) : '—',
       },
-      { key: 'city', header: t('columns.city'), nowrap: true, cellStyle: plainCell, sortable: true, sortValue: c => c.city, render: c => c.city || '—' },
+      {
+        // CAND-SORT-KEYS: serverKey maps to CandidateQuery's city sort.
+        key: 'city', header: t('columns.city'), nowrap: true, cellStyle: plainCell, sortable: true,
+        sortValue: c => c.city, serverKey: CANDIDATE_SORT_KEYS.city, render: c => c.city || '—',
+      },
       {
         // SORT-OFF-1 (Danny 04-09): sorting is off on lookup-backed columns until the
         // server join-sort lands (CAND-SORT-BE-2) — client-side sortValue only ordered

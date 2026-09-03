@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import CandidatesTable from './CandidatesTable'
+import { CANDIDATE_SORT_KEYS } from './hooks/useCandidatesData'
 import type { Candidate, CandidateBackofficeLink } from '@/types/candidate'
 
 // Controlled lookup metas — flags drive the deep-link, never the label/slug
@@ -144,6 +145,42 @@ describe('CandidatesTable · SORT-OFF-1 lookup-backed columns are not sortable',
     const nameTh = screen.getByText('Naam').closest('th') as HTMLElement
     expect(within(nameTh).getByRole('button')).toBeInTheDocument()
     expect(nameTh).toHaveAttribute('aria-sort', 'none')
+  })
+})
+
+// CAND-SORT-KEYS: controlled sort forwards a header click to onSortChange keyed
+// by the FE column's own `key` (DataTable's ControlledSort — see toggleSort()).
+// CANDIDATE_SORT_KEYS is the single source useCandidatesData's sortParams() also
+// reads to translate that FE key into the real backend sort_by value, so this
+// test pins BOTH ends: the clicked column reports the right FE key, and that key
+// maps to the expected server field.
+describe('CandidatesTable · controlled sort reports the right column keys (CAND-SORT-KEYS)', () => {
+  it('reports referenceNumber/title/city for the Referentienr./Functie/Woonplaats headers', async () => {
+    const user = userEvent.setup()
+    const onSortChange = vi.fn()
+    render(<CandidatesTable rows={[baseCandidate]} sort={null} onSortChange={onSortChange} />)
+
+    const clickHeader = async (name: string) => {
+      const th = screen.getByRole('columnheader', { name })
+      await user.click(within(th).getByRole('button'))
+    }
+    await clickHeader('Referentienr.')
+    await clickHeader('Functie')
+    await clickHeader('Woonplaats')
+
+    expect(onSortChange).toHaveBeenNthCalledWith(1, { by: 'referenceNumber', dir: 'asc' })
+    expect(onSortChange).toHaveBeenNthCalledWith(2, { by: 'title', dir: 'asc' })
+    expect(onSortChange).toHaveBeenNthCalledWith(3, { by: 'city', dir: 'asc' })
+    // The reported FE keys really do map to the server's reference_number/function_title/city.
+    expect(CANDIDATE_SORT_KEYS.referenceNumber).toBe('reference_number')
+    expect(CANDIDATE_SORT_KEYS.title).toBe('function_title')
+    expect(CANDIDATE_SORT_KEYS.city).toBe('city')
+  })
+
+  it('renders no sort button on the Fase (phase) lookup column (SORT-OFF-1)', () => {
+    render(<CandidatesTable rows={[baseCandidate]} sort={null} onSortChange={vi.fn()} />)
+    const th = screen.getByRole('columnheader', { name: 'Fase' })
+    expect(within(th).queryByRole('button')).toBeNull()
   })
 })
 

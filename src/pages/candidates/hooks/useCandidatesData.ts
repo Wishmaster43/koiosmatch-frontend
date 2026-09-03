@@ -72,6 +72,10 @@ export const CANDIDATE_SORT_KEYS: Record<string, string> = {
   name: 'last_name',
   created: 'created_at',
   lastContact: 'last_contact_at',
+  // CAND-SORT-KEYS: newly whitelisted backend sort columns (CandidateQuery.php:176).
+  referenceNumber: 'reference_number',
+  city: 'city',
+  title: 'function_title',
 }
 
 // Translate the page's FE-column-keyed sort into sort_by/sort_dir request params —
