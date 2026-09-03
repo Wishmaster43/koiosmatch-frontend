@@ -1363,6 +1363,7 @@
     "reason": {
       "never_contacted": "Es gab noch nie Kontakt. Nehmen Sie Kontakt auf, um dieses Dossier zu aktivieren.",
       "stale_contact": "Seit mehr als {{months}} Monaten kein Kontakt registriert. Planen Sie einen Anruf.",
+      "no_intake_planned": "Es ist noch kein Intake geplant.",
       "lead_without_funnel": "Lead ohne Bewerbung. Planen Sie ein Intake-Gespräch zur Qualifizierung.",
       "no_pool": "Noch in keinem Talentpool. Hinzufügen, damit der Kandidat auffindbar ist."
     }

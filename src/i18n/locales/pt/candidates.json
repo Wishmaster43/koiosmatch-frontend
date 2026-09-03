@@ -1363,6 +1363,7 @@
     "reason": {
       "never_contacted": "Ainda não houve qualquer contacto registado. Entre em contacto para ativar este dossiê.",
       "stale_contact": "Há mais de {{months}} meses sem contacto registado. Agende uma chamada.",
+      "no_intake_planned": "Ainda não há uma entrevista de admissão planeada.",
       "lead_without_funnel": "Lead sem candidatura. Agende uma intake para qualificar.",
       "no_pool": "Ainda não está em nenhum pool de talentos. Adicione-o para que o candidato seja encontrável."
     }
