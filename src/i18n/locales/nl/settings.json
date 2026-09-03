@@ -823,7 +823,11 @@
     "variantFull": "Volledig CV (met contactgegevens)",
     "notSentYet": "Koios verstuurt het voorstel nog niet zelf. De recruiter downloadt het CV en verstuurt het vanuit het eigen mailprogramma. De automatische, herroepbare deellink volgt zodra deze functionaliteit gereed is.",
     "saveFailed": "Opslaan mislukt",
-    "saved": "Opgeslagen"
+    "saved": "Opgeslagen",
+    "defaultSenderTitle": "Standaardafzender",
+    "defaultSenderSubtitle": "De gebruiker uit wiens naam voorstellen standaard worden verstuurd; leeg = de recruiter die het voorstel doet.",
+    "defaultSenderSelf": "Recruiter zelf",
+    "defaultSenderStale": "De opgeslagen standaardafzender bestaat niet meer; voorstellen gaan nu uit naam van de recruiter zelf. Kies een nieuwe afzender of maak het veld leeg."
   },
   "assessment": {
     "title": "Beoordelingscriteria",

@@ -33,6 +33,9 @@ export interface Proposal {
   // revoked proposal never receives a working link from the API itself.
   share_url: string | null
   share_expires_at: string | null
+  // VOORSTEL-AFZENDER-FE-1: the resolved sender at record time — null both for
+  // proposals recorded before the field existed and for a stale/never-set default.
+  sender: { id: string; name: string } | null
 }
 
 export function useProposals(applicationId: Id | null | undefined) {

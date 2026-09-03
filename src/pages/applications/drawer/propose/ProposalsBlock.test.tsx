@@ -24,7 +24,7 @@ const proposal = (over: Partial<Proposal> = {}): Proposal => ({
   id: 'p1', recipient_name: 'Piet Klaassen', recipient_email: 'piet@zorggroep.nl',
   cv_variant: 'proposal', send_status: 'sent', send_error: null,
   sent_at: '2026-07-20', revoked_at: null, opened_at: null,
-  open_count: 0, is_valid: true, share_url: null, share_expires_at: null, ...over,
+  open_count: 0, is_valid: true, share_url: null, share_expires_at: null, sender: null, ...over,
 })
 
 const setProposals = (proposals: Proposal[], over: Partial<{ loading: boolean; error: boolean }> = {}) => {
@@ -180,5 +180,15 @@ describe('ProposalsBlock', () => {
     setProposals([proposal({ send_status: null, sent_at: null })])
     render(<ProposalsBlock application={app} />)
     expect(screen.queryByText(/propose\.sendStatus\./)).toBeNull()
+  })
+})
+
+// VOORSTEL-AFZENDER-FE-1: the resolved sender shows on a row only when the API carries one.
+describe('ProposalsBlock · sender line', () => {
+  it('names the sender when present and shows nothing for a null sender', () => {
+    setProposals([proposal({ id: 'p1', sender: { id: 'u2', name: 'Sara Demo' } }), proposal({ id: 'p2', sender: null })])
+    render(<ProposalsBlock application={app} />)
+    expect(screen.getByText('propose.sentBy:{"name":"Sara Demo"}')).toBeInTheDocument()
+    expect(screen.getAllByText(/propose\.sentBy/)).toHaveLength(1)
   })
 })

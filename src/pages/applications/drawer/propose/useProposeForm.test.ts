@@ -44,6 +44,10 @@ const { funnelTypes } = vi.hoisted(() => ({
 }))
 vi.mock('@/context/LookupsContext', () => ({ useLookups: () => ({ funnelTypes }) }))
 
+// Tenant users — mutable per test via `usersFixture` (VOORSTEL-AFZENDER-FE-1).
+let usersFixture: Array<{ id: string; name: string }> = []
+vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: usersFixture }) }))
+
 // Tenant settings — mutable per test via `settingsFixture`.
 let settingsFixture: Record<string, unknown> = {}
 vi.mock('@/lib/settings/useAllSettings', () => ({
@@ -189,7 +193,45 @@ describe('useProposeForm', () => {
       subject: result.current.subject,
       body: result.current.body,
       send: true,
+      sender_user_id: null,
     })
+  })
+
+  // VOORSTEL-AFZENDER-FE-1: the picked sender travels as sender_user_id; the tenant
+  // default preselects it; the {recruiter} token renders the SENDER's name.
+  it('POSTs the picked sender as sender_user_id', async () => {
+    settingsFixture = {}
+    usersFixture = [{ id: 'u2', name: 'Sara Demo' }]
+    const { result } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.candidateLoading).toBe(false))
+    act(() => { result.current.setConsentConfirmed(true); result.current.setSenderUserId('u2') })
+    await waitFor(() => expect(result.current.disabledReason).toBeNull())
+    await act(async () => { await result.current.submit() })
+    expect(apiPost).toHaveBeenCalledWith('/applications/1/propose', expect.objectContaining({ sender_user_id: 'u2' }))
+  })
+
+  it('preselects the tenant default sender and renders it in the {recruiter} token', async () => {
+    settingsFixture = { proposal_default_sender_user_id: 'u2', application_proposal: JSON.stringify({ body_template: 'Groet, {recruiter}' }) }
+    usersFixture = [{ id: 'u2', name: 'Sara Demo' }]
+    const { result } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.candidateLoading).toBe(false))
+    await waitFor(() => expect(result.current.senderUserId).toBe('u2'))
+    await waitFor(() => expect(result.current.body).toContain('Sara Demo'))
+    act(() => { result.current.setConsentConfirmed(true) })
+    await waitFor(() => expect(result.current.disabledReason).toBeNull())
+    await act(async () => { await result.current.submit() })
+    expect(apiPost).toHaveBeenCalledWith('/applications/1/propose', expect.objectContaining({ sender_user_id: 'u2' }))
+  })
+
+  it('keeps an explicit pick when the settings re-fetch would otherwise reapply the default', async () => {
+    settingsFixture = { proposal_default_sender_user_id: 'u2' }
+    usersFixture = [{ id: 'u2', name: 'Sara Demo' }, { id: 'u3', name: 'Tim Mulder' }]
+    const { result, rerender } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.senderUserId).toBe('u2'))
+    act(() => { result.current.setSenderUserId('u3') })
+    settingsFixture = { proposal_default_sender_user_id: 'u2' }
+    rerender()
+    expect(result.current.senderUserId).toBe('u3')
   })
 
   // K-248 PROPOSE-SEND-1: `send` defaults to true and follows the sendEmail

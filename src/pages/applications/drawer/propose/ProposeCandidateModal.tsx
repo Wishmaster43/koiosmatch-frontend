@@ -85,6 +85,8 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
   // The shared "Name — Function" label (same as every other contact picker) —
   // distinguishes same-named contacts on the customer, never a dangling separator.
   const contactOptions = form.contacts.map(c => ({ value: c.id, label: contactOptionLabel(c) }))
+  // VOORSTEL-AFZENDER-FE-1: tenant users as the sender picker's options.
+  const senderOptions = (form.users ?? []).map((u: { id: string; name: string }) => ({ value: u.id, label: u.name }))
 
   // Human-readable reason the primary action is disabled (§3 — never a bare
   // greyed-out button with no explanation).
@@ -134,6 +136,16 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
                 <TriangleAlert size={12} /> {t('propose.recipientMissingEmail')}
               </div>
             )}
+          </div>
+
+          {/* 1b. Sender — VOORSTEL-AFZENDER-FE-1: which tenant user the e-mail goes
+              out in the name of; empty = the recruiter recording this proposal. */}
+          <div>
+            <div style={sectionTitle}>{t('propose.onBehalfOf')}</div>
+            <CreatableSelect allowCreate={false} value={form.senderUserId || null}
+              onChange={form.setSenderUserId} options={senderOptions}
+              placeholder={t('propose.onBehalfOfSelf')} clearable clearLabel={t('propose.onBehalfOf')} />
+            <Caption as="div" style={{ marginTop: 6 }}>{t('propose.onBehalfOfHint')}</Caption>
           </div>
 
           {/* 2. Documents — the house-style CV is always included (not unselectable:

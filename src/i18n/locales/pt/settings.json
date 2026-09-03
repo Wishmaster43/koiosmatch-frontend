@@ -823,7 +823,11 @@
     "variantFull": "CV completo (com dados de contacto)",
     "notSentYet": "O Koios ainda não envia a proposta automaticamente. O recrutador transfere o CV e envia-o a partir do seu próprio programa de e-mail. A ligação de partilha automática e revogável estará disponível assim que essa funcionalidade estiver pronta.",
     "saveFailed": "Falha ao guardar",
-    "saved": "Guardado"
+    "saved": "Guardado",
+    "defaultSenderTitle": "Remetente predefinido",
+    "defaultSenderSubtitle": "O utilizador em nome de quem as propostas são enviadas por predefinição; vazio = o recrutador que propõe.",
+    "defaultSenderSelf": "O próprio recrutador",
+    "defaultSenderStale": "O remetente predefinido guardado já não existe; as propostas saem agora em nome do recrutador. Escolha um novo remetente ou limpe o campo."
   },
   "assessment": {
     "title": "Critérios de avaliação",

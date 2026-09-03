@@ -655,7 +655,11 @@
     "variantFull": "Vollständiger Lebenslauf (mit Kontaktdaten)",
     "notSentYet": "Koios versendet den Vorschlag noch nicht selbst. Der Recruiter lädt den Lebenslauf herunter und versendet ihn über das eigene E-Mail-Programm. Der automatische, widerrufbare Freigabelink folgt, sobald diese Funktion verfügbar ist.",
     "saveFailed": "Speichern fehlgeschlagen",
-    "saved": "Gespeichert"
+    "saved": "Gespeichert",
+    "defaultSenderTitle": "Standardabsender",
+    "defaultSenderSubtitle": "Der Benutzer, in dessen Namen Vorschläge standardmäßig gesendet werden; leer = der vorschlagende Recruiter.",
+    "defaultSenderSelf": "Der Recruiter selbst",
+    "defaultSenderStale": "Der gespeicherte Standardabsender existiert nicht mehr; Vorschläge gehen jetzt im Namen des Recruiters. Wählen Sie einen neuen Absender oder leeren Sie das Feld."
   },
   "cvTemplate": {
     "title": "Lebenslauf-Vorlage",

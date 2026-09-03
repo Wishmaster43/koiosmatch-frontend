@@ -5,6 +5,7 @@
  * consent tick.
  */
 import { describe, it, expect, vi } from 'vitest'
+import userEvent from '@testing-library/user-event'
 import { render, screen } from '@testing-library/react'
 import ProposeCandidateModal from './ProposeCandidateModal'
 import type { ApplicationDetail } from '@/types/application'
@@ -49,6 +50,8 @@ const { formFixture } = vi.hoisted(() => ({
     disabledReason: 'noConsent' as const, submitting: false, submit: vi.fn(() => Promise.resolve(true)),
     copyMessage: vi.fn(), copied: false,
     shareUrl: null as string | null, copyShareLink: vi.fn(), shareLinkCopied: false,
+    // VOORSTEL-AFZENDER-FE-1: sender picker state + the tenant users it lists.
+    senderUserId: '', setSenderUserId: vi.fn(), users: [{ id: 'u2', name: 'Sara Demo' }],
   },
 }))
 vi.mock('./useProposeForm', () => ({ useProposeForm: () => formFixture }))
@@ -135,5 +138,18 @@ describe('ProposeCandidateModal · V-appdetail-4 body expand', () => {
     expect(toggle).toHaveTextContent('expand')
     await user.click(toggle)
     expect(toggle).toHaveTextContent('collapse')
+  })
+})
+
+// VOORSTEL-AFZENDER-FE-1: the sender section is a searchable, clearable picker (never a native select).
+describe('ProposeCandidateModal · sender', () => {
+  it('renders the sender section with a searchable picker defaulting to the proposer', async () => {
+    const user = userEvent.setup()
+    render(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
+    expect(screen.getByText('propose.onBehalfOf')).toBeInTheDocument()
+    expect(document.querySelector('select')).toBeNull()
+    await user.click(screen.getByRole('button', { name: 'propose.onBehalfOfSelf' }))
+    await user.click(await screen.findByRole('button', { name: 'Sara Demo' }))
+    expect(formFixture.setSenderUserId).toHaveBeenCalledWith('u2')
   })
 })

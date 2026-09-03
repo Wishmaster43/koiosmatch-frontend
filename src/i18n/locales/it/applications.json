@@ -525,7 +525,11 @@
       "failed": "Non riuscito",
       "no_consent": "Nessun consenso",
       "not_sent": "Non inviato"
-    }
+    },
+    "onBehalfOf": "Mittente",
+    "onBehalfOfSelf": "Io stesso (autore)",
+    "onBehalfOfHint": "L'e-mail parte a nome di questo utente; vuoto = tu stesso.",
+    "sentBy": "Inviato da {{name}}"
   },
   "restore": {
     "button": "Ripristina",

@@ -22,6 +22,7 @@ import { useLookups } from '@/context/LookupsContext'
 import { useCvSettings } from '@/lib/useCvSettings'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { useLocale } from '@/lib/datetime'
+import { useUsers } from '@/lib/queries'
 import { mapCandidate } from '@/pages/candidates/shared'
 import { buildProposalCvBlob } from '@/lib/proposalCv'
 import type { CvCandidate } from '@/pages/candidates/shared'
@@ -52,6 +53,11 @@ function fillTemplate(template: string, tokens: Record<string, string>): string 
   return template.replace(/\{(kandidaat|vacature|klant|contact|recruiter)\}/g, (_m, key: string) => tokens[key] ?? '')
 }
 
+// VOORSTEL-AFZENDER-FE-1: the tenant-wide default sender — a bare uuid string
+// saved through the generic settings passthrough (never inside the JSON
+// 'application_proposal' group), empty meaning "the proposer".
+const SENDER_SETTING_KEY = 'proposal_default_sender_user_id'
+
 // Owns every field, fetch and side effect behind ProposeCandidateModal (see file
 // docblock) and returns the flat state/handlers the modal renders.
 export function useProposeForm(application: ApplicationDetail) {
@@ -67,6 +73,9 @@ export function useProposeForm(application: ApplicationDetail) {
   const { settings: cvSettings } = useCvSettings() as { settings?: unknown }
   const settingsValues = useAllSettings()
   const proposalSettings = getJsonSetting<ApplicationProposalSettings>(settingsValues, 'application_proposal', {})
+  // Tenant users, for resolving the picked sender's display name (recruiter token
+  // + the modal's picker options) — same cached list every owner/recruiter picker uses.
+  const { data: users } = useUsers() as { data?: Array<{ id: string; name: string }> }
 
   // Contacts — a direct fetch rather than useCustomerCascade: that shared hook
   // exposes no loading flag, and this form must show an honest loading/error/
@@ -122,6 +131,17 @@ export function useProposeForm(application: ApplicationDetail) {
   const [subject, setSubjectState] = useState('')
   const [body, setBodyState] = useState('')
   const [consentConfirmed, setConsentConfirmed] = useState(false)
+  // VOORSTEL-AFZENDER-FE-1: the picked sender ('' = the proposer, resolved server-
+  // side too). Preselected from the tenant default ONCE — a senderDirtyRef mirrors
+  // dirtyRef below so a later settings re-fetch never clobbers a manual pick.
+  const [senderUserId, setSenderUserIdState] = useState<string>('')
+  const senderDirtyRef = useRef(false)
+  const setSenderUserId = (value: string) => { senderDirtyRef.current = true; setSenderUserIdState(value) }
+  useEffect(() => {
+    if (senderDirtyRef.current) return
+    const raw = settingsValues[SENDER_SETTING_KEY]
+    if (typeof raw === 'string') setSenderUserIdState(raw)
+  }, [settingsValues])
   // K-248 PROPOSE-SEND-1: whether Koios sends the mail itself (default ON) —
   // POST /propose's `send` flag; off records the proposal + share link only.
   const [sendEmail, setSendEmail] = useState(true)
@@ -159,6 +179,10 @@ export function useProposeForm(application: ApplicationDetail) {
   // to an empty string — a bare "Beste ," ("Dear ,") reads worse than a
   // still-empty field, and submit() is disabled without a recipient anyway
   // (see disabledReason).
+  // The {recruiter} token renders the SENDER — the picked user's name when set,
+  // else the proposer's own name (unchanged default behaviour).
+  const senderName = (senderUserId && users?.find(u => String(u.id) === senderUserId)?.name) || application.owner?.name || ''
+
   useEffect(() => {
     if (dirtyRef.current || !recipient) return
     const tokens = {
@@ -166,17 +190,17 @@ export function useProposeForm(application: ApplicationDetail) {
       vacature: application.vacancyTitle ?? '',
       klant: application.client ?? '',
       contact: recipient.name,
-      recruiter: application.owner?.name ?? '',
+      recruiter: senderName,
     }
     const subjectTpl = proposalSettings.subject_template || t('propose.defaultSubject')
     const bodyTpl = proposalSettings.body_template || t('propose.defaultBody')
     setSubjectState(fillTemplate(subjectTpl, tokens))
     setBodyState(fillTemplate(bodyTpl, tokens))
-    // Deliberately keyed on the recipient's own identity, not the whole
-    // `application`/`proposalSettings` objects (a new identity every render
-    // would re-fire this on every keystroke elsewhere) or `t`.
+    // Deliberately keyed on the recipient's own identity plus the resolved sender
+    // name, not the whole `application`/`proposalSettings`/`users` objects (a new
+    // identity every render would re-fire this on every keystroke elsewhere) or `t`.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recipient?.id, recipient?.name])
+  }, [recipient?.id, recipient?.name, senderName])
 
   const hasMotivation = Boolean(application.coverLetter)
 
@@ -236,6 +260,9 @@ export function useProposeForm(application: ApplicationDetail) {
         // when ticked — so the proposal history matches what the customer received.
         body: composedBody(),
         send: sendEmail,
+        // VOORSTEL-AFZENDER-FE-1: null means "resolve server-side" (tenant default,
+        // then the proposer) — never send an empty string for "no explicit pick".
+        sender_user_id: senderUserId || null,
       })
       // V-appdetail-5: PROPOSE-SHARE-LINK-1 shipped — the response's own record
       // carries the same recipient-facing share_url ProposalsBlock renders (never
@@ -304,6 +331,7 @@ export function useProposeForm(application: ApplicationDetail) {
     includeMotivation, setIncludeMotivation, hasMotivation,
     subject, setSubject, body, setBody,
     consentConfirmed, setConsentConfirmed,
+    senderUserId, setSenderUserId, users,
     sendEmail, setSendEmail,
     disabledReason, submitting, submit,
     copyMessage, copied,

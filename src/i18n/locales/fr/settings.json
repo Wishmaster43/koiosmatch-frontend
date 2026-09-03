@@ -655,7 +655,11 @@
     "variantFull": "CV complet (avec coordonnées)",
     "notSentYet": "Koios n'envoie pas encore la proposition lui-même. Le recruteur télécharge le CV et l'envoie depuis sa propre messagerie. Le lien de partage automatique et révocable arrivera dès que cette fonctionnalité sera disponible.",
     "saveFailed": "Échec de l'enregistrement",
-    "saved": "Enregistré"
+    "saved": "Enregistré",
+    "defaultSenderTitle": "Expéditeur par défaut",
+    "defaultSenderSubtitle": "L'utilisateur au nom duquel les propositions sont envoyées par défaut ; vide = le recruteur qui propose.",
+    "defaultSenderSelf": "Le recruteur",
+    "defaultSenderStale": "L'expéditeur par défaut enregistré n'existe plus ; les propositions partent désormais au nom du recruteur. Choisissez un nouvel expéditeur ou videz le champ."
   },
   "cvTemplate": {
     "title": "Modèle de CV",

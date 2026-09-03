@@ -823,7 +823,11 @@
     "variantFull": "CV completo (con dati di contatto)",
     "notSentYet": "Koios non invia ancora la proposta autonomamente. Il recruiter scarica il CV e lo invia dal proprio programma di posta. Il link di condivisione automatico e revocabile arriverà non appena questa funzionalità sarà pronta.",
     "saveFailed": "Salvataggio non riuscito",
-    "saved": "Salvato"
+    "saved": "Salvato",
+    "defaultSenderTitle": "Mittente predefinito",
+    "defaultSenderSubtitle": "L'utente a nome del quale le proposte vengono inviate per impostazione predefinita; vuoto = il recruiter che propone.",
+    "defaultSenderSelf": "Il recruiter stesso",
+    "defaultSenderStale": "Il mittente predefinito salvato non esiste più; le proposte partono ora a nome del recruiter. Scegli un nuovo mittente o svuota il campo."
   },
   "assessment": {
     "title": "Criteri di valutazione",

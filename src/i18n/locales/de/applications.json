@@ -505,7 +505,11 @@
       "failed": "Fehlgeschlagen",
       "no_consent": "Keine Einwilligung",
       "not_sent": "Nicht gesendet"
-    }
+    },
+    "onBehalfOf": "Absender",
+    "onBehalfOfSelf": "Ich selbst (Ersteller)",
+    "onBehalfOfHint": "Die E-Mail geht im Namen dieses Benutzers; leer = Sie selbst.",
+    "sentBy": "Gesendet von {{name}}"
   },
   "restore": {
     "button": "Wiederherstellen",

@@ -823,7 +823,11 @@
     "variantFull": "Full CV (with contact details)",
     "notSentYet": "Koios does not send the proposal itself yet. The recruiter downloads the CV and sends it from their own mail program. The automatic, revocable share link follows once that capability ships.",
     "saveFailed": "Save failed",
-    "saved": "Saved"
+    "saved": "Saved",
+    "defaultSenderTitle": "Default sender",
+    "defaultSenderSubtitle": "The user in whose name proposals are sent by default; empty = the recruiter who proposes.",
+    "defaultSenderSelf": "The recruiter",
+    "defaultSenderStale": "The stored default sender no longer exists; proposals now go out in the recruiter's own name. Pick a new sender or clear the field."
   },
   "assessment": {
     "title": "Assessment criteria",

@@ -9,14 +9,24 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Info, Save } from 'lucide-react'
 import { useAllSettings, getJsonSetting, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
+import { useUsers } from '@/lib/queries'
+import { useAuth } from '@/context/AuthContext'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SegmentedControl from '@/components/ui/SegmentedControl'
+import CreatableSelect from '@/components/ui/CreatableSelect'
+import CalloutBox from '@/components/ui/CalloutBox'
 import { Toggle } from '../components/SettingsKit'
 import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import SaveButton from '@/components/ui/SaveButton'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
-import { PageTitle, Mono } from '@/components/ui/typography'
+import { PageTitle, Mono, BodyText } from '@/components/ui/typography'
 import { tintBg, tintBorder } from '@/lib/tint'
+
+// VOORSTEL-AFZENDER-FE-1: the tenant-wide default sender — a bare uuid string
+// saved through the generic settings passthrough, never inside the JSON
+// 'application_proposal' group (a separate top-level settings key by contract).
+const SENDER_SETTING_KEY = 'proposal_default_sender_user_id'
 
 // The tenant-setting key: one JSON blob holding the whole proposal configuration
 // (shared contract with the sibling "propose candidate" modal — MODAL agent reads
@@ -38,9 +48,30 @@ const DEFAULTS = {
 // Settings screen for the proposal template plus sets_phase/default CV variant, backed by one JSON tenant setting.
 export default function ProposalSettings() {
   const { t } = useTranslation('settings')
+  const auth = useAuth()
+  const canEdit = auth?.hasPermission('settings.update') ?? false
   const values = useAllSettings()
   const stored = getJsonSetting(values, SETTINGS_KEY, {})
   const persisted = { ...DEFAULTS, ...stored }
+  const { data: users } = useUsers()
+  const senderOptions = (users ?? []).map(u => ({ value: u.id, label: u.name }))
+
+  // VOORSTEL-AFZENDER-FE-1: the stored default sender, '' meaning "the proposer".
+  const defaultSenderId = typeof values[SENDER_SETTING_KEY] === 'string' ? values[SENDER_SETTING_KEY] : ''
+  // Only flags stale once the users list has actually loaded — before that a
+  // real uuid would falsely read as "not found".
+  const senderStale = Boolean(defaultSenderId) && Array.isArray(users) && !users.some(u => u.id === defaultSenderId)
+
+  // Commits the default sender immediately (small, discrete pick — no draft buffer),
+  // mirroring the sets_phase/variant toggles below.
+  const chooseSender = async (id) => {
+    try {
+      await saveSettingsKeys({ [SENDER_SETTING_KEY]: id || '' })
+      invalidateAllSettingsCache()
+    } catch (err) {
+      notifyError(extractApiError(err, t('proposal.saveFailed')))
+    }
+  }
 
   // Local buffer for the free-text template fields; committed via an explicit save
   // so typing/rich-text edits never spam the API (house pattern, NumberingSettings).
@@ -159,6 +190,26 @@ export default function ProposalSettings() {
             { value: 'full', label: t('proposal.variantFull') },
           ]}
         />
+      </div>
+
+      {/* Default sender — VOORSTEL-AFZENDER-FE-1: the tenant user proposals go out
+          in the name of by default, unless a recruiter picks someone else. */}
+      <div style={cardStyle}>
+        <label style={labelStyle}>{t('proposal.defaultSenderTitle')}</label>
+        <p style={hintStyle}>{t('proposal.defaultSenderSubtitle')}</p>
+        {canEdit ? (
+          <CreatableSelect allowCreate={false} value={defaultSenderId || null}
+            onChange={chooseSender} options={senderOptions}
+            placeholder={t('proposal.defaultSenderSelf')}
+            clearable clearLabel={t('proposal.defaultSenderTitle')} />
+        ) : (
+          <BodyText>{senderOptions.find(o => o.value === defaultSenderId)?.label ?? t('proposal.defaultSenderSelf')}</BodyText>
+        )}
+        {senderStale && (
+          <div style={{ marginTop: 8 }}>
+            <CalloutBox variant="warning">{t('proposal.defaultSenderStale')}</CalloutBox>
+          </div>
+        )}
       </div>
     </div>
   )

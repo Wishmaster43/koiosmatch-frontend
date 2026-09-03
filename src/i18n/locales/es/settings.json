@@ -655,7 +655,11 @@
     "variantFull": "CV completo (con datos de contacto)",
     "notSentYet": "Koios todavía no envía la propuesta por sí mismo: el reclutador descarga el CV y lo envía desde su propio programa de correo. El enlace de compartición automático y revocable llegará en cuanto esa funcionalidad esté disponible.",
     "saveFailed": "Error al guardar",
-    "saved": "Guardado"
+    "saved": "Guardado",
+    "defaultSenderTitle": "Remitente predeterminado",
+    "defaultSenderSubtitle": "El usuario a cuyo nombre se envían las propuestas por defecto; vacío = el reclutador que propone.",
+    "defaultSenderSelf": "El propio reclutador",
+    "defaultSenderStale": "El remitente predeterminado guardado ya no existe; las propuestas salen ahora a nombre del reclutador. Elige un nuevo remitente o vacía el campo."
   },
   "cvTemplate": {
     "title": "Plantilla de CV",

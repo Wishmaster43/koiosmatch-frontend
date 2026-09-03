@@ -525,7 +525,11 @@
       "failed": "Mislukt",
       "no_consent": "Geen toestemming",
       "not_sent": "Niet verzonden"
-    }
+    },
+    "onBehalfOf": "Afzender",
+    "onBehalfOfSelf": "Ikzelf (maker)",
+    "onBehalfOfHint": "De e-mail gaat uit naam van deze gebruiker; leeg = jijzelf.",
+    "sentBy": "Verstuurd door {{name}}"
   },
   "restore": {
     "button": "Herstellen",

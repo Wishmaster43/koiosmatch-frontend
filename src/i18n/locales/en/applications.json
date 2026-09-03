@@ -525,7 +525,11 @@
       "failed": "Failed",
       "no_consent": "No consent",
       "not_sent": "Not sent"
-    }
+    },
+    "onBehalfOf": "Sender",
+    "onBehalfOfSelf": "Myself (proposer)",
+    "onBehalfOfHint": "The e-mail goes out in this user's name; empty = yourself.",
+    "sentBy": "Sent by {{name}}"
   },
   "restore": {
     "button": "Restore",

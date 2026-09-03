@@ -1,85 +1,72 @@
 /**
- * ProposalSettings.test — §13: assert the REQUEST (settings POST body), never
- * only that a callback fired. Mirrors CareerSiteSettings.test.jsx's mocking shape.
+ * ProposalSettings — VOORSTEL-AFZENDER-FE-1 default sender. §13: assert the REQUEST
+ * (POST /settings with the bare proposal_default_sender_user_id key), the stale
+ * warning once the users list has loaded, and the read-only face without settings.update.
  */
-import { describe, it, expect, afterEach, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import ProposalSettings from './ProposalSettings'
 
-// Real translations (no i18n provider in this render tree, so t() would
-// otherwise just echo the key) — mirrors BillingUsageSettings.test.jsx's pattern.
-const t = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
+const st = (key) => i18n.t(key, { ns: 'settings' })
 
-// Route the shared settings loader: the blob is controlled per test; saves go
-// through the REAL saveSettingsKeys so the api.post seam is asserted.
-const blobRef = vi.hoisted(() => ({ current: {} }))
+const mockSettings = vi.hoisted(() => vi.fn(() => ({})))
+const apiPost = vi.hoisted(() => vi.fn(async () => ({ data: {} })))
+const mockUseAuth = vi.hoisted(() => vi.fn(() => ({ hasPermission: () => true })))
+const notifyError = vi.hoisted(() => vi.fn(() => {}))
+const usersFixture = vi.hoisted(() => ({ data: [{ id: 'u1', name: 'Danny' }, { id: 'u2', name: 'Sara Demo' }] }))
+
 vi.mock('@/lib/settings/useAllSettings', async () => {
   const actual = await vi.importActual('@/lib/settings/useAllSettings')
-  return { ...actual, useAllSettings: () => blobRef.current }
+  return { ...actual, useAllSettings: () => mockSettings() }
 })
-const postMock = vi.hoisted(() => vi.fn(() => Promise.resolve({ data: {} })))
-// getActiveTenantId is the real (unmocked) useAllSettings module's tenant-scope key.
-vi.mock('@/lib/api', () => ({
-  default: { get: vi.fn(() => new Promise(() => {})), post: postMock },
-  getActiveTenantId: vi.fn(() => null),
-}))
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual('@/lib/api')
+  return { ...actual, default: { ...actual.default, post: apiPost, get: vi.fn() } }
+})
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
+vi.mock('@/lib/notify', () => ({ notifyError }))
+vi.mock('@/lib/queries', () => ({ useUsers: () => usersFixture }))
 
-afterEach(() => { vi.clearAllMocks(); blobRef.current = {} })
+afterEach(() => vi.clearAllMocks())
 
-const STORED = {
-  subject_template: 'Voorstel: {kandidaat} voor {vacature}',
-  body_template: '<p>Hallo {contact},</p>',
-  sets_phase: false,
-  default_cv_variant: 'proposal',
-}
-
-describe('ProposalSettings', () => {
-  it('renders the stored subject/body/variant', () => {
-    blobRef.current = { application_proposal: JSON.stringify(STORED) }
-    render(<ProposalSettings />)
-    expect(screen.getByDisplayValue(STORED.subject_template)).toBeInTheDocument()
-    expect(screen.getByRole('switch')).not.toBeChecked()
-    expect(screen.getAllByRole('radio')[0]).toBeChecked() // proposal
-  })
-
-  it('toggling sets_phase POSTs the merged JSON blob immediately', async () => {
-    blobRef.current = { application_proposal: JSON.stringify(STORED) }
+describe('ProposalSettings · default sender', () => {
+  it('posts the bare proposal_default_sender_user_id key when a user is picked', async () => {
+    mockSettings.mockReturnValue({})
     const user = userEvent.setup()
     render(<ProposalSettings />)
-    await user.click(screen.getByRole('switch'))
-    expect(postMock).toHaveBeenCalledWith('/settings', {
-      application_proposal: JSON.stringify({ ...STORED, sets_phase: true }),
-    })
+    await user.click(screen.getByRole('button', { name: st('proposal.defaultSenderSelf') }))
+    await user.click(await screen.findByRole('button', { name: 'Sara Demo' }))
+    await waitFor(() => expect(apiPost).toHaveBeenCalledWith('/settings', { proposal_default_sender_user_id: 'u2' }))
   })
 
-  it('picking the full CV variant POSTs the merged JSON blob', async () => {
-    blobRef.current = { application_proposal: JSON.stringify(STORED) }
+  it('clears back to the proposer by posting an empty value', async () => {
+    mockSettings.mockReturnValue({ proposal_default_sender_user_id: 'u2' })
     const user = userEvent.setup()
     render(<ProposalSettings />)
-    await user.click(screen.getAllByRole('radio')[1]) // full
-    expect(postMock).toHaveBeenCalledWith('/settings', {
-      application_proposal: JSON.stringify({ ...STORED, default_cv_variant: 'full' }),
-    })
+    // CreatableSelect names its clear cross t('clearField', { field }) — the one real clear affordance.
+    await user.click(screen.getByRole('button', { name: i18n.t('clearField', { ns: 'common', field: st('proposal.defaultSenderTitle') }) }))
+    await waitFor(() => expect(apiPost).toHaveBeenCalledWith('/settings', { proposal_default_sender_user_id: '' }))
   })
 
-  it('saving the template POSTs the edited subject/body', async () => {
-    blobRef.current = { application_proposal: JSON.stringify(STORED) }
-    const user = userEvent.setup()
+  it('warns when the stored default no longer resolves to a user', () => {
+    mockSettings.mockReturnValue({ proposal_default_sender_user_id: 'gone-uuid' })
     render(<ProposalSettings />)
-    await user.clear(screen.getByLabelText(t('proposal.subjectLabel')))
-    // Avoid `{...}` in the typed string — user-event's `type` reserves braces for
-    // special-key syntax; the token-substitution behaviour itself is not this test's concern.
-    await user.type(screen.getByLabelText(t('proposal.subjectLabel')), 'Nieuw onderwerp')
-    await user.click(screen.getByRole('button', { name: t('common.save') }))
-    expect(postMock).toHaveBeenCalledWith('/settings', {
-      application_proposal: JSON.stringify({ ...STORED, subject_template: 'Nieuw onderwerp' }),
-    })
+    expect(screen.getByText(st('proposal.defaultSenderStale'))).toBeInTheDocument()
   })
 
-  it('shows the honest "not sent yet" notice', () => {
+  it('shows no warning for a resolvable default', () => {
+    mockSettings.mockReturnValue({ proposal_default_sender_user_id: 'u1' })
     render(<ProposalSettings />)
-    expect(screen.getByText(t('proposal.notSentYet'))).toBeInTheDocument()
+    expect(screen.queryByText(st('proposal.defaultSenderStale'))).toBeNull()
+  })
+
+  it('renders the current default as plain text without settings.update', () => {
+    mockUseAuth.mockReturnValue({ hasPermission: () => false })
+    mockSettings.mockReturnValue({ proposal_default_sender_user_id: 'u2' })
+    render(<ProposalSettings />)
+    expect(screen.getByText('Sara Demo')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Sara Demo' })).toBeNull()
   })
 })
