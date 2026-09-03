@@ -2,6 +2,8 @@
 // entity tab). Fetch + filter happen inside it; it also absorbs the old
 // "Status zetten" (status_set) and "Werkervaring toevoegen" (experience_add) as
 // actions, replacing the separate Ophalen/Filter/Acties modules.
+// `effective_from` was declared by the engine's configSchema but never read by execute() —
+// "later laten ingaan" is a Wachten-step in front of the Bijwerken action instead.
 import { Users } from 'lucide-react'
 import makeEntityModule from './_entityModule'
 
@@ -40,7 +42,6 @@ export default makeEntityModule({
     { key: 'last_contact_before_months', label: 'Laatste contact ouder dan (maanden)', type: 'number', showIf: { key: 'action', value: 'Ophalen' } },
     // Bijwerken — dated + reasoned status change (was status_set).
     { key: 'reason',         label: 'Reden',        type: 'text', showIf: { key: 'action', value: 'Bijwerken' } },
-    { key: 'effective_from', label: 'Ingangsdatum', type: 'date', showIf: { key: 'action', value: 'Bijwerken' } },
     // Werkervaring toevoegen (was experience_add).
     // KANDIDATEN 9 (21-08): the old experience_position (top/bottom) option is
     // GONE — the backend deliberately ignores it (auto rows always append, §3B

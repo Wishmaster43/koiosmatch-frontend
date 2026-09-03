@@ -17,7 +17,6 @@ import { useOutputSeeding } from './useOutputSeeding'
 import { buildVarFields, computeWorkflowSnapshot } from './workflowEditorUtils'
 import type { Workflow, FlowNode, FlowEdge, FlowNodeData, EdgeFilters, FilterConditionGroup, ScheduleConfig,
   WorkflowVarGroup } from '@/types/workflow'
-import { unwrapList } from '@/lib/api'
 
 // Pure helpers extracted to workflowEditorUtils (§3, split at ~400 lines); re-exported
 // here so existing test imports (`from './useWorkflowEditor'`) keep working unchanged.
@@ -149,29 +148,10 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
     let output: unknown = null
 
     try {
-      if (data.type === 'candidates') {
-        // Entity module: only the "Ophalen" action reads; filters live in cfg.filters.
-        const cfg = (data.config ?? {}) as { limit?: number; filters?: EdgeFilters }
-        const params: Record<string, unknown> = { per_page: cfg.limit ?? 100 }
-        // Translate a status condition into a query param (other filters: backend later).
-        const statusCond = (cfg.filters?.conditions ?? []).find(c => c.field === 'status' && c.value)
-        if (statusCond) params.status = statusCond.value
-        const res = await api.get('/sm_candidates', { params })
-        const rows = unwrapList<Record<string, unknown>>(res).rows
-        output = rows.slice(0, cfg.limit ?? 100)
-
-      } else if (data.type === 'planning') {
-        const res = await api.get('/planning/shifts', { params: { per_page: 100 } }).catch(() => null)
-        // `res` can be null (the .catch above) — unwrapList requires a real
-        // response, so guard it explicitly (was `res?.data?.data ?? res?.data ?? []`).
-        output = res ? unwrapList(res).rows : []
-
-      } else {
-        // Generic module test-run — backend POST /workflows/test-module (G-9): previews the
-        // module's output; 422 for an unknown or non-testable (really-sends) module type.
-        const res = await api.post('/workflows/test-module', { module_type: data.type, config: data.config })
-        output = res.data?.output ?? res.data
-      }
+      // Generic module test-run — backend POST /workflows/test-module (G-9): previews the
+      // module's output; 422 for an unknown or non-testable (really-sends) module type.
+      const res = await api.post('/workflows/test-module', { module_type: data.type, config: data.config })
+      output = res.data?.output ?? res.data
     } catch (err) {
       const e = err as { response?: { data?: { message?: string } }; message?: string }
       output = { error: e.response?.data?.message ?? e.message }

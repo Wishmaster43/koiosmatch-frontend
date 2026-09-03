@@ -596,3 +596,24 @@ describe('useWorkflowEditor · NODE-PROGRESS-1 live progress mapping', () => {
     })
   })
 })
+
+describe('useWorkflowEditor · handleNodeRun', () => {
+  it('a candidates node test-step calls the generic /workflows/test-module route with module_type and config', async () => {
+    const { result } = setup([
+      { id: 'n1', type: 'candidates', config: { limit: 10, filters: { conditions: [{ field: 'status', value: 'Available' }] } }, position: { x: 0, y: 0 } },
+    ])
+
+    const mockPost = vi.mocked(api.post)
+    mockPost.mockResolvedValueOnce({ data: { output: [{ id: '1', name: 'Alice' }] } })
+
+    await act(async () => {
+      await result.current.handleNodeRun('n1', result.current.nodesWithFirst[0].data)
+    })
+
+    expect(mockPost).toHaveBeenCalledWith('/workflows/test-module', {
+      module_type: 'candidates',
+      config: { limit: 10, filters: { conditions: [{ field: 'status', value: 'Available' }] } },
+    })
+    expect(mockPost).not.toHaveBeenCalledWith(expect.stringContaining('/sm_candidates'), expect.anything())
+  })
+})
