@@ -1115,5 +1115,13 @@
   "copyAddress": {
     "copy": "Copiar morada",
     "copied": "Morada copiada"
+  },
+  "changelogDescriptions": {
+    "lookup": {
+      "reordered": "Ordem alterada"
+    },
+    "match": {
+      "created": "Match criado"
+    }
   }
 }

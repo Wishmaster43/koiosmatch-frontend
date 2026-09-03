@@ -24,6 +24,7 @@ import { History, AlertTriangle, ArrowRight, Download } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
 import { escapeCsvCell } from '@/lib/csv'
 import { isUuid } from '@/lib/uuid'
+import { describeChangelog } from './changelogDescription'
 import { Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import SoftChip from '@/components/ui/SoftChip'
@@ -134,7 +135,9 @@ export default function EntityChangelogTab<E extends ChangelogEvent = ChangelogE
   // Bare Spatie verbs become readable ("Bijgewerkt"); a human description wins.
   const actionOf = (ev: E): string => {
     const d = ev.description
-    if (d && !['updated', 'created', 'deleted', 'restored', ev.log_name].includes(d)) return d
+    // CHANGELOG-DESC-I18N-1: a key-shaped description ("lookup.reordered") is
+    // translated; a legacy Dutch literal ("Dossier geopend") renders as-is.
+    if (d && !['updated', 'created', 'deleted', 'restored', ev.log_name].includes(d)) return describeChangelog(d, t) ?? d
     const verb = ev.event ?? d ?? 'updated'
     return t(`changelog.actions.${verb}`, { defaultValue: d ?? verb })
   }
@@ -162,7 +165,7 @@ export default function EntityChangelogTab<E extends ChangelogEvent = ChangelogE
       if (extra) return [extra]
       const subject = subjectLabel?.(ev)
       const diffs = changesOf(ev)
-      if (!diffs.length) return [{ ...base, subject, fallback: fallbackDescription ? (ev.description ?? '—') : undefined }]
+      if (!diffs.length) return [{ ...base, subject, fallback: fallbackDescription ? (describeChangelog(ev.description, t) ?? '—') : undefined }]
       const isCreate = (ev.event ?? ev.description) === 'created'
       return diffs
         .map(ch => ({ ...base, subject, field: fieldLabel(ch.field), oldVal: fmtVal(ch.field, ch.old), newVal: fmtVal(ch.field, ch.next) }))

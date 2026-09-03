@@ -94,4 +94,26 @@ describe('EntityChangelogTab · CHANGELOG-3 uuid guard', () => {
     )
     expect(await screen.findByText('Vestiging · 9')).toBeInTheDocument()
   })
+
+  // CHANGELOG-DESC-I18N-1: a diff-less entry's description reaches the reader through
+  // describeChangelog — a key-shaped description (lookup.reordered) renders translated.
+  it('renders a translated body line for a key-shaped fallback description', async () => {
+    const events: ChangelogEvent[] = [{
+      id: 'e5', causer_name: 'Danny Polak', created_at: '2026-08-01T10:00:00Z', event: 'updated',
+      description: 'lookup.reordered',
+    }]
+    render(<EntityChangelogTab items={events} loading={false} error={false} namespace="candidates" fallbackDescription />)
+    expect(await screen.findByText('Volgorde gewijzigd')).toBeInTheDocument()
+    expect(screen.queryByText('lookup.reordered')).not.toBeInTheDocument()
+  })
+
+  // A legacy Dutch literal (not yet migrated to a key) keeps rendering as-is.
+  it('renders a legacy literal fallback description unchanged', async () => {
+    const events: ChangelogEvent[] = [{
+      id: 'e6', causer_name: 'Danny Polak', created_at: '2026-08-01T10:00:00Z', event: 'updated',
+      description: 'Dossier geopend',
+    }]
+    render(<EntityChangelogTab items={events} loading={false} error={false} namespace="candidates" fallbackDescription />)
+    expect(await screen.findByText('Dossier geopend')).toBeInTheDocument()
+  })
 })

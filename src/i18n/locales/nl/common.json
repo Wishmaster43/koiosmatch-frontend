@@ -1115,5 +1115,13 @@
   "copyAddress": {
     "copy": "Kopieer adres",
     "copied": "Adres gekopieerd"
+  },
+  "changelogDescriptions": {
+    "lookup": {
+      "reordered": "Volgorde gewijzigd"
+    },
+    "match": {
+      "created": "Match aangemaakt"
+    }
   }
 }
