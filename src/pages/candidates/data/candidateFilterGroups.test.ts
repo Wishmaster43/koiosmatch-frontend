@@ -59,3 +59,42 @@ describe('buildCandidateFilterGroups · period chip zero-pads single-digit day/m
     expect(groups.find(g => g.key === 'period')).toBeUndefined()
   })
 })
+
+describe('buildCandidateFilterGroups · retention expiring filter (RETENTIE-KLIK-1)', () => {
+  it('includes the retention expiring filter group with 30/60 day options', () => {
+    const setAttentionFilter = vi.fn()
+    const groups = buildCandidateFilterGroups({
+      t: (k: string) => k,
+      tog: <T,>(set: (fn: (p: T[]) => T[]) => void) => (v: T) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
+      filters: {
+        selectedStatus: [], setSelectedStatus: vi.fn(),
+        selectedPhase: [], setSelectedPhase: vi.fn(),
+        selectedFunnel: [], setSelectedFunnel: vi.fn(),
+        selectedType: [], setSelectedType: vi.fn(),
+        selectedTitle: [], setSelectedTitle: vi.fn(),
+        selectedPool: [], setSelectedPool: vi.fn(),
+        selectedCity: [], setSelectedCity: vi.fn(),
+        selectedProvince: [], setSelectedProvince: vi.fn(),
+        selectedGeslacht: [], setSelectedGeslacht: vi.fn(),
+        selectedOwner: [], setSelectedOwner: vi.fn(),
+        selectedLocation: [], setSelectedLocation: vi.fn(),
+        selectedSource: [], setSelectedSource: vi.fn(),
+        showArchived: false, setShowArchived: vi.fn(),
+        missingAppointmentFilter: false, setMissingAppointmentFilter: vi.fn(),
+        attentionFilter: null, setAttentionFilter,
+        dateRange: null, setDateRange: vi.fn(),
+        geoFilter: null, geoHint: null, applyGeo: vi.fn(), clearGeo: vi.fn(),
+      },
+      options: {
+        statusOptions: [], phaseOptions: [], funnelOptions: [], typeOptions: [],
+        titleOptions: [], poolOptions: [], cityOptions: [], provinceOptions: [],
+        genderOptions: [], ownerOptions: [], locationOptions: [], sourceOptions: [],
+      },
+    } as Parameters<typeof buildCandidateFilterGroups>[0])
+    const retention = groups.find(g => g.key === 'retentionExpiring') as unknown as { key: string; options: Array<{ value: string; label: string }> }
+    expect(retention).toBeDefined()
+    expect(retention.options).toHaveLength(2)
+    expect(retention.options[0].value).toBe('30')
+    expect(retention.options[1].value).toBe('60')
+  })
+})

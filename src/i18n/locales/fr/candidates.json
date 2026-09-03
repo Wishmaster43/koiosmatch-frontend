@@ -144,6 +144,10 @@
     "clearFilter": "Effacer le filtre",
     "pageScopeNotice": "Les totaux globaux sont temporairement indisponibles. Ces chiffres ne couvrent que la page chargée."
   },
+  "insights": {
+    "retentionExpiring": "Conservation expire",
+    "retentionExpiringSub": "{{count}} sous 30 jours"
+  },
   "filters": {
     "search": "Rechercher",
     "radius": "Rayon",
@@ -183,7 +187,10 @@
       "availableFromBefore": "Disponible avant"
     },
     "missingAppointment": "Rendez-vous manquant",
-    "missingDocs": "Documents manquants"
+    "missingDocs": "Documents manquants",
+    "retentionExpiring": "Conservation expire",
+    "retentionExpiring30": "sous 30 jours",
+    "retentionExpiring60": "sous 60 jours"
   },
   "modal": {
     "title": "Nouveau candidat",

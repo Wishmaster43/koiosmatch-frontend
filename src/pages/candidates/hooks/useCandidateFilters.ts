@@ -140,6 +140,10 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
     if (attentionFilter === 'activeConv')     p.active_conversations = 1
     // K-173: server-side missing-documents filter, same shape as no_followup/hasTasks.
     if (attentionFilter === 'missingDocs')    p.missing_documents = 1
+    // RETENTIE-KLIK-1: retention consent expiring within 60 days; also reachable as
+    // retentionExpiring30 from the right panel (30-day filter).
+    if (attentionFilter === 'retentionExpiring60') p.retention_expiring_days = 60
+    if (attentionFilter === 'retentionExpiring30') p.retention_expiring_days = 30
     // Period-click date range; set last so it wins over stale6m if both target last_contact.
     if (dateRange) p[dateRange.param] = [dateRange.from, dateRange.to]
     return p

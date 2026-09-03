@@ -135,11 +135,15 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
   , [stats, candidates, convCutoff])
   // Open candidate-linked tasks (server total from stats.attention.tasks).
   const tasksCount = stats?.attention?.tasks ?? 0
+  // Retention consent expiring within 30 and 60 days (server totals).
+  const retentionExpiring30Count = stats?.attention?.retention_expiring_30 ?? 0
+  const retentionExpiring60Count = stats?.attention?.retention_expiring_60 ?? 0
 
   return {
     statusOptions, funnelOptions, typeOptions, ownerOptions,
     genderOptions, provinceOptions, titleOptions, locationOptions,
     statusData, funnelData, rcData, intakeStages,
     staleCount, neverContactedCount, noFollowupCount, intakeCount, activeConvCount, tasksCount,
+    retentionExpiring30Count, retentionExpiring60Count,
   }
 }

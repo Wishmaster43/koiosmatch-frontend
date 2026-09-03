@@ -238,6 +238,44 @@ describe('useCandidateFilters — missingAppointment (V-appdetail-1/2)', () => {
   })
 })
 
+describe('useCandidateFilters — retention expiring (RETENTIE-KLIK-1)', () => {
+  it('sends retention_expiring_days=60 for the 60-day attention filter', () => {
+    const { result } = renderHook(() => useCandidateFilters(baseArgs))
+    act(() => { result.current.setAttentionFilter('retentionExpiring60') })
+    expect(result.current.filterParams.retention_expiring_days).toBe(60)
+  })
+
+  it('sends retention_expiring_days=30 for the 30-day attention filter', () => {
+    const { result } = renderHook(() => useCandidateFilters(baseArgs))
+    act(() => { result.current.setAttentionFilter('retentionExpiring30') })
+    expect(result.current.filterParams.retention_expiring_days).toBe(30)
+  })
+
+  it('clears retention_expiring_days when toggling the filter off', () => {
+    const { result } = renderHook(() => useCandidateFilters(baseArgs))
+    act(() => { result.current.setAttentionFilter('retentionExpiring60') })
+    expect(result.current.filterParams.retention_expiring_days).toBe(60)
+    act(() => { result.current.setAttentionFilter(null) })
+    expect(result.current.filterParams.retention_expiring_days).toBeUndefined()
+  })
+
+  it('includes retention_expiring_days in anyFilterActive', () => {
+    const { result } = renderHook(() => useCandidateFilters(baseArgs))
+    expect(result.current.anyFilterActive).toBe(false)
+    act(() => { result.current.setAttentionFilter('retentionExpiring60') })
+    expect(result.current.anyFilterActive).toBe(true)
+  })
+
+  it('clearAllFilters resets the retention expiring filter', () => {
+    const { result } = renderHook(() => useCandidateFilters(baseArgs))
+    act(() => { result.current.setAttentionFilter('retentionExpiring30') })
+    expect(result.current.attentionFilter).toBe('retentionExpiring30')
+    act(() => { result.current.clearAllFilters() })
+    expect(result.current.attentionFilter).toBeNull()
+    expect(result.current.filterParams.retention_expiring_days).toBeUndefined()
+  })
+})
+
 describe('useCandidateFilters — clearAllFilters + anyFilterActive', () => {
   it('anyFilterActive flips true once any picked filter is set', () => {
     const { result } = renderHook(() => useCandidateFilters(baseArgs))

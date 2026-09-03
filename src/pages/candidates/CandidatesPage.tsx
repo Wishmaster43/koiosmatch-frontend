@@ -29,6 +29,8 @@ import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
 import { useCandidateFilters } from './hooks/useCandidateFilters'
 import { buildCandidateFilterGroups } from './data/candidateFilterGroups'
 import { useCandidatesData, CANDIDATES_MAX_PER_PAGE } from './hooks/useCandidatesData'
+import type { CandidateSort } from './hooks/useCandidatesData'
+import type { ControlledSort } from '@/components/ui/DataTable'
 import { useCandidateOptions } from './hooks/useCandidateOptions'
 import { useCandidateBulkActions } from './hooks/useCandidateBulkActions'
 import { useCandidateDrawerActions } from './hooks/useCandidateDrawerActions'
@@ -72,6 +74,10 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const { registerFilters, unregisterFilters } = useRightPanel() as { registerFilters: (id: string, groups: unknown) => void; unregisterFilters: (id: string) => void }
 
   const [page,           setPage]           = usePageMemory('cand.page', 1)
+  // Column sort (DATATABLE-SORT-1 reference adoption): lifted controlled sort,
+  // mirrors VacanciesPage's `sort`/`setSort`. Unmapped columns still reorder the
+  // loaded page locally via DataTable.
+  const [sort,           setSort]           = usePageMemory<CandidateSort | null>('cand.sort', null)
   // Shared page-size hook (§ audit 2026-08-05): seeds from the user's profile
   // preference (Profile → Records per page), clamps to CANDIDATES_MAX_PER_PAGE and
   // stays sticky across the shell's unmount-on-navigate — mirrors every other page.
@@ -129,6 +135,8 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
 
   // Filters changed → back to page 1. Visible rows change → drop the bulk selection.
   useEffect(() => { setPage(1) }, [filterKey, setPage])
+  // Column sort also resets to page 1 (mirrors VacanciesPage).
+  useEffect(() => { setPage(1) }, [sort, setPage])
 
   // Show a transient success/error message; replaces any previous one. `action`
   // is optional (e.g. the "Openen" follow-up after a restore/archive) so this
@@ -155,7 +163,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
 
   // ── Data layer ──
   const { candidates, setCandidates, loading, error, total, setTotal, lastPage, stats, statsFailed, locations, rowsEpoch, fetching } =
-    useCandidatesData({ filterParams, page, pageSize, t, setActionMsg })
+    useCandidatesData({ filterParams, page, pageSize, t, setActionMsg, sort })
 
   // SELECT-RACE-1: rowsEpoch (bumped only when a NEW server result actually lands,
   // see useCandidatesData) closes the race where a select-all made against the
@@ -169,6 +177,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     genderOptions, provinceOptions, titleOptions, locationOptions,
     statusData, funnelData, rcData,
     staleCount, neverContactedCount, noFollowupCount, intakeCount, activeConvCount, tasksCount,
+    retentionExpiring30Count, retentionExpiring60Count,
   } = useCandidateOptions({ stats, candidates, locations, statuses, funnelTypes, candidateTypes, genders, phases })
 
   // CAND-FILTERS option lists: pools (ids from the lookup), city/source (page-derived).
@@ -364,7 +373,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     selectedStatus, setSelectedStatus, selectedPhase, setSelectedPhase, selectedFunnel, setSelectedFunnel,
     selectedOwner, setSelectedOwner, attentionFilter, toggleAttention, staleMonths,
     counts: { stale: staleCount, neverContacted: neverContactedCount, noFollowup: noFollowupCount,
-      intake: intakeCount, activeConv: activeConvCount, tasks: tasksCount },
+      intake: intakeCount, activeConv: activeConvCount, tasks: tasksCount, retentionExpiring30: retentionExpiring30Count, retentionExpiring60: retentionExpiring60Count },
   })
 
   return (
@@ -409,6 +418,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
           tableScrollRef={tableScrollRef} error={error} filtered={filtered} loading={loading}
           selectedId={selected?.id} onSelectCandidate={selectCandidate}
           selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} selectionBusy={fetching}
+          sort={sort as ControlledSort | null} onSortChange={next => setSort(next as CandidateSort)}
           page={page} lastPage={lastPage} pageSize={pageSize} pageSizeOptions={pageSizeOptions}
           onPageChange={setPage} onPageSizeChange={handlePageSizeChange}
           mapCenter={mapCenter} mapRadius={mapRadius} mapStraalActive={mapStraalActive}

@@ -144,6 +144,10 @@
     "clearFilter": "Borrar filtro",
     "pageScopeNotice": "Los totales globales no están disponibles temporalmente. Estas cifras solo cubren la página cargada."
   },
+  "insights": {
+    "retentionExpiring": "Conservación vence",
+    "retentionExpiringSub": "{{count}} en 30 días"
+  },
   "filters": {
     "search": "Buscar",
     "radius": "Radio",
@@ -183,7 +187,10 @@
       "availableFromBefore": "Disponible antes de"
     },
     "missingAppointment": "Falta cita",
-    "missingDocs": "Documentos faltantes"
+    "missingDocs": "Documentos faltantes",
+    "retentionExpiring": "Conservación vence",
+    "retentionExpiring30": "en 30 días",
+    "retentionExpiring60": "en 60 días"
   },
   "modal": {
     "title": "Nuevo candidato",

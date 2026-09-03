@@ -37,7 +37,7 @@ interface Args {
   staleMonths: number
   // noFollowup is null when the stats endpoint is unavailable: that rule cannot be
   // computed from list rows, so the card shows a dash rather than a wrong number.
-  counts: { stale: number; neverContacted: number; noFollowup: number | null; intake: number; activeConv: number; tasks: number }
+  counts: { stale: number; neverContacted: number; noFollowup: number | null; intake: number; activeConv: number; tasks: number; retentionExpiring30: number; retentionExpiring60: number }
 }
 
 // Pure builder for the candidates KPI/insights strip (see file docblock above) —
@@ -81,6 +81,10 @@ export function buildCandidateInsights({
       onClick: () => toggleAttention('activeConv'), active: attentionFilter === 'activeConv' },
     { key: 'tasks', label: t('kpi.tasks'), value: counts.tasks, sub: t('kpi.tasksSub'), color: TASKS_ACCENT,
       onClick: () => toggleAttention('hasTasks'), active: attentionFilter === 'hasTasks' },
+    // Retention consent expiring: show 60-day count as value, 30-day as sub-line.
+    // Click filters on retention_expiring_days=60 server param (RETENTIE-KLIK-1).
+    { key: 'retentionExpiring', label: t('insights.retentionExpiring'), value: counts.retentionExpiring60, sub: t('insights.retentionExpiringSub', { count: counts.retentionExpiring30 }), color: 'var(--color-warning-text)',
+      onClick: () => toggleAttention('retentionExpiring60'), active: attentionFilter === 'retentionExpiring60' },
   ]
   return { donuts, kpis }
 }

@@ -167,6 +167,10 @@
     "clearFilter": "Clear filter",
     "pageScopeNotice": "Server-wide totals are temporarily unavailable. These figures cover the loaded page only."
   },
+  "insights": {
+    "retentionExpiring": "Retention expiring",
+    "retentionExpiringSub": "{{count}} within 30 days"
+  },
   "filters": {
     "search": "Search",
     "radius": "Radius",
@@ -206,7 +210,10 @@
       "availableFromBefore": "Available before"
     },
     "missingAppointment": "Appointment missing",
-    "missingDocs": "Missing documents"
+    "missingDocs": "Missing documents",
+    "retentionExpiring": "Retention expiring",
+    "retentionExpiring30": "within 30 days",
+    "retentionExpiring60": "within 60 days"
   },
   "modal": {
     "title": "New candidate",

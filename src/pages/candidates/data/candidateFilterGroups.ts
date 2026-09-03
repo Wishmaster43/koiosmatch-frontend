@@ -92,6 +92,17 @@ export function buildCandidateFilterGroups({ t, tog, filters: f, options: o }: B
       selected: f.attentionFilter === 'missingDocs' ? ['missingDocs'] : [],
       options: [{ value: 'missingDocs', label: t('filters.missingDocs') }],
       onToggle: () => f.setAttentionFilter(f.attentionFilter === 'missingDocs' ? null : 'missingDocs') },
+    // Retention consent expiring: single-choice (30 vs 60 days) or none.
+    { key: 'retentionExpiring', type: 'search-select', display: 'open', category: catLifecycle, label: t('filters.retentionExpiring'),
+      selected: f.attentionFilter === 'retentionExpiring30' ? ['30'] : f.attentionFilter === 'retentionExpiring60' ? ['60'] : [],
+      options: [
+        { value: '30', label: t('filters.retentionExpiring30') },
+        { value: '60', label: t('filters.retentionExpiring60') },
+      ],
+      onToggle: (v: string | number) => {
+        if (v === '30') f.setAttentionFilter(f.attentionFilter === 'retentionExpiring30' ? null : 'retentionExpiring30')
+        else if (v === '60') f.setAttentionFilter(f.attentionFilter === 'retentionExpiring60' ? null : 'retentionExpiring60')
+      } },
     // Period (date range) from a dashboard bar click — a single removable value.
     ...(f.dateRange ? [{
       key: 'period', type: 'search-select', category: catDisplay,

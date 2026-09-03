@@ -167,6 +167,10 @@
     "clearFilter": "Filter wissen",
     "pageScopeNotice": "Serverbrede totalen zijn tijdelijk niet beschikbaar. Deze cijfers gaan alleen over de geladen pagina."
   },
+  "insights": {
+    "retentionExpiring": "Bewaartermijn verloopt",
+    "retentionExpiringSub": "{{count}} binnen 30 dagen"
+  },
   "filters": {
     "search": "Zoeken",
     "radius": "Straal",
@@ -206,7 +210,10 @@
       "availableFromBefore": "Beschikbaar vóór"
     },
     "missingAppointment": "Afspraak ontbreekt",
-    "missingDocs": "Documenten ontbreken"
+    "missingDocs": "Documenten ontbreken",
+    "retentionExpiring": "Bewaartermijn verloopt",
+    "retentionExpiring30": "binnen 30 dagen",
+    "retentionExpiring60": "binnen 60 dagen"
   },
   "modal": {
     "title": "Nieuwe kandidaat",

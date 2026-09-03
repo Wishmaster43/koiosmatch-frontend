@@ -144,6 +144,10 @@
     "clearFilter": "Filter löschen",
     "pageScopeNotice": "Serverweite Gesamtzahlen sind vorübergehend nicht verfügbar. Diese Zahlen betreffen nur die geladene Seite."
   },
+  "insights": {
+    "retentionExpiring": "Aufbewahrung läuft ab",
+    "retentionExpiringSub": "{{count}} innerhalb von 30 Tagen"
+  },
   "filters": {
     "search": "Suchen",
     "radius": "Umkreis",
@@ -183,7 +187,10 @@
       "availableFromBefore": "Verfügbar vor"
     },
     "missingAppointment": "Termin fehlt",
-    "missingDocs": "Fehlende Dokumente"
+    "missingDocs": "Fehlende Dokumente",
+    "retentionExpiring": "Aufbewahrung läuft ab",
+    "retentionExpiring30": "innerhalb von 30 Tagen",
+    "retentionExpiring60": "innerhalb von 60 Tagen"
   },
   "modal": {
     "title": "Neuer Kandidat",

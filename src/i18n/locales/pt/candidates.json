@@ -167,6 +167,10 @@
     "clearFilter": "Limpar filtro",
     "pageScopeNotice": "Os totais gerais do servidor estão temporariamente indisponíveis. Estes números referem-se apenas à página carregada."
   },
+  "insights": {
+    "retentionExpiring": "Conservação a expirar",
+    "retentionExpiringSub": "{{count}} em 30 dias"
+  },
   "filters": {
     "search": "Pesquisar",
     "radius": "Raio",
@@ -206,7 +210,10 @@
       "availableFromBefore": "Disponível antes de"
     },
     "missingAppointment": "Falta marcação",
-    "missingDocs": "Faltam documentos"
+    "missingDocs": "Faltam documentos",
+    "retentionExpiring": "Conservação a expirar",
+    "retentionExpiring30": "em 30 dias",
+    "retentionExpiring60": "em 60 dias"
   },
   "modal": {
     "title": "Novo candidato",

@@ -18,6 +18,7 @@ import CandidatesTable from './CandidatesTable'
 import CandidatesToolbar, { type BulkBarProps } from './CandidatesToolbar'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
+import type { ControlledSort } from '@/components/ui/DataTable'
 
 // Still-untyped JS component — declare the props this panel passes (typed boundary).
 const InsightsRow = InsightsRowJs as ComponentType<{ donuts?: unknown[]; kpis?: unknown[]; clearTitle?: string; notice?: string }>
@@ -70,6 +71,9 @@ interface CandidatesListPanelProps {
   // SELECT-RACE-1: true while the list query is fetching a NEW server result —
   // forwarded to the table's header select-all checkbox to keep it inert then.
   selectionBusy?: boolean
+  // Column sort (DATATABLE-SORT-1).
+  sort: ControlledSort | null
+  onSortChange: (sort: ControlledSort) => void
   page: number
   lastPage: number
   pageSize: number
@@ -95,7 +99,7 @@ export default function CandidatesListPanel({
   anyFilterActive, onClearFilters, blacklistActive, onToggleBlacklist,
   showArchived, onToggleArchived, showTrash, onToggleTrash, view, onToggleView,
   tableScrollRef, error, filtered, loading, selectedId, onSelectCandidate,
-  selectedIds, onToggleRow, onToggleAll, selectionBusy, page, lastPage, pageSize, pageSizeOptions, onPageChange, onPageSizeChange,
+  selectedIds, onToggleRow, onToggleAll, selectionBusy, sort, onSortChange, page, lastPage, pageSize, pageSizeOptions, onPageChange, onPageSizeChange,
   mapCenter, mapRadius, mapStraalActive, onMapCenterChange, onMapRadiusChange, onMapClearRadius,
 }: CandidatesListPanelProps) {
   const { t } = useTranslation(['candidates', 'common'])
@@ -154,6 +158,8 @@ export default function CandidatesListPanel({
                   selectionBusy={selectionBusy}
                   stickyHeader
                   scrollParentRef={tableScrollRef}
+                  sort={sort}
+                  onSortChange={onSortChange}
                 />
               </div>
               <PaginationBar
@@ -185,7 +191,8 @@ export default function CandidatesListPanel({
               <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto' }}>
                   <CandidatesTable rows={filtered} loading={loading} selectedId={selectedId}
-                    onSelect={onSelectCandidate} onOpenTab={onSelectCandidate} />
+                    onSelect={onSelectCandidate} onOpenTab={onSelectCandidate}
+                    sort={sort} onSortChange={onSortChange} />
                 </div>
                 <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
                   pageSizeOptions={pageSizeOptions} onPageChange={onPageChange} onPageSizeChange={onPageSizeChange} />

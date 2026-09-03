@@ -167,6 +167,10 @@
     "clearFilter": "Cancella filtro",
     "pageScopeNotice": "I totali a livello di server sono temporaneamente non disponibili. Questi dati riguardano solo la pagina caricata."
   },
+  "insights": {
+    "retentionExpiring": "Conservazione in scadenza",
+    "retentionExpiringSub": "{{count}} entro 30 giorni"
+  },
   "filters": {
     "search": "Cerca",
     "radius": "Raggio",
@@ -206,7 +210,10 @@
       "availableFromBefore": "Disponibile prima del"
     },
     "missingAppointment": "Appuntamento mancante",
-    "missingDocs": "Documenti mancanti"
+    "missingDocs": "Documenti mancanti",
+    "retentionExpiring": "Conservazione in scadenza",
+    "retentionExpiring30": "entro 30 giorni",
+    "retentionExpiring60": "entro 60 giorni"
   },
   "modal": {
     "title": "Nuovo candidato",
