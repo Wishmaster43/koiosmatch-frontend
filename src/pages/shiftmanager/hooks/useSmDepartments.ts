@@ -21,6 +21,10 @@ interface RawDepartment {
   [k: string]: unknown
 }
 
+// A stable empty list: a fresh [] per render re-triggers every consumer memo/effect
+// (LocationsPage's registerFilters loop — 'Maximum update depth exceeded', measured 03-09).
+const EMPTY: SmDepartmentRow[] = []
+
 export function useSmDepartments(): { departments: SmDepartmentRow[] } {
   // Fetch + flatten the raw rows into the shape the table renders (signal = cancel).
   const { data } = useQuery({
@@ -43,5 +47,5 @@ export function useSmDepartments(): { departments: SmDepartmentRow[] } {
     },
   })
 
-  return { departments: data ?? [] }
+  return { departments: data ?? EMPTY }
 }

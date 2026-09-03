@@ -19,6 +19,10 @@ interface RawContact {
   [k: string]: unknown
 }
 
+// A stable empty list: a fresh [] per render re-triggers every consumer memo/effect
+// (LocationsPage's registerFilters loop — 'Maximum update depth exceeded', measured 03-09).
+const EMPTY: SmContactRow[] = []
+
 export function useSmContacts(): { contacts: SmContactRow[] } {
   // Fetch + flatten the raw rows into the shape the table renders (signal = cancel).
   const { data } = useQuery({
@@ -39,5 +43,5 @@ export function useSmContacts(): { contacts: SmContactRow[] } {
     },
   })
 
-  return { contacts: data ?? [] }
+  return { contacts: data ?? EMPTY }
 }

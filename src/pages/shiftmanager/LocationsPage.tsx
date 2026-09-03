@@ -45,10 +45,11 @@ export default function LocationsPage() {
     { key: 'status',  label: t('locationsPage.filter.status'),
       options: statusOptions.map(s => ({ value: s, label: s })),
       selected: selStatuses,  onToggle: toggle(setSelStatuses) },
-    { key: 'klant',   label: t('locationsPage.filter.customer'),
+    // English group identifiers (§0.1): the label stays translated, the key never is.
+    { key: 'customer', label: t('locationsPage.filter.customer'),
       options: customerOptions.map(k => ({ value: k, label: k })),
       selected: selCustomers,   onToggle: toggle(setSelCustomers) },
-    { key: 'stad',    label: t('locationsPage.filter.city'),
+    { key: 'city',    label: t('locationsPage.filter.city'),
       options: cityOptions.map(s => ({ value: s, label: s })),
       selected: selCities,    onToggle: toggle(setSelCities) },
   ], [t, statusOptions, customerOptions, cityOptions, selStatuses, selCustomers, selCities])
