@@ -309,6 +309,8 @@ const ALLOWLIST: string[] = [
 
   // German "Kandidaten" = "candidates" (identical spelling), import-entity label
   'de/settings:import.entities.candidates.label',
+  // German "Kandidaten" = "candidates" (identical spelling), Koios chat search-result group header
+  'de/koios:results.group.kandidaten',
 
   // "AI Planner De-Escalate" is a seeded workflow's own literal name (unbranded across
   // locales, LOOKUP-I18N-1); "De" in "De-Escalate" trips the Dutch-article marker, not
