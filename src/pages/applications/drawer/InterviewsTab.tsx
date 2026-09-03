@@ -275,7 +275,15 @@ export default function InterviewsTab({ application: a, detailPhase }: { applica
           application when the backend's per-application link resolves to a real
           thread, falling back to the candidate-wide link otherwise (see
           useConversationScope's doc comment for the full re-verification). Reuses
-          the shared ConversationsSection exactly like the candidate drawer does. */}
+          the shared ConversationsSection exactly like the candidate drawer does.
+          INTERVIEW-TAB-COHERENTIE-1 point 4: this composition already surfaces the
+          shared 24h WA session-window countdown — ConversationsSection itself reads
+          components/drawer/sessionWindow.ts and renders the "time left" line above
+          its composer on the open thread, so the interview tab shows the SAME
+          countdown component the candidate drawer's conversation tab uses, not a
+          second copy. When there is no conversation (or none has ever run), the
+          honest states below (loading / noCandidate / no panel at all) already
+          render nothing in its place. */}
       {hasAnyInterviewActivity && (
         <div>
           <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 8 }}>{t('interview.conversation.title')}</GroupLabel>

@@ -15,7 +15,8 @@ import api from '@/lib/api'
 import type { ApplicationDetail, ApplicationInterview } from '@/types/application'
 
 // Deterministic key-echo (repo-wide precedent, e.g. InterviewStatusCard.test.tsx).
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+// i18n.language is read by the embedded ConversationsSection (Koios assist language prop).
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k, i18n: { language: 'nl' } }) }))
 // W7: deterministic date-format echo (repo-wide precedent, ConversationsSection.test.tsx)
 // so transcript-bubble timestamp assertions don't depend on the test runner's locale/TZ.
 vi.mock('@/lib/datetime', () => ({
@@ -372,6 +373,30 @@ describe('InterviewsTab · live conversation panel (CONV-APPLICATION-ID-1, 08-08
     // fetch is unrelated) — the assertion here is specifically that /conversations
     // is never called, i.e. the preflight itself never ran.
     expect(mockGet).not.toHaveBeenCalledWith('/conversations', expect.anything())
+  })
+
+  // INTERVIEW-TAB-COHERENTIE-1 point 4: the embedded ConversationsSection already
+  // owns the shared 24h WA session-window countdown (sessionWindow.ts) — this pins
+  // that the interview tab really renders it (not a second, forked copy) once a
+  // thread with an open window auto-expands, and that it renders nothing without
+  // any conversation at all.
+  it('shows the shared session-window countdown once the embedded conversation thread auto-expands with an open window', async () => {
+    // 21h since the last inbound message → 3h left inside the 24h window.
+    const lastInboundAt = new Date(Date.now() - 21 * 60 * 60 * 1000).toISOString()
+    mockGet.mockResolvedValueOnce({ data: { data: [{ id: 'conv-1' }] } }) // preflight (application scope)
+    mockGet.mockResolvedValueOnce({ data: { data: [{ id: 'conv-1', wa_number: '+31600000000', last_inbound_at: lastInboundAt }] } }) // ConversationsSection's own load
+    mockGet.mockResolvedValueOnce({ data: { data: [] } }) // messages for the auto-expanded thread
+    renderTab(app({ candidateId: 'cand-1', interview: runningInterview }))
+
+    await waitFor(() => expect(screen.getByText('conversations.windowLeftHours')).toBeInTheDocument())
+  })
+
+  it('shows no countdown when the application has no linked candidate (no conversation is possible)', () => {
+    renderTab(app({ interview: runningInterview }))
+    expect(screen.getByText('interview.conversation.noCandidate')).toBeInTheDocument()
+    expect(screen.queryByText('conversations.windowLeftHours')).toBeNull()
+    expect(screen.queryByText('conversations.windowLeftMinutes')).toBeNull()
+    expect(screen.queryByText('conversations.windowLeftSeconds')).toBeNull()
   })
 })
 
