@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
 import { DOC_TYPE_ICON_NAMES, resolveDocTypeIcon } from '@/lib/useDocumentTypes'
 import NumberSettingField from '../components/NumberSettingField'
+import SettingsLoadBanner from '../components/SettingsLoadBanner'
 
 // entity → the nav.<id> label already registered for this tab (registry.jsx dt_*
 // items), reused so each entity name is translated once (mirrors NoteTypesSettings'
@@ -64,6 +65,7 @@ export default function DocumentTypesSettings({ entity }) {
   const entityLabel = t(`nav.${ENTITY_NAV_ID[entity] ?? entity}`)
   return (
     <div style={{ maxWidth: 640 }}>
+      <SettingsLoadBanner />
       {/* Tenant-wide expiry-alert window — candidate scope only (see the field's own comment). */}
       {entity === 'candidate' && (
         <NumberSettingField id="document-expiring-alert-days" settingsKey={DOCUMENT_EXPIRING_ALERT_DAYS_KEY}

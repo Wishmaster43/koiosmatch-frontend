@@ -31,6 +31,7 @@ import { CANDIDATE_FIELD_GROUPS, normalizeRequiredFieldKeys } from './candidates
 import Button from '@/components/ui/Button'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import SettingsLoadBanner from '../components/SettingsLoadBanner'
 // audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 const KEY = 'candidate_required_fields'
@@ -82,6 +83,7 @@ export default function CandidateRequiredFieldsSettings() {
 
   return (
     <div style={{ maxWidth: 760 }}>
+      <SettingsLoadBanner />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
         <div>
           <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('requiredFields.title')}</h3>

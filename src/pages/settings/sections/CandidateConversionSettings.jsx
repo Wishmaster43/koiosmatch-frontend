@@ -13,6 +13,7 @@ import { useLookups } from '@/context/LookupsContext'
 import { useAllSettings, useSettingsLoaded, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
 import { SectionTitle } from '@/components/ui/typography'
+import SettingsLoadBanner from '../components/SettingsLoadBanner'
 
 // The tenant-setting key; the BE first-application automation reads the SAME key
 // (DEFAULT-STATUS-1 contract) so both conversion paths behave identically.
@@ -56,6 +57,7 @@ export function CandidateConversionSettings() {
 
   return (
     <div style={{ maxWidth: 560 }}>
+      <SettingsLoadBanner />
       <SectionTitle as="div" style={{ marginBottom: 4 }}>{t('candidateConversion.title')}</SectionTitle>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('candidateConversion.subtitle')}</div>
       {/* Searchable single-pick dropdown, like every other lookup filter (Danny 23-07). */}

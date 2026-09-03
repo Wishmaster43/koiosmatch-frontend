@@ -14,6 +14,7 @@ import { PermissionToggle } from '@/pages/settings/components/SettingsControls'
 import type { RequiredFieldDef } from './requiredFieldsCatalog'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import SettingsLoadBanner from '@/pages/settings/components/SettingsLoadBanner'
 // audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 export default function FlatRequiredFieldsToggleList({ settingKey, fields, hintKey }: {
@@ -45,6 +46,7 @@ export default function FlatRequiredFieldsToggleList({ settingKey, fields, hintK
   const row = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', fontSize: 13, borderBottom: '1px solid var(--border)' }
   return (
     <div>
+      <SettingsLoadBanner />
       {/* Explains the create/update semantics — full check on create, touched-fields-only on update. */}
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{t(hintKey)}</p>
       <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>

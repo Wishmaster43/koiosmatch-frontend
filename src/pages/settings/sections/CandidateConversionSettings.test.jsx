@@ -31,6 +31,8 @@ vi.mock('@/lib/settings/useAllSettings', () => ({
   useAllSettings: () => mockSettings(),
   // STALE-INIT-1: this test assumes the settings blob has already resolved.
   useSettingsLoaded: () => true,
+  // SETTINGS-LOAD-ERROR-1: the shared load-state hook the banner reads.
+  useSettingsLoadState: () => ({ state: 'loaded', retry: () => {} }),
   saveSettingsKeys: (...args) => saveSettingsKeys(...args),
   invalidateAllSettingsCache: vi.fn(),
 }))

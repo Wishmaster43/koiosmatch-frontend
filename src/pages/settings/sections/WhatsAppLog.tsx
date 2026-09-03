@@ -21,6 +21,7 @@ import { isInbound } from '@/components/ui/logChips'
 import { useWhatsAppData, useMessageColumns, WA_STATUS_VALUES } from '@/pages/whatsapp/shared'
 import type { WaMessage } from '@/types/whatsapp'
 import NumberSettingField from '../components/NumberSettingField'
+import SettingsLoadBanner from '../components/SettingsLoadBanner'
 // WA-LOG-LEESBAAR-1: row click opens the candidate's whole thread, readable.
 import WaConversationPanel from './whatsapp/WaConversationPanel'
 import { Caption } from '@/components/ui/typography'
@@ -126,6 +127,7 @@ export default function WhatsAppLog() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <SettingsLoadBanner />
       <NumberSettingField id="koios-conversation-memory-days" settingsKey={KOIOS_MEMORY_DAYS_KEY}
         title={t('waLog.memoryDaysTitle')} hint={t('waLog.memoryDaysHint')}
         label={t('waLog.memoryDaysLabel')} saveFailedMessage={t('waLog.memoryDaysSaveFailed')}

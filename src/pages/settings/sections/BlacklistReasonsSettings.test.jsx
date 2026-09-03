@@ -21,12 +21,18 @@ vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() })
 // (§13: assert the REQUEST), same pattern as CandidateConversionSettings.test.
 const mockSettings = vi.fn(() => ({}))
 const saveSettingsKeys = vi.fn(async () => {})
+// SETTINGS-LOAD-ERROR-1: load-state is stubbed 'loaded' by default so the
+// existing tests below are unaffected; the dedicated describe block flips it
+// to 'failed' to prove the shared SettingsLoadBanner renders + retries.
+const loadStateRef = vi.hoisted(() => ({ current: 'loaded' }))
+const retryMock = vi.hoisted(() => vi.fn())
 vi.mock('@/lib/settings/useAllSettings', async () => {
   const actual = await vi.importActual('@/lib/settings/useAllSettings')
   return {
     ...actual,
     useSettingsLoaded: () => true,
     useAllSettings: () => mockSettings(),
+    useSettingsLoadState: () => ({ state: loadStateRef.current, retry: retryMock }),
     saveSettingsKeys: (...args) => saveSettingsKeys(...args),
     invalidateAllSettingsCache: vi.fn(),
   }
@@ -131,5 +137,26 @@ describe('BlacklistReasonsSettings · reason-required toggle', () => {
     await user.click(screen.getByRole('switch', { name: st('blacklistReasons.requiredToggle.label') }))
 
     await waitFor(() => expect(saveSettingsKeys).toHaveBeenCalledWith({ customer_blacklist_reason_required: false }))
+  })
+})
+
+// SETTINGS-LOAD-ERROR-1: screen-level proof that a failed GET /settings surfaces the
+// shared SettingsLoadBanner with a working retry, instead of leaving the toggle
+// silently disabled forever with no visible error.
+describe('BlacklistReasonsSettings — failed settings load', () => {
+  it('shows the load-error banner and retries on click', async () => {
+    api.get.mockResolvedValue({ data: [row()] })
+    mockSettings.mockReturnValue({})
+    loadStateRef.current = 'failed'
+    const user = userEvent.setup()
+    render(<BlacklistReasonsSettings />)
+
+    await screen.findByText('No-show')
+    expect(screen.getByRole('alert')).toHaveTextContent(st('common.loadError'))
+
+    await user.click(screen.getByRole('button', { name: i18n.t('error.retry', { ns: 'common' }) }))
+    expect(retryMock).toHaveBeenCalledTimes(1)
+
+    loadStateRef.current = 'loaded'
   })
 })

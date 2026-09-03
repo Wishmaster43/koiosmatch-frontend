@@ -15,6 +15,7 @@ const st = (key: string) => i18n.t(key, { ns: 'settings' })
 // so it never touches the network; this file only exercises the dedupe field.
 vi.mock('@/lib/api', () => ({
   default: { get: vi.fn(async () => ({ data: { rows: [] } })) },
+  getActiveTenantId: vi.fn(() => 'test-tenant'),
   unwrap: (r: { data: unknown }) => r.data,
   unwrapList: (r: { data: unknown }) => r.data,
 }))
@@ -33,7 +34,9 @@ vi.mock('@/lib/settings/useAllSettings', async () => {
     // NumberSettingField (NoContactDaysField) — every test here assumes the
     // settings blob has already resolved (the cold-cache case is covered by
     // NumberSettingField.test.tsx, the shared field's own regression test).
+    // Also: SettingsLoadBanner needs useSettingsLoadState, which reports loaded.
     useSettingsLoaded: () => true,
+    useSettingsLoadState: () => ({ state: 'loaded', retry: vi.fn() }),
     saveSettingsKeys,
     invalidateAllSettingsCache: vi.fn(),
   }

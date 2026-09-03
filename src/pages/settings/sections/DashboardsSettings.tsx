@@ -37,6 +37,7 @@ import { useAuth } from '@/context/AuthContext'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import { Caption } from '@/components/ui/typography'
+import SettingsLoadBanner from '../components/SettingsLoadBanner'
 import {
   fetchDashboardKpiCatalog, fetchDashboardKpisRole, putDashboardKpisRole,
   type DashboardKpiCatalogEntry,
@@ -232,7 +233,14 @@ export default function DashboardsSettings() {
   // Loading state (§3) — all hooks above have already run, so this early return keeps
   // hook order stable across renders while still avoiding the on-then-off toggle flash.
   if (!settingsLoaded) {
-    return <div style={{ padding: 24 }}><Caption>{t('common.loading')}</Caption></div>
+    // A failed GET /settings shows the retry banner instead of stalling forever on "loading".
+    // The loading text is passed as loadingFallback, so the banner renders it while loading
+    // and the error banner while failed.
+    return (
+      <div style={{ padding: 24 }}>
+        <SettingsLoadBanner loadingFallback={<Caption>{t('common.loading')}</Caption>} />
+      </div>
+    )
   }
 
   return (

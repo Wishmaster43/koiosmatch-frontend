@@ -5,6 +5,7 @@ import { SectionTitle, Caption } from '@/components/ui/typography'
 import { useAllSettings, useSettingsLoaded, getBoolSetting, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import SettingsLoadBanner from '../components/SettingsLoadBanner'
 
 /**
  * BlacklistReasonsSettings — blacklist-reason lookup for ONE entity that carries a
@@ -54,6 +55,7 @@ export default function BlacklistReasonsSettings({ entity = 'candidate' }) {
 
   return (
     <div style={{ maxWidth: 640 }}>
+      <SettingsLoadBanner />
       {/* Tenant switch for the reason-required guard (BLACKLIST-TOGGLE-1) — sits above
           the reason lookup so the two blacklist-reason controls stay together. */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-3)', padding: 'var(--space-3) var(--space-4)',

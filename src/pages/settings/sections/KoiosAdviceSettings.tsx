@@ -27,6 +27,7 @@
 import { useTranslation } from 'react-i18next'
 import { PageTitle } from '@/components/ui/typography'
 import NumberSettingField from '../components/NumberSettingField'
+import SettingsLoadBanner from '../components/SettingsLoadBanner'
 
 // Tenant-setting keys — the generic /settings key/value store. Defaults mirror
 // the fallback numbers vacancyAdvice.ts/matchAdvice.ts's callers already use.
@@ -44,6 +45,7 @@ export default function KoiosAdviceSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
+      <SettingsLoadBanner />
       <div style={{ marginBottom: 16 }}>
         <PageTitle>{t('koiosAdvice.title')}</PageTitle>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('koiosAdvice.subtitle')}</p>

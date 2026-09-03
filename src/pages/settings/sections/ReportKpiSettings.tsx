@@ -23,6 +23,7 @@ import { REPORT_KPI_SCOPE_IDS, REPORT_KPI_FAMILY, REPORT_KPI_PINNED_FIRST, getRe
 import type { ReportKpiScopeId } from '@/pages/reports/shared'
 import { resolveReportKpiOrder } from '@/pages/reports/shared'
 import { Caption } from '@/components/ui/typography'
+import SettingsLoadBanner from '../components/SettingsLoadBanner'
 
 // Only scopes with a known catalogue (axis or fixed) get a block — a scope
 // without a ReportKpiBand strip has nothing to configure here. Scopes are the
@@ -41,7 +42,14 @@ export default function ReportKpiSettings() {
   const [active, setActive] = useState<ReportKpiScopeId>(CONFIGURABLE_SCOPE_IDS[0])
 
   if (!loaded) {
-    return <div style={{ padding: 16, color: 'var(--text-muted)', fontSize: 13 }}>{t('reportKpis.loading')}</div>
+    // A failed GET /settings shows the retry banner instead of stalling forever on "loading".
+    // The loading text is passed as loadingFallback, so the banner renders it while loading
+    // and the error banner while failed.
+    return (
+      <div style={{ padding: 16 }}>
+        <SettingsLoadBanner loadingFallback={<Caption>{t('reportKpis.loading')}</Caption>} />
+      </div>
+    )
   }
 
   return (

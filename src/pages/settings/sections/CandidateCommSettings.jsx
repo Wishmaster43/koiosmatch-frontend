@@ -15,6 +15,7 @@ import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache, getJsonSe
 import { notifyError } from '@/lib/notify'
 import { SectionTitle } from '@/components/ui/typography'
 import NumberSettingField from '../components/NumberSettingField'
+import SettingsLoadBanner from '../components/SettingsLoadBanner'
 
 // Tenant-setting key — the duplicate-detection field set (v1: email/mobile/phone).
 // Consumed TODAY by the backend DuplicateFinder (dedupeKeys(), default ['email','mobile'])
@@ -103,6 +104,7 @@ export function LastContactTypesSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
+      <SettingsLoadBanner />
       <NumberSettingField id="candidate-no-contact-days" settingsKey={NO_CONTACT_DAYS_KEY}
         title={t('lastContactTypes.noContactDaysTitle')} hint={t('lastContactTypes.noContactDaysHint')}
         label={t('lastContactTypes.noContactDaysLabel')} saveFailedMessage={t('lastContactTypes.noContactDaysSaveFailed')}

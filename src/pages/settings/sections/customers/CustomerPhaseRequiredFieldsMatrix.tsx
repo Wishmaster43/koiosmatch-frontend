@@ -20,6 +20,7 @@ import { PermissionToggle } from '@/pages/settings/components/SettingsControls'
 import { CUSTOMER_FIELDS } from './requiredFieldsCatalog'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import SettingsLoadBanner from '@/pages/settings/components/SettingsLoadBanner'
 // audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 const KEY = 'customer_required_fields'
@@ -50,6 +51,7 @@ export default function CustomerPhaseRequiredFieldsMatrix() {
   const cell = { padding: '8px 12px', fontSize: 13, borderBottom: '1px solid var(--border)', textAlign: 'center' as const }
   return (
     <div>
+      <SettingsLoadBanner />
       {/* Explains the create/update semantics — an ordinary edit that never changes
           phase is never blocked, however incomplete the record already is otherwise. */}
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{t('customerRequiredFields.phaseHint')}</p>
