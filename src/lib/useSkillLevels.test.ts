@@ -31,7 +31,7 @@ describe('useSkillLevels', () => {
   // The real shape LOOKUP-ICON-1 wires up: icon travels through untouched. A
   // FRESH module instance (vi.resetModules) is needed here: the test above
   // mounts the hook on a never-resolving GET, which otherwise claims
-  // useCachedLookup's module-scope inFlight slot for '/skill-levels' for the
+  // useCachedLookup's module-scope inFlight slot for '/skill-levels?active=1' for the
   // rest of this file's run (mirrors useDocumentTypes.test.ts's identical fix).
   it('carries the icon/color fields through from a real API response', async () => {
     vi.resetModules()

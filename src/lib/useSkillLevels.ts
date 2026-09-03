@@ -57,7 +57,9 @@ const mapSkillLevels = (res: AxiosResponse): SkillLevelItem[] | null => {
 export function useSkillLevels() {
   const { t } = useTranslation('common')
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
-  const { data: rawLevels } = useCachedLookup('/skill-levels', mapSkillLevels, DEFAULT_SKILL_LEVEL_ITEMS)
+  const { data: rawLevels } = // LOOKUP-ACTIVE-FLIP-1 (BE G2 e6cb4760): the picker reads only active levels; the settings
+  // screen keeps the bare route so inactive rows stay manageable there.
+  useCachedLookup('/skill-levels?active=1', mapSkillLevels, DEFAULT_SKILL_LEVEL_ITEMS)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   // `levels` stays the full-object shape (icon/color intact); `names` is the
   // backward-compatible plain-string list for any old string[]-only call-site.
