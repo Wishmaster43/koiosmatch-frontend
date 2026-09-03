@@ -47,6 +47,22 @@ vi.mock('@/lib/api', async () => {
   return { ...actual, default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }
 })
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
+// USERS-ROLES-LOC-1 phase 3 master switch — controllable settings blob + a spy on
+// the save path (§13), same pattern as BlacklistReasonsSettings.test.jsx. Existing
+// describes below never set branch_authz_enabled, so getBoolSetting's default
+// (false) applies and their own assertions are unaffected.
+const mockSettings = vi.fn((): Record<string, unknown> => ({}))
+const saveSettingsKeys = vi.fn<(keys: Record<string, unknown>) => Promise<void>>(async () => {})
+vi.mock('@/lib/settings/useAllSettings', async () => {
+  const actual = await vi.importActual('@/lib/settings/useAllSettings')
+  return {
+    ...actual,
+    useSettingsLoaded: () => true,
+    useAllSettings: () => mockSettings(),
+    saveSettingsKeys: (keys: Record<string, unknown>) => saveSettingsKeys(keys),
+    invalidateAllSettingsCache: vi.fn(),
+  }
+})
 
 afterEach(() => vi.clearAllMocks())
 
@@ -352,5 +368,43 @@ describe('RoleBranchTemplate — branch toggle (optimistic PUT + revert on failu
     vi.mocked(api.put).mockResolvedValue({ data: {} })
     await user.click(chip)
     await waitFor(() => expect(api.put).toHaveBeenLastCalledWith('/roles/r1/branches', { location_ids: ['l1'] }))
+  })
+})
+
+// USERS-ROLES-LOC-1 phase 3: the tenant-wide master switch above the roles list.
+// Request-level (§13): the exact key the BE guard reads (BranchGrantResolver::
+// flagEnabled reads Setting 'branch_authz_enabled').
+describe('RolesSettings — branch authorization master switch', () => {
+  const arm = () => {
+    mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [] })
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/roles') return Promise.resolve({ data: [] })
+      if (url === '/permissions') return Promise.resolve({ data: {} })
+      if (url === '/roles/icons') return Promise.reject(new Error('404'))
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+  }
+
+  it('reflects the off default and saves the exact key on toggle', async () => {
+    arm()
+    mockSettings.mockReturnValue({})
+    const user = userEvent.setup()
+    render(<RolesSettings />)
+
+    const toggle = await screen.findByRole('switch', { name: st('roles.branchAuthz.label') })
+    expect(toggle).toHaveAttribute('aria-checked', 'false')
+
+    await user.click(toggle)
+
+    await waitFor(() => expect(saveSettingsKeys).toHaveBeenCalledWith({ branch_authz_enabled: true }))
+  })
+
+  it('reflects an already-on tenant setting', async () => {
+    arm()
+    mockSettings.mockReturnValue({ branch_authz_enabled: 'true' })
+    render(<RolesSettings />)
+
+    const toggle = await screen.findByRole('switch', { name: st('roles.branchAuthz.label') })
+    expect(toggle).toHaveAttribute('aria-checked', 'true')
   })
 })

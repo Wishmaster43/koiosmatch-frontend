@@ -14,11 +14,13 @@ import { useConfirm } from '@/hooks/useConfirm'
 import type { Role, PermissionsByGroup, CreateRoleBody } from './rolesTypes'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
+import Toggle from '@/components/ui/Toggle'
 import { tintBg, tintBorder } from '@/lib/tint'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, SectionTitle, Caption } from '@/components/ui/typography'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { useAllSettings, useSettingsLoaded, getBoolSetting, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 // audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 // Thin container: owns the roles/permissions fetch and create/delete, and delegates
@@ -36,6 +38,21 @@ export default function RolesSettings() {
   const [deleting,    setDeleting]    = useState<Role['id'] | null>(null)
   const [editRole,    setEditRole]    = useState<Role | null>(null)
   const { confirm, dialog } = useConfirm()
+
+  // USERS-ROLES-LOC-1 phase 3 — the tenant-wide master switch for per-branch
+  // authorization (BranchGrantResolver reads this exact key; seed default OFF,
+  // measured in SettingSchema.php — no key means unrestricted, same as today).
+  const allSettings = useAllSettings()
+  const settingsLoaded = useSettingsLoaded()
+  const branchAuthzEnabled = getBoolSetting(allSettings, 'branch_authz_enabled', false)
+  const toggleBranchAuthz = async (v: boolean) => {
+    try {
+      await saveSettingsKeys({ branch_authz_enabled: v })
+      invalidateAllSettingsCache()
+    } catch (err) {
+      notifyError(extractApiError(err, t('common:actionFailed')))
+    }
+  }
 
   // Loads the role list, the full permission catalogue, and the allowed role-icon set
   // once on mount; the icon fetch degrades to the built-in list on a 404.
@@ -115,6 +132,19 @@ export default function RolesSettings() {
 
   return (
     <div>
+      {/* USERS-ROLES-LOC-1 phase 3 master switch — mirrors BlacklistReasonsSettings'
+          toggle card (2a128d67): a small standalone card above the list, disabled
+          until the settings blob has loaded so it never flips a stale default. */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-3)', padding: 'var(--space-3) var(--space-4)',
+                    border: '1px solid var(--border)', borderRadius: 8, marginBottom: 'var(--space-4)' }}>
+        <Toggle checked={branchAuthzEnabled} onChange={toggleBranchAuthz} disabled={!settingsLoaded}
+          ariaLabel={t('roles.branchAuthz.label')} />
+        <div>
+          <SectionTitle style={{ marginBottom: 2 }}>{t('roles.branchAuthz.label')}</SectionTitle>
+          <Caption>{t('roles.branchAuthz.hint')}</Caption>
+        </div>
+      </div>
+
       <div className="flex items-center justify-between mb-5">
         <div>
           <PageTitle>{t('roles.title')}</PageTitle>

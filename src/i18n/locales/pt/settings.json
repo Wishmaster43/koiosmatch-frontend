@@ -2164,7 +2164,11 @@
     "matrixAllowed": "{{active}}/{{total}} permitidos",
     "loadError": "Não foi possível carregar as funções.",
     "retry": "Tentar novamente",
-    "branchesLoadError": "Não foi possível carregar o modelo de filiais."
+    "branchesLoadError": "Não foi possível carregar o modelo de filiais.",
+    "branchAuthz": {
+      "label": "Aplicar permissões por filial",
+      "hint": "Aplica as permissões por filial (ver, editar, eliminar) a candidatos, clientes, filiais, compromissos, tarefas e conversas. Um utilizador sem filial associada continua sem restrições, ligado ou não."
+    }
   },
   "audit": {
     "title": "Registo de auditoria",

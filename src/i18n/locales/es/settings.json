@@ -1918,7 +1918,11 @@
     "matrixAllowed": "{{active}}/{{total}} permitido(s)",
     "loadError": "No se pudieron cargar los roles.",
     "retry": "Intentar de nuevo",
-    "branchesLoadError": "No se pudo cargar la plantilla de sucursales."
+    "branchesLoadError": "No se pudo cargar la plantilla de sucursales.",
+    "branchAuthz": {
+      "label": "Aplicar permisos por sede",
+      "hint": "Aplica los permisos por sede (ver, editar, eliminar) a candidatos, clientes, sedes, citas, tareas y conversaciones. Un usuario sin sede vinculada sigue sin restricciones, activado o no."
+    }
   },
   "audit": {
     "title": "Registro de auditoría",

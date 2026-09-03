@@ -64,7 +64,16 @@
     "loadError": "Vestigingen konden niet worden geladen.",
     "loading": "Laden…",
     "previewTitle": "Vestigingen bij deze rol",
-    "previewEmpty": "Geen startset. Deze rol heeft geen vestigingen; de nieuwe gebruiker start zonder beperking."
+    "previewEmpty": "Geen startset. Deze rol heeft geen vestigingen; de nieuwe gebruiker start zonder beperking.",
+    "flags": {
+      "view": "Bekijken",
+      "update": "Bewerken",
+      "delete": "Verwijderen",
+      "viewFor": "{{name}} bekijken",
+      "updateFor": "{{name}} bewerken",
+      "deleteFor": "{{name}} verwijderen",
+      "hint": "Per-vestiging rechten. Werkt pas zodra een beheerder \"Vestigingsrechten afdwingen\" aanzet in Instellingen → Rollen & Rechten."
+    }
   },
   "validation": {
     "emailFormat": "Voer een geldig e-mailadres in."

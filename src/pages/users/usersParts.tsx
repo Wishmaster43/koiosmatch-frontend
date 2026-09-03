@@ -249,7 +249,18 @@ export function EditableAvatar({ user: u, onPick }: { user: ManagedUser; onPick?
 
 // A branch row as returned by GET /users/{id}/branches and /roles/{id}/branches
 // (USERS-ROLES-LOC-1) — name is the location's display name, resolved server-side.
-export interface BranchRow { location_id: string | number; name?: string | null }
+// The three flags (fase 3, USERS-ROLES-LOC-1 phase 3) are per-branch abilities on
+// the USER coupling only — BranchAssignmentController::userBranches always returns
+// them (defaults can_view=true, can_update=true, can_delete=false); the ROLE
+// template (/roles/{id}/branches) carries no such columns (role_branches has none
+// on the backend — measured), so RoleBranchTemplate stays location-only.
+export interface BranchRow {
+  location_id: string | number
+  name?: string | null
+  can_view?: boolean
+  can_update?: boolean
+  can_delete?: boolean
+}
 
 // BranchChips — read-only soft-tinted chips for a fixed branch set (no toggle):
 // the role-template preview in NewUserModal and, at a glance, "what this user is

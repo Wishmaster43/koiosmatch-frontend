@@ -64,7 +64,16 @@
     "loadError": "Couldn't load branches.",
     "loading": "Loading…",
     "previewTitle": "Branches for this role",
-    "previewEmpty": "No starting set. This role has no branches, so the new user starts unrestricted."
+    "previewEmpty": "No starting set. This role has no branches, so the new user starts unrestricted.",
+    "flags": {
+      "view": "View",
+      "update": "Edit",
+      "delete": "Delete",
+      "viewFor": "View {{name}}",
+      "updateFor": "Edit {{name}}",
+      "deleteFor": "Delete {{name}}",
+      "hint": "Per-branch abilities. Only takes effect once an admin turns on \"Enforce branch authorization\" in Settings → Roles & Permissions."
+    }
   },
   "validation": {
     "emailFormat": "Enter a valid e-mail address."

@@ -22,7 +22,8 @@ import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { useUserBranches } from './hooks/useUserBranches'
 import type { ManagedUser } from '@/types/api'
-import { PageTitle, Caption, formLabelStyle } from '@/components/ui/typography'
+import { PageTitle, Caption, BodyText, formLabelStyle } from '@/components/ui/typography'
+import Toggle from '@/components/ui/Toggle'
 
 // VALIDATIE-LIVE-1-rest: `email` is the only field here the backend validates
 // with a shape rule (UserController's inline PATCH rules — `'email' =>
@@ -41,7 +42,7 @@ export default function EditUserModal({ user, onClose, onSaved }: {
   const { t } = useTranslation('users')
   const auth = useAuth()
   const locationOptions = useLocations()
-  const { branches, loading: branchesLoading, saving: branchesSaving, error: branchesError, toggle: toggleBranch } = useUserBranches(user.id)
+  const { branches, loading: branchesLoading, saving: branchesSaving, error: branchesError, toggle: toggleBranch, setFlag: setBranchFlag } = useUserBranches(user.id)
   // Fallback: split `name` when firstname/lastname arrive as a single string.
   const nameParts = (user.name ?? '').split(' ')
   const [form, setForm] = useState({
@@ -196,6 +197,39 @@ export default function EditUserModal({ user, onClose, onSaved }: {
             )}
             {!branchesLoading && !branchesError && branches.length === 0 && locationOptions.length > 0 && (
               <Caption as="p" style={{ marginTop: 8 }}>{t('branches.emptyHint')}</Caption>
+            )}
+
+            {/* Per-branch abilities (USERS-ROLES-LOC-1 phase 3) — dormant until the
+                tenant flips `branch_authz_enabled` in Settings → Roles; shown for
+                every currently assigned branch so the flags can be prepared ahead
+                of that switch. can_view defaults true, can_delete false server-side
+                (measured migration), never assumed here — every value comes from
+                the loaded row. */}
+            {!branchesLoading && !branchesError && branches.length > 0 && (
+              <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
+                <Caption as="p" style={{ marginBottom: 6 }}>{t('branches.flags.hint')}</Caption>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto', gap: 10, alignItems: 'center', marginBottom: 4 }}>
+                  <span />
+                  <Caption style={{ textAlign: 'center' }}>{t('branches.flags.view')}</Caption>
+                  <Caption style={{ textAlign: 'center' }}>{t('branches.flags.update')}</Caption>
+                  <Caption style={{ textAlign: 'center' }}>{t('branches.flags.delete')}</Caption>
+                </div>
+                {branches.map(b => (
+                  <div key={b.location_id}
+                    style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto', gap: 10, alignItems: 'center', padding: '4px 0' }}>
+                    <BodyText as="span">{b.name ?? '—'}</BodyText>
+                    <Toggle checked={b.can_view ?? true} disabled={branchesSaving}
+                      onChange={v => setBranchFlag(b.location_id, 'can_view', v)}
+                      ariaLabel={t('branches.flags.viewFor', { name: b.name ?? '' })} />
+                    <Toggle checked={b.can_update ?? true} disabled={branchesSaving}
+                      onChange={v => setBranchFlag(b.location_id, 'can_update', v)}
+                      ariaLabel={t('branches.flags.updateFor', { name: b.name ?? '' })} />
+                    <Toggle checked={b.can_delete ?? false} disabled={branchesSaving}
+                      onChange={v => setBranchFlag(b.location_id, 'can_delete', v)}
+                      ariaLabel={t('branches.flags.deleteFor', { name: b.name ?? '' })} />
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 

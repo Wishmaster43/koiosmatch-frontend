@@ -2164,7 +2164,11 @@
     "matrixAllowed": "{{active}}/{{total}} toegestaan",
     "loadError": "Kon de rollen niet laden.",
     "retry": "Opnieuw proberen",
-    "branchesLoadError": "Kon het vestigingssjabloon niet laden."
+    "branchesLoadError": "Kon het vestigingssjabloon niet laden.",
+    "branchAuthz": {
+      "label": "Vestigingsrechten afdwingen",
+      "hint": "Dwingt de per-vestiging rechten (bekijken, bewerken, verwijderen) af op kandidaten, klanten, vestigingen, afspraken, taken en gesprekken. Een gebruiker zonder vestigingskoppeling blijft onbeperkt, aan of uit."
+    }
   },
   "audit": {
     "title": "Audit log",

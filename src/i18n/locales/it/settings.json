@@ -2164,7 +2164,11 @@
     "matrixAllowed": "{{active}}/{{total}} consentiti",
     "loadError": "Impossibile caricare i ruoli.",
     "retry": "Riprova",
-    "branchesLoadError": "Impossibile caricare il modello sedi."
+    "branchesLoadError": "Impossibile caricare il modello sedi.",
+    "branchAuthz": {
+      "label": "Applica permessi per sede",
+      "hint": "Applica i permessi per sede (visualizzare, modificare, eliminare) a candidati, clienti, sedi, appuntamenti, attività e conversazioni. Un utente senza sede collegata resta senza restrizioni, attivo o no."
+    }
   },
   "audit": {
     "title": "Audit log",

@@ -64,7 +64,16 @@
     "loadError": "Die Standorte konnten nicht geladen werden.",
     "loading": "Wird geladen…",
     "previewTitle": "Standorte dieser Rolle",
-    "previewEmpty": "Keine Startauswahl. Diese Rolle hat keine Standorte; der neue Benutzer startet ohne Einschränkung."
+    "previewEmpty": "Keine Startauswahl. Diese Rolle hat keine Standorte; der neue Benutzer startet ohne Einschränkung.",
+    "flags": {
+      "view": "Ansehen",
+      "update": "Bearbeiten",
+      "delete": "Löschen",
+      "viewFor": "{{name}} ansehen",
+      "updateFor": "{{name}} bearbeiten",
+      "deleteFor": "{{name}} löschen",
+      "hint": "Rechte pro Standort. Wirkt erst, sobald ein Admin \"Standortrechte erzwingen\" unter Einstellungen → Rollen & Rechte aktiviert."
+    }
   },
   "validation": {
     "emailFormat": "Geben Sie eine gültige E-Mail-Adresse ein."

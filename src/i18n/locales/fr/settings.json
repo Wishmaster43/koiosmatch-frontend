@@ -1918,7 +1918,11 @@
     "matrixAllowed": "{{active}}/{{total}} autorisé(s)",
     "loadError": "Impossible de charger les rôles.",
     "retry": "Réessayer",
-    "branchesLoadError": "Impossible de charger le modèle d’agence."
+    "branchesLoadError": "Impossible de charger le modèle d’agence.",
+    "branchAuthz": {
+      "label": "Appliquer les droits par site",
+      "hint": "Applique les droits par site (consulter, modifier, supprimer) aux candidats, clients, sites, rendez-vous, tâches et conversations. Un utilisateur sans site rattaché reste sans restriction, activé ou non."
+    }
   },
   "audit": {
     "title": "Journal d'audit",

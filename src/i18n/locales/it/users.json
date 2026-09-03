@@ -64,7 +64,16 @@
     "loadError": "Impossibile caricare le sedi.",
     "loading": "Caricamento…",
     "previewTitle": "Sedi per questo ruolo",
-    "previewEmpty": "Nessun set iniziale. Questo ruolo non ha sedi, quindi il nuovo utente parte senza restrizioni."
+    "previewEmpty": "Nessun set iniziale. Questo ruolo non ha sedi, quindi il nuovo utente parte senza restrizioni.",
+    "flags": {
+      "view": "Visualizzare",
+      "update": "Modificare",
+      "delete": "Eliminare",
+      "viewFor": "Visualizzare {{name}}",
+      "updateFor": "Modificare {{name}}",
+      "deleteFor": "Eliminare {{name}}",
+      "hint": "Permessi per sede. Ha effetto solo quando un amministratore attiva \"Applica permessi per sede\" in Impostazioni → Ruoli e permessi."
+    }
   },
   "validation": {
     "emailFormat": "Inserisci un indirizzo e-mail valido."

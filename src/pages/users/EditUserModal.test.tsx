@@ -125,6 +125,36 @@ describe('EditUserModal · branches', () => {
   })
 })
 
+// USERS-ROLES-LOC-1 phase 3: per-branch can_view/can_update/can_delete toggles,
+// shown for every currently assigned branch. Request-level (§13).
+describe('EditUserModal · branch ability flags (phase 3)', () => {
+  it('renders a toggle triple per assigned branch and PUTs the changed flag only', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({
+      data: { data: [{ location_id: 'loc-1', name: 'Amsterdam', can_view: true, can_update: true, can_delete: false }] },
+    })
+    vi.mocked(api.put).mockResolvedValueOnce({
+      data: { data: [{ location_id: 'loc-1', name: 'Amsterdam', can_view: true, can_update: true, can_delete: true }] },
+    })
+    const user = userEvent.setup()
+    render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)
+
+    const deleteToggle = await screen.findByLabelText('branches.flags.deleteFor')
+    await user.click(deleteToggle)
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/users/u1/branches', {
+      branches: [{ location_id: 'loc-1', can_delete: true }],
+    }))
+  })
+
+  it('renders no flag toggles when the user has no assigned branches', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
+    render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)
+
+    await screen.findByText('branches.emptyHint')
+    expect(screen.queryByLabelText('branches.flags.deleteFor')).not.toBeInTheDocument()
+  })
+})
+
 // CredentialChangeGuard (CMBE 03-09): a SELF-edit that touches email or password
 // needs the account's own current password re-entered; the admin path (editing
 // someone else) never does. Assert the REQUEST body, never only that a callback fired.

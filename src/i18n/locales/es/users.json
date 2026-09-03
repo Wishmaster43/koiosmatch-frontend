@@ -64,7 +64,16 @@
     "loadError": "No se pudieron cargar las sedes.",
     "loading": "Cargando…",
     "previewTitle": "Sedes de este rol",
-    "previewEmpty": "Sin conjunto inicial. Este rol no tiene sedes; el nuevo usuario empieza sin restricción."
+    "previewEmpty": "Sin conjunto inicial. Este rol no tiene sedes; el nuevo usuario empieza sin restricción.",
+    "flags": {
+      "view": "Ver",
+      "update": "Editar",
+      "delete": "Eliminar",
+      "viewFor": "Ver {{name}}",
+      "updateFor": "Editar {{name}}",
+      "deleteFor": "Eliminar {{name}}",
+      "hint": "Permisos por sede. Solo surte efecto cuando un administrador activa \"Aplicar permisos por sede\" en Ajustes → Roles y permisos."
+    }
   },
   "validation": {
     "emailFormat": "Introduce una dirección de correo electrónico válida."

@@ -1918,7 +1918,11 @@
     "matrixAllowed": "{{active}}/{{total}} erlaubt",
     "loadError": "Die Rollen konnten nicht geladen werden.",
     "retry": "Erneut versuchen",
-    "branchesLoadError": "Die Filialvorlage konnte nicht geladen werden."
+    "branchesLoadError": "Die Filialvorlage konnte nicht geladen werden.",
+    "branchAuthz": {
+      "label": "Standortrechte erzwingen",
+      "hint": "Setzt die Standortrechte (ansehen, bearbeiten, löschen) bei Kandidaten, Kunden, Standorten, Terminen, Aufgaben und Gesprächen durch. Ein Benutzer ohne Standortkopplung bleibt uneingeschränkt, ein- oder ausgeschaltet."
+    }
   },
   "audit": {
     "title": "Audit-Log",

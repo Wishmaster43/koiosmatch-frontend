@@ -2164,7 +2164,11 @@
     "matrixAllowed": "{{active}}/{{total}} allowed",
     "loadError": "Could not load the roles.",
     "retry": "Try again",
-    "branchesLoadError": "Could not load the branch template."
+    "branchesLoadError": "Could not load the branch template.",
+    "branchAuthz": {
+      "label": "Enforce branch authorization",
+      "hint": "Enforces the per-branch rights (view, edit, delete) on candidates, customers, locations, appointments, tasks and conversations. A user without a branch coupling stays unrestricted, on or off."
+    }
   },
   "audit": {
     "title": "Audit log",

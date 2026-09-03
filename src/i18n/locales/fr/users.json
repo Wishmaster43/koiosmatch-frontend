@@ -64,7 +64,16 @@
     "loadError": "Impossible de charger les sites.",
     "loading": "Chargement…",
     "previewTitle": "Sites de ce rôle",
-    "previewEmpty": "Aucun ensemble de départ. Ce rôle n'a aucun site ; le nouvel utilisateur démarre sans restriction."
+    "previewEmpty": "Aucun ensemble de départ. Ce rôle n'a aucun site ; le nouvel utilisateur démarre sans restriction.",
+    "flags": {
+      "view": "Consulter",
+      "update": "Modifier",
+      "delete": "Supprimer",
+      "viewFor": "Consulter {{name}}",
+      "updateFor": "Modifier {{name}}",
+      "deleteFor": "Supprimer {{name}}",
+      "hint": "Droits par site. Ne prend effet que lorsqu'un administrateur active « Appliquer les droits par site » dans Paramètres → Rôles et droits."
+    }
   },
   "validation": {
     "emailFormat": "Saisissez une adresse e-mail valide."

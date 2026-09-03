@@ -12,8 +12,19 @@
  * to those branches for candidates (list/KPI/detail/bulk; out-of-scope = 404).
  * An EMPTY set still means unrestricted (legacy/rollout-safe default), but a
  * non-empty set is a real, enforced restriction today, not just a "startset".
- * Vacancies/customers/etc. are not scoped yet (fase 3, dormant can_view/
- * can_update/can_delete flags) — keep that distinction honest in any copy.
+ *
+ * USERS-ROLES-LOC-1 phase 3 (03-09): `setFlag` edits the per-branch can_view/
+ * can_update/can_delete abilities that BranchGrantResolver already reads on the
+ * server — dormant until the tenant flips `branch_authz_enabled` (Settings →
+ * Roles), enforced across the surfaces BranchAccess scopes (candidates, customers/
+ * locations, appointments, tasks, conversations, messages). Measured request shape (BranchAssignment
+ * Controller::updateUserBranches): `PUT /users/{id}/branches { branches:
+ * [{location_id, can_view?, can_update?, can_delete?}] }` is a REPLACE-SET —
+ * a location missing from the array is UNASSIGNED — and each flag is
+ * `sometimes`, so a row sent WITHOUT a flag key keeps its current value on the
+ * server (`collect($b)->only([...])` yields `[]` → skipped). `setFlag` exploits
+ * that: it sends every currently-assigned location_id (so nobody gets dropped)
+ * but only the changed row carries the changed flag.
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -69,5 +80,31 @@ export function useUserBranches(userId: string | number | null | undefined) {
     }
   }
 
-  return { branches, loading, saving, error, toggle }
+  // Change one ability flag on one already-assigned branch — optimistic PUT
+  // (replace-set carrying every current location_id, changed flag only on the
+  // touched row so unrelated rows' flags are left untouched server-side; see
+  // file doc for the exact request shape), revert + notify on failure.
+  const setFlag = async (locationId: string | number, flag: 'can_view' | 'can_update' | 'can_delete', value: boolean) => {
+    if (userId == null || error) return
+    const prev = branches
+    const next = branches.map(b => b.location_id === locationId ? { ...b, [flag]: value } : b)
+    setBranches(next)
+    setSaving(true)
+    try {
+      const payload = {
+        branches: next.map(b => b.location_id === locationId
+          ? { location_id: b.location_id, [flag]: value }
+          : { location_id: b.location_id }),
+      }
+      const res = await api.put(`/users/${userId}/branches`, payload)
+      setBranches(unwrapList<BranchRow>(res).rows)
+    } catch {
+      setBranches(prev)
+      notifyError(t('branches.saveFailed'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return { branches, loading, saving, error, toggle, setFlag }
 }

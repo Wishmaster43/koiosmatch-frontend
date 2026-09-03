@@ -64,7 +64,16 @@
     "loadError": "Não foi possível carregar as filiais.",
     "loading": "A carregar…",
     "previewTitle": "Filiais desta função",
-    "previewEmpty": "Sem conjunto inicial. Esta função não tem filiais, pelo que o novo utilizador começa sem restrição."
+    "previewEmpty": "Sem conjunto inicial. Esta função não tem filiais, pelo que o novo utilizador começa sem restrição.",
+    "flags": {
+      "view": "Ver",
+      "update": "Editar",
+      "delete": "Eliminar",
+      "viewFor": "Ver {{name}}",
+      "updateFor": "Editar {{name}}",
+      "deleteFor": "Eliminar {{name}}",
+      "hint": "Permissões por filial. Só tem efeito quando um administrador ativa \"Aplicar permissões por filial\" em Definições → Funções e permissões."
+    }
   },
   "validation": {
     "emailFormat": "Introduza um endereço de e-mail válido."
