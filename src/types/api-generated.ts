@@ -307,7 +307,13 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * PUT /api/tenant-modules — set a tenant's package + add-ons (new model, C-32).
+         * @description Body: { tenant_id?, package: core|pro|enterprise, addons?: (plan|sm|hf|sm_ai)[] }
+         *     The granular effective modules are recomputed + stored so the module:* gate and
+         *     any legacy reader of the `modules` column stay in sync.
+         */
+        patch: operations["patchTenantModules"];
         trace?: never;
     };
     "/api/admin/tenants/{tenant}/usage": {
@@ -1009,7 +1015,7 @@ export interface paths {
         /**
          * GET /exports/notes.csv (FAMILIES-SPEC lane E) — every note thread in ONE export:
          *     candidate/customer/application/match/outreach notes. streamExport is built for a
-         *     single query, so a MultiSourceChunker (below) walks the five Eloquent queries in
+         *     single query, so a MultiSourceChunker (App\Support) walks the five Eloquent queries in
          *     turn — real models ride through so an EncryptedFlexible `body` decrypts via its
          *     normal cast (a raw SQL union would hand back ciphertext, per the spec note).
          */
@@ -1329,7 +1335,7 @@ export interface paths {
         /**
          * GET /exports/notes.csv (FAMILIES-SPEC lane E) — every note thread in ONE export:
          *     candidate/customer/application/match/outreach notes. streamExport is built for a
-         *     single query, so a MultiSourceChunker (below) walks the five Eloquent queries in
+         *     single query, so a MultiSourceChunker (App\Support) walks the five Eloquent queries in
          *     turn — real models ride through so an EncryptedFlexible `body` decrypts via its
          *     normal cast (a raw SQL union would hand back ciphertext, per the spec note).
          */
@@ -2074,7 +2080,8 @@ export interface paths {
         delete: operations["deleteApplicationsApplication"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** PATCH /applications/{id} — move phase and/or reassign owner. */
+        patch: operations["patchApplicationsApplication"];
         trace?: never;
     };
     "/api/applications/{application}/documents": {
@@ -2655,7 +2662,8 @@ export interface paths {
         delete: operations["deleteAssessmentCriteriaGroupsGroup"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** PATCH /assessment-criteria-groups/{id} — update + (optionally) replace criteria. */
+        patch: operations["patchAssessmentCriteriaGroupsGroup"];
         trace?: never;
     };
     "/api/application-stages": {
@@ -3141,7 +3149,8 @@ export interface paths {
         delete: operations["deleteOutreachCampaignsCampaign"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** PATCH /outreach-campaigns/{id} — partial update (name/status/channel/owner/pool). */
+        patch: operations["patchOutreachCampaignsCampaign"];
         trace?: never;
     };
     "/api/outreach-campaigns/{campaign}/stats": {
@@ -3811,7 +3820,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** GET — name-ordered list; every row carries an `in_use` flag (false when nothing references it). */
+        /** GET — sort_order-ordered list (falls back to name), each row carrying `in_use`. */
         get: operations["getCandidateRejectionReasons"];
         put?: never;
         post: operations["postCandidateRejectionReasons"];
@@ -3841,7 +3850,7 @@ export interface paths {
         delete: operations["deleteCandidateRejectionReasonsId"];
         options?: never;
         head?: never;
-        patch?: never;
+        patch: operations["patchCandidateRejectionReasonsId"];
         trace?: never;
     };
     "/api/candidate-blacklist-reasons": {
@@ -3881,7 +3890,7 @@ export interface paths {
         delete: operations["deleteCandidateBlacklistReasonsId"];
         options?: never;
         head?: never;
-        patch?: never;
+        patch: operations["patchCandidateBlacklistReasonsId"];
         trace?: never;
     };
     "/api/blacklist-reasons": {
@@ -3921,7 +3930,7 @@ export interface paths {
         delete: operations["deleteBlacklistReasonsId"];
         options?: never;
         head?: never;
-        patch?: never;
+        patch: operations["patchBlacklistReasonsId"];
         trace?: never;
     };
     "/api/education-levels": {
@@ -3961,7 +3970,7 @@ export interface paths {
         delete: operations["deleteEducationLevelsId"];
         options?: never;
         head?: never;
-        patch?: never;
+        patch: operations["patchEducationLevelsId"];
         trace?: never;
     };
     "/api/candidate-genders/{gender}": {
@@ -3984,6 +3993,28 @@ export interface paths {
         post?: never;
         /** DELETE /genders/{gender} — 409 while still referenced by a candidate. */
         delete: operations["deleteCandidateGendersGender"];
+        options?: never;
+        head?: never;
+        /**
+         * PUT /genders/{gender}
+         *     Resolve by id (not implicit binding) — tenant routes init the connection
+         *     after binding, so we look up inside the tenant context ourselves.
+         */
+        patch: operations["patchCandidateGendersGender"];
+        trace?: never;
+    };
+    "/api/candidate-rejection-reasons/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** PUT reorder: persist each id's index as its sort_order (0-based, request order). */
+        put: operations["putCandidateRejectionReasonsReorder"];
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -6925,7 +6956,7 @@ export interface paths {
         delete: operations["deleteCustomerBlacklistReasonsId"];
         options?: never;
         head?: never;
-        patch?: never;
+        patch: operations["patchCustomerBlacklistReasonsId"];
         trace?: never;
     };
     "/api/customer-blacklist-reasons/reorder": {
@@ -7081,7 +7112,8 @@ export interface paths {
         delete: operations["deleteCustomersCustomer"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** PATCH /customers/{id} — partial update. Audited via AuditsChanges (old→new diff). */
+        patch: operations["patchCustomersCustomer"];
         trace?: never;
     };
     "/api/customers/{customer}/stats": {
@@ -8168,7 +8200,8 @@ export interface paths {
         delete: operations["deleteCustomersCustomerIdLocationsId"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** PATCH /customers/{customerId}/locations/{id} */
+        patch: operations["patchCustomersCustomerIdLocationsId"];
         trace?: never;
     };
     "/api/customers/{customerId}/departments/{id}": {
@@ -8207,7 +8240,8 @@ export interface paths {
         delete: operations["deleteCustomersCustomerIdDepartmentsId"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** PATCH /customers/{customerId}/departments/{id} */
+        patch: operations["patchCustomersCustomerIdDepartmentsId"];
         trace?: never;
     };
     "/api/customers/{customerId}/contacts/{id}": {
@@ -8243,7 +8277,8 @@ export interface paths {
         delete: operations["deleteCustomersCustomerIdContactsId"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** PATCH /customers/{customerId}/contacts/{id} */
+        patch: operations["patchCustomersCustomerIdContactsId"];
         trace?: never;
     };
     "/api/customers/{customer}/notes/{note}": {
@@ -8667,7 +8702,8 @@ export interface paths {
         delete: operations["deleteCustomersCustomerIdPriceAgreementsId"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** PATCH /customers/{customerId}/price-agreements/{id} */
+        patch: operations["patchCustomersCustomerIdPriceAgreementsId"];
         trace?: never;
     };
     "/api/customers/{customerId}/locations/{id}/notes": {
@@ -9360,7 +9396,8 @@ export interface paths {
         delete: operations["deleteCustomFieldsId"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** PATCH /custom-fields/{id} — edit a field; breaking parts lock once data exists. */
+        patch: operations["patchCustomFieldsId"];
         trace?: never;
     };
     "/api/admin/jobs": {
@@ -9699,7 +9736,8 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** PUT/PATCH /dashboard/kpis/{role} — set one role's tiles + order (settings.update, route middleware). */
+        patch: operations["patchDashboardKpisRole"];
         trace?: never;
     };
     "/api/files/avatars/{user}": {
@@ -10301,7 +10339,11 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * PUT /settings/whatsapp-queue { known_hourly_limit, new_hourly_limit, new_daily_limit,
+         *     new_weekly_limit } — persist the tenant caps. All optional; only the sent fields change.
+         */
+        patch: operations["patchSettingsWhatsappQueue"];
         trace?: never;
     };
     "/api/task-statuses": {
@@ -10642,7 +10684,13 @@ export interface paths {
         delete: operations["deleteWebhooksWebhook"];
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * PATCH /webhooks/{webhook} — rename / re-describe an inbound webhook (G-10). The token +
+         *     signing_secret are IMMUTABLE here (rotating them is a separate, deliberate action), so a
+         *     cosmetic edit can never silently break an already-configured caller. Resolved by id inside
+         *     the tenant context (no implicit binding on tenant routes, §4).
+         */
+        patch: operations["patchWebhooksWebhook"];
         trace?: never;
     };
     "/api/webhook-events": {
@@ -10702,7 +10750,8 @@ export interface paths {
         delete: operations["deleteWebhookSubscriptionsId"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** PUT/PATCH /webhook-subscriptions/{id} — update name/url/events/active. */
+        patch: operations["patchWebhookSubscriptionsId"];
         trace?: never;
     };
     "/api/webhook-subscriptions/{id}/deliveries": {
@@ -10794,7 +10843,8 @@ export interface paths {
         delete: operations["deleteApiKeysId"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** PUT/PATCH /api-keys/{id} — update metadata, scopes, allowlist or status. */
+        patch: operations["patchApiKeysId"];
         trace?: never;
     };
     "/api/api-keys/{id}/regenerate": {
@@ -11701,7 +11751,8 @@ export interface paths {
         delete: operations["deleteLocationsLocation"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** PUT/PATCH /locations/{location} — update one establishment. */
+        patch: operations["patchLocationsLocation"];
         trace?: never;
     };
     "/api/locations/{location}/geocode": {
@@ -11909,7 +11960,12 @@ export interface paths {
         delete: operations["deleteSettingsMatchWeightTemplatesMatchWeightTemplate"];
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * PUT/PATCH /settings/match-weight-templates/{id} — never touches an existing
+         *     vacancy (decision A); the response's `linked_vacancies_count` lets the FE offer
+         *     "apply to X existing vacancies?" as a separate, explicit follow-up action.
+         */
+        patch: operations["patchSettingsMatchWeightTemplatesMatchWeightTemplate"];
         trace?: never;
     };
     "/api/settings/match-weight-templates/{matchWeightTemplate}/apply": {
@@ -12580,7 +12636,8 @@ export interface paths {
         delete: operations["deleteMatchesMatchNotesNote"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** PATCH /matches/{id}/notes/{note} — edit a note (scoped to the match, IDOR-safe). */
+        patch: operations["patchMatchesMatchNotesNote"];
         trace?: never;
     };
     "/api/whatsapp-web/webhook": {
@@ -12898,7 +12955,8 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** PUT /api/settings/message-retention — set the tenant default (admin). */
+        patch: operations["patchSettingsMessageRetention"];
         trace?: never;
     };
     "/api/profile/message-retention": {
@@ -12916,7 +12974,8 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** PUT /api/profile/message-retention — the caller's own (only-lower) override. */
+        patch: operations["patchProfileMessageRetention"];
         trace?: never;
     };
     "/api/settings/messaging-costs": {
@@ -12973,7 +13032,7 @@ export interface paths {
         delete: operations["deleteEscalationReasonsId"];
         options?: never;
         head?: never;
-        patch?: never;
+        patch: operations["patchEscalationReasonsId"];
         trace?: never;
     };
     "/api/escalation-reasons/reorder": {
@@ -13577,7 +13636,7 @@ export interface paths {
         delete: operations["deleteOpportunityLostReasonsId"];
         options?: never;
         head?: never;
-        patch?: never;
+        patch: operations["patchOpportunityLostReasonsId"];
         trace?: never;
     };
     "/api/opportunities": {
@@ -13641,7 +13700,8 @@ export interface paths {
         delete: operations["deleteOpportunitiesOpportunity"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** PATCH /opportunities/{id} — partial update. Audited via AuditsChanges (old→new diff). */
+        patch: operations["patchOpportunitiesOpportunity"];
         trace?: never;
     };
     "/api/opportunities/{opportunity}/activity": {
@@ -14237,7 +14297,12 @@ export interface paths {
         delete: operations["deleteOpportunitiesOpportunityNotesNote"];
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * PUT /opportunities/{id}/notes/{note} — edit a note's body/type/language. G23
+         *     (OPP-NOTE-EDIT-1): parity with task_comments/candidate/customer notes, which are
+         *     editable. Author stays the creator; updated_by records who edited (changelog).
+         */
+        patch: operations["patchOpportunitiesOpportunityNotesNote"];
         trace?: never;
     };
     "/api/opportunities/{opportunity}/notes/{note}/restore-previous": {
@@ -16631,7 +16696,8 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** PUT/PATCH /reports/{report}/kpis — set the chosen cards + order (settings.update, route middleware). */
+        patch: operations["patchReportsReportKpis"];
         trace?: never;
     };
     "/api/settings/email/oauth/callback": {
@@ -16958,7 +17024,8 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** PUT /api/settings/messaging-limits — set caps (clamped to the ceiling). */
+        patch: operations["patchSettingsMessagingLimits"];
         trace?: never;
     };
     "/api/settings/rejection": {
@@ -16976,7 +17043,8 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** PUT /settings/rejection. */
+        patch: operations["patchSettingsRejection"];
         trace?: never;
     };
     "/api/settings/matching": {
@@ -16992,7 +17060,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        patch: operations["patchSettingsMatching"];
         trace?: never;
     };
     "/api/settings/my-notifications": {
@@ -17010,7 +17078,8 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** PUT /api/settings/my-notifications — set the caller's own override(s); null clears (inherit tenant). */
+        patch: operations["patchSettingsMyNotifications"];
         trace?: never;
     };
     "/api/settings/my-koios-mode": {
@@ -17028,7 +17097,8 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** PUT /api/settings/my-koios-mode — set the caller's own mode/opt-in. */
+        patch: operations["patchSettingsMyKoiosMode"];
         trace?: never;
     };
     "/api/settings/apps": {
@@ -17046,7 +17116,8 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** PUT/PATCH /settings/apps — replace the enabled-apps list. */
+        patch: operations["patchSettingsApps"];
         trace?: never;
     };
     "/api/countries": {
@@ -18081,7 +18152,8 @@ export interface paths {
         delete: operations["deleteTasksTask"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** PATCH /tasks/{id} — edit fields, move status, (optionally) replace links. */
+        patch: operations["patchTasksTask"];
         trace?: never;
     };
     "/api/tasks/{task}/activity": {
@@ -18387,7 +18459,12 @@ export interface paths {
         delete: operations["deleteTasksTaskNotesComment"];
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * PATCH /tasks/{id}/notes/{note} — edit a note's body/type (NOTES-4b: the task
+         *     thread became Notes, so it gets the same edit affordance as candidate notes).
+         * @description Records WHO edited (name) so the UI can show "edited by …".
+         */
+        patch: operations["patchTasksTaskNotesComment"];
         trace?: never;
     };
     "/api/tasks/{task}/comments/{comment}": {
@@ -18838,7 +18915,8 @@ export interface paths {
         delete: operations["deleteVacanciesVacancy"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** PATCH /vacancies/{id} — partial update. Audited via AuditsChanges (old→new diff). */
+        patch: operations["patchVacanciesVacancy"];
         trace?: never;
     };
     "/api/vacancies/{vacancy}/leads": {
@@ -19514,7 +19592,8 @@ export interface paths {
         delete: operations["deleteVacanciesVacancyNotesNote"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** PATCH /vacancies/{id}/notes/{note} — edit a note (scoped to the vacancy, IDOR-safe). */
+        patch: operations["patchVacanciesVacancyNotesNote"];
         trace?: never;
     };
     "/api/whatsapp/embedded-signup/config": {
@@ -20497,7 +20576,7 @@ export interface operations {
                      */
                     name: string;
                     /**
-                     * @example flex
+                     * @example enterprise
                      * @enum {string}
                      */
                     plan: "flex" | "pro" | "enterprise";
@@ -20598,6 +20677,30 @@ export interface operations {
         };
         responses: never;
     };
+    patchTenantModules: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must match an existing stored value.
+                     * @example architecto
+                     */
+                    tenant_id?: string;
+                    /** @example null */
+                    package?: string;
+                    /** @example null */
+                    addons?: string[];
+                };
+            };
+        };
+        responses: never;
+    };
     getAdminTenantsTenantUsage: {
         parameters: {
             query?: never;
@@ -20658,7 +20761,7 @@ export interface operations {
                      */
                     month?: string;
                     /**
-                     * @example activity
+                     * @example user
                      * @enum {string}
                      */
                     group_by: "activity" | "model" | "user" | "day";
@@ -20864,7 +20967,7 @@ export interface operations {
                          * @example 1
                          */
                         price_cents?: number;
-                        /** @example false */
+                        /** @example true */
                         active?: boolean;
                     }[];
                     /** @example null */
@@ -20884,7 +20987,7 @@ export interface operations {
                          * @example 17
                          */
                         price_cents?: number;
-                        /** @example false */
+                        /** @example true */
                         active?: boolean;
                     }[];
                     /** @example null */
@@ -20913,7 +21016,7 @@ export interface operations {
                          * @example 7
                          */
                         ai_price_cents?: number;
-                        /** @example false */
+                        /** @example true */
                         workflow_enabled?: boolean;
                         /**
                          * @description Het veld value moet minimaal 0 zijn. Het veld value mag niet groter zijn dan 1000000.
@@ -21007,7 +21110,7 @@ export interface operations {
                     workflow_tier?: string | null;
                     /**
                      * @description Must be a valid date in the format <code>Y-m-d</code>.
-                     * @example 2026-09-02
+                     * @example 2026-09-03
                      */
                     effective_from: string;
                 };
@@ -21110,7 +21213,7 @@ export interface operations {
                      * @example ikhwaykcmyuwpwlv
                      */
                     invoice_number_prefix?: string;
-                    /** @example false */
+                    /** @example true */
                     invoice_auto_finalize?: boolean;
                 };
             };
@@ -23317,7 +23420,7 @@ export interface operations {
                         score?: number | null;
                         /** @example 16 */
                         weight?: number;
-                        /** @example true */
+                        /** @example false */
                         hard?: boolean;
                         /** @example architecto */
                         note?: string | null;
@@ -23350,6 +23453,87 @@ export interface operations {
                      * @example b
                      */
                     reason: string;
+                };
+            };
+        };
+        responses: never;
+    };
+    patchApplicationsApplication: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                     * @example b
+                     */
+                    source?: string | null;
+                    /**
+                     * @description Must match an existing stored value.
+                     * @example architecto
+                     */
+                    phase_key?: string;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
+                     */
+                    application_stage_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
+                     */
+                    rejection_reason_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
+                     */
+                    vacancy_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example 21c4122b-d554-3723-966c-6d723ea5293f
+                     */
+                    interview_flow_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn.
+                     * @example add3503c-ebff-3875-93af-b8c6a695762b
+                     */
+                    owner_id?: string | null;
+                    /**
+                     * @description Het veld value moet tussen 0 en 100 liggen.
+                     * @example 1
+                     */
+                    match_score?: number;
+                    /** @example null */
+                    match_criteria?: {
+                        /** @example architecto */
+                        key?: string | null;
+                        /** @example architecto */
+                        label?: string | null;
+                        /**
+                         * @description Het veld value moet tussen 0 en 100 liggen.
+                         * @example 1
+                         */
+                        score?: number | null;
+                        /** @example 16 */
+                        weight?: number;
+                        /** @example false */
+                        hard?: boolean;
+                        /** @example architecto */
+                        note?: string | null;
+                    }[];
+                    /** @example null */
+                    custom_fields?: Record<string, never> | null;
                 };
             };
         };
@@ -23589,7 +23773,7 @@ export interface operations {
                     /** @example architecto */
                     note?: string | null;
                     /**
-                     * @example whatsapp
+                     * @example email
                      * @enum {string|null}
                      */
                     channel?: "email" | "whatsapp" | null;
@@ -24013,6 +24197,19 @@ export interface operations {
         requestBody?: never;
         responses: never;
     };
+    patchAssessmentCriteriaGroupsGroup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                group: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
     getApplicationStages: {
         parameters: {
             query?: never;
@@ -24287,12 +24484,12 @@ export interface operations {
                     location_id?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:16
+                     * @example 2026-09-03T19:29:40
                      */
                     from?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:16
+                     * @example 2026-09-03T19:29:40
                      */
                     to?: string;
                     /**
@@ -24334,7 +24531,7 @@ export interface operations {
                     type?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:17
+                     * @example 2026-09-03T19:29:40
                      */
                     scheduled_at: string;
                     /**
@@ -24343,7 +24540,7 @@ export interface operations {
                      */
                     duration_min?: number | null;
                     /**
-                     * @example remote
+                     * @example office
                      * @enum {string|null}
                      */
                     modality?: "office" | "remote" | "phone" | null;
@@ -24482,7 +24679,7 @@ export interface operations {
                     type?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:17
+                     * @example 2026-09-03T19:29:40
                      */
                     scheduled_at: string;
                     /**
@@ -24491,7 +24688,7 @@ export interface operations {
                      */
                     duration_min?: number | null;
                     /**
-                     * @example office
+                     * @example remote
                      * @enum {string|null}
                      */
                     modality?: "office" | "remote" | "phone" | null;
@@ -24546,7 +24743,7 @@ export interface operations {
                      */
                     contact_id?: string | null;
                     /**
-                     * @example no_show
+                     * @example completed
                      * @enum {string}
                      */
                     status?: "planned" | "completed" | "no_show" | "cancelled";
@@ -24618,7 +24815,7 @@ export interface operations {
                     type?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:17
+                     * @example 2026-09-03T19:29:40
                      */
                     scheduled_at?: string;
                     /**
@@ -24627,7 +24824,7 @@ export interface operations {
                      */
                     duration_min?: number | null;
                     /**
-                     * @example office
+                     * @example phone
                      * @enum {string|null}
                      */
                     modality?: "office" | "remote" | "phone" | null;
@@ -24682,7 +24879,7 @@ export interface operations {
                      */
                     contact_id?: string | null;
                     /**
-                     * @example completed
+                     * @example planned
                      * @enum {string}
                      */
                     status?: "planned" | "completed" | "no_show" | "cancelled";
@@ -24744,7 +24941,7 @@ export interface operations {
                     type?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:17
+                     * @example 2026-09-03T19:29:40
                      */
                     scheduled_at?: string;
                     /**
@@ -24808,7 +25005,7 @@ export interface operations {
                      */
                     contact_id?: string | null;
                     /**
-                     * @example completed
+                     * @example cancelled
                      * @enum {string}
                      */
                     status?: "planned" | "completed" | "no_show" | "cancelled";
@@ -25051,11 +25248,11 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example helloflex
+                     * @example shiftmanager
                      * @enum {string}
                      */
                     system: "helloflex" | "shiftmanager";
-                    /** @example false */
+                    /** @example true */
                     include_children?: boolean;
                 };
             };
@@ -25100,12 +25297,12 @@ export interface operations {
                      */
                     name: string;
                     /**
-                     * @example call
+                     * @example email
                      * @enum {string}
                      */
                     channel: "call" | "email" | "whatsapp";
                     /**
-                     * @example active
+                     * @example draft
                      * @enum {string}
                      */
                     status?: "draft" | "active" | "done";
@@ -25180,7 +25377,7 @@ export interface operations {
                      */
                     channel?: "call" | "email" | "whatsapp";
                     /**
-                     * @example draft
+                     * @example active
                      * @enum {string}
                      */
                     status?: "draft" | "active" | "done";
@@ -25212,6 +25409,51 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: never;
+    };
+    patchOutreachCampaignsCampaign: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                campaign: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example b
+                     */
+                    name?: string;
+                    /**
+                     * @example whatsapp
+                     * @enum {string}
+                     */
+                    channel?: "call" | "email" | "whatsapp";
+                    /**
+                     * @example active
+                     * @enum {string}
+                     */
+                    status?: "draft" | "active" | "done";
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
+                     */
+                    source_pool_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn.
+                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
+                     */
+                    owner_id?: string | null;
+                    /** @example null */
+                    custom_fields?: Record<string, never> | null;
+                };
+            };
+        };
         responses: never;
     };
     getOutreachCampaignsCampaignStats: {
@@ -25321,11 +25563,11 @@ export interface operations {
                         share?: number;
                     }[];
                     /**
-                     * @example shares
+                     * @example even
                      * @enum {string}
                      */
                     strategy?: "even" | "shares";
-                    /** @example false */
+                    /** @example true */
                     only_unassigned?: boolean;
                     /**
                      * @example function
@@ -25452,7 +25694,7 @@ export interface operations {
                          *     ]
                          */
                         outcome?: string[];
-                        /** @example false */
+                        /** @example true */
                         unassigned?: boolean;
                     };
                     /**
@@ -25955,7 +26197,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     order?: number;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -26016,7 +26258,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     order?: number;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -26185,6 +26427,22 @@ export interface operations {
         requestBody?: never;
         responses: never;
     };
+    patchCandidateRejectionReasonsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the candidate rejection reason.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
     getCandidateBlacklistReasons: {
         parameters: {
             query?: never;
@@ -26262,6 +26520,22 @@ export interface operations {
         responses: never;
     };
     deleteCandidateBlacklistReasonsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the candidate blacklist reason.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
+    patchCandidateBlacklistReasonsId: {
         parameters: {
             query?: never;
             header?: never;
@@ -26369,6 +26643,22 @@ export interface operations {
         requestBody?: never;
         responses: never;
     };
+    patchBlacklistReasonsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the blacklist reason.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
     getEducationLevels: {
         parameters: {
             query?: never;
@@ -26461,6 +26751,22 @@ export interface operations {
         requestBody?: never;
         responses: never;
     };
+    patchEducationLevelsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the education level.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
     putCandidateGendersGender: {
         parameters: {
             query?: never;
@@ -26484,7 +26790,7 @@ export interface operations {
                      * @example n
                      */
                     color?: string | null;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -26502,6 +26808,58 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: never;
+    };
+    patchCandidateGendersGender: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                gender: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value mag niet meer dan 100 tekens bevatten.
+                     * @example b
+                     */
+                    label?: string;
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example n
+                     */
+                    color?: string | null;
+                    /** @example false */
+                    active?: boolean;
+                };
+            };
+        };
+        responses: never;
+    };
+    putCandidateRejectionReasonsReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    ids?: string[];
+                };
+            };
+        };
         responses: never;
     };
     putCandidateBlacklistReasonsReorder: {
@@ -26638,7 +26996,7 @@ export interface operations {
                     type?: string;
                     /**
                      * @description DOC-EXPIRY-1: optional validity date (VOG/BIG/diploma-style uploads). Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:16
+                     * @example 2026-09-03T19:29:40
                      */
                     expires_at?: string | null;
                 };
@@ -26728,7 +27086,7 @@ export interface operations {
                     name: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:16
+                     * @example 2026-09-03T19:29:40
                      */
                     expires_at?: string | null;
                 };
@@ -26900,69 +27258,74 @@ export interface operations {
                     nationality?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:16
+                     * @example 2026-09-03T19:29:40
                      */
                     date_of_birth?: string | null;
                     /**
-                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
                      * @example n
+                     */
+                    place_of_birth?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example i
                      */
                     gender?: string | null;
                     /**
                      * @description Het veld value mag niet meer dan 255 tekens bevatten.
-                     * @example i
+                     * @example k
                      */
                     street?: string | null;
                     /**
                      * @description Het veld value mag niet meer dan 20 tekens bevatten.
-                     * @example khwaykcmyuwpwlvq
+                     * @example hwaykcmyuwpwlvqw
                      */
                     house_number?: string | null;
                     /**
                      * @description Het veld value mag niet meer dan 20 tekens bevatten.
-                     * @example wrsitcpscqldzsnr
+                     * @example rsitcpscqldzsnrw
                      */
                     house_number_suffix?: string | null;
                     /**
                      * @description Het veld value mag niet meer dan 20 tekens bevatten.
-                     * @example wtujwvlxjklqppwq
+                     * @example tujwvlxjklqppwqb
                      */
                     postcode?: string | null;
                     /**
                      * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                     * @example b
+                     * @example e
                      */
                     city?: string | null;
                     /**
                      * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                     * @example e
+                     * @example w
                      */
                     province?: string | null;
                     /**
                      * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                     * @example w
+                     * @example t
                      */
                     country?: string | null;
                     /** @example null */
                     iban?: string | null;
                     /**
                      * @description Het veld value mag niet meer dan 255 tekens bevatten.
-                     * @example t
+                     * @example n
                      */
                     account_holder_name?: string | null;
                     /**
                      * @description Het veld value moet een geldige UUID zijn.
-                     * @example 45e62725-5da9-35c7-82db-977f64d08292
+                     * @example 1df0d726-07cf-39dc-9280-74563f231abd
                      */
                     bank_document_id?: string | null;
                     /**
                      * @description Het veld value mag niet meer dan 255 tekens bevatten.
-                     * @example o
+                     * @example q
                      */
                     function_title?: string | null;
                     /**
                      * @description Must match the regex /^[^\s\/]+$/. Het veld value mag niet meer dan 255 tekens bevatten.
-                     * @example q
+                     * @example i
                      */
                     linkedin_slug?: string | null;
                     /** @example Eius et animi quos velit et. */
@@ -27009,7 +27372,7 @@ export interface operations {
                     status_reason?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:16
+                     * @example 2026-09-03T19:29:40
                      */
                     available_again_date?: string | null;
                     /**
@@ -27028,7 +27391,7 @@ export interface operations {
                     consent?: {
                         /** @example false */
                         whatsapp_opt_in?: boolean;
-                        /** @example false */
+                        /** @example true */
                         email_opt_in?: boolean;
                         /** @example false */
                         newsletter_opt_in?: boolean;
@@ -27065,14 +27428,14 @@ export interface operations {
                     work_permit_type?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:16
+                     * @example 2026-09-03T19:29:40
                      */
                     work_permit_valid_until?: string | null;
                     /** @example null */
                     preferences?: {
                         /**
                          * @description Het veld value is geen geldige datum.
-                         * @example 2026-09-02T20:34:16
+                         * @example 2026-09-03T19:29:40
                          */
                         available_from?: string | null;
                         /**
@@ -27127,7 +27490,7 @@ export interface operations {
                         wage_tax?: boolean | null;
                         /**
                          * @description Het veld value is geen geldige datum.
-                         * @example 2026-09-02T20:34:16
+                         * @example 2026-09-03T19:29:40
                          */
                         wage_tax_from?: string | null;
                         /** @example 4326.41688 */
@@ -27182,9 +27545,9 @@ export interface operations {
                          * @example NL642559314B23
                          */
                         vat_number?: string | null;
-                        /** @example false */
+                        /** @example true */
                         kor?: boolean | null;
-                        /** @example false */
+                        /** @example true */
                         intracommunity?: boolean | null;
                         /**
                          * @description Het veld value mag niet meer dan 255 tekens bevatten.
@@ -27546,69 +27909,74 @@ export interface operations {
                     nationality?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:16
+                     * @example 2026-09-03T19:29:40
                      */
                     date_of_birth?: string | null;
                     /**
-                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
                      * @example n
+                     */
+                    place_of_birth?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example i
                      */
                     gender?: string | null;
                     /**
                      * @description Het veld value mag niet meer dan 255 tekens bevatten.
-                     * @example i
+                     * @example k
                      */
                     street?: string | null;
                     /**
                      * @description Het veld value mag niet meer dan 20 tekens bevatten.
-                     * @example khwaykcmyuwpwlvq
+                     * @example hwaykcmyuwpwlvqw
                      */
                     house_number?: string | null;
                     /**
                      * @description Het veld value mag niet meer dan 20 tekens bevatten.
-                     * @example wrsitcpscqldzsnr
+                     * @example rsitcpscqldzsnrw
                      */
                     house_number_suffix?: string | null;
                     /**
                      * @description Het veld value mag niet meer dan 20 tekens bevatten.
-                     * @example wtujwvlxjklqppwq
+                     * @example tujwvlxjklqppwqb
                      */
                     postcode?: string | null;
                     /**
                      * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                     * @example b
+                     * @example e
                      */
                     city?: string | null;
                     /**
                      * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                     * @example e
+                     * @example w
                      */
                     province?: string | null;
                     /**
                      * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                     * @example w
+                     * @example t
                      */
                     country?: string | null;
                     /** @example null */
                     iban?: string | null;
                     /**
                      * @description Het veld value mag niet meer dan 255 tekens bevatten.
-                     * @example t
+                     * @example n
                      */
                     account_holder_name?: string | null;
                     /**
                      * @description Het veld value moet een geldige UUID zijn.
-                     * @example 45e62725-5da9-35c7-82db-977f64d08292
+                     * @example 1df0d726-07cf-39dc-9280-74563f231abd
                      */
                     bank_document_id?: string | null;
                     /**
                      * @description Het veld value mag niet meer dan 255 tekens bevatten.
-                     * @example o
+                     * @example q
                      */
                     function_title?: string | null;
                     /**
                      * @description Must match the regex /^[^\s\/]+$/. Het veld value mag niet meer dan 255 tekens bevatten.
-                     * @example q
+                     * @example i
                      */
                     linkedin_slug?: string | null;
                     /** @example Eius et animi quos velit et. */
@@ -27655,7 +28023,7 @@ export interface operations {
                     status_reason?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:16
+                     * @example 2026-09-03T19:29:40
                      */
                     available_again_date?: string | null;
                     /**
@@ -27672,13 +28040,13 @@ export interface operations {
                     candidate_types?: string[];
                     /** @example null */
                     consent?: {
-                        /** @example false */
+                        /** @example true */
                         whatsapp_opt_in?: boolean;
                         /** @example false */
                         email_opt_in?: boolean;
                         /** @example true */
                         newsletter_opt_in?: boolean;
-                        /** @example false */
+                        /** @example true */
                         retention_opt_in?: boolean;
                     };
                     /**
@@ -27711,14 +28079,14 @@ export interface operations {
                     work_permit_type?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:16
+                     * @example 2026-09-03T19:29:40
                      */
                     work_permit_valid_until?: string | null;
                     /** @example null */
                     preferences?: {
                         /**
                          * @description Het veld value is geen geldige datum.
-                         * @example 2026-09-02T20:34:16
+                         * @example 2026-09-03T19:29:40
                          */
                         available_from?: string | null;
                         /**
@@ -27762,18 +28130,18 @@ export interface operations {
                          *     ]
                          */
                         license_categories?: string[];
-                        /** @example false */
+                        /** @example true */
                         own_transport?: boolean | null;
                         /**
                          * @description Het veld value moet minimaal 0 zijn.
                          * @example 4
                          */
                         max_travel_km?: number | null;
-                        /** @example true */
+                        /** @example false */
                         wage_tax?: boolean | null;
                         /**
                          * @description Het veld value is geen geldige datum.
-                         * @example 2026-09-02T20:34:16
+                         * @example 2026-09-03T19:29:40
                          */
                         wage_tax_from?: string | null;
                         /** @example 4326.41688 */
@@ -27828,7 +28196,7 @@ export interface operations {
                          * @example NL642559314B23
                          */
                         vat_number?: string | null;
-                        /** @example false */
+                        /** @example true */
                         kor?: boolean | null;
                         /** @example false */
                         intracommunity?: boolean | null;
@@ -27894,7 +28262,7 @@ export interface operations {
                          * @example b3dfd3b4-abf6-34e6-9ab5-ef739060a5da
                          */
                         bank_document_id?: string | null;
-                        /** @example true */
+                        /** @example false */
                         self_billing?: boolean | null;
                         /**
                          * @description Het veld value mag niet meer dan 255 tekens bevatten.
@@ -28219,11 +28587,11 @@ export interface operations {
                 "application/json": {
                     /** @example [] */
                     consent: {
-                        /** @example true */
+                        /** @example false */
                         whatsapp_opt_in?: boolean;
-                        /** @example true */
+                        /** @example false */
                         email_opt_in?: boolean;
-                        /** @example true */
+                        /** @example false */
                         newsletter_opt_in?: boolean;
                     };
                 };
@@ -28299,7 +28667,7 @@ export interface operations {
                     blacklist_reason?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:16
+                     * @example 2026-09-03T19:29:40
                      */
                     available_again_date?: string | null;
                 };
@@ -30319,7 +30687,7 @@ export interface operations {
                     /** @example Eius et animi quos velit et. */
                     description?: string | null;
                     /**
-                     * @example dynamic
+                     * @example ai
                      * @enum {string}
                      */
                     type?: "static" | "dynamic" | "ai";
@@ -31054,6 +31422,22 @@ export interface operations {
         requestBody?: never;
         responses: never;
     };
+    patchCustomerBlacklistReasonsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the customer blacklist reason.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
     putCustomerBlacklistReasonsReorder: {
         parameters: {
             query?: never;
@@ -31219,7 +31603,7 @@ export interface operations {
                     billing_email?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:15
+                     * @example 2026-09-03T19:29:39
                      */
                     contract_end_date?: string | null;
                     /**
@@ -31309,13 +31693,13 @@ export interface operations {
                      * @example t
                      */
                     billing_country?: string | null;
-                    /** @example false */
+                    /** @example true */
                     hide_company_name?: boolean;
                     /** @example true */
                     has_career_page?: boolean;
-                    /** @example true */
+                    /** @example false */
                     show_in_my_vacancies?: boolean;
-                    /** @example true */
+                    /** @example false */
                     exclude_from_sourcing?: boolean;
                     /**
                      * @description Het veld value is geen geldig e-mailadres.
@@ -31612,7 +31996,7 @@ export interface operations {
                     billing_email?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:15
+                     * @example 2026-09-03T19:29:39
                      */
                     contract_end_date?: string | null;
                     /**
@@ -31704,9 +32088,9 @@ export interface operations {
                     billing_country?: string | null;
                     /** @example false */
                     hide_company_name?: boolean;
-                    /** @example true */
-                    has_career_page?: boolean;
                     /** @example false */
+                    has_career_page?: boolean;
+                    /** @example true */
                     show_in_my_vacancies?: boolean;
                     /** @example false */
                     exclude_from_sourcing?: boolean;
@@ -31748,6 +32132,223 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: never;
+    };
+    patchCustomersCustomer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The customer.
+                 * @example architecto
+                 */
+                customer: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                     * @example b
+                     */
+                    coc_number?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                     * @example n
+                     */
+                    vat_number?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example g
+                     */
+                    name?: string;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example z
+                     */
+                    debtor_number?: string | null;
+                    /**
+                     * @description Must match an existing stored value.
+                     * @example architecto
+                     */
+                    phase?: string;
+                    /**
+                     * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                     * @example n
+                     */
+                    source?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
+                     */
+                    status_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example 977e5426-8d13-3824-86aa-b092f8ae52c5
+                     */
+                    industry_id?: string | null;
+                    /**
+                     * @description Must match an existing stored value.
+                     * @example architecto
+                     */
+                    blacklist_reason?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn.
+                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
+                     */
+                    owner_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
+                     */
+                    location_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example [
+                     *       "a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f"
+                     *     ]
+                     */
+                    branch_ids?: string[];
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example 21c4122b-d554-3723-966c-6d723ea5293f
+                     */
+                    billing_branch_id?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example l
+                     */
+                    cost_center?: string | null;
+                    /**
+                     * @description Het veld value is geen geldig e-mailadres.
+                     * @example idickens@example.org
+                     */
+                    billing_email?: string | null;
+                    /**
+                     * @description Het veld value is geen geldige datum.
+                     * @example 2026-09-03T19:29:39
+                     */
+                    contract_end_date?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example h
+                     */
+                    website?: string | null;
+                    /**
+                     * @description Het veld value moet minimaal 0 zijn.
+                     * @example 87
+                     */
+                    employee_count?: number | null;
+                    /** @example Eius et animi quos velit et. */
+                    description?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example v
+                     */
+                    street?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 20 tekens bevatten.
+                     * @example dljnikhwaykcmyuw
+                     */
+                    house_number?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 20 tekens bevatten.
+                     * @example pwlvqwrsitcpscql
+                     */
+                    house_number_suffix?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 20 tekens bevatten.
+                     * @example dzsnrwtujwvlxjkl
+                     */
+                    postcode?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example q
+                     */
+                    city?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example p
+                     */
+                    state?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example p
+                     */
+                    country?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example w
+                     */
+                    province?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 40 tekens bevatten.
+                     * @example q
+                     */
+                    billing_po_box?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example b
+                     */
+                    billing_street?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 20 tekens bevatten.
+                     * @example ewtnnoqitpxntltc
+                     */
+                    billing_house_number?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 20 tekens bevatten.
+                     * @example vipojsausgioglrb
+                     */
+                    billing_house_number_suffix?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 20 tekens bevatten.
+                     * @example chgsrzyhcttwbkmk
+                     */
+                    billing_postcode?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example f
+                     */
+                    billing_city?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example t
+                     */
+                    billing_country?: string | null;
+                    /** @example false */
+                    hide_company_name?: boolean;
+                    /** @example false */
+                    has_career_page?: boolean;
+                    /** @example true */
+                    show_in_my_vacancies?: boolean;
+                    /** @example false */
+                    exclude_from_sourcing?: boolean;
+                    /**
+                     * @description Het veld value is geen geldig e-mailadres.
+                     * @example tobin24@example.org
+                     */
+                    email?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 50 tekens bevatten.
+                     * @example t
+                     */
+                    phone?: string | null;
+                    /** @example null */
+                    custom_fields?: Record<string, never> | null;
+                    /**
+                     * @description Must match an existing stored value.
+                     * @example [
+                     *       "architecto"
+                     *     ]
+                     */
+                    contract_types?: string[];
+                };
+            };
+        };
         responses: never;
     };
     getCustomersCustomerStats: {
@@ -32937,6 +33538,24 @@ export interface operations {
         requestBody?: never;
         responses: never;
     };
+    patchCustomersCustomerIdLocationsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the location.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
     getCustomersCustomerIdDepartmentsId: {
         parameters: {
             query?: never;
@@ -33035,6 +33654,58 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: never;
+    };
+    patchCustomersCustomerIdDepartmentsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the department.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    location_id?: string;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example g
+                     */
+                    name?: string;
+                    /** @example Eius et animi quos velit et. */
+                    description?: string | null;
+                    /**
+                     * @description DEPT-BILLING-1: cost centre + billing e-mail (lowest inheritance level). Het veld value mag niet meer dan 64 tekens bevatten.
+                     * @example v
+                     */
+                    cost_center?: string | null;
+                    /**
+                     * @description Het veld value is geen geldig e-mailadres. Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example jdach@example.org
+                     */
+                    billing_email?: string | null;
+                    /**
+                     * @description SUB-STATUS-1: lifecycle status — the tenant-scoped lookup uuid. Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example cd1eb1ea-4697-3b9a-9dd0-988044a83af6
+                     */
+                    status_id?: string | null;
+                    /** @example null */
+                    custom_fields?: Record<string, never> | null;
+                };
+            };
+        };
         responses: never;
     };
     putCustomersCustomerIdContactsId: {
@@ -33136,7 +33807,7 @@ export interface operations {
                     status_id?: string | null;
                     /** @example false */
                     is_primary?: boolean;
-                    /** @example false */
+                    /** @example true */
                     whatsapp_consent?: boolean;
                     /** @example null */
                     whatsapp_consent_at?: string;
@@ -33176,6 +33847,129 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: never;
+    };
+    patchCustomersCustomerIdContactsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the contact.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example b
+                     */
+                    first_name?: string;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example n
+                     */
+                    middle_name?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example g
+                     */
+                    last_name?: string;
+                    /**
+                     * @description Must match an existing stored value. Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example z
+                     */
+                    gender?: string | null;
+                    /**
+                     * @description Het veld value is geen geldig e-mailadres.
+                     * @example rempel.chadrick@example.org
+                     */
+                    email?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 50 tekens bevatten.
+                     * @example l
+                     */
+                    phone?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 50 tekens bevatten.
+                     * @example j
+                     */
+                    mobile?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example n
+                     */
+                    function?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example i
+                     */
+                    linkedin_slug?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 20000 tekens bevatten.
+                     * @example Deserunt aut ab provident perspiciatis quo omnis nostrum.
+                     */
+                    description?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn.
+                     * @example bfc53181-d647-36b2-9080-f9c2b76006f4
+                     */
+                    customer_location_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn.
+                     * @example 5d093e7f-5aae-3aa3-bece-f6e784dcbd67
+                     */
+                    customer_department_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn.
+                     * @example [
+                     *       "445bd3f6-8f2c-38cb-aa04-2f4e1edb32bb"
+                     *     ]
+                     */
+                    location_ids?: string[];
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn.
+                     * @example [
+                     *       "deea2dce-ea5d-340f-90ce-c06cddd4c879"
+                     *     ]
+                     */
+                    department_ids?: string[];
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example d9be5934-80e7-34a9-a136-841b5f0aea83
+                     */
+                    status_id?: string | null;
+                    /** @example false */
+                    is_primary?: boolean;
+                    /** @example true */
+                    whatsapp_consent?: boolean;
+                    /** @example null */
+                    whatsapp_consent_at?: string;
+                    /** @example false */
+                    email_consent?: boolean;
+                    /** @example null */
+                    email_consent_at?: string;
+                    /** @example true */
+                    newsletter_consent?: boolean;
+                    /** @example null */
+                    newsletter_consent_at?: string;
+                    /** @example null */
+                    custom_fields?: Record<string, never> | null;
+                    /**
+                     * @description Must match the regex /^[a-z]{2,3}$/.
+                     * @example zm
+                     */
+                    preferred_language?: string | null;
+                };
+            };
+        };
         responses: never;
     };
     deleteCustomersCustomerNotesNote: {
@@ -33991,6 +34785,24 @@ export interface operations {
         requestBody?: never;
         responses: never;
     };
+    patchCustomersCustomerIdPriceAgreementsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the price agreement.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
     getCustomersCustomerIdLocationsIdNotes: {
         parameters: {
             query?: never;
@@ -34617,6 +35429,22 @@ export interface operations {
         requestBody?: never;
         responses: never;
     };
+    patchCustomFieldsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the custom field.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
     getAdminJobs: {
         parameters: {
             query?: never;
@@ -34965,12 +35793,12 @@ export interface operations {
                     log_name?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:12
+                     * @example 2026-09-03T19:29:38
                      */
                     date_from?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>date_from</code> zijn.
-                     * @example 2052-09-25
+                     * @example 2052-09-26
                      */
                     date_to?: string | null;
                     /** @example false */
@@ -35086,6 +35914,30 @@ export interface operations {
         };
     };
     putDashboardKpisRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                role: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @example [
+                     *       "architecto"
+                     *     ]
+                     */
+                    kpis?: string[];
+                };
+            };
+        };
+        responses: never;
+    };
+    patchDashboardKpisRole: {
         parameters: {
             query?: never;
             header?: never;
@@ -35929,6 +36781,41 @@ export interface operations {
         };
         responses: never;
     };
+    patchSettingsWhatsappQueue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value moet minimaal 1 zijn. Het veld value mag niet groter zijn dan 100000.
+                     * @example 1
+                     */
+                    known_hourly_limit?: number;
+                    /**
+                     * @description Het veld value moet minimaal 1 zijn. Het veld value mag niet groter zijn dan 100000.
+                     * @example 22
+                     */
+                    new_hourly_limit?: number;
+                    /**
+                     * @description Het veld value moet minimaal 1 zijn. Het veld value mag niet groter zijn dan 100000.
+                     * @example 7
+                     */
+                    new_daily_limit?: number;
+                    /**
+                     * @description Het veld value moet minimaal 1 zijn. Het veld value mag niet groter zijn dan 100000.
+                     * @example 16
+                     */
+                    new_weekly_limit?: number;
+                };
+            };
+        };
+        responses: never;
+    };
     getTaskStatuses: {
         parameters: {
             query?: never;
@@ -35978,7 +36865,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     sort_order?: number;
-                    /** @example false */
+                    /** @example true */
                     is_done?: boolean;
                     /** @example false */
                     active?: boolean;
@@ -36108,7 +36995,7 @@ export interface operations {
                     sort_order?: number;
                     /** @example false */
                     is_done?: boolean;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -36186,7 +37073,7 @@ export interface operations {
                     active?: boolean;
                     /**
                      * @description KAND-CONTACT-STEMPELS-1: whether completing a task of this type stamps last_contact_at.
-                     * @example false
+                     * @example true
                      */
                     counts_as_contact?: boolean;
                 };
@@ -36261,7 +37148,7 @@ export interface operations {
                      */
                     contract_guid: string;
                     /**
-                     * @example ended
+                     * @example sent
                      * @enum {string}
                      */
                     status: "sent" | "active" | "ended";
@@ -36303,7 +37190,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example sdb
+                     * @example shiftmanager
                      * @enum {string}
                      */
                     system: "shiftmanager" | "intus" | "sdb";
@@ -36317,7 +37204,7 @@ export interface operations {
                     /** @example null */
                     admin_url?: string | null;
                     /**
-                     * @example company_token
+                     * @example bearer_token
                      * @enum {string}
                      */
                     auth_type: "bearer_token" | "oauth2" | "api_key" | "company_token";
@@ -36382,13 +37269,13 @@ export interface operations {
                     /** @example null */
                     admin_url?: string | null;
                     /**
-                     * @example company_token
+                     * @example api_key
                      * @enum {string}
                      */
                     auth_type?: "bearer_token" | "oauth2" | "api_key" | "company_token";
                     /** @example null */
                     credentials?: Record<string, never>;
-                    /** @example false */
+                    /** @example true */
                     active?: boolean;
                 };
             };
@@ -36471,7 +37358,7 @@ export interface operations {
                     description?: string | null;
                     /**
                      * @description Opt-in: when true, callers MUST send a valid HMAC X-Signature header.
-                     * @example true
+                     * @example false
                      */
                     require_signature?: boolean;
                 };
@@ -36586,6 +37473,39 @@ export interface operations {
         requestBody?: never;
         responses: never;
     };
+    patchWebhooksWebhook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The webhook.
+                 * @example architecto
+                 */
+                webhook: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example b
+                     */
+                    name?: string;
+                    /**
+                     * @description Het veld value mag niet meer dan 1000 tekens bevatten.
+                     * @example Et animi quos velit et fugiat.
+                     */
+                    description?: string | null;
+                    /** @example false */
+                    require_signature?: boolean;
+                };
+            };
+        };
+        responses: never;
+    };
     getWebhookEvents: {
         parameters: {
             query?: never;
@@ -36652,7 +37572,7 @@ export interface operations {
                     url: string;
                     /**
                      * @example [
-                     *       "candidate.created"
+                     *       "candidate.document_expiring"
                      *     ]
                      */
                     events?: ("candidate.created" | "candidate.status_changed" | "candidate.reactivated" | "candidate.archived" | "application.created" | "application.stage_changed" | "application.proposal_sent" | "application.stage_stale" | "match.created" | "match.updated" | "match.deleted" | "match.terminated" | "match.expiring" | "candidate.document_expiring" | "candidate.availability_changed" | "candidate.no_contact" | "candidate.missing_cv" | "candidate.availability_upcoming" | "candidate.availability_overdue" | "candidate.leave_ending_soon" | "candidate.leave_overdue" | "candidate.unavailable_ending_soon" | "candidate.unavailable_overdue" | "vacancy.created" | "vacancy.status_changed" | "vacancy.published" | "vacancy.updated" | "task.created" | "appointment.created" | "message.received" | "message.sent" | "backoffice.link.updated" | "ai_agent.webhook_received" | "candidate.birthday" | "candidate.retention_due" | "contact.retention_due" | "appointment.upcoming" | "facebook.lead_received" | "whatsapp.connection_down" | "whatsapp.connection_restored" | "interview.started" | "interview.completed" | "interview.disqualified" | "candidate.status_stale" | "candidate.phase_stale" | "task.overdue" | "conversation.unanswered" | "customer.no_contact" | "customer.contract_ending" | "customer.task_overdue" | "customer.match_ending" | "customer.vacancy_stale" | "vacancy.stale_online" | "vacancy.closing_soon")[];
@@ -36719,11 +37639,11 @@ export interface operations {
                     url?: string;
                     /**
                      * @example [
-                     *       "backoffice.link.updated"
+                     *       "candidate.unavailable_overdue"
                      *     ]
                      */
                     events?: ("candidate.created" | "candidate.status_changed" | "candidate.reactivated" | "candidate.archived" | "application.created" | "application.stage_changed" | "application.proposal_sent" | "application.stage_stale" | "match.created" | "match.updated" | "match.deleted" | "match.terminated" | "match.expiring" | "candidate.document_expiring" | "candidate.availability_changed" | "candidate.no_contact" | "candidate.missing_cv" | "candidate.availability_upcoming" | "candidate.availability_overdue" | "candidate.leave_ending_soon" | "candidate.leave_overdue" | "candidate.unavailable_ending_soon" | "candidate.unavailable_overdue" | "vacancy.created" | "vacancy.status_changed" | "vacancy.published" | "vacancy.updated" | "task.created" | "appointment.created" | "message.received" | "message.sent" | "backoffice.link.updated" | "ai_agent.webhook_received" | "candidate.birthday" | "candidate.retention_due" | "contact.retention_due" | "appointment.upcoming" | "facebook.lead_received" | "whatsapp.connection_down" | "whatsapp.connection_restored" | "interview.started" | "interview.completed" | "interview.disqualified" | "candidate.status_stale" | "candidate.phase_stale" | "task.overdue" | "conversation.unanswered" | "customer.no_contact" | "customer.contract_ending" | "customer.task_overdue" | "customer.match_ending" | "customer.vacancy_stale" | "vacancy.stale_online" | "vacancy.closing_soon")[];
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -36744,6 +37664,45 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: never;
+    };
+    patchWebhookSubscriptionsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the webhook subscription.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example b
+                     */
+                    name?: string;
+                    /**
+                     * @description Het veld value mag niet meer dan 2048 tekens bevatten.
+                     * @example http://bailey.com/
+                     */
+                    url?: string;
+                    /**
+                     * @example [
+                     *       "candidate.unavailable_overdue"
+                     *     ]
+                     */
+                    events?: ("candidate.created" | "candidate.status_changed" | "candidate.reactivated" | "candidate.archived" | "application.created" | "application.stage_changed" | "application.proposal_sent" | "application.stage_stale" | "match.created" | "match.updated" | "match.deleted" | "match.terminated" | "match.expiring" | "candidate.document_expiring" | "candidate.availability_changed" | "candidate.no_contact" | "candidate.missing_cv" | "candidate.availability_upcoming" | "candidate.availability_overdue" | "candidate.leave_ending_soon" | "candidate.leave_overdue" | "candidate.unavailable_ending_soon" | "candidate.unavailable_overdue" | "vacancy.created" | "vacancy.status_changed" | "vacancy.published" | "vacancy.updated" | "task.created" | "appointment.created" | "message.received" | "message.sent" | "backoffice.link.updated" | "ai_agent.webhook_received" | "candidate.birthday" | "candidate.retention_due" | "contact.retention_due" | "appointment.upcoming" | "facebook.lead_received" | "whatsapp.connection_down" | "whatsapp.connection_restored" | "interview.started" | "interview.completed" | "interview.disqualified" | "candidate.status_stale" | "candidate.phase_stale" | "task.overdue" | "conversation.unanswered" | "customer.no_contact" | "customer.contract_ending" | "customer.task_overdue" | "customer.match_ending" | "customer.vacancy_stale" | "vacancy.stale_online" | "vacancy.closing_soon")[];
+                    /** @example false */
+                    active?: boolean;
+                };
+            };
+        };
         responses: never;
     };
     getWebhookSubscriptionsIdDeliveries: {
@@ -36919,12 +37878,12 @@ export interface operations {
                      */
                     friendly_name?: string;
                     /**
-                     * @example additional
+                     * @example primary
                      * @enum {string}
                      */
                     type?: "primary" | "additional";
                     /**
-                     * @example active
+                     * @example disabled
                      * @enum {string}
                      */
                     status?: "active" | "disabled";
@@ -36956,7 +37915,7 @@ export interface operations {
                     allowed_ips?: string[];
                     /**
                      * @example [
-                     *       "read_write"
+                     *       "read"
                      *     ]
                      */
                     scopes?: ("read" | "read_write")[];
@@ -36979,6 +37938,74 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: never;
+    };
+    patchApiKeysId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the api key.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example b
+                     */
+                    friendly_name?: string;
+                    /**
+                     * @example primary
+                     * @enum {string}
+                     */
+                    type?: "primary" | "additional";
+                    /**
+                     * @example disabled
+                     * @enum {string}
+                     */
+                    status?: "active" | "disabled";
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example n
+                     */
+                    organisation?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 2000 tekens bevatten.
+                     * @example Animi quos velit et fugiat.
+                     */
+                    description?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example d
+                     */
+                    contact_name?: string | null;
+                    /**
+                     * @description Het veld value is geen geldig e-mailadres. Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example jermaine.tillman@example.org
+                     */
+                    contact_email?: string | null;
+                    /**
+                     * @example [
+                     *       "architecto"
+                     *     ]
+                     */
+                    allowed_ips?: string[];
+                    /**
+                     * @example [
+                     *       "read"
+                     *     ]
+                     */
+                    scopes?: ("read" | "read_write")[];
+                };
+            };
+        };
         responses: never;
     };
     postApiKeysIdRegenerate: {
@@ -37227,7 +38254,7 @@ export interface operations {
                     /** @example null */
                     history?: ({
                         /**
-                         * @example user
+                         * @example assistant
                          * @enum {string}
                          */
                         role: "user" | "assistant";
@@ -37258,7 +38285,7 @@ export interface operations {
                     /** @example null */
                     conversation_history?: ({
                         /**
-                         * @example assistant
+                         * @example user
                          * @enum {string}
                          */
                         role: "user" | "assistant";
@@ -37720,7 +38747,7 @@ export interface operations {
                     /**
                      * @description NOTES-ASSIST-COMBINED-1: process/summarize_process = verbeteren óf
                      *     samenvatten PLUS actiepunten in één AI-call ({text, items}).
-                     * @example actions
+                     * @example process
                      * @enum {string}
                      */
                     mode: "improve" | "summarize" | "actions" | "process" | "summarize_process";
@@ -37848,7 +38875,7 @@ export interface operations {
                     confirm_costs?: boolean;
                     /**
                      * @description VOICE-MODE-1: ask for a short, speakable answer (text-to-speech in the FE).
-                     * @example false
+                     * @example true
                      */
                     voice_mode?: boolean;
                     /**
@@ -37899,13 +38926,13 @@ export interface operations {
                          *     K4 (match_*) + K5 (calllist, opportunity_*) joined the closed vocabulary.
                          *     match_terminate is WIZARD_ONLY (ends a placement); the rest are Auto-allowed
                          *     neutral acts. calllist is a template-lane type; the others take the service lane.
-                         * @example appointment
+                         * @example opportunity_next_step
                          * @enum {string}
                          */
                         type: "task" | "whatsapp" | "email" | "appointment" | "notification" | "application_reject" | "application_propose" | "application_stage_move" | "interview_start" | "vacancy_publish" | "vacancy_start_interviews" | "vacancy_create_task" | "match_checkin" | "match_extend" | "match_terminate" | "calllist" | "opportunity_next_step" | "opportunity_follow_up";
                         /**
                          * @description Must be a valid date in the format <code>Y-m-d</code>.
-                         * @example 2026-09-02
+                         * @example 2026-09-03
                          */
                         due_date?: string | null;
                         /**
@@ -37915,7 +38942,7 @@ export interface operations {
                         confirmed?: boolean;
                         /**
                          * @description Het veld value is geen geldige datum.
-                         * @example 2026-09-02T20:34:19
+                         * @example 2026-09-03T19:29:41
                          */
                         start?: string | null;
                         /**
@@ -38003,7 +39030,7 @@ export interface operations {
                         match_id?: string | null;
                         /**
                          * @description Must be a valid date in the format <code>Y-m-d</code>.
-                         * @example 2026-09-02
+                         * @example 2026-09-03
                          */
                         end_date?: string | null;
                         /**
@@ -38029,7 +39056,7 @@ export interface operations {
                          */
                         note_action_item_id?: string | null;
                     }[];
-                    /** @example true */
+                    /** @example false */
                     confirmed?: boolean;
                     /** @example null */
                     source?: {
@@ -38114,12 +39141,12 @@ export interface operations {
                     surface?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:19
+                     * @example 2026-09-03T19:29:41
                      */
                     from?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:19
+                     * @example 2026-09-03T19:29:41
                      */
                     to?: string;
                     /**
@@ -38193,12 +39220,12 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:19
+                     * @example 2026-09-03T19:29:41
                      */
                     from?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:19
+                     * @example 2026-09-03T19:29:41
                      */
                     to?: string;
                 };
@@ -38294,7 +39321,7 @@ export interface operations {
                 "application/json": {
                     /**
                      * @example [
-                     *       true
+                     *       false
                      *     ]
                      */
                     tools?: (boolean | null)[];
@@ -38438,12 +39465,12 @@ export interface operations {
                     /**
                      * @description NOT 'sometimes' — that skips required_with when the field is absent,
                      *     silently allowing a half-open range (from without to). This field is required when <code>to</code> is present. Must be a valid date in the format <code>Y-m-d</code>.
-                     * @example 2026-09-02
+                     * @example 2026-09-03
                      */
                     from?: string | null;
                     /**
                      * @description This field is required when <code>from</code> is present. Must be a valid date in the format <code>Y-m-d</code>. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                     * @example 2052-09-25
+                     * @example 2052-09-26
                      */
                     to?: string | null;
                     /**
@@ -38487,12 +39514,12 @@ export interface operations {
                     days?: number;
                     /**
                      * @description This field is required when <code>to</code> is present. Must be a valid date in the format <code>Y-m-d</code>.
-                     * @example 2026-09-02
+                     * @example 2026-09-03
                      */
                     from?: string | null;
                     /**
                      * @description This field is required when <code>from</code> is present. Must be a valid date in the format <code>Y-m-d</code>. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                     * @example 2052-09-25
+                     * @example 2052-09-26
                      */
                     to?: string | null;
                 };
@@ -38890,6 +39917,107 @@ export interface operations {
         requestBody?: never;
         responses: never;
     };
+    patchLocationsLocation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The location.
+                 * @example architecto
+                 */
+                location: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example b
+                     */
+                    color?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 40 tekens bevatten.
+                     * @example n
+                     */
+                    icon?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example g
+                     */
+                    name?: string;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example z
+                     */
+                    street?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example m
+                     */
+                    house_number?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example i
+                     */
+                    house_number_suffix?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 16 tekens bevatten.
+                     * @example yvdljnikhwaykcmy
+                     */
+                    postcode?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 16 tekens bevatten.
+                     * @example uwpwlvqwrsitcpsc
+                     */
+                    postal_code?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example q
+                     */
+                    city?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example l
+                     */
+                    province?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example d
+                     */
+                    country?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example z
+                     */
+                    coc_number?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example s
+                     */
+                    vat_number?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example n
+                     */
+                    contact_name?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                     * @example r
+                     */
+                    phone?: string | null;
+                    /**
+                     * @description Het veld value is geen geldig e-mailadres. Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example feeney.demarcus@example.com
+                     */
+                    email?: string | null;
+                };
+            };
+        };
+        responses: never;
+    };
     postLocationsLocationGeocode: {
         parameters: {
             query?: never;
@@ -39075,7 +40203,7 @@ export interface operations {
                     hours_per_week_max?: number;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:14
+                     * @example 2026-09-03T19:29:39
                      */
                     available_from_before?: string;
                     /**
@@ -39192,6 +40320,19 @@ export interface operations {
         responses: never;
     };
     deleteSettingsMatchWeightTemplatesMatchWeightTemplate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                matchWeightTemplate: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
+    patchSettingsMatchWeightTemplatesMatchWeightTemplate: {
         parameters: {
             query?: never;
             header?: never;
@@ -39892,7 +41033,7 @@ export interface operations {
                     hours_per_week_max?: number;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:16
+                     * @example 2026-09-03T19:29:40
                      */
                     available_from_before?: string;
                     /**
@@ -40380,6 +41521,44 @@ export interface operations {
         requestBody?: never;
         responses: never;
     };
+    patchMatchesMatchNotesNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The match.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                match: string;
+                /**
+                 * @description The note.
+                 * @example architecto
+                 */
+                note: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value mag niet meer dan 5000 tekens bevatten.
+                     * @example b
+                     */
+                    body?: string;
+                    /** @example null */
+                    type?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 8 tekens bevatten.
+                     * @example ngzmiyvd
+                     */
+                    language?: string | null;
+                };
+            };
+        };
+        responses: never;
+    };
     postWhatsappWebWebhook: {
         parameters: {
             query?: never;
@@ -40429,7 +41608,7 @@ export interface operations {
                     message_id?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:12
+                     * @example 2026-09-03T19:29:38
                      */
                     sent_at?: string | null;
                 };
@@ -40588,7 +41767,7 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:12
+                     * @example 2026-09-03T19:29:38
                      */
                     before?: string;
                     /**
@@ -40648,18 +41827,18 @@ export interface operations {
                     number?: string[];
                     /**
                      * @example [
-                     *       "waba"
+                     *       "wa_web"
                      *     ]
                      */
                     channel?: ("waba" | "waba_coex" | "wa_web")[];
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:12
+                     * @example 2026-09-03T19:29:38
                      */
                     from?: string;
                     /**
                      * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                     * @example 2052-09-25
+                     * @example 2052-09-26
                      */
                     to?: string;
                     /**
@@ -40772,7 +41951,7 @@ export interface operations {
                     /** @example architecto */
                     webhook_verify_token?: string | null;
                     /**
-                     * @example meta
+                     * @example 360dialog
                      * @enum {string}
                      */
                     provider?: "meta" | "360dialog" | "embedded";
@@ -40837,7 +42016,7 @@ export interface operations {
                     /** @example architecto */
                     webhook_verify_token?: string;
                     /**
-                     * @example meta
+                     * @example 360dialog
                      * @enum {string}
                      */
                     provider?: "meta" | "360dialog" | "embedded";
@@ -41025,6 +42204,31 @@ export interface operations {
         };
         responses: never;
     };
+    patchSettingsMessageRetention: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value moet minimaal 1 zijn. Het veld value mag niet groter zijn dan 3650.
+                     * @example 1
+                     */
+                    days: number;
+                    /**
+                     * @description Optional: the view window rides the same admin surface. Het veld value moet minimaal 1 zijn. Het veld value mag niet groter zijn dan 365.
+                     * @example 22
+                     */
+                    load_default_days?: number;
+                };
+            };
+        };
+        responses: never;
+    };
     getProfileMessageRetention: {
         parameters: {
             query?: never;
@@ -41048,6 +42252,26 @@ export interface operations {
         };
     };
     putProfileMessageRetention: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value moet minimaal 1 zijn. Het veld value mag niet groter zijn dan 3650.
+                     * @example 1
+                     */
+                    days: number;
+                };
+            };
+        };
+        responses: never;
+    };
+    patchProfileMessageRetention: {
         parameters: {
             query?: never;
             header?: never;
@@ -41166,6 +42390,22 @@ export interface operations {
         responses: never;
     };
     deleteEscalationReasonsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the escalation reason.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
+    patchEscalationReasonsId: {
         parameters: {
             query?: never;
             header?: never;
@@ -41473,7 +42713,7 @@ export interface operations {
                     state_ai_flexplanner?: string;
                     /** @example 16 */
                     failed_attempts?: number;
-                    /** @example false */
+                    /** @example true */
                     escalated?: boolean;
                 };
             };
@@ -41498,7 +42738,7 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:19
+                     * @example 2026-09-03T19:29:40
                      */
                     before?: string;
                     /**
@@ -41548,7 +42788,7 @@ export interface operations {
                     /** @example architecto */
                     context_wamid?: string | null;
                     /**
-                     * @example outbound
+                     * @example inbound
                      * @enum {string}
                      */
                     direction: "inbound" | "outbound";
@@ -41560,7 +42800,7 @@ export interface operations {
                     message_content?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:19
+                     * @example 2026-09-03T19:29:40
                      */
                     sent_at?: string;
                     /**
@@ -41745,7 +42985,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example read
+                     * @example delivered
                      * @enum {string}
                      */
                     status: "delivered" | "read";
@@ -41788,7 +43028,7 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:19
+                     * @example 2026-09-03T19:29:41
                      */
                     before?: string;
                 };
@@ -42338,6 +43578,22 @@ export interface operations {
         requestBody?: never;
         responses: never;
     };
+    patchOpportunityLostReasonsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the opportunity lost reason.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
     getOpportunities: {
         parameters: {
             query?: never;
@@ -42407,7 +43663,7 @@ export interface operations {
                     currency?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:15
+                     * @example 2026-09-03T19:29:39
                      */
                     expected_close_at?: string | null;
                     /**
@@ -42431,18 +43687,18 @@ export interface operations {
                      */
                     hours?: number | null;
                     /**
-                     * @example total
+                     * @example week
                      * @enum {string|null}
                      */
                     hours_period?: "week" | "month" | "total" | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:15
+                     * @example 2026-09-03T19:29:39
                      */
                     start_date?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>start_date</code> zijn.
-                     * @example 2052-09-25
+                     * @example 2052-09-26
                      */
                     end_date?: string | null;
                     /**
@@ -42592,7 +43848,7 @@ export interface operations {
                     currency?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:15
+                     * @example 2026-09-03T19:29:39
                      */
                     expected_close_at?: string | null;
                     /**
@@ -42622,12 +43878,12 @@ export interface operations {
                     hours_period?: "week" | "month" | "total" | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:15
+                     * @example 2026-09-03T19:29:39
                      */
                     start_date?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>start_date</code> zijn.
-                     * @example 2052-09-25
+                     * @example 2052-09-26
                      */
                     end_date?: string | null;
                     /**
@@ -42688,6 +43944,141 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: never;
+    };
+    patchOpportunitiesOpportunity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The opportunity.
+                 * @example architecto
+                 */
+                opportunity: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example b
+                     */
+                    title?: string;
+                    /**
+                     * @description Het veld value mag niet meer dan 20000 tekens bevatten.
+                     * @example Et animi quos velit et fugiat.
+                     */
+                    description?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example 5707ca55-f609-3528-be8b-1baeaee1567e
+                     */
+                    customer_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example 947170af-7488-3f30-a16d-723355a9502f
+                     */
+                    opportunity_stage_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example cd1eb1ea-4697-3b9a-9dd0-988044a83af6
+                     */
+                    deal_type_id?: string | null;
+                    /**
+                     * @description Het veld value moet minimaal 0 zijn. Het veld value mag niet groter zijn dan 99999999.99.
+                     * @example 14
+                     */
+                    value?: number | null;
+                    /**
+                     * @description Het veld value moet 3 tekens bevatten.
+                     * @example way
+                     */
+                    currency?: string;
+                    /**
+                     * @description Het veld value is geen geldige datum.
+                     * @example 2026-09-03T19:29:39
+                     */
+                    expected_close_at?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn.
+                     * @example e2398df3-051c-3810-a269-3a15e327b316
+                     */
+                    owner_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example a232abbe-3006-3f67-bed4-124abab91dce
+                     */
+                    location_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example bfc53181-d647-36b2-9080-f9c2b76006f4
+                     */
+                    customer_location_id?: string | null;
+                    /**
+                     * @description Het veld value moet minimaal 0 zijn. Het veld value mag niet groter zijn dan 9999.99.
+                     * @example 25
+                     */
+                    hours?: number | null;
+                    /**
+                     * @example month
+                     * @enum {string|null}
+                     */
+                    hours_period?: "week" | "month" | "total" | null;
+                    /**
+                     * @description Het veld value is geen geldige datum.
+                     * @example 2026-09-03T19:29:39
+                     */
+                    start_date?: string | null;
+                    /**
+                     * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>start_date</code> zijn.
+                     * @example 2052-09-26
+                     */
+                    end_date?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
+                     */
+                    service_type_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
+                     */
+                    agreement_type_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
+                     */
+                    department_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example 21c4122b-d554-3723-966c-6d723ea5293f
+                     */
+                    contact_id?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 50 tekens bevatten.
+                     * @example [
+                     *       "l"
+                     *     ]
+                     */
+                    tags?: string[];
+                    /** @example null */
+                    custom_fields?: Record<string, never> | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 2000 tekens bevatten.
+                     * @example j
+                     */
+                    lost_note?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example n
+                     */
+                    lost_reason?: string | null;
+                };
+            };
+        };
         responses: never;
     };
     getOpportunitiesOpportunityActivity: {
@@ -43554,6 +44945,47 @@ export interface operations {
         requestBody?: never;
         responses: never;
     };
+    patchOpportunitiesOpportunityNotesNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The opportunity.
+                 * @example architecto
+                 */
+                opportunity: string;
+                /**
+                 * @description The note.
+                 * @example architecto
+                 */
+                note: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value mag niet meer dan 5000 tekens bevatten.
+                     * @example b
+                     */
+                    body: string;
+                    /**
+                     * @description Same tenant/entity-scoped lookup as store() — dropdown and validator agree.
+                     * @example null
+                     */
+                    type?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 8 tekens bevatten.
+                     * @example ngzmiyvd
+                     */
+                    language?: string | null;
+                };
+            };
+        };
+        responses: never;
+    };
     postOpportunitiesOpportunityNotesNoteRestorePrevious: {
         parameters: {
             query?: never;
@@ -43902,12 +45334,12 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:17
+                     * @example 2026-09-03T19:29:40
                      */
                     from: string;
                     /**
                      * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                     * @example 2052-09-25
+                     * @example 2052-09-26
                      */
                     to: string;
                     /**
@@ -43957,12 +45389,12 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:17
+                     * @example 2026-09-03T19:29:40
                      */
                     from?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:17
+                     * @example 2026-09-03T19:29:40
                      */
                     to?: string;
                 };
@@ -44279,18 +45711,18 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example month
+                     * @example day
                      * @enum {string}
                      */
                     period?: "day" | "week" | "month";
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:19
+                     * @example 2026-09-03T19:29:40
                      */
                     from?: string;
                     /**
                      * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                     * @example 2052-09-25
+                     * @example 2052-09-26
                      */
                     to?: string;
                     /**
@@ -44349,12 +45781,12 @@ export interface operations {
                     function?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:19
+                     * @example 2026-09-03T19:29:40
                      */
                     from?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:19
+                     * @example 2026-09-03T19:29:40
                      */
                     to?: string;
                     /** @example false */
@@ -44503,12 +45935,12 @@ export interface operations {
                     status?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:19
+                     * @example 2026-09-03T19:29:40
                      */
                     from?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:19
+                     * @example 2026-09-03T19:29:40
                      */
                     to?: string;
                     /**
@@ -44593,12 +46025,12 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:19
+                     * @example 2026-09-03T19:29:40
                      */
                     actual_start_time: string;
                     /**
                      * @description Het veld value is geen geldige datum. Het veld value moet een datum na <code>actual_start_time</code> zijn.
-                     * @example 2052-09-25
+                     * @example 2052-09-26
                      */
                     actual_end_time: string;
                     /**
@@ -44667,12 +46099,12 @@ export interface operations {
                     status?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:19
+                     * @example 2026-09-03T19:29:40
                      */
                     from?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:19
+                     * @example 2026-09-03T19:29:40
                      */
                     to?: string;
                     /**
@@ -44842,12 +46274,12 @@ export interface operations {
                     period?: "day" | "week" | "month";
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:19
+                     * @example 2026-09-03T19:29:40
                      */
                     from?: string;
                     /**
                      * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                     * @example 2052-09-25
+                     * @example 2052-09-26
                      */
                     to?: string;
                 };
@@ -45617,12 +47049,12 @@ export interface operations {
                         location?: string | null;
                         /**
                          * @description Het veld value is geen geldige datum.
-                         * @example 2026-09-02T20:34:12
+                         * @example 2026-09-03T19:29:38
                          */
                         start_date?: string | null;
                         /**
                          * @description Het veld value is geen geldige datum.
-                         * @example 2026-09-02T20:34:12
+                         * @example 2026-09-03T19:29:38
                          */
                         end_date?: string | null;
                         /**
@@ -45653,7 +47085,7 @@ export interface operations {
                         organisation?: string | null;
                         /**
                          * @description Het veld value is geen geldige datum.
-                         * @example 2026-09-02T20:34:12
+                         * @example 2026-09-03T19:29:38
                          */
                         issued_at?: string | null;
                         /**
@@ -46065,12 +47497,12 @@ export interface operations {
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:16
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
                 /**
@@ -46095,7 +47527,7 @@ export interface operations {
                 branch_id?: string;
                 /**
                  * @description This field is required when none of <code>contract_form</code>, <code>contract_status</code>, <code>date</code>, and <code>stop_reason</code> are present.
-                 * @example direct
+                 * @example funnel
                  */
                 origin?: "funnel" | "direct";
                 /**
@@ -46110,7 +47542,7 @@ export interface operations {
                 contract_status?: "none" | "sent" | "active" | "ended";
                 /**
                  * @description This field is required when none of <code>origin</code>, <code>contract_form</code>, <code>contract_status</code>, and <code>stop_reason</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:16
+                 * @example 2026-09-03T19:29:40
                  */
                 date?: string;
                 /**
@@ -46221,7 +47653,7 @@ export interface operations {
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
-                /** @example true */
+                /** @example false */
                 escalated?: boolean;
                 /**
                  * @description Het veld value moet een geldige UUID zijn.
@@ -46253,16 +47685,16 @@ export interface operations {
     getReportsVacanciesDrill: {
         parameters: {
             query?: {
-                /** @example month */
+                /** @example day */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:16
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
                 /**
@@ -46373,7 +47805,7 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "inbound"
+                 *       "outbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
@@ -46421,7 +47853,7 @@ export interface operations {
                 branch?: string;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>vacancy</code>, <code>stale_online</code>, <code>zero_applications</code>, and <code>closing_soon</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:16
+                 * @example 2026-09-03T19:29:40
                  */
                 date?: string;
                 /**
@@ -46431,12 +47863,12 @@ export interface operations {
                 vacancy?: string;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>date</code>, <code>vacancy</code>, <code>zero_applications</code>, and <code>closing_soon</code> are present.
-                 * @example false
+                 * @example true
                  */
                 stale_online?: boolean;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>date</code>, <code>vacancy</code>, <code>stale_online</code>, and <code>closing_soon</code> are present.
-                 * @example true
+                 * @example false
                  */
                 zero_applications?: boolean;
                 /**
@@ -46469,16 +47901,16 @@ export interface operations {
     getReportsCandidatesDrill: {
         parameters: {
             query?: {
-                /** @example day */
+                /** @example week */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
                 /**
@@ -46567,7 +47999,7 @@ export interface operations {
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
-                /** @example false */
+                /** @example true */
                 escalated?: boolean;
                 /**
                  * @description Het veld value moet een geldige UUID zijn.
@@ -46578,7 +48010,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "funnel"
+                 *       "direct"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -46616,7 +48048,7 @@ export interface operations {
                 branch?: string;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>phase</code>, <code>source</code>, <code>owner</code>, and <code>branch</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 date?: string;
                 /** @example week */
@@ -46651,19 +48083,19 @@ export interface operations {
     getReportsCandidatesKpisDrill: {
         parameters: {
             query: {
-                /** @example month */
+                /** @example day */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
-                /** @example active_conversations */
+                /** @example no_contact */
                 kpi: "no_followup" | "status_stale" | "no_cv" | "document_expiring" | "availability_due" | "no_contact" | "active_conversations" | "inflow" | "outflow";
                 /**
                  * @description Het veld value moet minimaal 1 zijn. Het veld value mag niet groter zijn dan 365.
@@ -46682,171 +48114,6 @@ export interface operations {
                  *     ]
                  */
                 location_id?: string[];
-                /**
-                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
-                 * @example [
-                 *       "n"
-                 *     ]
-                 */
-                source?: string[];
-                /**
-                 * @description Must match an existing stored value.
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                phase?: string[];
-                /**
-                 * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                 * @example [
-                 *       "n"
-                 *     ]
-                 */
-                function?: string[];
-                /**
-                 * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                 * @example [
-                 *       "g"
-                 *     ]
-                 */
-                industry?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                contract_form?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                stage?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                vacancy_id?: string[];
-                /**
-                 * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
-                 * @example [
-                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
-                 *     ]
-                 */
-                rejection_reason?: string[];
-                /**
-                 * @description Het veld value moet minimaal 0 zijn.
-                 * @example 12
-                 */
-                value_min?: number;
-                /**
-                 * @description Het veld value moet minimaal 0 zijn.
-                 * @example 77
-                 */
-                value_max?: number;
-                /**
-                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
-                 * @example [
-                 *       "i"
-                 *     ]
-                 */
-                type?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                priority?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                team_id?: string[];
-                /**
-                 * @example [
-                 *       "inbound"
-                 *     ]
-                 */
-                direction?: ("inbound" | "outbound")[];
-                /** @example false */
-                escalated?: boolean;
-                /**
-                 * @description Het veld value moet een geldige UUID zijn.
-                 * @example [
-                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
-                 *     ]
-                 */
-                customer_ids?: string[];
-                /**
-                 * @example [
-                 *       "funnel"
-                 *     ]
-                 */
-                origin?: ("funnel" | "direct")[];
-                /**
-                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
-                 * @example [
-                 *       "z"
-                 *     ]
-                 */
-                stop_reason?: string[];
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getReportsApplicationsKpisDrill: {
-        parameters: {
-            query: {
-                /** @example week */
-                period?: "day" | "week" | "month";
-                /**
-                 * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
-                 */
-                from?: string;
-                /**
-                 * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
-                 */
-                to?: string;
-                /** @example conversion_pct */
-                kpi: "total" | "new" | "active" | "matched" | "rejected" | "conversion_pct" | "avg_days_to_match" | "too_long_in_stage" | "missing_appointment";
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                owner_id?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                location_id?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                status?: string[];
                 /**
                  * @description Het veld value mag niet meer dan 64 tekens bevatten.
                  * @example [
@@ -46977,19 +48244,184 @@ export interface operations {
             };
         };
     };
-    getReportsApplicationsIntakesDrill: {
+    getReportsApplicationsKpisDrill: {
         parameters: {
             query: {
                 /** @example day */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
+                 */
+                to?: string;
+                /** @example rejected */
+                kpi: "total" | "new" | "active" | "matched" | "rejected" | "conversion_pct" | "avg_days_to_match" | "too_long_in_stage" | "missing_appointment";
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                owner_id?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                location_id?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                status?: string[];
+                /**
+                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                 * @example [
+                 *       "n"
+                 *     ]
+                 */
+                source?: string[];
+                /**
+                 * @description Must match an existing stored value.
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                phase?: string[];
+                /**
+                 * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                 * @example [
+                 *       "n"
+                 *     ]
+                 */
+                function?: string[];
+                /**
+                 * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                 * @example [
+                 *       "g"
+                 *     ]
+                 */
+                industry?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                contract_form?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                stage?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                vacancy_id?: string[];
+                /**
+                 * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                 * @example [
+                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
+                 *     ]
+                 */
+                rejection_reason?: string[];
+                /**
+                 * @description Het veld value moet minimaal 0 zijn.
+                 * @example 12
+                 */
+                value_min?: number;
+                /**
+                 * @description Het veld value moet minimaal 0 zijn.
+                 * @example 77
+                 */
+                value_max?: number;
+                /**
+                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                 * @example [
+                 *       "i"
+                 *     ]
+                 */
+                type?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                priority?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                team_id?: string[];
+                /**
+                 * @example [
+                 *       "outbound"
+                 *     ]
+                 */
+                direction?: ("inbound" | "outbound")[];
+                /** @example true */
+                escalated?: boolean;
+                /**
+                 * @description Het veld value moet een geldige UUID zijn.
+                 * @example [
+                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
+                 *     ]
+                 */
+                customer_ids?: string[];
+                /**
+                 * @example [
+                 *       "funnel"
+                 *     ]
+                 */
+                origin?: ("funnel" | "direct")[];
+                /**
+                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                 * @example [
+                 *       "z"
+                 *     ]
+                 */
+                stop_reason?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getReportsApplicationsIntakesDrill: {
+        parameters: {
+            query: {
+                /** @example week */
+                period?: "day" | "week" | "month";
+                /**
+                 * @description Het veld value is geen geldige datum.
+                 * @example 2026-09-03T19:29:40
+                 */
+                from?: string;
+                /**
+                 * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
+                 * @example 2052-09-26
                  */
                 to?: string;
                 /**
@@ -47029,15 +48461,15 @@ export interface operations {
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
-                /** @example done_in_period */
+                /** @example avg_completion_days */
                 kpi: "total" | "open" | "overdue" | "done_in_period" | "created_in_period" | "due_today" | "due_this_week" | "without_assignee" | "avg_completion_days";
                 /**
                  * @example [
@@ -47142,7 +48574,7 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "outbound"
+                 *       "inbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
@@ -47191,16 +48623,16 @@ export interface operations {
     getReportsMatchesKpisDrill: {
         parameters: {
             query: {
-                /** @example day */
+                /** @example week */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
                 /** @example without_end_date */
@@ -47377,19 +48809,19 @@ export interface operations {
     getReportsOutreachKpisDrill: {
         parameters: {
             query: {
-                /** @example month */
+                /** @example day */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
-                /** @example conversion_pct */
+                /** @example campaigns_active */
                 kpi: "total_targets" | "open_todo" | "called_in_period" | "reached" | "not_reached" | "conversion_pct" | "campaigns_active" | "campaigns_done_in_period" | "due_today" | "assigned";
                 /**
                  * @example [
@@ -47493,7 +48925,7 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "inbound"
+                 *       "outbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
@@ -47542,19 +48974,19 @@ export interface operations {
     getReportsVacanciesKpisDrill: {
         parameters: {
             query: {
-                /** @example week */
+                /** @example month */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
-                /** @example fill_rate */
+                /** @example filled */
                 kpi: "total" | "open" | "filled" | "fill_rate" | "ttf" | "customers_count" | "stale_online" | "long_concept" | "no_matches" | "closing_soon";
                 /**
                  * @example [
@@ -47666,7 +49098,7 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "outbound"
+                 *       "inbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
@@ -47681,7 +49113,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "direct"
+                 *       "funnel"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -47715,16 +49147,16 @@ export interface operations {
     getReportsCustomersKpiSignalDrill: {
         parameters: {
             query: {
-                /** @example week */
+                /** @example month */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
                 /** @example customers_active */
@@ -47843,7 +49275,7 @@ export interface operations {
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
-                /** @example true */
+                /** @example false */
                 escalated?: boolean;
                 /**
                  * @description Het veld value moet een geldige UUID zijn.
@@ -47888,19 +49320,19 @@ export interface operations {
     getReportsWhatsappKpisDrill: {
         parameters: {
             query: {
-                /** @example week */
+                /** @example day */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
-                /** @example active_7d */
+                /** @example escalations_open */
                 kpi: "conversations_total" | "active_7d" | "new_in_period" | "inbound_in_period" | "outbound_in_period" | "app_echoes_in_period" | "escalations_open" | "unanswered_over_window" | "avg_first_response_minutes";
                 /**
                  * @example [
@@ -47996,7 +49428,7 @@ export interface operations {
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
-                /** @example false */
+                /** @example true */
                 escalated?: boolean;
                 /**
                  * @description Het veld value moet een geldige UUID zijn.
@@ -48041,19 +49473,19 @@ export interface operations {
     getReportsWhatsappAxesDrill: {
         parameters: {
             query: {
-                /** @example week */
+                /** @example month */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
-                /** @example type */
+                /** @example direction */
                 axis: "timeseries" | "direction" | "type" | "escalated" | "conversation" | "channel";
                 /**
                  * @description Het veld value mag niet meer dan 64 tekens bevatten.
@@ -48152,7 +49584,7 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "inbound"
+                 *       "outbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
@@ -48167,7 +49599,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "funnel"
+                 *       "direct"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -48205,12 +49637,12 @@ export interface operations {
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
                 /**
@@ -48309,7 +49741,7 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "outbound"
+                 *       "inbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
@@ -48324,7 +49756,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "funnel"
+                 *       "direct"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -48335,7 +49767,7 @@ export interface operations {
                  *     ]
                  */
                 stop_reason?: string[];
-                /** @example false */
+                /** @example true */
                 stale?: boolean;
                 /** @example architecto */
                 owner?: string;
@@ -48343,10 +49775,10 @@ export interface operations {
                 branch?: string;
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 date?: string;
-                /** @example day */
+                /** @example week */
                 bucket?: "day" | "week";
                 /**
                  * @description Het veld value moet minimaal 1 zijn. Het veld value mag niet groter zijn dan 365.
@@ -48376,23 +49808,23 @@ export interface operations {
     getReportsApplicationsDrill: {
         parameters: {
             query?: {
-                /** @example day */
+                /** @example week */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
                 /** @example architecto */
                 stage?: string;
                 /** @example architecto */
                 stage_duration?: string;
-                /** @example placed */
+                /** @example active */
                 bucket?: "active" | "matched" | "rejected" | "placed" | "day" | "week";
                 /**
                  * @description Het veld value mag niet meer dan 64 tekens bevatten.
@@ -48407,7 +49839,7 @@ export interface operations {
                 vacancy?: string;
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 date?: string;
                 /**
@@ -48506,11 +49938,11 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "outbound"
+                 *       "inbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
-                /** @example false */
+                /** @example true */
                 escalated?: boolean;
                 /**
                  * @description Het veld value moet een geldige UUID zijn.
@@ -48521,7 +49953,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "direct"
+                 *       "funnel"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -48559,12 +49991,12 @@ export interface operations {
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
                 /**
@@ -48670,11 +50102,11 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "inbound"
+                 *       "outbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
-                /** @example false */
+                /** @example true */
                 escalated?: boolean;
                 /**
                  * @description Het veld value moet een geldige UUID zijn.
@@ -48713,7 +50145,7 @@ export interface operations {
                 branch?: string;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>phase</code>, <code>industry</code>, <code>owner</code>, and <code>branch</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 date?: string;
                 /** @example day */
@@ -48777,12 +50209,12 @@ export interface operations {
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
                 /**
@@ -48899,7 +50331,7 @@ export interface operations {
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
-                /** @example false */
+                /** @example true */
                 escalated?: boolean;
                 /**
                  * @description Het veld value moet een geldige UUID zijn.
@@ -48910,7 +50342,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "funnel"
+                 *       "direct"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -48938,7 +50370,7 @@ export interface operations {
                 branch?: string;
                 /**
                  * @description This field is required when none of <code>stage</code>, <code>customer</code>, <code>owner</code>, and <code>branch</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 date?: string;
                 /** @example week */
@@ -48966,16 +50398,16 @@ export interface operations {
     getReportsOpportunitiesKpisDrill: {
         parameters: {
             query: {
-                /** @example day */
+                /** @example week */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
                 /** @example win_rate */
@@ -49143,12 +50575,12 @@ export interface operations {
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
                 /**
@@ -49249,7 +50681,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "direct"
+                 *       "funnel"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -49292,7 +50724,7 @@ export interface operations {
                 branch?: string;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>type</code>, <code>priority</code>, <code>assignee</code>, <code>team</code>, and <code>branch</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 date?: string;
                 /** @example day */
@@ -49324,12 +50756,12 @@ export interface operations {
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
                 /**
@@ -49428,7 +50860,7 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "outbound"
+                 *       "inbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
@@ -49443,7 +50875,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "funnel"
+                 *       "direct"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -49481,7 +50913,7 @@ export interface operations {
                 channel?: string;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>outcome</code>, <code>campaign</code>, <code>assignee</code>, and <code>channel</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 date?: string;
                 /** @example week */
@@ -49513,12 +50945,12 @@ export interface operations {
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
                 /**
@@ -49543,7 +50975,7 @@ export interface operations {
                 branch_id?: string;
                 /**
                  * @description This field is required when none of <code>contract_form</code>, <code>contract_status</code>, <code>date</code>, and <code>stop_reason</code> are present.
-                 * @example direct
+                 * @example funnel
                  */
                 origin?: "funnel" | "direct";
                 /**
@@ -49553,12 +50985,12 @@ export interface operations {
                 contract_form?: string;
                 /**
                  * @description This field is required when none of <code>origin</code>, <code>contract_form</code>, <code>date</code>, and <code>stop_reason</code> are present.
-                 * @example none
+                 * @example ended
                  */
                 contract_status?: "none" | "sent" | "active" | "ended";
                 /**
                  * @description This field is required when none of <code>origin</code>, <code>contract_form</code>, <code>contract_status</code>, and <code>stop_reason</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 date?: string;
                 /**
@@ -49566,7 +50998,7 @@ export interface operations {
                  * @example l
                  */
                 stop_reason?: string;
-                /** @example week */
+                /** @example day */
                 bucket?: "day" | "week";
                 /**
                  * @example [
@@ -49705,12 +51137,12 @@ export interface operations {
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
                 /**
@@ -49821,7 +51253,7 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "inbound"
+                 *       "outbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
@@ -49836,7 +51268,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "direct"
+                 *       "funnel"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -49869,7 +51301,7 @@ export interface operations {
                 branch?: string;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>vacancy</code>, <code>stale_online</code>, <code>zero_applications</code>, and <code>closing_soon</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 date?: string;
                 /**
@@ -49879,7 +51311,7 @@ export interface operations {
                 vacancy?: string;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>date</code>, <code>vacancy</code>, <code>zero_applications</code>, and <code>closing_soon</code> are present.
-                 * @example true
+                 * @example false
                  */
                 stale_online?: boolean;
                 /**
@@ -49892,7 +51324,7 @@ export interface operations {
                  * @example true
                  */
                 closing_soon?: boolean;
-                /** @example day */
+                /** @example week */
                 bucket?: "day" | "week";
             };
             header?: never;
@@ -49917,16 +51349,16 @@ export interface operations {
     getReportsCandidatesAdvice: {
         parameters: {
             query?: {
-                /** @example day */
+                /** @example week */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
                 /**
@@ -50011,11 +51443,11 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "outbound"
+                 *       "inbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
-                /** @example true */
+                /** @example false */
                 escalated?: boolean;
                 /**
                  * @description Het veld value moet een geldige UUID zijn.
@@ -50026,7 +51458,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "funnel"
+                 *       "direct"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -50064,7 +51496,7 @@ export interface operations {
                 branch?: string;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>phase</code>, <code>source</code>, <code>owner</code>, and <code>branch</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 date?: string;
                 /** @example week */
@@ -50099,21 +51531,23 @@ export interface operations {
     getReportsApplicationsAdvice: {
         parameters: {
             query?: {
-                /** @example week */
+                /** @example month */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
                 /** @example architecto */
                 stage?: string;
-                /** @example week */
+                /** @example architecto */
+                stage_duration?: string;
+                /** @example placed */
                 bucket?: "active" | "matched" | "rejected" | "placed" | "day" | "week";
                 /**
                  * @description Het veld value mag niet meer dan 64 tekens bevatten.
@@ -50128,7 +51562,7 @@ export interface operations {
                 vacancy?: string;
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 date?: string;
                 /**
@@ -50227,7 +51661,7 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "inbound"
+                 *       "outbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
@@ -50276,16 +51710,16 @@ export interface operations {
     getReportsCustomersAdvice: {
         parameters: {
             query?: {
-                /** @example day */
+                /** @example month */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
                 /**
@@ -50406,7 +51840,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "direct"
+                 *       "funnel"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -50434,7 +51868,7 @@ export interface operations {
                 branch?: string;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>phase</code>, <code>industry</code>, <code>owner</code>, and <code>branch</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 date?: string;
                 /** @example day */
@@ -50473,12 +51907,12 @@ export interface operations {
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
                 /**
@@ -50591,7 +52025,7 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "inbound"
+                 *       "outbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
@@ -50634,7 +52068,7 @@ export interface operations {
                 branch?: string;
                 /**
                  * @description This field is required when none of <code>stage</code>, <code>customer</code>, <code>owner</code>, and <code>branch</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 date?: string;
                 /** @example week */
@@ -50662,16 +52096,16 @@ export interface operations {
     getReportsTasksAdvice: {
         parameters: {
             query?: {
-                /** @example week */
+                /** @example day */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
                 /**
@@ -50757,11 +52191,11 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "inbound"
+                 *       "outbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
-                /** @example false */
+                /** @example true */
                 escalated?: boolean;
                 /**
                  * @description Het veld value moet een geldige UUID zijn.
@@ -50772,7 +52206,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "funnel"
+                 *       "direct"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -50815,10 +52249,10 @@ export interface operations {
                 branch?: string;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>type</code>, <code>priority</code>, <code>assignee</code>, <code>team</code>, and <code>branch</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 date?: string;
-                /** @example day */
+                /** @example week */
                 bucket?: "day" | "week";
             };
             header?: never;
@@ -50843,16 +52277,16 @@ export interface operations {
     getReportsOutreachAdvice: {
         parameters: {
             query?: {
-                /** @example month */
+                /** @example day */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 from?: string;
                 /**
                  * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-25
+                 * @example 2052-09-26
                  */
                 to?: string;
                 /**
@@ -50966,7 +52400,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "direct"
+                 *       "funnel"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -51004,10 +52438,10 @@ export interface operations {
                 channel?: string;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>outcome</code>, <code>campaign</code>, <code>assignee</code>, and <code>channel</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-09-02T20:34:17
+                 * @example 2026-09-03T19:29:40
                  */
                 date?: string;
-                /** @example week */
+                /** @example day */
                 bucket?: "day" | "week";
             };
             header?: never;
@@ -51080,6 +52514,33 @@ export interface operations {
         };
     };
     putReportsReportKpis: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The report.
+                 * @example architecto
+                 */
+                report: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @example [
+                     *       "architecto"
+                     *     ]
+                     */
+                    kpis?: string[];
+                };
+            };
+        };
+        responses: never;
+    };
+    patchReportsReportKpis: {
         parameters: {
             query?: never;
             header?: never;
@@ -51543,6 +53004,41 @@ export interface operations {
         };
         responses: never;
     };
+    patchSettingsMessagingLimits: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value moet minimaal 1 items bevatten.
+                     * @example [
+                     *       []
+                     *     ]
+                     */
+                    lanes: {
+                        /** @example architecto */
+                        lane: string;
+                        /**
+                         * @description Het veld value moet minimaal 0 zijn.
+                         * @example 39
+                         */
+                        per_day: number;
+                        /**
+                         * @description Het veld value moet minimaal 0 zijn.
+                         * @example 84
+                         */
+                        per_week: number;
+                    }[];
+                };
+            };
+        };
+        responses: never;
+    };
     getSettingsRejection: {
         parameters: {
             query?: never;
@@ -51566,6 +53062,38 @@ export interface operations {
         };
     };
     putSettingsRejection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @example email
+                     * @enum {string}
+                     */
+                    default_channel: "email" | "whatsapp";
+                    /** @example null */
+                    templates?: {
+                        /**
+                         * @description Each template is keyed by reason id; validate the inner shape loosely. Het veld value mag niet meer dan 255 tekens bevatten.
+                         * @example b
+                         */
+                        email_subject?: string | null;
+                        /** @example architecto */
+                        email_body?: string | null;
+                        /** @example architecto */
+                        whatsapp_body?: string | null;
+                    }[];
+                };
+            };
+        };
+        responses: never;
+    };
+    patchSettingsRejection: {
         parameters: {
             query?: never;
             header?: never;
@@ -51649,6 +53177,36 @@ export interface operations {
         };
         responses: never;
     };
+    patchSettingsMatching: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @example architecto */
+                    strictness?: string;
+                    /**
+                     * @description MATCH-PLACEMENT-1 fase 4: the match approval mode (Settings → Matches).
+                     *     Accept the new English values AND the legacy Dutch ones during the FE/BE
+                     *     transition (ID-ENGELS-1) — put() normalises whatever comes in to the canonical
+                     *     English value, so a still-Dutch FE keeps working until it ships its rename.
+                     * @example architecto
+                     */
+                    approval_mode?: string;
+                    /**
+                     * @description MATCH-PLACEMENT-1 fase A: kostprijs→verkooptarief factor; nullable clears it. Het veld value moet minimaal 0.01 zijn.
+                     * @example 39
+                     */
+                    conversion_factor?: number | null;
+                };
+            };
+        };
+        responses: never;
+    };
     getSettingsMyNotifications: {
         parameters: {
             query?: never;
@@ -51683,7 +53241,34 @@ export interface operations {
                 "application/json": {
                     /**
                      * @example [
-                     *       false
+                     *       true
+                     *     ]
+                     */
+                    contexts?: (boolean | null)[];
+                    /**
+                     * @example [
+                     *       true
+                     *     ]
+                     */
+                    popup?: (boolean | null)[];
+                };
+            };
+        };
+        responses: never;
+    };
+    patchSettingsMyNotifications: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @example [
+                     *       true
                      *     ]
                      */
                     contexts?: (boolean | null)[];
@@ -51742,6 +53327,28 @@ export interface operations {
         };
         responses: never;
     };
+    patchSettingsMyKoiosMode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @example wizard
+                     * @enum {string}
+                     */
+                    mode?: "wizard" | "auto";
+                    /** @example true */
+                    auto_messages?: boolean;
+                };
+            };
+        };
+        responses: never;
+    };
     getSettingsApps: {
         parameters: {
             query?: never;
@@ -51765,6 +53372,16 @@ export interface operations {
         };
     };
     putSettingsApps: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
+    patchSettingsApps: {
         parameters: {
             query?: never;
             header?: never;
@@ -52008,7 +53625,7 @@ export interface operations {
                      * @example 39
                      */
                     position?: number;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -52199,7 +53816,7 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
-                    /** @example false */
+                    /** @example true */
                     ai_enabled?: boolean;
                     /** @example true */
                     active?: boolean;
@@ -52891,6 +54508,11 @@ export interface operations {
                      * @enum {string|null}
                      */
                     encryption?: "tls" | "ssl" | "none" | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example m
+                     */
+                    from_name?: string | null;
                 };
             };
         };
@@ -53014,7 +54636,7 @@ export interface operations {
                     sort_order?: number;
                     /** @example true */
                     is_default?: boolean;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -53160,7 +54782,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     sort_order?: number;
-                    /** @example false */
+                    /** @example true */
                     is_default?: boolean;
                     /** @example false */
                     active?: boolean;
@@ -53253,7 +54875,7 @@ export interface operations {
                     assignee_role_id?: number | null;
                     /**
                      * @description This field is required when <code>assignee_role_id</code> is present.
-                     * @example all
+                     * @example one
                      * @enum {string|null}
                      */
                     assignee_role_mode?: "all" | "one" | null;
@@ -53264,17 +54886,17 @@ export interface operations {
                     location_id?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:15
+                     * @example 2026-09-03T19:29:39
                      */
                     start_date?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:15
+                     * @example 2026-09-03T19:29:39
                      */
                     due_date?: string | null;
                     /**
                      * @description Must be a valid date in the format <code>H:i</code>.
-                     * @example 20:34
+                     * @example 19:29
                      */
                     due_time?: string | null;
                     /**
@@ -53292,7 +54914,7 @@ export interface operations {
                     /** @example null */
                     custom_fields?: Record<string, never> | null;
                     /**
-                     * @example fixed
+                     * @example after_complete
                      * @enum {string|null}
                      */
                     recurrence_mode?: "fixed" | "after_complete" | null;
@@ -53302,7 +54924,7 @@ export interface operations {
                      */
                     recurrence_config?: {
                         /**
-                         * @example quarterly
+                         * @example yearly
                          * @enum {string|null}
                          */
                         frequency?: "daily" | "weekly" | "monthly" | "quarterly" | "yearly" | null;
@@ -53333,7 +54955,7 @@ export interface operations {
                     links?: {
                         /**
                          * @description This field is required when <code>links</code> is present.
-                         * @example customer
+                         * @example task
                          * @enum {string}
                          */
                         type?: "candidate" | "application" | "vacancy" | "match" | "customer" | "opportunity" | "location" | "customer_location" | "department" | "contact" | "workflow" | "outreach_campaign" | "conversation" | "task";
@@ -53464,17 +55086,17 @@ export interface operations {
                     location_id?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:15
+                     * @example 2026-09-03T19:29:39
                      */
                     start_date?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:15
+                     * @example 2026-09-03T19:29:39
                      */
                     due_date?: string | null;
                     /**
                      * @description Must be a valid date in the format <code>H:i</code>.
-                     * @example 20:34
+                     * @example 19:29
                      */
                     due_time?: string | null;
                     /**
@@ -53495,7 +55117,7 @@ export interface operations {
                     links?: {
                         /**
                          * @description This field is required when <code>links</code> is present.
-                         * @example conversation
+                         * @example candidate
                          * @enum {string}
                          */
                         type?: "candidate" | "application" | "vacancy" | "match" | "customer" | "opportunity" | "location" | "customer_location" | "department" | "contact" | "workflow" | "outreach_campaign" | "conversation" | "task";
@@ -53540,7 +55162,7 @@ export interface operations {
                          */
                         after_days?: number | null;
                     } | null;
-                    /** @example true */
+                    /** @example false */
                     recurrence_active?: boolean;
                 };
             };
@@ -53561,6 +55183,155 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: never;
+    };
+    patchTasksTask: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The task.
+                 * @example architecto
+                 */
+                task: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example b
+                     */
+                    title?: string;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
+                     */
+                    parent_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
+                     */
+                    type_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
+                     */
+                    status_id?: string;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example 21c4122b-d554-3723-966c-6d723ea5293f
+                     */
+                    priority_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn.
+                     * @example add3503c-ebff-3875-93af-b8c6a695762b
+                     */
+                    assignee_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example c3b6b42e-3a0f-3935-b28d-cb767f8a2a0a
+                     */
+                    assignee_team_id?: string | null;
+                    /** @example 16 */
+                    assignee_role_id?: number | null;
+                    /**
+                     * @description This field is required when <code>assignee_role_id</code> is present.
+                     * @example all
+                     * @enum {string|null}
+                     */
+                    assignee_role_mode?: "all" | "one" | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
+                     */
+                    location_id?: string | null;
+                    /**
+                     * @description Het veld value is geen geldige datum.
+                     * @example 2026-09-03T19:29:39
+                     */
+                    start_date?: string | null;
+                    /**
+                     * @description Het veld value is geen geldige datum.
+                     * @example 2026-09-03T19:29:39
+                     */
+                    due_date?: string | null;
+                    /**
+                     * @description Must be a valid date in the format <code>H:i</code>.
+                     * @example 19:29
+                     */
+                    due_time?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 5000 tekens bevatten.
+                     * @example Quos velit et fugiat sunt nihil accusantium harum.
+                     */
+                    description?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 50 tekens bevatten.
+                     * @example [
+                     *       "i"
+                     *     ]
+                     */
+                    tags?: string[];
+                    /** @example null */
+                    custom_fields?: Record<string, never> | null;
+                    /** @example null */
+                    links?: {
+                        /**
+                         * @description This field is required when <code>links</code> is present.
+                         * @example candidate
+                         * @enum {string}
+                         */
+                        type?: "candidate" | "application" | "vacancy" | "match" | "customer" | "opportunity" | "location" | "customer_location" | "department" | "contact" | "workflow" | "outreach_campaign" | "conversation" | "task";
+                        /**
+                         * @description This field is required when <code>links</code> is present. Het veld value moet een geldige UUID zijn.
+                         * @example 10b3f4c6-2aaf-32e1-a52d-6bf43d9ddd70
+                         */
+                        id?: string;
+                    }[];
+                    /**
+                     * @example after_complete
+                     * @enum {string|null}
+                     */
+                    recurrence_mode?: "fixed" | "after_complete" | null;
+                    /** @example null */
+                    recurrence_config?: {
+                        /**
+                         * @example weekly
+                         * @enum {string|null}
+                         */
+                        frequency?: "daily" | "weekly" | "monthly" | "quarterly" | "yearly" | null;
+                        /**
+                         * @description Het veld value moet tussen 1 en 7 liggen.
+                         * @example [
+                         *       1
+                         *     ]
+                         */
+                        weekdays?: number[];
+                        /**
+                         * @description Het veld value moet tussen 1 en 31 liggen.
+                         * @example 2
+                         */
+                        monthday?: number | null;
+                        /**
+                         * @description Het veld value moet tussen 1 en 12 liggen.
+                         * @example 1
+                         */
+                        month?: number | null;
+                        /**
+                         * @description Het veld value moet minimaal 1 zijn.
+                         * @example 7
+                         */
+                        after_days?: number | null;
+                    } | null;
+                    /** @example false */
+                    recurrence_active?: boolean;
+                };
+            };
+        };
         responses: never;
     };
     getTasksTaskActivity: {
@@ -54096,6 +55867,41 @@ export interface operations {
         requestBody?: never;
         responses: never;
     };
+    patchTasksTaskNotesComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The task.
+                 * @example architecto
+                 */
+                task: string;
+                /** @example architecto */
+                comment: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value mag niet meer dan 5000 tekens bevatten.
+                     * @example b
+                     */
+                    body: string;
+                    /** @example null */
+                    type?: string | null;
+                    /**
+                     * @description NOTE-TAAL-1: optional per-note language code for FE spellcheck + AI. Het veld value mag niet meer dan 8 tekens bevatten.
+                     * @example ngzmiyvd
+                     */
+                    language?: string | null;
+                };
+            };
+        };
+        responses: never;
+    };
     deleteTasksTaskCommentsComment: {
         parameters: {
             query?: never;
@@ -54252,6 +56058,8 @@ export interface operations {
                      * @example {+-0pBNvYgx
                      */
                     password?: string;
+                    /** @example architecto */
+                    current_password?: string;
                     /** @example architecto */
                     role?: string;
                     /**
@@ -54574,12 +56382,12 @@ export interface operations {
                     contact_id?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:14
+                     * @example 2026-09-03T19:29:39
                      */
                     start_date?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>start_date</code> zijn.
-                     * @example 2052-09-25
+                     * @example 2052-09-26
                      */
                     end_date?: string | null;
                     /**
@@ -54589,7 +56397,7 @@ export interface operations {
                     positions_needed?: number | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:14
+                     * @example 2026-09-03T19:29:39
                      */
                     application_deadline?: string | null;
                     /**
@@ -55005,12 +56813,12 @@ export interface operations {
                     contact_id?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:14
+                     * @example 2026-09-03T19:29:39
                      */
                     start_date?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>start_date</code> zijn.
-                     * @example 2052-09-25
+                     * @example 2052-09-26
                      */
                     end_date?: string | null;
                     /**
@@ -55020,7 +56828,7 @@ export interface operations {
                     positions_needed?: number | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:14
+                     * @example 2026-09-03T19:29:39
                      */
                     application_deadline?: string | null;
                     /**
@@ -55210,6 +57018,269 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: never;
+    };
+    patchVacanciesVacancy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The vacancy.
+                 * @example architecto
+                 */
+                vacancy: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example b
+                     */
+                    title?: string;
+                    /** @example null */
+                    custom_fields?: Record<string, never> | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 50 tekens bevatten.
+                     * @example n
+                     */
+                    code?: string | null;
+                    /** @example Eius et animi quos velit et. */
+                    description?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                     * @example v
+                     */
+                    status?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                     * @example d
+                     */
+                    employment_type?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                     * @example l
+                     */
+                    seniority?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                     * @example j
+                     */
+                    education?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example n
+                     */
+                    industry?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example cd1eb1ea-4697-3b9a-9dd0-988044a83af6
+                     */
+                    customer_location_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example 5e4f00df-4238-35bd-9edc-0b98dc359c80
+                     */
+                    customer_department_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example 3c85cf54-98c1-36ed-b65a-abaafdecdfa9
+                     */
+                    contact_id?: string | null;
+                    /**
+                     * @description Het veld value is geen geldige datum.
+                     * @example 2026-09-03T19:29:39
+                     */
+                    start_date?: string | null;
+                    /**
+                     * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>start_date</code> zijn.
+                     * @example 2052-09-26
+                     */
+                    end_date?: string | null;
+                    /**
+                     * @description Het veld value moet minimaal 1 zijn.
+                     * @example 22
+                     */
+                    positions_needed?: number | null;
+                    /**
+                     * @description Het veld value is geen geldige datum.
+                     * @example 2026-09-03T19:29:39
+                     */
+                    application_deadline?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
+                     */
+                    interview_flow_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example 977e5426-8d13-3824-86aa-b092f8ae52c5
+                     */
+                    ai_agent_id?: string | null;
+                    /** @example true */
+                    interview_auto_reject?: boolean | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example y
+                     */
+                    category?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example v
+                     */
+                    location?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example d
+                     */
+                    street?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 20 tekens bevatten.
+                     * @example ljnikhwaykcmyuwp
+                     */
+                    house_number?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 20 tekens bevatten.
+                     * @example wlvqwrsitcpscqld
+                     */
+                    house_number_suffix?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 20 tekens bevatten.
+                     * @example zsnrwtujwvlxjklq
+                     */
+                    postcode?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example p
+                     */
+                    city?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example p
+                     */
+                    province?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example w
+                     */
+                    country?: string | null;
+                    /**
+                     * @description Must match an existing stored value.
+                     * @example [
+                     *       "architecto"
+                     *     ]
+                     */
+                    contract_types?: string[];
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example n
+                     */
+                    contract_type?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example g
+                     */
+                    cao?: string | null;
+                    /**
+                     * @description Het veld value moet minimaal 0 zijn.
+                     * @example 12
+                     */
+                    salary_min?: number | null;
+                    /**
+                     * @description Het veld value moet minimaal 0 zijn.
+                     * @example 77
+                     */
+                    salary_max?: number | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example i
+                     */
+                    salary_period?: string | null;
+                    /**
+                     * @description Het veld value moet tussen 0 en 168 liggen.
+                     * @example 0
+                     */
+                    hours_min?: number | null;
+                    /**
+                     * @description Het veld value moet tussen 0 en 168 liggen.
+                     * @example 1
+                     */
+                    hours_max?: number | null;
+                    /**
+                     * @description Het veld value moet tussen 0 en 60 liggen.
+                     * @example 1
+                     */
+                    experience_years?: number | null;
+                    /**
+                     * @description Het veld value moet tussen 0 en 60 liggen.
+                     * @example 1
+                     */
+                    experience_min_years?: number | null;
+                    /**
+                     * @description Het veld value moet tussen 0 en 60 liggen.
+                     * @example 1
+                     */
+                    experience_max_years?: number | null;
+                    /** @example true */
+                    published?: boolean;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example c3b6b42e-3a0f-3935-b28d-cb767f8a2a0a
+                     */
+                    customer_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn.
+                     * @example 51c7cf5e-fac2-3ac6-8ef8-61e6050503af
+                     */
+                    owner_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example d207102d-bce0-31f9-8c36-aa9cf4cfe75a
+                     */
+                    location_id?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example [
+                     *       "y"
+                     *     ]
+                     */
+                    tags?: string[];
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example [
+                     *       "k"
+                     *     ]
+                     */
+                    skills?: string[];
+                    /** @example null */
+                    application_settings?: Record<string, never> | null;
+                    /** @example null */
+                    published_channels?: Record<string, never>;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example 3b33fac5-d303-3ce9-8d1f-c931158d7dad
+                     */
+                    criteria_group_id?: string | null;
+                    /** @example null */
+                    criteria_overrides?: Record<string, never> | null;
+                    /**
+                     * @description Het veld value moet tussen 1 en 5 liggen.
+                     * @example [
+                     *       1
+                     *     ]
+                     */
+                    match_weights?: number[];
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example bfc53181-d647-36b2-9080-f9c2b76006f4
+                     */
+                    match_weight_template_id?: string | null;
+                };
+            };
+        };
         responses: never;
     };
     getVacanciesVacancyLeads: {
@@ -56237,6 +58308,49 @@ export interface operations {
         requestBody?: never;
         responses: never;
     };
+    patchVacanciesVacancyNotesNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The vacancy.
+                 * @example architecto
+                 */
+                vacancy: string;
+                /**
+                 * @description The note.
+                 * @example architecto
+                 */
+                note: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value mag niet meer dan 5000 tekens bevatten.
+                     * @example b
+                     */
+                    body?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 5000 tekens bevatten.
+                     * @example n
+                     */
+                    text?: string | null;
+                    /** @example null */
+                    type?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 8 tekens bevatten.
+                     * @example gzmiyvdl
+                     */
+                    language?: string | null;
+                };
+            };
+        };
+        responses: never;
+    };
     getWhatsappEmbeddedSignupConfig: {
         parameters: {
             query?: never;
@@ -56544,12 +58658,12 @@ export interface operations {
                     /**
                      * @description WEBHOOK-RUN-CORRELATION-1: an optional bureau-local date window on the run
                      *     history (the FE's tijdvenster-filter). Date-only, inclusive both ends. Het veld value is geen geldige datum.
-                     * @example 2026-09-02T20:34:19
+                     * @example 2026-09-03T19:29:41
                      */
                     from?: string;
                     /**
                      * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                     * @example 2052-09-25
+                     * @example 2052-09-26
                      */
                     to?: string;
                 };
@@ -56781,7 +58895,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example false
+                     * @example true
                      * @enum {string}
                      */
                     include_archived?: "0" | "1" | "true" | "false";
