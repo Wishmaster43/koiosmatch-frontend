@@ -14,9 +14,14 @@
  * of rendering an always-empty list, flipping it simply hides the section
  * (the simplest honest shape, per the brief).
  *
- * Read-only by design: editing happens at the source (the host record), so
- * rows carry no pencil/bin/pop-out — only the NOTITIE-REFERENTIE row shape
- * (type chip + author + date) plus the source chip.
+ * Rows carry the NOTITIE-REFERENTIE row shape (type chip + author + date) plus the
+ * source link, on the SAME face as NoteRow (title 12/600, body 12/400) — measured
+ * 04-09 on Ahmed Bakker: the source link inherited the drawer's 16px/400 through
+ * EntityLink's `font: inherit`, which is what Danny saw as "a bigger, heavier
+ * card". The pencil + pop-out Danny asked for on linked notes (same RECHTEN-NOTES-1
+ * rule as the own cards) wait for the feed row to carry author_id/can_manage and
+ * for the per-family write route (CMBE fixronde F) — a pencil the server 403s is
+ * worse than none (§3 no fake affordance).
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -85,7 +90,11 @@ function FeedRow({ item, noteTypes }: { item: NoteFeedItem; noteTypes: { value: 
       <Avatar initials={item.author ? initialsOf(item.author) : undefined} size={26} />
       <div style={{ flex: 1, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px' }}>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4, flexWrap: 'wrap', gap: 4 }}>
-          <SourceRef source={item.source} />
+          {/* NoteRow's title face (12/600) — EntityLink inherits its font from here, so the
+              linked card never rides the drawer's larger base size again. */}
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', minWidth: 0 }}>
+            <SourceRef source={item.source} />
+          </span>
           {chipLabel && <SoftChip label={chipLabel} color={resolved?.color ?? 'var(--color-primary)'} round size={10} />}
           <Caption as="span" style={{ marginLeft: 'auto', whiteSpace: 'nowrap' }}>
             {item.author ? `${item.author} · ` : ''}{formatDateTime(item.created_at)}
