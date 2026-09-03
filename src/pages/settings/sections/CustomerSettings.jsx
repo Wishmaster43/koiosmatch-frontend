@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
 
 // Customer status lifecycle (single value per customer, drives the soft status chip).
+// `is_default` is the backend-enforced singleton marking the status a new customer
+// starts in (CUST-DEFAULT-1 / SUBSTATUS-DEFAULT-1 in backend models/migrations).
 export function CustomerStatusesSettings() {
   const { t } = useTranslation('settings')
   return (
@@ -16,6 +18,7 @@ export function CustomerStatusesSettings() {
       subtitle={t('customerLookups.statuses.subtitle')}
       endpoint="/settings/customer-lookups/statuses"
       addLabel={t('customerLookups.statuses.add')}
+      defaultField={{ key: 'is_default' }}
     />
   )
 }
@@ -43,6 +46,8 @@ export function CustomerPhasesSettings() {
 }
 
 // Location status (single value per customer location).
+// `is_default` is the backend-enforced singleton marking the status a new location
+// starts in (SUBSTATUS-DEFAULT-1 in backend models/migrations).
 export function LocationStatusesSettings() {
   const { t } = useTranslation('settings')
   return (
@@ -51,11 +56,14 @@ export function LocationStatusesSettings() {
       subtitle={t('customerLookups.locationStatuses.subtitle')}
       endpoint="/settings/customer-lookups/location-statuses"
       addLabel={t('customerLookups.locationStatuses.add')}
+      defaultField={{ key: 'is_default' }}
     />
   )
 }
 
 // Department status (single value per department).
+// `is_default` is the backend-enforced singleton marking the status a new department
+// starts in (SUBSTATUS-DEFAULT-1 in backend models/migrations).
 export function DepartmentStatusesSettings() {
   const { t } = useTranslation('settings')
   return (
@@ -64,11 +72,14 @@ export function DepartmentStatusesSettings() {
       subtitle={t('customerLookups.departmentStatuses.subtitle')}
       endpoint="/settings/customer-lookups/department-statuses"
       addLabel={t('customerLookups.departmentStatuses.add')}
+      defaultField={{ key: 'is_default' }}
     />
   )
 }
 
 // Contact-person status (single value per customer contact).
+// `is_default` is the backend-enforced singleton marking the status a new contact
+// starts in (SUBSTATUS-DEFAULT-1 in backend models/migrations).
 export function ContactStatusesSettings() {
   const { t } = useTranslation('settings')
   return (
@@ -77,6 +88,7 @@ export function ContactStatusesSettings() {
       subtitle={t('customerLookups.contactStatuses.subtitle')}
       endpoint="/settings/customer-lookups/contact-statuses"
       addLabel={t('customerLookups.contactStatuses.add')}
+      defaultField={{ key: 'is_default' }}
     />
   )
 }
