@@ -21,7 +21,7 @@ describe('useReportList', () => {
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.error).toBe(true)
     expect(result.current.rows).toEqual([])
-    expect(api.get).toHaveBeenCalledWith('/workflow-runs')
+    expect(api.get).toHaveBeenCalledWith('/workflow-runs', undefined)
   })
 
   it('keeps error false on a successful request', async () => {
@@ -30,5 +30,11 @@ describe('useReportList', () => {
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.error).toBe(false)
     expect(result.current.rows).toEqual([{ id: 1 }])
+  })
+
+  it('K-3: passes a caller-supplied baseURL through to the request', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
+    renderHook(() => useReportList<{ id: number }>('/workflow-runs', 'http://koiosmatch-workflow-engine.test/api'))
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/workflow-runs', { baseURL: 'http://koiosmatch-workflow-engine.test/api' }))
   })
 })

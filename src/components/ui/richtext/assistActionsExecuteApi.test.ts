@@ -105,10 +105,11 @@ describe('executeRichTextActions', () => {
 })
 
 describe('fetchWorkflowRun', () => {
-  it('GETs /workflow-runs/{id}', async () => {
+  // K-3: a workflow-EXECUTION call — must carry the resolved engine base URL.
+  it('GETs /workflow-runs/{id} with the resolved workflow base URL', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { id: 'r1', workflow_id: 'w1', status: 'running' } })
     const row = await fetchWorkflowRun('r1')
-    expect(api.get).toHaveBeenCalledWith('/workflow-runs/r1', expect.objectContaining({ signal: undefined }))
+    expect(api.get).toHaveBeenCalledWith('/workflow-runs/r1', { signal: undefined, baseURL: expect.any(String) })
     expect(row).toEqual({ id: 'r1', workflow_id: 'w1', status: 'running' })
   })
 })

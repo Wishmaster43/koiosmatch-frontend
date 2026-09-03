@@ -180,3 +180,22 @@ describe('useWorkflowsData · list fetch carries include_archived on the request
     await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/workflows', { params: { include_archived: 1 } }))
   })
 })
+
+// K-3: handleRun is a workflow-EXECUTION call — it must route through the
+// configurable engine base URL (resolveWorkflowBaseURL), same as every other
+// run/cancel/logs call, never the bare main-api client.
+describe('useWorkflowsData · handleRun (K-3 workflow-execution base URL)', () => {
+  it('POSTs /workflows/{id}/run with quietStatuses:[409] and the resolved workflow base URL', async () => {
+    seedList()
+    mockedPost.mockResolvedValue({ data: {} })
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => { await result.current.handleRun('wf-1') })
+
+    expect(mockedPost).toHaveBeenCalledWith(
+      '/workflows/wf-1/run', undefined,
+      { quietStatuses: [409], baseURL: expect.any(String) },
+    )
+  })
+})

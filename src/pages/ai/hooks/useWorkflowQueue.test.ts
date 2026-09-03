@@ -3,7 +3,7 @@
  * the ?workflow_id= filter, the four lists, and the calm 403 degrade (never a
  * red error banner for a permission gap).
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { useWorkflowQueue } from './useWorkflowQueue'
 import api from '@/lib/api'
@@ -15,6 +15,7 @@ vi.mock('@/lib/api', async importOriginal => {
 const mockedGet = vi.mocked(api.get)
 
 beforeEach(() => vi.clearAllMocks())
+afterEach(() => vi.unstubAllEnvs())
 
 const FIXTURE = {
   pending: [{ run_id: 'r1', workflow_id: 'wf-1', workflow_name: 'Welcome', queued_at: '2026-08-24T08:00:00Z', trigger: 'event' }],
@@ -26,9 +27,12 @@ const FIXTURE = {
 
 describe('useWorkflowQueue', () => {
   it('pins GET /workflows/queue (no filter) and exposes all four lists + counts', async () => {
+    // K-3: pin the EXACT resolved base URL here — the other assertions in this
+    // file stay expect.any(String) (route/filter shape is what they cover).
+    vi.stubEnv('VITE_WORKFLOW_API_URL', 'http://engine.test/api')
     mockedGet.mockResolvedValue({ data: FIXTURE })
     const { result } = renderHook(() => useWorkflowQueue())
-    expect(mockedGet).toHaveBeenCalledWith('/workflows/queue')
+    expect(mockedGet).toHaveBeenCalledWith('/workflows/queue', { baseURL: 'http://engine.test/api' })
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.pending).toEqual(FIXTURE.pending)
     expect(result.current.waiting).toEqual(FIXTURE.waiting)
@@ -42,7 +46,7 @@ describe('useWorkflowQueue', () => {
   it('pins the ?workflow_id= filter param when one is passed', async () => {
     mockedGet.mockResolvedValue({ data: FIXTURE })
     renderHook(() => useWorkflowQueue('wf-1'))
-    expect(mockedGet).toHaveBeenCalledWith('/workflows/queue?workflow_id=wf-1')
+    expect(mockedGet).toHaveBeenCalledWith('/workflows/queue?workflow_id=wf-1', { baseURL: expect.any(String) })
   })
 
   it('a real failure (non-403) is an honest error, not a silently-empty queue', async () => {

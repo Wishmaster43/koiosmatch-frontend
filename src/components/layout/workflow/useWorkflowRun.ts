@@ -6,6 +6,7 @@
  */
 import { useQuery } from '@tanstack/react-query'
 import api from '@/lib/api'
+import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import type { RunRow } from '@/types/reports'
 
 // Statuses that mean the run is finished — polling stops here. Exported so the
@@ -18,7 +19,7 @@ export function useWorkflowRun(runId: string | number | null | undefined) {
     queryKey: ['workflow-run', runId],
     enabled: runId != null,
     queryFn: async ({ signal }) => {
-      const body = (await api.get(`/workflow-runs/${runId}`, { signal })).data
+      const body = (await api.get(`/workflow-runs/${runId}`, { signal, baseURL: resolveWorkflowBaseURL() })).data
       return (body?.data ?? body) as RunRow
     },
     // Poll while running; stop (false) once terminal or unknown.

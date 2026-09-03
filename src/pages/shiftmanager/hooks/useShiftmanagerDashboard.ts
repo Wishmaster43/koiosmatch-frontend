@@ -10,6 +10,9 @@ import api, { unwrapList } from '@/lib/api'
 import { normalizeSmCandidate } from '@/components/reports/useReportCandidates'
 // House numeric shape (DATUM-1): digits only, so no locale is needed here.
 import { hhmm as houseHhmm } from '@/lib/localDate'
+// K-3: /workflow-runs is a workflow-EXECUTION endpoint — route it through the
+// configurable engine base URL, same as every other run/cancel/logs call.
+import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 
 // Shift KPI stats from /sm_reports/dashboard.
 export interface SmDashStats {
@@ -47,7 +50,7 @@ export function useShiftmanagerDashboard(candidatesPerPage: number, hasAI: boole
     enabled: hasAI,
     queryFn: async ({ signal }) => {
       const { rows } = unwrapList<{ name?: string; status?: string; processed_count?: number; error?: string; started_at?: string }>(
-        await api.get('/workflow-runs', { params: { per_page: 5 }, signal }),
+        await api.get('/workflow-runs', { params: { per_page: 5 }, signal, baseURL: resolveWorkflowBaseURL() }),
       )
       return rows.map(r => ({ name: r.name, ok: (r.status ?? 'ok') === 'ok', n: r.processed_count, err: r.error, time: hhmm(r.started_at) })) as RunItem[]
     },

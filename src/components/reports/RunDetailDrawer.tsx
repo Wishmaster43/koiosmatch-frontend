@@ -6,6 +6,7 @@
  */
 import { useState, useEffect, useCallback } from 'react'
 import api from '@/lib/api'
+import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
 import { Zap, Clock, Users, X, AlertTriangle } from 'lucide-react'
@@ -43,7 +44,7 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
     let alive = true
     // Promise.resolve(...) so a test double that doesn't return a promise (or
     // throws synchronously) never crashes the effect — quiet on failure by design.
-    Promise.resolve(api.get(`/workflow-runs/${run.id}`)).then(res => {
+    Promise.resolve(api.get(`/workflow-runs/${run.id}`, { baseURL: resolveWorkflowBaseURL() })).then(res => {
       if (!alive) return
       const body = res?.data as { data?: RunRow } | RunRow | undefined
       const row = ((body as { data?: RunRow })?.data ?? body) as RunRow | undefined
@@ -65,7 +66,7 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
   const fetchLive = useCallback(async (): Promise<RunRow | undefined> => {
     if (run.workflow_id == null) return undefined
     try {
-      const res = await api.get(`/workflows/${run.workflow_id}/runs`)
+      const res = await api.get(`/workflows/${run.workflow_id}/runs`, { baseURL: resolveWorkflowBaseURL() })
       const body = res.data as { data?: RunRow[] } | RunRow[] | undefined
       const rows = (Array.isArray(body) ? body : body?.data ?? []) as RunRow[]
       const fresh = rows.find(r => String(r.id) === String(run.id))

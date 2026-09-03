@@ -17,7 +17,7 @@ vi.mock('@/lib/api', () => ({ default: { post: vi.fn(), get: vi.fn() } }))
 const mockedPost = vi.mocked(api.post)
 const mockedGet  = vi.mocked(api.get)
 
-afterEach(() => vi.clearAllMocks())
+afterEach(() => { vi.clearAllMocks(); vi.unstubAllEnvs() })
 
 // Fresh QueryClient per render — no cross-test cache bleed, no retries slowing failures.
 function wrapper({ children }: { children: ReactNode }) {
@@ -27,6 +27,10 @@ function wrapper({ children }: { children: ReactNode }) {
 
 describe('useWorkflowRunControl', () => {
   it('starts a run: sets activeRunId from the response and fires onRunStarted', async () => {
+    // K-3: pin the EXACT resolved base URL here, not just "a string" — the
+    // other assertions in this file stay expect.any(String) (route/body shape
+    // is what they cover).
+    vi.stubEnv('VITE_WORKFLOW_API_URL', 'http://engine.test/api')
     mockedPost.mockResolvedValue({ data: { run: { id: 'r1' } } })
     mockedGet.mockResolvedValue({ data: { id: 'r1', status: 'running' } })
     const onRunStarted = vi.fn()
@@ -37,7 +41,7 @@ describe('useWorkflowRunControl', () => {
 
     await act(async () => { await result.current.handleRun() })
 
-    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run', undefined, { quietStatuses: [409] })
+    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run', undefined, { quietStatuses: [409], baseURL: 'http://engine.test/api' })
     expect(result.current.activeRunId).toBe('r1')
     expect(result.current.runConflict).toBe(false)
     expect(result.current.runError).toBeNull()
@@ -57,7 +61,7 @@ describe('useWorkflowRunControl', () => {
 
     await act(async () => { await result.current.handleRun({ dryRun: true }) })
 
-    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run', { dry_run: true }, { quietStatuses: [409] })
+    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run', { dry_run: true }, { quietStatuses: [409], baseURL: expect.any(String) })
     expect(result.current.activeRunId).toBe('r3')
   })
 

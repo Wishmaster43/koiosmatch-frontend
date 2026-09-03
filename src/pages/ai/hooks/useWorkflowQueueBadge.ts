@@ -7,6 +7,7 @@
  */
 import { useEffect, useState } from 'react'
 import api, { unwrap } from '@/lib/api'
+import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import type { QueueSnapshot, QueueCounts } from './useWorkflowQueue'
 
 // Sums the queue states that count as an outstanding entry for the badge.
@@ -22,7 +23,7 @@ export function useWorkflowQueueBadge(workflowId?: string) {
   useEffect(() => {
     if (workflowId == null) { setCount(null); return }
     let alive = true
-    api.get(`/workflows/queue?workflow_id=${encodeURIComponent(String(workflowId))}`)
+    api.get(`/workflows/queue?workflow_id=${encodeURIComponent(String(workflowId))}`, { baseURL: resolveWorkflowBaseURL() })
       .then(res => { if (alive) setCount(total(unwrap<QueueSnapshot>(res)?.counts ?? {})) })
       .catch(() => { if (alive) setCount(null) })
     return () => { alive = false }

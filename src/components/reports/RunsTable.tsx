@@ -17,6 +17,7 @@ import { useDateFormat } from '@/lib/datetime'
 import DataTable from '../ui/DataTable'
 import type { Column } from '../ui/DataTable'
 import { useReportList } from './useReportList'
+import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import { formatDuration, StatusBadge } from './runFormat'
 import RunDetailDrawer from './RunDetailDrawer'
 import { Caption, bodyTextStyle } from '@/components/ui/typography'
@@ -55,7 +56,7 @@ export default function RunsTable() {
     return q ? `/workflow-runs?${q}` : '/workflow-runs'
   }, [workflowIdFilter, rangeFrom, rangeTo])
   // Data (fetch) lives in the shared hook (§3); this component only derives + renders.
-  const { rows, loading, error } = useReportList<RunRow>(runsUrl)
+  const { rows, loading, error } = useReportList<RunRow>(runsUrl, resolveWorkflowBaseURL())
   // App-wide active locale (§5) — never a hardcoded 'nl-NL' toLocale*String call.
   const { formatDate, formatTime } = useDateFormat()
   const [search,  setSearch]  = useState('')

@@ -9,6 +9,7 @@ import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { History, Play, Clock as ClockIcon, ChevronRight, ChevronDown, Users, Clock } from 'lucide-react'
 import { useReportList } from '@/components/reports/useReportList'
+import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import { useDateFormat } from '@/lib/datetime'
 import { formatDuration, StatusBadge, DryRunBanner } from '@/components/reports/runFormat'
 import RunDetailDrawer from '@/components/reports/RunDetailDrawer'
@@ -39,7 +40,7 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
 }) {
   const { t } = useTranslation('reports')
   // Runs are scoped to this workflow; the drawer opens above the editor overlay.
-  const { rows, loading } = useReportList<RunRow>(workflowId != null ? `/workflows/${workflowId}/runs` : '/workflow-runs')
+  const { rows, loading } = useReportList<RunRow>(workflowId != null ? `/workflows/${workflowId}/runs` : '/workflow-runs', resolveWorkflowBaseURL())
   // App-wide active locale (§5) — never a hardcoded 'nl-NL' toLocale*String call.
   const { formatDate, formatTime } = useDateFormat()
   const [drill, setDrill] = useState<RunRow | null>(null)

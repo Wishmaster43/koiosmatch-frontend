@@ -81,13 +81,13 @@ describe('RunsTable — WEBHOOK-RUN-CORRELATION-1 workflow_id filter', () => {
   it('requests /workflow-runs?workflow_id=<id> when the hash carries a filter', () => {
     window.location.hash = '#details.runs?workflow_id=42'
     render(<RunsTable />)
-    expect(vi.mocked(useReportList)).toHaveBeenCalledWith('/workflow-runs?workflow_id=42')
+    expect(vi.mocked(useReportList)).toHaveBeenCalledWith('/workflow-runs?workflow_id=42', expect.any(String))
   })
 
   // No filter in the hash: the plain, unfiltered endpoint (unchanged behaviour).
   it('requests the plain /workflow-runs endpoint when the hash carries no filter', () => {
     render(<RunsTable />)
-    expect(vi.mocked(useReportList)).toHaveBeenCalledWith('/workflow-runs')
+    expect(vi.mocked(useReportList)).toHaveBeenCalledWith('/workflow-runs', expect.any(String))
   })
 
   // Time window (slotstuk, server contract 53fe3bb0): picking from/to in the
@@ -101,7 +101,7 @@ describe('RunsTable — WEBHOOK-RUN-CORRELATION-1 workflow_id filter', () => {
     act(() => range.onFromChange('2026-08-01'))
     act(() => range.onToChange('2026-08-28'))
     await waitFor(() => expect(vi.mocked(useReportList))
-      .toHaveBeenCalledWith('/workflow-runs?from=2026-08-01&to=2026-08-28'))
+      .toHaveBeenCalledWith('/workflow-runs?from=2026-08-01&to=2026-08-28', expect.any(String)))
   })
 })
 

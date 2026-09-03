@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react'
 import { X, List, ChevronDown, History } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
+import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import { StatusBadge, StepStatusBadge, DryRunBanner, formatDT, formatDuration } from '@/components/reports/runFormat'
 import { CANCELLABLE, StopRunButton } from './runControl'
 import { useModuleCatalog } from './useModuleCatalog'
@@ -75,7 +76,7 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
     // Scoped per-workflow route (mirrors useWorkflowRunControl) — the global
     // /workflow-runs list is paginated, so client-side filtering page 1 showed
     // a truncated population for busy tenants (mega-audit r2).
-    api.get(workflowId == null ? '/workflow-runs' : `/workflows/${workflowId}/runs`, { signal: ctrl.signal })
+    api.get(workflowId == null ? '/workflow-runs' : `/workflows/${workflowId}/runs`, { signal: ctrl.signal, baseURL: resolveWorkflowBaseURL() })
       .then(res => {
         const rows = unwrapList<RunRow>(res).rows
         const mine = rows

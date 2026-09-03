@@ -8,6 +8,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useWorkflowRun } from './useWorkflowRun'
 import api from '@/lib/api'
+import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import type { RunRow } from '@/types/reports'
 import type { ActionBudget } from '@/types/actionBudget'
 
@@ -46,7 +47,7 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
     if (adopted.current || initialRunId != null || workflowId == null) return
     adopted.current = true
     let alive = true
-    Promise.resolve(api.get(`/workflows/${workflowId}/runs`))
+    Promise.resolve(api.get(`/workflows/${workflowId}/runs`, { baseURL: resolveWorkflowBaseURL() }))
       .then(res => {
         if (!alive) return
         const body = res?.data as { data?: RunRow[] } | RunRow[] | undefined
@@ -79,7 +80,7 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
       // Start the queued run and keep its id so we can poll the REAL per-step status
       // (WF-R3) — replaces the old fixed 800ms fake walk. Shape: { run: { id } }.
       // 409 (already running) gets its own inline feedback — keep the generic dev toast out.
-      const res = await api.post(`/workflows/${workflowId}/run`, body, { quietStatuses: [409] })
+      const res = await api.post(`/workflows/${workflowId}/run`, body, { quietStatuses: [409], baseURL: resolveWorkflowBaseURL() })
       const runId = (res.data?.run?.id ?? res.data?.data?.id ?? res.data?.id) as string | number | undefined
       if (runId != null) setActiveRunId(runId)
 

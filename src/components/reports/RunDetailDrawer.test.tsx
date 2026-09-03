@@ -21,6 +21,7 @@ describe('RunDetailDrawer — stop button', () => {
   beforeEach(() => {
     vi.mocked(api.get).mockReset()
     vi.mocked(api.post).mockReset()
+    vi.unstubAllEnvs()
   })
 
   it('shows the stop button for a RUNNING run', () => {
@@ -44,15 +45,18 @@ describe('RunDetailDrawer — stop button', () => {
   })
 
   it('cancels the run and refreshes immediately — the button disappears once the refetch shows it stopped', async () => {
+    // K-3: pin the EXACT resolved base URL on this test — the other requests
+    // asserted in this file stay expect.any(String) (route/body is what they cover).
+    vi.stubEnv('VITE_WORKFLOW_API_URL', 'http://engine.test/api')
     vi.mocked(api.post).mockResolvedValue({})
     vi.mocked(api.get).mockResolvedValue({ data: [{ ...baseRun, status: 'cancelled' }] })
     render(<RunDetailDrawer run={{ ...baseRun, status: 'running' }} onClose={() => {}} />)
 
     fireEvent.click(screen.getByText('runControl.stop'))
 
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/workflow-runs/5/cancel'))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/workflow-runs/5/cancel', undefined, { baseURL: 'http://engine.test/api' }))
     // Refresh-after-cancel: fetched right away, not on the next 3s poll tick.
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/workflows/10/runs'))
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/workflows/10/runs', { baseURL: 'http://engine.test/api' }))
     await waitFor(() => expect(screen.queryByText('runControl.stop')).not.toBeInTheDocument())
   })
 
@@ -75,7 +79,7 @@ describe('RunDetailDrawer — run detail fetch', () => {
   it('requests GET /workflow-runs/{id} once when opened', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { id: 5, child_runs: [] } })
     render(<RunDetailDrawer run={{ ...baseRun, status: 'success' }} onClose={() => {}} />)
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/workflow-runs/5'))
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/workflow-runs/5', { baseURL: expect.any(String) }))
     expect(vi.mocked(api.get).mock.calls.filter(c => c[0] === '/workflow-runs/5')).toHaveLength(1)
   })
 

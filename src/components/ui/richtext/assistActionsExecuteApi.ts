@@ -44,6 +44,9 @@ import api from '@/lib/api'
 import type { RichTextAssistActionItem, RichTextAssistActionType } from './richTextAssistApi'
 import type { RunRow } from '@/types/reports'
 import type { ActionBudget } from '@/types/actionBudget'
+// K-3: /workflow-runs is a workflow-EXECUTION endpoint — route it through the
+// configurable engine base URL, same as every other run/cancel/logs call.
+import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 
 // K-153: a synchronously failed run reports 'failed' + reason — never a green
 // 'executed' over a broken run. 'budget_exceeded' added PRIJSMODEL-C 30-08:
@@ -138,6 +141,6 @@ export async function executeRichTextActions(
  * response carries only the id, not the full run row the drawer needs.
  */
 export async function fetchWorkflowRun(runId: string, signal?: AbortSignal): Promise<RunRow> {
-  const res = await api.get<RunRow>(`/workflow-runs/${runId}`, { signal })
+  const res = await api.get<RunRow>(`/workflow-runs/${runId}`, { signal, baseURL: resolveWorkflowBaseURL() })
   return res.data
 }

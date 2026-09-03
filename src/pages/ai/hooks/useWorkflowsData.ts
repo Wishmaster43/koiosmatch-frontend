@@ -17,6 +17,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useConfirm } from '@/hooks/useConfirm'
 import { extractApiError } from '@/lib/extractApiError'
 import { useSeedLabel } from '@/lib/useSeedLabel'
+import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import { normalizeWorkflow, denormalizeWorkflow } from '../data/workflowMap'
 import type { Workflow, RawWorkflow } from '@/types/workflow'
 
@@ -142,7 +143,9 @@ export function useWorkflowsData(showArchived: boolean) {
   const handleRun = async (id?: string | number) => {
     try {
       // 409 (already running) is handled below with its own toast + builder focus.
-      await api.post(`/workflows/${id}/run`, undefined, { quietStatuses: [409] })
+      // K-3: this is a workflow-EXECUTION call — route it through the
+      // configurable engine base URL, same as every other run/cancel/logs call.
+      await api.post(`/workflows/${id}/run`, undefined, { quietStatuses: [409], baseURL: resolveWorkflowBaseURL() })
     } catch (err) {
       const e = err as { response?: { status?: number; data?: { run_id?: string | number } } }
       // RUN-CONTROL-1 single-flight 409: this workflow already has a live run —

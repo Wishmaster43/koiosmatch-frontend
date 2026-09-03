@@ -7,6 +7,7 @@
  */
 import { useEffect, useState, useCallback } from 'react'
 import api, { unwrap } from '@/lib/api'
+import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 
 // One entry per list — shapes mirror the K-171 contract exactly (never invented).
 export interface QueuePendingEntry { run_id?: string | number; workflow_id?: string | number; workflow_name?: string; queued_at?: string; trigger?: string }
@@ -46,7 +47,7 @@ export function useWorkflowQueue(workflowId?: string) {
     let alive = true
     setLoading(true); setError(false); setForbidden(false)
     const url = workflowId != null ? `/workflows/queue?workflow_id=${encodeURIComponent(String(workflowId))}` : '/workflows/queue'
-    api.get(url)
+    api.get(url, { baseURL: resolveWorkflowBaseURL() })
       .then(res => { if (alive) setData(unwrap<QueueSnapshot>(res) ?? EMPTY) })
       .catch(err => {
         if (!alive) return
