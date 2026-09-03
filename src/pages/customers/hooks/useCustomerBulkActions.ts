@@ -9,6 +9,7 @@
  */
 import { useMemo } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
 import api from '@/lib/api'
 import { initialsOf } from '@/lib/initials'
@@ -37,6 +38,10 @@ const subsetOf = (obj: Record<string, unknown>, keys: string[]): Record<string, 
 // Bulk-action data layer for CustomersPage: selection toggles, the generic optimistic bulkMutate, and the concrete bulk actions built on it.
 export function useCustomerBulkActions({ customers, setCustomers, setTotal, selectedIds, setSelectedIds, notify, statusMeta, t }: Args) {
   const { confirm, dialog } = useConfirm()
+  // r2-react-query-1: the KPI/donut row (useCustomersData's `['customers', 'stats', …]`
+  // query) must never go stale after a bulk field mutation — invalidated below on every
+  // successful bulkMutate call, never on a failed one.
+  const queryClient = useQueryClient()
   const toggleRow = (id: Id) => setSelectedIds(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n })
   const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => { const n = new Set(prev); ids.forEach(id => { if (allSelected) n.delete(id); else n.add(id) }); return n })
 
@@ -49,7 +54,11 @@ export function useCustomerBulkActions({ customers, setCustomers, setTotal, sele
     api.post(url, { customer_ids: ids, ...body })
       .then(res => { const updated = Array.isArray(res.data?.updated) ? new Set(res.data.updated) : null
         if (updated) setCustomers(prev => prev.map(c => (ids.includes(c.id!) && !updated.has(c.id)) ? ({ ...c, ...snap.get(c.id) } as Customer) : c))
-        onSuccess(updated ? updated.size : ids.length) })
+        onSuccess(updated ? updated.size : ids.length)
+        // r2-react-query-1: a bulk field mutation (owner/status) can move a KPI/donut
+        // distribution — invalidate the stats query so the InsightsRow refetches instead
+        // of showing stale counts until the next full page reload.
+        queryClient.invalidateQueries({ queryKey: ['customers', 'stats'] }) })
       .catch(() => { setCustomers(prev => prev.map(c => ids.includes(c.id!) ? ({ ...c, ...snap.get(c.id) } as Customer) : c)); notify('error', t('bulk.mutateError')) })
     setSelectedIds(new Set())
   }

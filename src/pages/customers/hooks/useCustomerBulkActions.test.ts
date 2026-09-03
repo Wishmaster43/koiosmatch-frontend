@@ -9,7 +9,9 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { useState } from 'react'
+import { useState, createElement } from 'react'
+import type { ReactNode } from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useCustomerBulkActions } from './useCustomerBulkActions'
 import type { Customer } from '@/types/customer'
 import type { Id } from '@/types/common'
@@ -34,8 +36,13 @@ const customer = (overrides: Partial<Customer> = {}): Customer => ({
 } as Customer)
 
 // Harness: real state, so we can observe optimistic update → reconcile/revert.
+// r2-react-query-1: wrapped in a real QueryClientProvider now that bulkMutate
+// invalidates the stats query — `queryClient` is returned so a test can spy on
+// invalidateQueries directly.
 function harness(initial: Customer[]) {
-  return renderHook(() => {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  const wrapper = ({ children }: { children: ReactNode }) => createElement(QueryClientProvider, { client: queryClient }, children)
+  const rendered = renderHook(() => {
     const [customers, setCustomers] = useState<Customer[]>(initial)
     const [total, setTotal] = useState(initial.length)
     const [selectedIds, setSelectedIds] = useState<Set<Id>>(new Set())
@@ -43,7 +50,8 @@ function harness(initial: Customer[]) {
       customers, setCustomers, setTotal, selectedIds, setSelectedIds, notify, statusMeta, t,
     })
     return { customers, total, selectedIds, setSelectedIds, actions }
-  })
+  }, { wrapper })
+  return Object.assign(rendered, { queryClient })
 }
 const rowOf = (r: { result: { current: { customers: Customer[] } } }, id: Id) => r.result.current.customers.find(c => c.id === id)
 
@@ -99,6 +107,31 @@ describe('useCustomerBulkActions · bulkSetStatus (bulkMutate optimistic/reconci
     act(() => r.result.current.actions.bulkSetStatus('actief'))
     await waitFor(() => expect(notify).toHaveBeenCalledWith('error', 'bulk.mutateError'))
     expect(rowOf(r, 1)?.status).toBe('prospect')
+  })
+})
+
+// r2-react-query-1: the KPI/donut row (useCustomersData's `['customers', 'stats', …]`
+// query) must never go stale after a bulk field mutation — bulkMutate invalidates it
+// on success, never on a failed call.
+describe('useCustomerBulkActions · stats invalidation after bulkMutate', () => {
+  it('invalidates the customers stats query after a successful bulk mutation', async () => {
+    post.mockResolvedValue({ data: { updated: [1] } })
+    const r = harness([customer({ id: 1, status: 'prospect' })])
+    const invalidateSpy = vi.spyOn(r.queryClient, 'invalidateQueries')
+    act(() => r.result.current.setSelectedIds(new Set([1])))
+    act(() => r.result.current.actions.bulkSetStatus('actief'))
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('success', 'bulk.statusChanged'))
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['customers', 'stats'] })
+  })
+
+  it('does not invalidate the stats query when the bulk mutation fails', async () => {
+    post.mockRejectedValue(new Error('boom'))
+    const r = harness([customer({ id: 1, status: 'prospect' })])
+    const invalidateSpy = vi.spyOn(r.queryClient, 'invalidateQueries')
+    act(() => r.result.current.setSelectedIds(new Set([1])))
+    act(() => r.result.current.actions.bulkSetStatus('actief'))
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('error', 'bulk.mutateError'))
+    expect(invalidateSpy).not.toHaveBeenCalled()
   })
 })
 

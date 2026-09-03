@@ -40,6 +40,10 @@ describe('useCandidatePlanningPreferences', () => {
     const r = renderHook(() => useCandidatePlanningPreferences('c1'))
     await waitFor(() => expect(r.result.current.loading).toBe(false))
     await act(async () => { await r.result.current.add('favorite', { linkable_type: 'customer', linkable_id: 10, linkable_name: 'Thuiszorg' }) })
+    // r2-tests-2 (§13): assert the exact REQUEST — the seam a callback-only test never proves.
+    expect(post).toHaveBeenCalledWith('/candidates/c1/planning-preferences', {
+      kind: 'favorite', linkable_type: 'customer', linkable_id: 10, reason: undefined,
+    })
     expect(r.result.current.favorites).toHaveLength(1)
     expect(r.result.current.favorites[0].id).toBe(99)   // temp id replaced by server id
   })
@@ -60,6 +64,8 @@ describe('useCandidatePlanningPreferences', () => {
     const r = renderHook(() => useCandidatePlanningPreferences('c1'))
     await waitFor(() => expect(r.result.current.favorites).toHaveLength(1))
     await act(async () => { await r.result.current.remove(5) })
+    // r2-tests-2 (§13): assert the exact REQUEST — the seam a callback-only test never proves.
+    expect(del).toHaveBeenCalledWith('/candidates/c1/planning-preferences/5')
     expect(r.result.current.favorites).toHaveLength(1)          // restored
     expect(notify).toHaveBeenCalledWith('common:actionFailed')
   })

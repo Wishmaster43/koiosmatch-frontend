@@ -18,6 +18,7 @@
  */
 import { useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
 import api from '@/lib/api'
 import { metaOf, initialsOf } from '../data/candidatesShared'
@@ -89,6 +90,10 @@ export function useCandidateBulkActions({
   filterParams, filteredTotal, onFilteredMutated,
 }: UseCandidateBulkActionsParams) {
   const { confirm, dialog } = useConfirm()
+  // r2-react-query-1: the KPI/donut row (useCandidatesData's `['candidates', 'stats', …]`
+  // query) must never go stale after a bulk field mutation — invalidated below on every
+  // successful bulkMutate/bulkMutateFiltered call, never on a failed one.
+  const queryClient = useQueryClient()
   // BULK-FILTERSET-1: which rows a bulk action targets — resets to 'selected'
   // whenever the checked selection is cleared (CandidatesToolbar's deselect),
   // so a stale "all filtered" choice never survives a fresh selection.
@@ -146,6 +151,9 @@ export function useCandidateBulkActions({
             : Array.isArray(res.data?.updated) ? res.data.updated.length : total
           onSuccess(updated, total, Array.isArray(res.data?.skipped) ? res.data.skipped : undefined)
           onFilteredMutated?.()
+          // r2-react-query-1: a filtered-scope field mutation can move any KPI/donut
+          // distribution just as much as an ids-scoped one — reconcile the stats query too.
+          queryClient.invalidateQueries({ queryKey: ['candidates', 'stats'] })
         })
         .catch((e) => {
           // A dedicated upper-bound response (backend caps the filtered bulk instead
@@ -180,6 +188,10 @@ export function useCandidateBulkActions({
         // BULK-SKIP-REASONS-1: forward the raw `skipped` array too — funnel/phase read
         // it for the reason breakdown; every other caller ignores this 3rd argument.
         onSuccess(updated ? updated.size : ids.length, ids.length, Array.isArray(res.data?.skipped) ? res.data.skipped : undefined)
+        // r2-react-query-1: a bulk field mutation (owner/type/consent/funnel/phase/status)
+        // can move a KPI/donut distribution — invalidate the stats query so the InsightsRow
+        // refetches instead of showing stale counts until the next full page reload.
+        queryClient.invalidateQueries({ queryKey: ['candidates', 'stats'] })
       })
       .catch(() => {
         setCandidates(prev => prev.map(c => ids.includes(c.id) ? { ...c, ...snap.get(c.id) } : c))

@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { useState } from 'react'
+import { useState, createElement } from 'react'
+import type { ReactNode } from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useVacancyBulkActions } from './useVacancyBulkActions'
 
 // Stub the tenant-aware api client so no real request runs.
@@ -13,8 +15,13 @@ const t = ((k: string) => k) as unknown as import('i18next').TFunction
 const statusMeta = (v?: string | number | null) => ({ label: `L:${v}`, color: '#111' })
 
 // Harness: real state, so we can observe optimistic update → reconcile/revert.
+// r2-react-query-1: wrapped in a real QueryClientProvider now that bulkMutate
+// invalidates the stats query — `queryClient` is returned so a test can spy on
+// invalidateQueries directly.
 function harness() {
-  return renderHook(() => {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  const wrapper = ({ children }: { children: ReactNode }) => createElement(QueryClientProvider, { client: queryClient }, children)
+  const rendered = renderHook(() => {
     const [vacancies, setVacancies] = useState<Array<Record<string, unknown>>>([
       { id: 1, statusValue: 'draft', tags: ['x'], aiAgentId: 'old', aiAgentName: 'Oud' },
       { id: 2, statusValue: 'draft', tags: ['x'], aiAgentId: null, aiAgentName: '' },
@@ -24,7 +31,8 @@ function harness() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const actions = useVacancyBulkActions({ vacancies, setVacancies, setTotal, selectedIds, setSelectedIds, notify, t, statusMeta } as any)
     return { vacancies, total, setSelectedIds, actions }
-  })
+  }, { wrapper })
+  return Object.assign(rendered, { queryClient })
 }
 const status = (r: { result: { current: { vacancies: Array<Record<string, unknown>> } } }, id: number) =>
   r.result.current.vacancies.find(v => v.id === id)?.statusValue
@@ -61,6 +69,31 @@ describe('useVacancyBulkActions · bulkMutate optimistic/reconcile', () => {
     await waitFor(() => expect(notify).toHaveBeenCalledWith('error', 'bulk.mutateError'))
     expect(status(r, 1)).toBe('draft')
     expect(status(r, 2)).toBe('draft')
+  })
+})
+
+// r2-react-query-1: the KPI/donut row (useVacanciesData's `['vacancies', 'stats', …]`
+// query) must never go stale after a bulk field mutation — bulkMutate invalidates it
+// on success, never on a failed call.
+describe('useVacancyBulkActions · stats invalidation after bulkMutate', () => {
+  it('invalidates the vacancies stats query after a successful bulk mutation', async () => {
+    post.mockResolvedValue({ data: { updated: [1, 2] } })
+    const r = harness()
+    const invalidateSpy = vi.spyOn(r.queryClient, 'invalidateQueries')
+    act(() => r.result.current.setSelectedIds(new Set([1, 2])))
+    act(() => r.result.current.actions.bulkSetStatus('open'))
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('success', 'bulk.statusChanged'))
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['vacancies', 'stats'] })
+  })
+
+  it('does not invalidate the stats query when the bulk mutation fails', async () => {
+    post.mockRejectedValue(new Error('boom'))
+    const r = harness()
+    const invalidateSpy = vi.spyOn(r.queryClient, 'invalidateQueries')
+    act(() => r.result.current.setSelectedIds(new Set([1, 2])))
+    act(() => r.result.current.actions.bulkSetStatus('open'))
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('error', 'bulk.mutateError'))
+    expect(invalidateSpy).not.toHaveBeenCalled()
   })
 })
 

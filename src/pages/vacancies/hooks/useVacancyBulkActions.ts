@@ -7,6 +7,7 @@
  */
 import { useMemo } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
 import api from '@/lib/api'
 import { initialsOf, subsetOf } from '../data/vacanciesShared'
@@ -36,6 +37,10 @@ interface BulkMutateArgs { url: string; body: Record<string, unknown>; patch: Re
 // See the file's top doc above; each mutation is optimistic and reconciles against the server updated/archived list on completion.
 export function useVacancyBulkActions({ vacancies, setVacancies, setTotal, selectedIds, setSelectedIds, notify, t, statusMeta }: UseVacancyBulkActionsArgs) {
   const { confirm, dialog } = useConfirm()
+  // r2-react-query-1: the KPI/donut row (useVacanciesData's `['vacancies', 'stats', …]`
+  // query) must never go stale after a bulk field mutation — invalidated below on every
+  // successful bulkMutate call, never on a failed one.
+  const queryClient = useQueryClient()
   // ── Bulk selection ──
   const toggleRow = (id: Id) => setSelectedIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next })
   const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => { const next = new Set(prev); ids.forEach(id => { if (allSelected) next.delete(id); else next.add(id) }); return next })
@@ -52,6 +57,10 @@ export function useVacancyBulkActions({ vacancies, setVacancies, setTotal, selec
         const updated = Array.isArray(res.data?.updated) ? new Set(res.data.updated) : null
         if (updated) setVacancies(prev => prev.map(v => (ids.includes(v.id!) && !updated.has(v.id)) ? ({ ...v, ...snap.get(v.id) } as Vacancy) : v))
         onSuccess(updated ? updated.size : ids.length)
+        // r2-react-query-1: a bulk field mutation (owner/status/client/publish/ai-agent)
+        // can move a KPI/donut distribution — invalidate the stats query so the InsightsRow
+        // refetches instead of showing stale counts until the next full page reload.
+        queryClient.invalidateQueries({ queryKey: ['vacancies', 'stats'] })
       })
       .catch(() => {
         setVacancies(prev => prev.map(v => ids.includes(v.id!) ? ({ ...v, ...snap.get(v.id) } as Vacancy) : v))

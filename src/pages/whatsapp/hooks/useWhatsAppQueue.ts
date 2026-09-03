@@ -46,10 +46,13 @@ export function useWhatsAppQueue() {
   useEffect(() => { load() }, [load])
 
   // Poll every 5s only while an active batch exists; stop the instant none remain.
+  // Every tick is also gated on tab visibility (mirrors useJobsList's `document
+  // .visibilityState === 'visible'` check and useNotifications' shouldPollNotifications)
+  // — a hidden tab must never keep hammering the backend every 5s.
   useEffect(() => {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
     if (notAvailable || error || !batches.some(isBatchActive)) return
-    timerRef.current = setInterval(load, POLL_MS)
+    timerRef.current = setInterval(() => { if (document.visibilityState === 'visible') load() }, POLL_MS)
     return () => { if (timerRef.current) clearInterval(timerRef.current) }
   }, [batches, notAvailable, error, load])
 

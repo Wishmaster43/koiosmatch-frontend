@@ -7,7 +7,9 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { useState } from 'react'
+import { useState, createElement } from 'react'
+import type { ReactNode } from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useCandidateBulkActions } from './useCandidateBulkActions'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
@@ -48,8 +50,13 @@ const cand = (overrides: Partial<Candidate> = {}): Candidate => ({
 // Harness: real state, so we can observe optimistic update → reconcile/revert.
 // BULK-FILTERSET-1: accepts the optional filterset args so scope tests can drive
 // them without disturbing every other test's default (no filters, ids-only).
+// r2-react-query-1: wrapped in a real QueryClientProvider now that bulkMutate
+// invalidates the stats query — `queryClient` is returned so a test can spy on
+// invalidateQueries directly (mirrors useCandidateMutations.test.ts's harness).
 function harness(initial: Candidate[], filterArgs: { filterParams?: Record<string, unknown>; filteredTotal?: number; onFilteredMutated?: () => void } = {}) {
-  return renderHook(() => {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  const wrapper = ({ children }: { children: ReactNode }) => createElement(QueryClientProvider, { client: queryClient }, children)
+  const rendered = renderHook(() => {
     const [candidates, setCandidates] = useState<Candidate[]>(initial)
     const [total, setTotal] = useState(initial.length)
     const [selectedIds, setSelectedIds] = useState<Set<Id>>(new Set())
@@ -59,7 +66,8 @@ function harness(initial: Candidate[], filterArgs: { filterParams?: Record<strin
       ...filterArgs,
     })
     return { candidates, total, selectedIds, setSelectedIds, actions }
-  })
+  }, { wrapper })
+  return Object.assign(rendered, { queryClient })
 }
 const rowOf = (r: { result: { current: { candidates: Candidate[] } } }, id: Id) => r.result.current.candidates.find(c => c.id === id)
 
@@ -150,6 +158,42 @@ describe('useCandidateBulkActions · filterset bulk scope (XOR ids/filters)', ()
     act(() => r.result.current.actions.bulkSetOwner({ id: 9, name: 'New Owner' }))
     act(() => r.result.current.actions.dialog.props.onConfirm())
     await waitFor(() => expect(notify).toHaveBeenCalledWith('error', 'bulk.limitExceeded'))
+  })
+})
+
+// r2-react-query-1: the KPI/donut row (useCandidatesData's `['candidates', 'stats', …]`
+// query) must never go stale after a bulk field mutation — bulkMutate/bulkMutateFiltered
+// invalidate it on success, never on a failed call.
+describe('useCandidateBulkActions · stats invalidation after bulkMutate', () => {
+  it('invalidates the candidates stats query after a successful selected-scope bulk mutation', async () => {
+    post.mockResolvedValue({ data: { updated: [1] } })
+    const r = harness([cand({ id: 1, owner: 'Old' })])
+    const invalidateSpy = vi.spyOn(r.queryClient, 'invalidateQueries')
+    act(() => r.result.current.setSelectedIds(new Set([1])))
+    act(() => r.result.current.actions.bulkSetOwner({ id: 9, name: 'New Owner' }))
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('success', 'bulk.ownerChanged'))
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['candidates', 'stats'] })
+  })
+
+  it('does not invalidate the stats query when the bulk mutation fails', async () => {
+    post.mockRejectedValue(new Error('boom'))
+    const r = harness([cand({ id: 1, owner: 'Old' })])
+    const invalidateSpy = vi.spyOn(r.queryClient, 'invalidateQueries')
+    act(() => r.result.current.setSelectedIds(new Set([1])))
+    act(() => r.result.current.actions.bulkSetOwner({ id: 9, name: 'New' }))
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('error', 'bulk.mutateError'))
+    expect(invalidateSpy).not.toHaveBeenCalled()
+  })
+
+  it('invalidates the stats query after a successful filtered-scope bulk mutation too', async () => {
+    post.mockResolvedValue({ data: { updated: 50 } })
+    const r = harness([cand({ id: 1, owner: 'Old' })], { filterParams: { status: ['available'] }, filteredTotal: 50 })
+    const invalidateSpy = vi.spyOn(r.queryClient, 'invalidateQueries')
+    act(() => r.result.current.setSelectedIds(new Set([1])))
+    act(() => r.result.current.actions.setBulkScope('filtered'))
+    act(() => r.result.current.actions.bulkSetOwner({ id: 9, name: 'New Owner' }))
+    act(() => r.result.current.actions.dialog.props.onConfirm())
+    await waitFor(() => expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['candidates', 'stats'] }))
   })
 })
 
