@@ -276,7 +276,7 @@
       "title": "Kandidaat uit cv",
       "intro": "Koios vult dit formulier in vanuit het cv. Jij controleert en klikt zelf op aanmaken.",
       "choose": "Cv kiezen",
-      "hint": "Alleen pdf · max. 10 MB",
+      "hint": "Alleen pdf, jpg, png, gif, webp, docx of xlsx · max. 10 MB",
       "uploading": "Cv wordt geüpload…",
       "reading": "Cv wordt gelezen…",
       "readingHint": "Dit duurt meestal 10 tot 40 seconden.",
@@ -298,7 +298,7 @@
       "extraEducations_other": "Het cv bevat ook {{count}} opleidingen. Voeg die toe in het dossier nadat de kandidaat is aangemaakt.",
       "noFreeText": "Vrije tekst uit het cv (samenvatting, motivatie, toelichting) wordt bewust niet overgenomen.",
       "error": {
-        "notPdf": "Alleen een pdf-bestand kan gelezen worden.",
+        "notPdf": "Alleen een pdf-, jpg-, png-, gif-, webp-, docx- of xlsx-bestand kan gelezen worden.",
         "tooLarge": "Dit bestand is groter dan 10 MB.",
         "throttled": "Te veel cv's achter elkaar. Wacht een minuut en probeer het opnieuw.",
         "forbidden": "Je hebt geen rechten om een cv te laten lezen.",

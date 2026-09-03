@@ -15,7 +15,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AddCandidateModal from '../AddCandidateModal'
-import { CV_POLL_INTERVAL_MS, CV_POLL_TIMEOUT_MS } from './useCvParse'
+import { CV_POLL_INTERVAL_MS, CV_POLL_TIMEOUT_MS, CV_ACCEPT_ATTR } from './useCvParse'
 
 const TOKEN = '6f1d2a54-3c1e-4c6f-9a2b-8e0f5d7c1a33'
 const PARSE_URL = '/candidates/parse-cv'
@@ -103,11 +103,46 @@ describe('CV upload · the request', () => {
     expect((getMock.mock.calls[0][1] as { signal?: AbortSignal })?.signal).toBeInstanceOf(AbortSignal)
   })
 
-  it('never uploads a non-PDF — it is refused in the browser', async () => {
+  it('never uploads an unsupported extension — it is refused in the browser', async () => {
     render(<AddCandidateModal onClose={noop} />)
-    await upload(new File(['x'], 'cv.docx', { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }))
+    await upload(new File(['x'], 'cv.txt', { type: 'text/plain' }))
     expect(postMock).not.toHaveBeenCalled()
     expect(await screen.findByText('modal.cv.error.notPdf')).toBeInTheDocument()
+  })
+
+  it.each(['jpg', 'jpeg', 'png', 'gif', 'webp', 'docx', 'xlsx'])(
+    'uploads a .%s file — PARSE-FORMATS-1 widened the accepted set to match the backend',
+    async (ext) => {
+      getMock.mockResolvedValue({ data: { status: 'processing' } })
+      render(<AddCandidateModal onClose={noop} />)
+      await upload(new File(['x'], `cv.${ext}`, { type: 'application/octet-stream' }))
+      expect(postMock).toHaveBeenCalledTimes(1)
+      // Same request seam as the .pdf case above: real URL + the file actually sent.
+      const [url, body] = postMock.mock.calls[0] as [string, FormData]
+      expect(url).toBe(PARSE_URL)
+      expect((body.get('file') as File).name).toBe(`cv.${ext}`)
+    },
+  )
+
+  it('accepts a suffix-less file when the browser reports a sniffable MIME type', async () => {
+    getMock.mockResolvedValue({ data: { status: 'processing' } })
+    render(<AddCandidateModal onClose={noop} />)
+    await upload(new File(['%PDF-1.4 fake'], 'scan', { type: 'application/pdf' }))
+    expect(postMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('rejects an unsupported extension with no MIME to fall back on', async () => {
+    render(<AddCandidateModal onClose={noop} />)
+    await upload(new File(['x'], 'x.exe', { type: '' }))
+    expect(postMock).not.toHaveBeenCalled()
+    expect(await screen.findByText('modal.cv.error.notPdf')).toBeInTheDocument()
+  })
+
+  it('exposes the full backend-accepted extension set on the file picker (PARSE-FORMATS-1)', () => {
+    render(<AddCandidateModal onClose={noop} />)
+    const input = screen.getByLabelText('modal.cv.choose') as HTMLInputElement
+    expect(input.accept).toBe('.pdf,.jpg,.jpeg,.png,.gif,.webp,.docx,.xlsx')
+    expect(CV_ACCEPT_ATTR).toBe(input.accept)
   })
 
   it('hides the whole control without candidates.create (both routes need it)', async () => {

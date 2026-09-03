@@ -276,7 +276,7 @@
       "title": "Candidato da CV",
       "intro": "Koios compila questo modulo a partire dal CV. Controlla i dati e clicca tu stesso su crea.",
       "choose": "Scegli CV",
-      "hint": "Solo PDF · max. 10 MB",
+      "hint": "Solo pdf, jpg, png, gif, webp, docx o xlsx · max 10 MB",
       "uploading": "Caricamento del CV in corso…",
       "reading": "Lettura del CV in corso…",
       "readingHint": "Di solito richiede da 10 a 40 secondi.",
@@ -298,7 +298,7 @@
       "extraEducations_other": "Il CV contiene anche {{count}} percorsi formativi. Aggiungili nel dossier dopo aver creato il candidato.",
       "noFreeText": "Il testo libero del CV (riepilogo, motivazione, note personali) non viene deliberatamente ripreso.",
       "error": {
-        "notPdf": "Può essere letto solo un file PDF.",
+        "notPdf": "Può essere letto solo un file pdf, jpg, png, gif, webp, docx o xlsx.",
         "tooLarge": "Questo file è più grande di 10 MB.",
         "throttled": "Troppi CV consecutivi. Attendi un minuto e riprova.",
         "forbidden": "Non hai i permessi per far leggere un CV.",

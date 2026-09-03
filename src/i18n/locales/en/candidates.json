@@ -276,7 +276,7 @@
       "title": "Candidate from CV",
       "intro": "Koios prefills this form from the CV. You check it and click create yourself.",
       "choose": "Choose CV",
-      "hint": "PDF only · max. 10 MB",
+      "hint": "Only pdf, jpg, png, gif, webp, docx or xlsx · max 10 MB",
       "uploading": "Uploading CV…",
       "reading": "Reading CV…",
       "readingHint": "This usually takes 10 to 40 seconds.",
@@ -298,7 +298,7 @@
       "extraEducations_other": "The CV also contains {{count}} educations. Add them in the dossier after creating the candidate.",
       "noFreeText": "Free text from the CV (summary, motivation, personal notes) is deliberately not copied over.",
       "error": {
-        "notPdf": "Only a PDF file can be read.",
+        "notPdf": "Only a pdf, jpg, png, gif, webp, docx or xlsx file can be read.",
         "tooLarge": "This file is larger than 10 MB.",
         "throttled": "Too many CVs in a row. Wait a minute and try again.",
         "forbidden": "You are not allowed to have a CV read.",

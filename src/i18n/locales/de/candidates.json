@@ -253,7 +253,7 @@
       "title": "Kandidat aus Lebenslauf",
       "intro": "Koios füllt dieses Formular anhand des Lebenslaufs aus. Sie prüfen es und klicken selbst auf Anlegen.",
       "choose": "Lebenslauf wählen",
-      "hint": "Nur PDF · max. 10 MB",
+      "hint": "Nur pdf, jpg, png, gif, webp, docx oder xlsx · max. 10 MB",
       "uploading": "Lebenslauf wird hochgeladen…",
       "reading": "Lebenslauf wird gelesen…",
       "readingHint": "Das dauert meist 10 bis 40 Sekunden.",
@@ -275,7 +275,7 @@
       "extraEducations_other": "Der Lebenslauf enthält außerdem {{count}} Ausbildungen. Fügen Sie sie nach dem Anlegen im Dossier hinzu.",
       "noFreeText": "Freitext aus dem Lebenslauf (Zusammenfassung, Motivation, Anmerkungen) wird bewusst nicht übernommen.",
       "error": {
-        "notPdf": "Es kann nur eine PDF-Datei gelesen werden.",
+        "notPdf": "Es kann nur eine pdf-, jpg-, png-, gif-, webp-, docx- oder xlsx-Datei gelesen werden.",
         "tooLarge": "Diese Datei ist größer als 10 MB.",
         "throttled": "Zu viele Lebensläufe hintereinander. Warten Sie eine Minute und versuchen Sie es erneut.",
         "forbidden": "Sie haben keine Berechtigung, einen Lebenslauf lesen zu lassen.",

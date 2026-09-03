@@ -13,7 +13,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FileUp, ClipboardPaste } from 'lucide-react'
-import { CV_ACCEPT_MIME, CV_TEXT_MIN_CHARS, CV_TEXT_MAX_CHARS } from './useCvParse'
+import { CV_ACCEPT_ATTR, CV_TEXT_MIN_CHARS, CV_TEXT_MAX_CHARS } from './useCvParse'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 
 interface CvEntryIconsProps {
@@ -78,7 +78,7 @@ export default function CvEntryIcons({ onFile, onSubmitText }: CvEntryIconsProps
       </button>
       {/* The real input: labelled for assistive tech, kept out of the tab order and
           out of sight — the visible button is what drives it (§6). */}
-      <input ref={inputRef} type="file" accept={CV_ACCEPT_MIME} onChange={handleChange}
+      <input ref={inputRef} type="file" accept={CV_ACCEPT_ATTR} onChange={handleChange}
         aria-label={t('modal.cv.choose')} tabIndex={-1}
         style={{ position: 'absolute', width: 0, height: 0, opacity: 0, border: 0, padding: 0 }} />
 

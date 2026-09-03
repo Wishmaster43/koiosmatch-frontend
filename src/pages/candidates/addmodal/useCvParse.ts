@@ -2,7 +2,8 @@
  * useCvParse — drives the ASYNCHRONOUS CV parse behind the create-candidate modal.
  *
  * Measured contract (routes/api/tenant/candidates.php:56-57, both permission:candidates.update):
- *   POST /candidates/parse-cv        multipart, field `file`, pdf only, max 10 MB,
+ *   POST /candidates/parse-cv        multipart, field `file`, pdf/jpg/jpeg/png/gif/webp/
+ *                                    docx/xlsx, max 10 MB,
  *                                    throttle 10/min → 202 { status:'processing', token }
  *   GET  /candidates/parse-cv/{token} → { status:'processing' }
  *                                     | { status:'ready',  fields:{…} }
@@ -23,10 +24,21 @@ import type { ParsedCvFields } from './cvPrefill'
 // we stop lying to the recruiter and say it did not come back in time.
 export const CV_POLL_INTERVAL_MS = 2000
 export const CV_POLL_TIMEOUT_MS = 90000
-// Mirrors ParseCvRequest's `mimes:pdf` + `max:10240` (KB). Client-side is UX only —
-// the server re-validates, and CvParsingService even re-checks the PDF magic bytes (§7).
+// Mirrors ParseCvRequest's `mimes:pdf,jpg,jpeg,png,gif,webp,docx,xlsx` + `max:10240` (KB).
+// Client-side is UX only — the server re-validates, and CvParsingService even
+// re-checks the PDF magic bytes for the pdf case (§7).
 export const CV_MAX_BYTES = 10 * 1024 * 1024
-export const CV_ACCEPT_MIME = 'application/pdf'
+// Extensions accepted by the backend, used both for the file-picker `accept` attribute
+// and for the client-side pre-flight guard (name-based, since MIME sniffing is unreliable
+// across browsers/OSes for these types).
+export const CV_ACCEPT_EXTENSIONS = ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'docx', 'xlsx'] as const
+// Dotted-extension list for the <input accept> attribute — a string of suffixes, not MIME
+// types (the name used to say MIME while holding extensions; renamed to match reality).
+export const CV_ACCEPT_ATTR = CV_ACCEPT_EXTENSIONS.map((ext) => `.${ext}`).join(',')
+// Sniffable MIME fallback for the pre-flight guard: a file with no/unknown extension but
+// a browser-reported type from this allowlist still passes (e.g. a suffix-less 'scan' the
+// OS still tagged 'application/pdf'). Extension stays the primary check; this only widens it.
+const ACCEPTED_MIME = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/webp'])
 // PASTE-CV-1 (13-08): same endpoint, `raw_text` body instead of a file — bounds
 // mirror ParseCvRequest's `raw_text` rule (30..50000 chars, XOR with file).
 export const CV_TEXT_MIN_CHARS = 30
@@ -161,9 +173,12 @@ export function useCvParse({ onReady }: UseCvParseOptions) {
     setFileName(file.name)
 
     // Pre-flight the two rules the FormRequest enforces, so an obvious mistake costs
-    // no upload and no throttle slot. The server stays the authority.
-    const isPdf = file.type === CV_ACCEPT_MIME || file.name.toLowerCase().endsWith('.pdf')
-    if (!isPdf) { fail(CV_ERROR_KEYS.notPdf); return }
+    // no upload and no throttle slot. The server stays the authority. Extension is the
+    // primary check; a sniffable MIME type covers a suffix-less name (e.g. 'scan').
+    const extension = file.name.toLowerCase().split('.').pop() ?? ''
+    const extensionAccepted = (CV_ACCEPT_EXTENSIONS as readonly string[]).includes(extension)
+    const mimeAccepted = ACCEPTED_MIME.has(file.type)
+    if (!extensionAccepted && !mimeAccepted) { fail(CV_ERROR_KEYS.notPdf); return }
     if (file.size > CV_MAX_BYTES) { fail(CV_ERROR_KEYS.tooLarge); return }
 
     setPhase('uploading')
