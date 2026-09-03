@@ -43,17 +43,27 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import KoiosSuggestionBadge from '@/components/ui/KoiosSuggestionBadge'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { ActionRuleBanner } from '@/components/actionrules'
-// HUISSTIJL-1: the shared JetBrains Mono atom + the muted-caption atom (identity-only swaps).
-import { Mono, Caption } from '@/components/ui/typography'
+// HUISSTIJL-1: the shared JetBrains Mono atom + the muted-caption/body-text atoms
+// (identity-only swaps — BodyText renders the read-only modality VALUE, field-card
+// canon: plain text, never a chip).
+import { Mono, Caption, BodyText } from '@/components/ui/typography'
 import { usePlanIntakeForm } from './planIntake/usePlanIntakeForm'
 import type { PlanIntakeFormOptions } from './planIntake/usePlanIntakeForm'
 import { input, fieldFootprint, errMsg, labelLeftRow, rowLabel, rowField } from './planIntake/styles'
 import Button from '@/components/ui/Button'
+import type { Modality } from '@/lib/useAppointmentTypes'
 
 // Re-exported from their new homes so every caller/test keeps importing them from
 // this module (WorkTab + AppointmentsTab take the type, the unit test the helper).
 export type { ExistingAppointment } from './planIntake/usePlanIntakeForm'
 export { endTimeOf } from './planIntake/helpers'
+
+// Afspraak-as (C.14): the fixed office/remote/phone axis has its own already-shipped
+// translated label per value — a lookup table keeps the mapping declarative and its
+// keys statically greppable for the i18n key-exists test (no computed t() key).
+const MODALITY_LABEL_KEY: Record<Modality, string> = {
+  office: 'work.modalityOffice', remote: 'work.modalityRemote', phone: 'work.modalityPhone',
+}
 
 // Thin container for the shared appointment modal (see file docblock above) — all
 // state/effects/submit live in usePlanIntakeForm, this only wires it to chrome.
@@ -63,6 +73,10 @@ export default function PlanIntakeModal(props: PlanIntakeFormOptions) {
   // only wires it to the shared chrome and renders the form below.
   const form = usePlanIntakeForm(props)
   const { t, errors, heading } = form
+  // A location-related 422 must stay visible even while the detail row itself is
+  // hidden for a phone appointment (verifier point 4) — computed once, reused by
+  // both the row's own visibility check and its error line below.
+  const hasWhereError = Boolean(errors.modality || errors.locationId || errors.appointmentLocation)
 
   return (
     // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
@@ -86,6 +100,17 @@ export default function PlanIntakeModal(props: PlanIntakeFormOptions) {
             <SelectMenu style={fieldFootprint} value={form.type || null} onChange={form.pickType} placeholder={t('work.pickType')}
               options={form.typeOptions.map(x => ({ value: x.value, label: x.label }))} />
             {errors.type && <div style={errMsg}>{t('common:required')}</div>}
+          </div>
+        </div>
+
+        {/* Afspraak-as (C.14, Danny 31-08 — verifier point 3): the modality the
+            chosen type proposes is a FIXED axis, shown as read-only plain text
+            (field-card canon: never a chip) right after Type, so it is visible
+            BEFORE saving instead of only inferable from the detail row below. */}
+        <div style={labelLeftRow}>
+          <span style={rowLabel}>{t('work.modality')}</span>
+          <div style={rowField}>
+            <BodyText>{t(MODALITY_LABEL_KEY[form.modality])}</BodyText>
           </div>
         </div>
 
@@ -120,16 +145,38 @@ export default function PlanIntakeModal(props: PlanIntakeFormOptions) {
           </Mono>
         </div>
 
-        {/* Office / remote / phone / a real tenant location. */}
-        <div style={labelLeftRow}>
-          <span style={rowLabel}>{t('work.modality')}</span>
-          <div style={rowField}>
-            {/* Searchable (Danny 24-07: "Locatie ook!!") — same modal combobox as the rest. */}
-            <CreatableSelect style={fieldFootprint} value={form.whereValue || null} onChange={form.pickWhere}
-              allowCreate={false} options={form.whereOptions} menuWidth={260} />
-            {(errors.modality || errors.locationId || errors.appointmentLocation) && <div style={errMsg}>{t('common:required')}</div>}
+        {/* Afspraak-as (C.14, Danny 31-08 — verifier points 1/2/4/5): `modality` is
+            the fixed axis shown above; this combobox is its DETAIL — a specific
+            tenant appointment-location slug or a real branch — hidden entirely for
+            a phone appointment (nothing to fill in). MEASURED BE RULE
+            (StoreAppointmentRequest::lookupRules on `appointment_location`, read
+            2026-09-03): once a tenant has configured its appointment-locations
+            lookup — the seeded default for every tenant — the field is validated
+            against THOSE slugs only (Rule::in); free text 422s. Only a tenant with
+            a completely EMPTY lookup gets a free-text escape hatch. So this stays
+            the same lookup PICKER for both on-location and remote — never a
+            free-text "paste your meeting link" promise the backend would usually
+            reject — with one neutral label and no address/link prose the field
+            cannot actually honour. A location-related 422 must still surface even
+            while the row is hidden for phone, so the row renders whenever there is
+            something to show OR an error to report (`hasWhereError`, above). */}
+        {(form.modality !== 'phone' || hasWhereError) && (
+          <div style={labelLeftRow}>
+            <span id="intake-where-label" style={rowLabel}>{t('work.modalityWhere')}</span>
+            <div style={rowField}>
+              {form.modality !== 'phone' && (
+                // Searchable (Danny 24-07: "Locatie ook!!") — same modal combobox as
+                // the rest. aria-labelledby composes with the trigger's own id so the
+                // accessible name is the row label, never just the placeholder text.
+                <CreatableSelect id="intake-where" aria-labelledby="intake-where-label"
+                  style={fieldFootprint} value={form.whereValue || null} onChange={form.pickWhere}
+                  allowCreate={false} options={form.whereOptions} menuWidth={260}
+                  placeholder={t('work.pickLocation')} />
+              )}
+              {hasWhereError && <div style={errMsg}>{t('common:required')}</div>}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Recruiter/owner. */}
         <div style={labelLeftRow}>

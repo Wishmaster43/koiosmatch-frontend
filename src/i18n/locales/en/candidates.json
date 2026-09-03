@@ -558,6 +558,8 @@
     "modalityOffice": "Office",
     "modalityRemote": "Remote",
     "modalityPhone": "Phone",
+    "modalityWhere": "Where",
+    "pickLocation": "Pick location",
     "owner": "Recruiter",
     "pickOwner": "Pick recruiter",
     "ownerDeviation": "Different recruiter",
@@ -1381,6 +1383,7 @@
     "windowTitle": "Notes — {{name}}",
     "loadError": "This candidate could not be loaded.",
     "summaryWindowTitle": "Profile text — {{name}}",
+    "matchRemarksWindowTitle": "Match remarks: {{name}}",
     "noteNotFound": "Note not found. It may have been deleted or belongs to another candidate.",
     "noteReadOnly": "This note belongs to another user. You can only read it here."
   },

@@ -558,6 +558,8 @@
     "modalityOffice": "Escritório",
     "modalityRemote": "À distância",
     "modalityPhone": "Por telefone",
+    "modalityWhere": "Onde",
+    "pickLocation": "Escolher localização",
     "owner": "Recrutador",
     "pickOwner": "Escolher recrutador",
     "ownerDeviation": "Recrutador diferente",
@@ -1381,6 +1383,7 @@
     "windowTitle": "Notas {{name}}",
     "loadError": "Não foi possível carregar este candidato.",
     "summaryWindowTitle": "Texto de perfil {{name}}",
+    "matchRemarksWindowTitle": "Observações do match: {{name}}",
     "noteNotFound": "Nota não encontrada. Pode ter sido eliminada ou pertencer a outro candidato.",
     "noteReadOnly": "Esta nota pertence a outro utilizador. Aqui só pode lê-la."
   },

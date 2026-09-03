@@ -535,6 +535,8 @@
     "modalityOffice": "Bureau",
     "modalityRemote": "À distance",
     "modalityPhone": "Téléphone",
+    "modalityWhere": "Où",
+    "pickLocation": "Choisir site",
     "owner": "Recruteur",
     "pickOwner": "Choisir le recruteur",
     "ownerDeviation": "Recruteur différent",
@@ -1381,6 +1383,7 @@
     "windowTitle": "Notes — {{name}}",
     "loadError": "Ce candidat n'a pas pu être chargé.",
     "summaryWindowTitle": "Texte de profil — {{name}}",
+    "matchRemarksWindowTitle": "Remarques du match: {{name}}",
     "noteNotFound": "Note introuvable. Elle a peut-être été supprimée ou appartient à un autre candidat.",
     "noteReadOnly": "Cette note appartient à un autre utilisateur. Vous pouvez uniquement la lire ici."
   },

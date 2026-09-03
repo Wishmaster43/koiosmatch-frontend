@@ -198,21 +198,43 @@ export function usePlanIntakeForm({
   // S24a(d) — the same re-sync for the appointment-location lookup pick. The seed's
   // default ("kantoor") happens to match today's real seed, so this isn't observed
   // live yet, but it must not silently break the moment a tenant's own default differs.
+  // MODALITY-PHONE-CLEAR-1 (Opus verifier, HIGH): a phone appointment has nothing to
+  // fill in here — PlanIntakeModal hides the whole detail row for it. Without this
+  // guard the default-resync below would silently REPOPULATE appointmentLocation the
+  // moment `modality` flips to 'phone' (this effect already reruns on every
+  // locationId/appointmentLocation change), leaving a stale value that still reached
+  // the submit body even though the field was invisible. `editing` still short-circuits
+  // first: an existing record's own stored values are never silently discarded on open,
+  // only submit() (below) forces the actually-sent payload to null for a phone modality.
   useEffect(() => {
     if (editing) return
+    if (modality === 'phone') {
+      if (locationId) setLocationId('')
+      if (appointmentLocation) setAppointmentLocation('')
+      return
+    }
     if (locationId) return // a real branch is picked instead — nothing to resync here
     if (appointmentLocation && appointmentLocations.some(x => x.value === appointmentLocation)) return
     if (!defaultLocation) return
     setAppointmentLocation(defaultLocation.value)
     // Loop-safe with `appointmentLocation` in deps: after the set the guard no-ops.
-  }, [defaultLocation, appointmentLocations, editing, locationId, appointmentLocation])
+  }, [modality, defaultLocation, appointmentLocations, editing, locationId, appointmentLocation])
 
   // Selecting a type re-proposes its duration + modality (the user can still change them);
   // a stale location pick no longer matches a re-proposed remote/phone modality, so clear it.
   const pickType = (v: string) => {
     setType(v)
     const m = metaOf(v)
-    if (m) { setDuration(m.default_duration_min); setModality(m.default_modality); setLocationId('') }
+    if (m) {
+      setDuration(m.default_duration_min)
+      setModality(m.default_modality)
+      setLocationId('')
+      // MODALITY-PHONE-CLEAR-1 (Opus verifier, HIGH): clear the lookup pick
+      // immediately on this direct path too — the effect above is the
+      // defense-in-depth backstop for every OTHER path that can set modality
+      // (the initial default and the type-resync effect).
+      if (m.default_modality === 'phone') setAppointmentLocation('')
+    }
   }
 
   // S24a(b): live end time, recomputed on every date/duration change.
@@ -248,15 +270,23 @@ export function usePlanIntakeForm({
     if (!when || !type) return
     setSaving(true)
     setErrors({}); setSubmitErr(null)
+    // MODALITY-PHONE-CLEAR-1 (Opus verifier, HIGH): force null for a phone
+    // appointment regardless of form state — the detail row is hidden and has
+    // nothing to submit, and a stale on-location/remote value must never reach
+    // the server (§3 no fake affordance: what is hidden must not silently
+    // persist). This is the payload-level guarantee; the state itself is also
+    // cleared as soon as modality flips (pickType + the S24a(d) resync effect
+    // above), so this only ever repeats what the state already holds.
+    const isPhone = modality === 'phone'
     const body = {
       scheduled_at: when, type, duration_min: duration, modality,
-      location_id: locationId || null,
-      appointment_location: appointmentLocation || null,
+      location_id: isPhone ? null : (locationId || null),
+      appointment_location: isPhone ? null : (appointmentLocation || null),
       ...(ownerId ? { owner_id: ownerId } : {}),
       // CLEAR-SWEEP (Danny 13-08): on EDIT '' means CLEARED and cleared must persist,
-    // so the key is sent as null (sometimes|nullable: omitted = unchanged server-side).
-    // On CREATE an empty vacancy stays an OMITTED key (CONSIST-2: no fake requirement).
-    ...(existing ? { vacancy_id: vacancyId || null } : (vacancyId ? { vacancy_id: vacancyId } : {})),
+      // so the key is sent as null (sometimes|nullable: omitted = unchanged server-side).
+      // On CREATE an empty vacancy stays an OMITTED key (CONSIST-2: no fake requirement).
+      ...(existing ? { vacancy_id: vacancyId || null } : (vacancyId ? { vacancy_id: vacancyId } : {})),
       ...(!editing && applicationId ? { application_id: applicationId } : {}),
     }
     try {
@@ -291,6 +321,10 @@ export function usePlanIntakeForm({
     t, editing, heading, submitLabel, vacancyHint,
     typeOptions, type, pickType,
     when, setWhen, duration, setDuration, endTime,
+    // Afspraak-as (C.14, Danny 31-08): modality is the fixed axis (office/remote/
+    // phone, proposed by the appointment type) — exposed so the detail field below
+    // can swap its label/placeholder and hide itself for a phone appointment.
+    modality,
     whereValue, whereOptions, pickWhere,
     ownerId, setOwnerId, ownerOptions,
     vacancyId, setVacancyId, vacancyOptions, vacancyFallback,

@@ -535,6 +535,8 @@
     "modalityOffice": "Büro",
     "modalityRemote": "Remote",
     "modalityPhone": "Telefon",
+    "modalityWhere": "Wo",
+    "pickLocation": "Standort wählen",
     "owner": "Recruiter",
     "pickOwner": "Recruiter wählen",
     "ownerDeviation": "Abweichender Recruiter",
@@ -1381,6 +1383,7 @@
     "windowTitle": "Notizen — {{name}}",
     "loadError": "Dieser Kandidat konnte nicht geladen werden.",
     "summaryWindowTitle": "Profiltext — {{name}}",
+    "matchRemarksWindowTitle": "Match-Anmerkungen: {{name}}",
     "noteNotFound": "Notiz nicht gefunden. Sie wurde möglicherweise gelöscht oder gehört zu einem anderen Kandidaten.",
     "noteReadOnly": "Diese Notiz gehört einem anderen Benutzer. Sie können sie hier nur lesen."
   },

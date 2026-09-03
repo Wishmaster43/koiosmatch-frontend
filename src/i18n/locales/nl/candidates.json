@@ -558,6 +558,8 @@
     "modalityOffice": "Kantoor",
     "modalityRemote": "Op afstand",
     "modalityPhone": "Telefonisch",
+    "modalityWhere": "Waar",
+    "pickLocation": "Kies locatie",
     "owner": "Recruiter",
     "pickOwner": "Kies recruiter",
     "ownerDeviation": "Recruiter wijkt af",
@@ -1381,6 +1383,7 @@
     "windowTitle": "Notities — {{name}}",
     "loadError": "Deze kandidaat kon niet worden geladen.",
     "summaryWindowTitle": "Profieltekst — {{name}}",
+    "matchRemarksWindowTitle": "Match opmerkingen: {{name}}",
     "noteNotFound": "Notitie niet gevonden. Mogelijk is hij verwijderd of hoort hij bij een andere kandidaat.",
     "noteReadOnly": "Deze notitie is van een andere gebruiker. Je kunt hem hier alleen lezen."
   },
