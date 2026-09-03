@@ -22,7 +22,12 @@
  */
 import { useEffect, useState } from 'react'
 import api, { unwrapList } from '@/lib/api'
-import { useAllSettings, getStringSetting } from '@/lib/settings/useAllSettings'
+import { useAllSettings, useSettingsLoaded, getStringSetting } from '@/lib/settings/useAllSettings'
+
+// The platform's home market — the SAME default the backend writes at tenant provisioning
+// (CMBE bundle H), so a tenant whose settings row was never created reads as NL on both
+// sides instead of 'unknown' (which the rule treats as 'show', Danny's 04-09 complaint).
+export const PLATFORM_DEFAULT_COMPANY_COUNTRY = 'NL'
 import { isWorkPermitBlockVisible, type NationalityRow, type WorkPermitDataState } from './workPermitVisibility'
 
 // Plumbing only (see file docblock above): gathers the tenant's country, the
@@ -35,7 +40,12 @@ export function useWorkPermitVisibility(
   // The tenant's own country — an ISO-2 code ('NL'), read from the shared
   // /settings blob every settings screen already uses.
   const settings = useAllSettings()
+  const settingsLoaded = useSettingsLoaded()
+  // WERKVERGUNNING-DEFAULT-1 (04-09): a LOADED blob without the key falls back to the
+  // platform default; while the blob is still loading the country stays unknown, so the
+  // rule keeps the card visible rather than hiding it on a guess.
   const companyCountry = getStringSetting(settings, 'company_country')
+    ?? (settingsLoaded ? PLATFORM_DEFAULT_COMPANY_COUNTRY : null)
 
   // null means "the lookup has not answered (yet)", which is NOT the same as an
   // empty list — only a real answer may ever lead to hiding the card.
