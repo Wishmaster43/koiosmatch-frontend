@@ -577,7 +577,7 @@
   "src/pages/settings/sections/DocumentTypesSettings.test.jsx": 1,
   "src/pages/settings/sections/EducationLevelsSettings.test.jsx": 1,
   "src/pages/settings/sections/EmailLog.tsx": 4,
-  "src/pages/settings/sections/EmailSettings.jsx": 7,
+  "src/pages/settings/sections/EmailSettings.jsx": 4,
   "src/pages/settings/sections/EscalationReasonsSettings.test.jsx": 1,
   "src/pages/settings/sections/EscalationSettings.tsx": 6,
   "src/pages/settings/sections/ExportSettings.jsx": 2,

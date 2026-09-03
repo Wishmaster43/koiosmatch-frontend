@@ -21,6 +21,7 @@ import Spinner from '@/components/ui/Spinner'
 import CalloutBox from '@/components/ui/CalloutBox'
 import Button from '@/components/ui/Button'
 import SaveButton from '@/components/ui/SaveButton'
+import SegmentedControl from '@/components/ui/SegmentedControl'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { PageTitle, Caption } from '@/components/ui/typography'
 
@@ -160,23 +161,13 @@ export default function EmailSettings({ context = 'klanten' }) {
         {/* Provider choice */}
         <div style={cardStyle}>
           <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 10 }}>{t('email.provider')}</div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {PROVIDERS.map(p => (
-              <button key={p.id} onClick={() => setProvider(p.id)}
-                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- option-card (title + description), not a Button
-                style={{ flex: 1, padding: '10px 12px', borderRadius: 8, cursor: 'pointer', textAlign: 'left',
-                         border: `1px solid ${provider === p.id ? 'var(--color-primary)' : 'var(--border)'}`,
-                         background: provider === p.id ? 'var(--color-primary-bg, var(--color-secondary-bg))' : 'var(--hover-bg)',
-                         transition: 'all 0.15s' }}>
-                <div style={{ fontSize: 13, fontWeight: 600,
-                              // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-                              color: provider === p.id ? 'var(--color-primary-text)' : 'var(--text)', marginBottom: 2 }}>
-                  {p.label}
-                </div>
-                <Caption as="div">{p.desc}</Caption>
-              </button>
-            ))}
-          </div>
+          {/* Provider choice — shared SegmentedControl option-card radiogroup, one group for the three providers. */}
+          <SegmentedControl
+            ariaLabel={t('email.provider')}
+            options={PROVIDERS.map(p => ({ value: p.id, label: p.label, description: p.desc }))}
+            value={provider}
+            onChange={setProvider}
+          />
 
           {(provider === 'gmail' || provider === 'office') && (
             <div style={{ marginTop: 14 }}>
@@ -243,24 +234,18 @@ export default function EmailSettings({ context = 'klanten' }) {
             </div>
             <div>
               <label style={labelStyle}>{t('email.security')}</label>
-              <div style={{ display: 'flex', gap: 8 }}>
-                {[
-                  { id: 'tls',  label: t('email.secTls') },
-                  { id: 'ssl',  label: t('email.secSsl') },
-                  { id: 'none', label: t('email.secNone') },
-                ].map(s => (
-                  <button key={s.id} onClick={() => setSmtpSecure(s.id)}
-                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- §4 soft-tint multi-option toggle pill, not a Button
-                    style={{ padding: '6px 14px', borderRadius: 20, fontSize: 12, cursor: 'pointer',
-                             border: `1px solid ${smtpSecure === s.id ? 'var(--color-primary)' : 'var(--border)'}`,
-                             background: smtpSecure === s.id ? 'var(--color-primary-bg, var(--color-secondary-bg))' : 'var(--hover-bg)',
-                             // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-                             color: smtpSecure === s.id ? 'var(--color-primary-text)' : 'var(--text)',
-                             fontWeight: smtpSecure === s.id ? 500 : 400 }}>
-                    {s.label}
-                  </button>
-                ))}
-              </div>
+              {/* SMTP security pill row — shared SegmentedControl, compact size (§4 soft-tint pill). */}
+              <SegmentedControl
+                size="compact"
+                ariaLabel={t('email.security')}
+                options={[
+                  { value: 'tls',  label: t('email.secTls') },
+                  { value: 'ssl',  label: t('email.secSsl') },
+                  { value: 'none', label: t('email.secNone') },
+                ]}
+                value={smtpSecure}
+                onChange={setSmtpSecure}
+              />
             </div>
           </div>
         )}
