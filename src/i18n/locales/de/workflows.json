@@ -1236,6 +1236,7 @@
     "De volledige, tenant-bewerkbare instructie voor de AI-agent persona, staps-state-machine, harde regels Het runtime-antwoordcontract wordt automatisch toegevoegd": "Die vollständige, mandantenbearbeitbare Anweisung für den KI-Agenten: Persona, Schritt-Zustandsautomat, feste Regeln. Der Laufzeit-Antwortvertrag wird automatisch hinzugefügt.",
     "Reageert de kandidaat niet, dan valt de run na dit aantal uren terug (workflowsresume-due watchdog)": "Antwortet der Kandidat nicht, fällt der Lauf nach dieser Anzahl Stunden zurück (workflows:resume-due watchdog).",
     "Alleen gekoppelde WhatsApp Web-nummers (eigen of vestiging)": "Nur verbundene WhatsApp Web-Nummern (eigene oder Standort).",
+    "Leeg laten betekent automatisch eerst de vestiging, anders de standaard": "Leer lassen bedeutet automatisch: zuerst die Niederlassung, sonst der Standard.",
     "Via WhatsApp Web kan alleen een sessiebericht (vrije tekst) worden verstuurd": "Über WhatsApp Web kann nur eine Sitzungsnachricht (Freitext) gesendet werden.",
     "bijv {{firstname}} of extra bericht tekst": "z.B. {{firstname}} oder zusätzlicher Nachrichtentext",
     "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek": "Lässt den KI-Agenten während des Gesprächs die Mandanten-Dokumente/Wissensdatenbank konsultieren.",

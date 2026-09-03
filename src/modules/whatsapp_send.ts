@@ -53,7 +53,9 @@ export default {
     // BACKEND defaults a missing/legacy channel to 'waba' and still requires this
     // field there — an unset channel must not hide an already-stored sender.
     { key: 'phone_number_id',     label: 'Afzender',               type: 'whatsapp_phone_number', endpoint: '/whatsapp-phone-numbers',
-      showIf: { key: 'channel', value: ['waba', 'waba_coex', undefined] } },
+      showIf: { key: 'channel', value: ['waba', 'waba_coex', undefined] },
+      // WA-SCOPE-2: an empty sender falls back automatically (branch first, then the tenant default).
+      help: 'Leeg laten betekent automatisch: eerst de vestiging, anders de standaard.' },
     // Recipient override: empty = each bundle's own mobile; a literal 06-number
     // redirects EVERY message there (dry-run testing, Danny 2026-07-09).
     { key: 'recipient_field',     label: 'Ontvanger',              type: 'text',
