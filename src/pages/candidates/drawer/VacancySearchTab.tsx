@@ -6,13 +6,15 @@
  * container, all data via the hook, one small component per tab).
  */
 import type { CSSProperties, ReactNode } from 'react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, ChevronRight } from 'lucide-react'
 import GeoSearchShell from '@/components/search/GeoSearchShell'
 import ScorePill from '@/components/match/ScorePill'
 import MatchScoreBlock from '@/components/match/MatchScoreBlock'
-import RadiusMap from '@/components/map/RadiusMap'
+// audit scalability-3: Leaflet only downloads when this tab actually renders the map —
+// the static import used to pull it into the page chunk via the drawer's tab list (§9).
+const RadiusMap = lazy(() => import('@/components/map/RadiusMap'))
 import DrillPager from '@/components/drawer/DrillPager'
 import EntityLink from '@/components/ui/EntityLink'
 import Button from '@/components/ui/Button'
@@ -196,12 +198,14 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
         variant="row" disabled={!candidate.address} />
     </div>
   ) : (
-    <RadiusMap points={points} center={center} radiusKm={radiusKm} height="100%"
+    <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
+      <RadiusMap points={points} center={center} radiusKm={radiusKm} height="100%"
       centerMarker={{ label: candidate.name ?? '', sub: t('vacancySearch.centerHome') }}
       // The candidate's home pin stays fixed — re-centring by clicking the map must
       // never move the search origin away from the candidate's own address.
       onCenterChange={() => {}}
       onPickPoint={selectVacancy} />
+    </Suspense>
   )
 
   // Compact summary card for the SELECTED vacancy — shown before navigating away,

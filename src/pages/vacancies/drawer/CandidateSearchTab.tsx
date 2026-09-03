@@ -10,13 +10,15 @@
  * results) instead of two hand-drifted layouts.
  */
 import type { CSSProperties } from 'react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw, X, ChevronRight } from 'lucide-react'
 import GeoSearchShell from '@/components/search/GeoSearchShell'
 import ScorePill from '@/components/match/ScorePill'
 import MatchScoreBlock from '@/components/match/MatchScoreBlock'
-import RadiusMap from '@/components/map/RadiusMap'
+// audit scalability-3: Leaflet only downloads when this tab actually renders the map —
+// the static import used to pull it into the page chunk via the drawer's tab list (§9).
+const RadiusMap = lazy(() => import('@/components/map/RadiusMap'))
 import DrillPager from '@/components/drawer/DrillPager'
 import EntityLink from '@/components/ui/EntityLink'
 import Button from '@/components/ui/Button'
@@ -198,12 +200,14 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
       <GeocodeButton endpoint={`/vacancies/${vacancy.id}/geocode`} permission="vacancies.update" variant="row" />
     </div>
   ) : (
-    <RadiusMap points={points} center={center} radiusKm={radiusKm} height="100%"
+    <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
+      <RadiusMap points={points} center={center} radiusKm={radiusKm} height="100%"
       centerMarker={{ label: vacancy.title ?? '', sub: t('candidateSearch.centerVacancy') }}
       // The vacancy pin stays fixed — re-centring by clicking the map must never
       // move the search origin away from the vacancy's own address.
       onCenterChange={() => {}}
       onPickPoint={selectCandidate} />
+    </Suspense>
   )
 
   // Compact summary card for the SELECTED candidate — shown before navigating
