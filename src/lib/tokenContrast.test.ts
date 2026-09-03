@@ -237,7 +237,6 @@ describe('house token pairs stay readable (defaults, light theme)', () => {
       const ch = (shift: number) => Math.round(pct * ((a >> shift) & 255) + (1 - pct) * ((b >> shift) & 255))
       return `#${[16, 8, 0].map(sh => ch(sh).toString(16).padStart(2, '0')).join('')}`
     }
-    // eslint-disable-next-line no-restricted-syntax -- brand fixtures: the algorithm's inputs, not UI colours
     const brands = [
       { name: 'default primary', hex: '#19A5CA', lightFloor: 4.5 },
       { name: 'AENF yellow', hex: '#F5C400', lightFloor: 4.5 },
