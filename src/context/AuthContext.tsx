@@ -89,7 +89,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    */
   const applyAuthResponse = useCallback((data: unknown): AuthUser => {
     const d = data as { user?: AuthUser; data?: AuthUser; accessible_pages?: string[]; tenant?: Tenant } | null | undefined
-    const u     = (d?.user ?? d?.data ?? data) as AuthUser
+    const raw   = (d?.user ?? d?.data ?? data) as AuthUser
+    // SUPERADMIN-FALLBACK-1 (04-09, measured as the readonly demo user): /auth/me
+    // carries the tenant as a SIBLING of `user`, never as user.tenant_id, so the
+    // "user without a tenant" heuristic in isSuperAdmin() fired for every tenant
+    // user and opened every permission gate. Stamp the sibling tenant onto the
+    // stored profile so the profile itself says which tenant it belongs to.
+    const sibling = d?.tenant
+    const u: AuthUser = raw && sibling?.id && raw.tenant_id == null && !raw.tenant ? { ...raw, tenant_id: sibling.id } : raw
     const pages = d?.accessible_pages ?? u?.accessible_pages ?? []
     setUser(u)
     setAccessiblePages(pages)
@@ -372,9 +379,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // True for any of the admin-ish roles; built from hasRole so the role list stays the single source.
   const isAdmin = useCallback(() =>
     hasRole('admin') || hasRole('tenant_admin') || hasRole('super_admin'), [hasRole])
-  // Super admin = explicit flag, the super_admin role, or a user without a tenant.
+  // Super admin = the explicit flag, the super_admin role, or a profile that EXPLICITLY
+  // says it has no tenant (`tenant_id: null` present). A profile that merely omits the
+  // key is a tenant user (SUPERADMIN-FALLBACK-1): "missing" must never mean "platform".
   const isSuperAdmin = useCallback(() =>
-    user?.is_super_admin === true || hasRole('super_admin') || (!!user && user.tenant_id == null && !user.tenant), [user, hasRole])
+    user?.is_super_admin === true || hasRole('super_admin')
+      || (!!user && 'tenant_id' in user && user.tenant_id === null && !user.tenant), [user, hasRole])
 
   // Capability check for paid add-on modules ('sm', 'hf', 'ai', 'ats', 'plan').
   // Module gating is uniform: an off module is unprovisioned for the tenant, so it stays

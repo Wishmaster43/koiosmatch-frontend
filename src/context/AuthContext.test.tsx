@@ -96,3 +96,36 @@ describe('AuthContext · logout leaves no cached data behind', () => {
     Object.defineProperty(window, 'location', { configurable: true, value: original })
   })
 })
+
+// SUPERADMIN-FALLBACK-1 (04-09): measured as the readonly demo user, the sidebar said
+// "Super admin" and every "+ Nieuw" opener rendered. /auth/me puts the tenant BESIDE
+// the user, so the "no tenant" clause fired for every tenant user.
+describe('AuthContext · isSuperAdmin() never fires on a profile that merely omits tenant_id', () => {
+  const me = (user: Record<string, unknown>, tenant?: Record<string, unknown>) => {
+    localStorage.setItem('km_session', '1')
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url === '/auth/me' ? Promise.resolve({ data: { user, tenant } }) : Promise.reject(new Error(`unexpected GET ${url}`)))
+  }
+
+  it('a tenant user with view-only permissions is neither super admin nor allowed to create', async () => {
+    me({ id: 'tom', is_super_admin: false, roles: [{ name: 'readonly' }], permissions: ['tasks.view'] }, { id: 't1', name: 'Demo' })
+    const { result } = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(result.current?.loading).toBe(false))
+    expect(result.current?.isSuperAdmin()).toBe(false)
+    expect(result.current?.hasPermission('tasks.create')).toBe(false)
+    expect(result.current?.hasPermission('tasks.view')).toBe(true)
+    expect(result.current?.user?.tenant_id).toBe('t1')
+  })
+
+  it('the explicit flag and an explicit tenant_id: null still mean platform super admin', async () => {
+    me({ id: 'd', is_super_admin: true, roles: [] })
+    const a = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(a.result.current?.loading).toBe(false))
+    expect(a.result.current?.isSuperAdmin()).toBe(true)
+    a.unmount()
+    me({ id: 'p', tenant_id: null, roles: [] })
+    const b = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(b.result.current?.loading).toBe(false))
+    expect(b.result.current?.isSuperAdmin()).toBe(true)
+  })
+})
