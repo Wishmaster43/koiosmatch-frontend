@@ -230,8 +230,13 @@ describe('DepartmentsPanel · tenant-configured default status filter (TENANT-DE
         : Promise.resolve({ data: { data: [] } }))
 
     render(<DepartmentsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" departments={twoDepartments} statuses={statuses} />)
-    await waitFor(() => expect(screen.getByText('Inactieve afdeling')).toBeInTheDocument())
-    expect(screen.queryByText('Actieve afdeling')).toBeNull()
+    // Both assertions inside ONE waitFor: the default filter lands asynchronously (the
+    // /settings read), so the active row may still be on screen one tick after the
+    // inactive one appears — measured as a full-suite-only failure on 04-09.
+    await waitFor(() => {
+      expect(screen.getByText('Inactieve afdeling')).toBeInTheDocument()
+      expect(screen.queryByText('Actieve afdeling')).toBeNull()
+    })
   })
 
   it('an explicit "all" default shows every row, ignoring the active-only guess', async () => {
