@@ -165,5 +165,17 @@
     "deviationHint": "Gebruikers kunnen dit in hun eigen profiel anders instellen.",
     "noPermission": "Je hebt geen rechten om dit te wijzigen.",
     "saveError": "Opslaan is mislukt."
+  },
+  "results": {
+    "group": {
+      "kandidaten": "Kandidaten",
+      "vacatures": "Vacatures",
+      "klanten": "Klanten",
+      "kansen": "Kansen",
+      "matches": "Matches"
+    },
+    "showMore": "Toon meer",
+    "showLess": "Toon minder",
+    "skipped": "Overgeslagen: {{reason}}"
   }
 }

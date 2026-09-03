@@ -44,6 +44,21 @@ export interface KoiosPendingAction {
 // A result-card deep link, attached to a tool step's read output (Job 3).
 export type KoiosResultRef = KoiosContextRef
 
+// Per-entity grouping metadata for search results (ZoekAlles tool).
+// When present, the step includes this alongside refs[].
+export interface KoiosSearchResultGroup {
+  entity: 'candidate' | 'vacancy' | 'customer' | 'opportunity' | 'match'
+  aantal?: number      // Total matching count before truncation
+  meer?: boolean       // True if truncated (>5 results)
+  overgeslagen?: { reden: string } | null  // When entity was skipped
+}
+
+// Grouped search results per entity, extracted from a zoek_alles step.
+export interface KoiosSearchResultsGrouped {
+  groups: Array<KoiosSearchResultGroup & { refs: KoiosResultRef[] }>
+  skipped: Array<{ entity: string; reden: string }>
+}
+
 // POST /ai/koios/actions/{id}/confirm response (KOIOS-CONFIRM-DECLINE-1,
 // PRIJSMODEL-C 30-08): a genuine tool refusal (staffel vol, kandidaat niet
 // gevonden, …) is now a 422 { status: 'declined', message, data }, never the

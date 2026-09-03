@@ -165,5 +165,17 @@
     "deviationHint": "Los usuarios pueden configurarlo de forma diferente en su propio perfil.",
     "noPermission": "No tienes permiso para cambiar esto.",
     "saveError": "Error al guardar."
+  },
+  "results": {
+    "group": {
+      "kandidaten": "Candidatos",
+      "vacatures": "Vacantes",
+      "klanten": "Clientes",
+      "kansen": "Oportunidades",
+      "matches": "Coincidencias"
+    },
+    "showMore": "Mostrar más",
+    "showLess": "Mostrar menos",
+    "skipped": "Omitido: {{reason}}"
   }
 }

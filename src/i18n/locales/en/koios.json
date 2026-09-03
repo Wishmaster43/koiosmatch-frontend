@@ -165,5 +165,17 @@
     "deviationHint": "Users can set this differently in their own profile.",
     "noPermission": "You do not have permission to change this.",
     "saveError": "Saving failed."
+  },
+  "results": {
+    "group": {
+      "kandidaten": "Candidates",
+      "vacatures": "Vacancies",
+      "klanten": "Customers",
+      "kansen": "Opportunities",
+      "matches": "Matches"
+    },
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "skipped": "Skipped: {{reason}}"
   }
 }

@@ -14,10 +14,68 @@ import KoiosUsage from './KoiosUsage'
 import KoiosPendingActionCard from './KoiosPendingActionCard'
 import KoiosResultCards from './KoiosResultCards'
 import KoiosFeedback from './KoiosFeedback'
-import type { KoiosResultRef } from './koiosTypes'
+import type { KoiosResultRef, KoiosSearchResultsGrouped } from './koiosTypes'
 import type { KoiosChatMessage, TFn } from '@/types/koios'
 import { GRADIENT, resolveMessage } from './koiosMessageParts'
 import type { KoiosModelOption } from '@/lib/koiosModelTiers'
+
+// ── Group search results by entity type ────────────────────────────────────────
+// Maps backend entity keys to FE ref types.
+const ENTITY_TYPE_MAP: Record<string, 'candidate' | 'vacancy' | 'customer' | 'opportunity' | 'match'> = {
+  kandidaten: 'candidate',
+  vacatures: 'vacancy',
+  klanten: 'customer',
+  kansen: 'opportunity',
+  matches: 'match',
+}
+
+// Extracts per-entity search metadata and groups refs by entity type.
+// If the backend sends full metadata in the step (e.g. for a zoek_alles tool),
+// this parses it; otherwise, reconstructs grouping from refs alone.
+function groupSearchResults(step: Record<string, unknown>, refs: KoiosResultRef[]): KoiosSearchResultsGrouped {
+  const groups: KoiosSearchResultsGrouped['groups'] = []
+  const skipped: KoiosSearchResultsGrouped['skipped'] = []
+
+  // Try to extract per-entity metadata from the step if present
+  // (backend may include raw tool output as { zoekterm, resultaten: {...} })
+  const resultaten = (step.resultaten ?? step.results) as Record<string, unknown> | undefined
+  const resultaatPerEntity = resultaten || {}
+
+  // Group refs by entity type in the canonical order
+  const refsByEntity = new Map<string, KoiosResultRef[]>()
+  for (const ref of refs) {
+    const list = refsByEntity.get(ref.type) || []
+    list.push(ref)
+    refsByEntity.set(ref.type, list)
+  }
+
+  // Render groups in entity order: candidates, vacancies, customers, opportunities, matches
+  const entityOrder: Array<'candidate' | 'vacancy' | 'customer' | 'opportunity' | 'match'> = [
+    'candidate', 'vacancy', 'customer', 'opportunity', 'match',
+  ]
+  for (const entityType of entityOrder) {
+    const entityRefs = refsByEntity.get(entityType) || []
+    if (entityRefs.length > 0 || resultaatPerEntity[entityType]) {
+      groups.push({
+        entity: entityType,
+        refs: entityRefs,
+        aantal: entityRefs.length,
+        meer: false,
+      })
+    }
+  }
+
+  // Collect skipped entities from the step's per-entity metadata
+  for (const [key, value] of Object.entries(resultaatPerEntity)) {
+    const entry = value as Record<string, unknown>
+    if (entry.overgeslagen === true && typeof entry.reden === 'string') {
+      const entityType = ENTITY_TYPE_MAP[key] || key
+      skipped.push({ entity: entityType, reden: entry.reden })
+    }
+  }
+
+  return { groups, skipped }
+}
 
 // ── Chat bubble ───────────────────────────────────────────────────────────────
 export default function KoiosMessage({ msg, isNew, t, locale, modelOptions }: { msg: KoiosChatMessage; isNew?: boolean; t: TFn; locale?: string; modelOptions?: KoiosModelOption[] }) {
@@ -26,8 +84,14 @@ export default function KoiosMessage({ msg, isNew, t, locale, modelOptions }: { 
   // Subtle tag under the bubble for a self-refusal or an unfinished (max_steps) run.
   const stopTag = isKoios && !notice && msg.stopReason === 'refusal' ? t('koios.stopRefused')
     : isKoios && !notice && msg.stopReason === 'max_steps' ? t('koios.stopMaxSteps') : null
-  // Job 3 (dormant): flatten every step's `refs[]` into one deep-link card row.
+  // Job 3: Group search results by entity type, with per-entity metadata.
+  // First, flatten all refs from all steps.
   const resultRefs: KoiosResultRef[] = (msg.steps ?? []).flatMap((s) => s.refs ?? [])
+  // Then, try to find a zoek_alles step and group results by entity with metadata.
+  const zoekAllesStep = (msg.steps ?? []).find((s) => s.tool === 'zoek_alles')
+  const groupedResults: KoiosSearchResultsGrouped = zoekAllesStep
+    ? groupSearchResults(zoekAllesStep, resultRefs)
+    : { groups: resultRefs.length > 0 ? [{ entity: 'candidate', refs: resultRefs, aantal: resultRefs.length, meer: false }] : [], skipped: [] }
 
   return (
     <div style={{ display: 'flex', gap: 8, flexDirection: isKoios ? 'row' : 'row-reverse',
@@ -57,8 +121,8 @@ export default function KoiosMessage({ msg, isNew, t, locale, modelOptions }: { 
         {stopTag && <div style={{ marginTop: 4, fontSize: 10, color: 'var(--text-muted)' }}>{stopTag}</div>}
         {/* Job 2 (dormant): a proposed write waiting for the user's confirm/cancel. */}
         {isKoios && !notice && msg.pendingAction && <KoiosPendingActionCard action={msg.pendingAction} />}
-        {/* Job 3 (dormant): deep-link cards for any refs a read-tool step returned. */}
-        {isKoios && !notice && resultRefs.length > 0 && <KoiosResultCards refs={resultRefs} />}
+        {/* Job 3: deep-link cards grouped by entity type, from a search tool step. */}
+        {isKoios && !notice && (groupedResults.groups.length > 0 || groupedResults.skipped.length > 0) && <KoiosResultCards groups={groupedResults} t={t} />}
         {isKoios && !notice && <KoiosSteps steps={msg.steps} t={t} />}
         {isKoios && !notice && msg.stopReason !== 'not_configured' && (
           <KoiosUsage usage={msg.usage} model={msg.model} t={t} locale={locale} options={modelOptions} />

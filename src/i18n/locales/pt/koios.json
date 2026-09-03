@@ -165,5 +165,17 @@
     "deviationHint": "Os utilizadores podem definir isto de forma diferente no seu próprio perfil.",
     "noPermission": "Não tem permissão para alterar isto.",
     "saveError": "Não foi possível guardar."
+  },
+  "results": {
+    "group": {
+      "kandidaten": "Candidatos",
+      "vacatures": "Vagas",
+      "klanten": "Clientes",
+      "kansen": "Oportunidades",
+      "matches": "Correspondências"
+    },
+    "showMore": "Mostrar mais",
+    "showLess": "Mostrar menos",
+    "skipped": "Ignorado: {{reason}}"
   }
 }

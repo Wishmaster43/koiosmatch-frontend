@@ -165,5 +165,17 @@
     "deviationHint": "Benutzer können dies in ihrem eigenen Profil anders einstellen.",
     "noPermission": "Du hast keine Berechtigung, dies zu ändern.",
     "saveError": "Speichern ist fehlgeschlagen."
+  },
+  "results": {
+    "group": {
+      "kandidaten": "Kandidaten",
+      "vacatures": "Stellen",
+      "klanten": "Kunden",
+      "kansen": "Chancen",
+      "matches": "Übereinstimmungen"
+    },
+    "showMore": "Mehr anzeigen",
+    "showLess": "Weniger anzeigen",
+    "skipped": "Übersprungen: {{reason}}"
   }
 }

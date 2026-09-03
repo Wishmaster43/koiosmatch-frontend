@@ -165,5 +165,17 @@
     "deviationHint": "Les utilisateurs peuvent régler cela différemment dans leur propre profil.",
     "noPermission": "Vous n'avez pas le droit de modifier ceci.",
     "saveError": "L'enregistrement a échoué."
+  },
+  "results": {
+    "group": {
+      "kandidaten": "Candidats",
+      "vacatures": "Offres d'emploi",
+      "klanten": "Clients",
+      "kansen": "Opportunités",
+      "matches": "Correspondances"
+    },
+    "showMore": "Afficher plus",
+    "showLess": "Afficher moins",
+    "skipped": "Ignoré : {{reason}}"
   }
 }
