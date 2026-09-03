@@ -129,6 +129,24 @@ describe('CandidatesTable · reference number column (JOB1)', () => {
   })
 })
 
+// SORT-OFF-1: the six lookup-backed columns no longer offer client-side sort
+// (it only reordered the loaded page, not the server result) while a genuinely
+// server-sorted column (name) keeps its sort control.
+describe('CandidatesTable · SORT-OFF-1 lookup-backed columns are not sortable', () => {
+  it('renders no sort button/aria-sort on phase, deployability, funnel, contract form, talent pool or owner, while name keeps its sort control', () => {
+    render(<CandidatesTable rows={[baseCandidate]} />)
+    const lookupHeaders = ['Fase', 'Status', 'Funnel type', 'Contractvorm', 'Talentenpool', 'Eigenaar']
+    for (const label of lookupHeaders) {
+      const th = screen.getByText(label).closest('th') as HTMLElement
+      expect(within(th).queryByRole('button')).toBeNull()
+      expect(th).not.toHaveAttribute('aria-sort')
+    }
+    const nameTh = screen.getByText('Naam').closest('th') as HTMLElement
+    expect(within(nameTh).getByRole('button')).toBeInTheDocument()
+    expect(nameTh).toHaveAttribute('aria-sort', 'none')
+  })
+})
+
 // JOB2: the compact per-row backoffice coupling indicator — before this change
 // HelloFlexMark was imported by nothing at all (grepped repo-wide) and there was
 // no signal anywhere in a list; a passing test here MUST fail on a revert.

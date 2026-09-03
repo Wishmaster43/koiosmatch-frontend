@@ -94,8 +94,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
   const seedLabel = useSeedLabel()
   const { formatDate } = useDateFormat()
   // LookupsContext is still untyped JS — cast its API to the meta shapes used here.
-  const { funnelTypes, funnelMeta, statusMeta, phaseMeta, typeMeta } = useLookups() as unknown as {
-    funnelTypes: Array<{ value: string }>
+  const { funnelMeta, statusMeta, phaseMeta, typeMeta } = useLookups() as unknown as {
     funnelMeta: (v: string) => { label: string; color: string; is_match?: boolean }
     statusMeta: (v: string) => { label: string; color: string; requires_match?: boolean; requires_reason?: boolean; expects_return_date?: boolean; is_blacklist?: boolean; icon?: string }
     phaseMeta: (v: string) => { label: string; color: string }
@@ -129,11 +128,9 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
 
   // Column defs — memoized so DataTable's per-row memo (audit item 7) actually
   // holds: a stable `columns` reference means a row only re-renders when ITS OWN
-  // data/selection changes. `avatarColor`/`funnelOrder` are derived INSIDE the
-  // memo body (not hoisted above it) so they never force an extra dependency.
+  // data/selection changes. `avatarColor` is derived INSIDE the memo body (not
+  // hoisted above it) so it never forces an extra dependency.
   const columns: Column<Candidate>[] = useMemo(() => {
-    // Sort the funnel column by lifecycle order (prospect → alumni), not alphabetically.
-    const funnelOrder: Record<string, number> = Object.fromEntries(funnelTypes.map((f, i) => [f.value, i]))
     const avatarColor = (g?: string | null) => coloredByGender ? (genderColor(g) ?? NEUTRAL_AVATAR) : NEUTRAL_AVATAR
 
     return [
@@ -177,8 +174,11 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
       },
       { key: 'city', header: t('columns.city'), nowrap: true, cellStyle: plainCell, sortable: true, sortValue: c => c.city, render: c => c.city || '—' },
       {
+        // SORT-OFF-1 (Danny 04-09): sorting is off on lookup-backed columns until the
+        // server join-sort lands (CAND-SORT-BE-2) — client-side sortValue only ordered
+        // the loaded page, a fake affordance next to the true server sort on other columns.
         // Phase (lifecycle: Lead/Kandidaat, "Candidate") — model v2 axis.
-        key: 'phase', header: t('columns.phase'), sortable: true, sortValue: c => phaseMeta(c.phase).label,
+        key: 'phase', header: t('columns.phase'),
         render: c => { if (!c.phase) return dash; const m = phaseMeta(c.phase)
           if (!colorPhase) return <span style={plainCell}>{m.label}</span>
           // Phase is a lifecycle axis — round chip, like status (Danny 2026-07-14).
@@ -186,7 +186,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
       },
       {
         // Deployability ("status": Beschikbaar/Geplaatst/…, "Available/Placed/…") — model v2 axis.
-        key: 'status', header: t('columns.deployability'), sortable: true, sortValue: c => c.status ? statusMeta(c.status).label : '',
+        key: 'status', header: t('columns.deployability'),
         // Lifecycle wins in the archived/trash views (ERASE-1): show a Gearchiveerd/
         // Verwijderd ("Archived/Deleted") chip instead of the deployability status.
         // Otherwise the shared chip.
@@ -251,7 +251,6 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
       },
       {
         key: 'funnelType', header: t('columns.funnelType'), nowrap: true,
-        sortable: true, sortValue: c => funnelOrder[c.stage] ?? 99,
         render: c => {
           if (!c.stage) return dash
           // Chip from the API's flat funnel_label/funnel_color; the lookup is the fallback.
@@ -271,7 +270,6 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
       },
       {
         key: 'candidateType', header: t('columns.contractForm'), nowrap: true,
-        sortValue: c => (c.candidateTypes ?? [])[0] ?? '', sortable: true,
         render: c => {
           const list = c.candidateTypes ?? []
           if (list.length === 0) return dash
@@ -296,7 +294,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
         },
       },
       {
-        key: 'talentPool', header: t('columns.talentPool'), nowrap: true, sortable: true, sortValue: c => (c.pools ?? [])[0]?.name ?? '',
+        key: 'talentPool', header: t('columns.talentPool'), nowrap: true,
         render: c => {
           const pools = c.pools ?? []
           if (pools.length === 0) return dash
@@ -343,7 +341,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
         ),
       },
       {
-        key: 'owner', header: t('columns.owner'), sortable: true, sortValue: c => c.owner,
+        key: 'owner', header: t('columns.owner'),
         render: c => (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             {c.ownerInitials !== '?' && <Avatar initials={c.ownerInitials} size={18} color={colorOwner ? c.ownerColor : NEUTRAL_AVATAR} soft />}
@@ -353,7 +351,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
       },
     ]
   }, [
-    t, formatDate, funnelTypes, funnelMeta, statusMeta, phaseMeta, typeMeta,
+    t, formatDate, funnelMeta, statusMeta, phaseMeta, typeMeta,
     genderColor, lastContactLabel, lastContactIcon, adviceOf, seedLabel,
     colorFunnel, colorType, colorPool, colorKoios, coloredByGender, colorStatus, colorPhase, colorOwner,
     showHelloflex, showShiftmanager,
