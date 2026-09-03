@@ -3880,5 +3880,8 @@
     "subtitle": "De standaardtaal voor berichten aan kandidaten en contactpersonen zonder eigen voorkeurstaal.",
     "label": "Standaardtaal",
     "saveFailed": "Opslaan is mislukt."
+  },
+  "changelog": {
+    "noTrailYet": "Nog geen audittrail voor dit onderdeel"
   }
 }

@@ -3880,5 +3880,8 @@
     "subtitle": "The default language for messages to candidates and contacts without a preferred language of their own.",
     "label": "Default language",
     "saveFailed": "Saving failed."
+  },
+  "changelog": {
+    "noTrailYet": "No audit trail for this section yet"
   }
 }

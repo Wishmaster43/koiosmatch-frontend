@@ -3880,5 +3880,8 @@
     "subtitle": "La langue par défaut des messages aux candidats et contacts sans langue préférée propre.",
     "label": "Langue par défaut",
     "saveFailed": "L'enregistrement a échoué."
-  }
+  },
+  "changelog": {
+    "noTrailYet": "Pas encore de journal d'audit pour cette section"
+}
 }

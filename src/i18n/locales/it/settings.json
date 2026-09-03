@@ -3880,5 +3880,8 @@
     "subtitle": "La lingua predefinita per i messaggi a candidati e referenti senza una lingua preferita propria.",
     "label": "Lingua predefinita",
     "saveFailed": "Salvataggio non riuscito."
-  }
+  },
+  "changelog": {
+    "noTrailYet": "Nessun registro di audit per questa sezione ancora"
+}
 }

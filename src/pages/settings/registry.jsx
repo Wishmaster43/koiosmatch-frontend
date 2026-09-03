@@ -12,6 +12,15 @@
  * Labels: groups.<key> and nav.<id> in the `settings` i18n namespace.
  * Gating: superAdminOnly | requiresPage | requiresPermission | (id === 'users') handled by the shell.
  *
+ * logName (CHANGELOG-OVERAL-1) — optional backend audit-log table name for lookups
+ * with audit trails. Rule: every item editing a tenant-managed lookup table whose
+ * changes are audited (CoiosMatch-api/docs/reference/AUDIT-LOG-NAMES.md) sets
+ * `logName: '<table>'` so the changelog popover queries the right log. Items editing
+ * the settings key/value table (or that don't have audit trails yet) omit logName
+ * (defaults to 'settings'). Set `logName: null` explicitly to disable the changelog
+ * button for items whose section is multi-table (e.g., opportunity_lookups) or
+ * tables not yet audited (with a comment explaining why).
+ *
  * Add a setting = one item here. A simple toggle/number setting = add a `schema`
  * (or a line to an existing schema) and skip writing a component entirely.
  */
@@ -191,14 +200,14 @@ export const NAV_GROUPS = [
     // Personalisation = shared/general tenant lookups (used across candidates, customers, contacts, …).
     key: 'personalisation', icon: BookOpen,
     items: [
-      { id: 'industries', icon: Factory, component: IndustrySettings },
+      { id: 'industries', icon: Factory, component: IndustrySettings, logName: 'industries' },
       // Regions per country (PROVINCES-1) — tenant CRUD + reorder, cascaded on the
       // address country picker; sits next to Industries as a shared lookup.
-      { id: 'provinces', icon: MapPin, component: ProvincesSettings },
-      { id: 'lang_languages', icon: Languages, component: LanguageListSettings },
-      { id: 'lang_levels', icon: BarChart2, component: LanguageLevelSettings },
-      { id: 'genders', icon: Users, component: GenderSettings },
-      { id: 'last_contact_types', icon: MessageCircle, component: LastContactTypesSettings },
+      { id: 'provinces', icon: MapPin, component: ProvincesSettings, logName: 'provinces' },
+      { id: 'lang_languages', icon: Languages, component: LanguageListSettings, logName: 'languages' },
+      { id: 'lang_levels', icon: BarChart2, component: LanguageLevelSettings, logName: 'language_levels' },
+      { id: 'genders', icon: Users, component: GenderSettings, logName: 'candidate_genders' },
+      { id: 'last_contact_types', icon: MessageCircle, component: LastContactTypesSettings, logName: 'last_contact_types' },
     ],
   },
   {
@@ -209,37 +218,37 @@ export const NAV_GROUPS = [
       // translated: "must go to the candidate and can just be called Functions"
       // — verbatim: "moet naar de kandidaat en kan gewoon Functies heten"); contact-person
       // titles stay the separate contact_functions item under `contacts`.
-      { id: 'functions', icon: Briefcase, component: FunctionsSettings },
-      { id: 'candidate_phases', icon: Target, component: CandidatePhasesSettings },
-      { id: 'candidate_statuses', icon: Users, component: CandidateStatusesSettings },
-      { id: 'contract_forms', icon: Tags, component: ContractFormsSettings },
+      { id: 'functions', icon: Briefcase, component: FunctionsSettings, logName: 'job_functions' },
+      { id: 'candidate_phases', icon: Target, component: CandidatePhasesSettings, logName: 'candidate_phases' },
+      { id: 'candidate_statuses', icon: Users, component: CandidateStatusesSettings, logName: 'candidate_statuses' },
+      { id: 'contract_forms', icon: Tags, component: ContractFormsSettings, logName: 'candidate_types' },
       // Nationality lookup (audit finding NATIONALITY-1) — candidate.nationality was
       // a free-text field with no tenant-managed vocabulary; mirrors genders/industries.
-      { id: 'nationalities', icon: Globe, component: NationalitiesSettings },
+      { id: 'nationalities', icon: Globe, component: NationalitiesSettings, logName: 'nationalities' },
       // Blacklist reason lookup (audit finding BLACKLIST-REASON-1) — the deployability
       // status "Blacklist" (§3B) needs its own reason vocabulary, distinct from the
       // generic status-reason free text; own icon so it reads as a flag, not a status.
       // Candidate half only — the customer vocabulary lives in the customers group
       // (translated: "customer with customer, candidate with candidate" —
       // verbatim: "klant bij klant, kandidaat bij kandidaat", Danny 2026-08-05).
-      { id: 'blacklist_reasons', icon: ShieldOff, render: () => <BlacklistReasonsSettings entity="candidate" /> },
-      { id: 'pools', icon: Star, component: PoolsSettings },
+      { id: 'blacklist_reasons', icon: ShieldOff, render: () => <BlacklistReasonsSettings entity="candidate" />, logName: 'candidate_blacklist_reasons' },
+      { id: 'pools', icon: Star, component: PoolsSettings, logName: 'pools' },
       { id: 'cv_template', icon: FileText, component: CvTemplateSettings },
       // Document types moved OUT to their own top-level `document_types` group
       // below (DOCTYPE-ENTITY-1/DOCTYPE-STRICT-1) — the lookup now spans every
       // entity the backend supports, not just the candidate, mirroring note_types.
-      { id: 'driver_licenses', icon: Car, component: DriverLicenseSettings },
+      { id: 'driver_licenses', icon: Car, component: DriverLicenseSettings, logName: 'driver_licenses' },
       { id: 'candidate_display', icon: Palette, schema: candidateDisplay },
       // Conversion behaviour: default deployability status after Lead → Kandidaat.
       { id: 'candidate_conversion', icon: UserCheck, component: CandidateConversionSettings },
       // Vacatures-tab visibility (Danny 23-07): per phase/status gate for the
       // drawer's vacancySearch tab — see CandidateVacancyTabSettings + vacancyTabVisibility.ts.
       { id: 'candidate_vacancy_tab', icon: Briefcase, component: CandidateVacancyTabSettings },
-      { id: 'candidate_skill_levels', icon: BarChart2, component: SkillLevelSettings },
+      { id: 'candidate_skill_levels', icon: BarChart2, component: SkillLevelSettings, logName: 'skill_levels' },
       // Education level lookup (KAND-NIVEAU-1) — dropdown for candidate_educations.level_id,
       // sibling to the skill-level lookup above; distinct from the unrelated
       // vacancy_education item (a separate vacancy-side education REQUIREMENT lookup).
-      { id: 'candidate_education_levels', icon: GraduationCap, component: EducationLevelsSettings },
+      { id: 'candidate_education_levels', icon: GraduationCap, component: EducationLevelsSettings, logName: 'education_levels' },
       // Candidate custom fields moved to the shared "Eigen velden" group below
       // (§3B custom-fields wave) — one CRUD implementation for every entity.
       { id: 'candidate_required_fields', icon: Flag, component: CandidateRequiredFieldsSettings },
@@ -253,14 +262,16 @@ export const NAV_GROUPS = [
     // application, not the candidate (Danny). Rejection messaging is handled by workflows.
     key: 'applications', icon: ClipboardList,
     items: [
-      { id: 'funnel_stages', icon: Target, component: FunnelStagesSettings },
+      { id: 'funnel_stages', icon: Target, component: FunnelStagesSettings, logName: 'application_stages' },
       // Acquisition-source lookup (S-SOURCE-1 GRADUATION, 2026-08-14) — backed by
       // /candidate-sources (the backend's shared CandidateSource lookup, also fed
       // into the candidate intake source field once that surface gets its own
       // picker); lives here because the application create/edit surfaces
       // (AddApplicationModal, ApplicationDetailsCard) are its only FE consumers today.
-      { id: 'application_sources', icon: Radio, component: ApplicationSourcesSettings },
-      { id: 'rejection', icon: XCircle, component: RejectionSettings },
+      // NOT YET AUDITED (fixround F): candidate_rejection_reasons and candidate_sources
+      // tables lack the audit trait; audit trail omitted until backend adds it.
+      { id: 'application_sources', icon: Radio, component: ApplicationSourcesSettings, logName: null },
+      { id: 'rejection', icon: XCircle, component: RejectionSettings, logName: null },
       { id: 'application_proposal', icon: Mail, component: ProposalSettings },
       { id: 'application_display', icon: Palette, schema: applicationDisplay },
       // APP-REQUIRED-FE-1: flat required-fields toggle list for the "nieuwe
@@ -278,19 +289,20 @@ export const NAV_GROUPS = [
     items: [
       // KLANT-FASE-1: lifecycle phase (Prospect → Klant) — same axis, same icon as the
       // candidate phase editor, so both read as "the same thing on another entity".
-      { id: 'customer_phases', icon: Target, component: CustomerPhasesSettings },
-      { id: 'customer_statuses', icon: Tags, component: CustomerStatusesSettings },
+      { id: 'customer_phases', icon: Target, component: CustomerPhasesSettings, logName: 'customer_phases' },
+      { id: 'customer_statuses', icon: Tags, component: CustomerStatusesSettings, logName: 'customer_statuses' },
       // CUST-SOURCE-FE-1: acquisition-source lookup mirroring application_sources
       // above — same Radio icon, so it reads as "the same thing on another entity".
-      { id: 'customer_sources', icon: Radio, component: CustomerSourcesSettings },
+      // NOT YET AUDITED (fixround F).
+      { id: 'customer_sources', icon: Radio, component: CustomerSourcesSettings, logName: null },
       // Customer half of the blacklist-reason vocabulary (KLANT-BLACKLIST-1) — lives
       // HERE, not as a sub-tab under candidates (translated: "customer with
       // customer" — verbatim: "klant bij klant", Danny 2026-08-05).
-      { id: 'customer_blacklist_reasons', icon: ShieldOff, render: () => <BlacklistReasonsSettings entity="customer" /> },
+      { id: 'customer_blacklist_reasons', icon: ShieldOff, render: () => <BlacklistReasonsSettings entity="customer" />, logName: 'customer_blacklist_reasons' },
       // CAO lookup — feeds price agreements + the + Match popup (Danny 24-07).
-      { id: 'cao', icon: Scale, component: CaoSettings },
-      { id: 'location_statuses', icon: MapPin, component: LocationStatusesSettings },
-      { id: 'department_statuses', icon: Building2, component: DepartmentStatusesSettings },
+      { id: 'cao', icon: Scale, component: CaoSettings, logName: 'collective_labour_agreements' },
+      { id: 'location_statuses', icon: MapPin, component: LocationStatusesSettings, logName: 'customer_location_statuses' },
+      { id: 'department_statuses', icon: Building2, component: DepartmentStatusesSettings, logName: 'customer_department_statuses' },
       // SUB-TABS-1 (Danny 02-08): was a single flat schema; now a component so the
       // customer-table settings and the three drill-down entity tables (+ Vacatures'
       // default filter) each get their own sub-tab — see CustomerDisplaySettings.
@@ -317,8 +329,8 @@ export const NAV_GROUPS = [
     // its registry spot moves) so contact-specific settings live in one place.
     key: 'contacts', icon: Users,
     items: [
-      { id: 'contact_functions', icon: Briefcase, component: ContactFunctionsSettings },
-      { id: 'contact_statuses', icon: Users, component: ContactStatusesSettings },
+      { id: 'contact_functions', icon: Briefcase, component: ContactFunctionsSettings, logName: 'contact_functions' },
+      { id: 'contact_statuses', icon: Users, component: ContactStatusesSettings, logName: 'customer_contact_statuses' },
     ],
   },
   {
@@ -327,8 +339,12 @@ export const NAV_GROUPS = [
     key: 'opportunities', icon: Target,
     items: [
       // Opportunity pipeline lookups (audit finding OPP-LOOKUPS-1) — stage/service/
-      // agreement/deal-type lists previously had no editor at all.
-      { id: 'opportunity_lookups', icon: ListTree, component: OpportunityLookupsSettings },
+      // agreement/deal-type lists previously had no editor at all. Multi-tab section
+      // edits five lookup tables (opportunity_stages, opportunity_service_types,
+      // opportunity_agreement_types, opportunity_deal_types, opportunity_lost_reasons);
+      // null logName disables the changelog until this component supports querying
+      // per-tab audit logs (each tab would need its own logName parameter).
+      { id: 'opportunity_lookups', icon: ListTree, component: OpportunityLookupsSettings, logName: null },
       { id: 'opportunity_display', icon: Palette, schema: opportunityDisplay },
     ],
   },
@@ -349,15 +365,15 @@ export const NAV_GROUPS = [
     // day a real vacancy-employment-type picker/reader lands (ticket VAC-EMPLOYMENT-1).
     key: 'vacancies', icon: Briefcase,
     items: [
-      { id: 'vacancy_statuses', icon: Briefcase, component: VacancyStatusSettings },
+      { id: 'vacancy_statuses', icon: Briefcase, component: VacancyStatusSettings, logName: 'vacancy_statuses' },
       // VACSTATUS-DEFAULT-1: which status a status-less vacancy create gets
       // (backend VacancyDefaultStatusResolver) — same UserCheck icon as the
       // candidate/customer conversion pickers, reads as "the same concept".
       { id: 'vacancy_default_status', icon: UserCheck, component: VacancyDefaultStatusSettings },
       { id: 'vacancy_phases', icon: Target, component: VacancyPhaseSettings },
-      { id: 'vacancy_seniority', icon: BarChart2, component: VacancySenioritySettings },
-      { id: 'vacancy_education', icon: BookOpen, component: VacancyEducationSettings },
-      { id: 'vacancy_channels', icon: Store, component: VacancyChannelSettings },
+      { id: 'vacancy_seniority', icon: BarChart2, component: VacancySenioritySettings, logName: 'vacancy_seniority_levels' },
+      { id: 'vacancy_education', icon: BookOpen, component: VacancyEducationSettings, logName: 'vacancy_education_levels' },
+      { id: 'vacancy_channels', icon: Store, component: VacancyChannelSettings, logName: 'vacancy_channels' },
       // Vacancy custom fields moved to the shared "Eigen velden" group below.
       { id: 'vacancy_app_defaults', icon: ClipboardList, component: VacancyApplicationDefaultsSettings },
       { id: 'vacancy_matching', icon: Sparkles, component: VacancyMatchingSettings },
@@ -374,9 +390,9 @@ export const NAV_GROUPS = [
     // Task (activity) lookups — own top-level menu, one sub-tab per list (decision §3B).
     key: 'tasks', icon: ListChecks,
     items: [
-      { id: 'task_statuses', icon: ListChecks, component: TaskStatusSettings },
-      { id: 'task_types', icon: Tags, component: TaskTypeSettings },
-      { id: 'task_priorities', icon: Flag, component: TaskPrioritySettings },
+      { id: 'task_statuses', icon: ListChecks, component: TaskStatusSettings, logName: 'task_statuses' },
+      { id: 'task_types', icon: Tags, component: TaskTypeSettings, logName: 'task_types' },
+      { id: 'task_priorities', icon: Flag, component: TaskPrioritySettings, logName: 'task_priorities' },
       { id: 'task_display', icon: Palette, schema: taskDisplay },
     ],
   },
@@ -384,13 +400,13 @@ export const NAV_GROUPS = [
     // Match lookups — statuses for the Matches feature (R-1; BE /match-statuses).
     key: 'matches', icon: Sparkles,
     items: [
-      { id: 'match_statuses', icon: Tags, component: MatchStatusSettings },
-      { id: 'contract_types', icon: FileText, component: ContractTypesSettings },
+      { id: 'match_statuses', icon: Tags, component: MatchStatusSettings, logName: 'match_statuses' },
+      { id: 'contract_types', icon: FileText, component: ContractTypesSettings, logName: 'contract_types' },
       // Match stop reasons (audit finding, 04-08) — MatchStopReasonSettings was fully
       // built + tested in MatchSettings.jsx but never wired into the registry, so the
       // mandatory reason recorded on POST /matches/{id}/terminate (MATCH-TERMINATE-1)
       // had no settings screen at all.
-      { id: 'match_stop_reasons', icon: XCircle, component: MatchStopReasonSettings },
+      { id: 'match_stop_reasons', icon: XCircle, component: MatchStopReasonSettings, logName: 'match_stop_reasons' },
       // Appointment types/locations moved OUT to their own top-level `appointments`
       // group below (Danny 2026-08-04) — appointments span every entity, not just
       // matches, mirrors note_types/document_types.
@@ -407,15 +423,15 @@ export const NAV_GROUPS = [
     // Outreach (call-list / bellijsten) lookups (R-1; BE /outreach-statuses).
     key: 'outreach', icon: Phone,
     items: [
-      { id: 'outreach_statuses', icon: Tags, component: OutreachStatusSettings },
+      { id: 'outreach_statuses', icon: Tags, component: OutreachStatusSettings, logName: 'outreach_statuses' },
       // Outreach outcomes (OUTREACH-2, round-4 audit finding #6) — the RESULT of one
       // call attempt, a separate dimension from the pipeline status above.
       // OutreachOutcomeSettings was fully built + tested (OutreachOutcomeSettings.test.jsx)
       // but never registered here, so the /outreach-outcomes lookup had no editor at all.
-      { id: 'outreach_outcomes', icon: CheckCircle, component: OutreachOutcomeSettings },
+      { id: 'outreach_outcomes', icon: CheckCircle, component: OutreachOutcomeSettings, logName: 'outreach_outcomes' },
       // Escalation reason lookup (audit finding ESCALATION-REASON-1) — call-list
       // escalation had no tenant-managed reason vocabulary.
-      { id: 'escalation_reasons', icon: AlertTriangle, component: EscalationReasonsSettings },
+      { id: 'escalation_reasons', icon: AlertTriangle, component: EscalationReasonsSettings, logName: 'escalation_reasons' },
       { id: 'outreach_display', icon: Palette, schema: outreachDisplay },
     ],
   },
@@ -493,17 +509,17 @@ export const NAV_GROUPS = [
     items: [
       // General (entity=null) comes first — the global rows every entity tab used to
       // inherit silently via the backend's ?entity= merge (NOTE-TYPES-3).
-      { id: 'nt_general', icon: MessageSquare, render: () => <NoteTypesSettings entity={null} /> },
-      { id: 'nt_candidate', icon: Users, render: () => <NoteTypesSettings entity="candidate" /> },
-      { id: 'nt_application', icon: ClipboardList, render: () => <NoteTypesSettings entity="application" /> },
-      { id: 'nt_customer', icon: Building2, render: () => <NoteTypesSettings entity="customer" /> },
-      { id: 'nt_location', icon: MapPin, render: () => <NoteTypesSettings entity="location" /> },
-      { id: 'nt_department', icon: Factory, render: () => <NoteTypesSettings entity="department" /> },
-      { id: 'nt_contact', icon: Users, render: () => <NoteTypesSettings entity="contact" /> },
-      { id: 'nt_opportunity', icon: Target, render: () => <NoteTypesSettings entity="opportunity" /> },
-      { id: 'nt_vacancy', icon: Briefcase, render: () => <NoteTypesSettings entity="vacancy" /> },
-      { id: 'nt_match', icon: Sparkles, render: () => <NoteTypesSettings entity="match" /> },
-      { id: 'nt_task', icon: ListChecks, render: () => <NoteTypesSettings entity="task" /> },
+      { id: 'nt_general', icon: MessageSquare, render: () => <NoteTypesSettings entity={null} />, logName: 'note_types' },
+      { id: 'nt_candidate', icon: Users, render: () => <NoteTypesSettings entity="candidate" />, logName: 'note_types' },
+      { id: 'nt_application', icon: ClipboardList, render: () => <NoteTypesSettings entity="application" />, logName: 'note_types' },
+      { id: 'nt_customer', icon: Building2, render: () => <NoteTypesSettings entity="customer" />, logName: 'note_types' },
+      { id: 'nt_location', icon: MapPin, render: () => <NoteTypesSettings entity="location" />, logName: 'note_types' },
+      { id: 'nt_department', icon: Factory, render: () => <NoteTypesSettings entity="department" />, logName: 'note_types' },
+      { id: 'nt_contact', icon: Users, render: () => <NoteTypesSettings entity="contact" />, logName: 'note_types' },
+      { id: 'nt_opportunity', icon: Target, render: () => <NoteTypesSettings entity="opportunity" />, logName: 'note_types' },
+      { id: 'nt_vacancy', icon: Briefcase, render: () => <NoteTypesSettings entity="vacancy" />, logName: 'note_types' },
+      { id: 'nt_match', icon: Sparkles, render: () => <NoteTypesSettings entity="match" />, logName: 'note_types' },
+      { id: 'nt_task', icon: ListChecks, render: () => <NoteTypesSettings entity="task" />, logName: 'note_types' },
     ],
   },
   {
@@ -549,11 +565,11 @@ export const NAV_GROUPS = [
     // restores the editor the day that entity grows a real FE reader.
     key: 'document_types', icon: FileText,
     items: [
-      { id: 'dt_candidate', icon: Users, render: () => <DocumentTypesSettings entity="candidate" /> },
-      { id: 'dt_customer', icon: Building2, render: () => <DocumentTypesSettings entity="customer" /> },
-      { id: 'dt_customer_location', icon: MapPin, render: () => <DocumentTypesSettings entity="customer_location" /> },
-      { id: 'dt_customer_department', icon: Building2, render: () => <DocumentTypesSettings entity="customer_department" /> },
-      { id: 'dt_vacancy', icon: Briefcase, render: () => <DocumentTypesSettings entity="vacancy" /> },
+      { id: 'dt_candidate', icon: Users, render: () => <DocumentTypesSettings entity="candidate" />, logName: 'candidate_document_types' },
+      { id: 'dt_customer', icon: Building2, render: () => <DocumentTypesSettings entity="customer" />, logName: 'candidate_document_types' },
+      { id: 'dt_customer_location', icon: MapPin, render: () => <DocumentTypesSettings entity="customer_location" />, logName: 'candidate_document_types' },
+      { id: 'dt_customer_department', icon: Building2, render: () => <DocumentTypesSettings entity="customer_department" />, logName: 'candidate_document_types' },
+      { id: 'dt_vacancy', icon: Briefcase, render: () => <DocumentTypesSettings entity="vacancy" />, logName: 'candidate_document_types' },
     ],
   },
   {
@@ -563,8 +579,8 @@ export const NAV_GROUPS = [
     // mirrors the note_types/document_types "spans every entity" moves above.
     key: 'appointments', icon: CalendarCheck,
     items: [
-      { id: 'appointment_types', icon: CalendarCheck, component: AppointmentTypeSettings },
-      { id: 'appointment_locations', icon: MapPin, component: AppointmentLocationSettings },
+      { id: 'appointment_types', icon: CalendarCheck, component: AppointmentTypeSettings, logName: 'appointment_types' },
+      { id: 'appointment_locations', icon: MapPin, component: AppointmentLocationSettings, logName: 'appointment_locations' },
     ],
   },
   {
@@ -667,7 +683,7 @@ export const NAV_GROUPS = [
         requiresModuleOrApp: { module: 'whatsapp_web' }, requiresPermission: 'settings.view' },
       { id: 'whatsapp_log', icon: ClipboardList, component: WhatsAppLog },
       // Message-type classification (priority_type on whatsapp_send; queue ordering).
-      { id: 'wa_message_types', icon: MessageCircle, component: WaMessageTypeSettings },
+      { id: 'wa_message_types', icon: MessageCircle, component: WaMessageTypeSettings, logName: 'whatsapp_message_types' },
     ],
   },
   {

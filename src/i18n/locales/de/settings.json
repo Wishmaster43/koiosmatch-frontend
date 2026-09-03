@@ -3880,5 +3880,8 @@
     "subtitle": "Die Standardsprache für Nachrichten an Kandidaten und Kontaktpersonen ohne eigene bevorzugte Sprache.",
     "label": "Standardsprache",
     "saveFailed": "Speichern fehlgeschlagen."
-  }
+  },
+  "changelog": {
+    "noTrailYet": "Für diesen Bereich gibt es noch kein Audit-Protokoll"
+}
 }

@@ -317,7 +317,7 @@ export default function SettingsPage() {
           {currentItem && currentGroup && (
             <>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: -8 }}>
-                <SettingsChangelogButton />
+                <SettingsChangelogButton logName={currentItem.logName} />
               </div>
               <SettingsTabs items={currentGroup.items} active={tab}
                 onSelect={(id) => goTo(category, id)} />

@@ -3880,5 +3880,8 @@
     "subtitle": "O idioma predefinido para mensagens a candidatos e pessoas de contacto sem idioma preferido próprio.",
     "label": "Idioma predefinido",
     "saveFailed": "Falha ao guardar."
-  }
+  },
+  "changelog": {
+    "noTrailYet": "Ainda não há registo de auditoria para esta secção"
+}
 }
