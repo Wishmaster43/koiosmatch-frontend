@@ -32,8 +32,10 @@ export function useAiListResource<T>({ endpoint, onLoaded, secondary = [] }: Use
   // The caller's callbacks/secondary list are re-created every render (inline
   // arrays and closures); keep the LATEST ones in refs so `load` only changes
   // identity with the endpoint — no refetch loop, no ignored dependency.
-  const onLoadedRef = useRef(onLoaded); onLoadedRef.current = onLoaded
-  const secondaryRef = useRef(secondary); secondaryRef.current = secondary
+  const onLoadedRef = useRef(onLoaded)
+  const secondaryRef = useRef(secondary)
+  // Refs are written in an effect, never during render (react-hooks/refs).
+  useEffect(() => { onLoadedRef.current = onLoaded; secondaryRef.current = secondary })
 
   const load = useCallback(() => {
     setLoading(true)

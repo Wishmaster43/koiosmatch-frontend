@@ -5,9 +5,11 @@
   // know" is impossible by construction (the huisstijl-ceiling pattern).
   "high": true,
   "allowlist": [
-    // vitest 3 → 4 is a MAJOR test-infra migration (784 test files), planned
+    // vitest 2 → 4 is a MAJOR test-infra migration (784 test files), planned
     // separately. All five advisories sit in the DEV-ONLY chain (vitest/vite dev
-    // server/esbuild): never in the production bundle path. Revalidate 2026-09-01.
+    // server/esbuild): never in the production bundle path. Revalidated 03-09-2026
+    // (audit frontend-security-quality-4): still dev-only, migration not started;
+    // revalidate again 2026-10-01.
     "GHSA-5xrq-8626-4rwp", // vitest (critical, dev-only test runner)
     "GHSA-4w7w-66w2-5vf9", // vite dev-server path traversal (dev-only)
     "GHSA-67mh-4wv8-2f99", // esbuild dev-server request forwarding (dev-only)
