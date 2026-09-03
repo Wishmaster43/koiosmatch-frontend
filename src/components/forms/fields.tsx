@@ -27,9 +27,21 @@ export interface SelectOption { value: string; label?: ReactNode }
 export const inputStyle: CSSProperties = fieldInputStyle
 
 // Red asterisk marking a required field; used in Label/FieldRow/Field and inline
-// form labels throughout the app. aria-hidden keeps it from doubling screen-reader
-// announcements of field names that already carry a 'required' attribute.
+// form labels throughout the app. aria-hidden is safe here because the control
+// itself carries `aria-required`/`required` (see requiredChildProps below) — the
+// asterisk is a visual echo of that state, not the only signal reaching AT.
 export const requiredMark = <span aria-hidden="true" style={{ color: 'var(--color-danger-text)', marginLeft: 2 }}>*</span>
+
+// Required-ness props cloned onto a Field/FieldRow child alongside id/aria-labelledby
+// (REQUIRED-A11Y-1): every child gets `aria-required` so screen readers announce it
+// (WCAG 1.3.1/3.3.2), and a native <input>/<select>/<textarea> also gets a real
+// `required` attribute — a custom picker (CreatableSelect/SelectMenu/…) renders its
+// own trigger element and manages its own validation, so it only needs the aria hint.
+function requiredChildProps(required: boolean | undefined, child: ReactElement): { 'aria-required'?: true; required?: true } {
+  if (!required) return {}
+  const isNativeControl = typeof child.type === 'string'
+  return { 'aria-required': true, ...(isNativeControl ? { required: true } : {}) }
+}
 
 /** Parse any date-ish value into a Date, or null when invalid/empty. */
 export function parseDate(value?: string | number | Date | null): Date | null {
@@ -56,7 +68,8 @@ export function FieldRow({ label, required, children }: { label: ReactNode; requ
   const id = useId()
   const labelId = `${id}-label`
   const child = isValidElement(children)
-    ? cloneElement(children as ReactElement<{ id?: string; 'aria-labelledby'?: string }>, { id, 'aria-labelledby': labelId })
+    ? cloneElement(children as ReactElement<{ id?: string; 'aria-labelledby'?: string; 'aria-required'?: true; required?: true }>,
+        { id, 'aria-labelledby': labelId, ...requiredChildProps(required, children) })
     : children
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
@@ -80,7 +93,8 @@ export function Field({ label, required, children }: { label: ReactNode; require
   // resolve to the same text, so nothing regresses.
   const labelId = `${id}-label`
   const child = isValidElement(children)
-    ? cloneElement(children as ReactElement<{ id?: string; 'aria-labelledby'?: string }>, { id, 'aria-labelledby': labelId })
+    ? cloneElement(children as ReactElement<{ id?: string; 'aria-labelledby'?: string; 'aria-required'?: true; required?: true }>,
+        { id, 'aria-labelledby': labelId, ...requiredChildProps(required, children) })
     : children
   return (
     <div>

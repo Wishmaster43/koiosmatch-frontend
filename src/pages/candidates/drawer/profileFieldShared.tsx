@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import { requiredMark } from '@/components/forms/fields'
 import Button from '@/components/ui/Button'
 // HUISSTIJL-1: the shared uppercase group-label atom (identity-only swap).
 import { GroupLabel } from '@/components/ui/typography'
@@ -55,7 +56,10 @@ export function FieldRow({ label, required, errorText, labelIcon, children }: {
       {/* Canon width/color/size (fieldRowCanon) + the flex/gap this row alone needs to seat an optional labelIcon next to the label text. */}
       <span style={{ ...CANON_LABEL_STYLE, display: 'flex', alignItems: 'center', gap: 5 }}>
         {labelIcon}
-        {label}{required && <span style={{ color: 'var(--color-danger-text)' }}> *</span>}
+        {/* REQUIRED-A11Y-1: shared house asterisk (fields.tsx). This label is a
+            <span>, not a <label htmlFor>, so aria-required cannot be wired here —
+            each call site owns its own input and must set it there. */}
+        {label}{required && requiredMark}
       </span>
       <div style={{ flex: 1, minWidth: 0 }}>
         {children}

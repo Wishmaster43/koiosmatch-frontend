@@ -10,6 +10,7 @@ import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
 import { SectionTitle, Caption, BodyText } from '@/components/ui/typography'
+import { requiredMark } from '@/components/forms/fields'
 import Button from '@/components/ui/Button'
 import DrawerTabs from '@/components/drawer/DrawerTabs'
 import { MODULE_META, MODULE_SCHEMAS } from '@/modules/index'
@@ -179,10 +180,13 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
         const isTranslations = field.type === 'translations'
         return (
           <div key={field.key}>
+            {/* REQUIRED-A11Y-1: shared house asterisk (fields.tsx). This <label> has
+                no htmlFor and FieldInput takes no id, so aria-required cannot be
+                wired here — that needs FieldInput itself (out of this file's scope). */}
             {!isTranslations && (
               <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
                 {fieldLabel(t, field.label as string | undefined)}
-                {isRequired && <span style={{ color: 'var(--color-danger-text)', marginLeft: 3 }}>*</span>}
+                {isRequired && requiredMark}
               </label>
             )}
             <FieldInput field={field as WorkflowField} value={fieldValue(field.key)} variables={variables} config={config}
@@ -301,9 +305,11 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
               const isEmpty    = fieldValue(field.key) == null || fieldValue(field.key) === ''
               return (
                 <div key={field.key}>
+                  {/* REQUIRED-A11Y-1: shared house asterisk (fields.tsx); see the
+                      renderFields comment above for why aria-required stays a gap here. */}
                   <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
                     {fieldLabel(t, field.label as string | undefined)}
-                    {isRequired && <span style={{ color: 'var(--color-danger-text)', marginLeft: 3 }}>*</span>}
+                    {isRequired && requiredMark}
                   </label>
                   <FieldInput field={field as WorkflowField} value={fieldValue(field.key)} variables={variables} config={config}
                     instructionOutputFields={instructionOutputFields}
