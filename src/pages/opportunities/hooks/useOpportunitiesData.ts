@@ -21,12 +21,11 @@
  * customer), gated behind the tenant's own `branch_authz_enabled` axis on the
  * backend (off = no effect either way).
  */
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
-import { isAbortError } from '@/lib/abortError'
 import { extractApiError } from '@/lib/extractApiError'
 import { useUsers } from '@/lib/queries'
 import { useOpportunityStages } from '@/lib/useOpportunityStages'
@@ -42,6 +41,9 @@ interface PageCustomer { id: Id; name: string }
 // Stable empty default — a fresh `?? []` each render loops the registerFilters effect
 // (see useCandidatesData for the full note).
 const EMPTY_OPPORTUNITIES: Opportunity[] = []
+// Same rationale for the customer picker options — a fresh `[]` per render loops
+// any consumer that feeds these into a memo behind an effect.
+const EMPTY_CUSTOMERS: PageCustomer[] = []
 
 // OpportunityQuery::rules() caps per_page at `between:1,200`. Fixed 2026-08-05 (audit:
 // "rows per page niet overal toegepast"): this hook used to call GET /opportunities
@@ -70,9 +72,6 @@ export function useOpportunitiesData(includeArchived: boolean = false, branchIds
   const { reasons: lostReasons } = useOpportunityLostReasons()
 
   const queryClient = useQueryClient()
-  const [customers, setCustomers] = useState<PageCustomer[]>([])
-  // A failed customers load must not read as "this tenant has no customers" (R8).
-  const [customersError, setCustomersError] = useState(false)
 
   // Opportunities list via React Query (A-3). A missing endpoint (404) is an
   // empty list, not an error. `refetch` doubles as the post-archive/restore
@@ -130,17 +129,22 @@ export function useOpportunitiesData(includeArchived: boolean = false, branchIds
   const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => { const next = new Set(prev); ids.forEach(id => allSelected ? next.delete(id) : next.add(id)); return next })
   const clearSelection = () => setSelectedIds(new Set())
 
-  // Load customers once for the drawer/modal pickers. per_page:100 so the
+  // Customer picker options for the drawer/modal pickers (r2-react-query-2: was a raw
+  // useEffect+axios block sitting beside the query-backed opportunities list above;
+  // now shares the React Query cache under its own key). per_page:100 so the
   // searchable client picker (AddOpportunityModal, CustomerTab) has the full set to
-  // type-filter over, not just the backend's small default page.
-  useEffect(() => {
-    const ctrl = new AbortController()
-    setCustomersError(false)
-    api.get('/customers', { params: { per_page: 100 }, signal: ctrl.signal })
-      .then(res => setCustomers(unwrapList<{ id?: Id; name?: string; company_name?: string }>(res).rows.map(c => ({ id: c.id ?? '', name: c.name ?? c.company_name ?? '—' }))))
-      .catch(err => { if (!isAbortError(err)) setCustomersError(true) })
-    return () => ctrl.abort()
-  }, [])
+  // type-filter over, not just the backend's small default page. A failed load must
+  // not read as "this tenant has no customers" (R8) — isError drives customersError.
+  const { data: customersData, isError: customersError } = useQuery({
+    queryKey: ['customers', 'options-full'],
+    queryFn: async ({ signal }) => {
+      const { rows } = unwrapList<{ id?: Id; name?: string; company_name?: string }>(
+        await api.get('/customers', { params: { per_page: 100 }, signal }),
+      )
+      return rows.map(c => ({ id: c.id ?? '', name: c.name ?? c.company_name ?? '—' })) as PageCustomer[]
+    },
+  })
+  const customers = customersData ?? EMPTY_CUSTOMERS
 
   // Drawer: select an opportunity, then refresh from the detail endpoint (ref-guarded).
   // ARCHIVE-1 measured: OpportunityController::show does NOT withTrashed() (unlike

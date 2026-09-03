@@ -176,6 +176,41 @@ describe('useOpportunitiesData · reference-number lookup (NUMMER-1)', () => {
   })
 })
 
+// r2-react-query-2: the customer picker options now share the React Query cache
+// under ['customers', 'options-full'] instead of a raw useEffect+axios block.
+describe('useOpportunitiesData · customer picker options (r2-react-query-2)', () => {
+  it('fetches /customers once with per_page:100 and caches it under options-full', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [] } })
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    function localWrapper({ children }: { children: ReactNode }) {
+      return <QueryClientProvider client={qc}>{children}</QueryClientProvider>
+    }
+    const { result } = renderHook(() => useOpportunitiesData(), { wrapper: localWrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    const customerCalls = mockedGet.mock.calls.filter(c => c[0] === '/customers')
+    expect(customerCalls).toHaveLength(1)
+    expect(customerCalls[0]?.[1]?.params).toEqual({ per_page: 100 })
+    expect(qc.getQueryData(['customers', 'options-full'])).toEqual([])
+  })
+
+  it('maps id/name (falling back to company_name) into the picker options', async () => {
+    mockedGet.mockImplementation((url: string) => url === '/customers'
+      ? Promise.resolve({ data: { data: [{ id: 'c1', company_name: 'Acme BV' }] } })
+      : Promise.resolve({ data: { data: [] } }))
+    const { result } = renderHook(() => useOpportunitiesData(), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    await waitFor(() => expect(result.current.customers).toEqual([{ id: 'c1', name: 'Acme BV' }]))
+  })
+
+  it('flags customersError on a failed load, without clearing to an empty-tenant read', async () => {
+    mockedGet.mockImplementation((url: string) => url === '/customers'
+      ? Promise.reject(new Error('network'))
+      : Promise.resolve({ data: { data: [] } }))
+    const { result } = renderHook(() => useOpportunitiesData(), { wrapper })
+    await waitFor(() => expect(result.current.customersError).toBe(true))
+  })
+})
+
 describe('useOpportunitiesData · tags PATCH (audit finding: tags never persisted)', () => {
   it('sends { tags } in the PATCH body when the drawer edits tags', async () => {
     mockedGet.mockResolvedValue({ data: { data: [{ id: 'o1', title: 'Deal A', tags: ['foo'] }] } })
