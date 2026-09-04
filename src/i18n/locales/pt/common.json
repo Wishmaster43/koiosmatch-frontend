@@ -580,6 +580,7 @@
     "restoreNotice": "Restaurado. Ainda pode anular isto mais uma vez.",
     "restoreUnavailable": "Não existe nenhuma versão anterior para restaurar.",
     "links": {
+      "title": "Ligações",
       "add": "Ligar",
       "remove": "Desvincular",
       "pickType": "Escolher tipo",

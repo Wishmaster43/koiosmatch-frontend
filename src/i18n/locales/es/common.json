@@ -580,6 +580,7 @@
     "restoreNotice": "Restaurado. Puedes deshacer esto una vez más.",
     "restoreUnavailable": "No hay una versión anterior para restaurar.",
     "links": {
+      "title": "Vínculos",
       "add": "Vincular",
       "remove": "Desvincular",
       "pickType": "Elegir tipo",

@@ -580,6 +580,7 @@
     "restoreNotice": "Restored. You can undo this once more.",
     "restoreUnavailable": "There is no previous version to restore.",
     "links": {
+      "title": "Links",
       "add": "Link",
       "remove": "Unlink",
       "pickType": "Choose type",

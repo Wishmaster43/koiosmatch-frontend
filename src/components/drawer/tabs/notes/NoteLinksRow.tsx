@@ -46,10 +46,14 @@ interface NoteLinksRowProps {
   canManage: boolean
   // Seed from the note's own `links` read field (K-225 H2) — see file docblock for the reseed behaviour.
   initialLinks?: NoteLinkItem[]
+  // KOPPELEN-IN-POPOUT-1 (Danny 05-09, verbatim: "we hebben een knop erboven niet in de notitie
+  // zelf"): the note ROW only DISPLAYS its chips; adding and unlinking happen in the note's
+  // second-screen editor, which mounts this row with mode 'edit'.
+  mode?: 'display' | 'edit'
 }
 
 // One note's link chips + add picker — see file docblock for the local-state caveat.
-export default function NoteLinksRow({ host, hostId, noteId, canManage, initialLinks }: NoteLinksRowProps) {
+export default function NoteLinksRow({ host, hostId, noteId, canManage, initialLinks, mode = 'display' }: NoteLinksRowProps) {
   const { t } = useTranslation('common')
   const [links, setLinks] = useState<NoteLinkItem[]>(initialLinks ?? [])
   // Reseed from a fresh `initialLinks` payload (e.g. a refetch after an unrelated
@@ -66,8 +70,10 @@ export default function NoteLinksRow({ host, hostId, noteId, canManage, initialL
   const [busyId, setBusyId] = useState<Id | 'add' | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  // Editing (add + unlink) only in the editor; a row that merely displays never carries a control.
+  const editable = mode === 'edit' && canManage
   // Nothing to show and nothing this reader may add — render nothing (no dead affordance).
-  if (links.length === 0 && !canManage) return null
+  if (links.length === 0 && !editable) return null
 
   // Attach a manual link, then append the server's own row (id, snapshot label).
   const handleAdd = (sel: { type: NoteLinkPrincipalType; id: Id; label: string }) => {
@@ -100,7 +106,7 @@ export default function NoteLinksRow({ host, hostId, noteId, canManage, initialL
                 ? <EntityLink page={page} id={link.linkable_id} title={typeLabel} tone="neutral" hideIcon>{`${typeLabel} · ${labelText}`}</EntityLink>
                 : `${typeLabel} · ${labelText}`
             } />
-            {link.is_manual && canManage && (
+            {link.is_manual && editable && (
               <Button variant="ghost" iconOnly size="sm" onClick={() => handleRemove(link)} disabled={busyId === link.id}
                 title={t('notes.links.remove')} aria-label={t('notes.links.remove')}>
                 {busyId === link.id ? <Spinner size={11} /> : <X size={11} />}
@@ -109,7 +115,7 @@ export default function NoteLinksRow({ host, hostId, noteId, canManage, initialL
           </span>
         )
       })}
-      {canManage && (
+      {editable && (
         adding
           ? <NoteLinkPicker existing={links} onAdd={handleAdd} onClose={() => setAdding(false)} busy={busyId === 'add'} />
           : <DrawerAddButton short onClick={() => setAdding(true)} label={t('notes.links.add')} />

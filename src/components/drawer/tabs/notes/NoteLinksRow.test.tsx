@@ -24,7 +24,7 @@ beforeEach(() => vi.clearAllMocks())
 
 describe('NoteLinksRow', () => {
   it('renders nothing when there are no links and the reader may not manage this note', () => {
-    const { container } = render(<NoteLinksRow host="candidates" hostId="c1" noteId="n1" canManage={false} />)
+    const { container } = render(<NoteLinksRow mode="edit" host="candidates" hostId="c1" noteId="n1" canManage={false} />)
     expect(container).toBeEmptyDOMElement()
   })
 
@@ -32,7 +32,7 @@ describe('NoteLinksRow', () => {
     const links: NoteLinkItem[] = [
       { id: 'l1', linkable_type: 'customer', linkable_id: 'cu1', label: 'Acme B.V.', is_manual: true },
     ]
-    render(<NoteLinksRow host="candidates" hostId="c1" noteId="n1" canManage={false} initialLinks={links} />)
+    render(<NoteLinksRow mode="edit" host="candidates" hostId="c1" noteId="n1" canManage={false} initialLinks={links} />)
     expect(screen.getByText('Klant · Acme B.V.')).toBeInTheDocument()
   })
 
@@ -40,7 +40,7 @@ describe('NoteLinksRow', () => {
     const links: NoteLinkItem[] = [
       { id: 'l1', linkable_type: 'location', linkable_id: 'lo1', label: null, is_manual: false },
     ]
-    render(<NoteLinksRow host="candidates" hostId="c1" noteId="n1" canManage={false} initialLinks={links} />)
+    render(<NoteLinksRow mode="edit" host="candidates" hostId="c1" noteId="n1" canManage={false} initialLinks={links} />)
     expect(screen.getByText('Locatie · Geen inzage')).toBeInTheDocument()
   })
 
@@ -50,10 +50,10 @@ describe('NoteLinksRow', () => {
       { id: 'auto', linkable_type: 'customer', linkable_id: 'cu2', label: 'Auto', is_manual: false },
     ]
     // Manageable reader: the manual link gets an unlink control, the derived one does not.
-    const { rerender } = render(<NoteLinksRow host="candidates" hostId="c1" noteId="n1" canManage initialLinks={links} />)
+    const { rerender } = render(<NoteLinksRow mode="edit" host="candidates" hostId="c1" noteId="n1" canManage initialLinks={links} />)
     expect(screen.getAllByRole('button', { name: 'Ontkoppelen' })).toHaveLength(1)
     // Not manageable: even the manual link's control disappears.
-    rerender(<NoteLinksRow host="candidates" hostId="c1" noteId="n1" canManage={false} initialLinks={links} />)
+    rerender(<NoteLinksRow mode="edit" host="candidates" hostId="c1" noteId="n1" canManage={false} initialLinks={links} />)
     expect(screen.queryByRole('button', { name: 'Ontkoppelen' })).not.toBeInTheDocument()
   })
 
@@ -62,7 +62,7 @@ describe('NoteLinksRow', () => {
     const created: NoteLinkItem = { id: 'l9', linkable_type: 'candidate', linkable_id: 'ca1', label: 'Ahmed Bakker', is_manual: true }
     vi.mocked(api.post).mockResolvedValueOnce({ data: { data: created } } as never)
 
-    render(<NoteLinksRow host="candidates" hostId="c1" noteId="n1" canManage />)
+    render(<NoteLinksRow mode="edit" host="candidates" hostId="c1" noteId="n1" canManage />)
     fireEvent.click(screen.getByRole('button', { name: 'Koppelen' }))
     // Default principal type is 'candidate' — open the entity search and pick the result.
     fireEvent.click(screen.getByRole('button', { name: 'Zoek record…' }))
@@ -83,13 +83,13 @@ describe('NoteLinksRow', () => {
     const first: NoteLinkItem[] = [
       { id: 'l1', linkable_type: 'customer', linkable_id: 'cu1', label: 'Acme B.V.', is_manual: true },
     ]
-    const { rerender } = render(<NoteLinksRow host="candidates" hostId="c1" noteId="n1" canManage={false} initialLinks={first} />)
+    const { rerender } = render(<NoteLinksRow mode="edit" host="candidates" hostId="c1" noteId="n1" canManage={false} initialLinks={first} />)
     expect(screen.getByText('Klant · Acme B.V.')).toBeInTheDocument()
 
     const second: NoteLinkItem[] = [
       { id: 'l2', linkable_type: 'customer', linkable_id: 'cu2', label: 'Globex N.V.', is_manual: true },
     ]
-    rerender(<NoteLinksRow host="candidates" hostId="c1" noteId="n1" canManage={false} initialLinks={second} />)
+    rerender(<NoteLinksRow mode="edit" host="candidates" hostId="c1" noteId="n1" canManage={false} initialLinks={second} />)
     expect(screen.queryByText('Klant · Acme B.V.')).not.toBeInTheDocument()
     expect(screen.getByText('Klant · Globex N.V.')).toBeInTheDocument()
   })
@@ -98,10 +98,10 @@ describe('NoteLinksRow', () => {
     const links: NoteLinkItem[] = [
       { id: 'l1', linkable_type: 'customer', linkable_id: 'cu1', label: 'Acme B.V.', is_manual: true },
     ]
-    const { rerender } = render(<NoteLinksRow host="candidates" hostId="c1" noteId="n1" canManage={false} initialLinks={links} />)
+    const { rerender } = render(<NoteLinksRow mode="edit" host="candidates" hostId="c1" noteId="n1" canManage={false} initialLinks={links} />)
     expect(screen.getByText('Klant · Acme B.V.')).toBeInTheDocument()
     // A brand-new array instance carrying the identical row — must not disappear/duplicate.
-    rerender(<NoteLinksRow host="candidates" hostId="c1" noteId="n1" canManage={false} initialLinks={[...links]} />)
+    rerender(<NoteLinksRow mode="edit" host="candidates" hostId="c1" noteId="n1" canManage={false} initialLinks={[...links]} />)
     expect(screen.getAllByText('Klant · Acme B.V.')).toHaveLength(1)
   })
 
@@ -110,10 +110,27 @@ describe('NoteLinksRow', () => {
     const links: NoteLinkItem[] = [
       { id: 'l1', linkable_type: 'customer', linkable_id: 'cu1', label: 'Acme B.V.', is_manual: true },
     ]
-    render(<NoteLinksRow host="customers" hostId="cu9" noteId="n7" canManage initialLinks={links} />)
+    render(<NoteLinksRow mode="edit" host="customers" hostId="cu9" noteId="n7" canManage initialLinks={links} />)
     expect(screen.getByText('Klant · Acme B.V.')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Ontkoppelen' }))
     await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/customers/cu9/notes/n7/links/l1'))
     await waitFor(() => expect(screen.queryByText('Klant · Acme B.V.')).not.toBeInTheDocument())
   })
 })
+
+// KOPPELEN-IN-POPOUT-1 (Danny 05-09): a note ROW never carries a link control; it only shows chips.
+describe('NoteLinksRow · display mode (the note row)', () => {
+  it('renders the chips but no Koppelen or Ontkoppelen control, even for a manageable note', () => {
+    render(<NoteLinksRow host="candidates" hostId="c1" noteId="n1" canManage
+      initialLinks={[{ id: 'l1', linkable_type: 'customer', linkable_id: 'k1', label: 'Bol', is_manual: true }]} />)
+    expect(screen.getByText(/Bol/)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Koppelen' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Ontkoppelen' })).not.toBeInTheDocument()
+  })
+
+  it('renders nothing at all without links in display mode', () => {
+    const { container } = render(<NoteLinksRow host="candidates" hostId="c1" noteId="n1" canManage initialLinks={[]} />)
+    expect(container).toBeEmptyDOMElement()
+  })
+})
+

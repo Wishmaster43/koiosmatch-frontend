@@ -580,6 +580,7 @@
     "restoreNotice": "Restauré. Vous pouvez encore annuler cette action une fois.",
     "restoreUnavailable": "Il n'y a pas de version précédente à restaurer.",
     "links": {
+      "title": "Liens",
       "add": "Lier",
       "remove": "Dissocier",
       "pickType": "Choisir un type",

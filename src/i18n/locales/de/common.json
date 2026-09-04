@@ -580,6 +580,7 @@
     "restoreNotice": "Wiederhergestellt. Du kannst dies noch einmal rückgängig machen.",
     "restoreUnavailable": "Es gibt keine vorherige Version zum Wiederherstellen.",
     "links": {
+      "title": "Verknüpfungen",
       "add": "Verknüpfen",
       "remove": "Entkoppeln",
       "pickType": "Typ wählen",

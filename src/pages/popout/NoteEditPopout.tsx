@@ -38,6 +38,12 @@ import { useParams } from 'react-router-dom'
 import PopoutShell from './PopoutShell'
 import PopoutSaveFooter from './PopoutSaveFooter'
 import NoteFields from '@/components/drawer/tabs/notes/NoteFields'
+// KOPPELEN-IN-POPOUT-1 (Danny 05-09): linking a note to its principals happens HERE, in the
+// second-screen editor, never as a control inside the note row (the row only shows chips).
+import { GroupLabel } from '@/components/ui/typography'
+import NoteLinksRow from '@/components/drawer/tabs/notes/NoteLinksRow'
+import type { Id } from '@/types/common'
+import type { NoteLinkHost, NoteLinkItem } from '@/components/drawer/tabs/notes/noteLinksApi'
 import { useNoteFields } from '@/components/drawer/tabs/notes/useNoteFields'
 import { canManageNote, isSystemNote } from '@/components/drawer/tabs/notes/noteRights'
 import SafeHtml from '@/components/ui/SafeHtml'
@@ -62,6 +68,8 @@ import type { NoteType, NotesLabels } from '@/components/drawer/tabs/NotesTab'
 // already satisfies it, so ONE editor body serves all of them (§11).
 interface EditableNote {
   id?: string | number
+  // Bundle H2: the note's principal links (manual + derived); the editor offers the manual ones.
+  links?: NoteLinkItem[]
   type?: string
   channel?: string
   title?: string
@@ -146,6 +154,7 @@ function CandidateNoteEditPopout() {
       {note && (
         <NoteEditor key={String(noteId)} note={note} managePermission="candidates.notes.manage_all"
           onSave={payload => editNote(noteIndex, payload)}
+          links={id && noteId ? { host: 'candidates', hostId: id, noteId } : undefined}
           noteTypes={writableTypes} channels={channels} labels={labels} readOnlyCopy={t('popout.noteReadOnly')} />
       )}
     </PopoutShell>
@@ -238,6 +247,7 @@ function CustomerNoteEditPopout() {
       {note && (
         <NoteEditor key={String(noteId)} note={note} managePermission="customers.notes.manage_all"
           onSave={payload => editNote(noteIndex, payload)}
+          links={id && noteId ? { host: 'customers', hostId: id, noteId } : undefined}
           noteTypes={writableTypes} channels={[]} labels={labels} readOnlyCopy={t('common:popout.noteReadOnly')} />
       )}
     </PopoutShell>
@@ -310,8 +320,10 @@ function GenericNoteEditPopout<R extends { loading: boolean; error: boolean; rel
 // Shared by EVERY entity branch (§11: one form, structural EditableNote input);
 // each branch now hands it its own already-resolved `labels`/`readOnlyCopy`
 // instead of a per-namespace switch living inside this shared body.
-function NoteEditor({ note, onSave, noteTypes, channels, managePermission, labels, readOnlyCopy }: {
+function NoteEditor({ note, onSave, noteTypes, channels, managePermission, labels, readOnlyCopy, links }: {
   note: EditableNote
+  // The host's note-link routes (candidates/customers only) — omitted = no Koppelingen block.
+  links?: { host: NoteLinkHost; hostId: Id; noteId: Id }
   onSave: (payload: { type: string; title: string; body: string; channel?: string; language?: string }) => Promise<boolean>
   noteTypes: NoteType[]
   channels: NoteType[]
@@ -338,6 +350,7 @@ function NoteEditor({ note, onSave, noteTypes, channels, managePermission, label
 
   // Same edit right the list applies (noteRights) — a pasted URL is not a licence.
   const editable = canManageNote(note, auth?.user?.id, auth?.hasPermission ?? (() => false), managePermission)
+  const { t: tCommon } = useTranslation('common')
 
   // Read-only: someone else's note without the manage right — show, never edit (§7).
   if (!editable) {
@@ -362,6 +375,14 @@ function NoteEditor({ note, onSave, noteTypes, channels, managePermission, label
           <NoteFields fields={fields} noteTypes={noteTypes} channels={channels} labels={labels}
             noteId={typeof note.id === 'string' ? note.id : undefined} editorMinHeight={220}
             onItems={onAssistItems} knownItems={knownItems} />
+          {/* Koppelingen (NOTITIE-DOORLINK-1 write side): chips + Koppelen picker + unlink, editor-only. */}
+          {links && (
+            <div style={{ marginTop: 12 }}>
+              <GroupLabel as="div" style={{ marginBottom: 4 }}>{tCommon('notes.links.title')}</GroupLabel>
+              <NoteLinksRow mode="edit" host={links.host} hostId={links.hostId} noteId={links.noteId} canManage={editable}
+                initialLinks={(note.links ?? []).filter(l => l.is_manual)} />
+            </div>
+          )}
         </div>
         {panelItems.length > 0 && (
           <NoteActionsPanel items={panelItems} onItemsChange={setPanelItems}

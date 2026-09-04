@@ -580,6 +580,7 @@
     "restoreNotice": "Ripristinato. Puoi ancora annullare questa operazione una volta.",
     "restoreUnavailable": "Non c'è una versione precedente da ripristinare.",
     "links": {
+      "title": "Collegamenti",
       "add": "Collega",
       "remove": "Scollega",
       "pickType": "Scegli tipo",

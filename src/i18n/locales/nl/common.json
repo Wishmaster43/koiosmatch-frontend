@@ -580,6 +580,7 @@
     "restoreNotice": "Teruggezet. Je kunt dit nog één keer ongedaan maken.",
     "restoreUnavailable": "Er is geen vorige versie om terug te zetten.",
     "links": {
+      "title": "Koppelingen",
       "add": "Koppelen",
       "remove": "Ontkoppelen",
       "pickType": "Kies type",
