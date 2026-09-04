@@ -344,6 +344,12 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
     contact: raw.contact
       ? { id: raw.contact.id ?? null, name: raw.contact.name ?? '', email: raw.contact.email ?? '', phone: raw.contact.phone ?? '' }
       : null,
+    // CONTACT-DERIVE-1: presence-gate — literally whether the raw record carries
+    // the `contact` key at all, never inferred from its value (see the type doc
+    // in types/application.ts). Lets the drawer trust a real null ("vacancy has
+    // no contact set") without falling back to a second vacancy fetch, while an
+    // older payload without the key still falls back to VAC-CASCADE-MIRROR-1.
+    hasContactField: 'contact' in raw,
     // APP-STAGE-DURATIONS-1: chronological phase history, [] when absent.
     stageDurations: mapStageDurations(raw.stage_durations),
     // APP-MATCH-SUMMARY-1: the linked Match, null when none hangs on this application.

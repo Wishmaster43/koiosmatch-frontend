@@ -306,6 +306,29 @@ describe('mapApplicationDetail', () => {
     })
   })
 
+  // CONTACT-DERIVE-1 (CMBE 12:05): hasContactField is a PRESENCE gate, literally
+  // whether the raw record carries the `contact` key — not whether it resolved to
+  // a real contact. ApplicationDetailsCard uses this to skip its vacancy-cascade
+  // fallback fetch entirely once a tenant is on the new contract, so the three
+  // cases (present, explicitly null, absent) must map to three different reads.
+  describe('hasContactField (CONTACT-DERIVE-1)', () => {
+    it('is true when the raw record carries a real contact', () => {
+      const detail = mapApplicationDetail({
+        id: 17,
+        contact: { id: 'ct-3', name: 'Marieke Jansen', email: 'marieke@zorggroep.nl', phone: '0612345678' },
+      })
+      expect(detail.hasContactField).toBe(true)
+    })
+
+    it('is STILL true when the key is explicitly null (the vacancy has no contact set) — a resolved absence, not a missing field', () => {
+      expect(mapApplicationDetail({ id: 18, contact: null }).hasContactField).toBe(true)
+    })
+
+    it('is false when the key is absent entirely (a payload that predates the field)', () => {
+      expect(mapApplicationDetail({ id: 19 }).hasContactField).toBe(false)
+    })
+  })
+
   // W7 (measured 07-08 in ApplicationDetailResource::interviews — APP-INTERVIEW-HISTORY-1):
   // the previous mapper read `channel`/`created_at`/`time`/`summary` and transcript
   // `author`/`side`/`time`/`text` — none of those exist on the resource. Pins the REAL

@@ -8,12 +8,13 @@
  * Bron are editable in-place, Klant/Locatie stay read-only (Klant derives from
  * the vacancy, so it is never itself an edit target; phase/recruiter are edited
  * in the drawer header instead). The Contactpersoon ("contact person") row
- * (CONTACT-PERSON-1) is
- * read-only by derivation, not by omission: it comes from the linked vacancy's
- * contact_id and is editable only on the vacancy — see the comment at that row.
+ * (CONTACT-PERSON-1/CONTACT-DERIVE-1) is read-only by derivation, not by
+ * omission: it comes from the linked vacancy's contact_id and is editable only
+ * on the vacancy — see the comment at that row.
  *
- * VAC-CASCADE-MIRROR-1 (Danny 05-08) — PARTIALLY SUPERSEDED by S6 (bundle F,
- * CMBE 685ce339): Klantlocatie/Afdeling used to have no application-owned
+ * VAC-CASCADE-MIRROR-1 (Danny 05-08) — SUPERSEDED by S6 (bundle F, CMBE
+ * 685ce339) for Klantlocatie/Afdeling and by CONTACT-DERIVE-1 (CMBE 12:05) for
+ * Contactpersoon: Klantlocatie/Afdeling used to have no application-owned
  * source (the Application model has no customer_location_id/
  * customer_department_id columns of its own), so those two rows were derived
  * from the LINKED VACANCY's own full detail fetch (useApplicationVacancy) —
@@ -25,13 +26,15 @@
  * rows below read `a.customerLocation`/`a.customerDepartment` — no vacancy
  * fetch, no extra permission gate.
  *
- * Contactpersoon ("Contact person") still has NO equivalent on the application
- * resource (no contact_id column either), so it stays on the VAC-CASCADE-
- * MIRROR-1 path: sourced from the same shared vacancy-detail fetch
+ * Contactpersoon ("Contact person") now has the SAME kind of application-owned
+ * source: ApplicationDetailResource::contact() sends `contact` ({id, name,
+ * email, phone} or null) straight on the DETAIL contract, so the row below
+ * reads `a.contact` first — no vacancy fetch, no `vacancies.view` gate for a
+ * viewer who only has `applications.view`. The shared vacancy-detail fetch
  * (useApplicationVacancy — shared React Query cache entry, §11: no duplicate
- * fetch when both tabs are open across a session), mirroring
- * DetailsGeneralTab's own EntityLink treatment byte-for-byte (customers page —
- * locations/departments/contacts have no page of their own).
+ * fetch when both tabs are open across a session) now only runs, and only as a
+ * FALLBACK, for a payload that predates the field (`a.hasContactField` false)
+ * — see the row's own comment below.
  *
  * LABEL-LEFT-1 (Danny 05-08): converted from the label-above grid to the
  * candidate drawer's label-left row canon (fieldRowCanon) — this was the last
@@ -107,10 +110,15 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
   // by the real /candidate-sources tenant lookup (see useApplicationSources' doc
   // comment for the full backend contract) instead of free text — never a hardcoded list.
   const { sources, allowFreeEntry } = useApplicationSources()
-  // VAC-CASCADE-MIRROR-1: the linked vacancy's full detail (customer location/
-  // department/contact) — null while loading or when no vacancy is linked; the
-  // three rows below fall back to a dash rather than fabricate a value.
-  const { vacancy: vac } = useApplicationVacancy(a.vacancyId)
+  // CONTACT-DERIVE-1: the linked vacancy's full detail is now only a FALLBACK
+  // for the Contactpersoon row (Klantlocatie/Afdeling already moved off it in
+  // S6), and only while the application itself predates the `contact` field
+  // (`a.hasContactField` false). Passing null disables the query entirely
+  // (useApplicationVacancy's own `enabled: vacancyId != null` gate) — no extra
+  // request, no extra `vacancies.view` permission gate, once a tenant is on
+  // the new contract.
+  const needsContactFallback = !a.hasContactField
+  const { vacancy: vac } = useApplicationVacancy(needsContactFallback ? a.vacancyId : null)
 
   // Seed the edit form with the current vacancy/source before switching the card into edit mode.
   const startEdit = () => {
@@ -172,27 +180,31 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
       <Row label={t('vacancies:details.customerDepartment')}>
         {a.customerDepartment ? <EntityLink page="customers" id={a.customerId}>{a.customerDepartment.name}</EntityLink> : '—'}
       </Row>
-      {/* Contactpersoon (CONTACT-PERSON-1 + VAC-CASCADE-MIRROR-1) — the name +
-          EntityLink come from the same shared vacancy-detail fetch as the two
-          rows above (guaranteed to match the Vacature tab); phone/email ride
-          along from ApplicationDetailResource's own `contact` block as a
-          best-effort second line (that contract carries them, the vacancy
-          detail's contact does not) — shown only when present, never fabricated.
+      {/* Contactpersoon (CONTACT-DERIVE-1, supersedes CONTACT-PERSON-1 +
+          VAC-CASCADE-MIRROR-1) — reads the application's OWN `contact`
+          (name/email/phone) first: no second vacancy fetch, no `vacancies.view`
+          gate. The EntityLink target is the same customer the Klant row above
+          already links to (a.customerId) — not a new destination. The linked-
+          vacancy detail (`vac`) is kept only as a FALLBACK for a payload that
+          predates the field (see `needsContactFallback` above), so a tenant not
+          yet on the new contract still sees the name it used to.
           Deliberately outside the pencil's edit mode: the field is derived from
           the vacancy's contact_id, and UpdateApplicationRequest has no contact
           field, so a picker here would PATCH nothing — changing it happens on
           the vacancy (Vacature tab → Details → Contactpersoon), which is also
           where the vacancies.update permission is checked. */}
       <Row label={t('vacancies:details.contactPerson')}>
-        {vac?.contactName ? (
+        {a.contact?.name ? (
           <>
-            <EntityLink page="customers" id={vac.clientId}>{vac.contactName}</EntityLink>
-            {(a.contact?.phone || a.contact?.email) && (
+            <EntityLink page="customers" id={a.customerId}>{a.contact.name}</EntityLink>
+            {(a.contact.phone || a.contact.email) && (
               <Caption as="div">
                 {[a.contact.phone, a.contact.email].filter(Boolean).join(' · ')}
               </Caption>
             )}
           </>
+        ) : vac?.contactName ? (
+          <EntityLink page="customers" id={vac.clientId}>{vac.contactName}</EntityLink>
         ) : '—'}
       </Row>
       {editing ? (

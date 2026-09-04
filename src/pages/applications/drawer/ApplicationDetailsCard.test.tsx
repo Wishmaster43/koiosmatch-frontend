@@ -4,13 +4,13 @@
  * it). Covers: the fields render, the shared pencil opens the edit inputs and
  * saving calls both callbacks, the Klantlocatie/Afdeling rows (S6, bundle F:
  * read straight off the application fixture's customerLocation/
- * customerDepartment, no vacancy fetch), the Contactpersoon row (still
- * VAC-CASCADE-MIRROR-1, 05-08: sourced from the linked vacancy's OWN detail —
- * present with a phone/email second line, and a dash when the vacancy has
- * none/is not yet loaded — never crash), and the APP-MATCH-SUMMARY-1
- * Match row (link + status chip + match period, rendered ONLY when the
- * application actually carries a match — never a dash row for an absent
- * relation).
+ * customerDepartment, no vacancy fetch), the Contactpersoon row (CONTACT-
+ * DERIVE-1, CMBE 12:05: sourced from the application's OWN `contact` first —
+ * no vacancy fetch when `hasContactField` is true — and falling back to the
+ * linked vacancy's OWN detail only for a payload that predates the field),
+ * and the APP-MATCH-SUMMARY-1 Match row (link + status chip + match period,
+ * rendered ONLY when the application actually carries a match — never a dash
+ * row for an absent relation).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -49,9 +49,10 @@ vi.mock('@/lib/api', () => ({
 import api from '@/lib/api'
 const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
 
-// VAC-CASCADE-MIRROR-1: mock the shared hook directly (repo precedent —
-// CompetitionBlock.test.tsx) — this file tests ApplicationDetailsCard's own
-// wiring, not useApplicationVacancy's React Query fetch (tested elsewhere).
+// VAC-CASCADE-MIRROR-1/CONTACT-DERIVE-1: mock the shared hook directly (repo
+// precedent — CompetitionBlock.test.tsx) — this file tests ApplicationDetailsCard's
+// own wiring (including WHETHER it calls the hook — null disables the query),
+// not useApplicationVacancy's React Query fetch (tested elsewhere).
 const mockUseApplicationVacancy = vi.fn()
 vi.mock('../hooks/useApplicationVacancy', () => ({
   useApplicationVacancy: (id: unknown) => mockUseApplicationVacancy(id),
@@ -59,14 +60,16 @@ vi.mock('../hooks/useApplicationVacancy', () => ({
 
 const app = (over: Partial<ApplicationDetail> = {}) => ({
   id: 1, source: 'Facebook', client: 'Yesway', vacancyTitle: 'Verpleegkundige', vacancyId: null,
+  customerId: 'cust-app-1',
   contact: null,
+  hasContactField: false,
   match: null,
   ...over,
 } as unknown as ApplicationDetail)
 
-// VAC-CASCADE-MIRROR-1: the linked vacancy's detail — only Contactpersoon still
-// reads it (clientId/contactName); Klantlocatie/Afdeling moved to the
-// application resource itself (S6, bundle F — see the `app()` fixture below).
+// VAC-CASCADE-MIRROR-1: the linked vacancy's detail — now only a FALLBACK for
+// Contactpersoon (used when a.hasContactField is false); Klantlocatie/Afdeling
+// moved to the application resource itself (S6, bundle F — see `app()` above).
 const vac = (over: Partial<VacancyDetail> = {}) => ({
   clientId: 'cust-1', contactName: '',
   ...over,
@@ -98,11 +101,13 @@ describe('ApplicationDetailsCard', () => {
     expect(screen.getByText('Dagbesteding')).toBeInTheDocument()
   })
 
-  it('renders Contactpersoon from the linked vacancy detail (VAC-CASCADE-MIRROR-1, still the only source)', () => {
+  it('falls back to the linked vacancy detail when the application predates the contact field (hasContactField false)', () => {
     mockUseApplicationVacancy.mockReturnValue({ vacancy: vac({ contactName: 'Daan Jansen' }), loading: false, error: false })
-    render(<ApplicationDetailsCard application={app()} />)
+    render(<ApplicationDetailsCard application={app({ vacancyId: 'vac-9', hasContactField: false, contact: null })} />)
     expect(screen.getByText('vacancies:details.contactPerson')).toBeInTheDocument()
     expect(screen.getByText('Daan Jansen')).toBeInTheDocument()
+    // The fallback query really runs, with the real vacancy id, when the key is absent.
+    expect(mockUseApplicationVacancy).toHaveBeenCalledWith('vac-9')
   })
 
   it('renders a dash for Klantlocatie/Afdeling/Contactpersoon when nothing is set/resolved (never fabricated)', () => {
@@ -160,22 +165,39 @@ describe('ApplicationDetailsCard', () => {
     expect(onUpdateSource).not.toHaveBeenCalled()
   })
 
-  it('renders the contact person (from the vacancy detail) with a phone/email second line (from the application resource) when present', () => {
-    mockUseApplicationVacancy.mockReturnValue({ vacancy: vac({ contactName: 'Marieke Jansen' }), loading: false, error: false })
-    render(<ApplicationDetailsCard application={app({ contact: { id: 'c1', name: 'Marieke Jansen', email: 'marieke@example.com', phone: '0612345678' } })} />)
+  // CONTACT-DERIVE-1: the application's own `contact` is now the PRIMARY source
+  // (name + phone/email), and carrying it means the vacancy-cascade fetch is
+  // never started at all — the mock is called with null, so a real component
+  // would disable the query (useApplicationVacancy's own `enabled` gate).
+  it('renders the contact person from the application resource itself, with no vacancy fetch, when hasContactField is true', () => {
+    render(<ApplicationDetailsCard application={app({
+      vacancyId: 'vac-1', hasContactField: true,
+      contact: { id: 'c1', name: 'Marieke Jansen', email: 'marieke@example.com', phone: '0612345678' },
+    })} />)
     expect(screen.getByText('Marieke Jansen')).toBeInTheDocument()
     expect(screen.getByText('0612345678 · marieke@example.com')).toBeInTheDocument()
+    expect(mockUseApplicationVacancy).toHaveBeenCalledWith(null)
   })
 
-  it('renders a dash and does not crash when there is no contact', () => {
-    render(<ApplicationDetailsCard application={app({ contact: null })} />)
+  it('renders a dash and does not crash when hasContactField is true but the vacancy has no contact set', () => {
+    render(<ApplicationDetailsCard application={app({ vacancyId: 'vac-1', hasContactField: true, contact: null })} />)
     expect(screen.getByText('vacancies:details.contactPerson')).toBeInTheDocument()
+    // A real null (backend already resolved "no contact") never falls back to a fetch.
+    expect(mockUseApplicationVacancy).toHaveBeenCalledWith(null)
   })
 
-  it('never shows a stale application-level contact name/phone when the vacancy detail itself has no contact (the vacancy detail is the source of truth)', () => {
-    render(<ApplicationDetailsCard application={app({ contact: { id: 'c1', name: 'Stale Name', email: 'stale@example.com', phone: '0600000000' } })} />)
-    expect(screen.queryByText('Stale Name')).toBeNull()
-    expect(screen.queryByText(/0600000000/)).toBeNull()
+  it('prefers the application-owned contact name over a differently-named linked-vacancy detail (the application is now the source of truth)', () => {
+    // Even if the fallback hook were to resolve something, hasContactField true
+    // means the component never reads it: `vac` here would only matter if the
+    // fallback were wired, which the assertion below proves it is not.
+    mockUseApplicationVacancy.mockReturnValue({ vacancy: vac({ contactName: 'Stale Vacancy Name' }), loading: false, error: false })
+    render(<ApplicationDetailsCard application={app({
+      vacancyId: 'vac-1', hasContactField: true,
+      contact: { id: 'c1', name: 'Fresh Name', email: 'fresh@example.com', phone: '0600000000' },
+    })} />)
+    expect(screen.getByText('Fresh Name')).toBeInTheDocument()
+    expect(screen.queryByText('Stale Vacancy Name')).toBeNull()
+    expect(mockUseApplicationVacancy).toHaveBeenCalledWith(null)
   })
 
   it('renders the Match row with its reference/status/match period when a match exists', () => {

@@ -264,6 +264,13 @@ export interface ApplicationDetail extends Application {
   // filter on it server-side; `email`/`phone` are nullable columns that the mapper
   // coerces to '', so consumers gate on truthiness, never on `!== null`.
   contact: { id: Id | null; name: string; email: string; phone: string } | null
+  // CONTACT-DERIVE-1 (CMBE 12:05): presence-gate for `contact` above — true once
+  // the raw record actually carries the key (even when it resolves to null,
+  // meaning "the linked vacancy has no contact set"). False only for a payload
+  // that predates the field. ApplicationDetailsCard's Contactpersoon row uses
+  // this to skip the linked-vacancy fallback fetch entirely once a tenant is on
+  // the new contract, mirroring `hasInterviewWorkflowField`'s own presence gate.
+  hasContactField: boolean
   // APP-STAGE-DURATIONS-1: chronological phase history, [] when the backend
   // sends none — the status strip falls back through currentStageEnteredAt
   // then the created-date line rather than ever fabricating a duration.
