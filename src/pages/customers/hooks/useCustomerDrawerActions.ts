@@ -5,7 +5,7 @@
  * extraction — behaviour unchanged); the container still owns tab rendering
  * and JSX composition.
  */
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useCustomerPhases } from '@/lib/useCustomerPhases'
@@ -72,23 +72,25 @@ export function useCustomerDrawerActions({ c, onUpdate, onClose, users, statuses
   // Keyed on an OPEN boolean plus a loaded ref, never on the modal object: every reason
   // keystroke replaces that object, which re-fired the GET on tenants with an empty lookup.
   const blacklistOpen = Boolean(blacklistModal)
-  const blacklistReasonsLoaded = useRef(false)
+  // State, not a ref: the prompt shows an honest 'no reasons configured yet' notice only
+  // once the lookup has ANSWERED, never during the first load (BLACKLIST-EMPTY-1).
+  const [blacklistReasonsLoaded, setBlacklistReasonsLoaded] = useState(false)
   useEffect(() => {
-    if (!blacklistOpen || blacklistReasonsLoaded.current) return
+    if (!blacklistOpen || blacklistReasonsLoaded) return
     let alive = true
     api.get('/customer-blacklist-reasons')
       .then(r => {
         if (!alive) return
-        blacklistReasonsLoaded.current = true
+        setBlacklistReasonsLoaded(true)
         setBlacklistReasons(
           ((unwrapList(r).rows) as Array<{ name?: string }>)
             .filter(x => x.name)
             .map(x => ({ value: String(x.name), label: String(x.name) })),
         )
       })
-      .catch(() => { if (alive) { blacklistReasonsLoaded.current = true; setBlacklistReasons([]) } })
+      .catch(() => { if (alive) { setBlacklistReasonsLoaded(true); setBlacklistReasons([]) } })
     return () => { alive = false }
-  }, [blacklistOpen])
+  }, [blacklistOpen, blacklistReasonsLoaded])
 
   // DELETE-ICON-1: the house confirm dialog (§0 restschuld) — same shared hook the
   // candidate drawer's own trash icon and OpportunitiesTab's delete already use.
@@ -234,6 +236,6 @@ export function useCustomerDrawerActions({ c, onUpdate, onClose, users, statuses
     showMerge, setShowMerge,
     setTags,
     // KLANT-BLACKLIST-PROMPT-1: the blacklist status-reason prompt state + actions.
-    blacklistModal, setBlacklistModal, confirmBlacklist, blacklistReasons,
+    blacklistModal, setBlacklistModal, confirmBlacklist, blacklistReasons, blacklistReasonsLoaded,
   }
 }

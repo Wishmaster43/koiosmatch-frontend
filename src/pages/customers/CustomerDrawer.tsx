@@ -184,7 +184,7 @@ export default function CustomerDrawer({
   // hooks), same as the useState calls it replaces, before the null check below.
   const {
     currentStatus, currentTags, changeStatus,
-    blacklistModal, setBlacklistModal, confirmBlacklist, blacklistReasons,
+    blacklistModal, setBlacklistModal, confirmBlacklist, blacklistReasons, blacklistReasonsLoaded,
     currentPhase, phaseInfo, showStatus,
     targetPhase, isEntryPhase, doConvertPhase,
     ownerOptions, ownerValue, onOwnerChange,
@@ -422,7 +422,7 @@ export default function CustomerDrawer({
     {/* KLANT-BLACKLIST-PROMPT-1: the blacklist status-reason prompt, mounted only
         while open (mirrors CandidateStatusModals' fresh-mount-per-open pattern). */}
     {blacklistModal && (
-      <CustomerStatusReasonModal state={blacklistModal} reasons={blacklistReasons}
+      <CustomerStatusReasonModal state={blacklistModal} reasons={blacklistReasons} reasonsLoaded={blacklistReasonsLoaded}
         onChangeReason={reason => setBlacklistModal(m => m && ({ ...m, reason }))}
         onCancel={() => setBlacklistModal(null)}
         onConfirm={confirmBlacklist} />

@@ -37,3 +37,22 @@ describe('CustomerStatusReasonModal · Save gating', () => {
     expect(screen.getByRole('button', { name: /blacklistReasonLabel|Reden/ })).toBeInTheDocument()
   })
 })
+
+// BLACKLIST-EMPTY-1: a required reason with no configured reasons is a dead end — the
+// prompt says so and links to Settings; while the lookup is still loading it stays quiet.
+describe('CustomerStatusReasonModal · no reasons configured', () => {
+  it('shows the notice + settings link and keeps Save disabled once the lookup answered empty', () => {
+    render(<CustomerStatusReasonModal state={{ target: 'bl', reason: '', needReason: true }}
+      onChangeReason={vi.fn()} onCancel={vi.fn()} onConfirm={vi.fn()} reasons={[]} reasonsLoaded />)
+    expect(screen.getByText('drawer.blacklistReasonNone')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'drawer.blacklistReasonSetup' })).toHaveAttribute('href', '#settings/customers/customer_blacklist_reasons')
+    expect(screen.getByRole('button', { name: 'common:save' })).toBeDisabled()
+  })
+
+  it('stays quiet while the lookup has not answered yet', () => {
+    render(<CustomerStatusReasonModal state={{ target: 'bl', reason: '', needReason: true }}
+      onChangeReason={vi.fn()} onCancel={vi.fn()} onConfirm={vi.fn()} reasons={[]} reasonsLoaded={false} />)
+    expect(screen.queryByText('drawer.blacklistReasonNone')).toBeNull()
+  })
+})
+

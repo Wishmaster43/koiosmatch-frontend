@@ -98,8 +98,8 @@ function MatchPickModal({
 
 // Status change asking a reason and/or a "available again" date (status flags).
 function StatusReasonModal({
-  statusModal, setStatusModal, onConfirmStatus, blReasons, t,
-}: Pick<Props, 'setStatusModal' | 'onConfirmStatus'> & { statusModal: StatusModalState; blReasons: BlacklistReasonOption[]; t: TFunction }) {
+  statusModal, setStatusModal, onConfirmStatus, blReasons, blReasonsLoaded = true, t,
+}: Pick<Props, 'setStatusModal' | 'onConfirmStatus'> & { statusModal: StatusModalState; blReasons: BlacklistReasonOption[]; blReasonsLoaded?: boolean; t: TFunction }) {
   const close = () => setStatusModal(null)
   return (
     // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
@@ -117,10 +117,19 @@ function StatusReasonModal({
             </div>
             {statusModal.isBlacklist ? (
               // Blacklist: lookup-backed searchable dropdown (BE validates exists on blacklist_reasons.name).
-              <CreatableSelect value={statusModal.reason || null} allowCreate={false} clearable
-                onChange={v => setStatusModal(m => m && ({ ...m, reason: v }))}
-                placeholder={t('drawer.blacklistReasonPick')} options={blReasons}
-                style={{ padding: '8px 10px', fontSize: 12 }} />
+              <>
+                <CreatableSelect value={statusModal.reason || null} allowCreate={false} clearable
+                  onChange={v => setStatusModal(m => m && ({ ...m, reason: v }))}
+                  placeholder={t('drawer.blacklistReasonPick')} options={blReasons}
+                  style={{ padding: '8px 10px', fontSize: 12 }} />
+                {/* BLACKLIST-EMPTY-1: no configured reasons = a dead end; say so and link to Settings. */}
+                {blReasonsLoaded && blReasons.length === 0 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
+                    <Caption as="span">{t('drawer.blacklistReasonNone')}</Caption>
+                    <Button variant="ghost" size="sm" href="#settings/candidate/blacklist_reasons">{t('drawer.blacklistReasonSetup')}</Button>
+                  </div>
+                )}
+              </>
             ) : (
               // Plain textarea, not RichTextEditor — the backend validates status_reason
               // as `string|max:255` and folds it into the status-change NOTE body via a
@@ -161,6 +170,8 @@ export default function CandidateStatusModals({
   // Blacklist reasons (tenant lookup) — loaded once when a blacklist prompt opens; the
   // backend validates against blacklist_reasons.name, so free text would 422.
   const [blReasons, setBlReasons] = useState<BlacklistReasonOption[]>([])
+  // BLACKLIST-EMPTY-1: true once the lookup answered, so an empty list reads as 'none configured'.
+  const [blReasonsLoaded, setBlReasonsLoaded] = useState(false)
   // Loads the blacklist-reason tenant lookup once, the first time a blacklist prompt opens, since the backend validates against these names rather than accepting free text.
   useEffect(() => {
     if (!statusModal?.isBlacklist || blReasons.length) return
@@ -174,6 +185,7 @@ export default function CandidateStatusModals({
           .map(x => ({ value: String(x.name), label: String(x.name), icon: x.icon ? <LookupIcon icon={x.icon} size={12} /> : undefined })),
       ))
       .catch(() => setBlReasons([]))
+      .finally(() => setBlReasonsLoaded(true))
   }, [statusModal?.isBlacklist, blReasons.length])
 
   return (
@@ -184,7 +196,7 @@ export default function CandidateStatusModals({
           vacancyOptions={vacancyOptions} creatingMatch={creatingMatch} onConfirmMatch={onConfirmMatch} t={t} />
       )}
       {statusModal && (
-        <StatusReasonModal statusModal={statusModal} setStatusModal={setStatusModal} onConfirmStatus={onConfirmStatus} blReasons={blReasons} t={t} />
+        <StatusReasonModal statusModal={statusModal} setStatusModal={setStatusModal} onConfirmStatus={onConfirmStatus} blReasons={blReasons} blReasonsLoaded={blReasonsLoaded} t={t} />
       )}
     </>
   )

@@ -11,6 +11,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import CandidateStatusModals from './CandidateStatusModals'
+import api from '@/lib/api'
 
 // api.get('/candidate-blacklist-reasons') only fires while a blacklist prompt is
 // open — stubbed so the reason dropdown has real options to pick from.
@@ -98,3 +99,16 @@ describe('CandidateStatusModals · blacklist reason dropdown', () => {
     expect(screen.getByText('🚫')).toBeInTheDocument()
   })
 })
+
+// BLACKLIST-EMPTY-1: an empty reason lookup (tenant wiped its reasons) renders the honest
+// notice + a link to Settings → Kandidaat → Blacklistredenen instead of an empty required picker.
+describe('CandidateStatusModals · no blacklist reasons configured', () => {
+  it('shows the notice and the settings link once the lookup answered empty', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } } as never)
+    render(<CandidateStatusModals {...baseProps}
+      statusModal={{ target: 'blacklist', reason: '', date: '', needReason: true, needDate: false, isBlacklist: true }} />)
+    expect(await screen.findByText('drawer.blacklistReasonNone')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'drawer.blacklistReasonSetup' })).toHaveAttribute('href', '#settings/candidate/blacklist_reasons')
+  })
+})
+

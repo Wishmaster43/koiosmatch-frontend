@@ -26,10 +26,12 @@ interface Props {
   onCancel: () => void
   onConfirm: () => void
   reasons: BlacklistReasonOption[]
+  // BLACKLIST-EMPTY-1: true once the lookup answered; an empty answer is a real 'none configured'.
+  reasonsLoaded?: boolean
 }
 
 // The single overlay: a searchable, lookup-backed reason picker + cancel/save footer.
-export default function CustomerStatusReasonModal({ state, onChangeReason, onCancel, onConfirm, reasons }: Props) {
+export default function CustomerStatusReasonModal({ state, onChangeReason, onCancel, onConfirm, reasons, reasonsLoaded = true }: Props) {
   const { t } = useTranslation('customers')
   // The picker renders a button, which htmlFor cannot label: the label id travels via aria-labelledby.
   const labelId = useId()
@@ -44,6 +46,14 @@ export default function CustomerStatusReasonModal({ state, onChangeReason, onCan
           onChange={v => onChangeReason(v || '')}
           placeholder={t('drawer.blacklistReasonPick')} options={reasons}
           style={{ padding: '8px 10px', fontSize: 12 }} />
+        {/* BLACKLIST-EMPTY-1: a required reason with NO configured reasons is a dead end:
+            say so and point at the settings screen instead of an empty required picker. */}
+        {reasonsLoaded && reasons.length === 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
+            <Caption as="span">{t('drawer.blacklistReasonNone')}</Caption>
+            <Button variant="ghost" size="sm" href="#settings/customers/customer_blacklist_reasons">{t('drawer.blacklistReasonSetup')}</Button>
+          </div>
+        )}
         {/* The tenant switch can make the reason optional; say so explicitly rather than leaving Save unexplained. */}
         {!state.needReason && (
           <Caption as="div" style={{ marginTop: 4, fontStyle: 'italic' }}>{t('drawer.blacklistReasonOptionalHint')}</Caption>
