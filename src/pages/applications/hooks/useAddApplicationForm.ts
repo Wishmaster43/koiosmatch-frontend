@@ -219,16 +219,21 @@ export function useAddApplicationForm({
       notifySuccess(t('work.applicationCreated'))
       onCreated(); onClose()
     } catch (err) {
-      // Show field-level errors from 422 validation responses; fall back to the
-      // server's message (or a generic one) instead of a fixed toast string.
+      // Show field-level errors from 422 validation responses inline on the form;
+      // only toast a message when there is NO validation bag to render inline —
+      // extractApiError prefers the bag's own raw (often untranslated Laravel
+      // "required" sentence, §10) over the generic fallback, so calling it
+      // unconditionally here would leak that raw sentence in a toast on top of
+      // the inline errors it already explains (DUP-04 review finding).
       const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
       const apiErrors = e?.response?.data?.errors
       if (apiErrors) {
         const e2: Record<string, boolean> = {}
         Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
         setErrors(e2)
+      } else {
+        notifyError(extractApiError(err, t(editing ? 'work.applicationUpdateFailed' : 'work.applicationFailed')))
       }
-      notifyError(e?.response?.data?.message ?? t(editing ? 'work.applicationUpdateFailed' : 'work.applicationFailed'))
     } finally { setSaving(false) }
   }
 

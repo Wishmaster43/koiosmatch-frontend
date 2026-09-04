@@ -13,6 +13,8 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifySuccess } from '@/lib/notify'
+// DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
+import { extractApiError } from '@/lib/extractApiError'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
 import { useAppointmentTypes } from '@/lib/useAppointmentTypes'
@@ -304,7 +306,7 @@ export function usePlanIntakeForm({
         Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
         setErrors(e2)
       } else {
-        setSubmitErr(e?.response?.data?.message ?? t('common:errorGeneric'))
+        setSubmitErr(extractApiError(err, t('common:errorGeneric')))
       }
     } finally { setSaving(false) }
   }

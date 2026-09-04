@@ -22,6 +22,7 @@ const baseProps = {
   hasContractLines: false, contractLines: [], setContractLines: vi.fn(), customerNotApplicable: false,
   fixedCandidateId: 'cand-1', pickedCandidateId: '', setPickedCandidateId: vi.fn(),
   candidateOptions: [],
+  candidateSearch: '', setCandidateSearch: vi.fn(), candidateSearchMinChars: 2,
   customerId: '', setCustomerId: vi.fn(), customerOptions: [],
   locationId: '', setLocationId: vi.fn(), locations: [],
   departmentId: '', setDepartmentId: vi.fn(), departments: [],

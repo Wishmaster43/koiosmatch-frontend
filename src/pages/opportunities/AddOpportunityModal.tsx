@@ -6,6 +6,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
+// DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
+import { extractApiError } from '@/lib/extractApiError'
 import { useAuth } from '@/context/AuthContext'
 import { useOpportunityStages } from '@/lib/useOpportunityStages'
 import { useOpportunityServiceTypes, useOpportunityAgreementTypes } from '@/lib/useOpportunityLookups'
@@ -278,7 +280,7 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
       } else {
         // Fallback: no field-level 422 — surface the server message (or a generic
         // one) instead of failing silently.
-        setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
+        setCreateError(extractApiError(err, t('common:errorGeneric')))
       }
     } finally {
       setSaving(false)

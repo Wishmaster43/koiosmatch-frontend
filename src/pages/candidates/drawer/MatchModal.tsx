@@ -79,7 +79,8 @@ import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 import type { Id } from '@/types/common'
-import Button from '@/components/ui/Button'
+import ModalFooter from '@/components/ui/ModalFooter'
+import { tintBorder } from '@/lib/tint'
 import TitleBarPills from '@/components/ui/TitleBarPills'
 
 // Thin container wiring useMatchForm's state/submit to the shared drawer chrome
@@ -192,6 +193,8 @@ export default function MatchModal({
                 customerNotApplicable={form.customerNotApplicable}
                 fixedCandidateId={form.fixedCandidateId} pickedCandidateId={form.pickedCandidateId} setPickedCandidateId={form.setPickedCandidateId}
                 candidateOptions={form.candidateOptions} candidateOptionsError={form.candidateOptionsError}
+                candidateSearch={form.candidateSearch} setCandidateSearch={form.setCandidateSearch}
+                candidateSearchMinChars={form.CANDIDATE_SEARCH_MIN_CHARS}
                 customerId={form.customerId} setCustomerId={form.setCustomerId} customerOptions={form.customerOptions}
                 locationId={form.locationId} setLocationId={form.setLocationId} locations={form.locations}
                 departmentId={form.departmentId} setDepartmentId={form.setDepartmentId} departments={form.departments}
@@ -270,7 +273,7 @@ export default function MatchModal({
         {form.submitErr && (
           <div role="alert" style={{ marginTop: 12, padding: '8px 10px', fontSize: 12, borderRadius: 8,
             color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
-            border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
+            border: tintBorder('var(--color-danger)') }}>
             {form.submitErr}
           </div>
         )}
@@ -285,19 +288,20 @@ export default function MatchModal({
 
       </div>
 
-      {/* Pinned footer — buttons stay visible whatever the content height (mirrors PlanIntakeModal). */}
-      {/* MATCH-KLANTLOOS-1: the relational requirement flips with the picked
+      {/* Pinned footer — the shared ModalFooter (§4) owns this footer layout.
+          MATCH-KLANTLOOS-1: the relational requirement flips with the picked
           Contractvorm — a klant-loos ("customer-less") form needs branch instead of customer. */}
       {(() => {
         const requiredOk = form.customerNotApplicable ? Boolean(form.branchId) : Boolean(form.customerId)
         const canSubmit = requiredOk && Boolean(form.func)
+        // Three-way submit label: deviation-confirm takes priority, then edit-vs-create.
+        const submitLabel = form.deviatesFromProposal && form.confirmDeviation
+          ? t('placement.rateProposal.deviationConfirm')
+          : t(editing ? 'common:save' : 'placement.create')
         return (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 22px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
-            <Button variant="secondary" onClick={onClose}>{t('common:cancel')}</Button>
-            <Button variant="primary" onClick={form.handleSubmitClick} disabled={form.saving || !canSubmit}>
-              {form.saving ? t('common:saving') : (form.deviatesFromProposal && form.confirmDeviation ? t('placement.rateProposal.deviationConfirm') : t(editing ? 'common:save' : 'placement.create'))}
-            </Button>
-          </div>
+          <ModalFooter onCancel={onClose} onSubmit={form.handleSubmitClick}
+            cancelLabel={t('common:cancel')} submitLabel={submitLabel}
+            disabled={!canSubmit} busy={form.saving} />
         )
       })()}
     </FloatingPanel>

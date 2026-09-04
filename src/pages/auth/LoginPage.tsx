@@ -16,9 +16,8 @@ import { useAuth } from '@/context/AuthContext'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
-
-// Read a server-provided error message off an axios-style error, if present.
-const messageOf = (e: unknown) => (e as { response?: { data?: { message?: string } } })?.response?.data?.message
+// DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
+import { extractApiError } from '@/lib/extractApiError'
 
 // Read the login throttle's machine field off a 429 (LOGIN-THROTTLE-1, Danny 13-08):
 // the backend sends retry_after (integer seconds) beside its message; we count that
@@ -133,7 +132,7 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
       // existing message path.
       const secs = retryAfterOf(err)
       if (secs !== null) setRetryAfter(secs)
-      else setError(messageOf(err) || t('login.failed'))
+      else setError(extractApiError(err, t('login.failed')))
     } finally {
       setLoading(false)
     }
@@ -227,7 +226,7 @@ function MfaForm({ mfaToken, onBack }: { mfaToken: string; onBack: () => void })
       await verifyMfa?.(mfaToken, code.replace(/\s/g, ''))
       navigate('/')
     } catch (err) {
-      setError(messageOf(err) || t('mfa.invalid'))
+      setError(extractApiError(err, t('mfa.invalid')))
       setCode('')
       inputRef.current?.focus()
     } finally {

@@ -8,6 +8,8 @@
 import { useState } from 'react'
 import type { TFunction } from 'i18next'
 import api, { unwrap } from '@/lib/api'
+// DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
+import { extractApiError } from '@/lib/extractApiError'
 import { API_TO_FORM } from '../addmodal/formHelpers'
 import type { NewLink } from '../links/AddLinkRow'
 import type { TaskForm } from '../AddTaskModal'
@@ -58,7 +60,7 @@ export function useAddTaskSubmit({
       Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
       setErrors(e2)
     } else {
-      setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
+      setCreateError(extractApiError(err, t('common:errorGeneric')))
     }
   }
 

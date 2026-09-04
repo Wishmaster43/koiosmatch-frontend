@@ -792,8 +792,10 @@ describe('MatchModal · Match opmerkingen card + pop-out wiring (MODAL34-REPAIR)
     // GET /candidates (the un-fixed candidate picker's own option source) — the
     // shared api.get mock reads this fixture for that ONE url, mirroring
     // editMatchFixture's pattern (never a one-off mockImplementation override,
-    // which would leak into every later test in this file). Set BEFORE render:
-    // the picker's option fetch runs once on mount.
+    // which would leak into every later test in this file). PRIV-1: the picker no
+    // longer fetches on mount (data minimisation, §8) — it only fetches once the
+    // recruiter has typed >= CANDIDATE_SEARCH_MIN_CHARS, so the fixture is read
+    // regardless of when it is set, but the test must actually type first.
     candidateListFixture.current = [{ id: 'cand-9', name: 'Piet Kandidaat' }]
     const user = userEvent.setup()
     render(<MatchModal onClose={noop} onCreated={noop} />)
@@ -803,6 +805,14 @@ describe('MatchModal · Match opmerkingen card + pop-out wiring (MODAL34-REPAIR)
 
     const candidateField = screen.getByText('placement.candidate').parentElement as HTMLElement
     await user.click(within(candidateField).getByRole('button'))
+    // The popover's own search input carries the hint as its OWN placeholder/
+    // aria-label (RelationsSection.tsx: `t('candidates:merge.searchHint', …)`) —
+    // type >= 2 chars (PRIV-1's CANDIDATE_SEARCH_MIN_CHARS) to trigger the
+    // debounced fetch. The popover is portalled to document.body (not inside
+    // candidateField's own subtree), so scope by its distinct accessible name
+    // instead of by container.
+    const searchInput = screen.getByRole('textbox', { name: /searchHint/ })
+    await user.type(searchInput, 'Pi')
     await user.click(await screen.findByRole('button', { name: 'Piet Kandidaat' }))
 
     expect(await screen.findByTitle('common:openSecondScreen')).toBeInTheDocument()

@@ -10,6 +10,8 @@
 import type { TFunction } from 'i18next'
 import { toLinkedinSlug } from '@/components/drawer/contactLinks'
 import { canonicalPhone } from '@/lib/phoneNumber'
+// DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
+import { extractApiError } from '@/lib/extractApiError'
 import type { Candidate } from '@/types/candidate'
 import type { FormState } from '../AddCandidateModal'
 import type { DuplicateMatch } from './useDuplicateProbe'
@@ -152,8 +154,7 @@ export function useCreateCandidateSubmit({
         setFieldMessages(m2)
       } else {
         // Fallback: show the server message or a generic error so the user isn't left guessing.
-        const msg = ex?.response?.data?.message ?? ex?.message ?? t('common:errorGeneric', 'Er is iets misgegaan')
-        setSubmitErr(msg)
+        setSubmitErr(extractApiError(ex, t('common:errorGeneric', 'Er is iets misgegaan')))
       }
     }
   }

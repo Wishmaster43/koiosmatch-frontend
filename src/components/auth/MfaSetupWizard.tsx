@@ -11,6 +11,8 @@ import { QRCodeSVG } from 'qrcode.react'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import { tint } from '@/lib/tint'
+// DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
+import { extractApiError } from '@/lib/extractApiError'
 
 // Loose server payload shapes — AuthContext types these calls as Promise<unknown>.
 type SetupResponse   = { otpauth_url?: string; secret?: string }
@@ -67,8 +69,7 @@ export default function MfaSetupWizard({ setupMfa, confirmMfa, onConfirmed, onFi
       await onConfirmed?.()
       setStep('recovery')
     } catch (err) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-      setError(msg || t('security.errInvalidRetry'))
+      setError(extractApiError(err, t('security.errInvalidRetry')))
       setCode('')
     }
     setBusy(false)

@@ -54,6 +54,7 @@ export default function RelationsSection({
   t, errors, editing,
   hasContractLines, contractLines, setContractLines, customerNotApplicable,
   fixedCandidateId, pickedCandidateId, setPickedCandidateId, candidateOptions, candidateOptionsError,
+  candidateSearch, setCandidateSearch, candidateSearchMinChars,
   customerId, setCustomerId, customerOptions,
   locationId, setLocationId, locations,
   departmentId, setDepartmentId, departments,
@@ -81,6 +82,9 @@ export default function RelationsSection({
   candidateOptions: Array<{ id?: Id; name?: string }>
   // A failed GET /candidates must read as an honest error on this picker, not "no candidates" (R8).
   candidateOptionsError?: boolean
+  // PRIV-1: the typed search term driving the server-side candidate search, plus the
+  // minimum length before a request fires (see useMatchForm's own docblock).
+  candidateSearch: string; setCandidateSearch: (v: string) => void; candidateSearchMinChars: number
   customerId: string; setCustomerId: (v: string) => void; customerOptions: CustomerOption[]
   locationId: string; setLocationId: (v: string) => void; locations: CascadeLocation[]
   departmentId: string; setDepartmentId: (v: string) => void; departments: CascadeDepartment[]
@@ -121,9 +125,21 @@ export default function RelationsSection({
         <F label={t('placement.candidate')} error={errors.pickedCandidateId}>
           {(labelId: string) => (
             <>
+              {/* PRIV-1: honest "type to search" hint instead of an always-loaded 200-row list.
+                  MUST-FIX (Opus review): a Caption sibling BELOW the trigger got occluded the
+                  instant the picker opened — CreatableSelect's popover is `position: fixed`,
+                  anchored 4px under the trigger, and covers everything below it for its whole
+                  height. The hint now lives in the trigger's own `placeholder`, which
+                  CreatableSelect renders in BOTH the closed trigger text and the popover's own
+                  search input (never occluded by its own popover) — shown only while nothing is
+                  picked yet AND the typed query is still below the minimum; once picked, or once
+                  enough is typed, the normal "pick a candidate" placeholder returns. */}
               <CreatableSelect value={pickedCandidateId || null} onChange={setPickedCandidateId} allowCreate={false}
-                placeholder={t('placement.pickCandidate')} menuWidth={pickerMenuWidth}
-                aria-labelledby={labelId}
+                placeholder={!pickedCandidateId && candidateSearch.trim().length < candidateSearchMinChars
+                  ? t('candidates:merge.searchHint', { min: candidateSearchMinChars })
+                  : t('placement.pickCandidate')}
+                menuWidth={pickerMenuWidth}
+                aria-labelledby={labelId} onSearch={setCandidateSearch}
                 options={candidateOptions.map(c => ({ value: String(c.id), label: c.name ?? '—' }))} />
               {/* R8: a failed /candidates load must read as an error, never as "this tenant has no candidates". */}
               {candidateOptionsError && (

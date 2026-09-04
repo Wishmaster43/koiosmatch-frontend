@@ -9,6 +9,8 @@ import { useTranslation } from 'react-i18next'
 import { Building2, Upload, CheckCircle2 } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { tintBorder } from '@/lib/tint'
+// DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
+import { extractApiError } from '@/lib/extractApiError'
 import { useIndustries } from '@/lib/useIndustries'
 import { useCustomerSources } from '@/lib/useCustomerSources'
 import { useLocations } from '@/lib/useLocations'
@@ -250,7 +252,7 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
           Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
           setErrors(e2)
         } else {
-          setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
+          setCreateError(extractApiError(err, t('common:errorGeneric')))
         }
       }
     } finally {

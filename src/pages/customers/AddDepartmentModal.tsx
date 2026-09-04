@@ -46,6 +46,8 @@ import type { LookupOption } from '@/types/common'
 import Button from '@/components/ui/Button'
 import ModalFooter from '@/components/ui/ModalFooter'
 import { tintBorder } from '@/lib/tint'
+// DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
+import { extractApiError } from '@/lib/extractApiError'
 
 interface LocationOption { id: Id; name: string }
 
@@ -150,7 +152,7 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
         Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
         setErrors(e2)
       } else {
-        setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
+        setCreateError(extractApiError(err, t('common:errorGeneric')))
       }
     }
   }
