@@ -4,11 +4,11 @@
  * component just renders rows. Clicking a row opens the campaign detail (step 2).
  */
 import { useTranslation } from 'react-i18next'
-import { RefreshCw, Phone, Mail, MessageCircle } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
 import DataTable, { type Column } from '@/components/ui/DataTable'
 import StatusBadge from '@/components/ui/StatusBadge'
 import SoftChip from '@/components/ui/SoftChip'
-import Avatar from '@/components/ui/Avatar'
+import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import { makeKoiosColumn } from '@/components/ui/koiosColumn'
 import { initialsOf } from '@/lib/initials'
 import { useDateFormat } from '@/lib/datetime'
@@ -16,20 +16,7 @@ import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useCampaignAdvice } from '@/lib/useCampaignAdvice'
 import type { Campaign } from './hooks/useOutreachCampaigns'
 import Button from '@/components/ui/Button'
-
-// Icon + colour per outreach channel (soft-chip convention) — fixed channel enum,
-// not a tenant lookup, so these are DATA (mirrors a categorical palette, not styling).
-/* eslint-disable no-restricted-syntax -- DATA: fixed per-channel colour map (incl. WhatsApp's real brand green), not UI styling */
-const CHANNEL_META: Record<string, { icon: typeof Phone; color: string }> = {
-  call:     { icon: Phone,         color: '#2563EB' },
-  email:    { icon: Mail,          color: '#D97706' },
-  whatsapp: { icon: MessageCircle, color: '#25D366' },
-}
-/* eslint-enable no-restricted-syntax */
-
-// Neutral grey fallback (§3A owner-cell convention) when no colour is available.
-// eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors the shared Avatar.tsx NEUTRAL_AVATAR constant)
-const NEUTRAL_AVATAR = '#9CA3AF'
+import { getChannelMeta } from './outreachChannelMeta'
 
 interface Props {
   campaigns: Campaign[]
@@ -74,7 +61,7 @@ export default function OutreachList({ campaigns, loading, error, onReload, onOp
       render: (r: Campaign) => <span style={{ fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 260 }} title={r.name}>{r.name ?? '—'}</span> },
     { key: 'channel', header: t('col.channel'),
       render: (r: Campaign) => {
-        const m = CHANNEL_META[r.channel ?? 'call'] ?? CHANNEL_META.call
+        const m = getChannelMeta(r.channel)
         const Icon = m.icon
         const label = t(`channel.${r.channel}`, { defaultValue: r.channel ?? '—' })
         if (!colorChannel) return <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--text)', fontSize: 12 }}><Icon size={12} /> {label}</span>

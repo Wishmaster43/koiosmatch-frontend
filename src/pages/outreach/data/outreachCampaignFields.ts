@@ -5,20 +5,19 @@
  * (§0.3 size split) so both hooks read the exact same vocabulary/derivation.
  */
 import type { Campaign } from '../hooks/useOutreachCampaigns'
+import { CHANNEL_META } from '../outreachChannelMeta'
 
 // Fixed status enum (not a tenant lookup) → board columns, donut + colours (hex for the chart).
-/* eslint-disable no-restricted-syntax -- DATA: fixed status/channel colour maps (incl. WhatsApp's real brand green), not UI styling */
+/* eslint-disable no-restricted-syntax -- DATA: fixed status colour map, not UI styling */
 export const STATUSES = [
   { key: 'draft',  color: '#9CA3AF' },
   { key: 'active', color: '#16A34A' },
   { key: 'done',   color: '#2563EB' },
 ]
-export const CHANNELS = [
-  { key: 'call',     color: '#2563EB' },
-  { key: 'email',    color: '#D97706' },
-  { key: 'whatsapp', color: '#25D366' },
-]
 /* eslint-enable no-restricted-syntax */
+// Channel colours read the ONE shared outreachChannelMeta map (§ dedup) — never
+// a second copy of the call/email/whatsapp colours here.
+export const CHANNELS = Object.entries(CHANNEL_META).map(([key, m]) => ({ key, color: m.color }))
 
 // Row-field readers — tolerant defaults for rows that predate a field.
 export const statusKey  = (c: Campaign) => c.status ?? 'draft'

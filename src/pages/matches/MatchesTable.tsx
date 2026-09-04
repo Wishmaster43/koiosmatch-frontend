@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
-import Avatar from '@/components/ui/Avatar'
+import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import EntityNameCell from '@/components/ui/EntityNameCell'
 import StatusPill from '@/components/ui/StatusPill'
 import SoftChip from '@/components/ui/SoftChip'
@@ -25,10 +25,6 @@ import ScorePill from './ScorePill'
 import ContractFormChip from './ContractFormChip'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
-
-// Neutral grey fallback (§3A owner-cell convention) when the mapper has no colour.
-// eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors Avatar.tsx's identical constant)
-const NEUTRAL_AVATAR = '#9CA3AF'
 
 // CEL-DOORKLIK-CANON: shared reset so a cell deep-link renders invisibly inside
 

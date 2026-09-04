@@ -7,7 +7,7 @@ import { Building2 } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import type { ReactNode } from 'react'
-import Avatar from '@/components/ui/Avatar'
+import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import EntityNameCell from '@/components/ui/EntityNameCell'
 import SoftChip from '@/components/ui/SoftChip'
 import { makeKoiosColumn } from '@/components/ui/koiosColumn'
@@ -22,9 +22,6 @@ import type { Id } from '@/types/common'
 
 // Cell deep-link reset (HOUSE RECIPE, CandidatesTable.tsx) — no visual identity of
 const dash = <span style={{ color: 'var(--text-muted)' }}>—</span>
-// Neutral grey fallback (§3A owner-cell convention) when the assignee has no colour.
-// eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors Avatar.tsx's identical constant)
-const NEUTRAL_AVATAR = '#9CA3AF'
 // Single-line title truncation (never wrap to 2 lines) — task titles can run long.
 const titleEllipsis = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const, display: 'block' as const, maxWidth: 250 }
 // "Bureau" (no assignee) icon bubble — same 22px footprint as the person Avatar, so
