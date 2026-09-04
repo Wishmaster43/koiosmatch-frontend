@@ -8,7 +8,7 @@ import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useAiListResource } from './useAiListResource'
-import type { AiAgent, AiItem } from '@/types/ai'
+import type { AiAgent, AiItem, AiKnowledgeLookupItem } from '@/types/ai'
 
 export function useAgentsData() {
   const { t } = useTranslation('workflows')
@@ -16,17 +16,21 @@ export function useAgentsData() {
   const [selected, setSelected] = useState<AiAgent | null>(null)
   const [prompts,  setPrompts]  = useState<AiItem[]>([])
   const [faqs,     setFaqs]     = useState<AiItem[]>([])
+  // KNOWLEDGE-SCOPE-1 (K-276): the pickable knowledge-item options for the
+  // agent's own knowledge_ids coupling (GET /ai/knowledge/lookup, {value,label}).
+  const [knowledgeItems, setKnowledgeItems] = useState<AiKnowledgeLookupItem[]>([])
   // House confirmation dialog (§0 leftover debt) — replaces the native window.confirm() below.
   const { confirm, dialog } = useConfirm()
 
-  // Load the agents and their prompt/faq option lists as three parallel requests,
-  // preselecting the first agent when there is one.
+  // Load the agents and their prompt/faq/knowledge option lists as four parallel
+  // requests, preselecting the first agent when there is one.
   const { loading, loadError, reload } = useAiListResource<AiAgent>({
     endpoint: '/ai/agents',
     onLoaded: list => { setAgents(list); if (list.length) setSelected(list[0]) },
     secondary: [
       { endpoint: '/ai/prompts', onLoaded: rows => setPrompts(rows as AiItem[]) },
       { endpoint: '/ai/faqs', onLoaded: rows => setFaqs(rows as AiItem[]) },
+      { endpoint: '/ai/knowledge/lookup', onLoaded: rows => setKnowledgeItems(rows as AiKnowledgeLookupItem[]) },
     ],
   })
 
@@ -69,5 +73,5 @@ export function useAgentsData() {
     }, { danger: true })
   }
 
-  return { agents, selected, setSelected, prompts, faqs, loading, loadError, reload, onSaved, onDelete, dialog }
+  return { agents, selected, setSelected, prompts, faqs, knowledgeItems, loading, loadError, reload, onSaved, onDelete, dialog }
 }

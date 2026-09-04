@@ -25,6 +25,12 @@ const mockFaqs: AiItem[] = [
   { id: 'f2', name: 'Vergoeding' },
 ]
 
+// Shaped like GET /ai/knowledge/lookup (KNOWLEDGE-SCOPE-1, K-276): [{value, label}].
+const mockKnowledgeItems = [
+  { value: 'k1', label: 'CAO regels' },
+  { value: 'k2', label: 'Onboarding' },
+]
+
 // Shaped like GET /whatsapp-templates (WaTemplateOption) — approved templates only.
 const mockTemplates = [
   { value: 'welcome_nl', label: 'welcome_nl (nl)' },
@@ -50,7 +56,7 @@ describe('AgentForm — WhatsApp intro template picker + FAQ/knowledge (WA_INTRO
   // a native <select> — open it by its labelled accessible name and click the
   // wanted option row instead of firing a `change` event on a <select>.
   it('shows the synced WhatsApp templates and PUTs the chosen wa_intro_template', async () => {
-    render(<AgentForm agent={mockAgent} prompts={[]} faqs={mockFaqs} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    render(<AgentForm agent={mockAgent} prompts={[]} faqs={mockFaqs} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
 
     // Real templates load from GET /whatsapp-templates — never a hardcoded name.
     const trigger = await screen.findByRole('button', { name: /WhatsApp-intro-template/ })
@@ -66,7 +72,7 @@ describe('AgentForm — WhatsApp intro template picker + FAQ/knowledge (WA_INTRO
   })
 
   it('is no longer a native <select> — the prompt and WA-template fields are the house CreatableSelect', async () => {
-    const { container } = render(<AgentForm agent={mockAgent} prompts={[]} faqs={mockFaqs} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    const { container } = render(<AgentForm agent={mockAgent} prompts={[]} faqs={mockFaqs} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
     await screen.findByRole('button', { name: /WhatsApp-intro-template/ })
     expect(container.querySelector('select')).toBeNull()
   })
@@ -76,13 +82,13 @@ describe('AgentForm — WhatsApp intro template picker + FAQ/knowledge (WA_INTRO
       if (url === '/whatsapp-templates') return Promise.resolve({ data: { data: [] } })
       return Promise.resolve({ data: [] })
     })
-    render(<AgentForm agent={mockAgent} prompts={[]} faqs={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    render(<AgentForm agent={mockAgent} prompts={[]} faqs={[]} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
 
     expect(await screen.findByText('Geen goedgekeurde templates gevonden. Controleer de WhatsApp-koppeling.')).toBeInTheDocument()
   })
 
   it('toggles the knowledge switch and a FAQ chip, and PUTs both fields', async () => {
-    render(<AgentForm agent={mockAgent} prompts={[]} faqs={mockFaqs} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    render(<AgentForm agent={mockAgent} prompts={[]} faqs={mockFaqs} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
     await screen.findByText('Openingstijden')
 
     fireEvent.click(screen.getByRole('switch'))
@@ -96,13 +102,48 @@ describe('AgentForm — WhatsApp intro template picker + FAQ/knowledge (WA_INTRO
   })
 })
 
+// KNOWLEDGE-SCOPE-1 (K-276): knowledge_ids mirrors faq_ids' picker but with a
+// stricter "omit = unchanged" write contract (mirrors the custom_api_key pattern
+// already in this file) — omitting the key on PUT leaves the agent's coupling as-is.
+describe('AgentForm — knowledge-item picker (KNOWLEDGE-SCOPE-1)', () => {
+  it('renders the lookup options and shows the empty state when the tenant has none', async () => {
+    render(<AgentForm agent={mockAgent} prompts={[]} faqs={[]} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    expect(await screen.findByText('Geen kennisitems aangemaakt')).toBeInTheDocument()
+  })
+
+  it('omits knowledge_ids from the PUT body when the picker is never touched', async () => {
+    render(<AgentForm agent={mockAgent} prompts={[]} faqs={[]} knowledgeItems={mockKnowledgeItems} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    await screen.findByText('CAO regels')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalled())
+    const [, body] = vi.mocked(api.put).mock.calls[0]
+    expect(body as Record<string, unknown>).not.toHaveProperty('knowledge_ids')
+  })
+
+  it('sends the full knowledge_ids array and shows the linked count once a chip is toggled', async () => {
+    render(<AgentForm agent={mockAgent} prompts={[]} faqs={[]} knowledgeItems={mockKnowledgeItems} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    await screen.findByText('CAO regels')
+
+    fireEvent.click(screen.getByText('CAO regels'))
+    expect(await screen.findByText('1 kennisitem(s) gekoppeld')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalled())
+    const [, body] = vi.mocked(api.put).mock.calls[0]
+    expect((body as Record<string, unknown>).knowledge_ids).toEqual(['k1'])
+  })
+})
+
 // Security audit finding D: the custom-LLM API key is write-only — the stored key
 // must never round-trip back into the form, and a save must only send a NEW value
 // the user actually typed (never the untouched masked placeholder).
 describe('AgentForm — masked custom API key (write-only, security audit finding D)', () => {
   it('shows the "set" badge for an existing key, never prefilling the real value, and omits it from an untouched save', async () => {
     const agentWithKey: AiAgent = { ...mockAgent, has_custom_api_key: true }
-    render(<AgentForm agent={agentWithKey} prompts={[]} faqs={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    render(<AgentForm agent={agentWithKey} prompts={[]} faqs={[]} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
 
     // The custom-API section auto-opens because a key is already configured; the
     // input starts empty — only the "✓ ingesteld" badge signals a stored key.
@@ -119,7 +160,7 @@ describe('AgentForm — masked custom API key (write-only, security audit findin
 
   it('sends the new key only when the user actually types one', async () => {
     const agentWithKey: AiAgent = { ...mockAgent, has_custom_api_key: true }
-    render(<AgentForm agent={agentWithKey} prompts={[]} faqs={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    render(<AgentForm agent={agentWithKey} prompts={[]} faqs={[]} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
 
     const input = await screen.findByPlaceholderText('Laat leeg om de huidige sleutel te behouden')
     fireEvent.change(input, { target: { value: 'sk-new-secret' } })
@@ -134,7 +175,7 @@ describe('AgentForm — masked custom API key (write-only, security audit findin
     // Defensive: even if a stale/legacy payload carried the real key, the form must
     // not echo it back into the input — only has_custom_api_key drives the UI.
     const agentWithLegacyField = { ...mockAgent, custom_endpoint: 'https://api.example.com/v1', custom_api_key: 'sk-leaked' } as AiAgent
-    render(<AgentForm agent={agentWithLegacyField} prompts={[]} faqs={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    render(<AgentForm agent={agentWithLegacyField} prompts={[]} faqs={[]} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
 
     const input = await screen.findByPlaceholderText('sk-...') as HTMLInputElement
     expect(input.value).toBe('')
@@ -150,7 +191,7 @@ describe('AgentForm — save failure must notify (was a silent catch)', () => {
     vi.mocked(api.put).mockRejectedValue(new Error('network error'))
     const dispatchSpy = vi.spyOn(window, 'dispatchEvent')
 
-    render(<AgentForm agent={mockAgent} prompts={[]} faqs={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    render(<AgentForm agent={mockAgent} prompts={[]} faqs={[]} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
     await screen.findByDisplayValue('Kelly')
 
     fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
@@ -166,7 +207,7 @@ describe('AgentForm — save failure must notify (was a silent catch)', () => {
 // button in the form header used to render a bare Trash2 icon with no aria-label/title.
 describe('AgentForm — delete button accessible name', () => {
   it('exposes an accessible name on the icon-only delete button', async () => {
-    render(<AgentForm agent={mockAgent} prompts={[]} faqs={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    render(<AgentForm agent={mockAgent} prompts={[]} faqs={[]} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
     await screen.findByDisplayValue('Kelly')
     expect(screen.getByRole('button', { name: 'Verwijderen' })).toBeInTheDocument()
   })
@@ -184,7 +225,7 @@ describe('AgentForm · inbound stamps on the webhook card (PUNT-2)', () => {
     const agent: AiAgent = { ...mockAgent, webhook_url: 'https://x/webhook',
       last_inbound_at: '2026-08-31T08:00:00Z', inbound_handled_count: 12,
       last_inbound_error_at: '2026-08-31T07:00:00Z', last_inbound_error_code: 'timeout' }
-    render(<AgentForm agent={agent} prompts={[]} faqs={mockFaqs} onSaved={() => {}} onDelete={() => {}} />)
+    render(<AgentForm agent={agent} prompts={[]} faqs={mockFaqs} knowledgeItems={[]} onSaved={() => {}} onDelete={() => {}} />)
     expect(await screen.findByText(new RegExp(wt('ai.agent.lastInbound')))).toBeInTheDocument()
     expect(screen.getByText(new RegExp(wt('ai.agent.inboundCount', { count: 12 })))).toBeInTheDocument()
     expect(screen.getByText(new RegExp(wt('ai.agent.lastInboundError')))).toBeInTheDocument()
@@ -192,7 +233,7 @@ describe('AgentForm · inbound stamps on the webhook card (PUNT-2)', () => {
   })
 
   it('renders neither line for an agent without stamps', async () => {
-    render(<AgentForm agent={{ ...mockAgent, webhook_url: 'https://x/webhook' }} prompts={[]} faqs={mockFaqs} onSaved={() => {}} onDelete={() => {}} />)
+    render(<AgentForm agent={{ ...mockAgent, webhook_url: 'https://x/webhook' }} prompts={[]} faqs={mockFaqs} knowledgeItems={[]} onSaved={() => {}} onDelete={() => {}} />)
     expect(await screen.findByText('https://x/webhook')).toBeInTheDocument()
     expect(screen.queryByText(new RegExp(wt('ai.agent.lastInbound')))).not.toBeInTheDocument()
   })

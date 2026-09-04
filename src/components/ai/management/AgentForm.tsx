@@ -10,24 +10,27 @@ import { Brain, ChevronDown, Eye, EyeOff, MessageSquare, Send, Trash2 } from 'lu
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import Avatar from '@/components/ui/Avatar'
-import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
 // G34: the house searchable dropdown replaces the native prompt/WA-template <select>s.
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import Toggle from '@/components/ui/Toggle'
 import { initialsOf } from '@/lib/initials'
 import { inputStyle, Field, CopyableValue, SaveBar } from './shared'
 import { InterviewFlowSection } from './InterviewFlowSection'
-import type { AiAgent, AiItem, ChatMessage } from '@/types/ai'
+import { AgentKnowledgeSection } from './AgentKnowledgeSection'
+import type { AiAgent, AiItem, AiKnowledgeLookupItem, ChatMessage } from '@/types/ai'
 // Reuse the WhatsApp-templates option shape from the workflow module's template
 // picker (GET /whatsapp-templates) instead of re-declaring it (§11 — one truth).
 import type { WaTemplateOption } from '@/components/layout/workflow/whatsappTemplate'
 import Button from '@/components/ui/Button'
-import { groupLabelStyle, SectionTitle, GroupLabel } from '@/components/ui/typography'
+import { groupLabelStyle, SectionTitle } from '@/components/ui/typography'
 
 // Mirrors shared.tsx's `Field` label style — used directly (not via `Field`) for the
 // two CreatableSelect pickers below, which need their own aria-labelledby wiring
 // r6: identity from the typography module; only display/margin are local layout.
 const fieldLabelStyle: CSSProperties = { ...groupLabelStyle, display: 'block', marginBottom: 5 }
+
+// KNOWLEDGE-SCOPE-1 (K-276): the backend rejects a knowledge_ids request body over
+// this length (422 on knowledge_ids.0) — guard it client-side too, at the toggle.
+const KNOWLEDGE_IDS_MAX = 200
 
 // The agent edit-form's local state. No `model` field (MODEL-1): the company-wide
 // model from Settings is used everywhere, never chosen per agent.
@@ -36,6 +39,8 @@ interface AgentFormState {
   prompt_id: string | number; faq_ids: Array<string | number>; use_knowledge: boolean; max_history: number
   // WA_INTRO_TEMPLATE-1: the approved WhatsApp template that opens the conversation.
   wa_intro_template: string
+  // KNOWLEDGE-SCOPE-1 (K-276): the per-agent knowledge-item coupling.
+  knowledge_ids: string[]
 }
 
 // ── Chat test ─────────────────────────────────────────────────────────────────
@@ -136,8 +141,9 @@ function ChatTest({ agent, onClose }: { agent: AiAgent; onClose?: () => void }) 
 
 // ── Agent form ────────────────────────────────────────────────────────────────
 
-export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
-  agent: AiAgent | null; prompts: AiItem[]; faqs: AiItem[]; onSaved: (a: AiAgent) => void; onDelete: (a: AiAgent) => void
+export function AgentForm({ agent, prompts, faqs, knowledgeItems, onSaved, onDelete }: {
+  agent: AiAgent | null; prompts: AiItem[]; faqs: AiItem[]; knowledgeItems: AiKnowledgeLookupItem[]
+  onSaved: (a: AiAgent) => void; onDelete: (a: AiAgent) => void
 }) {
   const { t } = useTranslation('workflows')
   // House date formatting (DATUM-1) for the inbound stamps below.
@@ -155,7 +161,12 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
     use_knowledge:   agent?.use_knowledge   ?? false,
     max_history:     agent?.max_history     ?? 10,
     wa_intro_template: agent?.wa_intro_template ?? '',
+    knowledge_ids:   agent?.knowledge_ids   ?? [],
   })
+  // KNOWLEDGE-SCOPE-1: the contract's "omit = unchanged" applies to knowledge_ids —
+  // only send it once the user actually touched the picker (mirrors the write-only
+  // custom_api_key handling below, same reasoning: never overwrite with a stale copy).
+  const [knowledgeTouched, setKnowledgeTouched] = useState(false)
   const [saving,      setSaving]      = useState(false)
   const [saved,       setSaved]       = useState(false)
   const [chatOpen,    setChatOpen]    = useState(false)
@@ -197,15 +208,22 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
     // The API key is write-only — never re-send the masked placeholder. Omit the
     // field entirely unless the user actually typed a new value, so an untouched
     // key is left exactly as stored (security audit finding D).
-    const { custom_api_key, ...rest } = form
+    const { custom_api_key, knowledge_ids, ...rest } = form
     const payload: Record<string, unknown> = { ...rest }
     if (custom_api_key) payload.custom_api_key = custom_api_key
+    // KNOWLEDGE-SCOPE-1: omitting the key leaves the coupling untouched server-side —
+    // only send it once the user actually toggled a knowledge item.
+    if (knowledgeTouched) payload.knowledge_ids = knowledge_ids
     try {
       const res = isNew
         ? await api.post('/ai/agents', payload)
         : await api.put(`/ai/agents/${agent.id}`, payload)
       onSaved(unwrap<AiAgent>(res))
       set('custom_api_key', '') // clear the typed value; has_custom_api_key now covers it
+      // Repair pass MUST-FIX 2: a stale `touched` flag must not survive a successful
+      // save — otherwise the NEXT save (even of a different agent, belt-and-braces
+      // alongside the AgentsTab remount-per-agent key) could resend this array.
+      setKnowledgeTouched(false)
       setSaved(true); setTimeout(() => setSaved(false), 2500)
     } catch {
       // A failed save used to leave no signal at all (silent catch) — say so instead.
@@ -215,6 +233,19 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
   }
 
   const toggleFaq = (id: string | number) => set('faq_ids', form.faq_ids.includes(id) ? form.faq_ids.filter(x => x !== id) : [...form.faq_ids, id])
+  // Toggling a knowledge item marks the coupling as touched (so save() knows to send
+  // it) and enforces the contract's 200-id cap (KNOWLEDGE-SCOPE-1). Reads the latest
+  // array inside the functional updater — not the `form` closure — so a rapid
+  // "select all" batch (each chip calling this in sequence within one event) can't
+  // race past the limit on a stale read.
+  const toggleKnowledgeItem = (id: string) => {
+    setForm(f => {
+      const has = f.knowledge_ids.includes(id)
+      if (!has && f.knowledge_ids.length >= KNOWLEDGE_IDS_MAX) return f
+      return { ...f, knowledge_ids: has ? f.knowledge_ids.filter(x => x !== id) : [...f.knowledge_ids, id] }
+    })
+    setKnowledgeTouched(true)
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
@@ -318,29 +349,15 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
                 )}
           </div>
 
-          {/* Kennisbank section — the general-knowledge toggle plus, when the tenant has
-              FAQs, which ones this agent may draw on (soft chips, mirrors the entity
-              multi-select convention rather than a hand-rolled checkbox list). */}
-          <div style={{ marginBottom: 13 }}>
-            <GroupLabel style={{ marginBottom: 8 }}>
-              {t('ai.agent.knowledge')}
-            </GroupLabel>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginBottom: 10 }}>
-              <Toggle checked={form.use_knowledge} onChange={v => set('use_knowledge', v)} ariaLabel={t('ai.agent.useKnowledge')} />
-              <span style={{ fontSize: 12, color: 'var(--text)' }}>{t('ai.agent.useKnowledge')}</span>
-            </label>
-            <Field label={t('ai.agent.selectFaqs')}>
-              {faqs.length === 0
-                ? <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{t('ai.agent.noFaqs')}</p>
-                : (
-                  <ChipMultiSelect
-                    options={faqs.map(f => ({ value: String(f.id), label: f.name ?? '' }))}
-                    selected={form.faq_ids.map(String)}
-                    onToggle={toggleFaq}
-                  />
-                )}
-            </Field>
-          </div>
+          {/* Kennisbank section — the general-knowledge toggle, the FAQ picker, and
+              (KNOWLEDGE-SCOPE-1) the knowledge-item coupling. Extracted component so
+              this container stays under the file-size target (§3). */}
+          <AgentKnowledgeSection
+            useKnowledge={form.use_knowledge} onUseKnowledgeChange={v => set('use_knowledge', v)}
+            faqs={faqs} faqIds={form.faq_ids} onToggleFaq={toggleFaq}
+            knowledgeItems={knowledgeItems} knowledgeIds={form.knowledge_ids} onToggleKnowledgeItem={toggleKnowledgeItem}
+            atMax={form.knowledge_ids.length >= KNOWLEDGE_IDS_MAX}
+          />
 
           <Field label={t('ai.agent.maxHistory')}>
             <input type="number" min={1} max={50} value={form.max_history}

@@ -364,7 +364,12 @@
       },
       "lastInbound": "Last inbound message",
       "inboundCount": "{{count}} turns handled",
-      "lastInboundError": "Last error"
+      "lastInboundError": "Last error",
+      "knowledgeItems": "Knowledge items",
+      "knowledgeItemsHint": "Only linked knowledge items are available to this agent. Empty = no knowledge.",
+      "noKnowledgeItems": "No knowledge items created",
+      "knowledgeItemsCount": "{{count}} knowledge item(s) linked",
+      "knowledgeItemsMax": "200 knowledge items is the maximum."
     },
     "tabs": {
       "agents": "Agents",

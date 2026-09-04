@@ -360,7 +360,12 @@
       },
       "lastInbound": "Letzte eingehende Nachricht",
       "inboundCount": "{{count}} Züge verarbeitet",
-      "lastInboundError": "Letzter Fehler"
+      "lastInboundError": "Letzter Fehler",
+      "knowledgeItems": "Wissenselemente",
+      "knowledgeItemsHint": "Nur verknüpfte Wissenselemente stehen diesem Agenten zur Verfügung. Leer = kein Wissen.",
+      "noKnowledgeItems": "Keine Wissenselemente erstellt",
+      "knowledgeItemsCount": "{{count}} Wissenselement(e) verknüpft",
+      "knowledgeItemsMax": "200 Wissenselemente ist das Maximum."
     },
     "tabs": {
       "agents": "Agenten",

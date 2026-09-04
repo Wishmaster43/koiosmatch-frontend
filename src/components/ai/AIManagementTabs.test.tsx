@@ -102,6 +102,56 @@ describe('AgentsTab — AI-AGENTS-2/3 fields', () => {
   })
 })
 
+// Repair-pass MUST-FIX 2 (KNOWLEDGE-SCOPE-1 verifier rejection): without a `key` on
+// <AgentForm>, switching the selected agent in the side list reused the SAME form
+// instance — its local state (including a touched knowledge_ids selection) never
+// resynced to the newly picked agent, so a save could silently re-apply agent A's
+// edits onto agent B. AgentsTab now keys AgentForm on the agent id to force a
+// remount; this proves both halves: the form actually resyncs to the new agent, and
+// a coupling touched on A never rides onto B's PUT body.
+describe('AgentForm/AgentsTab — the write contract must not leak across an agent switch', () => {
+  const mockAgentB: AiAgent = {
+    id: 'a2', name: 'Robin',
+    prompt_id: '', faq_ids: [], use_knowledge: false, max_history: 10,
+  }
+
+  beforeEach(() => {
+    vi.mocked(api.get).mockReset()
+    vi.mocked(api.put).mockReset()
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/ai/agents') return Promise.resolve({ data: [mockAgent, mockAgentB] })
+      // KNOWLEDGE-SCOPE-1 (K-276): the agent-picker's own knowledge-item option list.
+      if (url === '/ai/knowledge/lookup') return Promise.resolve({ data: [{ value: 'k1', label: 'CAO regels' }] })
+      return Promise.resolve({ data: [] })
+    })
+    vi.mocked(api.put).mockResolvedValue({ data: mockAgentB })
+  })
+
+  it('remounts the form on switch so a knowledge_ids selection touched on agent A never rides onto agent B\'s save', async () => {
+    render(<AgentsTab />)
+    // Agent A ("Kelly") is preselected on load — agent B ("Robin") sits in the side list.
+    await screen.findByText('CAO regels')
+    expect(screen.getByDisplayValue('Kelly')).toBeInTheDocument()
+
+    // Touch the knowledge picker on agent A — never saved.
+    fireEvent.click(screen.getByText('CAO regels'))
+
+    // Switch to agent B via the side-list row.
+    fireEvent.click(screen.getByText('Robin'))
+    // The form must resync to agent B's own data — proves the remount actually
+    // happened (without the key fix, the same instance would still show "Kelly").
+    await waitFor(() => expect(screen.getByDisplayValue('Robin')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalled())
+    const [url, body] = vi.mocked(api.put).mock.calls[0]
+    expect(url).toBe('/ai/agents/a2')
+    // Agent A's touched knowledge_ids must never leak onto agent B's PUT body.
+    expect(body as Record<string, unknown>).not.toHaveProperty('knowledge_ids')
+  })
+})
+
 // Audit 2026-07-28 (mutation lying about success, §3/§13): AgentsTab/PromptsTab/FAQTab's
 // delete handlers used to remove the row from local state UNCONDITIONALLY after the
 // DELETE call, even inside the .catch — so a failed delete still made the record vanish

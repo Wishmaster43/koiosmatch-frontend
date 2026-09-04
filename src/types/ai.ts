@@ -6,6 +6,10 @@
 // A prompt / FAQ / knowledge item (shared shape — all have id + name + body/content).
 export interface AiItem { id?: string | number; name?: string; body?: string; content?: string; version?: number; created_at?: string; [k: string]: unknown }
 
+// A knowledge-item lookup row (GET /ai/knowledge/lookup, KNOWLEDGE-SCOPE-1) — the
+// pickable option set for an agent's own knowledge_ids coupling.
+export interface AiKnowledgeLookupItem { value: string; label: string }
+
 // The recruiter/manager user an agent mirrors (AI-AGENTS-2: one agent per user).
 export interface AiAgentUser { id: string | number; name?: string | null }
 
@@ -45,6 +49,10 @@ export interface AiAgent {
   custom_api_key?: string
   prompt_id?: string | number
   faq_ids?: Array<string | number>
+  // KNOWLEDGE-SCOPE-1 (K-276): the per-agent knowledge coupling (ai_agent_knowledge
+  // pivot) — an empty array means no knowledge text on chat/test/interview, never
+  // "falls back to everything". Returned via $appends even when never sent.
+  knowledge_ids?: string[]
   use_knowledge?: boolean
   max_history?: number
   // The WhatsApp-approved template that opens the conversation with the candidate

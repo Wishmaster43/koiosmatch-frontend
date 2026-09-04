@@ -11,7 +11,7 @@ import { useAgentsData } from '@/components/ai/hooks/useAgentsData'
 
 export function AgentsTab() {
   const { t } = useTranslation('workflows')
-  const { agents, selected, setSelected, prompts, faqs, loading, loadError, onSaved, onDelete, dialog } = useAgentsData()
+  const { agents, selected, setSelected, prompts, faqs, knowledgeItems, loading, loadError, onSaved, onDelete, dialog } = useAgentsData()
 
   return (
     <>
@@ -26,7 +26,15 @@ export function AgentsTab() {
             onDelete={onDelete} />
         )}>
         {selected
-          ? <AgentForm agent={selected._new ? null : selected} prompts={prompts} faqs={faqs} onSaved={onSaved} onDelete={onDelete} />
+          // Repair-pass MUST-FIX 2: without a key, switching the selected agent kept
+          // reusing the SAME AgentForm instance — its local `form`/`knowledgeTouched`
+          // state (and every other field) never resynced to the newly picked agent, so
+          // a save could silently re-apply agent A's edits (including a touched
+          // knowledge_ids selection) onto agent B. Keying on the agent id forces a
+          // full remount, which re-seeds the form from the new `agent` prop.
+          ? <AgentForm key={selected._new ? 'new' : String(selected.id)}
+              agent={selected._new ? null : selected} prompts={prompts} faqs={faqs} knowledgeItems={knowledgeItems}
+              onSaved={onSaved} onDelete={onDelete} />
           : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 180, fontSize: 12, color: 'var(--text-muted)' }}>
               {t('ai.agent.selectOrNew')}
             </div>

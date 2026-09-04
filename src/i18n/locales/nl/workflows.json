@@ -421,7 +421,12 @@
       },
       "lastInbound": "Laatste inkomend bericht",
       "inboundCount": "{{count}} beurten verwerkt",
-      "lastInboundError": "Laatste fout"
+      "lastInboundError": "Laatste fout",
+      "knowledgeItems": "Kennisitems",
+      "knowledgeItemsHint": "Alleen gekoppelde kennisitems zijn voor deze agent beschikbaar. Leeg = geen kennis.",
+      "noKnowledgeItems": "Geen kennisitems aangemaakt",
+      "knowledgeItemsCount": "{{count}} kennisitem(s) gekoppeld",
+      "knowledgeItemsMax": "200 kennisitems is het maximum."
     },
     "tabs": {
       "agents": "Agents",

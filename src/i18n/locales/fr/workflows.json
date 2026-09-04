@@ -360,7 +360,12 @@
       },
       "lastInbound": "Dernier message entrant",
       "inboundCount": "{{count}} tours traités",
-      "lastInboundError": "Dernière erreur"
+      "lastInboundError": "Dernière erreur",
+      "knowledgeItems": "Éléments de connaissance",
+      "knowledgeItemsHint": "Seuls les éléments de connaissance liés sont disponibles pour cet agent. Vide = aucune connaissance.",
+      "noKnowledgeItems": "Aucun élément de connaissance créé",
+      "knowledgeItemsCount": "{{count}} élément(s) de connaissance lié(s)",
+      "knowledgeItemsMax": "200 éléments de connaissance est le maximum."
     },
     "tabs": {
       "agents": "Agents",

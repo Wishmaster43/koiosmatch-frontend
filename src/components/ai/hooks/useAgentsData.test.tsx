@@ -11,25 +11,34 @@ vi.mock('@/lib/api', async () => {
 
 function Harness() {
   const h = useAgentsData()
-  return <div data-testid="prompts-count">{h.prompts.length}</div>
+  return (
+    <>
+      <div data-testid="prompts-count">{h.prompts.length}</div>
+      <div data-testid="knowledge-count">{h.knowledgeItems.length}</div>
+    </>
+  )
 }
 
-describe('useAgentsData — requests /ai/agents plus the /ai/prompts and /ai/faqs option lists', () => {
+describe('useAgentsData — requests /ai/agents plus the /ai/prompts, /ai/faqs and /ai/knowledge/lookup option lists', () => {
   beforeEach(() => {
     vi.mocked(api.get).mockReset()
     vi.mocked(api.get).mockImplementation((url: string) => {
       if (url === '/ai/agents') return Promise.resolve({ data: [{ id: 'a1', name: 'Kelly' }] })
       if (url === '/ai/prompts') return Promise.resolve({ data: [{ id: 'p1', name: 'Opening' }] })
       if (url === '/ai/faqs') return Promise.resolve({ data: [] })
+      // KNOWLEDGE-SCOPE-1 (K-276): the agent-picker's own knowledge-item option list.
+      if (url === '/ai/knowledge/lookup') return Promise.resolve({ data: [{ value: 'k1', label: 'CAO regels' }] })
       return Promise.resolve({ data: [] })
     })
   })
 
-  it('fires all three GETs and exposes the loaded prompts list', async () => {
+  it('fires all four GETs and exposes the loaded prompts + knowledge-item lists', async () => {
     render(<Harness />)
     await waitFor(() => expect(screen.getByTestId('prompts-count')).toHaveTextContent('1'))
+    expect(screen.getByTestId('knowledge-count')).toHaveTextContent('1')
     expect(api.get).toHaveBeenCalledWith('/ai/agents')
     expect(api.get).toHaveBeenCalledWith('/ai/prompts')
     expect(api.get).toHaveBeenCalledWith('/ai/faqs')
+    expect(api.get).toHaveBeenCalledWith('/ai/knowledge/lookup')
   })
 })
