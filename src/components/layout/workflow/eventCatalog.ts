@@ -62,6 +62,52 @@ export const WORKFLOW_EVENT_KEYS = [
   'interview.started',
   'interview.completed',
   'interview.disqualified',
+  // S1 Lane A (KOIOS-ADVIES-OVERAL-1, CONTRACT-CHANGELOG 2026-09-04): six more
+  // dispatch sites, re-verified against TriggerModule::configSchema() (koiosmatch-api,
+  // app/Workflow/Modules/TriggerModule.php ~L68-72). Payload: `candidate.updated` =
+  // {candidate_id, changed}, `application.updated` = {application_id, changed},
+  // `customer.updated` = {customer_id, changed} (`changed` = changed column names
+  // only, never values); `opportunity.created` = {opportunity_id};
+  // `opportunity.updated` = {opportunity_id, changed}; `match.updated` = {id,
+  // match_id, changed} (was webhook-only before this bundle).
+  'candidate.updated',
+  'application.updated',
+  'customer.updated',
+  'opportunity.created',
+  'opportunity.updated',
+  'match.updated',
+  // REPAIR N5: 20 more dispatch sites already live server-side (verified against
+  // TriggerModule::configSchema() ~L68-135, koiosmatch-api, full option array —
+  // count matches: 57/57) but never pickable here. STILSTAND-1 family (dispatched
+  // by candidates:status-stale-due / phase-stale-due / tasks:overdue-due /
+  // conversations:unanswered-due / applications:stage-stale-due):
+  'candidate.status_stale',
+  'candidate.phase_stale',
+  'task.overdue',
+  'conversation.unanswered',
+  'application.stage_stale',
+  // KD10: five customer stagnation/lifecycle signals (customers:no-contact-due /
+  // contract-ending-due / task-overdue-due / match-ending-due / vacancy-stale-due).
+  'customer.no_contact',
+  'customer.contract_ending',
+  'customer.task_overdue',
+  'customer.match_ending',
+  'customer.vacancy_stale',
+  // NOTIF-DATUMS-1: the six PDF date-signals (11i-11n), candidates:date-signals-due.
+  'candidate.availability_upcoming',
+  'candidate.availability_overdue',
+  'candidate.leave_ending_soon',
+  'candidate.leave_overdue',
+  'candidate.unavailable_ending_soon',
+  'candidate.unavailable_overdue',
+  // PROPOSE-SEND-1 / STILSTAND family stragglers.
+  'application.proposal_sent',
+  // P11-FASE4: manual-archive event (CandidateBulkService::archive).
+  'candidate.archived',
+  // NOTIF-VERVAL-1: candidates:missing-cv-alerts (idempotent per day until resolved).
+  'candidate.missing_cv',
+  // K-247 Lane C: customer-contact retention review signal.
+  'contact.retention_due',
 ] as const
 
 export type WorkflowEventKey = (typeof WORKFLOW_EVENT_KEYS)[number]

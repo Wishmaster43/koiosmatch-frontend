@@ -199,3 +199,92 @@ describe('useWorkflowsData · handleRun (K-3 workflow-execution base URL)', () =
     )
   })
 })
+
+// S1 Lane C (CONTRACT-CHANGELOG 2026-09-04): POST /workflows/{id}/run-bulk —
+// count-then-confirm above the threshold (via this hook's own confirm dialog),
+// straight through below it. Mutation tests assert the REQUEST, never only the callback (§13).
+describe('useWorkflowsData · handleRunBulk (S1 run-bulk confirm)', () => {
+  it('202: POSTs run-bulk with no body and toasts the started count', async () => {
+    seedList()
+    mockedPost.mockResolvedValue({ data: { run_id: 'rb1', count: 12 } })
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => { await result.current.handleRunBulk('wf-1') })
+
+    expect(mockedPost).toHaveBeenCalledWith(
+      '/workflows/wf-1/run-bulk', undefined,
+      { quietStatuses: [409], baseURL: expect.any(String) },
+    )
+    expect(notify).toHaveBeenCalledWith('success', 'page.runBulkStarted')
+  })
+
+  // REPAIR M1: WorkflowController::runBulk() throws TWO different 409 shapes —
+  // this one (WorkflowAlreadyRunningException, {message, run_id}) must NEVER be
+  // read as the threshold shape, or an already-running workflow shows "raakt 0
+  // records (drempel 0)" and re-POSTs forever. Mirrors handleRun's own 409
+  // feedback exactly: toast + open the builder on the live run, no confirm().
+  it('409 single-flight (already running): toasts + opens the builder on the live run, never the confirm dialog', async () => {
+    seedList()
+    mockedPost.mockRejectedValue({ response: { status: 409, data: { message: 'loopt al', run_id: 'r-existing' } } })
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => { await result.current.handleRunBulk('wf-1') })
+
+    expect(notify).toHaveBeenCalledWith('info', 'runControl.alreadyRunning')
+    expect(result.current.editingWorkflow?.id).toBe('wf-1')
+    expect(result.current.focusRunId).toBe('r-existing')
+    // Never mistaken for the threshold shape: exactly the ONE call this test made.
+    expect(mockedPost).toHaveBeenCalledTimes(1)
+  })
+
+  it('409 above the threshold: opens the confirm dialog, then re-POSTs {confirm:true}', async () => {
+    seedList()
+    mockedPost
+      .mockRejectedValueOnce({ response: { status: 409, data: { count: 40, matched_records: 40, threshold: 25 } } })
+      .mockResolvedValueOnce({ data: { run_id: 'rb2', count: 40 } })
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => { await result.current.handleRunBulk('wf-1') })
+
+    expect(mockedPost).toHaveBeenNthCalledWith(
+      1, '/workflows/wf-1/run-bulk', undefined,
+      { quietStatuses: [409], baseURL: expect.any(String) },
+    )
+    await waitFor(() => expect(mockedPost).toHaveBeenNthCalledWith(
+      2, '/workflows/wf-1/run-bulk', { confirm: true },
+      { quietStatuses: [409], baseURL: expect.any(String) },
+    ))
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('success', 'page.runBulkStarted'))
+  })
+
+  // N3: routes through extractApiError (the REAL implementation here — only
+  // @/lib/api is mocked) rather than a flat fallback, so the specific backend
+  // reason reaches the user, same as handleSave/deleteFolder already do (§10).
+  it('a non-409 failure notifies the SPECIFIC backend reason (extractApiError), never opens the confirm dialog', async () => {
+    seedList()
+    mockedPost.mockRejectedValue({ response: { status: 422, data: { message: 'Workflow is niet actief' } } })
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => { await result.current.handleRunBulk('wf-1') })
+
+    expect(notifyError).toHaveBeenCalledWith('Workflow is niet actief')
+    expect(notify).not.toHaveBeenCalled()
+  })
+
+  // A network-style failure with no server message falls back to the i18n default,
+  // mirroring extractApiError's own contract (never a raw axios/network string, §10).
+  it('a network-style failure (no server message) falls back to the i18n default', async () => {
+    seedList()
+    mockedPost.mockRejectedValue(new Error('Request failed with status code 500'))
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => { await result.current.handleRunBulk('wf-1') })
+
+    expect(notifyError).toHaveBeenCalledWith('common:actionFailed')
+  })
+})

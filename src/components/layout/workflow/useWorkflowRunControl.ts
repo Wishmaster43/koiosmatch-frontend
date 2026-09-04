@@ -64,7 +64,17 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
   }, [workflowId])
 
   // Starts a real server-side run (or dry-run), tracks its id for polling, and turns a 409 into the 'already running' conflict state instead of a generic error.
-  const handleRun = useCallback(async (opts?: { dryRun?: boolean }) => {
+  // S1 Lane C: `subject` optionally seeds the run context with one record
+  // ({entity_type, entity_id}) — no UI wires this yet (no call site asked for
+  // it), the param only exists so a future record-scoped "run this workflow for
+  // THIS record" action doesn't need another round-trip through this hook.
+  // entity_type is the closed union `subjectContext()` (WorkflowController.php)
+  // actually accepts — a wider `string` would let a typo compile clean and 422
+  // at runtime instead.
+  const handleRun = useCallback(async (opts?: {
+    dryRun?: boolean
+    subject?: { entity_type: 'candidate' | 'application' | 'vacancy' | 'customer' | 'match'; entity_id: string }
+  }) => {
     setRunning(true)
     setRunError(null)
     setRunBudget(null)
@@ -75,12 +85,16 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
       const { default: api } = await import('@/lib/api')
       // WF-DRYRUN-FE-1: {dry_run:true} on the SAME route/port/single-flight —
       // undefined body (a real run) is unchanged, so the existing contract test
-      // pinning `undefined` here still holds.
-      const body = opts?.dryRun ? { dry_run: true } : undefined
+      // pinning `undefined` here still holds. Build the body from whichever
+      // optional keys are actually set, so a plain call still posts `undefined`.
+      const body: Record<string, unknown> = {}
+      if (opts?.dryRun) body.dry_run = true
+      if (opts?.subject) body.subject = opts.subject
+      const hasBody = Object.keys(body).length > 0
       // Start the queued run and keep its id so we can poll the REAL per-step status
       // (WF-R3) — replaces the old fixed 800ms fake walk. Shape: { run: { id } }.
       // 409 (already running) gets its own inline feedback — keep the generic dev toast out.
-      const res = await api.post(`/workflows/${workflowId}/run`, body, { quietStatuses: [409], baseURL: resolveWorkflowBaseURL() })
+      const res = await api.post(`/workflows/${workflowId}/run`, hasBody ? body : undefined, { quietStatuses: [409], baseURL: resolveWorkflowBaseURL() })
       const runId = (res.data?.run?.id ?? res.data?.data?.id ?? res.data?.id) as string | number | undefined
       if (runId != null) setActiveRunId(runId)
 
@@ -110,6 +124,68 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
     }
   }, [workflowId, onRunStarted])
 
+  // S1 Lane C (KOIOS-ADVIES-OVERAL-1): starts a workflow's own filtered ENTRY
+  // step over its whole matching set in one server-side pass (CONTRACT-CHANGELOG
+  // 2026-09-04, POST /workflows/{id}/run-bulk). Above the tenant's
+  // koios_advice.bulk_confirm_threshold without `confirm: true`, the backend
+  // answers 409 {count, matched_records, threshold} — this hook does NOT show a
+  // dialog itself; it returns those numbers so the caller can open the shared
+  // ConfirmDialog (`workflows.runBulk.confirm`) and re-call `runBulk({ confirm:
+  // true })`. A 202 adopts the started run exactly like handleRun.
+  //
+  // REPAIR M1: WorkflowController::runBulk() throws TWO structurally different
+  // 409s (measured) — the threshold body {count, matched_records, threshold}
+  // above, and WorkflowAlreadyRunningException's {message, run_id} single-flight
+  // conflict (same shape handleRun's 409 branch already handles 40 lines up).
+  // Treating every 409 as "threshold" made an already-running workflow read as
+  // "0 records (threshold 0)" and, worse, re-POST forever on confirm. Discriminate
+  // on the payload shape: `run_id` present → already running (adopt it exactly
+  // like handleRun does); `threshold` present → the real confirm path.
+  const runBulk = useCallback(async (opts?: { confirm?: boolean }): Promise<
+    | { status: 'started'; runId: string | null; count: number }
+    | { status: 'confirm'; count: number; matchedRecords: number; threshold: number }
+    | { status: 'already_running'; runId: string | null }
+    | { status: 'error'; message: string }
+  > => {
+    setRunning(true)
+    setRunError(null)
+    try {
+      const { default: api } = await import('@/lib/api')
+      // `filters` is deliberately never sent — the entry step's own saved
+      // filters always decide the set (CONTRACT-CHANGELOG: sending one 422s).
+      const body = opts?.confirm ? { confirm: true } : undefined
+      const res = await api.post(`/workflows/${workflowId}/run-bulk`, body, { quietStatuses: [409], baseURL: resolveWorkflowBaseURL() })
+      const rawRunId = (res.data?.run_id ?? res.data?.run?.id) as string | number | undefined
+      const runId = rawRunId != null ? String(rawRunId) : null
+      const count = (res.data?.count ?? 0) as number
+      if (runId != null) setActiveRunId(runId)
+      onRunStarted?.()
+      return { status: 'started', runId, count }
+    } catch (err) {
+      const e = err as { response?: { status?: number; data?: {
+        count?: number; matched_records?: number; threshold?: number; message?: string; run_id?: string | number
+      } } }
+      if (e.response?.status === 409) {
+        const d = e.response.data ?? {}
+        // Single-flight conflict FIRST — WorkflowAlreadyRunningException's body
+        // carries `run_id`, never `threshold`. Mirrors handleRun's 409 branch.
+        if (d.run_id != null) {
+          const runId = String(d.run_id)
+          setActiveRunId(runId)
+          setRunConflict(true)
+          onRunStarted?.()
+          return { status: 'already_running', runId }
+        }
+        return { status: 'confirm', count: d.count ?? 0, matchedRecords: d.matched_records ?? 0, threshold: d.threshold ?? 0 }
+      }
+      const message = e.response?.data?.message ?? ''
+      setRunError(message)
+      return { status: 'error', message }
+    } finally {
+      setRunning(false)
+    }
+  }, [workflowId, onRunStarted])
+
   // RUN-CONTROL-1: the polled run can still be cancelled → show the stop button.
   const liveRunActive = liveRun != null && ['running', 'waiting'].includes(String(liveRun.status))
 
@@ -122,6 +198,6 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
 
   return {
     running, runError, setRunError, runBudget, runningNodeId,
-    activeRunId, liveRun, liveRunActive, runConflict, handleStopped, handleRun,
+    activeRunId, liveRun, liveRunActive, runConflict, handleStopped, handleRun, runBulk,
   }
 }

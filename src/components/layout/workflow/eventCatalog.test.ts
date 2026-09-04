@@ -11,8 +11,11 @@ import { describe, it, expect } from 'vitest'
 import { WORKFLOW_EVENT_KEYS, eventKeyToI18nKey } from './eventCatalog'
 
 // Manual mirror of TriggerModule::configSchema()'s `event.options` (koiosmatch-api,
-// app/Workflow/Modules/TriggerModule.php ~L68-90), re-verified 2026-08-08 — every
-// key here has a real WorkflowDispatcher::dispatch() call site backing it.
+// app/Workflow/Modules/TriggerModule.php ~L68-135) — every key here has a real
+// WorkflowDispatcher::dispatch() call site backing it. REPAIR N5 (2026-09-04):
+// re-counted the backend's FULL options array by hand — 57 keys, this list now
+// carries all 57 (was 37/57) — the two tests below make this an exact bidirectional
+// mirror (no missing key, no fake affordance), not just a "contains" check.
 const BACKEND_DISPATCHED_EVENTS = [
   'application.created', 'application.stage_changed', 'match.created', 'match.expiring', 'match.terminated',
   'candidate.created', 'candidate.birthday', 'candidate.address_changed', 'candidate.reactivated',
@@ -22,6 +25,19 @@ const BACKEND_DISPATCHED_EVENTS = [
   'contract.signed', 'vacancy.status_changed', 'vacancy.created', 'vacancy.published', 'vacancy.updated',
   'ai_agent.webhook_received', 'whatsapp.connection_down', 'whatsapp.connection_restored',
   'interview.started', 'interview.completed', 'interview.disqualified',
+  // S1 Lane A (KOIOS-ADVIES-OVERAL-1, CONTRACT-CHANGELOG 2026-09-04).
+  'candidate.updated', 'application.updated', 'customer.updated',
+  'opportunity.created', 'opportunity.updated', 'match.updated',
+  // REPAIR N5: the 20 keys the previous pass missed (STILSTAND-1, KD10,
+  // NOTIF-DATUMS-1, PROPOSE-SEND-1, P11-FASE4, NOTIF-VERVAL-1, K-247 Lane C).
+  'candidate.status_stale', 'candidate.phase_stale', 'task.overdue', 'conversation.unanswered',
+  'application.stage_stale',
+  'customer.no_contact', 'customer.contract_ending', 'customer.task_overdue',
+  'customer.match_ending', 'customer.vacancy_stale',
+  'candidate.availability_upcoming', 'candidate.availability_overdue',
+  'candidate.leave_ending_soon', 'candidate.leave_overdue',
+  'candidate.unavailable_ending_soon', 'candidate.unavailable_overdue',
+  'application.proposal_sent', 'candidate.archived', 'candidate.missing_cv', 'contact.retention_due',
 ]
 
 // Every shipped locale's workflows.json, loaded eagerly like registryI18n.test.ts does.
@@ -43,6 +59,14 @@ describe('WORKFLOW_EVENT_KEYS · backend parity', () => {
 
   it('has no duplicate keys', () => {
     expect(new Set(WORKFLOW_EVENT_KEYS).size).toBe(WORKFLOW_EVENT_KEYS.length)
+  })
+
+  // REPAIR N5: an explicit count pins the FULL mirror (57/57), not just "no
+  // diff either way" — a future backend addition that also updates
+  // BACKEND_DISPATCHED_EVENTS but not this number would still be caught.
+  it('mirrors exactly 57 backend-dispatched events', () => {
+    expect(BACKEND_DISPATCHED_EVENTS.length).toBe(57)
+    expect(WORKFLOW_EVENT_KEYS.length).toBe(57)
   })
 })
 

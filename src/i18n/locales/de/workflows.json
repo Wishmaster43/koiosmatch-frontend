@@ -248,7 +248,8 @@
     "customer_departments": "Abteilungen",
     "customer_contacts": "Ansprechpartner",
     "outreach_campaigns": "Anruflisten",
-    "system_events": "Systemereignis"
+    "system_events": "Systemereignis",
+    "koios_advice": "Koios-Hinweis"
   },
   "status": {
     "active": "Aktiv",
@@ -300,7 +301,9 @@
     "archiveSuccess": "Workflow archiviert.",
     "restoreSuccess": "Workflow wiederhergestellt.",
     "viewWorkflows": "Workflows",
-    "viewManagement": "Verwaltung"
+    "viewManagement": "Verwaltung",
+    "runBulkStarted_one": "Workflow für {{count}} Datensatz gestartet.",
+    "runBulkStarted_other": "Workflow für {{count}} Datensätze gestartet."
   },
   "ai": {
     "saved": "Gespeichert",
@@ -336,6 +339,11 @@
       "noWaTemplate": "Keine Vorlage",
       "selectFaqs": "FAQs auswählen",
       "noFaqs": "Keine FAQs erstellt",
+      "knowledgeItems": "Wissenselemente",
+      "noKnowledgeItems": "Keine Wissenselemente erstellt",
+      "knowledgeItemsHint": "Nur verknüpfte Wissenselemente stehen diesem Agenten zur Verfügung. Leer = kein Wissen.",
+      "knowledgeItemsCount": "{{count}} Wissenselement(e) verknüpft",
+      "knowledgeItemsMax": "{{max}} Wissenselemente sind das Maximum.",
       "knowledge": "Wissensdatenbank",
       "useKnowledge": "Allgemeine Wissensdatenbank verwenden",
       "maxHistory": "Max. Konversationsverlauf",
@@ -360,12 +368,7 @@
       },
       "lastInbound": "Letzte eingehende Nachricht",
       "inboundCount": "{{count}} Züge verarbeitet",
-      "lastInboundError": "Letzter Fehler",
-      "knowledgeItems": "Wissenselemente",
-      "knowledgeItemsHint": "Nur verknüpfte Wissenselemente stehen diesem Agenten zur Verfügung. Leer = kein Wissen.",
-      "noKnowledgeItems": "Keine Wissenselemente erstellt",
-      "knowledgeItemsCount": "{{count}} Wissenselement(e) verknüpft",
-      "knowledgeItemsMax": "{{max}} Wissenselemente sind das Maximum."
+      "lastInboundError": "Letzter Fehler"
     },
     "tabs": {
       "agents": "Agenten",
@@ -908,7 +911,12 @@
     "In wachtrij gezet": "In die Warteschlange gestellt",
     "Direct uitgevoerd (sync)": "Direkt ausgeführt (sync)",
     "Kind-run id": "Kind-Run-ID",
-    "Uitkomst kind-run (sync)": "Ergebnis Kind-Run (sync)"
+    "Uitkomst kind-run (sync)": "Ergebnis Kind-Run (sync)",
+    "Entiteit": "Entität",
+    "Modus": "Modus",
+    "Altijd vernieuwen": "Immer aktualisieren",
+    "Verversingstermijn (uren)": "Aktualisierungsfenster (Stunden)",
+    "Maximum records per run": "Maximale Datensätze pro Lauf"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (mehrere Bundles)",
@@ -1082,7 +1090,10 @@
     "WhatsApp hersteld": "WhatsApp wiederhergestellt",
     "match_and_candidate_owner": "Match- und Kandidateneigentümer",
     "queue": "Warteschlange (asynchron)",
-    "sync": "Direkt (auf das Kind warten)"
+    "sync": "Direkt (auf das Kind warten)",
+    "application": "Bewerbung",
+    "subject": "Einzelner Datensatz",
+    "list": "Liste (Bulk)"
   },
   "agentTest": {
     "title": "Testvariablen",
@@ -1145,6 +1156,10 @@
     "alreadyRunning": "Dieser Workflow läuft bereits. Laufenden Lauf ansehen oder stoppen.",
     "budgetLine": "{{used}}/{{allowance}} {{unit}}",
     "upgradeHint": "Upgrade"
+  },
+  "runBulk": {
+    "confirm_one": "Dieser Workflow betrifft {{count}} Datensatz (Schwellenwert {{threshold}}). Fortfahren?",
+    "confirm_other": "Dieser Workflow betrifft {{count}} Datensätze (Schwellenwert {{threshold}}). Fortfahren?"
   },
   "runViewer": {
     "output": "Output",
@@ -1255,7 +1270,11 @@
     "Standaard aan de kandidaten/records van deze stap reizen mee als context van het kind": "Standardmäßig an: die Kandidaten/Datensätze dieses Schritts reisen als Kontext des Kindes mit.",
     "Extra sleutel/waarde-paren voor het kind ({{trigger*}} wordt hier al opgelost)": "Zusätzliche Schlüssel/Wert-Paare für das Kind ({{trigger.*}} ist hier bereits aufgelöst).",
     "Alleen voor Niet beschikbaar, Ziek en Verlof": "Nur für Nicht verfügbar, Krank und Urlaub.",
-    "Verplicht wanneer de status Blacklist is": "Erforderlich, wenn der Status Blacklist ist."
+    "Verplicht wanneer de status Blacklist is": "Erforderlich, wenn der Status Blacklist ist.",
+    "Altijd een nieuwe AI-call, ook als er recent advies is": "Immer einen neuen KI-Aufruf durchführen, auch wenn es aktuellen Rat gibt",
+    "Een advies jonger dan dit aantal uren wordt overgeslagen tenzij \"Altijd vernieuwen\" aan staat": "Ein Rat, der jünger als diese Anzahl Stunden ist, wird übersprungen, es sei denn, „Immer aktualisieren“ ist aktiviert.",
+    "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\")": "Feste Obergrenze für die Anzahl der Datensätze, die dieser Schritt in einem Lauf berät (Modus „list“).",
+    "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "\"Einzelner Datensatz\" = der Trigger-/manuelle Datensatz; \"Liste (Bulk)\" = jede Zeile aus dem vorherigen Abrufschritt."
   },
   "triggers": {
     "events": {
@@ -1289,7 +1308,33 @@
       "ai_agent_webhook_received": "KI-Agent-Webhook empfangen",
       "interview_started": "Interview gestartet",
       "interview_completed": "Interview abgeschlossen",
-      "interview_disqualified": "Interview disqualifiziert"
+      "interview_disqualified": "Interview disqualifiziert",
+      "candidate_updated": "Kandidat aktualisiert",
+      "application_updated": "Bewerbung aktualisiert",
+      "customer_updated": "Kunde aktualisiert",
+      "opportunity_created": "Chance erstellt",
+      "opportunity_updated": "Chance aktualisiert",
+      "match_updated": "Match aktualisiert",
+      "application_proposal_sent": "Bewerbung vorgeschlagen",
+      "application_stage_stale": "Bewerbung in Phase festgefahren",
+      "candidate_archived": "Kandidat archiviert",
+      "candidate_missing_cv": "Kandidat ohne Lebenslauf",
+      "candidate_phase_stale": "Phase des Kandidaten festgefahren",
+      "candidate_status_stale": "Status des Kandidaten festgefahren",
+      "candidate_availability_upcoming": "Verfügbarkeitsdatum des Kandidaten steht bevor",
+      "candidate_availability_overdue": "Verfügbarkeitsdatum des Kandidaten überfällig",
+      "candidate_leave_ending_soon": "Urlaub des Kandidaten endet bald",
+      "candidate_leave_overdue": "Urlaub des Kandidaten überfällig",
+      "candidate_unavailable_ending_soon": "Zeitraum nicht verfügbar endet bald",
+      "candidate_unavailable_overdue": "Zeitraum nicht verfügbar überfällig",
+      "contact_retention_due": "Bindungsprüfung Ansprechpartner fällig",
+      "conversation_unanswered": "Unterhaltung unbeantwortet",
+      "customer_no_contact": "Kunde nicht kontaktiert",
+      "customer_contract_ending": "Vertrag des Kunden endet bald",
+      "customer_task_overdue": "Aufgabe des Kunden überfällig",
+      "customer_match_ending": "Match des Kunden endet bald",
+      "customer_vacancy_stale": "Stelle des Kunden lange online",
+      "task_overdue": "Aufgabe überfällig"
     }
   },
   "templateLibrary": {

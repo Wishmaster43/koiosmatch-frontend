@@ -148,4 +148,115 @@ describe('useWorkflowRunControl', () => {
     await act(async () => { await result.current.handleRun() })
     await waitFor(() => expect(result.current.liveRunActive).toBe(true))
   })
+
+  // S1 Lane C: `subject` optionally seeds the run context with one record —
+  // posted on the SAME /run route/body shape as dry_run, never a separate call.
+  it('handleRun({ subject }): POSTs {subject} on the same route', async () => {
+    mockedPost.mockResolvedValue({ data: { run: { id: 'r4' } } })
+    mockedGet.mockResolvedValue({ data: { id: 'r4', status: 'success' } })
+    const { result } = renderHook(
+      () => useWorkflowRunControl({ workflowId: 'w1' }),
+      { wrapper },
+    )
+
+    await act(async () => { await result.current.handleRun({ subject: { entity_type: 'candidate', entity_id: 'c1' } }) })
+
+    expect(mockedPost).toHaveBeenCalledWith(
+      '/workflows/w1/run',
+      { subject: { entity_type: 'candidate', entity_id: 'c1' } },
+      { quietStatuses: [409], baseURL: expect.any(String) },
+    )
+  })
+})
+
+// S1 Lane C (CONTRACT-CHANGELOG 2026-09-04): POST /workflows/{id}/run-bulk —
+// count-then-confirm above the tenant's threshold, straight through below it.
+describe('useWorkflowRunControl · runBulk', () => {
+  it('202: adopts the started run and returns {status:"started", runId, count}', async () => {
+    mockedPost.mockResolvedValue({ data: { run_id: 'rb1', count: 12 } })
+    mockedGet.mockResolvedValue({ data: { id: 'rb1', status: 'running' } })
+    const onRunStarted = vi.fn()
+    const { result } = renderHook(
+      () => useWorkflowRunControl({ workflowId: 'w1', onRunStarted }),
+      { wrapper },
+    )
+
+    let outcome
+    await act(async () => { outcome = await result.current.runBulk() })
+
+    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run-bulk', undefined, { quietStatuses: [409], baseURL: expect.any(String) })
+    expect(outcome).toEqual({ status: 'started', runId: 'rb1', count: 12 })
+    expect(result.current.activeRunId).toBe('rb1')
+    expect(onRunStarted).toHaveBeenCalledTimes(1)
+  })
+
+  // REPAIR M1: WorkflowController::runBulk() throws TWO different 409 shapes —
+  // this one (WorkflowAlreadyRunningException, {message, run_id}) must NEVER be
+  // read as the threshold shape, or an already-running workflow shows "raakt 0
+  // records (drempel 0)" and the caller re-POSTs forever. No confirm number, no
+  // re-POST — adopt the live run exactly like handleRun's own 409 branch does.
+  it('409 single-flight (already running): adopts the run, never reads it as a threshold confirm', async () => {
+    mockedPost.mockRejectedValue({ response: { status: 409, data: { message: 'loopt al', run_id: 'r-existing' } } })
+    const onRunStarted = vi.fn()
+    const { result } = renderHook(
+      () => useWorkflowRunControl({ workflowId: 'w1', onRunStarted }),
+      { wrapper },
+    )
+
+    let outcome
+    await act(async () => { outcome = await result.current.runBulk() })
+
+    expect(outcome).toEqual({ status: 'already_running', runId: 'r-existing' })
+    expect(result.current.activeRunId).toBe('r-existing')
+    expect(result.current.runConflict).toBe(true)
+    expect(onRunStarted).toHaveBeenCalledTimes(1)
+    // Never mistaken for the threshold shape: no confirm() re-POST should follow —
+    // only the ONE call this test itself made.
+    expect(mockedPost).toHaveBeenCalledTimes(1)
+  })
+
+  it('409 above the threshold: returns the numbers, never starts a run', async () => {
+    mockedPost.mockRejectedValue({ response: { status: 409, data: { count: 40, matched_records: 40, threshold: 25 } } })
+    const onRunStarted = vi.fn()
+    const { result } = renderHook(
+      () => useWorkflowRunControl({ workflowId: 'w1', onRunStarted }),
+      { wrapper },
+    )
+
+    let outcome
+    await act(async () => { outcome = await result.current.runBulk() })
+
+    expect(outcome).toEqual({ status: 'confirm', count: 40, matchedRecords: 40, threshold: 25 })
+    expect(result.current.activeRunId).toBeNull()
+    expect(onRunStarted).not.toHaveBeenCalled()
+  })
+
+  it('confirm re-POST: sends {confirm:true} and starts the run', async () => {
+    mockedPost.mockResolvedValue({ data: { run_id: 'rb2', count: 40 } })
+    mockedGet.mockResolvedValue({ data: { id: 'rb2', status: 'running' } })
+    const { result } = renderHook(
+      () => useWorkflowRunControl({ workflowId: 'w1' }),
+      { wrapper },
+    )
+
+    let outcome
+    await act(async () => { outcome = await result.current.runBulk({ confirm: true }) })
+
+    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run-bulk', { confirm: true }, { quietStatuses: [409], baseURL: expect.any(String) })
+    expect(outcome).toEqual({ status: 'started', runId: 'rb2', count: 40 })
+  })
+
+  it('a non-409 failure surfaces the backend message via runError', async () => {
+    mockedPost.mockRejectedValue({ response: { status: 422, data: { message: 'Workflow is niet actief' } } })
+    const { result } = renderHook(
+      () => useWorkflowRunControl({ workflowId: 'w1' }),
+      { wrapper },
+    )
+
+    let outcome
+    await act(async () => { outcome = await result.current.runBulk() })
+
+    expect(outcome).toEqual({ status: 'error', message: 'Workflow is niet actief' })
+    expect(result.current.runError).toBe('Workflow is niet actief')
+  })
 })

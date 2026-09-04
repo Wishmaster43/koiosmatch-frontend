@@ -248,7 +248,8 @@
     "customer_departments": "Departamentos",
     "customer_contacts": "Contactos",
     "outreach_campaigns": "Listas de llamadas",
-    "system_events": "Evento del sistema"
+    "system_events": "Evento del sistema",
+    "koios_advice": "Aviso de Koios"
   },
   "status": {
     "active": "Activo",
@@ -300,7 +301,9 @@
     "archiveSuccess": "Flujo de trabajo archivado.",
     "restoreSuccess": "Flujo de trabajo restaurado.",
     "viewWorkflows": "Flujos de trabajo",
-    "viewManagement": "Gestión"
+    "viewManagement": "Gestión",
+    "runBulkStarted_one": "Flujo de trabajo iniciado para {{count}} registro.",
+    "runBulkStarted_other": "Flujo de trabajo iniciado para {{count}} registros."
   },
   "ai": {
     "saved": "Guardado",
@@ -336,6 +339,11 @@
       "noWaTemplate": "Sin plantilla",
       "selectFaqs": "Seleccionar FAQ",
       "noFaqs": "No se han creado FAQ",
+      "knowledgeItems": "Elementos de conocimiento",
+      "noKnowledgeItems": "No se han creado elementos de conocimiento",
+      "knowledgeItemsHint": "Solo los elementos de conocimiento vinculados están disponibles para este agente. Vacío = sin conocimiento.",
+      "knowledgeItemsCount": "{{count}} elemento(s) de conocimiento vinculado(s)",
+      "knowledgeItemsMax": "{{max}} elementos de conocimiento es el máximo.",
       "knowledge": "Base de conocimiento",
       "useKnowledge": "Usar base de conocimiento general",
       "maxHistory": "Máx. historial de conversación",
@@ -360,12 +368,7 @@
       },
       "lastInbound": "Último mensaje entrante",
       "inboundCount": "{{count}} turnos procesados",
-      "lastInboundError": "Último error",
-      "knowledgeItems": "Elementos de conocimiento",
-      "knowledgeItemsHint": "Solo los elementos de conocimiento vinculados están disponibles para este agente. Vacío = sin conocimiento.",
-      "noKnowledgeItems": "No se han creado elementos de conocimiento",
-      "knowledgeItemsCount": "{{count}} elemento(s) de conocimiento vinculado(s)",
-      "knowledgeItemsMax": "{{max}} elementos de conocimiento es el máximo."
+      "lastInboundError": "Último error"
     },
     "tabs": {
       "agents": "Agentes",
@@ -908,7 +911,12 @@
     "In wachtrij gezet": "Puesto en cola",
     "Direct uitgevoerd (sync)": "Ejecutado directamente (sync)",
     "Kind-run id": "Id de la ejecución hija",
-    "Uitkomst kind-run (sync)": "Resultado de la ejecución hija (sync)"
+    "Uitkomst kind-run (sync)": "Resultado de la ejecución hija (sync)",
+    "Entiteit": "Entidad",
+    "Modus": "Modo",
+    "Altijd vernieuwen": "Actualizar siempre",
+    "Verversingstermijn (uren)": "Ventana de actualización (horas)",
+    "Maximum records per run": "Máximo de registros por ejecución"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (varios bundles)",
@@ -1082,7 +1090,10 @@
     "WhatsApp hersteld": "WhatsApp restablecido",
     "match_and_candidate_owner": "propietario del match y del candidato",
     "queue": "Cola (asíncrono)",
-    "sync": "Directo (esperar al hijo)"
+    "sync": "Directo (esperar al hijo)",
+    "application": "Candidatura",
+    "subject": "Un solo registro",
+    "list": "Lista (lote)"
   },
   "agentTest": {
     "title": "Variables de prueba",
@@ -1145,6 +1156,10 @@
     "alreadyRunning": "Este flujo ya se está ejecutando. Consulta o detén la ejecución en curso.",
     "budgetLine": "{{used}}/{{allowance}} {{unit}}",
     "upgradeHint": "Mejorar plan"
+  },
+  "runBulk": {
+    "confirm_one": "Este flujo de trabajo afecta a {{count}} registro (umbral {{threshold}}). ¿Continuar?",
+    "confirm_other": "Este flujo de trabajo afecta a {{count}} registros (umbral {{threshold}}). ¿Continuar?"
   },
   "runViewer": {
     "output": "Salida",
@@ -1255,7 +1270,11 @@
     "Standaard aan de kandidaten/records van deze stap reizen mee als context van het kind": "Activado por defecto: los candidatos/registros de este paso viajan como contexto del hijo.",
     "Extra sleutel/waarde-paren voor het kind ({{trigger*}} wordt hier al opgelost)": "Pares clave/valor adicionales para el hijo ({{trigger.*}} ya está resuelto aquí).",
     "Alleen voor Niet beschikbaar, Ziek en Verlof": "Solo para No disponible, Enfermo y Licencia.",
-    "Verplicht wanneer de status Blacklist is": "Obligatorio cuando el estado es Lista negra."
+    "Verplicht wanneer de status Blacklist is": "Obligatorio cuando el estado es Lista negra.",
+    "Altijd een nieuwe AI-call, ook als er recent advies is": "Realizar siempre una nueva llamada de IA, incluso si hay un consejo reciente",
+    "Een advies jonger dan dit aantal uren wordt overgeslagen tenzij \"Altijd vernieuwen\" aan staat": "Se omite un consejo más reciente que este número de horas, a menos que esté activado «Actualizar siempre».",
+    "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\")": "Límite estricto del número de registros que este paso procesa en una sola ejecución (modo «list»).",
+    "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "«Un solo registro» = el registro del disparador/manual; «Lista (lote)» = cada fila del paso de obtención anterior."
   },
   "triggers": {
     "events": {
@@ -1289,7 +1308,33 @@
       "ai_agent_webhook_received": "Webhook de agente IA recibido",
       "interview_started": "Entrevista iniciada",
       "interview_completed": "Entrevista completada",
-      "interview_disqualified": "Entrevista descalificada"
+      "interview_disqualified": "Entrevista descalificada",
+      "candidate_updated": "Candidato actualizado",
+      "application_updated": "Solicitud actualizada",
+      "customer_updated": "Cliente actualizado",
+      "opportunity_created": "Oportunidad creada",
+      "opportunity_updated": "Oportunidad actualizada",
+      "match_updated": "Match actualizado",
+      "application_proposal_sent": "Solicitud propuesta",
+      "application_stage_stale": "Solicitud estancada en la etapa",
+      "candidate_archived": "Candidato archivado",
+      "candidate_missing_cv": "Candidato sin currículum",
+      "candidate_phase_stale": "Fase del candidato estancada",
+      "candidate_status_stale": "Estado del candidato estancado",
+      "candidate_availability_upcoming": "Fecha de disponibilidad del candidato próxima",
+      "candidate_availability_overdue": "Fecha de disponibilidad del candidato vencida",
+      "candidate_leave_ending_soon": "Permiso del candidato termina pronto",
+      "candidate_leave_overdue": "Permiso del candidato vencido",
+      "candidate_unavailable_ending_soon": "Periodo no disponible termina pronto",
+      "candidate_unavailable_overdue": "Periodo no disponible vencido",
+      "contact_retention_due": "Revisión de retención de contacto pendiente",
+      "conversation_unanswered": "Conversación sin responder",
+      "customer_no_contact": "Cliente sin contactar",
+      "customer_contract_ending": "Contrato del cliente termina pronto",
+      "customer_task_overdue": "Tarea del cliente vencida",
+      "customer_match_ending": "Match del cliente termina pronto",
+      "customer_vacancy_stale": "Vacante del cliente lleva tiempo en línea",
+      "task_overdue": "Tarea vencida"
     }
   },
   "templateLibrary": {

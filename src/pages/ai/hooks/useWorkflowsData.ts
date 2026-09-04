@@ -160,6 +160,51 @@ export function useWorkflowsData(showArchived: boolean) {
     }
   }
 
+  // S1 Lane C (KOIOS-ADVIES-OVERAL-1, CONTRACT-CHANGELOG 2026-09-04): starts a
+  // workflow's own filtered entry step over its WHOLE matching set in one
+  // server-side pass (POST /workflows/{id}/run-bulk). Above the tenant's
+  // koios_advice.bulk_confirm_threshold the backend answers 409 {count,
+  // matched_records, threshold} — reuses this hook's OWN confirm dialog (already
+  // wired for archive/deleteFolder above) rather than a raw window.confirm, then
+  // re-posts with {confirm:true}. RUN-BULK-1: no toolbar button calls this yet —
+  // none of the existing manual-run buttons (WorkflowCard/WorkflowListRow) are
+  // schedule-type-specific, so wiring one in would be inventing a new affordance;
+  // exposed here, tested, ready for a future call site.
+  //
+  // REPAIR M1: WorkflowController::runBulk() throws TWO different 409 shapes —
+  // the threshold body above, and WorkflowAlreadyRunningException's
+  // {message, run_id} single-flight conflict (identical to handleRun's own 409,
+  // 20 lines up). Treating every 409 as "threshold" showed "0 records (drempel
+  // 0)" for an already-running workflow and re-POSTed forever. Discriminate on
+  // `run_id` (single-flight) vs `threshold` (real confirm) and reuse handleRun's
+  // exact already-running feedback (toast + open the builder on that run).
+  const handleRunBulk = async (id: string | number, opts?: { confirm?: boolean }) => {
+    try {
+      const body = opts?.confirm ? { confirm: true } : undefined
+      const res = await api.post(`/workflows/${id}/run-bulk`, body, { quietStatuses: [409], baseURL: resolveWorkflowBaseURL() })
+      const count = (res.data?.count ?? 0) as number
+      notify('success', t('page.runBulkStarted', { count }))
+    } catch (err) {
+      const e = err as { response?: { status?: number; data?: {
+        count?: number; matched_records?: number; threshold?: number; run_id?: string | number
+      } } }
+      if (e.response?.status === 409) {
+        const d = e.response.data ?? {}
+        // Single-flight conflict FIRST — its body carries `run_id`, never `threshold`.
+        if (d.run_id != null) {
+          notify('info', t('runControl.alreadyRunning'))
+          const wf = workflows.find(w => w.id === id)
+          if (wf) openEditor(wf, d.run_id)
+          return
+        }
+        confirm(t('runBulk.confirm', { count: d.count ?? 0, threshold: d.threshold ?? 0 }), () => handleRunBulk(id, { confirm: true }))
+        return
+      }
+      // §10: never a raw axios/network string — the same helper handleSave/deleteFolder use.
+      notifyError(extractApiError(err, t('common:actionFailed')))
+    }
+  }
+
   // Active/draft toggle (list-row switch) — same semantics as the editor's status
   // button (active <-> inactive); optimistic, rolled back on failure (mirrors moveToFolder).
   const handleToggleStatus = (wf: Workflow) => {
@@ -286,7 +331,7 @@ export function useWorkflowsData(showArchived: boolean) {
     editingWorkflow, focusRunId, notFoundId,
     selectedFolder, setSelectedFolder, dragOverFolder, setDragOverFolder, dragWf,
     retryLoad, openEditor, openEditorById, closeEditor,
-    handleRun, handleToggleStatus, handleSave,
+    handleRun, handleRunBulk, handleToggleStatus, handleSave,
     handleArchive, handleRestore,
     createFolder, deleteFolder, moveToFolder,
     dialog,

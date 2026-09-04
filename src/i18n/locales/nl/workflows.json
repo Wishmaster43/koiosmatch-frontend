@@ -287,7 +287,8 @@
     "customer_departments": "Afdelingen",
     "customer_contacts": "Contactpersonen",
     "outreach_campaigns": "Bellijsten",
-    "system_events": "Systeemgebeurtenis"
+    "system_events": "Systeemgebeurtenis",
+    "koios_advice": "Koios-advies"
   },
   "categories": {
     "all": "Alle",
@@ -361,7 +362,9 @@
     "archiveSuccess": "Workflow gearchiveerd.",
     "restoreSuccess": "Workflow hersteld.",
     "viewWorkflows": "Workflows",
-    "viewManagement": "Beheer"
+    "viewManagement": "Beheer",
+    "runBulkStarted_one": "Workflow gestart voor {{count}} record.",
+    "runBulkStarted_other": "Workflow gestart voor {{count}} records."
   },
   "ai": {
     "saved": "Opgeslagen",
@@ -397,6 +400,11 @@
       "noWaTemplate": "Geen template",
       "selectFaqs": "FAQ's selecteren",
       "noFaqs": "Geen FAQ's aangemaakt",
+      "knowledgeItems": "Kennisitems",
+      "noKnowledgeItems": "Geen kennisitems aangemaakt",
+      "knowledgeItemsHint": "Alleen gekoppelde kennisitems zijn voor deze agent beschikbaar. Leeg = geen kennis.",
+      "knowledgeItemsCount": "{{count}} kennisitem(s) gekoppeld",
+      "knowledgeItemsMax": "{{max}} kennisitems is het maximum.",
       "knowledge": "Kennisbank",
       "useKnowledge": "Algemene kennisbank gebruiken",
       "maxHistory": "Max. conversatiehistorie",
@@ -421,12 +429,7 @@
       },
       "lastInbound": "Laatste inkomend bericht",
       "inboundCount": "{{count}} beurten verwerkt",
-      "lastInboundError": "Laatste fout",
-      "knowledgeItems": "Kennisitems",
-      "knowledgeItemsHint": "Alleen gekoppelde kennisitems zijn voor deze agent beschikbaar. Leeg = geen kennis.",
-      "noKnowledgeItems": "Geen kennisitems aangemaakt",
-      "knowledgeItemsCount": "{{count}} kennisitem(s) gekoppeld",
-      "knowledgeItemsMax": "{{max}} kennisitems is het maximum."
+      "lastInboundError": "Laatste fout"
     },
     "tabs": {
       "agents": "Agents",
@@ -941,7 +944,12 @@
     "In wachtrij gezet": "In wachtrij gezet",
     "Direct uitgevoerd (sync)": "Direct uitgevoerd (sync)",
     "Kind-run id": "Kind-run id",
-    "Uitkomst kind-run (sync)": "Uitkomst kind-run (sync)"
+    "Uitkomst kind-run (sync)": "Uitkomst kind-run (sync)",
+    "Entiteit": "Entiteit",
+    "Modus": "Modus",
+    "Altijd vernieuwen": "Altijd vernieuwen",
+    "Verversingstermijn (uren)": "Verversingstermijn (uren)",
+    "Maximum records per run": "Maximum records per run"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (meerdere bundles)",
@@ -1115,7 +1123,10 @@
     "WhatsApp hersteld": "WhatsApp hersteld",
     "match_and_candidate_owner": "eigenaar match én kandidaat",
     "queue": "Wachtrij (asynchroon)",
-    "sync": "Direct (wachten op het kind)"
+    "sync": "Direct (wachten op het kind)",
+    "application": "Sollicitatie",
+    "subject": "Eén record",
+    "list": "Lijst (bulk)"
   },
   "agentTest": {
     "title": "Test-variabelen",
@@ -1143,6 +1154,10 @@
     "alreadyRunning": "Deze workflow draait al. Bekijk of stop de lopende run.",
     "budgetLine": "{{used}}/{{allowance}} {{unit}}",
     "upgradeHint": "Upgraden"
+  },
+  "runBulk": {
+    "confirm_one": "Deze workflow raakt {{count}} record (drempel {{threshold}}). Doorgaan?",
+    "confirm_other": "Deze workflow raakt {{count}} records (drempel {{threshold}}). Doorgaan?"
   },
   "runViewer": {
     "output": "Output",
@@ -1253,7 +1268,11 @@
     "Standaard aan de kandidaten/records van deze stap reizen mee als context van het kind": "Standaard aan: de kandidaten/records van deze stap reizen mee als context van het kind.",
     "Extra sleutel/waarde-paren voor het kind ({{trigger*}} wordt hier al opgelost)": "Extra sleutel/waarde-paren voor het kind ({{trigger.*}} wordt hier al opgelost).",
     "Alleen voor Niet beschikbaar, Ziek en Verlof": "Alleen voor Niet beschikbaar, Ziek en Verlof.",
-    "Verplicht wanneer de status Blacklist is": "Verplicht wanneer de status Blacklist is."
+    "Verplicht wanneer de status Blacklist is": "Verplicht wanneer de status Blacklist is.",
+    "Altijd een nieuwe AI-call, ook als er recent advies is": "Altijd een nieuwe AI-call, ook als er recent advies is",
+    "Een advies jonger dan dit aantal uren wordt overgeslagen tenzij \"Altijd vernieuwen\" aan staat": "Een advies jonger dan dit aantal uren wordt overgeslagen tenzij \"Altijd vernieuwen\" aan staat.",
+    "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\")": "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\").",
+    "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap."
   },
   "triggers": {
     "events": {
@@ -1287,7 +1306,33 @@
       "ai_agent_webhook_received": "AI-agent webhook ontvangen",
       "interview_started": "Interview gestart",
       "interview_completed": "Interview afgerond",
-      "interview_disqualified": "Interview afgewezen"
+      "interview_disqualified": "Interview afgewezen",
+      "candidate_updated": "Kandidaat gewijzigd",
+      "application_updated": "Sollicitatie gewijzigd",
+      "customer_updated": "Klant gewijzigd",
+      "opportunity_created": "Kans aangemaakt",
+      "opportunity_updated": "Kans gewijzigd",
+      "match_updated": "Match gewijzigd",
+      "application_proposal_sent": "Sollicitatie voorgesteld",
+      "application_stage_stale": "Sollicitatie vastgelopen in fase",
+      "candidate_archived": "Kandidaat gearchiveerd",
+      "candidate_missing_cv": "Kandidaat zonder cv",
+      "candidate_phase_stale": "Fase kandidaat vastgelopen",
+      "candidate_status_stale": "Status kandidaat vastgelopen",
+      "candidate_availability_upcoming": "Beschikbaarheidsdatum kandidaat nadert",
+      "candidate_availability_overdue": "Beschikbaarheidsdatum kandidaat verstreken",
+      "candidate_leave_ending_soon": "Verlof kandidaat loopt bijna af",
+      "candidate_leave_overdue": "Verlof kandidaat verstreken",
+      "candidate_unavailable_ending_soon": "Periode niet beschikbaar loopt bijna af",
+      "candidate_unavailable_overdue": "Periode niet beschikbaar verstreken",
+      "contact_retention_due": "Retentiecheck contactpersoon verschuldigd",
+      "conversation_unanswered": "Gesprek onbeantwoord",
+      "customer_no_contact": "Klant niet gecontacteerd",
+      "customer_contract_ending": "Contract klant loopt bijna af",
+      "customer_task_overdue": "Taak klant verstreken",
+      "customer_match_ending": "Match klant loopt bijna af",
+      "customer_vacancy_stale": "Vacature klant staat lang online",
+      "task_overdue": "Taak verstreken"
     }
   },
   "templateLibrary": {

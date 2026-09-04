@@ -321,6 +321,12 @@ const ALLOWLIST: string[] = [
   'es/common:lookupSeeds.workflowNames.aiPlannerDeEscalate',
   'it/common:lookupSeeds.workflowNames.aiPlannerDeEscalate',
   'pt/common:lookupSeeds.workflowNames.aiPlannerDeEscalate',
+
+  // REPAIR N6: German "Kandidaten" = "candidates" (identical spelling), the outgoing
+  // webhook catalogue's new group label — same cognate as the workflow-folder/
+  // import-entity/Koios-chat entries above, verified via the sibling singular
+  // "Kandidat" translating differently elsewhere in this same locale file.
+  'de/settings:webhooks.events.groups.candidates',
 ]
 
 describe('i18n house style — no smuggled Dutch copies in translated locales', () => {

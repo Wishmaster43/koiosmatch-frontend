@@ -252,7 +252,8 @@
     "customer_departments": "Departments",
     "customer_contacts": "Contacts",
     "outreach_campaigns": "Call lists",
-    "system_events": "System event"
+    "system_events": "System event",
+    "koios_advice": "Koios advice"
   },
   "status": {
     "active": "Active",
@@ -304,7 +305,9 @@
     "archiveSuccess": "Workflow archived.",
     "restoreSuccess": "Workflow restored.",
     "viewWorkflows": "Workflows",
-    "viewManagement": "Management"
+    "viewManagement": "Management",
+    "runBulkStarted_one": "Workflow started for {{count}} record.",
+    "runBulkStarted_other": "Workflow started for {{count}} records."
   },
   "ai": {
     "saved": "Saved",
@@ -340,6 +343,11 @@
       "noWaTemplate": "No template",
       "selectFaqs": "Select FAQs",
       "noFaqs": "No FAQs created",
+      "knowledgeItems": "Knowledge items",
+      "noKnowledgeItems": "No knowledge items created",
+      "knowledgeItemsHint": "Only linked knowledge items are available to this agent. Empty = no knowledge.",
+      "knowledgeItemsCount": "{{count}} knowledge item(s) linked",
+      "knowledgeItemsMax": "{{max}} knowledge items is the maximum.",
       "knowledge": "Knowledge base",
       "useKnowledge": "Use general knowledge base",
       "maxHistory": "Max. conversation history",
@@ -364,12 +372,7 @@
       },
       "lastInbound": "Last inbound message",
       "inboundCount": "{{count}} turns handled",
-      "lastInboundError": "Last error",
-      "knowledgeItems": "Knowledge items",
-      "knowledgeItemsHint": "Only linked knowledge items are available to this agent. Empty = no knowledge.",
-      "noKnowledgeItems": "No knowledge items created",
-      "knowledgeItemsCount": "{{count}} knowledge item(s) linked",
-      "knowledgeItemsMax": "{{max}} knowledge items is the maximum."
+      "lastInboundError": "Last error"
     },
     "tabs": {
       "agents": "Agents",
@@ -908,7 +911,12 @@
     "Kind-run id": "Child run id",
     "Uitkomst kind-run (sync)": "Child run outcome (sync)",
     "Weer beschikbaar vanaf": "Available again from",
-    "Blacklist-reden": "Blacklist reason"
+    "Blacklist-reden": "Blacklist reason",
+    "Entiteit": "Entity",
+    "Modus": "Mode",
+    "Altijd vernieuwen": "Always refresh",
+    "Verversingstermijn (uren)": "Refresh window (hours)",
+    "Maximum records per run": "Maximum records per run"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (multiple bundles)",
@@ -1082,7 +1090,10 @@
     "WhatsApp hersteld": "WhatsApp restored",
     "match_and_candidate_owner": "match and candidate owner",
     "queue": "Queue (asynchronous)",
-    "sync": "Direct (wait for the child)"
+    "sync": "Direct (wait for the child)",
+    "application": "Application",
+    "subject": "Single record",
+    "list": "List (bulk)"
   },
   "agentTest": {
     "title": "Test variables",
@@ -1145,6 +1156,10 @@
     "alreadyRunning": "This workflow is already running. View or stop the active run.",
     "budgetLine": "{{used}}/{{allowance}} {{unit}}",
     "upgradeHint": "Upgrade"
+  },
+  "runBulk": {
+    "confirm_one": "This workflow touches {{count}} record (threshold {{threshold}}). Continue?",
+    "confirm_other": "This workflow touches {{count}} records (threshold {{threshold}}). Continue?"
   },
   "runViewer": {
     "output": "Output",
@@ -1255,7 +1270,11 @@
     "Standaard aan de kandidaten/records van deze stap reizen mee als context van het kind": "On by default: this step's candidates/records travel along as the child's context.",
     "Extra sleutel/waarde-paren voor het kind ({{trigger*}} wordt hier al opgelost)": "Extra key/value pairs for the child ({{trigger.*}} is already resolved here).",
     "Alleen voor Niet beschikbaar, Ziek en Verlof": "Only for Unavailable, Sick and Leave.",
-    "Verplicht wanneer de status Blacklist is": "Required when status is Blacklist."
+    "Verplicht wanneer de status Blacklist is": "Required when status is Blacklist.",
+    "Altijd een nieuwe AI-call, ook als er recent advies is": "Always make a new AI call, even if there is recent advice",
+    "Een advies jonger dan dit aantal uren wordt overgeslagen tenzij \"Altijd vernieuwen\" aan staat": "Advice younger than this many hours is skipped unless \"Always refresh\" is on.",
+    "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\")": "Hard ceiling on the number of records this step advises in one run (\"list\" mode).",
+    "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "\"Single record\" = the trigger/manual record; \"List (bulk)\" = every row from the previous fetch step."
   },
   "triggers": {
     "events": {
@@ -1289,7 +1308,33 @@
       "ai_agent_webhook_received": "AI agent webhook received",
       "interview_started": "Interview started",
       "interview_completed": "Interview completed",
-      "interview_disqualified": "Interview disqualified"
+      "interview_disqualified": "Interview disqualified",
+      "candidate_updated": "Candidate updated",
+      "application_updated": "Application updated",
+      "customer_updated": "Customer updated",
+      "opportunity_created": "Opportunity created",
+      "opportunity_updated": "Opportunity updated",
+      "match_updated": "Match updated",
+      "application_proposal_sent": "Application proposed",
+      "application_stage_stale": "Application stuck in stage",
+      "candidate_archived": "Candidate archived",
+      "candidate_missing_cv": "Candidate missing CV",
+      "candidate_phase_stale": "Candidate phase stale",
+      "candidate_status_stale": "Candidate status stale",
+      "candidate_availability_upcoming": "Candidate availability date upcoming",
+      "candidate_availability_overdue": "Candidate availability date overdue",
+      "candidate_leave_ending_soon": "Candidate leave ending soon",
+      "candidate_leave_overdue": "Candidate leave overdue",
+      "candidate_unavailable_ending_soon": "Candidate unavailable period ending soon",
+      "candidate_unavailable_overdue": "Candidate unavailable period overdue",
+      "contact_retention_due": "Customer contact retention check due",
+      "conversation_unanswered": "Conversation unanswered",
+      "customer_no_contact": "Customer not contacted",
+      "customer_contract_ending": "Customer contract ending soon",
+      "customer_task_overdue": "Customer task overdue",
+      "customer_match_ending": "Customer match ending soon",
+      "customer_vacancy_stale": "Customer vacancy stale online",
+      "task_overdue": "Task overdue"
     }
   },
   "templateLibrary": {

@@ -287,7 +287,8 @@
     "customer_departments": "Departamentos",
     "customer_contacts": "Pessoas de contacto",
     "outreach_campaigns": "Listas de chamadas",
-    "system_events": "Evento do sistema"
+    "system_events": "Evento do sistema",
+    "koios_advice": "Aconselhamento Koios"
   },
   "categories": {
     "all": "Todas",
@@ -361,7 +362,9 @@
     "archiveSuccess": "Workflow arquivada.",
     "restoreSuccess": "Workflow restaurada.",
     "viewWorkflows": "Workflows",
-    "viewManagement": "Gestão"
+    "viewManagement": "Gestão",
+    "runBulkStarted_one": "Fluxo de trabalho iniciado para {{count}} registo.",
+    "runBulkStarted_other": "Fluxo de trabalho iniciado para {{count}} registos."
   },
   "ai": {
     "saved": "Guardado",
@@ -397,6 +400,11 @@
       "noWaTemplate": "Sem modelo",
       "selectFaqs": "Selecionar FAQs",
       "noFaqs": "Nenhuma FAQ criada",
+      "knowledgeItems": "Itens de conhecimento",
+      "noKnowledgeItems": "Nenhum item de conhecimento criado",
+      "knowledgeItemsHint": "Apenas os itens de conhecimento vinculados estão disponíveis para este agente. Vazio = nenhum conhecimento.",
+      "knowledgeItemsCount": "{{count}} item(ns) de conhecimento vinculado(s)",
+      "knowledgeItemsMax": "{{max}} itens de conhecimento é o máximo.",
       "knowledge": "Base de conhecimento",
       "useKnowledge": "Utilizar base de conhecimento geral",
       "maxHistory": "Histórico máx. de conversação",
@@ -421,12 +429,7 @@
       },
       "lastInbound": "Última mensagem recebida",
       "inboundCount": "{{count}} interações processadas",
-      "lastInboundError": "Último erro",
-      "knowledgeItems": "Itens de conhecimento",
-      "knowledgeItemsHint": "Apenas os itens de conhecimento vinculados estão disponíveis para este agente. Vazio = nenhum conhecimento.",
-      "noKnowledgeItems": "Nenhum item de conhecimento criado",
-      "knowledgeItemsCount": "{{count}} item(ns) de conhecimento vinculado(s)",
-      "knowledgeItemsMax": "{{max}} itens de conhecimento é o máximo."
+      "lastInboundError": "Último erro"
     },
     "tabs": {
       "agents": "Agentes",
@@ -943,7 +946,12 @@
     "In wachtrij gezet": "Colocado em fila",
     "Direct uitgevoerd (sync)": "Executado diretamente (sync)",
     "Kind-run id": "Id da execução filha",
-    "Uitkomst kind-run (sync)": "Resultado da execução filha (sync)"
+    "Uitkomst kind-run (sync)": "Resultado da execução filha (sync)",
+    "Entiteit": "Entidade",
+    "Modus": "Modo",
+    "Altijd vernieuwen": "Atualizar sempre",
+    "Verversingstermijn (uren)": "Janela de atualização (horas)",
+    "Maximum records per run": "Máximo de registos por execução"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Matriz (vários bundles)",
@@ -1117,7 +1125,10 @@
     "WhatsApp hersteld": "WhatsApp restabelecido",
     "match_and_candidate_owner": "responsável pelo match e pelo candidato",
     "queue": "Fila (assíncrono)",
-    "sync": "Direto (aguarda o filho)"
+    "sync": "Direto (aguarda o filho)",
+    "application": "Candidatura",
+    "subject": "Registo único",
+    "list": "Lista (lote)"
   },
   "agentTest": {
     "title": "Variáveis de teste",
@@ -1145,6 +1156,10 @@
     "alreadyRunning": "Este workflow já está em execução. Consulte ou pare a execução ativa.",
     "budgetLine": "{{used}}/{{allowance}} {{unit}}",
     "upgradeHint": "Atualizar"
+  },
+  "runBulk": {
+    "confirm_one": "Este fluxo de trabalho afeta {{count}} registo (limiar {{threshold}}). Continuar?",
+    "confirm_other": "Este fluxo de trabalho afeta {{count}} registos (limiar {{threshold}}). Continuar?"
   },
   "runViewer": {
     "output": "Output",
@@ -1255,7 +1270,11 @@
     "Standaard aan de kandidaten/records van deze stap reizen mee als context van het kind": "Ativado por padrão: os candidatos/registos deste passo seguem como contexto do filho.",
     "Extra sleutel/waarde-paren voor het kind ({{trigger*}} wordt hier al opgelost)": "Pares chave/valor adicionais para o filho ({{trigger.*}} já é resolvido aqui).",
     "Alleen voor Niet beschikbaar, Ziek en Verlof": "Apenas para Indisponível, Doente e Licença.",
-    "Verplicht wanneer de status Blacklist is": "Obrigatório quando o status é Lista negra."
+    "Verplicht wanneer de status Blacklist is": "Obrigatório quando o status é Lista negra.",
+    "Altijd een nieuwe AI-call, ook als er recent advies is": "Fazer sempre uma nova chamada de IA, mesmo que exista um parecer recente",
+    "Een advies jonger dan dit aantal uren wordt overgeslagen tenzij \"Altijd vernieuwen\" aan staat": "Um parecer mais recente do que este número de horas é ignorado, a menos que \"Atualizar sempre\" esteja ativado.",
+    "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\")": "Limite máximo do número de registos que este passo processa numa única execução (modo \"list\").",
+    "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "\"Registo único\" = o registo do gatilho/manual; \"Lista (lote)\" = cada linha do passo de obtenção anterior."
   },
   "triggers": {
     "events": {
@@ -1289,7 +1308,33 @@
       "ai_agent_webhook_received": "Webhook do agente de IA recebido",
       "interview_started": "Entrevista iniciada",
       "interview_completed": "Entrevista concluída",
-      "interview_disqualified": "Entrevista rejeitada"
+      "interview_disqualified": "Entrevista rejeitada",
+      "candidate_updated": "Candidato alterado",
+      "application_updated": "Candidatura alterada",
+      "customer_updated": "Cliente alterado",
+      "opportunity_created": "Oportunidade criada",
+      "opportunity_updated": "Oportunidade alterada",
+      "match_updated": "Match alterado",
+      "application_proposal_sent": "Candidatura proposta",
+      "application_stage_stale": "Candidatura estagnada na fase",
+      "candidate_archived": "Candidato arquivado",
+      "candidate_missing_cv": "Candidato sem currículo",
+      "candidate_phase_stale": "Fase do candidato estagnada",
+      "candidate_status_stale": "Estado do candidato estagnado",
+      "candidate_availability_upcoming": "Data de disponibilidade do candidato a aproximar-se",
+      "candidate_availability_overdue": "Data de disponibilidade do candidato vencida",
+      "candidate_leave_ending_soon": "Licença do candidato a terminar em breve",
+      "candidate_leave_overdue": "Licença do candidato vencida",
+      "candidate_unavailable_ending_soon": "Período indisponível a terminar em breve",
+      "candidate_unavailable_overdue": "Período indisponível vencido",
+      "contact_retention_due": "Verificação de retenção do contacto pendente",
+      "conversation_unanswered": "Conversa sem resposta",
+      "customer_no_contact": "Cliente não contactado",
+      "customer_contract_ending": "Contrato do cliente a terminar em breve",
+      "customer_task_overdue": "Tarefa do cliente vencida",
+      "customer_match_ending": "Match do cliente a terminar em breve",
+      "customer_vacancy_stale": "Vaga do cliente há muito tempo online",
+      "task_overdue": "Tarefa vencida"
     }
   },
   "templateLibrary": {
