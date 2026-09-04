@@ -9,12 +9,13 @@
  * only decides how the recruiter STARTS them. Mirrors the drill-down's 26x26
  * bordered icon idiom (ProfileTab's own pop-out affordance).
  */
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import type { ChangeEvent, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FileUp, ClipboardPaste } from 'lucide-react'
 import { CV_ACCEPT_ATTR, CV_TEXT_MIN_CHARS, CV_TEXT_MAX_CHARS } from './useCvParse'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
+import { useClickOutside } from '@/hooks/useClickOutside'
 
 interface CvEntryIconsProps {
   onFile: (file: File) => void
@@ -43,13 +44,8 @@ export default function CvEntryIcons({ onFile, onSubmitText }: CvEntryIconsProps
   const tooShort = text.trim().length > 0 && text.trim().length < CV_TEXT_MIN_CHARS
   const canSubmit = text.trim().length >= CV_TEXT_MIN_CHARS && text.trim().length <= CV_TEXT_MAX_CHARS
 
-  // Close on an outside click — a plain non-modal popover.
-  useEffect(() => {
-    if (!pasteOpen) return
-    const onDown = (e: MouseEvent) => { if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) setPasteOpen(false) }
-    document.addEventListener('mousedown', onDown)
-    return () => document.removeEventListener('mousedown', onDown)
-  }, [pasteOpen])
+  // Close on an outside click — a plain non-modal popover (shared useClickOutside, CLICK-OUTSIDE-2).
+  useClickOutside([popoverRef], pasteOpen, () => setPasteOpen(false))
 
   // Escape layer: closes the paste popover (one-stage).
   useEscapeLayer(pasteOpen, () => setPasteOpen(false))

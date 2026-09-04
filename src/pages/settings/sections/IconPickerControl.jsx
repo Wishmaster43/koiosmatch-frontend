@@ -4,9 +4,10 @@
  * block). Generic: the host passes the curated `icons` (slug list) and a
  * `resolve(slug) → LucideIcon` — this control never hardcodes a vocabulary.
  */
-import { createElement, useEffect, useRef, useState } from 'react'
+import { createElement, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { useClickOutside } from '@/hooks/useClickOutside'
 
 // Panel component so the focus trap arms only while the popover is OPEN: Escape
 // is handled (and stopped) at the popover itself, never by a hosting dialog's trap.
@@ -29,13 +30,8 @@ export default function IconPickerControl({ icons, resolve, value, color, label,
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
-  // Close on an outside click while the popover is open.
-  useEffect(() => {
-    if (!open) return
-    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [open])
+  // Close on an outside click while the popover is open (shared useClickOutside, CLICK-OUTSIDE-2).
+  useClickOutside([ref], open, () => setOpen(false))
 
   return (
     <div ref={ref} style={{ position: 'relative', display: 'inline-flex', flexShrink: 0 }}>

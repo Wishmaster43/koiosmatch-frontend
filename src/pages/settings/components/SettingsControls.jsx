@@ -2,12 +2,13 @@
  * SettingsControls — small shared UI controls reused across settings sections:
  * a colour picker (swatch + popup), a colour badge, and a drag-to-reorder list.
  */
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { GripVertical, Check, ChevronUp, ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { COLOR_PRESETS } from '@/lib/colorPresets'
 import Toggle from '@/components/ui/Toggle'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { useClickOutside } from '@/hooks/useClickOutside'
 import SoftChip from '@/components/ui/SoftChip'
 import { tintBg, tintBorder } from '@/lib/tint'
 
@@ -17,12 +18,8 @@ import { tintBg, tintBorder } from '@/lib/tint'
 function ColorPickerPopup({ color, onChange, onClose }) {
   const [hex, setHex] = useState(color)
   const ref = useFocusTrap(onClose)
-  // Close the popup on any outside mousedown, not just its own trigger.
-  useEffect(() => {
-    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) onClose() }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [onClose, ref])
+  // Close the popup on any outside mousedown, not just its own trigger (shared useClickOutside, CLICK-OUTSIDE-2).
+  useClickOutside([ref], true, onClose)
   const apply = (c) => { setHex(c); onChange(c) }
   // Curated soft palette only — no free colour wheel/hex, so labels stay calm and
   // consistent in light + dark across statuses / funnel / candidate types / pools / …
