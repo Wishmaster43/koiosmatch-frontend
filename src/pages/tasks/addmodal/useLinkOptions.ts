@@ -19,6 +19,7 @@
  */
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import api, { unwrapList } from '@/lib/api'
+import { contactOptionLabel } from '@/lib/contactLabel'
 import { nameOf } from './formHelpers'
 import type { EntityRow } from './formHelpers'
 
@@ -70,13 +71,14 @@ export function useLinkOptions(): LinkOptionsState {
   const retry = useCallback(() => setAttempt(a => a + 1), [])
 
   // Map to picker options once per load, not on every render of the modal.
-  const toOptions = (list: EntityRow[]): LinkOption[] => list.map(r => ({ value: String(r.id), label: nameOf(r) }))
+  const toOptions = (list: EntityRow[], label: (r: EntityRow) => string = nameOf): LinkOption[] =>
+    list.map(r => ({ value: String(r.id), label: label(r) }))
   // Options for the candidate picker, recomputed only when its rows change.
   const candidates = useMemo(() => toOptions(rows.candidates), [rows.candidates])
   // Options for the customer picker, recomputed only when its rows change.
   const customers  = useMemo(() => toOptions(rows.customers),  [rows.customers])
-  // Options for the contact picker, recomputed only when its rows change.
-  const contacts   = useMemo(() => toOptions(rows.contacts),   [rows.contacts])
+  // Options for the contact picker: name plus job function when present (CONTACT-PICKER-FUNCTION-1).
+  const contacts   = useMemo(() => toOptions(rows.contacts, contactOptionLabel), [rows.contacts])
 
   return { candidates, customers, contacts, loading, error, retry }
 }

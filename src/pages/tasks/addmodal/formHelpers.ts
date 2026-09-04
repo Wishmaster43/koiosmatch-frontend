@@ -5,9 +5,11 @@
  * its size target while doing one job — wiring the form).
  */
 import type { Id } from '@/types/common'
+import type { ContactLike } from '@/lib/contactLabel'
 
 // One row of a linked-entity list endpoint (/candidates, /customers, /contacts).
-export interface EntityRow { id?: Id; name?: string; first_name?: string; last_name?: string; title?: string; email?: string }
+// `function` only exists on /contacts rows (the contact's job title at the customer).
+export interface EntityRow extends ContactLike { id?: Id; first_name?: string; last_name?: string; title?: string; email?: string }
 // One role as it can sit on a /users row: the API ships objects (measured 09-08:
 // `roles:[{id:7,name:"backoffice",color:"#D97706",icon:"clipboard-list"}]`), a
 // bare string is the looser shape the rest of the app also tolerates.

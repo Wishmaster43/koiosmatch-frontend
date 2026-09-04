@@ -69,6 +69,11 @@ describe('taskLinkTypes', () => {
     expect(TASK_LINK_ENDPOINTS.conversation.label({ id: '1' })).toBe('#1')
   })
 
+  it('labels a contact with its job function when present, name-only otherwise (shared lib/contactLabel)', () => {
+    expect(TASK_LINK_ENDPOINTS.contact.label({ id: '1', name: 'Jan Jansen', function: 'HR Manager' })).toBe('Jan Jansen — HR Manager')
+    expect(TASK_LINK_ENDPOINTS.contact.label({ id: '1', name: 'Jan Jansen' })).toBe('Jan Jansen')
+  })
+
   it('keeps location (own branch) and customer_location (a customer\'s site) as distinct, non-overlapping tokens', () => {
     // Both offered, each with its own endpoint/label — never sharing a url or a label fn.
     expect(TASK_LINK_TYPES).toContain('location')

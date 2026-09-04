@@ -16,23 +16,8 @@ import SearchSelect from '@/components/ui/SearchSelect'
 import FieldNotice from '@/components/ui/FieldNotice'
 import Spinner from '@/components/ui/Spinner'
 import type { NoteLinkItem, NoteLinkPrincipalType } from './noteLinksApi'
+import { PRINCIPAL_ENDPOINTS, PRINCIPAL_TYPES, type PickerRow } from './noteLinkPickerHelpers'
 import type { Id } from '@/types/common'
-
-// The shape a search-list row may carry, across the five principal endpoints.
-interface PickerRow { id?: Id; name?: string; first_name?: string; last_name?: string; customer_name?: string; [k: string]: unknown }
-const personName = (r: PickerRow): string => r.name || [r.first_name, r.last_name].filter(Boolean).join(' ') || `#${r.id}`
-
-// principal type → where to search it + how to label one row. `location`
-// (CustomerLocation) reads /customer-locations, same endpoint+disambiguation
-// taskLinkTypes.ts already uses for its own `customer_location` token.
-const PRINCIPAL_ENDPOINTS: Record<NoteLinkPrincipalType, { url: string; label: (r: PickerRow) => string }> = {
-  candidate: { url: '/candidates', label: personName },
-  customer: { url: '/customers', label: r => r.name || `#${r.id}` },
-  location: { url: '/customer-locations', label: r => (r.customer_name ? `${r.name || `#${r.id}`} (${r.customer_name})` : (r.name || `#${r.id}`)) },
-  department: { url: '/departments', label: r => r.name || `#${r.id}` },
-  contact: { url: '/contacts', label: personName },
-}
-const PRINCIPAL_TYPES = Object.keys(PRINCIPAL_ENDPOINTS) as NoteLinkPrincipalType[]
 
 export default function NoteLinkPicker({ existing, onAdd, onClose, busy }: {
   // Already-linked principals on this note — filtered out of the entity list per type.

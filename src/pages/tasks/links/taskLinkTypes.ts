@@ -36,12 +36,12 @@
  *    in the app, so they round-trip the same way the original eleven do.
  */
 import type { Id } from '@/types/common'
+import { contactOptionLabel, type ContactLike } from '@/lib/contactLabel'
 
 // The shape the pickers read from each list endpoint (every field optional —
 // the endpoints differ, the label function below picks what exists).
-export interface LinkRow {
+export interface LinkRow extends ContactLike {
   id?: Id
-  name?: string
   first_name?: string
   last_name?: string
   candidate?: { name?: string; first_name?: string; last_name?: string }
@@ -63,6 +63,11 @@ export interface LinkEndpoint {
 // "first last" for person-shaped rows, with an id fallback so a label is never blank.
 const personName = (r: LinkRow): string => r.name || [r.first_name, r.last_name].filter(Boolean).join(' ') || `#${r.id}`
 
+// Contact rows show name plus job function via the shared "Name — Function"
+// picker label (lib/contactLabel), the same builder every other contact
+// picker in the app uses (§11, no re-invented copy).
+const contactLabel = (r: LinkRow): string => contactOptionLabel(r)
+
 // token → how to fetch/label it. Keys must stay inside TaskLinkResolver::types().
 export const TASK_LINK_ENDPOINTS: Record<string, LinkEndpoint> = {
   candidate:   { url: '/candidates',    label: personName },
@@ -79,7 +84,7 @@ export const TASK_LINK_ENDPOINTS: Record<string, LinkEndpoint> = {
     return r.customer_name ? `${name} (${r.customer_name})` : name
   } },
   department:  { url: '/departments',   label: r => r.name || `#${r.id}` },
-  contact:     { url: '/contacts',      label: personName },
+  contact:     { url: '/contacts',      label: contactLabel },
   workflow:    { url: '/workflows',     label: r => r.name || `#${r.id}` },
   outreach_campaign: { url: '/outreach-campaigns', label: r => r.name || `#${r.id}` },
   conversation: { url: '/conversations', label: r => {

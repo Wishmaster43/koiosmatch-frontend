@@ -170,6 +170,11 @@ vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: authState.user
 // Mutable so the link-picker load-failure test can make ONE endpoint reject and
 // then heal it again to prove the retry actually re-fetches.
 const { apiState } = vi.hoisted(() => ({ apiState: { candidatesFail: false } }))
+// /contacts rows, reset to empty per test in beforeEach; the seam test below
+// overrides it before rendering to check the function shows in the picker.
+// vi.hoisted (like apiState) so the mock factory below — itself hoisted above
+// this file's other top-level code — can safely close over it.
+const { contactState } = vi.hoisted(() => ({ contactState: { rows: [] as { id: string; name?: string; function?: string }[] } }))
 vi.mock('@/lib/api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/api')>()
   const get = vi.fn((url: string) => {
@@ -180,7 +185,10 @@ vi.mock('@/lib/api', async (importOriginal) => {
     if (url === '/task-priorities')  return Promise.resolve({ data: PRIORITY_ROWS })
     if (url === '/candidates')       return apiState.candidatesFail ? Promise.reject(new Error('boom')) : Promise.resolve({ data: { data: CANDIDATE_ROWS } })
     if (url === '/departments')      return Promise.resolve({ data: { data: DEPARTMENT_ROWS } })
-    return Promise.resolve({ data: { data: [] } }) // /customers, /contacts
+    // /contacts defaults empty; the CONTACT-PICKER-FUNCTION-1 seam test overrides
+    // `contactState.rows` to exercise the rendered option label.
+    if (url === '/contacts')         return Promise.resolve({ data: { data: contactState.rows } })
+    return Promise.resolve({ data: { data: [] } }) // /customers
   })
   const patch = vi.fn(() => Promise.resolve({ data: { data: {} } }))
   const post  = vi.fn(() => Promise.resolve({ data: { data: {} } }))
@@ -201,6 +209,7 @@ beforeEach(() => {
   teamsState.rows = ORIGINAL_TEAMS
   teamsState.isError = false
   apiState.candidatesFail = false
+  contactState.rows = []
 })
 // Blanket safety net for the fixed-clock tests below: if one of them fails/throws
 // BEFORE its own vi.useRealTimers() call runs, fake timers would otherwise stay on
@@ -655,6 +664,19 @@ describe('AddTaskModal · searchable pickers (Danny 27-07 popup redesign, JOB B)
     // Typing filters down to the matching option only.
     expect(screen.getByRole('button', { name: 'Piet Jansen' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Klaas de Vries' })).toBeNull()
+  })
+
+  // CONTACT-PICKER-FUNCTION-1: the seam test — proves the RENDERED option carries
+  // the function, not just the pure helper (a re-pointed endpoint or a dropped
+  // label argument would still pass a helper-only test but fail this one).
+  it('shows a contact option as "Name — Function" when the row carries a function', async () => {
+    contactState.rows = [{ id: 'c1', name: 'Jan Jansen', function: 'HR Manager' }, { id: 'c2', name: 'Klaas de Vries' }]
+    const user = userEvent.setup()
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+
+    await user.click(screen.getByRole('button', { name: /modal\.contact/ }))
+    expect(await screen.findByRole('button', { name: 'Jan Jansen — HR Manager' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Klaas de Vries' })).toBeInTheDocument()
   })
 })
 
