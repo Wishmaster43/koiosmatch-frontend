@@ -134,6 +134,13 @@ export function mapApplication(a: ApiApplication = {}, funnelTypes: LookupItem[]
     client: a.client_name ?? a.client?.name ?? a.customer?.name ?? vacancy.client_name ?? '—',
     // S12/13: the customer id (ApplicationListResource sends the vacancy's client_id).
     customerId: a.customer_id ?? null,
+    // S6 (bundle F, CMBE 685ce339): {id, name} straight off the application
+    // resource — null when the vacancy has no customer location/department set,
+    // or when no `id` is present (never fabricate a row from a partial payload).
+    customerLocation: a.customer_location?.id != null
+      ? { id: a.customer_location.id, name: a.customer_location.name ?? '' } : null,
+    customerDepartment: a.customer_department?.id != null
+      ? { id: a.customer_department.id, name: a.customer_department.name ?? '' } : null,
     // S5: the application's own display number (e.g. "S-00123").
     referenceNumber: a.reference_number ?? '',
     // W31 (verified live 07-08 against ApplicationDetailResource::matchLink()): the

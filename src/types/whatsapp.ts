@@ -75,7 +75,16 @@ export interface WaMessage {
 export interface WaEscalation {
   candidate_id?: string | number
   candidate?: WaCandidate
+  // The derived diagnostic string (WhatsappDashboardController::deriveEscalationReason) —
+  // kept as the fallback vocabulary for `reasons.<key>` once escalation_reason (below)
+  // is absent, e.g. an older cached payload.
   reason?: string
+  // LOOKUP-GAP-1(c) CLOSED (bundle F, CMBE 685ce339): the REAL tenant escalation-reason
+  // row (conversations.escalation_reason_id) the conversation was actually flagged
+  // with — {id, name, color}, the same SimpleLookupController shape GET
+  // /escalation-reasons hands the settings dropdown (no separate value/label pair).
+  escalation_reason_id?: string | number | null
+  escalation_reason?: { id?: string | number; name?: string; color?: string | null } | null
   hours_waiting?: number
   [k: string]: unknown
 }

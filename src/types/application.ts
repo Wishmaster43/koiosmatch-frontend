@@ -115,6 +115,13 @@ export interface Application {
   client: string
   // S12/13: the customer id (the vacancy's client) — drives the Klant EntityLink.
   customerId: Id | null
+  // S6 (bundle F, CMBE 685ce339): the vacancy's customer location/department,
+  // sent directly on the APPLICATION resource (list AND detail — the detail
+  // resource reuses the list shape via array_merge) — {id, name} or null.
+  // Replaces the old vacancy-detail-fetch cascade ApplicationDetailsCard used
+  // to need for these two fields.
+  customerLocation: { id: Id; name: string } | null
+  customerDepartment: { id: Id; name: string } | null
   // S5: the application's own human-readable display number (e.g. "S-00123").
   referenceNumber: string
   score: number | null
@@ -312,6 +319,12 @@ export interface ApiApplication {
   customer?: { name?: string }
   // S12/13: the customer id (ApplicationListResource: the vacancy's client_id).
   customer_id?: Id | null
+  // S6 (bundle F, CMBE 685ce339): {id, name} of the vacancy's customer location/
+  // department, resolved by ApplicationListResource::vacancyLocation()/
+  // vacancyDepartment() — null-safe on either side (no vacancy, or a vacancy
+  // with no location/department picked). Detail reuses this same list shape.
+  customer_location?: { id?: Id; name?: string } | null
+  customer_department?: { id?: Id; name?: string } | null
   // S5: the application's own reference number (ApplicationListResource).
   reference_number?: string | null
   score?: number | null

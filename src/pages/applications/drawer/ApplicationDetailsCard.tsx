@@ -12,22 +12,26 @@
  * read-only by derivation, not by omission: it comes from the linked vacancy's
  * contact_id and is editable only on the vacancy — see the comment at that row.
  *
- * VAC-CASCADE-MIRROR-1 (Danny 05-08): Klantlocatie/Afdeling/Contactpersoon
- * ("Customer location/Department/Contact person") are
- * NOT an application-owned axis — the Application model has no
- * customer_location_id/customer_department_id/contact_id columns of its own
- * (verified in koiosmatch-api's Application model), so these three rows are
- * entirely derived from the LINKED VACANCY's own klant→locatie→afdeling→
- * contactpersoon ("customer→location→department→contact person") cascade.
- * ApplicationDetailResource's nested `vacancy`/`contact`
- * blocks only carry the vacancy's own work-site `city` + a name-only contact —
- * they never included customer_location/customer_department at all. Rather than
- * wait on a backend resource change, this block fetches the SAME full vacancy
- * detail the Vacature tab already reads (useApplicationVacancy — shared React
- * Query cache entry, §11: no duplicate fetch when both tabs are open across a
- * session) and sources all three rows from there, mirroring DetailsGeneralTab's
- * own EntityLink treatment byte-for-byte (customers page — locations/
- * departments/contacts have no page of their own).
+ * VAC-CASCADE-MIRROR-1 (Danny 05-08) — PARTIALLY SUPERSEDED by S6 (bundle F,
+ * CMBE 685ce339): Klantlocatie/Afdeling used to have no application-owned
+ * source (the Application model has no customer_location_id/
+ * customer_department_id columns of its own), so those two rows were derived
+ * from the LINKED VACANCY's own full detail fetch (useApplicationVacancy) —
+ * an extra request per drawer open, and one gated on `vacancies.view`, a
+ * permission a viewer with only `applications.view` need not hold (measured
+ * in the 2026-09-03 audit). Bundle F closed that gap: ApplicationListResource/
+ * ApplicationDetailResource now send `customer_location`/`customer_department`
+ * ({id, name} or null) directly on the application resource, so those two
+ * rows below read `a.customerLocation`/`a.customerDepartment` — no vacancy
+ * fetch, no extra permission gate.
+ *
+ * Contactpersoon ("Contact person") still has NO equivalent on the application
+ * resource (no contact_id column either), so it stays on the VAC-CASCADE-
+ * MIRROR-1 path: sourced from the same shared vacancy-detail fetch
+ * (useApplicationVacancy — shared React Query cache entry, §11: no duplicate
+ * fetch when both tabs are open across a session), mirroring
+ * DetailsGeneralTab's own EntityLink treatment byte-for-byte (customers page —
+ * locations/departments/contacts have no page of their own).
  *
  * LABEL-LEFT-1 (Danny 05-08): converted from the label-above grid to the
  * candidate drawer's label-left row canon (fieldRowCanon) — this was the last
@@ -154,19 +158,19 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
       <Row label={t('drawer.client')}>
         <EntityLink page="customers" id={a.customerId} title={t('drawer.openCustomer')}>{a.client || '—'}</EntityLink>
       </Row>
-      {/* Klantlocatie (VAC-CASCADE-MIRROR-1) — the linked vacancy's own
-          customer_location, sourced from the shared vacancy-detail fetch (see the
-          file comment above), never the application's own fields (it has none).
-          EntityLink opens the OWNING CUSTOMER (locations have no page of their
-          own), same as DetailsGeneralTab's row for this exact field. Dash while
-          the vacancy detail is loading, absent, or has no location picked. */}
+      {/* Klantlocatie (S6, bundle F) — read directly off the application
+          resource now (see the file comment above); EntityLink opens the
+          OWNING CUSTOMER (locations have no page of their own), same target
+          as the Klant row above and DetailsGeneralTab's row for this exact
+          field. Dash when the vacancy has no location picked. Reused i18n key:
+          'vacancies:details.customerLocation' already carries this exact
+          label in all 7 locales — no duplicate applications key added. */}
       <Row label={t('vacancies:details.customerLocation')}>
-        {vac?.customerLocationName ? <EntityLink page="customers" id={vac.clientId}>{vac.customerLocationName}</EntityLink> : '—'}
+        {a.customerLocation ? <EntityLink page="customers" id={a.customerId}>{a.customerLocation.name}</EntityLink> : '—'}
       </Row>
-      {/* Afdeling — was missing entirely from this summary; the vacancy carries
-          it (customer_department), so it is added here mirroring Klantlocatie. */}
+      {/* Afdeling (S6, bundle F) — same source/target as Klantlocatie above. */}
       <Row label={t('vacancies:details.customerDepartment')}>
-        {vac?.customerDepartmentName ? <EntityLink page="customers" id={vac.clientId}>{vac.customerDepartmentName}</EntityLink> : '—'}
+        {a.customerDepartment ? <EntityLink page="customers" id={a.customerId}>{a.customerDepartment.name}</EntityLink> : '—'}
       </Row>
       {/* Contactpersoon (CONTACT-PERSON-1 + VAC-CASCADE-MIRROR-1) — the name +
           EntityLink come from the same shared vacancy-detail fetch as the two

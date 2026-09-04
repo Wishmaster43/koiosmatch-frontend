@@ -52,6 +52,8 @@ vi.mock('@/lib/api', () => ({ default: { get: vi.fn(() => Promise.resolve({ data
 const row = (over: Partial<Application> = {}): Application => ({
   id: 'app-1', candidateId: 'cand-1', candidateName: 'Jane Doe', candidateInitials: 'JD',
   vacancyId: 'vac-1', vacancyTitle: 'Verpleegkundige', client: 'Acme', customerId: 'cust-1',
+  // S6 (bundle F): required fields, unused by this row's own render — null in this fixture.
+  customerLocation: null, customerDepartment: null,
   referenceNumber: 'S-001', score: 82, task: '', phaseKey: 'applied', bucket: 'active',
   interview: null, source: '', owner: { id: null, name: '', initials: '', color: null },
   candidateStatusLabel: '', candidateStatusColor: 'var(--text-muted)', candidateStatus: '', candidatePhase: '',

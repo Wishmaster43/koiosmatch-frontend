@@ -2,10 +2,12 @@
  * ApplicationDetailsCard — the framed Details block (Danny 25-07 c: Bron/Klant/
  * Locatie/Vacature used to float without a card, unlike Motivatie right below
  * it). Covers: the fields render, the shared pencil opens the edit inputs and
- * saving calls both callbacks, the Klantlocatie/Afdeling/Contactpersoon rows
- * (VAC-CASCADE-MIRROR-1, 05-08: sourced from the linked vacancy's OWN detail —
- * present with a phone/email second line on Contactpersoon, and a dash when the
- * vacancy has none/is not yet loaded — never crash), and the APP-MATCH-SUMMARY-1
+ * saving calls both callbacks, the Klantlocatie/Afdeling rows (S6, bundle F:
+ * read straight off the application fixture's customerLocation/
+ * customerDepartment, no vacancy fetch), the Contactpersoon row (still
+ * VAC-CASCADE-MIRROR-1, 05-08: sourced from the linked vacancy's OWN detail —
+ * present with a phone/email second line, and a dash when the vacancy has
+ * none/is not yet loaded — never crash), and the APP-MATCH-SUMMARY-1
  * Match row (link + status chip + match period, rendered ONLY when the
  * application actually carries a match — never a dash row for an absent
  * relation).
@@ -62,16 +64,17 @@ const app = (over: Partial<ApplicationDetail> = {}) => ({
   ...over,
 } as unknown as ApplicationDetail)
 
-// VAC-CASCADE-MIRROR-1: the linked vacancy's full detail (only the fields this
-// card reads — clientId/customerLocationName/customerDepartmentName/contactName).
+// VAC-CASCADE-MIRROR-1: the linked vacancy's detail — only Contactpersoon still
+// reads it (clientId/contactName); Klantlocatie/Afdeling moved to the
+// application resource itself (S6, bundle F — see the `app()` fixture below).
 const vac = (over: Partial<VacancyDetail> = {}) => ({
-  clientId: 'cust-1', customerLocationName: '', customerDepartmentName: '', contactName: '',
+  clientId: 'cust-1', contactName: '',
   ...over,
 } as unknown as VacancyDetail)
 
 describe('ApplicationDetailsCard', () => {
   // VAC-CASCADE-MIRROR-1: default = no vacancy detail resolved yet (loading or
-  // nothing linked) — the three cascade rows must fall back to a dash, never crash.
+  // nothing linked) — Contactpersoon must fall back to a dash, never crash.
   beforeEach(() => {
     mockUseApplicationVacancy.mockReturnValue({ vacancy: null, loading: false, error: false })
   })
@@ -84,21 +87,26 @@ describe('ApplicationDetailsCard', () => {
     expect(screen.getByText('drawer.detailsTitle')).toBeInTheDocument()
   })
 
-  it('renders Klantlocatie/Afdeling/Contactpersoon from the linked vacancy detail (VAC-CASCADE-MIRROR-1)', () => {
-    mockUseApplicationVacancy.mockReturnValue({
-      vacancy: vac({ customerLocationName: 'Rivas Zorggroep — Den Haag', customerDepartmentName: 'Dagbesteding', contactName: 'Daan Jansen' }),
-      loading: false, error: false,
-    })
-    render(<ApplicationDetailsCard application={app()} />)
+  it('renders Klantlocatie/Afdeling straight off the application resource (S6, bundle F)', () => {
+    render(<ApplicationDetailsCard application={app({
+      customerLocation: { id: 'loc1', name: 'Rivas Zorggroep — Den Haag' },
+      customerDepartment: { id: 'dep1', name: 'Dagbesteding' },
+    })} />)
     expect(screen.getByText('vacancies:details.customerLocation')).toBeInTheDocument()
     expect(screen.getByText('Rivas Zorggroep — Den Haag')).toBeInTheDocument()
     expect(screen.getByText('vacancies:details.customerDepartment')).toBeInTheDocument()
     expect(screen.getByText('Dagbesteding')).toBeInTheDocument()
+  })
+
+  it('renders Contactpersoon from the linked vacancy detail (VAC-CASCADE-MIRROR-1, still the only source)', () => {
+    mockUseApplicationVacancy.mockReturnValue({ vacancy: vac({ contactName: 'Daan Jansen' }), loading: false, error: false })
+    render(<ApplicationDetailsCard application={app()} />)
+    expect(screen.getByText('vacancies:details.contactPerson')).toBeInTheDocument()
     expect(screen.getByText('Daan Jansen')).toBeInTheDocument()
   })
 
-  it('renders a dash for Klantlocatie/Afdeling/Contactpersoon while the vacancy detail has not resolved (never fabricated)', () => {
-    render(<ApplicationDetailsCard application={app()} />)
+  it('renders a dash for Klantlocatie/Afdeling/Contactpersoon when nothing is set/resolved (never fabricated)', () => {
+    render(<ApplicationDetailsCard application={app({ customerLocation: null, customerDepartment: null })} />)
     expect(screen.getByText('vacancies:details.customerLocation')).toBeInTheDocument()
     expect(screen.getByText('vacancies:details.customerDepartment')).toBeInTheDocument()
     expect(screen.getByText('vacancies:details.contactPerson')).toBeInTheDocument()

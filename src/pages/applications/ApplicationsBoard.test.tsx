@@ -21,6 +21,8 @@ const PHASES: BoardPhase[] = [{ key: 'applied', label: 'Applied', color: '#4f7ff
 const APP: Application = {
   id: 'app-1', candidateId: 'cand-1', candidateName: 'Jane Doe', candidateInitials: 'JD',
   vacancyId: 'vac-1', vacancyTitle: 'Verpleegkundige IC', client: 'Zorggroep A', customerId: 'cust-1',
+  // S6 (bundle F): required fields, unused by BoardCard — null in this fixture.
+  customerLocation: null, customerDepartment: null,
   referenceNumber: 'S-1', score: null, task: '', phaseKey: 'applied', bucket: 'applied', source: '',
   owner: { initials: '', color: null, name: '' } as Application['owner'],
   candidateStatusLabel: '', candidateStatusColor: '', candidateStatus: '', candidatePhase: '',

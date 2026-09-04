@@ -56,6 +56,26 @@ describe('mapApplication', () => {
     expect(mapApplication({ id: 9 }).customerId).toBeNull()
   })
 
+  // S6 (bundle F, CMBE 685ce339): customer_location/customer_department now
+  // arrive directly on the application resource ({id, name}), null-safe.
+  it('maps customer_location/customer_department to customerLocation/customerDepartment, null when absent', () => {
+    const mapped = mapApplication({
+      id: 13,
+      customer_location: { id: 'loc1', name: 'Rivas Zorggroep — Den Haag' },
+      customer_department: { id: 'dep1', name: 'Dagbesteding' },
+    })
+    expect(mapped.customerLocation).toEqual({ id: 'loc1', name: 'Rivas Zorggroep — Den Haag' })
+    expect(mapped.customerDepartment).toEqual({ id: 'dep1', name: 'Dagbesteding' })
+
+    const empty = mapApplication({ id: 14, customer_location: null, customer_department: null })
+    expect(empty.customerLocation).toBeNull()
+    expect(empty.customerDepartment).toBeNull()
+
+    // Absent entirely (older cached payload) reads the same as explicit null.
+    expect(mapApplication({ id: 15 }).customerLocation).toBeNull()
+    expect(mapApplication({ id: 15 }).customerDepartment).toBeNull()
+  })
+
   // S5: the application's own display number (ApplicationListResource).
   it('maps reference_number to referenceNumber, empty string when absent', () => {
     expect(mapApplication({ id: 10, reference_number: 'S-00123' }).referenceNumber).toBe('S-00123')

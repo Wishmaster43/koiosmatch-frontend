@@ -20,17 +20,17 @@ const initials = (c?: WaCandidate) => c
   ? `${(c.first_name ?? '')[0] ?? ''}${(c.last_name ?? '')[0] ?? ''}`.toUpperCase()
   : '?'
 const fullName  = (c?: WaCandidate) => c ? `${c.first_name ?? ''} ${c.last_name ?? ''}`.trim() : '—'
-// LOOKUP-GAP-1(c): escalation-reason colour/label used to be this fixed 3-key
-// map, ignoring the real tenant lookup (/escalation-reasons, Settings → WhatsApp
-// → Escalatieredenen). EscalationList below now resolves a reason from that
-// lookup FIRST (via useEscalationReasons), so a tenant-renamed/added reason
-// renders its own colour/label. GET /whatsapp/escalations today still always
-// sends one of these three DERIVED diagnostic keys instead of a real tenant
-// reason (WhatsappDashboardController::deriveEscalationReason guesses from
-// message timestamps — see useEscalationReasons.ts's file header for the
-// verified backend gap) — this map is the honest fallback that keeps THOSE
-// colour-coded until the backend actually returns a real reason; its label
-// still always comes from t('reasons.<key>'), never a literal string here.
+// LOOKUP-GAP-1(c) CLOSED (bundle F, CMBE 685ce339): escalation-reason colour/
+// label used to be this fixed 3-key map, ignoring the real tenant lookup
+// (/escalation-reasons, Settings → WhatsApp → Escalatieredenen). GET
+// /whatsapp/escalations now sends the REAL row the conversation was flagged
+// with (`escalation_reason` {id, name, color}) — EscalationList prefers that,
+// then the shared lookup by id (via useEscalationReasons, e.g. a renamed
+// row), and only falls back to this DERIVED diagnostic-key map for an older
+// cached payload that still carries just the heuristic `reason` string
+// (WhatsappDashboardController::deriveEscalationReason, guessed from message
+// timestamps). Its label still always comes from t('reasons.<key>'), never a
+// literal string here.
 const DERIVED_REASON_STYLE: Record<string, string> = {
   failed_delivery:   'var(--color-danger)',
   no_reply:          'var(--color-warning)',
@@ -51,12 +51,13 @@ function Avatar({ candidate, size = 32 }: { candidate?: WaCandidate; size?: numb
   )
 }
 
-// Escalated-conversation list; each row's reason colour/label prefers the real
-// tenant lookup, falling back to the derived-diagnostic-key palette (see file doc).
+// Escalated-conversation list; each row's reason colour/label prefers the
+// row's own `escalation_reason` (bundle F), then the shared tenant lookup by
+// id, then the derived-diagnostic-key palette (see file doc).
 export function EscalationList({ escalations, loading }: { escalations: WaEscalation[]; loading?: boolean }) {
   const { t } = useTranslation('whatsapp')
-  // Real tenant escalation-reason lookup (LOOKUP-GAP-1(c))
-  // comment on DERIVED_REASON_STYLE for why today's rows still fall through to it.
+  // Real tenant escalation-reason lookup (LOOKUP-GAP-1(c)) — id-based fallback
+  // for a row whose `escalation_reason` name/color went stale (renamed lookup).
   const { metaOf } = useEscalationReasons()
   return (
     <div style={{
@@ -86,11 +87,16 @@ export function EscalationList({ escalations, loading }: { escalations: WaEscala
           </div>
         )}
         {!loading && escalations.map((esc, i) => {
-          // Lookup match wins (a real tenant reason, current or renamed) — falls
-          // back to the derived-diagnostic-key palette, then a neutral tint.
-          const lookupMeta = metaOf(esc.reason)
-          const color = lookupMeta?.color ?? (esc.reason ? DERIVED_REASON_STYLE[esc.reason] : undefined) ?? 'var(--text-muted)'
-          const reasonLabel = lookupMeta?.label ?? t(`reasons.${esc.reason}`, { defaultValue: esc.reason })
+          // LOOKUP-GAP-1(c) CLOSED (bundle F): the row's OWN escalation_reason
+          // wins first — its name is already tenant copy, rendered as-is, never
+          // re-translated. Then the shared lookup (by id, or by the legacy
+          // `reason` string for an older cached payload without an id), then
+          // the derived-diagnostic-key palette, then a neutral tint.
+          const lookupMeta = metaOf(esc.escalation_reason_id != null ? String(esc.escalation_reason_id) : esc.reason)
+          const color = esc.escalation_reason?.color ?? lookupMeta?.color
+            ?? (esc.reason ? DERIVED_REASON_STYLE[esc.reason] : undefined) ?? 'var(--text-muted)'
+          const reasonLabel = esc.escalation_reason?.name ?? lookupMeta?.label
+            ?? t(`reasons.${esc.reason}`, { defaultValue: esc.reason })
           return (
             <div key={esc.candidate_id ?? i} style={{
               display: 'flex', alignItems: 'center', gap: 10,

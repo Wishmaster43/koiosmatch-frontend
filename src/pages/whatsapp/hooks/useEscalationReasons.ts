@@ -7,16 +7,15 @@
  * useOutreachOutcomes/useNationalities (one GET per session, shared across every
  * mounted consumer).
  *
- * KNOWN BACKEND GAP (verified against koiosmatch-api, 2026-08-08): GET
- * /whatsapp/escalations (WhatsappDashboardController::escalations) still returns
- * a DERIVED diagnostic string ('failed_delivery' | 'no_reply' | 'negative_response'
- * from deriveEscalationReason()) on every row, never the conversation's real
- * escalation_reason_id — that column exists on the Conversation model/resource
- * but the dashboard endpoint never resolves/returns it. So metaOf() below already
- * resolves a REAL tenant reason (by id or name) correctly, but today's feed never
- * sends one; see ../components.tsx's DERIVED_REASON_STYLE for the honest fallback
- * that keeps today's three diagnostic keys colour-coded until that backend gap
- * closes. Flagged for CMBE, not fixed here (frontend-only task, backend read-only).
+ * BACKEND GAP CLOSED (bundle F, CMBE 685ce339 — was verified open 2026-08-08):
+ * GET /whatsapp/escalations (WhatsappDashboardController::escalations) now sends
+ * both the conversation's real `escalation_reason_id` and its resolved
+ * `escalation_reason` {id, name, color} row, alongside the older DERIVED
+ * diagnostic string ('failed_delivery' | 'no_reply' | 'negative_response' from
+ * deriveEscalationReason()). ../components.tsx's EscalationList prefers the real
+ * row, falls back to metaOf() below (id-based, covers a renamed lookup row), and
+ * only reaches DERIVED_REASON_STYLE's diagnostic-key palette for an older cached
+ * payload without either.
  */
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
