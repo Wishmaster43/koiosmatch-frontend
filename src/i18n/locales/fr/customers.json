@@ -121,6 +121,8 @@
     "blacklistReasonTitle": "Raison de la liste noire",
     "blacklistReasonLabel": "Raison",
     "blacklistReasonPick": "Choisir une raison…",
+    "blacklistReasonNone": "Aucun motif de liste noire n'est encore configuré pour ce client.",
+    "blacklistReasonSetup": "Configurer les motifs",
     "blacklistReasonOptionalHint": "Une raison est facultative pour ce locataire"
   },
   "overview": {
@@ -297,6 +299,10 @@
       "errForbidden": "Vous n'êtes pas autorisé à fusionner des sites.",
       "errFailed": "Échec de la fusion. Veuillez réessayer."
     }
+  },
+  "location": {
+    "branch": "Agence",
+    "noBranch": "Aucune agence"
   },
   "departments": {
     "empty": "Aucun service pour le moment",

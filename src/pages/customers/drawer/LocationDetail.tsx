@@ -14,8 +14,9 @@
  * LocationDepartments / LocationContacts (shared hooks, one source of truth with
  * the top-level tabs). Delete asks for confirmation and returns to the list.
  */
-import { useState } from 'react'
+import { useState, useEffect, useId } from 'react'
 import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import SectionCard from '@/components/ui/SectionCard'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
@@ -72,7 +73,13 @@ import type { Contact, Department, Location } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import { archiveLocation, restoreLocation } from '../hooks/useCustomerLocations'
 import { useSubEntityArchive } from '../hooks/useSubEntityArchive'
-import type { LocationPayload } from '../hooks/useCustomerLocations'
+import type { LocationPayload, LocationUpdateFailure } from '../hooks/useCustomerLocations'
+// K-283: the location's OWN branch field — the shared searchable/clearable combobox
+// (never a bare <select>, §3A) + the shared inline error notice for the 403 case.
+import CreatableSelect from '@/components/ui/CreatableSelect'
+import FieldNotice from '@/components/ui/FieldNotice'
+import { CANON_LABEL_STYLE, CANON_LABEL_WIDTH } from '@/components/drawer/fieldRowCanon'
+import { extractApiError } from '@/lib/extractApiError'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
 import ScopedApplicationsTab from './ScopedApplicationsTab'
 // NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1: this location's own Notities/Documenten
@@ -99,7 +106,10 @@ interface Props {
   // EXTRACT-1: the caller's own customers.update permission check for the
   // Koppelingen sub-tab's "Koppelen" buttons (§7 — UI gate, backend re-checks).
   canLinkBackoffice?: boolean
-  onSave: (id: Id, payload: Partial<LocationPayload>) => void
+  // K-283: widened from `=> void` (mirrors onDelete/onAddContact above) — the real
+  // useCustomerLocations().update resolves Location | LocationUpdateFailure, and the
+  // branch field below needs that to revert optimistically + show a 403 notice.
+  onSave: (id: Id, payload: Partial<LocationPayload>) => void | Promise<Location | LocationUpdateFailure | undefined>
   // SUBENTITEIT-DELETE-1: widened from `=> void` — see DepartmentDetail's identical
   // comment for why the existing `(id) => void`-typed callers stay compatible.
   onDelete: (id: Id) => void | Promise<DeleteResult>
@@ -122,6 +132,61 @@ interface Props {
    * a merge, so the host (LocationsTab) can switch the open record to it. */
   onMerged?: (survivorId: Id) => void
   close: () => void
+}
+
+/**
+ * LocationBranchField — K-283: which ONE of the tenant's own branches this site's
+ * own records run through (a DIFFERENT concept than LocationBranchSection's
+ * multi-branch VISIBILITY set inside LocationAddressTab — LOCATIE-VESTIGING-1's
+ * "which branches can SEE this location"). Lives as its own row directly in
+ * LocationDetail, next to LocationAddressTab, rather than inside that file's own
+ * field card (out of this ticket's scope) — the "FieldRow under the card" fallback.
+ *
+ * Immediate onChange PATCH (not the pencil→save cycle every other field on the
+ * Adres & gegevens sub-tab uses): local optimistic value, reverted on failure. A
+ * 403 (missing grant on the OLD or the NEW branch) renders an inline FieldNotice
+ * with the server's own message; any other failure already gets the generic toast
+ * useCustomerLocations.update() fires on every field's save path.
+ */
+function LocationBranchField({ location: loc, options, onSave, t }: {
+  location: Location
+  options: { value: string; label: string }[]
+  onSave: Props['onSave']
+  t: TFunction
+}) {
+  const [value, setValue] = useState(loc.branchId != null ? String(loc.branchId) : '')
+  const [notice, setNotice] = useState<string | null>(null)
+  // A <button> trigger is not labelable (§6) — pair it with the visible label explicitly.
+  const labelId = useId()
+  // Re-sync the local draft when the underlying row changes (server reconciliation,
+  // or the pager stepping to a different location while this component stays mounted).
+  useEffect(() => { setValue(loc.branchId != null ? String(loc.branchId) : ''); setNotice(null) }, [loc.id, loc.branchId])
+
+  // Optimistic pick/clear; reverted on any failure, with a specific 403 notice.
+  const handleChange = (next: string) => {
+    const previous = value
+    setValue(next)
+    setNotice(null)
+    Promise.resolve(onSave(loc.id as Id, { branchId: (next || null) as Id | null })).then(result => {
+      if (result && 'ok' in result && result.ok === false) {
+        setValue(previous)
+        if (result.status === 403) setNotice(extractApiError(result.error, t('locations.saveFailed')))
+      }
+    })
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26 }}>
+        <span id={labelId} style={CANON_LABEL_STYLE}>{t('location.branch')}</span>
+        <div style={{ minWidth: 0, flex: 1, maxWidth: 260 }}>
+          <CreatableSelect value={value} onChange={handleChange} options={options} allowCreate={false}
+            aria-labelledby={labelId} clearable clearLabel={t('location.branch')} placeholder={t('location.noBranch')} />
+        </div>
+      </div>
+      {notice && <FieldNotice text={notice} severity="error" style={{ marginLeft: CANON_LABEL_WIDTH + 12 }} />}
+    </div>
+  )
 }
 
 // The location drill-down: its own field editing, department/contact sub-sections,
@@ -322,10 +387,16 @@ export default function LocationDetail({
       {/* Adres & gegevens — no repeated title (it would duplicate the sub-tab label).
           §0.3 split: the whole sub-tab body now lives in LocationAddressTab. */}
       {subTab === 'address' && (
-        <LocationAddressTab location={l} customerId={customerId} contacts={contacts} t={t}
-          provinceOptions={provinceOptions} countryOptions={countryOptions} branchOptions={branchOptions}
-          onSave={onSave} onAddContact={onAddContact}
-          onGoToContacts={id => { setSubTab('contacts'); if (id != null) setOpenContactId(id) }} />
+        <>
+          <LocationAddressTab location={l} customerId={customerId} contacts={contacts} t={t}
+            provinceOptions={provinceOptions} countryOptions={countryOptions} branchOptions={branchOptions}
+            onSave={onSave} onAddContact={onAddContact}
+            onGoToContacts={id => { setSubTab('contacts'); if (id != null) setOpenContactId(id) }} />
+          {/* K-283: this site's OWN single branch — a FieldRow of its own (see the
+              component's doc comment above for why it is not inside LocationAddressTab's
+              own field card). */}
+          <LocationBranchField location={l} options={branchOptions} onSave={onSave} t={t} />
+        </>
       )}
 
       {/* The SAME panel the customer's Afdelingen tab renders — one department surface. */}

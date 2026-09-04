@@ -9,8 +9,8 @@
  * the /customer-phases lookup, so a tenant rename needs no re-fetch of the list.
  */
 import { describe, it, expect } from 'vitest'
-import { mapCustomer, mapCustomerNoteRow } from './mapCustomer'
-import type { ApiCustomer } from '@/types/customer'
+import { mapCustomer, mapCustomerNoteRow, mapLocation } from './mapCustomer'
+import type { ApiCustomer, ApiLocation } from '@/types/customer'
 
 describe('mapCustomer · phase (KLANT-FASE-1)', () => {
   it('carries the phase slug through untouched', () => {
@@ -107,5 +107,37 @@ describe('mapCustomer · detachedCount', () => {
   it('leaves detachedCount undefined when the field is absent, never a fabricated 0', () => {
     const c = mapCustomer({ id: 1, name: 'X' } as ApiCustomer)
     expect(c.detachedCount).toBeUndefined()
+  })
+})
+
+/**
+ * K-283 — a location's OWN single branch (branch_id/branch), a DIFFERENT field than
+ * branchIds/branches (LOCATIE-VESTIGING-1's multi-branch visibility set). Mirrors
+ * mapCustomer's own branch/branch_id read (BRANCH-1); only sent on routes that
+ * eager-load it, so the mapper stays tolerant of null/absent.
+ */
+describe('mapLocation · branch (K-283)', () => {
+  it('maps a present branch to branchId + branch {id,name}', () => {
+    const l = mapLocation({ id: 'loc-1', name: 'Vestiging A', branch_id: 'b-1', branch: { id: 'b-1', name: 'Amsterdam' } } as ApiLocation)
+    expect(l.branchId).toBe('b-1')
+    expect(l.branch).toEqual({ id: 'b-1', name: 'Amsterdam' })
+  })
+
+  it('maps an explicit null branch to branchId null and branch null', () => {
+    const l = mapLocation({ id: 'loc-1', name: 'Vestiging A', branch_id: null, branch: null } as ApiLocation)
+    expect(l.branchId).toBeNull()
+    expect(l.branch).toBeNull()
+  })
+
+  it('maps an absent branch (older/non-eager-loaded payload) to branchId null and branch null', () => {
+    const l = mapLocation({ id: 'loc-1', name: 'Vestiging A' } as ApiLocation)
+    expect(l.branchId).toBeNull()
+    expect(l.branch).toBeNull()
+  })
+
+  it('falls back to branch_id when only the flat id is sent, without the nested branch object', () => {
+    const l = mapLocation({ id: 'loc-1', name: 'Vestiging A', branch_id: 'b-2' } as ApiLocation)
+    expect(l.branchId).toBe('b-2')
+    expect(l.branch).toBeNull()
   })
 })

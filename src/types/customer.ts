@@ -153,6 +153,12 @@ export interface Location {
   branches: { id: Id; name: string }[]
   branchInherited: boolean
   effectiveBranches: { id: Id; name: string }[]
+  // K-283: this SITE's OWN single branch — mirrors Customer's branchId/branch pair
+  // (BRANCH-1), a DIFFERENT concept than branchIds/branches above (LOCATIE-VESTIGING-1's
+  // VISIBILITY set: which of the tenant's branches can SEE this location). This is
+  // which ONE of the tenant's own branches this location's own records run through.
+  branchId: Id | null
+  branch: { id: Id; name: string } | null
   // PDOK coordinates — customer_locations.lat/lng, float-cast by CustomerLocationResource.
   // There is no per-location re-geocode route yet, so these are read-only in the UI.
   lat: number | null
@@ -395,6 +401,10 @@ export interface ApiLocation {
   logo_url?: string | null
   branch_ids?: Id[]; branches?: { id?: Id; name?: string }[]
   branch_inherited?: boolean; effective_branches?: { id?: Id; name?: string }[]
+  // K-283: this location's OWN single branch (mirrors ApiCustomer's branch/branch_id) —
+  // sent on every read route now; nullable, and 403's when the caller lacks a grant on
+  // the old or the new branch.
+  branch?: { id?: Id; name?: string } | null; branch_id?: Id | null
   departments?: ApiDepartment[]; contacts?: ApiContact[]
   status?: ApiStatusRef | null; status_id?: Id | null
   custom_fields?: Record<string, unknown>

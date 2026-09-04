@@ -121,6 +121,8 @@
     "blacklistReasonTitle": "Blacklist reason",
     "blacklistReasonLabel": "Reason",
     "blacklistReasonPick": "Pick a reason…",
+    "blacklistReasonNone": "No blacklist reasons configured for this tenant yet.",
+    "blacklistReasonSetup": "Set up reasons",
     "blacklistReasonOptionalHint": "A reason is optional for this tenant"
   },
   "overview": {
@@ -297,6 +299,10 @@
       "errForbidden": "You are not allowed to merge locations.",
       "errFailed": "Merge failed. Please try again."
     }
+  },
+  "location": {
+    "branch": "Branch",
+    "noBranch": "No branch"
   },
   "departments": {
     "empty": "No departments yet",

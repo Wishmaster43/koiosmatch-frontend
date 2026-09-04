@@ -38,7 +38,22 @@ export interface LocationPayload {
   // Tenant custom-field values (§3B "Eigen velden" — the Extra sub-tab).
   customFields: Record<string, unknown>  /** LOCATIE-VESTIGING-1 — empty array = no deviation (inherit the customer's set). */
   branchIds: Id[]
+  // K-283: this site's OWN single branch (nullable) — a DIFFERENT field than branchIds
+  // above (LOCATIE-VESTIGING-1's visibility set). null clears it explicitly. OPTIONAL
+  // (unlike branchIds) so AddLocationModal's existing full-payload literal, which does
+  // not set it yet, keeps compiling — an omitted key simply means "not sent" (toApi).
+  branchId?: Id | null
 }
+
+/**
+ * K-283: the shape `update()` below resolves to on a FAILED PATCH — carries the raw
+ * axios error alongside the HTTP status, so a caller that needs more than the generic
+ * toast (the branch picker's own 403 notice) can inspect it. Every EXISTING caller
+ * ignores the resolved value entirely (fire-and-forget), so this addition changes
+ * nothing for them: `update()` still always resolves (never rejects) and still always
+ * shows the generic toast + reverts the optimistic row on any failure.
+ */
+export interface LocationUpdateFailure { ok: false; status?: number; error: unknown }
 
 /**
  * Broadcast channel for "this customer's location list changed underneath you"
@@ -54,7 +69,9 @@ const isTemp = (id: Id | undefined) => typeof id === 'string' && id.startsWith('
 
 // Build the API body from the payload — empty strings go through as '' (the BE
 // rules are `nullable` so an explicit clear is honoured, never silently dropped).
-const toApi = (p: Partial<LocationPayload>) => ({
+// Exported (mirrors useCustomerDepartments.toApi) so the wire mapping is unit-testable
+// on its own, without mounting the hook.
+export const toApi = (p: Partial<LocationPayload>) => ({
   ...(p.name !== undefined ? { name: p.name } : {}),
   ...(p.street !== undefined ? { street: p.street } : {}),
   ...(p.houseNumber !== undefined ? { house_number: p.houseNumber } : {}),
@@ -77,6 +94,9 @@ const toApi = (p: Partial<LocationPayload>) => ({
   // deviation untouched; an EMPTY ARRAY clears it, which is how a site goes back to
   // inheriting the customer's branches. So it must be sent as [], never omitted.
   ...(p.branchIds !== undefined ? { branch_ids: p.branchIds } : {}),
+  // K-283: this site's OWN single branch — nullable; an explicit `null` clears it
+  // (the picker's clear affordance), never omitted once the caller means to change it.
+  ...(p.branchId !== undefined ? { branch_id: p.branchId || null } : {}),
 })
 
 // Monotonic counter behind the optimistic row id (see `add`).
@@ -141,7 +161,14 @@ export function useCustomerLocations(customerId: Id | undefined) {
     setLocations(ls => ls.map(x => x.id === id ? { ...x, ...optimistic } : x))
     return api.patch(`/customers/${customerId}/locations/${id}`, toApi(payload))
       .then(res => { const saved = mapLocation(unwrap<ApiLocation>(res)); setLocations(ls => ls.map(x => x.id === id ? saved : x)); return saved })
-      .catch(() => { setLocations(snapshot); notifyError(t('locations.saveFailed')); return null })
+      .catch((err: unknown) => {
+        setLocations(snapshot)
+        notifyError(t('locations.saveFailed'))
+        // K-283: also resolve the raw error + status (see LocationUpdateFailure above) —
+        // still resolves (never rejects), so every existing fire-and-forget caller is unaffected.
+        const status = (err as { response?: { status?: number } })?.response?.status
+        return { ok: false, status, error: err } as LocationUpdateFailure
+      })
   }, [customerId, locations, t])
 
   // Delete — optimistic remove; a 409 (still referenced — the row's own `in_use`

@@ -121,6 +121,8 @@
     "blacklistReasonTitle": "Motivo de la lista negra",
     "blacklistReasonLabel": "Motivo",
     "blacklistReasonPick": "Elige un motivo…",
+    "blacklistReasonNone": "Aún no hay motivos de lista negra configurados para este inquilino.",
+    "blacklistReasonSetup": "Configurar motivos",
     "blacklistReasonOptionalHint": "Un motivo es opcional para esta organización"
   },
   "overview": {
@@ -297,6 +299,10 @@
       "errForbidden": "No tienes permiso para combinar ubicaciones.",
       "errFailed": "Error al combinar. Inténtalo de nuevo."
     }
+  },
+  "location": {
+    "branch": "Sucursal",
+    "noBranch": "Sin sucursal"
   },
   "departments": {
     "empty": "Aún no hay departamentos",

@@ -121,6 +121,8 @@
     "blacklistReasonTitle": "Motivo da lista negra",
     "blacklistReasonLabel": "Motivo",
     "blacklistReasonPick": "Escolha um motivo…",
+    "blacklistReasonNone": "Ainda não há motivos de lista negra configurados para este inquilino.",
+    "blacklistReasonSetup": "Configurar motivos",
     "blacklistReasonOptionalHint": "Um motivo é opcional para este tenant"
   },
   "overview": {
@@ -297,6 +299,10 @@
       "errForbidden": "Não tem permissões para unir localizações.",
       "errFailed": "Falha ao unir. Tente novamente."
     }
+  },
+  "location": {
+    "branch": "Filial",
+    "noBranch": "Sem filial"
   },
   "departments": {
     "empty": "Ainda sem departamentos",

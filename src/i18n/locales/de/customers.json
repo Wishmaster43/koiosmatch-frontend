@@ -121,6 +121,8 @@
     "blacklistReasonTitle": "Grund für Blacklist",
     "blacklistReasonLabel": "Grund",
     "blacklistReasonPick": "Grund wählen…",
+    "blacklistReasonNone": "Für diesen Mandanten sind noch keine Blacklist-Gründe hinterlegt.",
+    "blacklistReasonSetup": "Gründe einrichten",
     "blacklistReasonOptionalHint": "Ein Grund ist für diesen Mandanten optional"
   },
   "overview": {
@@ -297,6 +299,10 @@
       "errForbidden": "Sie sind nicht berechtigt, Standorte zusammenzuführen.",
       "errFailed": "Zusammenführen fehlgeschlagen. Bitte erneut versuchen."
     }
+  },
+  "location": {
+    "branch": "Niederlassung",
+    "noBranch": "Keine Niederlassung"
   },
   "departments": {
     "empty": "Noch keine Abteilungen",

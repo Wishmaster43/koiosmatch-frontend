@@ -121,6 +121,8 @@
     "blacklistReasonTitle": "Reden voor blacklist",
     "blacklistReasonLabel": "Reden",
     "blacklistReasonPick": "Kies een reden…",
+    "blacklistReasonNone": "Nog geen blacklistredenen ingesteld voor deze tenant.",
+    "blacklistReasonSetup": "Redenen instellen",
     "blacklistReasonOptionalHint": "Een reden is optioneel voor deze tenant"
   },
   "overview": {
@@ -297,6 +299,10 @@
       "errForbidden": "Je hebt geen rechten om locaties samen te voegen.",
       "errFailed": "Samenvoegen mislukt. Probeer het opnieuw."
     }
+  },
+  "location": {
+    "branch": "Vestiging",
+    "noBranch": "Geen vestiging"
   },
   "departments": {
     "empty": "Nog geen afdelingen",

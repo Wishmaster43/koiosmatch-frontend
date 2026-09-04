@@ -198,6 +198,11 @@ export function mapLocation(l: ApiLocation = {}): Location {
     branches: (l.branches ?? []).filter((b): b is { id: Id; name?: string } => b?.id != null).map(b => ({ id: b.id, name: b.name ?? '—' })),
     branchInherited: l.branch_inherited ?? true,
     effectiveBranches: (l.effective_branches ?? []).filter((b): b is { id: Id; name?: string } => b?.id != null).map(b => ({ id: b.id, name: b.name ?? '—' })),
+    // K-283: this site's OWN single branch — mirrors mapCustomer's own branch/branch_id
+    // read (BRANCH-1), a DIFFERENT concept than branchIds/branches above (LOCATIE-
+    // VESTIGING-1's visibility set). Tolerant: only present on routes that eager-load it.
+    branchId: (l.branch?.id ?? l.branch_id ?? null) as Id | null,
+    branch: l.branch?.id != null ? { id: l.branch.id as Id, name: l.branch.name ?? '—' } : null,
     // PDOK coordinates — tolerant coercion (Laravel decimals arrive as strings, §10).
     lat: toCoord(l.lat),
     lng: toCoord(l.lng),

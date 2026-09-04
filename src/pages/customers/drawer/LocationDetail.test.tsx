@@ -28,7 +28,9 @@ import type { LookupOption } from '@/types/common'
 // useCustomFields hits the API in an effect — stub it so the Extra sub-tab stays
 // hidden (no custom fields defined) and no network call happens under test.
 // useLocations is react-query-backed (the Vestiging block's option list) — mocked away.
-vi.mock('@/lib/useLocations', () => ({ useLocations: () => [{ value: 'br-1', label: 'Vestiging Noord' }] }))
+vi.mock('@/lib/useLocations', () => ({
+  useLocations: () => [{ value: 'br-1', label: 'Vestiging Noord' }, { value: 'br-2', label: 'Vestiging Zuid' }],
+}))
 vi.mock('@/lib/useCustomFields', () => ({
   useCustomFields: () => ({ fields: [], allFields: [], loading: false, invalidate: () => {} }),
 }))
@@ -136,6 +138,8 @@ const location = (overrides: Partial<Location> = {}): Location => ({
   costCenter: '', billingEmail: '', address: '', description: '', departments: [], contacts: [],
   // LOCATIE-VESTIGING-1 — no own couplings, so this site inherits the customer's.
   branchIds: [], branches: [], branchInherited: true, effectiveBranches: [],
+  // K-283 — this site's OWN single branch; null by default (not eager-loaded/unset).
+  branchId: null, branch: null,
   lat: null, lng: null,
   statusId: 'status-active', status: 'active', statusLabel: 'Actief',
   // eslint-disable-next-line no-restricted-syntax -- DATA fixture, mirrors a tenant lookup colour
@@ -623,7 +627,11 @@ describe('LocationDetail · Adres & gegevens section order (mirrors the Bedrijf 
     const contact = screen.getByText(ct('locations.detail.contactTitle'))
     const omschrijving = screen.getByText(ct('locations.detail.description'))
     const koios = screen.getByText(ct('ai.title'))
-    const vestiging = screen.getByText(ct('locations.detail.branchTitle'))
+    // K-283 added a SECOND "Vestiging" label right after this one (the location's own
+    // single-branch field, LocationBranchField) — same translated word, different
+    // field/concept (see that test's own describe block). The multi-branch section
+    // title below is still the first of the two in DOM order.
+    const vestiging = screen.getAllByText(ct('locations.detail.branchTitle'))[0]
 
     // DOCUMENT_POSITION_FOLLOWING on `b` relative to `a` means `a` sits first in DOM order.
     const isBefore = (a: HTMLElement, b: HTMLElement) =>
@@ -679,6 +687,79 @@ describe('LocationDetail · Vestiging helper text removed', () => {
   it('no longer renders the inherited/deviate explainer paragraph under Vestiging', () => {
     render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} />)
     expect(screen.queryByText(ct('locations.detail.branchHint'))).not.toBeInTheDocument()
+  })
+})
+
+/**
+ * K-283 — this location's OWN single branch (branchId/branch), a DIFFERENT field
+ * than the multi-branch LocationBranchSection above (LOCATIE-VESTIGING-1's
+ * visibility set). Immediate onChange PATCH, local optimistic value reverted on
+ * failure, and an inline notice specifically for the 403 (missing grant on the
+ * old/new branch) the backend contract calls out.
+ */
+describe('LocationDetail · own branch field (K-283)', () => {
+  it('renders the current branch name in the picker trigger', () => {
+    render(<LocationDetail location={location({ branchId: 'br-1', branch: { id: 'br-1', name: 'Vestiging Noord' } })}
+      onSave={vi.fn()} {...baseProps} />)
+    expect(screen.getByRole('button', { name: /Vestiging Noord/ })).toBeInTheDocument()
+  })
+
+  it('shows the placeholder when the location has no branch of its own yet', () => {
+    render(<LocationDetail location={location({ branchId: null, branch: null })} onSave={vi.fn()} {...baseProps} />)
+    expect(screen.getByRole('button', { name: new RegExp(ct('location.noBranch')) })).toBeInTheDocument()
+  })
+
+  it('picking another branch calls onSave with the new branchId, through this location\'s own id', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<LocationDetail location={location({ branchId: 'br-1', branch: { id: 'br-1', name: 'Vestiging Noord' } })}
+      onSave={onSave} {...baseProps} />)
+
+    await user.click(screen.getByRole('button', { name: /Vestiging Noord/ }))
+    await user.click(screen.getByRole('button', { name: 'Vestiging Zuid' }))
+
+    expect(onSave).toHaveBeenCalledWith('loc-1', { branchId: 'br-2' })
+  })
+
+  it('clearing sends branchId null', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<LocationDetail location={location({ branchId: 'br-1', branch: { id: 'br-1', name: 'Vestiging Noord' } })}
+      onSave={onSave} {...baseProps} />)
+
+    // The clear affordance's accessible name is composed via common:clearField (VAC-CLEAR-1).
+    await user.click(screen.getByRole('button', { name: cm('clearField', { field: ct('location.branch') }) }))
+
+    expect(onSave).toHaveBeenCalledWith('loc-1', { branchId: null })
+  })
+
+  it('a 403 (missing grant on the old/new branch) reverts the optimistic pick and shows the server message', async () => {
+    const user = userEvent.setup()
+    const err = { response: { status: 403, data: { message: 'Je hebt geen rechten op deze vestiging.' } } }
+    const onSave = vi.fn().mockResolvedValue({ ok: false, status: 403, error: err })
+    render(<LocationDetail location={location({ branchId: 'br-1', branch: { id: 'br-1', name: 'Vestiging Noord' } })}
+      onSave={onSave} {...baseProps} />)
+
+    await user.click(screen.getByRole('button', { name: /Vestiging Noord/ }))
+    await user.click(screen.getByRole('button', { name: 'Vestiging Zuid' }))
+
+    expect(onSave).toHaveBeenCalledWith('loc-1', { branchId: 'br-2' })
+    // Reverted: the trigger shows the OLD branch again, and the server's own message renders.
+    await waitFor(() => expect(screen.getByRole('button', { name: /Vestiging Noord/ })).toBeInTheDocument())
+    expect(screen.getByText('Je hebt geen rechten op deze vestiging.')).toBeInTheDocument()
+  })
+
+  it('a non-403 failure reverts silently (the hook\'s own generic toast already covers it) — no notice', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn().mockResolvedValue({ ok: false, status: 500, error: { response: { status: 500 } } })
+    render(<LocationDetail location={location({ branchId: 'br-1', branch: { id: 'br-1', name: 'Vestiging Noord' } })}
+      onSave={onSave} {...baseProps} />)
+
+    await user.click(screen.getByRole('button', { name: /Vestiging Noord/ }))
+    await user.click(screen.getByRole('button', { name: 'Vestiging Zuid' }))
+
+    await waitFor(() => expect(screen.getByRole('button', { name: /Vestiging Noord/ })).toBeInTheDocument())
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 })
 

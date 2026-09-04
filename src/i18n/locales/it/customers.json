@@ -121,6 +121,8 @@
     "blacklistReasonTitle": "Motivo della blacklist",
     "blacklistReasonLabel": "Motivo",
     "blacklistReasonPick": "Scegli un motivo…",
+    "blacklistReasonNone": "Nessun motivo di blacklist configurato per questo tenant.",
+    "blacklistReasonSetup": "Configura i motivi",
     "blacklistReasonOptionalHint": "Un motivo è facoltativo per questo tenant"
   },
   "overview": {
@@ -297,6 +299,10 @@
       "errForbidden": "Non hai i permessi per unire le sedi.",
       "errFailed": "Unione non riuscita. Riprova."
     }
+  },
+  "location": {
+    "branch": "Filiale",
+    "noBranch": "Nessuna filiale"
   },
   "departments": {
     "empty": "Ancora nessun reparto",
