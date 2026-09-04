@@ -244,6 +244,26 @@ describe('NotesTab · rights (RECHTEN-DETAIL-1)', () => {
   })
 })
 
+// K-225 H2 / NOTITIE-DOORLINK-1 read side: the note thread now carries a `links`
+// field per note — NoteRow must pass only the MANUAL ones down to NoteLinksRow,
+// the derived link to the note's own host is noise there (see NoteRow's docblock).
+describe('NotesTab · note links read side (K-225 H2)', () => {
+  it('renders exactly one chip for a note carrying one derived and one manual link', () => {
+    const linked = note({
+      id: 'n1',
+      links: [
+        { id: 'derived', linkable_type: 'candidate', linkable_id: 'c1', label: 'Self', is_manual: false },
+        { id: 'manual', linkable_type: 'customer', linkable_id: 'cu1', label: 'Acme B.V.', is_manual: true },
+      ],
+    })
+    render(<NotesTab notes={[linked]} labels={labels} noteLinks={{ host: 'candidates', hostId: 'c1' }}
+      showTimeline={false} showConversations={false} />)
+    // No real i18next instance in this file — notes.links.type.* falls back to the raw key.
+    expect(screen.getByText('notes.links.type.customer · Acme B.V.')).toBeInTheDocument()
+    expect(screen.queryByText(/Self/)).not.toBeInTheDocument()
+  })
+})
+
 /**
  * NOTE-FILTERS-1 / NOTES-DOC-FILTER-MENU-1 (Danny 08-08): the type + channel
  * filters moved from two inline dropdowns next to search into the shared

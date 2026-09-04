@@ -385,6 +385,8 @@
     "archiveFailed": "Archiving failed (possibly active links).",
     "blacklistReasonLabel": "Blacklist reason",
     "blacklistReasonPick": "Pick a reason…",
+    "blacklistReasonNone": "No blacklist reasons configured for this tenant yet.",
+    "blacklistReasonSetup": "Set up reasons",
     "tasksTitle": "Tasks",
     "tasksLoading": "Loading tasks…",
     "tasksError": "Failed to load tasks.",
@@ -1455,7 +1457,13 @@
       "statusSet": "Status set to {{to}}",
       "reason": " · Reason: {{reason}}",
       "blacklistReason": " · Blacklist reason: {{reason}}",
-      "effectiveFrom": " · Effective from {{date}}"
+      "effectiveFrom": " · Effective from {{date}}",
+      "phaseChange": "Phase changed from {{from}} to {{to}}",
+      "phaseSet": "Phase set to {{to}}",
+      "archived": "Archived",
+      "restored": "Restored from archive",
+      "markedForDeletion": "Deletion scheduled",
+      "eraseAt": " · Will be deleted on {{date}}"
     }
   }
 }

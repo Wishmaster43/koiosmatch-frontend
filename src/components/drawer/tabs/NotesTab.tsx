@@ -89,7 +89,8 @@ import NoteRow from './notes/NoteRow'
 // (noteRights, §11: one rule, two surfaces — they must never disagree).
 import { canManageNote as canManageNoteRule, isSystemNote } from './notes/noteRights'
 // NOTITIE-DOORLINK-1 write side (Danny GO 28-08): the manual koppel-picker capability type.
-import type { NoteLinkHost } from './notes/noteLinksApi'
+// K-225 H2: NoteLinkItem also types the note's own read-side `links` field (NoteItem below).
+import type { NoteLinkHost, NoteLinkItem } from './notes/noteLinksApi'
 // K-225 NOTE-META-1: an automation note renders its sentence from `meta` in the reader's language.
 import { noteMetaSentence, type NoteMeta } from './notes/noteMetaSentence'
 import { useLookupsOptional } from '@/context/LookupsContext'
@@ -115,7 +116,9 @@ export interface NoteType { value: string; label: string; color?: string }
 // has_previous_version (NOTE-UNDO-FE-1, K-172): true once the note carries an
 // undo slot (one previous body, filled by the update that most recently
 // overwrote it) — drives the row's "restore previous version" action below.
-export interface NoteItem { type?: string; channel?: string; title?: string; author?: string; author_name?: string; author_id?: string | number | null; created_by?: string | { name?: string }; updated_by?: string | { name?: string }; edited_by?: string; text?: string; body?: string; ago?: string; created_at?: string; updated_at?: string; language?: string; has_previous_version?: boolean; [k: string]: unknown }
+// links (NOTITIE-DOORLINK-1 read side, K-225 H2): the note's manual + derived
+// principal links — NoteRow renders only the manual ones (see that file).
+export interface NoteItem { type?: string; channel?: string; title?: string; author?: string; author_name?: string; author_id?: string | number | null; created_by?: string | { name?: string }; updated_by?: string | { name?: string }; edited_by?: string; text?: string; body?: string; ago?: string; created_at?: string; updated_at?: string; language?: string; has_previous_version?: boolean; links?: NoteLinkItem[]; [k: string]: unknown }
 // K-172: the previous-version peek — nulls when the note has no undo slot yet.
 export interface NotePreviousVersion { previous_body: string | null; previous_saved_at: string | null }
 interface TimelineItem { time?: string; created_at?: string; text?: string; description?: string; [k: string]: unknown }
@@ -296,7 +299,10 @@ export default function NotesTab({
   const { t: tCandidates } = useTranslation('candidates')
   const statusLookup = useLookupsOptional()?.statuses ?? []
   const statusLabel = (value: string) => statusLookup.find(s => String(s.value) === value)?.label ?? value
-  const metaBody = (n: NoteItem) => noteMetaSentence(n.meta as NoteMeta | null | undefined, { t: tCandidates, statusLabel, formatDate })
+  // K-225 H2: phase_change notes carry value slugs too; the tenant phase lookup gives the reader's label.
+  const phaseLookup = useLookupsOptional()?.phases ?? []
+  const phaseLabel = (value: string) => phaseLookup.find(p => String(p.value) === value)?.label ?? value
+  const metaBody = (n: NoteItem) => noteMetaSentence(n.meta as NoteMeta | null | undefined, { t: tCandidates, statusLabel, phaseLabel, formatDate })
   // Rights model (RECHTEN-DETAIL-1): current user id + the UI-gate permission check
   // (never security — the BE re-checks). Null-safe: a host with no AuthProvider in
   // its render tree (existing tests, hosts that haven't migrated) still works —

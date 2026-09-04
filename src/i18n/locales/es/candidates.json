@@ -362,6 +362,8 @@
     "archiveFailed": "Error al archivar (posibles vínculos activos).",
     "blacklistReasonLabel": "Motivo de blacklist",
     "blacklistReasonPick": "Elige un motivo…",
+    "blacklistReasonNone": "Aún no hay motivos de lista negra configurados para este inquilino.",
+    "blacklistReasonSetup": "Configurar motivos",
     "tasksTitle": "Tareas",
     "tasksLoading": "Cargando tareas…",
     "tasksError": "No se pudieron cargar las tareas.",
@@ -1455,7 +1457,13 @@
       "statusSet": "Estado establecido en {{to}}",
       "reason": " · Motivo: {{reason}}",
       "blacklistReason": " · Motivo de lista negra: {{reason}}",
-      "effectiveFrom": " · Fecha de vigencia {{date}}"
+      "effectiveFrom": " · Fecha de vigencia {{date}}",
+      "phaseChange": "Fase cambiada de {{from}} a {{to}}",
+      "phaseSet": "Fase establecida en {{to}}",
+      "archived": "Archivado",
+      "restored": "Restaurado desde el archivo",
+      "markedForDeletion": "Eliminación programada",
+      "eraseAt": " · Se eliminará el {{date}}"
     }
   }
 }

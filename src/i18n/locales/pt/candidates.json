@@ -385,6 +385,8 @@
     "archiveFailed": "O arquivamento falhou (possivelmente devido a ligações ativas).",
     "blacklistReasonLabel": "Motivo da lista negra",
     "blacklistReasonPick": "Escolha um motivo…",
+    "blacklistReasonNone": "Ainda não há motivos de lista negra configurados para este inquilino.",
+    "blacklistReasonSetup": "Configurar motivos",
     "tasksTitle": "Tarefas",
     "tasksLoading": "A carregar tarefas…",
     "tasksError": "Falha ao carregar tarefas.",
@@ -1455,7 +1457,13 @@
       "statusSet": "Estado definido como {{to}}",
       "reason": " · Motivo: {{reason}}",
       "blacklistReason": " · Motivo de lista negra: {{reason}}",
-      "effectiveFrom": " · Data de vigência {{date}}"
+      "effectiveFrom": " · Data de vigência {{date}}",
+      "phaseChange": "Fase alterada de {{from}} para {{to}}",
+      "phaseSet": "Fase definida como {{to}}",
+      "archived": "Arquivado",
+      "restored": "Restaurado do arquivo",
+      "markedForDeletion": "Exclusão agendada",
+      "eraseAt": " · Será excluído em {{date}}"
     }
   }
 }

@@ -385,6 +385,8 @@
     "archiveFailed": "Archiviazione non riuscita (possibili collegamenti attivi).",
     "blacklistReasonLabel": "Motivo blacklist",
     "blacklistReasonPick": "Scegli un motivo…",
+    "blacklistReasonNone": "Nessun motivo di blacklist configurato per questo tenant.",
+    "blacklistReasonSetup": "Configura i motivi",
     "tasksTitle": "Attività",
     "tasksLoading": "Caricamento attività…",
     "tasksError": "Caricamento attività non riuscito.",
@@ -1455,7 +1457,13 @@
       "statusSet": "Stato impostato su {{to}}",
       "reason": " · Motivo: {{reason}}",
       "blacklistReason": " · Motivo blacklist: {{reason}}",
-      "effectiveFrom": " · Data di decorrenza {{date}}"
+      "effectiveFrom": " · Data di decorrenza {{date}}",
+      "phaseChange": "Fase cambiata da {{from}} a {{to}}",
+      "phaseSet": "Fase impostata su {{to}}",
+      "archived": "Archiviato",
+      "restored": "Ripristinato dall'archivio",
+      "markedForDeletion": "Eliminazione pianificata",
+      "eraseAt": " · Verrà eliminato il {{date}}"
     }
   }
 }

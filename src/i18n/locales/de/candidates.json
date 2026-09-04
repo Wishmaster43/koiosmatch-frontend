@@ -362,6 +362,8 @@
     "archiveFailed": "Archivieren fehlgeschlagen (möglicherweise aktive Verknüpfungen).",
     "blacklistReasonLabel": "Blacklist-Grund",
     "blacklistReasonPick": "Grund wählen…",
+    "blacklistReasonNone": "Für diesen Mandanten sind noch keine Blacklist-Gründe hinterlegt.",
+    "blacklistReasonSetup": "Gründe einrichten",
     "tasksTitle": "Aufgaben",
     "tasksLoading": "Aufgaben laden…",
     "tasksError": "Aufgaben konnten nicht geladen werden.",
@@ -1455,7 +1457,13 @@
       "statusSet": "Status gesetzt auf {{to}}",
       "reason": " · Grund: {{reason}}",
       "blacklistReason": " · Sperrgrund: {{reason}}",
-      "effectiveFrom": " · Gültig ab {{date}}"
+      "effectiveFrom": " · Gültig ab {{date}}",
+      "phaseChange": "Phase geändert von {{from}} zu {{to}}",
+      "phaseSet": "Phase gesetzt auf {{to}}",
+      "archived": "Archiviert",
+      "restored": "Aus dem Archiv wiederhergestellt",
+      "markedForDeletion": "Löschung geplant",
+      "eraseAt": " · Wird gelöscht am {{date}}"
     }
   }
 }

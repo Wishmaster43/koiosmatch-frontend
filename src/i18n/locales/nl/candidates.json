@@ -385,6 +385,8 @@
     "archiveFailed": "Archiveren is mislukt (mogelijk actieve koppelingen).",
     "blacklistReasonLabel": "Blacklist-reden",
     "blacklistReasonPick": "Kies een reden…",
+    "blacklistReasonNone": "Nog geen blacklistredenen ingesteld voor deze tenant.",
+    "blacklistReasonSetup": "Redenen instellen",
     "tasksTitle": "Taken",
     "tasksLoading": "Taken laden…",
     "tasksError": "Taken laden is mislukt.",
@@ -1455,7 +1457,13 @@
       "statusSet": "Status gezet op {{to}}",
       "reason": " · Reden: {{reason}}",
       "blacklistReason": " · Blacklistreden: {{reason}}",
-      "effectiveFrom": " · Ingangsdatum {{date}}"
+      "effectiveFrom": " · Ingangsdatum {{date}}",
+      "phaseChange": "Fase gewijzigd van {{from}} naar {{to}}",
+      "phaseSet": "Fase gezet op {{to}}",
+      "archived": "Gearchiveerd",
+      "restored": "Hersteld uit archief",
+      "markedForDeletion": "Verwijdering gepland",
+      "eraseAt": " · Wordt gewist op {{date}}"
     }
   }
 }

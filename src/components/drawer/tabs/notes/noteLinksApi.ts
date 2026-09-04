@@ -12,11 +12,12 @@
  * (same tokens PlanningFavorites' LinkableType and noteDraftApi's
  * NOTE_DRAFT_ENTITY_TYPES already use).
  *
- * READ SIDE (measured 04-09): CandidateNoteController::shape() and
- * CustomerNoteController's mirror carry no `links` field on GET/POST/PATCH note
- * responses — a note's links are NOT part of the note payload yet. Callers keep
- * whatever this file's add/remove calls return in their own local/optimistic
- * state until a read field lands (tracked for the backend follow-up).
+ * READ SIDE (K-225 H2, landed 04-09): the candidate note thread, the candidate-
+ * detail embed, the customer note lists and every single-note response now
+ * carry a `links: NoteLinkItem[]` field — the derived link to the note's own
+ * host rides along with `is_manual: false` (chip-worthy only when `true`, see
+ * NoteRow). Callers still keep this file's add/remove results in their own
+ * local state for instant feedback (see NoteLinksRow's reseed behaviour).
  */
 import api from '@/lib/api'
 import type { Id } from '@/types/common'

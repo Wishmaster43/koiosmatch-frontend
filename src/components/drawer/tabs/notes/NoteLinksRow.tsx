@@ -4,13 +4,18 @@
  * affordance that opens NoteLinkPicker. Rendered under a note's body, only for a
  * host that passes the `noteLinks` capability (candidate/customer Notities tabs).
  *
- * LOCAL STATE, NOT SERVER STATE (see noteLinksApi's docblock — measured 04-09):
- * the note read/list endpoint carries no `links` field yet, so this component
- * keeps whatever the POST/DELETE calls return in its own state, seeded from the
- * optional `initialLinks` prop (empty today, forward-compatible with a future
- * read field without any further change here). A page reload/refetch of the
- * notes thread currently loses locally-added chips — an accepted, reported
- * limitation until the backend read field lands.
+ * LOCAL STATE, RESEEDED FROM THE SERVER (K-225 H2, measured 04-09): the note
+ * read/list endpoint now carries a `links` field, so the host (NoteRow) seeds
+ * `initialLinks` from it — MANUAL links only, the derived own-host link is
+ * noise on its own host. This component still keeps its own POST/DELETE
+ * results in local state for instant feedback, and RESEEDS from a fresh
+ * `initialLinks` payload whenever its CONTENT changes (a refetch after an
+ * unrelated edit brings the fresh server list in) — see the `seedKey` comparison
+ * below, keyed on the joined link ids rather than the array's identity, so a
+ * same-content re-render (a new array, same rows) never clobbers an add/remove
+ * this row just did optimistically. Adjusted DURING RENDER (React's own pattern
+ * for "reset state when a prop changes"), not in a useEffect — no extra
+ * render-then-effect cycle, and no dependency array to get wrong.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -39,7 +44,7 @@ interface NoteLinksRowProps {
   // Own-note-or-manage_all gate (mirrors the pencil/bin's canManageNote) — governs
   // both the add affordance and every chip's unlink control.
   canManage: boolean
-  // Seed for a future read field; every current caller omits it (see file docblock).
+  // Seed from the note's own `links` read field (K-225 H2) — see file docblock for the reseed behaviour.
   initialLinks?: NoteLinkItem[]
 }
 
@@ -47,6 +52,15 @@ interface NoteLinksRowProps {
 export default function NoteLinksRow({ host, hostId, noteId, canManage, initialLinks }: NoteLinksRowProps) {
   const { t } = useTranslation('common')
   const [links, setLinks] = useState<NoteLinkItem[]>(initialLinks ?? [])
+  // Reseed from a fresh `initialLinks` payload (e.g. a refetch after an unrelated
+  // edit) — keyed on the joined ids so a same-content re-render (a new array
+  // instance, identical rows) never overwrites a link this row just added/removed.
+  const seedKey = (initialLinks ?? []).map(l => l.id).join(',')
+  const [seenSeedKey, setSeenSeedKey] = useState(seedKey)
+  if (seedKey !== seenSeedKey) {
+    setSeenSeedKey(seedKey)
+    setLinks(initialLinks ?? [])
+  }
   const [adding, setAdding] = useState(false)
   // 'add' while the picker's own POST is in flight, else the link id being removed.
   const [busyId, setBusyId] = useState<Id | 'add' | null>(null)

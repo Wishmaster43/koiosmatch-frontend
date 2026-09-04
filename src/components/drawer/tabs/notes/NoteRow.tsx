@@ -132,9 +132,12 @@ export default function NoteRow({
         </div>
         <SafeHtml style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} html={bodyOverride ?? n.text ?? n.body ?? ''} />
         {/* NOTITIE-DOORLINK-1: only where the host opted in AND this note has a
-            resolved server id (a still-optimistic note has nothing to link yet). */}
+            resolved server id (a still-optimistic note has nothing to link yet).
+            K-225 H2: seed from the note's own `links` field — MANUAL links only,
+            the derived own-host link (is_manual: false) is noise on its own host. */}
         {noteLinks && noteIdOf(n) && (
-          <NoteLinksRow host={noteLinks.host} hostId={noteLinks.hostId} noteId={noteIdOf(n) as Id} canManage={canManageNote(n)} />
+          <NoteLinksRow host={noteLinks.host} hostId={noteLinks.hostId} noteId={noteIdOf(n) as Id} canManage={canManageNote(n)}
+            initialLinks={(n.links ?? []).filter(l => l.is_manual)} />
         )}
       </div>
     </div>

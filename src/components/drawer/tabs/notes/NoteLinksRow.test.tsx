@@ -77,6 +77,34 @@ describe('NoteLinksRow', () => {
     expect(screen.getByRole('button', { name: 'Koppelen' })).toBeInTheDocument()
   })
 
+  // K-225 H2: the note read endpoint now carries `links`, so a refetch (e.g. after
+  // an unrelated edit) hands this row a FRESH initialLinks payload — it must reseed.
+  it('reseeds from a fresh initialLinks payload (e.g. after a refetch) when its content changes', () => {
+    const first: NoteLinkItem[] = [
+      { id: 'l1', linkable_type: 'customer', linkable_id: 'cu1', label: 'Acme B.V.', is_manual: true },
+    ]
+    const { rerender } = render(<NoteLinksRow host="candidates" hostId="c1" noteId="n1" canManage={false} initialLinks={first} />)
+    expect(screen.getByText('Klant · Acme B.V.')).toBeInTheDocument()
+
+    const second: NoteLinkItem[] = [
+      { id: 'l2', linkable_type: 'customer', linkable_id: 'cu2', label: 'Globex N.V.', is_manual: true },
+    ]
+    rerender(<NoteLinksRow host="candidates" hostId="c1" noteId="n1" canManage={false} initialLinks={second} />)
+    expect(screen.queryByText('Klant · Acme B.V.')).not.toBeInTheDocument()
+    expect(screen.getByText('Klant · Globex N.V.')).toBeInTheDocument()
+  })
+
+  it('does not reseed on an identity-only change — a new array with the SAME rows leaves the chips as they are', () => {
+    const links: NoteLinkItem[] = [
+      { id: 'l1', linkable_type: 'customer', linkable_id: 'cu1', label: 'Acme B.V.', is_manual: true },
+    ]
+    const { rerender } = render(<NoteLinksRow host="candidates" hostId="c1" noteId="n1" canManage={false} initialLinks={links} />)
+    expect(screen.getByText('Klant · Acme B.V.')).toBeInTheDocument()
+    // A brand-new array instance carrying the identical row — must not disappear/duplicate.
+    rerender(<NoteLinksRow host="candidates" hostId="c1" noteId="n1" canManage={false} initialLinks={[...links]} />)
+    expect(screen.getAllByText('Klant · Acme B.V.')).toHaveLength(1)
+  })
+
   it('remove flow: clicking unlink DELETEs the exact route and drops the chip', async () => {
     vi.mocked(api.delete).mockResolvedValueOnce({ data: null } as never)
     const links: NoteLinkItem[] = [

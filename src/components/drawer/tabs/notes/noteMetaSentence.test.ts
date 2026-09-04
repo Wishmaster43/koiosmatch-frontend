@@ -21,7 +21,10 @@ const statusLabel = (value: string) => `LABEL(${value})`
 // than rendering the raw ISO string itself.
 const formatDate = (iso: string) => `FMT(${iso})`
 
-const ctx: NoteMetaContext = { t, statusLabel, formatDate }
+// Same shape as statusLabel, for the phase_change tenant lookup resolver.
+const phaseLabel = (value: string) => `PHASE(${value})`
+
+const ctx: NoteMetaContext = { t, statusLabel, phaseLabel, formatDate }
 
 describe('noteMetaSentence', () => {
   it('joins statusChange with reason, blacklist reason and effective date', () => {
@@ -55,7 +58,7 @@ describe('noteMetaSentence', () => {
   })
 
   it('returns null for an unknown kind', () => {
-    const meta = { kind: 'phase_change', from_value: 'lead', to_value: 'candidate' } as NoteMeta
+    const meta = { kind: 'something_else', from_value: 'lead', to_value: 'candidate' } as NoteMeta
     expect(noteMetaSentence(meta, ctx)).toBeNull()
   })
 
@@ -66,9 +69,53 @@ describe('noteMetaSentence', () => {
   })
 
   it('falls back to the raw slug when statusLabel does not resolve it', () => {
-    const passthrough: NoteMetaContext = { t, statusLabel: (v: string) => v, formatDate }
+    const passthrough: NoteMetaContext = { t, statusLabel: (v: string) => v, phaseLabel, formatDate }
     const meta: NoteMeta = { kind: 'status_change', from_value: 'available', to_value: 'unknown_slug' }
     const sentence = noteMetaSentence(meta, passthrough)
     expect(sentence).toBe('notes.meta.statusChange|{"from":"available","to":"unknown_slug"}')
+  })
+
+  // K-225 H2: phase_change — mirrors status_change's from/to resolution, but carries
+  // no reason/effective-date suffixes per the contract.
+  it('joins phaseChange with the resolved phase labels', () => {
+    const meta: NoteMeta = { kind: 'phase_change', from_value: 'lead', to_value: 'candidate' }
+    const sentence = noteMetaSentence(meta, ctx)
+    expect(sentence).toBe('notes.meta.phaseChange|{"from":"PHASE(lead)","to":"PHASE(candidate)"}')
+  })
+
+  it('falls back to phaseSet when from_value is missing', () => {
+    const meta: NoteMeta = { kind: 'phase_change', from_value: null, to_value: 'candidate' }
+    const sentence = noteMetaSentence(meta, ctx)
+    expect(sentence).toBe('notes.meta.phaseSet|{"to":"PHASE(candidate)"}')
+  })
+
+  // K-225 H2: archived — carries the shared reason suffix when reason_value is present.
+  it('archived appends the reason suffix when reason_value is present', () => {
+    const meta: NoteMeta = { kind: 'archived', reason_value: 'Duplicate profile' }
+    const sentence = noteMetaSentence(meta, ctx)
+    expect(sentence).toBe('notes.meta.archived|{}notes.meta.reason|{"reason":"Duplicate profile"}')
+  })
+
+  it('archived omits the reason suffix when reason_value is absent', () => {
+    const meta: NoteMeta = { kind: 'archived', reason_value: null }
+    expect(noteMetaSentence(meta, ctx)).toBe('notes.meta.archived|{}')
+  })
+
+  // K-225 H2: restored — the kind carries no optional fields at all.
+  it('restored renders the bare sentence', () => {
+    const meta: NoteMeta = { kind: 'restored' }
+    expect(noteMetaSentence(meta, ctx)).toBe('notes.meta.restored|{}')
+  })
+
+  // K-225 H2: marked_for_deletion — its own eraseAt suffix, distinct from effectiveFrom.
+  it('markedForDeletion appends the eraseAt suffix when erase_at is present', () => {
+    const meta: NoteMeta = { kind: 'marked_for_deletion', erase_at: '2026-10-01' }
+    const sentence = noteMetaSentence(meta, ctx)
+    expect(sentence).toBe('notes.meta.markedForDeletion|{}notes.meta.eraseAt|{"date":"FMT(2026-10-01)"}')
+  })
+
+  it('markedForDeletion omits the suffix when erase_at is null', () => {
+    const meta: NoteMeta = { kind: 'marked_for_deletion', erase_at: null }
+    expect(noteMetaSentence(meta, ctx)).toBe('notes.meta.markedForDeletion|{}')
   })
 })
