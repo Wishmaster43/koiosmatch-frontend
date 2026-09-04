@@ -97,6 +97,13 @@ export default defineConfig([
       globals: { ...globals.browser, ...globals.node },
     },
   },
+  // vite.config.js runs under Node (loadEnv reads process.cwd()), not the browser.
+  {
+    files: ['vite.config.js'],
+    languageOptions: {
+      globals: { ...globals.node },
+    },
+  },
   {
     files: ['**/*.{js,jsx}'],
     extends: [
