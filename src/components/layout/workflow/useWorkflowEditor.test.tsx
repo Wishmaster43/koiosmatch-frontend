@@ -497,6 +497,21 @@ describe('useWorkflowEditor · isDirty (dirty-check baseline)', () => {
     act(() => result.current.handleSave())
     expect(result.current.isDirty()).toBe(false)
   })
+
+  // Regression (repair round): useWorkflowGraph defers edges past the first render
+  // (a mount effect, so ReactFlow handles exist in the DOM first) — a dirty-check
+  // baseline seeded from the live `edges` on first render freezes a zero-edge
+  // snapshot, so a workflow that HAS a connection reads dirty the instant the real
+  // edges land, one tick later. The fix seeds the baseline from useWorkflowGraph's
+  // pre-deferral `initialEdges` instead, which are available synchronously.
+  it('stays clean after the deferred-edges effect settles, for a workflow with a connection', async () => {
+    const { result } = setup([
+      { id: 'n1', type: 'candidates', config: {}, position: { x: 0, y: 0 }, next: [{ target: 'n2' }] },
+      { id: 'n2', type: 'email', config: {}, position: { x: 220, y: 0 } },
+    ])
+    await waitFor(() => expect(result.current.edges).toHaveLength(1))
+    expect(result.current.isDirty()).toBe(false)
+  })
 })
 
 describe('useWorkflowEditor · start-node override', () => {

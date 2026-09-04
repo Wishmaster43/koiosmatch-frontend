@@ -5,8 +5,19 @@
  * these are re-exported from useWorkflowEditor.ts so existing test imports and
  * the hook's internal usage keep working unchanged.
  */
-import { flowToSteps } from './serialization'
+import { flowToSteps, mkEdge } from './serialization'
 import type { FlowNode, FlowEdge, ScheduleConfig, WorkflowVarField } from '@/types/workflow'
+
+// CONSENT-BEHOUD-1: whenever a graph mutation re-links two nodes with a NEW edge
+// standing in for an existing one (router splice, module insert-on-edge, node
+// delete-and-relink), the new edge must inherit the original edge's `data`
+// (filters like whatsapp_consent, label, raw route handles) — a bare mkEdge()
+// silently drops it. Centralised here (previously duplicated at three call
+// sites in useWorkflowEditor, now in useWorkflowGraph) so every site shares
+// one rule.
+export function mkEdgePreservingData(source: string, target: string, data: FlowEdge['data']): FlowEdge {
+  return { ...mkEdge(source, target), data }
+}
 
 // Flatten a test-run sample into dot-paths (max depth 2, capped) for the var
 // picker. An array is represented by the shape of its first element.
