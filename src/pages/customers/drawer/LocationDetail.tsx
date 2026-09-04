@@ -14,18 +14,12 @@
  * LocationDepartments / LocationContacts (shared hooks, one source of truth with
  * the top-level tabs). Delete asks for confirmation and returns to the list.
  */
-import { useState, useEffect, useId } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { TFunction } from 'i18next'
 import SectionCard from '@/components/ui/SectionCard'
 import SubTabBar from '@/components/drawer/SubTabBar'
-import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
-import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import MergeSubEntityModal from './MergeSubEntityModal'
-// TAKEN-OP-LOCATIE-1: TaskLinkResolver already knows 'customer_location' (task_links),
-// so this is one more <EntityTasksTab linkType="…"> line, mirroring DepartmentDetail.
-import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
 import { getCountryOptions } from '@/lib/countries'
 import { useProvinces } from '@/hooks/useProvinces'
 import { useDateFormat } from '@/lib/datetime'
@@ -49,21 +43,14 @@ import ContactsPanel from './ContactsPanel'
 // TAKEN-OP-LOCATIE-1/
 // LOC-DEPT-CHANGELOG-1 features landed.
 import LocationAddressTab from './LocationAddressTab'
-import PdokCard from '@/components/drawer/PdokCard'
+// §0.3 split (K-SIZE-SPLIT-A): the scoped-list sub-tab bodies (vacancies through
+// links), extracted the same way DepartmentSubTabPanels was split off DepartmentDetail.
+import LocationSubTabPanels from './LocationSubTabPanels'
 import { useLocations } from '@/lib/useLocations'
 import DrillBreadcrumb from '@/components/drawer/DrillBreadcrumb'
 import PlanningSummary from './PlanningSummary'
 import { useAuth } from '@/context/AuthContext'
 import { useCustomFields } from '@/lib/useCustomFields'
-// SCOPED-LIST-TAB-1: the location's own Vacatures/Matches sub-tabs (§3A —
-// shared config-driven tab, never a forked copy — mirrors DepartmentDetail).
-import ScopedVacanciesTab from './ScopedVacanciesTab'
-import ScopedMatchesTab from './ScopedMatchesTab'
-// SCOPED-LIST-TAB-1: this location's own Kansen sub-tab, right after Matches
-// (§3A — shared config-driven tab, never a forked copy — mirrors DepartmentDetail).
-import ScopedOpportunitiesTab from './ScopedOpportunitiesTab'
-// TIJDLIJN-SUBDRILL-1: the location's own activity log (LOC-DEPT-CHANGELOG-1).
-import SubEntityTimelineTab from './SubEntityTimelineTab'
 // SOLLICITATIES-SCOPE-1 (Danny asked 3x at customer level, then again here): the
 // location's own Sollicitaties sub-tab — reuses the shared CustomerApplicationsList
 // (its `vacancyIds` mode) fed by this location's OWN vacancy ids.
@@ -74,20 +61,7 @@ import type { Id, LookupOption } from '@/types/common'
 import { archiveLocation, restoreLocation } from '../hooks/useCustomerLocations'
 import { useSubEntityArchive } from '../hooks/useSubEntityArchive'
 import type { LocationPayload, LocationUpdateFailure } from '../hooks/useCustomerLocations'
-// K-283: the location's OWN branch field — the shared searchable/clearable combobox
-// (never a bare <select>, §3A) + the shared inline error notice for the 403 case.
-import CreatableSelect from '@/components/ui/CreatableSelect'
-import FieldNotice from '@/components/ui/FieldNotice'
-import { CANON_LABEL_STYLE, CANON_LABEL_WIDTH } from '@/components/drawer/fieldRowCanon'
-import { extractApiError } from '@/lib/extractApiError'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
-import ScopedApplicationsTab from './ScopedApplicationsTab'
-// NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1: this location's own Notities/Documenten
-// sub-tabs (§3A — shared config-driven surfaces, never a forked copy).
-import ScopedNotesTab from './ScopedNotesTab'
-// K-288: linked-notes feed moved out of ScopedNotesTab into its own sub-tab.
-import LinkedNotesTab from '@/components/drawer/tabs/notes/LinkedNotesTab'
-import ScopedDocumentsTab from './ScopedDocumentsTab'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
 import type { DeleteResult } from '../hooks/subEntityDelete'
 
@@ -132,61 +106,6 @@ interface Props {
    * a merge, so the host (LocationsTab) can switch the open record to it. */
   onMerged?: (survivorId: Id) => void
   close: () => void
-}
-
-/**
- * LocationBranchField — K-283: which ONE of the tenant's own branches this site's
- * own records run through (a DIFFERENT concept than LocationBranchSection's
- * multi-branch VISIBILITY set inside LocationAddressTab — LOCATIE-VESTIGING-1's
- * "which branches can SEE this location"). Lives as its own row directly in
- * LocationDetail, next to LocationAddressTab, rather than inside that file's own
- * field card (out of this ticket's scope) — the "FieldRow under the card" fallback.
- *
- * Immediate onChange PATCH (not the pencil→save cycle every other field on the
- * Adres & gegevens sub-tab uses): local optimistic value, reverted on failure. A
- * 403 (missing grant on the OLD or the NEW branch) renders an inline FieldNotice
- * with the server's own message; any other failure already gets the generic toast
- * useCustomerLocations.update() fires on every field's save path.
- */
-function LocationBranchField({ location: loc, options, onSave, t }: {
-  location: Location
-  options: { value: string; label: string }[]
-  onSave: Props['onSave']
-  t: TFunction
-}) {
-  const [value, setValue] = useState(loc.branchId != null ? String(loc.branchId) : '')
-  const [notice, setNotice] = useState<string | null>(null)
-  // A <button> trigger is not labelable (§6) — pair it with the visible label explicitly.
-  const labelId = useId()
-  // Re-sync the local draft when the underlying row changes (server reconciliation,
-  // or the pager stepping to a different location while this component stays mounted).
-  useEffect(() => { setValue(loc.branchId != null ? String(loc.branchId) : ''); setNotice(null) }, [loc.id, loc.branchId])
-
-  // Optimistic pick/clear; reverted on any failure, with a specific 403 notice.
-  const handleChange = (next: string) => {
-    const previous = value
-    setValue(next)
-    setNotice(null)
-    Promise.resolve(onSave(loc.id as Id, { branchId: (next || null) as Id | null })).then(result => {
-      if (result && 'ok' in result && result.ok === false) {
-        setValue(previous)
-        if (result.status === 403) setNotice(extractApiError(result.error, t('locations.saveFailed')))
-      }
-    })
-  }
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26 }}>
-        <span id={labelId} style={CANON_LABEL_STYLE}>{t('location.branch')}</span>
-        <div style={{ minWidth: 0, flex: 1, maxWidth: 260 }}>
-          <CreatableSelect value={value} onChange={handleChange} options={options} allowCreate={false}
-            aria-labelledby={labelId} clearable clearLabel={t('location.branch')} placeholder={t('location.noBranch')} />
-        </div>
-      </div>
-      {notice && <FieldNotice text={notice} severity="error" style={{ marginLeft: CANON_LABEL_WIDTH + 12 }} />}
-    </div>
-  )
 }
 
 // The location drill-down: its own field editing, department/contact sub-sections,
@@ -387,16 +306,10 @@ export default function LocationDetail({
       {/* Adres & gegevens — no repeated title (it would duplicate the sub-tab label).
           §0.3 split: the whole sub-tab body now lives in LocationAddressTab. */}
       {subTab === 'address' && (
-        <>
-          <LocationAddressTab location={l} customerId={customerId} contacts={contacts} t={t}
-            provinceOptions={provinceOptions} countryOptions={countryOptions} branchOptions={branchOptions}
-            onSave={onSave} onAddContact={onAddContact}
-            onGoToContacts={id => { setSubTab('contacts'); if (id != null) setOpenContactId(id) }} />
-          {/* K-283: this site's OWN single branch — a FieldRow of its own (see the
-              component's doc comment above for why it is not inside LocationAddressTab's
-              own field card). */}
-          <LocationBranchField location={l} options={branchOptions} onSave={onSave} t={t} />
-        </>
+        <LocationAddressTab location={l} customerId={customerId} contacts={contacts} t={t}
+          provinceOptions={provinceOptions} countryOptions={countryOptions} branchOptions={branchOptions}
+          onSave={onSave} onAddContact={onAddContact}
+          onGoToContacts={id => { setSubTab('contacts'); if (id != null) setOpenContactId(id) }} />
       )}
 
       {/* The SAME panel the customer's Afdelingen tab renders — one department surface. */}
@@ -418,70 +331,11 @@ export default function LocationDetail({
           departments={departments} statuses={contactStatuses} onAdd={onAddContact} onUpdate={onUpdateContact} />
       )}
 
-      {/* SCOPED-LIST-TAB-1: read-only, opens the real vacancy/match on row-click. */}
-      {subTab === 'vacancies' && (
-        <ScopedVacanciesTab scope="location" id={l.id as Id} customerId={customerId} customerName={customerName} scopeName={l.name} />
-      )}
-      {/* SOLLICITATIES-SCOPE-1: LocationSollicitatiesTab (below) owns step 1 (vacancy id
-          resolution) — mounting it only here, not unconditionally in this component,
-          keeps useScopedVacancyIds' react-query call out of every OTHER sub-tab/caller
-          that never opens this one (no QueryClientProvider needed for those). */}
-      {subTab === 'applications' && <ScopedApplicationsTab scope="location" id={l.id as Id} />}
-      {/* NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1: this site's own Notities/Documenten,
-          read through the scoped GET endpoints (with ?rollup=1 folding in its
-          departments' notes/documents — a department is a leaf, nothing rolls up
-          under it). Mounted only while active, mirrors ScopedApplicationsTab. */}
-      {subTab === 'notes' && <ScopedNotesTab scope="location" id={l.id as Id} customerId={customerId} />}
-      {/* K-288: notes written elsewhere in the chain that name this location as
-          principal (NOTITIE-DOORLINK-1) — now its own sub-tab, right after Notities. */}
-      {subTab === 'linkedNotes' && customerId != null && (
-        <LinkedNotesTab entity="customers" id={customerId} sub={{ kind: 'locations', id: l.id as Id }} />
-      )}
-      {subTab === 'documents' && <ScopedDocumentsTab scope="location" id={l.id as Id} customerId={customerId} />}
-      {subTab === 'matches' && <ScopedMatchesTab scope="location" id={l.id as Id} customerId={customerId} />}
-      {/* SCOPED-LIST-TAB-1: read-only, opens the real opportunity on row-click.
-          OPP-MODAL-PREFILL-1: customerName rides along too, for the "+ Kans"
-          modal's customer-picker option label (mirrors ScopedVacanciesTab above). */}
-      {subTab === 'opportunities' && <ScopedOpportunitiesTab scope="location" id={l.id as Id} customerId={customerId} customerName={customerName} />}
-      {/* TAKEN-OP-LOCATIE-1: own scoped label block (mirrors DepartmentDetail's
-          identical wiring) — the shared tab's CURRENT labels interface. */}
-      {subTab === 'tasks' && (
-        <EntityTasksTab linkType="customer_location" id={l.id as Id} labels={{
-          newTask: t('locations.detail.tasks.newTask'),
-          searchPlaceholder: t('locations.detail.tasks.searchPlaceholder'),
-          empty: t('locations.detail.tasks.empty'),
-          loading: t('locations.detail.tasks.loading'),
-          error: t('locations.detail.tasks.error'),
-          openTask: t('locations.detail.tasks.openTask'),
-        }} />
-      )}
-
-      {subTab === 'extra' && (
-        <CustomFieldsTab entityType="customer_location" values={l.customFields ?? {}}
-          onSave={patch => onSave(l.id as Id, { customFields: { ...l.customFields, ...patch } })} />
-      )}
-
-      {subTab === 'timeline' && customerId != null && (
-        <SubEntityTimelineTab endpoint={`/customers/${customerId}/locations/${l.id}/activity`} />
-      )}
-
-      {subTab === 'links' && (
-        <BackofficeLinksTab entity="locations" id={l.id as Id} helloflexLink={l.helloflexLink} shiftmanagerLink={l.shiftmanagerLink} canLink={canLinkBackoffice} refetchUrl={customerId ? `/customers/${customerId}/locations/${l.id}` : undefined}>
-          {/* PDOK sits in Koppelingen, like every other integration (Danny 28-07).
-              KLANTLOCATIE-GEOCODE-1 (backend 2026-08-01): the per-site re-geocode route
-              now exists, so this card ACTS as well as reads — mirroring the customer's
-              own card verbatim (CustomerDrawer, /customers/{id}/geocode), same shared
-              GeocodeButton, same customers.update gate, same `disabled` rule.
-              The route is addressed THROUGH the customer, so without a customerId there
-              is nothing to POST to and the endpoint is left off — the card then stays
-              honestly read-only rather than firing a /customers/undefined/… 404 (§3).
-              HelloFlex/Shiftmanager gate themselves on the tenant's connector apps,
-              which is why Yesway sees Shiftmanager and not HelloFlex. */}
-          <PdokCard lat={l.lat} lng={l.lng} permission="customers.update"
-            endpoint={customerId ? `/customers/${customerId}/locations/${l.id}/geocode` : undefined}
-            disabled={!l.city} />
-        </BackofficeLinksTab>
-      )}
+      {/* §0.3 split (K-SIZE-SPLIT-A): vacancies/applications/notes/linkedNotes/
+          documents/matches/opportunities/tasks/extra/timeline/links all live in
+          the shared LocationSubTabPanels now (mirrors DepartmentSubTabPanels). */}
+      <LocationSubTabPanels subTab={subTab} location={l} customerId={customerId} customerName={customerName}
+        canLinkBackoffice={canLinkBackoffice} onSave={onSave} t={t} />
 
       {hasPlanning && (
         <SectionCard title={t('planning.title')}>

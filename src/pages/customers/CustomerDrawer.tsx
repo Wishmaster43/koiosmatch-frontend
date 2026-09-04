@@ -22,9 +22,6 @@ import SoftChip from '@/components/ui/SoftChip'
 import { Caption, PageTitle } from '@/components/ui/typography'
 import CustomerHeaderActions from './drawer/CustomerHeaderActions'
 import MergeCustomerModal from './MergeCustomerModal'
-import PdokCard from '@/components/drawer/PdokCard'
-import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
-import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
 import { useCustomFields } from '@/lib/useCustomFields'
@@ -33,18 +30,9 @@ import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import { useCustomerDrawerActions } from './hooks/useCustomerDrawerActions'
 import CustomerStatusReasonModal from './drawer/CustomerStatusReasonModal'
 import ChangelogTab from './drawer/ChangelogTab'
-import OverviewTab from './drawer/OverviewTab'
-import LocationsTab from './drawer/LocationsTab'
-import DepartmentsTab from './drawer/DepartmentsTab'
-import ContactsTab from './drawer/ContactsTab'
-import VacanciesTab from './drawer/VacanciesTab'
-import MatchesTab from './drawer/MatchesTab'
-import OpportunitiesTab from './drawer/OpportunitiesTab'
-import PlanningTab from './drawer/PlanningTab'
-import StatisticsTab from './drawer/StatisticsTab'
-import DocumentsTab from './drawer/DocumentsTab'
-import PriceAgreementsTab from './drawer/PriceAgreementsTab'
-import CustomerNotesTab from './drawer/CustomerNotesTab'
+// §0.3 split (K-SIZE-SPLIT-A): the whole tab-body switch, extracted so this
+// thin container stays under the ~400-line trigger (§3).
+import CustomerDrawerTabPanels from './drawer/CustomerDrawerTabPanels'
 import { useCustomerLocations } from './hooks/useCustomerLocations'
 import { useCustomerDepartments } from './hooks/useCustomerDepartments'
 import { useCustomerContacts } from './hooks/useCustomerContacts'
@@ -225,80 +213,20 @@ export default function CustomerDrawer({
   // Plain {id,name} location list — the shared shape the sub-entity pickers need.
   const locationOptions = locationsApi.locations.map(l => ({ id: l.id as Id, name: l.name }))
 
-  const renderTab = (id: string, setActiveTab?: (id: string) => void): ReactNode => {
-    switch (id) {
-      case 'overview':      return <OverviewTab c={c} onSave={v => onUpdate?.(c.id, v)} statuses={statuses} />
-      case 'locations':     return (
-        <LocationsTab
-          customerId={c.id} customerName={c.name} locations={locationsApi.locations} departments={departmentsApi.departments} contacts={contactsApi.contacts}
-          statuses={locationStatuses} departmentStatuses={departmentStatuses} contactStatuses={contactStatuses}
-          canLinkBackoffice={canLinkBackoffice}
-          onAddLocation={locationsApi.add}
-          onSaveLocation={locationsApi.update} onDeleteLocation={locationsApi.remove}
-          onAddDepartment={(payload, locName) => departmentsApi.add(payload, locName)}
-          onUpdateDepartment={(id, payload, locName) => departmentsApi.update(id, payload, locName)}
-          onRemoveDepartment={departmentsApi.remove}
-          onAddContact={contactsApi.add} onUpdateContact={contactsApi.update} onRemoveContact={contactsApi.remove}
-        />
-      )
-      case 'departments':   return (
-        <DepartmentsTab
-          customerId={c.id} customerName={c.name} departments={departmentsApi.departments} contacts={contactsApi.contacts} locations={locationOptions} statuses={departmentStatuses}
-          canLinkBackoffice={canLinkBackoffice}
-          onAdd={departmentsApi.add} onUpdate={departmentsApi.update} onRemove={departmentsApi.remove}
-          contactStatuses={contactStatuses}
-          onAddContact={contactsApi.add} onUpdateContact={contactsApi.update} onRemoveContact={contactsApi.remove}
-        />
-      )
-      case 'contacts':      return (
-        <ContactsTab
-          contacts={contactsApi.contacts} locations={locationOptions} departments={departmentsApi.departments} statuses={contactStatuses}
-          canLinkBackoffice={canLinkBackoffice}
-          onAdd={contactsApi.add} onUpdate={contactsApi.update} onRemove={contactsApi.remove}
-        />
-      )
-      case 'vacancies':     return <VacanciesTab customerId={c.id} customerName={c.name} />
-      case 'matches':       return <MatchesTab customerId={c.id} />
-      case 'opportunities': return <OpportunitiesTab customerId={c.id} customerName={c.name} />
-      case 'planning':      return <PlanningTab customerId={c.id ?? ''} />
-      // TIJDLIJN-OVERAL (27-08): same content component the title-row changelog
-      // popover uses (mixed customer + sub-entity feed).
-      case 'timeline':      return <ChangelogTab customerId={c.id} locationNames={locationNames} departmentNames={departmentNames} contactNames={contactNames} />
-      case 'statistics':    return <StatisticsTab c={c} onGoToVacancies={() => setActiveTab?.('vacancies')} />
-      case 'priceAgreements': return <PriceAgreementsTab customerId={c.id} c={c} onSave={v => onUpdate?.(c.id, v)} />
-      // DOCS-LOC-DEPT-1: the customer's own locations/departments enable the
-      // "gekoppeld aan" upload picker inside DocumentsTab (§3A — the customer-level
-      // documents tab is the only unlocked one; ScopedDocumentsTab locks its own).
-      case 'documents':     return <DocumentsTab customerId={c.id} locations={locationsApi.locations} departments={departmentsApi.departments} />
-      case 'communication': return (
-        <CustomerNotesTab
-          customerId={c.id} customerName={c.name} customerInitials={c.initials}
-          authorInitials={authorInitials}
-          notes={c.notes ?? []}
-          onAddNote={payload => onAddNote?.(c.id, payload)}
-          onEditNote={(noteId, payload) => onEditNote?.(c.id, noteId, payload)}
-          onDeleteNote={noteId => onDeleteNote?.(c.id, noteId)}
-          onFetchPreviousVersion={onFetchPreviousVersion ? (noteId: Id | undefined) => onFetchPreviousVersion(c.id, noteId) : undefined}
-          onRestorePreviousNote={onRestorePreviousNote ? (noteId: Id | undefined) => onRestorePreviousNote(c.id, noteId) : undefined}
-          c={c} onSave={v => onUpdate?.(c.id, v)}
-        />
-      )
-      case 'extra':         return (
-        <CustomFieldsTab entityType="customer" values={c.customFields ?? {}}
-          onSave={patch => onUpdate?.(c.id, { customFields: { ...c.customFields, ...patch } })} />
-      )
-      case 'koppelingen':   return (
-        <BackofficeLinksTab entity="customers" id={c.id as Id} helloflexLink={c.helloflexLink} shiftmanagerLink={c.shiftmanagerLink} canLink={canLinkBackoffice}>
-          {/* PDOK moved out of the title row into this tab (Danny 28-07). Disabled when
-              there is no city yet — the customer's own address is city-only here.
-              lat/lng were never passed (CMBE 04-08) — the card decides "geocoded" on
-              them, so this ALWAYS said "nog niet gegecodeerd" regardless of the data. */}
-          <PdokCard lat={c.lat} lng={c.lng} endpoint={`/customers/${c.id}/geocode`} permission="customers.update" disabled={!c.city} />
-        </BackofficeLinksTab>
-      )
-      default: return null
-    }
-  }
+  // §0.3 split (K-SIZE-SPLIT-A): the tab-body dispatch itself lives in
+  // CustomerDrawerTabPanels now — this stays a thin wrapper around it.
+  const renderTab = (id: string, setActiveTab?: (id: string) => void): ReactNode => (
+    <CustomerDrawerTabPanels
+      id={id} c={c} setActiveTab={setActiveTab}
+      locationsApi={locationsApi} departmentsApi={departmentsApi} contactsApi={contactsApi}
+      statuses={statuses} locationOptions={locationOptions}
+      locationStatuses={locationStatuses} departmentStatuses={departmentStatuses} contactStatuses={contactStatuses}
+      canLinkBackoffice={canLinkBackoffice} authorInitials={authorInitials}
+      locationNames={locationNames} departmentNames={departmentNames} contactNames={contactNames}
+      onUpdate={onUpdate} onAddNote={onAddNote} onEditNote={onEditNote} onDeleteNote={onDeleteNote}
+      onFetchPreviousVersion={onFetchPreviousVersion} onRestorePreviousNote={onRestorePreviousNote}
+    />
+  )
 
   // Header title: an inline name input while editing, else name + subtitle.
   const renderTitle = () => headerEditing ? (

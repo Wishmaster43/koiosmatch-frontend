@@ -40,6 +40,12 @@ vi.mock('./hooks/useCustomerContacts', async (importOriginal) => {
   return { ...actual, setLocationPrimaryContact: vi.fn() }
 })
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notify: vi.fn() }))
+// K-283: useLocations is react-query-backed — mocked directly (mirrors
+// AddCustomerModal.test.tsx's own branch-picker mock) so this test doesn't
+// need a QueryClientProvider ancestor.
+vi.mock('@/lib/useLocations', () => ({
+  useLocations: () => [{ value: 'br-1', label: 'Vestiging Noord' }, { value: 'br-2', label: 'Vestiging Zuid' }],
+}))
 // Tiptap needs a real browser to mount — stubbed with a plain controlled textarea,
 // mirrors the house convention (DescriptionTab.test.tsx / candidate ProfileTab.test.tsx).
 vi.mock('@/components/ui/RichTextEditor', () => ({
@@ -165,6 +171,38 @@ describe('AddLocationModal', () => {
     expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({
       name: 'Hoofdlocatie', city: 'Utrecht', country: 'Nederland',
     }))
+  })
+})
+
+// K-283: the site's OWN single branch — optional and omitted from the POST
+// entirely when untouched (toApi's `!== undefined` check), mirrors the same
+// field on LocationAddressTab (LocationBranchField).
+describe('AddLocationModal · own branch picker (K-283)', () => {
+  it('omits branchId from the create payload when left untouched', async () => {
+    const onCreate = vi.fn().mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    render(<AddLocationModal onClose={() => {}} onCreate={onCreate} statuses={statuses} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+
+    expect(onCreate).toHaveBeenCalledTimes(1)
+    // Property present but `undefined` (plain object spread) — JSON.stringify/axios
+    // drop an `undefined` value on the wire, so this is the honest "omitted" check.
+    expect(onCreate.mock.calls[0][0].branchId).toBeUndefined()
+  })
+
+  it('picking a branch sends its id in the create payload', async () => {
+    const onCreate = vi.fn().mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    render(<AddLocationModal onClose={() => {}} onCreate={onCreate} statuses={statuses} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
+    await user.click(screen.getByRole('button', { name: new RegExp(ct('location.branch')) }))
+    await user.click(await screen.findByRole('button', { name: 'Vestiging Noord' }))
+
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ branchId: 'br-1' }))
   })
 })
 

@@ -59,6 +59,12 @@ import type { LookupOption, Id } from '@/types/common'
 import Button from '@/components/ui/Button'
 import ModalFooter from '@/components/ui/ModalFooter'
 import { tintBorder } from '@/lib/tint'
+// K-283: the site's OWN single branch (a different concept than branchIds, the
+// multi-branch VISIBILITY set) — same optional, clearable picker as
+// LocationAddressTab's own LocationBranchField (mirrors AddCustomerModal's own
+// branch picker, same useLocations() source so all three read one list).
+import { useLocations } from '@/lib/useLocations'
+import CreatableSelect from '@/components/ui/CreatableSelect'
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 // No billing_email entry (Danny 2026-07-22): that field has no input here anymore
@@ -130,6 +136,11 @@ export default function AddLocationModal({
     // branches. Editing keeps whatever deviation it already had — the Vestiging block in
     // the drill-down is where that is changed, never here.
     branchIds: initial?.branchIds ?? [],
+    // K-283: this site's OWN single branch — starts UNSET (undefined) on create so
+    // an untouched picker omits `branch_id` from the POST entirely (toApi's
+    // `!== undefined` check, mirrors every other optional field here); editing
+    // pre-fills whatever the record already carries.
+    branchId: initial?.branchId ?? undefined,
     name: initial?.name ?? '',
     street: initial?.street ?? '',
     houseNumber: initial?.houseNumber ?? '',
@@ -285,6 +296,9 @@ export default function AddLocationModal({
   }
 
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
+  // K-283: the tenant's own establishments — same GET /locations list
+  // LocationAddressTab's own branch field and the match form offer.
+  const branchOptions = useLocations().map(b => ({ value: String(b.value), label: b.label }))
 
   return (
     // POPUP-SLEEP-1: swapped the bespoke overlay/panel shell for the shared
@@ -359,6 +373,17 @@ export default function AddLocationModal({
                 costCenter={form.costCenter} onCostCenterChange={v => set('costCenter', v)}
                 cocNotice={cocNotice} vatNotice={vatNotice}
               />
+
+              {/* K-283: this site's OWN single branch — optional, clearable
+                  (§3A VAC-CLEAR-1), same CreatableSelect idiom as
+                  LocationAddressTab's LocationBranchField. */}
+              <div style={{ ...cardBox, padding: 16 }}>
+                <div id="location-branch-label" style={cardHead}>{t('location.branch')}</div>
+                <CreatableSelect value={form.branchId != null ? String(form.branchId) : ''}
+                  onChange={v => set('branchId', (v || null) as Id | null)}
+                  options={branchOptions} allowCreate={false} aria-labelledby="location-branch-label"
+                  clearable clearLabel={t('location.branch')} placeholder={t('location.noBranch')} />
+              </div>
 
               {/* Contact ter plaatse — extracted card (§0.3 split, 2026-08-03): the
                   existing-contact picker, new-contact fields and their local render

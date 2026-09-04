@@ -63,38 +63,28 @@
  * note here as well (same gate as the pencil).
  */
 import { NOTES_THREAD_POPOUT_ENTITIES } from '@/lib/secondScreen'
-import { useEffect, useState } from 'react'
-import type { ReactNode } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import DrawerAddButton from '@/components/drawer/DrawerAddButton'
-import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
 import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
-import { History, Search } from 'lucide-react'
+import { History } from 'lucide-react'
 import EventTimeline from '@/components/ui/EventTimeline'
 import SafeHtml from '@/components/ui/SafeHtml'
 import SectionCard, { sectionBlock } from '@/components/ui/SectionCard'
 import { useAuth } from '@/context/AuthContext'
 import { useConfirm } from '@/hooks/useConfirm'
-import type { NotesPopoutTarget } from '@/hooks/useNotesPopout'
 import { useDateFormat } from '@/lib/datetime'
 import Button from '@/components/ui/Button'
 import NoteComposer from './notes/NoteComposer'
-import type { NoteDraft } from '@/hooks/useNotesPopout'
-import { getNoteDraft, putNoteDraft, deleteNoteDraft } from './notes/noteDraftApi'
+import { useNoteComposerDraft } from './notes/useNoteComposerDraft'
 import { useNoteRestorePrevious } from './notes/useNoteRestorePrevious'
 import { useNotesPopoutHandoff } from './notes/useNotesPopoutHandoff'
 import { renderSystemRow, useMergedTimelineEvents } from './notes/notesTimeline'
 import NoteRow from './notes/NoteRow'
+import NotesToolbar from './notes/NotesToolbar'
+import { useNotesMeta } from './notes/useNotesMeta'
 // Rights + system-note rule — the SAME module the per-note popout window applies
 // (noteRights, §11: one rule, two surfaces — they must never disagree).
 import { canManageNote as canManageNoteRule, isSystemNote } from './notes/noteRights'
-// NOTITIE-DOORLINK-1 write side (Danny GO 28-08): the manual koppel-picker capability type.
-// K-225 H2: NoteLinkItem also types the note's own read-side `links` field (NoteItem below).
-import type { NoteLinkHost, NoteLinkItem } from './notes/noteLinksApi'
-// K-225 NOTE-META-1: an automation note renders its sentence from `meta` in the reader's language.
-import { noteMetaSentence, type NoteMeta } from './notes/noteMetaSentence'
-import { useLookupsOptional } from '@/context/LookupsContext'
-import type { Id } from '@/types/common'
 
 // Strip tags for search matching only (display still goes through SafeHtml) —
 // a raw substring match against the stored HTML would miss/false-match on markup.
@@ -106,168 +96,13 @@ const stripHtml = (html: string) => html.replace(/<[^>]*>/g, ' ')
 // without an id cannot be pointed at from another window, so it gets no button.
 const noteIdOf = (n: NoteItem) => (typeof n.id === 'string' || typeof n.id === 'number') ? String(n.id) : null
 
-// Exported: NoteComposer (notes/) reads these — one shared shape, never a
-// second hand-copied type for the popup.
-export interface NoteType { value: string; label: string; color?: string }
-// author_id (RECHTEN-DETAIL-1): the note creator's user id, present only on hosts that
-// implement the rights model — undefined (key absent) vs. explicit null are DIFFERENT
-// states, see the RIGHTS comment above. `language` (NOTE-TAAL-1): the note's own
-// spellcheck/output language, optional — null/absent = tenant default
-// has_previous_version (NOTE-UNDO-FE-1, K-172): true once the note carries an
-// undo slot (one previous body, filled by the update that most recently
-// overwrote it) — drives the row's "restore previous version" action below.
-// links (NOTITIE-DOORLINK-1 read side, K-225 H2): the note's manual + derived
-// principal links — NoteRow renders only the manual ones (see that file).
-export interface NoteItem { type?: string; channel?: string; title?: string; author?: string; author_name?: string; author_id?: string | number | null; created_by?: string | { name?: string }; updated_by?: string | { name?: string }; edited_by?: string; text?: string; body?: string; ago?: string; created_at?: string; updated_at?: string; language?: string; has_previous_version?: boolean; links?: NoteLinkItem[]; [k: string]: unknown }
-// K-172: the previous-version peek — nulls when the note has no undo slot yet.
-export interface NotePreviousVersion { previous_body: string | null; previous_saved_at: string | null }
-interface TimelineItem { time?: string; created_at?: string; text?: string; description?: string; [k: string]: unknown }
-export interface NotesLabels {
-  notes?: ReactNode; newNote?: ReactNode; type?: ReactNode; channel?: ReactNode; channelNone?: ReactNode; save?: string; cancel?: string; edit?: string; openChangelog?: string
-  notesEmpty?: ReactNode; timeline?: ReactNode; timelineEmpty?: ReactNode
-  conversations?: ReactNode; conversationsEmpty?: ReactNode
-  notePlaceholder?: (typeLabel: string) => string
-  // Delete affordance (RECHTEN-DETAIL-1) — icon title/aria-label + the shared
-  // confirm dialog's message. A host that omits these while still passing
-  // onDeleteNote gets a working button with blank copy (honest partial state,
-  // never a crash) until it wires the label too.
-  deleteNote?: string
-  deleteConfirm?: string
-  // Tooltip/aria-label for the optional "edit status event" pencil (see onEditStatusEvent below).
-  editStatusEvent?: string
-  // Placeholder/aria-label for the notes search box (optional — a host that omits
-  // it still gets a working, just unlabelled, search input; every current host
-  // supplies one via its own i18n namespace).
-  searchPlaceholder?: string
-  // Load-error row copy (see `error`/`onRetry` below) — the host's own "notes could
-  // not be loaded" message and the shared retry-button label (hosts reuse the
-  // existing `common:error.retry` key, mirrors MatchContractSection).
-  loadError?: ReactNode
-  retry?: ReactNode
-  // Restore-previous-version affordance (NOTE-UNDO-FE-1, K-172). Icon title/
-  // aria-label + the confirm dialog's title; the message itself is built here
-  // from the shared `common:notes.*` keys (previous_saved_at formatting needs
-  // useDateFormat, which only this component has).
-  restorePrevious?: string
-  restoreConfirmTitle?: string
-}
-// NOTE-TAAL-1: `language` rides along on save/edit — optional, undefined means
-// "let the backend default to the tenant language" (never force a value the
-// recruiter never picked).
-// NOTE-ACTION-ITEMS-1 (CMBE 173ffbf7): the wire shape the note write-path owns.
-// status/created are deliberately absent — the write-path owns the DEFINITION
-// only; a stale save must never reset an executed item.
-export interface NoteActionItemWire {
-  id?: string
-  title: string
-  type: string
-  link?: string
-  message?: string
-  due_date?: string
-  start?: string
-  assignee_id?: string
-  sort_order?: number
-}
-export interface NotePayload { type: string; title: string; body: string; channel?: string; language?: string; action_items?: NoteActionItemWire[] }
-
-interface NotesTabProps {
-  // CONCEPT-NOTE-2 (K-161): when the host names its dossier, a cancelled
-  // concept also persists server-side (survives refresh/another workplace) —
-  // without it the concept stays session-only.
-  draftEntity?: { type: import('./notes/noteDraftApi').NoteDraftEntityType; id: string }
-  notes?: NoteItem[]
-  // System events (status/phase changes, BE-written) — rendered in the TIMELINE
-  // section, not the notes thread (Danny 2026-07-13: events are not notes).
-  systemNotes?: NoteItem[]
-  timeline?: TimelineItem[]
-  noteTypes?: NoteType[]
-  // Full type list for CHIP resolution (composer keeps the writable-only list).
-  chipTypes?: NoteType[]
-  // Optional contact channels (last_contact_types). Picking one marks the note a
-  // contact moment → the backend stamps last_contact_at/_type/_by. Empty = internal note.
-  channels?: NoteType[]
-  labels?: NotesLabels
-  editorLabels?: Record<string, string>
-  authorInitials?: string
-  timelineName?: ReactNode
-  // NOTES-TIMELINE-CONVERGE-1: no longer rendered — EventTimeline marks rows with
-  // a kind icon, not an avatar (mirrors vacancies/applications Tijdlijn). Kept in
-  // the prop shape so existing hosts don't need an unrelated edit.
-  timelineInitials?: string
-  onAddNote?: (payload: NotePayload) => void
-  onEditNote?: (i: number, payload: NotePayload) => void
-  // Delete a note by its index in the full `notes` array (mirrors onEditNote).
-  // Omitted (every current host) → no delete button renders at all — no fake
-  // affordance (§3). RECHTEN-DETAIL-1 gating (see canManageNote) applies to it
-  // exactly like the edit pencil.
-  onDeleteNote?: (i: number) => void
-  // NOTE-UNDO-FE-1 (K-172): peek the one-slot undo (GET previous-version) and
-  // execute it (POST restore-previous). Both key off the note's index in the
-  // FULL `notes` array, mirroring onEditNote/onDeleteNote — the host resolves
-  // the note's own id from that index the same way it already does for edit/
-  // delete. Omitted (a host that hasn't wired the family's routes yet) → no
-  // action renders at all, no fake affordance (§3), regardless of
-  // has_previous_version on any note.
-  onFetchPreviousVersion?: (i: number) => Promise<NotePreviousVersion | null>
-  // Resolves true once the restore actually landed (mirrors editNote's return
-  // contract) — the caller re-fetches/reconciles the note in its own family
-  // shape; this tab never assumes the response shape itself.
-  onRestorePreviousNote?: (i: number) => Promise<boolean>
-  // Permission key checked when a note isn't the current user's own (RECHTEN-
-  // DETAIL-1). Defaults to the one manage-all permission that exists today
-  // (candidates); a future entity that ships its own author_id + rights model
-  // overrides this per its own permission name.
-  managePermission?: string
-  // Optional section toggles — hosts with their own sub-tabs render one section at a time.
-  showNotes?: boolean
-  // Optional host-supplied row rendered at the TOP of the composer (Danny 05-08:
-  // the customer tab's "link this note to …" picker belongs in the compose flow,
-  // not as a standing toolbar row). Rendered only while composing a NEW note.
-  composerExtra?: ReactNode
-  // F5 second-screen (+ NOTITIE-POPOUT-HANDOFF-1 / -EDIT-1): which record this
-  // notes surface belongs to, and which side of the glass this render is on. One
-  // prop carries the whole relationship — the composer's draft handoff, the
-  // per-note edit handoff and (in the window itself) receiving either all key off
-  // it. Passed ONLY by a host whose entity owns a `/popout/notes/{entity}/{id}`
-  // route — candidate, customer and vacancy today; applications/matches/tasks/
-  // opportunities and the scoped location/department notes have no such route, so
-  // they omit it and render no button at all (§3, no fake affordance). Naming the
-  // target is NOT enough for the per-note button: that one also needs a window that
-  // can really PATCH the note (NOTE_EDIT_POPOUT_ENTITIES). The popout pages pass it
-  // with `role: 'window'`, so the second screen receives handoffs but never offers
-  // to open itself again.
-  popout?: NotesPopoutTarget
-  // NOTITIE-DOORLINK-1 (Danny GO 28-08): opts a host into the manual koppel-picker
-  // chips under each regular note — only the candidate and customer Notities tabs
-  // pass this today (the two families the backend's addLink/removeLink routes
-  // serve, see noteLinksApi's docblock). Omitted host → NoteRow renders nothing new.
-  noteLinks?: { host: NoteLinkHost; hostId: Id }
-  showTimeline?: boolean
-  showConversations?: boolean
-  // Optional (Danny 2026-07-20, job A "potlood op de statuswissel"): when the host
-  // passes this, the "Statuswissel" system-event row gets an edit pencil that calls
-  // back into the host's status-edit entry point (candidates' CommunicationTab is
-  // the only current caller). Hosts that omit it — every other entity/tab — render
-  // no pencil at all; zero behaviour change for them (additive prop).
-  onEditStatusEvent?: () => void
-  // Optional load-error state (Danny 04-08: "voeg retry toe aan de notities-tab
-  // load-error" — added HERE, in the shared tab, so every host (applications,
-  // vacancies, matches, tasks, …) gets the same retry affordance at once, mirroring
-  // MatchContractSection's error+retry row. `error` replaces the whole tab body with
-  // a calm danger row; `onRetry` adds a retry button to it. A host that passes
-  // `error` without `onRetry` gets the previous static-text-only behaviour —
-  // fully back-compat for any caller that hasn't wired a retry point yet.
-  error?: boolean
-  onRetry?: () => void
-  // Optional per-item content override (MATCH-TIMELINE-EVENT-1, point 3): when it
-  // returns a node for a given timeline item, that REPLACES the default text line
-  // inside the row's existing dot/avatar/date wrapper — keeps this shared tab
-  // entity-agnostic (the host owns the entity-specific i18n + field mapping;
-  // candidates' CommunicationTab is the first/only current caller). Returning
-  // null/undefined for an item falls back to the default `ev.text`/`ev.description`
-  // line — zero behaviour change for every event the host doesn't recognise.
-  renderTimelineContent?: (ev: TimelineItem) => ReactNode | null
-}
+// Prop/data shapes extracted to notes/notesTabTypes.ts (§3 split) — re-exported
+// here so every existing `import type { ... } from '.../NotesTab'` still works.
+export type {
+  NoteType, NoteItem, NotePreviousVersion, TimelineItem, NotesLabels,
+  NoteActionItemWire, NotePayload, NotesTabProps,
+} from './notes/notesTabTypes'
+import type { NoteItem, NotesTabProps } from './notes/notesTabTypes'
 
 // Entity-agnostic notes/timeline/conversations tab; all entity-specific labels and data arrive via props (see file header).
 export default function NotesTab({
@@ -294,15 +129,9 @@ export default function NotesTab({
   // SHARED tab, so every entity's notes get it at once ('' = all).
   const [typeFilter, setTypeFilter] = useState('')
   const [channelFilter, setChannelFilter] = useState('')
-  const { formatDateTime, formatDate } = useDateFormat()
-  // K-225: status_change notes carry value slugs; the tenant status lookup gives the reader's label.
-  const { t: tCandidates } = useTranslation('candidates')
-  const statusLookup = useLookupsOptional()?.statuses ?? []
-  const statusLabel = (value: string) => statusLookup.find(s => String(s.value) === value)?.label ?? value
-  // K-225 H2: phase_change notes carry value slugs too; the tenant phase lookup gives the reader's label.
-  const phaseLookup = useLookupsOptional()?.phases ?? []
-  const phaseLabel = (value: string) => phaseLookup.find(p => String(p.value) === value)?.label ?? value
-  const metaBody = (n: NoteItem) => noteMetaSentence(n.meta as NoteMeta | null | undefined, { t: tCandidates, statusLabel, phaseLabel, formatDate })
+  const { formatDateTime } = useDateFormat()
+  // K-225/H2 meta-sentence resolution (status/phase value slugs → reader's label) — extracted (§3 split).
+  const { metaBody } = useNotesMeta()
   // Rights model (RECHTEN-DETAIL-1): current user id + the UI-gate permission check
   // (never security — the BE re-checks). Null-safe: a host with no AuthProvider in
   // its render tree (existing tests, hosts that haven't migrated) still works —
@@ -372,30 +201,6 @@ export default function NotesTab({
     })
   }
 
-  // Close the popup — NoteComposer owns its own field state, so this is just "not
-  // composing anything" again (mirrors the previous reset(), minus the field resets).
-  // Dropping a received draft too, so a next note never re-seeds from it.
-  const closeComposer = () => { setAdding(false); setEditingIdx(null); clearIncoming() }
-  // CONCEPT-NOTE-1 (Danny 24-08: "wegklikken en de tekst is weg is niet goed —
-  // als concept opslaan"): a cancelled NEW note survives as a session concept
-  // and seeds the next new-note open; a successful save clears it. Session
-  // scope is deliberate — note text is special-category data (§8), so it never
-  // touches localStorage; durable concepts are the CMBE follow-up.
-  const [concept, setConcept] = useState<NoteDraft | null>(null)
-  // Durable layer on top of the session concept (K-161): load once per dossier;
-  // a cancel PUTs, a save/empty-cancel DELETEs — all fire-and-forget, the
-  // session concept keeps working when the server call fails.
-  const draftType = draftEntity?.type
-  const draftId = draftEntity?.id
-  // Load any durable draft for this dossier once per draftType/draftId; a failed fetch simply keeps the session-only concept.
-  useEffect(() => {
-    if (!draftType || !draftId) return
-    const ctrl = new AbortController()
-    getNoteDraft(draftType, draftId, ctrl.signal)
-      .then(stored => { if (stored) setConcept(prev => prev ?? stored) })
-      .catch(() => { /* honest degrade: session-only */ })
-    return () => ctrl.abort()
-  }, [draftType, draftId])
   // POPOUT-HANDOFF-1 (Danny 09-08: "moet bestaand venster sluiten en de pop-out
   // direct openen in het versleepbare scherm, zoals bij profieltekst"). Popping out
   // is a HANDOFF, not a second copy: two editors for one thread means whichever you
@@ -404,24 +209,12 @@ export default function NotesTab({
   // back into the state setters above; a failed handoff simply never closes this.
   const composerOpen = adding || incomingDraft != null
   const openEdit = (i: number) => { setEditingIdx(i); setAdding(true) }
-  // NoteComposer hands back the finished payload; this is the only place that
-  // still decides add-vs-edit (the index into the FULL `notes` array).
-  const handleSaveConcept = (draft: NoteDraft | null) => {
-    setConcept(draft)
-    if (!draftEntity) return
-    if (draft) putNoteDraft(draftEntity.type, draftEntity.id, draft).catch(() => { /* session concept still holds */ })
-    else deleteNoteDraft(draftEntity.type, draftEntity.id).catch(() => { /* stale server draft is cleaned up server-side after 30 days */ })
-  }
-  // Finalizes a note save (add or edit): clears the concept/draft, applies the add-vs-edit branch, then closes the composer.
-  const handleSave = (payload: NotePayload) => {
-    setConcept(null)
-    if (draftEntity) deleteNoteDraft(draftEntity.type, draftEntity.id).catch(() => { /* server cleanup catches strays */ })
-    if (editingIdx == null) onAddNote?.(payload)
-    else onEditNote?.(editingIdx, payload)
-    closeComposer()
-  }
-  // Delete — staged behind the shared confirm dialog; index mirrors openEdit/onEditNote.
-  const requestDelete = (i: number) => confirm(labels.deleteConfirm ?? '', () => onDeleteNote?.(i), { danger: true })
+  // Concept/draft lifecycle (session + durable K-161) and the add/edit/delete
+  // save wiring — extracted (§3 split).
+  const { concept, closeComposer, handleSaveConcept, handleSave, requestDelete } = useNoteComposerDraft({
+    draftEntity, editingIdx, setAdding, setEditingIdx, clearIncoming,
+    onAddNote, onEditNote, onDeleteNote, confirm, deleteConfirmLabel: labels.deleteConfirm,
+  })
 
   // NOTE-UNDO-FE-1 (K-172): peek + stage the restore — logic lives in the
   // extracted hook (§3, this file's own 400-line split trigger) so this stays a
@@ -460,35 +253,14 @@ export default function NotesTab({
       {/* Notes */}
       {showNotes && (
       <div>
-        {/* No section title (Danny 05-08 "zelfde bij notities" — the tab already names
-            the section): the toolbar starts with the search bar on the LEFT, growing,
-            at the drill-down's standard footprint (6/10, radius 8, fontSize 12). */}
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 6, gap: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)' }}>
-            <Search size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder={labels.searchPlaceholder}
-              aria-label={labels.searchPlaceholder}
-              style={{ border: 'none', outline: 'none', fontSize: 12, color: 'var(--text)', background: 'none', flex: 1, minWidth: 0 }} />
-          </div>
-          {/* NOTES-DOC-FILTER-MENU-1 (Danny 08-08): type + channel now live BEHIND
-              this one compact Filter button instead of two inline dropdowns — the
-              dropdowns themselves are unchanged (still the house searchable
-              SelectMenu), only where they live changed. Self-hides when the host
-              offers neither vocabulary (DrawerFilterMenu renders null on empty). */}
-          <DrawerFilterMenu filters={filterRows}
-            label={t('filters.button', { defaultValue: 'Filter' })}
-            title={t('filters.title')} clearAllLabel={t('filters.clearAll')} />
-          {/* NOTITIE-POPOUT-EDIT-1 (Danny 10-08): the toolbar's own pop-out button is
-              GONE — it opened the thread but never an editor, which is exactly what
-              Danny reported twice. The affordance now lives per NOTE, beside that
-              note's pencil and bin (see the note rows below). */}
-          {/* Shared reference-style add button (Danny 20-07: notitie-knop had geen
-              achtergrondkleur) — one look on every entity's notes tab. Short text
-              (DRAWER-ADD-SHORT-1, Danny 05-08): this always renders inside a
-              drawer sub-tab, never a full page. Opens the POPUP composer now
-              (POPUP-SLEEP-1) instead of an inline block. */}
-          {!composerOpen && <DrawerAddButton onClick={() => setAdding(true)} label={labels.newNote} short />}
-        </div>
+        {/* Search + filter + add row — extracted to NotesToolbar (§3 split). */}
+        <NotesToolbar
+          search={search} onSearchChange={setSearch} searchPlaceholder={labels.searchPlaceholder}
+          filterRows={filterRows}
+          filterLabel={t('filters.button', { defaultValue: 'Filter' })}
+          filterTitle={t('filters.title')} filterClearAllLabel={t('filters.clearAll')}
+          composerOpen={composerOpen} onAddNote={() => setAdding(true)} newNoteLabel={labels.newNote}
+        />
         {/* POPUP-SLEEP-1: the add/edit composer — see notes/NoteComposer.tsx.
             EDIT-PREFILL-1 (Danny 08-08 "popup maar geen txt erin"): the composer
             holds its fields in state initialized from `initialNote` at MOUNT — but

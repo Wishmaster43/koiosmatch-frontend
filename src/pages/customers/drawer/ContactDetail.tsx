@@ -44,28 +44,16 @@ import ContactTextSection from './ContactTextSection'
 import RetentionConsentBlock from '@/components/drawer/RetentionConsentBlock'
 import { emailValue, phoneValue, linkedinValue, LinkedinMark } from '@/components/drawer/contactLinks'
 import SubTabBar from '@/components/drawer/SubTabBar'
-import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
-import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import { useBackofficeLinksVisible } from '@/components/drawer/useBackofficeLinksVisible'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import ChangelogTab from './ChangelogTab'
 import { useMessagingLanguageOptions } from '@/lib/useMessagingLanguageOptions'
-import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
 import MergeContactModal from './MergeContactModal'
-// SCOPED-LIST-TAB-1: this contact's own Kansen sub-tab, mirrors Location/
-// DepartmentDetail's identical wiring (§3A — shared config-driven tab, never a forked copy).
-import ScopedOpportunitiesTab from './ScopedOpportunitiesTab'
-// GESPREK-CONTACT-1: this contact's own Conversaties sub-tab — thin wrapper over the
-// shared components/drawer/ConversationsSection, pointed at the nested contact route.
-import ContactConversationsSection from './ContactConversationsSection'
-// CONTACT-NOTITIES-2: this contact's own Notities sub-tab, mirrors ScopedNotesTab's
-// identical wiring (§3A — shared notes-tab family, never a forked composer/list).
-import ContactNotesTab from './ContactNotesTab'
-// K-288: linked-notes feed moved out of the Notities section into its own sub-tab.
-import LinkedNotesTab from '@/components/drawer/tabs/notes/LinkedNotesTab'
-// TIJDLIJN-SUBDRILL-1: the contact's own activity log (LOC-DEPT-CHANGELOG-1).
-import SubEntityTimelineTab from './SubEntityTimelineTab'
+// §0.3 split (K-SIZE-SPLIT-A): the non-'data' sub-tab bodies (opportunities
+// through links), extracted the same way DepartmentSubTabPanels/
+// LocationSubTabPanels were split off their own details.
+import ContactSubTabPanels from './ContactSubTabPanels'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useContactFunctions } from '@/lib/useContactFunctions'
 import { useGenders } from '@/lib/useGenders'
@@ -412,70 +400,11 @@ export default function ContactDetail({ contact, locations, departments, statuse
         </>
       )}
 
-      {/* SCOPED-LIST-TAB-1: read-only, opens the real opportunity on row-click.
-          customerId comes off the contact record itself (this component receives
-          no separate customerId prop) — "+ Kans" stays hidden until it resolves.
-          OPP-MODAL-PREFILL-1: unlike Location/DepartmentDetail, this file has no
-          customerName in scope (Contact carries no such field and ContactDetail's
-          own props don't thread one) — the "+ Kans" modal's customer-picker option
-          label stays blank here. The customer/location/contact id itself still
-          locks correctly; fixing the label would need a new prop threaded through
-          ContactsPanel/CustomerDrawer, neither named in this task (§0 stay in scope). */}
-      {subTab === 'opportunities' && (
-        <ScopedOpportunitiesTab scope="contact" id={contact.id} customerId={contact.customerId ?? undefined} />
-      )}
-
-      {/* Taken — the tasks linked to THIS contact (Danny 28-07: "we willen hierop ook
-          … taken hebben op de klant en gelinkt aan contactpersoon"). Reads the generic
-          GET /tasks?contact={id} filter, which only started working on 28-07
-          (TASKS-LINK-FILTER-1); before that the filter was silently ignored and the
-          list would have shown every task in the tenant. Shared component — the
-          opportunity drawer renders the exact same body. */}
-      {subTab === 'tasks' && (
-        <EntityTasksTab
-          linkType="contact"
-          id={contact.id}
-          labels={{
-            // TAKEN-TOOLBAR-2: open/history dropped — the shared tab now filters by
-            // real task status (StatusFilterSelect), not a hardcoded open/history split.
-            newTask: t('contacts.tasks.newTask'),
-            empty: t('contacts.tasks.empty'), loading: t('contacts.tasks.loading'), error: t('contacts.tasks.error'),
-            openTask: t('contacts.tasks.openTask'), searchPlaceholder: t('contacts.tasks.searchPlaceholder'),
-          }}
-        />
-      )}
-
-      {/* GESPREK-CONTACT-1: the nested contact route needs a real customerId — mirrors
-          the ChangelogPopover/merge gating above (contact.customerId can be null on
-          legacy/edge data), so the tab silently shows nothing rather than firing a
-          /customers/undefined/… request. */}
-      {subTab === 'conversations' && contact.customerId != null && (
-        <ContactConversationsSection customerId={contact.customerId} contactId={contact.id as Id} mobile={contact.mobile} />
-      )}
-
-      {subTab === 'extra' && customFieldDefs.length > 0 && (
-        <CustomFieldsTab entityType="customer_contact" values={contact.customFields ?? {}}
-          onSave={patch => onSave(contact.id as Id, { customFields: { ...contact.customFields, ...patch } })} />
-      )}
-      {/* CONTACT-NOTITIES-2: this contact's own notes, filtered client-side against
-          the customer's own notes list (no dedicated scoped endpoint exists yet —
-          see useContactNotes' docblock). customerId can be null on legacy/edge data
-          (mirrors the conversations/changelog gating above). */}
-      {subTab === 'notes' && contact.customerId != null && (
-        <ContactNotesTab contactId={contact.id as Id} customerId={contact.customerId} />
-      )}
-      {/* K-288: chain-linked notes naming this contact as principal (CMBE 64d976ff),
-          now its own sub-tab instead of an inline section under Notities. */}
-      {subTab === 'linkedNotes' && contact.customerId != null && (
-        <LinkedNotesTab entity="customers" id={contact.customerId}
-          sub={{ kind: 'contacts', id: contact.id as Id }} />
-      )}
-      {subTab === 'timeline' && contact.customerId != null && (
-        <SubEntityTimelineTab endpoint={`/customers/${contact.customerId}/contacts/${contact.id}/activity`} />
-      )}
-      {subTab === 'links' && showKoppelingen && (
-        <BackofficeLinksTab entity="contacts" id={contact.id as Id} helloflexLink={contact.helloflexLink} shiftmanagerLink={contact.shiftmanagerLink} canLink={canLinkBackoffice} />
-      )}
+      {/* §0.3 split (K-SIZE-SPLIT-A): opportunities/tasks/conversations/extra/
+          notes/linkedNotes/timeline/links all live in the shared
+          ContactSubTabPanels now (mirrors Department/LocationSubTabPanels). */}
+      <ContactSubTabPanels subTab={subTab} contact={contact} customFieldsActive={customFieldDefs.length > 0}
+        showKoppelingen={showKoppelingen} canLinkBackoffice={canLinkBackoffice} onSave={onSave} t={t} />
       {/* `existing` is the CUSTOMER-WIDE list, which is exactly the set the scoped merge
           route can resolve — a contact from another customer is a 404 by design. */}
       {merging && contact.customerId != null && (
