@@ -14,6 +14,8 @@ import ViewModeToggle from '@/components/ui/ViewModeToggle'
 
 interface OutreachToolbarProps {
   onCreate: () => void
+  // OPENERS-HIDE-1: the "+ Bellijst" opener renders only when the reader holds outreach.create.
+  canCreate: boolean
   // Bumped by the page on clear-all so the self-stateful search input remounts.
   searchEpoch: number
   onSearch: (q: string) => void
@@ -29,16 +31,19 @@ interface OutreachToolbarProps {
 
 // Create button + search + clear-filters + archived/trash/view toggles (see file docblock).
 export default function OutreachToolbar({
-  onCreate, searchEpoch, onSearch, anyFilterActive, onClearFilters,
+  onCreate, canCreate, searchEpoch, onSearch, anyFilterActive, onClearFilters,
   showArchived, onToggleArchived, showTrash, onToggleTrash, view, onViewChange,
 }: OutreachToolbarProps) {
   const { t } = useTranslation('outreach')
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
-      {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-      <Button variant="primary" size="md" onClick={onCreate}>
-        <Plus size={15} /> {t('new')}
-      </Button>
+      {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
+          OPENERS-HIDE-1: hidden without outreach.create (RIGHTS-GATE-OPENERS-1 idiom). */}
+      {canCreate && (
+        <Button variant="primary" size="md" onClick={onCreate}>
+          <Plus size={15} /> {t('new')}
+        </Button>
+      )}
       <HeaderSearch key={searchEpoch} onSearch={onSearch} placeholder={t('page.searchPlaceholder')} width={280} />
       <ClearFiltersButton active={anyFilterActive} onClear={onClearFilters} />
 

@@ -55,13 +55,10 @@ export default function OutreachPage({ intent }: { intent?: unknown } = {}) {
   const canRestore = hasPermission?.('outreach.update') ?? false
   // Mark-for-erasure stays delete-class (tenant-admin-seeded) — HIDDEN without it (§7).
   const canMarkDeletion = hasPermission?.('outreach.delete') ?? false
-  // RIGHTS-GATE-OPENERS-1: mirrors outreach.create permission (backend:
-  // tasks-outreach.php:118 POST /outreach-campaigns).
+  // hidden without the create permission (OPENERS-HIDE-1, Danny 05-09), same
+  // as every other page toolbar (backend: tasks-outreach.php:118 POST /outreach-campaigns).
   const canCreateOutreach = hasPermission?.('outreach.create') ?? false
-  // An unauthorized click gets an honest toast instead of a silent no-op — the
-  // toolbar's create button itself always renders (§3).
   const handleCreateOpen = () => {
-    if (!canCreateOutreach) { notifyError(t('page.createForbidden')); return }
     setCreating(true)
   }
   const { campaigns, loading, error, reload, add, patch, drop } = useOutreachCampaigns()
@@ -215,6 +212,7 @@ export default function OutreachPage({ intent }: { intent?: unknown } = {}) {
           {/* Toolbar — create on the LEFT, archived toggle + view toggle on the RIGHT (mirror Opportunities) */}
           <OutreachToolbar
             onCreate={handleCreateOpen}
+            canCreate={canCreateOutreach}
             searchEpoch={filters.searchEpoch}
             onSearch={filters.setQuery}
             anyFilterActive={filters.anyFilterActive}

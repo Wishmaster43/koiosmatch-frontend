@@ -4,7 +4,6 @@
     "location": "Locatie"
   },
   "addShift": "Dienst toevoegen",
-  "addShiftForbidden": "Je hebt geen rechten om een nieuwe dienst aan te maken.",
   "loadErrorShifts": "Diensten konden niet worden geladen.",
   "previewSaveTitle": "Nog niet gekoppeld. Deze dienst wordt niet opgeslagen.",
   "sectionOrder": "Order",

@@ -35,6 +35,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import EntityLink from '@/components/ui/EntityLink'
 import SoftChip from '@/components/ui/SoftChip'
 import { useNavigation } from '@/context/NavigationContext'
+import { useAuth } from '@/context/AuthContext'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useDateFormat } from '@/lib/datetime'
 import { mapMatch } from '@/pages/matches/shared'
@@ -68,6 +69,10 @@ export default function ScopedMatchesTab({ scope, id, customerId }: {
 }) {
   const { t } = useTranslation(['customers', 'matches', 'candidates'])
   const { openEntity } = useNavigation()
+  const auth = useAuth()
+  // Same permission the customer-level MatchesTab gates its opener on
+  // (POST /matches is gated on matches.update; OPENERS-HIDE-1, Danny 05-09).
+  const canCreateMatch = auth?.hasPermission?.('matches.update') ?? false
   const { statuses: matchStatuses, metaOf: matchStatusMeta } = useMatchStatuses()
   const { formatDate } = useDateFormat()
   const queryClient = useQueryClient()
@@ -133,7 +138,7 @@ export default function ScopedMatchesTab({ scope, id, customerId }: {
         onRowClick={m => m.id != null && openEntity('matches', m.id)}
         // Point 1: only offered once the caller actually knows the customer —
         // otherwise the modal would have nothing to prefill (§3, no fake affordance).
-        onAdd={customerId ? () => setAdding(true) : undefined}
+        onAdd={customerId && canCreateMatch ? () => setAdding(true) : undefined}
         addLabel={t('customers:matches.add')}
         // STATUS FILTER: mirrors the customer-level MatchesTab's own useStatusFilter call.
         statuses={matchStatuses}

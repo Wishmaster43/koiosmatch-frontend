@@ -28,7 +28,13 @@ const { useCustomerOpportunitiesMock } = vi.hoisted(() => ({ useCustomerOpportun
 const mockOpportunities = (rows: ApiOpportunity[]) =>
   useCustomerOpportunitiesMock.mockReturnValue({ rows, loading: false, error: false, reload: vi.fn() })
 
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasModule: () => false }) }))
+// hasPermission stubbed via a module-level flag so the create-gate test below
+// can flip opportunities.update — defaults to true (every other test in this
+// file assumes the happy path, unrelated to the create gate).
+let canCreateOpportunity = true
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: () => ({ hasModule: () => false, hasPermission: (p: string) => (p === 'opportunities.update' ? canCreateOpportunity : true) }),
+}))
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: vi.fn() }) }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => `d(${v})` }) }))
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
@@ -192,5 +198,16 @@ describe('OpportunitiesTab · value column follows opportunity_value_in_hours (K
     // interpolated count — proves the SAME shared key OpportunitiesTable uses, not a local copy.
     expect(await screen.findByText('opportunities:cols.hoursValue')).toBeInTheDocument()
     expect(screen.queryByText('€ 1.234')).not.toBeInTheDocument()
+  })
+})
+
+// hidden without the create permission (OPENERS-HIDE-1, Danny 05-09), same
+// as the standalone Opportunities page.
+describe('OpportunitiesTab · create gate (OPENERS-HIDE-1)', () => {
+  it('hides the "+ Nieuwe kans" opener without opportunities.update', () => {
+    canCreateOpportunity = false
+    render(<OpportunitiesTab customerId="cust-1" customerName="Acme" />)
+    expect(screen.queryByRole('button', { name: 'opportunities.newOpportunity' })).toBeNull()
+    canCreateOpportunity = true
   })
 })

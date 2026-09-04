@@ -57,6 +57,8 @@ interface CandidatesToolbarProps {
   onSetBulkScope: (scope: 'selected' | 'filtered') => void
   filteredTotal: number
   onAddOpen: () => void
+  // OPENERS-HIDE-1: the "+ Add" opener renders only when the reader holds candidates.create.
+  canCreate: boolean
   searchEpoch: number
   globalSearch: string
   onSearch: (v: string) => void
@@ -79,7 +81,7 @@ interface CandidatesToolbarProps {
  * item 1) — purely a thin layout + prop-forwarding component, no new behaviour.
  */
 export default function CandidatesToolbar({
-  selectedCount, onClearSelection, bulkBar, bulkScope, onSetBulkScope, filteredTotal, onAddOpen, searchEpoch, globalSearch, onSearch,
+  selectedCount, onClearSelection, bulkBar, bulkScope, onSetBulkScope, filteredTotal, onAddOpen, canCreate, searchEpoch, globalSearch, onSearch,
   anyFilterActive, onClearFilters, blacklistActive, onToggleBlacklist,
   showArchived, onToggleArchived, showTrash, onToggleTrash, view, onToggleView,
 }: CandidatesToolbarProps) {
@@ -104,10 +106,13 @@ export default function CandidatesToolbar({
       ) : (
         <>
           {/* Add on the left (like Applications) — BTN_H (§4/§9, KANDIDAAT-100 #50): one
-              explicit height for every text/action button, everywhere. */}
-          <Button variant="primary" size="md" onClick={onAddOpen}>
-            + {t('page.add')}
-          </Button>
+              explicit height for every text/action button, everywhere. OPENERS-HIDE-1:
+              hidden (not just click-gated) without candidates.create. */}
+          {canCreate && (
+            <Button variant="primary" size="md" onClick={onAddOpen}>
+              + {t('page.add')}
+            </Button>
+          )}
           {/* Shared header search (T10) — debounced, drives the same server-side ?search=. */}
           <HeaderSearch key={searchEpoch} onSearch={onSearch} defaultValue={globalSearch}
             placeholder={t('page.searchPlaceholder')} width={300} />

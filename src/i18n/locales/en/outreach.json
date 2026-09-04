@@ -73,8 +73,7 @@
     "error": "Creating failed. Please try again."
   },
   "page": {
-    "searchPlaceholder": "Search call list, pool or candidate…",
-    "createForbidden": "You don't have permission to create a new call list."
+    "searchPlaceholder": "Search call list, pool or candidate…"
   },
   "drawer": {
     "label": "Call list",

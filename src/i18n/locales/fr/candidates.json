@@ -8,8 +8,7 @@
     "loadError": "Le chargement des candidats a échoué.",
     "searchPlaceholder": "Rechercher un candidat, une note, un document…",
     "empty": "Aucun candidat trouvé.",
-    "loading": "Chargement…",
-    "createForbidden": "Vous n'êtes pas autorisé à créer un nouveau candidat."
+    "loading": "Chargement…"
   },
   "columns": {
     "name": "Nom",

@@ -9,7 +9,6 @@ import { bureauNow } from '@/lib/bureauTime'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
-import { notifyError } from '@/lib/notify'
 import { ChevronLeft, ChevronRight, Plus, AlertCircle } from 'lucide-react'
 import { monthName, formatDate, getViewRange } from './helpers'
 import { usePlanningBoard } from './hooks/usePlanningBoard'
@@ -220,14 +219,13 @@ export default function PlanningPage({ intent }: { intent?: PlanningIntent | nul
           onChange={v => setView(v as typeof view)}
           options={VIEW_IDS.map(v => ({ value: v, label: t(`views.${v}`) }))} />
 
-        {/* Add button — an unauthorized click gets an honest toast instead of a
-            silent no-op; the button itself always renders (§3, RIGHTS-GATE-OPENERS-1). */}
-        <Button variant="primary" size="sm" onClick={() => {
-          if (!canCreateShift) { notifyError(t('addShiftForbidden')); return }
-          setModal(new Date())
-        }}>
-          <Plus size={14} /> {t('addShift')}
-        </Button>
+        {/* Add button — hidden without the create permission (OPENERS-HIDE-1,
+            Danny 05-09), same as every other page toolbar. */}
+        {canCreateShift && (
+          <Button variant="primary" size="sm" onClick={() => setModal(new Date())}>
+            <Plus size={14} /> {t('addShift')}
+          </Button>
+        )}
       </div>
 
       {/* Load-error state (§3: four honest states) — the board fetch failed;

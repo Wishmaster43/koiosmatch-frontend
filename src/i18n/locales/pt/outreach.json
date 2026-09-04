@@ -73,8 +73,7 @@
     "error": "Falha ao criar. Tente novamente."
   },
   "page": {
-    "searchPlaceholder": "Pesquisar lista de chamadas, pool ou candidato…",
-    "createForbidden": "Não tem permissões para criar uma nova lista de chamadas."
+    "searchPlaceholder": "Pesquisar lista de chamadas, pool ou candidato…"
   },
   "drawer": {
     "label": "Lista de chamadas",

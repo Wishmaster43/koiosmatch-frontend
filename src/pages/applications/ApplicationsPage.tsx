@@ -50,6 +50,9 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   const auth = useAuth()
   // Detach/restore are destructive → gate in the UI (backend re-checks the perm).
   const canManage = auth?.hasPermission?.('applications.update') ?? false
+  // hidden without the create permission (OPENERS-HIDE-1, Danny 05-09), same
+  // as every other page toolbar.
+  const canCreateApplication = auth?.hasPermission?.('applications.create') ?? false
   const { registerFilters, unregisterFilters } = useRightPanel()
   // Funnel phases come from the tenant lookup (Settings → Funnel stages), never hardcoded.
   const { funnelTypes, funnelMeta } = useLookups()
@@ -299,7 +302,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
         // VESTIGING-2: an explicit branch filter excludes applications with no
         // branch yet — a resulting empty list must say so (see the panel's own notice logic).
         branchFilterExcludesAll={selectedBranch.length > 0 && total === 0}
-        onAddOpen={() => setAddOpen(true)}
+        onAddOpen={() => setAddOpen(true)} canCreate={canCreateApplication}
         searchEpoch={searchEpoch} onSearch={setQuery}
         anyFilterActive={anyFilterActive} onClearFilters={clearAllFilters}
         candidateScopeCount={selectedCandidateIds.length} onClearCandidateScope={() => setSelectedCandidateIds([])}

@@ -25,7 +25,10 @@ vi.mock('@/context/RightPanelContext', () => ({
   useRightPanel: () => ({ registerFilters: (_k: string, groups: FilterGroup[]) => { capturedGroups = groups }, unregisterFilters: vi.fn() }),
 }))
 vi.mock('@/context/LookupsContext', () => ({ useLookups: () => ({ funnelTypes: [], funnelMeta: () => ({ label: '', color: '#000' }) }) }))
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
+// OPENERS-HIDE-1: a mutable flag so the create-gate test below can flip
+// applications.create without disturbing every other test's happy path.
+let canCreateApplication = true
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: (p: string) => (p === 'applications.create' ? canCreateApplication : true) }) }))
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
 vi.mock('@/lib/useBranchOptions', () => ({ useBranchOptions: () => [] }))
 vi.mock('@/context/NavigationContext', () => ({ useOpenFromIntent: () => {} }))
@@ -224,5 +227,23 @@ describe('ApplicationsPage · bucket donut (replaces the toolbar tab row)', () =
     expect(bucketGroup).toBeTruthy()
     act(() => bucketGroup!.onToggle('matched'))
     expect(bucketParamCalls.at(-1)).toBe('matched')
+  })
+})
+
+// hidden without the create permission (OPENERS-HIDE-1, Danny 05-09), same
+// as every other page toolbar.
+describe('ApplicationsPage · create gate (OPENERS-HIDE-1)', () => {
+  beforeEach(() => { canCreateApplication = true })
+
+  it('hides the "+ New application" opener without applications.create', () => {
+    canCreateApplication = false
+    render(<ApplicationsPage />)
+    expect(screen.queryByText('add.button')).toBeNull()
+  })
+
+  it('shows the opener with applications.create', () => {
+    canCreateApplication = true
+    render(<ApplicationsPage />)
+    expect(screen.getByText('add.button')).toBeInTheDocument()
   })
 })

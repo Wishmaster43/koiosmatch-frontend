@@ -1,6 +1,5 @@
 {
   "addShift": "Einsatz hinzufügen",
-  "addShiftForbidden": "Sie sind nicht berechtigt, einen neuen Einsatz anzulegen.",
   "loadErrorShifts": "Einsätze konnten nicht geladen werden.",
   "previewSaveTitle": "Noch nicht verbunden. Dieser Einsatz wird nicht gespeichert.",
   "sectionOrder": "Auftrag",

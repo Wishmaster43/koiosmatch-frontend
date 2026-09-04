@@ -285,9 +285,12 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
               onCoupleHelloFlex={bulkCoupleHelloFlex}
               onCoupleShiftmanager={bulkCoupleShiftmanager}
             />
-          ) : (
+          ) : hasPermission('matches.update') && (
             // Create a direct match (candidate + vacancy) from the Matches page.
             // BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
+            // POST /matches is gated on matches.update on the backend (there is no
+            // matches.create permission — routes/api/tenant/applications-matches.php),
+            // so the opener is hidden without it (OPENERS-HIDE-1, Danny 05-09).
             <Button variant="primary" size="md"
               onClick={() => setAddOpen(true)}>
               <Plus size={15} aria-hidden="true" /> {t('add.button')}

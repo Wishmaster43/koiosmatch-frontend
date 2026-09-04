@@ -27,6 +27,12 @@ const cust = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 
 
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: vi.fn(), navigate: vi.fn() }) }))
 
+// hasPermission stubbed via a module-level flag so the create-gate test below
+// can flip opportunities.update — defaults to true (every other test in this
+// file assumes the happy path, unrelated to the create gate).
+let canCreateOpportunity = true
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: (p: string) => (p === 'opportunities.update' ? canCreateOpportunity : true) }) }))
+
 // STAGE FILTER: mutable per-test, mirrors ScopedMatchesTab's own mockMatchStatuses —
 // each entry deliberately carries an `id` DIFFERENT from its `value` slug, so a test
 // that still narrows correctly proves the component keys the filter on `.value`, not
@@ -151,6 +157,20 @@ describe('ScopedOpportunitiesTab · "+ Kans" (customer-only prefill)', () => {
     const { onCreated } = addOpportunityModalProps.mock.calls.at(-1)?.[0] as { onCreated: () => void }
     onCreated()
     await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: ['department-opportunities', '/opportunities', 'customer_department_id', 'dep-1'] }))
+  })
+})
+
+// hidden without the create permission (OPENERS-HIDE-1, Danny 05-09), same
+// as the standalone Opportunities page.
+describe('ScopedOpportunitiesTab · create gate (OPENERS-HIDE-1)', () => {
+  afterEach(() => { canCreateOpportunity = true })
+
+  it('hides the "+ Kans" opener without opportunities.update', async () => {
+    canCreateOpportunity = false
+    apiGet.mockResolvedValue({ data: { data: [] } })
+    render(<ScopedOpportunitiesTab scope="location" id="loc-1" customerId="cust-1" customerName="Zorggroep A" />, { wrapper })
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+    expect(screen.queryByRole('button', { name: cust('opportunities.newOpportunity') })).toBeNull()
   })
 })
 

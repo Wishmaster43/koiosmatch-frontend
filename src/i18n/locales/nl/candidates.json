@@ -8,8 +8,7 @@
     "loadError": "Kandidaten laden is mislukt.",
     "searchPlaceholder": "Zoek kandidaat, notitie, document…",
     "empty": "Geen kandidaten gevonden.",
-    "loading": "Laden…",
-    "createForbidden": "Je hebt geen rechten om een nieuwe kandidaat aan te maken."
+    "loading": "Laden…"
   },
   "columns": {
     "name": "Naam",

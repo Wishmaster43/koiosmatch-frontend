@@ -8,8 +8,7 @@
     "loadError": "Kandidaten konnten nicht geladen werden.",
     "searchPlaceholder": "Kandidat, Notiz, Dokument suchen…",
     "empty": "Keine Kandidaten gefunden.",
-    "loading": "Wird geladen…",
-    "createForbidden": "Sie sind nicht berechtigt, einen neuen Kandidaten anzulegen."
+    "loading": "Wird geladen…"
   },
   "columns": {
     "name": "Name",

@@ -88,6 +88,10 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
   const canManageApplications = auth?.hasPermission?.('applications.update') ?? false
   // GET /applications/{id} sits behind applications.view — gates the expand chevron.
   const canViewApplications = auth?.hasPermission?.('applications.view') ?? false
+  // OPENERS-HIDE-1: hidden without applications.create (backend
+  // applications-matches.php:34 POST /applications), the same gate as the
+  // candidate drawer's WorkTab.
+  const canCreateApplication = auth?.hasPermission?.('applications.create') ?? false
   // The applicant currently being booked an intake for (opens the shared modal).
   const [intakeFor, setIntakeFor] = useState<{ applicationId: Id | null; candidateId: Id } | null>(null)
   const [addOpen, setAddOpen] = useState(false)
@@ -215,7 +219,7 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
             style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
         </div>
         <StatusFilterSelect value={phaseFilter} onToggle={togglePhase} statuses={phases} optionKey={s => s.value} />
-        {v.id != null && (
+        {v.id != null && canCreateApplication && (
           <DrawerAddButton onClick={() => setAddOpen(true)} label={t('applicants.addApplication')} short />
         )}
       </div>

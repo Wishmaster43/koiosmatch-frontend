@@ -64,10 +64,9 @@ vi.mock('@/context/AuthContext', () => ({
   useAuth: vi.fn(() => ({ user: { branch_ids: [] }, hasPermission: () => true })),
 }))
 import { useAuth } from '@/context/AuthContext'
-// Real notify() dispatches a window event with no listener in this test —
-// mocked so the forbidden-click test can assert it fired.
+// Real notify() dispatches a window event — mocked so nothing in this file's
+// renders touches the real event bus; no test here asserts on the mock itself.
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
-import { notifyError } from '@/lib/notify'
 // Minimal stand-in so the create-gate test can prove the modal opened without
 // mounting the real form (its own lookups/API calls are a different file's scope).
 vi.mock('./AddOpportunityModal', () => ({
@@ -297,33 +296,30 @@ describe('OpportunitiesPage · cross-entity intent seam (DASH-FEEDS-V3)', () => 
   })
 })
 
-// RIGHTS-GATE-OPENERS-1: the toolbar's "+ Nieuwe kans" button always renders
-// (§3); an unauthorized click toasts the forbidden message instead of opening
-// the create modal (there is no opportunities.create — the create route sits
-// in the opportunities.update permission group, same as matches).
-describe('OpportunitiesPage · create gate (RIGHTS-GATE-OPENERS-1)', () => {
-  it('blocks the create modal and toasts the forbidden message without opportunities.update', async () => {
+// OPENERS-HIDE-1: the toolbar's "+ Nieuwe kans" opener is HIDDEN (not
+// click-gated) without opportunities.update (there is no opportunities.create
+// — the create route sits in the opportunities.update permission group, same
+// as matches) — hidden without the create permission (OPENERS-HIDE-1, Danny
+// 05-09), same as every other page toolbar.
+describe('OpportunitiesPage · create gate (OPENERS-HIDE-1)', () => {
+  it('hides the opener without opportunities.update', async () => {
     useOpportunitiesDataMock.mockReturnValue(baseResult)
     vi.mocked(useAuth).mockReturnValue({ user: { branch_ids: [] }, hasPermission: () => false } as unknown as ReturnType<typeof useAuth>)
-    const user = userEvent.setup()
     render(<OpportunitiesPage />)
     await waitFor(() => expect(apiGet).toHaveBeenCalled())
 
-    await user.click(screen.getByRole('button', { name: `+ ${i18n.t('page.add', { ns: 'opportunities' })}` }))
+    expect(screen.queryByRole('button', { name: `+ ${i18n.t('page.add', { ns: 'opportunities' })}` })).not.toBeInTheDocument()
     expect(screen.queryByTestId('add-opportunity-modal')).toBeNull()
-    expect(notifyError).toHaveBeenCalledWith(i18n.t('page.createForbidden', { ns: 'opportunities' }))
   })
 
-  it('opens the create modal with opportunities.update', async () => {
+  it('shows the opener and opens the create modal with opportunities.update', async () => {
     useOpportunitiesDataMock.mockReturnValue(baseResult)
     vi.mocked(useAuth).mockReturnValue({ user: { branch_ids: [] }, hasPermission: () => true } as unknown as ReturnType<typeof useAuth>)
-    vi.mocked(notifyError).mockClear()
     const user = userEvent.setup()
     render(<OpportunitiesPage />)
     await waitFor(() => expect(apiGet).toHaveBeenCalled())
 
     await user.click(screen.getByRole('button', { name: `+ ${i18n.t('page.add', { ns: 'opportunities' })}` }))
     expect(screen.getByTestId('add-opportunity-modal')).toBeInTheDocument()
-    expect(notifyError).not.toHaveBeenCalled()
   })
 })

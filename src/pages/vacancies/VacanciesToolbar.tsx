@@ -19,6 +19,8 @@ interface VacanciesToolbarProps {
   /** The composed VacanciesBulkBar (page keeps its data wiring). */
   bulkBar: ReactNode
   onAddOpen: () => void
+  // OPENERS-HIDE-1: the "+ Add" opener renders only when the reader holds vacancies.create.
+  canCreate: boolean
   searchEpoch: number
   globalSearch: string
   onSearch: (v: string) => void
@@ -33,7 +35,7 @@ interface VacanciesToolbarProps {
 }
 
 export default function VacanciesToolbar({
-  selectedCount, bulkBar, onAddOpen, searchEpoch, globalSearch, onSearch,
+  selectedCount, bulkBar, onAddOpen, canCreate, searchEpoch, globalSearch, onSearch,
   anyFilterActive, onClearFilters, showArchived, onToggleArchived,
   showTrash, onToggleTrash, mapActive, onToggleView,
 }: VacanciesToolbarProps) {
@@ -48,10 +50,13 @@ export default function VacanciesToolbar({
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
         {selectedCount > 0 ? bulkBar : (
           <>
-            {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-            <Button variant="primary" size="md" onClick={onAddOpen}>
-              + {t('page.add')}
-            </Button>
+            {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
+                OPENERS-HIDE-1: hidden without vacancies.create (RIGHTS-GATE-OPENERS-1 idiom). */}
+            {canCreate && (
+              <Button variant="primary" size="md" onClick={onAddOpen}>
+                + {t('page.add')}
+              </Button>
+            )}
             {/* EXCEL-VACATURES-1 (Danny 14-08, screenshot: "Excel importeren moet in de
                 pop-up + nieuwe vacature niet hier boven de tabel!!"): the Excel/CSV
                 import button moved off this toolbar into AddVacancyModal's header —

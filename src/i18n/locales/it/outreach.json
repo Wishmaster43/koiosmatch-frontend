@@ -73,8 +73,7 @@
     "error": "Creazione non riuscita. Riprova."
   },
   "page": {
-    "searchPlaceholder": "Cerca lista di chiamate, pool o candidato…",
-    "createForbidden": "Non hai i permessi per creare una nuova lista di chiamate."
+    "searchPlaceholder": "Cerca lista di chiamate, pool o candidato…"
   },
   "drawer": {
     "label": "Lista di chiamate",

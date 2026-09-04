@@ -19,16 +19,12 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import PlanningPage from './PlanningPage'
 import { useAuth } from '@/context/AuthContext'
-import { notifyError } from '@/lib/notify'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
-// RIGHTS-GATE-OPENERS-1: wrapped in vi.fn() so the create-gate test below can
+// OPENERS-HIDE-1: wrapped in vi.fn() so the create-gate test below can
 // override hasPermission — defaults to true (every other test in this file
 // assumes the happy path, unrelated to the create gate).
 vi.mock('@/context/AuthContext', () => ({ useAuth: vi.fn(() => ({ hasPermission: () => true })) }))
-// Real notify() dispatches a window event with no listener in this test —
-// mocked so the forbidden-click test can assert it fired.
-vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 // Minimal stand-in so the create-gate test can prove the modal opened without
 // mounting the real form (its own lookups/API calls are a different file's scope).
 vi.mock('./AddShiftModal', () => ({
@@ -181,31 +177,26 @@ describe('PlanningPage · Orders view (ORDERS-PANEL-1 wiring)', () => {
   })
 })
 
-// RIGHTS-GATE-OPENERS-1: the "+ addShift" button always renders (§3); an
-// unauthorized click toasts the forbidden message instead of opening the modal.
-describe('PlanningPage · create gate (RIGHTS-GATE-OPENERS-1)', () => {
-  it('blocks the modal and toasts the forbidden message without planning.create', async () => {
+// hidden without the create permission (OPENERS-HIDE-1, Danny 05-09), same
+// as every other page toolbar.
+describe('PlanningPage · create gate (OPENERS-HIDE-1)', () => {
+  it('hides the "+ addShift" opener without planning.create', () => {
     mockUsePlanningBoard.mockReturnValue({ shifts: [], loading: false, error: false })
     mockUsePlanningOrdersList.mockReturnValue({ orders: [], loading: false, error: false })
     vi.mocked(useAuth).mockReturnValue({ hasPermission: () => false } as unknown as ReturnType<typeof useAuth>)
-    const user = userEvent.setup()
     render(<PlanningPage />)
 
-    await user.click(screen.getByRole('button', { name: 'addShift' }))
-    expect(screen.queryByTestId('add-shift-modal')).toBeNull()
-    expect(notifyError).toHaveBeenCalledWith('addShiftForbidden')
+    expect(screen.queryByRole('button', { name: 'addShift' })).toBeNull()
   })
 
-  it('opens the modal with planning.create', async () => {
+  it('shows the opener and opens the modal with planning.create', async () => {
     mockUsePlanningBoard.mockReturnValue({ shifts: [], loading: false, error: false })
     mockUsePlanningOrdersList.mockReturnValue({ orders: [], loading: false, error: false })
     vi.mocked(useAuth).mockReturnValue({ hasPermission: () => true } as unknown as ReturnType<typeof useAuth>)
-    vi.mocked(notifyError).mockClear()
     const user = userEvent.setup()
     render(<PlanningPage />)
 
     await user.click(screen.getByRole('button', { name: 'addShift' }))
     expect(screen.getByTestId('add-shift-modal')).toBeInTheDocument()
-    expect(notifyError).not.toHaveBeenCalled()
   })
 })

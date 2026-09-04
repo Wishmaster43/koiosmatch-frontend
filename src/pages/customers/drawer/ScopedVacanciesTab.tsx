@@ -68,6 +68,10 @@ export default function ScopedVacanciesTab({ scope, id, customerId, customerName
   const auth = useAuth()
   // K7b: same permission the Vacancies page itself gates editing on.
   const canEditVacancies = auth?.hasPermission?.('vacancies.update') ?? false
+  // hidden without the create permission (OPENERS-HIDE-1, Danny 05-09), same
+  // as every other page toolbar — the "+ Vacature" affordance was gated only
+  // on customerId being known, letting anyone (not just vacancies.create) open it.
+  const canCreateVacancy = auth?.hasPermission?.('vacancies.create') ?? false
   const queryClient = useQueryClient()
   const paramName = scope === 'department' ? 'customer_department_id' : 'customer_location_id'
   const [adding, setAdding] = useState(false)
@@ -134,7 +138,7 @@ export default function ScopedVacanciesTab({ scope, id, customerId, customerName
         onRowClick={v => v.id != null && openEntity('vacancies', v.id)}
         // Point 1: only offered once the caller actually knows the customer —
         // otherwise there is nothing to lock the create form to (§3).
-        onAdd={customerId ? () => setAdding(true) : undefined}
+        onAdd={customerId && canCreateVacancy ? () => setAdding(true) : undefined}
         addLabel={t('vacancies.add')}
         // STATUS FILTER: empty until the real lookup resolves (never the seed).
         statuses={resolved ? statusOptions : []}

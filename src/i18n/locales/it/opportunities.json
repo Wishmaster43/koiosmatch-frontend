@@ -8,8 +8,7 @@
     "add": "Nuova opportunità",
     "selected": "{{count}} selezionati",
     "clearSelection": "Cancella selezione",
-    "searchPlaceholder": "Cerca opportunità, descrizione, nota…",
-    "createForbidden": "Non hai i permessi per creare una nuova opportunità."
+    "searchPlaceholder": "Cerca opportunità, descrizione, nota…"
   },
   "cols": {
     "title": "Opportunità",

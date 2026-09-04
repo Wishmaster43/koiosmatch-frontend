@@ -8,8 +8,7 @@
     "loadError": "Loading candidates failed.",
     "searchPlaceholder": "Search candidate, note, document…",
     "empty": "No candidates found.",
-    "loading": "Loading…",
-    "createForbidden": "You don't have permission to create a new candidate."
+    "loading": "Loading…"
   },
   "columns": {
     "name": "Name",

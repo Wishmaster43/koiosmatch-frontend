@@ -59,6 +59,7 @@ import { AddTaskModal } from '@/pages/tasks/shared'
 import { TaskLookupsProvider, useTaskLookups } from '@/context/TaskLookupsContext'
 import { useDateFormat } from '@/lib/datetime'
 import { useActionRulePreflight, ActionRuleBanner } from '@/components/actionrules'
+import { useAuth } from '@/context/AuthContext'
 import type { Id } from '@/types/common'
 
 // One task row as the API returns it — lookup fields arrive as objects or bare slugs.
@@ -97,6 +98,10 @@ function CandidateTasksBody({ candidateId }: { candidateId: Id }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   const { statuses } = useTaskLookups()
+  const auth = useAuth()
+  // OPENERS-HIDE-1: hidden without tasks.create (backend tasks-outreach.php:67
+  // POST /tasks), the same gate as the tasks page toolbar.
+  const canCreateTask = auth?.hasPermission?.('tasks.create') ?? false
   const [tasks, setTasks] = useState<TaskRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -173,9 +178,11 @@ function CandidateTasksBody({ candidateId }: { candidateId: Id }) {
       <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={statuses} />
       {/* DRAWER-ADD-SHORT-1 (Danny 05-08): short — always inside the Communicatie →
           Taken sub-tab, never a full page. */}
-      <DrawerAddButton onClick={() => setAdding(true)} disabled={taskRuleBlocked}
-        title={taskRuleBlocked ? taskRuleDecision?.message ?? undefined : undefined}
-        label={t('drawer.newTask')} short />
+      {canCreateTask && (
+        <DrawerAddButton onClick={() => setAdding(true)} disabled={taskRuleBlocked}
+          title={taskRuleBlocked ? taskRuleDecision?.message ?? undefined : undefined}
+          label={t('drawer.newTask')} short />
+      )}
     </span>
   )
 

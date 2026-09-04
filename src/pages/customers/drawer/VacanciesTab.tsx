@@ -106,6 +106,12 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
   const auth = useAuth()
   // K7b: same permission the Vacancies page itself gates editing on.
   const canEditVacancies = auth?.hasPermission?.('vacancies.update') ?? false
+  // hidden without the create permission (OPENERS-HIDE-1, Danny 05-09), the
+  // same gate the vacancies page toolbar uses (VacanciesToolbar.tsx) — the
+  // "+ add vacancy" DrawerAddButton was UNCONDITIONAL before this change
+  // (vacancies.update only gated the edit pencil), so anyone without
+  // vacancies.create could still open the modal.
+  const canCreateVacancy = auth?.hasPermission?.('vacancies.create') ?? false
   // Two sub-tabs (SubTabBar) — Vacatures stays the default so this tab's behaviour
   // is unchanged for anyone who never opens Sollicitaties.
   const [subTab, setSubTab] = useState<'vacancies' | 'applications'>('vacancies')
@@ -261,7 +267,9 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
               statuses={statusOptions.map(o => ({ value: o.value, label: o.label }))} />
             <QuickViewToggle active={showUnpublished} onToggle={() => setShowUnpublished(v => !v)}
               label={t('vacancies.showUnpublished')} size="compact" />
-            <DrawerAddButton onClick={() => setAdding(true)} label={t('vacancies.add')} />
+            {canCreateVacancy && (
+              <DrawerAddButton onClick={() => setAdding(true)} label={t('vacancies.add')} />
+            )}
           </div>
           {error && <ErrorBanner style={{ marginBottom: 12 }}>{t('common:errorGeneric')}</ErrorBanner>}
           <DataTable columns={columns} rows={filteredRows} loading={loading} loadingText={t('page.loading')} emptyText={t('vacancies.empty')} />

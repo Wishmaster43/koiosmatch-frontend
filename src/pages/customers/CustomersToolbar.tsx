@@ -37,6 +37,8 @@ interface Props {
   users: AppUser[]
   statuses: LookupOption[]
   onAdd: () => void
+  // OPENERS-HIDE-1: the "+ Add" opener renders only when the reader holds customers.create.
+  canCreate: boolean
   searchEpoch: number
   globalSearch: string
   onSearch: (v: string) => void
@@ -52,7 +54,7 @@ interface Props {
 
 // The toolbar row: bulk bar in selection mode, otherwise add/search/clear + view toggles.
 export default function CustomersToolbar({
-  t, selectedCount, onClearSelection, bulk, canArchive, canGeocode, users, statuses, onAdd,
+  t, selectedCount, onClearSelection, bulk, canArchive, canGeocode, users, statuses, onAdd, canCreate,
   searchEpoch, globalSearch, onSearch, anyFilterActive, onClearAllFilters,
   showArchived, setShowArchived, showTrash, setShowTrash, view, setView,
 }: Props) {
@@ -69,10 +71,14 @@ export default function CustomersToolbar({
       ) : (
         <>
           {/* Add on the left (like Applications/Candidates) — BTN_H (§4/§9): one
-              explicit height for every text/action button, everywhere. */}
-          <Button variant="primary" size="md" onClick={onAdd}>
-            + {t('page.add')}
-          </Button>
+              explicit height for every text/action button, everywhere. Hidden
+              without the create permission (OPENERS-HIDE-1, Danny 05-09), same
+              as every other page toolbar. */}
+          {canCreate && (
+            <Button variant="primary" size="md" onClick={onAdd}>
+              + {t('page.add')}
+            </Button>
+          )}
           {/* Shared header search (T10) — debounced, drives the same server-side ?search=. */}
           <HeaderSearch key={searchEpoch} onSearch={onSearch} defaultValue={globalSearch}
             placeholder={t('page.searchPlaceholder')} width={300} />

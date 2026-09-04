@@ -45,6 +45,8 @@ interface CandidatesListPanelProps {
   onSetBulkScope: (scope: 'selected' | 'filtered') => void
   filteredTotal: number
   onAddOpen: () => void
+  // OPENERS-HIDE-1: the "+ Add" opener renders only when the reader holds candidates.create.
+  canCreate: boolean
   searchEpoch: number
   globalSearch: string
   onSearch: (v: string) => void
@@ -95,7 +97,7 @@ interface CandidatesListPanelProps {
 export default function CandidatesListPanel({
   insightDonuts, insightKpis, statsFailed, total, loadedCount,
   actionMsg, onDismissMessage,
-  selectedCount, onClearSelection, bulkBar, bulkScope, onSetBulkScope, filteredTotal, onAddOpen, searchEpoch, globalSearch, onSearch,
+  selectedCount, onClearSelection, bulkBar, bulkScope, onSetBulkScope, filteredTotal, onAddOpen, canCreate, searchEpoch, globalSearch, onSearch,
   anyFilterActive, onClearFilters, blacklistActive, onToggleBlacklist,
   showArchived, onToggleArchived, showTrash, onToggleTrash, view, onToggleView,
   tableScrollRef, error, filtered, loading, selectedId, onSelectCandidate,
@@ -125,7 +127,7 @@ export default function CandidatesListPanel({
         onClearSelection={onClearSelection}
         bulkBar={bulkBar}
         bulkScope={bulkScope} onSetBulkScope={onSetBulkScope} filteredTotal={filteredTotal}
-        onAddOpen={onAddOpen}
+        onAddOpen={onAddOpen} canCreate={canCreate}
         searchEpoch={searchEpoch} globalSearch={globalSearch} onSearch={onSearch}
         anyFilterActive={anyFilterActive} onClearFilters={onClearFilters}
         blacklistActive={blacklistActive} onToggleBlacklist={onToggleBlacklist}

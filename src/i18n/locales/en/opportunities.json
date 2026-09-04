@@ -8,8 +8,7 @@
     "add": "New opportunity",
     "selected": "{{count}} selected",
     "clearSelection": "Clear selection",
-    "searchPlaceholder": "Search opportunity, description, note…",
-    "createForbidden": "You don't have permission to create a new opportunity."
+    "searchPlaceholder": "Search opportunity, description, note…"
   },
   "cols": {
     "title": "Opportunity",

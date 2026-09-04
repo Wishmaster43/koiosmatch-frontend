@@ -5,7 +5,7 @@ import VacanciesToolbar from './VacanciesToolbar'
 
 // i18n is not initialised in tests → t() returns the key, so assertions drive on keys.
 const baseProps = () => ({
-  selectedCount: 0, bulkBar: <div>bulk-bar</div>, onAddOpen: () => {},
+  selectedCount: 0, bulkBar: <div>bulk-bar</div>, onAddOpen: () => {}, canCreate: true,
   searchEpoch: 0, globalSearch: '', onSearch: () => {},
   anyFilterActive: false, onClearFilters: () => {},
   showArchived: false, onToggleArchived: () => {},
@@ -36,5 +36,19 @@ describe('VacanciesToolbar · import button removed (EXCEL-VACATURES-1)', () => 
     render(<VacanciesToolbar {...props} onAddOpen={() => { added = true }} />)
     await user.click(screen.getByText('+ page.add'))
     expect(added).toBe(true)
+  })
+})
+
+// hidden without the create permission (OPENERS-HIDE-1, Danny 05-09), same
+// as every other page toolbar.
+describe('VacanciesToolbar · create gate (OPENERS-HIDE-1)', () => {
+  it('hides the add button without canCreate', () => {
+    render(<VacanciesToolbar {...baseProps()} canCreate={false} />)
+    expect(screen.queryByText('+ page.add')).toBeNull()
+  })
+
+  it('shows the add button with canCreate', () => {
+    render(<VacanciesToolbar {...baseProps()} canCreate={true} />)
+    expect(screen.getByText('+ page.add')).toBeInTheDocument()
   })
 })

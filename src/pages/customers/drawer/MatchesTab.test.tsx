@@ -12,7 +12,7 @@
  * Vestiging/Eigenaar/expiry-chip behaviour in isolation; this file only proves
  * this tab wires the right DATA into that shared card.
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 // Side-effect import: the real i18next instance, so useTranslation resolves
@@ -43,6 +43,11 @@ vi.mock('@/lib/useMatchStatuses', () => ({ useMatchStatuses: () => ({ statuses, 
 // Neither backoffice system enabled by default — BackofficeCouplingIndicator
 // stays out of the header (mirrors a tenant running neither connector).
 vi.mock('@/context/AppsContext', () => ({ useApps: () => ({ isAppEnabled: () => false }) }))
+// hasPermission stubbed via a module-level flag so the create-gate test below
+// can flip matches.update — defaults to true (every other test in this file
+// assumes the happy path, unrelated to the create gate).
+let canCreateMatch = true
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: (p: string) => (p === 'matches.update' ? canCreateMatch : true) }) }))
 
 // The hook that fires GET /matches?customer_id= is proven separately
 // (useCustomerMatches.test.ts, request-shape) — this file stubs it so the
@@ -248,5 +253,18 @@ describe('MatchesTab · exactly one open-in-new icon per card header', () => {
     // legitimately carries its own EntityLink icon and must not be counted here.
     const header = screen.getByTitle(ct('matchesView.openMatch')).parentElement as HTMLElement
     expect(header.querySelectorAll('svg.lucide-external-link')).toHaveLength(1)
+  })
+})
+
+// hidden without the create permission (OPENERS-HIDE-1, Danny 05-09), same
+// as the standalone Matches page.
+describe('MatchesTab · create gate (OPENERS-HIDE-1)', () => {
+  afterEach(() => { canCreateMatch = true })
+
+  it('hides the "+ Match" opener without matches.update', () => {
+    canCreateMatch = false
+    mockUseCustomerMatches.mockReturnValue({ rows: [], loading: false, error: false, reload: vi.fn() })
+    render(<MatchesTab customerId="cust-1" />)
+    expect(screen.queryByRole('button', { name: cust('matches.add') })).toBeNull()
   })
 })

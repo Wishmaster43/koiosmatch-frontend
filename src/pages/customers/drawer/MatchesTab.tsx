@@ -35,6 +35,7 @@ import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useApps } from '@/context/AppsContext'
+import { useAuth } from '@/context/AuthContext'
 import { MatchCard, MatchListHeaderBar } from '@/pages/matches/shared'
 import { MatchModal } from '@/pages/candidates/shared'
 import { useCustomerMatches } from '../hooks/useCustomerDrawerData'
@@ -47,6 +48,10 @@ export default function MatchesTab({ customerId }: { customerId?: Id }) {
   // Match lifecycle lookup (R-1b) — resolves the title's fase from the status
   // slug, same source the candidate card and the matches page table use.
   const { statuses: matchStatuses, metaOf: matchStatusMeta } = useMatchStatuses()
+  const auth = useAuth()
+  // Same permission MatchesPage itself gates its "+ New match" opener on
+  // (POST /matches is gated on matches.update; OPENERS-HIDE-1, Danny 05-09).
+  const canCreateMatch = auth?.hasPermission?.('matches.update') ?? false
   // Backoffice coupling glyph — gated on the tenant's own enabled apps, mirrors MatchesTable.
   const apps = useApps()
   const showHelloflex = apps?.isAppEnabled('hf') ?? false
@@ -86,8 +91,11 @@ export default function MatchesTab({ customerId }: { customerId?: Id }) {
         <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={matchStatuses} />
         {/* DRAWER-ADD-SHORT-1 (Danny 05-08): short — this is "Nieuwe match" (new
             record), unlike WorkTab's bare "Match" named-action button which stays
-            full (see DrawerAddButton's own docblock). */}
-        <DrawerAddButton onClick={() => setAdding(true)} label={t('customers:matches.add')} short />
+            full (see DrawerAddButton's own docblock). Hidden without the create
+            permission (OPENERS-HIDE-1, Danny 05-09). */}
+        {canCreateMatch && (
+          <DrawerAddButton onClick={() => setAdding(true)} label={t('customers:matches.add')} short />
+        )}
       </div>
       <SectionCard>
       {/* KLANTEN 4 (Danny 21-08 "Weergeven zoals bij de kandidaat"): the same

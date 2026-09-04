@@ -18,7 +18,7 @@
  * filter tests below pick a real option without a network round-trip.
  */
 import type { ReactNode } from 'react'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import CandidateTasks from './CandidateTasks'
@@ -63,6 +63,11 @@ vi.mock('@/context/TaskLookupsContext', () => ({
   TaskLookupsProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
   useTaskLookups: () => ({ statuses: statusesRef.current }),
 }))
+// Mutable per-test so the OPENERS-HIDE-1 gate describe below can flip
+// tasks.create off/on — default true keeps every pre-existing test above
+// seeing today's fully-permissioned "+ Taak" opener.
+let canCreateTask = true
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: (p: string) => (p === 'tasks.create' ? canCreateTask : true) }) }))
 
 describe('CandidateTasks · AXIS-MATRIX-2 preflight (CMFE audit R1)', () => {
   it('allow: no banner, "+ Taak" opens the shared modal', async () => {
@@ -228,5 +233,25 @@ describe('CandidateTasks · toolbar (search + status filter, ONE line)', () => {
     await user.click(await screen.findByRole('button', { name: 'Afgerond' }))
     expect(screen.getByText('Stuur contract')).toBeInTheDocument()
     expect(screen.queryByText('Bel kandidaat')).toBeNull()
+  })
+})
+
+describe('CandidateTasks · create opener (OPENERS-HIDE-1)', () => {
+  beforeEach(() => {
+    vi.mocked(useActionRulePreflight).mockReturnValue({ decision: null, loading: false, error: false })
+  })
+  afterEach(() => { canCreateTask = true })
+
+  it('hides "+ Taak" when tasks.create is denied', async () => {
+    canCreateTask = false
+    render(<CandidateTasks candidateId="cand-1" />)
+    await screen.findByPlaceholderText('drawer.tasksSearchPlaceholder')
+    expect(screen.queryByRole('button', { name: /drawer.newTask/ })).toBeNull()
+  })
+
+  it('shows "+ Taak" when tasks.create is granted', async () => {
+    canCreateTask = true
+    render(<CandidateTasks candidateId="cand-1" />)
+    expect(await screen.findByRole('button', { name: /drawer.newTask/ })).toBeInTheDocument()
   })
 })

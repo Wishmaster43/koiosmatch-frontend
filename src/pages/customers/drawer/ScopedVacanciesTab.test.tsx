@@ -27,8 +27,13 @@ const cust = (key: string) => i18n.t(key, { ns: 'customers' })
 const { openEntitySpy } = vi.hoisted(() => ({ openEntitySpy: vi.fn() }))
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: openEntitySpy, navigate: vi.fn() }) }))
 vi.mock('@/context/VacancyLookupsContext', () => ({ VacancyLookupsProvider: ({ children }: { children: ReactNode }) => children }))
-// K7b: the row pencil is permission-gated on vacancies.update.
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: (p: string) => p === 'vacancies.update' }) }))
+// K7b: the row pencil is permission-gated on vacancies.update; the "+ Vacature"
+// opener on vacancies.create (OPENERS-HIDE-1) — a module-level flag lets one
+// test flip the create permission without disturbing every other test here.
+let canCreateVacancy = true
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: () => ({ hasPermission: (p: string) => p === 'vacancies.update' || (p === 'vacancies.create' && canCreateVacancy) }),
+}))
 
 const mockUseScopedEntityList = vi.fn()
 vi.mock('../hooks/useScopedEntityList', () => ({ useScopedEntityList: () => mockUseScopedEntityList() }))
@@ -61,6 +66,7 @@ afterEach(() => { addVacancyModalProps.mockClear(); openEntitySpy.mockClear() })
 // Every test gets a sane default: the /vacancy-statuses lookup resolves with both
 // seed statuses unless a specific test overrides it (mirrors VacanciesTab.test.tsx).
 beforeEach(() => {
+  canCreateVacancy = true
   vi.mocked(api.get).mockImplementation((url: string) => {
     if (url === '/vacancy-statuses') return Promise.resolve({ data: { data: VACANCY_STATUSES } })
     return Promise.resolve({ data: { data: [] } })
@@ -68,6 +74,16 @@ beforeEach(() => {
 })
 
 describe('ScopedVacanciesTab · "+ Vacature" (point 1)', () => {
+  // hidden without the create permission (OPENERS-HIDE-1, Danny 05-09), same
+  // as every other page toolbar — this opener used to read only customerId.
+  it('does not render the add trigger without vacancies.create', async () => {
+    canCreateVacancy = false
+    mockUseScopedEntityList.mockReturnValue({ rows: [], loading: false, error: false })
+    render(<ScopedVacanciesTab scope="location" id="loc-1" customerId="cust-1" customerName="Zorggroep A" />, { wrapper })
+    await screen.findByRole('button', { name: cust('filters.status') })
+    expect(screen.queryByRole('button', { name: cust('vacancies.add') })).toBeNull()
+  })
+
   it('does not render the add trigger when the customer is unknown', async () => {
     mockUseScopedEntityList.mockReturnValue({ rows: [], loading: false, error: false })
     render(<ScopedVacanciesTab scope="location" id="loc-1" />, { wrapper })

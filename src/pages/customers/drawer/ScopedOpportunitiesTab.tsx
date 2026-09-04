@@ -48,6 +48,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import EntityLink from '@/components/ui/EntityLink'
 import SoftChip from '@/components/ui/SoftChip'
 import { useNavigation } from '@/context/NavigationContext'
+import { useAuth } from '@/context/AuthContext'
 import { useOpportunityStages } from '@/lib/useOpportunityStages'
 import { AddOpportunityModal } from '@/pages/opportunities/shared'
 import { mapOpportunity } from '@/pages/opportunities/shared'
@@ -80,6 +81,10 @@ export default function ScopedOpportunitiesTab({ scope, id, customerId, customer
 }) {
   const { t } = useTranslation('customers')
   const { openEntity } = useNavigation()
+  const auth = useAuth()
+  // Same permission the Opportunities page itself gates its "+ add" opener on
+  // (OPENERS-HIDE-1, Danny 05-09).
+  const canCreateOpportunity = auth?.hasPermission?.('opportunities.update') ?? false
   const { stages } = useOpportunityStages()
   const queryClient = useQueryClient()
   const paramName = scope === 'department' ? 'customer_department_id'
@@ -115,8 +120,9 @@ export default function ScopedOpportunitiesTab({ scope, id, customerId, customer
         emptyText={t('scopedList.opportunitiesEmpty')} errorText={t('scopedList.loadError')}
         onRowClick={o => o.id != null && openEntity('opportunities', o.id)}
         // Only offered once the caller actually knows the customer — otherwise
-        // the modal would have nothing to prefill (§3, no fake affordance).
-        onAdd={customerId ? () => setAdding(true) : undefined}
+        // the modal would have nothing to prefill (§3, no fake affordance) — and
+        // hidden without the create permission (OPENERS-HIDE-1, Danny 05-09).
+        onAdd={customerId && canCreateOpportunity ? () => setAdding(true) : undefined}
         addLabel={t('opportunities.newOpportunity')}
         statuses={stageOptions}
         statusOf={o => String(o.stageValue ?? '')}

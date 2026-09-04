@@ -59,6 +59,9 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const { registerFilters, unregisterFilters } = useRightPanel()
   const auth = useAuth()
   const hasPermission = auth?.hasPermission ?? (() => false)
+  // hidden without the create permission (OPENERS-HIDE-1, Danny 05-09), same
+  // as every other page toolbar.
+  const canCreateVacancy = hasPermission('vacancies.create')
   const { statuses, phases, statusMeta } = useVacancyLookups()
   // Coerce to a string|number-tolerant signature for the bulk hook + updaters.
   const statusMetaSafe = (v?: string | number | null) => statusMeta(v == null ? null : String(v))
@@ -364,7 +367,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                 selectedVacancies={vacancies.filter((v): v is typeof v & { id: Id } => v.id != null && selectedIds.has(v.id)).map(v => ({ id: v.id, title: v.title }))}
                 onOpenCandidateSearch={openCandidateSearch} />
             }
-            onAddOpen={() => setAddOpen(true)}
+            onAddOpen={() => setAddOpen(true)} canCreate={canCreateVacancy}
             searchEpoch={searchEpoch} globalSearch={globalSearch} onSearch={setGlobalSearch}
             anyFilterActive={anyFilterActive} onClearFilters={clearAllFilters}
             showArchived={showArchived} onToggleArchived={() => { setShowArchived(v => !v); setShowTrash(false) }}

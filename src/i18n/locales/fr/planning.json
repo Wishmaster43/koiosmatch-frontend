@@ -1,6 +1,5 @@
 {
   "addShift": "Ajouter une mission",
-  "addShiftForbidden": "Vous n'êtes pas autorisé à créer une nouvelle mission.",
   "loadErrorShifts": "Impossible de charger les missions.",
   "previewSaveTitle": "Pas encore connecté. Cette mission ne sera pas enregistrée.",
   "sectionOrder": "Commande",

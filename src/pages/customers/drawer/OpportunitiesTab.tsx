@@ -90,6 +90,9 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
   const { t } = useTranslation('customers')
   const auth = useAuth()
   const hasPlanning = (auth?.hasModule ?? (() => false))('plan')
+  // Same permission the Opportunities page itself gates its "+ add" opener on
+  // (OPENERS-HIDE-1, Danny 05-09).
+  const canCreateOpportunity = auth?.hasPermission?.('opportunities.update') ?? false
   const { openEntity } = useNavigation()
   const { formatDate } = useDateFormat()
   const { data: users = [] } = useUsers() as { data?: { id: Id; name: string }[] }
@@ -183,8 +186,11 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
               row only ever carries `stageValue`, never a stage id (§3B, no invented axis). */}
           <StatusFilterSelect value={stageFilter} onToggle={toggleStage} statuses={stages}
             optionKey={s => String(s.value ?? s.id ?? '')} />
-          {/* DRAWER-ADD-SHORT-1 (Danny 05-08): short in this drawer sub-tab's toolbar. */}
-          <DrawerAddButton onClick={() => setAdding(true)} label={t('opportunities.newOpportunity')} short />
+          {/* DRAWER-ADD-SHORT-1 (Danny 05-08): short in this drawer sub-tab's toolbar.
+              Hidden without the create permission (OPENERS-HIDE-1, Danny 05-09). */}
+          {canCreateOpportunity && (
+            <DrawerAddButton onClick={() => setAdding(true)} label={t('opportunities.newOpportunity')} short />
+          )}
         </div>
       }>
         {error && <Muted text={t('opportunities.loadError')} />}

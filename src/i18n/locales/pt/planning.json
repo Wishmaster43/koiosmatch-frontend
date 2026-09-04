@@ -4,7 +4,6 @@
     "location": "Localização"
   },
   "addShift": "Adicionar turno",
-  "addShiftForbidden": "Não tem permissões para criar um novo turno.",
   "loadErrorShifts": "Não foi possível carregar os turnos.",
   "previewSaveTitle": "Ainda não ligado. Este turno não será guardado.",
   "sectionOrder": "Encomenda",

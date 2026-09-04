@@ -17,6 +17,11 @@ vi.mock('@/context/VacancyLookupsContext', () => ({
   useVacancyLookups: () => ({ phases: PHASES, phaseMeta: () => ({ label: null, color: null }) }),
 }))
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn(() => Promise.resolve({ data: { data: {} } })) }, unwrap: (r: unknown) => r }))
+// Default: every permission granted, so the pre-existing house-toolbar/phase-filter
+// tests below (which never touch auth) keep seeing today's fully-permissioned UI.
+// The OPENERS-HIDE-1 gate describe further down overrides this via vi.doMock +
+// vi.resetModules + a dynamic re-import, same pattern as the pencil/unlink test.
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
 vi.mock('@/pages/candidates/drawer/PlanIntakeModal', () => ({ default: () => null }))
 vi.mock('@/pages/applications/AddApplicationModal', () => ({ default: () => null }))
 vi.mock('@/pages/candidates/drawer/AddApplicationModal', () => ({ default: () => null }))
@@ -94,6 +99,10 @@ describe('ApplicantsTab · reuses the candidate drawer ApplicationRow (S-vacapp-
   })
 
   it('hides pencil/unlink without applications.update, shows them with it', async () => {
+    // resetModules is now required here (unlike before OPENERS-HIDE-1 added the
+    // file-wide default AuthContext mock above): without it this doMock would
+    // override a module the earlier static import already resolved/cached.
+    vi.resetModules()
     vi.doMock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => false }) }))
     const { default: NoPerm } = await import('./ApplicantsTab')
     const { unmount } = render(<NoPerm vacancy={vacancy([
@@ -111,6 +120,21 @@ describe('ApplicantsTab · reuses the candidate drawer ApplicationRow (S-vacapp-
     ])} />)
     expect(screen.getByTitle('work.editApplication')).toBeInTheDocument()
     expect(screen.getByTitle('work.detachApplication')).toBeInTheDocument()
+  })
+
+  it('hides the "+ applicant" opener without applications.create, shows it with it (OPENERS-HIDE-1)', async () => {
+    vi.resetModules()
+    vi.doMock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => false }) }))
+    const { default: NoCreate } = await import('./ApplicantsTab')
+    const { unmount } = render(<NoCreate vacancy={vacancy([])} />)
+    expect(screen.queryByRole('button', { name: 'applicants.addApplication' })).toBeNull()
+    unmount()
+
+    vi.resetModules()
+    vi.doMock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
+    const { default: WithCreate } = await import('./ApplicantsTab')
+    render(<WithCreate vacancy={vacancy([])} />)
+    expect(screen.getByRole('button', { name: 'applicants.addApplication' })).toBeInTheDocument()
   })
 
   // PDF-VACATURES-13: the expanded application detail carries a DrillPager so the

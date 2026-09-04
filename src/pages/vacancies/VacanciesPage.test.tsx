@@ -5,8 +5,8 @@
  * (closing_soon=1 / stale_status=1) into the data layer, mirroring how
  * CandidatesPage:113 consumes { attention: 'stale6m' }.
  */
-import { describe, it, expect, vi } from 'vitest'
-import { act, render } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { act, render, screen } from '@testing-library/react'
 import { useState } from 'react'
 import VacanciesPage from './VacanciesPage'
 
@@ -19,7 +19,10 @@ let capturedGroups: FilterGroup[] = []
 vi.mock('@/context/RightPanelContext', () => ({
   useRightPanel: () => ({ registerFilters: (_k: string, groups: FilterGroup[]) => { capturedGroups = groups }, unregisterFilters: vi.fn() }),
 }))
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
+// hasPermission stubbed via a module-level flag so a test can flip it — a
+// static factory would lock every test to the same answer (mirrors OutreachPage.test.tsx).
+let canCreate = true
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: (p: string) => (p === 'vacancies.create' ? canCreate : true) }) }))
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
 vi.mock('@/lib/useBranchOptions', () => ({ useBranchOptions: () => [] }))
 vi.mock('@/context/VacancyLookupsContext', () => ({
@@ -144,5 +147,23 @@ describe('VacanciesPage · filter-panel parity (status/published/agent/archived)
     act(() => archivedGroup.onToggle('archived'))
     last = dataHookCalls[dataHookCalls.length - 1]
     expect(last.include_archived).toBe(1)
+  })
+})
+
+// hidden without the create permission (OPENERS-HIDE-1, Danny 05-09), same
+// as every other page toolbar.
+describe('VacanciesPage · create gate (OPENERS-HIDE-1)', () => {
+  beforeEach(() => { canCreate = true })
+
+  it('hides the opener without vacancies.create', () => {
+    canCreate = false
+    render(<VacanciesPage />)
+    expect(screen.queryByText('+ page.add')).toBeNull()
+  })
+
+  it('shows the opener with vacancies.create', () => {
+    canCreate = true
+    render(<VacanciesPage />)
+    expect(screen.getByText('+ page.add')).toBeInTheDocument()
   })
 })

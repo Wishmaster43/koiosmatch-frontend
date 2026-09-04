@@ -12,8 +12,7 @@
     "empty": "Nessun cliente trovato.",
     "loading": "Caricamento…",
     "loadError": "Caricamento clienti non riuscito.",
-    "archivedView": "Archiviati",
-    "createForbidden": "Non hai i permessi per creare un nuovo cliente."
+    "archivedView": "Archiviati"
   },
   "cols": {
     "name": "Nome",

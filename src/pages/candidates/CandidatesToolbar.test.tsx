@@ -16,7 +16,7 @@ const bulkBar = () => ({
 const baseProps = () => ({
   selectedCount: 0, onClearSelection: vi.fn(), bulkBar: bulkBar(),
   bulkScope: 'selected' as const, onSetBulkScope: vi.fn(), filteredTotal: 0,
-  onAddOpen: vi.fn(), searchEpoch: 0, globalSearch: '', onSearch: vi.fn(),
+  onAddOpen: vi.fn(), canCreate: true, searchEpoch: 0, globalSearch: '', onSearch: vi.fn(),
   anyFilterActive: false, onClearFilters: vi.fn(),
   blacklistActive: false, onToggleBlacklist: vi.fn(),
   showArchived: false, onToggleArchived: vi.fn(),
@@ -38,6 +38,12 @@ describe('CandidatesToolbar', () => {
     render(<CandidatesToolbar {...baseProps()} selectedCount={2} />)
     expect(screen.queryByText('+ page.add')).toBeNull()
     expect(screen.getByText('bulk.actions')).toBeInTheDocument()
+  })
+
+  // OPENERS-HIDE-1: the opener is HIDDEN (not click-gated) without candidates.create.
+  it('hides the add button without canCreate', () => {
+    render(<CandidatesToolbar {...baseProps()} canCreate={false} />)
+    expect(screen.queryByText('+ page.add')).toBeNull()
   })
 
   it('fires onAddOpen when the add button is clicked', async () => {

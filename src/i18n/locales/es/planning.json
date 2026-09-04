@@ -1,6 +1,5 @@
 {
   "addShift": "Añadir turno",
-  "addShiftForbidden": "No tienes permiso para crear un nuevo turno.",
   "loadErrorShifts": "No se pudieron cargar los turnos.",
   "previewSaveTitle": "Aún no conectado. Este turno no se guardará.",
   "sectionOrder": "Pedido",

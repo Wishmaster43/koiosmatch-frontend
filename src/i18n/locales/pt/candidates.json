@@ -8,8 +8,7 @@
     "loadError": "Não foi possível carregar os candidatos.",
     "searchPlaceholder": "Pesquisar candidato, nota, documento…",
     "empty": "Nenhum candidato encontrado.",
-    "loading": "A carregar…",
-    "createForbidden": "Não tem permissões para criar um novo candidato."
+    "loading": "A carregar…"
   },
   "columns": {
     "name": "Nome",

@@ -264,28 +264,25 @@ describe('CustomersPage · cross-entity intent forwards the drawer tab', () => {
   })
 })
 
-// RIGHTS-GATE-OPENERS-1: the toolbar's "+ Nieuwe klant" button always renders
-// (§3 — never a dead affordance); an unauthorized click surfaces an honest
-// forbidden message instead of opening the modal, mirroring CandidatesPage's
-// canCreateCandidate gate.
-describe('CustomersPage · create gate (RIGHTS-GATE-OPENERS-1)', () => {
-  it('blocks the create modal and shows the forbidden message without customers.create', async () => {
+// OPENERS-HIDE-1: the toolbar's "+ Nieuwe klant" opener is HIDDEN (not
+// click-gated) without customers.create — hidden without the create
+// permission (OPENERS-HIDE-1, Danny 05-09), same as every other page toolbar.
+describe('CustomersPage · create gate (OPENERS-HIDE-1)', () => {
+  it('hides the opener without customers.create', async () => {
     useCustomersDataMock.mockReturnValue(baseResult)
     // mockReturnValue (not -Once): the component re-renders several times
-    // before the click (filter registration, data effects) — a one-shot
+    // before the assertion (filter registration, data effects) — a one-shot
     // override would only cover the FIRST render and flip back to the
     // factory default on the ones that matter.
     vi.mocked(useAuth).mockReturnValue({ user: { branch_ids: [] }, hasPermission: () => false } as unknown as ReturnType<typeof useAuth>)
-    const user = userEvent.setup()
     render(<CustomersPage />)
     await waitFor(() => expect(apiGet).toHaveBeenCalled())
 
-    await user.click(screen.getByRole('button', { name: `+ ${cu('page.add')}` }))
-    expect(screen.getByText(cu('page.createForbidden'))).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: `+ ${cu('page.add')}` })).not.toBeInTheDocument()
     expect(screen.queryByTestId('add-customer-modal')).toBeNull()
   })
 
-  it('opens the create modal with customers.create', async () => {
+  it('shows the opener and opens the create modal with customers.create', async () => {
     useCustomersDataMock.mockReturnValue(baseResult)
     // Explicit (not relying on the previous test's override having reset) —
     // every test states its own auth state.
@@ -296,6 +293,5 @@ describe('CustomersPage · create gate (RIGHTS-GATE-OPENERS-1)', () => {
 
     await user.click(screen.getByRole('button', { name: `+ ${cu('page.add')}` }))
     expect(screen.getByTestId('add-customer-modal')).toBeInTheDocument()
-    expect(screen.queryByText(cu('page.createForbidden'))).toBeNull()
   })
 })

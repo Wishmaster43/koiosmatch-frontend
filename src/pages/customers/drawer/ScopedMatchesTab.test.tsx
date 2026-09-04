@@ -25,6 +25,11 @@ const cust = (key: string) => i18n.t(key, { ns: 'customers' })
 const mt = (key: string) => i18n.t(key, { ns: 'matches' })
 
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: vi.fn(), navigate: vi.fn() }) }))
+// hasPermission stubbed via a module-level flag, mirrors MatchesTab.test.tsx's
+// own gate test setup — default true so every pre-existing test above keeps
+// passing without knowing about the gate.
+let canCreateMatch = true
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: (p: string) => (p === 'matches.update' ? canCreateMatch : true) }) }))
 // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
 const metaOf = vi.fn((v?: string) => (v === 'open' ? { value: 'open', label: 'Open (lookup)', color: '#123456', is_closed: false } : undefined))
 // STATUS FILTER (Danny 05-08): mutable per-test so the filter tests below can
@@ -129,6 +134,24 @@ describe('ScopedMatchesTab · "+ Match" (point 1)', () => {
     const { onCreated } = matchModalProps.mock.calls.at(-1)?.[0] as { onCreated: () => void }
     onCreated()
     await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: ['location-matches', '/matches', 'customer_location_id', 'loc-1'] }))
+  })
+})
+
+describe('ScopedMatchesTab · create gate (OPENERS-HIDE-1)', () => {
+  afterEach(() => { canCreateMatch = true })
+
+  it('hides "+ Match" when matches.update is denied, even with a known customer', () => {
+    canCreateMatch = false
+    mockUseScopedEntityList.mockReturnValue({ rows: [], loading: false, error: false })
+    render(<ScopedMatchesTab scope="location" id="loc-1" customerId="cust-1" />, { wrapper })
+    expect(screen.queryByRole('button', { name: cust('matches.add') })).toBeNull()
+  })
+
+  it('shows "+ Match" when matches.update is granted and the customer is known', () => {
+    canCreateMatch = true
+    mockUseScopedEntityList.mockReturnValue({ rows: [], loading: false, error: false })
+    render(<ScopedMatchesTab scope="location" id="loc-1" customerId="cust-1" />, { wrapper })
+    expect(screen.getByRole('button', { name: cust('matches.add') })).toBeInTheDocument()
   })
 })
 

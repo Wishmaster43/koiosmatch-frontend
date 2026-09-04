@@ -40,6 +40,8 @@ interface ApplicationsListPanelProps {
   branchFilterExcludesAll: boolean
   // Toolbar
   onAddOpen: () => void
+  // hidden without the create permission (OPENERS-HIDE-1, Danny 05-09).
+  canCreate: boolean
   searchEpoch: number
   onSearch: (v: string) => void
   anyFilterActive: boolean
@@ -97,7 +99,7 @@ interface ApplicationsListPanelProps {
 // Insights row, toolbar and table/board view for the applications page; purely dumb rendering, all state and mutations arrive as props from ApplicationsPage (see file header).
 export default function ApplicationsListPanel({
   insightDonuts, insightKpis, statsFailed, wideIsPartial, branchFilterExcludesAll,
-  onAddOpen, searchEpoch, onSearch, anyFilterActive, onClearFilters,
+  onAddOpen, canCreate, searchEpoch, onSearch, anyFilterActive, onClearFilters,
   candidateScopeCount, onClearCandidateScope,
   showArchived, onToggleArchived, interviewBusy, onToggleInterviewBusy, interviewPaused, onToggleInterviewPaused,
   view, onViewChange,
@@ -131,10 +133,13 @@ export default function ApplicationsListPanel({
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'space-between',
         padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-          <Button variant="primary" size="md" onClick={onAddOpen}>
-            <Plus size={14} /> {t('add.button')}
-          </Button>
+          {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
+              Hidden without the create permission (OPENERS-HIDE-1, Danny 05-09). */}
+          {canCreate && (
+            <Button variant="primary" size="md" onClick={onAddOpen}>
+              <Plus size={14} /> {t('add.button')}
+            </Button>
+          )}
           {/* Shared header search (T10) — debounced, client-side text filter. */}
           <HeaderSearch key={searchEpoch} onSearch={onSearch} placeholder={t('page.searchPlaceholder')} width={300} />
           <ClearFiltersButton active={anyFilterActive} onClear={onClearFilters} />

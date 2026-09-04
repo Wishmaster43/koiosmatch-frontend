@@ -23,10 +23,12 @@ import { invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import { NavigationProvider } from '@/context/NavigationContext'
 import VacanciesTab from './VacanciesTab'
 
-// K7b: the row pencil is permission-gated on vacancies.update — stub the auth
-// hook so it renders in these deep-link tests.
+// K7b: the row pencil is permission-gated on vacancies.update; the "+ Vacature"
+// opener on vacancies.create (OPENERS-HIDE-1) — a module-level flag lets one
+// test flip the create permission without disturbing every other test here.
+let canCreateVacancy = true
 vi.mock('@/context/AuthContext', () => ({
-  useAuth: () => ({ hasPermission: (p: string) => p === 'vacancies.update' }),
+  useAuth: () => ({ hasPermission: (p: string) => p === 'vacancies.update' || (p === 'vacancies.create' && canCreateVacancy) }),
 }))
 
 // PRE-EXISTING FIX (found while adding the Sollicitaties sub-tab, unrelated to it —
@@ -85,6 +87,7 @@ afterEach(() => cleanup())
 
 beforeEach(() => {
   vi.clearAllMocks()
+  canCreateVacancy = true
   invalidateAllSettingsCache()
   vi.mocked(api.get).mockImplementation((url: string) => {
     if (url === '/vacancy-statuses') return Promise.resolve({ data: { data: VACANCY_STATUSES } })
@@ -250,5 +253,16 @@ describe('VacanciesTab · K7c applications deep link + K7b edit pencil', () => {
     await user.click(screen.getAllByLabelText('Vacature bewerken')[0])
 
     expect(goTo).toHaveBeenCalledWith('vacancies', { open: 'v-open', tab: undefined })
+  })
+})
+
+// hidden without the create permission (OPENERS-HIDE-1, Danny 05-09), same
+// as every other page toolbar — this opener used to read only vacancies.update.
+describe('VacanciesTab · create gate (OPENERS-HIDE-1)', () => {
+  it('hides the "+ Vacature" opener without vacancies.create', async () => {
+    canCreateVacancy = false
+    renderTab({ customerId: 'cust-1', customerName: 'Acme' })
+    await waitFor(() => expect(screen.getByText('Openstaande vacature')).toBeInTheDocument())
+    expect(screen.queryByText('Nieuwe vacature')).toBeNull()
   })
 })

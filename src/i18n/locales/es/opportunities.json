@@ -8,8 +8,7 @@
     "add": "Nueva oportunidad",
     "selected": "{{count}} seleccionado(s)",
     "clearSelection": "Borrar selección",
-    "searchPlaceholder": "Buscar oportunidad, descripción, nota…",
-    "createForbidden": "No tienes permiso para crear una nueva oportunidad."
+    "searchPlaceholder": "Buscar oportunidad, descripción, nota…"
   },
   "cols": {
     "title": "Oportunidad",

@@ -153,14 +153,10 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   }
   useEffect(() => () => { if (msgTimer.current) clearTimeout(msgTimer.current) }, [])
 
-  // RECHTEN-1: "+ Nieuwe kandidaat" gates on candidates.create (measured — POST
-  // /candidates requires it). CandidatesToolbar always renders the button, so the
-  // gate lives on the open handler: an unauthorized click gets an honest reason
-  // via the message banner instead of a silent no-op.
+  // hidden without the create permission (OPENERS-HIDE-1, Danny 05-09), same
+  // as every other page toolbar (measured — POST /candidates requires it).
   const canCreateCandidate = hasPermission('candidates.create')
-  // Gates the create-candidate action on the candidates.create permission, so an unauthorized click surfaces an honest reason instead of a silent no-op (the toolbar button itself always renders).
   const handleAddOpen = () => {
-    if (!canCreateCandidate) { notify('error', t('page.createForbidden')); return }
     setAddOpen(true)
   }
 
@@ -429,7 +425,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
             onCoupleBackoffice: bulkCoupleBackoffice,
             users, funnelTypes, candidateTypes, phases, statuses, selectedTags,
           }}
-          onAddOpen={handleAddOpen}
+          onAddOpen={handleAddOpen} canCreate={canCreateCandidate}
           searchEpoch={searchEpoch} globalSearch={globalSearch} onSearch={setGlobalSearch}
           anyFilterActive={anyFilterActive} onClearFilters={clearAllFilters}
           blacklistActive={blacklistActive} onToggleBlacklist={toggleBlacklist}
