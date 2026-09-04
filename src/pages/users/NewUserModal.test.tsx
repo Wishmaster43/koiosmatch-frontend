@@ -57,12 +57,13 @@ vi.mock('@/lib/useLocations', () => ({
 
 const noop = () => {}
 
-// G34: open the role picker (accessible name = "role <current value>", the field
-// label prefixed onto the trigger's own text — see CreatableSelect's doc comment)
-// and click the wanted option's row. Mirrors the exact same eventual onChange the
-// old `user.selectOptions(select, name)` produced.
+// G34 + ROLE-PICKER-LEFT-1: open the role picker (inside the shared FieldRow its
+// accessible name is the label alone, "role"; the current value rides as the
+// accessible description, see CreatableSelect's doc comment) and click the wanted
+// option's row. Mirrors the exact same eventual onChange the old
+// `user.selectOptions(select, name)` produced.
 const pickRole = async (user: ReturnType<typeof userEvent.setup>, label: string) => {
-  await user.click(screen.getByRole('button', { name: /^role / }))
+  await user.click(screen.getByRole('button', { name: 'role' }))
   await user.click(await screen.findByRole('button', { name: label }))
 }
 
@@ -80,8 +81,8 @@ describe('NewUserModal', () => {
     const user = userEvent.setup()
     render(<NewUserModal onClose={noop} onCreated={noop} />)
     // Belt-and-braces: the seed effect has landed on 'planner' before the picker opens.
-    await waitFor(() => expect(screen.getByRole('button', { name: 'role Planner' })).toBeInTheDocument())
-    await user.click(screen.getByRole('button', { name: 'role Planner' }))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'role' })).toHaveAccessibleDescription('Planner'))
+    await user.click(screen.getByRole('button', { name: 'role' }))
     expect(screen.getByRole('button', { name: 'Planner' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'backoffice' })).toBeInTheDocument()
   })

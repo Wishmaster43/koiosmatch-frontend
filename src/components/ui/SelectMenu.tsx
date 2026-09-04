@@ -54,8 +54,13 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, 'ari
   const listId = useId()
   const autoId = useId()
   const triggerId = id ?? autoId
-  // See CreatableSelect: label + own text, so the value is not swallowed by the name.
+  // See CreatableSelect (ROLE-PICKER-LEFT-1): the NAME stays exactly as it was
+  // (the label alone under a <label htmlFor>, label + own text under a bare
+  // <label id>); the current value rides as the accessible DESCRIPTION via
+  // aria-describedby → the value span, so it is announced in both shapes.
+  const valueId = `${triggerId}-value`
   const labelledBy = ariaLabelledBy ? `${ariaLabelledBy} ${triggerId}` : undefined
+  const describedBy = ariaLabelledBy ? valueId : undefined
   const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -124,14 +129,14 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, 'ari
           here vs var(--surface)/r6 there) — background var(--surface), border
           1px solid var(--border), radius 6, padding '6px 10px'. */}
       <button ref={triggerRef} type="button" onClick={() => setOpen(o => !o)}
-        id={triggerId} aria-labelledby={labelledBy} aria-required={ariaRequired || undefined}
+        id={triggerId} aria-labelledby={labelledBy} aria-describedby={describedBy} aria-required={ariaRequired || undefined}
         aria-expanded={open} aria-haspopup="listbox" aria-controls={open ? listId : undefined}
         style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', width: '100%',
           border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer' , ...style }}>
         {leading}
         {current?.initials && <Avatar initials={current.initials} size={18} />}
         {current?.icon && !current.initials && <span style={{ display: 'flex', flexShrink: 0 }}>{current.icon}</span>}
-        <span style={{ fontSize: (style as { fontSize?: number } | undefined)?.fontSize ?? 12, flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden',
+        <span id={valueId} style={{ fontSize: (style as { fontSize?: number } | undefined)?.fontSize ?? 12, flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden',
           textOverflow: 'ellipsis', color: current ? 'var(--text)' : 'var(--text-muted)' }}>
           {current?.label ?? placeholder ?? '-'}
         </span>

@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import SelectMenu from './SelectMenu'
+import { FieldRow } from '@/components/forms/fields'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 
 // A modal exactly as the app builds them: useFocusTrap on the panel, which closes
@@ -143,5 +144,40 @@ describe('SelectMenu · keyboard + focus (§6 WCAG 2.2 AA), continued', () => {
     await user.click(elsewhere)
     expect(elsewhere).toHaveFocus()
     expect(trigger).not.toHaveFocus()
+  })
+})
+
+// ROLE-PICKER-LEFT-1: inside the shared FieldRow (<label id htmlFor> on the trigger)
+// the accessible NAME stays the label alone (the name every FieldRow picker test in
+// the app queries) and the current value is announced as the accessible
+// DESCRIPTION. Folding the value into the name instead renamed ~90 pickers and
+// broke 41 name queries (measured 04-09), so this pins both halves.
+describe('SelectMenu · FieldRow name + value description (ROLE-PICKER-LEFT-1)', () => {
+  it('keeps the label as the name and exposes the picked value as the description', () => {
+    render(
+      <FieldRow label="Status">
+        <SelectMenu value="planner" onChange={() => {}}
+          options={[{ value: 'planner', label: 'Planner' }]} />
+      </FieldRow>,
+    )
+    const trigger = screen.getByRole('button', { name: 'Status' })
+    expect(trigger).toHaveAccessibleName('Status')
+    expect(trigger).toHaveAccessibleDescription('Planner')
+  })
+
+  it('describes an empty picker by its placeholder while the name is still the label alone', () => {
+    render(
+      <FieldRow label="Status">
+        <SelectMenu value={null} onChange={() => {}} placeholder="Kies status"
+          options={[{ value: 'planner', label: 'Planner' }]} />
+      </FieldRow>,
+    )
+    const trigger = screen.getByRole('button', { name: 'Status' })
+    expect(trigger).toHaveAccessibleDescription('Kies status')
+  })
+
+  it('adds no description when nothing labels the picker from outside (the name IS its own text)', () => {
+    render(<SelectMenu value="planner" onChange={() => {}} options={[{ value: 'planner', label: 'Planner' }]} />)
+    expect(screen.getByRole('button', { name: 'Planner' })).not.toHaveAttribute('aria-describedby')
   })
 })

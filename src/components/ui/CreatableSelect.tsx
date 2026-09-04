@@ -96,9 +96,19 @@ export default function CreatableSelect({
   const listId = useId()
   const autoId = useId()
   const triggerId = id ?? autoId
-  // Name = the field's label PLUS this button's own text (the current value); pointing
-  // aria-labelledby at the label alone would REPLACE the value instead of prefixing it.
+  // ROLE-PICKER-LEFT-1 (measured 04-09 in jsdom/dom-accessibility-api, the engine
+  // every RTL name query runs on): inside Field/FieldRow, whose <label htmlFor>
+  // targets this trigger, the self-reference below contributes NOTHING, so the
+  // accessible NAME is the label alone ("Status") and that is exactly what every
+  // Field/FieldRow call site and its tests query. Only a bare <label id>
+  // without htmlFor makes the self-reference append the button's own text
+  // ("Status Planner"), so it stays and the direct call sites keep their names
+  // as they are. The CURRENT VALUE is exposed as the accessible DESCRIPTION
+  // instead (aria-describedby → the inner value span): a screen reader announces
+  // it after the name in BOTH shapes, without renaming any control.
+  const valueId = `${triggerId}-value`
   const labelledBy = ariaLabelledBy ? `${ariaLabelledBy} ${triggerId}` : undefined
+  const describedBy = ariaLabelledBy ? valueId : undefined
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const ref = useRef<HTMLDivElement>(null)
@@ -190,7 +200,7 @@ export default function CreatableSelect({
         // tell a screen reader it opens a list — the part that was missing entirely once a
         // native <select> was replaced by this (measured 27-07).
         <button type="button" ref={triggerRef} onClick={() => setOpen(o => !o)}
-          id={triggerId} aria-labelledby={labelledBy} aria-required={ariaRequired || undefined}
+          id={triggerId} aria-labelledby={labelledBy} aria-describedby={describedBy} aria-required={ariaRequired || undefined}
           aria-expanded={open} aria-haspopup="listbox" aria-controls={open ? listId : undefined}
           style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', width: '100%',
             boxSizing: 'border-box', border: '1px solid var(--border)', borderRadius: 6,
@@ -202,7 +212,7 @@ export default function CreatableSelect({
               that never opts in keeps its exact current layout. */}
           {/* S-icon-1 (mirrored from SelectMenu): the selected option's own icon, if any. */}
           {current?.icon && <span style={{ display: 'flex', flexShrink: 0 }}>{current.icon}</span>}
-          <span style={{ fontSize: (style as { fontSize?: number } | undefined)?.fontSize ?? 12, flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden',
+          <span id={valueId} style={{ fontSize: (style as { fontSize?: number } | undefined)?.fontSize ?? 12, flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden',
             textOverflow: 'ellipsis', color: (current || value) ? 'var(--text)' : 'var(--text-muted)',
             ...(showClear ? { marginRight: CLEAR_BUTTON_SIZE } : {}) }}>
             {/* `value || placeholder`, NOT `value ?? placeholder`: an unset field commonly

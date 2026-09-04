@@ -5,7 +5,7 @@
  * inherit (USERS-ROLES-LOC-1 role-template copy on create). Extracted from
  * UsersPage.
  */
-import { useState, useEffect, useId } from 'react'
+import { useState, useEffect } from 'react'
 import type { CSSProperties, FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
@@ -24,7 +24,7 @@ import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { roleLabel } from './usersParts'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
-import { Caption, GroupLabel, formLabelStyle } from '@/components/ui/typography'
+import { Caption, GroupLabel } from '@/components/ui/typography'
 // FIELD-LAYOUT canon (Danny 13-08): every field is a label-LEFT row from the
 // shared form kit — mirrors AddCandidateModal's cards (src/pages/candidates/addmodal/).
 import { FieldRow, TextField, CheckboxField } from '@/components/forms/fields'
@@ -97,7 +97,6 @@ export default function NewUserModal({ onClose, onCreated }: {
   // The role picker is now the house CreatableSelect (string) => void — same
   // shape the native select's onChange already produced (e.target.value).
   const setRole = (v: string) => setForm(f => ({ ...f, role: v }))
-  const roleLabelId = useId()
 
   // Creates the user, then (only on a manual branch divergence) replaces its
   // branch set, and surfaces any agent-provisioning notice the backend echoed.
@@ -134,8 +133,6 @@ export default function NewUserModal({ onClose, onCreated }: {
 
   // Field faces come from fieldMetrics' canon (§4 2b) — never a local copy.
   const input: CSSProperties = fieldInputStyle
-  // Shared FormLabel identity (12/500/muted) + this file's own layout (§4: identity from the atom, layout local).
-  const label: CSSProperties = { display: 'block', ...formLabelStyle, marginBottom: 5 }
 
   return (
     // POPUP-SLEEP-1: migrated onto the shared FloatingPanel shell — draggable
@@ -166,18 +163,20 @@ export default function NewUserModal({ onClose, onCreated }: {
             </FieldRow>
           </div>
           <div style={{ marginBottom: 12 }}>
-            <label id={roleLabelId} style={label}>{t('role')}</label>
-            {/* Loading/empty is honest by having nothing to pick (§3 — no fake
-                affordance), never a disabled attribute the shared component doesn't
-                expose; the dimmed wrapper blocks interaction while there is nothing
-                selectable yet, mirroring the old select's disabled look. */}
-            <div style={(rolesLoading || roles.length === 0) ? { opacity: 0.6, pointerEvents: 'none' } : undefined}>
+            {/* ROLE-PICKER-LEFT-1: the shared FieldRow, like every sibling field
+                (§3A field-layout canon) — no private restyle. Not `required`:
+                nothing here validates the role as required (the create button is
+                merely disabled without one, no aria-required existed before this
+                row was hand-rolled). Loading/empty is honest by having nothing to
+                pick (§3 — no fake affordance); the dimmed style blocks interaction
+                while there is nothing selectable yet, mirroring the old select's
+                disabled look. */}
+            <FieldRow label={t('role')}>
               <CreatableSelect value={form.role || null} onChange={setRole} allowCreate={false}
-                aria-labelledby={roleLabelId}
                 placeholder={rolesLoading ? t('rolesLoading') : (roles.length === 0 ? t('noRoles') : undefined)}
                 options={roles.map(r => ({ value: r.name, label: roleLabel(t, r.name) }))}
-                style={input} />
-            </div>
+                style={(rolesLoading || roles.length === 0) ? { ...input, opacity: 0.6, pointerEvents: 'none' } : input} />
+            </FieldRow>
           </div>
 
           {/* AGENT-META-SETUP: only asked for a recruiter/manager — the two roles the

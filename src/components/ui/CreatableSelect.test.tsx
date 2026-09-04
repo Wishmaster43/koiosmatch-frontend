@@ -2,6 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import CreatableSelect from './CreatableSelect'
+import { FieldRow } from '@/components/forms/fields'
 
 // Build a fake getBoundingClientRect result — only top/bottom matter for the flip math.
 const rect = (top: number, bottom: number): DOMRect => ({
@@ -296,5 +297,40 @@ describe('CreatableSelect · aria-required forwarding (REQUIRED-A11Y-2)', () => 
   it('omits aria-required from the trigger when not passed', () => {
     render(<CreatableSelect value={null} onChange={() => {}} options={['A', 'B']} placeholder="Select" />)
     expect(screen.getByRole('button', { name: 'Select' })).not.toHaveAttribute('aria-required')
+  })
+})
+
+// ROLE-PICKER-LEFT-1: inside the shared FieldRow (<label id htmlFor> on the trigger)
+// the accessible NAME stays the label alone (the name every FieldRow picker test in
+// the app queries) and the current value is announced as the accessible
+// DESCRIPTION. Folding the value into the name instead renamed ~90 pickers and
+// broke 41 name queries (measured 04-09), so this pins both halves.
+describe('CreatableSelect · FieldRow name + value description (ROLE-PICKER-LEFT-1)', () => {
+  it('keeps the label as the name and exposes the picked value as the description', () => {
+    render(
+      <FieldRow label="Status">
+        <CreatableSelect value="planner" onChange={() => {}} allowCreate={false}
+          options={[{ value: 'planner', label: 'Planner' }]} />
+      </FieldRow>,
+    )
+    const trigger = screen.getByRole('button', { name: 'Status' })
+    expect(trigger).toHaveAccessibleName('Status')
+    expect(trigger).toHaveAccessibleDescription('Planner')
+  })
+
+  it('describes an empty picker by its placeholder while the name is still the label alone', () => {
+    render(
+      <FieldRow label="Status">
+        <CreatableSelect value={null} onChange={() => {}} allowCreate={false} placeholder="Kies status"
+          options={[{ value: 'planner', label: 'Planner' }]} />
+      </FieldRow>,
+    )
+    const trigger = screen.getByRole('button', { name: 'Status' })
+    expect(trigger).toHaveAccessibleDescription('Kies status')
+  })
+
+  it('adds no description when nothing labels the picker from outside (the name IS its own text)', () => {
+    render(<CreatableSelect value="planner" onChange={() => {}} allowCreate={false} options={[{ value: 'planner', label: 'Planner' }]} />)
+    expect(screen.getByRole('button', { name: 'Planner' })).not.toHaveAttribute('aria-describedby')
   })
 })
