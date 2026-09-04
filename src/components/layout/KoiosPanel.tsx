@@ -341,8 +341,9 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
               onClick={openMentionTrigger}>
               <AtSign size={14} />
             </Button>
-            {/* Bijlage-knop VERBORGEN tot het uploadpad bestaat (Danny 27-08:
-                een zichtbaar-dode knop is erger dan geen knop). */}
+            {/* Attachment button HIDDEN until the upload path exists (Danny 27-08,
+                verbatim: "een zichtbaar-dode knop is erger dan geen knop" —
+                "a visibly-dead button is worse than no button"). */}
 
             {/* Danny 27-08: the two landing cards are summonable/dismissable from
                 the composer — visible = primary ink, closed = muted (aria-pressed). */}

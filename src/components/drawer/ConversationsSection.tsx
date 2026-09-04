@@ -84,7 +84,7 @@ interface ConversationRow {
   // K-193: the thread's dominant channel (enum) + server label, badge fallback source.
   primary_channel?: 'waba' | 'waba_coex' | 'wa_web' | string
   channel_label?: string | null
-  // PUNT-2: 'laatste beurt'-semantiek — owner van het laatste bericht (incl. inbound-stempel).
+  // PUNT-2: "last turn" semantics — owner of the last message (including the inbound stamp).
   last_handled_by?: string | null
 }
 
@@ -318,7 +318,7 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
                 <SoftChip label={t('conversations.escalated')} color="var(--color-warning)" />
               )}
               {activeBadge(row.is_active)}
-              {/* PUNT-2: wie bezit de laatste beurt in dit gesprek — tooltip draagt de uitleg. */}
+              {/* PUNT-2: who holds the last turn in this conversation — the tooltip carries the explanation. */}
               {row.last_handled_by && HANDLED_BY_COLORS[row.last_handled_by] && (
                 <span title={t('conversations.lastTurn')}>
                   <SoftChip label={t(`conversations.handledBy.${row.last_handled_by}`)}

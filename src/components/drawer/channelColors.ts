@@ -13,10 +13,10 @@ export const CHANNEL_COLORS: Record<string, string> = {
   wa_web: 'var(--color-info)',
 }
 
-// PUNT-2 (BE 0a8521df): owner-stempel van een beurt — Koios blijft het gezicht
-// (engine = primary, workflow = de AI-modulefamilie violet, human = muted).
-// Gedeeld door de bericht-badge (ConversationMessage) en de thread-kop
-// (ConversationsSection); onbekende waarden renderen nergens.
+// PUNT-2 (BE 0a8521df): the owner stamp of a turn — Koios stays the face
+// (engine = primary, workflow = the AI-module-family violet, human = muted).
+// Shared by the message badge (ConversationMessage) and the thread header
+// (ConversationsSection); unknown values render nothing.
 export const HANDLED_BY_COLORS: Record<string, string> = {
   engine: 'var(--color-primary)',
   workflow: 'var(--color-violet)',
