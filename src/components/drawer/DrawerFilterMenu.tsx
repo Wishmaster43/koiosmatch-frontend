@@ -7,24 +7,17 @@
  * comment on the default export below for the design rationale.
  */
 import { useEffect, useId, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
-import { SlidersHorizontal, RotateCcw, Search } from 'lucide-react'
-import DatePicker from 'react-datepicker'
+import { SlidersHorizontal, RotateCcw } from 'lucide-react'
 import SelectMenu from '@/components/ui/SelectMenu'
-import SelectAllRow from '@/components/ui/SelectAllRow'
-import Slider from '@/components/ui/Slider'
-import Toggle from '@/components/ui/Toggle'
 import Button from '@/components/ui/Button'
 import CountBadge from '@/components/ui/CountBadge'
-import { parseDate } from '@/components/forms/fields'
-import { toLocalIsoDate } from '@/lib/localDate'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
-import { useBatchToggle } from '@/hooks/useBatchToggle'
 import { Z } from '@/lib/zIndexScale'
-
-export interface DrawerFilterOption { value: string; label: string }
+import { DrawerMultiFilterRow, DrawerRangeFilterRow, DrawerToggleFilterRow, DrawerDateFilterRow } from './drawerFilterRows'
+import type { DrawerFilterConfig } from './drawerFilterTypes'
+export type { DrawerFilterOption, DrawerFilterConfig, DrawerSingleFilterConfig, DrawerMultiFilterConfig, DrawerRangeFilterConfig, DrawerDateFilterConfig, DrawerToggleFilterConfig } from './drawerFilterTypes'
 
 // FILTER-WIDTH-1 (Danny 08-08, punt 13 "filter notities moet langer zijn" + punt 18
 // "filter bij documenten is te kort hierdoor kan je niet goed filteren"): the panel
@@ -42,98 +35,6 @@ const PANEL_WIDTH = 260
 // Inner content width: panel − 2×1px border − 2×10px padding. Handed to the nested
 // dropdown as its menuWidth so its option list is never narrower than its trigger.
 const CONTROL_WIDTH = PANEL_WIDTH - 22
-// Checklist height cap — ~14 rows before it scrolls (was ~6). This is the number
-// that actually decides whether filtering feels workable; long option labels wrap
-// onto a second line rather than forcing the panel wider.
-const CHECKLIST_MAX_HEIGHT = 440
-
-// Single-select row (notes type/channel, document type) — the house searchable
-// SelectMenu, '' = no filter. Mirrors SelectMenu's own value/onChange contract,
-// so this component is a thin composer around it, never a second implementation.
-export interface DrawerSingleFilterConfig {
-  type: 'single'
-  key: string
-  // Field label shown above its control inside the panel (already translated by the host).
-  label: ReactNode
-  value: string
-  options: DrawerFilterOption[]
-  onChange: (value: string) => void
-  // The dropdown's own "all" placeholder/option label (e.g. "Alle types").
-  allLabel: string
-}
-
-// Multi-select row (task status/type/priority, …) — an INLINE searchable
-// checklist, deliberately never a nested popover: the house SearchSelect (the
-// existing multi-select control) renders its dropdown via `createPortal` into
-// `document.body`, which would sit OUTSIDE this panel's own DOM subtree — this
-// panel's outside-click listener (below) would then see every option click as
-// "outside" and close the whole menu before `onToggle` could even register the
-// pick. Rendering the checklist inline (no portal) keeps every click inside the
-// panel's own subtree, side-stepping that class of bug entirely.
-export interface DrawerMultiFilterConfig {
-  type: 'multi'
-  key: string
-  label: ReactNode
-  selected: string[]
-  options: DrawerFilterOption[]
-  onToggle: (value: string) => void
-  // Placeholder/aria-label for this row's own search box (already translated).
-  searchPlaceholder: string
-  // "No options" copy for an empty vocabulary (already translated).
-  noResultsLabel: string
-}
-
-// Range row (P8-more-filters, batch 8: "Uren per week") — a two-thumb Slider,
-// mirrors VacancySearchFilters' own hours row. `active`/`onReset` are supplied by
-// the HOST rather than derived here: a range's "off" position is whatever the
-// host's own domain considers unbounded (e.g. [0, max] for hours), which only the
-// host knows — the shared component stays generic over that choice.
-export interface DrawerRangeFilterConfig {
-  type: 'range'
-  key: string
-  label: ReactNode
-  value: [number, number]
-  max: number
-  step?: number
-  onChange: (next: [number, number]) => void
-  // Formatted numeric readout beside the slider (already localized, e.g. "0–40").
-  valueLabel: string
-  ariaLabels: [string, string]
-  // Whether the current value narrows anything (drives the badge + clear-all).
-  active: boolean
-  // Reset THIS row back to its host-defined "off" value — used by clear-all.
-  onReset: () => void
-}
-
-// Date row (P8-more-filters: "Inzetbaar vanaf") — the shared react-datepicker
-// convention (DD-MM-YYYY, §4), '' = no filter. Renders via the app-wide
-// #datepicker-portal DOM node (index.html) instead of inline, so the calendar
-// popper is never clipped by this panel's own bounds — see the outside-click
-// listener below for the whitelist that keeps that portal from closing the panel.
-export interface DrawerDateFilterConfig {
-  type: 'date'
-  key: string
-  label: ReactNode
-  value: string
-  onChange: (next: string) => void
-  placeholder: string
-}
-
-// Toggle row (K-288, linked-notes "Alleen directe notities" switch) — a single
-// boolean, the shared Toggle atom. Minimal by design: no options/all-label, just
-// value + onChange, mirrored on the NoteFeedList section's own Toggle usage.
-export interface DrawerToggleFilterConfig {
-  type: 'toggle'
-  key: string
-  label: ReactNode
-  value: boolean
-  onChange: (value: boolean) => void
-  // Accessible name for the switch itself (label above is visual only — Toggle
-  // has no <label> association of its own, mirrors every other Toggle call site).
-  ariaLabel: string
-}
-
-export type DrawerFilterConfig = DrawerSingleFilterConfig | DrawerMultiFilterConfig | DrawerRangeFilterConfig | DrawerDateFilterConfig | DrawerToggleFilterConfig
 
 interface DrawerFilterMenuProps {
   filters: DrawerFilterConfig[]
@@ -144,104 +45,6 @@ interface DrawerFilterMenuProps {
   title: string
   // Clear-all icon button's tooltip/aria-label (already translated).
   clearAllLabel: string
-}
-
-// One multi-select filter row: an inline (non-portal) search box + a scrollable
-// checklist — see the DrawerMultiFilterConfig doc comment above for why this is
-// never the shared SearchSelect component directly.
-function DrawerMultiFilterRow({ config }: { config: DrawerMultiFilterConfig }) {
-  const [query, setQuery] = useState('')
-  const q = query.trim().toLowerCase()
-  const shown = q ? config.options.filter(o => o.label.toLowerCase().includes(q)) : config.options
-  // Select-all over the VISIBLE rows only; hosts expose a per-value onToggle, so the
-  // batch is applied one value per commit (see useBatchToggle for why never a loop).
-  const applyBatch = useBatchToggle<string>(config.onToggle)
-  return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', marginBottom: 4,
-        borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)' }}>
-        <Search size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-        <input value={query} onChange={e => setQuery(e.target.value)} placeholder={config.searchPlaceholder}
-          aria-label={config.searchPlaceholder}
-          style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', fontSize: 12, color: 'var(--text)', background: 'none' }} />
-      </div>
-      {config.options.length === 0 ? (
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', padding: '2px 4px' }}>{config.noResultsLabel}</div>
-      ) : (
-        <div style={{ maxHeight: CHECKLIST_MAX_HEIGHT, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <SelectAllRow dense visibleValues={shown.map(o => o.value)} selectedValues={config.selected}
-            onApply={values => applyBatch(values)} />
-          {shown.length === 0 && <div style={{ fontSize: 11, color: 'var(--text-muted)', padding: '2px 4px' }}>{config.noResultsLabel}</div>}
-          {/* FILTER-WIDTH-1: the label WRAPS instead of ellipsising — a truncated
-              option ("Verklaring Omtrent het …") is exactly what made filtering
-              impossible. flex-start keeps the box on the first line when it wraps.
-              HUISSTIJL-1 (Opus-F residual triage, judged — LEFT tinted, not trio):
-              a checked row in this checklist is the same "selected list row"
-              category the law already exempts on SelectMenu/SearchSelect/
-              CreatableSelect's own option rows — solid-filling only this sibling
-              would be new drift, not less of it. */}
-          {shown.map(o => {
-            const checked = config.selected.includes(o.value)
-            return (
-              <label key={o.value} style={{ display: 'flex', alignItems: 'flex-start', gap: 6, padding: '4px 6px', borderRadius: 5, cursor: 'pointer',
-                background: checked ? 'var(--color-primary-bg)' : 'none' }}>
-                <input type="checkbox" checked={checked} onChange={() => config.onToggle(o.value)}
-                  style={{ accentColor: 'var(--color-primary)', width: 12, height: 12, flexShrink: 0, marginTop: 3 }} />
-                <span style={{ fontSize: 12, lineHeight: 1.35, minWidth: 0, overflowWrap: 'anywhere',
-                  color: checked ? 'var(--color-primary-text)' : 'var(--text)' }}>
-                  {o.label}
-                </span>
-              </label>
-            )
-          })}
-        </div>
-      )}
-    </div>
-  )
-}
-
-// Range row: a two-thumb Slider + a JetBrains Mono readout (§4: numbers/IDs use
-// the mono face) — inline, no portal, so it never trips the outside-click check.
-function DrawerRangeFilterRow({ config }: { config: DrawerRangeFilterConfig }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <div style={{ flex: 1 }}>
-        <Slider range={config.value} max={config.max} step={config.step ?? 1}
-          onRangeChange={config.onChange} ariaLabels={config.ariaLabels} />
-      </div>
-      <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text)', whiteSpace: 'nowrap' }}>
-        {config.valueLabel}
-      </span>
-    </div>
-  )
-}
-
-// Bare filter-bar date input (mirrors VacancySearchFilters' own filterInput look)
-// — the CONTROL_WIDTH constant keeps it flush with the single-select row above it.
-const dateInputStyle = { padding: '6px 9px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', color: 'var(--text)', outline: 'none', width: CONTROL_WIDTH }
-
-// Toggle row: the shared Toggle atom — a single switch, no label repeated inside
-// (the group heading above already shows it).
-function DrawerToggleFilterRow({ config }: { config: DrawerToggleFilterConfig }) {
-  return <Toggle checked={config.value} onChange={config.onChange} ariaLabel={config.ariaLabel} />
-}
-
-// Date row: the shared react-datepicker convention (DD-MM-YYYY). Renders via the
-// app-wide #datepicker-portal node, not inline — see DrawerDateFilterConfig's doc
-// comment and this file's outside-click listener for why that portal is whitelisted.
-function DrawerDateFilterRow({ config }: { config: DrawerDateFilterConfig }) {
-  return (
-    <DatePicker
-      selected={parseDate(config.value)}
-      onChange={(d: Date | null) => config.onChange(d ? toLocalIsoDate(d) : '')}
-      dateFormat="dd-MM-yyyy"
-      showMonthDropdown showYearDropdown dropdownMode="select"
-      placeholderText={config.placeholder}
-      portalId="datepicker-portal"
-      popperPlacement="bottom-start"
-      customInput={<input aria-label={config.placeholder} style={dateInputStyle} />}
-    />
-  )
 }
 
 /**

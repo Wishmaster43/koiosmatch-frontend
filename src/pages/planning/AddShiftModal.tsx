@@ -57,9 +57,8 @@
  * and the submitted body.
  */
 import { useState } from 'react'
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, Save, Search, AlertCircle } from 'lucide-react'
+import { X, Save, AlertCircle } from 'lucide-react'
 import { formatDate, toIsoDate } from './helpers'
 import { useDateFormat } from '@/lib/datetime'
 import { useFunctions } from '@/lib/useFunctions'
@@ -69,7 +68,10 @@ import { usePlanningOrdersList } from './hooks/usePlanningOrders'
 import { useCreatePlanningShift } from './hooks/usePlanningShifts'
 import type { ShiftCandidateOption } from './hooks/useShiftLookups'
 import { extractApiError } from '@/lib/extractApiError'
-import { Field, Avatar, CandidateRow, colorFor, getInitials } from './AddShiftModalFields'
+import { Field, Avatar, colorFor, getInitials } from './AddShiftModalFields'
+import { INPUT } from './addShiftFieldStyles'
+import AddShiftOrderColumn from './AddShiftOrderColumn'
+import AddShiftCandidateColumn from './AddShiftCandidateColumn'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
@@ -77,13 +79,6 @@ import Button from '@/components/ui/Button'
 import type { ShiftInput } from '@/types/planning'
 import { tint } from '@/lib/tint'
 import { Caption, SectionTitle } from '@/components/ui/typography'
-
-// ── Field helpers — house footprint (padding '8px 11px', fontSize 13,
-// borderRadius 8, §3A/§4) so this modal's inputs match every other create form,
-// even though its 3-column workspace stays its own (genuinely different) layout.
-// eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- shared style OBJECT applied directly to native <input>/<textarea> elements throughout this file; a form field's own text colour must sit on the element itself, not on a wrapping BodyText atom
-const INPUT: CSSProperties = { padding: '8px 11px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8,
-  outline: 'none', background: 'var(--bg)', color: 'var(--text)', width: '100%', boxSizing: 'border-box' }
 
 // ── Add Shift Modal ───────────────────────────────────────────────────────────
 export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; onClose: () => void; onAdd: (shift: ShiftInput) => void }) {
@@ -228,78 +223,16 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
           {/* Body: 3 kolommen */}
           <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
 
-            {/* ── Links: order info — each SectionHead became a titled bordered
-                card (Danny 27-07); customer/department are searchable
-                CreatableSelects, never a bare `<select>`. Each cardHead+cardBox
-                pair is its own flex item (gap:16) — the shared cardBox no longer
-                carries its own marginBottom, mirroring every other wide modal. ── */}
-            <div style={{ width: 220, flexShrink: 0, borderRight: '1px solid var(--border)',
-              background: 'var(--surface)', overflowY: 'auto', padding: '14px 14px',
-              display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div>
-                <div style={cardHead}>{t('sectionOrder')}</div>
-                <div style={cardBox}>
-                  <Field label={t('order.listTitle')}>
-                    <CreatableSelect value={orderId || null} onChange={handleOrderChange} allowCreate={false}
-                      clearable clearLabel={t('order.noOrder')}
-                      placeholder={ordersLoading ? t('common:loading') : ordersError ? t('common:errorGeneric') : orders.length === 0 ? t('common:noResults') : t('common:select')}
-                      options={orders.map(o => ({ value: String(o.id), label: o.subject || o.function || o.reference || o.client || t('order.listTitle') }))} />
-                  </Field>
-                  <Field label={t('fCustomer')}>
-                    <CreatableSelect value={customerId || null} onChange={handleCustomerChange} allowCreate={false}
-                      placeholder={customersLoading ? t('common:loading')
-                        : customersError ? t('common:errorGeneric')
-                        : customers.length === 0 ? t('common:noResults')
-                        : t('common:select')}
-                      options={customers.map(c => ({ value: String(c.id), label: c.name }))} />
-                  </Field>
-                  <Field label={t('fDepartment')}>
-                    {/* Options stay empty until a customer is known — either picked
-                        directly, or derived from the selected order's own customer
-                        (departmentCustomerId above) — nothing selectable, not just
-                        visually greyed. */}
-                    <CreatableSelect value={departmentId || null} onChange={setDepartmentId} allowCreate={false}
-                      placeholder={!departmentCustomerId ? t('pickCustomerFirst')
-                        : departmentsLoading ? t('common:loading')
-                        : departmentsError ? t('common:errorGeneric')
-                        : departments.length === 0 ? t('common:noResults')
-                        : t('common:select')}
-                      options={!departmentCustomerId ? [] : departments.map(d => ({ value: String(d.id), label: d.name }))} />
-                  </Field>
-                  <Field label={t('fAssignment')}><input style={INPUT} /></Field>
-                  <Field label={t('fContact')}><input style={INPUT} placeholder={t('contactPlaceholder')} /></Field>
-                </div>
-              </div>
-
-              <div>
-                <div style={cardHead}>{t('sectionLocation')}</div>
-                <div style={cardBox}>
-                  <Field label={t('fAddress')}>
-                    <textarea style={{ ...INPUT, resize: 'none', height: 56 }}
-                      value={address} onChange={e => setAddress(e.target.value)} />
-                  </Field>
-                </div>
-              </div>
-
-              <div>
-                <div style={cardHead}>{t('sectionColor')}</div>
-                <div style={cardBox}>
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    {/* Icon-only swatch buttons need a real aria-label (§6) — the CSS
-                        value itself isn't meaningful to a screen reader, so number them.
-                        HUISSTIJL-1: left hand-styled — each swatch's fill IS the picked
-                        colour value (data), not a Button identity. */}
-                    {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
-                    {COLORS.map((c, i) => (
-                      <button key={c} type="button" onClick={() => setColor(c)} aria-label={`${t('sectionColor')} ${i + 1}`}
-                        style={{ width: 20, height: 20, borderRadius: '50%', background: c, border: 'none',
-                          cursor: 'pointer', outline: color === c ? `2px solid ${c}` : 'none', outlineOffset: 2 }} />
-                    ))}
-                    {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* ── Links: order info — extracted to AddShiftOrderColumn (SIZE-SPLIT-B). ── */}
+            <AddShiftOrderColumn
+              t={t} orderId={orderId} handleOrderChange={handleOrderChange} orders={orders}
+              ordersLoading={ordersLoading} ordersError={ordersError}
+              customerId={customerId} handleCustomerChange={handleCustomerChange} customers={customers}
+              customersLoading={customersLoading} customersError={customersError}
+              departmentId={departmentId} setDepartmentId={setDepartmentId} departments={departments}
+              departmentsLoading={departmentsLoading} departmentsError={departmentsError} departmentCustomerId={departmentCustomerId}
+              address={address} setAddress={setAddress} color={color} setColor={setColor} colors={COLORS}
+            />
 
             {/* ── Midden: dienst details — same titled-card treatment; jobtype/open
                 dienst are now searchable CreatableSelects. Each cardHead+cardBox
@@ -413,42 +346,12 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
               </div>
             </div>
 
-            {/* ── Rechts: kandidaat zoeken (PLAN-LOOKUP-1) ── */}
-            <div style={{ width: 240, flexShrink: 0, borderLeft: '1px solid var(--border)',
-              background: 'var(--surface)', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-
-              {/* Zoek */}
-              <div style={{ padding: '12px 12px 8px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-                <div style={{ position: 'relative' }}>
-                  <Search size={13} style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                  <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                    placeholder={t('searchCandidate')} aria-label={t('searchCandidate')}
-                    style={{ ...INPUT, paddingLeft: 28, fontSize: 12 }} />
-                </div>
-              </div>
-
-              <div style={{ flex: 1, overflowY: 'auto', padding: '10px 10px' }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.07em',
-                  textTransform: 'uppercase', marginBottom: 6 }}>
-                  {t('common:nav.candidates')}
-                </div>
-
-                {/* Four UI states — no fabricated favourite/distance ranking (see
-                    ./hooks/useShiftLookups header): just what the search returns. */}
-                {candidatesLoading && (
-                  <div style={{ padding: '12px 8px', fontSize: 12, color: 'var(--text-muted)' }}>{t('common:loading')}</div>
-                )}
-                {!candidatesLoading && candidatesError && (
-                  <div style={{ padding: '12px 8px', fontSize: 12, color: 'var(--color-danger-text)' }}>{t('common:errorGeneric')}</div>
-                )}
-                {!candidatesLoading && !candidatesError && candidates.length === 0 && (
-                  <div style={{ padding: '12px 8px', fontSize: 12, color: 'var(--text-muted)' }}>{t('common:noResults')}</div>
-                )}
-                {!candidatesLoading && !candidatesError && candidates.map(c => (
-                  <CandidateRow key={c.id} candidate={c} selected={candidate?.id === c.id} onClick={() => setCandidate(c)} />
-                ))}
-              </div>
-            </div>
+            {/* ── Rechts: kandidaat zoeken — extracted to AddShiftCandidateColumn (SIZE-SPLIT-B). ── */}
+            <AddShiftCandidateColumn
+              t={t} searchQuery={searchQuery} setSearchQuery={setSearchQuery}
+              candidatesLoading={candidatesLoading} candidatesError={candidatesError} candidates={candidates}
+              candidate={candidate} setCandidate={setCandidate}
+            />
           </div>
     </FloatingPanel>
   )

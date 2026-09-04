@@ -5,64 +5,28 @@
  * plotted on the shared RadiusMap + listed side by side (§3A blueprint: thin
  * container, all data via the hook, one small component per tab).
  */
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, ChevronRight } from 'lucide-react'
 import GeoSearchShell from '@/components/search/GeoSearchShell'
-import ScorePill from '@/components/match/ScorePill'
-import MatchScoreBlock from '@/components/match/MatchScoreBlock'
 // audit scalability-3: Leaflet only downloads when this tab actually renders the map —
 // the static import used to pull it into the page chunk via the drawer's tab list (§9).
 const RadiusMap = lazy(() => import('@/components/map/RadiusMap'))
-import DrillPager from '@/components/drawer/DrillPager'
-import EntityLink from '@/components/ui/EntityLink'
-import Button from '@/components/ui/Button'
-import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import GeocodeButton from '@/components/ui/GeocodeButton'
-import StatusPill from '@/components/ui/StatusPill'
-import DrawerAddButton from './DrawerAddButton'
+import Button from '@/components/ui/Button'
 import AddApplicationModal from './AddApplicationModal'
 import VacancySearchFilters, { VacancySearchActiveFilters } from './VacancySearchFilters'
+import VacancySearchSummaryCard from './VacancySearchSummaryCard'
+import type { VacancyDetail, LookupChip } from './VacancySearchSummaryCard'
+import VacancySearchResultRow from './VacancySearchResultRow'
 import api, { unwrap } from '@/lib/api'
 import { useVacancySearch } from '../hooks/useVacancySearch'
 import { useFunctions } from '@/lib/useFunctions'
 import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { toCoord } from '@/lib/coords'
-import { formatCurrency } from '@/lib/formatters'
-// HUISSTIJL-1: the shared JetBrains Mono atom + the muted-caption atom (identity-only swaps).
-import { Mono, Caption, SectionTitle } from '@/components/ui/typography'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
-// A tenant-lookup value carried on the FROZEN vacancyShape detail (education/
-// seniority) — either the resolved {value,label,color} object or absent.
-interface LookupChip { value?: string; label?: string; color?: string | null }
-
-// P8-result-cards: the extra detail fields the lazy GET /vacancies/{id} fetch
-// now also reads (FROZEN vacancyShape, CMBE wave 3) — salary/experience/hours
-// are tolerant numeric coercions (Laravel decimal-as-string, §10), education/
-// seniority arrive as {value,label,color}|null straight from the resource.
-interface VacancyDetail {
-  description?: string
-  salaryMin: number | null
-  salaryMax: number | null
-  salaryPeriod: string | null
-  experienceMin: number | null
-  experienceMax: number | null
-  education: LookupChip | null
-  seniority: LookupChip | null
-}
-
-// Renders a min/max pair as a compact range string ("20–32", "≥ 20", "≤ 32"),
-// or null when neither bound is present — the caller then omits the line entirely.
-function formatRange(min: number | null, max: number | null, format: (n: number) => string): string | null {
-  if (min == null && max == null) return null
-  if (min != null && max != null) return `${format(min)}–${format(max)}`
-  return format((min ?? max) as number)
-}
-
-const rowStyle: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '8px 10px', borderRadius: 8, cursor: 'pointer' }
 // Snippet length cap (2-3 lines of plain text) — a short teaser, not the full description.
 const SNIPPET_MAX_LENGTH = 220
 
@@ -209,94 +173,13 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
   )
 
   // Compact summary card for the SELECTED vacancy — shown before navigating away,
-  // never an immediate jump (Danny 23-07, point 5).
+  // never an immediate jump (Danny 23-07, point 5). Extracted to VacancySearchSummaryCard.
   const summaryCard: ReactNode = selectedRow && (
-    <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: 12, marginBottom: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
-        <div style={{ minWidth: 0 }}>
-          {/* The title IS the link (Danny 23-07): Match-style EntityLink — orange
-              name opens in-app, trailing icon a new tab. No separate action row. */}
-          <SectionTitle as="div">
-            <EntityLink page="vacancies" id={selectedRow.id}>{selectedRow.title}</EntityLink>
-          </SectionTitle>
-          {/* HUISSTIJL-1: identical 11/400/var(--text-muted) render as a div. */}
-          <Caption as="div">{[selectedRow.customer, selectedRow.city].filter(Boolean).join(' · ') || '—'}</Caption>
-        </div>
-        {/* Right column (Danny 13-08 screenshot): pager+close on top, Solliciteren
-            BENEATH them — the title row keeps its full width so long vacancy names
-            no longer truncate against the primary action. */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            {/* Browse through the current result list (Danny 05-08, point 3) — same
-                corner as every other detail pager (ContactDetail/LocationDetail). */}
-            <DrillPager index={selectedIndex + 1} total={rows.length} onPrev={goPrev} onNext={goNext} />
-            <Button variant="ghost" iconOnly size="sm" onClick={() => setSelectedId(null)} aria-label={t('common:close')}>
-              <X size={14} />
-            </Button>
-          </div>
-          {/* Solliciteren (Danny 06-08): the primary action for this open score panel —
-              opens the shared AddApplicationModal with this vacancy prefilled. */}
-          <DrawerAddButton onClick={() => setShowApply(true)} label={t('vacancySearch.apply')} />
-        </div>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        {/* HUISSTIJL-1: Caption owns the 11/muted identity; Mono only adds the font-family. */}
-        {selectedRow.distanceKm != null && (
-          <Caption><Mono>{selectedRow.distanceKm.toFixed(1)} km</Mono></Caption>
-        )}
-        <StatusPill label={statusMeta(selectedRow.status).label} color={statusMeta(selectedRow.status).color} />
-        {/* Already-fetched search-row fields (hours + contract form) — render on
-            the card too, no extra request needed. */}
-        {selectedRow.employmentType && <StatusPill label={selectedRow.employmentType} color="var(--text-muted)" />}
-        {/* HUISSTIJL-1: Caption owns the 11/muted identity; Mono only adds the font-family. */}
-        {formatRange(selectedRow.hoursMin, selectedRow.hoursMax, n => String(n)) && (
-          <Caption><Mono>
-            {t('vacancySearch.cardHours', { range: formatRange(selectedRow.hoursMin, selectedRow.hoursMax, n => String(n)) })}
-          </Mono></Caption>
-        )}
-      </div>
-      {/* P8-result-cards: the lazily-fetched detail line (salary/experience) +
-          education/seniority soft-chips — summary card ONLY, list rows stay calm.
-          The three formatCurrency(…, 'EUR', 'nl-NL', 0) calls below all format the
-          same salary range; 'nl-NL' is deliberate (§5's canonical currency locale,
-          not the tenant UI locale — mirrors OpportunitiesTable's own comment). */}
-      {detail && (formatRange(detail.salaryMin, detail.salaryMax, n => formatCurrency(n, 'EUR', 'nl-NL', 0)) || formatRange(detail.experienceMin, detail.experienceMax, n => String(n)) || detail.education || detail.seniority) && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          {/* HUISSTIJL-1: Caption owns the 11/muted identity; Mono only adds the font-family. */}
-          {formatRange(detail.salaryMin, detail.salaryMax, n => formatCurrency(n, 'EUR', 'nl-NL', 0)) && (
-            <Caption><Mono>
-              {t('vacancySearch.cardSalary', {
-                range: formatRange(detail.salaryMin, detail.salaryMax, n => formatCurrency(n, 'EUR', 'nl-NL', 0)),
-                period: detail.salaryPeriod ? t(`vacancySearch.salaryPeriod.${detail.salaryPeriod}`, { defaultValue: detail.salaryPeriod }) : '',
-              })}
-            </Mono></Caption>
-          )}
-          {formatRange(detail.experienceMin, detail.experienceMax, n => String(n)) && (
-            // HUISSTIJL-1: identical 11/400/var(--text-muted) render.
-            <Caption>
-              {t('vacancySearch.cardExperience', { range: formatRange(detail.experienceMin, detail.experienceMax, n => String(n)) })}
-            </Caption>
-          )}
-          {/* Seniority uses its lookup colour (§4); education mirrors the same soft-chip look. */}
-          {detail.seniority?.label && <StatusPill label={detail.seniority.label} color={detail.seniority.color} />}
-          {detail.education?.label && <StatusPill label={detail.education.label} color={detail.education.color} />}
-        </div>
-      )}
-      {description && <p style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.4, margin: 0 }}>{description}</p>}
-      {/* Read-only LIVE score (CMBE MATCH-EXPLORER-1 fase 2+3) — no onSave, so
-          MatchScoreBlock renders without its edit/adjust controls. */}
-      {selectedRow.score != null && (
-        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 10 }}>
-          <MatchScoreBlock score={selectedRow.score} criteria={selectedRow.criteria} />
-        </div>
-      )}
-      {selectedRow.aiAdviceReason && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11.5, color: 'var(--text-muted)' }}>
-          <KoiosAiMark size={16} title={t('vacancySearch.aiAdvised')} />
-          <span>{selectedRow.aiAdviceReason}</span>
-        </div>
-      )}
-    </div>
+    <VacancySearchSummaryCard
+      selectedRow={selectedRow} selectedIndex={selectedIndex} total={rows.length}
+      goPrev={goPrev} goNext={goNext} onClose={() => setSelectedId(null)} onApply={() => setShowApply(true)}
+      description={description} detail={detail} statusMeta={statusMeta}
+    />
   )
 
   // Four explicit states: loading, error (+ retry), empty, success list.
@@ -326,77 +209,11 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
     </div>
   ) : (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      {/* The selected vacancy renders as the card above — drop its list row (no duplicate). */}
-      {rows.filter(r => r.id !== selectedId).map(r => {
-        const isSelected = r.id === selectedId
-        return (
-          // Row = div[role=button] (not <button>: the title nests EntityLink's own
-          // button+anchor, and interactive-inside-interactive is invalid HTML).
-          // Danny 23-07: row click = summary card HERE; the title link/icon (Match-tab
-          // style: primary name in-app, trailing icon new tab) navigates instead.
-          <div key={String(r.id)} role="button" tabIndex={0}
-            onClick={() => selectVacancy(r.id)}
-            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectVacancy(r.id) } }}
-            style={{ ...rowStyle, width: '100%',
-              background: isSelected ? 'var(--color-primary-bg)' : 'transparent' }}
-            onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'var(--hover-bg)' }}
-            onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}>
-            <div style={{ minWidth: 0 }}>
-              {/* Title clicks must not ALSO flip the summary selection; the AI mark
-                  signals a Koios-advised match (MATCH-EXPLORER-1 fase 2+3). */}
-              {/* SectionTitle carries the text identity only — the click/keydown stop-
-                  propagation sits on this plain wrapping div (the atom's props don't
-                  carry event handlers). */}
-              <div onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
-                <SectionTitle as="div" style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
-                  {r.aiAdvised && <KoiosAiMark size={16} title={r.aiAdviceReason ?? t('vacancySearch.aiAdvised')} />}
-                  <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
-                    <EntityLink page="vacancies" id={r.id} title={t('vacancySearch.openInApp')}>{r.title}</EntityLink>
-                  </span>
-                </SectionTitle>
-              </div>
-              {/* HUISSTIJL-1: identical 11/400/var(--text-muted) render as a div. */}
-              <Caption as="div" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {[r.customer, r.city].filter(Boolean).join(' · ') || '—'}
-              </Caption>
-              {/* V-search-1: per-row meta chips — hours + employment type, only when
-                  the row really carries them (salary is detail-only, stays on the
-                  summary card). Mono for the numbers (§4). */}
-              {(formatRange(r.hoursMin, r.hoursMax, n => String(n)) || r.employmentType) && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2, minWidth: 0 }}>
-                  {/* HUISSTIJL-1: identical fontFamily/size/colour + chip-frame render. */}
-                  {formatRange(r.hoursMin, r.hoursMax, n => String(n)) && (
-                    <Mono style={{ fontSize: 10.5, color: 'var(--text-muted)',
-                      border: '1px solid var(--border)', borderRadius: 999, padding: '1px 7px', whiteSpace: 'nowrap' }}>
-                      {t('vacancySearch.cardHours', { range: formatRange(r.hoursMin, r.hoursMax, n => String(n)) })}
-                    </Mono>
-                  )}
-                  {r.employmentType && (
-                    <span style={{ fontSize: 10.5, color: 'var(--text-muted)', border: '1px solid var(--border)',
-                      borderRadius: 999, padding: '1px 7px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {r.employmentType}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-              {r.score != null && <ScorePill score={r.score} />}
-              {/* HUISSTIJL-1: Caption owns the 11/muted identity; Mono only adds the font-family. */}
-              {r.distanceKm != null && (
-                <Caption><Mono>{r.distanceKm.toFixed(1)} km</Mono></Caption>
-              )}
-              {/* Expand affordance (Danny 05-08, point 2: "niet duidelijk dat je een
-                  vacature kan openklappen") — a visible chevron on EVERY row, on top
-                  of the row's own cursor:pointer + hover background. Decorative only
-                  (the row itself already carries the click/keyboard semantics above).
-                  Bold + primary-orange (Danny 06-08 screenshot feedback) — same token
-                  EntityLink's title button uses, so it reads as one affordance family. */}
-              <ChevronRight size={14} strokeWidth={3} aria-hidden="true" style={{ color: 'var(--color-primary-text)' }} />
-            </div>
-          </div>
-        )
-      })}
+      {/* The selected vacancy renders as the card above — drop its list row (no
+          duplicate). Row rendering extracted to VacancySearchResultRow. */}
+      {rows.filter(r => r.id !== selectedId).map(r => (
+        <VacancySearchResultRow key={String(r.id)} row={r} isSelected={r.id === selectedId} onSelect={selectVacancy} />
+      ))}
     </div>
   )
 

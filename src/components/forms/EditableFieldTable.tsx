@@ -13,21 +13,14 @@ import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
-import { DateField } from './fields'
-import Toggle from '@/components/ui/Toggle'
 import { useDateFormat } from '@/lib/datetime'
-import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
 import type { ChipOption } from '@/components/ui/ChipMultiSelect'
-import CreatableSelect from '@/components/ui/CreatableSelect'
-import RichTextEditor from '@/components/ui/RichTextEditor'
-import SafeHtml from '@/components/ui/SafeHtml'
 import FieldNotice from '@/components/ui/FieldNotice'
 import { CANON_LABEL_WIDTH } from '@/components/drawer/fieldRowCanon'
-import SoftChip from '@/components/ui/SoftChip'
 import Button from '@/components/ui/Button'
-import { GroupLabel, monoStyle } from '@/components/ui/typography'
-import { tintBg, tintBorder, chipInk } from '@/lib/tint'
-import CopyIconButton from '@/components/ui/CopyIconButton'
+import { GroupLabel } from '@/components/ui/typography'
+import { renderFieldControl } from './editableFieldControls'
+import { renderFieldValue } from './editableFieldDisplay'
 
 export interface FieldRow {
   key: string
@@ -153,13 +146,6 @@ interface EditableFieldTableProps {
   labelFontSize?: number
 }
 
-// Normalise FieldRow options for the searchable picker: it matches on text, so a
-// ReactNode label (used by a few icon rows) falls back to the raw value.
-const selectOptions = (options: FieldRow['options']): Array<{ value: string; label: string }> =>
-  (options ?? []).map(o => (typeof o === 'string'
-    ? { value: o, label: o }
-    : { value: o.value, label: typeof o.label === 'string' ? o.label : o.value }))
-
 /**
  * Content comparison, deliberately NOT reference equality: most callers build their
  * `value` object inline, so a fresh identity arrives on every render — comparing by
@@ -241,141 +227,11 @@ export default function EditableFieldTable({
     </div>
   )
 
-  // Render the EDIT-mode control for one field, dispatched on its declared type.
-  const renderControl = (f: FieldRow) => {
-    const v = form[f.key]
-    // A boolean field is a TOGGLE, never a tick box (Danny: "GEEN VINKJES MAAR
-    // TOGGLES!!", repeated 28-07 for the primary-contact flag). One shared switch, so
-    // every boolean in every drawer reads the same.
-    if (f.type === 'checkbox') return <Toggle checked={Boolean(v)} onChange={val => setF(f.key, val)} ariaLabel={typeof f.label === 'string' ? f.label : undefined} />
-    // Every drawer picker is SEARCHABLE (Danny 28-07: "status/land/provincie is geen
-    // zoekbare dropdown"). This one line covers status, land, provincie, branche and
-    // vestiging on every entity that uses this table — a native <select> forces you to
-    // scroll a 200-item country list. allowCreate stays off: these are tenant lookups,
-    // adding a value belongs in Settings, not in a record's edit row.
-    if (f.type === 'select')   return <CreatableSelect value={(v as string) ?? ''} onChange={val => setF(f.key, val)} options={selectOptions(f.options)} placeholder={t('select')} allowCreate={false} style={compact}
-      clearable={f.clearable} clearLabel={f.clearable && typeof f.label === 'string' ? f.label : undefined} />
-    if (f.type === 'creatable') {
-      // Lookup combobox that can also add a free-text value (tenant `allowCreate`).
-      const opts = (f.options ?? []).map(o => (typeof o === 'string' ? o : { value: o.value, label: String(o.label ?? o.value) }))
-      // VAC-CLEAR-1: an optional creatable row is clearable when the config says so (same forwarding as the select branch).
-      return <CreatableSelect value={(v as string) ?? ''} onChange={val => setF(f.key, val)} options={opts} placeholder={t('select')} allowCreate={f.allowCreate !== false} style={compact}
-        clearable={f.clearable} clearLabel={f.clearable && typeof f.label === 'string' ? f.label : undefined} />
-    }
-    if (f.type === 'date')     return <DateField value={v as string | undefined} onChange={val => setF(f.key, val)} style={compact} />
-    if (f.type === 'textarea') return <textarea value={(v as string) ?? ''} onChange={e => setF(f.key, e.target.value)} rows={3} style={{ ...compact, resize: 'vertical' }} />
-    if (f.type === 'chips') {
-      const arr = (Array.isArray(v) ? v : []).map(String)
-      return <ChipMultiSelect options={f.chipOptions ?? []} selected={arr}
-        onToggle={val => setF(f.key, arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val])} />
-    }
-    // CONTACT-MULTI-1: a single-value coupling rendered as toggle chips (not a
-    // plain <select>) so the field is visually ready for multi-value later — the
-    // backend only supports one link today, so picking a chip REPLACES the value
-    // (clicking the active chip clears it) rather than adding to a set.
-    if (f.type === 'chip-select') {
-      const cur = v as string | undefined
-      const opts = f.chipOptions ?? []
-      if (opts.length === 0) return <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{f.emptyOptionsText ?? '—'}</span>
-      return (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-          {opts.map(o => {
-            const active = cur === o.value
-            const col = o.color ?? 'var(--color-primary)'
-            return (
-              <button key={o.value} type="button" onClick={() => setF(f.key, active ? '' : o.value)}
-                // Interactive toggle chip — stays a real <button> (SoftChip has no
-                // onClick), but the tint now uses the house tintBg/tintBorder formula
-                // instead of hex-concat (§4, HUISSTIJL-1).
-                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chip toggle, not a Button (SoftChip has no onClick and Button has no chip/pill identity)
-                style={{ padding: '3px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer', fontWeight: active ? 600 : 400, transition: 'all 0.12s',
-                  ...(active ? { background: tintBg(col, true), color: chipInk(col), border: tintBorder(col, true) } : { background: 'var(--surface)', color: 'var(--text-muted)', border: '1px solid var(--border)' }) }}>
-                {o.label}
-              </button>
-            )
-          })}
-        </div>
-      )
-    }
-    if (f.type === 'richtext') {
-      return <RichTextEditor value={(v as string) ?? ''} onChange={val => setF(f.key, val)}
-        expanded={!!richExpanded[f.key]} onToggleExpand={() => setRichExpanded(p => ({ ...p, [f.key]: !p[f.key] }))} />
-    }
-    // Numbers/IDs render in mono (§4) — rates, cost codes, etc.
-    return <input value={(v as string) ?? ''} type={f.inputType} step={f.step} onChange={e => setF(f.key, e.target.value)}
-      style={f.mono ? { ...compact, ...monoStyle } : compact} />
-  }
+  // Render the EDIT-mode control for one field — dispatch lives in editableFieldControls.tsx.
+  const renderControl = (f: FieldRow) => renderFieldControl(f, { form, setF, compact, t, richExpanded, setRichExpanded })
 
-  // Render the READ-mode display for one field, dispatched on its declared type.
-  const renderValue = (f: FieldRow) => {
-    const v = saved[f.key]
-    // Canon guard (Danny 05-08, "Geslacht: Man" rendered huge): a caller-supplied
-    // renderValue inherits the page's base font unless wrapped — force every custom
-    // render into the standard 12px value footprint so no field can drift again.
-    if (f.renderValue) return <span style={{ fontSize: 12 }}>{f.renderValue(v)}</span>
-    if (f.type === 'checkbox') return <Toggle checked={Boolean(v)} disabled onChange={() => {}} ariaLabel={typeof f.label === 'string' ? f.label : undefined} />
-    // Dates render as DD-MM-YYYY in read mode (the edit control already is).
-    if (f.type === 'date') return <span style={{ fontSize: 12, color: v ? 'var(--text)' : 'var(--text-muted)' }}>{v ? formatDate(v as string) : '-'}</span>
-    // Chips read as soft accent chips (consistent with the Candidate-type chips),
-    // not plain comma text — so the read view matches the edit view's chip look.
-    if (f.type === 'chips') {
-      const arr = (Array.isArray(v) ? v : []).map(String)
-      if (arr.length === 0) return <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>
-      return (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-          {arr.map(x => {
-            const o = (f.chipOptions ?? []).find(op => op.value === x)
-            // SoftChip — the ONE chip component (§4, HUISSTIJL-1). Per-value colour when
-            // set (e.g. contract forms), else the primary accent (never SoftChip's own
-            // neutral-grey fallback, which would drop the "Candidate-type chip" look).
-            return <SoftChip key={x} label={o?.label ?? x} color={o?.color ?? 'var(--color-primary)'} round />
-          })}
-        </div>
-      )
-    }
-    // Selects read as the OPTION LABEL, never the stored slug (Danny 2026-07-13:
-    // "Dienst: zorg_detachering" — the lookup label is "Zorg-detachering").
-    if (f.type === 'select') {
-      const o = (f.options ?? []).find(op => (typeof op === 'object' ? op.value : op) === v)
-      const label = o ? (typeof o === 'object' ? o.label : o) : v
-      return <span style={{ fontSize: 12, color: label ? 'var(--text)' : 'var(--text-muted)' }}>{(label as ReactNode) || '-'}</span>
-    }
-    // Single coupling reads as one soft chip (the future multi-value read view swaps
-    // this for a wrapped row of chips — CONTACT-MULTI-1 — without touching the schema).
-    if (f.type === 'chip-select') {
-      const cur = v as string | undefined
-      if (!cur) return <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>
-      const o = (f.chipOptions ?? []).find(op => op.value === cur)
-      // SoftChip — the ONE chip component (§4, HUISSTIJL-1).
-      return <SoftChip label={o?.label ?? cur} color={o?.color ?? 'var(--color-primary)'} round />
-    }
-    // Address composite reads as ONE composed line (only reached in read mode —
-    // editing expands this row into its addressFields instead, see renderRows).
-    if (f.type === 'address') {
-      const line = composeAddressLine(saved)
-      return (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 12, color: line ? 'var(--text)' : 'var(--text-muted)' }}>{line || '-'}</span>
-          <CopyIconButton label={t('common:copyAddress.copy')} copiedLabel={t('common:copyAddress.copied')} value={line || null} />
-        </span>
-      )
-    }
-    // Name composite reads as ONE composed line (only reached in read mode —
-    // editing expands this row into its nameFields instead, see renderRows). An
-    // en dash marks a fully empty name (Danny 05-08) — distinct from the plain
-    // hyphen the 'address' composite falls back to above.
-    if (f.type === 'name') {
-      const line = composeNameLine(saved)
-      return <span style={{ fontSize: 12, color: line ? 'var(--text)' : 'var(--text-muted)' }}>{line || '–'}</span>
-    }
-    // Richtext reads as sanitised HTML (same as notes / profile text).
-    if (f.type === 'richtext') {
-      return (v as string)
-        ? <SafeHtml html={v as string} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
-        : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>
-    }
-    return <span style={{ fontSize: 12, color: 'var(--text)', ...(f.mono ? monoStyle : {}) }}>{f.prefix ? `${f.prefix} ` : ''}{(v as ReactNode) || '-'}</span>
-  }
+  // Render the READ-mode display for one field — dispatch lives in editableFieldDisplay.tsx.
+  const renderValue = (f: FieldRow) => renderFieldValue(f, { saved, formatDate, t })
 
   // One row — full-width for textarea/chips/richtext (they need the width), label-left otherwise.
   // CANON-DIVIDER-1: the line between rows (and the row label's font size) are the two

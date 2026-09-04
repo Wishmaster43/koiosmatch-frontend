@@ -3,11 +3,12 @@
 // no entity page re-implements table chrome; a caller only declares columns.
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react'
 import type { CSSProperties, ReactNode, RefObject } from 'react'
-import SortCaret from './SortCaret'
 import { useTranslation } from 'react-i18next'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { TableRow } from './DataTableRow'
-import { field, compare, checkboxCol, expandCol, SKELETON_ROWS, skeletonBarWidth, shiftRangeIds } from './dataTableUtils'
+import DataTableHead from './DataTableHead'
+import DataTableSkeletonRows from './DataTableSkeletonRows'
+import { field, compare, shiftRangeIds } from './dataTableUtils'
 
 // Re-exported so existing `import { shiftRangeIds } from '.../DataTable'` call sites
 // (incl. the test file) keep working unchanged after the 2026-07-21 utils split.
@@ -286,9 +287,6 @@ export default function DataTable<Row>({
     })
   }, [columns, selectable])
 
-  // Sticky offset applied to every <th> when stickyHeader is enabled.
-  const stickyTh: CSSProperties = stickyHeader ? { position: 'sticky', top: 0, zIndex: 2, background: 'var(--bg)' } : {}
-
   // Build sticky-column style for a column at index i (header only — body cells use TableRow).
   const stickyColStyle = (i: number, bg = 'var(--bg)'): CSSProperties => {
     const left = stickyOffsets[i]
@@ -309,81 +307,13 @@ export default function DataTable<Row>({
       {/* Screen-reader-only loading announcement — the skeleton rows below carry no
           text of their own, so this is the only accessible signal that data is loading. */}
       {loading && <caption className="sr-only">{loadingText ?? t('loading')}</caption>}
-      <thead>
-        <tr style={{ borderBottom: '2px solid var(--border)' }}>
-          {selectable && (
-            <th style={{ ...checkboxCol, ...stickyTh }}>
-              {/* SELECT-RACE-1: inert (disabled + aria-disabled) while a fresh
-                  server result is in flight, so "select all" can never be
-                  clicked against rows about to be replaced. */}
-              <input type="checkbox" checked={allSelected}
-                disabled={selectionBusy}
-                aria-disabled={selectionBusy || undefined}
-                ref={el => { if (el) el.indeterminate = someSelected && !allSelected }}
-                onChange={() => onToggleAll?.(pageIds, allSelected)}
-                style={{ cursor: selectionBusy ? 'not-allowed' : 'pointer', accentColor: 'var(--color-primary)' }} aria-label={t('selectAll')} />
-            </th>
-          )}
-          {expandable && <th style={{ ...expandCol, ...stickyTh }} aria-hidden="true" />}
-          {columns.map((col, i) => {
-            const active = sort?.key === col.key
-            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- this IS the <th> element's own style object (padding/align/sticky-offset all mixed in), not a text node the Caption atom could wrap (§14 r7 necessity)
-            const baseStyle: CSSProperties = { padding: '8px 10px', textAlign: col.align ?? 'left', fontSize: 11,
-              fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap',
-              ...(col.width ? { minWidth: col.width, width: col.width } : {}),
-              ...stickyTh, ...stickyColStyle(i),
-              // sticky header + sticky col: bump zIndex so corner cell stays above both axes.
-              // HUISSTIJL-1: 1/2/3 here order STICKY SIBLINGS within this one table, not
-              // app-wide stacking context — internal layering, exempt from the z-ladder.
-              ...(stickyHeader && col.sticky ? { zIndex: 3 } : {}) }
-            if (!col.sortable) {
-              return <th key={col.key} style={baseStyle}>{col.header}</th>
-            }
-            const justify = col.align === 'right' ? 'flex-end' : col.align === 'center' ? 'center' : 'flex-start'
-            // aria-sort lives on the th itself (the columnheader role AT relies on);
-            // 'none' for every column that isn't the active sort, never omitted, so
-            // screen readers can tell an unsorted sortable column from a plain one.
-            const ariaSort: 'ascending' | 'descending' | 'none' = active ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'
-            // Padding moves from the th onto the button below so the clickable/focusable
-            // area matches the original full-cell hit region exactly.
-            const { padding: thPadding, ...thStyleRest } = baseStyle
-            return (
-              <th key={col.key} style={thStyleRest} aria-sort={ariaSort}>
-                {/* A real <button> inside the th (not tabIndex+onKeyDown on the th) — the
-                    conventional accessible-sort pattern: the th keeps its columnheader
-                    semantics, the button gets focus + native Enter/Space activation for
-                    free (WCAG 2.1.1 Keyboard, 4.1.2 Name/Role/Value). `all: unset` strips
-                    the browser's default button chrome; the explicit properties below
-                    restore the exact look the old <span> had (inherited color/font/
-                    white-space come back automatically since those are inherited CSS
-                    properties, unset just means "use the parent's value" for them). */}
-                <button type="button" onClick={() => toggleSort(col)} title={t('sort')}
-                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the sort trigger fills the whole <th> hit-region via `all: unset` so it inherits the header's own padding/align/sticky styling; Button's fixed sm chrome cannot stretch to an arbitrary table header cell (§14 r7 necessity)
-                  style={{ all: 'unset', boxSizing: 'border-box', display: 'inline-flex', width: '100%',
-                    padding: thPadding, cursor: 'pointer', userSelect: 'none', alignItems: 'center', gap: 3,
-                    justifyContent: justify, font: 'inherit', color: 'inherit' }}>
-                  {col.header}
-                  {/* One shared caret recipe (HUISSTIJL-1): active is coloured, everywhere. */}
-                  <SortCaret active={!!active} dir={sort?.dir} />
-                </button>
-              </th>
-            )
-          })}
-        </tr>
-      </thead>
+      <DataTableHead columns={columns} selectable={selectable} expandable={expandable} stickyHeader={stickyHeader}
+        stickyColStyle={stickyColStyle} sort={sort} toggleSort={toggleSort}
+        allSelected={allSelected} someSelected={someSelected} selectionBusy={selectionBusy}
+        pageIds={pageIds} onToggleAll={onToggleAll} />
       <tbody>
         {loading ? (
-          Array.from({ length: SKELETON_ROWS }).map((_, ri) => (
-            <tr key={`skeleton-${ri}`} style={{ borderBottom: '1px solid var(--border)' }}>
-              {selectable && <td style={checkboxCol} />}
-              {expandable && <td style={expandCol} />}
-              {columns.map((col, ci) => (
-                <td key={col.key} style={{ padding: '10px 10px', ...(col.width ? { minWidth: col.width, width: col.width } : {}) }}>
-                  <div className="animate-pulse" style={{ height: 12, borderRadius: 4, background: 'var(--hover-bg)', width: skeletonBarWidth(ri + ci) }} />
-                </td>
-              ))}
-            </tr>
-          ))
+          <DataTableSkeletonRows columns={columns} selectable={selectable} expandable={expandable} />
         ) : virtualize ? (
           <>
             {paddingTop > 0 && <tr style={{ height: paddingTop }}><td colSpan={totalCols} style={{ padding: 0, border: 'none' }} /></tr>}
