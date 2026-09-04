@@ -97,6 +97,36 @@ describe('AuthContext · logout leaves no cached data behind', () => {
   })
 })
 
+// AUDIT 04-09 frontend-security-quality-2 (191 react-query keys, 3 tenant-scoped): a
+// super admin switching tenant must never keep the previous tenant's cached lists
+// around while /auth/me for the new tenant is still in flight — the cache is cleared
+// BEFORE the reload re-bootstraps the app for the newly selected tenant.
+describe('AuthContext · setActiveTenant clears the query cache before reloading', () => {
+  it('calls queryClient.clear() before the hard reload, dropping the previous tenant rows', async () => {
+    const reload = vi.fn()
+    const original = window.location
+    Object.defineProperty(window, 'location', { configurable: true, value: { ...original, reload } })
+    const clearSpy = vi.spyOn(queryClient, 'clear')
+    localStorage.setItem('active_tenant', 'tenant-a')
+    queryClient.setQueryData(['candidates', 'tenant-a'], [{ id: 'c1', name: 'Tenant A candidate' }])
+    vi.mocked(api.get).mockResolvedValue({ data: { user: null } })
+    const { result } = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(result.current).not.toBeNull())
+
+    await result.current!.setActiveTenant({ id: 'tenant-b', name: 'Tenant B' })
+
+    expect(clearSpy).toHaveBeenCalled()
+    expect(localStorage.getItem('active_tenant')).toBe('tenant-b')
+    expect(queryClient.getQueryData(['candidates', 'tenant-a'])).toBeUndefined()
+    expect(reload).toHaveBeenCalled()
+    // The cache clear must land BEFORE the reload, so a slow reload (jsdom stub is a
+    // no-op) never leaves a window where the new tenant's first paint reads stale rows.
+    expect(clearSpy.mock.invocationCallOrder[0]).toBeLessThan(reload.mock.invocationCallOrder[0])
+    clearSpy.mockRestore()
+    Object.defineProperty(window, 'location', { configurable: true, value: original })
+  })
+})
+
 // SUPERADMIN-FALLBACK-1 (04-09): measured as the readonly demo user, the sidebar said
 // "Super admin" and every "+ Nieuw" opener rendered. /auth/me puts the tenant BESIDE
 // the user, so the "no tenant" clause fired for every tenant user.
