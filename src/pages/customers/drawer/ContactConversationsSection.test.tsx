@@ -31,7 +31,7 @@ beforeEach(() => {
     return Promise.reject(new Error(`unexpected GET ${url}`))
   })
   mockUseAuth.mockReset()
-  mockUseAuth.mockReturnValue({ hasPermission: (p: string) => p === 'customers.view' })
+  mockUseAuth.mockReturnValue({ hasPermission: (p: string) => p === 'customers.view' || p === 'page.whatsapp' })
 })
 
 describe('ContactConversationsSection', () => {
@@ -66,6 +66,22 @@ describe('ContactConversationsSection · start affordance (CONTACT-CONVERSATION-
   it('disables the trigger with an honest reason when the contact has no mobile number', async () => {
     render(<ContactConversationsSection customerId="cust-1" contactId="contact-1" mobile={null} />)
     expect(await screen.findByRole('button', { name: 'conversations.start' })).toBeDisabled()
+  })
+
+  // OPENERS-HIDE-1: the route's own gate (page.whatsapp) hides the trigger even
+  // when the PII gate (customers.view) passes — and vice versa.
+  it('hides the trigger without page.whatsapp even with customers.view', async () => {
+    mockUseAuth.mockReturnValue({ hasPermission: (p: string) => p === 'customers.view' })
+    render(<ContactConversationsSection customerId="cust-1" contactId="contact-1" mobile="+31612345678" />)
+    expect(await screen.findByText('+31612345678')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'conversations.start' })).toBeNull()
+  })
+
+  it('hides the trigger without customers.view even with page.whatsapp', async () => {
+    mockUseAuth.mockReturnValue({ hasPermission: (p: string) => p === 'page.whatsapp' })
+    render(<ContactConversationsSection customerId="cust-1" contactId="contact-1" mobile="+31612345678" />)
+    expect(await screen.findByText('+31612345678')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'conversations.start' })).toBeNull()
   })
 
   it('hides the start trigger entirely without customers.view — the PII gate', async () => {

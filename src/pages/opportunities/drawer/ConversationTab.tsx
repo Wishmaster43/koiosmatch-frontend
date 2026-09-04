@@ -30,8 +30,11 @@ import type { Opportunity } from '@/types/opportunity'
 export default function ConversationTab({ opportunity: o }: { opportunity: Opportunity }) {
   const { t } = useTranslation('opportunities')
   const auth = useAuth()
-  // PII gate: a contact thread carries customer data on top of page.whatsapp (§8).
-  const canViewCustomer = (auth?.hasPermission ?? (() => false))('customers.view')
+  // Two gates, both hide (OPENERS-HIDE-1): POST /conversations/start sits in the
+  // page.whatsapp route group (communication-ai.php:77-80), and the thread carries
+  // customer data on top of that (§8 PII gate), so customers.view is required too.
+  const can = auth?.hasPermission ?? (() => false)
+  const canStartConversation = can('page.whatsapp') && can('customers.view')
   const [showStartModal, setShowStartModal] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
   // Opportunity.php:212-214 → contact_id; mapOpportunity reads contactId at :85
@@ -50,7 +53,7 @@ export default function ConversationTab({ opportunity: o }: { opportunity: Oppor
               onClose={() => setShowStartModal(false)} onStarted={() => setRefreshKey(k => k + 1)} />
           )}
           <ConversationsSection key={refreshKey} threadsUrl={`/customers/${o.clientId}/contacts/${o.contactId}/conversations`}
-            headerAction={canViewCustomer ? (
+            headerAction={canStartConversation ? (
               <DrawerAddButton onClick={() => setShowStartModal(true)} icon={MessageCircle} label={t('conversations.start')} />
             ) : undefined} />
         </>

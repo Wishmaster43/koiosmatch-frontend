@@ -36,9 +36,11 @@ export default function ContactConversationsSection({ customerId, contactId, mob
 }) {
   const { t } = useTranslation('candidates')
   const auth = useAuth()
-  // PII gate: a contact thread is customer data on top of page.whatsapp (§8) — the
-  // affordance stays hidden without customers.view, never just disabled.
-  const canViewCustomer = (auth?.hasPermission ?? (() => false))('customers.view')
+  // Two gates, both hide (OPENERS-HIDE-1): POST /conversations/start sits in the
+  // page.whatsapp route group (communication-ai.php:77-80), and a contact thread is
+  // customer data on top of that (§8 PII gate), so customers.view is required too.
+  const can = auth?.hasPermission ?? (() => false)
+  const canStartConversation = can('page.whatsapp') && can('customers.view')
   const [showStartModal, setShowStartModal] = useState(false)
   // Bumped on a successful start so the thread list re-fetches from the server.
   const [refreshKey, setRefreshKey] = useState(0)
@@ -53,7 +55,7 @@ export default function ContactConversationsSection({ customerId, contactId, mob
           elsewhere on ContactDetail; already dossier-scoped so it needs no extra
           page.whatsapp gate (ConversationResource docblock, koiosmatch-api). */}
       <ConversationsSection key={refreshKey} threadsUrl={`/customers/${customerId}/contacts/${contactId}/conversations`}
-        headerAction={canViewCustomer ? (
+        headerAction={canStartConversation ? (
           <DrawerAddButton onClick={() => setShowStartModal(true)} icon={MessageCircle}
             label={t('conversations.start')} disabled={!mobile}
             title={mobile ? t('conversations.start') : t('conversations.startNoMobileContact')} />

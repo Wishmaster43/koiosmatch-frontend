@@ -57,7 +57,7 @@ function renderTab(o: Opportunity) {
 describe('ConversationTab', () => {
   beforeEach(() => {
     mockUseAuth.mockReset()
-    mockUseAuth.mockReturnValue({ hasPermission: (p: string) => p === 'customers.view' })
+    mockUseAuth.mockReturnValue({ hasPermission: (p: string) => p === 'customers.view' || p === 'page.whatsapp' })
   })
 
   it('renders the contact-scoped conversations section with the exact URL and a real thread row', async () => {
@@ -109,8 +109,22 @@ describe('ConversationTab', () => {
     expect(await screen.findByRole('button', { name: 'Conversatie starten' })).toBeInTheDocument()
   })
 
-  it('hides the start trigger without customers.view — the PII gate', async () => {
-    mockUseAuth.mockReturnValue({ hasPermission: () => false })
+  // OPENERS-HIDE-1: the route's own gate (page.whatsapp) hides the trigger even
+  // when the PII gate passes.
+  it('hides the start trigger without page.whatsapp even with customers.view', async () => {
+    mockUseAuth.mockReturnValue({ hasPermission: (p: string) => p === 'customers.view' })
+    mockedGet.mockImplementation((url: string) => {
+      if (url === '/customers/c1/contacts/contact-1/conversations') return Promise.resolve({ data: { data: [] } })
+      if (url === '/email-log') return Promise.resolve({ data: { data: [], meta: { total: 0 } } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    renderTab(opportunity())
+    await screen.findByText('Nog geen conversaties.')
+    expect(screen.queryByRole('button', { name: 'Conversatie starten' })).toBeNull()
+  })
+
+  it('hides the start trigger without customers.view even with page.whatsapp — the PII gate', async () => {
+    mockUseAuth.mockReturnValue({ hasPermission: (p: string) => p === 'page.whatsapp' })
     mockedGet.mockImplementation((url: string) => {
       if (url === '/customers/c1/contacts/contact-1/conversations') return Promise.resolve({ data: { data: [] } })
       if (url === '/email-log') return Promise.resolve({ data: { data: [], meta: { total: 0 } } })
