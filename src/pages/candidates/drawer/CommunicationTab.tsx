@@ -229,6 +229,8 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
     // owns opening it, the blocked-popup notice AND handing a half-typed note over,
     // so this host only names the target.
     popout: { entity: 'candidate' as const, id: String(c.id) },
+    // NOTITIE-DOORLINK-1 (Danny GO 28-08): the manual koppel-picker chips on each note.
+    noteLinks: { host: 'candidates' as const, hostId: c.id },
     labels: {
       // No section titles (Danny addendum 4): notes/timeline/conversations each
       // render as the SOLE visible NotesTab section for their own sub-tab, whose

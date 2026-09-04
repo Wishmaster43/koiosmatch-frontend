@@ -32,6 +32,8 @@ interface MergedTimelineOptions {
   timelineName?: ReactNode
   renderTimelineContent?: (ev: TimelineItem) => ReactNode | null
   noteAuthor: (n: NoteItem) => string
+  // K-225 NOTE-META-1: the reader's-language sentence for an automation note (null = stored body).
+  bodyOf?: (n: NoteItem) => string | null
 }
 
 // NOTES-TIMELINE-CONVERGE-1: system events + the host's own timeline items,
@@ -40,7 +42,7 @@ interface MergedTimelineOptions {
 // relative order.
 export function useMergedTimelineEvents({
   systemNotes, timeline, chipTypes, noteTypes, onEditStatusEvent, editStatusEventLabel, openChangelogLabel,
-  timelineName, renderTimelineContent, noteAuthor,
+  timelineName, renderTimelineContent, noteAuthor, bodyOf,
 }: MergedTimelineOptions) {
   return useMemo(() => {
     const sysEvents: TimelineEventInput[] = systemNotes.map((n, i) => {
@@ -52,7 +54,7 @@ export function useMergedTimelineEvents({
         text: (
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
             {n.type && <NoteTypeChip value={n.type} types={chipTypes ?? noteTypes} />}
-            <SafeHtml html={n.text ?? n.body ?? ''} />
+            <SafeHtml html={bodyOf?.(n) ?? n.text ?? n.body ?? ''} />
           </span>
         ),
         meta: noteAuthor(n) || undefined,
@@ -75,7 +77,7 @@ export function useMergedTimelineEvents({
     }))
     return [...sysEvents, ...hostEvents]
       .sort((a, b) => (Date.parse(String(b.time ?? '')) || 0) - (Date.parse(String(a.time ?? '')) || 0))
-  }, [systemNotes, timeline, chipTypes, noteTypes, onEditStatusEvent, editStatusEventLabel, openChangelogLabel, timelineName, renderTimelineContent, noteAuthor])
+  }, [systemNotes, timeline, chipTypes, noteTypes, onEditStatusEvent, editStatusEventLabel, openChangelogLabel, timelineName, renderTimelineContent, bodyOf, noteAuthor])
 }
 
 interface SystemRowOptions {
@@ -85,13 +87,15 @@ interface SystemRowOptions {
   onEditStatusEvent?: () => void
   noteAuthor: (n: NoteItem) => string
   noteWhen: (n: NoteItem) => string | undefined
+  // K-225 NOTE-META-1: the reader's-language sentence for an automation note (null = stored body).
+  bodyOf?: (n: NoteItem) => string | null
 }
 
 // Calm one-line system-event row (status/phase change): History icon, chip, no
 // pencil by default. The icon is a BUTTON that opens the record changelog
 // (Danny 13/7) — decoupled via a window event so this shared tab needs no
 // drawer-specific wiring.
-export function renderSystemRow(n: NoteItem, key: string | number, { labels, chipTypes, noteTypes, onEditStatusEvent, noteAuthor, noteWhen }: SystemRowOptions) {
+export function renderSystemRow(n: NoteItem, key: string | number, { labels, chipTypes, noteTypes, onEditStatusEvent, noteAuthor, noteWhen, bodyOf }: SystemRowOptions) {
   const who = noteAuthor(n)
   // Only the "Statuswissel" event (n.type === 'status_change') is editable in place —
   // never a 'lifecycle' event (archived/restored) — and only when the host actually
@@ -107,7 +111,7 @@ export function renderSystemRow(n: NoteItem, key: string | number, { labels, chi
       </button>
       <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '6px 10px' }}>
         {n.type && <NoteTypeChip value={n.type} types={chipTypes ?? noteTypes} />}
-        <SafeHtml style={{ fontSize: 12, color: 'var(--text)', flex: 1, minWidth: 0 }} html={n.text ?? n.body ?? ''} />
+        <SafeHtml style={{ fontSize: 12, color: 'var(--text)', flex: 1, minWidth: 0 }} html={bodyOf?.(n) ?? n.text ?? n.body ?? ''} />
         <Caption as="span" style={{ whiteSpace: 'nowrap' }}>{who ? `${who} · ` : ''}{noteWhen(n)}</Caption>
       </div>
       {canEditStatus && (

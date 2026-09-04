@@ -578,7 +578,21 @@
     "restoreConfirm": "Restaurer la version du {{date}} ?",
     "restoreConfirmNoDate": "Restaurer la version précédente ?",
     "restoreNotice": "Restauré. Vous pouvez encore annuler cette action une fois.",
-    "restoreUnavailable": "Il n'y a pas de version précédente à restaurer."
+    "restoreUnavailable": "Il n'y a pas de version précédente à restaurer.",
+    "links": {
+      "add": "Lier",
+      "remove": "Dissocier",
+      "pickType": "Choisir un type",
+      "pickEntity": "Rechercher un enregistrement…",
+      "restricted": "Accès restreint",
+      "type": {
+        "candidate": "Candidat",
+        "customer": "Client",
+        "location": "Site",
+        "department": "Département",
+        "contact": "Personne de contact"
+      }
+    }
   },
   "errors": {
     "koiosCreditExhausted": "Le crédit Koios de cette organisation est épuisé ou pas encore activé. Rechargez le solde ou contactez votre administrateur.",

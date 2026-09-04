@@ -1448,5 +1448,14 @@
       "kennismigrant": "Hochqualifizierter Migrant",
       "onbekend": "Unbekannt"
     }
+  },
+  "notes": {
+    "meta": {
+      "statusChange": "Status geändert von {{from}} zu {{to}}",
+      "statusSet": "Status gesetzt auf {{to}}",
+      "reason": " · Grund: {{reason}}",
+      "blacklistReason": " · Sperrgrund: {{reason}}",
+      "effectiveFrom": " · Gültig ab {{date}}"
+    }
   }
 }

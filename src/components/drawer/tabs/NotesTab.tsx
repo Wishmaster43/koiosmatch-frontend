@@ -88,6 +88,12 @@ import NoteRow from './notes/NoteRow'
 // Rights + system-note rule — the SAME module the per-note popout window applies
 // (noteRights, §11: one rule, two surfaces — they must never disagree).
 import { canManageNote as canManageNoteRule, isSystemNote } from './notes/noteRights'
+// NOTITIE-DOORLINK-1 write side (Danny GO 28-08): the manual koppel-picker capability type.
+import type { NoteLinkHost } from './notes/noteLinksApi'
+// K-225 NOTE-META-1: an automation note renders its sentence from `meta` in the reader's language.
+import { noteMetaSentence, type NoteMeta } from './notes/noteMetaSentence'
+import { useLookupsOptional } from '@/context/LookupsContext'
+import type { Id } from '@/types/common'
 
 // Strip tags for search matching only (display still goes through SafeHtml) —
 // a raw substring match against the stored HTML would miss/false-match on markup.
@@ -228,6 +234,11 @@ interface NotesTabProps {
   // with `role: 'window'`, so the second screen receives handoffs but never offers
   // to open itself again.
   popout?: NotesPopoutTarget
+  // NOTITIE-DOORLINK-1 (Danny GO 28-08): opts a host into the manual koppel-picker
+  // chips under each regular note — only the candidate and customer Notities tabs
+  // pass this today (the two families the backend's addLink/removeLink routes
+  // serve, see noteLinksApi's docblock). Omitted host → NoteRow renders nothing new.
+  noteLinks?: { host: NoteLinkHost; hostId: Id }
   showTimeline?: boolean
   showConversations?: boolean
   // Optional (Danny 2026-07-20, job A "potlood op de statuswissel"): when the host
@@ -263,7 +274,7 @@ export default function NotesTab({
   onFetchPreviousVersion, onRestorePreviousNote,
   managePermission = 'candidates.notes.manage_all',
   showNotes = true, showTimeline = true, showConversations = true, onEditStatusEvent, renderTimelineContent,
-  error, onRetry, composerExtra, popout,
+  error, onRetry, composerExtra, popout, noteLinks,
 }: NotesTabProps) {
   // Shared meta copy (edited-by) — common namespace so every host gets it at once.
   const { t } = useTranslation('common')
@@ -280,7 +291,12 @@ export default function NotesTab({
   // SHARED tab, so every entity's notes get it at once ('' = all).
   const [typeFilter, setTypeFilter] = useState('')
   const [channelFilter, setChannelFilter] = useState('')
-  const { formatDateTime } = useDateFormat()
+  const { formatDateTime, formatDate } = useDateFormat()
+  // K-225: status_change notes carry value slugs; the tenant status lookup gives the reader's label.
+  const { t: tCandidates } = useTranslation('candidates')
+  const statusLookup = useLookupsOptional()?.statuses ?? []
+  const statusLabel = (value: string) => statusLookup.find(s => String(s.value) === value)?.label ?? value
+  const metaBody = (n: NoteItem) => noteMetaSentence(n.meta as NoteMeta | null | undefined, { t: tCandidates, statusLabel, formatDate })
   // Rights model (RECHTEN-DETAIL-1): current user id + the UI-gate permission check
   // (never security — the BE re-checks). Null-safe: a host with no AuthProvider in
   // its render tree (existing tests, hosts that haven't migrated) still works —
@@ -416,7 +432,7 @@ export default function NotesTab({
   const mergedTimelineEvents = useMergedTimelineEvents({
     systemNotes, timeline, chipTypes, noteTypes, onEditStatusEvent,
     editStatusEventLabel: labels.editStatusEvent, openChangelogLabel: labels.openChangelog,
-    timelineName, renderTimelineContent, noteAuthor,
+    timelineName, renderTimelineContent, noteAuthor, bodyOf: metaBody,
   })
 
   // Load-error state (see NotesTabProps.error) — a calm danger row replaces the
@@ -501,7 +517,7 @@ export default function NotesTab({
               // System-row + regular-row rendering now live in notes/notesTimeline
               // and notes/NoteRow (§3 split) — this container only wires the data.
               if (isSystemNote(n)) {
-                return renderSystemRow(n, i, { labels, chipTypes, noteTypes, onEditStatusEvent, noteAuthor, noteWhen })
+                return renderSystemRow(n, i, { labels, chipTypes, noteTypes, onEditStatusEvent, noteAuthor, noteWhen, bodyOf: metaBody })
               }
               return (
                 <NoteRow key={i} n={n} i={i} who={noteAuthor(n)} authorInitials={authorInitials}
@@ -510,7 +526,8 @@ export default function NotesTab({
                   onEditNote={onEditNote} onDeleteNote={onDeleteNote} openEdit={openEdit} requestDelete={requestDelete}
                   canPopOutNote={canPopOutNote} openNoteWindow={openNoteWindow} noteIdOf={noteIdOf}
                   onFetchPreviousVersion={onFetchPreviousVersion} onRestorePreviousNote={onRestorePreviousNote}
-                  restoringIdx={restoringIdx} requestRestorePrevious={requestRestorePrevious} />
+                  restoringIdx={restoringIdx} requestRestorePrevious={requestRestorePrevious}
+                  noteLinks={noteLinks} bodyOverride={metaBody(n)} />
               )
             })
         }

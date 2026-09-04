@@ -255,3 +255,9 @@ export function useLookups(): LookupsValue {
   if (!ctx) throw new Error('useLookups must be used within a LookupsProvider')
   return ctx
 }
+
+// Tolerant read for SHARED leaves that also render outside the provider (unit-tested
+// drawer tabs, pop-outs): null instead of a throw, so the leaf degrades to raw values.
+export function useLookupsOptional(): LookupsValue | null {
+  return useContext(LookupsContext)
+}

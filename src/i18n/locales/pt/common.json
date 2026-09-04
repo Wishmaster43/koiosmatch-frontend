@@ -578,7 +578,21 @@
     "restoreConfirm": "Restaurar a versão de {{date}}?",
     "restoreConfirmNoDate": "Restaurar a versão anterior?",
     "restoreNotice": "Restaurado. Ainda pode anular isto mais uma vez.",
-    "restoreUnavailable": "Não existe nenhuma versão anterior para restaurar."
+    "restoreUnavailable": "Não existe nenhuma versão anterior para restaurar.",
+    "links": {
+      "add": "Ligar",
+      "remove": "Desvincular",
+      "pickType": "Escolher tipo",
+      "pickEntity": "Pesquisar registo…",
+      "restricted": "Sem acesso",
+      "type": {
+        "candidate": "Candidato",
+        "customer": "Cliente",
+        "location": "Filial",
+        "department": "Departamento",
+        "contact": "Pessoa de contacto"
+      }
+    }
   },
   "errors": {
     "koiosCreditExhausted": "O saldo Koios desta organização está esgotado ou ainda não foi ativado. Reforce o saldo ou contacte o administrador.",

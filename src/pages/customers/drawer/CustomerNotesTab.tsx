@@ -242,6 +242,8 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
     // CONCEPT-NOTE-2: durable concepts live per customer dossier (only with a
     // real id — a still-loading drawer stays session-only).
     ...(customerId ? { draftEntity: { type: 'customer' as const, id: String(customerId) } } : null),
+    // NOTITIE-DOORLINK-1 (Danny GO 28-08): the manual koppel-picker chips on each note.
+    ...(customerId ? { noteLinks: { host: 'customers' as const, hostId: customerId } } : null),
     notes: notesWithChip, onAddNote: handleAddNote,
     // K15NOTES: only offer edit/delete once the host actually wires them (mirrors
     // the candidate tab) — NotesTab itself re-gates per note via author_id/managePermission.

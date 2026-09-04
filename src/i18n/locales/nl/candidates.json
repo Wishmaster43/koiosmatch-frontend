@@ -1448,5 +1448,14 @@
       "kennismigrant": "Kennismigrant",
       "onbekend": "Onbekend"
     }
+  },
+  "notes": {
+    "meta": {
+      "statusChange": "Status gewijzigd van {{from}} naar {{to}}",
+      "statusSet": "Status gezet op {{to}}",
+      "reason": " · Reden: {{reason}}",
+      "blacklistReason": " · Blacklistreden: {{reason}}",
+      "effectiveFrom": " · Ingangsdatum {{date}}"
+    }
   }
 }

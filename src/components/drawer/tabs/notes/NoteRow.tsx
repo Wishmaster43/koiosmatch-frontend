@@ -14,6 +14,11 @@ import SafeHtml from '@/components/ui/SafeHtml'
 import { Caption } from '@/components/ui/typography'
 import { initialsOf } from '@/lib/initials'
 import { NoteTypeChip, NoteChannelChip } from './NoteChips'
+// NOTITIE-DOORLINK-1 write side: the note's own koppel-picker chips, additive —
+// renders only for a host that opts in via the `noteLinks` capability below.
+import NoteLinksRow from './NoteLinksRow'
+import type { NoteLinkHost } from './noteLinksApi'
+import type { Id } from '@/types/common'
 import type { NoteItem, NoteType, NotesLabels, NotePayload } from '../NotesTab'
 
 interface NoteRowProps {
@@ -44,6 +49,11 @@ interface NoteRowProps {
   onRestorePreviousNote?: (i: number) => Promise<boolean>
   restoringIdx: number | null
   requestRestorePrevious: (i: number) => void
+  // NOTITIE-DOORLINK-1 (Danny GO 28-08): the manual link chips + add picker —
+  // only the candidate/customer Notities tabs pass this (see NotesTab's own prop).
+  noteLinks?: { host: NoteLinkHost; hostId: Id }
+  // K-225 NOTE-META-1: the reader's-language sentence built from the note's meta; null = show the stored body.
+  bodyOverride?: string | null
 }
 
 // One note-thread row — avatar, chips, meta line and the per-note action icons.
@@ -51,6 +61,7 @@ export default function NoteRow({
   n, i, who, authorInitials, chipTypes, noteTypes, channels, labels, t,
   noteWhen, noteEditor, noteEdited, canManageNote, onEditNote, onDeleteNote, openEdit, requestDelete,
   canPopOutNote, openNoteWindow, noteIdOf, onFetchPreviousVersion, onRestorePreviousNote, restoringIdx, requestRestorePrevious,
+  noteLinks, bodyOverride,
 }: NoteRowProps) {
   return (
     <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
@@ -119,7 +130,12 @@ export default function NoteRow({
             </Button>
           )}
         </div>
-        <SafeHtml style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} html={n.text ?? n.body ?? ''} />
+        <SafeHtml style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} html={bodyOverride ?? n.text ?? n.body ?? ''} />
+        {/* NOTITIE-DOORLINK-1: only where the host opted in AND this note has a
+            resolved server id (a still-optimistic note has nothing to link yet). */}
+        {noteLinks && noteIdOf(n) && (
+          <NoteLinksRow host={noteLinks.host} hostId={noteLinks.hostId} noteId={noteIdOf(n) as Id} canManage={canManageNote(n)} />
+        )}
       </div>
     </div>
   )

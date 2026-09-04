@@ -1448,5 +1448,14 @@
       "kennismigrant": "Migrante altamente cualificado",
       "onbekend": "Desconocido"
     }
+  },
+  "notes": {
+    "meta": {
+      "statusChange": "Estado cambiado de {{from}} a {{to}}",
+      "statusSet": "Estado establecido en {{to}}",
+      "reason": " · Motivo: {{reason}}",
+      "blacklistReason": " · Motivo de lista negra: {{reason}}",
+      "effectiveFrom": " · Fecha de vigencia {{date}}"
+    }
   }
 }
