@@ -32,15 +32,17 @@ describe('RetentionSettings — load', () => {
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/settings'))
     expect(await screen.findAllByDisplayValue('24')).toHaveLength(2) // never-placed + consent-months share the 24 default
     expect(screen.getByDisplayValue('60')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('36')).toBeInTheDocument() // retention_contact_months (settings-coherence-7)
     expect(screen.getByDisplayValue('30')).toBeInTheDocument() // deletion_grace_days (TRASH-OVERAL-2)
   })
 
   it('coerces stored string values to numbers', async () => {
-    api.get.mockResolvedValue({ data: { retention_months_never_placed: '36', retention_months_ever_placed: '84', retention_consent_months: '12' } })
+    api.get.mockResolvedValue({ data: { retention_months_never_placed: '48', retention_months_ever_placed: '84', retention_consent_months: '12', retention_contact_months: '18' } })
     render(<RetentionSettings />)
-    expect(await screen.findByDisplayValue('36')).toBeInTheDocument()
+    expect(await screen.findByDisplayValue('48')).toBeInTheDocument()
     expect(screen.getByDisplayValue('84')).toBeInTheDocument()
     expect(screen.getByDisplayValue('12')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('18')).toBeInTheDocument() // retention_contact_months
   })
 
   it('never renders the legacy retention_candidate_months key as a field', async () => {
@@ -51,7 +53,7 @@ describe('RetentionSettings — load', () => {
 })
 
 describe('RetentionSettings — save', () => {
-  it('POSTs all four retention keys to /settings on save', async () => {
+  it('POSTs all five retention keys to /settings on save', async () => {
     const user = userEvent.setup()
     render(<RetentionSettings />)
     const neverPlaced = (await screen.findAllByDisplayValue('24'))[0]
@@ -62,7 +64,7 @@ describe('RetentionSettings — save', () => {
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', {
       retention_months_never_placed: '36', retention_months_ever_placed: '60', retention_consent_months: '24',
-      deletion_grace_days: '30',
+      retention_contact_months: '36', deletion_grace_days: '30',
     }))
   })
 
@@ -78,7 +80,7 @@ describe('RetentionSettings — save', () => {
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', {
       retention_months_never_placed: '24', retention_months_ever_placed: '60', retention_consent_months: '0',
-      deletion_grace_days: '30',
+      retention_contact_months: '36', deletion_grace_days: '30',
     }))
   })
 
@@ -94,7 +96,7 @@ describe('RetentionSettings — save', () => {
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', {
       retention_months_never_placed: '24', retention_months_ever_placed: '60', retention_consent_months: '24',
-      deletion_grace_days: '45',
+      retention_contact_months: '36', deletion_grace_days: '45',
     }))
   })
 })

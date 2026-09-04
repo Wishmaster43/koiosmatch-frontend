@@ -563,6 +563,10 @@
       "label": "Gültigkeit der Zustimmung",
       "description": "Anzahl Monate, die eine erteilte Aufbewahrungszustimmung gültig bleibt, bevor sie erneut bestätigt werden muss. 0 = Zustimmung läuft nie ab."
     },
+    "contactMonths": {
+      "label": "Aufbewahrungsfrist Kontaktpersonen",
+      "description": "Monate ohne Aktivität, nach denen eine Kontaktperson eines Kunden zur Prüfung vorgelegt wird (über das Ereignis contact.retention_due). Kontaktpersonen mit ausdrücklicher Einwilligung sind ausgenommen."
+    },
     "graceDays": {
       "label": "Papierkorb-Frist",
       "description": "Anzahl der Tage, die ein Datensatz im Papierkorb bleibt, bevor er automatisch endgültig gelöscht wird."

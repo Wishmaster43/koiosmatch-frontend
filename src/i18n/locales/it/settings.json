@@ -585,6 +585,10 @@
       "label": "Validità del consenso alla conservazione",
       "description": "Numero di mesi in cui un consenso alla conservazione concesso resta valido prima di dover essere riconfermato. 0 = il consenso non scade mai."
     },
+    "contactMonths": {
+      "label": "Periodo di conservazione dei contatti",
+      "description": "Mesi senza attività dopo i quali un contatto del cliente viene proposto per la revisione (tramite l'evento contact.retention_due). Un contatto con consenso esplicito è escluso."
+    },
     "graceDays": {
       "label": "Periodo nel cestino",
       "description": "Numero di giorni in cui un record resta nel cestino prima di essere eliminato definitivamente in modo automatico."

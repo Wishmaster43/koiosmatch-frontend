@@ -585,6 +585,10 @@
       "label": "Prazo de validade do consentimento",
       "description": "Número de meses que um consentimento de conservação concedido permanece válido antes de ser necessária nova confirmação. 0 = o consentimento nunca expira."
     },
+    "contactMonths": {
+      "label": "Prazo de retenção de contactos",
+      "description": "Meses sem atividade após os quais um contacto do cliente é apresentado para revisão (através do evento contact.retention_due). Um contacto com consentimento explícito fica excluído."
+    },
     "graceDays": {
       "label": "Prazo na reciclagem",
       "description": "Número de dias que um registo permanece na reciclagem antes de ser eliminado definitivamente de forma automática."

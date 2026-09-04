@@ -563,6 +563,10 @@
       "label": "Validez del consentimiento",
       "description": "Meses durante los que un consentimiento de conservación concedido sigue siendo válido antes de tener que reconfirmarse. 0 = el consentimiento nunca caduca."
     },
+    "contactMonths": {
+      "label": "Plazo de conservación de contactos",
+      "description": "Meses sin actividad tras los cuales un contacto de cliente se presenta para revisión (a través del evento contact.retention_due). Un contacto con consentimiento explícito queda excluido."
+    },
     "graceDays": {
       "label": "Plazo de la papelera",
       "description": "Número de días que un registro permanece en la papelera antes de eliminarse definitivamente de forma automática."

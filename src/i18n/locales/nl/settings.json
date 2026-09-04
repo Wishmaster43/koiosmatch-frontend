@@ -585,6 +585,10 @@
       "label": "Bewaartermijn toestemming",
       "description": "Aantal maanden dat een gegeven bewaartoestemming geldig blijft voordat opnieuw bevestiging nodig is. 0 = toestemming verloopt nooit."
     },
+    "contactMonths": {
+      "label": "Bewaartermijn contactpersonen",
+      "description": "Aantal maanden zonder activiteit waarna een contactpersoon van een klant ter beoordeling wordt aangeboden (via het contact.retention_due-event). Een contactpersoon met expliciete toestemming doet niet mee."
+    },
     "graceDays": {
       "label": "Prullenbaktermijn",
       "description": "Aantal dagen dat een record in de prullenbak blijft voordat het automatisch definitief wordt verwijderd."

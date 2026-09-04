@@ -6,7 +6,9 @@
  * (`retention_consent_months`, CandidateRetentionPolicy::KEY_CONSENT_MONTHS)
  * governs how long a granted retention-consent opt-in stays valid before it must
  * be re-confirmed — 0 is a deliberate "never expires" choice, so it is NOT
- * floored to 1 like the other two. These numbers are what the backend uses to
+ * floored to 1 like the other two. A fourth window (`retention_contact_months`,
+ * ContactRetentionPolicy::KEY_CONTACT_MONTHS) is the dormancy window after which a
+ * customer contact is surfaced for review through the contact.retention_due event. These numbers are what the backend uses to
  * derive `retention_expires_at` on the candidate (CandidateDetailResource),
  * shown read-only on the Communication -> Toestemmingen tab (and the candidate
  * drill-down privacy block) — this screen is the only place that policy is
@@ -27,6 +29,11 @@ export default function RetentionSettings() {
     retention_months_never_placed: 24,
     retention_months_ever_placed: 60,
     retention_consent_months: 24,
+    // settings-coherence-7 (K-247 lane C): months without activity after which a
+    // customer contact is surfaced for review (contact.retention_due). The backend
+    // read it (ContactRetentionPolicy::KEY_CONTACT_MONTHS, default 36, floored to 1)
+    // but no screen wrote it until now.
+    retention_contact_months: 36,
     // TRASH-OVERAL-2: days a pending-erase record stays in the trash before the
     // automatic hard erase (drives the "wordt rond {date}" wording app-wide).
     deletion_grace_days: 30,
@@ -51,6 +58,11 @@ export default function RetentionSettings() {
           <NumberField value={form.values.retention_consent_months}
             onChange={v => form.set('retention_consent_months', v)}
             min={0} max={120} unit={t('retention.unit')} />
+        </SettingRow>
+        <SettingRow label={t('retention.contactMonths.label')} description={t('retention.contactMonths.description')}>
+          <NumberField value={form.values.retention_contact_months}
+            onChange={v => form.set('retention_contact_months', v)}
+            min={1} max={120} unit={t('retention.unit')} />
         </SettingRow>
         {/* Trash grace window in DAYS (unit borrowed from escalation.daysUnit — §11:
             never a fresh label for something already named elsewhere). */}

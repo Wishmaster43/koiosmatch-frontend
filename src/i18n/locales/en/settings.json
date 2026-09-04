@@ -585,6 +585,10 @@
       "label": "Consent validity",
       "description": "Months a granted retention consent stays valid before it must be re-confirmed. 0 = consent never expires."
     },
+    "contactMonths": {
+      "label": "Contact retention window",
+      "description": "Months without activity after which a customer contact is surfaced for review (through the contact.retention_due event). A contact with explicit retention consent is excluded."
+    },
     "graceDays": {
       "label": "Trash period",
       "description": "Number of days a record stays in the trash before it is automatically deleted permanently."
