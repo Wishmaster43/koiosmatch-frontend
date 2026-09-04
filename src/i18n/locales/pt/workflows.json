@@ -426,7 +426,7 @@
       "knowledgeItemsHint": "Apenas os itens de conhecimento vinculados estão disponíveis para este agente. Vazio = nenhum conhecimento.",
       "noKnowledgeItems": "Nenhum item de conhecimento criado",
       "knowledgeItemsCount": "{{count}} item(ns) de conhecimento vinculado(s)",
-      "knowledgeItemsMax": "200 itens de conhecimento é o máximo."
+      "knowledgeItemsMax": "{{max}} itens de conhecimento é o máximo."
     },
     "tabs": {
       "agents": "Agentes",

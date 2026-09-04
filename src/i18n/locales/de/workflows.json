@@ -365,7 +365,7 @@
       "knowledgeItemsHint": "Nur verknüpfte Wissenselemente stehen diesem Agenten zur Verfügung. Leer = kein Wissen.",
       "noKnowledgeItems": "Keine Wissenselemente erstellt",
       "knowledgeItemsCount": "{{count}} Wissenselement(e) verknüpft",
-      "knowledgeItemsMax": "200 Wissenselemente ist das Maximum."
+      "knowledgeItemsMax": "{{max}} Wissenselemente sind das Maximum."
     },
     "tabs": {
       "agents": "Agenten",

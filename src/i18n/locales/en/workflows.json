@@ -369,7 +369,7 @@
       "knowledgeItemsHint": "Only linked knowledge items are available to this agent. Empty = no knowledge.",
       "noKnowledgeItems": "No knowledge items created",
       "knowledgeItemsCount": "{{count}} knowledge item(s) linked",
-      "knowledgeItemsMax": "200 knowledge items is the maximum."
+      "knowledgeItemsMax": "{{max}} knowledge items is the maximum."
     },
     "tabs": {
       "agents": "Agents",

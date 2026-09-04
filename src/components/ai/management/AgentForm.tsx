@@ -16,6 +16,7 @@ import { initialsOf } from '@/lib/initials'
 import { inputStyle, Field, CopyableValue, SaveBar } from './shared'
 import { InterviewFlowSection } from './InterviewFlowSection'
 import { AgentKnowledgeSection } from './AgentKnowledgeSection'
+import { KNOWLEDGE_IDS_MAX } from './agentLimits'
 import type { AiAgent, AiItem, AiKnowledgeLookupItem, ChatMessage } from '@/types/ai'
 // Reuse the WhatsApp-templates option shape from the workflow module's template
 // picker (GET /whatsapp-templates) instead of re-declaring it (§11 — one truth).
@@ -30,7 +31,6 @@ const fieldLabelStyle: CSSProperties = { ...groupLabelStyle, display: 'block', m
 
 // KNOWLEDGE-SCOPE-1 (K-276): the backend rejects a knowledge_ids request body over
 // this length (422 on knowledge_ids.0) — guard it client-side too, at the toggle.
-const KNOWLEDGE_IDS_MAX = 200
 
 // The agent edit-form's local state. No `model` field (MODEL-1): the company-wide
 // model from Settings is used everywhere, never chosen per agent.
@@ -161,7 +161,7 @@ export function AgentForm({ agent, prompts, faqs, knowledgeItems, onSaved, onDel
     use_knowledge:   agent?.use_knowledge   ?? false,
     max_history:     agent?.max_history     ?? 10,
     wa_intro_template: agent?.wa_intro_template ?? '',
-    knowledge_ids:   agent?.knowledge_ids   ?? [],
+    knowledge_ids: (agent?.knowledge_ids ?? []).map(String),
   })
   // KNOWLEDGE-SCOPE-1: the contract's "omit = unchanged" applies to knowledge_ids —
   // only send it once the user actually touched the picker (mirrors the write-only

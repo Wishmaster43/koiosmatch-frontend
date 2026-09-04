@@ -6,6 +6,7 @@
  * owned by the caller.
  */
 import { useTranslation } from 'react-i18next'
+import { KNOWLEDGE_IDS_MAX } from './agentLimits'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
 import Toggle from '@/components/ui/Toggle'
 import { Caption, GroupLabel } from '@/components/ui/typography'
@@ -88,7 +89,7 @@ export function AgentKnowledgeSection({
         {/* Contract cap notice (KNOWLEDGE-SCOPE-1: max 200 ids) — only shown once reached. */}
         {atMax && (
           <Caption as="p" style={{ margin: '4px 0 0' }}>
-            {t('ai.agent.knowledgeItemsMax')}
+            {t('ai.agent.knowledgeItemsMax', { max: KNOWLEDGE_IDS_MAX })}
           </Caption>
         )}
         <Caption as="p" style={{ margin: '4px 0 0' }}>
