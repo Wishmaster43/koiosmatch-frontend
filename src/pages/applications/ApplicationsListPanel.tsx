@@ -23,6 +23,7 @@ import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import Button from '@/components/ui/Button'
 import { BTN_H } from '@/config/buttonMetrics'
 import { tintBg, tintBorder } from '@/lib/tint'
+import { TOOLBAR_ROW_STYLE } from '@/components/ui/toolbarRow'
 // W31 remnant: the paused quick-view wears the SAME colour as the paused chip.
 import { interviewCategoryColor } from './data/applicationsShared'
 import type { Application } from '@/types/application'
@@ -130,8 +131,7 @@ export default function ApplicationsListPanel({
           : (branchFilterExcludesAll ? t('common:filters.branchExcludesUnassigned') : undefined)} />
 
       {/* Tab bar — add + search + quick-views + view toggle */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'space-between',
-        padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
+      <div style={{ ...TOOLBAR_ROW_STYLE, justifyContent: 'space-between', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
               Hidden without the create permission (OPENERS-HIDE-1, Danny 05-09). */}

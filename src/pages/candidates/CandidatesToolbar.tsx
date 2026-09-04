@@ -10,6 +10,7 @@ import CandidatesBulkBar from './CandidatesBulkBar'
 import type { CandidatePool } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
 import Button from '@/components/ui/Button'
+import { TOOLBAR_ROW_STYLE } from '@/components/ui/toolbarRow'
 
 interface BulkUser { id: Id; name: string }
 
@@ -88,7 +89,7 @@ export default function CandidatesToolbar({
   const { t } = useTranslation(['candidates', 'common'])
 
   return (
-    <div style={{ padding: '0 24px 12px', display: 'flex', gap: 10, alignItems: 'center', minHeight: 36, flexShrink: 0 }}>
+    <div style={{ ...TOOLBAR_ROW_STYLE, flexShrink: 0 }}>
       {selectedCount > 0 ? (
         <CandidatesBulkBar count={selectedCount} onClear={onClearSelection}
           bulkScope={bulkScope} onSetBulkScope={onSetBulkScope} filteredTotal={filteredTotal} anyFilterActive={anyFilterActive}

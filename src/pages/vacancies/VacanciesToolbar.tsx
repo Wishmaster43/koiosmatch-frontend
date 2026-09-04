@@ -13,6 +13,7 @@ import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import Button from '@/components/ui/Button'
+import { TOOLBAR_ROW_STYLE } from '@/components/ui/toolbarRow'
 
 interface VacanciesToolbarProps {
   selectedCount: number
@@ -42,8 +43,7 @@ export default function VacanciesToolbar({
   const { t } = useTranslation(['vacancies', 'common'])
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
-      padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
+    <div style={{ ...TOOLBAR_ROW_STYLE, flexWrap: 'wrap', flexShrink: 0 }}>
       {/* flex:1 so the selection bar stretches to the toggles (Danny 22-08: "de bar
           bij geselecteerde vacatures loopt niet door") — idle-mode children keep
           their intrinsic widths, so the + Nieuw/search row is unchanged. */}

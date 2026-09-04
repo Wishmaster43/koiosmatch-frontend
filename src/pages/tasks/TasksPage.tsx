@@ -41,6 +41,7 @@ import { buildTaskInsights } from './data/taskInsights'
 import type { Task, ApiTask } from '@/types/task'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
+import { TOOLBAR_ROW_STYLE } from '@/components/ui/toolbarRow'
 
 interface UserLike { id: Id; name: string; avatar_color?: string | null }
 
@@ -212,8 +213,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
         <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
 
         {/* Toolbar — add on the LEFT, archived toggle + view toggle on the RIGHT (mirror Opportunities) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10,
-          padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
+        <div style={{ ...TOOLBAR_ROW_STYLE, flexShrink: 0 }}>
           {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
           {canCreateTask && (
             <Button variant="primary" size="md" onClick={() => setAddOpen(true)}>

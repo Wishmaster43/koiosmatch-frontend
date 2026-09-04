@@ -46,6 +46,7 @@ import DeletionPreviewModal from '@/components/ui/DeletionPreviewModal'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
+import { TOOLBAR_ROW_STYLE } from '@/components/ui/toolbarRow'
 
 // MatchesPage — loads matches, shows an insights strip and paginates the table.
 export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
@@ -276,7 +277,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
       />
 
       {/* Toolbar — bulk bar or add button (left) + segmented view/archive selector (right) */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 24px 12px', flexShrink: 0, minHeight: 36 }}>
+      <div style={{ ...TOOLBAR_ROW_STYLE, flexShrink: 0 }}>
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
           {selectedIds.size > 0 ? (
             <MatchesBulkBar

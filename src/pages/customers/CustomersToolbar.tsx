@@ -10,6 +10,7 @@ import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import Button from '@/components/ui/Button'
+import { TOOLBAR_ROW_STYLE } from '@/components/ui/toolbarRow'
 import CustomersBulkBar from './CustomersBulkBar'
 import type { Id, LookupOption } from '@/types/common'
 
@@ -59,7 +60,7 @@ export default function CustomersToolbar({
   showArchived, setShowArchived, showTrash, setShowTrash, view, setView,
 }: Props) {
   return (
-    <div style={{ padding: '0 24px 12px', display: 'flex', gap: 10, alignItems: 'center', minHeight: 36, flexShrink: 0 }}>
+    <div style={{ ...TOOLBAR_ROW_STYLE, flexShrink: 0 }}>
       {selectedCount > 0 ? (
         <CustomersBulkBar count={selectedCount} onClear={onClearSelection}
           onSetOwner={bulk.onSetOwner} onSetStatus={bulk.onSetStatus} onAddTag={bulk.onAddTag}

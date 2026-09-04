@@ -33,6 +33,7 @@ import { useListPageSize } from '@/hooks/useListPageSize'
 import { isReferenceQuery } from '@/lib/referenceNumber'
 import { buildOpportunityFilterGroups } from './data/opportunityFilterGroups'
 import Button from '@/components/ui/Button'
+import { TOOLBAR_ROW_STYLE } from '@/components/ui/toolbarRow'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 
 // Single-select donut pick: clicking the active segment clears it.
@@ -276,8 +277,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
           />
 
           {/* Toolbar — add on the LEFT, archived toggle + view toggle on the RIGHT. */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10,
-            padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
+          <div style={{ ...TOOLBAR_ROW_STYLE, flexShrink: 0 }}>
             {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
                 hidden without the create permission (OPENERS-HIDE-1, Danny 05-09),
                 same as every other page toolbar. */}

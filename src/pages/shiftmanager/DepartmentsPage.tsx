@@ -13,6 +13,7 @@ import PaginationBar from '@/components/ui/PaginationBar'
 import DepartmentDrawer from './DepartmentDrawer'
 import SmKpiStrip from './SmKpiStrip'
 import HeaderSearch from '@/components/ui/HeaderSearch'
+import { TOOLBAR_ROW_STYLE } from '@/components/ui/toolbarRow'
 import { useListPageSize } from '@/hooks/useListPageSize'
 import { useSmDepartments } from './hooks/useSmDepartments'
 import type { SmDepartmentRow } from '@/types/shiftmanager'
@@ -98,7 +99,7 @@ export default function DepartmentsPage() {
         <SmKpiStrip kpis={kpis} />
 
         {/* Toolbar — free-text search only (read-only mirror, no add button); matches the shared spacing spec (§4). */}
-        <div style={{ padding: '0 24px 12px', minHeight: 36, display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={TOOLBAR_ROW_STYLE}>
           <HeaderSearch onSearch={setSearch} defaultValue={search} width={300} />
         </div>
 
