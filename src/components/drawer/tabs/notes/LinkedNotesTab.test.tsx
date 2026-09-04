@@ -67,9 +67,9 @@ beforeEach(() => {
 })
 
 describe('LinkedNotesTab · toolbar', () => {
-  // Bundle H (server source_type) has not landed — the hook always gets null;
-  // filtering happens client-side over the already-loaded page (see file docblock).
-  it('requests the feed once, without a source_type — filtering stays client-side for now', () => {
+  // Bundle H: the source type is a SERVER param — null while 'all sources' is selected,
+  // the chosen type afterwards (useNoteFeed refetches page 1 on change).
+  it('requests the feed without a source_type while all sources are selected', () => {
     render(<LinkedNotesTab entity="candidates" id="c1" />)
     expect(useNoteFeedMock).toHaveBeenCalledWith('candidates', 'c1', true, undefined, null)
   })
@@ -89,18 +89,17 @@ describe('LinkedNotesTab · toolbar', () => {
     expect(screen.queryByText('placed successfully')).not.toBeInTheDocument()
   })
 
-  it('the source-type filter row (in the shared DrawerFilterMenu) narrows to that family', async () => {
+  it('the source-type filter row (in the shared DrawerFilterMenu) asks the SERVER for that family (bundle H)', async () => {
     const user = userEvent.setup()
     useNoteFeedMock.mockReturnValue(feedResult([
       feedItem({ id: 'n1', body: 'application note', source: { type: 'application', id: 'a1', label: 'Sollicitatie · Jan', deleted: false } }),
-      feedItem({ id: 'n2', body: 'match note', source: { type: 'match', id: 'm1', label: 'Match · Piet', deleted: false } }),
     ]))
     render(<LinkedNotesTab entity="candidates" id="c1" />)
     await user.click(screen.getByRole('button', { name: 'Filter' }))
     await user.click(screen.getByRole('button', { name: 'Alle bronnen' }))
     await user.click(screen.getByRole('button', { name: 'Match' }))
-    expect(screen.getByText('match note')).toBeInTheDocument()
-    expect(screen.queryByText('application note')).not.toBeInTheDocument()
+    // The hook re-runs with source_type 'match'; the rows are whatever the server returns.
+    expect(useNoteFeedMock).toHaveBeenLastCalledWith('candidates', 'c1', true, undefined, 'match')
   })
 
   it('the "only direct" toggle shows the honest empty state instead of a filtered list', async () => {

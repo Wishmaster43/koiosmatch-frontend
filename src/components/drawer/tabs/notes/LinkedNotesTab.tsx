@@ -13,12 +13,10 @@
  * + one `DrawerFilterMenu` right, no section title — the sub-tab already names
  * itself). Search is CLIENT-SIDE over the loaded feed (the backend has no
  * search param on note-feed, mirrors NotesTab's own documented behaviour: it
- * only ever narrows what is ALREADY loaded). The source-type filter is ALSO
- * client-side for now — `sourceType` narrows the loaded `items` by
- * `item.source.type` — because bundle H (the server `source_type` param) has
- * not landed yet; `useNoteFeed`'s own `sourceType` argument already exists for
- * that day (see its own docblock) but is deliberately passed `null` here until
- * then. "Alleen directe notities" moved INTO the filter panel too, as a
+ * only ever narrows what is ALREADY loaded). The source-type filter is
+ * SERVER-SIDE since backend bundle H (71e7e434): `?source_type=<type>` reaches
+ * useNoteFeed, which refetches page 1, so a filtered view never shows "5 of the
+ * 25 loaded rows". "Alleen directe notities" moved INTO the filter panel too, as a
  * `type: 'toggle'` row (DrawerFilterMenu, K-288) — same honest-empty-state
  * behaviour as the NoteFeedList section it supersedes: ON shows nothing (this
  * feed only ever carries `is_direct:false` rows by construction), OFF shows
@@ -63,16 +61,15 @@ export default function LinkedNotesTab({ entity, id, sub }: LinkedNotesTabProps)
   const [search, setSearch] = useState('')
   const [sourceType, setSourceType] = useState('')
   const [onlyDirect, setOnlyDirect] = useState(false)
-  // sourceType stays client-side (see file docblock) — null until bundle H lands.
+  // The source-type filter is a server param (bundle H): '' = all sources → null.
   const { items, loading, error, hasMore, loadingMore, loadMore, reload } =
-    useNoteFeed(entity, id, true, sub, null)
+    useNoteFeed(entity, id, true, sub, sourceType || null)
   const noteTypeEntity = entity === 'candidates' ? 'candidate' : 'customer'
   const { types: noteTypes } = useNoteTypes(noteTypeEntity as never)
 
-  // Client-side source-type + search narrowing over the already-loaded page(s).
+  // Client-side search narrowing over the already-loaded page(s); the source type is already server-filtered.
   const q = search.trim().toLowerCase()
   const filteredItems = items
-    .filter(item => !sourceType || item.source.type === sourceType)
     .filter(item => !q
       || stripHtml(String(item.body ?? '')).toLowerCase().includes(q)
       || String(item.source.label ?? '').toLowerCase().includes(q)
