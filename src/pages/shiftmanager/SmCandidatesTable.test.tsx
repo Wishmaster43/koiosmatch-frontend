@@ -5,6 +5,7 @@ import { render, screen, fireEvent, within } from '@testing-library/react'
 import '@/i18n'
 import SmCandidatesTable from './SmCandidatesTable'
 import type { ReportCandidate } from '@/types/reports'
+import { tintBg } from '@/lib/tint'
 
 const rows: ReportCandidate[] = [
   {
@@ -33,7 +34,7 @@ describe('SmCandidatesTable · columns', () => {
 
     const chip = screen.getByText('Actief')
     // SoftChip tints via color-mix — never a solid background (§4).
-    expect(chip.closest('span')).toHaveStyle({ background: 'color-mix(in srgb, var(--color-success) 10%, transparent)' })
+    expect(chip.closest('span')).toHaveStyle({ background: tintBg('var(--color-success)') })
   })
 })
 

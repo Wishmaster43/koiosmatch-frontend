@@ -17,10 +17,11 @@ import { initialsOf } from '@/lib/initials'
 import { SM_CANDIDATE_STATUS_COLORS } from './data/smCandidateStatus'
 import { endDateOf } from './data/smCandidateFields'
 import type { ReportCandidate, CandidateFeature, GlobalRate } from '@/types/reports'
+import { Caption, monoStyle } from '@/components/ui/typography'
 
 const plainCell: CSSProperties = { color: 'var(--text)', fontSize: 12 }
 const mutedCell: CSSProperties = { color: 'var(--text-muted)', fontSize: 12 }
-const monoCell: CSSProperties = { color: 'var(--text)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace' }
+const monoCell: CSSProperties = { color: 'var(--text)', fontSize: 12, ...monoStyle }
 const dash = <span style={{ color: 'var(--text-muted)' }}>—</span>
 
 interface SmCandidatesTableProps {
@@ -51,7 +52,7 @@ export default function SmCandidatesTable({ rows, loading, onRowClick }: SmCandi
               <div style={{ color: 'var(--text)', fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={fullName}>
                 {fullName || '—'}
               </div>
-              {c.email && <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>{c.email}</div>}
+              {c.email && <Caption as="div">{c.email}</Caption>}
             </div>
           </div>
         )
@@ -89,7 +90,7 @@ export default function SmCandidatesTable({ rows, loading, onRowClick }: SmCandi
           <div style={{ display: 'flex', gap: 4, alignItems: 'center', flexWrap: 'wrap' }}>
             {shown.map(name => <SoftChip key={name} label={name} color="var(--color-primary)" />)}
             {items.length > shown.length && (
-              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('candidates.more', { ns: 'reports', count: items.length - shown.length })}</span>
+              <Caption as="span">{t('candidates.more', { ns: 'reports', count: items.length - shown.length })}</Caption>
             )}
           </div>
         )
@@ -104,10 +105,10 @@ export default function SmCandidatesTable({ rows, loading, onRowClick }: SmCandi
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {shown.map((r: GlobalRate, i: number) => (
-              <span key={i} style={{ fontSize: 11, whiteSpace: 'nowrap' }}>
+              <Caption key={i} as="span" style={{ whiteSpace: 'nowrap' }}>
                 <span style={{ color: 'var(--text-muted)' }}>{r.global_rate?.internal_description ?? r.step_name ?? '—'}: </span>
                 <span style={monoCell}>{r.hour_rate != null ? `€${Number(r.hour_rate).toFixed(2)}` : '—'}</span>
-              </span>
+              </Caption>
             ))}
             {rates.length > shown.length && (
               <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{t('candidates.more', { ns: 'reports', count: rates.length - shown.length })}</span>

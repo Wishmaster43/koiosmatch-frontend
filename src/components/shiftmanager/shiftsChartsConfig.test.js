@@ -3,6 +3,7 @@
 // color-mix (never a second hardcoded palette).
 import { describe, it, expect } from 'vitest'
 import { yearTint, YEAR_OPACITY } from './shiftsChartsConfig'
+import { tint } from '@/lib/tint'
 
 describe('yearTint', () => {
   it('keeps the plain series colour for rank 0 (the most recent selected year)', () => {
@@ -13,7 +14,7 @@ describe('yearTint', () => {
   it('mutes the same hue via color-mix for an older rank', () => {
     const pct = Math.round(YEAR_OPACITY[1] * 100)
     // eslint-disable-next-line no-restricted-syntax -- DATA: test fixture colour, not UI styling
-    expect(yearTint('#1B60A9', 1)).toBe(`color-mix(in srgb, #1B60A9 ${pct}%, transparent)`)
+    expect(yearTint('#1B60A9', 1)).toBe(tint('#1B60A9', pct))
   })
 
   it('never invents a different hue — the base colour always appears in the mix', () => {

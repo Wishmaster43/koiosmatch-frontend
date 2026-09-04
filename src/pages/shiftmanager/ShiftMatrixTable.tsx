@@ -15,10 +15,13 @@ import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { MatrixRow, MetricKey } from './hooks/useShiftAnalysis'
 import { monthLabel } from './shiftMonth'
+import { groupLabelStyle, Caption } from '@/components/ui/typography'
 
+// Pivot header cell: GroupLabel's raw identity (r6 style-object context — this
+// merges into a <th>, not a JSX atom) plus table-specific layout.
 const thBase: CSSProperties = {
-  padding: '10px 12px', borderBottom: '1px solid var(--border)', fontSize: 11, fontWeight: 600,
-  textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', whiteSpace: 'nowrap',
+  ...groupLabelStyle,
+  padding: '10px 12px', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap',
 }
 const tdBase: CSSProperties = { padding: '8px 12px', fontSize: 13, whiteSpace: 'nowrap' }
 
@@ -50,7 +53,7 @@ export default function ShiftMatrixTable({ columns, rows, metric }: {
             <tr key={r.id || i} style={{ borderBottom: '1px solid var(--hover-bg)' }}>
               <td style={{ ...tdBase, position: 'sticky', left: 0, background: 'var(--surface)', textAlign: 'left', fontWeight: 500, color: 'var(--text)' }}>
                 <div>{r.name || '—'}</div>
-                {r.position && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{r.position}</div>}
+                {r.position && <Caption as="div">{r.position}</Caption>}
               </td>
               {columns.map(c => {
                 const v = Number(r.months[c]?.[metric]) || 0

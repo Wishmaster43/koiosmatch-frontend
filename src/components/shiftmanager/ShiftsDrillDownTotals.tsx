@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import { Building2, Briefcase, MapPin } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { ShiftRow } from '@/types/shiftmanager'
+import { captionStyle, SectionTitle } from '@/components/ui/typography'
 
 // Per-location display meta (name + owning customer) keyed by location id.
 export type LocationMeta = Map<string, { name?: string; customer?: string }>
@@ -34,14 +35,15 @@ function groupSum(shifts: ShiftRow[], keyFn: (s: ShiftRow) => string, valFn: (s:
 function GroupTable({ icon: Icon, title, rows, total, valueCol, totalRow, fmt }: {
   icon: LucideIcon; title: string; rows: [string, number][]; total: number; valueCol: string; totalRow: string; fmt: (n: number) => string
 }) {
-  const th: CSSProperties = { padding: '6px 10px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
+  // Table header cell: Caption's raw identity (r6 style-object context) plus 600 weight for a header.
+  const th: CSSProperties = { ...captionStyle, fontWeight: 600, padding: '6px 10px', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
   const td: CSSProperties = { padding: '6px 10px', fontSize: 12, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)', fontVariantNumeric: 'tabular-nums' }
 
   return (
     <div style={{ marginBottom: 18 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 7 }}>
         <Icon size={14} color="var(--color-primary)" />
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{title}</span>
+        <SectionTitle as="span">{title}</SectionTitle>
       </div>
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>

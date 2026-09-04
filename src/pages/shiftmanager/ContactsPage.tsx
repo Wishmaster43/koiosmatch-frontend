@@ -14,6 +14,7 @@ import PaginationBar from '@/components/ui/PaginationBar'
 import ContactDrawer from './ContactDrawer'
 import { useSmContacts } from './hooks/useSmContacts'
 import type { SmContactRow } from '@/types/shiftmanager'
+import { Caption } from '@/components/ui/typography'
 
 // Shiftmanager contacts list: filters/search/pagination in local state, filter groups pushed into the shared right panel, and a row click opens the contact drawer.
 export default function ContactsPage() {
@@ -88,7 +89,7 @@ export default function ContactsPage() {
             <div key={k.label} style={{ background: 'var(--surface)', border: '1px solid var(--border)',
               borderRadius: 10, padding: '14px 18px', flex: 1 }}>
               <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text)', lineHeight: 1 }}>{k.value}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{k.label}</div>
+              <Caption as="div" style={{ marginTop: 4 }}>{k.label}</Caption>
             </div>
           ))}
         </div>

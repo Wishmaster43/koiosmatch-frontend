@@ -5,7 +5,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import { MapPin, Building2, Layers, X, Phone, Mail, ChevronRight } from 'lucide-react'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, Caption, BodyText, GroupLabel, SectionTitle } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import { Avatar, StatusBadge, ac } from './locationParts'
 import type { SmLocationRow } from '@/types/shiftmanager'
@@ -56,8 +56,7 @@ export default function LocationDrawer({ loc, onClose }: { loc: SmLocationRow | 
         {/* Klant koppeling */}
         <div style={{ background: 'var(--hover-bg)', borderRadius: 10, padding: '14px 16px', marginBottom: 20,
           border: '1px solid var(--border)' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.06em',
-            textTransform: 'uppercase', marginBottom: 10 }}>{t('locationsPage.drawer.customer')}</div>
+          <GroupLabel style={{ marginBottom: 10 }}>{t('locationsPage.drawer.customer')}</GroupLabel>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 36, height: 36, borderRadius: 8, background: ac(loc.customer),
               display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -65,8 +64,8 @@ export default function LocationDrawer({ loc, onClose }: { loc: SmLocationRow | 
               {loc.customer?.charAt(0)}
             </div>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{loc.customer}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('locationsPage.drawer.linkedCustomer')}</div>
+              <BodyText style={{ fontWeight: 600 }}>{loc.customer}</BodyText>
+              <Caption>{t('locationsPage.drawer.linkedCustomer')}</Caption>
             </div>
             <ChevronRight size={14} color="var(--text-muted)" style={{ marginLeft: 'auto' }} />
           </div>
@@ -82,12 +81,12 @@ export default function LocationDrawer({ loc, onClose }: { loc: SmLocationRow | 
                 <MapPin size={14} color="var(--text-muted)" />
               </div>
               <div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('locationsPage.drawer.address')}</div>
+                <Caption>{t('locationsPage.drawer.address')}</Caption>
                 {/* ADRES-KOPIEER canon: every address display carries the shared copy button. */}
-                <div style={{ fontSize: 13, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <BodyText style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span>{loc.address}, {loc.city}</span>
                   <CopyIconButton value={`${loc.address}, ${loc.city}`} label={t('common:copyAddress.copy')} copiedLabel={t('common:copyAddress.copied')} />
-                </div>
+                </BodyText>
               </div>
             </div>
             {loc.phone && (
@@ -97,8 +96,8 @@ export default function LocationDrawer({ loc, onClose }: { loc: SmLocationRow | 
                   <Phone size={14} color="var(--text-muted)" />
                 </div>
                 <div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('locationsPage.drawer.phone')}</div>
-                  <div style={{ fontSize: 13, color: 'var(--text)' }}>{loc.phone}</div>
+                  <Caption>{t('locationsPage.drawer.phone')}</Caption>
+                  <BodyText>{loc.phone}</BodyText>
                 </div>
               </div>
             )}
@@ -109,8 +108,8 @@ export default function LocationDrawer({ loc, onClose }: { loc: SmLocationRow | 
                   <Mail size={14} color="var(--text-muted)" />
                 </div>
                 <div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('locationsPage.drawer.email')}</div>
-                  <div style={{ fontSize: 13, color: 'var(--text)' }}>{loc.email}</div>
+                  <Caption>{t('locationsPage.drawer.email')}</Caption>
+                  <BodyText>{loc.email}</BodyText>
                 </div>
               </div>
             )}
@@ -131,7 +130,7 @@ export default function LocationDrawer({ loc, onClose }: { loc: SmLocationRow | 
               </div>
               <div>
                 <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', lineHeight: 1 }}>{s.value}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{s.label}</div>
+                <Caption as="div" style={{ marginTop: 2 }}>{s.label}</Caption>
               </div>
             </div>
           ))}
@@ -141,9 +140,9 @@ export default function LocationDrawer({ loc, onClose }: { loc: SmLocationRow | 
             add/edit control here, /sm_locations has no write route to back one). */}
         <div style={{ marginBottom: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('locationsPage.drawer.departments')}</span>
-            <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--hover-bg)',
-              padding: '1px 7px', borderRadius: 999 }}>{deps.length}</span>
+            <SectionTitle as="span">{t('locationsPage.drawer.departments')}</SectionTitle>
+            <Caption as="span" style={{ background: 'var(--hover-bg)',
+              padding: '1px 7px', borderRadius: 999 }}>{deps.length}</Caption>
           </div>
           {deps.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -154,7 +153,7 @@ export default function LocationDrawer({ loc, onClose }: { loc: SmLocationRow | 
                   onMouseEnter={e => e.currentTarget.style.background = 'var(--color-primary-bg)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'var(--hover-bg)'}>
                   <Layers size={13} color="var(--text-muted)" />
-                  <span style={{ flex: 1, fontSize: 13, color: 'var(--text)' }}>{dep}</span>
+                  <BodyText as="span" style={{ flex: 1 }}>{dep}</BodyText>
                   <ChevronRight size={13} color="var(--text-muted)" />
                 </div>
               ))}

@@ -6,7 +6,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import { Layers, MapPin, Users, X, ChevronRight } from 'lucide-react'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, Caption, BodyText, GroupLabel, SectionTitle, monoStyle } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import { ac, Avatar, StatusBadge } from './departmentParts'
 import type { SmDepartmentRow } from '@/types/shiftmanager'
@@ -43,8 +43,7 @@ export default function DepartmentDrawer({ dep, onClose }: { dep: SmDepartmentRo
         {/* Klant */}
         <div style={{ background: 'var(--hover-bg)', borderRadius: 10, padding: '14px 16px',
           marginBottom: 16, border: '1px solid var(--border)' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.06em',
-            textTransform: 'uppercase', marginBottom: 10 }}>{t('departmentsPage.customer')}</div>
+          <GroupLabel style={{ marginBottom: 10 }}>{t('departmentsPage.customer')}</GroupLabel>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 36, height: 36, borderRadius: 8, background: ac(dep.customer),
               display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -52,8 +51,8 @@ export default function DepartmentDrawer({ dep, onClose }: { dep: SmDepartmentRo
               {dep.customer?.charAt(0)}
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{dep.customer}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('departmentsPage.linkedCustomer')}</div>
+              <BodyText style={{ fontWeight: 600 }}>{dep.customer}</BodyText>
+              <Caption>{t('departmentsPage.linkedCustomer')}</Caption>
             </div>
             <ChevronRight size={14} color="var(--text-muted)" />
           </div>
@@ -62,16 +61,15 @@ export default function DepartmentDrawer({ dep, onClose }: { dep: SmDepartmentRo
         {/* Locatie */}
         <div style={{ background: 'var(--hover-bg)', borderRadius: 10, padding: '14px 16px',
           marginBottom: 20, border: '1px solid var(--border)' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.06em',
-            textTransform: 'uppercase', marginBottom: 10 }}>{t('departmentsPage.location')}</div>
+          <GroupLabel style={{ marginBottom: 10 }}>{t('departmentsPage.location')}</GroupLabel>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 36, height: 36, borderRadius: 8, background: 'var(--color-primary-bg)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <MapPin size={16} color="var(--color-primary)" />
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{dep.location}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{dep.city}</div>
+              <BodyText style={{ fontWeight: 600 }}>{dep.location}</BodyText>
+              <Caption>{dep.city}</Caption>
             </div>
             <ChevronRight size={14} color="var(--text-muted)" />
           </div>
@@ -82,9 +80,8 @@ export default function DepartmentDrawer({ dep, onClose }: { dep: SmDepartmentRo
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             background: 'var(--hover-bg)', borderRadius: 10, padding: '12px 16px', marginBottom: 20,
             border: '1px solid var(--border)' }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.06em',
-              textTransform: 'uppercase' }}>{t('departmentsPage.costCenter')}</span>
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace' }}>{dep.costCenter}</span>
+            <GroupLabel as="span">{t('departmentsPage.costCenter')}</GroupLabel>
+            <SectionTitle as="span" style={{ fontFamily: monoStyle.fontFamily }}>{dep.costCenter}</SectionTitle>
           </div>
         )}
 
@@ -102,7 +99,7 @@ export default function DepartmentDrawer({ dep, onClose }: { dep: SmDepartmentRo
               </div>
               <div>
                 <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', lineHeight: 1 }}>{s.value}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{s.label}</div>
+                <Caption as="div" style={{ marginTop: 2 }}>{s.label}</Caption>
               </div>
             </div>
           ))}
@@ -110,7 +107,7 @@ export default function DepartmentDrawer({ dep, onClose }: { dep: SmDepartmentRo
 
         {/* Notities leeg */}
         <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 10 }}>{t('departmentsPage.notes')}</div>
+          <SectionTitle style={{ marginBottom: 10 }}>{t('departmentsPage.notes')}</SectionTitle>
           <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13,
             background: 'var(--hover-bg)', borderRadius: 8, border: '1px dashed var(--border)' }}>
             {t('departmentsPage.noNotes')}

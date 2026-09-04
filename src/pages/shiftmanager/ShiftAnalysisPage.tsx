@@ -17,6 +17,7 @@ import type { ChartDatum } from '@/components/charts/chartTypes'
 import ShiftMatrixTable from './ShiftMatrixTable'
 import { monthLabel } from './shiftMonth'
 import { useShiftAnalysis, METRIC_KEYS, type MetricKey } from './hooks/useShiftAnalysis'
+import { SectionTitle } from '@/components/ui/typography'
 
 // Centered empty/info block for the unavailable + empty states.
 function InfoBlock({ text }: { text: string }) {
@@ -106,7 +107,7 @@ export default function ShiftAnalysisPage() {
 
               {/* Per-candidate matrix + metric toggle */}
               <div className="mb-3 flex items-center justify-between gap-3 flex-wrap">
-                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('shiftAnalysis.matrixTitle')}</span>
+                <SectionTitle as="span">{t('shiftAnalysis.matrixTitle')}</SectionTitle>
                 <DrillTabs tabs={metricTabs} active={metric} onChange={k => setMetric(k as MetricKey)} />
               </div>
               <ShiftMatrixTable columns={monthColumns} rows={matrixRows} metric={metric} />

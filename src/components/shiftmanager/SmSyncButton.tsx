@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { RefreshCw, Check, AlertTriangle, Clock } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import SelectMenu from '@/components/ui/SelectMenu'
+import Button from '@/components/ui/Button'
 import { useSmConnections } from './useSmConnections'
 import { useSmSync } from './useSmSync'
 
@@ -51,16 +52,11 @@ export default function SmSyncButton() {
           menuWidth={220}
         />
       ) : (
-        <button type="button" onClick={handleClick} disabled={blocked} title={title}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px',
-            fontSize: 11, fontWeight: 500, borderRadius: 7, border: '1px solid var(--border)',
-            cursor: blocked ? 'not-allowed' : 'pointer', background: 'var(--surface)',
-            color: 'var(--text)', opacity: blocked ? 0.55 : 1,
-          }}>
+        <Button type="button" variant="secondary" onClick={handleClick} disabled={blocked} title={title}
+          style={{ gap: 5, padding: '0 10px' }}>
           <RefreshCw size={11} className={syncing ? 'animate-spin' : ''} />
           {syncing ? t('charts.sync.busy') : t('charts.sync.button')}
-        </button>
+        </Button>
       )}
       {result && !syncing && (
         <span style={{

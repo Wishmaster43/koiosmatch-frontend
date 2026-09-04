@@ -14,6 +14,7 @@ import ErrorBoundary from "../ui/ErrorBoundary"
 import { YEAR_OPACITY } from "./shiftsChartsConfig"
 import type { ShiftsChartDatum, ShiftBar } from '@/types/shiftmanager'
 import { formatNumber } from '@/lib/formatters'
+import { captionStyle } from '@/components/ui/typography'
 
 // Grouped bar chart for shift counts by year/series; onBarClick drills a bar into its underlying rows.
 export function BarChartWidget({ data, bars, onBarClick }: {
@@ -146,7 +147,8 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear,
     const denom = totaalTotalByYear.get(b.year) ?? 0
     return denom ? `${Math.round(colTotal / denom * 100)}%` : '—'
   }
-  const th: CSSProperties = { padding: '7px 10px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
+  // Table header cell: Caption's raw identity (r6 style-object context) plus 600 weight for a header.
+  const th: CSSProperties = { ...captionStyle, fontWeight: 600, padding: '7px 10px', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
   const td: CSSProperties = { padding: '7px 10px', fontSize: 12, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)', fontVariantNumeric: 'tabular-nums' }
   const clickable = !!onCellClick
   return (

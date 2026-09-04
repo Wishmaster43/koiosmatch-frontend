@@ -10,6 +10,7 @@ import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import SoftChip from '@/components/ui/SoftChip'
 import { ac, ContactAvatar } from './contactParts'
+import { Caption } from '@/components/ui/typography'
 import type { SmContactRow } from '@/types/shiftmanager'
 
 const mutedCell: CSSProperties = { color: 'var(--text-muted)', fontSize: 12 }
@@ -33,7 +34,7 @@ export default function ContactsTable({ rows, loading, selectedId, onSelect }: {
           <ContactAvatar name={fullName(c)} size={30} />
           <div>
             <div style={{ fontWeight: 500, color: 'var(--text)' }}>{fullName(c)}</div>
-            {c.function_title && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{c.function_title}</div>}
+            {c.function_title && <Caption as="div">{c.function_title}</Caption>}
           </div>
         </div>
       ),
@@ -62,10 +63,21 @@ export default function ContactsTable({ rows, loading, selectedId, onSelect }: {
     {
       key: 'email', header: t('contactsPage.cols.email'), sortable: true, sortValue: c => c.email ?? '', nowrap: true,
       render: c => c.email
+        // A TEXT link, not a button-lookalike — same necessity-disable as
+        // ContactDrawer's identical mailto link (Opus r3): Button's ghost
+        // variant has no colour of its own, so the ink falls back to
+        // --text-muted, matching the empty-state "—" and losing the link's
+        // only affordance signal (no underline either). Link-blue + icon stay.
+        // Block-form disable: the style attribute sits a line into the opening
+        // tag, out of -next-line's reach (mirrors ContactDrawer).
+        /* eslint-disable huisstijlLegacy/no-restricted-syntax */
         ? <a href={`mailto:${c.email}`} onClick={e => e.stopPropagation()}
-            style={{ fontSize: 12, color: 'var(--color-secondary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--color-secondary)', textDecoration: 'none' }}
+            onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
+            onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none' }}>
             <Mail size={11} />{c.email}
           </a>
+        /* eslint-enable huisstijlLegacy/no-restricted-syntax */
         : <span style={{ color: 'var(--text-muted)' }}>—</span>,
     },
     {

@@ -5,7 +5,7 @@
  */
 import { X, Search, Clock, MapPin, Briefcase, User, Hash, Building2, CalendarCheck, Timer, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, BodyText, SectionTitle, Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import type { LucideIcon } from 'lucide-react'
 import { useState } from 'react'
@@ -88,9 +88,9 @@ function CandidateBlock({ invite }: { invite: ShiftInvite }) {
                       fontSize: 10, fontWeight: 600 }}>
           {ini}
         </div>
-        <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>
+        <BodyText as="span" style={{ fontWeight: 500 }}>
           {name || t('shiftsDrawer.unknown')}
-        </span>
+        </BodyText>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 3, paddingLeft: 31 }}>
         {email       && <Row icon={User}         label={t('shiftsDrawer.fields.email')}       value={email} />}
@@ -254,9 +254,9 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, 
                 {/* Row 1: position + status */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                   <Briefcase size={13} color="var(--text-muted)" style={{ flexShrink: 0 }} />
-                  <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)', flex: 1 }}>
+                  <SectionTitle as="span" style={{ flex: 1 }}>
                     {shift.job_type ?? t('shiftsDrawer.unknown')}
-                  </span>
+                  </SectionTitle>
                   <Badge status={shift.own_status} />
                 </div>
 
@@ -311,9 +311,9 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, 
                 {planned && (
                   <div style={{ marginTop: 8, paddingLeft: 21 }}>
                     {invites.length === 0 ? (
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                      <Caption style={{ fontStyle: 'italic' }}>
                         {t('shiftsDrawer.noCandidate')}
-                      </div>
+                      </Caption>
                     ) : (
                       invites.map((inv, j) => <CandidateBlock key={inv.id ?? j} invite={inv} />)
                     )}
@@ -328,9 +328,9 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                       padding: '8px 16px', borderTop: '1px solid var(--border)', background: 'var(--hover-bg)',
                       flexShrink: 0 }}>
-          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+          <Caption as="span">
             {loading ? '…' : t('shiftsDrawer.shownOf', { shown: filtered.length, total: shifts.length })}
-          </span>
+          </Caption>
           <Button variant="secondary" onClick={onClose}>
             {t('shiftsDrawer.close')}
           </Button>

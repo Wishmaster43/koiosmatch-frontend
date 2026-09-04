@@ -6,7 +6,7 @@
 import { useTranslation } from 'react-i18next'
 import { Mail, Phone, MessageCircle, MapPin, X, ChevronRight } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, Caption, BodyText, GroupLabel } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import { ac, ContactAvatar } from './contactParts'
 import type { SmContactRow } from '@/types/shiftmanager'
@@ -55,7 +55,7 @@ export default function ContactDrawer({ contact, onClose }: { contact: SmContact
                 <Mail size={13} color="var(--text-muted)" />
               </div>
               <div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('contactsPage.email')}</div>
+                <Caption as="div">{t('contactsPage.email')}</Caption>
                 {/* A TEXT link, not a button-lookalike — V7 covers <a>'s that look
                     like buttons; forcing this into Button chrome greyed the only
                     action in the block, indented it 10px and blocked wrapping
@@ -78,8 +78,8 @@ export default function ContactDrawer({ contact, onClose }: { contact: SmContact
                 <Phone size={13} color="var(--text-muted)" />
               </div>
               <div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('contactsPage.phone')}</div>
-                <div style={{ fontSize: 13, color: 'var(--text)' }}>{contact.mobile}</div>
+                <Caption>{t('contactsPage.phone')}</Caption>
+                <BodyText>{contact.mobile}</BodyText>
               </div>
             </div>
           </div>
@@ -88,8 +88,7 @@ export default function ContactDrawer({ contact, onClose }: { contact: SmContact
         {/* Klant */}
         <div style={{ background: 'var(--hover-bg)', borderRadius: 10, padding: '14px 16px',
           marginBottom: 12, border: '1px solid var(--border)' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.06em',
-            textTransform: 'uppercase', marginBottom: 10 }}>{t('contactsPage.customer')}</div>
+          <GroupLabel style={{ marginBottom: 10 }}>{t('contactsPage.customer')}</GroupLabel>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 34, height: 34, borderRadius: 8, background: ac(contact.customer),
               display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -97,8 +96,8 @@ export default function ContactDrawer({ contact, onClose }: { contact: SmContact
               {contact.customer?.charAt(0)}
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{contact.customer}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('contactsPage.linkedCustomer')}</div>
+              <BodyText style={{ fontWeight: 600 }}>{contact.customer}</BodyText>
+              <Caption>{t('contactsPage.linkedCustomer')}</Caption>
             </div>
             <ChevronRight size={14} color="var(--text-muted)" />
           </div>
@@ -107,16 +106,15 @@ export default function ContactDrawer({ contact, onClose }: { contact: SmContact
         {/* Locatie */}
         <div style={{ background: 'var(--hover-bg)', borderRadius: 10, padding: '14px 16px',
           border: '1px solid var(--border)' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.06em',
-            textTransform: 'uppercase', marginBottom: 10 }}>{t('contactsPage.location')}</div>
+          <GroupLabel style={{ marginBottom: 10 }}>{t('contactsPage.location')}</GroupLabel>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 34, height: 34, borderRadius: 8, background: 'var(--color-primary-bg)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <MapPin size={14} color="var(--color-primary)" />
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{contact.location}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('contactsPage.workLocation')}</div>
+              <BodyText style={{ fontWeight: 600 }}>{contact.location}</BodyText>
+              <Caption>{t('contactsPage.workLocation')}</Caption>
             </div>
             <ChevronRight size={14} color="var(--text-muted)" />
           </div>
