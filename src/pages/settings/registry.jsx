@@ -118,6 +118,7 @@ import { WaMessageTypeSettings } from './sections/WaMessageTypeSettings'
 import KoiosSettings from './sections/koios'
 import NotificationsSettings from './sections/NotificationsSettings'
 import EscalationSettings from './sections/EscalationSettings'
+import MyNotificationsSettings from './sections/MyNotificationsSettings'
 // Planning settings — gated on the 'plan' module (requiresPage: 'planning'); hidden until it is on.
 import { ShiftTypesSettings, AvailabilitySettings, AutoMatchSettings, PlanningBoardSettings } from './sections/PlanningSettings'
 import ReportKpiSettings from './sections/ReportKpiSettings'
@@ -719,6 +720,10 @@ export const NAV_GROUPS = [
       { id: 'notif_conversations', icon: Bell, render: () => <NotificationsSettings context="gesprekken" /> },
       // Escalation (item 11, 3b): per stall signal, an optional day-threshold + target (user/role).
       { id: 'notif_escalation', icon: Bell, component: EscalationSettings },
+      // Per-CALLER override on top of every context above (G28) — the caller's own
+      // in-app/popup exception, PUT /settings/my-notifications. 'notif_my' already
+      // carried a translated nav label in all seven locales before this mount landed.
+      { id: 'notif_my', icon: Bell, component: MyNotificationsSettings },
     ],
   },
   {
