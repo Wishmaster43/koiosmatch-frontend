@@ -1110,6 +1110,9 @@
     "delete": "Eliminar",
     "deleteConfirm": "¿Eliminar la clave API \"{{name}}\"?",
     "edit": "Editar",
+    "makePrimary": "Hacer principal",
+    "makePrimaryConfirm": "La clave principal actual se convertirá automáticamente en una clave adicional. ¿Continuar?",
+    "makePrimarySuccess": "La clave ahora es la clave principal.",
     "createTitle": "Nueva clave API",
     "namePlaceholder": "Nombre de la clave API…",
     "create": "Crear",
@@ -3883,5 +3886,5 @@
   },
   "changelog": {
     "noTrailYet": "Aún no hay registro de auditoría para esta sección"
-}
+  }
 }

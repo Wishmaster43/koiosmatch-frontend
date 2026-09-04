@@ -1356,6 +1356,9 @@
     "delete": "Elimina",
     "deleteConfirm": "Eliminare la chiave API \"{{name}}\"?",
     "edit": "Modifica",
+    "makePrimary": "Imposta come principale",
+    "makePrimaryConfirm": "La chiave primaria attuale diventerà automaticamente una chiave aggiuntiva. Continuare?",
+    "makePrimarySuccess": "La chiave è ora la chiave primaria.",
     "createTitle": "Nuova chiave API",
     "namePlaceholder": "Nome per l'API key…",
     "create": "Crea",
@@ -3883,5 +3886,5 @@
   },
   "changelog": {
     "noTrailYet": "Nessun registro di audit per questa sezione ancora"
-}
+  }
 }

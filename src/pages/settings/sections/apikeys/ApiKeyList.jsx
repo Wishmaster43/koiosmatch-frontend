@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { Plus, RefreshCw } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import StatusBadge from '@/components/ui/StatusBadge'
+import SoftChip from '@/components/ui/SoftChip'
 import { useDateFormat } from '@/lib/datetime'
 import { shortGuid } from './constants'
 import Button from '@/components/ui/Button'
@@ -32,8 +33,12 @@ export default function ApiKeyList({ keys, loading, error, onReload, onOpen, onN
       render: (r) => <StatusBadge status={r.status ?? 'active'} map={statusMap} /> },
     { key: 'organisation', header: t('apiKeys.col.organisation'),
       render: (r) => r.organisation ?? '—' },
+    // K-282: the primary key reads a visible "Primair" chip; additional rows stay
+    // calm (plain text, as before) — the exception, not the default, gets marked.
     { key: 'type', header: t('apiKeys.col.type'),
-      render: (r) => t(`apiKeys.type.${r.type ?? 'additional'}`, { defaultValue: r.type ?? '—' }) },
+      render: (r) => (r.type ?? 'additional') === 'primary'
+        ? <SoftChip label={t('apiKeys.type.primary')} color="var(--color-primary)" round />
+        : t(`apiKeys.type.${r.type ?? 'additional'}`, { defaultValue: r.type ?? '—' }) },
     { key: 'guid', header: t('apiKeys.col.guid'), nowrap: true,
       render: (r) => <code style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: 'var(--text-muted)' }}>{shortGuid(r.guid)}</code> },
     { key: 'created_at', header: t('apiKeys.col.created'), nowrap: true, sortable: true,

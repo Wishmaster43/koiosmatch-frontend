@@ -1110,6 +1110,9 @@
     "delete": "Löschen",
     "deleteConfirm": "API-Schlüssel \"{{name}}\" löschen?",
     "edit": "Bearbeiten",
+    "makePrimary": "Als primär festlegen",
+    "makePrimaryConfirm": "Der aktuelle primäre Schlüssel wird automatisch zu einem zusätzlichen Schlüssel. Fortfahren?",
+    "makePrimarySuccess": "Schlüssel ist jetzt der primäre Schlüssel.",
     "createTitle": "Neuer API-Schlüssel",
     "namePlaceholder": "Name für den API-Schlüssel…",
     "create": "Erstellen",
@@ -3883,5 +3886,5 @@
   },
   "changelog": {
     "noTrailYet": "Für diesen Bereich gibt es noch kein Audit-Protokoll"
-}
+  }
 }

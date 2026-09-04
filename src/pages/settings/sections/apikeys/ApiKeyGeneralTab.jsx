@@ -17,13 +17,15 @@ import Button from '@/components/ui/Button'
 import { Mono } from '@/components/ui/typography'
 
 // See the file's top doc above; read mode via the shared DetailTable, Edit flips to an inline form; the secret can only ever be masked here.
-export default function ApiKeyGeneralTab({ apiKey, onSave }) {
+export default function ApiKeyGeneralTab({ apiKey, onSave, onMakePrimary }) {
   const { t } = useTranslation('settings')
   const { formatDate } = useDateFormat()
   const [editing, setEditing] = useState(false)
   const [saving, setSaving]   = useState(false)
   const [form, setForm]       = useState(apiKey)
   const [ipDraft, setIpDraft] = useState('')
+  // K-282: the "Maak primair" action only makes sense on a non-primary key.
+  const isPrimary = (apiKey.type ?? 'additional') === 'primary'
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
   const ips = form.allowed_ips ?? []
@@ -73,8 +75,13 @@ export default function ApiKeyGeneralTab({ apiKey, onSave }) {
 
   return (
     <div style={{ maxWidth: 680 }}>
-      {/* Toolbar: Edit / Save+Cancel — the house Button owns height/radius everywhere. */}
+      {/* Toolbar: Maak primair (K-282, non-primary only) / Edit / Save+Cancel — the house Button owns height/radius everywhere. */}
       <div className="flex items-center justify-end" style={{ marginBottom: 14, gap: 8 }}>
+        {!isPrimary && (
+          <Button variant="secondary" size="sm" onClick={onMakePrimary}>
+            {t('apiKeys.makePrimary')}
+          </Button>
+        )}
         {editing ? (
           <>
             <Button variant="secondary" onClick={cancel}>

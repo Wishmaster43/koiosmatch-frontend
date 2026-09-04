@@ -14,14 +14,14 @@ import Spinner from '@/components/ui/Spinner'
 import ActionMenu from '@/components/ui/ActionMenu'
 import CalloutBox from '@/components/ui/CalloutBox'
 import { useConfirm } from '@/hooks/useConfirm'
-import { getApiKey, updateApiKey, deleteApiKey, regenerateApiKey } from './apiKeysApi'
+import { getApiKey, updateApiKey, deleteApiKey, regenerateApiKey, setApiKeyPrimary } from './apiKeysApi'
 import ApiKeyGeneralTab from './ApiKeyGeneralTab'
 import ApiKeyAccessTab from './ApiKeyAccessTab'
 import { BTN_H } from '@/config/buttonMetrics'
 import Button from '@/components/ui/Button'
 import { Mono } from '@/components/ui/typography'
 import { tintBorder } from '@/lib/tint'
-import { notifyError } from '@/lib/notify'
+import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 // audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
@@ -73,6 +73,22 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
     confirm(t('apiKeys.deleteConfirm', { name: apiKey?.friendly_name ?? '' }), async () => {
       try { await deleteApiKey(keyId); onDelete?.(keyId) } catch { /* noop */ }
     }, { danger: true })
+  }
+  // K-282: promote this key to primary after confirmation. The backend
+  // auto-demotes the previous primary, so onPatch's reload (useApiKeys) also
+  // corrects that sibling row once it resolves.
+  const makePrimary = () => {
+    confirm(t('apiKeys.makePrimaryConfirm'), async () => {
+      try {
+        const updated = await setApiKeyPrimary(keyId)
+        const merged = { ...apiKey, type: 'primary', ...updated }
+        setApiKey(merged)
+        onPatch?.(keyId, merged)
+        notifySuccess(t('apiKeys.makePrimarySuccess'))
+      } catch (err) {
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      }
+    })
   }
   const copySecret = () => { navigator.clipboard.writeText(secret ?? ''); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
@@ -141,7 +157,7 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
 
       {/* Active tab */}
       {tab === 'general'
-        ? <ApiKeyGeneralTab apiKey={apiKey} onSave={applyUpdate} />
+        ? <ApiKeyGeneralTab apiKey={apiKey} onSave={applyUpdate} onMakePrimary={makePrimary} />
         : <ApiKeyAccessTab scopes={apiKey.scopes ?? {}} onSave={(scopes) => applyUpdate({ scopes })} />}
       {dialog}
     </div>

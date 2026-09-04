@@ -24,3 +24,8 @@ export const deleteApiKey = (id) => api.delete(`/api-keys/${id}`)
 
 // Rotate the secret; the response carries the new plaintext secret exactly once.
 export const regenerateApiKey = (id) => api.post(`/api-keys/${id}/regenerate`).then((r) => r.data)
+
+// K-282: promote this key to primary via PATCH (backend bundle H). The model keeps
+// exactly one active primary — promoting one auto-demotes the previous primary
+// server-side (audited) — so every caller must reload the list after this resolves.
+export const setApiKeyPrimary = (id) => api.patch(`/api-keys/${id}`, { type: 'primary' }).then(unwrap)

@@ -1356,6 +1356,9 @@
     "delete": "Eliminar",
     "deleteConfirm": "Eliminar a chave de API \"{{name}}\"?",
     "edit": "Editar",
+    "makePrimary": "Tornar principal",
+    "makePrimaryConfirm": "A chave primária atual passará automaticamente a ser uma chave adicional. Continuar?",
+    "makePrimarySuccess": "A chave agora é a chave primária.",
     "createTitle": "Nova chave de API",
     "namePlaceholder": "Nome para a chave API…",
     "create": "Criar",
@@ -3883,5 +3886,5 @@
   },
   "changelog": {
     "noTrailYet": "Ainda não há registo de auditoria para esta secção"
-}
+  }
 }

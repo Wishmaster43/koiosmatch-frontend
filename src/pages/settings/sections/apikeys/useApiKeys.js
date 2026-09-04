@@ -26,8 +26,11 @@ export function useApiKeys() {
   useEffect(() => { load() }, [load])
 
   // Optimistic list helpers used by the list/detail views after a mutation.
-  const add   = (key)        => setKeys((p) => [key, ...p])
-  const patch = (id, data)   => setKeys((p) => p.map((k) => (k.id === id ? { ...k, ...data } : k)))
+  // K-282: add/patch also refetch the whole list — a type PATCH auto-demotes the
+  // previous primary key server-side, so a sibling row can change too; the
+  // optimistic update keeps the UI snappy while the reload corrects any drift.
+  const add   = (key)        => { setKeys((p) => [key, ...p]); load() }
+  const patch = (id, data)   => { setKeys((p) => p.map((k) => (k.id === id ? { ...k, ...data } : k))); load() }
   const drop  = (id)         => setKeys((p) => p.filter((k) => k.id !== id))
 
   return { keys, loading, error, reload: load, add, patch, drop }
