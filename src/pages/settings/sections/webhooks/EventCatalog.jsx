@@ -3,12 +3,16 @@
  * search box and a per-group "select all", plus a global select-all / clear. It's
  * controlled: `value` is the array of selected event keys, edits flow via onChange.
  * Uses the shared PermissionToggle so the control matches the rest of settings.
+ * Events come from the live GET /webhook-events catalog (useWebhookEventCatalog);
+ * the static webhookEvents list is only its network-error fallback.
  */
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
-import { EVENT_GROUPS, ALL_EVENTS, actionOf } from './webhookEvents'
+import { actionOf } from './webhookEvents'
+import { useWebhookEventCatalog } from './useWebhookEventCatalog'
 import { PermissionToggle } from '@/pages/settings/components/SettingsControls'
+import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
 
 // Controlled event-picker for a webhook subscription: grouped pill toggles with
@@ -16,10 +20,14 @@ import Button from '@/components/ui/Button'
 export default function EventCatalog({ value = [], onChange }) {
   const { t } = useTranslation('settings')
   const [query, setQuery] = useState('')
+  const { groups: EVENT_GROUPS, isLoading, isFallback } = useWebhookEventCatalog()
+  const ALL_EVENTS = useMemo(() => EVENT_GROUPS.flatMap((g) => g.events), [EVENT_GROUPS])
   // Set form of the controlled `value` for O(1) membership checks below.
   const selected = useMemo(() => new Set(value), [value])
 
-  const groupLabel  = (g) => t(`webhooks.events.groups.${g}`)
+  // Honest fallback: an unlisted server group (a live catalogue can add one at any
+  // time) shows its raw key instead of a leaked i18n path.
+  const groupLabel  = (g) => t(`webhooks.events.groups.${g}`, { defaultValue: g })
   const actionLabel = (a) => t(`webhooks.events.actions.${a}`, { defaultValue: a })
 
   // Filter events by raw key, group label or action label.
@@ -33,8 +41,8 @@ export default function EventCatalog({ value = [], onChange }) {
         !q || ev.toLowerCase().includes(q) || groupLabel(group).toLowerCase().includes(q) || actionLabel(actionOf(ev)).toLowerCase().includes(q)),
     }))
     .filter((g) => g.events.length > 0),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on q only; groupLabel/actionLabel are recomputed on every render so they never go stale
-    [q])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on q + EVENT_GROUPS only; groupLabel/actionLabel are recomputed on every render so they never go stale
+    [q, EVENT_GROUPS])
 
   // Toggle a single event on/off.
   const toggle = (ev) => {
@@ -53,8 +61,17 @@ export default function EventCatalog({ value = [], onChange }) {
 
   const allSelected = ALL_EVENTS.every((e) => selected.has(e))
 
+  // Loading state: the catalog request is still in flight (no fallback rendered yet).
+  if (isLoading) {
+    return <p style={{ fontSize: 13, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 8 }}><Spinner size={13} /> {t('common.loadingShort')}</p>
+  }
+
   return (
     <div>
+      {/* Network-error notice: the live catalog failed, showing the bundled fallback list instead */}
+      {isFallback && (
+        <p style={{ fontSize: 11, color: 'var(--color-warning-text)', marginBottom: 10 }}>{t('webhooks.events.catalogFallback')}</p>
+      )}
       {/* Toolbar: search + global select-all/clear + selected count */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
         <div style={{ position: 'relative', flex: 1 }}>

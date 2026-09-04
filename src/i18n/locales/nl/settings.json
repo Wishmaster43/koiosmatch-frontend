@@ -1542,6 +1542,7 @@
       "selectAll": "Alles selecteren",
       "clear": "Alles wissen",
       "noResults": "Geen events gevonden.",
+      "catalogFallback": "Kan de actuele lijst niet ophalen: de meegeleverde lijst wordt getoond.",
       "selectedCount": "{{count}} geselecteerd",
       "groups": {
         "candidates": "Kandidaten",

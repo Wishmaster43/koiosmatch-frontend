@@ -1542,6 +1542,7 @@
       "selectAll": "Select all",
       "clear": "Clear all",
       "noResults": "No events found.",
+      "catalogFallback": "Couldn't load the live list: showing the bundled list instead.",
       "selectedCount": "{{count}} selected",
       "groups": {
         "candidates": "Candidates",

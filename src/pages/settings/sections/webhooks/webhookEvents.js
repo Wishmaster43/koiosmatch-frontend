@@ -1,9 +1,11 @@
 /**
- * webhookEvents — the outgoing-webhook event catalog (single source of truth for
- * the UI). Grouped by resource; a subscription filters on any subset of these
- * keys. The backend mirrors this list (GET /webhook-events, `WebhookSubscription::
- * eventKeys()` validates subscriptions against it) — this is a static copy, kept
- * key-for-key and group-for-group with `config/webhooks.php` (koiosmatch-api).
+ * webhookEvents — the NETWORK-ERROR FALLBACK for the outgoing-webhook event
+ * catalog (SETTINGS-WEBHOOK-EVENTS-DUP-1). `GET /webhook-events` is now the live
+ * source of truth (fetched via `useWebhookEventCatalog`, which feeds EventCatalog/
+ * WebhookCreate/WebhookDetail) — this static list renders ONLY when that request
+ * fails, so the picker degrades instead of going blank. It is kept key-for-key
+ * and group-for-group with `config/webhooks.php` (koiosmatch-api) so the fallback
+ * stays a faithful stand-in; `webhookEvents.test.js` guards that parity.
  *
  * REPAIR N6 (2026-09-04): re-verified every key against config/webhooks.php by
  * hand (59 events). Five groups this file used to carry — `location`, `contact_person`,

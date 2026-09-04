@@ -6,9 +6,10 @@
  * catch live, but every unit test here stayed green because none of them ever
  * inspected the POST body.
  */
-import { describe, it, expect, vi, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import i18n from '@/i18n'
 import WebhookCreate from './WebhookCreate'
 
@@ -22,12 +23,25 @@ import api from '@/lib/api'
 // Resolve the active locale's own copy so assertions never hardcode a language.
 const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
 
+// EventCatalog fetches the live GET /webhook-events catalog — one event is enough for select-all.
+beforeEach(() => {
+  api.get.mockResolvedValue({ data: { data: [
+    { key: 'candidate.created', label: 'Candidate created', group: 'candidates', pii: false },
+  ] } })
+})
 afterEach(() => vi.clearAllMocks())
+
+// Fresh QueryClient per render — no cross-test cache bleed, no retries slowing failures.
+function renderWithQueryClient(ui) {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>)
+}
 
 // Fill name + URL, select every event via the catalog's own "select all", then submit.
 const fillAndSubmit = async (user) => {
   await user.type(screen.getByLabelText(st('webhooks.outgoing.field.name')), 'ATS integration')
   await user.type(screen.getByLabelText(st('webhooks.outgoing.field.url')), 'https://example.test/hook')
+  await waitFor(() => screen.getByRole('button', { name: st('webhooks.events.selectAll') }))
   await user.click(screen.getByRole('button', { name: st('webhooks.events.selectAll') }))
   await user.click(screen.getByRole('button', { name: st('webhooks.outgoing.create') }))
 }
@@ -36,7 +50,7 @@ describe('WebhookCreate — the create request', () => {
   it('POSTs /webhook-subscriptions with an `events` array in the body, never `event_types`', async () => {
     api.post.mockResolvedValue({ data: { id: 'wh-1', name: 'ATS integration', url: 'https://example.test/hook', events: ['candidate.created'], secret: 'shh' } })
     const user = userEvent.setup()
-    render(<WebhookCreate onBack={vi.fn()} onCreated={vi.fn()} />)
+    renderWithQueryClient(<WebhookCreate onBack={vi.fn()} onCreated={vi.fn()} />)
 
     await fillAndSubmit(user)
 
@@ -52,7 +66,7 @@ describe('WebhookCreate — the create request', () => {
   it('carries the exact name/url alongside the events array', async () => {
     api.post.mockResolvedValue({ data: { id: 'wh-1', secret: 'shh' } })
     const user = userEvent.setup()
-    render(<WebhookCreate onBack={vi.fn()} onCreated={vi.fn()} />)
+    renderWithQueryClient(<WebhookCreate onBack={vi.fn()} onCreated={vi.fn()} />)
 
     await fillAndSubmit(user)
 

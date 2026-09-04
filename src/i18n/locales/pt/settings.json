@@ -1542,6 +1542,7 @@
       "selectAll": "Selecionar tudo",
       "clear": "Limpar tudo",
       "noResults": "Nenhum evento encontrado.",
+      "catalogFallback": "Não foi possível carregar a lista atual: a lista incluída está a ser mostrada.",
       "selectedCount": "{{count}} selecionados",
       "groups": {
         "candidates": "Candidatos",

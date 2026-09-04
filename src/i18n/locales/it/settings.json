@@ -1542,6 +1542,7 @@
       "selectAll": "Seleziona tutto",
       "clear": "Cancella tutto",
       "noResults": "Nessun evento trovato.",
+      "catalogFallback": "Impossibile caricare l'elenco aggiornato: viene mostrato l'elenco incluso.",
       "selectedCount": "{{count}} selezionati",
       "groups": {
         "candidates": "Candidati",

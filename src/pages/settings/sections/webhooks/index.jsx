@@ -32,7 +32,7 @@ export default function WebhooksSettings() {
         })}
       </div>
 
-      {/* Danny 31-08: het Meta-adresblok hoort vindbaar bij de inkomende webhooks. */}
+      {/* Danny 2026-08-31 (verbatim, Dutch: "het Meta-adresblok hoort vindbaar bij de inkomende webhooks"): the Meta address block belongs findable next to incoming webhooks. */}
       {tab === 'outgoing' ? <OutgoingWebhooks /> : (<><WhatsAppMetaWebhookCard /><IncomingWebhooks /></>)}
     </div>
   )
