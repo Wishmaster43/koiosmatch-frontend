@@ -1273,7 +1273,7 @@
     "Verplicht wanneer de status Blacklist is": "Required when status is Blacklist.",
     "Altijd een nieuwe AI-call, ook als er recent advies is": "Always make a new AI call, even if there is recent advice",
     "Een advies jonger dan dit aantal uren wordt overgeslagen tenzij \"Altijd vernieuwen\" aan staat": "Advice younger than this many hours is skipped unless \"Always refresh\" is on.",
-    "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\")": "Hard ceiling on the number of records this step advises in one run (\"list\" mode).",
+    "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\")": "Hard ceiling on the number of records this step advises in one run (\"List (bulk)\" mode).",
     "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "\"Single record\" = the trigger/manual record; \"List (bulk)\" = every row from the previous fetch step."
   },
   "triggers": {

@@ -1273,7 +1273,7 @@
     "Verplicht wanneer de status Blacklist is": "Obligatoire quand le statut est Liste noire.",
     "Altijd een nieuwe AI-call, ook als er recent advies is": "Toujours effectuer un nouvel appel IA, même s'il existe un avis récent",
     "Een advies jonger dan dit aantal uren wordt overgeslagen tenzij \"Altijd vernieuwen\" aan staat": "Un avis plus récent que ce nombre d'heures est ignoré, sauf si « Toujours actualiser » est activé.",
-    "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\")": "Plafond strict sur le nombre d'enregistrements que cette étape traite en une seule exécution (mode « list »).",
+    "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\")": "Plafond strict sur le nombre d'enregistrements que cette étape traite en une seule exécution (mode \"Liste (lot)\").",
     "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "« Un seul enregistrement » = l’enregistrement du déclencheur/manuel ; « Liste (lot) » = chaque ligne de l’étape de récupération précédente."
   },
   "triggers": {

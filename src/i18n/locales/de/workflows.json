@@ -1273,7 +1273,7 @@
     "Verplicht wanneer de status Blacklist is": "Erforderlich, wenn der Status Blacklist ist.",
     "Altijd een nieuwe AI-call, ook als er recent advies is": "Immer einen neuen KI-Aufruf durchführen, auch wenn es aktuellen Rat gibt",
     "Een advies jonger dan dit aantal uren wordt overgeslagen tenzij \"Altijd vernieuwen\" aan staat": "Ein Rat, der jünger als diese Anzahl Stunden ist, wird übersprungen, es sei denn, „Immer aktualisieren“ ist aktiviert.",
-    "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\")": "Feste Obergrenze für die Anzahl der Datensätze, die dieser Schritt in einem Lauf berät (Modus „list“).",
+    "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\")": "Feste Obergrenze für die Anzahl der Datensätze, die dieser Schritt in einem Lauf berät (Modus \"Liste (Bulk)\").",
     "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "\"Einzelner Datensatz\" = der Trigger-/manuelle Datensatz; \"Liste (Bulk)\" = jede Zeile aus dem vorherigen Abrufschritt."
   },
   "triggers": {

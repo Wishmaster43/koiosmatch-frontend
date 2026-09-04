@@ -1271,7 +1271,7 @@
     "Verplicht wanneer de status Blacklist is": "Verplicht wanneer de status Blacklist is.",
     "Altijd een nieuwe AI-call, ook als er recent advies is": "Altijd een nieuwe AI-call, ook als er recent advies is",
     "Een advies jonger dan dit aantal uren wordt overgeslagen tenzij \"Altijd vernieuwen\" aan staat": "Een advies jonger dan dit aantal uren wordt overgeslagen tenzij \"Altijd vernieuwen\" aan staat.",
-    "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\")": "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\").",
+    "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\")": "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"Lijst (bulk)\").",
     "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap."
   },
   "triggers": {

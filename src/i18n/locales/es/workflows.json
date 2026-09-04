@@ -1273,7 +1273,7 @@
     "Verplicht wanneer de status Blacklist is": "Obligatorio cuando el estado es Lista negra.",
     "Altijd een nieuwe AI-call, ook als er recent advies is": "Realizar siempre una nueva llamada de IA, incluso si hay un consejo reciente",
     "Een advies jonger dan dit aantal uren wordt overgeslagen tenzij \"Altijd vernieuwen\" aan staat": "Se omite un consejo más reciente que este número de horas, a menos que esté activado «Actualizar siempre».",
-    "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\")": "Límite estricto del número de registros que este paso procesa en una sola ejecución (modo «list»).",
+    "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\")": "Límite estricto del número de registros que este paso procesa en una sola ejecución (modo \"Lista (lote)\").",
     "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "«Un solo registro» = el registro del disparador/manual; «Lista (lote)» = cada fila del paso de obtención anterior."
   },
   "triggers": {
