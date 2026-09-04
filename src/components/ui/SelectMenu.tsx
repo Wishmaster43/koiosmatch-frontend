@@ -16,6 +16,8 @@ import { ChevronDown, Check } from 'lucide-react'
 import Avatar from './Avatar'
 import { useDropdownPlacement, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
+import { useClickOutside } from '@/hooks/useClickOutside'
+import { matchesOptionQuery } from './optionFilter'
 
 interface SelectOption {
   value: string
@@ -74,20 +76,10 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, 'ari
   // document.body + fixed positioning off the shared flip/clamp hook.
   const { openUp, maxHeight: menuMaxHeight, rect } = useDropdownPlacement(ref, open)
 
-  // Close on outside click — Escape now goes through the shared layered stack
-  // below, so this listener only ever handles clicks. Only exists while open, so
-  // a CLOSED menu never swallows an outside click meant for something else.
-  useEffect(() => {
-    if (!open) return
-    // Closes the menu on a genuine outside click, ignoring clicks on the trigger or the portal-rendered menu itself.
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as Node
-      if (ref.current?.contains(target) || menuRef.current?.contains(target)) return
-      setOpen(false)
-    }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [open])
+  // Close on outside click (shared DUP-03 hook) — Escape now goes through the
+  // layered stack below. Only active while open, so a CLOSED menu never
+  // swallows an outside click meant for something else.
+  useClickOutside([ref, menuRef], open, () => setOpen(false))
 
   // Overlay-close layer: Escape closes this menu, top layer first, so a modal
   // underneath is untouched while the menu is open (PlanIntakeModal case).
@@ -115,9 +107,7 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, 'ari
   // than at 40+ call sites; the trigger, value contract and onChange are
   // untouched, so no consumer changes.
   const [query, setQuery] = useState('')
-  const shown = query.trim()
-    ? opts.filter(o => String(o.label ?? '').toLowerCase().includes(query.trim().toLowerCase()))
-    : opts
+  const shown = opts.filter(o => matchesOptionQuery(o.label, query))
   // A fresh open always starts unfiltered — a stale query would hide options.
   useEffect(() => { if (!open) setQuery('') }, [open])
 

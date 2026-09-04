@@ -26,6 +26,8 @@ import { Check, ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
+import { useClickOutside } from '@/hooks/useClickOutside'
+import { matchesOptionQuery } from './optionFilter'
 import SelectAllRow, { SELECT_ALL_ROW_HEIGHT } from './SelectAllRow'
 import { useBatchToggle } from '@/hooks/useBatchToggle'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
@@ -99,19 +101,9 @@ export default function SearchSelect({
   // Shared flip + clamp + rect placement (see the module doc comment above).
   const { openUp, maxHeight: menuMaxHeight, rect } = useDropdownPlacement(ref, open)
 
-  // Close the popover on an outside click; the portalled menu counts as "inside" too,
-  // or toggling an option would immediately self-close before the click registers.
-  useEffect(() => {
-    if (!open) return
-    // Ignore clicks inside the trigger or the portalled menu; anything else closes the popover.
-    const h = (e: MouseEvent) => {
-      const target = e.target as Node
-      if (ref.current?.contains(target) || menuRef.current?.contains(target)) return
-      setOpen(false)
-    }
-    document.addEventListener('mousedown', h)
-    return () => document.removeEventListener('mousedown', h)
-  }, [open])
+  // Close the popover on an outside click (shared DUP-03 hook); the portalled menu
+  // counts as "inside" too, or toggling an option would self-close before the click registers.
+  useClickOutside([ref, menuRef], open, () => setOpen(false))
 
   // Overlay-close layer: closes the popover no matter which element inside it
   // holds focus — an option button, not just the search input.
@@ -144,7 +136,7 @@ export default function SearchSelect({
   }, [query, onSearch])
 
   const opts: SearchSelectOption[] = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
-  const shown = onSearch ? opts : (query ? opts.filter(o => o.label.toLowerCase().includes(query.toLowerCase())) : opts)
+  const shown = onSearch ? opts : opts.filter(o => matchesOptionQuery(o.label, query))
 
   // Single gate for opening — disabled short-circuits both the default trigger
   // and any caller-supplied `renderTrigger` button, so `open` can never become

@@ -31,6 +31,8 @@ import { useTranslation } from 'react-i18next'
 import { ChevronDown, Check, Plus, X } from 'lucide-react'
 import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
+import { useClickOutside } from '@/hooks/useClickOutside'
+import { matchesOptionQuery } from './optionFilter'
 
 // Footprint of the opt-in clear button: a 24px WCAG 2.2 (2.5.8) target, parked
 // left of the chevron. The label span reserves exactly this much extra room so a
@@ -122,18 +124,8 @@ export default function CreatableSelect({
   // Shared flip + clamp + rect placement (see the module doc comment above).
   const { openUp, maxHeight: menuMaxHeight, rect } = useDropdownPlacement(ref, open)
 
-  // Close on outside click; focus the search box when opening.
-  useEffect(() => {
-    if (!open) return
-    // A click outside both the trigger and the portalled menu closes the popover.
-    const h = (e: MouseEvent) => {
-      const target = e.target as Node
-      if (ref.current?.contains(target) || menuRef.current?.contains(target)) return
-      setOpen(false)
-    }
-    document.addEventListener('mousedown', h)
-    return () => document.removeEventListener('mousedown', h)
-  }, [open])
+  // Close on outside click (shared DUP-03 hook); focus the search box when opening.
+  useClickOutside([ref, menuRef], open, () => setOpen(false))
   useEffect(() => { if (open) inputRef.current?.focus() }, [open])
 
   // W30: server-side search — when `onSearch` is given, debounce the typed query
@@ -173,7 +165,7 @@ export default function CreatableSelect({
   const ql = q.toLowerCase()
   // W30: server-search callers already filtered `opts` themselves — filtering
   // again locally would double-narrow on a query the server already applied.
-  const filtered = onSearch ? opts : (ql ? opts.filter(o => o.label.toLowerCase().includes(ql)) : opts)
+  const filtered = onSearch ? opts : opts.filter(o => matchesOptionQuery(o.label, query))
   const exists = opts.some(o => o.label.toLowerCase() === ql)
   const canCreate = allowCreate && q.length > 0 && !exists
 
