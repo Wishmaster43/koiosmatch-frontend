@@ -73,10 +73,10 @@ export function buildCandidateInsights({
     // "system/AI-ish accent" token whose own doc comment already names "intake" (§4).
     { key: 'intake',     label: t('kpi.intake'),           value: counts.intake,     sub: t('kpi.intakeSub'),           color: 'var(--color-violet)',
       onClick: () => toggleAttention('intakePlanned'), active: attentionFilter === 'intakePlanned' },
-    // Actieve gesprekken = het CONV-COUNT-1-serveraggregaat (echte WhatsApp-
-    // conversaties ≤14 dgn, niet geëscaleerd). De klik filtert server-side via
-    // ?active_conversations (CONV-FILTER-1) — dezelfde subquery als de teller,
-    // dus teller en lijst delen één definitie.
+    // Active conversations = the CONV-COUNT-1 server aggregate (real WhatsApp
+    // conversations ≤14 days, not escalated). The click filters server-side via
+    // ?active_conversations (CONV-FILTER-1) — the same subquery as the counter,
+    // so the counter and the list share one definition.
     { key: 'conversations', label: t('analytics.conversations'), value: counts.activeConv, color: 'var(--color-success-text)',
       onClick: () => toggleAttention('activeConv'), active: attentionFilter === 'activeConv' },
     { key: 'tasks', label: t('kpi.tasks'), value: counts.tasks, sub: t('kpi.tasksSub'), color: TASKS_ACCENT,

@@ -59,12 +59,15 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   const hidden = getJsonSetting<Record<string, { kpis?: string[]; blocks?: string[] }>>(settings, 'dashboard_hidden', {})
   const hiddenBlocks = hidden[activeType]?.blocks ?? []
   const hiddenKpis = hidden[activeType]?.kpis ?? []
-  // DASH-VOLGORDE-1 (Settings → Dashboards → Volgorde) — per-role KPI tile order.
-  // Same settings-blob pattern as `dashboard_hidden` above; the settings-editor
-  // keeps its own literal for this key too (DASHBOARD_KPI_ORDER_KEY there).
+  // DASH-VOLGORDE-1: per-role KPI tile order, edited under Settings → Dashboards in
+  // the "KPI's" group (dashboards/KpiOrderList.tsx). This settings-blob key is the
+  // pre-migration store: a role whose KPI set has migrated is written through
+  // GET/PUT /dashboard/kpis/{role} (K3-REFIT-1), a role that has not is still
+  // written here (DashboardsSettings.tsx, isRoleMigrated) — so this read stays live.
   const kpiOrder = getJsonSetting<Record<string, string[]>>(settings, 'dashboard_kpi_order', {})
-  // Planning-gated surfaces (Diensten-blok + open-diensten-KPI) only exist when the
-  // tenant has the module (Danny 2026-07-04: "Planning staat uit en ik zie DIENSTEN??").
+  // Planning-gated surfaces (the shifts block + open-shifts KPI) only exist when the
+  // tenant has the module (Danny 2026-07-04, verbatim: "Planning staat uit en ik zie
+  // DIENSTEN??" — "Planning is off and I still see SHIFTS??").
   const hasPlanning = (auth?.hasModule ?? (() => false))('plan')
 
   // Topbar filter selections (single-value per dimension server-side) — UI state
@@ -154,8 +157,8 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
           now makes explicit.) */}
       {!loading && !error && (
         <>
-          {/* Bron-versheid — Shiftmanager heeft z'n eigen "Laatste sync" op het SM-dashboard,
-              dus hier alleen de overige koppelingen (intus/sdb). Datum in nl-NL (24u). */}
+          {/* Source freshness — Shiftmanager has its own "Last sync" on the SM dashboard,
+              so only the other integrations (intus/sdb) show here. Date in nl-NL (24h). */}
           {(dash?.sync_sources ?? []).filter(s => s.system !== 'shiftmanager').length > 0 && (
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 16, marginBottom: 8, flexWrap: 'wrap' }}>
               {(dash?.sync_sources ?? []).filter(s => s.system !== 'shiftmanager').map(s => (
@@ -168,7 +171,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
             </div>
           )}
 
-          {/* K-173 fase 1 — the honest scope this response was actually computed
+          {/* K-173 phase 1 — the honest scope this response was actually computed
               under ("Mijn kandidaten" / role label + unassigned-branch footnote). */}
           <ScopeBadge scope={scope} />
 
@@ -182,7 +185,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
               under the KPI strip: the day's work first, then Koios and the charts. */}
           <FeedTileGrid dash={dash} vis={vis} onNavigate={onNavigate} hasPlanning={hasPlanning} lists={lists} exclude={topExclude} />
 
-          {/* K-173 fase 6 — sales_manager/accountmanager opportunity-ageing buckets. */}
+          {/* K-173 phase 6 — sales_manager/accountmanager opportunity-ageing buckets. */}
           {vis('block.oppAging') && <OppAging rows={oppAgingRows} />}
 
           {/* DASH-V3-UITROL-1 (K-181) — tenant-wide "Koios AI performance", only for
@@ -210,7 +213,9 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
 
           <TrendsRow vis={vis} trendData={trendData} trendSeries={trendSeries} funnelData={funnelData} onNavigate={onNavigate} />
 
-          {/* Planning-blokken — WhatsApp-wachtrij (🟢) + diensten-overzicht (🟡 tot de feed). */}
+          {/* Shifts block: a two-column grid whose second cell has been empty since
+              5c3264cd retired the personal WhatsApp queue that used to fill it, so
+              ShiftsSummary renders at half width. */}
           {vis('block.shifts') && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
             {vis('block.shifts') && <ShiftsSummary open={shifts.open} occupancy={shifts.occupancy} onOpen={() => onNavigate?.('planning')} />}

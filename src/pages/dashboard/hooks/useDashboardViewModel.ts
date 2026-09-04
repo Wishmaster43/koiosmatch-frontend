@@ -35,7 +35,7 @@ interface UseDashboardViewModelArgs {
   activeType: DashboardType
   hiddenBlocks: string[]
   hiddenKpis: string[]
-  // DASH-VOLGORDE-1 — per-role KPI tile order (Settings → Dashboards → Volgorde),
+  // DASH-VOLGORDE-1 — per-role KPI tile order (Settings → Dashboards, "KPI's" group),
   // { [dashboardType]: string[] of kpi ids }. Absent/unknown ids are dropped by
   // the resolver, never rendered as a blank tile. Optional (defaults to {} =
   // today's default order) so existing test/call sites keep compiling.
