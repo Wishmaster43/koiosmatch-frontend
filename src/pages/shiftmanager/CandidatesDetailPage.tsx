@@ -3,9 +3,14 @@
  * candidate-page blueprint (§3A/§4): a 9-slot KPI row, one toolbar row with the
  * shared HeaderSearch on the left, then the table + pagination. No reports-panel
  * chrome (title/border) around the table — this page reads like the native
- * Kandidaten page. The table stays server-paginated (useSmCandidatesList); the
- * KPI counts come from the full set (useReportCandidates) so they are
- * server-wide, not per-page. Status cards/donut filter the table in place;
+ * Kandidaten page. The table stays server-paginated (useSmCandidatesList);
+ * SmCandidatesInsightsRow (below) is what actually sources the KPI counts from
+ * GET /sm_candidates/stats (SM-STATS-2) — the `allCandidates` row fetch here is
+ * capped at `candidates_per_page` (server hard cap 500) and feeds ONLY the
+ * right-panel filter option lists (year/status/position/features) and this
+ * insights row's SM-STATS-3 row-derived tiles (attention/no-shows/cancellations/
+ * ending-soon/new-this-month drill list), never a "full"/"server-wide" count on
+ * its own. Status cards/donut filter the table in place;
  * attention/new/no-shows/cancellations/ending-soon open the rich drill-down.
  */
 import { useState, useMemo, useEffect } from 'react'
@@ -28,15 +33,19 @@ import { useRightPanel } from '@/context/RightPanelContext'
 import type { ReportCandidate } from '@/types/reports'
 
 // Shiftmanager candidates list restyled onto the native candidate-page blueprint:
-// server-wide KPI counts, a client-refined table over the current page, and the
-// rich drill-down drawers (per-KPI subset + per-row detail).
+// stats-sourced KPI counts (via SmCandidatesInsightsRow, SM-STATS-2), a
+// client-refined table over the current page, and the rich drill-down drawers
+// (per-KPI subset + per-row detail).
 export default function CandidatesDetailPage() {
   const { t } = useTranslation('reports')
   const { candidates_per_page } = useKpiSettings()
   const { candidates, loading, error, page, pageSize, total, lastPage, setPage, handlePageSizeChange } = useSmCandidatesList()
-  // Full set for server-wide KPI counts (independent of the table's page). While
-  // loading this is simply empty — the shared InsightsRow has no loading prop, so
-  // the donut/cards show zero/"—" until the stats arrive, same as the native page.
+  // Capped row page (server hard cap 500, `candidates_per_page` tenant setting) —
+  // NOT a full/server-wide set. Feeds the right-panel filter option lists and
+  // SmCandidatesInsightsRow's SM-STATS-3 row-derived tiles; the row's stats-backed
+  // KPI counts (SM-STATS-2) come from GET /sm_candidates/stats inside that
+  // component, not from this array. While loading this is simply empty — the
+  // shared InsightsRow has no loading prop, so cards read their stats fallback.
   const { candidates: allCandidates } = useReportCandidates(candidates_per_page)
 
   // Controlled status filter so a KPI/donut click can drive the table.
@@ -79,11 +88,14 @@ export default function CandidatesDetailPage() {
     })
   }, [candidates, statusFilter, search, selectedYears, selectedPositions, selectedFeatures])
 
-  // Filter options come from the FULL set so an axis never hides its own values.
+  // Filter options come from the `candidates_per_page` row page (server cap 500),
+  // wider than the table's own page, so an axis rarely hides its own values; a
+  // value only missing beyond that cap is an SM-STATS-3 gap (distinct-value axes).
   const toggle = (setter: (fn: (prev: Array<string | number>) => Array<string | number>) => void) => (value: string | number) =>
     setter(prev => (prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]))
   // Build the right-panel filter groups (year/status/position/features), option
-  // lists sourced from the FULL candidate set so an axis never hides its own values.
+  // lists sourced from the `candidates_per_page` row page (server cap 500), so an
+  // axis only hides a value that falls beyond that cap.
   const filterGroups = useMemo(() => {
     const src = allCandidates.length ? allCandidates : candidates
     const years = [...new Set(src.map(registrationYearOf).filter((y): y is number => y != null))].sort((a, b) => b - a)

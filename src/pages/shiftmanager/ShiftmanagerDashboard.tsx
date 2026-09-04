@@ -30,8 +30,10 @@ export default function ShiftmanagerDashboard() {
   const pkg  = auth?.activeTenant?.package ?? auth?.user?.tenant?.package ?? ''
   const hasAI = AI_PACKAGES.includes(pkg)
 
-  // Data layer: SM candidates, shift KPIs, + (AI packages) recent runs/conversations.
-  const { candidates, runs, conversations } = useShiftmanagerDashboard(candidates_per_page, hasAI)
+  // Data layer: SM candidates, shift KPIs, candidate stat COUNTS, + (AI packages) recent runs/conversations.
+  const { candidates, runs, conversations, candidateStats, candidateStatsLoading, candidateStatsError } =
+    useShiftmanagerDashboard(candidates_per_page, hasAI)
+  const useCandidateStats = !candidateStatsLoading && !candidateStatsError && Boolean(candidateStats)
 
   // Candidate-derived KPIs (real data — the shift/hours stats stay graceful "—"
   // until the /sm_reports/dashboard feed lands, worklist SM-SHIFTS). Keep the actual
@@ -43,11 +45,27 @@ export default function ShiftmanagerDashboard() {
     const inMonth = (s: unknown) => { if (typeof s !== 'string' || !s) return false; const d = new Date(s); return d.getMonth() === m && d.getFullYear() === y }
     // "New" + its average are over ALL candidates (a new registration counts regardless
     // of current status) so the tile matches the drill-down's calc (was: active-only → gem 7 vs 9).
+    // The ITEMS list still needs rows (feeds the tile's drill-down); the displayed AVG
+    // (a plain COUNT-derived mean) prefers the server's registrations_per_month below
+    // (SM-STATS-2) so it is never undercounted by the `candidates_per_page` row cap.
     const newList = list.filter(c => inMonth(c.registration_date))
     const grouped: Record<number, number> = {}
     list.forEach(c => { const s = c.registration_date; if (typeof s !== 'string') return; const d = new Date(s); if (d.getFullYear() !== y) return; grouped[d.getMonth()] = (grouped[d.getMonth()] || 0) + 1 })
     const vals = Object.values(grouped)
-    const avg = vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0
+    const rowAvg = vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0
+    // Displayed COUNT and AVG must describe the same population (§ same-population
+    // rule) — both prefer the server's registrations_per_month when it is available,
+    // never mixing a stats avg with a row-capped count or vice versa.
+    const thisMonthBucket = useCandidateStats && candidateStats
+      ? candidateStats.registrations_per_month.find(mb => mb.month - 1 === m)
+      : undefined
+    const avg = useCandidateStats && candidateStats
+      ? (() => {
+          const others = candidateStats.registrations_per_month.filter(mb => mb.month - 1 !== m).map(mb => mb.total)
+          return others.length ? Math.round(others.reduce((a, b) => a + b, 0) / others.length) : 0
+        })()
+      : rowAvg
+    const newCount = thisMonthBucket ? thisMonthBucket.total : newList.length
     // Mutually-exclusive activity buckets over ACTIVE candidates (for the one
     // combined "Activiteit" donut — Danny: samenvoegen op slimme manier, uit
     // last_worked_shift / last_planned_shift / number_of_times_worked).
@@ -67,8 +85,8 @@ export default function ShiftmanagerDashboard() {
     // `last_login_at` DOES exist on the model but NOT on the resource (BE handoff). The
     // 2 "works less" rules wait on future per-candidate hours (shifts-per-candidate).
     const attention = calcAttention(list as unknown as ReportCandidate[])
-    return { newList, avg, active, inactive, all: list, bNever, bWorked, bPlanned, bIdle, attention }
-  }, [candidates])
+    return { newList, newCount, avg, active, inactive, all: list, bNever, bWorked, bPlanned, bIdle, attention }
+  }, [candidates, useCandidateStats, candidateStats])
 
   // One combined "Activiteit" donut over ACTIVE candidates (Gewerkt deze maand /
   // Ingepland / Nooit gewerkt / Geen recente activiteit) — replaces 3 separate tiles.
@@ -97,13 +115,13 @@ export default function ShiftmanagerDashboard() {
   // Candidate cards (NOT filter-driven) — passed into ShiftsChartsBlock, which adds the
   // filter-driven shift cards → one combined 9-card row. Activiteit is a clearer channels
   // card (big total + a coloured count per bucket) instead of a cramped 54px donut (Danny).
-  const newColor = derived.newList.length >= target ? 'var(--color-success)'
-                 : derived.newList.length >= derived.avg ? 'var(--color-warning)' : 'var(--color-danger)'
+  const newColor = derived.newCount >= target ? 'var(--color-success)'
+                 : derived.newCount >= derived.avg ? 'var(--color-warning)' : 'var(--color-danger)'
   // Only the two candidate cards on the dashboard; ShiftsChartsBlock adds the seven
   // shift cards → one 9-card row. (Totaal/Inactief eruit — Danny: "ruk".)
   const leadingKpis: KpiSpec[] = [
     { key: 'activity',  label: t('dashboard.stats.workedActive'), value: `${derived.bWorked.length}/${derived.active.length}`, color: 'var(--color-success-text)', onClick: openActivityDrill },
-    { key: 'new',       label: `${t('dashboard.stats.newThisMonth')} — ${t('dashboard.stats.avgOnly', { avg: derived.avg })}`, value: `${derived.newList.length}/${target}`, color: newColor, onClick: () => openDrill('average', t('monthlyKpi.averageCalc'), derived.all) },
+    { key: 'new',       label: `${t('dashboard.stats.newThisMonth')} — ${t('dashboard.stats.avgOnly', { avg: derived.avg })}`, value: `${derived.newCount}/${target}`, color: newColor, onClick: () => openDrill('average', t('monthlyKpi.averageCalc'), derived.all) },
     { key: 'attention', label: t('dashboard.stats.attentionCandidates'), value: `${derived.attention.length}/${derived.active.length}`, color: derived.attention.length > 0 ? 'var(--color-danger)' : 'var(--color-success)', onClick: openAttentionDrill },
   ]
 

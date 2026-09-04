@@ -1,9 +1,13 @@
 /**
  * SmCandidatesInsightsRow — the 9-slot KPI/insights row for the Shiftmanager
  * candidates table (§3A blueprint: config-driven donuts[] + kpis[], equal
- * footprint, click-to-filter). One status donut + 8 KPI cards, computed from
- * the FULL candidate set (server-wide, independent of the table's page) so the
- * counts never change when the user pages through the table.
+ * footprint, click-to-filter). One status donut + 8 KPI cards: the status
+ * donut and the active/inactive/intake/new-this-month counts read GET
+ * /sm_candidates/stats (server COUNTS, SM-STATS-2); the row-derived tiles
+ * (attention, no-shows, cancellations, ending soon) read the `candidates_per_page`
+ * row page (server cap 500, SM-STATS-3 until the endpoint carries those
+ * breakdowns). Neither depends on the table's own page, so the counts never
+ * change when the user pages through the table.
  *
  * Renders through the shared `components/insights/InsightsRow` — the same
  * component the native candidates page uses — so this strip has the identical
@@ -17,6 +21,7 @@ import { useTranslation } from 'react-i18next'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import { calcAttention } from '@/components/reports/candidateAttention'
+import { useSmCandidateStats } from '@/components/reports/useSmCandidateStats'
 import { useLocale } from '@/lib/datetime'
 import { SM_CANDIDATE_STATUS_COLORS, SM_CANDIDATE_STATUS_KEYS } from './data/smCandidateStatus'
 import { endDateOf, noShowCountOf, cancellationsOf } from './data/smCandidateFields'
@@ -29,7 +34,9 @@ const pickKey = (d: unknown): string | undefined => {
 }
 
 // New-registrations this month vs. the historical monthly average (same calc as
-// the original CandidatesKpiRow, so the "new" metric keeps its exact meaning).
+// the original CandidatesKpiRow, so the "new" metric keeps its exact meaning) — the
+// ITEMS list still needs rows (feeds the tile's drill-down), the AVG is a plain
+// COUNT-derived number so it prefers the server's registrations_per_month below.
 function calcMonthStats(candidates: ReportCandidate[]) {
   const now = new Date(); const month = now.getMonth(); const year = now.getFullYear()
   const items = candidates.filter(c => {
@@ -48,6 +55,14 @@ function calcMonthStats(candidates: ReportCandidate[]) {
   const values = Object.values(grouped)
   const avg = values.length ? Math.round(values.reduce((s, v) => s + v, 0) / values.length) : 0
   return { items, avg }
+}
+
+// Same average, computed from the server's registrations_per_month (twelve plain
+// COUNTS, this calendar year) instead of the row page — matches calcMonthStats'
+// definition (mean of the OTHER eleven months) without the row cap.
+function avgFromStats(perMonth: { month: number; total: number }[], currentMonthIdx: number): number {
+  const others = perMonth.filter(m => m.month - 1 !== currentMonthIdx).map(m => m.total)
+  return others.length ? Math.round(others.reduce((s, v) => s + v, 0) / others.length) : 0
 }
 
 // Candidates whose employment ends within the next 30 days — a heads-up before the
@@ -81,15 +96,32 @@ export default function SmCandidatesInsightsRow({
   const locale = useLocale()
   const pickedStatus = statusFilter.length === 1 ? normalizeSmStatus(statusFilter[0]) : null
 
+  // SM-STATS-2: the status donut (its total) + active/inactive/intake KPI counts read the
+  // UNFILTERED GET /sm_candidates/stats.by_status (server-computed COUNTS, one call,
+  // §3A "server-wide not page") instead of counting the capped row page — a tenant
+  // past the `candidates_per_page` cap no longer undercounts these tiles. Falls back
+  // to the row-derived count only while stats is loading/erroring, so the tiles never
+  // show a stale zero before the first response.
+  const { stats, loading: statsLoading, error: statsError } = useSmCandidateStats()
+  const useStats = !statsLoading && !statsError && Boolean(stats)
+  // Own useMemo (not a plain `?? []`) so its reference is stable across renders where
+  // `stats` itself is unchanged — otherwise a fresh [] every render would make every
+  // memo/derivation below it recompute on every render (react-hooks/exhaustive-deps).
+  const byStatusBuckets = useMemo(() => stats?.by_status ?? [], [stats])
+
   // Status distribution — one donut; segments filter the table (§3A click-to-filter).
+  // Sums every by_status bucket that normalises to `key` — the backend groups on the
+  // raw `status` column (case/whitespace as stored), normalizeSmStatus collapses variants.
   const statusData = useMemo(() => SM_CANDIDATE_STATUS_KEYS
     .map(key => ({
       key, name: t(`candidates.status.${key}`, { ns: 'reports' }),
-      value: candidates.filter(c => statusOf(c) === key).length,
+      value: useStats
+        ? byStatusBuckets.filter(b => normalizeSmStatus(b.label) === key).reduce((s, b) => s + b.total, 0)
+        : candidates.filter(c => statusOf(c) === key).length,
       color: SM_CANDIDATE_STATUS_COLORS[key],
     }))
     .filter(d => d.value > 0)
-  , [candidates, t])
+  , [candidates, t, useStats, byStatusBuckets])
 
   const donuts: DonutSpec[] = [{
     key: 'status', title: t('candidates.cols.status', { ns: 'reports' }), data: statusData,
@@ -104,20 +136,45 @@ export default function SmCandidatesInsightsRow({
   // Existing report metrics (kept, same predicates as CandidatesKpiRow) plus two
   // data-derived additions (no-shows, cancellations) and one tied to the new
   // Uitschrijfdatum column (ending soon) to fill the shared 9-card footprint.
+  // SM-STATS-3 (backend ask, unresolved): attention/no-shows/cancellations/ending-soon
+  // need a per-candidate flag/date (missing_appointment, no_show_count, cancellations,
+  // end_date_employment window) the stats endpoint has no breakdown for — they stay
+  // row-derived over the capped `candidates` page (documented cap: useReportCandidates.ts).
   const aandacht      = useMemo(() => calcAttention(candidates), [candidates])
-  // Headcount feeding the "active" KPI card.
-  const activeTotal   = useMemo(() => candidates.filter(c => statusOf(c) === SM_STATUS.ACTIVE).length, [candidates])
-  // Active candidates with a future shift already planned — surfaced as the active KPI's sub-label.
+  // Headcount feeding the "active" KPI card — server COUNT (by_status), rows only
+  // as the stats-loading/error fallback (same population rule as the donut above).
+  const activeTotal   = useStats
+    ? byStatusBuckets.filter(b => normalizeSmStatus(b.label) === SM_STATUS.ACTIVE).reduce((s, b) => s + b.total, 0)
+    : candidates.filter(c => statusOf(c) === SM_STATUS.ACTIVE).length
+  // Active candidates with a future shift already planned — surfaced as the active KPI's
+  // sub-label; no stats breakdown for this (SM-STATS-3), stays row-derived.
   const plannedActive = useMemo(() => candidates.filter(c => {
     if (statusOf(c) !== SM_STATUS.ACTIVE) return false
     return c.last_planned_shift && new Date(c.last_planned_shift) > new Date()
   }).length, [candidates])
-  // Headcount feeding the "inactive" KPI card.
-  const inactiveTotal = useMemo(() => candidates.filter(c => statusOf(c) === SM_STATUS.INACTIVE).length, [candidates])
-  // Headcount feeding the "intake" KPI card.
-  const intakeTotal   = useMemo(() => candidates.filter(c => statusOf(c) === SM_STATUS.INTAKE).length, [candidates])
-  // New-registration count for the current month plus the historical monthly average.
-  const monthStats    = useMemo(() => calcMonthStats(candidates), [candidates])
+  // Headcount feeding the "inactive" KPI card — server COUNT, same fallback rule.
+  const inactiveTotal = useStats
+    ? byStatusBuckets.filter(b => normalizeSmStatus(b.label) === SM_STATUS.INACTIVE).reduce((s, b) => s + b.total, 0)
+    : candidates.filter(c => statusOf(c) === SM_STATUS.INACTIVE).length
+  // Headcount feeding the "intake" KPI card — server COUNT, same fallback rule.
+  const intakeTotal   = useStats
+    ? byStatusBuckets.filter(b => normalizeSmStatus(b.label) === SM_STATUS.INTAKE).reduce((s, b) => s + b.total, 0)
+    : candidates.filter(c => statusOf(c) === SM_STATUS.INTAKE).length
+  // New-registration count for the current month: the ITEMS list (drill-down) still
+  // needs rows, but the displayed COUNT and AVG must describe the SAME population
+  // (same-population rule, ShiftmanagerDashboard mirrors this) — both prefer the
+  // server's registrations_per_month (this calendar year, plain COUNTS) when it is
+  // available, never pairing a stats avg with a row-capped count.
+  const rowMonthStats  = useMemo(() => calcMonthStats(candidates), [candidates])
+  const currentMonthIdx = new Date().getMonth()
+  const statsMonthTotal = useStats && stats
+    ? stats.registrations_per_month.find(m => m.month - 1 === currentMonthIdx)?.total
+    : undefined
+  const monthStats    = {
+    items: rowMonthStats.items,
+    count: statsMonthTotal ?? rowMonthStats.items.length,
+    avg: useStats && stats ? avgFromStats(stats.registrations_per_month, currentMonthIdx) : rowMonthStats.avg,
+  }
   // Candidates with at least one recorded no-show, for their own KPI card.
   const noShows       = useMemo(() => candidates.filter(c => noShowCountOf(c) > 0), [candidates])
   // Candidates with at least one recorded cancellation, for their own KPI card.
@@ -138,7 +195,7 @@ export default function SmCandidatesInsightsRow({
       sub: t('kpiRow.attentionNote', { ns: 'reports' }), color: 'var(--color-danger-text)',
       onClick: () => onDrillDown(t('kpiRow.attention', { ns: 'reports' }), aandacht) },
     { key: 'newThisMonth', label: t('kpiRow.newThisMonth', { ns: 'reports', month: monthLabel, avg: monthStats.avg }),
-      value: monthStats.items.length, color: 'var(--color-primary-text)',
+      value: monthStats.count, color: 'var(--color-primary-text)',
       onClick: () => onDrillDown(t('kpiRow.drillNewIn', { ns: 'reports', month: monthLabel }), monthStats.items) },
     { key: 'noShows', label: t('candidatesPage.kpi.noShows'), value: noShows.length,
       sub: t('candidatesPage.kpi.noShowsSub'), color: 'var(--color-danger-text)',

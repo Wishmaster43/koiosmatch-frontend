@@ -4,6 +4,7 @@ import ErrorBanner from '@/components/ui/ErrorBanner'
 import Spinner from '@/components/ui/Spinner'
 import { useKpiSettings } from '@/lib/useKpiSettings'
 import { useReportCandidates } from './useReportCandidates'
+import { useSmCandidateStats } from './useSmCandidateStats'
 import type { ReportCandidate } from '@/types/reports'
 import type { ChartDatum } from '../charts/chartTypes'
 import {
@@ -17,7 +18,7 @@ import LineChartCard       from '../charts/LineChartCard'
 import CandidatesKpiRow    from './CandidatesKpiRow'
 import DrillDownDrawer     from './DrillDownDrawer'
 import { useRightPanel }   from '@/context/RightPanelContext'
-import { SM_STATUS, statusOf } from '@/lib/smStatus'
+import { SM_STATUS, statusOf, normalizeSmStatus } from '@/lib/smStatus'
 
 // Fixed deregistered-status filter for the "end of employment" charts — never
 // changes via a setter, so it lives as a module-scope constant, not state.
@@ -60,6 +61,27 @@ export default function CandidatesReport() {
   // ── Data & filter state ───────────────────────────────────────────────────
   // Data (fetch) lives in the shared hook (§3); this component only derives + renders.
   const { candidates, loading, error } = useReportCandidates(candidates_per_page)
+  // SM-STATS-2: the three header pills (active/deregistered/total, all COUNTS)
+  // now read ONE population: the unfiltered GET /sm_candidates/stats response
+  // (candidateStats.by_status + .total), never the row array. Previously ALL
+  // THREE pills read the capped row page (`/sm_candidates?per_page=candidates_per_page`,
+  // server hard cap 500) — but "active"/"deregistered" filtered that page through
+  // the position/status panel (`filteredGeneral`/`filteredDeleted`) while "total"
+  // was the whole unfiltered row page (`candidates.length`) — so the three counts
+  // described two different populations (filtered subset vs. whole row page) even
+  // before the server cap came into play (Opus finding). They deliberately stay UNFILTERED by the position/status
+  // filter panel below: the stats route's `status` param takes one value, the
+  // panel is an arbitrary multi-select, and there is no `position` param at all
+  // (SmCandidateController::stats) — so these pills read as fixed tenant-wide
+  // summaries, same as the KPI row beneath them, not as "current filter result"
+  // counters. The charts further down stay row-derived (filter-interactive) —
+  // see useReportCandidates.ts's doc comment for that split.
+  const { stats: candidateStats, loading: statsLoading, error: statsError } = useSmCandidateStats()
+  // Sums every by_status bucket that normalises to `key` (SM-STATUS is
+  // lowercased/whitespace-stripped client-side; the backend groups on the raw
+  // column, so "Actief"/"actief" can arrive as separate buckets — sum, don't pick one).
+  const sumByStatus = (key: string) =>
+    (candidateStats?.by_status ?? []).filter(b => normalizeSmStatus(b.label) === key).reduce((s, b) => s + b.total, 0)
   const [selectedStatuses,    setSelectedStatuses]    = useState<string[]>([SM_STATUS.ACTIVE])
   const [selectedPositions,   setSelectedPositions]   = useState<string[]>([])
   const [selectedYear,        setSelectedYear]        = useState<number | null>(new Date().getFullYear())
@@ -232,7 +254,7 @@ export default function CandidatesReport() {
                              background: 'var(--color-success-bg)', color: 'var(--color-on-success-bg)', borderRadius: 999,
                              padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-success)', flexShrink: 0 }} />
-                {filteredGeneral.length} {t('report.activeWord')}
+                {statsLoading || statsError || !candidateStats ? candidates.filter(c => statusOf(c) === SM_STATUS.ACTIVE).length : sumByStatus(SM_STATUS.ACTIVE)} {t('report.activeWord')}
               </span>
               {/* Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1
                   on its own pastel, AA fail (Opus r3.5). The dot stays full-strength
@@ -241,12 +263,12 @@ export default function CandidatesReport() {
                              background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)', borderRadius: 999,
                              padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-danger)', flexShrink: 0 }} />
-                {filteredDeleted.length} {t('report.deregisteredWord')}
+                {statsLoading || statsError || !candidateStats ? candidates.filter(c => statusOf(c) === SM_STATUS.DELETED).length : sumByStatus(SM_STATUS.DELETED)} {t('report.deregisteredWord')}
               </span>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
                              background: 'var(--hover-bg)', color: 'var(--text-muted)', borderRadius: 999,
                              padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
-                {candidates.length} {t('report.totalWord')}
+                {statsLoading || statsError || !candidateStats ? candidates.length : candidateStats.total} {t('report.totalWord')}
               </span>
             </div>
           </>

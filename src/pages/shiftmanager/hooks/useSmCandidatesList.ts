@@ -11,6 +11,9 @@ import { normalizeSmCandidate } from '@/components/reports/useReportCandidates'
  * size as the user's default. Via React Query: each page is cached + a superseded fetch
  * cancels, and the previous page stays visible while the next loads (A-3, no flash).
  */
+// One shared empty list so the pending state has a stable reference (see the return below).
+const EMPTY_CANDIDATES: ReturnType<typeof normalizeSmCandidate>[] = []
+
 export function useSmCandidatesList() {
   const defaultPageSize = useDefaultPageSize()
   const { refreshUser } = useAuth() ?? {}
@@ -46,7 +49,11 @@ export function useSmCandidatesList() {
   }
 
   return {
-    candidates: data?.candidates ?? [],
+    // STABLE-EMPTY (measured 05-09, mirrors useSmLocations): a fresh [] per render
+    // while the query is pending re-feeds CandidatesDetailPage's filterGroups memo,
+    // whose registerFilters effect updates the right-panel context, which re-renders
+    // the page: an effect-driven render loop that pinned a vitest worker at 90% CPU.
+    candidates: data?.candidates ?? EMPTY_CANDIDATES,
     loading:    isLoading,
     error:      !!error,
     page, pageSize,

@@ -8,6 +8,7 @@
 import { useQuery } from '@tanstack/react-query'
 import api, { unwrapList } from '@/lib/api'
 import { normalizeSmCandidate } from '@/components/reports/useReportCandidates'
+import { useSmCandidateStats } from '@/components/reports/useSmCandidateStats'
 // House numeric shape (DATUM-1): digits only, so no locale is needed here.
 import { hhmm as houseHhmm } from '@/lib/localDate'
 // K-3: /workflow-runs is a workflow-EXECUTION endpoint — route it through the
@@ -25,6 +26,18 @@ export interface ConvItem { name: string; msg: string; time: string }
 // House HH:mm numeric shape (DATUM-1) from an ISO timestamp — digits only,
 // identical in every app language, so no locale parameter is needed here.
 const hhmm = (iso?: string) => iso ? houseHhmm(new Date(iso)) : ''
+
+// PERF-1/SM-STATS-2 (audit): candidatesPerPage comes from the tenant's
+// `candidates_per_page` KPI setting (server hard cap 500, PageSize::from at
+// SmCandidateController::index) — this row fetch honours that configured cap
+// honestly (never "uncapped"/"full set"). Rows still feed the dashboard's
+// activity buckets (worked/planned/never/idle), the "active" headcount used as
+// those buckets' denominator, the attention list, and the "new this month"
+// tile's drill-down list — none of those have a matching stats breakdown yet
+// (SM-STATS-3: last_worked_shift, number_of_times_worked, last_planned_shift and
+// the missing_appointment flag). Only the "new this month" COUNT+AVG pair reads
+// GET /sm_candidates/stats below (registrations_per_month is a plain per-month
+// COUNT), so that one tile never undercounts past the row cap.
 
 export function useShiftmanagerDashboard(candidatesPerPage: number, hasAI: boolean) {
   // Candidates feed the (real) "new this month" KPI card.
@@ -71,11 +84,18 @@ export function useShiftmanagerDashboard(candidatesPerPage: number, hasAI: boole
     },
   })
 
+  // Server-computed candidate COUNTS (unfiltered, this calendar year) for the
+  // "active" headcount and the "new this month" pair — see the module doc above.
+  const candidateStatsQ = useSmCandidateStats({ year: new Date().getFullYear() })
+
   return {
     candidates:    candidatesQ.data ?? [],
     loading:       candidatesQ.isLoading,
     stats:         statsQ.data ?? null,
     runs:          runsQ.data ?? [],
     conversations: convQ.data ?? [],
+    candidateStats:        candidateStatsQ.stats,
+    candidateStatsLoading: candidateStatsQ.loading,
+    candidateStatsError:   candidateStatsQ.error,
   }
 }

@@ -19,6 +19,23 @@ export const normalizeSmCandidate = (r: Record<string, unknown>): ReportCandidat
   phone:     (r.phone ?? r.mobile) as string | undefined,
 })
 
+// PERF-1/SM-STATS-2 (audit): the tenant's `candidates_per_page` KPI setting caps this
+// fetch (server hard cap 500, PageSize::from at SmCandidateController::index). The
+// header pills (active/deregistered/total) and the KPI-row counts have since moved
+// off these rows onto GET /sm_candidates/stats (useSmCandidateStats) — one server-
+// computed COUNT per bucket, so they never undercount past this page's cap. This
+// hook still backs what stats genuinely cannot serve: the position/login/month/week/
+// city CHARTS and their drill-downs (filter-interactive on the position+status panel,
+// which the stats route has no `position` param for and only a single-value `status`
+// param — SmCandidateController::stats), and every per-row drill-down list. Those stay
+// row-derived and honour the configured `candidates_per_page` cap honestly (never
+// "uncapped"/"full set" — on a tenant past 500 candidates these charts/drill-downs
+// describe the first `candidates_per_page` rows, not the tenant). A full fix needs the
+// stats endpoint to grow a `position` param and multi-value `status` — flagged as
+// SM-STATS-3, alongside the per-candidate breakdowns (no-shows/cancellations/ending-
+// soon/last-login granularity) SmCandidatesInsightsRow and ShiftmanagerDashboard still
+// need rows for.
+
 // Data layer for the SM candidates report (see the module doc above); normalises the two known field spellings so a backend rename never blanks the drill-down.
 export function useReportCandidates(perPage: number): { candidates: ReportCandidate[]; loading: boolean; error: boolean } {
   const [candidates, setCandidates] = useState<ReportCandidate[]>([])
