@@ -21,7 +21,7 @@ import { useLinkOptions } from './addmodal/useLinkOptions'
 import { userName } from './addmodal/formHelpers'
 import type { UserLike } from './addmodal/formHelpers'
 import type { Id } from '@/types/common'
-import Button from '@/components/ui/Button'
+import ModalFooter from '@/components/ui/ModalFooter'
 import { useAddTaskEffects } from './hooks/useAddTaskEffects'
 import { useAddTaskSubmit } from './hooks/useAddTaskSubmit'
 
@@ -267,16 +267,15 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
           </div>
         )}
 
-        {/* Footer — Button owns the height (sm, 28px) for every text/action button, everywhere. */}
-        <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', flexShrink: 0,
-          display: 'flex', justifyContent: 'flex-end', gap: 8, background: 'var(--bg)' }}>
-          <Button variant="secondary" onClick={onClose}>
-            {t('modal.cancel')}
-          </Button>
-          <Button variant="primary" onClick={isEdit ? handleUpdate : handleSubmit} disabled={!canSubmit}>
-            {saving ? t('modal.saving') : isEdit ? t('modal.save') : t('modal.create')}
-          </Button>
-        </div>
+        {/* Footer — the shared ModalFooter (§4) owns this footer layout. */}
+        <ModalFooter
+          onCancel={onClose}
+          onSubmit={isEdit ? handleUpdate : handleSubmit}
+          cancelLabel={t('modal.cancel')}
+          submitLabel={isEdit ? t('modal.save') : t('modal.create')}
+          busy={saving}
+          disabled={!canSubmit}
+        />
     </FloatingPanel>
   )
 }

@@ -50,13 +50,15 @@ import { Mono, Caption, BodyText } from '@/components/ui/typography'
 import { usePlanIntakeForm } from './planIntake/usePlanIntakeForm'
 import type { PlanIntakeFormOptions } from './planIntake/usePlanIntakeForm'
 import { input, fieldFootprint, errMsg, labelLeftRow, rowLabel, rowField } from './planIntake/styles'
-import Button from '@/components/ui/Button'
+import ModalFooter from '@/components/ui/ModalFooter'
+import { tintBorder } from '@/lib/tint'
 import type { Modality } from '@/lib/useAppointmentTypes'
 
-// Re-exported from their new homes so every caller/test keeps importing them from
-// this module (WorkTab + AppointmentsTab take the type, the unit test the helper).
+// Re-exported from its new home so every caller keeps importing the type from
+// this module (WorkTab + AppointmentsTab take it). `endTimeOf` moved to a plain
+// value import in its test (react-refresh/only-export-components: a component
+// file re-exporting a non-component value breaks fast refresh for this module).
 export type { ExistingAppointment } from './planIntake/usePlanIntakeForm'
-export { endTimeOf } from './planIntake/helpers'
 
 // Afspraak-as (C.14): the fixed office/remote/phone axis has its own already-shipped
 // translated label per value — a lookup table keeps the mapping declarative and its
@@ -217,7 +219,7 @@ export default function PlanIntakeModal(props: PlanIntakeFormOptions) {
         {form.submitErr && (
           <div role="alert" style={{ marginBottom: 14, padding: '8px 10px', fontSize: 12, borderRadius: 8,
             color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
-            border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
+            border: tintBorder('var(--color-danger)') }}>
             {form.submitErr}
           </div>
         )}
@@ -225,15 +227,17 @@ export default function PlanIntakeModal(props: PlanIntakeFormOptions) {
       </div>
 
       {/* Pinned footer — buttons stay visible whatever the content height (Danny 13-08). */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 22px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
-          <Button variant="secondary" onClick={onClose}>{t('common:cancel')}</Button>
-          {/* Disabled when `when` OR `type` is missing (no hardcoded type fallback —
-              a tenant with zero configured appointment types has nothing valid to
-              submit, mirrors the existing `when`-empty gate). */}
-          <Button variant="primary" onClick={form.submit} disabled={form.saving || !form.when || !form.type || form.apptRuleBlocked}>
-            {form.saving ? t('common:saving') : form.submitLabel}
-          </Button>
-        </div>
+      {/* Disabled when `when` OR `type` is missing (no hardcoded type fallback —
+          a tenant with zero configured appointment types has nothing valid to
+          submit, mirrors the existing `when`-empty gate). */}
+      <ModalFooter
+        onCancel={onClose}
+        onSubmit={form.submit}
+        cancelLabel={t('common:cancel')}
+        submitLabel={form.submitLabel}
+        busy={form.saving}
+        disabled={form.saving || !form.when || !form.type || form.apptRuleBlocked}
+      />
     </FloatingPanel>
   )
 }

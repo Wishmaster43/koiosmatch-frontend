@@ -47,7 +47,7 @@ import PostCreateResultsPanel from './addmodal/PostCreateResultsPanel'
 import RecruiterCard from './addmodal/RecruiterCard'
 import type { Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
-import Button from '@/components/ui/Button'
+import ModalFooter from '@/components/ui/ModalFooter'
 
 interface ModalUser { id: Id; name: string }
 interface ModalCustomer { id: Id; name: string }
@@ -302,16 +302,15 @@ export default function AddVacancyModal({
           </div>
         )}
 
-        {/* Footer — Button owns the height (sm, 28px) for every text/action button, everywhere. */}
-        <div style={{ padding: '14px 22px', borderTop: '1px solid var(--border)', flexShrink: 0,
-          display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          <Button variant="secondary" onClick={onClose}>
-            {f.t('modal.cancel')}
-          </Button>
-          <Button variant="primary" onClick={f.handleSubmit} disabled={!canSubmit || f.saving}>
-            {f.saving ? f.t('modal.creating') : f.t('modal.create')}
-          </Button>
-        </div>
+        {/* Footer — the shared ModalFooter (§4) owns this footer layout. */}
+        <ModalFooter
+          onCancel={onClose}
+          onSubmit={f.handleSubmit}
+          cancelLabel={f.t('modal.cancel')}
+          submitLabel={f.t('modal.create')}
+          busy={f.saving}
+          disabled={!canSubmit || f.saving}
+        />
     </FloatingPanel>
   )
 }

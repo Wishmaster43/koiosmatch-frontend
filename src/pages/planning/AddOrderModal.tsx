@@ -36,7 +36,7 @@ import { useUsers } from '@/lib/queries'
 import { useCreatePlanningOrder, useUpdatePlanningOrder } from './hooks/usePlanningOrders'
 import type { PlanningOrderInput, PlanningOrderRow } from './hooks/usePlanningOrders'
 import { extractApiError } from '@/lib/extractApiError'
-import Button from '@/components/ui/Button'
+import ModalFooter from '@/components/ui/ModalFooter'
 import DictationTextarea from '@/components/forms/DictationTextarea'
 
 // The three status values PlanningOrder::STATUSES accepts — a fixed backend enum
@@ -227,15 +227,14 @@ export default function AddOrderModal({ onClose, onCreated, order }: { onClose: 
         </div>
       )}
 
-      <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', flexShrink: 0,
-        display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-        <Button variant="secondary" onClick={onClose}>
-          {t('common:cancel')}
-        </Button>
-        <Button variant="primary" onClick={handleSubmit} disabled={saving}>
-          {saving ? t('common:saving') : isEditing ? t('common:save') : t('order.modal.create')}
-        </Button>
-      </div>
+      <ModalFooter
+        onCancel={onClose}
+        onSubmit={handleSubmit}
+        cancelLabel={t('common:cancel')}
+        submitLabel={isEditing ? t('common:save') : t('order.modal.create')}
+        busy={saving}
+        disabled={saving}
+      />
     </FloatingPanel>
   )
 }

@@ -43,6 +43,7 @@ import { AddCandidateModal } from '@/pages/candidates/shared'
 import { UserPlus } from 'lucide-react'
 import type { Candidate } from '@/types/candidate'
 import Button from '@/components/ui/Button'
+import ModalFooter from '@/components/ui/ModalFooter'
 import { BodyText } from '@/components/ui/typography'
 import { tintBorder } from '@/lib/tint'
 
@@ -381,13 +382,15 @@ export default function PageAddApplicationModal({ onClose, onCreated, lockedVaca
           </div>
         )}
 
-        {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 22px', borderTop: '1px solid var(--border)' }}>
-          <Button variant="secondary" onClick={onClose}>{t('add.cancel')}</Button>
-          <Button variant="primary" onClick={create} disabled={!candidateId || saving || appRuleBlocked}>
-            {t('add.create')}
-          </Button>
-        </div>
+        {/* Footer — the shared ModalFooter (§4) owns this footer layout. */}
+        <ModalFooter
+          onCancel={onClose}
+          onSubmit={create}
+          cancelLabel={t('add.cancel')}
+          submitLabel={t('add.create')}
+          busy={saving}
+          disabled={!candidateId || saving || appRuleBlocked}
+        />
     </FloatingPanel>
 
     {/* NEWCAND-1: layered on top — its own FloatingPanel, own focus trap. */}

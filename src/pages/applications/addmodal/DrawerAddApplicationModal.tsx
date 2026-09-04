@@ -51,7 +51,7 @@ import CustomFieldsSection from './CustomFieldsSection'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import { requiredMark } from '@/components/forms/fields'
 import type { Id } from '@/types/common'
-import Button from '@/components/ui/Button'
+import ModalFooter from '@/components/ui/ModalFooter'
 import { tintBg, tintBorder } from '@/lib/tint'
 
 // Label-left canon (P32, batch 5): label column fixed at CANON_LABEL_WIDTH, control fills the rest.
@@ -270,12 +270,14 @@ export default function DrawerAddApplicationModal({ candidateId, candidateOwnerI
       </div>
 
       {/* Pinned footer — buttons stay visible whatever the content height (Danny 13-08). */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 22px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
-          <Button variant="secondary" onClick={onClose}>{t('common:cancel')}</Button>
-          <Button variant="primary" onClick={submit} disabled={saving || appRuleBlocked}>
-            {saving ? t('common:saving') : t(editing ? 'common:save' : 'work.createApplication')}
-          </Button>
-        </div>
+      <ModalFooter
+        onCancel={onClose}
+        onSubmit={submit}
+        cancelLabel={t('common:cancel')}
+        submitLabel={t(editing ? 'common:save' : 'work.createApplication')}
+        busy={saving}
+        disabled={saving || appRuleBlocked}
+      />
     </FloatingPanel>
   )
 }
