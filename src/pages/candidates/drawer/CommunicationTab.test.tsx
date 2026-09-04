@@ -383,6 +383,12 @@ describe('CommunicationTab · WhatsApp start trigger (WHATSAPP-COMPOSE-1)', () =
   const goToConversations = (user: ReturnType<typeof userEvent.setup>) =>
     user.click(screen.getByRole('tab', { name: 'sections.conversations' }))
 
+  // OPENERS-HIDE-1 (pass 5): this describe's own trigger tests need page.whatsapp
+  // (the file's own top-level beforeEach otherwise defaults hasPermission to false).
+  beforeEach(() => {
+    mockUseAuth.mockReturnValue({ hasPermission: (p: string) => p === 'page.whatsapp' })
+  })
+
   it('disables the trigger with an honest title when the candidate has no mobile number', async () => {
     const user = userEvent.setup()
     render(<CommunicationTab c={candidate()} />)
@@ -403,6 +409,24 @@ describe('CommunicationTab · WhatsApp start trigger (WHATSAPP-COMPOSE-1)', () =
     await goToConversations(user)
     await user.click(screen.getByRole('button', { name: 'conversations.start' }))
     expect(screen.getByRole('dialog', { name: 'conversations.startModalTitle' })).toBeInTheDocument()
+  })
+
+  // OPENERS-HIDE-1 (pass 5): POST /conversations/start is gated on page.whatsapp
+  // (communication-ai.php:76-80). Hidden without the permission, shown with it.
+  it('hides "Conversatie starten" without page.whatsapp', async () => {
+    mockUseAuth.mockReturnValue({ hasPermission: () => false })
+    const user = userEvent.setup()
+    render(<CommunicationTab c={candidate({}, { mobile: '+31612345678' })} />)
+    await goToConversations(user)
+    expect(screen.queryByRole('button', { name: 'conversations.start' })).toBeNull()
+  })
+
+  it('shows "Conversatie starten" with page.whatsapp', async () => {
+    mockUseAuth.mockReturnValue({ hasPermission: (p: string) => p === 'page.whatsapp' })
+    const user = userEvent.setup()
+    render(<CommunicationTab c={candidate({}, { mobile: '+31612345678' })} />)
+    await goToConversations(user)
+    expect(screen.getByRole('button', { name: 'conversations.start' })).toBeInTheDocument()
   })
 })
 

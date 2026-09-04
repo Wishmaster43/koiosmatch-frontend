@@ -35,6 +35,7 @@ import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import AddTaskModal from '../AddTaskModal'
 import SubtaskQuickView from './SubtaskQuickView'
 import { useNavigation } from '@/context/NavigationContext'
+import { useAuth } from '@/context/AuthContext'
 import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
 
@@ -60,6 +61,10 @@ export default function SubtasksSection({ task, onSubtaskCreated }: {
 }) {
   const { t } = useTranslation('tasks')
   const { openEntity } = useNavigation()
+  // OPENERS-HIDE-1 (pass 5): POST /tasks (subtask create) is gated on tasks.create
+  // (tasks-outreach.php:67) — hide the opener rather than let it 422 (§3).
+  const auth = useAuth()
+  const canCreateTask = auth?.hasPermission?.('tasks.create') ?? false
   const [rows, setRows] = useState<SubtaskRow[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
@@ -101,11 +106,14 @@ export default function SubtasksSection({ task, onSubtaskCreated }: {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {/* SUBTASK-CREATE-1: the one "+ add" affordance, house pattern (§3A —
-          DrawerAddButton, never coloured text). Always available, even before this
-          task has any subtasks yet — that is precisely how the first one gets made. */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <DrawerAddButton onClick={() => setAddOpen(true)} label={t('details.subtasks.add')} />
-      </div>
+          DrawerAddButton, never coloured text). Available even before this task
+          has any subtasks yet (that is precisely how the first one gets made),
+          but only with tasks.create (OPENERS-HIDE-1) — hidden, never disabled. */}
+      {canCreateTask && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <DrawerAddButton onClick={() => setAddOpen(true)} label={t('details.subtasks.add')} />
+        </div>
+      )}
 
       {addOpen && (
         <AddTaskModal parentId={task.id} onClose={() => setAddOpen(false)} onCreated={handleCreated} />

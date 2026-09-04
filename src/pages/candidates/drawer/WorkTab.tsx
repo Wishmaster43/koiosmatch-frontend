@@ -47,6 +47,9 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
   const canViewApplications = auth?.hasPermission?.('applications.view') ?? false
   // RIGHTS-GATE-OPENERS-1: mirrors applications.create permission (backend: applications-matches.php:34 POST /applications).
   const canCreateApplication = auth?.hasPermission?.('applications.create') ?? false
+  // OPENERS-HIDE-1 (pass 5): POST /matches is gated on matches.update
+  // (applications-matches.php:101-102) — mirrors ScopedMatchesTab/MatchesTab.
+  const canCreateMatch = auth?.hasPermission?.('matches.update') ?? false
   // Local copy of the applications so a create shows immediately (re-fetched from
   // the candidate detail after a POST — the BE may add a vacancy-less intake row).
   const [apps, setApps] = useState<AppRow[]>((c.applications ?? []) as unknown as AppRow[])
@@ -190,7 +193,7 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
           row (Danny live review, 04-08: "Zoeken status en + match moet op 1 lijn!!") —
           no more separate flex-end row above it. */}
       {subTab === 'matches' && (
-        <MatchesTab c={c} onEdit={setEditMatchId} onAdd={() => setModal('match')} />
+        <MatchesTab c={c} onEdit={setEditMatchId} onAdd={canCreateMatch ? () => setModal('match') : undefined} />
       )}
 
       {/* Talentenpools — moved here from the Profiel tab (kept as the exact same component). */}

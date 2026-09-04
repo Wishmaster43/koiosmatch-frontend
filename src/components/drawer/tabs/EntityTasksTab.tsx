@@ -48,6 +48,7 @@ import { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import { AddTaskModal } from '@/pages/tasks/shared'
 import { TaskLookupsProvider, useTaskLookups } from '@/context/TaskLookupsContext'
 import { useNavigation } from '@/context/NavigationContext'
+import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
 import { useEntityTasks } from '@/hooks/useEntityTasks'
 import type { EntityTask } from '@/hooks/useEntityTasks'
@@ -113,6 +114,10 @@ function EntityTasksTabBody({ linkType, id, labels, extraLinks = [] }: Props) {
   const { openEntity } = useNavigation()
   const { items, loading, error, reload } = useEntityTasks(linkType, id)
   const { statuses, types, priorities } = useTaskLookups()
+  // OPENERS-HIDE-1 (pass 5): POST /tasks is gated on tasks.create
+  // (tasks-outreach.php:67) — hide the opener rather than let it 422 (§3).
+  const auth = useAuth()
+  const canCreateTask = auth?.hasPermission?.('tasks.create') ?? false
   const [adding, setAdding] = useState(false)
   const [search, setSearch] = useState('')
 
@@ -188,7 +193,7 @@ function EntityTasksTabBody({ linkType, id, labels, extraLinks = [] }: Props) {
           title={t('common:filters.title')} clearAllLabel={t('common:filters.clearAll')} />
         {/* DRAWER-ADD-SHORT-1 (Danny 05-08): short — this tab always lives inside a
             drawer sub-tab, never a full page. */}
-        <DrawerAddButton onClick={() => setAdding(true)} label={labels.newTask} short />
+        {canCreateTask && <DrawerAddButton onClick={() => setAdding(true)} label={labels.newTask} short />}
       </div>
 
       {loading && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{labels.loading}</div>}

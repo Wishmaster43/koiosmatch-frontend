@@ -59,14 +59,14 @@ vi.mock('./MatchModal', () => ({
 
 const candidate = (applications: unknown[], matches: unknown[] = []): Candidate => ({ id: 9, matches, applications } as unknown as Candidate)
 
-// Default: a recruiter WITH applications.create + applications.update (add + pencil + unlink visible). The
-// permission test below overrides it.
+// Default: a recruiter WITH applications.create + applications.update + matches.update
+// (add + pencil + unlink + "+ Match" all visible). The permission tests below override it.
 beforeEach(() => {
   vi.mocked(api.delete).mockClear()
   vi.mocked(api.get).mockClear()
   openEntity.mockClear()
   vi.mocked(notifyError).mockClear()
-  vi.mocked(useAuth).mockReturnValue({ hasPermission: (p: string) => ['applications.create', 'applications.update'].includes(p) } as unknown as ReturnType<typeof useAuth>)
+  vi.mocked(useAuth).mockReturnValue({ hasPermission: (p: string) => ['applications.create', 'applications.update', 'matches.update'].includes(p) } as unknown as ReturnType<typeof useAuth>)
 })
 
 describe('WorkTab', () => {
@@ -253,6 +253,21 @@ describe('WorkTab · sub-tabs (kandidaten-ronde-2, punt C)', () => {
     rerender(<WorkTab c={candidate([])} />)
     expect(screen.getByRole('button', { name: 'work.addApplication' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'work.planIntake' })).toBeInTheDocument()
+  })
+
+  // OPENERS-HIDE-1 (pass 5): "+ Match" → MatchModal → POST /matches, gated
+  // matches.update (applications-matches.php:101-102). Hidden without the
+  // permission, never a dead button (§3) — mirrors ScopedMatchesTab/MatchesTab.
+  it('hides "+ Match" without matches.update, shows it with it', async () => {
+    const user = userEvent.setup()
+    vi.mocked(useAuth).mockReturnValue({ hasPermission: () => false } as unknown as ReturnType<typeof useAuth>)
+    const { rerender } = render(<WorkTab c={candidate([])} />)
+    await user.click(screen.getByRole('tab', { name: 'sections.placements' }))
+    expect(screen.queryByRole('button', { name: 'work.addMatch' })).toBeNull()
+
+    vi.mocked(useAuth).mockReturnValue({ hasPermission: (p: string) => p === 'matches.update' } as unknown as ReturnType<typeof useAuth>)
+    rerender(<WorkTab c={candidate([])} />)
+    expect(screen.getByRole('button', { name: 'work.addMatch' })).toBeInTheDocument()
   })
 })
 

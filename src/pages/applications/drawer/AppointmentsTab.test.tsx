@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AppointmentsTab from './AppointmentsTab'
@@ -35,8 +35,15 @@ vi.mock('@/pages/candidates/drawer/PlanIntakeModal', () => ({
 
 const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
 
+// OPENERS-HIDE-1: mutable per-test flag, mirrors ScopedMatchesTab.test.tsx's own
+// gate setup — default true so every pre-existing test above keeps seeing "+ appointment".
+let canPlanAppointment = true
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: (p: string) => (p === 'candidates.update' ? canPlanAppointment : true) }) }))
+
 const app = (over: Partial<ApplicationDetail> = {}) =>
   ({ id: 5, candidateId: 'c1', vacancyId: 'v9', appointments: [], ...over } as unknown as ApplicationDetail)
+
+beforeEach(() => { canPlanAppointment = true })
 
 describe('AppointmentsTab', () => {
   it('shows a loading state while the shared appointments entity is fetched', () => {
@@ -173,5 +180,25 @@ describe('AppointmentsTab', () => {
     await waitFor(() => screen.getByText('Type:intake_flex'))
     expect(screen.queryByText('appointments.rejectedNotice')).not.toBeInTheDocument()
     expect(screen.getByLabelText('common:edit')).toBeInTheDocument()
+  })
+})
+
+// OPENERS-HIDE-1 (pass 5): "+ appointment" → PlanIntakeModal → POST
+// /candidates/{id}/appointments, gated candidates.update (candidates.php:293).
+// Hidden without the permission, shown with it.
+describe('AppointmentsTab · opener gate (candidates.update)', () => {
+  it('hides "+ appointment" without candidates.update', async () => {
+    canPlanAppointment = false
+    mockGet.mockResolvedValue({ data: { data: [] } })
+    render(<AppointmentsTab application={app()} />)
+    await waitFor(() => expect(screen.getByText('appointments.empty')).toBeInTheDocument())
+    expect(screen.queryByRole('button', { name: 'appointments.new' })).toBeNull()
+  })
+
+  it('shows "+ appointment" with candidates.update', async () => {
+    canPlanAppointment = true
+    mockGet.mockResolvedValue({ data: { data: [] } })
+    render(<AppointmentsTab application={app()} />)
+    await waitFor(() => expect(screen.getByRole('button', { name: 'appointments.new' })).toBeInTheDocument())
   })
 })

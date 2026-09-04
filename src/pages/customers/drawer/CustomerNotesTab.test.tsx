@@ -45,6 +45,10 @@ vi.mock('@/pages/tasks/AddTaskModal', () => ({
   ),
 }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
+// OPENERS-HIDE-1 (pass 5): EntityTasksTab now gates its "+ Nieuwe taak" opener on
+// tasks.create — this file never asserted a specific permission, so grant it here
+// (mirrors EntityTasksTab.test.tsx's own targeted mock) rather than weakening the gate.
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: (p: string) => p === 'tasks.create' }) }))
 // The candidate/customer/contact link pickers each GET their own list; empty
 // rows are enough — this test only cares about the LOCKED customer field.
 vi.mock('@/lib/api', async (importOriginal) => {

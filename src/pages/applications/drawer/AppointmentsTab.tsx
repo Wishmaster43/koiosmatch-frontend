@@ -22,6 +22,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import ModalityChip from '@/components/ui/ModalityChip'
 import { PlanIntakeModal } from '@/pages/candidates/shared'
 import type { ExistingAppointment } from '@/pages/candidates/shared'
+import { useAuth } from '@/context/AuthContext'
 import type { ApplicationDetail } from '@/types/application'
 import type { Id } from '@/types/common'
 
@@ -44,6 +45,11 @@ export default function AppointmentsTab({ application: a }: { application: Appli
   // former hand-pinned UTC dateTimeOpts (BUREAU-KLOK-FE-1: one idiom, not four).
   const { formatWallTime } = useDateFormat()
   const { metaOf } = useAppointmentTypes()
+  // OPENERS-HIDE-1 (pass 5): POST /candidates/{id}/appointments is gated on
+  // candidates.update (candidates.php:293) — hide "+ appointment" rather than
+  // let it 422 (§3).
+  const auth = useAuth()
+  const canPlanAppointment = auth?.hasPermission?.('candidates.update') ?? false
 
   const [appointments, setAppointments] = useState<RawAppt[]>([])
   const [loading, setLoading] = useState(true)
@@ -99,8 +105,10 @@ export default function AppointmentsTab({ application: a }: { application: Appli
   const rejected = a.bucket === 'rejected'
 
   // New-appointment button — the house DrawerAddButton short (soft-tint primary),
-  // disabled when the application has no candidate link, or once rejected.
-  const newButton = (
+  // disabled when the application has no candidate link, or once rejected (a
+  // business-state disable, kept). Hidden entirely without candidates.update
+  // (OPENERS-HIDE-1) — a permission gap is never a disabled button, only §3.
+  const newButton = canPlanAppointment && (
     <DrawerAddButton onClick={() => setCreating(true)} disabled={a.candidateId == null || rejected}
       title={rejected ? t('appointments.rejectedNotice') : undefined}
       label={t('appointments.new')} short />

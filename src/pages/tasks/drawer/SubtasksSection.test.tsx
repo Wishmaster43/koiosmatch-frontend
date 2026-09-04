@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import SubtasksSection from './SubtasksSection'
@@ -13,6 +13,11 @@ vi.mock('@/lib/api', async () => {
 
 const openEntity = vi.fn()
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity }) }))
+
+// OPENERS-HIDE-1: mutable per-test flag, mirrors ScopedMatchesTab.test.tsx's own
+// gate setup — default true so every pre-existing test above keeps seeing "+ add".
+let canCreateTask = true
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: (p: string) => (p === 'tasks.create' ? canCreateTask : true) }) }))
 
 // SUBTASK-CREATE-1: AddTaskModal itself is covered by its own test file — here it
 // is stubbed to a single button that fires onCreated with the parentId it was
@@ -47,6 +52,8 @@ const task = (over: Partial<TaskDetail> = {}) => ({
 } as unknown as TaskDetail)
 
 describe('SubtasksSection (task drawer, SUBTASK-1)', () => {
+  beforeEach(() => { canCreateTask = true })
+
   it('always shows the add-subtask affordance, even with no subtasks and no parent', () => {
     mockGet.mockClear()
     render(<SubtasksSection task={task()} />)
@@ -142,6 +149,23 @@ describe('SubtasksSection (task drawer, SUBTASK-1)', () => {
       // Same total (1) → hasSubtasks stays true, so the effect's own deps don't
       // change; the refetch must be an explicit call, not a lucky rerender.
       await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/tasks', { params: { parent_id: 't1' } }))
+    })
+  })
+
+  // OPENERS-HIDE-1 (pass 5): "+ add" → AddTaskModal → POST /tasks (subtask
+  // create), gated tasks.create (tasks-outreach.php:67). Hidden without the
+  // permission, shown with it.
+  describe('OPENERS-HIDE-1: add-subtask opener gate (tasks.create)', () => {
+    it('hides the opener without tasks.create', () => {
+      canCreateTask = false
+      render(<SubtasksSection task={task()} />)
+      expect(screen.queryByText('details.subtasks.add')).not.toBeInTheDocument()
+    })
+
+    it('shows the opener with tasks.create', () => {
+      canCreateTask = true
+      render(<SubtasksSection task={task()} />)
+      expect(screen.getByText('details.subtasks.add')).toBeInTheDocument()
     })
   })
 })

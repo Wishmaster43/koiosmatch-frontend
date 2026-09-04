@@ -17,11 +17,16 @@ vi.mock('@/context/VacancyLookupsContext', () => ({
   useVacancyLookups: () => ({ phases: PHASES, phaseMeta: () => ({ label: null, color: null }) }),
 }))
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn(() => Promise.resolve({ data: { data: {} } })) }, unwrap: (r: unknown) => r }))
-// Default: every permission granted, so the pre-existing house-toolbar/phase-filter
-// tests below (which never touch auth) keep seeing today's fully-permissioned UI.
-// The OPENERS-HIDE-1 gate describe further down overrides this via vi.doMock +
+// Default: a TARGETED per-permission flag (mirrors ScopedMatchesTab.test.tsx:30),
+// not a blanket () => true — a mis-wire to the wrong permission key would fail
+// this default too, not just the dedicated gate tests below. Grants exactly the
+// two permissions this tab actually checks so the pre-existing house-toolbar/
+// phase-filter tests (which never touch auth) keep seeing today's UI. The
+// OPENERS-HIDE-1 gate describe further down overrides this via vi.doMock +
 // vi.resetModules + a dynamic re-import, same pattern as the pencil/unlink test.
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: () => ({ hasPermission: (p: string) => ['applications.update', 'applications.create'].includes(p) }),
+}))
 vi.mock('@/pages/candidates/drawer/PlanIntakeModal', () => ({ default: () => null }))
 vi.mock('@/pages/applications/AddApplicationModal', () => ({ default: () => null }))
 vi.mock('@/pages/candidates/drawer/AddApplicationModal', () => ({ default: () => null }))
@@ -103,7 +108,9 @@ describe('ApplicantsTab · reuses the candidate drawer ApplicationRow (S-vacapp-
     // file-wide default AuthContext mock above): without it this doMock would
     // override a module the earlier static import already resolved/cached.
     vi.resetModules()
-    vi.doMock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => false }) }))
+    // Targeted flag: only a WRONG permission is granted, so this proves the
+    // gate reads applications.update specifically, not just "some permission".
+    vi.doMock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: (p: string) => p === 'applications.create' }) }))
     const { default: NoPerm } = await import('./ApplicantsTab')
     const { unmount } = render(<NoPerm vacancy={vacancy([
       { id: 'a1', candidate_id: 'c1', candidate_name: 'Jan Jansen', phase: { value: 'applied' } },
@@ -113,7 +120,7 @@ describe('ApplicantsTab · reuses the candidate drawer ApplicationRow (S-vacapp-
     unmount()
 
     vi.resetModules()
-    vi.doMock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
+    vi.doMock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: (p: string) => p === 'applications.update' }) }))
     const { default: WithPerm } = await import('./ApplicantsTab')
     render(<WithPerm vacancy={vacancy([
       { id: 'a1', candidate_id: 'c1', candidate_name: 'Jan Jansen', phase: { value: 'applied' } },
@@ -124,14 +131,16 @@ describe('ApplicantsTab · reuses the candidate drawer ApplicationRow (S-vacapp-
 
   it('hides the "+ applicant" opener without applications.create, shows it with it (OPENERS-HIDE-1)', async () => {
     vi.resetModules()
-    vi.doMock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => false }) }))
+    // Targeted flag: only a WRONG permission is granted, proving the opener
+    // reads applications.create specifically.
+    vi.doMock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: (p: string) => p === 'applications.update' }) }))
     const { default: NoCreate } = await import('./ApplicantsTab')
     const { unmount } = render(<NoCreate vacancy={vacancy([])} />)
     expect(screen.queryByRole('button', { name: 'applicants.addApplication' })).toBeNull()
     unmount()
 
     vi.resetModules()
-    vi.doMock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
+    vi.doMock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: (p: string) => p === 'applications.create' }) }))
     const { default: WithCreate } = await import('./ApplicantsTab')
     render(<WithCreate vacancy={vacancy([])} />)
     expect(screen.getByRole('button', { name: 'applicants.addApplication' })).toBeInTheDocument()

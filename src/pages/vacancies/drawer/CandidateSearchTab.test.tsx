@@ -82,6 +82,11 @@ vi.mock('@/context/LookupsContext', () => ({
 const openEntityMock = vi.hoisted(() => vi.fn())
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: openEntityMock }) }))
 
+// OPENERS-HIDE-1: mutable per-test flag, mirrors ScopedMatchesTab.test.tsx's own
+// gate setup — default true so every pre-existing test above keeps seeing "Solliciteren".
+let canCreateApplication = true
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: (p: string) => (p === 'applications.create' ? canCreateApplication : true) }) }))
+
 // Point 18: the shared "+ Solliciteren" flow is reused wholesale (own extensive
 // test suite lives on AddApplicationModal itself) — stubbed here to just prove
 // this tab wires the right candidateId/initialVacancyId into it.
@@ -112,7 +117,7 @@ const rawRows = [
 ]
 /* eslint-enable no-restricted-syntax */
 
-beforeEach(() => { vi.clearAllMocks() })
+beforeEach(() => { vi.clearAllMocks(); canCreateApplication = true })
 
 describe('CandidateSearchTab · fetch + defaults', () => {
   it('fires GET /vacancies/{id}/candidate-matches with default filters, rows in SERVER (score) order with score pills', async () => {
@@ -519,6 +524,31 @@ describe('CandidateSearchTab · Solliciteren from the preview (point 18)', () =>
     const modal = screen.getByTestId('apply-modal')
     expect(modal).toHaveAttribute('data-candidate-id', 'c1')
     expect(modal).toHaveAttribute('data-vacancy-id', 'v1')
+  })
+})
+
+// OPENERS-HIDE-1 (pass 5): "Solliciteren" → CandidateAddApplicationModal →
+// POST /applications, gated applications.create (applications-matches.php:34).
+// Hidden without the permission, shown with it.
+describe('CandidateSearchTab · Solliciteren opener gate (applications.create)', () => {
+  it('hides the opener without applications.create', async () => {
+    canCreateApplication = false
+    mockGet.mockResolvedValueOnce({ data: { data: rawRows } })
+    render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
+    await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
+    await userEvent.click(screen.getByText('Verzorgende IG · Amersfoort'))
+
+    expect(screen.queryByRole('button', { name: nlCandidates.vacancySearch.apply })).toBeNull()
+  })
+
+  it('shows the opener with applications.create', async () => {
+    canCreateApplication = true
+    mockGet.mockResolvedValueOnce({ data: { data: rawRows } })
+    render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
+    await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
+    await userEvent.click(screen.getByText('Verzorgende IG · Amersfoort'))
+
+    expect(screen.getByRole('button', { name: nlCandidates.vacancySearch.apply })).toBeInTheDocument()
   })
 })
 

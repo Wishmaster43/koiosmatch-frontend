@@ -27,6 +27,7 @@ import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import { useCandidateNotes } from '@/pages/candidates/hooks/useCandidateNotes'
 import { mergeTimelineEvents } from './mergeTimelineEvents'
+import { useAuth } from '@/context/AuthContext'
 import type { Candidate } from '@/types/candidate'
 
 type AnyProps = Record<string, unknown>
@@ -60,6 +61,10 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   initialSubTab?: string }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
+  // OPENERS-HIDE-1 (pass 5): POST /conversations/start is gated on page.whatsapp
+  // (communication-ai.php:76-80) — hide "Conversatie starten" rather than let it 422 (§3).
+  const auth = useAuth()
+  const canStartConversation = auth?.hasPermission?.('page.whatsapp') ?? false
   // LOOKUP-I18N-1: seeded lookup labels (funnel stage on application events below)
   // render in the user's language while unchanged; a tenant rename stays as typed.
   const seedLabel = useSeedLabel()
@@ -341,9 +346,11 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
           )}
           <ConversationsSection key={convRefreshKey} threadsUrl="/conversations" threadsParams={{ candidate_id: c.id }}
             headerAction={
-              <DrawerAddButton onClick={() => setShowStartModal(true)} icon={MessageCircle}
-                label={t('conversations.start')} disabled={!c.mobile}
-                title={c.mobile ? t('conversations.start') : t('conversations.startNoMobile')} />
+              canStartConversation && (
+                <DrawerAddButton onClick={() => setShowStartModal(true)} icon={MessageCircle}
+                  label={t('conversations.start')} disabled={!c.mobile}
+                  title={c.mobile ? t('conversations.start') : t('conversations.startNoMobile')} />
+              )
             } />
         </>
       )}

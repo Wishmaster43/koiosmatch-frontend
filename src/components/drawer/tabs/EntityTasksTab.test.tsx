@@ -47,6 +47,10 @@ const prioritiesRef = vi.hoisted(() => ({ current: [
 
 vi.mock('@/hooks/useEntityTasks', () => ({ useEntityTasks: vi.fn() }))
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: openEntityMock, navigate: vi.fn() }) }))
+// OPENERS-HIDE-1: mutable per-test flag, mirrors ScopedMatchesTab.test.tsx's own
+// gate setup — default true so every pre-existing test above keeps seeing "+ Nieuwe taak".
+let canCreateTask = true
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: (p: string) => (p === 'tasks.create' ? canCreateTask : true) }) }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => `d(${v})`, formatDateTime: (v: string) => `dt(${v})` }) }))
 vi.mock('@/context/TaskLookupsContext', () => ({
   TaskLookupsProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -77,7 +81,7 @@ const mockTasks = (over: Partial<ReturnType<typeof useEntityTasks>> = {}) => {
   vi.mocked(useEntityTasks).mockReturnValue({ items: [], loading: false, error: false, reload: vi.fn(), ...over })
 }
 
-beforeEach(() => { vi.clearAllMocks(); settingsRef.current = {} })
+beforeEach(() => { vi.clearAllMocks(); settingsRef.current = {}; canCreateTask = true })
 
 describe('EntityTasksTab · four UI states', () => {
   it('shows the loading label while loading', () => {
@@ -301,6 +305,24 @@ describe('EntityTasksTab · "+ Nieuwe taak"', () => {
     expect(screen.getByTestId('add-task-modal')).toHaveAttribute(
       'data-extra-links', JSON.stringify([{ type: 'contact', id: 'c-1' }]),
     )
+  })
+})
+
+// OPENERS-HIDE-1 (pass 5): "+ Nieuwe taak" → AddTaskModal → POST /tasks, gated
+// tasks.create (tasks-outreach.php:67). Hidden without the permission, shown with it.
+describe('EntityTasksTab · "+ Nieuwe taak" opener gate (tasks.create)', () => {
+  it('hides the opener without tasks.create', () => {
+    canCreateTask = false
+    mockTasks()
+    render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
+    expect(screen.queryByRole('button', { name: labels.newTask })).not.toBeInTheDocument()
+  })
+
+  it('shows the opener with tasks.create', () => {
+    canCreateTask = true
+    mockTasks()
+    render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
+    expect(screen.getByRole('button', { name: labels.newTask })).toBeInTheDocument()
   })
 })
 

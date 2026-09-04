@@ -41,6 +41,7 @@ import { useLookups } from '@/context/LookupsContext'
 import { useDateFormat } from '@/lib/datetime'
 import { notify, notifyError } from '@/lib/notify'
 import { toCoord } from '@/lib/coords'
+import { useAuth } from '@/context/AuthContext'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -53,6 +54,10 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
   const { formatDate } = useDateFormat()
   const { functions: functionOptions } = useFunctions()
   const { statuses: statusOptions, candidateTypes } = useLookups()
+  // OPENERS-HIDE-1 (pass 5): POST /applications is gated on applications.create
+  // (applications-matches.php:34) — hide "Solliciteren" rather than let it 422 (§3).
+  const auth = useAuth()
+  const canCreateApplication = auth?.hasPermission?.('applications.create') ?? false
   const {
     rows, loading, error, retry, radiusKm, setRadiusKm,
     functions: selectedFunctions, setFunctions,
@@ -237,7 +242,9 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
               panel — opens the shared candidate-anchored apply flow with this
               vacancy prefilled (reuses candidates:vacancySearch.apply's label —
               same action, one i18n key, no vacancies.json duplicate). */}
-          <DrawerAddButton onClick={() => setShowApply(true)} label={t('candidates:vacancySearch.apply')} />
+          {canCreateApplication && (
+            <DrawerAddButton onClick={() => setShowApply(true)} label={t('candidates:vacancySearch.apply')} />
+          )}
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
