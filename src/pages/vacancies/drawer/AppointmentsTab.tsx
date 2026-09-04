@@ -9,6 +9,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Calendar, ChevronLeft, ChevronRight, Pencil } from 'lucide-react'
 import SectionCard from '@/components/ui/SectionCard'
 import SoftChip from '@/components/ui/SoftChip'
+import ModalityChip from '@/components/ui/ModalityChip'
 import EntityLink from '@/components/ui/EntityLink'
 import Button from '@/components/ui/Button'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
@@ -128,6 +129,8 @@ export default function AppointmentsTab({ vacancy: v }: { vacancy: VacancyDetail
                   {a.locationName && <Caption>{a.locationName}</Caption>}
                 </div>
                 {a.type && <SoftChip label={a.type} color="var(--color-primary)" />}
+                {/* C.14: the modality axis, own chip — never inferred from location text alone. */}
+                <ModalityChip modality={a.modality} />
                 {a.status && <SoftChip label={a.status} color="var(--color-info)" />}
                 {a.ownerName && <Caption style={{ flexShrink: 0 }}>{a.ownerName}</Caption>}
                 {/* Edit: opens the same shared modal, prefilled → PATCH. Only offered

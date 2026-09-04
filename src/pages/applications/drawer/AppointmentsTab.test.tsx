@@ -117,6 +117,8 @@ describe('AppointmentsTab', () => {
     await waitFor(() => expect(screen.getAllByText('Type:intake_flex')).toHaveLength(1))
     expect(screen.getByText('appointments.statuses.planned')).toBeInTheDocument()
     expect(screen.getByText('HQ Amsterdam')).toBeInTheDocument()
+    // C.14: the modality axis renders as its own chip (no resources loaded → raw key).
+    expect(screen.getByText('appointmentModality.office')).toBeInTheDocument()
   })
 
   it('opens the shared modal in edit mode, prefilled, when the pencil is clicked', async () => {

@@ -115,6 +115,15 @@ describe('AppointmentsTab (vacancy drawer) · four UI states + permission gate',
     expect(screen.getByText(/20-08-2026/)).toBeInTheDocument()
     expect(screen.queryByText(/2026-08-20T/)).toBeNull()
   })
+
+  // C.14: the modality axis renders as its own chip, translated per row's value.
+  it('renders the modality axis as its own chip (C.14)', () => {
+    state.rows = [row({ modality: 'remote' })]; state.total = 1; state.loading = false; state.error = false
+    renderTab()
+    // Real i18n resources are loaded here (unlike the applications-tab sibling
+    // test) — the tab's default locale is nl, so assert the translated value.
+    expect(screen.getByText('Op afstand')).toBeInTheDocument()
+  })
 })
 
 describe('AppointmentsTab (vacancy drawer) · create', () => {

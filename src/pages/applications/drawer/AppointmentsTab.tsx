@@ -19,6 +19,7 @@ import Button from '@/components/ui/Button'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import { SectionTitle, Caption } from '@/components/ui/typography'
 import SoftChip from '@/components/ui/SoftChip'
+import ModalityChip from '@/components/ui/ModalityChip'
 import { PlanIntakeModal } from '@/pages/candidates/shared'
 import type { ExistingAppointment } from '@/pages/candidates/shared'
 import type { ApplicationDetail } from '@/types/application'
@@ -177,7 +178,11 @@ export default function AppointmentsTab({ application: a }: { application: Appli
           <div key={ap.id} style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px', background: 'var(--surface)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
               <SectionTitle as="span">{typeLabel}</SectionTitle>
-              <SoftChip label={statusLabel} color="var(--color-secondary)" round />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                {/* C.14: the modality axis, own chip — never inferred from location text alone. */}
+                <ModalityChip modality={ap.modality} />
+                <SoftChip label={statusLabel} color="var(--color-secondary)" round />
+              </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10, fontSize: 12, color: 'var(--text-muted)' }}>
               {/* Wall-time DD-MM-YYYY HH:mm — the BE stores it in UTC as-entered, so no local-tz shift. */}

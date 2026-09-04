@@ -1162,5 +1162,10 @@
     "match": {
       "created": "Match aangemaakt"
     }
+  },
+  "appointmentModality": {
+    "office": "Kantoor",
+    "remote": "Op afstand",
+    "phone": "Telefonisch"
   }
 }

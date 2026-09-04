@@ -1162,5 +1162,10 @@
     "match": {
       "created": "Match criado"
     }
+  },
+  "appointmentModality": {
+    "office": "Escritório",
+    "remote": "À distância",
+    "phone": "Por telefone"
   }
 }
