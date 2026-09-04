@@ -80,6 +80,7 @@
     "openCandidate": "Abrir candidato",
     "openVacancy": "Abrir vacante",
     "openClient": "Abrir cliente",
+    "clientLocked": "El cliente ya no se puede cambiar: hay un contrato de HelloFlex activo en este match.",
     "contract": {
       "title": "Contrato y financiero",
       "groupContract": "Contrato",

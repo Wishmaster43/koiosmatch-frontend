@@ -44,6 +44,12 @@ export interface RawMatch {
   candidate_id?: string | number
   vacancy_id?: string | number
   customer_id?: string | number
+  // MATCH-CLIENT-EDIT (K-281): whether HelloFlex already holds a contract for
+  // this match — 'none' (or absent) means the client is still free to change;
+  // any other value, or a set GUID below, locks it (MatchClientGuard.php,
+  // same fields the list AND detail resources both serialize).
+  contract_status?: string | null
+  helloflex_contract_guid?: string | null
   // MATCH-ORDINAL-1 (M14/M15): the customer site the match sits at — already
   // serialized by MatchListResource.php but previously dropped by mapMatch.
   customer_location_id?: string | number | null
@@ -137,6 +143,11 @@ export interface MatchRow {
   candidateId: Id | null
   vacancyId: Id | null
   clientId: Id | null
+  // MATCH-CLIENT-EDIT (K-281): mapped straight off contract_status/
+  // helloflex_contract_guid — undefined/null means unlocked (either the
+  // payload predates this field, or the seeded default 'none' applies).
+  contractStatus?: string | null
+  helloflexContractGuid?: string | null
   // MATCH-ORDINAL-1 (M14/M15): the customer site axes — id-only (no name yet,
   // see the location/department ticket), used to compute "Nth match at this
   // location/department" without a second round-trip. Optional: older row

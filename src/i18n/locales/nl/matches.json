@@ -80,6 +80,7 @@
     "openCandidate": "Kandidaat openen",
     "openVacancy": "Vacature openen",
     "openClient": "Klant openen",
+    "clientLocked": "Klant kan niet meer wijzigen: er loopt een HelloFlex-contract op deze match.",
     "contract": {
       "title": "Contract & financieel",
       "groupContract": "Contract",

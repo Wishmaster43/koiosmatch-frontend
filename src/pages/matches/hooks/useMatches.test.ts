@@ -94,6 +94,25 @@ describe('useMatches', () => {
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.rows[0].contractType).toBeNull()
   })
+
+  // MATCH-CLIENT-EDIT (K-281): MatchListResource ships both fields on every list
+  // row (MatchClientGuard.php) — the mapper must pick them up so OverviewTab
+  // can show the client-locked notice without a second detail fetch.
+  it('maps contract_status and helloflex_contract_guid onto the row', async () => {
+    mockedGet.mockResolvedValue({
+      data: { data: [{ id: 'm8', contract_status: 'active', helloflex_contract_guid: 'hf-guid-1' }], meta: { last_page: 1 } },
+    })
+    const { result } = renderHook(() => useMatches())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.rows[0]).toMatchObject({ contractStatus: 'active', helloflexContractGuid: 'hf-guid-1' })
+  })
+
+  it('leaves contractStatus/helloflexContractGuid null when the row carries neither', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [{ id: 'm9' }], meta: { last_page: 1 } } })
+    const { result } = renderHook(() => useMatches())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.rows[0]).toMatchObject({ contractStatus: null, helloflexContractGuid: null })
+  })
 })
 
 // MATCH-ORIGIN-1: ONTSTAANSTYPE (direct vs via sollicitatie), OFFERED-IFF-READ —

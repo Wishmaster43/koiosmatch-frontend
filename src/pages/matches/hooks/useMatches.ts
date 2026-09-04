@@ -52,6 +52,10 @@ export function mapMatch(m: RawMatch): MatchRow {
     candidateId: m.candidate_id ?? m.candidate?.id ?? null,
     vacancyId:   m.vacancy_id ?? m.vacancy?.id ?? null,
     clientId:    m.customer_id ?? m.client?.id ?? m.customer?.id ?? null,
+    // MATCH-CLIENT-EDIT (K-281): straight off the list row (MatchListResource
+    // ships both) — drives the client-locked notice in OverviewTab.
+    contractStatus: m.contract_status ?? null,
+    helloflexContractGuid: m.helloflex_contract_guid ?? null,
     // MATCH-ORDINAL-1 (M14/M15): the location/department ids ride along on every
     // list row (MatchListResource.php) — only the mapper was dropping them.
     customerLocationId:   m.customer_location_id ?? null,

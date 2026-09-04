@@ -176,6 +176,37 @@ describe('OverviewTab · overzicht-data cluster', () => {
   })
 })
 
+// MATCH-CLIENT-EDIT (K-281): the client field stays read-only text (no picker
+// built yet), but a live HelloFlex contract now surfaces a locked-state notice
+// under it — mirrors MatchClientGuard::isClientLocked exactly.
+describe('OverviewTab · client-locked notice (MATCH-CLIENT-EDIT, K-281)', () => {
+  it('shows the locked notice once contractStatus is beyond the seeded default', async () => {
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    renderTab({ ...baseMatch, contractStatus: 'active' })
+    expect(await screen.findByText(i18n.t('matches:drawer.clientLocked'))).toBeInTheDocument()
+  })
+
+  it('shows the locked notice once a HelloFlex contract GUID is set, even with contractStatus "none"', async () => {
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    renderTab({ ...baseMatch, contractStatus: 'none', helloflexContractGuid: 'hf-guid-1' })
+    expect(await screen.findByText(i18n.t('matches:drawer.clientLocked'))).toBeInTheDocument()
+  })
+
+  it('hides the notice when contractStatus is the seeded "none" default and no GUID is set', async () => {
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    renderTab({ ...baseMatch, contractStatus: 'none', helloflexContractGuid: null })
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    expect(screen.queryByText(i18n.t('matches:drawer.clientLocked'))).not.toBeInTheDocument()
+  })
+
+  it('hides the notice when the payload predates the field (undefined never reads as locked)', async () => {
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    renderTab(baseMatch)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    expect(screen.queryByText(i18n.t('matches:drawer.clientLocked'))).not.toBeInTheDocument()
+  })
+})
+
 // MATCH-EDIT-1 (Danny 22-08, "waar is het potlootje bij een match?"): the
 // Contract/Financieel card is now editable — asserts the actual PATCH request
 // (route + mapped body), never just that a callback fired (§13).
