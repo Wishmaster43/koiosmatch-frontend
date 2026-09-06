@@ -80,7 +80,7 @@ describe('ProfileAddressTab · own fields, composed line, own request shape', ()
     await user.click(screen.getByTitle('Opslaan'))
     expect(onSave).toHaveBeenCalledTimes(1)
     expect(onSave).toHaveBeenCalledWith({
-      street: 'Kerkstraat', houseNumber: '12', houseNumberSuffix: 'a',
+      street: 'Kerkstraat', houseNumber: '12', houseNumberSuffix: 'a', addressLine2: '',
       postalCode: '1234 AB', city: 'Amersfoort', province: 'Utrecht', country: 'NL',
     })
   })

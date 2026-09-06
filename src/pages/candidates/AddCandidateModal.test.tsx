@@ -174,7 +174,7 @@ describe('AddCandidateModal · submit body unchanged by the layout rework', () =
     expect(createCandidate).toHaveBeenCalledWith({
       first_name: 'Jan', middle_name: null, last_name: 'Jansen', function_title: null,
       email: null, phone: null, mobile: null, date_of_birth: null, gender: null,
-      street: null, house_number: null, house_number_suffix: null, postcode: null,
+      street: null, house_number: null, house_number_suffix: null, address_line_2: null, postcode: null,
       city: null, province: null, country: null, owner_id: 'u1',
       // PROFILE-TEXT-1 (Danny 02-08): the profile-text card rides along on create;
       // untouched here, so it POSTs as null (never omitted, mirrors every other

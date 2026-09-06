@@ -181,6 +181,7 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     houseNumber:     c.house_number ?? '',
     houseNumberSuffix: c.house_number_suffix ?? c.house_number_addition ?? '',
     postalCode:      c.postal_code ?? '',
+    addressLine2:    c.address_line_2 ?? '',
     address:         [c.street, c.city].filter(Boolean).join(', ') || c.address || c.city || '-',
     gender:          c.gender ?? c.sex ?? '-',
     nationality:     c.nationality ?? '-',

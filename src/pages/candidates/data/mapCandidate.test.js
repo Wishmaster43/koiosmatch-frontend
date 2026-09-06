@@ -122,6 +122,19 @@ describe('mapCandidate — phone / mobile split (BE 2026-07-20)', () => {
   })
 })
 
+describe('mapCandidate — address_line_2 (second address line)', () => {
+  it('maps address_line_2 when present', () => {
+    const r = mapCandidate({ address_line_2: 'Appartement 5' })
+    expect(r.addressLine2).toBe('Appartement 5')
+  })
+  it('defaults to empty string when absent', () => {
+    expect(mapCandidate({}).addressLine2).toBe('')
+  })
+  it('defaults to empty string when null', () => {
+    expect(mapCandidate({ address_line_2: null }).addressLine2).toBe('')
+  })
+})
+
 describe('mapCandidate — pools / consent / address', () => {
   it('normalises pools (object passthrough, string → {name})', () => {
     expect(mapCandidate({ pools: [{ id: 1, name: 'Zorg' }, 'Flex'] }).pools)

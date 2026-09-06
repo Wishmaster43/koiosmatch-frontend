@@ -123,7 +123,7 @@ describe('ZzpTab · Adres composite (1.1.1/1.1.2)', () => {
     await user.click(screen.getAllByTitle('edit')[1])
     await user.click(screen.getByTitle('save'))
     expect(onSave).toHaveBeenCalledWith({
-      street: 'Kerkstraat', house_number: '12', house_number_suffix: 'a',
+      street: 'Kerkstraat', house_number: '12', house_number_suffix: 'a', address_line_2: '',
       postcode: '1234 AB', city: 'Utrecht', province: 'Utrecht', country: 'NL',
     })
   })
@@ -424,5 +424,74 @@ describe('ZzpTab · BANK-1 never falls back to the private salary account', () =
     await user.click(screen.getAllByTitle('edit')[2]) // Facturatie
     await user.click(screen.getByTitle('save'))
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ iban: '', account_holder_name: '' }))
+  })
+})
+
+// LANE-I2-1: backend now sends advisory-only hints per KvK/VAT identifier.
+// The FE displays these under the fields but never blocks saving (hints are
+// informational only).
+describe('ZzpTab · LANE-I2-1 freelance identifier hints', () => {
+  beforeEach(() => { checkDuplicateMock.mockReset(); notifyErrorMock.mockReset() })
+
+  it('shows no hint when status is "empty"', () => {
+    render(<ZzpTab c={candidate({
+      kvk_number_hint: { status: 'empty', country_code: null, example: null },
+      vat_number_hint: { status: 'empty', country_code: null, example: null },
+    })} />)
+    // The component should not render any hint div (raw-key mode: no hints rendered)
+    expect(screen.queryByText('zzp.hintExample')).toBeNull()
+    expect(screen.queryByText('zzp.hintInvalid')).toBeNull()
+    expect(screen.queryByText('zzp.hintUnverifiable')).toBeNull()
+  })
+
+  it('shows no hint when status is "valid"', () => {
+    render(<ZzpTab c={candidate({
+      kvk_number_hint: { status: 'valid', country_code: 'NL', example: '12345678' },
+      vat_number_hint: { status: 'valid', country_code: 'NL', example: 'NL123456789B01' },
+    })} />)
+    expect(screen.queryByText('zzp.hintInvalid')).toBeNull()
+    expect(screen.queryByText('zzp.hintUnverifiable')).toBeNull()
+  })
+
+  it('shows an "invalid" hint with the example when status is "invalid"', () => {
+    const { container } = render(<ZzpTab c={candidate({
+      kvk_number_hint: { status: 'invalid', country_code: 'NL', example: '12345678' },
+    })} />)
+    // The hint text should be rendered with the i18n key and example
+    const html = container.innerHTML
+    // In raw-key mode, we look for the key and the example value
+    expect(html).toMatch(/12345678/)
+  })
+
+  it('shows an "unverifiable" hint in muted color and italic when status is "unverifiable"', () => {
+    render(<ZzpTab c={candidate({
+      vat_number_hint: { status: 'unverifiable', country_code: null, example: null },
+    })} />)
+    const hint = screen.getByText('zzp.hintUnverifiable')
+    expect(hint).toHaveStyle({ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '11px' })
+  })
+
+  it('never blocks saving despite an "invalid" hint', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<ZzpTab c={candidate({
+      kvk_number_hint: { status: 'invalid', country_code: 'NL', example: '12345678' },
+    })} onSave={onSave} />)
+    // Even with an invalid hint shown, saving must work
+    await user.click(screen.getAllByTitle('edit')[2]) // Financieel
+    await user.click(screen.getByTitle('save'))
+    expect(onSave).toHaveBeenCalled()
+  })
+
+  it('PATCH body carries a non-Dutch VAT unchanged (backend now accepts any text)', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<ZzpTab c={candidate({
+      vat_number: 'BE0123456789',
+      vat_number_hint: { status: 'valid', country_code: 'BE', example: 'BE0123456789' },
+    })} onSave={onSave} />)
+    await user.click(screen.getAllByTitle('edit')[2])
+    await user.click(screen.getByTitle('save'))
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ vat_number: 'BE0123456789' }))
   })
 })

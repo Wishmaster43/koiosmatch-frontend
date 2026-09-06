@@ -15,7 +15,7 @@ import type { FormState } from '../AddCandidateModal'
 const emptyForm = (over: Partial<FormState> = {}): FormState => ({
   firstName: '', middleName: '', lastName: '', functionTitle: '',
   email: '', phone: '', mobile: '', dateOfBirth: '', gender: '', preferredLanguage: '',
-  street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', city: '', province: '', country: '',
+  street: '', houseNumber: '', houseNumberSuffix: '', addressLine2: '', postalCode: '', city: '', province: '', country: '',
   ownerId: '', summary: '', linkedin: '', ...over,
 })
 

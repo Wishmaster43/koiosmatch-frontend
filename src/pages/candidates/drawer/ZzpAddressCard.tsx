@@ -47,13 +47,14 @@ export interface ZzpAddressValues {
   street: string
   houseNumber: string
   houseNumberSuffix: string
+  addressLine2: string
   postalCode: string
   city: string
   province: string
   country: string
 }
 
-const EMPTY: ZzpAddressValues = { street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', city: '', province: '', country: '' }
+const EMPTY: ZzpAddressValues = { street: '', houseNumber: '', houseNumberSuffix: '', addressLine2: '', postalCode: '', city: '', province: '', country: '' }
 
 // ZZP business-address card (in-place pencil→save/cancel); country whitelist is the tenant operating-country list, distinct from the candidate's personal address.
 export default function ZzpAddressCard({ value, onSave }: { value: ZzpAddressValues; onSave: (v: ZzpAddressValues) => void }) {
@@ -105,6 +106,7 @@ export default function ZzpAddressCard({ value, onSave }: { value: ZzpAddressVal
             <FieldRow label={t('zzp.houseNumber')}><input value={form.houseNumber} onChange={e => setF('houseNumber', e.target.value)} style={inputStyle} /></FieldRow>
             {/* Reuses the candidate's own personal-address label (same word, same namespace) — no new key needed. */}
             <FieldRow label={t('profile.houseNumberSuffix')}><input value={form.houseNumberSuffix} onChange={e => setF('houseNumberSuffix', e.target.value)} style={inputStyle} /></FieldRow>
+            <FieldRow label={t('profile.addressLine2')}><input value={form.addressLine2} onChange={e => setF('addressLine2', e.target.value)} style={inputStyle} /></FieldRow>
             <FieldRow label={t('zzp.postalCode')}><input value={form.postalCode} onChange={e => setF('postalCode', e.target.value)} style={inputStyle} /></FieldRow>
             <FieldRow label={t('zzp.city')}><input value={form.city} onChange={e => setF('city', e.target.value)} style={inputStyle} /></FieldRow>
           </>

@@ -13,6 +13,7 @@ interface AddressCardProps {
   set: (k: keyof FormState, v: string) => void
   isReq: (k: keyof FormState) => boolean
   provinces: string[]
+  addressLine2?: string
 }
 
 // The address card fields; country is a fixed, UI-language-localized ISO list (never a tenant lookup), unlike the tenant-driven province list passed in.
@@ -34,6 +35,11 @@ export default function AddressCard({ form, errors, set, isReq, provinces }: Add
           </CvField>
           <Field label={t('modal.fields.houseNumberSuffix')}>
             <TextField value={form.houseNumberSuffix} onChange={v => set('houseNumberSuffix', v)} />
+          </Field>
+        </div>
+        <div style={row('1fr')}>
+          <Field label={t('modal.fields.addressLine2')}>
+            <TextField value={form.addressLine2 || ''} onChange={v => set('addressLine2', v)} />
           </Field>
         </div>
         <div style={row('1fr 2fr')}>

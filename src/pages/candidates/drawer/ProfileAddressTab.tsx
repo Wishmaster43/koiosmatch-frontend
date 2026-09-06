@@ -22,7 +22,7 @@ const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
 
 // The fields this sub-tab owns — split out of the old combined ProfileTab
 // (Danny 28-07: one pencil flipping ~15 fields was unmaintainable).
-type AddressKey = 'street' | 'houseNumber' | 'houseNumberSuffix' | 'postalCode' | 'city' | 'province' | 'country'
+type AddressKey = 'street' | 'houseNumber' | 'houseNumberSuffix' | 'addressLine2' | 'postalCode' | 'city' | 'province' | 'country'
 type AddressForm = Record<AddressKey, string>
 
 // Only street/postalCode/city are ever tenant-required among this tab's fields
@@ -41,7 +41,7 @@ export default function ProfileAddressTab({ c, onSave, autoEditSignal }: {
   const isReq = (key: AddressKey) => { const bk = REQ_MAP[key]; return !!bk && requiredKeys.includes(bk) }
 
   const emptyForm = (): AddressForm => ({
-    street: c.street ?? '', houseNumber: c.houseNumber ?? '', houseNumberSuffix: c.houseNumberSuffix ?? '',
+    street: c.street ?? '', houseNumber: c.houseNumber ?? '', houseNumberSuffix: c.houseNumberSuffix ?? '', addressLine2: c.addressLine2 ?? '',
     postalCode: c.postalCode ?? '', city: c.city ?? '', province: c.province ?? '', country: c.country ?? '',
   })
   const [editing, setEditing] = useState(false)
@@ -115,6 +115,7 @@ export default function ProfileAddressTab({ c, onSave, autoEditSignal }: {
         {field('street', t('profile.street'))}
         {field('houseNumber', t('profile.houseNumber'))}
         {field('houseNumberSuffix', t('profile.houseNumberSuffix'))}
+        {field('addressLine2', t('profile.addressLine2'))}
         {field('postalCode', t('profile.postalCode'))}
         {field('city', t('profile.city'))}
       </>

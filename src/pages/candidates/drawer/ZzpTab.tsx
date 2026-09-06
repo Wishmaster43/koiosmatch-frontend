@@ -52,8 +52,8 @@ import { useAuth } from '@/context/AuthContext'
 import { useConfirm } from '@/hooks/useConfirm'
 import { notifyError } from '@/lib/notify'
 import { useNumberingEntities } from '@/lib/useNumberingEntities'
+import { getCountryName } from '@/lib/countries'
 import { useIdentifierValidation } from '@/hooks/useIdentifierValidation'
-import { resolveCountryCode } from '@/lib/companyIdentifiers'
 // HUISSTIJL-1: the shared JetBrains Mono atom + the muted-caption atom (identity-only swaps).
 import { Mono, Caption } from '@/components/ui/typography'
 import ZzpAddressCard from './ZzpAddressCard'
@@ -61,7 +61,7 @@ import type { ZzpAddressValues } from './ZzpAddressCard'
 import { useBusinessEmailDuplicateCheck } from '../hooks/useBusinessEmailDuplicateCheck'
 import { useCandidateRecord } from '../hooks/useCandidateMutations'
 import { WIDE_LABEL_WIDTH } from './PreferencesZzpTabs'
-import type { Candidate } from '@/types/candidate'
+import type { Candidate, FreelanceIdentifierHint } from '@/types/candidate'
 
 type AnyProps = Record<string, unknown>
 // EditableFieldTable is still untyped JS — accept any props at the boundary.
@@ -75,7 +75,7 @@ const EMAIL_FORMAT_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 // The ZZP (freelance) preferences tab: business/invoicing fields plus the
 // creditor-number auto-fill flow, saved back through the drawer's onSave patch.
 export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string, unknown>) => void }) {
-  const { t } = useTranslation('candidates')
+  const { t, i18n } = useTranslation('candidates')
   const zzp = c.zzp
   // Legacy fallbacks live on the flat candidate record (not on the typed model).
   const flat = c as unknown as Record<string, unknown>
@@ -140,17 +140,16 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
     tenaamstelling: zzp.account_holder_name ?? '',
   }
   // KVK/BTW-PER-LAND-1 (Danny 08-08, points 10 + 11): the KvK/BTW shape follows the
-  // freelancer's OWN business country (the Adres block below), never a hardcoded
-  // Dutch rule; the tenant setting decides warn-vs-block. MEASURED 08-08 against the
-  // dev API: PATCH /candidates/{id} still validates `freelance.kvk_number` as
-  // `digits:8` and `freelance.vat_number` as `/^NL\d{9}B\d{2}$/`, so a non-Dutch
-  // number is refused server-side regardless of this setting — the honest hint under
-  // the card says exactly that instead of pretending the save will land.
+  // freelancer's OWN business country, never a hardcoded Dutch rule; the tenant
+  // setting decides warn-vs-block WHILE TYPING (useIdentifierValidation, the same
+  // hook the customer screens use). I18N-1 (BE 5a109b00, 04-09): the server now
+  // accepts any text and answers with ADVISORY hints per identifier (kvk_number_hint
+  // / vat_number_hint: status + ISO-2 country_code + example) — rendered under the
+  // Financieel card after a save, never a 422 — so the old "NL-only backend" notice
+  // is gone. `zzp.country` comes back as an ISO-2 code; the hook resolves both.
   const auth = useAuth()
   const identifiers = useIdentifierValidation()
   const zzpCountry = (zzp.country as string) ?? ''
-  const zzpCountryCode = resolveCountryCode(zzpCountry)
-  const backendNlOnly = zzpCountryCode !== null && zzpCountryCode !== 'NL'
   // FINANCIAL-GATE-1: same permission as the candidate's private bank card.
   const canSeeFinancial = auth?.hasPermission?.('candidates.financial.view') ?? false
   const fields = [
@@ -205,6 +204,7 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
     street:            (zzp.street as string)              ?? '',
     houseNumber:       (zzp.house_number as string)         ?? '',
     houseNumberSuffix: (zzp.house_number_suffix as string)  ?? '',
+    addressLine2:      (zzp.address_line_2 as string)       ?? '',
     postalCode:        (zzp.postal_code as string)          ?? '',
     city:              (zzp.city as string)                 ?? '',
     province:          (zzp.province as string)             ?? '',
@@ -212,6 +212,7 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
   }
   const handleSaveAddress = (v: ZzpAddressValues) => onSave?.({
     street: v.street, house_number: v.houseNumber, house_number_suffix: v.houseNumberSuffix,
+    address_line_2: v.addressLine2,
     // AUDIT 03-09 (types-drift-2): top-level candidate address → the request key is `postcode`.
     postcode: v.postalCode, city: v.city, province: v.province, country: v.country,
   })
@@ -270,14 +271,25 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
     })()
   }
 
+  // I18N-1: the server's advisory hint for one identifier (invalid / unverifiable only;
+  // empty and valid say nothing) — a Caption under the Financieel card, never a block.
+  const renderIdentifierHint = (kind: 'kvk' | 'vat') => {
+    const hint = (zzp as Record<string, unknown> | undefined)?.[kind === 'kvk' ? 'kvk_number_hint' : 'vat_number_hint'] as FreelanceIdentifierHint | undefined
+    if (!hint || hint.status === 'empty' || hint.status === 'valid') return null
+    if (hint.status === 'invalid') {
+      const country = hint.country_code ? getCountryName(hint.country_code, i18n.language) : ''
+      return (
+        <Caption style={{ display: 'block', color: 'var(--color-danger-text)', padding: '0 12px' }}>
+          {t('zzp.hintInvalid', { country })}{hint.example ? ` ${t('zzp.hintExample', { example: hint.example })}` : ''}
+        </Caption>
+      )
+    }
+    return <Caption style={{ display: 'block', fontStyle: 'italic', padding: '0 12px' }}>{t('zzp.hintUnverifiable')}</Caption>
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <EditableFieldTable title={t('zzp.groupCompany')} fields={blockFields(t('zzp.groupCompany'))} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSaveCompany} />
-      {/* Honest gap notice (§3): the FE now checks per country, the backend does not —
-          a non-Dutch KvK/BTW is still refused by PATCH /candidates/{id} (measured 08-08). */}
-      {backendNlOnly && (
-        <div style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--color-warning-text)', padding: '0 12px' }}>{t('zzp.identifierNlOnly')}</div>
-      )}
       <ZzpAddressCard value={addressValue} onSave={handleSaveAddress} />
       {/* CREDITOR-AUTO-1 locked row — only rendered once the tenant's numbering
           sequence actually owns this field (see creditorAutoNumbered above);
@@ -299,6 +311,8 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
         </div>
       )}
       <EditableFieldTable key={`invoicing-${invoicingEpoch}`} title={t('zzp.groupInvoicing')} fields={blockFields(t('zzp.groupInvoicing'))} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSaveInvoicing} />
+      {renderIdentifierHint('kvk')}
+      {renderIdentifierHint('vat')}
       {/* DOC-BANK-2: proof document for the BUSINESS account — same slot as the
           private card, writing freelance.bank_document_id (explicit null clears;
           an omitted key changes nothing — CMBE-measured `sometimes|nullable`).

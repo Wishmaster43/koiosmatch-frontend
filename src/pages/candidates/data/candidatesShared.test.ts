@@ -19,3 +19,15 @@ describe('buildCandidatePatch · preferredLanguage', () => {
     expect(buildCandidatePatch({ placeOfBirth: 'Utrecht' })).toEqual({ place_of_birth: 'Utrecht' })
   })
 })
+
+// I18N-1 (BE 5a109b00): the second address line travels as address_line_2 — the
+// builder is an allowlist, so a missing branch would silently drop the field.
+describe('buildCandidatePatch · addressLine2', () => {
+  it('maps addressLine2 to address_line_2 and lets an empty string clear it', () => {
+    expect(buildCandidatePatch({ addressLine2: 'Gebouw B' })).toEqual({ address_line_2: 'Gebouw B' })
+    expect(buildCandidatePatch({ addressLine2: '' })).toEqual({ address_line_2: '' })
+  })
+  it('leaves the key out when the patch does not carry it', () => {
+    expect(buildCandidatePatch({ city: 'Delft' })).not.toHaveProperty('address_line_2')
+  })
+})
