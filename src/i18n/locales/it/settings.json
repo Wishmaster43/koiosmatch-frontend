@@ -2227,7 +2227,8 @@
     "branchAuthz": {
       "label": "Applica permessi per sede",
       "hint": "Applica i permessi per sede (visualizzare, modificare, eliminare) a candidati, clienti, sedi, appuntamenti, attività e conversazioni. Un utente senza sede collegata resta senza restrizioni, attivo o no."
-    }
+    },
+    "readOnlyNotice": "I ruoli sono gestiti dall'amministratore della piattaforma; qui puoi solo visualizzarli."
   },
   "audit": {
     "title": "Audit log",

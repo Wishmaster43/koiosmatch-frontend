@@ -1981,7 +1981,8 @@
     "branchAuthz": {
       "label": "Standortrechte erzwingen",
       "hint": "Setzt die Standortrechte (ansehen, bearbeiten, löschen) bei Kandidaten, Kunden, Standorten, Terminen, Aufgaben und Gesprächen durch. Ein Benutzer ohne Standortkopplung bleibt uneingeschränkt, ein- oder ausgeschaltet."
-    }
+    },
+    "readOnlyNotice": "Rollen werden von der Plattformverwaltung verwaltet; Sie können sie hier nur anzeigen."
   },
   "audit": {
     "title": "Audit-Log",

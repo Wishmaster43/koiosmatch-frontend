@@ -2227,7 +2227,8 @@
     "branchAuthz": {
       "label": "Vestigingsrechten afdwingen",
       "hint": "Dwingt de per-vestiging rechten (bekijken, bewerken, verwijderen) af op kandidaten, klanten, vestigingen, afspraken, taken en gesprekken. Een gebruiker zonder vestigingskoppeling blijft onbeperkt, aan of uit."
-    }
+    },
+    "readOnlyNotice": "Rollen worden beheerd door de platformbeheerder; je kunt ze hier alleen bekijken."
   },
   "audit": {
     "title": "Audit log",

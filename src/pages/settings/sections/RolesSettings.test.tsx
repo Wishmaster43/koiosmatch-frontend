@@ -86,8 +86,10 @@ const GROUPS: PermissionGroups = [
 ]
 // canAccessPage-shaped auth values: the planning page needs the tenant 'plan'
 // module; outreach has no module requirement (page-layer only, fail-open).
-const AUTH_WITH_PLAN    = { user: { is_super_admin: false }, activeTenant: { modules: ['plan'] }, accessiblePages: [] }
-const AUTH_WITHOUT_PLAN = { user: { is_super_admin: false }, activeTenant: { modules: ['sm'] },   accessiblePages: [] }
+// isSuperAdmin added for role read-only gate tests (tests that exercise the
+// permission matrix and full workflows assume super-admin access).
+const AUTH_WITH_PLAN    = { user: { is_super_admin: false }, activeTenant: { modules: ['plan'] }, accessiblePages: [], isSuperAdmin: () => true }
+const AUTH_WITHOUT_PLAN = { user: { is_super_admin: false }, activeTenant: { modules: ['sm'] },   accessiblePages: [], isSuperAdmin: () => true }
 const activePerms = new Set(['candidates.view', 'candidates.update'])
 const hasPermission = (name: string) => activePerms.has(name)
 
@@ -208,13 +210,13 @@ describe('PermissionMatrix — module gating (canAccessPage, same gate as the si
   })
 
   it('hides an off module even for a super admin (module gate applies to everyone)', () => {
-    mockAuth.mockReturnValue({ user: { is_super_admin: true }, activeTenant: { modules: ['sm'] }, accessiblePages: [] })
+    mockAuth.mockReturnValue({ user: { is_super_admin: true }, activeTenant: { modules: ['sm'] }, accessiblePages: [], isSuperAdmin: () => true })
     render(<PermissionMatrix groups={GROUPS} hasPermission={hasPermission} onToggle={vi.fn()} />)
     expect(screen.queryByText(st('roles.groups.planning'))).not.toBeInTheDocument()
   })
 
   it('fails OPEN for module-free pages: outreach shows with an empty accessiblePages list', () => {
-    mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [] })
+    mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [], isSuperAdmin: () => true })
     render(<PermissionMatrix groups={GROUPS} hasPermission={hasPermission} onToggle={vi.fn()} />)
     expect(screen.getByText(st('roles.groups.outreach'))).toBeInTheDocument()
   })
@@ -222,7 +224,7 @@ describe('PermissionMatrix — module gating (canAccessPage, same gate as the si
 
 describe('RolesSettings — end-to-end toggle through the matrix', () => {
   it('clicking a CRUD toggle PUTs the full updated permission list (request, not just callback)', async () => {
-    mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [] })
+    mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [], isSuperAdmin: () => true })
     // eslint-disable-next-line no-restricted-syntax -- DATA: a fixture role's tenant-picked colour, not a style rule.
     const role: Role = { id: 'r1', name: 'recruiter', color: '#3B8FD4', icon: 'shield', users_count: 0,
       permissions: [{ name: 'candidates.view' }] }
@@ -263,7 +265,7 @@ describe('RolesSettings — end-to-end toggle through the matrix', () => {
 // request, not just that a callback fired).
 describe('RolesSettings — start-dashboard picker offers the manager type', () => {
   it('lists "Recruitment manager" as an option and PUTs dashboard_type: recruitment_manager on pick', async () => {
-    mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [] })
+    mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [], isSuperAdmin: () => true })
     // eslint-disable-next-line no-restricted-syntax -- DATA: a fixture role's tenant-picked colour, not a style rule.
     const role: Role = { id: 'r1', name: 'recruitermanager', color: '#3B8FD4', icon: 'shield', users_count: 0, dashboard_type: null, permissions: [] }
     vi.mocked(api.get).mockImplementation((url: string) => {
@@ -298,7 +300,7 @@ describe('RolesSettings — start-dashboard picker offers the manager type', () 
 // list row, and notifies (§13 — assert the request AND the rolled-back state).
 describe('RolesSettings — appearance save reverts on failure', () => {
   it('reverts the start-dashboard change and notifies when the PUT fails', async () => {
-    mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [] })
+    mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [], isSuperAdmin: () => true })
     // eslint-disable-next-line no-restricted-syntax -- DATA: a fixture role's tenant-picked colour, not a style rule.
     const role: Role = { id: 'r1', name: 'recruiter', color: '#3B8FD4', icon: 'shield', users_count: 0, dashboard_type: null, permissions: [] }
     vi.mocked(api.get).mockImplementation((url: string) => {
@@ -330,12 +332,73 @@ describe('RolesSettings — appearance save reverts on failure', () => {
   })
 })
 
+// Read-only gate for non-super-admins: create button hidden, edit disabled, delete hidden, notice shown.
+describe('RolesSettings — non-super-admin read-only gating', () => {
+  const arm = () => {
+    mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [] })
+    // eslint-disable-next-line no-restricted-syntax -- DATA: a fixture role's tenant-picked colour, not a style rule.
+    const role: Role = { id: 'r1', name: 'recruiter', color: '#3B8FD4', icon: 'shield', users_count: 0, permissions: [] }
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/roles') return Promise.resolve({ data: [role] })
+      if (url === '/permissions') return Promise.resolve({ data: {} })
+      if (url === '/roles/icons') return Promise.reject(new Error('404'))
+      if (url === '/roles/r1/branches') return Promise.resolve({ data: [] })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+  }
+
+  it('hides the create input and button when user is not super-admin', async () => {
+    arm()
+    render(<RolesSettings />)
+
+    // Wait for the roles list to load.
+    await waitFor(() => expect(screen.getByText('recruiter')).toBeInTheDocument())
+
+    // Create input + button are not rendered at all.
+    expect(screen.queryByPlaceholderText(st('roles.newPlaceholder'))).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: st('roles.create') })).not.toBeInTheDocument()
+  })
+
+  it('shows a read-only notice when user is not super-admin', async () => {
+    arm()
+    render(<RolesSettings />)
+
+    // The notice appears explaining roles are managed by platform admin.
+    await waitFor(() =>
+      expect(screen.getByText(st('roles.readOnlyNotice'))).toBeInTheDocument()
+    )
+  })
+
+  it('disables the edit button when user is not super-admin', async () => {
+    arm()
+    render(<RolesSettings />)
+
+    const editButton = await screen.findByRole('button', { name: st('roles.edit') })
+    expect(editButton).toBeDisabled()
+  })
+
+  it('hides the delete button when user is not super-admin', async () => {
+    arm()
+    render(<RolesSettings />)
+
+    // Wait for the role to load.
+    await waitFor(() => expect(screen.getByText('recruiter')).toBeInTheDocument())
+
+    // Delete button is not rendered at all (only edit is visible and disabled).
+    const allButtons = screen.getAllByRole('button')
+    const deleteButtons = allButtons.filter(btn => btn.getAttribute('aria-label')?.includes(st('roles.deleteTitle')))
+    expect(deleteButtons).toHaveLength(0)
+  })
+})
+
 // Audit r4 (§13): the branch-assignment toggle had a full optimistic+revert+notify
 // implementation but zero coverage — assert the REQUEST and the reverted state.
 describe('RoleBranchTemplate — branch toggle (optimistic PUT + revert on failure)', () => {
   const arm = () => {
     mockLocations.mockReturnValue([{ value: 'l1', label: 'Noord' }])
     vi.mocked(api.get).mockResolvedValue({ data: { data: [] } }) // role has no branches yet
+    // RoleBranchTemplate tests assume super-admin context (branch management).
+    mockAuth.mockReturnValue({ user: { is_super_admin: true }, accessiblePages: [], isSuperAdmin: () => true })
   }
 
   it('toggling a branch PUTs the replace-set to /roles/{id}/branches', async () => {
@@ -376,7 +439,7 @@ describe('RoleBranchTemplate — branch toggle (optimistic PUT + revert on failu
 // flagEnabled reads Setting 'branch_authz_enabled').
 describe('RolesSettings — branch authorization master switch', () => {
   const arm = () => {
-    mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [] })
+    mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [], isSuperAdmin: () => true })
     vi.mocked(api.get).mockImplementation((url: string) => {
       if (url === '/roles') return Promise.resolve({ data: [] })
       if (url === '/permissions') return Promise.resolve({ data: {} })

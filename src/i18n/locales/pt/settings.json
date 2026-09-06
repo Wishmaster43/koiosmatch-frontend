@@ -2227,7 +2227,8 @@
     "branchAuthz": {
       "label": "Aplicar permissões por filial",
       "hint": "Aplica as permissões por filial (ver, editar, eliminar) a candidatos, clientes, filiais, compromissos, tarefas e conversas. Um utilizador sem filial associada continua sem restrições, ligado ou não."
-    }
+    },
+    "readOnlyNotice": "Os papéis são gerenciados pelo administrador da plataforma; você só pode visualizá-los aqui."
   },
   "audit": {
     "title": "Registo de auditoria",

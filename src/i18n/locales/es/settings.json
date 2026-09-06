@@ -1981,7 +1981,8 @@
     "branchAuthz": {
       "label": "Aplicar permisos por sede",
       "hint": "Aplica los permisos por sede (ver, editar, eliminar) a candidatos, clientes, sedes, citas, tareas y conversaciones. Un usuario sin sede vinculada sigue sin restricciones, activado o no."
-    }
+    },
+    "readOnlyNotice": "Los roles son administrados por el administrador de la plataforma; solo puedes verlos aquí."
   },
   "audit": {
     "title": "Registro de auditoría",

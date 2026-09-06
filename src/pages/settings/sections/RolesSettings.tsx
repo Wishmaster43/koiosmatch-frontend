@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Trash2, AlertTriangle, RefreshCw } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
+import { useAuth } from '@/context/AuthContext'
 import { RoleDetail } from './RoleDetail'
 import { roleIconEl, ROLE_ICON_NAMES } from '@/lib/roleIcons'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -27,6 +28,9 @@ import { useAllSettings, useSettingsLoaded, getBoolSetting, saveSettingsKeys, in
 // the actual permission editing to RoleDetail (see file docblock above).
 export default function RolesSettings() {
   const { t } = useTranslation('settings')
+  const auth = useAuth()
+  const isSuperAdmin = auth?.isSuperAdmin?.() ?? false
+  const canEdit = isSuperAdmin
   const [roles,       setRoles]       = useState<Role[]>([])
   const [permissions, setPermissions] = useState<PermissionsByGroup>({})
   const [iconOptions, setIconOptions] = useState<string[]>(ROLE_ICON_NAMES)
@@ -150,20 +154,30 @@ export default function RolesSettings() {
           <PageTitle>{t('roles.title')}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('roles.subtitle')}</p>
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          {/* Data-entry field identity (native <input> sizing) — not running text, so
-              the BodyText atom does not apply here. */}
-          <input value={newRoleName} onChange={e => setNewRoleName(e.target.value)}
-            placeholder={t('roles.newPlaceholder')} onKeyDown={e => e.key === 'Enter' && createRole()}
-            // §4 2b: the field face comes from fieldMetrics' canon; only the width is local.
-            style={{ ...fieldInputStyle, width: 150 }} />
-          {/* Paired with the name input above — a soft CTA, not the row-level "+ add"
-              affordance, so it stays a Button (soft, not solid primary) rather than DrawerAddButton. */}
-          <Button variant="primary" onClick={createRole} disabled={creating || !newRoleName.trim()}>
-            <Plus size={13} /> {t('roles.create')}
-          </Button>
-        </div>
+        {/* Create input and button hidden unless user is super-admin. */}
+        {canEdit && (
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {/* Data-entry field identity (native <input> sizing) — not running text, so
+                the BodyText atom does not apply here. */}
+            <input value={newRoleName} onChange={e => setNewRoleName(e.target.value)}
+              placeholder={t('roles.newPlaceholder')} onKeyDown={e => e.key === 'Enter' && createRole()}
+              // §4 2b: the field face comes from fieldMetrics' canon; only the width is local.
+              style={{ ...fieldInputStyle, width: 150 }} />
+            {/* Paired with the name input above — a soft CTA, not the row-level "+ add"
+                affordance, so it stays a Button (soft, not solid primary) rather than DrawerAddButton. */}
+            <Button variant="primary" onClick={createRole} disabled={creating || !newRoleName.trim()}>
+              <Plus size={13} /> {t('roles.create')}
+            </Button>
+          </div>
+        )}
       </div>
+
+      {/* Read-only notice shown when user is not a super-admin. */}
+      {!canEdit && (
+        <div style={{ marginBottom: 'var(--space-4)' }}>
+          <Caption>{t('roles.readOnlyNotice')}</Caption>
+        </div>
+      )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {visibleRoles.map(role => {
@@ -190,14 +204,17 @@ export default function RolesSettings() {
               </div>
               <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
                 {/* PRIMAIR-VLAK-1: this row action wore the accent tint pre-migration — the accent action wears the trio, not neutral secondary (Opus-controle klus d). */}
-                <Button variant="primary" onClick={() => setEditRole(role)}>
+                <Button variant="primary" onClick={() => setEditRole(role)} disabled={!canEdit}>
                   {t('roles.edit')}
                 </Button>
-                <Button variant="dangerSoft" iconOnly aria-label={canDelete ? t('roles.deleteTitle') : t('roles.deleteBlocked', { count: userCount })}
-                  onClick={() => canDelete && deleteRole(role)} disabled={!canDelete || deleting === role.id}
-                  title={canDelete ? t('roles.deleteTitle') : t('roles.deleteBlocked', { count: userCount })}>
-                  {deleting === role.id ? <Spinner size={12} /> : <Trash2 size={12} />}
-                </Button>
+                {/* Delete button hidden unless user is super-admin. */}
+                {canEdit && (
+                  <Button variant="dangerSoft" iconOnly aria-label={canDelete ? t('roles.deleteTitle') : t('roles.deleteBlocked', { count: userCount })}
+                    onClick={() => canDelete && deleteRole(role)} disabled={!canDelete || deleting === role.id}
+                    title={canDelete ? t('roles.deleteTitle') : t('roles.deleteBlocked', { count: userCount })}>
+                    {deleting === role.id ? <Spinner size={12} /> : <Trash2 size={12} />}
+                  </Button>
+                )}
               </div>
             </div>
           )
