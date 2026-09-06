@@ -124,11 +124,13 @@ describe('useCustomerContacts · create payload mapping (toApi)', () => {
     const { result } = renderHook(() => useCustomerContacts('cust1'))
     await waitFor(() => expect(result.current.loading).toBe(false))
 
-    await act(async () => { await result.current.add({ ...fullPayload, departmentId: undefined, departmentIds: ['dep2', 'dep3'] }) })
+    // The singular is what the caller says (null = cleared); the array is never copied into it.
+    await act(async () => { await result.current.add({ ...fullPayload, departmentId: null, departmentIds: ['dep2', 'dep3'] }) })
 
     const body = mockPost.mock.calls[0][1]
     expect(body.department_ids).toEqual(['dep2', 'dep3'])
-    expect(body).not.toHaveProperty('customer_department_id')
+    expect(body.customer_department_id).toBeNull()
+    expect(body.customer_department_id).not.toBe('dep2')
   })
 
   it('passes the multi-value locations/departments arrays through on the created contact (CONTACT-MULTI-1)', async () => {
