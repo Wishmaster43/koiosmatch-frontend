@@ -36,6 +36,13 @@ describe('ProfileAddressTab · own fields, composed line, own request shape', ()
     expect(screen.queryByText('Huisnummer')).toBeNull()
   })
 
+  // I18N-1: the optional second line shows in read mode too, between the street
+  // line and the postcode line (the shared composeAddressLine order, = BE oneLine()).
+  it('read mode includes the second address line when the candidate has one', () => {
+    render(<ProfileAddressTab c={{ ...candidate, addressLine2: 'Gebouw B' } as unknown as Candidate} />)
+    expect(screen.getByText('Kerkstraat 12-a, Gebouw B, 1234 AB Utrecht')).toBeInTheDocument()
+  })
+
   it('read mode shows a copy-to-clipboard icon next to the composed address', async () => {
     const user = userEvent.setup()
     const writeTextSpy = vi.spyOn(navigator.clipboard, 'writeText')

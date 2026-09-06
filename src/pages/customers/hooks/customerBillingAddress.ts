@@ -100,6 +100,6 @@ export function resolveCustomerBillingAddress(c: Customer | null | undefined): R
   const own = BILLING_KEYS.some(k => fields[k].trim() !== '')
   return { own, fields, visitLine: composeAddressLine({
     street: c?.street, houseNumber: c?.houseNumber, houseNumberSuffix: c?.houseNumberSuffix,
-    postalCode: c?.postalCode, city: c?.city,
+    addressLine2: c?.addressLine2, postalCode: c?.postalCode, city: c?.city,
   }) }
 }

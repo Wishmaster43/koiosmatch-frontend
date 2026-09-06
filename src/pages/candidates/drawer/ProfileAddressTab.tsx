@@ -6,6 +6,7 @@
  *  one-line-read + expand-on-edit behaviour (mirrors the shared
  *  EditableFieldTable `type: 'address'` row — same pattern, same author). */
 import { useState, useEffect } from 'react'
+import { composeAddressLine } from '@/components/forms/EditableFieldTable'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useProvinces } from '@/hooks/useProvinces'
@@ -120,10 +121,11 @@ export default function ProfileAddressTab({ c, onSave, autoEditSignal }: {
         {field('city', t('profile.city'))}
       </>
     )
-    const line = [
-      [c.street, [c.houseNumber, c.houseNumberSuffix].filter(Boolean).join('-')].filter(Boolean).join(' '),
-      [c.postalCode, c.city].filter(Boolean).join(' '),
-    ].filter(s => s && s.trim()).join(', ')
+    // I18N-1: the shared composer, so the optional second line shows in read mode too.
+    const line = composeAddressLine({
+      street: c.street, houseNumber: c.houseNumber, houseNumberSuffix: c.houseNumberSuffix,
+      addressLine2: c.addressLine2, postalCode: c.postalCode, city: c.city,
+    })
     return (
       <FieldRow label={t('profile.address')}>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>

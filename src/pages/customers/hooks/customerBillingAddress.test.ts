@@ -28,15 +28,20 @@ describe('customerBillingAddress · API key contract', () => {
       billingStreet: 'billing_street',
       billingHouseNumber: 'billing_house_number',
       billingHouseNumberSuffix: 'billing_house_number_suffix',
+      billingAddressLine2: 'billing_address_line_2',
       billingPostalCode: 'billing_postcode',
       billingCity: 'billing_city',
+      billingProvince: 'billing_province',
       billingCountry: 'billing_country',
     })
   })
 
-  it('carries no province key — a Dutch invoice does not have one, so the column does not exist', () => {
-    expect(BILLING_KEYS.some(k => /province|state/i.test(k))).toBe(false)
-    expect(Object.values(BILLING_API_FIELDS).some(v => /province|state/.test(v))).toBe(false)
+  // I18N-1 (BE 5a109b00): line 2 + province joined the block for international
+  // invoicing — a Dutch invoice simply leaves both empty.
+  it('carries the I18N-1 line-2 and province keys under their exact backend columns', () => {
+    expect(BILLING_KEYS).toContain('billingAddressLine2')
+    expect(BILLING_KEYS).toContain('billingProvince')
+    expect(BILLING_API_FIELDS.billingProvince).toBe('billing_province')
   })
 })
 
@@ -44,12 +49,12 @@ describe('customerBillingAddress · mapCustomerBilling (raw API → UI block)', 
   it('reads each billing column into its UI key', () => {
     expect(mapCustomerBilling({
       billing_po_box: 'Postbus 1234', billing_street: 'Keizersgracht', billing_house_number: '7',
-      billing_house_number_suffix: 'B', billing_postcode: '1015 CJ', billing_city: 'Amsterdam',
-      billing_country: 'NL',
+      billing_house_number_suffix: 'B', billing_address_line_2: 'Unit 3', billing_postcode: '1015 CJ',
+      billing_city: 'Amsterdam', billing_province: 'Noord-Holland', billing_country: 'NL',
     })).toEqual({
       billingPoBox: 'Postbus 1234', billingStreet: 'Keizersgracht', billingHouseNumber: '7',
-      billingHouseNumberSuffix: 'B', billingPostalCode: '1015 CJ', billingCity: 'Amsterdam',
-      billingCountry: 'NL',
+      billingHouseNumberSuffix: 'B', billingAddressLine2: 'Unit 3', billingPostalCode: '1015 CJ',
+      billingCity: 'Amsterdam', billingProvince: 'Noord-Holland', billingCountry: 'NL',
     })
   })
 
@@ -92,7 +97,7 @@ describe('customerBillingAddress · resolve (empty means "use the visit address"
     const r = resolveCustomerBillingAddress(customer())
     expect(r.fields).toEqual({
       billingPoBox: '', billingStreet: '', billingHouseNumber: '', billingHouseNumberSuffix: '',
-      billingPostalCode: '', billingCity: '', billingCountry: '',
+      billingPostalCode: '', billingCity: '', billingAddressLine2: '', billingProvince: '', billingCountry: '',
     })
   })
 

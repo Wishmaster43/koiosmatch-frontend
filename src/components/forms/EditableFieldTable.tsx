@@ -79,12 +79,14 @@ type Values = Record<string, unknown>
 // Compose the standard NL one-line address (mirrors candidates/drawer/ProfileTab's
 // addressRow): "Straat 12a, 1234 AB Plaats". Fixed key names — every 'address' row
 // across the app (candidate profile, customer location) shares this shape.
+// I18N-1: an optional `addressLine2` (unit/building) sits between the street line and
+// the postcode line — the same order the backend's Address::oneLine() uses.
 // eslint-disable-next-line react-refresh/only-export-components -- pure formatter shared by several callers (customerBillingAddress, ZzpAddressCard) alongside this table's own components; not trivial to relocate without touching those unrelated files
 export const composeAddressLine = (v: Values): string => {
   const houseNo = [v.houseNumber, v.houseNumberSuffix].filter(Boolean).join('-')
   const line1 = [v.street, houseNo].filter(Boolean).join(' ')
   const line2 = [v.postalCode, v.city].filter(Boolean).join(' ')
-  return [line1, line2].filter(s => s && String(s).trim()).join(', ')
+  return [line1, v.addressLine2, line2].filter(s => s && String(s).trim()).join(', ')
 }
 
 // Compose the standard "Voornaam tussenvoegsel Achternaam" one-line name — the
