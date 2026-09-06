@@ -91,6 +91,8 @@ export interface Vacancy {
   // drives the Gearchiveerd/Prullenbak view split, mirrors Candidate.lifecycle.
   lifecycle: string
   pendingEraseAt: string | null
+  // Optional number of positions needed for this vacancy.
+  positionsNeeded: number | null
   // VAC-AGENT-1: the AI agent linked to this vacancy (Option A — linking an agent
   // IS the interview on/off switch; it carries its own interview flow, so only the
   // flow's id rides along too, never a duplicate flow picker on the vacancy itself).
@@ -336,6 +338,7 @@ export interface ApiVacancy {
   hours_unit?: string
   experience?: string
   experience_years?: number | null
+  positions_needed?: number | null
   seniority?: unknown
   seniority_label?: string
   education?: unknown

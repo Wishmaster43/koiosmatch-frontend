@@ -228,6 +228,7 @@
     "preferredIndustry": "Preferred industry",
     "category": "Function",
     "function": "Function",
+    "positionsNeeded": "Positions needed",
     "address": "Address",
     "street": "Street",
     "houseNumber": "House number",

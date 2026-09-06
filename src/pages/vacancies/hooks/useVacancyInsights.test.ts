@@ -17,7 +17,7 @@ const vacancy = (over: Partial<Vacancy> = {}): Vacancy => ({
   leadsCount: 0, applicationsCount: 0, applicationsByPhase: {}, matchesCount: 0, published: false, publishedChannels: [],
   owner: { id: null, name: '', initials: '?', color: null }, clientId: null, clientName: '',
   tags: [], created: '', createdSort: '', city: '', lat: null, lng: null, distanceKm: null,
-  startDate: '', endDate: '', archived: false, archivedAt: null,
+  startDate: '', endDate: '', positionsNeeded: null, archived: false, archivedAt: null,
   lifecycle: 'active', pendingEraseAt: null,
   aiAgentId: null, aiAgentName: '', interviewFlowId: null,
   interviewWorkflowId: null, interviewWorkflow: null, hasInterviewWorkflowField: false,

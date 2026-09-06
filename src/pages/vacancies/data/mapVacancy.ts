@@ -98,6 +98,8 @@ export function mapVacancy(v: ApiVacancy = {}): Vacancy {
     // the exact shape a native <input type="date"> reads/writes.
     startDate: v.start_date ?? '',
     endDate: v.end_date ?? '',
+    // Optional number of positions needed.
+    positionsNeeded: v.positions_needed != null ? Number(v.positions_needed) : null,
     // Archive state (soft-delete) — the FE archived-toggle (include_archived=1)
     // surfaces these rows; mirror candidates so the row renders the soft chip.
     archived: Boolean(v.archived ?? (v.deleted_at != null)),

@@ -228,6 +228,7 @@
     "preferredIndustry": "Settore preferito",
     "category": "Funzione",
     "function": "Funzione",
+    "positionsNeeded": "Numero di posizioni",
     "address": "Indirizzo",
     "street": "Via",
     "houseNumber": "Numero civico",

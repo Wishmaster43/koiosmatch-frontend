@@ -29,7 +29,7 @@ export default function DetailsGeneralTab({ vacancy: v, general, candidateTypes,
   const { t } = useTranslation('vacancies')
   const { editing, setEditing, form, setF, save, cancel, types, toggleType,
     clientId, handleClientChange, customerOptions, cascade, locationPicker, departmentPicker, contactPicker } = general
-  const { creatable, twoDates } = makeFieldHelpers(form, setF, t)
+  const { creatable, twoDates, number } = makeFieldHelpers(form, setF, t)
 
   return card(t('details.groups.general'), <>
     {/* V13: Contractvorm — multi-value soft chips in read mode, toggle buttons in edit mode. */}
@@ -64,6 +64,8 @@ export default function DetailsGeneralTab({ vacancy: v, general, candidateTypes,
     {/* VAC-DATES-1: the vacancy's own runtime window — start_date AND end_date
         (validated after_or_equal:start_date server-side), paired half-row. */}
     {row(`${t('details.startDate')} / ${t('details.endDate')}`, dateRange(formatDate, v.startDate, v.endDate) || dash, twoDates('startDate', 'endDate'), editing)}
+    {/* Optional number of positions needed. */}
+    {row(t('details.positionsNeeded'), v.positionsNeeded != null ? String(v.positionsNeeded) : dash, number('positionsNeeded', '', { min: 1 }), editing)}
     {/* V3: client — searchable (was a plain <select>). Picking a different client
         resets the dependent location/department/contact picks below. */}
     {row(t('drawer.client'),

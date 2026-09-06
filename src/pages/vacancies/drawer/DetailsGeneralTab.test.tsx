@@ -25,7 +25,7 @@ const industries = ['Zorg', 'Onderwijs']
 // convention) — this sub-tab only ever reads/calls its OWN `general` section.
 const makeGeneral = (overrides: Partial<GeneralSection> = {}): GeneralSection => ({
   editing: false, setEditing: vi.fn(),
-  form: { category: 'Verpleegkundige', industry: 'Zorg', startDate: '', endDate: '' },
+  form: { category: 'Verpleegkundige', industry: 'Zorg', startDate: '', endDate: '', positionsNeeded: '' },
   setF: vi.fn(), save: vi.fn(), cancel: vi.fn(),
   clientId: 'c1', handleClientChange: vi.fn(), customerOptions: [],
   cascade: { locationId: '', locationName: '', departmentId: '', departmentName: '', contactId: '', contactName: '' },
@@ -90,5 +90,40 @@ describe('DetailsGeneralTab · function/industry clear (CLEAR-SWEEP)', () => {
     const clear = screen.getAllByTitle(/clearField/i)[0]
     await user.click(clear)
     expect(general.setF).toHaveBeenCalledWith('category', '')
+  })
+})
+
+// Optional number of positions needed.
+describe('DetailsGeneralTab · positionsNeeded', () => {
+  it('read mode shows the numeric value when present', () => {
+    const vacancyWithPositions = { ...vacancy, positionsNeeded: 3 } as VacancyDetail
+    render(<DetailsGeneralTab vacancy={vacancyWithPositions} general={makeGeneral()}
+      candidateTypes={[]} typeMeta={() => ({ label: '', color: '#000' })}
+      industries={industries} fnOptions={fnOptions} formatDate={d => d} />)
+    expect(screen.getByText('3')).toBeInTheDocument()
+  })
+
+  it('read mode shows a dash when no positions are needed', () => {
+    render(<DetailsGeneralTab vacancy={vacancy} general={makeGeneral()}
+      candidateTypes={[]} typeMeta={() => ({ label: '', color: '#000' })}
+      industries={industries} fnOptions={fnOptions} formatDate={d => d} />)
+    const rows = screen.getAllByText('-')
+    // One of the dashes should be for positionsNeeded
+    expect(rows.length).toBeGreaterThan(0)
+  })
+
+  it('edit mode allows typing a numeric value and calls setF', async () => {
+    const user = userEvent.setup()
+    const general = makeGeneral({ editing: true, form: { category: 'Verpleegkundige', industry: 'Zorg', startDate: '', endDate: '', positionsNeeded: '' } })
+    render(<DetailsGeneralTab vacancy={vacancy} general={general}
+      candidateTypes={[]} typeMeta={() => ({ label: '', color: '#000' })}
+      industries={industries} fnOptions={fnOptions} formatDate={d => d} />)
+    const inputs = screen.getAllByRole('spinbutton') as HTMLInputElement[]
+    // Find the positionsNeeded input (the last one with min=1)
+    const input = inputs.find(el => el.min === '1')
+    expect(input).toBeDefined()
+    expect(input?.type).toBe('number')
+    await user.type(input!, '3')
+    expect(general.setF).toHaveBeenCalledWith('positionsNeeded', '3')
   })
 })

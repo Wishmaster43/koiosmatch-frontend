@@ -78,6 +78,17 @@ describe('mapVacancy', () => {
     })
   })
 
+  // Optional number of positions needed.
+  it('maps positions_needed when present', () => {
+    const row = mapVacancy({ id: 'v24', positions_needed: 3 })
+    expect(row.positionsNeeded).toBe(3)
+  })
+
+  it('defaults positions_needed to null when absent or null', () => {
+    expect(mapVacancy({ id: 'v25' }).positionsNeeded).toBeNull()
+    expect(mapVacancy({ id: 'v26', positions_needed: null }).positionsNeeded).toBeNull()
+  })
+
   // VAC-DATES-1: start_date/end_date now ship on the list resource too (both
   // already YYYY-MM-DD via Carbon::toDateString(), the exact <input type="date"> shape).
   it('maps the runtime window (start_date/end_date)', () => {

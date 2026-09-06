@@ -228,6 +228,7 @@
     "preferredIndustry": "Setor preferido",
     "category": "Função",
     "function": "Função",
+    "positionsNeeded": "Número de vagas",
     "address": "Morada",
     "street": "Rua",
     "houseNumber": "Número de porta",

@@ -45,7 +45,7 @@ type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 
 // Key unions split per sub-tab — each section's form state only ever holds the
 // fields IT owns, so its patch can only ever carry those fields.
-export type GeneralKey = 'category' | 'industry' | 'startDate' | 'endDate'
+export type GeneralKey = 'category' | 'industry' | 'startDate' | 'endDate' | 'positionsNeeded'
 export type LocationKey = 'street' | 'houseNumber' | 'houseNumberSuffix' | 'addressLine2' | 'postalCode' | 'city' | 'province' | 'country'
 export type RequirementsKey = 'experienceMin' | 'experienceMax' | 'seniority' | 'education'
 // VACANCY-CONTRACT-FIELD-1: the vacancy's own singular contract-kind/CAO slugs.
@@ -124,7 +124,7 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
   const fnOptions = functions.map(f => (typeof f === 'string' ? { value: f, label: f } : { value: f.value, label: f.label ?? f.value }))
 
   // ---- Algemeen: contract type, id (read-only), dates, client→cascade, function, industry ----
-  const seedGeneral = (): GeneralForm => ({ category: v.category, industry: v.industry, startDate: v.startDate, endDate: v.endDate })
+  const seedGeneral = (): GeneralForm => ({ category: v.category, industry: v.industry, startDate: v.startDate, endDate: v.endDate, positionsNeeded: v.positionsNeeded != null ? String(v.positionsNeeded) : '' })
   const generalForm = useEditableForm(seedGeneral)
   const [clientId, setClientId] = useState<string>(String(v.clientId ?? ''))
   const [types, setTypes] = useState<string[]>(v.contractTypes ?? [])
@@ -166,7 +166,7 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
   const toggleType = (val: string) => setTypes(p => p.includes(val) ? p.filter(x => x !== val) : [...p, val])
   // Customer options load only while the Algemeen pencil is open (capped page, React Query).
   const customerOptions = useCustomerOptions(generalForm.editing)
-  // Persists the Algemeen section patch (client, cascade, contract types, category/industry, dates) and commits the cascade as the new saved baseline.
+  // Persists the Algemeen section patch (client, cascade, contract types, category/industry, dates, positions) and commits the cascade as the new saved baseline.
   const saveGeneral = () => {
     onUpdate?.(v.id, {
       // Client lives in Algemeen (header stays calm) — send the name too for optimistic UI.
@@ -177,6 +177,8 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
       contractTypes: types, category: generalForm.form.category, industry: generalForm.form.industry,
       // VAC-DATES-1: runtime window (BE validates end_date after_or_equal:start_date).
       startDate: generalForm.form.startDate, endDate: generalForm.form.endDate,
+      // Optional number of positions needed.
+      positionsNeeded: generalForm.form.positionsNeeded === '' || generalForm.form.positionsNeeded == null ? null : Number(generalForm.form.positionsNeeded),
     })
     setSavedCascade(cascade)
     generalForm.setEditing(false)

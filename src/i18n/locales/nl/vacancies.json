@@ -228,6 +228,7 @@
     "preferredIndustry": "Voorkeurs branche",
     "category": "Functie",
     "function": "Functie",
+    "positionsNeeded": "Aantal posities",
     "address": "Adres",
     "street": "Straat",
     "houseNumber": "Huisnummer",

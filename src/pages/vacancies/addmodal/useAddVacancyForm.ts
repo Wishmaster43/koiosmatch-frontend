@@ -31,7 +31,7 @@ import type { Id } from '@/types/common'
 
 export interface VacancyCreateForm {
   title: string; status: string; ownerId: string; clientId: string; industry: string; category: string
-  contractTypes: string[]; startDate: string; endDate: string
+  contractTypes: string[]; startDate: string; endDate: string; positionsNeeded: string
   street: string; houseNumber: string; houseNumberSuffix: string; addressLine2: string; postalCode: string; city: string; province: string; country: string
   // Branch (agency) — the TENANT'S OWN establishment (`/locations`), POSTed as
   // `location_id`. Never confuse this with `customerLocationId` below (the
@@ -91,7 +91,7 @@ export function useAddVacancyForm({
 
   const [form, setForm] = useState<VacancyCreateForm>({
     title: '', status: defaultStatus(), ownerId: '', clientId: lockCustomerId ?? '', industry: '', category: '',
-    contractTypes: [], startDate: '', endDate: '',
+    contractTypes: [], startDate: '', endDate: '', positionsNeeded: '',
     street: '', houseNumber: '', houseNumberSuffix: '', addressLine2: '', postalCode: '', city: '', province: '', country: '',
     branchId: '',
     seniority: '', education: '',
