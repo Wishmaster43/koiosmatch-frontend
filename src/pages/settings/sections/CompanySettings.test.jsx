@@ -214,3 +214,19 @@ describe('CompanySettings — locale codes (I18N-1 L4)', () => {
     expect(payload.company_timezone).toBe('Europe/Amsterdam')
   })
 })
+
+// TAAL-NAAM-1 × I18N-1: the backend's languages list labels its codes as bare codes
+// ("EN", "DE" — measured on demo 06-09); the picker must still show the language NAME
+// in the UI language, never the code.
+describe('CompanySettings — language names from the backend code list', () => {
+  it('shows "Engels" for a backend option labelled "EN" and never the bare code', async () => {
+    api.get.mockImplementation((url) => url === '/settings/locale-options'
+      ? Promise.resolve({ data: { data: { currencies: [], timezones: [], languages: [{ code: 'nl', label: 'NL' }, { code: 'en', label: 'EN' }] } } })
+      : new Promise(() => {}))
+    loadSettings.mockResolvedValue({ company_language: 'en' })
+    renderPage()
+    expect(await screen.findByText('Engels')).toBeInTheDocument()
+    expect(screen.queryByText(/^EN$/)).not.toBeInTheDocument()
+  })
+})
+

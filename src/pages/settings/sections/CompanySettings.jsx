@@ -20,6 +20,7 @@ import { cardHead } from '@/components/ui/modalCards'
 // One language source for the whole app (Danny 14/7): the same five shipped
 // locales the profile picker offers — never a diverging local list.
 import { LANGUAGES as APP_LANGUAGES } from '@/pages/auth/shared'
+import { languageDisplayName } from '@/lib/languageNames'
 import Button from '@/components/ui/Button'
 import SaveButton from '@/components/ui/SaveButton'
 import { PageTitle } from '@/components/ui/typography'
@@ -127,7 +128,7 @@ const EMPTY = {
 
 // Renders the company-profile form (see file docblock above) and owns its load/save state.
 export default function CompanySettings() {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   // Tenant-configurable industry options for the dropdown below.
   // Options pair the STORED industry name with a translated label (LOOKUP-I18N-1).
   const { industryOptions: industries } = useIndustries()
@@ -135,7 +136,13 @@ export default function CompanySettings() {
   const { options: localeOptions } = useLocaleOptions()
   const currencyOptions = localeOptions.currencies.map(o => ({ value: o.code, label: o.label }))
   const timezoneOptions = localeOptions.timezones.map(o => ({ value: o.code, label: o.label }))
-  const languageOptions = localeOptions.languages.length ? localeOptions.languages.map(o => ({ value: o.code, label: o.label })) : LANGUAGES
+  // TAAL-NAAM-1 (Danny 25-08: "Taal moet Nederlands zijn, niet nl"): the backend's
+  // languages list labels its codes as bare codes ("EN", "DE" — measured on demo
+  // 06-09), so the NAME comes from ICU in the current UI language; the backend label
+  // is only the fallback when ICU does not know the code.
+  const languageOptions = localeOptions.languages.length
+    ? localeOptions.languages.map(o => { const name = languageDisplayName(o.code, i18n.language); return { value: o.code, label: name.toUpperCase() === o.code.toUpperCase() ? o.label : name } })
+    : LANGUAGES
   // Backend-sourced operating-country codes, labelled in the current UI language.
   const { options: countryOptions } = useCountriesLookup()
   const [form,       setForm]       = useState(EMPTY)
