@@ -65,7 +65,7 @@ const baseCustomer: Customer = {
   id: 1, name: 'Zorgpartners', initials: 'ZP', status: 'active', statusLabel: 'Actief', statusColor: '#000',
   city: 'Utrecht', industry: '', locationsCount: 0, departmentsCount: 0, contactsCount: 0, openVacanciesCount: 0,
   activeMatchesCount: 0, created: '2026-01-01', owner: 'Owner', ownerInitials: '?', ownerColor: null,
-  koiosAdvice: null, helloflexLink: null, shiftmanagerLink: null, logo: null,
+  koiosAiAdvice: null, helloflexLink: null, shiftmanagerLink: null, logo: null,
 } as unknown as Customer
 
 const statusMeta = () => ({ label: 'Actief', color: '#000' })

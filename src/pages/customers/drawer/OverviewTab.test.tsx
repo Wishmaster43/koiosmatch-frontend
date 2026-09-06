@@ -81,7 +81,7 @@ const customer = (overrides: Partial<Customer> = {}): Customer => ({
   hideCompanyName: false, hasCareerPage: false, showInVacancies: false, excludeFromSourcing: false,
   costCenter: '', billingEmail: '', tags: [], archived: false, locations: [], departments: [], contacts: [],
   notes: [], locationsCount: 0, departmentsCount: 0, contactsCount: 0, openVacanciesCount: 0,
-  activeMatchesCount: 0, created: '', logo: null, koiosAdvice: null, customFields: {},
+  activeMatchesCount: 0, created: '', logo: null, koiosAiAdvice: null, customFields: {},
   ...overrides,
 } as Customer)
 

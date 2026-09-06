@@ -297,6 +297,29 @@
       "high": "Hoog",
       "xhigh": "Zeer hoog",
       "max": "Maximaal"
+    },
+    "advice": {
+      "refresh": "Advies vernieuwen",
+      "score": "score",
+      "none": "Nog geen AI-advies",
+      "generatedAt": "Gegenereerd op {{date}}",
+      "pending": "Koios werkt aan het advies...",
+      "alreadyRunning": "Er loopt al een adviesrun voor dit record.",
+      "unavailable": "AI-advies is voor dit onderdeel niet ingeschakeld.",
+      "verdict": {
+        "proceed": "Doorgaan",
+        "review": "Beoordelen",
+        "reject": "Afwijzen",
+        "ok": "Oké",
+        "improve": "Verbeteren",
+        "opportunity": "Kans",
+        "risk": "Risico",
+        "stable": "Stabiel",
+        "renew": "Verlengen",
+        "at_risk": "Aandacht nodig",
+        "ending": "Loopt af",
+        "next_step": "Volgende stap"
+      }
     }
   },
   "actionRules": {

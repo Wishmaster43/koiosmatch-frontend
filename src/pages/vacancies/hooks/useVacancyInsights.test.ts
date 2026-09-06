@@ -21,6 +21,8 @@ const vacancy = (over: Partial<Vacancy> = {}): Vacancy => ({
   lifecycle: 'active', pendingEraseAt: null,
   aiAgentId: null, aiAgentName: '', interviewFlowId: null,
   interviewWorkflowId: null, interviewWorkflow: null, hasInterviewWorkflowField: false,
+  // S1 K-266/K-267: required field, unused by the fallback branches under test.
+  koiosAiAdvice: null,
   ...over,
 })
 

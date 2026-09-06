@@ -12,8 +12,10 @@
  * advisory block (still bottom-of-tab, unaffected by the merge).
  */
 import { useTranslation } from 'react-i18next'
+import { useAuth } from '@/context/AuthContext'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import { useVacancyAdvice } from '@/lib/useVacancyAdvice'
+import { useKoiosAdviceRun } from '@/lib/useKoiosAdviceRun'
 import { adviceInsightRows } from '@/lib/koiosAdviceInsight'
 import { buildVacancyAdviceInsights } from './vacancyAiInsights'
 import { useVacancyDetailsForm } from '../hooks/useVacancyDetailsForm'
@@ -38,6 +40,19 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
     contractTypeOptions, caoOptions,
     general, location, requirements, conditions } = useVacancyDetailsForm(v, onUpdate)
 
+  // S1 K-266/K-267: the "Advies vernieuwen" button is gated on vacancies.update
+  // AND the koios_ai module (EnsureTenantModule on the route — a Core tenant
+  // with only koios_assist gets a 403, so the button must not even render for
+  // it; mirrors WhatsAppPage's plain hasModule gate) and starts a REAL AI call
+  // (API-CREDITS-1).
+  const auth = useAuth()
+  const canUpdate = (auth?.hasPermission?.('vacancies.update') ?? false) && (auth?.hasModule?.('koios_ai') ?? false)
+  // freshAdvice + the run's own pending/notice live in the hook's module-scope
+  // store (S1 repair NOTE 3), keyed by the vacancy id, so a paid run survives
+  // a tab switch; `v.koiosAiAdvice.runId` lets the hook drop a stale local
+  // override once a bulk/workflow refetch brings a genuinely newer one.
+  const { request, pending, notice, freshAdvice } = useKoiosAdviceRun('vacancies', v.id, v.koiosAiAdvice?.runId)
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {/* Klant, locatie(vestiging)/afdeling/contactpersoon-cascade, contractvorm,
@@ -55,6 +70,10 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
       <KoiosAdviceBlock namespace="vacancies"
         insights={[...adviceInsightRows(resolveAdvice(v)), ...buildVacancyAdviceInsights(v, t)]}
         contextRef={v.id ? { type: 'vacancy', id: String(v.id), label: v.title ?? '' } : undefined}
+        aiAdvice={freshAdvice !== undefined ? freshAdvice : v.koiosAiAdvice}
+        onRequestAdvice={canUpdate ? request : undefined}
+        advicePending={pending}
+        adviceNotice={notice}
       />
       {/* DRILLDOWN-VOLGORDE-CANON (Danny 21-08): informatie → vrije tekst (own
           tab) → Koios AI → vestiging LAST — the bureau branch picker closes

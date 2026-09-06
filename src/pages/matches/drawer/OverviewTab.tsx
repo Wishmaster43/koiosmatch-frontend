@@ -40,37 +40,37 @@
  * below is DETAIL-FIRST though: it reads `contract.start_date ?? match.startDate`
  * (same for end_date), so a fresher contract fetch always wins over the possibly
  * stale match.* prop, not the other way round. The other Overview fields
- * (candidate/vacancy/client/owner/score/stage/created) stay read-only: some
- * have no server path in MatchRules at all (candidate/vacancy — a match's
- * relations aren't reassignable via PATCH), owner already has its OWN editable
- * path in the header, and client (customer_id) DOES have a server path but
- * reassigning a placement's customer is a materially bigger, guarded operation
- * (guardCustomerApplicability) that nobody asked for here — flagged for Danny
- * rather than built silently (§3A cell-doorklik-canon: inventory, don't decide).
+ * (candidate/vacancy/owner/score/stage/created) stay read-only: candidate/
+ * vacancy have no server path in MatchRules at all (a match's relations
+ * aren't reassignable via PATCH), and owner already has its OWN editable path
+ * in the header. Client (customer_id) DOES have a server path — reassigning a
+ * placement's customer is a materially bigger, guarded operation
+ * (guardCustomerApplicability), now built as its own flow — see MATCH-CLIENT-
+ * EDIT below.
  *
- * MATCH-CLIENT-EDIT (K-281, Danny 04-09 "volg je advies"): the client PICKER
- * itself is still a separate, not-yet-built slice — this pass only surfaces
- * the server's guard state on the existing read-only client row, so a future
- * picker (or a workflow/import write) is never a surprise 422. Once a match
- * carries a live HelloFlex contract (contractStatus !== 'none', or a
- * helloflexContractGuid), MatchClientGuard.php refuses any customer_id/
+ * MATCH-CLIENT-EDIT (K-281, Danny 04-09 "volg je advies"; CMBE GO 05-09): the
+ * client row's pencil (matches.update-gated, hidden once locked) opens the
+ * customer -> location -> department reassign flow — MatchClientRow.tsx, its
+ * own component (§0.3 split: this tab was approaching the 400-line trigger).
+ * Once a match carries a live HelloFlex contract (contractStatus !== 'none',
+ * or a helloflexContractGuid), MatchClientGuard.php refuses any customer_id/
  * customer_location_id/customer_department_id change at the model level (every
- * write path) — the Caption below the client row names that BEFORE a picker
- * exists, not after a failed save.
+ * write path) — MatchClientRow keeps naming that with the same Caption as
+ * before, just hides the pencil alongside it instead of showing a dead one.
  */
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Unplug } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import SectionCard from '@/components/ui/SectionCard'
-import { CANON_LABEL_STYLE, CANON_LABEL_WIDTH } from '@/components/drawer/fieldRowCanon'
 import SharedBranchSection from '@/components/drawer/BranchSection'
 import { useDateFormat } from '@/lib/datetime'
+import { useAuth } from '@/context/AuthContext'
 import StatusPill from '@/components/ui/StatusPill'
 import EntityLink from '@/components/ui/EntityLink'
-import { Caption } from '@/components/ui/typography'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import { useMatchAdvice } from '@/lib/useMatchAdvice'
+import { useKoiosAdviceRun } from '@/lib/useKoiosAdviceRun'
 import { adviceInsightRows } from '@/lib/koiosAdviceInsight'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
@@ -86,26 +86,15 @@ import MatchDurationBar from './MatchDurationBar'
 import MatchTextBlock from './MatchTextBlock'
 import MatchRemarksBlock from './MatchRemarksBlock'
 import MatchRenewalsBlock from './MatchRenewalsBlock'
+import MatchClientRow from './MatchClientRow'
+import { Field } from './MatchFieldRow'
+import { dash } from '@/components/drawer/fieldRowCanon'
 import type { MatchRow } from '@/types/match'
-
-// One read-only field row: label LEFT (canon width), value right — the
-// DRILLDOWN-VOLGORDE-CANON (Danny 21-08 "tekst links waarde rechts") applied:
-// the same EditableFieldTable/FieldRow look every candidate card uses.
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26 }}>
-      <span style={CANON_LABEL_STYLE}>{label}</span>
-      <div style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'var(--text)', wordBreak: 'break-word' }}>{children}</div>
-    </div>
-  )
-}
 
 // Render a plain text value, or an em dash when empty (never blank per §3 states).
 function textOrDash(value: string): ReactNode {
   return value && value !== '—' ? value : <span style={{ color: 'var(--text-muted)' }}>—</span>
 }
-
-const dash = <span style={{ color: 'var(--text-muted)' }}>—</span>
 
 interface OverviewTabProps {
   match: MatchRow
@@ -122,6 +111,13 @@ export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTa
   // KOIOS-ADVIES-OVERAL-1: the SAME resolver the matches table's Koios column
   // uses — the advisory block below prepends its advice so the two never disagree.
   const resolveAdvice = useMatchAdvice()
+  // S1 K-266/K-267: the "Advies vernieuwen" button is gated on matches.update
+  // AND the koios_ai module (EnsureTenantModule on the route — a Core tenant
+  // with only koios_assist gets a 403, so the button must not even render for
+  // it; mirrors WhatsAppPage's plain hasModule gate) and starts a REAL AI call
+  // (API-CREDITS-1).
+  const authForAdvice = useAuth()
+  const canUpdateAdvice = (authForAdvice?.hasPermission?.('matches.update') ?? false) && (authForAdvice?.hasModule?.('koios_ai') ?? false)
   // MATCH-EDIT-1: contract_type is a tenant lookup (mirrors the Contract tab's
   // own dropdown) — never a hardcoded option list.
   const { types: contractTypes } = useContractTypes()
@@ -140,12 +136,16 @@ export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTa
   // fetch, not the "one per tab" pattern the comment above describes.
   const { data: contract, loading: contractLoading, error: contractError, unavailable: contractUnavailable,
     retry: retryContract, revertTick, save: saveContract, matchTextPresent,
-    termination } = useMatchContract(match.id, onUpdate)
-
-  // MATCH-CLIENT-EDIT (K-281): mirrors MatchClientGuard::isClientLocked exactly
-  // (contract_status !== 'none' OR a set helloflex_contract_guid) — undefined/
-  // null contractStatus reads as the unlocked default, never a false lock.
-  const clientLocked = (!!match.contractStatus && match.contractStatus !== 'none') || !!match.helloflexContractGuid
+    termination, koiosAiAdvice: contractKoiosAiAdvice } = useMatchContract(match.id, onUpdate)
+  // S1 repair MUST-FIX 2: the LIST row's own koiosAiAdvice is compact
+  // (verdict+score only, MatchListResource) — the contract fetch above hits
+  // MatchDetailResource, which carries the FULL block, so it wins once loaded.
+  // Deep-link (which fetches the detail directly) and a plain row-click (which
+  // starts from the compact list row) now converge on the SAME card the
+  // moment this tab's own contract fetch lands, instead of disagreeing.
+  const currentAdvice = contractKoiosAiAdvice ?? match.koiosAiAdvice
+  const { request: requestAdvice, pending: advicePending, notice: adviceNotice, freshAdvice }
+    = useKoiosAdviceRun('matches', match.id, currentAdvice?.runId)
 
   // MATCH-EDIT-1: the six fields that used to live on the Contract tab — now
   // editable here, grouped under that tab's OWN "Contract"/"Financieel" titles
@@ -221,21 +221,10 @@ export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTa
               ? <EntityLink page="vacancies" id={match.vacancyId} title={t('drawer.openVacancy')}>{match.vacancy}</EntityLink>
               : dash}
           </Field>
-          <Field label={t('drawer.fields.client')}>
-            {match.client && match.client !== '—'
-              ? <EntityLink page="customers" id={match.clientId} title={t('drawer.openClient')}>{match.client}</EntityLink>
-              : dash}
-          </Field>
-          {/* MATCH-CLIENT-EDIT (K-281): the client row itself stays read-only
-              text (no picker built yet, §3A cell-doorklik-canon) — this notice
-              only surfaces the server-side lock so it's never a silent 422
-              later. Indented to the value column (CANON_LABEL_WIDTH + Field's
-              own 12px gap), never a full-width banner on a single field row. */}
-          {clientLocked && (
-            <Caption style={{ paddingLeft: CANON_LABEL_WIDTH + 12, marginTop: -2 }}>
-              {t('drawer.clientLocked')}
-            </Caption>
-          )}
+          {/* MATCH-CLIENT-EDIT (K-281): the client row + its own reassign flow
+              (pencil -> customer/location/department cascade -> confirm -> PATCH),
+              its own component (see file header). */}
+          <MatchClientRow match={match} onUpdate={onUpdate} />
           <Field label={t('drawer.fields.owner')}>{textOrDash(match.owner)}</Field>
           <Field label={t('drawer.fields.score')}><ScorePill value={match.score} /></Field>
           {/* MATCHES 18 + punt 2 (21-08): the fase derives from the application
@@ -348,6 +337,10 @@ export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTa
       <KoiosAdviceBlock namespace="matches"
         insights={[...adviceInsightRows(resolveAdvice(match)), ...buildMatchAdviceInsights(match, t)]}
         contextRef={match.id ? { type: 'match', id: String(match.id), label: '' } : undefined}
+        aiAdvice={freshAdvice !== undefined ? freshAdvice : currentAdvice}
+        onRequestAdvice={canUpdateAdvice ? requestAdvice : undefined}
+        advicePending={advicePending}
+        adviceNotice={adviceNotice}
       />
 
       {/* REMARKS-INTO-NOTES-1: the retired Opmerkingen field. Mounted only while it

@@ -173,7 +173,15 @@ function normalize(raw: unknown, fallback: LookupItem[]): LookupItem[] {
       is_rejected: flag(it, 'is_rejected'),
       // PROPOSE-STAGE-FLAG-1: same flag-resolution pattern as is_match/is_rejected.
       is_proposal: flag(it, 'is_proposal'),
-      is_default: flag(it, 'is_default') }))
+      is_default: flag(it, 'is_default'),
+      // K-281 repair pass 3 (Opus find): these two candidateTypes-only flags were
+      // NEVER whitelisted here, so typeMeta(...)?.customer_not_applicable/
+      // has_contract_lines was always undefined on a REAL tenant fetch (only the
+      // seed fallback ever carried them) — silently breaking MATCH-KLANTLOOS-1
+      // (useMatchForm.ts) and MATCH-SOORT-1's CONTRACTREGELS gate, and letting the
+      // MatchClientRow pencil render (then 422) on a klant-loos match.
+      has_contract_lines: flag(it, 'has_contract_lines'),
+      customer_not_applicable: flag(it, 'customer_not_applicable') }))
 }
 
 // Translate the AVAILABILITY seed's labels through i18n — this axis has no

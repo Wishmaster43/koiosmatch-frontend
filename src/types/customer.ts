@@ -5,6 +5,7 @@
  */
 import type { Id } from './common'
 import type { ApiBackofficeLink, BackofficeLink } from '@/lib/backofficeLink'
+import type { ApiKoiosAiAdvice, KoiosAiAdvice } from '@/lib/koiosAdviceMap'
 
 /** A contact person (flat UI shape). SUB-STATUS-1 status + CONTACT-MULTI-1 multi coupling. */
 export interface Contact {
@@ -328,9 +329,12 @@ export interface Customer {
   activeMatchesCount: number
   created: string
   logo: string | null
-  // `source` tags WHO produced this advice (mirrors CandidateAdvice) — the honest
-  // gate in useCustomerAdvice only trusts a backend value once it declares one.
-  koiosAdvice: { action?: string; label?: string; reason?: string; source?: string } | null
+  // S1 K-266/K-267 (KOIOS-ADVIES-OVERAL-1, renamed 04-09): the per-record AI
+  // advice cache (a real `koios_advice_customer` workflow run). Customer never
+  // had a deterministic rules card of its own — this is its only advice key
+  // (the old `koiosAdvice`/`koios_advice` field was never filled by the
+  // backend and has been replaced by this one at the source).
+  koiosAiAdvice: KoiosAiAdvice | null
   // Tenant custom-field values (§3B "Eigen velden" — the drawer's gated Extra tab).
   customFields: Record<string, unknown>
 }
@@ -483,8 +487,10 @@ export interface ApiCustomer {
   active_matches_count?: number; activeMatchesCount?: number
   created_at?: string; created?: string
   logo?: string | null; logo_url?: string | null
-  koios_advice?: { action?: string; label?: string; reason?: string; source?: string } | null
-  koiosAdvice?: { action?: string; label?: string; reason?: string; source?: string } | null
+  // S1 K-266/K-267 (renamed 04-09): the new AI advice cache (CustomerDetailResource::
+  // koios_ai_advice / CustomerListResource's compact verdict+score). The old
+  // `koios_advice`/`koiosAdvice` field this replaced was never filled by the backend.
+  koios_ai_advice?: ApiKoiosAiAdvice | null
   // Tenant custom-field values (§3B "Eigen velden").
   custom_fields?: Record<string, unknown>
   // EXTRACT-1: the shared raw shape (src/lib/backofficeLink).

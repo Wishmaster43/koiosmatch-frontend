@@ -297,6 +297,29 @@
       "high": "Hoch",
       "xhigh": "Sehr hoch",
       "max": "Maximum"
+    },
+    "advice": {
+      "refresh": "Empfehlung aktualisieren",
+      "score": "Bewertung",
+      "none": "Noch keine KI-Empfehlung",
+      "generatedAt": "Erstellt am {{date}}",
+      "pending": "Koios arbeitet an der Empfehlung ...",
+      "alreadyRunning": "Für diesen Datensatz läuft bereits ein Empfehlungslauf.",
+      "unavailable": "KI-Empfehlung ist für diesen Bereich nicht aktiviert.",
+      "verdict": {
+        "proceed": "Fortfahren",
+        "review": "Prüfen",
+        "reject": "Ablehnen",
+        "ok": "OK",
+        "improve": "Verbessern",
+        "opportunity": "Chance",
+        "risk": "Risiko",
+        "stable": "Stabil",
+        "renew": "Verlängern",
+        "at_risk": "Gefährdet",
+        "ending": "Endet",
+        "next_step": "Nächster Schritt"
+      }
     }
   },
   "actionRules": {

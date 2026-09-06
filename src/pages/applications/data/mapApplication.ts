@@ -4,6 +4,7 @@
 // language values, list-vs-detail field gaps) get normalised into our own shape.
 import { bucketOfPhase } from './applicationsShared'
 import { initialsOf } from '@/lib/initials'
+import { mapKoiosAiAdvice } from '@/lib/koiosAdviceMap'
 import type { Id } from '@/types/common'
 import type { LookupItem } from '@/context/LookupsContext'
 import type {
@@ -186,6 +187,8 @@ export function mapApplication(a: ApiApplication = {}, funnelTypes: LookupItem[]
     // PLACED-1: batched EXISTS on `matches` — tolerant default false when the
     // field is absent (older cached payloads, pre-9ba44e54 fixtures).
     hasMatch: Boolean(a.has_match),
+    // S1 K-266/K-267: the new per-record AI advice cache (real workflow run).
+    koiosAiAdvice: mapKoiosAiAdvice(a.koios_ai_advice),
   }
 }
 

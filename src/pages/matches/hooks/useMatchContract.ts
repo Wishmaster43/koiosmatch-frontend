@@ -12,6 +12,8 @@
  */
 import { useState, useEffect, useCallback } from 'react'
 import api, { unwrap, isServiceUnavailable } from '@/lib/api'
+import { mapKoiosAiAdvice } from '@/lib/koiosAdviceMap'
+import type { ApiKoiosAiAdvice, KoiosAiAdvice } from '@/lib/koiosAdviceMap'
 import type { MatchRow, MatchContractForm, MatchRenewal } from '@/types/match'
 import type { Id } from '@/types/common'
 
@@ -135,6 +137,12 @@ export function useMatchContract(
 ) {
   const [data,    setData]    = useState<MatchContract>(EMPTY)
   const [termination, setTermination] = useState<MatchTermination | null>(null)
+  // S1 repair MUST-FIX 2: MatchDetailResource already carries the FULL
+  // koios_ai_advice block on this same GET — pick() above never read it, so
+  // OverviewTab was stuck showing the LIST row's compact {verdict,score} even
+  // once this detail fetch landed. Kept here (not folded into MatchContract)
+  // since it is not part of the editable PATCH-body shape.
+  const [koiosAiAdvice, setKoiosAiAdvice] = useState<KoiosAiAdvice | null>(null)
   const [loading, setLoading] = useState(true)
   // Raw fetch error kept (not just a boolean) so a 503 — the integration simply
   // isn't configured yet — can be told apart from a real failure (C-15).
@@ -152,7 +160,7 @@ export function useMatchContract(
 
   // Load the contract layer once per match (detail-only fields — never on the list row).
   useEffect(() => {
-    if (!matchId) { setData(EMPTY); setTermination(null); setLoading(false); setMatchTextPresent(false); return }
+    if (!matchId) { setData(EMPTY); setTermination(null); setLoading(false); setMatchTextPresent(false); setKoiosAiAdvice(null); return }
     let alive = true
     setLoading(true); setRawError(null)
     api.get(`/matches/${matchId}`)
@@ -162,6 +170,7 @@ export function useMatchContract(
         setData(pick(raw))
         setTermination(pickTermination(raw))
         setMatchTextPresent('description' in raw || 'match_text' in raw)
+        setKoiosAiAdvice(mapKoiosAiAdvice(raw.koios_ai_advice as ApiKoiosAiAdvice | null | undefined))
       })
       .catch(err => { if (alive) setRawError(err) })
       .finally(() => { if (alive) setLoading(false) })
@@ -204,5 +213,5 @@ export function useMatchContract(
     }
   }, [matchId, data, onUpdate])
 
-  return { data, termination, loading, error, unavailable, saving, revertTick, retry, save, matchTextPresent }
+  return { data, termination, loading, error, unavailable, saving, revertTick, retry, save, matchTextPresent, koiosAiAdvice }
 }

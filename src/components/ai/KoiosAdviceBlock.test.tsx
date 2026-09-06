@@ -110,6 +110,67 @@ describe('KoiosAdviceBlock', () => {
   })
 })
 
+// S1 K-266/K-267: the new `aiAdvice` prop — a REAL AI advice cache, distinct
+// from the deterministic `insights` above. `@/lib/api`/AI calls are never
+// exercised here — this suite only renders the prop the hook already resolved.
+describe('KoiosAdviceBlock · aiAdvice (S1 K-266/K-267)', () => {
+  it('renders nothing extra when the host does not carry the field at all', () => {
+    render(<KoiosAdviceBlock namespace="candidates" insights={insights} />)
+    expect(screen.queryByText('common:koios.advice.none')).toBeNull()
+    expect(screen.queryByRole('button', { name: 'common:koios.advice.refresh' })).not.toBeInTheDocument()
+  })
+
+  it('renders the empty state + refresh button when aiAdvice is null and onRequestAdvice is passed', async () => {
+    const onRequestAdvice = vi.fn()
+    render(<KoiosAdviceBlock namespace="candidates" insights={insights} aiAdvice={null} onRequestAdvice={onRequestAdvice} />)
+    expect(screen.getByText('common:koios.advice.none')).toBeInTheDocument()
+    const btn = screen.getByRole('button', { name: 'common:koios.advice.refresh' })
+    await userEvent.click(btn)
+    expect(onRequestAdvice).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders no refresh button when onRequestAdvice is absent, even with aiAdvice present', () => {
+    render(<KoiosAdviceBlock namespace="candidates" insights={insights} aiAdvice={{ verdict: 'proceed', score: 80 }} />)
+    expect(screen.queryByRole('button', { name: 'common:koios.advice.refresh' })).not.toBeInTheDocument()
+  })
+
+  it('renders the verdict chip, score (a raw number, never a percentage), text and generated-at caption', () => {
+    render(<KoiosAdviceBlock namespace="applications" insights={[]} aiAdvice={{
+      verdict: 'proceed', score: 88, text: 'Strong fit for this role.', language: 'nl',
+      generatedAt: '2026-09-01T09:00:00Z', runId: 'run-9',
+    }} />)
+    expect(screen.getByText('common:koios.advice.verdict.proceed')).toBeInTheDocument()
+    // S1 repair NOTE 6 (EENHEID-LES): a 0-100 fit score, never a '%' suffix.
+    expect(screen.getByText('common:koios.advice.score')).toBeInTheDocument()
+    expect(screen.getByText('88')).toBeInTheDocument()
+    expect(screen.queryByText('88%')).toBeNull()
+    expect(screen.getByText('Strong fit for this role.')).toBeInTheDocument()
+    expect(screen.getByText('common:koios.advice.generatedAt')).toBeInTheDocument()
+  })
+
+  // S1 repair NOTE 4: the heading's own KoiosAiMark already carries the AI-Act
+  // disclosure hint — a second stacked AiGeneratedLabel would double the badge.
+  it('never renders a second "AI-gegenereerd" label alongside the aiAdvice block', () => {
+    render(<KoiosAdviceBlock namespace="applications" insights={[]} aiAdvice={{
+      verdict: 'proceed', score: 88, text: 'Strong fit.', generatedAt: '2026-09-01T09:00:00Z', runId: 'run-9',
+    }} />)
+    expect(screen.queryByText('aiGenerated')).toBeNull()
+  })
+
+  it('disables the refresh button while a run is pending', () => {
+    render(<KoiosAdviceBlock namespace="vacancies" insights={[]} aiAdvice={null}
+      onRequestAdvice={() => {}} advicePending />)
+    expect(screen.getByRole('button', { name: 'common:koios.advice.refresh' })).toBeDisabled()
+    expect(screen.getByText('common:koios.advice.pending')).toBeInTheDocument()
+  })
+
+  it('shows the run notice when one is passed', () => {
+    render(<KoiosAdviceBlock namespace="matches" insights={[]} aiAdvice={null}
+      onRequestAdvice={() => {}} adviceNotice="A run is already in progress." />)
+    expect(screen.getByText('A run is already in progress.')).toBeInTheDocument()
+  })
+})
+
 // A reason that already ends a sentence must not produce a double period in the question.
 describe('KoiosAdviceBlock · question composition', () => {
   it("strips the advice text's trailing period before interpolating it", async () => {

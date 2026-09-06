@@ -297,6 +297,29 @@
       "high": "Alto",
       "xhigh": "Muito alto",
       "max": "Máximo"
+    },
+    "advice": {
+      "refresh": "Atualizar conselho",
+      "score": "pontuação",
+      "none": "Ainda sem conselho de IA",
+      "generatedAt": "Gerado em {{date}}",
+      "pending": "O Koios está a preparar o conselho...",
+      "alreadyRunning": "Já existe uma execução de conselho em curso para este registo.",
+      "unavailable": "O conselho de IA não está ativado para esta secção.",
+      "verdict": {
+        "proceed": "Prosseguir",
+        "review": "Rever",
+        "reject": "Rejeitar",
+        "ok": "OK",
+        "improve": "Melhorar",
+        "opportunity": "Oportunidade",
+        "risk": "Risco",
+        "stable": "Estável",
+        "renew": "Renovar",
+        "at_risk": "Em risco",
+        "ending": "A terminar",
+        "next_step": "Próximo passo"
+      }
     }
   },
   "actionRules": {

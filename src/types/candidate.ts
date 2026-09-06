@@ -10,6 +10,7 @@
 
 import type { Id, Loose } from './common'
 import type { ApiBackofficeLink, BackofficeLink } from '@/lib/backofficeLink'
+import type { ApiKoiosAiAdvice, KoiosAiAdvice } from '@/lib/koiosAdviceMap'
 export type { Loose }
 
 /** A tenant-defined custom field definition (GET /custom-fields?entity_type=candidate). */
@@ -247,6 +248,10 @@ export interface Candidate {
   branches: CandidateBranch[]
   pools: CandidatePool[]
   koiosAdvice: CandidateAdvice | null
+  // S1 K-266/K-267 (KOIOS-ADVIES-OVERAL-1): the NEW per-record AI advice cache
+  // (a real `koios_advice_candidate` workflow run) — a SEPARATE key from
+  // `koiosAdvice` above, which stays the older deterministic next-step card.
+  koiosAiAdvice: KoiosAiAdvice | null
   experiences: Loose[]
   educations: Loose[]
   languages: Loose[]
@@ -453,6 +458,9 @@ export interface ApiCandidate {
   pools?: Array<CandidatePool | string>
   koios_advice?: Loose | null
   koiosAdvice?: Loose | null
+  // S1 K-266/K-267: the new AI advice cache (CandidateDetailResource::koios_ai_advice /
+  // CandidateListResource's compact verdict+score).
+  koios_ai_advice?: ApiKoiosAiAdvice | null
   experiences?: Loose[]
   work_experience?: Loose[]
   educations?: Loose[]

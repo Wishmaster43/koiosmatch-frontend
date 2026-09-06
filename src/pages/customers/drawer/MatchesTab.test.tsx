@@ -70,6 +70,8 @@ const row = (over: Partial<CustomerMatchRow> = {}): CustomerMatchRow => ({
   date: '', approval_status: '', approval_rejected_reason: '', customFieldValues: {},
   helloflexLink: null, shiftmanagerLink: null, archived: false, archivedAt: null,
   contractType: null, contractStatus: null,
+  // S1 repair NOTE 7: required field, unused by this tab's own render.
+  koiosAiAdvice: null,
   ...over,
 })
 

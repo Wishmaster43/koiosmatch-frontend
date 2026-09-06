@@ -141,6 +141,29 @@ describe('mapLocation · branch (K-283)', () => {
     expect(l.branch).toBeNull()
   })
 })
+
+// S1 K-266/K-267: the new koios_ai_advice cache — replaces the old, never-filled
+// koios_advice field customer used to declare.
+describe('mapCustomer · koiosAiAdvice', () => {
+  it('maps the full detail block', () => {
+    const c = mapCustomer({
+      id: 1,
+      koios_ai_advice: { verdict: 'opportunity', score: 70, text: 'Growing account.', language: 'nl', generated_at: '2026-09-01T07:00:00Z', run_id: 'run-3' },
+    } as ApiCustomer)
+    expect(c.koiosAiAdvice).toEqual({
+      verdict: 'opportunity', score: 70, text: 'Growing account.', language: 'nl', generatedAt: '2026-09-01T07:00:00Z', runId: 'run-3',
+    })
+  })
+  it('maps a compact list row', () => {
+    const c = mapCustomer({ id: 1, koios_ai_advice: { verdict: 'risk', score: 20 } } as ApiCustomer)
+    expect(c.koiosAiAdvice).toEqual({ verdict: 'risk', score: 20, text: null, language: null, generatedAt: null, runId: null })
+  })
+  it('stays null on an explicit null and on an absent key', () => {
+    expect(mapCustomer({ id: 1, koios_ai_advice: null } as ApiCustomer).koiosAiAdvice).toBeNull()
+    expect(mapCustomer({ id: 1 } as ApiCustomer).koiosAiAdvice).toBeNull()
+  })
+})
+
 // LANE-I1b: address_line_2 on customer and location, billing_address_line_2 + billing_province.
 describe('mapCustomer · address_line_2 and billing fields (LANE-I1b)', () => {
   it('maps address_line_2 on the customer visiting address', () => {

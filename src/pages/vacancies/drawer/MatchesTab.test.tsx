@@ -26,6 +26,8 @@ const row = (over: Partial<MatchRow> = {}): MatchRow => ({
   candidateId: 'c-1', vacancyId: 'v-1', clientId: 'cl-1', score: 80, stage: 'Open', status: 'open',
   stageColor: '#123456', owner: 'Danny', ownerId: 'u-1', ownerInitials: 'DP', ownerColor: null, date: '2026-06-01',
   helloflexLink: null, shiftmanagerLink: null,
+  // S1 repair NOTE 7: required field, unused by this tab's own render.
+  koiosAiAdvice: null,
   ...over,
 })
 

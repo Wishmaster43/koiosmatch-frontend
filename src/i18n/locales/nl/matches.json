@@ -63,6 +63,7 @@
       "candidate": "Kandidaat",
       "vacancy": "Vacature",
       "client": "Klant",
+      "clientViaVacancy": "Klant (via vacature)",
       "owner": "Eigenaar",
       "score": "Score",
       "stage": "Fase",
@@ -81,6 +82,17 @@
     "openVacancy": "Vacature openen",
     "openClient": "Klant openen",
     "clientLocked": "Klant kan niet meer wijzigen: er loopt een HelloFlex-contract op deze match.",
+    "editClient": "Klant wijzigen",
+    "clientChange": {
+      "title": "Match aan andere klant hangen",
+      "body": "Deze match wordt aan {{customer}} gehangen (locatie: {{location}}, afdeling: {{department}}). De facturatiegegevens worden opnieuw bepaald uit de nieuwe klant. Eigenaar, eigen vestiging en de gekoppelde vacature blijven zoals ze zijn: controleer die na de wissel. De goedkeuring kan opnieuw op 'in afwachting' komen. Doorgaan?",
+      "none": "geen",
+      "saveError": "Wijziging kon niet worden opgeslagen.",
+      "currentOwner": "Eigenaar: {{owner}}",
+      "currentVacancy": "Vacature: {{vacancy}}",
+      "currentBranch": "Vestiging: {{branch}}",
+      "vacancyMismatch": "Vacature {{title}} hangt aan {{vacancyCustomer}}: controleer."
+    },
     "contract": {
       "title": "Contract & financieel",
       "groupContract": "Contract",

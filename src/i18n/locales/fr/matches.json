@@ -63,6 +63,7 @@
       "candidate": "Candidat",
       "vacancy": "Poste",
       "client": "Client",
+      "clientViaVacancy": "Client (via poste)",
       "owner": "Responsable",
       "score": "Score",
       "stage": "Phase",
@@ -81,6 +82,17 @@
     "openVacancy": "Ouvrir le poste",
     "openClient": "Ouvrir le client",
     "clientLocked": "Le client ne peut plus être modifié : un contrat HelloFlex est actif sur ce match.",
+    "editClient": "Modifier le client",
+    "clientChange": {
+      "title": "Rattacher le match à un autre client",
+      "body": "Ce match sera rattaché à {{customer}} (site : {{location}}, service : {{department}}). Les données de facturation seront redéterminées à partir du nouveau client. Le responsable, l'agence propre et le poste lié restent inchangés : vérifiez-les après le changement. L'approbation peut repasser à 'en attente'. Continuer ?",
+      "none": "aucun",
+      "saveError": "Impossible d'enregistrer la modification.",
+      "currentOwner": "Responsable : {{owner}}",
+      "currentVacancy": "Poste : {{vacancy}}",
+      "currentBranch": "Agence : {{branch}}",
+      "vacancyMismatch": "Le poste {{title}} est rattaché à {{vacancyCustomer}} : à vérifier."
+    },
     "contract": {
       "title": "Contrat et finances",
       "groupContract": "Contrat",

@@ -18,6 +18,7 @@ import api from '@/lib/api'
 import { initialsOf } from '@/lib/initials'
 import { backofficeLinkOf } from '@/lib/backofficeLink'
 import { mergePatch } from '@/lib/mergePatch'
+import { mapKoiosAiAdvice } from '@/lib/koiosAdviceMap'
 import type { RawMatch, MatchRow } from '@/types/match'
 
 // MatchQuery caps per_page at `between:1,200` (measured 2026-08-05 seam-harness:
@@ -45,7 +46,11 @@ export function mapMatch(m: RawMatch): MatchRow {
     candidate:  name,
     initials:   initialsOf(name && name !== '—' ? name : null, '?'),
     vacancy:    m.vacancy_title ?? m.vacancy?.title ?? '—',
-    client:     m.client_name ?? m.client?.name ?? m.customer?.name ?? '—',
+    // K-281 repair pass 3 (Opus find): `client` is the VACANCY's customer
+    // (client_name/client.name, ResolvesOwnersAndClients::attachClientNames)
+    // — never `customer` below, which is THIS match's own customer and must
+    // stay a separate field or the two concepts collapse back into one string.
+    client:     m.client_name ?? m.client?.name ?? '—',
     // Flat FKs (§3A cross-entity links) — the Relations tab hyperlinks candidate/
     // vacancy/klant to their own page via these (EntityLink degrades to plain text
     // when null, so an absent id never renders a dead link).
@@ -60,6 +65,16 @@ export function mapMatch(m: RawMatch): MatchRow {
     // list row (MatchListResource.php) — only the mapper was dropping them.
     customerLocationId:   m.customer_location_id ?? null,
     customerDepartmentId: m.customer_department_id ?? null,
+    // K-281 repair (NOTE c): the site's own name, off the SAME nested objects
+    // the list resource already ships (MATCH-ORDINAL-2) — the mapper was
+    // dropping these too, same gap the ids above already had.
+    customerLocationName:   m.customer_location?.name ?? null,
+    customerDepartmentName: m.customer_department?.name ?? null,
+    // K-281 repair pass 3 (CMBE 06:25 contract): the match's OWN customer name,
+    // off the NEW `customer: {id, name}` MatchListResource/MatchDetailResource
+    // are adding — absent (null) until the backend ships it, or on a match
+    // with no customer_id at all (klant-loos, MATCH-KLANTLOOS-1).
+    customerName: m.customer?.name ?? null,
     score:      m.score ?? m.match_score ?? null,
     // Funnel stage only — the old `?? m.status` fallback painted "open" into the
     // stage axis once the R-1b resource replaced stage with status (broken board).
@@ -126,6 +141,8 @@ export function mapMatch(m: RawMatch): MatchRow {
     terminationEffectiveDate: m.termination?.effective_date ?? null,
     terminatedAt: m.termination?.terminated_at ?? null,
     renewalCount: m.renewal_count ?? null,
+    // S1 K-266/K-267: the new per-record AI advice cache (real workflow run).
+    koiosAiAdvice: mapKoiosAiAdvice(m.koios_ai_advice),
   }
 }
 

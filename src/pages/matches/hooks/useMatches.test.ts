@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
-import { useMatches, MATCHES_MAX_PER_PAGE } from './useMatches'
+import { useMatches, mapMatch, MATCHES_MAX_PER_PAGE } from './useMatches'
 import api from '@/lib/api'
 
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn() } }))
@@ -112,6 +112,64 @@ describe('useMatches', () => {
     const { result } = renderHook(() => useMatches())
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.rows[0]).toMatchObject({ contractStatus: null, helloflexContractGuid: null })
+  })
+
+  // K-281 repair (NOTE c): MATCH-ORDINAL-2's nested customer_location/
+  // customer_department objects (MatchListResource.php) already carry the
+  // site's own name — the mapper dropped these too, same gap the ids had
+  // before MATCH-ORDINAL-1.
+  it('maps customer_location/customer_department names onto the row', async () => {
+    mockedGet.mockResolvedValue({
+      data: {
+        data: [{
+          id: 'm10', customer_location_id: 'loc1', customer_department_id: 'dep1',
+          customer_location: { id: 'loc1', name: 'Hoofdvestiging' },
+          customer_department: { id: 'dep1', name: 'IC' },
+        }],
+        meta: { last_page: 1 },
+      },
+    })
+    const { result } = renderHook(() => useMatches())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.rows[0]).toMatchObject({
+      customerLocationName: 'Hoofdvestiging', customerDepartmentName: 'IC',
+    })
+  })
+
+  it('leaves customerLocationName/customerDepartmentName null when the row carries no site', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [{ id: 'm11' }], meta: { last_page: 1 } } })
+    const { result } = renderHook(() => useMatches())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.rows[0]).toMatchObject({ customerLocationName: null, customerDepartmentName: null })
+  })
+
+  // K-281 repair pass 3 (Opus find, CMBE 06:25 contract): `customer` is the
+  // match's OWN customer {id, name} — distinct from `client`/`client_name`
+  // (the VACANCY's customer, ResolvesOwnersAndClients::attachClientNames).
+  // Pinned on BOTH shapes per the manager's instruction: present and absent.
+  it('maps the NEW customer {id, name} onto customerName, distinct from the vacancy-derived client', async () => {
+    mockedGet.mockResolvedValue({
+      data: {
+        data: [{
+          id: 'm12', client_name: 'Zorggroep Noord (vacature)', customer: { id: 'cu2', name: 'Andere Zorg BV' },
+        }],
+        meta: { last_page: 1 },
+      },
+    })
+    const { result } = renderHook(() => useMatches())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.rows[0]).toMatchObject({
+      client: 'Zorggroep Noord (vacature)', customerName: 'Andere Zorg BV',
+    })
+  })
+
+  it('leaves customerName null on a payload that predates the customer key (never falls back to the vacancy name)', async () => {
+    mockedGet.mockResolvedValue({
+      data: { data: [{ id: 'm13', client_name: 'Zorggroep Noord (vacature)' }], meta: { last_page: 1 } },
+    })
+    const { result } = renderHook(() => useMatches())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.rows[0]).toMatchObject({ client: 'Zorggroep Noord (vacature)', customerName: null })
   })
 })
 
@@ -279,5 +337,26 @@ describe('useMatches · trash lifecycle mapping (TRASH-OVERAL-2)', () => {
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.rows[0]).toMatchObject({ lifecycle: 'archived', pendingEraseAt: null })
     expect(result.current.rows[1]).toMatchObject({ lifecycle: 'active' })
+  })
+})
+
+// S1 K-266/K-267: the new koios_ai_advice cache.
+describe('mapMatch · koiosAiAdvice', () => {
+  it('maps the full detail block', () => {
+    const r = mapMatch({
+      id: 'm1',
+      koios_ai_advice: { verdict: 'renew', score: 90, text: 'Client is happy.', language: 'nl', generated_at: '2026-09-01T06:00:00Z', run_id: 'run-7' },
+    })
+    expect(r.koiosAiAdvice).toEqual({
+      verdict: 'renew', score: 90, text: 'Client is happy.', language: 'nl', generatedAt: '2026-09-01T06:00:00Z', runId: 'run-7',
+    })
+  })
+  it('maps a compact list row', () => {
+    expect(mapMatch({ id: 'm1', koios_ai_advice: { verdict: 'at_risk', score: 35 } }).koiosAiAdvice)
+      .toEqual({ verdict: 'at_risk', score: 35, text: null, language: null, generatedAt: null, runId: null })
+  })
+  it('stays null on an explicit null and on an absent key', () => {
+    expect(mapMatch({ id: 'm1', koios_ai_advice: null }).koiosAiAdvice).toBeNull()
+    expect(mapMatch({ id: 'm1' }).koiosAiAdvice).toBeNull()
   })
 })

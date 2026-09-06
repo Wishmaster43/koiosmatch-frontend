@@ -297,6 +297,29 @@
       "high": "High",
       "xhigh": "Very high",
       "max": "Maximum"
+    },
+    "advice": {
+      "refresh": "Refresh advice",
+      "score": "score",
+      "none": "No AI advice yet",
+      "generatedAt": "Generated on {{date}}",
+      "pending": "Koios is working on the advice...",
+      "alreadyRunning": "An advice run is already in progress for this record.",
+      "unavailable": "AI advice is not enabled for this section.",
+      "verdict": {
+        "proceed": "Proceed",
+        "review": "Review",
+        "reject": "Reject",
+        "ok": "OK",
+        "improve": "Improve",
+        "opportunity": "Opportunity",
+        "risk": "Risk",
+        "stable": "Stable",
+        "renew": "Renew",
+        "at_risk": "At risk",
+        "ending": "Ending",
+        "next_step": "Next step"
+      }
     }
   },
   "actionRules": {

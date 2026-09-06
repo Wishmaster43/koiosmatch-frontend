@@ -6,6 +6,7 @@
 import type { Id } from './common'
 import type { DeletionLifecycle } from './deletion'
 import type { ApiBackofficeLink, BackofficeLink } from '@/lib/backofficeLink'
+import type { ApiKoiosAiAdvice, KoiosAiAdvice } from '@/lib/koiosAdviceMap'
 
 // MATCH-SOORT-1: the contract-form axis on a match — a candidate_types/
 // Contractvorm lookup value, echoed as a resolved {value,label,color} object
@@ -54,8 +55,20 @@ export interface RawMatch {
   // serialized by MatchListResource.php but previously dropped by mapMatch.
   customer_location_id?: string | number | null
   customer_department_id?: string | number | null
+  // K-281 repair (MUST-FIX/NOTE c): MATCH-ORDINAL-2's nested display objects
+  // (MatchListResource.php, list resource only — the detail resource still
+  // ships only the flat _id fields) — mapMatch previously dropped these too,
+  // same as the _id fields above were before MATCH-ORDINAL-1.
+  customer_location?: { id?: string | number; name?: string } | null
+  customer_department?: { id?: string | number; name?: string } | null
   vacancy_title?: string
   vacancy?: { id?: string | number; title?: string }
+  // `client_name`/`client` resolve from the VACANCY's client_id, never this
+  // match's own customer_id (ResolvesOwnersAndClients::attachClientNames) —
+  // see MatchRow.client's own comment. `customer` is the match's OWN
+  // customer {id, name} (K-281 repair pass 3, CMBE 06:25 contract,
+  // MatchListResource/MatchDetailResource) — absent on payloads from before
+  // the backend shipped it, mapped tolerantly to MatchRow.customerName.
   client_name?: string
   client?: { id?: string | number; name?: string }
   customer?: { id?: string | number; name?: string }
@@ -126,6 +139,9 @@ export interface RawMatch {
   renewal_count?: number | null
   // MATCH-RENEWAL-1: the renewal history chain — detail-only, array of renewal records.
   renewals?: MatchRenewal[]
+  // S1 K-266/K-267: the new AI advice cache (MatchDetailResource::koios_ai_advice /
+  // MatchListResource's compact verdict+score).
+  koios_ai_advice?: ApiKoiosAiAdvice | null
   [k: string]: unknown
 }
 
@@ -137,6 +153,12 @@ export interface MatchRow {
   candidate: string
   initials: string
   vacancy: string
+  // K-281 repair pass 3 (Opus find): despite the name, this is the VACANCY's
+  // customer (backend `client_name`, resolved from optional($model->vacancy)
+  // ->client_id — ResolvesOwnersAndClients::attachClientNames), NOT this
+  // match's own customer_id. See `customerName` below for the match's own
+  // customer; `clientId` is still the match's own customer_id (the id side
+  // was always correct — only this name string points at the vacancy).
   client: string
   // Flat FKs (§3A cross-entity links) — power the Relations tab's hyperlinks to
   // the candidate/vacancy/customer's own page + drawer (EntityLink).
@@ -148,12 +170,35 @@ export interface MatchRow {
   // payload predates this field, or the seeded default 'none' applies).
   contractStatus?: string | null
   helloflexContractGuid?: string | null
-  // MATCH-ORDINAL-1 (M14/M15): the customer site axes — id-only (no name yet,
-  // see the location/department ticket), used to compute "Nth match at this
-  // location/department" without a second round-trip. Optional: older row
-  // fixtures/tests that predate this axis simply read as "no site" (null).
+  // MATCH-ORDINAL-1 (M14/M15): the customer site axes as ids, used to compute
+  // "Nth match at this location/department" without a second round-trip; the
+  // matching NAMES sit right below (customerLocationName/customerDepartmentName,
+  // K-281). Optional: older row fixtures/tests that predate this axis simply
+  // read as "no site" (null).
   customerLocationId?: Id | null
   customerDepartmentId?: Id | null
+  // K-281 repair (NOTE c): the site's own name, straight off MatchListResource's
+  // nested customer_location/customer_department objects — present on BOTH the
+  // list AND the detail resource (MatchDetailResource::toArray builds on
+  // `(new MatchListResource(...))->toArray()` and never overrides these two
+  // keys, so the merge inherits them — corrected 04-09, an earlier comment
+  // here wrongly called this list-only). Lets the reassign flow show the
+  // CURRENT location/department by name (e.g. while the cascade fetch for the
+  // picker is still loading, or the site was since archived) instead of a
+  // bare id. null when the match carries no site, or the source payload
+  // predates this field.
+  customerLocationName?: string | null
+  customerDepartmentName?: string | null
+  // K-281 repair pass 3 (Opus find, CMBE 06:25 contract): the match's OWN
+  // customer name — mapped from the NEW `customer: {id, name}` MatchListResource/
+  // MatchDetailResource are adding (eager-loaded off customer_id). Distinct
+  // from `client` below, which the backend resolves from the VACANCY's
+  // client_id (ResolvesOwnersAndClients::attachClientNames) and can differ
+  // from this match's own customer once MATCH-CLIENT-EDIT reassigns it. null
+  // while the backend hasn't shipped the key yet, or the match carries no
+  // customer_id — the client row then falls back to `client` (the vacancy's
+  // customer) with the honest drawer.fields.clientViaVacancy label.
+  customerName?: string | null
   score: number | null
   stage: string
   // Lifecycle status slug (R-1b /match-statuses; the is_closed flag ends the match).
@@ -213,6 +258,11 @@ export interface MatchRow {
   terminationEffectiveDate?: string | null
   terminatedAt?: string | null
   renewalCount?: number | null
+  // S1 K-266/K-267 (KOIOS-ADVIES-OVERAL-1): the per-record AI advice cache (a
+  // real `koios_advice_match` workflow run). Required like the other four
+  // entity types (S1 repair NOTE 7) — mapMatch always sets it, null when
+  // absent, never undefined, so a host never needs a defensive `?? null`.
+  koiosAiAdvice: KoiosAiAdvice | null
   [k: string]: unknown
 }
 

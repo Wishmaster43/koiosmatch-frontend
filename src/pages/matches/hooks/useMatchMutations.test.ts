@@ -43,6 +43,8 @@ const row = (over: Partial<MatchRow> = {}): MatchRow => ({
   candidateId: null, vacancyId: null, clientId: null, score: null, stage: '',
   status: 'open', stageColor: '#000', owner: '', ownerId: null, ownerInitials: '', ownerColor: null,
   date: '', customFieldValues: {}, helloflexLink: null, shiftmanagerLink: null,
+  // S1 repair NOTE 7: required field, unused by these mutation tests.
+  koiosAiAdvice: null,
   ...over,
 })
 

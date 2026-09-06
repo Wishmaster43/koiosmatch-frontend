@@ -155,3 +155,27 @@ describe('useMatchContract', () => {
     expect(result.current.revertTick).toBe(revertBefore + 1)
   })
 })
+
+// S1 repair MUST-FIX 2: MatchDetailResource carries the FULL koios_ai_advice
+// block on this SAME GET — pick() never read it, so the drawer stayed stuck
+// on the list row's compact {verdict,score}. Kept here, mapped straight off
+// the detail row.
+describe('useMatchContract · koiosAiAdvice (S1 repair MUST-FIX 2)', () => {
+  it('maps the full koios_ai_advice block off the detail fetch', async () => {
+    mockedGet.mockResolvedValue({
+      data: { data: { ...detailRow, koios_ai_advice: { verdict: 'renew', score: 90, text: 'Client is happy.', language: 'nl', generated_at: '2026-09-01T06:00:00Z', run_id: 'run-7' } } },
+    })
+    const { result } = renderHook(() => useMatchContract('m1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.koiosAiAdvice).toEqual({
+      verdict: 'renew', score: 90, text: 'Client is happy.', language: 'nl', generatedAt: '2026-09-01T06:00:00Z', runId: 'run-7',
+    })
+  })
+
+  it('stays null when the detail row carries no koios_ai_advice', async () => {
+    mockedGet.mockResolvedValue({ data: { data: detailRow } })
+    const { result } = renderHook(() => useMatchContract('m1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.koiosAiAdvice).toBeNull()
+  })
+})

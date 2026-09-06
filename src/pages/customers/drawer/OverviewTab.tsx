@@ -47,8 +47,10 @@ import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import { useIndustries } from '@/lib/useIndustries'
 import { useLocations } from '@/lib/useLocations'
+import { useAuth } from '@/context/AuthContext'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import { useCustomerAdvice } from '@/lib/useCustomerAdvice'
+import { useKoiosAdviceRun } from '@/lib/useKoiosAdviceRun'
 import { adviceInsightRows } from '@/lib/koiosAdviceInsight'
 import BranchSection from '@/components/drawer/BranchSection'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
@@ -70,6 +72,19 @@ export default function OverviewTab({ c, onSave, statuses = [] }: { c: Customer;
   // KOIOS-ADVIES-OVERAL-1: the SAME resolver the customers table's Koios column
   // uses — the drawer block below prepends its advice so the two never disagree.
   const resolveAdvice = useCustomerAdvice()
+  // S1 K-266/K-267: the "Advies vernieuwen" button is gated on customers.update
+  // AND the koios_ai module (EnsureTenantModule on the route — a Core tenant
+  // with only koios_assist gets a 403, so the button must not even render for
+  // it; mirrors WhatsAppPage's plain hasModule gate) and starts a REAL AI call
+  // (API-CREDITS-1).
+  const authForAdvice = useAuth()
+  const canUpdateAdvice = (authForAdvice?.hasPermission?.('customers.update') ?? false) && (authForAdvice?.hasModule?.('koios_ai') ?? false)
+  // freshAdvice + the run's own pending/notice live in the hook's module-scope
+  // store (S1 repair NOTE 3), keyed by the customer id, so a paid run survives
+  // a tab switch; `c.koiosAiAdvice.runId` lets the hook drop a stale local
+  // override once a bulk/workflow refetch brings a genuinely newer one.
+  const { request: requestAdvice, pending: advicePending, notice: adviceNotice, freshAdvice }
+    = useKoiosAdviceRun('customers', c.id, c.koiosAiAdvice?.runId)
   const { industryOptions } = useIndustries()
   // CUST-SOURCE-FE-1: acquisition-source picker, same tenant-lookup shape as industry.
   const { sources: sourceOptions, allowFreeEntry: sourceAllowFreeEntry } = useCustomerSources()
@@ -229,6 +244,10 @@ export default function OverviewTab({ c, onSave, statuses = [] }: { c: Customer;
       <KoiosAdviceBlock namespace="customers"
         insights={[...adviceInsightRows(resolveAdvice(c)), ...buildCustomerAdviceInsights(c, t)]}
         contextRef={c.id ? { type: 'customer', id: String(c.id), label: c.name ?? '' } : undefined}
+        aiAdvice={freshAdvice !== undefined ? freshAdvice : c.koiosAiAdvice}
+        onRequestAdvice={canUpdateAdvice ? requestAdvice : undefined}
+        advicePending={advicePending}
+        adviceNotice={adviceNotice}
       />
 
       {/* VESTIGING ("BRANCH") — which of the tenant's establishments may see this

@@ -294,3 +294,26 @@ describe('mapCandidate · preferredLanguage', () => {
     expect(mapCandidate({ id: 'c3' }).preferredLanguage).toBe('')
   })
 })
+
+// S1 K-266/K-267: the new koios_ai_advice cache — present (detail shape), null and absent.
+describe('mapCandidate · koiosAiAdvice', () => {
+  it('maps the full detail block (verdict/score/text/language/generatedAt/runId)', () => {
+    const r = mapCandidate({
+      id: 'c1',
+      koios_ai_advice: { verdict: 'next_step', score: 72, text: 'Reach out.', language: 'nl', generated_at: '2026-09-01T10:00:00Z', run_id: 'run-1' },
+    })
+    expect(r.koiosAiAdvice).toEqual({
+      verdict: 'next_step', score: 72, text: 'Reach out.', language: 'nl', generatedAt: '2026-09-01T10:00:00Z', runId: 'run-1',
+    })
+  })
+  it('maps a compact list row (verdict/score only) without inventing the detail fields', () => {
+    const r = mapCandidate({ id: 'c2', koios_ai_advice: { verdict: 'next_step', score: 40 } })
+    expect(r.koiosAiAdvice).toEqual({ verdict: 'next_step', score: 40, text: null, language: null, generatedAt: null, runId: null })
+  })
+  it('stays null when the backend sends an explicit null', () => {
+    expect(mapCandidate({ id: 'c3', koios_ai_advice: null }).koiosAiAdvice).toBeNull()
+  })
+  it('stays null when the key is absent entirely', () => {
+    expect(mapCandidate({ id: 'c4' }).koiosAiAdvice).toBeNull()
+  })
+})

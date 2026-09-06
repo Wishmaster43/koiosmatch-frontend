@@ -63,6 +63,7 @@
       "candidate": "Candidate",
       "vacancy": "Vacancy",
       "client": "Client",
+      "clientViaVacancy": "Client (via vacancy)",
       "owner": "Owner",
       "score": "Score",
       "stage": "Stage",
@@ -81,6 +82,17 @@
     "openVacancy": "Open vacancy",
     "openClient": "Open client",
     "clientLocked": "The client can no longer change: a HelloFlex contract is active on this match.",
+    "editClient": "Change client",
+    "clientChange": {
+      "title": "Move match to another client",
+      "body": "This match will be moved to {{customer}} (location: {{location}}, department: {{department}}). The billing details will be redetermined from the new client. Owner, own branch and the linked vacancy stay as they are: check them after the switch. Approval may go back to pending. Continue?",
+      "none": "none",
+      "saveError": "Couldn't save the change.",
+      "currentOwner": "Owner: {{owner}}",
+      "currentVacancy": "Vacancy: {{vacancy}}",
+      "currentBranch": "Branch: {{branch}}",
+      "vacancyMismatch": "Vacancy {{title}} belongs to {{vacancyCustomer}}: please check."
+    },
     "contract": {
       "title": "Contract & financial",
       "groupContract": "Contract",

@@ -63,6 +63,7 @@
       "candidate": "Candidato",
       "vacancy": "Vaga",
       "client": "Cliente",
+      "clientViaVacancy": "Cliente (via vaga)",
       "owner": "Responsável",
       "score": "Pontuação",
       "stage": "Fase",
@@ -81,6 +82,17 @@
     "openVacancy": "Abrir vaga",
     "openClient": "Abrir cliente",
     "clientLocked": "O cliente já não pode ser alterado: há um contrato HelloFlex ativo neste match.",
+    "editClient": "Alterar cliente",
+    "clientChange": {
+      "title": "Associar o match a outro cliente",
+      "body": "Este match será associado a {{customer}} (localização: {{location}}, departamento: {{department}}). Os dados de faturação serão redeterminados a partir do novo cliente. O responsável, a filial própria e a vaga associada permanecem como estão: verifique-os após a alteração. A aprovação pode voltar a 'pendente'. Continuar?",
+      "none": "nenhum",
+      "saveError": "Não foi possível guardar a alteração.",
+      "currentOwner": "Responsável: {{owner}}",
+      "currentVacancy": "Vaga: {{vacancy}}",
+      "currentBranch": "Filial: {{branch}}",
+      "vacancyMismatch": "A vaga {{title}} pertence a {{vacancyCustomer}}: verificar."
+    },
     "contract": {
       "title": "Contrato e financeiro",
       "groupContract": "Contrato",

@@ -9,7 +9,7 @@
  * see that file's own tests for the "no longer renders there" regression) — the
  * tests below cover the new save path and the contract_type clear cycle.
  */
-import { describe, it, expect, vi, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { render, screen, waitFor, renderHook } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { I18nextProvider } from 'react-i18next'
@@ -41,6 +41,39 @@ vi.mock('@/lib/queries', () => ({
   useUsers: () => ({ data: [{ id: 'u1', name: 'Alice Smith' }, { id: 'u2', name: 'Bob Jones' }] }),
 }))
 
+// MATCH-CLIENT-EDIT (K-281): matches.update permission gate for MatchClientRow's
+// pencil — a LOCAL useAuth() check (mirrors MatchContractSection.test.tsx's own
+// pattern), default granted; individual tests flip it to prove the pencil hides.
+const mockHasPermission = vi.fn(() => true)
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: mockHasPermission }) }))
+beforeEach(() => { mockHasPermission.mockImplementation(() => true) })
+
+// MATCH-CLIENT-EDIT: the SAME shared customer/cascade hooks the + Match modal
+// uses (useCustomerOptions/useCustomerCascade, both in src/hooks/) — fixed
+// fixtures so the reassign flow's pickers/confirm text are deterministic,
+// never a live fetch. 'cl1'/'Zorggroep Noord' matches baseMatch's own client.
+vi.mock('@/hooks/useCustomerOptions', () => ({
+  useCustomerOptions: () => [
+    { value: 'cl1', label: 'Zorggroep Noord' },
+    { value: 'cl2', label: 'Andere Zorg BV' },
+  ],
+}))
+vi.mock('@/hooks/useCustomerCascade', () => ({
+  useCustomerCascade: () => ({
+    locations: [{ id: 'loc1', name: 'Hoofdvestiging', departments: [{ id: 'dep1', name: 'IC' }] }],
+    contacts: [], detail: null, refetch: vi.fn(),
+  }),
+}))
+// K-281 repair NOTE (d): the customer_not_applicable Contractvorm flag lives on
+// the tenant's candidateTypes lookup (LookupsContext) — tolerant read (null
+// outside a Provider) so every OTHER test here, none of which wrap one,
+// resolves the flag as absent/false exactly like the real app outside tests.
+const lookupsState: { typeMeta: ((v?: string | null) => { customer_not_applicable?: boolean }) | null } = { typeMeta: null }
+vi.mock('@/context/LookupsContext', () => ({
+  useLookupsOptional: () => (lookupsState.typeMeta ? { typeMeta: lookupsState.typeMeta } : null),
+}))
+beforeEach(() => { lookupsState.typeMeta = null })
+
 afterEach(() => vi.clearAllMocks())
 
 // Minimal valid MatchRow fixture — only the fields this tab actually reads.
@@ -50,6 +83,8 @@ const baseMatch: MatchRow = {
   owner: '', ownerId: null, ownerInitials: '', ownerColor: null, date: '2026-01-01',
   helloflexLink: null, shiftmanagerLink: null,
   contractType: 'ZZP Flex', startDate: '2026-01-01', endDate: '2026-06-30', branchName: 'Utrecht',
+  // S1 K-266/K-267: now a required MatchRow field (unrelated concurrent lane) — unused by this tab's own reassign-flow logic.
+  koiosAiAdvice: null,
 }
 
 function renderTab(match: MatchRow) {
@@ -176,9 +211,9 @@ describe('OverviewTab · overzicht-data cluster', () => {
   })
 })
 
-// MATCH-CLIENT-EDIT (K-281): the client field stays read-only text (no picker
-// built yet), but a live HelloFlex contract now surfaces a locked-state notice
-// under it — mirrors MatchClientGuard::isClientLocked exactly.
+// MATCH-CLIENT-EDIT (K-281): a live HelloFlex contract surfaces a locked-state
+// notice under the client row (and hides its pencil, see the reassign-flow
+// describe block below) — mirrors MatchClientGuard::isClientLocked exactly.
 describe('OverviewTab · client-locked notice (MATCH-CLIENT-EDIT, K-281)', () => {
   it('shows the locked notice once contractStatus is beyond the seeded default', async () => {
     mockedGet.mockResolvedValue({ data: { data: {} } })
@@ -204,6 +239,195 @@ describe('OverviewTab · client-locked notice (MATCH-CLIENT-EDIT, K-281)', () =>
     renderTab(baseMatch)
     await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
     expect(screen.queryByText(i18n.t('matches:drawer.clientLocked'))).not.toBeInTheDocument()
+  })
+})
+
+// MATCH-CLIENT-EDIT (K-281, DECISIONS + CMBE GO 05-09): the reassign flow —
+// pencil -> customer/location/department cascade -> ConfirmDialog -> PATCH.
+// Asserts the actual request body (§13), never just that a callback fired.
+describe('OverviewTab · client reassign flow (MATCH-CLIENT-EDIT, K-281)', () => {
+  // K-281 repair pass 3 (Opus find): match.client is the VACANCY's customer —
+  // the row must show the match's OWN customer (customerName, the new
+  // `customer` key) when present, under the plain "Klant" label.
+  it('shows the match\'s OWN customer name when customerName is present, under the plain Klant label', async () => {
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    renderTab({ ...baseMatch, customerName: 'Andere Zorg BV' })
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    expect(screen.getByText('Andere Zorg BV')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('matches:drawer.fields.client'))).toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('matches:drawer.fields.clientViaVacancy'))).not.toBeInTheDocument()
+  })
+
+  it('falls back to the vacancy\'s customer under the honest clientViaVacancy label when customerName is absent', async () => {
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    renderTab({ ...baseMatch, customerName: null }) // baseMatch.client = 'Zorggroep Noord' (the vacancy's customer)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    expect(screen.getByText('Zorggroep Noord')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('matches:drawer.fields.clientViaVacancy'))).toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('matches:drawer.fields.client'))).not.toBeInTheDocument()
+  })
+
+  it('hides the client pencil once a HelloFlex contract locks it', async () => {
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    renderTab({ ...baseMatch, contractStatus: 'active' })
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    expect(screen.queryByRole('button', { name: i18n.t('matches:drawer.editClient') })).not.toBeInTheDocument()
+  })
+
+  it('hides the client pencil without matches.update permission', async () => {
+    mockHasPermission.mockImplementation(() => false)
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    renderTab(baseMatch)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    expect(screen.queryByRole('button', { name: i18n.t('matches:drawer.editClient') })).not.toBeInTheDocument()
+  })
+
+  it('pencil opens the customer/location/department pickers, seeded with the current client', async () => {
+    const user = userEvent.setup()
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    renderTab(baseMatch)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    await user.click(screen.getByRole('button', { name: i18n.t('matches:drawer.editClient') }))
+    // Seeded with the match's current customer (cl1 -> Zorggroep Noord); the
+    // location/department pickers now render alongside it.
+    expect(screen.getByRole('button', { name: 'Zorggroep Noord' })).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('matches:drawer.fields.customerLocation'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('matches:drawer.fields.customerDepartment'))).toBeInTheDocument()
+  })
+
+  it('save opens the confirm dialog naming the newly picked customer', async () => {
+    const user = userEvent.setup()
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    renderTab(baseMatch)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    await user.click(screen.getByRole('button', { name: i18n.t('matches:drawer.editClient') }))
+    // Switch the customer to the other tenant option — location/department reset.
+    await user.click(screen.getByRole('button', { name: 'Zorggroep Noord' }))
+    await user.click(await screen.findByRole('button', { name: 'Andere Zorg BV' }))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
+    const expectedBody = i18n.t('matches:drawer.clientChange.body', {
+      customer: 'Andere Zorg BV',
+      location: i18n.t('matches:drawer.clientChange.none'),
+      department: i18n.t('matches:drawer.clientChange.none'),
+    })
+    expect(await screen.findByText(expectedBody)).toBeInTheDocument()
+    // Nothing sent yet — only the confirm step opened.
+    expect(mockedPatch).not.toHaveBeenCalled()
+  })
+
+  it('confirm PATCHes customer_id/customer_location_id/customer_department_id and syncs the row', async () => {
+    const user = userEvent.setup()
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    mockedPatch.mockResolvedValue({ data: { data: {} } })
+    const onUpdate = vi.fn()
+    render(<I18nextProvider i18n={i18n}><OverviewTab match={baseMatch} onUpdate={onUpdate} /></I18nextProvider>)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    await user.click(screen.getByRole('button', { name: i18n.t('matches:drawer.editClient') }))
+    await user.click(screen.getByRole('button', { name: 'Zorggroep Noord' }))
+    await user.click(await screen.findByRole('button', { name: 'Andere Zorg BV' }))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
+    await user.click(await screen.findByRole('button', { name: i18n.t('common:confirm') }))
+    await waitFor(() => expect(mockedPatch).toHaveBeenCalledWith('/matches/m1', {
+      customer_id: 'cl2', customer_location_id: null, customer_department_id: null,
+    }))
+    // K-281 repair pass 3 (Opus find): `client` is the VACANCY's customer and
+    // this PATCH never touches it — the optimistic patch updates `customerName`
+    // (this match's OWN customer) instead, never `client`.
+    expect(onUpdate).toHaveBeenCalledWith('m1', expect.objectContaining({
+      clientId: 'cl2', customerName: 'Andere Zorg BV', customerLocationId: null, customerDepartmentId: null,
+    }))
+    expect(onUpdate).not.toHaveBeenCalledWith('m1', expect.objectContaining({ client: expect.anything() }))
+  })
+
+  it('shows the server error and restores the previous customer on a failed save', async () => {
+    const user = userEvent.setup()
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    mockedPatch.mockRejectedValue({ response: { data: { message: 'Klant kan niet gewijzigd worden: er loopt een contract.' } } })
+    renderTab(baseMatch)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    await user.click(screen.getByRole('button', { name: i18n.t('matches:drawer.editClient') }))
+    await user.click(screen.getByRole('button', { name: 'Zorggroep Noord' }))
+    await user.click(await screen.findByRole('button', { name: 'Andere Zorg BV' }))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
+    await user.click(await screen.findByRole('button', { name: i18n.t('common:confirm') }))
+    // The server's message renders as the field notice…
+    expect(await screen.findByText('Klant kan niet gewijzigd worden: er loopt een contract.')).toBeInTheDocument()
+    // …and the picker reverts to the match's ORIGINAL customer, not the failed attempt.
+    expect(screen.getByRole('button', { name: 'Zorggroep Noord' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Andere Zorg BV' })).not.toBeInTheDocument()
+  })
+
+  it('cancel discards the draft without sending anything', async () => {
+    const user = userEvent.setup()
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    renderTab(baseMatch)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    await user.click(screen.getByRole('button', { name: i18n.t('matches:drawer.editClient') }))
+    await user.click(screen.getByRole('button', { name: 'Zorggroep Noord' }))
+    await user.click(await screen.findByRole('button', { name: 'Andere Zorg BV' }))
+    await user.click(screen.getByTitle(i18n.t('common:cancel')))
+    // Back to read mode showing the ORIGINAL client — nothing sent.
+    expect(screen.getByText('Zorggroep Noord')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Andere Zorg BV' })).not.toBeInTheDocument()
+    expect(mockedPatch).not.toHaveBeenCalled()
+  })
+
+  // K-281 repair NOTE (a): save with an UNCHANGED pick is a no-op — proven at
+  // the rendered level too (not just the hook), since Opus checks the RENDER.
+  it('save with an UNCHANGED customer just closes the editor — no confirm, no PATCH', async () => {
+    const user = userEvent.setup()
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    renderTab(baseMatch)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    await user.click(screen.getByRole('button', { name: i18n.t('matches:drawer.editClient') }))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
+    expect(screen.queryByText(i18n.t('matches:drawer.clientChange.title'))).not.toBeInTheDocument()
+    expect(mockedPatch).not.toHaveBeenCalled()
+    // Back to read mode.
+    expect(screen.getByText('Zorggroep Noord')).toBeInTheDocument()
+  })
+
+  // K-281 repair MUST-FIX 1: the confirm dialog states the TRUTH (billing is
+  // re-derived; owner/own branch/vacancy do NOT follow) and shows what to verify.
+  it('confirm dialog shows the current owner/vacancy/branch and a mismatch warning once the customer differs', async () => {
+    const user = userEvent.setup()
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    renderTab({ ...baseMatch, owner: 'Piet de Vries' })
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    await user.click(screen.getByRole('button', { name: i18n.t('matches:drawer.editClient') }))
+    await user.click(screen.getByRole('button', { name: 'Zorggroep Noord' }))
+    await user.click(await screen.findByRole('button', { name: 'Andere Zorg BV' }))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
+    expect(await screen.findByText(i18n.t('matches:drawer.clientChange.currentOwner', { owner: 'Piet de Vries' }))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('matches:drawer.clientChange.currentVacancy', { vacancy: 'Verpleegkundige · Zorggroep Noord' }))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('matches:drawer.clientChange.vacancyMismatch', { title: 'Verpleegkundige', vacancyCustomer: 'Zorggroep Noord' }))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('matches:drawer.clientChange.currentBranch', { branch: 'Utrecht' }))).toBeInTheDocument()
+  })
+
+  it('omits every caption line the match row carries no data for', async () => {
+    const user = userEvent.setup()
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    renderTab({ ...baseMatch, owner: '', vacancy: '—', client: '—', clientId: null, branchName: null })
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    await user.click(screen.getByRole('button', { name: i18n.t('matches:drawer.editClient') }))
+    await user.click(screen.getByRole('button', { name: i18n.t('candidates:placement.pickCustomer') }))
+    await user.click(await screen.findByRole('button', { name: 'Andere Zorg BV' }))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
+    expect(await screen.findByText(i18n.t('matches:drawer.clientChange.title'))).toBeInTheDocument()
+    expect(screen.queryByText(/^Eigenaar:/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/^Vacature:/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/^Vestiging:/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/hangt aan/)).not.toBeInTheDocument()
+  })
+
+  // K-281 repair NOTE (d): a customer_not_applicable Contractvorm (MATCH-KLANTLOOS-1)
+  // has no customer/location/department to reassign at all.
+  it('hides the pencil for a customer_not_applicable Contractvorm', async () => {
+    lookupsState.typeMeta = (v) => (v === 'klantloos' ? { customer_not_applicable: true } : {})
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    renderTab({ ...baseMatch, contractForm: { value: 'klantloos', label: 'Klantloos', color: '#000' } })
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    expect(screen.queryByRole('button', { name: i18n.t('matches:drawer.editClient') })).not.toBeInTheDocument()
   })
 })
 
@@ -389,5 +613,45 @@ describe('OverviewTab · renewal history (MATCH-RENEWAL-1)', () => {
     renderTab(baseMatch)
     expect(await screen.findByText('#1')).toBeInTheDocument()
     expect(screen.getByText('#2')).toBeInTheDocument()
+  })
+})
+
+// S1 repair MUST-FIX 2: the LIST row's koiosAiAdvice is compact (verdict+score
+// only); this tab's own useMatchContract fetch hits MatchDetailResource, which
+// carries the FULL block — it must win once loaded, so a plain row-click
+// (compact prop) converges on the SAME card a deep-link (full prop, fetched
+// directly) already shows.
+describe('OverviewTab · koiosAiAdvice prefers the detail fetch over the compact row (S1 repair MUST-FIX 2)', () => {
+  it('upgrades from the compact row advice to the full detail block once the contract fetch lands', async () => {
+    mockedGet.mockResolvedValue({
+      data: {
+        data: {
+          koios_ai_advice: {
+            verdict: 'renew', score: 85, text: 'Detailed AI reasoning from the full block.',
+            language: 'nl', generated_at: '2026-09-01T06:00:00Z', run_id: 'run-detail',
+          },
+        },
+      },
+    })
+    const compactOnly: MatchRow = {
+      ...baseMatch,
+      koiosAiAdvice: { verdict: 'renew', score: 70, text: null, language: null, generatedAt: null, runId: 'run-compact' },
+    }
+    renderTab(compactOnly)
+
+    // The compact row alone carries no text — waits for the richer detail row.
+    expect(await screen.findByText('Detailed AI reasoning from the full block.')).toBeInTheDocument()
+  })
+
+  it('falls back to the compact row while the detail fetch has not landed yet (never blank)', () => {
+    mockedGet.mockReturnValue(new Promise(() => {})) // never resolves during this test
+    const compactOnly: MatchRow = {
+      ...baseMatch,
+      koiosAiAdvice: { verdict: 'renew', score: 70, text: null, language: null, generatedAt: null, runId: 'run-compact' },
+    }
+    renderTab(compactOnly)
+
+    // Verdict chip renders straight away off the compact row (real i18n label).
+    expect(screen.getByText(i18n.t('common:koios.advice.verdict.renew'))).toBeInTheDocument()
   })
 })

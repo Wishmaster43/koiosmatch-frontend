@@ -5,6 +5,7 @@
  */
 import type { Id, Loose } from './common'
 import type { InterviewWorkflowRef } from './vacancy'
+import type { ApiKoiosAiAdvice, KoiosAiAdvice } from '@/lib/koiosAdviceMap'
 
 /**
  * APP-STAGE-DURATIONS-1 (landed): one entry per phase the application has
@@ -169,6 +170,10 @@ export interface Application {
   // never a per-row query) — drives the row/card placed badge and the "placed"
   // bucket-donut segment client-side. Tolerant default false when absent.
   hasMatch: boolean
+  // S1 K-266/K-267 (KOIOS-ADVIES-OVERAL-1): the NEW per-record AI advice cache
+  // (a real `koios_advice_application` workflow run) — a SEPARATE key from the
+  // existing `task`/`ai` free-text advice above (ApplicationMatchService).
+  koiosAiAdvice: KoiosAiAdvice | null
 }
 
 /** The enriched application model rendered by the drawer tabs. */
@@ -482,6 +487,9 @@ export interface ApiApplication {
   // customer_contacts. Optional here because only the DETAIL contract carries the
   // key; ApplicationListResource omits it, so the table/board can never show it.
   contact?: { id?: Id; name?: string; email?: string; phone?: string } | null
+  // S1 K-266/K-267: the new AI advice cache (ApplicationDetailResource::koios_ai_advice /
+  // ApplicationListResource's compact verdict+score).
+  koios_ai_advice?: ApiKoiosAiAdvice | null
   [k: string]: unknown
 }
 

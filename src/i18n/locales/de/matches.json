@@ -63,6 +63,7 @@
       "candidate": "Kandidat",
       "vacancy": "Stelle",
       "client": "Kunde",
+      "clientViaVacancy": "Kunde (über Stelle)",
       "owner": "Inhaber",
       "score": "Score",
       "stage": "Phase",
@@ -81,6 +82,17 @@
     "openVacancy": "Stelle öffnen",
     "openClient": "Kunde öffnen",
     "clientLocked": "Der Kunde kann nicht mehr geändert werden: Für diesen Match läuft ein HelloFlex-Vertrag.",
+    "editClient": "Kunde ändern",
+    "clientChange": {
+      "title": "Match einem anderen Kunden zuordnen",
+      "body": "Dieser Match wird {{customer}} zugeordnet (Standort: {{location}}, Abteilung: {{department}}). Die Abrechnungsdaten werden neu aus dem neuen Kunden bestimmt. Inhaber, eigene Niederlassung und die verknüpfte Stelle bleiben wie sie sind: nach der Umstellung prüfen. Die Genehmigung kann wieder auf 'ausstehend' zurückspringen. Fortfahren?",
+      "none": "keine",
+      "saveError": "Änderung konnte nicht gespeichert werden.",
+      "currentOwner": "Inhaber: {{owner}}",
+      "currentVacancy": "Stelle: {{vacancy}}",
+      "currentBranch": "Niederlassung: {{branch}}",
+      "vacancyMismatch": "Stelle {{title}} gehört zu {{vacancyCustomer}}: bitte prüfen."
+    },
     "contract": {
       "title": "Vertrag & Finanzen",
       "groupContract": "Vertrag",

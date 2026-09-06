@@ -36,6 +36,8 @@ function row(overrides: Partial<MatchRow>): MatchRow {
     owner: '', ownerId: null, ownerInitials: '', ownerColor: null,
     date: '2026-01-01',
     helloflexLink: null, shiftmanagerLink: null,
+    // S1 repair NOTE 7: required field, unused by this tab's own render.
+    koiosAiAdvice: null,
     ...overrides,
   }
 }

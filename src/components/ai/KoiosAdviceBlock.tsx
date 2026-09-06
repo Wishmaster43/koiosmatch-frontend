@@ -9,9 +9,27 @@ import { useTranslation } from 'react-i18next'
 import { RefreshCw, ChevronDown } from 'lucide-react'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import Button from '@/components/ui/Button'
-import { GroupLabel } from '@/components/ui/typography'
+import SoftChip from '@/components/ui/SoftChip'
+import { GroupLabel, Caption, Mono } from '@/components/ui/typography'
+import { useDateFormat } from '@/lib/datetime'
 import { askKoios } from '@/lib/koiosBridge'
 import type { KoiosContextRef } from '@/types/koios'
+import type { KoiosAiAdvice } from '@/lib/koiosAdviceMap'
+
+// S1 K-266/K-267: verdict -> semantic tone, covering every closed vocabulary
+// entry from koios_advice.php across the five entities (proceed/review/reject,
+// ok/improve, opportunity/risk/stable, renew/at_risk/ending, next_step). An
+// unrecognised future value falls back to the neutral tone, never a guess.
+const VERDICT_TONE: Record<string, string> = {
+  proceed: 'var(--color-success-text)', ok: 'var(--color-success-text)',
+  opportunity: 'var(--color-success-text)', renew: 'var(--color-success-text)',
+  review: 'var(--color-warning-text)', improve: 'var(--color-warning-text)',
+  at_risk: 'var(--color-warning-text)',
+  reject: 'var(--color-danger-text)', risk: 'var(--color-danger-text)', ending: 'var(--color-danger-text)',
+  stable: 'var(--color-info)', next_step: 'var(--color-info)',
+}
+const verdictColor = (verdict: string | null | undefined): string =>
+  (verdict && VERDICT_TONE[verdict]) || 'var(--text-muted)'
 
 /** One advisory row: a coloured dot + uppercase label (collapsed by default)
  *  that reveals `text` on click. */
@@ -35,6 +53,22 @@ interface KoiosAdviceBlockProps {
   // Optional context reference for the entity this advice is about (candidate, customer, etc.)
   // — attached to the window event when an advice row's ask-button is clicked.
   contextRef?: KoiosContextRef
+  // S1 K-266/K-267 (KOIOS-ADVIES-OVERAL-1): the NEW per-record AI advice cache
+  // (`koios_ai_advice`, a REAL Anthropic call, distinct from the deterministic
+  // `insights` above). `undefined` = the host doesn't carry this field at all
+  // (renders nothing extra, e.g. tasks/opportunities/outreach hosts); `null` =
+  // the host carries it but no run has completed yet (empty state).
+  aiAdvice?: KoiosAiAdvice | null
+  // Starts a REAL advice run (POST .../koios-advice, API-CREDITS-1) — only
+  // passed by a host whose reader holds `<entity>.update`. Without it the
+  // "Advies vernieuwen" button does not render at all (§3 no fake affordances).
+  onRequestAdvice?: () => void
+  // True while a just-started run is still being polled — disables the button
+  // so a second click can't fire a redundant real AI call.
+  advicePending?: boolean
+  // A translated notice from the run (already-running / template unavailable /
+  // generic failure) — shown so a failed "Advies vernieuwen" click is never silent.
+  adviceNotice?: string | null
 }
 
 /**
@@ -45,10 +79,14 @@ interface KoiosAdviceBlockProps {
  * collapsible dot+label rows, closed by default. §3A blueprint component —
  * extend by passing more `insights`, never fork the look.
  */
-export default function KoiosAdviceBlock({ namespace, insights, onRefresh, contextRef }: KoiosAdviceBlockProps) {
+export default function KoiosAdviceBlock({
+  namespace, insights, onRefresh, contextRef,
+  aiAdvice, onRequestAdvice, advicePending = false, adviceNotice,
+}: KoiosAdviceBlockProps) {
   // 'common' alongside the feature namespace — the AI-Act disclosure hint
   // (AI-ACT-1) is shared copy, not per-entity.
   const { t } = useTranslation([namespace, 'common'])
+  const { formatDateTime } = useDateFormat()
   const [loading, setLoading] = useState(false)
   // Which insight is expanded (null = all collapsed, the default).
   const [openIdx, setOpenIdx] = useState<number | null>(null)
@@ -114,6 +152,58 @@ export default function KoiosAdviceBlock({ namespace, insights, onRefresh, conte
                   </div>
                 )
               })}
+              {/* S1 K-266/K-267: the NEW real-AI advice cache — below the
+                  deterministic insights above, inside the same card. Renders
+                  only when the host actually carries this field (`aiAdvice`
+                  passed at all, even as null); a host that never mounts this
+                  prop sees no change at all. */}
+              {aiAdvice !== undefined && (
+                <div style={{ borderTop: '1px solid var(--border)', paddingTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {aiAdvice ? (
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <SoftChip round color={verdictColor(aiAdvice.verdict)}
+                          label={aiAdvice.verdict ? t(`common:koios.advice.verdict.${aiAdvice.verdict}`, { defaultValue: aiAdvice.verdict }) : '—'} />
+                        {/* EENHEID-LES: this is a 0-100 FIT SCORE (config/koios_advice.php),
+                            never a share-of-sum percentage — the raw number, never a '%'. */}
+                        {aiAdvice.score != null && (
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <Caption>{t('common:koios.advice.score')}</Caption>
+                            <Mono style={{ fontSize: 12, color: 'var(--text)' }}>{aiAdvice.score}</Mono>
+                          </span>
+                        )}
+                        {onRequestAdvice && (
+                          <Button variant="secondary" size="sm" disabled={advicePending} onClick={onRequestAdvice} style={{ marginLeft: 'auto' }}>
+                            {t('common:koios.advice.refresh')}
+                          </Button>
+                        )}
+                      </div>
+                      {/* The advice TEXT is prose from a real LLM call — plain text with
+                          preserved line breaks, never raw HTML (never SafeHtml here). */}
+                      {aiAdvice.text && (
+                        <div style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{aiAdvice.text}</div>
+                      )}
+                      {/* No AiGeneratedLabel here (S1 repair NOTE 4): the heading's own
+                          KoiosAiMark above already carries the AI-Act disclosure hint —
+                          stacking a second "AI-gegenereerd" label would double the badge. */}
+                      {aiAdvice.generatedAt && (
+                        <Caption>{t('common:koios.advice.generatedAt', { date: formatDateTime(aiAdvice.generatedAt) })}</Caption>
+                      )}
+                    </>
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                      <Caption>{t('common:koios.advice.none')}</Caption>
+                      {onRequestAdvice && (
+                        <Button variant="secondary" size="sm" disabled={advicePending} onClick={onRequestAdvice}>
+                          {t('common:koios.advice.refresh')}
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                  {advicePending && <Caption>{t('common:koios.advice.pending')}</Caption>}
+                  {adviceNotice && <Caption style={{ color: 'var(--color-warning-text)' }}>{adviceNotice}</Caption>}
+                </div>
+              )}
             </div>
           )}
       </div>

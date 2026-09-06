@@ -15,8 +15,10 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ShieldCheck } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
+import { useAuth } from '@/context/AuthContext'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import { useApplicationAdvice } from '@/lib/useApplicationAdvice'
+import { useKoiosAdviceRun } from '@/lib/useKoiosAdviceRun'
 import { adviceInsightRows } from '@/lib/koiosAdviceInsight'
 import SectionCard from '@/components/ui/SectionCard'
 import SafeHtml from '@/components/ui/SafeHtml'
@@ -49,6 +51,19 @@ export default function ContextSubTab({ application: a }: ContextSubTabProps) {
   // V-appdetail-4: motivation letter expand — read-only, no persistence involved.
   const [letterExpanded, setLetterExpanded] = useState(false)
   const letterIsLong = (a.coverLetter?.replace(/<[^>]*>/g, '').length ?? 0) > COLLAPSE_THRESHOLD
+
+  // S1 K-266/K-267: the "Advies vernieuwen" button is gated on applications.update
+  // AND the koios_ai module (EnsureTenantModule on the route — a Core tenant
+  // with only koios_assist gets a 403, so the button must not even render for
+  // it; mirrors WhatsAppPage's plain hasModule gate) and starts a REAL AI call
+  // (API-CREDITS-1).
+  const auth = useAuth()
+  const canUpdate = (auth?.hasPermission?.('applications.update') ?? false) && (auth?.hasModule?.('koios_ai') ?? false)
+  // freshAdvice + the run's own pending/notice live in the hook's module-scope
+  // store (S1 repair NOTE 3), keyed by the application id, so a paid run
+  // survives a tab switch; `a.koiosAiAdvice.runId` lets the hook drop a stale
+  // local override once a bulk/workflow refetch brings a genuinely newer one.
+  const { request, pending, notice, freshAdvice } = useKoiosAdviceRun('applications', a.id, a.koiosAiAdvice?.runId)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -98,7 +113,12 @@ export default function ContextSubTab({ application: a }: ContextSubTabProps) {
           blueprint), all in ONE AI-branded block (DUPLICATE-AI-BLOCK-1: no
           standalone "Taak" block next to it). */}
       <KoiosAdviceBlock namespace="applications"
-        insights={[...adviceInsightRows(resolveAdvice(a)), ...buildApplicationAdviceInsights(a, t)]} />
+        insights={[...adviceInsightRows(resolveAdvice(a)), ...buildApplicationAdviceInsights(a, t)]}
+        aiAdvice={freshAdvice !== undefined ? freshAdvice : a.koiosAiAdvice}
+        onRequestAdvice={canUpdate ? request : undefined}
+        advicePending={pending}
+        adviceNotice={notice}
+      />
     </div>
   )
 }

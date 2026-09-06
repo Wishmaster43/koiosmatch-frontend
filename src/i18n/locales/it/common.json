@@ -297,6 +297,29 @@
       "high": "Alto",
       "xhigh": "Molto alto",
       "max": "Massimo"
+    },
+    "advice": {
+      "refresh": "Aggiorna consiglio",
+      "score": "punteggio",
+      "none": "Nessun consiglio IA ancora",
+      "generatedAt": "Generato il {{date}}",
+      "pending": "Koios sta preparando il consiglio...",
+      "alreadyRunning": "Per questo record è già in corso un'elaborazione del consiglio.",
+      "unavailable": "Il consiglio IA non è abilitato per questa sezione.",
+      "verdict": {
+        "proceed": "Procedere",
+        "review": "Da rivedere",
+        "reject": "Rifiutare",
+        "ok": "OK",
+        "improve": "Da migliorare",
+        "opportunity": "Opportunità",
+        "risk": "Rischio",
+        "stable": "Stabile",
+        "renew": "Rinnovare",
+        "at_risk": "A rischio",
+        "ending": "In scadenza",
+        "next_step": "Prossimo passo"
+      }
     }
   },
   "actionRules": {

@@ -298,3 +298,25 @@ describe('mapVacancy · lifecycle (TRASH-OVERAL-2)', () => {
     expect(mapVacancy({ id: 'v1' }).pendingEraseAt).toBeNull()
   })
 })
+
+// S1 K-266/K-267: the new koios_ai_advice cache, read by mapVacancy and inherited
+// through mapVacancyDetail's `...base` spread.
+describe('mapVacancy / mapVacancyDetail · koiosAiAdvice', () => {
+  it('maps the full detail block', () => {
+    const r = mapVacancyDetail({
+      id: 'v1',
+      koios_ai_advice: { verdict: 'ok', score: null, text: 'Pipeline looks healthy.', language: 'nl', generated_at: '2026-09-01T08:00:00Z', run_id: 'run-5' },
+    })
+    expect(r.koiosAiAdvice).toEqual({
+      verdict: 'ok', score: null, text: 'Pipeline looks healthy.', language: 'nl', generatedAt: '2026-09-01T08:00:00Z', runId: 'run-5',
+    })
+  })
+  it('maps a compact list row', () => {
+    expect(mapVacancy({ id: 'v1', koios_ai_advice: { verdict: 'improve', score: null } }).koiosAiAdvice)
+      .toEqual({ verdict: 'improve', score: null, text: null, language: null, generatedAt: null, runId: null })
+  })
+  it('stays null on an explicit null and on an absent key', () => {
+    expect(mapVacancy({ id: 'v1', koios_ai_advice: null }).koiosAiAdvice).toBeNull()
+    expect(mapVacancy({ id: 'v1' }).koiosAiAdvice).toBeNull()
+  })
+})

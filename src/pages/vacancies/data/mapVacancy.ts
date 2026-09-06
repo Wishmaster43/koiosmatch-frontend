@@ -4,6 +4,7 @@
  */
 import { initialsOf } from '@/lib/initials'
 import { toCoord } from '@/lib/coords'
+import { mapKoiosAiAdvice } from '@/lib/koiosAdviceMap'
 import type { Id, Loose } from '@/types/common'
 import type { ApiVacancy, MatchCountState, Vacancy, VacancyDetail } from '@/types/vacancy'
 
@@ -123,6 +124,9 @@ export function mapVacancy(v: ApiVacancy = {}): Vacancy {
         }
       : null,
     hasInterviewWorkflowField: 'interview_workflow_id' in v,
+    // S1 K-266/K-267: the new per-record AI advice cache (real workflow run) —
+    // read here once so mapVacancyDetail inherits it through `...base` below.
+    koiosAiAdvice: mapKoiosAiAdvice(v.koios_ai_advice),
   }
 }
 

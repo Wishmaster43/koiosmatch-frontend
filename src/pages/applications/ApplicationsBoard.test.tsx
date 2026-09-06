@@ -28,6 +28,8 @@ const APP: Application = {
   candidateStatusLabel: '', candidateStatusColor: '', candidateStatus: '', candidatePhase: '',
   created: '2026-01-01', isNew: false, archived: false, deletedAt: null, interview: null,
   currentStageEnteredAt: null, missingAppointment: false, tooLongInStage: false, hasMatch: false,
+  // S1 K-266/K-267: required field, unused by BoardCard's own render.
+  koiosAiAdvice: null,
 }
 
 function renderBoard(goTo = vi.fn()) {

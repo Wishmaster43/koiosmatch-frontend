@@ -1,10 +1,12 @@
 /**
- * useCustomerAdvice — the customers table's "Koios" column resolver. Mirrors
- * useCandidateAdvice's honest gate: the backend `koios_advice` column is filled
- * by the seeder with an untagged action/reason (no real engine runs yet), so it
- * is only trusted once it declares a real origin — i.e. `advice.source` is a
- * non-empty string. Until then the local rule engine (customerAdvice.ts)
- * answers; this gate auto-lifts the moment the backend ships a tagged source.
+ * useCustomerAdvice — the customers table's "Koios" column resolver, the
+ * DETERMINISTIC rule-engine card (mirrors useCandidateAdvice's local-engine
+ * half). Customer never had a real backend engine behind this card — the old
+ * `koios_advice` column it once gated on was never filled by any backend code
+ * and has been renamed at the source to `koios_ai_advice` (S1 K-266/K-267, a
+ * SEPARATE, real AI advice cache — see `Customer.koiosAiAdvice` /
+ * `KoiosAdviceBlock`'s `aiAdvice` prop). So the local rule engine
+ * (customerAdvice.ts) is now the only source for this card, unconditionally.
  *
  * Action labels live in the SHARED `common:koios.actions.*` block (Danny 05-08
  * consistency pass) — new advice actions (follow_up, attention, renew, overdue)
@@ -16,26 +18,13 @@ import { deriveCustomerAdvice } from '@/lib/customerAdvice'
 import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import type { Customer } from '@/types/customer'
 
-// The customers table's Koios-column resolver (see file docblock above): trusts
-// the backend's advice only once it carries a real, non-seeded source.
+// The customers table's Koios-column resolver (see file docblock above): the
+// local rule engine always answers — there is no backend-tagged variant.
 export function useCustomerAdvice(): (c: Customer) => KoiosAdvice | null {
   const { t } = useTranslation('customers')
 
   // Stable identity: the table's memoized columns depend on this resolver.
   return useCallback((c: Customer): KoiosAdvice | null => {
-    // Trust the backend value only once it declares a real, non-seeded origin.
-    const backendSource = typeof c.koiosAdvice?.source === 'string' ? c.koiosAdvice.source : null
-    if (backendSource) {
-      const backendAction = c.koiosAdvice?.action ?? 'none'
-      if (backendAction === 'none') return null
-      return {
-        action: backendAction,
-        label: c.koiosAdvice?.label || t(`common:koios.actions.${backendAction}`, { defaultValue: backendAction }),
-        reason: c.koiosAdvice?.reason ?? null,
-        source: backendSource,
-      }
-    }
-
     const rule = deriveCustomerAdvice(c)
     if (rule.action === 'none') return null
 

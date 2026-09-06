@@ -4,6 +4,7 @@
  * mapVacancy / mapVacancyDetail (the /vacancies endpoint is still settling).
  */
 import type { Id, Loose } from './common'
+import type { ApiKoiosAiAdvice, KoiosAiAdvice } from '@/lib/koiosAdviceMap'
 
 /** VACANCY-LEADS-COUNT-1: provenance of `leadsCount` — the 15-min/nightly worker's
  * last run + why the number might not fully reflect reality right now. */
@@ -107,6 +108,9 @@ export interface Vacancy {
   // literally carried the `interview_workflow_id` key — never inferred from the
   // value itself (a real `null` still counts as "carries the key").
   hasInterviewWorkflowField: boolean
+  // S1 K-266/K-267 (KOIOS-ADVIES-OVERAL-1): the per-record AI advice cache (a
+  // real `koios_advice_vacancy` workflow run).
+  koiosAiAdvice: KoiosAiAdvice | null
 }
 
 /** A resolved interview-workflow reference, as nested on a vacancy/application. */
@@ -280,6 +284,9 @@ export interface ApiVacancy {
     folder?: { id?: Id; name?: string } | null
     agent?: { id?: Id; name?: string } | null
   } | null
+  // S1 K-266/K-267: the new AI advice cache (VacancyDetailResource::koios_ai_advice /
+  // VacancyListResource's compact verdict+score).
+  koios_ai_advice?: ApiKoiosAiAdvice | null
   tags?: unknown[]
   created_at?: string
   createdAt?: string

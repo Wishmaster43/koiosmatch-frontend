@@ -568,3 +568,24 @@ describe('mapApplicationDetail · ai advice passthrough (S34)', () => {
     expect(mapApplicationDetail({ id: 1, ai: { task: 'Bel de kandidaat' } }).ai).toBeUndefined()
   })
 })
+
+// S1 K-266/K-267: the new koios_ai_advice cache — a SEPARATE key from `ai`/`task` above.
+describe('mapApplication / mapApplicationDetail · koiosAiAdvice', () => {
+  it('maps the full detail block', () => {
+    const r = mapApplicationDetail({
+      id: 1,
+      koios_ai_advice: { verdict: 'proceed', score: 88, text: 'Strong fit.', language: 'nl', generated_at: '2026-09-01T09:00:00Z', run_id: 'run-9' },
+    })
+    expect(r.koiosAiAdvice).toEqual({
+      verdict: 'proceed', score: 88, text: 'Strong fit.', language: 'nl', generatedAt: '2026-09-01T09:00:00Z', runId: 'run-9',
+    })
+  })
+  it('maps a compact list row', () => {
+    expect(mapApplication({ id: 1, koios_ai_advice: { verdict: 'review', score: 55 } }).koiosAiAdvice)
+      .toEqual({ verdict: 'review', score: 55, text: null, language: null, generatedAt: null, runId: null })
+  })
+  it('stays null on an explicit null and on an absent key', () => {
+    expect(mapApplication({ id: 1, koios_ai_advice: null }).koiosAiAdvice).toBeNull()
+    expect(mapApplication({ id: 1 }).koiosAiAdvice).toBeNull()
+  })
+})

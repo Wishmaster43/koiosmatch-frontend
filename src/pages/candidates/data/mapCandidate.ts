@@ -10,6 +10,7 @@
 import { initialsOf } from '@/lib/initials'
 import { toCoord } from '@/lib/coords'
 import { backofficeLinkOf } from '@/lib/backofficeLink'
+import { mapKoiosAiAdvice } from '@/lib/koiosAdviceMap'
 import type { ApiCandidate, Candidate, CandidatePool, CandidateBranch, CandidateMatch, Loose } from '@/types/candidate'
 
 // Bytes → human size ("44856" → "44 KB"). Backend sends documents.size in bytes.
@@ -221,6 +222,8 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     pools:           (c.pools ?? []).map((p): CandidatePool => (typeof p === 'object' ? p : { name: p })),
     // Koios AI advice, precomputed server-side (background job).
     koiosAdvice:     c.koios_advice ?? c.koiosAdvice ?? null,
+    // S1 K-266/K-267: the new per-record AI advice cache (real workflow run).
+    koiosAiAdvice:   mapKoiosAiAdvice(c.koios_ai_advice),
 
     // ── Relations (detail only) — normalise snake_case → camelCase, newest first ──
     // Normalise to the UI camelCase shape (start/end/current/desc) alongside the raw

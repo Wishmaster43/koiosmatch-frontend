@@ -4,6 +4,7 @@
 import { initialsOf } from '@/lib/initials'
 import { toCoord } from '@/lib/coords'
 import { backofficeLinkOf } from '@/lib/backofficeLink'
+import { mapKoiosAiAdvice } from '@/lib/koiosAdviceMap'
 import type { Id } from '@/types/common'
 import type {
   ApiContact, ApiDepartment, ApiLocation, ApiCustomer,
@@ -359,7 +360,9 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     activeMatchesCount: c.active_matches_count ?? c.activeMatchesCount ?? 0,
     created: c.created_at ?? c.created ?? '',
     logo: c.logo ?? c.logo_url ?? null,
-    koiosAdvice: c.koios_advice ?? c.koiosAdvice ?? null,
+    // S1 K-266/K-267: the new per-record AI advice cache (real workflow run) —
+    // replaces the old never-filled `koios_advice`/`koiosAdvice` field.
+    koiosAiAdvice: mapKoiosAiAdvice(c.koios_ai_advice),
     // Tenant custom-field values (§3B "Eigen velden").
     customFields: c.custom_fields ?? {},
   }
