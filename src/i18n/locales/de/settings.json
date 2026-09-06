@@ -523,6 +523,7 @@
     "street": "Straße",
     "houseNumber": "Hausnummer",
     "houseNumberSuffix": "Zusatz",
+    "addressLine2": "Adresszeile 2",
     "postalCode": "PLZ",
     "city": "Ort",
     "country": "Land",
@@ -1585,7 +1586,9 @@
       "fields": {
         "customerName": "Kundenname",
         "whatsappConsent": "WhatsApp-Einwilligung",
-        "emailConsent": "E-Mail-Einwilligung"
+        "emailConsent": "E-Mail-Einwilligung",
+        "addressLine2": "Adresszeile 2",
+        "billingProvince": "Provinz (Rechnungsadresse)"
       },
       "mapping": {
         "title": "Spalten zuordnen",
@@ -3398,7 +3401,11 @@
     "add": "Nationalität hinzufügen",
     "countryCode": "Land",
     "isEu": "EU/EWR",
-    "isEuDesc": "Kandidaten mit dieser Nationalität müssen keine Angaben zur Arbeitserlaubnis machen."
+    "isEuDesc": "Kandidaten mit dieser Nationalität müssen keine Angaben zur Arbeitserlaubnis machen.",
+    "workPermitToggle": {
+      "label": "Arbeitserlaubnis auch für EU/EWR-Bürger erforderlich",
+      "hint": "An: Ein Kandidat mit EU/EWR-Nationalität wird wie jeder andere Nicht-Niederländer behandelt und muss eine gültige Arbeitserlaubnis haben, auch zum Zeitpunkt der Vermittlung."
+    }
   },
   "escalationReasons": {
     "title": "Eskalationsgründe",

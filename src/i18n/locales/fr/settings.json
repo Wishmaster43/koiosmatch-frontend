@@ -523,6 +523,7 @@
     "street": "Rue",
     "houseNumber": "Numéro",
     "houseNumberSuffix": "Complément",
+    "addressLine2": "Adresse ligne 2",
     "postalCode": "Code postal",
     "city": "Ville",
     "country": "Pays",
@@ -1585,7 +1586,9 @@
       "fields": {
         "customerName": "Nom du client",
         "whatsappConsent": "Consentement WhatsApp",
-        "emailConsent": "Consentement e-mail"
+        "emailConsent": "Consentement e-mail",
+        "addressLine2": "Adresse ligne 2",
+        "billingProvince": "Province (adresse de facturation)"
       },
       "mapping": {
         "title": "Faites correspondre vos colonnes",
@@ -3398,7 +3401,11 @@
     "add": "Ajouter une nationalité",
     "countryCode": "Pays",
     "isEu": "UE/EEE",
-    "isEuDesc": "Les candidats de cette nationalité ne sont pas invités à renseigner les champs de permis de travail."
+    "isEuDesc": "Les candidats de cette nationalité ne sont pas invités à renseigner les champs de permis de travail.",
+    "workPermitToggle": {
+      "label": "Permis de travail également obligatoire pour les ressortissants de l'UE/EEE",
+      "hint": "Activé : un candidat ayant la nationalité de l'UE/EEE est traité comme tout autre candidat non-néerlandais et doit posséder un permis de travail valide, aussi au moment du placement."
+    }
   },
   "escalationReasons": {
     "title": "Motifs d'escalade",

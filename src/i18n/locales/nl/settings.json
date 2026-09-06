@@ -545,6 +545,7 @@
     "street": "Straat",
     "houseNumber": "Huisnummer",
     "houseNumberSuffix": "Toevoegsel",
+    "addressLine2": "Adresregel 2",
     "postalCode": "Postcode",
     "city": "Plaats",
     "country": "Land",
@@ -1831,7 +1832,9 @@
       "fields": {
         "customerName": "Klantnaam",
         "whatsappConsent": "WhatsApp-toestemming",
-        "emailConsent": "E-mailtoestemming"
+        "emailConsent": "E-mailtoestemming",
+        "addressLine2": "Adresregel 2",
+        "billingProvince": "Provincie (factuuradres)"
       },
       "mapping": {
         "title": "Koppel je kolommen",
@@ -3398,7 +3401,11 @@
     "add": "Nationaliteit toevoegen",
     "countryCode": "Land",
     "isEu": "EU/EER",
-    "isEuDesc": "Kandidaten met deze nationaliteit hoeven geen werkvergunningsvelden in te vullen."
+    "isEuDesc": "Kandidaten met deze nationaliteit hoeven geen werkvergunningsvelden in te vullen.",
+    "workPermitToggle": {
+      "label": "Werkvergunning ook verplicht voor EU/EER-onderdanen",
+      "hint": "Aan: een kandidaat met een EU/EER-nationaliteit wordt behandeld als elke andere niet-Nederlandse kandidaat en moet een geldige werkvergunning hebben (ook bij een match)."
+    }
   },
   "escalationReasons": {
     "title": "Escalatieredenen",

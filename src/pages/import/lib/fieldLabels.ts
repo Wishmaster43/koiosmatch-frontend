@@ -35,6 +35,7 @@ const DEFAULT_LABELS: Record<string, FieldLabelRef> = {
   straat: { ns: 'customers', key: 'subModal.street' },
   huisnummer: { ns: 'customers', key: 'subModal.houseNumber' },
   toevoeging: { ns: 'customers', key: 'subModal.houseNumberSuffix' },
+  adresregel_2: { ns: 'settings', key: 'import.wizard.fields.addressLine2', defaultValue: 'Address line 2' },
   postcode: { ns: 'customers', key: 'subModal.postalCode' },
   land: { ns: 'customers', key: 'subModal.country' },
   kostenplaats: { ns: 'customers', key: 'subModal.costCenter' },
@@ -54,6 +55,25 @@ const DEFAULT_LABELS: Record<string, FieldLabelRef> = {
   // NEW — no consent toggle for these two channels exists anywhere in the app yet.
   whatsapp_toestemming: { ns: 'settings', key: 'import.wizard.fields.whatsappConsent', defaultValue: 'WhatsApp consent' },
   email_toestemming: { ns: 'settings', key: 'import.wizard.fields.emailConsent', defaultValue: 'Email consent' },
+  // English column names (new exports ship English headers).
+  first_name: { ns: 'customers', key: 'subModal.firstName' },
+  last_name: { ns: 'customers', key: 'subModal.lastName' },
+  house_number_suffix: { ns: 'customers', key: 'subModal.houseNumberSuffix' },
+  address_line_2: { ns: 'settings', key: 'import.wizard.fields.addressLine2', defaultValue: 'Address line 2' },
+  postal_code: { ns: 'customers', key: 'subModal.postalCode' },
+  city: { ns: 'customers', key: 'modal.fields.city' },
+  country: { ns: 'customers', key: 'subModal.country' },
+  cost_center: { ns: 'customers', key: 'subModal.costCenter' },
+  location_name: { ns: 'customers', key: 'subModal.locationName' },
+  department_name: { ns: 'customers', key: 'subModal.departmentName' },
+  mobile: { ns: 'customers', key: 'subModal.mobile' },
+  email_consent: { ns: 'settings', key: 'import.wizard.fields.emailConsent', defaultValue: 'Email consent' },
+  whatsapp_consent: { ns: 'settings', key: 'import.wizard.fields.whatsappConsent', defaultValue: 'WhatsApp consent' },
+  vat_number: { ns: 'customers', key: 'overview.vat' },
+  industry: { ns: 'customers', key: 'modal.fields.industry' },
+  street: { ns: 'customers', key: 'subModal.street' },
+  house_number: { ns: 'customers', key: 'subModal.houseNumber' },
+  billing_province: { ns: 'settings', key: 'import.wizard.fields.billingProvince', defaultValue: 'Billing province' },
 }
 
 // Where the LINK meaning ("which location does this belong to") reads better than

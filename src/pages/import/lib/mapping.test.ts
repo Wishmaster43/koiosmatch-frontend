@@ -40,6 +40,35 @@ describe('autoMapColumns', () => {
     const claimants = Object.entries(mapping).filter(([, target]) => target === 'naam')
     expect(claimants).toHaveLength(1)
   })
+
+  it('maps English header names when they are present as target columns', () => {
+    const mapping = autoMapColumns(['first_name', 'last_name', 'email'], ['first_name', 'last_name', 'email', 'email_consent'])
+    expect(mapping.first_name).toBe('first_name')
+    expect(mapping.last_name).toBe('last_name')
+    expect(mapping.email).toBe('email')
+  })
+
+  it('maps Dutch headers to English target columns via synonyms', () => {
+    const mapping = autoMapColumns(['voornaam', 'achternaam', 'mobiel'], ['first_name', 'last_name', 'mobile', 'email_consent'])
+    expect(mapping.voornaam).toBe('first_name')
+    expect(mapping.achternaam).toBe('last_name')
+    expect(mapping.mobiel).toBe('mobile')
+  })
+
+  it('maps address_line_2 with Dutch and English aliases', () => {
+    const mapping = autoMapColumns(['adresregel_2'], ['address_line_2', 'email'])
+    expect(mapping.adresregel_2).toBe('address_line_2')
+  })
+
+  it('maps English address_line_2 to the English target', () => {
+    const mapping = autoMapColumns(['address_line_2'], ['address_line_2', 'email'])
+    expect(mapping.address_line_2).toBe('address_line_2')
+  })
+
+  it('maps billing_province with expected aliases', () => {
+    const mapping = autoMapColumns(['billing_province'], ['billing_province', 'email'])
+    expect(mapping.billing_province).toBe('billing_province')
+  })
 })
 
 describe('setMapping', () => {

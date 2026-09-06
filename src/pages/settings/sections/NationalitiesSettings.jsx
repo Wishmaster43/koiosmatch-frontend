@@ -28,18 +28,54 @@
  * gained `sort_order` + PUT /nationalities/reorder that same day — drag-reorder is
  * back on (was correctly off before that commit; LOOKUP-GAP-1(d) verification 08-08
  * caught the stale `reorderable={false}`, a capability the backend now serves).
+ *
+ * I18N-1 (BE 5a109b00, 04-09): the tenant toggle `work_permit_required_for_eu_nationals`
+ * lives on THIS screen, above the list, because it overrides exactly what the `is_eu`
+ * flag below decides — when on, an EU/EEA national is treated like any other non-NL
+ * candidate by the candidate write gate and the match-time WorkPermitGuard (default
+ * off = unchanged behaviour). Saved through the shared settings machinery.
  */
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
+import Toggle from '@/components/ui/Toggle'
+import { SectionTitle, Caption } from '@/components/ui/typography'
+import { useAllSettings, useSettingsLoaded, getBoolSetting, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
+import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import { useCountriesLookup } from '@/lib/useCountriesLookup'
 import { getFlagEmoji } from '@/lib/countries'
+
+// Tenant setting key (backend name, I18N-1): EU/EEA nationals also need a work permit.
+const WORK_PERMIT_KEY = 'work_permit_required_for_eu_nationals'
 
 // Thin wrapper over the shared StatusListEditor (see the module doc above): adds the country-code flag adornment and the EU/EEA flagField on top of the plain name+colour CRUD.
 export default function NationalitiesSettings() {
   const { t } = useTranslation('settings')
   const { options: countryOptions } = useCountriesLookup()
+  const settings = useAllSettings()
+  const loaded = useSettingsLoaded()
+  const workPermitRequired = getBoolSetting(settings, WORK_PERMIT_KEY, false)
+  // Persist the toggle and refresh the shared settings cache so every consumer sees it.
+  const onWorkPermitToggle = async (v) => {
+    try {
+      await saveSettingsKeys({ [WORK_PERMIT_KEY]: v })
+      invalidateAllSettingsCache()
+    } catch (err) {
+      notifyError(extractApiError(err, t('common:actionFailed')))
+    }
+  }
   return (
     <div style={{ maxWidth: 640 }}>
+      {/* I18N-1: the EU/EEA work-permit override sits above the list it overrides. */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-3)', padding: 'var(--space-3) var(--space-4)',
+                    border: '1px solid var(--border)', borderRadius: 8, marginBottom: 'var(--space-4)' }}>
+        <Toggle checked={workPermitRequired} onChange={onWorkPermitToggle} disabled={!loaded}
+          ariaLabel={t('nationalities.workPermitToggle.label')} />
+        <div>
+          <SectionTitle style={{ marginBottom: 2 }}>{t('nationalities.workPermitToggle.label')}</SectionTitle>
+          <Caption>{t('nationalities.workPermitToggle.hint')}</Caption>
+        </div>
+      </div>
       {/* withIcon (batch 12, P22-30): colourless lookup, FALLBACK_SWATCH-tinted icon
           alongside the existing flag-emoji rowPrefix — the flag stays the "which
           country" signal, the icon is an independent generic adornment. */}

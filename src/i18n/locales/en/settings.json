@@ -545,6 +545,7 @@
     "street": "Street",
     "houseNumber": "House number",
     "houseNumberSuffix": "Addition",
+    "addressLine2": "Address line 2",
     "postalCode": "Postal code",
     "city": "City",
     "country": "Country",
@@ -1831,7 +1832,9 @@
       "fields": {
         "customerName": "Customer name",
         "whatsappConsent": "WhatsApp consent",
-        "emailConsent": "Email consent"
+        "emailConsent": "Email consent",
+        "addressLine2": "Address line 2",
+        "billingProvince": "Province (billing address)"
       },
       "mapping": {
         "title": "Match your columns",
@@ -3398,7 +3401,11 @@
     "add": "Add nationality",
     "countryCode": "Country",
     "isEu": "EU/EEA",
-    "isEuDesc": "Candidates with this nationality are not asked for work-permit fields."
+    "isEuDesc": "Candidates with this nationality are not asked for work-permit fields.",
+    "workPermitToggle": {
+      "label": "Work permit also required for EU/EEA nationals",
+      "hint": "On: a candidate with an EU/EEA nationality is treated like any other non-Dutch candidate and must hold a valid work permit, also at match time."
+    }
   },
   "escalationReasons": {
     "title": "Escalation reasons",

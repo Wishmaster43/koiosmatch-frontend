@@ -545,6 +545,7 @@
     "street": "Rua",
     "houseNumber": "Número",
     "houseNumberSuffix": "Aditamento",
+    "addressLine2": "Linha de endereço 2",
     "postalCode": "Código postal",
     "city": "Cidade",
     "country": "País",
@@ -1831,7 +1832,9 @@
       "fields": {
         "customerName": "Nome do cliente",
         "whatsappConsent": "Consentimento de WhatsApp",
-        "emailConsent": "Consentimento de e-mail"
+        "emailConsent": "Consentimento de e-mail",
+        "addressLine2": "Linha de endereço 2",
+        "billingProvince": "Província (morada de faturação)"
       },
       "mapping": {
         "title": "Corresponda as suas colunas",
@@ -3398,7 +3401,11 @@
     "add": "Adicionar nacionalidade",
     "countryCode": "País",
     "isEu": "UE/EEE",
-    "isEuDesc": "Aos candidatos com esta nacionalidade não são pedidos campos de autorização de trabalho."
+    "isEuDesc": "Aos candidatos com esta nacionalidade não são pedidos campos de autorização de trabalho.",
+    "workPermitToggle": {
+      "label": "Permissão de trabalho também obrigatória para cidadãos da UE/EEE",
+      "hint": "Ativado: um candidato com nacionalidade da UE/EEE é tratado como qualquer outro candidato não holandês e deve possuir um visto de trabalho válido, também no momento da colocação."
+    }
   },
   "escalationReasons": {
     "title": "Motivos de escalonamento",

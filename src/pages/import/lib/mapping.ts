@@ -16,11 +16,13 @@ export type ColumnMapping = Record<string, string>
 
 const TREE_PREFIXES = ['klant_', 'locatie_', 'afdeling_'] as const
 
-// A small bridge for a source file named in English (or loosely) against the
-// backend's own Dutch column vocabulary. This only SUGGESTS a mapping — every
-// suggestion stays overridable in the UI, so a missing/wrong synonym is never a
-// blocker, only a slightly worse first guess.
+// A bridge for source files named in English or Dutch against the backend's column
+// vocabulary. Accepts BOTH Dutch and English header names as first-class targets
+// (exports now ship English headers; imports accept Dutch headers for backward compat).
+// This only SUGGESTS a mapping — every suggestion stays overridable in the UI, so a
+// missing/wrong synonym is never a blocker, only a slightly worse first guess.
 const SYNONYMS: Record<string, string[]> = {
+  // Dutch targets + English synonyms (original); English targets + Dutch synonyms (new).
   naam: ['name', 'company', 'company_name', 'customer_name', 'client_name', 'client'],
   klant_naam: ['customer', 'customer_name', 'client', 'client_name', 'company', 'company_name', 'klant'],
   email: ['e_mail', 'mail', 'email_address', 'emailaddress'],
@@ -33,6 +35,7 @@ const SYNONYMS: Record<string, string[]> = {
   straat: ['street'],
   huisnummer: ['house_number', 'housenumber', 'number', 'no', 'nr'],
   toevoeging: ['suffix', 'house_number_suffix', 'addition'],
+  adresregel_2: ['address_line_2', 'address2', 'address_line2', 'line_2'],
   postcode: ['zip', 'zipcode', 'zip_code', 'postal_code'],
   land: ['country'],
   kostenplaats: ['cost_center', 'costcenter', 'cost_centre'],
@@ -47,6 +50,25 @@ const SYNONYMS: Record<string, string[]> = {
   whatsapp_toestemming: ['whatsapp_consent', 'whatsapp_opt_in', 'whatsapp_optin'],
   email_toestemming: ['email_consent', 'email_opt_in', 'email_optin'],
   omschrijving: ['description', 'notes', 'remarks'],
+  // English targets: Dutch aliases so old Dutch CSVs still map to new English export headers.
+  first_name: ['voornaam', 'first_name', 'firstname', 'given_name'],
+  last_name: ['achternaam', 'last_name', 'lastname', 'surname', 'family_name'],
+  house_number_suffix: ['toevoeging', 'house_number_suffix', 'suffix', 'addition'],
+  address_line_2: ['adresregel_2', 'address_line_2', 'address2', 'address_line2', 'line_2'],
+  postal_code: ['postcode', 'postal_code', 'zip', 'zipcode', 'zip_code'],
+  city: ['plaats', 'city', 'town'],
+  country: ['land', 'country'],
+  cost_center: ['kostenplaats', 'cost_center', 'costcenter', 'cost_centre'],
+  location_name: ['locatie_naam', 'location', 'location_name', 'site', 'branch'],
+  department_name: ['afdeling_naam', 'department', 'department_name', 'team'],
+  mobile: ['mobiel', 'mobile', 'cell', 'cellphone', 'mobile_number'],
+  email_consent: ['email_toestemming', 'email_consent', 'email_opt_in', 'email_optin'],
+  whatsapp_consent: ['whatsapp_toestemming', 'whatsapp_consent', 'whatsapp_opt_in', 'whatsapp_optin'],
+  vat_number: ['btw_nummer', 'vat_number', 'vat'],
+  industry: ['branche', 'industry', 'sector'],
+  street: ['straat', 'street'],
+  house_number: ['huisnummer', 'house_number', 'housenumber', 'number', 'no', 'nr'],
+  billing_province: ['facturatieprovincie', 'billing_province', 'billing_state', 'bill_province'],
 }
 
 // A prefixed tree column (klant_email, locatie_straat, …) also accepts its base

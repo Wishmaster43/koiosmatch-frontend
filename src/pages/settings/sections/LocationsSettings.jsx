@@ -18,6 +18,8 @@ const LocationsMapView = lazy(() => import('./LocationsMapView'))
 // composed consistently. Falls back to a legacy `address`/`full_address` string.
 const EMPTY_FORM = {
   name: '', street: '', house_number: '', house_number_suffix: '',
+  // I18N-1 (BE 5a109b00): optional second address line on the bureau location too.
+  address_line_2: '',
   // `province` rides along with the rest of the address (the backend's
   // Store/UpdateLocationRequest validate it) — added 08-08 with the searchable
   // country/province pickers in the form.

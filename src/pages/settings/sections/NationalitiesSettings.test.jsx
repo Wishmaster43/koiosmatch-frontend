@@ -16,6 +16,21 @@ vi.mock('@/lib/api', async () => {
 })
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
+// I18N-1 work-permit toggle: controllable settings blob + a spy on the save path
+// (§13: assert the REQUEST), same pattern as BlacklistReasonsSettings.test.
+const mockSettings = vi.fn(() => ({}))
+const saveSettingsKeys = vi.fn(async () => {})
+vi.mock('@/lib/settings/useAllSettings', async () => {
+  const actual = await vi.importActual('@/lib/settings/useAllSettings')
+  return {
+    ...actual,
+    useSettingsLoaded: () => true,
+    useAllSettings: () => mockSettings(),
+    saveSettingsKeys: (...args) => saveSettingsKeys(...args),
+    invalidateAllSettingsCache: vi.fn(),
+  }
+})
+
 const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
 
 // eslint-disable-next-line no-restricted-syntax -- DATA: fixture row's tenant colour, not a style rule.
@@ -97,5 +112,39 @@ describe('NationalitiesSettings', () => {
     fireEvent.drop(rowOf('Nederlandse'))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/nationalities/reorder', { ids: ['n2', 'n1'] }))
+  })
+})
+
+// I18N-1: the tenant's EU/EEA work-permit override lives on this screen (it overrides
+// the is_eu flag below it) — asserts the rendered state AND the saved key (§13).
+describe('NationalitiesSettings · work-permit toggle (I18N-1)', () => {
+  it('renders ON when work_permit_required_for_eu_nationals is \'1\'', async () => {
+    api.get.mockResolvedValue({ data: [row()] })
+    mockSettings.mockReturnValue({ work_permit_required_for_eu_nationals: '1' })
+    render(<NationalitiesSettings />)
+
+    await screen.findByText('Nederlandse')
+    expect(screen.getByRole('switch', { name: st('nationalities.workPermitToggle.label') })).toHaveAttribute('aria-checked', 'true')
+  })
+
+  it('renders OFF when the setting is \'0\' or absent', async () => {
+    api.get.mockResolvedValue({ data: [row()] })
+    mockSettings.mockReturnValue({})
+    render(<NationalitiesSettings />)
+
+    await screen.findByText('Nederlandse')
+    expect(screen.getByRole('switch', { name: st('nationalities.workPermitToggle.label') })).toHaveAttribute('aria-checked', 'false')
+  })
+
+  it('clicking the toggle saves work_permit_required_for_eu_nationals: true', async () => {
+    api.get.mockResolvedValue({ data: [row()] })
+    mockSettings.mockReturnValue({ work_permit_required_for_eu_nationals: '0' })
+    const user = userEvent.setup()
+    render(<NationalitiesSettings />)
+
+    await screen.findByText('Nederlandse')
+    await user.click(screen.getByRole('switch', { name: st('nationalities.workPermitToggle.label') }))
+
+    await waitFor(() => expect(saveSettingsKeys).toHaveBeenCalledWith({ work_permit_required_for_eu_nationals: true }))
   })
 })

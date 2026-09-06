@@ -545,6 +545,7 @@
     "street": "Via",
     "houseNumber": "Numero civico",
     "houseNumberSuffix": "Aggiunta",
+    "addressLine2": "Riga indirizzo 2",
     "postalCode": "CAP",
     "city": "Città",
     "country": "Paese",
@@ -1831,7 +1832,9 @@
       "fields": {
         "customerName": "Nome cliente",
         "whatsappConsent": "Consenso WhatsApp",
-        "emailConsent": "Consenso e-mail"
+        "emailConsent": "Consenso e-mail",
+        "addressLine2": "Riga indirizzo 2",
+        "billingProvince": "Provincia (indirizzo di fatturazione)"
       },
       "mapping": {
         "title": "Abbina le tue colonne",
@@ -3398,7 +3401,11 @@
     "add": "Aggiungi nazionalità",
     "countryCode": "Paese",
     "isEu": "UE/SEE",
-    "isEuDesc": "Ai candidati con questa nazionalità non vengono chiesti i campi del permesso di lavoro."
+    "isEuDesc": "Ai candidati con questa nazionalità non vengono chiesti i campi del permesso di lavoro.",
+    "workPermitToggle": {
+      "label": "Permesso di lavoro obbligatorio anche per i cittadini dell'UE/SEE",
+      "hint": "Attivo: un candidato con nazionalità UE/SEE è trattato come qualsiasi altro candidato non olandese e deve disporre di un valido permesso di lavoro, anche al momento del collocamento."
+    }
   },
   "escalationReasons": {
     "title": "Motivi di escalation",

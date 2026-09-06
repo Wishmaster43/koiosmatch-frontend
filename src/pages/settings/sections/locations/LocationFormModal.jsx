@@ -139,6 +139,10 @@ export default function LocationFormModal({ editingId, form, setForm, saving, on
                 {field('house_number', t('locations.houseNumber'), '28', 'text', 1)}
                 {field('house_number_suffix', t('locations.houseNumberSuffix'), 'A', 'text', 1)}
               </div>
+              {/* I18N-1: optional second address line (unit/building), own column on the backend. */}
+              <div style={{ display: 'flex', gap: 12 }}>
+                {field('address_line_2', t('locations.addressLine2'), t('locations.addressLine2'))}
+              </div>
               <div style={{ display: 'flex', gap: 12 }}>
                 {field('postal_code', t('locations.postalCode'), '1234 AB')}
                 {field('city', t('locations.city'), t('locations.city'))}
