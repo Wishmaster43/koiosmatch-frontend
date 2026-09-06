@@ -34,7 +34,7 @@ export default function DetailsLocationTab({ vacancy: v, location }: Props) {
   return card(t('details.groups.location'), <>
     {/* V9: address — each field its OWN labelled row when editing, mirroring the
         candidate ProfileAddressTab canon exactly (street / houseNumber /
-        houseNumberSuffix / postalCode / city as five separate rows, never a
+        houseNumberSuffix / addressLine2 / postalCode / city as separate rows, never a
         houseNumber+suffix pair squeezed onto one row); read mode still shows
         one composed line (street+no-suffix, postcode+city). */}
     {editing ? (
@@ -42,6 +42,7 @@ export default function DetailsLocationTab({ vacancy: v, location }: Props) {
         {row(t('details.street'), null, text('street'), editing)}
         {row(t('details.houseNumber'), null, text('houseNumber'), editing)}
         {row(t('details.houseNumberSuffix'), null, text('houseNumberSuffix'), editing)}
+        {row(t('details.addressLine2'), null, text('addressLine2'), editing)}
         {row(t('details.postalCode'), null, text('postalCode'), editing)}
         {row(t('details.city'), null, text('city'), editing)}
       </>

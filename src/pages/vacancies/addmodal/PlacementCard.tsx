@@ -16,12 +16,12 @@ import { getCountryOptions } from '@/lib/countries'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 
 interface CandidateType { value: string; label: string; color?: string }
-type AddressKey = 'street' | 'houseNumber' | 'houseNumberSuffix' | 'postalCode' | 'city' | 'province' | 'country'
+type AddressKey = 'street' | 'houseNumber' | 'houseNumberSuffix' | 'addressLine2' | 'postalCode' | 'city' | 'province' | 'country'
 
 interface Props {
   contractTypes: string[]; candidateTypes: CandidateType[]; onToggleType: (v: string) => void
   startDate: string; endDate: string; onStartDateChange: (v: string) => void; onEndDateChange: (v: string) => void
-  street: string; houseNumber: string; houseNumberSuffix: string; postalCode: string; city: string; province: string; country: string
+  street: string; houseNumber: string; houseNumberSuffix: string; addressLine2: string; postalCode: string; city: string; province: string; country: string
   onFieldChange: (k: AddressKey, v: string) => void
   provinces: string[]
   branchId: string; onBranchChange: (v: string) => void
@@ -30,7 +30,7 @@ interface Props {
 
 export default function PlacementCard({
   contractTypes, candidateTypes, onToggleType, startDate, endDate, onStartDateChange, onEndDateChange,
-  street, houseNumber, houseNumberSuffix, postalCode, city, province, country, onFieldChange, provinces,
+  street, houseNumber, houseNumberSuffix, addressLine2, postalCode, city, province, country, onFieldChange, provinces,
   branchId, onBranchChange, branchOptions,
 }: Props) {
   const { t, i18n } = useTranslation(['vacancies', 'common'])
@@ -74,6 +74,9 @@ export default function PlacementCard({
         </FieldRow>
         <FieldRow label={t('details.houseNumberSuffix')}>
           <TextField value={houseNumberSuffix} onChange={v => onFieldChange('houseNumberSuffix', v)} />
+        </FieldRow>
+        <FieldRow label={t('details.addressLine2')}>
+          <TextField value={addressLine2} onChange={v => onFieldChange('addressLine2', v)} />
         </FieldRow>
         <FieldRow label={t('details.postalCode')}>
           <TextField value={postalCode} onChange={v => onFieldChange('postalCode', v)} placeholder="1234 AB" />

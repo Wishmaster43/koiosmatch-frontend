@@ -45,7 +45,7 @@ type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 // Key unions split per sub-tab — each section's form state only ever holds the
 // fields IT owns, so its patch can only ever carry those fields.
 export type GeneralKey = 'category' | 'industry' | 'startDate' | 'endDate'
-export type LocationKey = 'street' | 'houseNumber' | 'houseNumberSuffix' | 'postalCode' | 'city' | 'province' | 'country'
+export type LocationKey = 'street' | 'houseNumber' | 'houseNumberSuffix' | 'addressLine2' | 'postalCode' | 'city' | 'province' | 'country'
 export type RequirementsKey = 'experienceMin' | 'experienceMax' | 'seniority' | 'education'
 // VACANCY-CONTRACT-FIELD-1: the vacancy's own singular contract-kind/CAO slugs.
 export type ConditionsKey = 'salaryMin' | 'salaryMax' | 'hoursMin' | 'hoursMax' | 'contractType' | 'cao'
@@ -151,6 +151,7 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
         locationForm.setF('street', p.street ?? '')
         locationForm.setF('houseNumber', p.houseNumber ?? '')
         locationForm.setF('houseNumberSuffix', p.houseNumberSuffix ?? '')
+        locationForm.setF('addressLine2', p.addressLine2 ?? '')
         locationForm.setF('postalCode', p.postalCode ?? '')
         locationForm.setF('city', p.city ?? '')
         locationForm.setF('province', p.province ?? '')
@@ -189,7 +190,7 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
 
   // ---- Location: structured address + country→province cascade ----
   const seedLocation = (): LocationForm => ({
-    street: v.street, houseNumber: v.houseNumber, houseNumberSuffix: v.houseNumberSuffix, postalCode: v.postalCode, city: v.city,
+    street: v.street, houseNumber: v.houseNumber, houseNumberSuffix: v.houseNumberSuffix, addressLine2: v.addressLine2, postalCode: v.postalCode, city: v.city,
     province: v.province, country: v.country,
   })
   const locationForm = useEditableForm(seedLocation)
@@ -209,7 +210,7 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
   const saveLocation = () => {
     const location = composeAddress(locationForm.form.street, locationForm.form.houseNumber, locationForm.form.houseNumberSuffix, locationForm.form.postalCode, locationForm.form.city)
     onUpdate?.(v.id, {
-      street: locationForm.form.street, houseNumber: locationForm.form.houseNumber, houseNumberSuffix: locationForm.form.houseNumberSuffix,
+      street: locationForm.form.street, houseNumber: locationForm.form.houseNumber, houseNumberSuffix: locationForm.form.houseNumberSuffix, addressLine2: locationForm.form.addressLine2,
       postalCode: locationForm.form.postalCode, city: locationForm.form.city, province: locationForm.form.province, country: locationForm.form.country, location,
     })
     locationForm.setEditing(false)

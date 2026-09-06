@@ -23,7 +23,7 @@ vi.mock('./useCustomerCascade', () => ({
   useCustomerCascade: () => ({
     locations: [{
       id: 'loc-1', name: 'Amsterdam', departments: [{ id: 'dep-1', name: 'ICU' }],
-      street: 'Damstraat', house_number: '1', house_number_suffix: 'A', postcode: '1012AB', city: 'Amsterdam', province: 'Noord-Holland', country: 'NL',
+      street: 'Damstraat', house_number: '1', house_number_suffix: 'A', address_line_2: '', postcode: '1012AB', city: 'Amsterdam', province: 'Noord-Holland', country: 'NL',
     }],
     contacts: [{ id: 'con-1', name: 'Jan Jansen' }],
   }),
@@ -56,7 +56,7 @@ describe('useCascadePickers · clearing a picked level', () => {
     // Empty id + empty name (+ empty address fields, V9 takeover payload) — the
     // caller turns the id/name into `null` in the PATCH body.
     expect(onLocationChange).toHaveBeenCalledWith({
-      id: '', name: '', street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', city: '', province: '', country: '',
+      id: '', name: '', street: '', houseNumber: '', houseNumberSuffix: '', addressLine2: '', postalCode: '', city: '', province: '', country: '',
     })
     // A department belongs to a location; dropping the location must drop it too
     // (the same dependant reset a location SWITCH already performs).
@@ -98,7 +98,7 @@ describe('useCascadePickers · V9 address takeover payload', () => {
     await user.click(screen.getByText('Amsterdam'))
     expect(onLocationChange).toHaveBeenCalledWith({
       id: 'loc-1', name: 'Amsterdam',
-      street: 'Damstraat', houseNumber: '1', houseNumberSuffix: 'A',
+      street: 'Damstraat', houseNumber: '1', houseNumberSuffix: 'A', addressLine2: '',
       postalCode: '1012AB', city: 'Amsterdam', province: 'Noord-Holland', country: 'NL',
     })
   })

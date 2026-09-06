@@ -68,7 +68,7 @@ const FIELD_TO_TAB: Record<string, string> = {
   industry: 'general', category: 'general', location: 'general',
   customerLocationId: 'general', customerDepartmentId: 'general', contactId: 'general',
   contractTypes: 'general', startDate: 'general', endDate: 'general',
-  street: 'general', houseNumber: 'general', houseNumberSuffix: 'general',
+  street: 'general', houseNumber: 'general', houseNumberSuffix: 'general', addressLine2: 'general',
   postalCode: 'general', city: 'general', province: 'general', country: 'general', branchId: 'general',
   seniority: 'requirements', education: 'requirements', skills: 'requirements',
   salaryMin: 'requirements', salaryMax: 'requirements', salaryPeriod: 'requirements',
@@ -223,7 +223,7 @@ export default function AddVacancyModal({
               contractTypes={f.form.contractTypes} candidateTypes={f.candidateTypes} onToggleType={f.toggleContractType}
               startDate={f.form.startDate} endDate={f.form.endDate}
               onStartDateChange={v => f.set('startDate', v)} onEndDateChange={v => f.set('endDate', v)}
-              street={f.form.street} houseNumber={f.form.houseNumber} houseNumberSuffix={f.form.houseNumberSuffix}
+              street={f.form.street} houseNumber={f.form.houseNumber} houseNumberSuffix={f.form.houseNumberSuffix} addressLine2={f.form.addressLine2}
               postalCode={f.form.postalCode} city={f.form.city} province={f.form.province} country={f.form.country}
               onFieldChange={f.onAddressChange} provinces={f.provinces}
               branchId={f.form.branchId} onBranchChange={f.handleBranchChange} branchOptions={f.branchOptions}

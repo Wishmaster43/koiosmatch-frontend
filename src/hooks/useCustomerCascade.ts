@@ -43,6 +43,7 @@ export interface CascadeLocation extends CascadeOption {
   street?: string | null
   house_number?: string | null
   house_number_suffix?: string | null
+  address_line_2?: string | null
   postcode?: string | null
   city?: string | null
   province?: string | null

@@ -1,8 +1,8 @@
 /**
  * DetailsLocationTab · V9 (VACATURES-100) regression guard: address fields
  * mirror the candidate ProfileAddressTab canon exactly — read mode composes
- * ONE line (street+no-suffix, postcode+city), edit mode shows FIVE separate
- * labelled rows (street / houseNumber / houseNumberSuffix / postalCode /
+ * ONE line (street+no-suffix, postcode+city), edit mode shows SIX separate
+ * labelled rows (street / houseNumber / houseNumberSuffix / addressLine2 / postalCode /
  * city), never a houseNumber+suffix pair squeezed onto one row. Province/
  * country stay searchable pick-only dropdowns resolving to a display name.
  *
@@ -29,7 +29,7 @@ vi.mock('@/lib/countries', () => ({
 }))
 
 const vacancy = {
-  id: 'v1', street: 'Kerkstraat', houseNumber: '12', houseNumberSuffix: 'a',
+  id: 'v1', street: 'Kerkstraat', houseNumber: '12', houseNumberSuffix: 'a', addressLine2: '',
   postalCode: '1234 AB', city: 'Utrecht', province: 'Utrecht', country: 'NL', location: '',
 } as unknown as VacancyDetail
 
@@ -37,7 +37,7 @@ const vacancy = {
 // this sub-tab only ever reads/calls its OWN `location` section.
 const makeLocation = (overrides: Partial<LocationSection> = {}): LocationSection => ({
   editing: false, setEditing: vi.fn(),
-  form: { street: 'Kerkstraat', houseNumber: '12', houseNumberSuffix: 'a', postalCode: '1234 AB', city: 'Utrecht', province: 'Utrecht', country: 'NL' },
+  form: { street: 'Kerkstraat', houseNumber: '12', houseNumberSuffix: 'a', addressLine2: '', postalCode: '1234 AB', city: 'Utrecht', province: 'Utrecht', country: 'NL' },
   setF: vi.fn(), save: vi.fn(), cancel: vi.fn(), provinces: ['Utrecht'],
   ...overrides,
 })
@@ -50,11 +50,12 @@ describe('DetailsLocationTab · address canon (V9)', () => {
     expect(screen.queryByText('Straat')).not.toBeInTheDocument()
   })
 
-  it('edit mode shows FIVE separate address rows, never a paired houseNumber+suffix row', () => {
+  it('edit mode shows SIX separate address rows, never a paired houseNumber+suffix row', () => {
     render(<DetailsLocationTab vacancy={vacancy} location={makeLocation({ editing: true })} />)
     expect(screen.getByText('Straat')).toBeInTheDocument()
     expect(screen.getByText('Huisnummer')).toBeInTheDocument()
     expect(screen.getByText('Toevoeging')).toBeInTheDocument()
+    expect(screen.getByText('Adresregel 2')).toBeInTheDocument()
     expect(screen.getByText('Postcode')).toBeInTheDocument()
     expect(screen.getByText('Plaats')).toBeInTheDocument()
     // The OLD combined "Huisnummer / Toevoeging" label must be gone.

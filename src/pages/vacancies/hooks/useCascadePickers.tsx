@@ -12,7 +12,7 @@ interface Picked { id: string; name: string }
 // so the caller (useVacancyDetailsForm) can take it over onto the Locatie
 // section's form the moment a customer location is chosen.
 export interface PickedLocation extends Picked {
-  street?: string; houseNumber?: string; houseNumberSuffix?: string
+  street?: string; houseNumber?: string; houseNumberSuffix?: string; addressLine2?: string
   postalCode?: string; city?: string; province?: string; country?: string
 }
 interface Args {
@@ -69,7 +69,7 @@ export function useCascadePickers({
     // caller decides whether/how to take it over onto the vacancy's address form.
     onLocationChange({
       id, name: loc?.name ?? '',
-      street: loc?.street ?? '', houseNumber: loc?.house_number ?? '', houseNumberSuffix: loc?.house_number_suffix ?? '',
+      street: loc?.street ?? '', houseNumber: loc?.house_number ?? '', houseNumberSuffix: loc?.house_number_suffix ?? '', addressLine2: loc?.address_line_2 ?? '',
       postalCode: loc?.postcode ?? '', city: loc?.city ?? '', province: loc?.province ?? '', country: loc?.country ?? '',
     })
     onDepartmentChange({ id: '', name: '' })

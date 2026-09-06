@@ -231,6 +231,7 @@
     "street": "Straat",
     "houseNumber": "Huisnummer",
     "houseNumberSuffix": "Toevoeging",
+    "addressLine2": "Adresregel 2",
     "postalCode": "Postcode",
     "city": "Plaats",
     "province": "Provincie",

@@ -234,6 +234,7 @@
     "street": "Calle",
     "houseNumber": "Número",
     "houseNumberSuffix": "Complemento",
+    "addressLine2": "Línea de dirección 2",
     "postalCode": "Código postal",
     "city": "Ciudad",
     "province": "Provincia",

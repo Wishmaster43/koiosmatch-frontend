@@ -226,6 +226,7 @@ export function mapVacancyDetail(raw: ApiVacancy = {}): VacancyDetail {
     city: raw.city ?? '',
     // VAC-COUNTRY-1 (Danny 22-07, punt 2): read the raw DB column name first, then
     // the already-mapped key the resource sends today — whichever arrives. Honest:
+    addressLine2: raw.address_line_2 ?? '',
     // the internal VacancyDetailResource does not serialize `location_country` /
     // `country` yet (BE gap, CMBE follow-up), so `country` reads '' until that lands.
     province: raw.location_province ?? raw.province ?? '',

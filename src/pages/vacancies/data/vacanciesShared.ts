@@ -111,6 +111,7 @@ export const buildVacancyPatch = (patch: Record<string, unknown>): Record<string
   if ('street'          in patch) body.street             = patch.street
   if ('houseNumber'     in patch) body.house_number       = patch.houseNumber
   if ('houseNumberSuffix' in patch) body.house_number_suffix = patch.houseNumberSuffix
+  if ('addressLine2'    in patch) body.address_line_2     = patch.addressLine2
   if ('postalCode'      in patch) body.postcode           = patch.postalCode
   if ('city'            in patch) body.city               = patch.city
   if ('province'        in patch) body.province           = patch.province

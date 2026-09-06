@@ -231,6 +231,7 @@
     "street": "Street",
     "houseNumber": "House number",
     "houseNumberSuffix": "Addition",
+    "addressLine2": "Address line 2",
     "postalCode": "Postal code",
     "city": "City",
     "province": "Province",

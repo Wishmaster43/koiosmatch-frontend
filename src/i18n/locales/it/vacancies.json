@@ -231,6 +231,7 @@
     "street": "Via",
     "houseNumber": "Numero civico",
     "houseNumberSuffix": "Aggiunta",
+    "addressLine2": "Riga indirizzo 2",
     "postalCode": "CAP",
     "city": "Città",
     "province": "Provincia",

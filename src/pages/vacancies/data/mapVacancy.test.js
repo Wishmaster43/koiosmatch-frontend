@@ -1,6 +1,18 @@
 import { describe, it, expect } from 'vitest'
 import { mapVacancy, mapVacancyDetail } from './mapVacancy'
 
+// I18N-1 (BE 5a109b00): the vacancy's second address line rides `address_line_2`
+// on the detail resource (its own column, NOT the house-number suffix).
+describe('mapVacancyDetail · addressLine2 (I18N-1)', () => {
+  it('maps address_line_2 when present', () => {
+    expect(mapVacancyDetail({ id: 'v1', address_line_2: 'Unit 4' }).addressLine2).toBe('Unit 4')
+  })
+  it('defaults to an empty string when absent or null', () => {
+    expect(mapVacancyDetail({ id: 'v1' }).addressLine2).toBe('')
+    expect(mapVacancyDetail({ id: 'v1', address_line_2: null }).addressLine2).toBe('')
+  })
+})
+
 describe('mapVacancy', () => {
   it('maps a snake_case API row with nested objects', () => {
     const row = mapVacancy({
