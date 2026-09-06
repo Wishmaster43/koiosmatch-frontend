@@ -1156,11 +1156,424 @@
     "copied": "Adresse copiée"
   },
   "changelogDescriptions": {
+    "action_rule": {
+      "reset": "Règle d'action réinitialisée par défaut",
+      "updated": "Règles d'action mises à jour",
+      "viewed": "Dossier ouvert"
+    },
+    "ai_agent": {
+      "tested": "Agent IA testé"
+    },
+    "anonymize_stale_candidates": {
+      "anonymized": "Candidats dormants anonymisés"
+    },
+    "api_key": {
+      "created": "Clé API créée",
+      "revoked": "Clé API révoquée",
+      "secret_regenerated": "Secret de clé API régénéré",
+      "updated": "Clé API mise à jour"
+    },
+    "application": {
+      "bulk_updated": "Candidatures mises à jour en masse",
+      "corrected": "Rejet de candidature corrigé",
+      "created": "Candidature créée",
+      "detached": "Candidature détachée",
+      "paused": "Entretien IA en pause",
+      "rejected": "Candidature rejetée par Koios",
+      "resumed": "Entretien IA repris",
+      "scored": "Candidature notée",
+      "updated": "Score Match de candidature remplacé"
+    },
+    "application_note": {
+      "added": "Note de candidature ajoutée",
+      "deleted": "Note de candidature supprimée",
+      "restored": "Version précédente de la note restaurée",
+      "updated": "Note de candidature mise à jour"
+    },
+    "application_proposal": {
+      "proposed": "Candidature proposée au contact",
+      "revoked": "Proposition de candidature révoquée"
+    },
+    "application_rejector": {
+      "rejected": "Candidature rejetée"
+    },
+    "appointment": {
+      "created": "Workflow de rendez-vous démarré par Koios",
+      "updated": "Rendez-vous mis à jour par Koios"
+    },
+    "auth": {
+      "login_failed": "Connexion échouée",
+      "login_success": "Connecté",
+      "logout": "Déconnecté",
+      "updated": "Profil personnel mis à jour"
+    },
+    "avatar": {
+      "deleted": "Avatar supprimé",
+      "uploaded": "Avatar téléchargé"
+    },
+    "backfill_match_billing": {
+      "backfilled": "Snapshot de facturation Match rempli"
+    },
+    "backoffice_sync": {
+      "blocked": "Candidat ignoré lors de la synchro",
+      "forced_despite_warning": "Synchro forcée malgré avertissement",
+      "queued": "Synchronisation backoffice en masse en attente"
+    },
+    "billing_budget_admin": {
+      "cleared": "Exception de budget de facturation effacée",
+      "updated": "Budget de facturation modifié"
+    },
+    "billing_tier_admin": {
+      "cleared": "Paramètre de niveau de facturation effacé",
+      "updated": "Paramètre de niveau de facturation modifié"
+    },
+    "branch_assignment": {
+      "updated": "Sites utilisateur mis à jour"
+    },
+    "build_documents_zip_export": {
+      "completed": "Export ZIP terminé: documents",
+      "failed": "Export ZIP échoué: documents"
+    },
+    "candidate": {
+      "applications_reopened": "Candidatures réouvertes après restauration",
+      "archived": "Candidat archivé",
+      "bulk_updated": "Candidats mis à jour en masse",
+      "created": "Candidat créé par Koios",
+      "integrity_repaired": "Intégrité réparée",
+      "notification_sent": "Workflow de notification démarré",
+      "reactivated": "Réactivation automatique effectuée",
+      "reference_number_backfilled": "Numéro de référence rempli",
+      "restored": "Candidat restauré",
+      "search_index_backfilled": "Index de recherche des candidats rempli",
+      "status_updated": "Statut de candidat modifié par Koios",
+      "updated": "Statut du candidat modifié",
+      "whatsapp_sent": "Workflow d'envoi WhatsApp démarré"
+    },
+    "candidate_call_list": {
+      "added": "Candidats ajoutés à la liste d'appels par Koios",
+      "created": "Liste d'appels créée par Koios",
+      "distributed": "Liste d'appels distribuée par Koios"
+    },
+    "candidate_contact_moment": {
+      "registered": "Moment de contact enregistré"
+    },
+    "candidate_cv_parse_proposal": {
+      "accepted": "Proposition d'analyse CV acceptée",
+      "rejected": "Proposition d'analyse CV rejetée"
+    },
+    "candidate_document": {
+      "replaced": "Document candidat remplacé"
+    },
+    "candidate_dossier": {
+      "viewed": "Dossier consulté"
+    },
+    "candidate_note": {
+      "added": "Note de candidat ajoutée par Koios",
+      "updated": "Note de candidat mise à jour par Koios"
+    },
+    "candidate_profile": {
+      "deleted": "Candidat supprimé définitivement",
+      "merged": "Candidat fusionné"
+    },
+    "career_application_handler": {
+      "received": "Candidature reçue via site carrière"
+    },
+    "conversation_importer": {
+      "imported": "Message importé"
+    },
+    "couple_match_to_hello_flex": {
+      "sent": "Contrat envoyé à HelloFlex"
+    },
+    "customer": {
+      "archived": "Client archivé par Koios",
+      "bulk_updated": "Clients mis à jour en masse",
+      "created": "Client créé par Koios",
+      "merged": "Client fusionné",
+      "restored": "Client restauré de l'archive",
+      "updated": "Sites du client modifiés"
+    },
+    "customer_contact": {
+      "archived": "Contact archivé par Koios",
+      "created": "Contact créé par Koios",
+      "merged": "Contact fusionné",
+      "restored": "Contact restauré",
+      "updated": "Contact mis à jour par Koios"
+    },
+    "customer_department": {
+      "archived": "Département archivé par Koios",
+      "created": "Département créé par Koios",
+      "merged": "Département fusionné",
+      "restored": "Département restauré",
+      "updated": "Département mis à jour par Koios"
+    },
+    "customer_location": {
+      "archived": "Site archivé par Koios",
+      "created": "Site créé par Koios",
+      "merged": "Site fusionné",
+      "restored": "Site restauré",
+      "updated": "Site mis à jour par Koios",
+      "uploaded": "Logo du site téléchargé"
+    },
+    "customer_note": {
+      "added": "Note client ajoutée"
+    },
+    "data_erasure": {
+      "cleared": "Données personnelles supprimées (RGPD)"
+    },
+    "document_zip_import": {
+      "attached": "Fichier attaché à l'import ZIP",
+      "completed": "Import ZIP terminé"
+    },
+    "email_log": {
+      "viewed": "Corps de l'e-mail consulté"
+    },
+    "export": {
+      "downloaded": "Export ZIP téléchargé: documents",
+      "queued": "Export ZIP en attente: documents"
+    },
+    "free_entry_lookup": {
+      "converted_to_strict": "Valeurs collectées lors de la conversion"
+    },
+    "geocode": {
+      "requested": "Géocodage PDOK demandé",
+      "updated": "Coordonnées PDOK mises à jour"
+    },
+    "hello_flex_webhook": {
+      "updated": "Statut du contrat mis à jour via webhook HelloFlex"
+    },
+    "interview": {
+      "paused": "Entretien IA en pause par Koios",
+      "resumed": "Entretien IA repris par Koios",
+      "started": "Entretien IA démarré par Koios"
+    },
+    "interview_outcome_applier": {
+      "completed": "Entretien IA terminé",
+      "rejected": "Candidature rejetée via entretien IA"
+    },
+    "invoice_settings": {
+      "updated": "Paramètres de facturation modifiés"
+    },
+    "job_queue": {
+      "cancelled": "Job en attente annulée",
+      "cleared": "Tous les jobs échoués supprimés",
+      "deleted": "Job échouée supprimée",
+      "requeued": "Job échouée remise en attente"
+    },
+    "koios_action_item": {
+      "executed": "Point d'action IA exécuté",
+      "failed": "Point d'action IA exécuté"
+    },
+    "koios_ai_settings": {
+      "budget_updated": "Budget quotidien IA mis à jour",
+      "model_changed": "Modèle IA modifié"
+    },
+    "koios_capabilities": {
+      "toggled": "Outil Koios basculé pour le Locataire"
+    },
+    "koios_feedback": {
+      "flagged_harmful": "Retour Koios marqué comme nuisible"
+    },
+    "koios_model_admin": {
+      "package_policy_updated": "Politique de package Koios modifiée",
+      "remapped": "Variante de modèle Koios remappée",
+      "routing_updated": "Routage Koios modifié",
+      "tenant_policy_updated": "Politique de client Koios modifiée"
+    },
+    "location": {
+      "created": "Site créé",
+      "deleted": "Site supprimé",
+      "updated": "Site mis à jour"
+    },
     "lookup": {
       "reordered": "Ordre modifié"
     },
     "match": {
-      "created": "Match créé"
+      "approved": "Match approuvé par Koios",
+      "blocked": "Création de Match bloquée par workflow",
+      "created": "Match créé par Koios",
+      "queued": "Couplage de contrat en masse en attente",
+      "rejected": "Match rejeté par Koios",
+      "renewed": "Match prolongé par Koios",
+      "restored": "Match restauré",
+      "sent": "Contrat envoyé à HelloFlex",
+      "terminated": "Match résilie par Koios",
+      "updated": "Match mis à jour par workflow"
+    },
+    "match_maker": {
+      "added": "Forme de contrat automatiquement ajoutée"
+    },
+    "match_note": {
+      "added": "Note de Match ajoutée par Koios",
+      "deleted": "Note de Match supprimée",
+      "updated": "Note de Match mise à jour"
+    },
+    "match_weight_template": {
+      "applied": "Modèle de poids Match appliqué"
+    },
+    "mfa": {
+      "blocked": "Vérification MFA bloquée",
+      "disabled": "MFA désactivé",
+      "enabled": "MFA activé",
+      "failed": "Vérification MFA échouée",
+      "generated": "Codes de récupération MFA régénérés",
+      "login_success": "Connecté (MFA)"
+    },
+    "module_setting": {
+      "updated": "Paramètres d'app mis à jour"
+    },
+    "note_importer": {
+      "cleared": "Auteur de note effacé après import"
+    },
+    "opportunity": {
+      "bulk_updated": "Opportunités mises à jour en masse",
+      "created": "Opportunité créée par Koios",
+      "updated": "Opportunité mise à jour par Koios"
+    },
+    "opportunity_note": {
+      "added": "Note d'opportunité ajoutée par Koios",
+      "deleted": "Note d'opportunité supprimée",
+      "edited": "Note d'opportunité modifiée",
+      "restored": "Version précédente de la note restaurée"
+    },
+    "outreach_campaign": {
+      "created": "Liste d'appels créée",
+      "deleted": "Liste d'appels supprimée",
+      "distributed": "Liste d'appels distribuée",
+      "generated": "Liste d'appels générée",
+      "restored": "Liste d'appels restaurée",
+      "updated": "Liste d'appels mise à jour"
+    },
+    "outreach_campaign_generator": {
+      "added": "Candidat ajouté à la liste d'appels malgré l'avertissement",
+      "blocked": "Candidat ignoré lors du remplissage de la liste d'appels"
+    },
+    "outreach_campaign_note": {
+      "added": "Note de liste d'appels ajoutée",
+      "deleted": "Note de liste d'appels supprimée",
+      "restored": "Version précédente de la note restaurée",
+      "updated": "Note de liste d'appels mise à jour"
+    },
+    "outreach_target": {
+      "assigned": "Cibles de sensibilisation assignées",
+      "owner_set": "Propriétaire des cibles de sensibilisation défini",
+      "unassigned": "Cibles de sensibilisation non assignées",
+      "updated": "Cible de sensibilisation mise à jour"
+    },
+    "planning": {
+      "created": "Mission créée par workflow",
+      "scheduled": "Candidat planifié par workflow"
+    },
+    "planning_connection": {
+      "created": "Connexion planning créée",
+      "deleted": "Connexion planning supprimée",
+      "updated": "Connexion planning mise à jour"
+    },
+    "platform_pricing": {
+      "updated": "Prix de plateforme modifiés"
+    },
+    "pool": {
+      "added": "Candidats ajoutés au pool",
+      "removed": "Candidats retirés du pool"
+    },
+    "public_proposal": {
+      "viewed": "Lien de proposition ouvert"
+    },
+    "report_drill": {
+      "viewed": "Drill de rapport ouvert"
+    },
+    "retention_consent": {
+      "confirmed": "Consentement confirmé via lien signé"
+    },
+    "retention_consent_keyword": {
+      "confirmed": "Consentement confirmé via réponse WhatsApp"
+    },
+    "retention_entities": {
+      "erased": "Entité supprimée définitivement",
+      "skipped": "Suppression ignorée (toujours en usage)"
+    },
+    "sm_sync": {
+      "started": "Synchronisation Shiftmanager démarrée manuellement"
+    },
+    "stage_mover": {
+      "updated": "Candidature mise à jour"
+    },
+    "status_set": {
+      "blocked": "Candidat ignoré lors du changement de statut",
+      "forced_despite_warning": "Changement de statut malgré avertissement",
+      "skipped": "Candidat ignoré selon la règle de statut"
+    },
+    "sync_sm_candidates": {
+      "synced": "Candidats synchronisés"
+    },
+    "sync_sm_customers": {
+      "synced": "Clients synchronisés"
+    },
+    "sync_sm_shifts": {
+      "synced": "Missions synchronisées"
+    },
+    "task": {
+      "bulk_archived": "Tâches archivées en masse par Koios",
+      "bulk_assigned": "Tâches assignées en masse par Koios",
+      "bulk_updated": "Tâches mises à jour en masse",
+      "created": "Tâche créée par Koios",
+      "updated": "Tâche mise à jour par Koios"
+    },
+    "task_comment": {
+      "added": "Commentaire de tâche ajouté",
+      "deleted": "Commentaire de tâche supprimé",
+      "updated": "Note de tâche mise à jour"
+    },
+    "task_link": {
+      "added": "Lien de tâche ajouté",
+      "removed": "Lien de tâche supprimé"
+    },
+    "task_note": {
+      "added": "Note de tâche ajoutée par Koios"
+    },
+    "tenant_billing_tier_admin": {
+      "revoked": "Changement de niveau prévu révoqué",
+      "updated": "Niveau de client modifié"
+    },
+    "user": {
+      "created": "Utilisateur créé",
+      "deleted": "Utilisateur supprimé",
+      "mfa_reset": "MFA réinitialisé pour l'utilisateur",
+      "roles_updated": "Rôle modifié pour l'utilisateur",
+      "updated": "Utilisateur mis à jour"
+    },
+    "vacancy": {
+      "archived": "Poste archivé par Koios",
+      "bulk_updated": "Postes mis à jour en masse par Koios",
+      "created": "Poste créé par Koios",
+      "published": "Poste publié par Koios",
+      "restored": "Poste restauré par Koios",
+      "updated": "Poste mis à jour par Koios"
+    },
+    "vacancy_note": {
+      "added": "Note de poste ajoutée",
+      "deleted": "Note de poste supprimée",
+      "updated": "Note de poste mise à jour"
+    },
+    "whatsapp": {
+      "created": "Connexion WhatsApp créée",
+      "deleted": "Connexion WhatsApp supprimée",
+      "updated": "Connexion WhatsApp mise à jour"
+    },
+    "whatsapp_embedded_signup": {
+      "stored": "Connexion WhatsApp coexistence stockée"
+    },
+    "whatsapp_send": {
+      "blocked": "Candidat ignoré lors de l'envoi WhatsApp",
+      "forced_despite_warning": "WhatsApp envoyé malgré avertissement"
+    },
+    "workflow": {
+      "toggled": "Workflow basculé par Koios"
+    },
+    "workflow_failure_handler": {
+      "failed": "Exécution de workflow échouée"
+    },
+    "workflow_run_budget_guard": {
+      "blocked": "Exécution de workflow bloquée"
     }
   },
   "appointmentModality": {

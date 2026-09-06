@@ -1156,11 +1156,424 @@
     "copied": "Dirección copiada"
   },
   "changelogDescriptions": {
+    "action_rule": {
+      "reset": "Regla de acción restablecida",
+      "updated": "Reglas de acción actualizadas",
+      "viewed": "Expediente abierto"
+    },
+    "ai_agent": {
+      "tested": "Agente IA probado"
+    },
+    "anonymize_stale_candidates": {
+      "anonymized": "Candidatos inactivos anonimizados"
+    },
+    "api_key": {
+      "created": "Clave API creada",
+      "revoked": "Clave API revocada",
+      "secret_regenerated": "Secreto de clave API regenerado",
+      "updated": "Clave API actualizada"
+    },
+    "application": {
+      "bulk_updated": "Candidaturas actualizadas en masa",
+      "corrected": "Rechazo de candidatura corregido",
+      "created": "Candidatura creada",
+      "detached": "Candidatura desvinculada",
+      "paused": "Entrevista IA pausada",
+      "rejected": "Candidatura rechazada",
+      "resumed": "Entrevista IA reanudada",
+      "scored": "Candidatura puntuada",
+      "updated": "Candidatura actualizada"
+    },
+    "application_note": {
+      "added": "Nota de candidatura añadida",
+      "deleted": "Nota de candidatura eliminada",
+      "restored": "Versión anterior de nota restaurada",
+      "updated": "Nota de candidatura actualizada"
+    },
+    "application_proposal": {
+      "proposed": "Candidatura propuesta al contacto",
+      "revoked": "Propuesta de candidatura revocada"
+    },
+    "application_rejector": {
+      "rejected": "Candidatura rechazada"
+    },
+    "appointment": {
+      "created": "Workflow de cita iniciado",
+      "updated": "Cita actualizada"
+    },
+    "auth": {
+      "login_failed": "Inicio de sesión fallido",
+      "login_success": "Sesión iniciada",
+      "logout": "Sesión cerrada",
+      "updated": "Perfil actualizado"
+    },
+    "avatar": {
+      "deleted": "Avatar eliminado",
+      "uploaded": "Avatar cargado"
+    },
+    "backfill_match_billing": {
+      "backfilled": "Instantánea de facturación rellenada"
+    },
+    "backoffice_sync": {
+      "blocked": "Candidato saltado en sincronización",
+      "forced_despite_warning": "Sincronización forzada pese a advertencia",
+      "queued": "Sincronización backoffice en cola"
+    },
+    "billing_budget_admin": {
+      "cleared": "Excepción de presupuesto borrada",
+      "updated": "Presupuesto de facturación modificado"
+    },
+    "billing_tier_admin": {
+      "cleared": "Configuración de nivel borrada",
+      "updated": "Nivel de facturación modificado"
+    },
+    "branch_assignment": {
+      "updated": "Ubicaciones de usuario actualizadas"
+    },
+    "build_documents_zip_export": {
+      "completed": "Exportación ZIP completada",
+      "failed": "Exportación ZIP fallida"
+    },
+    "candidate": {
+      "applications_reopened": "Candidaturas reapertas",
+      "archived": "Candidato archivado",
+      "bulk_updated": "Candidatos actualizados en masa",
+      "created": "Candidato creado",
+      "integrity_repaired": "Integridad de candidato reparada",
+      "notification_sent": "Workflow de notificación iniciado",
+      "reactivated": "Candidato reactivado automáticamente",
+      "reference_number_backfilled": "Número de referencia rellenado",
+      "restored": "Candidato restaurado",
+      "search_index_backfilled": "Índice de búsqueda rellenado",
+      "status_updated": "Estado de candidato modificado",
+      "updated": "Candidato actualizado",
+      "whatsapp_sent": "Workflow de envío WhatsApp iniciado"
+    },
+    "candidate_call_list": {
+      "added": "Candidatos añadidos a lista",
+      "created": "Lista de llamadas creada",
+      "distributed": "Lista de llamadas distribuida"
+    },
+    "candidate_contact_moment": {
+      "registered": "Momento de contacto registrado"
+    },
+    "candidate_cv_parse_proposal": {
+      "accepted": "Análisis de CV aceptado",
+      "rejected": "Análisis de CV rechazado"
+    },
+    "candidate_document": {
+      "replaced": "Documento de candidato reemplazado"
+    },
+    "candidate_dossier": {
+      "viewed": "Expediente visualizado"
+    },
+    "candidate_note": {
+      "added": "Nota de candidato añadida",
+      "updated": "Nota de candidato actualizada"
+    },
+    "candidate_profile": {
+      "deleted": "Candidato eliminado permanentemente",
+      "merged": "Candidato fusionado"
+    },
+    "career_application_handler": {
+      "received": "Solicitud recibida del sitio"
+    },
+    "conversation_importer": {
+      "imported": "Mensaje importado"
+    },
+    "couple_match_to_hello_flex": {
+      "sent": "Contrato enviado a HelloFlex"
+    },
+    "customer": {
+      "archived": "Cliente archivado",
+      "bulk_updated": "Clientes actualizados en masa",
+      "created": "Cliente creado",
+      "merged": "Cliente fusionado",
+      "restored": "Cliente restaurado del archivo",
+      "updated": "Cliente actualizado"
+    },
+    "customer_contact": {
+      "archived": "Contacto de cliente archivado",
+      "created": "Contacto de cliente creado",
+      "merged": "Contacto de cliente fusionado",
+      "restored": "Contacto de cliente restaurado",
+      "updated": "Contacto de cliente actualizado"
+    },
+    "customer_department": {
+      "archived": "Departamento de cliente archivado",
+      "created": "Departamento de cliente creado",
+      "merged": "Departamento de cliente fusionado",
+      "restored": "Departamento de cliente restaurado",
+      "updated": "Departamento de cliente actualizado"
+    },
+    "customer_location": {
+      "archived": "Ubicación de cliente archivada",
+      "created": "Ubicación de cliente creada",
+      "merged": "Ubicación de cliente fusionada",
+      "restored": "Ubicación de cliente restaurada",
+      "updated": "Ubicación de cliente actualizada",
+      "uploaded": "Logo de ubicación cargado"
+    },
+    "customer_note": {
+      "added": "Nota de cliente añadida"
+    },
+    "data_erasure": {
+      "cleared": "Datos personales borrados"
+    },
+    "document_zip_import": {
+      "attached": "Archivo adjunto en importación ZIP",
+      "completed": "Importación ZIP completada"
+    },
+    "email_log": {
+      "viewed": "Cuerpo de correo visualizado"
+    },
+    "export": {
+      "downloaded": "Exportación ZIP descargada",
+      "queued": "Exportación ZIP en cola"
+    },
+    "free_entry_lookup": {
+      "converted_to_strict": "Valores recopilados en conversión"
+    },
+    "geocode": {
+      "requested": "Geocodificación solicitada",
+      "updated": "Coordenadas actualizadas"
+    },
+    "hello_flex_webhook": {
+      "updated": "Estado del contrato actualizado vía webhook HelloFlex"
+    },
+    "interview": {
+      "paused": "Entrevista IA pausada",
+      "resumed": "Entrevista IA reanudada",
+      "started": "Entrevista IA iniciada"
+    },
+    "interview_outcome_applier": {
+      "completed": "Entrevista IA completada",
+      "rejected": "Candidatura rechazada vía IA"
+    },
+    "invoice_settings": {
+      "updated": "Configuración de facturación modificada"
+    },
+    "job_queue": {
+      "cancelled": "Trabajo en espera cancelado",
+      "cleared": "Todos los trabajos fallidos borrados",
+      "deleted": "Trabajo fallido eliminado",
+      "requeued": "Trabajo fallido reingresado"
+    },
+    "koios_action_item": {
+      "executed": "Punto de acción IA ejecutado",
+      "failed": "Punto de acción IA falló"
+    },
+    "koios_ai_settings": {
+      "budget_updated": "Presupuesto diario IA actualizado",
+      "model_changed": "Modelo IA modificado"
+    },
+    "koios_capabilities": {
+      "toggled": "Herramienta Koios activada"
+    },
+    "koios_feedback": {
+      "flagged_harmful": "Comentario Koios marcado como dañino"
+    },
+    "koios_model_admin": {
+      "package_policy_updated": "Política de paquete modificada",
+      "remapped": "Modelo Koios remapeado",
+      "routing_updated": "Enrutamiento Koios modificado",
+      "tenant_policy_updated": "Política de inquilino modificada"
+    },
+    "location": {
+      "created": "Ubicación creada",
+      "deleted": "Ubicación eliminada",
+      "updated": "Ubicación actualizada"
+    },
     "lookup": {
       "reordered": "Orden cambiado"
     },
     "match": {
-      "created": "Match creado"
+      "approved": "Match aprobado",
+      "blocked": "Creación de Match bloqueada",
+      "created": "Match creado",
+      "queued": "Acoplamiento de contrato en cola",
+      "rejected": "Match rechazado",
+      "renewed": "Match renovado",
+      "restored": "Match restaurado",
+      "sent": "Contrato enviado a HelloFlex",
+      "terminated": "Match terminado",
+      "updated": "Match actualizado"
+    },
+    "match_maker": {
+      "added": "Forma de contrato añadida automáticamente"
+    },
+    "match_note": {
+      "added": "Nota de Match añadida",
+      "deleted": "Nota de Match eliminada",
+      "updated": "Nota de Match actualizada"
+    },
+    "match_weight_template": {
+      "applied": "Plantilla de peso aplicada"
+    },
+    "mfa": {
+      "blocked": "Verificación MFA bloqueada",
+      "disabled": "MFA deshabilitado",
+      "enabled": "MFA habilitado",
+      "failed": "Verificación MFA fallida",
+      "generated": "Códigos de recuperación MFA regenerados",
+      "login_success": "Sesión iniciada con MFA"
+    },
+    "module_setting": {
+      "updated": "Configuración de app actualizada"
+    },
+    "note_importer": {
+      "cleared": "ID de autor de nota borrado"
+    },
+    "opportunity": {
+      "bulk_updated": "Oportunidades actualizadas en masa",
+      "created": "Oportunidad creada",
+      "updated": "Oportunidad actualizada"
+    },
+    "opportunity_note": {
+      "added": "Nota de oportunidad añadida",
+      "deleted": "Nota de oportunidad eliminada",
+      "edited": "Nota de oportunidad editada",
+      "restored": "Nota de oportunidad restaurada"
+    },
+    "outreach_campaign": {
+      "created": "Lista de llamadas creada",
+      "deleted": "Lista de llamadas eliminada",
+      "distributed": "Lista de llamadas distribuida",
+      "generated": "Lista de llamadas generada",
+      "restored": "Lista de llamadas restaurada",
+      "updated": "Lista de llamadas actualizada"
+    },
+    "outreach_campaign_generator": {
+      "added": "Candidato añadido pese a advertencia",
+      "blocked": "Candidato saltado en generación"
+    },
+    "outreach_campaign_note": {
+      "added": "Nota de lista de llamadas añadida",
+      "deleted": "Nota de lista de llamadas eliminada",
+      "restored": "Nota de lista de llamadas restaurada",
+      "updated": "Nota de lista de llamadas actualizada"
+    },
+    "outreach_target": {
+      "assigned": "Objetivos de contacto asignados",
+      "owner_set": "Propietario de objetivos establecido",
+      "unassigned": "Objetivos de contacto desasignados",
+      "updated": "Objetivo de contacto actualizado"
+    },
+    "planning": {
+      "created": "Turno creado",
+      "scheduled": "Candidato programado"
+    },
+    "planning_connection": {
+      "created": "Conexión de planificación creada",
+      "deleted": "Conexión de planificación eliminada",
+      "updated": "Conexión de planificación actualizada"
+    },
+    "platform_pricing": {
+      "updated": "Precios de plataforma modificados"
+    },
+    "pool": {
+      "added": "Candidatos añadidos a grupo",
+      "removed": "Candidatos eliminados del grupo"
+    },
+    "public_proposal": {
+      "viewed": "Enlace de propuesta abierto"
+    },
+    "report_drill": {
+      "viewed": "Exploración de informe abierta"
+    },
+    "retention_consent": {
+      "confirmed": "Consentimiento de retención confirmado"
+    },
+    "retention_consent_keyword": {
+      "confirmed": "Consentimiento confirmado vía WhatsApp"
+    },
+    "retention_entities": {
+      "erased": "Entidad eliminada permanentemente",
+      "skipped": "Entidad saltada en retención"
+    },
+    "sm_sync": {
+      "started": "Sincronización Shiftmanager iniciada"
+    },
+    "stage_mover": {
+      "updated": "Candidatura actualizada"
+    },
+    "status_set": {
+      "blocked": "Candidato saltado en cambio de estado",
+      "forced_despite_warning": "Cambio de estado forzado pese a advertencia",
+      "skipped": "Candidato saltado en cambio de estado"
+    },
+    "sync_sm_candidates": {
+      "synced": "Candidatos sincronizados"
+    },
+    "sync_sm_customers": {
+      "synced": "Clientes sincronizados"
+    },
+    "sync_sm_shifts": {
+      "synced": "Turnos sincronizados"
+    },
+    "task": {
+      "bulk_archived": "Tareas archivadas en masa",
+      "bulk_assigned": "Tareas asignadas en masa",
+      "bulk_updated": "Tareas actualizadas en masa",
+      "created": "Tarea creada",
+      "updated": "Tarea actualizada"
+    },
+    "task_comment": {
+      "added": "Comentario de tarea añadido",
+      "deleted": "Comentario de tarea eliminado",
+      "updated": "Comentario de tarea actualizado"
+    },
+    "task_link": {
+      "added": "Enlace de tarea añadido",
+      "removed": "Enlace de tarea eliminado"
+    },
+    "task_note": {
+      "added": "Nota de tarea añadida"
+    },
+    "tenant_billing_tier_admin": {
+      "revoked": "Cambio de nivel revocado",
+      "updated": "Nivel de facturación modificado"
+    },
+    "user": {
+      "created": "Usuario creado",
+      "deleted": "Usuario eliminado",
+      "mfa_reset": "MFA restablecido para usuario",
+      "roles_updated": "Rol modificado para usuario",
+      "updated": "Usuario actualizado"
+    },
+    "vacancy": {
+      "archived": "Vacante archivada",
+      "bulk_updated": "Vacantes actualizadas en masa",
+      "created": "Vacante creada",
+      "published": "Vacante publicada por Koios",
+      "restored": "Vacante restaurada",
+      "updated": "Vacante actualizada"
+    },
+    "vacancy_note": {
+      "added": "Nota de vacante añadida",
+      "deleted": "Nota de vacante eliminada",
+      "updated": "Nota de vacante actualizada"
+    },
+    "whatsapp": {
+      "created": "Conexión WhatsApp creada",
+      "deleted": "Conexión WhatsApp eliminada",
+      "updated": "Conexión WhatsApp actualizada"
+    },
+    "whatsapp_embedded_signup": {
+      "stored": "Conexión WhatsApp guardada"
+    },
+    "whatsapp_send": {
+      "blocked": "Candidato saltado en envío WhatsApp",
+      "forced_despite_warning": "WhatsApp enviado pese a advertencia"
+    },
+    "workflow": {
+      "toggled": "Workflow activado"
+    },
+    "workflow_failure_handler": {
+      "failed": "Workflow fallido, enrutado al propietario de respaldo"
+    },
+    "workflow_run_budget_guard": {
+      "blocked": "Nivel de workflow bloqueó ejecuciones"
     }
   },
   "appointmentModality": {

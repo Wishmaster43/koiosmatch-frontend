@@ -1156,11 +1156,424 @@
     "copied": "Adres gekopieerd"
   },
   "changelogDescriptions": {
+    "action_rule": {
+      "reset": "Actieregel teruggezet naar standaard",
+      "updated": "Actieregels bijgewerkt",
+      "viewed": "Dossier geopend"
+    },
+    "ai_agent": {
+      "tested": "AI-agent getest"
+    },
+    "anonymize_stale_candidates": {
+      "anonymized": "Dormante kandidaten geanonimiseerd"
+    },
+    "api_key": {
+      "created": "API-key aangemaakt",
+      "revoked": "API-key ingetrokken",
+      "secret_regenerated": "API-key geheim opnieuw gegenereerd",
+      "updated": "API-key bijgewerkt"
+    },
+    "application": {
+      "bulk_updated": "Sollicitaties in bulk bijgewerkt",
+      "corrected": "Sollicitatie-afwijzing gecorrigeerd",
+      "created": "Sollicitatie aangemaakt",
+      "detached": "Sollicitatie losgekoppeld",
+      "paused": "AI-interview onderbroken",
+      "rejected": "Sollicitatie afgewezen",
+      "resumed": "AI-interview hervat",
+      "scored": "Sollicitatie beoordeeld",
+      "updated": "Sollicitatie bijgewerkt"
+    },
+    "application_note": {
+      "added": "Notitie bij sollicitatie toegevoegd",
+      "deleted": "Notitie bij sollicitatie verwijderd",
+      "restored": "Vorige versie notitie hersteld",
+      "updated": "Notitie bij sollicitatie bijgewerkt"
+    },
+    "application_proposal": {
+      "proposed": "Sollicitatie voorgesteld aan contactpersoon",
+      "revoked": "Sollicitatie-voorstel ingetrokken"
+    },
+    "application_rejector": {
+      "rejected": "Sollicitatie afgewezen"
+    },
+    "appointment": {
+      "created": "Afspraak-workflow gestart",
+      "updated": "Afspraak bijgewerkt"
+    },
+    "auth": {
+      "login_failed": "Mislukte login",
+      "login_success": "Ingelogd",
+      "logout": "Uitgelogd",
+      "updated": "Eigen profiel bijgewerkt"
+    },
+    "avatar": {
+      "deleted": "Avatar verwijderd",
+      "uploaded": "Avatar geüpload"
+    },
+    "backfill_match_billing": {
+      "backfilled": "Match-facturingschema bijgevuld"
+    },
+    "backoffice_sync": {
+      "blocked": "Kandidaat overgeslagen bij backoffice-sync (geblokkeerd)",
+      "forced_despite_warning": "Backoffice-sync doorgezet ondanks waarschuwing",
+      "queued": "Bulk backoffice-sync in wachtrij"
+    },
+    "billing_budget_admin": {
+      "cleared": "Facturatiebudget-uitzondering verwijderd",
+      "updated": "Facturatiebudget gewijzigd"
+    },
+    "billing_tier_admin": {
+      "cleared": "Facturatiestaffel-instelling verwijderd",
+      "updated": "Facturatiestaffel-instelling gewijzigd"
+    },
+    "branch_assignment": {
+      "updated": "Gebruiker-vestigingen bijgewerkt"
+    },
+    "build_documents_zip_export": {
+      "completed": "ZIP-export gereed: documenten",
+      "failed": "ZIP-export mislukt: documenten"
+    },
+    "candidate": {
+      "applications_reopened": "Sollicitaties heropend na herstel",
+      "archived": "Kandidaat gearchiveerd",
+      "bulk_updated": "Kandidaten in bulk bijgewerkt",
+      "created": "Kandidaat aangemaakt",
+      "integrity_repaired": "Kandidaat-integriteit gerepareerd",
+      "notification_sent": "Notificatie-workflow gestart",
+      "reactivated": "Kandidaat automatisch gereactiveerd",
+      "reference_number_backfilled": "Referentienummer bijgevuld",
+      "restored": "Kandidaat hersteld",
+      "search_index_backfilled": "Kandidaat search-index bijgevuld",
+      "status_updated": "Kandidaatstatus gewijzigd",
+      "updated": "Kandidaat bijgewerkt",
+      "whatsapp_sent": "WhatsApp-verzend-workflow gestart"
+    },
+    "candidate_call_list": {
+      "added": "Kandidaten toegevoegd aan bellijst",
+      "created": "Bellijst aangemaakt door Koios",
+      "distributed": "Bellijst verdeeld"
+    },
+    "candidate_contact_moment": {
+      "registered": "Contactmoment geregistreerd"
+    },
+    "candidate_cv_parse_proposal": {
+      "accepted": "CV-parse voorstel geaccepteerd",
+      "rejected": "CV-parse voorstel afgewezen"
+    },
+    "candidate_document": {
+      "replaced": "Kandidaat-document vervangen"
+    },
+    "candidate_dossier": {
+      "viewed": "Dossier ingezien"
+    },
+    "candidate_note": {
+      "added": "Notitie bij kandidaat toegevoegd",
+      "updated": "Notitie bij kandidaat bijgewerkt"
+    },
+    "candidate_profile": {
+      "deleted": "Kandidaat permanent verwijderd",
+      "merged": "Kandidaat samengevoegd"
+    },
+    "career_application_handler": {
+      "received": "Openbare sollicitatie ontvangen"
+    },
+    "conversation_importer": {
+      "imported": "Bericht geïmporteerd (migratie)"
+    },
+    "couple_match_to_hello_flex": {
+      "sent": "Contract naar HelloFlex verstuurd"
+    },
+    "customer": {
+      "archived": "Klant gearchiveerd door Koios",
+      "bulk_updated": "Klanten in bulk bijgewerkt",
+      "created": "Klant aangemaakt",
+      "merged": "Klant samengevoegd",
+      "restored": "Klant hersteld uit archief",
+      "updated": "Klant bijgewerkt"
+    },
+    "customer_contact": {
+      "archived": "Contactpersoon gearchiveerd door Koios",
+      "created": "Contactpersoon aangemaakt door Koios",
+      "merged": "Contactpersoon samengevoegd",
+      "restored": "Contactpersoon hersteld",
+      "updated": "Contactpersoon bijgewerkt"
+    },
+    "customer_department": {
+      "archived": "Afdeling gearchiveerd door Koios",
+      "created": "Afdeling aangemaakt door Koios",
+      "merged": "Afdeling samengevoegd",
+      "restored": "Afdeling hersteld",
+      "updated": "Afdeling bijgewerkt"
+    },
+    "customer_location": {
+      "archived": "Vestiging gearchiveerd door Koios",
+      "created": "Vestiging aangemaakt door Koios",
+      "merged": "Vestiging samengevoegd",
+      "restored": "Vestiging hersteld",
+      "updated": "Vestiging bijgewerkt",
+      "uploaded": "Vestiging-logo geüpload"
+    },
+    "customer_note": {
+      "added": "Notitie bij klant toegevoegd"
+    },
+    "data_erasure": {
+      "cleared": "Persoonsgegevens gewist (AVG)"
+    },
+    "document_zip_import": {
+      "attached": "Document ZIP-import: bestand bijgevoegd",
+      "completed": "Document ZIP-import voltooid"
+    },
+    "email_log": {
+      "viewed": "E-mail-inhoud geopend"
+    },
+    "export": {
+      "downloaded": "ZIP-export gedownload: documenten",
+      "queued": "ZIP-export in wachtrij gezet: documenten"
+    },
+    "free_entry_lookup": {
+      "converted_to_strict": "Waarden verzameld bij omzetten naar strikte lijst"
+    },
+    "geocode": {
+      "requested": "PDOK-geocode aangevraagd",
+      "updated": "PDOK-coördinaten bijgewerkt"
+    },
+    "hello_flex_webhook": {
+      "updated": "Contractstatus bijgewerkt via HelloFlex"
+    },
+    "interview": {
+      "paused": "AI-interview onderbroken",
+      "resumed": "AI-interview hervat",
+      "started": "AI-interview gestart"
+    },
+    "interview_outcome_applier": {
+      "completed": "AI-interview voltooid",
+      "rejected": "Sollicitatie afgewezen via AI-interview"
+    },
+    "invoice_settings": {
+      "updated": "Factuurinstellingen gewijzigd"
+    },
+    "job_queue": {
+      "cancelled": "Wachtende job geannuleerd",
+      "cleared": "Alle mislukte jobs gewist",
+      "deleted": "Mislukte job verwijderd",
+      "requeued": "Mislukte job opnieuw in wachtrij"
+    },
+    "koios_action_item": {
+      "executed": "AI-actiepunt uitgevoerd",
+      "failed": "AI-actiepunt mislukt"
+    },
+    "koios_ai_settings": {
+      "budget_updated": "AI dagbudget bijgewerkt",
+      "model_changed": "AI-model gewijzigd"
+    },
+    "koios_capabilities": {
+      "toggled": "Koios-gereedschap in/uit voor tenant"
+    },
+    "koios_feedback": {
+      "flagged_harmful": "Koios-feedback als schadelijk gemarkeerd"
+    },
+    "koios_model_admin": {
+      "package_policy_updated": "Koios-pakketbeleid gewijzigd",
+      "remapped": "Koios-modelvariant opnieuw toegewezen",
+      "routing_updated": "Koios-routering gewijzigd",
+      "tenant_policy_updated": "Koios-tenant-modelbeleid gewijzigd"
+    },
+    "location": {
+      "created": "Locatie aangemaakt",
+      "deleted": "Locatie verwijderd",
+      "updated": "Locatie bijgewerkt"
+    },
     "lookup": {
       "reordered": "Volgorde gewijzigd"
     },
     "match": {
-      "created": "Match aangemaakt"
+      "approved": "Match goedgekeurd",
+      "blocked": "Match-aanmaak overgeslagen (geblokkeerd)",
+      "created": "Match aangemaakt",
+      "queued": "Bulk contractkoppeling in wachtrij",
+      "rejected": "Match afgewezen",
+      "renewed": "Match verlengd",
+      "restored": "Match hersteld",
+      "sent": "Contract naar HelloFlex verstuurd",
+      "terminated": "Match beëindigd",
+      "updated": "Match bijgewerkt"
+    },
+    "match_maker": {
+      "added": "Contractvorm automatisch toegevoegd"
+    },
+    "match_note": {
+      "added": "Notitie bij match toegevoegd",
+      "deleted": "Notitie bij match verwijderd",
+      "updated": "Notitie bij match bijgewerkt"
+    },
+    "match_weight_template": {
+      "applied": "Match-gewicht sjabloon toegepast"
+    },
+    "mfa": {
+      "blocked": "MFA-verificatie geblokkeerd (te veel pogingen)",
+      "disabled": "MFA uitgeschakeld",
+      "enabled": "MFA ingeschakeld",
+      "failed": "Mislukte MFA-verificatie",
+      "generated": "MFA-herstelcodes opnieuw gegenereerd",
+      "login_success": "Ingelogd (MFA)"
+    },
+    "module_setting": {
+      "updated": "App-instellingen bijgewerkt"
+    },
+    "note_importer": {
+      "cleared": "Notitie-auteur gewist na import"
+    },
+    "opportunity": {
+      "bulk_updated": "Kansen in bulk bijgewerkt",
+      "created": "Kans aangemaakt",
+      "updated": "Kans bijgewerkt"
+    },
+    "opportunity_note": {
+      "added": "Notitie bij kans toegevoegd",
+      "deleted": "Notitie bij kans verwijderd",
+      "edited": "Notitie bij kans bewerkt",
+      "restored": "Vorige versie notitie hersteld"
+    },
+    "outreach_campaign": {
+      "created": "Bellijst aangemaakt",
+      "deleted": "Bellijst verwijderd",
+      "distributed": "Bellijst verdeeld",
+      "generated": "Bellijst gegenereerd",
+      "restored": "Bellijst hersteld",
+      "updated": "Bellijst bijgewerkt"
+    },
+    "outreach_campaign_generator": {
+      "added": "Kandidaat toegevoegd aan bellijst ondanks waarschuwing",
+      "blocked": "Kandidaat overgeslagen bij bellijst (geblokkeerd)"
+    },
+    "outreach_campaign_note": {
+      "added": "Notitie bij bellijst toegevoegd",
+      "deleted": "Notitie bij bellijst verwijderd",
+      "restored": "Vorige versie notitie hersteld",
+      "updated": "Notitie bij bellijst bijgewerkt"
+    },
+    "outreach_target": {
+      "assigned": "Outreach-doelen toegewezen",
+      "owner_set": "Outreach-doelen eigenaar ingesteld",
+      "unassigned": "Outreach-doelen niet toegewezen",
+      "updated": "Outreach-doel bijgewerkt"
+    },
+    "planning": {
+      "created": "Dienst aangemaakt",
+      "scheduled": "Kandidaat ingepland"
+    },
+    "planning_connection": {
+      "created": "Planning-koppeling aangemaakt",
+      "deleted": "Planning-koppeling verwijderd",
+      "updated": "Planning-koppeling bijgewerkt"
+    },
+    "platform_pricing": {
+      "updated": "Platformprijzen gewijzigd"
+    },
+    "pool": {
+      "added": "Kandidaten aan pool toegevoegd",
+      "removed": "Kandidaten uit pool verwijderd"
+    },
+    "public_proposal": {
+      "viewed": "Voorstel-link geopend"
+    },
+    "report_drill": {
+      "viewed": "Rapport-drill geopend"
+    },
+    "retention_consent": {
+      "confirmed": "Bewaartoestemming bevestigd via link"
+    },
+    "retention_consent_keyword": {
+      "confirmed": "Bewaartoestemming bevestigd via WhatsApp"
+    },
+    "retention_entities": {
+      "erased": "Entiteit permanent verwijderd",
+      "skipped": "Verwijdering overgeslagen (nog in gebruik)"
+    },
+    "sm_sync": {
+      "started": "Shiftmanager-sync handmatig gestart"
+    },
+    "stage_mover": {
+      "updated": "Sollicitatie bijgewerkt"
+    },
+    "status_set": {
+      "blocked": "Statuswijziging overgeslagen (geblokkeerd)",
+      "forced_despite_warning": "Statuswijziging doorgezet ondanks waarschuwing",
+      "skipped": "Kandidaat overgeslagen bij statuswijziging"
+    },
+    "sync_sm_candidates": {
+      "synced": "Kandidaten gesynchroniseerd"
+    },
+    "sync_sm_customers": {
+      "synced": "Klanten gesynchroniseerd"
+    },
+    "sync_sm_shifts": {
+      "synced": "Diensten gesynchroniseerd"
+    },
+    "task": {
+      "bulk_archived": "Taken bulk gearchiveerd",
+      "bulk_assigned": "Taken bulk toegewezen",
+      "bulk_updated": "Taken in bulk bijgewerkt",
+      "created": "Taak aangemaakt door Koios",
+      "updated": "Taak bijgewerkt"
+    },
+    "task_comment": {
+      "added": "Opmerking bij taak toegevoegd",
+      "deleted": "Opmerking bij taak verwijderd",
+      "updated": "Opmerking bij taak bijgewerkt"
+    },
+    "task_link": {
+      "added": "Taak-link toegevoegd",
+      "removed": "Taak-link verwijderd"
+    },
+    "task_note": {
+      "added": "Notitie bij taak toegevoegd"
+    },
+    "tenant_billing_tier_admin": {
+      "revoked": "Geplande staffelwijziging ingetrokken",
+      "updated": "Tenant-staffel gewijzigd"
+    },
+    "user": {
+      "created": "Gebruiker aangemaakt",
+      "deleted": "Gebruiker verwijderd",
+      "mfa_reset": "MFA gereset voor gebruiker",
+      "roles_updated": "Rol gewijzigd voor gebruiker",
+      "updated": "Gebruiker bijgewerkt"
+    },
+    "vacancy": {
+      "archived": "Vacature gearchiveerd door Koios",
+      "bulk_updated": "Vacatures in bulk bijgewerkt",
+      "created": "Vacature aangemaakt",
+      "published": "Vacature gepubliceerd door Koios",
+      "restored": "Vacature hersteld",
+      "updated": "Vacature bijgewerkt"
+    },
+    "vacancy_note": {
+      "added": "Notitie bij vacature toegevoegd",
+      "deleted": "Notitie bij vacature verwijderd",
+      "updated": "Notitie bij vacature bijgewerkt"
+    },
+    "whatsapp": {
+      "created": "WhatsApp-koppeling aangemaakt",
+      "deleted": "WhatsApp-koppeling verwijderd",
+      "updated": "WhatsApp-koppeling bijgewerkt"
+    },
+    "whatsapp_embedded_signup": {
+      "stored": "WhatsApp-verbinding opgeslagen"
+    },
+    "whatsapp_send": {
+      "blocked": "Kandidaat overgeslagen bij WhatsApp-verzending",
+      "forced_despite_warning": "WhatsApp verstuurd ondanks waarschuwing"
+    },
+    "workflow": {
+      "toggled": "Workflow in/uit gezet"
+    },
+    "workflow_failure_handler": {
+      "failed": "Workflow mislukt, omgeleid naar fallback-eigenaar"
+    },
+    "workflow_run_budget_guard": {
+      "blocked": "Workflow-staffel blokkeerde nieuwe runs"
     }
   },
   "appointmentModality": {

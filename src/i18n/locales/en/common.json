@@ -1156,11 +1156,424 @@
     "copied": "Address copied"
   },
   "changelogDescriptions": {
+    "action_rule": {
+      "reset": "Action rule reset to default",
+      "updated": "Action rules updated",
+      "viewed": "Action rule opened"
+    },
+    "ai_agent": {
+      "tested": "AI agent tested"
+    },
+    "anonymize_stale_candidates": {
+      "anonymized": "Retention: inactive candidates anonymised"
+    },
+    "api_key": {
+      "created": "API key created",
+      "revoked": "API key revoked",
+      "secret_regenerated": "API key secret regenerated",
+      "updated": "API key updated"
+    },
+    "application": {
+      "bulk_updated": "Applications bulk updated",
+      "corrected": "Application rejection corrected",
+      "created": "Application created",
+      "detached": "Application detached",
+      "paused": "AI interview paused",
+      "rejected": "Application rejected",
+      "resumed": "AI interview resumed",
+      "scored": "Application scored",
+      "updated": "Application updated"
+    },
+    "application_note": {
+      "added": "Application note added",
+      "deleted": "Application note deleted",
+      "restored": "Application note previous version restored",
+      "updated": "Application note updated"
+    },
+    "application_proposal": {
+      "proposed": "Application proposed to contact",
+      "revoked": "Application proposal revoked"
+    },
+    "application_rejector": {
+      "rejected": "Application rejected"
+    },
+    "appointment": {
+      "created": "Appointment workflow started",
+      "updated": "Appointment updated"
+    },
+    "auth": {
+      "login_failed": "Login failed",
+      "login_success": "Logged in",
+      "logout": "Logged out",
+      "updated": "Account profile updated"
+    },
+    "avatar": {
+      "deleted": "Avatar deleted",
+      "uploaded": "Avatar uploaded"
+    },
+    "backfill_match_billing": {
+      "backfilled": "Match billing snapshot backfilled"
+    },
+    "backoffice_sync": {
+      "blocked": "Candidate skipped in backoffice sync (blocked)",
+      "forced_despite_warning": "Backoffice sync forced despite warning",
+      "queued": "Bulk backoffice sync queued"
+    },
+    "billing_budget_admin": {
+      "cleared": "Billing budget exception cleared",
+      "updated": "Billing budget changed"
+    },
+    "billing_tier_admin": {
+      "cleared": "Billing tier setting cleared",
+      "updated": "Billing tier setting changed"
+    },
+    "branch_assignment": {
+      "updated": "User locations updated"
+    },
+    "build_documents_zip_export": {
+      "completed": "Document export completed",
+      "failed": "Document export failed"
+    },
+    "candidate": {
+      "applications_reopened": "Applications reopened after candidate restored",
+      "archived": "Candidate archived",
+      "bulk_updated": "Candidates bulk updated",
+      "created": "Candidate created",
+      "integrity_repaired": "Candidate integrity repaired",
+      "notification_sent": "Notification workflow started",
+      "reactivated": "Candidate automatically reactivated",
+      "reference_number_backfilled": "Candidate reference number backfilled",
+      "restored": "Candidate restored",
+      "search_index_backfilled": "Candidate search index backfilled",
+      "status_updated": "Candidate status changed",
+      "updated": "Candidate updated",
+      "whatsapp_sent": "WhatsApp send workflow started"
+    },
+    "candidate_call_list": {
+      "added": "Candidates added to call list",
+      "created": "Call list created",
+      "distributed": "Call list distributed"
+    },
+    "candidate_contact_moment": {
+      "registered": "Contact moment registered"
+    },
+    "candidate_cv_parse_proposal": {
+      "accepted": "CV parse proposal accepted",
+      "rejected": "CV parse proposal rejected"
+    },
+    "candidate_document": {
+      "replaced": "Candidate document replaced"
+    },
+    "candidate_dossier": {
+      "viewed": "Candidate dossier opened"
+    },
+    "candidate_note": {
+      "added": "Candidate note added",
+      "updated": "Candidate note updated"
+    },
+    "candidate_profile": {
+      "deleted": "Candidate permanently deleted",
+      "merged": "Candidate merged"
+    },
+    "career_application_handler": {
+      "received": "Career site application received"
+    },
+    "conversation_importer": {
+      "imported": "Message imported (history migration)"
+    },
+    "couple_match_to_hello_flex": {
+      "sent": "Contract sent to HelloFlex"
+    },
+    "customer": {
+      "archived": "Customer archived",
+      "bulk_updated": "Customers bulk updated",
+      "created": "Customer created",
+      "merged": "Customer merged",
+      "restored": "Customer restored",
+      "updated": "Customer updated"
+    },
+    "customer_contact": {
+      "archived": "Contact archived",
+      "created": "Contact created",
+      "merged": "Contact merged",
+      "restored": "Contact restored",
+      "updated": "Contact updated"
+    },
+    "customer_department": {
+      "archived": "Department archived",
+      "created": "Department created",
+      "merged": "Department merged",
+      "restored": "Department restored",
+      "updated": "Department updated"
+    },
+    "customer_location": {
+      "archived": "Location archived",
+      "created": "Location created",
+      "merged": "Location merged",
+      "restored": "Location restored",
+      "updated": "Location updated",
+      "uploaded": "Location logo uploaded"
+    },
+    "customer_note": {
+      "added": "Customer note added"
+    },
+    "data_erasure": {
+      "cleared": "Personal data erased (GDPR)"
+    },
+    "document_zip_import": {
+      "attached": "Document ZIP import: file attached",
+      "completed": "Document ZIP import completed"
+    },
+    "email_log": {
+      "viewed": "Email body viewed"
+    },
+    "export": {
+      "downloaded": "Document export downloaded",
+      "queued": "Document export queued"
+    },
+    "free_entry_lookup": {
+      "converted_to_strict": "Values collected converting to strict list"
+    },
+    "geocode": {
+      "requested": "Geocoding requested",
+      "updated": "Geocoding coordinates updated"
+    },
+    "hello_flex_webhook": {
+      "updated": "Contract status updated via HelloFlex webhook"
+    },
+    "interview": {
+      "paused": "AI interview paused",
+      "resumed": "AI interview resumed",
+      "started": "AI interview started"
+    },
+    "interview_outcome_applier": {
+      "completed": "AI interview completed",
+      "rejected": "Application rejected via AI interview"
+    },
+    "invoice_settings": {
+      "updated": "Invoice settings changed"
+    },
+    "job_queue": {
+      "cancelled": "Pending job cancelled",
+      "cleared": "All failed jobs cleared",
+      "deleted": "Failed job deleted",
+      "requeued": "Failed job requeued"
+    },
+    "koios_action_item": {
+      "executed": "AI action executed",
+      "failed": "AI action failed"
+    },
+    "koios_ai_settings": {
+      "budget_updated": "AI daily budget updated",
+      "model_changed": "AI model changed"
+    },
+    "koios_capabilities": {
+      "toggled": "Koios tool toggled for tenant"
+    },
+    "koios_feedback": {
+      "flagged_harmful": "Koios feedback flagged harmful"
+    },
+    "koios_model_admin": {
+      "package_policy_updated": "Koios package policy changed",
+      "remapped": "Koios flavour model remapped",
+      "routing_updated": "Koios routing changed",
+      "tenant_policy_updated": "Koios tenant model policy changed"
+    },
+    "location": {
+      "created": "Location created",
+      "deleted": "Location deleted",
+      "updated": "Location updated"
+    },
     "lookup": {
       "reordered": "Order changed"
     },
     "match": {
-      "created": "Match created"
+      "approved": "Match approved",
+      "blocked": "Match creation skipped (blocked)",
+      "created": "Match created",
+      "queued": "Bulk contract coupling queued",
+      "rejected": "Match rejected",
+      "renewed": "Match renewed",
+      "restored": "Match restored",
+      "sent": "Contract sent to HelloFlex",
+      "terminated": "Match terminated",
+      "updated": "Match updated"
+    },
+    "match_maker": {
+      "added": "Contract form auto-added from Match"
+    },
+    "match_note": {
+      "added": "Match note added",
+      "deleted": "Match note deleted",
+      "updated": "Match note updated"
+    },
+    "match_weight_template": {
+      "applied": "Match weight template applied"
+    },
+    "mfa": {
+      "blocked": "MFA verification blocked (too many attempts)",
+      "disabled": "MFA disabled",
+      "enabled": "MFA enabled",
+      "failed": "MFA verification failed",
+      "generated": "MFA recovery codes regenerated",
+      "login_success": "Logged in (MFA)"
+    },
+    "module_setting": {
+      "updated": "App settings updated"
+    },
+    "note_importer": {
+      "cleared": "Note author cleared after import (history migration)"
+    },
+    "opportunity": {
+      "bulk_updated": "Opportunities bulk updated",
+      "created": "Opportunity created",
+      "updated": "Opportunity updated"
+    },
+    "opportunity_note": {
+      "added": "Opportunity note added",
+      "deleted": "Opportunity note deleted",
+      "edited": "Opportunity note edited",
+      "restored": "Opportunity note previous version restored"
+    },
+    "outreach_campaign": {
+      "created": "Call list created",
+      "deleted": "Call list deleted",
+      "distributed": "Call list distributed",
+      "generated": "Call list generated",
+      "restored": "Call list restored",
+      "updated": "Call list updated"
+    },
+    "outreach_campaign_generator": {
+      "added": "Candidate added to call list despite warning",
+      "blocked": "Candidate skipped in call list generation (blocked)"
+    },
+    "outreach_campaign_note": {
+      "added": "Call list note added",
+      "deleted": "Call list note deleted",
+      "restored": "Call list note previous version restored",
+      "updated": "Call list note updated"
+    },
+    "outreach_target": {
+      "assigned": "Outreach targets assigned",
+      "owner_set": "Outreach targets owner set",
+      "unassigned": "Outreach targets unassigned",
+      "updated": "Outreach target updated"
+    },
+    "planning": {
+      "created": "Shift created",
+      "scheduled": "Candidate scheduled"
+    },
+    "planning_connection": {
+      "created": "Planning connection created",
+      "deleted": "Planning connection deleted",
+      "updated": "Planning connection updated"
+    },
+    "platform_pricing": {
+      "updated": "Platform pricing changed"
+    },
+    "pool": {
+      "added": "Candidates added to talent pool",
+      "removed": "Candidates removed from talent pool"
+    },
+    "public_proposal": {
+      "viewed": "Proposal link opened"
+    },
+    "report_drill": {
+      "viewed": "Report drill opened"
+    },
+    "retention_consent": {
+      "confirmed": "Retention consent confirmed via signed link"
+    },
+    "retention_consent_keyword": {
+      "confirmed": "Retention consent confirmed via WhatsApp"
+    },
+    "retention_entities": {
+      "erased": "Record permanently deleted (retention)",
+      "skipped": "Retention: deletion skipped (still in use)"
+    },
+    "sm_sync": {
+      "started": "Shiftmanager sync manually started"
+    },
+    "stage_mover": {
+      "updated": "Application updated"
+    },
+    "status_set": {
+      "blocked": "Candidate skipped in status change (blocked)",
+      "forced_despite_warning": "Status change forced despite warning",
+      "skipped": "Candidate skipped in status change (status rule)"
+    },
+    "sync_sm_candidates": {
+      "synced": "Candidates synchronised"
+    },
+    "sync_sm_customers": {
+      "synced": "Customers synchronised"
+    },
+    "sync_sm_shifts": {
+      "synced": "Shifts synchronised"
+    },
+    "task": {
+      "bulk_archived": "Tasks bulk archived",
+      "bulk_assigned": "Tasks bulk assigned",
+      "bulk_updated": "Tasks bulk updated",
+      "created": "Task created",
+      "updated": "Task updated"
+    },
+    "task_comment": {
+      "added": "Task comment added",
+      "deleted": "Task comment deleted",
+      "updated": "Task comment updated"
+    },
+    "task_link": {
+      "added": "Task link added",
+      "removed": "Task link removed"
+    },
+    "task_note": {
+      "added": "Task note added"
+    },
+    "tenant_billing_tier_admin": {
+      "revoked": "Scheduled tier change revoked",
+      "updated": "Tenant tier changed"
+    },
+    "user": {
+      "created": "User created",
+      "deleted": "User deleted",
+      "mfa_reset": "User MFA reset",
+      "roles_updated": "User role changed",
+      "updated": "User updated"
+    },
+    "vacancy": {
+      "archived": "Vacancy archived",
+      "bulk_updated": "Vacancies bulk updated",
+      "created": "Vacancy created",
+      "published": "Vacancy published",
+      "restored": "Vacancy restored",
+      "updated": "Vacancy updated"
+    },
+    "vacancy_note": {
+      "added": "Vacancy note added",
+      "deleted": "Vacancy note deleted",
+      "updated": "Vacancy note updated"
+    },
+    "whatsapp": {
+      "created": "WhatsApp connection created",
+      "deleted": "WhatsApp connection deleted",
+      "updated": "WhatsApp connection updated"
+    },
+    "whatsapp_embedded_signup": {
+      "stored": "WhatsApp coexistence connection stored"
+    },
+    "whatsapp_send": {
+      "blocked": "Candidate skipped in WhatsApp send (blocked)",
+      "forced_despite_warning": "WhatsApp sent despite warning"
+    },
+    "workflow": {
+      "toggled": "Workflow toggled"
+    },
+    "workflow_failure_handler": {
+      "failed": "Workflow run failed, routed to fallback owner"
+    },
+    "workflow_run_budget_guard": {
+      "blocked": "Workflow tier blocked new runs"
     }
   },
   "appointmentModality": {
