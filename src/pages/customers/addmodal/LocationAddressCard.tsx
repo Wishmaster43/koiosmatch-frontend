@@ -28,6 +28,8 @@ interface LocationAddressCardProps {
   street: string; onStreetChange: (v: string) => void
   houseNumber: string; onHouseNumberChange: (v: string) => void
   houseNumberSuffix: string; onHouseNumberSuffixChange: (v: string) => void
+  // LANE-I1b: optional second address line.
+  addressLine2: string; onAddressLine2Change: (v: string) => void
   postalCode: string; onPostalCodeChange: (v: string) => void
   city: string; onCityChange: (v: string) => void
   state: string; onStateChange: (v: string) => void
@@ -37,6 +39,7 @@ interface LocationAddressCardProps {
 
 export default function LocationAddressCard({
   street, onStreetChange, houseNumber, onHouseNumberChange, houseNumberSuffix, onHouseNumberSuffixChange,
+  addressLine2, onAddressLine2Change,
   postalCode, onPostalCodeChange, city, onCityChange, state, onStateChange, country, onCountryChange, provinces,
 }: LocationAddressCardProps) {
   const { t } = useTranslation(['customers', 'common'])
@@ -49,6 +52,8 @@ export default function LocationAddressCard({
           <FieldRow label={t('subModal.houseNumber')}><TextField value={houseNumber} onChange={onHouseNumberChange} /></FieldRow>
           <FieldRow label={t('subModal.houseNumberSuffix')}><TextField value={houseNumberSuffix} onChange={onHouseNumberSuffixChange} /></FieldRow>
         </div>
+        {/* LANE-I1b: optional second address line. */}
+        <FieldRow label={t('address.addressLine2')}><TextField value={addressLine2} onChange={onAddressLine2Change} /></FieldRow>
         <div style={rowPostal}>
           <FieldRow label={t('subModal.postalCode')}><TextField value={postalCode} onChange={onPostalCodeChange} placeholder="1234 AB" /></FieldRow>
           <FieldRow label={t('subModal.city')}><TextField value={city} onChange={onCityChange} /></FieldRow>

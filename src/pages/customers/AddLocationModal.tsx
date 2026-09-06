@@ -71,6 +71,8 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 // (facturatie always comes from the customer), so there is nothing to blame it on.
 const API_TO_FORM: Record<string, string> = {
   name: 'name', street: 'street', house_number: 'houseNumber', house_number_suffix: 'houseNumberSuffix',
+  // LANE-I1b: address_line_2 on locations.
+  address_line_2: 'addressLine2',
   postcode: 'postalCode', city: 'city', state: 'state', country: 'country',
   coc_number: 'cocNumber', vat_number: 'vatNumber', contact_name: 'contactName',
   phone: 'phone', email: 'email',
@@ -145,6 +147,8 @@ export default function AddLocationModal({
     street: initial?.street ?? '',
     houseNumber: initial?.houseNumber ?? '',
     houseNumberSuffix: initial?.houseNumberSuffix ?? '',
+    // LANE-I1b: optional second address line.
+    addressLine2: initial?.addressLine2 ?? '',
     postalCode: initial?.postalCode ?? '',
     city: initial?.city ?? '',
     state: initial?.state ?? '',
@@ -358,6 +362,7 @@ export default function AddLocationModal({
                 street={form.street} onStreetChange={v => set('street', v)}
                 houseNumber={form.houseNumber} onHouseNumberChange={v => set('houseNumber', v)}
                 houseNumberSuffix={form.houseNumberSuffix} onHouseNumberSuffixChange={v => set('houseNumberSuffix', v)}
+                addressLine2={form.addressLine2} onAddressLine2Change={v => set('addressLine2', v)}
                 postalCode={form.postalCode} onPostalCodeChange={v => set('postalCode', v)}
                 city={form.city} onCityChange={v => set('city', v)}
                 state={form.state} onStateChange={v => set('state', v)}

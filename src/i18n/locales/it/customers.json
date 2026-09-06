@@ -167,6 +167,12 @@
     },
     "blacklistReason": "Motivo blacklist"
   },
+  "address": {
+    "addressLine2": "Riga indirizzo 2"
+  },
+  "billing": {
+    "province": "Provincia"
+  },
   "richText": {
     "empty": "Non ancora compilato."
   },
@@ -208,6 +214,7 @@
       "street": "Via",
       "houseNumber": "N. civico",
       "houseNumberSuffix": "Aggiunta",
+      "addressLine2": "Riga indirizzo 2",
       "postalCode": "CAP",
       "city": "Città",
       "state": "Provincia",

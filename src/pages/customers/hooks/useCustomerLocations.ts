@@ -20,6 +20,8 @@ export interface LocationPayload {
   street: string
   houseNumber: string
   houseNumberSuffix: string
+  // LANE-I1b: optional second address line.
+  addressLine2: string
   postalCode: string
   city: string
   state: string
@@ -76,6 +78,8 @@ export const toApi = (p: Partial<LocationPayload>) => ({
   ...(p.street !== undefined ? { street: p.street } : {}),
   ...(p.houseNumber !== undefined ? { house_number: p.houseNumber } : {}),
   ...(p.houseNumberSuffix !== undefined ? { house_number_suffix: p.houseNumberSuffix } : {}),
+  // LANE-I1b: optional second address line.
+  ...(p.addressLine2 !== undefined ? { address_line_2: p.addressLine2 } : {}),
   ...(p.postalCode !== undefined ? { postcode: p.postalCode } : {}),
   ...(p.city !== undefined ? { city: p.city } : {}),
   ...(p.state !== undefined ? { state: p.state } : {}),

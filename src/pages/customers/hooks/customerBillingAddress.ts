@@ -1,7 +1,8 @@
 /**
  * customerBillingAddress (FACTUURADRES-1, Danny 2026-08-01) — the customer's OWN
- * invoice address: seven columns on `customers` (billing_po_box … billing_country).
- * There is deliberately no `billing_province`: a Dutch invoice does not carry one.
+ * invoice address: nine columns on `customers` (billing_po_box … billing_country).
+ * I18N-1 (BE 5a109b00, 04-09) added `billing_address_line_2` + `billing_province` for
+ * international invoicing — a Dutch invoice leaves both empty, which is fine.
  * A main customer may invoice through a PO box, which can never be a vestiging, so
  * the billing-branch coupling could not answer this case.
  *
@@ -28,8 +29,10 @@ export interface CustomerBillingFields {
   billingStreet: string
   billingHouseNumber: string
   billingHouseNumberSuffix: string
+  billingAddressLine2: string
   billingPostalCode: string
   billingCity: string
+  billingProvince: string
   billingCountry: string
 }
 
@@ -43,8 +46,10 @@ export const BILLING_API_FIELDS: Record<keyof CustomerBillingFields, string> = {
   billingStreet: 'billing_street',
   billingHouseNumber: 'billing_house_number',
   billingHouseNumberSuffix: 'billing_house_number_suffix',
+  billingAddressLine2: 'billing_address_line_2',
   billingPostalCode: 'billing_postcode',
   billingCity: 'billing_city',
+  billingProvince: 'billing_province',
   billingCountry: 'billing_country',
 }
 

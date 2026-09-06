@@ -56,6 +56,10 @@ export default function AddressCard({ form, set, provinces }: AddressCardProps) 
             <TextField value={form.houseNumberSuffix} onChange={v => set('houseNumberSuffix', v)} />
           </FieldRow>
         </div>
+        {/* LANE-I1b: optional second address line (e.g. apartment/unit). */}
+        <FieldRow label={t('address.addressLine2')}>
+          <TextField value={form.addressLine2} onChange={v => set('addressLine2', v)} />
+        </FieldRow>
         {/* KLANTEN 2.3 (walkthrough 21-08): postcode and city each get their own
             full row — in the 1fr/2fr split, the canon label width ate up the
             postcode field. */}

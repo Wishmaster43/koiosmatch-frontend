@@ -184,6 +184,8 @@ export function mapLocation(l: ApiLocation = {}): Location {
     houseNumber: l.house_number ?? '',
     houseNumberSuffix: l.house_number_suffix ?? '',
     // BUG FIX (Danny 13/7): read the real `postcode` field, not `postal_code`.
+    // LANE-I1b: optional second address line.
+    addressLine2: l.address_line_2 ?? '',
     postalCode: l.postcode ?? l.postal_code ?? '',
     city: l.city ?? '',
     state: l.state ?? '',
@@ -286,6 +288,8 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     houseNumber: c.house_number ?? '',
     houseNumberSuffix: c.house_number_suffix ?? '',
     postalCode: c.postcode ?? c.postal_code ?? '',
+    // LANE-I1b: optional second address line.
+    addressLine2: c.address_line_2 ?? '',
     city: c.city ?? '',
     state: c.state ?? '',
     country: c.country ?? '',
@@ -293,6 +297,9 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     cocNumber: c.coc_number ?? '',
     vatNumber: c.vat_number ?? '',
     // JOB-CONTACT-1 (Danny 28-07): the customer's own e-mail/phone — the backend
+    // LANE-I1b: billing address line 2 + province.
+    billingAddressLine2: c.billing_address_line_2 ?? '',
+    billingProvince: c.billing_province ?? '',
     // already sends both (CustomerDetailResource), the mapper simply never read them.
     email: c.email ?? '',
     phone: c.phone ?? '',

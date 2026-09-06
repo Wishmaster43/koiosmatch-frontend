@@ -137,6 +137,8 @@ export interface Location {
   houseNumber: string
   houseNumberSuffix: string
   postalCode: string
+  // LANE-I1b: optional second address line (e.g. apartment/unit).
+  addressLine2: string
   city: string
   state: string
   country: string
@@ -263,6 +265,8 @@ export interface Customer {
   houseNumber: string
   houseNumberSuffix: string
   postalCode: string
+  // LANE-I1b: optional second address line (e.g. apartment/unit).
+  addressLine2: string
   city: string
   state: string
   country: string
@@ -271,6 +275,9 @@ export interface Customer {
   cocNumber: string
   vatNumber: string
   // JOB-CONTACT-1 (Danny 28-07: "elke hoofdklant moet ... contactgegevens hebben") —
+  // LANE-I1b: billing address line 2 + province (optional; billing_address folds them on the BE).
+  billingAddressLine2: string
+  billingProvince: string
   // the customer's OWN e-mail/phone, distinct from a contact person's. The API
   // already sent these (CustomerDetailResource); only the FE mapper never read them.
   email: string
@@ -396,6 +403,8 @@ export interface ApiLocation {
   contact_name?: string; phone?: string; email?: string
   cost_center?: string; billing_email?: string
   // LOCATIE-OMSCHRIJVING-1 (Danny 02-08): free company text, same shape as customers.description.
+  // LANE-I1b: optional second address line (address_line_2 on the backend).
+  address_line_2?: string
   description?: string
   // K4BLOGO: signed download URL, freshly minted on every read — never a stored path.
   logo_url?: string | null
@@ -438,8 +447,12 @@ export interface ApiCustomer {
   coc_number?: string; vat_number?: string
   city?: string; industry?: { name?: string } | string; website?: string
   // CUST-SOURCE-FE-1: acquisition-source name, plain string like industry.
+  // LANE-I1b: optional second address line (address_line_2 on the backend).
+  address_line_2?: string
   source?: string | null
   // JOB-CONTACT-1: the customer's own contact fields (CustomerDetailResource).
+  // LANE-I1b: billing address line 2 + province (optional; billing_address folds them on the BE).
+  billing_address_line_2?: string; billing_province?: string
   email?: string; phone?: string
   // STRAAL-1: geocoded coordinates + radius distance from the server.
   lat?: number; lng?: number; distance_km?: number

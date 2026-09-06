@@ -66,7 +66,7 @@ export interface CustomerForm {
   website: string; employeeCount: string; toneOfVoice: string; costCenter: string; billingEmail: string
   // KLANT-ADRES-1 (Danny 02-08): the customer's own visiting address, mirroring the
   // candidate's home-address fields one-for-one — see addmodal/AddressCard.
-  street: string; houseNumber: string; houseNumberSuffix: string; postalCode: string; province: string; country: string
+  street: string; houseNumber: string; houseNumberSuffix: string; addressLine2: string; postalCode: string; province: string; country: string
   // CUST-DUP-FE-1 (22-08): the tenant's own KvK/CoC number — the DEFAULT first
   // dedupe key (customer_dedupe_keys). Optional; a brand-new prospect may not have one yet.
   cocNumber: string
@@ -88,6 +88,8 @@ const API_TO_FORM: Record<string, string> = {
   location_id: 'branchId', website: 'website', employee_count: 'employeeCount', description: 'toneOfVoice',
   cost_center: 'costCenter', billing_email: 'billingEmail', phase: 'phase',
   street: 'street', house_number: 'houseNumber', house_number_suffix: 'houseNumberSuffix',
+  // LANE-I1b: address_line_2 on visiting address.
+  address_line_2: 'addressLine2',
   postcode: 'postalCode', province: 'province', country: 'country',
   // CUST-DUP-FE-1: coc_number is validated by StoreCustomerRequest (string|max:32).
   coc_number: 'cocNumber',

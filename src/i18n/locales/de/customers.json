@@ -167,6 +167,12 @@
     },
     "blacklistReason": "Blacklist-Grund"
   },
+  "address": {
+    "addressLine2": "Adresszeile 2"
+  },
+  "billing": {
+    "province": "Provinz"
+  },
   "richText": {
     "empty": "Noch nicht ausgefüllt."
   },
@@ -208,6 +214,7 @@
       "street": "Straße",
       "houseNumber": "Nr.",
       "houseNumberSuffix": "Zusatz",
+      "addressLine2": "Adresszeile 2",
       "postalCode": "PLZ",
       "city": "Ort",
       "state": "Bundesland",

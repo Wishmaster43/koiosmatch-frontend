@@ -53,7 +53,7 @@ interface CreateForm {
   toneOfVoice?: string; costCenter?: string; billingEmail?: string
   // KLANT-ADRES-1 (Danny 02-08): the customer's own visiting address, collected by
   // the create modal's new AddressCard — same optional/nullable rules as the rest.
-  street?: string; houseNumber?: string; houseNumberSuffix?: string; postalCode?: string
+  street?: string; houseNumber?: string; houseNumberSuffix?: string; addressLine2?: string; postalCode?: string
   province?: string; country?: string
   // CUST-DUP-FE-1 (22-08): the KvK/CoC number, now collected by the create modal
   // (the tenant's default primary dedupe key) — optional, same as the rest above.
@@ -74,6 +74,8 @@ const OPTIONAL_CREATE_FIELDS: Array<[keyof CreateForm, string]> = [
   ['branchId', 'location_id'], ['website', 'website'], ['employeeCount', 'employee_count'],
   ['toneOfVoice', 'description'], ['costCenter', 'cost_center'], ['billingEmail', 'billing_email'],
   ['street', 'street'], ['houseNumber', 'house_number'], ['houseNumberSuffix', 'house_number_suffix'],
+  // I18N-1 (BE 5a109b00): optional second address line, own column on the backend.
+  ['addressLine2', 'address_line_2'],
   ['postalCode', 'postcode'], ['province', 'province'], ['country', 'country'],
   // CUST-DUP-FE-1: without this entry the field would be a fake affordance (§3) —
   // typed in the modal, silently dropped from the POST body.
@@ -102,6 +104,9 @@ const FIELD_MAP: Record<string, string> = {
   // MISSING from that list is silently dropped by Laravel, so this map and those rules
   // must stay in step.
   street: 'street', houseNumber: 'house_number', houseNumberSuffix: 'house_number_suffix',
+  // I18N-1 (BE 5a109b00): the visit address's second line — without this entry the
+  // drawer row would be a fake affordance (§3), typed and silently dropped.
+  addressLine2: 'address_line_2',
   postalCode: 'postcode', state: 'state', country: 'country',
   cocNumber: 'coc_number', vatNumber: 'vat_number',
   // JOB-CONTACT-1 (Danny 28-07): the customer's own e-mail/phone Contact card.

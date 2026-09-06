@@ -141,3 +141,43 @@ describe('mapLocation · branch (K-283)', () => {
     expect(l.branch).toBeNull()
   })
 })
+// LANE-I1b: address_line_2 on customer and location, billing_address_line_2 + billing_province.
+describe('mapCustomer · address_line_2 and billing fields (LANE-I1b)', () => {
+  it('maps address_line_2 on the customer visiting address', () => {
+    const c = mapCustomer({ id: 1, name: 'X', address_line_2: 'Apartment 4B' } as ApiCustomer)
+    expect(c.addressLine2).toBe('Apartment 4B')
+  })
+
+  it('defaults addressLine2 to empty string when absent', () => {
+    const c = mapCustomer({ id: 1, name: 'X' } as ApiCustomer)
+    expect(c.addressLine2).toBe('')
+  })
+
+  it('maps billing_address_line_2 and billing_province on the customer', () => {
+    const c = mapCustomer({
+      id: 1, name: 'X',
+      billing_address_line_2: 'Suite 100', billing_province: 'North Holland',
+    } as ApiCustomer)
+    expect(c.billingAddressLine2).toBe('Suite 100')
+    expect(c.billingProvince).toBe('North Holland')
+  })
+
+  it('defaults billing fields to empty strings when absent', () => {
+    const c = mapCustomer({ id: 1, name: 'X' } as ApiCustomer)
+    expect(c.billingAddressLine2).toBe('')
+    expect(c.billingProvince).toBe('')
+  })
+})
+
+// LANE-I1b: address_line_2 on customer location.
+describe('mapLocation · address_line_2 (LANE-I1b)', () => {
+  it('maps address_line_2 on a location', () => {
+    const l = mapLocation({ id: 'loc-1', name: 'Main', address_line_2: 'Building B' } as ApiLocation)
+    expect(l.addressLine2).toBe('Building B')
+  })
+
+  it('defaults addressLine2 to empty string when absent', () => {
+    const l = mapLocation({ id: 'loc-1', name: 'Main' } as ApiLocation)
+    expect(l.addressLine2).toBe('')
+  })
+})

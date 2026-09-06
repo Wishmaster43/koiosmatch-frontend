@@ -167,6 +167,12 @@
     },
     "blacklistReason": "Motivo de lista negra"
   },
+  "address": {
+    "addressLine2": "Línea de dirección 2"
+  },
+  "billing": {
+    "province": "Provincia"
+  },
   "richText": {
     "empty": "Aún no completado."
   },
@@ -208,6 +214,7 @@
       "street": "Calle",
       "houseNumber": "N.º",
       "houseNumberSuffix": "Complemento",
+      "addressLine2": "Línea de dirección 2",
       "postalCode": "Código postal",
       "city": "Ciudad",
       "state": "Provincia",

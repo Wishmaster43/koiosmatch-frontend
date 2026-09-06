@@ -26,7 +26,7 @@ export function useAddCustomerForm({ defaultPhase, defaultStatusValue, meIsAssig
     name: '', status: defaultStatusValue, ownerId: '', industry: '', city: '',
     phase: defaultPhase,
     branchId: '', website: '', employeeCount: '', toneOfVoice: '', costCenter: '', billingEmail: '',
-    street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', province: '', country: '',
+    street: '', houseNumber: '', houseNumberSuffix: '', addressLine2: '', postalCode: '', province: '', country: '',
     cocNumber: '', vatNumber: '',
     // CUST-SOURCE-FE-1: acquisition source, empty until the recruiter picks one —
     // the app never guesses (§3A "the system never silently guesses").

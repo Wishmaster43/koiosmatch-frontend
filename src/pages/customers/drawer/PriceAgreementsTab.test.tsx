@@ -299,9 +299,10 @@ describe('PriceAgreementsTab · Facturatie sub-tab: the invoice address', () => 
     const user = userEvent.setup()
     render(<PriceAgreementsTab customerId="cust-1" c={customer()} onSave={vi.fn()} />)
     await user.click(await openBilling(user))
-    // PO box · street · house number · suffix · postcode · city (country is a picker).
+    // PO box · street · house number · suffix · address line 2 · postcode · city ·
+    // province (country is a picker). I18N-1 added line 2 + province.
     const inputs = screen.getAllByRole('textbox')
-    expect(inputs).toHaveLength(6)
+    expect(inputs).toHaveLength(8)
     inputs.forEach(i => expect(i).toHaveValue(''))
   })
 
@@ -314,14 +315,14 @@ describe('PriceAgreementsTab · Facturatie sub-tab: the invoice address', () => 
 
     const inputs = screen.getAllByRole('textbox')
     await user.type(inputs[0], 'Postbus 1234')
-    await user.type(inputs[4], '1015 CJ')
-    await user.type(inputs[5], 'Amsterdam')
+    await user.type(inputs[5], '1015 CJ')
+    await user.type(inputs[6], 'Amsterdam')
     await user.click(screen.getByRole('button', { name: 'save' }))
 
     expect(onSave).toHaveBeenCalledWith({
       billingPoBox: 'Postbus 1234', billingStreet: '', billingHouseNumber: '',
-      billingHouseNumberSuffix: '', billingPostalCode: '1015 CJ', billingCity: 'Amsterdam',
-      billingCountry: '',
+      billingHouseNumberSuffix: '', billingAddressLine2: '', billingPostalCode: '1015 CJ',
+      billingCity: 'Amsterdam', billingProvince: '', billingCountry: '',
     })
     // Controlled edit mode: the tab owns the toggle, so it must close it itself.
     expect(screen.queryByRole('button', { name: 'save' })).not.toBeInTheDocument()

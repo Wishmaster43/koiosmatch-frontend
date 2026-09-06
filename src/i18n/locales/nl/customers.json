@@ -167,6 +167,12 @@
     },
     "blacklistReason": "Blacklist-reden"
   },
+  "address": {
+    "addressLine2": "Adresregel 2"
+  },
+  "billing": {
+    "province": "Provincie"
+  },
   "richText": {
     "empty": "Nog niet ingevuld."
   },
@@ -208,6 +214,7 @@
       "street": "Straat",
       "houseNumber": "Huisnr.",
       "houseNumberSuffix": "Toevoeging",
+      "addressLine2": "Adresregel 2",
       "postalCode": "Postcode",
       "city": "Plaats",
       "state": "Provincie",

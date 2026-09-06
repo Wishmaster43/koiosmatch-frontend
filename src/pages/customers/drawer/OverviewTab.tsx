@@ -175,6 +175,8 @@ export default function OverviewTab({ c, onSave, statuses = [] }: { c: Customer;
     { key: 'email', label: t('overview.email'), inputType: 'email', group: gContact,
       renderValue: v => emailValue(v, t('overview.sendEmail')) },
     { key: 'phone', label: t('overview.phone'), group: gContact,
+        // LANE-I1b: optional second address line.
+        { key: 'addressLine2', label: t('address.addressLine2'), type: 'text' },
       renderValue: v => phoneValue(v, t('overview.callPhone')) },
     // The website is a way to reach the company, so it sits with the other contact
     // details (Danny 28-07) and opens in a new tab.

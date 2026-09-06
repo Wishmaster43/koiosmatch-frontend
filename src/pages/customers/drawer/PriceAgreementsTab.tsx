@@ -111,15 +111,19 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
   const countryOptions = useMemo(() => getCountryOptions(i18n.language), [i18n.language])
   // Loose rows, never the shared 'address' composite: that composite reads the fixed
   // visit-address keys, and an incomplete invoice address must stay visibly incomplete
-  // so somebody fixes it rather than hiding behind a composed line. No province row —
-  // a Dutch invoice does not carry one, so the column deliberately does not exist.
+  // so somebody fixes it rather than hiding behind a composed line. LANE-I1b: now includes
+  // the optional addressLine2 + province fields for international invoicing.
   const billingAddressFields: FieldRow[] = [
     { key: 'billingPoBox', label: t('overview.billingAddress.poBox') },
     { key: 'billingStreet', label: t('locations.detail.street') },
     { key: 'billingHouseNumber', label: t('locations.detail.houseNumber') },
     { key: 'billingHouseNumberSuffix', label: t('locations.detail.houseNumberSuffix') },
+    // LANE-I1b: optional second address line for apartment/unit/suite.
+    { key: 'billingAddressLine2', label: t('address.addressLine2') },
     { key: 'billingPostalCode', label: t('locations.detail.postalCode') },
     { key: 'billingCity', label: t('locations.detail.city') },
+    // LANE-I1b: province now supported for international invoicing.
+    { key: 'billingProvince', label: t('billing.province') },
     { key: 'billingCountry', label: t('locations.detail.country'), type: 'select', options: countryOptions },
   ]
   // Read view while the block is empty: the visit address, plus the line saying it is

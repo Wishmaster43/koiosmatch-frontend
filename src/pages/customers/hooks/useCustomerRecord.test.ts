@@ -162,6 +162,15 @@ describe('useCustomerRecord · updateCustomer', () => {
     expect(r.result.current.customers[0].phone).toBe('010-111')
   })
 
+  // I18N-1 (BE 5a109b00): the visit address's second line travels as address_line_2 —
+  // FIELD_MAP is an allowlist, so a missing entry would silently drop it.
+  it('maps addressLine2 to address_line_2', () => {
+    mockedPatch.mockResolvedValue({})
+    const r = harness([customer({ id: 1 })])
+    act(() => { r.result.current.record.updateCustomer(1, { addressLine2: 'Gebouw B' }) })
+    expect(mockedPatch).toHaveBeenCalledWith('/customers/1', { address_line_2: 'Gebouw B' })
+  })
+
   // FACTUURADRES-1 (Danny 2026-08-01): the invoice-address block. A key MISSING from
   // FIELD_MAP is silently dropped before the request is built, so the assertion is on
   // the exact PATCH body — the seam, not the callback.

@@ -132,6 +132,8 @@ export default function LocationAddressTab({
         { key: 'street', label: t('locations.detail.street'), type: 'text' },
         { key: 'houseNumber', label: t('locations.detail.houseNumber'), type: 'text' },
         { key: 'houseNumberSuffix', label: t('locations.detail.houseNumberSuffix'), type: 'text' },
+        // LANE-I1b: optional second address line.
+        { key: 'addressLine2', label: t('address.addressLine2'), type: 'text' },
         { key: 'postalCode', label: t('locations.detail.postalCode'), type: 'text' },
         { key: 'city', label: t('locations.detail.city'), type: 'text' },
       ] },
@@ -155,6 +157,8 @@ export default function LocationAddressTab({
   const values = {
     name: l.name,
     street: l.street, houseNumber: l.houseNumber, houseNumberSuffix: l.houseNumberSuffix,
+    // LANE-I1b: optional second address line.
+    addressLine2: l.addressLine2,
     postalCode: l.postalCode, city: l.city, state: l.state, country: l.country,
     cocNumber: l.cocNumber, vatNumber: l.vatNumber,
     costCenter: l.costCenter, billingEmail: l.billingEmail,
@@ -165,6 +169,8 @@ export default function LocationAddressTab({
     onSave(l.id as Id, {
       name: v.name as string,
       street: v.street as string, houseNumber: v.houseNumber as string, houseNumberSuffix: v.houseNumberSuffix as string,
+      // LANE-I1b: optional second address line.
+      addressLine2: v.addressLine2 as string,
       postalCode: v.postalCode as string, city: v.city as string, state: v.state as string, country: v.country as string,
       cocNumber: v.cocNumber as string, vatNumber: v.vatNumber as string,
       costCenter: v.costCenter as string, billingEmail: v.billingEmail as string,
