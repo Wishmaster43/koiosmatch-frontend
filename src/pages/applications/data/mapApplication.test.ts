@@ -589,3 +589,12 @@ describe('mapApplication / mapApplicationDetail · koiosAiAdvice', () => {
     expect(mapApplication({ id: 1 }).koiosAiAdvice).toBeNull()
   })
 })
+
+// APP-CV-AUTOMATION-1: has_cv rides the list row and the detail as a plain boolean.
+describe('mapApplication · hasCv', () => {
+  it('maps has_cv and defaults to false', () => {
+    expect(mapApplication({ id: 'a1', has_cv: true } as never).hasCv).toBe(true)
+    expect(mapApplication({ id: 'a2' } as never).hasCv).toBe(false)
+  })
+})
+

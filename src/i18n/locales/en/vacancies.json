@@ -123,7 +123,8 @@
     "searchAgent": "Search AI agent",
     "noAgents": "No AI agents",
     "agentLinked": "AI agent “{{name}}” linked to {{count}} vacancies.",
-    "agentUnlinked": "AI agent unlinked from {{count}} vacancies."
+    "agentUnlinked": "AI agent unlinked from {{count}} vacancies.",
+    "skippedNoChannel": "{{count}} vacancy(ies) skipped: no active publication channel configured"
   },
   "notes": {
     "title": "Notes",

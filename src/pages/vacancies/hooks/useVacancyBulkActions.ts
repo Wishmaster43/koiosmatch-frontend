@@ -57,6 +57,14 @@ export function useVacancyBulkActions({ vacancies, setVacancies, setTotal, selec
         const updated = Array.isArray(res.data?.updated) ? new Set(res.data.updated) : null
         if (updated) setVacancies(prev => prev.map(v => (ids.includes(v.id!) && !updated.has(v.id)) ? ({ ...v, ...snap.get(v.id) } as Vacancy) : v))
         onSuccess(updated ? updated.size : ids.length)
+        // O-25 (BE bundle MISC): a bulk publish skips rows without an active channel and says
+        // so per row in `skipped_reasons` — a readable sentence carrying the stable key
+        // `no_active_channel` as a SUBSTRING (never match the whole string).
+        const reasons = res.data?.skipped_reasons
+        if (reasons && typeof reasons === 'object') {
+          const noChannel = Object.values(reasons as Record<string, unknown>).filter(r => typeof r === 'string' && r.includes('no_active_channel')).length
+          if (noChannel) notify('warning', t('bulk.skippedNoChannel', { count: noChannel }))
+        }
         // r2-react-query-1: a bulk field mutation (owner/status/client/publish/ai-agent)
         // can move a KPI/donut distribution — invalidate the stats query so the InsightsRow
         // refetches instead of showing stale counts until the next full page reload.

@@ -7,6 +7,7 @@
  * this file stays the composition layer, not the logic.
  */
 import { useState, useRef, useEffect } from 'react'
+import { useAuth } from '@/context/AuthContext'
 import type { ChangeEvent, KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AtSign, ArrowUp, Sparkles, Lightbulb, Volume2 } from 'lucide-react'
@@ -143,6 +144,10 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
   // dictation, speak-the-latest-answer) — split into its own hook, see its docblock.
   const { available: conversationModeAvailable, speaking: koiosSpeaking, onDictationEnd } =
     useKoiosConversationMode({ voiceMode, open, locale, input, submit, messages })
+  // SPEECH-1 (BE bundle MISC Lane D): dictation + conversation mode are the `speech`
+  // add-on — the mic and the speaker button render only when the tenant carries it.
+  const auth = useAuth()
+  const speechEnabled = auth?.hasModule?.('speech') ?? false
 
   // Composer onChange: update the draft text, then let the mention hook decide
   // whether the "@" picker should open/update from the new value.
@@ -380,7 +385,7 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
             <div style={{ flex: 1 }} />
 
             {/* Conversation mode (VOICE-MODE-1) — only when dictation + speech-synthesis both exist. */}
-            {conversationModeAvailable && (
+            {speechEnabled && conversationModeAvailable && (
               <Button variant="ghost" iconOnly size="sm" aria-pressed={voiceMode} aria-busy={koiosSpeaking || undefined}
                 aria-label={t('voice.conversationMode', { ns: 'koios' })} onClick={() => setVoiceMode(!voiceMode)}
                 title={koiosSpeaking ? t('voice.speaking', { ns: 'koios' }) : t('voice.conversationMode', { ns: 'koios' })}>
@@ -388,8 +393,8 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
               </Button>
             )}
 
-            {/* Voice dictation (SPEECH-1) — renders nothing without browser support */}
-            <KoiosVoiceButton onText={appendVoiceText} t={t} onEnd={onDictationEnd} />
+            {/* Voice dictation (SPEECH-1) — renders nothing without browser support or the speech add-on */}
+            {speechEnabled && <KoiosVoiceButton onText={appendVoiceText} t={t} onEnd={onDictationEnd} />}
 
             {/* Send */}
             <button

@@ -613,6 +613,11 @@
       "display": "Display"
     },
     "trash": "Trash",
-    "periodCreated": "Period (created)"
+    "periodCreated": "Period (created)",
+    "cv": {
+      "label": "CV",
+      "with": "With CV",
+      "without": "Without CV"
+    }
   }
 }

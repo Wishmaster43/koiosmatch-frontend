@@ -386,7 +386,7 @@ describe('AddVacancyModal · Publicatie (punt 20)', () => {
 
     await fillTitleAndSubmit(user)
     expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({
-      published: true,
+      // O-25: no bare `published` key any more — the channel list carries the intent.
       published_channels: [{ value: 'indeed', published: true }],
       application_settings: expect.objectContaining({ cv: 'optional' }),
     }))

@@ -170,6 +170,8 @@ export interface Application {
   // never a per-row query) — drives the row/card placed badge and the "placed"
   // bucket-donut segment client-side. Tolerant default false when absent.
   hasMatch: boolean
+  // APP-CV-AUTOMATION-1 (BE bundle MISC Lane B): the candidate carries an is_cv-typed document.
+  hasCv: boolean
   // S1 K-266/K-267 (KOIOS-ADVIES-OVERAL-1): the NEW per-record AI advice cache
   // (a real `koios_advice_application` workflow run) — a SEPARATE key from the
   // existing `task`/`ai` free-text advice above (ApplicationMatchService).

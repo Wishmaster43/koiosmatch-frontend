@@ -58,7 +58,7 @@ const row = (over: Partial<Application> = {}): Application => ({
   interview: null, source: '', owner: { id: null, name: '', initials: '', color: null },
   candidateStatusLabel: '', candidateStatusColor: 'var(--text-muted)', candidateStatus: '', candidatePhase: '',
   created: '2026-07-01', isNew: false, archived: false, deletedAt: null, currentStageEnteredAt: null,
-  missingAppointment: false, tooLongInStage: false, hasMatch: false,
+  missingAppointment: false, tooLongInStage: false, hasMatch: false, hasCv: false,
   // S1 K-266/K-267: required field, unused by this row's own render.
   koiosAiAdvice: null,
   ...over,

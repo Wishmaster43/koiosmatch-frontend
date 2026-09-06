@@ -56,7 +56,9 @@ const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
 // is `null` — koiosMentionAccess.isCategoryVisible would then hide EVERY
 // permission-gated category, leaving the mention menu empty. Full access, same
 // stub shape as KoiosMentionMenu.test.tsx's own auth stub.
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
+// SPEECH-1: the `speech` add-on gates the mic + conversation mode; switchable per test.
+const speechModule = vi.hoisted(() => ({ enabled: true }))
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true, hasModule: (m: string) => (m === 'speech' ? speechModule.enabled : true) }) }))
 
 // Landing state (Danny 21/7): the radar REPLACES the generic welcome bubble, it
 // never sits alongside it, and only while no real conversation has started yet.
@@ -610,6 +612,18 @@ describe('KoiosPanel · conversation mode (VOICE-MODE-1)', () => {
     renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
     await screen.findByText('common:koios.radar.empty')
     expect(screen.getByRole('button', { name: 'voice.conversationMode' })).toBeInTheDocument()
+  })
+
+  // SPEECH-1 (BE bundle MISC Lane D): without the `speech` add-on neither the mic nor
+  // the conversation-mode toggle renders, browser support or not.
+  it('hides the mic and the conversation-mode toggle when the tenant lacks the speech add-on', async () => {
+    stubVoiceApis(); speechModule.enabled = false
+    try {
+      renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+      await screen.findByText('common:koios.radar.empty')
+      expect(screen.queryByRole('button', { name: 'voice.conversationMode' })).toBeNull()
+      expect(screen.queryByRole('button', { name: /voice\.(start|stop|dictate)/ })).toBeNull()
+    } finally { speechModule.enabled = true }
   })
 
   // (c) switching the toggle on and sending a message sends voice_mode: true.

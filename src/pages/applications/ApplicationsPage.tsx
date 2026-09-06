@@ -92,7 +92,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
     selectedVac, setSelectedVac, selectedClient, setSelectedClient,
     showArchived, setShowArchived, showTrash, setShowTrash, query, setQuery,
-    interviewBusy, setInterviewBusy, interviewPaused, setInterviewPaused, refMode,
+    interviewBusy, setInterviewBusy, interviewPaused, setInterviewPaused, refMode, cvFilter, setCvFilter,
     selectedBranch, setSelectedBranch,
     selectedCandidateIds, setSelectedCandidateIds,
     selectedCandidateOwnerId, setSelectedCandidateOwnerId,
@@ -183,7 +183,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
       bucket, setBucket, selectedPhase, setSelectedPhase, selectedOwner, setSelectedOwner,
       selectedSource, setSelectedSource, selectedVac, setSelectedVac,
       selectedClient, setSelectedClient, selectedBranch, setSelectedBranch,
-      showArchived, setShowArchived, showTrash, setShowTrash, dateRange, setDateRange,
+      showArchived, setShowArchived, showTrash, setShowTrash, dateRange, setDateRange, cvFilter, setCvFilter,
     },
     options: {
       bucketOptions, phaseOptions: asOptions(phaseData), ownerOptions: asOptions(ownerData), sourceOptions: asOptions(sourceData),
@@ -191,7 +191,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     },
   }), [t, bucket, setBucket, selectedPhase, setSelectedPhase, selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
     selectedVac, setSelectedVac, selectedClient, setSelectedClient, selectedBranch, setSelectedBranch,
-    showArchived, setShowArchived, showTrash, setShowTrash, dateRange, setDateRange,
+    showArchived, setShowArchived, showTrash, setShowTrash, dateRange, setDateRange, cvFilter, setCvFilter,
     bucketOptions, phaseData, ownerData, sourceData, vacOptions, clientOptions, branchOptions])
 
   // Register this page's filter groups with the shared right panel (§4: every filter

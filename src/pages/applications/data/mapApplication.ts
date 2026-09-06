@@ -187,6 +187,8 @@ export function mapApplication(a: ApiApplication = {}, funnelTypes: LookupItem[]
     // PLACED-1: batched EXISTS on `matches` — tolerant default false when the
     // field is absent (older cached payloads, pre-9ba44e54 fixtures).
     hasMatch: Boolean(a.has_match),
+    // APP-CV-AUTOMATION-1 (BE bundle MISC Lane B): the candidate carries an is_cv-typed document.
+    hasCv: Boolean(a.has_cv),
     // S1 K-266/K-267: the new per-record AI advice cache (real workflow run).
     koiosAiAdvice: mapKoiosAiAdvice(a.koios_ai_advice),
   }

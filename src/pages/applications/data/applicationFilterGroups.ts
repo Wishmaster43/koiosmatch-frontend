@@ -20,6 +20,8 @@ type Tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => void
 // pure module and must not drag in lib/datetime's i18n import.
 const fmtD = (s: string) => { const d = new Date(s); return isNaN(d.getTime()) ? s : ddmmyyyy(d) }
 
+export type CvFilter = 'with' | 'without' | null
+
 interface BuildArgs {
   t: TFunction
   tog: Tog
@@ -36,6 +38,8 @@ interface BuildArgs {
     showArchived: boolean; setShowArchived: (fn: (v: boolean) => boolean) => void
     showTrash: boolean; setShowTrash: (fn: (v: boolean) => boolean) => void
     dateRange: AppDateRangeFilter | null; setDateRange: (v: AppDateRangeFilter | null) => void
+    // APP-CV-AUTOMATION-1: single-value CV presence filter (with / without / any).
+    cvFilter: CvFilter; setCvFilter: (v: CvFilter) => void
   }
   options: {
     bucketOptions: Opt[]; phaseOptions: Opt[]; ownerOptions: Opt[]; sourceOptions: Opt[]
@@ -59,6 +63,11 @@ export function buildApplicationFilterGroups({ t, tog, filters: f, options: o }:
   return [
     { key: 'bucket',  type: 'search-select', category: catLifecycle, label: t('insights.bucket'), selected: f.bucket === 'active' ? [] : [f.bucket], options: o.bucketOptions, onToggle: onToggleBucket },
     { key: 'phase',   type: 'search-select', category: catLifecycle, label: t('insights.phase'),  selected: f.selectedPhase,  options: o.phaseOptions,  onToggle: tog(f.setSelectedPhase) },
+    // APP-CV-AUTOMATION-1 (BE bundle MISC Lane B): CV presence — single value like the
+    // bucket (picking the active one again clears it); server `?has_cv=1|0`, row `hasCv`.
+    { key: 'cv', type: 'search-select', category: catLifecycle, label: t('filters.cv.label'), selected: f.cvFilter ? [f.cvFilter] : [],
+      options: [{ value: 'with', label: t('filters.cv.with') }, { value: 'without', label: t('filters.cv.without') }],
+      onToggle: (v: string) => f.setCvFilter(f.cvFilter === v ? null : (v as CvFilter)) },
     { key: 'owner',   type: 'search-select', category: catOrg,       label: t('insights.owner'),  selected: f.selectedOwner,  options: o.ownerOptions,  onToggle: tog(f.setSelectedOwner) },
     { key: 'source',  type: 'search-select', category: catOrg,       label: t('insights.source'), selected: f.selectedSource, options: o.sourceOptions, onToggle: tog(f.setSelectedSource) },
     { key: 'vacancy', type: 'search-select', category: catOrg,       label: t('cols.vacancy'),    selected: f.selectedVac,    options: o.vacOptions,    onToggle: tog(f.setSelectedVac) },

@@ -123,7 +123,8 @@
     "searchAgent": "KI-Agent suchen",
     "noAgents": "Keine KI-Agenten",
     "agentLinked": "KI-Agent „{{name}}“ mit {{count}} Stellen verknüpft.",
-    "agentUnlinked": "KI-Agent von {{count}} Stellen getrennt."
+    "agentUnlinked": "KI-Agent von {{count}} Stellen getrennt.",
+    "skippedNoChannel": "{{count}} Stelle(n) übersprungen: kein aktiver Veröffentlichungskanal eingerichtet"
   },
   "notes": {
     "title": "Notizen",

@@ -613,6 +613,11 @@
       "display": "Anzeige"
     },
     "trash": "Papierkorb",
-    "periodCreated": "Zeitraum (erstellt)"
+    "periodCreated": "Zeitraum (erstellt)",
+    "cv": {
+      "label": "Lebenslauf",
+      "with": "Mit Lebenslauf",
+      "without": "Ohne Lebenslauf"
+    }
   }
 }

@@ -29,6 +29,7 @@ function build(dateRange: AppDateRangeFilter | null) {
       showArchived: false, setShowArchived: vi.fn(),
       showTrash: false, setShowTrash: vi.fn(),
       dateRange, setDateRange: vi.fn(),
+      cvFilter: null, setCvFilter: vi.fn(),
     },
     options: {
       bucketOptions: [], phaseOptions: [], ownerOptions: [], sourceOptions: [],
@@ -50,3 +51,14 @@ describe('buildApplicationFilterGroups · period chip zero-pads single-digit day
     expect(groups.find(g => g.key === 'period')).toBeUndefined()
   })
 })
+
+// APP-CV-AUTOMATION-1: the CV presence group sits in the Werving category with two options.
+describe('buildApplicationFilterGroups · CV presence group', () => {
+  it('offers with/without as a single-value group', () => {
+    const cv = build(null).find(g => g.key === 'cv')
+    expect(cv).toBeDefined()
+    expect(cv!.options.map(o => o.value)).toEqual(['with', 'without'])
+    expect(cv!.selected).toEqual([])
+  })
+})
+

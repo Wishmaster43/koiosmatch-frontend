@@ -123,7 +123,8 @@
     "searchAgent": "Rechercher un agent IA",
     "noAgents": "Aucun agent IA",
     "agentLinked": "Agent IA « {{name}} » lié à {{count}} offres.",
-    "agentUnlinked": "Agent IA dissocié de {{count}} offres."
+    "agentUnlinked": "Agent IA dissocié de {{count}} offres.",
+    "skippedNoChannel": "{{count}} poste(s) ignoré(s) : aucun canal de publication actif configuré"
   },
   "notes": {
     "title": "Notes",

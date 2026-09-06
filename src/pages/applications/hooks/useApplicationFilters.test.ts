@@ -301,3 +301,20 @@ describe('useApplicationFilters — D6 dashboard attention intent', () => {
     expect(result.current.filterParams.too_long_in_stage).toBeUndefined()
   })
 })
+
+// APP-CV-AUTOMATION-1 (BE bundle MISC Lane B): the CV presence filter sends ?has_cv=1|0
+// and narrows the client-side predicate on the row's own `hasCv` flag.
+describe('useApplicationFilters · CV presence (has_cv)', () => {
+  it('sends has_cv=1 for "with" and has_cv=0 for "without", nothing when unset', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    expect(result.current.filterParams.has_cv).toBeUndefined()
+    act(() => { result.current.setCvFilter('with') })
+    expect(result.current.filterParams.has_cv).toBe(1)
+    act(() => { result.current.setCvFilter('without') })
+    expect(result.current.filterParams.has_cv).toBe(0)
+    expect(result.current.anyFilterActive).toBe(true)
+    act(() => { result.current.clearAllFilters() })
+    expect(result.current.filterParams.has_cv).toBeUndefined()
+  })
+})
+

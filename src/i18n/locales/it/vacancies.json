@@ -123,7 +123,8 @@
     "searchAgent": "Cerca agente AI",
     "noAgents": "Nessun agente AI",
     "agentLinked": "Agente AI “{{name}}” collegato a {{count}} posizioni.",
-    "agentUnlinked": "Agente AI scollegato da {{count}} posizioni."
+    "agentUnlinked": "Agente AI scollegato da {{count}} posizioni.",
+    "skippedNoChannel": "{{count}} posizione/i saltata/e: nessun canale di pubblicazione attivo configurato"
   },
   "notes": {
     "title": "Note",

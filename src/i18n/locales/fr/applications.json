@@ -613,6 +613,11 @@
       "display": "Affichage"
     },
     "trash": "Corbeille",
-    "periodCreated": "Période (créé)"
+    "periodCreated": "Période (créé)",
+    "cv": {
+      "label": "CV",
+      "with": "Avec CV",
+      "without": "Sans CV"
+    }
   }
 }

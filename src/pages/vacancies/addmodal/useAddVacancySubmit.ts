@@ -30,7 +30,7 @@ const API_TO_FORM: Record<string, string> = {
   salary_min: 'salaryMin', salary_max: 'salaryMax', salary_period: 'salaryPeriod',
   hours_min: 'hoursMin', hours_max: 'hoursMax', description: 'description',
   match_weight_template_id: 'matchWeightTemplateId', match_weights: 'matchWeights',
-  ai_agent_id: 'aiAgentId', interview_workflow_id: 'interviewWorkflowId', published: 'published', published_channels: 'publishedChannels',
+  ai_agent_id: 'aiAgentId', interview_workflow_id: 'interviewWorkflowId', published_channels: 'publishedChannels',
   application_settings: 'applicationSettings',
 }
 
@@ -67,7 +67,7 @@ interface Args {
 // Owns validation, error state and the create submit handler for the "+ Vacature" form.
 export function useAddVacancySubmit({
   setErrors, setCreateError,
-  form, cascade, skills, channels, matchWeightTemplateId, matchWeights, aiAgentId, interviewWorkflowId, published,
+  form, cascade, skills, channels, matchWeightTemplateId, matchWeights, aiAgentId, interviewWorkflowId,
   applicationSettings, applicationSettingsTouched, showAttachmentCards, attachments, onClose, onCreated, t,
 }: Args) {
   const [saving, setSaving] = useState(false)
@@ -131,7 +131,8 @@ export function useAddVacancySubmit({
         // INTERVIEW-WORKFLOW-1 (Appendix D/E): optional companion link.
         ...(interviewWorkflowId ? { interview_workflow_id: interviewWorkflowId } : {}),
         // Punt 20: publication — only sent when touched away from "nothing yet".
-        ...(published ? { published: true } : {}),
+        // O-25 (BE bundle MISC 06e3b232): `published` is DERIVED from the channel publications
+        // and ignored on write — only `published_channels` below carries the intent.
         ...(publishedOnChannels.length
           ? { published_channels: publishedOnChannels.map(c => ({ value: c.value, published: true })) }
           : {}),

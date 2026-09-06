@@ -613,6 +613,11 @@
       "display": "Weergave"
     },
     "trash": "Prullenbak",
-    "periodCreated": "Periode (aangemaakt)"
+    "periodCreated": "Periode (aangemaakt)",
+    "cv": {
+      "label": "CV",
+      "with": "Met cv",
+      "without": "Zonder cv"
+    }
   }
 }

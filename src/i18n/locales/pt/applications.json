@@ -613,6 +613,11 @@
       "display": "Visualização"
     },
     "trash": "Reciclagem",
-    "periodCreated": "Período (criado)"
+    "periodCreated": "Período (criado)",
+    "cv": {
+      "label": "CV",
+      "with": "Com CV",
+      "without": "Sem CV"
+    }
   }
 }

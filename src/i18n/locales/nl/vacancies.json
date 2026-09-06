@@ -123,7 +123,8 @@
     "searchAgent": "Zoek AI-agent",
     "noAgents": "Geen AI-agents",
     "agentLinked": "AI-agent “{{name}}” gekoppeld aan {{count}} vacatures.",
-    "agentUnlinked": "AI-agent ontkoppeld van {{count}} vacatures."
+    "agentUnlinked": "AI-agent ontkoppeld van {{count}} vacatures.",
+    "skippedNoChannel": "{{count}} vacature(s) overgeslagen: geen actief publicatiekanaal ingesteld"
   },
   "notes": {
     "title": "Notities",

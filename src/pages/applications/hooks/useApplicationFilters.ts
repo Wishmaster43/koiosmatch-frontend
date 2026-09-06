@@ -59,6 +59,8 @@ interface FilterableApplication {
   vacancyTitle?: string
   // PLACED-1: batched EXISTS on `matches` — drives the 'placed' bucket pseudo-value.
   hasMatch?: boolean
+  // APP-CV-AUTOMATION-1: the candidate carries an is_cv-typed document (server-computed).
+  hasCv?: boolean
 }
 
 // Owns every applications-page filter dimension (each sticky via usePageMemory,
@@ -91,6 +93,8 @@ export function useApplicationFilters() {
   // keep them mutually exclusive (each clears its sibling before toggling on).
   const [interviewBusy,   setInterviewBusy]   = usePageMemory('apps.interviewBusy', false)
   const [interviewPaused, setInterviewPaused] = usePageMemory('apps.interviewPaused', false)
+  // APP-CV-AUTOMATION-1: CV presence filter — 'with' | 'without' | null (any), sticky per page.
+  const [cvFilter, setCvFilter] = usePageMemory<'with' | 'without' | null>('apps.cv', null)
   // 11.1: deep-link scope from the candidates bulk "manage per application"
   // action — transient (not usePageMemory), cleared via clearAllFilters or its
   // own dedicated chip (see ApplicationsPage).
@@ -102,7 +106,7 @@ export function useApplicationFilters() {
   const [selectedCandidateOwnerId, setSelectedCandidateOwnerId] = useState<Id | null>(null)
 
   // Anything narrowing the default view → the shared clear-button shows.
-  const anyFilterActive = Boolean(query.trim() || attention || showArchived || showTrash || dateRange || interviewBusy || interviewPaused
+  const anyFilterActive = Boolean(query.trim() || attention || showArchived || showTrash || dateRange || interviewBusy || interviewPaused || cvFilter
     || (bucket !== 'active' && bucket !== 'allActive')
     || selectedPhase.length || selectedOwner.length || selectedSource.length || selectedVac.length
     || selectedClient.length || selectedBranch.length || selectedCandidateIds.length || selectedCandidateOwnerId)
@@ -113,7 +117,7 @@ export function useApplicationFilters() {
     setSearchEpoch(e => e + 1); setQuery(''); setAttention(null); setShowArchived(false); setShowTrash(false); setBucket('active')
     setSelectedPhase([]); setSelectedOwner([]); setSelectedSource([]); setSelectedVac([]); setInterviewBusy(false)
     setInterviewPaused(false); setSelectedClient([]); setSelectedBranch([]); setSelectedCandidateIds([]); setDateRange(null)
-    setSelectedCandidateOwnerId(null)
+    setSelectedCandidateOwnerId(null); setCvFilter(null)
   }
 
   // NUMMER-1: is the CURRENT search text a well-formed reference number? Drives
@@ -156,6 +160,9 @@ export function useApplicationFilters() {
     if (selectedSource.length && !selectedSource.includes(a.source ?? ''))               return false
     if (selectedVac.length    && !selectedVac.includes(String(a.vacancyId)))             return false
     if (selectedClient.length && !selectedClient.includes(String(a.customerId)))         return false
+    // APP-CV-AUTOMATION-1: mirrors the server's ?has_cv=1|0 on the row's own flag.
+    if (cvFilter === 'with' && !a.hasCv) return false
+    if (cvFilter === 'without' && a.hasCv) return false
     // KPI attention filters (mirror the card definitions on the page).
     if (attention === 'new'     && !(a.isNew && a.bucket === 'active'))                          return false
     if (attention === 'scored'  && !(typeof a.score === 'number' && a.bucket !== 'rejected'))    return false
@@ -169,7 +176,7 @@ export function useApplicationFilters() {
       if (!`${a.candidateName ?? ''} ${a.vacancyTitle ?? ''} ${a.source ?? ''}`.toLowerCase().includes(q)) return false
     }
     return true
-  }, [bucket, showArchived, showTrash, attention, selectedPhase, selectedOwner, selectedSource, selectedVac, selectedClient, query])
+  }, [bucket, showArchived, showTrash, attention, selectedPhase, selectedOwner, selectedSource, selectedVac, selectedClient, query, cvFilter])
 
   // ── Server-side filter params (W27: every filter the backend supports goes
   // here now — see ApplicationQuery.php's rules()/ARRAY_FILTERS, measured 2026-08-07). ──
@@ -205,6 +212,8 @@ export function useApplicationFilters() {
     // are true (the page's click handlers keep them mutually exclusive already).
     if (interviewBusy) p.interview_status = 'busy'
     else if (interviewPaused) p.interview_status = 'paused'
+    // APP-CV-AUTOMATION-1: server-side CV presence (fail-open on has_cv=0 without an is_cv type).
+    if (cvFilter) p.has_cv = cvFilter === 'with' ? 1 : 0
     // 11.1: the candidates-bulk deep-link scope — a real, working server filter.
     if (selectedCandidateIds.length) p.candidate_ids = selectedCandidateIds
     // RAPPORT-APPS-VERDIEPING-1: dashboard candidate-owner drill — the
@@ -220,7 +229,7 @@ export function useApplicationFilters() {
     if (!showArchived && !showTrash && bucket === 'placed') p.has_match = 1
     return p
   }, [selectedPhase, selectedVac, selectedClient, selectedSource, selectedOwner, query, showArchived, showTrash,
-    interviewBusy, interviewPaused, selectedCandidateIds, selectedCandidateOwnerId, selectedBranch, attention, dateRange, bucket])
+    interviewBusy, interviewPaused, selectedCandidateIds, selectedCandidateOwnerId, selectedBranch, attention, dateRange, bucket, cvFilter])
 
   // Bucket param — TABLE query only (never board/stats): 'allActive' has no server
   // equivalent (spans two buckets) and showArchived's/showTrash's reveal must not be
@@ -236,7 +245,7 @@ export function useApplicationFilters() {
     selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
     selectedVac, setSelectedVac, selectedClient, setSelectedClient,
     showArchived, setShowArchived, showTrash, setShowTrash, query, setQuery,
-    interviewBusy, setInterviewBusy, interviewPaused, setInterviewPaused, refMode,
+    interviewBusy, setInterviewBusy, interviewPaused, setInterviewPaused, refMode, cvFilter, setCvFilter,
     selectedBranch, setSelectedBranch,
     selectedCandidateIds, setSelectedCandidateIds,
     selectedCandidateOwnerId, setSelectedCandidateOwnerId,
