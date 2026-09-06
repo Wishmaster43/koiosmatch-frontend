@@ -104,7 +104,7 @@ describe.each(['sollicitaties', 'kandidaten', 'klanten', 'matches', 'taken', 'ca
   },
 )
 
-describe.each(['vacatures', 'facturering'])(
+describe.each(['facturering'])(
   'NotificationsSettings — context=%s has no backend emitter yet (NOTIF-PARITY-1)',
   context => {
     it('renders ALL THREE switches disabled and shows the "not yet active" marker once on the block', async () => {
