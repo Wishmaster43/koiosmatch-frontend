@@ -90,6 +90,8 @@ vi.mock('@/hooks/useCustomerCascade', () => ({
 }))
 const { authState } = vi.hoisted(() => ({
   authState: {
+    // WL:L104: the recruiter's own branches — the create form falls back to the first one.
+    branchIds: ['user-branch-1', 'user-branch-2'] as string[],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- the default mock grants neither; the param exists only to match hasModule's real signature
     hasModule: (_k: string): boolean => false,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- the default mock grants neither; the param exists only to match hasPermission's real signature
@@ -97,7 +99,7 @@ const { authState } = vi.hoisted(() => ({
   },
 }))
 vi.mock('@/context/AuthContext', () => ({
-  useAuth: () => ({ user: { id: 'u1', name: 'Piet Recruiter' }, hasModule: authState.hasModule, hasPermission: authState.hasPermission }),
+  useAuth: () => ({ user: { id: 'u1', name: 'Piet Recruiter', branch_ids: authState.branchIds }, hasModule: authState.hasModule, hasPermission: authState.hasPermission }),
 }))
 const { matchTemplatesState } = vi.hoisted(() => ({
   matchTemplatesState: { templates: [] as Array<{ id: string; name: string; weights: Record<string, number>; linkedVacanciesCount: number }> },
@@ -148,6 +150,7 @@ vi.mock('@/lib/api', async () => {
 })
 
 beforeEach(() => {
+  authState.branchIds = ['user-branch-1', 'user-branch-2']
   detailByCustomer.clear()
   lookupState.statuses = makeDefaultStatuses()
   lookupState.channels = []
@@ -327,6 +330,16 @@ describe('AddVacancyModal · vestiging cosmetic prediction (VAC-VESTIGING-1)', (
     await fillTitleAndSubmit(user)
     expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({ location_id: 'branch-2' }))
   })
+
+  it('falls back to the recruiter\'s first branch when customer has no branch_id', async () => {
+    const user = userEvent.setup()
+    // Customer c2 (Yesway Zorg) has no branch_id — should fall back to user's first branch.
+    cascadeState.byCustomer.c2 = { locations: [], contacts: [] }
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await pickCustomer(user, 'Yesway Zorg')
+    await fillTitleAndSubmit(user)
+    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({ location_id: 'user-branch-1' }))
+  })
 })
 
 describe('AddVacancyModal · Inzet card — contractvorm, adres, vestiging (punt 10/12/13)', () => {
@@ -356,7 +369,9 @@ describe('AddVacancyModal · Inzet card — contractvorm, adres, vestiging (punt
   // VAC-VESTIGING-1: optional at create — clearing it (or never picking it)
   // must send NO `location_id` key at all, so the server can apply its own
   // default (never a stray `location_id: ''`/`null` on the base create).
-  it('sends no location_id key at all when the vestiging is never picked', async () => {
+  it('sends no location_id key at all when the vestiging is never picked and the recruiter has no branch', async () => {
+    // WL:L104: with a recruiter branch the form proposes it (see the fallback test); without one nothing is sent.
+    authState.branchIds = []
     const user = userEvent.setup()
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
     await fillTitleAndSubmit(user)
