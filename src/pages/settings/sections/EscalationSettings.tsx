@@ -20,6 +20,7 @@
  */
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useAuth } from '@/context/AuthContext'
 import { useSettingsForm } from '../lib/useSettingsForm'
 import { SettingsScaffold, SettingCard } from '../components/SettingsKit'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
@@ -39,7 +40,7 @@ const DAYS_MAX = 90
 
 // One escalation row: the day-threshold input (empty = off) + the target picker.
 // `error` renders the atomic-pair hint when days is set but no target is chosen.
-function EscalationRow({ signal, days, target, onDays, onTarget, options, error }: {
+function EscalationRow({ signal, days, target, onDays, onTarget, options, error, disabled = false }: {
   signal: Signal
   days: string
   target: string
@@ -47,6 +48,7 @@ function EscalationRow({ signal, days, target, onDays, onTarget, options, error 
   onTarget: (v: string) => void
   options: Array<{ value: string; label: string }>
   error: boolean
+  disabled?: boolean
 }) {
   const { t } = useTranslation('settings')
   const current = options.find(o => o.value === target)
@@ -57,12 +59,12 @@ function EscalationRow({ signal, days, target, onDays, onTarget, options, error 
         <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{t(`escalation.signal.${signal}.title`)}</div>
         <Caption as="div" style={{ marginTop: 2 }}>{t(`escalation.signal.${signal}.desc`)}</Caption>
       </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 16 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 16, opacity: disabled ? 0.6 : 1 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <label htmlFor={`escalate-days-${signal}`} style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)' }}>
             {t('escalation.afterDaysLabel')}
           </label>
-          <input id={`escalate-days-${signal}`} type="number" min={DAYS_MIN} max={DAYS_MAX}
+          <input id={`escalate-days-${signal}`} type="number" min={DAYS_MIN} max={DAYS_MAX} disabled={disabled}
             placeholder={t('escalation.afterDaysOff')}
             value={days}
             onChange={e => onDays(e.target.value)}
@@ -84,10 +86,11 @@ function EscalationRow({ signal, days, target, onDays, onTarget, options, error 
             options={options}
             selected={target ? [target] : []}
             onToggle={next => onTarget(next === target ? '' : next)}
+            disabled={disabled}
             triggerLabel={current?.label ?? t('escalation.targetPlaceholder')}
             renderTrigger={toggle => (
-              <button type="button" onClick={toggle} aria-label={t('escalation.targetLabel')}
-                style={{ ...fieldInputStyle, paddingRight: 28, cursor: 'pointer', background: 'var(--surface)',
+              <button type="button" onClick={toggle} aria-label={t('escalation.targetLabel')} disabled={disabled}
+                style={{ ...fieldInputStyle, paddingRight: 28, cursor: disabled ? 'default' : 'pointer', background: 'var(--surface)',
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: 220 }}>
                 {current?.label ?? <span style={{ color: 'var(--text-muted)' }}>{t('escalation.targetPlaceholder')}</span>}
               </button>
@@ -108,6 +111,8 @@ function EscalationRow({ signal, days, target, onDays, onTarget, options, error 
 /** Escalation thresholds — one row per stilstand signal, day count + target (user or role). */
 export default function EscalationSettings() {
   const { t } = useTranslation('settings')
+  const auth = useAuth()
+  const canEdit = auth?.hasPermission('settings.update') ?? false
 
   // Every signal contributes two string keys — empty string means "off" for the
   // days field and "unassigned" for the target field, so the honest empty state
@@ -121,6 +126,9 @@ export default function EscalationSettings() {
     return map
   }, [])
   const form = useSettingsForm(defaults)
+
+  // When user lacks permissions, hide Save.
+  const gatedForm = canEdit ? form : { ...form, save: undefined }
 
   // Signals currently blocked from saving (days set, no target chosen) — surfaced
   // inline per row; recomputed on every save attempt, cleared as soon as the user
@@ -202,7 +210,8 @@ export default function EscalationSettings() {
       subtitle={t('escalation.subtitle')}
       // Pass a proxy form: same load/dirty/saving state, but `save` runs the
       // atomic-pair gate first — the shared Save button stays the one control.
-      maxWidth={720} form={{ ...form, save: requestSave }} actions={undefined}>
+      // When user lacks permissions, gate the form to hide Save.
+      maxWidth={720} form={{ ...(canEdit ? { ...form, save: requestSave } : gatedForm) }} actions={undefined}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {SIGNALS.map(signal => (
           <EscalationRow key={signal} signal={signal}
@@ -211,7 +220,8 @@ export default function EscalationSettings() {
             onDays={v => form.set(`${signal}_escalate_after_days`, v)}
             onTarget={v => form.set(`${signal}_escalate_to`, v)}
             options={targetOptions}
-            error={blocked.has(signal)} />
+            error={blocked.has(signal)}
+            disabled={!canEdit} />
         ))}
       </div>
     </SettingsScaffold>

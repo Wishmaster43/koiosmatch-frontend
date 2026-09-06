@@ -14,6 +14,7 @@
  */
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useAuth } from '@/context/AuthContext'
 import { useSettingsForm } from '../lib/useSettingsForm'
 import {
   SettingsScaffold, SettingCardList, SettingRow,
@@ -21,31 +22,31 @@ import {
 } from './SettingsKit'
 
 // Picks the right input widget for one schema field, by its declared type.
-function FieldControl({ field, value, onChange, t, base }) {
+function FieldControl({ field, value, onChange, t, base, disabled }) {
   switch (field.type) {
     case 'toggle':
       // Accessible name (§6): the row's own label text is only visually adjacent,
       // never programmatically associated, so every switch needs its own name.
-      return <Toggle checked={!!value} onChange={onChange} ariaLabel={t(`${base}.label`)} />
+      return <Toggle checked={!!value} onChange={onChange} ariaLabel={t(`${base}.label`)} disabled={disabled} />
     case 'select': {
       const options = field.options.map(opt =>
         typeof opt === 'string'
           ? { value: opt, label: t(`${base}.options.${opt}`, opt) }
           : opt)
-      return <SelectField value={value} onChange={onChange} options={options} />
+      return <SelectField value={value} onChange={onChange} options={options} disabled={disabled} />
     }
     case 'text':
-      return <TextField value={value} onChange={onChange} placeholder={t(`${base}.placeholder`, '')} />
+      return <TextField value={value} onChange={onChange} placeholder={t(`${base}.placeholder`, '')} disabled={disabled} />
     case 'color':
       // Free-text validated colour (CHIPKLEUR-INSTELBAAR-1) — the field itself shows
       // the backend's validation message so a tenant gets a useful error, not a 422.
       return <ColorField value={value} onChange={onChange}
-        invalidLabel={t('common.invalidColorValue')} ariaLabel={t(`${base}.label`)} />
+        invalidLabel={t('common.invalidColorValue')} ariaLabel={t(`${base}.label`)} disabled={disabled} />
     case 'number':
     default:
       return (
         <NumberField value={value} onChange={onChange}
-          min={field.min} max={field.max} unit={t(`${base}.unit`, '')} />
+          min={field.min} max={field.max} unit={t(`${base}.unit`, '')} disabled={disabled} />
       )
   }
 }
@@ -53,6 +54,8 @@ function FieldControl({ field, value, onChange, t, base }) {
 // Renders an entire settings section from its declarative schema: field defaults, the shared settings-form hook, and the scaffold/card chrome.
 export default function SchemaSection({ schema }) {
   const { t } = useTranslation('settings')
+  const auth = useAuth()
+  const canEdit = auth?.hasPermission('settings.update') ?? false
   // Build the field-key → default-value map once per schema, seeding useSettingsForm.
   const defaults = useMemo(
     () => Object.fromEntries(schema.fields.map(f => [f.key, f.default])),
@@ -65,12 +68,15 @@ export default function SchemaSection({ schema }) {
   // never the raw key. `opt` collapses a missing translation to undefined.
   const opt = (key) => { const v = t(key); return v === key ? undefined : v }
 
+  // When user lacks permissions, hide Save and disable all fields.
+  const gatedForm = canEdit ? form : { ...form, save: undefined }
+
   return (
     <SettingsScaffold
       title={t(schema.titleI18n ?? `${k}.title`)}
       subtitle={opt(schema.subtitleI18n ?? `${k}.subtitle`)}
       maxWidth={schema.maxWidth ?? 720}
-      form={form}>
+      form={gatedForm}>
       <SettingCardList>
         {schema.fields.map(field => {
           const base = `${k}.fields.${field.key}`
@@ -79,7 +85,7 @@ export default function SchemaSection({ schema }) {
               label={t(`${base}.label`)}
               description={opt(`${base}.description`)}>
               <FieldControl field={field} value={form.values[field.key]}
-                onChange={v => form.set(field.key, v)} t={t} base={base} />
+                onChange={v => form.set(field.key, v)} t={t} base={base} disabled={!canEdit} />
             </SettingRow>
           )
         })}

@@ -16,7 +16,10 @@
  *   form.save()                   // persists + resets the dirty baseline
  */
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { loadSettings, saveSettings } from './settingsApi'
+import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 
 // Coerce a stored (string) API value to the type of its default so the form
 // state stays typed (number/boolean/string) regardless of what the server sent.
@@ -27,6 +30,7 @@ function coerce(raw, sample) {
 }
 
 export function useSettingsForm(defaults) {
+  const { t } = useTranslation('common')
   // Snapshot the defaults once (lazy init) so callers can pass an inline object
   // literal without retriggering the load effect on every render.
   const [base] = useState(() => defaults)
@@ -89,7 +93,9 @@ export function useSettingsForm(defaults) {
       setInitial(values)
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
-    } catch { /* surfaced by the API layer; keep the form editable */ }
+    } catch (err) {
+      notifyError(extractApiError(err, t('actionFailed')))
+    }
     finally { setSaving(false) }
   }
 

@@ -12,12 +12,17 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
+import { useAuth } from '@/context/AuthContext'
 import EscalationSettings from './EscalationSettings'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
   return { ...actual, default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }
 })
+
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: vi.fn(),
+}))
 
 // Network-backed hooks mocked directly (mirrors RolesSettings.test.tsx) so this
 // test needs no real QueryClientProvider.
@@ -34,6 +39,8 @@ beforeEach(() => {
   vi.clearAllMocks()
   ;vi.mocked(api.get).mockResolvedValue({ data: {} })
   ;vi.mocked(api.post).mockResolvedValue({ data: {} })
+  // By default, mock full permissions
+  vi.mocked(useAuth).mockReturnValue({ hasPermission: (perm: string) => perm === 'settings.update' } as unknown as ReturnType<typeof useAuth>)
 })
 
 describe('EscalationSettings', () => {
@@ -164,5 +171,22 @@ describe('EscalationSettings', () => {
 
     expect(await screen.findByText(t('escalation.targetUserOption', { name: 'Jan Jansen' }))).toBeInTheDocument()
     expect(screen.getByText(t('escalation.targetRoleOption', { name: 'recruiter' }))).toBeInTheDocument()
+  })
+})
+
+describe('EscalationSettings — permission gate (G2-schema-canedit)', () => {
+  it('disables all inputs and hides Save when user lacks settings.update', async () => {
+    vi.mocked(useAuth).mockReturnValue({ hasPermission: () => false } as unknown as ReturnType<typeof useAuth>)
+    render(<EscalationSettings />)
+
+    await waitFor(() => expect(screen.queryByRole('button', { name: t('common.save') })).not.toBeInTheDocument())
+
+    // All day inputs should be disabled
+    const daysInputs = screen.getAllByLabelText(t('escalation.afterDaysLabel'), { selector: 'input' })
+    daysInputs.forEach(input => expect(input).toBeDisabled())
+
+    // All target triggers should be disabled
+    const targetButtons = screen.getAllByRole('button', { name: t('escalation.targetLabel') })
+    targetButtons.forEach(btn => expect(btn).toBeDisabled())
   })
 })

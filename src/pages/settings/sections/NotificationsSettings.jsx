@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useAuth } from '@/context/AuthContext'
 import { useSettingsForm } from '../lib/useSettingsForm'
 import { SettingsScaffold, SettingRow, Toggle } from '../components/SettingsKit'
 import SoftChip from '@/components/ui/SoftChip'
@@ -14,6 +15,8 @@ import { hasNoEmitterYet } from '../lib/notificationContexts'
  * the header + dirty-aware save. */
 export default function NotificationsSettings({ context }) {
   const { t } = useTranslation('settings')
+  const auth = useAuth()
+  const canEdit = auth?.hasPermission('settings.update') ?? false
   const inAppKey = `notif_${context}_in_app`
   const emailKey = `notif_${context}_email`
   const popupKey = `notif_${context}_popup`
@@ -32,6 +35,9 @@ export default function NotificationsSettings({ context }) {
   )
   const form = useSettingsForm(defaults)
 
+  // When user lacks permissions, hide Save.
+  const gatedForm = canEdit ? form : { ...form, save: undefined }
+
   // ONE block, TWO named toggles (Danny 13-08 "1 blok met 2 toggles"): the two
   // channels of this one notification type live in a single SettingRow — the
   // channel name sits directly beside its own switch, so "app of e-mail" reads
@@ -48,7 +54,7 @@ export default function NotificationsSettings({ context }) {
     <SettingsScaffold
       title={t(`notifications.context.${context}.title`, context)}
       subtitle={t(`notifications.context.${context}.desc`, '')}
-      maxWidth={640} form={form}>
+      maxWidth={640} form={gatedForm}>
       <SettingRow label={t('notifications.channels.label')} description={t('notifications.channels.desc')}>
         {/* Honest gate (NOTIF-PARITY-1): a context with no real emitter never promises
             delivery it cannot make, on any of the three channels — a calm muted marker replaces
@@ -59,10 +65,10 @@ export default function NotificationsSettings({ context }) {
         )}
         <div style={{ display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
           {channels.map(ch => (
-            <label key={ch.key} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: noEmitterYet ? 'default' : 'pointer' }}>
+            <label key={ch.key} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: (noEmitterYet || !canEdit) ? 'default' : 'pointer' }}>
               <span style={{ fontSize: 12, color: 'var(--text)' }}>{ch.label}</span>
               <Toggle checked={!!form.values[ch.key]} onChange={v => form.set(ch.key, v)}
-                disabled={noEmitterYet} ariaLabel={ch.label}
+                disabled={noEmitterYet || !canEdit} ariaLabel={ch.label}
                 title={noEmitterYet ? t('notifications.inApp.notYetActiveReason') : undefined} />
             </label>
           ))}

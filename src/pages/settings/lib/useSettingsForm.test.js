@@ -8,12 +8,22 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import api from '@/lib/api'
+import * as notifyModule from '@/lib/notify'
+import * as extractModule from '@/lib/extractApiError'
 import { useSettingsForm } from './useSettingsForm'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
   return { ...actual, default: { get: vi.fn(), post: vi.fn() } }
 })
+
+vi.mock('@/lib/notify', () => ({
+  notifyError: vi.fn(),
+}))
+
+vi.mock('@/lib/extractApiError', () => ({
+  extractApiError: vi.fn((err, fallback) => fallback || 'Save failed'),
+}))
 
 beforeEach(() => vi.clearAllMocks())
 
@@ -63,5 +73,22 @@ describe('useSettingsForm · slow load never clobbers in-flight edits', () => {
     await act(async () => { resolveLoad({ data: { note: 'stored-on-server' } }); await Promise.resolve() })
     expect(result.current.values.note).toBe('typed-while-loading')
     expect(result.current.dirty).toBe(true)
+  })
+})
+
+// Error handling (G2-schema-canedit): save failures must surface via notifyError
+describe('useSettingsForm · save error handling', () => {
+  it('calls notifyError when save fails (403, 422, network error, etc)', async () => {
+    api.get.mockResolvedValue({ data: { retention_months_never_placed: '24' } })
+    api.post.mockRejectedValue(new Error('Forbidden: 403'))
+    const { result } = renderHook(() => useSettingsForm({ retention_months_never_placed: 24 }))
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    act(() => result.current.set('retention_months_never_placed', 36))
+    await act(async () => { await result.current.save() })
+
+    // extractApiError is called with the error and the fallback message
+    expect(vi.mocked(notifyModule.notifyError)).toHaveBeenCalled()
+    expect(vi.mocked(extractModule.extractApiError)).toHaveBeenCalled()
   })
 })

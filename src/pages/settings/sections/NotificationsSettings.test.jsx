@@ -12,6 +12,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
+import { useAuth } from '@/context/AuthContext'
 import NotificationsSettings from './NotificationsSettings'
 
 vi.mock('@/lib/api', async () => {
@@ -19,12 +20,18 @@ vi.mock('@/lib/api', async () => {
   return { ...actual, default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }
 })
 
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: vi.fn(),
+}))
+
 const t = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
 
 beforeEach(() => {
   vi.clearAllMocks()
   api.get.mockResolvedValue({ data: {} })
   api.post.mockResolvedValue({ data: {} })
+  // By default, mock full permissions
+  vi.mocked(useAuth).mockReturnValue({ hasPermission: (perm) => perm === 'settings.update' })
 })
 
 describe.each(['sollicitaties', 'kandidaten', 'klanten', 'matches', 'taken', 'calllists', 'opportunities'])(
@@ -140,3 +147,19 @@ describe.each(['facturering'])(
     })
   },
 )
+
+describe('NotificationsSettings — permission gate (G2-schema-canedit)', () => {
+  it('disables all toggles and hides Save when user lacks settings.update', async () => {
+    vi.mocked(useAuth).mockReturnValue({ hasPermission: () => false })
+    render(<NotificationsSettings context="sollicitaties" />)
+
+    const inApp = await screen.findByRole('switch', { name: t('notifications.inApp.label') })
+    const email = screen.getByRole('switch', { name: t('notifications.email.label') })
+    const popup = screen.getByRole('switch', { name: t('notifications.popup.label') })
+
+    expect(inApp).toBeDisabled()
+    expect(email).toBeDisabled()
+    expect(popup).toBeDisabled()
+    expect(screen.queryByRole('button', { name: t('common.save') })).not.toBeInTheDocument()
+  })
+})

@@ -122,10 +122,10 @@ export const Toggle = ToggleUi
 const inputStyle = fieldInputStyle
 
 // Right-aligned numeric input with an optional unit suffix, for settings that store a plain number.
-export function NumberField({ value, onChange, min = 0, max, unit, width = 80 }) {
+export function NumberField({ value, onChange, min = 0, max, unit, width = 80, disabled = false }) {
   return (
     <>
-      <input type="number" min={min} max={max} value={value}
+      <input type="number" min={min} max={max} value={value} disabled={disabled}
         onChange={e => onChange(Number(e.target.value))}
         style={{ ...inputStyle, width, textAlign: 'right', fontWeight: 600 }} />
       {unit && <span style={{ fontSize: 12, color: 'var(--text-muted)', minWidth: 60 }}>{unit}</span>}
@@ -134,9 +134,9 @@ export function NumberField({ value, onChange, min = 0, max, unit, width = 80 })
 }
 
 // Plain single-line text input sized for settings rows.
-export function TextField({ value, onChange, placeholder, width = 220 }) {
+export function TextField({ value, onChange, placeholder, width = 220, disabled = false }) {
   return (
-    <input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
+    <input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} disabled={disabled}
       style={{ ...inputStyle, width }} />
   )
 }
@@ -157,7 +157,7 @@ export function TextareaField({ value, onChange, placeholder, minHeight = 220 })
 // Single-select: `closeOnToggle` closes the menu on pick, `selected=[value]` marks the
 // current choice, and onToggle only fires onChange for an actual change (mirrors the
 // ProvincesSettings country-picker reference usage).
-export function SelectField({ value, onChange, options, ariaLabel }) {
+export function SelectField({ value, onChange, options, ariaLabel, disabled = false }) {
   const current = options.find(o => o.value === value)
   return (
     <SearchSelect
@@ -166,11 +166,12 @@ export function SelectField({ value, onChange, options, ariaLabel }) {
       selected={[value]}
       onToggle={next => { if (next !== value) onChange(next) }}
       triggerLabel={current?.label ?? value}
+      disabled={disabled}
       renderTrigger={toggle => (
-        <button type="button" onClick={toggle} aria-label={ariaLabel}
+        <button type="button" onClick={toggle} aria-label={ariaLabel} disabled={disabled}
           // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- dropdown trigger rendering the current field value, mirrors the house field-input chrome, not a Button
-          style={{ ...inputStyle, paddingRight: 28, cursor: 'pointer', background: 'var(--surface)',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: 160 }}>
+          style={{ ...inputStyle, paddingRight: 28, cursor: disabled ? 'default' : 'pointer', background: 'var(--surface)',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: 160, opacity: disabled ? 0.6 : 1 }}>
           {current?.label ?? value}
         </button>
       )}
@@ -187,7 +188,7 @@ const CHIP_COLOR_PATTERN = /^(#[0-9a-fA-F]{3}|#[0-9a-fA-F]{6}|#[0-9a-fA-F]{8}|va
 // curated preset picker (used for lookup-value colours): this accepts ANY valid hex or
 // design-token string, validates it client-side before it ever reaches the API, and
 // treats an empty value as "clear → fall back to the caller's default".
-export function ColorField({ value, onChange, invalidLabel, ariaLabel }) {
+export function ColorField({ value, onChange, invalidLabel, ariaLabel, disabled = false }) {
   const [draft, setDraft] = useState(value ?? '')
   const [invalid, setInvalid] = useState(false)
 
@@ -207,15 +208,15 @@ export function ColorField({ value, onChange, invalidLabel, ariaLabel }) {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, opacity: disabled ? 0.6 : 1 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         {/* The swatch is the PICKER, not a preview. It was a dead square for a day: the
             field had been rebuilt as free text to accept a design token, which made it
             capable and unusable — you could see a colour and not choose one (Danny 02-08).
             The palette is the same one every other lookup colour uses; the text box beside
             it stays for the cases the palette cannot express (a token, a brand hex). */}
-        <ColorSwatch color={draft.trim() || 'var(--border)'} onChange={c => { setDraft(c); setInvalid(false); onChange(c) }} />
-        <input type="text" value={draft} aria-label={ariaLabel} maxLength={32}
+        <ColorSwatch color={draft.trim() || 'var(--border)'} onChange={c => { setDraft(c); setInvalid(false); onChange(c) }} disabled={disabled} />
+        <input type="text" value={draft} aria-label={ariaLabel} maxLength={32} disabled={disabled}
           placeholder="var(--color-secondary)"
           onChange={e => setDraft(e.target.value)}
           onBlur={commit}
