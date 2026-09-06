@@ -108,11 +108,27 @@ describe('useCustomerContacts · create payload mapping (toApi)', () => {
     const body = mockPost.mock.calls[0][1]
     expect(body.customer_location_id).toBeNull()
     // An EMPTY ARRAY is a real "clear" for the pivot (ContactLocationSync checks presence,
-    // not truthiness), and the department's singular id must be nulled alongside it —
-    // the sync derives that one for locations but not for departments.
+    // not truthiness); the singular ids are nulled here because the caller cleared them
+    // explicitly (departmentId: null), not as an FE-side mirror of the array.
     expect(body.location_ids).toEqual([])
     expect(body.department_ids).toEqual([])
     expect(body.customer_department_id).toBeNull()
+  })
+
+  // OL:CONTACT-MULTI-ASYMMETRIE-1: since CONTACT-DEPT-MIRROR-1 the backend derives the
+  // primary department from the array itself — the FE no longer copies the first id
+  // into customer_department_id (two writers of one column drift).
+  it('sends department_ids alone: no FE-side copy of the first id into customer_department_id', async () => {
+    mockGet.mockResolvedValue({ data: { data: [] } })
+    mockPost.mockResolvedValue({ data: { data: { id: 'srv1' } } })
+    const { result } = renderHook(() => useCustomerContacts('cust1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => { await result.current.add({ ...fullPayload, departmentId: undefined, departmentIds: ['dep2', 'dep3'] }) })
+
+    const body = mockPost.mock.calls[0][1]
+    expect(body.department_ids).toEqual(['dep2', 'dep3'])
+    expect(body).not.toHaveProperty('customer_department_id')
   })
 
   it('passes the multi-value locations/departments arrays through on the created contact (CONTACT-MULTI-1)', async () => {

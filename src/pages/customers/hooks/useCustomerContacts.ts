@@ -252,16 +252,12 @@ const toApi = (p: Partial<ContactPayload>) => ({
   ...(p.role !== undefined ? { function: p.role } : {}),
   ...(p.locationId !== undefined ? { customer_location_id: p.locationId || null } : {}),
   ...(p.departmentId !== undefined ? { customer_department_id: p.departmentId || null } : {}),
-  // Sending the ARRAY wins over the singular field (ContactLocationSync). For locations
-  // that is complete — the service derives customer_location_id from the first id. For
-  // DEPARTMENTS it does not, so the singular id is sent explicitly: every existing row and
-  // every list filter still reads it, and leaving it stale would drop the contact out of
-  // its department's list. Reported to the backend as an asymmetry to fix at the source.
+  // Sending the ARRAY wins over the singular field: ContactLocationSync replaces the full
+  // pivot set and derives BOTH primary links (customer_location_id and, since
+  // CONTACT-DEPT-MIRROR-1, customer_department_id) from the first id — the old FE-side
+  // copy of the department id (OL:CONTACT-MULTI-ASYMMETRIE-1) is gone.
   ...(p.locationIds !== undefined ? { location_ids: p.locationIds } : {}),
-  ...(p.departmentIds !== undefined ? {
-    department_ids: p.departmentIds,
-    customer_department_id: p.departmentIds[0] ?? null,
-  } : {}),
+  ...(p.departmentIds !== undefined ? { department_ids: p.departmentIds } : {}),
   ...(p.statusId !== undefined ? { status_id: p.statusId || null } : {}),
   ...(p.isPrimary !== undefined ? { is_primary: p.isPrimary } : {}),
   ...(p.customFields !== undefined ? { custom_fields: p.customFields } : {}),
