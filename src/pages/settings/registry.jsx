@@ -186,7 +186,8 @@ export const NAV_GROUPS = [
     items: [
       { id: 'koios', icon: Sparkles, component: KoiosSettings },
       { id: 'memory', icon: BookOpen, component: MemorySettings },
-      { id: 'vacancy_generation', icon: Sparkles, component: VacancyGenerationSettings },
+      // AF:orphans-7-6 — vacancy-generation creation is gated on 'vacancy_generation.manage' permission.
+      { id: 'vacancy_generation', icon: Sparkles, component: VacancyGenerationSettings, requiresPermission: 'vacancy_generation.manage' },
       // Koios advice thresholds (old open Danny item): the stale-vacancy and
       // match-renewal day windows behind the "Koios" attention column on the
       // vacancies/matches tables — cross-entity Koios-rule config, so it sits
@@ -642,7 +643,8 @@ export const NAV_GROUPS = [
     key: 'views', icon: BarChart2,
     items: [
       { id: 'dashboards', icon: BarChart2, component: DashboardsSettings },
-      { id: 'view_customers', icon: Building2, render: () => <ViewConfigEditor module="customers" /> },
+      // AF:orphans-7-5 — view_customers only exists for tenants with the shiftmanager page/module.
+      { id: 'view_customers', icon: Building2, render: () => <ViewConfigEditor module="customers" />, requiresPage: 'shiftmanager' },
     ],
   },
   {
