@@ -136,9 +136,9 @@ export interface Location {
   street: string
   houseNumber: string
   houseNumberSuffix: string
-  postalCode: string
   // LANE-I1b: optional second address line (e.g. apartment/unit).
   addressLine2: string
+  postalCode: string
   city: string
   state: string
   country: string
@@ -264,9 +264,9 @@ export interface Customer {
   street: string
   houseNumber: string
   houseNumberSuffix: string
-  postalCode: string
   // LANE-I1b: optional second address line (e.g. apartment/unit).
   addressLine2: string
+  postalCode: string
   city: string
   state: string
   country: string
@@ -274,10 +274,10 @@ export interface Customer {
   // the SUB-registration below it (customer_locations.coc_number).
   cocNumber: string
   vatNumber: string
-  // JOB-CONTACT-1 (Danny 28-07: "elke hoofdklant moet ... contactgegevens hebben") —
   // LANE-I1b: billing address line 2 + province (optional; billing_address folds them on the BE).
   billingAddressLine2: string
   billingProvince: string
+  // JOB-CONTACT-1 (Danny 28-07: "elke hoofdklant moet ... contactgegevens hebben") —
   // the customer's OWN e-mail/phone, distinct from a contact person's. The API
   // already sent these (CustomerDetailResource); only the FE mapper never read them.
   email: string
@@ -399,12 +399,12 @@ export interface ApiDepartment {
 /** Raw API location (read defensively). The BE field is `postcode` (not `postal_code`). */
 export interface ApiLocation {
   id?: Id; reference_number?: string; name?: string; street?: string; house_number?: string; house_number_suffix?: string
+  // LANE-I1b: optional second address line (address_line_2 on the backend).
+  address_line_2?: string
   postcode?: string; postal_code?: string; city?: string; state?: string; country?: string; coc_number?: string; vat_number?: string
   contact_name?: string; phone?: string; email?: string
   cost_center?: string; billing_email?: string
   // LOCATIE-OMSCHRIJVING-1 (Danny 02-08): free company text, same shape as customers.description.
-  // LANE-I1b: optional second address line (address_line_2 on the backend).
-  address_line_2?: string
   description?: string
   // K4BLOGO: signed download URL, freshly minted on every read — never a stored path.
   logo_url?: string | null
@@ -443,16 +443,16 @@ export interface ApiCustomer {
   // KLANT-ADRES-1 / KLANT-KVK-1: the customer's own address + head registration
   // (CustomerDetailResource, delivered 28-07). `postcode` is the BE name, not postal_code.
   street?: string; house_number?: string; house_number_suffix?: string
-  postcode?: string; postal_code?: string; state?: string; country?: string
-  coc_number?: string; vat_number?: string
-  city?: string; industry?: { name?: string } | string; website?: string
-  // CUST-SOURCE-FE-1: acquisition-source name, plain string like industry.
   // LANE-I1b: optional second address line (address_line_2 on the backend).
   address_line_2?: string
-  source?: string | null
-  // JOB-CONTACT-1: the customer's own contact fields (CustomerDetailResource).
+  postcode?: string; postal_code?: string; state?: string; country?: string
+  coc_number?: string; vat_number?: string
   // LANE-I1b: billing address line 2 + province (optional; billing_address folds them on the BE).
   billing_address_line_2?: string; billing_province?: string
+  city?: string; industry?: { name?: string } | string; website?: string
+  // CUST-SOURCE-FE-1: acquisition-source name, plain string like industry.
+  source?: string | null
+  // JOB-CONTACT-1: the customer's own contact fields (CustomerDetailResource).
   email?: string; phone?: string
   // STRAAL-1: geocoded coordinates + radius distance from the server.
   lat?: number; lng?: number; distance_km?: number

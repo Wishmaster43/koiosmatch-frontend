@@ -87,7 +87,6 @@ export interface CandidateConsent {
  * every entity that carries backoffice_links[] uses the same shape. */
 export type CandidateBackofficeLink = BackofficeLink
 
-/** A linked match (read-only on the candidate; the contract lives in HelloFlex). */
 /** Backend-computed advisory hint for a freelance identifier (KvK/VAT). */
 export interface FreelanceIdentifierHint {
   status: 'empty' | 'valid' | 'invalid' | 'unverifiable'
@@ -95,6 +94,7 @@ export interface FreelanceIdentifierHint {
   example: string | null
 }
 
+/** A linked match (read-only on the candidate; the contract lives in HelloFlex). */
 export interface CandidateMatch {
   id?: Id
   vacancyId?: Id | null
@@ -215,8 +215,8 @@ export interface Candidate {
   helloflexLink: CandidateBackofficeLink | null
   houseNumber: string
   houseNumberSuffix: string
-  postalCode: string
   addressLine2: string
+  postalCode: string
   address: string
   gender: string
   nationality: string
@@ -424,12 +424,12 @@ export interface ApiCandidate {
   house_number?: string
   house_number_suffix?: string
   house_number_addition?: string
+  address_line_2?: string | null
   postal_code?: string
   address?: string
   gender?: string
   sex?: string
   nationality?: string
-  address_line_2?: string | null
   // AVG-RET-2-TAAL-1: null = agency default.
   preferred_language?: string | null
   date_of_birth?: string
