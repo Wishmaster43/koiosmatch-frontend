@@ -32,3 +32,23 @@ describe('exportAuditCsv — who column', () => {
     expect(captured).toContain('Danny')
   })
 })
+
+// AUDIT-SLEUTELS: the Action column translates a key-shaped description through
+// common:changelogDescriptions.<key>; an unknown key or legacy literal exports raw.
+describe('exportAuditCsv — action column', () => {
+  const tk = (key, opts) => key === 'common:changelogDescriptions.candidate.updated' ? 'Kandidaat bijgewerkt' : (opts?.defaultValue ?? key)
+  it('translates a key-shaped description', () => {
+    exportAuditCsv([{ created_at: '2026-08-01T10:00:00Z', causer_name: 'Danny', log_name: 'candidate', description: 'candidate.updated' }], tk)
+    expect(captured).toContain('Kandidaat bijgewerkt')
+    expect(captured).not.toContain('candidate.updated')
+  })
+  it('keeps an unknown key and a legacy literal as they are', () => {
+    exportAuditCsv([
+      { created_at: '2026-08-01T10:00:00Z', causer_name: 'Danny', log_name: 'candidate', description: 'match.renewed' },
+      { created_at: '2026-08-01T10:00:00Z', causer_name: 'Danny', log_name: 'candidate', description: 'Kandidaat aangemaakt' },
+    ], tk)
+    expect(captured).toContain('match.renewed')
+    expect(captured).toContain('Kandidaat aangemaakt')
+  })
+})
+

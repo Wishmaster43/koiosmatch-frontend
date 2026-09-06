@@ -9,6 +9,7 @@
  */
 import { ChevronUp, ChevronDown as ChevronDn, Eye } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { describeChangelog } from '@/components/drawer/tabs/changelogDescription'
 import { useDateFormat } from '@/lib/datetime'
 import { LogBadge, isAccessEvent, entityLabel } from './auditShared'
 import { buildDiffCells } from './auditDiffCells'
@@ -123,7 +124,9 @@ export default function AuditLogTable({ rows, sortCol, sortDir, onSort, onRowCli
                 <td style={{ ...TD, fontWeight: 500, color: access ? 'var(--text-muted)' : 'var(--text)' }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
                     {access && <Eye size={12} aria-label={t('audit.kind.access')} style={{ flexShrink: 0 }} />}
-                    {entry.description}
+                    {/* AUDIT-SLEUTELS (BE AUDIT-bundel): a key-shaped description translates via
+                        common:changelogDescriptions.<key>; unknown keys and legacy literals render raw. */}
+                    {describeChangelog(entry.description, tCommon)}
                   </span>
                 </td>
                 <td style={{ ...TD, fontSize: 11, color: 'var(--color-danger-text)' }}>{beforeCell}</td>

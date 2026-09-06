@@ -5,6 +5,7 @@
  * column order can change without touching the screen.
  */
 import { escapeCsvCell } from '@/lib/csv'
+import { describeChangelog } from '@/components/drawer/tabs/changelogDescription'
 import { entityLabel } from './auditShared'
 import { buildDiffCells } from './auditDiffCells'
 // House numeric shapes (DATUM-1) — from lib/localDate, the init-free module, since
@@ -30,7 +31,8 @@ export function exportAuditCsv(entries, t) {
       who(e),
       t(`audit.logName.${e.log_name}`, { defaultValue: e.log_name }),
       entityStr,
-      e.description ?? '', beforeCell, afterCell]
+      // AUDIT-SLEUTELS: key-shaped descriptions export translated, legacy literals raw.
+      describeChangelog(e.description, t) ?? '', beforeCell, afterCell]
   })
   const csv = '﻿' + [header, ...rows].map(r => r.map(escapeCsvCell).join(',')).join('\r\n')
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }))
