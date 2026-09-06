@@ -60,6 +60,13 @@ describe('LocationsSettings', () => {
     await waitFor(() => expect(screen.getByText(st('locations.loadError'))).toBeInTheDocument())
   })
 
+  it('fetches locations with per_page=100 to handle pagination correctly', async () => {
+    api.get.mockResolvedValue({ data: { data: [] } })
+    render(<LocationsSettings />)
+    await waitFor(() => expect(screen.getByText(st('locations.empty'))).toBeInTheDocument())
+    expect(api.get).toHaveBeenCalledWith('/locations', { params: { per_page: 100 } })
+  })
+
   it('shows the empty state when the backend returns no locations', async () => {
     api.get.mockResolvedValue({ data: { data: [] } })
     render(<LocationsSettings />)

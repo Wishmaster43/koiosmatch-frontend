@@ -95,8 +95,9 @@ export default function LocationsSettings() {
   const { confirm, dialog } = useConfirm()
 
   // Load once — failure is its own state (never a false "no locations yet").
+  // Backend max per_page is 100; tenants beyond that get paginator support in a follow-up.
   useEffect(() => {
-    api.get('/locations').then(r => setLocations(unwrapList(r).rows))
+    api.get('/locations', { params: { per_page: 100 } }).then(r => setLocations(unwrapList(r).rows))
       .catch(() => setLoadError(true)).finally(() => setLoading(false))
   }, [])
 
