@@ -21,6 +21,11 @@ export const SCOPE_ENTITIES = [
   'contracts',
   'documents',
   'reporting',
+  // Bundle EXT (BE c71a4e4f, K-50): four partner-API modules with their own scope.
+  'matches',
+  'opportunities',
+  'tasks',
+  'call_lists',
 ]
 
 // Permission level per scope. 'none' = the entity toggle is off (no access).

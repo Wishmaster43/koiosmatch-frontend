@@ -1430,7 +1430,11 @@
       "shift_schedulings": "Inplanningen",
       "contracts": "Contracten",
       "documents": "Documenten",
-      "reporting": "Rapportages"
+      "reporting": "Rapportages",
+      "matches": "Matches",
+      "opportunities": "Kansen",
+      "tasks": "Taken",
+      "call_lists": "Bellijsten"
     }
   },
   "webhooks": {

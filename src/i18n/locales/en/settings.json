@@ -1430,7 +1430,11 @@
       "shift_schedulings": "Schedulings",
       "contracts": "Contracts",
       "documents": "Documents",
-      "reporting": "Reporting"
+      "reporting": "Reporting",
+      "matches": "Matches",
+      "opportunities": "Opportunities",
+      "tasks": "Tasks",
+      "call_lists": "Call lists"
     }
   },
   "webhooks": {

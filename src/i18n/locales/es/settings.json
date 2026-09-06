@@ -1184,7 +1184,11 @@
       "shift_schedulings": "Planificaciones",
       "contracts": "Contratos",
       "documents": "Documentos",
-      "reporting": "Informes"
+      "reporting": "Informes",
+      "matches": "Matches",
+      "opportunities": "Oportunidades",
+      "tasks": "Tareas",
+      "call_lists": "Listas de llamadas"
     }
   },
   "webhooks": {
