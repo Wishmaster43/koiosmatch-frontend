@@ -1343,6 +1343,10 @@
     "data_erasure": {
       "cleared": "Datos personales borrados"
     },
+    "deletion_guard": {
+      "marked": "Marcado para eliminación",
+      "unmarked": "Marca de eliminación retirada"
+    },
     "document_zip_import": {
       "attached": "Archivo adjunto en importación ZIP",
       "completed": "Importación ZIP completada"
@@ -1363,6 +1367,9 @@
     },
     "hello_flex_webhook": {
       "updated": "Estado del contrato actualizado vía webhook HelloFlex"
+    },
+    "import_runner": {
+      "completed": "Importación completada"
     },
     "interview": {
       "paused": "Entrevista IA pausada",
@@ -1413,6 +1420,7 @@
     "match": {
       "approved": "Match aprobado",
       "blocked": "Creación de Match bloqueada",
+      "client_changed": "Match asignado a otro cliente",
       "created": "Match creado",
       "queued": "Acoplamiento de contrato en cola",
       "rejected": "Match rechazado",

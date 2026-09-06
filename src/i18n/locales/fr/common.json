@@ -1343,6 +1343,10 @@
     "data_erasure": {
       "cleared": "Données personnelles supprimées (RGPD)"
     },
+    "deletion_guard": {
+      "marked": "Marqué pour suppression",
+      "unmarked": "Marquage de suppression retiré"
+    },
     "document_zip_import": {
       "attached": "Fichier attaché à l'import ZIP",
       "completed": "Import ZIP terminé"
@@ -1363,6 +1367,9 @@
     },
     "hello_flex_webhook": {
       "updated": "Statut du contrat mis à jour via webhook HelloFlex"
+    },
+    "import_runner": {
+      "completed": "Import terminé"
     },
     "interview": {
       "paused": "Entretien IA en pause par Koios",
@@ -1413,6 +1420,7 @@
     "match": {
       "approved": "Match approuvé par Koios",
       "blocked": "Création de Match bloquée par workflow",
+      "client_changed": "Match rattaché à un autre client",
       "created": "Match créé par Koios",
       "queued": "Couplage de contrat en masse en attente",
       "rejected": "Match rejeté par Koios",

@@ -1343,6 +1343,10 @@
     "data_erasure": {
       "cleared": "Dados pessoais apagados"
     },
+    "deletion_guard": {
+      "marked": "Marcado para eliminação",
+      "unmarked": "Marca de eliminação removida"
+    },
     "document_zip_import": {
       "attached": "Ficheiro de import anexado",
       "completed": "Importação de ZIP concluída"
@@ -1363,6 +1367,9 @@
     },
     "hello_flex_webhook": {
       "updated": "Contrato atualizado via webhook"
+    },
+    "import_runner": {
+      "completed": "Importação concluída"
     },
     "interview": {
       "paused": "Entrevista AI pausada",
@@ -1413,6 +1420,7 @@
     "match": {
       "approved": "Match aprovado",
       "blocked": "Match bloqueado no workflow",
+      "client_changed": "Match atribuído a outro cliente",
       "created": "Match criado",
       "queued": "Acoplamento de contrato colocado na fila",
       "rejected": "Match rejeitado",

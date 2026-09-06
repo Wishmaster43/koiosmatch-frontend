@@ -1343,6 +1343,10 @@
     "data_erasure": {
       "cleared": "Persoonsgegevens gewist (AVG)"
     },
+    "deletion_guard": {
+      "marked": "Gemarkeerd voor verwijdering",
+      "unmarked": "Markering voor verwijdering opgeheven"
+    },
     "document_zip_import": {
       "attached": "Document ZIP-import: bestand bijgevoegd",
       "completed": "Document ZIP-import voltooid"
@@ -1363,6 +1367,9 @@
     },
     "hello_flex_webhook": {
       "updated": "Contractstatus bijgewerkt via HelloFlex"
+    },
+    "import_runner": {
+      "completed": "Import afgerond"
     },
     "interview": {
       "paused": "AI-interview onderbroken",
@@ -1413,6 +1420,7 @@
     "match": {
       "approved": "Match goedgekeurd",
       "blocked": "Match-aanmaak overgeslagen (geblokkeerd)",
+      "client_changed": "Match aan andere klant gehangen",
       "created": "Match aangemaakt",
       "queued": "Bulk contractkoppeling in wachtrij",
       "rejected": "Match afgewezen",

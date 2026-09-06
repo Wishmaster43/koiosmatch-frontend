@@ -1343,6 +1343,10 @@
     "data_erasure": {
       "cleared": "Personal data erased (GDPR)"
     },
+    "deletion_guard": {
+      "marked": "Marked for deletion",
+      "unmarked": "Deletion mark removed"
+    },
     "document_zip_import": {
       "attached": "Document ZIP import: file attached",
       "completed": "Document ZIP import completed"
@@ -1363,6 +1367,9 @@
     },
     "hello_flex_webhook": {
       "updated": "Contract status updated via HelloFlex webhook"
+    },
+    "import_runner": {
+      "completed": "Import completed"
     },
     "interview": {
       "paused": "AI interview paused",
@@ -1413,6 +1420,7 @@
     "match": {
       "approved": "Match approved",
       "blocked": "Match creation skipped (blocked)",
+      "client_changed": "Match moved to another customer",
       "created": "Match created",
       "queued": "Bulk contract coupling queued",
       "rejected": "Match rejected",

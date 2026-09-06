@@ -1343,6 +1343,10 @@
     "data_erasure": {
       "cleared": "Personendaten gelöscht"
     },
+    "deletion_guard": {
+      "marked": "Zur Löschung markiert",
+      "unmarked": "Löschmarkierung aufgehoben"
+    },
     "document_zip_import": {
       "attached": "Dokument-ZIP-Import: Datei hinzugefügt",
       "completed": "Dokument-ZIP-Import abgeschlossen"
@@ -1363,6 +1367,9 @@
     },
     "hello_flex_webhook": {
       "updated": "Vertragsstatus via HelloFlex-Webhook aktualisiert"
+    },
+    "import_runner": {
+      "completed": "Import abgeschlossen"
     },
     "interview": {
       "paused": "KI-Interview von Koios pausiert",
@@ -1413,6 +1420,7 @@
     "match": {
       "approved": "Match von Koios genehmigt",
       "blocked": "Match-Erstellung durch Workflow blockiert",
+      "client_changed": "Match einem anderen Kunden zugeordnet",
       "created": "Match von Koios erstellt",
       "queued": "Vertrags-Koppelung in Warteschlange",
       "rejected": "Match von Koios abgelehnt",
