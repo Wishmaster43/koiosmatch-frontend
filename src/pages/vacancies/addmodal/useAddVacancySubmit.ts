@@ -85,7 +85,7 @@ export function useAddVacancySubmit({
     // The single free-text `location` column is DERIVED from the structured
     // address (mirrors the drawer's saveLocation) — never a second, manually
     // typed source of truth for the same displayed place.
-    const composedLocation = composeAddress(form.street, form.houseNumber, form.houseNumberSuffix, form.postalCode, form.city)
+    const composedLocation = composeAddress(form.street, form.houseNumber, form.houseNumberSuffix, form.postalCode, form.city, form.addressLine2)
     const publishedOnChannels = channels.filter(c => c.published)
     try {
       const body = {

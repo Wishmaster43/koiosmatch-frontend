@@ -26,6 +26,7 @@
  * any more.
  */
 import { useState, useEffect } from 'react'
+import { composeAddressLine } from '@/components/forms/EditableFieldTable'
 import type { ReactNode } from 'react'
 import { useLookups } from '@/context/LookupsContext'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
@@ -88,11 +89,10 @@ export interface ConditionsSection {
 }
 
 // Compose a one-line address from the structured fields (street nr-suffix, postcode city).
-export function composeAddress(street: string, houseNumber: string, suffix: string, postalCode: string, city: string): string {
-  return [
-    [street, [houseNumber, suffix].filter(Boolean).join('-')].filter(Boolean).join(' '),
-    [postalCode, city].filter(Boolean).join(' '),
-  ].filter(s => s && s.trim()).join(', ')
+// I18N-1: delegates to the ONE shared composer so the optional second line lands between
+// the street line and the postcode line here too (read-mode line + the `location` string).
+export function composeAddress(street: string, houseNumber: string, suffix: string, postalCode: string, city: string, addressLine2 = ''): string {
+  return composeAddressLine({ street, houseNumber, houseNumberSuffix: suffix, addressLine2, postalCode, city })
 }
 
 // Generic editing/form-slice state shared by all four sections — one editing
@@ -208,7 +208,7 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
   }, [provinces])
   // Recomposes the one-line address from the structured fields and persists the Location section patch.
   const saveLocation = () => {
-    const location = composeAddress(locationForm.form.street, locationForm.form.houseNumber, locationForm.form.houseNumberSuffix, locationForm.form.postalCode, locationForm.form.city)
+    const location = composeAddress(locationForm.form.street, locationForm.form.houseNumber, locationForm.form.houseNumberSuffix, locationForm.form.postalCode, locationForm.form.city, locationForm.form.addressLine2)
     onUpdate?.(v.id, {
       street: locationForm.form.street, houseNumber: locationForm.form.houseNumber, houseNumberSuffix: locationForm.form.houseNumberSuffix, addressLine2: locationForm.form.addressLine2,
       postalCode: locationForm.form.postalCode, city: locationForm.form.city, province: locationForm.form.province, country: locationForm.form.country, location,

@@ -50,6 +50,13 @@ describe('DetailsLocationTab · address canon (V9)', () => {
     expect(screen.queryByText('Straat')).not.toBeInTheDocument()
   })
 
+  // I18N-1: the optional second line shows in read mode too, between the street line
+  // and the postcode line (shared composeAddressLine order = the backend's oneLine()).
+  it('read mode includes the second address line when the vacancy has one', () => {
+    render(<DetailsLocationTab vacancy={{ ...vacancy, addressLine2: 'Gebouw B' } as VacancyDetail} location={makeLocation()} />)
+    expect(screen.getByText('Kerkstraat 12-a, Gebouw B, 1234 AB Utrecht')).toBeInTheDocument()
+  })
+
   it('edit mode shows SIX separate address rows, never a paired houseNumber+suffix row', () => {
     render(<DetailsLocationTab vacancy={vacancy} location={makeLocation({ editing: true })} />)
     expect(screen.getByText('Straat')).toBeInTheDocument()

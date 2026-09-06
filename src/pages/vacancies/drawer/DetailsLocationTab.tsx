@@ -48,7 +48,7 @@ export default function DetailsLocationTab({ vacancy: v, location }: Props) {
       </>
     ) : (
       row(t('details.address'), (() => {
-        const line = composeAddress(v.street, v.houseNumber, v.houseNumberSuffix, v.postalCode, v.city) || v.location
+        const line = composeAddress(v.street, v.houseNumber, v.houseNumberSuffix, v.postalCode, v.city, v.addressLine2) || v.location
         return line
           ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>{line}<CopyIconButton label={t('common:copyAddress.copy')} copiedLabel={t('common:copyAddress.copied')} value={line} /></span>
           : dash
