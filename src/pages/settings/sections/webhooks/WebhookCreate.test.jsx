@@ -73,4 +73,30 @@ describe('WebhookCreate — the create request', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/webhook-subscriptions',
       expect.objectContaining({ name: 'ATS integration', url: 'https://example.test/hook' })))
   })
+
+  it('displays the signing_secret from the create response in the one-time reveal', async () => {
+    api.post.mockResolvedValue({ data: { id: 'wh-1', name: 'ATS integration', signing_secret: 'sk_live_xyz123abc' } })
+    const user = userEvent.setup()
+    renderWithQueryClient(<WebhookCreate onBack={vi.fn()} onCreated={vi.fn()} />)
+
+    await fillAndSubmit(user)
+
+    await waitFor(() => {
+      const secretDisplay = screen.getByText('sk_live_xyz123abc')
+      expect(secretDisplay).toBeInTheDocument()
+    })
+  })
+
+  it('falls back to legacy secret field when signing_secret is absent', async () => {
+    api.post.mockResolvedValue({ data: { id: 'wh-1', name: 'ATS integration', secret: 'legacy_secret_xyz' } })
+    const user = userEvent.setup()
+    renderWithQueryClient(<WebhookCreate onBack={vi.fn()} onCreated={vi.fn()} />)
+
+    await fillAndSubmit(user)
+
+    await waitFor(() => {
+      const secretDisplay = screen.getByText('legacy_secret_xyz')
+      expect(secretDisplay).toBeInTheDocument()
+    })
+  })
 })

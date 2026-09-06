@@ -69,9 +69,10 @@ export default function WebhookCreate({ onBack, onCreated }) {
       <div style={{ maxWidth: 760 }}>
         {result ? (
           // Phase 2 — one-time signing secret reveal (shared with ApiKeyCreate).
+          // The backend returns the key as signing_secret; secret is a legacy fallback.
           <OneTimeSecretReveal
             title={t('webhooks.outgoing.secretOnce')}
-            secret={result.secret}
+            secret={result.signing_secret ?? result.secret}
             hint={t('webhooks.outgoing.signingHint')}
             copyLabel={t('webhooks.outgoing.copySecret')}
             copiedLabel={t('common.copied')}

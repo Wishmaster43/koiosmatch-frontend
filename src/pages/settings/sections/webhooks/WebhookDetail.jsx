@@ -73,7 +73,8 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
   }
 
   // Header actions.
-  const regenerate = async () => { try { const res = await regenerateSecret(subId); setSecret(res?.secret ?? null) } catch { /* noop */ } }
+  // The backend returns the key as signing_secret; secret is a legacy fallback.
+  const regenerate = async () => { try { const res = await regenerateSecret(subId); setSecret(res?.signing_secret ?? res?.secret ?? null) } catch { /* noop */ } }
   const toggleStatus = () => applyUpdate({ status: (sub?.status ?? 'active') === 'active' ? 'disabled' : 'active' }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
   // Confirms then deletes the subscription, bubbling the removal back to the list.
   const remove = () => {
