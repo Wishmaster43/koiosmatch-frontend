@@ -4,7 +4,8 @@
  * to stop a stale response from winning. The fix loads once per mount (deps
  * intentionally empty — i18next's `t` reads the current language dynamically
  * even from a mount-time closure) and drops any response that arrives after
- * the component has unmounted.
+ * the component has unmounted. The per_page limit comes from tenant settings;
+ * the test asserts the API call includes the expected limit.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
@@ -18,11 +19,28 @@ vi.mock('@/lib/api', async () => {
 })
 import api from '@/lib/api'
 
+// Mock settings with controllable return value.
+const mockSettings = vi.fn(() => ({}))
+vi.mock('@/lib/settings/useAllSettings', () => ({
+  useAllSettings: () => mockSettings(),
+  getNumberSetting: (values, key, fallback) => {
+    const raw = values?.[key]
+    if (raw == null) return fallback
+    const n = typeof raw === 'number' ? raw : Number(raw)
+    return Number.isFinite(n) ? n : fallback
+  },
+}))
+
 const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
 
 function renderAuditLog() {
   return render(<RightPanelProvider><AuditLog /></RightPanelProvider>)
 }
+
+afterEach(() => {
+  vi.clearAllMocks()
+  mockSettings.mockReturnValue({})
+})
 
 // A promise the test controls the resolution timing of, so a language switch
 // can be simulated WHILE the request is still in flight.
@@ -38,7 +56,6 @@ function deferred() {
 const flushMicrotasks = () => new Promise(resolve => setTimeout(resolve, 0))
 
 afterEach(async () => {
-  vi.clearAllMocks()
   // afterEach hooks run LIFO — this one (registered after RTL's own auto-cleanup
   // import-time registration) fires BEFORE that cleanup unmounts the component,
   // so the language reset still hits a mounted tree and must be act-wrapped too.
@@ -50,6 +67,7 @@ describe('AuditLog — request seam', () => {
   // ("<name>-KoiosAI") on the REAL /activity-log envelope — it must win over
   // the human causer_name on the central audit surface.
   it('renders actor_label instead of causer_name when the feed carries both', async () => {
+    mockSettings.mockReturnValue({})
     api.get.mockResolvedValue({ data: { data: [{
       id: 1, description: 'updated', log_name: 'candidate',
       causer_name: 'Danny Polak', actor_label: 'Vacature Flow-KoiosAI',
@@ -60,18 +78,26 @@ describe('AuditLog — request seam', () => {
     expect(screen.queryByText(/Danny Polak/)).not.toBeInTheDocument()
   })
 
-  it('GETs the exact tenant-wide activity-log route (§13: pins the seam, not just that a call fired)', async () => {
+  it('GETs /activity-log with the default per_page limit (200) when no setting is configured', async () => {
+    mockSettings.mockReturnValue({})
     api.get.mockResolvedValue({ data: [] })
     await act(async () => { renderAuditLog() })
-    // THE SEAM: exact route, no query params — a renamed/typo'd endpoint fails
-    // here instead of 404-ing silently in production (mirrors the per-entity
-    // ChangelogTab route-assertion convention, e.g. outreach's ChangelogTab.test.tsx).
-    expect(api.get).toHaveBeenCalledWith('/activity-log')
+    // THE SEAM: exact route and per_page param from tenant settings default (activity_log_limit=200).
+    expect(api.get).toHaveBeenCalledWith('/activity-log', { params: { per_page: 200 } })
+  })
+
+  it('GETs /activity-log with the custom per_page limit when activity_log_limit is configured', async () => {
+    mockSettings.mockReturnValue({ activity_log_limit: 50 })
+    api.get.mockResolvedValue({ data: [] })
+    await act(async () => { renderAuditLog() })
+    // THE SEAM: passes the tenant-configured activity_log_limit as per_page.
+    expect(api.get).toHaveBeenCalledWith('/activity-log', { params: { per_page: 50 } })
   })
 })
 
 describe('AuditLog — activity-log fetch does not re-run on language switch', () => {
   it('calls /activity-log exactly once even if the language changes while the request is pending', async () => {
+    mockSettings.mockReturnValue({})
     const { promise, resolve } = deferred()
     api.get.mockReturnValue(promise)
 
@@ -90,6 +116,7 @@ describe('AuditLog — activity-log fetch does not re-run on language switch', (
   })
 
   it('shows the translated unavailable message in whatever language is active when the request fails, even without `t` in the deps', async () => {
+    mockSettings.mockReturnValue({})
     api.get.mockRejectedValue(new Error('network down'))
     await act(async () => {
       renderAuditLog()
@@ -101,6 +128,7 @@ describe('AuditLog — activity-log fetch does not re-run on language switch', (
 
 describe('AuditLog — unmounting before the fetch resolves does not throw', () => {
   it('drops a response that arrives after unmount instead of updating state', async () => {
+    mockSettings.mockReturnValue({})
     const { promise, resolve } = deferred()
     api.get.mockReturnValue(promise)
 

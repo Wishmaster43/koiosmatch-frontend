@@ -8,6 +8,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
+import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
 import { AuditDrawer } from './AuditDrawer'
 import AuditLogTable from './AuditLogTable'
 import { useAuditFilters } from './useAuditFilters'
@@ -16,12 +17,14 @@ import PaginationBar from '@/components/ui/PaginationBar'
 import CalloutBox from '@/components/ui/CalloutBox'
 import Button from '@/components/ui/Button'
 
+// Client-side page size — the backend per_page limit is passed from tenant settings (activity_log_limit).
 const PAGE_SIZE = 25
 
 // Thin container wiring the toolbar, table and drill-down drawer together (see
 // file docblock above); filtering and table markup live in their own modules.
 export default function AuditLog() {
   const { t } = useTranslation('settings')
+  const settings = useAllSettings()
   const [logs,    setLogs]    = useState([])
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(null)
@@ -35,10 +38,12 @@ export default function AuditLog() {
   // always reads the CURRENT language when called, so the catch's translated
   // message stays correct even from this mount-time closure; keeping `t` in the
   // deps re-ran this fetch on every language switch and raced two responses,
-  // with no guard to stop the older one from overwriting the newer.
+  // with no guard to stop the older one from overwriting the newer. The per_page
+  // limit comes from tenant settings (activity_log_limit, default 200).
   useEffect(() => {
     let alive = true
-    api.get('/activity-log')
+    const limit = getNumberSetting(settings, 'activity_log_limit', 200)
+    api.get('/activity-log', { params: { per_page: limit } })
       .then(res => { if (alive) setLogs(unwrapList(res).rows) })
       .catch(() => { if (alive) setError(t('audit.unavailable')) })
       .finally(() => { if (alive) setLoading(false) })
