@@ -8,6 +8,7 @@
  * a German tenant must see German grouping, not Dutch).
  */
 import { useLocale } from './datetime'
+import { useTenantCurrency } from './useTenantCurrency'
 
 type NumberInput = number | string | null | undefined
 
@@ -93,16 +94,20 @@ export function formatCurrency(
 }
 
 // React hook: binds all three formatters to the app's active locale (see useLocale
-// in datetime.ts) so components never hardcode 'nl-NL'.
+// in datetime.ts) so components never hardcode 'nl-NL'. `formatCurrency` here
+// defaults to the TENANT's currency (I18N-1 L5, /auth/me tenant.currency), so a
+// GB or CH tenant sees its own money; pass a record's own `currency` to override.
 export function useNumberFormat() {
   const locale = useLocale()
+  const tenantCurrency = useTenantCurrency()
   return {
     locale,
     formatNumber: (value: NumberInput) => formatNumber(value, locale),
     formatNumberCompact: (value: NumberInput, threshold?: number) => formatNumberCompact(value, locale, threshold),
     formatPercent: (value: NumberInput) => formatPercent(value, locale),
     formatRatio: (value: NumberInput) => formatRatio(value, locale),
+    currency: tenantCurrency,
     formatCurrency: (value: NumberInput, currency?: string, maximumFractionDigits?: number, minimumFractionDigits?: number) =>
-      formatCurrency(value, currency, locale, maximumFractionDigits, minimumFractionDigits),
+      formatCurrency(value, currency ?? tenantCurrency, locale, maximumFractionDigits, minimumFractionDigits),
   }
 }

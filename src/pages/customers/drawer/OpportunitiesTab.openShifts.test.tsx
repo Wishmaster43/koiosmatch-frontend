@@ -14,7 +14,9 @@ const { useCustomerOpenShiftsMock } = vi.hoisted(() => ({ useCustomerOpenShiftsM
 
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasModule: () => true }) }))
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: vi.fn() }) }))
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => `d(${v})` }) }))
+vi.mock('@/lib/datetime', () => ({
+  // useNumberFormat (tenant currency, I18N-1 L5) reads the app locale from datetime.
+  useLocale: () => 'nl-NL', useDateFormat: () => ({ formatDate: (v: string) => `d(${v})` }) }))
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
 vi.mock('../hooks/useCustomerDrawerData', () => ({
   useCustomerOpportunities: () => ({ rows: [], loading: false, error: false, reload: vi.fn() }),

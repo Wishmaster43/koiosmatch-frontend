@@ -1,5 +1,6 @@
 // OpportunitiesTable — declares the opportunities list COLUMNS only (§3A); sorting,
 // selection and the loading/empty/success states live in the shared DataTable.
+import { useNumberFormat } from '@/lib/formatters'
 import type { RefObject } from 'react'
 import { cellButton } from '@/components/ui/cellButton'
 import { useTranslation } from 'react-i18next'
@@ -46,6 +47,8 @@ interface OpportunitiesTableProps {
 export default function OpportunitiesTable({ rows, loading, error, onRowClick, selectedId, valueInHours = false, stages = [], selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef }: OpportunitiesTableProps) {
   const { openEntity } = useNavigation()
   const { t } = useTranslation(['opportunities', 'common'])
+  // Tenant currency + app locale for the value column (I18N-1 L5).
+  const { currency, locale } = useNumberFormat()
   const { formatDate } = useDateFormat()
   // Tenant display settings (Settings → Kansen → Tabelweergave). Coloured chips ON
   // by default, mirrors candidates/applications/customers.
@@ -118,7 +121,7 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
         const v = opportunityValueOf(r, valueInHours)
         if (v == null) return <span style={{ color: 'var(--text-muted)' }}>—</span>
         return <span style={{ fontWeight: 400, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>
-          {formatOpportunityValue(r, valueInHours, t)}
+          {formatOpportunityValue(r, valueInHours, t, currency, locale)}
         </span>
       } },
     // Contract term (start/end date) — plain info columns, muted dash when empty.

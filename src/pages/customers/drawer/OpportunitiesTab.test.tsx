@@ -36,7 +36,9 @@ vi.mock('@/context/AuthContext', () => ({
   useAuth: () => ({ hasModule: () => false, hasPermission: (p: string) => (p === 'opportunities.update' ? canCreateOpportunity : true) }),
 }))
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: vi.fn() }) }))
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => `d(${v})` }) }))
+vi.mock('@/lib/datetime', () => ({
+  // useNumberFormat (tenant currency, I18N-1 L5) reads the app locale from datetime.
+  useLocale: () => 'nl-NL', useDateFormat: () => ({ formatDate: (v: string) => `d(${v})` }) }))
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
 vi.mock('../hooks/useCustomerDrawerData', () => ({
   useCustomerOpportunities: () => useCustomerOpportunitiesMock(),

@@ -36,6 +36,9 @@ export interface Tenant {
   logo_url?: string | null
   /** Resolved bureau IANA timezone from /auth/me (BUREAU-KLOK-FE-1); server-degraded, never raw. */
   timezone?: string
+  /** Tenant ISO-4217 currency and messaging-language code from /auth/me (I18N-1 L5; backend defaults EUR / nl). */
+  currency?: string
+  language?: string
 }
 
 export interface User {

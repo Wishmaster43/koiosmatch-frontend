@@ -10,7 +10,7 @@ import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import StatusPill from '@/components/ui/StatusPill'
 import MatchScoreBlock from '@/components/match/MatchScoreBlock'
 import DrawerAddButton from './DrawerAddButton'
-import { formatCurrency } from '@/lib/formatters'
+import { useNumberFormat } from '@/lib/formatters'
 import { Mono, Caption, SectionTitle } from '@/components/ui/typography'
 import { formatRange } from './vacancySearchFormat'
 import type { VacancySearchRow } from '../hooks/useVacancySearch'
@@ -45,6 +45,8 @@ export default function VacancySearchSummaryCard({
   statusMeta: (status?: string | null) => VacancyLookupItem
 }) {
   const { t } = useTranslation('candidates')
+  // Tenant currency + app locale for the salary range (I18N-1 L5).
+  const { formatCurrency } = useNumberFormat()
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: 12, marginBottom: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
@@ -92,16 +94,16 @@ export default function VacancySearchSummaryCard({
       </div>
       {/* P8-result-cards: the lazily-fetched detail line (salary/experience) +
           education/seniority soft-chips — summary card ONLY, list rows stay calm.
-          The three formatCurrency(…, 'EUR', 'nl-NL', 0) calls below all format the
-          same salary range; 'nl-NL' is deliberate (§5's canonical currency locale,
-          not the tenant UI locale — mirrors OpportunitiesTable's own comment). */}
-      {detail && (formatRange(detail.salaryMin, detail.salaryMax, n => formatCurrency(n, 'EUR', 'nl-NL', 0)) || formatRange(detail.experienceMin, detail.experienceMax, n => String(n)) || detail.education || detail.seniority) && (
+          The three formatCurrency(…, undefined, 0) calls below all format the same
+          salary range in the TENANT's currency and the app locale (I18N-1 L5 via
+          useNumberFormat: a GB tenant sees pounds, not a locked EUR/nl-NL pair). */}
+      {detail && (formatRange(detail.salaryMin, detail.salaryMax, n => formatCurrency(n, undefined, 0)) || formatRange(detail.experienceMin, detail.experienceMax, n => String(n)) || detail.education || detail.seniority) && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           {/* HUISSTIJL-1: Caption owns the 11/muted identity; Mono only adds the font-family. */}
-          {formatRange(detail.salaryMin, detail.salaryMax, n => formatCurrency(n, 'EUR', 'nl-NL', 0)) && (
+          {formatRange(detail.salaryMin, detail.salaryMax, n => formatCurrency(n, undefined, 0)) && (
             <Caption><Mono>
               {t('vacancySearch.cardSalary', {
-                range: formatRange(detail.salaryMin, detail.salaryMax, n => formatCurrency(n, 'EUR', 'nl-NL', 0)),
+                range: formatRange(detail.salaryMin, detail.salaryMax, n => formatCurrency(n, undefined, 0)),
                 period: detail.salaryPeriod ? t(`vacancySearch.salaryPeriod.${detail.salaryPeriod}`, { defaultValue: detail.salaryPeriod }) : '',
               })}
             </Mono></Caption>

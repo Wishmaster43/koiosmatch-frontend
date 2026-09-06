@@ -12,6 +12,10 @@ import api from '@/lib/api'
 import { getCountryName } from '@/lib/countries'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import CompanySettings from './CompanySettings'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+// useLocaleOptions (I18N-1 lane I3) runs on React Query: every render gets a fresh client.
+const renderPage = () => render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><CompanySettings /></QueryClientProvider>)
 
 vi.mock('../lib/settingsApi', () => ({
   loadSettings: vi.fn(),
@@ -37,7 +41,7 @@ describe('CompanySettings — banner upload (BANNER-UPLOAD-1)', () => {
     loadSettings.mockResolvedValue({})
     saveSettings.mockResolvedValue(undefined)
     api.post.mockResolvedValue({ data: { banner_url: 'https://api.test/files/tenant-banner/t1?sig=x' } })
-    render(<CompanySettings />)
+    renderPage()
 
     await screen.findByRole('button', { name: t('common.upload') })
     const input = document.querySelector('input[type="file"]')
@@ -55,7 +59,7 @@ describe('CompanySettings — banner upload (BANNER-UPLOAD-1)', () => {
     saveSettings.mockResolvedValue(undefined)
     api.post.mockRejectedValue({ response: { data: { message: 'SVG bevat scripts' } } })
     const { notifyError } = await import('@/lib/notify')
-    render(<CompanySettings />)
+    renderPage()
 
     await screen.findByRole('button', { name: t('common.upload') })
     fireEvent.change(document.querySelector('input[type="file"]'), { target: { files: [new File(['x'], 'x.svg', { type: 'image/svg+xml' })] } })
@@ -68,7 +72,7 @@ describe('CompanySettings — banner upload (BANNER-UPLOAD-1)', () => {
     loadSettings.mockResolvedValue({ company_banner_url: 'blob:http://localhost/legacy-broken' })
     saveSettings.mockResolvedValue(undefined)
     const user = userEvent.setup()
-    render(<CompanySettings />)
+    renderPage()
 
     // A stale blob: row (pre-BANNER-UPLOAD-1 tenants) must not render as a banner;
     // the backend cleans it on the first real upload.
@@ -96,7 +100,7 @@ describe('CompanySettings — language shows its name, stores its code (TAAL-NAA
   it('renders "Nederlands" for a stored code and never the raw code', async () => {
     loadSettings.mockResolvedValue({ company_language: 'nl' })
     saveSettings.mockResolvedValue(undefined)
-    render(<CompanySettings />)
+    renderPage()
     expect(await screen.findByText('Nederlands')).toBeInTheDocument()
     expect(screen.queryByText(/^nl$/)).not.toBeInTheDocument()
   })
@@ -104,7 +108,7 @@ describe('CompanySettings — language shows its name, stores its code (TAAL-NAA
   it('normalizes a legacy stored NAME to its code and still renders the name', async () => {
     loadSettings.mockResolvedValue({ company_language: 'Deutsch' })
     saveSettings.mockResolvedValue(undefined)
-    render(<CompanySettings />)
+    renderPage()
     expect(await screen.findByText('Deutsch')).toBeInTheDocument()
   })
 })
@@ -112,7 +116,7 @@ describe('CompanySettings — language shows its name, stores its code (TAAL-NAA
 describe('CompanySettings — field order & grouping (COMPANY-ORDER-1)', () => {
   it('renders identity → address (street…country) → preferences, each under its own heading', async () => {
     loadSettings.mockResolvedValue({})
-    render(<CompanySettings />)
+    renderPage()
     await screen.findByRole('button', { name: t('common.upload') })
 
     // The full reading order, asserted pairwise on the rendered label nodes.
@@ -157,7 +161,7 @@ describe('CompanySettings — province cascade after the country move (COMPANY-O
     // province NAME in the tree can only be a menu option.
     loadSettings.mockResolvedValue({ company_country: 'NL', company_province: '' })
     const user = userEvent.setup()
-    render(<CompanySettings />)
+    renderPage()
     await screen.findByRole('button', { name: t('common.upload') })
 
     // The province picker (searchable dropdown, never a native select) starts on NL.
@@ -176,5 +180,37 @@ describe('CompanySettings — province cascade after the country move (COMPANY-O
     await user.click(provinceTrigger)
     expect(await screen.findByRole('button', { name: 'Antwerpen' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Utrecht' })).not.toBeInTheDocument()
+  })
+})
+
+
+// I18N-1 lane I3: currency and timezone are stored as CODES from the backend's closed
+// lists (GET /settings/locale-options); a legacy row that stored the Dutch LABEL is
+// normalised to its code on load so the next save writes what the backend validates.
+const LOCALE_OPTIONS = { currencies: [{ code: 'EUR', label: 'Euro (€)' }, { code: 'GBP', label: 'Pond sterling (£)' }], timezones: [{ code: 'Europe/Amsterdam', label: 'Amsterdam' }], languages: [{ code: 'nl', label: 'Nederlands' }, { code: 'en', label: 'English' }] }
+const mockLocaleOptions = () => api.get.mockImplementation((url) => url === '/settings/locale-options' ? Promise.resolve({ data: { data: LOCALE_OPTIONS } }) : new Promise(() => {}))
+
+describe('CompanySettings — locale codes (I18N-1 L4)', () => {
+  it('shows the label of the stored currency code from /settings/locale-options', async () => {
+    mockLocaleOptions()
+    loadSettings.mockResolvedValue({ company_currency: 'GBP', company_timezone: 'Europe/Amsterdam' })
+    renderPage()
+    expect(await screen.findByText('Pond sterling (£)')).toBeInTheDocument()
+    expect(screen.queryByText(/^GBP$/)).not.toBeInTheDocument()
+    expect(api.get).toHaveBeenCalledWith('/settings/locale-options', expect.anything())
+  })
+
+  it('normalises a legacy stored label to its code and saves the code', async () => {
+    const user = userEvent.setup()
+    mockLocaleOptions()
+    loadSettings.mockResolvedValue({ company_currency: 'Euro (€)', company_timezone: 'Europa/Amsterdam' })
+    saveSettings.mockResolvedValue(undefined)
+    renderPage()
+    expect(await screen.findByText('Euro (€)')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: t('common.save') }))
+    await waitFor(() => expect(saveSettings).toHaveBeenCalled())
+    const payload = saveSettings.mock.calls.at(-1)[0]
+    expect(payload.company_currency).toBe('EUR')
+    expect(payload.company_timezone).toBe('Europe/Amsterdam')
   })
 })

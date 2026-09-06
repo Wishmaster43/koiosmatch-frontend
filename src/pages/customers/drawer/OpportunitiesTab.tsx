@@ -17,6 +17,7 @@
  * API does not return) and a colour-on/off toggle for the stage chip, mirroring
  * `customer_department_table_color_status`.
  */
+import { useNumberFormat } from '@/lib/formatters'
 import type { ReactNode } from 'react'
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -88,6 +89,8 @@ function OpenShifts({ customerId }: { customerId?: Id }) {
 // Customer-scoped opportunities list: stage filter (StatusFilterSelect) + free-text title search + tenant colour/hours settings, mirroring the standalone Opportunities page for this one customer.
 export default function OpportunitiesTab({ customerId, customerName }: { customerId?: Id; customerName?: string }) {
   const { t } = useTranslation('customers')
+  // Tenant currency + app locale for the value column (I18N-1 L5).
+  const { currency, locale } = useNumberFormat()
   const auth = useAuth()
   const hasPlanning = (auth?.hasModule ?? (() => false))('plan')
   // Same permission the Opportunities page itself gates its "+ add" opener on
@@ -148,7 +151,7 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
         ? <SoftChip label={o.stage} color={o.stageColor} />
         : <span style={plainCell}>{o.stage}</span> },
     { key: 'value', header: t('opportunities.col.value'), align: 'right', cellStyle: { color: 'var(--text)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace' }, sortable: true,
-      sortValue: o => opportunityValueOf(o, valueInHours) ?? -1, render: o => formatOpportunityValue(o, valueInHours, t) },
+      sortValue: o => opportunityValueOf(o, valueInHours) ?? -1, render: o => formatOpportunityValue(o, valueInHours, t, currency, locale) },
     { key: 'expectedClose', header: t('opportunities.col.expectedClose'), cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, sortable: true,
       sortValue: o => o.expectedCloseAt ?? '', render: o => o.expectedCloseAt ? formatDate(o.expectedCloseAt) : '—' },
     { key: 'actions', header: '', align: 'right', render: o => (

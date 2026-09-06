@@ -14,6 +14,7 @@ import { useIndustries } from '@/lib/useIndustries'
 import { useCountriesLookup } from '@/lib/useCountriesLookup'
 import { useProvinces } from '@/hooks/useProvinces'
 import SearchSelect from '@/components/ui/SearchSelect'
+import { useLocaleOptions } from '@/lib/useLocaleOptions'
 import Spinner from '@/components/ui/Spinner'
 import { cardHead } from '@/components/ui/modalCards'
 // One language source for the whole app (Danny 14/7): the same five shipped
@@ -33,8 +34,16 @@ import { fieldSelectStyle, fieldInputStyle } from '@/components/forms/fieldMetri
 const LANGUAGES = APP_LANGUAGES.map(l => ({ value: l.value, label: l.label }))
 // Legacy rows stored the NAME; normalize either shape to the code.
 const toLanguageCode = v => APP_LANGUAGES.find(l => l.value === v || l.label === v)?.value ?? 'nl'
-const CURRENCIES = ['Euro (€)','Dollar ($)','Pond (£)']
-const TIMEZONES  = ['Europa/Amsterdam','Europa/Brussel','Europa/Londen','UTC']
+// I18N-1 lane I3 (BE 5a109b00): currency and timezone are stored as CODES
+// (ISO-4217 / IANA, 422 outside the backend's closed lists) and the pickers read
+// those lists from GET /settings/locale-options (useLocaleOptions). Rows saved
+// before this change hold the old Dutch LABEL ('Euro (€)', 'Europa/Amsterdam');
+// these two maps normalise a stored label to its code on load, so the next save
+// writes the code the backend now validates.
+const LEGACY_CURRENCY = { 'Euro (€)': 'EUR', 'Dollar ($)': 'USD', 'Pond (£)': 'GBP' }
+const LEGACY_TIMEZONE = { 'Europa/Amsterdam': 'Europe/Amsterdam', 'Europa/Brussel': 'Europe/Brussels', 'Europa/Londen': 'Europe/London' }
+const toCurrencyCode = v => LEGACY_CURRENCY[v] ?? (v || 'EUR')
+const toTimezoneCode = v => LEGACY_TIMEZONE[v] ?? (v || 'Europe/Amsterdam')
 
 // Module-scope so they keep a stable identity across renders (otherwise text
 // inputs lose focus on every keystroke). `last` drops the divider on a block's
@@ -113,7 +122,7 @@ const EMPTY = {
   company_industry: '', company_country: 'NL',
   company_street: '', company_house_number: '', company_house_number_suffix: '',
   company_postcode: '', company_city: '', company_province: '',
-  company_language: 'nl', company_currency: 'Euro (€)', company_timezone: 'Europa/Amsterdam',
+  company_language: 'nl', company_currency: 'EUR', company_timezone: 'Europe/Amsterdam',
 }
 
 // Renders the company-profile form (see file docblock above) and owns its load/save state.
@@ -122,6 +131,11 @@ export default function CompanySettings() {
   // Tenant-configurable industry options for the dropdown below.
   // Options pair the STORED industry name with a translated label (LOOKUP-I18N-1).
   const { industryOptions: industries } = useIndustries()
+  // Closed locale vocabularies (currency / timezone / language) as code+label pairs.
+  const { options: localeOptions } = useLocaleOptions()
+  const currencyOptions = localeOptions.currencies.map(o => ({ value: o.code, label: o.label }))
+  const timezoneOptions = localeOptions.timezones.map(o => ({ value: o.code, label: o.label }))
+  const languageOptions = localeOptions.languages.length ? localeOptions.languages.map(o => ({ value: o.code, label: o.label })) : LANGUAGES
   // Backend-sourced operating-country codes, labelled in the current UI language.
   const { options: countryOptions } = useCountriesLookup()
   const [form,       setForm]       = useState(EMPTY)
@@ -156,8 +170,8 @@ export default function CompanySettings() {
         company_city:     s.company_city     ?? '',
         company_province: s.company_province ?? '',
         company_language: toLanguageCode(s.company_language),
-        company_currency: s.company_currency ?? 'Euro (€)',
-        company_timezone: s.company_timezone ?? 'Europa/Amsterdam',
+        company_currency: toCurrencyCode(s.company_currency),
+        company_timezone: toTimezoneCode(s.company_timezone),
       }))
       // Never trust a stored blob: URL — it only ever worked in the browser tab
       // that created it (session-local object URL) and is dead in every other
@@ -275,9 +289,11 @@ export default function CompanySettings() {
 
           {/* 3. Preferences — the tenant's locale defaults, unrelated to the address. */}
           <Group title={t('company.sectionPreferences')}>
-            <Row label={t('company.language')}><Select value={form.company_language} onChange={v => set('company_language', v)} options={LANGUAGES} /></Row>
-            <Row label={t('company.currency')}><Select value={form.company_currency} onChange={v => set('company_currency', v)} options={CURRENCIES} /></Row>
-            <Row label={t('company.timezone')} last><Select value={form.company_timezone} onChange={v => set('company_timezone', v)} options={TIMEZONES} /></Row>
+            {/* Closed lists from the backend (codes as values, labels as shown); the
+                app's own language list stays the fallback until the request lands. */}
+            <Row label={t('company.language')}><Select value={form.company_language} onChange={v => set('company_language', v)} options={languageOptions} /></Row>
+            <Row label={t('company.currency')}><Select value={form.company_currency} onChange={v => set('company_currency', v)} options={currencyOptions} /></Row>
+            <Row label={t('company.timezone')} last><Select value={form.company_timezone} onChange={v => set('company_timezone', v)} options={timezoneOptions} /></Row>
           </Group>
         </div>
       )}

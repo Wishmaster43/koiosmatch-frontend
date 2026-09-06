@@ -9,6 +9,7 @@
  * click opens that opportunity the same way every other cross-record jump in
  * the app does (openEntity, mirrors matches/drawer/StatisticsTab's own row).
  */
+import { useNumberFormat } from '@/lib/formatters'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import SectionCard from '@/components/ui/SectionCard'
@@ -33,6 +34,8 @@ interface StatisticsTabProps {
 // This deal's ordinal position among its customer's other opportunities, plus the peer list to jump to — see the module doc above for the honesty rule.
 export default function StatisticsTab({ opportunity, allRows, valueInHours = false }: StatisticsTabProps) {
   const { t } = useTranslation('opportunities')
+  // Tenant currency + app locale for the value cell (I18N-1 L5).
+  const { currency, locale } = useNumberFormat()
   const { formatDate } = useDateFormat()
   const { openEntity } = useNavigation()
   // LOOKUP-I18N-1: the seeded stage label renders in the user's language.
@@ -75,7 +78,7 @@ export default function StatisticsTab({ opportunity, allRows, valueInHours = fal
                   {/* Value/unit — same shared formatter the table + customer drawer tab use (§11).
                       Caption owns the muted 11px identity, Mono nested inside owns the font (§4 atoms). */}
                   <Caption as="span" style={{ flexShrink: 0 }}>
-                    <Mono as="span">{v == null ? '—' : formatOpportunityValue(row, valueInHours, t)}</Mono>
+                    <Mono as="span">{v == null ? '—' : formatOpportunityValue(row, valueInHours, t, currency, locale)}</Mono>
                   </Caption>
                   {row.stage ? (
                     <span style={{ flexShrink: 0 }}><StatusPill label={seedLabel('opportunityStages', { label: row.stage })} color={row.stageColor} /></span>

@@ -17,13 +17,15 @@ export function opportunityValueOf(row: Pick<Opportunity, 'value' | 'hours'>, va
 // Formats the picked value for display. Uses the shared i18n key 'opportunities:cols.hoursValue'
 // explicitly (via t's namespace prefix) so callers outside the 'opportunities' namespace — like
 // the customer drawer tab — reuse the exact same translated string, never a local duplicate.
-export function formatOpportunityValue(row: Pick<Opportunity, 'value' | 'hours'>, valueInHours: boolean, t: TFunction): string {
+export function formatOpportunityValue(
+  row: Pick<Opportunity, 'value' | 'hours'>, valueInHours: boolean, t: TFunction,
+  // I18N-1 L5: money renders in the TENANT's currency and the app locale; callers
+  // pass both from useNumberFormat() (the defaults keep a bare call rendering EUR).
+  currency: string = 'EUR', locale: string = 'nl-NL',
+): string {
   const v = opportunityValueOf(row, valueInHours)
   if (v == null) return '—'
-  // Euro goes through the ONE house money formatter (lib/formatters §10) — whole
-  // euros for opportunity amounts, never a third hand-rolled Intl instance. The
-  // 'nl-NL' locale arg is deliberate, not a leftover default: EUR is locked to
-  // the domain's canonical currency locale (§5) regardless of tenant UI language
-  // — see OpportunitiesTable's own comment on the same call for the full reasoning.
-  return valueInHours ? t('opportunities:cols.hoursValue', { count: v }) : formatCurrency(v, 'EUR', 'nl-NL', 0)
+  // Money goes through the ONE house money formatter (lib/formatters §10) — whole
+  // amounts for opportunity values, never a third hand-rolled Intl instance.
+  return valueInHours ? t('opportunities:cols.hoursValue', { count: v }) : formatCurrency(v, currency, locale, 0)
 }

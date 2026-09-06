@@ -1,6 +1,7 @@
 // OpportunitiesBoard — kanban view, one column per deal stage. Presentational:
 // the page owns the data and the stage mutation (onMove); drag-and-drop wiring
 // and edge-auto-scroll live here, mirroring ApplicationsBoard's own idiom.
+import { useNumberFormat } from '@/lib/formatters'
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { DragEvent } from 'react'
@@ -21,6 +22,8 @@ function BoardCard({ opp, onDragStart, onClick, selected, valueInHours }: {
 }) {
   // ownerInitials/ownerColor/created are carried on the mapped row (not on the base type).
   const { t } = useTranslation()
+  // Tenant currency + app locale for the card value (I18N-1 L5).
+  const { currency, locale } = useNumberFormat()
   const o = opp as Opportunity & { ownerInitials?: string; ownerColor?: string | null; created?: string }
   return (
     <div draggable onDragStart={e => onDragStart(e, opp.id)} onClick={() => onClick(opp)}
@@ -37,7 +40,7 @@ function BoardCard({ opp, onDragStart, onClick, selected, valueInHours }: {
           drawer tab (K10c): one formatting path, never a third hand-rolled copy. */}
       {opportunityValueOf(o, valueInHours) != null && (
         <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-primary-text)', marginBottom: 8 }}>
-          {formatOpportunityValue(o, valueInHours, t)}
+          {formatOpportunityValue(o, valueInHours, t, currency, locale)}
         </div>
       )}
 
