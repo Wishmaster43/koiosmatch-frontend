@@ -16,6 +16,8 @@ import SaveButton from '@/components/ui/SaveButton'
 import Button from '@/components/ui/Button'
 import { PageTitle, Caption } from '@/components/ui/typography'
 import { tintBg, tintBorder } from '@/lib/tint'
+import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 
 // Preset swatches are tenant brand-colour DATA (persisted as brand_color) — literal hex by design, never tokens.
 /* eslint-disable no-restricted-syntax -- DATA: fixed swatch palette offered to tenants in the brand-colour picker */
@@ -97,8 +99,8 @@ export default function BrandSettings() {
     setSaving(true)
     setLogoError(null)
     try {
-      // '' (automatic) is sent as null so the backend clears any earlier pick.
-      const payload = { brand_color: primaryColor, company_name: companyName, brand_text_color: textColor || null }
+      // Backend clears automatic text-colour on '' (not null, which 422s).
+      const payload = { brand_color: primaryColor, company_name: companyName, brand_text_color: textColor || '' }
       if (logoFile) {
         const fd = new FormData()
         fd.append('logo', logoFile)
@@ -123,7 +125,9 @@ export default function BrandSettings() {
       auth?.refreshUser?.().catch(() => {})
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
-    } catch { /* noop */ }
+    } catch (err) {
+      notifyError(extractApiError(err, t('common:actionFailed')))
+    }
     setSaving(false)
   }
 
