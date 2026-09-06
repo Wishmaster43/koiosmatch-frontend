@@ -336,8 +336,7 @@ describe('RolesSettings — appearance save reverts on failure', () => {
 describe('RolesSettings — non-super-admin read-only gating', () => {
   const arm = () => {
     mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [] })
-    // eslint-disable-next-line no-restricted-syntax -- DATA: a fixture role's tenant-picked colour, not a style rule.
-    const role: Role = { id: 'r1', name: 'recruiter', color: '#3B8FD4', icon: 'shield', users_count: 0, permissions: [] }
+    const role: Role = { id: 'r1', name: 'recruiter', color: 'rgb(59, 143, 212)', icon: 'shield', users_count: 0, permissions: [] }
     vi.mocked(api.get).mockImplementation((url: string) => {
       if (url === '/roles') return Promise.resolve({ data: [role] })
       if (url === '/permissions') return Promise.resolve({ data: {} })
