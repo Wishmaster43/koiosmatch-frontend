@@ -27,7 +27,7 @@ export default {
     // Kennis-toggles — Danny's eigen opdracht (30-08 "2 toggles die op de module
     // AI agent aan staan", herbevestigd 31-08 na MODULE-TERUG-1): terug op de module.
     { key: 'use_external_knowledge', label: 'Kennisbank in deze stap gebruiken', type: 'boolean', tab: 'general', default: true,
-      hint: 'Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek.' },
+      hint: 'Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek. Werkt alleen als de agent zelf kennis beschikbaar heeft.' },
     { key: 'use_faq', label: "FAQ's gebruiken", type: 'boolean', tab: 'general', default: true,
       hint: 'Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek.' },
     // KANAAL-NAAR-SEND-1 (Danny 31-08, verbatim: "KANAAL IS VOLGENDE STAP IN DE

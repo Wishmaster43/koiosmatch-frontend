@@ -1269,7 +1269,6 @@
     "Leeg laten betekent automatisch eerst de vestiging, anders de standaard": "Laisser vide signifie automatique : d'abord l'agence, sinon la valeur par défaut.",
     "Via WhatsApp Web kan alleen een sessiebericht (vrije tekst) worden verstuurd": "Via WhatsApp Web, seul un message de session (texte libre) peut être envoyé.",
     "bijv {{firstname}} of extra bericht tekst": "ex. {{firstname}} ou texte de message supplémentaire",
-    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek": "Permet à l'agent IA de consulter les documents/la base de connaissances du client pendant la conversation.",
     "Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek": "Permet à l'agent IA de consulter la FAQ pendant la conversation.",
     "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips": "Les étapes numérotées que l'agent IA parcourt, chacune avec un champ de sortie optionnel et des jetons de variables.",
     "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Indications supplémentaires de persona et de ton pour l'agent IA, en plus des instructions ci-dessus. Le contrat de réponse d'exécution est ajouté automatiquement.",
@@ -1289,7 +1288,8 @@
     "Relatief venster ten opzichte van vandaag Alleen gebruikt als geen datums zijn ingevuld": "Fenêtre relative par rapport à aujourd'hui. Utilisée seulement si aucune date n'est renseignée.",
     "Leeg gelaten factoren gebruiken de standaardpunten": "Les facteurs laissés vides utilisent les points par défaut.",
     "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bonus ou malus par id client, par exemple 2 ou -3.",
-    "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Par fonction, les noms de fonctions primaires et secondaires considérés comme correspondance, en minuscules."
+    "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Par fonction, les noms de fonctions primaires et secondaires considérés comme correspondance, en minuscules.",
+    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Permet à l'agent IA de consulter les documents/la base de connaissances du client pendant la conversation. Ne fonctionne que si l'agent lui-même dispose de connaissances."
   },
   "triggers": {
     "events": {

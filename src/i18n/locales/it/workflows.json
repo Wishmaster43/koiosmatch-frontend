@@ -1269,7 +1269,6 @@
     "Leeg laten betekent automatisch eerst de vestiging, anders de standaard": "Lasciare vuoto significa automatico: prima la sede, altrimenti quello predefinito.",
     "Via WhatsApp Web kan alleen een sessiebericht (vrije tekst) worden verstuurd": "Tramite WhatsApp Web si può inviare solo un messaggio di sessione (testo libero).",
     "bijv {{firstname}} of extra bericht tekst": "es. {{firstname}} o testo aggiuntivo del messaggio",
-    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek": "Consente all'agente AI di consultare i documenti/la knowledge base del tenant durante la conversazione.",
     "Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek": "Consente all'agente AI di consultare le domande frequenti (FAQ) durante la conversazione.",
     "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips": "I passaggi numerati che l'agente AI percorre, ciascuno con un campo di output facoltativo e chip di variabili.",
     "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Indicazioni aggiuntive su persona e tono per l'agente AI, oltre alle istruzioni sopra. Il contratto di risposta runtime viene aggiunto automaticamente.",
@@ -1289,7 +1288,8 @@
     "Relatief venster ten opzichte van vandaag Alleen gebruikt als geen datums zijn ingevuld": "Finestra relativa rispetto a oggi. Usata solo se non sono state inserite date.",
     "Leeg gelaten factoren gebruiken de standaardpunten": "I fattori lasciati vuoti usano i punti predefiniti.",
     "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bonus o malus per id cliente, ad esempio 2 o -3.",
-    "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Per funzione i nomi delle funzioni primarie e secondarie che valgono come corrispondenza, in minuscolo."
+    "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Per funzione i nomi delle funzioni primarie e secondarie che valgono come corrispondenza, in minuscolo.",
+    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Consente all'agente AI di consultare i documenti/la knowledge base del tenant durante la conversazione. Funziona solo se l'agente stesso ha conoscenza disponibile."
   },
   "triggers": {
     "events": {

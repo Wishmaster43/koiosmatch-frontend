@@ -1269,7 +1269,6 @@
     "Leeg laten betekent automatisch eerst de vestiging, anders de standaard": "Leaving this empty means automatic: first the branch, otherwise the default.",
     "Via WhatsApp Web kan alleen een sessiebericht (vrije tekst) worden verstuurd": "Via WhatsApp Web only a session message (free text) can be sent.",
     "bijv {{firstname}} of extra bericht tekst": "e.g. {{firstname}} or extra message text",
-    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek": "Lets the AI agent consult the tenant's documents/knowledge base during the conversation.",
     "Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek": "Lets the AI agent consult the FAQ during the conversation.",
     "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips": "The numbered steps the AI agent walks through, each with an optional output field and variable chips.",
     "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Extra persona and tone guidance for the AI agent, alongside the instructions above. The runtime reply contract is added automatically.",
@@ -1289,7 +1288,8 @@
     "Relatief venster ten opzichte van vandaag Alleen gebruikt als geen datums zijn ingevuld": "Relative window measured from today. Only used when no dates are filled in.",
     "Leeg gelaten factoren gebruiken de standaardpunten": "Factors left empty use the default points.",
     "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bonus or malus per customer id, for example 2 or -3.",
-    "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Per function the primary and secondary function names that count as a match, in lower case."
+    "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Per function the primary and secondary function names that count as a match, in lower case.",
+    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Lets the AI agent consult the tenant's documents/knowledge base during the conversation. Only works when the agent itself has knowledge available."
   },
   "triggers": {
     "events": {

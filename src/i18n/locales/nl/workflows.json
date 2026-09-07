@@ -1267,7 +1267,6 @@
     "Leeg laten betekent automatisch eerst de vestiging, anders de standaard": "Leeg laten betekent automatisch: eerst de vestiging, anders de standaard.",
     "Via WhatsApp Web kan alleen een sessiebericht (vrije tekst) worden verstuurd": "Via WhatsApp Web kan alleen een sessiebericht (vrije tekst) worden verstuurd.",
     "bijv {{firstname}} of extra bericht tekst": "bijv. {{firstname}} of extra bericht tekst",
-    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek": "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek.",
     "Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek": "Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek.",
     "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips": "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips.",
     "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven. Het runtime-antwoordcontract wordt automatisch toegevoegd.",
@@ -1287,7 +1286,8 @@
     "Relatief venster ten opzichte van vandaag Alleen gebruikt als geen datums zijn ingevuld": "Relatief venster ten opzichte van vandaag. Alleen gebruikt als geen datums zijn ingevuld.",
     "Leeg gelaten factoren gebruiken de standaardpunten": "Leeg gelaten factoren gebruiken de standaardpunten.",
     "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bonus of malus per klant-id, bijvoorbeeld 2 of -3.",
-    "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters."
+    "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters.",
+    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek. Werkt alleen als de agent zelf kennis beschikbaar heeft."
   },
   "triggers": {
     "events": {

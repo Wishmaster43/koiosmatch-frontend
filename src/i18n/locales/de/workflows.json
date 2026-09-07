@@ -1269,7 +1269,6 @@
     "Leeg laten betekent automatisch eerst de vestiging, anders de standaard": "Leer lassen bedeutet automatisch: zuerst die Niederlassung, sonst der Standard.",
     "Via WhatsApp Web kan alleen een sessiebericht (vrije tekst) worden verstuurd": "Über WhatsApp Web kann nur eine Sitzungsnachricht (Freitext) gesendet werden.",
     "bijv {{firstname}} of extra bericht tekst": "z.B. {{firstname}} oder zusätzlicher Nachrichtentext",
-    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek": "Lässt den KI-Agenten während des Gesprächs die Mandanten-Dokumente/Wissensdatenbank konsultieren.",
     "Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek": "Lässt den KI-Agenten während des Gesprächs die FAQ konsultieren.",
     "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips": "Die nummerierten Schritte, die der KI-Agent durchläuft, jeweils mit optionalem Ausgabefeld und Variablen-Chips.",
     "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Zusätzliche Persona- und Tonhinweise für den KI-Agenten, neben den obigen Anweisungen. Der Laufzeit-Antwortvertrag wird automatisch hinzugefügt.",
@@ -1289,7 +1288,8 @@
     "Relatief venster ten opzichte van vandaag Alleen gebruikt als geen datums zijn ingevuld": "Relatives Fenster ab heute. Nur verwendet, wenn keine Daten eingetragen sind.",
     "Leeg gelaten factoren gebruiken de standaardpunten": "Leer gelassene Faktoren verwenden die Standardpunkte.",
     "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bonus oder Malus pro Kunden-ID, zum Beispiel 2 oder -3.",
-    "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Pro Funktion die primären und sekundären Funktionsnamen, die als Treffer gelten, in Kleinbuchstaben."
+    "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Pro Funktion die primären und sekundären Funktionsnamen, die als Treffer gelten, in Kleinbuchstaben.",
+    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Lässt den KI-Agenten während des Gesprächs die Mandanten-Dokumente/Wissensdatenbank konsultieren. Funktioniert nur, wenn der Agent selbst über Wissen verfügt."
   },
   "triggers": {
     "events": {
