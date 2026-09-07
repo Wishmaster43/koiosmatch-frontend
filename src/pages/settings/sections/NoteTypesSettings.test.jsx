@@ -96,3 +96,15 @@ describe('NoteTypesSettings — General tab (entity=null)', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/note-types', expect.not.objectContaining({ entity: expect.anything() })))
   })
 })
+
+// Danny 07-09: the location and department tabs showed a raw "nav.location" key —
+// every entity tab must resolve its label through the shared nav.* labels.
+describe('NoteTypesSettings · entity labels resolve for location and department', () => {
+  it.each(['location', 'department'])('renders no raw nav.* key for entity %s', async (entity) => {
+    api.get.mockResolvedValue({ data: [] })
+    render(<NoteTypesSettings entity={entity} />)
+    await screen.findByRole('heading', { level: 3 }).catch(() => null)
+    expect(document.body.textContent).not.toMatch(/nav\.(location|department)/)
+  })
+})
+

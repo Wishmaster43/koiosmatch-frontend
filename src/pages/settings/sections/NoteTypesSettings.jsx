@@ -24,6 +24,9 @@ const ENTITY_NAV_ID = {
   candidate: 'cf_candidate', application: 'cf_application', match: 'cf_match', task: 'cf_task',
   customer: 'cf_customer', contact: 'cf_customer_contact', opportunity: 'cf_opportunity',
   vacancy: 'cf_vacancy',
+  // Danny 07-09 (nt_location showed the raw key): the location/department tabs
+  // reuse the custom-fields sub-tab labels too, never an untranslated entity name.
+  location: 'cf_customer_location', department: 'cf_customer_department',
 }
 
 // Note-type editor scoped to one entity (or the General/global tab when entity is
