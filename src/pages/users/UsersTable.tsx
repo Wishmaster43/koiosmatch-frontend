@@ -9,7 +9,7 @@
  */
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pencil, Trash2, UserCog } from 'lucide-react'
+import { Pencil, Trash2, UserCog, KeyRound } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
@@ -27,16 +27,18 @@ interface UsersTableProps {
   canUpdate: boolean
   canDelete: boolean
   canAssignRoles: boolean
+  canResetMfa: boolean
   onEdit: (user: UserRow) => void
   onEditRoles: (user: UserRow) => void
   onDelete: (user: UserRow) => void
+  onResetMfa: (user: UserRow) => void
   onPickColor: (user: UserRow, color: string | null) => void
 }
 
 // Presentational users table; edit/roles/delete/colour actions are all permission-gated by the caller, this component only renders them.
 export default function UsersTable({
-  rows, loading, currentUserId, canUpdate, canDelete, canAssignRoles,
-  onEdit, onEditRoles, onDelete, onPickColor,
+  rows, loading, currentUserId, canUpdate, canDelete, canAssignRoles, canResetMfa,
+  onEdit, onEditRoles, onDelete, onResetMfa, onPickColor,
 }: UsersTableProps) {
   const { t } = useTranslation('users')
   const { formatDateTime } = useDateFormat()
@@ -135,22 +137,32 @@ export default function UsersTable({
         render: u => (u.last_login_at ? formatDateTime(u.last_login_at) : '—') })
     }
 
-    // Delete — soft-delete; never offered for a system account or for yourself
-    // (the backend refuses self-deletion with a 422 as well).
-    if (canDelete) {
-      cols.push({ key: 'actions', header: '', width: 60, align: 'right', render: u => {
-        if (isSuperAdminUser(u) || (u.id != null && u.id === currentUserId)) return null
+    // Reset MFA + Delete — both soft-delete and MFA reset are never offered for yourself or system accounts.
+    if (canResetMfa || canDelete) {
+      cols.push({ key: 'actions', header: '', width: 80, align: 'right', render: u => {
+        const isMe = u.id != null && u.id === currentUserId
+        const isSA = isSuperAdminUser(u)
         return (
-          // bin=dangerSoft per the row icon-action idiom.
-          <Button variant="dangerSoft" iconOnly onClick={() => onDelete(u)} title={t('delete.action')} aria-label={t('delete.action')}>
-            <Trash2 size={12} aria-hidden="true" />
-          </Button>
+          <div style={{ display: 'flex', gap: 4 }}>
+            {/* Reset MFA — key icon, hidden for self + system accounts. */}
+            {canResetMfa && !isSA && !isMe && (
+              <Button variant="secondary" iconOnly onClick={() => onResetMfa(u)} title={t('resetMfa')} aria-label={t('resetMfa')}>
+                <KeyRound size={12} aria-hidden="true" />
+              </Button>
+            )}
+            {/* Delete — bin, dangerSoft, hidden for self + system accounts. */}
+            {canDelete && !isSA && !isMe && (
+              <Button variant="dangerSoft" iconOnly onClick={() => onDelete(u)} title={t('delete.action')} aria-label={t('delete.action')}>
+                <Trash2 size={12} aria-hidden="true" />
+              </Button>
+            )}
+          </div>
         )
       } })
     }
 
     return cols
-  }, [t, formatDateTime, hasLastLogin, currentUserId, canUpdate, canDelete, canAssignRoles, onEdit, onEditRoles, onDelete, onPickColor])
+  }, [t, formatDateTime, hasLastLogin, currentUserId, canUpdate, canDelete, canAssignRoles, canResetMfa, onEdit, onEditRoles, onDelete, onResetMfa, onPickColor])
 
   return (
     <DataTable

@@ -72,6 +72,10 @@ describe('house token pairs stay readable (defaults, light theme)', () => {
   it('on-success-bg clears 4.5:1 as text on the success-bg pastel', () => {
     expect(ratio(token('color-on-success-bg'), token('color-success-bg'))).toBeGreaterThanOrEqual(4.5)
   })
+  // MFA recovery codes: the fixed terminal pair is the same in both themes (RecoveryCodesPanel).
+  it('terminal-ink clears 4.5:1 as text on the terminal-bg surface', () => {
+    expect(ratio(token('color-terminal-ink'), token('color-terminal-bg'))).toBeGreaterThanOrEqual(4.5)
+  })
 
   // Same class, danger side (Opus r3.5): the danger colour itself reads 3.95:1
   // on its own pastel — error banners carry their own ink token.

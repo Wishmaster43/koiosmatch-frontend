@@ -6,10 +6,11 @@
  */
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, Copy, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, ShieldCheck } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
+import RecoveryCodesPanel from '@/components/auth/RecoveryCodesPanel'
 import { tint } from '@/lib/tint'
 // DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
 import { extractApiError } from '@/lib/extractApiError'
@@ -42,7 +43,6 @@ export default function MfaSetupWizard({ setupMfa, confirmMfa, onConfirmed, onFi
   const [recoveryCodes, setRecoveryCodes] = useState<string[]>([])
   const [busy,          setBusy]          = useState(false)
   const [error,         setError]         = useState('')
-  const [copied,        setCopied]        = useState(false)
 
   // Start enrollment on mount: fetch the QR/secret from the server.
   const startSetup = useCallback(async () => {
@@ -73,13 +73,6 @@ export default function MfaSetupWizard({ setupMfa, confirmMfa, onConfirmed, onFi
       setCode('')
     }
     setBusy(false)
-  }
-
-  // Copy all recovery codes at once so they can be stored in a password manager.
-  const copyRecovery = () => {
-    void navigator.clipboard.writeText(recoveryCodes.join('\n')).then(() => {
-      setCopied(true); setTimeout(() => setCopied(false), 2000)
-    })
   }
 
   // Close the wizard after the recovery codes were shown.
@@ -120,35 +113,17 @@ export default function MfaSetupWizard({ setupMfa, confirmMfa, onConfirmed, onFi
 
   // Recovery codes view (shown once after a successful confirm).
   if (step === 'recovery') return (
-    <div style={{ maxWidth: 480 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px',
-                    background: 'var(--color-success-bg)', border: '1px solid var(--color-success)', borderRadius: 12, marginBottom: 24 }}>
-        <ShieldCheck size={18} color="var(--color-success)" style={{ flexShrink: 0, marginTop: 1 }} />
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-success-text)' }}>{t('security.enabledTitle')}</div>
-          <div style={{ fontSize: 12, color: 'var(--color-success-text)', marginTop: 2 }}>{t('security.enabledDesc')}</div>
+    <RecoveryCodesPanel codes={recoveryCodes} onDone={finish} busy={busy}
+      headline={
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px',
+                      background: 'var(--color-success-bg)', border: '1px solid var(--color-success)', borderRadius: 12, marginBottom: 24 }}>
+          <ShieldCheck size={18} color="var(--color-success)" style={{ flexShrink: 0, marginTop: 1 }} />
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-success-text)' }}>{t('security.enabledTitle')}</div>
+            <div style={{ fontSize: 12, color: 'var(--color-success-text)', marginTop: 2 }}>{t('security.enabledDesc')}</div>
+          </div>
         </div>
-      </div>
-      <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>{t('security.recoveryCodes')}</h3>
-      {/* Deliberate fixed dark "terminal" panel: recovery codes must stay high-contrast
-          and identical in light AND dark themes (carried over from SecuritySettings). */}
-      {/* eslint-disable-next-line no-restricted-syntax */}
-      <div style={{ background: '#1E1E2E', borderRadius: 10, padding: '16px 20px', marginBottom: 16,
-                    display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 24px' }}>
-        {recoveryCodes.map(c => (
-          // eslint-disable-next-line no-restricted-syntax -- fixed mint-on-dark code colour, see panel note above
-          <span key={c} style={{ fontFamily: 'monospace', fontSize: 13, color: '#A8E6CF', letterSpacing: '0.05em' }}>{c}</span>
-        ))}
-      </div>
-      <div style={{ display: 'flex', gap: 10 }}>
-        <Button variant="secondary" onClick={copyRecovery}>
-          <Copy size={13} /> {copied ? t('security.copied') : t('security.copy')}
-        </Button>
-        <Button variant="primary" onClick={() => void finish()} disabled={busy}>
-          {busy ? t('security.working') : t('security.done')}
-        </Button>
-      </div>
-    </div>
+      } />
   )
 
   // QR + secret + first-code confirm view.

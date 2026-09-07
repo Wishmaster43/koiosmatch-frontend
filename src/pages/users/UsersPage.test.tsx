@@ -116,4 +116,25 @@ describe('UsersPage · permission gating (§7 — hide, never dim)', () => {
     const myRow = screen.getByText('Me Myself').closest('tr')
     expect(within(myRow as HTMLElement).queryByLabelText('delete.action')).toBeNull()
   })
+
+  it('hides reset MFA without the permission', () => {
+    granted.clear()
+    render(<UsersPage />)
+    expect(screen.queryByLabelText('resetMfa')).toBeNull()
+  })
+
+  it('shows reset MFA button once the permission is granted', () => {
+    granted.clear()
+    granted.add('users.mfa_reset')
+    render(<UsersPage />)
+    // Every user EXCEPT the signed-in one gets the reset button.
+    expect(screen.getAllByLabelText('resetMfa').length).toBe(USERS.length - 1)
+  })
+
+  it('never offers reset MFA on your own account', () => {
+    granted.clear(); granted.add('users.mfa_reset')
+    render(<UsersPage />)
+    const myRow = screen.getByText('Me Myself').closest('tr')
+    expect(within(myRow as HTMLElement).queryByLabelText('resetMfa')).toBeNull()
+  })
 })

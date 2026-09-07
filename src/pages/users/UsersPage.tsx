@@ -25,6 +25,7 @@ import { userDisplayName } from './userRow'
 import type { UserRow } from './userRow'
 import { useUsersData } from './hooks/useUsersData'
 import { useUserDeletion } from './hooks/useUserDeletion'
+import { useUserMfaReset } from './hooks/useUserMfaReset'
 import { roleName } from './usersParts'
 import Button from '@/components/ui/Button'
 import { PageTitle } from '@/components/ui/typography'
@@ -48,12 +49,16 @@ export default function UsersPage() {
   const { target: deleteTarget, owned, busy: deleting, requestDelete, confirmTransfer, close: closeDelete } =
     useUserDeletion(removeUser)
 
+  // Reset MFA enrollment: confirm → API call → toast (no list change).
+  const { dialog: mfaDialog, requestReset } = useUserMfaReset()
+
   // UI gating only — mirrors the backend's permission middleware names.
   const can = auth?.hasPermission
   const canCreate      = can?.('users.create') ?? false
   const canUpdate      = can?.('users.update') ?? false
   const canDelete      = can?.('users.delete') ?? false
   const canAssignRoles = can?.('users.assign_roles') ?? false
+  const canResetMfa    = can?.('users.mfa_reset') ?? false
 
   // ManagedUser already satisfies UserRow (its extra fields are optional).
   const rows: UserRow[] = users
@@ -94,6 +99,7 @@ export default function UsersPage() {
   const handleEdit      = useCallback((u: UserRow) => setEditingUser(u), [])
   const handleEditRoles = useCallback((u: UserRow) => setRolesUser(u), [])
   const handleDelete    = useCallback((u: UserRow) => { void requestDelete(u) }, [requestDelete])
+  const handleResetMfa  = useCallback((u: UserRow) => { void requestReset(u) }, [requestReset])
 
   // Successor candidates for a transfer: every other user still in the list.
   const successors = useMemo(
@@ -132,8 +138,8 @@ export default function UsersPage() {
           </div>
         ) : (
           <UsersTable rows={filtered} loading={loading} currentUserId={me?.id ?? null}
-            canUpdate={canUpdate} canDelete={canDelete} canAssignRoles={canAssignRoles}
-            onEdit={handleEdit} onEditRoles={handleEditRoles} onDelete={handleDelete} onPickColor={handlePickColor} />
+            canUpdate={canUpdate} canDelete={canDelete} canAssignRoles={canAssignRoles} canResetMfa={canResetMfa}
+            onEdit={handleEdit} onEditRoles={handleEditRoles} onDelete={handleDelete} onResetMfa={handleResetMfa} onPickColor={handlePickColor} />
         )}
       </div>
 
@@ -153,6 +159,9 @@ export default function UsersPage() {
         <UserTransferDeleteModal user={deleteTarget} owned={owned} successors={successors}
           busy={deleting} onConfirm={confirmTransfer} onClose={closeDelete} />
       )}
+
+      {/* MFA reset confirmation dialog. */}
+      {mfaDialog}
     </div>
   )
 }

@@ -22,6 +22,10 @@
      5.02/4.61:1. Dark redefines the twin. Never --color-success itself as text. */
   --color-success-text:  #15803D;
   --color-success-bg:    #DCFCE7;
+  /* Fixed "terminal" surface for one-time secrets (MFA recovery codes): identical in
+     light and dark on purpose, so the codes stay high-contrast in both themes. */
+  --color-terminal-bg:   #1E1E2E;
+  --color-terminal-ink:  #A8E6CF;
   --color-warning:       #D97706;
   /* Warning as TEXT ink (same twin family as danger/success): the fill
      colour reads 3.19:1 on the light --bg — an AA fail; amber-700 clears
