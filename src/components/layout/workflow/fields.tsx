@@ -20,6 +20,7 @@ import { InstructionListField } from './fieldControls/InstructionListField'
 import type { InstructionOutputField } from './filterFieldCatalog'
 import type { OnChange } from './fieldControls/types'
 import { KeyValueField, GroupField } from './groupKeyValueFields'
+import { FunctionMatrixField } from './fieldControls/FunctionMatrixField'
 import Button from '@/components/ui/Button'
 import { TextExpandModal } from './fieldControls/TextExpandModal'
 import { TextFieldWithVars } from './VariablePicker'
@@ -173,6 +174,11 @@ export function FieldInput({ field, value, onChange, variables, config, instruct
     // WA-SEND-FIELDS-2: a plain key->value record (see fieldControls' header
     // comment) — distinct from 'keyvalue' below, which persists a {name,value}[] array.
     return <KeyValueField value={value} onChange={onChange} fieldKey={field.key} suggestions={field.suggestions} />
+  }
+  if (field.type === 'function_matrix') {
+    // shift_score's functie_matrix (OL:13 + AF:module-schema-reconcile-9) — a nested
+    // record mapping position-name -> {primary: string[], secondary: string[]}.
+    return <FunctionMatrixField value={value} onChange={onChange} fieldKey={field.key} />
   }
   if (field.type === 'group') {
     // WA-SEND-FIELDS-2: a titled sub-card per named sub-field (after_send_updates).

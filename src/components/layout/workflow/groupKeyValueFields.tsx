@@ -22,7 +22,7 @@ import { Caption } from '@/components/ui/typography'
 // render as pick-help via searchable selects; free entry stays allowed either way.
 // One icon-only row-remove cell for both the committed rows and the pending
 // draft — a single documented necessity exception instead of a copy per row.
-function RowRemoveButton({ onClick, label }: { onClick: () => void; label: string }) {
+export function RowRemoveButton({ onClick, label }: { onClick: () => void; label: string }) {
   return (
     <button type="button" onClick={onClick} aria-label={label} title={label}
       // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- dense inline row-remove inside a ~26px input row; Button sm's fixed 28px footprint breaks the row height (§14 r7 necessity)

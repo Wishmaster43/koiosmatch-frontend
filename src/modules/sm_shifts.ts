@@ -15,6 +15,8 @@ export default {
     { key: 'connection_id', label: 'Shiftmanager-account', type: 'lookup_select', endpoint: '/planning-connections' },
     { key: 'date_from', label: 'Datum van',  type: 'date' },
     { key: 'date_to',   label: 'Datum t/m',  type: 'date' },
+    { key: 'offset_from_days', label: 'Venster vanaf (dagen)', type: 'number', placeholder: '-30', hint: 'Relatief venster ten opzichte van vandaag, negatief is terug in de tijd. Alleen gebruikt als geen datums zijn ingevuld.' },
+    { key: 'offset_to_days', label: 'Venster tot (dagen)', type: 'number', placeholder: '180', hint: 'Relatief venster ten opzichte van vandaag. Alleen gebruikt als geen datums zijn ingevuld.' },
     { key: 'limit',     label: 'Max. items', type: 'number', default: 500, placeholder: '500' },
   ],
 }
