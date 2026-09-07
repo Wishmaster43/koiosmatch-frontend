@@ -7,7 +7,7 @@
  * cover the card's own four states in depth).
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import CareerSiteSettings from './CareerSiteSettings'
@@ -57,6 +57,44 @@ describe('CareerSiteSettings — the toggle', () => {
     render(<CareerSiteSettings />)
     await user.click(screen.getByRole('switch'))
     expect(postMock).toHaveBeenCalledWith('/settings', { career_site_active: 'true' })
+  })
+})
+
+describe('CareerSiteSettings — the career_site_url field', () => {
+  it('renders the stored URL value', () => {
+    blobRef.current = { career_site_url: 'https://werkenbij.voorbeeld.nl/vacature/{ref}' }
+    render(<CareerSiteSettings />)
+    expect(screen.getByDisplayValue('https://werkenbij.voorbeeld.nl/vacature/{ref}')).toBeInTheDocument()
+  })
+
+  it('updates the input value as the user types', async () => {
+    blobRef.current = { career_site_url: '' }
+    render(<CareerSiteSettings />)
+    const input = screen.getByPlaceholderText('https://werkenbij.voorbeeld.nl/vacature/{ref}') as HTMLInputElement
+    // fireEvent.change directly sets the value (avoids userEvent special char escaping issues)
+    fireEvent.change(input, { target: { value: 'https://jobs.example.com/roles/{ref}' } })
+    expect(input.value).toBe('https://jobs.example.com/roles/{ref}')
+  })
+
+  it('POSTs career_site_url on blur with a valid URL containing {ref}', async () => {
+    blobRef.current = { career_site_url: '' }
+    render(<CareerSiteSettings />)
+    const input = screen.getByPlaceholderText('https://werkenbij.voorbeeld.nl/vacature/{ref}') as HTMLInputElement
+    // fireEvent.change directly sets the value (avoids userEvent special char escaping issues)
+    fireEvent.change(input, { target: { value: 'https://jobs.example.com/roles/{ref}' } })
+    fireEvent.blur(input)
+    expect(postMock).toHaveBeenCalledWith('/settings', { career_site_url: 'https://jobs.example.com/roles/{ref}' })
+  })
+
+  it('shows the invalid hint and does not save when URL lacks {ref}', async () => {
+    const user = userEvent.setup()
+    blobRef.current = { career_site_url: '' }
+    render(<CareerSiteSettings />)
+    const input = screen.getByPlaceholderText('https://werkenbij.voorbeeld.nl/vacature/{ref}') as HTMLInputElement
+    await user.type(input, 'https://example.com/vacancies/123')
+    fireEvent.blur(input)
+    expect(screen.getByText(t('careerSite.urlInvalid'))).toBeInTheDocument()
+    expect(postMock).not.toHaveBeenCalled()
   })
 })
 
