@@ -35,6 +35,7 @@ import CustomFieldsSettings from './sections/CustomFieldsSettings'
 import VacancyGenerationSettings from './sections/VacancyGenerationSettings'
 import KoiosAdviceSettings from './sections/KoiosAdviceSettings'
 import JargonSettings from './sections/JargonSettings'
+import InterviewSettings from './sections/InterviewSettings'
 
 import UsersPage from '../users/UsersPage'
 import ViewConfigEditor from '@/components/settings/ViewConfigEditor'
@@ -193,6 +194,8 @@ export const NAV_GROUPS = [
       // vacancies/matches tables — cross-entity Koios-rule config, so it sits
       // here rather than forcing a fit into either entity's display schema.
       { id: 'koios_advice', icon: Clock, component: KoiosAdviceSettings },
+      // AI-interview configuration (X-12): rejection mode, booking link, recruiter phone.
+      { id: 'interview', icon: MessageSquare, component: InterviewSettings },
       // Tenant jargon list (K-155): terms the AI correction prompt uses to fix
       // dictated abbreviations (e.g. "bfv" -> "BHV") in notes/assist results.
       { id: 'jargon', icon: Languages, component: JargonSettings },
