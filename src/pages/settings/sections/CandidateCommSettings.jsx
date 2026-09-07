@@ -4,12 +4,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
-// B8: the shared always-visible checkbox list — a hand-rolled `<label><input
-// type="checkbox">` row per field is a finding (§0, "ALTIJD een zoekbare
-// dropdown … óók een lijst van drie opties" — "ALWAYS a searchable dropdown …
-// even a list of three options"); OpenCheckGroup is the ONE
-// component for a small fixed vocabulary.
-import OpenCheckGroup from '@/components/reports/filter/OpenCheckGroup'
+// Danny 07-09 (last-contact screen): "geen checkboxen maar toggles" — each dedupe
+// field is a Toggle atom with its title above the switch, never a checkbox list.
+import Toggle from '@/components/ui/Toggle'
 import { resolveGenericLookupIcon } from './lookupIcons'
 import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
@@ -82,13 +79,14 @@ function DedupeKeysField() {
     <div style={{ marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
       <SectionTitle as="div" style={{ marginBottom: 4 }}>{t('lastContactTypes.dedupeKeysTitle')}</SectionTitle>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, maxWidth: 460 }}>{t('lastContactTypes.dedupeKeysHint')}</div>
-      <div style={{ maxWidth: 220 }}>
-        <OpenCheckGroup group={{
-          key: 'dedupeKeys',
-          options: DEDUPE_FIELDS.map(field => ({ value: field, label: t(`lastContactTypes.dedupeKeys.${field}`) })),
-          selected: keys,
-          onToggle: toggle,
-        }} />
+      {/* One block per field: the field name ABOVE its own switch (Danny 07-09). */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-6)' }}>
+        {DEDUPE_FIELDS.map(field => (
+          <div key={field} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6 }}>
+            <span style={{ fontSize: 12, color: 'var(--text)' }}>{t(`lastContactTypes.dedupeKeys.${field}`)}</span>
+            <Toggle checked={keys.includes(field)} onChange={() => toggle(field)} ariaLabel={t(`lastContactTypes.dedupeKeys.${field}`)} />
+          </div>
+        ))}
       </div>
     </div>
   )
