@@ -236,7 +236,6 @@
   "src/lib/useOutreachStatuses.ts": 1,
   "src/lib/useReferenceRelations.test.ts": 1,
   "src/lib/useReferenceRelations.ts": 1,
-  "src/lib/useSkillLevels.test.ts": 2,
   "src/lib/useTeams.test.tsx": 2,
   "src/lib/useWorkPermitTypes.test.ts": 1,
   "src/lib/useWorkPermitTypes.ts": 1,
