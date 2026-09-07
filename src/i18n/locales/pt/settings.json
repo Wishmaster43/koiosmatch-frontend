@@ -2863,7 +2863,11 @@
   "waMessageTypes": {
     "title": "Tipos de mensagem",
     "subtitle": "A sua classificação das mensagens de WhatsApp enviadas (por exemplo, Candidatura, Lembrete). A ordem define a prioridade na fila.",
-    "add": "Adicionar tipo de mensagem"
+    "add": "Adicionar tipo de mensagem",
+    "isPriority": "Prioridade",
+    "isPriorityDesc": "As mensagens deste tipo entram na fila antes dos outros tipos.",
+    "dailyCap": "Limite diário",
+    "dailyCapSuffix": "por dia"
   },
   "candidateConversion": {
     "title": "Estado predefinido após conversão",

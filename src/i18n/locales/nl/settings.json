@@ -2863,7 +2863,11 @@
   "waMessageTypes": {
     "title": "Berichttypen",
     "subtitle": "Jouw classificatie van uitgaande WhatsApp-berichten (bv. Sollicitatie, Herinnering). De volgorde bepaalt de wachtrij-prioriteit.",
-    "add": "Berichttype toevoegen"
+    "add": "Berichttype toevoegen",
+    "isPriority": "Prioriteit",
+    "isPriorityDesc": "Berichten van dit type gaan vóór de andere typen de wachtrij in.",
+    "dailyCap": "Daglimiet",
+    "dailyCapSuffix": "per dag"
   },
   "candidateConversion": {
     "title": "Standaardstatus na conversie",

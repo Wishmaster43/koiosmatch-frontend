@@ -2863,7 +2863,11 @@
   "waMessageTypes": {
     "title": "Tipos de mensajes",
     "subtitle": "Tu clasificación de los mensajes de WhatsApp salientes (p. ej. Solicitud, Recordatorio). El orden determina la prioridad de la cola.",
-    "add": "Añadir tipo de mensaje"
+    "add": "Añadir tipo de mensaje",
+    "isPriority": "Prioridad",
+    "isPriorityDesc": "Los mensajes de este tipo entran en la cola antes que los demás tipos.",
+    "dailyCap": "Límite diario",
+    "dailyCapSuffix": "por día"
   },
   "candidateConversion": {
     "title": "Estado predeterminado tras la conversión",

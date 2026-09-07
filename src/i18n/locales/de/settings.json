@@ -2863,7 +2863,11 @@
   "waMessageTypes": {
     "title": "Nachrichtentypen",
     "subtitle": "Ihre Klassifizierung ausgehender WhatsApp-Nachrichten (z. B. Bewerbung, Erinnerung). Die Reihenfolge bestimmt die Warteschlangen-Priorität.",
-    "add": "Nachrichtentyp hinzufügen"
+    "add": "Nachrichtentyp hinzufügen",
+    "isPriority": "Priorität",
+    "isPriorityDesc": "Nachrichten dieses Typs kommen vor den anderen Typen in die Warteschlange.",
+    "dailyCap": "Tageslimit",
+    "dailyCapSuffix": "pro Tag"
   },
   "candidateConversion": {
     "title": "Standardstatus nach Konvertierung",

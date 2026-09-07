@@ -2863,7 +2863,11 @@
   "waMessageTypes": {
     "title": "Types de messages",
     "subtitle": "Votre classification des messages WhatsApp sortants (p. ex. Candidature, Rappel). L'ordre détermine la priorité de la file.",
-    "add": "Ajouter un type de message"
+    "add": "Ajouter un type de message",
+    "isPriority": "Priorité",
+    "isPriorityDesc": "Les messages de ce type passent avant les autres types dans la file.",
+    "dailyCap": "Plafond journalier",
+    "dailyCapSuffix": "par jour"
   },
   "candidateConversion": {
     "title": "Statut par défaut après conversion",

@@ -2863,7 +2863,11 @@
   "waMessageTypes": {
     "title": "Message types",
     "subtitle": "Your classification of outbound WhatsApp messages (e.g. Application, Reminder). The order sets the queue priority.",
-    "add": "Add message type"
+    "add": "Add message type",
+    "isPriority": "Priority",
+    "isPriorityDesc": "Messages of this type enter the queue ahead of the other types.",
+    "dailyCap": "Daily cap",
+    "dailyCapSuffix": "per day"
   },
   "candidateConversion": {
     "title": "Default status after conversion",

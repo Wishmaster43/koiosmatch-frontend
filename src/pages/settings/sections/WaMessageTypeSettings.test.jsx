@@ -6,7 +6,8 @@
  * guards the 2026-07-10 extraction (ee207f18) that recreated the editor without it.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
 import { WaMessageTypeSettings } from './WaMessageTypeSettings'
@@ -40,3 +41,28 @@ describe('WaMessageTypeSettings — priority rank input', () => {
     expect(rankInputs[1]).toHaveValue(2)
   })
 })
+
+// X-27: priority flag + daily cap ride the create request exactly as the backend
+// validates them (WhatsappMessageTypeController: is_priority boolean, daily_cap 1..10000).
+describe('WaMessageTypeSettings — priority flag and daily cap', () => {
+  it('POSTs is_priority and daily_cap picked in the create modal', async () => {
+    api.get.mockResolvedValue({ data: [type()] })
+    api.post.mockResolvedValue({ data: type({ id: 'm9', name: 'Herinnering', is_priority: true, daily_cap: 50 }) })
+    const user = userEvent.setup()
+    render(<WaMessageTypeSettings />)
+
+    await screen.findByText('Sollicitatie')
+    await user.click(screen.getByRole('button', { name: st('waMessageTypes.add') }))
+    await user.type(screen.getByPlaceholderText(st('statusList.namePlaceholder')), 'Herinnering')
+    await user.click(screen.getByRole('switch', { name: st('waMessageTypes.isPriority') }))
+    await user.type(screen.getByRole('spinbutton', { name: st('waMessageTypes.dailyCap') }), '50')
+    await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalled())
+    const [route, body] = api.post.mock.calls[0]
+    expect(route).toBe('/whatsapp-message-types')
+    expect(body).toEqual(expect.objectContaining({ name: 'Herinnering', is_priority: true }))
+    expect(Number(body.daily_cap)).toBe(50)
+  })
+})
+

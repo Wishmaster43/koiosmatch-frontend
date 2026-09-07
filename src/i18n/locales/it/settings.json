@@ -2863,7 +2863,11 @@
   "waMessageTypes": {
     "title": "Tipi di messaggio",
     "subtitle": "La tua classificazione dei messaggi WhatsApp in uscita (ad es. Candidatura, Promemoria). L'ordine determina la priorità della coda.",
-    "add": "Aggiungi tipo di messaggio"
+    "add": "Aggiungi tipo di messaggio",
+    "isPriority": "Priorità",
+    "isPriorityDesc": "I messaggi di questo tipo entrano in coda prima degli altri tipi.",
+    "dailyCap": "Limite giornaliero",
+    "dailyCapSuffix": "al giorno"
   },
   "candidateConversion": {
     "title": "Stato predefinito dopo la conversione",
