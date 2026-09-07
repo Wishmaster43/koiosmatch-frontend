@@ -1,0 +1,13 @@
+/* RadiusMap: the on-map OpenStreetMap credit stays (tile licence) but reads as a
+   quiet caption in the corner instead of a white label (Danny 08-09). */
+.leaflet-container .leaflet-control-attribution {
+  font-size: 10px;
+  line-height: 1.4;
+  padding: 1px 6px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--surface) 75%, transparent);
+}
+.leaflet-container .leaflet-control-attribution a {
+  color: var(--text-muted);
+  text-decoration: none;
+}

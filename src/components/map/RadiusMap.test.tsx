@@ -12,8 +12,11 @@ import RadiusMap from './RadiusMap'
 vi.mock('react-leaflet', () => ({
   MapContainer: ({ children }: { children?: unknown }) => <div data-testid="map">{children as never}</div>,
   TileLayer: () => null, Circle: () => null, Marker: () => null, Popup: () => null,
-  useMapEvents: () => null, useMap: () => ({ setView: () => {} }),
+  useMapEvents: () => null, useMap: () => ({ setView: () => {}, attributionControl: { setPrefix } }),
 }))
+
+// Spy on Leaflet's attribution prefix so the "Leaflet" corner label is provably off.
+const setPrefix = vi.fn()
 
 describe('RadiusMap · stacking containment (MAP-Z-1)', () => {
   it('traps Leaflet in its own stacking context so overlays always win', () => {
@@ -22,5 +25,11 @@ describe('RadiusMap · stacking containment (MAP-Z-1)', () => {
     expect(wrapper.style.isolation).toBe('isolate')
     expect(wrapper.style.zIndex).toBe('0')
     expect(wrapper.style.position).toBe('relative')
+  })
+
+  // Danny 08-09: no "Leaflet" prefix in the corner; the OSM credit itself stays (tile licence).
+  it('switches Leaflet\'s own attribution prefix off', () => {
+    render(<RadiusMap center={{ lat: 52, lng: 5 }} radiusKm={10} points={[]} height={300} />)
+    expect(setPrefix).toHaveBeenCalledWith(false)
   })
 })

@@ -5,11 +5,21 @@
  * and lets the user re-centre by clicking the map. Presentational: the host owns
  * centre/radius state and does the (server-side) radius filtering.
  */
-import { MapContainer, TileLayer, Circle, CircleMarker, Tooltip, useMapEvents } from 'react-leaflet'
+import { useEffect } from 'react'
+import { MapContainer, TileLayer, Circle, CircleMarker, Tooltip, useMap, useMapEvents } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
+import './radiusMap.css'
 import type { Id } from '@/types/common'
 
 export interface MapPoint { id: Id; lat: number; lng: number; label: string; sub?: string; color?: string }
+
+// Danny 08-09: drop Leaflet's own "Leaflet" prefix (and its flag) from the corner;
+// the OpenStreetMap credit stays because the ODbL tile licence requires it on-map.
+function AttributionPrefixOff() {
+  const map = useMap()
+  useEffect(() => { map.attributionControl?.setPrefix(false) }, [map])
+  return null
+}
 
 // Click-to-recentre helper (hooks must live inside MapContainer).
 function ClickToCenter({ onPick }: { onPick?: (lat: number, lng: number) => void }) {
@@ -42,6 +52,7 @@ export default function RadiusMap({ center, radiusKm, points, onCenterChange, on
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <AttributionPrefixOff />
         <ClickToCenter onPick={onCenterChange} />
         {/* The search radius around the chosen centre — the fixed, tenant-invariant map token (§4). */}
         <Circle center={[center.lat, center.lng]} radius={radiusKm * 1000}
