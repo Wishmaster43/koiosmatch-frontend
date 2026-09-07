@@ -19,14 +19,13 @@ import type { RunRow } from '@/types/reports'
 
 // Slide-over for one workflow run: header/status/metrics, a timeline of run
 // metadata, lineage and the per-step input/output list; polls while live.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default function RunDetailDrawer({ run, onClose, zIndex: _zIndex }: {
+export default function RunDetailDrawer({ run, onClose, zIndex }: {
   run: RunRow
   onClose: () => void
+  // Optional stacking level for a caller that opens this drawer above a modal (assist results, workflow history).
   zIndex?: number
 }) {
   const { t } = useTranslation('reports')
-  // ReportDrawerChrome uses CSS var(--z-drawer); parameter kept for backward compatibility with callers
   // Live view (WF-R3): while the run is RUNNING/WAITING, poll its workflow's run
   // list every 3s so pending/running step states and attempts update in place.
   const [live, setLive] = useState<RunRow | null>(null)
@@ -122,7 +121,7 @@ export default function RunDetailDrawer({ run, onClose, zIndex: _zIndex }: {
   const headerIcon = <Zap size={15} color="var(--color-primary)" />
 
   return (
-    <ReportDrawerChrome
+    <ReportDrawerChrome zIndex={zIndex}
       title={run.workflow_name ?? t('runs.drawer.workflowFallback', { id: run.workflow_id ?? run.id })}
       headerIcon={headerIcon}
       headerMeta={headerMeta}

@@ -11,6 +11,8 @@ import { useTranslation } from 'react-i18next'
 
 interface ReportDrawerChromeProps {
   title: string
+  // Stacking level: the house drawer band by default; a caller inside a modal passes the modal's own level.
+  zIndex?: number | string
   onClose: () => void
   headerIcon?: ReactNode
   headerMeta?: ReactNode
@@ -23,17 +25,18 @@ export default function ReportDrawerChrome({
   headerIcon,
   headerMeta,
   children,
+  zIndex = 'var(--z-drawer)',
 }: ReportDrawerChromeProps) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation()
 
   return (
     <>
-      <div className="fixed inset-0" style={{ background: 'rgba(0,0,0,0.25)', zIndex: 'var(--z-drawer)' }} onClick={onClose} />
+      <div className="fixed inset-0" style={{ background: 'rgba(0,0,0,0.25)', zIndex }} onClick={onClose} />
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}
         className="fixed top-0 bottom-0 right-0 flex flex-col bg-[var(--surface)]"
-        style={{ width: 420, zIndex: 'var(--z-drawer)', boxShadow: 'var(--shadow-drawer)' }}>
+        style={{ width: 420, zIndex, boxShadow: 'var(--shadow-drawer)' }}>
 
         {/* Header */}
         <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
