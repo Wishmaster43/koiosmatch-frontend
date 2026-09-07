@@ -27,7 +27,7 @@ export interface BillingTierRef {
 // never hardcoded in copy (§5 one source per value).
 export type BillingUsageWeights = {
   activities?: Record<string, number>
-  flavors?: { snel?: number; slim?: number; max?: number }
+  flavors?: { fast?: number; smart?: number; max?: number }
 }
 
 // upgrade_hint — presence-gated next-tier suggestion shown when a meter nears

@@ -35,9 +35,9 @@
     "unknownTier": "Modello sconosciuto",
     "activeUnknown": "Nessun livello attivo noto. Scegline uno qui sotto.",
     "tierHint": {
-      "snel": "Volume più alto, tariffa più bassa. Ottimo per il lavoro di routine.",
-      "slim": "Lo standard: qualità solida a una tariffa media.",
-      "max": "Migliore qualità per il lavoro più difficile. Tariffa più alta."
+      "max": "Migliore qualità per il lavoro più difficile. Tariffa più alta.",
+      "fast": "Volume più alto, tariffa più bassa. Ottimo per il lavoro di routine.",
+      "smart": "Lo standard: qualità solida a una tariffa media."
     },
     "costlierWarning": "{{model}} è più costoso del tuo modello attuale. Ogni token Koios AI avrà un peso maggiore.",
     "costlierConfirm": "Scegli comunque"

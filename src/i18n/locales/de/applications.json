@@ -149,7 +149,9 @@
       "details": "Details",
       "cv": "Lebenslauf",
       "context": "Kontext"
-    }
+    },
+    "vacancyClient": "Kunde der Stelle",
+    "vacancyClientOther": "Anderer Kunde als die Bewerbung, öffnen"
   },
   "cvProposal": {
     "title": "Vorschlag aus dem Lebenslauf",

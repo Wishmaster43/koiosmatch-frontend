@@ -10,7 +10,7 @@ import { useCardDraft } from './useCardDraft'
 import { cardStyle } from './cardStyles'
 import type { FlavorKey, KoiosModelInfo, KoiosCatalogEntry, KoiosModelsAdminData } from './types'
 
-const TIER_ICON = { snel: Zap, slim: Sparkles, max: Crown }
+const TIER_ICON = { fast: Zap, smart: Sparkles, max: Crown }
 
 // Compact cost hint — house currency formatting (§5), omitted entirely when the
 // catalog carries no price fields, rather than rendering "€undefined".

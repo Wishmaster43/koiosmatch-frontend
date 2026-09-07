@@ -5,13 +5,23 @@
 import api, { unwrap } from '@/lib/api'
 import type { KoiosModelsAdminData, KoiosModelsAdminPatch } from './types'
 import { normalizeFlavors } from './types'
+import { normalizeFlavorKey } from '@/lib/koiosModelTiers'
 
 const ENDPOINT = '/superadmin/koios/models'
 
 // Every response passes through here so a stale/list-shaped `flavors` (MODELS-PERSIST-1)
-// never reaches a card — only the canonical Record does.
+// never reaches a card — only the canonical Record does. Also normalizes legacy
+// flavor keys (snel/slim → fast/smart) for backwards compatibility with stale
+// cached or third-party API responses.
 function normalizeResponse(data: KoiosModelsAdminData): KoiosModelsAdminData {
-  return { ...data, flavors: normalizeFlavors(data.flavors) }
+  const normalizedFlavors = normalizeFlavors(data.flavors)
+  // Normalize old keys (snel/slim) to new keys (fast/smart)
+  const migratedFlavors: Record<string, string> = {}
+  for (const [key, value] of Object.entries(normalizedFlavors)) {
+    const newKey = normalizeFlavorKey(key) || key
+    migratedFlavors[newKey] = value
+  }
+  return { ...data, flavors: migratedFlavors }
 }
 
 // Full registry snapshot — models, flavours, catalog, packages, routing, tenants.

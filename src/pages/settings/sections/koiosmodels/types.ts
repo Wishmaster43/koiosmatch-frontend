@@ -7,7 +7,7 @@
  */
 
 // The three tenant-facing stands — mirrors lib/koiosModelTiers' ModelTierKey.
-export type FlavorKey = 'snel' | 'slim' | 'max'
+export type FlavorKey = 'fast' | 'smart' | 'max'
 
 // One selectable vendor model, as the platform whitelist reports it. MODELS-PERSIST-1
 // (CMBE): the live Models API returns dated vendor ids and models with no catalogue
@@ -102,6 +102,6 @@ export function normalizeFlavors(input: unknown): Record<FlavorKey, string> {
   return { ...(input as Record<FlavorKey, string>) }
 }
 
-export const FLAVOR_KEYS: FlavorKey[] = ['snel', 'slim', 'max']
+export const FLAVOR_KEYS: FlavorKey[] = ['fast', 'smart', 'max']
 export const EFFORT_LEVELS: EffortLevel[] = ['low', 'medium', 'high', 'xhigh', 'max']
 export const REQUEST_TYPES: KoiosRequestType[] = ['note_assist', 'generate', 'conversation_assist', 'report_advice']

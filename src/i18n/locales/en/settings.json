@@ -540,7 +540,10 @@
     "color": "Colour",
     "icon": "Icon",
     "colorHint": "Colour and icon make a branch recognisable in lists and on the map.",
-    "province": "Province"
+    "province": "Province",
+    "isDefault": "Default bureau",
+    "isDefaultHint": "This location is the default for new assignments.",
+    "defaultBadge": "Default"
   },
   "memory": {
     "title": "Memory",
@@ -673,7 +676,13 @@
     "phaseLockedHint": "Automations and KPIs rely on these phases, so nothing here can be added, removed or reordered. Only the colour is tenant-adjustable.",
     "customerNotApplicable": "Customer not applicable",
     "customerNotApplicableHint": "A match with this contract form has no customer, location, department or contact person; a branch is then required.",
-    "iconField": "Icon"
+    "iconField": "Icon",
+    "isLeave": "Leave status",
+    "isLeaveHint": "This status represents leave; cannot occur with an active match.",
+    "isUnavailable": "Unavailable flag",
+    "isUnavailableHint": "This status means not available for deployment.",
+    "isInactive": "Inactive",
+    "isInactiveHint": "This customer/location/department/contact is inactive."
   },
   "vacancy": {
     "title": "Statuses",
@@ -874,6 +883,15 @@
       "always": "Always",
       "alwaysDesc": "Every match requires approval first.",
       "saveFailed": "Saving failed. Your choice was reverted."
+    },
+    "leads": {
+      "title": "Notifications for new suggestions",
+      "subtitle": "Determine who is notified when AI finds new candidates for a vacancy.",
+      "modeLabel": "Who receives the notification",
+      "modeOwner": "Vacancy owner",
+      "modeTeam": "Team with role",
+      "roleLabel": "Role",
+      "saveFailed": "Settings could not be saved"
     }
   },
   "matchTemplatesSettings": {
@@ -1162,7 +1180,7 @@
           "unitToken_other": "tokens",
           "unitRun_one": "token",
           "unitRun_other": "tokens",
-          "weightsLine": "Weighting: chat question {{chat}} · other actions {{other}} · smart ×{{slim}} · max ×{{max}}",
+          "weightsLine": "Weight: chat question {{chat}} · other actions {{other}} · smart ×{{smart}} · max ×{{max}}",
           "warningNoTier": "You are at {{pct}}% of your bundle.",
           "exceededNoTier": "Your bundle is full. Upgrade your tier to continue.",
           "exceededOverageNoTier": "Your bundle is full. Further usage counts as extra: {{price}} per {{unit}}."
@@ -1316,6 +1334,12 @@
         "freeAllowanceNote": "The free allowance for AI tokens is not shown separately here yet. Only the billing endpoint returns that figure (kept out of this page, see the code comment).",
         "loadError": "Loading the invoice estimate failed.",
         "unavailable": "You do not have permission to view this."
+      },
+      "activityPerDay": {
+        "title": "Workflow-tokens by activity per day",
+        "subtitle": "Distribution of workflow-tokens by activity type per day",
+        "loadError": "Failed to load activity data",
+        "empty": "No activity data available"
       }
     },
     "invoices": {
@@ -2970,7 +2994,8 @@
       "date": "Date",
       "boolean": "Yes / No",
       "select": "Choice"
-    }
+    },
+    "optionsRequired": "This field requires at least one option"
   },
   "usage": {
     "tabs": {
@@ -3184,7 +3209,10 @@
       "colThroughput": "Throughput",
       "colRuntime": "Avg. duration",
       "empty": "No metrics yet. Horizon snapshots every 5 minutes."
-    }
+    },
+    "retryAllSuccess": "{{count}} jobs resubmitted",
+    "retryAllSkipped": "{{count}} jobs skipped (tenant no longer exists)",
+    "retryAllTruncated": "more failed jobs than processed at once, retry"
   },
   "actionRules": {
     "title": "Action rules",
@@ -3619,7 +3647,9 @@
     "subtitle": "AI markup for the whole platform (superadmin).",
     "markupLabel": "AI markup (%)",
     "loadError": "Failed to load platform pricing.",
-    "saved": "Platform pricing saved."
+    "saved": "Platform pricing saved.",
+    "fxUsdEurLabel": "USD→EUR exchange rate",
+    "fxUsdEurHint": "Exchange rate for converting USD to EUR (default 1.0)"
   },
   "invoiceSettings": {
     "title": "Invoice settings",
@@ -3978,6 +4008,12 @@
       "label": "Recruiter Phone Number",
       "description": "Phone number in E.164 format (+31612345678) for interview invitations when the owner has no number of their own",
       "placeholder": "+31612345678"
+    }
+  },
+  "koiosmodels": {
+    "flavorLabel": {
+      "fast": "Fast",
+      "smart": "Smart"
     }
   }
 }

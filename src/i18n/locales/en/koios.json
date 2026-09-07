@@ -35,9 +35,9 @@
     "unknownTier": "Unknown model",
     "activeUnknown": "No active flavour known. Pick one below.",
     "tierHint": {
-      "snel": "Highest volume, lowest rate. Great for routine work.",
-      "slim": "The default: strong quality at an average rate.",
-      "max": "Best quality for the hardest work. Highest rate."
+      "max": "Best quality for the hardest work. Highest rate.",
+      "fast": "Highest volume, lowest rate. Great for routine work.",
+      "smart": "The default: strong quality at an average rate."
     },
     "costlierWarning": "{{model}} is more expensive than your current model. Each Koios AI token will count more heavily.",
     "costlierConfirm": "Choose anyway"

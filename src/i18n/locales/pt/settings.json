@@ -540,7 +540,10 @@
     "color": "Cor",
     "icon": "Ícone",
     "colorHint": "A cor e o ícone tornam uma filial reconhecível em listas e no mapa.",
-    "province": "Província"
+    "province": "Província",
+    "isDefault": "Local padrão",
+    "isDefaultHint": "Este local é o padrão para novas atribuições.",
+    "defaultBadge": "Padrão"
   },
   "memory": {
     "title": "Memória",
@@ -673,7 +676,13 @@
     "phaseLockedHint": "Automatismos e KPIs dependem destas fases, por isso aqui não é possível adicionar, eliminar ou reordenar nada. Apenas a cor é ajustável.",
     "customerNotApplicable": "Cliente não aplicável",
     "customerNotApplicableHint": "Numa match com este tipo de contrato não há cliente, localização, departamento nem pessoa de contacto; uma filial é então obrigatória.",
-    "iconField": "Ícone"
+    "iconField": "Ícone",
+    "isLeave": "Status de licença",
+    "isLeaveHint": "Este status representa licença; não pode ocorrer com uma correspondência ativa.",
+    "isUnavailable": "Bandeira indisponível",
+    "isUnavailableHint": "Este status significa não disponível para implantação.",
+    "isInactive": "Inativo",
+    "isInactiveHint": "Este cliente/local/departamento/contato está inativo."
   },
   "vacancy": {
     "title": "Estados",
@@ -874,6 +883,15 @@
       "always": "Sempre",
       "alwaysDesc": "Cada match requer aprovação prévia.",
       "saveFailed": "Falha ao guardar. A escolha foi revertida."
+    },
+    "leads": {
+      "title": "Notificações para novas sugestões",
+      "subtitle": "Determine quem é notificado quando a IA encontra novos candidatos para uma vaga.",
+      "modeLabel": "Quem recebe a notificação",
+      "modeOwner": "Proprietário da vaga",
+      "modeTeam": "Equipe com função",
+      "roleLabel": "Função",
+      "saveFailed": "As configurações não puderam ser salvas"
     }
   },
   "matchTemplatesSettings": {
@@ -1162,7 +1180,7 @@
           "unitToken_other": "tokens",
           "unitRun_one": "token",
           "unitRun_other": "tokens",
-          "weightsLine": "Ponderação: pergunta no chat {{chat}} · outras ações {{other}} · slim ×{{slim}} · máx ×{{max}}",
+          "weightsLine": "Peso: pergunta de bate-papo {{chat}} · outras ações {{other}} · inteligente ×{{smart}} · max ×{{max}}",
           "warningNoTier": "Está em {{pct}}% do seu pacote.",
           "exceededNoTier": "O seu pacote está cheio. Faça upgrade do seu escalão para continuar.",
           "exceededOverageNoTier": "O seu pacote está cheio. O consumo adicional conta como extra: {{price}} por {{unit}}."
@@ -1316,6 +1334,12 @@
         "freeAllowanceNote": "A franquia gratuita de tokens de IA ainda não é mostrada separadamente aqui. Esse valor só é devolvido pelo endpoint de faturação (mantido fora desta página, ver o comentário no código).",
         "loadError": "Falha ao carregar a estimativa da fatura.",
         "unavailable": "Não tem permissões para ver isto."
+      },
+      "activityPerDay": {
+        "title": "Workflow-tokens por atividade por dia",
+        "subtitle": "Distribuição de workflow-tokens por tipo de atividade por dia",
+        "loadError": "Erro ao carregar dados de atividade",
+        "empty": "Nenhum dado de atividade disponível"
       }
     },
     "invoices": {
@@ -2970,7 +2994,8 @@
       "date": "Data",
       "boolean": "Sim / Não",
       "select": "Escolha"
-    }
+    },
+    "optionsRequired": "Este campo requer pelo menos uma opção"
   },
   "usage": {
     "tabs": {
@@ -3184,7 +3209,10 @@
       "colThroughput": "Débito",
       "colRuntime": "Duração média",
       "empty": "Ainda sem métricas. O Horizon faz uma captura a cada 5 minutos."
-    }
+    },
+    "retryAllSuccess": "{{count}} tarefas reenviadas",
+    "retryAllSkipped": "{{count}} tarefas ignoradas (tenant não existe mais)",
+    "retryAllTruncated": "mais tarefas com falha do que processadas de uma vez, tentar novamente"
   },
   "actionRules": {
     "title": "Regras de ação",
@@ -3619,7 +3647,9 @@
     "subtitle": "Margem de IA para toda a plataforma (superadmin).",
     "markupLabel": "Margem de IA (%)",
     "loadError": "Falha ao carregar os preços da plataforma.",
-    "saved": "Preços da plataforma guardados."
+    "saved": "Preços da plataforma guardados.",
+    "fxUsdEurLabel": "Taxa de câmbio USD→EUR",
+    "fxUsdEurHint": "Taxa de câmbio para conversão de USD para EUR (padrão 1,0)"
   },
   "invoiceSettings": {
     "title": "Definições de faturação",
@@ -3978,6 +4008,12 @@
       "label": "Número de telefone do recrutador",
       "description": "Número de telefone no formato E.164 (+351912345678) para convites de entrevista quando o responsável não tem número próprio",
       "placeholder": "+351912345678"
+    }
+  },
+  "koiosmodels": {
+    "flavorLabel": {
+      "fast": "Rápido",
+      "smart": "Inteligente"
     }
   }
 }

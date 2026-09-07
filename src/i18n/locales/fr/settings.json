@@ -518,7 +518,10 @@
     "color": "Couleur",
     "icon": "Icône",
     "colorHint": "La couleur et l’icône rendent un site reconnaissable dans les listes et sur la carte.",
-    "province": "Province"
+    "province": "Province",
+    "isDefault": "Bureau par défaut",
+    "isDefaultHint": "Ce lieu est la valeur par défaut pour les nouvelles missions.",
+    "defaultBadge": "Défaut"
   },
   "memory": {
     "title": "Mémoire",
@@ -916,7 +919,7 @@
           "unitToken_other": "jetons",
           "unitRun_one": "jeton",
           "unitRun_other": "jetons",
-          "weightsLine": "Pondération : question de chat {{chat}} · autres actions {{other}} · intelligent ×{{slim}} · max ×{{max}}",
+          "weightsLine": "Pondération: question chat {{chat}} · autres actions {{other}} · intelligent ×{{smart}} · max ×{{max}}",
           "warningNoTier": "Vous êtes à {{pct}} % de votre forfait.",
           "exceededNoTier": "Votre forfait est complet. Passez à un palier supérieur pour continuer.",
           "exceededOverageNoTier": "Votre forfait est complet. L'utilisation supplémentaire est facturée en extra : {{price}} par {{unit}}."
@@ -1070,6 +1073,12 @@
         "freeAllowanceNote": "Le forfait gratuit pour les jetons IA n'est pas encore affiché séparément ici. Seul le point de terminaison de facturation renvoie ce chiffre (volontairement exclu de cette page, voir le commentaire de code).",
         "loadError": "Le chargement de l'estimation de facture a échoué.",
         "unavailable": "Vous n'avez pas l'autorisation de consulter ceci."
+      },
+      "activityPerDay": {
+        "title": "Workflow-tokens par activité par jour",
+        "subtitle": "Distribution des workflow-tokens par type d'activité par jour",
+        "loadError": "Erreur lors du chargement des données d'activité",
+        "empty": "Aucune donnée d'activité disponible"
       }
     },
     "invoices": {
@@ -2208,7 +2217,13 @@
     "phaseLockedHint": "Les automatisations et les KPI s'appuient sur ces phases, donc rien ne peut être ajouté, supprimé ou réordonné ici. Seule la couleur est modifiable.",
     "customerNotApplicable": "Client non applicable",
     "customerNotApplicableHint": "Un match avec cette forme de contrat n'a ni client, ni site, ni service, ni personne de contact ; une agence est alors obligatoire.",
-    "iconField": "Icône"
+    "iconField": "Icône",
+    "isLeave": "Statut de congé",
+    "isLeaveHint": "Ce statut représente un congé ; ne peut pas coexister avec un match actif.",
+    "isUnavailable": "Drapeau non disponible",
+    "isUnavailableHint": "Ce statut signifie non disponible pour le déploiement.",
+    "isInactive": "Inactif",
+    "isInactiveHint": "Ce client/lieu/département/contact est inactif."
   },
   "planning": {
     "shiftTypes": {
@@ -2441,6 +2456,15 @@
       "always": "Toujours",
       "alwaysDesc": "Chaque match nécessite d’abord une approbation.",
       "saveFailed": "Échec de l’enregistrement. Le choix a été rétabli."
+    },
+    "leads": {
+      "title": "Notifications pour les nouvelles suggestions",
+      "subtitle": "Déterminez qui est notifié lorsque l'IA trouve de nouveaux candidats pour un poste.",
+      "modeLabel": "Qui reçoit la notification",
+      "modeOwner": "Propriétaire de l'offre",
+      "modeTeam": "Équipe avec rôle",
+      "roleLabel": "Rôle",
+      "saveFailed": "Les paramètres n'ont pas pu être enregistrés"
     }
   },
   "matchTemplatesSettings": {
@@ -2970,7 +2994,8 @@
       "date": "Date",
       "boolean": "Oui / Non",
       "select": "Choix"
-    }
+    },
+    "optionsRequired": "Ce champ nécessite au moins une option"
   },
   "usage": {
     "tabs": {
@@ -3184,7 +3209,10 @@
       "colThroughput": "Débit",
       "colRuntime": "Durée moy.",
       "empty": "Pas encore de métriques. Horizon prend un instantané toutes les 5 minutes."
-    }
+    },
+    "retryAllSuccess": "{{count}} tâches renvoyées",
+    "retryAllSkipped": "{{count}} tâches ignorées (le locataire n'existe plus)",
+    "retryAllTruncated": "plus de tâches échouées que traitées à la fois, réessayer"
   },
   "actionRules": {
     "title": "Règles d'action",
@@ -3619,7 +3647,9 @@
     "subtitle": "Marge IA pour toute la plateforme (superadmin).",
     "markupLabel": "Marge IA (%)",
     "loadError": "Échec du chargement de la tarification de la plateforme.",
-    "saved": "Tarification de la plateforme enregistrée."
+    "saved": "Tarification de la plateforme enregistrée.",
+    "fxUsdEurLabel": "Taux de change USD→EUR",
+    "fxUsdEurHint": "Taux de change pour la conversion USD en EUR (par défaut 1,0)"
   },
   "invoiceSettings": {
     "title": "Paramètres de facturation",
@@ -3978,6 +4008,12 @@
       "label": "Numéro de téléphone du recruteur",
       "description": "Numéro de téléphone au format E.164 (+33612345678) pour les invitations d'entretien lorsque le responsable n'a pas de numéro propre",
       "placeholder": "+33612345678"
+    }
+  },
+  "koiosmodels": {
+    "flavorLabel": {
+      "fast": "Rapide",
+      "smart": "Intelligent"
     }
   }
 }

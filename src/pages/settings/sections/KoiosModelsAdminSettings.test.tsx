@@ -39,17 +39,17 @@ const REGISTRY = {
     // No catalogue price yet — must be filtered out of the flavour pickers.
     { id: 'claude-experimental-preview', display_name: 'Claude Experimental', catalog_id: null, linkable: false },
   ],
-  flavors: { snel: 'claude-haiku-4-5', slim: 'claude-sonnet-5', max: 'claude-opus-4-8' },
+  flavors: { fast: 'claude-haiku-4-5', smart: 'claude-sonnet-5', max: 'claude-opus-4-8' },
   catalog: {
     'claude-haiku-4-5': { supports_effort: false },
     'claude-sonnet-5': { supports_effort: true, input_price_per_1m: 3, output_price_per_1m: 15 },
     'claude-opus-4-8': { supports_effort: true },
   },
-  packages: { core: { allowed_flavors: ['snel'], max_effort: 'medium' } },
+  packages: { core: { allowed_flavors: ['fast'], max_effort: 'medium' } },
   routing: {
-    note_assist: { flavor: 'snel', effort: null },
-    generate: { flavor: 'slim', effort: 'medium' },
-    conversation_assist: { flavor: 'slim', effort: null },
+    note_assist: { flavor: 'fast', effort: null },
+    generate: { flavor: 'smart', effort: 'medium' },
+    conversation_assist: { flavor: 'smart', effort: null },
     report_advice: { flavor: 'max', effort: 'high' },
   },
   tenants: {},
@@ -101,7 +101,7 @@ describe('KoiosModelsAdminSettings', () => {
     renderScreen()
     await userEvent.click(screen.getByRole('tab', { name: 'Routing' }))
     await screen.findByText('Routing per request type')
-    // note_assist routes to 'snel' == claude-haiku-4-5, supports_effort: false.
+    // note_assist routes to 'fast' == claude-haiku-4-5, supports_effort: false.
     const row = screen.getByText('Note assist').closest('div')!
     expect(within(row.parentElement as HTMLElement).getByText('This model has no effort levels.')).toBeInTheDocument()
   })
@@ -116,7 +116,7 @@ describe('KoiosModelsAdminSettings', () => {
   })
 
   it('PATCHes only the flavors section from the Flavours card', async () => {
-    vi.mocked(api.patch).mockResolvedValueOnce({ data: { data: { ...REGISTRY, flavors: { ...REGISTRY.flavors, snel: 'claude-sonnet-5' } } } })
+    vi.mocked(api.patch).mockResolvedValueOnce({ data: { data: { ...REGISTRY, flavors: { ...REGISTRY.flavors, fast: 'claude-sonnet-5' } } } })
     renderScreen()
     await screen.findByText('Flavours')
     // Pick the Slim option for the "Snel" flavour row via its searchable trigger.
@@ -128,7 +128,7 @@ describe('KoiosModelsAdminSettings', () => {
     await userEvent.click(within(portal).getByText(/Claude Sonnet/))
     const saveButtons = screen.getAllByRole('button', { name: 'Save' })
     await userEvent.click(saveButtons[0])
-    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/superadmin/koios/models', { flavors: expect.objectContaining({ snel: 'claude-sonnet-5' }) }))
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/superadmin/koios/models', { flavors: expect.objectContaining({ fast: 'claude-sonnet-5' }) }))
   })
 
   // The regression seam itself (§13): after a LIST-shaped GET the card must still PATCH
@@ -136,12 +136,12 @@ describe('KoiosModelsAdminSettings', () => {
   it('PATCHes the canonical Record after a list-shaped GET', async () => {
     vi.mocked(api.get).mockReset().mockResolvedValueOnce({
       data: { data: { ...REGISTRY, flavors: [
-        { key: 'snel', model_id: 'claude-haiku-4-5' },
-        { key: 'slim', model_id: 'claude-sonnet-5' },
+        { key: 'fast', model_id: 'claude-haiku-4-5' },
+        { key: 'smart', model_id: 'claude-sonnet-5' },
         { key: 'max', model_id: 'claude-opus-4-8' },
       ] } },
     })
-    vi.mocked(api.patch).mockResolvedValueOnce({ data: { data: { ...REGISTRY, flavors: { snel: 'claude-sonnet-5', slim: 'claude-sonnet-5', max: 'claude-opus-4-8' } } } })
+    vi.mocked(api.patch).mockResolvedValueOnce({ data: { data: { ...REGISTRY, flavors: { fast: 'claude-sonnet-5', smart: 'claude-sonnet-5', max: 'claude-opus-4-8' } } } })
     renderScreen()
     await screen.findByText('Flavours')
     const triggers = screen.getAllByRole('button', { name: /Pick a model|Claude Haiku/i })
@@ -150,14 +150,14 @@ describe('KoiosModelsAdminSettings', () => {
     await userEvent.click(within(portal).getByText(/Claude Sonnet/))
     await userEvent.click(screen.getAllByRole('button', { name: 'Save' })[0])
     await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/superadmin/koios/models',
-      { flavors: { snel: 'claude-sonnet-5', slim: 'claude-sonnet-5', max: 'claude-opus-4-8' } }))
+      { flavors: { fast: 'claude-sonnet-5', smart: 'claude-sonnet-5', max: 'claude-opus-4-8' } }))
   })
 
   it('normalizes a list-shaped flavors GET response into the Record every card expects', async () => {
     vi.mocked(api.get).mockReset().mockResolvedValueOnce({
       data: { data: { ...REGISTRY, flavors: [
-        { key: 'snel', model_id: 'claude-haiku-4-5' },
-        { key: 'slim', model_id: 'claude-sonnet-5' },
+        { key: 'fast', model_id: 'claude-haiku-4-5' },
+        { key: 'smart', model_id: 'claude-sonnet-5' },
         { key: 'max', model_id: 'claude-opus-4-8' },
       ] } },
     })

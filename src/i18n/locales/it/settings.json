@@ -540,7 +540,10 @@
     "color": "Colore",
     "icon": "Icona",
     "colorHint": "Colore e icona rendono una sede riconoscibile negli elenchi e sulla mappa.",
-    "province": "Provincia"
+    "province": "Provincia",
+    "isDefault": "Posizione predefinita",
+    "isDefaultHint": "Questa posizione è l'impostazione predefinita per le nuove assegnazioni.",
+    "defaultBadge": "Predefinito"
   },
   "memory": {
     "title": "Memoria",
@@ -673,7 +676,13 @@
     "phaseLockedHint": "Automazioni e KPI si basano su queste fasi, quindi qui non puoi aggiungere, eliminare o riordinare nulla. Solo il colore è modificabile.",
     "customerNotApplicable": "Cliente non applicabile",
     "customerNotApplicableHint": "In un match con questo tipo di contratto non ci sono cliente, sede, reparto o referente; in tal caso una sede è obbligatoria.",
-    "iconField": "Icona"
+    "iconField": "Icona",
+    "isLeave": "Stato di congedo",
+    "isLeaveHint": "Questo stato rappresenta un congedo; non può verificarsi con una partita attiva.",
+    "isUnavailable": "Flag non disponibile",
+    "isUnavailableHint": "Questo stato significa non disponibile per la distribuzione.",
+    "isInactive": "Inattivo",
+    "isInactiveHint": "Questo cliente/ubicazione/reparto/contatto è inattivo."
   },
   "vacancy": {
     "title": "Stati",
@@ -874,6 +883,15 @@
       "always": "Sempre",
       "alwaysDesc": "Ogni match richiede prima l'approvazione.",
       "saveFailed": "Salvataggio non riuscito. La scelta è stata ripristinata."
+    },
+    "leads": {
+      "title": "Notifiche per nuovi suggerimenti",
+      "subtitle": "Determina chi viene notificato quando l'IA trova nuovi candidati per una posizione.",
+      "modeLabel": "Chi riceve la notifica",
+      "modeOwner": "Proprietario dell'offerta",
+      "modeTeam": "Team con ruolo",
+      "roleLabel": "Ruolo",
+      "saveFailed": "Impossibile salvare le impostazioni"
     }
   },
   "matchTemplatesSettings": {
@@ -1162,7 +1180,7 @@
           "unitToken_other": "token",
           "unitRun_one": "token",
           "unitRun_other": "token",
-          "weightsLine": "Peso: domanda chat {{chat}} · altre azioni {{other}} · slim ×{{slim}} · max ×{{max}}",
+          "weightsLine": "Peso: domanda chat {{chat}} · altre azioni {{other}} · smart ×{{smart}} · max ×{{max}}",
           "warningNoTier": "Sei al {{pct}}% del tuo pacchetto.",
           "exceededNoTier": "Il tuo pacchetto è pieno. Aggiorna la tua staffel per continuare.",
           "exceededOverageNoTier": "Il tuo pacchetto è pieno. L'utilizzo successivo conta come extra: {{price}} per {{unit}}."
@@ -1316,6 +1334,12 @@
         "freeAllowanceNote": "La soglia gratuita per i token AI non è ancora mostrata separatamente qui. Solo l'endpoint di fatturazione restituisce questo dato (tenuto fuori da questa pagina, vedi il commento nel codice).",
         "loadError": "Caricamento dell'anteprima fattura non riuscito.",
         "unavailable": "Non hai i permessi per visualizzare questo contenuto."
+      },
+      "activityPerDay": {
+        "title": "Workflow-token per attività al giorno",
+        "subtitle": "Distribuzione dei workflow-token per tipo di attività al giorno",
+        "loadError": "Errore durante il caricamento dei dati di attività",
+        "empty": "Nessun dato di attività disponibile"
       }
     },
     "invoices": {
@@ -2970,7 +2994,8 @@
       "date": "Data",
       "boolean": "Sì / No",
       "select": "Scelta"
-    }
+    },
+    "optionsRequired": "Questo campo richiede almeno un'opzione"
   },
   "usage": {
     "tabs": {
@@ -3184,7 +3209,10 @@
       "colThroughput": "Throughput",
       "colRuntime": "Durata media",
       "empty": "Ancora nessuna metrica. Lo snapshot di Horizon gira ogni 5 minuti."
-    }
+    },
+    "retryAllSuccess": "{{count}} attività reinviate",
+    "retryAllSkipped": "{{count}} attività saltate (il tenant non esiste più)",
+    "retryAllTruncated": "più attività non riuscite rispetto a quelle elaborate contemporaneamente, riprovare"
   },
   "actionRules": {
     "title": "Regole di azione",
@@ -3619,7 +3647,9 @@
     "subtitle": "Margine AI per l'intera piattaforma (superadmin).",
     "markupLabel": "Margine AI (%)",
     "loadError": "Caricamento dei prezzi piattaforma non riuscito.",
-    "saved": "Prezzi piattaforma salvati."
+    "saved": "Prezzi piattaforma salvati.",
+    "fxUsdEurLabel": "Tasso di cambio USD→EUR",
+    "fxUsdEurHint": "Tasso di cambio per la conversione da USD a EUR (impostazione predefinita 1,0)"
   },
   "invoiceSettings": {
     "title": "Impostazioni fatture",
@@ -3978,6 +4008,12 @@
       "label": "Numero di telefono del reclutatore",
       "description": "Numero di telefono in formato E.164 (+393123456789) per gli inviti al colloquio quando il responsabile non ha un numero proprio",
       "placeholder": "+393123456789"
+    }
+  },
+  "koiosmodels": {
+    "flavorLabel": {
+      "fast": "Veloce",
+      "smart": "Smart"
     }
   }
 }

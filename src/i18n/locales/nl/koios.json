@@ -35,9 +35,9 @@
     "unknownTier": "Onbekend model",
     "activeUnknown": "Geen actieve smaak bekend. Kies hieronder een smaak.",
     "tierHint": {
-      "snel": "Hoogste volume, laagste tarief. Prima voor routinewerk.",
-      "slim": "De standaard: sterke kwaliteit tegen een gemiddeld tarief.",
-      "max": "Beste kwaliteit voor het moeilijkste werk. Hoogste tarief."
+      "max": "Beste kwaliteit voor het moeilijkste werk. Hoogste tarief.",
+      "fast": "Hoogste volume, laagste tarief. Prima voor routinewerk.",
+      "smart": "De standaard: sterke kwaliteit tegen een gemiddeld tarief."
     },
     "costlierWarning": "{{model}} is duurder dan je huidige model. Elke Koios AI-token weegt dan zwaarder.",
     "costlierConfirm": "Toch kiezen"

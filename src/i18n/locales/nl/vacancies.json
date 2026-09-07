@@ -610,6 +610,10 @@
     "colName": "Naam",
     "colPhase": "Fase",
     "colSource": "Bron",
-    "colCreated": "Aangemaakt"
+    "colCreated": "Aangemaakt",
+    "recountBtn": "Suggesties vernieuwen",
+    "recountQueued": "In de wachtrij gezet, de lijst ververst binnen enkele minuten",
+    "recountThrottled": "Even wachten, net al aangevraagd",
+    "recountFailed": "Vernieuwen is mislukt"
   }
 }

@@ -610,6 +610,10 @@
     "colName": "Nom",
     "colPhase": "Phase",
     "colSource": "Source",
-    "colCreated": "Créé le"
+    "colCreated": "Créé le",
+    "recountBtn": "Actualiser les suggestions",
+    "recountQueued": "En file d'attente, la liste sera actualisée dans quelques minutes",
+    "recountThrottled": "Veuillez patienter, demande déjà en cours",
+    "recountFailed": "L'actualisation a échoué"
   }
 }

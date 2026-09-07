@@ -518,7 +518,10 @@
     "color": "Farbe",
     "icon": "Symbol",
     "colorHint": "Farbe und Symbol machen einen Standort in Listen und auf der Karte erkennbar.",
-    "province": "Provinz"
+    "province": "Provinz",
+    "isDefault": "Standard-Standort",
+    "isDefaultHint": "Dieser Standort ist der Standard für neue Zuweisungen.",
+    "defaultBadge": "Standard"
   },
   "memory": {
     "title": "Speicher",
@@ -916,7 +919,7 @@
           "unitToken_other": "Tokens",
           "unitRun_one": "Token",
           "unitRun_other": "Tokens",
-          "weightsLine": "Gewichtung: Chat-Anfrage {{chat}} · andere Aktionen {{other}} · Smart ×{{slim}} · Max ×{{max}}",
+          "weightsLine": "Gewichtung: Chat-Frage {{chat}} · andere Aktionen {{other}} · intelligent ×{{smart}} · max ×{{max}}",
           "warningNoTier": "Du liegst bei {{pct}}% deines Kontingents.",
           "exceededNoTier": "Dein Kontingent ist voll. Wechsle auf eine höhere Stufe, um fortzufahren.",
           "exceededOverageNoTier": "Dein Kontingent ist voll. Weiterer Verbrauch zählt als Extra: {{price}} pro {{unit}}."
@@ -1070,6 +1073,12 @@
         "freeAllowanceNote": "Das Freikontingent für KI-Tokens wird hier noch nicht separat angezeigt. Dieser Wert liefert nur der Abrechnungs-Endpunkt (bewusst außerhalb dieser Seite gehalten, siehe Code-Kommentar).",
         "loadError": "Der Rechnungsvorschuss konnte nicht geladen werden.",
         "unavailable": "Du hast keine Berechtigung, dies anzuzeigen."
+      },
+      "activityPerDay": {
+        "title": "Workflow-Token nach Aktivität pro Tag",
+        "subtitle": "Verteilung von Workflow-Token nach Aktivitätstyp pro Tag",
+        "loadError": "Fehler beim Laden der Aktivitätsdaten",
+        "empty": "Keine Aktivitätsdaten verfügbar"
       }
     },
     "invoices": {
@@ -2208,7 +2217,13 @@
     "phaseLockedHint": "Automatisierungen und KPIs stützen sich auf diese Phasen, daher kann hier nichts hinzugefügt, gelöscht oder neu sortiert werden. Nur die Farbe ist anpassbar.",
     "customerNotApplicable": "Kunde nicht zutreffend",
     "customerNotApplicableHint": "Ein Match mit dieser Vertragsform hat keinen Kunden, keinen Standort, keine Abteilung und keinen Ansprechpartner; eine Niederlassung ist dann Pflicht.",
-    "iconField": "Symbol"
+    "iconField": "Symbol",
+    "isLeave": "Urlaubsstatus",
+    "isLeaveHint": "Dieser Status stellt Urlaub dar; kann nicht mit einem aktiven Match vorkommen.",
+    "isUnavailable": "Nicht verfügbar",
+    "isUnavailableHint": "Dieser Status bedeutet nicht verfügbar für Einsatz.",
+    "isInactive": "Inaktiv",
+    "isInactiveHint": "Dieser Kunde/diese Adresse/Abteilung/dieser Kontakt ist inaktiv."
   },
   "planning": {
     "shiftTypes": {
@@ -2441,6 +2456,15 @@
       "always": "Immer",
       "alwaysDesc": "Jeder Match braucht zuerst eine Genehmigung.",
       "saveFailed": "Speichern fehlgeschlagen. Die Auswahl wurde zurückgesetzt."
+    },
+    "leads": {
+      "title": "Benachrichtigungen für neue Vorschläge",
+      "subtitle": "Bestimmen Sie, wer benachrichtigt wird, wenn die KI neue Kandidaten für eine Stelle findet.",
+      "modeLabel": "Wer erhält die Benachrichtigung",
+      "modeOwner": "Stelleninhaber",
+      "modeTeam": "Team mit Rolle",
+      "roleLabel": "Rolle",
+      "saveFailed": "Einstellungen konnten nicht gespeichert werden"
     }
   },
   "matchTemplatesSettings": {
@@ -2970,7 +2994,8 @@
       "date": "Datum",
       "boolean": "Ja / Nein",
       "select": "Auswahl"
-    }
+    },
+    "optionsRequired": "Dieses Feld erfordert mindestens eine Option"
   },
   "usage": {
     "tabs": {
@@ -3184,7 +3209,10 @@
       "colThroughput": "Durchsatz",
       "colRuntime": "Ø Dauer",
       "empty": "Noch keine Metriken. Horizon erstellt alle 5 Minuten einen Snapshot."
-    }
+    },
+    "retryAllSuccess": "{{count}} Aufgaben erneut eingereicht",
+    "retryAllSkipped": "{{count}} Aufgaben übersprungen (Mandant existiert nicht mehr)",
+    "retryAllTruncated": "mehr fehlgeschlagene Aufgaben als auf einmal verarbeitet, erneut versuchen"
   },
   "actionRules": {
     "title": "Aktionsregeln",
@@ -3619,7 +3647,9 @@
     "subtitle": "KI-Marge für die gesamte Plattform (Superadmin).",
     "markupLabel": "KI-Marge (%)",
     "loadError": "Plattformpreise konnten nicht geladen werden.",
-    "saved": "Plattformpreise gespeichert."
+    "saved": "Plattformpreise gespeichert.",
+    "fxUsdEurLabel": "USD→EUR-Wechselkurs",
+    "fxUsdEurHint": "Wechselkurs zur Umrechnung von USD zu EUR (Standard 1,0)"
   },
   "invoiceSettings": {
     "title": "Rechnungseinstellungen",
@@ -3978,6 +4008,12 @@
       "label": "Telefonnummer des Recruiters",
       "description": "Telefonnummer im E.164-Format (+49301234567) für Interview-Einladungen, wenn der Verantwortliche keine eigene Nummer hat",
       "placeholder": "+49301234567"
+    }
+  },
+  "koiosmodels": {
+    "flavorLabel": {
+      "fast": "Schnell",
+      "smart": "Intelligent"
     }
   }
 }

@@ -8,9 +8,25 @@
  *                              currency, status{claude_configured, policy_loaded} }
  */
 import api, { unwrap } from '@/lib/api'
+import { normalizeFlavorKey } from '@/lib/koiosModelTiers'
+
+// Normalize flavor keys in the models response (backwards compatibility for
+// stale cached or third-party API responses that return old Dutch keys snel/slim).
+function normalizeModelsResponse(data) {
+  if (!data?.models) return data
+  return {
+    ...data,
+    models: {
+      ...data.models,
+      active: normalizeFlavorKey(data.models.active),
+      selectable: (data.models.selectable ?? []).map(f => normalizeFlavorKey(f) || f),
+    },
+  }
+}
 
 // Tenant Koios settings: active/selectable models, pricing, connection status.
-export const getKoiosSettings = () => api.get('/ai/koios/settings').then(unwrap)
+export const getKoiosSettings = () =>
+  api.get('/ai/koios/settings').then(r => normalizeModelsResponse(unwrap(r)))
 
 // MODEL-KIEZER-1 (Danny 24-07 GO): switch the tenant's active model — the backend
 // validates against the platform whitelist (Policy::selectableModels) + audits.
@@ -23,7 +39,13 @@ export const getKoiosLearning = (from, to) => api.get('/ai/koios/learning', { pa
 
 // KOIOS-CAPABILITIES-FE-1 (measured): the tenant tool matrix — surfaces/tools the
 // assistant can act through, plus limits and the active model flavour. No AI call.
-export const getKoiosCapabilities = () => api.get('/ai/koios/capabilities').then(unwrap)
+// Normalizes legacy flavor keys (snel/slim) in the response.
+export const getKoiosCapabilities = () =>
+  api.get('/ai/koios/capabilities').then(r => {
+    const data = unwrap(r)
+    if (!data?.flavor) return data
+    return { ...data, flavor: normalizeFlavorKey(data.flavor) || data.flavor }
+  })
 
 // KOIOS-TOOL-MATRIX-FE-1: enable/disable/reset one tool for the tenant. A `null`
 // value resets that tool to the platform default_enabled (never a client-side

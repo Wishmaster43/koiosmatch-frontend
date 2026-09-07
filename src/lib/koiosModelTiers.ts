@@ -63,29 +63,43 @@ export function findModelOption(id?: string | null, options?: KoiosModelOption[]
 // translations win instead; the server option stays the fallback vocabulary only
 // for an id the server lists that is NOT one of these three (a future flavour or
 // a legacy raw vendor id).
-const FLAVOR_TIER_MAP: Record<string, ModelTierKey> = { snel: 'fast', slim: 'smart', max: 'max' }
+const FLAVOR_TIER_MAP: Record<string, ModelTierKey> = { fast: 'fast', smart: 'smart', max: 'max' }
+
+// Backwards-compatibility normalizer for legacy API responses that return the
+// old Dutch flavor keys (snel/slim). Converts them to the new English keys
+// (fast/smart); anything else passes through unchanged. Applied at every API READ
+// of a flavour value so stale cached or third-party rows never break a picker.
+export function normalizeFlavorKey(v: string | null | undefined): string | null | undefined {
+  if (v === 'snel') return 'fast'
+  if (v === 'slim') return 'smart'
+  return v
+}
 
 // Resolve a model/flavour id to its display label: a known flavour's translated
 // tier label first, then the server's own label, then the shared tier substring
 // match (for a legacy raw vendor id), and finally the raw id as an honest last resort.
+// Normalizes legacy flavor keys (snel/slim) before lookup for display robustness.
 export function resolveModelLabel(id: string | null | undefined, options: KoiosModelOption[] | null | undefined, t: TranslateFn): string {
-  const flavorTier = id ? FLAVOR_TIER_MAP[id] : undefined
+  const normalizedId = normalizeFlavorKey(id) || id
+  const flavorTier = normalizedId ? FLAVOR_TIER_MAP[normalizedId] : undefined
   if (flavorTier) return t(`models.tier.${flavorTier}`, { ns: 'koios' })
-  const option = findModelOption(id, options)
+  const option = findModelOption(normalizedId, options)
   if (option) return option.label
-  const key = tierKeyForModel(id)
-  return key ? t(`models.tier.${key}`, { ns: 'koios' }) : (id ?? '')
+  const key = tierKeyForModel(normalizedId)
+  return key ? t(`models.tier.${key}`, { ns: 'koios' }) : (normalizedId ?? '')
 }
 
 // Resolve a model/flavour id to its display hint: a known flavour's translated
 // `models.tierHint.<flavor>` key first, falling back to the server's own hint as
 // the i18next `defaultValue` (so an un-translated flavour still shows something),
 // then the server hint for an unlisted id, then null.
+// Normalizes legacy flavor keys (snel/slim) before lookup for display robustness.
 export function resolveModelHint(id: string | null | undefined, options: KoiosModelOption[] | null | undefined, t: TranslateFn): string | null {
-  const option = findModelOption(id, options)
-  const flavorTier = id ? FLAVOR_TIER_MAP[id] : undefined
+  const normalizedId = normalizeFlavorKey(id) || id
+  const option = findModelOption(normalizedId, options)
+  const flavorTier = normalizedId ? FLAVOR_TIER_MAP[normalizedId] : undefined
   if (flavorTier) {
-    return t(`models.tierHint.${id}`, { ns: 'koios', defaultValue: option?.hint ?? t(`models.tierDesc.${flavorTier}`, { ns: 'koios' }) })
+    return t(`models.tierHint.${normalizedId}`, { ns: 'koios', defaultValue: option?.hint ?? t(`models.tierDesc.${flavorTier}`, { ns: 'koios' }) })
   }
   return option?.hint ?? null
 }

@@ -540,7 +540,10 @@
     "color": "Kleur",
     "icon": "Icoon",
     "colorHint": "Kleur en icoon maken een vestiging herkenbaar in lijsten en op de kaart.",
-    "province": "Provincie"
+    "province": "Provincie",
+    "isDefault": "Standaard bureau",
+    "isDefaultHint": "Dit bureau is de standaardlocatie voor nieuwe toewijzingen.",
+    "defaultBadge": "Standaard"
   },
   "memory": {
     "title": "Geheugen",
@@ -673,7 +676,13 @@
     "phaseLockedHint": "Automatiseringen en KPI's leunen op deze fasen, dus hier kun je niets toevoegen, verwijderen of herschikken. Alleen de kleur is aanpasbaar.",
     "customerNotApplicable": "Klant niet van toepassing",
     "customerNotApplicableHint": "Bij een match met deze contractvorm vervallen klant, locatie, afdeling en contactpersoon; een vestiging is dan verplicht.",
-    "iconField": "Icoon"
+    "iconField": "Icoon",
+    "isLeave": "Verlofstatus",
+    "isLeaveHint": "Deze status vertegenwoordigt verlof; kan niet samen met een actieve match voorkomen.",
+    "isUnavailable": "Niet beschikbaarvlag",
+    "isUnavailableHint": "Deze status betekent niet beschikbaar voor inzet.",
+    "isInactive": "Inactief",
+    "isInactiveHint": "Deze klant/locatie/afdeling/contactpersoon is inactief."
   },
   "vacancy": {
     "title": "Statussen",
@@ -874,6 +883,15 @@
       "always": "Altijd",
       "alwaysDesc": "Elke match heeft eerst goedkeuring nodig.",
       "saveFailed": "Opslaan mislukt. De keuze is teruggezet."
+    },
+    "leads": {
+      "title": "Meldingen bij nieuwe suggesties",
+      "subtitle": "Bepaal wie wordt geïnformeerd wanneer de AI nieuwe kandidaten voor een vacature vindt.",
+      "modeLabel": "Wie krijgt de melding",
+      "modeOwner": "Eigenaar van de vacature",
+      "modeTeam": "Team met rol",
+      "roleLabel": "Rol",
+      "saveFailed": "Instellingen konden niet worden opgeslagen"
     }
   },
   "matchTemplatesSettings": {
@@ -1162,7 +1180,7 @@
           "unitToken_other": "tokens",
           "unitRun_one": "token",
           "unitRun_other": "tokens",
-          "weightsLine": "Weging: chatvraag {{chat}} · andere acties {{other}} · slim ×{{slim}} · max ×{{max}}",
+          "weightsLine": "Weging: chatvraag {{chat}} · andere acties {{other}} · slim ×{{smart}} · max ×{{max}}",
           "warningNoTier": "Je zit op {{pct}}% van je bundel.",
           "exceededNoTier": "Je bundel is vol. Upgrade je staffel om verder te gaan.",
           "exceededOverageNoTier": "Je bundel is vol. Verder verbruik telt als extra: {{price}} per {{unit}}."
@@ -1316,6 +1334,12 @@
         "freeAllowanceNote": "De gratis voet voor AI-tokens wordt hier nog niet apart getoond. Dat cijfer levert alleen de facturatie-endpoint (buiten deze pagina gehouden, zie de code-comment).",
         "loadError": "Factuurvoorschot laden is mislukt.",
         "unavailable": "Je hebt geen rechten om dit te bekijken."
+      },
+      "activityPerDay": {
+        "title": "Workflow-tokens per activiteit per dag",
+        "subtitle": "Verdeling van workflow-tokens over activiteitstype per dag",
+        "loadError": "Fout bij laden van activiteitengegevens",
+        "empty": "Geen activiteitsgegevens beschikbaar"
       }
     },
     "invoices": {
@@ -2970,7 +2994,8 @@
       "date": "Datum",
       "boolean": "Ja / Nee",
       "select": "Keuze"
-    }
+    },
+    "optionsRequired": "Dit veld vereist minimaal een optie"
   },
   "usage": {
     "tabs": {
@@ -3184,7 +3209,10 @@
       "colThroughput": "Doorvoer",
       "colRuntime": "Gem. duur",
       "empty": "Nog geen metrics. Horizon snapshot draait elke 5 minuten."
-    }
+    },
+    "retryAllSuccess": "{{count}} taken opnieuw ingediend",
+    "retryAllSkipped": "{{count}} taken overgeslagen (tenant bestaat niet meer)",
+    "retryAllTruncated": "meer mislukte taken dan in één keer verwerkt, herhaal"
   },
   "actionRules": {
     "title": "Actieregels",
@@ -3619,7 +3647,9 @@
     "subtitle": "AI-marge voor het hele platform (superadmin).",
     "markupLabel": "AI-marge (%)",
     "loadError": "Platformprijzen laden is mislukt.",
-    "saved": "Platformprijzen opgeslagen."
+    "saved": "Platformprijzen opgeslagen.",
+    "fxUsdEurLabel": "USD→EUR-koers",
+    "fxUsdEurHint": "Wisselkoers voor omrekening van USD naar EUR (standaard 1,0)"
   },
   "invoiceSettings": {
     "title": "Factuurinstellingen",
@@ -3978,6 +4008,12 @@
       "label": "Recruiter-telefoonnummer",
       "description": "Telefoonnummer in E.164-notatie (+31612345678) voor interviewuitnodigingen wanneer de eigenaar geen eigen nummer heeft",
       "placeholder": "+31612345678"
+    }
+  },
+  "koiosmodels": {
+    "flavorLabel": {
+      "fast": "Snel",
+      "smart": "Slim"
     }
   }
 }

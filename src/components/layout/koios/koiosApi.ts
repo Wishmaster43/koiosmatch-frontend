@@ -20,6 +20,7 @@ import api from '@/lib/api'
 import type { KoiosContextRef } from '@/types/koios'
 import { isContextResolvable } from './koiosContextTypes'
 import type { KoiosConfirmActionResponse, KoiosEffort } from './koiosTypes'
+import { normalizeFlavorKey } from '@/lib/koiosModelTiers'
 
 // Send one chat turn. `model` is optional (defaults to the tenant's active
 // model); `context` is the @-mentioned records, filtered to backend-resolvable
@@ -46,7 +47,20 @@ export const sendChat = (
 }
 
 // Load the Koios settings (selectable models + connection/policy status).
-export const getKoiosSettings = () => api.get('/ai/koios/settings').then((r) => r.data)
+// Normalizes legacy flavor keys (snel/slim) for backwards compatibility.
+export const getKoiosSettings = () =>
+  api.get('/ai/koios/settings').then((r) => {
+    const data = r.data
+    if (!data?.models) return data
+    return {
+      ...data,
+      models: {
+        ...data.models,
+        active: normalizeFlavorKey(data.models.active),
+        selectable: (data.models.selectable ?? []).map((f: string) => normalizeFlavorKey(f) || f),
+      },
+    }
+  })
 
 // Confirm a pending action (KOIOS-AGENT-PLAN §6) — turns a proposed write into
 // an executed one. Dormant until the backend ships `pending_action`. A genuine

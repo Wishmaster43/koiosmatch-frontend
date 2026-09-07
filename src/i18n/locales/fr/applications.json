@@ -149,7 +149,9 @@
       "details": "Détails",
       "cv": "CV",
       "context": "Contexte"
-    }
+    },
+    "vacancyClient": "Client de l'offre",
+    "vacancyClientOther": "Client différent de la candidature, ouvrir"
   },
   "cvProposal": {
     "title": "Proposition issue du CV",

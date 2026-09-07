@@ -42,7 +42,7 @@ const iconForRank = (rank, maxRank) => (rank === 1 ? Zap : rank === maxRank ? Cr
 
 // The three known flavour keys the server now serves as `selectable[]`/`options[]`
 // ids (KOIOS-MODEL-VOCAB-1) — mirrors lib/koiosModelTiers' FLAVOR_TIER_MAP.
-const FLAVOR_TIER_KEYS = ['snel', 'slim', 'max']
+const FLAVOR_TIER_KEYS = ['fast', 'smart', 'max']
 
 // Tenant-facing model-tier picker (Snel/Slim/Max); the raw vendor id stays
 // super-admin-only (see the module doc comment above).

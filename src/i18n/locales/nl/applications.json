@@ -149,7 +149,9 @@
       "details": "Details",
       "cv": "CV",
       "context": "Context"
-    }
+    },
+    "vacancyClient": "Klant van de vacature",
+    "vacancyClientOther": "Andere klant dan de sollicitatie, openen"
   },
   "cvProposal": {
     "title": "Voorstel uit het cv",
