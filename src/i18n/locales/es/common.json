@@ -663,7 +663,8 @@
     "phoneExample": "+prefijo y número",
     "streetExample": "Calle Mayor 12",
     "cityExample": "Madrid",
-    "companyNameExample": "Grupo Sanitario Jansen"
+    "companyNameExample": "Grupo Sanitario Jansen",
+    "postcodeExample": "28001"
   },
   "noteConcept": {
     "restored": "Borrador restaurado. Aún no guardado."

@@ -663,7 +663,8 @@
     "phoneExample": "+prefisso e numero",
     "streetExample": "Via Roma 12",
     "cityExample": "Milano",
-    "companyNameExample": "Rossi Servizi S.r.l."
+    "companyNameExample": "Rossi Servizi S.r.l.",
+    "postcodeExample": "20121"
   },
   "noteConcept": {
     "restored": "Bozza ripristinata. Non ancora salvata."

@@ -133,7 +133,8 @@ export default function LocationFormModal({ editingId, form, setForm, saving, on
           <div>
             <div style={cardHead}>{t('locations.sectionAddress')}</div>
             <div style={cardBox}>
-              {/* Street + number + suffix on one line (compact, NL convention). */}
+              {/* Street + number + suffix on one line (compact). PLACEHOLDER-LOKAAL (X-I18N-4): the
+                  postcode and phone examples come from common:placeholders per language, never a Dutch literal. */}
               <div style={{ display: 'flex', gap: 12 }}>
                 {field('street', t('locations.street'), t('locations.street'), 'text', 3)}
                 {field('house_number', t('locations.houseNumber'), '28', 'text', 1)}
@@ -144,7 +145,7 @@ export default function LocationFormModal({ editingId, form, setForm, saving, on
                 {field('address_line_2', t('locations.addressLine2'), t('locations.addressLine2'))}
               </div>
               <div style={{ display: 'flex', gap: 12 }}>
-                {field('postal_code', t('locations.postalCode'), '1234 AB')}
+                {field('postal_code', t('locations.postalCode'), t('common:placeholders.postcodeExample'))}
                 {field('city', t('locations.city'), t('locations.city'))}
               </div>
               <div style={{ display: 'flex', gap: 12 }}>
@@ -171,7 +172,7 @@ export default function LocationFormModal({ editingId, form, setForm, saving, on
             <div style={cardBox}>
               {field('contact_name', t('locations.contactName'), t('locations.contactName'))}
               <div style={{ display: 'flex', gap: 12 }}>
-                {field('phone', t('locations.phone'), '+31 6 12345678', 'tel')}
+                {field('phone', t('locations.phone'), t('common:placeholders.phoneExample'), 'tel')}
                 {field('email', t('locations.email'), 'name@company.com', 'email')}
               </div>
             </div>

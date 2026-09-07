@@ -663,7 +663,8 @@
     "phoneExample": "+indicatif et numéro",
     "streetExample": "Rue Principale 12",
     "cityExample": "Paris",
-    "companyNameExample": "Groupe de soins Jansen"
+    "companyNameExample": "Groupe de soins Jansen",
+    "postcodeExample": "75001"
   },
   "noteConcept": {
     "restored": "Brouillon restauré. Pas encore enregistré."

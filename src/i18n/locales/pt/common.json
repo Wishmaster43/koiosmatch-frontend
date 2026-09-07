@@ -663,7 +663,8 @@
     "phoneExample": "+indicativo do país e número",
     "streetExample": "Rua Principal 12",
     "cityExample": "Lisboa",
-    "companyNameExample": "Silva Cuidados de Saúde, Lda."
+    "companyNameExample": "Silva Cuidados de Saúde, Lda.",
+    "postcodeExample": "1000-001"
   },
   "noteConcept": {
     "restored": "Rascunho restaurado. Ainda não guardado."

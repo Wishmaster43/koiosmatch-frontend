@@ -663,7 +663,8 @@
     "phoneExample": "+country code and number",
     "streetExample": "12 Main Street",
     "cityExample": "London",
-    "companyNameExample": "Jansen Care Group Ltd"
+    "companyNameExample": "Jansen Care Group Ltd",
+    "postcodeExample": "SW1A 1AA"
   },
   "noteConcept": {
     "restored": "Draft restored. Not saved yet."

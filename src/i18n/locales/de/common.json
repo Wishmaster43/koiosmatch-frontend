@@ -663,7 +663,8 @@
     "phoneExample": "+Ländervorwahl und Nummer",
     "streetExample": "Hauptstraße 12",
     "cityExample": "Berlin",
-    "companyNameExample": "Jansen Pflegegruppe GmbH"
+    "companyNameExample": "Jansen Pflegegruppe GmbH",
+    "postcodeExample": "10115"
   },
   "noteConcept": {
     "restored": "Entwurf wiederhergestellt. Noch nicht gespeichert."

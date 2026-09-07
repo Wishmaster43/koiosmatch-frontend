@@ -663,7 +663,8 @@
     "phoneExample": "+landcode en nummer",
     "streetExample": "Hoofdstraat 12",
     "cityExample": "Amsterdam",
-    "companyNameExample": "Jansen Zorggroep B.V."
+    "companyNameExample": "Jansen Zorggroep B.V.",
+    "postcodeExample": "1234 AB"
   },
   "noteConcept": {
     "restored": "Concept hersteld. Nog niet opgeslagen."
