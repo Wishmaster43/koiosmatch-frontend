@@ -97,7 +97,10 @@
     "instructionTotalChars": "{{count}} of {{max}} characters",
     "instructionTitle": "Title",
     "instructionTitlePlaceholder": "e.g. Travel distance (shown as the phase name)",
-    "textExpand": "Enlarge"
+    "textExpand": "Enlarge",
+    "functionPosition": "Function name",
+    "functionPrimary": "Primary functions",
+    "functionSecondary": "Secondary functions"
   },
   "scheduleModal": {
     "title": "Set schedule",
@@ -669,6 +672,7 @@
     "Functie": "Function",
     "Functies": "Functions",
     "Functietitel": "Job title",
+    "Functiematrix": "Function matrix",
     "Funnelfase": "Funnel stage",
     "Geavanceerde verwerker": "Advanced parser",
     "Gebeurtenis": "Event",
@@ -713,6 +717,7 @@
     "Klant-ID": "Customer ID",
     "Klanten": "Customers",
     "Klantnaam": "Customer name",
+    "Klantcorrecties (klant-id naar punten)": "Customer adjustments (customer id to points)",
     "Koios Match kandidaten": "Koios Match candidates",
     "Kolommen (kommagescheiden)": "Columns (comma-separated)",
     "Kolomscheidingsteken": "Column separator",
@@ -780,6 +785,7 @@
     "Pools": "Pools",
     "Positie in CV": "Position in CV",
     "Postcode": "Postal code",
+    "Punten per factor": "Points per factor",
     "Prioriteit": "Priority",
     "Proefdraaien (dry-run)": "Dry run",
     "Query parameters": "Query parameters",
@@ -864,6 +870,8 @@
     "Vastleggen (Commit)": "Commit",
     "Veld": "Field",
     "Velden": "Fields",
+    "Venster vanaf (dagen)": "Window from (days)",
+    "Venster tot (dagen)": "Window to (days)",
     "Vereist toestemmingsveld (fail-closed)": "Required consent field (fail-closed)",
     "Vervangwaarde": "Replacement value",
     "Verzendnummer (voor de sessieantwoorden)": "Sending number (for the session replies)",
@@ -1274,7 +1282,12 @@
     "Altijd een nieuwe AI-call, ook als er recent advies is": "Always make a new AI call, even if there is recent advice",
     "Een advies jonger dan dit aantal uren wordt overgeslagen tenzij \"Altijd vernieuwen\" aan staat": "Advice younger than this many hours is skipped unless \"Always refresh\" is on.",
     "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\")": "Hard ceiling on the number of records this step advises in one run (\"List (bulk)\" mode).",
-    "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "\"Single record\" = the trigger/manual record; \"List (bulk)\" = every row from the previous fetch step."
+    "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "\"Single record\" = the trigger/manual record; \"List (bulk)\" = every row from the previous fetch step.",
+    "Relatief venster ten opzichte van vandaag, negatief is terug in de tijd Alleen gebruikt als geen datums zijn ingevuld": "Relative window measured from today, negative means back in time. Only used when no dates are filled in.",
+    "Relatief venster ten opzichte van vandaag Alleen gebruikt als geen datums zijn ingevuld": "Relative window measured from today. Only used when no dates are filled in.",
+    "Leeg gelaten factoren gebruiken de standaardpunten": "Factors left empty use the default points.",
+    "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bonus or malus per customer id, for example 2 or -3.",
+    "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Per function the primary and secondary function names that count as a match, in lower case."
   },
   "triggers": {
     "events": {

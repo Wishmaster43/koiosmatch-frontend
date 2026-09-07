@@ -594,7 +594,15 @@
       "label": "Periodo nel cestino",
       "description": "Numero di giorni in cui un record resta nel cestino prima di essere eliminato definitivamente in modo automatico."
     },
-    "unit": "mesi"
+    "unit": "mesi",
+    "warningDays": {
+      "label": "Notifica di scadenza imminente",
+      "description": "Numero di giorni prima della scadenza del termine di conservazione in cui il reclutatore riceve una notifica."
+    },
+    "escalationDays": {
+      "label": "Escalation dopo l'archiviazione",
+      "description": "Numero di giorni in cui un fascicolo archiviato automaticamente può attendere prima che il manager riceva escalation giornaliera."
+    }
   },
   "statusList": {
     "nameLabel": "Nome",
@@ -968,7 +976,14 @@
     "enforceTitle": "MFA obbligatoria per tutti",
     "enforceDesc": "Ogni utente di questa organizzazione deve configurare l'autenticazione a due fattori prima di poter continuare a lavorare.",
     "enforceError": "Salvataggio non riuscito. Riprova.",
-    "enforceLoadError": "Impossibile caricare lo stato della policy MFA. Prova ad aggiornare la pagina."
+    "enforceLoadError": "Impossibile caricare lo stato della policy MFA. Prova ad aggiornare la pagina.",
+    "regenerateCodes": "Nuovi codici di recupero",
+    "regenerateTitle": "Genera nuovi codici di recupero",
+    "regenerateDesc": "Inserisci il codice della tua app di autenticazione o un codice di recupero inutilizzato. I tuoi vecchi codici di recupero scadranno.",
+    "regenerateBtn": "Rigenera codici",
+    "newCodesTitle": "Nuovi codici di recupero",
+    "newCodesDesc": "Conserva questi codici in modo sicuro. I vecchi codici non funzioneranno più.",
+    "codesRegenerated": "Codici di recupero rigenerati."
   },
   "email": {
     "title": "Impostazioni e-mail",
@@ -1253,7 +1268,7 @@
         "koiosLabel": "Token AI",
         "koiosNote": "{{n}} token",
         "whatsappLabel": "WhatsApp",
-        "whatsappNote": "{{n}} messaggi"
+        "whatsappNone": "Nessun messaggio in questo periodo"
       },
       "tabs": {
         "overview": "Panoramica",
@@ -3143,11 +3158,16 @@
     "retryAll": "Riprova tutte",
     "retryAllConfirm_one": "Rimettere in coda {{count}} attività non riuscita?",
     "retryAllConfirm_other": "Rimettere in coda tutte le {{count}} attività non riuscite?",
+    "retryAllQueueConfirm": "Rimettere in coda tutte le attività non riuscite nella coda {{queue}}? Il filtro del tenant non si applica qui.",
+    "retryAllUnfilteredConfirm_one": "Questo rimette in coda TUTTE le attività non riuscite, non solo la {{count}} filtrata. Il filtro tenant non si applica qui.",
+    "retryAllUnfilteredConfirm_other": "Questo rimette in coda TUTTE le attività non riuscite, non solo le {{count}} filtrate. Il filtro del tenant non si applica qui.",
     "forget": "Elimina",
     "forgetConfirm": "Eliminare definitivamente questa attività non riuscita? L'azione non può essere annullata.",
     "flush": "Cancella tutto",
     "flushConfirm_one": "Cancellare definitivamente {{count}} attività non riuscita? L'azione non può essere annullata.",
     "flushConfirm_other": "Cancellare definitivamente TUTTE le {{count}} attività non riuscite? L'azione non può essere annullata.",
+    "flushUnfilteredConfirm_one": "Questo elimina TUTTE le attività non riuscite in TUTTE le code, non solo la {{count}} filtrata. Questa azione non può essere annullata.",
+    "flushUnfilteredConfirm_other": "Questo cancella TUTTE le attività non riuscite in TUTTE le code, non solo le {{count}} filtrate. L'azione non può essere annullata.",
     "pagination": {
       "prev": "Precedente",
       "next": "Successiva",

@@ -38,7 +38,9 @@
       "snel": "Highest volume, lowest rate. Great for routine work.",
       "slim": "The default: strong quality at an average rate.",
       "max": "Best quality for the hardest work. Highest rate."
-    }
+    },
+    "costlierWarning": "{{model}} is more expensive than your current model. Each Koios AI token will count more heavily.",
+    "costlierConfirm": "Choose anyway"
   },
   "voice": {
     "start": "Dictate your message",

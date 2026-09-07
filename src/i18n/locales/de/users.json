@@ -134,5 +134,8 @@
     "none": "Noch keine Rolle gewählt",
     "add": "Rolle hinzufügen",
     "remove": "{{role}} entfernen"
-  }
+  },
+  "resetMfa": "MFA zurücksetzen",
+  "resetMfaConfirm": "MFA für {{name}} zurücksetzen? Der Benutzer muss sich beim nächsten Login erneut authentifizieren.",
+  "resetMfaDone": "MFA für {{name}} wurde zurückgesetzt."
 }

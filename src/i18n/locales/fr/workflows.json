@@ -93,7 +93,10 @@
     "instructionTotalChars": "{{count}} sur {{max}} caractères",
     "instructionTitle": "Titre",
     "instructionTitlePlaceholder": "p. ex. Distance de trajet (affiché comme nom de phase)",
-    "textExpand": "Agrandir"
+    "textExpand": "Agrandir",
+    "functionPosition": "Function name",
+    "functionPrimary": "Primary functions",
+    "functionSecondary": "Secondary functions"
   },
   "scheduleModal": {
     "title": "Définir la planification",
@@ -916,7 +919,12 @@
     "Modus": "Mode",
     "Altijd vernieuwen": "Toujours actualiser",
     "Verversingstermijn (uren)": "Délai de rafraîchissement (heures)",
-    "Maximum records per run": "Nombre maximum d'enregistrements par exécution"
+    "Maximum records per run": "Nombre maximum d'enregistrements par exécution",
+    "Functiematrix": "Matrice des fonctions",
+    "Punten per factor": "Points par facteur",
+    "Klantcorrecties (klant-id naar punten)": "Corrections client (id client vers points)",
+    "Venster vanaf (dagen)": "Fenêtre à partir de (jours)",
+    "Venster tot (dagen)": "Fenêtre jusqu'à (jours)"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Tableau (plusieurs bundles)",
@@ -1274,7 +1282,12 @@
     "Altijd een nieuwe AI-call, ook als er recent advies is": "Toujours effectuer un nouvel appel IA, même s'il existe un avis récent",
     "Een advies jonger dan dit aantal uren wordt overgeslagen tenzij \"Altijd vernieuwen\" aan staat": "Un avis plus récent que ce nombre d'heures est ignoré, sauf si « Toujours actualiser » est activé.",
     "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\")": "Plafond strict sur le nombre d'enregistrements que cette étape traite en une seule exécution (mode \"Liste (lot)\").",
-    "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "« Un seul enregistrement » = l’enregistrement du déclencheur/manuel ; « Liste (lot) » = chaque ligne de l’étape de récupération précédente."
+    "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "« Un seul enregistrement » = l’enregistrement du déclencheur/manuel ; « Liste (lot) » = chaque ligne de l’étape de récupération précédente.",
+    "Relatief venster ten opzichte van vandaag, negatief is terug in de tijd Alleen gebruikt als geen datums zijn ingevuld": "Fenêtre relative par rapport à aujourd'hui, négatif signifie dans le passé. Utilisée seulement si aucune date n'est renseignée.",
+    "Relatief venster ten opzichte van vandaag Alleen gebruikt als geen datums zijn ingevuld": "Fenêtre relative par rapport à aujourd'hui. Utilisée seulement si aucune date n'est renseignée.",
+    "Leeg gelaten factoren gebruiken de standaardpunten": "Les facteurs laissés vides utilisent les points par défaut.",
+    "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bonus ou malus par id client, par exemple 2 ou -3.",
+    "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Par fonction, les noms de fonctions primaires et secondaires considérés comme correspondance, en minuscules."
   },
   "triggers": {
     "events": {

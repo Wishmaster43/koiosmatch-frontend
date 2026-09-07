@@ -38,7 +38,9 @@
       "snel": "Mayor volumen, tarifa más baja. Ideal para trabajo rutinario.",
       "slim": "El estándar: gran calidad a tarifa media.",
       "max": "La mejor calidad para el trabajo más difícil. Tarifa más alta."
-    }
+    },
+    "costlierWarning": "{{model}} es más caro que tu modelo actual. Cada token de Koios AI tendrá un peso mayor.",
+    "costlierConfirm": "Elegir de todas formas"
   },
   "voice": {
     "start": "Dicta tu mensaje",

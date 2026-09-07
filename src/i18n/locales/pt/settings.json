@@ -594,7 +594,15 @@
       "label": "Prazo na reciclagem",
       "description": "Número de dias que um registo permanece na reciclagem antes de ser eliminado definitivamente de forma automática."
     },
-    "unit": "meses"
+    "unit": "meses",
+    "warningDays": {
+      "label": "Notificação de aviso",
+      "description": "Número de dias antes do vencimento do prazo de retenção que o recrutador recebe uma notificação."
+    },
+    "escalationDays": {
+      "label": "Escalação após arquivamento",
+      "description": "Número de dias que um dossier arquivado automaticamente pode aguardar antes que o gerente receba escalação diária."
+    }
   },
   "statusList": {
     "nameLabel": "Nome",
@@ -968,7 +976,14 @@
     "enforceTitle": "MFA obrigatória para todos",
     "enforceDesc": "Todos os utilizadores desta organização têm de configurar a autenticação de dois fatores antes de poderem continuar a trabalhar.",
     "enforceError": "Falha ao guardar. Tente novamente.",
-    "enforceLoadError": "Não foi possível carregar o estado da política de MFA. Tente atualizar a página."
+    "enforceLoadError": "Não foi possível carregar o estado da política de MFA. Tente atualizar a página.",
+    "regenerateCodes": "Novos códigos de recuperação",
+    "regenerateTitle": "Gerar novos códigos de recuperação",
+    "regenerateDesc": "Digite o código do seu aplicativo autenticador ou um código de recuperação não utilizado. Seus códigos de recuperação antigos expirarão.",
+    "regenerateBtn": "Regenerar códigos",
+    "newCodesTitle": "Novos códigos de recuperação",
+    "newCodesDesc": "Armazene esses códigos com segurança. Os códigos antigos não funcionarão mais.",
+    "codesRegenerated": "Códigos de recuperação regenerados."
   },
   "email": {
     "title": "Definições de e-mail",
@@ -1253,7 +1268,7 @@
         "koiosLabel": "Tokens de IA",
         "koiosNote": "{{n}} tokens",
         "whatsappLabel": "WhatsApp",
-        "whatsappNote": "{{n}} mensagens"
+        "whatsappNone": "Nenhuma mensagem neste período"
       },
       "tabs": {
         "overview": "Visão geral",
@@ -3143,11 +3158,16 @@
     "retryAll": "Tentar tudo novamente",
     "retryAllConfirm_one": "Voltar a colocar {{count}} tarefa falhada na fila?",
     "retryAllConfirm_other": "Voltar a colocar as {{count}} tarefas falhadas na fila?",
+    "retryAllQueueConfirm": "Voltar a colocar todas as tarefas falhadas na fila {{queue}}? O filtro de inquilino não se aplica aqui.",
+    "retryAllUnfilteredConfirm_one": "Isto volta a colocar em fila TODAS as tarefas falhadas, não apenas a {{count}} filtrada. O filtro de tenant não se aplica aqui.",
+    "retryAllUnfilteredConfirm_other": "Isto volta a colocar TODAS as tarefas falhadas na fila, não apenas as {{count}} filtradas. O filtro de inquilino não se aplica aqui.",
     "forget": "Eliminar",
     "forgetConfirm": "Eliminar permanentemente esta tarefa falhada? Esta ação não pode ser anulada.",
     "flush": "Limpar tudo",
     "flushConfirm_one": "Limpar permanentemente {{count}} tarefa falhada? Esta ação não pode ser anulada.",
     "flushConfirm_other": "Limpar permanentemente TODAS as {{count}} tarefas falhadas? Esta ação não pode ser anulada.",
+    "flushUnfilteredConfirm_one": "Isto apaga TODAS as tarefas falhadas em TODAS as filas, não apenas a {{count}} filtrada. Isto não pode ser anulado.",
+    "flushUnfilteredConfirm_other": "Isto limpa TODAS as tarefas falhadas em TODAS as filas, não apenas as {{count}} filtradas. Esta ação não pode ser anulada.",
     "pagination": {
       "prev": "Anterior",
       "next": "Seguinte",

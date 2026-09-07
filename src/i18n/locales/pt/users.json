@@ -134,5 +134,8 @@
     "none": "Ainda não foi escolhida nenhuma função",
     "add": "Adicionar função",
     "remove": "Remover {{role}}"
-  }
+  },
+  "resetMfa": "Redefinir MFA",
+  "resetMfaConfirm": "Redefinir MFA para {{name}}? O usuário precisará configurar um autenticador novamente no próximo login.",
+  "resetMfaDone": "MFA para {{name}} foi redefinido."
 }

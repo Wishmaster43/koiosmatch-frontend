@@ -134,5 +134,8 @@
     "none": "Aún no se ha elegido ningún rol",
     "add": "Añadir rol",
     "remove": "Quitar {{role}}"
-  }
+  },
+  "resetMfa": "Restablecer MFA",
+  "resetMfaConfirm": "¿Restablecer MFA para {{name}}? El usuario deberá configurar un autenticador nuevamente en su próximo inicio de sesión.",
+  "resetMfaDone": "Se ha restablecido el MFA para {{name}}."
 }

@@ -572,7 +572,15 @@
       "label": "Plazo de la papelera",
       "description": "Número de días que un registro permanece en la papelera antes de eliminarse definitivamente de forma automática."
     },
-    "unit": "meses"
+    "unit": "meses",
+    "warningDays": {
+      "label": "Notificación de proximidad",
+      "description": "Número de días antes del vencimiento del plazo de retención cuando el reclutador recibe una notificación."
+    },
+    "escalationDays": {
+      "label": "Escalada después del archivado",
+      "description": "Número de días que un expediente archivado automáticamente puede esperar antes de que el gerente reciba escalada diaria."
+    }
   },
   "statusList": {
     "nameLabel": "Nombre",
@@ -722,7 +730,14 @@
     "enforceTitle": "MFA obligatorio para todos",
     "enforceDesc": "Cada usuario de esta organización debe configurar la autenticación de dos factores antes de poder seguir trabajando.",
     "enforceError": "No se pudo guardar. Inténtalo de nuevo.",
-    "enforceLoadError": "No se pudo cargar el estado de la política MFA. Prueba a actualizar la página."
+    "enforceLoadError": "No se pudo cargar el estado de la política MFA. Prueba a actualizar la página.",
+    "regenerateCodes": "Nuevos códigos de recuperación",
+    "regenerateTitle": "Generar nuevos códigos de recuperación",
+    "regenerateDesc": "Ingrese el código de su aplicación de autenticación o un código de recuperación sin usar. Sus códigos de recuperación antiguos caducarán.",
+    "regenerateBtn": "Regenerar códigos",
+    "newCodesTitle": "Nuevos códigos de recuperación",
+    "newCodesDesc": "Almacene estos códigos de forma segura. Los códigos antiguos ya no funcionarán.",
+    "codesRegenerated": "Códigos de recuperación regenerados."
   },
   "email": {
     "title": "Configuración de correo",
@@ -1007,7 +1022,7 @@
         "koiosLabel": "Tokens de IA",
         "koiosNote": "{{n}} tokens",
         "whatsappLabel": "WhatsApp",
-        "whatsappNote": "{{n}} mensajes"
+        "whatsappNone": "Sin mensajes en este período"
       },
       "tabs": {
         "overview": "Resumen",
@@ -3143,11 +3158,16 @@
     "retryAll": "Reintentar todas",
     "retryAllConfirm_one": "¿Volver a poner {{count}} tarea fallida en la cola?",
     "retryAllConfirm_other": "¿Volver a poner las {{count}} tareas fallidas en la cola?",
+    "retryAllQueueConfirm": "¿Volver a poner todas las tareas fallidas de la cola {{queue}} en la cola? El filtro de inquilino no se aplica aquí.",
+    "retryAllUnfilteredConfirm_one": "Esto vuelve a encolar TODAS las tareas fallidas, no solo la {{count}} filtrada. El filtro de inquilino no se aplica aquí.",
+    "retryAllUnfilteredConfirm_other": "Esto vuelve a poner TODAS las tareas fallidas en la cola, no solo las {{count}} filtradas. El filtro de inquilino no se aplica aquí.",
     "forget": "Eliminar",
     "forgetConfirm": "¿Eliminar permanentemente esta tarea fallida? Esta acción no se puede deshacer.",
     "flush": "Borrar todo",
     "flushConfirm_one": "¿Borrar permanentemente {{count}} tarea fallida? Esta acción no se puede deshacer.",
     "flushConfirm_other": "¿Borrar permanentemente las {{count}} tareas fallidas? Esta acción no se puede deshacer.",
+    "flushUnfilteredConfirm_one": "Esto borra TODAS las tareas fallidas en TODAS las colas, no solo la {{count}} filtrada. Esta acción no se puede deshacer.",
+    "flushUnfilteredConfirm_other": "Esto borra TODAS las tareas fallidas en TODAS las colas, no solo las {{count}} filtradas. Esta acción no se puede deshacer.",
     "pagination": {
       "prev": "Anterior",
       "next": "Siguiente",

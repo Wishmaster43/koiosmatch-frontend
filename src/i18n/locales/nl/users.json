@@ -134,5 +134,8 @@
     "none": "Nog geen rol gekozen",
     "add": "Rol toevoegen",
     "remove": "{{role}} verwijderen"
-  }
+  },
+  "resetMfa": "MFA resetten",
+  "resetMfaConfirm": "MFA van {{name}} resetten? De gebruiker moet bij de volgende login opnieuw een authenticator koppelen.",
+  "resetMfaDone": "MFA van {{name}} is gereset."
 }

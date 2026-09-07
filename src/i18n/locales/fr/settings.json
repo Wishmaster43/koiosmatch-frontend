@@ -572,7 +572,15 @@
       "label": "Délai de la corbeille",
       "description": "Nombre de jours pendant lesquels un enregistrement reste dans la corbeille avant d'être supprimé définitivement de façon automatique."
     },
-    "unit": "mois"
+    "unit": "mois",
+    "warningDays": {
+      "label": "Avis d'expiration",
+      "description": "Nombre de jours avant l'expiration du délai de rétention que le recruteur reçoit une notification."
+    },
+    "escalationDays": {
+      "label": "Escalade après archivage",
+      "description": "Nombre de jours qu'un dossier archivé automatiquement peut attendre avant que le gestionnaire reçoive une escalade quotidienne."
+    }
   },
   "statusList": {
     "nameLabel": "Nom",
@@ -722,7 +730,14 @@
     "enforceTitle": "MFA obligatoire pour tout le monde",
     "enforceDesc": "Chaque utilisateur de cette organisation doit configurer l'authentification à deux facteurs avant de pouvoir continuer à travailler.",
     "enforceError": "Échec de l'enregistrement. Veuillez réessayer.",
-    "enforceLoadError": "Impossible de charger l’état de la politique MFA. Essayez d’actualiser la page."
+    "enforceLoadError": "Impossible de charger l’état de la politique MFA. Essayez d’actualiser la page.",
+    "regenerateCodes": "Nouveaux codes de récupération",
+    "regenerateTitle": "Générer de nouveaux codes de récupération",
+    "regenerateDesc": "Entrez le code de votre application d'authentification ou un code de récupération inutilisé. Vos anciens codes de récupération vont expirer.",
+    "regenerateBtn": "Régénérer les codes",
+    "newCodesTitle": "Nouveaux codes de récupération",
+    "newCodesDesc": "Stockez ces codes en sécurité. Les anciens codes ne fonctionneront plus.",
+    "codesRegenerated": "Codes de récupération régénérés."
   },
   "email": {
     "title": "Paramètres e-mail",
@@ -1007,7 +1022,7 @@
         "koiosLabel": "Jetons IA",
         "koiosNote": "{{n}} jetons",
         "whatsappLabel": "WhatsApp",
-        "whatsappNote": "{{n}} messages"
+        "whatsappNone": "Aucun message pendant cette période"
       },
       "tabs": {
         "overview": "Aperçu",
@@ -3143,11 +3158,16 @@
     "retryAll": "Tout réessayer",
     "retryAllConfirm_one": "Remettre {{count}} tâche échouée dans la file d'attente ?",
     "retryAllConfirm_other": "Remettre les {{count}} tâches échouées dans la file d'attente ?",
+    "retryAllQueueConfirm": "Remettre toutes les tâches échouées de la file {{queue}} dans la file d'attente ? Le filtre des locataires ne s'applique pas ici.",
+    "retryAllUnfilteredConfirm_one": "Ceci remet en file d'attente TOUTES les tâches échouées, pas seulement la {{count}} filtrée. Le filtre de locataire ne s'applique pas ici.",
+    "retryAllUnfilteredConfirm_other": "Ceci remet TOUTES les tâches échouées dans la file d'attente, et pas seulement les {{count}} filtrées. Le filtre des locataires ne s'applique pas ici.",
     "forget": "Supprimer",
     "forgetConfirm": "Supprimer définitivement cette tâche échouée ? Cette action est irréversible.",
     "flush": "Tout effacer",
     "flushConfirm_one": "Effacer définitivement {{count}} tâche échouée ? Cette action est irréversible.",
     "flushConfirm_other": "Effacer définitivement les {{count}} tâches échouées ? Cette action est irréversible.",
+    "flushUnfilteredConfirm_one": "Ceci supprime TOUTES les tâches échouées dans TOUTES les files, pas seulement la {{count}} filtrée. Cette action est irréversible.",
+    "flushUnfilteredConfirm_other": "Ceci efface TOUTES les tâches échouées dans TOUTES les files d'attente, et pas seulement les {{count}} filtrées. Cette action est irréversible.",
     "pagination": {
       "prev": "Précédent",
       "next": "Suivant",

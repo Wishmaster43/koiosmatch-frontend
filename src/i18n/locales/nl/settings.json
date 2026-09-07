@@ -594,7 +594,15 @@
       "label": "Prullenbaktermijn",
       "description": "Aantal dagen dat een record in de prullenbak blijft voordat het automatisch definitief wordt verwijderd."
     },
-    "unit": "maanden"
+    "unit": "maanden",
+    "warningDays": {
+      "label": "Waarschuwing vooraf",
+      "description": "Aantal dagen vóór het verlopen van de bewaartermijn waarop de recruiter een melding krijgt."
+    },
+    "escalationDays": {
+      "label": "Escalatie na archivering",
+      "description": "Aantal dagen dat een automatisch gearchiveerd dossier mag wachten voordat de manager dagelijks een escalatie krijgt."
+    }
   },
   "statusList": {
     "nameLabel": "Naam",
@@ -968,7 +976,14 @@
     "enforceTitle": "MFA verplicht voor iedereen",
     "enforceDesc": "Elke gebruiker in deze organisatie moet twee-factor verificatie instellen voordat hij verder kan werken.",
     "enforceError": "Opslaan mislukt. Probeer het opnieuw.",
-    "enforceLoadError": "Kon de MFA-beleidsstatus niet laden. Probeer de pagina te vernieuwen."
+    "enforceLoadError": "Kon de MFA-beleidsstatus niet laden. Probeer de pagina te vernieuwen.",
+    "regenerateCodes": "Nieuwe herstelcodes",
+    "regenerateTitle": "Nieuwe herstelcodes maken",
+    "regenerateDesc": "Voer de code uit je authenticator-app of een ongebruikte herstelcode in. Je oude herstelcodes vervallen.",
+    "regenerateBtn": "Codes vernieuwen",
+    "newCodesTitle": "Nieuwe herstelcodes",
+    "newCodesDesc": "Bewaar deze codes veilig. De oude codes werken niet meer.",
+    "codesRegenerated": "Herstelcodes vernieuwd."
   },
   "email": {
     "title": "E-mail instellingen",
@@ -1253,7 +1268,7 @@
         "koiosLabel": "AI-tokens",
         "koiosNote": "{{n}} tokens",
         "whatsappLabel": "WhatsApp",
-        "whatsappNote": "{{n}} berichten"
+        "whatsappNone": "Geen berichten in deze periode"
       },
       "tabs": {
         "overview": "Overzicht",
@@ -3143,11 +3158,16 @@
     "retryAll": "Alles opnieuw proberen",
     "retryAllConfirm_one": "{{count}} mislukte taak opnieuw in de wachtrij zetten?",
     "retryAllConfirm_other": "Alle {{count}} mislukte taken opnieuw in de wachtrij zetten?",
+    "retryAllQueueConfirm": "Alle mislukte taken in wachtrij {{queue}} opnieuw in de wachtrij zetten? Het tenantfilter geldt hier niet.",
+    "retryAllUnfilteredConfirm_one": "Dit zet ALLE mislukte taken opnieuw in de wachtrij, niet alleen de {{count}} gefilterde. Het tenantfilter geldt hier niet.",
+    "retryAllUnfilteredConfirm_other": "Dit zet ALLE mislukte taken opnieuw in de wachtrij, niet alleen de {{count}} gefilterde. Het tenantfilter geldt hier niet.",
     "forget": "Verwijderen",
     "forgetConfirm": "Deze mislukte taak permanent verwijderen? Dit kan niet ongedaan worden gemaakt.",
     "flush": "Alles wissen",
     "flushConfirm_one": "{{count}} mislukte taak permanent wissen? Dit kan niet ongedaan worden gemaakt.",
     "flushConfirm_other": "ALLE {{count}} mislukte taken permanent wissen? Dit kan niet ongedaan worden gemaakt.",
+    "flushUnfilteredConfirm_one": "Dit wist ALLE mislukte taken in ALLE wachtrijen, niet alleen de {{count}} gefilterde. Dit kan niet ongedaan worden gemaakt.",
+    "flushUnfilteredConfirm_other": "Dit wist ALLE mislukte taken in ALLE wachtrijen, niet alleen de {{count}} gefilterde. Dit kan niet ongedaan worden gemaakt.",
     "pagination": {
       "prev": "Vorige",
       "next": "Volgende",

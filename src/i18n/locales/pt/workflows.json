@@ -132,7 +132,10 @@
     "instructionTotalChars": "{{count}} de {{max}} caracteres",
     "instructionTitle": "Título",
     "instructionTitlePlaceholder": "p. ex. Distância de deslocação (visível como nome da fase)",
-    "textExpand": "Ampliar"
+    "textExpand": "Ampliar",
+    "functionPosition": "Function name",
+    "functionPrimary": "Primary functions",
+    "functionSecondary": "Secondary functions"
   },
   "scheduleModal": {
     "title": "Definir agendamento",
@@ -951,7 +954,12 @@
     "Modus": "Modo",
     "Altijd vernieuwen": "Atualizar sempre",
     "Verversingstermijn (uren)": "Janela de atualização (horas)",
-    "Maximum records per run": "Máximo de registos por execução"
+    "Maximum records per run": "Máximo de registos por execução",
+    "Functiematrix": "Matriz de funções",
+    "Punten per factor": "Pontos por fator",
+    "Klantcorrecties (klant-id naar punten)": "Correções por cliente (id de cliente para pontos)",
+    "Venster vanaf (dagen)": "Janela a partir de (dias)",
+    "Venster tot (dagen)": "Janela até (dias)"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Matriz (vários bundles)",
@@ -1274,7 +1282,12 @@
     "Altijd een nieuwe AI-call, ook als er recent advies is": "Fazer sempre uma nova chamada de IA, mesmo que exista um parecer recente",
     "Een advies jonger dan dit aantal uren wordt overgeslagen tenzij \"Altijd vernieuwen\" aan staat": "Um parecer mais recente do que este número de horas é ignorado, a menos que \"Atualizar sempre\" esteja ativado.",
     "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\")": "Limite máximo do número de registos que este passo processa numa única execução (modo \"Lista (lote)\").",
-    "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "\"Registo único\" = o registo do gatilho/manual; \"Lista (lote)\" = cada linha do passo de obtenção anterior."
+    "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "\"Registo único\" = o registo do gatilho/manual; \"Lista (lote)\" = cada linha do passo de obtenção anterior.",
+    "Relatief venster ten opzichte van vandaag, negatief is terug in de tijd Alleen gebruikt als geen datums zijn ingevuld": "Janela relativa em relação a hoje, negativo significa para trás no tempo. Usada apenas se não forem preenchidas datas.",
+    "Relatief venster ten opzichte van vandaag Alleen gebruikt als geen datums zijn ingevuld": "Janela relativa em relação a hoje. Usada apenas se não forem preenchidas datas.",
+    "Leeg gelaten factoren gebruiken de standaardpunten": "Os fatores deixados vazios usam os pontos predefinidos.",
+    "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bónus ou penalização por id de cliente, por exemplo 2 ou -3.",
+    "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Por função, os nomes de funções primárias e secundárias que contam como correspondência, em minúsculas."
   },
   "triggers": {
     "events": {

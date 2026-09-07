@@ -38,7 +38,9 @@
       "snel": "Höchstes Volumen, niedrigster Tarif. Ideal für Routinearbeit.",
       "slim": "Der Standard: starke Qualität zum mittleren Tarif.",
       "max": "Beste Qualität für die schwierigste Arbeit. Höchster Tarif."
-    }
+    },
+    "costlierWarning": "{{model}} ist teurer als dein aktuelles Modell. Jeder Koios AI-Token wird schwerer gewichtet.",
+    "costlierConfirm": "Trotzdem wählen"
   },
   "voice": {
     "start": "Nachricht einsprechen",

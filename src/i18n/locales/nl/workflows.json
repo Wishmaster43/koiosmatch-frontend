@@ -132,7 +132,10 @@
     "instructionTotalChars": "{{count}} van {{max}} tekens",
     "instructionTitle": "Titel",
     "instructionTitlePlaceholder": "bijv. Reisafstand (zichtbaar als fasenaam)",
-    "textExpand": "Vergroten"
+    "textExpand": "Vergroten",
+    "functionPosition": "Functienaam",
+    "functionPrimary": "Primaire functies",
+    "functionSecondary": "Secundaire functies"
   },
   "scheduleModal": {
     "title": "Planning instellen",
@@ -704,6 +707,7 @@
     "Functie": "Functie",
     "Functies": "Functies",
     "Functietitel": "Functietitel",
+    "Functiematrix": "Functiematrix",
     "Funnelfase": "Funnelfase",
     "Geavanceerde verwerker": "Geavanceerde verwerker",
     "Gebeurtenis": "Gebeurtenis",
@@ -748,6 +752,7 @@
     "Klant-ID": "Klant-ID",
     "Klanten": "Klanten",
     "Klantnaam": "Klantnaam",
+    "Klantcorrecties (klant-id naar punten)": "Klantcorrecties (klant-id naar punten)",
     "Koios Match kandidaten": "Koios Match kandidaten",
     "Kolommen (kommagescheiden)": "Kolommen (kommagescheiden)",
     "Kolomscheidingsteken": "Kolomscheidingsteken",
@@ -815,6 +820,7 @@
     "Pools": "Pools",
     "Positie in CV": "Positie in CV",
     "Postcode": "Postcode",
+    "Punten per factor": "Punten per factor",
     "Prioriteit": "Prioriteit",
     "Proefdraaien (dry-run)": "Proefdraaien (dry-run)",
     "Query parameters": "Query parameters",
@@ -899,6 +905,8 @@
     "Vastleggen (Commit)": "Vastleggen (Commit)",
     "Veld": "Veld",
     "Velden": "Velden",
+    "Venster vanaf (dagen)": "Venster vanaf (dagen)",
+    "Venster tot (dagen)": "Venster tot (dagen)",
     "Vereist toestemmingsveld (fail-closed)": "Vereist toestemmingsveld (fail-closed)",
     "Vervangwaarde": "Vervangwaarde",
     "Verzendnummer (voor de sessieantwoorden)": "Verzendnummer (voor de sessieantwoorden)",
@@ -1272,7 +1280,12 @@
     "Altijd een nieuwe AI-call, ook als er recent advies is": "Altijd een nieuwe AI-call, ook als er recent advies is",
     "Een advies jonger dan dit aantal uren wordt overgeslagen tenzij \"Altijd vernieuwen\" aan staat": "Een advies jonger dan dit aantal uren wordt overgeslagen tenzij \"Altijd vernieuwen\" aan staat.",
     "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\")": "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"Lijst (bulk)\").",
-    "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap."
+    "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap.",
+    "Relatief venster ten opzichte van vandaag, negatief is terug in de tijd Alleen gebruikt als geen datums zijn ingevuld": "Relatief venster ten opzichte van vandaag, negatief is terug in de tijd. Alleen gebruikt als geen datums zijn ingevuld.",
+    "Relatief venster ten opzichte van vandaag Alleen gebruikt als geen datums zijn ingevuld": "Relatief venster ten opzichte van vandaag. Alleen gebruikt als geen datums zijn ingevuld.",
+    "Leeg gelaten factoren gebruiken de standaardpunten": "Leeg gelaten factoren gebruiken de standaardpunten.",
+    "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bonus of malus per klant-id, bijvoorbeeld 2 of -3.",
+    "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters."
   },
   "triggers": {
     "events": {

@@ -572,7 +572,15 @@
       "label": "Papierkorb-Frist",
       "description": "Anzahl der Tage, die ein Datensatz im Papierkorb bleibt, bevor er automatisch endgültig gelöscht wird."
     },
-    "unit": "Monate"
+    "unit": "Monate",
+    "warningDays": {
+      "label": "Vorabbenachrichtigung",
+      "description": "Anzahl der Tage vor Ablauf der Aufbewahrungsfrist, an denen der Recruiter eine Benachrichtigung erhält."
+    },
+    "escalationDays": {
+      "label": "Eskalation nach Archivierung",
+      "description": "Anzahl der Tage, die ein automatisch archiviertes Dossier warten darf, bevor die Manager tägliche Eskalation erhält."
+    }
   },
   "statusList": {
     "nameLabel": "Name",
@@ -722,7 +730,14 @@
     "enforceTitle": "MFA für alle verpflichtend",
     "enforceDesc": "Jeder Benutzer dieser Organisation muss die Zwei-Faktor-Authentifizierung einrichten, bevor er weiterarbeiten kann.",
     "enforceError": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
-    "enforceLoadError": "Der MFA-Richtlinienstatus konnte nicht geladen werden. Bitte Seite aktualisieren."
+    "enforceLoadError": "Der MFA-Richtlinienstatus konnte nicht geladen werden. Bitte Seite aktualisieren.",
+    "regenerateCodes": "Neue Wiederherstellungscodes",
+    "regenerateTitle": "Neue Wiederherstellungscodes generieren",
+    "regenerateDesc": "Geben Sie den Code aus Ihrer Authentifizierungs-App oder einen ungenutzten Wiederherstellungscode ein. Ihre alten Wiederherstellungscodes werden ablaufen.",
+    "regenerateBtn": "Codes erneuern",
+    "newCodesTitle": "Neue Wiederherstellungscodes",
+    "newCodesDesc": "Speichern Sie diese Codes sicher. Die alten Codes funktionieren nicht mehr.",
+    "codesRegenerated": "Wiederherstellungscodes erneuert."
   },
   "email": {
     "title": "E-Mail-Einstellungen",
@@ -1007,7 +1022,7 @@
         "koiosLabel": "KI-Tokens",
         "koiosNote": "{{n}} Tokens",
         "whatsappLabel": "WhatsApp",
-        "whatsappNote": "{{n}} Nachrichten"
+        "whatsappNone": "Keine Nachrichten in diesem Zeitraum"
       },
       "tabs": {
         "overview": "Übersicht",
@@ -3143,11 +3158,16 @@
     "retryAll": "Alle erneut versuchen",
     "retryAllConfirm_one": "{{count}} fehlgeschlagene Aufgabe erneut in die Warteschlange stellen?",
     "retryAllConfirm_other": "Alle {{count}} fehlgeschlagenen Aufgaben erneut in die Warteschlange stellen?",
+    "retryAllQueueConfirm": "Alle fehlgeschlagenen Aufgaben in Warteschlange {{queue}} erneut in die Warteschlange stellen? Der Tenant-Filter gilt hier nicht.",
+    "retryAllUnfilteredConfirm_one": "Dies stellt ALLE fehlgeschlagenen Aufgaben erneut in die Warteschlange, nicht nur die {{count}} gefilterte. Der Mandantenfilter gilt hier nicht.",
+    "retryAllUnfilteredConfirm_other": "Dies stellt ALLE fehlgeschlagenen Aufgaben erneut in die Warteschlange, nicht nur die {{count}} gefilterten. Der Tenant-Filter gilt hier nicht.",
     "forget": "Löschen",
     "forgetConfirm": "Diese fehlgeschlagene Aufgabe endgültig löschen? Dies kann nicht rückgängig gemacht werden.",
     "flush": "Alles löschen",
     "flushConfirm_one": "{{count}} fehlgeschlagene Aufgabe endgültig löschen? Dies kann nicht rückgängig gemacht werden.",
     "flushConfirm_other": "ALLE {{count}} fehlgeschlagenen Aufgaben endgültig löschen? Dies kann nicht rückgängig gemacht werden.",
+    "flushUnfilteredConfirm_one": "Dies löscht ALLE fehlgeschlagenen Aufgaben in ALLEN Warteschlangen, nicht nur die {{count}} gefilterte. Dies kann nicht rückgängig gemacht werden.",
+    "flushUnfilteredConfirm_other": "Dies löscht ALLE fehlgeschlagenen Aufgaben in ALLEN Warteschlangen, nicht nur die {{count}} gefilterten. Dies kann nicht rückgängig gemacht werden.",
     "pagination": {
       "prev": "Zurück",
       "next": "Weiter",

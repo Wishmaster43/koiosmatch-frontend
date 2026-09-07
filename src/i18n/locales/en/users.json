@@ -134,5 +134,8 @@
     "none": "No role chosen yet",
     "add": "Add role",
     "remove": "Remove {{role}}"
-  }
+  },
+  "resetMfa": "Reset MFA",
+  "resetMfaConfirm": "Reset MFA for {{name}}? They will need to set up an authenticator again at their next login.",
+  "resetMfaDone": "MFA for {{name}} has been reset."
 }

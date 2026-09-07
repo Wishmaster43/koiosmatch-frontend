@@ -93,7 +93,10 @@
     "instructionTotalChars": "{{count}} de {{max}} caracteres",
     "instructionTitle": "Título",
     "instructionTitlePlaceholder": "p. ej. Distancia de viaje (visible como nombre de fase)",
-    "textExpand": "Ampliar"
+    "textExpand": "Ampliar",
+    "functionPosition": "Function name",
+    "functionPrimary": "Primary functions",
+    "functionSecondary": "Secondary functions"
   },
   "scheduleModal": {
     "title": "Configurar programación",
@@ -916,7 +919,12 @@
     "Modus": "Modo",
     "Altijd vernieuwen": "Actualizar siempre",
     "Verversingstermijn (uren)": "Ventana de actualización (horas)",
-    "Maximum records per run": "Máximo de registros por ejecución"
+    "Maximum records per run": "Máximo de registros por ejecución",
+    "Functiematrix": "Matriz de funciones",
+    "Punten per factor": "Puntos por factor",
+    "Klantcorrecties (klant-id naar punten)": "Correcciones por cliente (id de cliente a puntos)",
+    "Venster vanaf (dagen)": "Ventana desde (días)",
+    "Venster tot (dagen)": "Ventana hasta (días)"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (varios bundles)",
@@ -1274,7 +1282,12 @@
     "Altijd een nieuwe AI-call, ook als er recent advies is": "Realizar siempre una nueva llamada de IA, incluso si hay un consejo reciente",
     "Een advies jonger dan dit aantal uren wordt overgeslagen tenzij \"Altijd vernieuwen\" aan staat": "Se omite un consejo más reciente que este número de horas, a menos que esté activado «Actualizar siempre».",
     "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\")": "Límite estricto del número de registros que este paso procesa en una sola ejecución (modo \"Lista (lote)\").",
-    "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "«Un solo registro» = el registro del disparador/manual; «Lista (lote)» = cada fila del paso de obtención anterior."
+    "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "«Un solo registro» = el registro del disparador/manual; «Lista (lote)» = cada fila del paso de obtención anterior.",
+    "Relatief venster ten opzichte van vandaag, negatief is terug in de tijd Alleen gebruikt als geen datums zijn ingevuld": "Ventana relativa respecto a hoy, negativo significa hacia atrás en el tiempo. Solo se usa si no se han rellenado fechas.",
+    "Relatief venster ten opzichte van vandaag Alleen gebruikt als geen datums zijn ingevuld": "Ventana relativa respecto a hoy. Solo se usa si no se han rellenado fechas.",
+    "Leeg gelaten factoren gebruiken de standaardpunten": "Los factores vacíos usan los puntos predeterminados.",
+    "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bonificación o penalización por id de cliente, por ejemplo 2 o -3.",
+    "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Por función, los nombres de funciones primarias y secundarias que cuentan como coincidencia, en minúsculas."
   },
   "triggers": {
     "events": {

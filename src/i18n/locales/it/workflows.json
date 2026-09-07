@@ -132,7 +132,10 @@
     "instructionTotalChars": "{{count}} di {{max}} caratteri",
     "instructionTitle": "Titolo",
     "instructionTitlePlaceholder": "es. Distanza di viaggio (visibile come nome fase)",
-    "textExpand": "Ingrandisci"
+    "textExpand": "Ingrandisci",
+    "functionPosition": "Function name",
+    "functionPrimary": "Primary functions",
+    "functionSecondary": "Secondary functions"
   },
   "scheduleModal": {
     "title": "Imposta pianificazione",
@@ -951,7 +954,12 @@
     "Modus": "Modalità",
     "Altijd vernieuwen": "Aggiorna sempre",
     "Verversingstermijn (uren)": "Finestra di aggiornamento (ore)",
-    "Maximum records per run": "Numero massimo di record per esecuzione"
+    "Maximum records per run": "Numero massimo di record per esecuzione",
+    "Functiematrix": "Matrice delle funzioni",
+    "Punten per factor": "Punti per fattore",
+    "Klantcorrecties (klant-id naar punten)": "Correzioni cliente (id cliente a punti)",
+    "Venster vanaf (dagen)": "Finestra da (giorni)",
+    "Venster tot (dagen)": "Finestra fino a (giorni)"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (più bundle)",
@@ -1274,7 +1282,12 @@
     "Altijd een nieuwe AI-call, ook als er recent advies is": "Effettua sempre una nuova chiamata IA, anche se è presente un consiglio recente",
     "Een advies jonger dan dit aantal uren wordt overgeslagen tenzij \"Altijd vernieuwen\" aan staat": "Un consiglio più recente di questo numero di ore viene saltato, a meno che \"Aggiorna sempre\" non sia attivo.",
     "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\")": "Limite massimo al numero di record elaborati da questo passaggio in un'unica esecuzione (modalità \"Elenco (bulk)\").",
-    "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "\"Singolo record\" = il record del trigger/manuale; \"Elenco (bulk)\" = ogni riga del passaggio di recupero precedente."
+    "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "\"Singolo record\" = il record del trigger/manuale; \"Elenco (bulk)\" = ogni riga del passaggio di recupero precedente.",
+    "Relatief venster ten opzichte van vandaag, negatief is terug in de tijd Alleen gebruikt als geen datums zijn ingevuld": "Finestra relativa rispetto a oggi, negativo significa indietro nel tempo. Usata solo se non sono state inserite date.",
+    "Relatief venster ten opzichte van vandaag Alleen gebruikt als geen datums zijn ingevuld": "Finestra relativa rispetto a oggi. Usata solo se non sono state inserite date.",
+    "Leeg gelaten factoren gebruiken de standaardpunten": "I fattori lasciati vuoti usano i punti predefiniti.",
+    "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bonus o malus per id cliente, ad esempio 2 o -3.",
+    "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Per funzione i nomi delle funzioni primarie e secondarie che valgono come corrispondenza, in minuscolo."
   },
   "triggers": {
     "events": {

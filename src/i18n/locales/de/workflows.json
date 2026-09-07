@@ -93,7 +93,10 @@
     "instructionTotalChars": "{{count}} von {{max}} Zeichen",
     "instructionTitle": "Titel",
     "instructionTitlePlaceholder": "z. B. Reisedistanz (als Phasenname sichtbar)",
-    "textExpand": "Vergrößern"
+    "textExpand": "Vergrößern",
+    "functionPosition": "Function name",
+    "functionPrimary": "Primary functions",
+    "functionSecondary": "Secondary functions"
   },
   "scheduleModal": {
     "title": "Zeitplan festlegen",
@@ -916,7 +919,12 @@
     "Modus": "Modus",
     "Altijd vernieuwen": "Immer aktualisieren",
     "Verversingstermijn (uren)": "Aktualisierungsfenster (Stunden)",
-    "Maximum records per run": "Maximale Datensätze pro Lauf"
+    "Maximum records per run": "Maximale Datensätze pro Lauf",
+    "Functiematrix": "Funktionsmatrix",
+    "Punten per factor": "Punkte pro Faktor",
+    "Klantcorrecties (klant-id naar punten)": "Kundenkorrekturen (Kunden-ID zu Punkten)",
+    "Venster vanaf (dagen)": "Fenster ab (Tage)",
+    "Venster tot (dagen)": "Fenster bis (Tage)"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (mehrere Bundles)",
@@ -1274,7 +1282,12 @@
     "Altijd een nieuwe AI-call, ook als er recent advies is": "Immer einen neuen KI-Aufruf durchführen, auch wenn es aktuellen Rat gibt",
     "Een advies jonger dan dit aantal uren wordt overgeslagen tenzij \"Altijd vernieuwen\" aan staat": "Ein Rat, der jünger als diese Anzahl Stunden ist, wird übersprungen, es sei denn, „Immer aktualisieren“ ist aktiviert.",
     "Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus \"list\")": "Feste Obergrenze für die Anzahl der Datensätze, die dieser Schritt in einem Lauf berät (Modus \"Liste (Bulk)\").",
-    "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "\"Einzelner Datensatz\" = der Trigger-/manuelle Datensatz; \"Liste (Bulk)\" = jede Zeile aus dem vorherigen Abrufschritt."
+    "\"Eén record\" = de trigger-/handmatige record; \"Lijst (bulk)\" = elke rij uit de vorige ophaal-stap": "\"Einzelner Datensatz\" = der Trigger-/manuelle Datensatz; \"Liste (Bulk)\" = jede Zeile aus dem vorherigen Abrufschritt.",
+    "Relatief venster ten opzichte van vandaag, negatief is terug in de tijd Alleen gebruikt als geen datums zijn ingevuld": "Relatives Fenster ab heute, negativ bedeutet zurück in der Zeit. Nur verwendet, wenn keine Daten eingetragen sind.",
+    "Relatief venster ten opzichte van vandaag Alleen gebruikt als geen datums zijn ingevuld": "Relatives Fenster ab heute. Nur verwendet, wenn keine Daten eingetragen sind.",
+    "Leeg gelaten factoren gebruiken de standaardpunten": "Leer gelassene Faktoren verwenden die Standardpunkte.",
+    "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bonus oder Malus pro Kunden-ID, zum Beispiel 2 oder -3.",
+    "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Pro Funktion die primären und sekundären Funktionsnamen, die als Treffer gelten, in Kleinbuchstaben."
   },
   "triggers": {
     "events": {

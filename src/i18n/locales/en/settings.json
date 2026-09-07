@@ -594,7 +594,15 @@
       "label": "Trash period",
       "description": "Number of days a record stays in the trash before it is automatically deleted permanently."
     },
-    "unit": "months"
+    "unit": "months",
+    "warningDays": {
+      "label": "Due soon notification",
+      "description": "Number of days before the retention term expires that the recruiter receives a notification."
+    },
+    "escalationDays": {
+      "label": "Escalation after archiving",
+      "description": "Number of days an auto-archived dossier may wait before the manager receives daily escalation."
+    }
   },
   "statusList": {
     "nameLabel": "Name",
@@ -968,7 +976,14 @@
     "enforceTitle": "Require MFA for everyone",
     "enforceDesc": "Every user in this organisation must set up two-factor authentication before they can continue working.",
     "enforceError": "Saving failed. Please try again.",
-    "enforceLoadError": "Could not load the MFA policy status. Try refreshing the page."
+    "enforceLoadError": "Could not load the MFA policy status. Try refreshing the page.",
+    "regenerateCodes": "New recovery codes",
+    "regenerateTitle": "Generate new recovery codes",
+    "regenerateDesc": "Enter the code from your authenticator app or an unused recovery code. Your old recovery codes will expire.",
+    "regenerateBtn": "Regenerate codes",
+    "newCodesTitle": "New recovery codes",
+    "newCodesDesc": "Store these codes safely. The old codes will no longer work.",
+    "codesRegenerated": "Recovery codes regenerated."
   },
   "email": {
     "title": "Email settings",
@@ -1253,7 +1268,7 @@
         "koiosLabel": "AI tokens",
         "koiosNote": "{{n}} tokens",
         "whatsappLabel": "WhatsApp",
-        "whatsappNote": "{{n}} messages"
+        "whatsappNone": "No messages in this period"
       },
       "tabs": {
         "overview": "Overview",
@@ -3143,11 +3158,16 @@
     "retryAll": "Retry all",
     "retryAllConfirm_one": "Re-queue {{count}} failed job?",
     "retryAllConfirm_other": "Re-queue all {{count}} failed jobs?",
+    "retryAllQueueConfirm": "Re-queue every failed job in queue {{queue}}? The tenant filter does not apply here.",
+    "retryAllUnfilteredConfirm_one": "This re-queues ALL failed jobs, not just the {{count}} filtered one. The tenant filter does not apply here.",
+    "retryAllUnfilteredConfirm_other": "This re-queues ALL failed jobs, not just the {{count}} filtered ones. The tenant filter does not apply here.",
     "forget": "Delete",
     "forgetConfirm": "Permanently delete this failed job? This cannot be undone.",
     "flush": "Clear all",
     "flushConfirm_one": "Permanently wipe {{count}} failed job? This cannot be undone.",
     "flushConfirm_other": "Permanently wipe ALL {{count}} failed jobs? This cannot be undone.",
+    "flushUnfilteredConfirm_one": "This wipes ALL failed jobs in ALL queues, not just the {{count}} filtered one. This cannot be undone.",
+    "flushUnfilteredConfirm_other": "This wipes ALL failed jobs in ALL queues, not just the {{count}} filtered ones. This cannot be undone.",
     "pagination": {
       "prev": "Previous",
       "next": "Next",

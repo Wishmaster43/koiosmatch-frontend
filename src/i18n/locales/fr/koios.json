@@ -38,7 +38,9 @@
       "snel": "Volume maximal, tarif le plus bas. Parfait pour le routinier.",
       "slim": "Le standard : grande qualité à tarif moyen.",
       "max": "La meilleure qualité pour le plus difficile. Tarif le plus élevé."
-    }
+    },
+    "costlierWarning": "{{model}} est plus cher que votre modèle actuel. Chaque jeton Koios AI sera compté plus lourdement.",
+    "costlierConfirm": "Choisir quand même"
   },
   "voice": {
     "start": "Dictez votre message",

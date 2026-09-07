@@ -134,5 +134,8 @@
     "none": "Nessun ruolo scelto ancora",
     "add": "Aggiungi ruolo",
     "remove": "Rimuovi {{role}}"
-  }
+  },
+  "resetMfa": "Ripristina MFA",
+  "resetMfaConfirm": "Ripristinare l'MFA per {{name}}? L'utente dovrà configurare di nuovo un autenticatore al prossimo accesso.",
+  "resetMfaDone": "L'MFA per {{name}} è stato ripristinato."
 }

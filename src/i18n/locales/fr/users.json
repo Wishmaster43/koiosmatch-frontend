@@ -134,5 +134,8 @@
     "none": "Aucun rôle choisi",
     "add": "Ajouter un rôle",
     "remove": "Retirer {{role}}"
-  }
+  },
+  "resetMfa": "Réinitialiser l'AMF",
+  "resetMfaConfirm": "Réinitialiser l'AMF pour {{name}}? L'utilisateur devra configurer à nouveau un authentificateur lors de sa prochaine connexion.",
+  "resetMfaDone": "L'AMF pour {{name}} a été réinitialisée."
 }
