@@ -55,7 +55,7 @@ describe('useCustomerDrawerActions · blacklist status prompt', () => {
   it('opens the modal instead of patching when a blacklisted status is picked', async () => {
     const { hook, onUpdate } = harness(customer())
     act(() => { hook.result.current.changeStatus('bl') })
-    expect(hook.result.current.blacklistModal).toEqual({ target: 'bl', reason: '', needReason: true })
+    expect(hook.result.current.blacklistModal).toEqual({ target: 'bl', reason: '', reasonKey: null, needReason: true })
     expect(onUpdate).not.toHaveBeenCalled()
     await waitFor(() => expect(mockedGet).toHaveBeenCalled())
   })
@@ -65,7 +65,7 @@ describe('useCustomerDrawerActions · blacklist status prompt', () => {
   it('prefills the stored blacklistReason when re-opening on an already-blacklisted customer', async () => {
     const { hook } = harness(customer({ status: 'bl', blacklistReason: 'Wanbetaling' }))
     act(() => { hook.result.current.changeStatus('bl') })
-    expect(hook.result.current.blacklistModal).toEqual({ target: 'bl', reason: 'Wanbetaling', needReason: true })
+    expect(hook.result.current.blacklistModal).toEqual({ target: 'bl', reason: 'Wanbetaling', reasonKey: null, needReason: true })
     await waitFor(() => expect(mockedGet).toHaveBeenCalled())
   })
 
@@ -83,14 +83,14 @@ describe('useCustomerDrawerActions · blacklist status prompt', () => {
     act(() => { hook.result.current.setBlacklistModal(m => m && ({ ...m, reason: 'Fraude' })) })
     act(() => { hook.result.current.confirmBlacklist() })
     expect(onUpdate).toHaveBeenCalledTimes(1)
-    expect(onUpdate).toHaveBeenCalledWith(1, { status: 'bl', blacklistReason: 'Fraude' })
+    expect(onUpdate).toHaveBeenCalledWith(1, { status: 'bl', blacklistReason: 'Fraude', blacklistReasonKey: null })
     expect(hook.result.current.blacklistModal).toBeNull()
   })
 
   it('picking a normal status patches with blacklistReason: null to clear any stored reason', () => {
     const { hook, onUpdate } = harness(customer())
     act(() => { hook.result.current.changeStatus('available') })
-    expect(onUpdate).toHaveBeenCalledWith(1, { status: 'available', blacklistReason: null })
+    expect(onUpdate).toHaveBeenCalledWith(1, { status: 'available', blacklistReason: null, blacklistReasonKey: null })
     expect(hook.result.current.blacklistModal).toBeNull()
   })
 
