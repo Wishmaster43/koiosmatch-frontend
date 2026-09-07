@@ -176,7 +176,8 @@ export function useMatchForm({
     let alive = true
     const controller = new AbortController()
     setCandidateOptionsError(false)
-    api.get('/candidates', { params: { per_page: 25, search: candidateSearch.trim() }, signal: controller.signal })
+    // AUDIT: light=1 → GET /candidates returns only id/name/initials (data minimization, §8).
+    api.get('/candidates', { params: { per_page: 25, search: candidateSearch.trim(), light: 1 }, signal: controller.signal })
       .then(r => { if (alive) setCandidateOptions((r.data?.data ?? []) as Array<{ id?: Id; name?: string }>) })
       .catch(() => { if (alive) { setCandidateOptions([]); setCandidateOptionsError(true) } })
     return () => { alive = false; controller.abort() }

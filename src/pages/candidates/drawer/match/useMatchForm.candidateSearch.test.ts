@@ -73,7 +73,7 @@ describe('useMatchForm · candidate picker search (PRIV-1/PRIV-2)', () => {
     act(() => { result.current.setCandidateSearch('jan') })
     await waitFor(() => expect(candidateCalls().length).toBeGreaterThan(0))
     const callOpts = candidateCalls()[0]?.[1]
-    expect(callOpts?.params).toEqual(expect.objectContaining({ search: 'jan' }))
+    expect(callOpts?.params).toEqual(expect.objectContaining({ search: 'jan', light: 1 }))
     expect((callOpts?.params?.per_page as number) ?? Infinity).toBeLessThanOrEqual(25)
     await waitFor(() => expect(result.current.candidateOptions).toEqual([{ id: 'c1', name: 'Jan Jansen' }]))
   })
