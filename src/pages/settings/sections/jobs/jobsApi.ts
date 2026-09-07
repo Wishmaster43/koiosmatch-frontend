@@ -84,11 +84,15 @@ export const cancelJob = (id: string | number) => api.delete(`/admin/jobs/${id}`
 // POST /admin/jobs/failed/{uuid}/retry — re-queue one failed job.
 export const retryFailedJob = (uuid: string) => api.post(`/admin/jobs/failed/${uuid}/retry`)
 
-// POST /admin/jobs/failed/retry-all — re-queue every failed job; returns { count }.
-export const retryAllFailedJobs = () => api.post('/admin/jobs/failed/retry-all')
+// POST /admin/jobs/failed/retry-all — re-queue failed jobs in a queue (or all if no queue is specified); returns { count }. The tenant filter cannot be honoured by the backend.
+type RetryAllBody = NonNullable<operations['postAdminJobsFailedRetryAll']['requestBody']>['content']['application/json']
+export const retryAllFailedJobs = (queue?: string): Promise<AxiosResponse> => {
+  const body: RetryAllBody = queue ? { queue } : {}
+  return api.post('/admin/jobs/failed/retry-all', body)
+}
 
 // DELETE /admin/jobs/failed/{uuid} — drop one failed job permanently.
 export const forgetFailedJob = (uuid: string) => api.delete(`/admin/jobs/failed/${uuid}`)
 
-// DELETE /admin/jobs/failed — clear ALL failed jobs (explicit confirm body required by the API).
+// DELETE /admin/jobs/failed — clear ALL failed jobs in ALL queues and ALL tenants (explicit confirm body required by the API). The queue and tenant filters are ignored by the backend.
 export const flushFailedJobs = () => api.delete('/admin/jobs/failed', { data: { confirm: true } })

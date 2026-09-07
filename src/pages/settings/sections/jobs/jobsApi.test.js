@@ -50,10 +50,16 @@ describe('jobsApi', () => {
     expect(api.post).toHaveBeenCalledWith('/admin/jobs/failed/abc-123/retry')
   })
 
-  it('retryAllFailedJobs sends POST /admin/jobs/failed/retry-all', async () => {
+  it('retryAllFailedJobs sends POST /admin/jobs/failed/retry-all with no body when queue is undefined', async () => {
     vi.mocked(api.post).mockResolvedValue({ data: { count: 3 } })
     await retryAllFailedJobs()
-    expect(api.post).toHaveBeenCalledWith('/admin/jobs/failed/retry-all')
+    expect(api.post).toHaveBeenCalledWith('/admin/jobs/failed/retry-all', {})
+  })
+
+  it('retryAllFailedJobs sends POST /admin/jobs/failed/retry-all with queue body when queue is specified', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: { count: 1 } })
+    await retryAllFailedJobs('sync')
+    expect(api.post).toHaveBeenCalledWith('/admin/jobs/failed/retry-all', { queue: 'sync' })
   })
 
   it('forgetFailedJob sends DELETE /admin/jobs/failed/{uuid}', async () => {

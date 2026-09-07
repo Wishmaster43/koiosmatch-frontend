@@ -71,10 +71,10 @@ export function useFailedJobs() {
     finally { setBusyId(null) }
   }
 
-  // Re-queue every failed job (irreversible — caller confirms before calling this).
+  // Re-queue every failed job in the selected queue (or all if no queue filter); tenant filter cannot be narrowed on the backend.
   const retryAll = async () => {
     setActionError(null); setBulkBusy(true)
-    try { await retryAllFailedJobs(); load() }
+    try { await retryAllFailedJobs(filters.queue || undefined); load() }
     catch (err) { setActionError(err?.response?.data?.message ?? t('jobs.actionFailed')) }
     finally { setBulkBusy(false) }
   }

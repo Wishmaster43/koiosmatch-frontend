@@ -25,9 +25,26 @@ export default function FailedJobsTab() {
   } = useFailedJobs()
   const { confirm, dialog } = useConfirm()
 
-  // Bulk actions are irreversible — confirm with the exact count before firing.
-  const confirmRetryAll = () => confirm(t('jobs.retryAllConfirm', { count: result.total }), retryAll)
-  const confirmFlush = () => confirm(t('jobs.flushConfirm', { count: result.total }), flush, { danger: true })
+  // Bulk actions are irreversible — confirm with the exact scope before firing.
+  const confirmRetryAll = () => {
+    let key = 'jobs.retryAllConfirm'
+    const opts = { count: result.total }
+    if (filters.queue) {
+      key = 'jobs.retryAllQueueConfirm'
+      opts.queue = filters.queue
+    } else if (filters.tenant) {
+      key = 'jobs.retryAllUnfilteredConfirm'
+    }
+    confirm(t(key, opts), retryAll)
+  }
+  const confirmFlush = () => {
+    let key = 'jobs.flushConfirm'
+    const opts = { count: result.total }
+    if (filters.queue || filters.tenant) {
+      key = 'jobs.flushUnfilteredConfirm'
+    }
+    confirm(t(key, opts), flush, { danger: true })
+  }
 
   const columns = [
     { key: 'queue', header: t('jobs.col.queue'), nowrap: true },
