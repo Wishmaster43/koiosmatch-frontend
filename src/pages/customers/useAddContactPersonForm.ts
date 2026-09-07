@@ -3,12 +3,17 @@
 // the client-side duplicate check, the location→department cascade, and the
 // submit chain + 422 field-error mapping. See AddContactPersonModal's own
 // module doc for the full design rationale (CARD SPLIT, §0.3).
-import { useState, useEffect } from 'react'
+// DRY-SUBENTITY-1: the basic state (isEdit/importWizard/importOpen/errors/
+// createError) plus the import-wizard effect now come from the shared
+// useSubEntitySave hook (mirrors AddDepartmentModal/AddLocationModal) — this
+// hook keeps only what those two don't need: field MESSAGES (not just booleans)
+// and the duplicate-check/primary-confirm orchestration.
+import { useState } from 'react'
 import type { TFunction } from 'i18next'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
-import { useImportWizard } from '@/pages/settings/shared'
+import { useSubEntitySave } from './hooks/useSubEntitySave'
 import type { ContactPayload } from './hooks/useCustomerContacts'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
@@ -56,10 +61,10 @@ export function useAddContactPersonForm({
   t: TFunction
 }) {
   const { confirm, dialog } = useConfirm()
-  const isEdit = Boolean(initial)
-  // The wizard state lives HERE (container) — mirrors AddCustomerModal.
-  const importWizard = useImportWizard('contacts')
-  const [importOpen, setImportOpen] = useState(false)
+  // Shared state/error management (DRY-SUBENTITY-1): isEdit, import wizard +
+  // its success effect, and the 422 error state all come from one hook.
+  const { isEdit, importWizard, importOpen, setImportOpen, errors, setErrors, createError, setCreateError } =
+    useSubEntitySave({ initial, apiToFormMap: API_TO_FORM, t, onImported, onClose, importEntity: 'contacts' })
   const [form, setForm] = useState<ContactPayload>({
     firstName: initial?.firstName ?? '',
     middleName: initial?.middleName ?? '',
@@ -81,9 +86,6 @@ export function useAddContactPersonForm({
     isPrimary: initial?.isPrimary ?? false,
     customFields: initial?.customFields ?? {},
   })
-  const [errors, setErrors] = useState<Record<string, boolean>>({})
-  // Non-field 422/generic failure — only reachable on the CREATE path (see submit()).
-  const [createError, setCreateError] = useState<string | null>(null)
   // VALIDATIE-LIVE-1-rest: live, on-blur/typing format check for email — owns
   // the per-field message state too (the server's own 422 text, set via
   // setFieldMessages below, always wins over a live check).
@@ -95,18 +97,6 @@ export function useAddContactPersonForm({
     clearFieldMessage(k)
     setCreateError(null)
   }
-
-  // SUBENTITY-IMPORT-1: a real run that landed at least one row means the contact(s)
-  // already exist — close this modal (and let the parent refresh its list) so the
-  // untouched manual form below can never also fire a second, duplicate create.
-  useEffect(() => {
-    if (importWizard.run.status !== 'success') return
-    const { summary } = importWizard.run.result
-    if (summary.create + summary.update === 0) return
-    onImported?.()
-    onClose()
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the run RESULT changing, not onClose/onImported identity
-  }, [importWizard.run])
 
   // The contact who currently holds the primary flag (excluding the one being
   // edited, so re-saving the already-primary contact never prompts).
@@ -167,6 +157,8 @@ export function useAddContactPersonForm({
     if (isEdit) { onCreate?.(payload); onClose(); return }
     // Create path: add() rethrows on failure (C-18) so 422 field errors land under
     // their fields here instead of a generic toast while the modal closed regardless.
+    // Kept local (not useSubEntitySave's handleApiError): this path ALSO extracts
+    // per-field MESSAGE text from the 422 body, which the shared helper doesn't.
     try {
       await onCreate?.(payload)
       onClose()

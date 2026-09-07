@@ -49,17 +49,21 @@
  * location→department cascade, and the submit chain + 422 field-error mapping)
  * moved into useAddContactPersonForm — this container now only wires the hook to
  * the cards, staying a thin container per §3A.
+ *
+ * SHARED-FRAME-1 (DRY-SUBENTITY-1): the FloatingPanel header/footer/import-card
+ * chrome moved to the shared SubEntityModalFrame — mirrors AddDepartmentModal.
+ * useAddContactPersonForm itself now sources its basic state (isEdit/importWizard/
+ * importOpen/errors/createError) from useSubEntitySave.
  */
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
-import { Users, Upload, CheckCircle2 } from 'lucide-react'
-import FloatingPanel from '@/components/ui/FloatingPanel'
+import { Users } from 'lucide-react'
 import { useContactFunctions } from '@/lib/useContactFunctions'
 import { useGenders } from '@/lib/useGenders'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
-import { WIDE_MODAL } from '@/components/ui/modalMetrics'
-import { modalColumns, cardBox, cardHead } from '@/components/ui/modalCards'
+import { modalColumns } from '@/components/ui/modalCards'
 import SubEntityImportCard from './SubEntityImportCard'
+import SubEntityModalFrame from './addmodal/SubEntityModalFrame'
 import ContactIdentityCard from './addmodal/ContactIdentityCard'
 import ContactDetailsCard from './addmodal/ContactDetailsCard'
 import ContactLinkCard from './ContactLinkCard'
@@ -67,8 +71,6 @@ import { useAddContactPersonForm } from './useAddContactPersonForm'
 import type { ContactPayload } from './hooks/useCustomerContacts'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
-import Button from '@/components/ui/Button'
-import ModalFooter from '@/components/ui/ModalFooter'
 import { tintBorder } from '@/lib/tint'
 import { useMessagingLanguageOptions } from '@/lib/useMessagingLanguageOptions'
 
@@ -129,112 +131,103 @@ export default function AddContactPersonModal({
   // AVG-RET-2-TAAL-1: shared messaging-language picker options.
   const { options: languageOptions } = useMessagingLanguageOptions()
 
+  // Render the error alert banner if present.
+  const alertElement = createError && (
+    <div role="alert" style={{ margin: '0 22px 8px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
+      color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
+      border: tintBorder('var(--color-danger)', true), flexShrink: 0 }}>
+      {createError}
+    </div>
+  )
+
+  // Render the import card component if the wizard is active.
+  const importCardElement = (
+    <SubEntityImportCard entity="contacts" wizard={importWizard} customerName={customerName}
+      canView={canViewImportTemplate} canImport={canRunImport} />
+  )
+
   return (
-    // POPUP-SLEEP-1: swapped the bespoke overlay/panel shell for the shared
-    // draggable FloatingPanel — same focus-trap/backdrop/Esc semantics.
-    <FloatingPanel open onClose={onClose}
+    <SubEntityModalFrame
+      open
+      onClose={onClose}
       ariaLabel={isEdit ? t('subModal.editContact') : t('subModal.addContact')}
-      persistKey="customer-add-contact" scrollBody={false}
-      width={`min(calc(100vw - 48px), ${WIDE_MODAL.maxWidth}px)`} maxWidth={`${WIDE_MODAL.maxWidth}px`}
-      header={
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Users size={15} color="var(--color-primary)" />
-          </div>
-          <div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{isEdit ? t('subModal.editContact') : t('subModal.addContact')}</div>
-            {customerName && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>{customerName}</div>}
-          </div>
-          {/* K1b (2026-08-14): the import affordance lives top-right in the header, a
-              real button, never buried in a collapsed section — mirrors AddCustomerModal. */}
-          {!isEdit && (
-            <Button type="button" variant="primary" onClick={() => setImportOpen(v => !v)} aria-expanded={importOpen}
-              style={{ gap: 6, marginLeft: 'auto' }}>
-              {/* Icon swap = the paused-import signal (AddCustomerModal canon): never a second identity paint on the chrome. */}
-              {importWizard.file ? <CheckCircle2 size={13} /> : <Upload size={13} />}
-              {t('subModal.import.title', { entity: t('settings:import.entities.contacts.label') })}
-            </Button>
-          )}
-        </div>
-      }>
-        <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* K1b (2026-08-14): the import flow opens from the header button and renders
-              as the first card while open — summoned deliberately, mirrors AddCustomerModal. */}
-          {importOpen && !isEdit && (
-            <div style={{ ...cardBox, padding: 16 }}>
-              <div style={cardHead}>{t('subModal.import.title', { entity: t('settings:import.entities.contacts.label') })}</div>
-              <SubEntityImportCard entity="contacts" wizard={importWizard} customerName={customerName}
-                canView={canViewImportTemplate} canImport={canRunImport} />
-            </div>
-          )}
-          {/* HET-RECEPT (Danny 14-08): two responsive columns, same idiom as
-              AddCustomerModal/AddLocationModal — LEFT keeps the identity fields
-              the recruiter always fills (Persoon/Contact), RIGHT holds the
-              relational coupling (Koppeling); falls back to one column below
-              340px per column. */}
-          <div style={modalColumns('repeat(auto-fit, minmax(340px, 1fr))')}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {/* Persoon — name + function (Danny 27-07 card split: name/lastname/functie). */}
-              <ContactIdentityCard
-                firstName={form.firstName} onFirstNameChange={v => set('firstName', v)} firstNameError={errors.firstName}
-                middleName={form.middleName} onMiddleNameChange={v => set('middleName', v)}
-                lastName={form.lastName} onLastNameChange={v => set('lastName', v)} lastNameError={errors.lastName}
-                role={form.role} onRoleChange={v => set('role', v)} contactFunctions={contactFunctions} allowFreeEntry={allowFreeEntry}
-                gender={form.gender} onGenderChange={v => set('gender', v)} genders={genderOptions}
-                preferredLanguage={form.preferredLanguage ?? ''} onPreferredLanguageChange={v => set('preferredLanguage', v)} languageOptions={languageOptions}
-              />
+      persistKey="customer-add-contact"
+      isEdit={isEdit}
+      title={isEdit ? t('subModal.editContact') : t('subModal.addContact')}
+      subtitle={customerName}
+      icon={Users}
+      iconColor="var(--color-primary)"
+      iconBg="var(--color-primary-bg)"
+      importOpen={importOpen}
+      setImportOpen={setImportOpen}
+      importButtonTitle={t('subModal.import.title', { entity: t('settings:import.entities.contacts.label') })}
+      importCardTitle={t('subModal.import.title', { entity: t('settings:import.entities.contacts.label') })}
+      alert={alertElement}
+      importCard={importCardElement}
+      onCancel={onClose}
+      onSubmit={submit}
+      cancelLabel={t('subModal.cancel')}
+      submitLabel={isEdit ? t('subModal.save') : t('subModal.create')}
+      submitDisabled={!canSubmit}
+    >
+      {/* HET-RECEPT (Danny 14-08): two responsive columns, same idiom as
+          AddCustomerModal/AddLocationModal — LEFT keeps the identity fields
+          the recruiter always fills (Persoon/Contact), RIGHT holds the
+          relational coupling (Koppeling); falls back to one column below
+          340px per column. */}
+      <div style={modalColumns('repeat(auto-fit, minmax(340px, 1fr))')}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Persoon — name + function (Danny 27-07 card split: name/lastname/functie). */}
+          <ContactIdentityCard
+            firstName={form.firstName} onFirstNameChange={v => set('firstName', v)} firstNameError={errors.firstName}
+            middleName={form.middleName} onMiddleNameChange={v => set('middleName', v)}
+            lastName={form.lastName} onLastNameChange={v => set('lastName', v)} lastNameError={errors.lastName}
+            role={form.role} onRoleChange={v => set('role', v)} contactFunctions={contactFunctions} allowFreeEntry={allowFreeEntry}
+            gender={form.gender} onGenderChange={v => set('gender', v)} genders={genderOptions}
+            preferredLanguage={form.preferredLanguage ?? ''} onPreferredLanguageChange={v => set('preferredLanguage', v)} languageOptions={languageOptions}
+          />
 
-              {/* Contact — e-mail/telefoon/mobiel (Danny 27-07: exact card the request named)
-                  + LinkedIn (CONTACT-LINKEDIN-1, 05-08). */}
-              <ContactDetailsCard
-                cardLabel={t('subModal.groups.contactInfo')}
-                emailLabel={t('subModal.email')} phoneLabel={t('subModal.phone')} mobileLabel={t('subModal.mobile')}
-                email={form.email} onEmailChange={v => set('email', v)} onEmailBlur={() => markTouched('email')}
-                emailError={!!emailDup || errors.email || !!emailMessage} emailMessage={emailMessage}
-                phone={form.phone} onPhoneChange={v => set('phone', v)} phoneError={!!phoneDup || errors.phone} phoneMessage={phoneMessage}
-                mobile={form.mobile} onMobileChange={v => set('mobile', v)} mobileError={!!mobileDup || errors.mobile} mobileMessage={mobileMessage}
-                linkedinLabel={t('subModal.linkedin')} linkedinPlaceholder={t('subModal.linkedinPlaceholder')}
-                linkedin={form.linkedin} onLinkedinChange={v => set('linkedin', v)}
-              />
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {/* Koppeling — locatie/afdeling (searchable, allowCreate=false: real relational
-                  ids) + status/primair-vlag for that link. Extracted into its own component
-                  (ContactLinkCard) to keep this file under the ~400-line split trigger. */}
-              <ContactLinkCard
-                locationId={form.locationId ? String(form.locationId) : null}
-                departmentId={form.departmentId ? String(form.departmentId) : null}
-                statusId={form.statusId ? String(form.statusId) : null}
-                isPrimary={form.isPrimary}
-                locationOptions={locations.map(l => ({ value: String(l.id), label: l.name }))}
-                departmentOptions={departmentOptions}
-                departmentPlaceholder={departmentPlaceholder}
-                statusOptions={statuses}
-                showLocationPicker={showLocationPicker}
-                showDepartmentPicker={showDepartmentPicker}
-                showStatusPicker={showStatusPicker}
-                onLocationChange={v => { set('locationId', v || null); set('departmentId', null) }}
-                onDepartmentChange={v => set('departmentId', v || null)}
-                onStatusChange={v => set('statusId', v || null)}
-                onPrimaryToggle={handlePrimaryToggle}
-              />
-            </div>
-          </div>
+          {/* Contact — e-mail/telefoon/mobiel (Danny 27-07: exact card the request named)
+              + LinkedIn (CONTACT-LINKEDIN-1, 05-08). */}
+          <ContactDetailsCard
+            cardLabel={t('subModal.groups.contactInfo')}
+            emailLabel={t('subModal.email')} phoneLabel={t('subModal.phone')} mobileLabel={t('subModal.mobile')}
+            email={form.email} onEmailChange={v => set('email', v)} onEmailBlur={() => markTouched('email')}
+            emailError={!!emailDup || errors.email || !!emailMessage} emailMessage={emailMessage}
+            phone={form.phone} onPhoneChange={v => set('phone', v)} phoneError={!!phoneDup || errors.phone} phoneMessage={phoneMessage}
+            mobile={form.mobile} onMobileChange={v => set('mobile', v)} mobileError={!!mobileDup || errors.mobile} mobileMessage={mobileMessage}
+            linkedinLabel={t('subModal.linkedin')} linkedinPlaceholder={t('subModal.linkedinPlaceholder')}
+            linkedin={form.linkedin} onLinkedinChange={v => set('linkedin', v)}
+          />
         </div>
 
-        {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}
-        {createError && (
-          <div role="alert" style={{ margin: '0 22px 8px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
-            color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
-            border: tintBorder('var(--color-danger)', true), flexShrink: 0 }}>
-            {createError}
-          </div>
-        )}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Koppeling — locatie/afdeling (searchable, allowCreate=false: real relational
+              ids) + status/primair-vlag for that link. Extracted into its own component
+              (ContactLinkCard) to keep this file under the ~400-line split trigger. */}
+          <ContactLinkCard
+            locationId={form.locationId ? String(form.locationId) : null}
+            departmentId={form.departmentId ? String(form.departmentId) : null}
+            statusId={form.statusId ? String(form.statusId) : null}
+            isPrimary={form.isPrimary}
+            locationOptions={locations.map(l => ({ value: String(l.id), label: l.name }))}
+            departmentOptions={departmentOptions}
+            departmentPlaceholder={departmentPlaceholder}
+            statusOptions={statuses}
+            showLocationPicker={showLocationPicker}
+            showDepartmentPicker={showDepartmentPicker}
+            showStatusPicker={showStatusPicker}
+            onLocationChange={v => { set('locationId', v || null); set('departmentId', null) }}
+            onDepartmentChange={v => set('departmentId', v || null)}
+            onStatusChange={v => set('statusId', v || null)}
+            onPrimaryToggle={handlePrimaryToggle}
+          />
+        </div>
+      </div>
 
-        <ModalFooter onCancel={onClose} cancelLabel={t('subModal.cancel')}
-          onSubmit={submit} submitLabel={isEdit ? t('subModal.save') : t('subModal.create')} disabled={!canSubmit} />
+      {/* useConfirm's staged dialog — a fixed-position overlay (FloatingPanel), so its
+          position in this tree doesn't affect where it renders on screen. */}
       {dialog}
-    </FloatingPanel>
+    </SubEntityModalFrame>
   )
 }

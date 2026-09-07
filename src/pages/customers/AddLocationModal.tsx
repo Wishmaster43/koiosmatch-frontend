@@ -30,34 +30,37 @@
  * container keeps everything that orchestrates ACROSS cards: all form/error
  * state, `pickedContactId` ownership, the province cascade, the
  * location → contact → coupling submit chain + 422 field-error mapping.
+ *
+ * SHARED-FRAME-1 (DRY-SUBENTITY-1): the FloatingPanel header/footer/import-card
+ * chrome moved to the shared SubEntityModalFrame, and the basic import-wizard/
+ * error state moved to the shared useSubEntitySave hook — mirrors
+ * AddDepartmentModal. Everything specific to THIS entity (province cascade,
+ * identifier validation, the contact-coupling submit chain) stays local.
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
-import { MapPin, Upload, CheckCircle2 } from 'lucide-react'
-import FloatingPanel from '@/components/ui/FloatingPanel'
+import { MapPin } from 'lucide-react'
 import { useProvinces } from '@/hooks/useProvinces'
 import { notifyError } from '@/lib/notify'
 import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
 import { useIdentifierValidation } from '@/hooks/useIdentifierValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
-import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { modalColumns, cardBox, cardHead } from '@/components/ui/modalCards'
 import SubEntityImportCard from './SubEntityImportCard'
+import SubEntityModalFrame from './addmodal/SubEntityModalFrame'
+import { useSubEntitySave } from './hooks/useSubEntitySave'
 import LocationGeneralCard from './addmodal/LocationGeneralCard'
 import LocationAddressCard from './addmodal/LocationAddressCard'
 import LocationBusinessCard from './addmodal/LocationBusinessCard'
 import ContactOnSiteCard from './addmodal/ContactOnSiteCard'
 import LocationDescriptionCard from './addmodal/LocationDescriptionCard'
-import { useImportWizard } from '@/pages/settings/shared'
 import { setLocationPrimaryContact, splitContactName } from './hooks/useCustomerContacts'
 import type { LocationPayload } from './hooks/useCustomerLocations'
 import type { ContactPayload } from './hooks/useCustomerContacts'
 import type { Location, Contact } from '@/types/customer'
 import type { LookupOption, Id } from '@/types/common'
-import Button from '@/components/ui/Button'
-import ModalFooter from '@/components/ui/ModalFooter'
 import { tintBorder } from '@/lib/tint'
 // K-283: the site's OWN single branch (a different concept than branchIds, the
 // multi-branch VISIBILITY set) — same optional, clearable picker as
@@ -120,12 +123,10 @@ export default function AddLocationModal({
   const hasPermission = authCtx?.hasPermission ?? (() => false)
   const canViewImportTemplate = hasPermission('customers.view')
   const canRunImport = hasPermission('customers.create')
-  // The wizard state lives HERE (container), not in the card — mirrors AddCustomerModal.
-  const importWizard = useImportWizard('locations')
-  // K1b (2026-08-14): the import affordance sits in the header (Upload button),
-  // never buried in a collapsed section — mirrors AddCustomerModal exactly.
-  const [importOpen, setImportOpen] = useState(false)
-  const isEdit = Boolean(initial)
+  // Shared state/error management (DRY-SUBENTITY-1): import wizard
+  // and 422 error handling extracted into a reusable hook.
+  const { isEdit, importWizard, importOpen, setImportOpen, errors, setErrors, createError, setCreateError, handleApiError } =
+    useSubEntitySave({ initial, apiToFormMap: API_TO_FORM, t, onImported, onClose, importEntity: 'locations' })
   // CONTACT-PRIMAIR-LOCATIE-1: which existing contact (if any) was picked as "contact
   // ter plaatse" — distinct from the free-text name, since only a REAL id can be
   // coupled after the location is created (see submit()). Null = either nothing
@@ -169,9 +170,6 @@ export default function AddLocationModal({
     description: initial?.description ?? '',
     customFields: initial?.customFields ?? {},
   })
-  const [errors, setErrors] = useState<Record<string, boolean>>({})
-  // Non-field 422/generic failure — only reachable on the CREATE path (see submit()).
-  const [createError, setCreateError] = useState<string | null>(null)
   // COLLAPSIBLE-TEXT-1: Omschrijving's collapsed/editing state now lives inside
   // LocationDescriptionCard (nothing outside that card ever reads it).
   // STATUS-HIDDEN-1 (Danny 02-08, second round, verbatim: "…status moet weg in
@@ -210,18 +208,6 @@ export default function AddLocationModal({
     if (form.state && !provinces.includes(form.state)) setForm(f => ({ ...f, state: '' }))
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the resolved province list changing, not every form edit
   }, [provinces])
-
-  // SUBENTITY-IMPORT-1: a real run that landed at least one row means the location(s)
-  // already exist — close this modal (and let the parent refresh its list) so the
-  // untouched manual form below can never also fire a second, duplicate create.
-  useEffect(() => {
-    if (importWizard.run.status !== 'success') return
-    const { summary } = importWizard.run.result
-    if (summary.create + summary.update === 0) return
-    onImported?.()
-    onClose()
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the run RESULT changing, not onClose/onImported identity
-  }, [importWizard.run])
 
   const submit = async () => {
     // VALIDATIE-LIVE-1-rest: block on a live format failure too — marks any
@@ -287,15 +273,7 @@ export default function AddLocationModal({
       }
       onClose()
     } catch (err) {
-      const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
-      const apiErrors = e?.response?.data?.errors
-      if (apiErrors) {
-        const e2: Record<string, boolean> = {}
-        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
-        setErrors(e2)
-      } else {
-        setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
-      }
+      handleApiError(err)
     }
   }
 
@@ -303,127 +281,109 @@ export default function AddLocationModal({
   // K-283: the tenant's own establishments — same GET /locations list
   // LocationAddressTab's own branch field and the match form offer.
   const branchOptions = useLocations().map(b => ({ value: String(b.value), label: b.label }))
+  const canSubmit = !!form.name.trim() && !hasFormatError && !hasIdentifierError
+
+  // Render the error alert banner if present.
+  const alertElement = createError && (
+    <div role="alert" style={{ margin: '0 22px 8px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
+      color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
+      border: tintBorder('var(--color-danger)', true), flexShrink: 0 }}>
+      {createError}
+    </div>
+  )
+
+  // Render the import card component if the wizard is active.
+  const importCardElement = (
+    <SubEntityImportCard entity="locations" wizard={importWizard} customerName={customerName}
+      canView={canViewImportTemplate} canImport={canRunImport} />
+  )
 
   return (
-    // POPUP-SLEEP-1: swapped the bespoke overlay/panel shell for the shared
-    // draggable FloatingPanel — same focus-trap/backdrop/Esc semantics.
-    <FloatingPanel open onClose={onClose}
+    <SubEntityModalFrame
+      open
+      onClose={onClose}
       ariaLabel={isEdit ? t('subModal.editLocation') : t('subModal.addLocation')}
-      persistKey="customer-add-location" scrollBody={false}
-      width={`min(calc(100vw - 48px), ${WIDE_MODAL.maxWidth}px)`} maxWidth={`${WIDE_MODAL.maxWidth}px`}
-      header={
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--color-secondary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <MapPin size={15} color="var(--color-secondary)" />
-          </div>
-          <div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{isEdit ? t('subModal.editLocation') : t('subModal.addLocation')}</div>
-            {customerName && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>{customerName}</div>}
-          </div>
-          {/* K1b (2026-08-14): the import affordance lives top-right in the header, a
-              real button, never buried in a collapsed section — mirrors AddCustomerModal. */}
-          {/* HUISSTIJL-1: the header import toggle reads the solid house trio; the
-              §4-IMPORT "a paused import stays visible" cue survives as the ink
-              RING once a file is picked — the same active-signal convention the
-              sort/filter triggers use on the solid fill. */}
-          {!isEdit && (
-            <Button type="button" variant="primary" onClick={() => setImportOpen(v => !v)} aria-expanded={importOpen}
-              style={{ gap: 6, marginLeft: 'auto' }}>
-              {/* Icon swap = the paused-import signal (AddCustomerModal canon): never a second identity paint on the chrome. */}
-              {importWizard.file ? <CheckCircle2 size={13} /> : <Upload size={13} />}
-              {t('subModal.import.title', { entity: t('settings:import.entities.locations.label') })}
-            </Button>
-          )}
-        </div>
-      }>
-        <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* K1b (2026-08-14): the import flow opens from the header button and renders
-              as the first card while open — summoned deliberately, mirrors AddCustomerModal. */}
-          {importOpen && !isEdit && (
-            <div style={{ ...cardBox, padding: 16 }}>
-              <div style={cardHead}>{t('subModal.import.title', { entity: t('settings:import.entities.locations.label') })}</div>
-              <SubEntityImportCard entity="locations" wizard={importWizard} customerName={customerName}
-                canView={canViewImportTemplate} canImport={canRunImport} />
-            </div>
-          )}
-          {/* Two-column section split (Danny 03-08 A+D decision): six cards stacked
-              in ONE column left half the wide 1060px frame idle and forced a
-              scroll — the required core (Algemeen/Adres) now sits left, the
-              secondary cards (Zakelijk/Contact ter plaatse/Omschrijving) right;
-              falls back to one column at narrow widths via the auto-fit idiom. */}
-          <div style={modalColumns('repeat(auto-fit, minmax(340px, 1fr))')}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <LocationGeneralCard
-                name={form.name} onNameChange={v => set('name', v)} nameError={errors.name}
-                showStatusPicker={showStatusPicker} statusId={form.statusId ? String(form.statusId) : null}
-                onStatusChange={v => set('statusId', v || null)} statusOptions={statusOptions}
-              />
-              <LocationAddressCard
-                street={form.street} onStreetChange={v => set('street', v)}
-                houseNumber={form.houseNumber} onHouseNumberChange={v => set('houseNumber', v)}
-                houseNumberSuffix={form.houseNumberSuffix} onHouseNumberSuffixChange={v => set('houseNumberSuffix', v)}
-                addressLine2={form.addressLine2} onAddressLine2Change={v => set('addressLine2', v)}
-                postalCode={form.postalCode} onPostalCodeChange={v => set('postalCode', v)}
-                city={form.city} onCityChange={v => set('city', v)}
-                state={form.state} onStateChange={v => set('state', v)}
-                country={form.country} onCountryChange={v => set('country', v)}
-                provinces={provinces}
-              />
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <LocationBusinessCard
-                cocNumber={form.cocNumber} onCocNumberChange={v => set('cocNumber', v)}
-                vatNumber={form.vatNumber} onVatNumberChange={v => set('vatNumber', v)}
-                costCenter={form.costCenter} onCostCenterChange={v => set('costCenter', v)}
-                cocNotice={cocNotice} vatNotice={vatNotice}
-              />
-
-              {/* K-283: this site's OWN single branch — optional, clearable
-                  (§3A VAC-CLEAR-1), same CreatableSelect idiom as
-                  LocationAddressTab's LocationBranchField. */}
-              <div style={{ ...cardBox, padding: 16 }}>
-                <div id="location-branch-label" style={cardHead}>{t('location.branch')}</div>
-                <CreatableSelect value={form.branchId != null ? String(form.branchId) : ''}
-                  onChange={v => set('branchId', (v || null) as Id | null)}
-                  options={branchOptions} allowCreate={false} aria-labelledby="location-branch-label"
-                  clearable clearLabel={t('location.branch')} placeholder={t('location.noBranch')} />
-              </div>
-
-              {/* Contact ter plaatse — extracted card (§0.3 split, 2026-08-03): the
-                  existing-contact picker, new-contact fields and their local render
-                  logic live in ContactOnSiteCard; only pickedContactId's OWNERSHIP
-                  stays here (the post-create coupling call in submit() needs it). */}
-              <ContactOnSiteCard
-                isEdit={isEdit}
-                contactName={form.contactName} email={form.email} phone={form.phone}
-                onContactNameChange={v => set('contactName', v)}
-                onEmailChange={v => set('email', v)} onEmailBlur={() => markTouched('email')}
-                emailError={!!fieldMessage('email')} emailMessage={fieldMessage('email')}
-                onPhoneChange={v => set('phone', v)}
-                pickedContactId={pickedContactId} onPickedContactChange={setPickedContactId}
-                existingContacts={existingContacts}
-              />
-
-              <LocationDescriptionCard value={form.description} onChange={v => set('description', v)} />
-            </div>
-          </div>
+      persistKey="customer-add-location"
+      isEdit={isEdit}
+      title={isEdit ? t('subModal.editLocation') : t('subModal.addLocation')}
+      subtitle={customerName}
+      icon={MapPin}
+      iconColor="var(--color-secondary)"
+      iconBg="var(--color-secondary-bg)"
+      importOpen={importOpen}
+      setImportOpen={setImportOpen}
+      importButtonTitle={t('subModal.import.title', { entity: t('settings:import.entities.locations.label') })}
+      importCardTitle={t('subModal.import.title', { entity: t('settings:import.entities.locations.label') })}
+      alert={alertElement}
+      importCard={importCardElement}
+      onCancel={onClose}
+      onSubmit={submit}
+      cancelLabel={t('subModal.cancel')}
+      submitLabel={isEdit ? t('subModal.save') : t('subModal.create')}
+      submitDisabled={!canSubmit}
+    >
+      {/* Two-column section split (Danny 03-08 A+D decision): six cards stacked
+          in ONE column left half the wide 1060px frame idle and forced a
+          scroll — the required core (Algemeen/Adres) now sits left, the
+          secondary cards (Zakelijk/Contact ter plaatse/Omschrijving) right;
+          falls back to one column at narrow widths via the auto-fit idiom. */}
+      <div style={modalColumns('repeat(auto-fit, minmax(340px, 1fr))')}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <LocationGeneralCard
+            name={form.name} onNameChange={v => set('name', v)} nameError={errors.name}
+            showStatusPicker={showStatusPicker} statusId={form.statusId ? String(form.statusId) : null}
+            onStatusChange={v => set('statusId', v || null)} statusOptions={statusOptions}
+          />
+          <LocationAddressCard
+            street={form.street} onStreetChange={v => set('street', v)}
+            houseNumber={form.houseNumber} onHouseNumberChange={v => set('houseNumber', v)}
+            houseNumberSuffix={form.houseNumberSuffix} onHouseNumberSuffixChange={v => set('houseNumberSuffix', v)}
+            addressLine2={form.addressLine2} onAddressLine2Change={v => set('addressLine2', v)}
+            postalCode={form.postalCode} onPostalCodeChange={v => set('postalCode', v)}
+            city={form.city} onCityChange={v => set('city', v)}
+            state={form.state} onStateChange={v => set('state', v)}
+            country={form.country} onCountryChange={v => set('country', v)}
+            provinces={provinces}
+          />
         </div>
 
-        {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}
-        {createError && (
-          <div role="alert" style={{ margin: '0 22px 8px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
-            color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
-            border: tintBorder('var(--color-danger)', true), flexShrink: 0 }}>
-            {createError}
-          </div>
-        )}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <LocationBusinessCard
+            cocNumber={form.cocNumber} onCocNumberChange={v => set('cocNumber', v)}
+            vatNumber={form.vatNumber} onVatNumberChange={v => set('vatNumber', v)}
+            costCenter={form.costCenter} onCostCenterChange={v => set('costCenter', v)}
+            cocNotice={cocNotice} vatNotice={vatNotice}
+          />
 
-        {/* KVK/BTW-PER-LAND-1: a blocking identifier mismatch gates the button too,
-            so the disabled state and submit() agree on one condition. */}
-        <ModalFooter onCancel={onClose} cancelLabel={t('subModal.cancel')}
-          onSubmit={submit} submitLabel={isEdit ? t('subModal.save') : t('subModal.create')}
-          disabled={!form.name.trim() || hasFormatError || hasIdentifierError} />
-    </FloatingPanel>
+          {/* K-283: this site's OWN single branch — optional, clearable
+              (§3A VAC-CLEAR-1), same CreatableSelect idiom as
+              LocationAddressTab's LocationBranchField. */}
+          <div style={{ ...cardBox, padding: 16 }}>
+            <div id="location-branch-label" style={cardHead}>{t('location.branch')}</div>
+            <CreatableSelect value={form.branchId != null ? String(form.branchId) : ''}
+              onChange={v => set('branchId', (v || null) as Id | null)}
+              options={branchOptions} allowCreate={false} aria-labelledby="location-branch-label"
+              clearable clearLabel={t('location.branch')} placeholder={t('location.noBranch')} />
+          </div>
+
+          {/* Contact ter plaatse — extracted card (§0.3 split, 2026-08-03): the
+              existing-contact picker, new-contact fields and their local render
+              logic live in ContactOnSiteCard; only pickedContactId's OWNERSHIP
+              stays here (the post-create coupling call in submit() needs it). */}
+          <ContactOnSiteCard
+            isEdit={isEdit}
+            contactName={form.contactName} email={form.email} phone={form.phone}
+            onContactNameChange={v => set('contactName', v)}
+            onEmailChange={v => set('email', v)} onEmailBlur={() => markTouched('email')}
+            emailError={!!fieldMessage('email')} emailMessage={fieldMessage('email')}
+            onPhoneChange={v => set('phone', v)}
+            pickedContactId={pickedContactId} onPickedContactChange={setPickedContactId}
+            existingContacts={existingContacts}
+          />
+
+          <LocationDescriptionCard value={form.description} onChange={v => set('description', v)} />
+        </div>
+      </div>
+    </SubEntityModalFrame>
   )
 }
