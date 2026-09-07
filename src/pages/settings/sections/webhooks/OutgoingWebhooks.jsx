@@ -2,13 +2,16 @@
  * OutgoingWebhooks — container for the outgoing event subscriptions. Owns the
  * list state and switches between list and a single subscription's detail (same
  * list↔detail pattern as the API-keys section). Data flows through the hook so
- * the table stays in sync after create / edit / delete.
+ * the table stays in sync after create / edit / delete. The WorkflowEndpointsCard
+ * mounts at the bottom, so both the subscription list and the endpoint configs
+ * are visible/editable on the same page.
  */
 import { useState } from 'react'
 import { useWebhookSubscriptions } from './useWebhookSubscriptions'
 import WebhookList from './WebhookList'
 import WebhookDetail from './WebhookDetail'
 import WebhookCreate from './WebhookCreate'
+import WorkflowEndpointsCard from './WorkflowEndpointsCard'
 
 export default function OutgoingWebhooks() {
   const { subs, loading, error, reload, add, patch, drop } = useWebhookSubscriptions()
@@ -34,13 +37,18 @@ export default function OutgoingWebhooks() {
   }
 
   return (
-    <WebhookList
-      subs={subs}
-      loading={loading}
-      error={error}
-      onReload={reload}
-      onOpen={setSelectedId}
-      onNew={() => setCreating(true)}
-    />
+    <>
+      <WebhookList
+        subs={subs}
+        loading={loading}
+        error={error}
+        onReload={reload}
+        onOpen={setSelectedId}
+        onNew={() => setCreating(true)}
+      />
+      <div style={{ marginTop: 32 }}>
+        <WorkflowEndpointsCard />
+      </div>
+    </>
   )
 }

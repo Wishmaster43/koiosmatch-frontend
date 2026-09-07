@@ -1370,6 +1370,15 @@
       "stepToken": "Vous choisissez le verify token vous-même et le saisissez à deux endroits : chez Meta et dans",
       "tokenLink": "Paramètres → WhatsApp",
       "stepAgent": "Les URL de webhook des agents (sur la carte agent) sont internes à Koios — ne jamais les enregistrer chez Meta."
+    },
+    "endpoints": {
+      "title": "Points de terminaison de flux",
+      "hint": "Les URL vers lesquelles l'étape de workflow webhook_send envoie. Chaque slug correspond au réglage webhook_endpoint_<slug>.",
+      "slugPlaceholder": "par exemple crm_partner",
+      "urlPlaceholder": "https://api.example.com/webhook",
+      "add": "Ajouter un endpoint",
+      "remove": "Supprimer l'endpoint",
+      "invalidSlug": "Un slug ne contient que des minuscules, des chiffres, des tirets et des tirets bas."
     }
   },
   "sync": {

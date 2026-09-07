@@ -1616,6 +1616,15 @@
       "stepToken": "Het verify-token kies je zelf en vul je op twee plekken in: bij Meta én in",
       "tokenLink": "Instellingen → WhatsApp",
       "stepAgent": "De agent-webhook-URL\\u2019s (op de agent-kaart) zijn Koios-intern — registreer die nooit bij Meta."
+    },
+    "endpoints": {
+      "title": "Workflow-endpoints",
+      "hint": "De URL's waar de workflowstap webhook_send naartoe stuurt. Elke slug hoort bij de tenant-instelling webhook_endpoint_<slug>.",
+      "slugPlaceholder": "bijvoorbeeld crm_partner",
+      "urlPlaceholder": "https://api.example.com/webhook",
+      "add": "Endpoint toevoegen",
+      "remove": "Endpoint verwijderen",
+      "invalidSlug": "Een slug bevat alleen kleine letters, cijfers, koppeltekens en onderstrepingstekens."
     }
   },
   "sync": {
