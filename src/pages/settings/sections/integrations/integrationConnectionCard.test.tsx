@@ -46,20 +46,23 @@ describe('per-connector field spec', () => {
     expect(screen.queryByText(t('integrations.connection.environment'))).not.toBeInTheDocument()
   })
 
-  // helloflex: two_way + environment picker + client_id + client_secret (secret).
-  it('renders the helloflex fields including the environment picker', async () => {
+  // helloflex: environment picker + client_id + client_secret (secret); no two_way
+  // switch until a push-sync exists (question 119, Danny 08-09: A).
+  it('renders the helloflex fields including the environment picker, without the two-way switch', async () => {
     mockGet.mockResolvedValue({ two_way: false, environment: 'uat', client_id: 'cid-1', has_client_secret: false, connected_as: null })
     await renderCard('helloflex')
     expect(screen.getByText(t('integrations.connection.environment'))).toBeInTheDocument()
+    expect(screen.queryByText(t('integrations.connection.twoWay'))).not.toBeInTheDocument()
     expect(screen.getByDisplayValue('cid-1')).toBeInTheDocument()
     expect(screen.getByText(t('integrations.connection.secretNotSet'))).toBeInTheDocument()
     expect(screen.getByText(t('integrations.connection.notConnected'))).toBeInTheDocument()
   })
 
-  // werkzoeken: two_way + api_key (secret) only — no base_url/client_id.
+  // werkzoeken: api_key (secret) only — no base_url/client_id and no two_way switch (question 119).
   it('renders the werkzoeken fields', async () => {
     mockGet.mockResolvedValue({ two_way: true, has_api_key: false, connected_as: null })
     await renderCard('werkzoeken')
+    expect(screen.queryByText(t('integrations.connection.twoWay'))).not.toBeInTheDocument()
     expect(screen.getByText(t('integrations.connection.apiKey'))).toBeInTheDocument()
     expect(screen.queryByLabelText(t('integrations.connection.baseUrl'))).not.toBeInTheDocument()
   })

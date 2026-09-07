@@ -70,14 +70,14 @@ const FIELD_SPEC: Record<ConnectorId, FieldSpecEntry[]> = {
     { key: 'base_url', kind: 'text' },
     { key: 'api_key', kind: 'secret' },
   ],
+  // Question 119 (Danny 08-09, A): HelloFlex and Werkzoeken have no push-sync yet, so
+  // their two_way switch stays hidden until one exists; Shiftmanager keeps it.
   helloflex: [
-    { key: 'two_way', kind: 'toggle' },
     { key: 'environment', kind: 'select' },
     { key: 'client_id', kind: 'text' },
     { key: 'client_secret', kind: 'secret' },
   ],
   werkzoeken: [
-    { key: 'two_way', kind: 'toggle' },
     { key: 'api_key', kind: 'secret' },
   ],
 }
