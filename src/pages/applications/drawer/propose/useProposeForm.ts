@@ -20,7 +20,7 @@ import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { useLookups } from '@/context/LookupsContext'
 import { useCvSettings } from '@/lib/useCvSettings'
-import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
+import { useAllSettings, getJsonSetting, getStringSetting } from '@/lib/settings/useAllSettings'
 import { useLocale } from '@/lib/datetime'
 import { useUsers } from '@/lib/queries'
 import { mapCandidate } from '@/pages/candidates/shared'
@@ -46,11 +46,26 @@ interface ApplicationProposalSettings {
   default_cv_variant?: CvVariant
 }
 
-// Fixed token names ({kandidaat} {vacature} {klant} {contact} {recruiter}) per
-// the shared contract — literal, never translated, so a tenant's own template
-// text works the same regardless of the recruiter's UI language.
+// Fills every known token in a template — English names (candidate, vacancy, customer,
+// contact, recruiter, agency) and legacy Dutch aliases (kandidaat, vacature, klant,
+// bureau). The {link} token stays untouched (filled by backend on send). Unknown
+// tokens are left as-is.
 function fillTemplate(template: string, tokens: Record<string, string>): string {
-  return template.replace(/\{(kandidaat|vacature|klant|contact|recruiter)\}/g, (_m, key: string) => tokens[key] ?? '')
+  const tokenMap: Record<string, string> = {
+    // English tokens
+    candidate: tokens.candidate ?? '',
+    vacancy: tokens.vacancy ?? '',
+    customer: tokens.customer ?? '',
+    contact: tokens.contact ?? '',
+    recruiter: tokens.recruiter ?? '',
+    agency: tokens.agency ?? '',
+    // Legacy Dutch aliases
+    kandidaat: tokens.candidate ?? '',
+    vacature: tokens.vacancy ?? '',
+    klant: tokens.customer ?? '',
+    bureau: tokens.agency ?? '',
+  }
+  return template.replace(/\{(candidate|vacancy|customer|contact|recruiter|agency|kandidaat|vacature|klant|bureau)\}/g, (_m, key: string) => tokenMap[key] ?? '')
 }
 
 // VOORSTEL-AFZENDER-FE-1: the tenant-wide default sender — a bare uuid string
@@ -187,12 +202,17 @@ export function useProposeForm(application: ApplicationDetail) {
 
   useEffect(() => {
     if (dirtyRef.current || !recipient) return
+    // Tenant company_name setting (agency token) or empty string fallback.
+    const companyName = getStringSetting(settingsValues, 'company_name', null) ?? ''
+    // One canonical token map with both English names and legacy Dutch aliases
+    // derived from it (no second copy of values).
     const tokens = {
-      kandidaat: application.candidateName ?? '',
-      vacature: application.vacancyTitle ?? '',
-      klant: application.client ?? '',
+      candidate: application.candidateName ?? '',
+      vacancy: application.vacancyTitle ?? '',
+      customer: application.client ?? '',
       contact: recipient.name,
       recruiter: senderName,
+      agency: companyName,
     }
     const subjectTpl = proposalSettings.subject_template || t('propose.defaultSubject')
     const bodyTpl = proposalSettings.body_template || t('propose.defaultBody')
@@ -202,7 +222,7 @@ export function useProposeForm(application: ApplicationDetail) {
     // name, not the whole `application`/`proposalSettings`/`users` objects (a new
     // identity every render would re-fire this on every keystroke elsewhere) or `t`.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recipient?.id, recipient?.name, senderName])
+  }, [recipient?.id, recipient?.name, senderName, settingsValues])
 
   const hasMotivation = Boolean(application.coverLetter)
 

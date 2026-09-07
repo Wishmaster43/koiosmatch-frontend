@@ -58,6 +58,12 @@ vi.mock('@/lib/settings/useAllSettings', () => ({
     if (raw == null) return fallback
     try { return typeof raw === 'string' ? JSON.parse(raw) : raw } catch { return fallback }
   },
+  // Mirrors the real getStringSetting: return string value or fallback.
+  getStringSetting: (values: Record<string, unknown>, key: string, fallback: string | null = null): string | null => {
+    const raw = values[key]
+    if (raw == null) return fallback
+    return typeof raw === 'string' ? raw : fallback
+  },
 }))
 
 const { apiGet, apiPost, apiPatch } = vi.hoisted(() => ({
@@ -326,5 +332,43 @@ describe('useProposeForm', () => {
     expect(result.current.disabledReason).toBe('noConsent')
     act(() => { result.current.setRecipientContactId('') })
     expect(result.current.disabledReason).not.toBeNull()
+  })
+
+  // Fills all known tokens (English and legacy Dutch aliases) and leaves unknown
+  // tokens + {link} untouched. The backend fills {link} on send.
+  it('fills English tokens and legacy Dutch aliases, leaves {link} untouched', async () => {
+    settingsFixture = { company_name: 'Tech Solutions B.V.', application_proposal: JSON.stringify({ body_template: '{candidate} / {kandidaat} / {agency} / {bureau} / {link}' }) }
+    const { result } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.contactsLoading).toBe(false))
+    expect(result.current.body).toBe('Jan de Vries / Jan de Vries / Tech Solutions B.V. / Tech Solutions B.V. / {link}')
+  })
+
+  // Default subject must render with the English tokens ({candidate} {vacancy}),
+  // not Dutch aliases. The mock t() returns the key itself, so when English tokens
+  // are filled, the subject contains the filled values not the token placeholders.
+  it('renders the default subject with English tokens', async () => {
+    settingsFixture = { application_proposal: JSON.stringify({ subject_template: 'Candidate {candidate} proposed for {vacancy}' }) }
+    const { result } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.contactsLoading).toBe(false))
+    // Verify English tokens are filled (not left as {candidate}/{vacancy})
+    expect(result.current.subject).toContain('Jan de Vries')
+    expect(result.current.subject).toContain('Verpleegkundige')
+    // Ensure tokens are replaced, not left as placeholders
+    expect(result.current.subject).not.toContain('{candidate}')
+    expect(result.current.subject).not.toContain('{vacancy}')
+  })
+
+  // Agency token reads the tenant's company_name setting, falls back to empty.
+  it('fills {agency} from the company_name setting, defaults to empty', async () => {
+    settingsFixture = { application_proposal: JSON.stringify({ body_template: 'Agency: {agency}' }) }
+    const { result } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.contactsLoading).toBe(false))
+    expect(result.current.body).toBe('Agency: ')
+
+    // Now re-render with the setting present
+    settingsFixture = { company_name: 'My Company GmbH', application_proposal: JSON.stringify({ body_template: 'Agency: {agency}' }) }
+    const { result: result2 } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result2.current.contactsLoading).toBe(false))
+    expect(result2.current.body).toBe('Agency: My Company GmbH')
   })
 })
