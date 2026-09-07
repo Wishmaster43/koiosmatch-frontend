@@ -23,6 +23,7 @@ vi.mock('@/lib/useLocations', () => ({
 const createDevice = vi.fn()
 let mockReturn: Record<string, unknown>
 let capturedBasePath: string | undefined
+vi.mock('@/components/whatsappWeb/useWhatsAppWebHealth', () => ({ useWhatsAppWebHealth: () => ({ gateway: null, gatewayDown: false, loading: false }) }))
 vi.mock('@/components/whatsappWeb/useWhatsAppWeb', () => ({
   useWhatsAppWeb: (basePath: string) => { capturedBasePath = basePath; return mockReturn },
 }))

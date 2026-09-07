@@ -14,6 +14,8 @@ import { useAuth } from '@/context/AuthContext'
 import { useLocations } from '@/lib/useLocations'
 import { useWhatsAppWeb } from '@/components/whatsappWeb/useWhatsAppWeb'
 import WhatsAppWebDevice from '@/components/whatsappWeb/WhatsAppWebDevice'
+import WhatsAppWebGatewayBanner from '@/components/whatsappWeb/WhatsAppWebGatewayBanner'
+import { useWhatsAppWebHealth } from '@/components/whatsappWeb/useWhatsAppWebHealth'
 import type { WhatsAppDevice } from '@/components/whatsappWeb/statusMeta'
 import WaWebQueueLimits from './WaWebQueueLimits'
 import { FieldRow, SelectField, TextField } from '@/components/forms/fields'
@@ -37,8 +39,10 @@ export default function WhatsAppWebNumbersSettings() {
   const locations = useLocations()
 
   // Devices + mutations, generalised from the profile hook via basePath (K-195).
-  const { devices, phase, busyId, notEnabledId, createDevice, connect, disconnect, remove } =
+  const { devices, phase, busyId, notEnabledId, unreachableId, createDevice, connect, disconnect, remove } =
     useWhatsAppWeb(SETTINGS_BASE_PATH)
+  // Gateway verdict from /whatsapp-web/health: banner + linking off while it is down.
+  const { gateway, gatewayDown } = useWhatsAppWebHealth()
   const rows = devices as BranchDevice[]
 
   // Add-form local state: which location, optional label/phone.
@@ -78,6 +82,7 @@ export default function WhatsAppWebNumbersSettings() {
 
       {phase === 'ready' && (
         <>
+          <WhatsAppWebGatewayBanner gateway={gateway} />
           {/* Empty state */}
           {rows.length === 0 && <CalloutBox variant="info">{t('whatsappWeb.empty')}</CalloutBox>}
 
@@ -91,6 +96,8 @@ export default function WhatsAppWebNumbersSettings() {
                 device={device}
                 busy={busyId === device.id}
                 notEnabled={notEnabledId === device.id}
+                unreachable={unreachableId === device.id}
+                gatewayDown={gatewayDown}
                 onConnect={connect}
                 onDisconnect={async id => { if (!(await disconnect(id))) setSubmitError(t('whatsappWeb.actionError')) }}
                 onRemove={async id => { if (!(await remove(id))) setSubmitError(t('whatsappWeb.actionError')) }}
@@ -119,7 +126,7 @@ export default function WhatsAppWebNumbersSettings() {
                 </FieldRow>
                 {submitError && <CalloutBox variant="danger">{submitError}</CalloutBox>}
                 <div>
-                  <Button variant="primary" size="sm" onClick={handleAdd} disabled={!locationId || busyId === 'new'}>
+                  <Button variant="primary" size="sm" onClick={handleAdd} disabled={!locationId || busyId === 'new' || gatewayDown}>
                     {busyId === 'new' ? <Spinner size={13} /> : <Plus size={13} />}
                     {t('whatsappWeb.submit')}
                   </Button>

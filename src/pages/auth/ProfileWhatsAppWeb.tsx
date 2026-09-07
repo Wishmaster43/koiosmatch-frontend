@@ -12,6 +12,8 @@ import { useTranslation } from 'react-i18next'
 import { Plus } from 'lucide-react'
 import { useWhatsAppWeb } from '@/components/whatsappWeb/useWhatsAppWeb'
 import WhatsAppWebDevice from '@/components/whatsappWeb/WhatsAppWebDevice'
+import WhatsAppWebGatewayBanner from '@/components/whatsappWeb/WhatsAppWebGatewayBanner'
+import { useWhatsAppWebHealth } from '@/components/whatsappWeb/useWhatsAppWebHealth'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import CalloutBox from '@/components/ui/CalloutBox'
@@ -22,7 +24,9 @@ import { BodyText, Caption } from '@/components/ui/typography'
 // the four UI states plus the honest "module/permission off" case.
 export default function ProfileWhatsAppWeb() {
   const { t } = useTranslation('auth')
-  const { devices, phase, busyId, notEnabledId, createDevice, connect, disconnect, remove } = useWhatsAppWeb()
+  const { devices, phase, busyId, notEnabledId, unreachableId, createDevice, connect, disconnect, remove } = useWhatsAppWeb()
+  // Gateway verdict from /whatsapp-web/health: banner + linking off while it is down.
+  const { gateway, gatewayDown } = useWhatsAppWebHealth()
   // A failed create/disconnect/remove says so (the hook resolves false instead of throwing).
   const [actionFailed, setActionFailed] = useState(false)
   const guarded = async (p: Promise<boolean>) => { setActionFailed(!(await p)) }
@@ -54,6 +58,7 @@ export default function ProfileWhatsAppWeb() {
       {phase === 'ready' && (
         <>
         {actionFailed && <div style={{ marginBottom: 12 }}><CalloutBox variant="danger">{t('profile.whatsappWeb.actionError')}</CalloutBox></div>}
+        <WhatsAppWebGatewayBanner gateway={gateway} />
         <>
           {devices.length === 0 && (
             <div style={{ marginBottom: 12 }}><CalloutBox variant="info">{t('profile.whatsappWeb.empty')}</CalloutBox></div>
@@ -65,13 +70,15 @@ export default function ProfileWhatsAppWeb() {
               device={d}
               busy={busyId === d.id}
               notEnabled={notEnabledId === d.id}
+              unreachable={unreachableId === d.id}
+              gatewayDown={gatewayDown}
               onConnect={connect}
               onDisconnect={id => guarded(disconnect(id))}
               onRemove={id => guarded(remove(id))}
             />
           ))}
 
-          <Button variant="primary" size="sm" onClick={() => guarded(createDevice())} disabled={busyId === 'new'}>
+          <Button variant="primary" size="sm" onClick={() => guarded(createDevice())} disabled={busyId === 'new' || gatewayDown}>
             {busyId === 'new' ? <Spinner size={14} /> : <Plus size={14} />}
             {t('profile.whatsappWeb.addDevice')}
           </Button>

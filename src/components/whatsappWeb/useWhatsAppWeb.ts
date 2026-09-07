@@ -23,12 +23,18 @@
  * which polls only while a device is transient and settles once none are (A-3).
  * A 403/404 on the list means the module/permission is off (calm 'unavailable',
  * not an error); a 501 from connect() means the gateway isn't configured and must
- * surface as a typed 'notEnabled' error on that device, never a silent catch.
+ * surface as a typed 'notEnabled' error on that device, never a silent catch; a 503
+ * (or any 5xx / dropped connection) means the gateway is configured but not
+ * reachable and surfaces as 'unreachable' on that device; every other failure
+ * becomes a toast with the server's own message.
  */
 import { useCallback, useState } from 'react'
 import type { AxiosResponse } from 'axios'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import { TRANSIENT_STATUSES } from './statusMeta'
 import type { WhatsAppDevice } from './statusMeta'
 
@@ -54,8 +60,11 @@ function readList(res: AxiosResponse | undefined): WhatsAppDevice[] {
 export function useWhatsAppWeb(basePath: string = '/profile/whatsapp-web') {
   // busyId flags the row (or 'new') being mutated — UI state, not part of the cache.
   const [busyId, setBusyId] = useState<DeviceId | null>(null)
-  // notEnabled flags the device whose connect() came back 501 (gateway not configured).
+  // notEnabled flags the device whose connect() came back 501 (gateway not configured);
+  // unreachable flags the one whose gateway call failed with a 5xx or never connected.
   const [notEnabledId, setNotEnabledId] = useState<DeviceId | null>(null)
+  const [unreachableId, setUnreachableId] = useState<DeviceId | null>(null)
+  const { t } = useTranslation('common')
 
   // Device list. refetchInterval polls only while a device is still connecting/awaiting
   // a QR scan, then stops. A 403/404 = module/permission off (calm 'unavailable'), no retry.
@@ -93,25 +102,31 @@ export function useWhatsAppWeb(basePath: string = '/profile/whatsapp-web') {
   const createDevice = useCallback((body?: Record<string, unknown>) =>
     run('new', () => (body ? api.post(basePath, body) : api.post(basePath))), [run, basePath])
 
-  // Connect: a 501 means the gateway isn't configured — surface it on the row
-  // instead of letting run()'s catch swallow it silently.
+  // Connect: a 501 means the gateway isn't configured and a 5xx (or a dropped
+  // connection, no status at all) means it is configured but not reachable — both
+  // surface on the row; anything else is a toast. Never a silent catch.
   const connect = useCallback(async (id: WhatsAppDevice['id']) => {
     setNotEnabledId(null)
+    setUnreachableId(null)
     setBusyId(id)
     try {
       await api.post(`${basePath}/${id}/connect`)
       await refetch()
     } catch (e) {
-      if (statusOf(e) === 501) setNotEnabledId(id)
+      const status = statusOf(e)
+      if (status === 501) setNotEnabledId(id)
+      else if (status == null || status >= 500) setUnreachableId(id)
+      else notifyError(extractApiError(e, t('actionFailed')))
+      await refetch().catch(() => undefined)
     } finally {
       setBusyId(null)
     }
-  }, [refetch, basePath])
+  }, [refetch, basePath, t])
 
   // Disconnect this device; shares run()'s busy-tracking + error handling.
   const disconnect = useCallback((id: WhatsAppDevice['id']) => run(id, () => api.post(`${basePath}/${id}/disconnect`)), [run, basePath])
   // Remove this device entirely; shares run()'s busy-tracking + error handling.
   const remove      = useCallback((id: WhatsAppDevice['id']) => run(id, () => api.delete(`${basePath}/${id}`)), [run, basePath])
 
-  return { devices, phase, busyId, notEnabledId, createDevice, connect, disconnect, remove }
+  return { devices, phase, busyId, notEnabledId, unreachableId, createDevice, connect, disconnect, remove }
 }

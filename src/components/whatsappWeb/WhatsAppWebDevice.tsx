@@ -19,13 +19,17 @@ interface WhatsAppWebDeviceProps {
   device: WhatsAppDevice
   busy: boolean
   notEnabled: boolean
+  // The last connect() on this row failed against the gateway (5xx / no answer).
+  unreachable?: boolean
+  // Linking is off while the gateway is not configured or not answering (health).
+  gatewayDown?: boolean
   onConnect: (id: WhatsAppDevice['id']) => void
   onDisconnect: (id: WhatsAppDevice['id']) => void
   onRemove: (id: WhatsAppDevice['id']) => void
 }
 
 // One WhatsApp Web device row: status dot/label, QR/connecting block, and the connect/disconnect/remove actions.
-export default function WhatsAppWebDevice({ device, busy, notEnabled, onConnect, onDisconnect, onRemove }: WhatsAppWebDeviceProps) {
+export default function WhatsAppWebDevice({ device, busy, notEnabled, unreachable = false, gatewayDown = false, onConnect, onDisconnect, onRemove }: WhatsAppWebDeviceProps) {
   const { t } = useTranslation('auth')
   const { formatDateTime } = useDateFormat()
   // Resolve the dot colour + label for this status (fallback: disconnected).
@@ -66,7 +70,7 @@ export default function WhatsAppWebDevice({ device, busy, notEnabled, onConnect,
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
           {/* Link is offered only for a fully disconnected device. */}
           {device.status === 'disconnected' && (
-            <Button variant="secondary" size="sm" onClick={() => onConnect(device.id)} disabled={busy}>
+            <Button variant="secondary" size="sm" onClick={() => onConnect(device.id)} disabled={busy || gatewayDown}>
               {busy ? <Spinner size={13} /> : <MessageCircle size={13} />}
               {t('profile.whatsappWeb.connect')}
             </Button>
@@ -90,6 +94,13 @@ export default function WhatsAppWebDevice({ device, busy, notEnabled, onConnect,
       {notEnabled && (
         <div style={{ marginTop: 10 }}>
           <CalloutBox variant="info">{t('profile.whatsappWeb.notEnabled')}</CalloutBox>
+        </div>
+      )}
+
+      {/* Gateway configured but not answering on connect() — a warning, never a raw server error. */}
+      {unreachable && !notEnabled && (
+        <div style={{ marginTop: 10 }}>
+          <CalloutBox variant="warning">{t('profile.whatsappWeb.gatewayUnreachableRow')}</CalloutBox>
         </div>
       )}
 

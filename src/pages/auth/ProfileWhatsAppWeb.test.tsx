@@ -8,6 +8,7 @@ import { useWhatsAppWeb } from '@/components/whatsappWeb/useWhatsAppWeb'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }), initReactI18next: { type: '3rdParty', init: () => {} } }))
 vi.mock('@/components/whatsappWeb/useWhatsAppWeb', () => ({ useWhatsAppWeb: vi.fn() }))
+vi.mock('@/components/whatsappWeb/useWhatsAppWebHealth', () => ({ useWhatsAppWebHealth: () => ({ gateway: null, gatewayDown: false, loading: false }) }))
 
 const baseHook = {
   devices: [] as unknown[], phase: 'loading' as string, busyId: null, notEnabledId: null,

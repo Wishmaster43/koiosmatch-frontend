@@ -12,6 +12,9 @@ import { useWhatsAppWeb } from './useWhatsAppWeb'
 import api from '@/lib/api'
 
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn(), post: vi.fn(), delete: vi.fn() } }))
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }), initReactI18next: { type: '3rdParty', init: () => {} } }))
+import { notifyError } from '@/lib/notify'
 
 afterEach(() => vi.clearAllMocks())
 
@@ -178,4 +181,40 @@ describe('useWhatsAppWeb', () => {
       expect(api.get).toHaveBeenCalledTimes(2)
     })
   })
+  it('connect() 503 (gateway not answering) surfaces as unreachableId, never a silent catch', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [{ id: 7, status: 'disconnected' }] } })
+    vi.mocked(api.post).mockRejectedValue({ response: { status: 503, data: { message: 'WhatsApp-gateway is niet bereikbaar.' } } })
+    const { result } = renderHook(() => useWhatsAppWeb(), { wrapper })
+    await waitFor(() => expect(result.current.phase).toBe('ready'))
+
+    await act(async () => { await result.current.connect(7) })
+
+    expect(result.current.unreachableId).toBe(7)
+    expect(result.current.notEnabledId).toBeNull()
+    expect(notifyError).not.toHaveBeenCalled()
+  })
+
+  it('connect() with a dropped connection (no status) also reads as unreachable', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [{ id: 7, status: 'disconnected' }] } })
+    vi.mocked(api.post).mockRejectedValue(new Error('Network Error'))
+    const { result } = renderHook(() => useWhatsAppWeb(), { wrapper })
+    await waitFor(() => expect(result.current.phase).toBe('ready'))
+
+    await act(async () => { await result.current.connect(7) })
+
+    expect(result.current.unreachableId).toBe(7)
+  })
+
+  it('connect() with any other failure toasts the server message', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [{ id: 7, status: 'disconnected' }] } })
+    vi.mocked(api.post).mockRejectedValue({ response: { status: 422, data: { message: 'Nummer al gekoppeld.' } } })
+    const { result } = renderHook(() => useWhatsAppWeb(), { wrapper })
+    await waitFor(() => expect(result.current.phase).toBe('ready'))
+
+    await act(async () => { await result.current.connect(7) })
+
+    expect(result.current.unreachableId).toBeNull()
+    expect(notifyError).toHaveBeenCalledWith('Nummer al gekoppeld.')
+  })
+
 })

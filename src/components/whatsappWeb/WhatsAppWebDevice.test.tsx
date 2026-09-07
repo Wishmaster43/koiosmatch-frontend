@@ -76,3 +76,14 @@ it('reads the warmup object (stage + daily cap) when the server ships it', () =>
   expect(screen.getByText(/^profile\.whatsappWeb\.warmup\.1:.*nieuw nummer/)).toBeInTheDocument()
   expect(screen.getByText(/^profile\.whatsappWeb\.dailyCap:.*"cap":5/)).toBeInTheDocument()
 })
+
+// Gateway handling on the row: the unreachable warning and linking switched off while the gateway is down.
+it('unreachable: shows the gateway warning on the row', () => {
+  render(<WhatsAppWebDevice device={baseDevice} busy={false} notEnabled={false} unreachable onConnect={noop} onDisconnect={noop} onRemove={noop} />)
+  expect(screen.getByText('profile.whatsappWeb.gatewayUnreachableRow')).toBeInTheDocument()
+})
+
+it('gatewayDown: the Connect button is disabled', () => {
+  render(<WhatsAppWebDevice device={baseDevice} busy={false} notEnabled={false} gatewayDown onConnect={noop} onDisconnect={noop} onRemove={noop} />)
+  expect(screen.getByText('profile.whatsappWeb.connect').closest('button')).toBeDisabled()
+})
