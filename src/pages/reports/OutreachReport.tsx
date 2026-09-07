@@ -18,13 +18,10 @@
  * entity record page.
  */
 import { useState } from 'react'
-import { BodyText } from '@/components/ui/typography'
 import { formatPercent } from '@/lib/formatters'
 import { useTranslation } from 'react-i18next'
 import { buildReportQueryParams, EMPTY_REPORT_FILTERS } from './reportFilterParams'
 import ReportKpiBand from './ReportKpiBand'
-import { reportCardStyle as card } from './ReportSectionCard'
-import ReportStateBlock from './ReportStateBlock'
 import ReportGrid from './ReportGrid'
 import ReportChartCard from './ReportChartCard'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
@@ -40,9 +37,7 @@ import type { ChartDatum } from '@/components/charts/chartTypes'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateOwnerSegment } from '@/types/analytics'
-import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
-import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
-import { resolveReportKpiOrder } from './resolveReportKpiOrder'
+import { useReportKpiOrdering } from './hooks/useReportKpiOrdering'
 import { getCompareSlug } from './reportCompareSupport'
 import { useReportCompare } from './useReportCompare'
 import ReportCompareMetric from './ReportCompareMetric'
@@ -50,6 +45,8 @@ import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
 import type { ReportFilterState } from './reportFilterParams'
 import OutreachDepthSections from './depth/OutreachDepthSections'
+import { ReportStateFlow } from './components/ReportStateFlow'
+import { ReportDataWindow } from './components/ReportDataWindow'
 
 // The plain single-value XOR axes; `assignee` has its own D2 shape below.
 type Axis = 'campaign' | 'channel' | 'status' | 'outcome'
@@ -168,11 +165,7 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key
   // has vanished — RAPPORT-KPI-INSTELBAAR).
-  const settingsValues = useAllSettings()
-  const catalogKeys = getReportKpiCatalog('outreach').map(c => c.key)
-  const defaultOrder = getReportKpiDefaultOrder('outreach')
-  const stored = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey('outreach'), undefined)
-  const { order: kpiOrder, fellBack } = resolveReportKpiOrder(stored, catalogKeys, defaultOrder)
+  const { kpiOrder, fellBack } = useReportKpiOrdering('outreach')
   const kpis: KpiSpec[] = kpiOrder.map(key => kpiByKey[key]).filter((k): k is KpiSpec => k != null)
 
   return (
@@ -185,20 +178,23 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
       {/* The report's data window, rendered prominently from the RESPONSE —
           DD-MM-YYYY (never ISO, §3B DATUM-1). */}
       {!loading && !error && data && (
-        <BodyText as="div" style={{ fontWeight: 500, marginBottom: 12 }}>
-          {t('outreach.window', { from: formatDate(data.from), to: formatDate(data.to) })}
-        </BodyText>
+        <ReportDataWindow
+          from={formatDate(data.from)}
+          to={formatDate(data.to)}
+          reportKey="outreach"
+          totalCompare={totalCompare}
+        />
       )}
 
-      {(!hasData || !data) && (
-        <div style={{ ...card, overflow: 'hidden' }}>
-          <ReportStateBlock
-            loading={loading} error={error} empty={!loading && !error && total === 0}
-            loadingLabel={t('outreach.loading')} errorLabel={t('outreach.error')} emptyLabel={t('outreach.empty')}
-            onRetry={() => refetch()}
-          />
-        </div>
-      )}
+      <ReportStateFlow
+        loading={loading}
+        error={error}
+        empty={!loading && !error && total === 0}
+        loadingLabel={t('outreach.loading')}
+        errorLabel={t('outreach.error')}
+        emptyLabel={t('outreach.empty')}
+        onRetry={() => refetch()}
+      />
 
       {hasData && data && (
         <ReportGrid>

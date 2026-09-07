@@ -18,11 +18,8 @@
  */
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { BodyText } from '@/components/ui/typography'
 import ReportKpiBand from './ReportKpiBand'
 import ReportSwitchBar from './ReportSwitchBar'
-import { reportCardStyle as card } from './ReportSectionCard'
-import ReportStateBlock from './ReportStateBlock'
 import ReportGrid from './ReportGrid'
 import ReportChartCard from './ReportChartCard'
 import ReportDrillDrawer from './ReportDrillDrawer'
@@ -44,14 +41,13 @@ import type { ReportFilterState } from './reportFilterParams'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateSegment, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
-import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
-import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
-import type { ReportKpiScopeId } from './kpiCatalog'
-import { resolveReportKpiOrder } from './resolveReportKpiOrder'
+import { useReportKpiOrdering } from './hooks/useReportKpiOrdering'
 import { useReportCompareData } from './hooks/useReportCompareData'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
+import { ReportStateFlow } from './components/ReportStateFlow'
+import { ReportDataWindow } from './components/ReportDataWindow'
 
 // The five drillable axes; `param` is the XOR query key the drill/advice endpoints expect.
 type Axis = 'status' | 'phase' | 'source' | 'owner' | 'branch'
@@ -191,12 +187,8 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
     branch_none: { axis: 'branch', axisLabel: t('candidates.axes.branch'), segs: (data?.by_branch ?? []).filter(s => s.value === 'none').map(s => ({ key: s.value, label: s.label, count: s.count })) },
     source_none: { axis: 'source', axisLabel: t('candidates.axes.source'), segs: (data?.by_source ?? []).filter(s => s.value === 'none').map(s => ({ key: s.value, label: s.label, count: s.count })) },
   }), [data, t])
-  const kpiScope = view as ReportKpiScopeId
-  const settingsValues = useAllSettings()
-  const catalogKeys = getReportKpiCatalog(kpiScope).map(c => c.key)
-  const defaultOrder = getReportKpiDefaultOrder(kpiScope)
-  const stored = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey(kpiScope), undefined)
-  const { order: kpiOrder, fellBack } = resolveReportKpiOrder(stored, catalogKeys, defaultOrder)
+  const kpiScope = view
+  const { kpiOrder, fellBack } = useReportKpiOrdering(kpiScope)
 
   const openKpiParams = drill?.rowsParams as Record<string, unknown> | undefined
   let kpis: KpiSpec[]
@@ -250,23 +242,24 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
           delta beside it — the comparison explains the page TOTAL, so it lives
           on the total's own line, never mixed into a differently-defined card. */}
       {!loading && !error && data && (
-        <BodyText as="div" style={{ fontWeight: 500, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          {t(isLeads ? 'leads.window' : 'candidates.window', { from: formatDate(data.from), to: formatDate(data.to) })}
-          {!isLeads && totalCompare && <ReportCompareMetric metric={totalCompare} polarity="up-good" />}
-        </BodyText>
+        <ReportDataWindow
+          from={formatDate(data.from)}
+          to={formatDate(data.to)}
+          reportKey={isLeads ? 'leads' : 'candidates'}
+          isLeads={isLeads}
+          totalCompare={!isLeads ? totalCompare : undefined}
+        />
       )}
 
-      {(!hasData || !data) && (
-        <div style={{ ...card, overflow: 'hidden' }}>
-          <ReportStateBlock
-            loading={loading} error={error} empty={!loading && !error && total === 0}
-            loadingLabel={t(isLeads ? 'leads.loading' : 'candidates.loading')}
-            errorLabel={t(isLeads ? 'leads.error' : 'candidates.error')}
-            emptyLabel={t(isLeads ? 'leads.empty' : 'candidates.empty')}
-            onRetry={() => refetch()}
-          />
-        </div>
-      )}
+      <ReportStateFlow
+        loading={loading}
+        error={error}
+        empty={!loading && !error && total === 0}
+        loadingLabel={t(isLeads ? 'leads.loading' : 'candidates.loading')}
+        errorLabel={t(isLeads ? 'leads.error' : 'candidates.error')}
+        emptyLabel={t(isLeads ? 'leads.empty' : 'candidates.empty')}
+        onRetry={() => refetch()}
+      />
 
       {hasData && data && (
         <ReportGrid>

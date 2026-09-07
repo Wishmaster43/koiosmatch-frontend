@@ -26,8 +26,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
-import { reportCardStyle as card } from './ReportSectionCard'
-import ReportStateBlock from './ReportStateBlock'
 import ReportGrid from './ReportGrid'
 import ReportChartCard from './ReportChartCard'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
@@ -43,10 +41,10 @@ import { BodyText, Caption, Mono } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat } from '@/lib/formatters'
 import type { ReportPeriod, WhatsappSegment } from '@/types/analytics'
-import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
-import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
-import { resolveReportKpiOrder } from './resolveReportKpiOrder'
+import { useReportKpiOrdering } from './hooks/useReportKpiOrdering'
 import type { ReportFilterState } from './reportFilterParams'
+import { ReportStateFlow } from './components/ReportStateFlow'
+import { ReportDataWindow } from './components/ReportDataWindow'
 
 // Semantic colour per server key, applied only when the count is non-zero (§4:
 // colour carries meaning — a calm zero stays uncoloured). avg_first_response_
@@ -166,11 +164,7 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
 
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored).
-  const settingsValues = useAllSettings()
-  const catalogKeys = getReportKpiCatalog('whatsapp').map(c => c.key)
-  const defaultOrder = getReportKpiDefaultOrder('whatsapp')
-  const stored = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey('whatsapp'), undefined)
-  const { order: kpiOrder, fellBack } = resolveReportKpiOrder(stored, catalogKeys, defaultOrder)
+  const { kpiOrder, fellBack } = useReportKpiOrdering('whatsapp')
   const kpis: KpiSpec[] = kpiOrder.map(key => kpiByKey[key]).filter((k): k is KpiSpec => k != null)
 
   return (
@@ -183,20 +177,22 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
       {/* The report's data window, rendered prominently from the RESPONSE —
           DD-MM-YYYY (never ISO, §3B DATUM-1). */}
       {!loading && !error && data && (
-        <BodyText style={{ fontWeight: 500, marginBottom: 12 }}>
-          {t('whatsapp.window', { from: formatDate(data.meta.from), to: formatDate(data.meta.to) })}
-        </BodyText>
+        <ReportDataWindow
+          from={formatDate(data.meta.from)}
+          to={formatDate(data.meta.to)}
+          reportKey="whatsapp"
+        />
       )}
 
-      {(!hasData || !data) && (
-        <div style={{ ...card, overflow: 'hidden' }}>
-          <ReportStateBlock
-            loading={loading} error={error} empty={!loading && !error && total === 0}
-            loadingLabel={t('whatsapp.loading')} errorLabel={t('whatsapp.error')} emptyLabel={t('whatsapp.empty')}
-            onRetry={() => refetch()}
-          />
-        </div>
-      )}
+      <ReportStateFlow
+        loading={loading}
+        error={error}
+        empty={!loading && !error && total === 0}
+        loadingLabel={t('whatsapp.loading')}
+        errorLabel={t('whatsapp.error')}
+        emptyLabel={t('whatsapp.empty')}
+        onRetry={() => refetch()}
+      />
 
       {hasData && data && (
         <ReportGrid>

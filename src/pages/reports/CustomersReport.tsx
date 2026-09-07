@@ -23,8 +23,6 @@ import { useTranslation } from 'react-i18next'
 import { BodyText } from '@/components/ui/typography'
 import ReportKpiBand from './ReportKpiBand'
 import ReportSwitchBar from './ReportSwitchBar'
-import { reportCardStyle as card } from './ReportSectionCard'
-import ReportStateBlock from './ReportStateBlock'
 import ReportGrid from './ReportGrid'
 import ReportChartCard from './ReportChartCard'
 import ReportDrillDrawer from './ReportDrillDrawer'
@@ -45,14 +43,13 @@ import type { ChartDatum } from '@/components/charts/chartTypes'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateSegment, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
-import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
-import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey, CUSTOMERS_SIGNAL_LABEL_KEYS } from './kpiCatalog'
-import type { ReportKpiScopeId } from './kpiCatalog'
-import { resolveReportKpiOrder } from './resolveReportKpiOrder'
+import { useReportKpiOrdering } from './hooks/useReportKpiOrdering'
+import { CUSTOMERS_SIGNAL_LABEL_KEYS, type ReportKpiScopeId } from './kpiCatalog'
 import { useReportCompareData } from './hooks/useReportCompareData'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
+import { ReportStateFlow } from './components/ReportStateFlow'
 import { useNavigation } from '@/context/NavigationContext'
 import CustomerDepthSections from './depth/CustomerDepthSections'
 
@@ -200,11 +197,7 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
   // `view` is constrained to VIEWS at runtime (useReportSwitch); both members
   // are valid KPI-catalog scope ids (kpiCatalog.ts), so the cast is safe.
   const kpiScope = view as ReportKpiScopeId
-  const settingsValues = useAllSettings()
-  const catalogKeys = getReportKpiCatalog(kpiScope).map(c => c.key)
-  const defaultKpiOrder = getReportKpiDefaultOrder(kpiScope)
-  const storedKpiOrder = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey(kpiScope), undefined)
-  const { order: kpiOrder, fellBack } = resolveReportKpiOrder(storedKpiOrder, catalogKeys, defaultKpiOrder)
+  const { kpiOrder, fellBack } = useReportKpiOrdering(kpiScope)
 
   // KPI-CUSTOMERS-SIGNALS-1 (mirrors TasksReport/OutreachReport's
   // kpiByServerKey idiom): the Klanten position's cards 2-9 are the server's
@@ -284,17 +277,15 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
         </BodyText>
       )}
 
-      {(!hasData || !data) && (
-        <div style={{ ...card, overflow: 'hidden' }}>
-          <ReportStateBlock
-            loading={loading} error={error} empty={!loading && !error && total === 0}
-            loadingLabel={t(isProspects ? 'prospects.loading' : 'customers.loading')}
-            errorLabel={t(isProspects ? 'prospects.error' : 'customers.error')}
-            emptyLabel={t(isProspects ? 'prospects.empty' : 'customers.empty')}
-            onRetry={() => refetch()}
-          />
-        </div>
-      )}
+      <ReportStateFlow
+        loading={loading}
+        error={error}
+        empty={!loading && !error && total === 0}
+        loadingLabel={t(isProspects ? 'prospects.loading' : 'customers.loading')}
+        errorLabel={t(isProspects ? 'prospects.error' : 'customers.error')}
+        emptyLabel={t(isProspects ? 'prospects.empty' : 'customers.empty')}
+        onRetry={() => refetch()}
+      />
 
       {hasData && data && (
         <ReportGrid>

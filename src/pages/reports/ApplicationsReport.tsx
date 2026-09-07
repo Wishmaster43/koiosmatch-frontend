@@ -12,8 +12,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
-import { reportCardStyle as card, ReportSectionCard, ReportSectionCardBody, ReportSection } from './ReportSectionCard'
-import ReportStateBlock from './ReportStateBlock'
+import { ReportSectionCard, ReportSectionCardBody, ReportSection } from './ReportSectionCard'
 import ReportGrid, { ReportGridItem } from './ReportGrid'
 import ReportChartCard from './ReportChartCard'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
@@ -32,18 +31,18 @@ import BarChartCard from '@/components/charts/BarChartCard'
 import type { ChartDatum } from '@/components/charts/chartTypes'
 import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat } from '@/lib/formatters'
-import { Caption, BodyText } from '@/components/ui/typography'
+import { Caption } from '@/components/ui/typography'
 import type {
   ReportPeriod, CandidateSegment, CandidateOwnerSegment,
   ApplicationTopSegment, ApplicationBucketCounts, ApplicationStageDurationSegment, ApplicationStageSegment,
 } from '@/types/analytics'
-import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
-import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
-import { resolveReportKpiOrder } from './resolveReportKpiOrder'
+import { useReportKpiOrdering } from './hooks/useReportKpiOrdering'
 import { useReportCompareData } from './hooks/useReportCompareData'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
+import { ReportStateFlow } from './components/ReportStateFlow'
+import { ReportDataWindow } from './components/ReportDataWindow'
 
 // The nine fixed KPI keys the live backend returns (ApplicationKpisReport::CARDS,
 // RAPPORT-APPS-VERDIEPING-1) in camelCase label form (applications.kpi.*) — the
@@ -236,11 +235,7 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
 
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored) — mirrors whatsapp.
-  const settingsValues = useAllSettings()
-  const catalogKeys = getReportKpiCatalog('applications').map(c => c.key)
-  const defaultOrder = getReportKpiDefaultOrder('applications')
-  const stored = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey('applications'), undefined)
-  const { order: kpiOrder, fellBack } = resolveReportKpiOrder(stored, catalogKeys, defaultOrder)
+  const { kpiOrder, fellBack } = useReportKpiOrdering('applications')
   // Total applications rising is unambiguously good, mirrors CandidatesReport.
   if (totalCompare && kpiByKey.total) kpiByKey.total = { ...kpiByKey.total, sub: <ReportCompareMetric metric={totalCompare} polarity="up-good" /> }
   const kpis: KpiSpec[] = kpiOrder.map(key => kpiByKey[key]).filter((k): k is KpiSpec => k != null)
@@ -254,20 +249,23 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
 
       {/* The report's data window, rendered prominently — DD-MM-YYYY (never ISO, §3B). */}
       {!loading && !error && data && (
-        <BodyText as="div" style={{ fontWeight: 500, marginBottom: 12 }}>
-          {t('applications.window', { from: formatDate(data.from), to: formatDate(data.to) })}
-        </BodyText>
+        <ReportDataWindow
+          from={formatDate(data.from)}
+          to={formatDate(data.to)}
+          reportKey="applications"
+          totalCompare={totalCompare}
+        />
       )}
 
-      {(!hasData || !data) && (
-        <div style={{ ...card, overflow: 'hidden' }}>
-          <ReportStateBlock
-            loading={loading} error={error} empty={!loading && !error && total === 0}
-            loadingLabel={t('applications.loading')} errorLabel={t('applications.error')} emptyLabel={t('applications.empty')}
-            onRetry={() => refetch()}
-          />
-        </div>
-      )}
+      <ReportStateFlow
+        loading={loading}
+        error={error}
+        empty={!loading && !error && total === 0}
+        loadingLabel={t('applications.loading')}
+        errorLabel={t('applications.error')}
+        emptyLabel={t('applications.empty')}
+        onRetry={() => refetch()}
+      />
 
       {hasData && data && (
         <ReportGrid>

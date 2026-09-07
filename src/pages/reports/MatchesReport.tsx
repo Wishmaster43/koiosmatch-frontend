@@ -14,8 +14,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
-import ReportStateBlock from './ReportStateBlock'
-import { reportCardStyle as card } from './ReportSectionCard'
 import ReportGrid from './ReportGrid'
 import ReportChartCard from './ReportChartCard'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
@@ -31,16 +29,15 @@ import type { ChartDatum } from '@/components/charts/chartTypes'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateTimeseriesPoint, CandidateSegment, MatchTerminationReasonSegment } from '@/types/analytics'
-import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
-import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
-import { resolveReportKpiOrder } from './resolveReportKpiOrder'
+import { useReportKpiOrdering } from './hooks/useReportKpiOrdering'
 import { useReportCompareData } from './hooks/useReportCompareData'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
 import SharedStatTile from '@/components/ui/StatTile'
-import { BodyText } from '@/components/ui/typography'
 import { renderKpiValue } from './renderKpiValue'
+import { ReportStateFlow } from './components/ReportStateFlow'
+import { ReportDataWindow } from './components/ReportDataWindow'
 
 // One match stat tile; with an onClick it becomes a drillable surface (keyboard
 // operable — same affordance pattern as SegmentBars).
@@ -206,11 +203,7 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key
   // has vanished — RAPPORT-KPI-INSTELBAAR).
-  const settingsValues = useAllSettings()
-  const catalogKeys = getReportKpiCatalog('matches').map(c => c.key)
-  const defaultOrder = getReportKpiDefaultOrder('matches')
-  const stored = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey('matches'), undefined)
-  const { order: kpiOrder, fellBack } = resolveReportKpiOrder(stored, catalogKeys, defaultOrder)
+  const { kpiOrder, fellBack } = useReportKpiOrdering('matches')
   const kpis: KpiSpec[] = kpiOrder.map(key => kpiByKey[key]).filter((k): k is KpiSpec => k != null)
 
   return (
@@ -224,20 +217,23 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
           DD-MM-YYYY (never ISO, §3B DATUM-1). 500 = the top of §4's body/label
           weight range: an emphasized data line, not a heading. */}
       {!loading && !error && data && (
-        <BodyText as="div" style={{ fontWeight: 500, marginBottom: 12 }}>
-          {t('matches.window', { from: formatDate(data.from), to: formatDate(data.to) })}
-        </BodyText>
+        <ReportDataWindow
+          from={formatDate(data.from)}
+          to={formatDate(data.to)}
+          reportKey="matches"
+          totalCompare={totalCompare}
+        />
       )}
 
-      {(loading || error || isEmpty) && (
-        <div style={{ ...card, overflow: 'hidden' }}>
-          <ReportStateBlock
-            loading={loading} error={error} empty={isEmpty}
-            loadingLabel={t('matches.loading')} errorLabel={t('matches.error')} emptyLabel={t('matches.empty')}
-            onRetry={() => refetch()}
-          />
-        </div>
-      )}
+      <ReportStateFlow
+        loading={loading}
+        error={error}
+        empty={isEmpty}
+        loadingLabel={t('matches.loading')}
+        errorLabel={t('matches.error')}
+        emptyLabel={t('matches.empty')}
+        onRetry={() => refetch()}
+      />
 
       {!loading && !error && !isEmpty && data && (
         <ReportGrid>
