@@ -25,7 +25,8 @@ import { updateKoiosModel } from './koiosApi'
 import { tierKeyForModel, findModelOption, resolveModelLabel, resolveModelHint } from '@/lib/koiosModelTiers'
 import { useAuth } from '@/context/AuthContext'
 import SegmentedControl from '@/components/ui/SegmentedControl'
-import { SectionTitle, Mono } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
+import { SectionTitle, Caption, Mono } from '@/components/ui/typography'
 
 // Frozen empty lists so a missing payload keeps one stable identity (memo deps).
 const EMPTY_SELECTABLE = []
@@ -48,6 +49,7 @@ const FLAVOR_TIER_KEYS = ['snel', 'slim', 'max']
 export default function KoiosModelsCard({ models, t, onChanged }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const [pendingPick, setPendingPick] = useState(null)
   // MODEL-IDS PLATFORM-ONLY: only a super admin sees the raw vendor id — Danny's
   // own platform config, never a tenant fact (mirrors the SettingsPage/AppsSettings
   // isSuperAdmin() gate).
@@ -56,11 +58,43 @@ export default function KoiosModelsCard({ models, t, onChanged }) {
   const active = models?.active
   const selectable = models?.selectable ?? EMPTY_SELECTABLE
   const serverOptions = models?.options ?? EMPTY_OPTIONS
+  const costNote = models?.cost_note
   // Honest state (§10 tolerant-by-contract, Opus F2): the backend's Policy keeps
   // `active` inside `selectable` today, but that is a config invariant, not a code
   // one — if it ever breaks, three unmarked radios would silently reproduce the
   // exact "which model is linked?" confusion this card exists to end.
   const activeUnknown = selectable.length > 0 && (active == null || !selectable.includes(active))
+
+  // Find cost_rank for active and candidate models to compare.
+  const getModelCostRank = (model) => findModelOption(model, serverOptions)?.cost_rank ?? 1
+  const activeCostRank = getModelCostRank(active)
+
+  // Handle model selection with costlier-model warning logic.
+  const handleChange = (model) => {
+    if (model === active || saving) return
+    const candidateCostRank = getModelCostRank(model)
+    // If the candidate model costs more, show a warning instead of picking immediately.
+    if (candidateCostRank > activeCostRank) {
+      setPendingPick(model)
+      setError(null)
+    } else {
+      // Equal or cheaper cost goes through immediately.
+      pick(model)
+    }
+  }
+
+  // Confirm the pending costlier-model pick.
+  const confirmPick = async () => {
+    if (pendingPick != null) {
+      await pick(pendingPick)
+      setPendingPick(null)
+    }
+  }
+
+  // Cancel the pending pick.
+  const cancelPick = () => {
+    setPendingPick(null)
+  }
 
   // Pick a tier — no optimism: wait for the server (it validates the whitelist).
   const pick = async (model) => {
@@ -112,7 +146,23 @@ export default function KoiosModelsCard({ models, t, onChanged }) {
       {activeUnknown && (
         <div role="status" style={{ fontSize: 12, color: 'var(--color-warning-text)', marginBottom: 8 }}>{t('models.activeUnknown')}</div>
       )}
-      <SegmentedControl commitOnFocus={false} options={modelOptions} value={active ?? ''} onChange={pick} ariaLabel={t('models.title')} />
+      <SegmentedControl commitOnFocus={false} options={modelOptions} value={pendingPick ?? active ?? ''} onChange={handleChange} ariaLabel={t('models.title')} />
+
+      {costNote && (
+        <Caption style={{ marginTop: 8, display: 'block' }}>{costNote}</Caption>
+      )}
+
+      {pendingPick && (
+        <div style={{ marginTop: 12 }}>
+          <div role="status" style={{ fontSize: 12, color: 'var(--color-warning-text)', marginBottom: 8 }}>
+            {t('models.costlierWarning', { model: resolveModelLabel(pendingPick, serverOptions, t) })}
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Button variant="primary" size="sm" onClick={confirmPick} disabled={saving}>{t('models.costlierConfirm')}</Button>
+            <Button variant="ghost" size="sm" onClick={cancelPick} disabled={saving}>{t('common:cancel')}</Button>
+          </div>
+        </div>
+      )}
 
       {error && <div style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 10 }}>{error}</div>}
     </div>
