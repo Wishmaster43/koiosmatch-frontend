@@ -26,10 +26,11 @@ import SaveButton from '@/components/ui/SaveButton'
 import Spinner from '@/components/ui/Spinner'
 import { SectionTitle, Caption, GroupLabel } from '@/components/ui/typography'
 import TenantBudgetOverride from './TenantBudgetOverride'
+import BillingCardShell from './billing/BillingCardShell'
 import type {
   AdminBillingBudgetsResponse, AdminBillingBudgetsUpdate, BillingBudgetEntry, BillingPackageKey,
 } from '@/types/billingUsage'
-import { PACKAGE_KEYS, card, sub, label, inputWrap, inputStyle } from './billingCardStyles'
+import { PACKAGE_KEYS, label, inputWrap, inputStyle } from './billingCardStyles'
 
 // A package row's editable number, blank = 0 for an empty field.
 // ai_token_budget dropped (PRIJSMODEL-C): read-only ai_tier_key replaces it.
@@ -117,28 +118,14 @@ export default function BillingBudgetsCard() {
     }
   }
 
-  if (phase === 'loading') {
-    return (
-      <div style={card}>
-        <SectionTitle style={{ marginBottom: 4 }}>{t('billingBudgets.title')}</SectionTitle>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>
-      </div>
-    )
-  }
-
-  if (phase === 'error') {
-    return (
-      <div style={card}>
-        <SectionTitle style={{ marginBottom: 4 }}>{t('billingBudgets.title')}</SectionTitle>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('billingBudgets.loadError')}</p>
-      </div>
-    )
-  }
-
   return (
-    <div style={card}>
-      <SectionTitle style={{ marginBottom: 4 }}>{t('billingBudgets.title')}</SectionTitle>
-      <div style={sub}>{t('billingBudgets.subtitle')}</div>
+    <BillingCardShell
+      phase={phase}
+      title={t('billingBudgets.title')}
+      subtitle={t('billingBudgets.subtitle')}
+      loadingLabel={t('common.loadingShort')}
+      errorLabel={t('billingBudgets.loadError')}
+    >
 
       <GroupLabel style={{ marginBottom: 10 }}>{t('billingBudgets.packagesHeading')}</GroupLabel>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
@@ -194,6 +181,6 @@ export default function BillingBudgetsCard() {
           :           <><Save size={13} /> {t('common.save')}</>}
         </SaveButton>
       </div>
-    </div>
+    </BillingCardShell>
   )
 }

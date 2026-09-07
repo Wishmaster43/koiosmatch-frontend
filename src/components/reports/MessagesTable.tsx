@@ -15,6 +15,7 @@ import { TD, SortableTableHead, ReportTableToolbar } from './reportTableChrome'
 import { useReportTableFilter } from './useReportTableFilter'
 import { BodyText, Caption } from '@/components/ui/typography'
 import { useReportList }      from './useReportList'
+import { buildStatusGroup, buildWorkflowGroup } from './reportFilterDefs'
 import type { MessageRow, ReportFilterGroup, SortState } from '@/types/reports'
 import { ChannelBadge, StatusBadge } from './messages/messageParts'
 import MessageDrawer from './messages/MessageDrawer'
@@ -74,27 +75,13 @@ export default function MessagesTable() {
       })
     }
     if (statusOptions.length) {
-      groups.push({
-        key: 'status', label: t('messages.filters.status'),
-        selected: selectedStatuses,
-        options: statusOptions.map(s => ({
-          value: s,
-          label: t(`messages.status.${s?.toLowerCase()}`, { defaultValue: s }),
-          count: rows.filter(r => r.status === s).length,
-        })),
-        onToggle: v => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
-      })
+      groups.push(buildStatusGroup(t, statusOptions, selectedStatuses, rows, 'messages.filters.status',
+        v => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
+        (s: string) => s.toLowerCase?.() ?? s))
     }
     if (workflowOptions.length) {
-      groups.push({
-        key: 'workflow', label: t('messages.filters.workflow'), type: 'search-select',
-        selected: selectedWorkflows,
-        options: workflowOptions.map(w => ({
-          value: w, label: w,
-          count: rows.filter(r => r.workflow_name === w).length,
-        })),
-        onToggle: v => setSelectedWorkflows(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
-      })
+      groups.push(buildWorkflowGroup(t, workflowOptions, selectedWorkflows, rows, 'messages.filters.workflow',
+        v => setSelectedWorkflows(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])))
     }
     return groups
   }, [t, channelOptions, statusOptions, workflowOptions, selectedChannels, selectedStatuses, selectedWorkflows, rows])

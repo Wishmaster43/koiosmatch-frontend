@@ -17,8 +17,9 @@ import { useNumberFormat } from '@/lib/formatters'
 import SaveButton from '@/components/ui/SaveButton'
 import Spinner from '@/components/ui/Spinner'
 import { SectionTitle, Caption, GroupLabel, monoStyle } from '@/components/ui/typography'
+import BillingCardShell from './billing/BillingCardShell'
 import type { AdminBillingBudgetsResponse, AdminBillingBudgetsUpdate, BillingBudgetEntry, BillingPackageKey } from '@/types/billingUsage'
-import { PACKAGE_KEYS, card, sub, label, inputWrap, inputStyle } from './billingCardStyles'
+import { PACKAGE_KEYS, label, inputWrap, inputStyle } from './billingCardStyles'
 
 // A package row's two editable numbers. Blank = NULL (= unlimited / no
 // package-level value), NEVER 0: writing 0 onto an unlimited package would
@@ -97,31 +98,17 @@ export default function BillingUsersCard() {
     }
   }
 
-  if (phase === 'loading') {
-    return (
-      <div style={card}>
-        <SectionTitle style={{ marginBottom: 4 }}>{t('billingUsers.title')}</SectionTitle>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>
-      </div>
-    )
-  }
-
-  if (phase === 'error') {
-    return (
-      <div style={card}>
-        <SectionTitle style={{ marginBottom: 4 }}>{t('billingUsers.title')}</SectionTitle>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('billingUsers.loadError')}</p>
-      </div>
-    )
-  }
-
   const tenantUsers = data?.tenant_users ?? {}
   const tenantIds = Object.keys(tenantUsers)
 
   return (
-    <div style={card}>
-      <SectionTitle style={{ marginBottom: 4 }}>{t('billingUsers.title')}</SectionTitle>
-      <div style={sub}>{t('billingUsers.subtitle')}</div>
+    <BillingCardShell
+      phase={phase}
+      title={t('billingUsers.title')}
+      subtitle={t('billingUsers.subtitle')}
+      loadingLabel={t('common.loadingShort')}
+      errorLabel={t('billingUsers.loadError')}
+    >
 
       <GroupLabel style={{ marginBottom: 10 }}>{t('billingUsers.packagesHeading')}</GroupLabel>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
@@ -214,6 +201,6 @@ export default function BillingUsersCard() {
           </table>
         </div>
       )}
-    </div>
+    </BillingCardShell>
   )
 }

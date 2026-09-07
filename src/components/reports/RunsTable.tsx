@@ -20,6 +20,7 @@ import { useReportList } from './useReportList'
 import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import { formatDuration, StatusBadge } from './runFormat'
 import RunDetailDrawer from './RunDetailDrawer'
+import { buildStatusGroup, buildWorkflowGroup } from './reportFilterDefs'
 import { Caption, bodyTextStyle } from '@/components/ui/typography'
 import type { RunRow, ReportFilterGroup } from '@/types/reports'
 
@@ -145,27 +146,12 @@ export default function RunsTable() {
   const filterGroups = useMemo(() => {
     const groups: ReportFilterGroup[] = []
     if (statusOptions.length) {
-      groups.push({
-        key: 'status', label: t('runs.filters.status'),
-        selected: selectedStatuses,
-        options: statusOptions.map(s => ({
-          value: s,
-          label: t(`runs.status.${s}`, { defaultValue: s }),
-          count: rows.filter(r => r.status === s).length,
-        })),
-        onToggle: v => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
-      })
+      groups.push(buildStatusGroup(t, statusOptions, selectedStatuses, rows, 'runs.filters.status',
+        v => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])))
     }
     if (workflowOptions.length) {
-      groups.push({
-        key: 'workflow', label: t('runs.filters.workflow'), type: 'search-select',
-        selected: selectedWorkflows,
-        options: workflowOptions.map(w => ({
-          value: w, label: w,
-          count: rows.filter(r => r.workflow_name === w).length,
-        })),
-        onToggle: v => setSelectedWorkflows(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
-      })
+      groups.push(buildWorkflowGroup(t, workflowOptions, selectedWorkflows, rows, 'runs.filters.workflow',
+        v => setSelectedWorkflows(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])))
     }
     // The run window — server-filtered (from/to ride the request), so counts and
     // rows always agree with what the endpoint returns.
