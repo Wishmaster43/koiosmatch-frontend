@@ -52,3 +52,14 @@ export function useVacancyLeads(vacancyId: Id | undefined, enabled: boolean) {
   })
   return { rows: data, loading, error }
 }
+
+// POST /vacancies/{id}/leads/recount — queue a rescan of AI-suggested candidates for
+// one vacancy. Returns 202 {status:'queued'} or 429 when throttled (20/min).
+export function useRecountVacancyLeads() {
+  const mutate = async (vacancyId: Id): Promise<{ status: string }> => {
+    const resp = await api.post(`/vacancies/${vacancyId}/leads/recount`, {}, { quietStatuses: [429] })
+    return resp.data
+  }
+
+  return { mutate }
+}

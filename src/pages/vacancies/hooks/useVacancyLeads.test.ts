@@ -5,17 +5,26 @@
  * docblock): candidate-matches is the score-ranked search tab, /leads is the
  * appointment-tied set with no formal application yet. Mirrors
  * useVacancyMatches.test.ts's request-shape proof, §13.
+ *
+ * useRecountVacancyLeads tests the POST /vacancies/{id}/leads/recount endpoint,
+ * which queues a manual rescan of AI-suggested candidates for one vacancy (B-48).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createElement, type ReactNode } from 'react'
 import api from '@/lib/api'
-import { useVacancyLeads } from './useVacancyLeads'
+import { useVacancyLeads, useRecountVacancyLeads } from './useVacancyLeads'
 
 vi.mock('@/lib/api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/api')>()
-  return { ...actual, default: { get: vi.fn(() => Promise.resolve({ data: { data: [] } } as { data: { data: unknown[] } })) } }
+  return {
+    ...actual,
+    default: {
+      get: vi.fn(() => Promise.resolve({ data: { data: [] } } as { data: { data: unknown[] } })),
+      post: vi.fn(() => Promise.resolve({ data: { status: 'queued' } })),
+    },
+  }
 })
 
 const wrapper = ({ children }: { children: ReactNode }) =>
@@ -52,5 +61,33 @@ describe('useVacancyLeads', () => {
     expect(row.name).toBe('Jane Doe')
     expect(row.phase).toBe('lead')
     expect(row.source).toBe('career_site')
+  })
+})
+
+describe('useRecountVacancyLeads', () => {
+  it('POSTs to /vacancies/{id}/leads/recount with an empty body (B-48)', async () => {
+    const { result } = renderHook(() => useRecountVacancyLeads(), { wrapper })
+    await result.current.mutate('vac-1')
+
+    expect(api.post).toHaveBeenCalledWith(
+      '/vacancies/vac-1/leads/recount',
+      {},
+      { quietStatuses: [429] }
+    )
+  })
+
+  it('returns the 202 response body {status:"queued"}', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { status: 'queued' } })
+    const { result } = renderHook(() => useRecountVacancyLeads(), { wrapper })
+    const resp = await result.current.mutate('vac-1')
+
+    expect(resp).toEqual({ status: 'queued' })
+  })
+
+  it('lets 429 throttle responses propagate (quietStatuses handling)', async () => {
+    vi.mocked(api.post).mockRejectedValueOnce({ response: { status: 429 } })
+    const { result } = renderHook(() => useRecountVacancyLeads(), { wrapper })
+
+    await expect(result.current.mutate('vac-1')).rejects.toEqual({ response: { status: 429 } })
   })
 })

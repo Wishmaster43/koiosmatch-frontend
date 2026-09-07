@@ -1,11 +1,45 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import VacancyLeadsPanel from './VacancyLeadsPanel'
 import type { VacancyLeadRow } from './hooks/useVacancyLeads'
 
 const openEntity = vi.fn()
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity }) }))
+
+const hasPermission = vi.fn()
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission }) }))
+
+vi.mock('@/lib/notify', () => ({
+  notifySuccess: vi.fn(),
+  notifyError: vi.fn(),
+}))
+
+// Mock useTranslation for the new i18n keys that aren't in locale files yet.
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal() as Record<string, unknown>
+  return {
+    ...actual,
+    useTranslation: () => ({
+      t: (key: string) => {
+        const translations: Record<string, string> = {
+          'leadsExpand.recountBtn': 'Suggesties vernieuwen',
+          'leadsExpand.recountQueued': 'In de wachtrij gezet, de lijst ververst binnen enkele minuten',
+          'leadsExpand.recountThrottled': 'Even wachten, net al aangevraagd',
+          'leadsExpand.recountFailed': 'Vernieuwen is mislukt',
+          'leadsExpand.loading': 'Leads laden…',
+          'leadsExpand.empty': 'Geen leads gevonden.',
+          'leadsExpand.error': 'Leads konden niet worden geladen.',
+          'leadsExpand.colName': 'Naam',
+          'leadsExpand.colPhase': 'Fase',
+          'leadsExpand.colSource': 'Bron',
+          'leadsExpand.colCreated': 'Aangemaakt',
+        }
+        return translations[key] ?? key
+      },
+    }),
+  }
+})
 
 // Mock the lookups — phase labels and source labels resolve via the mocks.
 vi.mock('@/context/LookupsContext', () => ({
@@ -35,10 +69,12 @@ vi.mock('@/lib/useSeedLabel', () => ({
   },
 }))
 
-// Mock the useVacancyLeads hook to return stable test data.
+// Mock the useVacancyLeads and useRecountVacancyLeads hooks.
 const mockLeads = vi.fn()
+const mockRecountMutate = vi.fn()
 vi.mock('./hooks/useVacancyLeads', () => ({
   useVacancyLeads: (vacancyId: unknown, enabled: unknown) => mockLeads(vacancyId, enabled),
+  useRecountVacancyLeads: () => ({ mutate: mockRecountMutate }),
 }))
 
 // Mock the date formatter.
@@ -64,6 +100,7 @@ const baseLeadRow: VacancyLeadRow = {
 describe('VacancyLeadsPanel', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    hasPermission.mockReturnValue(false) // Default is no permission; tests explicitly grant it.
   })
 
   it('renders loading state', () => {
@@ -140,5 +177,54 @@ describe('VacancyLeadsPanel', () => {
 
     // useDateFormat mock returns the raw date string; createdAt is displayed as-is.
     expect(screen.getByText('2026-01-15')).toBeInTheDocument()
+  })
+
+  it('renders the recount button when hasPermission returns true', () => {
+    hasPermission.mockReturnValue(true)
+    mockLeads.mockReturnValue({ rows: [], loading: false, error: null })
+    render(<VacancyLeadsPanel vacancyId={'v1'} />)
+
+    expect(screen.getByRole('button', { name: /Suggesties vernieuwen/i })).toBeInTheDocument()
+  })
+
+  it('hides the recount button when hasPermission returns false (no fake affordances)', () => {
+    hasPermission.mockReturnValue(false)
+    mockLeads.mockReturnValue({ rows: [], loading: false, error: null })
+    render(<VacancyLeadsPanel vacancyId={'v1'} />)
+
+    expect(screen.queryByRole('button', { name: /Suggesties vernieuwen/i })).not.toBeInTheDocument()
+  })
+
+  it('clicking recount button POSTs to the leads/recount endpoint and shows a queued message', async () => {
+    const { notifySuccess } = await import('@/lib/notify')
+    const user = userEvent.setup()
+    hasPermission.mockReturnValue(true)
+    mockLeads.mockReturnValue({ rows: [], loading: false, error: null })
+    mockRecountMutate.mockResolvedValueOnce({ status: 'queued' })
+    render(<VacancyLeadsPanel vacancyId={'v1'} />)
+
+    const btn = screen.getByRole('button', { name: /Suggesties vernieuwen/i })
+    await user.click(btn)
+
+    await waitFor(() => {
+      expect(mockRecountMutate).toHaveBeenCalledWith('v1')
+      expect(vi.mocked(notifySuccess)).toHaveBeenCalled()
+    })
+  })
+
+  it('recount button handles 429 throttle response', async () => {
+    const { notifyError } = await import('@/lib/notify')
+    const user = userEvent.setup()
+    hasPermission.mockReturnValue(true)
+    mockLeads.mockReturnValue({ rows: [], loading: false, error: null })
+    mockRecountMutate.mockRejectedValueOnce({ response: { status: 429 } })
+    render(<VacancyLeadsPanel vacancyId={'v1'} />)
+
+    const btn = screen.getByRole('button', { name: /Suggesties vernieuwen/i })
+    await user.click(btn)
+
+    await waitFor(() => {
+      expect(vi.mocked(notifyError)).toHaveBeenCalled()
+    })
   })
 })
