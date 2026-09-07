@@ -29,7 +29,7 @@ import { LIST_TILES } from './blocks/lists'
 import KoiosForYouCard from './KoiosForYouCard'
 import KoiosPerformanceCard from './blocks/KoiosPerformanceCard'
 import type { DashStats, DashOpp, DashData } from '@/types/dashboard'
-import { useAllSettings, getJsonSetting, getBoolSetting } from '@/lib/settings/useAllSettings'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { useNumberFormat } from '@/lib/formatters'
 import { useDateFormat } from '@/lib/datetime'
 import type { DashboardType } from './templates'
@@ -53,9 +53,6 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   // Tenant per-role toggles (Settings → Dashboards): a block/KPI is shown if the template
   // allows it AND it is not switched off for this role. Live via the shared settings store.
   const settings = useAllSettings()
-  // Deal magnitude in hours instead of euro (Settings → Opportunities → display) — the
-  // pipeline KPI must follow the same tenant rule as the opportunities page.
-  const valueInHours = getBoolSetting(settings, 'opportunity_value_in_hours', false)
   const hidden = getJsonSetting<Record<string, { kpis?: string[]; blocks?: string[] }>>(settings, 'dashboard_hidden', {})
   const hiddenBlocks = hidden[activeType]?.blocks ?? []
   const hiddenKpis = hidden[activeType]?.kpis ?? []
@@ -111,7 +108,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     oppAgingRows = [],
   } = useDashboardViewModel({
     t, formatNumber, stats, opp, dash, dashCharts, statusMeta, funnelMeta, funnelTypes,
-    activeType, hiddenBlocks, hiddenKpis, kpiOrder, hasPlanning, valueInHours,
+    activeType, hiddenBlocks, hiddenKpis, kpiOrder, hasPlanning,
     onNavigate,
   })
 

@@ -38,7 +38,8 @@
     "avgHours": "Ore medie",
     "won": "Vinte",
     "lost": "Perse",
-    "winRate": "Tasso di vittoria (%)"
+    "winRate": "Tasso di vittoria (%)",
+    "pipelineQuotes": "Preventivi (aperti)"
   },
   "drawer": {
     "entityLabel": "Opportunità",

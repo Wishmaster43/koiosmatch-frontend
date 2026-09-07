@@ -98,7 +98,8 @@
     "candidatesAvailable": "Beschikbare kandidaten",
     "candidatesAvailableSub": "Inzetbaarheid: beschikbaar",
     "shiftsNoshowTodaySub": "Vandaag niet verschenen",
-    "shiftsCancelledTodaySub": "Vandaag geannuleerd"
+    "shiftsCancelledTodaySub": "Vandaag geannuleerd",
+    "pipelineQuotes": "Offertes (open)"
   },
   "chart": {
     "byStatus": "Kandidaten per status",

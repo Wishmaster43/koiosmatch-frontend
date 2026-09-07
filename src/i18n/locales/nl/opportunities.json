@@ -38,7 +38,8 @@
     "avgHours": "Gem. uren",
     "won": "Gewonnen",
     "lost": "Verloren",
-    "winRate": "Winratio (%)"
+    "winRate": "Winratio (%)",
+    "pipelineQuotes": "Offertes (open)"
   },
   "drawer": {
     "entityLabel": "Kans",

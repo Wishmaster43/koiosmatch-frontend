@@ -432,7 +432,10 @@
       },
       "lastInbound": "Laatste inkomend bericht",
       "inboundCount": "{{count}} beurten verwerkt",
-      "lastInboundError": "Laatste fout"
+      "lastInboundError": "Laatste fout",
+      "knowledgeLinked_one": "Gekoppeld: {{count}} bron",
+      "knowledgeLinked_other": "Gekoppeld: {{count}} bronnen",
+      "knowledgeNone": "Nog geen kennis gekoppeld"
     },
     "tabs": {
       "agents": "Agents",

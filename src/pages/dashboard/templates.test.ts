@@ -16,7 +16,6 @@ describe('dashboard KPI row guard', () => {
     num: () => '',
     eur: () => '',
     opp: null,
-    valueInHours: false,
   })
   const knownIds = new Set(Object.keys(kpiById))
 

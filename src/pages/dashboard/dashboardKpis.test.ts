@@ -17,7 +17,6 @@ const baseArgs = (kpis: Record<string, number | null | undefined>, onNavigate: R
   num: (v?: number | null) => (v == null ? '—' : String(v)),
   eur: (v?: unknown) => String(v),
   opp: null,
-  valueInHours: false,
   candidateTotalLabel: '0',
   onNavigate,
 })

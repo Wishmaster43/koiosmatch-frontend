@@ -29,18 +29,16 @@ interface BuildArgs {
   drills?: Record<string, DashDrillDescriptor | null>
   num: (v?: number | null) => string
   eur: (v?: unknown) => string
-  // pipeline_hours is a PINNED dashboard-KPI since BE 4b320105 (sum of the deals'
-  // hours column, same hoursOpenBase predicate as /opportunities/stats — one
-  // predicate, can never diverge); the raw opp feed remains ONLY as the tolerant
-  // fallback for a cached pre-key envelope (§10).
-  opp: { pipeline_hours?: number | null } | null
-  valueInHours: boolean
+  // X-5-UNIT-PER-ROW (bundle B2-2): pipeline values are PINNED dashboard-KPIs
+  // (pipeline_value/pipeline_hours/pipeline_quotes); the raw opp feed fallback
+  // is only for a cached pre-key envelope (§10).
+  opp: { pipeline_value?: number | null; pipeline_hours?: number | null; pipeline_quotes?: number | null } | null
   onNavigate?: (page: string, intent?: Record<string, unknown>) => void
 }
 
 // i18n-scan: dashboard — pure builder: `t` is a parameter, so the keysExist
 // scanner needs this pragma to see the ~40 t('kpi.*') literals below.
-export function buildDashboardKpis({ t, kpis, drills = {}, num, eur, opp, valueInHours, onNavigate }: BuildArgs): Record<string, DashboardKpi> {
+export function buildDashboardKpis({ t, kpis, drills = {}, num, eur, opp, onNavigate }: BuildArgs): Record<string, DashboardKpi> {
   // K-173 fase 2 — resolve a tile's onClick: a present drill descriptor navigates
   // via entity+params (the exact filters that reproduce this tile's own number);
   // an explicit `null` descriptor means no drill (undefined onClick, no dead
@@ -67,14 +65,17 @@ export function buildDashboardKpis({ t, kpis, drills = {}, num, eur, opp, valueI
     never:             { id: 'never', label: t('kpi.neverContacted'), value: num(kpis.never_contacted), sub: t('kpi.attentionNeeded'), color: 'var(--color-danger-text)', bg: 'var(--color-danger-bg)', Icon: AlertCircle, onClick: resolveClick('never_contacted', () => onNavigate?.('candidates', { attention: 'neverContacted' })) },
     tasks:             { id: 'tasks', label: t('kpi.openTasks'), value: num(kpis.tasks), sub: t('kpi.linkedToCandidates'), color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: CheckCircle, onClick: resolveClick('tasks', () => onNavigate?.('tasks', { kpi: 'open' })) },
     opps:              { id: 'opps', label: t('kpi.opportunities'), value: num(kpis.opps_total), sub: t('kpi.openOpportunities'), color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: Target, onClick: resolveClick('opps_total', () => onNavigate?.('opportunities', {})) },
-    // Deal magnitude follows the tenant setting (euro vs hours) — same rule as the
-    // opportunities page. Hours mode shows the hours sum once the feed carries it (DASH-HOURS).
-    pipeline:          { id: 'pipeline', label: valueInHours ? t('kpi.pipelineHours') : t('kpi.pipelineValue'),
-      value: valueInHours
-        ? (kpis.pipeline_hours != null ? num(kpis.pipeline_hours)
-          : opp?.pipeline_hours != null ? num(opp.pipeline_hours) : '—')
-        : (kpis.pipeline_value != null ? eur(kpis.pipeline_value) : '—'),
-      sub: t('kpi.sumOpenOpps'), color: 'var(--color-success-text)', bg: 'var(--color-success-bg)', Icon: valueInHours ? CalendarClock : Euro, onClick: resolveClick('pipeline_value', () => onNavigate?.('opportunities', {})) },
+    // Per-unit pipeline KPIs (X-5-UNIT-PER-ROW, bundle B2-2): euro, hours, and quotes.
+    // Each tile appears only when the server sum > 0 (handled in the tile list, not here).
+    pipeline:          { id: 'pipeline', label: t('kpi.pipelineValue'),
+      value: kpis.pipeline_value != null ? eur(kpis.pipeline_value) : (opp?.pipeline_value != null ? eur(opp.pipeline_value) : '—'),
+      sub: t('kpi.sumOpenOpps'), color: 'var(--color-success-text)', bg: 'var(--color-success-bg)', Icon: Euro, onClick: resolveClick('pipeline_value', () => onNavigate?.('opportunities', {})) },
+    pipelineHours:     { id: 'pipelineHours', label: t('kpi.pipelineHours'),
+      value: kpis.pipeline_hours != null ? num(kpis.pipeline_hours) : (opp?.pipeline_hours != null ? num(opp.pipeline_hours) : '—'),
+      sub: t('kpi.sumOpenOpps'), color: 'var(--color-success-text)', bg: 'var(--color-success-bg)', Icon: CalendarClock, onClick: resolveClick('pipeline_hours', () => onNavigate?.('opportunities', {})) },
+    pipelineQuotes:    { id: 'pipelineQuotes', label: t('kpi.pipelineQuotes'),
+      value: kpis.pipeline_quotes != null ? num(kpis.pipeline_quotes) : (opp?.pipeline_quotes != null ? num(opp.pipeline_quotes) : '—'),
+      sub: t('kpi.sumOpenOpps'), color: 'var(--color-success-text)', bg: 'var(--color-success-bg)', Icon: Briefcase, onClick: resolveClick('pipeline_quotes', () => onNavigate?.('opportunities', {})) },
     placements:        { id: 'placements', label: t('kpi.placements'), value: num(kpis.placements), sub: t('kpi.placementsSub'), color: 'var(--color-success-text)', bg: 'var(--color-success-bg)', Icon: Briefcase, onClick: resolveClick('placements', () => onNavigate?.('matches', {})) },
     intakes:           { id: 'intakes', label: t('kpi.intakes'), value: num(kpis.intake_planned), sub: t('kpi.intakesSub'), color: 'var(--color-primary-text)', bg: 'var(--color-primary-bg)', Icon: CalendarCheck, onClick: resolveClick('intake_planned', () => onNavigate?.('candidates', { attention: 'intakePlanned' })) },
     fillRate:          { id: 'fillRate', label: t('kpi.fillRate'), value: kpis.fill_rate != null ? `${kpis.fill_rate}%` : '—', sub: t('kpi.fillRateSub'), color: 'var(--color-success-text)', bg: 'var(--color-success-bg)', Icon: TrendingUp, onClick: resolveClick('fill_rate', () => onNavigate?.('vacancies', {})) },

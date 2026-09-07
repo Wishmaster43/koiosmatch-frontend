@@ -10,7 +10,6 @@ import { LayoutList, Kanban, Archive, Trash2 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { usePublishSelection } from '@/context/SelectionContext'
-import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useBranchOptions } from '@/lib/useBranchOptions'
 import OpportunitiesInsightsRow from './OpportunitiesInsightsRow'
 import HeaderSearch from '@/components/ui/HeaderSearch'
@@ -64,8 +63,6 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   // opportunities.update group, same reasoning as matches).
   const canCreateOpportunity = hasPermission('opportunities.update')
   const { registerFilters, unregisterFilters } = useRightPanel()
-  // Tenant setting: show the deal magnitude in hours instead of euro (Settings → Kansen, "Opportunities").
-  const valueInHours = getBoolSetting(useAllSettings(), 'opportunity_value_in_hours', false)
   // ARCHIVE-1: the archived quick-view (TRASH-OVERAL-2: now an ISOLATED
   // lifecycle==='archived' view — mirrors candidates; include_archived returns
   // only soft-deleted rows since TRASH-OVERAL-1b, so "alongside" is history).
@@ -264,7 +261,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
 
           {/* KPI block: donuts (stage/owner, click-to-filter) + value KPI cards */}
           <OpportunitiesInsightsRow
-            rows={rows} stages={stages} valueInHours={valueInHours}
+            rows={rows} stages={stages}
             stage={stage} owner={owner} client={client}
             onPickStage={pickOne(setStage)} onClearStage={() => setStage([])}
             onPickOwner={pickOne(setOwner)} onClearOwner={() => setOwner([])}
@@ -324,7 +321,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
               render: () => (
                 <>
                   <div ref={tableScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '0 20px 20px' }}>
-                    <OpportunitiesTable rows={filtered} loading={loading} error={error} valueInHours={valueInHours} stages={stages}
+                    <OpportunitiesTable rows={filtered} loading={loading} error={error} stages={stages}
                       selectedId={selected?.id} onRowClick={selectOpportunity} stickyHeader scrollParentRef={tableScrollRef}
                       selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} />
                   </div>
@@ -337,7 +334,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
             {
               id: 'board',
               render: () => (
-                <OpportunitiesBoard rows={boardRows} stages={stages} valueInHours={valueInHours}
+                <OpportunitiesBoard rows={boardRows} stages={stages}
                   onMove={handleMove} selectedId={selected?.id} onSelect={selectOpportunity} />
               ),
             },
@@ -351,7 +348,6 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
           // KANSEN-A-3: the full tenant set (already fetch-all looped) — the
           // Statistieken tab's "other opportunities at this customer" source.
           allRows={rows}
-          valueInHours={valueInHours}
           onClose={closeDrawer}
           expanded={drawerExpanded}
           onToggleExpand={() => setDrawerExpanded(v => !v)}

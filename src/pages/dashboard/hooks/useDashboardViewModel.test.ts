@@ -25,7 +25,6 @@ const baseArgs = (overrides: Record<string, unknown> = {}) => ({
   hiddenBlocks: [],
   hiddenKpis: [],
   hasPlanning: false,
-  valueInHours: false,
   ...overrides,
 })
 

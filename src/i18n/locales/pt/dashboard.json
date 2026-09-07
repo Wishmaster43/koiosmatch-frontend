@@ -98,7 +98,8 @@
     "candidatesAvailable": "Candidatos disponíveis",
     "candidatesAvailableSub": "Disponibilidade: disponível",
     "shiftsNoshowTodaySub": "Não compareceram hoje",
-    "shiftsCancelledTodaySub": "Cancelado hoje"
+    "shiftsCancelledTodaySub": "Cancelado hoje",
+    "pipelineQuotes": "Orçamentos (abertos)"
   },
   "chart": {
     "byStatus": "Candidatos por estado",

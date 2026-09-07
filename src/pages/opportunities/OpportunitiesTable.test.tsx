@@ -100,14 +100,14 @@ describe('OpportunitiesTable · value column via shared opportunityValue helper'
   }
 
   it('formats a euro value with the shared nl-NL EUR formatter (euro mode)', () => {
-    const row = { ...baseRow, id: 'o40', value: 12500, hours: null }
-    const { container } = render(<OpportunitiesTable rows={[row]} valueInHours={false} />)
+    const row = { ...baseRow, id: 'o40', value: 12500, hours: null, dealTypeUnit: 'euro' }
+    const { container } = render(<OpportunitiesTable rows={[row]} />)
     expect(getValueCell(container).textContent).toBe('€ 12.500')
   })
 
   it('formats an hours value via the shared i18n key (hours mode)', () => {
-    const row = { ...baseRow, id: 'o41', value: null, hours: 40 }
-    const { container } = render(<OpportunitiesTable rows={[row]} valueInHours={true} />)
+    const row = { ...baseRow, id: 'o41', value: null, hours: 40, dealTypeUnit: 'hours' }
+    const { container } = render(<OpportunitiesTable rows={[row]} />)
     expect(getValueCell(container).textContent).toBe('40 u')
   })
 })

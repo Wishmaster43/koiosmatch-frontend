@@ -27,12 +27,10 @@ interface StatisticsTabProps {
   // The full tenant opportunity set (useOpportunitiesData's `rows`) — the source
   // both this deal's ordinal position and its customer-mates are derived from.
   allRows: Opportunity[]
-  // Tenant setting: show the deal magnitude in hours instead of euro (mirrors the table).
-  valueInHours?: boolean
 }
 
 // This deal's ordinal position among its customer's other opportunities, plus the peer list to jump to — see the module doc above for the honesty rule.
-export default function StatisticsTab({ opportunity, allRows, valueInHours = false }: StatisticsTabProps) {
+export default function StatisticsTab({ opportunity, allRows }: StatisticsTabProps) {
   const { t } = useTranslation('opportunities')
   // Tenant currency + app locale for the value cell (I18N-1 L5).
   const { currency, locale } = useNumberFormat()
@@ -60,7 +58,7 @@ export default function StatisticsTab({ opportunity, allRows, valueInHours = fal
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {others.map(row => {
-              const v = opportunityValueOf(row, valueInHours)
+              const v = opportunityValueOf(row)
               return (
                 <button key={row.id} type="button" title={t('drawer.statistics.openOpportunity')}
                   onClick={() => row.id != null && openEntity('opportunities', row.id)}
@@ -75,10 +73,10 @@ export default function StatisticsTab({ opportunity, allRows, valueInHours = fal
                       {row.expectedCloseAt ? formatDate(row.expectedCloseAt) : '—'}
                     </Caption>
                   </div>
-                  {/* Value/unit — same shared formatter the table + customer drawer tab use (§11).
+                  {/* Value/unit — per-row unit from dealType.unit (X-5-UNIT-PER-ROW).
                       Caption owns the muted 11px identity, Mono nested inside owns the font (§4 atoms). */}
                   <Caption as="span" style={{ flexShrink: 0 }}>
-                    <Mono as="span">{v == null ? '—' : formatOpportunityValue(row, valueInHours, t, currency, locale)}</Mono>
+                    <Mono as="span">{v == null ? '—' : formatOpportunityValue(row, t, currency, locale)}</Mono>
                   </Caption>
                   {row.stage ? (
                     <span style={{ flexShrink: 0 }}><StatusPill label={seedLabel('opportunityStages', { label: row.stage })} color={row.stageColor} /></span>

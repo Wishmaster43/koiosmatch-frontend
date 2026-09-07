@@ -171,30 +171,25 @@ describe('OpportunitiesTab · stage colour toggle (customer_opportunity_table_co
 })
 
 /**
- * K10c (PLAN-KLANTEN batch 1): the tenant's "Kansen in uren" setting
- * (`opportunity_value_in_hours`) must switch this tab's value column between
- * euro and hours exactly like OpportunitiesTable already does — the drawer
- * tab was ignoring it and always showing euro.
+ * X-5-UNIT-PER-ROW (bundle B2-2): the value column now shows per-row dealType.unit
+ * (euro/hours/quote) instead of following a tenant-wide setting.
  */
-describe('OpportunitiesTab · value column follows opportunity_value_in_hours (K10c)', () => {
-  const rowWithBoth: ApiOpportunity[] = [
-    // eslint-disable-next-line no-restricted-syntax -- DATA: test-seed colour, not a UI colour choice
-    { id: 'opp-value', title: 'Nieuwe zorgvraag', stage: { value: 'lead', label: 'Lead', color: '#94A3B8' }, value: 1234, hours: 40 } as ApiOpportunity,
+describe('OpportunitiesTab · value column per row unit (X-5-UNIT-PER-ROW)', () => {
+  const euroRow: ApiOpportunity[] = [
+    { id: 'opp-euro', title: 'Euro deal', stage: { value: 'lead', label: 'Lead', color: '#94A3B8' }, value: 1234, hours: null, deal_type: { unit: 'euro' } } as ApiOpportunity,
+  ]
+  const hoursRow: ApiOpportunity[] = [
+    { id: 'opp-hours', title: 'Hours deal', stage: { value: 'lead', label: 'Lead', color: '#94A3B8' }, value: null, hours: 40, deal_type: { unit: 'hours' } } as ApiOpportunity,
   ]
 
-  it('shows the euro amount when the setting is off (default)', async () => {
-    mockOpportunities(rowWithBoth)
+  it('shows euro amount for euro-typed deal', async () => {
+    mockOpportunities(euroRow)
     render(<OpportunitiesTab customerId="cust-1" customerName="Acme" />)
     expect(await screen.findByText('€ 1.234')).toBeInTheDocument()
-    expect(screen.queryByText('opportunities:cols.hoursValue')).not.toBeInTheDocument()
   })
 
-  it('shows hours (via the shared cols.hoursValue key) when the setting is on', async () => {
-    vi.mocked(api.get).mockImplementation((url: string) =>
-      url === '/settings'
-        ? Promise.resolve({ data: { opportunity_value_in_hours: 'true' } })
-        : Promise.resolve({ data: {} }))
-    mockOpportunities(rowWithBoth)
+  it('shows hours (via the shared cols.hoursValue key) for hours-typed deal', async () => {
+    mockOpportunities(hoursRow)
     render(<OpportunitiesTab customerId="cust-1" customerName="Acme" />)
     // i18n is unmocked here, so t() echoes the raw explicit-namespace key with its
     // interpolated count — proves the SAME shared key OpportunitiesTable uses, not a local copy.

@@ -98,7 +98,8 @@
     "candidatesAvailable": "Available candidates",
     "candidatesAvailableSub": "Deployability: available",
     "shiftsNoshowTodaySub": "No-shows today",
-    "shiftsCancelledTodaySub": "Cancelled today"
+    "shiftsCancelledTodaySub": "Cancelled today",
+    "pipelineQuotes": "Quotes (open)"
   },
   "chart": {
     "byStatus": "Candidates by status",

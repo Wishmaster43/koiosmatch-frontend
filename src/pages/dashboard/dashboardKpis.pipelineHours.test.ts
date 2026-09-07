@@ -14,20 +14,20 @@ const base = { t, num, eur, drills: {}, onNavigate: undefined } as never
 
 describe('pipeline tile — hours mode', () => {
   it('prefers the pinned server KPI over the raw opp feed', () => {
-    const out = buildDashboardKpis({ ...(base as object), valueInHours: true,
+    const out = buildDashboardKpis({ ...(base as object),
       kpis: { pipeline_hours: 128 } as never, opp: { pipeline_hours: 999 } } as never)
-    expect(out.pipeline.value).toBe('128')
+    expect(out.pipelineHours.value).toBe('128')
   })
 
   it('falls back to the raw opp feed only when the pinned key is absent (cached pre-key envelope)', () => {
-    const out = buildDashboardKpis({ ...(base as object), valueInHours: true,
+    const out = buildDashboardKpis({ ...(base as object),
       kpis: {} as never, opp: { pipeline_hours: 42 } } as never)
-    expect(out.pipeline.value).toBe('42')
+    expect(out.pipelineHours.value).toBe('42')
   })
 
   it('renders the house dash when neither carries a value', () => {
-    const out = buildDashboardKpis({ ...(base as object), valueInHours: true,
+    const out = buildDashboardKpis({ ...(base as object),
       kpis: {} as never, opp: null } as never)
-    expect(out.pipeline.value).toBe('\u2014')
+    expect(out.pipelineHours.value).toBe('\u2014')
   })
 })

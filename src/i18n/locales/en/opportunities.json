@@ -38,7 +38,8 @@
     "avgHours": "Avg. hours",
     "won": "Won",
     "lost": "Lost",
-    "winRate": "Win rate (%)"
+    "winRate": "Win rate (%)",
+    "pipelineQuotes": "Quotes (open)"
   },
   "drawer": {
     "entityLabel": "Opportunity",

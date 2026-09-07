@@ -15,9 +15,8 @@ import { useBoardDrag } from '@/components/ui/board'
 interface StageCol { value: string | number; label: string; color?: string }
 
 // A single draggable opportunity card.
-function BoardCard({ opp, onDragStart, onClick, selected, valueInHours }: {
+function BoardCard({ opp, onDragStart, onClick, selected }: {
   opp: Opportunity; onDragStart: (e: DragEvent<HTMLDivElement>, id: Id | undefined) => void; onClick: (o: Opportunity) => void; selected: boolean
-  valueInHours: boolean
 }) {
   // ownerInitials/ownerColor/created are carried on the mapped row (not on the base type).
   const { t } = useTranslation()
@@ -36,10 +35,10 @@ function BoardCard({ opp, onDragStart, onClick, selected, valueInHours }: {
       <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>{opp.client || '—'}</div>
 
       {/* Value — the SAME shared hours-vs-euro cell as the table and the customer
-          drawer tab (K10c): one formatting path, never a third hand-rolled copy. */}
-      {opportunityValueOf(o, valueInHours) != null && (
+          drawer tab (X-5-UNIT-PER-ROW): per-row unit from dealType.unit. */}
+      {opportunityValueOf(o) != null && (
         <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-primary-text)', marginBottom: 8 }}>
-          {formatOpportunityValue(o, valueInHours, t, currency, locale)}
+          {formatOpportunityValue(o, t, currency, locale)}
         </div>
       )}
 
@@ -53,14 +52,13 @@ function BoardCard({ opp, onDragStart, onClick, selected, valueInHours }: {
 }
 
 // A single stage column.
-function BoardColumn({ stage, items, onDragStart, onDrop, onDragOver, onSelect, selectedId, valueInHours }: {
+function BoardColumn({ stage, items, onDragStart, onDrop, onDragOver, onSelect, selectedId }: {
   stage: StageCol; items: Opportunity[]
   onDragStart: (e: DragEvent<HTMLDivElement>, id: Id | undefined) => void
   onDrop: (e: DragEvent<HTMLDivElement>, stageValue: string | number) => void
   onDragOver: (e: DragEvent<HTMLDivElement>) => void
   onSelect: (o: Opportunity) => void
   selectedId?: Id | null
-  valueInHours: boolean
 }) {
   // LOOKUP-I18N-1: the seeded stage label renders in the user's language; the
   // column's own drop/grouping logic still keys on `stage.value`/`.label` raw.
@@ -75,7 +73,7 @@ function BoardColumn({ stage, items, onDragStart, onDrop, onDragOver, onSelect, 
         <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500 }}>{items.length}</span>
       </div>
       {items.map(o => (
-        <BoardCard valueInHours={valueInHours} key={o.id} opp={o} selected={o.id === selectedId}
+        <BoardCard key={o.id} opp={o} selected={o.id === selectedId}
           onDragStart={onDragStart} onClick={onSelect} />
       ))}
     </div>
@@ -83,9 +81,8 @@ function BoardColumn({ stage, items, onDragStart, onDrop, onDragOver, onSelect, 
 }
 
 // OpportunitiesBoard — Kanban board grouped by stage; supports drag-and-drop to move.
-export default function OpportunitiesBoard({ rows, stages, onMove, selectedId, onSelect, valueInHours = false }: {
+export default function OpportunitiesBoard({ rows, stages, onMove, selectedId, onSelect }: {
   rows: Opportunity[]; stages: StageCol[]; onMove: (id: Id, stageValue: string | number) => void; selectedId?: Id | null; onSelect: (o: Opportunity) => void
-  valueInHours?: boolean
 }) {
   // Drag-and-drop wiring: ref for auto-scroll, handlers for start/over/drop, dragId ref.
   const { boardScrollRef, boardAutoScroll, handleDragStart, handleDragOver, handleDrop } = useBoardDrag<HTMLDivElement, string | number>({ onMove })
@@ -96,7 +93,7 @@ export default function OpportunitiesBoard({ rows, stages, onMove, selectedId, o
       {stages.map(s => (
         // LOOKUP-I18N-1: match on the raw stageValue only — r.stage may be a
         // translated (or stale-locale) label and must never drive grouping.
-        <BoardColumn valueInHours={valueInHours} key={s.value} stage={s}
+        <BoardColumn key={s.value} stage={s}
           items={rows.filter(r => r.stageValue === s.value)}
           onDragStart={handleDragStart} onDrop={handleDrop} onDragOver={handleDragOver}
           onSelect={onSelect} selectedId={selectedId} />

@@ -31,7 +31,6 @@ interface OpportunitiesTableProps {
   error?: unknown
   onRowClick?: (row: Opportunity) => void
   selectedId?: Id | null
-  valueInHours?: boolean
   // Stage lookup (won/lost flags) — decides whether an overdue expected-close date
   // still counts as "late" (a closed deal is never overdue).
   stages?: LookupOption[]
@@ -44,7 +43,7 @@ interface OpportunitiesTableProps {
 }
 
 // OpportunitiesTable — declares columns only; the shared DataTable owns sorting + states.
-export default function OpportunitiesTable({ rows, loading, error, onRowClick, selectedId, valueInHours = false, stages = [], selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef }: OpportunitiesTableProps) {
+export default function OpportunitiesTable({ rows, loading, error, onRowClick, selectedId, stages = [], selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef }: OpportunitiesTableProps) {
   const { openEntity } = useNavigation()
   const { t } = useTranslation(['opportunities', 'common'])
   // Tenant currency + app locale for the value column (I18N-1 L5).
@@ -110,18 +109,16 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
     // Value column follows the tenant setting: euro amount or hours. Regular weight,
     // same as the other plain-text columns (§4: bold is emphasis/active only, never
     // decoration on a data column — 500 still read as bold next to client/date/owner).
-    // Shared opportunityValueOf/formatOpportunityValue (K10c) — the customer drawer's
-    // OpportunitiesTab and this table now read the exact same formatting, including
-    // the EUR formatter locked to 'nl-NL' (the domain's canonical currency locale per
-    // §5, chosen over this table's previous `locale`-driven formatter — the tenant UI
-    // locale must never change the currency's decimal/grouping convention).
+    // Shared opportunityValueOf/formatOpportunityValue (X-5-UNIT-PER-ROW) — per-row unit
+    // from dealType.unit (euro/hours/quote, default euro for untyped). The customer drawer's
+    // OpportunitiesTab and this table now read the exact same formatting.
     { key: 'value',  header: t('cols.value'), align: 'right', sortable: true,
-      sortValue: r => opportunityValueOf(r, valueInHours) ?? -1,
+      sortValue: r => opportunityValueOf(r) ?? -1,
       render: r => {
-        const v = opportunityValueOf(r, valueInHours)
+        const v = opportunityValueOf(r)
         if (v == null) return <span style={{ color: 'var(--text-muted)' }}>—</span>
         return <span style={{ fontWeight: 400, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>
-          {formatOpportunityValue(r, valueInHours, t, currency, locale)}
+          {formatOpportunityValue(r, t, currency, locale)}
         </span>
       } },
     // Contract term (start/end date) — plain info columns, muted dash when empty.

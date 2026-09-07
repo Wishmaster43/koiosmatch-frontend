@@ -432,7 +432,10 @@
       },
       "lastInbound": "Ultimo messaggio in entrata",
       "inboundCount": "{{count}} turni elaborati",
-      "lastInboundError": "Ultimo errore"
+      "lastInboundError": "Ultimo errore",
+      "knowledgeLinked_one": "Collegato: {{count}} fonte",
+      "knowledgeLinked_other": "Collegato: {{count}} fonti",
+      "knowledgeNone": "Nessuna conoscenza collegata ancora"
     },
     "tabs": {
       "agents": "Agenti",

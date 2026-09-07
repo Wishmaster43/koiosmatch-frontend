@@ -13,10 +13,11 @@ vi.mock('@/lib/api', async () => {
 })
 
 // A saved agent shaped like the real GET /ai/agents response (WA_INTRO_TEMPLATE-1
-// contract — CMBE has landed wa_intro_template/faq_ids/use_knowledge as real fields).
+// contract — CMBE has landed wa_intro_template/faq_ids/use_knowledge as real fields;
+// B2-3 adds has_knowledge as a derived field).
 const mockAgent: AiAgent = {
   id: 'a1', name: 'Kelly',
-  prompt_id: '', faq_ids: [], use_knowledge: false, max_history: 10,
+  prompt_id: '', faq_ids: [], use_knowledge: false, has_knowledge: false, max_history: 10,
   wa_intro_template: '',
 }
 
@@ -236,6 +237,33 @@ describe('AgentForm · inbound stamps on the webhook card (PUNT-2)', () => {
     render(<AgentForm agent={{ ...mockAgent, webhook_url: 'https://x/webhook' }} prompts={[]} faqs={mockFaqs} knowledgeItems={[]} onSaved={() => {}} onDelete={() => {}} />)
     expect(await screen.findByText('https://x/webhook')).toBeInTheDocument()
     expect(screen.queryByText(new RegExp(wt('ai.agent.lastInbound')))).not.toBeInTheDocument()
+  })
+})
+
+// B2-3 (K-276-USE-KNOWLEDGE-REVERSAL): use_knowledge is a real, writable boolean
+// on every agent (default true for new agents); has_knowledge shows the coupling state.
+describe('AgentForm · use_knowledge default and has_knowledge caption (B2-3)', () => {
+  it('defaults use_knowledge to true for a new agent and sends it in the POST body', async () => {
+    render(<AgentForm agent={null} prompts={[]} faqs={mockFaqs} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    await screen.findByText('Openingstijden')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalled())
+    const [, body] = vi.mocked(api.post).mock.calls[0]
+    expect((body as Record<string, unknown>).use_knowledge).toBe(true)
+  })
+
+  it('sends use_knowledge in the PUT body when toggled', async () => {
+    render(<AgentForm agent={mockAgent} prompts={[]} faqs={mockFaqs} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    await screen.findByText('Openingstijden')
+
+    fireEvent.click(screen.getByRole('switch'))
+    fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalled())
+    const [, body] = vi.mocked(api.put).mock.calls[0]
+    expect((body as Record<string, unknown>).use_knowledge).toBe(true)
   })
 })
 

@@ -44,6 +44,11 @@ export function AgentKnowledgeSection({
         <Toggle checked={useKnowledge} onChange={onUseKnowledgeChange} ariaLabel={t('ai.agent.useKnowledge')} />
         <span style={{ fontSize: 12, color: 'var(--text)' }}>{t('ai.agent.useKnowledge')}</span>
       </label>
+      {/* B2-3: the linked count follows the form's own selection (the server's has_knowledge
+          only mirrors it after save), so an item just ticked counts immediately. */}
+      <Caption as="p" style={{ margin: '0 0 12px 28px' }}>
+        {knowledgeIds.length > 0 ? t('ai.agent.knowledgeLinked', { count: knowledgeIds.length }) : t('ai.agent.knowledgeNone')}
+      </Caption>
       {/* Repair-pass a11y fix: Field's htmlFor→cloneElement only reaches a SINGLE
           child element, and ChipMultiSelect never accepted that id anyway (it has
           no `id` prop) — so the group had no accessible name at all. Pass ariaLabel

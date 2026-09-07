@@ -38,7 +38,8 @@
     "avgHours": "Horas medias",
     "won": "Ganadas",
     "lost": "Perdidas",
-    "winRate": "Tasa de éxito (%)"
+    "winRate": "Tasa de éxito (%)",
+    "pipelineQuotes": "Presupuestos (abiertos)"
   },
   "drawer": {
     "entityLabel": "Oportunidad",

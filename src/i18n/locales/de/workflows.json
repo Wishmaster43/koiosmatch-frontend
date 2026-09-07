@@ -371,7 +371,10 @@
       },
       "lastInbound": "Letzte eingehende Nachricht",
       "inboundCount": "{{count}} Züge verarbeitet",
-      "lastInboundError": "Letzter Fehler"
+      "lastInboundError": "Letzter Fehler",
+      "knowledgeLinked_one": "Verknüpft: {{count}} Quelle",
+      "knowledgeLinked_other": "Verknüpft: {{count}} Quellen",
+      "knowledgeNone": "Noch kein Wissen verknüpft"
     },
     "tabs": {
       "agents": "Agenten",

@@ -54,6 +54,8 @@ export interface AiAgent {
   // "falls back to everything". Returned via $appends even when never sent.
   knowledge_ids?: string[]
   use_knowledge?: boolean
+  // Derived field: true when ≥1 knowledge item is coupled to this agent.
+  has_knowledge?: boolean
   max_history?: number
   // The WhatsApp-approved template that opens the conversation with the candidate
   // (WA_INTRO_TEMPLATE-1) — always a real synced template name, never free text.

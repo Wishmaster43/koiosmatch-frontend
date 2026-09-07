@@ -98,7 +98,8 @@
     "candidatesAvailable": "Verfügbare Kandidaten",
     "candidatesAvailableSub": "Einsatzfähigkeit: verfügbar",
     "shiftsNoshowTodaySub": "Heute nicht erschienen",
-    "shiftsCancelledTodaySub": "Heute storniert"
+    "shiftsCancelledTodaySub": "Heute storniert",
+    "pipelineQuotes": "Angebote (offen)"
   },
   "chart": {
     "byStatus": "Kandidaten nach Status",

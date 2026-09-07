@@ -39,7 +39,7 @@ describe('OpportunitiesInsightsRow · owner donut keys on id (OPP-OWNER-ID-1)', 
     const onPickOwner = vi.fn()
     render(
       <OpportunitiesInsightsRow
-        rows={rows as Opportunity[]} stages={[]} valueInHours={false}
+        rows={rows as Opportunity[]} stages={[]}
         stage={[]} owner={[]} client={[]}
         onPickStage={noop} onClearStage={noop}
         onPickOwner={onPickOwner} onClearOwner={noop}
@@ -59,7 +59,7 @@ describe('OpportunitiesInsightsRow · owner donut keys on id (OPP-OWNER-ID-1)', 
   it('resolves the picked owner id back to the display name for the visible chip', () => {
     render(
       <OpportunitiesInsightsRow
-        rows={rows as Opportunity[]} stages={[]} valueInHours={false}
+        rows={rows as Opportunity[]} stages={[]}
         stage={[]} owner={['u1']} client={[]}
         onPickStage={noop} onClearStage={noop}
         onPickOwner={noop} onClearOwner={noop}

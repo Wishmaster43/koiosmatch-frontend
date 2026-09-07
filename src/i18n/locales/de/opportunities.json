@@ -38,7 +38,8 @@
     "avgHours": "Ø Stunden",
     "won": "Gewonnen",
     "lost": "Verloren",
-    "winRate": "Gewinnrate (%)"
+    "winRate": "Gewinnrate (%)",
+    "pipelineQuotes": "Angebote (offen)"
   },
   "drawer": {
     "entityLabel": "Chance",

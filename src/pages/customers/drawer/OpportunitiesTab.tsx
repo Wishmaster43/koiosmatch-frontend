@@ -129,9 +129,7 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
   // so an absent setting keeps today's coloured-chip look.
   const settings = useAllSettings()
   const colorStage = getBoolSetting(settings, 'customer_opportunity_table_color_stage', true)
-  // K10c: the tenant's "Kansen in uren" setting — mirrors OpportunitiesTable's own
-  // 'opportunity_value_in_hours' read so the drawer tab and the page never disagree.
-  const valueInHours = getBoolSetting(settings, 'opportunity_value_in_hours', false)
+  // X-5-UNIT-PER-ROW: per-row unit from dealType.unit (euro/hours/quote), no tenant setting.
 
   // Deletes one opportunity after confirmation, reloading the list on success or surfacing an honest error toast on failure.
   const remove = (o: Opportunity) => {
@@ -151,7 +149,7 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
         ? <SoftChip label={o.stage} color={o.stageColor} />
         : <span style={plainCell}>{o.stage}</span> },
     { key: 'value', header: t('opportunities.col.value'), align: 'right', cellStyle: { color: 'var(--text)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace' }, sortable: true,
-      sortValue: o => opportunityValueOf(o, valueInHours) ?? -1, render: o => formatOpportunityValue(o, valueInHours, t, currency, locale) },
+      sortValue: o => opportunityValueOf(o) ?? -1, render: o => formatOpportunityValue(o, t, currency, locale) },
     { key: 'expectedClose', header: t('opportunities.col.expectedClose'), cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, sortable: true,
       sortValue: o => o.expectedCloseAt ?? '', render: o => o.expectedCloseAt ? formatDate(o.expectedCloseAt) : '—' },
     { key: 'actions', header: '', align: 'right', render: o => (

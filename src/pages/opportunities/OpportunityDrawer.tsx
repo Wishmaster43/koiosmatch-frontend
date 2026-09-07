@@ -44,8 +44,6 @@ interface OpportunityDrawerProps {
   stages?: LookupOption[]
   users?: DrawerUser[]
   customers?: DrawerCustomer[]
-  // Tenant setting: show the deal magnitude in hours instead of euro (mirrors the table).
-  valueInHours?: boolean
   // ARCHIVE-1: per-id soft-delete/restore (§7 — UI-only gate; the backend
   // re-checks opportunities.delete / opportunities.update). Absent = no
   // permission, so the trash icon/restore button simply don't render.
@@ -64,7 +62,7 @@ interface OpportunityDrawerProps {
  */
 export default function OpportunityDrawer({
   opportunity: o, allRows = [], onClose, expanded, onToggleExpand, onUpdate, stages = [], users = [], customers = [],
-  onArchive, onRestore, trash, valueInHours = false,
+  onArchive, onRestore, trash,
 }: OpportunityDrawerProps) {
   const { t } = useTranslation('opportunities')
   const { formatDate, formatDateTime } = useDateFormat()
@@ -119,7 +117,7 @@ export default function OpportunityDrawer({
     { id: 'timeline', label: t('drawer.tabs.timeline'), render: () => <ChangelogTab opportunity={o} /> },
     // Statistieken LAST, app-wide (Danny 24-08: "statistieken is laatste tabje,
     // HUISSTIJL") — a read-only summary, never a working tab.
-    { id: 'statistics', label: t('drawer.tabs.statistics'), render: () => <StatisticsTab opportunity={o} allRows={allRows} valueInHours={valueInHours} /> },
+    { id: 'statistics', label: t('drawer.tabs.statistics'), render: () => <StatisticsTab opportunity={o} allRows={allRows} /> },
   ]
 
   const renderTitle = () => editing ? (

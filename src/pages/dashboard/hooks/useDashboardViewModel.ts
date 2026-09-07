@@ -41,7 +41,6 @@ interface UseDashboardViewModelArgs {
   // today's default order) so existing test/call sites keep compiling.
   kpiOrder?: Record<string, string[]>
   hasPlanning: boolean
-  valueInHours: boolean
   onNavigate?: (page: string, params?: Record<string, unknown>) => void
 }
 
@@ -49,7 +48,7 @@ interface UseDashboardViewModelArgs {
 // For why this lives outside Dashboard.tsx.
 export function useDashboardViewModel({
   t, formatNumber, stats, opp, dash, dashCharts, statusMeta, funnelMeta, funnelTypes,
-  activeType, hiddenBlocks, hiddenKpis, kpiOrder = {}, hasPlanning, valueInHours,
+  activeType, hiddenBlocks, hiddenKpis, kpiOrder = {}, hasPlanning,
   onNavigate,
 }: UseDashboardViewModelArgs) {
   // The feed timestamps carry a month NAME on any day but today, so they follow the
@@ -214,7 +213,7 @@ export function useDashboardViewModel({
   // K-173 fase 2 — dash.drills flows straight through so each tile can resolve its
   // own onClick against the server's exact list filters (see buildDashboardKpis).
   const kpiById = buildDashboardKpis({
-    t, kpis, drills: dash?.drills, num, eur, opp, valueInHours, onNavigate,
+    t, kpis, drills: dash?.drills, num, eur, opp, onNavigate,
   })
   // MODULE-gated tiles render NOTHING when their server key is ABSENT: K-168
   // only omits a key when the tenant lacks the module behind it (workflows /

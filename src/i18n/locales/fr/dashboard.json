@@ -98,7 +98,8 @@
     "candidatesAvailable": "Candidats disponibles",
     "candidatesAvailableSub": "Disponibilité : disponible",
     "shiftsNoshowTodaySub": "Absences aujourd'hui",
-    "shiftsCancelledTodaySub": "Annulées aujourd'hui"
+    "shiftsCancelledTodaySub": "Annulées aujourd'hui",
+    "pipelineQuotes": "Devis (ouverts)"
   },
   "chart": {
     "byStatus": "Candidats par statut",

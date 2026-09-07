@@ -158,7 +158,8 @@ export function AgentForm({ agent, prompts, faqs, knowledgeItems, onSaved, onDel
     custom_api_key:  '',
     prompt_id:       agent?.prompt_id       ?? '',
     faq_ids:         agent?.faq_ids         ?? [],
-    use_knowledge:   agent?.use_knowledge   ?? false,
+    // B2-3: use_knowledge defaults to true for a newly-stored agent (bundle B2).
+    use_knowledge:   agent?.use_knowledge   ?? true,
     max_history:     agent?.max_history     ?? 10,
     wa_intro_template: agent?.wa_intro_template ?? '',
     knowledge_ids: (agent?.knowledge_ids ?? []).map(String),
