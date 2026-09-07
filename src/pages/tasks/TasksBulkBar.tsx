@@ -6,10 +6,11 @@
  * the backend re-checks.
  */
 import { useTranslation } from 'react-i18next'
-import { ListChecks, Activity, Flag, UserCog, Archive } from 'lucide-react'
+import { ListChecks, Activity, Flag, UserCog } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
 import type { MenuNode } from '@/components/ui/ActionMenu'
 import BulkBarShell from '@/components/ui/BulkBarShell'
+import { archiveNode } from '@/components/ui/bulk/bulkNodes'
 import type { TaskLookupItem } from '@/context/TaskLookupsContext'
 import type { Id } from '@/types/common'
 
@@ -50,7 +51,7 @@ export default function TasksBulkBar({
       searchPlaceholder: t('bulk.searchPriority'), options: priorityOptions, onPick: v => onSetPriority(String(v)) },
     { key: 'assignee', label: t('bulk.changeAssignee'), icon: UserCog,
       searchPlaceholder: t('bulk.searchAssignee'), emptyText: t('bulk.noUsers'), options: assigneeOptions, onPick: v => onSetAssignee(String(v)) },
-    ...(canArchive ? [{ key: 'archive', label: t('bulk.archive'), icon: Archive, danger: true, onSelect: onArchive }] : []),
+    ...archiveNode(t, { canArchive, onArchive }),
   ]
 
   return (

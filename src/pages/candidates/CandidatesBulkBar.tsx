@@ -6,7 +6,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ListChecks, Folder, FolderPlus, FolderMinus, UserCog, Milestone, Briefcase, Tag, Tags, StickyNote, Archive, ShieldCheck, UserCheck, Activity, GitMerge, RefreshCw, ExternalLink, Link2, Building2, Layers } from 'lucide-react'
+import { ListChecks, Folder, FolderPlus, FolderMinus, UserCog, Milestone, Briefcase, Tag, Tags, StickyNote, ShieldCheck, UserCheck, Activity, RefreshCw, ExternalLink, Link2, Building2, Layers } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
 import { BTN_H_SM } from '@/config/buttonMetrics'
 import type { MenuNode } from '@/components/ui/ActionMenu'
@@ -14,6 +14,7 @@ import BulkBarShell from '@/components/ui/BulkBarShell'
 import BulkNoteModal from '@/components/ui/BulkNoteModal'
 import { useAuth } from '@/context/AuthContext'
 import { useApps } from '@/context/AppsContext'
+import { archiveNode, mergeNode, pickById, pickPool } from '@/components/ui/bulk/bulkNodes'
 import { useTenantPools } from './hooks/useCandidatePools'
 import type { CandidatePool } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
@@ -112,19 +113,20 @@ export default function CandidatesBulkBar({
   const tagOptions = selectedTags.map(tg => ({ value: tg, label: tg }))
 
   // Resolve a picked pool/user id back to the full object the parent needs.
-  const pickPool = (handler: (pool: CandidatePool) => void) => (poolId: string | number) => { const p = pools.find(x => (x.id ?? x.name) === poolId); if (p) handler(p) }
-  const pickUser = (handler: (user: BulkUser) => void) => (userId: string | number) => { const u = users.find(x => x.id === userId); if (u) handler(u) }
+  const pickPoolHandler = pickPool(pools, onAddToPool)
+  const pickPoolRemoveHandler = pickPool(pools, onRemoveFromPool)
+  const pickUserHandler = pickById(users, onSetOwner)
 
   // Declarative bulk-action tree; extend with more actions as extra nodes.
   // Archive is gated: only present when the user may delete (server re-checks).
   const items: MenuNode[] = [
     { key: 'owner', label: t('bulk.changeOwner'), icon: UserCog,
-      searchPlaceholder: t('bulk.searchOwner'), emptyText: t('bulk.noUsers'), options: userOptions, onPick: pickUser(onSetOwner) },
+      searchPlaceholder: t('bulk.searchOwner'), emptyText: t('bulk.noUsers'), options: userOptions, onPick: pickUserHandler },
     { key: 'pool', label: t('bulk.pool'), icon: Folder, items: [
       { key: 'add-pool', label: t('bulk.addToPool'), icon: FolderPlus,
-        searchPlaceholder: t('bulk.searchPool'), emptyText: t('bulk.noPools'), options: poolOptions, onPick: pickPool(onAddToPool) },
+        searchPlaceholder: t('bulk.searchPool'), emptyText: t('bulk.noPools'), options: poolOptions, onPick: pickPoolHandler },
       { key: 'remove-pool', label: t('bulk.removeFromPool'), icon: FolderMinus,
-        searchPlaceholder: t('bulk.searchPool'), emptyText: t('bulk.noPools'), options: poolOptions, onPick: pickPool(onRemoveFromPool) },
+        searchPlaceholder: t('bulk.searchPool'), emptyText: t('bulk.noPools'), options: poolOptions, onPick: pickPoolRemoveHandler },
     ] },
     // BULK-FUNNEL-SOLE-1: the BE bulk endpoint (candidates/bulk/funnel-stage) moves
     // each candidate's ONE-AND-ONLY live application — a candidate with 0 or >1 live
@@ -166,7 +168,7 @@ export default function CandidatesBulkBar({
     ] },
     // Bulk-merge (punt 4): only offered with EXACTLY 2 rows selected — merging is
     // pairwise (one survivor absorbs one duplicate), so any other count is ambiguous.
-    ...(count === 2 && canMerge && onMerge ? [{ key: 'merge', label: t('bulk.merge'), icon: GitMerge, onSelect: onMerge }] : []),
+    ...mergeNode(t, { count, canMerge, onMerge }),
     // GEO-REGEOCODE-1: reuses the ONE shared common:geocode.refresh label (no
     // per-entity i18n key) — mirrors the per-record GeocodeButton's tooltip text.
     ...(canGeocode && onGeocode ? [{ key: 'geocode', label: t('common:geocode.refresh'), icon: RefreshCw, onSelect: onGeocode }] : []),
@@ -178,7 +180,7 @@ export default function CandidatesBulkBar({
         ...(showShiftmanager ? [{ key: 'shiftmanager', label: t('common:backofficeLinks.shiftmanager.name'), icon: Layers, onSelect: () => onCoupleBackoffice('shiftmanager') }] : []),
       ],
     }] : []),
-    ...(canArchive ? [{ key: 'archive', label: t('bulk.archive'), icon: Archive, danger: true, onSelect: onArchive }] : []),
+    ...archiveNode(t, { canArchive, onArchive }),
   ]
 
   // colour override note (was on SectionTitle directly): this bar sits on a

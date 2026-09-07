@@ -6,11 +6,12 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ListChecks, Search, UserCog, CircleDot, Building2, Globe, GlobeLock, Bot, BotOff, Tag, StickyNote, Archive } from 'lucide-react'
+import { ListChecks, Search, UserCog, CircleDot, Building2, Globe, GlobeLock, Bot, BotOff, Tag, StickyNote } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
 import type { MenuNode } from '@/components/ui/ActionMenu'
 import BulkBarShell from '@/components/ui/BulkBarShell'
 import BulkNoteModal from '@/components/ui/BulkNoteModal'
+import { archiveNode, pickById, removeTagNode } from '@/components/ui/bulk/bulkNodes'
 import type { Id, LookupOption } from '@/types/common'
 
 interface BulkUser { id: Id; name: string }
@@ -64,9 +65,9 @@ export default function VacanciesBulkBar({
   const vacancyOptions = selectedVacancies.map(v => ({ value: v.id, label: v.title }))
 
   // Resolve a picked user/customer/agent id back to the full object the parent needs.
-  const pickUser = (handler: (u: BulkUser) => void) => (id: string | number) => { const u = users.find(x => x.id === id); if (u) handler(u) }
-  const pickCustomer = (handler: (c: BulkCustomer) => void) => (id: string | number) => { const c = customers.find(x => x.id === id); if (c) handler(c) }
-  const pickAgent = (id: string | number) => { const a = aiAgents.find(x => x.id === id); if (a) onSetAiAgent(a) }
+  const pickUserHandler = pickById(users, onSetOwner)
+  const pickCustomerHandler = pickById(customers, onSetClient)
+  const pickAgentHandler = pickById(aiAgents, onSetAiAgent)
 
   // Declarative bulk-action tree; archive is gated (server re-checks). "Kandidaten
   // zoeken" is navigation, not a mutation, so it goes first: one checked vacancy
@@ -82,11 +83,11 @@ export default function VacanciesBulkBar({
             options: vacancyOptions, onPick: onOpenCandidateSearch },
     ] as MenuNode[] : []),
     { key: 'owner', label: t('bulk.changeOwner'), icon: UserCog,
-      searchPlaceholder: t('bulk.searchOwner'), emptyText: t('bulk.noUsers'), options: userOptions, onPick: pickUser(onSetOwner) },
+      searchPlaceholder: t('bulk.searchOwner'), emptyText: t('bulk.noUsers'), options: userOptions, onPick: pickUserHandler },
     { key: 'status', label: t('bulk.changeStatus'), icon: CircleDot,
       searchPlaceholder: t('bulk.searchStatus'), options: statusOptions, onPick: onSetStatus },
     { key: 'client', label: t('bulk.changeClient'), icon: Building2,
-      searchPlaceholder: t('bulk.searchClient'), emptyText: t('bulk.noClients'), options: customerOptions, onPick: pickCustomer(onSetClient) },
+      searchPlaceholder: t('bulk.searchClient'), emptyText: t('bulk.noClients'), options: customerOptions, onPick: pickCustomerHandler },
     { key: 'publishing', label: t('bulk.publishing'), icon: Globe, items: [
       { key: 'publish',   label: t('bulk.publish'),   icon: Globe,     onSelect: onPublish },
       { key: 'unpublish', label: t('bulk.unpublish'), icon: GlobeLock, onSelect: onUnpublish },
@@ -98,13 +99,12 @@ export default function VacanciesBulkBar({
     // list unavailable): an option list that can only ever be empty is a dead end.
     ...(agentOptions.length ? [{ key: 'aiAgent', label: t('bulk.aiAgent'), icon: Bot, items: [
       { key: 'aiAgentLink',   label: t('bulk.linkAgent'),   icon: Bot,
-        searchPlaceholder: t('bulk.searchAgent'), emptyText: t('bulk.noAgents'), options: agentOptions, onPick: pickAgent },
+        searchPlaceholder: t('bulk.searchAgent'), emptyText: t('bulk.noAgents'), options: agentOptions, onPick: pickAgentHandler },
       { key: 'aiAgentUnlink', label: t('bulk.unlinkAgent'), icon: BotOff, onSelect: () => onSetAiAgent(null) },
     ] }] : []),
-    { key: 'tag', label: t('bulk.removeTag'), icon: Tag,
-      searchPlaceholder: t('bulk.searchTag'), emptyText: t('bulk.noTags'), options: tagOptions, onPick: v => onRemoveTag(String(v)) },
+    removeTagNode(t, { tagOptions, onRemoveTag }, { key: 'tag', labelKey: 'bulk.removeTag', iconType: Tag }),
     { key: 'note', label: t('bulk.addNote'), icon: StickyNote, onSelect: () => setNoteModalOpen(true) },
-    ...(canArchive ? [{ key: 'archive', label: t('bulk.archive'), icon: Archive, danger: true, onSelect: onArchive }] : []),
+    ...archiveNode(t, { canArchive, onArchive }),
   ]
 
   return (

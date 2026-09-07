@@ -5,10 +5,11 @@
  * via props, the mutation runs in the page. Extend by adding a node.
  */
 import { useTranslation } from 'react-i18next'
-import { ListChecks, Milestone, Unlink } from 'lucide-react'
+import { ListChecks, Milestone } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
 import type { MenuNode } from '@/components/ui/ActionMenu'
 import BulkBarShell from '@/components/ui/BulkBarShell'
+import { detachNode } from '@/components/ui/bulk/bulkNodes'
 import type { LookupOption } from '@/types/common'
 
 interface ApplicationsBulkBarProps {
@@ -34,9 +35,7 @@ export default function ApplicationsBulkBar({ count, onClear, onSetPhase, onDeta
   const items: MenuNode[] = [
     { key: 'phase', label: t('bulk.changePhase'), icon: Milestone,
       searchPlaceholder: t('bulk.searchPhase'), options: phaseOptions, onPick: v => onSetPhase(String(v)) },
-    ...(canManage ? [{ key: 'detach', label: t('bulk.detach'), icon: Unlink, danger: true, input: true,
-      placeholder: t('bulk.detachReasonPlaceholder'), submitLabel: t('bulk.detachConfirm'),
-      onSubmit: (v: string | Array<string | number>) => onDetach(String(v)) }] : []),
+    ...detachNode(t, { canManage, onDetach }),
   ]
 
   return (

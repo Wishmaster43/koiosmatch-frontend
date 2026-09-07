@@ -6,10 +6,11 @@
  * the backend re-checks.
  */
 import { useTranslation } from 'react-i18next'
-import { ListChecks, Activity, Archive } from 'lucide-react'
+import { ListChecks, Activity } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
 import type { MenuNode } from '@/components/ui/ActionMenu'
 import BulkBarShell from '@/components/ui/BulkBarShell'
+import { archiveNode } from '@/components/ui/bulk/bulkNodes'
 
 interface StatusOption { value: string; label: string; color: string }
 
@@ -30,7 +31,7 @@ export default function OutreachBulkBar({ count, onClear, onSetStatus, onArchive
   const items: MenuNode[] = [
     { key: 'status', label: t('bulk.changeStatus'), icon: Activity,
       searchPlaceholder: t('bulk.searchStatus'), options: statuses, onPick: (v) => onSetStatus(String(v)) },
-    ...(canArchive ? [{ key: 'archive', label: t('bulk.archive'), icon: Archive, danger: true, onSelect: onArchive } as MenuNode] : []),
+    ...archiveNode(t, { canArchive, onArchive }),
   ]
 
   return (
