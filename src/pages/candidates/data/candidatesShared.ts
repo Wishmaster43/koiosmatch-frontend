@@ -62,6 +62,8 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
   if ('phase'          in patch) body.phase           = patch.phase
   if ('status_reason'  in patch) body.status_reason   = patch.status_reason
   if ('blacklist_reason' in patch) body.blacklist_reason = patch.blacklist_reason
+  // KEY-ADOPTION: send the stable lookup key for blacklist_reason alongside the name.
+  if ('blacklistReasonKey' in patch) body.blacklist_reason_key = patch.blacklistReasonKey
   // Camel UI keys (drawer optimistic merge) → API keys. statusChangedAt is display-only
   // (the backend stamps its own status_changed_at) and is deliberately NOT mapped.
   if ('statusReason'    in patch) body.status_reason        = patch.statusReason
@@ -81,6 +83,8 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
   if ('title'          in patch) body.function_title  = patch.title
   if ('gender'            in patch) body.gender            = patch.gender
   if ('nationality'       in patch) body.nationality       = patch.nationality
+  // KEY-ADOPTION: send the stable lookup key for nationality alongside the name.
+  if ('nationalityKey'    in patch) body.nationality_key   = patch.nationalityKey
   if ('preferredLanguage' in patch) body.preferred_language = patch.preferredLanguage === '' ? null : patch.preferredLanguage
   if ('dob'               in patch) body.date_of_birth     = patch.dob
   if ('placeOfBirth'      in patch) body.place_of_birth    = patch.placeOfBirth
@@ -103,6 +107,8 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
   // DANNY-6: acquisition source (free-text column, CandidateProfileRequest max:64).
   // Without this mapping the Herkomst card's save silently dropped the field.
   if ('source'            in patch) body.source            = patch.source === '' ? null : patch.source
+  // KEY-ADOPTION: send the stable lookup key for source alongside the name.
+  if ('sourceKey'         in patch) body.source_key        = patch.sourceKey
   // WORK-PERMIT-1: plain columns on candidates (CandidateProfileRequest validates both) —
   // without this mapping the WorkPermitBlock's save silently dropped its fields.
   if ('workPermitType'       in patch) body.work_permit_type        = patch.workPermitType || null

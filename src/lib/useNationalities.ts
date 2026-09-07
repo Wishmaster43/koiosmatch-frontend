@@ -30,17 +30,18 @@ export const DEFAULT_NATIONALITIES = [
   'Marokkaans', 'Surinaams', 'Antilliaans', 'Overig',
 ]
 
-interface NationalitiesData { names: string[]; flags: Record<string, string> }
+interface NationalitiesData { names: string[]; flags: Record<string, string>; keys: Record<string, string | null> }
 
-const DEFAULT_DATA: NationalitiesData = { names: DEFAULT_NATIONALITIES, flags: {} }
+const DEFAULT_DATA: NationalitiesData = { names: DEFAULT_NATIONALITIES, flags: {}, keys: {} }
 
-type Named = { name?: string; label?: string; value?: string; country_code?: string }
+type Named = { name?: string; label?: string; value?: string; country_code?: string; key?: string }
 
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
 const mapNationalities = (res: AxiosResponse): NationalitiesData | null => {
   const raw = (unwrapList(res).rows) as unknown[]
   const names: string[] = []
   const flags: Record<string, string> = {}
+  const keys: Record<string, string | null> = {}
   raw.forEach(x => {
     if (typeof x === 'string') { names.push(x); return }
     const n = x as Named
@@ -49,8 +50,9 @@ const mapNationalities = (res: AxiosResponse): NationalitiesData | null => {
     names.push(name)
     const flag = getFlagEmoji(n.country_code)
     if (flag) flags[name] = flag
+    keys[name] = n.key ?? null
   })
-  return names.length ? { names, flags } : null
+  return names.length ? { names, flags, keys } : null
 }
 
 // Cached tenant nationality lookup + a name-to-flag-emoji map derived from each row's country code (see the module doc above for why both share one cache entry).
@@ -60,11 +62,12 @@ export function useNationalities() {
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   // Flags are re-keyed onto the translated name so `flags[name]` still resolves for callers
   // that look the flag up by the (possibly translated) name coming back from this hook.
+  // KEY-ADOPTION: each raw row may carry a `key` field from the API; seed defaults have no key.
   const translated = useMemo(() => {
     // LOOKUP-I18N-1 SAFETY: the picker saves the string it shows, so the stored names stay
     // raw and only `options` carries a translated label (display sites use useSeedLabel).
     const names = data.names
-    const options = data.names.map(name => ({ value: name, label: translateSeedLabel(t, 'nationalities', { label: name }) }))
+    const options = data.names.map(name => ({ value: name, label: translateSeedLabel(t, 'nationalities', { label: name }), key: data.keys[name] ?? null }))
     const flags: Record<string, string> = {}
     data.names.forEach((name, i) => {
       const flag = data.flags[name]

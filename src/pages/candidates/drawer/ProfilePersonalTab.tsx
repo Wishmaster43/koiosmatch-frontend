@@ -78,7 +78,12 @@ export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
     // drifted from its lookup (seeded 'Nederlandse' vs 'Nederlands') used to fail the
     // whole save with a 422 on a key the recruiter never edited.
     const before = emptyForm()
-    const changed = Object.fromEntries((Object.keys(form) as PersonalKey[]).filter(k => form[k] !== before[k]).map(k => [k, form[k]]))
+    const changed = Object.fromEntries((Object.keys(form) as PersonalKey[]).filter(k => form[k] !== before[k]).map(k => [k, form[k]])) as Record<string, unknown>
+    // KEY-ADOPTION: when nationality changes, include its stable lookup key alongside the name.
+    if ('nationality' in changed) {
+      const nationalityKey = nationalityOptions.find(o => o.value === form.nationality)?.key ?? null
+      changed.nationalityKey = nationalityKey
+    }
     if (Object.keys(changed).length) onSave?.(changed)
     setEditing(false); setErrors({})
   }

@@ -174,6 +174,7 @@ export interface Candidate {
   // "By whom" the status changed — shown in the header info line once the API sends it (H2).
   statusChangedBy: string | null
   blacklistReason: string | null
+  blacklistReasonKey?: string | null
   availability: string | null
   owner: string
   ownerId: string | number | null
@@ -193,6 +194,7 @@ export interface Candidate {
   lastContactType: string | null
   lastContactBy: string | null
   source?: string | null
+  sourceKey?: string | null
   // SOURCE-DETAIL-1: careersite-filled snapshot text (e.g. which vacancy/page the
   // candidate applied through) — survives vacancy deletion by design, text-only.
   sourceDetail?: string | null
@@ -221,6 +223,7 @@ export interface Candidate {
   address: string
   gender: string
   nationality: string
+  nationalityKey?: string | null
   // AVG-RET-2-TAAL-1: preferred messaging language ('' = agency default).
   preferredLanguage: string
   dob: string
@@ -265,7 +268,9 @@ export interface Candidate {
   // copied it through). Mirrors `documents`/`skills`: a straight passthrough,
   // ReferenceResource's keys already match this tab's own field keys 1:1.
   references: Loose[]
-  skills: string[]
+  // Skills are relation items with name, level, document_id, etc. — stored as Loose
+  // since the exact shape varies across backend versions and mapCandidate spreads them through.
+  skills: Loose[]
   documents: Loose[]
   applications: Loose[]
   matches: CandidateMatch[]
@@ -385,6 +390,7 @@ export interface ApiCandidate {
   status_changed_at?: string | null
   status_effective_from?: string | null
   blacklist_reason?: string | null
+  blacklist_reason_key?: string | null
   blacklisted_by?: string | { name?: string } | null
   blacklisted_at?: string | null
   availability?: string | null
@@ -413,6 +419,7 @@ export interface ApiCandidate {
   created?: string
   // CREATED-BY-SOURCE-1: acquisition channel + who created this dossier (a CENTRAL user).
   source?: string | null
+  source_key?: string | null
   // SOURCE-DETAIL-1: raw snapshot string from the backend (careersite fills it automatically).
   source_detail?: string | null
   created_by?: { id?: string | number; name?: string } | null
@@ -435,6 +442,7 @@ export interface ApiCandidate {
   gender?: string
   sex?: string
   nationality?: string
+  nationality_key?: string | null
   // AVG-RET-2-TAAL-1: null = agency default.
   preferred_language?: string | null
   date_of_birth?: string
@@ -469,7 +477,8 @@ export interface ApiCandidate {
   certifications?: Loose[]
   // REFERENTIE-VELDEN-1: raw candidate_references rows nested on GET /candidates/{id}.
   references?: Loose[]
-  skills?: string[]
+  // KEY-ADOPTION: skills are relation items with name, level, level_key, document_id, etc.
+  skills?: Loose[]
   documents?: Loose[]
   applications?: Loose[]
   matches?: ApiCandidateMatch[]

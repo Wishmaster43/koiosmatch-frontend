@@ -19,6 +19,8 @@ import type { Id, LookupOption } from '@/types/common'
 export interface StatusModalState {
   target: string; reason: string; date: string
   needReason: boolean; needDate: boolean; isBlacklist?: boolean
+  // KEY-ADOPTION: stable lookup key for blacklist reason, extracted when the modal opens.
+  reasonKey?: string | null
 }
 
 interface Args {
@@ -96,7 +98,7 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
     // A reason/date-flagged default can't be set silently (that's how the reason-less
     // seed rows happened) — open the usual prompt so the reason lands properly.
     if (needsPrompt) {
-      setStatusModal({ target: def, reason: '', date: '', needReason: Boolean(defStatus.requires_reason), needDate: Boolean(defStatus.expects_return_date), isBlacklist: false })
+      setStatusModal({ target: def, reason: '', date: '', needReason: Boolean(defStatus.requires_reason), needDate: Boolean(defStatus.expects_return_date), isBlacklist: false, reasonKey: null })
     }
     setConverting(true); setTimeout(() => setConverting(false), 1000)
     const requiredComplete = makeRequiredComplete(c, allSettings)
@@ -128,6 +130,8 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
       needReason: statusFlags.is_blacklist ? (!!statusFlags.requires_reason && blacklistReasonRequired) : !!statusFlags.requires_reason,
       needDate: !!statusFlags.expects_return_date,
       isBlacklist: !!statusFlags.is_blacklist,
+      // KEY-ADOPTION: include the blacklist reason key when re-opening the edit modal.
+      reasonKey: statusFlags.is_blacklist ? (c.blacklistReasonKey ?? null) : undefined,
     })
   }
 
@@ -146,6 +150,7 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
         target: v, reason: '', date: '',
         needReason: isBlacklist ? (Boolean(it?.requires_reason) && blacklistReasonRequired) : Boolean(it?.requires_reason),
         needDate: Boolean(it?.expects_return_date), isBlacklist,
+        reasonKey: null, // Will be set when user selects a blacklist reason
       })
       return
     }
@@ -161,7 +166,7 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
     if (!statusModal || !c) return
     setStatus(statusModal.target)
     const reasonPatch = statusModal.isBlacklist
-      ? { blacklistReason: statusModal.reason || null }
+      ? { blacklistReason: statusModal.reason || null, blacklistReasonKey: statusModal.reasonKey ?? null }
       : { statusReason: statusModal.reason || null }
     const changed = statusModal.target !== c.status
     // STATUS-DATE-SYNC-1: the server makes the return date THE availability-from

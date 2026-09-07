@@ -32,10 +32,12 @@ interface MatchRow { id?: string | number; vacancyTitle?: string; client?: strin
 // BLACKLIST-ICON-1: the blacklist-reason picker carries the full lookup object
 // (value/label/icon) — mirrors SelectMenu's S-icon-1 shape now that CreatableSelect
 // supports it, instead of the previous bare `string[]` of names.
-interface BlacklistReasonOption { value: string; label: string; icon?: ReactNode }
+// KEY-ADOPTION: each option carries its stable lookup key (null for seed defaults).
+interface BlacklistReasonOption { value: string; label: string; icon?: ReactNode; key?: string | null }
 // isBlacklist → the reason is the lookup-backed blacklist_reason (dropdown from
 // /candidate-blacklist-reasons; BE validates Rule::exists), never free text.
-export interface StatusModalState { target: string; reason: string; date: string; needReason: boolean; needDate: boolean; isBlacklist?: boolean }
+// KEY-ADOPTION: reasonKey stores the stable lookup key for blacklist reasons.
+export interface StatusModalState { target: string; reason: string; date: string; needReason: boolean; needDate: boolean; isBlacklist?: boolean; reasonKey?: string | null }
 
 interface Props {
   // "Placed" → link an existing match or create one against a vacancy.
@@ -119,7 +121,11 @@ function StatusReasonModal({
               // Blacklist: lookup-backed searchable dropdown (BE validates exists on blacklist_reasons.name).
               <>
                 <CreatableSelect value={statusModal.reason || null} allowCreate={false} clearable
-                  onChange={v => setStatusModal(m => m && ({ ...m, reason: v }))}
+                  onChange={v => {
+                    // KEY-ADOPTION: when a blacklist reason is selected, extract and store its key.
+                    const selectedReason = blReasons.find(r => r.value === v)
+                    setStatusModal(m => m && ({ ...m, reason: v, reasonKey: selectedReason?.key ?? null }))
+                  }}
                   placeholder={t('drawer.blacklistReasonPick')} options={blReasons}
                   style={{ padding: '8px 10px', fontSize: 12 }} />
                 {/* BLACKLIST-EMPTY-1: no configured reasons = a dead end; say so and link to Settings. */}
@@ -177,12 +183,13 @@ export default function CandidateStatusModals({
     if (!statusModal?.isBlacklist || blReasons.length) return
     api.get('/candidate-blacklist-reasons')
       .then(r => setBlReasons(
-        ((unwrapList(r).rows) as Array<{ name?: string; icon?: string }>)
+        ((unwrapList(r).rows) as Array<{ name?: string; icon?: string; key?: string }>)
           .filter(x => x.name)
           // BLACKLIST-ICON-1: full lookup object, mirroring S-icon-1 — the value the
           // BE validates against stays `name` (unchanged contract), the icon just
           // rides alongside it for display, resolved via the shared LookupIcon.
-          .map(x => ({ value: String(x.name), label: String(x.name), icon: x.icon ? <LookupIcon icon={x.icon} size={12} /> : undefined })),
+          // KEY-ADOPTION: also extract the stable key for each reason.
+          .map(x => ({ value: String(x.name), label: String(x.name), icon: x.icon ? <LookupIcon icon={x.icon} size={12} /> : undefined, key: x.key ?? null })),
       ))
       .catch(() => setBlReasons([]))
       .finally(() => setBlReasonsLoaded(true))

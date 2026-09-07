@@ -29,7 +29,8 @@ let tenantSeq = 0
 // test suite never initialises react-i18next, so `t(key, { defaultValue })` falls
 // back to `defaultValue` verbatim, i.e. label === value here (real-locale translation
 // is covered by lookupSeedI18n.test.ts, the pure helper's own suite).
-const asOptions = (names: string[]) => names.map(name => ({ value: name, label: name }))
+// KEY-ADOPTION: each option now carries a `key` field (null for seeds).
+const asOptions = (names: string[]) => names.map(name => ({ value: name, label: name, key: null }))
 
 // A fresh tenant id per test isolates useCachedLookup's module-scope cache.
 const nextTenant = () => `t${tenantSeq++}`
@@ -110,5 +111,55 @@ describe('useApplicationSources', () => {
     mockedGet.mockReturnValue(new Promise(() => {}))
     const { result } = renderHook(() => useApplicationSources())
     expect(typeof result.current.invalidate).toBe('function')
+  })
+
+  // KEY-ADOPTION: keys are extracted from the API response and included in options.
+  it('includes key in source options from the API', async () => {
+    mockedTenantId.mockReturnValue(nextTenant())
+    mockedGet.mockResolvedValue({
+      data: {
+        data: [
+          { id: 's1', name: 'Indeed', key: 'indeed' },
+          { id: 's2', name: 'LinkedIn', key: 'linkedin' },
+        ],
+        allow_free_entry: false,
+      },
+    })
+    const { result } = renderHook(() => useApplicationSources())
+    await waitFor(() => expect(result.current.sources).toHaveLength(2))
+    expect(result.current.sources[0]).toEqual({
+      value: 'Indeed',
+      label: 'Indeed',
+      key: 'indeed',
+    })
+    expect(result.current.sources[1]).toEqual({
+      value: 'LinkedIn',
+      label: 'LinkedIn',
+      key: 'linkedin',
+    })
+  })
+
+  it('includes null key for rows without a backend key', async () => {
+    mockedTenantId.mockReturnValue(nextTenant())
+    mockedGet.mockResolvedValue({
+      data: {
+        data: [{ id: 's1', name: 'Indeed' }],
+        allow_free_entry: false,
+      },
+    })
+    const { result } = renderHook(() => useApplicationSources())
+    await waitFor(() => expect(result.current.sources).toHaveLength(1))
+    expect(result.current.sources[0].key).toBe(null)
+  })
+
+  it('includes null key for seed defaults while pending', () => {
+    mockedTenantId.mockReturnValue(nextTenant())
+    mockedGet.mockReturnValue(new Promise(() => {}))
+    const { result } = renderHook(() => useApplicationSources())
+    const defaultSources = result.current.sources
+    defaultSources.forEach(source => {
+      expect(source).toHaveProperty('key')
+      expect(source.key).toBe(null)
+    })
   })
 })

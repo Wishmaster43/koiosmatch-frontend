@@ -123,6 +123,8 @@ export function mapCandidate(c: ApiCandidate): Candidate {
       ? (c.status_changed_by as { name?: string } | null)?.name ?? null
       : (c.status_changed_by as string | null | undefined)) ?? null,
     blacklistReason:  c.blacklist_reason ?? null,
+    // KEY-ADOPTION: stable lookup key for blacklist_reason, null for legacy/seeded data.
+    blacklistReasonKey: c.blacklist_reason_key ?? null,
     // Availability — legacy separate axis (folded into deployability in v2); kept for back-compat.
     availability:    c.availability ?? null,
     owner:           ownerName,
@@ -148,6 +150,8 @@ export function mapCandidate(c: ApiCandidate): Candidate {
       : null,
     // Acquisition source (website/facebook/…) — feeds the source filter once the list sends it.
     source:          (c.source as string | undefined) ?? null,
+    // KEY-ADOPTION: stable lookup key for source, null for legacy/seeded data.
+    sourceKey:       c.source_key ?? null,
     // SOURCE-DETAIL-1: careersite snapshot string (e.g. exact vacancy/page title) —
     // tolerant string mapping, kept as free text since it must outlive the vacancy.
     sourceDetail:    (c.source_detail as string | undefined) ?? null,
@@ -186,6 +190,8 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     address:         [c.street, c.city].filter(Boolean).join(', ') || c.address || c.city || '-',
     gender:          c.gender ?? c.sex ?? '-',
     nationality:     c.nationality ?? '-',
+    // KEY-ADOPTION: stable lookup key for nationality, null for legacy/seeded data.
+    nationalityKey:  c.nationality_key ?? null,
     // AVG-RET-2-TAAL-1: preferred messaging language ('' = agency default).
     preferredLanguage: c.preferred_language ?? '',
     dob:             c.date_of_birth ?? c.dob ?? c.birthdate ?? '-',
@@ -264,7 +270,14 @@ export function mapCandidate(c: ApiCandidate): Candidate {
       })),
       x => Math.max(dateVal(x.issued), dateVal(x.expires)),
     ),
-    skills:          c.skills ?? [],
+    // KEY-ADOPTION: map level_key to levelKey for the UI to select by key when present.
+    skills:          (c.skills ?? []).map((s: unknown) => {
+      const skill = s as Record<string, unknown>
+      return {
+        ...skill,
+        levelKey: (skill.level_key as string | null | undefined) ?? null,
+      }
+    }),
     // REFERENTIE-VELDEN-1: third-party references (referees) — straight
     // passthrough, mirrors skills/documents; was missing entirely (BackgroundTab's
     // defensive read always resolved to `[]` in the real app — verified live).

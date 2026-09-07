@@ -61,8 +61,8 @@ import { lookupNames } from './lookupUtils'
 
 // A picker option: `value` is the untranslated name the backend recognises;
 // `label` is what the user sees (translated for a seeded default, unchanged for
-// a tenant-typed one). Matches the shared CreatableSelect option shape 1:1.
-export interface ApplicationSourceOption { value: string; label: string }
+// a tenant-typed one); `key` is the stable API slug. Matches the shared CreatableSelect option shape 1:1.
+export interface ApplicationSourceOption { value: string; label: string; key?: string | null }
 
 // Small starter seed shown before any real /candidate-sources data has loaded
 // (data values, not UI copy — same treatment as DEFAULT_FUNCTIONS).
@@ -84,19 +84,30 @@ export const DEFAULT_APPLICATION_SOURCES = [
 // contract rather than guessing the safer-sounding option. Being briefly too
 // permissive costs a value the server can still reject; being briefly too strict
 // costs the user the ability to work at all.
-interface SourcesLookupData { sources: string[]; apiFreeEntry: boolean }
-const FALLBACK: SourcesLookupData = { sources: DEFAULT_APPLICATION_SOURCES, apiFreeEntry: true }
+interface SourcesLookupData { sources: string[]; apiFreeEntry: boolean; sourceKeys: Record<string, string | null> }
+const FALLBACK: SourcesLookupData = { sources: DEFAULT_APPLICATION_SOURCES, apiFreeEntry: true, sourceKeys: {} }
 
 // Names keep the seed when empty; apiFreeEntry defaults STRICT when the response omits the flag
 // carries no boolean flag (a genuinely empty or failed response), per the reasoning above.
 const mapSources = (res: AxiosResponse): SourcesLookupData => {
   const names = lookupNames(res)
   const free = (res?.data as { allow_free_entry?: unknown })?.allow_free_entry
+  // KEY-ADOPTION: extract the key from each lookup row (null for seed defaults).
+  const raw = (res?.data as { data?: unknown[] })?.data ?? []
+  const sourceKeys: Record<string, string | null> = {}
+  if (Array.isArray(raw)) {
+    raw.forEach((x: unknown) => {
+      const row = x as { name?: string; key?: string }
+      const name = row.name
+      if (name) sourceKeys[name] = row.key ?? null
+    })
+  }
   return {
     sources: names.length ? names : DEFAULT_APPLICATION_SOURCES,
     // Danny 21-08 (settings round): free entry is OFF by default — strict is the
     // norm, free entry is the deliberate exception the tenant switches on themselves.
     apiFreeEntry: typeof free === 'boolean' ? free : false,
+    sourceKeys,
   }
 }
 
@@ -108,9 +119,10 @@ export function useApplicationSources() {
   // (LOOKUP-I18N-1). VALUE stays the raw backend name (never translated) so the
   // submitted `source` is always what the backend's ValidCandidateSource lookup
   // recognises; only LABEL is translated for display.
+  // KEY-ADOPTION: each source option carries its stable key from the API (null for seeds).
   const sources = useMemo(
-    () => translateSeedList(t, 'candidateSources', data.sources.map(name => ({ value: name, label: name }))),
-    [data.sources, t],
+    () => translateSeedList(t, 'candidateSources', data.sources.map(name => ({ value: name, label: name, key: data.sourceKeys[name] ?? null }))),
+    [data.sources, data.sourceKeys, t],
   )
   return { sources, allowFreeEntry: data.apiFreeEntry, invalidate }
 }
