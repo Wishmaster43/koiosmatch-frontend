@@ -80,7 +80,8 @@ const TO_API: Record<string, (v: RelItem) => Record<string, unknown>> = {
   // DOC-LANG-SKILL-LINK-1: document_id belongs here too — measured live 08-08,
   // PATCH /candidates/{id}/skills/{skill} persists it (200, echoed back). It was
   // missing, so the skills picker's pick was dropped on save (a fake affordance).
-  skills: v => ({ name: v.name, level: v.level, document_id: v.document_id || null }),
+  // KEY-ADOPTION: send level_key (the stable lookup row key) together with the legacy level name.
+  skills: v => ({ name: v.name, level: v.level, level_key: v.levelKey || null, document_id: v.document_id || null }),
   // REFERENTIE-VELDEN-1: candidate_references columns — a straight passthrough,
   // ReferenceResource's field names already match the form's own keys 1:1 (no
   // FE→BE renaming needed, mirrors the old contract's shape). relation_id and

@@ -26,6 +26,7 @@ import { unwrapList } from '@/lib/api'
 export interface SkillLevelItem {
   value: string
   label: string
+  key?: string | null
   icon?: string | null
   color?: string | null
 }
@@ -33,19 +34,19 @@ export interface SkillLevelItem {
 const SEED_NAMES = ['Basis', 'Gevorderd', 'Expert']
 // Kept for any consumer still importing the old plain-string constant.
 export const DEFAULT_SKILL_LEVELS = SEED_NAMES
-export const DEFAULT_SKILL_LEVEL_ITEMS: SkillLevelItem[] = SEED_NAMES.map(name => ({ value: name, label: name, icon: null, color: null }))
+export const DEFAULT_SKILL_LEVEL_ITEMS: SkillLevelItem[] = SEED_NAMES.map(name => ({ value: name, label: name, key: null, icon: null, color: null }))
 
-type Named = { name?: string; label?: string; value?: string; icon?: string; color?: string }
+type Named = { name?: string; label?: string; value?: string; key?: string; icon?: string; color?: string }
 
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
 const mapSkillLevels = (res: AxiosResponse): SkillLevelItem[] | null => {
   const raw = (unwrapList(res).rows) as unknown[]
   const items = raw
     .map((x): SkillLevelItem | null => {
-      if (typeof x === 'string') return x ? { value: x, label: x, icon: null, color: null } : null
+      if (typeof x === 'string') return x ? { value: x, label: x, key: null, icon: null, color: null } : null
       const n = x as Named
       const name = n.name ?? n.label ?? n.value
-      return name ? { value: name, label: name, icon: n.icon ?? null, color: n.color ?? null } : null
+      return name ? { value: name, label: name, key: n.key ?? null, icon: n.icon ?? null, color: n.color ?? null } : null
     })
     .filter((v): v is SkillLevelItem => v !== null)
   return items.length ? items : null

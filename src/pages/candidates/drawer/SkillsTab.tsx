@@ -20,11 +20,21 @@ import type { RelItem, RelTabProps } from './sectionTabsShared'
 export function SkillsTab({ items = [], onAdd, onEdit, onRemove, documents = [], onJumpToDocuments, onReorder }: RelTabProps) {
   const { t } = useTranslation('candidates')
   // Level is a tenant lookup dropdown (SKILL-LVL-1), mirroring the languages editor.
-  // LOOKUP-ICON-1: useSkillLevels now returns full {value,label,icon,color}
+  // LOOKUP-ICON-1: useSkillLevels now returns full {value,label,icon,color,key}
   // objects (was string[]) — the AddForm `options` field still only needs
   // label text, so pass `names`; the icon lookup below reads the full `levels`.
   const { levels, names: levelNames } = useSkillLevels()
   const levelIconOf = (label: string) => levels.find(l => l.label === label)?.icon
+  // KEY-ADOPTION: resolve the levelKey from the picked level name before passing to parent.
+  const resolveSkillLevel = (skill: RelItem) => {
+    if (skill.level) {
+      const matched = levels.find(l => l.label === skill.level)
+      if (matched?.key) return { ...skill, levelKey: matched.key }
+    }
+    return skill
+  }
+  const wrappedOnAdd = onAdd ? (v: RelItem) => onAdd(resolveSkillLevel(v)) : undefined
+  const wrappedOnEdit = onEdit ? (i: number, v: RelItem) => onEdit(i, resolveSkillLevel(v)) : undefined
   // DOC-LANG-SKILL-LINK-1: preview overlay for a row's linked proof document — the
   // shared house DocPreviewModal (never a fork), mirrors Education/Certifications.
   const [previewDoc, setPreviewDoc] = useState<RelItem | null>(null)
@@ -52,7 +62,7 @@ export function SkillsTab({ items = [], onAdd, onEdit, onRemove, documents = [],
     <>
     <AddableSection title={null} emptyText={t('sections.skillsEmpty')} renderAddButton={renderAddButton} order={order} headerExtra={control}
       dragEnabled={isOwnOrder} onReorder={onReorder}
-      items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
+      items={items} fields={fields} onAdd={wrappedOnAdd} onEdit={wrappedOnEdit} onRemove={onRemove}
       renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
         const v = raw as { id?: Id; name?: string; skill?: string; level?: string }
         const name  = typeof raw === 'string' ? raw : (v.name ?? v.skill ?? '')

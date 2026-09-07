@@ -611,28 +611,81 @@ describe('BackgroundTab · REF-ERVARING-1 work_experience_id round-trips through
 
 /**
  * DOC-1-EIGENAAR-1 punt 5 (het vangnet): even with a correct picker the 422 can still
- * happen (a second tab, a stale list). The recruiter must then read the SERVER's own
- * reason, never a generic "actie mislukt" — and api.ts's dev diagnostic toast is
+ * happen (a second tab, a stale list). The recruiter must then read the SERVER’s own
+ * reason, never a generic "actie mislukt" — and api.ts’s dev diagnostic toast is
  * silenced for 422 so it cannot bury it (quietStatuses, asserted above).
  */
-describe('BackgroundTab · a 422 surfaces the server’s readable reason', () => {
-  it('shows the backend guard’s message instead of the generic fallback', async () => {
+describe("BackgroundTab 422 error display", () => {
+  it("shows the backend message instead of generic fallback", async () => {
     const user = userEvent.setup()
     vi.mocked(api.patch).mockReset()
     vi.mocked(api.patch).mockRejectedValue({
-      response: { status: 422, data: { message: 'Dit document is al aan een ander onderdeel gekoppeld.', errors: { document_id: ['Dit document is al aan een ander onderdeel gekoppeld.'] } } },
+      response: { status: 422, data: { message: "Dit document is al aan een ander onderdeel gekoppeld.", errors: { document_id: ["Dit document is al aan een ander onderdeel gekoppeld."] } } },
     })
     vi.mocked(notifyError).mockClear()
     render(<BackgroundTab c={{
       ...candidate(),
-      certifications: [{ id: 'c1', name: 'VCA Basis' }],
-      documents: [{ id: 'doc-free', name: 'vrij.pdf' }],
+      certifications: [{ id: "c1", name: "VCA Basis" }],
+      documents: [{ id: "doc-free", name: "vrij.pdf" }],
     } as unknown as Candidate} />)
-    await user.click(screen.getByRole('tab', { name: 'Certificeringen' }))
-    await user.click(screen.getByTitle('Bewerken'))
-    await user.click(screen.getByRole('button', { name: 'Gekoppeld document' }))
-    await user.click(await screen.findByRole('button', { name: 'vrij.pdf' }))
-    await user.click(screen.getByTitle('Opslaan'))
-    await waitFor(() => expect(notifyError).toHaveBeenCalledWith('Dit document is al aan een ander onderdeel gekoppeld.'))
+    await user.click(screen.getByRole("tab", { name: "Certificeringen" }))
+    await user.click(screen.getByTitle("Bewerken"))
+    await user.click(screen.getByRole("button", { name: "Gekoppeld document" }))
+    await user.click(await screen.findByRole("button", { name: "vrij.pdf" }))
+    await user.click(screen.getByTitle("Opslaan"))
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith("Dit document is al aan een ander onderdeel gekoppeld."))
+  })
+})
+
+/**
+ * KEY-ADOPTION skills level_key (K-277): BackgroundTab sends level_key
+ * alongside the legacy level name when a skill is added or edited.
+ */
+describe("BackgroundTab KEY-ADOPTION skills", () => {
+  beforeEach(() => {
+    vi.mocked(api.post).mockReset()
+    vi.mocked(api.patch).mockReset()
+    vi.mocked(api.post).mockResolvedValue({})
+    vi.mocked(api.patch).mockResolvedValue({ data: { data: {} } })
+  })
+
+  it("POSTs skills with level_key in the request body", async () => {
+    const user = userEvent.setup()
+    render(<BackgroundTab c={candidate()} />)
+    await user.click(screen.getByRole("tab", { name: "Vaardigheden" }))
+    await user.click(screen.getByRole("button", { name: "Toevoegen" }))
+    await user.type(screen.getByPlaceholderText("Vaardigheid *"), "Excel")
+    fireEvent.click(screen.getByTitle("Opslaan"))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith(
+      "/candidates/1/skills",
+      { name: "Excel", level: "", level_key: null, document_id: null },
+      { quietStatuses: [422] }
+    ))
+  })
+
+  it("PATCHes skills with level_key preserved across renames", async () => {
+    const user = userEvent.setup()
+    const c = {
+      ...candidate(),
+      skills: [{ id: "s1", name: "Excel", level: "Expert", levelKey: "expert_key" }],
+    } as unknown as Candidate
+    render(<BackgroundTab c={c} />)
+    await user.click(screen.getByRole("tab", { name: "Vaardigheden" }))
+    await user.click(screen.getByTitle("Bewerken"))
+    const input = screen.getByDisplayValue("Excel")
+    await user.clear(input)
+    await user.type(input, "Excel Advanced")
+    fireEvent.click(screen.getByTitle("Opslaan"))
+
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith(
+      "/candidates/1/skills/s1",
+      expect.objectContaining({
+        name: "Excel Advanced",
+        level: "Expert",
+        level_key: "expert_key",
+      }),
+      expect.anything()
+    ))
   })
 })

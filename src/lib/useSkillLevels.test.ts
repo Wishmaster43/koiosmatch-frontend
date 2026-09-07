@@ -1,8 +1,9 @@
 /**
  * useSkillLevels — LOOKUP-ICON-1 coverage: the hook now returns full
- * {value,label,icon,color} objects (was string[]), plus a backward-compatible
+ * {value,label,icon,color,key} objects (was string[]), plus a backward-compatible
  * `names` string list for old call-sites. The shared fetch/cache/dedupe plumbing
  * already has its own coverage in useCachedLookup.test.ts.
+ * KEY-ADOPTION: the key field holds the stable lookup row identifier.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
@@ -33,17 +34,33 @@ describe('useSkillLevels', () => {
   // mounts the hook on a never-resolving GET, which otherwise claims
   // useCachedLookup's module-scope inFlight slot for '/skill-levels?active=1' for the
   // rest of this file's run (mirrors useDocumentTypes.test.ts's identical fix).
-  it('carries the icon/color fields through from a real API response', async () => {
+  it('carries the icon/color/key fields through from a real API response', async () => {
     vi.resetModules()
     const freshApi = (await import('@/lib/api')).default
-    vi.mocked(freshApi.get).mockResolvedValue({ data: { data: [{ name: 'Expert', icon: 'star', color: '#79B58E' }] } })
+    vi.mocked(freshApi.get).mockResolvedValue({ data: { data: [{ name: 'Expert', key: 'expert_key', icon: 'star', color: 'rgb(59, 143, 212)' }] } })
     const { useSkillLevels: freshUseSkillLevels } = await import('./useSkillLevels')
 
     const { result, rerender } = renderHook(() => freshUseSkillLevels())
     await vi.waitFor(() => {
       rerender()
-      expect(result.current.levels).toEqual([{ value: 'Expert', label: 'Expert', icon: 'star', color: '#79B58E' }])
+      expect(result.current.levels).toEqual([{ value: 'Expert', label: 'Expert', key: 'expert_key', icon: 'star', color: 'rgb(59, 143, 212)' }])
     })
     expect(result.current.names).toEqual(['Expert'])
+  })
+
+  // KEY-ADOPTION: a renamed label still selects the row by key.
+  it('preserves the key when the label is renamed', async () => {
+    vi.resetModules()
+    const freshApi = (await import('@/lib/api')).default
+    vi.mocked(freshApi.get).mockResolvedValue({ data: { data: [{ name: 'Senior', key: 'expert_key', icon: 'star', color: 'rgb(59, 143, 212)' }] } })
+    const { useSkillLevels: freshUseSkillLevels } = await import('./useSkillLevels')
+
+    const { result, rerender } = renderHook(() => freshUseSkillLevels())
+    await vi.waitFor(() => {
+      rerender()
+      // The key stays stable even though the label changed from 'Expert' to 'Senior'
+      expect(result.current.levels[0].key).toBe('expert_key')
+      expect(result.current.levels[0].label).toBe('Senior')
+    })
   })
 })
