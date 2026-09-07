@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import type { FormState } from '../AddCandidateModal'
 import { Field, CvField, TextField, CreatableSelect, cardHead, cardBox, row } from './fields'
 import { getCountryOptions } from '@/lib/countries'
+import { postcodePlaceholder } from '@/lib/postcode'
 
 interface AddressCardProps {
   form: FormState
@@ -44,7 +45,7 @@ export default function AddressCard({ form, errors, set, isReq, provinces }: Add
         </div>
         <div style={row('1fr 2fr')}>
           <CvField name="postalCode" label={t('modal.fields.postalCode')} required={isReq('postalCode')}>
-            <TextField value={form.postalCode} onChange={v => set('postalCode', v)} error={errors.postalCode} />
+            <TextField value={form.postalCode} onChange={v => set('postalCode', v)} error={errors.postalCode} placeholder={postcodePlaceholder(form.country, t)} />
           </CvField>
           <CvField name="city" label={t('modal.fields.city')} required={isReq('city')}>
             <TextField value={form.city} onChange={v => set('city', v)} placeholder={t('common:placeholders.cityExample')} error={errors.city} />

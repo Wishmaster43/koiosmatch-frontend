@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { cardHead, cardBox, row2, row } from '@/components/ui/modalCards'
+import { postcodePlaceholder } from '@/lib/postcode'
 
 // FIELD-HEIGHT-1: same literal as the parent modal's own `pickerStyle` (kept
 // local since this is the only field in this card that needs it).
@@ -55,7 +56,7 @@ export default function LocationAddressCard({
         {/* LANE-I1b: optional second address line. */}
         <FieldRow label={t('address.addressLine2')}><TextField value={addressLine2} onChange={onAddressLine2Change} /></FieldRow>
         <div style={rowPostal}>
-          <FieldRow label={t('subModal.postalCode')}><TextField value={postalCode} onChange={onPostalCodeChange} placeholder="1234 AB" /></FieldRow>
+          <FieldRow label={t('subModal.postalCode')}><TextField value={postalCode} onChange={onPostalCodeChange} placeholder={postcodePlaceholder(country, t)} /></FieldRow>
           <FieldRow label={t('subModal.city')}><TextField value={city} onChange={onCityChange} /></FieldRow>
         </div>
         <div style={row2}>

@@ -14,6 +14,7 @@ import { FieldRow, TextField, DateField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { getCountryOptions } from '@/lib/countries'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
+import { postcodePlaceholder } from '@/lib/postcode'
 
 interface CandidateType { value: string; label: string; color?: string }
 type AddressKey = 'street' | 'houseNumber' | 'houseNumberSuffix' | 'addressLine2' | 'postalCode' | 'city' | 'province' | 'country'
@@ -79,7 +80,7 @@ export default function PlacementCard({
           <TextField value={addressLine2} onChange={v => onFieldChange('addressLine2', v)} />
         </FieldRow>
         <FieldRow label={t('details.postalCode')}>
-          <TextField value={postalCode} onChange={v => onFieldChange('postalCode', v)} placeholder="1234 AB" />
+          <TextField value={postalCode} onChange={v => onFieldChange('postalCode', v)} placeholder={postcodePlaceholder(country, t)} />
         </FieldRow>
         <FieldRow label={t('details.city')}>
           <TextField value={city} onChange={v => onFieldChange('city', v)} />

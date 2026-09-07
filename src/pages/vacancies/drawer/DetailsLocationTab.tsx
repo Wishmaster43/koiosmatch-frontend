@@ -6,6 +6,7 @@ import { composeAddress } from '../hooks/useVacancyDetailsForm'
 import CopyIconButton from '@/components/ui/CopyIconButton'
 import type { LocationSection } from '../hooks/useVacancyDetailsForm'
 import type { VacancyDetail } from '@/types/vacancy'
+import { postcodePlaceholder } from '@/lib/postcode'
 
 interface Props { vacancy: VacancyDetail; location: LocationSection }
 
@@ -43,7 +44,7 @@ export default function DetailsLocationTab({ vacancy: v, location }: Props) {
         {row(t('details.houseNumber'), null, text('houseNumber'), editing)}
         {row(t('details.houseNumberSuffix'), null, text('houseNumberSuffix'), editing)}
         {row(t('details.addressLine2'), null, text('addressLine2'), editing)}
-        {row(t('details.postalCode'), null, text('postalCode'), editing)}
+        {row(t('details.postalCode'), null, text('postalCode', postcodePlaceholder(form.country, t)), editing)}
         {row(t('details.city'), null, text('city'), editing)}
       </>
     ) : (

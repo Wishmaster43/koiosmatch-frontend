@@ -25,6 +25,7 @@ import Button from '@/components/ui/Button'
 import SaveButton from '@/components/ui/SaveButton'
 import { PageTitle } from '@/components/ui/typography'
 import { fieldSelectStyle, fieldInputStyle } from '@/components/forms/fieldMetrics'
+import { postcodePlaceholder } from '@/lib/postcode'
 
 // Option lists (data — kept as-is; only labels are translated). Industries and
 // countries are now backend-sourced (Settings → Personalisation → Industries;
@@ -282,7 +283,7 @@ export default function CompanySettings() {
                 <Input value={form.company_house_number_suffix} onChange={v => set('company_house_number_suffix', v)} placeholder={t('company.houseNumberSuffix')} style={{ maxWidth: 170 }} />
               </div>
             </Row>
-            <Row label={t('company.postcode')}><Input value={form.company_postcode} onChange={v => set('company_postcode', v)} placeholder="1234 AB" /></Row>
+            <Row label={t('company.postcode')}><Input value={form.company_postcode} onChange={v => set('company_postcode', v)} placeholder={postcodePlaceholder(form.company_country, t)} /></Row>
             <Row label={t('company.city')}><Input value={form.company_city} onChange={v => set('company_city', v)} placeholder={t('company.cityPlaceholder')} /></Row>
             {/* Provincie ("Province") is a searchable dropdown like everywhere else (Danny 08-08,
                 CLAUDE.md §4) — options cascade on the picked country, mirroring the

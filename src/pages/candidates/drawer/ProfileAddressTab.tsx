@@ -16,6 +16,7 @@ import { FieldRow, EditControls, GroupCard, GroupHeader, inputStyle } from './pr
 import { useProfileRequiredKeys } from './useProfileRequiredKeys'
 import type { Candidate } from '@/types/candidate'
 import CopyIconButton from '@/components/ui/CopyIconButton'
+import { postcodePlaceholder } from '@/lib/postcode'
 
 type AnyProps = Record<string, unknown>
 // CreatableSelect is still untyped JS — accept any props at the boundary.
@@ -88,7 +89,7 @@ export default function ProfileAddressTab({ c, onSave, autoEditSignal }: {
         placeholder={t('common:select')} style={inputStyle}
         options={countryOptions} />
     )
-    return <input value={form[key]} onChange={e => setF(key, e.target.value)} style={inputStyle} />
+    return <input value={form[key]} onChange={e => setF(key, e.target.value)} placeholder={key === 'postalCode' ? postcodePlaceholder(form.country, t) : undefined} style={inputStyle} />
   }
 
   // Country stores the ISO-2 code; resolve the localized display name (never the

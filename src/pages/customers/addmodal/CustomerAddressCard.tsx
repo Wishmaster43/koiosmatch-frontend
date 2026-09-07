@@ -21,6 +21,7 @@ import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { cardHead, cardBox, row } from '@/components/ui/modalCards'
 import { getCountryOptions } from '@/lib/countries'
+import { postcodePlaceholder } from '@/lib/postcode'
 
 interface AddressCardProps {
   form: CustomerForm
@@ -64,7 +65,7 @@ export default function AddressCard({ form, set, provinces }: AddressCardProps) 
             full row — in the 1fr/2fr split, the canon label width ate up the
             postcode field. */}
         <FieldRow label={t('locations.detail.postalCode')}>
-          <TextField value={form.postalCode} onChange={v => set('postalCode', v)} />
+          <TextField value={form.postalCode} onChange={v => set('postalCode', v)} placeholder={postcodePlaceholder(form.country, t)} />
         </FieldRow>
         <FieldRow label={t('modal.fields.city')}>
           <TextField value={form.city} onChange={v => set('city', v)} placeholder={t('common:placeholders.cityExample')} />
