@@ -176,10 +176,10 @@ describe('OpportunitiesTab · stage colour toggle (customer_opportunity_table_co
  */
 describe('OpportunitiesTab · value column per row unit (X-5-UNIT-PER-ROW)', () => {
   const euroRow: ApiOpportunity[] = [
-    { id: 'opp-euro', title: 'Euro deal', stage: { value: 'lead', label: 'Lead', color: '#94A3B8' }, value: 1234, hours: null, deal_type: { unit: 'euro' } } as ApiOpportunity,
+    { id: 'opp-euro', title: 'Euro deal', stage: { value: 'lead', label: 'Lead', color: 'var(--color-primary)' }, value: 1234, hours: null, deal_type: { unit: 'euro' } } as ApiOpportunity,
   ]
   const hoursRow: ApiOpportunity[] = [
-    { id: 'opp-hours', title: 'Hours deal', stage: { value: 'lead', label: 'Lead', color: '#94A3B8' }, value: null, hours: 40, deal_type: { unit: 'hours' } } as ApiOpportunity,
+    { id: 'opp-hours', title: 'Hours deal', stage: { value: 'lead', label: 'Lead', color: 'var(--color-primary)' }, value: null, hours: 40, deal_type: { unit: 'hours' } } as ApiOpportunity,
   ]
 
   it('shows euro amount for euro-typed deal', async () => {
