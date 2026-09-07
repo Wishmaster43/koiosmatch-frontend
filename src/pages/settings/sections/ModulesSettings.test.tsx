@@ -4,7 +4,8 @@
  * use the shared SegmentedControl / Toggle. Covers the same tier/addon payload the
  * hand-rolled version sent, plus the stopPropagation regression guard: clicking the
  * Toggle directly must not ALSO fire the row's own onClick (which would silently
- * toggle the addon back off in the same click).
+ * toggle the addon back off in the same click). Add-on names and descriptions now come
+ * from i18n (modules.addon.{id} and modules.addonDesc.{id}) instead of hardcoded.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import userEvent from '@testing-library/user-event'
@@ -14,6 +15,7 @@ import ModulesSettings from './ModulesSettings'
 const mockGet = vi.fn()
 const mockPut = vi.fn()
 vi.mock('@/lib/api', () => ({ default: { get: (...a: unknown[]) => mockGet(...a), put: (...a: unknown[]) => mockPut(...a) } }))
+// Mock i18n to return keys as-is (like translation keys), so we can find elements by key names in tests.
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
 vi.mock('./tiers/BillingTiersCard', () => ({ default: () => <div data-testid="billing-tiers-card" /> }))
 vi.mock('@/i18n', () => ({ LOCALE_BY_LANG: { nl: 'nl-NL', en: 'en-GB' } }))
@@ -86,5 +88,38 @@ describe('ModulesSettings', () => {
     render(<ModulesSettings />)
     await userEvent.click(await screen.findByRole('tab', { name: 'modules.tabs.tiers' }))
     expect(await screen.findByTestId('billing-tiers-card')).toBeInTheDocument()
+  })
+
+  // Add-on names and descriptions are now from i18n modules.addon.{id} and modules.addonDesc.{id}.
+  // The invoicing add-on is a new entry that uses the Receipt icon.
+  it('renders the invoicing add-on with other add-ons', async () => {
+    mockGet.mockResolvedValue({ data: { package: 'pro', addons: [] } })
+    render(<ModulesSettings />)
+    await userEvent.click(await screen.findByRole('tab', { name: 'modules.tabs.package' }))
+
+    const switches = await screen.findAllByRole('switch')
+    // Expect 5 switches: reports, sm, hf, plan, invoicing
+    expect(switches).toHaveLength(5)
+    // Invoicing should be the 5th switch
+    expect(switches[4]).toHaveAttribute('aria-label', 'modules.addon.invoicing')
+  })
+
+  // Legacy package notice: when package is null, display a migration prompt.
+  it('renders a legacy package notice when package is null', async () => {
+    mockGet.mockResolvedValue({ data: { package: null, addons: [] } })
+    render(<ModulesSettings />)
+    await userEvent.click(await screen.findByRole('tab', { name: 'modules.tabs.package' }))
+
+    expect(await screen.findByText('modules.legacyPackage')).toBeInTheDocument()
+  })
+
+  // No legacy notice when package is a valid tier.
+  it('does not render legacy notice for valid packages', async () => {
+    mockGet.mockResolvedValue({ data: { package: 'enterprise', addons: ['reports'] } })
+    render(<ModulesSettings />)
+    await userEvent.click(await screen.findByRole('tab', { name: 'modules.tabs.package' }))
+
+    const notices = screen.queryAllByText('modules.legacyPackage')
+    expect(notices).toHaveLength(0)
   })
 })

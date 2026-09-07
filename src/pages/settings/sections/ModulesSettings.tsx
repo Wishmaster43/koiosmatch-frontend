@@ -9,7 +9,7 @@
 import { useState, useEffect, useRef } from 'react'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { useTranslation } from 'react-i18next'
-import { Check, Save, Package, Rocket, Crown, BarChart2, CalendarDays } from 'lucide-react'
+import { Check, Save, Package, Rocket, Crown, BarChart2, CalendarDays, Receipt } from 'lucide-react'
 // Real brand logos for the reporting add-ons (local assets, §7 CSP).
 import shiftmanagerLogo from '@/assets/integrations/shiftmanager.png'
 import helloflexLogo from '@/assets/integrations/helloflex.png'
@@ -31,7 +31,8 @@ type ModulesSubTab = 'pricing' | 'tiers' | 'budgets' | 'package' | 'users'
 
 // Base package option ("size bar" cards) / add-on toggle row.
 interface PackageOption { id: string; name: string; desc: string; Icon: typeof Package; }
-interface AddonOption extends Omit<PackageOption, 'Icon'> { Icon?: typeof BarChart2; image?: string; comingSoon?: boolean }
+// Add-on rows carry only an id and an icon: name/desc are i18n keys (modules.addon.<id> / modules.addonDesc.<id>).
+interface AddonOption { id: string; Icon?: typeof BarChart2; image?: string; comingSoon?: boolean }
 
 // Base packages (the "size bar"). `desc` lists what each adds over the previous one.
 const PACKAGES: PackageOption[] = [
@@ -45,11 +46,13 @@ const PACKAGES: PackageOption[] = [
 // 'sm_ai' (Shiftmanager AI Planner) is retired (Danny 2026-07-02): no distinct surface, so it
 // is no longer offered here — legacy tenants keep working (it still resolves to shiftmanager).
 // MODULES-ICONS-1 (Danny 23-07): every row carries an icon — the reporting add-ons show the REAL brand logo of the system they report on.
+// Addon names and descriptions are read from i18n via modules.addon.{id} and modules.addonDesc.{id} keys.
 const ADDONS: AddonOption[] = [
-  { id: 'reports', name: 'Rapporten Koios Match',  Icon: BarChart2,          desc: 'Eigen Koios Match-rapportages en inzichten.' },
-  { id: 'sm',    name: 'Rapportage Shiftmanager',  image: shiftmanagerLogo,  desc: 'Rapportages en GET-syncs op Shiftmanager-data (diensten, klanten, kandidaten).' },
-  { id: 'hf',    name: 'Rapportage HelloFlex',     image: helloflexLogo,     desc: 'Rapportages en GET-syncs op HelloFlex-data.' },
-  { id: 'plan',  name: 'Planning',                 Icon: CalendarDays,       desc: 'Eigen plannings­module: orders, diensten en inplanning.' },
+  { id: 'reports', Icon: BarChart2 },
+  { id: 'sm', image: shiftmanagerLogo },
+  { id: 'hf', image: helloflexLogo },
+  { id: 'plan', Icon: CalendarDays },
+  { id: 'invoicing', Icon: Receipt },
 ]
 
 // Legacy package string → new base tier (display only; the backend sends {package, addons}
@@ -82,6 +85,7 @@ export default function ModulesSettings() {
   const [saving,  setSaving]  = useState(false)
   const [savedOk, setSavedOk] = useState(false)
   const [loadError, setLoadError] = useState(false)
+  const [isLegacy, setIsLegacy] = useState(false) // Package is null (legacy tenant)
 
   // Load the tenant's current package + add-ons. An alive guard stops a stale
   // response from a previous tenant overwriting a newer one (fast super-admin switch).
@@ -95,7 +99,8 @@ export default function ModulesSettings() {
         if (!alive) return
         const tier = LEGACY_TO_TIER[res.data?.package] ?? 'core'
         const ad   = Array.isArray(res.data?.addons) ? res.data.addons : []
-        setPkg(tier); setAddons(ad); setSavedAt({ pkg: tier, addons: ad })
+        const legacy = !res.data?.package // Mark as legacy if package is null
+        setPkg(tier); setAddons(ad); setSavedAt({ pkg: tier, addons: ad }); setIsLegacy(legacy)
       })
       .catch(() => { if (alive) setLoadError(true) })
       .finally(() => { if (alive) setLoading(false) })
@@ -117,11 +122,12 @@ export default function ModulesSettings() {
         .then(res => {
           const tier = LEGACY_TO_TIER[res.data?.package] ?? 'core'
           const ad   = Array.isArray(res.data?.addons) ? res.data.addons : []
+          const legacy = !res.data?.package
           const { pkg: p, addons: a, savedAt: s } = stateRef.current
           const dirty = p !== s.pkg || !sameSet(a, s.addons)
           // Only adopt the fresh server truth when there is no pending local change.
           if (!dirty) { setPkg(tier); setAddons(ad) }
-          setSavedAt({ pkg: tier, addons: ad })
+          setSavedAt({ pkg: tier, addons: ad }); setIsLegacy(legacy)
         })
         .catch(() => {})
     }
@@ -181,6 +187,13 @@ export default function ModulesSettings() {
       {subTab === 'users' && <BillingUsersCard />}
 
       {subTab === 'package' && (<>
+      {/* Legacy package notice: when package is null, show a migration prompt */}
+      {isLegacy && (
+        <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20, padding: '12px 14px',
+          background: 'var(--color-info-bg)', borderRadius: 8, border: '1px solid var(--color-info)' }}>
+          {t('modules.legacyPackage')}
+        </div>
+      )}
       {/* Base package (one of three) */}
       <GroupLabel style={{ marginBottom: 10 }}>
         {t('modules.tierHeading')}
@@ -234,8 +247,8 @@ export default function ModulesSettings() {
                 ? <img src={addon.image} alt="" width={18} height={18} style={{ flexShrink: 0, objectFit: 'contain', borderRadius: 4 }} />
                 : AddonIcon ? <AddonIcon size={16} color={on ? 'var(--color-success)' : 'var(--text-muted)'} style={{ flexShrink: 0 }} /> : null}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{t(`modules.addon.${addon.id}`, { defaultValue: addon.name })}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t(`modules.addonDesc.${addon.id}`, { defaultValue: addon.desc })}</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{t(`modules.addon.${addon.id}`)}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t(`modules.addonDesc.${addon.id}`)}</div>
               </div>
               {/* Shared Toggle (audit finding, §4/§11) replaces the hand-rolled switch +
                   hardcoded white thumb — same on/off semantics (toggleAddon). Wrapped with
@@ -243,7 +256,7 @@ export default function ModulesSettings() {
                   the row's own onClick (which would double-toggle it straight back off). */}
               <div onClick={(e) => e.stopPropagation()}>
                 <Toggle checked={on} onChange={() => toggleAddon(addon.id)} disabled={disabled}
-                  ariaLabel={t(`modules.addon.${addon.id}`, { defaultValue: addon.name })} />
+                  ariaLabel={t(`modules.addon.${addon.id}`)} />
               </div>
               {disabled && (
                 <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-info)',
