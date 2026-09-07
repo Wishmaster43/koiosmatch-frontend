@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
+import { useState, useEffect, useCallback, lazy, Suspense, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Map as MapIcon, AlertTriangle } from 'lucide-react'
-import api, { unwrap, unwrapList } from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
+import { fetchAllPages } from '@/lib/fetchAllPages'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { useConfirm } from '@/hooks/useConfirm'
 import { DEFAULT_LOCATION_COLOR, DEFAULT_LOCATION_ICON } from '@/lib/locationIcons'
@@ -80,6 +81,8 @@ export default function LocationsSettings() {
   const [deletingId,setDeletingId]= useState(null)
   const [page,      setPage]      = useState(1)
   const PER_PAGE = 10
+  // Re-arm the mounted flag on every mount (StrictMode double-mount) so a stray response after unmount can't set state.
+  const mountedRef = useRef(true)
   // a11y (§6): trap focus in the "+ Vestiging" panel + close on Escape while open
   // (Danny 27-07 — the wide-form frame gets the same dialog behaviour as +Match/
   // +Kandidaat). The trap itself is armed INSIDE LocationFormModal (see its
@@ -94,11 +97,16 @@ export default function LocationsSettings() {
   // House confirm dialog (never native window.confirm, §3A) — staged by remove().
   const { confirm, dialog } = useConfirm()
 
-  // Load once — failure is its own state (never a false "no locations yet").
-  // Backend max per_page is 100; tenants beyond that get paginator support in a follow-up.
+  // Load all pages of locations — if a tenant has >100 branches, fetch them all
+  // via the fetchAllPages helper (pages 1..lastPage concatenated). Abort on unmount.
   useEffect(() => {
-    api.get('/locations', { params: { per_page: 100 } }).then(r => setLocations(unwrapList(r).rows))
-      .catch(() => setLoadError(true)).finally(() => setLoading(false))
+    mountedRef.current = true
+    const ctrl = new AbortController()
+    fetchAllPages('/locations', {}, ctrl.signal)
+      .then(res => { if (mountedRef.current) setLocations(res.rows) })
+      .catch(() => { if (mountedRef.current) setLoadError(true) })
+      .finally(() => { if (mountedRef.current) setLoading(false) })
+    return () => { mountedRef.current = false; ctrl.abort() }
   }, [])
 
   const openCreate = () => { setEditingId(null); setForm(EMPTY_FORM); setShowModal(true) }

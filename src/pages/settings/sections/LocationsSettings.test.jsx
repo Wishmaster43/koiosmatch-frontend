@@ -60,11 +60,57 @@ describe('LocationsSettings', () => {
     await waitFor(() => expect(screen.getByText(st('locations.loadError'))).toBeInTheDocument())
   })
 
-  it('fetches locations with per_page=100 to handle pagination correctly', async () => {
-    api.get.mockResolvedValue({ data: { data: [] } })
+  it('fetches locations across all pages when lastPage > 1', async () => {
+    // First page response: 2 locations, lastPage = 2
+    const page1Rows = [location({ id: 'loc1', name: 'Vestiging 1' }), location({ id: 'loc2', name: 'Vestiging 2' })]
+    // Second page response: 1 location
+    const page2Rows = [location({ id: 'loc3', name: 'Vestiging 3' })]
+
+    api.get.mockImplementation((path, config) => {
+      const currentPage = config.params.page ?? 1
+      if (currentPage === 1) {
+        return Promise.resolve({
+          data: {
+            data: page1Rows,
+            meta: { total: 3, current_page: 1, per_page: 100, last_page: 2 },
+          },
+        })
+      } else if (currentPage === 2) {
+        return Promise.resolve({
+          data: {
+            data: page2Rows,
+            meta: { total: 3, current_page: 2, per_page: 100, last_page: 2 },
+          },
+        })
+      }
+    })
+
     render(<LocationsSettings />)
-    await waitFor(() => expect(screen.getByText(st('locations.empty'))).toBeInTheDocument())
-    expect(api.get).toHaveBeenCalledWith('/locations', { params: { per_page: 100 } })
+
+    // Verify both pages were fetched.
+    await waitFor(() => {
+      expect(api.get).toHaveBeenCalledWith('/locations', { params: { per_page: 100 }, signal: expect.any(AbortSignal) })
+      expect(api.get).toHaveBeenCalledWith('/locations', { params: { per_page: 100, page: 2 }, signal: expect.any(AbortSignal) })
+    })
+
+    // All rows from both pages are rendered.
+    expect(await screen.findByText('Vestiging 1')).toBeInTheDocument()
+    expect(screen.getByText('Vestiging 2')).toBeInTheDocument()
+    expect(screen.getByText('Vestiging 3')).toBeInTheDocument()
+  })
+
+  it('fetches locations with per_page=100 and handles single-page results', async () => {
+    api.get.mockResolvedValue({
+      data: {
+        data: [location()],
+        meta: { total: 1, current_page: 1, per_page: 100, last_page: 1 },
+      },
+    })
+    render(<LocationsSettings />)
+    await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
+    // Only page 1 is fetched when lastPage is 1.
+    expect(api.get).toHaveBeenCalledTimes(1)
+    expect(api.get).toHaveBeenCalledWith('/locations', { params: { per_page: 100 }, signal: expect.any(AbortSignal) })
   })
 
   it('shows the empty state when the backend returns no locations', async () => {
