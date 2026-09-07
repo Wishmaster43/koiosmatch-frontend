@@ -39,7 +39,7 @@ describe('OpportunityLostReasonModal', () => {
     await user.click(await screen.findByRole('button', { name: 'lost.reasonPlaceholder' }))
     await user.click(await screen.findByRole('button', { name: 'Budget' }))
     await user.click(screen.getByText('lost.confirm'))
-    expect(onConfirm).toHaveBeenCalledWith('Budget')
+    expect(onConfirm).toHaveBeenCalledWith('Budget', null)
   })
 
   it('cancel calls onCancel and never onConfirm', async () => {

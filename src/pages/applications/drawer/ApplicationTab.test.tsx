@@ -212,7 +212,7 @@ describe('ApplicationTab', () => {
       await user.type(screen.getByPlaceholderText('drawer.source'), 'LinkedIn')
       await user.click(screen.getByRole('button', { name: 'LinkedIn' }))
       await user.click(screen.getByLabelText('common:save'))
-      expect(onUpdateSource).toHaveBeenCalledWith(5, 'LinkedIn')
+      expect(onUpdateSource).toHaveBeenCalledWith(5, 'LinkedIn', null)
     })
 
     it('does not call onUpdateSource when Bron is unchanged', async () => {

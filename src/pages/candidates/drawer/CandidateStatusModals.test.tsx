@@ -83,7 +83,7 @@ describe('CandidateStatusModals · blacklist reason dropdown', () => {
     expect(setStatusModal).toHaveBeenCalledTimes(1)
     const updater = setStatusModal.mock.calls[0][0] as (m: unknown) => unknown
     expect(updater({ target: 'blacklist', reason: '', date: '', needReason: true, needDate: false, isBlacklist: true }))
-      .toEqual({ target: 'blacklist', reason: 'No-show', date: '', needReason: true, needDate: false, isBlacklist: true })
+      .toEqual({ target: 'blacklist', reason: 'No-show', reasonKey: null, date: '', needReason: true, needDate: false, isBlacklist: true })
   })
 
   // BLACKLIST-ICON-1: the reasons carry the tenant lookup's own icon (S-icon-1,
