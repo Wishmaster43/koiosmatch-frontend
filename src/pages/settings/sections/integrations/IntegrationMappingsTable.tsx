@@ -17,6 +17,7 @@ import Button from '@/components/ui/Button'
 import SaveButton from '@/components/ui/SaveButton'
 import Toggle from '@/components/ui/Toggle'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
+import CalloutBox from '@/components/ui/CalloutBox'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { PageTitle, Caption } from '@/components/ui/typography'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
@@ -162,6 +163,13 @@ export default function IntegrationMappingsTable({ connector, domains }: { conne
       <SubTabBar tabs={domainTabs} active={domain} onChange={setDomain} />
       <PageTitle>{t('integrations.mappings.title')}</PageTitle>
       <Caption as="p" style={{ marginTop: 2, marginBottom: 16 }}>{t('integrations.mappings.subtitle')}</Caption>
+
+      {/* Informational notice that these mappings are preparation and not yet active. */}
+      <div style={{ marginBottom: 16 }}>
+        <CalloutBox variant="info">
+          {t('integrations.mappings.preparationNotice')}
+        </CalloutBox>
+      </div>
 
       {loading ? (
         <Caption as="p">{t('common.loadingShort')}</Caption>

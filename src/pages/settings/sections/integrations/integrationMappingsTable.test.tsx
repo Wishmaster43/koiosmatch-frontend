@@ -156,4 +156,13 @@ describe('IntegrationMappingsTable', () => {
     await screen.findByDisplayValue('k1')
     expect(container.querySelectorAll('select').length).toBe(0)
   })
+
+  // Renders an informational CalloutBox explaining that mappings are preparation
+  // and will be used once synchronization is enabled in a future release.
+  it('renders the preparation notice above the table', async () => {
+    mockList.mockResolvedValue([row])
+    render(<IntegrationMappingsTable connector="werkzoeken" domains={['cao']} />)
+    await screen.findByDisplayValue('k1')
+    expect(screen.getByText(/will only be used once synchronization is enabled/i)).toBeInTheDocument()
+  })
 })
