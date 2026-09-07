@@ -5,14 +5,14 @@
  * Chrome (sortable header + toolbar) and paging state come from the shared
  * reportTableChrome/useReportPaging (§3, "36-42 identical lines" consolidation).
  */
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useRightPanel }      from '@/context/RightPanelContext'
 import DepartmentDrawer       from './DepartmentDrawer'
 import ReportEmptyState       from './ReportEmptyState'
 import PaginationBar          from '../ui/PaginationBar'
 import { useReportPaging }    from './useReportPaging'
 import { TD, SortableTableHead, ReportTableToolbar } from './reportTableChrome'
+import { useReportTableFilter } from './useReportTableFilter'
 import { useSmCustomerTree }  from '@/hooks/useSmCustomerTree'
 import { useCustomerOptions } from './useCustomerOptions'
 import type { ReportDepartment, SortState } from '@/types/reports'
@@ -26,8 +26,6 @@ export default function DepartmentsTable() {
   const [selectedCustomers, setSelectedCustomers] = useState<Array<string | number>>([])
   const [selectedStatuses,  setSelectedStatuses]  = useState<Array<string | number>>(['active'])
   const [sort,    setSort]    = useState<SortState>({ key: 'customer_name', dir: 'asc' })
-
-  const { registerFilters, unregisterFilters } = useRightPanel()
 
   // Data lives in the shared hook (§3); derive the flattened department rows here.
   const { customers, loading } = useSmCustomerTree()
@@ -47,38 +45,12 @@ export default function DepartmentsTable() {
   // Deduped, alphabetised customer id/name pairs for the panel's search-select.
   const customerOptions = useCustomerOptions(rows)
 
-  // Applies the panel's customer/status selections plus the free-text search across
-  // department, location, customer and cost-center fields.
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase()
-    return rows.filter(r => {
-      if (selectedCustomers.length && !selectedCustomers.includes(r.customer_id as string))    return false
-      if (selectedStatuses.length  && !selectedStatuses.includes(r.location_status as string)) return false
-      if (!q) return true
-      return (
-        (r.name          ?? '').toLowerCase().includes(q) ||
-        (r.location_name ?? '').toLowerCase().includes(q) ||
-        (r.customer_name ?? '').toLowerCase().includes(q) ||
-        (r.cost_center   ?? '').toLowerCase().includes(q)
-      )
-    })
-  }, [rows, search, selectedCustomers, selectedStatuses])
-
-  // Applies the active column/direction on top of the filtered rows; recomputes only
-  // when the filter result or the sort state changes.
-  const sorted = useMemo(() => {
-    const { key, dir } = sort
-    return [...filtered].sort((a, b) => {
-      const av = (a[key] ?? '').toString().toLowerCase()
-      const bv = (b[key] ?? '').toString().toLowerCase()
-      if (av < bv) return dir === 'asc' ? -1 : 1
-      if (av > bv) return dir === 'asc' ?  1 : -1
-      return 0
-    })
-  }, [filtered, sort])
-
-  // Shared paging/sort-toggle state (§3 consolidation) — page resets to 1 on any filter/size change.
-  const { page, paged, totalPages, pageSize, handlePageSizeChange, setPage, setSort_ } = useReportPaging(sorted, setSort, 'asc')
+  // Filter predicate: checks panel's customer/status selections.
+  const filterPredicate = useCallback((r: ReportDepartment) => {
+    if (selectedCustomers.length && !selectedCustomers.includes(r.customer_id as string))    return false
+    if (selectedStatuses.length  && !selectedStatuses.includes(r.location_status as string)) return false
+    return true
+  }, [selectedCustomers, selectedStatuses])
 
   // Distinct location statuses seen in the data, for the panel's status filter chips.
   const statusOptions = useMemo(() =>
@@ -111,12 +83,20 @@ export default function DepartmentsTable() {
     },
   ], [t, selectedCustomers, selectedStatuses, customerOptions, statusOptions, rows])
 
-  // Registers this table's filter groups with the shared right panel on mount/change,
-  // and unregisters them on cleanup so a stale group doesn't linger for another table.
-  useEffect(() => {
-    registerFilters('departments-table', filterGroups)
-    return () => unregisterFilters('departments-table')
-  }, [filterGroups, registerFilters, unregisterFilters])
+  // Consolidates filtered/sorted memo and registers filter groups with the shared panel.
+  const { filtered, sorted } = useReportTableFilter({
+    rows,
+    search,
+    sortState: sort,
+    filterPredicate,
+    searchFields: ['name', 'location_name', 'customer_name', 'cost_center'],
+    sortKey: sort.key,
+    filterGroupsConfig: filterGroups,
+    tableId: 'departments-table',
+  })
+
+  // Shared paging/sort-toggle state (§3 consolidation) — page resets to 1 on any filter/size change.
+  const { page, paged, totalPages, pageSize, handlePageSizeChange, setPage, setSort_ } = useReportPaging(sorted, setSort, 'asc')
 
   const COLS = [
     { key: 'customer_name', label: t('departments.cols.customer'),   sortable: true },

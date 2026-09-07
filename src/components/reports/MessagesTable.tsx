@@ -6,13 +6,13 @@
  * (sortable header + toolbar) and paging state come from the shared
  * reportTableChrome/useReportPaging (§3, "36-42 identical lines" consolidation).
  */
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useRightPanel }      from '@/context/RightPanelContext'
 import { useDateFormat }      from '@/lib/datetime'
 import PaginationBar          from '../ui/PaginationBar'
 import { useReportPaging }    from './useReportPaging'
 import { TD, SortableTableHead, ReportTableToolbar } from './reportTableChrome'
+import { useReportTableFilter } from './useReportTableFilter'
 import { BodyText, Caption } from '@/components/ui/typography'
 import { useReportList }      from './useReportList'
 import type { MessageRow, ReportFilterGroup, SortState } from '@/types/reports'
@@ -43,8 +43,6 @@ export default function MessagesTable() {
   const [selectedChannels,  setSelectedChannels]  = useState<Array<string | number>>([])
   const [selectedWorkflows, setSelectedWorkflows] = useState<Array<string | number>>([])
 
-  const { registerFilters, unregisterFilters } = useRightPanel()
-
   // Distinct channel values already loaded client-side seed the right-panel filter — no separate lookup fetch needed.
   const channelOptions  = useMemo(() => [...new Set(rows.map(r => r.channel).filter((x): x is string => Boolean(x)))].sort(), [rows])
   // Same derivation for status: built from the current row set, not a lookup table.
@@ -52,39 +50,13 @@ export default function MessagesTable() {
   // Workflow names vary per tenant automation, so the filter list is built from what actually appears in the loaded rows.
   const workflowOptions = useMemo(() => [...new Set(rows.map(r => r.workflow_name).filter((x): x is string => Boolean(x)))].sort(), [rows])
 
-  // Combines the right-panel chip selections with the free-text search across recipient/subject/template/workflow fields.
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase()
-    return rows.filter(r => {
-      if (selectedStatuses.length  && !selectedStatuses.includes(r.status as string))        return false
-      if (selectedChannels.length  && !selectedChannels.includes(r.channel as string))       return false
-      if (selectedWorkflows.length && !selectedWorkflows.includes(r.workflow_name as string)) return false
-      if (!q) return true
-      return (
-        (r.recipient_name  ?? '').toLowerCase().includes(q) ||
-        (r.recipient_email ?? '').toLowerCase().includes(q) ||
-        (r.recipient_phone ?? '').toLowerCase().includes(q) ||
-        (r.subject         ?? '').toLowerCase().includes(q) ||
-        (r.template_name   ?? '').toLowerCase().includes(q) ||
-        (r.workflow_name   ?? '').toLowerCase().includes(q)
-      )
-    })
-  }, [rows, search, selectedStatuses, selectedChannels, selectedWorkflows])
-
-  // Case-insensitive string sort driven by the sortable column headers; runs after filtering so paging reflects the filtered set.
-  const sorted = useMemo(() => {
-    const { key, dir } = sort
-    return [...filtered].sort((a, b) => {
-      const av = (a[key] ?? '').toString().toLowerCase()
-      const bv = (b[key] ?? '').toString().toLowerCase()
-      if (av < bv) return dir === 'asc' ? -1 : 1
-      if (av > bv) return dir === 'asc' ?  1 : -1
-      return 0
-    })
-  }, [filtered, sort])
-
-  // Shared paging/sort-toggle state (§3 consolidation) — page resets to 1 on any filter/size change.
-  const { page, paged, totalPages, pageSize, handlePageSizeChange, setPage, setSort_ } = useReportPaging(sorted, setSort, 'desc')
+  // Filter predicate: checks panel's status/channel/workflow selections.
+  const filterPredicate = useCallback((r: MessageRow) => {
+    if (selectedStatuses.length  && !selectedStatuses.includes(r.status as string))        return false
+    if (selectedChannels.length  && !selectedChannels.includes(r.channel as string))       return false
+    if (selectedWorkflows.length && !selectedWorkflows.includes(r.workflow_name as string)) return false
+    return true
+  }, [selectedStatuses, selectedChannels, selectedWorkflows])
 
   // Assembles the right-panel filter groups only from dimensions that actually have options, each carrying live counts from the current rows.
   const filterGroups = useMemo(() => {
@@ -127,11 +99,20 @@ export default function MessagesTable() {
     return groups
   }, [t, channelOptions, statusOptions, workflowOptions, selectedChannels, selectedStatuses, selectedWorkflows, rows])
 
-  // Publish the filter groups into the shared right panel on mount/change, and unregister them on unmount so a stale filter UI doesn't linger after leaving this table.
-  useEffect(() => {
-    registerFilters('messages-table', filterGroups)
-    return () => unregisterFilters('messages-table')
-  }, [filterGroups, registerFilters, unregisterFilters])
+  // Consolidates filtered/sorted memo and registers filter groups with the shared panel.
+  const { filtered, sorted } = useReportTableFilter({
+    rows,
+    search,
+    sortState: sort,
+    filterPredicate,
+    searchFields: ['recipient_name', 'recipient_email', 'recipient_phone', 'subject', 'template_name', 'workflow_name'],
+    sortKey: sort.key,
+    filterGroupsConfig: filterGroups,
+    tableId: 'messages-table',
+  })
+
+  // Shared paging/sort-toggle state (§3 consolidation) — page resets to 1 on any filter/size change.
+  const { page, paged, totalPages, pageSize, handlePageSizeChange, setPage, setSort_ } = useReportPaging(sorted, setSort, 'desc')
 
   return (
     <div className="flex flex-col h-full">

@@ -5,16 +5,16 @@
  * Chrome (sortable header + toolbar) and paging state come from the shared
  * reportTableChrome/useReportPaging (§3, "36-42 identical lines" consolidation).
  */
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import Spinner from '@/components/ui/Spinner'
-import { useRightPanel }      from '@/context/RightPanelContext'
 import CustomerDetailDrawer   from './CustomerDetailDrawer'
 import ReportEmptyState       from './ReportEmptyState'
 import PaginationBar          from '../ui/PaginationBar'
 import { useReportPaging }    from './useReportPaging'
 import { TD, SortableTableHead, ReportTableToolbar } from './reportTableChrome'
+import { useReportTableFilter } from './useReportTableFilter'
 import { useReportCustomers } from './useReportCustomers'
 import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
 import type { ReportCustomer, SortState } from '@/types/reports'
@@ -29,8 +29,6 @@ export default function CustomersTable() {
   const [sort,              setSort]              = useState<SortState>({ key: 'name', dir: 'asc' })
   const [detail,            setDetail]            = useState<ReportCustomer | null>(null)
 
-  const { registerFilters, unregisterFilters } = useRightPanel()
-
   // Unique, sorted status values found in the current data set, used to build the filter panel options.
   const statusOptions = useMemo(() =>
     [...new Set(customers.map(c => c.status).filter((x): x is string => Boolean(x)))].sort(),
@@ -39,42 +37,11 @@ export default function CustomersTable() {
   const toggle = (setter: Dispatch<SetStateAction<Array<string | number>>>) => (val: string | number) =>
     setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
 
-  // Applies the status filter and free-text search (name/debtor number/account manager/external id) before sorting.
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase()
-    return customers.filter(c => {
-      if (selectedStatuses.length && !selectedStatuses.includes(c.status as string)) return false
-      if (!q) return true
-      return (
-        (c.name             ?? '').toLowerCase().includes(q) ||
-        (c.debtor_number    ?? '').toLowerCase().includes(q) ||
-        (c.account_manager  ?? '').toLowerCase().includes(q) ||
-        (c.external_id      ?? '').toString().includes(q)
-      )
-    })
-  }, [customers, search, selectedStatuses])
-
-  // Sorts the filtered rows by the active column; locations/departments sort by derived counts, others by string value.
-  const sorted = useMemo(() => {
-    const { key, dir } = sort
-    return [...filtered].sort((a, b) => {
-      let av: string | number, bv: string | number
-      if (key === 'locations')   { av = a.locations?.length ?? 0;  bv = b.locations?.length ?? 0 }
-      else if (key === 'departments') {
-        av = (a.locations ?? []).reduce((s, l) => s + (l.departments?.length ?? 0), 0)
-        bv = (b.locations ?? []).reduce((s, l) => s + (l.departments?.length ?? 0), 0)
-      } else {
-        av = (a[key] ?? '').toString().toLowerCase()
-        bv = (b[key] ?? '').toString().toLowerCase()
-      }
-      if ((av as number) < (bv as number)) return dir === 'asc' ? -1 : 1
-      if ((av as number) > (bv as number)) return dir === 'asc' ? 1  : -1
-      return 0
-    })
-  }, [filtered, sort])
-
-  // Shared paging/sort-toggle state (§3 consolidation) — page resets to 1 on any filter/size change.
-  const { page, paged, totalPages, pageSize, handlePageSizeChange, setPage, setSort_ } = useReportPaging(sorted, setSort, 'asc')
+  // Filter predicate: checks status selection.
+  const filterPredicate = useCallback((c: ReportCustomer) => {
+    if (selectedStatuses.length && !selectedStatuses.includes(c.status as string)) return false
+    return true
+  }, [selectedStatuses])
 
   // Declares the status filter group registered into the shared right-hand filter panel.
   const filterGroups = useMemo(() => [
@@ -90,11 +57,42 @@ export default function CustomersTable() {
     },
   ], [t, selectedStatuses, statusOptions, customers])
 
-  // Registers this table's filter groups into the shared panel and unregisters them on unmount.
-  useEffect(() => {
-    registerFilters('customers-table', filterGroups)
-    return () => unregisterFilters('customers-table')
-  }, [filterGroups, registerFilters, unregisterFilters])
+  // Consolidates filtered/sorted memo and registers filter groups with the shared panel.
+  // Note: locations/departments numeric columns need special comparison logic, handled locally.
+  const { filtered, sorted: sortedAll } = useReportTableFilter({
+    rows: customers,
+    search,
+    sortState: sort,
+    filterPredicate,
+    searchFields: ['name', 'debtor_number', 'account_manager', 'external_id'],
+    sortKey: sort.key,
+    filterGroupsConfig: filterGroups,
+    tableId: 'customers-table',
+  })
+
+  // Special handling for locations/departments: numeric columns need numeric comparison, not string.
+  const sorted = useMemo(() => {
+    if (sort.key === 'locations' || sort.key === 'departments') {
+      const { dir } = sort
+      return [...sortedAll].sort((a, b) => {
+        let av: number, bv: number
+        if (sort.key === 'locations') {
+          av = a.locations?.length ?? 0
+          bv = b.locations?.length ?? 0
+        } else {
+          av = (a.locations ?? []).reduce((s, l) => s + (l.departments?.length ?? 0), 0)
+          bv = (b.locations ?? []).reduce((s, l) => s + (l.departments?.length ?? 0), 0)
+        }
+        if (av < bv) return dir === 'asc' ? -1 : 1
+        if (av > bv) return dir === 'asc' ? 1  : -1
+        return 0
+      })
+    }
+    return sortedAll
+  }, [sortedAll, sort])
+
+  // Shared paging/sort-toggle state (§3 consolidation) — page resets to 1 on any filter/size change.
+  const { page, paged, totalPages, pageSize, handlePageSizeChange, setPage, setSort_ } = useReportPaging(sorted, setSort, 'asc')
 
   const COLS = [
     { key: 'name',          label: t('customers.cols.name'),          sortable: true },
