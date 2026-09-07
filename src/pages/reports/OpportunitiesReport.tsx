@@ -24,13 +24,14 @@ import type { KpiSpec } from '@/components/insights/InsightsRow'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useOpportunitiesReport } from './useOpportunitiesReport'
 import { gateDrillClick } from './reportDrillGate'
+import { useSeriesDrill } from './hooks/useSeriesDrill'
 import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
 import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
 import type { ChartDatum } from '@/components/charts/chartTypes'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
-import type { ReportPeriod, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
+import type { ReportPeriod, CandidateOwnerSegment } from '@/types/analytics'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
@@ -41,8 +42,7 @@ import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
 import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterParams'
 import type { ReportFilterState } from './reportFilterParams'
-import { formatKpiUnitValue } from './kpiUnitFormat'
-import type { KpiUnit } from './kpiUnitFormat'
+import { renderKpiValue } from './renderKpiValue'
 
 // The three plain single-value XOR axes; `owner` has its own D2 shape below.
 type Axis = 'stage' | 'customer' | 'branch'
@@ -88,15 +88,6 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
       // rows share one population. baseParams already carries period.
       adviceEndpoint: '/reports/opportunities/advice', adviceParams: { ...baseParams, ...xorParam },
     })
-  const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
-    title: pt.label, value: pt.value, subtitle: windowSub(),
-    // A week bar's `date` is the point's own key; the drawer then counts the WHOLE
-    // week (bucket=week) so bar and drawer total always agree.
-    rowsEndpoint: '/reports/opportunities/drill',
-    rowsParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
-    adviceEndpoint: '/reports/opportunities/advice',
-    adviceParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
-  })
 
   // Stage axis: a lookup axis with its own colour per value (CHART-TYPE RULE) →
   // donut. 'none'/'others' sentinels and orphaned (deleted-lookup) values are
@@ -134,10 +125,8 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
     return <BarChartCard data={data} onBarClick={onPick} />
   }
 
-  const onSeriesPick = gateDrillClick('opportunities', (dateKey: string) => {
-    const pt = data?.timeseries.series.find(p => p.date === dateKey)
-    if (pt) openBucket(pt)
-  })
+  // Series pick via extracted hook.
+  const { onSeriesPick } = useSeriesDrill('opportunities', data, baseParams, windowSub, setDrill)
 
   // KPI-OPP-1 (CMBE 27-08, commit eb3af985): the strip reads the server's own
   // nine-card kpis[] suite verbatim — mirrors MatchesReport/TasksReport's
@@ -166,7 +155,7 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
   // UNIT-CANON (FRONTEND-CONTRACT §13, REPORT-KPI-STRIP-1): the SERVER's unit
   // field on each kpis[] entry decides the formatting; the local map is only the
   // tolerant fallback for a cached pre-unit envelope (§10) — never the source.
-  const KPI_UNIT_FALLBACK: Partial<Record<string, KpiUnit>> = { win_rate: 'pct', open_value: 'euro' }
+  const KPI_UNIT_FALLBACK: Partial<Record<string, unknown>> = { win_rate: 'pct', open_value: 'euro' }
   const unitByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.unit ?? KPI_UNIT_FALLBACK[k.key]]))
   const openKpiParams = drill?.rowsParams as Record<string, unknown> | undefined
   const kpiByKey: Record<string, KpiSpec> = Object.fromEntries(
@@ -174,8 +163,8 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
       const label = t(labelKey)
       const raw = kpiByServerKey.get(key)
       const has = raw != null
-      const unit = unitByServerKey.get(key)
-      const value = !has ? '—' : unit ? formatKpiUnitValue(raw, unit) : raw
+      const unit = unitByServerKey.get(key) as string | undefined
+      const value = renderKpiValue(raw, has, unit)
       return [key, {
         key, label, value,
         color: has && raw !== 0 ? KPI_COLOR[key] : undefined,

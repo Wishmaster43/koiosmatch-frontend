@@ -48,8 +48,7 @@ import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
 import type { ReportKpiScopeId } from './kpiCatalog'
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
-import { getCompareSlug } from './reportCompareSupport'
-import { useReportCompare } from './useReportCompare'
+import { useReportCompareData } from './hooks/useReportCompareData'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
@@ -108,10 +107,7 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
 
   // RAPPORT-COMPARE-2: the compare mode arrives from the right-hand filter
   // panel (ReportsPage). Same window + same filters as the plain report call.
-  const compareSlug = getCompareSlug('candidates', view)
-  const compareBaseParams = { ...buildReportQueryParams(period, 'candidates', filters), ...(phaseFilter ? { phase: [phaseFilter] } : {}) }
-  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compare, compareBaseParams)
-  const totalCompare = compare.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
+  const { totalCompare } = useReportCompareData(period, 'candidates', filters, data, compare, phaseFilter ? { phase: [phaseFilter] } : undefined, view)
 
   // Drill-down: one shared drawer for the whole page. Exactly one XOR param per
   // open drill, always layered on the report's own active filters, and every

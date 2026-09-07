@@ -34,15 +34,13 @@ import type { ReportPeriod, CandidateTimeseriesPoint, CandidateSegment, MatchTer
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
-import { getCompareSlug } from './reportCompareSupport'
-import { useReportCompare } from './useReportCompare'
+import { useReportCompareData } from './hooks/useReportCompareData'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
 import SharedStatTile from '@/components/ui/StatTile'
 import { BodyText } from '@/components/ui/typography'
-import { formatKpiUnitValue } from './kpiUnitFormat'
-import type { KpiUnit } from './kpiUnitFormat'
+import { renderKpiValue } from './renderKpiValue'
 
 // One match stat tile; with an onClick it becomes a drillable surface (keyboard
 // operable — same affordance pattern as SegmentBars).
@@ -62,10 +60,7 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
   const isEmpty = !loading && !error && (!data || data.total === 0)
 
   // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
-  const compareSlug = getCompareSlug('matches')
-  const compareBaseParams = { ...buildReportQueryParams(period, 'matches', filters) }
-  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compare, compareBaseParams)
-  const totalCompare = compare.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
+  const { totalCompare } = useReportCompareData(period, 'matches', filters, data, compare)
 
   // Drill-down: clicking a KPI/segment/tile/bucket explains it (breakdown + the
   // matches behind it + Koios advice). Exactly one XOR param per open drill —
@@ -190,7 +185,7 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
   // UNIT-CANON (FRONTEND-CONTRACT §13, REPORT-KPI-STRIP-1): the SERVER's unit
   // field on each kpis[] entry decides the formatting; the local map is only the
   // tolerant fallback for a cached pre-unit envelope (§10) — never the source.
-  const KPI_UNIT_FALLBACK: Partial<Record<string, KpiUnit>> = { avg_duration_days: 'days', reach_rate: 'ratio' }
+  const KPI_UNIT_FALLBACK: Partial<Record<string, unknown>> = { avg_duration_days: 'days', reach_rate: 'ratio' }
   const unitByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.unit ?? KPI_UNIT_FALLBACK[k.key]]))
   const openKpiParams = drill?.rowsParams as Record<string, unknown> | undefined
   const kpiByKey: Record<string, KpiSpec> = Object.fromEntries(
@@ -198,8 +193,8 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
       const label = t(labelKey)
       const raw = kpiByServerKey.get(key)
       const has = raw != null
-      const unit = unitByServerKey.get(key)
-      const value = !has ? '—' : unit ? formatKpiUnitValue(raw, unit) : raw
+      const unit = unitByServerKey.get(key) as string | undefined
+      const value = renderKpiValue(raw, has, unit)
       return [key, {
         key, label, value,
         color: has && raw !== 0 ? KPI_COLOR[key] : undefined,

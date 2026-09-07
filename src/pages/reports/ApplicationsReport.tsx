@@ -21,6 +21,7 @@ import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useApplicationsReport } from './useApplicationsReport'
 import { gateDrillClick } from './reportDrillGate'
+import { useSeriesDrill } from './hooks/useSeriesDrill'
 import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterParams'
 import type { ReportFilterState } from './reportFilterParams'
 import SegmentBars from './SegmentBars'
@@ -33,14 +34,13 @@ import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat } from '@/lib/formatters'
 import { Caption, BodyText } from '@/components/ui/typography'
 import type {
-  ReportPeriod, CandidateSegment, CandidateOwnerSegment, CandidateTimeseriesPoint,
+  ReportPeriod, CandidateSegment, CandidateOwnerSegment,
   ApplicationTopSegment, ApplicationBucketCounts, ApplicationStageDurationSegment, ApplicationStageSegment,
 } from '@/types/analytics'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
-import { getCompareSlug } from './reportCompareSupport'
-import { useReportCompare } from './useReportCompare'
+import { useReportCompareData } from './hooks/useReportCompareData'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
@@ -97,10 +97,7 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
 
   // RAPPORT-COMPARE-1: year-on-year / period-on-period, reference adoption
   // (§reportCompareSupport.ts) — mirrors CandidatesReport's hosting exactly.
-  const compareSlug = getCompareSlug('applications')
-  const compareBaseParams = { ...buildReportQueryParams(period, 'applications', filters) }
-  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compare, compareBaseParams)
-  const totalCompare = compare.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
+  const { totalCompare } = useReportCompareData(period, 'applications', filters, data, compare)
 
   // One shared drawer for the whole page — a KPI-card click and an axis/bucket/
   // timeseries click both open the SAME drawer (replacing whatever was open
@@ -125,19 +122,6 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
       rowsEndpoint: '/reports/applications/drill', rowsParams: { ...baseParams, ...xorParam },
       adviceEndpoint: '/reports/applications/advice', adviceParams: { ...baseParams, ...xorParam },
     })
-  const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
-    title: pt.label, value: pt.value, subtitle: `${formatDate(data?.from)} – ${formatDate(data?.to)}`,
-    entityPage: 'applications',
-    // DUAL ROLE of the `bucket` param (contract note, "portie 2"): here it is the
-    // GRANULARITY companion of `date` (day|week — a week bar counts the whole week,
-    // so bar and list totals always agree). Below, in bucketDonutData(), `bucket`
-    // is instead a FUNNEL segment value (active|matched|rejected|placed) sent
-    // WITHOUT `date`. The two value sets never overlap, so the two roles never collide.
-    rowsEndpoint: '/reports/applications/drill',
-    rowsParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
-    adviceEndpoint: '/reports/applications/advice',
-    adviceParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
-  })
 
   // INTAKE-IN-APPS-1: the intake axis drill (GET /reports/applications/intakes/drill,
   // operation getReportsApplicationsIntakesDrill) — its documented request body only
@@ -224,10 +208,8 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
         sub: s.direct_entries ? t('applications.axes.directEntries', { count: s.direct_entries }) : undefined }))} />
   }
 
-  const onSeriesPick = gateDrillClick('applications', (dateKey: string) => {
-    const pt = data?.timeseries.series.find(p => p.date === dateKey)
-    if (pt) openBucket(pt)
-  })
+  // Series pick via extracted hook.
+  const { onSeriesPick } = useSeriesDrill('applications', data, baseParams, windowSub, setDrill, 'applications')
 
   // Nine-card KPI strip (RAPPORT-APPS-VERDIEPING-1): straight off the envelope's
   // own `kpis[]` array now — each label from the local i18n catalogue, each card

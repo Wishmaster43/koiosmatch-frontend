@@ -24,6 +24,7 @@ import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useTasksReport } from './useTasksReport'
 import { gateDrillClick } from './reportDrillGate'
+import { useSeriesDrill } from './hooks/useSeriesDrill'
 import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterParams'
 import type { ReportFilterState } from './reportFilterParams'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
@@ -32,12 +33,11 @@ import BarChartCard from '@/components/charts/BarChartCard'
 import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
 import type { ChartDatum } from '@/components/charts/chartTypes'
 import { useDateFormat } from '@/lib/datetime'
-import type { ReportPeriod, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
+import type { ReportPeriod, CandidateOwnerSegment } from '@/types/analytics'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
-import { getCompareSlug } from './reportCompareSupport'
-import { useReportCompare } from './useReportCompare'
+import { useReportCompareData } from './hooks/useReportCompareData'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
@@ -59,10 +59,7 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, co
   const hasData = !loading && !error && total > 0
 
   // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
-  const compareSlug = getCompareSlug('tasks')
-  const compareBaseParams = { ...buildReportQueryParams(period, 'tasks', filters) }
-  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compare, compareBaseParams)
-  const totalCompare = compare.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
+  const { totalCompare } = useReportCompareData(period, 'tasks', filters, data, compare)
 
   // One shared drawer for the whole page — a KPI-card click and an axis/bucket
   // click both open the SAME drawer (replacing whatever was open before). Exactly
@@ -80,15 +77,6 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, co
       rowsEndpoint: '/reports/tasks/drill', rowsParams: { ...baseParams, ...xorParam },
       adviceEndpoint: '/reports/tasks/advice', adviceParams: { ...baseParams, ...xorParam },
     })
-  const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
-    title: pt.label, value: pt.value, subtitle: windowSub(), entityPage: 'tasks',
-    // A week bar's `date` is the point's own key; the drawer then counts the WHOLE
-    // week (bucket=week) so bar and drawer total always agree.
-    rowsEndpoint: '/reports/tasks/drill',
-    rowsParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
-    adviceEndpoint: '/reports/tasks/advice',
-    adviceParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
-  })
 
   // Donut data for a coloured/few-value axis (§chart-type-rule): each slice
   // wears its own tenant colour, falling back to the house series. 'none'
@@ -124,10 +112,8 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, co
       if (seg) openSegment({ label: seg.name, count: seg.count }, { assignee: d.key })
     })
 
-  const onSeriesPick = gateDrillClick('tasks', (dateKey: string) => {
-    const pt = data?.timeseries.series.find(p => p.date === dateKey)
-    if (pt) openBucket(pt)
-  })
+  // Series pick via extracted hook.
+  const { onSeriesPick } = useSeriesDrill('tasks', data, baseParams, windowSub, setDrill, 'tasks')
 
   // KPI-TAKEN-1 (naronde wave 1b): the nine-card strip reads the server's own
   // kpis[] suite verbatim — value and drawer share ONE backend predicate per key

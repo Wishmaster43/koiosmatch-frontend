@@ -36,13 +36,11 @@ import type { ReportPeriod, VacancyReportRow, CandidateTimeseriesPoint } from '@
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
-import { getCompareSlug } from './reportCompareSupport'
-import { useReportCompare } from './useReportCompare'
+import { useReportCompareData } from './hooks/useReportCompareData'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
-import { formatKpiUnitValue } from './kpiUnitFormat'
-import type { KpiUnit } from './kpiUnitFormat'
+import { renderKpiValue } from './renderKpiValue'
 
 // Number cell: emphasised when > 0, muted when zero (mirrors the SM entity tables).
 const numCell = (n: number) => (
@@ -58,10 +56,7 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
   const hasData = !loading && !error && (data?.total ?? 0) > 0
 
   // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
-  const compareSlug = getCompareSlug('vacancies')
-  const compareBaseParams = { ...buildReportQueryParams(period, 'vacancies', filters) }
-  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compare, compareBaseParams)
-  const totalCompare = compare.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
+  const { totalCompare } = useReportCompareData(period, 'vacancies', filters, data, compare)
 
   // One drawer for every drill source: KPI tiles, table rows, axis bars, buckets —
   // ALWAYS layered on top of the report's own active panel filters (`baseParams`),
@@ -163,7 +158,7 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
   // UNIT-CANON (FRONTEND-CONTRACT §13, REPORT-KPI-STRIP-1): the SERVER's unit
   // field on each kpis[] entry decides the formatting; the local map is only the
   // tolerant fallback for a cached pre-unit envelope (§10) — never the source.
-  const KPI_UNIT_FALLBACK: Partial<Record<string, KpiUnit>> = { fill_rate: 'ratio' }
+  const KPI_UNIT_FALLBACK: Partial<Record<string, unknown>> = { fill_rate: 'ratio' }
   const unitByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.unit ?? KPI_UNIT_FALLBACK[k.key]]))
   const openKpiParams = drill?.rowsParams as Record<string, unknown> | undefined
   const kpiByKey: Record<string, KpiSpec> = Object.fromEntries(
@@ -171,8 +166,8 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
       const label = t(labelKey)
       const raw = kpiByServerKey.get(key)
       const has = raw != null
-      const unit = unitByServerKey.get(key)
-      const value = !has ? '—' : unit ? formatKpiUnitValue(raw, unit) : raw
+      const unit = unitByServerKey.get(key) as string | undefined
+      const value = renderKpiValue(raw, has, unit)
       // PARITY EXCEPTION (documented BE-side, KPI-VAC-1): customers_count counts
       // DISTINCT customers while its drill lists those customers' VACANCIES (rows
       // ≥ card value) — an explicit subtitle names the divergence instead of the

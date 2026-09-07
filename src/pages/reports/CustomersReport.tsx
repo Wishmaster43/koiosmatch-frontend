@@ -49,8 +49,7 @@ import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey, CUSTOMERS_SIGNAL_LABEL_KEYS } from './kpiCatalog'
 import type { ReportKpiScopeId } from './kpiCatalog'
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
-import { getCompareSlug } from './reportCompareSupport'
-import { useReportCompare } from './useReportCompare'
+import { useReportCompareData } from './hooks/useReportCompareData'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
@@ -114,10 +113,7 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
   const hasData = !loading && !error && total > 0
 
   // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
-  const compareSlug = getCompareSlug('customers', view)
-  const compareBaseParams = { ...buildReportQueryParams(period, 'customers', filters), ...(phaseFilter ? { phase: [phaseFilter] } : {}) }
-  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compare, compareBaseParams)
-  const totalCompare = compare.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
+  const { totalCompare } = useReportCompareData(period, 'customers', filters, data, compare, phaseFilter ? { phase: [phaseFilter] } : undefined, view)
 
   // Drill-down: one shared drawer for the whole page — a segment/bucket click
   // opens it fresh, replacing whatever was open before. Exactly one XOR param

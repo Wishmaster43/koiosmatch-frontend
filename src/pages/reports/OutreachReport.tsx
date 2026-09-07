@@ -32,13 +32,14 @@ import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useOutreachReport } from './useOutreachReport'
 import { gateDrillClick } from './reportDrillGate'
+import { useSeriesDrill } from './hooks/useSeriesDrill'
 import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
 import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
 import type { ChartDatum } from '@/components/charts/chartTypes'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
-import type { ReportPeriod, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
+import type { ReportPeriod, CandidateOwnerSegment } from '@/types/analytics'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
@@ -86,15 +87,6 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
       rowsEndpoint: '/reports/outreach/drill', rowsParams: { ...baseParams, ...xorParam },
       adviceEndpoint: '/reports/outreach/advice', adviceParams: { ...baseParams, ...xorParam },
     })
-  const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
-    title: pt.label, value: pt.value, subtitle: windowSub(),
-    // A week bar's `date` is the point's own key; the drawer then counts the WHOLE
-    // week (bucket=week) so bar and drawer total always agree.
-    rowsEndpoint: '/reports/outreach/drill',
-    rowsParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
-    adviceEndpoint: '/reports/outreach/advice',
-    adviceParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
-  })
 
   // Chart datum builders (RAPPORT-GEZICHT-WAVE2 chart-type rule): 'none'/'others'
   // sentinels, "Onbekend"/"Geen uitkomst" rows and orphan strings are all normal
@@ -128,10 +120,8 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
       if (seg) openSegment({ label: seg.name, count: seg.count }, { assignee: seg.owner_id })
     })
 
-  const onSeriesPick = gateDrillClick('outreach', (dateKey: string) => {
-    const pt = data?.timeseries.series.find(p => p.date === dateKey)
-    if (pt) openBucket(pt)
-  })
+  // Series pick via extracted hook.
+  const { onSeriesPick } = useSeriesDrill('outreach', data, baseParams, windowSub, setDrill)
 
   // KPI-OUTREACH-1 (mirrors TasksReport's KPI-TAKEN-1): the nine-card strip
   // reads the server's own kpis[] suite verbatim — value and drawer share ONE
