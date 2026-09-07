@@ -13,6 +13,7 @@ import PaginationBar          from '../ui/PaginationBar'
 import { useReportPaging }    from './useReportPaging'
 import { TD, SortableTableHead, ReportTableToolbar } from './reportTableChrome'
 import { useReportTableFilter } from './useReportTableFilter'
+import { renderMonospaceCell } from './reportTableCells'
 import { useSmCustomerTree }  from '@/hooks/useSmCustomerTree'
 import { useCustomerOptions } from './useCustomerOptions'
 import type { ReportDepartment, SortState } from '@/types/reports'
@@ -137,11 +138,7 @@ export default function DepartmentsTable() {
                     <td style={TD}>{r.customer_name}</td>
                     <td style={TD}>{r.location_name}</td>
                     <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>{r.name}</td>
-                    <td style={TD}>
-                      {r.cost_center
-                        ? <span style={{ fontFamily: 'monospace', fontSize: 12 }}>{r.cost_center}</span>
-                        : <span style={{ color: 'var(--border)' }}>—</span>}
-                    </td>
+                    <td style={TD}>{renderMonospaceCell(r.cost_center)}</td>
                   </tr>
                 ))}
               </tbody>

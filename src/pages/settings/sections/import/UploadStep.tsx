@@ -1,24 +1,17 @@
 /**
- * UploadStep — step 1: download the example file, then upload a CSV to preview.
- * The upload dropzone is DISABLED (never hidden) for a user without customers.create
- * — they can still see the entity and download its template (§3: "renders disabled
- * with an honest notice" beats a button that would 403).
+ * UploadStep — step 1 for settings import: stage a file and run server-side preview.
+ * Accepts .csv/.txt/.xlsx for spreadsheets or .zip for documents (entity-dependent).
+ * Does not parse client-side; the server handles all format reading.
  */
-import { useRef, useState, type ChangeEvent, type DragEvent } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CloudUpload, Download } from 'lucide-react'
 import { downloadImportTemplate } from './importApi'
 import { notifyError } from '@/lib/notify'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
+import { FileDropZoneUI } from '@/pages/import/shared'
 
-// Only these extensions are ever accepted by the backend (ImportUploadRequest:
-// mimes:csv,txt,xlsx) — .xlsx is read by its own reader (ZIP magic + Excel's own
-// sheet row numbers), never converted client-side.
-const ACCEPTED_EXTENSIONS = ['.csv', '.txt', '.xlsx']
-
-// TRANSFER-FAMILIES ZIP: the documents import is a ZIP (files + mapping.csv);
-// every other entity stays spreadsheet-only. Cap mirrors the server (200 MB).
+// Documents entity accepts ZIP (files + mapping.csv); others accept spreadsheets only.
 const ZIP_ENTITIES = ['documents']
 const ZIP_MAX_MB = 200
 
@@ -33,25 +26,28 @@ interface UploadStepProps {
   canImport: boolean
 }
 
-// Wizard step 1: template download + a permission-gated dropzone that stages the
-// picked file (no client-side parsing) for the caller's server-side preview run.
+// Settings import: stage file and optionally run server-side preview.
 export default function UploadStep({
   entity, file, onSelectFile, onRunPreview, previewStatus, previewError, canView, canImport,
 }: UploadStepProps) {
   const { t } = useTranslation('settings')
-  const [drag, setDrag] = useState(false)
   const [typeError, setTypeError] = useState<string | null>(null)
   const [downloadPending, setDownloadPending] = useState(false)
-  const fileRef = useRef<HTMLInputElement>(null)
-  const checking = previewStatus === 'loading'
 
-  // The documents entity eats a ZIP; everything else the spreadsheet trio.
   const isZip = ZIP_ENTITIES.includes(entity)
-  const extensions = isZip ? ['.zip'] : ACCEPTED_EXTENSIONS
-  // Reject a wrong type or an oversized ZIP with an honest, actionable message.
+  const acceptAttribute = isZip ? '.zip' : '.csv,.txt,.xlsx'
+
+  // Validate file type and size before staging.
   const acceptFile = (candidate: File) => {
     const lower = candidate.name.toLowerCase()
-    if (!extensions.some((ext) => lower.endsWith(ext))) {
+    const isValidZip = lower.endsWith('.zip')
+    const isValidSpreadsheet = ['.csv', '.txt', '.xlsx'].some(ext => lower.endsWith(ext))
+
+    if (isZip && !isValidZip) {
+      setTypeError(t('import.wrongFileType'))
+      return
+    }
+    if (!isZip && !isValidSpreadsheet) {
       setTypeError(t('import.wrongFileType'))
       return
     }
@@ -63,7 +59,7 @@ export default function UploadStep({
     onSelectFile(candidate)
   }
 
-  // GET /imports/{entity}/template.csv, streamed to disk — the "export as example" feature.
+  // Download template file from the backend.
   const handleDownloadTemplate = async () => {
     setDownloadPending(true)
     try {
@@ -75,84 +71,40 @@ export default function UploadStep({
     }
   }
 
-  // File dropped onto the zone — ignored while import isn't permitted.
-  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault()
-    setDrag(false)
-    if (!canImport) return
-    const dropped = event.dataTransfer.files?.[0]
-    if (dropped) acceptFile(dropped)
-  }
-
-  // File picked via the hidden native input (the "Selecteer" button/click-zone).
-  const handleFileInput = (event: ChangeEvent<HTMLInputElement>) => {
-    const picked = event.target.files?.[0]
-    if (picked) acceptFile(picked)
-  }
+  const checking = previewStatus === 'loading'
 
   return (
     <div>
-      {/* The example file — one click, filled-in rows included. */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        padding: '12px 16px', background: 'var(--hover-bg)', borderRadius: 8, marginBottom: 16, gap: 12 }}>
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{t('import.downloadTemplate')}</div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('import.downloadTemplateHint')}</div>
-        </div>
-        <Button variant="secondary" onClick={handleDownloadTemplate} disabled={!canView || downloadPending}
-          title={canView ? undefined : t('import.noViewPermission')}>
-          {downloadPending ? <Spinner size={14} /> : <Download size={14} />}
-          {t('import.downloadTemplate')}
-        </Button>
-      </div>
+      <FileDropZoneUI
+        dropHint={t('import.dropHere')}
+        entity={entity}
+        canView={canView}
+        canImport={canImport}
+        acceptAttribute={acceptAttribute}
+        acceptedTypesHint={t(isZip ? 'import.acceptedTypesZip' : 'import.acceptedTypes')}
+        downloadLabel={t('import.downloadTemplate')}
+        selectLabel={t('import.selectCsv')}
+        noImportPermissionMessage={t('import.noImportPermission')}
+        noViewPermissionHint={t('import.noViewPermission')}
+        onFileAccepted={acceptFile}
+        disabled={checking}
+        onDownloadTemplate={handleDownloadTemplate}
+        downloadPending={downloadPending}
+        parsing={checking}
+        typeError={typeError}
+        selectedFile={file}
+        replaceFileLabel={t('import.replaceFile')}
+        fileSelectedLabel={(name) => t('import.fileSelected', { name })}
+      />
 
-      {!canImport && (
-        <p style={{ fontSize: 12, color: 'var(--color-warning-text)', marginBottom: 12 }}>{t('import.noImportPermission')}</p>
-      )}
-
-      {/* Upload dropzone — disabled (opacity + cursor), never hidden, without the create right. */}
-      <div
-        onDragOver={(event) => { event.preventDefault(); if (canImport) setDrag(true) }}
-        onDragLeave={() => setDrag(false)}
-        onDrop={handleDrop}
-        onClick={() => canImport && fileRef.current?.click()}
-        style={{ border: `2px dashed ${drag ? 'var(--color-primary)' : 'var(--border)'}`, borderRadius: 10,
-                 minHeight: 160, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                 gap: 12, cursor: canImport ? 'pointer' : 'not-allowed', opacity: canImport ? 1 : 0.5,
-                 background: drag ? 'var(--color-primary-bg)' : 'var(--hover-bg)', transition: 'all 0.15s' }}>
-        <CloudUpload size={28} style={{ color: 'var(--text-muted)' }} aria-hidden="true" />
-        <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('import.dropHere')}</span>
-        <Button variant="primary" onClick={(event) => { event.stopPropagation(); if (canImport) fileRef.current?.click() }}
-          disabled={!canImport}>
-          {t('import.selectCsv')}
-        </Button>
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t(isZip ? 'import.acceptedTypesZip' : 'import.acceptedTypes')}</span>
-        <input ref={fileRef} type="file" accept={isZip ? '.zip' : '.csv,.txt,.xlsx'} aria-label={t('import.selectCsv')}
-          style={{ display: 'none' }} onChange={handleFileInput} disabled={!canImport} />
-      </div>
-
-      {typeError && <p style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 10 }}>{typeError}</p>}
-
-      {file && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
-          background: 'var(--color-success-bg)',
-          border: '1px solid var(--color-success)',
-          borderRadius: 8, marginTop: 12 }}>
-          <span style={{ fontSize: 13, color: 'var(--text)', flex: 1 }}>{t('import.fileSelected', { name: file.name })}</span>
-          <button type="button" onClick={() => fileRef.current?.click()} disabled={!canImport}
-            style={{ fontSize: 12, color: 'var(--color-primary-text)', background: 'none', border: 'none',
-                     cursor: canImport ? 'pointer' : 'not-allowed', padding: 0 }}>
-            {t('import.replaceFile')}
-          </button>
-        </div>
-      )}
-
+      {/* Preview error */}
       {previewStatus === 'error' && (
         <p style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 10 }}>
           {previewError || t('import.previewErrorFallback')}
         </p>
       )}
 
+      {/* Run preview button */}
       <div style={{ marginTop: 20 }}>
         <Button variant="primary" onClick={onRunPreview} disabled={!file || !canImport || checking}>
           {checking && <Spinner size={14} />}

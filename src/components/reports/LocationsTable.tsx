@@ -13,8 +13,8 @@ import PaginationBar          from '../ui/PaginationBar'
 import { useReportPaging }    from './useReportPaging'
 import { TD, SortableTableHead, ReportTableToolbar } from './reportTableChrome'
 import { useReportTableFilter } from './useReportTableFilter'
-import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
 import CopyIconButton from '../ui/CopyIconButton'
+import { renderStatusCell, renderCountCell } from './reportTableCells'
 import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
 import { useCustomerOptions } from './useCustomerOptions'
 import type { ReportLocation, SortState } from '@/types/reports'
@@ -159,8 +159,8 @@ export default function LocationsTable() {
                         </span>
                       ) : <span style={{ color: 'var(--border)' }}>—</span>}
                     </td>
-                    <td style={TD}><StatusBadge status={r.status} /></td>
-                    <td style={TD}><span style={{ fontWeight: 500 }}>{r.dept_count}</span></td>
+                    <td style={TD}>{renderStatusCell(r.status)}</td>
+                    <td style={TD}>{renderCountCell(r.dept_count)}</td>
                   </tr>
                 ))}
               </tbody>

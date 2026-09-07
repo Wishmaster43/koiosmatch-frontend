@@ -16,7 +16,7 @@ import { useReportPaging }    from './useReportPaging'
 import { TD, SortableTableHead, ReportTableToolbar } from './reportTableChrome'
 import { useReportTableFilter } from './useReportTableFilter'
 import { useReportCustomers } from './useReportCustomers'
-import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
+import { renderStatusCell, renderCountCell, renderMonospaceCell } from './reportTableCells'
 import type { ReportCustomer, SortState } from '@/types/reports'
 
 // Read-only reports view of customers; data/loading/error come from the shared hook, filters register into the right panel below.
@@ -153,21 +153,11 @@ export default function CustomersTable() {
                       <td style={TD}>
                         <span style={{ fontWeight: 500, color: 'var(--text)' }}>{c.name}</span>
                       </td>
-                      <td style={TD}>
-                        <span style={{ fontFamily: 'monospace', fontSize: 12 }}>
-                          {c.debtor_number || <span style={{ color: 'var(--border)' }}>—</span>}
-                        </span>
-                      </td>
-                      <td style={TD}><StatusBadge status={c.status} /></td>
+                      <td style={TD}>{renderMonospaceCell(c.debtor_number)}</td>
+                      <td style={TD}>{renderStatusCell(c.status)}</td>
                       <td style={TD}>{c.account_manager || <span style={{ color: 'var(--border)' }}>—</span>}</td>
-                      <td style={TD}>
-                        <span style={{ fontWeight: 500 }}>{locCount}</span>
-                        {locCount === 0 && <span style={{ color: 'var(--border)', marginLeft: 4, fontSize: 11 }}>—</span>}
-                      </td>
-                      <td style={TD}>
-                        <span style={{ fontWeight: 500 }}>{deptCount}</span>
-                        {deptCount === 0 && <span style={{ color: 'var(--border)', marginLeft: 4, fontSize: 11 }}>—</span>}
-                      </td>
+                      <td style={TD}>{renderCountCell(locCount)}</td>
+                      <td style={TD}>{renderCountCell(deptCount)}</td>
                     </tr>
                   )
                 })}
