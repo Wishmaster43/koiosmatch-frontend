@@ -3,12 +3,16 @@
  * owner > logged-in user), the locked-vacancy owner fetch, the start-stage seeding,
  * and the application.create AXIS preflight for pages/applications/AddApplicationModal.
  * Extracted verbatim (R6) from that file — behaviour is unchanged, only the location.
+ *
+ * DRY-OWNER-1: delegates the owner-derivation logic to useOwnerDerivation
+ * (extracted from both this and useApplicationOwnerChain — 0% behaviour change).
  */
 import { useState, useEffect, useMemo, useRef } from 'react'
 import api, { unwrap } from '@/lib/api'
 import { useApplicationStages } from '@/hooks/useApplicationStages'
 import { useActionRulePreflight } from '@/components/actionrules'
 import { isUuid } from '@/lib/uuid'
+import { useOwnerDerivation } from './useOwnerDerivation'
 import type { Id } from '@/types/common'
 import type { PickOption } from '../addmodal/types'
 
@@ -59,32 +63,15 @@ export function useApplicationOwnerAndStage({
 
   const vacancyOwnerId = lockedVacancy ? lockedVacancyOwnerId : pickedVacancy?.ownerId
 
-  // APP-OWNER-1: derivation chain, highest priority first — the picked vacancy's
-  // own recruiter (owner) > the picked candidate's own owner > the logged-in user
-  // (this file's own earlier "default to me" behaviour). Every rung only proposes
-  // a real, ASSIGNABLE tenant user (never a super-admin the server would 422 on).
+  // APP-OWNER-1: delegate the derivation chain to the shared hook (DRY-OWNER-1).
   const candidateOwnerId = pickedCandidate?.ownerId
-  const vacancyOwnerAssignable = vacancyOwnerId != null && ownerOptions.some(o => o.value === String(vacancyOwnerId))
-  const candidateOwnerAssignable = candidateOwnerId != null && ownerOptions.some(o => o.value === String(candidateOwnerId))
-  const derivedOwnerId = vacancyOwnerAssignable ? String(vacancyOwnerId)
-    : candidateOwnerAssignable ? String(candidateOwnerId)
-    : meIsAssignable ? String(me?.id)
-    : ''
-
-  // Seeded from the chain above, never re-seeded once the recruiter makes a MANUAL
-  // pick (tracked by a ref — the vacancy/candidate pick can arrive AFTER a
-  // lower-priority auto-seed already landed and still must be able to promote
-  // itself over it; mirrors the candidate-drawer variant's identical guard).
-  const [ownerId, setOwnerIdState] = useState('')
-  const ownerManualRef = useRef(false)
-  // Auto-seed the owner from the derived chain above, but never once the recruiter
-  // has made a manual pick (ownerManualRef) — a later-arriving auto-seed must not override it.
-  useEffect(() => {
-    if (ownerManualRef.current) return
-    if (derivedOwnerId && derivedOwnerId !== ownerId) setOwnerIdState(derivedOwnerId)
-  }, [derivedOwnerId]) // eslint-disable-line react-hooks/exhaustive-deps
-  // The picker's own onChange — any explicit pick permanently stops the auto-seed above.
-  const setOwnerId = (v: string) => { ownerManualRef.current = true; setOwnerIdState(v) }
+  const { ownerId, setOwnerId } = useOwnerDerivation({
+    vacancyOwnerId,
+    candidateOwnerId,
+    meId: me?.id,
+    userOptions: ownerOptions,
+    meIsAssignable,
+  })
 
   // Start stage ("fase") — V17: "+ Sollicitant" used to POST candidate/vacancy/owner only,
   // so a recruiter adding an applicant from a vacancy could not say where they enter.

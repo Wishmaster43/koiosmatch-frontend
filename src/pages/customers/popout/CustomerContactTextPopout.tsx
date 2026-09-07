@@ -8,12 +8,13 @@
  * No `assistGenerate` — 'contact' is not in the shared GenerateEntity union yet
  * (richTextAssistApi.ts), so the Genereer button stays omitted here, mirroring
  * how the department popout stayed without it before that entity was added.
+ *
+ * DRY-POPOUT-1: shared rendering via SharedTextPopoutBody — behaviour unchanged.
  */
 import { useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { PopoutShell } from '@/pages/popout/shared'
-import { TextPopoutEditor } from '@/pages/popout/shared'
 import { useTextPopoutDraft } from '@/pages/popout/shared'
+import SharedTextPopoutBody from './SharedTextPopoutBody'
 import { useContactTextLite, patchContactText } from '../hooks/useCustomerTextPopout'
 import { textPopoutTopic, parseContactPopoutId } from '@/lib/secondScreen'
 
@@ -47,23 +48,20 @@ export default function CustomerContactTextPopout({ id }: { id: string | undefin
   // record" state, never a silent wrong fetch (§3).
   if (!parsed) {
     return (
-      <PopoutShell
+      <SharedTextPopoutBody
         loading={false} error onRetry={reload}
         loadingLabel="" errorLabel={t('popout.loadError')} retryLabel={t('common:error.retry')}
-        name="" initials="" subtitle=""
-      >
-        {null}
-      </PopoutShell>
+        name="" subtitle="" text="" dirty={false} onChange={() => {}} onSave={async () => false}
+      />
     )
   }
 
   return (
-    <PopoutShell
+    <SharedTextPopoutBody
       loading={loading} error={error || !contact} onRetry={reload}
       loadingLabel={t('common:loading')} errorLabel={t('popout.loadError')} retryLabel={t('common:error.retry')}
-      name={contact?.name ?? ''} initials="" subtitle={t('contacts.detail.freeText')}
-    >
-      <TextPopoutEditor value={text ?? ''} onChange={change} onSave={save} dirty={dirty} />
-    </PopoutShell>
+      name={contact?.name ?? ''} subtitle={t('contacts.detail.freeText')}
+      text={text} dirty={dirty} onChange={change} onSave={save}
+    />
   )
 }

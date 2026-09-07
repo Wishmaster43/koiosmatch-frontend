@@ -9,12 +9,13 @@
  * KOIOS-GENERATE-1: `generate` wired — 'department' is live in the backend's
  * generate controller and in the shared GenerateEntity type (widened 13-08), so
  * this popout offers Genereer exactly like the customer popout.
+ *
+ * DRY-POPOUT-1: shared rendering via SharedTextPopoutBody — behaviour unchanged.
  */
 import { useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { PopoutShell } from '@/pages/popout/shared'
-import { TextPopoutEditor } from '@/pages/popout/shared'
 import { useTextPopoutDraft } from '@/pages/popout/shared'
+import SharedTextPopoutBody from './SharedTextPopoutBody'
 import { useDepartmentTextLite, patchDepartmentText } from '../hooks/useCustomerTextPopout'
 import { textPopoutTopic, parseDepartmentPopoutId } from '@/lib/secondScreen'
 
@@ -50,24 +51,21 @@ export default function CustomerDepartmentTextPopout({ id }: { id: string | unde
   // record" state, never a silent wrong fetch (§3).
   if (!parsed) {
     return (
-      <PopoutShell
+      <SharedTextPopoutBody
         loading={false} error onRetry={reload}
         loadingLabel="" errorLabel={t('popout.loadError')} retryLabel={t('common:error.retry')}
-        name="" initials="" subtitle=""
-      >
-        {null}
-      </PopoutShell>
+        name="" subtitle="" text="" dirty={false} onChange={() => {}} onSave={async () => false}
+      />
     )
   }
 
   return (
-    <PopoutShell
+    <SharedTextPopoutBody
       loading={loading} error={error || !department} onRetry={reload}
       loadingLabel={t('common:loading')} errorLabel={t('popout.loadError')} retryLabel={t('common:error.retry')}
-      name={department?.name ?? ''} initials="" subtitle={t('departments.detail.description')}
-    >
-      <TextPopoutEditor value={text ?? ''} onChange={change} onSave={save} dirty={dirty}
-        generate={{ entity: 'department', id: parsed.departmentId }} />
-    </PopoutShell>
+      name={department?.name ?? ''} subtitle={t('departments.detail.description')}
+      text={text} dirty={dirty} onChange={change} onSave={save}
+      generate={{ entity: 'department', id: parsed.departmentId }}
+    />
   )
 }
