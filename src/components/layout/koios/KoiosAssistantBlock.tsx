@@ -47,7 +47,9 @@ function SuggestionCard({ suggestion, onAskKoios }: { suggestion: KoiosAssistant
   const meta = KIND_META[suggestion.kind] ?? KIND_META.pending_action
   const Icon = meta.Icon
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '8px 0' }}>
+    // Compact row (Danny 07-09): title line, one body line, then the deep-link chip and the
+    // actions on ONE row; a hairline separates rows instead of vertical air.
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '8px 0', borderTop: '1px solid var(--border)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
           width: 20, height: 20, borderRadius: 6, color: meta.color }}>
@@ -56,15 +58,11 @@ function SuggestionCard({ suggestion, onAskKoios }: { suggestion: KoiosAssistant
         <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{suggestion.title}</span>
       </div>
       <BodyText style={{ marginLeft: 28 }}>{suggestion.body}</BodyText>
-      {suggestion.refs.length > 0 && (
-        <div style={{ marginLeft: 28 }}>
-          <KoiosResultCards refs={suggestion.refs} />
-        </div>
-      )}
       {/* Golf 2 (contract CMBE-gepind): a parked action gets the REAL confirm/
           cancel seam; every other kind hands off to the chat composer — sending
           stays the user's own explicit click (API-CREDITS-1 posture). */}
-      <div style={{ marginLeft: 28, marginTop: 2 }}>
+      <div style={{ marginLeft: 28, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+        {suggestion.refs.length > 0 ? <KoiosResultCards refs={suggestion.refs} compact /> : <span />}
         <SuggestionActions suggestion={suggestion} onAskKoios={onAskKoios} />
       </div>
     </div>
@@ -86,6 +84,8 @@ function ExecErrorNotice({ message, budget, t }: { message?: string; budget?: Ac
 
 // Stable row identity (Opus golf-2 verify): the pending-action id when present,
 // else kind+title — NEVER the array index, which glued one action's terminal
+// state onto a DIFFERENT action after a refetch reshuffled the list.
+
 // state onto a DIFFERENT action after a refetch reshuffled the list.
 function suggestionKey(s: KoiosAssistantSuggestion): string {
   const ref = s.refs.find(r => r.type === 'pending_action')
@@ -252,7 +252,9 @@ export default function KoiosAssistantBlock({ onAskKoios, onClose }: { onAskKoio
           <Caption style={{ display: 'block', margin: '6px 0 0' }}>{t('koios.assistant.emptyState')}</Caption>
         )}
         {!loading && !error && suggestions.length > 0 && (
-          <div style={{ margin: '4px 0 0', display: 'flex', flexDirection: 'column' }}>
+          // The list scrolls inside the block (max ~half the panel) so the advice block
+          // below stays reachable when the backend returns its full ten suggestions.
+          <div style={{ margin: '4px 0 0', display: 'flex', flexDirection: 'column', maxHeight: '48vh', overflowY: 'auto' }}>
             {suggestions.map(s => <SuggestionCard key={suggestionKey(s)} suggestion={s} onAskKoios={onAskKoios} />)}
           </div>
         )}

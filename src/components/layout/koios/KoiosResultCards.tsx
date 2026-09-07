@@ -7,6 +7,7 @@
  * CHILD refs (appointment/note/document) route through their parent's drawer.
  */
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigation } from '@/context/NavigationContext'
 import { entityIconEl } from './koiosEntityIcons'
 import { pageForResultRef, tabForChildRef } from './koiosResultLinks'
@@ -15,15 +16,26 @@ import { Caption, GroupLabel } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import type { KoiosSearchResultsGrouped, KoiosResultRef } from './koiosTypes'
 
-// Entity label keys and their i18n paths (koios.results.group.*)
+// Entity group label keys inside the `koios` namespace (results.group.*); an entity
+// type without a key falls back to the raw type so a new backend type never renders
+// as an untranslated dotted key.
 const ENTITY_LABELS: Record<string, string> = {
-  candidate: 'koios.results.group.kandidaten',
-  vacancy: 'koios.results.group.vacatures',
-  customer: 'koios.results.group.klanten',
-  opportunity: 'koios.results.group.kansen',
-  match: 'koios.results.group.matches',
+  candidate: 'kandidaten',
+  vacancy: 'vacatures',
+  customer: 'klanten',
+  opportunity: 'kansen',
+  match: 'matches',
 }
-
+// Legacy `refs` prop (assistant suggestions): bucket by the ref's own type, in first-seen order.
+function groupRefsByType(refs: KoiosResultRef[]): Array<{ entity: string; refs: KoiosResultRef[]; aantal: number; meer: boolean }> {
+  const order: string[] = []
+  const byType: Record<string, KoiosResultRef[]> = {}
+  for (const r of refs) {
+    if (!byType[r.type]) { byType[r.type] = []; order.push(r.type) }
+    byType[r.type].push(r)
+  }
+  return order.map(entity => ({ entity, refs: byType[entity], aantal: byType[entity].length, meer: false }))
+}
 // Resolves the click target for one ref: a direct page for a mapped type, or
 // (for a child ref) the parent's page + measured sub-tab; null when neither applies.
 function resolveTarget(ref: KoiosResultRef): { page: string; id: string; tab?: string } | null {
@@ -77,20 +89,20 @@ function ResultCard({ item }: { item: KoiosResultRef }) {
 export default function KoiosResultCards({
   groups,
   refs,
-  t,
+  compact = false,
 }: {
   groups?: KoiosSearchResultsGrouped
   refs?: KoiosResultRef[]
+  // Legacy callers passed a `t`; labels now resolve in the koios namespace here, so the
+  // same cards read identically in the chat and in the assistant block.
   t?: (key: string, opts?: Record<string, unknown>) => string
+  // compact: no group header (the caller's own title already names the entity) and no top margin.
+  compact?: boolean
 }) {
-  // Support both old refs prop and new groups prop for backward compatibility.
-  const { groups: actualGroups } = groups || {
-    groups: refs && refs.length > 0
-      ? [{ entity: 'candidate', refs, aantal: refs.length, meer: false }]
-      : [],
-  }
+  const { t: tk } = useTranslation('koios')
+  // Support both the old refs prop and the new groups prop.
+  const { groups: actualGroups } = groups || { groups: refs && refs.length > 0 ? groupRefsByType(refs) : [] }
   const { skipped: actualSkipped } = groups || { skipped: [] }
-  const mockT = t || ((key: string) => key)
   // Track which entity groups are expanded (show all refs instead of just 5).
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
 
@@ -107,7 +119,7 @@ export default function KoiosResultCards({
   }
 
   return (
-    <div data-testid="koios-result-cards" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 6 }}>
+    <div data-testid="koios-result-cards" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: compact ? 0 : 6 }}>
       {/* Render each entity group with its label and truncated refs. */}
       {actualGroups.map((group) => {
         const unique = dedupeRefs(group.refs)
@@ -118,15 +130,17 @@ export default function KoiosResultCards({
         const displayed = isExpanded ? unique : unique.slice(0, ITEMS_PER_GROUP)
         const hasMore = unique.length > ITEMS_PER_GROUP
 
-        const labelKey = ENTITY_LABELS[group.entity] || `koios.results.group.${group.entity}`
-        const entityLabel = mockT(labelKey, { defaultValue: group.entity })
+        const labelKey = ENTITY_LABELS[group.entity]
+        const entityLabel = labelKey ? tk(`results.group.${labelKey}`, { defaultValue: group.entity }) : group.entity
 
         return (
           <div key={group.entity}>
-            {/* Group label with entity name and count. */}
-            <GroupLabel style={{ marginBottom: 6 }}>
-              {entityLabel} ({unique.length})
-            </GroupLabel>
+            {/* Group label with entity name and count (skipped in compact mode). */}
+            {!compact && (
+              <GroupLabel style={{ marginBottom: 6 }}>
+                {entityLabel} ({unique.length})
+              </GroupLabel>
+            )}
             {/* Cards for this group. */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: hasMore ? 6 : 0 }}>
               {displayed.map((item) => (
@@ -141,7 +155,7 @@ export default function KoiosResultCards({
                 onClick={() => toggleExpanded(group.entity)}
                 style={{ fontSize: 12 }}
               >
-                {isExpanded ? mockT('koios.results.showLess', { defaultValue: 'Toon minder' }) : mockT('koios.results.showMore', { defaultValue: 'Toon meer' })}
+                {isExpanded ? tk('results.showLess') : tk('results.showMore')}
               </Button>
             )}
           </div>
@@ -153,7 +167,7 @@ export default function KoiosResultCards({
         <div style={{ marginTop: actualGroups.length > 0 ? 4 : 0 }}>
           {actualSkipped.map((skip) => (
             <Caption key={skip.entity} style={{ display: 'block', marginTop: 4 }}>
-              {mockT('koios.results.skipped', { defaultValue: 'Overgeslagen: {{reason}}', reason: skip.reden })}
+              {tk('results.skipped', { defaultValue: 'Overgeslagen: {{reason}}', reason: skip.reden })}
             </Caption>
           ))}
         </div>
