@@ -20,7 +20,7 @@ export default {
     { key: 'title', label: 'Titel', type: 'text' },
     // Tenant lookups (§10): the stored value is the lookup's immutable slug,
     // matching TaskType::where('value', …) / TaskPriority::where('value', …).
-    { key: 'type', label: 'Soort', type: 'lookup_select', endpoint: '/task-types' },
+    { key: 'type', label: 'Soort', type: 'lookup_select', endpoint: '/task-types?active=1' },
     { key: 'priority', label: 'Prioriteit', type: 'lookup_select', endpoint: '/task-priorities' },
     // BE resolves the owner strategy from this exact string set (or a raw user
     // uuid, not offered here — TaskCreateModule::resolveAssignee/ownerAssignee).

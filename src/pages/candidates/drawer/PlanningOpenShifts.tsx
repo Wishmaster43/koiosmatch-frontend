@@ -144,7 +144,7 @@ export default function PlanningOpenShifts({ openShifts, loading, error, onReloa
                   {tags.map((tag, j) => (
                     <span key={j} style={{ fontSize: 9, padding: '1px 6px', borderRadius: 99,
                       background: tag.ok ? 'var(--color-success-bg)' : 'var(--color-danger-bg)',
-                      color: tag.ok ? 'var(--color-success)' : 'var(--color-danger)', fontWeight: 500 }}>
+                      color: tag.ok ? 'var(--color-success-text)' : 'var(--color-danger-text)', fontWeight: 500 }}>
                       {tag.ok ? '✓' : '✗'} {tag.label}
                     </span>
                   ))}
