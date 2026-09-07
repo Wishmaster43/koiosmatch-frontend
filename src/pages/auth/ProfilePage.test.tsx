@@ -19,10 +19,11 @@ vi.mock('./ProfileWhatsAppWeb', () => ({ default: () => <div>whatsapp-web-panel<
 
 let hasModuleImpl: (key: string) => boolean = () => false
 let permissions: Array<string | { name?: string }> = []
+let mfaFlags: Record<string, unknown> = {}
 vi.mock('@/context/AuthContext', () => ({
   useAuth: () => ({
     hasModule: (key: string) => hasModuleImpl(key),
-    user: { permissions },
+    user: { permissions, ...mfaFlags },
     activeTenant: null,
     accessiblePages: [],
   }),
@@ -55,5 +56,20 @@ describe('ProfilePage — WhatsApp Web tab gating', () => {
     permissions = ['page.candidates', 'page.whatsapp']
     render(<ProfilePage />)
     expect(screen.getByText('profile.whatsappWeb.title')).toBeInTheDocument()
+  })
+
+  // CMBE 08-09: mfa_setup_required is a SOFT signal — a nudge on the profile, never a wall.
+  it('shows the MFA nudge with a jump to the security tab when the policy wants enrollment', async () => {
+    mfaFlags = { mfa_setup_required: true, mfa_enabled: false }
+    render(<ProfilePage />)
+    expect(await screen.findByText('profile.mfaNudge.title')).toBeInTheDocument()
+    mfaFlags = {}
+  })
+
+  it('shows no MFA nudge once MFA is enabled', () => {
+    mfaFlags = { mfa_setup_required: true, mfa_enabled: true }
+    render(<ProfilePage />)
+    expect(screen.queryByText('profile.mfaNudge.title')).not.toBeInTheDocument()
+    mfaFlags = {}
   })
 })

@@ -20,3 +20,11 @@ export function isMfaEnrollmentError(error: unknown): boolean {
   const response = (error as MaybeAxiosError)?.response
   return response?.status === 403 && response?.data?.code === MFA_ENROLLMENT_REQUIRED_CODE
 }
+
+// MFA-GATE-SPLIT-1 (definitive, CMBE 08-09): the hard wall is mfa_enrollment_blocked
+// (the server's blocksUser(), absent until BE bouwgolf 2 = never a wall); the soft
+// nudge is mfa_setup_required (the policy wants this role enrolled). Enrolled = neither.
+export function mfaSignals(user: { mfa_enabled?: boolean; mfa_setup_required?: boolean; mfa_enrollment_blocked?: boolean } | null | undefined): { hard: boolean; soft: boolean } {
+  if (!user || user.mfa_enabled === true) return { hard: false, soft: false }
+  return { hard: user.mfa_enrollment_blocked === true, soft: user.mfa_setup_required === true }
+}

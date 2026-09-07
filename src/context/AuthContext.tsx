@@ -37,6 +37,8 @@ export interface AuthContextValue {
   user: AuthUser | null
   loading: boolean
   accessiblePages: string[]
+  // HARD MFA signal seen mid-session (403 mfa_enrollment_required); see App.tsx's gate.
+  mfaBlocked: boolean
   tenants: Tenant[]
   activeTenant: Tenant | null
   setActiveTenant: (tenant: Tenant) => Promise<void>
@@ -200,10 +202,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // api.js fires 'km:auth-expired' after a 401 (and has already cleared
   // localStorage). We clear React state here so ProtectedRoute routes to /login
   // within the SPA — no full-page reload, no lost router context.
+  // HARD MFA signal seen mid-session (403 mfa_enrollment_required); App.tsx's wall reads it.
+  const [mfaBlocked, setMfaBlocked] = useState(false)
   useEffect(() => {
     // A 401 elsewhere already cleared localStorage; clear the in-memory auth state too so ProtectedRoute routes to /login without a full reload.
     const onExpired = () => {
       setUser(null)
+      setMfaBlocked(false)
       setActiveTenantState(null)
       setTenants([])
       setAccessiblePages([])
@@ -213,11 +218,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   // MFA enforcement mid-session (MFA-ENF): api.ts fires this on the first 403 with
-  // code mfa_enrollment_required. Re-fetching /auth/me sets mfa_setup_required on
-  // the user, which flips App.tsx's ProtectedRoute into the enrollment gate.
+  // code mfa_enrollment_required, the server's HARD signal. Remember it here (the
+  // gate reads it next to user.mfa_enrollment_blocked) and re-fetch the profile.
   useEffect(() => {
-    // Mid-session MFA enforcement kicked in; re-fetch the profile so mfa_setup_required flips ProtectedRoute into the enrollment gate.
     const onMfaRequired = () => {
+      setMfaBlocked(true)
       api.get('/auth/me').then(res => applyAuthResponse(res.data)).catch(() => {})
     }
     window.addEventListener('km:mfa-enrollment-required', onMfaRequired)
@@ -437,13 +442,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // use changes (audit item 5). Every value above is itself a narrow-dep useCallback,
   // so this object's reference only changes on a genuine auth event.
   const value = useMemo<AuthContextValue>(() => ({
-    user, loading, accessiblePages,
+    user, loading, accessiblePages, mfaBlocked,
     tenants, activeTenant, setActiveTenant,
     login, logout, refreshUser,
     verifyMfa, setupMfa, confirmMfa, disableMfa,
     hasRole, hasPermission, isAdmin, isSuperAdmin, hasModule, dashboardType,
   }), [
-    user, loading, accessiblePages,
+    user, loading, accessiblePages, mfaBlocked,
     tenants, activeTenant, setActiveTenant,
     login, logout, refreshUser,
     verifyMfa, setupMfa, confirmMfa, disableMfa,

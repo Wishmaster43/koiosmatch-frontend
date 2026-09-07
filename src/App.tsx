@@ -21,6 +21,7 @@ import LoginPage                                  from './pages/auth/LoginPage'
 import DashboardLayout                            from './components/layout/DashboardLayout'
 import TenantThemed from './components/layout/TenantThemed'
 import './index.css'
+import { mfaSignals } from '@/lib/mfaGate'
 
 // Lazy: only users blocked by tenant-wide MFA enforcement ever load this screen.
 const MfaEnrollmentGate = lazy(() => import('./pages/auth/MfaEnrollmentGate'))
@@ -57,11 +58,10 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   // failure like /auth/me 500'ing) — show the loader instead of crashing the tree.
   const auth = useAuth()
   if (!auth || auth.loading) return <BootLoader />
-  // B-23: MFA enforcement — /auth/me flags the user with mfa_setup_required when
-  // the tenant enforces MFA and this user hasn't enrolled yet. Block the whole app
-  // behind the enrollment gate until MFA is set up (server 403s every other call anyway).
-  // Rely on user.mfa_setup_required, not on settings keys (which are now access-gated).
-  if (auth.user?.mfa_setup_required && auth.user.mfa_enabled !== true) {
+  // MFA: the enrollment WALL only on the hard signals (a 403 mfa_enrollment_required seen
+  // mid-session, or user.mfa_enrollment_blocked from /auth/me); mfa_setup_required is the
+  // soft policy flag, a profile nudge, never a wall (MFA-GATE-SPLIT-1, CMBE 08-09).
+  if (auth.mfaBlocked === true || mfaSignals(auth.user).hard) {
     return <Suspense fallback={<BootLoader />}><MfaEnrollmentGate /></Suspense>
   }
   return auth.user ? <>{children}</> : <Navigate to="/login" replace />

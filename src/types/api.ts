@@ -54,8 +54,11 @@ export interface User {
   roles?: Array<string | { name: string; permissions?: Named[]; dashboard_type?: string }>
   permissions?: Named[]
   mfa_enabled?: boolean
-  // True when the tenant enforces MFA (mfa.enforced) and this user must enroll first.
+  // MFA-GATE-SPLIT-1 (CMBE 08-09, definitive): mfa_setup_required is the SOFT policy
+  // flag (profile nudge, never a wall); mfa_enrollment_blocked mirrors the server's
+  // blocksUser() exactly and is the HARD wall (absent until BE bouwgolf 2 lands).
   mfa_setup_required?: boolean
+  mfa_enrollment_blocked?: boolean
   tenant?: Tenant
   accessible_pages?: string[]
   // C-33: free-form per-user UI state (layout/filters/sort/theme), self-owned via

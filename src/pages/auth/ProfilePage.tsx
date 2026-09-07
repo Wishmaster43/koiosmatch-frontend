@@ -12,6 +12,8 @@ import { useAuth }            from '@/context/AuthContext'
 import Avatar                 from '@/components/ui/Avatar'
 import Spinner                from '@/components/ui/Spinner'
 import Button                 from '@/components/ui/Button'
+import CalloutBox             from '@/components/ui/CalloutBox'
+import { mfaSignals }         from '@/lib/mfaGate'
 import ProfileEmailConnect    from './ProfileEmailConnect'
 import ProfileWhatsAppWeb      from './ProfileWhatsAppWeb'
 import SecuritySettings        from '../settings/sections/SecuritySettings'
@@ -98,6 +100,18 @@ export default function ProfilePage() {
           )}
         </div>
       </div>
+
+      {/* Soft MFA nudge: the policy wants this role enrolled; the wall is App.tsx's business. */}
+      {mfaSignals(auth?.user).soft && tab !== 'security' && (
+        <div style={{ marginBottom: 16 }}>
+          <CalloutBox variant="info" title={t('profile.mfaNudge.title')}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+              <span>{t('profile.mfaNudge.body')}</span>
+              <Button variant="secondary" size="sm" onClick={() => setTab('security')}>{t('profile.mfaNudge.action')}</Button>
+            </div>
+          </CalloutBox>
+        </div>
+      )}
 
       <ProfileTabs tabs={tabs} active={tab} onSelect={setTab} />
 
