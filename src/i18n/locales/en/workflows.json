@@ -352,7 +352,7 @@
       "knowledgeItemsCount": "{{count}} knowledge item(s) linked",
       "knowledgeItemsMax": "{{max}} knowledge items is the maximum.",
       "knowledge": "Knowledge base",
-      "useKnowledge": "Use general knowledge base",
+      "useKnowledge": "Knowledge base available to this agent",
       "maxHistory": "Max. conversation history",
       "confirmDelete": "Delete agent \"{{name}}\"?",
       "inUse": "This agent is in use and cannot be deleted.",
@@ -898,7 +898,6 @@
     "Zoekopdracht": "Search query",
     "Laatste contact ouder dan (maanden)": "Last contact older than (months)",
     "Interviewflow": "Interview flow",
-    "Externe kennisbank gebruiken": "Use external knowledge base",
     "FAQ's gebruiken": "Use FAQs",
     "AI-instructies": "AI instructions",
     "Afwijzingsmodus": "Rejection mode",
@@ -924,7 +923,8 @@
     "Modus": "Mode",
     "Altijd vernieuwen": "Always refresh",
     "Verversingstermijn (uren)": "Refresh window (hours)",
-    "Maximum records per run": "Maximum records per run"
+    "Maximum records per run": "Maximum records per run",
+    "Kennisbank in deze stap gebruiken": "Use the knowledge base in this step"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (multiple bundles)",

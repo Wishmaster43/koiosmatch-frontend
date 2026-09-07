@@ -409,7 +409,7 @@
       "knowledgeItemsCount": "{{count}} elemento/i di conoscenza collegato/i",
       "knowledgeItemsMax": "{{max}} elementi di conoscenza è il massimo.",
       "knowledge": "Base di conoscenza",
-      "useKnowledge": "Usa la base di conoscenza generale",
+      "useKnowledge": "Base di conoscenza disponibile per questo agente",
       "maxHistory": "Max. cronologia conversazione",
       "confirmDelete": "Eliminare l'agente \"{{name}}\"?",
       "inUse": "Questo agente è in uso e non può essere eliminato.",
@@ -930,7 +930,6 @@
     "Zoekopdracht": "Query di ricerca",
     "Laatste contact ouder dan (maanden)": "Ultimo contatto più vecchio di (mesi)",
     "Interviewflow": "Flusso di colloquio",
-    "Externe kennisbank gebruiken": "Usa base di conoscenza esterna",
     "FAQ's gebruiken": "Usa le FAQ",
     "AI-instructies": "Istruzioni AI",
     "Afwijzingsmodus": "Modalità di rifiuto",
@@ -959,7 +958,8 @@
     "Punten per factor": "Punti per fattore",
     "Klantcorrecties (klant-id naar punten)": "Correzioni cliente (id cliente a punti)",
     "Venster vanaf (dagen)": "Finestra da (giorni)",
-    "Venster tot (dagen)": "Finestra fino a (giorni)"
+    "Venster tot (dagen)": "Finestra fino a (giorni)",
+    "Kennisbank in deze stap gebruiken": "Usa la base di conoscenza in questo passaggio"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (più bundle)",
