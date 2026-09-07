@@ -3,7 +3,6 @@
 // reuse the house avatar/chip/pill conventions so a match row reads exactly
 // like every other entity table.
 import type { RefObject } from 'react'
-import { cellButton } from '@/components/ui/cellButton'
 import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
 import DataTable from '@/components/ui/DataTable'

@@ -65,7 +65,7 @@ describe('KoiosMessage — search results grouping', () => {
     }
     render(<KoiosMessage msg={msg} t={mockT} />)
     // Both candidate and vacancy group labels should render with counts
-    expect(screen.getByText('Candidates (2)')).toBeInTheDocument()
-    expect(screen.getByText('Vacancies (1)')).toBeInTheDocument()
+    expect(screen.getByText('Kandidaten (2)')).toBeInTheDocument()
+    expect(screen.getByText('Vacatures (1)')).toBeInTheDocument()
   })
 })
