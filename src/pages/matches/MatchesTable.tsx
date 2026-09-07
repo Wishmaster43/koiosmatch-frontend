@@ -111,15 +111,10 @@ export default function MatchesTable({
     // default cell (`field(row, col.key)`) prints a blank string for an empty
     // vacancy title, the only column left inconsistent with the house convention.
     { key: 'vacancy', header: t('cols.vacancy'), sortable: true, nowrap: false,
-      render: r => {
-        const text = r.vacancy || '—'
-        // LABEL-GUARD (K-292 O1): an id with no visible name (dash fallback) is not
-        // a valid link target — no invisible hitbox around the placeholder dash.
-        if (r.vacancyId == null || !r.vacancy) return text
-        // CEL-DOORKLIK-CANON: vacancy cell deep-links to the vacancy drilldown.
-        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own text content via the shared cellButton reset (§14 r7 necessity)
-        return <button type="button" onClick={e => { e.stopPropagation(); openEntity('vacancies', r.vacancyId as Id) }} aria-label={r.vacancy ? `${t('drawer.openVacancy')}: ${r.vacancy}` : t('drawer.openVacancy')} style={cellButton}>{text}</button>
-      } },
+      // Danny 07-09 (1A): like the candidate and client cells, the vacancy cell is plain
+      // text — the ROW click opens the match; the vacancy drilldown is one click further
+      // from the match drawer. No gateway button, no invisible hitbox around the dash.
+      render: r => r.vacancy || '—' },
     // Customer — soft avatar + name (AVATAR-CHIP-1: same chip as the candidate identity
     // column), muted text keeps it reading as a secondary reference.
     { key: 'client',  header: t('cols.client'),  sortable: true, nowrap: true,

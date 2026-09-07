@@ -240,16 +240,19 @@ describe('MatchesTable · cell deep-links (CEL-DOORKLIK-CANON)', () => {
     expect(onRowClick).toHaveBeenCalledTimes(1)
   })
 
-  it('opens the vacancy drilldown from the vacancy cell', async () => {
+  // Danny 07-09 (1A, after the candidate and client cells): the vacancy cell is plain
+  // text too — clicking it opens the MATCH row, never the vacancy drilldown.
+  it('clicking the vacancy name opens the match row, not the vacancy drilldown', async () => {
     const user = userEvent.setup()
     const onRowClick = vi.fn()
     const row = { ...baseRow, id: 71, vacancyId: 'vac-7' }
     render(<MatchesTable rows={[row]} onRowClick={onRowClick} />)
 
-    await user.click(screen.getByRole('button', { name: /Vacature openen/ }))
+    expect(screen.queryByRole('button', { name: /Vacature openen/ })).toBeNull()
+    await user.click(screen.getByText(row.vacancy))
 
-    expect(mockOpenEntity).toHaveBeenCalledWith('vacancies', 'vac-7')
-    expect(onRowClick).not.toHaveBeenCalled()
+    expect(mockOpenEntity).not.toHaveBeenCalled()
+    expect(onRowClick).toHaveBeenCalledTimes(1)
   })
 
   // Danny 07-09 ("en klant moet ook de match openen"): same for the client cell.
