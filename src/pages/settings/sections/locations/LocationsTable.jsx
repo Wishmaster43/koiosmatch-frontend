@@ -16,6 +16,7 @@ import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
 import LocationBadge from './LocationBadge'
 import CopyIconButton from '@/components/ui/CopyIconButton'
+import SoftChip from '@/components/ui/SoftChip'
 
 // NECESSITY: these are shared `<th>`/`<td>` cell styles (not standalone text), spread
 // across every column of this table. Migrating them to the Caption/BodyText atoms
@@ -73,6 +74,10 @@ export default function LocationsTable({ isLocked, rows, page, totalPages, onPag
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <LocationBadge name={loc.name} color={loc.color} icon={loc.icon} />
                     {loc.name}
+                    {/* B-43: is_default badge — shows default location in the table. */}
+                    {loc.is_default && (
+                      <span style={{ marginLeft: 6 }}><SoftChip label={t('locations.defaultBadge')} color="var(--color-primary)" /></span>
+                    )}
                   </div>
                 </td>
                 <td style={TD}>

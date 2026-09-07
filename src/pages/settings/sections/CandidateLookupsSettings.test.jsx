@@ -266,8 +266,8 @@ describe('CandidateLookupsSettings — status is_blacklist flag', () => {
     await user.click(screen.getByTitle(st('lookups.edit')))
     // The Toggle component exposes no accessible name (no ariaLabel passed here);
     // is_blacklist is the last of the four status modal toggles in render order.
-    const switches = screen.getAllByRole('switch')
-    await user.click(switches[switches.length - 1])
+    // Select the blacklist flag by its accessible name, never by position (B-38 added flags after it).
+    await user.click(screen.getByRole('switch', { name: st('lookups.isBlacklist') }))
     await user.click(screen.getByText(st('common.save')))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith(

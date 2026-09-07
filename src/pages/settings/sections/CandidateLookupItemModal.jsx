@@ -29,7 +29,7 @@ function FlagRow({ labelKey, hintKey, checked, onChange, disabled, isDanger }) {
   return (
     <div style={{ marginBottom: 14 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Toggle checked={checked} onChange={onChange} disabled={disabled} />
+        <Toggle checked={checked} onChange={onChange} disabled={disabled} ariaLabel={t(labelKey)} />
         <LabelComponent as="span" style={labelColor}>{t(labelKey)}</LabelComponent>
       </div>
       <Caption as="div" style={{ marginTop: 4 }}>{t(hintKey)}</Caption>
@@ -171,6 +171,18 @@ export default function CandidateLookupItemModal({
         {isStatusBlock && (
           <FlagRow labelKey="lookups.isBlacklist" hintKey="lookups.isBlacklistHint"
             checked={modal.is_blacklist} onChange={v => setModal(m => ({ ...m, is_blacklist: v }))} isDanger />
+        )}
+
+        {/* Leave status toggle — statuses only (B-38: candidate status flags round-trip). */}
+        {isStatusBlock && (
+          <FlagRow labelKey="lookups.isLeave" hintKey="lookups.isLeaveHint"
+            checked={modal.is_leave} onChange={v => setModal(m => ({ ...m, is_leave: v }))} />
+        )}
+
+        {/* Unavailable status toggle — statuses only (B-38: candidate status flags round-trip). */}
+        {isStatusBlock && (
+          <FlagRow labelKey="lookups.isUnavailable" hintKey="lookups.isUnavailableHint"
+            checked={modal.is_unavailable} onChange={v => setModal(m => ({ ...m, is_unavailable: v }))} />
         )}
 
         {/* Appointment toggle — funnel stages only; flags the intake stage. */}

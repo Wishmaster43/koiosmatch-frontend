@@ -386,4 +386,32 @@ describe('LocationsSettings', () => {
     await waitFor(() => expect(screen.getByText('Vestiging 1')).toBeInTheDocument())
     expect(screen.queryByText(st('locations.empty'))).not.toBeInTheDocument()
   })
+
+  it('B-43: PATCHes is_default:true through /locations/{id} when the default flag is toggled', async () => {
+    const rows = [location({ id: 'loc1', name: 'Rotterdam' }), location({ id: 'loc2', name: 'Amsterdam' })]
+    api.get.mockResolvedValue({ data: { data: rows } })
+    api.patch.mockResolvedValue({ data: { data: { ...rows[0], is_default: true } } })
+    const user = userEvent.setup()
+    render(<LocationsSettings />)
+    await waitFor(() => expect(screen.getByText('Rotterdam')).toBeInTheDocument())
+
+    // Click Edit on Rotterdam
+    const editButtons = screen.getAllByRole('button', { name: st('locations.edit') })
+    await user.click(editButtons[0])
+
+    // Toggle the is_default switch (the shared Toggle atom, role=switch).
+    const checkbox = await screen.findByRole('switch', { name: st('locations.isDefault') })
+    expect(checkbox).toHaveAttribute('aria-checked', 'false')
+    await user.click(checkbox)
+    expect(checkbox).toBeChecked()
+
+    // Click Save
+    await user.click(screen.getByRole('button', { name: st('common.save') }))
+
+    // Assert the PATCH body includes is_default:true
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith(
+      '/locations/loc1',
+      expect.objectContaining({ is_default: true })
+    ))
+  })
 })

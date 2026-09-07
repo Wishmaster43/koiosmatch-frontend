@@ -29,6 +29,8 @@ const EMPTY_FORM = {
   coc_number: '', vat_number: '', contact_name: '', phone: '', email: '',
   // VESTIGING-ICOON-1: branding — rides along in the same create/update payload.
   color: DEFAULT_LOCATION_COLOR, icon: DEFAULT_LOCATION_ICON,
+  // B-43: is_default flag — the backend keeps exactly one default location.
+  is_default: false,
 }
 // Field keys the API returns/accepts 1:1 (LocationResource ↔ Store/UpdateLocationRequest).
 const FORM_KEYS = Object.keys(EMPTY_FORM)

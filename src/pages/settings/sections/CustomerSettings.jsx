@@ -10,6 +10,7 @@ import StatusListEditor from './StatusListEditor'
 // Customer status lifecycle (single value per customer, drives the soft status chip).
 // `is_default` is the backend-enforced singleton marking the status a new customer
 // starts in (CUST-DEFAULT-1 / SUBSTATUS-DEFAULT-1 in backend models/migrations).
+// `is_inactive` (B-38) is a non-singleton flag — multiple statuses may be inactive.
 export function CustomerStatusesSettings() {
   const { t } = useTranslation('settings')
   return (
@@ -19,6 +20,7 @@ export function CustomerStatusesSettings() {
       endpoint="/settings/customer-lookups/statuses"
       addLabel={t('customerLookups.statuses.add')}
       withValueSlug
+      flagFields={[{ key: 'is_inactive', label: t('lookups.isInactive'), description: t('lookups.isInactiveHint') }]}
       defaultField={{ key: 'is_default' }}
     />
   )

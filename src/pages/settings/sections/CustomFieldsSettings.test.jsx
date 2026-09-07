@@ -181,3 +181,135 @@ describe('CustomFieldsSettings — drag-reorder (K11)', () => {
     expect(labels[0]).toContain('Plate')
   })
 })
+
+// B-36: options field validation — options REQUIRED for select, PROHIBITED for others.
+describe('CustomFieldsSettings — B-36 options field validation', () => {
+  it('POSTs a select field with options key in the body', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [] } })
+    mockedPost.mockResolvedValue({ data: { data: { id: 'new-id', key: 'pref', label_i18n: { en: 'Preference' }, type: 'select', options: ['A', 'B'], active: true, in_use: false, visible_in_ui: true, sort_order: 0 } } })
+    render(<CustomFieldsSettings entityType="vacancy" />)
+
+    // Wait for load to finish (empty list)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalled())
+
+    // Open add-field form
+    fireEvent.click(screen.getByText(st('customFieldsSettings.add')))
+
+    // Fill the form: label, type=select, options
+    fireEvent.change(screen.getByPlaceholderText(st('customFieldsSettings.labelPlaceholder')), { target: { value: 'Preference' } })
+    fireEvent.click(screen.getByRole('button', { name: st('customFieldsSettings.types.text') }))
+    fireEvent.click(screen.getByText(st('customFieldsSettings.types.select')))
+
+    // Options field now appears — fill it
+    await waitFor(() => expect(screen.getByPlaceholderText(st('customFieldsSettings.optionsPlaceholder'))).toBeInTheDocument())
+    fireEvent.change(screen.getByPlaceholderText(st('customFieldsSettings.optionsPlaceholder')), { target: { value: 'A, B' } })
+
+    // Submit
+    fireEvent.click(screen.getByRole('button', { name: st('customFieldsSettings.add') }))
+
+    // Assert the POST body: options key PRESENT for select type.
+    await waitFor(() => expect(mockedPost).toHaveBeenCalledWith('/custom-fields', expect.objectContaining({
+      type: 'select',
+      options: ['A', 'B'],
+    })))
+  })
+
+  it('POSTs a text field WITHOUT options key in the body', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [] } })
+    mockedPost.mockResolvedValue({ data: { data: { id: 'new-id', key: 'name', label_i18n: { en: 'Name' }, type: 'text', active: true, in_use: false, visible_in_ui: true, sort_order: 0 } } })
+    render(<CustomFieldsSettings entityType="vacancy" />)
+
+    // Wait for load to finish (empty list)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalled())
+
+    // Open add-field form
+    fireEvent.click(screen.getByText(st('customFieldsSettings.add')))
+
+    // Fill the form: label, type=text (default)
+    fireEvent.change(screen.getByPlaceholderText(st('customFieldsSettings.labelPlaceholder')), { target: { value: 'Name' } })
+
+    // Submit
+    fireEvent.click(screen.getByRole('button', { name: st('customFieldsSettings.add') }))
+
+    // Assert the POST body: options key NOT PRESENT for non-select type.
+    await waitFor(() => expect(mockedPost).toHaveBeenCalledWith('/custom-fields', expect.not.objectContaining({
+      options: expect.anything(),
+    })))
+  })
+
+  it('shows an error and refuses to save a select field with zero options', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [] } })
+    render(<CustomFieldsSettings entityType="vacancy" />)
+
+    // Wait for load to finish (empty list)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalled())
+
+    // Open add-field form
+    fireEvent.click(screen.getByText(st('customFieldsSettings.add')))
+
+    // Fill the form: label, type=select, leave options empty
+    fireEvent.change(screen.getByPlaceholderText(st('customFieldsSettings.labelPlaceholder')), { target: { value: 'Preference' } })
+    fireEvent.click(screen.getByRole('button', { name: st('customFieldsSettings.types.text') }))
+    fireEvent.click(screen.getByText(st('customFieldsSettings.types.select')))
+
+    // Options field appears — leave it empty (default)
+    await waitFor(() => expect(screen.getByPlaceholderText(st('customFieldsSettings.optionsPlaceholder'))).toBeInTheDocument())
+
+    // Submit without options
+    fireEvent.click(screen.getByRole('button', { name: st('customFieldsSettings.add') }))
+
+    // Assert: the error message appears, POST not called.
+    await waitFor(() => expect(screen.getByText(st('customFieldsSettings.optionsRequired'))).toBeInTheDocument())
+    expect(mockedPost).not.toHaveBeenCalled()
+  })
+
+  it('PATCHes a select field with options key in the body', async () => {
+    const selectField = { id: '1', key: 'pref', label_i18n: { en: 'Preference' }, type: 'select', options: ['A'], active: true, in_use: false, visible_in_ui: true, sort_order: 0 }
+    mockedGet.mockResolvedValue({ data: { data: [selectField] } })
+    mockedPatch.mockResolvedValue({ data: { data: { ...selectField, options: ['A', 'B', 'C'] } } })
+    render(<CustomFieldsSettings entityType="vacancy" />)
+
+    await waitFor(() => expect(screen.getByText('Preference')).toBeInTheDocument())
+
+    // Expand the field
+    const row = screen.getByText('Preference').parentElement.parentElement
+    const buttons = within(row).getAllByRole('button')
+    fireEvent.click(buttons[buttons.length - 1]) // Expand
+
+    // Edit options
+    fireEvent.change(screen.getByDisplayValue('A'), { target: { value: 'A, B, C' } })
+
+    // Save
+    fireEvent.click(screen.getByRole('button', { name: st('common.save') }))
+
+    // Assert the PATCH body: options key PRESENT for select type.
+    await waitFor(() => expect(mockedPatch).toHaveBeenCalledWith('/custom-fields/1', expect.objectContaining({
+      options: ['A', 'B', 'C'],
+    })))
+  })
+
+  it('PATCHes a text field WITHOUT options key in the body', async () => {
+    const textField = { id: '1', key: 'name', label_i18n: { en: 'Name' }, type: 'text', active: true, in_use: false, visible_in_ui: true, sort_order: 0 }
+    mockedGet.mockResolvedValue({ data: { data: [textField] } })
+    mockedPatch.mockResolvedValue({ data: { data: textField } })
+    render(<CustomFieldsSettings entityType="vacancy" />)
+
+    await waitFor(() => expect(screen.getByText('Name')).toBeInTheDocument())
+
+    // Expand the field
+    const row = screen.getByText('Name').parentElement.parentElement
+    const buttons = within(row).getAllByRole('button')
+    fireEvent.click(buttons[buttons.length - 1]) // Expand
+
+    // Edit label
+    fireEvent.change(screen.getByDisplayValue('Name'), { target: { value: 'Full Name' } })
+
+    // Save
+    fireEvent.click(screen.getByRole('button', { name: st('common.save') }))
+
+    // Assert the PATCH body: options key NOT PRESENT for non-select type.
+    await waitFor(() => expect(mockedPatch).toHaveBeenCalledWith('/custom-fields/1', expect.not.objectContaining({
+      options: expect.anything(),
+    })))
+  })
+})

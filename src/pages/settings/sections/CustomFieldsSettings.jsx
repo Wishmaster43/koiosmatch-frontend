@@ -61,7 +61,7 @@ export default function CustomFieldsSettings({ entityType }) {
   const [expanded, setExpanded] = useState(null)
   const [adding,   setAdding]   = useState(false)
   const [saving,   setSaving]   = useState(null)
-  const [newForm,  setNewForm]  = useState({ label: '', key: '', type: 'text', options: '' })
+  const [newForm,  setNewForm]  = useState({ label: '', key: '', type: 'text', options: '', optionError: false })
   const [editForms, setEditForms] = useState({})
 
   // Load definitions whenever the entity or language changes (unified /custom-fields).
@@ -120,6 +120,14 @@ export default function CustomFieldsSettings({ entityType }) {
   const handleCreate = async () => {
     const label = newForm.label.trim()
     if (!label) return
+    // Client-side validation: select type requires at least one option.
+    if (newForm.type === 'select') {
+      const opts = newForm.options.split(',').map(s => s.trim()).filter(Boolean)
+      if (opts.length === 0) {
+        setNewForm(p => ({ ...p, optionError: true }))
+        return
+      }
+    }
     setSaving('new')
     try {
       const payload = {
@@ -127,7 +135,10 @@ export default function CustomFieldsSettings({ entityType }) {
         key:   newForm.key.trim() || toSlug(label),
         label_i18n: { en: label, [i18n.language]: label },
         type:  newForm.type,
-        options: newForm.type === 'select' ? newForm.options.split(',').map(s => s.trim()).filter(Boolean) : [],
+      }
+      // Include options ONLY for select type.
+      if (newForm.type === 'select') {
+        payload.options = newForm.options.split(',').map(s => s.trim()).filter(Boolean)
       }
       const res = await api.post('/custom-fields', payload)
       const d = unwrap(res)
@@ -141,17 +152,27 @@ export default function CustomFieldsSettings({ entityType }) {
   // Save edits to an existing field.
   const handleSave = async (field) => {
     const form = editForms[field.id] ?? {}
+    const effectiveType = form.type ?? field.type
+    // Client-side validation: select type requires at least one option.
+    if (effectiveType === 'select') {
+      const opts = (form.options ?? (field.options ?? []).join(', ')).split(',').map(s => s.trim()).filter(Boolean)
+      if (opts.length === 0) {
+        setEditForms(p => ({ ...p, [field.id]: { ...(p[field.id] ?? {}), optionError: true } }))
+        return
+      }
+    }
     setSaving(field.id)
     try {
       const newLabel = form.label ?? field.label
       const payload = {
         label_i18n: { ...(field.label_i18n ?? {}), [i18n.language]: newLabel },
         active:  form.active ?? field.active,
-        options: (form.type ?? field.type) === 'select'
-          ? (form.options ?? (field.options ?? []).join(', ')).split(',').map(s => s.trim()).filter(Boolean)
-          : field.options,
       }
-      if (!field.has_data) payload.type = form.type ?? field.type
+      // Include options ONLY for select type.
+      if (effectiveType === 'select') {
+        payload.options = (form.options ?? (field.options ?? []).join(', ')).split(',').map(s => s.trim()).filter(Boolean)
+      }
+      if (!field.has_data) payload.type = effectiveType
       const res = await api.patch(`/custom-fields/${field.id}`, payload)
       const d = unwrap(res)
       setFields(p => p.map(f => f.id === field.id ? toField(d, i18n.language) : f))
@@ -277,10 +298,13 @@ export default function CustomFieldsSettings({ entityType }) {
                   {/* Options — only for select type */}
                   {currentType === 'select' && (
                     <div>
-                      <label style={labelStyle}>{t('customFieldsSettings.options')}</label>
+                      <label style={labelStyle}>{t('customFieldsSettings.options')} *</label>
                       <input value={ef.options ?? (field.options ?? []).join(', ')} onChange={e => setEF(field.id, 'options', e.target.value)}
                         placeholder={t('customFieldsSettings.optionsPlaceholder')} style={inputStyle} />
-                      <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{t('customFieldsSettings.optionsHint')}</p>
+                      {ef.optionError && (
+                        <p style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('customFieldsSettings.optionsRequired')}</p>
+                      )}
+                      <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: ef.optionError ? 1 : 3 }}>{t('customFieldsSettings.optionsHint')}</p>
                     </div>
                   )}
 
@@ -336,10 +360,13 @@ export default function CustomFieldsSettings({ entityType }) {
             </div>
             {newForm.type === 'select' && (
               <div>
-                <label style={labelStyle}>{t('customFieldsSettings.options')}</label>
-                <input value={newForm.options} onChange={e => setNewForm(p => ({ ...p, options: e.target.value }))}
+                <label style={labelStyle}>{t('customFieldsSettings.options')} *</label>
+                <input value={newForm.options} onChange={e => setNewForm(p => ({ ...p, options: e.target.value, optionError: false }))}
                   placeholder={t('customFieldsSettings.optionsPlaceholder')} style={inputStyle} />
-                <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{t('customFieldsSettings.optionsHint')}</p>
+                {newForm.optionError && (
+                  <p style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('customFieldsSettings.optionsRequired')}</p>
+                )}
+                <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: newForm.optionError ? 1 : 3 }}>{t('customFieldsSettings.optionsHint')}</p>
               </div>
             )}
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>

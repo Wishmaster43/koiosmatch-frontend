@@ -19,7 +19,7 @@ import { Percent } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
-import { SectionTitle } from '@/components/ui/typography'
+import { SectionTitle, Caption } from '@/components/ui/typography'
 
 const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 28, background: 'var(--surface)' }
 const sub = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }
@@ -30,10 +30,11 @@ const inputStyle = { border: 'none', outline: 'none', background: 'transparent',
 export default function PlatformPricingCard() {
   const { t } = useTranslation('settings')
   const [markup, setMarkup] = useState('')
-  const [saved, setSaved] = useState({ markup: '' }) // last server-confirmed value, for revert-on-failure
+  const [fxUsdEur, setFxUsdEur] = useState('')
+  const [saved, setSaved] = useState({ markup: '', fxUsdEur: '' }) // last server-confirmed value, for revert-on-failure
   const [phase, setPhase] = useState('loading') // loading | ready | error
 
-  // Load the current platform pricing knob.
+  // Load the current platform pricing knobs.
   useEffect(() => {
     let alive = true
     api.get('/admin/platform-pricing')
@@ -41,28 +42,36 @@ export default function PlatformPricingCard() {
         if (!alive) return
         const d = unwrap(res) ?? {}
         const m = d.ai_markup_percent != null ? String(d.ai_markup_percent) : ''
-        setMarkup(m); setSaved({ markup: m })
+        const f = d.fx_usd_eur != null ? String(d.fx_usd_eur) : ''
+        setMarkup(m); setFxUsdEur(f); setSaved({ markup: m, fxUsdEur: f })
         setPhase('ready')
       })
       .catch(() => { if (alive) setPhase('error') })
     return () => { alive = false }
   }, [])
 
-  // Persist the markup knob. Optimistic: the field already shows the typed
-  // value; revert + toast on a validation/network failure.
-  const save = async (nextMarkup) => {
+  // Persist both pricing knobs together. Optimistic: the fields already show the typed
+  // values; revert + toast on a validation/network failure.
+  const save = async (nextMarkup, nextFxUsdEur) => {
     const mNum = Number(nextMarkup)
-    if (nextMarkup === saved.markup) return
+    const fNum = Number(nextFxUsdEur)
+    if (nextMarkup === saved.markup && nextFxUsdEur === saved.fxUsdEur) return
+    // Validate both fields
     if (!isFinite(mNum) || mNum < 0 || mNum > 500) {
       setMarkup(saved.markup)
       return
     }
+    if (!isFinite(fNum) || fNum < 0) {
+      setFxUsdEur(saved.fxUsdEur)
+      return
+    }
     try {
-      await api.put('/admin/platform-pricing', { ai_markup_percent: mNum })
-      setSaved({ markup: nextMarkup })
+      await api.put('/admin/platform-pricing', { ai_markup_percent: mNum, fx_usd_eur: fNum })
+      setSaved({ markup: nextMarkup, fxUsdEur: nextFxUsdEur })
       notifySuccess(t('platformPricing.saved'))
     } catch (err) {
       setMarkup(saved.markup)
+      setFxUsdEur(saved.fxUsdEur)
       notifyError(extractApiError(err, t('common:actionFailed')))
     }
   }
@@ -96,9 +105,18 @@ export default function PlatformPricingCard() {
           <div style={inputWrap}>
             <input id="platform-pricing-markup" type="number" min={0} max={500} step={0.01}
               value={markup} onChange={(e) => setMarkup(e.target.value)}
-              onBlur={(e) => save(e.target.value)} style={inputStyle} />
+              onBlur={(e) => save(e.target.value, fxUsdEur)} style={inputStyle} />
             <Percent size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} aria-hidden="true" />
           </div>
+        </div>
+        <div style={{ flex: '1 1 200px', minWidth: 180 }}>
+          <label style={label} htmlFor="platform-pricing-fx">{t('platformPricing.fxUsdEurLabel')}</label>
+          <div style={inputWrap}>
+            <input id="platform-pricing-fx" type="number" min={0} step={0.01}
+              value={fxUsdEur} onChange={(e) => setFxUsdEur(e.target.value)}
+              onBlur={(e) => save(markup, e.target.value)} style={inputStyle} />
+          </div>
+          <Caption as="p" style={{ marginTop: 4 }}>{t('platformPricing.fxUsdEurHint')}</Caption>
         </div>
       </div>
     </div>

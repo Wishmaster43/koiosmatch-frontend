@@ -64,14 +64,15 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
   const supportsIcon = isStatusBlock || isContractFormBlock
 
   // eslint-disable-next-line no-restricted-syntax -- DATA: default swatch colour pre-filled for a newly created lookup row, not UI chrome
-  const openAdd  = ()   => setModal({ mode: 'add',  value: '', label: '', color: '#3B8FD4', icon: null, requires_appointment: false, requires_reason: false, requires_match: false, expects_return_date: false, is_match: false, is_rejected: false, is_proposal: false, is_blacklist: false, is_applicant: false, customer_not_applicable: false })
+  const openAdd  = ()   => setModal({ mode: 'add',  value: '', label: '', color: '#3B8FD4', icon: null, requires_appointment: false, requires_reason: false, requires_match: false, expects_return_date: false, is_match: false, is_rejected: false, is_proposal: false, is_blacklist: false, is_applicant: false, customer_not_applicable: false, is_leave: false, is_unavailable: false })
   // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
   const openEdit = (it) => setModal({ mode: 'edit', id: it.id, value: it.value, label: it.label, color: it.color ?? '#6B7280', icon: it.icon ?? null,
     requires_appointment: it.requires_appointment === true, requires_reason: it.requires_reason === true,
     requires_match: it.requires_match === true, expects_return_date: it.expects_return_date === true,
     is_match: it.is_match === true, is_rejected: it.is_rejected === true,
     is_proposal: it.is_proposal === true, is_blacklist: it.is_blacklist === true,
-    is_applicant: it.is_applicant === true, customer_not_applicable: it.customer_not_applicable === true })
+    is_applicant: it.is_applicant === true, customer_not_applicable: it.customer_not_applicable === true,
+    is_leave: it.is_leave === true, is_unavailable: it.is_unavailable === true })
 
   // Persists the add/edit modal: creates or updates the lookup row, sending only the
   // per-type flag fields this lookup actually supports (the backend guards the rest).
@@ -81,7 +82,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
     // Only send the flag that exists on this lookup; the backend guards the rest.
     const flagFields = {
       ...(supportsIcon  ? { icon: modal.icon || null } : {}),
-      ...(isStatusBlock ? { requires_reason: modal.requires_reason, requires_match: modal.requires_match, expects_return_date: modal.expects_return_date, is_blacklist: modal.is_blacklist } : {}),
+      ...(isStatusBlock ? { requires_reason: modal.requires_reason, requires_match: modal.requires_match, expects_return_date: modal.expects_return_date, is_blacklist: modal.is_blacklist, is_leave: modal.is_leave, is_unavailable: modal.is_unavailable } : {}),
       ...(isFunnelBlock ? { requires_appointment: modal.requires_appointment, is_match: modal.is_match, is_rejected: modal.is_rejected, is_proposal: modal.is_proposal } : {}),
       ...(isPhaseBlock  ? { is_applicant: modal.is_applicant } : {}),
       // MATCH-KLANTLOOS-1: contract forms only — a match resolved to this form

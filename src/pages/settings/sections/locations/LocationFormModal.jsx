@@ -29,6 +29,8 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useCountriesLookup } from '@/lib/useCountriesLookup'
 import { useProvinces } from '@/hooks/useProvinces'
 import FieldNotice from '@/components/ui/FieldNotice'
+import Toggle from '@/components/ui/Toggle'
+import { BodyText, Caption } from '@/components/ui/typography'
 import { useIdentifierValidation } from '@/hooks/useIdentifierValidation'
 import IconPickerControl from '../IconPickerControl'
 import Button from '@/components/ui/Button'
@@ -101,8 +103,7 @@ export default function LocationFormModal({ editingId, form, setForm, saving, on
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Algemeen — just the name; this form carries no "standaard"/default
-              flag (unlike the customer-location modal), so nothing invented here.
+          {/* Algemeen — name, branding, and default flag (B-43).
               Titled-card chrome (Danny 27-07 point B: "kaders om elk blokje") via
               the shared cardHead/cardBox (CLAUDE.md §11: one source instead of a
               per-entity copy). */}
@@ -126,6 +127,16 @@ export default function LocationFormModal({ editingId, form, setForm, saving, on
                 </div>
               </div>
               <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>{t('locations.colorHint')}</p>
+              {/* B-43: is_default flag — the backend keeps exactly one default location. */}
+              <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <Toggle checked={!!form.is_default} onChange={v => setForm(x => ({ ...x, is_default: v }))} ariaLabel={t('locations.isDefault')} />
+                  <div>
+                    <BodyText>{t('locations.isDefault')}</BodyText>
+                    <Caption>{t('locations.isDefaultHint')}</Caption>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
