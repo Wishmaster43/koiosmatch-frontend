@@ -34,10 +34,22 @@ const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
 // Resolve the shared ConfirmDialog's own labels (common namespace).
 const ct = (key, opts) => i18n.t(key, { ns: 'common', ...opts })
 
+// Profile fixture — FLAT keys as returned by the backend API (not nested).
+// Use this for mocking GET responses and API calls.
 const profile = (over = {}) => ({
-  id: 'p1', name: 'Zorg — ochtenddiensten', is_default: false, priority: 10,
-  matcher: { location_ids: [], contract_types: [], function_titles: [], industries: [] },
-  content: { template: '', tone_of_voice: 'neutral', length: 'medium', language: '', allow_emoji: false, brand_instructions: '', forbidden_words: [], content_block_ids: [] },
+  id: 'p1', name: 'Zorg — ochtenddiensten', is_default: false, priority: 15,
+  location_ids: ['loc1'],
+  contract_types: ['ZZP Flex'],
+  function_titles: ['Verzorgende IG'],
+  industries: ['Zorg'],
+  template: 'A vacancy for {{title}}',
+  tone_of_voice: 'professional',
+  length: 'long',
+  language: 'Nederlands',
+  allow_emoji: true,
+  brand_instructions: 'Always be friendly',
+  forbidden_words: ['bad', 'words'],
+  content_block_ids: ['block1', 'block2'],
   in_use: false,
   ...over,
 })
@@ -78,10 +90,10 @@ describe('VacancyGenerationProfilesList', () => {
     mockGet(Promise.resolve({ data: { data: [profile()] } }))
     render(<VacancyGenerationProfilesList />)
     await waitFor(() => expect(screen.getByText('Zorg — ochtenddiensten')).toBeInTheDocument())
-    expect(screen.getByText(`${st('vacancyGenerationSettings.priorityLabel')}: 10`)).toBeInTheDocument()
+    expect(screen.getByText(`${st('vacancyGenerationSettings.priorityLabel')}: 15`)).toBeInTheDocument()
   })
 
-  it('creating a profile POSTs the full matcher/content body shape to the profiles route', async () => {
+  it('creating a profile POSTs a flat body with all 12 matcher/content keys', async () => {
     mockGet(Promise.resolve({ data: { data: [] } }))
     api.post.mockResolvedValue({ data: { data: profile({ id: 'new1', name: 'New profile' }) } })
     const user = userEvent.setup()
@@ -92,16 +104,27 @@ describe('VacancyGenerationProfilesList', () => {
     await user.type(screen.getByPlaceholderText(st('vacancyGenerationSettings.namePlaceholder')), 'New profile')
     await user.click(await screen.findByRole('button', { name: st('vacancyGenerationSettings.add') }))
 
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/vacancy-generation-profiles', expect.objectContaining({
+    // Verify the POST body is FLAT: top-level name/is_default/priority + all 12 matcher/content keys flat
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/vacancy-generation-profiles', {
       name: 'New profile',
       is_default: false,
       priority: 10,
-      matcher: { location_ids: [], contract_types: [], function_titles: [], industries: [] },
-      content: expect.objectContaining({ tone_of_voice: 'neutral', length: 'medium', allow_emoji: false, forbidden_words: [] }),
-    })))
+      location_ids: [],
+      contract_types: [],
+      function_titles: [],
+      industries: [],
+      template: '',
+      tone_of_voice: 'neutral',
+      length: 'medium',
+      language: '',
+      allow_emoji: false,
+      brand_instructions: '',
+      forbidden_words: [],
+      content_block_ids: [],
+    }))
   })
 
-  it('saving an edited profile PUTs to the profile-specific route with the edited name', async () => {
+  it('saving an edited profile PUTs a flat body with all 12 keys to the profile-specific route', async () => {
     mockGet(Promise.resolve({ data: { data: [profile()] } }))
     api.put.mockResolvedValue({ data: { data: profile({ name: 'Renamed' }) } })
     const user = userEvent.setup()
@@ -114,7 +137,24 @@ describe('VacancyGenerationProfilesList', () => {
     await user.type(nameInput, 'Renamed')
     await user.click(await screen.findByRole('button', { name: st('common.save') }))
 
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/vacancy-generation-profiles/p1', expect.objectContaining({ name: 'Renamed' })))
+    // Verify the PUT body is FLAT with all 12 keys (the edited name is the only change)
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/vacancy-generation-profiles/p1', {
+      name: 'Renamed',
+      is_default: false,
+      priority: 15,
+      location_ids: ['loc1'],
+      contract_types: ['ZZP Flex'],
+      function_titles: ['Verzorgende IG'],
+      industries: ['Zorg'],
+      template: 'A vacancy for {{title}}',
+      tone_of_voice: 'professional',
+      length: 'long',
+      language: 'Nederlands',
+      allow_emoji: true,
+      brand_instructions: 'Always be friendly',
+      forbidden_words: ['bad', 'words'],
+      content_block_ids: ['block1', 'block2'],
+    }))
   })
 
   it('a 409 on delete keeps the row and blocks re-deletion instead of removing it', async () => {
@@ -125,7 +165,9 @@ describe('VacancyGenerationProfilesList', () => {
 
     await waitFor(() => expect(screen.getByText('Zorg — ochtenddiensten')).toBeInTheDocument())
     await user.click(screen.getByRole('button', { name: `${st('common.edit')}: Zorg — ochtenddiensten` }))
-    await user.click(await screen.findByRole('button', { name: st('vacancyGenerationSettings.delete') }))
+    // Find the delete button in the footer (getAllByRole to avoid match with forbidden-word delete buttons)
+    const deleteButtons = await screen.findAllByRole('button', { name: st('vacancyGenerationSettings.delete') })
+    await user.click(deleteButtons[deleteButtons.length - 1])
     await user.click(await screen.findByRole('button', { name: ct('confirm') }))
 
     await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/vacancy-generation-profiles/p1'))

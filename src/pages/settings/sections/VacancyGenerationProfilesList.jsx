@@ -22,6 +22,7 @@ import { DefaultToggle } from '../components/SettingsControls'
 import VacancyGenerationProfileEditor from './VacancyGenerationProfileEditor'
 import Button from '@/components/ui/Button'
 import { Caption } from '@/components/ui/typography'
+import { toApiProfile, fromApiProfile } from './vacancyGeneration/profileShape'
 
 const ENDPOINT = '/vacancy-generation-profiles'
 const BLOCKS_ENDPOINT = '/vacancy-content-blocks'
@@ -72,23 +73,20 @@ export default function VacancyGenerationProfilesList() {
   // Shallow-merge a patch from the editor into one profile's draft (top-level keys;
   // the editor itself already rebuilds the full nested matcher/content object).
   const patch = (id, p) => setEditForms(prev => ({ ...prev, [id]: { ...(prev[id] ?? emptyDraft()), ...p } }))
-  // Seeds this profile's edit draft from its current values (backfilling any matcher/content key the stored record predates) and expands its card.
+  // Seeds this profile's edit draft from its flat API values, converting to nested structure.
+  // Backfills missing matcher/content keys from emptyDraft for profiles predating new fields.
   const openEdit = (profile) => {
-    setEditForms(prev => ({ ...prev, [profile.id]: {
-      name: profile.name, is_default: !!profile.is_default, priority: profile.priority ?? 10,
-      matcher: { location_ids: [], contract_types: [], function_titles: [], industries: [], ...(profile.matcher ?? {}) },
-      content: { ...emptyDraft().content, ...(profile.content ?? {}) },
-    } }))
+    setEditForms(prev => ({ ...prev, [profile.id]: fromApiProfile(profile) }))
     setExpanded(profile.id)
   }
 
-  // Create a new profile.
+  // Create a new profile, flattening the nested draft to the API's flat validation shape.
   const handleCreate = async () => {
     const name = newForm.name.trim()
     if (!name) return
     setSaving('new')
     try {
-      const res = await api.post(ENDPOINT, { name, is_default: newForm.is_default, priority: newForm.priority, matcher: newForm.matcher, content: newForm.content })
+      const res = await api.post(ENDPOINT, toApiProfile(newForm))
       setProfiles(p => [...p, unwrap(res)])
       setNewForm(emptyDraft())
       setAdding(false)
@@ -97,14 +95,13 @@ export default function VacancyGenerationProfilesList() {
     } finally { setSaving(null) }
   }
 
-  // Save an edit to an existing profile.
+  // Save an edit to an existing profile, flattening the nested draft to the API's flat shape.
   const handleSave = async (profile) => {
     const form = editForms[profile.id]
     if (!form?.name?.trim()) return
     setSaving(profile.id)
     try {
-      const payload = { name: form.name.trim(), is_default: form.is_default, priority: form.priority, matcher: form.matcher, content: form.content }
-      const res = await api.put(`${ENDPOINT}/${profile.id}`, payload)
+      const res = await api.put(`${ENDPOINT}/${profile.id}`, toApiProfile(form))
       const updated = unwrap(res)
       setProfiles(p => p.map(x => x.id === profile.id ? updated : x))
       setExpanded(null)
@@ -148,7 +145,8 @@ export default function VacancyGenerationProfilesList() {
     setSettingDefaultId(profile.id)
     setProfiles(p => p.map(x => (x.id === profile.id ? { ...x, is_default: next } : (next ? { ...x, is_default: false } : x))))
     try {
-      await api.put(`${ENDPOINT}/${profile.id}`, { ...profile, is_default: next })
+      // Send only is_default (which the backend validates as sometimes|boolean).
+      await api.put(`${ENDPOINT}/${profile.id}`, { is_default: next })
     } catch {
       setProfiles(previous)
       notifyError(t('vacancyGenerationSettings.saveFailed'))
