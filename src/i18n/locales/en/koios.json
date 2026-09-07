@@ -181,5 +181,18 @@
     "showMore": "Show more",
     "showLess": "Show less",
     "skipped": "Skipped: {{reason}}"
+  },
+  "effortDefault": {
+    "title": "Default effort",
+    "hint": "A higher effort makes every Koios AI-token weigh more. The package ceiling always applies.",
+    "noPermission": "You do not have permission to change this setting.",
+    "saveError": "Saving failed."
+  },
+  "effort": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "xhigh": "Extra high",
+    "max": "Maximum"
   }
 }

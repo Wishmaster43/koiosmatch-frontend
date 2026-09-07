@@ -181,5 +181,18 @@
     "showMore": "Toon meer",
     "showLess": "Toon minder",
     "skipped": "Overgeslagen: {{reason}}"
+  },
+  "effortDefault": {
+    "title": "Standaard inspanning",
+    "hint": "Een hogere inspanning laat elke Koios AI-token zwaarder wegen. Het pakketplafond geldt altijd.",
+    "noPermission": "Je hebt geen rechten om deze instelling te wijzigen.",
+    "saveError": "Opslaan mislukt."
+  },
+  "effort": {
+    "low": "Laag",
+    "medium": "Gemiddeld",
+    "high": "Hoog",
+    "xhigh": "Extra hoog",
+    "max": "Maximaal"
   }
 }

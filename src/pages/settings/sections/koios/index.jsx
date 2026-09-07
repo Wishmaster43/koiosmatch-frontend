@@ -15,6 +15,7 @@ import { getKoiosSettings } from './koiosApi'
 import KoiosStatusCard from './KoiosStatusCard'
 import KoiosModelsCard from './KoiosModelsCard'
 import KoiosModeDefaultCard from './KoiosModeDefaultCard'
+import KoiosEffortDefaultCard from './KoiosEffortDefaultCard'
 import KoiosLearningCard from './KoiosLearningCard'
 import KoiosCapabilitiesCard from './KoiosCapabilitiesCard'
 import KoiosFeedbackCard from './KoiosFeedbackCard'
@@ -71,6 +72,7 @@ export default function KoiosSettings() {
               <KoiosModelsCard models={settings?.models} t={t}
                 onChanged={(model) => { setSettings((s) => ({ ...s, models: { ...s.models, active: model } })); invalidateKoiosSettings() }} />
               <KoiosModeDefaultCard />
+              <KoiosEffortDefaultCard />
             </>
           )}
           {tab === 'learning' && <KoiosLearningCard />}

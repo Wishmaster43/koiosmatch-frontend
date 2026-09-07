@@ -181,5 +181,18 @@
     "showMore": "Mehr anzeigen",
     "showLess": "Weniger anzeigen",
     "skipped": "Übersprungen: {{reason}}"
+  },
+  "effortDefault": {
+    "title": "Standard-Anstrengung",
+    "hint": "Ein höherer Aufwand lässt jeden Koios AI-Token schwerer wiegen. Die Paketobergrenze gilt immer.",
+    "noPermission": "Du hast keine Berechtigung, diese Einstellung zu ändern.",
+    "saveError": "Speichern fehlgeschlagen."
+  },
+  "effort": {
+    "low": "Niedrig",
+    "medium": "Mittel",
+    "high": "Hoch",
+    "xhigh": "Sehr hoch",
+    "max": "Maximum"
   }
 }

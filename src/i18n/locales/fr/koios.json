@@ -181,5 +181,18 @@
     "showMore": "Afficher plus",
     "showLess": "Afficher moins",
     "skipped": "Ignoré : {{reason}}"
+  },
+  "effortDefault": {
+    "title": "Effort par défaut",
+    "hint": "Un effort plus élevé fait peser davantage chaque jeton Koios AI. Le plafond du forfait s'applique toujours.",
+    "noPermission": "Vous n'avez pas l'autorisation de modifier ce réglage.",
+    "saveError": "Échec de l'enregistrement."
+  },
+  "effort": {
+    "low": "Faible",
+    "medium": "Moyen",
+    "high": "Élevé",
+    "xhigh": "Très élevé",
+    "max": "Maximum"
   }
 }

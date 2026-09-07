@@ -181,5 +181,18 @@
     "showMore": "Mostrar más",
     "showLess": "Mostrar menos",
     "skipped": "Omitido: {{reason}}"
+  },
+  "effortDefault": {
+    "title": "Esfuerzo predeterminado",
+    "hint": "Un esfuerzo mayor hace que cada token de Koios AI pese más. El límite del paquete siempre se aplica.",
+    "noPermission": "No tienes permiso para cambiar este ajuste.",
+    "saveError": "Error al guardar."
+  },
+  "effort": {
+    "low": "Bajo",
+    "medium": "Medio",
+    "high": "Alto",
+    "xhigh": "Muy alto",
+    "max": "Máximo"
   }
 }
