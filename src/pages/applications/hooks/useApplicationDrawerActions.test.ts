@@ -35,7 +35,7 @@ const FUNNEL: LookupItem[] = [
 const app = (overrides: Partial<Application> = {}): Application => ({
   id: 1, candidateId: 9, candidateName: 'Test kandidaat', candidateInitials: 'TK',
   vacancyId: 1, vacancyTitle: 'Verpleegkundige', client: 'Acme', customerId: 1, referenceNumber: 'S-1',
-  score: null, task: '', phaseKey: 'applied', bucket: 'active', source: '',
+  score: null, task: '', phaseKey: 'applied', bucket: 'active', source: '', sourceKey: null,
   owner: { id: null, name: '', initials: '', color: null },
   candidateStatusLabel: '', candidateStatusColor: '', candidateStatus: '', candidatePhase: '',
   created: '2026-07-01', isNew: false, archived: false, deletedAt: null,
@@ -337,5 +337,41 @@ describe('useApplicationDrawerActions · selectApplication (INTERVIEW-CONSENT-PE
     act(() => { result.current.actions.selectApplication(app({ id: 1 })) })
     await waitFor(() => expect(apiGet).toHaveBeenCalled())
     await waitFor(() => expect(result.current.actions.selected?.interviewConsentGivenAt).toBeNull())
+  })
+})
+
+// S7: Bron (source) editable picker — the seam for KEY-ADOPTION source_key.
+describe('useApplicationDrawerActions · handleUpdateSource', () => {
+  beforeEach(() => { vi.clearAllMocks() })
+
+  it('sends source and source_key as the request body (KEY-ADOPTION)', async () => {
+    apiPatch.mockResolvedValue({ data: {} })
+    const { result } = harness([app({ source: 'Manual' })])
+    act(() => { result.current.actions.handleUpdateSource(1, 'LinkedIn', 'linkedin') })
+    await waitFor(() => expect(apiPatch).toHaveBeenCalled())
+    expect(apiPatch).toHaveBeenCalledWith('/applications/1', { source: 'LinkedIn', source_key: 'linkedin' })
+  })
+
+  it('keeps the new source when the server accepts', async () => {
+    apiPatch.mockResolvedValue({ data: {} })
+    const { result } = harness([app({ source: 'Manual' })])
+    act(() => { result.current.actions.handleUpdateSource(1, 'LinkedIn', 'linkedin') })
+    await waitFor(() => expect(result.current.applications[0].source).toBe('LinkedIn'))
+    expect(result.current.applications[0].sourceKey).toBe('linkedin')
+    expect(notifyError).not.toHaveBeenCalled()
+  })
+
+  it('reverts the source in both the row and the open drawer when the PATCH FAILS', async () => {
+    apiPatch.mockRejectedValue({ response: { status: 422, data: { message: 'Bron ongeldig' } } })
+    const initial = app({ source: 'Manual', sourceKey: null })
+    const { result } = harness([initial])
+    // Preload the open drawer with the SAME pre-edit source, to prove BOTH slices revert.
+    act(() => { result.current.actions.setSelected(detail({ id: 1, source: initial.source, sourceKey: initial.sourceKey })) })
+    act(() => { result.current.actions.handleUpdateSource(1, 'LinkedIn', 'linkedin') })
+    await waitFor(() => expect(notifyError).toHaveBeenCalled())
+    expect(result.current.applications[0].source).toBe('Manual')
+    expect(result.current.applications[0].sourceKey).toBeNull()
+    expect(result.current.actions.selected?.source).toBe('Manual')
+    expect(result.current.actions.selected?.sourceKey).toBeNull()
   })
 })

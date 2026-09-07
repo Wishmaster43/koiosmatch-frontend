@@ -141,7 +141,7 @@ describe('ApplicationDetailsCard', () => {
     await user.click(screen.getByLabelText('common:save'))
 
     expect(onLinkVacancy).toHaveBeenCalledWith(1, null, { title: undefined, client: undefined })
-    expect(onUpdateSource).toHaveBeenCalledWith(1, 'LinkedIn')
+    expect(onUpdateSource).toHaveBeenCalledWith(1, 'LinkedIn', null)
   })
 
   it('clears the source picker back to empty (optional field, VAC-CLEAR-1)', async () => {
@@ -151,7 +151,7 @@ describe('ApplicationDetailsCard', () => {
     await user.click(screen.getByLabelText('common:edit'))
     await user.click(screen.getByTitle('clearField'))
     await user.click(screen.getByLabelText('common:save'))
-    expect(onUpdateSource).toHaveBeenCalledWith(1, '')
+    expect(onUpdateSource).toHaveBeenCalledWith(1, '', null)
   })
 
   it('cancels the edit without calling either callback', async () => {

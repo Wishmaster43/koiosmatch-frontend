@@ -184,14 +184,16 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
 
   // S7: PATCH the editable Bron field from the Sollicitatie tab's Details block
   // (mirrors handleOwner's simple optimistic-patch-then-PATCH shape).
-  const handleUpdateSource = (id: Id | undefined, source: string) => {
+  const handleUpdateSource = (id: Id | undefined, source: string, sourceKey?: string | null) => {
     const before = applications.find(a => a.id === id) ?? wideRows.find(a => a.id === id)
-    setApplications(prev => prev.map(a => a.id === id ? { ...a, source } : a))
-    setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, source } as ApplicationDetail) : prev))
-    api.patch(`/applications/${id}`, { source }).catch(() => {
+    // K-277: the key travels with the name; null when the caller has none (backend falls back to the name).
+    const key = sourceKey ?? null
+    setApplications(prev => prev.map(a => a.id === id ? { ...a, source, sourceKey: key } : a))
+    setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, source, sourceKey: key } as ApplicationDetail) : prev))
+    api.patch(`/applications/${id}`, { source, source_key: key }).catch(() => {
       if (before) {
-        setApplications(prev => prev.map(a => a.id === id ? { ...a, source: before.source } : a))
-        setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, source: before.source } as ApplicationDetail) : prev))
+        setApplications(prev => prev.map(a => a.id === id ? { ...a, source: before.source, sourceKey: before.sourceKey } : a))
+        setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, source: before.source, sourceKey: before.sourceKey } as ApplicationDetail) : prev))
       }
       notifyError(t('common:actionFailed'))
     })

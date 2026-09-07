@@ -218,6 +218,8 @@ export default function PageAddApplicationModal({ onClose, onCreated, lockedVaca
   const [source, setSource] = useState('')
   const sourceFieldId = useId()
   const { sources: sourceOptions, allowFreeEntry: sourceAllowFreeEntry } = useApplicationSources()
+  // K-277: the picked option's stable key rides along with the name (null for free entry).
+  const sourceKey = (sourceOptions.find(o => o.value === source) as { key?: string | null } | undefined)?.key ?? null
 
   // W30: the tenant's active custom-field defs for applications — StoreApplicationRequest
   // also accepts `custom_fields` (ValidCustomFields('application')). The section only
@@ -231,7 +233,7 @@ export default function PageAddApplicationModal({ onClose, onCreated, lockedVaca
   // R6: the POST submit, its client-side required-field preflight and its 422
   // field-error mapping are extracted into their own hook (behaviour unchanged).
   const { create, saving, createError, errors } = useCreateApplication({
-    candidateId, vacancyId, ownerId, phaseId, source, customFieldValues,
+    candidateId, vacancyId, ownerId, phaseId, source, sourceKey, customFieldValues,
     vacancyRequired, ownerRequired, phaseRequired, sourceRequired,
     appRuleBlocked, onCreated,
   })

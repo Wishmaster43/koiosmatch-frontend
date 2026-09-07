@@ -132,6 +132,8 @@ export interface Application {
   phaseKey: string
   bucket: string
   source: string
+  // K-277: the stable lookup key next to the legacy source name (mapper sets it; optional for fixtures).
+  sourceKey?: string | null
   owner: ApplicationOwner
   candidateStatusLabel: string
   candidateStatusColor: string
@@ -395,6 +397,7 @@ export interface ApiApplication {
   bucket?: string
   source?: string
   source_name?: string
+  source_key?: string | null
   owner?: { id?: Id; name?: string; avatar_color?: string | null }
   owner_id?: Id
   owner_name?: string

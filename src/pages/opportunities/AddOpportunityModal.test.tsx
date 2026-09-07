@@ -397,9 +397,9 @@ describe('AddOpportunityModal · OPP-LOST-FE-1 lost-reason guard on save', () =>
     locationId: null, departmentId: null, contactId: null,
   } as unknown as Opportunity
 
-  it('picking a lost stage with reasons configured opens the confirm modal; confirm stays disabled until a reason is picked, then PATCHes stage + lost_reason', async () => {
+  it('picking a lost stage with reasons configured opens the confirm modal; confirm stays disabled until a reason is picked, then PATCHes stage + lost_reason + lost_reason_key', async () => {
     const user = userEvent.setup()
-    mockedLostReasons.mockReturnValue({ reasons: [{ value: 'Budget', label: 'Budget' }], loading: false, invalidate: vi.fn() })
+    mockedLostReasons.mockReturnValue({ reasons: [{ value: 'Budget', label: 'Budget', color: undefined, key: 'budget_cut' }], loading: false, invalidate: vi.fn() })
     render(<AddOpportunityModal onClose={noop} existing={existing} customers={[{ id: 'cust-1', name: 'Acme' }]} />)
 
     await user.click(fieldTrigger('modal.fields.stage'))
@@ -418,7 +418,7 @@ describe('AddOpportunityModal · OPP-LOST-FE-1 lost-reason guard on save', () =>
 
     await user.click(confirmBtn)
     expect(api.patch).toHaveBeenCalledWith('/opportunities/opp-9', expect.objectContaining({
-      opportunity_stage_id: 'stage-3', lost_reason: 'Budget',
+      opportunity_stage_id: 'stage-3', lost_reason: 'Budget', lost_reason_key: 'budget_cut',
     }))
   })
 

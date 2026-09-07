@@ -22,10 +22,10 @@ import { unwrapList } from '@/lib/api'
 import type { Id } from '@/types/common'
 
 // A picker option: `value`/`label` are the reason NAME (posted as `lost_reason`
-// verbatim, the backend contract has no separate id/name split on write).
-export interface OpportunityLostReasonOption { value: string; label: string; color?: string }
+// verbatim), with an additive `key` (the stable lookup key, posted as `lost_reason_key`).
+export interface OpportunityLostReasonOption { value: string; label: string; color?: string; key?: string | null }
 
-interface RawLostReason { id?: Id; name?: string; color?: string }
+interface RawLostReason { id?: Id; name?: string; color?: string; key?: string }
 
 // No demo seed on purpose (backend contract: "the agency curates first").
 const FALLBACK: OpportunityLostReasonOption[] = []
@@ -37,7 +37,7 @@ const FALLBACK: OpportunityLostReasonOption[] = []
 const mapReasons = (res: AxiosResponse): OpportunityLostReasonOption[] =>
   unwrapList<RawLostReason>(res).rows
     .filter((r): r is RawLostReason & { name: string } => Boolean(r.name))
-    .map(r => ({ value: r.name, label: r.name, color: r.color }))
+    .map(r => ({ value: r.name, label: r.name, color: r.color, key: r.key ?? null }))
 
 // Tenant opportunity lost-reason lookup (see file docblock above).
 export function useOpportunityLostReasons() {

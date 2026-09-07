@@ -24,6 +24,8 @@ export interface Opportunity {
   // OPP-LOST-FE-1: the lost-reason NAME (tenant lookup) recorded when the stage
   // moved to an is_lost stage; '' = none (mirrors application rejection.reason).
   lostReason: string
+  // The stable lookup key for the lost reason (KEY-ADOPTION).
+  lostReasonKey?: string | null
   value: number | null
   currency: string
   owner: string
@@ -94,6 +96,8 @@ export interface ApiOpportunity {
   status?: string
   // OPP-LOST-FE-1: the reason NAME (nullable), posted/received verbatim.
   lost_reason?: string | null
+  // The stable lookup key for the lost reason (KEY-ADOPTION).
+  lost_reason_key?: string | null
   customer_id?: Id
   client_id?: Id
   value?: number | null

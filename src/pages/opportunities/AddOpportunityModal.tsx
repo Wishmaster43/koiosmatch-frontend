@@ -236,7 +236,7 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
   // Build the create/update body (every field conditionally null-guarded) and POST
   // or PATCH depending on whether an existing Kans is being edited. `lostReason`
   // rides the body only once OpportunityLostReasonModal has supplied one below.
-  const save = async (lostReason?: string) => {
+  const save = async (lostReason?: string, lostReasonKey?: string | null) => {
     setSaving(true)
     setCreateError(null)
     try {
@@ -262,8 +262,8 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
         // OPP-DESCRIPTION-1: an empty/whitespace-only draft is OMITTED entirely
         // (never `description: ''`) — mirrors +Match's own text-block contract.
         ...(hasDescriptionText(description) ? { description } : {}),
-        // OPP-LOST-FE-1: the confirmed lost reason, only once the guard gated this save.
-        ...(lostReason !== undefined ? { lost_reason: lostReason } : {}),
+        // OPP-LOST-FE-1: the confirmed lost reason and key, only once the guard gated this save.
+        ...(lostReason !== undefined ? { lost_reason: lostReason, lost_reason_key: lostReasonKey ?? null } : {}),
       }
       const r = existing
         ? await api.patch(`/opportunities/${existing.id}`, body)
@@ -296,8 +296,8 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
     if (stageNeedsLostReason) { setShowLostReasonModal(true); return }
     void save()
   }
-  // Confirm from OpportunityLostReasonModal: re-run the save WITH the picked reason.
-  const confirmLostReason = (reason: string) => { void save(reason) }
+  // Confirm from OpportunityLostReasonModal: re-run the save WITH the picked reason and key.
+  const confirmLostReason = (reason: string, reasonKey: string | null) => { void save(reason, reasonKey) }
   // Cancel: no request fires — the form (including the stage pick) stays as-is.
   const cancelLostReason = () => setShowLostReasonModal(false)
 

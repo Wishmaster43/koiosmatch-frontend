@@ -24,7 +24,7 @@ interface ApplicationTabProps {
   // S7: PATCH the source field (`Bron` in the UI, PATCH /applications/{id}
   // {source}) — shares the Details block's edit mode/pencil with onLinkVacancy.
   // Undefined hides the pencil (read-only caller, mirrors onLinkVacancy).
-  onUpdateSource?: (id: Id | undefined, source: string) => void
+  onUpdateSource?: (id: Id | undefined, source: string, sourceKey?: string | null) => void
   // S2/S3: switch the drawer to another of ITS OWN tabs (Appointments/Interviews)
   // — threaded down from ApplicationDrawer's EntityDrawer render callback.
   // Undefined (e.g. no drawer context) makes the strip's cells render as plain text.

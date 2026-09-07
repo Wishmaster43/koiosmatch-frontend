@@ -51,6 +51,7 @@ export function mapOpportunity(o: ApiOpportunity): Opportunity {
     stageColor: stageObj?.color ?? o.stage_color ?? '#6E8FD6',
     // OPP-LOST-FE-1: the reason NAME recorded on the lost transition; '' = none.
     lostReason: o.lost_reason ?? '',
+    lostReasonKey: o.lost_reason_key ?? null,
     value:      num(rawValue),
     currency:   o.currency ?? 'EUR',
     owner:      ownerObj?.name ?? o.owner_name ?? '',

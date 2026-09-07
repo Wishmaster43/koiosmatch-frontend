@@ -15,7 +15,7 @@ interface DetailsSubTabProps {
   onLinkVacancy?: (id: Id | undefined, vacancyId: Id | null, meta?: { title?: string; client?: string }) => void
   // S7: PATCH the Bron field — shares ApplicationDetailsCard's own pencil/save/
   // cancel with onLinkVacancy.
-  onUpdateSource?: (id: Id | undefined, source: string) => void
+  onUpdateSource?: (id: Id | undefined, source: string, sourceKey?: string | null) => void
 }
 
 // Thin passthrough (see the module doc above): renders the unchanged editable card, forwarding the two PATCH callbacks as-is.

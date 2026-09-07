@@ -21,13 +21,21 @@ const nextTenant = () => `t${tenantSeq++}`
 afterEach(() => vi.clearAllMocks())
 
 describe('useOpportunityLostReasons', () => {
-  it('fetches /opportunity-lost-reasons and maps name/color to value/label', async () => {
+  it('fetches /opportunity-lost-reasons and maps name/color/key to value/label/key', async () => {
+    mockedTenantId.mockReturnValue(nextTenant())
+    mockedGet.mockResolvedValue({ data: { data: [{ id: 'r1', name: 'Budget', key: 'budget_cut' }] } })
+    const { result } = renderHook(() => useOpportunityLostReasons())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(mockedGet).toHaveBeenCalledWith('/opportunity-lost-reasons', undefined)
+    expect(result.current.reasons).toEqual([{ value: 'Budget', label: 'Budget', color: undefined, key: 'budget_cut' }])
+  })
+
+  it('maps reason rows without a key to null', async () => {
     mockedTenantId.mockReturnValue(nextTenant())
     mockedGet.mockResolvedValue({ data: { data: [{ id: 'r1', name: 'Budget' }] } })
     const { result } = renderHook(() => useOpportunityLostReasons())
     await waitFor(() => expect(result.current.loading).toBe(false))
-    expect(mockedGet).toHaveBeenCalledWith('/opportunity-lost-reasons', undefined)
-    expect(result.current.reasons).toEqual([{ value: 'Budget', label: 'Budget', color: undefined }])
+    expect(result.current.reasons).toEqual([{ value: 'Budget', label: 'Budget', color: undefined, key: null }])
   })
 
   it('resolves to an empty list, never demo data, when the request fails', async () => {

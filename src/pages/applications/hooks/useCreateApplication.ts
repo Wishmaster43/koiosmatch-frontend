@@ -21,7 +21,7 @@ const API_TO_FORM: Record<string, string> = {
 }
 
 export function useCreateApplication({
-  candidateId, vacancyId, ownerId, phaseId, source, customFieldValues,
+  candidateId, vacancyId, ownerId, phaseId, source, sourceKey, customFieldValues,
   vacancyRequired, ownerRequired, phaseRequired, sourceRequired,
   appRuleBlocked, onCreated,
 }: {
@@ -30,6 +30,7 @@ export function useCreateApplication({
   ownerId: string
   phaseId: string
   source: string
+  sourceKey?: string | null
   customFieldValues: Record<string, unknown>
   vacancyRequired: boolean
   ownerRequired: boolean
@@ -77,7 +78,7 @@ export function useCreateApplication({
       const res = await api.post('/applications', {
         candidate_id: candidateId, vacancy_id: vacancyId || null, owner_id: ownerId || null,
         ...(phaseId ? { application_stage_id: phaseId } : {}),
-        ...(source.trim() ? { source: source.trim() } : {}),
+        ...(source.trim() ? { source: source.trim(), source_key: sourceKey ?? null } : {}),
         ...(Object.keys(customFieldValues).length ? { custom_fields: customFieldValues } : {}),
       })
       onCreated(mapApplication(unwrap(res), funnelTypes))

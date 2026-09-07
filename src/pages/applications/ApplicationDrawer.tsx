@@ -63,7 +63,7 @@ interface ApplicationDrawerProps {
   // by the Sollicitatie tab's Details block and the Vacature tab (§3A).
   onLinkVacancy?: (id: Id | undefined, vacancyId: Id | null, meta?: { title?: string; client?: string }) => void
   // S7: PATCH the editable Bron field from the Sollicitatie tab's Details block.
-  onUpdateSource?: (id: Id | undefined, source: string) => void
+  onUpdateSource?: (id: Id | undefined, source: string, sourceKey?: string | null) => void
   users?: Array<{ id: Id; name: string }>
   // S15: detaching REQUIRES a reason (BE 422s without one) — the drawer collects
   // it via DetachReasonModal before calling this.

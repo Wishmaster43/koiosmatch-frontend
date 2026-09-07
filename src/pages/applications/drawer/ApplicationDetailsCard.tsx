@@ -92,7 +92,7 @@ const inputStyle = fieldInputStyle
 interface ApplicationDetailsCardProps {
   application: ApplicationDetail
   onLinkVacancy?: (id: Id | undefined, vacancyId: Id | null, meta?: { title?: string; client?: string }) => void
-  onUpdateSource?: (id: Id | undefined, source: string) => void
+  onUpdateSource?: (id: Id | undefined, source: string, sourceKey?: string | null) => void
 }
 
 // Vacancy-link + Bron (source) card for the application: shows the linked vacancy's cascade (customer/location/contact) and shares one pencil-edit mode for both fields.
@@ -132,7 +132,8 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
     const picked = vacancyId ? vacancyOptions.find(v => String(v.value) === vacancyId) : undefined
     onLinkVacancy?.(a.id, vacancyId || null, { title: picked?.label, client: picked?.client })
     // S7: only PATCH the source when it actually changed (avoid a no-op write).
-    if (source !== (a.source ?? '')) onUpdateSource?.(a.id, source)
+    // K-277: the picked option's stable key rides along (null for free entry); the backend falls back to the name.
+    if (source !== (a.source ?? '')) onUpdateSource?.(a.id, source, sources.find(o => o.value === source)?.key ?? null)
     setEditing(false)
   }
 

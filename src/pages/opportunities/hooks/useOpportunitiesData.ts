@@ -188,7 +188,7 @@ export function useOpportunitiesData(includeArchived: boolean = false, branchIds
   // sitting in the new column as if the server had accepted it. Snapshot ONLY
   // the stage fields the optimistic write is about to overwrite and put them
   // back on failure, mirroring useApplicationDrawerActions.handleMove.
-  const applyStageMove = (id: Id, stageValue: string | number, lostReason?: string) => {
+  const applyStageMove = (id: Id, stageValue: string | number, lostReason?: string, lostReasonKey?: string | null) => {
     // A stage without a persistable id (seed fallback) cannot be PATCHed - refuse
     // the move honestly instead of letting an optimistic write pretend it saved.
     const s = stages.find(x => x.value === stageValue)
@@ -196,14 +196,16 @@ export function useOpportunitiesData(includeArchived: boolean = false, branchIds
     const m = stageMeta(String(stageValue))
     const before = rows.find(r => r.id === id)
     const beforeStage = before
-      ? { stage: before.stage, stageValue: before.stageValue, stageColor: before.stageColor, lostReason: before.lostReason }
+      ? { stage: before.stage, stageValue: before.stageValue, stageColor: before.stageColor, lostReason: before.lostReason, lostReasonKey: before.lostReasonKey }
       : undefined
     const local: Partial<Opportunity> = { stage: m.label, stageValue, stageColor: m.color }
     if (lostReason !== undefined) local.lostReason = lostReason
+    if (lostReasonKey !== undefined) local.lostReasonKey = lostReasonKey
     setRows(prev => prev.map(r => r.id === id ? ({ ...r, ...local } as Opportunity) : r))
     setSelected(prev => (prev && prev.id === id ? ({ ...prev, ...local } as Opportunity) : prev))
     const body: Record<string, unknown> = { opportunity_stage_id: s.id }
     if (lostReason !== undefined) body.lost_reason = lostReason
+    if (lostReasonKey !== undefined) body.lost_reason_key = lostReasonKey
     api.patch(`/opportunities/${id}`, body).catch(err => {
       if (beforeStage) {
         setRows(prev => prev.map(r => r.id === id ? ({ ...r, ...beforeStage } as Opportunity) : r))
@@ -219,11 +221,11 @@ export function useOpportunitiesData(includeArchived: boolean = false, branchIds
     applyStageMove(id, stageValue)
   }
 
-  // Confirms the pending lost move with the picked reason; cancel just drops it
+  // Confirms the pending lost move with the picked reason and key; cancel just drops it
   // (the card/picker stays on its old stage — no optimistic write ever ran).
-  const confirmLost = (reason: string) => {
+  const confirmLost = (reason: string, reasonKey: string | null) => {
     if (!pendingLost) return
-    applyStageMove(pendingLost.id, pendingLost.stageValue, reason)
+    applyStageMove(pendingLost.id, pendingLost.stageValue, reason, reasonKey)
     setPendingLost(null)
   }
   const cancelLost = () => setPendingLost(null)

@@ -15,7 +15,7 @@ import { useOpportunityLostReasons } from '@/lib/useOpportunityLostReasons'
 
 interface Props {
   onCancel: () => void
-  onConfirm: (reason: string) => void
+  onConfirm: (reason: string, reasonKey: string | null) => void
   submitting?: boolean
 }
 
@@ -24,9 +24,17 @@ export default function OpportunityLostReasonModal({ onCancel, onConfirm, submit
   const { t } = useTranslation(['opportunities', 'common'])
   const { reasons } = useOpportunityLostReasons()
   const [reason, setReason] = useState('')
+  const [reasonKey, setReasonKey] = useState<string | null>(null)
 
-  // Confirms the lost move with the picked reason; a no-op without one or while already submitting.
-  const submit = () => { if (!reason || submitting) return; onConfirm(reason) }
+  // When the reason selection changes, resolve its key from the options.
+  const handleReasonChange = (v: string) => {
+    setReason(v)
+    const picked = reasons.find(r => r.value === v)
+    setReasonKey(picked?.key ?? null)
+  }
+
+  // Confirms the lost move with the picked reason and key; a no-op without one or while already submitting.
+  const submit = () => { if (!reason || submitting) return; onConfirm(reason, reasonKey) }
 
   return (
     <FloatingPanel open onClose={onCancel} ariaLabel={t('lost.modalTitle')}
@@ -43,7 +51,7 @@ export default function OpportunityLostReasonModal({ onCancel, onConfirm, submit
         {/* Reason — searchable CreatableSelect, allowCreate off: a lost reason is a
             tenant lookup, picked never free-typed here (mirrors RejectionModal). */}
         <Caption as="div" style={{ marginBottom: 5 }}>{t('lost.reason')}</Caption>
-        <CreatableSelect allowCreate={false} value={reason || null} onChange={setReason}
+        <CreatableSelect allowCreate={false} value={reason || null} onChange={handleReasonChange}
           placeholder={t('lost.reasonPlaceholder')}
           options={reasons.map(r => ({ value: r.value, label: r.label }))} />
       </div>

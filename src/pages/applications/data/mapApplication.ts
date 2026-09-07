@@ -159,6 +159,7 @@ export function mapApplication(a: ApiApplication = {}, funnelTypes: LookupItem[]
     // INTERVIEW-PHASE-1: the live interview session's category + step progress.
     interview: mapInterview(a.interview),
     source: a.source ?? a.source_name ?? '',
+    sourceKey: a.source_key ?? null,
     owner: {
       id: owner.id ?? a.owner_id ?? null,
       name: owner.name ?? a.owner_name ?? '',
