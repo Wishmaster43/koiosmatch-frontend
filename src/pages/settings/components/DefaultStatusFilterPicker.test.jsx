@@ -76,3 +76,29 @@ describe('DefaultStatusFilterPicker · a dropdown, not a radio group', () => {
     expect(onChange).toHaveBeenCalledWith('all')
   })
 })
+
+describe('DefaultStatusFilterPicker · deleted status guard (DELETED STATUS GUARD, 02-09)', () => {
+  it('falls back to the guessed active status when the saved value no longer exists', () => {
+    render(<DefaultStatusFilterPicker statuses={statuses} value="s-deleted" onChange={vi.fn()} />)
+    // Should show the deletedHint instead of chosenHint.
+    expect(screen.getByText(st('customerDisplay.defaultFilter.deletedHint'))).toBeInTheDocument()
+    // The effective value should fall back to the active status, not the deleted one.
+    expect(screen.getByText('Actief')).toBeInTheDocument()
+  })
+
+  it('falls back to "All statuses" when the saved value is deleted AND no active status exists', () => {
+    const noActiveStatuses = [{ id: 's-placed', value: 'placed', label: 'Geplaatst' }]
+    render(<DefaultStatusFilterPicker statuses={noActiveStatuses} value="s-deleted" onChange={vi.fn()} />)
+    // Should show the deletedHint.
+    expect(screen.getByText(st('customerDisplay.defaultFilter.deletedHint'))).toBeInTheDocument()
+    // Should fall back to "All statuses" when there's no active-like status.
+    expect(screen.getByText(st('customerDisplay.defaultFilter.allOption'))).toBeInTheDocument()
+  })
+
+  it('does not show deletedHint when the saved value exists', () => {
+    render(<DefaultStatusFilterPicker statuses={statuses} value="s-active" onChange={vi.fn()} />)
+    expect(screen.queryByText(st('customerDisplay.defaultFilter.deletedHint'))).toBeNull()
+    // Should show chosenHint instead.
+    expect(screen.getByText(st('customerDisplay.defaultFilter.chosenHint'))).toBeInTheDocument()
+  })
+})

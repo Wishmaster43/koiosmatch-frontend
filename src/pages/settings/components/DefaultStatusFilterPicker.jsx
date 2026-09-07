@@ -20,6 +20,12 @@
  * active-like status exists) — reusing `isActiveValue`, never a second copy of that
  * heuristic. A short line of text says whether that value was chosen or guessed.
  *
+ * DELETED STATUS GUARD (Danny 02-09): a stored value that no longer exists in the
+ * statuses lookup (deleted by the tenant) is now treated as NOT configured — the
+ * picker falls back to the same guess as if nothing was stored, and renders a
+ * Caption hint below the field explaining that the previously chosen status no
+ * longer exists.
+ *
  * SWEEP-SETTINGS-DROPDOWN (Danny 08-08): this list is a tenant lookup (grows with
  * however many statuses the tenant defines), so the non-searchable `SelectMenu`
  * checklist was the one settings-tree picker still without a type-to-filter box.
@@ -35,10 +41,15 @@ import { STATUS_FILTER_ALL, isActiveValue } from '@/components/drawer/StatusFilt
 export default function DefaultStatusFilterPicker({ statuses, value, onChange }) {
   const { t } = useTranslation('settings')
 
-  // The value ACTUALLY in effect today: a tenant-chosen one if saved, otherwise the
-  // same guess useStatusFilter falls back to (or "all" when no active-like status
-  // exists) — so the control never shows a state the tab itself is not really in.
-  const configured = value != null
+  // Check if the stored value actually exists in the current statuses lookup.
+  // If it doesn't (status was deleted), treat as not configured.
+  // Note: STATUS_FILTER_ALL is always valid even if no status exists.
+  const statusExists = value && value !== STATUS_FILTER_ALL && statuses.some(s => String(s.id ?? s.value) === value)
+  const configured = value != null && (value === STATUS_FILTER_ALL || statusExists)
+
+  // The value ACTUALLY in effect today: a tenant-chosen one if saved AND still exists,
+  // otherwise the same guess useStatusFilter falls back to (or "all" when no active-like
+  // status exists) — so the control never shows a state the tab itself is not really in.
   const guessed = statuses.find(s => isActiveValue(s.value))
   const guessedValue = guessed ? String(guessed.id ?? guessed.value) : STATUS_FILTER_ALL
   const effective = configured ? value : guessedValue
@@ -48,9 +59,19 @@ export default function DefaultStatusFilterPicker({ statuses, value, onChange })
     ...statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label })),
   ]
 
+  // Determine which description to show.
+  let descriptionKey = 'customerDisplay.defaultFilter.autoHint'
+  if (value != null && value !== STATUS_FILTER_ALL && !statusExists) {
+    // Stored value no longer exists (not STATUS_FILTER_ALL, and not in lookup).
+    descriptionKey = 'customerDisplay.defaultFilter.deletedHint'
+  } else if (configured) {
+    // Stored value exists (either STATUS_FILTER_ALL or a real status id).
+    descriptionKey = 'customerDisplay.defaultFilter.chosenHint'
+  }
+
   return (
     <SettingRow label={t('customerDisplay.defaultFilter.title')}
-      description={configured ? t('customerDisplay.defaultFilter.chosenHint') : t('customerDisplay.defaultFilter.autoHint')}>
+      description={t(descriptionKey)}>
       <div style={{ width: 220 }}>
         <SelectField value={effective} options={options} onChange={onChange} />
       </div>
