@@ -9,10 +9,12 @@ import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel }      from '@/context/RightPanelContext'
 import DepartmentDrawer       from './DepartmentDrawer'
+import ReportEmptyState       from './ReportEmptyState'
 import PaginationBar          from '../ui/PaginationBar'
 import { useReportPaging }    from './useReportPaging'
 import { TD, SortableTableHead, ReportTableToolbar } from './reportTableChrome'
 import { useSmCustomerTree }  from '@/hooks/useSmCustomerTree'
+import { useCustomerOptions } from './useCustomerOptions'
 import type { ReportDepartment, SortState } from '@/types/reports'
 
 // Owns local search/sort/pagination state and derives the flattened department rows from
@@ -42,13 +44,8 @@ export default function DepartmentsTable() {
     )
   ), [customers])
 
-  // Deduped, alphabetised customer id/name pairs for the panel's search-select — only
-  // rebuilds when the underlying rows change, not on every search keystroke.
-  const customerOptions = useMemo(() =>
-    [...new Map(rows.map(r => [r.customer_id, r.customer_name] as [string | number, string | undefined])).entries()]
-      .map(([id, name]) => ({ id, name }))
-      .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '')),
-    [rows])
+  // Deduped, alphabetised customer id/name pairs for the panel's search-select.
+  const customerOptions = useCustomerOptions(rows)
 
   // Applies the panel's customer/status selections plus the free-text search across
   // department, location, customer and cost-center fields.
@@ -146,9 +143,7 @@ export default function DepartmentsTable() {
               <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('departments.loading')}</p>
             </div>
           ) : sorted.length === 0 ? (
-            <div className="flex items-center justify-center" style={{ height: 160 }}>
-              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('departments.empty')}</p>
-            </div>
+            <ReportEmptyState message={t('departments.empty')} />
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <SortableTableHead columns={COLS} sort={sort} onSort={setSort_} />

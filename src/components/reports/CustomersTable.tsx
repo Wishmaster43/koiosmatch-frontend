@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import Spinner from '@/components/ui/Spinner'
 import { useRightPanel }      from '@/context/RightPanelContext'
 import CustomerDetailDrawer   from './CustomerDetailDrawer'
+import ReportEmptyState       from './ReportEmptyState'
 import PaginationBar          from '../ui/PaginationBar'
 import { useReportPaging }    from './useReportPaging'
 import { TD, SortableTableHead, ReportTableToolbar } from './reportTableChrome'
@@ -136,9 +137,7 @@ export default function CustomersTable() {
               <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('customers.loading')}</p>
             </div>
           ) : sorted.length === 0 ? (
-            <div className="flex items-center justify-center" style={{ height: 180 }}>
-              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('customers.empty')}</p>
-            </div>
+            <ReportEmptyState message={t('customers.empty')} height={180} />
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <SortableTableHead columns={COLS} sort={sort} onSort={setSort_} />

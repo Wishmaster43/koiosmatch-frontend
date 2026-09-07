@@ -9,12 +9,14 @@ import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel }      from '@/context/RightPanelContext'
 import LocationDrawer         from './LocationDrawer'
+import ReportEmptyState       from './ReportEmptyState'
 import PaginationBar          from '../ui/PaginationBar'
 import { useReportPaging }    from './useReportPaging'
 import { TD, SortableTableHead, ReportTableToolbar } from './reportTableChrome'
 import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
 import CopyIconButton from '../ui/CopyIconButton'
 import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
+import { useCustomerOptions } from './useCustomerOptions'
 import type { ReportLocation, SortState } from '@/types/reports'
 
 // Searchable, sortable, paginated locations table; filters live in local state and are pushed into the shared right-panel context, and a row click opens the location drawer.
@@ -45,11 +47,7 @@ export default function LocationsTable() {
     [...new Set(rows.map(r => r.status).filter((x): x is string => Boolean(x)))].sort(), [rows])
 
   // One option per customer, deduped via a Map keyed by id, for the customer filter list.
-  const customerOptions = useMemo(() =>
-    [...new Map(rows.map(r => [r.customer_id, r.customer_name] as [string | number, string | undefined])).entries()]
-      .map(([id, name]) => ({ id, name }))
-      .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '')),
-    [rows])
+  const customerOptions = useCustomerOptions(rows)
 
   // Applies the active status/customer filters plus the free-text search (name/customer/address) in one pass.
   const filtered = useMemo(() => {
@@ -138,9 +136,7 @@ export default function LocationsTable() {
               <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('locations.loading')}</p>
             </div>
           ) : sorted.length === 0 ? (
-            <div className="flex items-center justify-center" style={{ height: 160 }}>
-              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('locations.empty')}</p>
-            </div>
+            <ReportEmptyState message={t('locations.empty')} />
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <SortableTableHead columns={COLS} sort={sort} onSort={setSort_} />
