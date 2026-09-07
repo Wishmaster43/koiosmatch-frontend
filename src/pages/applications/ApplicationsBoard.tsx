@@ -2,7 +2,6 @@
  * ApplicationsBoard — kanban view, one column per funnel phase. Presentational:
  * the page owns the data and the phase mutation (onMove).
  */
-import { useRef } from 'react'
 import type { DragEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
@@ -15,10 +14,9 @@ import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import { SectionTitle, Caption } from '@/components/ui/typography'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
-import { useDragAutoScroll } from '@/lib/useDragAutoScroll'
 import { scoreColor } from '@/components/match/scoreColor'
-import { tintBg, chipInk } from '@/lib/tint'
 import { activatableCardProps } from '@/components/ui/activatableCard'
+import { BoardColumnHeader, useBoardDrag } from '@/components/ui/board'
 
 export interface BoardPhase { key: string; label: string; color: string }
 
@@ -104,13 +102,7 @@ function BoardColumn({ phase, items, onDragStart, onDrop, onDragOver, onSelect, 
   return (
     <div style={{ width: 260, flexShrink: 0, display: 'flex', flexDirection: 'column' }}
       onDrop={e => onDrop(e, phase.key)} onDragOver={onDragOver}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-        <SectionTitle as="span">{phase.label}</SectionTitle>
-        {/* Count pill in the phase's own tint — the house tint helper (lib/tint),
-            token-safe for both hex and var(--…) phase colours. */}
-        <span style={{ fontSize: 11, fontWeight: 600, padding: '1px 7px', borderRadius: 99,
-          background: tintBg(phase.color), color: chipInk(phase.color) }}>{items.length}</span>
-      </div>
+      <BoardColumnHeader label={phase.label} count={items.length} color={phase.color} showDot={false} />
       <div style={{ flex: 1, minHeight: 60 }}>
         {items.map(app => (
           <BoardCard key={app.id} app={app} onDragStart={onDragStart}
@@ -130,17 +122,8 @@ export default function ApplicationsBoard({ rows, phases, onMove, onSelect, sele
   loading?: boolean; error?: unknown
 }) {
   const { t } = useTranslation('applications')
-  // Edge-scroll the board while dragging (HTML5 DnD never scrolls itself).
-  const { ref: boardScrollRef, onDragOver: boardAutoScroll } = useDragAutoScroll<HTMLDivElement>()
-  const dragId = useRef<Id | null>(null)
-
-  const handleDragStart = (e: DragEvent<HTMLDivElement>, id: Id | undefined) => { dragId.current = id ?? null; e.dataTransfer.effectAllowed = 'move' }
-  const handleDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }
-  // Completes a card drag: moves the dragged application to the dropped-on phase and clears the tracked drag id.
-  const handleDrop = (e: DragEvent<HTMLDivElement>, phaseKey: string) => {
-    e.preventDefault()
-    if (dragId.current != null) { onMove(dragId.current, phaseKey); dragId.current = null }
-  }
+  // Drag-and-drop wiring: ref for auto-scroll, handlers for start/over/drop, dragId ref.
+  const { boardScrollRef, boardAutoScroll, handleDragStart, handleDragOver, handleDrop } = useBoardDrag<HTMLDivElement, string>({ onMove })
 
   // Honest four-state board (F3): a wide-sample fetch failure or the first-paint
   // load must never look like "zero applications everywhere" — show the same

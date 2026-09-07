@@ -1,15 +1,13 @@
 // MatchesBoard — kanban view of matches, one column per match status, with
 // drag-and-drop between columns. See the fuller doc comment on the component below.
-import { useRef } from 'react'
 import type { DragEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import Avatar from '@/components/ui/Avatar'
 import ScorePill from './ScorePill'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
-import { useDragAutoScroll } from '@/lib/useDragAutoScroll'
-import { tintBg, chipInk } from '@/lib/tint'
 import { activatableCardProps } from '@/components/ui/activatableCard'
+import { BoardColumnHeader, useBoardDrag } from '@/components/ui/board'
 
 export interface BoardColumn { key: string; label: string; color: string }
 
@@ -62,12 +60,7 @@ function BoardColumnView({ column, items, onDragStart, onDrop, onDragOver, onSel
   return (
     <div style={{ width: 270, flexShrink: 0, display: 'flex', flexDirection: 'column' }}
       onDrop={e => onDrop(e, column.key)} onDragOver={onDragOver}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-        <span style={{ width: 8, height: 8, borderRadius: '50%', background: column.color, flexShrink: 0 }} />
-        <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)' }}>{column.label}</span>
-        <span style={{ fontSize: 11, fontWeight: 600, padding: '1px 7px', borderRadius: 99,
-          background: tintBg(column.color, true), color: chipInk(column.color) }}>{items.length}</span>
-      </div>
+      <BoardColumnHeader label={column.label} count={items.length} color={column.color} showDot />
       <div style={{ flex: 1, minHeight: 80, borderRadius: 10,
         border: items.length === 0 ? '1px dashed var(--border)' : 'none' }}>
         {items.length === 0 ? (
@@ -90,22 +83,13 @@ export default function MatchesBoard({ rows, columns, onMove, onSelect, selected
   rows: MatchRow[]; columns: BoardColumn[]; onMove: (id: Id, stageKey: string) => void
   onSelect: (m: MatchRow) => void; selectedId?: Id | null
 }) {
-  // Edge-scroll the board while dragging (HTML5 DnD never scrolls itself).
-  const { ref: boardScrollRef, onDragOver: boardAutoScroll } = useDragAutoScroll<HTMLDivElement>()
   const { t } = useTranslation('matches')
-  const dragId = useRef<Id | null>(null)
+  // Drag-and-drop wiring: ref for auto-scroll, handlers for start/over/drop, dragId ref.
+  const { boardScrollRef, boardAutoScroll, handleDragStart, handleDragOver, handleDrop } = useBoardDrag<HTMLDivElement, string>({ onMove })
 
   // A match's status may arrive as the lookup value or its label — match either.
   const norm = (s?: string) => String(s ?? '').trim().toLowerCase()
   const inColumn = (r: MatchRow, c: BoardColumn) => norm(r.status) === norm(c.key) || norm(r.status) === norm(c.label)
-
-  const handleDragStart = (e: DragEvent<HTMLDivElement>, id: Id | undefined) => { dragId.current = id ?? null; e.dataTransfer.effectAllowed = 'move' }
-  const handleDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }
-  // Drop moves the dragged match into the target stage column, delegating the status mutation to the page's onMove.
-  const handleDrop = (e: DragEvent<HTMLDivElement>, stageKey: string) => {
-    e.preventDefault()
-    if (dragId.current != null) { onMove(dragId.current, stageKey); dragId.current = null }
-  }
 
   return (
     <div ref={boardScrollRef} onDragOver={boardAutoScroll} style={{ flex: 1, overflow: 'auto', padding: '0 24px 20px' }}>

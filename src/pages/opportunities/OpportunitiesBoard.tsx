@@ -2,16 +2,15 @@
 // the page owns the data and the stage mutation (onMove); drag-and-drop wiring
 // and edge-auto-scroll live here, mirroring ApplicationsBoard's own idiom.
 import { useNumberFormat } from '@/lib/formatters'
-import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { DragEvent } from 'react'
 import Avatar from '@/components/ui/Avatar'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
-import { useDragAutoScroll } from '@/lib/useDragAutoScroll'
 import { opportunityValueOf, formatOpportunityValue } from './data/opportunityValue'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import { activatableCardProps } from '@/components/ui/activatableCard'
+import { useBoardDrag } from '@/components/ui/board'
 
 interface StageCol { value: string | number; label: string; color?: string }
 
@@ -88,21 +87,8 @@ export default function OpportunitiesBoard({ rows, stages, onMove, selectedId, o
   rows: Opportunity[]; stages: StageCol[]; onMove: (id: Id, stageValue: string | number) => void; selectedId?: Id | null; onSelect: (o: Opportunity) => void
   valueInHours?: boolean
 }) {
-  // Edge-scroll the board while dragging (HTML5 DnD never scrolls itself).
-  const { ref: boardScrollRef, onDragOver: boardAutoScroll } = useDragAutoScroll<HTMLDivElement>()
-  const dragging = useRef<Id | null>(null)
-
-  // Track the dragged card's id in a ref (no re-render needed) for the drop handler to read.
-  const onDragStart = (e: DragEvent<HTMLDivElement>, id: Id | undefined) => {
-    dragging.current = id ?? null
-    e.dataTransfer.effectAllowed = 'move'
-  }
-  const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }
-  // Move the dragged card to the dropped-on stage, then clear the drag ref.
-  const onDrop = (e: DragEvent<HTMLDivElement>, stageValue: string | number) => {
-    e.preventDefault()
-    if (dragging.current != null) { onMove(dragging.current, stageValue); dragging.current = null }
-  }
+  // Drag-and-drop wiring: ref for auto-scroll, handlers for start/over/drop, dragId ref.
+  const { boardScrollRef, boardAutoScroll, handleDragStart, handleDragOver, handleDrop } = useBoardDrag<HTMLDivElement, string | number>({ onMove })
 
   return (
     <div ref={boardScrollRef} onDragOver={boardAutoScroll} style={{ flex: 1, overflowX: 'auto', overflowY: 'auto', padding: '0 20px 20px',
@@ -112,7 +98,7 @@ export default function OpportunitiesBoard({ rows, stages, onMove, selectedId, o
         // translated (or stale-locale) label and must never drive grouping.
         <BoardColumn valueInHours={valueInHours} key={s.value} stage={s}
           items={rows.filter(r => r.stageValue === s.value)}
-          onDragStart={onDragStart} onDrop={onDrop} onDragOver={onDragOver}
+          onDragStart={handleDragStart} onDrop={handleDrop} onDragOver={handleDragOver}
           onSelect={onSelect} selectedId={selectedId} />
       ))}
     </div>
