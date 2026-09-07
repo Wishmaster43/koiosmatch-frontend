@@ -32,8 +32,9 @@ export function useSubEntitySave({
   // so the untouched manual form below can never fire a second, duplicate create.
   // The callbacks ride in refs: the effect reacts to the run RESULT only, never to
   // a parent re-render handing in a new onClose/onImported identity.
-  const onImportedRef = useRef(onImported); onImportedRef.current = onImported
-  const onCloseRef = useRef(onClose); onCloseRef.current = onClose
+  const onImportedRef = useRef(onImported)
+  const onCloseRef = useRef(onClose)
+  useEffect(() => { onImportedRef.current = onImported; onCloseRef.current = onClose })
   useEffect(() => {
     if (importWizard.run.status !== 'success') return
     const { summary } = importWizard.run.result
