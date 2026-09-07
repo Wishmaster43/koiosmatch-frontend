@@ -257,7 +257,8 @@
     "whatsapp_web": "WhatsApp Web-nummers",
     "shiftmanager": "Shiftmanager",
     "helloflex": "HelloFlex",
-    "werkzoeken": "Werkzoeken"
+    "werkzoeken": "Werkzoeken",
+    "interview": "AI-interview"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -1610,12 +1611,15 @@
       "copyUrl": "Callback-URL kopiëren",
       "copied": "Gekopieerd",
       "loadError": "Kon de koppelingsstatus niet laden.",
-      "tokenSet": "verify-token ingesteld",
-      "tokenMissing": "verify-token ontbreekt",
       "stepApp": "Registratie is op app-niveau bij Meta (developers.facebook.com → app → WhatsApp → Configuration): één keer callback + token, daarna per WABA het veld \"messages\" abonneren. Nieuwe nummers liften vanzelf mee.",
       "stepToken": "Het verify-token kies je zelf en vul je op twee plekken in: bij Meta én in",
       "tokenLink": "Instellingen → WhatsApp",
-      "stepAgent": "De agent-webhook-URL\\u2019s (op de agent-kaart) zijn Koios-intern — registreer die nooit bij Meta."
+      "stepAgent": "De agent-webhook-URL\\u2019s (op de agent-kaart) zijn Koios-intern — registreer die nooit bij Meta.",
+      "verifyTokenSet": "Verify-token ingesteld",
+      "verifyTokenMissing": "Verify-token ontbreekt",
+      "appSecretSet": "App secret ingesteld",
+      "appSecretMissing": "App secret ontbreekt",
+      "appSecretWarning": "App secret ontbreekt: Meta-webhooks worden niet geverifieerd en inbound berichten worden geweigerd."
     },
     "endpoints": {
       "title": "Workflow-endpoints",
@@ -2136,7 +2140,9 @@
       "syncNo": "nee",
       "chip": "Coexistence",
       "disconnected": "Ontkoppeld via de app op {{date}}. Opnieuw koppelen kan alleen via de wizard hierboven; ontkoppelen gebeurt altijd in de WhatsApp Business-app."
-    }
+    },
+    "appSecretSet": "App secret ingesteld",
+    "appSecretMissing": "App secret ontbreekt"
   },
   "roles": {
     "loading": "Rollen ophalen…",
@@ -2882,7 +2888,9 @@
       "outreach_campaign": "Bellijst",
       "customer_contact": "Contactpersoon",
       "location": "Vestiging (eigen)"
-    }
+    },
+    "nextValue": "Volgende: {{n}}",
+    "startLocked": "Startwaarde ligt vast zodra het eerste nummer is uitgegeven."
   },
   "vacancyDisplay": {
     "title": "Tabelweergave",
@@ -3361,7 +3369,11 @@
       "inactiveNotice": "Niet beschikbaar zolang de carrière-site uit staat.",
       "noTenant": "Nog geen tenant geselecteerd."
     },
-    "saveError": "Kon de wijziging niet opslaan."
+    "saveError": "Kon de wijziging niet opslaan.",
+    "urlLabel": "Eigen vacaturesite-URL",
+    "urlHint": "Absolute URL met {ref} op de plek van het vacaturenummer, bijvoorbeeld https://werkenbij.example.nl/vacature/{ref}",
+    "urlInvalid": "Gebruik een absolute URL met {ref}.",
+    "urlPlaceholder": "https://werkenbij.voorbeeld.nl/vacature/{ref}"
   },
   "caoSettings": {
     "title": "CAO's",
@@ -3945,5 +3957,27 @@
   },
   "changelog": {
     "noTrailYet": "Nog geen audittrail voor dit onderdeel"
+  },
+  "interview": {
+    "title": "AI-interview",
+    "subtitle": "Configuratie voor AI-interviews: afwijzingsmodus, boekingslink en contactnummer",
+    "rejectionMode": {
+      "label": "Afwijzingsmodus",
+      "description": "Hoe gaat Koios om met kandidaten die door de AI-interview zijn afgekeurd: voorstel doen (recruiter bevestigt) of automatisch afwijzen",
+      "options": {
+        "proposal": "Voorstel, recruiter bevestigt",
+        "automatic": "Automatisch afwijzen"
+      }
+    },
+    "bookingLink": {
+      "label": "Boekingslink",
+      "description": "URL waar kandidaten hun interview kunnen inplannen (Koios stuurt deze link)",
+      "placeholder": "https://calendly.com/bedrijf"
+    },
+    "recruiterPhone": {
+      "label": "Recruiter-telefoonnummer",
+      "description": "Telefoonnummer in E.164-notatie (+31612345678) voor interviewuitnodigingen wanneer de eigenaar geen eigen nummer heeft",
+      "placeholder": "+31612345678"
+    }
   }
 }

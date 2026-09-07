@@ -183,6 +183,8 @@ export default function WhatsAppConnectionsList({
                 )}
                 <SoftChip label={row.has_verify_token ? t('whatsapp.verifyTokenSet') : t('whatsapp.verifyTokenUnset')}
                   color={row.has_verify_token ? 'var(--color-success)' : null} />
+                <SoftChip label={row.has_app_secret ? t('whatsapp.appSecretSet') : t('whatsapp.appSecretMissing')}
+                  color={row.has_app_secret ? 'var(--color-success)' : null} />
                 {canManage && (
                   <DefaultToggle active={row.is_default} busy={promotingId === row.id} undoable={false} title={undefined}
                     onClick={() => promote(row)} activeLabel={t('common.default')} inactiveLabel={t('common.setDefault')} />

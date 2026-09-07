@@ -257,7 +257,8 @@
     "whatsapp_web": "Números WhatsApp Web",
     "shiftmanager": "Shiftmanager",
     "helloflex": "HelloFlex",
-    "werkzoeken": "Werkzoeken"
+    "werkzoeken": "Werkzoeken",
+    "interview": "Entrevista IA"
   },
   "kpis": {
     "title": "Definições de KPI",
@@ -1610,12 +1611,15 @@
       "copyUrl": "Copiar URL de callback",
       "copied": "Copiado",
       "loadError": "Não foi possível carregar o estado da ligação.",
-      "tokenSet": "verify token definido",
-      "tokenMissing": "verify token em falta",
       "stepApp": "O registo é feito ao nível da app na Meta (developers.facebook.com → app → WhatsApp → Configuration): callback + token uma vez, depois subscrever o campo \"messages\" por WABA. Os números novos acompanham automaticamente.",
       "stepToken": "O verify token é escolhido por si e introduzido em dois locais: na Meta e em",
       "tokenLink": "Definições → WhatsApp",
-      "stepAgent": "Os URLs de webhook do agente (no cartão do agente) são internos ao Koios: nunca os registe na Meta."
+      "stepAgent": "Os URLs de webhook do agente (no cartão do agente) são internos ao Koios: nunca os registe na Meta.",
+      "verifyTokenSet": "Token de verificação definido",
+      "verifyTokenMissing": "Token de verificação ausente",
+      "appSecretSet": "Segredo do app definido",
+      "appSecretMissing": "Segredo do app ausente",
+      "appSecretWarning": "Segredo do app ausente: webhooks do Meta não serão verificados e mensagens de entrada serão rejeitadas."
     },
     "endpoints": {
       "title": "Pontos de extremidade do fluxo",
@@ -2136,7 +2140,9 @@
       "syncNo": "não",
       "chip": "Coexistence",
       "disconnected": "Desassociado através da aplicação em {{date}}. Voltar a associar só é possível através do assistente acima; desassociar acontece sempre na aplicação WhatsApp Business."
-    }
+    },
+    "appSecretSet": "Segredo do app definido",
+    "appSecretMissing": "Segredo do app ausente"
   },
   "roles": {
     "loading": "A carregar funções…",
@@ -2882,7 +2888,9 @@
       "outreach_campaign": "Lista de chamadas",
       "customer_contact": "Pessoa de contacto",
       "location": "Filial (própria)"
-    }
+    },
+    "nextValue": "Próximo: {{n}}",
+    "startLocked": "O valor inicial é bloqueado após o primeiro número ser alocado."
   },
   "vacancyDisplay": {
     "title": "Vista de tabela",
@@ -3361,7 +3369,11 @@
       "inactiveNotice": "Indisponível enquanto o site de carreiras estiver desativado.",
       "noTenant": "Ainda não foi selecionada nenhuma agência."
     },
-    "saveError": "Não foi possível guardar a alteração."
+    "saveError": "Não foi possível guardar a alteração.",
+    "urlLabel": "URL do site de carreira personalizado",
+    "urlHint": "URL absoluta com placeholder {ref} onde o número da vaga deve aparecer, por exemplo https://carreiras.example.pt/vagas/{ref}",
+    "urlInvalid": "Use uma URL absoluta contendo {ref}.",
+    "urlPlaceholder": "https://empregos.exemplo.pt/vaga/{ref}"
   },
   "caoSettings": {
     "title": "Convenções coletivas (CAO)",
@@ -3945,5 +3957,27 @@
   },
   "changelog": {
     "noTrailYet": "Ainda não há registo de auditoria para esta secção"
+  },
+  "interview": {
+    "title": "Entrevista de IA",
+    "subtitle": "Configuração para entrevistas de IA: modo de rejeição, link de reserva e número de contato",
+    "rejectionMode": {
+      "label": "Modo de rejeição",
+      "description": "Como Koios lida com candidatos desqualificados pela entrevista de IA: propor uma rejeição (o recrutador confirma) ou rejeitar automaticamente",
+      "options": {
+        "proposal": "Proposta, recrutador confirma",
+        "automatic": "Rejeitar automaticamente"
+      }
+    },
+    "bookingLink": {
+      "label": "Link de reserva",
+      "description": "URL onde os candidatos podem agendar sua entrevista (Koios envia este link)",
+      "placeholder": "https://calendly.com/empresa"
+    },
+    "recruiterPhone": {
+      "label": "Número de telefone do recrutador",
+      "description": "Número de telefone no formato E.164 (+351912345678) para convites de entrevista quando o responsável não tem número próprio",
+      "placeholder": "+351912345678"
+    }
   }
 }

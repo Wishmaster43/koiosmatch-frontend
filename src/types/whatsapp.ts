@@ -113,6 +113,7 @@ export interface WhatsappConnectionRow {
   role_name?: string | null
   is_default: boolean
   has_verify_token: boolean
+  has_app_secret: boolean
   // 'embedded' = linked through the coexistence wizard (K-160) — its token
   // lives server-side only and disconnecting happens in the WhatsApp app.
   provider?: 'meta' | '360dialog' | 'embedded'

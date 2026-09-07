@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { Check, X as XIcon } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import Button from '@/components/ui/Button'
+import CalloutBox from '@/components/ui/CalloutBox'
 import CopyIconButton from '@/components/ui/CopyIconButton'
 import { SectionTitle, Caption, Mono } from '@/components/ui/typography'
 import type { WhatsappConnectionRow } from '@/types/whatsapp'
@@ -49,18 +50,29 @@ export default function WhatsAppMetaWebhookCard() {
         <CopyIconButton value={CALLBACK_URL} label={t('webhooks.meta.copyUrl')} copiedLabel={t('webhooks.meta.copied')} />
       </div>
 
-      {/* Verify-token status per connection — never the value itself. */}
+      {/* Verify-token and app-secret status per connection — never the values themselves. */}
       {loadState === 'error' && <Caption as="p" style={{ color: 'var(--color-danger-text)' }}>{t('webhooks.meta.loadError')}</Caption>}
       {loadState === 'ready' && connections.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 10 }}>
           {connections.map((c) => (
-            <Caption key={c.id} as="div" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              {c.has_verify_token
-                ? <Check size={12} style={{ color: 'var(--color-success-text)' }} role="img" aria-label={t('webhooks.meta.tokenSet')} />
-                : <XIcon size={12} style={{ color: 'var(--color-danger-text)' }} role="img" aria-label={t('webhooks.meta.tokenMissing')} />}
-              <span>{c.label ?? c.waba_id}</span>
-              <span>{c.has_verify_token ? t('webhooks.meta.tokenSet') : t('webhooks.meta.tokenMissing')}</span>
-            </Caption>
+            <div key={c.id} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <Caption as="div" style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                {c.has_verify_token
+                  ? <Check size={12} style={{ color: 'var(--color-success-text)' }} role="img" aria-label={t('webhooks.meta.verifyTokenSet')} />
+                  : <XIcon size={12} style={{ color: 'var(--color-danger-text)' }} role="img" aria-label={t('webhooks.meta.verifyTokenMissing')} />}
+                <span>{c.label ?? c.waba_id}</span>
+                <span>{c.has_verify_token ? t('webhooks.meta.verifyTokenSet') : t('webhooks.meta.verifyTokenMissing')}</span>
+                {c.has_app_secret
+                  ? <Check size={12} style={{ color: 'var(--color-success-text)' }} role="img" aria-label={t('webhooks.meta.appSecretSet')} />
+                  : <XIcon size={12} style={{ color: 'var(--color-danger-text)' }} role="img" aria-label={t('webhooks.meta.appSecretMissing')} />}
+                <span>{c.has_app_secret ? t('webhooks.meta.appSecretSet') : t('webhooks.meta.appSecretMissing')}</span>
+              </Caption>
+              {!c.has_app_secret && (
+                <CalloutBox variant="warning">
+                  {t('webhooks.meta.appSecretWarning')}
+                </CalloutBox>
+              )}
+            </div>
           ))}
         </div>
       )}

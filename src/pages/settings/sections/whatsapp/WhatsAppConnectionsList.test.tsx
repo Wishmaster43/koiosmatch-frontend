@@ -35,7 +35,7 @@ const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 's
 
 const row = (over: Partial<WhatsappConnectionRow> = {}): WhatsappConnectionRow => ({
   id: 'conn-1', waba_id: '10229012934', label: null, location_id: null, role_name: null,
-  is_default: false, has_verify_token: false, provider: 'meta', status: 'active', ...over,
+  is_default: false, has_verify_token: false, has_app_secret: false, provider: 'meta', status: 'active', ...over,
 })
 
 const baseProps = {
@@ -94,6 +94,13 @@ describe('WhatsAppConnectionsList · scope chip', () => {
     expect(screen.getByText(st('whatsapp.verifyTokenSet'))).toBeInTheDocument()
     rerender(<WhatsAppConnectionsList {...baseProps} connections={[row({ has_verify_token: false })]} />)
     expect(screen.getByText(st('whatsapp.verifyTokenUnset'))).toBeInTheDocument()
+  })
+
+  it('has_app_secret indicator shows Set when true, Missing when false', () => {
+    const { rerender } = render(<WhatsAppConnectionsList {...baseProps} connections={[row({ has_app_secret: true })]} />)
+    expect(screen.getByText(st('whatsapp.appSecretSet'))).toBeInTheDocument()
+    rerender(<WhatsAppConnectionsList {...baseProps} connections={[row({ has_app_secret: false })]} />)
+    expect(screen.getByText(st('whatsapp.appSecretMissing'))).toBeInTheDocument()
   })
 })
 

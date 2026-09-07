@@ -257,7 +257,8 @@
     "whatsapp_web": "Numeri WhatsApp Web",
     "shiftmanager": "Shiftmanager",
     "helloflex": "HelloFlex",
-    "werkzoeken": "Werkzoeken"
+    "werkzoeken": "Werkzoeken",
+    "interview": "Colloquio IA"
   },
   "kpis": {
     "title": "Impostazioni KPI",
@@ -1610,12 +1611,15 @@
       "copyUrl": "Copia URL di callback",
       "copied": "Copiato",
       "loadError": "Impossibile caricare lo stato della connessione.",
-      "tokenSet": "verify token impostato",
-      "tokenMissing": "verify token mancante",
       "stepApp": "La registrazione è a livello di app presso Meta (developers.facebook.com → app → WhatsApp → Configuration): callback + token una sola volta, poi si sottoscrive il campo \"messages\" per ogni WABA. I nuovi numeri si aggiungono automaticamente.",
       "stepToken": "Il verify token lo scegli tu e lo inserisci in due punti: presso Meta e in",
       "tokenLink": "Impostazioni → WhatsApp",
-      "stepAgent": "Gli URL webhook dell'agente (sulla scheda agente) sono interni a Koios: non registrarli mai presso Meta."
+      "stepAgent": "Gli URL webhook dell'agente (sulla scheda agente) sono interni a Koios: non registrarli mai presso Meta.",
+      "verifyTokenSet": "Token di verifica impostato",
+      "verifyTokenMissing": "Token di verifica mancante",
+      "appSecretSet": "Segreto app impostato",
+      "appSecretMissing": "Segreto app mancante",
+      "appSecretWarning": "Segreto app mancante: i webhook Meta non verranno verificati e i messaggi in entrata verranno rifiutati."
     },
     "endpoints": {
       "title": "Endpoint del flusso",
@@ -2136,7 +2140,9 @@
       "syncNo": "no",
       "chip": "Coexistence",
       "disconnected": "Disconnesso tramite l'app il {{date}}. Il ricollegamento avviene solo tramite la procedura guidata sopra; lo scollegamento avviene sempre nell'app WhatsApp Business."
-    }
+    },
+    "appSecretSet": "Segreto app impostato",
+    "appSecretMissing": "Segreto app mancante"
   },
   "roles": {
     "loading": "Recupero ruoli…",
@@ -2882,7 +2888,9 @@
       "outreach_campaign": "Lista di chiamate",
       "customer_contact": "Referente",
       "location": "Sede (propria)"
-    }
+    },
+    "nextValue": "Prossimo: {{n}}",
+    "startLocked": "Il valore iniziale è bloccato una volta assegnato il primo numero."
   },
   "vacancyDisplay": {
     "title": "Visualizzazione tabella",
@@ -3361,7 +3369,11 @@
       "inactiveNotice": "Non disponibile finché il sito carriere è disattivato.",
       "noTenant": "Nessuna agenzia ancora selezionata."
     },
-    "saveError": "Impossibile salvare la modifica."
+    "saveError": "Impossibile salvare la modifica.",
+    "urlLabel": "URL del sito carriere personalizzato",
+    "urlHint": "URL assoluto con il placeholder {ref} dove deve apparire il numero di posizione, ad esempio https://carriere.example.it/offerte/{ref}",
+    "urlInvalid": "Utilizzare un URL assoluto contenente {ref}.",
+    "urlPlaceholder": "https://lavoro.esempio.it/annuncio/{ref}"
   },
   "caoSettings": {
     "title": "CCNL",
@@ -3945,5 +3957,27 @@
   },
   "changelog": {
     "noTrailYet": "Nessun registro di audit per questa sezione ancora"
+  },
+  "interview": {
+    "title": "Colloquio IA",
+    "subtitle": "Configurazione per colloqui IA: modalità di rifiuto, link di prenotazione e numero di contatto",
+    "rejectionMode": {
+      "label": "Modalità di rifiuto",
+      "description": "Come Koios gestisce i candidati non idonei all'intervista IA: proporre un rifiuto (il reclutatore conferma) o rifiutare automaticamente",
+      "options": {
+        "proposal": "Proposta, reclutatore conferma",
+        "automatic": "Rifiuta automaticamente"
+      }
+    },
+    "bookingLink": {
+      "label": "Link di prenotazione",
+      "description": "URL dove i candidati possono prenotare il loro colloquio (Koios invia questo link)",
+      "placeholder": "https://calendly.com/azienda"
+    },
+    "recruiterPhone": {
+      "label": "Numero di telefono del reclutatore",
+      "description": "Numero di telefono in formato E.164 (+393123456789) per gli inviti al colloquio quando il responsabile non ha un numero proprio",
+      "placeholder": "+393123456789"
+    }
   }
 }

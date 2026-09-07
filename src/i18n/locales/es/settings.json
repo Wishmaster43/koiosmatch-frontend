@@ -257,7 +257,8 @@
     "whatsapp_web": "Números de WhatsApp Web",
     "shiftmanager": "Shiftmanager",
     "helloflex": "HelloFlex",
-    "werkzoeken": "Werkzoeken"
+    "werkzoeken": "Werkzoeken",
+    "interview": "Entrevista IA"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -1364,12 +1365,15 @@
       "copyUrl": "Copiar URL de callback",
       "copied": "Copiado",
       "loadError": "No se pudo cargar el estado de la conexión.",
-      "tokenSet": "verify token configurado",
-      "tokenMissing": "falta el verify token",
       "stepApp": "El registro es a nivel de app en Meta (developers.facebook.com → app → WhatsApp → Configuration): callback + token una vez, y después suscribir el campo «messages» por WABA. Los números nuevos se suman automáticamente.",
       "stepToken": "El verify token lo eliges tú mismo y lo introduces en dos sitios: en Meta y en",
       "tokenLink": "Ajustes → WhatsApp",
-      "stepAgent": "Las URL de webhook de los agentes (en la ficha del agente) son internas de Koios — nunca las registres en Meta."
+      "stepAgent": "Las URL de webhook de los agentes (en la ficha del agente) son internas de Koios — nunca las registres en Meta.",
+      "verifyTokenSet": "Token de verificación configurado",
+      "verifyTokenMissing": "Token de verificación faltante",
+      "appSecretSet": "Secreto de aplicación configurado",
+      "appSecretMissing": "Secreto de aplicación faltante",
+      "appSecretWarning": "Secreto de aplicación faltante: los webhooks de Meta no se verificarán y los mensajes entrantes se rechazarán."
     },
     "endpoints": {
       "title": "Puntos de conexión del flujo",
@@ -1890,7 +1894,9 @@
       "syncNo": "no",
       "chip": "Coexistence",
       "disconnected": "Desconectado desde la aplicación el {{date}}. Volver a vincular solo es posible con el asistente de arriba; la desconexión siempre se hace en la aplicación WhatsApp Business."
-    }
+    },
+    "appSecretSet": "Secreto de aplicación configurado",
+    "appSecretMissing": "Secreto de aplicación faltante"
   },
   "roles": {
     "loading": "Cargando roles…",
@@ -2882,7 +2888,9 @@
       "outreach_campaign": "Lista de llamadas",
       "customer_contact": "Persona de contacto",
       "location": "Sucursal (propia)"
-    }
+    },
+    "nextValue": "Siguiente: {{n}}",
+    "startLocked": "El valor de inicio se bloquea una vez que se asigna el primer número."
   },
   "vacancyDisplay": {
     "title": "Vista de tabla",
@@ -3361,7 +3369,11 @@
       "inactiveNotice": "No disponible mientras el sitio de carreras esté desactivado.",
       "noTenant": "Todavía no se ha seleccionado ningún inquilino."
     },
-    "saveError": "No se pudo guardar el cambio."
+    "saveError": "No se pudo guardar el cambio.",
+    "urlLabel": "URL del sitio de carrera personalizado",
+    "urlHint": "URL absoluta con el placeholder {ref} donde debe aparecer el número de vacante, por ejemplo https://carreras.example.es/empleos/{ref}",
+    "urlInvalid": "Use una URL absoluta que contenga {ref}.",
+    "urlPlaceholder": "https://empleo.ejemplo.es/oferta/{ref}"
   },
   "caoSettings": {
     "title": "Convenios colectivos",
@@ -3945,5 +3957,27 @@
   },
   "changelog": {
     "noTrailYet": "Aún no hay registro de auditoría para esta sección"
+  },
+  "interview": {
+    "title": "Entrevista por IA",
+    "subtitle": "Configuración para entrevistas por IA: modo de rechazo, enlace de reserva y número de contacto",
+    "rejectionMode": {
+      "label": "Modo de rechazo",
+      "description": "Cómo maneja Koios los candidatos descalificados por la entrevista por IA: proponer un rechazo (el reclutador confirma) o rechazar automáticamente",
+      "options": {
+        "proposal": "Propuesta, reclutador confirma",
+        "automatic": "Rechazar automáticamente"
+      }
+    },
+    "bookingLink": {
+      "label": "Enlace de reserva",
+      "description": "URL donde los candidatos pueden programar su entrevista (Koios envía este enlace)",
+      "placeholder": "https://calendly.com/empresa"
+    },
+    "recruiterPhone": {
+      "label": "Número de teléfono del reclutador",
+      "description": "Número de teléfono en formato E.164 (+34612345678) para las invitaciones a entrevistas cuando el responsable no tiene número propio",
+      "placeholder": "+34612345678"
+    }
   }
 }

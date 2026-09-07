@@ -257,7 +257,8 @@
     "whatsapp_web": "Numéros WhatsApp Web",
     "shiftmanager": "Shiftmanager",
     "helloflex": "HelloFlex",
-    "werkzoeken": "Werkzoeken"
+    "werkzoeken": "Werkzoeken",
+    "interview": "Entretien IA"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -1364,12 +1365,15 @@
       "copyUrl": "Copier l\\u2019URL de callback",
       "copied": "Copié",
       "loadError": "Impossible de charger l\\u2019état de la connexion.",
-      "tokenSet": "verify token renseigné",
-      "tokenMissing": "verify token manquant",
       "stepApp": "L\\u2019enregistrement se fait au niveau de l\\u2019app chez Meta (developers.facebook.com → app → WhatsApp → Configuration) : callback + token une fois, puis abonner le champ « messages » par WABA. Les nouveaux numéros suivent automatiquement.",
       "stepToken": "Vous choisissez le verify token vous-même et le saisissez à deux endroits : chez Meta et dans",
       "tokenLink": "Paramètres → WhatsApp",
-      "stepAgent": "Les URL de webhook des agents (sur la carte agent) sont internes à Koios — ne jamais les enregistrer chez Meta."
+      "stepAgent": "Les URL de webhook des agents (sur la carte agent) sont internes à Koios — ne jamais les enregistrer chez Meta.",
+      "verifyTokenSet": "Token de vérification défini",
+      "verifyTokenMissing": "Token de vérification manquant",
+      "appSecretSet": "Secret d'application défini",
+      "appSecretMissing": "Secret d'application manquant",
+      "appSecretWarning": "Secret d'application manquant : les webhooks Meta ne seront pas vérifiés et les messages entrants seront rejetés."
     },
     "endpoints": {
       "title": "Points de terminaison de flux",
@@ -1890,7 +1894,9 @@
       "syncNo": "non",
       "chip": "Coexistence",
       "disconnected": "Déconnecté via l'application le {{date}}. La reliaison passe par l'assistant ci-dessus ; la déconnexion se fait toujours dans l'application WhatsApp Business."
-    }
+    },
+    "appSecretSet": "Secret d'application défini",
+    "appSecretMissing": "Secret d'application manquant"
   },
   "roles": {
     "loading": "Chargement des rôles…",
@@ -2882,7 +2888,9 @@
       "outreach_campaign": "Liste d'appels",
       "customer_contact": "Personne de contact",
       "location": "Agence (propre)"
-    }
+    },
+    "nextValue": "Suivant: {{n}}",
+    "startLocked": "La valeur de départ est verrouillée une fois que le premier numéro a été alloué."
   },
   "vacancyDisplay": {
     "title": "Affichage du tableau",
@@ -3361,7 +3369,11 @@
       "inactiveNotice": "Indisponible tant que le site carrière est désactivé.",
       "noTenant": "Aucun client sélectionné pour l'instant."
     },
-    "saveError": "Impossible d'enregistrer la modification."
+    "saveError": "Impossible d'enregistrer la modification.",
+    "urlLabel": "URL du site carrière personnalisé",
+    "urlHint": "URL absolue avec le placeholder {ref} à la place du numéro d'emploi, par exemple https://emplois.example.fr/offres/{ref}",
+    "urlInvalid": "Utilisez une URL absolue contenant {ref}.",
+    "urlPlaceholder": "https://emplois.exemple.fr/offre/{ref}"
   },
   "caoSettings": {
     "title": "Conventions collectives",
@@ -3945,5 +3957,27 @@
   },
   "changelog": {
     "noTrailYet": "Pas encore de journal d'audit pour cette section"
+  },
+  "interview": {
+    "title": "Entretien IA",
+    "subtitle": "Configuration pour les entretiens IA: mode de rejet, lien de réservation et numéro de contact",
+    "rejectionMode": {
+      "label": "Mode de rejet",
+      "description": "Comment Koios traite les candidats disqualifiés par l'entretien IA: proposer un rejet (le recruteur confirme) ou rejeter automatiquement",
+      "options": {
+        "proposal": "Proposition, recruteur confirme",
+        "automatic": "Rejeter automatiquement"
+      }
+    },
+    "bookingLink": {
+      "label": "Lien de réservation",
+      "description": "URL où les candidats peuvent planifier leur entretien (Koios envoie ce lien)",
+      "placeholder": "https://calendly.com/entreprise"
+    },
+    "recruiterPhone": {
+      "label": "Numéro de téléphone du recruteur",
+      "description": "Numéro de téléphone au format E.164 (+33612345678) pour les invitations d'entretien lorsque le responsable n'a pas de numéro propre",
+      "placeholder": "+33612345678"
+    }
   }
 }

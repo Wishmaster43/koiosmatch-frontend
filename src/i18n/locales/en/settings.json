@@ -257,7 +257,8 @@
     "whatsapp_web": "WhatsApp Web numbers",
     "shiftmanager": "Shiftmanager",
     "helloflex": "HelloFlex",
-    "werkzoeken": "Werkzoeken"
+    "werkzoeken": "Werkzoeken",
+    "interview": "AI interview"
   },
   "kpis": {
     "title": "KPI settings",
@@ -1610,12 +1611,15 @@
       "copyUrl": "Copy callback URL",
       "copied": "Copied",
       "loadError": "Could not load the connection status.",
-      "tokenSet": "verify token set",
-      "tokenMissing": "verify token missing",
       "stepApp": "Registration is app-level at Meta (developers.facebook.com → app → WhatsApp → Configuration): callback + token once, then subscribe the \"messages\" field per WABA. New numbers ride along automatically.",
       "stepToken": "You choose the verify token yourself and enter it in two places: at Meta and in",
       "tokenLink": "Settings → WhatsApp",
-      "stepAgent": "The agent webhook URLs (on the agent card) are Koios-internal — never register those at Meta."
+      "stepAgent": "The agent webhook URLs (on the agent card) are Koios-internal — never register those at Meta.",
+      "verifyTokenSet": "Verify token set",
+      "verifyTokenMissing": "Verify token missing",
+      "appSecretSet": "App secret set",
+      "appSecretMissing": "App secret missing",
+      "appSecretWarning": "App secret missing: Meta webhooks will not be verified and inbound messages will be rejected."
     },
     "endpoints": {
       "title": "Workflow endpoints",
@@ -2136,7 +2140,9 @@
       "syncNo": "no",
       "chip": "Coexistence",
       "disconnected": "Disconnected from the app on {{date}}. Re-linking happens through the wizard above; unlinking always happens in the WhatsApp Business app."
-    }
+    },
+    "appSecretSet": "App secret set",
+    "appSecretMissing": "App secret missing"
   },
   "roles": {
     "loading": "Loading roles…",
@@ -2882,7 +2888,9 @@
       "outreach_campaign": "Call list",
       "customer_contact": "Contact person",
       "location": "Branch (own)"
-    }
+    },
+    "nextValue": "Next: {{n}}",
+    "startLocked": "Start value is locked once the first number has been allocated."
   },
   "vacancyDisplay": {
     "title": "Table display",
@@ -3361,7 +3369,11 @@
       "inactiveNotice": "Unavailable while the career site is off.",
       "noTenant": "No tenant selected yet."
     },
-    "saveError": "Could not save the change."
+    "saveError": "Could not save the change.",
+    "urlLabel": "Custom career site URL",
+    "urlHint": "Absolute URL with {ref} placeholder where the vacancy number should appear, for example https://careers.example.com/jobs/{ref}",
+    "urlInvalid": "Use an absolute URL containing {ref}.",
+    "urlPlaceholder": "https://jobs.example.com/vacancy/{ref}"
   },
   "caoSettings": {
     "title": "Collective agreements (CLA)",
@@ -3945,5 +3957,27 @@
   },
   "changelog": {
     "noTrailYet": "No audit trail for this section yet"
+  },
+  "interview": {
+    "title": "AI Interview",
+    "subtitle": "Configuration for AI interviews: rejection mode, booking link, and contact number",
+    "rejectionMode": {
+      "label": "Rejection Mode",
+      "description": "How Koios handles candidates disqualified by the AI interview: propose a rejection (recruiter confirms) or reject automatically",
+      "options": {
+        "proposal": "Proposal, recruiter confirms",
+        "automatic": "Reject automatically"
+      }
+    },
+    "bookingLink": {
+      "label": "Booking Link",
+      "description": "URL where candidates can schedule their interview (Koios sends this link)",
+      "placeholder": "https://calendly.com/company"
+    },
+    "recruiterPhone": {
+      "label": "Recruiter Phone Number",
+      "description": "Phone number in E.164 format (+31612345678) for interview invitations when the owner has no number of their own",
+      "placeholder": "+31612345678"
+    }
   }
 }

@@ -52,7 +52,7 @@ const fillRequired = async (user: ReturnType<typeof userEvent.setup>) => {
 
 const EXISTING: WhatsappConnectionRow = {
   id: 'conn-1', waba_id: '10229012934', label: 'Oud label',
-  location_id: null, role_name: null, is_default: false, has_verify_token: false, provider: 'meta',
+  location_id: null, role_name: null, is_default: false, has_verify_token: false, has_app_secret: false, provider: 'meta',
 }
 
 describe('WhatsAppConnectionForm · WA-VESTIGING-FE-1 · create', () => {

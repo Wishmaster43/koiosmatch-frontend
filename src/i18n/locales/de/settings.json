@@ -257,7 +257,8 @@
     "whatsapp_web": "WhatsApp Web-Nummern",
     "shiftmanager": "Shiftmanager",
     "helloflex": "HelloFlex",
-    "werkzoeken": "Werkzoeken"
+    "werkzoeken": "Werkzoeken",
+    "interview": "KI-Interview"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -1364,12 +1365,15 @@
       "copyUrl": "Callback-URL kopieren",
       "copied": "Kopiert",
       "loadError": "Verbindungsstatus konnte nicht geladen werden.",
-      "tokenSet": "Verify-Token hinterlegt",
-      "tokenMissing": "Verify-Token fehlt",
       "stepApp": "Die Registrierung erfolgt auf App-Ebene bei Meta (developers.facebook.com → App → WhatsApp → Configuration): einmal Callback + Token, danach pro WABA das Feld „messages\" abonnieren. Neue Nummern fahren automatisch mit.",
       "stepToken": "Das Verify-Token wählst du selbst und trägst es an zwei Stellen ein: bei Meta und in",
       "tokenLink": "Einstellungen → WhatsApp",
-      "stepAgent": "Die Agent-Webhook-URLs (auf der Agentenkarte) sind Koios-intern — niemals bei Meta registrieren."
+      "stepAgent": "Die Agent-Webhook-URLs (auf der Agentenkarte) sind Koios-intern — niemals bei Meta registrieren.",
+      "verifyTokenSet": "Verify-Token gesetzt",
+      "verifyTokenMissing": "Verify-Token fehlend",
+      "appSecretSet": "App Secret gesetzt",
+      "appSecretMissing": "App Secret fehlend",
+      "appSecretWarning": "App Secret fehlend: Meta-Webhooks werden nicht verifiziert und eingehende Nachrichten werden abgelehnt."
     },
     "endpoints": {
       "title": "Workflow-Endpunkte",
@@ -1890,7 +1894,9 @@
       "syncNo": "nein",
       "chip": "Coexistence",
       "disconnected": "Am {{date}} über die App getrennt. Neu verknüpfen geht nur über den Assistenten oben; das Trennen erfolgt immer in der WhatsApp-Business-App."
-    }
+    },
+    "appSecretSet": "App Secret gesetzt",
+    "appSecretMissing": "App Secret fehlend"
   },
   "roles": {
     "loading": "Rollen werden geladen…",
@@ -2882,7 +2888,9 @@
       "outreach_campaign": "Anrufliste",
       "customer_contact": "Ansprechpartner",
       "location": "Niederlassung (eigen)"
-    }
+    },
+    "nextValue": "Nächste: {{n}}",
+    "startLocked": "Der Startwert wird gesperrt, sobald die erste Nummer vergeben ist."
   },
   "vacancyDisplay": {
     "title": "Tabellenansicht",
@@ -3361,7 +3369,11 @@
       "inactiveNotice": "Nicht verfügbar, solange die Karriereseite ausgeschaltet ist.",
       "noTenant": "Noch kein Mandant ausgewählt."
     },
-    "saveError": "Die Änderung konnte nicht gespeichert werden."
+    "saveError": "Die Änderung konnte nicht gespeichert werden.",
+    "urlLabel": "Benutzerdefinierte Karrieresite-URL",
+    "urlHint": "Absolute URL mit {ref} Platzhalter an der Stelle der Stellennummer, zum Beispiel https://karrieren.example.de/stellen/{ref}",
+    "urlInvalid": "Verwenden Sie eine absolute URL mit {ref}.",
+    "urlPlaceholder": "https://karriere.beispiel.de/stelle/{ref}"
   },
   "caoSettings": {
     "title": "Tarifverträge",
@@ -3945,5 +3957,27 @@
   },
   "changelog": {
     "noTrailYet": "Für diesen Bereich gibt es noch kein Audit-Protokoll"
+  },
+  "interview": {
+    "title": "KI-Interview",
+    "subtitle": "Konfiguration für KI-Interviews: Ablehnungsmodus, Buchungslink und Kontaktnummer",
+    "rejectionMode": {
+      "label": "Ablehnungsmodus",
+      "description": "Wie Koios mit Kandidaten umgeht, die vom KI-Interview disqualifiziert wurden: Ablehnung vorschlagen (Recruiter bestätigt) oder automatisch ablehnen",
+      "options": {
+        "proposal": "Vorschlag, Recruiter bestätigt",
+        "automatic": "Automatisch ablehnen"
+      }
+    },
+    "bookingLink": {
+      "label": "Buchungslink",
+      "description": "URL, unter der Kandidaten ihr Interview vereinbaren können (Koios sendet diesen Link)",
+      "placeholder": "https://calendly.com/unternehmen"
+    },
+    "recruiterPhone": {
+      "label": "Telefonnummer des Recruiters",
+      "description": "Telefonnummer im E.164-Format (+49301234567) für Interview-Einladungen, wenn der Verantwortliche keine eigene Nummer hat",
+      "placeholder": "+49301234567"
+    }
   }
 }
