@@ -32,6 +32,9 @@ interface UseCustomerDrawerActionsArgs {
   statuses: LookupOption[]
 }
 
+// Raw blacklist reason option (from the API) with its stable key.
+interface BlacklistReasonRow { name?: string; key?: string }
+
 // Thin container hook: header state (status/phase/owner/tags/name/logo), the
 // convert-phase action, count-sync effects wiring is left to the caller (it
 // needs the sub-entity API objects), and the delete/merge actions.
@@ -82,10 +85,11 @@ export function useCustomerDrawerActions({ c, onUpdate, onClose, users, statuses
       .then(r => {
         if (!alive) return
         setBlacklistReasonsLoaded(true)
+        // KEY-ADOPTION: extract both name and key from each row; name is for display/back-compat.
         setBlacklistReasons(
-          ((unwrapList(r).rows) as Array<{ name?: string }>)
+          ((unwrapList(r).rows) as BlacklistReasonRow[])
             .filter(x => x.name)
-            .map(x => ({ value: String(x.name), label: String(x.name) })),
+            .map(x => ({ value: String(x.name), label: String(x.name), key: x.key ?? null })),
         )
       })
       .catch(() => { if (alive) { setBlacklistReasonsLoaded(true); setBlacklistReasons([]) } })
@@ -130,26 +134,31 @@ export function useCustomerDrawerActions({ c, onUpdate, onClose, users, statuses
   // in ONE PATCH (the BE guard validates the transition together with the
   // reason). Every other status clears the blacklist reason (send null) so no
   // stale reason stays on file when the customer leaves the blacklist.
+  // KEY-ADOPTION: track the reason's stable key (looked up from the current reason name).
   const changeStatus  = (v: string) => {
     const picked = statuses.find(s => String(s.value) === v)
     if (picked?.isBlacklist) {
-      setBlacklistModal({ target: v, reason: (c?.blacklistReason ?? ''), needReason: blacklistReasonRequired })
+      const reasonKey = blacklistReasons.find(r => r.value === c?.blacklistReason)?.key ?? null
+      setBlacklistModal({ target: v, reason: (c?.blacklistReason ?? ''), reasonKey, needReason: blacklistReasonRequired })
       return
     }
     setStatus(v)
     // STATUS-OVERRIDE-REVERT-1: clear the override on a rejected PATCH so the
     // picker falls back to the (reverted) record value instead of the refused one.
-    Promise.resolve(onUpdate?.(c?.id, { status: v, blacklistReason: null })).then(ok => { if (ok === false) setStatus(null) })
+    Promise.resolve(onUpdate?.(c?.id, { status: v, blacklistReason: null, blacklistReasonKey: null })).then(ok => { if (ok === false) setStatus(null) })
   }
-  // Confirm the blacklist prompt: one PATCH carrying both the new status and the
-  // reason. Cancel (closing without confirming) never patches — the picker keeps
-  // showing the unchanged status.
+  // Confirm the blacklist prompt: one PATCH carrying the new status, the reason,
+  // and the reason's stable key. Cancel (closing without confirming) never patches.
+  // KEY-ADOPTION: resolve the key from the picked option.
   const confirmBlacklist = () => {
     if (!blacklistModal || !c) return
+    // Look up the picked option to get its stable key.
+    const pickedOption = blacklistReasons.find(r => r.value === blacklistModal.reason)
+    const reasonKey = pickedOption?.key ?? null
     // Local override mirrors changeStatus above: updateCustomer reverts the record slices on
     // a rejected PATCH, and now clears this override too (STATUS-OVERRIDE-REVERT-1).
     setStatus(blacklistModal.target)
-    Promise.resolve(onUpdate?.(c.id, { status: blacklistModal.target, blacklistReason: blacklistModal.reason || null }))
+    Promise.resolve(onUpdate?.(c.id, { status: blacklistModal.target, blacklistReason: blacklistModal.reason || null, blacklistReasonKey: reasonKey }))
       .then(ok => { if (ok === false) setStatus(null) })
     setBlacklistModal(null)
   }

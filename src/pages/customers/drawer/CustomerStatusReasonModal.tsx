@@ -16,9 +16,11 @@ import { useId } from 'react'
 import { Caption, FormLabel } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 
-export interface BlacklistReasonOption { value: string; label: string }
+// KEY-ADOPTION: each option carries its stable backend key (null for fallbacks).
+export interface BlacklistReasonOption { value: string; label: string; key?: string | null }
 
-export interface CustomerBlacklistModalState { target: string; reason: string; needReason: boolean }
+// KEY-ADOPTION: track the picked reason's stable key alongside the name.
+export interface CustomerBlacklistModalState { target: string; reason: string; reasonKey: string | null; needReason: boolean }
 
 interface Props {
   state: CustomerBlacklistModalState

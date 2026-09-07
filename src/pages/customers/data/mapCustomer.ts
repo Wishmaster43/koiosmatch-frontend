@@ -278,6 +278,9 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     // the column is null-safe backend-side, so an older payload may omit it entirely —
     // '' then means "no phase yet" and the chip falls back to a dash.
     phase: typeof c.phase === 'string' ? c.phase : '',
+    // KEY-ADOPTION: read the stable lookup keys alongside legacy names for
+    // blacklist_reason and source.
+    blacklistReasonKey: c.blacklist_reason_key ?? null,
     owner: owner.name ?? c.account_manager ?? c.owner_name ?? '',
     ownerId: owner.id ?? c.owner_id ?? null,
     ownerInitials: initialsOf(owner.name ?? c.account_manager ?? c.owner_name ?? ''),
@@ -311,7 +314,9 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     distanceKm: toCoord(c.distance_km),
     industry: (c.industry && typeof c.industry === 'object') ? (c.industry.name ?? '') : (c.industry ?? ''),
     // CUST-SOURCE-FE-1: plain acquisition-source name, matched by name like industry.
+    // KEY-ADOPTION: also read the stable lookup key.
     source: c.source ?? '',
+    sourceKey: c.source_key ?? null,
     website: c.website ?? '',
     employeeCount: c.employee_count ?? c.employeeCount ?? '',
     description: c.description ?? '',

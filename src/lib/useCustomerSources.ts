@@ -17,29 +17,37 @@ import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { translateSeedList } from './lookupSeedI18n'
-import { lookupNames } from './lookupUtils'
 
 // A picker option: `value` is the untranslated name the backend recognises;
-// `label` is what the user sees. Matches the shared CreatableSelect option shape 1:1.
-export interface CustomerSourceOption { value: string; label: string }
+// `label` is what the user sees. `key` is the backend's stable lookup key (null for
+// seed fallbacks that have no key). Matches the shared CreatableSelect option shape 1:1.
+export interface CustomerSourceOption { value: string; label: string; key: string | null }
 
 // Small starter seed shown before any real /customer-sources data has loaded
 // (data values, not UI copy — same treatment as DEFAULT_APPLICATION_SOURCES).
-export const DEFAULT_CUSTOMER_SOURCES = ['LinkedIn', 'Google', 'Website leads']
+// KEY-ADOPTION: seed values have no key (null), real lookup rows carry the backend's stable key.
+export const DEFAULT_CUSTOMER_SOURCES = [
+  { name: 'LinkedIn', key: null },
+  { name: 'Google', key: null },
+  { name: 'Website leads', key: null },
+]
 
 // Both pieces of state (names + the API's free-entry flag) come from the same
-// response, so they're cached together as one value.
-interface SourcesLookupData { sources: string[]; apiFreeEntry: boolean }
+// response, so they're cached together as one value. Sources carry {name,key} pairs.
+interface SourcesLookupData { sources: Array<{ name: string; key: string | null }>; apiFreeEntry: boolean }
 const FALLBACK: SourcesLookupData = { sources: DEFAULT_CUSTOMER_SOURCES, apiFreeEntry: true }
 
-// Names keep the seed when empty; apiFreeEntry defaults STRICT when the response
-// carries no boolean flag (a genuinely empty or failed response), per the
-// FREE-ENTRY-FALLBACK-1 reasoning in useApplicationSources.ts.
+// Extract sources with their stable keys; names keep the seed when empty;
+// apiFreeEntry defaults STRICT when the response carries no boolean flag.
 const mapSources = (res: AxiosResponse): SourcesLookupData => {
-  const names = lookupNames(res)
+  // Extract rows from the API response { data: { data: [...], allow_free_entry: ... } }.
+  const rows = ((res?.data as Record<string, unknown>)?.data as Array<{ name?: string; key?: string }> | undefined) ?? []
+  const sources = rows.length
+    ? rows.map(r => ({ name: String(r.name ?? ''), key: r.key ?? null }))
+    : DEFAULT_CUSTOMER_SOURCES
   const free = (res?.data as { allow_free_entry?: unknown })?.allow_free_entry
   return {
-    sources: names.length ? names : DEFAULT_CUSTOMER_SOURCES,
+    sources,
     apiFreeEntry: typeof free === 'boolean' ? free : false,
   }
 }
@@ -51,8 +59,9 @@ export function useCustomerSources() {
   // Seeded defaults render in the user language; a tenant value stays as typed.
   // VALUE stays the raw backend name (never translated) so the submitted `source`
   // is always what the backend recognises; only LABEL is translated for display.
+  // KEY-ADOPTION: each option carries its stable backend key (null for seed fallbacks).
   const sources = useMemo(
-    () => translateSeedList(t, 'customerSources', data.sources.map(name => ({ value: name, label: name }))),
+    () => translateSeedList(t, 'customerSources', data.sources.map(s => ({ value: s.name, label: s.name, key: s.key }))),
     [data.sources, t],
   )
   return { sources, allowFreeEntry: data.apiFreeEntry, invalidate }

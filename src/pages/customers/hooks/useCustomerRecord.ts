@@ -47,8 +47,8 @@ interface CreateForm {
   // KLANT-FASE-1: lifecycle phase slug picked in the create modal (is_default preselected).
   phase?: string
   // CUST-SOURCE-FE-1: acquisition-source name picked in the create modal, optional
-  // like industry.
-  source?: string
+  // like industry. KEY-ADOPTION: sourceKey carries the stable lookup key.
+  source?: string; sourceKey?: string | null
   branchId?: string; website?: string; employeeCount?: string
   companyText?: string; costCenter?: string; billingEmail?: string
   // KLANT-ADRES-1 (Danny 02-08): the customer's own visiting address, collected by
@@ -79,7 +79,8 @@ const OPTIONAL_CREATE_FIELDS: Array<[keyof CreateForm, string]> = [
   // the create popup; StoreCustomerRequest already accepts vat_number.
   ['vatNumber', 'vat_number'],
   // CUST-SOURCE-FE-1: acquisition source, optional like the rest above.
-  ['source', 'source'],
+  // KEY-ADOPTION: sourceKey carries the stable lookup key.
+  ['source', 'source'], ['sourceKey', 'source_key'],
 ]
 
 interface Args {
@@ -93,7 +94,10 @@ interface Args {
 const FIELD_MAP: Record<string, string> = {
   name: 'name', debtorNumber: 'debtor_number', city: 'city', industry: 'industry',
   // CUST-SOURCE-FE-1: the drawer's source picker, matched by name like industry.
-  source: 'source',
+  // KEY-ADOPTION: send source_key alongside the legacy source name.
+  source: 'source', sourceKey: 'source_key',
+  // KEY-ADOPTION: send blacklist_reason_key alongside the legacy blacklist_reason.
+  blacklistReasonKey: 'blacklist_reason_key',
   // KLANT-ADRES-1 / KLANT-KVK-1 (backend 28-07): the customer's own address + head
   // registration. Every key here is validated by CustomerRequest::sharedRules — a key
   // MISSING from that list is silently dropped by Laravel, so this map and those rules

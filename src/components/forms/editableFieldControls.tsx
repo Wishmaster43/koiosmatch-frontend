@@ -41,9 +41,27 @@ export function renderFieldControl(f: FieldRow, ctx: {
     clearable={f.clearable} clearLabel={f.clearable && typeof f.label === 'string' ? f.label : undefined} />
   if (f.type === 'creatable') {
     // Lookup combobox that can also add a free-text value (tenant `allowCreate`).
-    const opts = (f.options ?? []).map(o => (typeof o === 'string' ? o : { value: o.value, label: String(o.label ?? o.value) }))
-    // VAC-CLEAR-1: an optional creatable row is clearable when the config says so (same forwarding as the select branch).
-    return <CreatableSelect value={(v as string) ?? ''} onChange={val => setF(f.key, val)} options={opts} placeholder={t('select')} allowCreate={f.allowCreate !== false} style={compact}
+    // KEY-ADOPTION: options may carry a `key` field; select by key when present,
+    // else fall back to matching by name. Resolve and store the key on change.
+    const opts = (f.options ?? []).map(o => {
+      if (typeof o === 'string') return { value: o, label: o, key: null }
+      return { value: o.value, label: String(o.label ?? o.value), key: (o as Record<string, unknown>).key ?? null }
+    })
+    // Find the current selected option: match by key first (if keyField exists), else by value.
+    const keyField = `${f.key}Key` // e.g., 'source' → 'sourceKey'
+    const keyValue = form[keyField] as string | null | undefined
+    const selected = keyValue && opts.some(o => o.key === keyValue)
+      ? opts.find(o => o.key === keyValue)
+      : opts.find(o => o.value === v)
+    // VAC-CLEAR-1: an optional creatable row is clearable when the config says so.
+    return <CreatableSelect value={selected?.value ?? ''} onChange={val => {
+      setF(f.key, val)
+      // KEY-ADOPTION: resolve the picked option's key and store it alongside the name.
+      // Always re-resolve: a free-typed value after a pick must drop the old key (the
+      // backend ranks key above name, a stale key would silently save the previous row).
+      const picked = opts.find(o => o.value === val)
+      setF(keyField, picked?.key ?? null)
+    }} options={opts} placeholder={t('select')} allowCreate={f.allowCreate !== false} style={compact}
       clearable={f.clearable} clearLabel={f.clearable && typeof f.label === 'string' ? f.label : undefined} />
   }
   if (f.type === 'date') return <DateField value={v as string | undefined} onChange={val => setF(f.key, val)} style={compact} />

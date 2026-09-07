@@ -562,3 +562,43 @@ describe('useCustomerRecord · restoreCustomer (TRASH-OVERAL-2)', () => {
     expect(r.result.current.customers[0].archived).toBe(true)
   })
 })
+
+// KEY-ADOPTION (Danny 07-09): lookup values are identified by stable `key` field
+// (sent alongside legacy name for backward compat). The source and blacklist_reason
+// fields carry their keys in sourceKey and blacklistReasonKey; PATCH and POST bodies
+// send source_key and blacklist_reason_key (the API precedence is id > key > name).
+describe('useCustomerRecord · KEY-ADOPTION (source_key, blacklist_reason_key)', () => {
+  it('PATCHes source_key alongside the legacy source name', async () => {
+    mockedPatch.mockResolvedValue({})
+    const r = harness([customer({ id: 1, source: 'LinkedIn', sourceKey: null })])
+    act(() => { r.result.current.record.updateCustomer(1, { source: 'Google', sourceKey: 'google' }) })
+    // Both the name (for back-compat) and the stable key travel together.
+    expect(mockedPatch).toHaveBeenCalledWith('/customers/1', { source: 'Google', source_key: 'google' })
+  })
+
+  it('POSTs source_key alongside the legacy source name on create', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: { id: 99, name: 'Created' } })
+    const r = harness([])
+    await act(async () => {
+      await r.result.current.record.handleCreate({
+        name: 'Created', status: 'active', ownerId: '', industry: '', city: '', source: 'Google', sourceKey: 'google',
+      })
+    })
+    expect(vi.mocked(api.post)).toHaveBeenCalledWith('/customers', expect.objectContaining({ source: 'Google', source_key: 'google' }))
+  })
+
+  it('PATCHes blacklist_reason_key alongside the legacy blacklist_reason', async () => {
+    mockedPatch.mockResolvedValue({})
+    const r = harness([customer({ id: 1, status: 'bl', blacklistReason: 'Fraude', blacklistReasonKey: null })])
+    act(() => { r.result.current.record.updateCustomer(1, { blacklistReason: 'Fraude', blacklistReasonKey: 'fraud' }) })
+    expect(mockedPatch).toHaveBeenCalledWith('/customers/1', { blacklist_reason: 'Fraude', blacklist_reason_key: 'fraud' })
+  })
+
+  // When a field is cleared, both the name and the key are sent as null.
+  it('sends null for both source and source_key when source is cleared', async () => {
+    mockedPatch.mockResolvedValue({})
+    const r = harness([customer({ id: 1, source: 'Google', sourceKey: 'google' })])
+    act(() => { r.result.current.record.updateCustomer(1, { source: '', sourceKey: null }) })
+    expect(mockedPatch).toHaveBeenCalledWith('/customers/1', { source: '', source_key: null })
+  })
+})

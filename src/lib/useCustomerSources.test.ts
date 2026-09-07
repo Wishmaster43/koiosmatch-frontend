@@ -22,7 +22,12 @@ let tenantSeq = 0
 
 // This test suite never initialises react-i18next, so `t(key, { defaultValue })`
 // falls back to `defaultValue` verbatim, i.e. label === value here.
-const asOptions = (names: string[]) => names.map(name => ({ value: name, label: name }))
+// KEY-ADOPTION: asOptions now includes key (null for seed, real key for API rows).
+const asOptions = (names: string[], keys?: (string | null)[]) => names.map((name, i) => ({
+  value: name,
+  label: name,
+  key: keys?.[i] ?? null
+}))
 
 // A fresh tenant id per test isolates useCachedLookup's module-scope cache.
 const nextTenant = () => `t${tenantSeq++}`
@@ -41,7 +46,9 @@ describe('useCustomerSources', () => {
     mockedTenantId.mockReturnValue(nextTenant())
     mockedGet.mockReturnValue(new Promise(() => {}))
     const { result } = renderHook(() => useCustomerSources())
-    expect(result.current.sources).toEqual(asOptions(DEFAULT_CUSTOMER_SOURCES))
+    // DEFAULT_CUSTOMER_SOURCES is now {name,key}[] — extract names for asOptions.
+    const seedNames = DEFAULT_CUSTOMER_SOURCES.map(s => s.name)
+    expect(result.current.sources).toEqual(asOptions(seedNames))
     expect(result.current.allowFreeEntry).toBe(true)
   })
 
@@ -50,17 +57,19 @@ describe('useCustomerSources', () => {
     mockedTenantId.mockReturnValue(nextTenant())
     mockedGet.mockRejectedValue(new Error('network'))
     const { result } = renderHook(() => useCustomerSources())
-    await waitFor(() => expect(result.current.sources).toEqual(asOptions(DEFAULT_CUSTOMER_SOURCES)))
+    const seedNames = DEFAULT_CUSTOMER_SOURCES.map(s => s.name)
+    await waitFor(() => expect(result.current.sources).toEqual(asOptions(seedNames)))
     expect(result.current.allowFreeEntry).toBe(true)
   })
 
-  it('maps the distinct lookup row names once the response resolves', async () => {
+  // KEY-ADOPTION: maps the distinct lookup row names AND their stable keys.
+  it('maps the distinct lookup row names and keys once the response resolves', async () => {
     mockedTenantId.mockReturnValue(nextTenant())
     mockedGet.mockResolvedValue({
-      data: { data: [{ id: 's1', name: 'LinkedIn' }, { id: 's2', name: 'Google' }], allow_free_entry: false },
+      data: { data: [{ id: 's1', name: 'LinkedIn', key: 'linkedin' }, { id: 's2', name: 'Google', key: 'google' }], allow_free_entry: false },
     })
     const { result } = renderHook(() => useCustomerSources())
-    await waitFor(() => expect(result.current.sources).toEqual(asOptions(['LinkedIn', 'Google'])))
+    await waitFor(() => expect(result.current.sources).toEqual(asOptions(['LinkedIn', 'Google'], ['linkedin', 'google'])))
   })
 
   it('keeps the seed when the lookup is empty (nothing usable in the response)', async () => {
@@ -68,7 +77,8 @@ describe('useCustomerSources', () => {
     mockedGet.mockResolvedValue({ data: { data: [], allow_free_entry: false } })
     const { result } = renderHook(() => useCustomerSources())
     await waitFor(() => expect(mockedGet).toHaveBeenCalled())
-    expect(result.current.sources).toEqual(asOptions(DEFAULT_CUSTOMER_SOURCES))
+    const seedNames = DEFAULT_CUSTOMER_SOURCES.map(s => s.name)
+    expect(result.current.sources).toEqual(asOptions(seedNames))
   })
 
   it('keeps the seed when the endpoint is unavailable (network/404)', async () => {
@@ -76,7 +86,8 @@ describe('useCustomerSources', () => {
     mockedGet.mockRejectedValue(new Error('404'))
     const { result } = renderHook(() => useCustomerSources())
     await waitFor(() => expect(mockedGet).toHaveBeenCalled())
-    expect(result.current.sources).toEqual(asOptions(DEFAULT_CUSTOMER_SOURCES))
+    const seedNames = DEFAULT_CUSTOMER_SOURCES.map(s => s.name)
+    expect(result.current.sources).toEqual(asOptions(seedNames))
   })
 
   it('honours a false allow_free_entry from the API', async () => {
@@ -98,6 +109,18 @@ describe('useCustomerSources', () => {
     mockedGet.mockReturnValue(new Promise(() => {}))
     const { result } = renderHook(() => useCustomerSources())
     expect(typeof result.current.invalidate).toBe('function')
+  })
+})
+
+// KEY-ADOPTION: API rows without a key field default to null (backward compat).
+describe('useCustomerSources · backward compat: missing key', () => {
+  it('defaults to key=null when an API row omits the key field', async () => {
+    mockedTenantId.mockReturnValue(nextTenant())
+    mockedGet.mockResolvedValue({
+      data: { data: [{ id: 's1', name: 'LinkedIn' /* no key */ }], allow_free_entry: false },
+    })
+    const { result } = renderHook(() => useCustomerSources())
+    await waitFor(() => expect(result.current.sources[0].key).toBe(null))
   })
 })
 

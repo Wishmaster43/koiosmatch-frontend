@@ -248,8 +248,10 @@ export interface Customer {
   statusColor: string | undefined
   // KLANT-BLACKLIST-PROMPT-1: the lookup-backed blacklist reason (mirrors the
   // candidate's blacklistReason) — set by the status-reason prompt, validated by
-  // the backend against customer_blacklist_reasons.name.
+  // the backend against customer_blacklist_reasons.name/key.
   blacklistReason: string | null
+  // KEY-ADOPTION: the stable lookup key for the blacklist reason (null when unset).
+  blacklistReasonKey: string | null
   // KLANT-FASE-1: the lifecycle phase SLUG (customer_phases.value) — "prospect or
   // customer", a different axis than `status`. The API sends a bare slug; label and
   // colour are resolved from the /customer-phases lookup (useCustomerPhases).
@@ -291,6 +293,8 @@ export interface Customer {
   // CUST-SOURCE-FE-1: acquisition-source NAME (customer_sources lookup) — matched
   // by name like industry/functions, never a foreign key.
   source: string
+  // KEY-ADOPTION: the stable lookup key for the source (null when unset).
+  sourceKey: string | null
   website: string
   employeeCount: string | number
   description: string
@@ -434,9 +438,10 @@ export interface ApiCustomer {
   branch?: { id?: Id; name?: string } | null; branch_id?: Id | null; branch_name?: string
   status?: { value?: string | number; label?: string; color?: string } | string | number
   status_id?: string | number; status_label?: string; status_color?: string
-  // KLANT-BLACKLIST-PROMPT-1: asked of CMBE (the resource does not emit it yet) —
-  // read tolerantly so a future add lands without another FE change.
+  // KLANT-BLACKLIST-PROMPT-1: asked of CMBE — the lookup-backed reason.
+  // KEY-ADOPTION: read both the name and the stable key tolerantly.
   blacklist_reason?: string | null
+  blacklist_reason_key?: string | null
   // KLANT-FASE-1: bare lifecycle-phase slug on both the list and detail resource.
   // Null-safe on the backend, so it may legitimately arrive as null.
   phase?: string | null
@@ -453,7 +458,9 @@ export interface ApiCustomer {
   billing_address_line_2?: string; billing_province?: string
   city?: string; industry?: { name?: string } | string; website?: string
   // CUST-SOURCE-FE-1: acquisition-source name, plain string like industry.
+  // KEY-ADOPTION: read both the name and the stable key tolerantly.
   source?: string | null
+  source_key?: string | null
   // JOB-CONTACT-1: the customer's own contact fields (CustomerDetailResource).
   email?: string; phone?: string
   // STRAAL-1: geocoded coordinates + radius distance from the server.
