@@ -51,7 +51,6 @@ const billingUsage = (over: Record<string, unknown> = {}) => ({
 function mockApi(billing = billingUsage()) {
   vi.mocked(api.get).mockImplementation((url: string) => {
     if (url === '/billing/usage') return Promise.resolve({ data: { data: billing } })
-    if (url === '/settings/messaging-costs') return Promise.resolve({ data: { usage: {}, cost: {}, by_number: [] } })
     return Promise.resolve({ data: {} })
   })
 }
@@ -80,7 +79,7 @@ describe('BillingUsageSettings — sub-tabs share one period', () => {
   it('switching to Per workflow renders the row from the same shared fetch, no second request', async () => {
     mockApi()
     renderPage()
-    await waitFor(() => expect(api.get).toHaveBeenCalledTimes(2)) // /billing/usage + /settings/messaging-costs
+    await waitFor(() => expect(api.get).toHaveBeenCalledTimes(1)) // /billing/usage only
     await userEvent.click(screen.getByRole('tab', { name: t('billing.usage.tabs.workflow') }))
     expect(await screen.findByText('Welkomstflow')).toBeInTheDocument()
     // No extra /billing/usage call fired by switching tabs.
@@ -159,20 +158,20 @@ describe('BillingUsageSettings — vocabulary keys exist in all seven locales', 
   })
 })
 
-describe('BillingUsageSettings — WhatsApp tab is presence-based', () => {
-  it('renders the legacy by_number fallback when whatsapp.by_channel is absent', async () => {
+describe('BillingUsageSettings — WhatsApp tab shows channel data or empty state', () => {
+  it('renders the empty state when whatsapp.by_channel is absent', async () => {
     mockApi()
     renderPage()
     await userEvent.click(screen.getByRole('tab', { name: t('billing.usage.tabs.whatsapp') }))
-    expect(await screen.findByText(t('billing.usage.whatsapp.fallbackCaption'))).toBeInTheDocument()
+    expect(await screen.findByText(t('billing.usage.whatsapp.empty'))).toBeInTheDocument()
   })
 
   // K-242 (02-09): by_channel is INFO only now (message counts) — no tokens/amount.
   it('renders the per-channel table when whatsapp.by_channel is present', async () => {
-    mockApi(billingUsage({ whatsapp: { by_channel: [{ channel: 'wa_web', messages: 12 }] } }))
+    mockApi(billingUsage({ whatsapp: { by_channel: [{ channel: 'wa_web', label: 'WA Web', messages: 12 }] } }))
     renderPage()
     await userEvent.click(screen.getByRole('tab', { name: t('billing.usage.tabs.whatsapp') }))
     expect(await screen.findByText('WA Web')).toBeInTheDocument()
-    expect(screen.queryByText(t('billing.usage.whatsapp.fallbackCaption'))).not.toBeInTheDocument()
+    expect(screen.queryByText(t('billing.usage.whatsapp.empty'))).not.toBeInTheDocument()
   })
 })

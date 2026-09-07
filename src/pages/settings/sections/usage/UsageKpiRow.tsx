@@ -4,13 +4,9 @@ import { useNumberFormat } from '@/lib/formatters'
 import KpiCard from '@/components/ui/KpiCard'
 import type { BillingUsageResponse } from '@/types/billingUsage'
 
-interface WhatsAppUsage { cost?: { total?: number }; usage?: { waba_messages?: number }; currency?: string }
-
 interface UsageKpiRowProps {
   billing: BillingUsageResponse['data'] | undefined
   billingLoading: boolean
-  wa: WhatsAppUsage | null
-  waLoading: boolean
 }
 
 /**
@@ -19,11 +15,12 @@ interface UsageKpiRowProps {
  * tile). Four cards: Total this period (workflow + AI amount for the selected
  * `/billing/usage` period — the endpoint has no single "total" field, so this is
  * the documented sum, not a fabricated figure), Workflow (credits + EUR), Koios AI
- * (tokens + EUR), WhatsApp (EUR + messages — deliberately month-only, the messaging
- * endpoint has no period param at all, see UsageOverviewSection's header comment).
+ * (tokens + EUR), WhatsApp (message count per channel).
  */
-export default function UsageKpiRow({ billing, billingLoading, wa, waLoading }: UsageKpiRowProps) {
+export default function UsageKpiRow({ billing, billingLoading }: UsageKpiRowProps) {
   const { t } = useTranslation('settings')
+  // Channel names render through the shared lookup keys (same as UsageWhatsAppTab), never the platform label.
+  const { t: tc } = useTranslation('candidates')
   const { formatNumber, formatCurrency } = useNumberFormat()
 
   // Total this period = workflow.amount + ai.amount — the endpoint returns no
@@ -32,6 +29,15 @@ export default function UsageKpiRow({ billing, billingLoading, wa, waLoading }: 
   // header comment. Rounded the same way mergeDailyRows rounds daily totals.
   const totalAmount = billing ? Math.round(((billing.workflow?.amount ?? 0) + (billing.ai?.amount ?? 0)) * 100) / 100 : undefined
   const aiTokens = (billing?.ai?.input_tokens ?? 0) + (billing?.ai?.output_tokens ?? 0)
+
+  // Sum message counts from all channels (K-242: by_channel is INFO only, no cost/tokens).
+  const whatsappChannels = billing?.whatsapp?.by_channel ?? []
+  const whatsappTotalMessages = whatsappChannels.reduce((sum, c) => sum + (c.messages ?? 0), 0)
+  // Per-channel note: label + count for channels with messages, joined with " · ".
+  const whatsappChannelNotes = whatsappChannels
+    .filter((c) => (c.messages ?? 0) > 0)
+    .map((c) => `${tc(`conversations.channel.${c.channel}`, { defaultValue: c.label || c.channel })} (${formatNumber(c.messages ?? 0)})`)
+    .join(' · ')
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 10, marginBottom: 14 }}>
@@ -61,11 +67,11 @@ export default function UsageKpiRow({ billing, billingLoading, wa, waLoading }: 
         note={billing ? t('billing.usage.kpi.koiosNote', { n: formatNumber(aiTokens) }) : undefined}
       />
       <KpiCard
-        loading={waLoading}
+        loading={billingLoading}
         icon={MessageCircle} iconBg="var(--color-primary-bg)" iconColor="var(--color-primary)"
         label={t('billing.usage.kpi.whatsappLabel')}
-        value={wa ? formatCurrency(wa.cost?.total, wa.currency ?? 'EUR') : '—'}
-        note={wa ? t('billing.usage.kpi.whatsappNote', { n: formatNumber(wa.usage?.waba_messages ?? 0) }) : undefined}
+        value={billing ? formatNumber(whatsappTotalMessages) : '—'}
+        note={whatsappTotalMessages > 0 ? whatsappChannelNotes : (billing ? t('billing.usage.kpi.whatsappNone') : undefined)}
       />
     </div>
   )

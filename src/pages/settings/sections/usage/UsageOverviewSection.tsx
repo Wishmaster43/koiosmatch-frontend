@@ -26,20 +26,16 @@ import UsageDrilldownCard from './UsageDrilldownCard'
 import UsageDailyTable from './UsageDailyTable'
 import { notice } from '../usageCardStyles'
 
-interface WhatsAppUsage { cost?: { total?: number }; usage?: { waba_messages?: number }; currency?: string }
-
 interface UsageOverviewSectionProps {
   data: BillingUsageResponse['data'] | undefined
   phase: 'loading' | 'ready' | 'empty' | 'error' | 'unavailable'
   // Subscription-meter drill (Danny 24-08): switches the chart to that meter's
   // series and scrolls it into view; nonce distinguishes repeated clicks.
   drillRequest?: { category: 'workflow' | 'ai'; nonce: number } | null
-  wa: WhatsAppUsage | null
-  waLoading: boolean
 }
 
 // Pure presenter for the Overzicht sub-tab (see file header for the F5 fetch-sharing decision).
-export default function UsageOverviewSection({ data, phase, drillRequest, wa, waLoading }: UsageOverviewSectionProps) {
+export default function UsageOverviewSection({ data, phase, drillRequest }: UsageOverviewSectionProps) {
   const { t } = useTranslation('settings')
 
   const [category, setCategory] = useState<UsageCategory>('total')
@@ -66,7 +62,7 @@ export default function UsageOverviewSection({ data, phase, drillRequest, wa, wa
 
   return (
     <div>
-      <UsageKpiRow billing={data} billingLoading={phase === 'loading'} wa={wa} waLoading={waLoading} />
+      <UsageKpiRow billing={data} billingLoading={phase === 'loading'} />
 
       {phase === 'loading' && <p style={notice}>{t('common.loadingShort')}</p>}
       {phase === 'error' && <p style={notice}>{t('billing.usage.daily.loadError')}</p>}

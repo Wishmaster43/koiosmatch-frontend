@@ -159,8 +159,8 @@ export interface BillingUsageResponse {
     workflow: BillingUsageWorkflow
     ai: BillingUsageAi
     subscription?: BillingUsageSubscription
-    // Presence-gated (CMBE announced, not yet confirmed live) — components must
-    // never assume this key exists and fall back to /settings/messaging-costs.
+    // Presence-gated (K-242, 02-09: INFO only, wa_web messages count as Workflow-tokens) —
+    // K-207 migration complete: /settings/messaging-costs legacy fallback removed (09-07).
     whatsapp?: BillingUsageWhatsapp
   }
 }

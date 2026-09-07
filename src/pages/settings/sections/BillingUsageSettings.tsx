@@ -13,8 +13,8 @@
  *                    prev_month support — honest caption) + workflow-runs total.
  *   - Per workflow: workflow.per_workflow, row click → the workflow editor.
  *   - Per gebruiker:ai.per_user.
- *   - WhatsApp:     whatsapp.by_channel when present, else the legacy
- *                    messaging-costs by_number card (own component fetch).
+ *   - WhatsApp:     whatsapp.by_channel per-channel message counts (K-242: INFO only,
+ *                    no legacy fallback).
  *
  * ONE vocabulary everywhere (settings.json billing.usage.*): "Workflow-tokens" (formerly
  * "Koios Tokens"/"workflow-runs") = workflow executions INCLUDING wa_web sends (K-242, one
@@ -49,8 +49,6 @@ import UsageWhatsAppTab from './usage/UsageWhatsAppTab'
 type Period = 'month' | 'prev_month'
 type Phase = 'loading' | 'ready' | 'empty' | 'error' | 'unavailable'
 type Tab = 'overview' | 'activity' | 'workflow' | 'user' | 'whatsapp'
-
-interface WhatsAppUsage { cost?: { total?: number }; usage?: { waba_messages?: number }; currency?: string }
 
 // EXCEL-1 — stream the usage xlsx (per day / per workflow / per user tabs, sale
 // prices only, §9) to disk via a temporary object URL, never a bare <a href>.
@@ -103,26 +101,6 @@ export default function BillingUsageSettings() {
       })
     return () => ctrl.abort()
   }, [period])
-
-  // Legacy WhatsApp KPI-tile fetch — kept for the Overzicht KPI row and the
-  // WhatsApp tab's fallback (month-only, no period param, §see UsageWhatsAppTab).
-  const [wa, setWa] = useState<WhatsAppUsage | null>(null)
-  const [waPhase, setWaPhase] = useState<Phase>('loading')
-  // One-time legacy WhatsApp KPI fetch (month-only, no period param) for the overview tile and the WhatsApp tab's fallback.
-  useEffect(() => {
-    const ctrl = new AbortController()
-    api.get('/settings/messaging-costs', { signal: ctrl.signal })
-      .then((res) => {
-        const d = unwrap<WhatsAppUsage>(res)
-        setWa(d)
-        setWaPhase((d?.usage?.waba_messages ?? 0) > 0 ? 'ready' : 'empty')
-      })
-      .catch((err) => {
-        if (ctrl.signal.aborted) return
-        setWaPhase(err?.response?.status === 403 ? 'unavailable' : 'error')
-      })
-    return () => ctrl.abort()
-  }, [])
 
   // Meter drill from the subscription card into the daily chart (Danny 24-08).
   const [meterDrill, setMeterDrill] = useState<{ category: 'workflow' | 'ai'; nonce: number } | null>(null)
@@ -184,8 +162,7 @@ export default function BillingUsageSettings() {
             <SubscriptionCard subscription={data?.subscription ?? null} phase={phase}
               onDrillAi={() => setMeterDrill({ category: 'ai', nonce: Date.now() })}
               onDrillWorkflow={() => setMeterDrill({ category: 'workflow', nonce: Date.now() })} />
-            <UsageOverviewSection data={data} phase={phase} drillRequest={meterDrill}
-              wa={wa} waLoading={waPhase === 'loading'} />
+            <UsageOverviewSection data={data} phase={phase} drillRequest={meterDrill} />
             <UsageInvoiceCard data={data} phase={phase} />
           </>
         )}
