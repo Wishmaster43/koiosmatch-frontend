@@ -15,26 +15,26 @@ import { useCustomerCascade } from '../hooks/useCustomerCascade'
 // Proposes the customer's mirrored branch, falling back to the recruiter's own
 // first branch; freezing once edited by hand — see the module doc comment above.
 export function useVacancyBranchDefault(clientId: string, setBranchId: (v: string) => void) {
-  // Defensive cast (mirrors AddCandidateModal's own read of branch_ids) — the
-  // shared AuthUser type doesn't declare this field yet, but ME-BRANCHES-1 ships it.
-  const { user: me } = useAuth() as unknown as { user: { branch_ids?: Array<string | number> } | null }
-  // Primitive dependency on purpose: the effect below keys on THIS string, never on the
-  // user object itself (a mock or provider that hands out a fresh object per render
-  // would otherwise re-propose on every render and loop into an out-of-memory crash).
-  const recruiterBranch = me?.branch_ids?.[0]
+  const auth = useAuth()
+  const me = auth?.user
+  // Primitive dependencies on purpose (K-284): the effect below keys on THESE strings,
+  // never on the user object itself (a mock or provider that hands out a fresh object
+  // per render would otherwise re-propose on every render and loop into an out-of-memory crash).
+  const recruiterDefaultBranch = me?.default_branch_id
+  const recruiterFirstBranch = me?.branch_ids?.[0]
   const { detail } = useCustomerCascade(clientId)
   const [branchDirty, setBranchDirty] = useState(false)
 
-  // Re-propose the customer's branch or fall back to the recruiter's first branch
+  // Re-propose the customer's branch or fall back to the recruiter's default/first branch
   // on every customer switch, but only while the recruiter has not touched the
   // branch field by hand (propose-but-freeze).
   useEffect(() => {
     if (branchDirty) return
     const customerBranch = detail?.branch_id
-    const proposed = customerBranch ?? recruiterBranch
+    const proposed = customerBranch ?? recruiterDefaultBranch ?? recruiterFirstBranch
     setBranchId(proposed != null ? String(proposed) : '')
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-propose on the resolved customer detail / recruiter branch / dirty flag, never on setBranchId's identity
-  }, [detail, recruiterBranch, branchDirty])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-propose on the resolved customer detail / recruiter branches / dirty flag, never on setBranchId's identity
+  }, [detail, recruiterDefaultBranch, recruiterFirstBranch, branchDirty])
 
   // A manual pick (including the clear-X) freezes the proposal for the rest of
   // this create session — mirrors useBranchDefault's own handleBranchChange.

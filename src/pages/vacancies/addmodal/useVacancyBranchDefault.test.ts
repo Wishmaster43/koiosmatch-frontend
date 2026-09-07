@@ -7,14 +7,21 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { useVacancyBranchDefault } from './useVacancyBranchDefault'
 
-// Mock AuthContext to provide branch_ids.
-vi.mock('@/context/AuthContext', () => ({
-  useAuth: () => ({
+// Mock AuthContext to provide default_branch_id, default_branch, and branch_ids.
+const { authState } = vi.hoisted(() => ({
+  authState: {
     user: {
       id: 'recruiter-1',
       name: 'Piet Recruiter',
+      default_branch_id: null as string | number | null,
+      default_branch: null as { id: string | number; name: string } | null,
       branch_ids: ['user-branch-1', 'user-branch-2'],
     },
+  },
+}))
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: () => ({
+    user: authState.user,
   }),
 }))
 
@@ -35,6 +42,8 @@ vi.mock('../hooks/useCustomerCascade', () => ({
 
 beforeEach(() => {
   cascadeState.detail = null
+  authState.user.default_branch_id = null
+  authState.user.default_branch = null
 })
 
 describe('useVacancyBranchDefault', () => {
@@ -88,5 +97,17 @@ describe('useVacancyBranchDefault', () => {
 
     // Verify setBranchId was not called again (no re-proposal after manual edit).
     expect(setBranchId).not.toHaveBeenCalled()
+  })
+
+  it('default_branch_id wins over branch_ids[0] when customer has no branch_id (K-284)', async () => {
+    authState.user.default_branch_id = 'default-user-branch'
+    cascadeState.detail = {} // No branch_id on customer.
+    const setBranchId = vi.fn()
+    renderHook(() => useVacancyBranchDefault('customer-2', setBranchId))
+
+    // Should use the default_branch_id, not branch_ids[0].
+    await waitFor(() => {
+      expect(setBranchId).toHaveBeenCalledWith('default-user-branch')
+    })
   })
 })

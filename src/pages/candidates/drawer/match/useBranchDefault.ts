@@ -15,19 +15,19 @@ import type { LocationOption } from '@/lib/useLocations'
 import type { CustomerCascadeDetail } from '@/hooks/useCustomerCascade'
 
 export function useBranchDefault(detail: CustomerCascadeDetail | null, locations: LocationOption[]) {
-  // Defensive cast (mirrors AddCandidateModal's own read of branch_ids) — the
-  // shared AuthUser type doesn't declare this field yet, but ME-BRANCHES-1 ships it.
-  const { user: me } = useAuth() as unknown as { user: { branch_ids?: Array<string | number> } | null }
+  const auth = useAuth()
+  const me = auth?.user
   const [branchId, setBranchId] = useState('')
   const [branchDirty, setBranchDirty] = useState(false)
 
-  // Deepest-first proposal: customer branch > recruiter's own branch > tenant default.
+  // Deepest-first proposal (K-284): customer branch > recruiter's default branch > recruiter's first linked branch > tenant default.
   useEffect(() => {
     if (branchDirty) return
     const customerBranch = detail?.branch_id
-    const recruiterBranch = me?.branch_ids?.[0]
+    const recruiterDefaultBranch = me?.default_branch_id
+    const recruiterFirstBranch = me?.branch_ids?.[0]
     const tenantDefault = locations.find(l => l.is_default)?.value
-    const proposed = customerBranch ?? recruiterBranch ?? tenantDefault
+    const proposed = customerBranch ?? recruiterDefaultBranch ?? recruiterFirstBranch ?? tenantDefault
     setBranchId(proposed != null ? String(proposed) : '')
   }, [detail, me, locations, branchDirty])
 

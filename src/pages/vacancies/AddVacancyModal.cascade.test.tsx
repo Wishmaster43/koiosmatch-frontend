@@ -92,6 +92,8 @@ const { authState } = vi.hoisted(() => ({
   authState: {
     // WL:L104: the recruiter's own branches — the create form falls back to the first one.
     branchIds: ['user-branch-1', 'user-branch-2'] as string[],
+    // K-284: user's default branch (preferred); null by default for tests.
+    defaultBranchId: null as string | null,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- the default mock grants neither; the param exists only to match hasModule's real signature
     hasModule: (_k: string): boolean => false,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- the default mock grants neither; the param exists only to match hasPermission's real signature
@@ -99,7 +101,7 @@ const { authState } = vi.hoisted(() => ({
   },
 }))
 vi.mock('@/context/AuthContext', () => ({
-  useAuth: () => ({ user: { id: 'u1', name: 'Piet Recruiter', branch_ids: authState.branchIds }, hasModule: authState.hasModule, hasPermission: authState.hasPermission }),
+  useAuth: () => ({ user: { id: 'u1', name: 'Piet Recruiter', default_branch_id: authState.defaultBranchId, branch_ids: authState.branchIds }, hasModule: authState.hasModule, hasPermission: authState.hasPermission }),
 }))
 const { matchTemplatesState } = vi.hoisted(() => ({
   matchTemplatesState: { templates: [] as Array<{ id: string; name: string; weights: Record<string, number>; linkedVacanciesCount: number }> },
@@ -151,6 +153,7 @@ vi.mock('@/lib/api', async () => {
 
 beforeEach(() => {
   authState.branchIds = ['user-branch-1', 'user-branch-2']
+  authState.defaultBranchId = null
   detailByCustomer.clear()
   lookupState.statuses = makeDefaultStatuses()
   lookupState.channels = []

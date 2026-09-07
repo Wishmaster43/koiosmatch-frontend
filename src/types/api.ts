@@ -63,6 +63,12 @@ export interface User {
   // ::formatUser casts a null column to `{}`) — never a bare array despite the loose
   // backend validation (`sometimes|nullable|array`). See src/hooks/useUserPreference.
   ui_preferences?: Record<string, unknown> | null
+  // K-284: user's preferred default branch (vestiging) id and details; null when none set.
+  default_branch_id?: string | number | null
+  // K-284: user's preferred default branch full details { id, name }; null when none set.
+  default_branch?: { id: string | number; name: string } | null
+  // ME-BRANCHES-1: list of branch ids the user is linked to; used for fallback when no default_branch_id.
+  branch_ids?: Array<string | number>
 }
 
 /** A user row in the tenant user-management page (User + its settable icon colour). */
