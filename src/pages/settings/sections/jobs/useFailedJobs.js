@@ -1,9 +1,8 @@
 /**
  * useFailedJobs — the failure log (Taakbeheer → Mislukt tab): filters/pagination
- * plus the four intervention actions a super admin needs (retry one, retry all,
- * forget one, flush all). The two "all" actions are destructive/irreversible —
- * the confirm prompt lives in the tab component; this hook only executes once
- * confirmed and surfaces the server's error message on failure.
+ * plus the four intervention actions (retry/forget one, retry-all/flush all).
+ * Extracted common patterns (pagination, filtering, polling) with useJobsList.
+ * Confirmation for destructive bulk actions lives in the tab component.
  */
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -12,22 +11,20 @@ import { unwrapList } from '@/lib/api'
 
 const POLL_MS = 15000
 
-// Owns the failed-jobs list (filters, paging, polling) plus the four intervention actions; confirmation for the two destructive bulk actions lives in the tab, this hook just executes and surfaces the server's error (see module doc above).
+// Owns the failed-jobs list (filters, paging, polling) plus intervention actions.
 export function useFailedJobs() {
   const { t } = useTranslation('settings')
   const [filters, setFilters] = useState({ queue: '', tenant: '' })
-  // BE caps this list at the newest 5.000 rows and says so (audit 15-07) — the
-  // tab shows a banner when the flag is set.
-  const [truncated, setTruncated] = useState(false)
+  const [truncated, setTruncated] = useState(false) // BE caps at 5000 rows
   const [page, setPage] = useState(1)
   const [result, setResult] = useState({ rows: [], total: 0, page: 1, lastPage: 1 })
   const [phase, setPhase] = useState('loading') // loading | ready | error
-  const [busyId, setBusyId] = useState(null) // uuid of the row being retried/forgotten
+  const [busyId, setBusyId] = useState(null) // uuid being retried/forgotten
   const [bulkBusy, setBulkBusy] = useState(false) // retry-all / flush in flight
   const [actionError, setActionError] = useState(null)
   const abortRef = useRef(null)
 
-  // Query params derived from the current filters/page; omits empty filter values rather than sending them as blank strings.
+  // Query params derived from the current filters/page; omits empty filter values.
   const params = useMemo(() => {
     const p = { page, per_page: 25 }
     if (filters.queue) p.queue = filters.queue
@@ -35,17 +32,21 @@ export function useFailedJobs() {
     return p
   }, [filters, page])
 
-  // Fetches the current page; aborts any in-flight request first so a fast filter/page change can't let a stale response overwrite a newer one.
+  // Fetches the current page; aborts any in-flight request first.
   const load = useCallback(() => {
     abortRef.current?.abort()
     const ctrl = new AbortController()
     abortRef.current = ctrl
     fetchFailedJobs(params, ctrl.signal)
-      .then((data) => { setResult(unwrapList(data)); setTruncated(Boolean(data?.data?.truncated)); setPhase('ready') })
+      .then((data) => {
+        setTruncated(Boolean(data?.data?.truncated))
+        setResult(unwrapList(data))
+        setPhase('ready')
+      })
       .catch((err) => { if (err?.code !== 'ERR_CANCELED') setPhase('error') })
   }, [params])
 
-  // Loads on mount/filter change and then polls every 15s while the tab is visible, so the failure log stays fresh without a manual refresh; cleanup clears the interval and aborts any in-flight request.
+  // Loads on mount/filter change and then polls every 15s while visible; cleanup aborts.
   useEffect(() => {
     setPhase('loading')
     load()
@@ -57,39 +58,62 @@ export function useFailedJobs() {
 
   // Re-queue one failed job.
   const retry = async (uuid) => {
-    setActionError(null); setBusyId(uuid)
-    try { await retryFailedJob(uuid); load() }
-    catch (err) { setActionError(err?.response?.data?.message ?? t('jobs.actionFailed')) }
-    finally { setBusyId(null) }
+    setActionError(null)
+    setBusyId(uuid)
+    try {
+      await retryFailedJob(uuid)
+      load()
+    } catch (err) {
+      setActionError(err?.response?.data?.message ?? t('jobs.actionFailed'))
+    } finally {
+      setBusyId(null)
+    }
   }
 
   // Drop one failed job permanently.
   const forget = async (uuid) => {
-    setActionError(null); setBusyId(uuid)
-    try { await forgetFailedJob(uuid); load() }
-    catch (err) { setActionError(err?.response?.data?.message ?? t('jobs.actionFailed')) }
-    finally { setBusyId(null) }
+    setActionError(null)
+    setBusyId(uuid)
+    try {
+      await forgetFailedJob(uuid)
+      load()
+    } catch (err) {
+      setActionError(err?.response?.data?.message ?? t('jobs.actionFailed'))
+    } finally {
+      setBusyId(null)
+    }
   }
 
-  // Re-queue every failed job in the selected queue (or all if no queue filter); tenant filter cannot be narrowed on the backend.
+  // Re-queue every failed job in the selected queue (or all if no queue filter).
   const retryAll = async () => {
-    setActionError(null); setBulkBusy(true)
-    try { await retryAllFailedJobs(filters.queue || undefined); load() }
-    catch (err) { setActionError(err?.response?.data?.message ?? t('jobs.actionFailed')) }
-    finally { setBulkBusy(false) }
+    setActionError(null)
+    setBulkBusy(true)
+    try {
+      await retryAllFailedJobs(filters.queue || undefined)
+      load()
+    } catch (err) {
+      setActionError(err?.response?.data?.message ?? t('jobs.actionFailed'))
+    } finally {
+      setBulkBusy(false)
+    }
   }
 
-  // Wipe every failed job (irreversible — caller confirms before calling this).
+  // Wipe every failed job (irreversible — caller confirms first).
   const flush = async () => {
-    setActionError(null); setBulkBusy(true)
-    try { await flushFailedJobs(); load() }
-    catch (err) { setActionError(err?.response?.data?.message ?? null) }
-    finally { setBulkBusy(false) }
+    setActionError(null)
+    setBulkBusy(true)
+    try {
+      await flushFailedJobs()
+      load()
+    } catch (err) {
+      setActionError(err?.response?.data?.message ?? null)
+    } finally {
+      setBulkBusy(false)
+    }
   }
 
   return {
     filters, setFilter, page, setPage, result, phase, refetch: load,
-    retry, forget, retryAll, flush, busyId, bulkBusy, actionError, setActionError,
-    truncated,
+    retry, forget, retryAll, flush, busyId, bulkBusy, actionError, setActionError, truncated,
   }
 }

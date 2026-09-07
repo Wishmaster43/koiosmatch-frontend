@@ -1,6 +1,6 @@
 /**
- * AuditDrawer — drill-down for one audit entry: before/after diff (DiffRow) per
- * changed field. Extracted from AuditLog.
+ * AuditDrawer — drill-down for one audit entry: before/after diff per changed field.
+ * Uses shared DiffRow for consistent styling across audit and other detail views.
  */
 import { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -8,31 +8,9 @@ import { X, Eye } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useDateFormat } from '@/lib/datetime'
 import { KPI_KEYS, LogBadge, isAccessEvent, buildFieldDiff, entityLabel } from './auditShared'
-import { BodyText, GroupLabel, Caption, PageTitle } from '@/components/ui/typography'
+import { GroupLabel, Caption, PageTitle } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
-
-// One before/after field row; the value panels tint danger/success only when
-// the two sides actually differ, so an unchanged field reads calm/neutral.
-function DiffRow({ label, before, after }) {
-  const { t } = useTranslation('settings')
-  const changed = JSON.stringify(before) !== JSON.stringify(after)
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr 1fr', gap: 8,
-                  padding: '7px 0', borderBottom: '1px solid var(--hover-bg)', alignItems: 'start' }}>
-      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{label}</span>
-      <div style={{ fontSize: 12, background: changed ? 'var(--color-danger-bg)' : 'var(--hover-bg)',
-                    borderRadius: 6, padding: '3px 8px', color: changed ? 'var(--color-danger)' : 'var(--text-muted)',
-                    wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
-        {Array.isArray(before) ? (before.length ? before.join(', ') : t('audit.none')) : String(before ?? '—')}
-      </div>
-      <div style={{ fontSize: 12, background: changed ? 'var(--color-success-bg)' : 'var(--hover-bg)',
-                    borderRadius: 6, padding: '3px 8px', color: changed ? 'var(--color-success)' : 'var(--text-muted)',
-                    wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
-        {Array.isArray(after)  ? (after.length  ? after.join(', ')  : t('audit.none')) : String(after  ?? '—')}
-      </div>
-    </div>
-  )
-}
+import { DiffRow, DetailRow } from '@/pages/settings/shared/DetailRowLayout'
 
 // Drill-down for one audit log entry: dispatches to a per-log-type rendering
 // (access/http/auth/sync/roles/settings) or the generic before/after diff fallback.
@@ -49,9 +27,7 @@ export function AuditDrawer({ entry, onClose }) {
   const kpiLabel = (k) => KPI_KEYS.includes(k) ? t(`audit.kpi.${k}`) : k
 
   const renderContent = () => {
-    // Access (read) events — the AVG "Dossier geopend/ingezien" compliance log. These
-    // never carry an old→new diff by design, so they get their own compact panel
-    // instead of a dash-filled diff grid (Danny/CMBE 2026-07-14: visually distinct).
+    // Access (read) events — the AVG "Dossier geopend/ingezien" compliance log; no diff rows.
     if (isAccessEvent(entry)) {
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -59,16 +35,8 @@ export function AuditDrawer({ entry, onClose }) {
             <Eye size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
             <span style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>{t('audit.accessNotice')}</span>
           </div>
-          {[
-            { label: t('audit.colEntity'), value: entry.subject_type ? [entityLabel(entry.subject_type, t), entry.subject_label].filter(Boolean).join(' · ') : '—' },
-            { label: t('audit.auth.ip'), value: p.ip ?? '—' },
-          ].map(row => (
-            <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                           background: 'var(--hover-bg)', borderRadius: 8, padding: '10px 14px' }}>
-              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{row.label}</span>
-              <BodyText style={{ maxWidth: 240, overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'right' }} as="span">{row.value}</BodyText>
-            </div>
-          ))}
+          <DetailRow label={t('audit.colEntity')} value={entry.subject_type ? [entityLabel(entry.subject_type, t), entry.subject_label].filter(Boolean).join(' · ') : '—'} />
+          <DetailRow label={t('audit.auth.ip')} value={p.ip ?? '—'} />
         </div>
       )
     }
@@ -120,17 +88,9 @@ export function AuditDrawer({ entry, onClose }) {
     if (logName === 'auth') {
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {[
-            { label: t('audit.auth.action'),  value: p.action ?? entry.description },
-            { label: t('audit.auth.ip'),      value: p.ip ?? p.ip_address ?? '—' },
-            { label: t('audit.auth.browser'), value: p.user_agent ?? '—' },
-          ].map(row => (
-            <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                           background: 'var(--hover-bg)', borderRadius: 8, padding: '10px 14px' }}>
-              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{row.label}</span>
-              <BodyText style={{ maxWidth: 240, overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'right' }} as="span">{row.value}</BodyText>
-            </div>
-          ))}
+          <DetailRow label={t('audit.auth.action')} value={p.action ?? entry.description} />
+          <DetailRow label={t('audit.auth.ip')} value={p.ip ?? p.ip_address ?? '—'} />
+          <DetailRow label={t('audit.auth.browser')} value={p.user_agent ?? '—'} />
         </div>
       )
     }

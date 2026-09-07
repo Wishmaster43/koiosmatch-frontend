@@ -1,9 +1,7 @@
 /**
- * WorkflowEndpointsCard — editable webhook_send step endpoint URLs, stored as
- * tenant settings webhook_endpoint_<slug>. Allows admins to map arbitrary slugs
- * to SSRF-guarded URLs, which the workflow engine resolves per step. A row edits
- * the URL on blur; + endpoint adds a new slug+URL pair with client-side slug
- * validation (lowercase a-z0-9_- only).
+ * WorkflowEndpointsCard — editable webhook_send step endpoint URLs.
+ * Stored as tenant settings webhook_endpoint_<slug>; allows mapping arbitrary
+ * slugs to SSRF-guarded URLs. Uses shared EndpointRowGrid for consistent styling.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -14,6 +12,8 @@ import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import Button from '@/components/ui/Button'
 import { Caption, Mono } from '@/components/ui/typography'
 import { extractApiError } from '@/lib/extractApiError'
+import { EndpointRowGrid } from '@/pages/settings/shared/EndpointRow'
+import { endpointInputStyle } from '@/pages/settings/shared/endpointStyles'
 
 // Parses all webhook_endpoint_* settings and returns them as slug→url pairs.
 function parseEndpoints(settings: Record<string, unknown>): Array<{ slug: string; url: string }> {
@@ -43,26 +43,19 @@ interface EndpointRowProps {
   isSaving?: boolean
 }
 
-// One row: slug display, URL input, remove button, error message.
+// Display row: slug (readonly), URL input, remove button.
 function EndpointRow({ slug, url, onUrlChange, onRemove, error, isSaving }: EndpointRowProps) {
   const { t } = useTranslation('settings')
   const [localUrl, setLocalUrl] = useState(url)
 
   const handleBlur = () => {
-    if (localUrl !== url) {
-      onUrlChange(localUrl)
-    }
+    if (localUrl !== url) onUrlChange(localUrl)
   }
 
   return (
-    <div style={{ marginBottom: 12, paddingBottom: 12, borderBottom: '1px solid var(--border)' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr 32px', gap: 10, alignItems: 'center' }}>
-        {/* Slug display (readonly on existing rows, input on new) */}
-        <Mono style={{ wordBreak: 'break-all' }}>
-          {slug}
-        </Mono>
-
-        {/* URL input */}
+    <EndpointRowGrid
+      slugCol={<Mono style={{ wordBreak: 'break-all' }}>{slug}</Mono>}
+      urlCol={
         <input
           type="text"
           value={localUrl}
@@ -70,19 +63,10 @@ function EndpointRow({ slug, url, onUrlChange, onRemove, error, isSaving }: Endp
           onBlur={handleBlur}
           disabled={isSaving}
           placeholder={t('webhooks.endpoints.urlPlaceholder')}
-          style={{
-            fontSize: 13,
-            padding: '6px 8px',
-            border: '1px solid var(--border)',
-            borderRadius: 6,
-            fontFamily: 'monospace',
-            color: error ? 'var(--color-danger-text)' : 'var(--text)',
-            backgroundColor: error ? 'var(--color-danger-bg)' : 'var(--bg)',
-            cursor: isSaving ? 'not-allowed' : 'auto',
-          }}
+          style={endpointInputStyle(!!error, isSaving)}
         />
-
-        {/* Remove button */}
+      }
+      actionCol={
         <Button
           variant="ghost"
           size="sm"
@@ -94,15 +78,9 @@ function EndpointRow({ slug, url, onUrlChange, onRemove, error, isSaving }: Endp
         >
           <XIcon size={16} />
         </Button>
-      </div>
-
-      {/* Error message inline */}
-      {error && (
-        <Caption style={{ color: 'var(--color-danger-text)', marginTop: 4 }}>
-          {error}
-        </Caption>
-      )}
-    </div>
+      }
+      error={error}
+    />
   )
 }
 
@@ -135,33 +113,22 @@ function NewEndpointRow({ onSave, onCancel, error, isSaving }: NewEndpointRowPro
   }
 
   const handleUrlBlur = () => {
-    // Automatically save when the URL field loses focus.
     handleSave()
   }
 
   return (
-    <div style={{ marginBottom: 12, paddingBottom: 12, borderBottom: '1px solid var(--border)' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr 32px', gap: 10, alignItems: 'center' }}>
-        {/* Slug input (new rows only) */}
+    <EndpointRowGrid
+      slugCol={
         <input
           type="text"
           value={slug}
           onChange={(e) => handleSlugChange(e.target.value)}
           disabled={isSaving}
           placeholder={t('webhooks.endpoints.slugPlaceholder')}
-          style={{
-            fontSize: 13,
-            padding: '6px 8px',
-            border: `1px solid ${slugError ? 'var(--color-danger)' : 'var(--border)'}`,
-            borderRadius: 6,
-            fontFamily: 'monospace',
-            color: slugError ? 'var(--color-danger-text)' : 'var(--text)',
-            backgroundColor: slugError ? 'var(--color-danger-bg)' : 'var(--bg)',
-            cursor: isSaving ? 'not-allowed' : 'auto',
-          }}
+          style={endpointInputStyle(!!slugError, isSaving)}
         />
-
-        {/* URL input */}
+      }
+      urlCol={
         <input
           type="text"
           value={url}
@@ -169,19 +136,10 @@ function NewEndpointRow({ onSave, onCancel, error, isSaving }: NewEndpointRowPro
           onBlur={handleUrlBlur}
           disabled={isSaving}
           placeholder={t('webhooks.endpoints.urlPlaceholder')}
-          style={{
-            fontSize: 13,
-            padding: '6px 8px',
-            border: '1px solid var(--border)',
-            borderRadius: 6,
-            fontFamily: 'monospace',
-            color: error ? 'var(--color-danger-text)' : 'var(--text)',
-            backgroundColor: error ? 'var(--color-danger-bg)' : 'var(--bg)',
-            cursor: isSaving ? 'not-allowed' : 'auto',
-          }}
+          style={endpointInputStyle(!!error, isSaving)}
         />
-
-        {/* Cancel button (styled like the remove button) */}
+      }
+      actionCol={
         <Button
           variant="ghost"
           size="sm"
@@ -193,22 +151,9 @@ function NewEndpointRow({ onSave, onCancel, error, isSaving }: NewEndpointRowPro
         >
           <XIcon size={16} />
         </Button>
-      </div>
-
-      {/* Slug validation error */}
-      {slugError && (
-        <Caption style={{ color: 'var(--color-danger-text)', marginTop: 4 }}>
-          {slugError}
-        </Caption>
-      )}
-
-      {/* Server error */}
-      {error && (
-        <Caption style={{ color: 'var(--color-danger-text)', marginTop: 4 }}>
-          {error}
-        </Caption>
-      )}
-    </div>
+      }
+      error={slugError || error}
+    />
   )
 }
 
