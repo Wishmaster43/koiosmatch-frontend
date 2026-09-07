@@ -213,17 +213,29 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
           <VacancyLinkField value={vacancyId} options={vacancyOptions} onChange={setVacancyId} error={vacancyOptionsError} />
         </Row>
       ) : (
-        <Row label={t('drawer.vacancy')}>
-          {/* S12/S13: the vacancy is a real linkable entity (id available) —
-              EntityLink gives in-app click + new-tab icon; the return-tab
-              stash (S14/S22) makes browser BACK land back on this Sollicitatie
-              ("Application") tab instead of resetting to the drawer's first tab. */}
-          <span onClickCapture={() => { if (a.id != null) rememberReturnTab(a.id, 'application') }}>
-            <EntityLink page="vacancies" id={a.vacancyId} title={t('drawer.openVacancy')}>
-              {a.vacancyTitle || '—'}
-            </EntityLink>
-          </span>
-        </Row>
+        <>
+          <Row label={t('drawer.vacancy')}>
+            {/* S12/S13: the vacancy is a real linkable entity (id available) —
+                EntityLink gives in-app click + new-tab icon; the return-tab
+                stash (S14/S22) makes browser BACK land back on this Sollicitatie
+                ("Application") tab instead of resetting to the drawer's first tab. */}
+            <span onClickCapture={() => { if (a.id != null) rememberReturnTab(a.id, 'application') }}>
+              <EntityLink page="vacancies" id={a.vacancyId} title={t('drawer.openVacancy')}>
+                {a.vacancyTitle || '—'}
+              </EntityLink>
+            </span>
+          </Row>
+          {/* B-46: the vacancy's own customer (nested vacancy.customer_id) normally equals the
+              application's customer; only when it differs does a quiet link to that other
+              customer appear, so the recruiter can see the vacancy hangs under another client. */}
+          {a.vacancy?.customerId != null && String(a.vacancy.customerId) !== String(a.customerId ?? "") && (
+            <Row label={t('drawer.vacancyClient')}>
+              <EntityLink page="customers" id={a.vacancy.customerId} title={t('drawer.openCustomer')}>
+                {t('drawer.vacancyClientOther')}
+              </EntityLink>
+            </Row>
+          )}
+        </>
       )}
       {/* APP-MATCH-SUMMARY-1: the linked Match (Hired -> match) — renders
           NOTHING when the application has no Match at all, never a dash row

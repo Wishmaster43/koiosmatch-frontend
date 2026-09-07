@@ -262,6 +262,8 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
     vacancy: {
       id: vac.id ?? base.vacancyId, title: vac.title ?? base.vacancyTitle, client: base.client,
       vacancyId: vac.code ?? vac.reference ?? '', status: vac.status_label ?? vac.status ?? '',
+      // B-46: the vacancy's customer id from the nested vacancy object.
+      customerId: (vac.customer_id as Id | undefined) ?? null,
       employmentType: vac.employment_type ?? '',
       // Locatie (S6): ApplicationDetailResource sends the vacancy's work-site `city`
       // (from location_city), not a `location` string — fall back to it so the

@@ -89,10 +89,10 @@ describe('TierMeter', () => {
   it('derives the weightsLine from a chat + non-chat activity map', () => {
     const meter: BillingUsageTierMeter = {
       tier: { key: 'pro', label: 'Pro' }, allowance: 100, used: 10, pct: 10, state: 'ok', over: 0,
-      weights: { activities: { chat: 3, note_assist: 1 }, flavors: { slim: 2, max: 5 } },
+      weights: { activities: { chat: 3, note_assist: 1 }, flavors: { smart: 2, max: 5 } },
     }
     render(<TierMeter label="AI" meter={meter} unit="token" />)
-    expect(screen.getByText(t('billing.usage.plan.tier.weightsLine', { chat: '3', other: '1', slim: '2', max: '5' }))).toBeInTheDocument()
+    expect(screen.getByText(t('billing.usage.plan.tier.weightsLine', { chat: '3', other: '1', smart: '2', max: '5' }))).toBeInTheDocument()
   })
 
   // N1: a tier-less blocked meter (legacy allowance 0) reads the bundle copy, never
@@ -114,6 +114,6 @@ describe('TierMeter', () => {
   it('renders no weightsLine for an empty activities map', () => {
     const meter: BillingUsageTierMeter = { tier: { key: 'pro', label: 'Pro' }, allowance: 100, used: 10, pct: 10, state: 'ok', over: 0, weights: { activities: {}, flavors: {} } }
     render(<TierMeter label="AI" meter={meter} unit="token" />)
-    expect(screen.queryByText(/slim/i)).toBeNull()
+    expect(screen.queryByText(/smart/i)).toBeNull()
   })
 })

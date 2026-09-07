@@ -8,6 +8,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { fetchFailedJobs, retryFailedJob, forgetFailedJob, retryAllFailedJobs, flushFailedJobs } from './jobsApi'
 import { unwrapList } from '@/lib/api'
+import { extractApiError } from '@/lib/extractApiError'
 
 const POLL_MS = 15000
 
@@ -64,7 +65,7 @@ export function useFailedJobs() {
       await retryFailedJob(uuid)
       load()
     } catch (err) {
-      setActionError(err?.response?.data?.message ?? t('jobs.actionFailed'))
+      setActionError(extractApiError(err, t('jobs.actionFailed')))
     } finally {
       setBusyId(null)
     }
@@ -78,21 +79,26 @@ export function useFailedJobs() {
       await forgetFailedJob(uuid)
       load()
     } catch (err) {
-      setActionError(err?.response?.data?.message ?? t('jobs.actionFailed'))
+      setActionError(extractApiError(err, t('jobs.actionFailed')))
     } finally {
       setBusyId(null)
     }
   }
 
   // Re-queue every failed job in the selected queue (or all if no queue filter).
+  // Resolves the server's {count, skipped, truncated} so the caller can say what
+  // happened (B-53/I-2), or null when the request failed (error shown here).
   const retryAll = async () => {
     setActionError(null)
     setBulkBusy(true)
     try {
-      await retryAllFailedJobs(filters.queue || undefined)
+      const res = await retryAllFailedJobs(filters.queue || undefined)
+      const { count = 0, skipped = [], truncated: wasTruncated = false } = res.data ?? {}
       load()
+      return { count, skipped, truncated: Boolean(wasTruncated) }
     } catch (err) {
-      setActionError(err?.response?.data?.message ?? t('jobs.actionFailed'))
+      setActionError(extractApiError(err, t('jobs.actionFailed')))
+      return null
     } finally {
       setBulkBusy(false)
     }
@@ -106,7 +112,7 @@ export function useFailedJobs() {
       await flushFailedJobs()
       load()
     } catch (err) {
-      setActionError(err?.response?.data?.message ?? null)
+      setActionError(extractApiError(err, t('jobs.actionFailed')))
     } finally {
       setBulkBusy(false)
     }

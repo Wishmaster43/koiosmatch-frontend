@@ -14,6 +14,7 @@ import { useFailedJobs } from './useFailedJobs'
 import Button from '@/components/ui/Button'
 import { Mono } from '@/components/ui/typography'
 import { tintBorder } from '@/lib/tint'
+import { notify } from '@/lib/notify'
 
 // Failure log with per-row retry/forget and two destructive bulk actions, both gated behind the shared confirm dialog naming the exact count (see file header).
 export default function FailedJobsTab() {
@@ -25,6 +26,17 @@ export default function FailedJobsTab() {
   } = useFailedJobs()
   const { confirm, dialog } = useConfirm()
 
+  // Retry-all: one toast with the count, plus the skipped (dead tenant) and
+  // truncated (more failures than one pass covers) notes when the server reports them.
+  const runRetryAll = async () => {
+    const r = await retryAll()
+    if (!r) return
+    const parts = [t('jobs.retryAllSuccess', { count: r.count })]
+    if (r.skipped.length > 0) parts.push(t('jobs.retryAllSkipped', { count: r.skipped.length }))
+    if (r.truncated) parts.push(t('jobs.retryAllTruncated'))
+    notify('success', parts.join(' · '))
+  }
+
   // Bulk actions are irreversible — confirm with the exact scope before firing.
   const confirmRetryAll = () => {
     let key = 'jobs.retryAllConfirm'
@@ -35,7 +47,7 @@ export default function FailedJobsTab() {
     } else if (filters.tenant) {
       key = 'jobs.retryAllUnfilteredConfirm'
     }
-    confirm(t(key, opts), retryAll)
+    confirm(t(key, opts), runRetryAll)
   }
   const confirmFlush = () => {
     let key = 'jobs.flushConfirm'

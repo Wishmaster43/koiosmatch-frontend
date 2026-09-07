@@ -193,6 +193,7 @@ export interface ApplicationDetail extends Application {
   }
   vacancy: {
     id: Id | null; title: string; client: string; vacancyId: string; status: string
+    customerId: Id | null
     employmentType: string; location: string; salary: string; hours: string
     experience: string; seniority: string; education: string
     branch: string; category: string; skills: unknown[]; tags: unknown[]

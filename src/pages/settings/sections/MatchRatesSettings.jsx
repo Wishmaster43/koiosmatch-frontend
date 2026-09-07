@@ -5,6 +5,9 @@
  * so it lives here as its own block, not under Vacancies → Matching where it used to
  * render (VacancyMatchingSettings). Only the SCREEN moved — it still persists to the
  * same tenant-wide /settings/matching resource the vacancy strictness slider uses.
+ *
+ * S-1: conversion_factor is now stripped for callers without billing.view permission.
+ * When absent, the field is hidden and the conversion_factor key is never PUT.
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -21,17 +24,23 @@ export default function MatchRatesSettings() {
   const [savedFactor, setSavedFactor] = useState('') // last server-confirmed value, for revert-on-failure
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
+  // S-1: conversion_factor field is hidden when absent from the response (no billing.view).
+  const [hasConversionFactorField, setHasConversionFactorField] = useState(false)
 
   // Load the saved conversion factor (a slice of the same /settings/matching row).
   // Alive-guard avoids a state update after unmount; a real failure gets its own
   // error state instead of silently rendering as "no factor configured" (§3 — error
   // is never the same as empty).
+  // S-1: presence-gate the field — only render it if the response includes the key.
   useEffect(() => {
     let alive = true
     api.get('/settings/matching')
       .then(r => {
         if (!alive) return
         const d = (unwrap(r)) ?? {}
+        // S-1: check if conversion_factor key is present in the response.
+        const hasField = 'conversion_factor' in d
+        setHasConversionFactorField(hasField)
         const cf = d.conversion_factor != null ? String(d.conversion_factor) : ''
         setConversionFactor(cf); setSavedFactor(cf)
       })
@@ -43,7 +52,9 @@ export default function MatchRatesSettings() {
   // Saves on blur (partial PUT) — optimistic, revert + toast on failure. An empty
   // input persists null (no factor configured); a non-numeric or non-positive value
   // is rejected locally and reverted, no request sent.
+  // S-1: when conversion_factor is absent from the response, never PUT the key.
   const saveConversionFactor = async () => {
+    if (!hasConversionFactorField) return // Hidden when not present; do not PUT.
     const trimmed = conversionFactor.trim()
     if (trimmed === savedFactor) return
     const num = trimmed === '' ? null : Number(trimmed)
@@ -62,7 +73,8 @@ export default function MatchRatesSettings() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14, color: 'var(--color-danger-text)', fontSize: 13 }}>
           <AlertTriangle size={14} /> {t('matchRates.loadError')}
         </div>
-      ) : (
+      ) : hasConversionFactorField ? (
+        // S-1: only render the input when conversion_factor is present in the response.
         <input type="number" step="0.01" min="0" value={conversionFactor}
           onChange={e => setConversionFactor(e.target.value)}
           onBlur={saveConversionFactor}
@@ -71,7 +83,7 @@ export default function MatchRatesSettings() {
           style={{ marginTop: 14, width: 140, height: 34, padding: '0 10px', fontSize: 13,
             fontFamily: 'JetBrains Mono, monospace', border: '1px solid var(--border)', borderRadius: 8,
             outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }} />
-      )}
+      ) : null}
     </div>
   )
 }

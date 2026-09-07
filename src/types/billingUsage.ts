@@ -92,6 +92,8 @@ export interface BillingUsageWorkflow {
   amount?: number
   per_day?: Array<{ date: string; credits?: number }>
   per_workflow?: Array<{ workflow_id: string; name?: string; runs?: number; credits?: number }>
+  // B-27: day × activity breakdown — one row per date×activity combination.
+  per_activity_per_day?: Array<{ date: string; activity: string; credits?: number }>
 }
 export interface BillingUsageAiPerUser {
   user_id: string

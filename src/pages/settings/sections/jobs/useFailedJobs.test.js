@@ -50,21 +50,23 @@ describe('useFailedJobs', () => {
     expect(vi.mocked(fetchFailedJobs).mock.calls.length).toBe(callsBefore)
   })
 
-  it('retryAll() passes the queue filter to the bulk endpoint and reloads', async () => {
+  it('retryAll() passes the queue filter to the bulk endpoint and captures {count, skipped, truncated}', async () => {
     vi.mocked(fetchFailedJobs).mockResolvedValue(page([{ uuid: 'a' }, { uuid: 'b' }]))
-    vi.mocked(retryAllFailedJobs).mockResolvedValue({ data: { count: 2 } })
+    vi.mocked(retryAllFailedJobs).mockResolvedValue({ data: { count: 2, skipped: [], truncated: false } })
     const { result } = renderHook(() => useFailedJobs())
     await waitFor(() => expect(result.current.phase).toBe('ready'))
     await act(async () => { result.current.setFilter('queue', 'sync') })
     await waitFor(() => expect(result.current.filters.queue).toBe('sync'))
-    await act(async () => { await result.current.retryAll() })
+    let outcome
+    await act(async () => { outcome = await result.current.retryAll() })
     expect(retryAllFailedJobs).toHaveBeenCalledWith('sync')
     expect(result.current.bulkBusy).toBe(false)
+    expect(outcome).toEqual({ count: 2, skipped: [], truncated: false })
   })
 
   it('retryAll() calls the bulk endpoint with undefined queue when no filter is set', async () => {
     vi.mocked(fetchFailedJobs).mockResolvedValue(page([{ uuid: 'a' }]))
-    vi.mocked(retryAllFailedJobs).mockResolvedValue({ data: { count: 1 } })
+    vi.mocked(retryAllFailedJobs).mockResolvedValue({ data: { count: 1, skipped: [], truncated: false } })
     const { result } = renderHook(() => useFailedJobs())
     await waitFor(() => expect(result.current.phase).toBe('ready'))
     await act(async () => { await result.current.retryAll() })

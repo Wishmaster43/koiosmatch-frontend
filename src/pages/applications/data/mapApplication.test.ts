@@ -248,6 +248,13 @@ describe('mapApplicationDetail', () => {
     expect(mapApplicationDetail({ id: 6 }).vacancy.location).toBe('')
   })
 
+  // B-46: the vacancy's customer_id, now available in the nested vacancy object.
+  it('maps vacancy.customer_id to vacancy.customerId, null when absent', () => {
+    expect(mapApplicationDetail({ id: 20, vacancy: { customer_id: 'cust-abc' } }).vacancy.customerId).toBe('cust-abc')
+    expect(mapApplicationDetail({ id: 21, vacancy: {} }).vacancy.customerId).toBeNull()
+    expect(mapApplicationDetail({ id: 22 }).vacancy.customerId).toBeNull()
+  })
+
   // MOTIVATIE-ZICHTBAAR-1: the careersite apply's motivation letter, null-safe
   // until CMBE ships `cover_letter` on the detail resource.
   describe('coverLetter (MOTIVATIE-ZICHTBAAR-1)', () => {

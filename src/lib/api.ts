@@ -195,10 +195,11 @@ api.interceptors.response.use(
       notifyError(`API ${method.toUpperCase()} ${safeUrl} → ${status}`)
     }
 
-    // MFA enforcement (MFA-ENF): a 403 with code mfa_enrollment_required means the
-    // tenant admin flipped mfa.enforced while this user was logged in without MFA.
-    // Signal AuthContext to refresh /auth/me so the enrollment gate takes over
-    // immediately (instead of at the next boot). Once per session is enough.
+    // B-23: MFA enforcement — a 403 with code mfa_enrollment_required means the
+    // tenant enforces MFA and this user hasn't enrolled yet. Signal AuthContext to
+    // refresh /auth/me so the enrollment gate takes over immediately (instead of at
+    // the next boot). Once per session is enough. The gate relies on the error code
+    // (isMfaEnrollmentError), not on settings keys which are now access-gated.
     if (isMfaEnrollmentError(error) && !sessionStorage.getItem('km_mfa_gate')) {
       sessionStorage.setItem('km_mfa_gate', '1')
       window.dispatchEvent(new CustomEvent('km:mfa-enrollment-required'))

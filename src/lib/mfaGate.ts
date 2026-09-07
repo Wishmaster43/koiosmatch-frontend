@@ -1,8 +1,10 @@
 /**
- * mfaGate — helpers for tenant-wide MFA enforcement (settings key `mfa.enforced`).
- * When enforcement is on and the user has no second factor, the API rejects every
- * call except /auth/me, /auth/logout and /auth/mfa/setup|confirm with a
- * 403 whose body carries { code: 'mfa_enrollment_required' }.
+ * mfaGate — helpers for tenant-wide MFA enforcement (B-23).
+ * When the tenant enforces MFA and the user has no second factor, the API rejects
+ * every call except /auth/me, /auth/logout and /auth/mfa/setup|confirm with a
+ * 403 whose body carries { code: 'mfa_enrollment_required' }. The gate checks the
+ * error code, not settings keys (which are now access-gated and unavailable to
+ * callers without billing.view).
  */
 
 // The error code the API returns on calls blocked by MFA enforcement.

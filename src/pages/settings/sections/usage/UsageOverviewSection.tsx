@@ -24,6 +24,7 @@ import UsageDayChart from './UsageDayChart'
 import type { UsageCategory, UsageGranularity } from './UsageDayChart'
 import UsageDrilldownCard from './UsageDrilldownCard'
 import UsageDailyTable from './UsageDailyTable'
+import UsagePerActivityPerDayChart from './UsagePerActivityPerDayChart'
 import { notice } from '../usageCardStyles'
 
 interface UsageOverviewSectionProps {
@@ -85,6 +86,9 @@ export default function UsageOverviewSection({ data, phase, drillRequest }: Usag
             onSelectDate={setSelectedDate}
           />
           </div>
+
+          {/* B-27: day × activity breakdown chart — stacked by activity. */}
+          <UsagePerActivityPerDayChart workflow={data?.workflow} phase={phase} />
 
           {selectedRow && <UsageDrilldownCard row={selectedRow} onClose={() => setSelectedDate(null)} />}
 

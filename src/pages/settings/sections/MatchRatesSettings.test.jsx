@@ -99,3 +99,29 @@ describe('MatchRatesSettings — unmount safety (alive-guard)', () => {
     await new Promise(resolve => setTimeout(resolve, 0))
   })
 })
+
+// S-1: conversion_factor is stripped for callers without billing.view permission.
+// When absent from the response, the input field is hidden and no PUT is sent.
+describe('MatchRatesSettings — S-1 absent field (no billing.view)', () => {
+  it('hides the input when conversion_factor is absent from the response', async () => {
+    api.get.mockResolvedValue({ data: { data: {} } })
+    render(<MatchRatesSettings />)
+
+    // Input never appears when the field is absent.
+    await waitFor(() => {
+      expect(screen.queryByLabelText(st('matchRates.title'))).not.toBeInTheDocument()
+    })
+  })
+
+  it('does not send a PUT when the field is absent (absence = no permission)', async () => {
+    api.get.mockResolvedValue({ data: { data: {} } })
+    api.put.mockResolvedValue({ data: { data: {} } })
+    render(<MatchRatesSettings />)
+
+    // Verify the input is not rendered.
+    await waitFor(() => {
+      expect(screen.queryByLabelText(st('matchRates.title'))).not.toBeInTheDocument()
+    })
+    expect(api.put).not.toHaveBeenCalled()
+  })
+})

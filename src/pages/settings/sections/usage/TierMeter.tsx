@@ -76,7 +76,7 @@ export default function TierMeter({ label, meter, unit, tenantName, onDrill }: T
     ? t('billing.usage.plan.tier.weightsLine', {
         chat: formatNumber(chatWeight),
         other: formatNumber(otherWeight),
-        slim: formatNumber(weights?.flavors?.slim ?? 2),
+        smart: formatNumber(weights?.flavors?.smart ?? 2),
         max: formatNumber(weights?.flavors?.max ?? 5),
       })
     : null
