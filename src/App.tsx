@@ -12,6 +12,7 @@ import { queryClient }                            from './lib/queryClient'
 import { AuthProvider, useAuth }                  from './context/AuthContext'
 import { RightPanelProvider }                     from './context/RightPanelContext'
 import { ThemeProvider }                          from './context/ThemeContext'
+import { UiPreferenceSync }                       from './context/UiPreferenceSync'
 import { AppsProvider }                           from './context/AppsContext'
 import { LookupsProvider }                        from './context/LookupsContext'
 import ErrorBoundary                              from '@/components/ui/ErrorBoundary'
@@ -79,6 +80,7 @@ export default function App() {
       <QueryClientProvider client={queryClient}>
       <ThemeProvider>
       <AuthProvider>
+        <UiPreferenceSync />
         <AppsProvider>
         <LookupsProvider>
         {/* RightPanelProvider inside AuthProvider so components can use both auth and filter panel context */}
