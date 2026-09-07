@@ -158,6 +158,17 @@ describe('ApplicationsTable · too-long-in-stage row icon (D6-KAART-2)', () => {
   })
 })
 
+// Danny 07-09: the missing-appointment flag lives here as a text chip next to the phase
+// (moved off the candidates table's name cell), only on rows carrying the flag.
+describe('ApplicationsTable · missing-appointment chip (V-appdetail-1)', () => {
+  it('shows the chip text only on rows carrying the flag', () => {
+    const flagged = { ...baseRow, id: 30, missingAppointment: true }
+    const notFlagged = { ...baseRow, id: 31, missingAppointment: false }
+    render(<ApplicationsTable rows={[flagged, notFlagged]} />)
+    expect(screen.getAllByText('Afspraak ontbreekt')).toHaveLength(1)
+  })
+})
+
 // PLACED-1 (2026-08-14): the placed row badge — colour is never the only signal,
 // so the icon renders behind an accessible name (real nl i18n resolves it).
 describe('ApplicationsTable · placed row badge (PLACED-1)', () => {

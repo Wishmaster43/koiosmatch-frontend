@@ -12,6 +12,7 @@ import { stopPropagation } from '@/components/ui/dataTableUtils'
 import Avatar from '@/components/ui/Avatar'
 import EntityNameCell from '@/components/ui/EntityNameCell'
 import StatusPill from '@/components/ui/StatusPill'
+import SoftChip from '@/components/ui/SoftChip'
 import CandidateStatusChip from '@/components/ui/CandidateStatusChip'
 import { makeKoiosColumn } from '@/components/ui/koiosColumn'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
@@ -173,6 +174,12 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
           {r.tooLongInStage && (
             <Clock size={13} strokeWidth={2} color="var(--color-warning)"
               aria-label={t('kpi.tooLongInStage')} role="img" />
+          )}
+          {/* V-appdetail-1 (Danny 07-09): a requires_appointment phase with no planned
+              appointment shows as TEXT here, next to the phase it belongs to (moved off
+              the candidates table's name cell). */}
+          {r.missingAppointment && (
+            <SoftChip label={t('kpi.missingAppointment')} color="var(--color-warning)" title={t('missingAppointment')} />
           )}
           {/* PLACED-1: subtle placed badge — colour never the only signal, the icon
               shape + tooltip/aria text carry the meaning on their own. */}

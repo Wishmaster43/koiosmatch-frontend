@@ -8,7 +8,7 @@ import { cellButton } from '@/components/ui/cellButton'
 import { useTranslation } from 'react-i18next'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { ComponentType, CSSProperties, RefObject } from 'react'
-import { Mail, MessageCircle, PhoneCall, Building2, Video, FileText, HelpCircle, CalendarX2 } from 'lucide-react' // HelpCircle = fallback for unknown contact channel; CalendarX2 = missing-appointment attention icon
+import { Mail, MessageCircle, PhoneCall, Building2, Video, FileText, HelpCircle } from 'lucide-react' // HelpCircle = fallback for unknown contact channel
 import DataTable from '@/components/ui/DataTable'
 import CandidateStatusChip from '@/components/ui/CandidateStatusChip'
 import SoftChip from '@/components/ui/SoftChip'
@@ -144,13 +144,6 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
             <Avatar initials={c.initials} size={26} color={avatarColor(c.gender)} soft />
             <span style={{ color: 'var(--text)', fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 150 }} title={c.name}>{c.name}</span>
-            {/* V-appdetail-1/2: a stage that requires an appointment (requires_appointment,
-                §3B) has none planned yet — a scanning aid so the recruiter can act on it
-                without opening the drawer. Icon-only, accessible label carries the meaning
-                (§6: never colour alone). */}
-            {c.missingAppointment && (
-              <CalendarX2 size={14} color="var(--color-warning)" aria-label={t('columns.missingAppointment')} role="img" style={{ flexShrink: 0 }} />
-            )}
           </div>
         ),
       },
