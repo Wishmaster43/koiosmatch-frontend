@@ -2220,7 +2220,7 @@
     "iconField": "Symbol",
     "isLeave": "Urlaubsstatus",
     "isLeaveHint": "Dieser Status stellt Urlaub dar; kann nicht mit einem aktiven Match vorkommen.",
-    "isUnavailable": "Nicht verfügbar",
+    "isUnavailable": "Nicht-verfügbar-Status",
     "isUnavailableHint": "Dieser Status bedeutet nicht verfügbar für Einsatz.",
     "isInactive": "Inaktiv",
     "isInactiveHint": "Dieser Kunde/diese Adresse/Abteilung/dieser Kontakt ist inaktiv."
@@ -3561,9 +3561,9 @@
     "empty": "Noch keine Modelle verfügbar. Bitte aktualisieren.",
     "save": "Speichern",
     "flavorLabel": {
-      "snel": "Schnell",
-      "slim": "Intelligent",
-      "max": "Max"
+      "max": "Max",
+      "fast": "Schnell",
+      "smart": "Intelligent"
     },
     "effortLevel": {
       "low": "Niedrig",

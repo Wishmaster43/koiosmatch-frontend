@@ -614,6 +614,7 @@
     "recountBtn": "Vorschläge aktualisieren",
     "recountQueued": "In Warteschlange, die Liste wird in wenigen Minuten aktualisiert",
     "recountThrottled": "Bitte warten, Anfrage läuft bereits",
-    "recountFailed": "Aktualisierung fehlgeschlagen"
+    "recountFailed": "Aktualisierung fehlgeschlagen",
+    "recountInfo": "Berechnet die KI-Kandidatenvorschläge für diese Stelle neu; das kann einige Minuten dauern."
   }
 }

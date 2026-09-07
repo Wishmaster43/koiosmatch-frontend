@@ -34,6 +34,8 @@ vi.mock('@/lib/settings/useAllSettings', async importOriginal => {
 const mockUseVacancyLeads = vi.fn()
 vi.mock('./hooks/useVacancyLeads', () => ({
   useVacancyLeads: (vacancyId: unknown, enabled: unknown) => mockUseVacancyLeads(vacancyId, enabled),
+  // B-48 recount button: inert here, its own contract test lives in useVacancyLeads.test.ts.
+  useRecountVacancyLeads: () => ({ mutate: vi.fn() }),
 }))
 
 // Mock useLookups and useSeedLabel so the VacancyLeadsPanel can resolve phase and source labels.

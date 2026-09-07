@@ -679,7 +679,7 @@
     "iconField": "Icon",
     "isLeave": "Leave status",
     "isLeaveHint": "This status represents leave; cannot occur with an active match.",
-    "isUnavailable": "Unavailable flag",
+    "isUnavailable": "Unavailable status",
     "isUnavailableHint": "This status means not available for deployment.",
     "isInactive": "Inactive",
     "isInactiveHint": "This customer/location/department/contact is inactive."
@@ -3561,9 +3561,9 @@
     "empty": "No models available yet. Try refreshing.",
     "save": "Save",
     "flavorLabel": {
-      "snel": "Fast",
-      "slim": "Smart",
-      "max": "Max"
+      "max": "Max",
+      "fast": "Fast",
+      "smart": "Smart"
     },
     "effortLevel": {
       "low": "Low",

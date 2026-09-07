@@ -2220,7 +2220,7 @@
     "iconField": "Icono",
     "isLeave": "Estado de licencia",
     "isLeaveHint": "Este estado representa licencia; no puede ocurrir con un partido activo.",
-    "isUnavailable": "Bandera no disponible",
+    "isUnavailable": "Estado no disponible",
     "isUnavailableHint": "Este estado significa no disponible para despliegue.",
     "isInactive": "Inactivo",
     "isInactiveHint": "Este cliente/ubicación/departamento/contacto está inactivo."
@@ -3561,9 +3561,9 @@
     "empty": "Todavía no hay modelos disponibles. Intenta actualizar.",
     "save": "Guardar",
     "flavorLabel": {
-      "snel": "Rápido",
-      "slim": "Inteligente",
-      "max": "Máx"
+      "max": "Máx",
+      "fast": "Rápido",
+      "smart": "Inteligente"
     },
     "effortLevel": {
       "low": "Bajo",

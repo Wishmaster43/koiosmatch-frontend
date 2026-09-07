@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, lazy, Suspense, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Map as MapIcon, AlertTriangle } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
+import { isCancel } from 'axios'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { fetchAllPages } from '@/lib/fetchAllPages'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
@@ -106,7 +107,9 @@ export default function LocationsSettings() {
     const ctrl = new AbortController()
     fetchAllPages('/locations', {}, ctrl.signal)
       .then(res => { if (mountedRef.current) setLocations(res.rows) })
-      .catch(() => { if (mountedRef.current) setLoadError(true) })
+      // A cancelled request (StrictMode's first mount, a fast unmount) is not a load
+      // failure: its rejection lands after the re-mount re-armed mountedRef (§9).
+      .catch((err) => { if (mountedRef.current && !isCancel(err)) setLoadError(true) })
       .finally(() => { if (mountedRef.current) setLoading(false) })
     return () => { mountedRef.current = false; ctrl.abort() }
   }, [])

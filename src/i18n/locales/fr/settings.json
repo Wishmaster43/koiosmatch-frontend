@@ -2220,7 +2220,7 @@
     "iconField": "Icône",
     "isLeave": "Statut de congé",
     "isLeaveHint": "Ce statut représente un congé ; ne peut pas coexister avec un match actif.",
-    "isUnavailable": "Drapeau non disponible",
+    "isUnavailable": "Statut indisponible",
     "isUnavailableHint": "Ce statut signifie non disponible pour le déploiement.",
     "isInactive": "Inactif",
     "isInactiveHint": "Ce client/lieu/département/contact est inactif."
@@ -3561,9 +3561,9 @@
     "empty": "Aucun modèle disponible pour l'instant. Essayez d'actualiser.",
     "save": "Enregistrer",
     "flavorLabel": {
-      "snel": "Rapide",
-      "slim": "Intelligent",
-      "max": "Max"
+      "max": "Max",
+      "fast": "Rapide",
+      "smart": "Intelligent"
     },
     "effortLevel": {
       "low": "Faible",

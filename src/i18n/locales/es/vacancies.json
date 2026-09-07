@@ -614,6 +614,7 @@
     "recountBtn": "Actualizar sugerencias",
     "recountQueued": "En cola, la lista se actualizará en unos minutos",
     "recountThrottled": "Por favor espere, la solicitud ya está en progreso",
-    "recountFailed": "La actualización falló"
+    "recountFailed": "La actualización falló",
+    "recountInfo": "Recalcula las sugerencias de candidatos de la IA para esta vacante; puede tardar unos minutos."
   }
 }

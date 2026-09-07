@@ -679,7 +679,7 @@
     "iconField": "Ícone",
     "isLeave": "Status de licença",
     "isLeaveHint": "Este status representa licença; não pode ocorrer com uma correspondência ativa.",
-    "isUnavailable": "Bandeira indisponível",
+    "isUnavailable": "Estado indisponível",
     "isUnavailableHint": "Este status significa não disponível para implantação.",
     "isInactive": "Inativo",
     "isInactiveHint": "Este cliente/local/departamento/contato está inativo."
@@ -3561,9 +3561,9 @@
     "empty": "Ainda não há modelos disponíveis. Tente atualizar.",
     "save": "Guardar",
     "flavorLabel": {
-      "snel": "Rápido",
-      "slim": "Inteligente",
-      "max": "Máx"
+      "max": "Máx",
+      "fast": "Rápido",
+      "smart": "Inteligente"
     },
     "effortLevel": {
       "low": "Baixo",

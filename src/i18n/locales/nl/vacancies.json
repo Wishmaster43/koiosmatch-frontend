@@ -614,6 +614,7 @@
     "recountBtn": "Suggesties vernieuwen",
     "recountQueued": "In de wachtrij gezet, de lijst ververst binnen enkele minuten",
     "recountThrottled": "Even wachten, net al aangevraagd",
-    "recountFailed": "Vernieuwen is mislukt"
+    "recountFailed": "Vernieuwen is mislukt",
+    "recountInfo": "Vernieuwt de AI-kandidatensuggesties voor deze vacature; dit kan enkele minuten duren."
   }
 }

@@ -679,7 +679,7 @@
     "iconField": "Icoon",
     "isLeave": "Verlofstatus",
     "isLeaveHint": "Deze status vertegenwoordigt verlof; kan niet samen met een actieve match voorkomen.",
-    "isUnavailable": "Niet beschikbaarvlag",
+    "isUnavailable": "Niet-beschikbaarstatus",
     "isUnavailableHint": "Deze status betekent niet beschikbaar voor inzet.",
     "isInactive": "Inactief",
     "isInactiveHint": "Deze klant/locatie/afdeling/contactpersoon is inactief."
@@ -3561,9 +3561,9 @@
     "empty": "Nog geen modellen beschikbaar. Probeer te verversen.",
     "save": "Opslaan",
     "flavorLabel": {
-      "snel": "Snel",
-      "slim": "Slim",
-      "max": "Max"
+      "max": "Max",
+      "fast": "Snel",
+      "smart": "Slim"
     },
     "effortLevel": {
       "low": "Laag",

@@ -679,7 +679,7 @@
     "iconField": "Icona",
     "isLeave": "Stato di congedo",
     "isLeaveHint": "Questo stato rappresenta un congedo; non può verificarsi con una partita attiva.",
-    "isUnavailable": "Flag non disponibile",
+    "isUnavailable": "Stato non disponibile",
     "isUnavailableHint": "Questo stato significa non disponibile per la distribuzione.",
     "isInactive": "Inattivo",
     "isInactiveHint": "Questo cliente/ubicazione/reparto/contatto è inattivo."
@@ -3561,9 +3561,9 @@
     "empty": "Nessun modello ancora disponibile. Prova ad aggiornare.",
     "save": "Salva",
     "flavorLabel": {
-      "snel": "Veloce",
-      "slim": "Smart",
-      "max": "Max"
+      "max": "Max",
+      "fast": "Veloce",
+      "smart": "Smart"
     },
     "effortLevel": {
       "low": "Basso",
