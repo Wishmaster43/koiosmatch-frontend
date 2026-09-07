@@ -1261,22 +1261,7 @@
     "restoreForbidden": "Sie haben keine Berechtigung, einen Datensatz wiederherzustellen.",
     "editData": "Daten anpassen"
   },
-  "integrations": {
-    "pdok": {
-      "name": "PDOK",
-      "alt": "PDOK-Logo",
-      "linked": "Verknüpft",
-      "notGeocoded": "Noch nicht geocodiert",
-      "autoInfo": "Koordinaten werden automatisch aktualisiert, sobald sich die Adresse ändert.",
-      "updatedAt": "Aktualisiert am {{date}}",
-      "updatedAtBy": "Aktualisiert am {{date}} · angefordert von {{name}}",
-      "requestedAtBy": "Angefordert am {{date}} von {{name}}",
-      "refresh": "Aktualisieren",
-      "refreshing": "Wird aktualisiert…",
-      "refreshStarted": "PDOK-Update gestartet. Koordinaten erscheinen in Kürze",
-      "refreshFailed": "Aktualisierung fehlgeschlagen"
-    }
-  },
+  "integrations": {},
   "conversations": {
     "active": "Aktiver Chat",
     "inactive": "Kein aktives Gespräch",
@@ -1467,6 +1452,22 @@
       "restored": "Aus dem Archiv wiederhergestellt",
       "markedForDeletion": "Löschung geplant",
       "eraseAt": " · Wird gelöscht am {{date}}"
+    }
+  },
+  "backofficeLinks": {
+    "geocode": {
+      "name": "OpenCage",
+      "alt": "OpenCage-Logo",
+      "linked": "Verknüpft",
+      "notGeocoded": "Noch nicht geocodiert",
+      "autoInfo": "Koordinaten werden automatisch aktualisiert, wenn sich die Adresse ändert.",
+      "updatedAt": "Aktualisiert {{date}}",
+      "updatedAtBy": "Aktualisiert {{date}} · angefordert von {{name}}",
+      "requestedAtBy": "Angefordert {{date}} von {{name}}",
+      "refresh": "Aktualisieren",
+      "refreshing": "Aktualisieren…",
+      "refreshStarted": "OpenCage-Aktualisierung gestartet. Koordinaten werden in Kürze angezeigt",
+      "refreshFailed": "Aktualisierung fehlgeschlagen"
     }
   }
 }

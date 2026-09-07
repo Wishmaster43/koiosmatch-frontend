@@ -13,7 +13,7 @@ describe('buildCsp', () => {
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://api.koiosmatch.nl",
         "font-src 'self' https://fonts.gstatic.com",
-        "connect-src 'self' https://api.pdok.nl https://graph.facebook.com blob: https://api.koiosmatch.nl",
+        "connect-src 'self' https://graph.facebook.com blob: https://api.koiosmatch.nl",
         "frame-src https://staticxx.facebook.com https://www.facebook.com",
         "object-src 'none'",
         "base-uri 'self'",
@@ -28,7 +28,7 @@ describe('buildCsp', () => {
   // documents.previewUnavailable.
   it('includes blob: in connect-src for the pdf.js DocPreviewModal fetch', () => {
     const policy = buildCsp({ VITE_API_URL: 'https://api.koiosmatch.nl/api' })
-    expect(policy).toContain("connect-src 'self' https://api.pdok.nl https://graph.facebook.com blob:")
+    expect(policy).toContain("connect-src 'self' https://graph.facebook.com blob:")
   })
 
   it('adds the workflow-engine origin when it differs from the API origin', () => {
@@ -48,7 +48,7 @@ describe('buildCsp', () => {
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "img-src 'self' data: blob: https://*.tile.openstreetmap.org",
         "font-src 'self' https://fonts.gstatic.com",
-        "connect-src 'self' https://api.pdok.nl https://graph.facebook.com blob:",
+        "connect-src 'self' https://graph.facebook.com blob:",
         "frame-src https://staticxx.facebook.com https://www.facebook.com",
         "object-src 'none'",
         "base-uri 'self'",
@@ -62,7 +62,7 @@ describe('buildCsp', () => {
       VITE_CSRF_URL: 'https://api.koiosmatch.nl/sanctum/csrf-cookie',
     })
     expect(policy).toContain(
-      "connect-src 'self' https://api.pdok.nl https://graph.facebook.com blob: https://api.koiosmatch.nl",
+      "connect-src 'self' https://graph.facebook.com blob: https://api.koiosmatch.nl",
     )
     expect(policy.match(/api\.koiosmatch\.nl/g)?.length).toBe(2) // once in connect-src, once in img-src
   })

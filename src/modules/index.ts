@@ -87,7 +87,7 @@ import condition         from './condition'
 import facebook_send     from './facebook_send'
 import candidates_fetch  from './candidates_fetch'
 import backoffice_sync   from './backoffice_sync'
-import pdok_geocode      from './pdok_geocode'
+import geocode           from './geocode'
 import type { ModuleDef } from './types'
 
 /**
@@ -187,7 +187,7 @@ const MODULES: ModuleDef[] = [
   ai_match,
   condition,
   facebook_send,
-  pdok_geocode,
+  geocode,
   candidates_fetch,
   backoffice_sync,
   customer_locations,

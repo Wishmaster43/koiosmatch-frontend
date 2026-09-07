@@ -47,58 +47,59 @@ beforeEach(() => {
 // so its background poll loop never leaks a pending real setTimeout past the test.
 afterEach(() => { vi.useRealTimers() })
 
-describe('IntegrationsTab · PDOK (always visible)', () => {
+describe('IntegrationsTab · OpenCage geocode card (always visible)', () => {
   it('shows the "not geocoded" fallback when lat/lng are null', () => {
     render(<IntegrationsTab c={baseCandidate()} />)
-    expect(screen.getByText('integrations.pdok.notGeocoded')).toBeInTheDocument()
+    expect(screen.getByText('backofficeLinks.geocode.notGeocoded')).toBeInTheDocument()
   })
 
   it('shows the "linked" chip + coordinates once lat/lng are known', () => {
     render(<IntegrationsTab c={baseCandidate({ lat: 52.3676, lng: 4.9041 })} />)
-    expect(screen.getByText('integrations.pdok.linked')).toBeInTheDocument()
+    expect(screen.getByText('backofficeLinks.geocode.linked')).toBeInTheDocument()
     expect(screen.getByText('52.36760, 4.90410')).toBeInTheDocument()
   })
 
   it('renders even when no module/app is enabled', () => {
     render(<IntegrationsTab c={baseCandidate()} />)
-    expect(screen.getByAltText('integrations.pdok.alt')).toBeInTheDocument()
+    // The card carries a vector mark now (no logo image): assert the card's name instead.
+    expect(screen.getAllByText('backofficeLinks.geocode.name').length).toBeGreaterThan(0)
   })
 })
 
 // CAND-PDOK-GEOCODE-META-1: when/by whom the last geocode was requested, and
 // when the coordinates were last written — a muted line under the coords/status.
-describe('IntegrationsTab · PDOK geocode provenance (CAND-PDOK-GEOCODE-META-1)', () => {
+describe('IntegrationsTab · geocode provenance (CAND-PDOK-GEOCODE-META-1)', () => {
   it('shows "updated · requested by" once coordinates were written and a requester is known', () => {
     const c = baseCandidate({ lat: 52.3676, lng: 4.9041, geocode: { requestedAt: '2026-07-20T08:00:00Z', requestedBy: 'Bente de Jong', updatedAt: '2026-07-20T08:00:05Z' } })
     render(<IntegrationsTab c={c} />)
-    expect(screen.getByText('integrations.pdok.updatedAtBy')).toBeInTheDocument()
+    expect(screen.getByText('backofficeLinks.geocode.updatedAtBy')).toBeInTheDocument()
   })
 
   it('shows the requester-less "updated" line when updatedAt is stamped without a requester (automatic address path)', () => {
     const c = baseCandidate({ lat: 52.3676, lng: 4.9041, geocode: { requestedAt: null, requestedBy: null, updatedAt: '2026-07-20T08:00:05Z' } })
     render(<IntegrationsTab c={c} />)
-    expect(screen.getByText('integrations.pdok.updatedAt')).toBeInTheDocument()
-    expect(screen.queryByText('integrations.pdok.updatedAtBy')).toBeNull()
+    expect(screen.getByText('backofficeLinks.geocode.updatedAt')).toBeInTheDocument()
+    expect(screen.queryByText('backofficeLinks.geocode.updatedAtBy')).toBeNull()
   })
 
   it('shows "requested by" while a manual request is still queued (no updatedAt yet)', () => {
     const c = baseCandidate({ geocode: { requestedAt: '2026-07-20T08:00:00Z', requestedBy: 'Bente de Jong', updatedAt: null } })
     render(<IntegrationsTab c={c} />)
-    expect(screen.getByText('integrations.pdok.requestedAtBy')).toBeInTheDocument()
+    expect(screen.getByText('backofficeLinks.geocode.requestedAtBy')).toBeInTheDocument()
   })
 
   it('shows no provenance line when the block is entirely absent', () => {
     render(<IntegrationsTab c={baseCandidate()} />)
-    expect(screen.queryByText('integrations.pdok.updatedAtBy')).toBeNull()
-    expect(screen.queryByText('integrations.pdok.updatedAt')).toBeNull()
-    expect(screen.queryByText('integrations.pdok.requestedAtBy')).toBeNull()
+    expect(screen.queryByText('backofficeLinks.geocode.updatedAtBy')).toBeNull()
+    expect(screen.queryByText('backofficeLinks.geocode.updatedAt')).toBeNull()
+    expect(screen.queryByText('backofficeLinks.geocode.requestedAtBy')).toBeNull()
   })
 })
 
 describe('IntegrationsTab · PDOK manual "Bijwerken" (CAND-PDOK-GEOCODE-FE-1, candidates.update-gated)', () => {
   it('does not render the "Bijwerken" button without candidates.update permission', () => {
     render(<IntegrationsTab c={baseCandidate()} />)
-    expect(screen.queryByRole('button', { name: /integrations.pdok.refresh/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: /backofficeLinks.geocode.refresh/ })).toBeNull()
   })
 
   it('POSTs /candidates/{id}/geocode on click, shows the "started" toast, and polls quietly for new coordinates', async () => {
@@ -110,14 +111,14 @@ describe('IntegrationsTab · PDOK manual "Bijwerken" (CAND-PDOK-GEOCODE-FE-1, ca
     // leaking a real, unresolved network call.
     mockGet.mockResolvedValue({ data: { lat: null, lng: null } })
     render(<IntegrationsTab c={baseCandidate()} />)
-    const button = screen.getByRole('button', { name: /integrations.pdok.refresh/ })
+    const button = screen.getByRole('button', { name: /backofficeLinks.geocode.refresh/ })
     fireEvent.click(button)
     // advanceTimersByTimeAsync drains microtasks between each timer tick, so both
     // the POST's .then chain and every setTimeout-based poll step settle here —
     // covers the POST resolution plus all 5 poll ticks (~10s) in one go.
     await act(async () => { await vi.advanceTimersByTimeAsync(11000) })
     expect(mockPost).toHaveBeenCalledWith('/candidates/1/geocode')
-    expect(mockNotifySuccess).toHaveBeenCalledWith('integrations.pdok.refreshStarted')
+    expect(mockNotifySuccess).toHaveBeenCalledWith('backofficeLinks.geocode.refreshStarted')
     expect(mockGet).toHaveBeenCalledWith('/candidates/1')
   })
 
@@ -136,7 +137,7 @@ describe('IntegrationsTab · PDOK manual "Bijwerken" (CAND-PDOK-GEOCODE-FE-1, ca
     } })
     const onUpdate = vi.fn()
     render(<StrictMode><IntegrationsTab c={baseCandidate()} onUpdate={onUpdate} /></StrictMode>)
-    fireEvent.click(screen.getByRole('button', { name: /integrations.pdok.refresh/ }))
+    fireEvent.click(screen.getByRole('button', { name: /backofficeLinks.geocode.refresh/ }))
     await act(async () => { await vi.advanceTimersByTimeAsync(11000) })
     // The poll survived the double-mount: fresh (string-)coords coerced + provenance merged up.
     expect(onUpdate).toHaveBeenCalledWith(1, {
@@ -149,7 +150,7 @@ describe('IntegrationsTab · PDOK manual "Bijwerken" (CAND-PDOK-GEOCODE-FE-1, ca
     mockUseAuth.mockReturnValue({ hasModule: () => false, hasPermission: (p: string) => p === 'candidates.update' })
     mockPost.mockRejectedValue({ response: { data: { message: 'Geen rechten' } } })
     render(<IntegrationsTab c={baseCandidate()} />)
-    const button = screen.getByRole('button', { name: /integrations.pdok.refresh/ })
+    const button = screen.getByRole('button', { name: /backofficeLinks.geocode.refresh/ })
     fireEvent.click(button)
     await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('Geen rechten'))
     // No poll on failure — the button is clickable again right away.

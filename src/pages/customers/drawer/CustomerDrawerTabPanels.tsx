@@ -23,7 +23,7 @@ import CustomerNotesTab from './CustomerNotesTab'
 import ChangelogTab from './ChangelogTab'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
-import PdokCard from '@/components/drawer/PdokCard'
+import GeocodeCard from '@/components/drawer/GeocodeCard'
 import type { Customer } from '@/types/customer'
 import type { Id } from '@/types/common'
 import type { useCustomerLocations } from '../hooks/useCustomerLocations'
@@ -126,11 +126,11 @@ export default function CustomerDrawerTabPanels({
     )
     case 'koppelingen':   return (
       <BackofficeLinksTab entity="customers" id={c.id as Id} helloflexLink={c.helloflexLink} shiftmanagerLink={c.shiftmanagerLink} canLink={canLinkBackoffice}>
-        {/* PDOK moved out of the title row into this tab (Danny 28-07). Disabled when
+        {/* OpenCage geocoding moved out of the title row into this tab (Danny 28-07). Disabled when
             there is no city yet — the customer's own address is city-only here.
             lat/lng were never passed (CMBE 04-08) — the card decides "geocoded" on
-            them, so this ALWAYS said "nog niet gegecodeerd" regardless of the data. */}
-        <PdokCard lat={c.lat} lng={c.lng} endpoint={`/customers/${c.id}/geocode`} permission="customers.update" disabled={!c.city} />
+            them, so this ALWAYS said "nog niet gegeocodeerd" regardless of the data. */}
+        <GeocodeCard lat={c.lat} lng={c.lng} endpoint={`/customers/${c.id}/geocode`} permission="customers.update" disabled={!c.city} />
       </BackofficeLinksTab>
     )
     default: return null

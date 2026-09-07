@@ -11,7 +11,7 @@ import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import DetachedCountBadge from '@/components/ui/DetachedCountBadge'
-import PdokCard from '@/components/drawer/PdokCard'
+import GeocodeCard from '@/components/drawer/GeocodeCard'
 import { channelIcon } from './data/channelIcons'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import ChangelogTab from './drawer/ChangelogTab'
@@ -97,13 +97,13 @@ const TABS: { id: string; tKey: string; autoExpand?: boolean; render: (v: Vacanc
   // V-tasks-1: mirrors the candidate drawer's own Taken ("Tasks") tab, via the shared
   // EntityTasksTab shell (see VacancyTasksTab's own header for why).
   { id: 'tasks',      tKey: 'tasks',      render: v => <VacancyTasksTab vacancy={v} /> },
-  // Koppelingen ("Links") (Danny 28-07): PDOK left the title row, so the vacancy
+  // Koppelingen ("Links") (Danny 28-07): OpenCage geocoding left the title row, so the vacancy
   // gets the same
   // tab as every other entity. Vacancies are NOT in the backoffice sync registry
   // (no HelloFlex/Shiftmanager token), so this tab holds the geocoding card only —
   // showing empty link cards would suggest a coupling that does not exist.
   { id: 'koppelingen', tKey: 'backofficeLinks', render: v => (
-    <PdokCard lat={v.lat} lng={v.lng} endpoint={`/vacancies/${v.id}/geocode`} permission="vacancies.update"
+    <GeocodeCard lat={v.lat} lng={v.lng} endpoint={`/vacancies/${v.id}/geocode`} permission="vacancies.update"
       disabled={!v.city && !v.street && !v.postalCode && !v.location} />
   ) },
   // TIJDLIJN-OVERAL (27-08): timeline sits SECOND-TO-LAST, Statistics stays last —

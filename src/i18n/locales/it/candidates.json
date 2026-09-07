@@ -1261,22 +1261,7 @@
     "restoreForbidden": "Non hai i permessi per ripristinare una scheda.",
     "editData": "Modifica i dati"
   },
-  "integrations": {
-    "pdok": {
-      "name": "PDOK",
-      "alt": "Logo PDOK",
-      "linked": "Collegato",
-      "notGeocoded": "Non ancora geocodificato",
-      "autoInfo": "Le coordinate si aggiornano automaticamente quando l'indirizzo cambia.",
-      "updatedAt": "Aggiornato il {{date}}",
-      "updatedAtBy": "Aggiornato il {{date}} · richiesto da {{name}}",
-      "requestedAtBy": "Richiesto il {{date}} da {{name}}",
-      "refresh": "Aggiorna",
-      "refreshing": "Aggiornamento in corso…",
-      "refreshStarted": "Aggiornamento PDOK avviato. Le coordinate appariranno a breve",
-      "refreshFailed": "Aggiornamento non riuscito"
-    }
-  },
+  "integrations": {},
   "conversations": {
     "active": "Chat attiva",
     "inactive": "Nessuna conversazione attiva",
@@ -1467,6 +1452,22 @@
       "restored": "Ripristinato dall'archivio",
       "markedForDeletion": "Eliminazione pianificata",
       "eraseAt": " · Verrà eliminato il {{date}}"
+    }
+  },
+  "backofficeLinks": {
+    "geocode": {
+      "name": "OpenCage",
+      "alt": "Logo OpenCage",
+      "linked": "Collegato",
+      "notGeocoded": "Non ancora geocodificato",
+      "autoInfo": "Le coordinate vengono aggiornate automaticamente quando l'indirizzo cambia.",
+      "updatedAt": "Aggiornato {{date}}",
+      "updatedAtBy": "Aggiornato {{date}} · richiesto da {{name}}",
+      "requestedAtBy": "Richiesto {{date}} da {{name}}",
+      "refresh": "Aggiorna",
+      "refreshing": "Aggiornamento…",
+      "refreshStarted": "Aggiornamento OpenCage avviato. Le coordinate appariranno a breve",
+      "refreshFailed": "Aggiornamento non riuscito"
     }
   }
 }

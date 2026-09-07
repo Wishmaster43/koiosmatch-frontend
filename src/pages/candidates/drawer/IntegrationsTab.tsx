@@ -1,32 +1,31 @@
 /**
- * IntegrationsTab ("Koppelingen") — the candidate-only PDOK address-geocoding
+ * IntegrationsTab ("Koppelingen") — the candidate-only OpenCage address-geocoding
  * card (automatic on address change, plus a manual "Bijwerken" trigger —
- * CAND-PDOK-GEOCODE-FE-1), followed by the shared HelloFlex/Shiftmanager
+ * GEO-GEOCODE-FE-1), followed by the shared HelloFlex/Shiftmanager
  * backoffice-link cards (EXTRACT-1: extracted into
  * components/drawer/BackofficeLinksTab so every entity that carries
  * backoffice_links[] — customers, locations, departments, contacts, matches —
- * reuses the exact same cards, §3A/§11). PDOK is always shown; the shared
+ * reuses the exact same cards, §3A/§11). OpenCage geocoding is always shown; the shared
  * component itself gates HelloFlex/Shiftmanager on the tenant's connector app
  * flag. No fake affordances (§3): every button fires a real request.
  */
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { RefreshCw } from 'lucide-react'
+import { RefreshCw, Compass } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import SectionCard from '@/components/ui/SectionCard'
 import SoftChip from '@/components/ui/SoftChip'
-import BackofficeLinksTab, { CardTitle } from '@/components/drawer/BackofficeLinksTab'
+import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
 import api, { unwrap } from '@/lib/api'
 import { toCoord } from '@/lib/coords'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
-import pdokIcon from '@/assets/integrations/pdok.png'
 import { Mono } from '@/components/ui/typography'
 import type { Candidate } from '@/types/candidate'
 
-// PDOK geocode provenance (CAND-PDOK-GEOCODE-META-1): prefers "Bijgewerkt …" once
+// OpenCage geocode provenance (GEO-GEOCODE-META-1): prefers "Bijgewerkt …" once
 // coordinates were actually written (the automatic address-change path stamps
 // this too, without a requester — name part only shows when known); falls back
 // to "Aangevraagd … door …" while a manual request is still queued. Renders
@@ -38,15 +37,15 @@ function PdokMetaLine({ geocode }: { geocode: Candidate['geocode'] }) {
     return (
       <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>
         {geocode.requestedBy
-          ? t('integrations.pdok.updatedAtBy', { date: formatDateTime(geocode.updatedAt), name: geocode.requestedBy })
-          : t('integrations.pdok.updatedAt', { date: formatDateTime(geocode.updatedAt) })}
+          ? t('backofficeLinks.geocode.updatedAtBy', { date: formatDateTime(geocode.updatedAt), name: geocode.requestedBy })
+          : t('backofficeLinks.geocode.updatedAt', { date: formatDateTime(geocode.updatedAt) })}
       </p>
     )
   }
   if (geocode?.requestedAt && geocode.requestedBy) {
     return (
       <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>
-        {t('integrations.pdok.requestedAtBy', { date: formatDateTime(geocode.requestedAt), name: geocode.requestedBy })}
+        {t('backofficeLinks.geocode.requestedAtBy', { date: formatDateTime(geocode.requestedAt), name: geocode.requestedBy })}
       </p>
     )
   }
@@ -66,11 +65,11 @@ export default function IntegrationsTab({ c, onUpdate }: {
   const auth = useAuth()
   const hasPermission = auth?.hasPermission ?? (() => false)
 
-  // CAND-PDOK-GEOCODE-FE-1: manual "Bijwerken" trigger for the async geocode
+  // GEO-GEOCODE-FE-1: manual "Bijwerken" trigger for the async geocode
   // workflow (POST .../geocode, 202 queued). Once it resolves we poll the
   // candidate a few times so the fresh lat/lng show up without a full drawer
   // reload; guarded so a stray poll tick after unmount never sets state.
-  // One write-permission check, used by BOTH the PDOK refresh and the Koppelen buttons.
+  // One write-permission check, used by BOTH the geocode refresh and the Koppelen buttons.
   const canUpdate = hasPermission('candidates.update')
   const [pdokRefreshing, setPdokRefreshing] = useState(false)
   const [coordsOverride, setCoordsOverride] = useState<{ lat: number | null; lng: number | null } | null>(null)
@@ -95,19 +94,19 @@ export default function IntegrationsTab({ c, onUpdate }: {
     setPdokRefreshing(true)
     try {
       await api.post(`/candidates/${c.id}/geocode`)
-      notifySuccess(t('integrations.pdok.refreshStarted'))
+      notifySuccess(t('backofficeLinks.geocode.refreshStarted'))
     } catch (err) {
-      notifyError(extractApiError(err, t('integrations.pdok.refreshFailed')))
+      notifyError(extractApiError(err, t('backofficeLinks.geocode.refreshFailed')))
       setPdokRefreshing(false)
       return
     }
-    // PDOK-LATLNG-1 (CMBE 22-07): the 202 means "queued" — stop the spinner HERE
+    // GEO-LATLNG-1 (CMBE 22-07): the 202 means "queued" — stop the spinner HERE
     // (Danny saw an "eternal" spinner riding the whole poll) and refresh in the
     // background: the job writes lat/lng within ~1s, so re-fetch at ~3s (one
     // retry at 6s). Values are coerced via toCoord — Laravel sends decimals as
     // strings, which the old !== comparison and the mapper both mishandled.
     setPdokRefreshing(false)
-    // PDOK-REFRESH-2: always ADOPT the fresh values (coords + provenance) — a re-geocode
+    // GEO-REFRESH-2: always ADOPT the fresh values (coords + provenance) — a re-geocode
     // of the same address keeps the same pin, but the "Bijgewerkt … door …" meta DID
     // change; the old changed-coords-only guard made that invisible until a page reload.
     const baseUpdatedAt = c.geocode?.updatedAt ?? null
@@ -135,7 +134,7 @@ export default function IntegrationsTab({ c, onUpdate }: {
         if (meta) setGeocodeOverride(meta)
         // Done once the write actually landed (a fresh updated_at stamp); else poll once more.
         if (meta?.updatedAt && meta.updatedAt !== baseUpdatedAt) {
-          // PDOK-REFRESH-2b (Danny: "nog steeds CMD+R"): merge the fresh values into the
+          // GEO-REFRESH-2b (Danny: "nog steeds CMD+R"): merge the fresh values into the
           // PAGE record too — list/map/other tabs update in place, and the panel survives
           // a tab switch. Pure local merge: patchCandidate maps none of these keys, so
           // this never fires an API write (buildCandidatePatch → empty body → skipped).
@@ -160,20 +159,23 @@ export default function IntegrationsTab({ c, onUpdate }: {
     // write permission — the extraction briefly left this one always-enabled, which
     // offered a link button to read-only users the backend would refuse anyway.
     <BackofficeLinksTab entity="candidates" id={c.id} helloflexLink={c.helloflexLink} shiftmanagerLink={c.shiftmanagerLink} canLink={canUpdate}>
-      {/* PDOK — geocoding runs automatically on address change; "Bijwerken" (gated
+      {/* OpenCage — geocoding runs automatically on address change; "Bijwerken" (gated
           on candidates.update) queues a manual re-geocode via the same async
           workflow, then the tab polls briefly for the fresh coordinates. */}
-      <SectionCard title={<CardTitle icon={pdokIcon} alt={t('integrations.pdok.alt')} label={t('integrations.pdok.name')} />}>
+      <SectionCard title={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+        <Compass size={16} />
+        {t('backofficeLinks.geocode.name')}
+      </span>}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
           {hasCoords ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <SoftChip label={t('integrations.pdok.linked')} color="var(--color-success)" />
+              <SoftChip label={t('backofficeLinks.geocode.linked')} color="var(--color-success)" />
               <Mono style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                 {effectiveLat?.toFixed(5)}, {effectiveLng?.toFixed(5)}
               </Mono>
             </div>
           ) : (
-            <SoftChip label={t('integrations.pdok.notGeocoded')} color="var(--text-muted)" />
+            <SoftChip label={t('backofficeLinks.geocode.notGeocoded')} color="var(--text-muted)" />
           )}
           {/* HUISSTIJL-1: the house Button trio (variant="soft", iconOnly) — same
               title/aria-label/disabled as before, only the chrome moved off a
@@ -181,8 +183,8 @@ export default function IntegrationsTab({ c, onUpdate }: {
               className (stateful action icon, never re-tinted by the trio). */}
           {canUpdate && (
             <Button variant="soft" iconOnly onClick={onRefreshPdok} disabled={pdokRefreshing}
-              title={pdokRefreshing ? t('integrations.pdok.refreshing') : t('integrations.pdok.refresh')}
-              aria-label={pdokRefreshing ? t('integrations.pdok.refreshing') : t('integrations.pdok.refresh')}>
+              title={pdokRefreshing ? t('backofficeLinks.geocode.refreshing') : t('backofficeLinks.geocode.refresh')}
+              aria-label={pdokRefreshing ? t('backofficeLinks.geocode.refreshing') : t('backofficeLinks.geocode.refresh')}>
               <RefreshCw size={13} className={pdokRefreshing ? 'animate-spin' : ''} />
             </Button>
           )}
@@ -190,7 +192,7 @@ export default function IntegrationsTab({ c, onUpdate }: {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
           <PdokMetaLine geocode={geocodeOverride ?? c.geocode} />
           <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>
-            {t('integrations.pdok.autoInfo')}
+            {t('backofficeLinks.geocode.autoInfo')}
           </p>
         </div>
       </SectionCard>

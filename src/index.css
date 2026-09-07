@@ -79,7 +79,7 @@
   --module-intus:        #0E3A53; /* Intus brand navy */
   --module-teal-strong:  #0F6E56; /* Knowledge search, Planning/shifts, Set status */
   --module-pink:         #DB2777; /* Matches */
-  --module-geo:          #1B4C8C; /* PDOK geocode */
+  --module-geocode:      #1B4C8C; /* OpenCage geocoding */
   --module-periwinkle:   #6E8FD6; /* Tasks */
 
   /* Text/icon colour for content painted on a FILLED accent surface (primary/danger

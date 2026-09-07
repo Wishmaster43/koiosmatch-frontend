@@ -1261,22 +1261,7 @@
     "restoreForbidden": "You are not allowed to restore a record.",
     "editData": "Edit details"
   },
-  "integrations": {
-    "pdok": {
-      "name": "PDOK",
-      "alt": "PDOK logo",
-      "linked": "Linked",
-      "notGeocoded": "Not yet geocoded",
-      "autoInfo": "Coordinates update automatically whenever the address changes.",
-      "updatedAt": "Updated {{date}}",
-      "updatedAtBy": "Updated {{date}} · requested by {{name}}",
-      "requestedAtBy": "Requested {{date}} by {{name}}",
-      "refresh": "Refresh",
-      "refreshing": "Refreshing…",
-      "refreshStarted": "PDOK update started. Coordinates will appear shortly",
-      "refreshFailed": "Refresh failed"
-    }
-  },
+  "integrations": {},
   "conversations": {
     "active": "Active chat",
     "inactive": "No active conversation",
@@ -1467,6 +1452,22 @@
       "restored": "Restored from archive",
       "markedForDeletion": "Deletion scheduled",
       "eraseAt": " · Will be deleted on {{date}}"
+    }
+  },
+  "backofficeLinks": {
+    "geocode": {
+      "name": "OpenCage",
+      "alt": "OpenCage logo",
+      "linked": "Linked",
+      "notGeocoded": "Not yet geocoded",
+      "autoInfo": "Coordinates are automatically updated when the address changes.",
+      "updatedAt": "Updated {{date}}",
+      "updatedAtBy": "Updated {{date}} · requested by {{name}}",
+      "requestedAtBy": "Requested {{date}} by {{name}}",
+      "refresh": "Update",
+      "refreshing": "Updating…",
+      "refreshStarted": "OpenCage update started. Coordinates will appear shortly",
+      "refreshFailed": "Update failed"
     }
   }
 }

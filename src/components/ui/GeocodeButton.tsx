@@ -1,5 +1,5 @@
 /**
- * GeocodeButton (GEO-REGEOCODE-1) — the ONE shared "PDOK opnieuw ophalen" trigger,
+ * GeocodeButton (GEO-REGEOCODE-1) — the ONE shared OpenCage geocode trigger,
  * reused verbatim on the candidate/customer/vacancy drawer header and the Settings
  * → Vestigingen row (never re-implemented per entity, §3A). Every per-id geocode
  * route is queued + rate-limited (202 Accepted) — the coordinates land later via

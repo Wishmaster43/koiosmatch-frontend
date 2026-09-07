@@ -22,7 +22,7 @@ export interface KoiosCapabilityTool {
   enabled_for_tenant: boolean
   default_enabled: boolean
   connection_active: boolean | null
-  connection: 'whatsapp' | 'shiftmanager' | 'helloflex' | 'pdok' | null
+  connection: 'whatsapp' | 'shiftmanager' | 'helloflex' | 'opencage' | null
 }
 
 // One surface that Koios can assist on (chat, notes, reports, etc).

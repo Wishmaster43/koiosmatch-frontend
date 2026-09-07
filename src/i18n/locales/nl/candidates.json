@@ -1261,22 +1261,7 @@
     "restoreForbidden": "Je hebt geen rechten om een dossier te herstellen.",
     "editData": "Gegevens aanpassen"
   },
-  "integrations": {
-    "pdok": {
-      "name": "PDOK",
-      "alt": "PDOK-logo",
-      "linked": "Gekoppeld",
-      "notGeocoded": "Nog niet gegeocodeerd",
-      "autoInfo": "Coördinaten worden automatisch bijgewerkt zodra het adres wijzigt.",
-      "updatedAt": "Bijgewerkt {{date}}",
-      "updatedAtBy": "Bijgewerkt {{date}} · aangevraagd door {{name}}",
-      "requestedAtBy": "Aangevraagd {{date}} door {{name}}",
-      "refresh": "Bijwerken",
-      "refreshing": "Bijwerken…",
-      "refreshStarted": "PDOK-update gestart. Coördinaten verschijnen zo",
-      "refreshFailed": "Bijwerken mislukt"
-    }
-  },
+  "integrations": {},
   "conversations": {
     "active": "Actief gesprek",
     "inactive": "Geen actieve conversatie",
@@ -1467,6 +1452,22 @@
       "restored": "Hersteld uit archief",
       "markedForDeletion": "Verwijdering gepland",
       "eraseAt": " · Wordt gewist op {{date}}"
+    }
+  },
+  "backofficeLinks": {
+    "geocode": {
+      "name": "OpenCage",
+      "alt": "OpenCage-logo",
+      "linked": "Gekoppeld",
+      "notGeocoded": "Nog niet gegeocodeerd",
+      "autoInfo": "Coördinaten worden automatisch bijgewerkt zodra het adres wijzigt.",
+      "updatedAt": "Bijgewerkt {{date}}",
+      "updatedAtBy": "Bijgewerkt {{date}} · aangevraagd door {{name}}",
+      "requestedAtBy": "Aangevraagd {{date}} door {{name}}",
+      "refresh": "Bijwerken",
+      "refreshing": "Bijwerken…",
+      "refreshStarted": "OpenCage-update gestart. Coördinaten verschijnen zo",
+      "refreshFailed": "Bijwerken mislukt"
     }
   }
 }

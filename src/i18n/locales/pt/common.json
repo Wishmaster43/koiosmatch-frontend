@@ -374,7 +374,7 @@
     "clearRadius": "Limpar raio"
   },
   "geocode": {
-    "refresh": "Obter novamente as coordenadas do PDOK",
+    "refresh": "Geocodificar novamente (OpenCage)",
     "started": "Nova obtenção iniciada…",
     "updated": "Coordenadas atualizadas.",
     "notFound": "Endereço não encontrado. Verifique os dados do endereço."
@@ -437,18 +437,18 @@
       "statusFailed": "Falhou",
       "syncNow": "Sincronizar agora"
     },
-    "pdok": {
-      "name": "PDOK",
-      "alt": "Logótipo PDOK",
-      "linked": "Associado",
-      "notGeocoded": "Ainda não geocodificado",
-      "autoInfo": "As coordenadas são atualizadas automaticamente assim que o endereço é alterado.",
-      "readOnly": "As coordenadas vêm da própria filial do cliente; ainda não é possível geocodificar novamente aqui."
-    },
     "statusIcons": {
       "linked": "{{system}} associado",
       "failed": "Sincronização de {{system}} falhou: {{error}}",
       "failedNoReason": "Sincronização de {{system}} falhou"
+    },
+    "geocode": {
+      "name": "OpenCage",
+      "alt": "Logo OpenCage",
+      "linked": "Vinculado",
+      "notGeocoded": "Ainda não geocodificado",
+      "autoInfo": "As coordenadas são atualizadas automaticamente quando o endereço muda.",
+      "readOnly": "As coordenadas vêm do próprio local do cliente; a re-geocodificação ainda não é possível aqui."
     }
   },
   "breadcrumb": "Trilho de navegação",
@@ -1073,8 +1073,6 @@
       "nietBenaderdXDagen": "Não contactado > X dias",
       "verjaardagsfelicitatie": "Felicitação de aniversário",
       "afspraakbevestiging": "Confirmação de marcação",
-      "adresGeocoderenPDOK": "Geocodificar morada (PDOK)",
-      "adressenGeocoderenBulkPDOK": "Geocodificar moradas: em massa (PDOK)",
       "helloflexKoppelingPerKandidaat": "Ligação HelloFlex (por candidato)",
       "helloflexKoppelingBulk": "Ligação HelloFlex: em massa",
       "shiftmanagerKoppelingPerKandidaat": "Ligação Shiftmanager (por candidato)",
@@ -1093,12 +1091,6 @@
       "taakBijVacatureLangOnlineZonderResultaat": "Tarefa por vaga há muito online sem resultado",
       "meldingBijNaderendeSluitingsdatum": "Notificação por data de fecho a aproximar-se",
       "onboardingEvaluatie": "Integração e avaliação",
-      "klantadresGeocoderenPDOK": "Geocodificar morada do cliente (PDOK)",
-      "klantadressenGeocoderenBulkPDOK": "Geocodificar moradas de clientes: em massa (PDOK)",
-      "locatieadresGeocoderenPDOK": "Geocodificar morada da filial (PDOK)",
-      "locatieadressenGeocoderenBulkPDOK": "Geocodificar moradas de filiais: em massa (PDOK)",
-      "vacatureadresGeocoderenPDOK": "Geocodificar morada da vaga (PDOK)",
-      "vacatureadressenGeocoderenBulkPDOK": "Geocodificar moradas de vagas: em massa (PDOK)",
       "nieuweMatchMelding": "Novo match: notificação",
       "opMatchfaseMelding": "Na fase do match: notificação",
       "whatsappStoringMelding": "Falha no WhatsApp: notificação",

@@ -270,7 +270,6 @@
     "whatsapp_send": "Enviar WhatsApp",
     "facebook_send": "Resposta do Facebook",
     "candidates_fetch": "Candidatos Koios Match",
-    "pdok_geocode": "Geocodificar endereço (PDOK)",
     "backoffice_sync": "Ligar ao backoffice",
     "interview_start": "Iniciar entrevista de IA",
     "notification_send": "Enviar notificação",
@@ -613,7 +612,6 @@
     "Actie": "Ação",
     "Actief": "Ativo",
     "Adres (straat nr postcode)": "Morada (rua, n.º, código postal)",
-    "Adres geocoderen (PDOK)": "Geocodificar morada (PDOK)",
     "Afdeling": "Departamento",
     "Afwijsreden": "Motivo de rejeição",
     "Afwijsreden (filter)": "Motivo de rejeição (filtro)",
@@ -1292,7 +1290,8 @@
     "Leeg gelaten factoren gebruiken de standaardpunten": "Os fatores deixados vazios usam os pontos predefinidos.",
     "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bónus ou penalização por id de cliente, por exemplo 2 ou -3.",
     "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Por função, os nomes de funções primárias e secundárias que contam como correspondência, em minúsculas.",
-    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Permite que o agente de IA consulte os documentos/base de conhecimento da agência durante a conversa. Só funciona se o próprio agente tiver conhecimento disponível."
+    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Permite que o agente de IA consulte os documentos/base de conhecimento da agência durante a conversa. Só funciona se o próprio agente tiver conhecimento disponível.",
+    "Sla records over die al coördinaten hebben; aan te raden bij bulk": "Ignorar registos que já têm coordenadas; recomendado para execuções em massa."
   },
   "triggers": {
     "events": {
@@ -1447,5 +1446,7 @@
   },
   "runs": {
     "routingOverruled": "substituído"
-  }
+  },
+  "geocode": "Geocodificar endereço (OpenCage)",
+  "geocode_bulk": "Geocodificar endereços, em lote (OpenCage)"
 }

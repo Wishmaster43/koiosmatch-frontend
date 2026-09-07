@@ -31,9 +31,10 @@ function originOf(raw: string | undefined): string | null {
 /**
  * Builds the CSP directive string from the resolved env. Collects the API,
  * workflow-engine and CSRF origins (when absolute) alongside every fixed host
- * this app is known to call: Google Fonts (stylesheet + font files), the PDOK
- * address-lookup API (src/lib/geocode.ts), OSM tiles (RadiusMap.tsx), and
- * Facebook's SDK script/graph/frame hosts (facebookSdk.ts, useEmbeddedSignup.ts).
+ * this app is known to call: Google Fonts (stylesheet + font files), OSM tiles
+ * (RadiusMap.tsx), and Facebook's SDK script/graph/frame hosts (facebookSdk.ts,
+ * useEmbeddedSignup.ts). OpenCage geocoding goes through the backend proxy
+ * (GEO-GEOCODE-SEARCH-1), so it never reaches the browser.
  */
 export function buildCsp(env: CspEnv): string {
   // De-duplicate extra connect-src origins gathered from env + fixed hosts.
@@ -54,7 +55,6 @@ export function buildCsp(env: CspEnv): string {
   // connect-src governs; Chrome does not match blob: against 'self').
   const connectSrc = [
     "'self'",
-    'https://api.pdok.nl',
     'https://graph.facebook.com',
     'blob:',
     ...connectOrigins,

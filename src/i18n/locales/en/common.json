@@ -374,7 +374,7 @@
     "clearRadius": "Clear radius"
   },
   "geocode": {
-    "refresh": "Re-fetch PDOK coordinates",
+    "refresh": "Geocode again (OpenCage)",
     "started": "Re-fetch started…",
     "updated": "Coordinates updated.",
     "notFound": "Address not found. Check the address details."
@@ -437,18 +437,18 @@
       "statusFailed": "Failed",
       "syncNow": "Sync now"
     },
-    "pdok": {
-      "name": "PDOK",
-      "alt": "PDOK logo",
-      "linked": "Linked",
-      "notGeocoded": "Not yet geocoded",
-      "autoInfo": "Coordinates update automatically whenever the address changes.",
-      "readOnly": "Coordinates come from the customer location itself; re-geocoding is not available here yet."
-    },
     "statusIcons": {
       "linked": "{{system}} linked",
       "failed": "{{system}} sync failed: {{error}}",
       "failedNoReason": "{{system}} sync failed"
+    },
+    "geocode": {
+      "name": "OpenCage",
+      "alt": "OpenCage logo",
+      "linked": "Linked",
+      "notGeocoded": "Not yet geocoded",
+      "autoInfo": "Coordinates are automatically updated when the address changes.",
+      "readOnly": "Coordinates come from the customer location itself; re-geocoding is not yet possible here."
     }
   },
   "breadcrumb": "Breadcrumb",
@@ -1073,8 +1073,6 @@
       "nietBenaderdXDagen": "Not approached > X days",
       "verjaardagsfelicitatie": "Birthday greeting",
       "afspraakbevestiging": "Appointment confirmation",
-      "adresGeocoderenPDOK": "Geocode address (PDOK)",
-      "adressenGeocoderenBulkPDOK": "Geocode addresses — bulk (PDOK)",
       "helloflexKoppelingPerKandidaat": "HelloFlex connection (per candidate)",
       "helloflexKoppelingBulk": "HelloFlex connection — bulk",
       "shiftmanagerKoppelingPerKandidaat": "Shiftmanager connection (per candidate)",
@@ -1093,12 +1091,6 @@
       "taakBijVacatureLangOnlineZonderResultaat": "Task on vacancy long online without result",
       "meldingBijNaderendeSluitingsdatum": "Notification on approaching closing date",
       "onboardingEvaluatie": "Onboarding & evaluation",
-      "klantadresGeocoderenPDOK": "Geocode customer address (PDOK)",
-      "klantadressenGeocoderenBulkPDOK": "Geocode customer addresses — bulk (PDOK)",
-      "locatieadresGeocoderenPDOK": "Geocode location address (PDOK)",
-      "locatieadressenGeocoderenBulkPDOK": "Geocode location addresses — bulk (PDOK)",
-      "vacatureadresGeocoderenPDOK": "Geocode vacancy address (PDOK)",
-      "vacatureadressenGeocoderenBulkPDOK": "Geocode vacancy addresses — bulk (PDOK)",
       "nieuweMatchMelding": "New match — notification",
       "opMatchfaseMelding": "On match stage — notification",
       "whatsappStoringMelding": "WhatsApp outage — notification",
@@ -1364,7 +1356,7 @@
     },
     "geocode": {
       "requested": "Geocoding requested",
-      "updated": "Geocoding coordinates updated"
+      "updated": "Coordinates updated"
     },
     "hello_flex_webhook": {
       "updated": "Contract status updated via HelloFlex webhook"

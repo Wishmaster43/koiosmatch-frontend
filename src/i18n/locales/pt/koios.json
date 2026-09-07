@@ -114,7 +114,6 @@
       "whatsapp": "WhatsApp",
       "shiftmanager": "ShiftManager",
       "helloflex": "HelloFlex",
-      "pdok": "PDOK",
       "other": "Outros"
     },
     "kindRead": "Ler",
@@ -194,5 +193,8 @@
     "high": "Alto",
     "xhigh": "Muito alto",
     "max": "Máximo"
+  },
+  "tools": {
+    "opencage": "Geocodificação OpenCage"
   }
 }

@@ -1,33 +1,29 @@
 /**
- * geocode — resolve a Dutch postcode/place/address to coordinates via the PDOK
- * Locatieserver (the same public source the backend uses; free, no key, no PII —
- * the query is a place name). Used by the radius filter block in the sidebar.
+ * geocode — resolve a postcode/place/address to coordinates via the backend
+ * OpenCage proxy (GEO-GEOCODE-SEARCH-1). Works for all countries, gated by view
+ * permission + tenant daily budget. Used by the radius filter block in the sidebar.
  */
 
-export interface GeoHit { lat: number; lng: number; label: string }
+import api from '@/lib/api'
 
-// PDOK free-search endpoint; one best hit limited to place-like types.
-const PDOK_URL = 'https://api.pdok.nl/bzk/locatieserver/search/v3_1/free'
+export interface GeoHit { lat: number; lng: number; label?: string | null }
 
-/** Geocode a free-text NL location; returns null when nothing matches. */
-export async function geocodeNL(query: string): Promise<GeoHit | null> {
+/** Geocode a free-text location; returns null on empty input, miss, or error. */
+export async function geocodeLocation(query: string, country?: string): Promise<GeoHit | null> {
   const q = query.trim()
   if (!q) return null
-  const params = new URLSearchParams({
-    q, rows: '1',
-    fl: 'centroide_ll,weergavenaam',
-    fq: 'type:(woonplaats OR postcode OR adres)',
-  })
   try {
-    const res = await fetch(`${PDOK_URL}?${params}`)
-    if (!res.ok) return null
-    const json = await res.json() as { response?: { docs?: Array<{ centroide_ll?: string; weergavenaam?: string }> } }
-    const doc = json.response?.docs?.[0]
-    // centroide_ll is WKT: "POINT(lng lat)".
-    const m = doc?.centroide_ll?.match(/POINT\(([\d.-]+) ([\d.-]+)\)/)
-    if (!m) return null
-    return { lng: Number(m[1]), lat: Number(m[2]), label: doc?.weergavenaam ?? q }
+    const params: Record<string, string> = { q }
+    if (country) params.country = country
+    const res = await api.get<{ data: GeoHit }>('/api/geocode/search', { params })
+    return res.data.data
   } catch {
+    // 404 = not found, 429/503 = provider issues — all return null
     return null
   }
+}
+
+/** Legacy alias for NL-only queries (kept for backward compatibility with radius filter). */
+export async function geocodeNL(query: string): Promise<GeoHit | null> {
+  return geocodeLocation(query, 'NL')
 }

@@ -231,7 +231,6 @@
     "whatsapp_send": "Enviar WhatsApp",
     "facebook_send": "Retroalimentación de Facebook",
     "candidates_fetch": "Candidatos de Koios Match",
-    "pdok_geocode": "Geocodificar dirección (PDOK)",
     "backoffice_sync": "Vincular con el backoffice",
     "interview_start": "Iniciar entrevista IA",
     "notification_send": "Enviar notificación",
@@ -578,7 +577,6 @@
     "Actie": "Acción",
     "Actief": "Activo",
     "Adres (straat nr postcode)": "Dirección (calle, n.º, código postal)",
-    "Adres geocoderen (PDOK)": "Geocodificar dirección (PDOK)",
     "Afdeling": "Departamento",
     "Afwijsreden": "Motivo de rechazo",
     "Afwijsreden (filter)": "Motivo de rechazo (filtro)",
@@ -1292,7 +1290,8 @@
     "Leeg gelaten factoren gebruiken de standaardpunten": "Los factores vacíos usan los puntos predeterminados.",
     "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bonificación o penalización por id de cliente, por ejemplo 2 o -3.",
     "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Por función, los nombres de funciones primarias y secundarias que cuentan como coincidencia, en minúsculas.",
-    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Permite que el agente de IA consulte los documentos o la base de conocimiento del inquilino durante la conversación. Solo funciona si el propio agente tiene conocimiento disponible."
+    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Permite que el agente de IA consulte los documentos o la base de conocimiento del inquilino durante la conversación. Solo funciona si el propio agente tiene conocimiento disponible.",
+    "Sla records over die al coördinaten hebben; aan te raden bij bulk": "Omitir los registros que ya tienen coordenadas; recomendado para ejecuciones masivas."
   },
   "triggers": {
     "events": {
@@ -1447,5 +1446,7 @@
   },
   "runs": {
     "routingOverruled": "anulada"
-  }
+  },
+  "geocode": "Geocodificar dirección (OpenCage)",
+  "geocode_bulk": "Geocodificar direcciones, en lote (OpenCage)"
 }

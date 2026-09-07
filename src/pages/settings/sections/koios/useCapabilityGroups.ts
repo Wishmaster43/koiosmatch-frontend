@@ -21,7 +21,7 @@ export type CapabilityDomain =
   | 'candidates' | 'vacancies' | 'applications' | 'customers' | 'matches' | 'tasks'
   | 'calllists' | 'notes' | 'reports' | 'appointments' | 'workflows'
   | 'opportunities' | 'departments' | 'locations' | 'contacts'
-  | 'whatsapp' | 'shiftmanager' | 'helloflex' | 'pdok' | 'other'
+  | 'whatsapp' | 'shiftmanager' | 'helloflex' | 'opencage' | 'other'
 
 export interface CapabilityGroup { id: CapabilityDomain; tools: KoiosCapabilityTool[] }
 
@@ -51,7 +51,7 @@ const TOKEN_DOMAIN: Record<string, CapabilityDomain> = {
 
 // Connection → domain always wins first (an explicit integration beats a name guess).
 const CONNECTION_DOMAIN: Partial<Record<string, CapabilityDomain>> = {
-  whatsapp: 'whatsapp', shiftmanager: 'shiftmanager', helloflex: 'helloflex', pdok: 'pdok',
+  whatsapp: 'whatsapp', shiftmanager: 'shiftmanager', helloflex: 'helloflex', opencage: 'opencage',
 }
 
 // Known split cases under the first-token rule (KOIOS-TOOL-MATRIX-FE-3 verdict

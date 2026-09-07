@@ -374,7 +374,7 @@
     "clearRadius": "Borrar radio"
   },
   "geocode": {
-    "refresh": "Actualizar coordenadas PDOK",
+    "refresh": "Geocodificar de nuevo (OpenCage)",
     "started": "Actualización iniciada…",
     "updated": "Coordenadas actualizadas.",
     "notFound": "Dirección no encontrada. Revisa los datos."
@@ -437,18 +437,18 @@
       "statusFailed": "Fallido",
       "syncNow": "Sincronizar ahora"
     },
-    "pdok": {
-      "name": "PDOK",
-      "alt": "Logo de PDOK",
-      "linked": "Vinculado",
-      "notGeocoded": "Aún no geocodificado",
-      "autoInfo": "Las coordenadas se actualizan automáticamente en cuanto cambia la dirección.",
-      "readOnly": "Las coordenadas provienen de la propia ubicación del cliente; volver a geocodificar aún no es posible aquí."
-    },
     "statusIcons": {
       "linked": "{{system}} vinculado",
       "failed": "Error de sincronización de {{system}}: {{error}}",
       "failedNoReason": "Sincronización {{system}} fallida"
+    },
+    "geocode": {
+      "name": "OpenCage",
+      "alt": "Logo de OpenCage",
+      "linked": "Vinculado",
+      "notGeocoded": "Aún no geocodificado",
+      "autoInfo": "Las coordenadas se actualizan automáticamente cuando la dirección cambia.",
+      "readOnly": "Las coordenadas provienen del ubicación de la cliente misma; la regeocificación aún no es posible aquí."
     }
   },
   "breadcrumb": "Ruta de navegación",
@@ -1073,8 +1073,6 @@
       "nietBenaderdXDagen": "No contactado > X días",
       "verjaardagsfelicitatie": "Felicitación de cumpleaños",
       "afspraakbevestiging": "Confirmación de cita",
-      "adresGeocoderenPDOK": "Geocodificar dirección (PDOK)",
-      "adressenGeocoderenBulkPDOK": "Geocodificar direcciones — masivo (PDOK)",
       "helloflexKoppelingPerKandidaat": "Conexión HelloFlex (por candidato)",
       "helloflexKoppelingBulk": "Conexión HelloFlex — masivo",
       "shiftmanagerKoppelingPerKandidaat": "Conexión Shiftmanager (por candidato)",
@@ -1093,12 +1091,6 @@
       "taakBijVacatureLangOnlineZonderResultaat": "Tarea por vacante mucho tiempo en línea sin resultado",
       "meldingBijNaderendeSluitingsdatum": "Notificación por fecha de cierre próxima",
       "onboardingEvaluatie": "Incorporación y evaluación",
-      "klantadresGeocoderenPDOK": "Geocodificar dirección del cliente (PDOK)",
-      "klantadressenGeocoderenBulkPDOK": "Geocodificar direcciones de clientes — masivo (PDOK)",
-      "locatieadresGeocoderenPDOK": "Geocodificar dirección de sede (PDOK)",
-      "locatieadressenGeocoderenBulkPDOK": "Geocodificar direcciones de sede — masivo (PDOK)",
-      "vacatureadresGeocoderenPDOK": "Geocodificar dirección de la vacante (PDOK)",
-      "vacatureadressenGeocoderenBulkPDOK": "Geocodificar direcciones de vacantes — masivo (PDOK)",
       "nieuweMatchMelding": "Nuevo match — notificación",
       "opMatchfaseMelding": "En fase de match — notificación",
       "whatsappStoringMelding": "Interrupción de WhatsApp — notificación",

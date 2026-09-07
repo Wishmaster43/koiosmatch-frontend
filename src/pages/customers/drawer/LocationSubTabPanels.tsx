@@ -24,7 +24,7 @@ import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 // TIJDLIJN-SUBDRILL-1: the location's own activity log (LOC-DEPT-CHANGELOG-1).
 import SubEntityTimelineTab from './SubEntityTimelineTab'
-import PdokCard from '@/components/drawer/PdokCard'
+import GeocodeCard from '@/components/drawer/GeocodeCard'
 import type { Location } from '@/types/customer'
 import type { Id } from '@/types/common'
 
@@ -93,7 +93,7 @@ export default function LocationSubTabPanels({ subTab, location: l, customerId, 
 
       {subTab === 'links' && (
         <BackofficeLinksTab entity="locations" id={l.id as Id} helloflexLink={l.helloflexLink} shiftmanagerLink={l.shiftmanagerLink} canLink={canLinkBackoffice} refetchUrl={customerId ? `/customers/${customerId}/locations/${l.id}` : undefined}>
-          {/* PDOK sits in Koppelingen, like every other integration (Danny 28-07).
+          {/* OpenCage geocoding sits in Koppelingen, like every other integration (Danny 28-07).
               KLANTLOCATIE-GEOCODE-1 (backend 2026-08-01): the per-site re-geocode route
               now exists, so this card ACTS as well as reads — mirroring the customer's
               own card verbatim (CustomerDrawer, /customers/{id}/geocode), same shared
@@ -103,7 +103,7 @@ export default function LocationSubTabPanels({ subTab, location: l, customerId, 
               honestly read-only rather than firing a /customers/undefined/… 404 (§3).
               HelloFlex/Shiftmanager gate themselves on the tenant's connector apps,
               which is why Yesway sees Shiftmanager and not HelloFlex. */}
-          <PdokCard lat={l.lat} lng={l.lng} permission="customers.update"
+          <GeocodeCard lat={l.lat} lng={l.lng} permission="customers.update"
             endpoint={customerId ? `/customers/${customerId}/locations/${l.id}/geocode` : undefined}
             disabled={!l.city} />
         </BackofficeLinksTab>

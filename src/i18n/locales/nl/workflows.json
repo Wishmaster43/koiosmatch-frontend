@@ -270,7 +270,6 @@
     "whatsapp_send": "WhatsApp Sturen",
     "facebook_send": "Facebook terugkoppeling",
     "candidates_fetch": "Koios Match kandidaten",
-    "pdok_geocode": "Adres geocoderen (PDOK)",
     "backoffice_sync": "Backoffice koppelen",
     "interview_start": "AI-interview starten",
     "notification_send": "Melding versturen",
@@ -613,7 +612,6 @@
     "Actie": "Actie",
     "Actief": "Actief",
     "Adres (straat nr postcode)": "Adres (straat nr postcode)",
-    "Adres geocoderen (PDOK)": "Adres geocoderen (PDOK)",
     "Afdeling": "Afdeling",
     "Afwijsreden": "Afwijsreden",
     "Afwijsreden (filter)": "Afwijsreden (filter)",
@@ -1290,7 +1288,8 @@
     "Leeg gelaten factoren gebruiken de standaardpunten": "Leeg gelaten factoren gebruiken de standaardpunten.",
     "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bonus of malus per klant-id, bijvoorbeeld 2 of -3.",
     "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters.",
-    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek. Werkt alleen als de agent zelf kennis beschikbaar heeft."
+    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek. Werkt alleen als de agent zelf kennis beschikbaar heeft.",
+    "Sla records over die al coördinaten hebben; aan te raden bij bulk": "Sla records over die al coördinaten hebben; aan te raden bij bulk."
   },
   "triggers": {
     "events": {
@@ -1445,5 +1444,7 @@
   },
   "runs": {
     "routingOverruled": "overschreven"
-  }
+  },
+  "geocode": "Adres geocoderen (OpenCage)",
+  "geocode_bulk": "Adressen geocoderen, bulk (OpenCage)"
 }

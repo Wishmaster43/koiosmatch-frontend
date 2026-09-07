@@ -72,7 +72,7 @@ const EXPECTED_SCHEMA_KEYS: Record<string, string[]> = {
   candidate_filter: ['ai_enabled', 'pools', 'positions', 'status', 'last_contact_days', 'last_worked_days', 'no_show_max'],
   // effective_from deliberately absent: declared by the engine schema but never read by execute() (fake affordance).
   status_set: ['status', 'reason', 'return_date', 'blacklist_reason'],
-  pdok_geocode: ['entity', 'candidate_id', 'only_missing', 'all_records'],
+  geocode: ['entity', 'candidate_id', 'only_missing', 'all_records'],
   // WF-WAIT-NODE-FE-1: the ONE merged 'wait' node — mirrors WaitModule::configSchema.
   wait: ['until_field', 'days', 'hours', 'skip_weekends'],
   // INTERVIEW-WORKFLOW-1 Appendix C (Danny 30-08) supersedes WF-AI-AGENT-NODE-FE-1

@@ -231,7 +231,6 @@
     "whatsapp_send": "Envoyer WhatsApp",
     "facebook_send": "Retour Facebook",
     "candidates_fetch": "Candidats Koios Match",
-    "pdok_geocode": "Géocoder l’adresse (PDOK)",
     "backoffice_sync": "Lier au backoffice",
     "interview_start": "Démarrer l'entretien IA",
     "notification_send": "Envoyer une notification",
@@ -578,7 +577,6 @@
     "Actie": "Action",
     "Actief": "Actif",
     "Adres (straat nr postcode)": "Adresse (rue, n°, code postal)",
-    "Adres geocoderen (PDOK)": "Géocoder l’adresse (PDOK)",
     "Afdeling": "Service",
     "Afwijsreden": "Motif de refus",
     "Afwijsreden (filter)": "Motif de refus (filtre)",
@@ -1292,7 +1290,8 @@
     "Leeg gelaten factoren gebruiken de standaardpunten": "Les facteurs laissés vides utilisent les points par défaut.",
     "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bonus ou malus par id client, par exemple 2 ou -3.",
     "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Par fonction, les noms de fonctions primaires et secondaires considérés comme correspondance, en minuscules.",
-    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Permet à l'agent IA de consulter les documents/la base de connaissances du client pendant la conversation. Ne fonctionne que si l'agent lui-même dispose de connaissances."
+    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Permet à l'agent IA de consulter les documents/la base de connaissances du client pendant la conversation. Ne fonctionne que si l'agent lui-même dispose de connaissances.",
+    "Sla records over die al coördinaten hebben; aan te raden bij bulk": "Ignorer les enregistrements qui ont déjà des coordonnées ; recommandé pour les traitements en masse."
   },
   "triggers": {
     "events": {
@@ -1447,5 +1446,7 @@
   },
   "runs": {
     "routingOverruled": "supplantée"
-  }
+  },
+  "geocode": "Géocoder l'adresse (OpenCage)",
+  "geocode_bulk": "Géocoder les adresses, en masse (OpenCage)"
 }

@@ -235,7 +235,6 @@
     "whatsapp_send": "Send WhatsApp",
     "facebook_send": "Facebook feedback",
     "candidates_fetch": "Koios Match candidates",
-    "pdok_geocode": "Geocode address (PDOK)",
     "backoffice_sync": "Link to backoffice",
     "interview_start": "Start AI interview",
     "notification_send": "Send notification",
@@ -578,7 +577,6 @@
     "Actie": "Action",
     "Actief": "Active",
     "Adres (straat nr postcode)": "Address (street, no., postal code)",
-    "Adres geocoderen (PDOK)": "Geocode address (PDOK)",
     "Afdeling": "Department",
     "Afwijsreden": "Rejection reason",
     "Afwijsreden (filter)": "Rejection reason (filter)",
@@ -1292,7 +1290,8 @@
     "Leeg gelaten factoren gebruiken de standaardpunten": "Factors left empty use the default points.",
     "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bonus or malus per customer id, for example 2 or -3.",
     "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Per function the primary and secondary function names that count as a match, in lower case.",
-    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Lets the AI agent consult the tenant's documents/knowledge base during the conversation. Only works when the agent itself has knowledge available."
+    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Lets the AI agent consult the tenant's documents/knowledge base during the conversation. Only works when the agent itself has knowledge available.",
+    "Sla records over die al coördinaten hebben; aan te raden bij bulk": "Skip records that already carry coordinates; recommended for bulk runs."
   },
   "triggers": {
     "events": {
@@ -1447,5 +1446,7 @@
   },
   "runs": {
     "routingOverruled": "overruled"
-  }
+  },
+  "geocode": "Geocode address (OpenCage)",
+  "geocode_bulk": "Geocode addresses, bulk (OpenCage)"
 }

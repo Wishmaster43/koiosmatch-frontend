@@ -217,7 +217,7 @@ describe('LocationDetail · title-row status badge', () => {
 const openKoppelingen = async (user: ReturnType<typeof userEvent.setup>) =>
   user.click(screen.getByRole('tab', { name: cm('backofficeLinks.tabLabel') }))
 
-describe('LocationDetail · PDOK card in Koppelingen', () => {
+describe('LocationDetail · geocode card in Koppelingen', () => {
   it('POSTs the per-location geocode route, addressed through its customer', async () => {
     const user = userEvent.setup()
     render(<LocationDetail location={location({ city: 'Gorinchem' })} onSave={vi.fn()} {...baseProps} />)
@@ -253,7 +253,7 @@ describe('LocationDetail · PDOK card in Koppelingen', () => {
     await openKoppelingen(user)
 
     expect(screen.queryByRole('button', { name: cm('geocode.refresh') })).toBeNull()
-    expect(screen.getByText(cm('backofficeLinks.pdok.readOnly'))).toBeInTheDocument()
+    expect(screen.getByText(cm('backofficeLinks.geocode.readOnly'))).toBeInTheDocument()
   })
 
   it('never fires the geocode POST on mount — only on an explicit click', async () => {
