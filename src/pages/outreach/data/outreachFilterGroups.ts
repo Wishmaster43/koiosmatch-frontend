@@ -8,8 +8,8 @@
  */
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
+import { Opt, archivedCheckboxGroup } from '@/lib/filterGroups/common'
 
-interface Opt { value: string; label: string; count?: number }
 type Tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => void
 
 interface BuildArgs {
@@ -42,7 +42,7 @@ export function buildOutreachFilterGroups({
     // ── Organisatie: who owns it, which target group it was seeded from.
     ...(ownerOptions.length ? [{ key: 'owner', type: 'search-select', category: catOrganisation, label: t('filters.owner'), selected: selectedOwner, options: ownerOptions, onToggle: tog(setSelectedOwner) }] : []),
     ...(targetGroupOptions.length ? [{ key: 'targetGroup', type: 'search-select', category: catOrganisation, label: t('filters.targetGroup'), selected: selectedTargetGroup, options: targetGroupOptions, onToggle: tog(setSelectedTargetGroup) }] : []),
-    // ── Weergave: archived (view-scoping, not campaign data).
-    { key: 'archived', type: 'checkbox', category: catDisplay, label: t('filters.archived'), selected: showArchived ? ['archived'] : [], options: [{ value: 'archived', label: t('view.archived') }], onToggle: () => setShowArchived(v => !v) },
+    // View-scoping: archived (not campaign data).
+    archivedCheckboxGroup(t, catDisplay, showArchived, setShowArchived, 'view.archived'),
   ]
 }

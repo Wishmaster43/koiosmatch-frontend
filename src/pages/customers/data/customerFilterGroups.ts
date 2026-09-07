@@ -5,16 +5,10 @@
  */
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
-import { ddmmyyyy } from '@/lib/localDate'
 import { NO_STATUS_KEY } from './customerInsights'
+import { Opt, archivedCheckboxGroup, periodCreatedGroup } from '@/lib/filterGroups/common'
 
-interface Opt { value?: string | number; label?: string; count?: number; color?: string }
 type Tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => void
-
-// DD-MM-YYYY (DATUM-1) for the period-chip label; echoes the input if unparseable.
-// `ddmmyyyy` comes from lib/localDate, the init-free module (§0/DATUM-1) — this is a
-// pure module and must not drag in lib/datetime's i18n import.
-const fmtD = (s: string) => { const d = new Date(s); return isNaN(d.getTime()) ? s : ddmmyyyy(d) }
 
 export interface CustomerDateRange { param: 'created_between'; from: string; to: string }
 export interface CustomerGeoFilter { q: string; km: number; lat: number; lng: number; label: string }
@@ -62,15 +56,9 @@ export function buildCustomerFilterGroups({ t, tog, filters: f, options: o }: Bu
       onApply: f.applyGeo, onClear: f.clearGeo },
     { key: 'owner',    type: 'search-select', category: catOrg, label: t('filters.accountManager'), selected: f.selectedOwner,  options: o.ownerOptions,  onToggle: tog(f.setSelectedOwner) },
     { key: 'branch',   type: 'search-select', category: catOrg, label: t('common:filters.branch'),  selected: f.selectedBranch, options: o.branchOptions, onToggle: tog(f.setSelectedBranch) },
-    // Archived mirrors the quick-view toggle; both share the showArchived state.
-    { key: 'archived', type: 'checkbox', category: catDisplay, label: t('filters.archived'), selected: f.showArchived ? ['archived'] : [], options: [{ value: 'archived', label: t('page.archivedView') }], onToggle: () => f.setShowArchived(v => !v) },
-    // Period (created date range) from a dashboard bar click — a single removable value.
-    ...(f.dateRange ? [{
-      key: 'period', type: 'search-select', category: catDisplay,
-      label: t('filters.periodCreated'),
-      selected: [`${f.dateRange.from}|${f.dateRange.to}`],
-      options: [{ value: `${f.dateRange.from}|${f.dateRange.to}`, label: `${fmtD(f.dateRange.from)} – ${fmtD(f.dateRange.to)}` }],
-      onToggle: () => f.setDateRange(null),
-    }] : []),
+    // Archived mirrors the quick-view toggle.
+    archivedCheckboxGroup(t, catDisplay, f.showArchived, f.setShowArchived, 'page.archivedView'),
+    // Period group (date range from a dashboard bar click).
+    ...periodCreatedGroup(t, catDisplay, f.dateRange, f.setDateRange),
   ]
 }

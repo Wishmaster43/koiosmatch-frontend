@@ -7,18 +7,11 @@
  */
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
-import { ddmmyyyy } from '@/lib/localDate'
 import type { AppDateRangeFilter } from '../hooks/useApplicationFilters'
+import { Opt, archivedCheckboxGroup, trashCheckboxGroup, periodCreatedGroup } from '@/lib/filterGroups/common'
 
 type SetBucket = Dispatch<SetStateAction<string>>
-
-interface Opt { value?: string | number; label?: string; count?: number; color?: string }
 type Tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => void
-
-// DD-MM-YYYY (DATUM-1) for the period-chip label; echoes the input if unparseable.
-// `ddmmyyyy` comes from lib/localDate, the init-free module (§0/DATUM-1) — this is a
-// pure module and must not drag in lib/datetime's i18n import.
-const fmtD = (s: string) => { const d = new Date(s); return isNaN(d.getTime()) ? s : ddmmyyyy(d) }
 
 export type CvFilter = 'with' | 'without' | null
 
@@ -75,17 +68,10 @@ export function buildApplicationFilterGroups({ t, tog, filters: f, options: o }:
     // VESTIGING-2: inherited from the candidate; values limited to the user's own
     // branch scope — never a widening.
     { key: 'branch',  type: 'search-select', category: catOrg,       label: t('common:filters.branch'), selected: f.selectedBranch, options: o.branchOptions, onToggle: tog(f.setSelectedBranch) },
-    // Archived + trash mirror the quick-view toggles — both share one server flag
-    // (include_archived), two UI entry points (see useApplicationFilters).
-    { key: 'archived', type: 'checkbox', category: catDisplay, label: t('archived.toggle'), selected: f.showArchived ? ['archived'] : [], options: [{ value: 'archived', label: t('archived.toggle') }], onToggle: () => f.setShowArchived(v => !v) },
-    { key: 'trash',    type: 'checkbox', category: catDisplay, label: t('filters.trash'),  selected: f.showTrash ? ['trash'] : [],       options: [{ value: 'trash', label: t('filters.trash') }],     onToggle: () => f.setShowTrash(v => !v) },
-    // Period (created date range) from a dashboard bar click — a single removable value.
-    ...(f.dateRange ? [{
-      key: 'period', type: 'search-select', category: catDisplay,
-      label: t('filters.periodCreated'),
-      selected: [`${f.dateRange.from}|${f.dateRange.to}`],
-      options: [{ value: `${f.dateRange.from}|${f.dateRange.to}`, label: `${fmtD(f.dateRange.from)} – ${fmtD(f.dateRange.to)}` }],
-      onToggle: () => f.setDateRange(null),
-    }] : []),
+    // Archived + trash mirrors (quick-view toggles share one server flag include_archived).
+    archivedCheckboxGroup(t, catDisplay, f.showArchived, f.setShowArchived, 'archived.toggle'),
+    trashCheckboxGroup(t, catDisplay, f.showTrash, f.setShowTrash),
+    // Period group (date range from a dashboard bar click).
+    ...periodCreatedGroup(t, catDisplay, f.dateRange, f.setDateRange),
   ]
 }

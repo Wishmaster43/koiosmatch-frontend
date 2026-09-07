@@ -5,18 +5,11 @@
  * Small fixed lookups render as OPEN checkbox lists; long lists stay dropdowns.
  */
 import type { Dispatch, SetStateAction } from 'react'
-import { ddmmyyyy } from '@/lib/localDate'
 import type { GeoFilter, DateRangeFilter } from '../hooks/useCandidateFilters'
+import { Opt, archivedCheckboxGroup, fmtD } from '@/lib/filterGroups/common'
 
-// Option rows arrive from several stats feeds — value/label may be undefined on
-// malformed rows; the panel renders them defensively, so keep the type loose.
-interface Opt { value?: string | number; label?: string; count?: number; color?: string }
+// Plural toggle for candidates (generic type parameter, unlike applications).
 type Tog = <T,>(set: Dispatch<SetStateAction<T[]>>) => (v: T) => void
-
-// DD-MM-YYYY (DATUM-1) for the period-chip label; echoes the input if unparseable.
-// `ddmmyyyy` comes from lib/localDate, the init-free module (§0/DATUM-1) — this is a
-// pure module and must not drag in lib/datetime's i18n import.
-const fmtD = (s: string) => { const d = new Date(s); return isNaN(d.getTime()) ? s : ddmmyyyy(d) }
 
 interface BuildArgs {
   t: (k: string, o?: Record<string, unknown>) => string
@@ -76,11 +69,10 @@ export function buildCandidateFilterGroups({ t, tog, filters: f, options: o }: B
     { key: 'owner',    type: 'search-select', category: catOrganisation, label: t('filters.owner'),  selected: f.selectedOwner,    options: o.ownerOptions,    onToggle: tog(f.setSelectedOwner) },
     { key: 'location', type: 'search-select', category: catOrganisation, label: t('filters.branch'), selected: f.selectedLocation, options: o.locationOptions, onToggle: tog(f.setSelectedLocation) },
     ...(o.sourceOptions.length ? [{ key: 'source', type: 'search-select', category: catOrganisation,   label: t('filters.source'), selected: f.selectedSource, options: o.sourceOptions, onToggle: tog(f.setSelectedSource) }] : []),
-    // ── Weergave: archived + period (view-scoping, not recruiting data).
+    // ── Weergave: archived (view-scoping, not recruiting data).
     // Archived mirrors the quick-view toggle; both share the showArchived state.
-    { key: 'archived', type: 'checkbox', category: catDisplay, label: t('filters.archived'), selected: f.showArchived ? ['archived'] : [], options: [{ value: 'archived', label: t('page.archivedView') }], onToggle: () => f.setShowArchived(v => !v) },
-    // V-appdetail-1/2: findable client-side refine mirroring the table's attention
-    // icon — no server count is claimed here, just "show only these".
+    archivedCheckboxGroup(t, catDisplay, f.showArchived, f.setShowArchived, 'page.archivedView'),
+    // Attention flags: missing appointment, missing documents, retention expiring.
     { key: 'missingAppointment', type: 'checkbox', category: catLifecycle, label: t('filters.missingAppointment'),
       selected: f.missingAppointmentFilter ? ['missingAppointment'] : [],
       options: [{ value: 'missingAppointment', label: t('filters.missingAppointment') }],
@@ -103,7 +95,7 @@ export function buildCandidateFilterGroups({ t, tog, filters: f, options: o }: B
         if (v === '30') f.setAttentionFilter(f.attentionFilter === 'retentionExpiring30' ? null : 'retentionExpiring30')
         else if (v === '60') f.setAttentionFilter(f.attentionFilter === 'retentionExpiring60' ? null : 'retentionExpiring60')
       } },
-    // Period (date range) from a dashboard bar click — a single removable value.
+    // Period (date range) from a dashboard bar click — specialized for candidates.
     ...(f.dateRange ? [{
       key: 'period', type: 'search-select', category: catDisplay,
       label: t(f.dateRange.param === 'created_between' ? 'filters.periodCreated' : 'filters.periodLastContact'),

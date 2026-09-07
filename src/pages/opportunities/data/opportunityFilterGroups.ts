@@ -7,8 +7,8 @@
  */
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
+import { Opt, archivedCheckboxGroup } from '@/lib/filterGroups/common'
 
-interface Opt { value: string; label: string; count?: number }
 type Tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => void
 
 interface BuildArgs {
@@ -43,7 +43,7 @@ export function buildOpportunityFilterGroups({
     // VESTIGING-2: inherited from the customer; values limited to the user's own
     // branch scope — never a widening.
     { key: 'branch', type: 'search-select', category: catOrganisation, label: t('common:filters.branch'), selected: selectedBranch, options: branchOptions, onToggle: tog(setSelectedBranch) },
-    // ── Weergave: archived (view-scoping, not deal data).
-    { key: 'archived', type: 'checkbox', category: catDisplay, label: t('filters.archived'), selected: showArchived ? ['archived'] : [], options: [{ value: 'archived', label: t('filters.archived') }], onToggle: () => setShowArchived(v => !v) },
+    // View-scoping: archived (not deal data).
+    archivedCheckboxGroup(t, catDisplay, showArchived, setShowArchived),
   ]
 }
