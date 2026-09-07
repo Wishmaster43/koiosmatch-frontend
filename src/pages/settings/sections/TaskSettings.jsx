@@ -24,7 +24,7 @@ export function TaskStatusSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      <StatusListEditor compact withColor title={t('tasks.statusTitle')} subtitle={t('tasks.statusSubtitle')}
+      <StatusListEditor compact withColor withValueSlug title={t('tasks.statusTitle')} subtitle={t('tasks.statusSubtitle')}
         endpoint="/task-statuses" addLabel={t('tasks.statusAdd')}
         flagField={{ key: 'is_done', label: t('tasks.flagDone'), description: t('tasks.flagDoneDesc') }} />
     </div>
@@ -40,7 +40,7 @@ export function TaskTypeSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      <StatusListEditor compact withColor title={t('tasks.typeTitle')} subtitle={t('tasks.typeSubtitle')}
+      <StatusListEditor compact withColor withValueSlug title={t('tasks.typeTitle')} subtitle={t('tasks.typeSubtitle')}
         endpoint="/task-types" addLabel={t('tasks.typeAdd')}
         iconPicker={{ icons: TASK_TYPE_ICON_NAMES, resolve: resolveGenericLookupIcon }}
         flagField={{ key: 'counts_as_contact', label: t('tasks.typeCountsAsContact'), description: t('tasks.typeCountsAsContactDesc') }}
@@ -56,7 +56,7 @@ export function TaskPrioritySettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      <StatusListEditor compact withColor title={t('tasks.priorityTitle')} subtitle={t('tasks.prioritySubtitle')}
+      <StatusListEditor compact withColor withValueSlug title={t('tasks.priorityTitle')} subtitle={t('tasks.prioritySubtitle')}
         endpoint="/task-priorities" addLabel={t('tasks.priorityAdd')}
         defaultField={{ key: 'is_default', labelKey: 'tasks.priorityDefault' }} />
     </div>

@@ -45,6 +45,7 @@ export default function NoteTypesSettings({ entity = null }) {
         // and keeps only rows that actually belong to it.
         fetchEntity={entity ?? undefined}
         postFilter={postFilter}
+        withValueSlug
         title={t('noteTypes.title', { entity: entityLabel })} subtitle={t('noteTypes.subtitle')}
         endpoint="/note-types" addLabel={t('noteTypes.add')} />
     </div>

@@ -22,7 +22,7 @@ export function AppointmentTypeSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      <StatusListEditor compact withColor
+      <StatusListEditor compact withColor withValueSlug
         iconPicker={{ icons: APPOINTMENT_TYPE_ICON_NAMES, resolve: resolveGenericLookupIcon }}
         title={t('appointmentTypes.title')} subtitle={t('appointmentTypes.subtitle')}
         endpoint="/appointment-types" addLabel={t('appointmentTypes.add')}

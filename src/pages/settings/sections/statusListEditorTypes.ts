@@ -37,6 +37,7 @@ export interface FlagFieldDef {
   key: string
   label: string
   description?: string
+  default?: boolean
 }
 
 export interface NumberFieldDef {

@@ -4,6 +4,8 @@
  * priority split (koiosmatch-api app/Workflow/Modules/WhatsAppSendModule.php:260-276),
  * so the rank number is real "1 = sent first" semantics, not decoration. This regression-
  * guards the 2026-07-10 extraction (ee207f18) that recreated the editor without it.
+ * Also: §13 regression guard for the withValueSlug opt-in (AF:lookups-1):
+ * WhatsappMessageTypeController extends SlugLookupController, whose store() REQUIRES `value`.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -63,6 +65,20 @@ describe('WaMessageTypeSettings — priority flag and daily cap', () => {
     expect(route).toBe('/whatsapp-message-types')
     expect(body).toEqual(expect.objectContaining({ name: 'Herinnering', is_priority: true }))
     expect(Number(body.daily_cap)).toBe(50)
+  })
+
+  it('create POST to /whatsapp-message-types carries the slugged value (withValueSlug)', async () => {
+    api.get.mockResolvedValue({ data: [] })
+    api.post.mockResolvedValue({ data: type({ id: 'm9', name: 'Bulk SMS' }) })
+    const user = userEvent.setup()
+    render(<WaMessageTypeSettings />)
+
+    await user.click(await screen.findByRole('button', { name: st('waMessageTypes.add') }))
+    await user.type(screen.getByPlaceholderText(st('statusList.namePlaceholder')), 'Bulk SMS')
+    await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/whatsapp-message-types',
+      expect.objectContaining({ name: 'Bulk SMS', value: 'bulk_sms' })))
   })
 })
 

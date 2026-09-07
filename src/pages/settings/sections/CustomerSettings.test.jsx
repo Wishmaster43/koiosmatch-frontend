@@ -71,6 +71,20 @@ describe('CustomerStatusesSettings', () => {
     expect(url).toBe('/settings/customer-lookups/statuses/s2')
     expect(body.is_default).toBe(true)
   })
+
+  it('create POST to /settings/customer-lookups/statuses carries the slugged value (withValueSlug)', async () => {
+    api.get.mockResolvedValue({ data: [] })
+    api.post.mockResolvedValue({ data: mockStatus('s3', 'Prospect') })
+    const user = userEvent.setup()
+    render(<CustomerStatusesSettings />)
+
+    await user.click(await screen.findByRole('button', { name: st('customerLookups.statuses.add') }))
+    await user.type(screen.getByPlaceholderText(st('statusList.namePlaceholder')), 'Prospect')
+    await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings/customer-lookups/statuses',
+      expect.objectContaining({ name: 'Prospect', value: 'prospect' })))
+  })
 })
 
 describe('LocationStatusesSettings', () => {
@@ -101,6 +115,20 @@ describe('LocationStatusesSettings', () => {
     const [url, body] = api.put.mock.calls[0]
     expect(url).toBe('/settings/customer-lookups/location-statuses/l2')
     expect(body.is_default).toBe(true)
+  })
+
+  it('create POST to /settings/customer-lookups/location-statuses carries the slugged value (withValueSlug)', async () => {
+    api.get.mockResolvedValue({ data: [] })
+    api.post.mockResolvedValue({ data: mockStatus('l3', 'Pending') })
+    const user = userEvent.setup()
+    render(<LocationStatusesSettings />)
+
+    await user.click(await screen.findByRole('button', { name: st('customerLookups.locationStatuses.add') }))
+    await user.type(screen.getByPlaceholderText(st('statusList.namePlaceholder')), 'Pending')
+    await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings/customer-lookups/location-statuses',
+      expect.objectContaining({ name: 'Pending', value: 'pending' })))
   })
 })
 
@@ -133,6 +161,20 @@ describe('DepartmentStatusesSettings', () => {
     expect(url).toBe('/settings/customer-lookups/department-statuses/d2')
     expect(body.is_default).toBe(true)
   })
+
+  it('create POST to /settings/customer-lookups/department-statuses carries the slugged value (withValueSlug)', async () => {
+    api.get.mockResolvedValue({ data: [] })
+    api.post.mockResolvedValue({ data: mockStatus('d3', 'On hold') })
+    const user = userEvent.setup()
+    render(<DepartmentStatusesSettings />)
+
+    await user.click(await screen.findByRole('button', { name: st('customerLookups.departmentStatuses.add') }))
+    await user.type(screen.getByPlaceholderText(st('statusList.namePlaceholder')), 'On hold')
+    await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings/customer-lookups/department-statuses',
+      expect.objectContaining({ name: 'On hold', value: 'on_hold' })))
+  })
 })
 
 describe('ContactStatusesSettings', () => {
@@ -163,5 +205,19 @@ describe('ContactStatusesSettings', () => {
     const [url, body] = api.put.mock.calls[0]
     expect(url).toBe('/settings/customer-lookups/contact-statuses/c2')
     expect(body.is_default).toBe(true)
+  })
+
+  it('create POST to /settings/customer-lookups/contact-statuses carries the slugged value (withValueSlug)', async () => {
+    api.get.mockResolvedValue({ data: [] })
+    api.post.mockResolvedValue({ data: mockStatus('c3', 'Retired') })
+    const user = userEvent.setup()
+    render(<ContactStatusesSettings />)
+
+    await user.click(await screen.findByRole('button', { name: st('customerLookups.contactStatuses.add') }))
+    await user.type(screen.getByPlaceholderText(st('statusList.namePlaceholder')), 'Retired')
+    await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings/customer-lookups/contact-statuses',
+      expect.objectContaining({ name: 'Retired', value: 'retired' })))
   })
 })

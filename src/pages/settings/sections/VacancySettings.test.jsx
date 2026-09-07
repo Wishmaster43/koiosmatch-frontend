@@ -6,6 +6,8 @@
  * (HasSingletonFlag; is_default whitelisted in VacancySeniorityLevelController /
  * VacancyEducationLevelController), so the test asserts the REQUEST (§13) —
  * method + route + body — not merely that a click happened.
+ * Also: X-20 regression guard for the flag defaults: VacancyChannelSettings'
+ * `active` flag gets `default: true` so new channels start active.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -146,5 +148,19 @@ describe('VacancyChannelSettings', () => {
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/vacancy-channels/ch1',
       expect.objectContaining({ active: false, default_enabled: true })))
+  })
+
+  it('create POST to /vacancy-channels carries active:true (X-20: flag default)', async () => {
+    api.get.mockResolvedValue({ data: [] })
+    api.post.mockResolvedValue({ data: channel({ id: 'ch9', name: 'LinkedIn', active: true, default_enabled: false }) })
+    const user = userEvent.setup()
+    render(<VacancyChannelSettings />)
+
+    await user.click(await screen.findByRole('button', { name: st('vacancy.channelsAdd') }))
+    await user.type(screen.getByPlaceholderText(st('statusList.namePlaceholder')), 'LinkedIn')
+    await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/vacancy-channels',
+      expect.objectContaining({ name: 'LinkedIn', active: true })))
   })
 })

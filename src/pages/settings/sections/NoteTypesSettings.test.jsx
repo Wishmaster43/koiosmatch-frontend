@@ -47,6 +47,20 @@ describe('NoteTypesSettings — per-entity tab', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/note-types', expect.objectContaining({ entity: 'candidate', name: 'Feedback' })))
   })
 
+  it('creating a type carries the slugged value (withValueSlug)', async () => {
+    api.get.mockResolvedValue({ data: [row()] })
+    api.post.mockResolvedValue({ data: row({ id: 'row-2', name: 'Follow-up' }) })
+    const user = userEvent.setup()
+    render(<NoteTypesSettings entity="candidate" />)
+
+    await screen.findByText('Intake')
+    await user.click(screen.getByRole('button', { name: st('noteTypes.add') }))
+    await user.type(screen.getByPlaceholderText(st('statusList.namePlaceholder')), 'Follow-up')
+    await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/note-types', expect.objectContaining({ entity: 'candidate', name: 'Follow-up', value: 'follow_up' })))
+  })
+
   it('fires PUT /note-types/reorder with only this tab\'s row ids on drop', async () => {
     api.get.mockResolvedValue({ data: [row({ id: 't1', name: 'Intake' }), row({ id: 't2', name: 'Feedback' })] })
     api.put.mockResolvedValue({ data: {} })

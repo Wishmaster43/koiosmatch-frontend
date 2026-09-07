@@ -15,7 +15,7 @@ export function AppointmentLocationSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      <StatusListEditor compact withColor
+      <StatusListEditor compact withColor withValueSlug
         title={t('appointmentLocations.title')} subtitle={t('appointmentLocations.subtitle')}
         endpoint="/appointment-locations" addLabel={t('appointmentLocations.add')}
         defaultField={{ key: 'is_default' }} />

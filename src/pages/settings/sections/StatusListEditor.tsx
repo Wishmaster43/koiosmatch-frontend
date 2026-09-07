@@ -94,7 +94,7 @@ export default function StatusListEditor({
   // prop still wins (DocumentTypesSettings' own curated set), never overridden here.
   const resolvedIconPicker = iconPicker ?? (withIcon ? { icons: GENERIC_LOOKUP_ICON_NAMES, resolve: resolveGenericLookupIcon } : null)
   // eslint-disable-next-line no-restricted-syntax -- DATA: default swatch colour pre-filled for a newly created lookup row, not UI chrome
-  const emptyDraft = (): StatusListDraft => ({ name: '', color: '#3B8FD4', ...(withIcon ? { icon: '' } : {}), ...(extraField ? { [extraField.key]: extraField.default } : {}), ...(numberField ? { [numberField.key]: numberField.default } : {}), ...Object.fromEntries(flagList.map(f => [f.key, false])) })
+  const emptyDraft = (): StatusListDraft => ({ name: '', color: '#3B8FD4', ...(withIcon ? { icon: '' } : {}), ...(extraField ? { [extraField.key]: extraField.default } : {}), ...(numberField ? { [numberField.key]: numberField.default } : {}), ...Object.fromEntries(flagList.map(f => [f.key, f.default ?? false])) })
   // Lookups differ in their display field: name (phases/status) vs label/value (genders/languages).
   const labelOf = (i: StatusListItem): string => i.name ?? i.label ?? i.value ?? ''
   // An item is protected when the backend marks it as referenced by existing data.

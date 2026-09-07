@@ -152,7 +152,7 @@ export function VacancyChannelSettings() {
         endpoint="/vacancy-channels" addLabel={t('vacancy.channelsAdd')}
         iconPicker={{ icons: VACANCY_CHANNEL_ICON_NAMES, resolve: resolveGenericLookupIcon }}
         flagFields={[
-          { key: 'active', label: t('vacancy.channelActive'), description: t('vacancy.channelActiveDesc') },
+          { key: 'active', label: t('vacancy.channelActive'), description: t('vacancy.channelActiveDesc'), default: true },
           { key: 'default_enabled', label: t('vacancy.channelDefaultEnabled'), description: t('vacancy.channelDefaultEnabledDesc') },
         ]} />
     </div>

@@ -111,6 +111,7 @@ export function LastContactTypesSettings() {
       <StatusListEditor
         title={t('lastContactTypes.title')} subtitle={t('lastContactTypes.subtitle')}
         endpoint="/last-contact-types" addLabel={t('lastContactTypes.add')}
+        withValueSlug withColor
         iconPicker={{ icons: CONTACT_CHANNEL_ICON_NAMES, resolve: resolveGenericLookupIcon }} />
     </div>
   )

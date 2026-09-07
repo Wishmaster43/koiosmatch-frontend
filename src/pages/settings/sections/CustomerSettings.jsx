@@ -18,6 +18,7 @@ export function CustomerStatusesSettings() {
       subtitle={t('customerLookups.statuses.subtitle')}
       endpoint="/settings/customer-lookups/statuses"
       addLabel={t('customerLookups.statuses.add')}
+      withValueSlug
       defaultField={{ key: 'is_default' }}
     />
   )
@@ -56,6 +57,7 @@ export function LocationStatusesSettings() {
       subtitle={t('customerLookups.locationStatuses.subtitle')}
       endpoint="/settings/customer-lookups/location-statuses"
       addLabel={t('customerLookups.locationStatuses.add')}
+      withValueSlug
       defaultField={{ key: 'is_default' }}
     />
   )
@@ -72,6 +74,7 @@ export function DepartmentStatusesSettings() {
       subtitle={t('customerLookups.departmentStatuses.subtitle')}
       endpoint="/settings/customer-lookups/department-statuses"
       addLabel={t('customerLookups.departmentStatuses.add')}
+      withValueSlug
       defaultField={{ key: 'is_default' }}
     />
   )
@@ -88,6 +91,7 @@ export function ContactStatusesSettings() {
       subtitle={t('customerLookups.contactStatuses.subtitle')}
       endpoint="/settings/customer-lookups/contact-statuses"
       addLabel={t('customerLookups.contactStatuses.add')}
+      withValueSlug
       defaultField={{ key: 'is_default' }}
     />
   )

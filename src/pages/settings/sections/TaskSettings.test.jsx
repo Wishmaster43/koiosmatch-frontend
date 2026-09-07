@@ -2,14 +2,16 @@
  * TaskStatusSettings — round-4 audit finding #4: `is_done` is backend-writable
  * (TaskStatusController.php:45,61) and FE-consumed (TaskLookupsContext.doneStatusValues)
  * but the Settings screen never wired it. §13: assert the PUT request body, not
- * merely that a click happened.
+ * merely that a click happened. Also: §13 regression guards for the withValueSlug
+ * opt-in (AF:lookups-1) on TaskStatusSettings, TaskTypeSettings, and
+ * TaskPrioritySettings — each controller requires `value` on create.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
-import { TaskStatusSettings } from './TaskSettings'
+import { TaskStatusSettings, TaskTypeSettings, TaskPrioritySettings } from './TaskSettings'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
@@ -46,5 +48,51 @@ describe('TaskStatusSettings', () => {
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/task-statuses/ts1',
       expect.objectContaining({ is_done: true })))
+  })
+
+  it('create POST to /task-statuses carries the slugged value (withValueSlug)', async () => {
+    api.get.mockResolvedValue({ data: [] })
+    api.post.mockResolvedValue({ data: { id: 'x1', name: 'In progress' } })
+    const user = userEvent.setup()
+    render(<TaskStatusSettings />)
+
+    await user.click(await screen.findByRole('button', { name: st('tasks.statusAdd') }))
+    await user.type(screen.getByPlaceholderText(st('statusList.namePlaceholder')), 'In progress')
+    await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/task-statuses',
+      expect.objectContaining({ name: 'In progress', value: 'in_progress' })))
+  })
+})
+
+describe('TaskTypeSettings', () => {
+  it('create POST to /task-types carries the slugged value (withValueSlug)', async () => {
+    api.get.mockResolvedValue({ data: [] })
+    api.post.mockResolvedValue({ data: { id: 'x1', name: 'Phone call' } })
+    const user = userEvent.setup()
+    render(<TaskTypeSettings />)
+
+    await user.click(await screen.findByRole('button', { name: st('tasks.typeAdd') }))
+    await user.type(screen.getByPlaceholderText(st('statusList.namePlaceholder')), 'Phone call')
+    await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/task-types',
+      expect.objectContaining({ name: 'Phone call', value: 'phone_call' })))
+  })
+})
+
+describe('TaskPrioritySettings', () => {
+  it('create POST to /task-priorities carries the slugged value (withValueSlug)', async () => {
+    api.get.mockResolvedValue({ data: [] })
+    api.post.mockResolvedValue({ data: { id: 'x1', name: 'Low' } })
+    const user = userEvent.setup()
+    render(<TaskPrioritySettings />)
+
+    await user.click(await screen.findByRole('button', { name: st('tasks.priorityAdd') }))
+    await user.type(screen.getByPlaceholderText(st('statusList.namePlaceholder')), 'Low')
+    await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/task-priorities',
+      expect.objectContaining({ name: 'Low', value: 'low' })))
   })
 })

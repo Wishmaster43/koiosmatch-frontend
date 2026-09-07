@@ -55,4 +55,18 @@ describe('AppointmentLocationSettings', () => {
     // Row survives the 409 (never silently removed) — its name is still on screen.
     expect(screen.getByText('Kantoor')).toBeInTheDocument()
   })
+
+  it('create POST to /appointment-locations carries the slugged value (withValueSlug)', async () => {
+    api.get.mockResolvedValue({ data: [] })
+    api.post.mockResolvedValue({ data: { id: 'x1', name: 'Bij klant' } })
+    const user = userEvent.setup()
+    render(<AppointmentLocationSettings />)
+
+    await user.click(await screen.findByRole('button', { name: st('appointmentLocations.add') }))
+    await user.type(screen.getByPlaceholderText(st('statusList.namePlaceholder')), 'Bij klant')
+    await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/appointment-locations',
+      expect.objectContaining({ name: 'Bij klant', value: 'bij_klant' })))
+  })
 })

@@ -14,7 +14,7 @@ export default function GenderSettings() {
       subtitle={t('genderSettings.subtitle')}
       endpoint="/genders"
       addLabel={t('genderSettings.add')}
-      withColor
+      withValueSlug withColor
     />
   )
 }
