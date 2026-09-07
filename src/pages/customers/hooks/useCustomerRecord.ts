@@ -50,7 +50,7 @@ interface CreateForm {
   // like industry.
   source?: string
   branchId?: string; website?: string; employeeCount?: string
-  toneOfVoice?: string; costCenter?: string; billingEmail?: string
+  companyText?: string; costCenter?: string; billingEmail?: string
   // KLANT-ADRES-1 (Danny 02-08): the customer's own visiting address, collected by
   // the create modal's new AddressCard — same optional/nullable rules as the rest.
   street?: string; houseNumber?: string; houseNumberSuffix?: string; addressLine2?: string; postalCode?: string
@@ -64,15 +64,10 @@ interface CreateForm {
 // Optional create fields → their API keys (same mapping the PATCH path uses).
 // `phase` rides along here (not in the base body) because its rule is
 // `sometimes|exists:customer_phases,value` — an empty string would be a 422.
-// BEDRIJFSTEKST-1 (Danny 02-08): `toneOfVoice` now maps to `description` — the backend
-// column `tone_of_voice` was merged into `description` and dropped (StoreCustomerRequest
-// silently ignores it), so the OLD mapping here POSTed to a key CustomerRequest::
-// sharedRules validates but Customer::$fillable/the DB no longer has; this form field is
-// relabelled "Bedrijfstekst" (reuses overview.companyText) and now actually persists.
 const OPTIONAL_CREATE_FIELDS: Array<[keyof CreateForm, string]> = [
   ['phase', 'phase'],
   ['branchId', 'location_id'], ['website', 'website'], ['employeeCount', 'employee_count'],
-  ['toneOfVoice', 'description'], ['costCenter', 'cost_center'], ['billingEmail', 'billing_email'],
+  ['companyText', 'description'], ['costCenter', 'cost_center'], ['billingEmail', 'billing_email'],
   ['street', 'street'], ['houseNumber', 'house_number'], ['houseNumberSuffix', 'house_number_suffix'],
   // I18N-1 (BE 5a109b00): optional second address line, own column on the backend.
   ['addressLine2', 'address_line_2'],
@@ -119,7 +114,7 @@ const FIELD_MAP: Record<string, string> = {
   // KLANT-BLACKLIST-PROMPT-1: the lookup-backed blacklist reason, validated by the
   // BE guard against customer_blacklist_reasons.name (mirrors the candidate hook).
   blacklistReason: 'blacklist_reason',
-  toneOfVoice: 'tone_of_voice', description: 'description', recruitmentProblems: 'recruitment_problems',
+  description: 'description',
   hideCompanyName: 'hide_company_name', hasCareerPage: 'has_career_page',
   showInVacancies: 'show_in_my_vacancies', excludeFromSourcing: 'exclude_from_sourcing', tags: 'tags',
   // Kostenplaats + facturatie-email (Danny 2026-07-22) — the customer-level source.

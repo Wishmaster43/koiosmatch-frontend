@@ -77,7 +77,7 @@ const customer = (overrides: Partial<Customer> = {}): Customer => ({
   statusLabel: 'Prospect', statusColor: 'slate', owner: '', ownerId: null, ownerInitials: '', ownerColor: null,
   city: 'Utrecht', email: 'info@rivas.nl', phone: '030-1234567',
   lat: null, lng: null, distanceKm: null, industry: 'Zorg', website: '', employeeCount: '',
-  toneOfVoice: '', description: '', recruitmentProblems: '', privacyPolicyUrl: '',
+  description: '',
   hideCompanyName: false, hasCareerPage: false, showInVacancies: false, excludeFromSourcing: false,
   costCenter: '', billingEmail: '', tags: [], archived: false, locations: [], departments: [], contacts: [],
   notes: [], locationsCount: 0, departmentsCount: 0, contactsCount: 0, openVacanciesCount: 0,

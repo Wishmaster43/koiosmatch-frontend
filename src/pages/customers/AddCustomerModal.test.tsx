@@ -277,7 +277,7 @@ describe('AddCustomerModal · new fields ride along in the whole form object (Da
       branchId: 'loc-1',
       website: 'https://rivas.nl',
       employeeCount: '250',
-      toneOfVoice: 'Formeel',
+      companyText: 'Formeel',
       costCenter: 'CC-42',
       billingEmail: 'facturen@rivas.nl',
     }))

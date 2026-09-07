@@ -293,9 +293,7 @@ export interface Customer {
   source: string
   website: string
   employeeCount: string | number
-  toneOfVoice: string
   description: string
-  recruitmentProblems: string
   hideCompanyName: boolean
   hasCareerPage: boolean
   showInVacancies: boolean
@@ -461,8 +459,7 @@ export interface ApiCustomer {
   // STRAAL-1: geocoded coordinates + radius distance from the server.
   lat?: number; lng?: number; distance_km?: number
   employee_count?: string | number; employeeCount?: string | number
-  tone_of_voice?: string; toneOfVoice?: string; description?: string
-  recruitment_problems?: string; recruitmentProblems?: string
+  description?: string
   hide_company_name?: unknown; has_career_page?: unknown
   show_in_my_vacancies?: unknown; exclude_from_sourcing?: unknown
   // Kostenplaats + facturatie-email at the customer level (Danny 2026-07-22).

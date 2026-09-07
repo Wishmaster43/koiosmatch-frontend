@@ -25,7 +25,7 @@ export function useAddCustomerForm({ defaultPhase, defaultStatusValue, meIsAssig
   const [form, setForm] = useState<CustomerForm>({
     name: '', status: defaultStatusValue, ownerId: '', industry: '', city: '',
     phase: defaultPhase,
-    branchId: '', website: '', employeeCount: '', toneOfVoice: '', costCenter: '', billingEmail: '',
+    branchId: '', website: '', employeeCount: '', companyText: '', costCenter: '', billingEmail: '',
     street: '', houseNumber: '', houseNumberSuffix: '', addressLine2: '', postalCode: '', province: '', country: '',
     cocNumber: '', vatNumber: '',
     // CUST-SOURCE-FE-1: acquisition source, empty until the recruiter picks one —

@@ -34,7 +34,7 @@ const customer = (overrides: Partial<Customer> = {}): Customer => ({
   id: 1, name: 'Test customer', initials: 'TC', debtorNumber: '', status: 'prospect',
   statusLabel: 'Prospect', statusColor: 'slate', owner: '', ownerId: null, ownerInitials: '', ownerColor: null,
   city: '', email: '', phone: '', lat: null, lng: null, distanceKm: null, industry: '', website: '', employeeCount: '',
-  toneOfVoice: '', description: '', recruitmentProblems: '', privacyPolicyUrl: '',
+  description: '',
   hideCompanyName: false, hasCareerPage: false, showInVacancies: false, excludeFromSourcing: false,
   costCenter: '', billingEmail: '', tags: [], archived: false, locations: [], departments: [], contacts: [],
   notes: [], locationsCount: 0, departmentsCount: 0, contactsCount: 0, openVacanciesCount: 0,
@@ -140,6 +140,17 @@ describe('useCustomerRecord · updateCustomer', () => {
     const r = harness([customer({ id: 1, source: '' })])
     act(() => { r.result.current.record.updateCustomer(1, { source: 'Google' }) })
     expect(mockedPatch).toHaveBeenCalledWith('/customers/1', { source: 'Google' })
+  })
+
+  // BEDRIJFSTEKST-1: the dead tone_of_voice / recruitment_problems columns were
+  // dropped and merged into description — the PATCH map must not contain them.
+  it('does not PATCH tone_of_voice or recruitment_problems (dead columns)', () => {
+    mockedPatch.mockResolvedValue({})
+    const r = harness([customer({ id: 1 })])
+    act(() => { r.result.current.record.updateCustomer(1, { description: 'Bedrijfstekst' }) })
+    const body = mockedPatch.mock.calls[0]?.[1] as Record<string, unknown>
+    expect(body).not.toHaveProperty('tone_of_voice')
+    expect(body).not.toHaveProperty('recruitment_problems')
   })
 
   // KLANT-BLACKLIST-PROMPT-1: status + blacklistReason travel in ONE PATCH — the
@@ -341,6 +352,20 @@ describe('useCustomerRecord · customer phase (KLANT-FASE-1)', () => {
     const body = vi.mocked(api.post).mock.calls[0][1] as Record<string, unknown>
     expect(body).not.toHaveProperty('industry')
     expect(body).not.toHaveProperty('owner_id')
+  })
+
+  // BEDRIJFSTEKST-1: the create-form key companyText POSTs as `description`.
+  it('POSTs companyText as description', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: { id: 20, name: 'Nieuw' } })
+    const r = harness([])
+    await act(async () => {
+      await r.result.current.record.handleCreate({
+        name: 'Nieuw', debtorNumber: '', status: 'active', ownerId: '', industry: '', city: '', phase: '',
+        companyText: 'Dit is onze bedrijfsfilosofie',
+      })
+    })
+
+    expect(vi.mocked(api.post)).toHaveBeenCalledWith('/customers', expect.objectContaining({ description: 'Dit is onze bedrijfsfilosofie' }))
   })
 })
 

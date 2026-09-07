@@ -10,10 +10,9 @@
  * the exact defect this pass fixes (prose in a one-line input). Uses the
  * shared collapsed-ghost block (COLLAPSIBLE-TEXT-1, same shape as +Match's
  * Opmerkingen), reusing the SAME overview.companyText key the drawer's merged
- * company-text field already uses (one label, not a second copy). The
- * internal `toneOfVoice` form key is unchanged — it POSTs under `description`
- * (useCustomerRecord's OPTIONAL_CREATE_FIELDS; the backend column
- * `tone_of_voice` was dropped and merged into `description`).
+ * company-text field already uses (one label, not a second copy). One merged
+ * company text: the form's companyText POSTs/PATCHes as `description`
+ * (BEDRIJFSTEKST-1).
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -37,7 +36,7 @@ export default function CustomerCompanyTextCard({ form, set }: CustomerCompanyTe
     <div>
       <div style={cardHead}>{t('overview.companyText')}</div>
       <div style={cardBox}>
-        <CollapsibleRichText t={t} value={form.toneOfVoice} onChange={v => set('toneOfVoice', v)}
+        <CollapsibleRichText t={t} value={form.companyText} onChange={v => set('companyText', v)}
           expanded={expanded} setExpanded={setExpanded}
           editing={editing} setEditing={setEditing}
           placeholder={t('common:add')} />

@@ -63,7 +63,7 @@ export interface CustomerForm {
   // ... is missing a lot of information"): the
   // CustomerRequest::sharedRules fields this create form never collected, even
   // though create+update share the same validator. All optional.
-  website: string; employeeCount: string; toneOfVoice: string; costCenter: string; billingEmail: string
+  website: string; employeeCount: string; companyText: string; costCenter: string; billingEmail: string
   // KLANT-ADRES-1 (Danny 02-08): the customer's own visiting address, mirroring the
   // candidate's home-address fields one-for-one — see addmodal/AddressCard.
   street: string; houseNumber: string; houseNumberSuffix: string; addressLine2: string; postalCode: string; province: string; country: string
@@ -79,13 +79,9 @@ interface ModalUser { id: Id; name: string }
 // 422 field-error keys are snake_case; map them back to this form's field names.
 // No `debtor_number` entry (DEBITEURNUMMER-1, Danny 02-08): the field is no longer
 // collected at creation, so a 422 on it can never occur from this form.
-// STALE-KEY-FIX (COLLAPSIBLE-TEXT-1): this used to list `tone_of_voice`, but the
-// create POST has sent this field under `description` since BEDRIJFSTEKST-1 (see
-// useCustomerRecord's OPTIONAL_CREATE_FIELDS) — a 422 on `description` was falling
-// through unmapped, so the Bedrijfstekst card would silently show no error at all.
 const API_TO_FORM: Record<string, string> = {
   name: 'name', status: 'status', owner_id: 'ownerId', industry: 'industry', city: 'city',
-  location_id: 'branchId', website: 'website', employee_count: 'employeeCount', description: 'toneOfVoice',
+  location_id: 'branchId', website: 'website', employee_count: 'employeeCount', description: 'companyText',
   cost_center: 'costCenter', billing_email: 'billingEmail', phase: 'phase',
   street: 'street', house_number: 'houseNumber', house_number_suffix: 'houseNumberSuffix',
   // LANE-I1b: address_line_2 on visiting address.
@@ -117,7 +113,7 @@ const EMAIL_ERROR_KEYS = { billingEmail: 'validation.emailFormat' }
  * candidate AND IS MISSING A LOT OF INFORMATION"). Every dropdown is now a
  * searchable CreatableSelect.
  * Extended with the fields CustomerRequest::sharedRules already accepts on create
- * (branch/website/employeeCount/toneOfVoice/costCenter/billingEmail) — all
+ * (branch/website/employeeCount/companyText/costCenter/billingEmail) — all
  * optional, so a quick "just the name" create still works unchanged. This modal
  * hands the WHOLE form object to `onCreate` (unchanged behaviour), so the new
  * fields already ride along; useCustomerRecord's handleCreate picks them up into
