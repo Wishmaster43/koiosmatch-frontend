@@ -27,6 +27,8 @@ export interface NumberingEntity {
   pad: number
   start: number
   label: string
+  next_value?: number
+  allocated?: boolean
 }
 
 // The pre-endpoint six-entity seed — the offline/loading fallback so the screen
@@ -41,7 +43,7 @@ const FALLBACK: NumberingEntity[] = [
   { key: 'match',               prefix: 'M', pad: 5, start: 1, label: 'Match' },
 ]
 
-// Parse {data:[{key,prefix,pad,start,label}]}. This endpoint is never legitimately
+// Parse {data:[{key,prefix,pad,start,label,next_value,allocated}]}. This endpoint is never legitimately
 // empty (it mirrors a non-empty backend config file) — an empty response means
 // "nothing usable", so useCachedLookup keeps the fallback and retries next mount.
 function mapEntities(res: AxiosResponse): NumberingEntity[] | null {
@@ -54,6 +56,8 @@ function mapEntities(res: AxiosResponse): NumberingEntity[] | null {
       pad: Number(row.pad) || 1,
       start: Number(row.start) || 1,
       label: String(row.label ?? row.key ?? ''),
+      next_value: row.next_value != null ? Number(row.next_value) : undefined,
+      allocated: Boolean(row.allocated),
     }))
     .filter(e => e.key)
   return rows.length ? rows : null

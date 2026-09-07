@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next'
 import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import { useNumberingEntities } from '@/lib/useNumberingEntities'
 import { notifyError } from '@/lib/notify'
-import { PageTitle, Caption } from '@/components/ui/typography'
+import { PageTitle, Caption, Mono } from '@/components/ui/typography'
 
 const cellInput = {
   height: 32, padding: '0 8px', fontSize: 13, color: 'var(--text)', boxSizing: 'border-box',
@@ -76,10 +76,18 @@ function EntityRow({ entity, settings }) {
           style={{ ...cellInput, width: 64, textAlign: 'right' }} />
       </td>
       <td style={{ padding: '8px 12px' }}>
-        <input type="number" min={1} value={start} aria-label={t('numbering.start')}
-          onChange={e => setStart(Number(e.target.value))}
-          onBlur={e => commit(keys.start, Math.max(1, Number(e.target.value) || entity.start), savedStart, setStart)}
-          style={{ ...cellInput, width: 80, textAlign: 'right' }} />
+        {entity.allocated ? (
+          // Start is read-only once first number allocated — show current value + next number.
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }} title={t('numbering.startLocked')}>
+            <Mono>{start}</Mono>
+            <Caption as="span">{t('numbering.nextValue', { n: entity.next_value })}</Caption>
+          </div>
+        ) : (
+          <input type="number" min={1} value={start} aria-label={t('numbering.start')}
+            onChange={e => setStart(Number(e.target.value))}
+            onBlur={e => commit(keys.start, Math.max(1, Number(e.target.value) || entity.start), savedStart, setStart)}
+            style={{ ...cellInput, width: 80, textAlign: 'right' }} />
+        )}
       </td>
     </tr>
   )
