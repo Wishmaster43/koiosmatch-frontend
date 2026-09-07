@@ -22,11 +22,11 @@ import { SettingsScaffold, SettingCardList, SettingRow, NumberField } from '../c
 // Tenant-wide AVG retention windows editor (see the module doc above): the only screen that edits the policy the backend derives retention_expires_at from.
 export default function RetentionSettings() {
   const { t } = useTranslation('settings')
-  // Tenant defaults per the backend policy (AVG-RET-2): 24 months for a candidate
+  // Tenant defaults per the backend policy (AVG-RET-2): 12 months for a candidate
   // never placed, 60 months for one placed at least once, 24 months for how long
   // a granted retention consent stays valid before it must be re-confirmed.
   const form = useSettingsForm({
-    retention_months_never_placed: 24,
+    retention_months_never_placed: 12,
     retention_months_ever_placed: 60,
     retention_consent_months: 24,
     // settings-coherence-7 (K-247 lane C): months without activity after which a
@@ -37,6 +37,10 @@ export default function RetentionSettings() {
     // TRASH-OVERAL-2: days a pending-erase record stays in the trash before the
     // automatic hard erase (drives the "wordt rond {date}" wording app-wide).
     deletion_grace_days: 30,
+    // Notification windows for retention: days before expiry to warn the recruiter,
+    // and days an auto-archived dossier waits before daily escalation to the manager.
+    retention_warning_days: 30,
+    retention_escalation_days: 14,
   })
 
   return (
@@ -63,6 +67,18 @@ export default function RetentionSettings() {
           <NumberField value={form.values.retention_contact_months}
             onChange={v => form.set('retention_contact_months', v)}
             min={1} max={120} unit={t('retention.unit')} />
+        </SettingRow>
+        {/* Days before retention term expires that the "due soon" notification fires. */}
+        <SettingRow label={t('retention.warningDays.label')} description={t('retention.warningDays.description')}>
+          <NumberField value={form.values.retention_warning_days}
+            onChange={v => form.set('retention_warning_days', v)}
+            min={0} max={365} unit={t('escalation.daysUnit')} />
+        </SettingRow>
+        {/* Days an auto-archived dossier waits before daily escalation to the recruiter_manager role. */}
+        <SettingRow label={t('retention.escalationDays.label')} description={t('retention.escalationDays.description')}>
+          <NumberField value={form.values.retention_escalation_days}
+            onChange={v => form.set('retention_escalation_days', v)}
+            min={0} max={365} unit={t('escalation.daysUnit')} />
         </SettingRow>
         {/* Trash grace window in DAYS (unit borrowed from escalation.daysUnit — §11:
             never a fresh label for something already named elsewhere). */}

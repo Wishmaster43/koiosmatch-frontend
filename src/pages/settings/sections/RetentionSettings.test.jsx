@@ -1,10 +1,10 @@
 /**
  * RetentionSettings (AVG-RET-2, Danny 22-07 punt 8; consent row added 13-08
- * per CMBE handoff) — asserts the REAL /settings request (§13: a mutation/read
- * test must prove the seam, never only that a callback fired): the three
- * retention windows load with tenant defaults, coerce stored strings to
- * numbers, and save all three keys on a single POST. The legacy
- * `retention_candidate_months` key is never rendered as a field.
+ * per CMBE handoff; warning and escalation windows added per X-11) — asserts the
+ * REAL /settings request (§13: a mutation/read test must prove the seam, never
+ * only that a callback fired): the retention windows load with tenant defaults,
+ * coerce stored strings to numbers, and save all seven keys on a single POST.
+ * The legacy `retention_candidate_months` key is never rendered as a field.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -27,13 +27,15 @@ beforeEach(() => {
 })
 
 describe('RetentionSettings — load', () => {
-  it('GETs /settings and renders the tenant defaults (24 / 60 / 24 months + 30 grace days)', async () => {
+  it('GETs /settings and renders the tenant defaults (12 / 60 / 24 / 36 / 30 / 14 / 30)', async () => {
     render(<RetentionSettings />)
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/settings'))
-    expect(await screen.findAllByDisplayValue('24')).toHaveLength(2) // never-placed + consent-months share the 24 default
-    expect(screen.getByDisplayValue('60')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('36')).toBeInTheDocument() // retention_contact_months (settings-coherence-7)
-    expect(screen.getByDisplayValue('30')).toBeInTheDocument() // deletion_grace_days (TRASH-OVERAL-2)
+    expect(await screen.findByDisplayValue('12')).toBeInTheDocument() // retention_months_never_placed
+    expect(screen.getByDisplayValue('60')).toBeInTheDocument() // retention_months_ever_placed
+    expect(screen.getByDisplayValue('24')).toBeInTheDocument() // retention_consent_months
+    expect(screen.getAllByDisplayValue('36')).toHaveLength(1) // retention_contact_months
+    expect(screen.getAllByDisplayValue('30')).toHaveLength(2) // retention_warning_days + deletion_grace_days
+    expect(screen.getByDisplayValue('14')).toBeInTheDocument() // retention_escalation_days
   })
 
   it('coerces stored string values to numbers', async () => {
@@ -53,10 +55,10 @@ describe('RetentionSettings — load', () => {
 })
 
 describe('RetentionSettings — save', () => {
-  it('POSTs all five retention keys to /settings on save', async () => {
+  it('POSTs all seven retention keys to /settings on save', async () => {
     const user = userEvent.setup()
     render(<RetentionSettings />)
-    const neverPlaced = (await screen.findAllByDisplayValue('24'))[0]
+    const neverPlaced = await screen.findByDisplayValue('12')
 
     await user.clear(neverPlaced)
     await user.type(neverPlaced, '36')
@@ -64,23 +66,24 @@ describe('RetentionSettings — save', () => {
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', {
       retention_months_never_placed: '36', retention_months_ever_placed: '60', retention_consent_months: '24',
-      retention_contact_months: '36', deletion_grace_days: '30',
+      retention_contact_months: '36', retention_warning_days: '30', retention_escalation_days: '14',
+      deletion_grace_days: '30',
     }))
   })
 
   it('allows 0 for consent months (deliberate "never expires") and saves it verbatim', async () => {
     const user = userEvent.setup()
     render(<RetentionSettings />)
-    const rows = await screen.findAllByDisplayValue('24')
-    const consentField = rows[rows.length - 1]
+    const consentField = await screen.findByDisplayValue('24')
 
     await user.clear(consentField)
     await user.type(consentField, '0')
     await user.click(screen.getByRole('button', { name: t('common.save') }))
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', {
-      retention_months_never_placed: '24', retention_months_ever_placed: '60', retention_consent_months: '0',
-      retention_contact_months: '36', deletion_grace_days: '30',
+      retention_months_never_placed: '12', retention_months_ever_placed: '60', retention_consent_months: '0',
+      retention_contact_months: '36', retention_warning_days: '30', retention_escalation_days: '14',
+      deletion_grace_days: '30',
     }))
   })
 
@@ -88,15 +91,17 @@ describe('RetentionSettings — save', () => {
   it('saves deletion_grace_days when the grace-days row changes', async () => {
     const user = userEvent.setup()
     render(<RetentionSettings />)
-    const graceField = await screen.findByDisplayValue('30')
+    const graceFields = await screen.findAllByDisplayValue('30')
+    const graceField = graceFields[graceFields.length - 1]
 
     await user.clear(graceField)
     await user.type(graceField, '45')
     await user.click(screen.getByRole('button', { name: t('common.save') }))
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', {
-      retention_months_never_placed: '24', retention_months_ever_placed: '60', retention_consent_months: '24',
-      retention_contact_months: '36', deletion_grace_days: '45',
+      retention_months_never_placed: '12', retention_months_ever_placed: '60', retention_consent_months: '24',
+      retention_contact_months: '36', retention_warning_days: '30', retention_escalation_days: '14',
+      deletion_grace_days: '45',
     }))
   })
 })
@@ -111,7 +116,7 @@ describe('RetentionSettings — load failure (AVG: never save over an unknown po
 
     expect(await screen.findByText(t('common.loadError'))).toBeInTheDocument()
     // The hardcoded defaults never render as if they were the confirmed tenant policy.
-    expect(screen.queryByDisplayValue('24')).not.toBeInTheDocument()
+    expect(screen.queryByDisplayValue('12')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: t('common.save') })).toBeDisabled()
   })
 })
