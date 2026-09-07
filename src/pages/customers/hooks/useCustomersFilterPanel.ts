@@ -7,7 +7,7 @@
 import { useMemo, useCallback, useEffect } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
-import { geocodeNL } from '@/lib/geocode'
+import { geocodeLocation } from '@/lib/geocode'
 import { buildCustomerStatusOptions } from '../data/customerInsights'
 import { buildCustomerFilterGroups } from '../data/customerFilterGroups'
 import type { CustomerDateRange } from '../data/customerFilterGroups'
@@ -99,7 +99,7 @@ export function useCustomersFilterPanel({
   // on it — every captured setter is itself stable, only `t` can genuinely change.
   const applyGeo = useCallback(async (q: string, km: number) => {
     setGeoHint(null)
-    const hit = await geocodeNL(q)
+    const hit = await geocodeLocation(q)
     if (!hit) { setGeoHint(t('common:filters.notFound')); return }
     setGeoFilter({ q, km, lat: hit.lat, lng: hit.lng, label: `${hit.label} · ${km} km` })
     setMapCenter({ lat: hit.lat, lng: hit.lng }); setMapRadius(km)

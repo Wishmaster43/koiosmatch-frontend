@@ -35,7 +35,7 @@ import type { VacancySort } from './hooks/useVacanciesData'
 import type { ControlledSort } from '@/components/ui/DataTable'
 import { useVacancyFilterParams } from './hooks/useVacancyFilterParams'
 import { buildVacancyFilterGroups } from './data/vacancyFilterGroups'
-import { geocodeNL } from '@/lib/geocode'
+import { geocodeLocation } from '@/lib/geocode'
 import { useAiAgents } from './hooks/useAiAgents'
 import { useVacancyRecord } from './hooks/useVacancyRecord'
 import { useVacancyInsights } from './hooks/useVacancyInsights'
@@ -249,7 +249,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   // is itself stable, only `t` can genuinely change.
   const applyGeo = useCallback(async (q: string, km: number) => {
     setGeoHint(null)
-    const hit = await geocodeNL(q)
+    const hit = await geocodeLocation(q)
     if (!hit) { setGeoHint(t('common:filters.notFound')); return }
     setGeoFilter({ q, km, lat: hit.lat, lng: hit.lng, label: `${hit.label} · ${km} km` })
   }, [t, setGeoHint, setGeoFilter])

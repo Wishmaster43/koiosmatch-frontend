@@ -28,10 +28,10 @@ vi.mock('@/lib/usePageMemory', () => ({
     useState(typeof initial === 'function' ? (initial as () => unknown)() : initial),
 }))
 
-// geocodeNL hits the public PDOK API over fetch — stub it so the geo-radius
+// geocodeLocation goes through the backend proxy — stub it so the geo-radius
 // test stays hermetic and deterministic.
 vi.mock('@/lib/geocode', () => ({
-  geocodeNL: vi.fn(async (q: string) =>
+  geocodeLocation: vi.fn(async (q: string) =>
     q === 'nowhere' ? null : { lat: 52.1, lng: 5.1, label: 'Utrecht' }),
 }))
 
@@ -165,7 +165,7 @@ describe('useCandidateFilters — date-range filter (dashboard period click)', (
   })
 })
 
-describe('useCandidateFilters — geo radius (straal-blok, PDOK)', () => {
+describe('useCandidateFilters — geo radius (straal-blok, OpenCage)', () => {
   it('sends lat/lng/radius once a place is applied', async () => {
     const { result } = renderHook(() => useCandidateFilters(baseArgs))
     await act(async () => { await result.current.applyGeo('Utrecht', 25) })

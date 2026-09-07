@@ -15,7 +15,7 @@ export async function geocodeLocation(query: string, country?: string): Promise<
   try {
     const params: Record<string, string> = { q }
     if (country) params.country = country
-    const res = await api.get<{ data: GeoHit }>('/api/geocode/search', { params })
+    const res = await api.get<{ data: GeoHit }>('/geocode/search', { params })
     return res.data.data
   } catch {
     // 404 = not found, 429/503 = provider issues — all return null
@@ -24,6 +24,3 @@ export async function geocodeLocation(query: string, country?: string): Promise<
 }
 
 /** Legacy alias for NL-only queries (kept for backward compatibility with radius filter). */
-export async function geocodeNL(query: string): Promise<GeoHit | null> {
-  return geocodeLocation(query, 'NL')
-}
