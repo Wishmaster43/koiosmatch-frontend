@@ -1050,7 +1050,6 @@
         "colName": "Workflow",
         "colRuns": "Exécutions",
         "colTokens": "Jetons de workflow",
-        "colAmount": "Montant",
         "empty": "Pas encore d'utilisation de workflow sur cette période.",
         "loadError": "Le chargement de l'utilisation par workflow a échoué.",
         "unavailable": "Vous n'avez pas l'autorisation de voir ceci.",
@@ -1770,13 +1769,15 @@
       "sm": "Rapports Shiftmanager",
       "hf": "Rapports HelloFlex",
       "sm_ai": "Shiftmanager AI Planner",
-      "plan": "Planning"
+      "plan": "Planning",
+      "invoicing": "Facturation"
     },
     "addonDesc": {
       "reports": "Rapports et insights propres à Koios Match.",
       "sm": "Rapports et synchronisations GET sur les données Shiftmanager (missions, clients, candidats).",
       "hf": "Rapports et synchronisations GET sur les données HelloFlex.",
-      "plan": "Module de planning propre : commandes, missions et planification."
+      "plan": "Module de planning propre : commandes, missions et planification.",
+      "invoicing": "Factures et paiements depuis Koios Match"
     },
     "tabs": {
       "pricing": "Tarifs de la plateforme",
@@ -1784,7 +1785,8 @@
       "budgets": "Budgets mensuels",
       "package": "Choix du forfait",
       "users": "Utilisateurs"
-    }
+    },
+    "legacyPackage": "Ce compte fonctionne sur un forfait hérité ; sélectionnez un forfait ci-dessous pour migrer."
   },
   "whatsapp": {
     "loading": "Chargement des données WhatsApp…",
@@ -2744,7 +2746,8 @@
       "title": "Filtre de statut par défaut",
       "allOption": "Tous les statuts",
       "chosenHint": "Ce statut est présélectionné dès l'ouverture de cet onglet.",
-      "autoHint": "Pas encore choisi. C'est actuellement le statut qui ressemble à 'actif' (ou Tous, s'il n'en existe aucun)."
+      "autoHint": "Pas encore choisi. C'est actuellement le statut qui ressemble à 'actif' (ou Tous, s'il n'en existe aucun).",
+      "deletedHint": "Le statut précédemment choisi n'existe plus ; il sera remplacé par la valeur par défaut."
     }
   },
   "customerVacancyDefaults": {
@@ -3923,6 +3926,7 @@
       "loadError": "Échec du chargement des mappings.",
       "saveError": "Échec de l’enregistrement.",
       "deleteError": "Échec de la suppression.",
+      "preparationNotice": "Ces mappages de champs sont en préparation: ils ne seront utilisés qu'une fois la synchronisation activée dans une future version.",
       "domains": {
         "cao": "Convention collective",
         "schaal": "Échelle",

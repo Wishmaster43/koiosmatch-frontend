@@ -1050,7 +1050,6 @@
         "colName": "Workflow",
         "colRuns": "Ejecuciones",
         "colTokens": "Tokens de workflow",
-        "colAmount": "Importe",
         "empty": "Todavía no hay uso de workflow en este periodo.",
         "loadError": "No se pudo cargar el uso por workflow.",
         "unavailable": "No tienes permiso para ver esto.",
@@ -1770,13 +1769,15 @@
       "sm": "Informes Shiftmanager",
       "hf": "Informes HelloFlex",
       "sm_ai": "Shiftmanager AI Planner",
-      "plan": "Planificación"
+      "plan": "Planificación",
+      "invoicing": "Facturación"
     },
     "addonDesc": {
       "reports": "Informes e insights propios de Koios Match.",
       "sm": "Informes y sincronizaciones GET sobre los datos de Shiftmanager (turnos, clientes, candidatos).",
       "hf": "Informes y sincronizaciones GET sobre los datos de HelloFlex.",
-      "plan": "Módulo de planificación propio: pedidos, turnos y programación."
+      "plan": "Módulo de planificación propio: pedidos, turnos y programación.",
+      "invoicing": "Facturas y pagos desde Koios Match"
     },
     "tabs": {
       "pricing": "Precios de la plataforma",
@@ -1784,7 +1785,8 @@
       "budgets": "Presupuestos mensuales",
       "package": "Elección de paquete",
       "users": "Usuarios"
-    }
+    },
+    "legacyPackage": "Esta cuenta se ejecuta en un paquete heredado; seleccione un paquete a continuación para migrar."
   },
   "whatsapp": {
     "loading": "Cargando datos de WhatsApp…",
@@ -2744,7 +2746,8 @@
       "title": "Filtro de estado predeterminado",
       "allOption": "Todos los estados",
       "chosenHint": "Este estado queda preseleccionado en cuanto se abre esta pestaña.",
-      "autoHint": "Aún no elegido. Actualmente es el estado que parece 'activo' (o Todos, si no existe ninguno)."
+      "autoHint": "Aún no elegido. Actualmente es el estado que parece 'activo' (o Todos, si no existe ninguno).",
+      "deletedHint": "El estado elegido anteriormente ya no existe; se vuelve al valor predeterminado."
     }
   },
   "customerVacancyDefaults": {
@@ -3923,6 +3926,7 @@
       "loadError": "No se pudieron cargar los mappings.",
       "saveError": "No se pudo guardar.",
       "deleteError": "No se pudo eliminar.",
+      "preparationNotice": "Estos mapeos de campos son preparación: solo se utilizarán una vez que la sincronización se habilite en una versión futura.",
       "domains": {
         "cao": "Convenio",
         "schaal": "Escala",

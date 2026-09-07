@@ -1296,7 +1296,6 @@
         "colName": "Workflow",
         "colRuns": "Esecuzioni",
         "colTokens": "Token workflow",
-        "colAmount": "Importo",
         "empty": "Nessun utilizzo workflow ancora in questo periodo.",
         "loadError": "Caricamento dell'utilizzo per workflow non riuscito.",
         "unavailable": "Non hai i permessi per visualizzare questo contenuto.",
@@ -1993,13 +1992,15 @@
       "sm": "Report Shiftmanager",
       "hf": "Report HelloFlex",
       "sm_ai": "Shiftmanager AI Planner",
-      "plan": "Pianificazione"
+      "plan": "Pianificazione",
+      "invoicing": "Fatturazione"
     },
     "addonDesc": {
       "reports": "Report e insight propri di Koios Match.",
       "sm": "Report e sincronizzazioni GET sui dati Shiftmanager (turni, clienti, candidati).",
       "hf": "Report e sincronizzazioni GET sui dati HelloFlex.",
-      "plan": "Modulo di pianificazione proprio: ordini, turni e programmazione."
+      "plan": "Modulo di pianificazione proprio: ordini, turni e programmazione.",
+      "invoicing": "Fatture e pagamenti da Koios Match"
     },
     "pkgCol": "Pacchetto",
     "current": "Attuale",
@@ -2030,7 +2031,8 @@
       "budgets": "Budget mensili",
       "package": "Scelta pacchetto",
       "users": "Utenti"
-    }
+    },
+    "legacyPackage": "Questo account è in esecuzione su un pacchetto legacy; selezionare un pacchetto di seguito per eseguire la migrazione."
   },
   "whatsapp": {
     "loading": "Recupero dati WhatsApp in corso…",
@@ -2762,7 +2764,8 @@
       "title": "Filtro di stato predefinito",
       "allOption": "Tutti gli stati",
       "chosenHint": "Questo stato viene selezionato subito all'apertura di questa scheda.",
-      "autoHint": "Non ancora scelto. Al momento è automaticamente lo stato che assomiglia ad 'attivo' (o Tutti, se non esiste)."
+      "autoHint": "Non ancora scelto. Al momento è automaticamente lo stato che assomiglia ad 'attivo' (o Tutti, se non esiste).",
+      "deletedHint": "Lo stato precedentemente scelto non esiste più; si torna al valore predefinito."
     }
   },
   "customerVacancyDefaults": {
@@ -3923,6 +3926,7 @@
       "loadError": "Caricamento dei mapping non riuscito.",
       "saveError": "Salvataggio non riuscito.",
       "deleteError": "Eliminazione non riuscita.",
+      "preparationNotice": "Questi mappaggi di campi sono preparazione: verranno utilizzati solo una volta abilitata la sincronizzazione in una versione futura.",
       "domains": {
         "cao": "CCNL",
         "schaal": "Scala",

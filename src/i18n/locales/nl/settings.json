@@ -1296,7 +1296,6 @@
         "colName": "Workflow",
         "colRuns": "Runs",
         "colTokens": "Workflow-tokens",
-        "colAmount": "Bedrag",
         "empty": "Nog geen workflow-verbruik in deze periode.",
         "loadError": "Verbruik per workflow laden is mislukt.",
         "unavailable": "Je hebt geen rechten om dit te bekijken.",
@@ -1993,13 +1992,15 @@
       "sm": "Rapportage Shiftmanager",
       "hf": "Rapportage HelloFlex",
       "sm_ai": "Shiftmanager AI Planner",
-      "plan": "Planning"
+      "plan": "Planning",
+      "invoicing": "Facturatie"
     },
     "addonDesc": {
       "reports": "Eigen Koios Match-rapportages en inzichten.",
       "sm": "Rapportages en GET-syncs op Shiftmanager-data (diensten, klanten, kandidaten).",
       "hf": "Rapportages en GET-syncs op HelloFlex-data.",
-      "plan": "Eigen planningsmodule: orders, diensten en inplanning."
+      "plan": "Eigen planningsmodule: orders, diensten en inplanning.",
+      "invoicing": "Facturen en betalingen vanuit Koios Match"
     },
     "pkgCol": "Pakket",
     "current": "Huidig",
@@ -2030,7 +2031,8 @@
       "budgets": "Maandbudgetten",
       "package": "Pakketkeuze",
       "users": "Gebruikers"
-    }
+    },
+    "legacyPackage": "Dit account draait nog op een oud pakket; kies hieronder een pakket om te migreren."
   },
   "whatsapp": {
     "loading": "WhatsApp gegevens ophalen…",
@@ -2762,7 +2764,8 @@
       "title": "Standaard statusfilter",
       "allOption": "Alle statussen",
       "chosenHint": "Deze status is direct geselecteerd zodra dit tabblad opent.",
-      "autoHint": "Nog niet gekozen. Dit is nu automatisch de status die op 'actief' lijkt (of Alle, als die niet bestaat)."
+      "autoHint": "Nog niet gekozen. Dit is nu automatisch de status die op 'actief' lijkt (of Alle, als die niet bestaat).",
+      "deletedHint": "De eerder gekozen status bestaat niet meer; de standaard wordt weer geraden."
     }
   },
   "customerVacancyDefaults": {
@@ -3923,6 +3926,7 @@
       "loadError": "Mappings laden mislukt.",
       "saveError": "Opslaan mislukt.",
       "deleteError": "Verwijderen mislukt.",
+      "preparationNotice": "Deze veldkoppelingen zijn voorbereiding: ze worden pas gebruikt zodra de synchronisatie in een volgende release aan staat.",
       "domains": {
         "cao": "CAO",
         "schaal": "Schaal",

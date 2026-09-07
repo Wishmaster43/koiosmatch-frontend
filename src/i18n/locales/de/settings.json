@@ -1050,7 +1050,6 @@
         "colName": "Workflow",
         "colRuns": "Läufe",
         "colTokens": "Workflow-Tokens",
-        "colAmount": "Betrag",
         "empty": "Noch kein Workflow-Verbrauch in diesem Zeitraum.",
         "loadError": "Laden des Verbrauchs nach Workflow fehlgeschlagen.",
         "unavailable": "Du hast keine Berechtigung, dies anzuzeigen.",
@@ -1770,13 +1769,15 @@
       "sm": "Reporting Shiftmanager",
       "hf": "Reporting HelloFlex",
       "sm_ai": "Shiftmanager AI Planner",
-      "plan": "Planung"
+      "plan": "Planung",
+      "invoicing": "Fakturierung"
     },
     "addonDesc": {
       "reports": "Eigene Koios Match-Berichte und Einblicke.",
       "sm": "Berichte und GET-Abgleiche auf Shiftmanager-Daten (Schichten, Kunden, Kandidaten).",
       "hf": "Berichte und GET-Abgleiche auf HelloFlex-Daten.",
-      "plan": "Eigenes Planungsmodul: Aufträge, Schichten und Einsatzplanung."
+      "plan": "Eigenes Planungsmodul: Aufträge, Schichten und Einsatzplanung.",
+      "invoicing": "Rechnungen und Zahlungen von Koios Match"
     },
     "tabs": {
       "pricing": "Plattformpreise",
@@ -1784,7 +1785,8 @@
       "budgets": "Monatsbudgets",
       "package": "Paketwahl",
       "users": "Benutzer"
-    }
+    },
+    "legacyPackage": "Dieses Konto läuft unter einem Legacy-Paket; wählen Sie unten ein Paket für die Migration."
   },
   "whatsapp": {
     "loading": "WhatsApp-Daten werden geladen…",
@@ -2744,7 +2746,8 @@
       "title": "Standard-Statusfilter",
       "allOption": "Alle Status",
       "chosenHint": "Dieser Status ist direkt ausgewählt, sobald dieser Tab geöffnet wird.",
-      "autoHint": "Noch nicht gewählt. Das ist derzeit automatisch der Status, der wie 'aktiv' aussieht (oder Alle, falls keiner existiert)."
+      "autoHint": "Noch nicht gewählt. Das ist derzeit automatisch der Status, der wie 'aktiv' aussieht (oder Alle, falls keiner existiert).",
+      "deletedHint": "Der zuvor gewählte Status existiert nicht mehr; es wird wieder auf den Standard zurückgegriffen."
     }
   },
   "customerVacancyDefaults": {
@@ -3923,6 +3926,7 @@
       "loadError": "Mappings konnten nicht geladen werden.",
       "saveError": "Speichern fehlgeschlagen.",
       "deleteError": "Löschen fehlgeschlagen.",
+      "preparationNotice": "Diese Feldzuordnungen sind Vorbereitung: Sie werden erst verwendet, wenn die Synchronisierung in einer zukünftigen Version aktiviert wird.",
       "domains": {
         "cao": "Tarifvertrag",
         "schaal": "Stufe",

@@ -1296,7 +1296,6 @@
         "colName": "Workflow",
         "colRuns": "Runs",
         "colTokens": "Workflow tokens",
-        "colAmount": "Amount",
         "empty": "No workflow usage yet in this period.",
         "loadError": "Loading usage per workflow failed.",
         "unavailable": "You do not have permission to view this.",
@@ -1993,13 +1992,15 @@
       "sm": "Reporting Shiftmanager",
       "hf": "Reporting HelloFlex",
       "sm_ai": "Shiftmanager AI Planner",
-      "plan": "Planning"
+      "plan": "Planning",
+      "invoicing": "Invoicing"
     },
     "addonDesc": {
       "reports": "Koios Match's own reporting and insights.",
       "sm": "Reporting and GET syncs on Shiftmanager data (shifts, customers, candidates).",
       "hf": "Reporting and GET syncs on HelloFlex data.",
-      "plan": "Its own planning module: orders, shifts and scheduling."
+      "plan": "Its own planning module: orders, shifts and scheduling.",
+      "invoicing": "Invoices and payments from Koios Match"
     },
     "pkgCol": "Package",
     "current": "Current",
@@ -2030,7 +2031,8 @@
       "budgets": "Monthly budgets",
       "package": "Package choice",
       "users": "Users"
-    }
+    },
+    "legacyPackage": "This account runs on a legacy package; select a package below to migrate."
   },
   "whatsapp": {
     "loading": "Loading WhatsApp data…",
@@ -2762,7 +2764,8 @@
       "title": "Default status filter",
       "allOption": "All statuses",
       "chosenHint": "This status is preselected as soon as this tab opens.",
-      "autoHint": "Not chosen yet. This is currently the status that looks like 'active' (or All, if none exists)."
+      "autoHint": "Not chosen yet. This is currently the status that looks like 'active' (or All, if none exists).",
+      "deletedHint": "The previously chosen status no longer exists; falling back to the default."
     }
   },
   "customerVacancyDefaults": {
@@ -3923,6 +3926,7 @@
       "loadError": "Failed to load mappings.",
       "saveError": "Saving failed.",
       "deleteError": "Delete failed.",
+      "preparationNotice": "These field mappings are preparation: they will only be used once synchronization is enabled in a future release.",
       "domains": {
         "cao": "CLA",
         "schaal": "Scale",
