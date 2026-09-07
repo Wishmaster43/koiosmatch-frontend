@@ -29,6 +29,8 @@ import GeocodeButton from '@/components/ui/GeocodeButton'
 import StatusPill from '@/components/ui/StatusPill'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import ActiveFilterChip from '@/components/search/ActiveFilterChip'
+import { SearchListBody } from '@/components/drawer/search/SearchListBody'
+import { useSearchSelection } from '@/components/drawer/search/useSearchSelection'
 // Reuse the candidate-anchored "+ Solliciteren" ("+ Apply") flow (mirrors ApplicantsTab's own
 // CandidateAddApplicationModal reuse, §2 sanctioned cross-entity import for this
 // exact shared flow) — never a second apply form.
@@ -43,7 +45,6 @@ import { notify, notifyError } from '@/lib/notify'
 import { toCoord } from '@/lib/coords'
 import { useAuth } from '@/context/AuthContext'
 import type { VacancyDetail } from '@/types/vacancy'
-import type { Id } from '@/types/common'
 
 const rowStyle: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '8px 10px', borderRadius: 8, cursor: 'pointer' }
 
@@ -67,17 +68,12 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
   } = useCandidateSearch(vacancy)
 
   // A row/marker pick SELECTS a candidate (summary card) instead of navigating
-  // straight away — mirrors candidates/drawer/VacancySearchTab (Danny 23-07).
-  const [selectedId, setSelectedId] = useState<Id | null>(null)
-  // Reset the selection on a vacancy switch (adjust-during-render, mirrors the hook's own idiom).
-  const [prevVacancyId, setPrevVacancyId] = useState(vacancy.id)
-  if (vacancy.id !== prevVacancyId) { setPrevVacancyId(vacancy.id); setSelectedId(null) }
+  // straight away — mirrors candidates/drawer/VacancySearchTab (Danny 23-07), shared selection state.
+  const { selectedId, selectedRow, selectId, clearSelection } = useSearchSelection(vacancy.id!, rows)
 
   // The refresh-advice button's own busy flag (separate from the list's loading state).
   const [refreshing, setRefreshing] = useState(false)
 
-  const selectedRow = rows.find(r => r.id === selectedId) ?? null
-  const selectCandidate = (id: Id) => setSelectedId(id)
 
   // "Solliciteren" (point 18, mirrors VacancySearchTab): opens the shared
   // candidate-anchored apply flow for the SELECTED candidate with this vacancy
@@ -90,8 +86,8 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
   // result list via the shared DrillPager — undefined at the ends disables the
   // matching button, never a cycle.
   const selectedIndex = rows.findIndex(r => r.id === selectedId)
-  const goPrev = selectedIndex > 0 ? () => setSelectedId(rows[selectedIndex - 1].id) : undefined
-  const goNext = selectedIndex >= 0 && selectedIndex < rows.length - 1 ? () => setSelectedId(rows[selectedIndex + 1].id) : undefined
+  const goPrev = selectedIndex > 0 ? () => selectId(rows[selectedIndex - 1].id) : undefined
+  const goNext = selectedIndex >= 0 && selectedIndex < rows.length - 1 ? () => selectId(rows[selectedIndex + 1].id) : undefined
 
   const toggleFunction = (name: string) =>
     setFunctions(selectedFunctions.includes(name) ? selectedFunctions.filter(f => f !== name) : [...selectedFunctions, name])
@@ -211,7 +207,7 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
       // The vacancy pin stays fixed — re-centring by clicking the map must never
       // move the search origin away from the vacancy's own address.
       onCenterChange={() => {}}
-      onPickPoint={selectCandidate} />
+      onPickPoint={selectId} />
     </Suspense>
   )
 
@@ -234,7 +230,7 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <DrillPager index={selectedIndex + 1} total={rows.length} onPrev={goPrev} onNext={goNext} />
-            <Button variant="ghost" iconOnly size="sm" onClick={() => setSelectedId(null)} aria-label={t('common:close')}>
+            <Button variant="ghost" iconOnly size="sm" onClick={clearSelection} aria-label={t('common:close')}>
               <X size={14} />
             </Button>
           </div>
@@ -269,31 +265,31 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
     </div>
   )
 
-  // Four explicit states: loading, error (+ retry), empty, success list.
-  const listBody = loading ? (
-    <div style={{ padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:loading')}</div>
-  ) : error ? (
-    <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <span style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('common:error.body')}</span>
-      <Button variant="secondary" size="sm" onClick={retry} style={{ alignSelf: 'flex-start' }}>
-        {t('common:error.retry')}
-      </Button>
-    </div>
-  ) : rows.length === 0 ? (
-    <div style={{ padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>{t('candidateSearch.empty')}</div>
-  ) : (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
-      {/* The selected candidate renders as the card above — drop its list row (no duplicate). */}
-      {rows.filter(r => r.id !== selectedId).map(r => {
+  // Four explicit states: loading, error (+ retry), empty, success list — delegated to shared component.
+  const listBody = (
+    <SearchListBody
+      loading={loading}
+      error={error}
+      rows={rows}
+      onRetry={retry}
+      noLocation={noLocation}
+      emptyMessage={t('candidateSearch.empty')}
+      noLocationMessage={t('candidateSearch.noLocation')}
+      noLocationButton={
+        <GeocodeButton endpoint={`/vacancies/${vacancy.id}/geocode`} permission="vacancies.update" variant="row" />
+      }
+      selectedId={selectedId}
+      onSelect={selectId}
+      renderRow={(r) => {
         const isSelected = r.id === selectedId
         return (
           // Row = div[role=button]: the title nests EntityLink's own button+anchor
           // (Match-tab style — primary name opens in-app, trailing icon a new tab),
           // and interactive-inside-interactive is invalid HTML. Row click selects
           // the summary card; the title link/icon navigate instead.
-          <div key={String(r.id)} role="button" tabIndex={0}
-            onClick={() => selectCandidate(r.id)}
-            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectCandidate(r.id) } }}
+          <div role="button" tabIndex={0}
+            onClick={() => selectId(r.id)}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectId(r.id) } }}
             style={{ ...rowStyle, width: '100%', background: isSelected ? 'var(--color-primary-bg)' : 'transparent' }}
             onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'var(--hover-bg)' }}
             onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}>
@@ -326,8 +322,8 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
             </div>
           </div>
         )
-      })}
-    </div>
+      }}
+    />
   )
 
   // HUISSTIJL-1: the house Button (variant="soft") — solid tenant trio, same as

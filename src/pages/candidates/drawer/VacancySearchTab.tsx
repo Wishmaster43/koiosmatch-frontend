@@ -13,19 +13,19 @@ import GeoSearchShell from '@/components/search/GeoSearchShell'
 // the static import used to pull it into the page chunk via the drawer's tab list (§9).
 const RadiusMap = lazy(() => import('@/components/map/RadiusMap'))
 import GeocodeButton from '@/components/ui/GeocodeButton'
-import Button from '@/components/ui/Button'
 import AddApplicationModal from './AddApplicationModal'
 import VacancySearchFilters, { VacancySearchActiveFilters } from './VacancySearchFilters'
 import VacancySearchSummaryCard from './VacancySearchSummaryCard'
 import type { VacancyDetail, LookupChip } from './VacancySearchSummaryCard'
 import VacancySearchResultRow from './VacancySearchResultRow'
+import { SearchListBody } from '@/components/drawer/search/SearchListBody'
+import { useSearchSelection } from '@/components/drawer/search/useSearchSelection'
 import api, { unwrap } from '@/lib/api'
 import { useVacancySearch } from '../hooks/useVacancySearch'
 import { useFunctions } from '@/lib/useFunctions'
 import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { toCoord } from '@/lib/coords'
 import type { Candidate } from '@/types/candidate'
-import type { Id } from '@/types/common'
 
 // Snippet length cap (2-3 lines of plain text) — a short teaser, not the full description.
 const SNIPPET_MAX_LENGTH = 220
@@ -67,11 +67,8 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
   } = useVacancySearch(candidate)
 
   // A row/marker pick now SELECTS a vacancy (summary card) instead of navigating
-  // straight away (Danny 23-07, point 5) — state lives here in the tab.
-  const [selectedId, setSelectedId] = useState<Id | null>(null)
-  // Reset the selection on a candidate switch (adjust-during-render, mirrors the hook's idiom).
-  const [prevCandidateId, setPrevCandidateId] = useState(candidate.id)
-  if (candidate.id !== prevCandidateId) { setPrevCandidateId(candidate.id); setSelectedId(null) }
+  // straight away (Danny 23-07, point 5) — shared selection state resets on candidate switch.
+  const { selectedId, selectedRow, selectId, clearSelection } = useSearchSelection(candidate.id, rows)
 
   // "Solliciteren" (Danny 06-08 screenshot): opens AddApplicationModal for THIS
   // candidate with the open panel's vacancy prefilled. Closed on any selection
@@ -112,16 +109,14 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
     return () => ctrl.abort()
   }, [selectedId])
 
-  const selectedRow = rows.find(r => r.id === selectedId) ?? null
-  const selectVacancy = (id: Id) => setSelectedId(id)
 
   // Browse (Danny 05-08, point 3): prev/next through the CURRENT result list,
   // reusing the shared DrillPager anatomy (mirrors LocationDetail/ContactDetail).
   // Disabled at the ends — no cycling, and undefined (never a no-op handler) is
   // what makes DrillPager itself render the button disabled.
   const selectedIndex = rows.findIndex(r => r.id === selectedId)
-  const goPrev = selectedIndex > 0 ? () => setSelectedId(rows[selectedIndex - 1].id) : undefined
-  const goNext = selectedIndex >= 0 && selectedIndex < rows.length - 1 ? () => setSelectedId(rows[selectedIndex + 1].id) : undefined
+  const goPrev = selectedIndex > 0 ? () => selectId(rows[selectedIndex - 1].id) : undefined
+  const goNext = selectedIndex >= 0 && selectedIndex < rows.length - 1 ? () => selectId(rows[selectedIndex + 1].id) : undefined
 
   const center = { lat: toCoord(candidate.lat) as number, lng: toCoord(candidate.lng) as number }
   const points = rows
@@ -168,7 +163,7 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
       // The candidate's home pin stays fixed — re-centring by clicking the map must
       // never move the search origin away from the candidate's own address.
       onCenterChange={() => {}}
-      onPickPoint={selectVacancy} />
+      onPickPoint={selectId} />
     </Suspense>
   )
 
@@ -177,44 +172,31 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
   const summaryCard: ReactNode = selectedRow && (
     <VacancySearchSummaryCard
       selectedRow={selectedRow} selectedIndex={selectedIndex} total={rows.length}
-      goPrev={goPrev} goNext={goNext} onClose={() => setSelectedId(null)} onApply={() => setShowApply(true)}
+      goPrev={goPrev} goNext={goNext} onClose={() => clearSelection()} onApply={() => setShowApply(true)}
       description={description} detail={detail} statusMeta={statusMeta}
     />
   )
 
-  // Four explicit states: loading, error (+ retry), empty, success list.
-  const listBody: ReactNode = loading ? (
-    <div style={{ padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:loading')}</div>
-  ) : error ? (
-    <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <span style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('common:error.body')}</span>
-      <Button variant="secondary" size="sm" onClick={retry} style={{ alignSelf: 'flex-start' }}>
-        {t('common:error.retry')}
-      </Button>
-    </div>
-  ) : rows.length === 0 ? (
-    // GEO-EMPTY-1 (Danny 14-08, verbatim: "…geen vacatures terwijl die er wel
-    // zijn" — i.e. "in the demo I find no vacancies while they do exist"): the
-    // radius filter runs against the candidate's own coordinates, so an
-    // un-geocoded candidate can NEVER match — blaming the filters there sends the user
-    // hunting in the wrong place. Name the real cause and offer the geocode action.
-    <div style={{ padding: 16, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-        {noLocation ? t('vacancySearch.noLocationResults') : t('vacancySearch.empty')}
-      </span>
-      {noLocation && (
+  // Four explicit states: loading, error (+ retry), empty, success list — delegated to shared component.
+  const listBody: ReactNode = (
+    <SearchListBody
+      loading={loading}
+      error={error}
+      rows={rows}
+      onRetry={retry}
+      noLocation={noLocation}
+      emptyMessage={t('vacancySearch.empty')}
+      noLocationMessage={t('vacancySearch.noLocationResults')}
+      noLocationButton={
         <GeocodeButton endpoint={`/candidates/${candidate.id}/geocode`} permission="candidates.update"
           variant="row" disabled={!candidate.address} />
+      }
+      selectedId={selectedId}
+      onSelect={selectId}
+      renderRow={(r, isSelected) => (
+        <VacancySearchResultRow key={String(r.id)} row={r} isSelected={isSelected} onSelect={selectId} />
       )}
-    </div>
-  ) : (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
-      {/* The selected vacancy renders as the card above — drop its list row (no
-          duplicate). Row rendering extracted to VacancySearchResultRow. */}
-      {rows.filter(r => r.id !== selectedId).map(r => (
-        <VacancySearchResultRow key={String(r.id)} row={r} isSelected={r.id === selectedId} onSelect={selectVacancy} />
-      ))}
-    </div>
+    />
   )
 
   const listPane: ReactNode = <div>{summaryCard}{listBody}</div>
