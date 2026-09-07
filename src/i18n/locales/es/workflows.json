@@ -1210,7 +1210,9 @@
     "{{1output}} of leeg laten voor volledige output": "{{1.output}} o dejar vacío para la salida completa",
     "{{veldnaam}} of vaste tekst": "{{veldnaam}} o texto fijo",
     "{{vraag van kandidaat}}": "{{pregunta del candidato}}",
-    "Standaard van de vacature/sollicitatie": "Predeterminado de la vacante/candidatura"
+    "Standaard van de vacature/sollicitatie": "Predeterminado de la vacante/candidatura",
+    "-30": "-30",
+    "180": "180"
   },
   "fieldHints": {
     "Array stuurt elk item apart door naar de volgende module (zoals een Iterator)": "Array envía cada elemento por separado al siguiente módulo (como un Iterator).",
