@@ -28,6 +28,9 @@ import {
 } from './kpis'
 
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn(), post: vi.fn() } }))
+// SchemaSection gates its Save button on settings.update (X-29/AF:orphans-4-2, 713175d3):
+// these tests exercise the editor path, so the mocked viewer holds that permission.
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const st = (key) => i18n.t(key, { ns: 'settings' })
