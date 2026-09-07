@@ -40,19 +40,23 @@ export function UiPreferenceSync() {
     }
   }, [auth, theme, serverTheme, language, serverLanguage, setTheme, setLanguage])
 
-  // When local theme changes (not via login), write it to preferences.
+  // Write only on a CHANGE the user made after mount: a login must never spend a
+  // PUT /auth/me (throttle 10/min) merely because the server has no value yet.
+  const prevThemeRef = useRef(theme)
   useEffect(() => {
-    if (!auth?.user) return
-    if (serverTheme === theme) return // Skip writes when unchanged.
-
+    const changed = prevThemeRef.current !== theme
+    prevThemeRef.current = theme
+    if (!changed || !auth?.user) return
+    if (serverTheme === theme) return // The login apply-pass lands here: nothing to write.
     setServerTheme(theme)
   }, [auth, theme, serverTheme, setServerTheme])
 
-  // When local language changes (not via login), write it to preferences.
+  const prevLanguageRef = useRef(language)
   useEffect(() => {
-    if (!auth?.user) return
-    if (serverLanguage === language) return // Skip writes when unchanged.
-
+    const changed = prevLanguageRef.current !== language
+    prevLanguageRef.current = language
+    if (!changed || !auth?.user) return
+    if (serverLanguage === language) return
     setServerLanguage(language)
   }, [auth, language, serverLanguage, setServerLanguage])
 
