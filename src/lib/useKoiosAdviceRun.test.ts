@@ -242,7 +242,7 @@ describe('useKoiosAdviceRun', () => {
     expect(result2.current.pending).toBe(false)
   })
 
-  it('a run that outlives the poll budget ends without a stale notice', async () => {
+  it('a run that outlives the poll budget ends with the timeout notice (Danny 08-09), never silently', async () => {
     vi.useFakeTimers()
     vi.mocked(api.post).mockRejectedValue({ response: { status: 409, data: { message: 'busy', run_id: 'run-9' } } })
     vi.mocked(api.get).mockResolvedValue({
@@ -258,6 +258,9 @@ describe('useKoiosAdviceRun', () => {
     // Pre-fix: the budget-exhausted publish() in pollForRun only patched
     // `pending`, leaving the 409 notice stuck forever even though the run
     // never landed.
-    expect(result.current.notice).toBeNull()
+    expect(result.current.notice).toBe(ct('koios.advice.timeout'))
   })
+
+
 })
+

@@ -301,7 +301,7 @@
     "advice": {
       "refresh": "Atualizar conselho",
       "score": "pontuação",
-      "none": "Ainda sem conselho de IA",
+      "none": "Ainda sem conselho resumido",
       "generatedAt": "Gerado em {{date}}",
       "pending": "O Koios está a preparar o conselho...",
       "alreadyRunning": "Já existe uma execução de conselho em curso para este registo.",
@@ -319,7 +319,8 @@
         "at_risk": "Em risco",
         "ending": "A terminar",
         "next_step": "Próximo passo"
-      }
+      },
+      "timeout": "O conselho não chegou dentro de um minuto. Atualiza a página ou tenta novamente mais tarde."
     }
   },
   "actionRules": {

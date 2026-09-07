@@ -301,7 +301,7 @@
     "advice": {
       "refresh": "Empfehlung aktualisieren",
       "score": "Bewertung",
-      "none": "Noch keine KI-Empfehlung",
+      "none": "Noch keine zusammenfassende Empfehlung",
       "generatedAt": "Erstellt am {{date}}",
       "pending": "Koios arbeitet an der Empfehlung ...",
       "alreadyRunning": "Für diesen Datensatz läuft bereits ein Empfehlungslauf.",
@@ -319,7 +319,8 @@
         "at_risk": "Gefährdet",
         "ending": "Endet",
         "next_step": "Nächster Schritt"
-      }
+      },
+      "timeout": "Die Empfehlung ist nicht innerhalb einer Minute eingetroffen. Aktualisieren Sie die Seite oder versuchen Sie es später erneut."
     }
   },
   "actionRules": {

@@ -301,7 +301,7 @@
     "advice": {
       "refresh": "Actualiser le conseil",
       "score": "score",
-      "none": "Pas encore de conseil IA",
+      "none": "Pas encore d'avis récapitulatif",
       "generatedAt": "Généré le {{date}}",
       "pending": "Koios prépare le conseil...",
       "alreadyRunning": "Une génération de conseil est déjà en cours pour cet enregistrement.",
@@ -319,7 +319,8 @@
         "at_risk": "À risque",
         "ending": "Se termine",
         "next_step": "Prochaine étape"
-      }
+      },
+      "timeout": "L'avis n'est pas arrivé dans la minute. Actualisez la page ou réessayez plus tard."
     }
   },
   "actionRules": {

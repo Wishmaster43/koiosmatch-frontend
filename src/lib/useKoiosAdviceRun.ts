@@ -72,10 +72,12 @@ interface RunStartResponse { run_id?: string }
 // REQUEST that started (or refused) a run (e.g. the 409 "already running"
 // caption) — once the run has ENDED that caption would sit under a card that
 // already moved on, contradicting it.
-function pollForRun(entityPath: string, id: Id, key: string, runId: string | null, gen: number, ticksLeft: number) {
+function pollForRun(entityPath: string, id: Id, key: string, runId: string | null, gen: number, ticksLeft: number, timeoutNotice: string) {
   const s = getState(key)
   if (gen !== s.gen) return
-  if (ticksLeft <= 0) { publish(s, { pending: false, notice: null }); return }
+  // Budget spent without a result: say so (Danny 08-09: "er gebeurt niets"), never
+  // fall back to the empty state as if nothing had been asked.
+  if (ticksLeft <= 0) { publish(s, { pending: false, notice: timeoutNotice }); return }
   setTimeout(async () => {
     if (gen !== s.gen) return
     try {
@@ -86,7 +88,7 @@ function pollForRun(entityPath: string, id: Id, key: string, runId: string | nul
     } catch {
       // A transient poll failure never aborts the run — just try again next tick.
     }
-    pollForRun(entityPath, id, key, runId, gen, ticksLeft - 1)
+    pollForRun(entityPath, id, key, runId, gen, ticksLeft - 1, timeoutNotice)
   }, POLL_INTERVAL_MS)
 }
 
@@ -150,13 +152,13 @@ export function useKoiosAdviceRun(
       const res = unwrap<RunStartResponse>(
         await api.post(`/${entityPath}/${id}/koios-advice`, undefined, { quietStatuses: [403, 409, 422] }),
       )
-      pollForRun(entityPath, id, key, res?.run_id ?? null, gen, POLL_MAX_TICKS)
+      pollForRun(entityPath, id, key, res?.run_id ?? null, gen, POLL_MAX_TICKS, t('koios.advice.timeout'))
     } catch (e) {
       const status = (e as { response?: { status?: number } })?.response?.status
       if (status === 409) {
         const runId = (e as { response?: { data?: { run_id?: string } } })?.response?.data?.run_id ?? null
         publish(s, { notice: t('koios.advice.alreadyRunning') })
-        pollForRun(entityPath, id, key, runId, gen, POLL_MAX_TICKS)
+        pollForRun(entityPath, id, key, runId, gen, POLL_MAX_TICKS, t('koios.advice.timeout'))
         return
       }
       if (status === 422) { publish(s, { notice: extractApiError(e, t('koios.advice.unavailable')), pending: false }); return }

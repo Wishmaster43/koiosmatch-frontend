@@ -301,7 +301,7 @@
     "advice": {
       "refresh": "Aggiorna consiglio",
       "score": "punteggio",
-      "none": "Nessun consiglio IA ancora",
+      "none": "Ancora nessun consiglio riepilogativo",
       "generatedAt": "Generato il {{date}}",
       "pending": "Koios sta preparando il consiglio...",
       "alreadyRunning": "Per questo record è già in corso un'elaborazione del consiglio.",
@@ -319,7 +319,8 @@
         "at_risk": "A rischio",
         "ending": "In scadenza",
         "next_step": "Prossimo passo"
-      }
+      },
+      "timeout": "Il consiglio non è arrivato entro un minuto. Aggiorna la pagina o riprova più tardi."
     }
   },
   "actionRules": {

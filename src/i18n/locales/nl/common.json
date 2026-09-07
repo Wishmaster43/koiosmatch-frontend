@@ -301,7 +301,7 @@
     "advice": {
       "refresh": "Advies vernieuwen",
       "score": "score",
-      "none": "Nog geen AI-advies",
+      "none": "Nog geen samenvattend advies",
       "generatedAt": "Gegenereerd op {{date}}",
       "pending": "Koios werkt aan het advies...",
       "alreadyRunning": "Er loopt al een adviesrun voor dit record.",
@@ -319,7 +319,8 @@
         "at_risk": "Aandacht nodig",
         "ending": "Loopt af",
         "next_step": "Volgende stap"
-      }
+      },
+      "timeout": "Het advies is niet binnen een minuut binnengekomen. Vernieuw de pagina of probeer het later opnieuw."
     }
   },
   "actionRules": {

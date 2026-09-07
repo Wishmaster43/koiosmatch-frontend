@@ -301,7 +301,7 @@
     "advice": {
       "refresh": "Refresh advice",
       "score": "score",
-      "none": "No AI advice yet",
+      "none": "No summary advice yet",
       "generatedAt": "Generated on {{date}}",
       "pending": "Koios is working on the advice...",
       "alreadyRunning": "An advice run is already in progress for this record.",
@@ -319,7 +319,8 @@
         "at_risk": "At risk",
         "ending": "Ending",
         "next_step": "Next step"
-      }
+      },
+      "timeout": "The advice did not arrive within a minute. Refresh the page or try again later."
     }
   },
   "actionRules": {
