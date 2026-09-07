@@ -224,16 +224,20 @@ describe('MatchesTable · Koios column (Danny 05-08)', () => {
 // CEL-DOORKLIK-CANON: candidate/vacancy/client cells deep-link to their own
 // drilldown, and never let that click also open the row's own detail drawer.
 describe('MatchesTable · cell deep-links (CEL-DOORKLIK-CANON)', () => {
-  it('opens the candidate drilldown from the candidate cell, without triggering the row click', async () => {
+  // Danny 07-09 (verbatim: "bij de match tabel als je drukt op de kandidaat moet je toch
+  // de match openen"): the candidate cell is plain identity content — clicking it is a
+  // row click that opens the MATCH, never the candidate drilldown.
+  it('clicking the candidate name opens the match row, not the candidate drilldown', async () => {
     const user = userEvent.setup()
     const onRowClick = vi.fn()
     const row = { ...baseRow, id: 70, candidateId: 'cand-7' }
     render(<MatchesTable rows={[row]} onRowClick={onRowClick} />)
 
-    await user.click(screen.getByRole('button', { name: /Kandidaat openen/ }))
+    expect(screen.queryByRole('button', { name: /Kandidaat openen/ })).toBeNull()
+    await user.click(screen.getByText(row.candidate))
 
-    expect(mockOpenEntity).toHaveBeenCalledWith('candidates', 'cand-7')
-    expect(onRowClick).not.toHaveBeenCalled()
+    expect(mockOpenEntity).not.toHaveBeenCalled()
+    expect(onRowClick).toHaveBeenCalledTimes(1)
   })
 
   it('opens the vacancy drilldown from the vacancy cell', async () => {
@@ -248,16 +252,18 @@ describe('MatchesTable · cell deep-links (CEL-DOORKLIK-CANON)', () => {
     expect(onRowClick).not.toHaveBeenCalled()
   })
 
-  it('opens the customer drilldown from the client cell', async () => {
+  // Danny 07-09 ("en klant moet ook de match openen"): same for the client cell.
+  it('clicking the client name opens the match row, not the customer drilldown', async () => {
     const user = userEvent.setup()
     const onRowClick = vi.fn()
-    const row = { ...baseRow, id: 72, clientId: 'cust-7' }
+    const row = { ...baseRow, id: 71, clientId: 'cust-7', client: 'Rivas Zorggroep' }
     render(<MatchesTable rows={[row]} onRowClick={onRowClick} />)
 
-    await user.click(screen.getByRole('button', { name: /Klant openen/ }))
+    expect(screen.queryByRole('button', { name: /Klant openen/ })).toBeNull()
+    await user.click(screen.getByText('Rivas Zorggroep'))
 
-    expect(mockOpenEntity).toHaveBeenCalledWith('customers', 'cust-7')
-    expect(onRowClick).not.toHaveBeenCalled()
+    expect(mockOpenEntity).not.toHaveBeenCalled()
+    expect(onRowClick).toHaveBeenCalledTimes(1)
   })
 
   it('renders the candidate cell unwrapped when no candidateId is present', () => {
