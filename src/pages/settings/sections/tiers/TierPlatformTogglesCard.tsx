@@ -15,12 +15,11 @@ import { inputWrap, inputStyle, label as labelStyle } from '../billingCardStyles
 // Patch shape this card sends up — one call per field change, always partial,
 // and always exactly the changed field (never the whole overage object) so the
 // container's dirty-merge never rewrites sibling fields (F1).
-type TogglesPatch = Partial<{ overage: Partial<BillingOverageConfig>; warn_at_pct: number; upgrade_contact: string | null }>
+type TogglesPatch = Partial<{ overage: Partial<BillingOverageConfig>; warn_at_pct: number }>
 
 interface TierPlatformTogglesCardProps {
   overage: BillingOverageConfig
   warnAtPct?: number
-  upgradeContact?: string | null
   onChange: (patch: TogglesPatch) => void
   disabled?: boolean
 }
@@ -63,11 +62,10 @@ function OverageMeterRow({
   )
 }
 
-// Renders the two overage meter rows plus warn_at_pct and upgrade_contact.
-export default function TierPlatformTogglesCard({ overage, warnAtPct, upgradeContact, onChange, disabled }: TierPlatformTogglesCardProps) {
+// Renders the two overage meter rows plus warn_at_pct.
+export default function TierPlatformTogglesCard({ overage, warnAtPct, onChange, disabled }: TierPlatformTogglesCardProps) {
   const { t } = useTranslation('settings')
   const warnId = useId()
-  const contactId = useId()
 
   return (
     <div>
@@ -103,19 +101,6 @@ export default function TierPlatformTogglesCard({ overage, warnAtPct, upgradeCon
               style={inputStyle}
             />
             <Caption>%</Caption>
-          </div>
-        </div>
-        <div style={{ flex: '1 1 240px', minWidth: 200 }}>
-          <label htmlFor={contactId} style={labelStyle}>{t('billingTiers.upgradeContactLabel')}</label>
-          <div style={inputWrap}>
-            <input
-              id={contactId}
-              type="text"
-              value={upgradeContact ?? ''}
-              disabled={disabled}
-              onChange={(e) => onChange({ upgrade_contact: e.target.value === '' ? null : e.target.value })}
-              style={inputStyle}
-            />
           </div>
         </div>
       </div>

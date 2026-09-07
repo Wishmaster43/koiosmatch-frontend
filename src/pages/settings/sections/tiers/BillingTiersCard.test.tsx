@@ -139,23 +139,6 @@ describe('BillingTiersCard', () => {
     }))
   })
 
-  it('clears upgrade_contact as an explicit null in the PUT body (F2)', async () => {
-    mockGet()
-    vi.mocked(api.put).mockResolvedValue({ data: catalog })
-    render(<BillingTiersCard />)
-
-    const contactInput = await screen.findByLabelText(t('billingTiers.upgradeContactLabel')) as HTMLInputElement
-    await waitFor(() => expect(contactInput.value).toBe('mailto:sales@koios.example'))
-    fireEvent.change(contactInput, { target: { value: '' } })
-    expect(contactInput.value).toBe('')
-
-    const saveBtn = await screen.findByRole('button', { name: t('common.save') })
-    fireEvent.click(saveBtn)
-
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/billing-tiers', {
-      upgrade_contact: null,
-    }))
-  })
 
   it('renders the unavailable copy on a 404 and shows no save button', async () => {
     vi.mocked(api.get).mockRejectedValue({ response: { status: 404 } })

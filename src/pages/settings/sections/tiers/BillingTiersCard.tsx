@@ -40,7 +40,7 @@ export interface TierAssignmentRow {
 }
 
 // Platform toggle fields the container tracks dirty-only, mirrored 1:1 onto the PUT body.
-type PlatformPatch = { overage?: Partial<BillingOverageConfig>; warn_at_pct?: number; upgrade_contact?: string | null }
+type PlatformPatch = { overage?: Partial<BillingOverageConfig>; warn_at_pct?: number }
 
 // Superadmin tier-catalog container: GET on mount, per-field dirty tracking, one SaveButton PUT.
 export default function BillingTiersCard() {
@@ -102,10 +102,6 @@ export default function BillingTiersCard() {
   const workflowRows = (data?.workflow_tiers ?? []).map((row) => applyRowPatch(row, workflowDirty[row.key], 'monthly_runs'))
   const overageDraft: BillingOverageConfig = { ...data?.overage, ...platformDirty.overage }
   const warnAtPctDraft = platformDirty.warn_at_pct ?? data?.warn_at_pct
-  // F2: a `?? ''` on the merged value would swallow a deliberate null-out (clearing
-  // the field draft's `null` is falsy-safe but truthy-eligible for `??`), so check
-  // presence in the dirty patch explicitly rather than chaining `??` across both.
-  const upgradeContactDraft = 'upgrade_contact' in platformDirty ? (platformDirty.upgrade_contact ?? '') : (data?.upgrade_contact ?? '')
   const baselinesDraft = { ...(data?.package_baselines ?? {}) } as Record<BillingPackageKey, BillingPackageBaseline>
   for (const key of Object.keys(baselineDirty) as BillingPackageKey[]) {
     baselinesDraft[key] = { ...baselinesDraft[key], ...baselineDirty[key] }
@@ -127,7 +123,6 @@ export default function BillingTiersCard() {
     setPlatformDirty((prev) => ({
       ...prev,
       ...(patch.warn_at_pct !== undefined ? { warn_at_pct: patch.warn_at_pct } : {}),
-      ...(patch.upgrade_contact !== undefined ? { upgrade_contact: patch.upgrade_contact } : {}),
       ...(patch.overage ? { overage: { ...prev.overage, ...patch.overage } } : {}),
     }))
 
@@ -153,7 +148,6 @@ export default function BillingTiersCard() {
     }
     if (platformDirty.overage && Object.keys(platformDirty.overage).length) body.overage = platformDirty.overage
     if (platformDirty.warn_at_pct !== undefined) body.warn_at_pct = platformDirty.warn_at_pct
-    if (platformDirty.upgrade_contact !== undefined) body.upgrade_contact = platformDirty.upgrade_contact
     const baselineEntries = Object.entries(baselineDirty).filter(([, patch]) => Object.keys(patch ?? {}).length)
     if (baselineEntries.length) {
       body.package_baselines = Object.fromEntries(baselineEntries) as AdminBillingTiersUpdate['package_baselines']
@@ -235,7 +229,7 @@ export default function BillingTiersCard() {
 
       <SectionTitle style={{ marginBottom: 8, marginTop: 20 }}>{t('billingTiers.overageHeading')}</SectionTitle>
       <TierPlatformTogglesCard
-        overage={overageDraft} warnAtPct={warnAtPctDraft} upgradeContact={upgradeContactDraft}
+        overage={overageDraft} warnAtPct={warnAtPctDraft}
         onChange={onPlatformChange} disabled={saving}
       />
 

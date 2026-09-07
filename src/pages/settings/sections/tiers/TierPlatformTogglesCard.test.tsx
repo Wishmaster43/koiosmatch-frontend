@@ -1,6 +1,7 @@
 /**
  * TierPlatformTogglesCard tests (props-only presenter) — no native <select>,
- * and a disabled price input when its meter's overage toggle is off.
+ * no upgrade-contact input field, and a disabled price input when its meter's
+ * overage toggle is off.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -10,12 +11,12 @@ import TierPlatformTogglesCard from './TierPlatformTogglesCard'
 const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 
 describe('TierPlatformTogglesCard', () => {
-  // Both meter labels and the shared knobs render.
-  it('renders both overage rows and the shared knobs', () => {
+  // Both meter labels and the warn-percentage knob render; no upgrade-contact field.
+  it('renders both overage rows and the warn-percentage knob', () => {
     render(
       <TierPlatformTogglesCard
         overage={{ ai_enabled: true, ai_price_cents: 5, workflow_enabled: false, workflow_price_cents: 2 }}
-        warnAtPct={80} upgradeContact="mailto:sales@koiosmatch.nl" onChange={vi.fn()}
+        warnAtPct={80} onChange={vi.fn()}
       />,
     )
     // F3: the container prints the section heading now, not this card — assert
@@ -23,7 +24,7 @@ describe('TierPlatformTogglesCard', () => {
     expect(screen.getByText(st('billing.usage.plan.tier.aiTitle'))).toBeInTheDocument()
     expect(screen.getByText(st('billing.usage.plan.tier.workflowTitle'))).toBeInTheDocument()
     expect(screen.getByLabelText(st('billingTiers.warnPctLabel'))).toBeInTheDocument()
-    expect(screen.getByLabelText(st('billingTiers.upgradeContactLabel'))).toBeInTheDocument()
+    expect(screen.queryByLabelText(st('billingTiers.upgradeContactLabel'))).not.toBeInTheDocument()
   })
 
   // Off meter shows the caption and its price input is disabled.
