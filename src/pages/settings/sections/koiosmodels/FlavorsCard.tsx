@@ -1,16 +1,15 @@
 import { formatCurrency } from '@/lib/formatters'
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Zap, Sparkles, Crown } from 'lucide-react'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import SaveButton from '@/components/ui/SaveButton'
 import { SectionTitle, Caption, Mono } from '@/components/ui/typography'
-import { extractApiError } from '@/lib/extractApiError'
 import { patchKoiosModelsAdmin } from './api'
 import { FLAVOR_KEYS } from './types'
+import { useCardDraft } from './useCardDraft'
+import { cardStyle } from './cardStyles'
 import type { FlavorKey, KoiosModelInfo, KoiosCatalogEntry, KoiosModelsAdminData } from './types'
 
-const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' }
 const TIER_ICON = { snel: Zap, slim: Sparkles, max: Crown }
 
 // Compact cost hint — house currency formatting (§5), omitted entirely when the
@@ -29,12 +28,13 @@ function costHint(entry: KoiosCatalogEntry | undefined, fmt: (v: number) => stri
  */
 export default function FlavorsCard({ data, onSaved }: { data: KoiosModelsAdminData; onSaved: (patch: Partial<KoiosModelsAdminData>) => void }) {
   const { t } = useTranslation('settings')
-  const [draft, setDraft] = useState(data.flavors)
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { draft, setDraft, saving, saved, error, dirty, save } = useCardDraft(
+    data.flavors,
+    (draft) => patchKoiosModelsAdmin({ flavors: draft }),
+    (draft, original) => FLAVOR_KEYS.some(k => draft[k] !== original[k]),
+    (result) => onSaved({ flavors: result.flavors }),
+  )
 
-  const dirty = FLAVOR_KEYS.some(k => draft[k] !== data.flavors[k])
   // Only LINKABLE models are offerable (MODELS-PERSIST-1: a live vendor id with no
   // catalogue price cannot be pinned to a flavour) — the value is the catalogue id,
   // never the raw vendor id, since that is what the PATCH must send.
@@ -47,23 +47,8 @@ export default function FlavorsCard({ data, onSaved }: { data: KoiosModelsAdminD
     value: (m.catalog_id ?? m.id) as string, label: `${m.display_name} · ${m.catalog_id ?? m.id}`,
   }))
 
-  // Persist only the flavours section — never the whole document. The body is
-  // always the canonical Record of catalogue ids (never a list), per MODELS-PERSIST-1.
-  const save = async () => {
-    setSaving(true); setError(null)
-    try {
-      const next = await patchKoiosModelsAdmin({ flavors: draft })
-      onSaved({ flavors: next.flavors })
-      setSaved(true)
-      window.setTimeout(() => setSaved(false), 2000)
-    } catch (err) {
-      setError(extractApiError(err, t('koiosModelsAdmin.saveFailed')))
-    }
-    setSaving(false)
-  }
-
   return (
-    <div style={card}>
+    <div style={cardStyle}>
       <SectionTitle style={{ marginBottom: 4 }}>{t('koiosModelsAdmin.flavors.title')}</SectionTitle>
       <Caption style={{ display: 'block', marginBottom: 12 }}>{t('koiosModelsAdmin.flavors.subtitle')}</Caption>
 

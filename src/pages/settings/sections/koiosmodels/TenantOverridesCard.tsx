@@ -8,19 +8,19 @@
  * Clearing sends null through PATCH rather than dropping the key, so the
  * override actually resets server-side (§3A VAC-CLEAR-1).
  */
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useState } from 'react'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
 import SaveButton from '@/components/ui/SaveButton'
 import { SectionTitle, Caption } from '@/components/ui/typography'
-import { extractApiError } from '@/lib/extractApiError'
 import { useAuth } from '@/context/AuthContext'
 import { patchKoiosModelsAdmin } from './api'
 import { FLAVOR_KEYS } from './types'
+import { useCardDraft } from './useCardDraft'
+import { cardStyle } from './cardStyles'
 import type { FlavorKey, KoiosTenantOverride, KoiosModelsAdminData } from './types'
 
-const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, background: 'var(--surface)' }
 const NO_FLOOR = '' // maps to null — no floor set
 
 const EMPTY_OVERRIDE: KoiosTenantOverride = { allowed_flavors: null, min_flavor: null }
@@ -30,10 +30,12 @@ export default function TenantOverridesCard({ data, onSaved }: { data: KoiosMode
   const { t } = useTranslation('settings')
   const tenants = useAuth()?.tenants ?? []
   const [tenantId, setTenantId] = useState<string>('')
-  const [draft, setDraft] = useState<Record<string, KoiosTenantOverride>>(data.tenants)
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { draft, setDraft, saving, saved, error, dirty, save } = useCardDraft(
+    data.tenants,
+    (draft) => patchKoiosModelsAdmin({ tenants: draft }),
+    (draft, original) => JSON.stringify(draft) !== JSON.stringify(original),
+    (result) => onSaved({ tenants: result.tenants }),
+  )
 
   const tenantOptions = tenants.map((tn: { id: string; name?: string }) => ({ value: tn.id, label: tn.name ?? tn.id }))
   const current = tenantId ? (draft[tenantId] ?? EMPTY_OVERRIDE) : null
@@ -41,7 +43,6 @@ export default function TenantOverridesCard({ data, onSaved }: { data: KoiosMode
     { value: NO_FLOOR, label: t('koiosModelsAdmin.tenantOverrides.noFloor') },
     ...FLAVOR_KEYS.map(f => ({ value: f, label: t(`koiosModelsAdmin.flavorLabel.${f}`) })),
   ]
-  const dirty = JSON.stringify(draft) !== JSON.stringify(data.tenants)
 
   // Merges a partial patch into the currently selected tenant's draft override.
   const updateCurrent = (patch: Partial<KoiosTenantOverride>) => {
@@ -57,22 +58,8 @@ export default function TenantOverridesCard({ data, onSaved }: { data: KoiosMode
     updateCurrent({ allowed_flavors: next.length ? next : null })
   }
 
-  // Persists the whole draft map in one PATCH, syncs the parent's data, and flashes the shared saved-state for 2s.
-  const save = async () => {
-    setSaving(true); setError(null)
-    try {
-      const next = await patchKoiosModelsAdmin({ tenants: draft })
-      onSaved({ tenants: next.tenants })
-      setSaved(true)
-      window.setTimeout(() => setSaved(false), 2000)
-    } catch (err) {
-      setError(extractApiError(err, t('koiosModelsAdmin.saveFailed')))
-    }
-    setSaving(false)
-  }
-
   return (
-    <div style={card}>
+    <div style={cardStyle}>
       <SectionTitle style={{ marginBottom: 4 }}>{t('koiosModelsAdmin.tenantOverrides.title')}</SectionTitle>
       <Caption style={{ display: 'block', marginBottom: 12 }}>{t('koiosModelsAdmin.tenantOverrides.subtitle')}</Caption>
 

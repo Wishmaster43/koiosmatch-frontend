@@ -30,7 +30,7 @@ export { formatDateOnly, formatDateTimeStr } from './localDate'
 // Single-sourced from localDate.ts (the init-free module) — re-exported here so existing
 // importers of `ddmmyyyy`/`hhmm` from this module keep working.
 import { ddmmyyyy, hhmm } from './localDate'
-export { ddmmyyyy, hhmm, hhmmss } from './localDate'
+export { ddmmyyyy, hhmm, hhmmss, formatMonthYear } from './localDate'
 const NUMERIC_DATE: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric' }
 const isNumericDate = (o: Intl.DateTimeFormatOptions) =>
   o.day === '2-digit' && o.month === '2-digit' && o.year === 'numeric' && !o.weekday && !o.hour && !o.minute && !o.era && !o.timeZoneName

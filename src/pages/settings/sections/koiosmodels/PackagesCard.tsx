@@ -5,28 +5,27 @@
  * hand-rolled copy of that chip). The max-effort ceiling IS a dropdown (open
  * vocabulary) via CreatableSelect.
  */
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
 import SaveButton from '@/components/ui/SaveButton'
 import { SectionTitle, Caption } from '@/components/ui/typography'
-import { extractApiError } from '@/lib/extractApiError'
 import { patchKoiosModelsAdmin } from './api'
 import { FLAVOR_KEYS, EFFORT_LEVELS } from './types'
+import { useCardDraft } from './useCardDraft'
+import { cardStyle } from './cardStyles'
 import type { FlavorKey, KoiosPackageEntry, KoiosModelsAdminData } from './types'
-
-const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' }
 
 // Per-package flavour toggles + effort ceiling editor.
 export default function PackagesCard({ data, onSaved }: { data: KoiosModelsAdminData; onSaved: (patch: Partial<KoiosModelsAdminData>) => void }) {
   const { t } = useTranslation('settings')
-  const [draft, setDraft] = useState<Record<string, KoiosPackageEntry>>(data.packages)
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { draft, setDraft, saving, saved, error, dirty, save } = useCardDraft(
+    data.packages,
+    (draft) => patchKoiosModelsAdmin({ packages: draft }),
+    (draft, original) => JSON.stringify(draft) !== JSON.stringify(original),
+    (result) => onSaved({ packages: result.packages }),
+  )
 
-  const dirty = JSON.stringify(draft) !== JSON.stringify(data.packages)
   const effortOptions = EFFORT_LEVELS.map(e => ({ value: e, label: t(`koiosModelsAdmin.effortLevel.${e}`) }))
   const packageKeys = Object.keys(data.packages)
 
@@ -39,22 +38,8 @@ export default function PackagesCard({ data, onSaved }: { data: KoiosModelsAdmin
     })
   }
 
-  // Persists the draft package config and adopts the server's own patched copy.
-  const save = async () => {
-    setSaving(true); setError(null)
-    try {
-      const next = await patchKoiosModelsAdmin({ packages: draft })
-      onSaved({ packages: next.packages })
-      setSaved(true)
-      window.setTimeout(() => setSaved(false), 2000)
-    } catch (err) {
-      setError(extractApiError(err, t('koiosModelsAdmin.saveFailed')))
-    }
-    setSaving(false)
-  }
-
   return (
-    <div style={card}>
+    <div style={cardStyle}>
       <SectionTitle style={{ marginBottom: 4 }}>{t('koiosModelsAdmin.packages.title')}</SectionTitle>
       <Caption style={{ display: 'block', marginBottom: 12 }}>{t('koiosModelsAdmin.packages.subtitle')}</Caption>
 

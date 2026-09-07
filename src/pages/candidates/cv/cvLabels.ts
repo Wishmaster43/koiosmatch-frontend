@@ -8,6 +8,7 @@
  * nothing to do with the document's layout.
  */
 import type { TranslateFn } from './cvTypes'
+import { formatMonthYear } from '@/lib/localDate'
 
 // Locale-aware "mmm yyyy". The drawer passes the active language's locale so a
 // generated CV matches the user's language; falls back to Dutch.
@@ -15,7 +16,7 @@ export function fmtDate(d?: string | number | null, locale = 'nl-NL'): string {
   if (!d) return ''
   const dt = new Date(d)
   if (isNaN(dt.getTime())) return String(d)
-  return dt.toLocaleDateString(locale, { month: 'short', year: 'numeric' })
+  return formatMonthYear(dt, locale, 'short')
 }
 
 // Dutch fallback for the section labels — used when no `t` is supplied (the PDF is
