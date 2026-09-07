@@ -186,7 +186,7 @@ export default function MyNotificationsSettings() {
   ]
 
   return (
-    <div style={{ maxWidth: 640 }}>
+    <div style={{ maxWidth: 960 }}>
       <div style={{ marginBottom: 20 }}>
         <PageTitle>{t('notifications.my.title')}</PageTitle>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('notifications.my.subtitle')}</p>

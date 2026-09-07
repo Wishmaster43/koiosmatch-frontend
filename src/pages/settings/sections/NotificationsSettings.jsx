@@ -54,7 +54,7 @@ export default function NotificationsSettings({ context }) {
     <SettingsScaffold
       title={t(`notifications.context.${context}.title`, context)}
       subtitle={t(`notifications.context.${context}.desc`, '')}
-      maxWidth={640} form={gatedForm}>
+      maxWidth={960} form={gatedForm}>
       <SettingRow label={t('notifications.channels.label')} description={t('notifications.channels.desc')}>
         {/* Honest gate (NOTIF-PARITY-1): a context with no real emitter never promises
             delivery it cannot make, on any of the three channels — a calm muted marker replaces
@@ -63,9 +63,10 @@ export default function NotificationsSettings({ context }) {
           <SoftChip label={t('notifications.inApp.notYetActive')} color="var(--text-muted)"
             title={t('notifications.inApp.notYetActiveReason')} />
         )}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
+        {/* Danny 07-09: the channel name sits ABOVE its switch, blocks side by side with air between them. */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-6)', flexWrap: 'wrap' }}>
           {channels.map(ch => (
-            <label key={ch.key} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: (noEmitterYet || !canEdit) ? 'default' : 'pointer' }}>
+            <label key={ch.key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6, cursor: (noEmitterYet || !canEdit) ? 'default' : 'pointer' }}>
               <span style={{ fontSize: 12, color: 'var(--text)' }}>{ch.label}</span>
               <Toggle checked={!!form.values[ch.key]} onChange={v => form.set(ch.key, v)}
                 disabled={noEmitterYet || !canEdit} ariaLabel={ch.label}
