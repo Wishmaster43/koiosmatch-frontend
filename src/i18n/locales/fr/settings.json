@@ -269,26 +269,6 @@
         "description": "Objectif mensuel de nouvelles inscriptions",
         "unit": "candidats"
       },
-      "churn_warning_threshold": {
-        "label": "Seuil d'alerte d'attrition",
-        "description": "Pourcentage d'attrition déclenchant une alerte",
-        "unit": "%"
-      },
-      "avg_candidates_window": {
-        "label": "Période de calcul de la moyenne",
-        "description": "Nombre de mois pour la moyenne mobile",
-        "unit": "mois"
-      },
-      "occupancy_target": {
-        "label": "Objectif de taux d'occupation",
-        "description": "Valeur cible du taux d'occupation",
-        "unit": "%"
-      },
-      "response_rate_target": {
-        "label": "Objectif de taux de réponse",
-        "description": "Valeur cible de réponse des candidats aux messages",
-        "unit": "%"
-      },
       "no_contact_alert_months": {
         "label": "Alerte : aucun contact ≥ N mois",
         "description": "Signale un enregistrement sans contact depuis ce nombre de mois",
@@ -302,11 +282,6 @@
       "open_tasks_target": {
         "label": "Objectif tâches ouvertes",
         "description": "Valeur cible pour les tâches ouvertes",
-        "unit": "tâches"
-      },
-      "overdue_warning_threshold": {
-        "label": "Seuil tâches en retard",
-        "description": "Nombre de tâches en retard déclenchant une alerte",
         "unit": "tâches"
       },
       "daily_calls_target": {
@@ -2092,11 +2067,7 @@
       "documents": "Documents"
     },
     "kpi": {
-      "new_candidates_target": "Objectif nouveaux candidats",
-      "churn_warning_threshold": "Seuil d'attrition",
-      "avg_candidates_window": "Période moy.",
-      "occupancy_target": "Objectif d'occupation",
-      "response_rate_target": "Objectif taux de réponse"
+      "new_candidates_target": "Objectif nouveaux candidats"
     },
     "props": {
       "synced": "Synchronisé",
@@ -2254,16 +2225,6 @@
       "sm_fill_rate_target": {
         "label": "Objectif de taux de remplissage",
         "description": "Pourcentage cible de services pourvus",
-        "unit": "%"
-      },
-      "sm_open_shifts_warning": {
-        "label": "Alerte services ouverts",
-        "description": "Nombre de services ouverts déclenchant une alerte",
-        "unit": "services"
-      },
-      "sm_no_show_threshold": {
-        "label": "Seuil d’absence",
-        "description": "Pourcentage d’absences déclenchant une alerte",
         "unit": "%"
       },
       "sm_filled_shifts_target": {

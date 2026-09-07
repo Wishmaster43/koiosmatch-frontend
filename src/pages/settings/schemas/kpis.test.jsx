@@ -16,7 +16,16 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import i18n from '@/i18n'
 import api from '@/lib/api'
 import SchemaSection from '../components/SchemaSection'
-import { kpisOpportunities, kpisVacancies } from './kpis'
+import {
+  kpisCandidates,
+  kpisApplications,
+  kpisCustomers,
+  kpisLocations,
+  kpisDepartments,
+  kpisTasks,
+  kpisOpportunities,
+  kpisVacancies,
+} from './kpis'
 
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn(), post: vi.fn() } }))
 
@@ -29,12 +38,12 @@ beforeEach(() => {
   api.post.mockResolvedValue({})
 })
 
-// Field shape + defaults pinned as data — exactly the four backend-confirmed
+// Field shape + defaults pinned as data — exactly the two backend-confirmed
 // keys, number 1..365, nothing more/less.
 describe('kpisOpportunities / kpisVacancies — field shape pinned', () => {
   it('kpisOpportunities carries the two pipeline thresholds, number 1..365', () => {
     expect(kpisOpportunities.fields).toEqual([
-      { key: 'opportunity_stale_days', type: 'number', default: 30, min: 1, max: 365 },
+      { key: 'opportunity_stale_days', type: 'number', default: 14, min: 1, max: 365 },
       { key: 'opportunity_closing_soon_days', type: 'number', default: 14, min: 1, max: 365 },
     ])
   })
@@ -47,11 +56,11 @@ describe('kpisOpportunities / kpisVacancies — field shape pinned', () => {
 })
 
 describe('kpisOpportunities · defaults + persists the exact backend keys', () => {
-  it('pre-fills both defaults (30, 14) when the tenant has never saved a value', async () => {
+  it('pre-fills both defaults (14, 14) when the tenant has never saved a value', async () => {
     render(<SchemaSection schema={kpisOpportunities} />)
     const inputs = await screen.findAllByRole('spinbutton')
     expect(inputs).toHaveLength(2)
-    await waitFor(() => expect(inputs[0]).toHaveValue(30))
+    await waitFor(() => expect(inputs[0]).toHaveValue(14))
     expect(inputs[1]).toHaveValue(14)
     expect(inputs[0]).toHaveAttribute('min', '1')
     expect(inputs[0]).toHaveAttribute('max', '365')
@@ -60,7 +69,7 @@ describe('kpisOpportunities · defaults + persists the exact backend keys', () =
   it('POSTs /settings with both keys, opportunity_stale_days at the edited value', async () => {
     render(<SchemaSection schema={kpisOpportunities} />)
     const inputs = await screen.findAllByRole('spinbutton')
-    await waitFor(() => expect(inputs[0]).toHaveValue(30))
+    await waitFor(() => expect(inputs[0]).toHaveValue(14))
     fireEvent.change(inputs[0], { target: { value: '45' } })
 
     const saveBtn = await waitFor(() => {
@@ -125,5 +134,42 @@ describe('kpisVacancies · subtitle cross-references the Koios-advice screen', (
     render(<SchemaSection schema={kpisVacancies} />)
     await screen.findAllByRole('spinbutton')
     expect(screen.getByText(st('kpis.vacanciesSubtitle'))).toBeInTheDocument()
+  })
+})
+
+// Lane J cleanup (X-7): dead keys removed from all schema exports.
+describe('Dead KPI keys · all removed from schemas', () => {
+  it('opportunity_stale_days defaults to 14 (OpportunityStaleWindow::DEFAULT_DAYS)', () => {
+    const field = kpisOpportunities.fields.find((f) => f.key === 'opportunity_stale_days')
+    expect(field?.default).toBe(14)
+  })
+
+  // Seven dead keys: churn_warning_threshold, avg_candidates_window, occupancy_target (3×),
+  // response_rate_target, overdue_warning_threshold, sm_open_shifts_warning, sm_no_show_threshold.
+  // Assert they are absent from all schema exports.
+  it('churn_warning_threshold is absent from kpisCandidates', () => {
+    const keys = kpisCandidates.fields.map((f) => f.key)
+    expect(keys).not.toContain('churn_warning_threshold')
+  })
+
+  it('avg_candidates_window is absent from kpisCandidates', () => {
+    const keys = kpisCandidates.fields.map((f) => f.key)
+    expect(keys).not.toContain('avg_candidates_window')
+  })
+
+  it('response_rate_target is absent from kpisApplications', () => {
+    const keys = kpisApplications.fields.map((f) => f.key)
+    expect(keys).not.toContain('response_rate_target')
+  })
+
+  it('occupancy_target is absent from kpisCustomers, kpisLocations, kpisDepartments', () => {
+    expect(kpisCustomers.fields.map((f) => f.key)).not.toContain('occupancy_target')
+    expect(kpisLocations.fields.map((f) => f.key)).not.toContain('occupancy_target')
+    expect(kpisDepartments.fields.map((f) => f.key)).not.toContain('occupancy_target')
+  })
+
+  it('overdue_warning_threshold is absent from kpisTasks', () => {
+    const keys = kpisTasks.fields.map((f) => f.key)
+    expect(keys).not.toContain('overdue_warning_threshold')
   })
 })

@@ -269,26 +269,6 @@
         "description": "Objetivo mensual de nuevas inscripciones",
         "unit": "candidatos"
       },
-      "churn_warning_threshold": {
-        "label": "Umbral de alerta de bajas",
-        "description": "Porcentaje de bajas que muestra una alerta",
-        "unit": "%"
-      },
-      "avg_candidates_window": {
-        "label": "Periodo de cálculo del promedio",
-        "description": "Número de meses para la media móvil",
-        "unit": "meses"
-      },
-      "occupancy_target": {
-        "label": "Objetivo de ocupación",
-        "description": "Valor objetivo de la tasa de ocupación",
-        "unit": "%"
-      },
-      "response_rate_target": {
-        "label": "Objetivo de tasa de respuesta",
-        "description": "Valor objetivo de respuesta de candidatos a mensajes",
-        "unit": "%"
-      },
       "no_contact_alert_months": {
         "label": "Alerta: sin contacto ≥ N meses",
         "description": "Marca un registro sin contacto durante estos meses",
@@ -302,11 +282,6 @@
       "open_tasks_target": {
         "label": "Objetivo de tareas abiertas",
         "description": "Valor objetivo de tareas abiertas",
-        "unit": "tareas"
-      },
-      "overdue_warning_threshold": {
-        "label": "Umbral de tareas vencidas",
-        "description": "Número de tareas vencidas que activa una alerta",
         "unit": "tareas"
       },
       "daily_calls_target": {
@@ -2092,11 +2067,7 @@
       "documents": "Documentos"
     },
     "kpi": {
-      "new_candidates_target": "Objetivo nuevos candidatos",
-      "churn_warning_threshold": "Umbral de abandono",
-      "avg_candidates_window": "Período prom.",
-      "occupancy_target": "Objetivo de ocupación",
-      "response_rate_target": "Objetivo tasa de respuesta"
+      "new_candidates_target": "Objetivo nuevos candidatos"
     },
     "props": {
       "synced": "Sincronizado",
@@ -2254,16 +2225,6 @@
       "sm_fill_rate_target": {
         "label": "Objetivo de tasa de cobertura",
         "description": "Porcentaje objetivo de turnos cubiertos",
-        "unit": "%"
-      },
-      "sm_open_shifts_warning": {
-        "label": "Aviso de turnos abiertos",
-        "description": "Número de turnos abiertos que activa un aviso",
-        "unit": "turnos"
-      },
-      "sm_no_show_threshold": {
-        "label": "Umbral de ausencias",
-        "description": "Porcentaje de ausencias que activa un aviso",
         "unit": "%"
       },
       "sm_filled_shifts_target": {

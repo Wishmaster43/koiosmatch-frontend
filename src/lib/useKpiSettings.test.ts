@@ -67,7 +67,7 @@ describe('useKpiSettings · tenant scoping', () => {
 
     const { result } = renderHook(() => useKpiSettings())
     await waitFor(() => expect(mockedGet).toHaveBeenCalledTimes(1))
-    expect(result.current.occupancy_target).toBe(SETTING_DEFAULTS.occupancy_target)
+    expect(result.current.new_candidates_target).toBe(SETTING_DEFAULTS.new_candidates_target)
   })
 
   // (d) invalidateKpiCache() only clears the CURRENT tenant's slot — switching

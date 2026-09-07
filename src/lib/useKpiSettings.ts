@@ -13,10 +13,6 @@ import api, { getActiveTenantId } from './api'
 export const SETTING_DEFAULTS: Record<string, number> = {
   // KPI targets
   new_candidates_target:   15,
-  churn_warning_threshold: 10,
-  avg_candidates_window:   12,
-  occupancy_target:        85,
-  response_rate_target:    80,
   // Weergave
   candidates_per_page:     500,
   top_cities_n:            10,

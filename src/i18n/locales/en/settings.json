@@ -269,26 +269,6 @@
         "description": "Monthly target for new registrations",
         "unit": "candidates"
       },
-      "churn_warning_threshold": {
-        "label": "Churn warning threshold",
-        "description": "Churn percentage at which a warning is shown",
-        "unit": "%"
-      },
-      "avg_candidates_window": {
-        "label": "Average calculation window",
-        "description": "Number of months used for the moving average",
-        "unit": "months"
-      },
-      "occupancy_target": {
-        "label": "Occupancy target",
-        "description": "Target value for occupancy rate",
-        "unit": "%"
-      },
-      "response_rate_target": {
-        "label": "Response rate target",
-        "description": "Target value for candidate response to messages",
-        "unit": "%"
-      },
       "no_contact_alert_months": {
         "label": "Alert: no contact ≥ N months",
         "description": "Flag a record when it has had no contact for this many months",
@@ -302,11 +282,6 @@
       "open_tasks_target": {
         "label": "Open tasks target",
         "description": "Target for the number of open tasks",
-        "unit": "tasks"
-      },
-      "overdue_warning_threshold": {
-        "label": "Overdue tasks warning threshold",
-        "description": "Number of overdue tasks that triggers a warning",
         "unit": "tasks"
       },
       "daily_calls_target": {
@@ -2341,11 +2316,7 @@
       "documents": "Documents"
     },
     "kpi": {
-      "new_candidates_target": "New candidates target",
-      "churn_warning_threshold": "Churn threshold",
-      "avg_candidates_window": "Avg. period",
-      "occupancy_target": "Occupancy target",
-      "response_rate_target": "Response rate target"
+      "new_candidates_target": "New candidates target"
     },
     "props": {
       "synced": "Synced",
@@ -2467,16 +2438,6 @@
       "sm_fill_rate_target": {
         "label": "Fill-rate target",
         "description": "Target percentage of filled shifts",
-        "unit": "%"
-      },
-      "sm_open_shifts_warning": {
-        "label": "Open shifts warning",
-        "description": "Number of open shifts that triggers a warning",
-        "unit": "shifts"
-      },
-      "sm_no_show_threshold": {
-        "label": "No-show threshold",
-        "description": "No-show percentage that triggers a warning",
         "unit": "%"
       },
       "sm_filled_shifts_target": {

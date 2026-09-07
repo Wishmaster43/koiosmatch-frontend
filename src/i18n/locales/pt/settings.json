@@ -269,26 +269,6 @@
         "description": "Meta mensal para novos registos",
         "unit": "candidatos"
       },
-      "churn_warning_threshold": {
-        "label": "Limiar de alerta de saída",
-        "description": "Percentagem de saída a partir da qual é mostrado um alerta",
-        "unit": "%"
-      },
-      "avg_candidates_window": {
-        "label": "Período de cálculo da média",
-        "description": "Número de meses usados para calcular a média móvel",
-        "unit": "meses"
-      },
-      "occupancy_target": {
-        "label": "Meta de taxa de ocupação",
-        "description": "Valor-alvo para a taxa de ocupação",
-        "unit": "%"
-      },
-      "response_rate_target": {
-        "label": "Meta de taxa de resposta",
-        "description": "Valor-alvo para a resposta dos candidatos às mensagens",
-        "unit": "%"
-      },
       "no_contact_alert_months": {
         "label": "Alerta: sem contacto ≥ N meses",
         "description": "Mostrar um sinal de atenção quando um registo não tem contacto há este número de meses",
@@ -302,11 +282,6 @@
       "open_tasks_target": {
         "label": "Meta de tarefas em aberto",
         "description": "Valor-alvo para o número de tarefas em aberto",
-        "unit": "tarefas"
-      },
-      "overdue_warning_threshold": {
-        "label": "Limiar de alerta de tarefas atrasadas",
-        "description": "Número de tarefas atrasadas a partir do qual aparece um alerta",
         "unit": "tarefas"
       },
       "daily_calls_target": {
@@ -2341,11 +2316,7 @@
       "documents": "Documentos"
     },
     "kpi": {
-      "new_candidates_target": "Meta de novos candidatos",
-      "churn_warning_threshold": "Limite de saída",
-      "avg_candidates_window": "Período médio",
-      "occupancy_target": "Meta de taxa de ocupação",
-      "response_rate_target": "Meta de taxa de resposta"
+      "new_candidates_target": "Meta de novos candidatos"
     },
     "props": {
       "synced": "Sincronizado",
@@ -2467,16 +2438,6 @@
       "sm_fill_rate_target": {
         "label": "Meta de taxa de preenchimento",
         "description": "Percentagem-alvo de turnos preenchidos",
-        "unit": "%"
-      },
-      "sm_open_shifts_warning": {
-        "label": "Aviso de turnos em aberto",
-        "description": "Número de turnos em aberto a partir do qual surge um aviso",
-        "unit": "turnos"
-      },
-      "sm_no_show_threshold": {
-        "label": "Limite de faltas de comparência",
-        "description": "Percentagem de faltas de comparência a partir da qual surge um aviso",
         "unit": "%"
       },
       "sm_filled_shifts_target": {

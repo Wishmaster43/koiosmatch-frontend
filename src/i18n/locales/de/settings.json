@@ -269,26 +269,6 @@
         "description": "Monatliches Ziel für Neuanmeldungen",
         "unit": "Kandidaten"
       },
-      "churn_warning_threshold": {
-        "label": "Abwanderungs-Warngrenze",
-        "description": "Abwanderungsquote, ab der eine Warnung erscheint",
-        "unit": "%"
-      },
-      "avg_candidates_window": {
-        "label": "Durchschnitts-Berechnungszeitraum",
-        "description": "Anzahl Monate für den gleitenden Durchschnitt",
-        "unit": "Monate"
-      },
-      "occupancy_target": {
-        "label": "Auslastungsziel",
-        "description": "Zielwert für die Auslastung",
-        "unit": "%"
-      },
-      "response_rate_target": {
-        "label": "Ziel-Antwortrate",
-        "description": "Zielwert für Kandidatenantworten auf Nachrichten",
-        "unit": "%"
-      },
       "no_contact_alert_months": {
         "label": "Warnung: kein Kontakt ≥ N Monate",
         "description": "Kennzeichnet einen Datensatz nach so vielen Monaten ohne Kontakt",
@@ -302,11 +282,6 @@
       "open_tasks_target": {
         "label": "Ziel offene Aufgaben",
         "description": "Zielwert für offene Aufgaben",
-        "unit": "Aufgaben"
-      },
-      "overdue_warning_threshold": {
-        "label": "Warngrenze überfällige Aufgaben",
-        "description": "Anzahl überfälliger Aufgaben für eine Warnung",
         "unit": "Aufgaben"
       },
       "daily_calls_target": {
@@ -2092,11 +2067,7 @@
       "documents": "Dokumente"
     },
     "kpi": {
-      "new_candidates_target": "Ziel neue Kandidaten",
-      "churn_warning_threshold": "Abwanderungsgrenze",
-      "avg_candidates_window": "Durchschn. Zeitraum",
-      "occupancy_target": "Auslastungsziel",
-      "response_rate_target": "Antwortrate-Ziel"
+      "new_candidates_target": "Ziel neue Kandidaten"
     },
     "props": {
       "synced": "Synchronisiert",
@@ -2254,16 +2225,6 @@
       "sm_fill_rate_target": {
         "label": "Besetzungsquote-Ziel",
         "description": "Zielanteil besetzter Dienste",
-        "unit": "%"
-      },
-      "sm_open_shifts_warning": {
-        "label": "Warnung offene Dienste",
-        "description": "Anzahl offener Dienste, die eine Warnung auslöst",
-        "unit": "Dienste"
-      },
-      "sm_no_show_threshold": {
-        "label": "No-Show-Schwelle",
-        "description": "No-Show-Prozentsatz, der eine Warnung auslöst",
         "unit": "%"
       },
       "sm_filled_shifts_target": {

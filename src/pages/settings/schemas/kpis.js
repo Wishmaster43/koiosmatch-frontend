@@ -22,12 +22,10 @@ export const kpisLeads = {
   ],
 }
 
-// Candidates — pool health (churn + averaging window) + no-contact alerts.
+// Candidates — pool health + no-contact alerts.
 export const kpisCandidates = {
   ...base, titleI18n: 'nav.kpis_candidates',
   fields: [
-    { key: 'churn_warning_threshold', type: 'number', default: 10, min: 0 },
-    { key: 'avg_candidates_window',   type: 'number', default: 12, min: 0 },
     // Active-conversation window (CONV-DRILLDOWN-FE): drives the drawer's
     // is_active badge AND the "actieve gesprekken" KPI (same server derivation).
     { key: 'conversation_active_weeks', type: 'number', default: 4, min: 1, max: 52 },
@@ -43,31 +41,27 @@ export const kpisCandidates = {
 export const kpisApplications = {
   ...base, titleI18n: 'nav.kpis_applications',
   fields: [
-    { key: 'response_rate_target', type: 'number', default: 80, min: 0, max: 100 },
   ],
 }
 
-// Customers — client-side occupancy.
+// Customers — no KPI targets.
 export const kpisCustomers = {
   ...base, titleI18n: 'nav.kpis_customers',
   fields: [
-    { key: 'occupancy_target', type: 'number', default: 85, min: 0, max: 100 },
   ],
 }
 
-// Locations — occupancy target measured per location.
+// Locations — no KPI targets.
 export const kpisLocations = {
   ...base, titleI18n: 'nav.kpis_locations',
   fields: [
-    { key: 'occupancy_target', type: 'number', default: 85, min: 0, max: 100 },
   ],
 }
 
-// Departments — occupancy target measured per department.
+// Departments — no KPI targets.
 export const kpisDepartments = {
   ...base, titleI18n: 'nav.kpis_departments',
   fields: [
-    { key: 'occupancy_target', type: 'number', default: 85, min: 0, max: 100 },
   ],
 }
 
@@ -79,12 +73,11 @@ export const kpisContacts = {
   ],
 }
 
-// Tasks — workload thresholds (open volume + overdue warning).
+// Tasks — workload thresholds (open volume).
 export const kpisTasks = {
   ...base, titleI18n: 'nav.kpis_tasks',
   fields: [
     { key: 'open_tasks_target', type: 'number', default: 20, min: 0 },
-    { key: 'overdue_warning_threshold', type: 'number', default: 5, min: 0 },
   ],
 }
 
@@ -112,7 +105,8 @@ export const kpisMatches = {
 export const kpisOpportunities = {
   ...base, titleI18n: 'nav.kpis_opportunities',
   fields: [
-    { key: 'opportunity_stale_days', type: 'number', default: 30, min: 1, max: 365 },
+    // Default aligns with OpportunityStaleWindow::DEFAULT_DAYS (backend).
+    { key: 'opportunity_stale_days', type: 'number', default: 14, min: 1, max: 365 },
     { key: 'opportunity_closing_soon_days', type: 'number', default: 14, min: 1, max: 365 },
   ],
 }

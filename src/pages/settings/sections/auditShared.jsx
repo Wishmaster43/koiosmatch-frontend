@@ -26,7 +26,7 @@ export const LOG_NAME_META = {
 }
 
 // Settings keys shown in diffs — known KPI keys get a friendly label via t('audit.kpi.*').
-export const KPI_KEYS = ['new_candidates_target', 'churn_warning_threshold', 'avg_candidates_window', 'occupancy_target', 'response_rate_target']
+export const KPI_KEYS = ['new_candidates_target']
 
 // Bookkeeping fields carry no audit meaning — never show them as diff rows (mirrors
 // ChangelogTab's NOISE_FIELDS; kept in sync manually — a shared lib is a follow-up

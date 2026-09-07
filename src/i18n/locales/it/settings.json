@@ -269,26 +269,6 @@
         "description": "Obiettivo mensile per le nuove registrazioni",
         "unit": "candidati"
       },
-      "churn_warning_threshold": {
-        "label": "Soglia di avviso abbandono",
-        "description": "Percentuale di abbandono oltre la quale viene mostrato un avviso",
-        "unit": "%"
-      },
-      "avg_candidates_window": {
-        "label": "Periodo di calcolo della media",
-        "description": "Numero di mesi usati per calcolare la media mobile",
-        "unit": "mesi"
-      },
-      "occupancy_target": {
-        "label": "Obiettivo tasso di occupazione",
-        "description": "Valore obiettivo per il tasso di occupazione",
-        "unit": "%"
-      },
-      "response_rate_target": {
-        "label": "Obiettivo tasso di risposta",
-        "description": "Valore obiettivo per la risposta dei candidati ai messaggi",
-        "unit": "%"
-      },
       "no_contact_alert_months": {
         "label": "Avviso: nessun contatto da ≥ N mesi",
         "description": "Mostra un segnale di attenzione quando un record non ha contatti da tanti mesi",
@@ -302,11 +282,6 @@
       "open_tasks_target": {
         "label": "Obiettivo attività aperte",
         "description": "Valore obiettivo per il numero di attività aperte",
-        "unit": "attività"
-      },
-      "overdue_warning_threshold": {
-        "label": "Soglia di avviso attività in ritardo",
-        "description": "Numero di attività in ritardo che fa scattare un avviso",
         "unit": "attività"
       },
       "daily_calls_target": {
@@ -2341,11 +2316,7 @@
       "documents": "Documenti"
     },
     "kpi": {
-      "new_candidates_target": "Obiettivo nuovi candidati",
-      "churn_warning_threshold": "Soglia di abbandono",
-      "avg_candidates_window": "Periodo medio",
-      "occupancy_target": "Obiettivo tasso di occupazione",
-      "response_rate_target": "Obiettivo tasso di risposta"
+      "new_candidates_target": "Obiettivo nuovi candidati"
     },
     "props": {
       "synced": "Sincronizzato",
@@ -2467,16 +2438,6 @@
       "sm_fill_rate_target": {
         "label": "Obiettivo tasso di copertura",
         "description": "Percentuale obiettivo di turni coperti",
-        "unit": "%"
-      },
-      "sm_open_shifts_warning": {
-        "label": "Avviso turni aperti",
-        "description": "Numero di turni aperti che genera un avviso",
-        "unit": "turni"
-      },
-      "sm_no_show_threshold": {
-        "label": "Soglia no-show",
-        "description": "Percentuale di no-show che genera un avviso",
         "unit": "%"
       },
       "sm_filled_shifts_target": {

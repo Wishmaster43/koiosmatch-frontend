@@ -269,26 +269,6 @@
         "description": "Maandelijks streefgetal voor nieuwe inschrijvingen",
         "unit": "kandidaten"
       },
-      "churn_warning_threshold": {
-        "label": "Uitstroom waarschuwingsgrens",
-        "description": "Percentage uitstroom waarbij een waarschuwing getoond wordt",
-        "unit": "%"
-      },
-      "avg_candidates_window": {
-        "label": "Gemiddelde berekeningsperiode",
-        "description": "Aantal maanden voor berekening van het voortschrijdend gemiddelde",
-        "unit": "maanden"
-      },
-      "occupancy_target": {
-        "label": "Bezettingsgraad doel",
-        "description": "Streefwaarde voor bezettingsgraad",
-        "unit": "%"
-      },
-      "response_rate_target": {
-        "label": "Response rate doel",
-        "description": "Streefwaarde voor kandidaat response op berichten",
-        "unit": "%"
-      },
       "no_contact_alert_months": {
         "label": "Alert: geen contact ≥ N maanden",
         "description": "Toon een aandacht-signaal als een record zoveel maanden geen contact had",
@@ -302,11 +282,6 @@
       "open_tasks_target": {
         "label": "Doel open taken",
         "description": "Streefwaarde voor het aantal open taken",
-        "unit": "taken"
-      },
-      "overdue_warning_threshold": {
-        "label": "Waarschuwingsgrens taken te laat",
-        "description": "Aantal te-late taken waarbij een waarschuwing verschijnt",
         "unit": "taken"
       },
       "daily_calls_target": {
@@ -2341,11 +2316,7 @@
       "documents": "Documenten"
     },
     "kpi": {
-      "new_candidates_target": "Doel nieuwe kandidaten",
-      "churn_warning_threshold": "Uitstroom grens",
-      "avg_candidates_window": "Gem. periode",
-      "occupancy_target": "Bezettingsgraad doel",
-      "response_rate_target": "Response rate doel"
+      "new_candidates_target": "Doel nieuwe kandidaten"
     },
     "props": {
       "synced": "Gesynchroniseerd",
@@ -2467,16 +2438,6 @@
       "sm_fill_rate_target": {
         "label": "Vervullingsgraad doel",
         "description": "Streefpercentage gevulde diensten",
-        "unit": "%"
-      },
-      "sm_open_shifts_warning": {
-        "label": "Openstaande diensten waarschuwing",
-        "description": "Aantal openstaande diensten waarbij een waarschuwing verschijnt",
-        "unit": "diensten"
-      },
-      "sm_no_show_threshold": {
-        "label": "No-show drempel",
-        "description": "Percentage no-shows waarbij een waarschuwing verschijnt",
         "unit": "%"
       },
       "sm_filled_shifts_target": {
