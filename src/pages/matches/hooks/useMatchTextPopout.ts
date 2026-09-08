@@ -5,11 +5,12 @@
  * plus a standalone PATCH /matches/{id} on the SAME `match_text` field the
  * drawer's own MatchTextBlock writes through useMatchContract.save.
  */
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback } from 'react'
 import api, { unwrap } from '@/lib/api'
 import { initialsOf } from '@/lib/initials'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { useLiteRecord } from '@/hooks/useLiteRecord'
 import type { TFunction } from 'i18next'
 import type { Id } from '@/types/common'
 
@@ -24,31 +25,31 @@ interface RawMatchLite {
   description?: string | null
 }
 
+// Mapper: fetch and build the MatchTextLite from the raw response.
+function mapMatchTextLite(raw: RawMatchLite, id: string): MatchTextLite {
+  // Candidate — vacancy as the window title; the em-dash here is a
+  // separator between two data values, not sentence punctuation (§5 exception).
+  const title = [raw.candidate?.name, raw.vacancy?.title].filter(Boolean).join(' — ') || '?'
+  return {
+    id: String(raw.id ?? id),
+    title,
+    initials: initialsOf(raw.candidate?.name ?? title),
+    matchText: raw.description ?? raw.match_text ?? ''
+  }
+}
+
 // Light identity fetch for the popped-out match-text window.
 export function useMatchTextLite(id: string | undefined) {
-  const [match, setMatch] = useState<MatchTextLite | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
-
-  // Fetches the match identity/text and builds the window title from candidate+vacancy; stable via useCallback so the mount effect and the exposed reload share one function.
-  const load = useCallback(() => {
-    if (!id) { setLoading(false); return }
-    setLoading(true); setError(false)
-    api.get(`/matches/${id}`)
-      .then(r => {
-        const raw = unwrap<RawMatchLite>(r)
-        // Candidate — vacancy as the window title; the em-dash here is a
-        // separator between two data values, not sentence punctuation (§5 exception).
-        const title = [raw.candidate?.name, raw.vacancy?.title].filter(Boolean).join(' — ') || '?'
-        setMatch({ id: String(raw.id ?? id), title, initials: initialsOf(raw.candidate?.name ?? title), matchText: raw.description ?? raw.match_text ?? '' })
-      })
-      .catch(() => setError(true))
-      .finally(() => setLoading(false))
-  }, [id])
-
-  // Runs the fetch once on mount (and again whenever load is recreated by an id change).
-  useEffect(() => { load() }, [load])
-  return { match, loading, error, reload: load }
+  // Fetch and map in one stable callback so useLiteRecord's effect stays single-run per id.
+  const fetchRecord = useCallback(
+    (matchId: string) => api.get(`/matches/${matchId}`).then(r => {
+      const raw = unwrap<RawMatchLite>(r)
+      return mapMatchTextLite(raw, matchId)
+    }),
+    []
+  )
+  const { record: match, loading, error, reload } = useLiteRecord(id, fetchRecord)
+  return { match, loading, error, reload }
 }
 
 // Standalone PATCH /matches/{id} — same field MatchTextBlock writes.
