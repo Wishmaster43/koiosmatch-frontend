@@ -62,3 +62,16 @@ export const updateKoiosCapabilityTool = (name, value) =>
 // call (API-CREDITS-1) — pure reporting over already-stored rows.
 export const getKoiosFeedback = (page = 1, perPage = 25) =>
   api.get('/ai/koios/feedback', { params: { page, per_page: perPage } }).then(unwrap)
+
+// USAGE-LIMITS-1: GET /ai/koios/usage/budget — the standing daily budget state
+// for the Gebruik & limieten screen: {status, spent_cents, limit_cents, pct_used,
+// reason, unit, used, limit, upgrade_hint, resets_at}. Read-only per-user snapshot.
+export const getKoiosBudget = () =>
+  api.get('/ai/koios/usage/budget').then(unwrap)
+
+// USAGE-LIMITS-1: PUT /ai/koios/usage/budget — tenant sets own daily caps
+// (per user / for the organisation), each only LOWER than the platform ceiling.
+// Accepts {daily_user_cents?, daily_tenant_cents?} (both optional, nullable,
+// integer, min:1). Returns the updated snapshot + the new cap values.
+export const updateKoiosBudget = (daily_user_cents, daily_tenant_cents) =>
+  api.put('/ai/koios/usage/budget', { daily_user_cents, daily_tenant_cents }).then(unwrap)

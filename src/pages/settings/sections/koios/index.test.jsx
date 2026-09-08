@@ -18,8 +18,13 @@ vi.mock('./KoiosLearningCard', () => ({ default: () => <div>learning-card</div> 
 vi.mock('./KoiosCapabilitiesCard', () => ({ default: () => <div>capabilities-card</div> }))
 vi.mock('./KoiosFeedbackCard', () => ({ default: () => <div>feedback-card</div> }))
 
+// The budget card is react-query backed and has its own suite; the index test only
+// proves the cards are wired, so it renders as an empty stand-in here.
+vi.mock('./KoiosBudgetCard', () => ({ default: () => null }))
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key) => key }),
+  // The budget card reaches @/lib/datetime (useLocale) whose i18n bootstrap needs this export.
+  initReactI18next: { type: '3rdParty', init: () => {} },
 }))
 
 beforeEach(() => { mockGetKoiosSettings.mockReset() })
