@@ -59,7 +59,8 @@
       "related": "Gerelateerd",
       "timeline": "Tijdlijn"
     },
-    "lookupNotReady": "Nog niet op te slaan. Deze optie is nog niet beschikbaar. Probeer het straks opnieuw."
+    "lookupNotReady": "Nog niet op te slaan. Deze optie is nog niet beschikbaar. Probeer het straks opnieuw.",
+    "scheduleAppointment": "Afspraak plannen"
   },
   "bulk": {
     "selected": "{{count}} geselecteerd",
@@ -271,5 +272,10 @@
   },
   "cellLinks": {
     "openLink": "Open gekoppeld record"
+  },
+  "timeline": {
+    "loading": "Laden…",
+    "error": "Kan de geschiedenis niet laden",
+    "empty": "Geen geschiedenis"
   }
 }

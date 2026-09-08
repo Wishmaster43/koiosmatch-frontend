@@ -59,7 +59,8 @@
     },
     "markDone": "Marquer comme terminé",
     "tags": "Tags",
-    "lookupNotReady": "Impossible d'enregistrer pour l'instant. Cette option n'est pas encore disponible. Veuillez réessayer dans un instant."
+    "lookupNotReady": "Impossible d'enregistrer pour l'instant. Cette option n'est pas encore disponible. Veuillez réessayer dans un instant.",
+    "scheduleAppointment": "Planifier un rendez-vous"
   },
   "details": {
     "title": "Détails de la tâche",
@@ -271,5 +272,10 @@
   },
   "cellLinks": {
     "openLink": "Ouvrir l’enregistrement lié"
+  },
+  "timeline": {
+    "loading": "Chargement…",
+    "error": "Impossible de charger l'historique",
+    "empty": "Pas d'historique"
   }
 }

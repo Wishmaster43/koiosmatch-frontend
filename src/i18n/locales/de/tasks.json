@@ -59,7 +59,8 @@
     },
     "markDone": "Als erledigt markieren",
     "tags": "Tags",
-    "lookupNotReady": "Konnte noch nicht gespeichert werden – diese Option ist noch nicht verfügbar. Bitte versuchen Sie es gleich noch einmal."
+    "lookupNotReady": "Konnte noch nicht gespeichert werden – diese Option ist noch nicht verfügbar. Bitte versuchen Sie es gleich noch einmal.",
+    "scheduleAppointment": "Termin planen"
   },
   "details": {
     "title": "Aufgabendetails",
@@ -271,5 +272,10 @@
   },
   "cellLinks": {
     "openLink": "Verknüpften Datensatz öffnen"
+  },
+  "timeline": {
+    "loading": "Wird geladen…",
+    "error": "Verlauf kann nicht geladen werden",
+    "empty": "Kein Verlauf"
   }
 }

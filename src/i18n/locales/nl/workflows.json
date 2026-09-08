@@ -964,7 +964,10 @@
     "Afspraken": "Afspraken",
     "Geplande datum/tijd": "Geplande datum/tijd",
     "Type": "Type",
-    "Afspraak": "Afspraak"
+    "Afspraak": "Afspraak",
+    "Endpoint-URL (https)": "Endpoint-URL (https)",
+    "Endpoint-slug (gedeelde instelling)": "Endpoint-slug (gedeelde instelling)",
+    "Richting/label voor de ontvanger": "Richting/label voor de ontvanger"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (meerdere bundles)",
@@ -1217,7 +1220,8 @@
     "{{vraag van kandidaat}}": "{{vraag van kandidaat}}",
     "Standaard van de vacature/sollicitatie": "Standaard van de vacature/sollicitatie",
     "-30": "-30",
-    "180": "180"
+    "180": "180",
+    "https//hookexamplecom/koios": "https://hook.example.com/koios"
   },
   "fieldHints": {
     "Array stuurt elk item apart door naar de volgende module (zoals een Iterator)": "Array stuurt elk item apart door naar de volgende module (zoals een Iterator).",
@@ -1297,7 +1301,9 @@
     "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek. Werkt alleen als de agent zelf kennis beschikbaar heeft.",
     "Sla records over die al coördinaten hebben; aan te raden bij bulk": "Sla records over die al coördinaten hebben; aan te raden bij bulk.",
     "Titel van de agenda-afspraak (standaard \"Afspraak\")": "Titel van de agenda-afspraak (standaard \"Afspraak\").",
-    "Afspraak-id (bv {{triggerappointment_id}})": "Afspraak-id (bv. {{trigger.appointment_id}})."
+    "Afspraak-id (bv {{triggerappointment_id}})": "Afspraak-id (bv. {{trigger.appointment_id}}).",
+    "Directe https-URL voor deze stap Laat leeg om de gedeelde instelling webhook_endpoint_<slug> hieronder te gebruiken Geen inloggegevens in de URL": "Directe https-URL voor deze stap. Laat leeg om de gedeelde instelling webhook_endpoint_<slug> hieronder te gebruiken. Geen inloggegevens in de URL.",
+    "Alleen gebruikt als hierboven geen URL staat de tenant-instelling webhook_endpoint_<slug> bepaalt dan de URL": "Alleen gebruikt als hierboven geen URL staat: de tenant-instelling webhook_endpoint_<slug> bepaalt dan de URL."
   },
   "triggers": {
     "events": {

@@ -1237,7 +1237,12 @@
       "matches": "Matches",
       "opportunities": "Oportunidades",
       "tasks": "Tareas",
-      "call_lists": "Listas de llamadas"
+      "call_lists": "Listas de llamadas",
+      "candidate_notes": "Notas de candidato",
+      "candidate_documents": "Documentos de candidato",
+      "candidate_conversations": "Conversaciones de candidato",
+      "candidate_educations": "Educaciones de candidato",
+      "candidate_references": "Referencias de candidato"
     }
   },
   "webhooks": {
@@ -3207,7 +3212,7 @@
     "retryAll": "Reintentar todas",
     "retryAllConfirm_one": "¿Volver a poner {{count}} tarea fallida en la cola?",
     "retryAllConfirm_other": "¿Volver a poner las {{count}} tareas fallidas en la cola?",
-    "retryAllQueueConfirm": "¿Volver a poner todas las tareas fallidas de la cola {{queue}} en la cola? El filtro de inquilino no se aplica aquí.",
+    "retryAllQueueConfirm": "¿Reintentar {{ count }} trabajos fallidos en la cola '{{ queue }}'?",
     "retryAllUnfilteredConfirm_one": "Esto vuelve a encolar TODAS las tareas fallidas, no solo la {{count}} filtrada. El filtro de inquilino no se aplica aquí.",
     "retryAllUnfilteredConfirm_other": "Esto vuelve a poner TODAS las tareas fallidas en la cola, no solo las {{count}} filtradas. El filtro de inquilino no se aplica aquí.",
     "forget": "Eliminar",
@@ -3258,7 +3263,14 @@
     },
     "retryAllSuccess": "{{count}} tareas reenviadas",
     "retryAllSkipped": "{{count}} tareas omitidas (el inquilino ya no existe)",
-    "retryAllTruncated": "más tareas fallidas de las procesadas de una vez, reintentar"
+    "retryAllTruncated": "más tareas fallidas de las procesadas de una vez, reintentar",
+    "retryAllConfirm": "¿Reintentar {{ count }} trabajos fallidos?",
+    "retryAllTenantConfirm": "¿Reintentar {{ count }} trabajos fallidos del inquilino '{{ tenant }}'?",
+    "retryAllQueueTenantConfirm": "¿Reintentar {{ count }} trabajos fallidos en la cola '{{ queue }}' del inquilino '{{ tenant }}'?",
+    "flushConfirm": "¿Eliminar permanentemente todos los {{ count }} trabajos fallidos? Esto no se puede deshacer.",
+    "flushQueueConfirm": "¿Eliminar permanentemente los {{ count }} trabajos fallidos en la cola '{{ queue }}'? Esto no se puede deshacer.",
+    "flushTenantConfirm": "¿Eliminar permanentemente los {{ count }} trabajos fallidos del inquilino '{{ tenant }}'? Esto no se puede deshacer.",
+    "flushQueueTenantConfirm": "¿Eliminar permanentemente los {{ count }} trabajos fallidos en la cola '{{ queue }}' del inquilino '{{ tenant }}'? Esto no se puede deshacer."
   },
   "actionRules": {
     "title": "Reglas de acción",
@@ -3777,7 +3789,8 @@
       "outreach": "Listas de llamadas",
       "whatsapp": "WhatsApp",
       "prospects": "Prospectos"
-    }
+    },
+    "notFound": "Informe desconocido"
   },
   "freeEntry": {
     "blockedTitle": "La entrada libre aún no se puede desactivar",
@@ -3809,7 +3822,8 @@
     "loadError": "No se pudieron cargar los presupuestos mensuales.",
     "saveFailed": "No se pudieron guardar los presupuestos.",
     "saved": "Presupuestos guardados.",
-    "aiTierLabel": "Nivel de IA: {{tier}}"
+    "aiTierLabel": "Nivel de IA: {{tier}}",
+    "baseFee": "Tarifa base"
   },
   "billingTiers": {
     "title": "Niveles",

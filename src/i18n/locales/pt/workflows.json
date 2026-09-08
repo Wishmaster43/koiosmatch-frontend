@@ -966,7 +966,10 @@
     "Afspraken": "Compromissos",
     "Geplande datum/tijd": "Data/hora agendada",
     "Type": "Tipo",
-    "Afspraak": "Compromisso"
+    "Afspraak": "Compromisso",
+    "Endpoint-URL (https)": "URL do ponto de extremidade (https)",
+    "Endpoint-slug (gedeelde instelling)": "Slug do ponto de extremidade (configuração compartilhada)",
+    "Richting/label voor de ontvanger": "Direção/rótulo para o destinatário"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Matriz (vários bundles)",
@@ -1219,7 +1222,8 @@
     "{{vraag van kandidaat}}": "{{pergunta do candidato}}",
     "Standaard van de vacature/sollicitatie": "Predefinição da vaga/candidatura",
     "-30": "-30",
-    "180": "180"
+    "180": "180",
+    "https//hookexamplecom/koios": "https://hook.example.com/koios"
   },
   "fieldHints": {
     "Array stuurt elk item apart door naar de volgende module (zoals een Iterator)": "O array envia cada item separadamente para o módulo seguinte (como um Iterator).",
@@ -1299,7 +1303,9 @@
     "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Permite que o agente de IA consulte os documentos/base de conhecimento da agência durante a conversa. Só funciona se o próprio agente tiver conhecimento disponível.",
     "Sla records over die al coördinaten hebben; aan te raden bij bulk": "Ignorar registos que já têm coordenadas; recomendado para execuções em massa.",
     "Titel van de agenda-afspraak (standaard \"Afspraak\")": "Título do compromisso do calendário (padrão \"Compromisso\").",
-    "Afspraak-id (bv {{triggerappointment_id}})": "ID do compromisso (ex: {{trigger.appointment_id}})."
+    "Afspraak-id (bv {{triggerappointment_id}})": "ID do compromisso (ex: {{trigger.appointment_id}}).",
+    "Directe https-URL voor deze stap Laat leeg om de gedeelde instelling webhook_endpoint_<slug> hieronder te gebruiken Geen inloggegevens in de URL": "URL HTTPS direta para este passo. Deixe em branco para usar a configuração compartilhada webhook_endpoint_<slug> abaixo. Nenhuma credencial na URL.",
+    "Alleen gebruikt als hierboven geen URL staat de tenant-instelling webhook_endpoint_<slug> bepaalt dan de URL": "Usado apenas se nenhuma URL for definida acima: a configuração do locatário webhook_endpoint_<slug> então determina a URL."
   },
   "triggers": {
     "events": {

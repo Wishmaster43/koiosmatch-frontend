@@ -74,8 +74,11 @@
       "viewFor": "{{name}} ansehen",
       "updateFor": "{{name}} bearbeiten",
       "deleteFor": "{{name}} löschen",
-      "hint": "Rechte pro Standort. Wirkt erst, sobald ein Admin \"Standortrechte erzwingen\" unter Einstellungen → Rollen & Rechte aktiviert."
-    }
+      "hint": "Rechte pro Standort. Wirkt erst, sobald ein Admin \"Standortrechte erzwingen\" unter Einstellungen → Rollen & Rechte aktiviert.",
+      "defaultFor": "Standardfiliale für {{name}}"
+    },
+    "isDefault": "Standardwert",
+    "isDefaultHint": "Pro Benutzer kann nur eine Standardfiliale gesetzt sein"
   },
   "validation": {
     "emailFormat": "Geben Sie eine gültige E-Mail-Adresse ein."

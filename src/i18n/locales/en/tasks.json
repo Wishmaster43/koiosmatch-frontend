@@ -59,7 +59,8 @@
       "related": "Related",
       "timeline": "Timeline"
     },
-    "lookupNotReady": "Couldn't save yet. This option isn't available. Please try again in a moment."
+    "lookupNotReady": "Couldn't save yet. This option isn't available. Please try again in a moment.",
+    "scheduleAppointment": "Schedule appointment"
   },
   "bulk": {
     "selected": "{{count}} selected",
@@ -271,5 +272,10 @@
   },
   "cellLinks": {
     "openLink": "Open linked record"
+  },
+  "timeline": {
+    "loading": "Loading…",
+    "error": "Unable to load history",
+    "empty": "No history"
   }
 }

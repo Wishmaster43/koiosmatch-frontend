@@ -74,8 +74,11 @@
       "viewFor": "Visualizzare {{name}}",
       "updateFor": "Modificare {{name}}",
       "deleteFor": "Eliminare {{name}}",
-      "hint": "Permessi per sede. Ha effetto solo quando un amministratore attiva \"Applica permessi per sede\" in Impostazioni → Ruoli e permessi."
-    }
+      "hint": "Permessi per sede. Ha effetto solo quando un amministratore attiva \"Applica permessi per sede\" in Impostazioni → Ruoli e permessi.",
+      "defaultFor": "Filiale predefinita per {{name}}"
+    },
+    "isDefault": "Predefinito",
+    "isDefaultHint": "Una sola filiale predefinita per utente"
   },
   "validation": {
     "emailFormat": "Inserisci un indirizzo e-mail valido."

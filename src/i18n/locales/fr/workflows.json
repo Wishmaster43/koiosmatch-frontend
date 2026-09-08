@@ -931,7 +931,10 @@
     "Afspraken": "Rendez-vous",
     "Geplande datum/tijd": "Date/heure prévue",
     "Type": "Type",
-    "Afspraak": "Rendez-vous"
+    "Afspraak": "Rendez-vous",
+    "Endpoint-URL (https)": "URL de point de terminaison (https)",
+    "Endpoint-slug (gedeelde instelling)": "Slug du point de terminaison (paramètre partagé)",
+    "Richting/label voor de ontvanger": "Direction/libellé pour le destinataire"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Tableau (plusieurs bundles)",
@@ -1219,7 +1222,8 @@
     "{{vraag van kandidaat}}": "{{question du candidat}}",
     "Standaard van de vacature/sollicitatie": "Par défaut de l’offre/candidature",
     "-30": "-30",
-    "180": "180"
+    "180": "180",
+    "https//hookexamplecom/koios": "https://hook.example.com/koios"
   },
   "fieldHints": {
     "Array stuurt elk item apart door naar de volgende module (zoals een Iterator)": "Array envoie chaque élément séparément au module suivant (comme un Iterator).",
@@ -1299,7 +1303,9 @@
     "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Permet à l'agent IA de consulter les documents/la base de connaissances du client pendant la conversation. Ne fonctionne que si l'agent lui-même dispose de connaissances.",
     "Sla records over die al coördinaten hebben; aan te raden bij bulk": "Ignorer les enregistrements qui ont déjà des coordonnées ; recommandé pour les traitements en masse.",
     "Titel van de agenda-afspraak (standaard \"Afspraak\")": "Titre du rendez-vous calendaire (par défaut \"Rendez-vous\").",
-    "Afspraak-id (bv {{triggerappointment_id}})": "ID du rendez-vous (ex : {{trigger.appointment_id}})."
+    "Afspraak-id (bv {{triggerappointment_id}})": "ID du rendez-vous (ex : {{trigger.appointment_id}}).",
+    "Directe https-URL voor deze stap Laat leeg om de gedeelde instelling webhook_endpoint_<slug> hieronder te gebruiken Geen inloggegevens in de URL": "URL HTTPS directe pour cette étape. Laissez vide pour utiliser le paramètre partagé webhook_endpoint_<slug> ci-dessous. Aucune information d'identification dans l'URL.",
+    "Alleen gebruikt als hierboven geen URL staat de tenant-instelling webhook_endpoint_<slug> bepaalt dan de URL": "Utilisé uniquement si aucune URL n'est définie ci-dessus : le paramètre locataire webhook_endpoint_<slug> détermine alors l'URL."
   },
   "triggers": {
     "events": {

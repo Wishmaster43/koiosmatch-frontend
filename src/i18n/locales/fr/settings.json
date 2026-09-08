@@ -1237,7 +1237,12 @@
       "matches": "Matches",
       "opportunities": "Opportunités",
       "tasks": "Tâches",
-      "call_lists": "Listes d’appels"
+      "call_lists": "Listes d’appels",
+      "candidate_notes": "Notes de candidat",
+      "candidate_documents": "Documents de candidat",
+      "candidate_conversations": "Conversations de candidat",
+      "candidate_educations": "Formations de candidat",
+      "candidate_references": "Références de candidat"
     }
   },
   "webhooks": {
@@ -3207,7 +3212,7 @@
     "retryAll": "Tout réessayer",
     "retryAllConfirm_one": "Remettre {{count}} tâche échouée dans la file d'attente ?",
     "retryAllConfirm_other": "Remettre les {{count}} tâches échouées dans la file d'attente ?",
-    "retryAllQueueConfirm": "Remettre toutes les tâches échouées de la file {{queue}} dans la file d'attente ? Le filtre des locataires ne s'applique pas ici.",
+    "retryAllQueueConfirm": "Réessayer {{ count }} tâches échouées dans la file '{{ queue }}' ?",
     "retryAllUnfilteredConfirm_one": "Ceci remet en file d'attente TOUTES les tâches échouées, pas seulement la {{count}} filtrée. Le filtre de locataire ne s'applique pas ici.",
     "retryAllUnfilteredConfirm_other": "Ceci remet TOUTES les tâches échouées dans la file d'attente, et pas seulement les {{count}} filtrées. Le filtre des locataires ne s'applique pas ici.",
     "forget": "Supprimer",
@@ -3258,7 +3263,14 @@
     },
     "retryAllSuccess": "{{count}} tâches renvoyées",
     "retryAllSkipped": "{{count}} tâches ignorées (le locataire n'existe plus)",
-    "retryAllTruncated": "plus de tâches échouées que traitées à la fois, réessayer"
+    "retryAllTruncated": "plus de tâches échouées que traitées à la fois, réessayer",
+    "retryAllConfirm": "Réessayer {{ count }} tâches échouées ?",
+    "retryAllTenantConfirm": "Réessayer {{ count }} tâches échouées du locataire '{{ tenant }}' ?",
+    "retryAllQueueTenantConfirm": "Réessayer {{ count }} tâches échouées dans la file '{{ queue }}' du locataire '{{ tenant }}' ?",
+    "flushConfirm": "Supprimer définitivement tous les {{ count }} emplois échoués ? Cela ne peut pas être annulé.",
+    "flushQueueConfirm": "Supprimer définitivement les {{ count }} tâches échouées dans la file '{{ queue }}' ? Cela ne peut pas être annulé.",
+    "flushTenantConfirm": "Supprimer définitivement les {{ count }} tâches échouées du locataire '{{ tenant }}' ? Cela ne peut pas être annulé.",
+    "flushQueueTenantConfirm": "Supprimer définitivement les {{ count }} tâches échouées dans la file '{{ queue }}' du locataire '{{ tenant }}' ? Cela ne peut pas être annulé."
   },
   "actionRules": {
     "title": "Règles d'action",
@@ -3777,7 +3789,8 @@
       "outreach": "Listes d'appels",
       "whatsapp": "WhatsApp",
       "prospects": "Prospects"
-    }
+    },
+    "notFound": "Rapport inconnu"
   },
   "freeEntry": {
     "blockedTitle": "La saisie libre ne peut pas encore être désactivée",
@@ -3809,7 +3822,8 @@
     "loadError": "Impossible de charger les budgets mensuels.",
     "saveFailed": "Échec de l'enregistrement des budgets.",
     "saved": "Budgets enregistrés.",
-    "aiTierLabel": "Palier IA : {{tier}}"
+    "aiTierLabel": "Palier IA : {{tier}}",
+    "baseFee": "Frais de base"
   },
   "billingTiers": {
     "title": "Paliers",

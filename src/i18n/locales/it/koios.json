@@ -196,5 +196,14 @@
   },
   "tools": {
     "opencage": "Geocodifica OpenCage"
+  },
+  "budget": {
+    "title": "Budget giornaliero",
+    "hint": "Impostare i limiti di spesa giornalieri per l'utilizzo di Koios AI per utente e per la vostra organizzazione.",
+    "dailyUserLabel": "Limite per utente (EUR)",
+    "dailyTenantLabel": "Limite dell'organizzazione (EUR)",
+    "noPermission": "Non hai il permesso di modificare queste impostazioni.",
+    "saveError": "Errore nel salvataggio del budget",
+    "saved": "Budget salvato"
   }
 }

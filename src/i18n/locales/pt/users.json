@@ -74,8 +74,11 @@
       "viewFor": "Ver {{name}}",
       "updateFor": "Editar {{name}}",
       "deleteFor": "Eliminar {{name}}",
-      "hint": "Permissões por filial. Só tem efeito quando um administrador ativa \"Aplicar permissões por filial\" em Definições → Funções e permissões."
-    }
+      "hint": "Permissões por filial. Só tem efeito quando um administrador ativa \"Aplicar permissões por filial\" em Definições → Funções e permissões.",
+      "defaultFor": "Filial padrão para {{name}}"
+    },
+    "isDefault": "Padrão",
+    "isDefaultHint": "Apenas uma filial padrão por usuário"
   },
   "validation": {
     "emailFormat": "Introduza um endereço de e-mail válido."

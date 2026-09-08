@@ -59,7 +59,8 @@
     },
     "markDone": "Marcar como hecho",
     "tags": "Etiquetas",
-    "lookupNotReady": "Todavía no se pudo guardar: esta opción aún no está disponible. Vuelve a intentarlo en un momento."
+    "lookupNotReady": "Todavía no se pudo guardar: esta opción aún no está disponible. Vuelve a intentarlo en un momento.",
+    "scheduleAppointment": "Programar cita"
   },
   "details": {
     "title": "Detalles de la tarea",
@@ -271,5 +272,10 @@
   },
   "cellLinks": {
     "openLink": "Abrir registro vinculado"
+  },
+  "timeline": {
+    "loading": "Cargando…",
+    "error": "No se puede cargar el historial",
+    "empty": "Sin historial"
   }
 }

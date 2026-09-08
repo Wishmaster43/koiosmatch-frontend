@@ -1237,7 +1237,12 @@
       "matches": "Matches",
       "opportunities": "Chancen",
       "tasks": "Aufgaben",
-      "call_lists": "Anruflisten"
+      "call_lists": "Anruflisten",
+      "candidate_notes": "Kandidatnotizen",
+      "candidate_documents": "Kandidatendokumente",
+      "candidate_conversations": "Kandidatengespräche",
+      "candidate_educations": "Kandidatenausbildungen",
+      "candidate_references": "Kandidatenreferenzen"
     }
   },
   "webhooks": {
@@ -3207,7 +3212,7 @@
     "retryAll": "Alle erneut versuchen",
     "retryAllConfirm_one": "{{count}} fehlgeschlagene Aufgabe erneut in die Warteschlange stellen?",
     "retryAllConfirm_other": "Alle {{count}} fehlgeschlagenen Aufgaben erneut in die Warteschlange stellen?",
-    "retryAllQueueConfirm": "Alle fehlgeschlagenen Aufgaben in Warteschlange {{queue}} erneut in die Warteschlange stellen? Der Tenant-Filter gilt hier nicht.",
+    "retryAllQueueConfirm": "{{ count }} fehlgeschlagene Jobs in Warteschlange '{{ queue }}' erneut einreihen?",
     "retryAllUnfilteredConfirm_one": "Dies stellt ALLE fehlgeschlagenen Aufgaben erneut in die Warteschlange, nicht nur die {{count}} gefilterte. Der Mandantenfilter gilt hier nicht.",
     "retryAllUnfilteredConfirm_other": "Dies stellt ALLE fehlgeschlagenen Aufgaben erneut in die Warteschlange, nicht nur die {{count}} gefilterten. Der Tenant-Filter gilt hier nicht.",
     "forget": "Löschen",
@@ -3258,7 +3263,14 @@
     },
     "retryAllSuccess": "{{count}} Aufgaben erneut eingereicht",
     "retryAllSkipped": "{{count}} Aufgaben übersprungen (Mandant existiert nicht mehr)",
-    "retryAllTruncated": "mehr fehlgeschlagene Aufgaben als auf einmal verarbeitet, erneut versuchen"
+    "retryAllTruncated": "mehr fehlgeschlagene Aufgaben als auf einmal verarbeitet, erneut versuchen",
+    "retryAllConfirm": "{{ count }} fehlgeschlagene Jobs erneut in die Warteschlange einreihen?",
+    "retryAllTenantConfirm": "{{ count }} fehlgeschlagene Jobs von Mandant '{{ tenant }}' erneut einreihen?",
+    "retryAllQueueTenantConfirm": "{{ count }} fehlgeschlagene Jobs in Warteschlange '{{ queue }}' von Mandant '{{ tenant }}' erneut einreihen?",
+    "flushConfirm": "Alle {{ count }} fehlgeschlagenen Jobs endgültig löschen? Dies kann nicht rückgängig gemacht werden.",
+    "flushQueueConfirm": "Die {{ count }} fehlgeschlagenen Jobs in Warteschlange '{{ queue }}' endgültig löschen? Dies kann nicht rückgängig gemacht werden.",
+    "flushTenantConfirm": "Die {{ count }} fehlgeschlagenen Jobs von Mandant '{{ tenant }}' endgültig löschen? Dies kann nicht rückgängig gemacht werden.",
+    "flushQueueTenantConfirm": "Die {{ count }} fehlgeschlagenen Jobs in Warteschlange '{{ queue }}' von Mandant '{{ tenant }}' endgültig löschen? Dies kann nicht rückgängig gemacht werden."
   },
   "actionRules": {
     "title": "Aktionsregeln",
@@ -3777,7 +3789,8 @@
       "outreach": "Anruflisten",
       "whatsapp": "WhatsApp",
       "prospects": "Interessenten"
-    }
+    },
+    "notFound": "Unbekannter Bericht"
   },
   "freeEntry": {
     "blockedTitle": "Freie Eingabe kann noch nicht deaktiviert werden",
@@ -3809,7 +3822,8 @@
     "loadError": "Monatsbudgets konnten nicht geladen werden.",
     "saveFailed": "Budgets konnten nicht gespeichert werden.",
     "saved": "Budgets gespeichert.",
-    "aiTierLabel": "KI-Staffel: {{tier}}"
+    "aiTierLabel": "KI-Staffel: {{tier}}",
+    "baseFee": "Grundgebühr"
   },
   "billingTiers": {
     "title": "Stufen",

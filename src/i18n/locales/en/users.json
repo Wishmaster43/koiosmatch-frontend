@@ -74,8 +74,11 @@
       "viewFor": "View {{name}}",
       "updateFor": "Edit {{name}}",
       "deleteFor": "Delete {{name}}",
-      "hint": "Per-branch abilities. Only takes effect once an admin turns on \"Enforce branch authorization\" in Settings → Roles & Permissions."
-    }
+      "hint": "Per-branch abilities. Only takes effect once an admin turns on \"Enforce branch authorization\" in Settings → Roles & Permissions.",
+      "defaultFor": "Default location for {{name}}"
+    },
+    "isDefault": "Default",
+    "isDefaultHint": "Only one default location per user"
   },
   "validation": {
     "emailFormat": "Enter a valid e-mail address."

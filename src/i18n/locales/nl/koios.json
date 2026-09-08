@@ -196,5 +196,14 @@
   },
   "tools": {
     "opencage": "OpenCage geocoding"
+  },
+  "budget": {
+    "title": "Dagelijks budget",
+    "hint": "Stel dagelijkse limieten in voor het Koios AI-verbruik per gebruiker en voor de hele organisatie.",
+    "dailyUserLabel": "Limiet per gebruiker (EUR)",
+    "dailyTenantLabel": "Limiet organisatie (EUR)",
+    "noPermission": "Je hebt geen rechten om deze instellingen te wijzigen.",
+    "saveError": "Fout bij opslaan van budget",
+    "saved": "Budget opgeslagen"
   }
 }

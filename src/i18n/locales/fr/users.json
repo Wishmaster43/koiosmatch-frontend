@@ -74,8 +74,11 @@
       "viewFor": "Consulter {{name}}",
       "updateFor": "Modifier {{name}}",
       "deleteFor": "Supprimer {{name}}",
-      "hint": "Droits par site. Ne prend effet que lorsqu'un administrateur active « Appliquer les droits par site » dans Paramètres → Rôles et droits."
-    }
+      "hint": "Droits par site. Ne prend effet que lorsqu'un administrateur active « Appliquer les droits par site » dans Paramètres → Rôles et droits.",
+      "defaultFor": "Agence par défaut pour {{name}}"
+    },
+    "isDefault": "Par défaut",
+    "isDefaultHint": "Une seule agence par défaut par utilisateur"
   },
   "validation": {
     "emailFormat": "Saisissez une adresse e-mail valide."

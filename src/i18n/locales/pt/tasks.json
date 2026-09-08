@@ -59,7 +59,8 @@
       "related": "Relacionado",
       "timeline": "Cronologia"
     },
-    "lookupNotReady": "Ainda não é possível guardar. Esta opção ainda não está disponível. Tente novamente daqui a pouco."
+    "lookupNotReady": "Ainda não é possível guardar. Esta opção ainda não está disponível. Tente novamente daqui a pouco.",
+    "scheduleAppointment": "Agendar reunião"
   },
   "bulk": {
     "selected": "{{count}} selecionada(s)",
@@ -271,5 +272,10 @@
   },
   "cellLinks": {
     "openLink": "Abrir registo associado"
+  },
+  "timeline": {
+    "loading": "Carregando…",
+    "error": "Não foi possível carregar o histórico",
+    "empty": "Sem histórico"
   }
 }

@@ -1498,7 +1498,12 @@
       "matches": "Match",
       "opportunities": "Opportunità",
       "tasks": "Attività",
-      "call_lists": "Liste di chiamata"
+      "call_lists": "Liste di chiamata",
+      "candidate_notes": "Note candidato",
+      "candidate_documents": "Documenti candidato",
+      "candidate_conversations": "Conversazioni candidato",
+      "candidate_educations": "Educazioni candidato",
+      "candidate_references": "Riferimenti candidato"
     }
   },
   "webhooks": {
@@ -3207,7 +3212,7 @@
     "retryAll": "Riprova tutte",
     "retryAllConfirm_one": "Rimettere in coda {{count}} attività non riuscita?",
     "retryAllConfirm_other": "Rimettere in coda tutte le {{count}} attività non riuscite?",
-    "retryAllQueueConfirm": "Rimettere in coda tutte le attività non riuscite nella coda {{queue}}? Il filtro del tenant non si applica qui.",
+    "retryAllQueueConfirm": "Riprovare {{ count }} processi falliti nella coda '{{ queue }}'?",
     "retryAllUnfilteredConfirm_one": "Questo rimette in coda TUTTE le attività non riuscite, non solo la {{count}} filtrata. Il filtro tenant non si applica qui.",
     "retryAllUnfilteredConfirm_other": "Questo rimette in coda TUTTE le attività non riuscite, non solo le {{count}} filtrate. Il filtro del tenant non si applica qui.",
     "forget": "Elimina",
@@ -3258,7 +3263,14 @@
     },
     "retryAllSuccess": "{{count}} attività reinviate",
     "retryAllSkipped": "{{count}} attività saltate (il tenant non esiste più)",
-    "retryAllTruncated": "più attività non riuscite rispetto a quelle elaborate contemporaneamente, riprovare"
+    "retryAllTruncated": "più attività non riuscite rispetto a quelle elaborate contemporaneamente, riprovare",
+    "retryAllConfirm": "Riprovare {{ count }} processi falliti?",
+    "retryAllTenantConfirm": "Riprovare {{ count }} processi falliti dal tenant '{{ tenant }}'?",
+    "retryAllQueueTenantConfirm": "Riprovare {{ count }} processi falliti nella coda '{{ queue }}' dal tenant '{{ tenant }}'?",
+    "flushConfirm": "Eliminare definitivamente tutti i {{ count }} processi falliti? Questa azione non può essere annullata.",
+    "flushQueueConfirm": "Eliminare definitivamente i {{ count }} processi falliti nella coda '{{ queue }}'? Questa azione non può essere annullata.",
+    "flushTenantConfirm": "Eliminare definitivamente i {{ count }} processi falliti dal tenant '{{ tenant }}'? Questa azione non può essere annullata.",
+    "flushQueueTenantConfirm": "Eliminare definitivamente i {{ count }} processi falliti nella coda '{{ queue }}' dal tenant '{{ tenant }}'? Questa azione non può essere annullata."
   },
   "actionRules": {
     "title": "Regole di azione",
@@ -3777,7 +3789,8 @@
       "outreach": "Liste di chiamate",
       "whatsapp": "WhatsApp",
       "prospects": "Prospect"
-    }
+    },
+    "notFound": "Report sconosciuto"
   },
   "freeEntry": {
     "blockedTitle": "L'inserimento libero non può ancora essere disattivato",
@@ -3809,7 +3822,8 @@
     "loadError": "Impossibile caricare i budget mensili.",
     "saveFailed": "Salvataggio dei budget non riuscito.",
     "saved": "Budget salvati.",
-    "aiTierLabel": "Fascia AI: {{tier}}"
+    "aiTierLabel": "Fascia AI: {{tier}}",
+    "baseFee": "Tariffa base"
   },
   "billingTiers": {
     "title": "Fasce",

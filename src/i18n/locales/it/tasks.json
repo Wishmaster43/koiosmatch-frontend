@@ -59,7 +59,8 @@
       "related": "Correlati",
       "timeline": "Cronologia"
     },
-    "lookupNotReady": "Non ancora salvabile. Questa opzione non è ancora disponibile. Riprova tra poco."
+    "lookupNotReady": "Non ancora salvabile. Questa opzione non è ancora disponibile. Riprova tra poco.",
+    "scheduleAppointment": "Pianifica appuntamento"
   },
   "bulk": {
     "selected": "{{count}} selezionati",
@@ -271,5 +272,10 @@
   },
   "cellLinks": {
     "openLink": "Apri record collegato"
+  },
+  "timeline": {
+    "loading": "Caricamento…",
+    "error": "Impossibile caricare la cronologia",
+    "empty": "Nessuna cronologia"
   }
 }

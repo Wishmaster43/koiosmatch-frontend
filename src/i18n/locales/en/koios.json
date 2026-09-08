@@ -196,5 +196,14 @@
   },
   "tools": {
     "opencage": "OpenCage geocoding"
+  },
+  "budget": {
+    "title": "Daily budget",
+    "hint": "Set daily spending limits for Koios AI usage per user and for your organisation.",
+    "dailyUserLabel": "User limit (EUR)",
+    "dailyTenantLabel": "Organisation limit (EUR)",
+    "noPermission": "You do not have permission to change these settings.",
+    "saveError": "Error saving budget",
+    "saved": "Budget saved"
   }
 }

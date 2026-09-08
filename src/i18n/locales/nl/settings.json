@@ -1498,7 +1498,12 @@
       "matches": "Matches",
       "opportunities": "Kansen",
       "tasks": "Taken",
-      "call_lists": "Bellijsten"
+      "call_lists": "Bellijsten",
+      "candidate_notes": "Kandidaat-notities",
+      "candidate_documents": "Kandidaat-documenten",
+      "candidate_conversations": "Kandidaat-gesprekken",
+      "candidate_educations": "Kandidaat-opleidingen",
+      "candidate_references": "Kandidaat-referenties"
     }
   },
   "webhooks": {
@@ -3207,7 +3212,7 @@
     "retryAll": "Alles opnieuw proberen",
     "retryAllConfirm_one": "{{count}} mislukte taak opnieuw in de wachtrij zetten?",
     "retryAllConfirm_other": "Alle {{count}} mislukte taken opnieuw in de wachtrij zetten?",
-    "retryAllQueueConfirm": "Alle mislukte taken in wachtrij {{queue}} opnieuw in de wachtrij zetten? Het tenantfilter geldt hier niet.",
+    "retryAllQueueConfirm": "{{ count }} mislukte jobs in wachtrij '{{ queue }}' opnieuw in de wachtrij zetten?",
     "retryAllUnfilteredConfirm_one": "Dit zet ALLE mislukte taken opnieuw in de wachtrij, niet alleen de {{count}} gefilterde. Het tenantfilter geldt hier niet.",
     "retryAllUnfilteredConfirm_other": "Dit zet ALLE mislukte taken opnieuw in de wachtrij, niet alleen de {{count}} gefilterde. Het tenantfilter geldt hier niet.",
     "forget": "Verwijderen",
@@ -3258,7 +3263,14 @@
     },
     "retryAllSuccess": "{{count}} taken opnieuw ingediend",
     "retryAllSkipped": "{{count}} taken overgeslagen (tenant bestaat niet meer)",
-    "retryAllTruncated": "meer mislukte taken dan in één keer verwerkt, herhaal"
+    "retryAllTruncated": "meer mislukte taken dan in één keer verwerkt, herhaal",
+    "retryAllConfirm": "{{ count }} mislukte jobs opnieuw in de wachtrij zetten?",
+    "retryAllTenantConfirm": "{{ count }} mislukte jobs van tenant '{{ tenant }}' opnieuw in de wachtrij zetten?",
+    "retryAllQueueTenantConfirm": "{{ count }} mislukte jobs in wachtrij '{{ queue }}' van tenant '{{ tenant }}' opnieuw in de wachtrij zetten?",
+    "flushConfirm": "Alle {{ count }} mislukte jobs permanent wissen? Dit kan niet ongedaan gemaakt worden.",
+    "flushQueueConfirm": "De {{ count }} mislukte jobs in wachtrij '{{ queue }}' permanent wissen? Dit kan niet ongedaan gemaakt worden.",
+    "flushTenantConfirm": "De {{ count }} mislukte jobs van tenant '{{ tenant }}' permanent wissen? Dit kan niet ongedaan gemaakt worden.",
+    "flushQueueTenantConfirm": "De {{ count }} mislukte jobs in wachtrij '{{ queue }}' van tenant '{{ tenant }}' permanent wissen? Dit kan niet ongedaan gemaakt worden."
   },
   "actionRules": {
     "title": "Actieregels",
@@ -3777,7 +3789,8 @@
       "outreach": "Belllijsten",
       "whatsapp": "WhatsApp",
       "prospects": "Prospects"
-    }
+    },
+    "notFound": "Onbekend rapport"
   },
   "freeEntry": {
     "blockedTitle": "Vrije invoer kan nog niet uit",
@@ -3809,7 +3822,8 @@
     "loadError": "Maandbudgetten konden niet worden geladen.",
     "saveFailed": "Budgetten opslaan is mislukt.",
     "saved": "Budgetten opgeslagen.",
-    "aiTierLabel": "AI-staffel: {{tier}}"
+    "aiTierLabel": "AI-staffel: {{tier}}",
+    "baseFee": "Basistarief"
   },
   "billingTiers": {
     "title": "Staffels",

@@ -74,8 +74,11 @@
       "viewFor": "Ver {{name}}",
       "updateFor": "Editar {{name}}",
       "deleteFor": "Eliminar {{name}}",
-      "hint": "Permisos por sede. Solo surte efecto cuando un administrador activa \"Aplicar permisos por sede\" en Ajustes → Roles y permisos."
-    }
+      "hint": "Permisos por sede. Solo surte efecto cuando un administrador activa \"Aplicar permisos por sede\" en Ajustes → Roles y permisos.",
+      "defaultFor": "Sucursal predeterminada para {{name}}"
+    },
+    "isDefault": "Predeterminado",
+    "isDefaultHint": "Solo una sucursal predeterminada por usuario"
   },
   "validation": {
     "emailFormat": "Introduce una dirección de correo electrónico válida."

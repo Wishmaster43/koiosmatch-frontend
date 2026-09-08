@@ -1498,7 +1498,12 @@
       "matches": "Matches",
       "opportunities": "Opportunities",
       "tasks": "Tasks",
-      "call_lists": "Call lists"
+      "call_lists": "Call lists",
+      "candidate_notes": "Candidate notes",
+      "candidate_documents": "Candidate documents",
+      "candidate_conversations": "Candidate conversations",
+      "candidate_educations": "Candidate educations",
+      "candidate_references": "Candidate references"
     }
   },
   "webhooks": {
@@ -3207,7 +3212,7 @@
     "retryAll": "Retry all",
     "retryAllConfirm_one": "Re-queue {{count}} failed job?",
     "retryAllConfirm_other": "Re-queue all {{count}} failed jobs?",
-    "retryAllQueueConfirm": "Re-queue every failed job in queue {{queue}}? The tenant filter does not apply here.",
+    "retryAllQueueConfirm": "Retry {{ count }} failed jobs in queue '{{ queue }}'?",
     "retryAllUnfilteredConfirm_one": "This re-queues ALL failed jobs, not just the {{count}} filtered one. The tenant filter does not apply here.",
     "retryAllUnfilteredConfirm_other": "This re-queues ALL failed jobs, not just the {{count}} filtered ones. The tenant filter does not apply here.",
     "forget": "Delete",
@@ -3258,7 +3263,14 @@
     },
     "retryAllSuccess": "{{count}} jobs resubmitted",
     "retryAllSkipped": "{{count}} jobs skipped (tenant no longer exists)",
-    "retryAllTruncated": "more failed jobs than processed at once, retry"
+    "retryAllTruncated": "more failed jobs than processed at once, retry",
+    "retryAllConfirm": "Retry {{ count }} failed jobs?",
+    "retryAllTenantConfirm": "Retry {{ count }} failed jobs from tenant '{{ tenant }}'?",
+    "retryAllQueueTenantConfirm": "Retry {{ count }} failed jobs in queue '{{ queue }}' from tenant '{{ tenant }}'?",
+    "flushConfirm": "Permanently delete all {{ count }} failed jobs? This cannot be undone.",
+    "flushQueueConfirm": "Permanently delete the {{ count }} failed jobs in queue '{{ queue }}'? This cannot be undone.",
+    "flushTenantConfirm": "Permanently delete the {{ count }} failed jobs from tenant '{{ tenant }}'? This cannot be undone.",
+    "flushQueueTenantConfirm": "Permanently delete the {{ count }} failed jobs in queue '{{ queue }}' from tenant '{{ tenant }}'? This cannot be undone."
   },
   "actionRules": {
     "title": "Action rules",
@@ -3777,7 +3789,8 @@
       "outreach": "Call lists",
       "whatsapp": "WhatsApp",
       "prospects": "Prospects"
-    }
+    },
+    "notFound": "Unknown report"
   },
   "freeEntry": {
     "blockedTitle": "Free entry cannot be turned off yet",
@@ -3809,7 +3822,8 @@
     "loadError": "Failed to load monthly budgets.",
     "saveFailed": "Failed to save the budgets.",
     "saved": "Budgets saved.",
-    "aiTierLabel": "AI tier: {{tier}}"
+    "aiTierLabel": "AI tier: {{tier}}",
+    "baseFee": "Base fee"
   },
   "billingTiers": {
     "title": "Tiers",

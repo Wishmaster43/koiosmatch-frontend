@@ -74,8 +74,11 @@
       "viewFor": "{{name}} bekijken",
       "updateFor": "{{name}} bewerken",
       "deleteFor": "{{name}} verwijderen",
-      "hint": "Per-vestiging rechten. Werkt pas zodra een beheerder \"Vestigingsrechten afdwingen\" aanzet in Instellingen → Rollen & Rechten."
-    }
+      "hint": "Per-vestiging rechten. Werkt pas zodra een beheerder \"Vestigingsrechten afdwingen\" aanzet in Instellingen → Rollen & Rechten.",
+      "defaultFor": "Standaardvestiging voor {{name}}"
+    },
+    "isDefault": "Standaard",
+    "isDefaultHint": "Er kan maar één standaardvestiging per gebruiker zijn"
   },
   "validation": {
     "emailFormat": "Voer een geldig e-mailadres in."
