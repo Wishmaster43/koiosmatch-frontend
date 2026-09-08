@@ -1242,7 +1242,9 @@
       "candidate_documents": "Kandidatendokumente",
       "candidate_conversations": "Kandidatengespräche",
       "candidate_educations": "Kandidatenausbildungen",
-      "candidate_references": "Kandidatenreferenzen"
+      "candidate_references": "Kandidatenreferenzen",
+      "company": "Unternehmen",
+      "users": "Benutzer"
     }
   },
   "webhooks": {

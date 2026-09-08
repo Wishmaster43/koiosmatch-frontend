@@ -26,6 +26,10 @@ export const SCOPE_ENTITIES = [
   'opportunities',
   'tasks',
   'call_lists',
+  // EXTERNAL-API-COMPANY-USERS-1 (BE 08-09): read-only partner endpoints for the tenant's
+  // company profile + locations (`company`) and its users (`users`).
+  'company',
+  'users',
   // Dossier content scopes — see ExternalApiKey::ENTITIES (backend App\Models\ExternalApiKey).
   'candidate_notes',
   'candidate_documents',

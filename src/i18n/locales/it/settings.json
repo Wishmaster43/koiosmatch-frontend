@@ -1503,7 +1503,9 @@
       "candidate_documents": "Documenti candidato",
       "candidate_conversations": "Conversazioni candidato",
       "candidate_educations": "Educazioni candidato",
-      "candidate_references": "Riferimenti candidato"
+      "candidate_references": "Riferimenti candidato",
+      "company": "Azienda",
+      "users": "Utenti"
     }
   },
   "webhooks": {

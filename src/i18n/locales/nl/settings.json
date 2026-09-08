@@ -1503,7 +1503,9 @@
       "candidate_documents": "Kandidaat-documenten",
       "candidate_conversations": "Kandidaat-gesprekken",
       "candidate_educations": "Kandidaat-opleidingen",
-      "candidate_references": "Kandidaat-referenties"
+      "candidate_references": "Kandidaat-referenties",
+      "company": "Bedrijf",
+      "users": "Gebruikers"
     }
   },
   "webhooks": {
