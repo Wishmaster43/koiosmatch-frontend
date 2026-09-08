@@ -33,7 +33,7 @@ describe('ContactFunctionsSettings', () => {
   it('GETs /contact-functions on mount with no params', async () => {
     api.get.mockResolvedValue({ data: [] })
     render(<ContactFunctionsSettings />)
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/contact-functions', undefined))
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/contact-functions?active=1', undefined))
   })
 
   it('shows a calm notice (no live Add button) when the endpoint 404s', async () => {
@@ -57,7 +57,7 @@ async function renderWithContactFunctions(rows = [], allowFreeEntry = true) {
   vi.resetModules()
   const apiModule = await import('@/lib/api')
   apiModule.default.get.mockImplementation(url => {
-    if (url === '/contact-functions') return Promise.resolve({ data: { data: rows, allow_free_entry: allowFreeEntry } })
+    if (url === '/contact-functions?active=1') return Promise.resolve({ data: { data: rows, allow_free_entry: allowFreeEntry } })
     return Promise.resolve({ data: {} })
   })
   const { default: FreshContactFunctionsSettings } = await import('./ContactFunctionsSettings')

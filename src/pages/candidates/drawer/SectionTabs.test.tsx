@@ -108,7 +108,7 @@ describe('EducationTab · "Nog in opleiding" checkbox label (C-11 regression gua
 describe('EducationTab · education level (KAND-NIVEAU-1)', () => {
   it('offers the tenant education levels (GET /education-levels) as a pick-only dropdown, and the save payload carries the picked level_id', async () => {
     vi.mocked(api.get).mockImplementation((url: string) =>
-      url === '/education-levels'
+      url === '/education-levels?active=1'
         ? Promise.resolve({ data: { data: [{ id: 'lvl-1', name: 'MBO-4' }, { id: 'lvl-2', name: 'HBO' }] } })
         : Promise.resolve({ data: { data: [] } }),
     )

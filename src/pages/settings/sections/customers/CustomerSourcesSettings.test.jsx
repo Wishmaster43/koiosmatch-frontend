@@ -26,7 +26,7 @@ async function renderWithSources(sourceRows = [], allowFreeEntry = false) {
   vi.resetModules()
   const apiModule = await import('@/lib/api')
   apiModule.default.get.mockImplementation(url => {
-    if (url === '/customer-sources') return Promise.resolve({ data: { data: sourceRows, allow_free_entry: allowFreeEntry } })
+    if (url === '/customer-sources' || url === '/customer-sources?active=1') return Promise.resolve({ data: { data: sourceRows, allow_free_entry: allowFreeEntry } })
     return Promise.resolve({ data: {} })
   })
   const { default: CustomerSourcesSettings } = await import('./CustomerSourcesSettings')
@@ -37,7 +37,7 @@ async function renderWithSources(sourceRows = [], allowFreeEntry = false) {
 describe('CustomerSourcesSettings — wired to the REAL /customer-sources lookup', () => {
   it('GETs /customer-sources on mount with no params', async () => {
     const api = await renderWithSources()
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/customer-sources', undefined))
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/customer-sources?active=1', undefined))
   })
 
   it('reflects the API allow_free_entry:true as checked', async () => {

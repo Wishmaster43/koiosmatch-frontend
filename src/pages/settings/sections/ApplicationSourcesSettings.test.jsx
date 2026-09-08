@@ -34,7 +34,7 @@ async function renderWithSources(sourceRows = [], allowFreeEntry = false) {
   vi.resetModules()
   const apiModule = await import('@/lib/api')
   apiModule.default.get.mockImplementation(url => {
-    if (url === '/candidate-sources') return Promise.resolve({ data: { data: sourceRows, allow_free_entry: allowFreeEntry } })
+    if (url === '/candidate-sources' || url === '/candidate-sources?active=1') return Promise.resolve({ data: { data: sourceRows, allow_free_entry: allowFreeEntry } })
     return Promise.resolve({ data: {} })
   })
   const { default: ApplicationSourcesSettings } = await import('./ApplicationSourcesSettings')
@@ -98,7 +98,7 @@ describe('ApplicationSourcesSettings — free-entry toggle (real dedicated route
 describe('ApplicationSourcesSettings — wired to the REAL /candidate-sources lookup', () => {
   it('GETs /candidate-sources on mount with no params', async () => {
     const api = await renderWithSources()
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/candidate-sources', undefined))
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/candidate-sources?active=1', undefined))
   })
 
   it('creating a new source POSTs it to /candidate-sources', async () => {

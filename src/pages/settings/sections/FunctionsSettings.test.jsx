@@ -28,7 +28,7 @@ async function renderWithFunctions(rows = [], allowFreeEntry = false) {
   vi.resetModules()
   const apiModule = await import('@/lib/api')
   apiModule.default.get.mockImplementation(url => {
-    if (url === '/functions') return Promise.resolve({ data: { data: rows, allow_free_entry: allowFreeEntry } })
+    if (url === '/functions?active=1') return Promise.resolve({ data: { data: rows, allow_free_entry: allowFreeEntry } })
     return Promise.resolve({ data: {} })
   })
   const { default: FunctionsSettings } = await import('./FunctionsSettings')
@@ -93,7 +93,7 @@ describe('FunctionsSettings — strict preflight (FUNC-STRICT-PREFLIGHT-1)', () 
   it('tightening with off-list values runs the preflight and shows them before any PUT', async () => {
     const api = await renderWithFunctions([], true)
     api.get.mockImplementation(url => {
-      if (url === '/functions') return Promise.resolve({ data: { data: [], allow_free_entry: true } })
+      if (url === '/functions?active=1') return Promise.resolve({ data: { data: [], allow_free_entry: true } })
       if (url === '/functions/mismatches') {
         return Promise.resolve({ data: [{ entity: 'candidate', id: 'c1', name: 'Jan', function: 'Verpleger', count: 2 }] })
       }
@@ -120,7 +120,7 @@ describe('FunctionsSettings — strict preflight (FUNC-STRICT-PREFLIGHT-1)', () 
   it('tightening with no off-list values skips the confirmation entirely', async () => {
     const api = await renderWithFunctions([], true)
     api.get.mockImplementation(url => {
-      if (url === '/functions') return Promise.resolve({ data: { data: [], allow_free_entry: true } })
+      if (url === '/functions?active=1') return Promise.resolve({ data: { data: [], allow_free_entry: true } })
       if (url === '/functions/mismatches') return Promise.resolve({ data: [] })
       return Promise.resolve({ data: {} })
     })
