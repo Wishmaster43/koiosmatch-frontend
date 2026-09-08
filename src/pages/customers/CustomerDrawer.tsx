@@ -38,6 +38,7 @@ import { useCustomerDepartments } from './hooks/useCustomerDepartments'
 import { useCustomerContacts } from './hooks/useCustomerContacts'
 import type { Customer } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
+import type { CustomerNoteCallbacks } from '@/types/customerNoteCallbacks'
 
 const TABS = [
   { id: 'overview',      tKey: 'overview' },
@@ -80,10 +81,8 @@ const TABS = [
 ]
 
 interface DrawerUser { id: Id; name: string; avatar_color?: string }
-// NOTE-TAAL-1: optional per-note language, forwarded unchanged to useCustomerRecord's addNote.
-type NotePayload = { type: string; title: string; body: string; language?: string }
 
-interface CustomerDrawerProps {
+interface CustomerDrawerProps extends CustomerNoteCallbacks {
   customer: Customer | null
   onClose: () => void
   expanded?: boolean
@@ -92,15 +91,6 @@ interface CustomerDrawerProps {
   // override (useCustomerDrawerActions' status/phase/owner) can clear on a
   // rejected PATCH.
   onUpdate?: (id: Id | undefined, patch: Record<string, unknown>) => void | Promise<boolean>
-  onAddNote?: (id: Id | undefined, payload: NotePayload) => void
-  // K15NOTES: edit/delete a single existing note — mirrors onAddNote's (id, payload)
-  // shape, plus the note's own id so the host can resolve which note changed.
-  onEditNote?: (id: Id | undefined, noteId: Id | undefined, payload: NotePayload) => void
-  onDeleteNote?: (id: Id | undefined, noteId: Id | undefined) => void
-  // NOTE-UNDO-FE-1 (K-172): peek + execute the one-slot undo — mirrors onEditNote's
-  // (id, noteId) shape, resolved by the host (useCustomerRecord).
-  onFetchPreviousVersion?: (id: Id | undefined, noteId: Id | undefined) => Promise<{ previous_body: string | null; previous_saved_at: string | null } | null>
-  onRestorePreviousNote?: (id: Id | undefined, noteId: Id | undefined) => Promise<boolean>
   users?: DrawerUser[]
   statuses?: LookupOption[]
   // SUB-STATUS-1: the three sub-entity status lookups (one API call, lifted from

@@ -42,15 +42,7 @@ import { toLocalIsoDate } from '@/lib/localDate'
 import { Caption } from '@/components/ui/typography'
 import type { Customer } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
-
-// TOOLBAR-4 — the search box's own footprint, byte-identical to every other
-// sub-entity list (Locaties/Afdelingen/Contactpersonen/Matches): flex-growing,
-// '6px 10px' padding, radius 8, fontSize 12, icon 13.
-const searchWrap = {
-  display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0, padding: '6px 10px',
-  background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8,
-} as const
-const searchInput = { flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' } as const
+import { PANEL_SEARCH_WRAP as searchWrap, PANEL_SEARCH_INPUT as searchInput } from '@/lib/panelSearchStyles'
 
 // The customer's price agreements list (Prijsafspraken sub-tab) plus the
 // Facturatie sub-tab (billing settings + the customer's own invoice address).

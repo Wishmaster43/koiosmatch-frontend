@@ -30,8 +30,7 @@ import type { Id } from '@/types/common'
 import type { useCustomerLocations } from '../hooks/useCustomerLocations'
 import type { useCustomerDepartments } from '../hooks/useCustomerDepartments'
 import type { useCustomerContacts } from '../hooks/useCustomerContacts'
-
-type NotePayload = { type: string; title: string; body: string; language?: string }
+import type { NotePayload } from '@/types/customerNoteCallbacks'
 
 export default function CustomerDrawerTabPanels({
   id, c, setActiveTab,

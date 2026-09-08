@@ -53,6 +53,7 @@ import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
+import { PANEL_SEARCH_WRAP as searchWrap, PANEL_SEARCH_INPUT as searchInput } from '@/lib/panelSearchStyles'
 
 type AnyProps = Record<string, unknown>
 const SoftChip = SoftChipJs as unknown as ComponentType<AnyProps>
@@ -60,16 +61,6 @@ const muted = { color: 'var(--text-muted)', fontSize: 12 }
 // Plain-text fallback style for a coloured column toggled off (CHIPKLEUR-INSTELBAAR-1) —
 // mirrors the `plainCell` convention in CandidatesTable/CustomersTable.
 const plainCell = { color: 'var(--text)', fontSize: 12 }
-
-const searchWrap = {
-  // minWidth 0: a flex child's implicit min-width:auto would keep the input's ~170px
-  // intrinsic width and push the add button off the 548px panel (Danny 03-08:
-  // "+ nieuwe contactpersoon valt nog steeds een beetje weg", i.e. "+ new contact
-  // still gets pushed off a bit") — search yields instead.
-  display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0, padding: '6px 10px',
-  background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8,
-} as const
-const searchInput = { flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' } as const
 
 export type DepartmentScope = 'customer' | 'location'
 
