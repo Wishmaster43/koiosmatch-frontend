@@ -6,8 +6,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { contrastRatio, applyBrandTokens, clampedOnAccent } from '@/hooks/useTenantTheme'
 import { useTranslation } from 'react-i18next'
-import { Check, Save, Upload, X, AlertTriangle, RefreshCw } from 'lucide-react'
-import Spinner from '@/components/ui/Spinner'
+import { Upload, X, AlertTriangle, RefreshCw } from 'lucide-react'
 import api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import { useNumberFormat } from '@/lib/formatters'
@@ -141,11 +140,7 @@ export default function BrandSettings() {
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('brand.subtitle')}</p>
         </div>
         {/* SaveButton — the ONE saved-state save action (§4 success token pair). */}
-        <SaveButton saved={saved} onClick={save} disabled={saving}>
-          {saved   ? <><Check size={13} /> {t('common.saved')}</>                         :
-           saving  ? <><Spinner size={13} /> {t('common.saving')}</> :
-                     <><Save size={13} /> {t('common.save')}</>}
-        </SaveButton>
+        <SaveButton saved={saved} saving={saving} onClick={save} disabled={saving} />
       </div>
 
       {loading && <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>{t('common.loading')}</p>}

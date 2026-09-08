@@ -8,7 +8,7 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import SaveButton from '@/components/ui/SaveButton'
+import SaveRow from '@/components/ui/SaveRow'
 import { SectionTitle, Caption } from '@/components/ui/typography'
 import { patchKoiosModelsAdmin } from './api'
 import { REQUEST_TYPES, EFFORT_LEVELS } from './types'
@@ -84,12 +84,7 @@ export default function RoutingCard({ data, onSaved }: { data: KoiosModelsAdminD
         })}
       </div>
 
-      {error && <div style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 10 }}>{error}</div>}
-      <div style={{ marginTop: 12 }}>
-        <SaveButton size="sm" saved={saved} disabled={!dirty || saving} onClick={save}>
-          {t('koiosModelsAdmin.save')}
-        </SaveButton>
-      </div>
+      <SaveRow error={error} saved={saved} saving={saving} dirty={dirty} onSave={save} label={t('koiosModelsAdmin.save')} />
     </div>
   )
 }

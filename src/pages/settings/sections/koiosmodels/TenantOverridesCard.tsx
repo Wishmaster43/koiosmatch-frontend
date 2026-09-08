@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
-import SaveButton from '@/components/ui/SaveButton'
+import SaveRow from '@/components/ui/SaveRow'
 import { SectionTitle, Caption } from '@/components/ui/typography'
 import { useAuth } from '@/context/AuthContext'
 import { patchKoiosModelsAdmin } from './api'
@@ -100,12 +100,7 @@ export default function TenantOverridesCard({ data, onSaved }: { data: KoiosMode
         </div>
       )}
 
-      {error && <div style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 10 }}>{error}</div>}
-      <div style={{ marginTop: 12 }}>
-        <SaveButton size="sm" saved={saved} disabled={!dirty || saving} onClick={save}>
-          {t('koiosModelsAdmin.save')}
-        </SaveButton>
-      </div>
+      <SaveRow error={error} saved={saved} saving={saving} dirty={dirty} onSave={save} label={t('koiosModelsAdmin.save')} />
     </div>
   )
 }

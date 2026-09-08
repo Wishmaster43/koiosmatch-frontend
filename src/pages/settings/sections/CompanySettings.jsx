@@ -6,7 +6,7 @@
  */
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, Save, AlertTriangle, RefreshCw } from 'lucide-react'
+import { AlertTriangle, RefreshCw } from 'lucide-react'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
@@ -15,7 +15,6 @@ import { useCountriesLookup } from '@/lib/useCountriesLookup'
 import { useProvinces } from '@/hooks/useProvinces'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { useLocaleOptions } from '@/lib/useLocaleOptions'
-import Spinner from '@/components/ui/Spinner'
 import { cardHead } from '@/components/ui/modalCards'
 // One language source for the whole app (Danny 14/7): the same five shipped
 // locales the profile picker offers — never a diverging local list.
@@ -227,9 +226,7 @@ export default function CompanySettings() {
           <PageTitle>{t('company.title')}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('company.subtitle')}</p>
         </div>
-        <SaveButton onClick={save} disabled={saving} saved={saved} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {saved ? <><Check size={13}/> {t('common.saved')}</> : saving ? <><Spinner size={13} /> {t('common.saving')}</> : <><Save size={13}/> {t('common.save')}</>}
-        </SaveButton>
+        <SaveButton onClick={save} disabled={saving} saved={saved} saving={saving} />
       </div>
 
       {/* Company name & logo live under Brand — kept in one place to avoid duplicates. */}
