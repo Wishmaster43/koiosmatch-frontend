@@ -3900,16 +3900,15 @@
   "dashboardsSaveError": "Falha ao guardar a definição de KPI: a alteração foi revertida. Tente novamente.",
   "dashboardsSharedDefault": "partilhado (Padrão)",
   "whatsappWeb": {
-    "intro": "Associe um número do WhatsApp Web separado por filial, além da conta WhatsApp Business da agência.",
+    "intro": "Associe um número do WhatsApp Web separado a uma ou mais filiais, além da conta WhatsApp Business da empresa.",
     "loading": "A carregar…",
     "unavailable": "Esta funcionalidade não está disponível para o seu tenant.",
     "error": "Não foi possível carregar os números das filiais.",
     "empty": "Ainda nenhum número de filial associado.",
     "noLocation": "Sem filial",
-    "contactSyncNote": "Este número sincroniza apenas contactos desta filial (só com consentimento do WhatsApp).",
+    "contactSyncNote": "Este número sincroniza apenas contactos das filiais associadas (só com consentimento do WhatsApp).",
     "addTitle": "Associar número de filial",
-    "locationLabel": "Filial",
-    "locationPlaceholder": "Selecione a filial",
+    "locationLabel": "Filiais",
     "labelField": "Nome",
     "labelPlaceholder": "Nome (opcional)",
     "phoneField": "Número de telefone",
@@ -3929,8 +3928,14 @@
       "newWeekly": "Novos, por semana",
       "save": "Guardar",
       "saved": "Guardado",
-      "readOnlyNote": "Não tem permissões para alterar estes limites."
-    }
+      "readOnlyNote": "Não tem permissões para alterar estes limites.",
+      "maxHint": "máx. {{max}}"
+    },
+    "noLocationsAvailable": "Ainda não há filiais criadas.",
+    "locationsRequired": "Escolha pelo menos uma filial.",
+    "editLocations": "Editar filiais",
+    "saveLocations": "Guardar filiais",
+    "updateError": "Não foi possível guardar as filiais."
   },
   "dashboardsOnOffFilter": "Filtro ligado/desligado",
   "dashboardsFilterAll": "Tudo",

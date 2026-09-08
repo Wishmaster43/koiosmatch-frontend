@@ -3900,16 +3900,15 @@
   "dashboardsSaveError": "Salvataggio dell'impostazione KPI non riuscito: la modifica è stata annullata. Riprova.",
   "dashboardsSharedDefault": "condiviso (Predefinito)",
   "whatsappWeb": {
-    "intro": "Collega un numero WhatsApp Web separato per sede, accanto all'account WhatsApp Business aziendale.",
+    "intro": "Collega un numero WhatsApp Web separato a una o più sedi, accanto all'account WhatsApp Business aziendale.",
     "loading": "Caricamento in corso…",
     "unavailable": "Questa funzione non è disponibile per la tua agenzia.",
     "error": "Impossibile caricare i numeri delle sedi.",
     "empty": "Ancora nessun numero di sede collegato.",
     "noLocation": "Nessuna sede",
-    "contactSyncNote": "Questo numero sincronizza solo i contatti di questa sede (solo con consenso WhatsApp).",
+    "contactSyncNote": "Questo numero sincronizza solo i contatti delle sedi collegate (solo con il consenso WhatsApp).",
     "addTitle": "Collega numero di sede",
-    "locationLabel": "Sede",
-    "locationPlaceholder": "Seleziona sede",
+    "locationLabel": "Sedi",
     "labelField": "Nome",
     "labelPlaceholder": "Nome (facoltativo)",
     "phoneField": "Numero di telefono",
@@ -3929,8 +3928,14 @@
       "newWeekly": "Nuovi, alla settimana",
       "save": "Salva",
       "saved": "Salvato",
-      "readOnlyNote": "Non hai i permessi per modificare questi limiti."
-    }
+      "readOnlyNote": "Non hai i permessi per modificare questi limiti.",
+      "maxHint": "max. {{max}}"
+    },
+    "noLocationsAvailable": "Nessuna sede creata finora.",
+    "locationsRequired": "Scegli almeno una sede.",
+    "editLocations": "Modifica sedi",
+    "saveLocations": "Salva sedi",
+    "updateError": "Impossibile salvare le sedi."
   },
   "dashboardsOnOffFilter": "Filtro attivo/disattivo",
   "dashboardsFilterAll": "Tutti",

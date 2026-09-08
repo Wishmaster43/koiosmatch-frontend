@@ -3900,16 +3900,15 @@
   "dashboardsSaveError": "Opslaan van de KPI-instelling is mislukt: de wijziging is teruggedraaid. Probeer het opnieuw.",
   "dashboardsSharedDefault": "gedeeld (Standaard)",
   "whatsappWeb": {
-    "intro": "Koppel een los WhatsApp Web-nummer per vestiging, naast het bedrijfsbrede WhatsApp Business-account.",
+    "intro": "Koppel een los WhatsApp Web-nummer aan één of meer vestigingen, naast het bedrijfsbrede WhatsApp Business-account.",
     "loading": "Bezig met laden…",
     "unavailable": "Deze functie is niet beschikbaar voor jouw tenant.",
     "error": "Kon de vestigingsnummers niet laden.",
     "empty": "Nog geen vestigingsnummers gekoppeld.",
     "noLocation": "Geen vestiging",
-    "contactSyncNote": "Dit nummer synchroniseert alleen contacten van deze vestiging (alleen met WhatsApp-toestemming).",
+    "contactSyncNote": "Dit nummer synchroniseert alleen contacten van de gekoppelde vestigingen (alleen met WhatsApp-toestemming).",
     "addTitle": "Vestigingsnummer koppelen",
-    "locationLabel": "Vestiging",
-    "locationPlaceholder": "Selecteer vestiging",
+    "locationLabel": "Vestigingen",
     "labelField": "Naam",
     "labelPlaceholder": "Naam (optioneel)",
     "phoneField": "Telefoonnummer",
@@ -3929,8 +3928,14 @@
       "newWeekly": "Nieuw, per week",
       "save": "Opslaan",
       "saved": "Opgeslagen",
-      "readOnlyNote": "Je hebt geen rechten om deze limieten te wijzigen."
-    }
+      "readOnlyNote": "Je hebt geen rechten om deze limieten te wijzigen.",
+      "maxHint": "max. {{max}}"
+    },
+    "noLocationsAvailable": "Nog geen vestigingen aangemaakt.",
+    "locationsRequired": "Kies minimaal één vestiging.",
+    "editLocations": "Vestigingen aanpassen",
+    "saveLocations": "Vestigingen opslaan",
+    "updateError": "Kon de vestigingen niet opslaan."
   },
   "dashboardsOnOffFilter": "Aan/uit-filter",
   "dashboardsFilterAll": "Alles",

@@ -3900,16 +3900,15 @@
   "dashboardsSaveError": "Speichern der KPI-Einstellung fehlgeschlagen: die Änderung wurde zurückgesetzt. Bitte erneut versuchen.",
   "dashboardsSharedDefault": "geteilt (Standard)",
   "whatsappWeb": {
-    "intro": "Verknüpfe eine eigene WhatsApp Web-Nummer pro Niederlassung, neben dem unternehmensweiten WhatsApp Business-Konto.",
+    "intro": "Verknüpfe eine eigene WhatsApp Web-Nummer mit einer oder mehreren Niederlassungen, neben dem unternehmensweiten WhatsApp Business-Konto.",
     "loading": "Wird geladen…",
     "unavailable": "Diese Funktion ist für deinen Mandanten nicht verfügbar.",
     "error": "Die Niederlassungsnummern konnten nicht geladen werden.",
     "empty": "Noch keine Niederlassungsnummern verknüpft.",
     "noLocation": "Keine Niederlassung",
-    "contactSyncNote": "Diese Nummer synchronisiert nur Kontakte dieser Niederlassung (nur mit WhatsApp-Zustimmung).",
+    "contactSyncNote": "Diese Nummer synchronisiert nur Kontakte der verknüpften Niederlassungen (nur mit WhatsApp-Einwilligung).",
     "addTitle": "Niederlassungsnummer verknüpfen",
-    "locationLabel": "Niederlassung",
-    "locationPlaceholder": "Niederlassung wählen",
+    "locationLabel": "Niederlassungen",
     "labelField": "Name",
     "labelPlaceholder": "Name (optional)",
     "phoneField": "Telefonnummer",
@@ -3929,8 +3928,14 @@
       "newWeekly": "Neu, pro Woche",
       "save": "Speichern",
       "saved": "Gespeichert",
-      "readOnlyNote": "Du hast keine Berechtigung, diese Limits zu ändern."
-    }
+      "readOnlyNote": "Du hast keine Berechtigung, diese Limits zu ändern.",
+      "maxHint": "max. {{max}}"
+    },
+    "noLocationsAvailable": "Noch keine Niederlassungen angelegt.",
+    "locationsRequired": "Wähle mindestens eine Niederlassung.",
+    "editLocations": "Niederlassungen bearbeiten",
+    "saveLocations": "Niederlassungen speichern",
+    "updateError": "Die Niederlassungen konnten nicht gespeichert werden."
   },
   "dashboardsOnOffFilter": "Ein/Aus-Filter",
   "dashboardsFilterAll": "Alle",

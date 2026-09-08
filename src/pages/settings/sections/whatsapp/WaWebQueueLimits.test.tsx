@@ -47,6 +47,20 @@ describe('WaWebQueueLimits', () => {
       { known_hourly_limit: 60, new_hourly_limit: 5, new_daily_limit: 30, new_weekly_limit: 120 }))
   })
 
+  // WA-WEB-CAPS-DEFAULT-1 (CMBE ae235dea): the inputs carry the server's per-field ceilings.
+  it('inputs carry the server ceilings 1000/200/500/1000 as max, with the hint per field', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { known_hourly_limit: 40, new_hourly_limit: 5, new_daily_limit: 30, new_weekly_limit: 120 } })
+    render(<WaWebQueueLimits canManage />)
+    await waitFor(() => expect(screen.getByDisplayValue('40')).toBeInTheDocument())
+
+    expect(screen.getByDisplayValue('40')).toHaveAttribute('max', '1000')
+    expect(screen.getByDisplayValue('5')).toHaveAttribute('max', '200')
+    expect(screen.getByDisplayValue('30')).toHaveAttribute('max', '500')
+    expect(screen.getByDisplayValue('120')).toHaveAttribute('max', '1000')
+    expect(screen.getByDisplayValue('40')).toHaveAttribute('min', '1')
+    expect(screen.getAllByText('whatsappWeb.queue.maxHint')).toHaveLength(4)
+  })
+
   it('load error state', async () => {
     vi.mocked(api.get).mockRejectedValue(new Error('nope'))
     render(<WaWebQueueLimits canManage />)

@@ -11,6 +11,8 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { extractApiError } from '@/lib/extractApiError'
+// GETALLEN-1: the ceiling hint renders its thousands through the house formatter.
+import { useNumberFormat } from '@/lib/formatters'
 import { FieldRow, TextField } from '@/components/forms/fields'
 import SaveButton from '@/components/ui/SaveButton'
 import Spinner from '@/components/ui/Spinner'
@@ -25,6 +27,11 @@ type QueueLimits = {
   new_weekly_limit?: number
 }
 const FIELDS: Array<keyof QueueLimits> = ['known_hourly_limit', 'new_hourly_limit', 'new_daily_limit', 'new_weekly_limit']
+// WA-WEB-CAPS-DEFAULT-1 (CMBE ae235dea, Danny 08-09 "dit moet veel lager"): the server's
+// per-field ceilings (WhatsappQueueConfigController / SettingSchema) — mirrored on the
+// inputs and in the hint so a typo can no longer set a ban-inviting cap; the PUT 422s
+// above them regardless.
+const MAX: Record<keyof QueueLimits, number> = { known_hourly_limit: 1000, new_hourly_limit: 200, new_daily_limit: 500, new_weekly_limit: 1000 }
 type Phase = 'loading' | 'ready' | 'error'
 
 // `canManage` gates the fields/Save behind settings.update — the backend PUT is
@@ -32,6 +39,7 @@ type Phase = 'loading' | 'ready' | 'error'
 // gets read-only values and no Save, never a form whose Save silently 403s.
 export default function WaWebQueueLimits({ canManage }: { canManage: boolean }) {
   const { t } = useTranslation('settings')
+  const { formatNumber } = useNumberFormat()
   const [values, setValues] = useState<QueueLimits>({})
   const [phase, setPhase] = useState<Phase>('loading')
   const [saving, setSaving] = useState(false)
@@ -96,8 +104,11 @@ export default function WaWebQueueLimits({ canManage }: { canManage: boolean }) 
           {FIELDS.map(field => (
             <FieldRow key={field} label={t(`whatsappWeb.queue.${camel(field)}`)}>
               {canManage
-                ? <TextField type="number" value={values[field] != null ? String(values[field]) : ''}
-                    onChange={v => handleChange(field, v)} placeholder="0" />
+                ? <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <TextField type="number" min={1} max={MAX[field]} value={values[field] != null ? String(values[field]) : ''}
+                      onChange={v => handleChange(field, v)} placeholder="0" style={{ width: 120 }} />
+                    <Caption>{t('whatsappWeb.queue.maxHint', { max: formatNumber(MAX[field]) })}</Caption>
+                  </div>
                 : <Mono>{values[field] != null ? String(values[field]) : '—'}</Mono>}
             </FieldRow>
           ))}

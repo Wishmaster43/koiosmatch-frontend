@@ -3900,16 +3900,15 @@
   "dashboardsSaveError": "Saving the KPI setting failed: the change was reverted. Please try again.",
   "dashboardsSharedDefault": "shared (Default)",
   "whatsappWeb": {
-    "intro": "Link a separate WhatsApp Web number per branch, alongside the tenant-wide WhatsApp Business account.",
+    "intro": "Link a separate WhatsApp Web number to one or more branches, next to the company-wide WhatsApp Business account.",
     "loading": "Loading…",
     "unavailable": "This feature is not available for your tenant.",
     "error": "Could not load the branch numbers.",
     "empty": "No branch numbers linked yet.",
     "noLocation": "No branch",
-    "contactSyncNote": "This number only syncs contacts from this branch (only with WhatsApp consent).",
+    "contactSyncNote": "This number only syncs contacts of the linked branches (only with WhatsApp consent).",
     "addTitle": "Link a branch number",
-    "locationLabel": "Branch",
-    "locationPlaceholder": "Select a branch",
+    "locationLabel": "Branches",
     "labelField": "Label",
     "labelPlaceholder": "Label (optional)",
     "phoneField": "Phone number",
@@ -3929,8 +3928,14 @@
       "newWeekly": "New, per week",
       "save": "Save",
       "saved": "Saved",
-      "readOnlyNote": "You do not have permission to change these limits."
-    }
+      "readOnlyNote": "You do not have permission to change these limits.",
+      "maxHint": "max. {{max}}"
+    },
+    "noLocationsAvailable": "No branches created yet.",
+    "locationsRequired": "Choose at least one branch.",
+    "editLocations": "Edit branches",
+    "saveLocations": "Save branches",
+    "updateError": "Could not save the branches."
   },
   "dashboardsOnOffFilter": "On/off filter",
   "dashboardsFilterAll": "All",

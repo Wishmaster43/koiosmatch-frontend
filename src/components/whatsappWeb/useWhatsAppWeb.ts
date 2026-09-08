@@ -10,8 +10,11 @@
  * permission) or `/settings/whatsapp-web-numbers` (`settings.view`/`.update`):
  *   GET    {basePath}                 -> { data: [ device… ] }
  *   POST   {basePath} {body?}         -> create a new device (own devices: no
- *                                         body; branch devices: {location_id
- *                                         (required), label?, phone_number?})
+ *                                         body; branch devices: {location_ids[]
+ *                                         (required, min 1), label?, phone_number?}
+ *                                         — WA-WEB-BRANCHES-1, CMBE ae235dea)
+ *   PATCH  {basePath}/{id} {location_ids[]} -> replace the branch set a device
+ *                                         serves (branch surface only; min 1)
  *   POST   {basePath}/{id}/connect    -> { status: 'connecting' } (QR arrives via webhook)
  *                                         501 when the gateway isn't configured
  *   POST   {basePath}/{id}/disconnect -> { status: 'disconnected' }
@@ -98,9 +101,15 @@ export function useWhatsAppWeb(basePath: string = '/profile/whatsapp-web') {
 
   // Create a new device session; the user then links it from its card. `body` is
   // omitted on the own-device surface (matches the pre-generalisation request
-  // exactly) and carries {location_id, label?, phone_number?} on the branch surface.
+  // exactly) and carries {location_ids[], label?, phone_number?} on the branch surface.
   const createDevice = useCallback((body?: Record<string, unknown>) =>
     run('new', () => (body ? api.post(basePath, body) : api.post(basePath))), [run, basePath])
+
+  // WA-WEB-BRANCHES-1: replace the set of branches a device serves (PATCH, full set,
+  // min 1 — the server 422s an empty set, never a silent orphan). Shares run()'s
+  // busy-tracking + honest false-on-failure so the editor keeps the user's picks.
+  const updateDevice = useCallback((id: WhatsAppDevice['id'], body: Record<string, unknown>) =>
+    run(id, () => api.patch(`${basePath}/${id}`, body)), [run, basePath])
 
   // Connect: a 501 means the gateway isn't configured and a 5xx (or a dropped
   // connection, no status at all) means it is configured but not reachable — both
@@ -128,5 +137,5 @@ export function useWhatsAppWeb(basePath: string = '/profile/whatsapp-web') {
   // Remove this device entirely; shares run()'s busy-tracking + error handling.
   const remove      = useCallback((id: WhatsAppDevice['id']) => run(id, () => api.delete(`${basePath}/${id}`)), [run, basePath])
 
-  return { devices, phase, busyId, notEnabledId, unreachableId, createDevice, connect, disconnect, remove }
+  return { devices, phase, busyId, notEnabledId, unreachableId, createDevice, updateDevice, connect, disconnect, remove }
 }

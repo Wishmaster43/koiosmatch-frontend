@@ -11,7 +11,7 @@ import type { ReactNode } from 'react'
 import { useWhatsAppWeb } from './useWhatsAppWeb'
 import api from '@/lib/api'
 
-vi.mock('@/lib/api', () => ({ default: { get: vi.fn(), post: vi.fn(), delete: vi.fn() } }))
+vi.mock('@/lib/api', () => ({ default: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() } }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }), initReactI18next: { type: '3rdParty', init: () => {} } }))
 import { notifyError } from '@/lib/notify'
@@ -135,18 +135,34 @@ describe('useWhatsAppWeb', () => {
       expect(result.current.devices).toHaveLength(1)
     })
 
-    it('createDevice(body) posts the location_id/label/phone_number body to the settings route', async () => {
+    it('createDevice(body) posts the location_ids[]/label/phone_number body to the settings route (WA-WEB-BRANCHES-1)', async () => {
       vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
       vi.mocked(api.post).mockResolvedValue({ data: { id: 9, status: 'disconnected' } })
       const { result } = renderHook(() => useWhatsAppWeb('/settings/whatsapp-web-numbers'), { wrapper })
       await waitFor(() => expect(result.current.phase).toBe('ready'))
 
       await act(async () => {
-        await result.current.createDevice({ location_id: 'loc-1', label: 'Branch A', phone_number: undefined })
+        await result.current.createDevice({ location_ids: ['loc-1', 'loc-2'], label: 'Branch A', phone_number: undefined })
       })
 
       expect(api.post).toHaveBeenCalledWith('/settings/whatsapp-web-numbers',
-        { location_id: 'loc-1', label: 'Branch A', phone_number: undefined })
+        { location_ids: ['loc-1', 'loc-2'], label: 'Branch A', phone_number: undefined })
+    })
+
+    it('updateDevice(id, body) PATCHes the full branch set on the settings route and resolves false on failure', async () => {
+      vi.mocked(api.get).mockResolvedValue({ data: { data: [{ id: 5, status: 'disconnected' }] } })
+      vi.mocked(api.patch).mockResolvedValueOnce({ data: { id: 5 } })
+      const { result } = renderHook(() => useWhatsAppWeb('/settings/whatsapp-web-numbers'), { wrapper })
+      await waitFor(() => expect(result.current.phase).toBe('ready'))
+
+      let ok = false
+      await act(async () => { ok = await result.current.updateDevice(5, { location_ids: ['loc-2'] }) })
+      expect(api.patch).toHaveBeenCalledWith('/settings/whatsapp-web-numbers/5', { location_ids: ['loc-2'] })
+      expect(ok).toBe(true)
+
+      vi.mocked(api.patch).mockRejectedValueOnce({ response: { status: 422 } })
+      await act(async () => { ok = await result.current.updateDevice(5, { location_ids: [] }) })
+      expect(ok).toBe(false)
     })
 
     it('connect/disconnect/remove hit the settings-scoped routes', async () => {

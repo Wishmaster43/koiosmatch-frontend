@@ -21,6 +21,7 @@ vi.mock('@/lib/useLocations', () => ({
 // components/whatsappWeb (not an entity barrel: a barrel loads eagerly and would
 // drag @/lib/datetime + the i18n init into every consumer's test tree).
 const createDevice = vi.fn()
+const updateDevice = vi.fn()
 let mockReturn: Record<string, unknown>
 let capturedBasePath: string | undefined
 vi.mock('@/components/whatsappWeb/useWhatsAppWebHealth', () => ({ useWhatsAppWebHealth: () => ({ gateway: null, gatewayDown: false, loading: false }) }))
@@ -37,7 +38,7 @@ vi.mock('./WaWebQueueLimits', () => ({ default: () => <div data-testid="queue-li
 function setHook(overrides: Record<string, unknown>) {
   mockReturn = {
     devices: [], phase: 'ready', busyId: null, notEnabledId: null,
-    createDevice, connect: vi.fn(), disconnect: vi.fn(), remove: vi.fn(),
+    createDevice, updateDevice, connect: vi.fn(), disconnect: vi.fn(), remove: vi.fn(),
     ...overrides,
   }
 }
@@ -69,32 +70,74 @@ describe('WhatsAppWebNumbersSettings', () => {
     expect(screen.getByText('whatsappWeb.empty')).toBeInTheDocument()
   })
 
-  it('renders one card per device with its location name as the title prefix', () => {
+  // WA-WEB-BRANCHES-1: a row reads `locations[]` (never the deprecated singular).
+  it('renders one card per device with its served branch names, comma-joined, as the title prefix', () => {
     setHook({ phase: 'ready', devices: [
-      { id: 1, label: 'Front desk', location: { id: 'loc-1', name: 'Branch A' } },
-      { id: 2, label: 'Back office', location: null },
+      { id: 1, label: 'Front desk', locations: [{ id: 'loc-1', name: 'Branch A' }, { id: 'loc-2', name: 'Branch B' }] },
+      { id: 2, label: 'Back office', locations: [], location: { id: 'loc-9', name: 'Stale singular' } },
     ] })
     render(<WhatsAppWebNumbersSettings />)
     expect(screen.getByTestId('device-1')).toBeInTheDocument()
-    expect(screen.getByText('Branch A')).toBeInTheDocument()
+    expect(screen.getByText('Branch A, Branch B')).toBeInTheDocument()
     expect(screen.getByTestId('device-2')).toBeInTheDocument()
     expect(screen.getByText('whatsappWeb.noLocation')).toBeInTheDocument()
+    expect(screen.queryByText('Stale singular')).toBeNull()
   })
 
-  it('submits the add form with exactly {location_id, label, phone_number}', async () => {
+  it('submits the add form with exactly {location_ids[], label, phone_number} and refuses an empty branch set', async () => {
     setHook({ phase: 'ready', devices: [] })
     render(<WhatsAppWebNumbersSettings />)
     const user = userEvent.setup()
 
-    // The searchable location combobox opens as a listbox trigger button.
-    await user.click(screen.getByText('whatsappWeb.locationPlaceholder'))
-    await user.click(await screen.findByText('Branch B'))
+    // No branch picked yet: the hint shows and the submit stays disabled (the server 422s an empty set).
+    expect(screen.getByText('whatsappWeb.locationsRequired')).toBeInTheDocument()
+    expect(screen.getByText('whatsappWeb.submit').closest('button')).toBeDisabled()
+
+    // The branch picker is the house chip multi-select: two picks = two ids.
+    await user.click(screen.getByRole('button', { name: 'Branch B' }))
+    await user.click(screen.getByRole('button', { name: 'Branch A' }))
     await user.type(screen.getByPlaceholderText('whatsappWeb.labelPlaceholder'), 'Reception')
     await user.click(screen.getByText('whatsappWeb.submit'))
 
     await waitFor(() => expect(createDevice).toHaveBeenCalledWith({
-      location_id: 'loc-2', label: 'Reception', phone_number: undefined,
+      location_ids: ['loc-2', 'loc-1'], label: 'Reception', phone_number: undefined,
     }))
+  })
+
+  it('the row pencil opens the branch editor seeded with the served set and PATCHes the full new set', async () => {
+    updateDevice.mockResolvedValue(true)
+    setHook({ phase: 'ready', devices: [
+      { id: 1, label: 'Front desk', locations: [{ id: 'loc-1', name: 'Branch A' }] },
+    ] })
+    render(<WhatsAppWebNumbersSettings />)
+    const user = userEvent.setup()
+
+    await user.click(screen.getByRole('button', { name: 'whatsappWeb.editLocations' }))
+    // Seeded: Branch A already pressed inside the editor (the add form below has its own, unpressed, copy).
+    const pressed = screen.getAllByRole('button', { name: 'Branch A', pressed: true })
+    expect(pressed).toHaveLength(1)
+    await user.click(screen.getAllByRole('button', { name: 'Branch B' })[0])
+    await user.click(screen.getByText('whatsappWeb.saveLocations'))
+
+    await waitFor(() => expect(updateDevice).toHaveBeenCalledWith(1, { location_ids: ['loc-1', 'loc-2'] }))
+    // A landed PATCH closes the editor again.
+    await waitFor(() => expect(screen.queryByText('whatsappWeb.saveLocations')).toBeNull())
+  })
+
+  it('a failed branch PATCH keeps the editor open and reports it', async () => {
+    updateDevice.mockResolvedValue(false)
+    setHook({ phase: 'ready', devices: [
+      { id: 1, label: 'Front desk', locations: [{ id: 'loc-1', name: 'Branch A' }] },
+    ] })
+    render(<WhatsAppWebNumbersSettings />)
+    const user = userEvent.setup()
+
+    await user.click(screen.getByRole('button', { name: 'whatsappWeb.editLocations' }))
+    await user.click(screen.getAllByRole('button', { name: 'Branch B' })[0])
+    await user.click(screen.getByText('whatsappWeb.saveLocations'))
+
+    expect(await screen.findByText('whatsappWeb.updateError')).toBeInTheDocument()
+    expect(screen.getByText('whatsappWeb.saveLocations')).toBeInTheDocument()
   })
 
   it('hook is driven off the settings base path', () => {

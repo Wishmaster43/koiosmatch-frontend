@@ -3900,16 +3900,15 @@
   "dashboardsSaveError": "L'enregistrement du réglage KPI a échoué : la modification a été annulée. Veuillez réessayer.",
   "dashboardsSharedDefault": "partagé (Défaut)",
   "whatsappWeb": {
-    "intro": "Associez un numéro WhatsApp Web distinct par agence, en plus du compte WhatsApp Business de l'entreprise.",
+    "intro": "Associez un numéro WhatsApp Web distinct à une ou plusieurs agences, en plus du compte WhatsApp Business de l'entreprise.",
     "loading": "Chargement…",
     "unavailable": "Cette fonction n'est pas disponible pour votre organisation.",
     "error": "Impossible de charger les numéros d'agence.",
     "empty": "Aucun numéro d'agence associé pour l'instant.",
     "noLocation": "Aucune agence",
-    "contactSyncNote": "Ce numéro ne synchronise que les contacts de cette agence (uniquement avec consentement WhatsApp).",
+    "contactSyncNote": "Ce numéro ne synchronise que les contacts des agences associées (uniquement avec le consentement WhatsApp).",
     "addTitle": "Associer un numéro d'agence",
-    "locationLabel": "Agence",
-    "locationPlaceholder": "Sélectionner une agence",
+    "locationLabel": "Agences",
     "labelField": "Nom",
     "labelPlaceholder": "Nom (facultatif)",
     "phoneField": "Numéro de téléphone",
@@ -3929,8 +3928,14 @@
       "newWeekly": "Nouveaux, par semaine",
       "save": "Enregistrer",
       "saved": "Enregistré",
-      "readOnlyNote": "Vous n'avez pas le droit de modifier ces limites."
-    }
+      "readOnlyNote": "Vous n'avez pas le droit de modifier ces limites.",
+      "maxHint": "max. {{max}}"
+    },
+    "noLocationsAvailable": "Aucune agence créée pour le moment.",
+    "locationsRequired": "Choisissez au moins une agence.",
+    "editLocations": "Modifier les agences",
+    "saveLocations": "Enregistrer les agences",
+    "updateError": "Impossible d'enregistrer les agences."
   },
   "dashboardsOnOffFilter": "Filtre activé/désactivé",
   "dashboardsFilterAll": "Tout",

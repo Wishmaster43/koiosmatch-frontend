@@ -3900,16 +3900,15 @@
   "dashboardsSaveError": "No se pudo guardar el ajuste de KPI: el cambio se ha revertido. Inténtalo de nuevo.",
   "dashboardsSharedDefault": "compartido (Predeterminado)",
   "whatsappWeb": {
-    "intro": "Vincula un número de WhatsApp Web independiente por sucursal, junto a la cuenta de WhatsApp Business de la empresa.",
+    "intro": "Vincula un número de WhatsApp Web independiente a una o varias sucursales, junto a la cuenta de WhatsApp Business de la empresa.",
     "loading": "Cargando…",
     "unavailable": "Esta función no está disponible para tu organización.",
     "error": "No se pudieron cargar los números de sucursal.",
     "empty": "Aún no hay números de sucursal vinculados.",
     "noLocation": "Sin sucursal",
-    "contactSyncNote": "Este número solo sincroniza contactos de esta sucursal (solo con consentimiento de WhatsApp).",
+    "contactSyncNote": "Este número solo sincroniza contactos de las sucursales vinculadas (solo con consentimiento de WhatsApp).",
     "addTitle": "Vincular número de sucursal",
-    "locationLabel": "Sucursal",
-    "locationPlaceholder": "Selecciona una sucursal",
+    "locationLabel": "Sucursales",
     "labelField": "Nombre",
     "labelPlaceholder": "Nombre (opcional)",
     "phoneField": "Número de teléfono",
@@ -3929,8 +3928,14 @@
       "newWeekly": "Nuevos, por semana",
       "save": "Guardar",
       "saved": "Guardado",
-      "readOnlyNote": "No tienes permiso para cambiar estos límites."
-    }
+      "readOnlyNote": "No tienes permiso para cambiar estos límites.",
+      "maxHint": "máx. {{max}}"
+    },
+    "noLocationsAvailable": "Aún no hay sucursales creadas.",
+    "locationsRequired": "Elige al menos una sucursal.",
+    "editLocations": "Editar sucursales",
+    "saveLocations": "Guardar sucursales",
+    "updateError": "No se pudieron guardar las sucursales."
   },
   "dashboardsOnOffFilter": "Filtro activado/desactivado",
   "dashboardsFilterAll": "Todo",
