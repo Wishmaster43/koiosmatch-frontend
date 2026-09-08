@@ -10,6 +10,7 @@ import Toggle from '@/components/ui/Toggle'
 import { resolveGenericLookupIcon } from './lookupIcons'
 import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import { SectionTitle } from '@/components/ui/typography'
 import NumberSettingField from '../components/NumberSettingField'
 import SettingsLoadBanner from '../components/SettingsLoadBanner'
@@ -69,9 +70,9 @@ function DedupeKeysField() {
     try {
       await saveSettingsKeys({ [DEDUPE_KEYS_KEY]: next })
       invalidateAllSettingsCache()
-    } catch {
+    } catch (err) {
       setKeys(previous)
-      notifyError(t('lastContactTypes.dedupeKeysSaveFailed'))
+      notifyError(extractApiError(err, t('lastContactTypes.dedupeKeysSaveFailed')))
     }
   }
 

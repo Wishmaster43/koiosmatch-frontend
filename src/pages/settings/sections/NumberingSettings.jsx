@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next'
 import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import { useNumberingEntities } from '@/lib/useNumberingEntities'
 import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import { PageTitle, Caption, Mono } from '@/components/ui/typography'
 
 const cellInput = {
@@ -41,6 +42,10 @@ function EntityRow({ entity, settings }) {
   const [prefix, setPrefix] = useState(savedPrefix)
   const [pad,    setPad]    = useState(savedPad)
   const [start,  setStart]  = useState(savedStart)
+  const [prefixError, setPrefixError] = useState(null)
+
+  // Validate prefix: alphanumeric only, max 10 chars (B-35).
+  const isValidPrefix = (val) => /^[a-zA-Z0-9]*$/.test(val) && val.length <= 10
 
   // Persist one field — optimistic, revert + toast on failure (house pattern).
   const commit = async (key, value, prevValue, setter) => {
@@ -49,9 +54,9 @@ function EntityRow({ entity, settings }) {
     try {
       await saveSettingsKeys({ [key]: value })
       invalidateAllSettingsCache()
-    } catch {
+    } catch (err) {
       setter(prevValue)
-      notifyError(t('numbering.saveFailed'))
+      notifyError(extractApiError(err, t('numbering.saveFailed')))
     }
   }
 
@@ -64,10 +69,30 @@ function EntityRow({ entity, settings }) {
         {t(`numbering.entities.${entity.key}`, { defaultValue: entity.label })}
       </td>
       <td style={{ padding: '8px 12px' }}>
-        <input value={prefix} maxLength={8} aria-label={t('numbering.prefix')}
-          onChange={e => setPrefix(e.target.value)}
-          onBlur={e => commit(keys.prefix, e.target.value.trim() || entity.prefix, savedPrefix, setPrefix)}
-          style={{ ...cellInput, width: 70 }} />
+        <div>
+          <input value={prefix} maxLength={10} aria-label={t('numbering.prefix')}
+            onChange={e => {
+              setPrefix(e.target.value)
+              setPrefixError(null)
+            }}
+            onBlur={e => {
+              const val = e.target.value.trim() || entity.prefix
+              if (!isValidPrefix(val)) {
+                setPrefixError(t('numbering.prefixInvalid'))
+                setPrefix(savedPrefix)
+                return
+              }
+              setPrefixError(null)
+              commit(keys.prefix, val, savedPrefix, setPrefix)
+            }}
+            style={{ ...cellInput, width: 70, borderColor: prefixError ? 'var(--color-danger)' : 'var(--border)' }} />
+          {/* Inline validation line (B-35): the field alone cannot say why the value was refused. */}
+          {prefixError && (
+            <span role="alert" style={{ display: 'block', marginTop: 4 }}>
+              <Caption as="span" style={{ color: 'var(--color-danger-text)' }}>{prefixError}</Caption>
+            </span>
+          )}
+        </div>
       </td>
       <td style={{ padding: '8px 12px' }}>
         <input type="number" min={1} max={8} value={pad} aria-label={t('numbering.pad')}

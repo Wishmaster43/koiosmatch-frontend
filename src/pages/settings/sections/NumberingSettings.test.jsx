@@ -12,9 +12,13 @@
  *
  * X-42 (Lane O): allocated flag + next_value display — when an entity has allocated=true,
  * the start field renders read-only with the next value; when allocated=false, it's editable.
+ *
+ * B-35 (Lane SETTINGS-G2): prefix validation — alphanumeric only, max 10 chars.
+ * Invalid input shows an error and does not save. Valid input saves successfully.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
@@ -112,5 +116,41 @@ describe('NumberingSettings — renders the backend entity list, not a hardcoded
     const cells = customerRow.querySelectorAll('td')
     const startCell = cells[cells.length - 1]
     expect(startCell.querySelector('div')).toBeTruthy() // Should have a div (not input)
+  })
+})
+
+describe('NumberingSettings — B-35 prefix validation (alphanumeric, max 10)', () => {
+  // The backend 422s a prefix outside [a-zA-Z0-9]{1,10}; the screen refuses it
+  // client-side first: inline hint, value reverted, nothing POSTed.
+  it('rejects a non-alphanumeric prefix: inline hint, value reverted, no request', async () => {
+    await renderNumbering(TWELVE)
+    const apiModule = await import('@/lib/api')
+    const i18n = (await import('@/i18n')).default
+    await screen.findByText('Kandidaat')
+
+    const [prefixInput] = screen.getAllByLabelText(i18n.t('numbering.prefix', { ns: 'settings' }))
+    await userEvent.clear(prefixInput)
+    await userEvent.type(prefixInput, 'K-1')
+    await userEvent.tab()
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(i18n.t('numbering.prefixInvalid', { ns: 'settings' }))
+    expect(prefixInput).toHaveValue('K')
+    expect(apiModule.default.post).not.toHaveBeenCalled()
+  })
+
+  it('saves a valid prefix through POST /settings with the exact numbering key', async () => {
+    await renderNumbering(TWELVE)
+    const apiModule = await import('@/lib/api')
+    apiModule.default.post.mockResolvedValue({ data: {} })
+    const i18n = (await import('@/i18n')).default
+    await screen.findByText('Kandidaat')
+
+    const [prefixInput] = screen.getAllByLabelText(i18n.t('numbering.prefix', { ns: 'settings' }))
+    await userEvent.clear(prefixInput)
+    await userEvent.type(prefixInput, 'KX')
+    await userEvent.tab()
+
+    await waitFor(() => expect(apiModule.default.post).toHaveBeenCalledWith('/settings', { 'numbering.candidate.prefix': 'KX' }))
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 })

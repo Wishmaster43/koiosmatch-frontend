@@ -90,18 +90,17 @@ describe('ModulesSettings', () => {
     expect(await screen.findByTestId('billing-tiers-card')).toBeInTheDocument()
   })
 
-  // Add-on names and descriptions are now from i18n modules.addon.{id} and modules.addonDesc.{id}.
-  // The invoicing add-on is a new entry that uses the Receipt icon.
-  it('renders the invoicing add-on with other add-ons', async () => {
+  // Add-on names and descriptions come from i18n modules.addon.{id} and modules.addonDesc.{id}.
+  // B-28: the invoicing add-on was removed from the catalogue (platform invoicing is
+  // not a tenant add-on), so exactly four add-on switches remain.
+  it('renders the four add-ons and no invoicing add-on (B-28)', async () => {
     mockGet.mockResolvedValue({ data: { package: 'pro', addons: [] } })
     render(<ModulesSettings />)
     await userEvent.click(await screen.findByRole('tab', { name: 'modules.tabs.package' }))
 
     const switches = await screen.findAllByRole('switch')
-    // Expect 5 switches: reports, sm, hf, plan, invoicing
-    expect(switches).toHaveLength(5)
-    // Invoicing should be the 5th switch
-    expect(switches[4]).toHaveAttribute('aria-label', 'modules.addon.invoicing')
+    expect(switches).toHaveLength(4)
+    expect(switches.map(s => s.getAttribute('aria-label'))).not.toContain('modules.addon.invoicing')
   })
 
   // Legacy package notice: when package is null, display a migration prompt.

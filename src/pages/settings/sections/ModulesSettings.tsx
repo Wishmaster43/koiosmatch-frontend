@@ -9,7 +9,7 @@
 import { useState, useEffect, useRef } from 'react'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { useTranslation } from 'react-i18next'
-import { Check, Save, Package, Rocket, Crown, BarChart2, CalendarDays, Receipt } from 'lucide-react'
+import { Check, Save, Package, Rocket, Crown, BarChart2, CalendarDays } from 'lucide-react'
 // Real brand logos for the reporting add-ons (local assets, §7 CSP).
 import shiftmanagerLogo from '@/assets/integrations/shiftmanager.png'
 import helloflexLogo from '@/assets/integrations/helloflex.png'
@@ -52,7 +52,6 @@ const ADDONS: AddonOption[] = [
   { id: 'sm', image: shiftmanagerLogo },
   { id: 'hf', image: helloflexLogo },
   { id: 'plan', Icon: CalendarDays },
-  { id: 'invoicing', Icon: Receipt },
 ]
 
 // Legacy package string → new base tier (display only; the backend sends {package, addons}

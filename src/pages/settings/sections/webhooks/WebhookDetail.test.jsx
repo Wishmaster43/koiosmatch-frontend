@@ -100,4 +100,36 @@ describe('WebhookDetail — secret regeneration', () => {
       expect(secretDisplay).toBeInTheDocument()
     })
   })
+
+  it('sends status toggle with the correct PATCH body (active → disabled)', async () => {
+    const user = userEvent.setup()
+    const listRow = {
+      id: 'wh-1',
+      name: 'ATS integration',
+      url: 'https://example.test/hook',
+      events: ['candidate.created'],
+      status: 'active',
+    }
+    const onPatch = vi.fn()
+    renderWithQueryClient(
+      <WebhookDetail
+        subId="wh-1"
+        listRow={listRow}
+        onBack={vi.fn()}
+        onPatch={onPatch}
+        onDelete={vi.fn()}
+      />
+    )
+
+    api.put.mockResolvedValue({ data: { status: 'disabled' } })
+
+    // Open the action menu and click the status toggle.
+    await waitFor(() => screen.getByRole('button', { name: st('webhooks.outgoing.action') }))
+    await user.click(screen.getByRole('button', { name: st('webhooks.outgoing.action') }))
+    await user.click(screen.getByRole('menuitem', { name: st('webhooks.outgoing.deactivate') }))
+
+    await waitFor(() => {
+      expect(api.put).toHaveBeenCalledWith(expect.stringContaining('/wh-1'), { status: 'disabled' })
+    })
+  })
 })

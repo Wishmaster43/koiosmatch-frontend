@@ -11,7 +11,7 @@ import {
   Shield, ShieldCheck, User, Users, UserCog, UserCheck, Briefcase, Star, Crown, Key,
   Settings, Headphones, Phone, Calendar, CalendarDays, BarChart2, Building2, ClipboardList,
   Target, Megaphone, Wrench, Eye, Lock, Award, Zap, Flag, Handshake, HeartHandshake,
-  GraduationCap, Stethoscope, Truck, Package, Sparkles, BookOpen, Globe,
+  GraduationCap, Stethoscope, Truck, Package, Sparkles, BookOpen, Globe, TrendingUp,
 } from 'lucide-react'
 
 export type RoleIcon = ComponentType<{ size?: number; color?: string; style?: CSSProperties }>
@@ -29,7 +29,7 @@ const ICONS: Record<string, RoleIcon> = {
   flag: Flag, handshake: Handshake, 'heart-handshake': HeartHandshake,
   'graduation-cap': GraduationCap, graduationcap: GraduationCap,
   stethoscope: Stethoscope, truck: Truck, package: Package, sparkles: Sparkles,
-  book: BookOpen, 'book-open': BookOpen, globe: Globe,
+  book: BookOpen, 'book-open': BookOpen, globe: Globe, 'trending-up': TrendingUp,
 }
 
 // The pickable set, in a stable order (used by the icon picker as a fallback when

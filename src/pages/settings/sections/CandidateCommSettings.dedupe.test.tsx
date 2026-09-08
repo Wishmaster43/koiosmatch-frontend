@@ -99,4 +99,17 @@ describe('CandidateCommSettings · dedupe keys — save failure reverts', () => 
     await waitFor(() => expect(phone).not.toBeChecked())
     expect(notifyError).toHaveBeenCalledWith(st('lastContactTypes.dedupeKeysSaveFailed'))
   })
+
+  it('shows the 422 error from the backend via extractApiError', async () => {
+    mockSettings.mockReturnValue({})
+    const err = { response: { data: { message: 'candidate_dedupe_keys: unrecognised value' } } }
+    saveSettingsKeys.mockRejectedValueOnce(err)
+    const user = userEvent.setup()
+    render(<LastContactTypesSettings />)
+    const phone = screen.getByLabelText(st('lastContactTypes.dedupeKeys.phone'))
+
+    await user.click(phone)
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith('candidate_dedupe_keys: unrecognised value'))
+  })
 })
