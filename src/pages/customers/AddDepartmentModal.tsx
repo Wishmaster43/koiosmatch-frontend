@@ -28,8 +28,8 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAuth } from '@/context/AuthContext'
 import { Building } from 'lucide-react'
+import { useSafePermission } from '@/hooks/useSafePermission'
 import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import CollapsibleRichText from '@/components/ui/CollapsibleRichText'
@@ -37,12 +37,12 @@ import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { cardHead, cardBox, row2, row3Even } from '@/components/ui/modalCards'
 import SubEntityImportCard from './SubEntityImportCard'
 import SubEntityModalFrame from './addmodal/SubEntityModalFrame'
+import CreateErrorAlert from './addmodal/CreateErrorAlert'
 import { useSubEntitySave } from './hooks/useSubEntitySave'
 import type { DepartmentPayload } from './hooks/useCustomerDepartments'
 import type { Department } from '@/types/customer'
 import type { Id } from '@/types/common'
 import type { LookupOption } from '@/types/common'
-import { tintBorder } from '@/lib/tint'
 
 interface LocationOption { id: Id; name: string }
 
@@ -67,11 +67,7 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
   lockLocationId?: Id
 }) {
   const { t } = useTranslation(['customers', 'common'])
-  const authCtx = useAuth() as unknown as { hasPermission?: (permName: string) => boolean } | null
-  // SUBENTITY-IMPORT-1: falls back to "no permission" rather than crashing when the
-  // context is mid-boot OR genuinely absent (this modal is also mounted from screens
-  // with no AuthProvider ancestor in tests) — mirrors AddCustomerModal's own fallback.
-  const hasPermission = authCtx?.hasPermission ?? (() => false)
+  const hasPermission = useSafePermission()
   const canViewImportTemplate = hasPermission('customers.view')
   const canRunImport = hasPermission('customers.create')
   // Shared state/error management (DRY-SUBENTITY-1): import wizard
@@ -132,11 +128,7 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
 
   // Render the error alert banner if present.
   const alertElement = createError && (
-    <div role="alert" style={{ margin: '0 22px 8px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
-      color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
-      border: tintBorder('var(--color-danger)', true), flexShrink: 0 }}>
-      {createError}
-    </div>
+    <CreateErrorAlert message={createError} />
   )
 
   // Render the import card component if the wizard is active.

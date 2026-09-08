@@ -8,9 +8,9 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Building2, Upload, CheckCircle2 } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import { tintBorder } from '@/lib/tint'
 // DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
 import { extractApiError } from '@/lib/extractApiError'
+import { useSafePermission } from '@/hooks/useSafePermission'
 import { useIndustries } from '@/lib/useIndustries'
 import { useCustomerSources } from '@/lib/useCustomerSources'
 import { useLocations } from '@/lib/useLocations'
@@ -32,6 +32,7 @@ import CustomerBranchesCard from './addmodal/CustomerBranchesCard'
 import DuplicateNotice from '@/components/forms/DuplicateNotice'
 import type { DuplicateMatch } from '@/components/forms/DuplicateNotice'
 import { useCustomerDuplicateGuard } from './addmodal/useCustomerDuplicateGuard'
+import CreateErrorAlert from './addmodal/CreateErrorAlert'
 // EXCEL-VACATURES-1 (2026-08-14): the compact "create from file" card and its
 // wizard/permission wiring generalised out of this page into a shared component —
 // vacancies now reuses the exact same two, never a second copy (CLAUDE.md §11).
@@ -174,16 +175,10 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
   // account the server would 422 on (owner_id is validated against tenant users).
   const authCtx = useAuth() as unknown as {
     user: { id?: Id; name?: string } | null
-    hasPermission?: (permName: string) => boolean
   }
   const { user: me } = authCtx
   const meIsAssignable = me?.id != null && users.some(u => String(u.id) === String(me.id))
-  // CUSTOMER-IMPORT-1: falls back to "no permission" rather than crashing when the
-  // context is mid-boot (mirrors ImporterenSettings' own hasPermission fallback).
-  // The wizard/permission/auto-close wiring itself lives in the shared
-  // useEntityImportCard (kept out of this container to stay under the ~400-line
-  // split trigger, CLAUDE.md §3).
-  const hasPermission = authCtx.hasPermission ?? (() => false)
+  const hasPermission = useSafePermission()
   const { wizard: importWizard, canView: canViewImportTemplate, canImport: canRunImport } =
     useEntityImportCard({ entity: CUSTOMER_TREE_ENTITY, hasPermission, onImported, onClose })
   // DEBITEURNUMMER-1 (Danny 02-08): status is HIDDEN in this form (the phase pills
@@ -367,13 +362,7 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
         )}
         {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}
         {createError && (
-          // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1 on
-          // its own pastel, AA fail (Opus r3.5).
-          <div role="alert" style={{ margin: '0 24px 8px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
-            color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
-            border: tintBorder('var(--color-danger)', true), flexShrink: 0 }}>
-            {createError}
-          </div>
+          <CreateErrorAlert message={createError} inset={24} />
         )}
 
         {/* Footer — the shared ModalFooter (§4) owns the one explicit height/layout, everywhere. */}

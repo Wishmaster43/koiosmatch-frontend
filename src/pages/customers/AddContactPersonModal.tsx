@@ -56,14 +56,15 @@
  * importOpen/errors/createError) from useSubEntitySave.
  */
 import { useTranslation } from 'react-i18next'
-import { useAuth } from '@/context/AuthContext'
 import { Users } from 'lucide-react'
+import { useSafePermission } from '@/hooks/useSafePermission'
 import { useContactFunctions } from '@/lib/useContactFunctions'
 import { useGenders } from '@/lib/useGenders'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { modalColumns } from '@/components/ui/modalCards'
 import SubEntityImportCard from './SubEntityImportCard'
 import SubEntityModalFrame from './addmodal/SubEntityModalFrame'
+import CreateErrorAlert from './addmodal/CreateErrorAlert'
 import ContactIdentityCard from './addmodal/ContactIdentityCard'
 import ContactDetailsCard from './addmodal/ContactDetailsCard'
 import ContactLinkCard from './ContactLinkCard'
@@ -71,7 +72,6 @@ import { useAddContactPersonForm } from './useAddContactPersonForm'
 import type { ContactPayload } from './hooks/useCustomerContacts'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
-import { tintBorder } from '@/lib/tint'
 import { useMessagingLanguageOptions } from '@/lib/useMessagingLanguageOptions'
 
 interface OptionRow { id: Id; name: string }
@@ -99,11 +99,7 @@ export default function AddContactPersonModal({
   existing?: Contact[]
 }) {
   const { t } = useTranslation(['customers', 'common'])
-  const authCtx = useAuth() as unknown as { hasPermission?: (permName: string) => boolean } | null
-  // SUBENTITY-IMPORT-1: falls back to "no permission" rather than crashing when the
-  // context is mid-boot OR genuinely absent (this modal is also mounted from screens
-  // with no AuthProvider ancestor in tests) — mirrors AddCustomerModal's own fallback.
-  const hasPermission = authCtx?.hasPermission ?? (() => false)
+  const hasPermission = useSafePermission()
   const canViewImportTemplate = hasPermission('customers.view')
   const canRunImport = hasPermission('customers.create')
   // Contact function (job title) is a lookup combobox, split from the candidate
@@ -133,11 +129,7 @@ export default function AddContactPersonModal({
 
   // Render the error alert banner if present.
   const alertElement = createError && (
-    <div role="alert" style={{ margin: '0 22px 8px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
-      color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
-      border: tintBorder('var(--color-danger)', true), flexShrink: 0 }}>
-      {createError}
-    </div>
+    <CreateErrorAlert message={createError} />
   )
 
   // Render the import card component if the wizard is active.

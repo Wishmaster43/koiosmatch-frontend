@@ -39,8 +39,8 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAuth } from '@/context/AuthContext'
 import { MapPin } from 'lucide-react'
+import { useSafePermission } from '@/hooks/useSafePermission'
 import { useProvinces } from '@/hooks/useProvinces'
 import { notifyError } from '@/lib/notify'
 import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
@@ -50,6 +50,7 @@ import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { modalColumns, cardBox, cardHead } from '@/components/ui/modalCards'
 import SubEntityImportCard from './SubEntityImportCard'
 import SubEntityModalFrame from './addmodal/SubEntityModalFrame'
+import CreateErrorAlert from './addmodal/CreateErrorAlert'
 import { useSubEntitySave } from './hooks/useSubEntitySave'
 import LocationGeneralCard from './addmodal/LocationGeneralCard'
 import LocationAddressCard from './addmodal/LocationAddressCard'
@@ -61,7 +62,6 @@ import type { LocationPayload } from './hooks/useCustomerLocations'
 import type { ContactPayload } from './hooks/useCustomerContacts'
 import type { Location, Contact } from '@/types/customer'
 import type { LookupOption, Id } from '@/types/common'
-import { tintBorder } from '@/lib/tint'
 // K-283: the site's OWN single branch (a different concept than branchIds, the
 // multi-branch VISIBILITY set) — same optional, clearable picker as
 // LocationAddressTab's own LocationBranchField (mirrors AddCustomerModal's own
@@ -116,11 +116,7 @@ export default function AddLocationModal({
   onAddContact?: (payload: ContactPayload) => Promise<Contact | void> | void
 }) {
   const { t } = useTranslation(['customers', 'common'])
-  const authCtx = useAuth() as unknown as { hasPermission?: (permName: string) => boolean } | null
-  // SUBENTITY-IMPORT-1: falls back to "no permission" rather than crashing when the
-  // context is mid-boot OR genuinely absent (this modal is also mounted from screens
-  // with no AuthProvider ancestor in tests) — mirrors AddCustomerModal's own fallback.
-  const hasPermission = authCtx?.hasPermission ?? (() => false)
+  const hasPermission = useSafePermission()
   const canViewImportTemplate = hasPermission('customers.view')
   const canRunImport = hasPermission('customers.create')
   // Shared state/error management (DRY-SUBENTITY-1): import wizard
@@ -285,11 +281,7 @@ export default function AddLocationModal({
 
   // Render the error alert banner if present.
   const alertElement = createError && (
-    <div role="alert" style={{ margin: '0 22px 8px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
-      color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
-      border: tintBorder('var(--color-danger)', true), flexShrink: 0 }}>
-      {createError}
-    </div>
+    <CreateErrorAlert message={createError} />
   )
 
   // Render the import card component if the wizard is active.
