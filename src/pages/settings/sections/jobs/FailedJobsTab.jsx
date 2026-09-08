@@ -37,24 +37,33 @@ export default function FailedJobsTab() {
     notify('success', parts.join(' · '))
   }
 
+  // Determine the confirmation key based on which filters are active (X-41).
+  // The dialog message must match the action's actual scope.
+  const getConfirmKey = (baseKey) => {
+    const hasQueue = Boolean(filters.queue)
+    const hasTenant = Boolean(filters.tenant)
+
+    if (hasQueue && hasTenant) return `${baseKey}QueueTenantConfirm`
+    if (hasQueue) return `${baseKey}QueueConfirm`
+    if (hasTenant) return `${baseKey}TenantConfirm`
+    return `${baseKey}Confirm`
+  }
+
   // Bulk actions are irreversible — confirm with the exact scope before firing.
   const confirmRetryAll = () => {
-    let key = 'jobs.retryAllConfirm'
+    const key = getConfirmKey('jobs.retryAll')
     const opts = { count: result.total }
-    if (filters.queue) {
-      key = 'jobs.retryAllQueueConfirm'
-      opts.queue = filters.queue
-    } else if (filters.tenant) {
-      key = 'jobs.retryAllUnfilteredConfirm'
-    }
+    if (filters.queue) opts.queue = filters.queue
+    if (filters.tenant) opts.tenant = filters.tenant
     confirm(t(key, opts), runRetryAll)
   }
+
+  // Confirm flush with the exact scope — the queue/tenant params are sent to the API.
   const confirmFlush = () => {
-    let key = 'jobs.flushConfirm'
+    const key = getConfirmKey('jobs.flush')
     const opts = { count: result.total }
-    if (filters.queue || filters.tenant) {
-      key = 'jobs.flushUnfilteredConfirm'
-    }
+    if (filters.queue) opts.queue = filters.queue
+    if (filters.tenant) opts.tenant = filters.tenant
     confirm(t(key, opts), flush, { danger: true })
   }
 

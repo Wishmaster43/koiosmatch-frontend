@@ -50,37 +50,77 @@ describe('useFailedJobs', () => {
     expect(vi.mocked(fetchFailedJobs).mock.calls.length).toBe(callsBefore)
   })
 
-  it('retryAll() passes the queue filter to the bulk endpoint and captures {count, skipped, truncated}', async () => {
+  it('retryAll() passes queue and tenant filters, and captures {count, skipped, truncated, scope}', async () => {
     vi.mocked(fetchFailedJobs).mockResolvedValue(page([{ uuid: 'a' }, { uuid: 'b' }]))
-    vi.mocked(retryAllFailedJobs).mockResolvedValue({ data: { count: 2, skipped: [], truncated: false } })
+    vi.mocked(retryAllFailedJobs).mockResolvedValue({
+      data: { count: 2, skipped: [], truncated: false, scope: { queue: 'sync', tenant: null } }
+    })
     const { result } = renderHook(() => useFailedJobs())
     await waitFor(() => expect(result.current.phase).toBe('ready'))
     await act(async () => { result.current.setFilter('queue', 'sync') })
     await waitFor(() => expect(result.current.filters.queue).toBe('sync'))
     let outcome
     await act(async () => { outcome = await result.current.retryAll() })
-    expect(retryAllFailedJobs).toHaveBeenCalledWith('sync')
+    expect(retryAllFailedJobs).toHaveBeenCalledWith('sync', undefined)
     expect(result.current.bulkBusy).toBe(false)
-    expect(outcome).toEqual({ count: 2, skipped: [], truncated: false })
+    expect(outcome).toEqual({ count: 2, skipped: [], truncated: false, scope: { queue: 'sync', tenant: null } })
   })
 
-  it('retryAll() calls the bulk endpoint with undefined queue when no filter is set', async () => {
+  it('retryAll() passes both queue and tenant filters when both are set (X-41)', async () => {
+    vi.mocked(fetchFailedJobs).mockResolvedValue(page([{ uuid: 'a' }]))
+    vi.mocked(retryAllFailedJobs).mockResolvedValue({
+      data: { count: 1, skipped: [], truncated: false, scope: { queue: 'workflows', tenant: 'yesway' } }
+    })
+    const { result } = renderHook(() => useFailedJobs())
+    await waitFor(() => expect(result.current.phase).toBe('ready'))
+    await act(async () => {
+      result.current.setFilter('queue', 'workflows')
+      result.current.setFilter('tenant', 'yesway')
+    })
+    await waitFor(() => expect(result.current.filters.queue).toBe('workflows'))
+    let outcome
+    await act(async () => { outcome = await result.current.retryAll() })
+    expect(retryAllFailedJobs).toHaveBeenCalledWith('workflows', 'yesway')
+    expect(outcome?.scope).toEqual({ queue: 'workflows', tenant: 'yesway' })
+  })
+
+  it('retryAll() calls with undefined queue and tenant when no filters are set', async () => {
     vi.mocked(fetchFailedJobs).mockResolvedValue(page([{ uuid: 'a' }]))
     vi.mocked(retryAllFailedJobs).mockResolvedValue({ data: { count: 1, skipped: [], truncated: false } })
     const { result } = renderHook(() => useFailedJobs())
     await waitFor(() => expect(result.current.phase).toBe('ready'))
     await act(async () => { await result.current.retryAll() })
-    expect(retryAllFailedJobs).toHaveBeenCalledWith(undefined)
+    expect(retryAllFailedJobs).toHaveBeenCalledWith(undefined, undefined)
     expect(result.current.bulkBusy).toBe(false)
   })
 
-  it('flush() calls the bulk endpoint and reloads', async () => {
+  it('flush() passes queue and tenant filters to the bulk endpoint (X-41)', async () => {
     vi.mocked(fetchFailedJobs).mockResolvedValue(page([{ uuid: 'a' }]))
-    vi.mocked(flushFailedJobs).mockResolvedValue({ data: {} })
+    vi.mocked(flushFailedJobs).mockResolvedValue({
+      data: { count: 1, skipped: [], truncated: false, scope: { queue: 'sync', tenant: null } }
+    })
     const { result } = renderHook(() => useFailedJobs())
     await waitFor(() => expect(result.current.phase).toBe('ready'))
+    await act(async () => { result.current.setFilter('queue', 'sync') })
+    await waitFor(() => expect(result.current.filters.queue).toBe('sync'))
     await act(async () => { await result.current.flush() })
-    expect(flushFailedJobs).toHaveBeenCalledTimes(1)
+    expect(flushFailedJobs).toHaveBeenCalledWith('sync', undefined)
     expect(result.current.bulkBusy).toBe(false)
+  })
+
+  it('flush() passes both queue and tenant filters when both are set', async () => {
+    vi.mocked(fetchFailedJobs).mockResolvedValue(page([{ uuid: 'a' }]))
+    vi.mocked(flushFailedJobs).mockResolvedValue({
+      data: { count: 1, skipped: [], truncated: false, scope: { queue: 'workflows', tenant: 'yesway' } }
+    })
+    const { result } = renderHook(() => useFailedJobs())
+    await waitFor(() => expect(result.current.phase).toBe('ready'))
+    await act(async () => {
+      result.current.setFilter('queue', 'workflows')
+      result.current.setFilter('tenant', 'yesway')
+    })
+    await waitFor(() => expect(result.current.filters.queue).toBe('workflows'))
+    await act(async () => { await result.current.flush() })
+    expect(flushFailedJobs).toHaveBeenCalledWith('workflows', 'yesway')
   })
 })

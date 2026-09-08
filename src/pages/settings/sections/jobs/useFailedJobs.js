@@ -85,17 +85,17 @@ export function useFailedJobs() {
     }
   }
 
-  // Re-queue every failed job in the selected queue (or all if no queue filter).
-  // Resolves the server's {count, skipped, truncated} so the caller can say what
-  // happened (B-53/I-2), or null when the request failed (error shown here).
+  // Re-queue failed jobs matching the selected queue/tenant filters (or all if no filters).
+  // Resolves the server's {count, skipped, truncated, scope} so the caller can say what
+  // happened and confirm the scope (B-53/I-2, X-41), or null when the request failed.
   const retryAll = async () => {
     setActionError(null)
     setBulkBusy(true)
     try {
-      const res = await retryAllFailedJobs(filters.queue || undefined)
-      const { count = 0, skipped = [], truncated: wasTruncated = false } = res.data ?? {}
+      const res = await retryAllFailedJobs(filters.queue || undefined, filters.tenant || undefined)
+      const { count = 0, skipped = [], truncated: wasTruncated = false, scope } = res.data ?? {}
       load()
-      return { count, skipped, truncated: Boolean(wasTruncated) }
+      return { count, skipped, truncated: Boolean(wasTruncated), scope }
     } catch (err) {
       setActionError(extractApiError(err, t('jobs.actionFailed')))
       return null
@@ -104,15 +104,17 @@ export function useFailedJobs() {
     }
   }
 
-  // Wipe every failed job (irreversible — caller confirms first).
+  // Clear failed jobs matching the optional queue/tenant filters (X-41 — irreversible, caller confirms).
   const flush = async () => {
     setActionError(null)
     setBulkBusy(true)
     try {
-      await flushFailedJobs()
+      const res = await flushFailedJobs(filters.queue || undefined, filters.tenant || undefined)
       load()
+      return res.data
     } catch (err) {
       setActionError(extractApiError(err, t('jobs.actionFailed')))
+      return null
     } finally {
       setBulkBusy(false)
     }

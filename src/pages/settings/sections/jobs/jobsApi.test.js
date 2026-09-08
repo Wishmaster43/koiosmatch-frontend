@@ -50,7 +50,7 @@ describe('jobsApi', () => {
     expect(api.post).toHaveBeenCalledWith('/admin/jobs/failed/abc-123/retry')
   })
 
-  it('retryAllFailedJobs sends POST /admin/jobs/failed/retry-all with no body when queue is undefined', async () => {
+  it('retryAllFailedJobs sends POST /admin/jobs/failed/retry-all with no body when no filters are specified', async () => {
     vi.mocked(api.post).mockResolvedValue({ data: { count: 3 } })
     await retryAllFailedJobs()
     expect(api.post).toHaveBeenCalledWith('/admin/jobs/failed/retry-all', {})
@@ -62,15 +62,39 @@ describe('jobsApi', () => {
     expect(api.post).toHaveBeenCalledWith('/admin/jobs/failed/retry-all', { queue: 'sync' })
   })
 
+  it('retryAllFailedJobs sends POST /admin/jobs/failed/retry-all with tenant body when tenant is specified (X-41)', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: { count: 2 } })
+    await retryAllFailedJobs(undefined, 'yesway')
+    expect(api.post).toHaveBeenCalledWith('/admin/jobs/failed/retry-all', { tenant: 'yesway' })
+  })
+
+  it('retryAllFailedJobs sends POST /admin/jobs/failed/retry-all with both queue and tenant when both are specified (X-41)', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: { count: 1 } })
+    await retryAllFailedJobs('workflows', 'yesway')
+    expect(api.post).toHaveBeenCalledWith('/admin/jobs/failed/retry-all', { queue: 'workflows', tenant: 'yesway' })
+  })
+
   it('forgetFailedJob sends DELETE /admin/jobs/failed/{uuid}', async () => {
     vi.mocked(api.delete).mockResolvedValue({ data: {} })
     await forgetFailedJob('abc-123')
     expect(api.delete).toHaveBeenCalledWith('/admin/jobs/failed/abc-123')
   })
 
-  it('flushFailedJobs sends DELETE /admin/jobs/failed with the required confirm body', async () => {
+  it('flushFailedJobs sends DELETE /admin/jobs/failed with confirm body when no filters are specified', async () => {
     vi.mocked(api.delete).mockResolvedValue({ data: {} })
     await flushFailedJobs()
     expect(api.delete).toHaveBeenCalledWith('/admin/jobs/failed', { data: { confirm: true } })
+  })
+
+  it('flushFailedJobs sends DELETE /admin/jobs/failed with queue and confirm body when queue is specified (X-41)', async () => {
+    vi.mocked(api.delete).mockResolvedValue({ data: {} })
+    await flushFailedJobs('sync')
+    expect(api.delete).toHaveBeenCalledWith('/admin/jobs/failed', { data: { confirm: true, queue: 'sync' } })
+  })
+
+  it('flushFailedJobs sends DELETE /admin/jobs/failed with both queue and tenant and confirm body (X-41)', async () => {
+    vi.mocked(api.delete).mockResolvedValue({ data: {} })
+    await flushFailedJobs('workflows', 'yesway')
+    expect(api.delete).toHaveBeenCalledWith('/admin/jobs/failed', { data: { confirm: true, queue: 'workflows', tenant: 'yesway' } })
   })
 })

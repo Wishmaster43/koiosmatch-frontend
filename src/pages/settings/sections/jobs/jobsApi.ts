@@ -23,6 +23,14 @@ import type { operations } from '@/types/api-generated'
 type JobsListParams   = NonNullable<operations['getAdminJobsList']['requestBody']>['content']['application/json']
 type FailedJobsParams = NonNullable<operations['getAdminJobsFailed']['requestBody']>['content']['application/json']
 
+// Bulk action request body (X-41): the generated spec only documented queue, but
+// the backend now also accepts an optional tenant filter per the contract. Both params
+// are additive and optional.
+interface BulkJobActionRequest {
+  queue?: string
+  tenant?: string
+}
+
 // Hand-written — the spec carries no 2xx schema for GET /admin/jobs (§ above).
 export interface QueueBucket {
   status: 'active' | 'stalled' | 'idle'
@@ -84,15 +92,30 @@ export const cancelJob = (id: string | number) => api.delete(`/admin/jobs/${id}`
 // POST /admin/jobs/failed/{uuid}/retry — re-queue one failed job.
 export const retryFailedJob = (uuid: string) => api.post(`/admin/jobs/failed/${uuid}/retry`)
 
-// POST /admin/jobs/failed/retry-all — re-queue failed jobs in a queue (or all if no queue is specified); returns { count }. The tenant filter cannot be honoured by the backend.
-type RetryAllBody = NonNullable<operations['postAdminJobsFailedRetryAll']['requestBody']>['content']['application/json']
-export const retryAllFailedJobs = (queue?: string): Promise<AxiosResponse> => {
-  const body: RetryAllBody = queue ? { queue } : {}
+// Hand-written — response for bulk actions includes metadata about what was acted upon.
+export interface BulkJobActionResponse {
+  message: string
+  count: number
+  skipped: string[]
+  truncated: boolean
+  scope?: { queue: string | null; tenant: string | null }
+}
+
+// POST /admin/jobs/failed/retry-all — re-queue failed jobs matching the optional queue/tenant filters (X-41); returns { count, skipped, truncated, scope }.
+export const retryAllFailedJobs = (queue?: string, tenant?: string): Promise<AxiosResponse<BulkJobActionResponse>> => {
+  const body: BulkJobActionRequest = {}
+  if (queue) body.queue = queue
+  if (tenant) body.tenant = tenant
   return api.post('/admin/jobs/failed/retry-all', body)
 }
 
 // DELETE /admin/jobs/failed/{uuid} — drop one failed job permanently.
 export const forgetFailedJob = (uuid: string) => api.delete(`/admin/jobs/failed/${uuid}`)
 
-// DELETE /admin/jobs/failed — clear ALL failed jobs in ALL queues and ALL tenants (explicit confirm body required by the API). The queue and tenant filters are ignored by the backend.
-export const flushFailedJobs = () => api.delete('/admin/jobs/failed', { data: { confirm: true } })
+// DELETE /admin/jobs/failed — clear failed jobs matching the optional queue/tenant filters (X-41); explicit confirm body required by the API.
+export const flushFailedJobs = (queue?: string, tenant?: string): Promise<AxiosResponse<BulkJobActionResponse>> => {
+  const body: BulkJobActionRequest & { confirm: boolean } = { confirm: true }
+  if (queue) body.queue = queue
+  if (tenant) body.tenant = tenant
+  return api.delete('/admin/jobs/failed', { data: body })
+}
