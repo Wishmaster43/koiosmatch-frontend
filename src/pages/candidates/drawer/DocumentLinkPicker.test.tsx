@@ -11,6 +11,13 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import DocumentLinkPicker from './DocumentLinkPicker'
 
+// DROPDOWN-CLEAR-1: SelectMenu now renders a separate clear X button alongside the
+// trigger. This helper gets only the trigger button (which has aria-haspopup).
+const getLinkTrigger = () => {
+  const allButtons = screen.getAllByRole('button', { name: /link/ })
+  return allButtons.find(btn => btn.hasAttribute('aria-haspopup'))!
+}
+
 describe('DocumentLinkPicker · empty state (no fake affordance)', () => {
   it('renders nothing when educations/certifications/languages/skills are all empty', () => {
     const { container } = render(
@@ -34,7 +41,7 @@ describe('DocumentLinkPicker · G34 is no longer a native <select>', () => {
         educations={[{ id: 'e1', title: 'Verpleegkunde' }]} certifications={[]} />,
     )
     expect(container.querySelector('select')).toBeNull()
-    expect(screen.getByRole('button', { name: /link/ })).toBeInTheDocument()
+    expect(getLinkTrigger()).toBeInTheDocument()
   })
 })
 
@@ -47,7 +54,7 @@ describe('DocumentLinkPicker · DOC-LANG-SKILL-LINK-1 grouped options', () => {
     render(
       <DocumentLinkPicker ariaLabel="link" value="" onChange={vi.fn()} educations={[]} certifications={[]} languages={languages} skills={[]} />,
     )
-    await user.click(screen.getByRole('button', { name: /link/ }))
+    await user.click(getLinkTrigger())
     expect(screen.getByRole('button', { name: 'sections.languages · Engels' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'sections.languages · Duits' })).toBeInTheDocument()
   })
@@ -57,7 +64,7 @@ describe('DocumentLinkPicker · DOC-LANG-SKILL-LINK-1 grouped options', () => {
     render(
       <DocumentLinkPicker ariaLabel="link" value="" onChange={vi.fn()} educations={[]} certifications={[]} languages={[]} skills={skills} />,
     )
-    await user.click(screen.getByRole('button', { name: /link/ }))
+    await user.click(getLinkTrigger())
     expect(screen.getByRole('button', { name: 'sections.skills · Heftruck rijden' })).toBeInTheDocument()
   })
 
@@ -68,7 +75,7 @@ describe('DocumentLinkPicker · DOC-LANG-SKILL-LINK-1 grouped options', () => {
         educations={[{ id: 'e1', title: 'Verpleegkunde' }]} certifications={[{ id: 'c1', name: 'VCA Basis' }]}
         languages={languages} skills={skills} />,
     )
-    await user.click(screen.getByRole('button', { name: /link/ }))
+    await user.click(getLinkTrigger())
     expect(screen.getByRole('button', { name: 'sections.education · Verpleegkunde' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'sections.certifications · VCA Basis' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'sections.languages · Engels' })).toBeInTheDocument()
@@ -81,7 +88,7 @@ describe('DocumentLinkPicker · DOC-LANG-SKILL-LINK-1 grouped options', () => {
     render(
       <DocumentLinkPicker ariaLabel="link" value="" onChange={onChange} educations={[]} certifications={[]} languages={[]} skills={skills} />,
     )
-    await user.click(screen.getByRole('button', { name: /link/ }))
+    await user.click(getLinkTrigger())
     await user.click(screen.getByRole('button', { name: 'sections.skills · Heftruck rijden' }))
     expect(onChange).toHaveBeenCalledWith('skill:skill1')
   })
@@ -108,7 +115,7 @@ describe('DocumentLinkPicker · REFERENTIE-VELDEN-1 reference group', () => {
     render(
       <DocumentLinkPicker ariaLabel="link" value="" onChange={vi.fn()} educations={[]} certifications={[]} references={references} />,
     )
-    await user.click(screen.getByRole('button', { name: /link/ }))
+    await user.click(getLinkTrigger())
     expect(screen.getByRole('button', { name: 'sections.references · Jan de Vries' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'sections.references · Anna Bakker' })).toBeInTheDocument()
   })
@@ -119,7 +126,7 @@ describe('DocumentLinkPicker · REFERENTIE-VELDEN-1 reference group', () => {
     render(
       <DocumentLinkPicker ariaLabel="link" value="" onChange={onChange} educations={[]} certifications={[]} references={references} />,
     )
-    await user.click(screen.getByRole('button', { name: /link/ }))
+    await user.click(getLinkTrigger())
     await user.click(screen.getByRole('button', { name: 'sections.references · Anna Bakker' }))
     expect(onChange).toHaveBeenCalledWith('reference:ref2')
   })
@@ -139,7 +146,7 @@ describe('DocumentLinkPicker · DOC-1-EIGENAAR-1 occupied entries are not offere
   it('leaves out an education that already carries another document', async () => {
     const user = userEvent.setup()
     render(<DocumentLinkPicker ariaLabel="link" value="" onChange={vi.fn()} educations={educations} certifications={[]} />)
-    await user.click(screen.getByRole('button', { name: /link/ }))
+    await user.click(getLinkTrigger())
     expect(screen.queryByRole('button', { name: 'sections.education · Verpleegkunde' })).toBeNull()
     expect(screen.getByRole('button', { name: 'sections.education · Anatomie' })).toBeInTheDocument()
   })
@@ -147,7 +154,7 @@ describe('DocumentLinkPicker · DOC-1-EIGENAAR-1 occupied entries are not offere
   it('KEEPS the entry this very document is linked to, so the pick stays switchable', async () => {
     const user = userEvent.setup()
     render(<DocumentLinkPicker ariaLabel="link" value="education:e1" onChange={vi.fn()} educations={educations} certifications={[]} />)
-    await user.click(screen.getByRole('button', { name: /link/ }))
+    await user.click(getLinkTrigger())
     expect(screen.getByRole('button', { name: 'sections.education · Verpleegkunde' })).toBeInTheDocument()
   })
 
@@ -155,7 +162,7 @@ describe('DocumentLinkPicker · DOC-1-EIGENAAR-1 occupied entries are not offere
     const user = userEvent.setup()
     // value points at education e1 — the occupied certification c1 must stay hidden.
     render(<DocumentLinkPicker ariaLabel="link" value="education:e1" onChange={vi.fn()} educations={educations} certifications={certifications} />)
-    await user.click(screen.getByRole('button', { name: /link/ }))
+    await user.click(getLinkTrigger())
     expect(screen.queryByRole('button', { name: 'sections.certifications · VCA Basis' })).toBeNull()
   })
 

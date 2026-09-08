@@ -120,7 +120,20 @@ vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'u1', br
 // candidate test piggybacks a real i18n init on, poisoning every `t()` call in
 // this same test process from "return the raw key" to real Dutch strings
 // (mirrors WorkTab.test.tsx's identical mock, same reason).
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => `fmt(${v})`, locale: 'nl-NL' }) }))
+vi.mock('@/lib/datetime', () => ({
+  useDateFormat: () => ({ formatDate: (v: string) => `fmt(${v})`, locale: 'nl-NL' }),
+  useLocale: () => 'nl-NL',
+  // Re-exports from localDate module — tests don't use them, but the module imports
+  // them for re-export, so the mock must have them to avoid "not exported" errors.
+  toLocalIsoDate: () => '',
+  humanizeIsoDates: (s: string) => s,
+  formatDateOnly: (s: string) => s,
+  formatDateTimeStr: (s: string) => s,
+  ddmmyyyy: () => '',
+  hhmm: () => '',
+  hhmmss: () => '',
+  formatMonthYear: () => '',
+}))
 vi.mock('../hooks/useRateProposal', () => ({
   useRateProposal: () => ({ proposal: null, deviatesFromProposal: false, confirmDeviation: false, setConfirmDeviation: vi.fn() }),
 }))
@@ -528,7 +541,10 @@ describe('MatchModal · Contractsoort/Vestiging/CAO/Recruiter are searchable (Da
     // "Sanne" search narrowing the LIST OPTIONS to just her is asserted as
     // exactly one remaining match (the trigger), not a second one from a
     // still-listed Piet Recruiter option.
-    await user.click(within(ownerField).getByRole('button'))
+    // DROPDOWN-CLEAR-1: filter to the trigger button (has aria-haspopup), not the clear X.
+    const ownerButtons = within(ownerField).getAllByRole('button')
+    const ownerTrigger = ownerButtons.find(btn => btn.hasAttribute('aria-haspopup'))!
+    await user.click(ownerTrigger)
     await user.type(screen.getByPlaceholderText('placement.optional'), 'Sanne')
     expect(screen.getByRole('button', { name: 'Sanne Planner' })).toBeInTheDocument()
     expect(screen.getAllByRole('button', { name: /Piet Recruiter$/ })).toHaveLength(1)

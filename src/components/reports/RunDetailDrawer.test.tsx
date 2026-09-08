@@ -2,11 +2,13 @@
  * RunDetailDrawer — RUN-CONTROL-1 polish wave: this Make-style bundle inspector
  * stays read-only otherwise, but a still-live (running/waiting) run gets the
  * shared StopRunButton, and cancelling it refreshes the drawer immediately
- * instead of waiting out the 3s poll tick. i18n is not initialised in tests, so
- * t() returns the raw key (mirrors RunStepList.test.tsx / WorkflowHistoryView.test.tsx).
+ * instead of waiting out the 3s poll tick. i18n IS initialised here so
+ * t() returns translated text (mirrors configPanelWaWeb.test.tsx).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { I18nextProvider } from 'react-i18next'
+import i18n from '@/i18n'
 import api from '@/lib/api'
 import RunDetailDrawer from './RunDetailDrawer'
 import type { RunRow } from '@/types/reports'
@@ -25,23 +27,41 @@ describe('RunDetailDrawer — stop button', () => {
   })
 
   it('shows the stop button for a RUNNING run', () => {
-    render(<RunDetailDrawer run={{ ...baseRun, status: 'running' }} onClose={() => {}} />)
-    expect(screen.getByText('runControl.stop')).toBeInTheDocument()
+    render(
+    <I18nextProvider i18n={i18n}>
+      <RunDetailDrawer run={{ ...baseRun, status: 'running' }} onClose={() => {}} />
+    </I18nextProvider>,
+  )
+    // i18n is initialized; the key translates to Dutch "Stoppen"
+    expect(screen.getByText('Stoppen')).toBeInTheDocument()
   })
 
   it('shows the stop button for a WAITING run too', () => {
-    render(<RunDetailDrawer run={{ ...baseRun, status: 'waiting' }} onClose={() => {}} />)
-    expect(screen.getByText('runControl.stop')).toBeInTheDocument()
+    render(
+    <I18nextProvider i18n={i18n}>
+      <RunDetailDrawer run={{ ...baseRun, status: 'waiting' }} onClose={() => {}} />
+    </I18nextProvider>,
+  )
+    // i18n is initialized; the key translates to Dutch "Stoppen"
+    expect(screen.getByText('Stoppen')).toBeInTheDocument()
   })
 
   it('hides the stop button for a finished (success) run', () => {
-    render(<RunDetailDrawer run={{ ...baseRun, status: 'success' }} onClose={() => {}} />)
-    expect(screen.queryByText('runControl.stop')).not.toBeInTheDocument()
+    render(
+    <I18nextProvider i18n={i18n}>
+      <RunDetailDrawer run={{ ...baseRun, status: 'success' }} onClose={() => {}} />
+    </I18nextProvider>,
+  )
+    expect(screen.queryByText('Stoppen')).not.toBeInTheDocument()
   })
 
   it('hides the stop button for an already-cancelled run', () => {
-    render(<RunDetailDrawer run={{ ...baseRun, status: 'cancelled' }} onClose={() => {}} />)
-    expect(screen.queryByText('runControl.stop')).not.toBeInTheDocument()
+    render(
+    <I18nextProvider i18n={i18n}>
+      <RunDetailDrawer run={{ ...baseRun, status: 'cancelled' }} onClose={() => {}} />
+    </I18nextProvider>,
+  )
+    expect(screen.queryByText('Stoppen')).not.toBeInTheDocument()
   })
 
   it('cancels the run and refreshes immediately — the button disappears once the refetch shows it stopped', async () => {
@@ -50,21 +70,29 @@ describe('RunDetailDrawer — stop button', () => {
     vi.stubEnv('VITE_WORKFLOW_API_URL', 'http://engine.test/api')
     vi.mocked(api.post).mockResolvedValue({})
     vi.mocked(api.get).mockResolvedValue({ data: [{ ...baseRun, status: 'cancelled' }] })
-    render(<RunDetailDrawer run={{ ...baseRun, status: 'running' }} onClose={() => {}} />)
+    render(
+    <I18nextProvider i18n={i18n}>
+      <RunDetailDrawer run={{ ...baseRun, status: 'running' }} onClose={() => {}} />
+    </I18nextProvider>,
+  )
 
-    fireEvent.click(screen.getByText('runControl.stop'))
+    fireEvent.click(screen.getByText('Stoppen'))
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/workflow-runs/5/cancel', undefined, { baseURL: 'http://engine.test/api' }))
     // Refresh-after-cancel: fetched right away, not on the next 3s poll tick.
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/workflows/10/runs', { baseURL: 'http://engine.test/api' }))
-    await waitFor(() => expect(screen.queryByText('runControl.stop')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByText('Stoppen')).not.toBeInTheDocument())
   })
 
   it('surfaces the backend reason inline when the cancel fails (e.g. already finished)', async () => {
     vi.mocked(api.post).mockRejectedValue({ response: { data: { message: 'Run is al klaar' } } })
-    render(<RunDetailDrawer run={{ ...baseRun, status: 'running' }} onClose={() => {}} />)
+    render(
+    <I18nextProvider i18n={i18n}>
+      <RunDetailDrawer run={{ ...baseRun, status: 'running' }} onClose={() => {}} />
+    </I18nextProvider>,
+  )
 
-    fireEvent.click(screen.getByText('runControl.stop'))
+    fireEvent.click(screen.getByText('Stoppen'))
     expect(await screen.findByText('Run is al klaar')).toBeInTheDocument()
   })
 })
@@ -78,14 +106,23 @@ describe('RunDetailDrawer — run detail fetch', () => {
 
   it('requests GET /workflow-runs/{id} once when opened', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { id: 5, child_runs: [] } })
-    render(<RunDetailDrawer run={{ ...baseRun, status: 'success' }} onClose={() => {}} />)
+    render(
+    <I18nextProvider i18n={i18n}>
+      <RunDetailDrawer run={{ ...baseRun, status: 'success' }} onClose={() => {}} />
+    </I18nextProvider>,
+  )
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/workflow-runs/5', { baseURL: expect.any(String) }))
     expect(vi.mocked(api.get).mock.calls.filter(c => c[0] === '/workflow-runs/5')).toHaveLength(1)
   })
 
   it('merges the fetched child_runs into the run shown to RunLineage', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { id: 5, child_runs: [{ id: 'child-1', status: 'completed' }] } })
-    render(<RunDetailDrawer run={{ ...baseRun, status: 'success' }} onClose={() => {}} />)
-    expect(await screen.findByText('runs.drawer.childRuns')).toBeInTheDocument()
+    render(
+    <I18nextProvider i18n={i18n}>
+      <RunDetailDrawer run={{ ...baseRun, status: 'success' }} onClose={() => {}} />
+    </I18nextProvider>,
+  )
+    // i18n is initialized; the key translates to Dutch "Kind-runs"
+    expect(await screen.findByText('Kind-runs')).toBeInTheDocument()
   })
 })

@@ -21,25 +21,28 @@ describe('WhatsappPhoneNumberField · channel-driven Coexistence filter', () => 
   beforeEach(() => vi.clearAllMocks())
 
   it('lists every sender number when channel is not waba_coex', async () => {
-    render(<WhatsappPhoneNumberField value={undefined} onChange={vi.fn()} fieldKey="phone_number_id" endpoint="/whatsapp-phone-numbers" config={{ channel: 'waba' }} />)
-    fireEvent.click(screen.getByRole('button'))
-    await waitFor(() => expect(screen.getAllByRole('button')[0]).toHaveAttribute('aria-expanded', 'true'))
+    const { container } = render(<WhatsappPhoneNumberField value={undefined} onChange={vi.fn()} fieldKey="phone_number_id" endpoint="/whatsapp-phone-numbers" config={{ channel: 'waba' }} />)
+    const trigger = container.querySelector('[aria-haspopup="listbox"]') as HTMLElement
+    fireEvent.click(trigger)
+    await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'true'))
     expect(await screen.findByText('WABA main')).toBeInTheDocument()
     expect(screen.getByText('Coexistence line')).toBeInTheDocument()
   })
 
   it('keeps only coexistence:true numbers when channel is waba_coex', async () => {
-    render(<WhatsappPhoneNumberField value={undefined} onChange={vi.fn()} fieldKey="phone_number_id" endpoint="/whatsapp-phone-numbers" config={{ channel: 'waba_coex' }} />)
-    fireEvent.click(screen.getByRole('button'))
-    await waitFor(() => expect(screen.getAllByRole('button')[0]).toHaveAttribute('aria-expanded', 'true'))
+    const { container } = render(<WhatsappPhoneNumberField value={undefined} onChange={vi.fn()} fieldKey="phone_number_id" endpoint="/whatsapp-phone-numbers" config={{ channel: 'waba_coex' }} />)
+    const trigger = container.querySelector('[aria-haspopup="listbox"]') as HTMLElement
+    fireEvent.click(trigger)
+    await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'true'))
     expect(await screen.findByText('Coexistence line')).toBeInTheDocument()
     expect(screen.queryByText('WABA main')).not.toBeInTheDocument()
   })
 
   it('keeps a stored value visible even when the active filter would drop it', async () => {
-    render(<WhatsappPhoneNumberField value="111" onChange={vi.fn()} fieldKey="phone_number_id" endpoint="/whatsapp-phone-numbers" config={{ channel: 'waba_coex' }} />)
-    fireEvent.click(screen.getByRole('button'))
-    await waitFor(() => expect(screen.getAllByRole('button')[0]).toHaveAttribute('aria-expanded', 'true'))
+    const { container } = render(<WhatsappPhoneNumberField value="111" onChange={vi.fn()} fieldKey="phone_number_id" endpoint="/whatsapp-phone-numbers" config={{ channel: 'waba_coex' }} />)
+    const trigger = container.querySelector('[aria-haspopup="listbox"]') as HTMLElement
+    fireEvent.click(trigger)
+    await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'true'))
     // '111' is not coexistence, but is the CURRENT value — must stay reachable
     // (trigger shows it as selected AND the dropdown lists it, hence 2 matches).
     await waitFor(() => expect(screen.getAllByText('WABA main').length).toBeGreaterThan(1))
@@ -54,9 +57,10 @@ describe('WhatsappPhoneNumberField · channel-driven Coexistence filter', () => 
 
   it('writes the picked number id via onChange', async () => {
     const onChange = vi.fn()
-    render(<WhatsappPhoneNumberField value={undefined} onChange={onChange} fieldKey="phone_number_id" endpoint="/whatsapp-phone-numbers" config={{ channel: 'waba' }} />)
-    fireEvent.click(screen.getByRole('button'))
-    await waitFor(() => expect(screen.getAllByRole('button')[0]).toHaveAttribute('aria-expanded', 'true'))
+    const { container } = render(<WhatsappPhoneNumberField value={undefined} onChange={onChange} fieldKey="phone_number_id" endpoint="/whatsapp-phone-numbers" config={{ channel: 'waba' }} />)
+    const trigger = container.querySelector('[aria-haspopup="listbox"]') as HTMLElement
+    fireEvent.click(trigger)
+    await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'true'))
     fireEvent.click(await screen.findByText('WABA main'))
     await waitFor(() => expect(onChange).toHaveBeenCalledWith('phone_number_id', '111'))
   })

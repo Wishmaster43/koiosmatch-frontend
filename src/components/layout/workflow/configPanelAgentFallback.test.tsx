@@ -8,9 +8,15 @@
  * (Dutch) label text.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, within, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import ConfigPanel from './ConfigPanel'
 import type { FlowNode } from '@/types/workflow'
+
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k, i18n: { language: 'nl' } }) }))
+vi.mock('@/components/layout/workflow/useModuleCatalog', () => ({ useModuleCatalog: () => ({ catalog: {} }) }))
+vi.mock('@/components/layout/workflow/AgentTestPanel', () => ({ default: () => null }))
+vi.mock('@/components/layout/workflow/OutputTree', () => ({ default: () => null }))
+vi.mock('@/components/layout/workflow/FanoutSummary', () => ({ default: () => null }))
 
 // The GET /ai/agents lookup this field reads for its options.
 vi.mock('@/lib/api', () => ({
@@ -28,7 +34,8 @@ vi.mock('@/lib/api', () => ({
 
 function openAgentSelect() {
   const wrapper = screen.getByText('AI-agent', { selector: 'label' }).closest('div')!
-  fireEvent.click(within(wrapper).getByRole('button'))
+  const trigger = wrapper.querySelector('[aria-haspopup="listbox"]') as HTMLElement
+  fireEvent.click(trigger)
 }
 
 const node: FlowNode = { id: 'n1', position: { x: 0, y: 0 }, data: { type: 'ai_agent', config: { agent: 'Kelly' } } }

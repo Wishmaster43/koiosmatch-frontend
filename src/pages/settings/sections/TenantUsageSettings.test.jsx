@@ -58,19 +58,21 @@ describe('TenantUsageSettings — subtabs', () => {
     await screen.findByText('usage.col.connectors')
 
     // Pick a month via the trigger button (renders the current label initially).
-    const monthTrigger = screen.getByRole('button')
-    const initialLabel = monthTrigger.textContent
+    // getAllByRole to skip the clear X button that SearchSelect now renders.
+    const monthTrigger = screen.getAllByRole('button')[0]
+    const initialLabel = monthTrigger.textContent.trim()
     await userEvent.click(monthTrigger)
     // The option list renders as buttons too (SearchSelect); pick one that
     // differs from the currently selected month so the change is observable.
+    // Skip the clear button (which SearchSelect now renders) by excluding buttons with id ending in '-clear'.
     const options = await screen.findAllByRole('button')
-    const otherMonth = options.find(o => o !== monthTrigger && o.textContent && o.textContent !== initialLabel)
+    const otherMonth = options.find(o => o !== monthTrigger && !o.id.endsWith('-clear') && o.textContent && o.textContent.trim() !== initialLabel)
     await userEvent.click(otherMonth)
-    const chosenLabel = otherMonth.textContent
+    const chosenLabel = otherMonth.textContent.trim()
 
     await userEvent.click(screen.getByRole('tab', { name: 'usage.tabs.breakdown' }))
     await userEvent.click(screen.getByRole('tab', { name: 'usage.tabs.kpis' }))
 
-    expect(screen.getByRole('button').textContent).toBe(chosenLabel)
+    expect(screen.getAllByRole('button')[0].textContent.trim()).toBe(chosenLabel)
   })
 })

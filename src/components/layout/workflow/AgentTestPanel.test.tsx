@@ -14,6 +14,11 @@ import AgentTestPanel from './AgentTestPanel'
 // new message via a ref effect, unrelated to what this test asserts.
 Element.prototype.scrollIntoView = vi.fn()
 
+vi.mock('react-i18next', async () => {
+  const actual = await vi.importActual<typeof import('react-i18next')>('react-i18next')
+  return { ...actual, useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k, i18n: { language: 'nl' } }) }
+})
+
 const postMock = vi.fn().mockResolvedValue({ data: { response: 'ok' } })
 vi.mock('@/lib/api', () => ({
   default: { post: (...args: unknown[]) => postMock(...args) },

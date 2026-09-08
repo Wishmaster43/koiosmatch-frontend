@@ -35,14 +35,14 @@ describe('KoiosEffortDefaultCard — reads the tenant default', () => {
   it('shows the seeded high default when nothing is stored', () => {
     mockSettings.mockReturnValue({})
     render(<KoiosEffortDefaultCard />)
-    const button = screen.getByRole('button')
+    const button = screen.getByRole('button', { name: /Hoog|Laag|Gemiddeld|Extra hoog|Maximaal/ })
     expect(button).toHaveTextContent(st('effort.high'))
   })
 
   it('reads a stored effort level', () => {
     mockSettings.mockReturnValue({ 'koios_default_effort': 'xhigh' })
     render(<KoiosEffortDefaultCard />)
-    const button = screen.getByRole('button')
+    const button = screen.getByRole('button', { name: /Hoog|Laag|Gemiddeld|Extra hoog|Maximaal/ })
     expect(button).toHaveTextContent(st('effort.xhigh'))
   })
 })
@@ -53,7 +53,7 @@ describe('KoiosEffortDefaultCard — saves', () => {
     render(<KoiosEffortDefaultCard />)
 
     // Open the dropdown and select a different level.
-    fireEvent.click(screen.getByRole('button'))
+    fireEvent.click(screen.getByRole('button', { name: /Hoog|Laag|Gemiddeld|Extra hoog|Maximaal/ }))
 
     // Find and click the "medium" option.
     const mediumOption = screen.getByText(st('effort.medium'))
@@ -67,7 +67,7 @@ describe('KoiosEffortDefaultCard — saves', () => {
     apiPost.mockRejectedValueOnce({ response: { data: { errors: { 'koios_default_effort': ['Effort level exceeds package ceiling.'] } } } })
     render(<KoiosEffortDefaultCard />)
 
-    fireEvent.click(screen.getByRole('button'))
+    fireEvent.click(screen.getByRole('button', { name: /Hoog|Laag|Gemiddeld|Extra hoog|Maximaal/ }))
     const maxOption = screen.getByText(st('effort.max'))
     fireEvent.click(maxOption)
 

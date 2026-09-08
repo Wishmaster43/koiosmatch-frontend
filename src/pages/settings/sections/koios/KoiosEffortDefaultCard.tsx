@@ -55,8 +55,10 @@ export default function KoiosEffortDefaultCard() {
         {canEdit ? (
           // The searchable dropdown (its own field face, no custom trigger) renders only for who
           // may write (§3 no fake affordances); a save in flight is not re-fired by a second click.
+          // DROPDOWN-CLEAR-1: effort is a required setting with no default-on-clear logic.
           <SearchSelect
             closeOnToggle
+            clearable={false}
             triggerLabel={current?.label ?? effort}
             aria-label={t('effortDefault.title') as string}
             options={options}

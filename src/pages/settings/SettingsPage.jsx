@@ -299,7 +299,8 @@ export default function SettingsPage() {
               <span id={categoryPickerLabelId} className="sr-only">{t('shell.categoryPicker')}</span>
               {/* Canon (r8 MV-1/2): the picker reads FIELD metrics, the search button
                   the md search-chrome size — the ad-hoc 38px pair is retired. */}
-              <SelectMenu aria-labelledby={categoryPickerLabelId} value={category} onChange={selectCategory}
+              {/* DROPDOWN-CLEAR-1: this is the settings-group NAVIGATION, always on a group; an empty value would strand the page. */}
+              <SelectMenu clearable={false} aria-labelledby={categoryPickerLabelId} value={category} onChange={selectCategory}
                 options={visibleGroups.map(g => ({ value: g.key, label: t(`groups.${g.key}`) }))}
                 style={{ flex: 1, height: FIELD_HEIGHT, fontSize: FIELD_FONT_SIZE }} />
               <Button variant="secondary" size="md" iconOnly onClick={() => setSearchOpen(true)} aria-label={t('shell.search')}>

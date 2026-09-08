@@ -62,7 +62,10 @@ const getFileInput = (container: HTMLElement) => container.querySelector('input[
 // documents.docTypeFor never resolves; production i18n differentiates them for real).
 // `getAllByRole` + index picks the wanted row; opening it scopes the option query to
 // its OWN wrapper div, so it never collides with the always-visible "apply to all" chips.
+// DROPDOWN-CLEAR-1: SelectMenu now renders a separate clear X button alongside the
+// trigger. Filter to only trigger buttons (which have aria-haspopup).
 const getTypeTriggers = () => screen.getAllByRole('button', { name: /documents\.docTypeFor/ })
+  .filter(btn => btn.hasAttribute('aria-haspopup'))
 // PORTAL-MARKER-1: the open menu is PORTALLED into document.body now — scope the
 // option query to the one open portal menu (only one exists at a time).
 const openPortalMenu = () => document.querySelector('[data-dropdown-portal]') as HTMLElement

@@ -380,7 +380,10 @@ describe('AddVacancyModal · Publicatie (punt 20)', () => {
     // One application-setting change — the trigger is scoped to the CV row; the
     // OPTIONS live in the portalled menu (PORTAL-MARKER-1), the only one open.
     const cvRow = screen.getByText('publishing.fields.cv').parentElement as HTMLElement
-    await user.click(within(cvRow).getByRole('button'))
+    // DROPDOWN-CLEAR-1: filter to the trigger button (has aria-haspopup), not the clear X.
+    const cvButtons = within(cvRow).getAllByRole('button')
+    const cvTrigger = cvButtons.find(btn => btn.hasAttribute('aria-haspopup'))!
+    await user.click(cvTrigger)
     const menu = document.querySelector('[data-dropdown-portal]') as HTMLElement
     await user.click(within(menu).getByRole('button', { name: 'publishing.values.optional' }))
 

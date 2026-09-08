@@ -42,6 +42,7 @@ interface UseCandidatesDataParams {
   t: TFunction
   setActionMsg: (msg: ActionMsg) => void
   sort?: CandidateSort | null
+  locale?: string
 }
 
 // Stable empty defaults. A fresh `?? []` each render gives the memo chain (options →
@@ -89,7 +90,7 @@ function sortParams(sort?: CandidateSort | null): Record<string, string> {
 // Data layer for the candidates page: the paginated/filtered/sorted list query
 // plus the SELECT-RACE-1 row-signature tracking that decides when bulk selection
 // must be dropped (see the comment above that effect below).
-export function useCandidatesData({ filterParams, page, pageSize, t, setActionMsg, sort }: UseCandidatesDataParams) {
+export function useCandidatesData({ filterParams, page, pageSize, t, setActionMsg, sort, locale = 'nl-NL' }: UseCandidatesDataParams) {
   const queryClient = useQueryClient()
 
   // List (paginated, server-filtered). 422 = the backend rejected a filter value → keep the
@@ -101,7 +102,7 @@ export function useCandidatesData({ filterParams, page, pageSize, t, setActionMs
       try {
         const res = await api.get('/candidates', { params: { ...filterParams, ...sortParams(sort), page, per_page: pageSize }, signal })
         const { rows, total, lastPage } = unwrapList(res)
-        return { candidates: (rows as ApiCandidate[]).map(mapCandidate), total, lastPage }
+        return { candidates: (rows as ApiCandidate[]).map(c => mapCandidate(c, locale)), total, lastPage }
       } catch (err) {
         if ((err as { response?: { status?: number } })?.response?.status === 422) {
           setActionMsg({ type: 'error', text: t('page.filterUnsupported', { defaultValue: 'Dit filter wordt (nog) niet door de server ondersteund.' }) })

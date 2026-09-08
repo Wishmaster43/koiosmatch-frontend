@@ -409,14 +409,18 @@ describe('PlanIntakeModal · Afspraak-as (modality axis + its detail field)', ()
     expect(screen.getByText('work.modalityWhere')).toBeInTheDocument()
     // Accessible name is composed from the row label (verifier point 5) — never
     // just the placeholder text — proving the label id is actually wired in.
-    expect(screen.getByRole('button', { name: /work\.modalityWhere/ })).toBeInTheDocument()
+    // DROPDOWN-CLEAR-1: filter to the trigger button (has aria-haspopup), not the clear X.
+    const modalityButtons = screen.getAllByRole('button', { name: /work\.modalityWhere/ })
+    expect(modalityButtons.find(btn => btn.hasAttribute('aria-haspopup'))).toBeInTheDocument()
   })
 
   it('shows the SAME neutral location picker for a remote (video) appointment — BE only accepts configured lookup slugs, never free text', () => {
     vi.mocked(useAppointmentTypes).mockReturnValue(typeFixture('remote'))
     render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
     expect(screen.getByText('work.modalityWhere')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /work\.modalityWhere/ })).toBeInTheDocument()
+    // DROPDOWN-CLEAR-1: filter to the trigger button (has aria-haspopup), not the clear X.
+    const modalityButtons = screen.getAllByRole('button', { name: /work\.modalityWhere/ })
+    expect(modalityButtons.find(btn => btn.hasAttribute('aria-haspopup'))).toBeInTheDocument()
   })
 
   it('hides the detail field entirely for a phone appointment', () => {

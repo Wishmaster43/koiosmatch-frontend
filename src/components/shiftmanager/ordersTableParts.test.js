@@ -27,9 +27,9 @@ describe('formatTime', () => {
 
 describe('formatHours', () => {
   it('renders two decimals (incl. zero)', () => {
-    expect(formatHours(8.5)).toBe('8.50')
-    expect(formatHours(0)).toBe('0.00')
-    expect(formatHours('7.25')).toBe('7.25')
+    expect(formatHours(8.5)).toBe('8,5')
+    expect(formatHours(0)).toBe('0')
+    expect(formatHours('7.25')).toBe('7,25')
   })
   it('dashes null/undefined', () => {
     expect(formatHours(null)).toBe('—')

@@ -37,7 +37,9 @@ export function OperatorSelect({ value, onChange, style, ariaLabel }: {
   return (
     <>
       <span id={labelId} className="sr-only">{label}</span>
-      <CreatableSelect value={value ?? '='} onChange={onChange} aria-labelledby={labelId} allowCreate={false}
+      {/* DROPDOWN-CLEAR-1: a filter always has an operator (default '='); the step config
+          is saved as typed, so '' would persist a broken condition. */}
+      <CreatableSelect value={value ?? '='} onChange={onChange} aria-labelledby={labelId} allowCreate={false} clearable={false}
         options={options} menuWidth={230}
         style={{ padding: '6px 8px', fontSize: 12, ...style }} />
     </>

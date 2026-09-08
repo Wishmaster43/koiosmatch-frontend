@@ -258,7 +258,11 @@ export default function EntityHeader({
             // and left-aligned instead of stretching across the whole header.
             <div key={m.key} style={{ width: m.width ?? 200, maxWidth: '100%', minWidth: 0, flexShrink: 0 }}>
               <Caption as="div" style={{ marginBottom: 4 }}>{m.label}</Caption>
-              <SelectMenu value={m.value} options={m.options} onChange={m.onChange} placeholder={m.placeholder} menuWidth={m.menuWidth ?? 180} />
+              {/* DROPDOWN-CLEAR-1: header meta pickers PERSIST on every pick (status/phase/owner
+                  PATCH straight away) and most are required; clearing to '' here would write an
+                  empty value the record must keep. Optional owner pickers get their clear once
+                  every host maps '' to null (follow-up, frozen drawers). */}
+              <SelectMenu value={m.value} options={m.options} onChange={m.onChange} placeholder={m.placeholder} menuWidth={m.menuWidth ?? 180} clearable={false} />
             </div>
           ))}
           {/* Trailing meta content (e.g. funnel chips) fills the space beside the pickers. */}

@@ -165,14 +165,16 @@ describe('CompanySettings — province cascade after the country move (COMPANY-O
     await screen.findByRole('button', { name: t('common.upload') })
 
     // The province picker (searchable dropdown, never a native select) starts on NL.
-    const provinceTrigger = within(rowOf(t('company.province'))).getByRole('button')
+    // getAllByRole to skip the clear X button that SearchSelect now renders.
+    const provinceTrigger = within(rowOf(t('company.province'))).getAllByRole('button')[0]
     await user.click(provinceTrigger)
     expect(await screen.findByRole('button', { name: 'Utrecht' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Antwerpen' })).not.toBeInTheDocument()
     await user.click(provinceTrigger)
 
     // Pick Belgium in the country row that now sits BELOW the province row.
-    const countryTrigger = within(rowOf(t('company.country'))).getByRole('button')
+    // getAllByRole to skip the clear X button that SearchSelect now renders.
+    const countryTrigger = within(rowOf(t('company.country'))).getAllByRole('button')[0]
     await user.click(countryTrigger)
     await user.click(await screen.findByRole('button', { name: getCountryName('BE', i18n.language) }))
 

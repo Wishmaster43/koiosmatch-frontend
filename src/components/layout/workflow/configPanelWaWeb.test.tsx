@@ -2,11 +2,13 @@
  * configPanelWaWeb.test — K-193 fase 2b (C): picking 'wa_web' on whatsapp_send's
  * channel field auto-sets message_type to 'session' (the only format WhatsApp
  * Web can send), never silently — a Caption notice explains why — and the step
- * output renders its whatsapp_queued counter. Real i18n is not initialized here
- * (mirrors configPanelRequired.test.tsx), so `t()` returns the raw key.
+ * output renders its whatsapp_queued counter. Real i18n IS initialized here
+ * (mirrors configPanelItemsPlural.test.tsx) so dropdown options + i18n keys render.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, within, fireEvent, waitFor } from '@testing-library/react'
+import { I18nextProvider } from 'react-i18next'
+import i18n from '@/i18n'
 import ConfigPanel from './ConfigPanel'
 import type { FlowNode } from '@/types/workflow'
 
@@ -18,8 +20,10 @@ import type { FlowNode } from '@/types/workflow'
 function openChannelSelect() {
   // Both the visible <label> and the sr-only span carry the same fallback text
   // ("Kanaal") — scope to the visible <label> so the query is unambiguous.
+  // DROPDOWN-CLEAR-1: filter to the dropdown trigger (aria-haspopup), not the clear X.
   const wrapper = screen.getByText('Kanaal', { selector: 'label' }).closest('div')!
-  fireEvent.click(within(wrapper).getByRole('button'))
+  const trigger = within(wrapper).getAllByRole('button').find(btn => btn.hasAttribute('aria-haspopup'))!
+  fireEvent.click(trigger)
 }
 
 describe('ConfigPanel · whatsapp_send legacy config (no stored channel)', () => {
@@ -27,7 +31,11 @@ describe('ConfigPanel · whatsapp_send legacy config (no stored channel)', () =>
     // The backend defaults a missing `channel` to 'waba' and still requires
     // phone_number_id there; the builder must not hide an already-stored sender.
     const node: FlowNode = { id: 'n1', position: { x: 0, y: 0 }, data: { type: 'whatsapp_send', config: { phone_number_id: 'p1' } } }
-    render(<ConfigPanel node={node} onUpdate={vi.fn()} onDelete={vi.fn()} />)
+    render(
+      <I18nextProvider i18n={i18n}>
+        <ConfigPanel node={node} onUpdate={vi.fn()} onDelete={vi.fn()} />
+      </I18nextProvider>,
+    )
     expect(screen.getByText('Afzender', { selector: 'label' })).toBeInTheDocument()
   })
 })
@@ -36,10 +44,15 @@ describe('ConfigPanel · whatsapp_send wa_web channel branch', () => {
   it('picking wa_web writes message_type "session" into the node config', async () => {
     const onUpdate = vi.fn()
     const node: FlowNode = { id: 'n1', position: { x: 0, y: 0 }, data: { type: 'whatsapp_send', config: { message_type: 'template' } } }
-    render(<ConfigPanel node={node} onUpdate={onUpdate} onDelete={vi.fn()} />)
+    render(
+      <I18nextProvider i18n={i18n}>
+        <ConfigPanel node={node} onUpdate={onUpdate} onDelete={vi.fn()} />
+      </I18nextProvider>,
+    )
     // Open the channel select and choose "wa_web" (raw enum value, i18n unmocked).
     openChannelSelect()
-    const opt = await screen.findByText('wa_web')
+    // The 'wa_web' option has a i18n translation "WA Web (eigen nummer)"
+    const opt = await screen.findByText('WA Web (eigen nummer)')
     fireEvent.click(opt)
     await waitFor(() => expect(onUpdate).toHaveBeenCalledWith('n1', 'channel', 'wa_web'))
     expect(onUpdate).toHaveBeenCalledWith('n1', 'message_type', 'session')
@@ -48,9 +61,14 @@ describe('ConfigPanel · whatsapp_send wa_web channel branch', () => {
   it('does not overwrite message_type when it is already "session"', async () => {
     const onUpdate = vi.fn()
     const node: FlowNode = { id: 'n1', position: { x: 0, y: 0 }, data: { type: 'whatsapp_send', config: { message_type: 'session' } } }
-    render(<ConfigPanel node={node} onUpdate={onUpdate} onDelete={vi.fn()} />)
+    render(
+      <I18nextProvider i18n={i18n}>
+        <ConfigPanel node={node} onUpdate={onUpdate} onDelete={vi.fn()} />
+      </I18nextProvider>,
+    )
     openChannelSelect()
-    const opt = await screen.findByText('wa_web')
+    // The 'wa_web' option has a i18n translation "WA Web (eigen nummer)"
+    const opt = await screen.findByText('WA Web (eigen nummer)')
     fireEvent.click(opt)
     await waitFor(() => expect(onUpdate).toHaveBeenCalledWith('n1', 'channel', 'wa_web'))
     expect(onUpdate).not.toHaveBeenCalledWith('n1', 'message_type', 'session')
@@ -58,8 +76,13 @@ describe('ConfigPanel · whatsapp_send wa_web channel branch', () => {
 
   it('shows the wa_web session-only notice under message_type when channel is wa_web', () => {
     const node: FlowNode = { id: 'n1', position: { x: 0, y: 0 }, data: { type: 'whatsapp_send', config: { channel: 'wa_web', message_type: 'session' } } }
-    render(<ConfigPanel node={node} onUpdate={vi.fn()} onDelete={vi.fn()} />)
-    expect(screen.getByText('fields.waWebSessionOnly')).toBeInTheDocument()
+    render(
+      <I18nextProvider i18n={i18n}>
+        <ConfigPanel node={node} onUpdate={vi.fn()} onDelete={vi.fn()} />
+      </I18nextProvider>,
+    )
+    // i18n is initialized; the key translates to Dutch "WhatsApp Web verstuurt alleen..."
+    expect(screen.getByText(/WhatsApp Web verstuurt/)).toBeInTheDocument()
   })
 
   it('renders the whatsapp_queued output counter', async () => {
@@ -67,9 +90,14 @@ describe('ConfigPanel · whatsapp_send wa_web channel branch', () => {
       id: 'n1', position: { x: 0, y: 0 },
       data: { type: 'whatsapp_send', config: { channel: 'wa_web' }, output: { whatsapp_queued: 4 } },
     }
-    render(<ConfigPanel node={node} onUpdate={vi.fn()} onDelete={vi.fn()} />)
-    fireEvent.click(screen.getByText('config.tabExecution (1)'))
-    expect(screen.getByText('fields.whatsappQueued')).toBeInTheDocument()
+    render(
+      <I18nextProvider i18n={i18n}>
+        <ConfigPanel node={node} onUpdate={vi.fn()} onDelete={vi.fn()} />
+      </I18nextProvider>,
+    )
+    fireEvent.click(screen.getByRole('tab', { name: /Uitvoering/ }))
+    // i18n is initialized; the key translates to Dutch "In WhatsApp Web-wachtrij gezet..."
+    expect(screen.getByText(/In WhatsApp Web-wachtrij/)).toBeInTheDocument()
   })
 
   it('does NOT render the whatsapp_queued line for a WABA fan-out (same key, other channel)', () => {
@@ -79,8 +107,12 @@ describe('ConfigPanel · whatsapp_send wa_web channel branch', () => {
       id: 'n1', position: { x: 0, y: 0 },
       data: { type: 'whatsapp_send', config: { channel: 'waba' }, output: { whatsapp_fanout: { total: 4, sent: 4 }, whatsapp_queued: 4 } },
     }
-    render(<ConfigPanel node={node} onUpdate={vi.fn()} onDelete={vi.fn()} />)
-    fireEvent.click(screen.getByText('config.tabExecution (1)'))
+    render(
+      <I18nextProvider i18n={i18n}>
+        <ConfigPanel node={node} onUpdate={vi.fn()} onDelete={vi.fn()} />
+      </I18nextProvider>,
+    )
+    fireEvent.click(screen.getByRole('tab', { name: /Uitvoering/ }))
     expect(screen.queryByText('fields.whatsappQueued')).not.toBeInTheDocument()
   })
 
@@ -89,8 +121,12 @@ describe('ConfigPanel · whatsapp_send wa_web channel branch', () => {
       id: 'n1', position: { x: 0, y: 0 },
       data: { type: 'whatsapp_send', config: { channel: 'wa_web' }, output: { whatsapp_queued: 0 } },
     }
-    render(<ConfigPanel node={node} onUpdate={vi.fn()} onDelete={vi.fn()} />)
-    fireEvent.click(screen.getByText('config.tabExecution (1)'))
+    render(
+      <I18nextProvider i18n={i18n}>
+        <ConfigPanel node={node} onUpdate={vi.fn()} onDelete={vi.fn()} />
+      </I18nextProvider>,
+    )
+    fireEvent.click(screen.getByRole('tab', { name: /Uitvoering/ }))
     expect(screen.queryByText('fields.whatsappQueued')).not.toBeInTheDocument()
   })
 })

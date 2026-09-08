@@ -122,7 +122,8 @@ export function ScheduleFields({ form }: { form: ScheduleForm }) {
             <div>
               <label style={fieldLabel}>{t('scheduleModal.month')}</label>
               <span id={monthLabelId} className="sr-only">{t('scheduleModal.month')}</span>
-              <CreatableSelect value={String(month)} onChange={v => setMonth(+v)} aria-labelledby={monthLabelId} allowCreate={false}
+              {/* DROPDOWN-CLEAR-1: a yearly schedule always has a month (1-12); '' would become NaN. */}
+              <CreatableSelect value={String(month)} onChange={v => setMonth(+v)} aria-labelledby={monthLabelId} allowCreate={false} clearable={false}
                 options={Array.from({ length: 12 }, (_, i) => ({ value: String(i + 1), label: monthName(locale, i) }))}
                 style={{ ...selectStyle, width: '100%' }} />
             </div>

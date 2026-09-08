@@ -36,7 +36,9 @@ export function DateRelativeFields({ dateField, onDateFieldChange, days, onDaysC
         <label id={dateFieldLabelId} style={fieldLabel}>
           {t('dateRelative.dateFieldLabel')}
         </label>
-        <CreatableSelect value={dateField} onChange={disabled ? () => {} : onDateFieldChange} allowCreate={false}
+        {/* DROPDOWN-CLEAR-1: the relative-date rule always needs an anchor field; the
+            config persists as typed, so '' would save a rule that can never fire. */}
+        <CreatableSelect value={dateField} onChange={disabled ? () => {} : onDateFieldChange} allowCreate={false} clearable={false}
           options={DATE_RELATIVE_FIELDS.map(f => ({ value: f.value, label: t(f.labelKey) }))}
           aria-labelledby={dateFieldLabelId} style={{ width: '100%' }} />
       </div>

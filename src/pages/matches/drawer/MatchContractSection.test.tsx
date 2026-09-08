@@ -74,7 +74,7 @@ describe('MatchContractSection · financial permission gate', () => {
     expect(screen.getByText('drawer.contract.purchaseRate')).toBeInTheDocument()
     expect(screen.getByText('drawer.contract.sellRate')).toBeInTheDocument()
     expect(screen.getByText('drawer.contract.margin')).toBeInTheDocument()
-    expect(screen.getByText('8.00')).toBeInTheDocument()
+    expect(screen.getByText(/8,00/)).toBeInTheDocument()
   })
 
   it('hides the purchase rate field and the margin block without the permission, keeps the sale rate', () => {
@@ -82,7 +82,7 @@ describe('MatchContractSection · financial permission gate', () => {
     setup()
     expect(screen.queryByText('drawer.contract.purchaseRate')).toBeNull()
     expect(screen.queryByText('drawer.contract.margin')).toBeNull()
-    expect(screen.queryByText('8.00')).toBeNull()
+    expect(screen.queryByText(/8,00/)).toBeNull()
     expect(screen.getByText('drawer.contract.sellRate')).toBeInTheDocument()
   })
 
@@ -116,8 +116,8 @@ describe('MatchContractSection · CONTRACTREGELS rate lines (TARIEF-ZIJDE-1)', (
     const rows = screen.getAllByText(/Verpleegkundige|Helpende/)
     expect(rows).toHaveLength(2) // both function titles render — the line itself is never hidden
     expect(screen.getByText('—')).toBeInTheDocument() // the gated line's blanked rate
-    expect(screen.getByText('24.50')).toBeInTheDocument() // the ungated line's real amount
-    expect(screen.queryByText('0.00')).toBeNull() // never a fabricated zero
+    expect(screen.getByText(/24,50/)).toBeInTheDocument() // the ungated line's real amount
+    expect(screen.queryByText(/0,00|0\.00/)).toBeNull() // never a fabricated zero
   })
 
   it('renders the function title and order the same way with or without matches.financial.view', () => {
@@ -126,6 +126,6 @@ describe('MatchContractSection · CONTRACTREGELS rate lines (TARIEF-ZIJDE-1)', (
     const titles = screen.getAllByText(/Verpleegkundige|Helpende/).map(el => el.textContent)
     expect(titles).toEqual(['Verpleegkundige', 'Helpende']) // array order === sort order, unaffected by the permission
     expect(screen.getByText('—')).toBeInTheDocument()
-    expect(screen.getByText('24.50')).toBeInTheDocument()
+    expect(screen.getByText(/24,50/)).toBeInTheDocument()
   })
 })

@@ -15,10 +15,10 @@ import type { FlowNode } from '@/types/workflow'
 // Pin i18n.language only (mirrors the translations-tab test); t() stays the raw key.
 vi.mock('react-i18next', async () => {
   const actual = await vi.importActual<typeof import('react-i18next')>('react-i18next')
-  return { ...actual, useTranslation: (...args: Parameters<typeof actual.useTranslation>) => {
-    const real = actual.useTranslation(...args)
-    return { ...real, i18n: { ...real.i18n, language: 'nl' } }
-  } }
+  return { ...actual, useTranslation: () => ({
+    t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k,
+    i18n: { language: 'nl' }
+  }) }
 })
 
 // The webhook-id → name lookup fetch (ConfigPanel's own /webhooks call).

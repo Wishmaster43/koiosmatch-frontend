@@ -192,7 +192,9 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
         {showLanguage && (
           <span style={{ display: 'contents' }} title={t('editor.language', { defaultValue: 'Taal' })}>
             <span id={langLabelId} className="sr-only">{t('editor.language', { defaultValue: 'Taal' })}</span>
+            {/* DROPDOWN-CLEAR-1: language is required for spellcheck; clearing to '' breaks editor locale logic */}
             <SelectMenu aria-labelledby={langLabelId} value={lang} onChange={pickLang}
+              clearable={false}
               options={EDITOR_LANGS.map(l => ({ value: l, label: l.toUpperCase() }))}
               menuWidth={70}
               style={{ ...captionStyle, padding: '2px 4px', width: 'auto', background: 'var(--surface)' }} />

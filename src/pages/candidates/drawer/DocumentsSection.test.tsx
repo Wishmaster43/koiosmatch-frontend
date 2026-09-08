@@ -80,7 +80,10 @@ const getReplaceFileInput = (container: HTMLElement) => container.querySelector(
 // never resolves; production i18n differentiates them for real). Opening a trigger
 // scopes the option query to its OWN wrapper div, so it never collides with the
 // always-visible "apply to all" chips or another row's picker.
+// DROPDOWN-CLEAR-1: SelectMenu now renders a separate clear X button alongside the
+// trigger. Filter to only trigger buttons (which have aria-haspopup).
 const getTypeTriggers = () => screen.getAllByRole('button', { name: /documents\.docTypeFor/ })
+  .filter(btn => btn.hasAttribute('aria-haspopup'))
 // PORTAL-MARKER-1: the open menu is PORTALLED into document.body now — scope the
 // option query to the one open portal menu (only one exists at a time), which
 // keeps the original intent: never collide with in-page chips or other rows.
@@ -91,7 +94,9 @@ const pickRowType = async (user: ReturnType<typeof userEvent.setup>, rowIndex: n
 }
 // G34: the "Koppelen aan" link picker (DocumentLinkPicker) is the house SelectMenu
 // too — same idiom, distinct accessible-name prefix (documents.linkToFor).
+// DROPDOWN-CLEAR-1: filter to only trigger buttons (which have aria-haspopup).
 const getLinkTriggers = () => screen.queryAllByRole('button', { name: /documents\.linkToFor/ })
+  .filter(btn => btn.hasAttribute('aria-haspopup'))
 const pickLink = async (user: ReturnType<typeof userEvent.setup>, rowIndex: number, label: string) => {
   await user.click(getLinkTriggers()[rowIndex])
   await user.click(await within(openPortalMenu()).findByRole('button', { name: label }))

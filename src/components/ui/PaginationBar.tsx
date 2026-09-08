@@ -77,7 +77,9 @@ export default function PaginationBar({ page, totalPages, totalRows, pageSize, o
           longer applies. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <span id={rowsLabelId} style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('rowsPerPage')}</span>
+        {/* DROPDOWN-CLEAR-1: pageSize is required; clearing to '' would emit NaN and break pagination */}
         <SelectMenu aria-labelledby={rowsLabelId} value={String(pageSize)}
+          clearable={false}
           onChange={v => onPageSizeChange(Number(v))}
           options={pageSizeOptions.map(n => ({ value: String(n), label: String(n) }))}
           menuWidth={90}

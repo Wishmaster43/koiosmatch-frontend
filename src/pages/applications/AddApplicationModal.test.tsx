@@ -129,7 +129,8 @@ vi.mock('@/lib/api', () => ({
       // below keeps exercising the create-a-new-value path regardless of the
       // hook's own strict-by-default fallback (covered on its own in
       // useApplicationSources.test.ts).
-      if (url === '/candidate-sources') return Promise.resolve({ data: { data: [], allow_free_entry: true } })
+      // X-20 prep: the dropdown hook states ?active=1 explicitly; the bare path stays for the list editor.
+      if (url === '/candidate-sources' || url === '/candidate-sources?active=1') return Promise.resolve({ data: { data: [], allow_free_entry: true } })
       return Promise.resolve({ data: { data: [] } })
     }),
     post: vi.fn(() => Promise.resolve({ data: { data: { id: 'a1' } } })),
@@ -539,7 +540,7 @@ describe('AddApplicationModal · source (S-SOURCE-1, supersedes CMBE 5961c673)',
     render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
     await user.click(screen.getAllByRole('button', { name: 'drawer.source' })[0])
     await user.type(screen.getByPlaceholderText('drawer.source'), '  Website  ')
-    await user.click(screen.getByRole('button', { name: /Website/ }))
+    await user.click(await screen.findByRole('button', { name: /Website/ }))
     await pickCandidateAndVacancy(user)
     await user.click(screen.getByRole('button', { name: 'add.create' }))
 

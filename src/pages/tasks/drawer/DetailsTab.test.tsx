@@ -350,13 +350,15 @@ describe('tasks DetailsTab — internal department (TEAM-1)', () => {
 
   it('clearing the department sends an explicit null pair, never an omitted key', () => {
     const onUpdate = vi.fn()
-    const { container } = render(<DetailsTab task={withTeam} onUpdate={onUpdate} />)
+    render(<DetailsTab task={withTeam} onUpdate={onUpdate} />)
     fireEvent.click(screen.getByTitle('Taakdetails'))
-    // CreatableSelect's opt-in clear (X); in edit mode the department picker is the
-    // only clearable one on screen (the branch picker lives in the read view).
-    const clearBtn = container.querySelector('button[id$="-clear"]')
+    // DROPDOWN-CLEAR-1: both assignee and team pickers now have clear buttons by default;
+    // find the team picker's clear button specifically by its aria-label (which includes
+    // the localized team field label).
+    const teamClearLabel = i18n.t('clearField', { field: i18n.t('tasks:details.team') })
+    const clearBtn = screen.getByLabelText(teamClearLabel, { selector: 'button' })
     expect(clearBtn).toBeTruthy()
-    fireEvent.click(clearBtn!)
+    fireEvent.click(clearBtn)
     fireEvent.click(screen.getByTitle('Plaatsen'))
 
     expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ teamId: null, team: null }))

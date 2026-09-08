@@ -134,8 +134,11 @@ describe('ZzpTab · Adres composite (1.1.1/1.1.2)', () => {
     await user.click(screen.getAllByTitle('edit')[1])
     expect(container.querySelectorAll('select')).toHaveLength(0)
     const provinceRow = screen.getByText('profile.province').parentElement as HTMLElement
-    expect(within(provinceRow).getByRole('button')).toHaveTextContent('Utrecht')
-    await user.click(within(provinceRow).getByRole('button'))
+    // DROPDOWN-CLEAR-1: filter to the trigger button (has aria-haspopup), not the clear X.
+    const provinceButtons = within(provinceRow).getAllByRole('button')
+    const provinceTrigger = provinceButtons.find(btn => btn.hasAttribute('aria-haspopup'))!
+    expect(provinceTrigger).toHaveTextContent('Utrecht')
+    await user.click(provinceTrigger)
     // Search for the CURRENT value on purpose (mirrors ProfileAddressTab's own test):
     // the trigger button keeps showing the picked value regardless of the query
     // (so BOTH the trigger and the still-matching option render as 'Utrecht' —
@@ -151,11 +154,16 @@ describe('ZzpTab · Adres composite (1.1.1/1.1.2)', () => {
     render(<ZzpTab c={candidate()} />)
     await user.click(screen.getAllByTitle('edit')[1])
     const countryRow = screen.getByText('zzp.country').parentElement as HTMLElement
-    await user.click(within(countryRow).getByRole('button'))
+    // DROPDOWN-CLEAR-1: filter to the trigger button (has aria-haspopup), not the clear X.
+    const countryButtons = within(countryRow).getAllByRole('button')
+    const countryTrigger = countryButtons.find(btn => btn.hasAttribute('aria-haspopup'))!
+    await user.click(countryTrigger)
     await user.click(screen.getByRole('button', { name: 'Belgium' }))
     // BE's own province list (mocked) has no 'Utrecht' — the cascade must clear it.
     const provinceRow = screen.getByText('profile.province').parentElement as HTMLElement
-    await vi.waitFor(() => expect(within(provinceRow).getByRole('button')).not.toHaveTextContent('Utrecht'))
+    const provinceButtons = within(provinceRow).getAllByRole('button')
+    const provinceTrigger = provinceButtons.find(btn => btn.hasAttribute('aria-haspopup'))!
+    await vi.waitFor(() => expect(provinceTrigger).not.toHaveTextContent('Utrecht'))
   })
 })
 

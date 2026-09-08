@@ -57,8 +57,9 @@ export default function MessagingLanguageSettings() {
       <Caption style={{ display: 'block', margin: '4px 0 12px' }}>{t('messagingLanguage.subtitle')}</Caption>
 
       {canEdit ? (
+        // DROPDOWN-CLEAR-1: language is a required setting with no empty state.
         <CreatableSelect value={current} onChange={(v: string) => !saving && save(v)} allowCreate={false}
-          placeholder={t('messagingLanguage.label')} options={options} style={{ maxWidth: 320 }} />
+          clearable={false} placeholder={t('messagingLanguage.label')} options={options} style={{ maxWidth: 320 }} />
       ) : (
         <BodyText>{labelFor(current)}</BodyText>
       )}

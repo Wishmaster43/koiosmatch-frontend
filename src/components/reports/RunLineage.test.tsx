@@ -5,10 +5,18 @@
  * promoted top-level fields — both shapes are pinned here. Renders nothing
  * for a root-level run (no parent), the honest empty case.
  */
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import RunLineage from './RunLineage'
 import type { RunRow } from '@/types/reports'
+
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>()
+  return {
+    ...actual,
+    useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k, i18n: { language: 'nl' } })
+  }
+})
 
 describe('RunLineage', () => {
   it('renders nothing for a root-level run (no parent, no chain)', () => {

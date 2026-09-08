@@ -11,6 +11,13 @@ import { render, screen } from '@testing-library/react'
 import ConfigPanel from './ConfigPanel'
 import type { FlowNode } from '@/types/workflow'
 
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k, i18n: { language: 'nl' } }) }))
+vi.mock('@/lib/api', () => ({ default: {}, unwrapList: (v: unknown) => v }))
+vi.mock('@/components/layout/workflow/useModuleCatalog', () => ({ useModuleCatalog: () => ({ catalog: {} }) }))
+vi.mock('@/components/layout/workflow/AgentTestPanel', () => ({ default: () => null }))
+vi.mock('@/components/layout/workflow/OutputTree', () => ({ default: () => null }))
+vi.mock('@/components/layout/workflow/FanoutSummary', () => ({ default: () => null }))
+
 const node: FlowNode = {
   id: 'n1', position: { x: 0, y: 0 },
   data: { type: 'whatsapp_send', config: {} },

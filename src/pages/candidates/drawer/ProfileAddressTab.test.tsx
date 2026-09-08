@@ -97,7 +97,10 @@ describe('ProfileAddressTab · own fields, composed line, own request shape', ()
     render(<ProfileAddressTab c={candidate} />)
     await user.click(screen.getByTitle('Bewerken'))
     const provinceRow = screen.getByText('Provincie').parentElement as HTMLElement
-    expect(within(provinceRow).getByRole('button')).toHaveTextContent('Utrecht')
+    // DROPDOWN-CLEAR-1: filter to the trigger button (has aria-haspopup), not the clear X.
+    const provinceButtons = within(provinceRow).getAllByRole('button')
+    const provinceTrigger = provinceButtons.find(btn => btn.hasAttribute('aria-haspopup'))!
+    expect(provinceTrigger).toHaveTextContent('Utrecht')
   })
 
   it('blocks save and flags street/postcode/city when the tenant requires them', async () => {
