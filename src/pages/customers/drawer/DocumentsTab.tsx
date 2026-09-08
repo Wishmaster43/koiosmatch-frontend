@@ -43,6 +43,7 @@ import { useDocumentTypes, resolveDocTypeIcon } from '@/lib/useDocumentTypes'
 import { useDateFormat } from '@/lib/datetime'
 import { sectionBlock } from '@/components/ui/SectionCard'
 import { useEntityDocuments, type EntityDoc } from '@/hooks/useEntityDocuments'
+import { useBulkDocumentDelete } from '@/hooks/useBulkDocumentDelete'
 import { useDocumentLinkPicker } from '../hooks/useDocumentLinkPicker'
 import { useDocumentUploadQueue } from '../hooks/useDocumentUploadQueue'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
@@ -106,9 +107,19 @@ export default function DocumentsTab({ customerId, locations = [], departments =
   const [previewDoc,  setPreviewDoc]  = useState<EntityDoc | null>(null)
   // Bulk-download selection, keyed by docKey — cleared once a download batch starts.
   const [selected, setSelected] = useState<Set<string>>(new Set())
-  // Pending delete confirmation — a single row (doc + its resolved index) or the
-  // whole bulk selection; nothing is removed until the shared ConfirmDialog is confirmed.
-  const [confirmDelete, setConfirmDelete] = useState<{ kind: 'one'; doc: EntityDoc; index: number } | { kind: 'many' } | null>(null)
+  // Shared document deletion state and handlers — manages pending delete confirmation
+  // (one or many) and fires the appropriate callback once confirmed.
+  const { confirmDelete, setConfirmDelete, confirmDeleteName, confirmDeleteAction } = useBulkDocumentDelete(
+    (doc, index) => {
+      setSelected(prev => { const next = new Set(prev); next.delete(docKey(doc, index)); return next })
+      remove(doc.id)
+    },
+    () => {
+      const toRemove = docs.map((d, i) => ({ d, key: docKey(d, i) })).filter(({ key }) => selected.has(key))
+      toRemove.forEach(({ d }) => remove(d.id))
+      setSelected(new Set())
+    }
+  )
   const fileRef = useRef<HTMLInputElement>(null)
   // G34: base id for the per-queued-file type picker's sr-only label — SelectMenu's
   // trigger is a <button>, so it needs aria-labelledby (never a plain aria-label prop).
@@ -151,27 +162,6 @@ export default function DocumentsTab({ customerId, locations = [], departments =
   // Preview opens the shared modal (blob-fetched in-dialog) — never a raw
   // window.open, which used to trigger a download instead of a preview.
   const preview = (d: EntityDoc) => setPreviewDoc(d)
-  // Remove a doc and prune its selection key too, so a stale key never lingers.
-  const doRemove = (d: EntityDoc, i: number) => {
-    setSelected(prev => { const next = new Set(prev); next.delete(docKey(d, i)); return next })
-    remove(d.id)
-  }
-  // Bulk-delete every selected doc — one remove() call per row (the hook does its
-  // own optimistic filter/revert), then clear the selection.
-  const removeSelected = () => {
-    const toRemove = docs.map((d, i) => ({ d, key: docKey(d, i) })).filter(({ key }) => selected.has(key))
-    toRemove.forEach(({ d }) => remove(d.id))
-    setSelected(new Set())
-  }
-  // Runs the staged single/bulk delete once the destructive confirm is accepted.
-  const confirmDeleteAction = () => {
-    if (confirmDelete?.kind === 'one') doRemove(confirmDelete.doc, confirmDelete.index)
-    else if (confirmDelete?.kind === 'many') removeSelected()
-    setConfirmDelete(null)
-  }
-  // File name shown in the single-delete confirm message (empty once the dialog is closed).
-  const confirmDeleteName = confirmDelete?.kind === 'one' ? String(confirmDelete.doc.name ?? confirmDelete.doc.file_name ?? '') : ''
-
   // DOC-FILTER-PARITY-1: the type filter row, behind the shared DrawerFilterMenu —
   // self-hides when the tenant has no document types configured for this scope
   // (DrawerFilterMenu renders null on empty).

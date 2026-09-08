@@ -15,6 +15,7 @@ import { sectionBlock } from './constants'
 import { useDocumentTypes } from '@/lib/useDocumentTypes'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import { useAuth } from '@/context/AuthContext'
+import { useBulkDocumentDelete } from '@/hooks/useBulkDocumentDelete'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
 import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
@@ -69,9 +70,17 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
   const [previewDoc,  setPreviewDoc]  = useState<DocItem | null>(null)
   // Bulk-download selection, keyed by docKey — cleared once a download batch starts.
   const [selected, setSelected] = useState<Set<string>>(new Set())
-  // Pending delete confirmation — a single row (by index) or the whole bulk
-  // selection; nothing is removed until the shared ConfirmDialog is confirmed.
-  const [confirmDelete, setConfirmDelete] = useState<{ kind: 'one'; index: number } | { kind: 'many' } | null>(null)
+  // Shared document deletion state and handlers — manages pending delete confirmation
+  // (one or many) and fires the appropriate callback once confirmed.
+  const { confirmDelete, setConfirmDelete, confirmDeleteName, confirmDeleteAction } = useBulkDocumentDelete(
+    (_doc, index) => {
+      removeDoc(index, key => setSelected(prev => { const next = new Set(prev); next.delete(key); return next }))
+    },
+    () => {
+      removeSelected(selected)
+      setSelected(new Set())
+    }
+  )
   const fileRef = useRef<HTMLInputElement>(null)
   // DOC-VERSIE-1 point 3: which doc a replace-file pick targets — set right before
   // the hidden single-file input opens, consumed (and cleared) on its onChange.
@@ -104,20 +113,6 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
     await downloadFilesSequentially(items)
     setSelected(new Set())
   }
-
-  // Runs the staged single/bulk delete once the destructive confirm is accepted.
-  const confirmDeleteAction = () => {
-    if (confirmDelete?.kind === 'one') {
-      // Prune the removed row's selection key too, so a stale key never lingers.
-      removeDoc(confirmDelete.index, key => setSelected(prev => { const next = new Set(prev); next.delete(key); return next }))
-    } else if (confirmDelete?.kind === 'many') {
-      removeSelected(selected)
-      setSelected(new Set())
-    }
-    setConfirmDelete(null)
-  }
-  // File name shown in the single-delete confirm message (empty once the dialog is closed).
-  const confirmDeleteName = confirmDelete?.kind === 'one' ? String(docs[confirmDelete.index]?.name ?? docs[confirmDelete.index]?.file_name ?? '') : ''
 
   // DOC-TYPE-FILTER-1 / NOTES-DOC-FILTER-MENU-1 (Danny 08-08): the document-type
   // filter moved BEHIND the shared DrawerFilterMenu instead of an inline dropdown
@@ -224,7 +219,7 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
               onRenameCancel={() => setRenamingDoc(null)}
               onReplace={() => { setReplaceTargetId(d.id ?? null); replaceFileRef.current?.click() }}
               onPreview={() => setPreviewDoc(d)}
-              onDeleteRequest={() => setConfirmDelete({ kind: 'one', index: i })}
+              onDeleteRequest={() => setConfirmDelete({ kind: 'one', doc: d, index: i })}
               docColor={docColor} docTypeLabel={docTypeLabel} docTypeIcon={docTypeIcon}
               linked={currentLink} linking={linkingDoc === i} linkValue={currentLink ? `${currentLink.kind}:${currentLink.id}` : ''}
               canLink={hasSelectableEntry(linkableLists, currentLink?.id)} onLinkToggle={() => setLinkingDoc(prev => (prev === i ? null : i))}
