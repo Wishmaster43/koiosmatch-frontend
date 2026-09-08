@@ -8,6 +8,8 @@
  * (useCustomerLocations/useCustomerDepartments/useCustomerContacts, instantiated in
  * CustomerDrawer) — full C-6 field sets, edit + delete, not just an optimistic add.
  */
+import { actionItemsWire } from '@/components/drawer/tabs/notes/notesTabTypes'
+import type { NoteActionItemWire } from '@/components/drawer/tabs/NotesTab'
 import { useState, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
@@ -30,9 +32,11 @@ interface AppUser { id: Id; name: string; avatar_color?: string }
 // sends exactly ONE of the three ids, never more than one.
 // NOTE-TAAL-1 (06-08): `language` rides along optionally — undefined lets the
 // backend keep its own tenant default, never forced by the FE.
+// NOTE-ACTION-ITEMS-1 (X-34): forward the action_items panel only when present (present = the full wanted set; absent = untouched).
 type NotePayload = {
   type: string; title: string; body: string; language?: string
   customer_contact_id?: Id; customer_location_id?: Id; customer_department_id?: Id
+  action_items?: NoteActionItemWire[]
 }
 // The create form's full shape. Everything past `city` is optional (the backend's
 // CustomerRequest::sharedRules marks them sometimes|nullable) and only travels when
@@ -284,6 +288,7 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
       customer_contact_id: payload.customer_contact_id,
       customer_location_id: payload.customer_location_id,
       customer_department_id: payload.customer_department_id,
+      ...actionItemsWire(payload.action_items)
     })
       .catch(err => {
         setDetail(prev => (prev && prev.id === id
@@ -297,12 +302,14 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
   // reverting on failure — mirrors addNote's revert-by-reference and useCandidateNotes'
   // editNote. `noteId` is the note's own id (NotesTab passes the full note back to the
   // host, which resolves its id off the current detail).
+  // NOTE-ACTION-ITEMS-1: forward the action_items panel only when present (present = the full wanted set; absent = untouched).
   const editNote = (id: Id | undefined, noteId: Id | undefined, payload: NotePayload) => {
     const snapshot = detail
     setDetail(prev => (prev && prev.id === id
       ? ({ ...prev, notes: (prev.notes ?? []).map(n => (n.id === noteId ? { ...n, type: payload.type, title: payload.title, text: payload.body } : n)) } as Customer)
       : prev))
-    api.patch(`/customers/${id}/notes/${noteId}`, { type: payload.type, text: payload.body, language: payload.language })
+    api.patch(`/customers/${id}/notes/${noteId}`, { type: payload.type, text: payload.body, language: payload.language,
+      ...actionItemsWire(payload.action_items) })
       .catch(err => {
         setDetail(prev => (prev && prev.id === id ? snapshot : prev))
         notifyError(extractApiError(err, t('common:actionFailed')))

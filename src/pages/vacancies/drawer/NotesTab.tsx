@@ -6,6 +6,8 @@
  * had no type picker at all ("note TYPES stay as-is until NOTE-TYPES-3 lands", which
  * has now landed).
  */
+import { actionItemsWire } from '@/components/drawer/tabs/notes/notesTabTypes'
+import type { NoteActionItemWire } from '@/components/drawer/tabs/NotesTab'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
@@ -39,11 +41,13 @@ export default function NotesTab({ vacancy: v }: { vacancy: VacancyDetail }) {
   // on failure the exact optimistic object is removed again and the server's own
   // message surfaced — never a silently-stuck fake note. NOTE-TAAL-1: `payload` is
   // forwarded to the API AS-IS, so the optional `language` field rides along for free.
-  const addNote = (payload: { type: string; title: string; body: string; language?: string }) => {
+  // NOTE-ACTION-ITEMS-1: forward the action_items panel only when present (present = the full wanted set; absent = untouched).
+  const addNote = (payload: { type: string; title: string; body: string; language?: string; action_items?: NoteActionItemWire[] }) => {
     const local: Note = { ...payload, text: payload.body, author: currentUserName, created_at: new Date().toISOString() }
     setNotes(prev => [local, ...prev])
     if (v.id != null) {
-      api.post(`/vacancies/${v.id}/notes`, payload).catch(err => {
+      api.post(`/vacancies/${v.id}/notes`, { type: payload.type, title: payload.title, body: payload.body, language: payload.language,
+        ...actionItemsWire(payload.action_items) }).catch(err => {
         setNotes(prev => prev.filter(n => n !== local))
         notifyError(extractApiError(err, t('common:actionFailed')))
       })
@@ -54,13 +58,15 @@ export default function NotesTab({ vacancy: v }: { vacancy: VacancyDetail }) {
   // 1049413a (VacancyNoteController::update/destroy) — full candidate parity.
   // Index-keyed like every other family; the note's own id must have resolved
   // (never a local optimistic-only add) before it can be edited or deleted.
-  const editNote = (i: number, payload: { type: string; title: string; body: string; language?: string }) => {
+  // NOTE-ACTION-ITEMS-1: forward the action_items panel only when present (present = the full wanted set; absent = untouched).
+  const editNote = (i: number, payload: { type: string; title: string; body: string; language?: string; action_items?: NoteActionItemWire[] }) => {
     const target = notes[i]
     const noteId = target?.id
     if (v.id == null || noteId == null) return
     const snapshot = notes
-    setNotes(prev => prev.map((n, idx) => idx === i ? { ...n, ...payload, text: payload.body } : n))
-    api.patch(`/vacancies/${v.id}/notes/${noteId}`, { ...payload, text: payload.body }).catch(err => {
+    setNotes(prev => prev.map((n, idx) => idx === i ? { ...n, type: payload.type, title: payload.title, body: payload.body, language: payload.language } : n))
+    api.patch(`/vacancies/${v.id}/notes/${noteId}`, { type: payload.type, title: payload.title, body: payload.body, text: payload.body, language: payload.language,
+      ...actionItemsWire(payload.action_items) }).catch(err => {
       setNotes(snapshot)
       notifyError(extractApiError(err, t('common:actionFailed')))
     })

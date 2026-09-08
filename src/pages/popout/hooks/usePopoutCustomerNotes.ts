@@ -11,6 +11,9 @@
  * `customer.notes[]`, CustomerController::notes) — only the ADD flow drops the
  * link picker, never the read.
  */
+import { landedWrite } from './popoutNoteWrite'
+import { actionItemsWire } from '@/components/drawer/tabs/notes/notesTabTypes'
+import type { NoteActionItemWire } from '@/components/drawer/tabs/NotesTab'
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
@@ -22,7 +25,8 @@ import type { CustomerNote } from '@/types/customer'
 // NotesTab hands back the editor payload on save (add/edit share this shape).
 // K15NOTES: PATCH/DELETE /customers/{id}/notes/{note} now exist — this hook mirrors
 // useCandidateNotes' index-based edit/delete instead of staying add-only.
-interface NotePayload { type: string; title: string; body: string; language?: string }
+// NOTE-ACTION-ITEMS-1 (X-34): forward the action_items panel only when present (present = the full wanted set; absent = untouched).
+interface NotePayload { type: string; title: string; body: string; language?: string; action_items?: NoteActionItemWire[] }
 
 // Notes CRUD for the customer notes popout window, mirroring useCandidateNotes'
 // index-based edit/delete (see the module doc comment above).
@@ -44,6 +48,7 @@ export function usePopoutCustomerNotes(customerId: string | undefined) {
   // Create — optimistic prepend, then POST + reload. OPTIMISTIC-REVERT-1 pattern:
   // on failure the optimistic entry is removed again and the server's own message
   // surfaced — never a silently-stuck fake note.
+  // NOTE-ACTION-ITEMS-1: forward the action_items panel only when present (present = the full wanted set; absent = untouched).
   const addNote = useCallback((payload: NotePayload) => {
     if (!customerId) return
     const temp: CustomerNote = {
@@ -51,7 +56,8 @@ export function usePopoutCustomerNotes(customerId: string | undefined) {
       contactId: null, contactName: '', locationId: null, locationName: '', departmentId: null, departmentName: '', level: '',
     }
     setNotes(prev => [temp, ...prev])
-    api.post(`/customers/${customerId}/notes`, { type: payload.type, text: payload.body, language: payload.language })
+    api.post(`/customers/${customerId}/notes`, { type: payload.type, text: payload.body, language: payload.language,
+      ...actionItemsWire(payload.action_items) })
       .then(() => load())
       .catch(err => {
         setNotes(prev => prev.filter(n => n.id !== temp.id))
@@ -63,19 +69,16 @@ export function usePopoutCustomerNotes(customerId: string | undefined) {
   // (mirrors useCandidateNotes.editNote). Reverts to the pre-edit snapshot on failure.
   // POPOUT-PARITEIT-1: resolves TRUE only on a landed write — the per-note popout's
   // PopoutSaveFooter contract requires an honest signal (§3).
+  // NOTE-ACTION-ITEMS-1: forward the action_items panel only when present (present = the full wanted set; absent = untouched).
   const editNote = useCallback((index: number, payload: NotePayload): Promise<boolean> => {
     if (!customerId) return Promise.resolve(false)
     const target = notes[index]
     if (!target) return Promise.resolve(false)
     const snapshot = notes
     setNotes(prev => prev.map((n, i) => (i === index ? { ...n, type: payload.type, text: payload.body } : n)))
-    return api.patch(`/customers/${customerId}/notes/${target.id}`, { type: payload.type, text: payload.body, language: payload.language })
-      .then(() => { load(); return true })
-      .catch(err => {
-        setNotes(snapshot)
-        notifyError(extractApiError(err, t('common:actionFailed')))
-        return false
-      })
+    return landedWrite(
+      api.patch(`/customers/${customerId}/notes/${target.id}`, { type: payload.type, text: payload.body, language: payload.language, ...actionItemsWire(payload.action_items) }),
+      load, () => setNotes(snapshot), t)
   }, [customerId, notes, load, t])
 
   // K15NOTES: delete — optimistic remove with revert (mirrors useCandidateNotes.deleteNote).

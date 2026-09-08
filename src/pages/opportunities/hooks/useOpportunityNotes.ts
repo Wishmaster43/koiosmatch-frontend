@@ -10,6 +10,8 @@
  * ownership model), so the shared NotesTab's edit pencil stays unrestricted here —
  * matches the pre-existing store()/destroy() behaviour.
  */
+import { actionItemsWire } from '@/components/drawer/tabs/notes/notesTabTypes'
+import type { NoteActionItemWire } from '@/components/drawer/tabs/NotesTab'
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
@@ -32,6 +34,8 @@ export interface OpportunityNote {
   updated_at?: string
   // NOTE-UNDO-FE-1 (K-172): true once the note carries a filled one-slot undo.
   has_previous_version?: boolean
+  // NOTE-ACTION-ITEMS-1 (X-34): persisted panel items, returned on read, omitted on write when absent.
+  action_items?: NoteActionItemWire[] | null
   [k: string]: unknown
 }
 
@@ -77,11 +81,13 @@ export function useOpportunityNotes(id?: Id) {
   // success, and on failure remove that exact temp note + surface the server's own
   // reason — never leave a failed note lingering as if it had saved.
   // NOTE-TAAL-1: `language` is optional and forwarded to the API as-is (undefined = tenant default).
-  const addNote = useCallback((payload: { type: string; body: string; language?: string }) => {
+  // NOTE-ACTION-ITEMS-1: forward the action_items panel only when present (present = the full wanted set; absent = untouched).
+  const addNote = useCallback((payload: { type: string; body: string; language?: string; action_items?: NoteActionItemWire[] }) => {
     if (!id || !payload.body.trim()) return
     const temp: OpportunityNote = { id: `tmp-${Date.now()}`, type: payload.type, body: payload.body, created_at: new Date().toISOString() }
     setItems(prev => [temp, ...prev])
-    api.post(`/opportunities/${id}/notes`, payload)
+    api.post(`/opportunities/${id}/notes`, { type: payload.type, body: payload.body, language: payload.language,
+      ...actionItemsWire(payload.action_items) })
       .then(() => load())
       .catch(err => {
         setItems(prev => prev.filter(n => n.id !== temp.id))
@@ -93,13 +99,15 @@ export function useOpportunityNotes(id?: Id) {
   // {body, type?, language?}. NotesTab passes a list index (mirrors
   // useCandidateNotes.editNote); optimistic locally, then reload so the
   // server-resolved `updated_by`/`updated_at` (edited-by meta) shows at once.
-  const editNote = useCallback((index: number, payload: { type: string; body: string; language?: string }) => {
+  // NOTE-ACTION-ITEMS-1: forward the action_items panel only when present (present = the full wanted set; absent = untouched).
+  const editNote = useCallback((index: number, payload: { type: string; body: string; language?: string; action_items?: NoteActionItemWire[] }) => {
     if (!id) return
     const target = items[index]
     if (!target?.id) return
     const snapshot = items
     setItems(prev => prev.map((n, i) => (i === index ? { ...n, type: payload.type, body: payload.body, language: payload.language } : n)))
-    api.put(`/opportunities/${id}/notes/${target.id}`, payload)
+    api.put(`/opportunities/${id}/notes/${target.id}`, { type: payload.type, body: payload.body, language: payload.language,
+      ...actionItemsWire(payload.action_items) })
       .then(() => load())
       .catch(err => {
         setItems(snapshot)

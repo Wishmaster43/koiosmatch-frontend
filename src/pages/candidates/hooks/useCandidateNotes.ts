@@ -26,6 +26,7 @@
  * threading the field through, which unwrapList already does structurally (no
  * per-field mapping here) — declared explicitly below for type safety.
  */
+import { actionItemsWire } from '@/components/drawer/tabs/notes/notesTabTypes'
 import { useState, useEffect, useCallback } from 'react'
 // One shared payload shape (§11): the composer's NotePayload, action_items included.
 import type { NotePayload } from '@/components/drawer/tabs/NotesTab'
@@ -89,7 +90,7 @@ export function useCandidateNotes(candidateId: string | number | undefined, opts
     setNotes(prev => [temp, ...prev])
     api.post(`/candidates/${candidateId}/notes`, { type: payload.type, text: payload.body, channel: payload.channel, language: payload.language,
       // NOTE-ACTION-ITEMS-1: present = the full wanted set; absent = untouched.
-      ...(payload.action_items ? { action_items: payload.action_items } : {}) })
+      ...actionItemsWire(payload.action_items) })
       .then(() => { load(); if (payload.channel) opts?.onContactStamped?.() })
       .catch(() => { setNotes(prev => prev.filter(n => n.id !== temp.id)); notifyError(t('common:actionFailed')) })
     // eslint-disable-next-line react-hooks/exhaustive-deps -- opts is a caller-literal; the callback identity must not retrigger
@@ -106,7 +107,7 @@ export function useCandidateNotes(candidateId: string | number | undefined, opts
     setNotes(prev => prev.map((n, i) => (i === index ? { ...n, type: payload.type, channel: payload.channel, body: payload.body, language: payload.language } : n)))
     return api.patch(`/candidates/${candidateId}/notes/${target.id}`, { text: payload.body, type: payload.type, channel: payload.channel, language: payload.language,
       // NOTE-ACTION-ITEMS-1: present = the full wanted set; absent = untouched.
-      ...(payload.action_items ? { action_items: payload.action_items } : {}) })
+      ...actionItemsWire(payload.action_items) })
       .then(() => { load(); return true })
       .catch(() => { setNotes(snapshot); notifyError(t('common:actionFailed')); return false })
   }, [candidateId, notes, load, t])

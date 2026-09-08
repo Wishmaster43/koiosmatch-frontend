@@ -72,6 +72,11 @@ export interface NoteActionItemWire {
 }
 export interface NotePayload { type: string; title: string; body: string; channel?: string; language?: string; action_items?: NoteActionItemWire[] }
 
+// Spread helper for every note write-path: the panel travels ONLY when the composer
+// produced one (present = the full wanted set, absent = leave the stored panel untouched).
+export const actionItemsWire = (items?: NoteActionItemWire[]): { action_items?: NoteActionItemWire[] } =>
+  (items ? { action_items: items } : {})
+
 export interface NotesTabProps {
   // CONCEPT-NOTE-2 (K-161): when the host names its dossier, a cancelled
   // concept also persists server-side (survives refresh/another workplace) —

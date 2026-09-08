@@ -7,6 +7,8 @@
  * surfaced — never a silently-stuck fake note. This hook owns only the data;
  * rendering (labels, the shared NotesTab wiring) stays with each entity's thin tab.
  */
+import { actionItemsWire } from '@/components/drawer/tabs/notes/notesTabTypes'
+import type { NoteActionItemWire } from '@/components/drawer/tabs/NotesTab'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
@@ -16,7 +18,8 @@ import { useAuth } from '@/context/AuthContext'
 import type { Id } from '@/types/common'
 
 // Structural match for the shared NotesTab's NoteItem (typed fields + open index).
-export interface EntityNote { type?: string; title?: string; author?: string; text?: string; body?: string; created_at?: string; [k: string]: unknown }
+// action_items (X-34): persisted panel items, returned on read, omitted on write when absent.
+export interface EntityNote { type?: string; title?: string; author?: string; text?: string; body?: string; created_at?: string; action_items?: NoteActionItemWire[] | null; [k: string]: unknown }
 
 export interface UseEntityNotesResult {
   notes: EntityNote[]
@@ -69,13 +72,15 @@ export function useEntityNotes({ id, basePath, updateMethod = 'patch' }: { id: I
 
   // Optimistic add, then persist. NOTE-TAAL-1: `payload` is forwarded to the API
   // AS-IS, so the optional `language` field rides along for free.
-  const addNote = useCallback((payload: { type: string; title: string; body: string; language?: string }) => {
+  // NOTE-ACTION-ITEMS-1: forward the action_items panel only when present (present = the full wanted set; absent = untouched).
+  const addNote = useCallback((payload: { type: string; title: string; body: string; language?: string; action_items?: NoteActionItemWire[] }) => {
     const local: EntityNote = { ...payload, text: payload.body, author: authorName, created_at: new Date().toISOString() }
     setNotes(prev => [local, ...prev])
     if (id != null) {
       // Refetch on success (mirrors useCandidateNotes) so the real id/author/
       // timestamp from the server replaces the optimistic stand-in.
-      api.post(`${basePath}/notes`, payload).then(fetchNotes).catch(err => {
+      api.post(`${basePath}/notes`, { type: payload.type, title: payload.title, body: payload.body, language: payload.language,
+        ...actionItemsWire(payload.action_items) }).then(fetchNotes).catch(err => {
         setNotes(prev => prev.filter(n => n !== local))
         notifyError(extractApiError(err, t('actionFailed')))
       })
@@ -86,7 +91,8 @@ export function useEntityNotes({ id, basePath, updateMethod = 'patch' }: { id: I
   // optimistic pattern, PATCH `${basePath}/notes/{id}` — only called by a host
   // whose entity has this route, e.g. tasks; a note without a resolved id
   // (still-optimistic) is skipped, mirroring vacancies/customers).
-  const editNote = useCallback((i: number, payload: { type: string; title: string; body: string; language?: string }): Promise<boolean> => {
+  // NOTE-ACTION-ITEMS-1: forward the action_items panel only when present (present = the full wanted set; absent = untouched).
+  const editNote = useCallback((i: number, payload: { type: string; title: string; body: string; language?: string; action_items?: NoteActionItemWire[] }): Promise<boolean> => {
     const target = notes[i]
     const noteId = target?.id
     if (noteId == null) return Promise.resolve(false)
@@ -96,7 +102,8 @@ export function useEntityNotes({ id, basePath, updateMethod = 'patch' }: { id: I
     // every family's controller finds the field name it actually expects. Refetch
     // on success so "edited by ..." (server-stamped) actually shows.
     const call = updateMethod === 'put' ? api.put : api.patch
-    return call(`${basePath}/notes/${noteId}`, { type: payload.type, title: payload.title, body: payload.body, text: payload.body, language: payload.language })
+    return call(`${basePath}/notes/${noteId}`, { type: payload.type, title: payload.title, body: payload.body, text: payload.body, language: payload.language,
+      ...actionItemsWire(payload.action_items) })
       .then(() => { fetchNotes(); return true })
       .catch(err => {
         setNotes(snapshot)
