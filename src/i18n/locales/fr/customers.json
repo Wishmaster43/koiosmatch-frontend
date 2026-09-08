@@ -929,10 +929,6 @@
   "appointmentsTab": {
     "noPermission": "Vous n'avez pas l'autorisation de voir les rendez-vous.",
     "loadError": "Impossible de charger les rendez-vous.",
-    "empty": "Pas encore de rendez-vous chez ce client.",
-    "overdue": "En retard",
-    "noCandidate": "Aucun candidat",
-    "pageOf": "Page {{page}} sur {{lastPage}}",
-    "joinMeeting": "Rejoindre la réunion"
+    "empty": "Pas encore de rendez-vous chez ce client."
   }
 }

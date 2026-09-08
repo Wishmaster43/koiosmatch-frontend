@@ -21,6 +21,7 @@ import DocumentsTab from './DocumentsTab'
 import PriceAgreementsTab from './PriceAgreementsTab'
 import CustomerNotesTab from './CustomerNotesTab'
 import ChangelogTab from './ChangelogTab'
+import AppointmentsTab from './AppointmentsTab'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import GeocodeCard from '@/components/drawer/GeocodeCard'
@@ -100,6 +101,8 @@ export default function CustomerDrawerTabPanels({
     case 'planning':      return <PlanningTab customerId={c.id ?? ''} />
     // TIJDLIJN-OVERAL (27-08): same content component the title-row changelog
     // popover uses (mixed customer + sub-entity feed).
+    // X-38: additive Afspraken tab (see CustomerDrawer's TABS comment).
+    case 'appointments':  return <AppointmentsTab customerId={c.id} />
     case 'timeline':      return <ChangelogTab customerId={c.id} locationNames={locationNames} departmentNames={departmentNames} contactNames={contactNames} />
     case 'statistics':    return <StatisticsTab c={c} onGoToVacancies={() => setActiveTab?.('vacancies')} />
     case 'priceAgreements': return <PriceAgreementsTab customerId={c.id} c={c} onSave={v => onUpdate?.(c.id, v)} />

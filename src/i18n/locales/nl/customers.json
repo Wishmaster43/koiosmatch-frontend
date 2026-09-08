@@ -929,10 +929,6 @@
   "appointmentsTab": {
     "noPermission": "Je hebt geen rechten om afspraken te bekijken.",
     "loadError": "Afspraken konden niet worden geladen.",
-    "empty": "Nog geen afspraken bij deze klant.",
-    "overdue": "Verlopen",
-    "noCandidate": "Geen kandidaat",
-    "pageOf": "Pagina {{page}} van {{lastPage}}",
-    "joinMeeting": "Deelnemen aan meeting"
+    "empty": "Nog geen afspraken bij deze klant."
   }
 }

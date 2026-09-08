@@ -929,10 +929,6 @@
   "appointmentsTab": {
     "noPermission": "Não tem permissão para ver marcações.",
     "loadError": "Não foi possível carregar as marcações.",
-    "empty": "Ainda sem marcações com este cliente.",
-    "overdue": "Expirado",
-    "noCandidate": "Sem candidato",
-    "pageOf": "Página {{page}} de {{lastPage}}",
-    "joinMeeting": "Participar na reunião"
+    "empty": "Ainda sem marcações com este cliente."
   }
 }

@@ -929,10 +929,6 @@
   "appointmentsTab": {
     "noPermission": "You don't have permission to view appointments.",
     "loadError": "Could not load appointments.",
-    "empty": "No appointments for this customer yet.",
-    "overdue": "Overdue",
-    "noCandidate": "No candidate",
-    "pageOf": "Page {{page}} of {{lastPage}}",
-    "joinMeeting": "Join meeting"
+    "empty": "No appointments for this customer yet."
   }
 }

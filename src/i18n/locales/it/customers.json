@@ -929,10 +929,6 @@
   "appointmentsTab": {
     "noPermission": "Non hai i permessi per visualizzare gli appuntamenti.",
     "loadError": "Impossibile caricare gli appuntamenti.",
-    "empty": "Ancora nessun appuntamento con questo cliente.",
-    "overdue": "Scaduto",
-    "noCandidate": "Nessun candidato",
-    "pageOf": "Pagina {{page}} di {{lastPage}}",
-    "joinMeeting": "Partecipa alla riunione"
+    "empty": "Ancora nessun appuntamento con questo cliente."
   }
 }

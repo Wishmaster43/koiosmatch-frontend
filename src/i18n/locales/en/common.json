@@ -1609,5 +1609,11 @@
     "remote": "Remote",
     "phone": "Phone"
   },
-  "saved": "Saved"
+  "saved": "Saved",
+  "appointmentsList": {
+    "overdue": "Overdue",
+    "noCandidate": "No candidate",
+    "joinMeeting": "Join meeting",
+    "pageOf": "Page {{page}} of {{lastPage}}"
+  }
 }

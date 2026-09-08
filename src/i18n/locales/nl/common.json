@@ -1609,5 +1609,11 @@
     "remote": "Op afstand",
     "phone": "Telefonisch"
   },
-  "saved": "Opgeslagen"
+  "saved": "Opgeslagen",
+  "appointmentsList": {
+    "overdue": "Verlopen",
+    "noCandidate": "Geen kandidaat",
+    "joinMeeting": "Deelnemen aan meeting",
+    "pageOf": "Pagina {{page}} van {{lastPage}}"
+  }
 }

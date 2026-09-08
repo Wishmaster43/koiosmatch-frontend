@@ -68,6 +68,10 @@ const TABS = [
   // common:backofficeLinks.tabLabel key (not this file's own drawer.tabs.*), so all
   // six adopting entities read identically.
   { id: 'koppelingen',   tKey: 'backofficeLinks' },
+  // X-38 (AFSPRAKEN-PLEK-1): every appointment linked to this customer through any of
+  // its four customer-side keys — GET /appointments?customer_id=. Purely additive on the
+  // frozen drill-down; sits before Tijdlijn/Statistieken (TIJDLIJN-OVERAL order).
+  { id: 'appointments',  tKey: 'appointments' },
   // TIJDLIJN-OVERAL (27-08): second-to-last, reuses the same ChangelogTab content
   // the title-row popover renders — the popover itself stays untouched (§3A(d)).
   { id: 'timeline',      tKey: 'timeline' },

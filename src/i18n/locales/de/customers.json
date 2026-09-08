@@ -929,10 +929,6 @@
   "appointmentsTab": {
     "noPermission": "Sie haben keine Berechtigung, Termine anzuzeigen.",
     "loadError": "Termine konnten nicht geladen werden.",
-    "empty": "Noch keine Termine bei diesem Kunden.",
-    "overdue": "Überfällig",
-    "noCandidate": "Kein Kandidat",
-    "pageOf": "Seite {{page}} von {{lastPage}}",
-    "joinMeeting": "An Meeting teilnehmen"
+    "empty": "Noch keine Termine bei diesem Kunden."
   }
 }

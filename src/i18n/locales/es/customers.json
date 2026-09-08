@@ -929,10 +929,6 @@
   "appointmentsTab": {
     "noPermission": "No tienes permiso para ver las citas.",
     "loadError": "No se pudieron cargar las citas.",
-    "empty": "Todavía no hay citas con este cliente.",
-    "overdue": "Vencida",
-    "noCandidate": "Sin candidato",
-    "pageOf": "Página {{page}} de {{lastPage}}",
-    "joinMeeting": "Unirse a la reunión"
+    "empty": "Todavía no hay citas con este cliente."
   }
 }

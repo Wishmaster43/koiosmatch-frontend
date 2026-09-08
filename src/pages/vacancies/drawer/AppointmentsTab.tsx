@@ -6,18 +6,11 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
-import { Calendar, ChevronLeft, ChevronRight, Video, Pencil } from 'lucide-react'
 import SectionCard from '@/components/ui/SectionCard'
-import SoftChip from '@/components/ui/SoftChip'
-import ModalityChip from '@/components/ui/ModalityChip'
-import EntityLink from '@/components/ui/EntityLink'
-import Button from '@/components/ui/Button'
+import AppointmentsList from '@/components/drawer/AppointmentsList'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { useAuth } from '@/context/AuthContext'
-import { useDateFormat } from '@/lib/datetime'
-import { useVacancyAppointments, VACANCY_APPOINTMENTS_PER_PAGE } from '../hooks/useVacancyAppointments'
-// HUISSTIJL-1: the meta text (11px/muted) is the shared Caption atom.
-import { Caption } from '@/components/ui/typography'
+import { useVacancyAppointments } from '../hooks/useVacancyAppointments'
 import { PlanIntakeModal } from '@/pages/candidates/shared'
 import type { ExistingAppointment } from '@/pages/candidates/shared'
 import PickCandidateForAppointmentModal from './PickCandidateForAppointmentModal'
@@ -49,10 +42,8 @@ interface EditingAppointment { candidateId: Id; appt: ExistingAppointment }
  * Mirrors MatchesTab's anatomy otherwise (§3A: extend, never fork a new shape).
  */
 export default function AppointmentsTab({ vacancy: v }: { vacancy: VacancyDetail }) {
-  const { t } = useTranslation(['vacancies', 'common'])
+  const { t } = useTranslation('vacancies')
   const auth = useAuth()
-  // scheduled_at is a zoneless WALL time (BUREAU-KLOK-FE-1 risk 1) — never local-render it.
-  const { formatWallTime } = useDateFormat()
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
   // "+ Afspraak" flow: pick a candidate first, then the shared modal opens.
@@ -105,61 +96,10 @@ export default function AppointmentsTab({ vacancy: v }: { vacancy: VacancyDetail
           <DrawerAddButton onClick={() => setCreating(true)} label={t('appointmentsTab.new')} short />
         </div>
       )}
-      <SectionCard>
-        {rows.length === 0 ? (
-          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('appointmentsTab.empty')}</div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {rows.map(a => (
-              <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px',
-                border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg)' }}>
-                <Calendar size={14} color="var(--text-muted)" style={{ flexShrink: 0 }} />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 120 }}>
-                  <span style={{ fontSize: 12, fontFamily: 'var(--font-mono, monospace)', color: 'var(--text)' }}>
-                    {a.scheduledAt ? formatWallTime(a.scheduledAt) : '—'}
-                  </span>
-                  {a.isOverdue && <SoftChip label={t('appointmentsTab.overdue')} color="var(--color-danger)" size={10} />}
-                </div>
-                <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)' }}>
-                    {a.candidateId != null
-                      ? <EntityLink page="candidates" id={a.candidateId}>{a.candidateName || '—'}</EntityLink>
-                      : (a.candidateName || t('appointmentsTab.noCandidate'))}
-                  </span>
-                  {a.locationName && <Caption>{a.locationName}</Caption>}
-                </div>
-                {a.type && <SoftChip label={a.type} color="var(--color-primary)" />}
-                {/* C.14: the modality axis, own chip — never inferred from location text alone. */}
-                <ModalityChip modality={a.modality} />
-                {a.status && <SoftChip label={a.status} color="var(--color-info)" />}
-                {/* Meeting link: render a join button when meeting_url is present. */}
-                {a.meetingUrl && <Button href={a.meetingUrl} target="_blank" rel="noopener noreferrer" variant="ghost" size="sm"><Video size={13} /> {t('appointments.joinMeeting')}</Button>}
-                {a.ownerName && <Caption style={{ flexShrink: 0 }}>{a.ownerName}</Caption>}
-                {/* Edit: opens the same shared modal, prefilled → PATCH. Only offered
-                    when the row carries its own candidate (mirrors the applications
-                    drawer's identical guard — an appointment without a linked
-                    candidate has no /candidates/{id}/appointments/{id} route to PATCH). */}
-                {a.candidateId != null && canManage && (
-                  <Button variant="secondary" iconOnly size="sm"
-                    onClick={() => setEditing({ candidateId: a.candidateId as Id, appt: toExisting(a) })}
-                    title={t('common:edit')} aria-label={t('common:edit')}>
-                    <Pencil size={12} />
-                  </Button>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </SectionCard>
-      {total > VACANCY_APPOINTMENTS_PER_PAGE && (
-        <Caption as="div" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8 }}>
-          <span>{t('appointmentsTab.pageOf', { page, lastPage })}</span>
-          <Button variant="secondary" iconOnly size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}
-            title={t('common:prevPage')} aria-label={t('common:prevPage')}><ChevronLeft size={13} /></Button>
-          <Button variant="secondary" iconOnly size="sm" onClick={() => setPage(p => Math.min(lastPage, p + 1))} disabled={page >= lastPage}
-            title={t('common:nextPage')} aria-label={t('common:nextPage')}><ChevronRight size={13} /></Button>
-        </Caption>
-      )}
+      {/* X-38: the rows + page footer are the shared AppointmentsList (customer tab uses the same). */}
+      <AppointmentsList rows={rows} total={total} page={page} lastPage={lastPage} onPageChange={setPage}
+        emptyText={t('appointmentsTab.empty')} canManage={canManage}
+        onEdit={a => setEditing({ candidateId: a.candidateId as Id, appt: toExisting(a) })} />
       {creating && v.id != null && (
         <PickCandidateForAppointmentModal vacancyId={v.id}
           onClose={() => setCreating(false)} onCreated={() => { setCreating(false); reload() }} />

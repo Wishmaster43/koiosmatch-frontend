@@ -1609,5 +1609,11 @@
     "remote": "À distance",
     "phone": "Téléphone"
   },
-  "saved": "Enregistré"
+  "saved": "Enregistré",
+  "appointmentsList": {
+    "overdue": "En retard",
+    "noCandidate": "Aucun candidat",
+    "joinMeeting": "Rejoindre la réunion",
+    "pageOf": "Page {{page}} sur {{lastPage}}"
+  }
 }
