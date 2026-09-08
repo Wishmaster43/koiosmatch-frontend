@@ -1911,7 +1911,7 @@
     "formTitleCreate": "Ajouter un nouveau jeton",
     "formTitleEdit": "Modifier le jeton",
     "labelField": "Nom",
-    "labelFieldPlaceholder": "Ex. Yesway Zorg",
+    "labelFieldPlaceholder": "Ex. Yesway Technique",
     "tokenUnchangedPlaceholder": "Laisser vide pour ne pas modifier",
     "scopeLabel": "Disponible pour",
     "scopeEveryone": "Tout le monde",
@@ -2460,7 +2460,7 @@
     "empty": "Aucun groupe de critères pour le moment.",
     "loading": "Chargement…",
     "groupName": "Nom du groupe",
-    "groupNamePlaceholder": "ex. Soins — Verzorgende IG",
+    "groupNamePlaceholder": "ex. Logistique — Cariste",
     "description": "Description",
     "descriptionPlaceholder": "Description facultative…",
     "criteria": "Critères",
@@ -2530,7 +2530,7 @@
     "employmentTypeAdd": "Ajouter un type de contrat",
     "employmentTypeNone": "Aucun",
     "functionTitleLabel": "Fonction (optionnel)",
-    "functionTitlePlaceholder": "Ex. Infirmier(ère)",
+    "functionTitlePlaceholder": "Ex. Cariste",
     "defaultAssignmentHint": "Suggéré automatiquement pour un nouveau poste avec ce type de contrat/cette fonction, mais seulement si exactement un profil correspond.",
     "add": "Ajouter un profil",
     "delete": "Supprimer",
@@ -3377,7 +3377,7 @@
     "empty": "Aucun profil de génération créé pour le moment.",
     "add": "+ Profil",
     "nameLabel": "Nom",
-    "namePlaceholder": "Ex. Soins — équipes flex du matin",
+    "namePlaceholder": "Ex. Logistique — équipes flex du matin",
     "priorityLabel": "Priorité",
     "priorityHint": "Si plusieurs profils correspondent, la priorité la plus élevée l'emporte.",
     "matcherTitle": "Quand ce profil s'applique-t-il ?",
@@ -3823,7 +3823,11 @@
     "saveFailed": "Échec de l'enregistrement des budgets.",
     "saved": "Budgets enregistrés.",
     "aiTierLabel": "Palier IA : {{tier}}",
-    "baseFee": "Frais de base"
+    "baseFee": "Frais de base",
+    "basis": {
+      "weighted-as-raw-indicative": "pondéré comme brut, indicatif",
+      "fast-blend-90-10": "mélange rapide 90/10"
+    }
   },
   "billingTiers": {
     "title": "Paliers",

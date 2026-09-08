@@ -104,7 +104,8 @@
       "financial": "Financiero",
       "billing": "Facturación",
       "tasks": "Tareas",
-      "timeline": "Cronología"
+      "timeline": "Cronología",
+      "appointments": "Citas"
     },
     "changelog": "Cambios",
     "photoUpload": "Subir logo",
@@ -710,7 +711,7 @@
     "locationName": "Nombre de ubicación",
     "locationPlaceholder": "P. ej. Sede central",
     "departmentName": "Nombre de departamento",
-    "departmentPlaceholder": "P. ej. Atención domiciliaria",
+    "departmentPlaceholder": "P. ej. Almacén",
     "description": "Descripción",
     "selectLocation": "Ubicación",
     "selectDepartment": "Departamento",
@@ -924,5 +925,14 @@
       "paused": "En pausa",
       "closed": "Cerrado"
     }
+  },
+  "appointmentsTab": {
+    "noPermission": "No tienes permiso para ver las citas.",
+    "loadError": "No se pudieron cargar las citas.",
+    "empty": "Todavía no hay citas con este cliente.",
+    "overdue": "Vencida",
+    "noCandidate": "Sin candidato",
+    "pageOf": "Página {{page}} de {{lastPage}}",
+    "joinMeeting": "Unirse a la reunión"
   }
 }

@@ -1911,7 +1911,7 @@
     "formTitleCreate": "Añadir un nuevo token",
     "formTitleEdit": "Editar token",
     "labelField": "Nombre",
-    "labelFieldPlaceholder": "P. ej. Yesway Zorg",
+    "labelFieldPlaceholder": "P. ej. Yesway Técnica",
     "tokenUnchangedPlaceholder": "Déjalo vacío para no modificarlo",
     "scopeLabel": "Disponible para",
     "scopeEveryone": "Todos",
@@ -2460,7 +2460,7 @@
     "empty": "Aún no hay grupos de criterios.",
     "loading": "Cargando…",
     "groupName": "Nombre del grupo",
-    "groupNamePlaceholder": "p. ej. Cuidados — Verzorgende IG",
+    "groupNamePlaceholder": "p. ej. Logística — Carretillero",
     "description": "Descripción",
     "descriptionPlaceholder": "Descripción opcional…",
     "criteria": "Criterios",
@@ -2530,7 +2530,7 @@
     "employmentTypeAdd": "Añadir tipo de contrato",
     "employmentTypeNone": "Ninguno",
     "functionTitleLabel": "Función (opcional)",
-    "functionTitlePlaceholder": "P. ej. Enfermero/a",
+    "functionTitlePlaceholder": "P. ej. Carretillero",
     "defaultAssignmentHint": "Se sugiere automáticamente para una nueva vacante con este tipo de contrato/función, pero solo cuando coincide exactamente un perfil.",
     "add": "Añadir perfil",
     "delete": "Eliminar",
@@ -3377,7 +3377,7 @@
     "empty": "Aún no se han creado perfiles de generación.",
     "add": "+ Perfil",
     "nameLabel": "Nombre",
-    "namePlaceholder": "P. ej. Sanidad — turnos flex de mañana",
+    "namePlaceholder": "P. ej. Logística — turnos flex de mañana",
     "priorityLabel": "Prioridad",
     "priorityHint": "Si varios perfiles coinciden, gana la prioridad más alta.",
     "matcherTitle": "¿Cuándo se aplica este perfil?",
@@ -3823,7 +3823,11 @@
     "saveFailed": "No se pudieron guardar los presupuestos.",
     "saved": "Presupuestos guardados.",
     "aiTierLabel": "Nivel de IA: {{tier}}",
-    "baseFee": "Tarifa base"
+    "baseFee": "Tarifa base",
+    "basis": {
+      "weighted-as-raw-indicative": "ponderado como bruto, indicativo",
+      "fast-blend-90-10": "mezcla rápida 90/10"
+    }
   },
   "billingTiers": {
     "title": "Niveles",

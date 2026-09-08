@@ -840,7 +840,7 @@
     "empty": "Ainda não há grupos de critérios.",
     "loading": "A carregar…",
     "groupName": "Nome do grupo",
-    "groupNamePlaceholder": "p. ex. Saúde: Enfermeiro(a)",
+    "groupNamePlaceholder": "p. ex. Logística: Operador de empilhador",
     "description": "Descrição",
     "descriptionPlaceholder": "Descrição opcional…",
     "criteria": "Critérios",
@@ -910,7 +910,7 @@
     "employmentTypeAdd": "Adicionar tipo de contrato",
     "employmentTypeNone": "Nenhum",
     "functionTitleLabel": "Função (opcional)",
-    "functionTitlePlaceholder": "P. ex. Enfermeiro(a)",
+    "functionTitlePlaceholder": "P. ex. Operador de empilhador",
     "defaultAssignmentHint": "É sugerido automaticamente numa nova vaga com este tipo de contrato/função, mas apenas quando exatamente um perfil corresponde.",
     "add": "Adicionar perfil",
     "delete": "Eliminar",
@@ -2172,7 +2172,7 @@
     "formTitleCreate": "Adicionar novo token",
     "formTitleEdit": "Editar token",
     "labelField": "Nome",
-    "labelFieldPlaceholder": "Por exemplo, Yesway Care",
+    "labelFieldPlaceholder": "Por exemplo, Yesway Técnica",
     "tokenUnchangedPlaceholder": "Deixe em branco para manter inalterado",
     "scopeLabel": "Disponível para",
     "scopeEveryone": "Todos",
@@ -3377,7 +3377,7 @@
     "empty": "Ainda não foram criados perfis de geração.",
     "add": "+ Perfil",
     "nameLabel": "Nome",
-    "namePlaceholder": "Por exemplo, Saúde: turnos de manhã flex",
+    "namePlaceholder": "Por exemplo, Logística: turnos de manhã flex",
     "priorityLabel": "Prioridade",
     "priorityHint": "Quando vários perfis correspondem, prevalece a prioridade mais alta.",
     "matcherTitle": "Quando se aplica este perfil?",
@@ -3823,7 +3823,11 @@
     "saveFailed": "Não foi possível guardar os orçamentos.",
     "saved": "Orçamentos guardados.",
     "aiTierLabel": "Escalão de IA: {{tier}}",
-    "baseFee": "Taxa base"
+    "baseFee": "Taxa base",
+    "basis": {
+      "weighted-as-raw-indicative": "ponderado como bruto, indicativo",
+      "fast-blend-90-10": "mistura rápida 90/10"
+    }
   },
   "billingTiers": {
     "title": "Escalões",

@@ -104,7 +104,8 @@
       "financial": "Financial",
       "billing": "Billing",
       "tasks": "Tasks",
-      "timeline": "Timeline"
+      "timeline": "Timeline",
+      "appointments": "Appointments"
     },
     "changelog": "Changelog",
     "photoUpload": "Upload logo",
@@ -710,7 +711,7 @@
     "locationName": "Location name",
     "locationPlaceholder": "E.g. Head office",
     "departmentName": "Department name",
-    "departmentPlaceholder": "E.g. Home care",
+    "departmentPlaceholder": "E.g. Warehouse",
     "description": "Description",
     "selectLocation": "Location",
     "selectDepartment": "Department",
@@ -924,5 +925,14 @@
       "paused": "Paused",
       "closed": "Closed"
     }
+  },
+  "appointmentsTab": {
+    "noPermission": "You don't have permission to view appointments.",
+    "loadError": "Could not load appointments.",
+    "empty": "No appointments for this customer yet.",
+    "overdue": "Overdue",
+    "noCandidate": "No candidate",
+    "pageOf": "Page {{page}} of {{lastPage}}",
+    "joinMeeting": "Join meeting"
   }
 }

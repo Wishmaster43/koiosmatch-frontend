@@ -840,7 +840,7 @@
     "empty": "Ancora nessun gruppo di criteri.",
     "loading": "Caricamento…",
     "groupName": "Nome gruppo",
-    "groupNamePlaceholder": "es. Sanità, Infermiere IG",
+    "groupNamePlaceholder": "es. Logistica, Carrellista",
     "description": "Descrizione",
     "descriptionPlaceholder": "Descrizione facoltativa…",
     "criteria": "Criteri",
@@ -910,7 +910,7 @@
     "employmentTypeAdd": "Aggiungi tipo di rapporto di lavoro",
     "employmentTypeNone": "Nessuno",
     "functionTitleLabel": "Funzione (facoltativo)",
-    "functionTitlePlaceholder": "Es. Infermiere",
+    "functionTitlePlaceholder": "Es. Carrellista",
     "defaultAssignmentHint": "Suggerito automaticamente per una nuova posizione con questo tipo di rapporto di lavoro/questa funzione, ma solo se corrisponde esattamente un profilo.",
     "add": "Aggiungi profilo",
     "delete": "Elimina",
@@ -2172,7 +2172,7 @@
     "formTitleCreate": "Aggiungi nuovo token",
     "formTitleEdit": "Modifica token",
     "labelField": "Nome",
-    "labelFieldPlaceholder": "Es. Yesway Care",
+    "labelFieldPlaceholder": "Es. Yesway Tecnica",
     "tokenUnchangedPlaceholder": "Lascia vuoto per non modificare",
     "scopeLabel": "Disponibile per",
     "scopeEveryone": "Tutti",
@@ -3377,7 +3377,7 @@
     "empty": "Nessun profilo di generazione creato ancora.",
     "add": "+ Profilo",
     "nameLabel": "Nome",
-    "namePlaceholder": "Ad es. Sanità, turni flessibili mattutini",
+    "namePlaceholder": "Ad es. Logistica, turni flessibili mattutini",
     "priorityLabel": "Priorità",
     "priorityHint": "Se più profili corrispondono, vince quello con priorità più alta.",
     "matcherTitle": "Quando si applica questo profilo?",
@@ -3823,7 +3823,11 @@
     "saveFailed": "Salvataggio dei budget non riuscito.",
     "saved": "Budget salvati.",
     "aiTierLabel": "Fascia AI: {{tier}}",
-    "baseFee": "Tariffa base"
+    "baseFee": "Tariffa base",
+    "basis": {
+      "weighted-as-raw-indicative": "ponderato come grezzo, indicativo",
+      "fast-blend-90-10": "miscela rapida 90/10"
+    }
   },
   "billingTiers": {
     "title": "Fasce",

@@ -63,7 +63,7 @@
     "generalCard": "Generale",
     "sourceCard": "Origine",
     "name": "Nome",
-    "namePlaceholder": "Es. Lista di chiamate assistenti disponibili",
+    "namePlaceholder": "Es. Lista di chiamate autisti disponibili",
     "channel": "Canale",
     "pool": "Pool di origine (opzionale)",
     "poolNone": "Nessuno, compila più tardi",

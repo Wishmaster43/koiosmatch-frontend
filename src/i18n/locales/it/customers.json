@@ -104,7 +104,8 @@
       "financial": "Finanziario",
       "billing": "Fatturazione",
       "tasks": "Attività",
-      "timeline": "Cronologia"
+      "timeline": "Cronologia",
+      "appointments": "Appuntamenti"
     },
     "changelog": "Modifiche",
     "photoUpload": "Carica logo",
@@ -710,7 +711,7 @@
     "locationName": "Nome sede",
     "locationPlaceholder": "Es. Sede principale",
     "departmentName": "Nome reparto",
-    "departmentPlaceholder": "Es. Assistenza domiciliare",
+    "departmentPlaceholder": "Es. Magazzino",
     "description": "Descrizione",
     "selectLocation": "Sede",
     "selectDepartment": "Reparto",
@@ -924,5 +925,14 @@
       "paused": "In pausa",
       "closed": "Chiusa"
     }
+  },
+  "appointmentsTab": {
+    "noPermission": "Non hai i permessi per visualizzare gli appuntamenti.",
+    "loadError": "Impossibile caricare gli appuntamenti.",
+    "empty": "Ancora nessun appuntamento con questo cliente.",
+    "overdue": "Scaduto",
+    "noCandidate": "Nessun candidato",
+    "pageOf": "Pagina {{page}} di {{lastPage}}",
+    "joinMeeting": "Partecipa alla riunione"
   }
 }

@@ -1204,6 +1204,14 @@ Be honest. If something is not done, say so — do not pretend.
     voorbeeld-placeholders dragen per taal een passend marktvoorbeeld (telefoon-
     prefix, stad, postcodeformaat, tussenvoegsel) en nooit zorg-framing als hét
     voorbeeld (algemeen staffing) — en nooit een kastlijntje in het voorbeeldproza.
+    **PLACEHOLDER-GENERIEK-1 (Danny 08-09, verbatim: "we zouden generieke
+    placeholders hebben overal!!", op "Jansen Zorggroep B.V." in de klant-modal):**
+    de audit van 08-09 vond acht zorg-geframede placeholder-sleutels ×7 talen
+    (bedrijfsnaam, functie, afdeling, bellijst, assessmentgroep, matchprofiel,
+    vacaturegeneratie, WhatsApp-label) — alle naar algemeen-staffing-voorbeelden
+    (logistiek/techniek). De guard `src/i18n/placeholdersGeneric.houseStyle.test.js`
+    laat elke placeholder-/example-sleutel met zorgvocabulaire in welke taal dan ook
+    falen; een nieuw voorbeeld kiest een neutraal beroep of bedrijf.
   · **NOTITIE-REFERENTIE (Danny 27-08: "Notities moeten zo zijn!"):** de
     kandidaat-notitierij is de canon voor élke entiteit: typechip + auteur +
     DD-MM-YYYY HH:mm + potlood + prullenbak + pop-out. Een notitietab zonder die

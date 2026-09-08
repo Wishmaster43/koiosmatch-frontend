@@ -840,7 +840,7 @@
     "empty": "Nog geen criteria-groepen.",
     "loading": "Laden…",
     "groupName": "Groepsnaam",
-    "groupNamePlaceholder": "bijv. Zorg — Verzorgende IG",
+    "groupNamePlaceholder": "bijv. Logistiek — Heftruckchauffeur",
     "description": "Omschrijving",
     "descriptionPlaceholder": "Optionele omschrijving…",
     "criteria": "Criteria",
@@ -910,7 +910,7 @@
     "employmentTypeAdd": "Dienstverband toevoegen",
     "employmentTypeNone": "Geen",
     "functionTitleLabel": "Functie (optioneel)",
-    "functionTitlePlaceholder": "Bijv. Verpleegkundige",
+    "functionTitlePlaceholder": "Bijv. Heftruckchauffeur",
     "defaultAssignmentHint": "Wordt automatisch voorgesteld bij een nieuwe vacature met dit dienstverband/deze functie, maar alleen als precies één profiel past.",
     "add": "Profiel toevoegen",
     "delete": "Verwijderen",
@@ -2172,7 +2172,7 @@
     "formTitleCreate": "Nieuw token toevoegen",
     "formTitleEdit": "Token bewerken",
     "labelField": "Naam",
-    "labelFieldPlaceholder": "Bijv. Yesway Zorg",
+    "labelFieldPlaceholder": "Bijv. Yesway Techniek",
     "tokenUnchangedPlaceholder": "Laat leeg om ongewijzigd te laten",
     "scopeLabel": "Beschikbaar voor",
     "scopeEveryone": "Iedereen",
@@ -3377,7 +3377,7 @@
     "empty": "Nog geen generatieprofielen aangemaakt.",
     "add": "+ Profiel",
     "nameLabel": "Naam",
-    "namePlaceholder": "Bijv. Zorg — Flex ochtenddiensten",
+    "namePlaceholder": "Bijv. Logistiek — Flex ochtenddiensten",
     "priorityLabel": "Prioriteit",
     "priorityHint": "Bij meerdere passende profielen wint de hoogste prioriteit.",
     "matcherTitle": "Wanneer geldt dit profiel?",
@@ -3823,7 +3823,11 @@
     "saveFailed": "Budgetten opslaan is mislukt.",
     "saved": "Budgetten opgeslagen.",
     "aiTierLabel": "AI-staffel: {{tier}}",
-    "baseFee": "Basistarief"
+    "baseFee": "Basistarief",
+    "basis": {
+      "weighted-as-raw-indicative": "gewogen als ruw, indicatief",
+      "fast-blend-90-10": "snelle mix 90/10"
+    }
   },
   "billingTiers": {
     "title": "Staffels",

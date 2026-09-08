@@ -104,7 +104,8 @@
       "financial": "Financieel",
       "billing": "Facturatie",
       "tasks": "Taken",
-      "timeline": "Tijdlijn"
+      "timeline": "Tijdlijn",
+      "appointments": "Afspraken"
     },
     "changelog": "Wijzigingen",
     "photoUpload": "Logo uploaden",
@@ -710,7 +711,7 @@
     "locationName": "Naam locatie",
     "locationPlaceholder": "Bijv. Hoofdlocatie",
     "departmentName": "Naam afdeling",
-    "departmentPlaceholder": "Bijv. Thuiszorg",
+    "departmentPlaceholder": "Bijv. Magazijn",
     "description": "Omschrijving",
     "selectLocation": "Locatie",
     "selectDepartment": "Afdeling",
@@ -924,5 +925,14 @@
       "paused": "Gepauzeerd",
       "closed": "Gesloten"
     }
+  },
+  "appointmentsTab": {
+    "noPermission": "Je hebt geen rechten om afspraken te bekijken.",
+    "loadError": "Afspraken konden niet worden geladen.",
+    "empty": "Nog geen afspraken bij deze klant.",
+    "overdue": "Verlopen",
+    "noCandidate": "Geen kandidaat",
+    "pageOf": "Pagina {{page}} van {{lastPage}}",
+    "joinMeeting": "Deelnemen aan meeting"
   }
 }

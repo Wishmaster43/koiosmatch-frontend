@@ -63,7 +63,7 @@
     "generalCard": "General",
     "sourceCard": "Source",
     "name": "Name",
-    "namePlaceholder": "e.g. Call list available care workers",
+    "namePlaceholder": "e.g. Call list available drivers",
     "channel": "Channel",
     "pool": "Source pool (optional)",
     "poolNone": "None, fill later",

@@ -104,7 +104,8 @@
       "financial": "Financeiro",
       "billing": "Faturação",
       "tasks": "Tarefas",
-      "timeline": "Cronologia"
+      "timeline": "Cronologia",
+      "appointments": "Marcações"
     },
     "changelog": "Alterações",
     "photoUpload": "Carregar logótipo",
@@ -710,7 +711,7 @@
     "locationName": "Nome da filial",
     "locationPlaceholder": "Ex.: Sede",
     "departmentName": "Nome do departamento",
-    "departmentPlaceholder": "Ex.: Apoio domiciliário",
+    "departmentPlaceholder": "Ex.: Armazém",
     "description": "Descrição",
     "selectLocation": "Filial",
     "selectDepartment": "Departamento",
@@ -924,5 +925,14 @@
       "paused": "Pausada",
       "closed": "Fechada"
     }
+  },
+  "appointmentsTab": {
+    "noPermission": "Não tem permissão para ver marcações.",
+    "loadError": "Não foi possível carregar as marcações.",
+    "empty": "Ainda sem marcações com este cliente.",
+    "overdue": "Expirado",
+    "noCandidate": "Sem candidato",
+    "pageOf": "Página {{page}} de {{lastPage}}",
+    "joinMeeting": "Participar na reunião"
   }
 }

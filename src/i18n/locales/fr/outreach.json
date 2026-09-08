@@ -63,7 +63,7 @@
     "generalCard": "Général",
     "sourceCard": "Source",
     "name": "Nom",
-    "namePlaceholder": "p. ex. Liste d'appels soignants disponibles",
+    "namePlaceholder": "p. ex. Liste d'appels chauffeurs disponibles",
     "channel": "Canal",
     "pool": "Vivier source (facultatif)",
     "poolNone": "Aucun, remplir plus tard",

@@ -840,7 +840,7 @@
     "empty": "No criteria groups yet.",
     "loading": "Loading…",
     "groupName": "Group name",
-    "groupNamePlaceholder": "e.g. Care — IG nurse",
+    "groupNamePlaceholder": "e.g. Logistics — Forklift driver",
     "description": "Description",
     "descriptionPlaceholder": "Optional description…",
     "criteria": "Criteria",
@@ -910,7 +910,7 @@
     "employmentTypeAdd": "Add employment type",
     "employmentTypeNone": "None",
     "functionTitleLabel": "Function (optional)",
-    "functionTitlePlaceholder": "E.g. Registered nurse",
+    "functionTitlePlaceholder": "E.g. Forklift driver",
     "defaultAssignmentHint": "Auto-suggested for a new vacancy with this employment type/function, but only when exactly one profile matches.",
     "add": "Add profile",
     "delete": "Delete",
@@ -2172,7 +2172,7 @@
     "formTitleCreate": "Add a new token",
     "formTitleEdit": "Edit token",
     "labelField": "Name",
-    "labelFieldPlaceholder": "E.g. Yesway Care",
+    "labelFieldPlaceholder": "E.g. Yesway Technical",
     "tokenUnchangedPlaceholder": "Leave blank to keep unchanged",
     "scopeLabel": "Available to",
     "scopeEveryone": "Everyone",
@@ -3377,7 +3377,7 @@
     "empty": "No generation profiles created yet.",
     "add": "+ Profile",
     "nameLabel": "Name",
-    "namePlaceholder": "E.g. Healthcare — flex morning shifts",
+    "namePlaceholder": "E.g. Logistics — flex morning shifts",
     "priorityLabel": "Priority",
     "priorityHint": "When several profiles match, the highest priority wins.",
     "matcherTitle": "When does this profile apply?",
@@ -3823,7 +3823,11 @@
     "saveFailed": "Failed to save the budgets.",
     "saved": "Budgets saved.",
     "aiTierLabel": "AI tier: {{tier}}",
-    "baseFee": "Base fee"
+    "baseFee": "Base fee",
+    "basis": {
+      "weighted-as-raw-indicative": "weighted as raw, indicative",
+      "fast-blend-90-10": "fast blend 90/10"
+    }
   },
   "billingTiers": {
     "title": "Tiers",

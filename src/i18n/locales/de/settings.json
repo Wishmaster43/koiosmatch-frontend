@@ -1911,7 +1911,7 @@
     "formTitleCreate": "Neues Token hinzufügen",
     "formTitleEdit": "Token bearbeiten",
     "labelField": "Name",
-    "labelFieldPlaceholder": "Z. B. Yesway Zorg",
+    "labelFieldPlaceholder": "Z. B. Yesway Technik",
     "tokenUnchangedPlaceholder": "Leer lassen, um unverändert zu bleiben",
     "scopeLabel": "Verfügbar für",
     "scopeEveryone": "Alle",
@@ -2460,7 +2460,7 @@
     "empty": "Noch keine Kriteriengruppen.",
     "loading": "Wird geladen…",
     "groupName": "Gruppenname",
-    "groupNamePlaceholder": "z. B. Pflege — Verzorgende IG",
+    "groupNamePlaceholder": "z. B. Logistik — Staplerfahrer",
     "description": "Beschreibung",
     "descriptionPlaceholder": "Optionale Beschreibung…",
     "criteria": "Kriterien",
@@ -2530,7 +2530,7 @@
     "employmentTypeAdd": "Anstellungsart hinzufügen",
     "employmentTypeNone": "Keine",
     "functionTitleLabel": "Funktion (optional)",
-    "functionTitlePlaceholder": "Z. B. Krankenpfleger",
+    "functionTitlePlaceholder": "Z. B. Staplerfahrer",
     "defaultAssignmentHint": "Wird bei einer neuen Stelle mit dieser Anstellungsart/Funktion automatisch vorgeschlagen, aber nur wenn genau ein Profil passt.",
     "add": "Profil hinzufügen",
     "delete": "Löschen",
@@ -3377,7 +3377,7 @@
     "empty": "Noch keine Generierungsprofile angelegt.",
     "add": "+ Profil",
     "nameLabel": "Name",
-    "namePlaceholder": "Z. B. Pflege — Flex-Frühschichten",
+    "namePlaceholder": "Z. B. Logistik — Flex-Frühschichten",
     "priorityLabel": "Priorität",
     "priorityHint": "Passen mehrere Profile, gewinnt die höchste Priorität.",
     "matcherTitle": "Wann gilt dieses Profil?",
@@ -3823,7 +3823,11 @@
     "saveFailed": "Budgets konnten nicht gespeichert werden.",
     "saved": "Budgets gespeichert.",
     "aiTierLabel": "KI-Staffel: {{tier}}",
-    "baseFee": "Grundgebühr"
+    "baseFee": "Grundgebühr",
+    "basis": {
+      "weighted-as-raw-indicative": "gewichtet wie roh, indikativ",
+      "fast-blend-90-10": "schnelle Mischung 90/10"
+    }
   },
   "billingTiers": {
     "title": "Stufen",

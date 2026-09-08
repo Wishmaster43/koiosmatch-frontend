@@ -169,7 +169,8 @@ export default function BillingBudgetsCard() {
                     {t('billingBudgets.valueCaption', {
                       cogs: entry.value.ai_cogs != null ? formatCurrency(entry.value.ai_cogs) : '—',
                       sale: entry.value.ai_sale != null ? formatCurrency(entry.value.ai_sale) : '—',
-                      basis: entry.value.basis ?? '—',
+                      // The server's basis token is a vocabulary, never copy: translate it, fall back to the raw token.
+                      basis: entry.value.basis ? t(`billingBudgets.basis.${entry.value.basis}`, { defaultValue: entry.value.basis }) : '—',
                     })}
                   </Caption>
                 )}

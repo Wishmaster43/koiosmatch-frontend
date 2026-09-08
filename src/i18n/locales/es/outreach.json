@@ -63,7 +63,7 @@
     "generalCard": "General",
     "sourceCard": "Origen",
     "name": "Nombre",
-    "namePlaceholder": "p. ej. Lista de llamadas cuidadores disponibles",
+    "namePlaceholder": "p. ej. Lista de llamadas conductores disponibles",
     "channel": "Canal",
     "pool": "Bolsa de origen (opcional)",
     "poolNone": "Ninguna, rellenar más tarde",

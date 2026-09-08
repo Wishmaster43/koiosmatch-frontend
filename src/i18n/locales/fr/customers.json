@@ -104,7 +104,8 @@
       "financial": "Financier",
       "billing": "Facturation",
       "tasks": "Tâches",
-      "timeline": "Chronologie"
+      "timeline": "Chronologie",
+      "appointments": "Rendez-vous"
     },
     "changelog": "Historique",
     "photoUpload": "Téléverser le logo",
@@ -710,7 +711,7 @@
     "locationName": "Nom du site",
     "locationPlaceholder": "P. ex. Siège",
     "departmentName": "Nom du service",
-    "departmentPlaceholder": "P. ex. Soins à domicile",
+    "departmentPlaceholder": "P. ex. Entrepôt",
     "description": "Description",
     "selectLocation": "Site",
     "selectDepartment": "Service",
@@ -924,5 +925,14 @@
       "paused": "En pause",
       "closed": "Clôturé"
     }
+  },
+  "appointmentsTab": {
+    "noPermission": "Vous n'avez pas l'autorisation de voir les rendez-vous.",
+    "loadError": "Impossible de charger les rendez-vous.",
+    "empty": "Pas encore de rendez-vous chez ce client.",
+    "overdue": "En retard",
+    "noCandidate": "Aucun candidat",
+    "pageOf": "Page {{page}} sur {{lastPage}}",
+    "joinMeeting": "Rejoindre la réunion"
   }
 }
