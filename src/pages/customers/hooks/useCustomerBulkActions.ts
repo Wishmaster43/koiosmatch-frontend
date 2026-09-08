@@ -15,6 +15,7 @@ import api from '@/lib/api'
 import { initialsOf } from '@/lib/initials'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useBackofficeCoupleBulk } from '@/hooks/useBackofficeCoupleBulk'
+import { toggleInSet, toggleAllInSet } from '@/lib/selectionSet'
 import type { Customer } from '@/types/customer'
 import type { Id } from '@/types/common'
 
@@ -42,8 +43,8 @@ export function useCustomerBulkActions({ customers, setCustomers, setTotal, sele
   // query) must never go stale after a bulk field mutation — invalidated below on every
   // successful bulkMutate call, never on a failed one.
   const queryClient = useQueryClient()
-  const toggleRow = (id: Id) => setSelectedIds(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n })
-  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => { const n = new Set(prev); ids.forEach(id => { if (allSelected) n.delete(id); else n.add(id) }); return n })
+  const toggleRow = (id: Id) => setSelectedIds(prev => toggleInSet(prev, id))
+  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => toggleAllInSet(prev, ids, allSelected))
 
   // Generic optimistic bulk field mutation (apply → reconcile on `updated` → revert).
   const bulkMutate = ({ url, body, patch, keys, onSuccess }: { url: string; body: Record<string, unknown>; patch: Record<string, unknown>; keys: string[]; onSuccess: (n: number) => void }) => {

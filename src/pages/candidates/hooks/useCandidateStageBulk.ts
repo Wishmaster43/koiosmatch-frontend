@@ -1,4 +1,5 @@
 import api from '@/lib/api'
+import { reasonBreakdown } from '@/lib/bulkSkipReasons'
 import type { TFunction } from 'i18next'
 import { metaOf } from '../data/candidatesShared'
 import type { Id } from '@/types/common'
@@ -38,23 +39,6 @@ interface UseCandidateStageBulkParams {
 export function useCandidateStageBulk({
   selectedIds, notify, t, funnelTypes, confirm, bulkMutate, notifyOutcome,
 }: UseCandidateStageBulkParams) {
-  // BULK-SKIP-REASONS-1: `/candidates/bulk/funnel-stage` and `/candidates/bulk/phase`
-  // now return `skipped` as [{id, reason}] (every other bulk endpoint keeps the bare
-  // id array — see notifyOutcome, unchanged for those). Group the reasons into a
-  // human "N reason, M reason" string; returns '' when `skipped` isn't the reasoned
-  // shape (defensive fallback — caller falls back to the old bare-count summary).
-  const reasonBreakdown = (skipped?: unknown[]): string => {
-    const reasoned = (skipped ?? []).filter(
-      (s): s is { id: Id; reason: string } => typeof s === 'object' && s !== null && 'reason' in s,
-    )
-    if (!reasoned.length) return ''
-    const counts: Record<string, number> = {}
-    reasoned.forEach(s => { counts[s.reason] = (counts[s.reason] ?? 0) + 1 })
-    return Object.entries(counts)
-      .map(([reason, count]) => `${count} ${t(`bulk.skipReasons.${reason}`, { defaultValue: reason })}`)
-      .join(', ')
-  }
-
   // Move the selection to a funnel stage — the real bulk route (BULK-2) with single-PATCH
   // semantics (Match-spawn on hired, event after commit). Replaces the per-id bridge.
   // BULK-FUNNEL-SOLE-1: the BE now moves each candidate's ONE-AND-ONLY live application
@@ -64,7 +48,7 @@ export function useCandidateStageBulk({
     url: '/candidates/bulk/funnel-stage', body: { funnel_type: stage },
     patch: { stage }, keys: ['stage'],
     onSuccess: (n, total, skipped) => {
-      const breakdown = reasonBreakdown(skipped)
+      const breakdown = reasonBreakdown(skipped, t)
       if (total > 0 && n < total && breakdown) {
         notify('warning', t('bulk.partialResultReasoned', {
           value: metaOf(funnelTypes, stage)?.label ?? stage, updated: n, total, skipped: total - n, breakdown,
@@ -85,7 +69,7 @@ export function useCandidateStageBulk({
       url: '/candidates/bulk/phase', body: { phase },
       patch: { phase }, keys: ['phase'],
       onSuccess: (n, _total, skipped) => {
-        const breakdown = reasonBreakdown(skipped)
+        const breakdown = reasonBreakdown(skipped, t)
         if (n < total && breakdown) { notify('warning', t('bulk.convertResultReasoned', { updated: n, total, breakdown })); return }
         notify(n < total ? 'warning' : 'success', t('bulk.convertResult', { updated: n, total }))
       },

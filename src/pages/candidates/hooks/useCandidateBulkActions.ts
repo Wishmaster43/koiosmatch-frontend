@@ -21,6 +21,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
 import api from '@/lib/api'
+import { toggleInSet, toggleAllInSet } from '@/lib/selectionSet'
 import { metaOf, initialsOf } from '../data/candidatesShared'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useNavigation } from '@/context/NavigationContext'
@@ -103,16 +104,8 @@ export function useCandidateBulkActions({
   // "manage per application" deep-link (mirrors EntityLink's use of the same context).
   const { navigate } = useNavigation()
   // ── Bulk selection ──
-  const toggleRow = (id: Id) => setSelectedIds(prev => {
-    const next = new Set(prev)
-    if (next.has(id)) next.delete(id); else next.add(id)
-    return next
-  })
-  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => {
-    const next = new Set(prev)
-    ids.forEach(id => allSelected ? next.delete(id) : next.add(id))
-    return next
-  })
+  const toggleRow = (id: Id) => setSelectedIds(prev => toggleInSet(prev, id))
+  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => toggleAllInSet(prev, ids, allSelected))
 
   // Snapshot a subset of fields, for optimistic revert/reconcile.
   const subsetOf = <T,>(obj: T, keys: Array<keyof T>): Partial<T> =>

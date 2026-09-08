@@ -10,6 +10,7 @@ import api from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { initialsOf } from '@/lib/initials'
 import { useTaskLookupIds } from './useTaskLookupIds'
+import { toggleInSet, toggleAllInSet } from '@/lib/selectionSet'
 import type { Task, TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
 
@@ -40,10 +41,8 @@ export function useTaskBulkActions({
 
   // ── Bulk selection + mutations ──
   const clearSelection = () => setSelectedIds(new Set())
-  const toggleRow = (id: Id) => setSelectedIds(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n })
-  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => {
-    const n = new Set(prev); ids.forEach(i => { if (allSelected) n.delete(i); else n.add(i) }); return n
-  })
+  const toggleRow = (id: Id) => setSelectedIds(prev => toggleInSet(prev, id))
+  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => toggleAllInSet(prev, ids, allSelected))
 
   // Optimistic bulk field-set: apply the local patch + PATCH each; `all` re-derives labels.
   const runBulkPatch = async (localPatch: Record<string, unknown>, apiBody: Record<string, unknown>) => {

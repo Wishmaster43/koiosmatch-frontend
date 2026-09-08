@@ -13,6 +13,7 @@
 import { useState, useEffect, useMemo, useRef, type Dispatch, type SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { notifyError, notifySuccess } from '@/lib/notify'
+import { toggleInSet, toggleAllInSet } from '@/lib/selectionSet'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { usePublishSelection } from '@/context/SelectionContext'
@@ -151,8 +152,8 @@ export default function OutreachPage({ intent }: { intent?: unknown } = {}) {
   }
 
   // ── Bulk selection + mutations (active table only) ──
-  const toggleRow = (id: string) => setSelectedIds((prev) => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n })
-  const toggleAll = (ids: string[], allSelected: boolean) => setSelectedIds((prev) => { const n = new Set(prev); ids.forEach((i) => allSelected ? n.delete(i) : n.add(i)); return n })
+  const toggleRow = (id: string) => setSelectedIds((prev) => toggleInSet(prev, id))
+  const toggleAll = (ids: string[], allSelected: boolean) => setSelectedIds((prev) => toggleAllInSet(prev, ids, allSelected))
   // Bulk set status: optimistic patch + PATCH each (no dedicated bulk endpoint needed).
   const bulkSetStatus = async (status: string) => {
     const ids = [...selectedIds]; if (!ids.length) return

@@ -12,6 +12,7 @@ import type { TFunction } from 'i18next'
 import api from '@/lib/api'
 import { initialsOf, subsetOf } from '../data/vacanciesShared'
 import { useConfirm } from '@/hooks/useConfirm'
+import { toggleInSet, toggleAllInSet } from '@/lib/selectionSet'
 import type { Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -42,8 +43,8 @@ export function useVacancyBulkActions({ vacancies, setVacancies, setTotal, selec
   // successful bulkMutate call, never on a failed one.
   const queryClient = useQueryClient()
   // ── Bulk selection ──
-  const toggleRow = (id: Id) => setSelectedIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next })
-  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => { const next = new Set(prev); ids.forEach(id => { if (allSelected) next.delete(id); else next.add(id) }); return next })
+  const toggleRow = (id: Id) => setSelectedIds(prev => toggleInSet(prev, id))
+  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => toggleAllInSet(prev, ids, allSelected))
 
   // Generic optimistic bulk mutation: apply `patch`, persist, reconcile on the
   // server's `updated` list, revert on failure.

@@ -14,7 +14,9 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import { notify } from '@/lib/notify'
 import type { ToastType } from '@/lib/notify'
+import { reasonBreakdown as computeReasonBreakdown } from '@/lib/bulkSkipReasons'
 import { useBackofficeCoupleBulk } from '@/hooks/useBackofficeCoupleBulk'
+import { toggleInSet, toggleAllInSet } from '@/lib/selectionSet'
 import type { Id } from '@/types/common'
 
 export type CoupleTarget = 'helloflex' | 'shiftmanager'
@@ -31,16 +33,8 @@ interface UseMatchesBulkActionsArgs {
 
 export function useMatchesBulkActions({ selectedIds, setSelectedIds, t }: UseMatchesBulkActionsArgs) {
   // ── Bulk selection ──
-  const toggleRow = (id: Id) => setSelectedIds(prev => {
-    const next = new Set(prev)
-    if (next.has(id)) next.delete(id); else next.add(id)
-    return next
-  })
-  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => {
-    const next = new Set(prev)
-    ids.forEach(id => { if (allSelected) next.delete(id); else next.add(id) })
-    return next
-  })
+  const toggleRow = (id: Id) => setSelectedIds(prev => toggleInSet(prev, id))
+  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => toggleAllInSet(prev, ids, allSelected))
 
   // HF-CONTRACTMAP-1: `skipped` may carry [{id, reason}] (mirrors the candidate
   // bulk BULK-SKIP-REASONS-1 pattern) — the resolver skips a match whose contract
@@ -48,17 +42,7 @@ export function useMatchesBulkActions({ selectedIds, setSelectedIds, t }: UseMat
   // Group reasoned entries into a human "N reason" breakdown; falls back to '' for
   // the bare-id `skipped` shape other targets/routes still return (the shared
   // useBackofficeCoupleBulk falls back to the plain partial toast on an empty string).
-  const reasonBreakdown = (skipped: unknown[]): string => {
-    const reasoned = skipped.filter(
-      (s): s is { id: Id; reason: string } => typeof s === 'object' && s !== null && 'reason' in s,
-    )
-    if (!reasoned.length) return ''
-    const counts: Record<string, number> = {}
-    reasoned.forEach(s => { counts[s.reason] = (counts[s.reason] ?? 0) + 1 })
-    return Object.entries(counts)
-      .map(([reason, count]) => `${count} ${t(`bulk.skipReasons.${reason}`, { defaultValue: reason })}`)
-      .join(', ')
-  }
+  const reasonBreakdown = (skipped: unknown[]): string => computeReasonBreakdown(skipped, t)
 
   // Queues the selection for backoffice coupling via the shared bulk-sync endpoint
   // (see file doc above) — matches' own target-label lookup, reason breakdown and

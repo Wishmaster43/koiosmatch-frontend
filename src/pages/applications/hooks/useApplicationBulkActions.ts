@@ -14,12 +14,14 @@
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import api from '@/lib/api'
+import { reasonBreakdown } from '@/lib/bulkSkipReasons'
 import { notify as notifyTyped, notifyError } from '@/lib/notify'
 // Local loose-typed wrapper: mirrors useCandidateBulkActions' `notify` prop —
 // a partial-result toast is a 'warning', a type the shared lib's strict
 // ToastType ('error'|'success'|'info') doesn't carry yet.
 const notify = notifyTyped as unknown as (type: string, message: string) => void
 import { bucketOfPhase } from '../data/applicationsShared'
+import { toggleInSet, toggleAllInSet } from '@/lib/selectionSet'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
 import type { LookupItem } from '@/context/LookupsContext'
@@ -42,22 +44,8 @@ interface SkippedRow { id: Id; reason?: string; code?: string }
 
 export function useApplicationBulkActions({ applications, setApplications, setTotal, selectedIds, setSelectedIds, funnelTypes, t }: Args) {
   // Row-selection handlers for the table checkboxes + bulk bar.
-  const toggleRow = (id: Id) => setSelectedIds(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n })
-  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => {
-    const n = new Set(prev); ids.forEach(i => allSelected ? n.delete(i) : n.add(i)); return n })
-
-  // Group reasoned skip rows into a human "N reason, M reason" string (mirrors
-  // useCandidateStageBulk/useMatchesBulkActions reasonBreakdown) — falls back to ''
-  // when the server sent bare ids or no reason at all.
-  const reasonBreakdown = (skipped: SkippedRow[]): string => {
-    const reasoned = skipped.filter((s): s is SkippedRow & { reason: string } => typeof s.reason === 'string' && s.reason.length > 0)
-    if (!reasoned.length) return ''
-    const counts: Record<string, number> = {}
-    reasoned.forEach(s => { counts[s.reason] = (counts[s.reason] ?? 0) + 1 })
-    return Object.entries(counts)
-      .map(([reason, count]) => `${count} ${t(`bulk.skipReasons.${reason}`, { defaultValue: reason })}`)
-      .join(', ')
-  }
+  const toggleRow = (id: Id) => setSelectedIds(prev => toggleInSet(prev, id))
+  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => toggleAllInSet(prev, ids, allSelected))
 
   // Normalize whatever `skipped` shape the response carries into SkippedRow[].
   const parseSkipped = (raw: unknown): SkippedRow[] => {
@@ -72,7 +60,7 @@ export function useApplicationBulkActions({ applications, setApplications, setTo
   // present, or a bare "N of M" count otherwise. One shared rule for both actions.
   const notifyOutcome = (successKey: string, params: Record<string, unknown>, updated: number, total: number, skipped: SkippedRow[]) => {
     if (total > 0 && updated < total) {
-      const breakdown = reasonBreakdown(skipped)
+      const breakdown = reasonBreakdown(skipped, t)
       const key = breakdown ? 'bulk.partialResultReasoned' : 'bulk.partialResult'
       notify('warning', t(key, { ...params, updated, total, skipped: total - updated, breakdown }))
     } else {
