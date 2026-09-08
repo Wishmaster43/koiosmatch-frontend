@@ -21,7 +21,17 @@ import type { Candidate } from '@/types/candidate'
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k: string, opts?: Record<string, unknown>) => (opts ? `${k}:${JSON.stringify(opts)}` : k) }),
 }))
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v }) }))
+vi.mock('@/lib/datetime', () => ({
+  useDateFormat: () => ({ formatDate: (v: string) => v }),
+  daysSince: (value: string | null | undefined, now: Date): number | null => {
+    if (!value) return null
+    const d = new Date(value)
+    if (isNaN(d.getTime())) return null
+    const diffMs = now.getTime() - d.getTime()
+    if (diffMs < 0) return null
+    return Math.floor(diffMs / 86400000)
+  },
+}))
 
 let mockNotes: { notes: unknown[]; loaded: boolean } = { notes: [], loaded: true }
 vi.mock('@/pages/candidates/hooks/useCandidateNotes', () => ({

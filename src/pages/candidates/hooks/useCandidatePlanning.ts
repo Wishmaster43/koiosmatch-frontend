@@ -86,14 +86,20 @@ export function namesByType(prefs: Preference[]): FavLists {
   return out
 }
 
+// Retry trigger for failed data fetches — bumps attempt state to re-run load effects.
+function useRetryable() {
+  const [attempt, setAttempt] = useState(0)
+  const reload = useCallback(() => setAttempt(a => a + 1), [])
+  return { attempt, reload }
+}
+
 // Load + mutate a candidate's planning preferences (favourite + blacklist).
 export function useCandidatePlanningPreferences(candidateId?: Id) {
   const { t } = useTranslation('candidates')
   const [prefs,   setPrefs]   = useState<Preference[]>([])
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(false)
-  // Bumped by reload() to re-run the load effect below (retry after a real failure).
-  const [attempt, setAttempt] = useState(0)
+  const { attempt, reload } = useRetryable()
 
   // Load all preferences once per candidate. HONEST-PLANNING-1: this route carries no
   // planning_configured split yet (unlike the customer side) — a 404 here is a REAL
@@ -118,9 +124,6 @@ export function useCandidatePlanningPreferences(candidateId?: Id) {
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
   }, [candidateId, attempt])
-
-  // Re-fires the real request (used by the error state's retry action).
-  const reload = useCallback(() => setAttempt(a => a + 1), [])
 
   // Optimistically add a preference; reconcile with the server row, roll back + toast on failure.
   const add = async (kind: PrefKind, target: { linkable_type: LinkableType; linkable_id: Id; linkable_name: string; reason?: string }) => {
@@ -229,8 +232,7 @@ export function useCandidateAvailability(candidateId?: Id) {
   const [entries, setEntries] = useState<Availability[]>([])
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(false)
-  // Bumped by reload() to re-run the load effect below (retry after a real failure).
-  const [attempt, setAttempt] = useState(0)
+  const { attempt, reload } = useRetryable()
 
   // Load once per candidate. HONEST-PLANNING-1: no planning_configured split on this route
   // yet, so a failure (404 included — it now means "candidate not found", the route is
@@ -252,9 +254,6 @@ export function useCandidateAvailability(candidateId?: Id) {
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
   }, [candidateId, attempt])
-
-  // Re-fires the real request (used by the error state's retry action).
-  const reload = useCallback(() => setAttempt(a => a + 1), [])
 
   // Optimistically add an entry; reconcile with the server row, roll back + toast on failure (409 = slot taken).
   const add = async (entry: { date: string; part: DayPart; status: AvailStatus; reason?: string }) => {

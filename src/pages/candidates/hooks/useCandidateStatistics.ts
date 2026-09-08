@@ -10,6 +10,7 @@ import { useMemo } from 'react'
 import type { Candidate } from '@/types/candidate'
 import type { AppRow, Appt } from '@/pages/candidates/drawer/applicationRowModel'
 import type { CandidateNote } from '@/pages/candidates/hooks/useCandidateNotes'
+import { daysSince } from '@/lib/datetime'
 
 // One funnel-stage bucket with its live count — grouped by the row's own stable
 // key (stageKey, falling back to the translated label) so a tenant renaming a
@@ -30,17 +31,6 @@ export interface CandidateStatistics {
   lastContactType: string | null
   daysSinceCreated: number | null
   daysSincePhaseChange: number | null
-}
-
-// Whole days between an ISO/date-ish value and `now` — null for a missing,
-// unparseable, or future value (a stamp in the future is not "days since").
-function daysSince(value: string | null | undefined, now: Date): number | null {
-  if (!value) return null
-  const d = new Date(value)
-  if (isNaN(d.getTime())) return null
-  const diffMs = now.getTime() - d.getTime()
-  if (diffMs < 0) return null
-  return Math.floor(diffMs / 86400000)
 }
 
 // Groups the candidate's applications by funnel stage, counting each bucket —
