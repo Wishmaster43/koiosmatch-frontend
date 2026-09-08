@@ -10,6 +10,7 @@ import type { TFunction } from 'i18next'
 import api, { unwrap } from '@/lib/api'
 // DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
 import { extractApiError } from '@/lib/extractApiError'
+import { extractFormErrors } from '@/lib/extractFormErrors'
 import { API_TO_FORM } from '../addmodal/formHelpers'
 import type { NewLink } from '../links/AddLinkRow'
 import type { TaskForm } from '../AddTaskModal'
@@ -53,12 +54,9 @@ export function useAddTaskSubmit({
 
   // Shared 422/message handling for both create and edit submits.
   const applyServerErrors = (err: unknown) => {
-    const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
-    const apiErrors = e?.response?.data?.errors
-    if (apiErrors) {
-      const e2: Record<string, boolean> = {}
-      Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
-      setErrors(e2)
+    const fieldErrors = extractFormErrors(err, API_TO_FORM)
+    if (fieldErrors) {
+      setErrors(fieldErrors)
     } else {
       setCreateError(extractApiError(err, t('common:errorGeneric')))
     }

@@ -9,6 +9,7 @@ import { useState, useEffect, useRef } from 'react'
 import type { TFunction } from 'i18next'
 import { useImportWizard } from '@/pages/settings/shared'
 import { extractApiError } from '@/lib/extractApiError'
+import { extractFormErrors } from '@/lib/extractFormErrors'
 
 // Shared state/effect management for customer sub-entity modals: import wizard
 // and error handling. The modal manages its own form state via useState.
@@ -45,12 +46,9 @@ export function useSubEntitySave({
 
   // Handle 422 field errors: translate API snake_case keys back to camelCase form fields.
   const handleApiError = (err: unknown) => {
-    const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
-    const apiErrors = e?.response?.data?.errors
-    if (apiErrors) {
-      const e2: Record<string, boolean> = {}
-      Object.keys(apiErrors).forEach(k => { e2[apiToFormMap[k] ?? k] = true })
-      setErrors(e2)
+    const fieldErrors = extractFormErrors(err, apiToFormMap)
+    if (fieldErrors) {
+      setErrors(fieldErrors)
     } else {
       setCreateError(extractApiError(err, t('common:errorGeneric')))
     }
