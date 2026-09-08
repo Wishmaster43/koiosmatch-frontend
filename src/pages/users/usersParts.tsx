@@ -254,12 +254,15 @@ export function EditableAvatar({ user: u, onPick }: { user: ManagedUser; onPick?
 // them (defaults can_view=true, can_update=true, can_delete=false); the ROLE
 // template (/roles/{id}/branches) carries no such columns (role_branches has none
 // on the backend — measured), so RoleBranchTemplate stays location-only.
+// is_default (X-13): exactly one per user when they have couplings; the first
+// remaining coupling auto-promotes if the default is removed.
 export interface BranchRow {
   location_id: string | number
   name?: string | null
   can_view?: boolean
   can_update?: boolean
   can_delete?: boolean
+  is_default?: boolean
 }
 
 // BranchChips — read-only soft-tinted chips for a fixed branch set (no toggle):

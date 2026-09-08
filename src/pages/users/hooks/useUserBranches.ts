@@ -29,6 +29,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
+import { extractApiError } from '@/lib/extractApiError'
 import { notifyError } from '@/lib/notify'
 import type { BranchRow } from '../usersParts'
 
@@ -84,7 +85,7 @@ export function useUserBranches(userId: string | number | null | undefined) {
   // (replace-set carrying every current location_id, changed flag only on the
   // touched row so unrelated rows' flags are left untouched server-side; see
   // file doc for the exact request shape), revert + notify on failure.
-  const setFlag = async (locationId: string | number, flag: 'can_view' | 'can_update' | 'can_delete', value: boolean) => {
+  const setFlag = async (locationId: string | number, flag: 'can_view' | 'can_update' | 'can_delete' | 'is_default', value: boolean) => {
     if (userId == null || error) return
     const prev = branches
     const next = branches.map(b => b.location_id === locationId ? { ...b, [flag]: value } : b)
@@ -98,9 +99,12 @@ export function useUserBranches(userId: string | number | null | undefined) {
       }
       const res = await api.put(`/users/${userId}/branches`, payload)
       setBranches(unwrapList<BranchRow>(res).rows)
-    } catch {
+    } catch (err) {
       setBranches(prev)
-      notifyError(t('branches.saveFailed'))
+      // Extract API error message via the shared handler for consistent UX
+      // (422 validation errors from the server describe why the change failed).
+      const msg = extractApiError(err, t('branches.saveFailed'))
+      notifyError(msg)
     } finally {
       setSaving(false)
     }

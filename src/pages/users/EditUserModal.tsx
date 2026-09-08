@@ -207,25 +207,31 @@ export default function EditUserModal({ user, onClose, onSaved }: {
               <Caption as="p" style={{ marginTop: 8 }}>{t('branches.emptyHint')}</Caption>
             )}
 
-            {/* Per-branch abilities (USERS-ROLES-LOC-1 phase 3) — dormant until the
-                tenant flips `branch_authz_enabled` in Settings → Roles; shown for
-                every currently assigned branch so the flags can be prepared ahead
-                of that switch. can_view defaults true, can_delete false server-side
-                (measured migration), never assumed here — every value comes from
-                the loaded row. */}
+            {/* Per-branch abilities (USERS-ROLES-LOC-1 phase 3) + default radio (X-13).
+                Abilities: dormant until tenant flips `branch_authz_enabled` in Settings → Roles;
+                shown for every currently assigned branch so flags can be prepared ahead of switch.
+                Default: exactly one per user; server enforces it via 422 if violated.
+                can_view defaults true, can_delete false server-side (measured migration),
+                never assumed here — every value comes from the loaded row. */}
             {!branchesLoading && !branchesError && branches.length > 0 && (
               <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
                 <Caption as="p" style={{ marginBottom: 6 }}>{t('branches.flags.hint')}</Caption>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto', gap: 10, alignItems: 'center', marginBottom: 4 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto auto', gap: 10, alignItems: 'center', marginBottom: 4 }}>
                   <span />
+                  <Caption style={{ textAlign: 'center' }}>{t('branches.isDefault')}</Caption>
                   <Caption style={{ textAlign: 'center' }}>{t('branches.flags.view')}</Caption>
                   <Caption style={{ textAlign: 'center' }}>{t('branches.flags.update')}</Caption>
                   <Caption style={{ textAlign: 'center' }}>{t('branches.flags.delete')}</Caption>
                 </div>
                 {branches.map(b => (
                   <div key={b.location_id}
-                    style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto', gap: 10, alignItems: 'center', padding: '4px 0' }}>
+                    style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto auto', gap: 10, alignItems: 'center', padding: '4px 0' }}>
                     <BodyText as="span">{b.name ?? '—'}</BodyText>
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                      <input type="radio" name="default-branch" checked={b.is_default ?? false} disabled={branchesSaving}
+                        onChange={() => setBranchFlag(b.location_id, 'is_default', true)}
+                        aria-label={t('branches.flags.defaultFor', { name: b.name ?? '' })} />
+                    </div>
                     <Toggle checked={b.can_view ?? true} disabled={branchesSaving}
                       onChange={v => setBranchFlag(b.location_id, 'can_view', v)}
                       ariaLabel={t('branches.flags.viewFor', { name: b.name ?? '' })} />

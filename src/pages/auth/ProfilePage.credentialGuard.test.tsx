@@ -23,7 +23,7 @@ vi.mock('@/context/ThemeContext', () => ({
   useTheme: () => ({ theme: 'light', setTheme: vi.fn(), language: 'nl', setLanguage: vi.fn() }),
 }))
 vi.mock('@/lib/api', () => ({
-  default: { put: vi.fn(), post: vi.fn(), delete: vi.fn(), get: vi.fn() },
+  default: { put: vi.fn(), post: vi.fn(), delete: vi.fn(), get: vi.fn(() => Promise.resolve({ data: { data: [], default_branch_id: null } })) },
 }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
 vi.mock('./ProfileWhatsAppWeb', () => ({ default: () => <div>whatsapp-web-panel</div> }))

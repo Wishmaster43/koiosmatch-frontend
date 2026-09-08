@@ -1,7 +1,8 @@
 /**
  * ProfileDetailsTab — the "Profiel" tab: the editable personal-info form
  * (name / email / phone + save) and a read-only access card showing the user's
- * roles and linked location(s). State lives in ProfilePage; this renders it.
+ * roles and linked location(s), plus the user's default branch preference picker.
+ * State lives in ProfilePage; this renders it.
  */
 import type { ChangeEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -10,6 +11,8 @@ import { Section, Field, Pill, ROLE_META, inputStyle } from './profileParts'
 import { Caption } from '@/components/ui/typography'
 import Spinner from '@/components/ui/Spinner'
 import SaveButton from '@/components/ui/SaveButton'
+import SelectMenu from '@/components/ui/SelectMenu'
+import { useProfileBranches } from './useProfileBranches'
 
 interface ProfileForm { firstname: string; lastname: string; email: string; phone: string }
 interface ProfileUser { roles?: Array<string | { name?: string }>; locations?: unknown[]; location?: unknown }
@@ -30,11 +33,14 @@ interface ProfileDetailsTabProps {
   onCurrentPasswordChange?: (e: ChangeEvent<HTMLInputElement>) => void
 }
 
-// The editable personal-info form plus a read-only roles/locations access card.
+// The editable personal-info form plus a read-only roles/locations access card + default branch picker.
 export default function ProfileDetailsTab({ form, onField, onSave, saving, saved, error, user,
   credentialChange, currentPassword, onCurrentPasswordChange }: ProfileDetailsTabProps) {
   const { t } = useTranslation('auth')
   const { t: tUsers } = useTranslation('users')
+
+  // Load the user's linked branches + set default preference (X-13).
+  const { branches, defaultBranchId, loading: branchesLoading, setDefault } = useProfileBranches()
 
   // Read-only access info from /auth/me — roles + (one or more) linked locations.
   const roles     = user?.roles ?? []
@@ -101,7 +107,7 @@ export default function ProfileDetailsTab({ form, onField, onSave, saving, saved
         </SaveButton>
       </Section>
 
-      {/* Access: linked roles + location(s) (read-only) */}
+      {/* Access: linked roles + location(s) (read-only) + default branch preference (X-13) */}
       <Section title={t('profile.access')}>
         <Field label={t('profile.roles')}>
           {roles.length ? (
@@ -121,6 +127,29 @@ export default function ProfileDetailsTab({ form, onField, onSave, saving, saved
               {locations.map((l, i) => <Pill key={i} icon={MapPin} label={locName(l)} />)}
             </div>
           ) : <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('profile.noLocations')}</span>}
+        </Field>
+
+        {/* Default branch preference (X-13) — user-facing option within their own couplings. */}
+        <Field label={t('profile.defaultBranch')}>
+          {branchesLoading ? (
+            <Caption as="div"><Spinner size={12} /> {t('profile.loading')}</Caption>
+          ) : branches.length === 0 ? (
+            // An unrestricted user (no couplings) cannot pick a default here — honest notice, no picker (§3).
+            <Caption as="div">{t('profile.noBranchCouplings')}</Caption>
+          ) : (
+            <>
+              <SelectMenu
+                options={branches.map(b => ({ value: b.location_id, label: b.name ?? '—' }))}
+                value={defaultBranchId ?? ''}
+                onChange={(v) => setDefault(v || null)}
+                placeholder={t('profile.defaultBranch')}
+               
+                clearable
+                clearLabel={t('common:clear')}
+              />
+              <Caption as="p" style={{ marginTop: 5 }}>{t('profile.defaultBranchHint')}</Caption>
+            </>
+          )}
         </Field>
       </Section>
     </>
