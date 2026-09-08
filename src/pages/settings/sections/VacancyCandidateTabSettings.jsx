@@ -36,6 +36,7 @@ import LookupChipSelect from '../components/LookupChipSelect'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { toggleInList } from '@/lib/selectionSet'
 // audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 const KEY = 'vacancy_candidate_tab'
@@ -110,7 +111,7 @@ function VacancyCandidateTabSettingsInner() {
   // the leads counter (LEADS-PARITY-1, Opus wave-B2).
   const persist = (patch) => saveSettingsKeys({ [KEY]: { ...(stored ?? {}), ...patch } }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
   const toggleIn = (key) => (value) =>
-    persist({ [key]: cfg[key].includes(value) ? cfg[key].filter(v => v !== value) : [...cfg[key], value] })
+    persist({ [key]: toggleInList(cfg[key], value) })
   // Flip one boolean leads-criteria key (apply_radius / exclude_already_applied /
   // include_expiring_placements) — same immediate full-object persist.
   const toggleBool = (key) => () => persist({ [key]: !cfg[key] })

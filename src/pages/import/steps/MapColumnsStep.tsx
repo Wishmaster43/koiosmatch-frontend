@@ -8,12 +8,11 @@
  */
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AlertTriangle } from 'lucide-react'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { fieldLabel } from '../lib/fieldLabels'
 import { SKIP, missingRequiredColumns, unmappedSourceColumns, type ColumnMapping } from '../lib/mapping'
 import Button from '@/components/ui/Button'
-import { tintBg, tintBorder } from '@/lib/tint'
+import CalloutBox from '@/components/ui/CalloutBox'
 
 const SELECT_STYLE: CSSProperties = {
   height: 32, fontSize: 13, minWidth: 220,
@@ -103,15 +102,13 @@ export default function MapColumnsStep({ entity, headers, targetColumns, mapping
       )}
 
       {missingRequired.length > 0 && (
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 16, padding: '10px 12px',
-          background: tintBg('var(--color-warning)'),
-          border: tintBorder('var(--color-warning)'),
-          borderRadius: 8, fontSize: 12, color: 'var(--text)' }}>
-          <AlertTriangle size={14} style={{ color: 'var(--color-warning-text)', flexShrink: 0 }} aria-hidden="true" />
-          {t('import.wizard.mapping.missingRequired', {
-            defaultValue: `Still required: ${missingRequired.map((column) => fieldLabel(t, entity, column)).join(', ')}`,
-            fields: missingRequired.map((column) => fieldLabel(t, entity, column)).join(', '),
-          })}
+        <div style={{ marginTop: 16 }}>
+          <CalloutBox variant="warning">
+            {t('import.wizard.mapping.missingRequired', {
+              defaultValue: `Still required: ${missingRequired.map((column) => fieldLabel(t, entity, column)).join(', ')}`,
+              fields: missingRequired.map((column) => fieldLabel(t, entity, column)).join(', '),
+            })}
+          </CalloutBox>
         </div>
       )}
 

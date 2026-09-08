@@ -6,12 +6,11 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AlertTriangle } from 'lucide-react'
 import ImportResultPanel from './ImportResultPanel'
 import type { ImportRunResult } from './importApi'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
-import { tintBg, tintBorder } from '@/lib/tint'
+import CalloutBox from '@/components/ui/CalloutBox'
 
 interface PreviewStepProps {
   result: ImportRunResult
@@ -44,12 +43,10 @@ export default function PreviewStep({ result, runStatus, runError, canImport, on
         showAllRows={showAllRows} onToggleShowAll={() => setShowAllRows((v) => !v)} />
 
       {nothingToImport && (
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 16, padding: '10px 12px',
-          background: tintBg('var(--color-warning)'),
-          border: tintBorder('var(--color-warning)'),
-          borderRadius: 8, fontSize: 12, color: 'var(--text)' }}>
-          <AlertTriangle size={14} style={{ color: 'var(--color-warning-text)', flexShrink: 0 }} aria-hidden="true" />
-          {t('import.preview.nothingToImport')}
+        <div style={{ marginTop: 16 }}>
+          <CalloutBox variant="warning">
+            {t('import.preview.nothingToImport')}
+          </CalloutBox>
         </div>
       )}
 

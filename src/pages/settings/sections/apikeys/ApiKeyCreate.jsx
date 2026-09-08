@@ -19,6 +19,7 @@ import SettingsDetailHeader from '@/pages/settings/components/SettingsDetailHead
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
 import { Caption, formLabelStyle } from '@/components/ui/typography'
+import { useCreateForm } from '@/pages/settings/lib/useCreateForm'
 
 // Two-phase inline view (see the module doc above): the create form, then the one-time secret reveal — no modal, so the whole overview stays readable.
 export default function ApiKeyCreate({ onBack, onCreated }) {
@@ -26,9 +27,7 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
   const levelsByEntity = useScopeEntityLevels()
   const [form, setForm]     = useState({ friendly_name: '', type: 'additional', organisation: '', description: '', contact_name: '', contact_email: '' })
   const [scopes, setScopes] = useState({})   // access grid, sent with the create call
-  const [saving, setSaving] = useState(false)
-  const [error, setError]   = useState(false)
-  const [result, setResult] = useState(null)   // { ...key, secret } after create
+  const { saving, setSaving, error, setError, result, setResult } = useCreateForm()
   const firstField          = useRef(null)
 
   // Focus the name field on open.

@@ -14,6 +14,7 @@ import SettingsDetailHeader from '@/pages/settings/components/SettingsDetailHead
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
 import { formLabelStyle } from '@/components/ui/typography'
+import { useCreateForm } from '@/pages/settings/lib/useCreateForm'
 
 // Two-phase inline create view: the subscription form, then a one-time secret reveal that is never persisted client-side.
 export default function WebhookCreate({ onBack, onCreated }) {
@@ -21,9 +22,7 @@ export default function WebhookCreate({ onBack, onCreated }) {
   const [name, setName]     = useState('')
   const [url, setUrl]       = useState('')
   const [events, setEvents] = useState([])
-  const [saving, setSaving] = useState(false)
-  const [error, setError]   = useState(false)
-  const [result, setResult] = useState(null)   // { ...sub, secret } after create
+  const { saving, setSaving, error, setError, result, setResult } = useCreateForm()
   const firstField          = useRef(null)
 
   // Focus the name field on open.
