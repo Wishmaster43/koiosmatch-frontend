@@ -32,12 +32,14 @@ import type {
 } from '@/types/billingUsage'
 import { PACKAGE_KEYS, label, inputWrap, inputStyle } from './billingCardStyles'
 
-// A package row's editable number, blank = 0 for an empty field.
+// A package row's editable numbers, blank = 0/null for empty fields.
 // ai_token_budget dropped (PRIJSMODEL-C): read-only ai_tier_key replaces it.
 // whatsapp_token_budget RETIRED (K-242): folded into included_workflow_runs.
-type PackageDraft = { included_workflow_runs: string }
+// base_price_cents is stored in cents, edited and displayed in euros.
+type PackageDraft = { included_workflow_runs: string; base_price_cents: string }
 const draftFromEntry = (entry?: BillingBudgetEntry): PackageDraft => ({
   included_workflow_runs: entry?.included_workflow_runs != null ? String(entry.included_workflow_runs) : '',
+  base_price_cents: entry?.base_price_cents != null ? String(entry.base_price_cents / 100) : '',
 })
 
 // See the file's top doc above; superadmin package/tenant budget editor with the SaveButton optimistic-confirm pattern.
@@ -56,7 +58,7 @@ export default function BillingBudgetsCard() {
   // Per-tenant override state, owned by the child so this card stays under the
   // §3 400-line split trigger; lifted here only for the shared Save action.
   const [tenantId, setTenantId] = useState<string | null>(null)
-  const [tenantDraft, setTenantDraft] = useState<{ included_workflow_runs: string }>({ included_workflow_runs: '' })
+  const [tenantDraft, setTenantDraft] = useState<{ included_workflow_runs: string; base_price_cents: string }>({ included_workflow_runs: '', base_price_cents: '' })
   const [tenantDirty, setTenantDirty] = useState(false)
 
   // Load package defaults + existing tenant overrides.
@@ -81,6 +83,7 @@ export default function BillingBudgetsCard() {
   const packagesDirty = PACKAGE_KEYS.some((key) => {
     const saved = draftFromEntry(data?.packages?.[key])
     return saved.included_workflow_runs !== drafts[key].included_workflow_runs
+      || saved.base_price_cents !== drafts[key].base_price_cents
   })
   const hasChange = packagesDirty || tenantDirty
 
@@ -91,16 +94,38 @@ export default function BillingBudgetsCard() {
     if (packagesDirty) {
       body.packages = {}
       for (const key of PACKAGE_KEYS) {
-        body.packages[key] = {
+        const saved = draftFromEntry(data?.packages?.[key])
+        const pkg: { included_workflow_runs: number; base_price_cents?: number } = {
           included_workflow_runs: Number(drafts[key].included_workflow_runs) || 0,
         }
+        // Include base_price_cents only if it changed: convert from euros to cents.
+        if (drafts[key].base_price_cents !== saved.base_price_cents) {
+          if (drafts[key].base_price_cents) {
+            pkg.base_price_cents = Math.round(Number(drafts[key].base_price_cents) * 100)
+          }
+        }
+        body.packages![key] = pkg
       }
     }
     if (tenantId && tenantDirty) {
-      body.tenants = {
-        [tenantId]: {
-          included_workflow_runs: tenantDraft.included_workflow_runs === '' ? null : Number(tenantDraft.included_workflow_runs),
-        },
+      const saved = draftFromEntry(data?.tenants?.[tenantId])
+      const tenantEntry: { included_workflow_runs?: number | null; base_price_cents?: number | null } = {}
+
+      // Include fields only if they changed from the saved value.
+      if (tenantDraft.included_workflow_runs !== saved.included_workflow_runs) {
+        tenantEntry.included_workflow_runs = tenantDraft.included_workflow_runs === '' ? null : Number(tenantDraft.included_workflow_runs)
+      }
+      if (tenantDraft.base_price_cents !== saved.base_price_cents) {
+        if (tenantDraft.base_price_cents === '') {
+          tenantEntry.base_price_cents = null
+        } else if (tenantDraft.base_price_cents) {
+          tenantEntry.base_price_cents = Math.round(Number(tenantDraft.base_price_cents) * 100)
+        }
+      }
+
+      // Only send if something actually changed.
+      if (Object.keys(tenantEntry).length > 0) {
+        body.tenants = { [tenantId]: tenantEntry }
       }
     }
     setSaving(true)
@@ -143,6 +168,15 @@ export default function BillingBudgetsCard() {
                     <input id={`billing-budget-wf-${key}`} type="number" min={0} step={1}
                       value={drafts[key].included_workflow_runs}
                       onChange={(e) => setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], included_workflow_runs: e.target.value } }))}
+                      style={inputStyle} />
+                  </div>
+                </div>
+                <div style={{ flex: '1 1 160px', minWidth: 140 }}>
+                  <label style={label} htmlFor={`billing-budget-base-${key}`}>{t('billingBudgets.baseFee')}</label>
+                  <div style={inputWrap}>
+                    <input id={`billing-budget-base-${key}`} type="number" min={0} step={0.01}
+                      value={drafts[key].base_price_cents}
+                      onChange={(e) => setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], base_price_cents: e.target.value } }))}
                       style={inputStyle} />
                   </div>
                 </div>

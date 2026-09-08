@@ -16,7 +16,8 @@ import type { BillingBudgetEntry } from '@/types/billingUsage'
 // raw-token budget knob here. workflow_credit_budget renamed to included_workflow_runs.
 // whatsapp_token_budget RETIRED (K-242, 02-09): WhatsApp usage folds into the
 // workflow-run bundle now — a PUT still sending it 422s.
-interface Draft { included_workflow_runs: string }
+// base_price_cents is stored in cents, edited and displayed in euros.
+interface Draft { included_workflow_runs: string; base_price_cents: string }
 
 const label = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 4, display: 'block' }
 // Color lives on the WRAP, not the input — mirrors BillingBudgetsCard's split.
@@ -25,6 +26,7 @@ const inputStyle = { border: 'none', outline: 'none', background: 'transparent',
 
 const draftFromEntry = (entry?: BillingBudgetEntry): Draft => ({
   included_workflow_runs: entry?.included_workflow_runs != null ? String(entry.included_workflow_runs) : '',
+  base_price_cents: entry?.base_price_cents != null ? String(entry.base_price_cents / 100) : '',
 })
 
 interface Props {
@@ -35,7 +37,7 @@ interface Props {
   onDraftChange: (draft: Draft) => void
 }
 
-// Super-admin per-tenant budget override: search-picks a tenant, then edits its workflow-token budget draft (K-242: one unit).
+// Super-admin per-tenant budget override: search-picks a tenant, then edits its workflow-token + base-fee budget draft (K-242: one unit).
 export default function TenantBudgetOverride({ tenants, tenantId, onTenantIdChange, draft, onDraftChange }: Props) {
   const { t } = useTranslation('settings')
   const { options, onSearch } = useTenantSearch()
@@ -72,6 +74,16 @@ export default function TenantBudgetOverride({ tenants, tenantId, onTenantIdChan
               <input id="tenant-budget-wf" type="number" min={0} step={1}
                 value={draft.included_workflow_runs}
                 onChange={(e) => onDraftChange({ ...draft, included_workflow_runs: e.target.value })}
+                placeholder={t('billingBudgets.tenantClearPlaceholder')}
+                style={inputStyle} />
+            </div>
+          </div>
+          <div style={{ flex: '1 1 160px', minWidth: 140 }}>
+            <label style={label} htmlFor="tenant-budget-base">{t('billingBudgets.baseFee')}</label>
+            <div style={inputWrap}>
+              <input id="tenant-budget-base" type="number" min={0} step={0.01}
+                value={draft.base_price_cents}
+                onChange={(e) => onDraftChange({ ...draft, base_price_cents: e.target.value })}
                 placeholder={t('billingBudgets.tenantClearPlaceholder')}
                 style={inputStyle} />
             </div>

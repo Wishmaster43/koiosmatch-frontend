@@ -30,12 +30,12 @@ afterEach(() => vi.clearAllMocks())
 
 const budgets = {
   packages: {
-    core: { included_workflow_runs: 200, ai_tier_key: 'assist', value: { ai_cogs: 1, ai_sale: 2, basis: 'per 1k' } },
-    pro: { included_workflow_runs: 800, ai_tier_key: 'pro', value: { ai_cogs: 1, ai_sale: 2, basis: 'per 1k' } },
-    enterprise: { included_workflow_runs: 3000, ai_tier_key: 'max', value: { ai_cogs: 1, ai_sale: 2, basis: 'per 1k' } },
+    core: { included_workflow_runs: 200, base_price_cents: 1000, ai_tier_key: 'assist', value: { ai_cogs: 1, ai_sale: 2, basis: 'per 1k' } },
+    pro: { included_workflow_runs: 800, base_price_cents: 2500, ai_tier_key: 'pro', value: { ai_cogs: 1, ai_sale: 2, basis: 'per 1k' } },
+    enterprise: { included_workflow_runs: 3000, base_price_cents: 5000, ai_tier_key: 'max', value: { ai_cogs: 1, ai_sale: 2, basis: 'per 1k' } },
   },
   tenants: {
-    't-1': { included_workflow_runs: 500 },
+    't-1': { included_workflow_runs: 500, base_price_cents: 1500 },
   },
   resets_at: '2026-09-01T00:00:00Z',
 }
@@ -119,5 +119,74 @@ describe('BillingBudgetsCard', () => {
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/billing-budgets', expect.objectContaining({
       tenants: { 't-1': { included_workflow_runs: null } },
     })))
+  })
+
+  it('renders base-fee inputs for packages and converts euros to cents on save', async () => {
+    mockGet()
+    vi.mocked(api.put).mockResolvedValue({ data: budgets })
+    render(<BillingBudgetsCard />)
+
+    const baseInputs = await screen.findAllByLabelText(t('billingBudgets.baseFee'))
+    expect(baseInputs).toHaveLength(3)
+    // base_price_cents: 1000 (in cents) = 10.00 euros
+    expect(baseInputs[0]).toHaveValue(10)
+    expect(baseInputs[1]).toHaveValue(25)
+    expect(baseInputs[2]).toHaveValue(50)
+  })
+
+  it('PUTs the edited base-fee in cents', async () => {
+    mockGet()
+    vi.mocked(api.put).mockResolvedValue({ data: budgets })
+    render(<BillingBudgetsCard />)
+
+    const baseInputs = await screen.findAllByLabelText(t('billingBudgets.baseFee'))
+    await userEvent.clear(baseInputs[0])
+    await userEvent.type(baseInputs[0], '19.99')
+
+    await userEvent.click(screen.getByRole('button', { name: t('common.save') }))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/billing-budgets', expect.objectContaining({
+      packages: expect.objectContaining({ core: expect.objectContaining({ base_price_cents: 1999 }) }),
+    })))
+  })
+
+  it('PUTs null to clear a tenant base-fee override', async () => {
+    mockGet()
+    vi.mocked(api.put).mockResolvedValue({ data: budgets })
+    render(<BillingBudgetsCard />)
+
+    await screen.findAllByLabelText(t('billingBudgets.workflowBudgetLabel'))
+    const tenantTrigger = screen.getByText(t('billingBudgets.tenantPickerPlaceholder'))
+    await userEvent.click(tenantTrigger)
+    const option = await screen.findByText('Yesway Flex B.V.')
+    await userEvent.click(option)
+
+    const baseInput = await screen.findByLabelText(t('billingBudgets.baseFee'), { selector: '#tenant-budget-base' })
+    await userEvent.clear(baseInput)
+
+    await userEvent.click(screen.getByRole('button', { name: t('common.save') }))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/billing-budgets', expect.objectContaining({
+      tenants: { 't-1': expect.objectContaining({ base_price_cents: null }) },
+    })))
+  })
+
+  it('omits base_price_cents from packages that did not change', async () => {
+    mockGet()
+    vi.mocked(api.put).mockResolvedValue({ data: budgets })
+    render(<BillingBudgetsCard />)
+
+    const wfInputs = await screen.findAllByLabelText(t('billingBudgets.workflowBudgetLabel'))
+    await userEvent.clear(wfInputs[0])
+    await userEvent.type(wfInputs[0], '250')
+
+    await userEvent.click(screen.getByRole('button', { name: t('common.save') }))
+
+    await waitFor(() => {
+      const body = vi.mocked(api.put).mock.calls[0][1] as { packages?: Record<string, unknown> }
+      // pro and enterprise unchanged, so base_price_cents should be absent (not sent).
+      expect(body.packages?.pro).not.toHaveProperty('base_price_cents')
+      expect(body.packages?.enterprise).not.toHaveProperty('base_price_cents')
+    })
   })
 })

@@ -288,6 +288,9 @@ export interface BillingBudgetEntry {
   // the field name says cents, keep it that unit end to end).
   included_users?: number
   extra_user_price_cents?: number
+  // C4-BILLING (Danny 27-08): the package's fixed monthly base fee, in cents.
+  // Tenant override accepts null to clear back to the package value.
+  base_price_cents?: number | null
 }
 // K-175 — per-tenant seat snapshot, additive on the same GET (worker brief
 // 24-08, cited verbatim: "tenant_users: {<tenant_id>: {package, active_users}}").
@@ -315,9 +318,11 @@ export interface AdminBillingBudgetsUpdate {
     // null = clear to "no package value" (unlimited) — the controller writes
     // per-knob (array_key_exists), so an omitted knob stays untouched.
     included_users?: number | null; extra_user_price_cents?: number | null
+    base_price_cents?: number
   }>>
   tenants?: Record<string, {
     included_workflow_runs?: number | null
     included_users?: number | null; extra_user_price_cents?: number | null
+    base_price_cents?: number | null
   }>
 }
