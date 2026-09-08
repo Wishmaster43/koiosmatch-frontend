@@ -7,6 +7,8 @@
  */
 import { useLookups } from '@/context/LookupsContext'
 import SoftChip from './SoftChip'
+import StatusChipFallback from './StatusChipFallback'
+import { NEUTRAL_AVATAR } from './Avatar'
 
 interface CandidateStatusChipProps {
   status?: string | null
@@ -32,19 +34,23 @@ export default function CandidateStatusChip({ status, phase, plain = false, fall
     statusMeta: (v: string) => { label: string; color: string }
     phases: Array<{ value: string }>
   }
-  // No slug: render the pre-resolved fallback (one component everywhere) — a Lead
-  // still shows nothing, and a dash when there's no status at all.
-  if (!status) {
-    if (phase != null && phase === phases[0]?.value) return <span style={{ color: 'var(--text-muted)' }}>—</span>
-    if (!fallbackLabel) return <span style={{ color: 'var(--text-muted)' }}>—</span>
-    if (plain) return <span style={{ fontSize: 12.5, color: 'var(--text)' }}>{fallbackLabel}</span>
-    // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors Avatar's NEUTRAL_AVATAR / TitleBadge's identical constant)
-    return <SoftChip label={fallbackLabel} color={fallbackColor || '#9CA3AF'} round={round} />
+  // Detect entry phase (first in the lookup array).
+  const isEntryPhase = phase != null && phase === phases[0]?.value
+
+  // No slug or entry phase: the shared fallback renders the dash / pre-resolved chip (one
+  // component everywhere, DATA neutral grey = Avatar's NEUTRAL_AVATAR); otherwise the lookup.
+  if (!status || isEntryPhase) {
+    return <StatusChipFallback
+    status={status}
+    isEntryPhase={isEntryPhase}
+    fallbackLabel={fallbackLabel}
+    fallbackColor={fallbackColor || NEUTRAL_AVATAR}
+    plain={plain}
+    round={round}
+    />
   }
-  // Slug present: apply the model-v2 rule — a Lead is not deployable, so no chip.
-  if (phase != null && phase === phases[0]?.value) {
-    return <span style={{ color: 'var(--text-muted)' }}>—</span>
-  }
+
+  // Status slug present and not entry phase: use the tenant lookup.
   const m = statusMeta(status)
   if (plain) return <span style={{ fontSize: 12.5, color: 'var(--text)' }}>{m.label}</span>
   return <SoftChip label={m.label} color={m.color} round={round} />

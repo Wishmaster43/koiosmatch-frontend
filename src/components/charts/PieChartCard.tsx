@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { PieChart, Pie, Cell, Tooltip } from 'recharts'
 import { useTranslation } from 'react-i18next'
 import { CHART_SERIES_COLORS } from './chartTypes'
+import ChartEmptyState from '@/components/ui/ChartEmptyState'
 import type { ChartDatum, TipProps } from './chartTypes'
 import ErrorBoundary from '../ui/ErrorBoundary'
 import { useNumberFormat } from '@/lib/formatters'
@@ -53,12 +54,7 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
   const total = data.reduce((s, d) => s + d.value, 0)
 
   if (!data.length) {
-    return (
-      <div className="flex flex-col flex-1 min-w-0">
-        <div className="mb-4 text-sm font-medium" style={{ color: 'var(--text-muted)' }}>{title}</div>
-        <div className="flex items-center justify-center h-40 text-xs" style={{ color: 'var(--text-muted)' }}>{t('noData')}</div>
-      </div>
-    )
+    return <ChartEmptyState title={title} />
   }
 
   const innerR = Math.round(size * 0.27)
