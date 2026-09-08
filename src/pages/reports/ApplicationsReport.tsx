@@ -43,6 +43,7 @@ import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
+import { orderKpis } from './lib/kpiOrder'
 
 // The nine fixed KPI keys the live backend returns (ApplicationKpisReport::CARDS,
 // RAPPORT-APPS-VERDIEPING-1) in camelCase label form (applications.kpi.*) — the
@@ -238,7 +239,7 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
   const { kpiOrder, fellBack } = useReportKpiOrdering('applications')
   // Total applications rising is unambiguously good, mirrors CandidatesReport.
   if (totalCompare && kpiByKey.total) kpiByKey.total = { ...kpiByKey.total, sub: <ReportCompareMetric metric={totalCompare} polarity="up-good" /> }
-  const kpis: KpiSpec[] = kpiOrder.map(key => kpiByKey[key]).filter((k): k is KpiSpec => k != null)
+  const kpis: KpiSpec[] = orderKpis(kpiOrder, kpiByKey)
 
   return (
     <div>

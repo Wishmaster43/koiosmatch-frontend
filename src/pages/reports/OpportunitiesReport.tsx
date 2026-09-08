@@ -21,6 +21,7 @@ import type { KpiSpec } from '@/components/insights/InsightsRow'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useOpportunitiesReport } from './useOpportunitiesReport'
 import { gateDrillClick } from './reportDrillGate'
+import { orderKpis } from './lib/kpiOrder'
 import { useSeriesDrill } from './hooks/useSeriesDrill'
 import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
@@ -179,7 +180,7 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
   // choice (falls back to today's order when nothing is stored, or a stored key
   // has vanished — RAPPORT-KPI-INSTELBAAR).
   const { kpiOrder, fellBack } = useReportKpiOrdering('opportunities')
-  const kpis: KpiSpec[] = kpiOrder.map(key => kpiByKey[key]).filter((k): k is KpiSpec => k != null)
+  const kpis: KpiSpec[] = orderKpis(kpiOrder, kpiByKey)
 
   return (
     <div>
