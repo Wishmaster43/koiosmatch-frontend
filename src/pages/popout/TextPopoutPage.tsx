@@ -13,7 +13,7 @@
 import type { ComponentType } from 'react'
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import PopoutShell from './PopoutShell'
+import PopoutErrorShell from '@/components/popout/PopoutErrorShell'
 import CandidateSummaryPopout from './CandidateSummaryPopout'
 import MatchRemarksPopout from './MatchRemarksPopout'
 // K3/K5 (batch 5): the customer bedrijfstekst + department omschrijving popouts
@@ -63,15 +63,7 @@ export default function TextPopoutPage() {
   // Unknown pair — never a blank screen (§3); reload is the only meaningful
   // "retry" for a malformed URL (there is no request to re-issue).
   if (!Page) {
-    return (
-      <PopoutShell
-        loading={false} error onRetry={() => window.location.reload()}
-        loadingLabel="" errorLabel={t('popout.unknownEntity')} retryLabel={t('error.retry')}
-        name="" initials="" subtitle=""
-      >
-        {null}
-      </PopoutShell>
-    )
+    return <PopoutErrorShell onRetry={() => window.location.reload()} label={t('popout.unknownEntity')} />
   }
 
   return <Page id={id} />

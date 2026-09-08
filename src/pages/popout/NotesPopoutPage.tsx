@@ -13,7 +13,7 @@
 import type { ComponentType } from 'react'
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import PopoutShell from './PopoutShell'
+import PopoutErrorShell from '@/components/popout/PopoutErrorShell'
 import CandidateNotesPopout from './CandidateNotesPopout'
 import CustomerNotesPopout from './CustomerNotesPopout'
 import VacancyNotesPopout from './VacancyNotesPopout'
@@ -43,15 +43,7 @@ export default function NotesPopoutPage() {
   // Unknown entity segment — never a blank screen (§3); reload is the only
   // meaningful "retry" for a malformed URL (there is no request to re-issue).
   if (!isKnownEntity(entity)) {
-    return (
-      <PopoutShell
-        loading={false} error onRetry={() => window.location.reload()}
-        loadingLabel="" errorLabel={t('popout.unknownEntity')} retryLabel={t('error.retry')}
-        name="" initials="" subtitle=""
-      >
-        {null}
-      </PopoutShell>
-    )
+    return <PopoutErrorShell onRetry={() => window.location.reload()} label={t('popout.unknownEntity')} />
   }
 
   const EntityPage = ENTITY_PAGES[entity]
@@ -59,15 +51,7 @@ export default function NotesPopoutPage() {
   // page (only `outreachTarget` today) hits the same honest error state above
   // would have, never a runtime crash on an undefined component (§3).
   if (!EntityPage) {
-    return (
-      <PopoutShell
-        loading={false} error onRetry={() => window.location.reload()}
-        loadingLabel="" errorLabel={t('popout.unknownEntity')} retryLabel={t('error.retry')}
-        name="" initials="" subtitle=""
-      >
-        {null}
-      </PopoutShell>
-    )
+    return <PopoutErrorShell onRetry={() => window.location.reload()} label={t('popout.unknownEntity')} />
   }
   return <EntityPage id={id} />
 }

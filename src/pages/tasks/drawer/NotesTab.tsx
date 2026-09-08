@@ -9,28 +9,12 @@
  * fetch/optimistic-add/retry machinery is the SHARED `useEntityNotes` hook
  * (NOTES-TWINS-1, §11) — identical to the match tab.
  */
-import { useTranslation } from 'react-i18next'
 import SharedNotesTab from '@/components/drawer/tabs/NotesTab'
-import { useNoteTypes } from '@/lib/useNoteTypes'
-import { useEntityNotes } from '@/hooks/useEntityNotes'
-import { useAuth } from '@/context/AuthContext'
-import { initialsOf } from '@/lib/initials'
+import { useNotesTabSetup } from '@/hooks/useNotesTabSetup'
 import type { TaskDetail } from '@/types/task'
 
 export default function NotesTab({ task }: { task: TaskDetail }) {
-  const { t } = useTranslation('tasks')
-  // Note categories from the tenant lookup, scoped to 'task' (NOTE-TYPES-2/3).
-  const { writableTypes: noteTypes } = useNoteTypes('task')
-  // NOTITIE-PARITEIT (Danny 27-08): tasks/{task}/notes/{comment} has both PATCH
-  // and DELETE routes (TaskCommentController::update/destroy) — full candidate
-  // parity is reachable here, unlike matches/vacancies (delete-only).
-  // AUTHOR-CURRENT-USER-1: useEntityNotes stamps the optimistic note with the
-  // CURRENT logged-in user itself (see the hook) — the task's owner is a
-  // different person entirely and must not be passed in.
-  const { notes, loading, error, fetchNotes, addNote, editNote, deleteNote } = useEntityNotes({ id: task.id, basePath: `/tasks/${task.id}` })
-  // Author avatar initials — the current user composing the note, not the task's owner.
-  const auth = useAuth()
-  const initials = initialsOf(auth?.user?.name, 'Koios')
+  const { t, noteTypes, notes, loading, error, fetchNotes, addNote, editNote, deleteNote, initials } = useNotesTabSetup('task', String(task.id), `/tasks/${task.id}`, 'tasks')
 
   // Four UI states (§3): loading / error+retry (rendered by the SHARED tab, 04-08 —
   // `fetchNotes` doubles as the retry action) / empty (the shared tab's own

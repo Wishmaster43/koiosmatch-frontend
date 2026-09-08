@@ -8,32 +8,15 @@
  * preloaded prop. The fetch/optimistic-add/retry machinery is the SHARED
  * `useEntityNotes` hook (NOTES-TWINS-1, §11) — identical to the task tab.
  */
-import { useTranslation } from 'react-i18next'
 import SharedNotesTab from '@/components/drawer/tabs/NotesTab'
-import { useNoteTypes } from '@/lib/useNoteTypes'
-import { useEntityNotes } from '@/hooks/useEntityNotes'
-import { useAuth } from '@/context/AuthContext'
-import { initialsOf } from '@/lib/initials'
+import { useNotesTabSetup } from '@/hooks/useNotesTabSetup'
 import type { MatchRow } from '@/types/match'
 
 // Internal notes on a match (see file docblock above): fetches its own list on
 // mount (a match row carries no preloaded notes) and renders through the shared
 // NotesTab family.
 export default function NotesTab({ match: m }: { match: MatchRow }) {
-  const { t } = useTranslation('matches')
-  // Note categories from the tenant lookup, scoped to 'match' (NOTE-TYPES-2/3).
-  const { writableTypes: noteTypes } = useNoteTypes('match')
-  // NOTITIE-PARITEIT (Danny 27-08): matches/{match}/notes/{note} initially only
-  // had a DELETE route (MatchNoteController::destroy); the PATCH landed with
-  // CMBE 1049413a (MatchNoteController::update), so edit is now wired too — full
-  // parity with the other note tabs.
-  // AUTHOR-CURRENT-USER-1: useEntityNotes stamps the optimistic note with the
-  // CURRENT logged-in user itself (see the hook) — the match's owner is a
-  // different person entirely and must not be passed in.
-  const { notes, loading, error, fetchNotes, addNote, editNote, deleteNote } = useEntityNotes({ id: m.id, basePath: `/matches/${m.id}` })
-  // Author avatar initials — the current user composing the note, not the match's owner.
-  const auth = useAuth()
-  const initials = initialsOf(auth?.user?.name, 'Koios')
+  const { t, noteTypes, notes, loading, error, fetchNotes, addNote, editNote, deleteNote, initials } = useNotesTabSetup('match', String(m.id), `/matches/${m.id}`, 'matches')
 
   // Four UI states (§3): loading / error+retry (rendered by the SHARED tab, 04-08 —
   // `fetchNotes` doubles as the retry action) / empty (the shared tab's own
