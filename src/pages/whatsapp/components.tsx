@@ -7,12 +7,14 @@
  * @/lib/datetime for the locale-aware axis label, which this file's own flat
  * i18n test mock (components.test.tsx) cannot carry — see that file's header.
  */
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Clock } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'
 import { SectionTitle, Caption } from '@/components/ui/typography'
 import { useEscalationReasons } from './hooks/useEscalationReasons'
 import type { WaCandidate, WaEscalation } from '@/types/whatsapp'
+import type { WaConversationRow } from './hooks/useConversations'
 
 
 export const PAD  = (n: number) => String(n).padStart(2, '0')
@@ -36,6 +38,30 @@ const DERIVED_REASON_STYLE: Record<string, string> = {
   no_reply:          'var(--color-warning)',
   negative_response: 'var(--color-violet)',
 }
+// ─── helpers ────────────────────────────────────────────────────────────────
+
+// Whole minutes left until `expiresAt`; null when there is no expiry or it has passed.
+const minutesLeft = (expiresAt?: string | null): number | null => {
+  if (!expiresAt) return null
+  const diff = new Date(expiresAt).getTime() - Date.now()
+  return diff > 0 ? Math.floor(diff / 60_000) : null
+}
+
+// Minutes left in the 24h window, refreshed once a minute while an expiry is set.
+function useWindowMinutesLeft(expiresAt?: string | null): number | null {
+  const [minutes, setMinutes] = useState<number | null>(() => minutesLeft(expiresAt))
+  useEffect(() => {
+    setMinutes(minutesLeft(expiresAt))
+    if (!expiresAt) return
+    const interval = setInterval(() => setMinutes(minutesLeft(expiresAt)), 60_000)
+    return () => clearInterval(interval)
+  }, [expiresAt])
+  return minutes
+}
+
+// Under two hours left the countdown chip switches to the warning tint (X-28).
+const CLOSING_SOON_MINUTES = 120
+
 // ─── sub-components ─────────────────────────────────────────────────────────
 
 function Avatar({ candidate, size = 32 }: { candidate?: WaCandidate; size?: number }) {
@@ -49,6 +75,40 @@ function Avatar({ candidate, size = 32 }: { candidate?: WaCandidate; size?: numb
       {initials(candidate)}
     </div>
   )
+}
+
+// X-28: the 24h-window countdown — "Venster sluit over 3 u 12 min" while open,
+// "Venster gesloten" once it closed after an inbound, nothing when no inbound ever arrived.
+export function WindowCountdownChip({ row }: { row: WaConversationRow }) {
+  const { t } = useTranslation('whatsapp')
+  const minutes = useWindowMinutesLeft(row.window_expires_at)
+
+  // No inbound message ever = no window at all.
+  if (!row.last_inbound_at) return null
+
+  if (row.window_open && minutes !== null) {
+    const hours = Math.floor(minutes / 60)
+    const rest = minutes % 60
+    const time = hours > 0
+      ? t('conversations.countdownHours', { hours, minutes: rest })
+      : t('conversations.countdownMinutes', { minutes: rest })
+    const color = minutes < CLOSING_SOON_MINUTES ? 'var(--color-warning)' : 'var(--color-info)'
+    return <SoftChip label={t('conversations.windowClosesIn', { time })} color={color} />
+  }
+
+  if (!row.window_open) {
+    return <SoftChip label={t('conversations.windowClosed')} color="var(--text-muted)" />
+  }
+
+  return null
+}
+
+// X-28: who is driving the thread — the AI agent (active) or a recruiter who took over (paused).
+export function AgentBadgeChip({ agentSessionStatus }: { agentSessionStatus?: 'active' | 'paused' | null }) {
+  const { t } = useTranslation('whatsapp')
+  if (agentSessionStatus === 'active') return <SoftChip label={t('conversations.agentActive')} color="var(--color-info)" />
+  if (agentSessionStatus === 'paused') return <SoftChip label={t('conversations.agentPaused')} color="var(--text-muted)" />
+  return null
 }
 
 // Escalated-conversation list; each row's reason colour/label prefers the

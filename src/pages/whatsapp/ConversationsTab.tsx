@@ -29,6 +29,7 @@ import { useConversations } from './hooks/useConversations'
 import type { WaConversationRow } from './hooks/useConversations'
 import { useConversationThread } from './hooks/useConversationThread'
 import { buildConversationFilterGroups } from './data/conversationFilterGroups'
+import { WindowCountdownChip, AgentBadgeChip } from './components'
 
 // The name/label the row is known by: candidate first, contact second, raw number last.
 const counterpartName = (row: WaConversationRow) =>
@@ -127,10 +128,12 @@ export default function ConversationsTab({ openConversationId }: { openConversat
     {
       key: 'flags', header: t('conversations.column.flags'),
       render: r => (
-        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
           {/* A count/flag badge never renders when false — an inactive chip is simply absent (§SCHERMWAARHEID). */}
           {r.awaiting_reply && <SoftChip label={t('conversations.flagUnanswered')} color="var(--color-warning)" />}
           {r.escalated && <SoftChip label={t('conversations.flagEscalated')} color="var(--color-danger)" />}
+          <WindowCountdownChip row={r} />
+          <AgentBadgeChip agentSessionStatus={r.agent_session_status} />
         </div>
       ),
     },

@@ -24,10 +24,12 @@ export interface WaConversationRow {
   last_message_direction?: 'inbound' | 'outbound' | string | null
   last_message_at?: string | null
   last_inbound_at?: string | null
+  window_expires_at?: string | null
   window_open?: boolean
   awaiting_reply?: boolean
   escalated?: boolean
   is_active?: boolean
+  agent_session_status?: 'active' | 'paused' | null
   candidate?: WaConversationCandidate | null
   customer_contact?: WaConversationContact | null
   owner?: WaConversationOwner | null
