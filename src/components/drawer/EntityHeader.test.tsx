@@ -4,7 +4,7 @@
  * the previous one — otherwise every avatar upload leaks memory for the tab's lifetime.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, fireEvent, cleanup } from '@testing-library/react'
+import { render, fireEvent, cleanup, screen } from '@testing-library/react'
 import '@/i18n'
 import EntityHeader from './EntityHeader'
 
@@ -68,5 +68,27 @@ describe('EntityHeader photo upload', () => {
     const { unmount } = renderWithAvatar()
     unmount()
     expect(revokeObjectURL).not.toHaveBeenCalled()
+  })
+})
+
+// DROPDOWN-CLEAR-1 (B2): a meta picker declared `clearable` renders the shared clear X
+// (accessible name "<label> wissen") and hands '' to onChange; without the flag no X.
+describe('EntityHeader · meta picker clear (DROPDOWN-CLEAR-1)', () => {
+  const pickers = (clearable: boolean, onChange = vi.fn()) => [{
+    key: 'owner', label: 'Owner', value: 'u-1',
+    options: [{ value: 'u-1', label: 'Jane Doe' }, { value: 'u-2', label: 'Piet de Vries' }],
+    onChange, clearable, clearLabel: 'Owner',
+  }]
+
+  it('renders the clear X on a clearable picker with a value and hands "" to onChange', () => {
+    const onChange = vi.fn()
+    render(<EntityHeader label="Vacancy" title="Verpleegkundige" meta={pickers(true, onChange)} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Owner wissen' }))
+    expect(onChange).toHaveBeenCalledWith('')
+  })
+
+  it('renders no clear X when the picker opts out', () => {
+    render(<EntityHeader label="Vacancy" title="Verpleegkundige" meta={pickers(false)} />)
+    expect(screen.queryByRole('button', { name: /wissen$/ })).toBeNull()
   })
 })

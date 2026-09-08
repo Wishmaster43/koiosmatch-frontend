@@ -51,10 +51,12 @@ import { Caption, PageTitle } from '@/components/ui/typography'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useUsers } from '@/lib/queries'
 import { initialsOf } from '@/lib/initials'
+import { useAuth } from '@/context/AuthContext'
 import OverviewTab from './drawer/OverviewTab'
 import StatisticsTab from './drawer/StatisticsTab'
 import MatchContractSection from './drawer/MatchContractSection'
 import NotesTab from './drawer/NotesTab'
+import AgentSessionsTab from './drawer/AgentSessionsTab'
 import TerminateMatchModal from './drawer/TerminateMatchModal'
 import RenewMatchModal from './drawer/RenewMatchModal'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
@@ -122,6 +124,7 @@ export default function MatchDrawer({
 }: MatchDrawerProps) {
   const { t } = useTranslation('matches')
   const { formatDate, formatDateTime } = useDateFormat()
+  const auth = useAuth()
   // Approval data/actions live in one hook here (thin container, §3) — the header
   // pieces below stay presentational.
   const { reason, busy, rejectOpen, setRejectOpen, approve, reject } = useMatchApproval(match, onApprovalChange)
@@ -184,9 +187,14 @@ export default function MatchDrawer({
     ...users.map(u => ({ value: String(u.id), label: u.name ?? '', initials: initialsOf(u.name) })),
   ]
   // Resolve the picked id back to the full user so the caller can write the name/
-  // colour optimistically as well as PATCH the id.
+  // colour optimistically as well as PATCH the id. Empty string unsets the owner.
   const handleOwnerChange = (value: string) => {
     if (value === '__current') return
+    if (value === '') {
+      // DROPDOWN-CLEAR-1: clearing the owner passes null to the update path.
+      onUpdate?.(match.id, { ownerId: null })
+      return
+    }
     const user = users.find(u => String(u.id) === value)
     if (user) onSetOwner?.(user)
   }
@@ -210,6 +218,11 @@ export default function MatchDrawer({
     // NT-MATCH-1: notes, after the content tabs above and before Extra/Koppelingen
     // (the changelog ALSO rides the Tijdlijn tab since TIJDLIJN-OVERAL, 27-08).
     { id: 'notes', label: t('notes.title'), render: () => <NotesTab match={match} /> },
+    // AI interview sessions, only visible when the module is enabled and both
+    // matches.view + applications.view permissions are present.
+    ...(auth?.hasModule?.('koios_ai') && auth?.hasPermission?.('matches.view') && auth?.hasPermission?.('applications.view')
+      ? [{ id: 'agentSessions', label: t('drawer.tabs.agentSessions'), render: () => <AgentSessionsTab match={match} /> }]
+      : []),
     ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra'), render: () => (
       <CustomFieldsTab entityType="match" values={match.customFieldValues ?? {}}
         onSave={patch => onUpdateCustomFields?.(match.id, patch)} />
@@ -342,6 +355,7 @@ export default function MatchDrawer({
               key: 'owner', label: t('drawer.fields.owner'), value: ownerValue,
               options: ownerOptions, onChange: handleOwnerChange,
               placeholder: t('drawer.ownerUnassigned'), menuWidth: 200, width: 190,
+              clearable: true, clearLabel: t('drawer.fields.owner'),
             }] : []),
           ]}
           // Read-only owner whenever the picker is gated off — the fact stays visible.

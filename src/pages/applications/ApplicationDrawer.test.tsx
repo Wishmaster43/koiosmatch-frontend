@@ -7,7 +7,7 @@
  * popover icon are untouched and still render.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ComponentProps } from 'react'
 // Real i18n (nl) side-effect init so t() resolves genuine Dutch text — the
@@ -103,5 +103,25 @@ describe('ApplicationDrawer · footer/action gate (RIGHTS-GATE-OPENERS-1)', () =
     expect(screen.getByRole('button', { name: 'Afwijzen' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Ontkoppelen' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Voorstellen aan klant' })).toBeInTheDocument()
+  })
+})
+
+// DROPDOWN-CLEAR-1 (B2): the header owner picker's X hands (id, null) to onOwnerChange;
+// an unassigned application shows the placeholder and no X.
+describe('ApplicationDrawer · owner picker clear (DROPDOWN-CLEAR-1)', () => {
+  const users = [{ id: 'u-1', name: 'Jane Doe' }, { id: 'u-2', name: 'Piet de Vries' }]
+
+  it('clears the owner via the X and hands (id, null) to onOwnerChange', () => {
+    const onOwnerChange = vi.fn()
+    const app = application({ owner: { id: 'u-1', name: 'Jane Doe', initials: 'JD', color: null } })
+    renderDrawer({ application: app, onClose: vi.fn(), onOwnerChange, users })
+    fireEvent.click(screen.getByRole('button', { name: /wissen$/ }))
+    expect(onOwnerChange).toHaveBeenCalledWith(1, null)
+  })
+
+  it('shows the placeholder and no X when unassigned', () => {
+    renderDrawer({ application: application(), onClose: vi.fn(), onOwnerChange: vi.fn(), users })
+    expect(screen.queryByRole('button', { name: /wissen$/ })).toBeNull()
+    expect(screen.getByRole('button', { name: /Geen eigenaar/ })).toBeInTheDocument()
   })
 })

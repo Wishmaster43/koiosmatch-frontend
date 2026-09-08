@@ -5,7 +5,7 @@
  * every other tab body is stubbed so only the header + tab bar + the tab under
  * test actually mount).
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 // Real i18n (nl) instance so the tab labels resolve genuine Dutch text — kept as
@@ -19,6 +19,11 @@ import type { MatchRow } from '@/types/match'
 
 // MATCH-TERMINATE-1: metaOf's is_closed flag now drives the header's terminate
 // button gate — the mock must return a working metaOf, not just a bare list.
+// X-3 / B2: auth is mocked per test — null (no provider) by default, so every block
+// written before the mock keeps the exact behaviour it was written against.
+const { mockUseAuth } = vi.hoisted(() => ({ mockUseAuth: vi.fn((): unknown => null) }))
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
+
 vi.mock('@/lib/useMatchStatuses', () => ({
   useMatchStatuses: () => ({
     statuses: [{ value: 'open', label: 'Open' }, { value: 'closed', label: 'Afgesloten' }],
@@ -417,5 +422,50 @@ describe('MatchDrawer · trash lifecycle (TRASH-OVERAL-2)', () => {
       match={{ ...match, archived: true, lifecycle: 'pending_erase', pendingEraseAt: '2026-08-10T12:00:00Z' }}
       onClose={vi.fn()} />)
     expect(screen.queryByRole('button', { name: unmarkLabel })).not.toBeInTheDocument()
+  })
+})
+
+// DROPDOWN-CLEAR-1 (B2): the header owner picker's clear X unsets the owner through the
+// onUpdate path ({ ownerId: null }) — never through onSetOwner, which carries a picked user.
+describe('MatchDrawer · owner picker clear (DROPDOWN-CLEAR-1)', () => {
+  it('clears the owner via the X and hands { ownerId: null } to onUpdate', async () => {
+    const user = userEvent.setup()
+    const onSetOwner = vi.fn(); const onUpdate = vi.fn()
+    render(<MatchDrawer match={owned()} onClose={vi.fn()} onSetOwner={onSetOwner} onUpdate={onUpdate} />)
+    await user.click(screen.getByRole('button', { name: /wissen$/ }))
+    expect(onUpdate).toHaveBeenCalledWith('m1', { ownerId: null })
+    expect(onSetOwner).not.toHaveBeenCalled()
+  })
+
+  it('shows no clear X on an ownerless match (placeholder state)', () => {
+    render(<MatchDrawer match={owned({ owner: '', ownerId: null, ownerInitials: '' })} onClose={vi.fn()} onSetOwner={vi.fn()} />)
+    expect(screen.queryByRole('button', { name: /wissen$/ })).toBeNull()
+    expect(screen.getByRole('button', { name: /Geen eigenaar/ })).toBeInTheDocument()
+  })
+})
+
+// X-3: the AI-sessies tab needs the koios_ai module AND both matches.view + applications.view.
+describe('MatchDrawer · AI-sessies tab gate (X-3)', () => {
+  const tabName = i18n.t('matches:drawer.tabs.agentSessions')
+  const auth = (module: boolean, perms: string[]) => ({
+    hasModule: (m: string) => module && m === 'koios_ai',
+    hasPermission: (p: string) => perms.includes(p),
+  })
+  afterEach(() => { mockUseAuth.mockReset(); mockUseAuth.mockImplementation(() => null) })
+
+  it('renders the tab with the module and both permissions', () => {
+    mockUseAuth.mockReturnValue(auth(true, ['matches.view', 'applications.view']))
+    render(<MatchDrawer match={match} onClose={vi.fn()} />)
+    expect(screen.getByRole('tab', { name: tabName })).toBeInTheDocument()
+  })
+
+  it('hides the tab without the module, and without applications.view', () => {
+    mockUseAuth.mockReturnValue(auth(false, ['matches.view', 'applications.view']))
+    const { unmount } = render(<MatchDrawer match={match} onClose={vi.fn()} />)
+    expect(screen.queryByRole('tab', { name: tabName })).toBeNull()
+    unmount()
+    mockUseAuth.mockReturnValue(auth(true, ['matches.view']))
+    render(<MatchDrawer match={match} onClose={vi.fn()} />)
+    expect(screen.queryByRole('tab', { name: tabName })).toBeNull()
   })
 })

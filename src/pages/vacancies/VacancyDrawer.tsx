@@ -308,7 +308,8 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
             // Client moved to the Details tab (P3: calm header — max status + owner,
             // mirror the candidate blueprint §3A(c)); the subtitle still shows it.
             { key: 'owner', label: t('drawer.owner'), value: v.owner?.id,
-              options: ownerOptions, onChange: val => onUpdate?.(v.id, { ownerId: val }), menuWidth: 200, width: 190 },
+              options: ownerOptions, onChange: val => onUpdate?.(v.id, { ownerId: val || null }), menuWidth: 200, width: 190,
+              clearable: true, clearLabel: t('drawer.owner') },
           ]}
           tags={{ items: currentTags, onAdd: tag => setTagsAndSave([...currentTags, tag]),
             onRemove: tag => setTagsAndSave(currentTags.filter(x => x !== tag)), addLabel: t('drawer.tags') }}

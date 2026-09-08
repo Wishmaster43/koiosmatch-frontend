@@ -56,7 +56,8 @@
       "relations": "Relaties",
       "changelog": "Wijzigingen",
       "extra": "Extra",
-      "timeline": "Tijdlijn"
+      "timeline": "Tijdlijn",
+      "agentSessions": "AI-sessies"
     },
     "sectionDetails": "Matchgegevens",
     "fields": {
@@ -366,5 +367,17 @@
       "open": "Actief",
       "closed": "Afgesloten"
     }
+  },
+  "agentSessions": {
+    "loading": "Sessies laden...",
+    "loadError": "AI-sessies konden niet worden geladen.",
+    "empty": "Nog geen AI-interview voor deze match.",
+    "viaCandidate": "Deze match heeft geen eigen sollicitatie; dit zijn de AI-sessies van de kandidaat.",
+    "pause": "AI-agent pauzeren",
+    "resume": "AI-agent hervatten",
+    "pauseConfirmTitle": "AI-agent pauzeren?",
+    "pauseConfirm": "Jij neemt dit gesprek over. De AI-agent stuurt geen berichten meer tot je hem hervat.",
+    "pauseConfirmAction": "Pauzeren",
+    "controlFailed": "Kon de AI-agent niet aanpassen."
   }
 }

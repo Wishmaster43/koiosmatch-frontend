@@ -186,6 +186,8 @@ export interface MetaPicker {
   placeholder?: string
   width?: number
   menuWidth?: number
+  clearable?: boolean
+  clearLabel?: string
 }
 
 interface EntityHeaderProps {
@@ -262,7 +264,7 @@ export default function EntityHeader({
                   PATCH straight away) and most are required; clearing to '' here would write an
                   empty value the record must keep. Optional owner pickers get their clear once
                   every host maps '' to null (follow-up, frozen drawers). */}
-              <SelectMenu value={m.value} options={m.options} onChange={m.onChange} placeholder={m.placeholder} menuWidth={m.menuWidth ?? 180} clearable={false} />
+              <SelectMenu value={m.value} options={m.options} onChange={m.onChange} placeholder={m.placeholder} menuWidth={m.menuWidth ?? 180} clearable={m.clearable ?? false} clearLabel={m.clearLabel} />
             </div>
           ))}
           {/* Trailing meta content (e.g. funnel chips) fills the space beside the pickers. */}

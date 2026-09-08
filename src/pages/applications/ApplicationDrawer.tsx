@@ -58,7 +58,8 @@ interface ApplicationDrawerProps {
   onReject?: (id: Id | undefined, payload: RejectPayload) => void
   onAdjustScore?: (id: Id | undefined, payload: { score: number | null; criteria: Criterion[] }) => void
   onPhaseChange?: (id: Id | undefined, phaseKey: string) => void
-  onOwnerChange?: (id: Id | undefined, ownerId: string) => void
+  // DROPDOWN-CLEAR-1: null = unassign (the header owner picker's clear X).
+  onOwnerChange?: (id: Id | undefined, ownerId: string | null) => void
   // Re-link (or unlink, null) the vacancy this application is coupled to — shared
   // by the Sollicitatie tab's Details block and the Vacature tab (§3A).
   onLinkVacancy?: (id: Id | undefined, vacancyId: Id | null, meta?: { title?: string; client?: string }) => void
@@ -126,11 +127,14 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
   // Header meta pickers — phase (funnel lookup) + recruiter (tenant users). The
   // owner is matched by id; a fallback option covers an owner not in the list.
   const ownerInUsers = (users ?? []).some(u => String(u.id) === String(a.owner?.id))
+  // DROPDOWN-CLEAR-1: an owner missing from /users keeps a synthetic current entry so the
+  // name stays visible; NO owner renders the placeholder (value ''), so the clear X only
+  // appears on a real value (mirrors MatchDrawer's ownerUnassigned wiring).
   const ownerOptions = [
-    ...(a.owner?.id != null && ownerInUsers ? [] : [{ value: '__current', label: a.owner?.name || t('insights.noOwner') }]),
+    ...(a.owner?.id != null && !ownerInUsers ? [{ value: '__current', label: a.owner?.name ?? '' }] : []),
     ...(users ?? []).map(u => ({ value: String(u.id), label: u.name })),
   ]
-  const ownerValue = a.owner?.id != null && ownerInUsers ? String(a.owner.id) : '__current'
+  const ownerValue = a.owner?.id == null ? '' : (ownerInUsers ? String(a.owner.id) : '__current')
   // Standard picker widths (§3A blueprint: Status/Phase ~160 + Eigenaar ~190).
   // APP-REJECT-GUARD-1: the funnel stage flagged is_rejected — never the literal
   // 'rejected' key, a tenant may rename it. Picking it from the header requires
@@ -142,7 +146,8 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
       onChange: (v: string) => { if (v === rejectedFunnelValue) setRejectModalOpen(true); else onPhaseChange?.(a.id, v) },
       menuWidth: 170, width: 160 },
     { key: 'owner', label: t('drawer.owner'), value: ownerValue, options: ownerOptions,
-      onChange: (v: string) => { if (v !== '__current') onOwnerChange?.(a.id, String(v)) }, menuWidth: 200, width: 190 },
+      onChange: (v: string) => { if (v !== '__current') onOwnerChange?.(a.id, v || null) }, menuWidth: 200, width: 190,
+      placeholder: t('insights.noOwner'), clearable: true, clearLabel: t('drawer.owner') },
   ]
   // Gate for the "Voorstellen aan klant" header action (Danny 25-07): needs both
   // a candidate and a customer to propose to, and is pointless once archived or

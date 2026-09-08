@@ -56,7 +56,8 @@
       "relations": "Relations",
       "changelog": "Changelog",
       "extra": "Extra",
-      "timeline": "Timeline"
+      "timeline": "Timeline",
+      "agentSessions": "AI sessions"
     },
     "sectionDetails": "Match details",
     "fields": {
@@ -369,5 +370,17 @@
       "open": "Active",
       "closed": "Closed"
     }
+  },
+  "agentSessions": {
+    "loading": "Loading sessions...",
+    "loadError": "AI sessions could not be loaded.",
+    "empty": "No AI interview yet for this match.",
+    "viaCandidate": "This match has no own application; these are the candidate's AI sessions.",
+    "pause": "Pause AI agent",
+    "resume": "Resume AI agent",
+    "pauseConfirmTitle": "Pause AI agent?",
+    "pauseConfirm": "You take over this conversation. The AI agent will not send messages until you resume it.",
+    "pauseConfirmAction": "Pause",
+    "controlFailed": "Could not adjust the AI agent."
   }
 }

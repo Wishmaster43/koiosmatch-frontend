@@ -26,16 +26,18 @@ const statsTabLabel = (nlOutreach as { drawer: { tabs: { stats: string } } }).dr
 // The detail hook is the drawer's only data source — stub it and observe the id it gets.
 // `detailReturn` is a per-test mutable override so individual tests can supply a real
 // detail payload (e.g. reference_number) instead of the default null/loading stub.
-const { detailMock, detailReturn } = vi.hoisted(() => ({
+const { detailMock, detailReturn, setOwnerMock } = vi.hoisted(() => ({
   detailMock: vi.fn(),
   detailReturn: { current: null as Record<string, unknown> | null },
+  // DROPDOWN-CLEAR-1: hoisted so the owner-clear test can assert the (id, null) call.
+  setOwnerMock: vi.fn(),
 }))
 vi.mock('./hooks/useOutreachDetail', () => ({
   useOutreachDetail: (id: string | null) => {
     detailMock(id)
     return {
       detail: detailReturn.current, loading: false, error: false,
-      setTargetStatus: vi.fn(), setTargetOutcome: vi.fn(), setOwner: vi.fn(), setCustomFields: vi.fn(),
+      setTargetStatus: vi.fn(), setTargetOutcome: vi.fn(), setOwner: setOwnerMock, setCustomFields: vi.fn(),
       // G29/G30: real functions so the prop-wiring test can assert their type.
       setTargetNote: vi.fn(), assignTargets: vi.fn(),
     }
@@ -238,5 +240,23 @@ describe('OutreachDrawer — table-identical Koios advice (KOIOS-ADVIES-OVERAL-1
     detailReturn.current = { ...campaign, targets: [] }
     render(<OutreachDrawer id="c1" onClose={() => {}} />)
     expect(screen.queryByText(aiTitle)).not.toBeInTheDocument()
+  })
+})
+
+// DROPDOWN-CLEAR-1 (B2): the header owner picker's X persists the clear as setOwner(id, null).
+describe('OutreachDrawer · owner picker clear (DROPDOWN-CLEAR-1)', () => {
+  afterEach(() => { detailReturn.current = null; setOwnerMock.mockClear() })
+
+  it('clears the owner via the X and persists setOwner(id, null)', () => {
+    detailReturn.current = { id: 'c3', name: 'Bellijst Zorg', owner: { id: 'r1', name: 'Nora Recruiter' } }
+    render(<OutreachDrawer id="c3" onClose={() => {}} />)
+    fireEvent.click(screen.getByRole('button', { name: /wissen$/ }))
+    expect(setOwnerMock).toHaveBeenCalledWith('c3', null)
+  })
+
+  it('shows no clear X on an ownerless campaign (placeholder state)', () => {
+    detailReturn.current = { id: 'c3', name: 'Bellijst Zorg', owner: null }
+    render(<OutreachDrawer id="c3" onClose={() => {}} />)
+    expect(screen.queryByRole('button', { name: /wissen$/ })).toBeNull()
   })
 })

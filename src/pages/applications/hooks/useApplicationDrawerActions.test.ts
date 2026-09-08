@@ -216,6 +216,30 @@ describe('useApplicationDrawerActions · handleOwner', () => {
     expect(result.current.actions.selected?.owner).toEqual(initial.owner)
     expect(notifyError).toHaveBeenCalledWith('Geen rechten')
   })
+
+  it('clears the owner when called with null, sending { owner_id: null } as the request body', async () => {
+    apiPatch.mockResolvedValue({ data: {} })
+    const withOwner = app({ owner: { id: 'u2', name: 'Nieuwe Recruiter', initials: 'NR', color: null } })
+    const { result } = harness([withOwner], { users: USERS })
+    act(() => { result.current.actions.handleOwner(1, null) })
+    await waitFor(() => expect(apiPatch).toHaveBeenCalled())
+    expect(apiPatch).toHaveBeenCalledWith('/applications/1', { owner_id: null })
+    // The UI model shows an unassigned owner (empty object with all null/empty fields)
+    expect(result.current.applications[0].owner).toEqual({ id: null, name: '', initials: '', color: null })
+  })
+
+  it('reverts the owner when clearing fails, restoring the previous owner in both slices', async () => {
+    apiPatch.mockRejectedValue({ response: { status: 422, data: { message: 'Koppeling bezet' } } })
+    const withOwner = app({ owner: { id: 'u2', name: 'Nieuwe Recruiter', initials: 'NR', color: null } })
+    const { result } = harness([withOwner], { users: USERS })
+    act(() => { result.current.actions.setSelected(detail({ id: 1, owner: withOwner.owner })) })
+    act(() => { result.current.actions.handleOwner(1, null) })
+    await waitFor(() => expect(notifyError).toHaveBeenCalled())
+    // Both slices revert to the original owner
+    expect(result.current.applications[0].owner).toEqual(withOwner.owner)
+    expect(result.current.actions.selected?.owner).toEqual(withOwner.owner)
+    expect(notifyError).toHaveBeenCalledWith('Koppeling bezet')
+  })
 })
 
 describe('useApplicationDrawerActions · handleAdjustScore', () => {

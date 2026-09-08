@@ -208,3 +208,23 @@ describe('VacancyDrawer · trash lifecycle (TRASH-OVERAL-2)', () => {
     expect(wiring.onUnmarked).toHaveBeenCalledWith('v1')
   })
 })
+
+// DROPDOWN-CLEAR-1 (B2): pick → clear → placeholder on the header owner picker.
+describe('VacancyDrawer · owner picker clear (DROPDOWN-CLEAR-1)', () => {
+  const users = [{ id: 'u-1', name: 'Nina Bakker' }, { id: 'u-2', name: 'Piet de Vries' }]
+  const withOwner = { ...vacancy, owner: { id: 'u-1', name: 'Nina Bakker' } } as unknown as VacancyDetail
+
+  it('clears the owner via the X and hands { ownerId: null } to onUpdate', async () => {
+    const user = userEvent.setup(); const onUpdate = vi.fn()
+    render(<VacancyDrawer vacancy={withOwner} onClose={vi.fn()} onUpdate={onUpdate} users={users} />)
+    await user.click(screen.getByRole('button', { name: /wissen$/ }))
+    expect(onUpdate).toHaveBeenCalledWith(vacancy.id, { ownerId: null })
+  })
+
+  it('shows no clear X once the owner is gone (placeholder state)', () => {
+    const cleared = { ...vacancy, owner: { id: null, name: '' } } as unknown as VacancyDetail
+    render(<VacancyDrawer vacancy={cleared} onClose={vi.fn()} onUpdate={vi.fn()} users={users} />)
+    expect(screen.queryByRole('button', { name: /wissen$/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: /Nina Bakker/ })).toBeNull()
+  })
+})

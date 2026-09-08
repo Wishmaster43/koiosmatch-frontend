@@ -19,7 +19,7 @@ import { extractApiError } from '@/lib/extractApiError'
 import { initialsOf } from '@/lib/initials'
 import { mapApplication, mapApplicationDetail } from '../data/mapApplication'
 import { bucketOfPhase } from '../data/applicationsShared'
-import type { Application, ApplicationDetail } from '@/types/application'
+import type { Application, ApplicationDetail, ApplicationOwner } from '@/types/application'
 import type { RejectPayload } from '../drawer/RejectionModal'
 import type { Criterion } from '@/components/match/MatchScoreBlock'
 import type { Id } from '@/types/common'
@@ -134,12 +134,28 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
   // it were saved. Snapshot ONLY the owner field before the optimistic write (wideRows
   // fallback: the drawer may be open while viewing the board) and restore it in both the
   // list row and the open detail on failure, surfacing the server's own message.
-  const handleOwner = (id: Id, ownerId: string) => {
+  // DROPDOWN-CLEAR-1: empty string clears the owner (ownerId: null on the wire).
+  const handleOwner = (id: Id, ownerId: string | null) => {
+    const before = applications.find(a => a.id === id) ?? wideRows.find(a => a.id === id)
+    if (!ownerId) {
+      // Clear the owner: the UI model keeps an EMPTY owner object (mapApplication's own shape
+      // for an unassigned application), never null — the row/header render it as unassigned.
+      const unassigned: ApplicationOwner = { id: null, name: '', initials: '', color: null }
+      setApplications(prev => prev.map(a => a.id === id ? { ...a, owner: unassigned } : a))
+      setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, owner: unassigned } as ApplicationDetail) : prev))
+      api.patch(`/applications/${id}`, { owner_id: null })
+        .catch(err => {
+          if (before) {
+            setApplications(prev => prev.map(a => a.id === id ? { ...a, owner: before.owner } : a))
+            setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, owner: before.owner } as ApplicationDetail) : prev))
+          }
+          notifyError(extractApiError(err, t('common:actionFailed')))
+        })
+      return
+    }
     const u = users.find(x => String(x.id) === String(ownerId))
     if (!u) return
-    const before = applications.find(a => a.id === id) ?? wideRows.find(a => a.id === id)
-    const initials = initialsOf(u.name)
-    const owner = { id: ownerId, name: u.name, initials, color: null }
+    const owner = { id: ownerId, name: u.name, initials: initialsOf(u.name), color: null }
     setApplications(prev => prev.map(a => a.id === id ? { ...a, owner } : a))
     setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, owner } as ApplicationDetail) : prev))
     api.patch(`/applications/${id}`, { owner_id: ownerId })

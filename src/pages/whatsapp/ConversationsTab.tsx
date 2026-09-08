@@ -29,7 +29,7 @@ import api, { unwrap } from '@/lib/api'
 import { useConversations } from './hooks/useConversations'
 import type { WaConversationRow } from './hooks/useConversations'
 import { useConversationThread } from './hooks/useConversationThread'
-import { useAgentSessionControl } from './hooks/useAgentSessionControl'
+import { useAgentSessionControl } from '@/hooks/useAgentSessionControl'
 import { buildConversationFilterGroups } from './data/conversationFilterGroups'
 import { WindowCountdownChip, AgentBadgeChip } from './components'
 
@@ -62,7 +62,7 @@ export default function ConversationsTab({ openConversationId }: { openConversat
   // CMFE-MEET-1: recruiter takeover of the live AI interview; a landed pause/resume
   // re-fetches the list so the agent chip in the row and the drawer header flips.
   const reloadRows = useCallback(() => { void refetch?.() }, [refetch])
-  const agentControl = useAgentSessionControl(reloadRows)
+  const agentControl = useAgentSessionControl(reloadRows, t('conversations.agentControlFailed'))
   const [confirmPause, setConfirmPause] = useState(false)
   const thread = useConversationThread(selectedId)
 

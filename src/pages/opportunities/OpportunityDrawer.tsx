@@ -197,7 +197,8 @@ export default function OpportunityDrawer({
               onChange: (val: string) => onUpdate?.(o.id, { stageValue: val }), menuWidth: 170, width: 160 },
             { key: 'owner', label: t('drawer.owner'), value: o.ownerId,
               options: ownerOptions, placeholder: t('drawer.selectOwner'),
-              onChange: (val: string) => onUpdate?.(o.id, { ownerId: val }), menuWidth: 200, width: 190 },
+              onChange: (val: string) => onUpdate?.(o.id, { ownerId: val || null }), menuWidth: 200, width: 190,
+              clearable: true, clearLabel: t('drawer.owner') },
           ]}
           // C-41: free-form tags — UpdateOpportunityRequest accepts `tags` (measured).
           tags={{ items: currentTags, onAdd: tag => setTagsAndSave([...currentTags, tag]),

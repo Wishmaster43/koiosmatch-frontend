@@ -140,3 +140,23 @@ describe('OpportunityDrawer · trash lifecycle (TRASH-OVERAL-2)', () => {
     expect(wiring.onUnmarked).toHaveBeenCalledWith('o1')
   })
 })
+
+// DROPDOWN-CLEAR-1 (B2): pick → clear → placeholder on the header owner picker.
+describe('OpportunityDrawer · owner picker clear (DROPDOWN-CLEAR-1)', () => {
+  const users = [{ id: 'u-1', name: 'Anna de Vries' }, { id: 'u-2', name: 'Bob Smith' }]
+  const owned = { ...mapOpportunity({ id: 'o1', title: 'Deal A' }), ownerId: 'u-1', owner: 'Anna de Vries' }
+
+  it('clears the owner via the X and hands { ownerId: null } to onUpdate', async () => {
+    const user = userEvent.setup(); const onUpdate = vi.fn()
+    render(<OpportunityDrawer opportunity={owned} onClose={noop} onUpdate={onUpdate} users={users} />)
+    await user.click(screen.getByRole('button', { name: /wissen$/ }))
+    expect(onUpdate).toHaveBeenCalledWith('o1', { ownerId: null })
+  })
+
+  it('shows no clear X on an ownerless opportunity (placeholder state)', () => {
+    const cleared = { ...owned, ownerId: null, owner: '' }
+    render(<OpportunityDrawer opportunity={cleared} onClose={noop} onUpdate={vi.fn()} users={users} />)
+    expect(screen.queryByRole('button', { name: /wissen$/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: /Anna de Vries/ })).toBeNull()
+  })
+})

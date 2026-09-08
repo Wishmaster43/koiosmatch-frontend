@@ -241,7 +241,8 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
           meta={archived ? [] : [
             { key: 'owner', label: t('drawer.owner'), value: String(detail?.owner?.id ?? ''),
               options: ownerOptions, placeholder: t('drawer.selectOwner'),
-              onChange: onOwnerChange, menuWidth: 200, width: 190 },
+              onChange: onOwnerChange, menuWidth: 200, width: 190,
+              clearable: true, clearLabel: t('drawer.owner') },
           ]}
         >
           {/* Enkelstuks-sweep: archived state + per-id restore via the ONE shared

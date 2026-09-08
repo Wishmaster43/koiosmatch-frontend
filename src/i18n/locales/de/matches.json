@@ -56,7 +56,8 @@
       "relations": "Beziehungen",
       "changelog": "Änderungen",
       "extra": "Extra",
-      "timeline": "Verlauf"
+      "timeline": "Verlauf",
+      "agentSessions": "KI-Sitzungen"
     },
     "sectionDetails": "Match-Details",
     "fields": {
@@ -366,5 +367,17 @@
       "open": "Aktiv",
       "closed": "Abgeschlossen"
     }
+  },
+  "agentSessions": {
+    "loading": "Sitzungen werden geladen...",
+    "loadError": "KI-Sitzungen konnten nicht geladen werden.",
+    "empty": "Noch kein KI-Interview für diesen Match.",
+    "viaCandidate": "Dieses Match hat keine eigene Bewerbung; dies sind die KI-Sitzungen des Kandidaten.",
+    "pause": "KI-Agent pausieren",
+    "resume": "KI-Agent fortsetzen",
+    "pauseConfirmTitle": "KI-Agent pausieren?",
+    "pauseConfirm": "Du übernahmst dieses Gespräch. Der KI-Agent sendet keine Nachrichten, bis du ihn fortsetzt.",
+    "pauseConfirmAction": "Pausieren",
+    "controlFailed": "Konnte den KI-Agent nicht anpassen."
   }
 }

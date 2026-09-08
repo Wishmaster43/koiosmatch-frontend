@@ -56,7 +56,8 @@
       "relations": "Relations",
       "changelog": "Historique",
       "extra": "Extra",
-      "timeline": "Chronologie"
+      "timeline": "Chronologie",
+      "agentSessions": "Sessions IA"
     },
     "sectionDetails": "Détails du match",
     "fields": {
@@ -367,5 +368,17 @@
       "open": "Actif",
       "closed": "Clôturé"
     }
+  },
+  "agentSessions": {
+    "loading": "Chargement des sessions...",
+    "loadError": "Les sessions IA n'ont pas pu être chargées.",
+    "empty": "Pas encore d'entretien IA pour ce match.",
+    "viaCandidate": "Ce match n'a pas sa propre candidature; ce sont les sessions IA du candidat.",
+    "pause": "Suspendre l'agent IA",
+    "resume": "Reprendre l'agent IA",
+    "pauseConfirmTitle": "Suspendre l'agent IA?",
+    "pauseConfirm": "Vous reprenez cette conversation. L'agent IA n'enverra pas de messages jusqu'à ce que vous le repreniez.",
+    "pauseConfirmAction": "Suspendre",
+    "controlFailed": "Impossible d'ajuster l'agent IA."
   }
 }
