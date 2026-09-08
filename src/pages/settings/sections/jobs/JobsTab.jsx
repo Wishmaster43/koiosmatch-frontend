@@ -1,13 +1,14 @@
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
-import DataTable from '@/components/ui/DataTable'
 import StatusPill from '@/components/ui/StatusPill'
 import { formatDT, formatDuration } from '@/components/reports/runFormat'
 import { useJobsList } from './useJobsList'
 import SearchSelect from '@/components/ui/SearchSelect'
-import { Mono } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import { tintBorder } from '@/lib/tint'
+import JobsFilterBar from './JobsFilterBar'
+import JobsTableFrame from './JobsTableFrame'
+import { jobColumns } from './jobColumns.jsx'
 
 const STATE_COLOR = { pending: 'var(--text-muted)', reserved: 'var(--color-warning)' }
 
@@ -22,11 +23,9 @@ export default function JobsTab() {
   const { t } = useTranslation('settings')
   const { filters, setFilter, page, setPage, result, phase, cancel, cancelError, setCancelError } = useJobsList()
 
+  // Shared columns (queue, tenant, job) + tab-specific columns.
   const columns = [
-    { key: 'queue', header: t('jobs.col.queue'), nowrap: true },
-    { key: 'tenant_id', header: t('jobs.col.tenant'), nowrap: true,
-      render: (r) => r.tenant_id === 'central' ? t('jobs.centralTenant') : r.tenant_id },
-    { key: 'job', header: t('jobs.col.job'), render: (r) => <Mono style={{ fontSize: 12 }}>{r.job}</Mono> },
+    ...jobColumns(t),
     { key: 'attempts', header: t('jobs.col.attempts'), align: 'right' },
     { key: 'created_at', header: t('jobs.col.createdAt'), nowrap: true, render: (r) => formatDT(r.created_at) },
     { key: 'state', header: t('jobs.col.status'), nowrap: true,
@@ -45,11 +44,10 @@ export default function JobsTab() {
   return (
     <div>
       {/* Filters — queue/tenant are free text (the backend has no enum for either); status is a fixed 2-value set. */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
-        <input value={filters.queue} onChange={(e) => setFilter('queue', e.target.value)} placeholder={t('jobs.filters.queue')}
-          style={{ height: 32, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', width: 160 }} />
-        <input value={filters.tenant} onChange={(e) => setFilter('tenant', e.target.value)} placeholder={t('jobs.filters.tenant')}
-          style={{ height: 32, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', width: 160 }} />
+      <JobsFilterBar filters={filters} setFilter={setFilter} labels={t} />
+
+      {/* Status filter is JobsTab-only. */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
         {/* Herhaal-audit r4 finding 7: SearchSelect's own default trigger face —
             same footprint as RecentJobsTab's tenant filter, so the two compact
             filter triggers in Taakbeheer no longer disagree on height. */}
@@ -79,13 +77,7 @@ export default function JobsTab() {
         </div>
       )}
 
-      {phase === 'error' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('jobs.loadError')}</p>}
-
-      {phase !== 'error' && (
-        <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'auto' }}>
-          <DataTable columns={columns} rows={result.rows} loading={phase === 'loading'} emptyText={t('jobs.empty')} getRowId={(r) => r.id} />
-        </div>
-      )}
+      <JobsTableFrame phase={phase} columns={columns} rows={result.rows} emptyText={t('jobs.empty')} getRowId={(r) => r.id} />
 
       {/* Pagination — server-paginated (max 100/page; we ask for 25). A simple
           prev/next (no page-size picker) doesn't fit the shared PaginationBar's

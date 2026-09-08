@@ -7,7 +7,6 @@
  */
 import { useTranslation } from 'react-i18next'
 import { RefreshCw, Trash2, X } from 'lucide-react'
-import DataTable from '@/components/ui/DataTable'
 import { formatDT } from '@/components/reports/runFormat'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useFailedJobs } from './useFailedJobs'
@@ -15,6 +14,9 @@ import Button from '@/components/ui/Button'
 import { Mono } from '@/components/ui/typography'
 import { tintBorder } from '@/lib/tint'
 import { notify } from '@/lib/notify'
+import JobsFilterBar from './JobsFilterBar'
+import JobsTableFrame from './JobsTableFrame'
+import { jobColumns } from './jobColumns.jsx'
 
 // Failure log with per-row retry/forget and two destructive bulk actions, both gated behind the shared confirm dialog naming the exact count (see file header).
 export default function FailedJobsTab() {
@@ -67,11 +69,9 @@ export default function FailedJobsTab() {
     confirm(t(key, opts), flush, { danger: true })
   }
 
+  // Shared columns (queue, tenant, job) + tab-specific columns.
   const columns = [
-    { key: 'queue', header: t('jobs.col.queue'), nowrap: true },
-    { key: 'tenant_id', header: t('jobs.col.tenant'), nowrap: true,
-      render: (r) => r.tenant_id === 'central' ? t('jobs.centralTenant') : r.tenant_id },
-    { key: 'job', header: t('jobs.col.job'), render: (r) => <Mono style={{ fontSize: 12 }}>{r.job}</Mono> },
+    ...jobColumns(t),
     // TAAKBEHEER-HORIZON-1b: the workflow:<key> tag off the failing job's payload, or a dash when it isn't a workflow run.
     { key: 'workflow', header: t('jobs.col.workflow'), nowrap: true, render: (r) => r.workflow ?? '—' },
     // JOB-PROVENANCE-1: wie de job aanvroeg + over welk record hij ging.
@@ -96,13 +96,12 @@ export default function FailedJobsTab() {
 
   return (
     <div>
-      {/* Filters + bulk actions. */}
+      {/* Filters + bulk actions (FailedJobsTab-specific). */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-        <input value={filters.queue} onChange={(e) => setFilter('queue', e.target.value)} placeholder={t('jobs.filters.queue')}
-          style={{ height: 32, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', width: 160 }} />
-        <input value={filters.tenant} onChange={(e) => setFilter('tenant', e.target.value)} placeholder={t('jobs.filters.tenant')}
-          style={{ height: 32, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', width: 160 }} />
-        <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', flex: 1 }}>
+          <JobsFilterBar filters={filters} setFilter={setFilter} labels={t} />
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
           <Button variant="secondary" disabled={bulkBusy || result.total === 0} onClick={confirmRetryAll}>
             <RefreshCw size={12} /> {t('jobs.retryAll')}
           </Button>
@@ -129,13 +128,7 @@ export default function FailedJobsTab() {
         </p>
       )}
 
-      {phase === 'error' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('jobs.loadError')}</p>}
-
-      {phase !== 'error' && (
-        <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'auto' }}>
-          <DataTable columns={columns} rows={result.rows} loading={phase === 'loading'} emptyText={t('jobs.emptyFailed')} getRowId={(r) => r.uuid} />
-        </div>
-      )}
+      <JobsTableFrame phase={phase} columns={columns} rows={result.rows} emptyText={t('jobs.emptyFailed')} getRowId={(r) => r.uuid} />
 
       {result.lastPage > 1 && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, marginTop: 10 }}>
