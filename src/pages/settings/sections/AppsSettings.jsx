@@ -1,7 +1,9 @@
 /** AppsSettings — toggle external app connectors (with monthly-cost + package warnings). */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check } from 'lucide-react'
+import { Check, Save } from 'lucide-react'
+import SaveButton from '@/components/ui/SaveButton'
+import Spinner from '@/components/ui/Spinner'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
@@ -19,8 +21,12 @@ export default function AppsSettings() {
   const { enabled, setApps } = useApps()
   const auth                        = useAuth()
   const { hasPermission }           = auth
-  const [saving, setSaving]         = useState(null)
-  const [saved,  setSaved]          = useState(null)
+  const [saving, setSaving]         = useState(false)
+  const [saved,  setSaved]          = useState(false)
+  // Toggles only edit this draft; ONE Save persists it (Danny 09-09: activating on every
+  // toggle made the switch wait for the backend, and Pakketkeuze already saves with a button).
+  const [draft, setDraft]           = useState(enabled)
+  const dirty = JSON.stringify([...draft].sort()) !== JSON.stringify([...enabled].sort())
   // APPS-GROUPS-3 (Danny 23-07): ONE shell entry, with an internal LINE tab strip —
   // the exact taakbeheer/ApiKeyDetail pattern, never boxed pills.
   const [tab, setTab]               = useState('planning')
@@ -32,23 +38,27 @@ export default function AppsSettings() {
   // True when the active tenant's package includes connectors (package 3).
   const tenantHasConnectors = canAccessPage('apps', auth)
 
-  // Flip one app's enabled flag, persist it, and surface a real error (invalid slug, no permission) rather than a silent no-op.
-  const toggle = async (appId) => {
+  // Flip one app's flag in the draft; nothing is persisted until Save.
+  const toggle = (appId) => {
     if (!canEdit) return
-    const newEnabled = enabled.includes(appId)
-      ? enabled.filter(id => id !== appId)
-      : [...enabled, appId]
-    setSaving(appId)
+    setDraft(prev => (prev.includes(appId) ? prev.filter(id => id !== appId) : [...prev, appId]))
+  }
+
+  // Persist the whole draft in one PUT and surface a real error (invalid slug, no
+  // permission) rather than a silent no-op; a failure keeps the draft for a retry.
+  const save = async () => {
+    if (!canEdit || !dirty) return
+    setSaving(true)
     try {
-      await api.put('/settings/apps', { enabled: newEnabled })
-      setApps(newEnabled)
-      setSaved(appId); setTimeout(() => setSaved(null), 2000)
+      await api.put('/settings/apps', { enabled: draft })
+      setApps(draft)
+      setSaved(true); setTimeout(() => setSaved(false), 2000)
     } catch (err) {
       // Surface the real reason (422 invalid slug / 403 no super-admin/package) —
       // the silent noop hid the hf-slug 422 entirely (Danny 23-07).
       notifyError(extractApiError(err, t('common:actionFailed')))
     }
-    setSaving(null)
+    setSaving(false)
   }
 
   const tabs = [
@@ -85,9 +95,7 @@ export default function AppsSettings() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {AVAILABLE_APPS.filter(app => app.group === tab).map(app => {
-          const on = enabled.includes(app.id)
-          const isSaving = saving === app.id
-          const isSaved  = saved  === app.id
+          const on = draft.includes(app.id)
           const soon = !!app.comingSoon
           return (
             <div key={app.id} style={{
@@ -143,13 +151,23 @@ export default function AppsSettings() {
               {/* Shared house Toggle (audit finding, 05-08) — replaces the hand-rolled
                   44x24 success-green pill so every on/off control looks the same. */}
               <Toggle checked={on && !soon} onChange={() => { if (!soon) toggle(app.id) }}
-                disabled={!canEdit || isSaving || soon}
+                disabled={!canEdit || saving || soon}
                 title={soon ? t('apps.comingSoon') : !canEdit ? t('apps.noRights') : on ? t('apps.disable') : t('apps.enable')} />
-              {isSaved && <Check size={14} color="var(--color-success)" style={{ flexShrink: 0 }} />}
             </div>
           )
         })}
       </div>
+
+      {canEdit && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 20 }}>
+          <SaveButton onClick={save} disabled={saving || !dirty} saved={saved}
+            style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {saved ? <><Check size={13} /> {t('common.saved')}</>
+            : saving ? <><Spinner size={13} /> {t('common.saving')}</>
+            :          <><Save size={13} /> {t('common.save')}</>}
+          </SaveButton>
+        </div>
+      )}
     </div>
   )
 }

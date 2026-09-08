@@ -4222,15 +4222,11 @@
       }
     },
     "bookingLink": {
-      "label": "Booking Link",
-      "description": "URL where candidates can schedule their interview (Koios sends this link)",
+      "label": "Default booking link",
+      "description": "Fallback when the owner has no booking link of their own; set per owner on the profile.",
       "placeholder": "https://calendly.com/company"
     },
-    "recruiterPhone": {
-      "label": "Recruiter Phone Number",
-      "description": "Phone number in E.164 format (+31612345678) for interview invitations when the owner has no number of their own",
-      "placeholder": "+31612345678"
-    }
+    "recruiterPhone": {}
   },
   "koiosmodels": {
     "flavorLabel": {

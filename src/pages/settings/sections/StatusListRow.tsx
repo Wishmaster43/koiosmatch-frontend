@@ -12,7 +12,7 @@ import type { StatusListItem, ExtraFieldDef, FlagFieldDef, NumberFieldDef, Defau
 
 export default function StatusListRow({
   item, items, showRank, withColor, resolvedIconPicker, rowPrefix, flagList, numberField, extraField, singletons,
-  busyDefaultKey, deleting, labelOf, commitRank, updateColor, updateIcon, setDefault, openEdit, remove, inUse,
+  busyDefaultKey, deleting, labelOf, commitRank, updateColor, updateIcon, setDefault, openEdit, remove, inUse, locked = false,
 }: {
   item: StatusListItem; items: StatusListItem[]; showRank: boolean; withColor: boolean
   resolvedIconPicker: IconPickerDef | null; rowPrefix: ((item: StatusListItem) => React.ReactNode) | null
@@ -26,6 +26,8 @@ export default function StatusListRow({
   openEdit: (item: StatusListItem) => void
   remove: (item: StatusListItem) => void
   inUse: (item: StatusListItem) => boolean
+  // A locked list (system values such as phases) keeps rename/colour but never delete.
+  locked?: boolean
 }) {
   const { t } = useTranslation('settings')
   return (
@@ -51,7 +53,9 @@ export default function StatusListRow({
           without an explicit iconPicker prop now ALSO renders the picker, fed by the
           generic curated set — the old free-text lucide-key input is retired (it
           silently accepted wrong keys). */}
-      {resolvedIconPicker && (
+      {/* A row with its own adornment (the nationality flag) carries no icon box on top of
+          it — one glyph per row (Danny 09-09: "Een vlag en een icon overkill"). */}
+      {resolvedIconPicker && !rowPrefix && (
         <IconPickerControl icons={resolvedIconPicker.icons} resolve={resolvedIconPicker.resolve} value={item.icon}
           color={item.color ?? FALLBACK_SWATCH} label={labelOf(item)} onPick={(icon: string) => updateIcon(item, icon)} />
       )}
@@ -99,10 +103,12 @@ export default function StatusListRow({
           Accessible name stays the plain "delete" verb even while disabled —
           title carries the in-use reason as a tooltip, aria-label never goes
           undefined (VAC-CLEAR-style regression: name must survive both states). */}
-      <Button variant="dangerSoft" iconOnly onClick={() => remove(item)} disabled={deleting === item.id || inUse(item)}
-        title={inUse(item) ? t('statusList.inUse') : undefined} aria-label={t('common:delete')}>
-        {deleting === item.id ? <Spinner size={11} /> : <Trash2 size={11} />}
-      </Button>
+      {!locked && (
+        <Button variant="dangerSoft" iconOnly onClick={() => remove(item)} disabled={deleting === item.id || inUse(item)}
+          title={inUse(item) ? t('statusList.inUse') : undefined} aria-label={t('common:delete')}>
+          {deleting === item.id ? <Spinner size={11} /> : <Trash2 size={11} />}
+        </Button>
+      )}
     </>
   )
 }

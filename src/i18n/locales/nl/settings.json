@@ -4222,15 +4222,11 @@
       }
     },
     "bookingLink": {
-      "label": "Boekingslink",
-      "description": "URL waar kandidaten hun interview kunnen inplannen (Koios stuurt deze link)",
+      "label": "Standaard boekingslink",
+      "description": "Terugval wanneer de eigenaar geen eigen boekingslink heeft; per eigenaar instelbaar op het profiel.",
       "placeholder": "https://calendly.com/bedrijf"
     },
-    "recruiterPhone": {
-      "label": "Recruiter-telefoonnummer",
-      "description": "Telefoonnummer in E.164-notatie (+31612345678) voor interviewuitnodigingen wanneer de eigenaar geen eigen nummer heeft",
-      "placeholder": "+31612345678"
-    }
+    "recruiterPhone": {}
   },
   "koiosmodels": {
     "flavorLabel": {

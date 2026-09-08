@@ -12,6 +12,9 @@ import LimitMeterRow from '@/components/ui/LimitMeterRow'
 import { SettingsScaffold, SettingCardList, SettingCard } from '@/pages/settings/components/SettingsKit'
 import { Caption } from '@/components/ui/typography'
 import { getTenantLimits, type TenantLimitRow } from './limitsApi'
+import { useApps } from '@/context/AppsContext'
+import { useAuth } from '@/context/AuthContext'
+import { canAccessPage } from '@/lib/access'
 import type { BillingTierRef } from '@/types/billingTiers'
 
 // The tier a meter row is priced on. Two contract shapes (CMBE 08-09): the flat tier
@@ -28,10 +31,23 @@ const tierOf = (row: TenantLimitRow): BillingTierRef | null => {
 export default function TenantLimitsSettings() {
   const { t } = useTranslation('settings')
   const { formatNumber, formatCurrency } = useNumberFormat()
+  const auth = useAuth()
+  const apps = useApps()
+
+  // A connector the tenant does not have is not a meter it should see (Danny 09-09: "je hoort
+  // nergens shiftmanager en HelloFlex … te zien als deze niet aan staan"). Shiftmanager and
+  // HelloFlex ride on their app switches, the WhatsApp meters on the WhatsApp page access.
+  const visible = (row: TenantLimitRow) => {
+    const key = row.key.toLowerCase()
+    if (key.includes('shiftmanager') || key.startsWith('sm_')) return (apps?.enabled ?? []).includes('shiftmanager')
+    if (key.includes('helloflex') || key.startsWith('hf')) return (apps?.enabled ?? []).includes('hf')
+    if (key.includes('whatsapp') || key.includes('wa_web')) return canAccessPage('whatsapp', auth)
+    return true
+  }
 
   // The tenant's own meters; a minute of staleness is the agreed polling floor.
   const { data, isPending, isError } = useQuery({ queryKey: ['tenant-limits'], queryFn: getTenantLimits, staleTime: 60_000 })
-  const rows = data ?? []
+  const rows = (data ?? []).filter(visible)
 
   return (
     <SettingsScaffold title={t('limits.usage_and_limits')} subtitle={t('limits.subtitle')}

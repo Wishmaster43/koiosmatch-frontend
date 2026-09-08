@@ -86,6 +86,8 @@ export interface StatusListEditorProps {
   withValueSlug?: boolean
   reorderable?: boolean
   rowPrefix?: ((item: StatusListItem) => ReactNode) | null
+  // System values (phases): rename/colour/order allowed, never add or delete.
+  locked?: boolean
 }
 
 export type StatusListDraft = Record<string, unknown> & { name: string; color?: string }

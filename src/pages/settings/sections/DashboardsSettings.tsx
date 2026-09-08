@@ -47,7 +47,11 @@ import { resolveReportKpiOrder } from '@/pages/reports/shared'
 import RolePicker from './dashboards/RolePicker'
 import KpiOrderList from './dashboards/KpiOrderList'
 import BlockGroupList from './dashboards/BlockGroupList'
-import type { OnOffFilter } from './dashboards/catalog'
+import SubTabBar from '@/components/drawer/SubTabBar'
+import type { OnOffFilter, BlockCategory } from './dashboards/catalog'
+
+// The four sub-tabs of the page: the KPI list and the three block categories.
+type DashboardSection = 'kpis' | BlockCategory
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 // audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
@@ -227,6 +231,7 @@ export default function DashboardsSettings() {
   const [role, setRole] = useState<DashboardType>(initialRole)
   const [search, setSearch] = useState('')
   const [onOffFilter, setOnOffFilter] = useState<OnOffFilter>('all')
+  const [section, setSection] = useState<DashboardSection>('kpis')
   const apiRole = toApiRole(role)
   const migrated = isRoleMigrated(apiRole)
 
@@ -270,18 +275,31 @@ export default function DashboardsSettings() {
         </div>
       )}
 
-      <KpiOrderList
-        role={role} apiRole={apiRole} migrated={migrated}
-        isHidden={isHidden} onToggle={toggle} onSaveOrder={saveOrder}
-        roleKpis={roleKpis} order={order} resolveOrder={resolveOrder}
-        catalogByKey={catalogByKey} search={search} onOffFilter={onOffFilter}
-        t={t} td={td}
-      />
+      {/* Danny 09-09 ("Subtabjes aub Kpis, Grafieken, lijsten etc. te lang"): one
+          sub-tab per group instead of one long page; search and on/off stay above. */}
+      <SubTabBar active={section} onChange={(id) => setSection(id as DashboardSection)} tabs={[
+        { id: 'kpis', label: t('dashboardsKpis') },
+        { id: 'block', label: t('dashboardsGroups.block') },
+        { id: 'chart', label: t('dashboardsGroups.chart') },
+        { id: 'list', label: t('dashboardsGroups.list') },
+      ]} />
 
-      <BlockGroupList
-        role={role} isHidden={isHidden} onToggle={toggle}
-        search={search} onOffFilter={onOffFilter} t={t} td={td}
-      />
+      {section === 'kpis' && (
+        <KpiOrderList
+          role={role} apiRole={apiRole} migrated={migrated}
+          isHidden={isHidden} onToggle={toggle} onSaveOrder={saveOrder}
+          roleKpis={roleKpis} order={order} resolveOrder={resolveOrder}
+          catalogByKey={catalogByKey} search={search} onOffFilter={onOffFilter}
+          t={t} td={td}
+        />
+      )}
+
+      {section !== 'kpis' && (
+        <BlockGroupList
+          role={role} isHidden={isHidden} onToggle={toggle} only={section}
+          search={search} onOffFilter={onOffFilter} t={t} td={td}
+        />
+      )}
     </div>
   )
 }

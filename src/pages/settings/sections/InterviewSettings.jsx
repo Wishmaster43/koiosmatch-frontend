@@ -4,7 +4,7 @@
  * schedule interviews), and recruiter phone (fallback contact for interview
  * invitations). All three keys POST through the same /settings form path, with
  * the backend validating interview_rejection_mode against the enum, booking_link
- * as a URL, and recruiter_phone as E.164 format (normalized at write time by
+ * as a URL; the recruiter phone is a per-agent field (Danny 09-09), not a tenant key (was E.164 here, normalized by
  * PhoneNumber::toE164).
  */
 import { useTranslation } from 'react-i18next'
@@ -18,7 +18,6 @@ export default function InterviewSettings() {
   const form = useSettingsForm({
     interview_rejection_mode: 'proposal',
     booking_link: '',
-    recruiter_phone: '',
   })
 
   // Rejection mode options: proposal (Koios proposes, recruiter confirms) or automatic (direct rejection).
@@ -51,14 +50,6 @@ export default function InterviewSettings() {
         </SettingRow>
 
         {/* Recruiter phone: fallback E.164 number Koios sends when there is no per-user owner phone. */}
-        <SettingRow label={t('interview.recruiterPhone.label')} description={t('interview.recruiterPhone.description')}>
-          <TextField
-            value={form.values.recruiter_phone}
-            onChange={v => form.set('recruiter_phone', v)}
-            placeholder={t('interview.recruiterPhone.placeholder')}
-            width={280}
-          />
-        </SettingRow>
       </SettingCardList>
     </SettingsScaffold>
   )

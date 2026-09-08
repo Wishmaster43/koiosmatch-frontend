@@ -23,35 +23,40 @@ interface BlockGroupListProps {
   onToggle: (type: string, kind: 'kpis' | 'blocks', id: string) => void
   search: string
   onOffFilter: OnOffFilter
+  // One category only (the page shows Werkfeeds / Grafieken / Lijsten as sub-tabs,
+  // Danny 09-09: "Subtabjes aub Kpis, Grafieken, lijsten"); omit for every category.
+  only?: BlockCategory
   t: TFunction
   td: TFunction
 }
 
 // One toggle row per block, grouped by category (see the module doc above): a category with nothing to show after filtering renders no heading at all.
-export default function BlockGroupList({ role, isHidden, onToggle, search, onOffFilter, t, td }: BlockGroupListProps) {
+export default function BlockGroupList({ role, isHidden, onToggle, search, onOffFilter, only, t, td }: BlockGroupListProps) {
   const ids = blocksForRole(role)
   const groups = groupBlocksByCategory(ids)
   const label = (id: string) => (BLOCK_LABEL_KEY[id] ? td(BLOCK_LABEL_KEY[id]) : id)
+  const categories = only ? [only] : BLOCK_CATEGORY_ORDER
+  const sectionLabel = only ? t(CATEGORY_TITLE_KEY[only]) : t('dashboardsBlocks')
 
   // A category's rows after search + on/off filtering — computed once per
   // category so the "nothing left" empty state and the render pass agree.
   const visibleRows = (category: BlockCategory) =>
     (groups[category] ?? []).filter(id => matchesSearch(label(id), search) && matchesOnOff(!isHidden(role, 'blocks', id), onOffFilter))
 
-  const anyVisible = BLOCK_CATEGORY_ORDER.some(cat => visibleRows(cat).length > 0)
+  const anyVisible = categories.some(cat => visibleRows(cat).length > 0)
   if (!anyVisible) {
     return (
-      <section aria-label={t('dashboardsBlocks')}>
-        <GroupLabel as="h3" style={{ marginBottom: 6 }}>{t('dashboardsBlocks')}</GroupLabel>
+      <section aria-label={sectionLabel}>
+        <GroupLabel as="h3" style={{ marginBottom: 6 }}>{sectionLabel}</GroupLabel>
         <Caption>{t('dashboardsEmpty')}</Caption>
       </section>
     )
   }
 
   return (
-    <section aria-label={t('dashboardsBlocks')}>
-      <GroupLabel as="h3" style={{ marginBottom: 6 }}>{t('dashboardsBlocks')}</GroupLabel>
-      {BLOCK_CATEGORY_ORDER.map(category => {
+    <section aria-label={sectionLabel}>
+      {!only && <GroupLabel as="h3" style={{ marginBottom: 6 }}>{t('dashboardsBlocks')}</GroupLabel>}
+      {categories.map(category => {
         const rows = visibleRows(category)
         if (rows.length === 0) return null
         return (

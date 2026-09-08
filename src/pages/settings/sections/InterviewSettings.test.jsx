@@ -2,7 +2,7 @@
  * InterviewSettings (X-12) — asserts the REAL /settings request (§13: a mutation
  * test must prove the seam): the three interview keys load with tenant defaults,
  * and save all three on a single POST. Backend validates interview_rejection_mode
- * against the enum, booking_link as a URL, and recruiter_phone as E.164.
+ * against the enum and booking_link as a URL (the recruiter phone lives on the agent).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -25,7 +25,7 @@ beforeEach(() => {
 })
 
 describe('InterviewSettings — load', () => {
-  it('GETs /settings and renders the tenant defaults (proposal mode, empty booking_link and recruiter_phone)', async () => {
+  it('GETs /settings and renders the tenant defaults (proposal mode, empty booking_link)', async () => {
     render(<InterviewSettings />)
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/settings'))
     // Proposal mode is the default (shows as the trigger label).
@@ -40,18 +40,17 @@ describe('InterviewSettings — load', () => {
       data: {
         interview_rejection_mode: 'automatic',
         booking_link: 'https://calendly.com/mycompany',
-        recruiter_phone: '+31612345678',
       },
     })
     render(<InterviewSettings />)
     expect(await screen.findByText(t('interview.rejectionMode.options.automatic'))).toBeInTheDocument()
     expect(screen.getByDisplayValue('https://calendly.com/mycompany')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('+31612345678')).toBeInTheDocument()
   })
 })
 
 describe('InterviewSettings — save', () => {
-  it('POSTs all three interview keys to /settings on save', async () => {
+  // The recruiter phone lives on the AI agent (Danny 09-09, row 20); this screen posts the two tenant keys.
+  it('POSTs the two interview keys to /settings on save', async () => {
     const user = userEvent.setup()
     render(<InterviewSettings />)
 
@@ -61,11 +60,9 @@ describe('InterviewSettings — save', () => {
     const automaticOption = screen.getByText(t('interview.rejectionMode.options.automatic'))
     await user.click(automaticOption)
 
-    // Fill in booking link and recruiter phone (wait for fields to load).
+    // Fill in the booking link (wait for the field to load).
     const bookingLinkInput = await screen.findByPlaceholderText(t('interview.bookingLink.placeholder'))
-    const recruiterPhoneInput = screen.getByPlaceholderText(t('interview.recruiterPhone.placeholder'))
     await user.type(bookingLinkInput, 'https://calendly.com/mycompany')
-    await user.type(recruiterPhoneInput, '+31612345678')
 
     // Save and assert the POST body.
     await user.click(screen.getByRole('button', { name: t('common.save') }))
@@ -73,7 +70,6 @@ describe('InterviewSettings — save', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', {
       interview_rejection_mode: 'automatic',
       booking_link: 'https://calendly.com/mycompany',
-      recruiter_phone: '+31612345678',
     }))
   })
 
@@ -81,7 +77,7 @@ describe('InterviewSettings — save', () => {
     const user = userEvent.setup()
     render(<InterviewSettings />)
 
-    // Only change the booking link, leave rejection mode and recruiter phone at defaults.
+    // Only change the booking link, leave the rejection mode at its default.
     const bookingLinkInput = await screen.findByPlaceholderText(t('interview.bookingLink.placeholder'))
     await user.type(bookingLinkInput, 'https://bookings.example.com')
 
@@ -90,27 +86,26 @@ describe('InterviewSettings — save', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', {
       interview_rejection_mode: 'proposal',
       booking_link: 'https://bookings.example.com',
-      recruiter_phone: '',
     }))
   })
 })
 
 describe('InterviewSettings — errors', () => {
-  it('shows backend 422 error message for recruiter_phone validation failure', async () => {
+  it('shows backend 422 error message for booking_link validation failure', async () => {
     api.post.mockRejectedValue({
       response: {
         status: 422,
         data: {
-          message: 'Invalid phone number format.',
-          errors: { recruiter_phone: ['Must be a valid E.164 number.'] },
+          message: 'Invalid URL.',
+          errors: { booking_link: ['Must be a valid URL.'] },
         },
       },
     })
     const user = userEvent.setup()
     render(<InterviewSettings />)
 
-    const recruiterPhoneInput = await screen.findByPlaceholderText(t('interview.recruiterPhone.placeholder'))
-    await user.type(recruiterPhoneInput, 'invalid-phone')
+    const bookingLinkInput = await screen.findByPlaceholderText(t('interview.bookingLink.placeholder'))
+    await user.type(bookingLinkInput, 'not-a-url')
     await user.click(screen.getByRole('button', { name: t('common.save') }))
 
     // The useSettingsForm hook handles error display; we verify the POST was attempted.

@@ -813,10 +813,10 @@ export const NAV_GROUPS = [
   },
 ]
 
-// CATALOG-NAV-PARKED (09-09 01:40): the generic catalogue screens (DRAFT-SETTINGS-CATALOG-1,
+// CATALOG-NAV-PARKED (09-09 01:15): the generic catalogue screens (DRAFT-SETTINGS-CATALOG-1,
 // X-4 FE half) are built, but GET /settings/catalog lands with the BE bundle of 09-09;
 // until then the group stays OUT of NAV_GROUPS so no settings screen opens on an error
-// state (Danny 09-09 01:35 on #settings/catalog/windows). Re-add it to NAV_GROUPS the
+// state (Danny 09-09 01:15 on #settings/catalog/windows). Re-add it to NAV_GROUPS the
 // moment the endpoint answers; the guard test reads it from here meanwhile.
 export const CATALOG_NAV_GROUP = {
     // Generic catalogue settings — sections from GET /settings/catalog that are not

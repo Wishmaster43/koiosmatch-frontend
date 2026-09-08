@@ -317,11 +317,17 @@ export default function SettingsPage() {
 
           {currentItem && currentGroup && (
             <>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: -8 }}>
-                <SettingsChangelogButton logName={currentItem.logName} />
+              {/* The tab strip scrolls inside its own column; the changelog button keeps its
+                  own space at the right (it used to float over the last tab, Danny 09-09). */}
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <SettingsTabs items={currentGroup.items} active={tab}
+                    onSelect={(id) => goTo(category, id)} />
+                </div>
+                <div style={{ flexShrink: 0, paddingBottom: 6 }}>
+                  <SettingsChangelogButton logName={currentItem.logName} />
+                </div>
               </div>
-              <SettingsTabs items={currentGroup.items} active={tab}
-                onSelect={(id) => goTo(category, id)} />
               <SettingItem key={`${category}/${tab}`} item={currentItem} />
             </>
           )}

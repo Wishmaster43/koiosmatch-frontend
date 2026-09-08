@@ -4222,15 +4222,11 @@
       }
     },
     "bookingLink": {
-      "label": "Lien de réservation",
-      "description": "URL où les candidats peuvent planifier leur entretien (Koios envoie ce lien)",
+      "label": "Lien de réservation par défaut",
+      "description": "Repli quand le propriétaire n’a pas son propre lien; réglable par propriétaire dans le profil.",
       "placeholder": "https://calendly.com/entreprise"
     },
-    "recruiterPhone": {
-      "label": "Numéro de téléphone du recruteur",
-      "description": "Numéro de téléphone au format E.164 (+33612345678) pour les invitations d'entretien lorsque le responsable n'a pas de numéro propre",
-      "placeholder": "+33612345678"
-    }
+    "recruiterPhone": {}
   },
   "koiosmodels": {
     "flavorLabel": {

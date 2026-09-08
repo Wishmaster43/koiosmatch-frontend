@@ -96,7 +96,7 @@ export default function TenantUsageSettings() {
               // fieldMetrics' select canon, never a hand-painted box.
               <button type="button" onClick={toggle}
                 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- form-field trigger face (fieldSelectStyle canon), not an action button
-                style={{ ...fieldSelectStyle, width: 'auto', textTransform: 'capitalize' }}>
+                style={{ ...fieldSelectStyle, width: 'auto', minWidth: 220, textTransform: 'capitalize' }}>
                 {months.find(m => m.value === month)?.label ?? month}
               </button>
             )}

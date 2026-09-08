@@ -4222,15 +4222,11 @@
       }
     },
     "bookingLink": {
-      "label": "Link de reserva",
-      "description": "URL onde os candidatos podem agendar sua entrevista (Koios envia este link)",
+      "label": "Link de marcação predefinido",
+      "description": "Alternativa quando o proprietário não tem link próprio; definido por proprietário no perfil.",
       "placeholder": "https://calendly.com/empresa"
     },
-    "recruiterPhone": {
-      "label": "Número de telefone do recrutador",
-      "description": "Número de telefone no formato E.164 (+351912345678) para convites de entrevista quando o responsável não tem número próprio",
-      "placeholder": "+351912345678"
-    }
+    "recruiterPhone": {}
   },
   "koiosmodels": {
     "flavorLabel": {

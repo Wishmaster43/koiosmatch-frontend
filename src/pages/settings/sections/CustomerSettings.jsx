@@ -41,6 +41,8 @@ export function CustomerPhasesSettings() {
       subtitle={t('customerLookups.phases.subtitle')}
       endpoint="/customer-phases"
       addLabel={t('customerLookups.phases.add')}
+      // Danny 09-09 (row 19): phases drive the pop-ups and the dashboard donuts — the editor can lock
+      // add/delete (`locked`); switched on together with the BE guard once Danny confirms.
       withValueSlug
       flagField={{ key: 'is_customer', label: t('customerLookups.phases.isCustomer'), description: t('customerLookups.phases.isCustomerHint') }}
       defaultField={{ key: 'is_default' }}

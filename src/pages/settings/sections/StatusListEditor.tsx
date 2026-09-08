@@ -81,7 +81,7 @@ export default function StatusListEditor({
   title, subtitle, endpoint, addLabel, withColor = true, compact = false, extraField = null, flagField = null,
   flagFields = null, numberField = null, defaultField = null, defaultFields = null, withIcon = false, iconPicker = null,
   allowAdd = true, showRank = false, entity = null, fetchEntity = undefined, postFilter = null, notFoundNotice = null,
-  withValueSlug = false, reorderable = true, rowPrefix = null,
+  withValueSlug = false, reorderable = true, rowPrefix = null, locked = false,
 }: StatusListEditorProps) {
   const { t } = useTranslation('settings')
   // defaultField (singular) is sugar for a one-element defaultFields array — both
@@ -311,7 +311,7 @@ export default function StatusListEditor({
         </div>
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
           {/* HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A). */}
-          {allowAdd && <DrawerAddButton onClick={openCreate} label={addLabel} />}
+          {allowAdd && !locked && <DrawerAddButton onClick={openCreate} label={addLabel} />}
         </div>
       </div>
 
@@ -327,7 +327,7 @@ export default function StatusListEditor({
               numberField={numberField} extraField={extraField} singletons={singletons}
               busyDefaultKey={busyDefaultKey} deleting={deleting} labelOf={labelOf} commitRank={commitRank}
               updateColor={updateColor} updateIcon={updateIcon} setDefault={setDefault} openEdit={openEdit}
-              remove={remove} inUse={inUse}
+              remove={remove} inUse={inUse} locked={locked}
             />
           )}
         />

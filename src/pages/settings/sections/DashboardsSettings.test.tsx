@@ -7,7 +7,7 @@
  * shape around it.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, within, waitFor } from '@testing-library/react'
+import { render, screen, within, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import DashboardsSettings, { DASHBOARD_HIDDEN_KEY, DASHBOARD_KPI_ORDER_KEY } from './DashboardsSettings'
@@ -86,10 +86,12 @@ describe('DashboardsSettings — role picker (F6 rebuild)', () => {
     expect(screen.queryByText(dt('kpi.matchesActive'))).not.toBeInTheDocument()
   })
 
-  it('a wildcard role (admin) shows the Werkfeeds/Grafieken/Lijsten block groups', () => {
+  it('a wildcard role (admin) shows the Werkfeeds/Grafieken/Lijsten block groups on their sub-tabs', () => {
     render(<DashboardsSettings />)
 
-    expect(screen.getByRole('region', { name: st('dashboardsBlocks') })).toBeInTheDocument()
+    // Danny 09-09: the groups are sub-tabs; the charts group opens on its own tab.
+    fireEvent.click(screen.getByRole('tab', { name: st('dashboardsGroups.chart') }))
+    expect(screen.getByRole('region', { name: st('dashboardsGroups.chart') })).toBeInTheDocument()
     expect(screen.getByText(dt('chart.byRecruiter'))).toBeInTheDocument()
   })
 })
@@ -130,6 +132,7 @@ describe('DashboardsSettings — every block row carries a real translated label
   it('shows the translated "Candidates by recruiter" label for chart.recruiter, never the raw id', () => {
     render(<DashboardsSettings />)
 
+    fireEvent.click(screen.getByRole('tab', { name: st('dashboardsGroups.chart') }))
     expect(screen.getByText(dt('chart.byRecruiter'))).toBeInTheDocument()
     expect(screen.queryByText('chart.recruiter', { exact: true })).not.toBeInTheDocument()
   })

@@ -54,7 +54,7 @@ export default function NumberInput({
   const [text, setText] = useState(() => format(value))
   // Focus lives in a ref: the resting-text effect reads it without re-running on focus changes.
   const focusedRef = useRef(false)
-  // A value the field had to clamp is SAID, never silently corrected (Danny 09-09 01:45:
+  // A value the field had to clamp is SAID, never silently corrected (Danny 09-09 01:20:
   // "als ik niet hoger mag dan 120 maanden dan moet er wel een melding komen").
   const [notice, setNotice] = useState<string | null>(null)
 

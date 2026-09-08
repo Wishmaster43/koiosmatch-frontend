@@ -4222,15 +4222,11 @@
       }
     },
     "bookingLink": {
-      "label": "Link di prenotazione",
-      "description": "URL dove i candidati possono prenotare il loro colloquio (Koios invia questo link)",
+      "label": "Link di prenotazione predefinito",
+      "description": "Ripiego quando il proprietario non ha un proprio link; impostabile per proprietario nel profilo.",
       "placeholder": "https://calendly.com/azienda"
     },
-    "recruiterPhone": {
-      "label": "Numero di telefono del reclutatore",
-      "description": "Numero di telefono in formato E.164 (+393123456789) per gli inviti al colloquio quando il responsabile non ha un numero proprio",
-      "placeholder": "+393123456789"
-    }
+    "recruiterPhone": {}
   },
   "koiosmodels": {
     "flavorLabel": {
