@@ -47,7 +47,7 @@ export default function ProfilePage() {
   const [tab, setTab] = useState('profile')
 
   // Data layer: the profile form (synced from /auth/me), save, and avatar upload/remove.
-  const { user, form, setForm, set, saving, saved, error, handleSave,
+  const { user, form, setForm, set, saving, saved, error, handleSave, savePageSize,
           photo, avatarBusy, fileRef, onPickAvatar, removeAvatar, initials,
           currentPassword, setCurrentPassword, credentialChange } = useProfileForm()
 
@@ -136,7 +136,7 @@ export default function ProfilePage() {
       )}
 
       {tab === 'display' && (
-        <ProfileDisplayTab form={form} setForm={setForm}
+        <ProfileDisplayTab form={form} setForm={setForm} onPickPageSize={savePageSize}
           theme={theme} setTheme={setTheme} language={language} setLanguage={setLanguage} />
       )}
 

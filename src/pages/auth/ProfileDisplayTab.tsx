@@ -19,6 +19,8 @@ import { Caption } from '@/components/ui/typography'
 interface ProfileDisplayTabProps {
   form: ProfileFormData
   setForm: Dispatch<SetStateAction<ProfileFormData>>
+  // Persists a picked page size right away (X-15): this tab has no Save button.
+  onPickPageSize?: (n: number) => void
   theme: string
   setTheme: (theme: string) => void
   language: string
@@ -26,7 +28,7 @@ interface ProfileDisplayTabProps {
 }
 
 // Display preferences tab (see the module doc above): owns only local dropdown-open state, everything else round-trips through the caller/hooks that actually persist it.
-export default function ProfileDisplayTab({ form, setForm, theme, setTheme, language, setLanguage }: ProfileDisplayTabProps) {
+export default function ProfileDisplayTab({ form, setForm, onPickPageSize, theme, setTheme, language, setLanguage }: ProfileDisplayTabProps) {
   const { t } = useTranslation('auth')
   const [langOpen, setLangOpen] = useState(false)
   const currentLang = LANGUAGES.find(l => l.value === language) ?? LANGUAGES[0]
@@ -48,7 +50,7 @@ export default function ProfileDisplayTab({ form, setForm, theme, setTheme, lang
             const active = (form.default_per_page ?? 50) === n
             return (
               <button key={n}
-                onClick={() => setForm(f => ({ ...f, default_per_page: n }))}
+                onClick={() => { setForm(f => ({ ...f, default_per_page: n })); onPickPageSize?.(n) }}
                 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- §4 soft-tint multi-option toggle pill (selected/unselected identity Button's variants don't express), not a Button copy
                 style={{
                   padding: '7px 16px', borderRadius: 8, fontSize: 13, fontWeight: 500,

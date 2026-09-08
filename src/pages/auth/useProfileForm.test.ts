@@ -58,8 +58,8 @@ describe('useProfileForm avatar blob URL lifecycle', () => {
     expect(revokeObjectURL).toHaveBeenCalledTimes(1)
   })
 
-  it('revokes the local preview once the server avatar_url replaces it', async () => {
-    vi.mocked(api.post).mockResolvedValue({ data: { avatar_url: 'https://cdn/x.png' } })
+  it('revokes the local preview once the server avatar_url replaces it (AvatarController shape { user: { avatar_url } })', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: { user: { avatar_url: 'https://cdn/x.png' } } })
     const { result } = renderHook(() => useProfileForm())
 
     await act(async () => { await result.current.onPickAvatar(pickEvent(file('a.png'))) })
@@ -91,5 +91,19 @@ describe('useProfileForm avatar blob URL lifecycle', () => {
     act(() => { void result.current.onPickAvatar(pickEvent(file('a.png'))) })
     await act(async () => { await result.current.removeAvatar() })
     expect(revokeObjectURL).toHaveBeenCalledWith('blob:mock-1')
+  })
+
+  it('savePageSize PUTs the partial body to /auth/me (X-15: the Weergave tab has no Save button)', async () => {
+    vi.mocked(api.put).mockResolvedValue({ data: {} })
+    const { result } = renderHook(() => useProfileForm())
+    await act(async () => { await result.current.savePageSize(100) })
+    expect(api.put).toHaveBeenCalledWith('/auth/me', { default_per_page: 100 })
+  })
+
+  it('savePageSize surfaces a failed persist instead of pretending it saved', async () => {
+    vi.mocked(api.put).mockRejectedValue(new Error('500'))
+    const { result } = renderHook(() => useProfileForm())
+    await act(async () => { await result.current.savePageSize(200) })
+    expect(notifyError).toHaveBeenCalledWith('profile.saveFailed')
   })
 })

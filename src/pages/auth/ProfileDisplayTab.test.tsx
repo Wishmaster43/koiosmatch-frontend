@@ -73,3 +73,18 @@ describe('ProfileDisplayTab · Koios AI mode (K0)', () => {
     expect(screen.getByRole('checkbox', { name: 'profile.koiosMode.autoMessagesHint' })).not.toBeDisabled()
   })
 })
+
+// X-15: the Weergave tab has no Save button, so a page-size pick must persist by itself —
+// the pill hands the picked size to the caller's persist handler and updates the form.
+describe('ProfileDisplayTab · page-size pick persists on its own (X-15)', () => {
+  it('calls onPickPageSize with the picked size and updates the form', async () => {
+    const user = userEvent.setup()
+    const setForm = vi.fn()
+    const onPickPageSize = vi.fn()
+    render(<ProfileDisplayTab form={{ firstname: '', lastname: '', email: '', phone: '', default_per_page: 50 }} setForm={setForm}
+      onPickPageSize={onPickPageSize} theme="light" setTheme={vi.fn()} language="en" setLanguage={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: '100' }))
+    expect(onPickPageSize).toHaveBeenCalledWith(100)
+    expect(setForm).toHaveBeenCalledTimes(1)
+  })
+})

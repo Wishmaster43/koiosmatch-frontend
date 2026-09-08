@@ -52,7 +52,9 @@ export function useProfileForm() {
       lastname:         user.lastname         ?? '',
       email:            user.email            ?? '',
       phone:            user.phone            ?? '',
-      default_per_page: user.default_per_page ?? 500,
+      // Unset preference seeds the CANONICAL list fallback (useListPageSize: 50), so the
+      // Weergave pill and every list page agree on what "no preference" means.
+      default_per_page: user.default_per_page ?? 50,
     })
     setOriginalEmail(user.email ?? '')
   }, [user?.id, user?.firstname, user?.lastname, user?.email, user?.phone, user?.default_per_page])
@@ -92,6 +94,17 @@ export function useProfileForm() {
     }
   }
 
+  // X-15: the Weergave tab has no Save button, so a page-size pick persists on its own
+  // (partial PUT, same route the list pages use) and refreshes the cached user.
+  const savePageSize = async (n: number) => {
+    try {
+      await api.put('/auth/me', { default_per_page: n })
+      await refreshUser?.()
+    } catch {
+      notifyError(t('profile.saveFailed'))
+    }
+  }
+
   const photo = avatarPreview ?? user?.avatar_url ?? null
 
   // Upload a new avatar — optimistic preview, persist, then refresh on success.
@@ -108,7 +121,10 @@ export function useProfileForm() {
       const fd = new FormData()
       fd.append('avatar', file)
       const res = await api.post('/auth/me/avatar', fd)
-      if (res.data?.avatar_url) {
+      // AvatarController answers { user: { avatar_url } } (X-15); the bare shape stays
+      // tolerated so an older response never leaves the local preview hanging.
+      const savedUrl = res.data?.user?.avatar_url ?? res.data?.avatar_url
+      if (savedUrl) {
         // The server copy replaces the local preview — the blob URL is no longer needed.
         URL.revokeObjectURL(url); createdUrlRef.current = null
         setAvatarPreview(null); await refreshUser?.()
@@ -140,7 +156,7 @@ export function useProfileForm() {
   const initials = [form.firstname, form.lastname]
     .filter(Boolean).map(n => n[0]).join('').toUpperCase() || '?'
 
-  return { user, form, setForm, set, saving, saved, error, handleSave,
+  return { user, form, setForm, set, saving, saved, error, handleSave, savePageSize,
            photo, avatarBusy, fileRef, onPickAvatar, removeAvatar, initials,
            // CredentialChangeGuard: the "current password" field only ever
            // appears when the e-mail actually changed (or a stale-diff 403 forced it).
