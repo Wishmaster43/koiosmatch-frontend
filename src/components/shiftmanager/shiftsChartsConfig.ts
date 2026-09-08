@@ -22,10 +22,12 @@ export const SERIES: ShiftSeries[] = [
 ]
 /* eslint-enable no-restricted-syntax */
 
+import { formatMonthName } from '@/lib/localDate'
+
 // Locale-aware short month name for index 0–11 (used for chart axis labels).
 // `locale` is required (DATUM-1/LANE-B): a pure module-scope helper never
 // hardcodes nl-NL or imports i18n — callers pass the active app locale.
-export const monthAbbr = (locale: string, i: number) => new Date(2000, i, 1).toLocaleString(locale, { month: "short" })
+export const monthAbbr = (locale: string, i: number) => formatMonthName(new Date(2000, i, 1), locale, 'short')
 
 export const CURRENT_YEAR = new Date().getFullYear()
 export const YEAR_OPTIONS = [CURRENT_YEAR - 2, CURRENT_YEAR - 1, CURRENT_YEAR]

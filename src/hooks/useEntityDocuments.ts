@@ -23,6 +23,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList, unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { formatFileSizeMb, formatNumber } from '@/lib/formatters'
 import type { Id } from '@/types/common'
 
 export interface EntityDoc {
@@ -54,10 +55,11 @@ const isTemp = (id: Id | undefined) => typeof id === 'string' && id.startsWith('
 let tempDocSeq = 0
 
 // Render bytes as a compact KB/MB string; pass strings through (optimistic rows).
-const fmtSize = (s: string | number | undefined): string => {
+// Uses locale-aware formatting via formatFileSizeMb and formatNumber.
+const fmtSize = (s: string | number | undefined, locale: string = 'nl-NL'): string => {
   if (typeof s === 'string') return s
   if (typeof s !== 'number' || !isFinite(s)) return ''
-  return s >= 1_048_576 ? (s / 1_048_576).toFixed(1) + ' MB' : Math.max(1, Math.round(s / 1024)) + ' KB'
+  return s >= 1_048_576 ? formatFileSizeMb(s, locale) + ' MB' : formatNumber(Math.max(1, Math.round(s / 1024)), locale) + ' KB'
 }
 
 // Generic document-attachment hook shared by every entity (see file docblock

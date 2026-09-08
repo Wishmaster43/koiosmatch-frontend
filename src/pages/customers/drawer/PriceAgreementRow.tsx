@@ -12,6 +12,7 @@ import { Pencil, Trash2 } from 'lucide-react'
 import { useCao } from '@/lib/useCao'
 import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
+import { useNumberFormat } from '@/lib/formatters'
 import { sectionBlock } from '@/components/ui/SectionCard'
 import SafeHtml from '@/components/ui/SafeHtml'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -43,6 +44,7 @@ export default function PriceAgreementRow({ agreement, onSave, onDelete }: {
 }) {
   const { t } = useTranslation('customers')
   const { formatDate } = useDateFormat()
+  const { formatCurrency } = useNumberFormat()
   const { colorOf } = useCao()
   // MATCH-FIN-GATE-1 (Danny 14-08): what the agency pays + the derived margin
   // are gated on `matches.financial.view`, mirroring MatchContractSection —
@@ -98,14 +100,14 @@ export default function PriceAgreementRow({ agreement, onSave, onDelete }: {
         <Mono style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
           {canSeeFinancial && (
             <>
-              <span style={{ color: 'var(--text)' }}>€ {agreement.purchaseRate != null ? agreement.purchaseRate.toFixed(2) : '—'}</span>
+              <span style={{ color: 'var(--text)' }}>{agreement.purchaseRate != null ? formatCurrency(agreement.purchaseRate, undefined, 2) : '—'}</span>
               <span style={{ color: 'var(--text-muted)' }}>→</span>
             </>
           )}
-          <span style={{ color: 'var(--text)' }}>{agreement.saleRate != null ? `€ ${agreement.saleRate.toFixed(2)}` : '—'}</span>
+          <span style={{ color: 'var(--text)' }}>{agreement.saleRate != null ? formatCurrency(agreement.saleRate, undefined, 2) : '—'}</span>
           {canSeeFinancial && margin != null && (
             <span style={{ fontSize: 11, color: margin >= 0 ? 'var(--color-success)' : 'var(--color-danger)' }}>
-              ({t('priceAgreements.margin')} € {margin.toFixed(2)})
+              ({t('priceAgreements.margin')} {formatCurrency(margin, undefined, 2)})
             </span>
           )}
         </Mono>

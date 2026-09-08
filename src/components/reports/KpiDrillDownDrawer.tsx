@@ -18,11 +18,12 @@ import DrillTabs from '@/components/ui/DrillTabs'
 import type { ReportCandidate } from '@/types/reports'
 // App-wide active locale + the house DD-MM-YYYY date formatter (DATUM-1/LANE-B).
 import { useLocale, useDateFormat } from '@/lib/datetime'
+import { formatMonthName } from '@/lib/localDate'
 import { SM_STATUS, normalizeSmStatus } from '@/lib/smStatus'
 
 // Locale-aware full month name for index 0–11; `locale` is required (a pure
 // module-scope helper never hardcodes nl-NL or imports i18n).
-const monthName = (locale: string, i: number) => new Date(2000, i, 1).toLocaleString(locale, { month: 'long' })
+const monthName = (locale: string, i: number) => formatMonthName(new Date(2000, i, 1), locale, 'long')
 
 // A colour-tinted status pill for a drilldown row, via the shared SoftChip/StatusPill
 // (KPIDRILL-CHROME-1) — the tint/ink pairing (incl. the danger-on-danger AA fix) now

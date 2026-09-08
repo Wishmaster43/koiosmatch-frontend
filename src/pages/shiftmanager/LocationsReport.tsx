@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { MapPin, Layers, Building2, AlertCircle } from 'lucide-react'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
 import { useRightPanel } from '@/context/RightPanelContext'
+import { useNumberFormat } from '@/lib/formatters'
 import KpiBlock         from '@/components/ui/KpiBlock'
 import Spinner from '@/components/ui/Spinner'
 import EntityListDrawer from '@/components/ui/EntityListDrawer'
@@ -18,6 +19,7 @@ import type { SmDrillItem } from '@/types/shiftmanager'
 // drill-down datasets, and registers the status filter with the shared right panel.
 export default function LocationsReport() {
   const { t } = useTranslation('shiftmanager')
+  const { formatNumber } = useNumberFormat()
   const { customers, loading } = useSmCustomerTree()
   const [drawer,    setDrawer]    = useState<{ title: string; items: SmDrillItem[] } | null>(null)
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([])
@@ -132,7 +134,7 @@ export default function LocationsReport() {
           value={totalDep}
           icon={Layers} color="var(--color-violet)" bg="var(--color-violet-bg)"
           loading={loading}
-          sub={active.length > 0 ? t('locationsReport.sub.avgPerLocation', { n: (totalDep / Math.max(active.length, 1)).toFixed(1) }) : undefined}
+          sub={active.length > 0 ? t('locationsReport.sub.avgPerLocation', { n: formatNumber(totalDep / Math.max(active.length, 1), 1) }) : undefined}
           onClick={!loading ? () => setDrawer({ title: t('locationsReport.drill.allDepartments'), items: drillDepartments }) : undefined}
         />
         <KpiBlock

@@ -11,16 +11,19 @@ import { initialsOf } from '@/lib/initials'
 import { toCoord } from '@/lib/coords'
 import { backofficeLinkOf } from '@/lib/backofficeLink'
 import { mapKoiosAiAdvice } from '@/lib/koiosAdviceMap'
+import { formatFileSizeMb } from '@/lib/formatters'
 import type { ApiCandidate, Candidate, CandidatePool, CandidateBranch, CandidateMatch, Loose } from '@/types/candidate'
 
 // Bytes → human size ("44856" → "44 KB"). Backend sends documents.size in bytes.
-const fmtSize = (b: unknown): string => {
+// Note: locale passed by callers so bytes can be rendered with tenant-appropriate formatting.
+const fmtSize = (b: unknown, locale?: string): string => {
   if (b == null || b === '') return ''
   const n = Number(b)
   if (Number.isNaN(n)) return String(b)
   if (n < 1024)        return `${n} B`
   if (n < 1024 * 1024) return `${Math.round(n / 1024)} KB`
-  return `${(n / 1024 / 1024).toFixed(1)} MB`
+  // Format MB with locale-aware grouping — caller passes useNumberFormat().locale
+  return `${formatFileSizeMb(n, locale ?? 'nl-NL')} MB`
 }
 
 // Newest-first sort for dated lists. Unparseable dates (dummy "period" strings)
@@ -34,7 +37,8 @@ const byNewest = <T>(list: T[], getKey: (x: T) => number): T[] =>
   [...list].sort((a, b) => getKey(b) - getKey(a))
 
 // See the file's top doc above; the one place raw API fields become the candidate shape the UI works with.
-export function mapCandidate(c: ApiCandidate): Candidate {
+// locale: passed by React callers via useNumberFormat().locale for locale-aware number formatting.
+export function mapCandidate(c: ApiCandidate, locale: string = 'nl-NL'): Candidate {
   const name = c.name || c.full_name
     || [c.firstname, c.lastname].filter(Boolean).join(' ')
     || [c.first_name, c.last_name].filter(Boolean).join(' ') || '?'
@@ -285,7 +289,7 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     documents:       (c.documents ?? []).map(d => ({
       ...d,
       name: d.name ?? d.file_name,
-      size: typeof d.size === 'string' && /\D/.test(d.size) ? d.size : fmtSize(d.size),
+      size: typeof d.size === 'string' && /\D/.test(d.size) ? d.size : fmtSize(d.size, locale),
       url:  d.url,
       type: d.type ?? null,
     })),

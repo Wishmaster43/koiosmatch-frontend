@@ -14,6 +14,7 @@ import { X } from 'lucide-react'
 import type { TFunction } from 'i18next'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { useAuth } from '@/context/AuthContext'
+import { useNumberFormat } from '@/lib/formatters'
 import { RateProposalHint } from '../RateProposalNotice'
 import type { RateProposal } from '@/pages/candidates/hooks/useRateProposal'
 import { FormField as F } from './FormField'
@@ -37,6 +38,8 @@ export default function FinancialSection({
   costCenter: string; setCostCenter: (v: string) => void; setCostCenterDirty: (v: boolean) => void
   billingEmails: string[]; setBillingEmails: (fn: (p: string[]) => string[]) => void; setBillingDirty: (v: boolean) => void
 }) {
+  // Margin is a calculated number with 2 decimal places (locale-aware formatting).
+  const { formatNumber } = useNumberFormat()
   // MATCH-FIN-GATE-1 (Danny 14-08): the match create/edit form is the third
   // surface carrying purchase rate + margin — gated on `matches.financial.view`,
   // same as MatchContractSection/PriceAgreementForm. Sell rate stays visible;
@@ -74,7 +77,7 @@ export default function FinancialSection({
             background: 'var(--surface-2, var(--bg))',
             color: hasRates ? (margin >= 0 ? 'var(--color-success)' : 'var(--color-danger)') : 'var(--text-muted)' }}>
             {/* HUISSTIJL-1: identical fontFamily/weight render. */}
-            <Mono style={{ fontWeight: 700 }}>{hasRates ? margin.toFixed(2) : '—'}</Mono>
+            <Mono style={{ fontWeight: 700 }}>{hasRates ? formatNumber(margin, 2) : '—'}</Mono>
           </div>
         </F>
       )}

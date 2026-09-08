@@ -68,7 +68,7 @@ function normalizeRateLimit(value: KoiosRateLimit): { count: number; unit: RateU
 
 function LimitsBlock({ limits }: { limits?: KoiosLimits }) {
   const { t } = useTranslation('koios')
-  const { locale, formatPercent } = useNumberFormat()
+  const { locale, formatPercent, formatNumber } = useNumberFormat()
   if (!limits) return null
   const { max_tokens_per_request, monthly_budget_cents, warn_at_pct, rate_limits } = limits
 
@@ -82,7 +82,7 @@ function LimitsBlock({ limits }: { limits?: KoiosLimits }) {
   const renderRate = (value: KoiosRateLimit) => {
     const parsed = normalizeRateLimit(value)
     if (!parsed) return typeof value === 'string' ? value : String(value.count)
-    return t(`capabilities.facts.${parsed.unit}`, { count: new Intl.NumberFormat(locale).format(parsed.count) })
+    return t(`capabilities.facts.${parsed.unit}`, { count: formatNumber(parsed.count) })
   }
 
   // A rate limit is "configured" unless it is the legacy empty string — the
@@ -96,7 +96,7 @@ function LimitsBlock({ limits }: { limits?: KoiosLimits }) {
         {max_tokens_per_request !== null && max_tokens_per_request !== undefined && (
           <div style={rowStyle}>
             <Caption style={CANON_LABEL_STYLE}>{t('capabilities.facts.maxTokens')}</Caption>
-            <BodyText>{new Intl.NumberFormat(locale).format(max_tokens_per_request)}</BodyText>
+            <BodyText>{formatNumber(max_tokens_per_request)}</BodyText>
           </div>
         )}
         {budgetEuro !== null && (

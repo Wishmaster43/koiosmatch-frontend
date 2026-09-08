@@ -12,6 +12,7 @@ import { Search } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 // App-wide active locale (DATUM-1/LANE-B) — feeds the month-dropdown labels.
 import { useLocale } from '@/lib/datetime'
+import { formatMonthName } from '@/lib/localDate'
 import { Caption } from '@/components/ui/typography'
 import PaginationBar     from '../ui/PaginationBar'
 // Searchable combobox replaces the bare native <select> (Danny 08-08, §4) — same
@@ -82,7 +83,7 @@ export default function OrdersTable() {
   // Locale-aware "mon yyyy" label for the month dropdown.
   const formatMonth = (m: string) => {
     const [y, mo] = m.split('-')
-    return `${new Date(Number(y), Number(mo) - 1, 1).toLocaleString(locale, { month: 'short' })} ${y}`
+    return `${formatMonthName(new Date(Number(y), Number(mo) - 1, 1), locale, 'short')} ${y}`
   }
 
   return (

@@ -8,13 +8,15 @@
 import { useTranslation } from 'react-i18next'
 import type { RateProposal } from '../hooks/useRateProposal'
 import { tintBg, tintBorder } from '@/lib/tint'
+import { useNumberFormat } from '@/lib/formatters'
 
 // Subtle italic hint — source-labelled, shown only once a proposal was FOUND.
 export function RateProposalHint({ proposal }: { proposal: RateProposal | null }) {
   const { t } = useTranslation('candidates')
+  const { formatCurrency } = useNumberFormat()
   if (!proposal?.found) return null
-  const purchase = proposal.purchase_rate?.toFixed(2) ?? '—'
-  const sell = proposal.sale_rate?.toFixed(2) ?? '—'
+  const purchase = proposal.purchase_rate != null ? formatCurrency(proposal.purchase_rate, undefined, 2) : '—'
+  const sell = proposal.sale_rate != null ? formatCurrency(proposal.sale_rate, undefined, 2) : '—'
   return (
     <div style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--color-info)' }}>
       {proposal.source === 'purchase_only'
@@ -29,14 +31,17 @@ export function RateDeviationWarning({ proposal, purchase, sell, onCancel }: {
   proposal: RateProposal | null; purchase: string; sell: string; onCancel: () => void
 }) {
   const { t } = useTranslation('candidates')
+  const { formatCurrency } = useNumberFormat()
   return (
     <div role="alert" style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 12, padding: '9px 11px', borderRadius: 8, fontSize: 12,
       color: 'var(--color-warning-text)', background: tintBg('var(--color-warning)'),
       border: tintBorder('var(--color-warning)') }}>
       <span style={{ fontWeight: 600 }}>
         {t('placement.rateProposal.deviationWarning', {
-          proposalPurchase: proposal?.purchase_rate?.toFixed(2) ?? '—', proposalSell: proposal?.sale_rate?.toFixed(2) ?? '—',
-          enteredPurchase: Number(purchase).toFixed(2), enteredSell: Number(sell).toFixed(2),
+          proposalPurchase: proposal?.purchase_rate != null ? formatCurrency(proposal.purchase_rate, undefined, 2) : '—',
+          proposalSell: proposal?.sale_rate != null ? formatCurrency(proposal.sale_rate, undefined, 2) : '—',
+          enteredPurchase: formatCurrency(Number(purchase), undefined, 2),
+          enteredSell: formatCurrency(Number(sell), undefined, 2),
         })}
       </span>
       <button onClick={onCancel}

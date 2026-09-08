@@ -16,6 +16,7 @@ import SectionCard from '@/components/ui/SectionCard'
 import SoftChip from '@/components/ui/SoftChip'
 import GeocodeButton from '@/components/ui/GeocodeButton'
 import { Mono, Caption } from '@/components/ui/typography'
+import { formatCoord } from '@/lib/formatters'
 
 interface GeocodeCardProps {
   // Coordinates as held on the record (already coerced by the mapper — Laravel sends
@@ -55,7 +56,7 @@ export default function GeocodeCard({ lat, lng, endpoint, permission, disabled }
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <SoftChip label={t('backofficeLinks.geocode.linked')} color="var(--color-success)" />
             <Mono style={{ color: 'var(--text-muted)' }}>
-              {shownLat?.toFixed(5)}, {shownLng?.toFixed(5)}
+              {formatCoord(shownLat)}, {formatCoord(shownLng)}
             </Mono>
           </div>
         ) : (

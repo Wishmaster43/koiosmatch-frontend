@@ -14,8 +14,8 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import PieChartCard from './PieChartCard'
 
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
-vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatNumber: (n: number) => String(n) }) }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k, i18n: { language: 'nl' } }) }))
+vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatNumber: (n: number) => String(n), formatPercent: (n: number) => String(Math.round(n)) }) }))
 // recharts needs real layout; only this component's own markup is under test.
 vi.mock('recharts', () => ({
   PieChart: ({ children }: { children?: React.ReactNode }) => <div data-testid="pie">{children}</div>,

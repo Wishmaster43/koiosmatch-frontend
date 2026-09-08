@@ -13,6 +13,7 @@
  * didn't list (a legacy raw vendor id).
  */
 import type { KoiosUsageData, TFn } from '@/types/koios'
+import { formatNumber } from '@/lib/formatters'
 import { resolveModelLabel, type KoiosModelOption } from '@/lib/koiosModelTiers'
 
 // `locale` (DATUM-1/LANE-B): the real caller (KoiosPanel) always passes the
@@ -27,7 +28,7 @@ export default function KoiosUsage({ usage, model, t, locale = 'nl-NL', options 
   const tokens = (usage?.input_tokens ?? 0) + (usage?.output_tokens ?? 0)
 
   // Locale-aware token formatting (thousands separator follows the app locale).
-  const tokensFmt = new Intl.NumberFormat(locale).format(tokens)
+  const tokensFmt = formatNumber(tokens, locale)
 
   // Resolve the model id (this message's own, or the usage payload's) to its
   // stand label — server options first, shared tier map as fallback.

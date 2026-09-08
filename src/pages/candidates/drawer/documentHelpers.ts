@@ -1,6 +1,7 @@
 // documentHelpers — shared types and pure helpers for the candidate Documents
 // section: the DocItem row shape, selection keys, persisted/downloadable checks,
 // grid columns, expiry classification and file-size formatting.
+import { formatFileSizeMb } from '@/lib/formatters'
 import type { DocVersion } from './DocumentVersionHistory'
 import type { Id } from '@/types/common'
 
@@ -73,9 +74,9 @@ export const computeDocExpiry = (expiresAt: string | null | undefined, now: Date
  * Human file size. The API sends `size` in BYTES; the candidate mapper already
  * formatted it on load, but a fresh upload/replace RESPONSE overwrote that with
  * the raw number (Danny 08-08 saw "757653" right after uploading). Both paths
- * go through this one helper now.
+ * go through this one helper now. locale: passed by callers via useNumberFormat().locale.
  */
-export const formatDocSize = (b: unknown): string => {
+export const formatDocSize = (b: unknown, locale: string = 'nl-NL'): string => {
   if (b == null || b === '') return ''
   // Already formatted upstream ("740 KB") — leave it alone.
   if (typeof b === 'string' && /[a-z]/i.test(b)) return b
@@ -83,5 +84,6 @@ export const formatDocSize = (b: unknown): string => {
   if (Number.isNaN(n)) return String(b)
   if (n < 1024) return `${n} B`
   if (n < 1024 * 1024) return `${Math.round(n / 1024)} KB`
-  return `${(n / 1024 / 1024).toFixed(1)} MB`
+  // Format MB with locale-aware grouping — caller passes useNumberFormat().locale
+  return `${formatFileSizeMb(n, locale)} MB`
 }

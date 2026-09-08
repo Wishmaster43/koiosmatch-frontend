@@ -22,6 +22,7 @@ import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import SectionCard from '@/components/ui/SectionCard'
 import DrawerTabs from '@/components/drawer/DrawerTabs'
 import { useDateFormat } from '@/lib/datetime'
+import { useNumberFormat } from '@/lib/formatters'
 import { initialsOf } from '@/lib/initials'
 import { SM_CANDIDATE_STATUS_COLORS } from '@/pages/shiftmanager/shared'
 import { endDateOf, noShowCountOf, cancellationsOf, featureNamesOf } from '@/pages/shiftmanager/shared'
@@ -64,6 +65,7 @@ function ComingSoon({ icon: Icon, title, desc }: { icon: LucideIcon; title: stri
 function TabAlgemeen({ c }: { c: ReportCandidate }) {
   const { t } = useTranslation('reports')
   const { formatDate, formatDateTime } = useDateFormat()
+  const { formatCurrency } = useNumberFormat()
   const features = featureNamesOf(c)
   const rates: GlobalRate[] = Array.isArray(c.global_rate_summary) ? c.global_rate_summary : []
 
@@ -132,7 +134,7 @@ function TabAlgemeen({ c }: { c: ReportCandidate }) {
                 </div>
                 <div className="text-right flex-shrink-0">
                   <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace' }}>
-                    {r.hour_rate != null ? `€ ${Number(r.hour_rate).toFixed(2)}` : '—'}
+                    {r.hour_rate != null ? formatCurrency(r.hour_rate, undefined, 2) : '—'}
                   </div>
                   {r.is_default_step === 1 && (
                     <div style={{ marginTop: 2, display: 'inline-block' }}>

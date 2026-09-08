@@ -6,7 +6,10 @@ import { describe, it, expect, vi } from 'vitest'
 import { render } from '@testing-library/react'
 import CustomersByOwnerDonut from './CustomersByOwnerDonut'
 
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (k: string) => k }),
+  initReactI18next: { type: '3rdParty', init: () => {} },
+}))
 
 let captured: { onItemClick?: (d: unknown) => void; data?: { name: string; filterValue: unknown }[]; isInert?: (d: { filterValue?: unknown }) => boolean } = {}
 vi.mock('@/components/charts/PieChartCard', () => ({

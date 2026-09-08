@@ -9,6 +9,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Send, Trash2, X, Bot, User, Zap } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
+import { formatSeconds } from '@/lib/formatters'
 import Button from '@/components/ui/Button'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import Spinner from '@/components/ui/Spinner'
@@ -25,9 +26,13 @@ interface Message {
 
 interface Variable { key: string; value: string }
 
-// Formats milliseconds to a readable duration string
-function fmtMs(ms: number) {
-  return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${ms}ms`
+// Formats milliseconds to a readable duration string (uses formatSeconds for locale-aware rendering).
+function fmtMs(ms: number, locale: string = 'nl-NL') {
+  if (ms >= 1000) {
+    const formatted = formatSeconds(ms, locale)
+    return `${formatted}s`
+  }
+  return `${ms}ms`
 }
 
 // Chat UI that POSTs the agent's own inline config (instructions, not a persona) so

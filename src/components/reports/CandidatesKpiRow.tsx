@@ -11,6 +11,7 @@ import { SM_STATUS, statusOf } from '@/lib/smStatus'
 import type { ReportCandidate } from '@/types/reports'
 // App-wide active locale (DATUM-1/LANE-B) — feeds the "new this month" month name.
 import { useLocale } from '@/lib/datetime'
+import { formatMonthYear } from '@/lib/localDate'
 
 // Count candidates whose status matches the given value, via the shared normalisation.
 const count = (candidates: ReportCandidate[], status: string) =>
@@ -76,7 +77,7 @@ export default function CandidatesKpiRow({ candidates = [], loading = false, onD
   const actiefTotal    = count(candidates, SM_STATUS.ACTIVE)
   const geplandItems   = calcGepland(candidates)
   const { currentMonthCount, avg, delta } = calcMonthStats(candidates)
-  const currentMonthLabel = new Date().toLocaleString(locale, { month: 'long' })
+  const currentMonthLabel = formatMonthYear(new Date(), locale, 'long')
 
   return (
     <div className="grid gap-4 mb-6"

@@ -22,7 +22,7 @@ import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import { calcAttention } from '@/components/reports/candidateAttention'
 import { useSmCandidateStats } from '@/components/reports/useSmCandidateStats'
-import { useLocale } from '@/lib/datetime'
+import { useDateFormat } from '@/lib/datetime'
 import { SM_CANDIDATE_STATUS_COLORS, SM_CANDIDATE_STATUS_KEYS } from './data/smCandidateStatus'
 import { endDateOf, noShowCountOf, cancellationsOf } from './data/smCandidateFields'
 import type { ReportCandidate } from '@/types/reports'
@@ -93,7 +93,7 @@ export default function SmCandidatesInsightsRow({
   candidates, statusFilter, onStatusPick, onStatusClear, onDrillDown,
 }: SmCandidatesInsightsRowProps) {
   const { t } = useTranslation(['shiftmanager', 'reports', 'common'])
-  const locale = useLocale()
+  const { formatDate } = useDateFormat()
   const pickedStatus = statusFilter.length === 1 ? normalizeSmStatus(statusFilter[0]) : null
 
   // SM-STATS-2: the status donut (its total) + active/inactive/intake KPI counts read the
@@ -181,7 +181,7 @@ export default function SmCandidatesInsightsRow({
   const cancellations = useMemo(() => candidates.filter(c => cancellationsOf(c) > 0), [candidates])
   const endingSoon    = useMemo(() => calcEndingSoon(candidates), [candidates])
   // Locale-aware month name (app locale, not a hardcoded 'nl-NL' — §5).
-  const monthLabel = new Date().toLocaleString(locale, { month: 'long' })
+  const monthLabel = formatDate(new Date(), { month: 'long' })
 
   const kpis: KpiSpec[] = [
     { key: 'active', label: t('kpiRow.active', { ns: 'reports' }), value: activeTotal,

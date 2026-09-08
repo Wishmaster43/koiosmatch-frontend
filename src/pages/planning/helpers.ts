@@ -1,17 +1,19 @@
+import { formatMonthName, formatWeekday } from '@/lib/localDate'
+
 // Locale-aware date helpers for the planning calendar. Monday-first weekday
 // abbreviations (2024-01-01 was a Monday); month/weekday names follow the
 // active app locale. `locale` is REQUIRED (DATUM-1/LANE-B): a defaulted
 // 'nl-NL' let a caller silently forget the argument and render Dutch names
 // on a non-Dutch screen — every caller (views.tsx / PlanningPage.tsx /
 // AddShiftModal.tsx) now passes useLocale()/useDateFormat().locale explicitly.
-export const monthName = (locale: string, i: number) => new Date(2000, i, 1).toLocaleString(locale, { month: 'long' })
+export const monthName = (locale: string, i: number) => formatMonthName(new Date(2000, i, 1), locale, 'long')
 
 // Monday-first weekday abbreviations for the given locale. No plain-array
 // export at the default locale any more (that was the silent-Dutch trap) —
 // every caller computes its own memoised array via useMemo(() =>
 // weekdaysMon(locale), [locale]).
 export const weekdaysMon = (locale: string) => Array.from({ length: 7 }, (_, i) =>
-  new Date(2024, 0, 1 + i).toLocaleString(locale, { weekday: 'short' }))
+  formatWeekday(new Date(2024, 0, 1 + i), locale))
 
 // True when two dates fall on the same calendar day.
 export function isSameDay(a: Date, b: Date) {

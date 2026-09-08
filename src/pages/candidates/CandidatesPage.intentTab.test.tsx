@@ -29,7 +29,14 @@ vi.mock('./hooks/useCandidateDrawerActions', () => ({
 }))
 
 // Everything else is stubbed to the minimum the container needs to mount.
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+// Keep initReactI18next so @/lib/datetime's i18n bootstrap still works.
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>()
+  return {
+    ...actual,
+    useTranslation: () => ({ t: (k: string) => k, i18n: { language: 'nl' } }),
+  }
+})
 vi.mock('@tanstack/react-query', () => ({ useQueryClient: () => ({ invalidateQueries: vi.fn() }) }))
 vi.mock('@/context/RightPanelContext', () => ({ useRightPanel: () => ({ registerFilters: vi.fn(), unregisterFilters: vi.fn() }) }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))

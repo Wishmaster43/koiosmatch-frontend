@@ -10,7 +10,7 @@ import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import StatusPill from '@/components/ui/StatusPill'
 import MatchScoreBlock from '@/components/match/MatchScoreBlock'
 import DrawerAddButton from './DrawerAddButton'
-import { useNumberFormat } from '@/lib/formatters'
+import { useNumberFormat, formatDistanceKm } from '@/lib/formatters'
 import { Mono, Caption, SectionTitle } from '@/components/ui/typography'
 import { formatRange } from './vacancySearchFormat'
 import type { VacancySearchRow } from '../hooks/useVacancySearch'
@@ -79,7 +79,7 @@ export default function VacancySearchSummaryCard({
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         {/* HUISSTIJL-1: Caption owns the 11/muted identity; Mono only adds the font-family. */}
         {selectedRow.distanceKm != null && (
-          <Caption><Mono>{selectedRow.distanceKm.toFixed(1)} km</Mono></Caption>
+          <Caption><Mono>{formatDistanceKm(selectedRow.distanceKm)} km</Mono></Caption>
         )}
         <StatusPill label={statusMeta(selectedRow.status).label} color={statusMeta(selectedRow.status).color} />
         {/* Already-fetched search-row fields (hours + contract form) — render on

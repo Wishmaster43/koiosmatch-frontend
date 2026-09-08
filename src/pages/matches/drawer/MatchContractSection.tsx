@@ -28,6 +28,7 @@ import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import { Caption, Mono } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import { notifySuccess, notifyError } from '@/lib/notify'
+import { useNumberFormat } from '@/lib/formatters'
 import { useCao } from '@/lib/useCao'
 import { useAuth } from '@/context/AuthContext'
 import ContractFormChip from '../ContractFormChip'
@@ -47,6 +48,7 @@ interface Props {
 // Editable Contract & Financieel tab (see the module doc above for what moved to Overview and what stayed here): reads/saves through useMatchContract's optimistic PATCH.
 export default function MatchContractSection({ matchId, onUpdate, archived }: Props) {
   const { t } = useTranslation(['matches', 'common'])
+  const { formatCurrency } = useNumberFormat()
   const { types: caoTypes } = useCao()
   const { data, loading, error, unavailable, revertTick, retry, save } = useMatchContract(matchId, onUpdate)
 
@@ -165,7 +167,7 @@ export default function MatchContractSection({ matchId, onUpdate, archived }: Pr
                   padding: '4px 8px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6 }}>
                   <span style={{ color: 'var(--text)' }}>{l.functionTitle || '—'}</span>
                   <Mono style={{ color: 'var(--text-muted)' }}>
-                    {l.rate != null ? l.rate.toFixed(2) : '—'}
+                    {l.rate != null ? formatCurrency(l.rate, undefined, 2) : '—'}
                   </Mono>
                 </li>
               ))}
@@ -187,7 +189,7 @@ export default function MatchContractSection({ matchId, onUpdate, archived }: Pr
           background: 'var(--surface)', border: '1px solid var(--border)',
           color: margin != null ? (margin >= 0 ? 'var(--color-success)' : 'var(--color-danger)') : 'var(--text-muted)' }}>
           <span style={{ color: 'var(--text-muted)' }}>{t('drawer.contract.margin')}</span>
-          <Mono style={{ fontWeight: 700 }}>{margin != null ? margin.toFixed(2) : '—'}</Mono>
+          <Mono style={{ fontWeight: 700 }}>{margin != null ? formatCurrency(margin, undefined, 2) : '—'}</Mono>
         </div>
       )}
     </div>

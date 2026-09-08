@@ -33,6 +33,15 @@ const projectRules = {
   }],
 }
 
+// GETALLEN-1 (Danny 08-09): all user-visible numbers through locale formatters.
+// A local plugin that re-exposes the built-in no-restricted-syntax rule under
+// an alias, following the same pattern as huisstijlPlugin (see comment below).
+const getallenPlugin = {
+  rules: {
+    'no-restricted-syntax': builtinRules.get('no-restricted-syntax'),
+  },
+}
+
 // HUISSTIJL slotaudit — a local "plugin" that re-exposes the built-in
 // no-restricted-syntax rule under alias names. ESLint flat config MERGES config
 // objects per rule KEY: when two objects both set the plain `no-restricted-syntax`
@@ -142,6 +151,25 @@ export default defineConfig([
       'no-restricted-syntax': ['warn', {
         selector: 'Literal[value=/#[0-9A-Fa-f]{6}/]',
         message: 'Ad-hoc hex colour — use a design token (var(--color-*)/color-mix), or add an eslint-disable-next-line with a reason if this hex is DATA (seed/palette).',
+      }],
+    },
+  },
+  // GETALLEN-1 (Danny 08-09): all user-visible numbers through locale formatters,
+  // never `.toFixed()` / `.toLocaleString()` / direct `Intl.NumberFormat` calls.
+  {
+    files: ['src/**/*.{ts,tsx,js,jsx}'],
+    ignores: ['src/lib/formatters.ts', '**/*.test.*'],
+    plugins: { getallen: getallenPlugin },
+    rules: {
+      'getallen/no-restricted-syntax': ['error', {
+        selector: "CallExpression[callee.property.name='toFixed']",
+        message: 'GETALLEN-1: render numbers through src/lib/formatters (useNumberFormat) — never toFixed/toLocaleString/Intl.NumberFormat in a component.',
+      }, {
+        selector: "CallExpression[callee.property.name='toLocaleString']",
+        message: 'GETALLEN-1: render numbers through src/lib/formatters (useNumberFormat) — never toFixed/toLocaleString/Intl.NumberFormat in a component.',
+      }, {
+        selector: "NewExpression[callee.object.name='Intl'][callee.property.name='NumberFormat']",
+        message: 'GETALLEN-1: render numbers through src/lib/formatters (useNumberFormat) — never toFixed/toLocaleString/Intl.NumberFormat in a component.',
       }],
     },
   },

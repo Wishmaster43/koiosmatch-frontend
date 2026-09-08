@@ -50,6 +50,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import { useNavigation } from '@/context/NavigationContext'
 import { useAuth } from '@/context/AuthContext'
 import { useOpportunityStages } from '@/lib/useOpportunityStages'
+import { formatCurrency } from '@/lib/formatters'
 import { AddOpportunityModal } from '@/pages/opportunities/shared'
 import { mapOpportunity } from '@/pages/opportunities/shared'
 import ScopedListTab from './ScopedListTab'
@@ -57,12 +58,6 @@ import type { ApiOpportunity, Opportunity } from '@/types/opportunity'
 import type { Id, LookupOption } from '@/types/common'
 import type { Column } from '@/components/ui/DataTable'
 import { monoStyle } from '@/components/ui/typography'
-
-// EUR formatter deliberately locked to 'nl-NL' — the domain's canonical currency
-// locale (§5), never the tenant UI locale, so the decimal/grouping convention
-// stays fixed regardless of app language (mirrors OpportunitiesTable's own
-// opportunityValueOf/formatOpportunityValue comment; not exported there).
-const money = new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
 
 // Reuse the customer-level Kansen tab's own mapper verbatim — never a forked shape.
 const mapRow = (raw: Record<string, unknown>): Opportunity => mapOpportunity(raw as ApiOpportunity)
@@ -108,7 +103,7 @@ export default function ScopedOpportunitiesTab({ scope, id, customerId, customer
       // directly (no JSX slot for the <Mono> atom here) — the font-family comes
       // from the atom's own canonical style identity instead of a local literal.
       cellStyle: { color: 'var(--text)', fontSize: 12, ...monoStyle },
-      render: o => o.value != null ? money.format(o.value) : '—' },
+      render: o => o.value != null ? formatCurrency(o.value, 'EUR', 'nl-NL', 0) : '—' },
   ]
 
   return (

@@ -14,6 +14,7 @@ import { Building2, Briefcase, MapPin } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { ShiftRow } from '@/types/shiftmanager'
 import { captionStyle, SectionTitle } from '@/components/ui/typography'
+import { useNumberFormat } from '@/lib/formatters'
 
 // Per-location display meta (name + owning customer) keyed by location id.
 export type LocationMeta = Map<string, { name?: string; customer?: string }>
@@ -78,7 +79,8 @@ function GroupTable({ icon: Icon, title, rows, total, valueCol, totalRow, fmt }:
 export default function ShiftsDrillDownTotals({ shifts, locationMeta }: {
   shifts: ShiftRow[]; locationMeta: LocationMeta
 }) {
-  const { t, i18n } = useTranslation('shiftmanager')
+  const { t } = useTranslation('shiftmanager')
+  const { formatNumber } = useNumberFormat()
   const unknown = t('shiftsDrawer.unknown')
   // Switch the aggregated value between number of shifts and worked hours —
   // defaults to hours (Danny, verbatim: "drill down moet altijd op uren
@@ -100,8 +102,8 @@ export default function ShiftsDrillDownTotals({ shifts, locationMeta }: {
   const byLocation = useMemo(() => groupSum(shifts, (s) =>
     locationMeta.get(locId(s))?.name ?? String(s.order?.customer_location?.name ?? ''), valFn, unknown), [shifts, locationMeta, unknown, unit]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Shifts as whole numbers, hours with one decimal (nl-NL / active locale).
-  const fmt = (n: number) => n.toLocaleString(i18n.language, unit === 'hours' ? { minimumFractionDigits: 1, maximumFractionDigits: 1 } : {})
+  // Shifts as whole numbers, hours with one decimal (active locale).
+  const fmt = (n: number) => formatNumber(n, unit === 'hours' ? 1 : undefined)
   const valueCol = unit === 'hours' ? t('shiftsDrawer.byHours') : t('shiftsDrawer.countCol')
 
   if (shifts.length === 0) {

@@ -7,6 +7,7 @@ import EntityLink from '@/components/ui/EntityLink'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import ScorePill from '@/components/match/ScorePill'
 import { Mono, Caption, SectionTitle } from '@/components/ui/typography'
+import { useNumberFormat } from '@/lib/formatters'
 import { formatRange } from './vacancySearchFormat'
 import type { CSSProperties } from 'react'
 import type { VacancySearchRow } from '../hooks/useVacancySearch'
@@ -18,6 +19,7 @@ export default function VacancySearchResultRow({ row, isSelected, onSelect }: {
   row: VacancySearchRow; isSelected: boolean; onSelect: (id: Id) => void
 }) {
   const { t } = useTranslation('candidates')
+  const { formatDistanceKm } = useNumberFormat()
   return (
     // Row = div[role=button] (not <button>: the title nests EntityLink's own
     // button+anchor, and interactive-inside-interactive is invalid HTML).
@@ -73,7 +75,7 @@ export default function VacancySearchResultRow({ row, isSelected, onSelect }: {
         {row.score != null && <ScorePill score={row.score} />}
         {/* HUISSTIJL-1: Caption owns the 11/muted identity; Mono only adds the font-family. */}
         {row.distanceKm != null && (
-          <Caption><Mono>{row.distanceKm.toFixed(1)} km</Mono></Caption>
+          <Caption><Mono>{formatDistanceKm(row.distanceKm)} km</Mono></Caption>
         )}
         {/* Expand affordance (Danny 05-08, point 2: "niet duidelijk dat je een
             vacature kan openklappen") — a visible chevron on EVERY row, on top

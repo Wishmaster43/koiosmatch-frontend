@@ -87,3 +87,15 @@ export function formatMonthYear(d: Date, locale: string, variant: MonthYearVaria
     : { month: 'short', year: '2-digit' }
   return d.toLocaleDateString(locale, opts)
 }
+
+// Month name only (no year): 'long' = "september", 'short' = "sep". Used for
+// calendar labels, chart axes, and month selectors — where year is shown separately.
+export function formatMonthName(d: Date, locale: string, variant: 'long' | 'short' = 'long'): string {
+  const opts: Intl.DateTimeFormatOptions = variant === 'long' ? { month: 'long' } : { month: 'short' }
+  return d.toLocaleDateString(locale, opts)
+}
+
+// Weekday abbreviation: "Mon", "Tue", etc. Used for calendar headers and roster rows.
+export function formatWeekday(d: Date, locale: string): string {
+  return d.toLocaleDateString(locale, { weekday: 'short' })
+}

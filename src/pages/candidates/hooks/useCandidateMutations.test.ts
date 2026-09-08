@@ -21,6 +21,15 @@ vi.mock('@/lib/api', async () => {
   return { ...actual, default: { patch: vi.fn(), get: vi.fn() } }
 })
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
+// Mock react-i18next to return raw keys so tests assert on stable key strings (but
+// keep initReactI18next so i18n bootstrap in @/lib/datetime still works).
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>()
+  return {
+    ...actual,
+    useTranslation: () => ({ t: (k: string) => k, i18n: { language: 'nl' } }),
+  }
+})
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 

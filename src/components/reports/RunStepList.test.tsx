@@ -1,7 +1,11 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import RunStepList from './RunStepList'
 import type { RunStep } from '@/types/reports'
+
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string; n?: number; count?: number; time?: string }) => opts?.defaultValue ?? k, i18n: { language: 'nl' } }) }))
+vi.mock('@/lib/formatters', () => ({ formatSeconds: (ms: number) => String((ms / 1000).toFixed(1)).replace('.', ',') }))
+vi.mock('@/components/layout/workflow/useModuleCatalog', () => ({ useModuleCatalog: () => ({ catalog: {} }) }))
 
 // i18n is not initialised in tests, so t() returns the raw key — assertions
 // check for the keys (e.g. 'runs.drawer.input').

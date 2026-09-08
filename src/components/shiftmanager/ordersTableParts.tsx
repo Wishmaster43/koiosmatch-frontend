@@ -9,6 +9,7 @@ import type { CSSProperties, ReactNode } from 'react'
 
 import SortCaret from '@/components/ui/SortCaret'
 import { formatDateOnly } from '@/lib/localDate'
+import { formatNumber } from '@/lib/formatters'
 
 export const NOW = new Date()
 export const PAD = (n: number) => String(n).padStart(2, '0')
@@ -50,7 +51,8 @@ export const TD: CSSProperties = { padding: '9px 12px', fontSize: 12, color: 'va
 // Date-only via the ONE shared formatter (heraudit I18N-2); time stays local.
 export const formatDate   = formatDateOnly
 export const formatTime   = (dt?: string | number | Date | null) => { if (!dt) return '—'; const d = new Date(dt); return `${PAD(d.getHours())}:${PAD(d.getMinutes())}` }
-export const formatHours  = (h?: number | string | null) => h != null ? Number(h).toFixed(2) : '—'
+// Locale-aware hours formatting with 2 decimals (DATUM-1/LANE-B).
+export const formatHours  = (h?: number | string | null, locale: string = 'nl-NL') => h != null ? formatNumber(Number(h), locale, 2) : '—'
 export const dash         = (v: unknown): ReactNode => v ? (v as ReactNode) : <span style={{ color: 'var(--border)' }}>—</span>
 
 // Section card with an uppercase title — used by the detail drawer.

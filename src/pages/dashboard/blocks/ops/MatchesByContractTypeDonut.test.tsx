@@ -11,7 +11,10 @@ import type { MatchesByContractTypeRow } from '@/types/dashboard'
 
 // LOOKUP-I18N-1: the house mock resolves `t(key, { defaultValue })` like real
 // i18next, so seedLabel's untranslated-key fallback renders the seed's own label.
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k }) }))
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k }),
+  initReactI18next: { type: '3rdParty', init: () => {} },
+}))
 
 // Capture PieChartCard props instead of rendering recharts (jsdom has no layout engine).
 // The click handler is invoked with the exact recharts legend-entry shape (the datum itself).

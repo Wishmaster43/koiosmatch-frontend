@@ -22,9 +22,9 @@ function toFiniteNumber(value: NumberInput): number | null {
 // Full grouped number with the locale's thousands separator — e.g. 99968 → "99.968"
 // (nl-NL) / "99,968" (en-GB). Non-React call sites pass an explicit locale; React
 // components should prefer the useNumberFormat() hook below so they never hardcode one.
-export function formatNumber(value: NumberInput, locale: string = 'nl-NL'): string {
+export function formatNumber(value: NumberInput, locale: string = 'nl-NL', maximumFractionDigits?: number): string {
   const n = toFiniteNumber(value)
-  return n === null ? '—' : new Intl.NumberFormat(locale).format(n)
+  return n === null ? '—' : new Intl.NumberFormat(locale, { maximumFractionDigits }).format(n)
 }
 
 /**
@@ -93,19 +93,56 @@ export function formatCurrency(
   return n === null ? '—' : new Intl.NumberFormat(locale, { style: 'currency', currency, maximumFractionDigits, minimumFractionDigits }).format(n)
 }
 
-// React hook: binds all three formatters to the app's active locale (see useLocale
-// in datetime.ts) so components never hardcode 'nl-NL'. `formatCurrency` here
-// defaults to the TENANT's currency (I18N-1 L5, /auth/me tenant.currency), so a
-// GB or CH tenant sees its own money; pass a record's own `currency` to override.
+// Distance in km, locale-aware grouping, max 1 decimal — e.g. 12.34 → "12,3 km" (nl-NL).
+// Caller keeps the unit string in i18n (e.g. t('km')), formatter returns the number only.
+export function formatDistanceKm(value: NumberInput, locale: string = 'nl-NL'): string {
+  const n = toFiniteNumber(value)
+  return n === null ? '—' : new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(n)
+}
+
+// File size in MB, locale-aware grouping, max 1 decimal — e.g. 123.45 → "123,5 MB" (nl-NL).
+// Caller keeps the unit string in i18n, formatter returns the number only.
+export function formatFileSizeMb(bytes: NumberInput, locale: string = 'nl-NL'): string {
+  const n = toFiniteNumber(bytes)
+  if (n === null) return '—'
+  const mb = n / 1024 / 1024
+  return new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(mb)
+}
+
+// Geographic coordinate (latitude/longitude), fixed 5 decimals, locale-INDEPENDENT.
+// A coordinate is a code, not a quantity; the decimal separator is a technical detail
+// not localized. Always returns exactly 5 decimals: "12.34567", never "12,34567" (nl-NL).
+export function formatCoord(value: NumberInput): string {
+  const n = toFiniteNumber(value)
+  return n === null ? '—' : n.toFixed(5)
+}
+
+// Time in seconds (from milliseconds), locale-aware grouping, 1 decimal — e.g. 1234 ms → "1,2s" (nl-NL).
+// Caller keeps the unit string in i18n, formatter returns the number only.
+export function formatSeconds(ms: NumberInput, locale: string = 'nl-NL'): string {
+  const n = toFiniteNumber(ms)
+  if (n === null) return '—'
+  const seconds = n / 1000
+  return new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(seconds)
+}
+
+// React hook: binds all formatters to the app's active locale (see useLocale in datetime.ts)
+// so components never hardcode 'nl-NL'. `formatCurrency` defaults to the TENANT's currency
+// (I18N-1 L5, /auth/me tenant.currency), so a GB or CH tenant sees its own money; pass a
+// record's own `currency` to override.
 export function useNumberFormat() {
   const locale = useLocale()
   const tenantCurrency = useTenantCurrency()
   return {
     locale,
-    formatNumber: (value: NumberInput) => formatNumber(value, locale),
+    formatNumber: (value: NumberInput, maximumFractionDigits?: number) => formatNumber(value, locale, maximumFractionDigits),
     formatNumberCompact: (value: NumberInput, threshold?: number) => formatNumberCompact(value, locale, threshold),
     formatPercent: (value: NumberInput) => formatPercent(value, locale),
     formatRatio: (value: NumberInput) => formatRatio(value, locale),
+    formatDistanceKm: (value: NumberInput) => formatDistanceKm(value, locale),
+    formatFileSizeMb: (value: NumberInput) => formatFileSizeMb(value, locale),
+    formatCoord: formatCoord,
+    formatSeconds: (value: NumberInput) => formatSeconds(value, locale),
     currency: tenantCurrency,
     formatCurrency: (value: NumberInput, currency?: string, maximumFractionDigits?: number, minimumFractionDigits?: number) =>
       formatCurrency(value, currency ?? tenantCurrency, locale, maximumFractionDigits, minimumFractionDigits),

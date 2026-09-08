@@ -10,6 +10,7 @@ import { Check, Save, Upload, X, AlertTriangle, RefreshCw } from 'lucide-react'
 import Spinner from '@/components/ui/Spinner'
 import api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
+import { useNumberFormat } from '@/lib/formatters'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { BTN_H } from '@/config/buttonMetrics'
 import SaveButton from '@/components/ui/SaveButton'
@@ -30,6 +31,7 @@ const BRAND_COLOR_PRESETS = [
 export default function BrandSettings() {
   const { t } = useTranslation('settings')
   const auth = useAuth()
+  const { formatNumber } = useNumberFormat()
   // eslint-disable-next-line no-restricted-syntax -- DATA: default brand colour value, not UI styling
   const [primaryColor, setPrimaryColor]   = useState('#3B8FD4') // default brand colour (data, not styling)
   // eslint-disable-next-line no-restricted-syntax -- DATA: typeable hex mirror of primaryColor's default
@@ -251,10 +253,10 @@ export default function BrandSettings() {
                     claims a state the app is not in (§3). */}
                 {clampedOnAccent(textColor, primaryColor).toLowerCase() !== textColor.toLowerCase()
                   ? t('brand.textColorOverridden', {
-                      ratio: contrastRatio(textColor, primaryColor).toFixed(1),
+                      ratio: formatNumber(contrastRatio(textColor, primaryColor), 1),
                       used: clampedOnAccent(textColor, primaryColor).toUpperCase(),
                     })
-                  : t('brand.textColorLowContrast', { ratio: contrastRatio(textColor, primaryColor).toFixed(1) })}
+                  : t('brand.textColorLowContrast', { ratio: formatNumber(contrastRatio(textColor, primaryColor), 1) })}
               </div>
             )}
           </div>

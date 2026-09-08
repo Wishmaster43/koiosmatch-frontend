@@ -10,6 +10,8 @@ import type { KoiosPendingAction } from './koiosTypes'
 vi.mock('./koiosApi', () => ({ confirmPendingAction: vi.fn(), cancelPendingAction: vi.fn() }))
 // useKoiosToolCapabilities fetches GET /ai/koios/capabilities directly via the axios client.
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn() }, unwrap: (r: { data: unknown }) => r.data }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k }) }))
+vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatNumber: (n: number) => String(n) }) }))
 const mockConfirm = confirmPendingAction as unknown as ReturnType<typeof vi.fn>
 const mockCancel = cancelPendingAction as unknown as ReturnType<typeof vi.fn>
 const mockCapabilities = (api as unknown as { get: ReturnType<typeof vi.fn> }).get

@@ -4,6 +4,7 @@
  * (§0.3 size split); behaviour identical to the original inline helpers.
  */
 import { hhmm } from '@/lib/localDate'
+import { formatCurrency } from '@/lib/formatters'
 
 // Turn a backend slug (status/funnel/stage value) into a readable label.
 export const humanize = (s?: unknown): string =>
@@ -27,7 +28,7 @@ export const fmtWhen = (iso: string | undefined, locale: string) => {
 // convention as fmtWhen above — EUR stays the fixed currency (tenant's business
 // currency, not language-dependent); only the grouping/decimal separator follows locale.
 export const eur = (v?: unknown, locale: string = 'nl-NL') =>
-  new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(Number(v) || 0)
+  formatCurrency(Number(v) || 0, 'EUR', locale, 0)
 
 // Extract the filter value from a clicked chart datum (sector or legend item).
 export const fv = (d?: unknown) => {

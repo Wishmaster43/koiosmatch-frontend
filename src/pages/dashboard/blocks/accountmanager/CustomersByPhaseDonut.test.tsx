@@ -7,7 +7,10 @@ import { render } from '@testing-library/react'
 import CustomersByPhaseDonut from './CustomersByPhaseDonut'
 import type { CustomerByPhaseRow } from '@/types/dashboard'
 
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k }) }))
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k }),
+  initReactI18next: { type: '3rdParty', init: () => {} },
+}))
 // Mock lookup fixture mirrors the backend seed colours — DATA hex, not UI styling.
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 vi.mock('@/lib/useCustomerPhases', () => ({

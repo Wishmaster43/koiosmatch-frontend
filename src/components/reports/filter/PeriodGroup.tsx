@@ -12,12 +12,14 @@ import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 // App-wide active locale (DATUM-1/LANE-B) — feeds the month-grid labels.
 import { useLocale } from '@/lib/datetime'
 
+import { formatMonthName } from '@/lib/localDate'
+
 // Hoisted: an inline accent literal under background: false-fires the accent-fill selector.
 const ACCENT = 'var(--color-primary)'
 
 // Locale-aware short month name for index 0–11; `locale` is required (a pure
 // module-scope helper never hardcodes nl-NL or imports i18n).
-const monthAbbr = (locale: string, i: number) => new Date(2000, i, 1).toLocaleString(locale, { month: 'short' })
+const monthAbbr = (locale: string, i: number) => formatMonthName(new Date(2000, i, 1), locale, 'short')
 const QUARTERS  = ['Q1','Q2','Q3','Q4']
 
 // Renders one filter group: granularity toggle + year chips + month/quarter grid, all driving group.value ('' | year | year-Qn | year-mm').

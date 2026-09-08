@@ -25,6 +25,7 @@ function Controlled({ initial, noteId, candidateId, autoRun }: { initial: NoteAc
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
 vi.mock('@/pages/tasks/shared', () => ({ AddLinkRow: () => null }))
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k }) }))
+vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatNumber: (n: number) => String(n) }) }))
 vi.mock('@/components/ui/richtext/assistActionsExecuteApi', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/components/ui/richtext/assistActionsExecuteApi')>()
   return { ...actual, executeRichTextActions: vi.fn() }

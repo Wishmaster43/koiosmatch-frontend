@@ -13,6 +13,7 @@ import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useLookups } from '@/context/LookupsContext'
 import { usePublishSelection } from '@/context/SelectionContext'
+import { useLocale } from '@/lib/datetime'
 import { useGenders } from '@/lib/useGenders'
 import { useUsers } from '@/lib/queries'
 import CandidateDrawerJs from './CandidateDrawer'
@@ -161,8 +162,9 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   }
 
   // ── Data layer ──
+  const locale = useLocale()
   const { candidates, setCandidates, loading, error, total, setTotal, lastPage, stats, statsFailed, locations, rowsEpoch, fetching } =
-    useCandidatesData({ filterParams, page, pageSize, t, setActionMsg, sort })
+    useCandidatesData({ filterParams, page, pageSize, t, setActionMsg, sort, locale })
 
   // SELECT-RACE-1: rowsEpoch (bumped only when a NEW server result actually lands,
   // see useCandidatesData) closes the race where a select-all made against the

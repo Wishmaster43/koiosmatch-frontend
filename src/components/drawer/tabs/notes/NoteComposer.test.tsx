@@ -22,6 +22,8 @@ import userEvent from '@testing-library/user-event'
 import NoteComposer from './NoteComposer'
 import { chipInk } from '@/lib/tint'
 
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k, i18n: { language: 'nl' } }) }))
+vi.mock('@/lib/datetime', () => ({ useLocale: () => 'nl-NL' }))
 vi.mock('@/components/ui/RichTextEditor', () => ({
   // Renders `toolbarExtra` like the real editor does — the dictation mic lives in
   // that slot now (Danny 08-08 "mic naast de taal"), so the mock must mount it.

@@ -14,6 +14,7 @@ vi.mock('@/lib/api', async () => {
 })
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+vi.mock('@/lib/formatters', () => ({ formatFileSizeMb: (bytes: number) => String(Math.round(bytes / 1048576 * 10) / 10), formatNumber: (n: number) => String(n) }))
 
 const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
 

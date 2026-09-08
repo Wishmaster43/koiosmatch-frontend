@@ -13,6 +13,7 @@ import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
 import SoftChip from '@/components/ui/SoftChip'
 import { useDateFormat } from '@/lib/datetime'
+import { useNumberFormat } from '@/lib/formatters'
 import { initialsOf } from '@/lib/initials'
 import { SM_CANDIDATE_STATUS_COLORS } from './data/smCandidateStatus'
 import { endDateOf } from './data/smCandidateFields'
@@ -35,11 +36,13 @@ interface SmCandidatesTableProps {
 export default function SmCandidatesTable({ rows, loading, onRowClick }: SmCandidatesTableProps) {
   const { t } = useTranslation(['shiftmanager', 'reports'])
   const { formatDate } = useDateFormat()
+  const { formatCurrency } = useNumberFormat()
 
   // Column defs — memoized so DataTable's per-row memo actually holds (mirrors
   // the native CandidatesTable's rationale: a stable `columns` reference keeps
   // a row from re-rendering when unrelated rows/state change).
   const columns: Column<ReportCandidate>[] = useMemo(() => [
+    // Column configurations use formatCurrency for hour rates (included in dependency array below).
     {
       key: 'name', header: t('candidates.cols.name', { ns: 'reports' }), sortable: true,
       sortValue: c => `${c.firstname ?? ''} ${c.lastname ?? ''}`.trim(), sticky: true, width: 200, nowrap: true,
@@ -107,7 +110,7 @@ export default function SmCandidatesTable({ rows, loading, onRowClick }: SmCandi
             {shown.map((r: GlobalRate, i: number) => (
               <Caption key={i} as="span" style={{ whiteSpace: 'nowrap' }}>
                 <span style={{ color: 'var(--text-muted)' }}>{r.global_rate?.internal_description ?? r.step_name ?? '—'}: </span>
-                <span style={monoCell}>{r.hour_rate != null ? `€${Number(r.hour_rate).toFixed(2)}` : '—'}</span>
+                <span style={monoCell}>{r.hour_rate != null ? formatCurrency(r.hour_rate, 'EUR', undefined, 2) : '—'}</span>
               </Caption>
             ))}
             {rates.length > shown.length && (
@@ -117,7 +120,7 @@ export default function SmCandidatesTable({ rows, loading, onRowClick }: SmCandi
         )
       },
     },
-  ], [t, formatDate])
+  ], [t, formatDate, formatCurrency])
 
   return (
     <DataTable

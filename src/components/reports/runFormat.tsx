@@ -7,6 +7,7 @@ import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Ban, CheckCircle, XCircle, RotateCcw, Clock } from 'lucide-react'
 import { formatDateTimeStr } from '@/lib/localDate'
+import { formatSeconds } from '@/lib/formatters'
 import SoftChip from '@/components/ui/SoftChip'
 import CalloutBox from '@/components/ui/CalloutBox'
 
@@ -17,11 +18,12 @@ import CalloutBox from '@/components/ui/CalloutBox'
 export const formatDT = formatDateTimeStr
 
 // Format a millisecond duration as ms / s / m s (or em-dash if empty).
+// Caller passes locale (DATUM-1/LANE-B) for locale-aware second formatting.
 // eslint-disable-next-line react-refresh/only-export-components -- shared formatter every run table/drawer in this file imports; HMR-nicety warning only
-export function formatDuration(ms?: number | null) {
+export function formatDuration(ms?: number | null, locale: string = 'nl-NL') {
   if (ms == null) return '—'
   if (ms < 1000) return `${ms}ms`
-  if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`
+  if (ms < 60000) return `${formatSeconds(ms, locale)}s`
   return `${Math.floor(ms / 60000)}m ${Math.floor((ms % 60000) / 1000)}s`
 }
 

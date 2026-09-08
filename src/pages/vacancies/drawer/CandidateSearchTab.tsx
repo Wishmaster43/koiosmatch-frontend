@@ -16,6 +16,7 @@ import { RefreshCw, X, ChevronRight } from 'lucide-react'
 import GeoSearchShell from '@/components/search/GeoSearchShell'
 import ScorePill from '@/components/match/ScorePill'
 import MatchScoreBlock from '@/components/match/MatchScoreBlock'
+import { useNumberFormat } from '@/lib/formatters'
 // audit scalability-3: Leaflet only downloads when this tab actually renders the map —
 // the static import used to pull it into the page chunk via the drawer's tab list (§9).
 const RadiusMap = lazy(() => import('@/components/map/RadiusMap'))
@@ -53,6 +54,7 @@ const rowStyle: CSSProperties = { display: 'flex', alignItems: 'center', justify
 export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation('vacancies')
   const { formatDate } = useDateFormat()
+  const { formatDistanceKm } = useNumberFormat()
   const { functions: functionOptions } = useFunctions()
   const { statuses: statusOptions, candidateTypes } = useLookups()
   // OPENERS-HIDE-1 (pass 5): POST /applications is gated on applications.create
@@ -246,7 +248,7 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         {/* HUISSTIJL-1: Caption owns the 11/muted identity; Mono only adds the font-family. */}
         {selectedRow.distanceKm != null && (
-          <Caption><Mono>{selectedRow.distanceKm.toFixed(1)} km</Mono></Caption>
+          <Caption><Mono>{formatDistanceKm(selectedRow.distanceKm)} km</Mono></Caption>
         )}
         <StatusPill label={selectedRow.statusLabel || selectedRow.status} color={selectedRow.statusColor} />
       </div>
@@ -313,7 +315,7 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
               {r.score != null && <ScorePill score={r.score} />}
               {/* HUISSTIJL-1: Caption owns the 11/muted identity; Mono only adds the font-family. */}
               {r.distanceKm != null && (
-                <Caption><Mono>{r.distanceKm.toFixed(1)} km</Mono></Caption>
+                <Caption><Mono>{formatDistanceKm(r.distanceKm)} km</Mono></Caption>
               )}
               {/* Expand affordance (point 17, mirrors VacancySearchTab): a visible
                   chevron on EVERY row signals the row opens a preview, on top of

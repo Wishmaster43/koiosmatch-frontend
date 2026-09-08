@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { renderHook } from '@testing-library/react'
-import { formatNumber, formatNumberCompact, formatCurrency, formatPercent, formatRatio, useNumberFormat } from './formatters'
+import { formatNumber, formatNumberCompact, formatCurrency, formatPercent, formatRatio, formatDistanceKm, formatFileSizeMb, formatCoord, formatSeconds, useNumberFormat } from './formatters'
 
 describe('formatNumber', () => {
   it('groups thousands with the nl-NL separator by default', () => {
@@ -61,6 +61,35 @@ describe('formatPercent / formatRatio', () => {
 
   it('follows the locale separator', () => {
     expect(formatPercent(5.882, 'en-GB')).toBe('5.9%')
+  })
+})
+
+describe('formatDistanceKm / formatFileSizeMb / formatCoord / formatSeconds', () => {
+  it('formats distance with max 1 decimal and locale grouping', () => {
+    expect(formatDistanceKm(12.34)).toBe('12,3')
+    expect(formatDistanceKm(12.34, 'en-GB')).toBe('12.3')
+  })
+
+  it('formats file size in MB with max 1 decimal', () => {
+    expect(formatFileSizeMb(123.45 * 1024 * 1024)).toBe('123,5')
+    expect(formatFileSizeMb(123.45 * 1024 * 1024, 'en-GB')).toBe('123.5')
+  })
+
+  it('formats coordinates with fixed 5 decimals, locale-independent', () => {
+    expect(formatCoord(52.3667)).toBe('52.36670')
+    expect(formatCoord(52.3667)).toBe('52.36670')
+  })
+
+  it('formats seconds from milliseconds with max 1 decimal', () => {
+    expect(formatSeconds(1234)).toBe('1,2')
+    expect(formatSeconds(1234, 'en-GB')).toBe('1.2')
+  })
+
+  it('returns dash for invalid/null input on all new formatters', () => {
+    expect(formatDistanceKm(null)).toBe('—')
+    expect(formatFileSizeMb(undefined)).toBe('—')
+    expect(formatCoord('invalid')).toBe('—')
+    expect(formatSeconds(NaN)).toBe('—')
   })
 })
 

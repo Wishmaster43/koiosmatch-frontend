@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
 import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
 import { useRightPanel } from '@/context/RightPanelContext'
+import { useNumberFormat } from '@/lib/formatters'
 import ModuleView       from '@/components/settings/ModuleView'
 import EntityListDrawer  from '@/components/ui/EntityListDrawer'
 import Spinner from '@/components/ui/Spinner'
@@ -18,6 +19,7 @@ import type { SmDrillItem } from '@/types/shiftmanager'
 // Renders the KPI blocks and shifts chart, registers filters into the right panel, and opens a drill-down drawer on KPI click.
 export default function CustomersReport() {
   const { t } = useTranslation('shiftmanager')
+  const { formatNumber } = useNumberFormat()
   const { customers, loading } = useSmCustomerTree()
   const [drawer, setDrawer] = useState<{ title: string; items: SmDrillItem[] } | null>(null)
 
@@ -67,12 +69,12 @@ export default function CustomersReport() {
     },
     total_locations: {
       value: totalLoc,
-      sub: active.length > 0 ? t('customersReport.sub.avgPerCustomer', { n: (totalLoc / Math.max(active.length, 1)).toFixed(1) }) : undefined,
+      sub: active.length > 0 ? t('customersReport.sub.avgPerCustomer', { n: formatNumber(totalLoc / Math.max(active.length, 1), 1) }) : undefined,
       onClick: !loading ? () => setDrawer({ title: t('customersReport.drill.allLocations'), items: drillLocations }) : undefined,
     },
     total_departments: {
       value: totalDep,
-      sub: totalLoc > 0 ? t('customersReport.sub.avgPerLocation', { n: (totalDep / Math.max(totalLoc, 1)).toFixed(1) }) : undefined,
+      sub: totalLoc > 0 ? t('customersReport.sub.avgPerLocation', { n: formatNumber(totalDep / Math.max(totalLoc, 1), 1) }) : undefined,
       onClick: !loading ? () => setDrawer({ title: t('customersReport.drill.allDepartments'), items: drillDepartments }) : undefined,
     },
     customers_without_location: {

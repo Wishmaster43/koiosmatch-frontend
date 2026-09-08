@@ -22,6 +22,7 @@ import api, { unwrap } from '@/lib/api'
 import { toCoord } from '@/lib/coords'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { formatCoord } from '@/lib/formatters'
 import { Mono } from '@/components/ui/typography'
 import type { Candidate } from '@/types/candidate'
 
@@ -171,7 +172,7 @@ export default function IntegrationsTab({ c, onUpdate }: {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <SoftChip label={t('backofficeLinks.geocode.linked')} color="var(--color-success)" />
               <Mono style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                {effectiveLat?.toFixed(5)}, {effectiveLng?.toFixed(5)}
+                {formatCoord(effectiveLat)}, {formatCoord(effectiveLng)}
               </Mono>
             </div>
           ) : (

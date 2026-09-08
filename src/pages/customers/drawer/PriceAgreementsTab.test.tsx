@@ -39,12 +39,16 @@ import { useAuth } from '@/context/AuthContext'
 // what the comment above is avoiding) so `todayIso` still computes for real.
 vi.mock('@/lib/datetime', () => ({
   useDateFormat: () => ({ formatDate: (v: string) => v }),
-  toLocalIsoDate: (d: Date) => {
-    const y = d.getFullYear()
-    const m = String(d.getMonth() + 1).padStart(2, '0')
-    const day = String(d.getDate()).padStart(2, '0')
-    return `${y}-${m}-${day}`
-  },
+  useLocale: () => 'nl-NL',
+  toLocalIsoDate: () => '',
+  // Re-exports from localDate — needed to prevent "not exported" errors
+  humanizeIsoDates: (s: string) => s,
+  formatDateOnly: (s: string) => s,
+  formatDateTimeStr: (s: string) => s,
+  ddmmyyyy: () => '',
+  hhmm: () => '',
+  hhmmss: () => '',
+  formatMonthYear: () => '',
 }))
 vi.mock('../hooks/usePriceAgreements', () => ({ usePriceAgreements: vi.fn() }))
 // TOOLBAR-4: the toolbar tests below render a real (populated) row list, which

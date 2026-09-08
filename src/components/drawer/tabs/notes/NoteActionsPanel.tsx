@@ -24,15 +24,9 @@ import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 import { humanizeIsoDates } from '@/lib/localDate'
 import { buildEntityDeepLink } from '@/components/ui/EntityLink'
 import { useAssistActionsExecute } from '@/components/ui/richtext/useAssistActionsExecute'
+import { useNumberFormat } from '@/lib/formatters'
 import type { AssistActionType } from './noteAssistApi'
 import type { ActionBudget } from '@/types/actionBudget'
-
-// Plain grouped-number formatting for the budget line — deliberately NOT
-// lib/formatters' useNumberFormat: that module re-exports lib/datetime, whose
-// import graph self-initialises real i18next as a side effect (BARREL-DATETIME-LES,
-// CLAUDE.md §2) — pulling it into this component would drag real i18n into every
-// test file that renders NoteActionsPanel without expecting that cascade.
-const formatCount = (n: number) => new Intl.NumberFormat().format(n)
 
 // One panel item — a suggested action item plus its OWN execution outcome.
 // `created` only appears once the server actually made a record (executed).
@@ -131,12 +125,13 @@ function StatusChip({ status }: { status: NoteActionPanelItem['status'] }) {
 // One editable item card — pencil toggles inline title + date/start inputs;
 // edits are kept in-panel and sent VERBATIM on the next execute (the backend
 // runs items[].title/message/start/due_date exactly as posted).
-function ActionItemCard({ item, index, onEdit, onConfirm, candidateId }: {
+function ActionItemCard({ item, index, onEdit, onConfirm, candidateId, formatNumber }: {
   item: NoteActionPanelItem
   index: number
   onEdit: (index: number, patch: Partial<NoteActionPanelItem>) => void
   onConfirm: (index: number) => void
   candidateId?: string
+  formatNumber: (n: number) => string
 }) {
   const { t } = useTranslation('common')
   const [editing, setEditing] = useState(false)
@@ -223,7 +218,7 @@ function ActionItemCard({ item, index, onEdit, onConfirm, candidateId }: {
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-warning-text)' }}>
             <AlertTriangle size={12} />
             {item.budget?.used != null && item.budget?.allowance != null && t('notesAssist.panel.budgetLine', {
-              used: formatCount(item.budget.used), allowance: formatCount(item.budget.allowance), unit: item.budget.unit ?? '',
+              used: formatNumber(item.budget.used), allowance: formatNumber(item.budget.allowance), unit: item.budget.unit ?? '',
               defaultValue: '{{used}}/{{allowance}} {{unit}}',
             })}
             {item.budget?.upgrade_hint?.next_tier_label && (
@@ -245,6 +240,7 @@ function ActionItemCard({ item, index, onEdit, onConfirm, candidateId }: {
 // Renders the action list and drives its batch execute/auto-run; Wizard confirms per item, Auto runs the same path unattended.
 export default function NoteActionsPanel({ items, onItemsChange, noteId, candidateId, autoRun }: NoteActionsPanelProps) {
   const { t } = useTranslation('common')
+  const { formatNumber } = useNumberFormat()
   const exec = useAssistActionsExecute(noteId ? { note_id: noteId } : {})
   const hasProposed = items.some(it => it.status === 'proposed')
   // Always-current panel items for the sync effect below (avoids re-running
@@ -341,7 +337,7 @@ export default function NoteActionsPanel({ items, onItemsChange, noteId, candida
         <Caption as="div" style={{ color: 'var(--color-danger-text)' }}>{exec.errorMessage}</Caption>
       )}
       {items.map((it, i) => (
-        <ActionItemCard key={`${it.title}__${it.type}__${i}`} item={it} index={i} onEdit={editItem} onConfirm={confirmOne} candidateId={candidateId} />
+        <ActionItemCard key={`${it.title}__${it.type}__${i}`} item={it} index={i} onEdit={editItem} onConfirm={confirmOne} candidateId={candidateId} formatNumber={formatNumber} />
       ))}
     </div>
   )

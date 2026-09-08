@@ -12,19 +12,19 @@ import { useNumberFormat } from '@/lib/formatters'
 const DEFAULT_COLORS = CHART_SERIES_COLORS
 
 // `unit` is an optional label appended to the count tooltip (e.g. "12 candidates").
-// `formatNumber` is passed in (the tooltip is a plain function, not a component,
+// `formatNumber` and `formatPercent` are passed in (the tooltip is a plain function, not a component,
 // so it can't call the useNumberFormat hook itself — see LineTooltip's `t` prop).
-function ChartTooltip({ active, payload, total, showPercent, unit, formatNumber }: TipProps & { total?: number; showPercent?: boolean; unit?: string; formatNumber: (v: number) => string }) {
+function ChartTooltip({ active, payload, total, showPercent, unit, formatNumber, formatPercent: fmt }: TipProps & { total?: number; showPercent?: boolean; unit?: string; formatNumber: (v: number) => string; formatPercent: (v: number) => string }) {
   if (!active || !payload?.length) return null
   const item = payload[0]
   const val  = item.value ?? 0
-  const pct  = total ? ((val / total) * 100).toFixed(1) : '0'
+  const pct  = total ? fmt((val / total) * 100) : '—'
   return (
     <div className="px-4 py-3 text-sm rounded-xl"
       style={{ background: 'var(--surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-float)' }}>
       <div className="mb-1 font-medium" style={{ color: 'var(--text)' }}>{item.name}</div>
       <div style={{ color: item.payload?.fill }}>
-        {showPercent ? `${pct}%` : `${formatNumber(val)}${unit ? ' ' + unit : ''}`}
+        {showPercent ? pct : `${formatNumber(val)}${unit ? ' ' + unit : ''}`}
       </div>
     </div>
   )
@@ -49,7 +49,7 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
 }) {
   const { t } = useTranslation('common')
   // Locale-aware grouping (§ FMT-GETAL-1) — never a hardcoded 'nl-NL' toLocaleString.
-  const { formatNumber } = useNumberFormat()
+  const { formatNumber, formatPercent: fmt } = useNumberFormat()
   const total = data.reduce((s, d) => s + d.value, 0)
 
   if (!data.length) {
@@ -91,7 +91,7 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
                   cursor={onItemClick && !isInert?.(data[i]) ? 'pointer' : 'default'} />
               ))}
             </Pie>
-            <Tooltip content={<ChartTooltip total={total} showPercent={showPercent} unit={unit} formatNumber={formatNumber} />} />
+            <Tooltip content={<ChartTooltip total={total} showPercent={showPercent} unit={unit} formatNumber={formatNumber} formatPercent={fmt} />} />
           </PieChart>
         </div>
         </ErrorBoundary>
@@ -100,7 +100,7 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
         {!hideLegend && (
         <div className="flex flex-col flex-1 min-w-0 gap-2">
           {data.map((entry, i) => {
-            const pct = total ? ((entry.value / total) * 100).toFixed(1) : '0'
+            const pct = total ? fmt((entry.value / total) * 100) : '—'
             // Keyboard operability (§6): a clickable legend row is a REAL control
             // — role/tabIndex/Enter+Space, mirroring the SegmentBars rows these
             // donuts replaced on the report pages (wave-2 Opus finding). An inert
@@ -124,7 +124,7 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
                   <span className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{entry.name}</span>
                 </div>
                 <span className="flex-shrink-0 text-xs font-medium" style={{ color: 'var(--text)' }}>
-                  {showPercent ? `${pct}%` : formatNumber(entry.value)}
+                  {showPercent ? pct : formatNumber(entry.value)}
                 </span>
               </div>
             )

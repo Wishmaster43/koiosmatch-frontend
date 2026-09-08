@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { Layers, MapPin, Building2, Hash } from 'lucide-react'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
 import { useRightPanel } from '@/context/RightPanelContext'
+import { useNumberFormat } from '@/lib/formatters'
 import KpiBlock from '@/components/ui/KpiBlock'  // shared KPI card
 import Spinner from '@/components/ui/Spinner'
 import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
@@ -16,6 +17,7 @@ import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
 // its KPI counts, and registers the customer filter with the shared right panel.
 export default function DepartmentsReport() {
   const { t } = useTranslation('shiftmanager')
+  const { formatNumber } = useNumberFormat()
   const { customers, loading } = useSmCustomerTree()
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>([])
 
@@ -85,7 +87,7 @@ export default function DepartmentsReport() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 28 }}>
         <KpiBlock label={t('departmentsReport.kpi.totalDepartments')}  value={departments.length}        icon={Layers}    color="var(--color-violet)" bg="var(--color-violet-bg)" loading={loading} />
         <KpiBlock label={t('departmentsReport.kpi.uniqueLocations')}   value={uniqueLocations.length}    icon={MapPin}    color="var(--color-secondary)" bg="var(--color-secondary-bg)" loading={loading}
-          sub={uniqueLocations.length > 0 ? t('departmentsReport.sub.avgPerLocation', { n: (departments.length / Math.max(uniqueLocations.length, 1)).toFixed(1) }) : undefined} />
+          sub={uniqueLocations.length > 0 ? t('departmentsReport.sub.avgPerLocation', { n: formatNumber(departments.length / Math.max(uniqueLocations.length, 1), 1) }) : undefined} />
         <KpiBlock label={t('departmentsReport.kpi.uniqueCustomers')}   value={uniqueCustomers.length}    icon={Building2} color="var(--color-success)" bg="var(--color-success-bg)" loading={loading} />
         <KpiBlock label={t('departmentsReport.kpi.withCostCenter')}
           value={departments.filter(d => d.cost_center).length}

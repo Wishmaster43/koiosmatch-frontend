@@ -35,6 +35,21 @@ import { monoStyle } from '@/components/ui/typography'
 // renders as a viewer who HAS the permission. The gate itself is proven by its
 // own describe block at the bottom of this file.
 const mockHasPermission = vi.fn()
+// This test suite runs WITHOUT real i18n (line 21), so prevent @/lib/datetime's
+// module-scope i18n bootstrap from initializing — add useLocale to prevent
+// "not exported" errors if it's imported transitively.
+vi.mock('@/lib/datetime', () => ({
+  useDateFormat: () => ({ formatDate: (v: string) => v }),
+  useLocale: () => 'nl-NL',
+  toLocalIsoDate: () => '',
+  humanizeIsoDates: (s: string) => s,
+  formatDateOnly: (s: string) => s,
+  formatDateTimeStr: (s: string) => s,
+  ddmmyyyy: () => '',
+  hhmm: () => '',
+  hhmmss: () => '',
+  formatMonthYear: () => '',
+}))
 // DOC-BANK-2: the slot has its own suite — a marker stub keeps this one on the card's wiring.
 vi.mock('./IbanDocumentSlot', () => ({ default: ({ onLink }: { onLink: (id: string | null) => void }) => (
   <div data-testid="iban-doc-slot"><button type="button" data-testid="iban-doc-slot-link" onClick={() => onLink('stub-id')}>link</button></div>

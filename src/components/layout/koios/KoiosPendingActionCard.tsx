@@ -27,6 +27,7 @@ import Button from '@/components/ui/Button'
 import CalloutBox from '@/components/ui/CalloutBox'
 import { Caption } from '@/components/ui/typography'
 import SoftChip from '@/components/ui/SoftChip'
+import { useNumberFormat } from '@/lib/formatters'
 import { confirmPendingAction, cancelPendingAction } from './koiosApi'
 import { entityIconEl } from './koiosEntityIcons'
 import { useKoiosToolCapabilities, findToolCapability, KOIOS_CONNECTION_HASH } from './useKoiosToolCapabilities'
@@ -38,13 +39,6 @@ type CardStatus = 'proposed' | 'confirming' | 'submitting' | 'confirmed' | 'canc
 // A pending-action REST call's error status, when the server rejects it because
 // the proposal is gone/already resolved (never a generic error in that case).
 const isExpiredStatus = (status?: number) => status === 404 || status === 410 || status === 422
-
-// Plain grouped-number formatting for the budget line — deliberately NOT
-// lib/formatters' useNumberFormat: that module re-exports lib/datetime, whose
-// import graph self-initialises real i18next as a side effect (BARREL-DATETIME-LES,
-// CLAUDE.md §2) — pulling it into this component would drag real i18n into every
-// test file that renders KoiosPendingActionCard without expecting that cascade.
-const formatCount = (n: number) => new Intl.NumberFormat().format(n)
 
 // Best-effort: surface an "owner" preview row next to the entity chip, if present
 // (KOIOS-AGENT-PLAN §7 Job 2 — "naam + eigenaar wanneer aanwezig in preview").
@@ -76,6 +70,7 @@ function PreviewRow({ row }: { row: KoiosPreviewRow }) {
 // and (for a destructive action) a required second confirm step before submitting.
 export default function KoiosPendingActionCard({ action }: { action: KoiosPendingAction }) {
   const { t } = useTranslation(['common', 'koios'])
+  const { formatNumber } = useNumberFormat()
   const [status, setStatus] = useState<CardStatus>('proposed')
   const [remaining, setRemaining] = useState(() => secondsLeft(action.expires_at))
   const [refusedReason, setRefusedReason] = useState<string | null>(null)
@@ -217,7 +212,7 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
           {budget && (
             <Caption as="p" style={{ marginTop: 4 }}>
               {budget.used != null && budget.allowance != null && t('koios.pendingAction.budgetLine', {
-                used: formatCount(budget.used), allowance: formatCount(budget.allowance), unit: budget.unit ?? '',
+                used: formatNumber(budget.used), allowance: formatNumber(budget.allowance), unit: budget.unit ?? '',
               })}
               {budget.upgrade_hint?.next_tier_label && (
                 <> · {t('koios.pendingAction.upgradeHint', { tier: budget.upgrade_hint.next_tier_label })}</>
