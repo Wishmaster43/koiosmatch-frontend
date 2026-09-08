@@ -31,7 +31,9 @@ import { useAdminBillingBudgets } from './useAdminBillingBudgets'
 import type {
   AdminBillingBudgetsResponse, AdminBillingBudgetsUpdate, BillingBudgetEntry,
 } from '@/types/billingUsage'
-import { PACKAGE_KEYS, label, inputWrap, inputStyle } from './billingCardStyles'
+import { PACKAGE_KEYS } from './billingCardStyles'
+import { NumberField, SettingCardList, SettingRow } from '../components/SettingsKit'
+import CurrencyInput from '@/components/ui/CurrencyInput'
 
 // A package row's editable numbers, blank = 0/null for empty fields.
 // ai_token_budget dropped (PRIJSMODEL-C): read-only ai_tier_key replaces it.
@@ -139,25 +141,20 @@ export default function BillingBudgetsCard() {
               <SectionTitle style={{ marginBottom: 8 }}>
                 {t(`billingBudgets.package.${key}`, { defaultValue: key })}
               </SectionTitle>
-              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-                <div style={{ flex: '1 1 160px', minWidth: 140 }}>
-                  <label style={label} htmlFor={`billing-budget-wf-${key}`}>{t('billingBudgets.workflowBudgetLabel')}</label>
-                  <div style={inputWrap}>
-                    <input id={`billing-budget-wf-${key}`} type="number" min={0} step={1}
-                      value={drafts[key].included_workflow_runs}
-                      onChange={(e) => setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], included_workflow_runs: e.target.value } }))}
-                      style={inputStyle} />
-                  </div>
-                </div>
-                <div style={{ flex: '1 1 160px', minWidth: 140 }}>
-                  <label style={label} htmlFor={`billing-budget-base-${key}`}>{t('billingBudgets.baseFee')}</label>
-                  <div style={inputWrap}>
-                    <input id={`billing-budget-base-${key}`} type="number" min={0} step={0.01}
-                      value={drafts[key].base_price_cents}
-                      onChange={(e) => setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], base_price_cents: e.target.value } }))}
-                      style={inputStyle} />
-                  </div>
-                </div>
+              <SettingCardList>
+                <SettingRow label={t('billingBudgets.workflowBudgetLabel')}>
+                  <NumberField value={Number(drafts[key].included_workflow_runs) || 0} min={0} width={110}
+                    ariaLabel={`${t('billingBudgets.workflowBudgetLabel')}: ${t(`billingBudgets.package.${key}`, { defaultValue: key })}`}
+                    onChange={(v: number) => setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], included_workflow_runs: String(v) } }))} />
+                </SettingRow>
+                {/* The draft holds euros as text (the PUT converts to cents); the field shows and edits euros. */}
+                <SettingRow label={t('billingBudgets.baseFee')}>
+                  <CurrencyInput cents={Math.round((Number(drafts[key].base_price_cents) || 0) * 100)} width={110} unit={t('billingTiers.perMonth')}
+                    ariaLabel={`${t('billingBudgets.baseFee')}: ${t(`billingBudgets.package.${key}`, { defaultValue: key })}`}
+                    onChange={(cents) => setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], base_price_cents: cents == null ? '' : String(cents / 100) } }))} />
+                </SettingRow>
+              </SettingCardList>
+              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center', marginTop: 8 }}>
                 {/* PRIJSMODEL-C: AI capacity is a staffel now — read-only, never an input, never PUT'd. */}
                 {entry?.ai_tier_key && (
                   <Caption style={{ paddingBottom: 8 }}>

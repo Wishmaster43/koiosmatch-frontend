@@ -274,9 +274,9 @@
     "vacanciesSubtitle": "Objectifs pour les tableaux de bord et les rapports. L'ancienneté des postes est gérée sous Koios AI → Seuils de conseils.",
     "fields": {
       "new_candidates_target": {
-        "label": "Objectif nouveaux candidats / mois",
+        "label": "Objectif nouveaux leads / mois",
         "description": "Objectif mensuel de nouvelles inscriptions",
-        "unit": "candidats"
+        "unit": "leads"
       },
       "no_contact_alert_months": {
         "label": "Alerte : aucun contact ≥ N mois",
@@ -3382,7 +3382,7 @@
     "loadError": "Le chargement des profils de génération a échoué.",
     "saveFailed": "L'enregistrement a échoué.",
     "empty": "Aucun profil de génération créé pour le moment.",
-    "add": "+ Profil",
+    "add": "Ajouter un profil",
     "nameLabel": "Nom",
     "namePlaceholder": "Ex. Logistique — équipes flex du matin",
     "priorityLabel": "Priorité",
@@ -3849,8 +3849,11 @@
     "markupLabel": "Marge IA (%)",
     "loadError": "Échec du chargement de la tarification de la plateforme.",
     "saved": "Tarification de la plateforme enregistrée.",
-    "fxUsdEurLabel": "Taux de change USD→EUR",
-    "fxUsdEurHint": "Taux de change pour la conversion USD en EUR (par défaut 1,0)"
+    "markupHint": "Marge sur le prix d’achat de l’usage IA, en pourcentage.",
+    "workflowTokenPriceLabel": "Prix par jeton de workflow supplémentaire",
+    "workflowTokenPriceHint": "Le prix d’un jeton de workflow au-delà du palier.",
+    "workflowTokenPriceWhere": "Réglable sous Forfait → Paliers → Dépassement.",
+    "saveFailed": "L’enregistrement des prix de la plateforme a échoué."
   },
   "invoiceSettings": {
     "title": "Paramètres de facturation",
@@ -3980,8 +3983,7 @@
     "colLabel": "Palier",
     "colIncludedTokens": "Jetons par mois",
     "colIncludedRuns": "Jetons de workflow par mois",
-    "colPrice": "Prix par mois (centimes)",
-    "priceCaption": "= {{amount}} par mois",
+    "colPrice": "Prix par mois",
     "colActive": "Actif",
     "colInUse": "En utilisation",
     "catalogEmpty": "Aucun palier chargé.",
@@ -3989,8 +3991,8 @@
     "inUseValue_other": "{{count}} clients",
     "overageHeading": "Overage",
     "overageEnabled": "Autoriser l'utilisation au-delà du palier",
-    "overageAiPrice": "Prix par jeton supplémentaire (centimes)",
-    "overageWorkflowPrice": "Prix par jeton de workflow supplémentaire (centimes)",
+    "overageAiPrice": "Prix par jeton supplémentaire",
+    "overageWorkflowPrice": "Prix par jeton de workflow supplémentaire",
     "overageOffCaption": "Désactivé : à 100 %, Koios bloque et demande au client un palier supérieur.",
     "warnPctLabel": "Avertir à partir de (%)",
     "upgradeContactLabel": "Contact de mise à niveau (mailto ou URL)",
@@ -4015,15 +4017,22 @@
     "loadError": "Impossible de charger les paliers.",
     "saveFailed": "L'enregistrement des paliers a échoué.",
     "saved": "Paliers enregistrés.",
-    "unavailable": "Les paliers ne sont pas encore disponibles sur ce serveur."
+    "unavailable": "Les paliers ne sont pas encore disponibles sur ce serveur.",
+    "perMonth": "par mois",
+    "tabs": {
+      "ai": "Paliers IA",
+      "workflow": "Paliers de workflow",
+      "overage": "Dépassement",
+      "includes": "Inclus par forfait",
+      "tenants": "Palier par tenant"
+    }
   },
   "billingUsers": {
     "title": "Utilisateurs",
     "subtitle": "Utilisateurs inclus et prix par utilisateur supplémentaire par pack, et l'occupation actuelle par client.",
     "packagesHeading": "Packs",
     "includedUsersLabel": "Utilisateurs inclus",
-    "extraPriceLabel": "Prix par utilisateur supplémentaire (centimes)",
-    "extraPriceCaption": "= {{amount}} par utilisateur supplémentaire",
+    "extraPriceLabel": "Prix par utilisateur supplémentaire",
     "loadError": "Impossible de charger les données utilisateurs.",
     "saveFailed": "L'enregistrement a échoué.",
     "saved": "Enregistré.",
@@ -4035,7 +4044,8 @@
     "colIncluded": "Inclus",
     "colExtra": "Supplémentaires",
     "unlimited": "Illimité",
-    "extraValue": "{{count}} supplémentaires · {{amount}}"
+    "extraValue": "{{count}} supplémentaires · {{amount}}",
+    "perUser": "par utilisateur"
   },
   "dashboardsOrderRoleLabel": "Rôle",
   "dashboardsOrderHint": "Définit l'ordre dans lequel les tuiles KPI apparaissent sur le tableau de bord pour ce rôle. Seuls les KPI activés (onglet KPI) sont listés.",

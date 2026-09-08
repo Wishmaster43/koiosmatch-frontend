@@ -2,16 +2,17 @@
  * TierCatalogTable (PRIJSMODEL-C, DEEL C §4c) — one meter's platform tier
  * catalog (AI or workflow), fixed keys, no add/remove: label/monthly volume/
  * price/active are editable per row, `in_use` is read-only context. Props-only
- * presenter, mirrors BillingBudgetsCard's edit-in-place inputs but through the
- * shared DataTable (§4 HUISSTIJL-1) instead of hand-rolled cards.
+ * presenter on the shared DataTable with the settings-kit fields: the name is a
+ * plain TextField, the volume a NumberField (thousands grouped), the price a
+ * CurrencyInput in euros (the API keeps cents) — Danny 09-09: no mono names, no
+ * cents, a separator in every thousand.
  */
 import { useTranslation } from 'react-i18next'
 import DataTable from '@/components/ui/DataTable'
 import Toggle from '@/components/ui/Toggle'
-import { Caption } from '@/components/ui/typography'
-import { useNumberFormat } from '@/lib/formatters'
+import CurrencyInput from '@/components/ui/CurrencyInput'
 import type { BillingAiTier, BillingWorkflowTier } from '@/types/billingTiers'
-import { inputWrap, inputStyle } from '../billingCardStyles'
+import { NumberField, TextField } from '@/pages/settings/components/SettingsKit'
 
 // Patch shape a row edit sends up — only the fields this table can change.
 export type TierRowPatch = Partial<{ label: string; monthly: number; price_cents: number; active: boolean }>
@@ -33,57 +34,34 @@ const monthlyOf = (row: BillingAiTier | BillingWorkflowTier): number => {
 // Renders the fixed-key platform tier catalog for one meter as an editable DataTable.
 export default function TierCatalogTable({ meter, rows, onChange, disabled }: TierCatalogTableProps) {
   const { t } = useTranslation('settings')
-  const { formatCurrency } = useNumberFormat()
+  const volumeHeader = meter === 'ai' ? t('billingTiers.colIncludedTokens') : t('billingTiers.colIncludedRuns')
 
   const columns = [
     {
       key: 'label',
       header: t('billingTiers.colLabel'),
       render: (row: BillingAiTier | BillingWorkflowTier) => (
-        <div style={inputWrap}>
-          <input
-            aria-label={t('billingTiers.colLabel')}
-            value={row.label ?? ''}
-            disabled={disabled}
-            onChange={(e) => onChange(row.key, { label: e.target.value })}
-            style={inputStyle}
-          />
-        </div>
+        <TextField value={row.label ?? ''} width={180} disabled={disabled}
+          onChange={(v: string) => onChange(row.key, { label: v })} />
       ),
     },
     {
       key: 'monthly',
-      header: meter === 'ai' ? t('billingTiers.colIncludedTokens') : t('billingTiers.colIncludedRuns'),
+      header: volumeHeader,
       render: (row: BillingAiTier | BillingWorkflowTier) => (
-        <div style={inputWrap}>
-          <input
-            type="number" min={0} step={1}
-            aria-label={meter === 'ai' ? t('billingTiers.colIncludedTokens') : t('billingTiers.colIncludedRuns')}
-            value={monthlyOf(row)}
-            disabled={disabled}
-            onChange={(e) => onChange(row.key, { monthly: Number(e.target.value) || 0 })}
-            style={inputStyle}
-          />
-        </div>
+        <NumberField value={monthlyOf(row)} min={0} width={110} disabled={disabled}
+          ariaLabel={`${volumeHeader}: ${row.label || row.key}`}
+          onChange={(v: number) => onChange(row.key, { monthly: v })} />
       ),
     },
     {
       key: 'price_cents',
       header: t('billingTiers.colPrice'),
       render: (row: BillingAiTier | BillingWorkflowTier) => (
-        <div>
-          <div style={inputWrap}>
-            <input
-              type="number" min={0} step={1}
-              aria-label={t('billingTiers.colPrice')}
-              value={row.price_cents ?? 0}
-              disabled={disabled}
-              onChange={(e) => onChange(row.key, { price_cents: Number(e.target.value) || 0 })}
-              style={inputStyle}
-            />
-          </div>
-          <Caption>{t('billingTiers.priceCaption', { amount: formatCurrency((row.price_cents ?? 0) / 100) })}</Caption>
-        </div>
+        <CurrencyInput cents={row.price_cents ?? 0} width={110} disabled={disabled}
+          unit={t('billingTiers.perMonth')}
+          ariaLabel={`${t('billingTiers.colPrice')}: ${row.label || row.key}`}
+          onChange={(cents) => onChange(row.key, { price_cents: cents ?? 0 })} />
       ),
     },
     {

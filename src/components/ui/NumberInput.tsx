@@ -30,6 +30,8 @@ export interface NumberInputProps {
   prefix?: ReactNode
   unit?: ReactNode
   disabled?: boolean
+  // Fired once on blur with the final (clamped, rounded) value — for fields that persist themselves.
+  onCommit?: (value: number | null) => void
   placeholder?: string
   ariaLabel?: string
   id?: string
@@ -43,7 +45,7 @@ const clamp = (n: number, min?: number, max?: number) =>
   Math.min(max ?? Number.POSITIVE_INFINITY, Math.max(min ?? Number.NEGATIVE_INFINITY, n))
 
 export default function NumberInput({
-  value, onChange, min, max, decimals = 0, width = 96, prefix, unit, disabled = false,
+  value, onChange, min, max, decimals = 0, width = 96, prefix, unit, disabled = false, onCommit,
   placeholder, ariaLabel, id, mono = false, style,
 }: NumberInputProps) {
   const { t } = useTranslation('common')
@@ -73,7 +75,7 @@ export default function NumberInput({
   const handleBlur = () => {
     focusedRef.current = false
     const parsed = parseLocaleNumber(text, locale)
-    if (parsed == null) { setText(''); if (value != null) onChange(null); return }
+    if (parsed == null) { setText(''); if (value != null) onChange(null); onCommit?.(null); return }
     const factor = 10 ** decimals
     const clamped = clamp(parsed, min, max)
     const rounded = Math.round(clamped * factor) / factor
@@ -82,6 +84,7 @@ export default function NumberInput({
     else setNotice(null)
     if (rounded !== value) onChange(rounded)
     setText(format(rounded))
+    onCommit?.(rounded)
   }
 
   return (

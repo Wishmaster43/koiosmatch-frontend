@@ -1,9 +1,9 @@
 /**
- * TierCatalogTable tests (props-only presenter) — per-meter headers, no native
- * <select> in the DOM, and the cents caption rendering "= € 299,00".
+ * TierCatalogTable tests (props-only presenter) — per-meter headers, kit fields
+ * (grouped volume, euro price with cents on the wire), no native <select>.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import i18n from '@/i18n'
 import TierCatalogTable from './TierCatalogTable'
 import type { BillingAiTier, BillingWorkflowTier } from '@/types/billingTiers'
@@ -19,27 +19,32 @@ const workflowRows: BillingWorkflowTier[] = [
 ]
 
 describe('TierCatalogTable', () => {
-  // AI meter renders the tokens header and the € caption for its price.
-  it('renders the AI header and the cents-to-euro caption', () => {
+  it('renders the AI header, a grouped volume and the price in euros', () => {
     render(<TierCatalogTable meter="ai" rows={aiRows} onChange={vi.fn()} />)
     expect(screen.getByText(st('billingTiers.colIncludedTokens'))).toBeInTheDocument()
-    expect(screen.getByText(st('billingTiers.priceCaption', { amount: '€ 299,00' }))).toBeInTheDocument()
+    expect(screen.getByLabelText(`${st('billingTiers.colIncludedTokens')}: AI Pro`)).toHaveValue('10.000')
+    expect(screen.getByLabelText(`${st('billingTiers.colPrice')}: AI Pro`)).toHaveValue('299,00')
+    expect(screen.getAllByText(st('billingTiers.perMonth'))).toHaveLength(2)
   })
 
-  // Workflow meter renders the runs header instead of the tokens header.
+  it('hands an edited euro price up as cents', () => {
+    const onChange = vi.fn()
+    render(<TierCatalogTable meter="ai" rows={aiRows} onChange={onChange} />)
+    fireEvent.change(screen.getByLabelText(`${st('billingTiers.colPrice')}: AI Pro`), { target: { value: '349,50' } })
+    expect(onChange).toHaveBeenCalledWith('pro', { price_cents: 34950 })
+  })
+
   it('renders the workflow header', () => {
     render(<TierCatalogTable meter="workflow" rows={workflowRows} onChange={vi.fn()} />)
     expect(screen.getByText(st('billingTiers.colIncludedRuns'))).toBeInTheDocument()
     expect(screen.queryByText(st('billingTiers.colIncludedTokens'))).not.toBeInTheDocument()
   })
 
-  // No native <select> anywhere in the rendered table (CLAUDE.md §3A).
   it('never renders a native select', () => {
     const { container } = render(<TierCatalogTable meter="ai" rows={aiRows} onChange={vi.fn()} />)
     expect(container.querySelectorAll('select')).toHaveLength(0)
   })
 
-  // in_use renders as plain text, never a decorative dot.
   it('renders in_use as text', () => {
     render(<TierCatalogTable meter="ai" rows={aiRows} onChange={vi.fn()} />)
     expect(screen.getByText(st('billingTiers.inUseValue', { count: 2 }))).toBeInTheDocument()

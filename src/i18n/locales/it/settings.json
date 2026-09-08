@@ -274,9 +274,9 @@
     "vacanciesSubtitle": "Valori obiettivo per dashboard e report. L'invecchiamento delle posizioni è gestito in Koios AI → Soglie di consiglio.",
     "fields": {
       "new_candidates_target": {
-        "label": "Obiettivo nuovi candidati / mese",
+        "label": "Obiettivo nuovi lead / mese",
         "description": "Obiettivo mensile per le nuove registrazioni",
-        "unit": "candidati"
+        "unit": "lead"
       },
       "no_contact_alert_months": {
         "label": "Avviso: nessun contatto da ≥ N mesi",
@@ -3382,7 +3382,7 @@
     "loadError": "Caricamento dei profili di generazione non riuscito.",
     "saveFailed": "Salvataggio non riuscito.",
     "empty": "Nessun profilo di generazione creato ancora.",
-    "add": "+ Profilo",
+    "add": "Aggiungi profilo",
     "nameLabel": "Nome",
     "namePlaceholder": "Ad es. Logistica, turni flessibili mattutini",
     "priorityLabel": "Priorità",
@@ -3849,8 +3849,11 @@
     "markupLabel": "Margine AI (%)",
     "loadError": "Caricamento dei prezzi piattaforma non riuscito.",
     "saved": "Prezzi piattaforma salvati.",
-    "fxUsdEurLabel": "Tasso di cambio USD→EUR",
-    "fxUsdEurHint": "Tasso di cambio per la conversione da USD a EUR (impostazione predefinita 1,0)"
+    "markupHint": "Ricarico sul prezzo di acquisto dell’uso AI, in percentuale.",
+    "workflowTokenPriceLabel": "Prezzo per token di workflow aggiuntivo",
+    "workflowTokenPriceHint": "Il prezzo di un token di workflow oltre lo scaglione.",
+    "workflowTokenPriceWhere": "Impostabile in Pacchetto → Scaglioni → Eccedenza.",
+    "saveFailed": "Salvataggio dei prezzi della piattaforma non riuscito."
   },
   "invoiceSettings": {
     "title": "Impostazioni fatture",
@@ -3980,8 +3983,7 @@
     "colLabel": "Fascia",
     "colIncludedTokens": "Token al mese",
     "colIncludedRuns": "Token workflow al mese",
-    "colPrice": "Prezzo al mese (centesimi)",
-    "priceCaption": "= {{amount}} al mese",
+    "colPrice": "Prezzo al mese",
     "colActive": "Attivo",
     "colInUse": "In uso",
     "catalogEmpty": "Nessuna fascia caricata.",
@@ -3989,8 +3991,8 @@
     "inUseValue_other": "{{count}} agenzie",
     "overageHeading": "Overage",
     "overageEnabled": "Consenti consumo oltre la fascia",
-    "overageAiPrice": "Prezzo per token extra (centesimi)",
-    "overageWorkflowPrice": "Prezzo per token workflow extra (centesimi)",
+    "overageAiPrice": "Prezzo per token aggiuntivo",
+    "overageWorkflowPrice": "Prezzo per token di workflow aggiuntivo",
     "overageOffCaption": "Disattivato: al 100% Koios blocca e chiede all'agenzia di passare a una fascia superiore.",
     "warnPctLabel": "Avvisa a partire da (%)",
     "upgradeContactLabel": "Contatto per upgrade (mailto o URL)",
@@ -4015,15 +4017,22 @@
     "loadError": "Impossibile caricare gli scaglioni.",
     "saveFailed": "Salvataggio degli scaglioni non riuscito.",
     "saved": "Scaglioni salvati.",
-    "unavailable": "Gli scaglioni non sono ancora disponibili su questo server."
+    "unavailable": "Gli scaglioni non sono ancora disponibili su questo server.",
+    "perMonth": "al mese",
+    "tabs": {
+      "ai": "Scaglioni AI",
+      "workflow": "Scaglioni workflow",
+      "overage": "Eccedenza",
+      "includes": "Incluso per pacchetto",
+      "tenants": "Scaglione per tenant"
+    }
   },
   "billingUsers": {
     "title": "Utenti",
     "subtitle": "Utenti inclusi e prezzo per utente extra per pacchetto, e l'occupazione attuale per agenzia.",
     "packagesHeading": "Pacchetti",
     "includedUsersLabel": "Utenti inclusi",
-    "extraPriceLabel": "Prezzo per utente extra (centesimi)",
-    "extraPriceCaption": "= {{amount}} per utente extra",
+    "extraPriceLabel": "Prezzo per utente aggiuntivo",
     "loadError": "Impossibile caricare i dati degli utenti.",
     "saveFailed": "Salvataggio non riuscito.",
     "saved": "Salvato.",
@@ -4035,7 +4044,8 @@
     "colIncluded": "Inclusi",
     "colExtra": "Extra",
     "unlimited": "Illimitato",
-    "extraValue": "{{count}} extra · {{amount}}"
+    "extraValue": "{{count}} extra · {{amount}}",
+    "perUser": "per utente"
   },
   "dashboardsOrderRoleLabel": "Ruolo",
   "dashboardsOrderHint": "Stabilisci l'ordine in cui i riquadri KPI per questo ruolo appaiono sulla dashboard. Nell'elenco compaiono solo i KPI attivati (scheda KPI).",

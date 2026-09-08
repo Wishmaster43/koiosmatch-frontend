@@ -274,9 +274,9 @@
     "vacanciesSubtitle": "Valores-alvo para painéis e relatórios. O envelhecimento de vagas é gerido em Koios AI → Limiares de aconselhamento.",
     "fields": {
       "new_candidates_target": {
-        "label": "Meta de novos candidatos / mês",
+        "label": "Meta novos leads / mês",
         "description": "Meta mensal para novos registos",
-        "unit": "candidatos"
+        "unit": "leads"
       },
       "no_contact_alert_months": {
         "label": "Alerta: sem contacto ≥ N meses",
@@ -3382,7 +3382,7 @@
     "loadError": "Falha ao carregar os perfis de geração.",
     "saveFailed": "Falha ao guardar.",
     "empty": "Ainda não foram criados perfis de geração.",
-    "add": "+ Perfil",
+    "add": "Adicionar perfil",
     "nameLabel": "Nome",
     "namePlaceholder": "Por exemplo, Logística: turnos de manhã flex",
     "priorityLabel": "Prioridade",
@@ -3849,8 +3849,11 @@
     "markupLabel": "Margem de IA (%)",
     "loadError": "Falha ao carregar os preços da plataforma.",
     "saved": "Preços da plataforma guardados.",
-    "fxUsdEurLabel": "Taxa de câmbio USD→EUR",
-    "fxUsdEurHint": "Taxa de câmbio para conversão de USD para EUR (padrão 1,0)"
+    "markupHint": "Margem sobre o preço de compra do uso de IA, em percentagem.",
+    "workflowTokenPriceLabel": "Preço por token de workflow extra",
+    "workflowTokenPriceHint": "O preço de um token de workflow acima do escalão.",
+    "workflowTokenPriceWhere": "Definido em Pacote → Escalões → Excedente.",
+    "saveFailed": "Falha ao guardar os preços da plataforma."
   },
   "invoiceSettings": {
     "title": "Definições de faturação",
@@ -3980,8 +3983,7 @@
     "colLabel": "Escalão",
     "colIncludedTokens": "Tokens por mês",
     "colIncludedRuns": "Tokens de workflow por mês",
-    "colPrice": "Preço por mês (cêntimos)",
-    "priceCaption": "= {{amount}} por mês",
+    "colPrice": "Preço por mês",
     "colActive": "Ativo",
     "colInUse": "Em utilização",
     "catalogEmpty": "Nenhum escalão carregado.",
@@ -3989,8 +3991,8 @@
     "inUseValue_other": "{{count}} agências",
     "overageHeading": "Consumo excedente",
     "overageEnabled": "Permitir consumo acima do escalão",
-    "overageAiPrice": "Preço por token extra (cêntimos)",
-    "overageWorkflowPrice": "Preço por token de workflow extra (cêntimos)",
+    "overageAiPrice": "Preço por token extra",
+    "overageWorkflowPrice": "Preço por token de workflow extra",
     "overageOffCaption": "Desativado: a 100% o Koios bloqueia e pede à agência um escalão superior.",
     "warnPctLabel": "Avisar a partir de (%)",
     "upgradeContactLabel": "Contacto para upgrade (mailto ou URL)",
@@ -4015,15 +4017,22 @@
     "loadError": "Não foi possível carregar os escalões.",
     "saveFailed": "Falha ao guardar os escalões.",
     "saved": "Escalões guardados.",
-    "unavailable": "Os escalões ainda não estão disponíveis neste servidor."
+    "unavailable": "Os escalões ainda não estão disponíveis neste servidor.",
+    "perMonth": "por mês",
+    "tabs": {
+      "ai": "Escalões de IA",
+      "workflow": "Escalões de workflow",
+      "overage": "Excedente",
+      "includes": "Incluído por pacote",
+      "tenants": "Escalão por tenant"
+    }
   },
   "billingUsers": {
     "title": "Utilizadores",
     "subtitle": "Utilizadores incluídos e preço por utilizador extra por pacote, e a ocupação atual por tenant.",
     "packagesHeading": "Pacotes",
     "includedUsersLabel": "Utilizadores incluídos",
-    "extraPriceLabel": "Preço por utilizador extra (cêntimos)",
-    "extraPriceCaption": "= {{amount}} por utilizador extra",
+    "extraPriceLabel": "Preço por utilizador extra",
     "loadError": "Não foi possível carregar os dados de utilizadores.",
     "saveFailed": "Falha ao guardar.",
     "saved": "Guardado.",
@@ -4035,7 +4044,8 @@
     "colIncluded": "Incluídos",
     "colExtra": "Extra",
     "unlimited": "Ilimitado",
-    "extraValue": "{{count}} extra · {{amount}}"
+    "extraValue": "{{count}} extra · {{amount}}",
+    "perUser": "por utilizador"
   },
   "dashboardsOrderRoleLabel": "Função",
   "dashboardsOrderHint": "Determine a ordem em que os tiles de KPI aparecem no painel para esta função. Apenas os KPIs ativados (separador KPIs) constam da lista.",

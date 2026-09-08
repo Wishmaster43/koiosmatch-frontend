@@ -21,6 +21,7 @@ import TierPlatformTogglesCard from './TierPlatformTogglesCard'
 import TierPackageIncludesCard from './TierPackageIncludesCard'
 import TenantTierAssignment from './TenantTierAssignment'
 import { card, sub } from '../billingCardStyles'
+import SubTabBar from '@/components/drawer/SubTabBar'
 import type {
   AdminBillingTiersResponse, AdminBillingTiersUpdate, AdminTenantBillingTiersResponse,
   AdminTenantBillingTiersUpdate, BillingAiTier, BillingWorkflowTier, BillingOverageConfig,
@@ -49,6 +50,8 @@ export default function BillingTiersCard() {
   const [data, setData] = useState<AdminBillingTiersResponse | null>(null)
   const [phase, setPhase] = useState<Phase>('loading')
   const [saving, setSaving] = useState(false)
+  // Danny 09-09 ("deze pagina is te lang"): the five sections are sub-tabs; one Save serves them all.
+  const [section, setSection] = useState<'ai' | 'workflow' | 'overage' | 'includes' | 'tenants'>('ai')
   const [savedOk, setSavedOk] = useState(false)
 
   // Per-key dirty patches for the two tier catalogs and the per-package includes —
@@ -221,31 +224,44 @@ export default function BillingTiersCard() {
       <SectionTitle style={{ marginBottom: 4 }}>{t('billingTiers.title')}</SectionTitle>
       <div style={sub}>{t('billingTiers.subtitle')}</div>
 
-      <SectionTitle style={{ marginBottom: 8, marginTop: 20 }}>{t('billingTiers.aiHeading')}</SectionTitle>
-      <TierCatalogTable meter="ai" rows={aiRows} onChange={onAiChange} disabled={saving} />
-
-      <SectionTitle style={{ marginBottom: 8, marginTop: 20 }}>{t('billingTiers.workflowHeading')}</SectionTitle>
-      <TierCatalogTable meter="workflow" rows={workflowRows} onChange={onWorkflowChange} disabled={saving} />
-
-      <SectionTitle style={{ marginBottom: 8, marginTop: 20 }}>{t('billingTiers.overageHeading')}</SectionTitle>
-      <TierPlatformTogglesCard
-        overage={overageDraft} warnAtPct={warnAtPctDraft}
-        onChange={onPlatformChange} disabled={saving}
-      />
-
-      <SectionTitle style={{ marginBottom: 8, marginTop: 20 }}>{t('billingTiers.includesHeading')}</SectionTitle>
-      <TierPackageIncludesCard baselines={baselinesDraft} aiTiers={aiRows} onChange={onBaselineChange} disabled={saving} />
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0' }}>
-        <SaveButton onClick={save} disabled={saving || !hasChange} saved={savedOk}>
-          {savedOk ? t('billingTiers.saved') : t('common.save')}
-        </SaveButton>
+      <div style={{ margin: '12px 0 16px' }}>
+        <SubTabBar active={section} onChange={(id) => setSection(id as typeof section)} tabs={[
+          { id: 'ai', label: t('billingTiers.tabs.ai') },
+          { id: 'workflow', label: t('billingTiers.tabs.workflow') },
+          { id: 'overage', label: t('billingTiers.tabs.overage') },
+          { id: 'includes', label: t('billingTiers.tabs.includes') },
+          { id: 'tenants', label: t('billingTiers.tabs.tenants') },
+        ]} />
       </div>
 
-      <SectionTitle style={{ marginBottom: 8, marginTop: 20 }}>{t('billingTiers.tenantHeading')}</SectionTitle>
-      <TenantTierAssignment
-        aiTiers={aiRows} workflowTiers={workflowRows} onAssign={onAssign} assignments={assignments}
-      />
+      {section === 'ai' && (<>
+        <SectionTitle style={{ marginBottom: 8 }}>{t('billingTiers.aiHeading')}</SectionTitle>
+        <TierCatalogTable meter="ai" rows={aiRows} onChange={onAiChange} disabled={saving} />
+      </>)}
+      {section === 'workflow' && (<>
+        <SectionTitle style={{ marginBottom: 8 }}>{t('billingTiers.workflowHeading')}</SectionTitle>
+        <TierCatalogTable meter="workflow" rows={workflowRows} onChange={onWorkflowChange} disabled={saving} />
+      </>)}
+      {section === 'overage' && (
+        <TierPlatformTogglesCard overage={overageDraft} warnAtPct={warnAtPctDraft} onChange={onPlatformChange} disabled={saving} />
+      )}
+      {section === 'includes' && (
+        <TierPackageIncludesCard baselines={baselinesDraft} aiTiers={aiRows} onChange={onBaselineChange} disabled={saving} />
+      )}
+
+      {section !== 'tenants' && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0' }}>
+          <SaveButton onClick={save} disabled={saving || !hasChange} saved={savedOk}>
+            {savedOk ? t('billingTiers.saved') : t('common.save')}
+          </SaveButton>
+        </div>
+      )}
+
+      {section === 'tenants' && (
+        <TenantTierAssignment
+          aiTiers={aiRows} workflowTiers={workflowRows} onAssign={onAssign} assignments={assignments}
+        />
+      )}
     </div>
   )
 }

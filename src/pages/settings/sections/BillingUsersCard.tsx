@@ -20,7 +20,10 @@ import { SectionTitle, Caption, GroupLabel, monoStyle } from '@/components/ui/ty
 import BillingCardShell from './billing/BillingCardShell'
 import { useAdminBillingBudgets } from './useAdminBillingBudgets'
 import type { AdminBillingBudgetsResponse, AdminBillingBudgetsUpdate, BillingBudgetEntry } from '@/types/billingUsage'
-import { PACKAGE_KEYS, label, inputWrap, inputStyle } from './billingCardStyles'
+import { PACKAGE_KEYS } from './billingCardStyles'
+import { SettingCardList, SettingRow } from '../components/SettingsKit'
+import NumberInput from '@/components/ui/NumberInput'
+import CurrencyInput from '@/components/ui/CurrencyInput'
 
 // A package row's two editable numbers. Blank = NULL (= unlimited / no
 // package-level value), NEVER 0: writing 0 onto an unlimited package would
@@ -95,29 +98,19 @@ export default function BillingUsersCard() {
             <SectionTitle style={{ marginBottom: 8 }}>
               {t(`billingBudgets.package.${key}`, { defaultValue: key })}
             </SectionTitle>
-            <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-              <div style={{ flex: '1 1 160px', minWidth: 140 }}>
-                <label style={label} htmlFor={`billing-users-included-${key}`}>{t('billingUsers.includedUsersLabel')}</label>
-                <div style={inputWrap}>
-                  <input id={`billing-users-included-${key}`} type="number" min={0} step={1}
-                    value={drafts[key].included_users}
-                    onChange={(e) => setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], included_users: e.target.value } }))}
-                    style={inputStyle} />
-                </div>
-              </div>
-              <div style={{ flex: '1 1 160px', minWidth: 140 }}>
-                <label style={label} htmlFor={`billing-users-price-${key}`}>{t('billingUsers.extraPriceLabel')}</label>
-                <div style={inputWrap}>
-                  <input id={`billing-users-price-${key}`} type="number" min={0} step={1}
-                    value={drafts[key].extra_user_price_cents}
-                    onChange={(e) => setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], extra_user_price_cents: e.target.value } }))}
-                    style={inputStyle} />
-                </div>
-              </div>
-              <Caption style={{ paddingBottom: 8 }}>
-                {t('billingUsers.extraPriceCaption', { amount: formatCurrency((Number(drafts[key].extra_user_price_cents) || 0) / 100) })}
-              </Caption>
-            </div>
+            <SettingCardList>
+              <SettingRow label={t('billingUsers.includedUsersLabel')}>
+                {/* An EMPTY field means unlimited (null on the PUT), so the raw NumberInput rides here — the kit field would coerce it to 0. */}
+                <NumberInput value={drafts[key].included_users === '' ? null : Number(drafts[key].included_users)} min={0} width={90}
+                  ariaLabel={`${t('billingUsers.includedUsersLabel')}: ${t(`billingBudgets.package.${key}`, { defaultValue: key })}`}
+                  onChange={(v) => setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], included_users: v == null ? '' : String(v) } }))} />
+              </SettingRow>
+              <SettingRow label={t('billingUsers.extraPriceLabel')}>
+                <CurrencyInput cents={Number(drafts[key].extra_user_price_cents) || 0} width={110} unit={t('billingUsers.perUser')}
+                  ariaLabel={`${t('billingUsers.extraPriceLabel')}: ${t(`billingBudgets.package.${key}`, { defaultValue: key })}`}
+                  onChange={(cents) => setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], extra_user_price_cents: cents == null ? '' : String(cents) } }))} />
+              </SettingRow>
+            </SettingCardList>
           </div>
         ))}
       </div>

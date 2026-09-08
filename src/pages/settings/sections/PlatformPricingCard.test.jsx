@@ -1,13 +1,11 @@
 /**
  * PlatformPricingCard (CREDITS-1) — asserts the REAL request (route + body), per
- * §13: proves the seam, not just that a callback fired. Covers the initial GET,
- * the optimistic save-on-blur PUT of the AI markup and fx_usd_eur knobs (B-26),
- * and revert-on-failure. PRIJSMODEL-C (30-08): the workflow credit-price knob is
- * gone from this endpoint.
+ * §13: the initial GET, the save-on-commit PUT of the AI markup alone (the USD→EUR
+ * rate is no longer on the screen and never in the body, Danny 09-09), the pointer
+ * to the workflow-token overage price, and revert-on-failure.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import i18n from '@/i18n'
 import api from '@/lib/api'
 import PlatformPricingCard from './PlatformPricingCard'
@@ -32,35 +30,26 @@ function mockGet(pricing = { ai_markup_percent: 60, fx_usd_eur: 1.05 }) {
 }
 
 describe('PlatformPricingCard', () => {
-  it('GETs /admin/platform-pricing and renders both markup and fx_usd_eur knobs', async () => {
+  it('GETs /admin/platform-pricing, renders the markup knob and never the fx rate', async () => {
     mockGet()
     render(<PlatformPricingCard />)
-    expect(await screen.findByLabelText(t('platformPricing.markupLabel'))).toHaveValue(60)
-    expect(screen.getByLabelText(t('platformPricing.fxUsdEurLabel'))).toHaveValue(1.05)
+    // step 0.01 → the field rests on two decimals.
+    expect(await screen.findByLabelText(t('platformPricing.markupLabel'))).toHaveValue('60,00')
     expect(api.get).toHaveBeenCalledWith('/admin/platform-pricing')
-    // The workflow credit-price knob is gone; the overage price lives in the tiers card.
-    expect(screen.queryByText(/creditprijs/i)).toBeNull()
+    expect(screen.queryByText(/USD/)).toBeNull()
+    // The workflow-token price is managed on the tiers card; this card only points there.
+    expect(screen.getByText(t('platformPricing.workflowTokenPriceWhere'))).toBeInTheDocument()
   })
 
-  it('PUTs both ai_markup_percent and fx_usd_eur on blur of markup field', async () => {
+  it('PUTs ai_markup_percent alone when the field commits', async () => {
     mockGet()
-    api.put.mockResolvedValue({ data: { ai_markup_percent: 75, fx_usd_eur: 1.05 } })
+    api.put.mockResolvedValue({ data: { ai_markup_percent: 75 } })
     render(<PlatformPricingCard />)
-    const user = userEvent.setup()
     const input = await screen.findByLabelText(t('platformPricing.markupLabel'))
-    await user.clear(input); await user.type(input, '75'); await user.tab()
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/platform-pricing', { ai_markup_percent: 75, fx_usd_eur: 1.05 }))
-    await waitFor(() => expect(notifySuccess).toHaveBeenCalled())
-  })
-
-  it('PUTs both fields when fx_usd_eur is changed', async () => {
-    mockGet()
-    api.put.mockResolvedValue({ data: { ai_markup_percent: 60, fx_usd_eur: 1.1 } })
-    render(<PlatformPricingCard />)
-    const user = userEvent.setup()
-    const fxInput = await screen.findByLabelText(t('platformPricing.fxUsdEurLabel'))
-    await user.clear(fxInput); await user.type(fxInput, '1.1'); await user.tab()
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/platform-pricing', { ai_markup_percent: 60, fx_usd_eur: 1.1 }))
+    fireEvent.focus(input)
+    fireEvent.change(input, { target: { value: '75' } })
+    fireEvent.blur(input)
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/platform-pricing', { ai_markup_percent: 75 }))
     await waitFor(() => expect(notifySuccess).toHaveBeenCalled())
   })
 
@@ -68,10 +57,11 @@ describe('PlatformPricingCard', () => {
     mockGet()
     api.put.mockRejectedValue({ response: { status: 422, data: { message: 'nee' } } })
     render(<PlatformPricingCard />)
-    const user = userEvent.setup()
     const input = await screen.findByLabelText(t('platformPricing.markupLabel'))
-    await user.clear(input); await user.type(input, '75'); await user.tab()
+    fireEvent.focus(input)
+    fireEvent.change(input, { target: { value: '75' } })
+    fireEvent.blur(input)
     await waitFor(() => expect(api.put).toHaveBeenCalled())
-    await waitFor(() => expect(input).toHaveValue(60))
+    await waitFor(() => expect(input).toHaveValue('60,00'))
   })
 })

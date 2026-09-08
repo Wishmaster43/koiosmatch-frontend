@@ -274,9 +274,9 @@
     "vacanciesSubtitle": "Targets for dashboards and reports. Vacancy staleness is managed under Koios AI → Advice thresholds.",
     "fields": {
       "new_candidates_target": {
-        "label": "New candidates target / month",
+        "label": "Target new leads / month",
         "description": "Monthly target for new registrations",
-        "unit": "candidates"
+        "unit": "leads"
       },
       "no_contact_alert_months": {
         "label": "Alert: no contact ≥ N months",
@@ -3382,7 +3382,7 @@
     "loadError": "Loading generation profiles failed.",
     "saveFailed": "Saving failed.",
     "empty": "No generation profiles created yet.",
-    "add": "+ Profile",
+    "add": "Add profile",
     "nameLabel": "Name",
     "namePlaceholder": "E.g. Logistics — flex morning shifts",
     "priorityLabel": "Priority",
@@ -3849,8 +3849,11 @@
     "markupLabel": "AI markup (%)",
     "loadError": "Failed to load platform pricing.",
     "saved": "Platform pricing saved.",
-    "fxUsdEurLabel": "USD→EUR exchange rate",
-    "fxUsdEurHint": "Exchange rate for converting USD to EUR (default 1.0)"
+    "markupHint": "Markup on the purchase price of AI usage, in percent.",
+    "workflowTokenPriceLabel": "Price per extra workflow token",
+    "workflowTokenPriceHint": "The price of one workflow token above the tier.",
+    "workflowTokenPriceWhere": "Set under Package → Tiers → Overage.",
+    "saveFailed": "Saving the platform pricing failed."
   },
   "invoiceSettings": {
     "title": "Invoice settings",
@@ -3980,8 +3983,7 @@
     "colLabel": "Tier",
     "colIncludedTokens": "Tokens per month",
     "colIncludedRuns": "Workflow tokens per month",
-    "colPrice": "Price per month (cents)",
-    "priceCaption": "= {{amount}} per month",
+    "colPrice": "Price per month",
     "colActive": "Active",
     "colInUse": "In use",
     "catalogEmpty": "No tiers loaded.",
@@ -3989,8 +3991,8 @@
     "inUseValue_other": "{{count}} tenants",
     "overageHeading": "Overage",
     "overageEnabled": "Allow usage above the tier",
-    "overageAiPrice": "Price per extra token (cents)",
-    "overageWorkflowPrice": "Price per extra workflow token (cents)",
+    "overageAiPrice": "Price per extra token",
+    "overageWorkflowPrice": "Price per extra workflow token",
     "overageOffCaption": "Off: at 100% Koios blocks and asks the tenant for a higher tier.",
     "warnPctLabel": "Warn from (%)",
     "upgradeContactLabel": "Upgrade contact (mailto or URL)",
@@ -4015,15 +4017,22 @@
     "loadError": "Could not load the tiers.",
     "saveFailed": "Saving the tiers failed.",
     "saved": "Tiers saved.",
-    "unavailable": "Tiers are not available on this server yet."
+    "unavailable": "Tiers are not available on this server yet.",
+    "perMonth": "per month",
+    "tabs": {
+      "ai": "AI tiers",
+      "workflow": "Workflow tiers",
+      "overage": "Overage",
+      "includes": "Included per package",
+      "tenants": "Tier per tenant"
+    }
   },
   "billingUsers": {
     "title": "Users",
     "subtitle": "Included users and the price per extra user per package, and the live seat count per tenant.",
     "packagesHeading": "Packages",
     "includedUsersLabel": "Included users",
-    "extraPriceLabel": "Price per extra user (cents)",
-    "extraPriceCaption": "= {{amount}} per extra user",
+    "extraPriceLabel": "Price per extra user",
     "loadError": "Failed to load the user data.",
     "saveFailed": "Failed to save.",
     "saved": "Saved.",
@@ -4035,7 +4044,8 @@
     "colIncluded": "Included",
     "colExtra": "Extra",
     "unlimited": "Unlimited",
-    "extraValue": "{{count}} extra · {{amount}}"
+    "extraValue": "{{count}} extra · {{amount}}",
+    "perUser": "per user"
   },
   "dashboardsOrderRoleLabel": "Role",
   "dashboardsOrderHint": "Choose the order in which the KPI tiles appear on the dashboard for this role. Only enabled KPIs (KPIs tab) are listed.",

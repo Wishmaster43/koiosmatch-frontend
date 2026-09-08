@@ -4,6 +4,8 @@
  * backend's RunRetentionSettings::TENANT_KEY reads (App\Workflow\RunRetentionSettings.php).
  * Asserts the real POST /settings request (route + body), not just that a callback fired —
  * §13: a mutation test proves nothing about the seam until it checks the request itself.
+ * The field is the house NumberInput (a text field with locale grouping); its 1..31
+ * bound is enforced on blur and SAID in a notice, never silently corrected.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
@@ -29,21 +31,25 @@ beforeEach(() => {
 describe('workflowRunHistory · defaults to the platform ceiling when unset', () => {
   it('pre-fills 31 days when the tenant has never saved a value', async () => {
     render(<SchemaSection schema={workflowRunHistory} />)
-    await waitFor(() => expect(screen.getByRole('spinbutton')).toHaveValue(31))
+    await waitFor(() => expect(screen.getByRole('textbox')).toHaveValue('31'))
   })
 
-  it('the field is bounded to the backend ceiling (1..31) in the control itself', async () => {
+  it('clamps to the backend ceiling (1..31) on blur and says so', async () => {
     render(<SchemaSection schema={workflowRunHistory} />)
-    const input = await screen.findByRole('spinbutton')
-    expect(input).toHaveAttribute('min', '1')
-    expect(input).toHaveAttribute('max', '31')
+    const input = await screen.findByRole('textbox')
+    await waitFor(() => expect(input).toHaveValue('31'))
+    fireEvent.focus(input)
+    fireEvent.change(input, { target: { value: '60' } })
+    fireEvent.blur(input)
+    expect(input).toHaveValue('31')
+    expect(screen.getByRole('status')).toHaveTextContent(i18n.t('field.maxNotice', { ns: 'common', max: '31' }))
   })
 })
 
 describe('workflowRunHistory · save persists the exact backend key', () => {
   it('POSTs /settings with workflow_run_retention_days set to the edited value', async () => {
     render(<SchemaSection schema={workflowRunHistory} />)
-    const input = await screen.findByRole('spinbutton')
+    const input = await screen.findByRole('textbox')
     fireEvent.change(input, { target: { value: '10' } })
 
     const saveBtn = await waitFor(() => {
@@ -63,6 +69,6 @@ describe('workflowRunHistory · save persists the exact backend key', () => {
   it('loads a previously saved value back from GET /settings', async () => {
     api.get.mockResolvedValue({ data: { workflow_run_retention_days: '7' } })
     render(<SchemaSection schema={workflowRunHistory} />)
-    await waitFor(() => expect(screen.getByRole('spinbutton')).toHaveValue(7))
+    await waitFor(() => expect(screen.getByRole('textbox')).toHaveValue('7'))
   })
 })

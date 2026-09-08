@@ -1,78 +1,62 @@
 /**
- * PlatformPricingCard (CREDITS-1 fase 1) — superadmin-only platform pricing knob:
- * the AI markup percentage. Lives inside ModulesSettings (the superadmin
- * "packages/pricing" screen — Danny: "waar stel ik prijzen in"). House pattern:
- * optimistic save-on-blur with revert + toast on failure (mirrors
- * MatchRatesSettings' conversion-factor field). Unit is always shown next to the
- * input (%) so a bare number never reads as ambiguous.
- * Danny 14-08 asked "where is the save button" — this field already persists
- * automatically on blur, so instead of adding a redundant explicit button we
- * made the existing autosave visible: a success toast confirms the write, so
- * the recruiter never wonders whether a typed value actually landed.
- * PRIJSMODEL-C (30-08): the workflow-creditprijs knob is GONE from this endpoint
- * (`workflow_credit_price` no longer exists) — the overage price now lives on
- * /admin/billing-tiers's overage block, edited via BillingTiersCard instead.
+ * PlatformPricingCard — superadmin platform pricing knob: the AI markup percentage
+ * (CREDITS-1). PRIJSMODEL-C (30-08): the workflow-token price lives on Pakket →
+ * Staffels → Overage, so this card only points there. The USD→EUR rate the API
+ * still returns is NOT shown (Danny 09-09: "nooit om gevraagd"); the PUT sends
+ * ai_markup_percent alone and the backend keeps its stored rate (B-26 `sometimes`).
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Percent } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { SectionTitle, Caption } from '@/components/ui/typography'
-
-const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 28, background: 'var(--surface)' }
-const sub = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }
-const label = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 4, display: 'block' }
-const inputWrap = { display: 'flex', alignItems: 'center', gap: 6, border: '1px solid var(--border)', borderRadius: 8, padding: '6px 10px', background: 'var(--input-bg)' }
-const inputStyle = { border: 'none', outline: 'none', background: 'transparent', color: 'var(--text)', fontSize: 13, width: '100%', fontFamily: "'JetBrains Mono', monospace" }
+import ErrorBanner from '@/components/ui/ErrorBanner'
+import { NumberField, SettingCardList, SettingRow } from '../components/SettingsKit'
+import { card, sub } from './billingCardStyles'
 
 export default function PlatformPricingCard() {
   const { t } = useTranslation('settings')
-  const [markup, setMarkup] = useState('')
-  const [fxUsdEur, setFxUsdEur] = useState('')
-  const [saved, setSaved] = useState({ markup: '', fxUsdEur: '' }) // last server-confirmed value, for revert-on-failure
+  const [markup, setMarkup] = useState(0)
+  const [savedMarkup, setSavedMarkup] = useState(0) // last server-confirmed value, for revert-on-failure
   const [phase, setPhase] = useState('loading') // loading | ready | error
 
-  // Load the current platform pricing knobs.
+  // Load the current platform pricing knob; an alive guard drops a late response after unmount.
+  const load = () => {
+    setPhase('loading')
+    return api.get('/admin/platform-pricing')
+      .then((res) => {
+        const d = unwrap(res) ?? {}
+        const m = d.ai_markup_percent != null ? Number(d.ai_markup_percent) : 0
+        setMarkup(m); setSavedMarkup(m); setPhase('ready')
+      })
+      .catch(() => setPhase('error'))
+  }
   useEffect(() => {
     let alive = true
     api.get('/admin/platform-pricing')
       .then((res) => {
         if (!alive) return
         const d = unwrap(res) ?? {}
-        const m = d.ai_markup_percent != null ? String(d.ai_markup_percent) : ''
-        const f = d.fx_usd_eur != null ? String(d.fx_usd_eur) : ''
-        setMarkup(m); setFxUsdEur(f); setSaved({ markup: m, fxUsdEur: f })
-        setPhase('ready')
+        const m = d.ai_markup_percent != null ? Number(d.ai_markup_percent) : 0
+        setMarkup(m); setSavedMarkup(m); setPhase('ready')
       })
       .catch(() => { if (alive) setPhase('error') })
     return () => { alive = false }
   }, [])
 
-  // Persist both pricing knobs together. Optimistic: the fields already show the typed
-  // values; revert + toast on a validation/network failure.
-  const save = async (nextMarkup, nextFxUsdEur) => {
-    const mNum = Number(nextMarkup)
-    const fNum = Number(nextFxUsdEur)
-    if (nextMarkup === saved.markup && nextFxUsdEur === saved.fxUsdEur) return
-    // Validate both fields
-    if (!isFinite(mNum) || mNum < 0 || mNum > 500) {
-      setMarkup(saved.markup)
-      return
-    }
-    if (!isFinite(fNum) || fNum < 0) {
-      setFxUsdEur(saved.fxUsdEur)
-      return
-    }
+  // Persist the markup once the field commits (blur). Optimistic: the field already
+  // shows the typed value; revert + toast on a validation/network failure.
+  const save = async (next) => {
+    const value = next ?? 0
+    if (value === savedMarkup) return
     try {
-      await api.put('/admin/platform-pricing', { ai_markup_percent: mNum, fx_usd_eur: fNum })
-      setSaved({ markup: nextMarkup, fxUsdEur: nextFxUsdEur })
+      await api.put('/admin/platform-pricing', { ai_markup_percent: value })
+      setSavedMarkup(value)
       notifySuccess(t('platformPricing.saved'))
     } catch (err) {
-      setMarkup(saved.markup)
-      setFxUsdEur(saved.fxUsdEur)
-      notifyError(extractApiError(err, t('common:actionFailed')))
+      setMarkup(savedMarkup)
+      notifyError(extractApiError(err, t('platformPricing.saveFailed')))
     }
   }
 
@@ -80,16 +64,15 @@ export default function PlatformPricingCard() {
     return (
       <div style={card}>
         <SectionTitle style={{ marginBottom: 4 }}>{t('platformPricing.title')}</SectionTitle>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>
+        <Caption>{t('common.loadingShort')}</Caption>
       </div>
     )
   }
-
   if (phase === 'error') {
     return (
       <div style={card}>
         <SectionTitle style={{ marginBottom: 4 }}>{t('platformPricing.title')}</SectionTitle>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('platformPricing.loadError')}</p>
+        <ErrorBanner onRetry={load}>{t('platformPricing.loadError')}</ErrorBanner>
       </div>
     )
   }
@@ -98,27 +81,15 @@ export default function PlatformPricingCard() {
     <div style={card}>
       <SectionTitle style={{ marginBottom: 4 }}>{t('platformPricing.title')}</SectionTitle>
       <div style={sub}>{t('platformPricing.subtitle')}</div>
-
-      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-        <div style={{ flex: '1 1 200px', minWidth: 180 }}>
-          <label style={label} htmlFor="platform-pricing-markup">{t('platformPricing.markupLabel')}</label>
-          <div style={inputWrap}>
-            <input id="platform-pricing-markup" type="number" min={0} max={500} step={0.01}
-              value={markup} onChange={(e) => setMarkup(e.target.value)}
-              onBlur={(e) => save(e.target.value, fxUsdEur)} style={inputStyle} />
-            <Percent size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} aria-hidden="true" />
-          </div>
-        </div>
-        <div style={{ flex: '1 1 200px', minWidth: 180 }}>
-          <label style={label} htmlFor="platform-pricing-fx">{t('platformPricing.fxUsdEurLabel')}</label>
-          <div style={inputWrap}>
-            <input id="platform-pricing-fx" type="number" min={0} step={0.01}
-              value={fxUsdEur} onChange={(e) => setFxUsdEur(e.target.value)}
-              onBlur={(e) => save(markup, e.target.value)} style={inputStyle} />
-          </div>
-          <Caption as="p" style={{ marginTop: 4 }}>{t('platformPricing.fxUsdEurHint')}</Caption>
-        </div>
-      </div>
+      <SettingCardList>
+        <SettingRow label={t('platformPricing.markupLabel')} description={t('platformPricing.markupHint')}>
+          <NumberField value={markup} min={0} max={500} step={0.01} unit="%" width={90}
+            ariaLabel={t('platformPricing.markupLabel')} onChange={setMarkup} onCommit={save} />
+        </SettingRow>
+        <SettingRow label={t('platformPricing.workflowTokenPriceLabel')} description={t('platformPricing.workflowTokenPriceHint')}>
+          <Caption>{t('platformPricing.workflowTokenPriceWhere')}</Caption>
+        </SettingRow>
+      </SettingCardList>
     </div>
   )
 }

@@ -20,14 +20,14 @@ describe('TierPackageIncludesCard', () => {
   // Each of the three packages renders its own runs field.
   it('renders one runs input per package', () => {
     render(<TierPackageIncludesCard baselines={{}} aiTiers={aiTiers} onChange={vi.fn()} />)
-    expect(screen.getAllByLabelText(st('billingTiers.includesRuns'))).toHaveLength(3)
+    expect(screen.getAllByLabelText(st('billingTiers.includesRuns'), { exact: false })).toHaveLength(3)
   })
 
   // Editing the runs number for one package calls onChange for that package only.
   it('calls onChange with the edited runs number', () => {
     const onChange = vi.fn()
     render(<TierPackageIncludesCard baselines={{}} aiTiers={aiTiers} onChange={onChange} />)
-    const [coreRuns] = screen.getAllByLabelText(st('billingTiers.includesRuns'))
+    const [coreRuns] = screen.getAllByLabelText(st('billingTiers.includesRuns'), { exact: false })
     fireEvent.change(coreRuns, { target: { value: '50' } })
     expect(onChange).toHaveBeenCalledWith('core', { workflow_runs: 50 })
   })

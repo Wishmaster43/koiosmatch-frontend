@@ -129,7 +129,12 @@ export const Toggle = ToggleUi
 const inputStyle = fieldInputStyle
 
 // Right-aligned numeric input with an optional unit suffix, for settings that store a plain number.
-export function NumberField({ value, onChange, min = 0, max, unit, width = 96, disabled = false, step, ariaLabel, decimals }) {
+/**
+ * @param {{ value: number, onChange: (n: number) => void, min?: number, max?: number, unit?: import('react').ReactNode,
+ *   width?: number | string, disabled?: boolean, step?: number, ariaLabel?: string, decimals?: number,
+ *   onCommit?: (n: number | null) => void }} props
+ */
+export function NumberField({ value, onChange, min = 0, max, unit, width = 96, disabled = false, step, ariaLabel, decimals, onCommit }) {
   // GETALLEN-1 also inside inputs: the house NumberInput shows 1.250, not 1250; `step`
   // with a fraction implies the decimals a schema wants (0.01 → 2), an explicit
   // `decimals` wins. The callers keep receiving a number (0 when the field is emptied),
@@ -137,12 +142,13 @@ export function NumberField({ value, onChange, min = 0, max, unit, width = 96, d
   const dec = decimals ?? (step && step < 1 ? Math.max(0, Math.ceil(-Math.log10(step))) : 0)
   return (
     <NumberInput value={value} onChange={n => onChange(n ?? 0)} min={min} max={max} decimals={dec}
-      width={width} unit={unit} disabled={disabled} ariaLabel={ariaLabel}
+      width={width} unit={unit} disabled={disabled} ariaLabel={ariaLabel} onCommit={onCommit}
       style={{ fontWeight: 600 }} />
   )
 }
 
 // Plain single-line text input sized for settings rows; optional password type.
+/** @param {{ value: string, onChange: (v: string) => void, placeholder?: string, width?: number | string, disabled?: boolean, type?: string }} props */
 export function TextField({ value, onChange, placeholder, width = 220, disabled = false, type = 'text' }) {
   return (
     <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} disabled={disabled}

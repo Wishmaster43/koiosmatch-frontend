@@ -50,19 +50,19 @@ describe('BillingUsersCard', () => {
     mockGet()
     render(<BillingUsersCard />)
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/admin/billing-budgets'))
-    const inputs = await screen.findAllByLabelText(t('billingUsers.includedUsersLabel'))
+    const inputs = await screen.findAllByLabelText(t('billingUsers.includedUsersLabel'), { exact: false })
     expect(inputs).toHaveLength(3)
-    expect(inputs[0]).toHaveValue(5)
-    expect(inputs[1]).toHaveValue(10)
+    expect(inputs[0]).toHaveValue('5')
+    expect(inputs[1]).toHaveValue('10')
     // null included_users on enterprise still renders as an empty editable field, not 0.
-    expect(inputs[2]).toHaveValue(null)
+    expect(inputs[2]).toHaveValue('')
   })
 
   it('PUTs only the seat fields on the package block when saving', async () => {
     mockGet()
     vi.mocked(api.put).mockResolvedValue({ data: budgets })
     render(<BillingUsersCard />)
-    const [coreIncluded] = await screen.findAllByLabelText(t('billingUsers.includedUsersLabel'))
+    const [coreIncluded] = await screen.findAllByLabelText(t('billingUsers.includedUsersLabel'), { exact: false })
     await userEvent.clear(coreIncluded)
     await userEvent.type(coreIncluded, '6')
     await userEvent.click(screen.getByText(t('common.save')))
@@ -79,7 +79,7 @@ describe('BillingUsersCard', () => {
     mockGet()
     vi.mocked(api.put).mockResolvedValue({ data: budgets })
     render(<BillingUsersCard />)
-    const [coreIncluded] = await screen.findAllByLabelText(t('billingUsers.includedUsersLabel'))
+    const [coreIncluded] = await screen.findAllByLabelText(t('billingUsers.includedUsersLabel'), { exact: false })
     await userEvent.clear(coreIncluded)
     await userEvent.click(screen.getByText(t('common.save')))
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/billing-budgets', {

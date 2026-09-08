@@ -274,9 +274,9 @@
     "vacanciesSubtitle": "Objetivos para paneles e informes. La antigüedad de las vacantes se gestiona en Koios AI → Umbrales de aviso.",
     "fields": {
       "new_candidates_target": {
-        "label": "Objetivo nuevos candidatos / mes",
+        "label": "Objetivo nuevos leads / mes",
         "description": "Objetivo mensual de nuevas inscripciones",
-        "unit": "candidatos"
+        "unit": "leads"
       },
       "no_contact_alert_months": {
         "label": "Alerta: sin contacto ≥ N meses",
@@ -3382,7 +3382,7 @@
     "loadError": "Error al cargar los perfiles de generación.",
     "saveFailed": "Error al guardar.",
     "empty": "Aún no se han creado perfiles de generación.",
-    "add": "+ Perfil",
+    "add": "Añadir perfil",
     "nameLabel": "Nombre",
     "namePlaceholder": "P. ej. Logística — turnos flex de mañana",
     "priorityLabel": "Prioridad",
@@ -3849,8 +3849,11 @@
     "markupLabel": "Margen de IA (%)",
     "loadError": "No se pudo cargar los precios de la plataforma.",
     "saved": "Precios de la plataforma guardados.",
-    "fxUsdEurLabel": "Tipo de cambio USD→EUR",
-    "fxUsdEurHint": "Tipo de cambio para convertir USD a EUR (por defecto 1,0)"
+    "markupHint": "Margen sobre el precio de compra del uso de IA, en porcentaje.",
+    "workflowTokenPriceLabel": "Precio por token de workflow adicional",
+    "workflowTokenPriceHint": "El precio de un token de workflow por encima del escalón.",
+    "workflowTokenPriceWhere": "Se ajusta en Paquete → Escalones → Exceso.",
+    "saveFailed": "No se pudo guardar el precio de la plataforma."
   },
   "invoiceSettings": {
     "title": "Configuración de facturación",
@@ -3980,8 +3983,7 @@
     "colLabel": "Nivel",
     "colIncludedTokens": "Tokens por mes",
     "colIncludedRuns": "Tokens de workflow por mes",
-    "colPrice": "Precio por mes (céntimos)",
-    "priceCaption": "= {{amount}} por mes",
+    "colPrice": "Precio por mes",
     "colActive": "Activo",
     "colInUse": "En uso",
     "catalogEmpty": "No se han cargado niveles.",
@@ -3989,8 +3991,8 @@
     "inUseValue_other": "{{count}} clientes",
     "overageHeading": "Overage",
     "overageEnabled": "Permitir uso por encima del nivel",
-    "overageAiPrice": "Precio por token adicional (céntimos)",
-    "overageWorkflowPrice": "Precio por token de workflow adicional (céntimos)",
+    "overageAiPrice": "Precio por token adicional",
+    "overageWorkflowPrice": "Precio por token de workflow adicional",
     "overageOffCaption": "Desactivado: al 100% Koios bloquea y pide al cliente un nivel superior.",
     "warnPctLabel": "Avisar a partir de (%)",
     "upgradeContactLabel": "Contacto de actualización (mailto o URL)",
@@ -4015,15 +4017,22 @@
     "loadError": "No se pudieron cargar los niveles.",
     "saveFailed": "No se pudieron guardar los niveles.",
     "saved": "Niveles guardados.",
-    "unavailable": "Los niveles todavía no están disponibles en este servidor."
+    "unavailable": "Los niveles todavía no están disponibles en este servidor.",
+    "perMonth": "por mes",
+    "tabs": {
+      "ai": "Escalones de IA",
+      "workflow": "Escalones de workflow",
+      "overage": "Exceso",
+      "includes": "Incluido por paquete",
+      "tenants": "Escalón por tenant"
+    }
   },
   "billingUsers": {
     "title": "Usuarios",
     "subtitle": "Usuarios incluidos y el precio por usuario adicional por paquete, y la ocupación actual por cliente.",
     "packagesHeading": "Paquetes",
     "includedUsersLabel": "Usuarios incluidos",
-    "extraPriceLabel": "Precio por usuario adicional (céntimos)",
-    "extraPriceCaption": "= {{amount}} por usuario adicional",
+    "extraPriceLabel": "Precio por usuario adicional",
     "loadError": "No se pudieron cargar los datos de usuarios.",
     "saveFailed": "No se pudo guardar.",
     "saved": "Guardado.",
@@ -4035,7 +4044,8 @@
     "colIncluded": "Incluidos",
     "colExtra": "Adicionales",
     "unlimited": "Ilimitado",
-    "extraValue": "{{count}} adicionales · {{amount}}"
+    "extraValue": "{{count}} adicionales · {{amount}}",
+    "perUser": "por usuario"
   },
   "dashboardsOrderRoleLabel": "Rol",
   "dashboardsOrderHint": "Define el orden en que las tarjetas de KPI aparecen en el panel para este rol. Solo se listan los KPI habilitados (pestaña KPI).",

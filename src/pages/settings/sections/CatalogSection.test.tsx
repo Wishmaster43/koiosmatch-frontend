@@ -39,7 +39,7 @@ describe('CatalogSection', () => {
     await waitFor(() => expect(screen.getByText('settings.windows.no_contact_days.label')).toBeTruthy())
     expect(screen.getByText('settings.windows.stale_candidate_days.label')).toBeTruthy()
     expect(api.get).toHaveBeenCalledWith('/settings/catalog')
-    await waitFor(() => expect((screen.getAllByRole('spinbutton')[0] as HTMLInputElement).value).toBe('45'))
+    await waitFor(() => expect((screen.getAllByRole('textbox')[0] as HTMLInputElement).value).toBe('45'))
   })
 
   it('keeps a dedicated row off the generic screen', async () => {

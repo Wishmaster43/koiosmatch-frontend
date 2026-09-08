@@ -56,7 +56,7 @@ function FieldControl({ field, value, onChange, t, base, label, disabled }) {
     case 'number':
     default:
       return (
-        <NumberField value={value} onChange={onChange}
+        <NumberField value={value} onChange={onChange} ariaLabel={label}
           min={field.min} max={field.max} step={field.step} unit={t(`${base}.unit`, '')} disabled={disabled} />
       )
   }

@@ -74,14 +74,15 @@ describe('BillingTiersCard', () => {
     render(<BillingTiersCard />)
 
     // Two rows share the "colPrice" aria-label — Assist is index 0, Pro is index 1.
-    const priceInputs = await screen.findAllByLabelText(t('billingTiers.colPrice'))
+    const priceInputs = await screen.findAllByLabelText(t('billingTiers.colPrice'), { exact: false })
     fireEvent.change(priceInputs[1], { target: { value: '299' } })
 
     const saveBtn = await screen.findByRole('button', { name: t('common.save') })
     fireEvent.click(saveBtn)
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/billing-tiers', {
-      ai_tiers: [{ key: 'pro', price_cents: 299 }],
+      // The field takes EUROS (Danny 09-09) and the PUT carries cents.
+      ai_tiers: [{ key: 'pro', price_cents: 29900 }],
     }))
   })
 
@@ -94,7 +95,7 @@ describe('BillingTiersCard', () => {
     const { notifyError } = await import('@/lib/notify')
     render(<BillingTiersCard />)
 
-    const priceInputs = await screen.findAllByLabelText(t('billingTiers.colPrice'))
+    const priceInputs = await screen.findAllByLabelText(t('billingTiers.colPrice'), { exact: false })
     fireEvent.change(priceInputs[1], { target: { value: '299' } })
 
     const saveBtn = await screen.findByRole('button', { name: t('common.save') })
@@ -102,8 +103,9 @@ describe('BillingTiersCard', () => {
 
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith('Dubbele key: pro'))
     // The row keeps the typed value — no silent revert on a validation failure.
-    const priceInputsAfter = await screen.findAllByLabelText(t('billingTiers.colPrice'))
-    expect(priceInputsAfter[1]).toHaveValue(299)
+    const priceInputsAfter = await screen.findAllByLabelText(t('billingTiers.colPrice'), { exact: false })
+    // The euro field re-formats the kept value; the point is that it is 299, not the server's 199.
+    expect(priceInputsAfter[1]).toHaveValue('299,00')
   })
 
   it('PUTs only the toggled overage field, never the sibling overage fields (real TierPlatformTogglesCard, F1)', async () => {
@@ -111,6 +113,8 @@ describe('BillingTiersCard', () => {
     vi.mocked(api.put).mockResolvedValue({ data: catalog })
     render(<BillingTiersCard />)
 
+    // Overage lives on its own sub-tab now (Danny 09-09: the page was too long).
+    fireEvent.click(await screen.findByRole('tab', { name: t('billingTiers.tabs.overage') }))
     // The AI overage switch carries the AI meter in its accessible name (§6: no two switches share a name).
     const overageToggles = await screen.findAllByRole('switch', { name: `${t('billingTiers.overageEnabled')}: ${t('billing.usage.plan.tier.aiTitle')}` })
     fireEvent.click(overageToggles[0])
@@ -128,8 +132,10 @@ describe('BillingTiersCard', () => {
     vi.mocked(api.put).mockResolvedValue({ data: catalog })
     render(<BillingTiersCard />)
 
-    const priceInput = await screen.findByLabelText(t('billingTiers.overageAiPrice'))
-    fireEvent.change(priceInput, { target: { value: '15' } })
+    fireEvent.click(await screen.findByRole('tab', { name: t('billingTiers.tabs.overage') }))
+    const priceInput = await screen.findByLabelText(t('billingTiers.overageAiPrice'), { exact: false })
+    // Euros in the field, cents on the wire: € 0,15 → 15.
+    fireEvent.change(priceInput, { target: { value: '0,15' } })
 
     const saveBtn = await screen.findByRole('button', { name: t('common.save') })
     fireEvent.click(saveBtn)
@@ -153,6 +159,7 @@ describe('BillingTiersCard', () => {
     vi.mocked(api.put).mockResolvedValue({ data: {} })
     render(<BillingTiersCard />)
 
+    fireEvent.click(await screen.findByRole('tab', { name: t('billingTiers.tabs.tenants') }))
     const assignBtn = await screen.findByText('assign-tenant')
     fireEvent.click(assignBtn)
 

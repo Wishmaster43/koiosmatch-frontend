@@ -274,9 +274,9 @@
     "vacanciesSubtitle": "Streefwaarden voor dashboards en rapportages. Vacature-veroudering wordt beheerd onder Koios AI → Advies-drempels.",
     "fields": {
       "new_candidates_target": {
-        "label": "Doel nieuwe kandidaten / maand",
+        "label": "Doel nieuwe leads / maand",
         "description": "Maandelijks streefgetal voor nieuwe inschrijvingen",
-        "unit": "kandidaten"
+        "unit": "leads"
       },
       "no_contact_alert_months": {
         "label": "Alert: geen contact ≥ N maanden",
@@ -3382,7 +3382,7 @@
     "loadError": "Laden van generatieprofielen is mislukt.",
     "saveFailed": "Opslaan is mislukt.",
     "empty": "Nog geen generatieprofielen aangemaakt.",
-    "add": "+ Profiel",
+    "add": "Profiel toevoegen",
     "nameLabel": "Naam",
     "namePlaceholder": "Bijv. Logistiek — Flex ochtenddiensten",
     "priorityLabel": "Prioriteit",
@@ -3849,8 +3849,11 @@
     "markupLabel": "AI-marge (%)",
     "loadError": "Platformprijzen laden is mislukt.",
     "saved": "Platformprijzen opgeslagen.",
-    "fxUsdEurLabel": "USD→EUR-koers",
-    "fxUsdEurHint": "Wisselkoers voor omrekening van USD naar EUR (standaard 1,0)"
+    "markupHint": "Opslag op de inkoopprijs van AI-verbruik, in procenten.",
+    "workflowTokenPriceLabel": "Prijs per extra workflow-token",
+    "workflowTokenPriceHint": "De prijs van één workflow-token boven de staffel.",
+    "workflowTokenPriceWhere": "Instelbaar onder Pakket → Staffels → Overage.",
+    "saveFailed": "Platformprijzen opslaan is mislukt."
   },
   "invoiceSettings": {
     "title": "Factuurinstellingen",
@@ -3980,8 +3983,7 @@
     "colLabel": "Staffel",
     "colIncludedTokens": "Tokens per maand",
     "colIncludedRuns": "Workflow-tokens per maand",
-    "colPrice": "Prijs per maand (cent)",
-    "priceCaption": "= {{amount}} per maand",
+    "colPrice": "Prijs per maand",
     "colActive": "Actief",
     "colInUse": "In gebruik",
     "catalogEmpty": "Geen staffels geladen.",
@@ -3989,8 +3991,8 @@
     "inUseValue_other": "{{count}} tenants",
     "overageHeading": "Overage",
     "overageEnabled": "Verbruik boven de staffel toestaan",
-    "overageAiPrice": "Prijs per extra token (cent)",
-    "overageWorkflowPrice": "Prijs per extra workflow-token (cent)",
+    "overageAiPrice": "Prijs per extra token",
+    "overageWorkflowPrice": "Prijs per extra workflow-token",
     "overageOffCaption": "Uit: bij 100% blokkeert Koios en vraagt de tenant om een hogere staffel.",
     "warnPctLabel": "Waarschuwen vanaf (%)",
     "upgradeContactLabel": "Upgrade-contact (mailto of URL)",
@@ -4015,15 +4017,22 @@
     "loadError": "Staffels konden niet worden geladen.",
     "saveFailed": "Staffels opslaan is mislukt.",
     "saved": "Staffels opgeslagen.",
-    "unavailable": "Staffels zijn nog niet beschikbaar op deze server."
+    "unavailable": "Staffels zijn nog niet beschikbaar op deze server.",
+    "perMonth": "per maand",
+    "tabs": {
+      "ai": "AI-staffels",
+      "workflow": "Workflow-staffels",
+      "overage": "Overage",
+      "includes": "Inbegrepen per pakket",
+      "tenants": "Staffelkeuze per tenant"
+    }
   },
   "billingUsers": {
     "title": "Gebruikers",
     "subtitle": "Inbegrepen gebruikers en prijs per extra gebruiker per pakket, en de actuele bezetting per tenant.",
     "packagesHeading": "Pakketten",
     "includedUsersLabel": "Inbegrepen gebruikers",
-    "extraPriceLabel": "Prijs per extra gebruiker (cent)",
-    "extraPriceCaption": "= {{amount}} per extra gebruiker",
+    "extraPriceLabel": "Prijs per extra gebruiker",
     "loadError": "Gebruikersgegevens konden niet worden geladen.",
     "saveFailed": "Opslaan is mislukt.",
     "saved": "Opgeslagen.",
@@ -4035,7 +4044,8 @@
     "colIncluded": "Inbegrepen",
     "colExtra": "Extra",
     "unlimited": "Onbeperkt",
-    "extraValue": "{{count}} extra · {{amount}}"
+    "extraValue": "{{count}} extra · {{amount}}",
+    "perUser": "per gebruiker"
   },
   "dashboardsOrderRoleLabel": "Rol",
   "dashboardsOrderHint": "Bepaal de volgorde waarin de KPI-tegels voor deze rol op het dashboard verschijnen. Alleen ingeschakelde KPI's (tabblad KPI's) staan in de lijst.",

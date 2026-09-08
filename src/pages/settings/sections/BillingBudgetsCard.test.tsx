@@ -53,16 +53,17 @@ describe('BillingBudgetsCard', () => {
     mockGet()
     render(<BillingBudgetsCard />)
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/admin/billing-budgets'))
-    const inputs = await screen.findAllByLabelText(t('billingBudgets.workflowBudgetLabel'))
+    const inputs = await screen.findAllByLabelText(t('billingBudgets.workflowBudgetLabel'), { exact: false })
     expect(inputs).toHaveLength(3)
-    expect(inputs[0]).toHaveValue(200)
-    expect(inputs[1]).toHaveValue(800)
+    // The house NumberInput is a text field showing the grouped number.
+    expect(inputs[0]).toHaveValue('200')
+    expect(inputs[1]).toHaveValue('800')
   })
 
   it('renders the read-only AI staffel per package, never as an input', async () => {
     mockGet()
     render(<BillingBudgetsCard />)
-    await screen.findAllByLabelText(t('billingBudgets.workflowBudgetLabel'))
+    await screen.findAllByLabelText(t('billingBudgets.workflowBudgetLabel'), { exact: false })
     expect(screen.getByText(t('billingBudgets.aiTierLabel', { tier: 'assist' }))).toBeInTheDocument()
     expect(screen.queryByLabelText(t('billingBudgets.aiBudgetLabel'))).not.toBeInTheDocument()
   })
@@ -72,7 +73,7 @@ describe('BillingBudgetsCard', () => {
     vi.mocked(api.put).mockResolvedValue({ data: budgets })
     render(<BillingBudgetsCard />)
 
-    const inputs = await screen.findAllByLabelText(t('billingBudgets.workflowBudgetLabel'))
+    const inputs = await screen.findAllByLabelText(t('billingBudgets.workflowBudgetLabel'), { exact: false })
     await userEvent.clear(inputs[0])
     await userEvent.type(inputs[0], '1500')
 
@@ -88,7 +89,7 @@ describe('BillingBudgetsCard', () => {
     vi.mocked(api.put).mockResolvedValue({ data: budgets })
     render(<BillingBudgetsCard />)
 
-    const inputs = await screen.findAllByLabelText(t('billingBudgets.workflowBudgetLabel'))
+    const inputs = await screen.findAllByLabelText(t('billingBudgets.workflowBudgetLabel'), { exact: false })
     await userEvent.clear(inputs[0])
     await userEvent.type(inputs[0], '1500')
     await userEvent.click(screen.getByRole('button', { name: t('common.save') }))
@@ -105,7 +106,7 @@ describe('BillingBudgetsCard', () => {
     vi.mocked(api.put).mockResolvedValue({ data: budgets })
     render(<BillingBudgetsCard />)
 
-    await screen.findAllByLabelText(t('billingBudgets.workflowBudgetLabel'))
+    await screen.findAllByLabelText(t('billingBudgets.workflowBudgetLabel'), { exact: false })
     const tenantTrigger = screen.getByText(t('billingBudgets.tenantPickerPlaceholder'))
     await userEvent.click(tenantTrigger)
     const option = await screen.findByText('Yesway Flex B.V.')
@@ -126,12 +127,12 @@ describe('BillingBudgetsCard', () => {
     vi.mocked(api.put).mockResolvedValue({ data: budgets })
     render(<BillingBudgetsCard />)
 
-    const baseInputs = await screen.findAllByLabelText(t('billingBudgets.baseFee'))
+    const baseInputs = await screen.findAllByLabelText(t('billingBudgets.baseFee'), { exact: false })
     expect(baseInputs).toHaveLength(3)
-    // base_price_cents: 1000 (in cents) = 10.00 euros
-    expect(baseInputs[0]).toHaveValue(10)
-    expect(baseInputs[1]).toHaveValue(25)
-    expect(baseInputs[2]).toHaveValue(50)
+    // base_price_cents: 1000 (in cents) shows as € 10,00 in the euro field.
+    expect(baseInputs[0]).toHaveValue('10,00')
+    expect(baseInputs[1]).toHaveValue('25,00')
+    expect(baseInputs[2]).toHaveValue('50,00')
   })
 
   it('PUTs the edited base-fee in cents', async () => {
@@ -139,9 +140,9 @@ describe('BillingBudgetsCard', () => {
     vi.mocked(api.put).mockResolvedValue({ data: budgets })
     render(<BillingBudgetsCard />)
 
-    const baseInputs = await screen.findAllByLabelText(t('billingBudgets.baseFee'))
+    const baseInputs = await screen.findAllByLabelText(t('billingBudgets.baseFee'), { exact: false })
     await userEvent.clear(baseInputs[0])
-    await userEvent.type(baseInputs[0], '19.99')
+    await userEvent.type(baseInputs[0], '19,99')
 
     await userEvent.click(screen.getByRole('button', { name: t('common.save') }))
 
@@ -155,7 +156,7 @@ describe('BillingBudgetsCard', () => {
     vi.mocked(api.put).mockResolvedValue({ data: budgets })
     render(<BillingBudgetsCard />)
 
-    await screen.findAllByLabelText(t('billingBudgets.workflowBudgetLabel'))
+    await screen.findAllByLabelText(t('billingBudgets.workflowBudgetLabel'), { exact: false })
     const tenantTrigger = screen.getByText(t('billingBudgets.tenantPickerPlaceholder'))
     await userEvent.click(tenantTrigger)
     const option = await screen.findByText('Yesway Flex B.V.')
@@ -176,7 +177,7 @@ describe('BillingBudgetsCard', () => {
     vi.mocked(api.put).mockResolvedValue({ data: budgets })
     render(<BillingBudgetsCard />)
 
-    const wfInputs = await screen.findAllByLabelText(t('billingBudgets.workflowBudgetLabel'))
+    const wfInputs = await screen.findAllByLabelText(t('billingBudgets.workflowBudgetLabel'), { exact: false })
     await userEvent.clear(wfInputs[0])
     await userEvent.type(wfInputs[0], '250')
 

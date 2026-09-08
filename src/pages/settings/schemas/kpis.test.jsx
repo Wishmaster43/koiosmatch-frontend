@@ -61,18 +61,17 @@ describe('kpisOpportunities / kpisVacancies — field shape pinned', () => {
 describe('kpisOpportunities · defaults + persists the exact backend keys', () => {
   it('pre-fills both defaults (14, 14) when the tenant has never saved a value', async () => {
     render(<SchemaSection schema={kpisOpportunities} />)
-    const inputs = await screen.findAllByRole('spinbutton')
+    const inputs = await screen.findAllByRole('textbox')
+    // The house NumberInput is a text field (GETALLEN-1 inside inputs); it clamps 1..365 on blur.
     expect(inputs).toHaveLength(2)
-    await waitFor(() => expect(inputs[0]).toHaveValue(14))
-    expect(inputs[1]).toHaveValue(14)
-    expect(inputs[0]).toHaveAttribute('min', '1')
-    expect(inputs[0]).toHaveAttribute('max', '365')
+    await waitFor(() => expect(inputs[0]).toHaveValue('14'))
+    expect(inputs[1]).toHaveValue('14')
   })
 
   it('POSTs /settings with both keys, opportunity_stale_days at the edited value', async () => {
     render(<SchemaSection schema={kpisOpportunities} />)
-    const inputs = await screen.findAllByRole('spinbutton')
-    await waitFor(() => expect(inputs[0]).toHaveValue(14))
+    const inputs = await screen.findAllByRole('textbox')
+    await waitFor(() => expect(inputs[0]).toHaveValue('14'))
     fireEvent.change(inputs[0], { target: { value: '45' } })
 
     const saveBtn = await waitFor(() => {
@@ -93,23 +92,23 @@ describe('kpisOpportunities · defaults + persists the exact backend keys', () =
   it('loads a previously saved value back from GET /settings', async () => {
     api.get.mockResolvedValue({ data: { opportunity_stale_days: '90' } })
     render(<SchemaSection schema={kpisOpportunities} />)
-    const inputs = await screen.findAllByRole('spinbutton')
-    await waitFor(() => expect(inputs[0]).toHaveValue(90))
+    const inputs = await screen.findAllByRole('textbox')
+    await waitFor(() => expect(inputs[0]).toHaveValue('90'))
   })
 })
 
 describe('kpisVacancies · defaults + persists the exact backend key', () => {
   it('pre-fills the default (7) when the tenant has never saved a value', async () => {
     render(<SchemaSection schema={kpisVacancies} />)
-    const inputs = await screen.findAllByRole('spinbutton')
+    const inputs = await screen.findAllByRole('textbox')
     expect(inputs).toHaveLength(1)
-    await waitFor(() => expect(inputs[0]).toHaveValue(7))
+    await waitFor(() => expect(inputs[0]).toHaveValue('7'))
   })
 
   it('POSTs /settings with vacancy_closing_soon_days at the edited value', async () => {
     render(<SchemaSection schema={kpisVacancies} />)
-    const inputs = await screen.findAllByRole('spinbutton')
-    await waitFor(() => expect(inputs[0]).toHaveValue(7))
+    const inputs = await screen.findAllByRole('textbox')
+    await waitFor(() => expect(inputs[0]).toHaveValue('7'))
     fireEvent.change(inputs[0], { target: { value: '10' } })
 
     const saveBtn = await waitFor(() => {
@@ -135,7 +134,7 @@ describe('kpisVacancies · defaults + persists the exact backend key', () => {
 describe('kpisVacancies · subtitle cross-references the Koios-advice screen', () => {
   it('renders the vacanciesSubtitle override, not the generic kpis.subtitle', async () => {
     render(<SchemaSection schema={kpisVacancies} />)
-    await screen.findAllByRole('spinbutton')
+    await screen.findAllByRole('textbox')
     expect(screen.getByText(st('kpis.vacanciesSubtitle'))).toBeInTheDocument()
   })
 })

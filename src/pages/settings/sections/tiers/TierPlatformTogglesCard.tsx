@@ -1,16 +1,14 @@
 /**
  * TierPlatformTogglesCard (PRIJSMODEL-C, DEEL C §4c) — the platform-wide overage
- * toggles per meter plus the shared warn-percentage and upgrade-contact knobs.
- * Props-only presenter (mirrors PlatformPricingCard's percent-suffix input);
- * the parent container owns GET/PUT, headings and the SaveButton (F3: this
- * card renders no SectionTitle of its own — the container already prints one).
+ * toggles per meter plus the shared warn-percentage knob, as settings-kit rows
+ * (label left, control right — the one settings face). Props-only presenter; the
+ * parent container owns GET/PUT, headings and the SaveButton.
  */
-import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import Toggle from '@/components/ui/Toggle'
-import { BodyText, Caption, GroupLabel } from '@/components/ui/typography'
+import CurrencyInput from '@/components/ui/CurrencyInput'
 import type { BillingOverageConfig } from '@/types/billingTiers'
-import { inputWrap, inputStyle, label as labelStyle } from '../billingCardStyles'
+import { NumberField, SettingCardList, SettingRow } from '@/pages/settings/components/SettingsKit'
 
 // Patch shape this card sends up — one call per field change, always partial,
 // and always exactly the changed field (never the whole overage object) so the
@@ -24,52 +22,37 @@ interface TierPlatformTogglesCardProps {
   disabled?: boolean
 }
 
-// One meter's overage row: a GroupLabel naming the meter, then toggle + a cents
-// price input that disables with the platform when off.
-function OverageMeterRow({
+// One meter's overage: a switch row and a euro price row that follows the switch.
+function OverageMeterRows({
   meterName, priceLabel, enabled, priceCents, onToggle, onPriceChange, disabled,
 }: {
   meterName: string; priceLabel: string; enabled: boolean; priceCents: number
   onToggle: (v: boolean) => void; onPriceChange: (cents: number) => void; disabled?: boolean
 }) {
   const { t } = useTranslation('settings')
-  const priceId = useId()
   return (
-    <div style={{ marginBottom: 12 }}>
-      <GroupLabel style={{ marginBottom: 6 }}>{meterName}</GroupLabel>
-      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {/* The switch name carries the meter, so the two switches never share one accessible name (§6). */}
-          <Toggle checked={enabled} ariaLabel={`${t('billingTiers.overageEnabled')}: ${meterName}`} disabled={disabled} onChange={onToggle} />
-          <BodyText>{t('billingTiers.overageEnabled')}</BodyText>
-        </div>
-        <div style={{ flex: '1 1 160px', minWidth: 140 }}>
-          <label htmlFor={priceId} style={labelStyle}>{priceLabel}</label>
-          <div style={inputWrap}>
-            <input
-              id={priceId}
-              type="number" min={0} step={1}
-              value={priceCents}
-              disabled={!enabled || disabled}
-              onChange={(e) => onPriceChange(Number(e.target.value) || 0)}
-              style={inputStyle}
-            />
-          </div>
-          {!enabled && <Caption>{t('billingTiers.overageOffCaption')}</Caption>}
-        </div>
-      </div>
-    </div>
+    <>
+      <SettingRow label={`${meterName}: ${t('billingTiers.overageEnabled')}`}
+        description={enabled ? undefined : t('billingTiers.overageOffCaption')}>
+        {/* The switch name carries the meter, so the two switches never share one accessible name (§6). */}
+        <Toggle checked={enabled} ariaLabel={`${t('billingTiers.overageEnabled')}: ${meterName}`} disabled={disabled} onChange={onToggle} />
+      </SettingRow>
+      <SettingRow label={`${meterName}: ${priceLabel}`}>
+        <CurrencyInput cents={priceCents} disabled={!enabled || disabled} width={110}
+          ariaLabel={`${priceLabel}: ${meterName}`}
+          onChange={(cents) => onPriceChange(cents ?? 0)} />
+      </SettingRow>
+    </>
   )
 }
 
-// Renders the two overage meter rows plus warn_at_pct.
+// Renders the two overage meters plus warn_at_pct as kit rows.
 export default function TierPlatformTogglesCard({ overage, warnAtPct, onChange, disabled }: TierPlatformTogglesCardProps) {
   const { t } = useTranslation('settings')
-  const warnId = useId()
 
   return (
-    <div>
-      <OverageMeterRow
+    <SettingCardList>
+      <OverageMeterRows
         meterName={t('billing.usage.plan.tier.aiTitle')}
         priceLabel={t('billingTiers.overageAiPrice')}
         enabled={overage.ai_enabled ?? false}
@@ -78,7 +61,7 @@ export default function TierPlatformTogglesCard({ overage, warnAtPct, onChange, 
         onToggle={(v) => onChange({ overage: { ai_enabled: v } })}
         onPriceChange={(cents) => onChange({ overage: { ai_price_cents: cents } })}
       />
-      <OverageMeterRow
+      <OverageMeterRows
         meterName={t('billing.usage.plan.tier.workflowTitle')}
         priceLabel={t('billingTiers.overageWorkflowPrice')}
         enabled={overage.workflow_enabled ?? false}
@@ -87,23 +70,11 @@ export default function TierPlatformTogglesCard({ overage, warnAtPct, onChange, 
         onToggle={(v) => onChange({ overage: { workflow_enabled: v } })}
         onPriceChange={(cents) => onChange({ overage: { workflow_price_cents: cents } })}
       />
-
-      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-        <div style={{ flex: '1 1 160px', minWidth: 140 }}>
-          <label htmlFor={warnId} style={labelStyle}>{t('billingTiers.warnPctLabel')}</label>
-          <div style={inputWrap}>
-            <input
-              id={warnId}
-              type="number" min={0} max={100} step={1}
-              value={warnAtPct ?? 0}
-              disabled={disabled}
-              onChange={(e) => onChange({ warn_at_pct: Number(e.target.value) || 0 })}
-              style={inputStyle}
-            />
-            <Caption>%</Caption>
-          </div>
-        </div>
-      </div>
-    </div>
+      <SettingRow label={t('billingTiers.warnPctLabel')}>
+        <NumberField value={warnAtPct ?? 0} min={0} max={100} unit="%" width={80} disabled={disabled}
+          ariaLabel={t('billingTiers.warnPctLabel')}
+          onChange={(v: number) => onChange({ warn_at_pct: v })} />
+      </SettingRow>
+    </SettingCardList>
   )
 }

@@ -274,9 +274,9 @@
     "vacanciesSubtitle": "Zielwerte für Dashboards und Berichte. Die Veralterung von Stellen wird unter Koios AI → Hinweis-Schwellenwerte verwaltet.",
     "fields": {
       "new_candidates_target": {
-        "label": "Ziel neue Kandidaten / Monat",
+        "label": "Ziel neue Leads / Monat",
         "description": "Monatliches Ziel für Neuanmeldungen",
-        "unit": "Kandidaten"
+        "unit": "Leads"
       },
       "no_contact_alert_months": {
         "label": "Warnung: kein Kontakt ≥ N Monate",
@@ -3382,7 +3382,7 @@
     "loadError": "Laden der Generierungsprofile fehlgeschlagen.",
     "saveFailed": "Speichern fehlgeschlagen.",
     "empty": "Noch keine Generierungsprofile angelegt.",
-    "add": "+ Profil",
+    "add": "Profil hinzufügen",
     "nameLabel": "Name",
     "namePlaceholder": "Z. B. Logistik — Flex-Frühschichten",
     "priorityLabel": "Priorität",
@@ -3849,8 +3849,11 @@
     "markupLabel": "KI-Marge (%)",
     "loadError": "Plattformpreise konnten nicht geladen werden.",
     "saved": "Plattformpreise gespeichert.",
-    "fxUsdEurLabel": "USD→EUR-Wechselkurs",
-    "fxUsdEurHint": "Wechselkurs zur Umrechnung von USD zu EUR (Standard 1,0)"
+    "markupHint": "Aufschlag auf den Einkaufspreis der KI-Nutzung, in Prozent.",
+    "workflowTokenPriceLabel": "Preis pro zusätzlichem Workflow-Token",
+    "workflowTokenPriceHint": "Der Preis eines Workflow-Tokens über der Staffel.",
+    "workflowTokenPriceWhere": "Einstellbar unter Paket → Staffeln → Mehrverbrauch.",
+    "saveFailed": "Speichern der Plattformpreise fehlgeschlagen."
   },
   "invoiceSettings": {
     "title": "Rechnungseinstellungen",
@@ -3980,8 +3983,7 @@
     "colLabel": "Stufe",
     "colIncludedTokens": "Tokens pro Monat",
     "colIncludedRuns": "Workflow-Tokens pro Monat",
-    "colPrice": "Preis pro Monat (Cent)",
-    "priceCaption": "= {{amount}} pro Monat",
+    "colPrice": "Preis pro Monat",
     "colActive": "Aktiv",
     "colInUse": "In Gebrauch",
     "catalogEmpty": "Keine Stufen geladen.",
@@ -3989,8 +3991,8 @@
     "inUseValue_other": "{{count}} Mandanten",
     "overageHeading": "Overage",
     "overageEnabled": "Verbrauch über der Stufe erlauben",
-    "overageAiPrice": "Preis pro zusätzlichem Token (Cent)",
-    "overageWorkflowPrice": "Preis pro zusätzlichem Workflow-Token (Cent)",
+    "overageAiPrice": "Preis pro zusätzlichem Token",
+    "overageWorkflowPrice": "Preis pro zusätzlichem Workflow-Token",
     "overageOffCaption": "Aus: Bei 100% blockiert Koios und bittet den Mandanten um eine höhere Stufe.",
     "warnPctLabel": "Warnen ab (%)",
     "upgradeContactLabel": "Upgrade-Kontakt (mailto oder URL)",
@@ -4015,15 +4017,22 @@
     "loadError": "Stufen konnten nicht geladen werden.",
     "saveFailed": "Speichern der Stufen ist fehlgeschlagen.",
     "saved": "Stufen gespeichert.",
-    "unavailable": "Stufen sind auf diesem Server noch nicht verfügbar."
+    "unavailable": "Stufen sind auf diesem Server noch nicht verfügbar.",
+    "perMonth": "pro Monat",
+    "tabs": {
+      "ai": "KI-Staffeln",
+      "workflow": "Workflow-Staffeln",
+      "overage": "Mehrverbrauch",
+      "includes": "Inklusive pro Paket",
+      "tenants": "Staffel pro Tenant"
+    }
   },
   "billingUsers": {
     "title": "Benutzer",
     "subtitle": "Inbegriffene Benutzer und der Preis pro zusätzlichem Benutzer je Paket sowie die aktuelle Belegung pro Mandant.",
     "packagesHeading": "Pakete",
     "includedUsersLabel": "Inbegriffene Benutzer",
-    "extraPriceLabel": "Preis pro zusätzlichem Benutzer (Cent)",
-    "extraPriceCaption": "= {{amount}} pro zusätzlichem Benutzer",
+    "extraPriceLabel": "Preis pro zusätzlichem Benutzer",
     "loadError": "Benutzerdaten konnten nicht geladen werden.",
     "saveFailed": "Speichern ist fehlgeschlagen.",
     "saved": "Gespeichert.",
@@ -4035,7 +4044,8 @@
     "colIncluded": "Inbegriffen",
     "colExtra": "Zusätzlich",
     "unlimited": "Unbegrenzt",
-    "extraValue": "{{count}} zusätzlich · {{amount}}"
+    "extraValue": "{{count}} zusätzlich · {{amount}}",
+    "perUser": "pro Benutzer"
   },
   "dashboardsOrderRoleLabel": "Rolle",
   "dashboardsOrderHint": "Legt die Reihenfolge fest, in der die KPI-Kacheln für diese Rolle im Dashboard erscheinen. Nur aktivierte KPIs (Tab KPIs) stehen in der Liste.",
