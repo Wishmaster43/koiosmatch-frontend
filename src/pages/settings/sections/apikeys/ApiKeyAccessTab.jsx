@@ -6,11 +6,13 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ScopeEditor from './ScopeEditor'
+import { useScopeEntityLevels } from './useScopeEntityLevels'
 import SaveButton from '@/components/ui/SaveButton'
 
 // The Access tab: edits the scope map as a local draft, persisted only on Save.
 export default function ApiKeyAccessTab({ scopes, onSave }) {
   const { t } = useTranslation('settings')
+  const levelsByEntity = useScopeEntityLevels()
   const [draft, setDraft]   = useState(() => ({ ...(scopes ?? {}) }))
   const [saving, setSaving] = useState(false)
   const [saved, setSaved]   = useState(false)
@@ -37,7 +39,7 @@ export default function ApiKeyAccessTab({ scopes, onSave }) {
         <SaveButton onClick={save} disabled={!dirty || saving} saved={saved} saving={saving} />
       </div>
 
-      <ScopeEditor value={draft} onChange={setDraft} />
+      <ScopeEditor value={draft} onChange={setDraft} levelsByEntity={levelsByEntity} />
     </div>
   )
 }

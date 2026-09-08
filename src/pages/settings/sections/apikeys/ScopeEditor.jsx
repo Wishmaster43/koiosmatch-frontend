@@ -13,16 +13,25 @@
 import { useTranslation } from 'react-i18next'
 import { Toggle } from '@/pages/settings/components/SettingsKit'
 import SearchSelect from '@/components/ui/SearchSelect'
+import { BodyText } from '@/components/ui/typography'
 import { SCOPE_ENTITIES, ACCESS_LEVELS } from './constants'
 
-export default function ScopeEditor({ value = {}, onChange }) {
+// SCOPE-LEVEL-READONLY-1: `levelsByEntity` ({ entity: level[] }) is the backend's hint of the
+// levels it offers per entity (useScopeEntityLevels); absent or empty = every level, as before.
+export default function ScopeEditor({ value = {}, onChange, levelsByEntity = {} }) {
   const { t } = useTranslation('settings')
 
-  // Toggling on defaults to read; toggling off removes the entity entirely.
+  // The levels offered for one entity: the hint filtered to known levels, else all of them.
+  const offeredFor = (entity) => {
+    const hint = (levelsByEntity[entity] ?? []).filter((lvl) => ACCESS_LEVELS.includes(lvl))
+    return hint.length ? hint : ACCESS_LEVELS
+  }
+
+  // Toggling on defaults to the first offered level (read); toggling off removes the entity.
   const toggle = (entity) => {
     const next = { ...value }
     if (next[entity]) delete next[entity]
-    else next[entity] = 'read'
+    else next[entity] = offeredFor(entity)[0]
     onChange(next)
   }
 
@@ -34,6 +43,9 @@ export default function ScopeEditor({ value = {}, onChange }) {
       {SCOPE_ENTITIES.map((entity, i) => {
         const level = value[entity]
         const on = Boolean(level)
+        // A stored level the hint no longer offers stays pickable, so it is visible and changeable.
+        const offered = offeredFor(entity)
+        const options = (level && !offered.includes(level) ? [...offered, level] : offered)
         return (
           <div key={entity} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '11px 16px', borderTop: i ? '1px solid var(--border)' : 'none' }}>
             <Toggle checked={on} onChange={() => toggle(entity)} />
@@ -45,16 +57,23 @@ export default function ScopeEditor({ value = {}, onChange }) {
                 trigger button per call site. triggerAriaLabel keeps the accessible
                 name naming the ENTITY ("Candidates"), since the visible text is only
                 the picked LEVEL ("Read"). */}
-            <SearchSelect
-              options={ACCESS_LEVELS.map((lvl) => ({ value: lvl, label: t(`apiKeys.level.${lvl}`) }))}
-              selected={[level ?? 'read']}
-              onToggle={(v) => setLevel(entity, v)}
-              closeOnToggle
-              searchable={false}
-              disabled={!on}
-              triggerLabel={t(`apiKeys.level.${level ?? 'read'}`)}
-              triggerAriaLabel={t(`apiKeys.scopes.${entity}`)}
-            />
+            {options.length === 1 ? (
+              // One offered level = nothing to pick (§3 no fake affordance): the level reads as text.
+              <BodyText as="span" style={{ color: on ? 'var(--text)' : 'var(--text-muted)' }} aria-label={t(`apiKeys.scopes.${entity}`)}>
+                {t(`apiKeys.level.${options[0]}`)}
+              </BodyText>
+            ) : (
+              <SearchSelect
+                options={options.map((lvl) => ({ value: lvl, label: t(`apiKeys.level.${lvl}`) }))}
+                selected={[level ?? options[0]]}
+                onToggle={(v) => setLevel(entity, v)}
+                closeOnToggle
+                searchable={false}
+                disabled={!on}
+                triggerLabel={t(`apiKeys.level.${level ?? options[0]}`)}
+                triggerAriaLabel={t(`apiKeys.scopes.${entity}`)}
+              />
+            )}
           </div>
         )
       })}

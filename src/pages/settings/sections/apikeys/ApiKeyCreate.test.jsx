@@ -4,7 +4,7 @@
  * candidate dossier entities (notes, documents, conversations, educations,
  * references) must be sendable just like any other scope.
  */
-import { describe, it, expect, afterEach, vi } from 'vitest'
+import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
@@ -14,13 +14,16 @@ import ApiKeyCreate from './ApiKeyCreate'
 // Keep the real unwrap/unwrapList — only api.post is stubbed.
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
-  return { ...actual, default: { post: vi.fn() } }
+  // SCOPE-LEVEL-READONLY-1: the create view also reads the level hint; a 404 = no hint.
+  return { ...actual, default: { get: vi.fn().mockRejectedValue({ response: { status: 404 } }), post: vi.fn() } }
 })
 vi.mock('@/lib/notify', () => ({ notifySuccess: vi.fn(), notifyError: vi.fn() }))
 
 const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
 
 afterEach(() => { vi.clearAllMocks(); vi.restoreAllMocks() })
+// restoreAllMocks drops the factory's GET implementation; re-arm the level-hint 404 per test.
+beforeEach(() => { vi.mocked(api.get).mockRejectedValue({ response: { status: 404 } }) })
 
 describe('ApiKeyCreate — scope request', () => {
   it('POSTs /api-keys with all form fields and the selected scopes in the request body', async () => {

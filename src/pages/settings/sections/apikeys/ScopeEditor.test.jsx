@@ -68,3 +68,33 @@ describe('ScopeEditor', () => {
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ candidate_notes: 'read' }))
   })
 })
+
+// SCOPE-LEVEL-READONLY-1: the backend's per-entity level hint narrows the picker; a single
+// offered level renders as text (no dead picker), the default level follows the hint.
+describe('ScopeEditor · offered levels (SCOPE-LEVEL-READONLY-1)', () => {
+  it('renders a read-only entity as plain text instead of a picker', () => {
+    render(<ScopeEditor value={{ company: 'read' }} onChange={() => {}} levelsByEntity={{ company: ['read'] }} />)
+    expect(screen.queryByRole('button', { name: st('apiKeys.scopes.company') })).toBeNull()
+    expect(screen.getByLabelText(st('apiKeys.scopes.company'))).toHaveTextContent(st('apiKeys.level.read'))
+    // Other rows keep their picker.
+    expect(screen.getByRole('button', { name: st('apiKeys.scopes.candidates') })).toBeInTheDocument()
+  })
+
+  it('keeps a stored level the hint no longer offers pickable (visible and changeable)', () => {
+    render(<ScopeEditor value={{ company: 'read_write' }} onChange={() => {}} levelsByEntity={{ company: ['read'] }} />)
+    expect(screen.getByRole('button', { name: st('apiKeys.scopes.company') })).toHaveTextContent(st('apiKeys.level.read_write'))
+  })
+
+  it('defaults a toggled-on entity to the first offered level', async () => {
+    const onChange = vi.fn()
+    const user = userEvent.setup()
+    render(<ScopeEditor value={{}} onChange={onChange} levelsByEntity={{ candidates: ['read_write'] }} />)
+    await user.click(screen.getAllByRole('switch')[0])
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ candidates: 'read_write' }))
+  })
+
+  it('keeps every level when there is no hint (today\'s behaviour)', () => {
+    render(<ScopeEditor value={{ company: 'read' }} onChange={() => {}} />)
+    expect(screen.getByRole('button', { name: st('apiKeys.scopes.company') })).toBeInTheDocument()
+  })
+})

@@ -29,3 +29,8 @@ export const regenerateApiKey = (id) => api.post(`/api-keys/${id}/regenerate`).t
 // exactly one active primary — promoting one auto-demotes the previous primary
 // server-side (audited) — so every caller must reload the list after this resolves.
 export const setApiKeyPrimary = (id) => api.patch(`/api-keys/${id}`, { type: 'primary' }).then(unwrap)
+
+// SCOPE-LEVEL-READONLY-1 (DRAFT-SETTINGS-CATALOG-1 §5): the levels the backend offers per
+// scope entity ({entity, levels}[]); read-only entities list only 'read'. Tolerant of both
+// the {data: [...]} envelope and a bare array.
+export const listScopeEntities = () => api.get('/api-keys/scope-entities').then((r) => (Array.isArray(r.data) ? r.data : (r.data?.data ?? [])))

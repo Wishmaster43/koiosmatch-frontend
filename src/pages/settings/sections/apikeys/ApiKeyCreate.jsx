@@ -12,6 +12,7 @@ import { Key } from 'lucide-react'
 import { createApiKey } from './apiKeysApi'
 import { KEY_TYPES } from './constants'
 import ScopeEditor from './ScopeEditor'
+import { useScopeEntityLevels } from './useScopeEntityLevels'
 import SearchSelect from '@/components/ui/SearchSelect'
 import OneTimeSecretReveal from '@/pages/settings/components/OneTimeSecretReveal'
 import SettingsDetailHeader from '@/pages/settings/components/SettingsDetailHeader'
@@ -22,6 +23,7 @@ import { Caption, formLabelStyle } from '@/components/ui/typography'
 // Two-phase inline view (see the module doc above): the create form, then the one-time secret reveal — no modal, so the whole overview stays readable.
 export default function ApiKeyCreate({ onBack, onCreated }) {
   const { t } = useTranslation('settings')
+  const levelsByEntity = useScopeEntityLevels()
   const [form, setForm]     = useState({ friendly_name: '', type: 'additional', organisation: '', description: '', contact_name: '', contact_email: '' })
   const [scopes, setScopes] = useState({})   // access grid, sent with the create call
   const [saving, setSaving] = useState(false)
@@ -133,7 +135,7 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
             <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
               <label style={labelStyle}>{t('apiKeys.tab.access')}</label>
               <Caption style={{ display: 'block', margin: '0 0 10px' }}>{t('apiKeys.access.subtitle')}</Caption>
-              <ScopeEditor value={scopes} onChange={setScopes} />
+              <ScopeEditor value={scopes} onChange={setScopes} levelsByEntity={levelsByEntity} />
             </div>
 
             {error && <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('apiKeys.createError')}</div>}
