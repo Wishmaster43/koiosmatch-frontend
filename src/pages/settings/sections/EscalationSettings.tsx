@@ -17,10 +17,17 @@
  * the backend's `blank($target)` half of the same guard, belt-and-braces),
  * and a signal with days set but no target is BLOCKED client-side (never
  * sent half-configured) rather than silently saved as an inert pair.
+ *
+ * SIGNALS (X-6): fetched from GET /settings/signal-catalog (15 keys) with
+ * the four original keys as seed fallback. The catalogue resolves BEFORE the
+ * form mounts: useSettingsForm snapshots its defaults once, so a form mounted
+ * on the seed list would never load the stored values of the other signals.
  */
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/context/AuthContext'
+import api from '@/lib/api'
 import { useSettingsForm } from '../lib/useSettingsForm'
 import { SettingsScaffold, SettingCard } from '../components/SettingsKit'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
@@ -28,12 +35,12 @@ import SearchSelect from '@/components/ui/SearchSelect'
 import { useUsers } from '@/lib/queries'
 import { useAssignableRoles } from '@/pages/users/shared'
 import { Caption } from '@/components/ui/typography'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 
-// The four stilstand signals the backend escalates today (11-escalatie 3b).
-// Copied verbatim from the changelog — never invent a fifth here without a
-// matching backend key.
-const SIGNALS = ['task_overdue', 'candidate_status_stale', 'conversation_unanswered', 'candidate_phase_stale'] as const
-type Signal = typeof SIGNALS[number]
+// Seed fallback: the four original stilstand signals (in use before X-6) —
+// rendered only when the catalogue endpoint fails, never invented beyond.
+const SIGNALS_SEED: readonly string[] = ['task_overdue', 'candidate_status_stale', 'conversation_unanswered', 'candidate_phase_stale']
+type Signal = string
 
 const DAYS_MIN = 1
 const DAYS_MAX = 90
@@ -108,8 +115,34 @@ function EscalationRow({ signal, days, target, onDays, onTarget, options, error,
   )
 }
 
-/** Escalation thresholds — one row per stilstand signal, day count + target (user or role). */
+/** Escalation thresholds — resolves the signal catalogue first, then mounts the form on the final list. */
 export default function EscalationSettings() {
+  const { t } = useTranslation('settings')
+
+  // X-6: the catalogue is the source of the signal list; the seed only covers an outage.
+  const catalog = useQuery({
+    queryKey: ['signal-catalog'],
+    queryFn: async () => {
+      const resp = await api.get('/settings/signal-catalog')
+      return (resp.data?.signals ?? []) as string[]
+    },
+    staleTime: Infinity,
+  })
+
+  // Loading: the scaffold's own skeleton, no form yet (see the file doc for why).
+  if (catalog.isPending) {
+    return (
+      <SettingsScaffold title={t('escalation.title')} subtitle={t('escalation.subtitle')}
+        maxWidth={720} form={{ loading: true }} actions={undefined} />
+    )
+  }
+
+  const signals = catalog.data && catalog.data.length > 0 ? catalog.data : SIGNALS_SEED
+  return <EscalationForm signals={signals} catalogFailed={catalog.isError} onRetry={() => { void catalog.refetch() }} />
+}
+
+// One row per stilstand signal, day count + target (user or role); owns the settings form.
+function EscalationForm({ signals, catalogFailed, onRetry }: { signals: readonly Signal[]; catalogFailed: boolean; onRetry: () => void }) {
   const { t } = useTranslation('settings')
   const auth = useAuth()
   const canEdit = auth?.hasPermission('settings.update') ?? false
@@ -119,12 +152,12 @@ export default function EscalationSettings() {
   // needs no separate flag.
   const defaults = useMemo(() => {
     const map: Record<string, string> = {}
-    for (const signal of SIGNALS) {
+    for (const signal of signals) {
       map[`${signal}_escalate_after_days`] = ''
       map[`${signal}_escalate_to`] = ''
     }
     return map
-  }, [])
+  }, [signals])
   const form = useSettingsForm(defaults)
 
   // When user lacks permissions, hide Save.
@@ -168,7 +201,7 @@ export default function EscalationSettings() {
   const requestSave = () => {
     const nextBlocked = new Set<Signal>()
     const normalized: Record<string, string> = { ...form.values }
-    for (const signal of SIGNALS) {
+    for (const signal of signals) {
       const daysKey = `${signal}_escalate_after_days`
       const targetKey = `${signal}_escalate_to`
       const days = String(form.values[daysKey] ?? '')
@@ -212,8 +245,14 @@ export default function EscalationSettings() {
       // atomic-pair gate first — the shared Save button stays the one control.
       // When user lacks permissions, gate the form to hide Save.
       maxWidth={720} form={{ ...(canEdit ? { ...form, save: requestSave } : gatedForm) }} actions={undefined}>
+      {/* Catalogue outage: the seed rows stay editable, but the user is told the list is incomplete. */}
+      {catalogFailed && (
+        <ErrorBanner variant="subtle" onRetry={onRetry} style={{ marginBottom: 12 }}>
+          {t('escalation.catalogUnavailable')}
+        </ErrorBanner>
+      )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {SIGNALS.map(signal => (
+        {signals.map(signal => (
           <EscalationRow key={signal} signal={signal}
             days={String(form.values[`${signal}_escalate_after_days`] ?? '')}
             target={String(form.values[`${signal}_escalate_to`] ?? '')}
