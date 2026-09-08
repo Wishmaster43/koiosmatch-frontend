@@ -113,7 +113,7 @@ export const CANDIDATE_FIELD_GROUPS: CandidateRequiredFieldGroup[] = [
     titleKey: 'candidates:preferences.groupOther',
     fields: [
       { key: 'source', labelKey: 'candidates:filters.source' },
-      { key: 'summary', labelKey: 'candidates:modal.fields.summary' },
+      { key: 'description', labelKey: 'candidates:modal.fields.summary' },
     ],
   },
 ]
@@ -129,6 +129,7 @@ export const CANDIDATE_FIELD_KEYS: string[] = CANDIDATE_FIELD_GROUPS.flatMap(g =
 export const LEGACY_FIELD_KEY_ALIASES: Record<string, string> = {
   postal_code: 'postcode',
   linkedin: 'linkedin_slug',
+  summary: 'description',
 }
 
 /**

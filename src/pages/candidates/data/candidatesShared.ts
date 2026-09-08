@@ -113,7 +113,10 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
   // without this mapping the WorkPermitBlock's save silently dropped its fields.
   if ('workPermitType'       in patch) body.work_permit_type        = patch.workPermitType || null
   if ('workPermitValidUntil' in patch) body.work_permit_valid_until = patch.workPermitValidUntil || null
-  // FE-internal 'summary' writes the renamed wire key `description` (CMBE b87e3240).
+  // Candidate description (CMBE 2026-09-07 V2-B-SUMMARY-FOLD): FE now sends the API
+  // key `description` directly; legacy FE still sends `summary` which maps here. Both
+  // paths → the same `description` wire key.
+  if ('description'       in patch) body.description       = patch.description
   if ('summary'           in patch) body.description       = patch.summary
   if ('languages'         in patch) body.languages         = patch.languages
   if ('preferences'       in patch) body.preferences       = patch.preferences

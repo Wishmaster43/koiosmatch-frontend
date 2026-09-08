@@ -110,6 +110,10 @@ describe('requiredFieldsCatalog — what a tenant may mark required', () => {
   it('folds the legacy keys onto their working equivalent without dropping anything', () => {
     expect(normalizeRequiredFieldKeys(['first_name', 'postal_code', 'linkedin']))
       .toEqual(['first_name', 'postcode', 'linkedin_slug'])
+    // The summary → description rename (V2-B-SUMMARY-FOLD, 2026-09-07) also folds,
+    // so a tenant that stored 'summary' before the rename still renders as required.
+    expect(normalizeRequiredFieldKeys(['first_name', 'summary']))
+      .toEqual(['first_name', 'description'])
     // An unknown key is kept — it may be an attribute a later release adds.
     expect(normalizeRequiredFieldKeys(['who_knows'])).toEqual(['who_knows'])
   })

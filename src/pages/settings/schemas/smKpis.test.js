@@ -6,9 +6,14 @@ import { describe, it, expect } from 'vitest'
 import smKpis from './smKpis'
 
 describe('smKpis · dead keys removed', () => {
-  it('carries only the three active KPI keys', () => {
+  it('carries only the two active KPI keys', () => {
     const keys = smKpis.fields.map((f) => f.key)
-    expect(keys).toEqual(['sm_occupancy_target', 'sm_fill_rate_target', 'sm_filled_shifts_target'])
+    expect(keys).toEqual(['sm_fill_rate_target', 'sm_filled_shifts_target'])
+  })
+
+  it('sm_occupancy_target is absent', () => {
+    const keys = smKpis.fields.map((f) => f.key)
+    expect(keys).not.toContain('sm_occupancy_target')
   })
 
   it('sm_open_shifts_warning is absent', () => {
