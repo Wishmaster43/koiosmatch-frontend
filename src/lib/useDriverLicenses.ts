@@ -13,6 +13,14 @@
  * (driver licences have no separate id/label split), mirroring how
  * useLastContactTypes already exposes icon-bearing items. Consumers that only
  * need the name list read `.label` (or `.value` — identical here).
+ *
+ * LICENSE-KEYS-1 (2026-09-08): each row now carries a stable read-only `key`
+ * (HasLookupKey — set once at creation from the code, e.g. "BE"→"be", never
+ * rewritten on a later rename). The FE mirrors this in candidate preferences:
+ * `license_category_keys` is a NEW additive array column dual-written alongside
+ * the legacy `license_categories` code array on every write path. A code that
+ * resolves to a driver_licenses row contributes its key; a code matching none is
+ * left out of the keys array (not an error — the legacy array is unaffected).
  */
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -25,24 +33,29 @@ export interface DriverLicenseItem {
   value: string
   label: string
   icon?: string | null
+  key?: string | null
 }
 
 const SEED_NAMES = ['AM', 'A', 'B', 'BE', 'C', 'C1', 'CE', 'D', 'D1', 'DE', 'T']
-export const DEFAULT_DRIVER_LICENSES: DriverLicenseItem[] = SEED_NAMES.map(name => ({ value: name, label: name, icon: null }))
+export const DEFAULT_DRIVER_LICENSES: DriverLicenseItem[] = SEED_NAMES.map(name => ({ value: name, label: name, icon: null, key: null }))
 
-type Named = { name?: string; label?: string; value?: string; icon?: string }
+type Named = { name?: string; label?: string; value?: string; icon?: string; key?: string }
 
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
 const mapDriverLicenses = (res: AxiosResponse): DriverLicenseItem[] | null => {
   const raw = (unwrapList(res).rows) as unknown[]
-  const items = raw
-    .map(x => {
-      if (typeof x === 'string') return { value: x, label: x, icon: null as string | null }
+  const items: DriverLicenseItem[] = []
+  for (const x of raw) {
+    if (typeof x === 'string') {
+      items.push({ value: x, label: x, icon: null, key: null })
+    } else {
       const n = x as Named
       const name = n.name ?? n.label ?? n.value
-      return name ? { value: name, label: name, icon: n.icon ?? null } : null
-    })
-    .filter((v): v is { value: string; label: string; icon: string | null } => Boolean(v))
+      if (name) {
+        items.push({ value: name, label: name, icon: n.icon ?? null, key: n.key ?? null })
+      }
+    }
+  }
   return items.length ? items : null
 }
 

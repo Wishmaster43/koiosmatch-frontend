@@ -24,7 +24,15 @@ vi.mock('@/context/LookupsContext', () => ({
 }))
 vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: [], functionOptions: [].map(n => ({ value: n, label: n })), allowFreeEntry: true }) }))
 vi.mock('@/lib/useIndustries', () => ({ useIndustries: () => ({ industries: [], industryOptions: [].map(n => ({ value: n, label: n })) }) }))
-vi.mock('@/lib/useDriverLicenses', () => ({ useDriverLicenses: () => ({ licenses: [] }) }))
+vi.mock('@/lib/useDriverLicenses', () => ({
+  useDriverLicenses: () => ({
+    licenses: [
+      { value: 'B', label: 'Rijbewijs B', icon: null, key: 'b' },
+      { value: 'C', label: 'Rijbewijs C', icon: 'truck', key: 'c' },
+      { value: 'AM', label: 'Rijbewijs AM', icon: null, key: null }, // key may be null
+    ],
+  }),
+}))
 // NOODCONTACT-SPLIT-1: EmergencyContactCard's relation dropdown now fetches its
 // own lookup — mocked for isolation, mirrors the other lookup hooks above.
 vi.mock('@/lib/useEmergencyContactRelations', () => ({ useEmergencyContactRelations: () => ({ emergencyContactRelations: [] }) }))
@@ -65,6 +73,7 @@ describe('PreferencesTab · sub-tabs (kandidaten-ronde-2, punt D)', () => {
   // PREF-PENCIL-SPLIT-1 (05-08): the Reizen save must PATCH only its own keys —
   // never Beschikbaarheid's (available_from/hours_per_week/…), even though the
   // table's internal draft still carries the complete preferences object.
+  // LICENSE-KEYS-1: license_category_keys is now included (derived from selected codes).
   it('Reizen save sends ONLY the travel keys', async () => {
     const user = userEvent.setup()
     const onSave = vi.fn()
@@ -75,8 +84,30 @@ describe('PreferencesTab · sub-tabs (kandidaten-ronde-2, punt D)', () => {
     expect(onSave).toHaveBeenCalledTimes(1)
     const body = onSave.mock.calls[0][0] as Record<string, unknown>
     expect(Object.keys(body).sort()).toEqual(
-      ['license_categories', 'max_travel_km', 'max_travel_min', 'own_transport'].sort(),
+      ['license_categories', 'license_category_keys', 'max_travel_km', 'max_travel_min', 'own_transport'].sort(),
     )
+  })
+
+  // LICENSE-KEYS-1 (2026-09-08): Reizen save derives license_category_keys from
+  // selected driver licenses and includes them in the PATCH body. A code that
+  // resolves to a driver_licenses row contributes its key; a code matching none is
+  // left out of the keys array (not an error — the legacy array is unaffected).
+  it('Reizen save derives license_category_keys from selected codes and sends both arrays', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    const c = {
+      ...candidate(),
+      preferences: { license_categories: ['B', 'C', 'AM'] },
+    } as unknown as Candidate
+    render(<PreferencesTab c={c} onSave={onSave} />)
+    await user.click(screen.getByRole('tab', { name: 'preferences.groupTravel' }))
+    await user.click(screen.getByTitle('edit'))
+    await user.click(screen.getByTitle('save'))
+    expect(onSave).toHaveBeenCalledTimes(1)
+    const body = onSave.mock.calls[0][0] as Record<string, unknown>
+    // Both legacy codes and derived keys are sent; AM has no key so it's excluded from keys.
+    expect(body.license_categories).toEqual(['B', 'C', 'AM'])
+    expect(body.license_category_keys).toEqual(['b', 'c'])
   })
 
   // EDIT-STATE-LEAK (Danny 05-08: "beschikbaarheid wijzig → Reizen ook wijzigbaar"):

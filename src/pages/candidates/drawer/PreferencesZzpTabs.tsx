@@ -238,12 +238,23 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
     preferred_days: v.days,
     sector_pref:    v.industry,
   })
-  const toApiTravel = (v: Record<string, unknown>) => ({
-    max_travel_km:      v.travel_distance === '' ? null : Number(v.travel_distance),
-    max_travel_min:     v.travel_time === '' ? null : Number(v.travel_time),
-    own_transport:      v.own_transport,
-    license_categories: v.driver_licenses,
-  })
+  const toApiTravel = (v: Record<string, unknown>) => {
+    // LICENSE-KEYS-1: derive keys array from selected driver licenses. A code that
+    // resolves to a driver_licenses row contributes its key; a code matching none
+    // is simply left out of the keys array (not an error — the legacy array is
+    // unaffected either way).
+    const selectedCodes = (Array.isArray(v.driver_licenses) ? v.driver_licenses : []).map(String)
+    const derivedKeys = selectedCodes
+      .map(code => licenses.find(l => l.value === code)?.key)
+      .filter((k): k is string => Boolean(k))
+    return {
+      max_travel_km:      v.travel_distance === '' ? null : Number(v.travel_distance),
+      max_travel_min:     v.travel_time === '' ? null : Number(v.travel_time),
+      own_transport:      v.own_transport,
+      license_categories: v.driver_licenses,
+      license_category_keys: derivedKeys.length > 0 ? derivedKeys : undefined,
+    }
+  }
   const toApiPayroll = (v: Record<string, unknown>) => ({
     wage_tax:      v.wage_tax,
     wage_tax_from: v.wage_tax_from,
