@@ -8,12 +8,13 @@
  */
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, Key } from 'lucide-react'
+import { Key } from 'lucide-react'
 import { createApiKey } from './apiKeysApi'
 import { KEY_TYPES } from './constants'
 import ScopeEditor from './ScopeEditor'
 import SearchSelect from '@/components/ui/SearchSelect'
 import OneTimeSecretReveal from '@/pages/settings/components/OneTimeSecretReveal'
+import SettingsDetailHeader from '@/pages/settings/components/SettingsDetailHeader'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
 import { Caption, formLabelStyle } from '@/components/ui/typography'
@@ -57,15 +58,13 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
 
   return (
     <div>
-      {/* Header: back + icon + title (mirrors ApiKeyDetail) */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 22 }}>
-        <Button variant="secondary" onClick={onBack} aria-label={t('common.back')}>
-          <ArrowLeft size={13} /> {t('common.back')}
-        </Button>
-        <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <Key size={16} style={{ color: 'var(--color-primary-text)' }} />
-        </div>
-        <h2 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text)', margin: 0 }}>{t('apiKeys.createTitle')}</h2>
+      <div style={{ marginBottom: 22 }}>
+        <SettingsDetailHeader
+          onBack={onBack}
+          backLabel={t('common.back')}
+          icon={Key}
+          title={t('apiKeys.createTitle')}
+        />
       </div>
 
       {/* Form / secret reveal, capped to a comfortable reading width */}

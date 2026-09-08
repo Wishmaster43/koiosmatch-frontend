@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, Check, Copy, MoreHorizontal, Pencil, Power, RefreshCw, Save, Trash2, Webhook, X } from 'lucide-react'
+import { Check, MoreHorizontal, Pencil, Power, RefreshCw, Save, Trash2, Webhook, X } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
 import Spinner from '@/components/ui/Spinner'
 import ActionMenu from '@/components/ui/ActionMenu'
@@ -8,12 +8,12 @@ import CalloutBox from '@/components/ui/CalloutBox'
 import { useConfirm } from '@/hooks/useConfirm'
 import { getSubscription, updateSubscription, deleteSubscription, regenerateSecret } from './webhooksApi'
 import EventCatalog from './EventCatalog'
-import { BTN_H } from '@/config/buttonMetrics'
+import SettingsDetailHeader from '@/pages/settings/components/SettingsDetailHeader'
+import SecretRevealBox from '@/pages/settings/components/SecretRevealBox'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
 import SaveButton from '@/components/ui/SaveButton'
 import { SectionTitle, BodyText, Mono } from '@/components/ui/typography'
-import { tintBorder } from '@/lib/tint'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 // audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
@@ -34,7 +34,6 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
   const [savingEv, setSavingEv] = useState(false)
   const [savedEv, setSavedEv]   = useState(false)
   const [secret, setSecret]   = useState(null)
-  const [copied, setCopied]   = useState(false)
   const { confirm, dialog } = useConfirm()
 
   // Fetch full detail; fall back to the list row on failure.
@@ -82,7 +81,6 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
       try { await deleteSubscription(subId); onDelete?.(subId) } catch { /* noop */ }
     }, { danger: true })
   }
-  const copySecret = () => { navigator.clipboard.writeText(secret ?? ''); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
   if (!sub) return <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>
 
@@ -93,40 +91,42 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
 
   return (
     <div>
-      {/* Header */}
-      <div className="flex items-center justify-between" style={{ marginBottom: 8, gap: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-          <Button variant="secondary" onClick={onBack} aria-label={t('common.back')}>
-            <ArrowLeft size={13} /> {t('common.back')}
-          </Button>
-          <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Webhook size={16} style={{ color: 'var(--color-primary-text)' }} />
-          </div>
-          <h2 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{sub.name}</h2>
-          <StatusBadge status={sub.status ?? 'active'} map={statusMap} />
-          {loading && <span style={{ color: 'var(--text-muted)' }}><Spinner size={13} /></span>}
-        </div>
-        <ActionMenu label={t('webhooks.outgoing.action')} icon={MoreHorizontal} align="right" menuWidth={220}
-          items={[
-            { key: 'regenerate', label: t('webhooks.outgoing.regenerate'), icon: RefreshCw, onSelect: regenerate },
-            { key: 'toggle', label: (sub.status ?? 'active') === 'active' ? t('webhooks.outgoing.deactivate') : t('webhooks.outgoing.activate'), icon: Power, onSelect: toggleStatus },
-            { key: 'delete', label: t('webhooks.outgoing.delete'), icon: Trash2, danger: true, onSelect: remove },
-          ]} />
-      </div>
+      <SettingsDetailHeader
+        onBack={onBack}
+        backLabel={t('common.back')}
+        icon={Webhook}
+        title={sub.name}
+        statusBadge={<StatusBadge status={sub.status ?? 'active'} map={statusMap} />}
+        loading={loading}
+        actions={
+          <ActionMenu
+            label={t('webhooks.outgoing.action')}
+            icon={MoreHorizontal}
+            align="right"
+            menuWidth={220}
+            items={[
+              { key: 'regenerate', label: t('webhooks.outgoing.regenerate'), icon: RefreshCw, onSelect: regenerate },
+              { key: 'toggle', label: (sub.status ?? 'active') === 'active' ? t('webhooks.outgoing.deactivate') : t('webhooks.outgoing.activate'), icon: Power, onSelect: toggleStatus },
+              { key: 'delete', label: t('webhooks.outgoing.delete'), icon: Trash2, danger: true, onSelect: remove },
+            ]}
+          />
+        }
+      />
 
       {/* One-time secret banner after regenerate */}
       {secret && (
         <div style={{ margin: '14px 0' }}>
-          <CalloutBox variant="success" title={t('webhooks.outgoing.secretOnce')}
-            onDismiss={() => setSecret(null)} dismissLabel={t('webhooks.outgoing.dismiss')}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Mono as="code" style={{ flex: 1, fontSize: 12, background: 'var(--surface)', border: tintBorder('var(--color-success)'), borderRadius: 6, padding: '8px 10px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{secret}</Mono>
-              {/* HUISSTIJL-1 necessity: success-tinted action, no Button variant covers a success-tinted border/text pairing (only primary/secondary/ghost/soft/danger/dangerSoft exist). */}
-              {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- state-carrying success accent (secret-copy confirmation); Button has no success-tint variant */}
-              <button onClick={copySecret} style={{ height: BTN_H, padding: '0 10px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: tintBorder('var(--color-success)'), borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success-text)', whiteSpace: 'nowrap' }}>
-                {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? t('common.copied') : t('webhooks.outgoing.copySecret')}
-              </button>
-            </div>
+          <CalloutBox
+            variant="success"
+            title={t('webhooks.outgoing.secretOnce')}
+            onDismiss={() => setSecret(null)}
+            dismissLabel={t('webhooks.outgoing.dismiss')}
+          >
+            <SecretRevealBox
+              secret={secret}
+              copyLabel={t('webhooks.outgoing.copySecret')}
+              copiedLabel={t('common.copied')}
+            />
           </CalloutBox>
         </div>
       )}

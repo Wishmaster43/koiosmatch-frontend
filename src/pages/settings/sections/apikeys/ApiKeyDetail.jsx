@@ -8,7 +8,7 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, Check, Copy, Key, MoreHorizontal, Power, RefreshCw, Trash2 } from 'lucide-react'
+import { Key, MoreHorizontal, Power, RefreshCw, Trash2 } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
 import Spinner from '@/components/ui/Spinner'
 import ActionMenu from '@/components/ui/ActionMenu'
@@ -18,10 +18,8 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { getApiKey, updateApiKey, deleteApiKey, regenerateApiKey, setApiKeyPrimary } from './apiKeysApi'
 import ApiKeyGeneralTab from './ApiKeyGeneralTab'
 import ApiKeyAccessTab from './ApiKeyAccessTab'
-import { BTN_H } from '@/config/buttonMetrics'
-import Button from '@/components/ui/Button'
-import { Mono } from '@/components/ui/typography'
-import { tintBorder } from '@/lib/tint'
+import SettingsDetailHeader from '@/pages/settings/components/SettingsDetailHeader'
+import SecretRevealBox from '@/pages/settings/components/SecretRevealBox'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 // audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
@@ -33,7 +31,6 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
   const [loading, setLoading] = useState(true)
   const [tab, setTab]         = useState('general')
   const [secret, setSecret]   = useState(null)   // one-time secret after regenerate
-  const [copied, setCopied]   = useState(false)
   const { confirm, dialog } = useConfirm()
 
   // Fetch full detail (scopes/ips/contact); fall back to the list row on failure.
@@ -91,7 +88,6 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
       }
     })
   }
-  const copySecret = () => { navigator.clipboard.writeText(secret ?? ''); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
   if (!apiKey) {
     return <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>
@@ -104,42 +100,41 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
 
   return (
     <div>
-      {/* Header */}
-      <div className="flex items-center justify-between" style={{ marginBottom: 8, gap: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-          <Button variant="secondary" onClick={onBack} aria-label={t('common.back')}>
-            <ArrowLeft size={13} /> {t('common.back')}
-          </Button>
-          <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Key size={16} style={{ color: 'var(--color-primary-text)' }} />
-          </div>
-          <div style={{ minWidth: 0 }}>
-            <h2 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{apiKey.friendly_name ?? apiKey.name}</h2>
-          </div>
-          <StatusBadge status={apiKey.status ?? 'active'} map={statusMap} />
-        </div>
-        <ActionMenu label={t('apiKeys.action')} icon={MoreHorizontal} align="right" menuWidth={220}
-          items={[
-            { key: 'regenerate', label: t('apiKeys.regenerate'), icon: RefreshCw, onSelect: regenerate },
-            { key: 'toggle', label: (apiKey.status ?? 'active') === 'active' ? t('apiKeys.deactivate') : t('apiKeys.activate'), icon: Power, onSelect: toggleStatus },
-            { key: 'delete', label: t('apiKeys.delete'), icon: Trash2, danger: true, onSelect: remove },
-          ]} />
-      </div>
+      <SettingsDetailHeader
+        onBack={onBack}
+        backLabel={t('common.back')}
+        icon={Key}
+        title={apiKey.friendly_name ?? apiKey.name}
+        statusBadge={<StatusBadge status={apiKey.status ?? 'active'} map={statusMap} />}
+        actions={
+          <ActionMenu
+            label={t('apiKeys.action')}
+            icon={MoreHorizontal}
+            align="right"
+            menuWidth={220}
+            items={[
+              { key: 'regenerate', label: t('apiKeys.regenerate'), icon: RefreshCw, onSelect: regenerate },
+              { key: 'toggle', label: (apiKey.status ?? 'active') === 'active' ? t('apiKeys.deactivate') : t('apiKeys.activate'), icon: Power, onSelect: toggleStatus },
+              { key: 'delete', label: t('apiKeys.delete'), icon: Trash2, danger: true, onSelect: remove },
+            ]}
+          />
+        }
+      />
 
       {/* One-time secret banner after regenerate */}
       {secret && (
         <div style={{ margin: '14px 0' }}>
-          <CalloutBox variant="success" title={t('apiKeys.secretOnce')}
-            onDismiss={() => setSecret(null)} dismissLabel={t('apiKeys.dismiss')}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Mono as="code" style={{ flex: 1, fontSize: 12, background: 'var(--surface)', border: tintBorder('var(--color-success)'), borderRadius: 6, padding: '8px 10px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{secret}</Mono>
-              {/* HUISSTIJL-1 necessity: success-tinted action, no Button variant covers a success-tinted border/text pairing (only primary/secondary/ghost/soft/danger/dangerSoft exist). */}
-              <button onClick={copySecret}
-                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- state-carrying success accent (secret-copy confirmation); Button has no success-tint variant
-                style={{ height: BTN_H, padding: '0 10px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: tintBorder('var(--color-success)'), borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success-text)', whiteSpace: 'nowrap' }}>
-                {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? t('common.copied') : t('apiKeys.copySecret')}
-              </button>
-            </div>
+          <CalloutBox
+            variant="success"
+            title={t('apiKeys.secretOnce')}
+            onDismiss={() => setSecret(null)}
+            dismissLabel={t('apiKeys.dismiss')}
+          >
+            <SecretRevealBox
+              secret={secret}
+              copyLabel={t('apiKeys.copySecret')}
+              copiedLabel={t('common.copied')}
+            />
           </CalloutBox>
         </div>
       )}
