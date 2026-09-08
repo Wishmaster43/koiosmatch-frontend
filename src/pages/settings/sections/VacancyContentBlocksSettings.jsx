@@ -14,7 +14,7 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Trash2, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react'
+import { ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import RichTextEditor from '@/components/ui/RichTextEditor'
@@ -24,6 +24,9 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
 import { Caption } from '@/components/ui/typography'
+import EditorRowFooter from '@/components/ui/EditorRowFooter'
+import AddFormFooter from '@/components/ui/AddFormFooter'
+import AddCardTrigger from '@/components/ui/AddCardTrigger'
 
 const ENDPOINT = '/vacancy-content-blocks'
 const KINDS = ['intro', 'cta', 'legal']
@@ -180,20 +183,19 @@ export default function VacancyContentBlocksSettings() {
                   <label style={labelStyle}>{t('vacancyContentBlocksSettings.bodyLabel')}</label>
                   <RichTextEditor value={form.body ?? ''} onChange={v => setEF(block.id, 'body', v)} minHeight={90} />
                 </div>
-                <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
-                  <Button variant="dangerSoft" size="sm" onClick={() => handleDelete(block)} disabled={block.in_use || saving === block.id}
-                    title={block.in_use ? t('vacancyContentBlocksSettings.deleteBlocked') : undefined}>
-                    <Trash2 size={12} /> {t('vacancyContentBlocksSettings.delete')}
-                  </Button>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <Button variant="secondary" size="sm" onClick={() => setExpanded(null)}>
-                      {t('common.cancel')}
-                    </Button>
-                    <Button variant="primary" size="sm" onClick={() => handleSave(block)} disabled={saving === block.id || !form.name?.trim()}>
-                      {saving === block.id ? t('common.saving') : t('common.save')}
-                    </Button>
-                  </div>
-                </div>
+                <EditorRowFooter
+                  onDelete={() => handleDelete(block)}
+                  deleteLabel={t('vacancyContentBlocksSettings.delete')}
+                  deleteDisabled={block.in_use}
+                  deleteTitle={block.in_use ? t('vacancyContentBlocksSettings.deleteBlocked') : undefined}
+                  onCancel={() => setExpanded(null)}
+                  cancelLabel={t('common.cancel')}
+                  onSave={() => handleSave(block)}
+                  saveLabel={t('common.save')}
+                  savingLabel={t('common.saving')}
+                  saving={saving === block.id}
+                  saveDisabled={!form.name?.trim()}
+                />
               </div>
             )}
 
@@ -235,22 +237,19 @@ export default function VacancyContentBlocksSettings() {
               <label style={labelStyle}>{t('vacancyContentBlocksSettings.bodyLabel')}</label>
               <RichTextEditor value={newForm.body} onChange={v => setNewForm(p => ({ ...p, body: v }))} minHeight={90} />
             </div>
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <Button variant="secondary" size="sm" onClick={() => setAdding(false)}>
-                {t('common.cancel')}
-              </Button>
-              <Button variant="primary" size="sm" onClick={handleCreate} disabled={!newForm.name.trim() || saving === 'new'}>
-                {saving === 'new' ? t('common.saving') : t('vacancyContentBlocksSettings.add')}
-              </Button>
-            </div>
+            <AddFormFooter
+              onCancel={() => setAdding(false)}
+              cancelLabel={t('common.cancel')}
+              onSubmit={handleCreate}
+              submitLabel={t('vacancyContentBlocksSettings.add')}
+              savingLabel={t('common.saving')}
+              saving={saving === 'new'}
+              disabled={!newForm.name.trim()}
+            />
           </div>
         </div>
       ) : (
-        // Full-width trigger: Button variant="soft" (§4 tint), not DrawerAddButton — this
-        // spans the whole card, unlike the row-level "+ add" affordance.
-        <Button variant="soft" size="sm" onClick={() => setAdding(true)} style={{ width: '100%' }}>
-          <Plus size={14} /> {t('vacancyContentBlocksSettings.add')}
-        </Button>
+        <AddCardTrigger onClick={() => setAdding(true)} label={t('vacancyContentBlocksSettings.add')} />
       )}
       {dialog}
     </div>

@@ -11,7 +11,7 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Trash2, ChevronDown, ChevronUp, Eye, EyeOff, Monitor, MonitorOff } from 'lucide-react'
+import { ChevronDown, ChevronUp, Eye, EyeOff, Monitor, MonitorOff } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { notifyError } from '@/lib/notify'
@@ -20,6 +20,9 @@ import { DragList } from '../components/SettingsControls'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
 import { Caption, PageTitle } from '@/components/ui/typography'
+import EditorRowFooter from '@/components/ui/EditorRowFooter'
+import AddFormFooter from '@/components/ui/AddFormFooter'
+import AddCardTrigger from '@/components/ui/AddCardTrigger'
 
 // Field types the backend supports.
 const FIELD_TYPES = ['text', 'textarea', 'number', 'date', 'boolean', 'select']
@@ -311,17 +314,19 @@ export default function CustomFieldsSettings({ entityType }) {
                   {/* Actions — herhaal-audit r4 finding 4: Button's own dangerSoft/
                       secondary recipe covers the disabled look; no per-callsite
                       background/colour ternary needed anymore. */}
-                  <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between', marginTop: 4 }}>
-                    <Button variant="dangerSoft" size="sm" onClick={() => handleDelete(field)} disabled={field.has_data || saving === field.id}
-                      title={field.has_data ? t('customFieldsSettings.deleteBlocked') : t('customFieldsSettings.delete')}>
-                      <Trash2 size={12} /> {t('customFieldsSettings.delete')}
-                    </Button>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <Button variant="secondary" size="sm" onClick={() => setExpanded(null)}>{t('common.cancel')}</Button>
-                      <Button variant="primary" size="sm" onClick={() => handleSave(field)} disabled={saving === field.id}>
-                        {saving === field.id ? t('common.saving') : t('common.save')}
-                      </Button>
-                    </div>
+                  <div style={{ marginTop: 4 }}>
+                  <EditorRowFooter
+                    onDelete={() => handleDelete(field)}
+                    deleteLabel={t('customFieldsSettings.delete')}
+                    deleteDisabled={field.has_data}
+                    deleteTitle={field.has_data ? t('customFieldsSettings.deleteBlocked') : t('customFieldsSettings.delete')}
+                    onCancel={() => setExpanded(null)}
+                    cancelLabel={t('common.cancel')}
+                    onSave={() => handleSave(field)}
+                    saveLabel={t('common.save')}
+                    savingLabel={t('common.saving')}
+                    saving={saving === field.id}
+                  />
                   </div>
                 </div>
               )}
@@ -369,20 +374,19 @@ export default function CustomFieldsSettings({ entityType }) {
                 <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: newForm.optionError ? 1 : 3 }}>{t('customFieldsSettings.optionsHint')}</p>
               </div>
             )}
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <Button variant="secondary" size="sm" onClick={() => setAdding(false)}>{t('common.cancel')}</Button>
-              <Button variant="primary" size="sm" onClick={handleCreate} disabled={!newForm.label.trim() || saving === 'new'}>
-                {saving === 'new' ? t('common.saving') : t('customFieldsSettings.add')}
-              </Button>
-            </div>
+            <AddFormFooter
+              onCancel={() => setAdding(false)}
+              cancelLabel={t('common.cancel')}
+              onSubmit={handleCreate}
+              submitLabel={t('customFieldsSettings.add')}
+              savingLabel={t('common.saving')}
+              saving={saving === 'new'}
+              disabled={!newForm.label.trim()}
+            />
           </div>
         </div>
       ) : (
-        // Full-width trigger: Button variant="soft" (§4 tint), not DrawerAddButton — this
-        // spans the whole card, unlike the row-level "+ add" affordance.
-        <Button variant="soft" size="sm" onClick={() => setAdding(true)} style={{ width: '100%' }}>
-          <Plus size={14} /> {t('customFieldsSettings.add')}
-        </Button>
+        <AddCardTrigger onClick={() => setAdding(true)} label={t('customFieldsSettings.add')} />
       )}
     </div>
   )

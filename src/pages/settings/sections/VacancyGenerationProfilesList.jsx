@@ -14,7 +14,7 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Trash2, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react'
+import { ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -23,6 +23,9 @@ import VacancyGenerationProfileEditor from './VacancyGenerationProfileEditor'
 import Button from '@/components/ui/Button'
 import { Caption } from '@/components/ui/typography'
 import { toApiProfile, fromApiProfile } from './vacancyGeneration/profileShape'
+import EditorRowFooter from '@/components/ui/EditorRowFooter'
+import AddFormFooter from '@/components/ui/AddFormFooter'
+import AddCardTrigger from '@/components/ui/AddCardTrigger'
 
 const ENDPOINT = '/vacancy-generation-profiles'
 const BLOCKS_ENDPOINT = '/vacancy-content-blocks'
@@ -192,19 +195,20 @@ export default function VacancyGenerationProfilesList() {
             {isOpen && form && (
               <div style={{ marginTop: 14, borderTop: '1px solid var(--border)', paddingTop: 14 }}>
                 <VacancyGenerationProfileEditor draft={form} onChange={p => patch(profile.id, p)} contentBlocks={contentBlocks} />
-                <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between', marginTop: 14 }}>
-                  <Button variant="dangerSoft" size="sm" onClick={() => handleDelete(profile)} disabled={profile.in_use || saving === profile.id}
-                    title={profile.in_use ? t('vacancyGenerationSettings.deleteBlocked') : undefined}>
-                    <Trash2 size={12} /> {t('vacancyGenerationSettings.delete')}
-                  </Button>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <Button variant="secondary" size="sm" onClick={() => setExpanded(null)}>
-                      {t('common.cancel')}
-                    </Button>
-                    <Button variant="primary" size="sm" onClick={() => handleSave(profile)} disabled={saving === profile.id || !form.name?.trim()}>
-                      {saving === profile.id ? t('common.saving') : t('common.save')}
-                    </Button>
-                  </div>
+                <div style={{ marginTop: 14 }}>
+                  <EditorRowFooter
+                    onDelete={() => handleDelete(profile)}
+                    deleteLabel={t('vacancyGenerationSettings.delete')}
+                    deleteDisabled={profile.in_use}
+                    deleteTitle={profile.in_use ? t('vacancyGenerationSettings.deleteBlocked') : undefined}
+                    onCancel={() => setExpanded(null)}
+                    cancelLabel={t('common.cancel')}
+                    onSave={() => handleSave(profile)}
+                    saveLabel={t('common.save')}
+                    savingLabel={t('common.saving')}
+                    saving={saving === profile.id}
+                    saveDisabled={!form.name?.trim()}
+                  />
                 </div>
               </div>
             )}
@@ -215,21 +219,20 @@ export default function VacancyGenerationProfilesList() {
       {adding ? (
         <div style={cardStyle}>
           <VacancyGenerationProfileEditor draft={newForm} onChange={p => setNewForm(prev => ({ ...prev, ...p }))} contentBlocks={contentBlocks} />
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 14 }}>
-            <Button variant="secondary" size="sm" onClick={() => setAdding(false)}>
-              {t('common.cancel')}
-            </Button>
-            <Button variant="primary" size="sm" onClick={handleCreate} disabled={!newForm.name.trim() || saving === 'new'}>
-              {saving === 'new' ? t('common.saving') : t('vacancyGenerationSettings.add')}
-            </Button>
+          <div style={{ marginTop: 14 }}>
+            <AddFormFooter
+              onCancel={() => setAdding(false)}
+              cancelLabel={t('common.cancel')}
+              onSubmit={handleCreate}
+              submitLabel={t('vacancyGenerationSettings.add')}
+              savingLabel={t('common.saving')}
+              saving={saving === 'new'}
+              disabled={!newForm.name.trim()}
+            />
           </div>
         </div>
       ) : (
-        // Full-width trigger: Button variant="soft" (§4 tint), not DrawerAddButton — this
-        // spans the whole card, unlike the row-level "+ add" affordance.
-        <Button variant="soft" size="sm" onClick={() => setAdding(true)} style={{ width: '100%' }}>
-          <Plus size={14} /> {t('vacancyGenerationSettings.add')}
-        </Button>
+        <AddCardTrigger onClick={() => setAdding(true)} label={t('vacancyGenerationSettings.add')} />
       )}
       {dialog}
     </div>

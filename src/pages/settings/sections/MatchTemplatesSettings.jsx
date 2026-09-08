@@ -11,7 +11,7 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Trash2, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react'
+import { ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import Slider from '@/components/ui/Slider'
@@ -23,6 +23,9 @@ import { useFunctions } from '@/lib/useFunctions'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
 import { Mono } from '@/components/ui/typography'
+import EditorRowFooter from '@/components/ui/EditorRowFooter'
+import AddFormFooter from '@/components/ui/AddFormFooter'
+import AddCardTrigger from '@/components/ui/AddCardTrigger'
 
 // The six scoring dimensions (mirrors the backend App\Enums\MatchDimension, single
 // source of truth there, and the vacancy Matching tab's picker). Duplicated here on
@@ -287,20 +290,19 @@ export default function MatchTemplatesSettings() {
                 {renderFunctionField(form.function_title, v => setEF(tpl.id, 'function_title', v))}
                 <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('matchTemplatesSettings.defaultAssignmentHint')}</p>
 
-                <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
-                  <Button variant="dangerSoft" size="sm" onClick={() => handleDelete(tpl)} disabled={linked > 0 || saving === tpl.id}
-                    title={linked > 0 ? t('matchTemplatesSettings.deleteBlocked') : undefined}>
-                    <Trash2 size={12} /> {t('matchTemplatesSettings.delete')}
-                  </Button>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <Button variant="secondary" size="sm" onClick={() => setExpanded(null)}>
-                      {t('common.cancel')}
-                    </Button>
-                    <Button variant="primary" size="sm" onClick={() => handleSave(tpl)} disabled={saving === tpl.id || !form.name?.trim()}>
-                      {saving === tpl.id ? t('common.saving') : t('common.save')}
-                    </Button>
-                  </div>
-                </div>
+                <EditorRowFooter
+                  onDelete={() => handleDelete(tpl)}
+                  deleteLabel={t('matchTemplatesSettings.delete')}
+                  deleteDisabled={linked > 0}
+                  deleteTitle={linked > 0 ? t('matchTemplatesSettings.deleteBlocked') : undefined}
+                  onCancel={() => setExpanded(null)}
+                  cancelLabel={t('common.cancel')}
+                  onSave={() => handleSave(tpl)}
+                  saveLabel={t('common.save')}
+                  savingLabel={t('common.saving')}
+                  saving={saving === tpl.id}
+                  saveDisabled={!form.name?.trim()}
+                />
               </div>
             )}
           </div>
@@ -323,22 +325,19 @@ export default function MatchTemplatesSettings() {
             {renderFunctionField(newForm.function_title, v => setNewForm(p => ({ ...p, function_title: v })))}
             <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('matchTemplatesSettings.defaultAssignmentHint')}</p>
 
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <Button variant="secondary" size="sm" onClick={() => setAdding(false)}>
-                {t('common.cancel')}
-              </Button>
-              <Button variant="primary" size="sm" onClick={handleCreate} disabled={!newForm.name.trim() || saving === 'new'}>
-                {saving === 'new' ? t('common.saving') : t('matchTemplatesSettings.add')}
-              </Button>
-            </div>
+            <AddFormFooter
+              onCancel={() => setAdding(false)}
+              cancelLabel={t('common.cancel')}
+              onSubmit={handleCreate}
+              submitLabel={t('matchTemplatesSettings.add')}
+              savingLabel={t('common.saving')}
+              saving={saving === 'new'}
+              disabled={!newForm.name.trim()}
+            />
           </div>
         </div>
       ) : (
-        // Full-width trigger: Button variant="soft" (§4 tint), not DrawerAddButton — this
-        // spans the whole card, unlike the row-level "+ add" affordance.
-        <Button variant="soft" size="sm" onClick={() => setAdding(true)} style={{ width: '100%' }}>
-          <Plus size={14} /> {t('matchTemplatesSettings.add')}
-        </Button>
+        <AddCardTrigger onClick={() => setAdding(true)} label={t('matchTemplatesSettings.add')} />
       )}
       {dialog}
     </div>
