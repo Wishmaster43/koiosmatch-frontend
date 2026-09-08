@@ -127,7 +127,7 @@ function Panel({ onClose, ariaLabel, title, header, children, width, minWidth, m
         ref={mergedPanelRef}
         role="dialog" aria-modal={overlay ? true : undefined} aria-label={ariaLabel ?? title ?? 'dialog'} tabIndex={-1}
         onPointerDown={() => { if (!zIndex) setZ(nextFloatingZ()) }}
-        style={{ ...positioned, maxWidth: maximized ? '95vw' : (maxWidth ?? 'min(94vw, 1100px)'), maxHeight: '92vh',
+        style={{ ...positioned, fontFamily: 'var(--font-ui)', maxWidth: maximized ? '95vw' : (maxWidth ?? 'min(94vw, 1100px)'), maxHeight: '92vh',
           display: 'flex', flexDirection: 'column', background: 'var(--surface)',
           borderRadius: 14, border: '1px solid var(--border)', pointerEvents: 'auto',
           // The window lifts while it is being dragged; that lift never animates

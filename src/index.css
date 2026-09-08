@@ -5,6 +5,10 @@
 @tailwind utilities;
 
 :root {
+  /* Typography tokens (HUISSTIJL-1): the UI face and the numbers/IDs face. Inline
+     panels (FloatingPanel) reset to --font-ui so a host cell's mono face never leaks in. */
+  --font-ui: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
   color-scheme: light;
   /* ── Koiosmatch huisstijl ── */
   --color-primary:       #19A5CA;
@@ -303,7 +307,7 @@
 body {
   margin: 0;
   background: #F5F5F7;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
 }
 
