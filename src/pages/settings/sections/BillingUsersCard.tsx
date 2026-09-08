@@ -7,7 +7,7 @@
  * above the included seats. null included_users means unlimited and renders
  * as text, never an invented infinity glyph (worker brief, verbatim).
  */
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Save } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
@@ -18,7 +18,8 @@ import SaveButton from '@/components/ui/SaveButton'
 import Spinner from '@/components/ui/Spinner'
 import { SectionTitle, Caption, GroupLabel, monoStyle } from '@/components/ui/typography'
 import BillingCardShell from './billing/BillingCardShell'
-import type { AdminBillingBudgetsResponse, AdminBillingBudgetsUpdate, BillingBudgetEntry, BillingPackageKey } from '@/types/billingUsage'
+import { useAdminBillingBudgets } from './useAdminBillingBudgets'
+import type { AdminBillingBudgetsResponse, AdminBillingBudgetsUpdate, BillingBudgetEntry } from '@/types/billingUsage'
 import { PACKAGE_KEYS, label, inputWrap, inputStyle } from './billingCardStyles'
 
 // A package row's two editable numbers. Blank = NULL (= unlimited / no
@@ -38,32 +39,9 @@ export default function BillingUsersCard() {
   const { t } = useTranslation('settings')
   const { formatCurrency } = useNumberFormat()
 
-  const [data, setData] = useState<AdminBillingBudgetsResponse | null>(null)
-  const [phase, setPhase] = useState<'loading' | 'ready' | 'error'>('loading')
-  const [drafts, setDrafts] = useState<Record<BillingPackageKey, PackageDraft>>({
-    core: draftFromEntry(), pro: draftFromEntry(), enterprise: draftFromEntry(),
-  })
+  const { data, setData, phase, drafts, setDrafts } = useAdminBillingBudgets(draftFromEntry)
   const [saving, setSaving] = useState(false)
   const [savedOk, setSavedOk] = useState(false)
-
-  // Load package seat defaults + the live per-tenant seat snapshot.
-  useEffect(() => {
-    let alive = true
-    api.get('/admin/billing-budgets')
-      .then((res) => {
-        if (!alive) return
-        const body = unwrap<AdminBillingBudgetsResponse>(res)
-        setData(body ?? null)
-        setDrafts({
-          core: draftFromEntry(body?.packages?.core),
-          pro: draftFromEntry(body?.packages?.pro),
-          enterprise: draftFromEntry(body?.packages?.enterprise),
-        })
-        setPhase('ready')
-      })
-      .catch(() => { if (alive) setPhase('error') })
-    return () => { alive = false }
-  }, [])
 
   const hasChange = PACKAGE_KEYS.some((key) => {
     const saved = draftFromEntry(data?.packages?.[key])

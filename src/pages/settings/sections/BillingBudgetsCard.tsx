@@ -15,7 +15,7 @@
  * included_workflow_runs bundle server-side, so this card no longer sends or
  * shows whatsapp_token_budget; a PUT still carrying it now 422s.
  */
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Save } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
@@ -27,8 +27,9 @@ import Spinner from '@/components/ui/Spinner'
 import { SectionTitle, Caption, GroupLabel } from '@/components/ui/typography'
 import TenantBudgetOverride from './TenantBudgetOverride'
 import BillingCardShell from './billing/BillingCardShell'
+import { useAdminBillingBudgets } from './useAdminBillingBudgets'
 import type {
-  AdminBillingBudgetsResponse, AdminBillingBudgetsUpdate, BillingBudgetEntry, BillingPackageKey,
+  AdminBillingBudgetsResponse, AdminBillingBudgetsUpdate, BillingBudgetEntry,
 } from '@/types/billingUsage'
 import { PACKAGE_KEYS, label, inputWrap, inputStyle } from './billingCardStyles'
 
@@ -47,11 +48,7 @@ export default function BillingBudgetsCard() {
   const { t } = useTranslation('settings')
   const { formatCurrency } = useNumberFormat()
 
-  const [data, setData] = useState<AdminBillingBudgetsResponse | null>(null)
-  const [phase, setPhase] = useState<'loading' | 'ready' | 'error'>('loading')
-  const [drafts, setDrafts] = useState<Record<BillingPackageKey, PackageDraft>>({
-    core: draftFromEntry(), pro: draftFromEntry(), enterprise: draftFromEntry(),
-  })
+  const { data, setData, phase, drafts, setDrafts } = useAdminBillingBudgets(draftFromEntry)
   const [saving, setSaving] = useState(false)
   const [savedOk, setSavedOk] = useState(false)
 
@@ -60,25 +57,6 @@ export default function BillingBudgetsCard() {
   const [tenantId, setTenantId] = useState<string | null>(null)
   const [tenantDraft, setTenantDraft] = useState<{ included_workflow_runs: string; base_price_cents: string }>({ included_workflow_runs: '', base_price_cents: '' })
   const [tenantDirty, setTenantDirty] = useState(false)
-
-  // Load package defaults + existing tenant overrides.
-  useEffect(() => {
-    let alive = true
-    api.get('/admin/billing-budgets')
-      .then((res) => {
-        if (!alive) return
-        const body = unwrap<AdminBillingBudgetsResponse>(res)
-        setData(body ?? null)
-        setDrafts({
-          core: draftFromEntry(body?.packages?.core),
-          pro: draftFromEntry(body?.packages?.pro),
-          enterprise: draftFromEntry(body?.packages?.enterprise),
-        })
-        setPhase('ready')
-      })
-      .catch(() => { if (alive) setPhase('error') })
-    return () => { alive = false }
-  }, [])
 
   const packagesDirty = PACKAGE_KEYS.some((key) => {
     const saved = draftFromEntry(data?.packages?.[key])
