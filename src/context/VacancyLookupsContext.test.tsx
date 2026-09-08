@@ -34,11 +34,11 @@ afterEach(() => vi.clearAllMocks())
 describe('VacancyLookupsContext defaults', () => {
   it('carries is_default through and resolves the flagged seniority + education', async () => {
     mockLookups({
-      '/vacancy-seniority-levels': [
+      '/vacancy-seniority-levels?active=1': [
         { id: 's1', name: 'Starter', is_default: false },
         { id: 's2', name: 'Medior', is_default: true },
       ],
-      '/vacancy-education-levels': [
+      '/vacancy-education-levels?active=1': [
         { id: 'e1', name: 'MBO', is_default: true },
         { id: 'e2', name: 'HBO', is_default: false },
       ],
@@ -52,7 +52,7 @@ describe('VacancyLookupsContext defaults', () => {
   })
 
   it('accepts the tinyint/string shapes Laravel may serialise the flag as', async () => {
-    mockLookups({ '/vacancy-seniority-levels': [{ id: 's1', name: 'Starter' }, { id: 's2', name: 'Senior', is_default: 1 }] })
+    mockLookups({ '/vacancy-seniority-levels?active=1': [{ id: 's1', name: 'Starter' }, { id: 's2', name: 'Senior', is_default: 1 }] })
     const { result } = renderHook(() => useVacancyLookups(), { wrapper })
 
     await waitFor(() => expect(result.current.loading).toBe(false))
@@ -61,8 +61,8 @@ describe('VacancyLookupsContext defaults', () => {
 
   it('proposes nothing when the tenant flagged no default (no index-0 guess)', async () => {
     mockLookups({
-      '/vacancy-seniority-levels': [{ id: 's1', name: 'Starter' }, { id: 's2', name: 'Senior' }],
-      '/vacancy-education-levels': [{ id: 'e1', name: 'MBO' }],
+      '/vacancy-seniority-levels?active=1': [{ id: 's1', name: 'Starter' }, { id: 's2', name: 'Senior' }],
+      '/vacancy-education-levels?active=1': [{ id: 'e1', name: 'MBO' }],
     })
     const { result } = renderHook(() => useVacancyLookups(), { wrapper })
 
@@ -81,7 +81,7 @@ describe('VacancyLookupsContext defaults', () => {
 describe('VacancyLookupsContext channel flags', () => {
   it('carries active/default_enabled through, and default_enabled tolerates the tinyint shape', async () => {
     mockLookups({
-      '/vacancy-channels': [
+      '/vacancy-channels?active=1': [
         { id: 'c1', name: 'Career page', active: true, default_enabled: true },
         { id: 'c2', name: 'Indeed', active: true, default_enabled: 0 },
       ],
@@ -97,7 +97,7 @@ describe('VacancyLookupsContext channel flags', () => {
 
   it('drops a deactivated channel from the list entirely (sortActiveRows filters it before mapping)', async () => {
     mockLookups({
-      '/vacancy-channels': [
+      '/vacancy-channels?active=1': [
         { id: 'c1', name: 'Career page', active: true },
         { id: 'c2', name: 'Old board', active: false },
       ],

@@ -38,7 +38,7 @@ const mapOutreachOutcomes = (res: AxiosResponse): LookupOption[] | null => {
 export function useOutreachOutcomes() {
   const { t } = useTranslation('common')
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
-  const { data: rawOutcomes } = useCachedLookup('/outreach-outcomes', mapOutreachOutcomes, DEFAULT_OUTREACH_OUTCOMES)
+  const { data: rawOutcomes } = useCachedLookup('/outreach-outcomes?active=1', mapOutreachOutcomes, DEFAULT_OUTREACH_OUTCOMES)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const outcomes = useMemo(() => translateSeedList(t, 'outcomes', rawOutcomes), [rawOutcomes, t])
 

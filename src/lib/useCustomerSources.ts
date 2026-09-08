@@ -55,7 +55,7 @@ const mapSources = (res: AxiosResponse): SourcesLookupData => {
 // Tenant customer-source lookup with its own free-entry toggle, defaulting to strict when the response omits the flag.
 export function useCustomerSources() {
   const { t } = useTranslation('common')
-  const { data, invalidate } = useCachedLookup('/customer-sources', mapSources, FALLBACK)
+  const { data, invalidate } = useCachedLookup('/customer-sources?active=1', mapSources, FALLBACK)
   // Seeded defaults render in the user language; a tenant value stays as typed.
   // VALUE stays the raw backend name (never translated) so the submitted `source`
   // is always what the backend recognises; only LABEL is translated for display.

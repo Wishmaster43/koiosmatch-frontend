@@ -47,7 +47,7 @@ function mapCodes(res: AxiosResponse): string[] | null {
 // Platform country codes paired with a locale-aware display name resolved via getCountryName, so a live language switch relabels instantly without new i18n keys (see file header).
 export function useCountriesLookup() {
   const { i18n } = useTranslation()
-  const { data: codes, loading } = useCachedLookup('/countries', mapCodes, FALLBACK_CODES)
+  const { data: codes, loading } = useCachedLookup('/countries?active=1', mapCodes, FALLBACK_CODES)
   // Resolve each code to its display name in the CURRENT app language every
   // render (cheap — a handful of rows) so a live language switch relabels instantly.
   const options: CountryOption[] = codes.map(code => ({ value: code, label: getCountryName(code, i18n.language) }))

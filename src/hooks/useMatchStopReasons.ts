@@ -30,6 +30,6 @@ const mapMatchStopReasons = (res: AxiosResponse): LookupOption[] | null => {
 // The tenant's match termination reasons — no seed fallback on purpose (see file
 // doc): an empty result must read as "not configured yet", never faked options.
 export function useMatchStopReasons() {
-  const { data: reasons, loading } = useCachedLookup('/match-stop-reasons', mapMatchStopReasons, NO_STOP_REASONS)
+  const { data: reasons, loading } = useCachedLookup('/match-stop-reasons?active=1', mapMatchStopReasons, NO_STOP_REASONS)
   return { reasons, loading }
 }

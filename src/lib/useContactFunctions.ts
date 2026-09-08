@@ -69,7 +69,7 @@ const mapContactFunctions = (res: AxiosResponse): ContactFunctionsLookupData => 
 // read off the SAME cached response (see the file doc for the two-key pitfall this avoids).
 export function useContactFunctions() {
   const { t } = useTranslation('common')
-  const { data, invalidate } = useCachedLookup('/contact-functions', mapContactFunctions, FALLBACK)
+  const { data, invalidate } = useCachedLookup('/contact-functions?active=1', mapContactFunctions, FALLBACK)
   // Seeded defaults render in the user language; a tenant value stays as typed
   // (LOOKUP-I18N-1). VALUE stays the raw backend name (never translated) so the
   // submitted `function` is always what the backend recognises; only LABEL is

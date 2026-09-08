@@ -44,7 +44,7 @@ const mapCao = (res: AxiosResponse): LookupOption[] | null => {
 // Tenant CAO lookup with an i18n'd seed fallback; a tenant-created value stays exactly as typed.
 export function useCao() {
   const { t } = useTranslation('common')
-  const { data: rawTypes } = useCachedLookup('/cao', mapCao, DEFAULT_CAO)
+  const { data: rawTypes } = useCachedLookup('/cao?active=1', mapCao, DEFAULT_CAO)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const types = useMemo(() => translateSeedList(t, 'cao', rawTypes), [rawTypes, t])
 

@@ -153,11 +153,11 @@ export function VacancyLookupsProvider({ children }: { children: ReactNode }) {
     const load = (url: string, fallback: VacancyLookupItem[], set: Dispatch<SetStateAction<VacancyLookupItem[]>>, pinId = false) =>
       api.get(url).then(r => set(normalize(unwrap(r), fallback, pinId))).catch(() => {})
     Promise.allSettled([
-      load('/vacancy-statuses',         DEFAULT_VACANCY_STATUSES, setStatuses),
-      load('/vacancy-phases',           DEFAULT_VACANCY_PHASES,   setPhases),
-      load('/vacancy-seniority-levels', DEFAULT_SENIORITY_LEVELS, setSeniorityLevels),
-      load('/vacancy-education-levels', DEFAULT_EDUCATION_LEVELS, setEducationLevels),
-      load('/vacancy-channels',         DEFAULT_CHANNELS,         setChannels, true),
+      load('/vacancy-statuses?active=1',         DEFAULT_VACANCY_STATUSES, setStatuses),
+      load('/vacancy-phases?active=1',           DEFAULT_VACANCY_PHASES,   setPhases),
+      load('/vacancy-seniority-levels?active=1', DEFAULT_SENIORITY_LEVELS, setSeniorityLevels),
+      load('/vacancy-education-levels?active=1', DEFAULT_EDUCATION_LEVELS, setEducationLevels),
+      load('/vacancy-channels?active=1',         DEFAULT_CHANNELS,         setChannels, true),
     ]).finally(() => setLoading(false))
   }, [])
 

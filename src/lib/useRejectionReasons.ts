@@ -38,7 +38,7 @@ const mapRejectionReasons = (res: AxiosResponse): LookupOption[] | null => {
 // Cached tenant rejection-reasons lookup shared by the report filter panel and RejectionModal (see the module doc above); no seed fallback since an unknown reason set renders honestly empty.
 export function useRejectionReasons() {
   const { t } = useTranslation('common')
-  const { data: rawReasons, loading } = useCachedLookup('/candidate-rejection-reasons', mapRejectionReasons, NO_REJECTION_REASONS)
+  const { data: rawReasons, loading } = useCachedLookup('/candidate-rejection-reasons?active=1', mapRejectionReasons, NO_REJECTION_REASONS)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const reasons = useMemo(() => translateSeedList(t, 'rejectionReasons', rawReasons), [rawReasons, t])
   return { reasons, loading }

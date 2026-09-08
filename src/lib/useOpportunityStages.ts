@@ -37,7 +37,7 @@ const mapOpportunityStages = (res: AxiosResponse): LookupOption[] | null => norm
 // and cached so every mounted consumer shares one fetch.
 export function useOpportunityStages() {
   const { t } = useTranslation('common')
-  const { data: rawStages } = useCachedLookup('/opportunity-stages', mapOpportunityStages, DEFAULT_OPPORTUNITY_STAGES)
+  const { data: rawStages } = useCachedLookup('/opportunity-stages?active=1', mapOpportunityStages, DEFAULT_OPPORTUNITY_STAGES)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const stages = useMemo(() => translateSeedList(t, 'opportunityStages', rawStages), [rawStages, t])
 

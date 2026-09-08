@@ -48,7 +48,7 @@ const mapMatchStatuses = (res: AxiosResponse): MatchStatus[] | null => {
 export function useMatchStatuses() {
   const { t } = useTranslation('common')
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
-  const { data: rawStatuses } = useCachedLookup('/match-statuses', mapMatchStatuses, DEFAULT_MATCH_STATUSES)
+  const { data: rawStatuses } = useCachedLookup('/match-statuses?active=1', mapMatchStatuses, DEFAULT_MATCH_STATUSES)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const statuses = useMemo(() => translateSeedList(t, 'matchStatuses', rawStatuses), [rawStatuses, t])
 

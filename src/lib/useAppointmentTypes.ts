@@ -69,7 +69,7 @@ const mapAppointmentTypes = (res: AxiosResponse): AppointmentType[] | null => {
 export function useAppointmentTypes() {
   const { t } = useTranslation('common')
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
-  const { data: rawTypes } = useCachedLookup('/appointment-types', mapAppointmentTypes, DEFAULT_APPOINTMENT_TYPES)
+  const { data: rawTypes } = useCachedLookup('/appointment-types?active=1', mapAppointmentTypes, DEFAULT_APPOINTMENT_TYPES)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const types = useMemo(() => translateSeedList(t, 'appointmentTypes', rawTypes), [rawTypes, t])
 

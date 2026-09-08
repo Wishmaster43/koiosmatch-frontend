@@ -45,7 +45,7 @@ const mapWorkPermitTypes = (res: AxiosResponse): LookupOption[] | null => {
 // The tenant's work-permit-type lookup, translated for seeded defaults.
 export function useWorkPermitTypes() {
   const { t } = useTranslation('common')
-  const { data: rawTypes } = useCachedLookup('/work-permit-types', mapWorkPermitTypes, DEFAULT_WORK_PERMIT_TYPES)
+  const { data: rawTypes } = useCachedLookup('/work-permit-types?active=1', mapWorkPermitTypes, DEFAULT_WORK_PERMIT_TYPES)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const workPermitTypes = useMemo(() => translateSeedList(t, 'workPermitTypes', rawTypes), [rawTypes, t])
   return { workPermitTypes }

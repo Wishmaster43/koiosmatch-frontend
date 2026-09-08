@@ -36,7 +36,7 @@ describe('useWorkPermitTypes · lookup mapping', () => {
     /* eslint-enable no-restricted-syntax */
 
     await waitFor(() => expect(result.current.workPermitTypes).toHaveLength(2))
-    expect(get).toHaveBeenCalledWith('/work-permit-types', undefined)
+    expect(get).toHaveBeenCalledWith('/work-permit-types?active=1', undefined)
     expect(result.current.workPermitTypes[0]).toMatchObject({ value: 'twv', label: 'Tewerkstellingsvergunning (TWV)' })
   })
 

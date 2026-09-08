@@ -25,11 +25,11 @@ async function freshHook() {
 }
 
 describe('useFunctions', () => {
-  it('GETs /functions on mount with no params', async () => {
+  it('GETs /functions?active=1 on mount with no params', async () => {
     const { mockedGet, useFunctions } = await freshHook()
     mockedGet.mockResolvedValue({ data: [] })
     renderHook(() => useFunctions())
-    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/functions', undefined))
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/functions?active=1', undefined))
   })
 
   it('keeps the seed fallback and stays permissive while the request is pending', async () => {

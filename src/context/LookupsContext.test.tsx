@@ -36,6 +36,7 @@ describe('LookupsContext · candidateTypes flags reach typeMeta (K-281 repair pa
     })
     const { result } = renderHook(() => useLookups(), { wrapper })
     await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(mockedGet).toHaveBeenCalledWith('/settings/candidate-lookups?active=1')
     expect(result.current.typeMeta('klantloos').customer_not_applicable).toBe(true)
   })
 

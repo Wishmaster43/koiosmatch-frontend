@@ -59,7 +59,7 @@ const mapLevels = (res: AxiosResponse): EducationLevelOption[] | null => {
 // Tenant education-level lookup, keeping the real id alongside the display name since candidate_educations references it by id, never by name (see file header).
 export function useEducationLevels() {
   const { t } = useTranslation('common')
-  const { data: rawLevels } = useCachedLookup('/education-levels', mapLevels, DEFAULT_EDUCATION_LEVELS)
+  const { data: rawLevels } = useCachedLookup('/education-levels?active=1', mapLevels, DEFAULT_EDUCATION_LEVELS)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const levels = useMemo(() => translateSeedList(t, 'educationLevels', rawLevels), [rawLevels, t])
   return { levels }

@@ -56,7 +56,7 @@ const mapStages = (res: AxiosResponse): ApplicationStageOption[] | null => {
 // Tenant application-stage lookup with an i18n'd seed fallback; a tenant-created value stays exactly as typed.
 export function useApplicationStages() {
   const { t } = useTranslation('common')
-  const { data: stagesRaw } = useCachedLookup('/application-stages', mapStages, DEFAULT_APPLICATION_STAGES)
+  const { data: stagesRaw } = useCachedLookup('/application-stages?active=1', mapStages, DEFAULT_APPLICATION_STAGES)
 
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   // Reuses the `funnelTypes` seed family (same values as DEFAULT_FUNNEL_TYPES) rather than a

@@ -42,7 +42,7 @@ describe('useApplicationSources', () => {
     mockedTenantId.mockReturnValue(nextTenant())
     mockedGet.mockReturnValue(new Promise(() => {})) // never resolves
     renderHook(() => useApplicationSources())
-    expect(mockedGet).toHaveBeenCalledWith('/candidate-sources', undefined)
+    expect(mockedGet).toHaveBeenCalledWith('/candidate-sources?active=1', undefined)
     expect(mockedGet).not.toHaveBeenCalledWith('/applications/stats', expect.anything())
   })
 

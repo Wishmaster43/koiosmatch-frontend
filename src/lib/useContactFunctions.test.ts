@@ -36,7 +36,7 @@ describe('useContactFunctions', () => {
     const { mockedGet, useContactFunctions } = await freshHook()
     mockedGet.mockResolvedValue({ data: [] })
     renderHook(() => useContactFunctions())
-    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/contact-functions', undefined))
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/contact-functions?active=1', undefined))
   })
 
   // FUNC-FREEENTRY-FIX (2026-08-17): the never-configured default mirrors the

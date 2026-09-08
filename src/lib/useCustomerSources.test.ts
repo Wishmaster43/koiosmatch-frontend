@@ -39,7 +39,7 @@ describe('useCustomerSources', () => {
     mockedTenantId.mockReturnValue(nextTenant())
     mockedGet.mockReturnValue(new Promise(() => {})) // never resolves
     renderHook(() => useCustomerSources())
-    expect(mockedGet).toHaveBeenCalledWith('/customer-sources', undefined)
+    expect(mockedGet).toHaveBeenCalledWith('/customer-sources?active=1', undefined)
   })
 
   it('returns the seed and stays permissive while the request is pending', () => {

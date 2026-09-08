@@ -47,7 +47,7 @@ describe('useCustomerPhases · lookup mapping', () => {
     // Wait for the API rows specifically: the seed fallback also has two rows, so a
     // length-only wait would let the assertions run against the seed.
     await waitFor(() => expect(result.current.phases[0].value).toBe('interesse'))
-    expect(get).toHaveBeenCalledWith('/customer-phases', undefined)
+    expect(get).toHaveBeenCalledWith('/customer-phases?active=1', undefined)
     expect(result.current.phases).toHaveLength(2)
     expect(result.current.phases.map(p => p.value)).toEqual(['interesse', 'vaste_klant'])
     expect(result.current.phaseMeta('vaste_klant')).toMatchObject({ label: 'Vaste klant', color: '#16A34A', isCustomer: true })

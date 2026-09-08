@@ -42,7 +42,7 @@ describe('useCountriesLookup · lookup mapping', () => {
     ])
 
     await waitFor(() => expect(result.current.options).toHaveLength(3))
-    expect(get).toHaveBeenCalledWith('/countries', undefined)
+    expect(get).toHaveBeenCalledWith('/countries?active=1', undefined)
     expect(result.current.options).toEqual([
       { value: 'NL', label: 'Nederland' },
       { value: 'BE', label: 'België' },

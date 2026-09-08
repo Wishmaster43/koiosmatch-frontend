@@ -114,7 +114,7 @@ const mapSources = (res: AxiosResponse): SourcesLookupData => {
 // Tenant candidate-source lookup with its own free-entry toggle, defaulting to strict when the response omits the flag.
 export function useApplicationSources() {
   const { t } = useTranslation('common')
-  const { data, invalidate } = useCachedLookup('/candidate-sources', mapSources, FALLBACK)
+  const { data, invalidate } = useCachedLookup('/candidate-sources?active=1', mapSources, FALLBACK)
   // Seeded defaults render in the user language; a tenant value stays as typed
   // (LOOKUP-I18N-1). VALUE stays the raw backend name (never translated) so the
   // submitted `source` is always what the backend's ValidCandidateSource lookup

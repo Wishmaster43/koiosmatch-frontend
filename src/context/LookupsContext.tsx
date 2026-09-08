@@ -210,7 +210,7 @@ export function LookupsProvider({ children }: { children: ReactNode }) {
     // No session yet → keep the seeds and stay quiet (no pre-login 401 in the console);
     // the effect re-runs the moment the user logs in (or switches tenant).
     if (!user) { setLoading(false); return }
-    api.get('/settings/candidate-lookups')
+    api.get('/settings/candidate-lookups?active=1')
       .then(res => {
         const d = res.data ?? {}
         setCandidateTypes(normalize(d.candidate_types, DEFAULT_CANDIDATE_TYPES))

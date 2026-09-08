@@ -37,7 +37,7 @@ const mapLastContactTypes = (res: AxiosResponse): LookupOption[] | null => {
 // The last-contact-type tenant lookup, translating seeded defaults into the user language while a tenant's own value stays exactly as typed.
 export function useLastContactTypes() {
   const { t } = useTranslation('common')
-  const { data: rawTypes } = useCachedLookup('/last-contact-types', mapLastContactTypes, DEFAULT_LAST_CONTACT_TYPES)
+  const { data: rawTypes } = useCachedLookup('/last-contact-types?active=1', mapLastContactTypes, DEFAULT_LAST_CONTACT_TYPES)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const types = useMemo(() => translateSeedList(t, 'lastContactTypes', rawTypes), [rawTypes, t])
 

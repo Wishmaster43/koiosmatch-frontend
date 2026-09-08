@@ -26,7 +26,7 @@ describe('useOpportunityLostReasons', () => {
     mockedGet.mockResolvedValue({ data: { data: [{ id: 'r1', name: 'Budget', key: 'budget_cut' }] } })
     const { result } = renderHook(() => useOpportunityLostReasons())
     await waitFor(() => expect(result.current.loading).toBe(false))
-    expect(mockedGet).toHaveBeenCalledWith('/opportunity-lost-reasons', undefined)
+    expect(mockedGet).toHaveBeenCalledWith('/opportunity-lost-reasons?active=1', undefined)
     expect(result.current.reasons).toEqual([{ value: 'Budget', label: 'Budget', color: undefined, key: 'budget_cut' }])
   })
 

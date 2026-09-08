@@ -92,7 +92,7 @@ export function useContractTypes() {
   const { t } = useTranslation('common')
   // One cached GET /contract-types per session; the seed list stands in only while
   // that request is in flight or if it returns nothing usable (mapper → null).
-  const { data: rawOptions } = useCachedLookup('/contract-types', mapContractTypeOptions, DEFAULT_CONTRACT_TYPE_OPTIONS)
+  const { data: rawOptions } = useCachedLookup('/contract-types?active=1', mapContractTypeOptions, DEFAULT_CONTRACT_TYPE_OPTIONS)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const options = useMemo(() => translateSeedList(t, 'contractTypes', rawOptions), [rawOptions, t])
   // `types` stays UNTRANSLATED on purpose (see the doc comment above) — every

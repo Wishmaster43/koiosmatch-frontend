@@ -66,7 +66,7 @@ const mapFunctions = (res: AxiosResponse): FunctionsLookupData => {
 // Cached tenant function-name lookup + the API's own free-entry flag (see the module doc above for why they must come from the same response).
 export function useFunctions() {
   const { t } = useTranslation('common')
-  const { data, invalidate } = useCachedLookup('/functions', mapFunctions, FALLBACK)
+  const { data, invalidate } = useCachedLookup('/functions?active=1', mapFunctions, FALLBACK)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   // LOOKUP-I18N-1 SAFETY: this list is VALUE and LABEL at once — the picker stores the
   // string it shows, so a translated entry would be SAVED and the record would carry
