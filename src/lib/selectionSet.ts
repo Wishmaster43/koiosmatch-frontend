@@ -28,3 +28,11 @@ export function toggleAllInSet<T>(prev: Set<T>, ids: T[], allSelected: boolean):
   })
   return next
 }
+
+/**
+ * Toggle one value in an immutable array (a new array is returned, the input is never mutated).
+ * Used for filter toggles where state is an array instead of a Set.
+ */
+export function toggleInList(prev: string[], val: string): string[] {
+  return prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val]
+}

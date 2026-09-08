@@ -4,10 +4,10 @@
  * the read-only SM mirror via useSmDepartments (never a direct write here).
  */
 import { useState, useMemo, useEffect } from 'react'
-import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Layers, Building2, Users } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
+import { toggleInList } from '@/lib/selectionSet'
 import DepartmentsTable from './DepartmentsTable'
 import PaginationBar from '@/components/ui/PaginationBar'
 import DepartmentDrawer from './DepartmentDrawer'
@@ -34,9 +34,6 @@ export default function DepartmentsPage() {
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
-  const toggle = (setter: Dispatch<SetStateAction<string[]>>) => (val: string) =>
-    setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
-
   // Distinct status values present in the current department list, for the status filter.
   const statusOptions  = useMemo(() => [...new Set(departments.map(d => d.status).filter((x): x is string => Boolean(x)))].sort(), [departments])
   // Same derivation for customer, for the customer filter.
@@ -48,13 +45,13 @@ export default function DepartmentsPage() {
   const filterGroups = useMemo(() => [
     { key: 'status',  label: t('departmentsPage.filter.status'),
       options: statusOptions.map(s => ({ value: s, label: t(`departmentsPage.status.${s.toLowerCase()}`, { defaultValue: s }) })),
-      selected: selStatuses,  onToggle: toggle(setSelStatuses) },
+      selected: selStatuses,  onToggle: (val: string) => setSelStatuses(prev => toggleInList(prev, val)) },
     { key: 'customer',   label: t('departmentsPage.filter.customer'),
       options: customerOptions.map(k => ({ value: k, label: k })),
-      selected: selCustomers,   onToggle: toggle(setSelCustomers) },
+      selected: selCustomers,   onToggle: (val: string) => setSelCustomers(prev => toggleInList(prev, val)) },
     { key: 'location', label: t('departmentsPage.filter.location'),
       options: locationOptions.map(l => ({ value: l, label: l })),
-      selected: selLocations,  onToggle: toggle(setSelLocations) },
+      selected: selLocations,  onToggle: (val: string) => setSelLocations(prev => toggleInList(prev, val)) },
   ], [t, statusOptions, customerOptions, locationOptions, selStatuses, selCustomers, selLocations])
 
   // Publishes the filter groups to the shared right panel, and unregisters them on unmount so a stale filter set doesn't linger after leaving this page.

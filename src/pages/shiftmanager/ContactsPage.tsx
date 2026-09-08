@@ -6,9 +6,9 @@
  * list page. Nothing here mutates: the external system owns these records.
  */
 import { useState, useMemo, useEffect } from 'react'
-import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '@/context/RightPanelContext'
+import { toggleInList } from '@/lib/selectionSet'
 import ContactsTable from './ContactsTable'
 import PaginationBar from '@/components/ui/PaginationBar'
 import ContactDrawer from './ContactDrawer'
@@ -30,9 +30,6 @@ export default function ContactsPage() {
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
-  const toggle = (setter: Dispatch<SetStateAction<string[]>>) => (val: string) =>
-    setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
-
   // Distinct customer names present in the loaded contacts, sorted, for the customer filter options.
   const customerOptions = useMemo(() => [...new Set(contacts.map(c => c.customer).filter((x): x is string => Boolean(x)))].sort(), [contacts])
 
@@ -40,13 +37,13 @@ export default function ContactsPage() {
   const filterGroups = useMemo(() => [
     { key: 'klant', label: t('contactsPage.cols.customer'),
       options: customerOptions.map(k => ({ value: k, label: k, count: contacts.filter(c => c.customer === k).length })),
-      selected: selCustomers, onToggle: toggle(setSelCustomers) },
+      selected: selCustomers, onToggle: (val: string) => setSelCustomers(prev => toggleInList(prev, val)) },
     { key: 'planning', label: t('contactsPage.planningContact'),
       options: [
         { value: 'ja',  label: t('contactsPage.planningContact'),   count: contacts.filter(c => c.planning).length },
         { value: 'nee', label: t('contactsPage.noPlanningContact'), count: contacts.filter(c => !c.planning).length },
       ],
-      selected: selPlanning, onToggle: toggle(setSelPlanning) },
+      selected: selPlanning, onToggle: (val: string) => setSelPlanning(prev => toggleInList(prev, val)) },
   ], [t, customerOptions, contacts, selCustomers, selPlanning])
 
   // Registers this page's filter groups with the shared right panel, and unregisters them on unmount so they do not leak into another page.

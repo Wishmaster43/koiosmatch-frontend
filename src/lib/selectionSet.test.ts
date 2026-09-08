@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { toggleInSet, toggleAllInSet } from './selectionSet'
+import { toggleInSet, toggleAllInSet, toggleInList } from './selectionSet'
 
 describe('toggleInSet', () => {
   it('adds an id to an empty set', () => {
@@ -88,5 +88,38 @@ describe('toggleAllInSet', () => {
     const ids = [1, 2, 3]
     const next = toggleAllInSet(prev, ids, false)
     expect(next).toEqual(new Set(ids))
+  })
+})
+
+describe('toggleInList', () => {
+  it('adds a value to an empty array', () => {
+    const prev: string[] = []
+    const next = toggleInList(prev, 'a')
+    expect(next).toEqual(['a'])
+  })
+
+  it('adds a value to a non-empty array', () => {
+    const prev = ['a', 'b']
+    const next = toggleInList(prev, 'c')
+    expect(next).toEqual(['a', 'b', 'c'])
+  })
+
+  it('removes an existing value', () => {
+    const prev = ['a', 'b', 'c']
+    const next = toggleInList(prev, 'b')
+    expect(next).toEqual(['a', 'c'])
+  })
+
+  it('does not mutate the input array', () => {
+    const prev = ['a', 'b']
+    const original = [...prev]
+    toggleInList(prev, 'c')
+    expect(prev).toEqual(original)
+  })
+
+  it('preserves order of remaining values', () => {
+    const prev = ['x', 'y', 'z']
+    const next = toggleInList(prev, 'y')
+    expect(next).toEqual(['x', 'z'])
   })
 })
