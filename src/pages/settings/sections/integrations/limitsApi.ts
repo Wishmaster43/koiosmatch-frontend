@@ -3,6 +3,7 @@
  * GET /settings/integrations/limits (tenant) + GET /admin/limits (super-admin).
  */
 import api from '@/lib/api'
+import type { BillingUsageTierMeterBase, BillingTierRef } from '@/types/billingTiers'
 
 // A single limit meter row from the tenant endpoint.
 export interface TenantLimitRow {
@@ -14,16 +15,9 @@ export interface TenantLimitRow {
   cap: number | null
   percent: number | null
   cap_reached: boolean
-  prices?: {
-    tier: {
-      key: string
-      label: string
-      monthly_tokens: number
-      price_cents: number
-      effective_from: string
-      source: string
-    }
-  }
+  // billing.view only: the FULL tier meter for this unit (same block GET /billing/usage
+  // exposes) — the chosen tier sits in `tier.tier`, the package baseline in `tier.baseline_tier`.
+  prices?: { tier: BillingUsageTierMeterBase & { baseline_tier?: BillingTierRef | null } }
 }
 
 // A platform limit row from the super-admin endpoint.

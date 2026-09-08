@@ -11,7 +11,11 @@ import { useNumberFormat } from '@/lib/formatters'
 import LimitMeterRow from '@/components/ui/LimitMeterRow'
 import { SettingsScaffold, SettingCardList, SettingCard } from '@/pages/settings/components/SettingsKit'
 import { Caption } from '@/components/ui/typography'
-import { getTenantLimits } from './limitsApi'
+import { getTenantLimits, type TenantLimitRow } from './limitsApi'
+import type { BillingTierRef } from '@/types/billingTiers'
+
+// The tier a meter row is priced on: the tenant's chosen tier, else the package baseline (measured on demo: `tier` null, `baseline_tier` set).
+const tierOf = (row: TenantLimitRow): BillingTierRef | null => row.prices?.tier?.tier ?? row.prices?.tier?.baseline_tier ?? null
 
 export default function TenantLimitsSettings() {
   const { t } = useTranslation('settings')
@@ -31,12 +35,12 @@ export default function TenantLimitsSettings() {
           {rows.map(row => (
             <SettingCard key={row.key} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <LimitMeterRow meter={row} />
-              {/* Billing tier (billing.view only): what the allowance is and what it costs. */}
-              {row.prices?.tier && (
+              {/* Billing tier (billing.view only): the chosen tier, else the package baseline. */}
+              {tierOf(row) && (
                 <Caption as="div">
-                  {t('limits.tier.included', { tier: row.prices.tier.label, n: formatNumber(row.prices.tier.monthly_tokens) })}
+                  {t('limits.tier.included', { tier: tierOf(row)?.label ?? tierOf(row)?.key, n: formatNumber(tierOf(row)?.monthly_tokens ?? tierOf(row)?.monthly_runs ?? row.cap ?? 0) })}
                   {' · '}
-                  {t('limits.tier.price', { amount: formatCurrency(row.prices.tier.price_cents / 100) })}
+                  {t('limits.tier.price', { amount: formatCurrency((tierOf(row)?.price_cents ?? 0) / 100) })}
                 </Caption>
               )}
             </SettingCard>
