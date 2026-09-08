@@ -10,6 +10,7 @@ import { RefreshCw } from 'lucide-react'
 import { fetchJobMetrics } from './jobsApi'
 import Button from '@/components/ui/Button'
 import { SectionTitle } from '@/components/ui/typography'
+import { useVisiblePoll } from '@/hooks/useVisiblePoll'
 
 const TH = { padding: '9px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
 const TD = { padding: '9px 12px', fontSize: 12.5, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
@@ -58,13 +59,11 @@ export default function MetricsTab() {
     }
   }, [])
 
-  // Initial load, then a 15s visible-tab poll (matches Overzicht/Recent).
+  // Initial load.
   useEffect(() => { load() }, [load])
-  // The poll itself: re-loads every 15s only while the tab is visible, so a backgrounded tab doesn't burn requests.
-  useEffect(() => {
-    const timer = setInterval(() => { if (!document.hidden) load() }, 15000)
-    return () => clearInterval(timer)
-  }, [load])
+
+  // Poll while visible (shared useVisiblePoll).
+  useVisiblePoll(load, 15000)
 
   return (
     <div>

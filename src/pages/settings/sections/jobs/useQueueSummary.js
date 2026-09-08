@@ -5,6 +5,7 @@
  */
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { fetchQueueSummary } from './jobsApi'
+import { useVisiblePoll } from '@/hooks/useVisiblePoll'
 
 const POLL_MS = 15000
 
@@ -23,12 +24,14 @@ export function useQueueSummary() {
       .catch((err) => { if (err?.code !== 'ERR_CANCELED') setPhase('error') })
   }, [])
 
-  // Initial load + a 15s poll that skips ticks while the browser tab is hidden.
+  // Initial load; cleanup aborts in-flight requests.
   useEffect(() => {
     load()
-    const id = setInterval(() => { if (document.visibilityState === 'visible') load() }, POLL_MS)
-    return () => { clearInterval(id); abortRef.current?.abort() }
+    return () => { abortRef.current?.abort() }
   }, [load])
+
+  // Poll while visible (shared useVisiblePoll).
+  useVisiblePoll(load, POLL_MS)
 
   return { summary, phase, refetch: load }
 }

@@ -7,9 +7,10 @@
  * "not available yet" state below, but also surfaces in the dev log like any
  * other real failure.
  */
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import api, { unwrapList } from '@/lib/api'
 import type { WaQueueBatch } from '@/types/whatsapp'
+import { useVisiblePoll } from '@/hooks/useVisiblePoll'
 
 const POLL_MS = 5000
 
@@ -30,7 +31,6 @@ export function useWhatsAppQueue() {
   const [loading,      setLoading]      = useState(true)
   const [error,        setError]        = useState(false)
   const [notAvailable, setNotAvailable] = useState(false)
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // Load today's batches; a 404 flags "not shipped yet", any other failure is a real error.
   const load = useCallback(() => {
@@ -45,16 +45,9 @@ export function useWhatsAppQueue() {
 
   useEffect(() => { load() }, [load])
 
-  // Poll every 5s only while an active batch exists; stop the instant none remain.
-  // Every tick is also gated on tab visibility (mirrors useJobsList's `document
-  // .visibilityState === 'visible'` check and useNotifications' shouldPollNotifications)
-  // — a hidden tab must never keep hammering the backend every 5s.
-  useEffect(() => {
-    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
-    if (notAvailable || error || !batches.some(isBatchActive)) return
-    timerRef.current = setInterval(() => { if (document.visibilityState === 'visible') load() }, POLL_MS)
-    return () => { if (timerRef.current) clearInterval(timerRef.current) }
-  }, [batches, notAvailable, error, load])
+  // Poll while visible (shared useVisiblePoll); disable if no active batches or an error occurred.
+  const shouldPoll = !notAvailable && !error && batches.some(isBatchActive)
+  useVisiblePoll(load, POLL_MS, shouldPoll)
 
   return { batches, loading, error, notAvailable, reload: load }
 }

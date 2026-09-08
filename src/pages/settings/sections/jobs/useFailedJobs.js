@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { fetchFailedJobs, retryFailedJob, forgetFailedJob, retryAllFailedJobs, flushFailedJobs } from './jobsApi'
 import { unwrapList } from '@/lib/api'
 import { extractApiError } from '@/lib/extractApiError'
+import { useVisiblePoll } from '@/hooks/useVisiblePoll'
 
 const POLL_MS = 15000
 
@@ -47,13 +48,15 @@ export function useFailedJobs() {
       .catch((err) => { if (err?.code !== 'ERR_CANCELED') setPhase('error') })
   }, [params])
 
-  // Loads on mount/filter change and then polls every 15s while visible; cleanup aborts.
+  // Loads on mount/filter change; cleanup aborts.
   useEffect(() => {
     setPhase('loading')
     load()
-    const id = setInterval(() => { if (document.visibilityState === 'visible') load() }, POLL_MS)
-    return () => { clearInterval(id); abortRef.current?.abort() }
+    return () => { abortRef.current?.abort() }
   }, [load])
+
+  // Poll while visible (shared useVisiblePoll).
+  useVisiblePoll(load, POLL_MS)
 
   const setFilter = (key, value) => { setFilters((f) => ({ ...f, [key]: value })); setPage(1) }
 

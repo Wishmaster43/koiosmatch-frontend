@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { fetchJobsList, cancelJob } from './jobsApi'
 import { unwrapList } from '@/lib/api'
+import { useVisiblePoll } from '@/hooks/useVisiblePoll'
 
 const POLL_MS = 15000
 
@@ -39,13 +40,15 @@ export function useJobsList() {
       .catch((err) => { if (err?.code !== 'ERR_CANCELED') setPhase('error') })
   }, [params])
 
-  // Loads on mount/filter change and polls every 15s while the tab is visible, aborting any in-flight request and the interval on cleanup.
+  // Loads on mount/filter change; cleanup aborts in-flight requests.
   useEffect(() => {
     setPhase('loading')
     load()
-    const id = setInterval(() => { if (document.visibilityState === 'visible') load() }, POLL_MS)
-    return () => { clearInterval(id); abortRef.current?.abort() }
+    return () => { abortRef.current?.abort() }
   }, [load])
+
+  // Poll while visible (shared useVisiblePoll).
+  useVisiblePoll(load, POLL_MS)
 
   // Reset to page 1 whenever a filter changes (stale page numbers otherwise 404-ish empty).
   const setFilter = (key, value) => { setFilters((f) => ({ ...f, [key]: value })); setPage(1) }

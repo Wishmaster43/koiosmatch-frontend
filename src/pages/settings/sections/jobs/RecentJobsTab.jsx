@@ -18,6 +18,7 @@ import Button from '@/components/ui/Button'
 import { Caption, Mono } from '@/components/ui/typography'
 // House numeric shape (DATUM-1): digits only, so no locale is needed here.
 import { hhmmss } from '@/lib/localDate'
+import { useVisiblePoll } from '@/hooks/useVisiblePoll'
 
 const STATUS_COLOR = {
   completed: 'var(--color-success)', failed: 'var(--color-danger)',
@@ -52,13 +53,11 @@ export default function RecentJobsTab() {
     }
   }, [tenant, jobSearch])
 
-  // Initial + filter-driven load, then a 15s visible-tab poll (matches Overzicht).
+  // Initial + filter-driven load.
   useEffect(() => { load() }, [load])
-  // Polls every 15s while this tab is visible; skipped when the document is hidden to save requests.
-  useEffect(() => {
-    const timer = setInterval(() => { if (!document.hidden) load() }, 15000)
-    return () => clearInterval(timer)
-  }, [load])
+
+  // Poll while visible (shared useVisiblePoll).
+  useVisiblePoll(load, 15000)
 
   // Tenant options from the data itself — no extra endpoint needed.
   const tenants = useMemo(() => [...new Set(rows.map(r => r.tenant).filter(Boolean))].sort(), [rows])
