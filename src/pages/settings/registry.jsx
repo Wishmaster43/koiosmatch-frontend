@@ -130,6 +130,7 @@ import TenantInvoicesSettings from './sections/TenantInvoicesSettings'
 import BillingUsageSettings from './sections/BillingUsageSettings'
 import InvoiceCompanySettings from './sections/InvoiceCompanySettings'
 import AdminInvoicesSettings from './sections/AdminInvoicesSettings'
+import CatalogSection from './sections/CatalogSection'
 
 import {
   kpisLeads, kpisCandidates, kpisApplications, kpisCustomers, kpisLocations,
@@ -204,6 +205,18 @@ export const NAV_GROUPS = [
       // Tenant jargon list (K-155): terms the AI correction prompt uses to fix
       // dictated abbreviations (e.g. "bfv" -> "BHV") in notes/assist results.
       { id: 'jargon', icon: Languages, component: JargonSettings },
+    ],
+  },
+  {
+    // Generic catalogue settings — sections from GET /settings/catalog that are not
+    // already dedicated screens. The catalogue drives the FE screen from the contract (§2).
+    key: 'catalog', icon: SlidersHorizontal,
+    items: [
+      { id: 'windows', icon: Clock, render: () => <CatalogSection section="windows" /> },
+      { id: 'retention', icon: History, render: () => <CatalogSection section="retention" /> },
+      { id: 'messaging', icon: MessageCircle, render: () => <CatalogSection section="messaging" /> },
+      { id: 'email', icon: Mail, render: () => <CatalogSection section="email" /> },
+      { id: 'kpi', icon: Target, render: () => <CatalogSection section="kpi" /> },
     ],
   },
   {

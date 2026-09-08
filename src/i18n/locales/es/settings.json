@@ -63,7 +63,8 @@
     "document_types": "Tipos de documento",
     "appointments": "Citas",
     "workflows": "Workflows",
-    "reports": "Informes"
+    "reports": "Informes",
+    "catalog": "Reglas generales"
   },
   "nav": {
     "candidate_display": "Visualización de la tabla",
@@ -94,7 +95,7 @@
     "notif_applications": "Candidaturas",
     "notif_vacancies": "Vacantes",
     "notif_billing": "Facturación",
-    "email": "Correo",
+    "email": "Correo electrónico",
     "whatsapp": "WhatsApp Business",
     "appstore": "App store",
     "apikeys": "Claves API",
@@ -261,7 +262,11 @@
     "interview": "Entrevista IA",
     "ai_transparency": "Transparencia de IA",
     "limits": "Uso y límites",
-    "admin_limits": "Límites de plataforma"
+    "admin_limits": "Límites de plataforma",
+    "windows": "Ventanas de tiempo y alertas",
+    "retention": "Retención de datos",
+    "messaging": "Mensajería",
+    "kpi": "Umbrales de KPI"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -4156,6 +4161,32 @@
       "day": "por día",
       "week": "por semana",
       "month": "por mes"
+    }
+  },
+  "catalog": {
+    "empty": "No hay configuración disponible para esta sección.",
+    "invalidJson": "Formato JSON inválido.",
+    "sections": {
+      "windows": {
+        "title": "Ventanas de tiempo y alertas",
+        "subtitle": "Configure los umbrales para advertencias y alertas."
+      },
+      "retention": {
+        "title": "Retención de datos",
+        "subtitle": "Defina cuánto tiempo se retienen los datos."
+      },
+      "messaging": {
+        "title": "Mensajería",
+        "subtitle": "Configuración de mensajería."
+      },
+      "email": {
+        "title": "Correo electrónico",
+        "subtitle": "Configuración para envío de correos."
+      },
+      "kpi": {
+        "title": "Umbrales de KPI",
+        "subtitle": "Configure objetivos y umbrales de KPI."
+      }
     }
   }
 }

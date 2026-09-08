@@ -63,7 +63,8 @@
     "document_types": "Types de document",
     "appointments": "Rendez-vous",
     "workflows": "Workflows",
-    "reports": "Rapports"
+    "reports": "Rapports",
+    "catalog": "Règles générales"
   },
   "nav": {
     "candidate_display": "Affichage du tableau",
@@ -261,7 +262,11 @@
     "interview": "Entretien IA",
     "ai_transparency": "Transparence IA",
     "limits": "Utilisation et limites",
-    "admin_limits": "Limites de plateforme"
+    "admin_limits": "Limites de plateforme",
+    "windows": "Fenêtres de temps et alertes",
+    "retention": "Conservation des données",
+    "messaging": "Messagerie",
+    "kpi": "Seuils KPI"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -4156,6 +4161,32 @@
       "day": "par jour",
       "week": "par semaine",
       "month": "par mois"
+    }
+  },
+  "catalog": {
+    "empty": "Aucun paramètre disponible pour cette section.",
+    "invalidJson": "Format JSON invalide.",
+    "sections": {
+      "windows": {
+        "title": "Fenêtres de temps et alertes",
+        "subtitle": "Configurez les seuils pour les avertissements et les alertes."
+      },
+      "retention": {
+        "title": "Conservation des données",
+        "subtitle": "Définissez la durée de conservation des données."
+      },
+      "messaging": {
+        "title": "Messagerie",
+        "subtitle": "Configuration de la messagerie."
+      },
+      "email": {
+        "title": "E-mail",
+        "subtitle": "Configuration pour l'envoi d'e-mails."
+      },
+      "kpi": {
+        "title": "Seuils KPI",
+        "subtitle": "Configurez les objectifs et seuils KPI."
+      }
     }
   }
 }

@@ -63,7 +63,8 @@
     "document_types": "Tipi di documento",
     "appointments": "Appuntamenti",
     "workflows": "Workflow",
-    "reports": "Report"
+    "reports": "Report",
+    "catalog": "Regole generali"
   },
   "nav": {
     "candidate_display": "Visualizzazione tabella",
@@ -97,7 +98,7 @@
     "notif_applications": "Candidature",
     "notif_vacancies": "Posizioni",
     "notif_billing": "Fatturazione",
-    "email": "E-mail",
+    "email": "Email",
     "whatsapp": "WhatsApp Business",
     "appstore": "App store",
     "apikeys": "Chiavi API",
@@ -261,7 +262,11 @@
     "interview": "Colloquio IA",
     "ai_transparency": "Trasparenza IA",
     "limits": "Utilizzo e limiti",
-    "admin_limits": "Limiti della piattaforma"
+    "admin_limits": "Limiti della piattaforma",
+    "windows": "Finestre di tempo e avvisi",
+    "retention": "Conservazione dei dati",
+    "messaging": "Messaggistica",
+    "kpi": "Soglie KPI"
   },
   "kpis": {
     "title": "Impostazioni KPI",
@@ -4156,6 +4161,32 @@
       "day": "al giorno",
       "week": "per settimana",
       "month": "al mese"
+    }
+  },
+  "catalog": {
+    "empty": "Nessuna impostazione disponibile per questa sezione.",
+    "invalidJson": "Formato JSON non valido.",
+    "sections": {
+      "windows": {
+        "title": "Finestre di tempo e avvisi",
+        "subtitle": "Configurare le soglie per avvisi e notifiche."
+      },
+      "retention": {
+        "title": "Conservazione dei dati",
+        "subtitle": "Definisci per quanto tempo i dati vengono conservati."
+      },
+      "messaging": {
+        "title": "Messaggistica",
+        "subtitle": "Configurazione della messaggistica."
+      },
+      "email": {
+        "title": "Email",
+        "subtitle": "Configurazione per l'invio di email."
+      },
+      "kpi": {
+        "title": "Soglie KPI",
+        "subtitle": "Configura obiettivi e soglie KPI."
+      }
     }
   }
 }

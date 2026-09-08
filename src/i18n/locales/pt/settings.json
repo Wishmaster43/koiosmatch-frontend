@@ -63,7 +63,8 @@
     "document_types": "Tipos de documento",
     "appointments": "Marcações",
     "workflows": "Workflows",
-    "reports": "Relatórios"
+    "reports": "Relatórios",
+    "catalog": "Regras gerais"
   },
   "nav": {
     "candidate_display": "Vista de tabela",
@@ -97,7 +98,7 @@
     "notif_applications": "Candidaturas",
     "notif_vacancies": "Vagas",
     "notif_billing": "Faturação",
-    "email": "E-mail",
+    "email": "Email",
     "whatsapp": "WhatsApp Business",
     "appstore": "App store",
     "apikeys": "Chaves de API",
@@ -261,7 +262,11 @@
     "interview": "Entrevista IA",
     "ai_transparency": "Transparência de IA",
     "limits": "Uso e limites",
-    "admin_limits": "Limites da plataforma"
+    "admin_limits": "Limites da plataforma",
+    "windows": "Janelas de tempo e alertas",
+    "retention": "Retenção de dados",
+    "messaging": "Mensagens",
+    "kpi": "Limiares de KPI"
   },
   "kpis": {
     "title": "Definições de KPI",
@@ -4156,6 +4161,32 @@
       "day": "por dia",
       "week": "por semana",
       "month": "por mês"
+    }
+  },
+  "catalog": {
+    "empty": "Nenhuma configuração disponível para esta seção.",
+    "invalidJson": "Formato JSON inválido.",
+    "sections": {
+      "windows": {
+        "title": "Janelas de tempo e alertas",
+        "subtitle": "Configure os limiares para avisos e alertas."
+      },
+      "retention": {
+        "title": "Retenção de dados",
+        "subtitle": "Defina quanto tempo os dados são retidos."
+      },
+      "messaging": {
+        "title": "Mensagens",
+        "subtitle": "Configuração de mensagens."
+      },
+      "email": {
+        "title": "Email",
+        "subtitle": "Configuração para envio de email."
+      },
+      "kpi": {
+        "title": "Limiares de KPI",
+        "subtitle": "Configure metas e limiares de KPI."
+      }
     }
   }
 }

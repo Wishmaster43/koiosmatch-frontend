@@ -139,21 +139,24 @@ export function NumberField({ value, onChange, min = 0, max, unit, width = 80, d
   )
 }
 
-// Plain single-line text input sized for settings rows.
-export function TextField({ value, onChange, placeholder, width = 220, disabled = false }) {
+// Plain single-line text input sized for settings rows; optional password type.
+export function TextField({ value, onChange, placeholder, width = 220, disabled = false, type = 'text' }) {
   return (
-    <input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} disabled={disabled}
+    <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} disabled={disabled}
       style={{ ...inputStyle, width }} />
   )
 }
 
 // Multi-line text input for short settings values; not rich text since this kit is for config strings, not prose.
-export function TextareaField({ value, onChange, placeholder, minHeight = 220 }) {
+export function TextareaField({ value, onChange, onBlur, placeholder, minHeight = 220, disabled = false, ariaLabel, mono = false, invalid = false }) {
   return (
-    <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-      style={{ width: '100%', minHeight, padding: 14, fontSize: 13, border: '1px solid var(--border)',
+    <textarea value={value} onChange={e => onChange(e.target.value)} onBlur={onBlur} placeholder={placeholder}
+      disabled={disabled} aria-label={ariaLabel} aria-invalid={invalid || undefined}
+      style={{ width: '100%', minHeight, padding: 14, fontSize: 13,
+               border: `1px solid ${invalid ? 'var(--color-danger)' : 'var(--border)'}`,
                borderRadius: 10, outline: 'none', resize: 'vertical', color: 'var(--text)',
-               fontFamily: 'inherit', lineHeight: 1.6 }} />
+               fontFamily: mono ? 'var(--font-mono)' : 'inherit', lineHeight: 1.6,
+               opacity: disabled ? 0.6 : 1 }} />
   )
 }
 

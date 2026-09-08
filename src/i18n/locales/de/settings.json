@@ -63,7 +63,8 @@
     "document_types": "Dokumenttypen",
     "appointments": "Termine",
     "workflows": "Workflows",
-    "reports": "Berichte"
+    "reports": "Berichte",
+    "catalog": "Allgemeine Regeln"
   },
   "nav": {
     "candidate_display": "Tabellenansicht",
@@ -261,7 +262,11 @@
     "interview": "KI-Interview",
     "ai_transparency": "KI-Transparenz",
     "limits": "Verbrauch & Limits",
-    "admin_limits": "Plattform-Limits"
+    "admin_limits": "Plattform-Limits",
+    "windows": "Zeitfenster und Warnungen",
+    "retention": "Datenspeicherung",
+    "messaging": "Messaging",
+    "kpi": "KPI-Schwellwerte"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -4156,6 +4161,32 @@
       "day": "pro Tag",
       "week": "pro Woche",
       "month": "pro Monat"
+    }
+  },
+  "catalog": {
+    "empty": "Für diesen Bereich sind keine Einstellungen verfügbar.",
+    "invalidJson": "Ungültiges JSON-Format.",
+    "sections": {
+      "windows": {
+        "title": "Zeitfenster und Warnungen",
+        "subtitle": "Konfigurieren Sie Schwellwerte für Warnungen und Alerts."
+      },
+      "retention": {
+        "title": "Datenspeicherung",
+        "subtitle": "Definieren Sie, wie lange Daten gespeichert werden."
+      },
+      "messaging": {
+        "title": "Messaging",
+        "subtitle": "Konfiguration für Messaging."
+      },
+      "email": {
+        "title": "E-Mail",
+        "subtitle": "Konfiguration für E-Mail-Versand."
+      },
+      "kpi": {
+        "title": "KPI-Schwellwerte",
+        "subtitle": "Konfigurieren Sie KPI-Ziele und Schwellwerte."
+      }
     }
   }
 }

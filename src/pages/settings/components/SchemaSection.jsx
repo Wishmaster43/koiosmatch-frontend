@@ -8,9 +8,11 @@
  *   ]}
  *
  * Labels/descriptions/units/option-labels all resolve from the `settings` i18n
- * namespace under `<i18nKey>.fields.<key>.*`, matching the existing convention.
- * Complex sections keep their own components — this is only for the plumbing-light
- * majority (toggles / numbers / selects / text / colour).
+ * namespace under `<i18nKey>.fields.<key>.*`, matching the existing convention; a
+ * field may carry its own `labelKey`/`helpKey` instead (the catalogue screens,
+ * DRAFT-SETTINGS-CATALOG-1 §1). Complex sections keep their own components — this is
+ * only for the plumbing-light majority (toggles / numbers / selects / text / colour /
+ * secret / json).
  */
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -20,33 +22,42 @@ import {
   SettingsScaffold, SettingCardList, SettingRow,
   Toggle, NumberField, TextField, SelectField, ColorField,
 } from './SettingsKit'
+import JsonField from './JsonField'
 
 // Picks the right input widget for one schema field, by its declared type.
-function FieldControl({ field, value, onChange, t, base, disabled }) {
+function FieldControl({ field, value, onChange, t, base, label, disabled }) {
   switch (field.type) {
     case 'toggle':
       // Accessible name (§6): the row's own label text is only visually adjacent,
       // never programmatically associated, so every switch needs its own name.
-      return <Toggle checked={!!value} onChange={onChange} ariaLabel={t(`${base}.label`)} disabled={disabled} />
+      return <Toggle checked={!!value} onChange={onChange} ariaLabel={label} disabled={disabled} />
     case 'select': {
       const options = field.options.map(opt =>
         typeof opt === 'string'
           ? { value: opt, label: t(`${base}.options.${opt}`, opt) }
-          : opt)
-      return <SelectField value={value} onChange={onChange} options={options} disabled={disabled} />
+          : { value: opt.value, label: t(opt.label, opt.value) })
+      return <SelectField value={value} onChange={onChange} options={options} ariaLabel={label} disabled={disabled} />
     }
     case 'text':
       return <TextField value={value} onChange={onChange} placeholder={t(`${base}.placeholder`, '')} disabled={disabled} />
+    case 'secret':
+      // A secret arrives masked (§1 '••••••••') and is typed blind; an unchanged mask is
+      // never posted back (see the save wrapper below).
+      return <TextField type="password" value={value} onChange={onChange} placeholder={t(`${base}.placeholder`, '')} disabled={disabled} />
     case 'color':
       // Free-text validated colour (CHIPKLEUR-INSTELBAAR-1) — the field itself shows
       // the backend's validation message so a tenant gets a useful error, not a 422.
       return <ColorField value={value} onChange={onChange}
-        invalidLabel={t('common.invalidColorValue')} ariaLabel={t(`${base}.label`)} disabled={disabled} />
+        invalidLabel={t('common.invalidColorValue')} ariaLabel={label} disabled={disabled} />
+    case 'json':
+      // Structured value edited as text per its catalogue format (jsonFormat).
+      return <JsonField value={value} onChange={onChange} format={field.format} ariaLabel={label}
+        placeholder={t(`${base}.placeholder`, '')} invalidLabel={t('catalog.invalidJson')} disabled={disabled} />
     case 'number':
     default:
       return (
         <NumberField value={value} onChange={onChange}
-          min={field.min} max={field.max} unit={t(`${base}.unit`, '')} disabled={disabled} />
+          min={field.min} max={field.max} step={field.step} unit={t(`${base}.unit`, '')} disabled={disabled} />
       )
   }
 }
@@ -68,8 +79,15 @@ export default function SchemaSection({ schema }) {
   // never the raw key. `opt` collapses a missing translation to undefined.
   const opt = (key) => { const v = t(key); return v === key ? undefined : v }
 
+  // Persist every field except a secret the user did not touch: its value is the
+  // server's mask, and writing that back would replace the real secret with dots.
+  const saveEditable = () => form.save(
+    schema.fields
+      .filter(f => f.type !== 'secret' || form.values[f.key] !== form.initial[f.key])
+      .map(f => f.key),
+  )
   // When user lacks permissions, hide Save and disable all fields.
-  const gatedForm = canEdit ? form : { ...form, save: undefined }
+  const gatedForm = canEdit ? { ...form, save: saveEditable } : { ...form, save: undefined }
 
   return (
     <SettingsScaffold
@@ -79,13 +97,15 @@ export default function SchemaSection({ schema }) {
       form={gatedForm}>
       <SettingCardList>
         {schema.fields.map(field => {
+          // A field's own labelKey/helpKey (catalogue rows) wins over the folder convention.
           const base = `${k}.fields.${field.key}`
+          const label = t(field.labelKey ?? `${base}.label`)
           return (
             <SettingRow key={field.key}
-              label={t(`${base}.label`)}
-              description={opt(`${base}.description`)}>
+              label={label}
+              description={opt(field.helpKey ?? `${base}.help`)}>
               <FieldControl field={field} value={form.values[field.key]}
-                onChange={v => form.set(field.key, v)} t={t} base={base} disabled={!canEdit} />
+                onChange={v => form.set(field.key, v)} t={t} base={base} label={label} disabled={!canEdit} />
             </SettingRow>
           )
         })}

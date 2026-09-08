@@ -63,7 +63,8 @@
     "document_types": "Documenttypes",
     "appointments": "Afspraken",
     "workflows": "Workflows",
-    "reports": "Rapporten"
+    "reports": "Rapporten",
+    "catalog": "Algemene regels"
   },
   "nav": {
     "candidate_display": "Tabelweergave",
@@ -261,7 +262,11 @@
     "interview": "AI-interview",
     "ai_transparency": "AI-transparantie",
     "limits": "Verbruik & limieten",
-    "admin_limits": "Platformlimieten"
+    "admin_limits": "Platformlimieten",
+    "windows": "Termijnen en signalen",
+    "retention": "Bewaartermijnen",
+    "messaging": "Berichten",
+    "kpi": "KPI-drempels"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -4156,6 +4161,32 @@
       "day": "per dag",
       "week": "per week",
       "month": "per maand"
+    }
+  },
+  "catalog": {
+    "empty": "Geen instellingen beschikbaar voor deze sectie.",
+    "invalidJson": "Ongeldig JSON-formaat.",
+    "sections": {
+      "windows": {
+        "title": "Termijnen en signalen",
+        "subtitle": "Configureer de drempels voor waarschuwingen en signalen."
+      },
+      "retention": {
+        "title": "Bewaartermijnen",
+        "subtitle": "Definieer hoe lang gegevens worden bewaard."
+      },
+      "messaging": {
+        "title": "Berichten",
+        "subtitle": "Instellingen voor berichtconfiguratie."
+      },
+      "email": {
+        "title": "E-mail",
+        "subtitle": "Instellingen voor e-mailverzending."
+      },
+      "kpi": {
+        "title": "KPI-drempels",
+        "subtitle": "Configureer KPI-doelstellingen en drempels."
+      }
     }
   }
 }

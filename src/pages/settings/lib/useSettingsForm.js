@@ -83,13 +83,18 @@ export function useSettingsForm(defaults) {
     [values, initial],
   )
 
-  const save = async () => {
+  // Optional `keys` limits the POST to a subset (a masked secret must never be
+  // written back as dots — SchemaSection passes only the keys it may persist).
+  const save = async (keys) => {
     // Never persist over an unknown policy — a failed load means `values` is still
     // the hardcoded defaults, not what the tenant actually has configured.
     if (loadError) return
     setSaving(true)
     try {
-      await saveSettings(values)
+      const payload = Array.isArray(keys)
+        ? Object.fromEntries(keys.filter(key => key in values).map(key => [key, values[key]]))
+        : values
+      await saveSettings(payload)
       setInitial(values)
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
@@ -99,5 +104,5 @@ export function useSettingsForm(defaults) {
     finally { setSaving(false) }
   }
 
-  return { values, set, setValues, dirty, loading, saving, saved, save, loadError }
+  return { values, set, setValues, initial, dirty, loading, saving, saved, save, loadError }
 }

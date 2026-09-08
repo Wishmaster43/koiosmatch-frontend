@@ -63,7 +63,8 @@
     "document_types": "Document types",
     "appointments": "Appointments",
     "workflows": "Workflows",
-    "reports": "Reports"
+    "reports": "Reports",
+    "catalog": "General rules"
   },
   "nav": {
     "candidate_display": "Table display",
@@ -261,7 +262,11 @@
     "interview": "AI interview",
     "ai_transparency": "AI Transparency",
     "limits": "Usage & limits",
-    "admin_limits": "Platform limits"
+    "admin_limits": "Platform limits",
+    "windows": "Time windows and alerts",
+    "retention": "Data retention",
+    "messaging": "Messaging",
+    "kpi": "KPI thresholds"
   },
   "kpis": {
     "title": "KPI settings",
@@ -4156,6 +4161,32 @@
       "day": "per day",
       "week": "per week",
       "month": "per month"
+    }
+  },
+  "catalog": {
+    "empty": "No settings available for this section.",
+    "invalidJson": "Invalid JSON format.",
+    "sections": {
+      "windows": {
+        "title": "Time windows and alerts",
+        "subtitle": "Configure thresholds for warnings and alerts."
+      },
+      "retention": {
+        "title": "Data retention",
+        "subtitle": "Define how long data is retained."
+      },
+      "messaging": {
+        "title": "Messaging",
+        "subtitle": "Configuration for messaging."
+      },
+      "email": {
+        "title": "Email",
+        "subtitle": "Configuration for email sending."
+      },
+      "kpi": {
+        "title": "KPI thresholds",
+        "subtitle": "Configure KPI targets and thresholds."
+      }
     }
   }
 }
