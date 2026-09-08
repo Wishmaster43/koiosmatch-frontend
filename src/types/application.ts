@@ -5,6 +5,7 @@
  */
 import type { NoteActionItemWire } from '@/components/drawer/tabs/notes/notesTabTypes'
 import type { Id, Loose } from './common'
+import type { InterviewWorkflow } from './interviewWorkflow'
 import type { InterviewWorkflowRef } from './vacancy'
 import type { ApiKoiosAiAdvice, KoiosAiAdvice } from '@/lib/koiosAdviceMap'
 
@@ -380,11 +381,7 @@ export interface ApiApplication {
   // INTERVIEW-WORKFLOW-1: optional on purpose — the presence-gate signal is whether
   // this key exists on the raw record at all (see mapApplicationDetail).
   interview_workflow_id?: Id | null
-  interview_workflow?: {
-    id?: Id; name?: string
-    folder?: { id?: Id; name?: string } | null
-    agent?: { id?: Id; name?: string } | null
-  } | null
+  interview_workflow?: InterviewWorkflow | null
   task?: string
   ai_task?: string
   // ApplicationMatchService::ai (detail resource): score-band advice + the hard-fail flag; `task` is the list shape.

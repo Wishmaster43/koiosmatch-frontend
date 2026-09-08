@@ -4,6 +4,7 @@
  * mapVacancy / mapVacancyDetail (the /vacancies endpoint is still settling).
  */
 import type { Id, Loose } from './common'
+import type { InterviewWorkflow } from './interviewWorkflow'
 import type { ApiKoiosAiAdvice, KoiosAiAdvice } from '@/lib/koiosAdviceMap'
 
 /** VACANCY-LEADS-COUNT-1: provenance of `leadsCount` — the 15-min/nightly worker's
@@ -281,11 +282,7 @@ export interface ApiVacancy {
   // contract omits the key entirely, which is exactly the presence-gate signal
   // mapVacancy reads (`'interview_workflow_id' in raw`).
   interview_workflow_id?: Id | null
-  interview_workflow?: {
-    id?: Id; name?: string
-    folder?: { id?: Id; name?: string } | null
-    agent?: { id?: Id; name?: string } | null
-  } | null
+  interview_workflow?: InterviewWorkflow | null
   // S1 K-266/K-267: the new AI advice cache (VacancyDetailResource::koios_ai_advice /
   // VacancyListResource's compact verdict+score).
   koios_ai_advice?: ApiKoiosAiAdvice | null
