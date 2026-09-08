@@ -10,6 +10,7 @@ import { useApps, AVAILABLE_APPS } from '@/context/AppsContext'
 import { canAccessPage } from '@/lib/access'
 import Toggle from '@/components/ui/Toggle'
 import CalloutBox from '@/components/ui/CalloutBox'
+import SubTabBar from '@/components/drawer/SubTabBar'
 import { readableOn } from '@/hooks/useTenantTheme'
 
 // Connector toggles gated on super-admin + package: shows an honest disabled state, never a clickable 403.
@@ -50,6 +51,14 @@ export default function AppsSettings() {
     setSaving(null)
   }
 
+  const tabs = [
+    { id: 'planning', label: t('apps.tabPlanning') },
+    { id: 'backoffice', label: t('apps.tabBackoffice') },
+    { id: 'telefonie', label: t('apps.tabTelefonie') },
+    { id: 'verificatie', label: t('apps.tabVerificatie') },
+    { id: 'koios_ai', label: t('apps.tabKoiosAi') },
+  ]
+
   return (
     <div style={{ maxWidth: 680 }}>
       {/* Package context banner — shown when the active tenant is NOT on package 3 yet.
@@ -69,20 +78,9 @@ export default function AppsSettings() {
         </div>
       )}
 
-      {/* Tab strip — same look as JobQueueSettings/ApiKeyDetail's inline tabs. */}
-      <div role="tablist" style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
-        {[['planning', t('apps.tabPlanning')], ['backoffice', t('apps.tabBackoffice')], ['telefonie', t('apps.tabTelefonie')], ['verificatie', t('apps.tabVerificatie')], ['koios_ai', t('apps.tabKoiosAi')]].map(([id, label]) => {
-          const active = id === tab
-          return (
-            <button key={id} role="tab" aria-selected={active} onClick={() => setTab(id)}
-              style={{ padding: '9px 14px', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 13,
-                // Text colour uses the AA-contrast primary-text token, not the raw accent (P2b).
-                fontWeight: active ? 600 : 500, color: active ? 'var(--color-primary-text)' : 'var(--text-muted)',
-                borderBottom: `2px solid ${active ? 'var(--color-primary)' : 'transparent'}`, marginBottom: -1 }}>
-              {label}
-            </button>
-          )
-        })}
+      {/* Tab strip — the shared SubTabBar (DRY-1 O5); the wrapper keeps the old outer margin. */}
+      <div style={{ marginBottom: 20 }}>
+        <SubTabBar tabs={tabs} active={tab} onChange={setTab} />
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

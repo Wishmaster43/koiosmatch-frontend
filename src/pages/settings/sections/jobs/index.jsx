@@ -9,6 +9,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ListChecks } from 'lucide-react'
+import SubTabBar from '@/components/drawer/SubTabBar'
 import { useQueueSummary } from './useQueueSummary'
 import QueueHealthBlock from './QueueHealthBlock'
 import QueueOverviewTab from './QueueOverviewTab'
@@ -28,6 +29,8 @@ export default function JobQueueSettings() {
   const [tab, setTab] = useState('overview')
   const { summary, phase, refetch } = useQueueSummary()
 
+  const tabs = TABS.map(id => ({ id, label: t(`jobs.tab.${id}`) }))
+
   return (
     <div>
       {/* Header */}
@@ -40,20 +43,9 @@ export default function JobQueueSettings() {
       {/* QUEUE-WATCH-1: Horizon/scheduler health strip + incident banner, above the tabs. */}
       <QueueHealthBlock queueStatus={summary?.queue_status} />
 
-      {/* Tab strip — same look as ApiKeyDetail's inline tabs. */}
-      <div role="tablist" style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
-        {TABS.map((id) => {
-          const active = id === tab
-          return (
-            <button key={id} role="tab" aria-selected={active} onClick={() => setTab(id)}
-              style={{ padding: '9px 14px', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 13,
-                // Text colour uses the AA-contrast primary-text token, not the raw accent (P2b).
-                fontWeight: active ? 600 : 500, color: active ? 'var(--color-primary-text)' : 'var(--text-muted)',
-                borderBottom: `2px solid ${active ? 'var(--color-primary)' : 'transparent'}`, marginBottom: -1 }}>
-              {t(`jobs.tab.${id}`)}
-            </button>
-          )
-        })}
+      {/* Tab strip — the shared SubTabBar (DRY-1 O5); the wrapper keeps the old outer margin. */}
+      <div style={{ marginBottom: 20 }}>
+        <SubTabBar tabs={tabs} active={tab} onChange={setTab} />
       </div>
 
       {tab === 'overview' && <QueueOverviewTab summary={summary} phase={phase} onRefresh={refetch} onGoToFailed={() => setTab('failed')} />}

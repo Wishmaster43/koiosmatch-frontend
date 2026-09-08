@@ -13,6 +13,7 @@ import StatusBadge from '@/components/ui/StatusBadge'
 import Spinner from '@/components/ui/Spinner'
 import ActionMenu from '@/components/ui/ActionMenu'
 import CalloutBox from '@/components/ui/CalloutBox'
+import SubTabBar from '@/components/drawer/SubTabBar'
 import { useConfirm } from '@/hooks/useConfirm'
 import { getApiKey, updateApiKey, deleteApiKey, regenerateApiKey, setApiKeyPrimary } from './apiKeysApi'
 import ApiKeyGeneralTab from './ApiKeyGeneralTab'
@@ -96,7 +97,10 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
     return <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>
   }
 
-  const tabs = [['general', t('apiKeys.tab.general')], ['access', t('apiKeys.tab.access')]]
+  const tabs = [
+    { id: 'general', label: t('apiKeys.tab.general') },
+    { id: 'access', label: t('apiKeys.tab.access') },
+  ]
 
   return (
     <div>
@@ -140,19 +144,11 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
         </div>
       )}
 
-      {/* Tab strip */}
-      <div role="tablist" style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--border)', margin: '16px 0 24px' }}>
-        {tabs.map(([id, label]) => {
-          const active = id === tab
-          return (
-            <button key={id} role="tab" aria-selected={active} onClick={() => setTab(id)}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- state-carrying tab-strip control: active tab reads a colored underline, not a Button fill; Button has no tab face
-              style={{ padding: '9px 14px', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 13, fontWeight: active ? 600 : 500, color: active ? 'var(--color-primary)' : 'var(--text-muted)', borderBottom: `2px solid ${active ? 'var(--color-primary)' : 'transparent'}`, marginBottom: -1 }}>
-              {label}
-            </button>
-          )
-        })}
-        {loading && <span style={{ color: 'var(--text-muted)', alignSelf: 'center', marginLeft: 8 }}><Spinner size={13} /></span>}
+      {/* Tab strip — the shared SubTabBar (DRY-1 O5); the wrapper keeps the old outer
+          margins and the row keeps the loading spinner inline at the strip's end. */}
+      <div style={{ margin: '16px 0 24px', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ flex: 1, minWidth: 0 }}><SubTabBar tabs={tabs} active={tab} onChange={setTab} /></div>
+        {loading && <span style={{ color: 'var(--text-muted)', flexShrink: 0 }}><Spinner size={13} /></span>}
       </div>
 
       {/* Active tab */}
