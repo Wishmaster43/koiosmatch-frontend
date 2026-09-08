@@ -9,7 +9,7 @@
  * the /customer-phases lookup, so a tenant rename needs no re-fetch of the list.
  */
 import { describe, it, expect } from 'vitest'
-import { mapCustomer, mapCustomerNoteRow, mapLocation } from './mapCustomer'
+import { mapCustomer, mapCustomerNoteRow, mapLocation, mapContact } from './mapCustomer'
 import type { ApiCustomer, ApiLocation } from '@/types/customer'
 
 describe('mapCustomer · phase (KLANT-FASE-1)', () => {
@@ -202,5 +202,14 @@ describe('mapLocation · address_line_2 (LANE-I1b)', () => {
   it('defaults addressLine2 to empty string when absent', () => {
     const l = mapLocation({ id: 'loc-1', name: 'Main' } as ApiLocation)
     expect(l.addressLine2).toBe('')
+  })
+})
+
+// RETENTION-CONSENT-BLANK-1 (Danny 08-09 B): the contact carries the server-derived retention
+// deadline next to its consent facts; absent = null so the card renders no "bewaren tot" line.
+describe('mapContact · retention_expires_at', () => {
+  it('maps the ISO deadline and defaults to null', () => {
+    expect(mapContact({ id: 'c1', retention_expires_at: '2028-09-08T00:00:00Z' }).retentionExpiresAt).toBe('2028-09-08T00:00:00Z')
+    expect(mapContact({ id: 'c2' }).retentionExpiresAt).toBeNull()
   })
 })

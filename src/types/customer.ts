@@ -85,6 +85,8 @@ export interface Contact {
   retentionConsent?: boolean
   retentionConsentAt?: string | null
   retentionWarnedAt?: string | null
+  // RETENTION-CONSENT-BLANK-1 (Danny 08-09 B): the server-derived retention deadline (ISO) or null.
+  retentionExpiresAt?: string | null
 }
 
 /** A department nested under a location (flat UI shape). SUB-STATUS-1: lifecycle status. */
@@ -380,6 +382,8 @@ export interface ApiContact {
   retention_consent?: boolean | null
   retention_consent_at?: string | null
   retention_warned_at?: string | null
+  // RETENTION-CONSENT-BLANK-1: derived deadline from CustomerContactResource (lands with the catalogue bundle).
+  retention_expires_at?: string | null
   [k: string]: unknown
 }
 

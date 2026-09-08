@@ -164,6 +164,8 @@ export function mapContact(p: ApiContact = {}): Contact {
     retentionConsent: p.retention_consent ?? undefined,
     retentionConsentAt: p.retention_consent_at ?? null,
     retentionWarnedAt: p.retention_warned_at ?? null,
+    // RETENTION-CONSENT-BLANK-1: the server-derived deadline; null = no row on the card.
+    retentionExpiresAt: p.retention_expires_at ?? null,
   }
 }
 

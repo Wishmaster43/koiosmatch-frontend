@@ -387,7 +387,8 @@ export default function ContactDetail({ contact, locations, departments, statuse
           <RetentionConsentBlock
             optIn={contact.retentionConsent ?? false}
             consentAt={contact.retentionConsentAt ?? null}
-            expiresAt={null}
+            // RETENTION-CONSENT-BLANK-1 (Danny 08-09 B): the derived deadline renders the "bewaren tot" line; null = no line.
+            expiresAt={contact.retentionExpiresAt ?? null}
             onToggle={val => onSave(contact.id as Id, { retentionConsent: val })}
             namespace="customers"
             viewPermission="customers.update"
