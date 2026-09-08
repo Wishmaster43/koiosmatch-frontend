@@ -192,6 +192,12 @@
     "agentPaused": "Recruiter takes over",
     "windowClosesIn": "Window closes in {{time}}",
     "countdownHours": "{{hours}} h {{minutes}} min",
-    "countdownMinutes": "{{minutes}} min"
+    "countdownMinutes": "{{minutes}} min",
+    "pauseAgent": "Pause AI agent",
+    "resumeAgent": "Resume AI agent",
+    "pauseConfirmTitle": "Pause the AI agent?",
+    "pauseConfirm": "You take over this conversation. The AI agent sends no more messages until you resume it.",
+    "pauseConfirmAction": "Pause",
+    "agentControlFailed": "Could not change the AI agent."
   }
 }

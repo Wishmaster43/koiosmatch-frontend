@@ -13,6 +13,10 @@ import type { WaConversationRow } from './hooks/useConversations'
 
 const mockConversations = vi.fn()
 vi.mock('./hooks/useConversations', () => ({ useConversations: (filters: unknown) => mockConversations(filters) }))
+// CMFE-MEET-1: the pause/resume control POSTs through the api client; the list refetch is the hook's own.
+const { postMock } = vi.hoisted(() => ({ postMock: vi.fn() }))
+vi.mock('@/lib/api', () => ({ default: { get: vi.fn(), post: postMock }, unwrap: (r: { data: unknown }) => r.data }))
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
 const mockThread = vi.fn()
 vi.mock('./hooks/useConversationThread', () => ({ useConversationThread: (id: string | null) => mockThread(id) }))
@@ -109,5 +113,47 @@ describe('ConversationsTab', () => {
     const btn = screen.getByRole('button', { name: /oudere berichten|load older/i })
     await userEvent.click(btn)
     expect(loadOlder).toHaveBeenCalled()
+  })
+})
+
+/**
+ * CMFE-MEET-1 (BE 0f459730) — recruiter takeover of the live AI interview from the
+ * conversation drawer: the control follows agent_session_status, pause asks first and
+ * POSTs the exact route, resume POSTs directly; a landed write refetches the list.
+ */
+describe('ConversationsTab · agent session pause/resume (CMFE-MEET-1)', () => {
+  it('an active agent thread offers pause; confirming POSTs the pause route and refetches the list', async () => {
+    const refetch = vi.fn()
+    mockConversations.mockReturnValue({ data: [row({ agent_session_status: 'active' })], isLoading: false, isError: false, refetch })
+    mockThread.mockReturnValue(noThread)
+    postMock.mockResolvedValue({ data: {} })
+    render(<ConversationsTab />)
+    await userEvent.click(screen.getByText('Jane Doe'))
+    await userEvent.click(screen.getByRole('button', { name: /AI-agent pauzeren/i }))
+    expect(postMock).not.toHaveBeenCalled()
+    await userEvent.click(screen.getByRole('button', { name: /^Pauzeren$/ }))
+    expect(postMock).toHaveBeenCalledWith('/conversations/conv-1/agent-session/pause')
+    expect(refetch).toHaveBeenCalledTimes(1)
+    expect(screen.queryByRole('button', { name: /^Pauzeren$/ })).not.toBeInTheDocument()
+  })
+
+  it('a paused thread offers resume, which POSTs the resume route without a dialog', async () => {
+    mockConversations.mockReturnValue({ data: [row({ agent_session_status: 'paused' })], isLoading: false, isError: false, refetch: vi.fn() })
+    mockThread.mockReturnValue(noThread)
+    postMock.mockResolvedValue({ data: {} })
+    render(<ConversationsTab />)
+    await userEvent.click(screen.getByText('Jane Doe'))
+    expect(screen.queryByRole('button', { name: /AI-agent pauzeren/i })).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: /AI-agent hervatten/i }))
+    expect(postMock).toHaveBeenCalledWith('/conversations/conv-1/agent-session/resume')
+  })
+
+  it('a thread without an agent session shows neither control', async () => {
+    mockConversations.mockReturnValue({ data: [row()], isLoading: false, isError: false, refetch: vi.fn() })
+    mockThread.mockReturnValue(noThread)
+    render(<ConversationsTab />)
+    await userEvent.click(screen.getByText('Jane Doe'))
+    expect(screen.queryByRole('button', { name: /AI-agent (pauzeren|hervatten)/i })).not.toBeInTheDocument()
+    expect(postMock).not.toHaveBeenCalled()
   })
 })

@@ -8,9 +8,9 @@
  * composer already lives (§0 no fake affordances: a control here would either
  * duplicate that flow or silently do nothing).
  */
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronUp, MessageCircle, X } from 'lucide-react'
+import { ChevronUp, MessageCircle, Pause, Play, X } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useNavigation } from '@/context/NavigationContext'
 import DataTable from '@/components/ui/DataTable'
@@ -21,6 +21,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import EntityLink from '@/components/ui/EntityLink'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { Caption, BodyText, SectionTitle } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import { CHANNEL_COLORS } from '@/components/drawer/channelColors'
@@ -28,6 +29,7 @@ import api, { unwrap } from '@/lib/api'
 import { useConversations } from './hooks/useConversations'
 import type { WaConversationRow } from './hooks/useConversations'
 import { useConversationThread } from './hooks/useConversationThread'
+import { useAgentSessionControl } from './hooks/useAgentSessionControl'
 import { buildConversationFilterGroups } from './data/conversationFilterGroups'
 import { WindowCountdownChip, AgentBadgeChip } from './components'
 
@@ -56,7 +58,12 @@ export default function ConversationsTab({ openConversationId }: { openConversat
   }, [search])
   const [selectedId, setSelectedId] = useState<string | null>(openConversationId ?? null)
 
-  const { data: rows = [], isLoading, isError } = useConversations({ escalated, unanswered, active, search: debouncedSearch || undefined })
+  const { data: rows = [], isLoading, isError, refetch } = useConversations({ escalated, unanswered, active, search: debouncedSearch || undefined })
+  // CMFE-MEET-1: recruiter takeover of the live AI interview; a landed pause/resume
+  // re-fetches the list so the agent chip in the row and the drawer header flips.
+  const reloadRows = useCallback(() => { void refetch?.() }, [refetch])
+  const agentControl = useAgentSessionControl(reloadRows)
+  const [confirmPause, setConfirmPause] = useState(false)
   const thread = useConversationThread(selectedId)
 
   // K-193: only this tab's dimensions register while it is active — never a toolbar control (§3A).
@@ -164,6 +171,19 @@ export default function ConversationsTab({ openConversationId }: { openConversat
                 <SoftChip label={t(`candidates:conversations.channel.${selectedRow.primary_channel}`, { defaultValue: selectedRow.channel_label ?? '' })}
                   color={CHANNEL_COLORS[selectedRow.primary_channel]} />
               )}
+              {/* CMFE-MEET-1: the agent state sits next to its control. Pause hands the thread
+                  to the recruiter (confirmed first), resume gives it back to the agent. */}
+              <AgentBadgeChip agentSessionStatus={selectedRow.agent_session_status} />
+              {selectedRow.agent_session_status === 'active' && (
+                <Button size="sm" variant="secondary" onClick={() => setConfirmPause(true)} disabled={agentControl.busy != null}>
+                  <Pause size={12} /> {t('conversations.pauseAgent')}
+                </Button>
+              )}
+              {selectedRow.agent_session_status === 'paused' && (
+                <Button size="sm" variant="secondary" onClick={() => { void agentControl.run(selectedRow.id, 'resume') }} disabled={agentControl.busy != null}>
+                  {agentControl.busy === 'resume' ? <Spinner size={12} /> : <Play size={12} />} {t('conversations.resumeAgent')}
+                </Button>
+              )}
               {/* data-drawer-close: the shared EntityDrawer/Escape-key contract (§ SWEEP-ESC), mirrors EntityHeader's own close button. */}
               <Button variant="ghost" iconOnly onClick={() => setSelectedId(null)} aria-label={t('common:close')} data-drawer-close>
                 <X size={14} />
@@ -212,6 +232,10 @@ export default function ConversationsTab({ openConversationId }: { openConversat
           }]}
         />
       )}
+      {/* Pause is a takeover, so it asks first; resume needs no dialog. */}
+      <ConfirmDialog open={confirmPause} title={t('conversations.pauseConfirmTitle')} message={t('conversations.pauseConfirm')}
+        confirmLabel={t('conversations.pauseConfirmAction')} onCancel={() => setConfirmPause(false)}
+        onConfirm={async () => { if (selectedRow) await agentControl.run(selectedRow.id, 'pause'); setConfirmPause(false) }} />
     </div>
   )
 }

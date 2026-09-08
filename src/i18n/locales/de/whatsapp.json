@@ -192,6 +192,12 @@
     "agentPaused": "Recruiter übernimmt",
     "windowClosesIn": "Fenster schließt in {{time}}",
     "countdownHours": "{{hours}} Std. {{minutes}} Min.",
-    "countdownMinutes": "{{minutes}} Min."
+    "countdownMinutes": "{{minutes}} Min.",
+    "pauseAgent": "KI-Agent pausieren",
+    "resumeAgent": "KI-Agent fortsetzen",
+    "pauseConfirmTitle": "KI-Agent pausieren?",
+    "pauseConfirm": "Du übernimmst dieses Gespräch. Der KI-Agent sendet keine Nachrichten mehr, bis du ihn fortsetzt.",
+    "pauseConfirmAction": "Pausieren",
+    "agentControlFailed": "Der KI-Agent konnte nicht geändert werden."
   }
 }

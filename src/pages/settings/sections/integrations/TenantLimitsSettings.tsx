@@ -14,10 +14,10 @@ import { Caption } from '@/components/ui/typography'
 import { getTenantLimits, type TenantLimitRow } from './limitsApi'
 import type { BillingTierRef } from '@/types/billingTiers'
 
-// The tier a meter row is priced on. Two contract shapes (CMBE 08-09 12:00): the flat
-// tier block itself (`prices.tier.key`, the intended shape, lands with CMFE-MEET-1) or the
-// whole tier meter (measured on demo before that fix) — then the chosen tier, else the
-// package baseline. The meter fallback stays one release as a safety net.
+// The tier a meter row is priced on. Two contract shapes (CMBE 08-09): the flat tier
+// block itself (`prices.tier.key` or null — the intended shape, landed with CMFE-MEET-1
+// 0f459730) or the whole tier meter (measured on demo before that fix) — then the chosen
+// tier, else the package baseline. The meter fallback stays one release as a safety net.
 const tierOf = (row: TenantLimitRow): BillingTierRef | null => {
   const raw = row.prices?.tier
   if (!raw) return null

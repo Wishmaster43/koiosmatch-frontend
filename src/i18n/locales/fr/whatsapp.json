@@ -192,6 +192,12 @@
     "agentPaused": "Le recruteur prend le relais",
     "windowClosesIn": "La fenêtre se ferme dans {{time}}",
     "countdownHours": "{{hours}} h {{minutes}} min",
-    "countdownMinutes": "{{minutes}} min"
+    "countdownMinutes": "{{minutes}} min",
+    "pauseAgent": "Mettre l'agent IA en pause",
+    "resumeAgent": "Reprendre l'agent IA",
+    "pauseConfirmTitle": "Mettre l'agent IA en pause ?",
+    "pauseConfirm": "Vous reprenez cette conversation. L'agent IA n'envoie plus de messages tant que vous ne le relancez pas.",
+    "pauseConfirmAction": "Mettre en pause",
+    "agentControlFailed": "Impossible de modifier l'agent IA."
   }
 }

@@ -192,6 +192,12 @@
     "agentPaused": "El reclutador se hace cargo",
     "windowClosesIn": "La ventana se cierra en {{time}}",
     "countdownHours": "{{hours}} h {{minutes}} min",
-    "countdownMinutes": "{{minutes}} min"
+    "countdownMinutes": "{{minutes}} min",
+    "pauseAgent": "Pausar agente de IA",
+    "resumeAgent": "Reanudar agente de IA",
+    "pauseConfirmTitle": "¿Pausar el agente de IA?",
+    "pauseConfirm": "Tú asumes esta conversación. El agente de IA no envía más mensajes hasta que lo reanudes.",
+    "pauseConfirmAction": "Pausar",
+    "agentControlFailed": "No se pudo cambiar el agente de IA."
   }
 }

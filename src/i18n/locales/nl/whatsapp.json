@@ -192,6 +192,12 @@
     "agentPaused": "Recruiter neemt over",
     "windowClosesIn": "Venster sluit over {{time}}",
     "countdownHours": "{{hours}} u {{minutes}} min",
-    "countdownMinutes": "{{minutes}} min"
+    "countdownMinutes": "{{minutes}} min",
+    "pauseAgent": "AI-agent pauzeren",
+    "resumeAgent": "AI-agent hervatten",
+    "pauseConfirmTitle": "AI-agent pauzeren?",
+    "pauseConfirm": "Jij neemt dit gesprek over. De AI-agent stuurt geen berichten meer tot je hem hervat.",
+    "pauseConfirmAction": "Pauzeren",
+    "agentControlFailed": "Kon de AI-agent niet aanpassen."
   }
 }

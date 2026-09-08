@@ -192,6 +192,12 @@
     "agentPaused": "Il recruiter prende il controllo",
     "windowClosesIn": "La finestra si chiude tra {{time}}",
     "countdownHours": "{{hours}} h {{minutes}} min",
-    "countdownMinutes": "{{minutes}} min"
+    "countdownMinutes": "{{minutes}} min",
+    "pauseAgent": "Metti in pausa l'agente IA",
+    "resumeAgent": "Riprendi l'agente IA",
+    "pauseConfirmTitle": "Mettere in pausa l'agente IA?",
+    "pauseConfirm": "Prendi tu in mano questa conversazione. L'agente IA non invia più messaggi finché non lo riprendi.",
+    "pauseConfirmAction": "Metti in pausa",
+    "agentControlFailed": "Impossibile modificare l'agente IA."
   }
 }

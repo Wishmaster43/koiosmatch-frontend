@@ -192,6 +192,12 @@
     "agentPaused": "Recrutador assume",
     "windowClosesIn": "Janela fecha em {{time}}",
     "countdownHours": "{{hours}} h {{minutes}} min",
-    "countdownMinutes": "{{minutes}} min"
+    "countdownMinutes": "{{minutes}} min",
+    "pauseAgent": "Pausar agente de IA",
+    "resumeAgent": "Retomar agente de IA",
+    "pauseConfirmTitle": "Pausar o agente de IA?",
+    "pauseConfirm": "Tu assumes esta conversa. O agente de IA não envia mais mensagens até o retomares.",
+    "pauseConfirmAction": "Pausar",
+    "agentControlFailed": "Não foi possível alterar o agente de IA."
   }
 }
