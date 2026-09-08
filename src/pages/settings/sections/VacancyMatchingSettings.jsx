@@ -193,7 +193,7 @@ export default function VacancyMatchingSettings() {
               { value: 'owner', label: t('matching.leads.modeOwner') },
               { value: 'team', label: t('matching.leads.modeTeam') },
             ]}
-            placeholder={t('common.select')}
+            placeholder={t('common:select')}
           />
         </div>
 
@@ -207,7 +207,7 @@ export default function VacancyMatchingSettings() {
               value={leadsNotifyRole}
               onChange={setNotifyRole}
               options={rolesData.map(r => ({ value: r.name, label: r.label }))}
-              placeholder={t('common.select')}
+              placeholder={t('common:select')}
             />
           </div>
         )}

@@ -157,7 +157,7 @@
     "noDevices": "Aucun numéro WhatsApp Web lié.",
     "statValue": "{{count}} en attente",
     "estDrain": "± {{hours}} h pour vider",
-"rateAndDrain": "{{rate}} par heure · ± {{hours}} h pour se vider",
+    "rateAndDrain": "{{rate}} par heure · ± {{hours}} h pour se vider",
     "rateLimit": "{{rate}} par heure",
     "loading": "Chargement de la file d'attente…",
     "error": "Impossible de charger la file d'attente.",
@@ -186,6 +186,12 @@
     "searchPlaceholder": "Rechercher par nom ou numéro…",
     "filterEscalated": "Escaladé",
     "filterUnanswered": "Sans réponse",
-    "filterActive": "Actif"
+    "filterActive": "Actif",
+    "windowClosed": "Fenêtre fermée",
+    "agentActive": "Agent IA actif",
+    "agentPaused": "Le recruteur prend le relais",
+    "windowClosesIn": "La fenêtre se ferme dans {{time}}",
+    "countdownHours": "{{hours}} h {{minutes}} min",
+    "countdownMinutes": "{{minutes}} min"
   }
 }

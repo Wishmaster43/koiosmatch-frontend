@@ -186,6 +186,12 @@
     "searchPlaceholder": "Cerca per nome o numero…",
     "filterEscalated": "Escalato",
     "filterUnanswered": "Senza risposta",
-    "filterActive": "Attivo"
+    "filterActive": "Attivo",
+    "windowClosed": "Finestra chiusa",
+    "agentActive": "Agente IA attivo",
+    "agentPaused": "Il recruiter prende il controllo",
+    "windowClosesIn": "La finestra si chiude tra {{time}}",
+    "countdownHours": "{{hours}} h {{minutes}} min",
+    "countdownMinutes": "{{minutes}} min"
   }
 }

@@ -157,7 +157,7 @@
     "noDevices": "No WhatsApp Web numbers linked.",
     "statValue": "{{count}} queued",
     "estDrain": "± {{hours}}h to drain",
-"rateAndDrain": "{{rate}} per hour · ± {{hours}}h to drain",
+    "rateAndDrain": "{{rate}} per hour · ± {{hours}}h to drain",
     "rateLimit": "{{rate}} per hour",
     "loading": "Loading queue…",
     "error": "Could not load the queue.",
@@ -186,6 +186,12 @@
     "searchPlaceholder": "Search by name or number…",
     "filterEscalated": "Escalated",
     "filterUnanswered": "Unanswered",
-    "filterActive": "Active"
+    "filterActive": "Active",
+    "windowClosed": "Window closed",
+    "agentActive": "AI agent active",
+    "agentPaused": "Recruiter takes over",
+    "windowClosesIn": "Window closes in {{time}}",
+    "countdownHours": "{{hours}} h {{minutes}} min",
+    "countdownMinutes": "{{minutes}} min"
   }
 }

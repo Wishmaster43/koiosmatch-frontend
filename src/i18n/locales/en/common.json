@@ -321,7 +321,8 @@
         "next_step": "Next step"
       },
       "timeout": "The advice did not arrive within a minute. Refresh the page or try again later."
-    }
+    },
+    "aboutLink": "About Koios AI"
   },
   "actionRules": {
     "title": "Action check",
@@ -358,7 +359,8 @@
     "nextAction": {
       "auto_processing": "Will be processed automatically.",
       "check_followup_task": "Check the follow-up task that was created."
-    }
+    },
+    "askKoios": "Ask Koios"
   },
   "activeFilters": "Active filters",
   "clearAll": "Clear all",

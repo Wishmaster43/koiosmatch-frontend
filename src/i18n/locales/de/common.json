@@ -321,7 +321,8 @@
         "next_step": "Nächster Schritt"
       },
       "timeout": "Die Empfehlung ist nicht innerhalb einer Minute eingetroffen. Aktualisieren Sie die Seite oder versuchen Sie es später erneut."
-    }
+    },
+    "aboutLink": "Über Koios KI"
   },
   "actionRules": {
     "title": "Aktionsprüfung",
@@ -358,7 +359,8 @@
     "nextAction": {
       "auto_processing": "Wird automatisch verarbeitet.",
       "check_followup_task": "Prüfen Sie die erstellte Folgeaufgabe."
-    }
+    },
+    "askKoios": "Koios fragen"
   },
   "activeFilters": "Aktive Filter",
   "clearAll": "Alle löschen",

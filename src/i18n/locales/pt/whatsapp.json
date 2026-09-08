@@ -186,6 +186,12 @@
     "searchPlaceholder": "Pesquisar por nome ou número…",
     "filterEscalated": "Escalado",
     "filterUnanswered": "Sem resposta",
-    "filterActive": "Ativa"
+    "filterActive": "Ativa",
+    "windowClosed": "Janela fechada",
+    "agentActive": "Agente de IA ativo",
+    "agentPaused": "Recrutador assume",
+    "windowClosesIn": "Janela fecha em {{time}}",
+    "countdownHours": "{{hours}} h {{minutes}} min",
+    "countdownMinutes": "{{minutes}} min"
   }
 }

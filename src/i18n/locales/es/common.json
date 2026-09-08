@@ -321,7 +321,8 @@
         "next_step": "Próximo paso"
       },
       "timeout": "El consejo no llegó en un minuto. Actualiza la página o inténtalo de nuevo más tarde."
-    }
+    },
+    "aboutLink": "Acerca de Koios IA"
   },
   "actionRules": {
     "title": "Verificación de acción",
@@ -358,7 +359,8 @@
     "nextAction": {
       "auto_processing": "Se procesará automáticamente.",
       "check_followup_task": "Revise la tarea de seguimiento creada."
-    }
+    },
+    "askKoios": "Preguntar a Koios"
   },
   "activeFilters": "Filtros activos",
   "clearAll": "Borrar todo",

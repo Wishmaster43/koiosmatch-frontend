@@ -157,7 +157,7 @@
     "noDevices": "Geen WhatsApp Web-nummers gekoppeld.",
     "statValue": "{{count}} in wachtrij",
     "estDrain": "± {{hours}} uur om leeg te lopen",
-"rateAndDrain": "{{rate}} per uur · ± {{hours}} uur om leeg te lopen",
+    "rateAndDrain": "{{rate}} per uur · ± {{hours}} uur om leeg te lopen",
     "rateLimit": "{{rate}} per uur",
     "loading": "Wachtrij laden…",
     "error": "Kon de wachtrij niet laden.",
@@ -186,6 +186,12 @@
     "searchPlaceholder": "Zoek op naam of nummer…",
     "filterEscalated": "Geëscaleerd",
     "filterUnanswered": "Onbeantwoord",
-    "filterActive": "Actief"
+    "filterActive": "Actief",
+    "windowClosed": "Venster gesloten",
+    "agentActive": "AI-agent actief",
+    "agentPaused": "Recruiter neemt over",
+    "windowClosesIn": "Venster sluit over {{time}}",
+    "countdownHours": "{{hours}} u {{minutes}} min",
+    "countdownMinutes": "{{minutes}} min"
   }
 }

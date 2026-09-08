@@ -157,7 +157,7 @@
     "noDevices": "No hay números de WhatsApp Web vinculados.",
     "statValue": "{{count}} en cola",
     "estDrain": "± {{hours}} h para vaciarse",
-"rateAndDrain": "{{rate}} por hora · ± {{hours}} h para vaciarse",
+    "rateAndDrain": "{{rate}} por hora · ± {{hours}} h para vaciarse",
     "rateLimit": "{{rate}} por hora",
     "loading": "Cargando cola…",
     "error": "No se pudo cargar la cola.",
@@ -186,6 +186,12 @@
     "searchPlaceholder": "Buscar por nombre o número…",
     "filterEscalated": "Escalado",
     "filterUnanswered": "Sin responder",
-    "filterActive": "Activo"
+    "filterActive": "Activo",
+    "windowClosed": "Ventana cerrada",
+    "agentActive": "Agente de IA activo",
+    "agentPaused": "El reclutador se hace cargo",
+    "windowClosesIn": "La ventana se cierra en {{time}}",
+    "countdownHours": "{{hours}} h {{minutes}} min",
+    "countdownMinutes": "{{minutes}} min"
   }
 }

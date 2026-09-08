@@ -321,7 +321,8 @@
         "next_step": "Volgende stap"
       },
       "timeout": "Het advies is niet binnen een minuut binnengekomen. Vernieuw de pagina of probeer het later opnieuw."
-    }
+    },
+    "aboutLink": "Over Koios AI"
   },
   "actionRules": {
     "title": "Actiecontrole",
@@ -358,7 +359,8 @@
     "nextAction": {
       "auto_processing": "Wordt automatisch verwerkt.",
       "check_followup_task": "Bekijk de aangemaakte vervolgtaak."
-    }
+    },
+    "askKoios": "Vraag Koios"
   },
   "activeFilters": "Actieve filters",
   "clearAll": "Alles wissen",

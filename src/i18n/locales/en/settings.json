@@ -258,7 +258,10 @@
     "shiftmanager": "Shiftmanager",
     "helloflex": "HelloFlex",
     "werkzoeken": "Werkzoeken",
-    "interview": "AI interview"
+    "interview": "AI interview",
+    "ai_transparency": "AI Transparency",
+    "limits": "Usage & limits",
+    "admin_limits": "Platform limits"
   },
   "kpis": {
     "title": "KPI settings",
@@ -1144,10 +1147,55 @@
       "candidate_phase_stale": {
         "title": "Candidate phase stale",
         "desc": "A candidate's lifecycle phase has not changed in too long."
+      },
+      "customer_match_ending": {
+        "title": "Match ending",
+        "desc": "A match is about to end soon."
+      },
+      "document_expiring": {
+        "title": "Document expiring",
+        "desc": "A document is about to expire soon."
+      },
+      "certification_expiring": {
+        "title": "Certification expiring",
+        "desc": "A certification is about to expire soon."
+      },
+      "match_expiring": {
+        "title": "Match expiring",
+        "desc": "A match is about to expire soon."
+      },
+      "missing_cv": {
+        "title": "No CV",
+        "desc": "A candidate has not uploaded a CV."
+      },
+      "candidate_availability_upcoming": {
+        "title": "Candidate becoming available",
+        "desc": "A candidate is becoming available soon."
+      },
+      "candidate_availability_overdue": {
+        "title": "Candidate availability overdue",
+        "desc": "A candidate should already be available."
+      },
+      "candidate_leave_ending_soon": {
+        "title": "Leave ending soon",
+        "desc": "A candidate's leave is ending soon."
+      },
+      "candidate_leave_overdue": {
+        "title": "Leave already ended",
+        "desc": "A candidate's leave has already ended."
+      },
+      "candidate_unavailable_ending_soon": {
+        "title": "Candidate becoming deployable",
+        "desc": "A candidate is becoming deployable soon."
+      },
+      "candidate_unavailable_overdue": {
+        "title": "Candidate unavailability period overdue",
+        "desc": "A candidate's unavailability period has already ended."
       }
     },
     "missingTargetHint": "Choose a person or role to escalate to, or clear 'Escalate after' to turn it off.",
-    "daysUnit": "days"
+    "daysUnit": "days",
+    "catalogUnavailable": "The signal catalogue could not be loaded. Only the four default signals are shown."
   },
   "billing": {
     "usage": {
@@ -1308,7 +1356,8 @@
         "empty": "No workflow usage yet in this period.",
         "loadError": "Loading usage per workflow failed.",
         "unavailable": "You do not have permission to view this.",
-        "rowHint": "Open this workflow"
+        "rowHint": "Open this workflow",
+        "colAmount": "Amount"
       },
       "perUser": {
         "title": "Usage per user",
@@ -2469,11 +2518,7 @@
     "title": "Shiftmanager KPI settings",
     "subtitle": "Targets for the Shiftmanager dashboard",
     "fields": {
-      "sm_occupancy_target": {
-        "label": "Occupancy target",
-        "description": "Target occupancy rate",
-        "unit": "%"
-      },
+      "sm_occupancy_target": {},
       "sm_fill_rate_target": {
         "label": "Fill-rate target",
         "description": "Target percentage of filled shifts",
@@ -2914,7 +2959,8 @@
       "location": "Branch (own)"
     },
     "nextValue": "Next: {{n}}",
-    "startLocked": "Start value is locked once the first number has been allocated."
+    "startLocked": "Start value is locked once the first number has been allocated.",
+    "prefixInvalid": "Letters and digits only (max. 10 characters)"
   },
   "vacancyDisplay": {
     "title": "Table display",
@@ -4014,6 +4060,77 @@
     "flavorLabel": {
       "fast": "Fast",
       "smart": "Smart"
+    }
+  },
+  "aiAct": {
+    "title": "AI Transparency",
+    "subtitle": "How Koios AI works: principles and settings",
+    "principles": {
+      "wizard_is_default": {
+        "title": "Wizard is the default",
+        "body": "Human oversight is always on. Koios suggests, you decide before anything happens."
+      },
+      "no_automatic_selection_decisions": {
+        "title": "No automatic selection decisions",
+        "body": "Rejecting, hiring and shortlisting always require human approval, even in automatic mode. GDPR Article 22 right."
+      },
+      "every_action_is_a_logged_workflow": {
+        "title": "Every action is a logged workflow",
+        "body": "Everything Koios does is fully recorded. You can always see what, when and why."
+      },
+      "ai_output_is_labeled": {
+        "title": "AI output is clearly labeled",
+        "body": "When something is AI-generated, you see it immediately. Never hidden."
+      },
+      "toggles_never_disable_obligations": {
+        "title": "Settings can enable or disable features, not obligations",
+        "body": "Disabling a feature doesn't remove oversight or stop logging. Those are permanent."
+      }
+    },
+    "humanOversight": "Human oversight of selection decisions",
+    "humanOversightValue": "Always",
+    "tenantPosture": {
+      "title": "Account settings",
+      "defaultMode": {
+        "label": "Default mode",
+        "wizard": "Wizard (confirm each item)",
+        "auto": "Automatic (execute directly)"
+      },
+      "autoMessages": {
+        "label": "Automatic messages"
+      }
+    },
+    "features": {
+      "title": "Koios AI features",
+      "koios_chat": "Koios AI Chat",
+      "ai_agent_interviews": "AI Interview",
+      "ai_workflow_steps": "AI in workflows",
+      "active": "Active",
+      "inactive": "Inactive"
+    }
+  },
+  "limits": {
+    "no_limit": "no limit",
+    "cap_reached": "limit reached",
+    "signal_not_blocked": "signal, not blocked",
+    "usage_and_limits": "Usage & limits",
+    "subtitle": "How many calls this environment has made and which limits apply",
+    "empty": "No usage recorded yet",
+    "tier": {
+      "included": "Tier {{tier}}: {{n}} included per month",
+      "price": "{{amount}} per month"
+    },
+    "tenants_at_limit": "Tenants at limit",
+    "tenantsAtLimitEmpty": "No tenants near a limit",
+    "skipped_tenants_notice_one": "{{count}} tenant could not be checked.",
+    "skipped_tenants_notice_other": "{{count}} tenants could not be checked.",
+    "platformTitle": "Platform limits",
+    "platformSubtitle": "Usage per connector at platform level and tenants nearing their limit",
+    "window": {
+      "hour": "per hour",
+      "day": "per day",
+      "week": "per week",
+      "month": "per month"
     }
   }
 }

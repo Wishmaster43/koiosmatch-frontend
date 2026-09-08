@@ -157,7 +157,7 @@
     "noDevices": "Keine WhatsApp Web-Nummern verknüpft.",
     "statValue": "{{count}} in Warteschlange",
     "estDrain": "± {{hours}} Std. bis leer",
-"rateAndDrain": "{{rate}} pro Stunde · ± {{hours}} Std. bis leer",
+    "rateAndDrain": "{{rate}} pro Stunde · ± {{hours}} Std. bis leer",
     "rateLimit": "{{rate}} pro Stunde",
     "loading": "Warteschlange wird geladen…",
     "error": "Warteschlange konnte nicht geladen werden.",
@@ -186,6 +186,12 @@
     "searchPlaceholder": "Nach Name oder Nummer suchen…",
     "filterEscalated": "Eskaliert",
     "filterUnanswered": "Unbeantwortet",
-    "filterActive": "Aktiv"
+    "filterActive": "Aktiv",
+    "windowClosed": "Fenster geschlossen",
+    "agentActive": "KI-Agent aktiv",
+    "agentPaused": "Recruiter übernimmt",
+    "windowClosesIn": "Fenster schließt in {{time}}",
+    "countdownHours": "{{hours}} Std. {{minutes}} Min.",
+    "countdownMinutes": "{{minutes}} Min."
   }
 }

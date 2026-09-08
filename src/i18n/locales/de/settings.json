@@ -258,7 +258,10 @@
     "shiftmanager": "Shiftmanager",
     "helloflex": "HelloFlex",
     "werkzoeken": "Werkzoeken",
-    "interview": "KI-Interview"
+    "interview": "KI-Interview",
+    "ai_transparency": "KI-Transparenz",
+    "limits": "Verbrauch & Limits",
+    "admin_limits": "Plattform-Limits"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -883,10 +886,55 @@
       "candidate_phase_stale": {
         "title": "Kandidatenphase stagniert",
         "desc": "Die Lebenszyklusphase eines Kandidaten hat sich zu lange nicht geändert."
+      },
+      "customer_match_ending": {
+        "title": "Match endet",
+        "desc": "Ein Match endet bald."
+      },
+      "document_expiring": {
+        "title": "Dokument verfällt",
+        "desc": "Ein Dokument verfällt bald."
+      },
+      "certification_expiring": {
+        "title": "Zertifikat verfällt",
+        "desc": "Ein Zertifikat verfällt bald."
+      },
+      "match_expiring": {
+        "title": "Match verfällt",
+        "desc": "Ein Match verfällt bald."
+      },
+      "missing_cv": {
+        "title": "Kein Lebenslauf",
+        "desc": "Ein Kandidat hat keinen Lebenslauf hochgeladen."
+      },
+      "candidate_availability_upcoming": {
+        "title": "Kandidat bald verfügbar",
+        "desc": "Ein Kandidat wird bald verfügbar."
+      },
+      "candidate_availability_overdue": {
+        "title": "Verfügbarkeit des Kandidaten überfällig",
+        "desc": "Ein Kandidat sollte bereits verfügbar sein."
+      },
+      "candidate_leave_ending_soon": {
+        "title": "Urlaub endet bald",
+        "desc": "Der Urlaub eines Kandidaten endet bald."
+      },
+      "candidate_leave_overdue": {
+        "title": "Urlaub bereits beendet",
+        "desc": "Der Urlaub eines Kandidaten hat bereits geendet."
+      },
+      "candidate_unavailable_ending_soon": {
+        "title": "Kandidat bald einsatzbereit",
+        "desc": "Ein Kandidat wird bald wieder einsatzbereit."
+      },
+      "candidate_unavailable_overdue": {
+        "title": "Nichtverfügbarkeitszeitraum des Kandidaten überfällig",
+        "desc": "Der Nichtverfügbarkeitszeitraum eines Kandidaten ist bereits abgelaufen."
       }
     },
     "missingTargetHint": "Wählen Sie eine Person oder Rolle zum Eskalieren, oder leeren Sie \"Eskalieren nach\", um es auszuschalten.",
-    "daysUnit": "Tage"
+    "daysUnit": "Tage",
+    "catalogUnavailable": "Der Signalkatalog konnte nicht geladen werden. Nur die vier Standardsignale werden angezeigt."
   },
   "billing": {
     "usage": {
@@ -1047,7 +1095,8 @@
         "empty": "Noch kein Workflow-Verbrauch in diesem Zeitraum.",
         "loadError": "Laden des Verbrauchs nach Workflow fehlgeschlagen.",
         "unavailable": "Du hast keine Berechtigung, dies anzuzeigen.",
-        "rowHint": "Diesen Workflow öffnen"
+        "rowHint": "Diesen Workflow öffnen",
+        "colAmount": "Betrag"
       },
       "perUser": {
         "title": "Verbrauch nach Benutzer",
@@ -2247,11 +2296,7 @@
     "title": "Shiftmanager-KPI-Einstellungen",
     "subtitle": "Zielwerte für das Shiftmanager-Dashboard",
     "fields": {
-      "sm_occupancy_target": {
-        "label": "Auslastungsziel",
-        "description": "Zielauslastung",
-        "unit": "%"
-      },
+      "sm_occupancy_target": {},
       "sm_fill_rate_target": {
         "label": "Besetzungsquote-Ziel",
         "description": "Zielanteil besetzter Dienste",
@@ -2914,7 +2959,8 @@
       "location": "Niederlassung (eigen)"
     },
     "nextValue": "Nächste: {{n}}",
-    "startLocked": "Der Startwert wird gesperrt, sobald die erste Nummer vergeben ist."
+    "startLocked": "Der Startwert wird gesperrt, sobald die erste Nummer vergeben ist.",
+    "prefixInvalid": "Nur Buchstaben und Ziffern zulässig (max. 10 Zeichen)"
   },
   "vacancyDisplay": {
     "title": "Tabellenansicht",
@@ -4014,6 +4060,77 @@
     "flavorLabel": {
       "fast": "Schnell",
       "smart": "Intelligent"
+    }
+  },
+  "aiAct": {
+    "title": "KI-Transparenz",
+    "subtitle": "So funktioniert Koios KI: Grundsätze und Einstellungen",
+    "principles": {
+      "wizard_is_default": {
+        "title": "Assistent ist Standard",
+        "body": "Menschliche Aufsicht ist immer aktiviert. Koios schlägt vor, Sie entscheiden, bevor etwas passiert."
+      },
+      "no_automatic_selection_decisions": {
+        "title": "Keine automatischen Auswahlentscheidungen",
+        "body": "Ablehnen, Einstellen und Shortlisten erfordern immer menschliche Genehmigung, auch im automatischen Modus. DSGVO Artikel 22."
+      },
+      "every_action_is_a_logged_workflow": {
+        "title": "Jede Aktion wird protokolliert",
+        "body": "Alles, was Koios tut, wird vollständig erfasst. Sie können immer sehen, was, wann und warum."
+      },
+      "ai_output_is_labeled": {
+        "title": "KI-Ausgaben sind gekennzeichnet",
+        "body": "Wenn etwas von KI generiert wurde, sehen Sie das sofort. Niemals versteckt."
+      },
+      "toggles_never_disable_obligations": {
+        "title": "Einstellungen können Features aktivieren oder deaktivieren, nicht Verpflichtungen",
+        "body": "Das Deaktivieren einer Funktion bedeutet nicht, dass die Aufsicht entfernt oder die Protokollierung beendet wird. Diese sind dauerhaft."
+      }
+    },
+    "humanOversight": "Menschliche Aufsicht von Auswahlentscheidungen",
+    "humanOversightValue": "Immer",
+    "tenantPosture": {
+      "title": "Kontoeinstellungen",
+      "defaultMode": {
+        "label": "Standardmodus",
+        "wizard": "Assistent (jedes Element bestätigen)",
+        "auto": "Automatisch (direkt ausführen)"
+      },
+      "autoMessages": {
+        "label": "Automatische Nachrichten"
+      }
+    },
+    "features": {
+      "title": "Koios-KI-Funktionen",
+      "koios_chat": "Koios KI Chat",
+      "ai_agent_interviews": "KI-Interview",
+      "ai_workflow_steps": "KI in Workflows",
+      "active": "Aktiv",
+      "inactive": "Inaktiv"
+    }
+  },
+  "limits": {
+    "no_limit": "kein Limit",
+    "cap_reached": "Limit erreicht",
+    "signal_not_blocked": "Signal, nicht blockiert",
+    "usage_and_limits": "Verbrauch & Limits",
+    "subtitle": "Wie viele Aufrufe diese Umgebung getätigt hat und welche Limits gelten",
+    "empty": "Noch kein Verbrauch registriert",
+    "tier": {
+      "included": "Stufe {{tier}}: {{n}} inbegriffen pro Monat",
+      "price": "{{amount}} pro Monat"
+    },
+    "tenants_at_limit": "Tenants am Limit",
+    "tenantsAtLimitEmpty": "Keine Tenants in der Nähe eines Limits",
+    "skipped_tenants_notice_one": "{{count}} Tenant konnte nicht überprüft werden.",
+    "skipped_tenants_notice_other": "{{count}} Tenants konnten nicht überprüft werden.",
+    "platformTitle": "Plattform-Limits",
+    "platformSubtitle": "Verbrauch pro Konnector auf Plattformebene und Tenants, die ihrem Limit näherkommen",
+    "window": {
+      "hour": "pro Stunde",
+      "day": "pro Tag",
+      "week": "pro Woche",
+      "month": "pro Monat"
     }
   }
 }

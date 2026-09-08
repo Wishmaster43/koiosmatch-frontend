@@ -258,7 +258,10 @@
     "shiftmanager": "Shiftmanager",
     "helloflex": "HelloFlex",
     "werkzoeken": "Werkzoeken",
-    "interview": "AI-interview"
+    "interview": "AI-interview",
+    "ai_transparency": "AI-transparantie",
+    "limits": "Verbruik & limieten",
+    "admin_limits": "Platformlimieten"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -1144,10 +1147,55 @@
       "candidate_phase_stale": {
         "title": "Kandidaatfase stilstand",
         "desc": "De levenscyclusfase van een kandidaat is te lang niet gewijzigd."
+      },
+      "customer_match_ending": {
+        "title": "Match eindigt",
+        "desc": "Een match is bijna klaar en eindigt binnenkort."
+      },
+      "document_expiring": {
+        "title": "Document verloopt",
+        "desc": "Een document is bijna verlopen en vervalt binnenkort."
+      },
+      "certification_expiring": {
+        "title": "Certificaat verloopt",
+        "desc": "Een certificaat is bijna verlopen en vervalt binnenkort."
+      },
+      "match_expiring": {
+        "title": "Match verloopt",
+        "desc": "Een match is bijna verlopen en eindigt binnenkort."
+      },
+      "missing_cv": {
+        "title": "Geen cv",
+        "desc": "Een kandidaat heeft geen cv geüpload."
+      },
+      "candidate_availability_upcoming": {
+        "title": "Kandidaat binnenkort beschikbaar",
+        "desc": "Een kandidaat wordt binnenkort beschikbaar."
+      },
+      "candidate_availability_overdue": {
+        "title": "Kandidaat beschikbaarheid achterhaald",
+        "desc": "Een kandidaat had al beschikbaar moeten zijn."
+      },
+      "candidate_leave_ending_soon": {
+        "title": "Verlof eindigt binnenkort",
+        "desc": "Het verlof van een kandidaat eindigt binnenkort."
+      },
+      "candidate_leave_overdue": {
+        "title": "Verlof is voorbij",
+        "desc": "Het verlof van een kandidaat is al voorbij."
+      },
+      "candidate_unavailable_ending_soon": {
+        "title": "Kandidaat wordt binnenkort inzetbaar",
+        "desc": "Een kandidaat wordt binnenkort weer inzetbaar."
+      },
+      "candidate_unavailable_overdue": {
+        "title": "Kandidaat inzetbaarheidstermijn voorbij",
+        "desc": "De inzetbaarheidstermijn van een kandidaat is al voorbij."
       }
     },
     "missingTargetHint": "Kies een persoon of rol om te escaleren, of laat 'Escaleer na' leeg om uit te zetten.",
-    "daysUnit": "dagen"
+    "daysUnit": "dagen",
+    "catalogUnavailable": "De signaalcatalogus kon niet worden geladen. Alleen de vier standaardsignalen worden getoond."
   },
   "billing": {
     "usage": {
@@ -1308,7 +1356,8 @@
         "empty": "Nog geen workflow-verbruik in deze periode.",
         "loadError": "Verbruik per workflow laden is mislukt.",
         "unavailable": "Je hebt geen rechten om dit te bekijken.",
-        "rowHint": "Open deze workflow"
+        "rowHint": "Open deze workflow",
+        "colAmount": "Bedrag"
       },
       "perUser": {
         "title": "Verbruik per gebruiker",
@@ -2469,11 +2518,7 @@
     "title": "Shiftmanager KPI-instellingen",
     "subtitle": "Streefwaarden voor het Shiftmanager-dashboard",
     "fields": {
-      "sm_occupancy_target": {
-        "label": "Bezettingsgraad doel",
-        "description": "Streefwaarde voor de bezettingsgraad",
-        "unit": "%"
-      },
+      "sm_occupancy_target": {},
       "sm_fill_rate_target": {
         "label": "Vervullingsgraad doel",
         "description": "Streefpercentage gevulde diensten",
@@ -2914,7 +2959,8 @@
       "location": "Vestiging (eigen)"
     },
     "nextValue": "Volgende: {{n}}",
-    "startLocked": "Startwaarde ligt vast zodra het eerste nummer is uitgegeven."
+    "startLocked": "Startwaarde ligt vast zodra het eerste nummer is uitgegeven.",
+    "prefixInvalid": "Alleen letters en cijfers toegestaan (max. 10 tekens)"
   },
   "vacancyDisplay": {
     "title": "Tabelweergave",
@@ -4014,6 +4060,77 @@
     "flavorLabel": {
       "fast": "Snel",
       "smart": "Slim"
+    }
+  },
+  "aiAct": {
+    "title": "AI-transparantie",
+    "subtitle": "Hoe Koios AI werkt: beginselen en instellingen",
+    "principles": {
+      "wizard_is_default": {
+        "title": "Wizard is standaard",
+        "body": "Menselijk toezicht is altijd geactiveerd. Koios stelt voor, jij beslist voordat er iets gebeurt."
+      },
+      "no_automatic_selection_decisions": {
+        "title": "Geen automatische selectiebeslissingen",
+        "body": "Afwijzen, aannemen en shortlisten vereisen altijd menselijke bevestiging, ook in automatische modus. Privacyrecht art. 22 AVG."
+      },
+      "every_action_is_a_logged_workflow": {
+        "title": "Elke actie is een geregistreerde workflow",
+        "body": "Alles wat Koios doet wordt volledig geregistreerd. Jij kunt altijd zien wat, wanneer en waarom."
+      },
+      "ai_output_is_labeled": {
+        "title": "AI-uitingen zijn duidelijk gelabeld",
+        "body": "Wanneer iets door Koios is gegenereerd, zie je dat onmiddellijk. Nooit camouflage."
+      },
+      "toggles_never_disable_obligations": {
+        "title": "Instellingen kunnen features aan of uit zetten, niet verplichtingen",
+        "body": "Een feature uitschakelen betekent niet dat toezicht verdwijnt of registratie stopt. Die gelden altijd."
+      }
+    },
+    "humanOversight": "Menselijk toezicht op selectiebeslissingen",
+    "humanOversightValue": "Altijd",
+    "tenantPosture": {
+      "title": "Instellingen van dit account",
+      "defaultMode": {
+        "label": "Standaardmodus",
+        "wizard": "Wizard (per item bevestigen)",
+        "auto": "Automatisch (direct uitvoeren)"
+      },
+      "autoMessages": {
+        "label": "Automatische berichten"
+      }
+    },
+    "features": {
+      "title": "Koios AI-features",
+      "koios_chat": "Koios AI Chat",
+      "ai_agent_interviews": "AI Interview",
+      "ai_workflow_steps": "AI in workflows",
+      "active": "Actief",
+      "inactive": "Inactief"
+    }
+  },
+  "limits": {
+    "no_limit": "geen limiet",
+    "cap_reached": "limiet bereikt",
+    "signal_not_blocked": "signaal, niet geblokkeerd",
+    "usage_and_limits": "Verbruik & limieten",
+    "subtitle": "Hoeveel calls deze omgeving heeft gedaan en welke limieten gelden",
+    "empty": "Nog geen verbruik geregistreerd",
+    "tier": {
+      "included": "Staffel {{tier}}: {{n}} inbegrepen per maand",
+      "price": "{{amount}} per maand"
+    },
+    "tenants_at_limit": "Tenants bij de limiet",
+    "tenantsAtLimitEmpty": "Geen tenants in de buurt van een limiet",
+    "skipped_tenants_notice_one": "{{count}} tenant kon niet worden gecontroleerd.",
+    "skipped_tenants_notice_other": "{{count}} tenants konden niet worden gecontroleerd.",
+    "platformTitle": "Platformlimieten",
+    "platformSubtitle": "Verbruik per koppeling op platformniveau en tenants die hun limiet naderen",
+    "window": {
+      "hour": "per uur",
+      "day": "per dag",
+      "week": "per week",
+      "month": "per maand"
     }
   }
 }
