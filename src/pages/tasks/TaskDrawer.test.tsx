@@ -78,10 +78,22 @@ vi.mock('@/lib/api', () => ({
     return body && typeof body === 'object' && 'data' in body ? (body as { data: unknown }).data : body
   },
   unwrapList: () => ({ rows: [] }),
+  getActiveTenantId: vi.fn(() => 'test-tenant'),
 }))
 vi.mock('@/pages/settings/lib/settingsApi', () => ({
   loadSettings: () => Promise.resolve({ deletion_grace_days: '30' }),
 }))
+vi.mock('@/pages/candidates/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/pages/candidates/shared')>()
+  return {
+    ...actual,
+    PlanIntakeModal: ({ candidateId, applicationId, onClose }: { candidateId?: string | number; applicationId?: string | number | null; onClose: () => void }) => (
+      <div data-testid="plan-intake-modal" data-candidate-id={candidateId} data-application-id={applicationId}>
+        <button onClick={onClose}>Close</button>
+      </div>
+    ),
+  }
+})
 
 // A minimal drawer-ready task; `archived` (+ optional `archivedAt`) flips per test.
 const task = (archived: boolean, archivedAt: string | null = null): TaskDetail => ({
@@ -398,11 +410,10 @@ describe('TaskDrawer · header follows the table colour toggle (TASK-DISPLAY-DRI
 
 /**
  * TIJDLIJN-OVERAL (27-08): the timeline tab is LAST (tasks carry no Statistics
- * tab) and reuses the same ChangelogTab content the title-row popover shows —
- * verified via the request it fires (GET /tasks/{id}/activity, the shared
- * useTaskActivity/EntityChangelogTab plumbing).
+ * tab) — X-36 update: now fires GET /tasks/{id}/timeline instead of the old
+ * activity endpoint; the title-row popover still shows the raw activity/changelog.
  */
-describe('TaskDrawer · Timeline tab (TIJDLIJN-OVERAL)', () => {
+describe('TaskDrawer · Timeline tab (TIJDLIJN-OVERAL + X-36)', () => {
   it('renders "timeline" as the LAST tab, after notes', () => {
     mount(task(false))
     const labels = screen.getAllByRole('tab').map(b => b.textContent)
@@ -413,17 +424,101 @@ describe('TaskDrawer · Timeline tab (TIJDLIJN-OVERAL)', () => {
     expect(timelineIdx).toBe(labels.length - 1)
   })
 
-  it('mounts the shared changelog content (fires GET /tasks/{id}/activity) when selected', async () => {
+  it('allows selecting and rendering the timeline tab with TimelineTab component', async () => {
     mount(task(false))
-    fireEvent.click(screen.getByRole('tab', { name: i18n.t('tasks:drawer.tabs.timeline') }))
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/tasks/t1/activity', expect.anything()))
+    // The timeline tab should be clickable and render (exact content tested in TimelineTab.test.tsx)
+    const timelineTab = screen.getByRole('tab', { name: i18n.t('tasks:drawer.tabs.timeline') })
+    expect(timelineTab).toBeInTheDocument()
+    fireEvent.click(timelineTab)
+    // After clicking, the tab should be active (aria-selected)
+    await waitFor(() => {
+      expect(timelineTab).toHaveAttribute('aria-selected', 'true')
+    })
   })
 
-  it('the title-row popover still opens the same changelog content', async () => {
+  it('the title-row popover still opens the raw changelog (GET /tasks/{id}/activity)', async () => {
     const user = userEvent.setup()
     mount(task(false))
     const trigger = screen.getByRole('button', { name: i18n.t('common:changelog') })
     await user.click(trigger)
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/tasks/t1/activity', expect.anything()))
+  })
+})
+
+/**
+ * X-36: quick action "Afspraak plannen" (schedule appointment) — appears only on
+ * tasks linked to a candidate, opens PlanIntakeModal with candidateId and optional
+ * applicationId.
+ */
+describe('TaskDrawer · Quick action "Afspraak plannen" (X-36)', () => {
+  it('shows the "Afspraak plannen" button when the task links to a candidate', () => {
+    mount({ ...task(false), links: [{ type: 'candidate', id: 'c123', label: 'Alice' }] })
+    expect(screen.getByRole('button', { name: i18n.t('tasks:drawer.scheduleAppointment') })).toBeInTheDocument()
+  })
+
+  it('hides the button when the task has no candidate link', () => {
+    mount({ ...task(false), links: [{ type: 'vacancy', id: 'v1', label: 'Role X' }] })
+    expect(screen.queryByRole('button', { name: i18n.t('tasks:drawer.scheduleAppointment') })).toBeNull()
+  })
+
+  it('hides the button when the task is archived (restore first)', () => {
+    mount({ ...task(true), links: [{ type: 'candidate', id: 'c123', label: 'Alice' }] })
+    expect(screen.queryByRole('button', { name: i18n.t('tasks:drawer.scheduleAppointment') })).toBeNull()
+  })
+
+  it('opens the modal with the candidate ID when clicked', async () => {
+    const user = userEvent.setup()
+    mount({
+      ...task(false),
+      links: [
+        { type: 'candidate', id: 'c123', label: 'Alice' },
+      ],
+    })
+    const btn = screen.getByRole('button', { name: i18n.t('tasks:drawer.scheduleAppointment') })
+    await user.click(btn)
+    await waitFor(() => {
+      const modal = screen.getByTestId('plan-intake-modal')
+      expect(modal).toBeInTheDocument()
+      expect(modal).toHaveAttribute('data-candidate-id', 'c123')
+    })
+  })
+
+  it('opens the modal with both candidate and application IDs when both are present', async () => {
+    const user = userEvent.setup()
+    mount({
+      ...task(false),
+      links: [
+        { type: 'candidate', id: 'c123', label: 'Alice' },
+        { type: 'application', id: 'app456', label: 'Application' },
+      ],
+    })
+    const btn = screen.getByRole('button', { name: i18n.t('tasks:drawer.scheduleAppointment') })
+    await user.click(btn)
+    await waitFor(() => {
+      const modal = screen.getByTestId('plan-intake-modal')
+      expect(modal).toBeInTheDocument()
+      expect(modal).toHaveAttribute('data-candidate-id', 'c123')
+      expect(modal).toHaveAttribute('data-application-id', 'app456')
+    })
+  })
+
+  it('closes the modal when onClose is called', async () => {
+    const user = userEvent.setup()
+    mount({
+      ...task(false),
+      links: [
+        { type: 'candidate', id: 'c123', label: 'Alice' },
+      ],
+    })
+    const btn = screen.getByRole('button', { name: i18n.t('tasks:drawer.scheduleAppointment') })
+    await user.click(btn)
+    await waitFor(() => {
+      expect(screen.getByTestId('plan-intake-modal')).toBeInTheDocument()
+    })
+    // Click the close button in the modal
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+    await waitFor(() => {
+      expect(screen.queryByTestId('plan-intake-modal')).not.toBeInTheDocument()
+    })
   })
 })

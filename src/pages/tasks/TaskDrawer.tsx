@@ -5,7 +5,7 @@
  * common changes need no edit-mode; the full field edit still lives in DetailsTab.
  */
 import type { ReactNode } from 'react'
-import { useState } from 'react'
+import { useState, Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle2, Edit2, Save, X } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
@@ -26,6 +26,9 @@ import LinksTab from './drawer/LinksTab'
 import NotesTab from './drawer/NotesTab'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import ChangelogTab from './drawer/ChangelogTab'
+import TimelineTab from './drawer/TimelineTab'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import { PlanIntakeModal } from '@/pages/candidates/shared'
 import { Caption } from '@/components/ui/typography'
 import { PageTitle } from '@/components/ui/typography'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
@@ -86,6 +89,8 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
   const [titleDraft, setTitleDraft] = useState('')
   const [prevId, setPrevId] = useState<Id | undefined>(task?.id)
   if (task?.id !== prevId) { setPrevId(task?.id); setEditingTitle(false); setTitleDraft('') }
+  // X-36: quick action "Afspraak plannen" modal state (only for tasks linked to a candidate).
+  const [openPlanIntake, setOpenPlanIntake] = useState(false)
   // TASK-DISPLAY-DRILL-1: settings read BEFORE the early return (rules of hooks).
   const displaySettings = useAllSettings()
   // Inline-edit-cancel layer: the title input cancels edit mode on Escape.
@@ -113,6 +118,12 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
   const avatarColor = colorStatus ? (statusInfo.color || NEUTRAL_AVATAR) : NEUTRAL_AVATAR
   const typeInfo = typeMeta(String(task.typeKey))
 
+  // X-36: extract candidate and application IDs from task.links for the quick action.
+  const candidateLink = task.links?.find(link => link.type === 'candidate')
+  const applicationLink = task.links?.find(link => link.type === 'application')
+  const candidateId = candidateLink?.id
+  const applicationId = applicationLink?.id
+
   // Map a tab id to its content component.
   const renderTab = (id: string): ReactNode => {
     switch (id) {
@@ -122,8 +133,8 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
       // pinned under Details.
       case 'related':  return <RelatedTasks task={task} />
       case 'notes':    return <NotesTab task={task} />
-      // TIJDLIJN-OVERAL: reuses the same changelog content the popover shows.
-      case 'timeline': return <ChangelogTab task={task} />
+      // X-36: timeline tab reads from GET /tasks/{id}/timeline (merged feed).
+      case 'timeline': return <TimelineTab task={task} />
       case 'extra':    return <CustomFieldsTab entityType="task" values={task.customFields ?? {}}
                           onSave={patch => onUpdate(task.id, { customFields: { ...task.customFields, ...patch } })} />
       default:         return null
@@ -176,7 +187,8 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
     ) : null
 
   return (
-    <EntityDrawer
+    <Fragment>
+      <EntityDrawer
       entity={task}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
@@ -230,6 +242,10 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
             </>
           ) : (
             <>
+              {/* X-36: quick action "Afspraak plannen" (only for tasks linked to a candidate). */}
+              {!task.archived && candidateId && (
+                <DrawerAddButton label={t('drawer.scheduleAppointment')} onClick={() => setOpenPlanIntake(true)} />
+              )}
               {!task.archived && <Button variant="secondary" iconOnly size="sm" onClick={startTitleEdit} title={t('common:edit')} aria-label={t('common:edit')}><Edit2 size={13} /></Button>}
               {markDone}
             </>
@@ -262,6 +278,16 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
           )}
         </EntityHeader>
       )}
-    />
+      />
+      {/* X-36: quick action modal — opens with candidate ID and optional application ID. */}
+      {openPlanIntake && candidateId && (
+        <PlanIntakeModal
+          candidateId={candidateId}
+          applicationId={applicationId ?? null}
+          onClose={() => setOpenPlanIntake(false)}
+          onCreated={() => { setOpenPlanIntake(false) }}
+        />
+      )}
+    </Fragment>
   )
 }
