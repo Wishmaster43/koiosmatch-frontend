@@ -36,13 +36,13 @@ import TrashLifecycleSection from '@/components/drawer/TrashLifecycleSection'
 import type { TrashSectionConfig } from '@/components/drawer/TrashLifecycleSection'
 import { initialsOf } from '@/lib/initials'
 import Button from '@/components/ui/Button'
+import TitleEditInput from '@/components/drawer/TitleEditInput'
+import { userName, type UserLike } from '@/lib/userDisplay'
 import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
 import { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 
 interface NewLink { type: string; id: string; label: string }
-interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: string; email?: string; avatar_color?: string | null }
-const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email || '—'
 
 // The tab order. The changelog is a header popover (not a tab), mirroring candidate.
 // NT-TASK-1 (Danny, reinstated): the old plain "Reacties" thread removed 2026-07-14
@@ -210,11 +210,7 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
           avatar={{ initials: initialsOf(task.title, 'T'), soft: true, color: avatarColor }}
           renderTitle={() => editingTitle ? (
             // T1: inline title edit — mirror VacancyDrawer's renderTitle swap.
-            <input autoFocus value={titleDraft} onChange={e => setTitleDraft(e.target.value)} aria-label={t('modal.titleLabel')}
-              onKeyDown={e => { if (e.key === 'Enter') saveTitleEdit() }}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- an <input> matching the title's own size while editing, not a PageTitle render
-              style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: 15, fontWeight: 700,
-                borderRadius: 6, border: '1px solid var(--border)', outline: 'none', color: 'var(--text)' }} />
+            <TitleEditInput value={titleDraft} onChange={setTitleDraft} onSave={saveTitleEdit} ariaLabel={t('modal.titleLabel')} />
           ) : (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>

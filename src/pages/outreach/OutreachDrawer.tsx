@@ -51,7 +51,7 @@ import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import PendingEraseBanner from '@/components/drawer/PendingEraseBanner'
 import { buildTrashNote } from '@/hooks/useTrashFlow'
 import { Trash2 } from 'lucide-react'
-import type { Id } from '@/types/common'
+import { userName, type UserLike } from '@/lib/userDisplay'
 import type { TargetFilter } from './drawer/targetFilter'
 
 // Campaign status → semantic colour for the header badge (draft calm, done success).
@@ -59,9 +59,6 @@ const STATUS_COLOR: Record<string, string> = {
   // eslint-disable-next-line no-restricted-syntax -- DATA: fixed status colour map, no token matches this specific calm grey
   draft: '#94A3B8', active: 'var(--color-primary)', done: 'var(--color-success)',
 }
-
-interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: string; email?: string }
-const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email || '—'
 
 // Thin container: wires useOutreachDetail's data into the shared drawer shell and owns the Stats-to-Targets click-to-filter state shared by the two tabs.
 export default function OutreachDrawer({ id, createdAt, archived = false, archivedAt = null, fallbackName, fallbackStatus, onRestore, inTrash = false, pendingEraseAt = null, graceDays = null, onMarkDeletion, onUnmark, onClose, expanded = false, onToggleExpand, onMutated }: {

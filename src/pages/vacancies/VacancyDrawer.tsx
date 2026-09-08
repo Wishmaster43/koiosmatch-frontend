@@ -14,6 +14,7 @@ import DetachedCountBadge from '@/components/ui/DetachedCountBadge'
 import GeocodeCard from '@/components/drawer/GeocodeCard'
 import { channelIcon } from './data/channelIcons'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
+import TitleEditInput from '@/components/drawer/TitleEditInput'
 import ChangelogTab from './drawer/ChangelogTab'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import TrashLifecycleSection from '@/components/drawer/TrashLifecycleSection'
@@ -268,11 +269,7 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
           avatar={{ initials: (v.clientName?.[0] ?? v.title?.[0] ?? '?').toUpperCase(), soft: true }}
           renderTitle={() => editingTitle ? (
             // V7: inline title edit — mirror OpportunityDrawer's renderTitle swap.
-            <input autoFocus value={titleDraft} onChange={e => setTitleDraft(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') saveTitleEdit() }}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- an <input> matching the title's own size while editing, not a PageTitle render
-              style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: 15, fontWeight: 700,
-                borderRadius: 6, border: '1px solid var(--border)', outline: 'none', color: 'var(--text)' }} />
+            <TitleEditInput value={titleDraft} onChange={setTitleDraft} onSave={saveTitleEdit} />
           ) : (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>

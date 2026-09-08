@@ -30,27 +30,11 @@ import { useTextPopoutHost } from '@/hooks/useTextPopoutHost'
 import { isTaskOverdue, dueDateTime } from '../data/mapTask'
 import SubtasksSection from './SubtasksSection'
 import Button from '@/components/ui/Button'
+import RowField from '@/components/drawer/RowField'
+import { userName, type UserLike } from '@/lib/userDisplay'
 import type { TaskDetail } from '@/types/task'
-import type { Id } from '@/types/common'
 import type { ReactNode } from 'react'
-import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
-
-interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: string; email?: string; avatar_color?: string | null }
-
-// Display name for a user record (tolerant of the various shapes /users returns).
-const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email || '—'
-
-// One read-mode row: muted label left, value right.
-function Row({ label, children }: { label: ReactNode; children: ReactNode }) {
-  // Canon (05-08): clean cards — no row dividers, shared label style (fieldRowCanon).
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26 }}>
-      <span style={CANON_LABEL_STYLE}>{label}</span>
-      <span style={{ flex: 1, minWidth: 0 }}>{children}</span>
-    </div>
-  )
-}
 
 // Shared save/cancel icon pair — used by both independently-editable sections below.
 function EditControls({ onSave, onCancel, saveLabel, cancelLabel }: { onSave: () => void; onCancel: () => void; saveLabel: string; cancelLabel: string }) {
@@ -248,16 +232,16 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
           </div>
         ) : (
           <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)', padding: '6px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Row label={t('details.type')}>{typeInfo.label ? plainValue(typeInfo.label) : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
-            <Row label={t('details.status')}>{statusInfo.label ? plainValue(statusInfo.label) : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
-            <Row label={t('details.priority')}>{priorityInfo.label ? plainValue(priorityInfo.label) : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
-            <Row label={t('details.due')}>
+            <RowField label={t('details.type')}>{typeInfo.label ? plainValue(typeInfo.label) : <span style={{ color: 'var(--text-muted)' }}>—</span>}</RowField>
+            <RowField label={t('details.status')}>{statusInfo.label ? plainValue(statusInfo.label) : <span style={{ color: 'var(--text-muted)' }}>—</span>}</RowField>
+            <RowField label={t('details.priority')}>{priorityInfo.label ? plainValue(priorityInfo.label) : <span style={{ color: 'var(--text-muted)' }}>—</span>}</RowField>
+            <RowField label={t('details.due')}>
               <span style={{ fontSize: 12, color: task.due ? (isTaskOverdue(task) ? 'var(--color-danger)' : 'var(--text)') : 'var(--text-muted)', fontWeight: isTaskOverdue(task) ? 600 : 400 }}>
                 {/* TASK-DUE-TIME-1: DD-MM-YYYY HH:mm when a time is set, date-only otherwise. */}
                 {task.due ? (task.dueTime ? formatDateTime(dueDateTime(task.due, task.dueTime)) : formatDate(task.due)) : '—'}
               </span>
-            </Row>
-            <Row label={t('details.assignee')}>
+            </RowField>
+            <RowField label={t('details.assignee')}>
               {task.assignee ? (
                 <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   {/* Explicit neutral when colours are off: Avatar hashes a palette colour on null. */}
@@ -265,15 +249,15 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
                   <span style={{ fontSize: 12, color: 'var(--text)' }}>{task.assignee.name}</span>
                 </span>
               ) : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('bureau')}</span>}
-            </Row>
+            </RowField>
             {/* TEAM-1: the department, plain value like type/status/priority above
                 (TASK-DISPLAY-DRILL-1 — no chips in the drilldown, colour is a table face). */}
-            <Row label={t('details.team')}>
+            <RowField label={t('details.team')}>
               {task.team
                 ? plainValue(task.team.name)
                 : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>—</span>}
-            </Row>
-            <Row label={t('details.owner')}><span style={{ fontSize: 12, color: 'var(--text)' }}>{task.owner?.name || '—'}</span></Row>
+            </RowField>
+            <RowField label={t('details.owner')}><span style={{ fontSize: 12, color: 'var(--text)' }}>{task.owner?.name || '—'}</span></RowField>
           </div>
         )}
       </div>
@@ -339,11 +323,11 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
           ARCHIVED task (same gating as every other field above). */}
       <div>
         {task.archived ? (
-          <Row label={t('details.location')}>
+          <RowField label={t('details.location')}>
             <span style={{ fontSize: 12, color: task.location?.name ? 'var(--text)' : 'var(--text-muted)' }}>
               {task.location?.name || '—'}
             </span>
-          </Row>
+          </RowField>
         ) : (
           <Field label={t('details.location')}>
             <CreatableSelect

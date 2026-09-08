@@ -9,7 +9,6 @@
  * full drawer for anything this view doesn't cover.
  */
 import { useEffect, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ExternalLink } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
@@ -21,7 +20,7 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import SafeHtml from '@/components/ui/SafeHtml'
 import Spinner from '@/components/ui/Spinner'
 import { PageTitle, Caption } from '@/components/ui/typography'
-import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
+import RowField from '@/components/drawer/RowField'
 import { FieldRow } from '@/components/forms/fields'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu (the status
 // CreatableSelect below) is never "outside" — mirrors ChangelogPopover.
@@ -33,16 +32,6 @@ import { useDateFormat } from '@/lib/datetime'
 import { mapTaskDetail } from '../data/mapTask'
 import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
-
-// One read-mode row: muted label left, value right (mirrors DetailsTab's Row).
-function Row({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26 }}>
-      <span style={CANON_LABEL_STYLE}>{label}</span>
-      <span style={{ flex: 1, minWidth: 0 }}>{children}</span>
-    </div>
-  )
-}
 
 // Modeless quick-view popover for one subtask: fetches its detail lazily and lets a status change persist without opening the full drawer.
 export default function SubtaskQuickView({ id, onClose, onChanged }: {
@@ -152,14 +141,14 @@ export default function SubtaskQuickView({ id, onClose, onChanged }: {
               <CreatableSelect value={String(task.statusKey)} onChange={changeStatus}
                 options={statuses.map(s => ({ value: s.value, label: s.label }))} allowCreate={false} />
             </FieldRow>
-            <Row label={t('details.assignee')}>
+            <RowField label={t('details.assignee')}>
               <span style={{ fontSize: 12, color: task.assignee ? 'var(--text)' : 'var(--text-muted)' }}>
                 {task.assignee?.name || t('bureau')}
               </span>
-            </Row>
-            <Row label={t('details.due')}>
+            </RowField>
+            <RowField label={t('details.due')}>
               <span style={{ fontSize: 12, color: 'var(--text)' }}>{formatDate(task.due)}</span>
-            </Row>
+            </RowField>
             {task.description && (
               <div style={{ borderRadius: 10, border: '1px solid var(--border)', padding: '9px 12px', marginTop: 4 }}>
                 <SafeHtml html={task.description} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
