@@ -7,6 +7,8 @@
  */
 import task_create        from './task_create'
 import appointment_create from './appointment_create'
+import appointments       from './appointments'
+import calendar_invite    from './calendar_invite'
 import calllist_add       from './calllist_add'
 import webhook_send       from './webhook_send'
 import candidate_archive  from './candidate_archive'
@@ -116,6 +118,8 @@ export const ENGINE_INTERNAL_TYPES = ['trigger'] as const
 const MODULES: ModuleDef[] = [
   task_create,
   appointment_create,
+  appointments,
+  calendar_invite,
   calllist_add,
   webhook_send,
   candidate_archive,

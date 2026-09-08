@@ -20,7 +20,7 @@ import type { Id } from '@/types/common'
 export interface AppRow { id?: Id; logo_url?: string; vacancy?: { logo_url?: string; title?: string; url?: string; id?: Id }; vacature?: string; title?: string; url?: string; stageLabel?: string; stageKey?: string; stageColor?: string; created_at?: string; client_name?: string | null }
 
 // A linked appointment as returned by /candidates/{id}/appointments.
-export interface Appt { id: Id; application_id?: Id | null; type?: string; scheduled_at?: string; duration_min?: number | null; modality?: string; owner?: { id?: Id; name?: string }; location_name?: string; status?: string }
+export interface Appt { id: Id; application_id?: Id | null; type?: string; scheduled_at?: string; duration_min?: number | null; modality?: string; owner?: { id?: Id; name?: string }; location_name?: string; status?: string; meeting_url?: string | null }
 
 // The vacancy link, when the API exposes a URL; otherwise null (plain text).
 // AUDIT-2: URLs are tenant-entered data — only http(s) may render as a link.

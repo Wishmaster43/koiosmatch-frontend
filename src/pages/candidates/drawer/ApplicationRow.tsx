@@ -41,6 +41,7 @@ import type { CSSProperties } from 'react'
 import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Calendar, Clock, User, Building2, Video, Phone, Pencil, Unlink, ExternalLink, ChevronRight, ChevronDown } from 'lucide-react'
+import Button from '@/components/ui/Button'
 import EntityLink from '@/components/ui/EntityLink'
 import StatusPill from '@/components/ui/StatusPill'
 import ApplicationRowDetails from './ApplicationRowDetails'
@@ -235,6 +236,8 @@ export default function ApplicationRow({ candidateId, row, appointment, canManag
           {appointment.scheduled_at && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Clock size={11} /> {timeRange(appointment)}{appointment.duration_min ? ` · ${appointment.duration_min} min` : ''}</span>}
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><ModalityIcon m={appointment.modality} /> {t(`work.modality${appointment.modality === 'remote' ? 'Remote' : appointment.modality === 'phone' ? 'Phone' : 'Office'}`)}{appointment.location_name ? ` · ${appointment.location_name}` : ''}</span>
           {appointment.owner?.name && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><User size={11} /> {appointment.owner.name}</span>}
+          {/* Meeting link: render a join button when meeting_url is present. */}
+          {appointment.meeting_url && <Button href={appointment.meeting_url} target="_blank" rel="noopener noreferrer" variant="ghost" size="sm"><Video size={13} /> {t('appointments.joinMeeting')}</Button>}
           {/* Pencil: edit this intake appointment (Danny) — prefilled modal → PATCH.
               Passes the ROW'S VACANCY id, never the application's own id (regression guard). */}
           <button type="button" onClick={() => onEditAppointment({ id: appointment.id, scheduled_at: appointment.scheduled_at, duration_min: appointment.duration_min, modality: appointment.modality, type: appointment.type, owner_id: (appointment.owner as { id?: Id })?.id, vacancy_id: vacancyId })}

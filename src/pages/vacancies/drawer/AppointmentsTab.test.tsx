@@ -65,7 +65,7 @@ const row = (over: Partial<VacancyAppointmentRow> = {}): VacancyAppointmentRow =
   type: 'intake', scheduledAt: '2026-08-20T09:30:00+00:00', durationMin: 30, modality: 'office',
   appointmentLocation: 'office', ownerId: 'u-1', ownerName: 'Danny Polak', locationId: 'loc-1',
   locationName: 'Yesway Amsterdam', status: 'planned', isOverdue: false, source: 'manual',
-  outcome: null, notes: null,
+  outcome: null, notes: null, meetingUrl: null,
   ...over,
 })
 

@@ -202,3 +202,18 @@ describe('AppointmentsTab · opener gate (candidates.update)', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: 'appointments.new' })).toBeInTheDocument())
   })
 })
+
+// B-10 (golf 3): a linked appointment with a meeting_url gets a join link on its row.
+describe('AppointmentsTab · meeting link (B-10)', () => {
+  it('renders the join link only for the row that carries a meeting_url', async () => {
+    mockGet.mockResolvedValue({ data: { data: [
+      { id: 'a1', application_id: 5, type: 'intake_flex', scheduled_at: '2026-07-15T10:45:00+00:00', status: 'planned', meeting_url: 'https://meet.google.com/abc-defg-hij' },
+      { id: 'a2', application_id: 5, type: 'call', scheduled_at: '2026-07-16T10:45:00+00:00', status: 'planned', meeting_url: null },
+    ] } })
+    render(<AppointmentsTab application={app()} />)
+    const link = await screen.findByRole('link', { name: /appointments\.joinMeeting/ })
+    expect(link).toHaveAttribute('href', 'https://meet.google.com/abc-defg-hij')
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(screen.getAllByRole('link', { name: /appointments\.joinMeeting/ })).toHaveLength(1)
+  })
+})

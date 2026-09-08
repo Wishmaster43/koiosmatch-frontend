@@ -233,3 +233,22 @@ describe('ApplicationRow · unlink follows the soft-tint convention, same size a
     expect(pencil.style.boxSizing).toBe('border-box')
   })
 })
+
+// B-10 (golf 3): an appointment that carries a meeting_url shows a join link on the row;
+// without one nothing renders (null until a calendar_invite workflow step wrote it).
+describe('ApplicationRow · meeting link (B-10)', () => {
+  const appt = { id: 'ap-1', application_id: 'app-1', type: 'intake', scheduled_at: '2026-09-10T09:00:00', modality: 'video' }
+
+  it('renders the join button with the meeting url in a new tab', async () => {
+    renderRow({ appointment: { ...appt, meeting_url: 'https://meet.google.com/abc-defg-hij' } })
+    const link = screen.getByRole('link', { name: new RegExp(ct('appointments.joinMeeting')) })
+    expect(link).toHaveAttribute('href', 'https://meet.google.com/abc-defg-hij')
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+  })
+
+  it('renders no join button when meeting_url is null', () => {
+    renderRow({ appointment: { ...appt, meeting_url: null } })
+    expect(screen.queryByText(ct('appointments.joinMeeting'))).not.toBeInTheDocument()
+  })
+})

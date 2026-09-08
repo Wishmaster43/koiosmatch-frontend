@@ -33,6 +33,7 @@ export interface RawVacancyAppointment {
   source: string | null
   outcome: string | null
   notes: string | null
+  meeting_url: string | null
 }
 
 // Mapped shape the tab renders (camelCase).
@@ -63,6 +64,7 @@ export interface VacancyAppointmentRow {
   source: string | null
   outcome: string | null
   notes: string | null
+  meetingUrl: string | null
 }
 
 // Raw → mapped: one place, so a backend field rename surfaces here, not scattered in JSX.
@@ -94,5 +96,6 @@ export function mapVacancyAppointment(raw: RawVacancyAppointment): VacancyAppoin
     source: raw.source,
     outcome: raw.outcome,
     notes: raw.notes,
+    meetingUrl: raw.meeting_url,
   }
 }

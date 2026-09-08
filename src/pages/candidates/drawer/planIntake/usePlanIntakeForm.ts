@@ -30,6 +30,7 @@ import type { Id } from '@/types/common'
 export interface ExistingAppointment {
   id: Id; scheduled_at?: string; duration_min?: number | null; modality?: string; owner_id?: Id
   type?: string; vacancy_id?: Id | null; location_id?: Id | null; appointment_location?: string | null
+  meeting_url?: string | null
 }
 
 export interface PlanIntakeFormOptions {

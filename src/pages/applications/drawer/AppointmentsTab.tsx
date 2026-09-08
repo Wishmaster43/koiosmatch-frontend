@@ -10,7 +10,7 @@
  */
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Calendar, Clock, User, MapPin, Pencil, Search } from 'lucide-react'
+import { Calendar, Clock, User, MapPin, Video, Pencil, Search } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import { useDateFormat } from '@/lib/datetime'
 import { useAppointmentTypes } from '@/lib/useAppointmentTypes'
@@ -33,6 +33,7 @@ interface RawAppt {
   duration_min?: number | null; modality?: string
   owner?: { id?: Id; name?: string } | null
   location_name?: string | null; location_id?: Id | null; status?: string
+  meeting_url?: string | null
 }
 
 
@@ -198,6 +199,8 @@ export default function AppointmentsTab({ application: a }: { application: Appli
               {ap.duration_min != null && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Clock size={12} /> {t('appointments.durationMin', { count: ap.duration_min })}</span>}
               {ap.owner?.name && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><User size={12} /> {t('appointments.with')}: {ap.owner.name}</span>}
               {ap.location_name && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><MapPin size={12} /> {ap.location_name}</span>}
+              {/* Meeting link: render a join button when meeting_url is present. */}
+              {ap.meeting_url && <Button href={ap.meeting_url} target="_blank" rel="noopener noreferrer" variant="ghost" size="sm"><Video size={13} /> {t('appointments.joinMeeting')}</Button>}
               {/* Edit: opens the same shared modal, prefilled → PATCH. Off once rejected (S34). */}
               {a.candidateId != null && !rejected && (
                 <Button variant="secondary" size="sm" iconOnly style={{ marginLeft: 'auto' }}

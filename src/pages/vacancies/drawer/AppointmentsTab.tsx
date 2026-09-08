@@ -6,7 +6,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
-import { Calendar, ChevronLeft, ChevronRight, Pencil } from 'lucide-react'
+import { Calendar, ChevronLeft, ChevronRight, Video, Pencil } from 'lucide-react'
 import SectionCard from '@/components/ui/SectionCard'
 import SoftChip from '@/components/ui/SoftChip'
 import ModalityChip from '@/components/ui/ModalityChip'
@@ -132,6 +132,8 @@ export default function AppointmentsTab({ vacancy: v }: { vacancy: VacancyDetail
                 {/* C.14: the modality axis, own chip — never inferred from location text alone. */}
                 <ModalityChip modality={a.modality} />
                 {a.status && <SoftChip label={a.status} color="var(--color-info)" />}
+                {/* Meeting link: render a join button when meeting_url is present. */}
+                {a.meetingUrl && <Button href={a.meetingUrl} target="_blank" rel="noopener noreferrer" variant="ghost" size="sm"><Video size={13} /> {t('appointments.joinMeeting')}</Button>}
                 {a.ownerName && <Caption style={{ flexShrink: 0 }}>{a.ownerName}</Caption>}
                 {/* Edit: opens the same shared modal, prefilled → PATCH. Only offered
                     when the row carries its own candidate (mirrors the applications
