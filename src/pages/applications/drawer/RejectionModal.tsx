@@ -11,6 +11,7 @@ import KoiosSuggestionBadge from '@/components/ui/KoiosSuggestionBadge'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
+import ReasonModalHeader from '@/components/ui/ReasonModalHeader'
 import { Caption } from '@/components/ui/typography'
 import type { ApplicationDetail } from '@/types/application'
 import type { Id } from '@/types/common'
@@ -121,13 +122,13 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
       persistKey="application-rejection" width={520} maxWidth="92vw"
       bodyStyle={{ padding: 20 }}
       header={
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center',
-            background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}><XCircle size={16} /></span>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>
-            {isCorrection ? t('rejection.correctModalTitle') : t('rejection.modalTitle')}
-          </span>
-        </span>
+        <ReasonModalHeader
+          icon={XCircle}
+          iconBg="var(--color-danger-bg)"
+          iconColor="var(--color-on-danger-bg)"
+          title={isCorrection ? t('rejection.correctModalTitle') : t('rejection.modalTitle')}
+          titleWeight={700}
+        />
       }>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {/* AI advice — a decision aid for the ORIGINAL reject only; irrelevant

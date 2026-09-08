@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next'
 import { Ban } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import ReasonModalHeader from '@/components/ui/ReasonModalHeader'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { useMatchStopReasons } from '@/hooks/useMatchStopReasons'
@@ -23,7 +24,7 @@ import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import type { MatchRow } from '@/types/match'
 import Button from '@/components/ui/Button'
 import DictationTextarea from '@/components/forms/DictationTextarea'
-import { PageTitle, Caption } from '@/components/ui/typography'
+import { Caption } from '@/components/ui/typography'
 
 // Canon field style (G33/fieldMetrics) — was its own padding-8/radius-8 copy;
 // fieldBox covers the single-line date input + the disabled-lookup notice;
@@ -93,13 +94,7 @@ export default function TerminateMatchModal({ match, onClose, onUpdate }: Props)
     <FloatingPanel open onClose={onClose} ariaLabel={t('drawer.terminate.modalTitle')}
       persistKey="match-terminate" width={460} maxWidth="92vw"
       bodyStyle={{ padding: 20 }}
-      header={
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center',
-            background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}><Ban size={16} /></span>
-          <PageTitle as="span" style={{ fontWeight: 700 }}>{t('drawer.terminate.modalTitle')}</PageTitle>
-        </span>
-      }>
+      header={<ReasonModalHeader icon={Ban} iconBg="var(--color-danger-bg)" iconColor="var(--color-on-danger-bg)" title={t('drawer.terminate.modalTitle')} titleWeight={700} />}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {/* Reason — searchable tenant lookup (allowCreate off: a stop reason is
               picked, never free-typed). No seed fallback: an honest disabled

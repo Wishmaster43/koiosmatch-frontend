@@ -163,6 +163,8 @@ export function useAddContactPersonForm({
       await onCreate?.(payload)
       onClose()
     } catch (err) {
+      // Extract field errors and messages from the response; Laravel 422 payloads
+      // carry an array of messages per field — keep the first (mirroring the old logic).
       const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
       const apiErrors = e?.response?.data?.errors
       if (apiErrors) {
@@ -171,7 +173,6 @@ export function useAddContactPersonForm({
         Object.entries(apiErrors).forEach(([k, v]) => {
           const field = API_TO_FORM[k] ?? k
           e2[field] = true
-          // Laravel 422 payloads carry an array of messages per field — keep the first.
           const msg = Array.isArray(v) ? v[0] : v
           if (typeof msg === 'string') m2[field] = msg
         })

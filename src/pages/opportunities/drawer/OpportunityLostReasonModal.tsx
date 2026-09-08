@@ -9,7 +9,8 @@ import { useTranslation } from 'react-i18next'
 import { XCircle } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import { Caption, PageTitle } from '@/components/ui/typography'
+import ReasonModalHeader from '@/components/ui/ReasonModalHeader'
+import { Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import { useOpportunityLostReasons } from '@/lib/useOpportunityLostReasons'
 
@@ -40,13 +41,7 @@ export default function OpportunityLostReasonModal({ onCancel, onConfirm, submit
     <FloatingPanel open onClose={onCancel} ariaLabel={t('lost.modalTitle')}
       persistKey="opportunity-lost-reason" width={480} maxWidth="92vw"
       bodyStyle={{ padding: 20 }}
-      header={
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center',
-            background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}><XCircle size={16} /></span>
-          <PageTitle as="span">{t('lost.modalTitle')}</PageTitle>
-        </span>
-      }>
+      header={<ReasonModalHeader icon={XCircle} iconBg="var(--color-danger-bg)" iconColor="var(--color-on-danger-bg)" title={t('lost.modalTitle')} />}>
       <div>
         {/* Reason — searchable CreatableSelect, allowCreate off: a lost reason is a
             tenant lookup, picked never free-typed here (mirrors RejectionModal). */}

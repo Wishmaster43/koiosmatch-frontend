@@ -12,7 +12,8 @@ import { Unlink } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import Button from '@/components/ui/Button'
 import DictationTextarea from '@/components/forms/DictationTextarea'
-import { PageTitle, Caption } from '@/components/ui/typography'
+import ReasonModalHeader from '@/components/ui/ReasonModalHeader'
+import { Caption } from '@/components/ui/typography'
 
 const REASON_MAX = 1000
 
@@ -35,13 +36,7 @@ export default function DetachReasonModal({ onCancel, onConfirm, submitting }: P
     <FloatingPanel open onClose={onCancel} ariaLabel={t('detach.reasonTitle')}
       persistKey="application-detach-reason" width={420} maxWidth="92vw"
       bodyStyle={{ padding: 20 }}
-      header={
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center',
-            background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}><Unlink size={16} /></span>
-          <PageTitle as="span" style={{ fontWeight: 700 }}>{t('detach.reasonTitle')}</PageTitle>
-        </span>
-      }>
+      header={<ReasonModalHeader icon={Unlink} iconBg="var(--color-danger-bg)" iconColor="var(--color-on-danger-bg)" title={t('detach.reasonTitle')} titleWeight={700} />}>
         <Caption as="label" style={{ display: 'block', marginBottom: 5 }}>{t('detach.reasonLabel')}</Caption>
         {/* POP-UPS 4: the reason field gets the house mic (plain-text dictation). */}
         <DictationTextarea autoFocus value={reason} rows={3} aria-label={t('detach.reasonLabel')}

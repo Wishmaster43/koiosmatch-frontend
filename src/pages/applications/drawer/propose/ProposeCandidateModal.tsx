@@ -12,9 +12,10 @@ import { useActionRulePreflight, ActionRuleBanner, ActionRuleDialog } from '@/co
 import type { ActionRuleDecision } from '@/components/actionrules'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import RichTextEditor from '@/components/ui/RichTextEditor'
+import ReasonModalHeader from '@/components/ui/ReasonModalHeader'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { contactOptionLabel } from '@/lib/contactLabel'
-import { Caption, PageTitle, sectionTitleStyle } from '@/components/ui/typography'
+import { Caption, sectionTitleStyle } from '@/components/ui/typography'
 import { useProposeForm } from './useProposeForm'
 import type { ApplicationDetail } from '@/types/application'
 import Button from '@/components/ui/Button'
@@ -115,13 +116,7 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
     <FloatingPanel open onClose={onClose} ariaLabel={t('propose.title')}
       persistKey="application-propose" width={560} maxWidth="92vw"
       bodyStyle={{ padding: 20 }}
-      header={
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center',
-            background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)' }}><Send size={16} /></span>
-          <PageTitle as="span">{t('propose.title')}</PageTitle>
-        </span>
-      }>
+      header={<ReasonModalHeader icon={Send} iconBg="var(--color-primary-bg)" iconColor="var(--color-primary-text)" title={t('propose.title')} />}>
         {decision?.effect === 'warn' && <div style={{ marginBottom: 12 }}><ActionRuleBanner decision={decision} /></div>}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

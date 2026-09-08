@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { extractApiError } from '@/lib/extractApiError'
+import { extractFormErrors } from '@/lib/extractFormErrors'
 import { useLookups } from '@/context/LookupsContext'
 import { mapApplication } from '../data/mapApplication'
 import type { Application } from '@/types/application'
@@ -85,12 +86,9 @@ export function useCreateApplication({
     } catch (err) {
       // Show field-level errors from 422 validation responses (highlights the
       // specific picker); fall back to the server's message otherwise.
-      const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
-      const apiErrors = e?.response?.data?.errors
-      if (apiErrors) {
-        const e2: Record<string, boolean> = {}
-        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
-        setErrors(e2)
+      const formErrors = extractFormErrors(err, API_TO_FORM)
+      if (formErrors) {
+        setErrors(formErrors)
       }
       setCreateError(extractApiError(err, t('common:errorGeneric')))
     } finally { setSaving(false) }

@@ -9,6 +9,7 @@
 import { useState } from 'react'
 import type { TFunction } from 'i18next'
 import { extractApiError } from '@/lib/extractApiError'
+import { extractFormErrors } from '@/lib/extractFormErrors'
 import api, { unwrap } from '@/lib/api'
 import { composeAddress } from '../hooks/useVacancyDetailsForm'
 import { mapVacancy } from '../data/mapVacancy'
@@ -152,12 +153,9 @@ export function useAddVacancySubmit({
         onClose()
       }
     } catch (err) {
-      const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
-      const apiErrors = e?.response?.data?.errors
-      if (apiErrors) {
-        const e2: Record<string, boolean> = {}
-        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
-        setErrors(e2)
+      const formErrors = extractFormErrors(err, API_TO_FORM)
+      if (formErrors) {
+        setErrors(formErrors)
       } else {
         setCreateError(extractApiError(err, t('common:errorGeneric')))
       }

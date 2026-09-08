@@ -15,6 +15,8 @@ import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import ReasonModalHeader from '@/components/ui/ReasonModalHeader'
+import { Caption } from '@/components/ui/typography'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { useDateFormat } from '@/lib/datetime'
@@ -94,11 +96,13 @@ export default function RenewMatchModal({ match, onClose, onUpdate }: Props) {
       persistKey="match-renew" width={420} maxWidth="92vw"
       bodyStyle={{ padding: 20 }}
       header={
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center',
-            background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)' }}><RefreshCw size={16} /></span>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('drawer.renew.modalTitle')}</span>
-        </span>
+        <ReasonModalHeader
+          icon={RefreshCw}
+          iconBg="var(--color-primary-bg)"
+          iconColor="var(--color-primary-text)"
+          title={t('drawer.renew.modalTitle')}
+          titleWeight={700}
+        />
       }>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {/* Current end date — read-only context so the recruiter knows what they're
@@ -111,7 +115,7 @@ export default function RenewMatchModal({ match, onClose, onUpdate }: Props) {
 
           {/* New end date — the only field the contract accepts (no reason/duration). */}
           <div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 5 }}>{t('drawer.renew.newEndDateLabel')}</div>
+            <Caption as="div" style={{ marginBottom: 5 }}>{t('drawer.renew.newEndDateLabel')}</Caption>
             <input type="date" value={newEndDate} onChange={e => setNewEndDate(e.target.value)}
               min={currentEndDate ? dayAfterISO(currentEndDate) : undefined}
               aria-label={t('drawer.renew.newEndDateLabel')} style={fieldBox} />

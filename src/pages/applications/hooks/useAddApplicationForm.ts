@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { extractFormErrors } from '@/lib/extractFormErrors'
 import { useApplicationOwnerChain } from './useApplicationOwnerChain'
 import type { VacancyOption } from '@/pages/candidates/shared'
 import type { Id } from '@/types/common'
@@ -220,17 +221,11 @@ export function useAddApplicationForm({
       onCreated(); onClose()
     } catch (err) {
       // Show field-level errors from 422 validation responses inline on the form;
-      // only toast a message when there is NO validation bag to render inline —
-      // extractApiError prefers the bag's own raw (often untranslated Laravel
-      // "required" sentence, §10) over the generic fallback, so calling it
-      // unconditionally here would leak that raw sentence in a toast on top of
-      // the inline errors it already explains (DUP-04 review finding).
-      const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
-      const apiErrors = e?.response?.data?.errors
-      if (apiErrors) {
-        const e2: Record<string, boolean> = {}
-        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
-        setErrors(e2)
+      // only toast a message when there is NO validation bag to render inline
+      // (DUP-04: extractApiError would surface the bag's raw Laravel sentence).
+      const formErrors = extractFormErrors(err, API_TO_FORM)
+      if (formErrors) {
+        setErrors(formErrors)
       } else {
         notifyError(extractApiError(err, t(editing ? 'work.applicationUpdateFailed' : 'work.applicationFailed')))
       }
