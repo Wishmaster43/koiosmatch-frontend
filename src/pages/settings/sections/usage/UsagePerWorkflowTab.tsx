@@ -24,7 +24,7 @@ type Row = NonNullable<BillingUsageWorkflow['per_workflow']>[number]
 // See the file's top doc above; each row deep-links to its workflow editor (CEL-DOORKLIK-CANON, a cell is a gateway, never a dead end).
 export default function UsagePerWorkflowTab({ workflow, phase }: UsagePerWorkflowTabProps) {
   const { t } = useTranslation('settings')
-  const { formatNumber } = useNumberFormat()
+  const { formatNumber, formatCurrency } = useNumberFormat()
   // Row click opens the workflow editor through the app's navigation seam (a hash
   // assignment alone never reaches the shell's router).
   const { openEntity } = useNavigation()
@@ -33,6 +33,7 @@ export default function UsagePerWorkflowTab({ workflow, phase }: UsagePerWorkflo
     { key: 'name', header: t('billing.usage.perWorkflow.colName'), sortable: true, render: (r) => r.name ?? r.workflow_id },
     { key: 'runs', header: t('billing.usage.perWorkflow.colRuns'), align: 'right', sortable: true, render: (r) => formatNumber(r.runs) },
     { key: 'credits', header: t('billing.usage.perWorkflow.colTokens'), align: 'right', sortable: true, render: (r) => formatNumber(r.credits) },
+    { key: 'amount', header: t('billing.usage.perWorkflow.colAmount'), align: 'right', sortable: true, render: (r) => r.amount === null || r.amount === undefined ? '—' : formatCurrency(r.amount) },
   ]
 
   return (

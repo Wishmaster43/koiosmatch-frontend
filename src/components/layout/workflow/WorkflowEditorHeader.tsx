@@ -199,10 +199,10 @@ export default function WorkflowEditorHeader({
         </span>
       )}
       {/* PRIJSMODEL-C 30-08: the staffel stand next to a budget_exceeded run error —
-          a real Button href only when the server actually gave a contact/url,
-          never a fake CTA (§0 no fake affordances). */}
+          a real Button href only when the server actually gave a contact CTA,
+          never a fake affordance (§0 no fake affordances). */}
       {runError !== null && runBudget && (() => {
-        const upgradeHref = runBudget.upgrade_hint?.contact || runBudget.upgrade_hint?.url
+        const upgradeHref = runBudget.upgrade_hint?.contact
         return (
           <span style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
             <Caption>
@@ -212,7 +212,7 @@ export default function WorkflowEditorHeader({
               })}
             </Caption>
             {upgradeHref && (
-              <Button size="sm" variant="ghost" href={upgradeHref} target={runBudget.upgrade_hint?.url ? '_blank' : undefined}>
+              <Button size="sm" variant="ghost" href={upgradeHref}>
                 {t('runControl.upgradeHint')}
               </Button>
             )}

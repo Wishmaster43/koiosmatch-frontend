@@ -91,7 +91,7 @@ export interface BillingUsageWorkflow {
   overage_price?: number
   amount?: number
   per_day?: Array<{ date: string; credits?: number }>
-  per_workflow?: Array<{ workflow_id: string; name?: string; runs?: number; credits?: number }>
+  per_workflow?: Array<{ workflow_id: string; name?: string; runs?: number; credits?: number; amount?: number | null }>
   // B-27: day × activity breakdown — one row per date×activity combination.
   per_activity_per_day?: Array<{ date: string; activity: string; credits?: number }>
 }

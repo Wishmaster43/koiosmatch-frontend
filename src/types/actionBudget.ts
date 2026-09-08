@@ -12,10 +12,8 @@ export type ActionBudgetState = 'ok' | 'warn' | 'blocked'
 export interface ActionBudgetUpgradeHint {
   next_tier_key?: string
   next_tier_label?: string
-  // Workflow-run upgrade hints carry a contact/url instead (WorkflowEditorHeader
-  // renders a real Button href only when one of these is present).
+  // Workflow-run upgrade hints carry a contact CTA string (e.g. mailto:...).
   contact?: string | null
-  url?: string | null
 }
 
 export interface ActionBudget {
