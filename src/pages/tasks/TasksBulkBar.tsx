@@ -6,10 +6,9 @@
  * the backend re-checks.
  */
 import { useTranslation } from 'react-i18next'
-import { ListChecks, Activity, Flag, UserCog } from 'lucide-react'
-import ActionMenu from '@/components/ui/ActionMenu'
+import { Activity, Flag, UserCog } from 'lucide-react'
 import type { MenuNode } from '@/components/ui/ActionMenu'
-import BulkBarShell from '@/components/ui/BulkBarShell'
+import BulkActionsBar from '@/components/ui/BulkActionsBar'
 import { archiveNode } from '@/components/ui/bulk/bulkNodes'
 import type { TaskLookupItem } from '@/context/TaskLookupsContext'
 import type { Id } from '@/types/common'
@@ -55,9 +54,10 @@ export default function TasksBulkBar({
   ]
 
   return (
-    <BulkBarShell label={t('bulk.selected', { count })} onClear={onClear} clearLabel={t('bulk.deselect')}>
-      {/* Single bulk-mutations menu with drill-in submenus */}
-      <ActionMenu label={t('bulk.actions')} icon={ListChecks} items={items} />
-    </BulkBarShell>
+    <BulkActionsBar
+      onClear={onClear}
+      items={items}
+      labels={{ selected: t('bulk.selected', { count }), clear: t('bulk.deselect'), actions: t('bulk.actions') }}
+    />
   )
 }

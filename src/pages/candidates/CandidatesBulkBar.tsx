@@ -6,11 +6,10 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ListChecks, Folder, FolderPlus, FolderMinus, UserCog, Milestone, Briefcase, Tag, Tags, StickyNote, ShieldCheck, UserCheck, Activity, RefreshCw, ExternalLink, Link2, Building2, Layers } from 'lucide-react'
-import ActionMenu from '@/components/ui/ActionMenu'
+import { Folder, FolderPlus, FolderMinus, UserCog, Milestone, Briefcase, Tag, Tags, StickyNote, ShieldCheck, UserCheck, Activity, RefreshCw, ExternalLink, Link2, Building2, Layers } from 'lucide-react'
 import { BTN_H_SM } from '@/config/buttonMetrics'
 import type { MenuNode } from '@/components/ui/ActionMenu'
-import BulkBarShell from '@/components/ui/BulkBarShell'
+import BulkActionsBar from '@/components/ui/BulkActionsBar'
 import BulkNoteModal from '@/components/ui/BulkNoteModal'
 import { useAuth } from '@/context/AuthContext'
 import { useApps } from '@/context/AppsContext'
@@ -189,7 +188,11 @@ export default function CandidatesBulkBar({
   const label = bulkScope === 'filtered' ? t('bulk.scopeSelected', { count: filteredTotal }) : t('bulk.selected', { count })
 
   return (
-    <BulkBarShell label={label} onClear={onClear} clearLabel={t('bulk.deselect')}>
+    <BulkActionsBar
+      onClear={onClear}
+      items={items}
+      labels={{ selected: label, clear: t('bulk.deselect'), actions: t('bulk.actions') }}
+    >
       {/* BULK-FILTERSET-1: only offered when a filter narrows the list — an empty
           filter set is never sent as "all" (the backend 422s it too, see the hook). */}
       {anyFilterActive && (
@@ -205,11 +208,9 @@ export default function CandidatesBulkBar({
         /* eslint-enable huisstijlLegacy/no-restricted-syntax */
       )}
 
-      {/* Single bulk-mutations menu with drill-in submenus */}
-      <ActionMenu label={t('bulk.actions')} icon={ListChecks} items={items} />
       <BulkNoteModal open={noteModalOpen} onClose={() => setNoteModalOpen(false)}
         onSubmit={html => { onAddNote(html); setNoteModalOpen(false) }}
         title={t('bulk.addNote')} submitLabel={t('bulk.noteSubmit')} />
-    </BulkBarShell>
+    </BulkActionsBar>
   )
 }

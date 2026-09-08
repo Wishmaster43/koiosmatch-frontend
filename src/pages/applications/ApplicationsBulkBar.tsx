@@ -5,10 +5,9 @@
  * via props, the mutation runs in the page. Extend by adding a node.
  */
 import { useTranslation } from 'react-i18next'
-import { ListChecks, Milestone } from 'lucide-react'
-import ActionMenu from '@/components/ui/ActionMenu'
+import { Milestone } from 'lucide-react'
 import type { MenuNode } from '@/components/ui/ActionMenu'
-import BulkBarShell from '@/components/ui/BulkBarShell'
+import BulkActionsBar from '@/components/ui/BulkActionsBar'
 import { detachNode } from '@/components/ui/bulk/bulkNodes'
 import type { LookupOption } from '@/types/common'
 
@@ -39,9 +38,10 @@ export default function ApplicationsBulkBar({ count, onClear, onSetPhase, onDeta
   ]
 
   return (
-    <BulkBarShell label={t('bulk.selected', { count })} onClear={onClear} clearLabel={t('bulk.deselect')}>
-      {/* Single bulk-actions menu with drill-in submenus */}
-      <ActionMenu label={t('bulk.actions')} icon={ListChecks} items={items} />
-    </BulkBarShell>
+    <BulkActionsBar
+      onClear={onClear}
+      items={items}
+      labels={{ selected: t('bulk.selected', { count }), clear: t('bulk.deselect'), actions: t('bulk.actions') }}
+    />
   )
 }

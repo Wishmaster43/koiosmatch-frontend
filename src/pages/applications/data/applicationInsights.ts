@@ -14,6 +14,7 @@ import type { BoardPhase } from '../ApplicationsBoard'
 // W27: one shared stats shape (was hand-duplicated here before) — see
 // useApplicationsData's own header comment for the verified server contract.
 import type { AppStats } from '../hooks/useApplicationsData'
+import { pickOne as pickOneImpl } from '@/lib/insightsHelpers'
 
 export interface Aggregate { name: string; key: string; color?: string; value: number }
 
@@ -25,11 +26,7 @@ export interface Aggregate { name: string; key: string; color?: string; value: n
 const AI_TASKS_ACCENT = '#0D9488'
 
 // Donut click → set exactly one filter value (or clear when clicking it again).
-export const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
-  const o = d as { key?: string; name?: string; payload?: { key?: string } } | null | undefined
-  const v = o?.key ?? o?.payload?.key ?? o?.name
-  if (v != null) set(p => (p.length === 1 && p[0] === v) ? [] : [v])
-}
+export const pickOne = pickOneImpl
 
 // Bucket donut click → the SAME single-value bucket state the old toolbar tab
 // row drove (Danny 14-08: "de knoppenrij verdwijnt, dit wordt een donut",

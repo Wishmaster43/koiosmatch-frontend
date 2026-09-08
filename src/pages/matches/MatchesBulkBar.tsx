@@ -11,10 +11,9 @@
  * the shared ActionMenu — extend by adding a node, never fork the bar.
  */
 import { useTranslation } from 'react-i18next'
-import { ListChecks, Link2, Building2, Layers } from 'lucide-react'
-import ActionMenu from '@/components/ui/ActionMenu'
+import { Link2, Building2, Layers } from 'lucide-react'
 import type { MenuNode } from '@/components/ui/ActionMenu'
-import BulkBarShell from '@/components/ui/BulkBarShell'
+import BulkActionsBar from '@/components/ui/BulkActionsBar'
 import { useAuth } from '@/context/AuthContext'
 import { useApps } from '@/context/AppsContext'
 
@@ -49,12 +48,16 @@ export default function MatchesBulkBar({
   ] : []
 
   return (
-    <BulkBarShell label={t('bulk.selected', { count })} onClear={onClear} clearLabel={t('bulk.deselect')}>
-      {items.length > 0
-        ? <ActionMenu label={t('bulk.actions')} icon={ListChecks} items={items} />
+    <BulkActionsBar
+      onClear={onClear}
+      items={items}
+      labels={{ selected: t('bulk.selected', { count }), clear: t('bulk.deselect'), actions: t('bulk.actions') }}
+    >
+      {items.length === 0 && (
         // Two honest empty reasons: no permission at all, vs a permission but
         // no backoffice system enabled for this tenant.
-        : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{canCouple ? t('bulk.coupleUnavailable') : t('bulk.noPermission')}</span>}
-    </BulkBarShell>
+        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{canCouple ? t('bulk.coupleUnavailable') : t('bulk.noPermission')}</span>
+      )}
+    </BulkActionsBar>
   )
 }

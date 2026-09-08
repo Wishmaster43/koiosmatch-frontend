@@ -6,10 +6,9 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ListChecks, UserCog, CircleDot, Tag, Tags, StickyNote, RefreshCw, Link2, Building2, Layers } from 'lucide-react'
-import ActionMenu from '@/components/ui/ActionMenu'
+import { UserCog, CircleDot, Tag, Tags, StickyNote, RefreshCw, Link2, Building2, Layers } from 'lucide-react'
 import type { MenuNode } from '@/components/ui/ActionMenu'
-import BulkBarShell from '@/components/ui/BulkBarShell'
+import BulkActionsBar from '@/components/ui/BulkActionsBar'
 import BulkNoteModal from '@/components/ui/BulkNoteModal'
 import { useAuth } from '@/context/AuthContext'
 import { useApps } from '@/context/AppsContext'
@@ -98,11 +97,14 @@ export default function CustomersBulkBar({
   ]
 
   return (
-    <BulkBarShell label={t('bulk.selected', { count })} onClear={onClear} clearLabel={t('bulk.deselect')}>
-      <ActionMenu label={t('bulk.actions')} icon={ListChecks} items={items} />
+    <BulkActionsBar
+      onClear={onClear}
+      items={items}
+      labels={{ selected: t('bulk.selected', { count }), clear: t('bulk.deselect'), actions: t('bulk.actions') }}
+    >
       <BulkNoteModal open={noteModalOpen} onClose={() => setNoteModalOpen(false)}
         onSubmit={html => { onAddNote(html); setNoteModalOpen(false) }}
         title={t('bulk.addNote')} submitLabel={t('bulk.noteSubmit')} />
-    </BulkBarShell>
+    </BulkActionsBar>
   )
 }

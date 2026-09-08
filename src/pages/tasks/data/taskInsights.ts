@@ -8,13 +8,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import type { Aggregate } from '../hooks/useTaskOptions'
-
-// Donut click → set exactly one filter value (or clear when clicking it again).
-const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
-  const o = d as { key?: string; name?: string; payload?: { key?: string } } | null | undefined
-  const v = o?.key ?? o?.payload?.key ?? o?.name
-  if (v != null) set(p => (p.length === 1 && p[0] === v) ? [] : [v])
-}
+import { pickOne } from '@/lib/insightsHelpers'
 
 interface Args {
   t: TFunction
