@@ -16,11 +16,11 @@
 import { useTranslation } from 'react-i18next'
 import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
-import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
-import type { ChartDatum } from '@/components/charts/chartTypes'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import ReportChartCard from './ReportChartCard'
 import { gateDrillClick } from './reportDrillGate'
+import { donutData, barData, ownerBarData } from './lib/chartData'
+import { segmentClick, ownerClick } from './lib/drillClick'
 import type {
   VacanciesReportData, CandidateSegment, CandidateOwnerSegment,
   ApplicationTopSegment, CandidateTimeseriesPoint,
@@ -38,36 +38,18 @@ export default function VacancyReportAxes({ data, onSegment, onBucket }: {
 
   // Donut datum builder — the coloured status lookup axis wears each value's
   // own colour, with the shared series as fallback (CandidatesReport idiom).
-  const donutData = (segs: CandidateSegment[]): { data: ChartDatum[]; colors: string[] } => ({
-    data: segs.map(s => ({ name: s.label, value: s.count, key: s.value })),
-    colors: segs.map((s, i) => s.color ?? CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]),
-  })
   const pickSegment = (axis: Axis, segs: CandidateSegment[]) =>
-    gateDrillClick('vacancies', (d: unknown) => {
-      const key = (d as { key?: string })?.key ?? (d as { payload?: { key?: string } })?.payload?.key
-      const seg = segs.find(s => s.value === key)
-      if (seg) onSegment(seg, { [axis]: seg.value })
-    })
+    gateDrillClick('vacancies', segmentClick(segs, axis, onSegment))
 
   // Ranking axis bar-datum builder: 'none'/'others' sentinels and orphaned
   // (deleted-lookup) values are all normal array entries — each drills on its
   // RAW value, exactly like any other segment (no special-casing).
-  const barData = (segs: (CandidateSegment | ApplicationTopSegment)[]): ChartDatum[] =>
-    segs.map(s => ({ name: s.label, value: s.count, key: s.value }))
   const pickBar = (axis: Axis, segs: (CandidateSegment | ApplicationTopSegment)[]) =>
-    gateDrillClick('vacancies', (d: ChartDatum) => {
-      const seg = segs.find(x => x.value === d.key)
-      if (seg) onSegment(seg, { [axis]: seg.value })
-    })
+    gateDrillClick('vacancies', segmentClick(segs, axis, onSegment))
 
   // Owner axis (D2 shape: owner_id/name → the `owner` param).
-  const ownerBarData = (segs: CandidateOwnerSegment[]): ChartDatum[] =>
-    segs.map(s => ({ name: s.name, value: s.count, key: s.owner_id }))
   const pickOwnerBar = (segs: CandidateOwnerSegment[]) =>
-    gateDrillClick('vacancies', (d: ChartDatum) => {
-      const seg = segs.find(x => x.owner_id === d.key)
-      if (seg) onSegment({ label: seg.name, count: seg.count }, { owner: seg.owner_id })
-    })
+    gateDrillClick('vacancies', ownerClick(segs, onSegment))
 
   const onSeriesPick = gateDrillClick('vacancies', (dateKey: string) => {
     const pt = data.timeseries.series.find(p => p.date === dateKey)

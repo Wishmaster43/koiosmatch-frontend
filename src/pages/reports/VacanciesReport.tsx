@@ -38,6 +38,7 @@ import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
 import { renderKpiValue } from './renderKpiValue'
+import { buildKpiSpecs } from './lib/kpiSpecs'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
 
@@ -160,30 +161,21 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
   const KPI_UNIT_FALLBACK: Partial<Record<string, unknown>> = { fill_rate: 'ratio' }
   const unitByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.unit ?? KPI_UNIT_FALLBACK[k.key]]))
   const openKpiParams = drill?.rowsParams as Record<string, unknown> | undefined
-  const kpiByKey: Record<string, KpiSpec> = Object.fromEntries(
-    Object.entries(SUITE_LABEL_KEY).map(([key, labelKey]) => {
-      const label = t(labelKey)
-      const raw = kpiByServerKey.get(key)
-      const has = raw != null
-      const unit = unitByServerKey.get(key) as string | undefined
-      const value = renderKpiValue(raw, has, unit)
-      // PARITY EXCEPTION (documented BE-side, KPI-VAC-1): customers_count counts
-      // DISTINCT customers while its drill lists those customers' VACANCIES (rows
-      // ≥ card value) — an explicit subtitle names the divergence instead of the
-      // default window text.
-      const subtitle = key === 'customers_count' ? t('vacancies.kpi.customersCountDrillSub') : undefined
-      return [key, {
-        key, label, value,
-        color: has && raw !== 0 ? KPI_COLOR[key] : undefined,
-        active: openKpiParams?.kpi === key,
-        // KPI-DREMPELS-FE-1: threshold cards keep their tenant-threshold caption.
-        sub: key === 'total' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" />
-          : key === 'stale_online' && data?.summary?.advice_stale_days != null ? t('thresholdDays', { n: data.summary.advice_stale_days })
-          : key === 'closing_soon' && data?.summary?.closing_soon_days != null ? t('thresholdDays', { n: data.summary.closing_soon_days })
-          : undefined,
-        onClick: has ? openKpiDrill(key, label, value, subtitle) : undefined,
-      } satisfies KpiSpec]
-    }))
+  // PARITY EXCEPTION (documented BE-side, KPI-VAC-1): customers_count counts
+  // DISTINCT customers while its drill lists those customers' VACANCIES (rows
+  // ≥ card value) — an explicit subtitle names the divergence instead of the
+  // default window text.
+  const kpiByKey = buildKpiSpecs({
+    kpis: kpiByServerKey, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t,
+    openKpiDrill: (key, label, value) => openKpiDrill(key, label, value, key === 'customers_count' ? t('vacancies.kpi.customersCountDrillSub') : undefined),
+    keyBy: 'server', activeKey: openKpiParams?.kpi as string | undefined, clickOnlyWhenHas: true,
+    valueFor: (key, raw, has) => renderKpiValue(raw, has, unitByServerKey.get(key) as string | undefined),
+    // KPI-DREMPELS-FE-1: threshold cards keep their tenant-threshold caption.
+    subFor: key => key === 'total' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" />
+      : key === 'stale_online' && data?.summary?.advice_stale_days != null ? t('thresholdDays', { n: data.summary.advice_stale_days })
+      : key === 'closing_soon' && data?.summary?.closing_soon_days != null ? t('thresholdDays', { n: data.summary.closing_soon_days })
+      : undefined,
+  })
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key
   // has vanished — RAPPORT-KPI-INSTELBAAR).

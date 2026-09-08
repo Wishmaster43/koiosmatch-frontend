@@ -24,8 +24,8 @@ import { gateDrillClick } from './reportDrillGate'
 import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterParams'
 import type { ReportFilterState } from './reportFilterParams'
 import PieChartCard from '@/components/charts/PieChartCard'
-import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
-import type { ChartDatum } from '@/components/charts/chartTypes'
+import { donutData } from './lib/chartData'
+import { buildKpiSpecs } from './lib/kpiSpecs'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateTimeseriesPoint, CandidateSegment, MatchTerminationReasonSegment } from '@/types/analytics'
@@ -80,10 +80,6 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
   })
   const contractFormSegs = data?.by_contract_form ?? []
   // Donut data builder — each lookup value wears its OWN colour, house series as fallback.
-  const donutData = (segs: CandidateSegment[]): { data: ChartDatum[]; colors: string[] } => ({
-    data: segs.map(s => ({ name: s.label, value: s.count, key: s.value })),
-    colors: segs.map((s, i) => s.color ?? CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]),
-  })
   // Origin donut (herkomst: via funnel vs. direct match) — restores by_origin's
   // display surface after the old origin KPI cards retired with the strip flip;
   // static two-value axis, so house series colours, and each slice drills the
@@ -185,21 +181,12 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
   const KPI_UNIT_FALLBACK: Partial<Record<string, unknown>> = { avg_duration_days: 'days', reach_rate: 'ratio' }
   const unitByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.unit ?? KPI_UNIT_FALLBACK[k.key]]))
   const openKpiParams = drill?.rowsParams as Record<string, unknown> | undefined
-  const kpiByKey: Record<string, KpiSpec> = Object.fromEntries(
-    Object.entries(SUITE_LABEL_KEY).map(([key, labelKey]) => {
-      const label = t(labelKey)
-      const raw = kpiByServerKey.get(key)
-      const has = raw != null
-      const unit = unitByServerKey.get(key) as string | undefined
-      const value = renderKpiValue(raw, has, unit)
-      return [key, {
-        key, label, value,
-        color: has && raw !== 0 ? KPI_COLOR[key] : undefined,
-        active: openKpiParams?.kpi === key,
-        sub: key === 'total' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined,
-        onClick: has ? openKpiDrill(key, label, value) : undefined,
-      } satisfies KpiSpec]
-    }))
+  const kpiByKey = buildKpiSpecs({
+    kpis: kpiByServerKey, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t, openKpiDrill,
+    keyBy: 'server', activeKey: openKpiParams?.kpi as string | undefined, clickOnlyWhenHas: true,
+    valueFor: (key, raw, has) => renderKpiValue(raw, has, unitByServerKey.get(key) as string | undefined),
+    subFor: key => (key === 'total' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined),
+  })
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key
   // has vanished — RAPPORT-KPI-INSTELBAAR).

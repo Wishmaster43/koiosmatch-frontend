@@ -45,6 +45,7 @@ import { useReportKpiOrdering } from './hooks/useReportKpiOrdering'
 import type { ReportFilterState } from './reportFilterParams'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
+import { buildKpiSpecs } from './lib/kpiSpecs'
 
 // Semantic colour per server key, applied only when the count is non-zero (§4:
 // colour carries meaning — a calm zero stays uncoloured). avg_first_response_
@@ -148,19 +149,17 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
   // The nine fixed cards straight off the server's kpis[] array — each label from
   // the local i18n catalogue, each card clickable into its own drill.
   const kpiByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.count]))
-  const kpiByKey: Record<string, KpiSpec> = Object.fromEntries(
-    Object.entries(KPI_LABEL_KEYS).map(([serverKey, labelKey]) => {
-      const camelKey = labelKey.split('.').pop()!
-      const raw = kpiByServerKey.get(serverKey)
-      // The avg-response-time card carries a minutes unit; every other card is a
-      // plain count. Both render the house dash when the field is genuinely absent.
-      const value = raw == null ? '—' : serverKey === 'avg_first_response_minutes' ? formatNumber(raw) : raw
-      const sub = raw != null && serverKey === 'avg_first_response_minutes' ? t('whatsapp.kpi.minutesUnit') : undefined
-      const onClick = openKpiDrill(serverKey, t(labelKey), value)
-      const color = raw != null && raw !== 0 ? KPI_COLOR[serverKey] : undefined
-      return [camelKey, { key: camelKey, label: t(labelKey), value, sub, color, ...(onClick ? { onClick } : {}) }]
-    }),
-  )
+  const kpiByKey = buildKpiSpecs({
+    kpis: kpiByServerKey,
+    labelKeys: KPI_LABEL_KEYS,
+    colors: KPI_COLOR,
+    t,
+    openKpiDrill,
+    valueFor: (serverKey, raw) =>
+      raw == null ? '—' : serverKey === 'avg_first_response_minutes' ? formatNumber(raw) : raw,
+    subFor: (serverKey, raw) =>
+      raw != null && serverKey === 'avg_first_response_minutes' ? t('whatsapp.kpi.minutesUnit') : undefined,
+  })
 
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored).

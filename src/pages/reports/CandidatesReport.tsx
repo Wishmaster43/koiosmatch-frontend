@@ -27,8 +27,6 @@ import type { KpiSpec } from '@/components/insights/InsightsRow'
 import type { DrillSpec } from './ReportDrillDrawer'
 import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
-import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
-import type { ChartDatum } from '@/components/charts/chartTypes'
 import { useCandidatesReport } from './useCandidatesReport'
 import { useCandidatesKpiSuite } from './useCandidatesKpiSuite'
 import { useReportSwitch } from './useReportSwitch'
@@ -48,6 +46,8 @@ import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
+import { donutData, barData, ownerBarData } from './lib/chartData'
+import { segmentClick, ownerClick } from './lib/drillClick'
 
 // The five drillable axes; `param` is the XOR query key the drill/advice endpoints expect.
 type Axis = 'status' | 'phase' | 'source' | 'owner' | 'branch'
@@ -143,30 +143,12 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
 
   // Chart datum builders — the donut wears each lookup value's OWN colour with
   // the shared series as fallback; rankings get the plain house series.
-  const donutData = (segs: CandidateSegment[]): { data: ChartDatum[]; colors: string[] } => ({
-    data: segs.map(s => ({ name: s.label, value: s.count, key: s.value })),
-    colors: segs.map((s, i) => s.color ?? CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]),
-  })
   const pickSegment = (axis: Axis, segs: CandidateSegment[]) =>
-    gateDrillClick('candidates', (d: unknown) => {
-      const key = (d as { key?: string })?.key ?? (d as { payload?: { key?: string } })?.payload?.key
-      const seg = segs.find(s => s.value === key)
-      if (seg) openSegment(axis, seg, { [axis]: seg.value })
-    })
-  const barData = (segs: CandidateSegment[]): ChartDatum[] =>
-    segs.map(s => ({ name: s.label, value: s.count, key: s.value }))
-  const ownerBarData = (segs: CandidateOwnerSegment[]): ChartDatum[] =>
-    segs.map(s => ({ name: s.name, value: s.count, key: s.owner_id }))
+    gateDrillClick('candidates', segmentClick(segs, axis, (seg, params) => openSegment(axis, seg, params)))
   const pickBar = (axis: Axis, segs: CandidateSegment[]) =>
-    gateDrillClick('candidates', (d: ChartDatum) => {
-      const seg = segs.find(s => s.value === d.key)
-      if (seg) openSegment(axis, seg, { [axis]: seg.value })
-    })
+    gateDrillClick('candidates', segmentClick(segs, axis, (seg, params) => openSegment(axis, seg, params)))
   const pickOwnerBar = (segs: CandidateOwnerSegment[]) =>
-    gateDrillClick('candidates', (d: ChartDatum) => {
-      const seg = segs.find(s => s.owner_id === d.key)
-      if (seg) openSegment('owner', { label: seg.name, count: seg.count }, { owner: seg.owner_id })
-    })
+    gateDrillClick('candidates', ownerClick(segs, (seg, params) => openSegment('owner', seg, params)))
 
   const onSeriesPick = gateDrillClick('candidates', (dateKey: string) => {
     const pt = data?.timeseries.series.find(p => p.date === dateKey)

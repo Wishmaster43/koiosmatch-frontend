@@ -38,8 +38,6 @@ import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterPara
 import type { ReportFilterState } from './reportFilterParams'
 import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
-import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
-import type { ChartDatum } from '@/components/charts/chartTypes'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateSegment, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
@@ -52,6 +50,8 @@ import type { ReportCompareMode } from './reportCompareMode'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { useNavigation } from '@/context/NavigationContext'
 import CustomerDepthSections from './depth/CustomerDepthSections'
+import { donutData, barData, ownerBarData } from './lib/chartData'
+import { segmentClick, ownerClick } from './lib/drillClick'
 
 // The four plain axes; `param` is the XOR query key the drill/advice endpoints expect.
 // Deliberately no 'source' — see the header comment.
@@ -142,30 +142,12 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
   // Chart datum builders — the donut wears each lookup value's OWN colour with
   // the shared series as fallback; rankings get the plain house series
   // (CandidatesReport idiom, §chart-type-rule).
-  const donutData = (segs: CandidateSegment[]): { data: ChartDatum[]; colors: string[] } => ({
-    data: segs.map(s => ({ name: s.label, value: s.count, key: s.value })),
-    colors: segs.map((s, i) => s.color ?? CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]),
-  })
   const pickSegment = (axis: Axis, segs: CandidateSegment[]) =>
-    gateDrillClick('customers', (d: unknown) => {
-      const key = (d as { key?: string })?.key ?? (d as { payload?: { key?: string } })?.payload?.key
-      const seg = segs.find(s => s.value === key)
-      if (seg) openSegment(seg, { [axis]: seg.value })
-    })
-  const barData = (segs: CandidateSegment[]): ChartDatum[] =>
-    segs.map(s => ({ name: s.label, value: s.count, key: s.value }))
+    gateDrillClick('customers', segmentClick(segs, axis, openSegment))
   const pickBar = (axis: Axis, segs: CandidateSegment[]) =>
-    gateDrillClick('customers', (d: ChartDatum) => {
-      const seg = segs.find(s => s.value === d.key)
-      if (seg) openSegment(seg, { [axis]: seg.value })
-    })
-  const ownerBarData = (segs: CandidateOwnerSegment[]): ChartDatum[] =>
-    segs.map(s => ({ name: s.name, value: s.count, key: s.owner_id }))
+    gateDrillClick('customers', segmentClick(segs, axis, openSegment))
   const pickOwnerBar = (segs: CandidateOwnerSegment[]) =>
-    gateDrillClick('customers', (d: ChartDatum) => {
-      const seg = segs.find(s => s.owner_id === d.key)
-      if (seg) openSegment({ label: seg.name, count: seg.count }, { owner: seg.owner_id })
-    })
+    gateDrillClick('customers', ownerClick(segs, openSegment))
 
   // KPIS-DRILL-1: a signal card whose key is one of the nine kpi-drill enum
   // values opens the same shared drawer, but sourced from the dedicated

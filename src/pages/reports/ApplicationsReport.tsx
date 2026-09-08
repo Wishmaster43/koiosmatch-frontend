@@ -45,6 +45,9 @@ import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
 import { orderKpis } from './lib/kpiOrder'
 
+import { buildKpiSpecs } from './lib/kpiSpecs'
+import { segmentClick, ownerClick } from './lib/drillClick'
+import { barData, ownerBarData } from './lib/chartData'
 // The nine fixed KPI keys the live backend returns (ApplicationKpisReport::CARDS,
 // RAPPORT-APPS-VERDIEPING-1) in camelCase label form (applications.kpi.*) — the
 // server's own `label` is intentionally ignored (§5). Mirrors WhatsappReport's
@@ -146,21 +149,10 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
   // slice wears its own tenant colour, falling back to the house series.
 
   // Bar data for a ranking axis (people/orgs/free values).
-  const barData = (segs: (CandidateSegment | ApplicationTopSegment)[]): ChartDatum[] =>
-    segs.map(s => ({ name: s.label, value: s.count, key: s.value }))
   const pickBar = (axis: Axis, segs: (CandidateSegment | ApplicationTopSegment)[]) =>
-    gateDrillClick('applications', (d: ChartDatum) => {
-      const seg = segs.find(s => s.value === d.key)
-      if (seg) openSegment(seg, { [axis]: d.key })
-    })
-
-  const ownerBarData = (segs: CandidateOwnerSegment[]): ChartDatum[] =>
-    segs.map(s => ({ name: s.name, value: s.count, key: s.owner_id }))
+    gateDrillClick('applications', segmentClick(segs, axis, openSegment))
   const pickOwnerBar = (segs: CandidateOwnerSegment[]) =>
-    gateDrillClick('applications', (d: ChartDatum) => {
-      const seg = segs.find(s => s.owner_id === d.key)
-      if (seg) openSegment({ label: seg.name, count: seg.count }, { owner: d.key })
-    })
+    gateDrillClick('applications', ownerClick(segs, openSegment))
 
   // Funnel-bucket donut: `bucket` here is the SEGMENT value (see the dual-role
   // note above openBucket) — sent without `date`, so it never collides with the
@@ -219,20 +211,17 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
   // colour carries meaning — a calm zero stays uncoloured). Conversion/avg-days
   // are debatable-meaning metrics and stay uncoloured (per brief).
   const kpiByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.count]))
-  const kpiByKey: Record<string, KpiSpec> = Object.fromEntries(
-    Object.entries(KPI_LABEL_KEYS).map(([serverKey, labelKey]) => {
-      const camelKey = labelKey.split('.').pop()!
-      const raw = kpiByServerKey.get(serverKey)
-      // conversion_pct carries a percentage unit, avg_days_to_match a days unit —
-      // every other card is a plain count. The house dash renders when NULL
-      // (STATS-HONEST-1: nothing decided/matched yet, never a fake 0).
-      const value = raw == null ? '—' : serverKey === 'conversion_pct' ? `${formatNumber(raw)}%` : formatNumber(raw)
-      const sub = raw != null && serverKey === 'avg_days_to_match' ? t('applications.kpi.daysUnit') : undefined
-      const onClick = openKpiDrill(serverKey, t(labelKey), value)
-      const color = raw != null && raw !== 0 ? KPI_COLOR[serverKey] : undefined
-      return [camelKey, { key: camelKey, label: t(labelKey), value, sub, color, ...(onClick ? { onClick } : {}) }]
-    }),
-  )
+  const kpiByKey = buildKpiSpecs({
+    kpis: kpiByServerKey,
+    labelKeys: KPI_LABEL_KEYS,
+    colors: KPI_COLOR,
+    t,
+    openKpiDrill,
+    valueFor: (serverKey, raw) =>
+      raw == null ? '—' : serverKey === 'conversion_pct' ? `${formatNumber(raw)}%` : formatNumber(raw),
+    subFor: (serverKey, raw) =>
+      raw != null && serverKey === 'avg_days_to_match' ? t('applications.kpi.daysUnit') : undefined,
+  })
 
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored) — mirrors whatsapp.

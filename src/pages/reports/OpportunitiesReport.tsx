@@ -25,8 +25,6 @@ import { orderKpis } from './lib/kpiOrder'
 import { useSeriesDrill } from './hooks/useSeriesDrill'
 import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
-import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
-import type { ChartDatum } from '@/components/charts/chartTypes'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateOwnerSegment } from '@/types/analytics'
@@ -39,6 +37,9 @@ import type { ReportCompareMode } from './reportCompareMode'
 import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterParams'
 import type { ReportFilterState } from './reportFilterParams'
 import { renderKpiValue } from './renderKpiValue'
+import { buildKpiSpecs } from './lib/kpiSpecs'
+import { donutData, barData, ownerBarData } from './lib/chartData'
+import { segmentClick, ownerClick } from './lib/drillClick'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
 
@@ -90,38 +91,16 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
   // Stage axis: a lookup axis with its own colour per value (CHART-TYPE RULE) →
   // donut. 'none'/'others' sentinels and orphaned (deleted-lookup) values are
   // all normal array entries — each slice drills on its RAW value.
-  const stageDonut = (segs: AxisSeg[]) => {
-    const donutData = {
-      data: segs.map(s => ({ name: s.label, value: s.count, key: s.value })),
-      colors: segs.map((s, i) => s.color ?? CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]),
-    }
-    const onPick = gateDrillClick('opportunities', (d: unknown) => {
-      const key = (d as { key?: string })?.key ?? (d as { payload?: { key?: string } })?.payload?.key
-      const seg = segs.find(s => s.value === key)
-      if (seg) openSegment(seg, { stage: key })
-    })
-    return <PieChartCard {...donutData} onItemClick={onPick} />
-  }
+  const stageDonut = (segs: AxisSeg[]) =>
+    <PieChartCard {...donutData(segs)} onItemClick={gateDrillClick('opportunities', segmentClick(segs, 'stage', openSegment))} />
 
   // Ranking axes (customer/branch: people/orgs, no lookup colour) → bar chart.
-  const bars = (axis: Exclude<Axis, 'stage'>, segs: AxisSeg[]) => {
-    const data: ChartDatum[] = segs.map(s => ({ name: s.label, value: s.count, key: s.value }))
-    const onPick = gateDrillClick('opportunities', (d: ChartDatum) => {
-      const seg = segs.find(s => s.value === d.key)
-      if (seg) openSegment(seg, { [axis]: d.key })
-    })
-    return <BarChartCard data={data} onBarClick={onPick} />
-  }
+  const bars = (axis: Exclude<Axis, 'stage'>, segs: AxisSeg[]) =>
+    <BarChartCard data={barData(segs)} onBarClick={gateDrillClick('opportunities', segmentClick(segs, axis, openSegment))} />
 
   // Owner axis (D2 shape: owner_id/name → the `owner` param) → bar chart.
-  const ownerBars = (segs: CandidateOwnerSegment[]) => {
-    const data: ChartDatum[] = segs.map(s => ({ name: s.name, value: s.count, key: s.owner_id }))
-    const onPick = gateDrillClick('opportunities', (d: ChartDatum) => {
-      const seg = segs.find(s => s.owner_id === d.key)
-      if (seg) openSegment({ label: seg.name, count: seg.count }, { owner: d.key })
-    })
-    return <BarChartCard data={data} onBarClick={onPick} />
-  }
+  const ownerBars = (segs: CandidateOwnerSegment[]) =>
+    <BarChartCard data={ownerBarData(segs)} onBarClick={gateDrillClick('opportunities', ownerClick(segs, openSegment))} />
 
   // Series pick via extracted hook.
   const { onSeriesPick } = useSeriesDrill('opportunities', data, baseParams, windowSub, setDrill)
@@ -156,26 +135,17 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
   const KPI_UNIT_FALLBACK: Partial<Record<string, unknown>> = { win_rate: 'pct', open_value: 'euro' }
   const unitByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.unit ?? KPI_UNIT_FALLBACK[k.key]]))
   const openKpiParams = drill?.rowsParams as Record<string, unknown> | undefined
-  const kpiByKey: Record<string, KpiSpec> = Object.fromEntries(
-    Object.entries(SUITE_LABEL_KEY).map(([key, labelKey]) => {
-      const label = t(labelKey)
-      const raw = kpiByServerKey.get(key)
-      const has = raw != null
-      const unit = unitByServerKey.get(key) as string | undefined
-      const value = renderKpiValue(raw, has, unit)
-      return [key, {
-        key, label, value,
-        color: has && raw !== 0 ? KPI_COLOR[key] : undefined,
-        active: openKpiParams?.kpi === key,
-        // KPI-DREMPELS-FE-1: threshold cards keep their tenant-threshold caption
-        // (the envelope still carries the configured day counts).
-        sub: key === 'total' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" />
-          : key === 'stale' && data?.totals?.stale_days != null ? t('thresholdDays', { n: data.totals.stale_days })
-          : key === 'closing_soon' && data?.totals?.closing_soon_days != null ? t('thresholdDays', { n: data.totals.closing_soon_days })
-          : undefined,
-        onClick: has ? openKpiDrill(key, label, value) : undefined,
-      } satisfies KpiSpec]
-    }))
+  const kpiByKey = buildKpiSpecs({
+    kpis: kpiByServerKey, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t, openKpiDrill,
+    keyBy: 'server', activeKey: openKpiParams?.kpi as string | undefined, clickOnlyWhenHas: true,
+    valueFor: (key, raw, has) => renderKpiValue(raw, has, unitByServerKey.get(key) as string | undefined),
+    // KPI-DREMPELS-FE-1: threshold cards keep their tenant-threshold caption
+    // (the envelope still carries the configured day counts).
+    subFor: key => key === 'total' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" />
+      : key === 'stale' && data?.totals?.stale_days != null ? t('thresholdDays', { n: data.totals.stale_days })
+      : key === 'closing_soon' && data?.totals?.closing_soon_days != null ? t('thresholdDays', { n: data.totals.closing_soon_days })
+      : undefined,
+  })
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key
   // has vanished — RAPPORT-KPI-INSTELBAAR).

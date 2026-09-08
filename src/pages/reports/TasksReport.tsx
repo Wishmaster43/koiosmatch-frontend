@@ -27,8 +27,6 @@ import type { ReportFilterState } from './reportFilterParams'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
-import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
-import type { ChartDatum } from '@/components/charts/chartTypes'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateOwnerSegment } from '@/types/analytics'
 import { useReportKpiOrdering } from './hooks/useReportKpiOrdering'
@@ -38,6 +36,9 @@ import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
+import { donutData, barData, ownerBarData } from './lib/chartData'
+import { buildKpiSpecs } from './lib/kpiSpecs'
+import { segmentClick, ownerClick } from './lib/drillClick'
 
 // The plain single-value XOR axes; `assignee` has its own D2 shape below.
 type Axis = 'status' | 'type' | 'priority' | 'team' | 'branch'
@@ -79,35 +80,18 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, co
   // wears its own tenant colour, falling back to the house series. 'none'
   // sentinels and orphaned (deleted-lookup) values are normal entries — each
   // drills on its RAW value (the lookup ID for status/priority, never a slug).
-  const donutData = (segs: AxisSeg[]): { data: ChartDatum[]; colors: string[] } => ({
-    data: segs.map(s => ({ name: s.label, value: s.count, key: s.value })),
-    colors: segs.map((s, i) => s.color ?? CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]),
-  })
   const pickSegment = (axis: Axis, segs: AxisSeg[]) =>
-    gateDrillClick('tasks', (d: unknown) => {
-      const key = (d as { key?: string })?.key ?? (d as { payload?: { key?: string } })?.payload?.key
-      const seg = segs.find(s => s.value === key)
-      if (seg) openSegment(seg, { [axis]: seg.value })
-    })
+    gateDrillClick('tasks', segmentClick(segs, axis, openSegment))
 
   // Bar data for a ranking axis (open vocabulary / people / orgs).
-  const barData = (segs: AxisSeg[]): ChartDatum[] =>
-    segs.map(s => ({ name: s.label, value: s.count, key: s.value }))
   const pickBar = (axis: Axis, segs: AxisSeg[]) =>
-    gateDrillClick('tasks', (d: ChartDatum) => {
-      const seg = segs.find(s => s.value === d.key)
-      if (seg) openSegment(seg, { [axis]: d.key })
-    })
+    gateDrillClick('tasks', segmentClick(segs, axis, openSegment))
 
   // Assignee axis (D2 shape: owner_id/name → the `assignee` param; a NULL
   // assignee arrives as the 'none' row, "Niet toegewezen").
-  const assigneeBarData = (segs: CandidateOwnerSegment[]): ChartDatum[] =>
-    segs.map(s => ({ name: s.name, value: s.count, key: s.owner_id }))
+  const assigneeBarData = ownerBarData
   const pickAssigneeBar = (segs: CandidateOwnerSegment[]) =>
-    gateDrillClick('tasks', (d: ChartDatum) => {
-      const seg = segs.find(s => s.owner_id === d.key)
-      if (seg) openSegment({ label: seg.name, count: seg.count }, { assignee: d.key })
-    })
+    gateDrillClick('tasks', ownerClick(segs, openSegment, 'assignee'))
 
   // Series pick via extracted hook.
   const { onSeriesPick } = useSeriesDrill('tasks', data, baseParams, windowSub, setDrill, 'tasks')
@@ -141,23 +125,13 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, co
     without_assignee: 'tasks.kpi.withoutAssignee', avg_completion_days: 'tasks.kpi.avgCompletionDays',
   }
   const openKpiParams = drill?.rowsParams as Record<string, unknown> | undefined
-  const kpiByKey: Record<string, KpiSpec> = Object.fromEntries(
-    Object.entries(SUITE_LABEL_KEY).map(([key, labelKey]) => {
-      const label = t(labelKey)
-      const raw = kpiByServerKey.get(key)
-      const has = raw != null
-      // avg_completion_days is a computed average in days, not a row count.
-      const value = !has ? '—'
-        : key === 'avg_completion_days' ? t('tasks.kpi.daysValue', { days: Math.round(raw as number) })
-        : raw
-      return [key, {
-        key, label, value,
-        color: has && raw !== 0 ? KPI_COLOR[key] : undefined,
-        active: openKpiParams?.kpi === key,
-        sub: key === 'total' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined,
-        onClick: has ? openKpiDrill(key, label, value) : undefined,
-      } satisfies KpiSpec]
-    }))
+  const kpiByKey = buildKpiSpecs({
+    kpis: kpiByServerKey, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t, openKpiDrill,
+    keyBy: 'server', activeKey: openKpiParams?.kpi as string | undefined, clickOnlyWhenHas: true,
+    // avg_completion_days is a computed average in days, not a row count.
+    valueFor: (key, raw, has) => (!has ? '—' : key === 'avg_completion_days' ? t('tasks.kpi.daysValue', { days: Math.round(raw as number) }) : (raw as number)),
+    subFor: key => (key === 'total' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined),
+  })
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key
   // has vanished — RAPPORT-KPI-INSTELBAAR).

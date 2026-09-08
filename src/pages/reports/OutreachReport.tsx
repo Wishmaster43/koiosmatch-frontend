@@ -30,10 +30,11 @@ import type { DrillSpec } from './ReportDrillDrawer'
 import { useOutreachReport } from './useOutreachReport'
 import { gateDrillClick } from './reportDrillGate'
 import { useSeriesDrill } from './hooks/useSeriesDrill'
+import { donutData, barData, ownerBarData } from './lib/chartData'
+import { segmentClick, ownerClick } from './lib/drillClick'
+import { buildKpiSpecs } from './lib/kpiSpecs'
 import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
-import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
-import type { ChartDatum } from '@/components/charts/chartTypes'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateOwnerSegment } from '@/types/analytics'
@@ -90,32 +91,16 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
   // entries — each drills on its RAW value, exactly like any other segment. An
   // archived campaign keeps its name and drills on its uuid. Outreach axes carry
   // no lookup colour field, so donuts fall back to the house series.
-  const donutData = (segs: AxisSeg[]): { data: ChartDatum[]; colors: string[] } => ({
-    data: segs.map(s => ({ name: s.label, value: s.count, key: s.value })),
-    colors: segs.map((_, i) => CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]),
-  })
   const pickSegment = (axis: Axis, segs: AxisSeg[]) =>
-    gateDrillClick('outreach', (d: unknown) => {
-      const key = (d as { key?: string })?.key ?? (d as { payload?: { key?: string } })?.payload?.key
-      const seg = segs.find(s => s.value === key)
-      if (seg) openSegment(seg, { [axis]: seg.value })
-    })
-  const barData = (segs: AxisSeg[]): ChartDatum[] => segs.map(s => ({ name: s.label, value: s.count, key: s.value }))
+    gateDrillClick('outreach', segmentClick(segs, axis, openSegment))
   const pickBar = (axis: Axis, segs: AxisSeg[]) =>
-    gateDrillClick('outreach', (d: ChartDatum) => {
-      const seg = segs.find(s => s.value === d.key)
-      if (seg) openSegment(seg, { [axis]: seg.value })
-    })
+    gateDrillClick('outreach', segmentClick(segs, axis, openSegment))
 
   // Assignee axis (D2 shape: owner_id/name → the `assignee` param; a NULL
   // assignee arrives as the 'none' row, "Niet toegewezen") → ranking bar.
-  const assigneeBarData = (segs: CandidateOwnerSegment[]): ChartDatum[] =>
-    segs.map(s => ({ name: s.name, value: s.count, key: s.owner_id }))
+  const assigneeBarData = ownerBarData
   const pickAssigneeBar = (segs: CandidateOwnerSegment[]) =>
-    gateDrillClick('outreach', (d: ChartDatum) => {
-      const seg = segs.find(s => s.owner_id === d.key)
-      if (seg) openSegment({ label: seg.name, count: seg.count }, { assignee: seg.owner_id })
-    })
+    gateDrillClick('outreach', ownerClick(segs, openSegment, 'assignee'))
 
   // Series pick via extracted hook.
   const { onSeriesPick } = useSeriesDrill('outreach', data, baseParams, windowSub, setDrill)
@@ -145,23 +130,13 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
     due_today: 'outreach.kpi.dueToday',
   }
   const openKpiParams = drill?.rowsParams as Record<string, unknown> | undefined
-  const kpiByKey: Record<string, KpiSpec> = Object.fromEntries(
-    Object.entries(SUITE_LABEL_KEY).map(([key, labelKey]) => {
-      const label = t(labelKey)
-      const raw = kpiByServerKey.get(key)
-      const has = raw != null
-      // conversion_pct is a float percentage, not a row count.
-      const value = !has ? '—'
-        : key === 'conversion_pct' ? formatPercent(raw as number)
-        : raw
-      return [key, {
-        key, label, value,
-        color: has && raw !== 0 ? KPI_COLOR[key] : undefined,
-        active: openKpiParams?.kpi === key,
-        sub: key === 'total_targets' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined,
-        onClick: has ? openKpiDrill(key, label, value) : undefined,
-      } satisfies KpiSpec]
-    }))
+  const kpiByKey = buildKpiSpecs({
+    kpis: kpiByServerKey, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t, openKpiDrill,
+    keyBy: 'server', activeKey: openKpiParams?.kpi as string | undefined, clickOnlyWhenHas: true,
+    // conversion_pct is a float percentage, not a row count.
+    valueFor: (key, raw, has) => (!has ? '—' : key === 'conversion_pct' ? formatPercent(raw as number) : (raw as number)),
+    subFor: key => (key === 'total_targets' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined),
+  })
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key
   // has vanished — RAPPORT-KPI-INSTELBAAR).
