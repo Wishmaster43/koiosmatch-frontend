@@ -3,6 +3,7 @@
  * enriched `ApplicationDetail` for the drawer) and the raw API record
  * (`ApiApplication`), read defensively by mapApplication / mapApplicationDetail.
  */
+import type { NoteActionItemWire } from '@/components/drawer/tabs/notes/notesTabTypes'
 import type { Id, Loose } from './common'
 import type { InterviewWorkflowRef } from './vacancy'
 import type { ApiKoiosAiAdvice, KoiosAiAdvice } from '@/lib/koiosAdviceMap'
@@ -222,7 +223,8 @@ export interface ApplicationDetail extends Application {
   // note's OWNER user id (resolved from `author_id`) — the shared NotesTab's
   // canManageNote() rights gate reads this to tell "note is mine" from "note is a
   // colleague's" (a null/omitted key stays permissive; a real id engages the gate).
-  notes: Array<{ id: Id | undefined; author: string; authorId: Id | null; type: string; title: string; text: string; language: string; time: string; hasPreviousVersion?: boolean }>
+  // X-34b: action_items rides along on the wire key (the shared NotesTab reads it; null = none).
+  notes: Array<{ id: Id | undefined; author: string; authorId: Id | null; type: string; title: string; text: string; language: string; time: string; hasPreviousVersion?: boolean; action_items?: NoteActionItemWire[] | null }>
   matchCriteria: unknown[]
   matchSummary: string
   matchSource: string
@@ -471,7 +473,7 @@ export interface ApiApplication {
   // ships on every note too, and `author` resolves to a real name — the controller's
   // `ownerNames` map (previously referenced but never filled) is populated from a
   // single central-connection lookup before the resource serializes.
-  notes?: Array<{ id?: Id; author?: string; author_id?: Id | null; type?: string; title?: string | null; text?: string; language?: string | null; created_at?: string; has_previous_version?: boolean }>
+  notes?: Array<{ id?: Id; author?: string; author_id?: Id | null; type?: string; title?: string | null; text?: string; language?: string | null; created_at?: string; has_previous_version?: boolean; action_items?: NoteActionItemWire[] | null }>
   match_criteria?: unknown[]
   match_summary?: string
   match_score_source?: string

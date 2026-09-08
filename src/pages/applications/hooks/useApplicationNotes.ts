@@ -41,6 +41,8 @@ import { useAuth } from '@/context/AuthContext'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { actionItemsWire } from '@/components/drawer/tabs/notes/notesTabTypes'
+import type { NoteActionItemWire } from '@/components/drawer/tabs/NotesTab'
 import type { ApplicationDetail } from '@/types/application'
 import type { Id } from '@/types/common'
 
@@ -62,13 +64,15 @@ export interface ApplicationNote {
   created_at?: string
   // NOTE-UNDO-FE-1 (K-172): true once the note carries a filled one-slot undo.
   has_previous_version?: boolean
+  // NOTE-ACTION-ITEMS-1: persisted panel items, returned on read, omitted on write when absent.
+  action_items?: NoteActionItemWire[] | null
   // The shared NoteItem type carries an index signature (author_name/created_by/…
   // it also reads) — mirrored here so this narrower shape stays assignable to it.
   [k: string]: unknown
 }
 
 // The composer payload the shared NotesTab hands back on save.
-interface NotePayload { type: string; title: string; body: string; language?: string }
+interface NotePayload { type: string; title: string; body: string; language?: string; action_items?: NoteActionItemWire[] }
 
 // Manages one application's internal notes's seed/create/edit
 // contract (no delete route exists yet, so none is offered).
@@ -81,6 +85,8 @@ export function useApplicationNotes(applicationId: Id | undefined, initialNotes:
     initialNotes.map(n => ({
       id: n.id, type: n.type, title: n.title, author: n.author, author_id: n.authorId ?? null,
       text: n.text, language: n.language, created_at: n.time, has_previous_version: n.hasPreviousVersion ?? false,
+      // X-34b: persisted panel items seed the row, so a reopened note shows its action points.
+      action_items: n.action_items ?? null,
     })),
   )
 
@@ -89,6 +95,7 @@ export function useApplicationNotes(applicationId: Id | undefined, initialNotes:
   // even if more notes were added meanwhile) and the server's own message
   // surfaces — mirrors useCandidateNotes' OPTIMISTIC-REVERT-1 fix so a failed
   // note never lingers on screen as if it had saved.
+  // NOTE-ACTION-ITEMS-1: forward the action_items panel only when present (present = the full wanted set; absent = untouched).
   const addNote = useCallback((payload: NotePayload) => {
     if (!applicationId) return
     const local: ApplicationNote = {
@@ -97,9 +104,11 @@ export function useApplicationNotes(applicationId: Id | undefined, initialNotes:
       author: user?.name ?? 'Koios',
       author_id: user?.id ?? null,
       created_at: new Date().toISOString(),
+      action_items: payload.action_items ?? null,
     }
     setNotes(prev => [local, ...prev])
-    api.post(`/applications/${applicationId}/notes`, payload).catch(err => {
+    api.post(`/applications/${applicationId}/notes`, { type: payload.type, title: payload.title, body: payload.body, language: payload.language,
+      ...actionItemsWire(payload.action_items) }).catch(err => {
       setNotes(prev => prev.filter(n => n !== local))
       notifyError(extractApiError(err, t('common:actionFailed')))
     })
@@ -110,15 +119,18 @@ export function useApplicationNotes(applicationId: Id | undefined, initialNotes:
   // editNote). Returns whether the write landed — NOTITIE-POPOUT-URL-1's
   // per-note window awaits this before closing itself; the drawer tab ignores
   // the promise, same as every other host.
+  // NOTE-ACTION-ITEMS-1: forward the action_items panel only when present (present = the full wanted set; absent = untouched).
   const editNote = useCallback((index: number, payload: NotePayload): Promise<boolean> => {
     if (!applicationId) return Promise.resolve(false)
     const target = notes[index]
     if (!target) return Promise.resolve(false)
     const snapshot = notes
     setNotes(prev => prev.map((n, i) => (i === index
-      ? { ...n, type: payload.type, title: payload.title, text: payload.body, language: payload.language }
+      // absent = untouched: the row keeps its items when the composer sent none.
+      ? { ...n, type: payload.type, title: payload.title, text: payload.body, language: payload.language, ...(payload.action_items ? { action_items: payload.action_items } : {}) }
       : n)))
-    return api.patch(`/applications/${applicationId}/notes/${target.id}`, payload)
+    return api.patch(`/applications/${applicationId}/notes/${target.id}`, { type: payload.type, title: payload.title, body: payload.body, text: payload.body, language: payload.language,
+      ...actionItemsWire(payload.action_items) })
       // K-172: the edit itself fills the one-slot undo — surface the icon now.
       .then(() => { setNotes(prev => prev.map((n, i) => (i === index ? { ...n, has_previous_version: true } : n))); return true })
       .catch(err => {

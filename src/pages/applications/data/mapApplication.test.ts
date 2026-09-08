@@ -401,12 +401,12 @@ describe('mapApplicationDetail · notes (W10)', () => {
     expect(detail.notes).toEqual([{
       id: 'n1', author: 'Bente de Jong', authorId: null, type: 'call', title: 'Belafspraak',
       text: 'Gebeld over intake', language: 'nl', time: '2026-08-06T10:00:00Z', hasPreviousVersion: false,
-    }])
+     action_items: null,}])
   })
 
   it('defaults type/title/language to empty strings when the resource omits them', () => {
     const detail = mapApplicationDetail({ id: 24, notes: [{ id: 'n2', author: 'Bente de Jong', text: 'Kort' }] })
-    expect(detail.notes).toEqual([{ id: 'n2', author: 'Bente de Jong', authorId: null, type: '', title: '', text: 'Kort', language: '', time: '', hasPreviousVersion: false }])
+    expect(detail.notes).toEqual([{ id: 'n2', author: 'Bente de Jong', authorId: null, type: '', title: '', text: 'Kort', language: '', time: '', hasPreviousVersion: false, action_items: null }])
   })
 
   // NOTE-UNDO-FE-1 (K-172): has_previous_version maps through to hasPreviousVersion.
@@ -428,6 +428,15 @@ describe('mapApplicationDetail · notes (W10)', () => {
       notes: [{ id: 'n3', author: 'Kelly Recruiter', author_id: 'u9', text: 'Eigen notitie', created_at: '2026-08-07T09:00:00Z' }],
     })
     expect(detail.notes[0].authorId).toBe('u9')
+  })
+  // X-34b (CMBE 0b3ac963): action_items ride along on the wire key, null when the note has none.
+  it('maps action_items through as-is (X-34b), null when absent', () => {
+    const detail = mapApplicationDetail({ id: 25, notes: [
+      { id: 'n3', author: 'Kelly', text: 'Met actie', action_items: [{ id: 'ai1', title: 'Bellen', type: 'reminder', status: 'pending' }] },
+      { id: 'n4', author: 'Kelly', text: 'Zonder' },
+    ] } as never)
+    expect(detail.notes[0].action_items).toEqual([{ id: 'ai1', title: 'Bellen', type: 'reminder', status: 'pending' }])
+    expect(detail.notes[1].action_items).toBeNull()
   })
 })
 

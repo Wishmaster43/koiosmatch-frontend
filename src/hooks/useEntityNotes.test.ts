@@ -22,6 +22,7 @@ vi.mock('@/lib/api', async () => {
       get: vi.fn().mockResolvedValue({ data: { data: [] } }),
       post: vi.fn().mockResolvedValue({ data: {} }),
       patch: vi.fn().mockResolvedValue({ data: {} }),
+      put: vi.fn().mockResolvedValue({ data: {} }),
       delete: vi.fn().mockResolvedValue({ data: {} }),
     },
   }
@@ -32,6 +33,7 @@ beforeEach(() => {
   vi.mocked(api.get).mockClear().mockResolvedValue({ data: { data: [] } })
   vi.mocked(api.post).mockClear().mockResolvedValue({ data: {} })
   vi.mocked(api.patch).mockClear().mockResolvedValue({ data: {} })
+  vi.mocked(api.put).mockClear().mockResolvedValue({ data: {} })
   mockUseAuth.mockReturnValue({ user: { id: 'u1', name: 'Kelly Recruiter' } } as never)
 })
 
@@ -74,5 +76,75 @@ describe('useEntityNotes · addNote author (AUTHOR-CURRENT-USER-1)', () => {
     act(() => { result.current.addNote({ type: 'general', title: '', body: 'x' }) })
     await act(async () => { await Promise.resolve(); await Promise.resolve() })
     expect(api.get).toHaveBeenCalledWith('/matches/m1/notes')
+  })
+})
+
+describe('useEntityNotes · action_items wiring (X-34b — tasks notes)', () => {
+  it('POSTs action_items when present in the payload', async () => {
+    const { result } = renderHook(() => useEntityNotes({ id: 't1', basePath: '/tasks/t1' }))
+    await act(async () => { await Promise.resolve() })
+    const items = [
+      { title: 'Follow up', type: 'task', due_date: '2026-09-15', assignee_id: 'u2' },
+    ]
+    act(() => { result.current.addNote({ type: 'general', title: '', body: 'Action taken', action_items: items }) })
+    expect(api.post).toHaveBeenCalledWith('/tasks/t1/notes', expect.objectContaining({
+      type: 'general',
+      title: '',
+      body: 'Action taken',
+      action_items: items,
+    }))
+  })
+
+  it('omits action_items from POST when absent in the payload', async () => {
+    const { result } = renderHook(() => useEntityNotes({ id: 't1', basePath: '/tasks/t1' }))
+    await act(async () => { await Promise.resolve() })
+    act(() => { result.current.addNote({ type: 'general', title: '', body: 'No actions' }) })
+    const postCall = vi.mocked(api.post).mock.calls[0]
+    expect(postCall[0]).toBe('/tasks/t1/notes')
+    expect(postCall[1]).not.toHaveProperty('action_items')
+  })
+
+  it('PATCHes action_items when present in the payload', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [{ id: 'n1', type: 'general', title: '', text: 'old', created_at: '2026-08-01T10:00:00Z' }] } })
+    const { result } = renderHook(() => useEntityNotes({ id: 't1', basePath: '/tasks/t1' }))
+    await act(async () => { await Promise.resolve() })
+    const items = [{ title: 'New task', type: 'task', due_date: '2026-09-20' }]
+    act(() => { result.current.editNote(0, { type: 'general', title: '', body: 'Updated', action_items: items }) })
+    expect(api.patch).toHaveBeenCalledWith('/tasks/t1/notes/n1', expect.objectContaining({
+      type: 'general',
+      title: '',
+      body: 'Updated',
+      action_items: items,
+    }))
+  })
+
+  it('omits action_items from PATCH when absent in the payload', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [{ id: 'n1', type: 'general', title: '', text: 'old', created_at: '2026-08-01T10:00:00Z' }] } })
+    const { result } = renderHook(() => useEntityNotes({ id: 't1', basePath: '/tasks/t1' }))
+    await act(async () => { await Promise.resolve() })
+    act(() => { result.current.editNote(0, { type: 'general', title: '', body: 'Updated' }) })
+    const patchCall = vi.mocked(api.patch).mock.calls[0]
+    expect(patchCall[0]).toBe('/tasks/t1/notes/n1')
+    expect(patchCall[1]).not.toHaveProperty('action_items')
+  })
+
+  it('preserves action_items on read: fetched notes carry them in the list', async () => {
+    const items = [{ id: 'ai1', title: 'Follow up', type: 'task', status: 'pending', created: '2026-09-01T10:00:00Z' }]
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [{ id: 'n1', type: 'general', title: '', text: 'Note text', created_at: '2026-08-01T10:00:00Z', action_items: items }] } })
+    const { result } = renderHook(() => useEntityNotes({ id: 't1', basePath: '/tasks/t1' }))
+    await act(async () => { await Promise.resolve() })
+    expect(result.current.notes[0].action_items).toEqual(items)
+  })
+
+  it('uses PUT instead of PATCH when updateMethod is set to "put"', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [{ id: 'n1', type: 'general', title: '', text: 'old', created_at: '2026-08-01T10:00:00Z' }] } })
+    const { result } = renderHook(() => useEntityNotes({ id: 'o1', basePath: '/opportunities/o1', updateMethod: 'put' }))
+    await act(async () => { await Promise.resolve() })
+    vi.mocked(api.put).mockClear()
+    const items = [{ title: 'Task', type: 'task' }]
+    act(() => { result.current.editNote(0, { type: 'general', title: '', body: 'Updated', action_items: items }) })
+    expect(api.put).toHaveBeenCalledWith('/opportunities/o1/notes/n1', expect.objectContaining({
+      action_items: items,
+    }))
   })
 })

@@ -42,6 +42,18 @@ describe('useApplicationNotes · addNote author (AUTHOR-1)', () => {
     expect(api.post).toHaveBeenCalledWith('/applications/app1/notes', { type: 'general', title: 'Kort', body: 'Tekst', language: 'nl' })
   })
 
+  it('POSTs with action_items when the payload carries them (NOTE-ACTION-ITEMS-1)', () => {
+    const { result } = renderHook(() => useApplicationNotes('app1', []))
+    act(() => { result.current.addNote({ type: 'general', title: '', body: 'Tekst', action_items: [{ title: 'Volgen', type: 'reminder' }] }) })
+    expect(api.post).toHaveBeenCalledWith('/applications/app1/notes', { type: 'general', title: '', body: 'Tekst', action_items: [{ title: 'Volgen', type: 'reminder' }] })
+  })
+
+  it('POSTs WITHOUT action_items key when the payload has no action_items (NOTE-ACTION-ITEMS-1)', () => {
+    const { result } = renderHook(() => useApplicationNotes('app1', []))
+    act(() => { result.current.addNote({ type: 'general', title: '', body: 'Tekst' }) })
+    expect(vi.mocked(api.post).mock.calls[0][1]).not.toHaveProperty('action_items')
+  })
+
   it('removes the optimistic note again when the save fails (OPTIMISTIC-REVERT-1 parity)', async () => {
     vi.mocked(api.post).mockRejectedValueOnce({ response: { status: 422 } })
     const { result } = renderHook(() => useApplicationNotes('app1', []))
@@ -152,4 +164,44 @@ it('marks the edited note as restorable after a successful PATCH (K-172 slot)', 
     [{ id: 'n1', type: 'note', title: '', text: 'Oud', language: 'nl', hasPreviousVersion: false }] as never))
   await act(async () => { await result.current.editNote(0, { type: 'note', title: '', body: 'Nieuw', language: 'nl' }) })
   expect(result.current.notes[0].has_previous_version).toBe(true)
+})
+
+describe('useApplicationNotes · editNote (NOTE-ACTION-ITEMS-1)', () => {
+  it('PATCHes with action_items when the payload carries them', async () => {
+    const initial: ApplicationDetail['notes'] = [
+      { id: 'n1', author: 'Kelly', authorId: 'u9', type: 'general', title: '', text: 'First', language: '', time: '2026-08-06T09:00:00Z' },
+    ]
+    const { result } = renderHook(() => useApplicationNotes('app1', initial))
+    await act(async () => { await result.current.editNote(0, { type: 'general', title: '', body: 'Gewijzigd', action_items: [{ title: 'Volgen', type: 'reminder' }] }) })
+    expect(api.patch).toHaveBeenCalledWith('/applications/app1/notes/n1', {
+      type: 'general', title: '', body: 'Gewijzigd', text: 'Gewijzigd', action_items: [{ title: 'Volgen', type: 'reminder' }],
+    })
+  })
+
+  it('PATCHes WITHOUT action_items key when the payload has no action_items', async () => {
+    const initial: ApplicationDetail['notes'] = [
+      { id: 'n1', author: 'Kelly', authorId: 'u9', type: 'general', title: '', text: 'First', language: '', time: '2026-08-06T09:00:00Z' },
+    ]
+    const { result } = renderHook(() => useApplicationNotes('app1', initial))
+    await act(async () => { await result.current.editNote(0, { type: 'general', title: '', body: 'Gewijzigd' }) })
+    expect(vi.mocked(api.patch).mock.calls[0][1]).not.toHaveProperty('action_items')
+  })
+
+  it('includes action_items in the optimistic local note when present', () => {
+    const initial: ApplicationDetail['notes'] = [
+      { id: 'n1', author: 'Kelly', authorId: 'u9', type: 'general', title: '', text: 'First', language: '', time: '2026-08-06T09:00:00Z' },
+    ]
+    const { result } = renderHook(() => useApplicationNotes('app1', initial))
+    act(() => { result.current.editNote(0, { type: 'general', title: '', body: 'Gewijzigd', action_items: [{ title: 'Volgen', type: 'reminder' }] }) })
+    expect(result.current.notes[0].action_items).toEqual([{ title: 'Volgen', type: 'reminder' }])
+  })
+
+  it('keeps the existing action_items on the optimistic local note when the edit sends none (absent = untouched)', () => {
+    const initial: ApplicationDetail['notes'] = [
+      { id: 'n1', author: 'Kelly', authorId: 'u9', type: 'general', title: '', text: 'First', language: '', time: '2026-08-06T09:00:00Z', action_items: [{ title: 'Oude actie', type: 'reminder' }] },
+    ]
+    const { result } = renderHook(() => useApplicationNotes('app1', initial))
+    act(() => { result.current.editNote(0, { type: 'general', title: '', body: 'Gewijzigd' }) })
+    expect(result.current.notes[0].action_items).toEqual([{ title: 'Oude actie', type: 'reminder' }])
+  })
 })
