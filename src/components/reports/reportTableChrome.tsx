@@ -12,8 +12,10 @@ import { useTranslation } from 'react-i18next'
 import type { CSSProperties, ReactNode } from 'react'
 import { Search } from 'lucide-react'
 import SortCaret from '@/components/ui/SortCaret'
+import Spinner from '@/components/ui/Spinner'
 import { captionStyle, bodyTextStyle, pageTitleStyle } from '@/components/ui/typography'
 import type { SortState } from '@/types/reports'
+import ReportEmptyState from './ReportEmptyState'
 
 // Shared header-cell chrome — spreads the Caption identity (11/400/muted) so
 // this reads as a reused atom, not a re-declared one; fontWeight bumps to 600
@@ -106,6 +108,56 @@ export function ReportTableToolbar({ title, summary, searchValue, onSearchChange
           placeholder={searchPlaceholder}
           style={{ ...bodyTextStyle, height: 34, width: 260, paddingLeft: 32, paddingRight: 12,
                    border: '1px solid var(--border)', borderRadius: 8, outline: 'none' }} />
+      </div>
+    </div>
+  )
+}
+
+// Clickable table row with hover effect — used by all four report tables
+// (LocationsTable, DepartmentsTable, CustomersTable, MessagesTable) to render
+// the interactive <tr> that opens a drill-down on click.
+export function ReportRow({ onClick, children }: { onClick: () => void; children: ReactNode }) {
+  return (
+    <tr
+      style={{ cursor: 'pointer' }}
+      onClick={onClick}
+      onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
+      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+    >
+      {children}
+    </tr>
+  )
+}
+
+// Shared frame wrapping a report table: outer/inner divs, loading block, and empty state.
+// Renders the centred loading spinner/message, an empty-state message, or the table
+// children by state. Adopted by LocationsTable (text-only), DepartmentsTable (text-only),
+// and CustomersTable (spinner variant); MessagesTable keeps its own frame (in-table
+// loading/error rows).
+export function ReportTableFrame({ loading, loadingLabel, empty, emptyLabel, emptyHeight, spinner = false, loadingHeight = 200, children }: {
+  loading: boolean
+  loadingLabel: string
+  empty: boolean
+  emptyLabel: string
+  emptyHeight?: number
+  spinner?: boolean
+  loadingHeight?: number
+  children: ReactNode
+}) {
+  return (
+    <div className="flex flex-1 min-h-0 overflow-hidden bg-[var(--surface)] rounded-xl"
+      style={{ border: '1px solid var(--border)' }}>
+      <div className="flex-1 min-w-0 overflow-auto">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center gap-3" style={{ height: loadingHeight }}>
+            {spinner && <span style={{ color: 'var(--border)' }}><Spinner size={18} /></span>}
+            <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{loadingLabel}</p>
+          </div>
+        ) : empty ? (
+          <ReportEmptyState message={emptyLabel} height={emptyHeight} />
+        ) : (
+          children
+        )}
       </div>
     </div>
   )

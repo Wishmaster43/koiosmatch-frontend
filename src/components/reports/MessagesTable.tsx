@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { useDateFormat }      from '@/lib/datetime'
 import PaginationBar          from '../ui/PaginationBar'
 import { useReportPaging }    from './useReportPaging'
-import { TD, SortableTableHead, ReportTableToolbar } from './reportTableChrome'
+import { TD, SortableTableHead, ReportTableToolbar, ReportRow } from './reportTableChrome'
 import { useReportTableFilter } from './useReportTableFilter'
 import { BodyText, Caption } from '@/components/ui/typography'
 import { useReportList }      from './useReportList'
@@ -130,11 +130,7 @@ export default function MessagesTable() {
                 </td></tr>
               )}
               {!loading && paged.map((r, i) => (
-                  <tr key={r.id ?? i}
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => setDrill(r)}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                  <ReportRow key={r.id ?? i} onClick={() => setDrill(r)}>
                     <td style={{ ...TD, fontSize: 12, whiteSpace: 'nowrap' }}>
                       <div style={{ fontWeight: 500, color: 'var(--text)' }}>
                         {formatDate(r.sent_at ?? r.created_at)}
@@ -163,7 +159,7 @@ export default function MessagesTable() {
                     <td style={{ ...TD, fontSize: 12, color: 'var(--text-muted)' }}>
                       {r.workflow_name ?? <span style={{ color: 'var(--border)' }}>—</span>}
                     </td>
-                  </tr>
+                  </ReportRow>
                 ))}
             </tbody>
           </table>

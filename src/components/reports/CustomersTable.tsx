@@ -8,12 +8,10 @@
 import { useState, useMemo, useCallback } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import Spinner from '@/components/ui/Spinner'
 import CustomerDetailDrawer   from './CustomerDetailDrawer'
-import ReportEmptyState       from './ReportEmptyState'
 import PaginationBar          from '../ui/PaginationBar'
 import { useReportPaging }    from './useReportPaging'
-import { TD, SortableTableHead, ReportTableToolbar } from './reportTableChrome'
+import { TD, SortableTableHead, ReportTableToolbar, ReportRow, ReportTableFrame } from './reportTableChrome'
 import { useReportTableFilter } from './useReportTableFilter'
 import { useReportCustomers } from './useReportCustomers'
 import { renderStatusCell, renderCountCell, renderMonospaceCell } from './reportTableCells'
@@ -126,46 +124,37 @@ export default function CustomersTable() {
       )}
 
       {/* Table */}
-      <div className="flex flex-1 min-h-0 overflow-hidden bg-[var(--surface)] rounded-xl"
-        style={{ border: '1px solid var(--border)' }}>
-        <div className="flex-1 min-w-0 overflow-auto">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center gap-3" style={{ height: 240 }}>
-              <span style={{ color: 'var(--border)' }}><Spinner size={18} /></span>
-              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('customers.loading')}</p>
-            </div>
-          ) : sorted.length === 0 ? (
-            <ReportEmptyState message={t('customers.empty')} height={180} />
-          ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <SortableTableHead columns={COLS} sort={sort} onSort={setSort_} />
-              <tbody>
-                {paged.map((c, i) => {
-                  const locCount  = c.locations?.length ?? 0
-                  const deptCount = (c.locations ?? []).reduce((s, l) => s + (l.departments?.length ?? 0), 0)
-                  return (
-                    <tr key={c.id ?? i}
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => setDetail(c)}
-                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
-                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                    >
-                      <td style={TD}>
-                        <span style={{ fontWeight: 500, color: 'var(--text)' }}>{c.name}</span>
-                      </td>
-                      <td style={TD}>{renderMonospaceCell(c.debtor_number)}</td>
-                      <td style={TD}>{renderStatusCell(c.status)}</td>
-                      <td style={TD}>{c.account_manager || <span style={{ color: 'var(--border)' }}>—</span>}</td>
-                      <td style={TD}>{renderCountCell(locCount)}</td>
-                      <td style={TD}>{renderCountCell(deptCount)}</td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          )}
-        </div>
-      </div>
+      <ReportTableFrame
+        loading={loading}
+        loadingLabel={t('customers.loading')}
+        empty={sorted.length === 0}
+        emptyLabel={t('customers.empty')}
+        spinner
+        loadingHeight={240}
+        emptyHeight={180}
+      >
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <SortableTableHead columns={COLS} sort={sort} onSort={setSort_} />
+          <tbody>
+            {paged.map((c, i) => {
+              const locCount  = c.locations?.length ?? 0
+              const deptCount = (c.locations ?? []).reduce((s, l) => s + (l.departments?.length ?? 0), 0)
+              return (
+                <ReportRow key={c.id ?? i} onClick={() => setDetail(c)}>
+                  <td style={TD}>
+                    <span style={{ fontWeight: 500, color: 'var(--text)' }}>{c.name}</span>
+                  </td>
+                  <td style={TD}>{renderMonospaceCell(c.debtor_number)}</td>
+                  <td style={TD}>{renderStatusCell(c.status)}</td>
+                  <td style={TD}>{c.account_manager || <span style={{ color: 'var(--border)' }}>—</span>}</td>
+                  <td style={TD}>{renderCountCell(locCount)}</td>
+                  <td style={TD}>{renderCountCell(deptCount)}</td>
+                </ReportRow>
+              )
+            })}
+          </tbody>
+        </table>
+      </ReportTableFrame>
 
       <PaginationBar page={page} totalPages={totalPages} totalRows={sorted.length}
         pageSize={pageSize} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} />

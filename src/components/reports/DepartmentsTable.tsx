@@ -8,10 +8,9 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import DepartmentDrawer       from './DepartmentDrawer'
-import ReportEmptyState       from './ReportEmptyState'
 import PaginationBar          from '../ui/PaginationBar'
 import { useReportPaging }    from './useReportPaging'
-import { TD, SortableTableHead, ReportTableToolbar } from './reportTableChrome'
+import { TD, SortableTableHead, ReportTableToolbar, ReportRow, ReportTableFrame } from './reportTableChrome'
 import { useReportTableFilter } from './useReportTableFilter'
 import { renderMonospaceCell } from './reportTableCells'
 import { useSmCustomerTree }  from '@/hooks/useSmCustomerTree'
@@ -116,36 +115,26 @@ export default function DepartmentsTable() {
         searchPlaceholder={t('departments.search')}
       />
 
-      <div className="flex flex-1 min-h-0 overflow-hidden bg-[var(--surface)] rounded-xl"
-        style={{ border: '1px solid var(--border)' }}>
-        <div className="flex-1 min-w-0 overflow-auto">
-          {loading ? (
-            <div className="flex items-center justify-center" style={{ height: 200 }}>
-              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('departments.loading')}</p>
-            </div>
-          ) : sorted.length === 0 ? (
-            <ReportEmptyState message={t('departments.empty')} />
-          ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <SortableTableHead columns={COLS} sort={sort} onSort={setSort_} />
-              <tbody>
-                {paged.map((r, i) => (
-                  <tr key={r.id ?? i}
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => setDrill(r)}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                    <td style={TD}>{r.customer_name}</td>
-                    <td style={TD}>{r.location_name}</td>
-                    <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>{r.name}</td>
-                    <td style={TD}>{renderMonospaceCell(r.cost_center)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      </div>
+      <ReportTableFrame
+        loading={loading}
+        loadingLabel={t('departments.loading')}
+        empty={sorted.length === 0}
+        emptyLabel={t('departments.empty')}
+      >
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <SortableTableHead columns={COLS} sort={sort} onSort={setSort_} />
+          <tbody>
+            {paged.map((r, i) => (
+              <ReportRow key={r.id ?? i} onClick={() => setDrill(r)}>
+                <td style={TD}>{r.customer_name}</td>
+                <td style={TD}>{r.location_name}</td>
+                <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>{r.name}</td>
+                <td style={TD}>{renderMonospaceCell(r.cost_center)}</td>
+              </ReportRow>
+            ))}
+          </tbody>
+        </table>
+      </ReportTableFrame>
 
       <PaginationBar page={page} totalPages={totalPages} totalRows={sorted.length}
         pageSize={pageSize} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} />
