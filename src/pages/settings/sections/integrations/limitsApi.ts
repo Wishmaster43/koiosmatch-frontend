@@ -17,7 +17,7 @@ export interface TenantLimitRow {
   cap_reached: boolean
   // billing.view only: the FULL tier meter for this unit (same block GET /billing/usage
   // exposes) — the chosen tier sits in `tier.tier`, the package baseline in `tier.baseline_tier`.
-  prices?: { tier: BillingUsageTierMeterBase & { baseline_tier?: BillingTierRef | null } }
+  prices?: { tier: BillingTierRef | (BillingUsageTierMeterBase & { baseline_tier?: BillingTierRef | null }) }
 }
 
 // A platform limit row from the super-admin endpoint.

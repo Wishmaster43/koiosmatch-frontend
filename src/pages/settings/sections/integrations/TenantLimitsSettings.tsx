@@ -14,8 +14,16 @@ import { Caption } from '@/components/ui/typography'
 import { getTenantLimits, type TenantLimitRow } from './limitsApi'
 import type { BillingTierRef } from '@/types/billingTiers'
 
-// The tier a meter row is priced on: the tenant's chosen tier, else the package baseline (measured on demo: `tier` null, `baseline_tier` set).
-const tierOf = (row: TenantLimitRow): BillingTierRef | null => row.prices?.tier?.tier ?? row.prices?.tier?.baseline_tier ?? null
+// The tier a meter row is priced on. Two contract shapes (CMBE 08-09 12:00): the flat
+// tier block itself (`prices.tier.key`, the intended shape, lands with CMFE-MEET-1) or the
+// whole tier meter (measured on demo before that fix) — then the chosen tier, else the
+// package baseline. The meter fallback stays one release as a safety net.
+const tierOf = (row: TenantLimitRow): BillingTierRef | null => {
+  const raw = row.prices?.tier
+  if (!raw) return null
+  if ('key' in raw) return raw
+  return raw.tier ?? raw.baseline_tier ?? null
+}
 
 export default function TenantLimitsSettings() {
   const { t } = useTranslation('settings')

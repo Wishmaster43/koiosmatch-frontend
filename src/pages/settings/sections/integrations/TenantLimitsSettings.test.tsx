@@ -49,6 +49,14 @@ describe('TenantLimitsSettings', () => {
     expect(screen.queryByText(/Koios Assist/)).not.toBeInTheDocument()
   })
 
+  it('reads the flat tier block when the backend sends the tier itself (CMFE-MEET-1 shape)', async () => {
+    const flat = [{ ...rows[0], prices: { tier: { key: 'smart', label: 'Slim', monthly_tokens: 50000, price_cents: 4900, source: 'chosen' } } }]
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: flat } })
+    renderPage()
+    await screen.findByText('Koios AI-tokens')
+    expect(screen.getByText(new RegExp(t('limits.tier.included', { tier: 'Slim', n: '50.000' })))).toBeInTheDocument()
+  })
+
   it('falls back to the package baseline tier when no tier was chosen', async () => {
     const baselineOnly = [{ ...rows[0], prices: { tier: { unit: 'koios_ai_token', tier: null, allowance: 500, baseline_tier: { key: 'assist', label: 'Koios Assist', monthly_tokens: 500, price_cents: 0 } } } }]
     vi.mocked(api.get).mockResolvedValueOnce({ data: { data: baselineOnly } })
