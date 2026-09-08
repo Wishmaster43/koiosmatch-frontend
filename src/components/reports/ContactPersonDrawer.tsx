@@ -1,31 +1,11 @@
-import type { ReactNode } from 'react'
 import Avatar from '@/components/ui/Avatar'
 import { useTranslation } from 'react-i18next'
 import { Mail, Phone, Building2, MessageCircle, Briefcase, User } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
 import type { ReportContact } from '@/types/reports'
 import Button from '@/components/ui/Button'
 import { PageTitle, GroupLabel } from '@/components/ui/typography'
 import ReportDrawerChrome from './ReportDrawerChrome'
-
-// One labeled row of contact info; renders a mailto/tel link when href is given.
-function InfoRow({ icon: Icon, label, value, href }: { icon: LucideIcon; label: ReactNode; value?: ReactNode; href?: string | null }) {
-  if (!value) return null
-  return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8,
-                  padding: '8px 0', borderBottom: '1px solid var(--hover-bg)' }}>
-      <Icon size={13} color="var(--border)" style={{ flexShrink: 0, marginTop: 1 }} />
-      <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>{label}</span>
-      {href
-        ? <Button variant="ghost" href={href}
-            style={{ fontSize: 12, color: 'var(--color-secondary)', whiteSpace: 'normal', wordBreak: 'break-all',
-                     height: 'auto', padding: 0, justifyContent: 'flex-start', textAlign: 'left' }}>
-            {value}
-          </Button>
-        : <span style={{ fontSize: 12, color: 'var(--text)' }}>{value}</span>}
-    </div>
-  )
-}
+import InfoRow from './InfoRow'
 
 /**
  * ContactPersonDrawer — slide-in panel with one contact person's details and

@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import DepartmentDrawer       from './DepartmentDrawer'
 import PaginationBar          from '../ui/PaginationBar'
 import { useReportPaging }    from './useReportPaging'
+import { buildReportFilterGroups } from '@/lib/reportFilters'
 import { TD, SortableTableHead, ReportTableToolbar, ReportRow, ReportTableFrame } from './reportTableChrome'
 import { useReportTableFilter } from './useReportTableFilter'
 import { renderMonospaceCell } from './reportTableCells'
@@ -56,32 +57,27 @@ export default function DepartmentsTable() {
   const statusOptions = useMemo(() =>
     [...new Set(rows.map(r => r.location_status).filter((x): x is string => Boolean(x)))].sort(), [rows])
 
-  // Declarative filter-group config fed to RightPanelContext (§4: every filter lives in
-  // the right-hand panel, never the toolbar); memoised so the panel doesn't re-render
-  // on every keystroke.
-  const filterGroups = useMemo(() => [
-    {
-      key: 'customer', label: t('departments.filters.customer'),
-      type: 'search-select',
-      selected: selectedCustomers,
-      options: customerOptions.map(c => ({
-        value: c.id,
-        label: c.name,
-        count: rows.filter(r => r.customer_id === c.id).length,
-      })),
-      onToggle: (v: string | number) => setSelectedCustomers(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
-    },
-    {
-      key: 'status', label: t('departments.filters.locationStatus'),
-      selected: selectedStatuses,
-      options: statusOptions.map(s => ({
-        value: s,
-        label: s === 'active' ? t('common.statusActive') : s === 'inactive' ? t('common.statusInactive') : s,
-        count: rows.filter(r => r.location_status === s).length,
-      })),
-      onToggle: (v: string | number) => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
-    },
-  ], [t, selectedCustomers, selectedStatuses, customerOptions, statusOptions, rows])
+  // Declarative filter-group config via the shared builder (§3 consolidation); memoised
+  // so the panel doesn't re-render on every keystroke.
+  const filterGroups = useMemo(() =>
+    buildReportFilterGroups({
+      t,
+      rows,
+      customerOptions,
+      statusOptions,
+      selectedCustomers,
+      selectedStatuses,
+      onToggleCustomer: (v) => setSelectedCustomers(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
+      onToggleStatus: (v) => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
+      config: {
+        customerLabelKey: 'departments.filters.customer',
+        statusLabelKey: 'departments.filters.locationStatus',
+        customerFieldKey: 'customer_id',
+        statusFieldKey: 'location_status',
+      },
+    }),
+    [t, rows, customerOptions, statusOptions, selectedCustomers, selectedStatuses]
+  )
 
   // Consolidates filtered/sorted memo and registers filter groups with the shared panel.
   const { filtered, sorted } = useReportTableFilter({

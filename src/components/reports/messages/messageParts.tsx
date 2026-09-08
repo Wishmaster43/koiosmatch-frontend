@@ -5,16 +5,13 @@
  * comes from the shared SortableTableHead (§3, reportTableChrome.tsx).
  */
 import { MessageCircle, Mail, Phone, CheckCheck, Clock, XCircle, AlertTriangle } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { formatDateTimeStr } from '@/lib/localDate'
+import MetadataBadge, { type BadgeMeta } from '@/components/ui/MetadataBadge'
 
 // Short readable date + time via the ONE shared formatter (heraudit I18N-2).
 // eslint-disable-next-line react-refresh/only-export-components -- shared formatter every message table/drawer in this file imports; HMR-nicety warning only
 export const formatDT = formatDateTimeStr
-
-// One badge's visual treatment.
-export interface BadgeMeta { bg: string; color: string; Icon: LucideIcon }
 
 // Channel → colour + icon. Label = t('messages.channel.<key>').
 /* eslint-disable no-restricted-syntax -- fixed channel→colour mapping (DATA), mirrors the lookup-colour pattern used elsewhere; these shades have no exact token equivalent */
@@ -43,29 +40,25 @@ export const STATUS_META: Record<string, BadgeMeta> = {
 
 export function ChannelBadge({ channel }: { channel?: string }) {
   const { t } = useTranslation('reports')
-  const key = channel?.toLowerCase()
-  const m = (key ? CHANNEL_META[key] : undefined) ?? { bg: 'var(--hover-bg)', color: 'var(--text-muted)', Icon: MessageCircle }
-  const Icon = m.Icon
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: m.bg, color: m.color,
-                   fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap' }}>
-      <Icon size={10} />
-      {channel ? t(`messages.channel.${key}`, { defaultValue: channel }) : '—'}
-    </span>
+    <MetadataBadge
+      value={channel}
+      meta={CHANNEL_META}
+      labelOf={(key) => t(`messages.channel.${key}`, { defaultValue: channel })}
+      fallbackIcon={MessageCircle}
+    />
   )
 }
 
 // Coloured status pill with an icon; an unrecognised/missing status falls back to a muted neutral look rather than rendering nothing.
 export function StatusBadge({ status }: { status?: string }) {
   const { t } = useTranslation('reports')
-  const key = status?.toLowerCase()
-  const m = (key ? STATUS_META[key] : undefined) ?? { bg: 'var(--hover-bg)', color: 'var(--text-muted)', Icon: Clock }
-  const Icon = m.Icon
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: m.bg, color: m.color,
-                   fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap' }}>
-      <Icon size={10} />
-      {status ? t(`messages.status.${key}`, { defaultValue: status }) : '—'}
-    </span>
+    <MetadataBadge
+      value={status}
+      meta={STATUS_META}
+      labelOf={(key) => t(`messages.status.${key}`, { defaultValue: status })}
+      fallbackIcon={Clock}
+    />
   )
 }

@@ -10,6 +10,8 @@ import { useTranslation } from 'react-i18next'
 import LocationDrawer         from './LocationDrawer'
 import PaginationBar          from '../ui/PaginationBar'
 import { useReportPaging }    from './useReportPaging'
+import useNumericColumnSort   from '@/hooks/useNumericColumnSort'
+import { buildReportFilterGroups } from '@/lib/reportFilters'
 import { TD, SortableTableHead, ReportTableToolbar, ReportRow, ReportTableFrame } from './reportTableChrome'
 import { useReportTableFilter } from './useReportTableFilter'
 import CopyIconButton from '../ui/CopyIconButton'
@@ -53,34 +55,28 @@ export default function LocationsTable() {
     return true
   }, [selectedStatuses, selectedCustomers])
 
-  // Builds the customer/status filter definitions, with live per-option counts, handed to the shared right-panel filter UI.
-  const filterGroups = useMemo(() => [
-    {
-      key: 'customer', label: t('locations.filters.customer'),
-      type: 'search-select',
-      selected: selectedCustomers,
-      options: customerOptions.map(c => ({
-        value: c.id,
-        label: c.name,
-        count: rows.filter(r => r.customer_id === c.id).length,
-      })),
-      onToggle: (v: string | number) => setSelectedCustomers(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
-    },
-    {
-      key: 'status', label: t('locations.filters.status'),
-      selected: selectedStatuses,
-      options: statusOptions.map(s => ({
-        value: s,
-        label: s === 'active' ? t('common.statusActive') : s === 'inactive' ? t('common.statusInactive') : s,
-        count: rows.filter(r => r.status === s).length,
-      })),
-      onToggle: (v: string | number) => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
-    },
-  ], [t, selectedCustomers, selectedStatuses, customerOptions, statusOptions, rows])
+  // Builds the customer/status filter definitions via the shared builder.
+  const filterGroups = useMemo(() =>
+    buildReportFilterGroups({
+      t,
+      rows,
+      customerOptions,
+      statusOptions,
+      selectedCustomers,
+      selectedStatuses,
+      onToggleCustomer: (v) => setSelectedCustomers(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
+      onToggleStatus: (v) => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
+      config: {
+        customerLabelKey: 'locations.filters.customer',
+        statusLabelKey: 'locations.filters.status',
+        customerFieldKey: 'customer_id',
+        statusFieldKey: 'status',
+      },
+    }),
+    [t, rows, customerOptions, statusOptions, selectedCustomers, selectedStatuses]
+  )
 
   // Consolidates filtered/sorted memo and registers filter groups with the shared panel.
-  // Note: dept_count numeric comparison is handled locally in the table rows render,
-  // while string fields sort through the shared compareSortable logic.
   const { filtered, sorted: sortedAll } = useReportTableFilter({
     rows,
     search,
@@ -92,20 +88,9 @@ export default function LocationsTable() {
     tableId: 'locations-table',
   })
 
-  // Special handling for dept_count: numeric column needs numeric comparison, not string.
-  const sorted = useMemo(() => {
-    if (sort.key === 'dept_count') {
-      const { dir } = sort
-      return [...sortedAll].sort((a, b) => {
-        const av = a.dept_count ?? 0
-        const bv = b.dept_count ?? 0
-        if (av < bv) return dir === 'asc' ? -1 : 1
-        if (av > bv) return dir === 'asc' ?  1 : -1
-        return 0
-      })
-    }
-    return sortedAll
-  }, [sortedAll, sort])
+  // Apply numeric sorting for dept_count column.
+  const deptCountOf = useCallback((r: ReportLocation) => r.dept_count, [])
+  const sorted = useNumericColumnSort(sortedAll, sort, 'dept_count', deptCountOf)
 
   // Shared paging/sort-toggle state (§3 consolidation) — page resets to 1 on any filter/size change.
   const { page, paged, totalPages, pageSize, handlePageSizeChange, setPage, setSort_ } = useReportPaging(sorted, setSort, 'asc')

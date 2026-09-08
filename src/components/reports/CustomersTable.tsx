@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import CustomerDetailDrawer   from './CustomerDetailDrawer'
 import PaginationBar          from '../ui/PaginationBar'
 import { useReportPaging }    from './useReportPaging'
+import useNumericColumnSort   from '@/hooks/useNumericColumnSort'
 import { TD, SortableTableHead, ReportTableToolbar, ReportRow, ReportTableFrame } from './reportTableChrome'
 import { useReportTableFilter } from './useReportTableFilter'
 import { useReportCustomers } from './useReportCustomers'
@@ -56,7 +57,6 @@ export default function CustomersTable() {
   ], [t, selectedStatuses, statusOptions, customers])
 
   // Consolidates filtered/sorted memo and registers filter groups with the shared panel.
-  // Note: locations/departments numeric columns need special comparison logic, handled locally.
   const { filtered, sorted: sortedAll } = useReportTableFilter({
     rows: customers,
     search,
@@ -68,26 +68,11 @@ export default function CustomersTable() {
     tableId: 'customers-table',
   })
 
-  // Special handling for locations/departments: numeric columns need numeric comparison, not string.
-  const sorted = useMemo(() => {
-    if (sort.key === 'locations' || sort.key === 'departments') {
-      const { dir } = sort
-      return [...sortedAll].sort((a, b) => {
-        let av: number, bv: number
-        if (sort.key === 'locations') {
-          av = a.locations?.length ?? 0
-          bv = b.locations?.length ?? 0
-        } else {
-          av = (a.locations ?? []).reduce((s, l) => s + (l.departments?.length ?? 0), 0)
-          bv = (b.locations ?? []).reduce((s, l) => s + (l.departments?.length ?? 0), 0)
-        }
-        if (av < bv) return dir === 'asc' ? -1 : 1
-        if (av > bv) return dir === 'asc' ? 1  : -1
-        return 0
-      })
-    }
-    return sortedAll
-  }, [sortedAll, sort])
+  // Apply numeric sorting for locations and departments columns.
+  const locationsOf = useCallback((c: ReportCustomer) => c.locations?.length, [])
+  const departmentsOf = useCallback((c: ReportCustomer) => (c.locations ?? []).reduce((s, l) => s + (l.departments?.length ?? 0), 0), [])
+  const sortedLocs = useNumericColumnSort(sortedAll, sort, 'locations', locationsOf)
+  const sorted = useNumericColumnSort(sortedLocs, sort, 'departments', departmentsOf)
 
   // Shared paging/sort-toggle state (§3 consolidation) — page resets to 1 on any filter/size change.
   const { page, paged, totalPages, pageSize, handlePageSizeChange, setPage, setSort_ } = useReportPaging(sorted, setSort, 'asc')

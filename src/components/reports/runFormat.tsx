@@ -3,13 +3,13 @@
  * RunsTable report and the workflow editor's runs panel, so run rendering stays
  * consistent and is never duplicated. Labels resolve via the `reports` namespace.
  */
-import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Ban, CheckCircle, XCircle, RotateCcw, Clock } from 'lucide-react'
 import { formatDateTimeStr } from '@/lib/localDate'
 import { formatSeconds } from '@/lib/formatters'
 import SoftChip from '@/components/ui/SoftChip'
 import CalloutBox from '@/components/ui/CalloutBox'
+import MetadataBadge, { type BadgeMeta } from '@/components/ui/MetadataBadge'
 
 // Short readable date + time — delegates to the ONE shared formatter (heraudit
 // I18N-2: this file, messageParts and ordersTableParts each hand-built the same
@@ -27,14 +27,11 @@ export function formatDuration(ms?: number | null, locale: string = 'nl-NL') {
   return `${Math.floor(ms / 60000)}m ${Math.floor((ms % 60000) / 1000)}s`
 }
 
-// One status's visual treatment.
-interface StatusMeta { bg: string; color: string; Icon: ComponentType<{ size?: number }> }
-
 // Run status → colour + icon. Label = t('runs.status.<key>').
 // `cancelled` (RUN-CONTROL-1 stop button) is deliberately NEUTRAL grey — a
 // stopped run is not a failure; red stays reserved for `failed`.
 // eslint-disable-next-line react-refresh/only-export-components -- shared meta map every run table/drawer in this file imports; HMR-nicety warning only
-export const STATUS_META: Record<string, StatusMeta> = {
+export const STATUS_META: Record<string, BadgeMeta> = {
   success:   { bg: 'var(--color-success-bg)', color: 'var(--color-success-text)', Icon: CheckCircle },
   // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1 on its
   // own pastel, AA fail (Opus r3.5).
@@ -48,14 +45,13 @@ export const STATUS_META: Record<string, StatusMeta> = {
 // Coloured pill with icon + translated label for a run/step status.
 export function StatusBadge({ status }: { status?: string }) {
   const { t } = useTranslation('reports')
-  const m = (status ? STATUS_META[status] : undefined) ?? { bg: 'var(--hover-bg)', color: 'var(--text-muted)', Icon: Clock }
-  const Icon = m.Icon
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: m.bg, color: m.color,
-                   fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap' }}>
-      <Icon size={10} />
-      {status ? t(`runs.status.${status}`, { defaultValue: status }) : '—'}
-    </span>
+    <MetadataBadge
+      value={status}
+      meta={STATUS_META}
+      labelOf={(key) => t(`runs.status.${key}`, { defaultValue: status })}
+      fallbackIcon={Clock}
+    />
   )
 }
 
