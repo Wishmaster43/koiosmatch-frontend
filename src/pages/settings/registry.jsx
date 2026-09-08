@@ -27,13 +27,16 @@
 import {
   AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, CalendarCheck, CalendarDays, Car,
   ClipboardList, Clock, CreditCard, Download, EyeOff, Factory, FileText, Flag, GraduationCap, Hash, History, Key, LayoutGrid,
-  ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Megaphone, Package, Palette, Percent, Phone, Radio, Scale, Shield, SlidersHorizontal, Sparkles, Star,
+  ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Megaphone, Package, Palette, Percent, Phone, Radio, Scale, Shield, SlidersHorizontal, Sparkles, Star, Gauge,
   Boxes, Globe, Store, Tags, Target, Upload, UserCheck, Users, Webhook, XCircle,
   ShieldOff, AlertTriangle, ListTree, CheckCircle,
 } from 'lucide-react'
 import CustomFieldsSettings from './sections/CustomFieldsSettings'
 import VacancyGenerationSettings from './sections/VacancyGenerationSettings'
 import KoiosAdviceSettings from './sections/KoiosAdviceSettings'
+import AiTransparencySettings from './sections/AiTransparencySettings'
+import AdminLimitsSettings from './sections/AdminLimitsSettings'
+import TenantLimitsSettings from './sections/integrations/TenantLimitsSettings'
 import JargonSettings from './sections/JargonSettings'
 import InterviewSettings from './sections/InterviewSettings'
 
@@ -194,6 +197,8 @@ export const NAV_GROUPS = [
       // vacancies/matches tables — cross-entity Koios-rule config, so it sits
       // here rather than forcing a fit into either entity's display schema.
       { id: 'koios_advice', icon: Clock, component: KoiosAdviceSettings },
+      // AI-Act transparency (X-32): principles, human oversight, tenant posture, active features.
+      { id: 'ai_transparency', icon: Scale, component: AiTransparencySettings },
       // AI-interview configuration (X-12): rejection mode, booking link, recruiter phone.
       { id: 'interview', icon: MessageSquare, component: InterviewSettings },
       // Tenant jargon list (K-155): terms the AI correction prompt uses to fix
@@ -747,6 +752,8 @@ export const NAV_GROUPS = [
       { id: 'webhooks', icon: Webhook, component: WebhooksSettings },
       // Facebook Leads (FB-LEADS-1) — per-tenant Leads-app credentials + webhook URL.
       { id: 'facebook_leads', icon: Megaphone, component: FacebookLeadsSettings },
+      // LIMIET-MONITOR-1: how many calls this tenant made per connector and which caps apply.
+      { id: 'limits', icon: Gauge, component: TenantLimitsSettings },
     ],
   },
   {
@@ -775,6 +782,8 @@ export const NAV_GROUPS = [
       { id: 'modules', icon: Package, component: ModulesSettings, superAdminOnly: true },
       { id: 'apps', icon: AppWindow, component: AppsSettings, superAdminOnly: true },
       { id: 'usage', icon: BarChart2, component: TenantUsageSettings, superAdminOnly: true },
+      // LIMIET-MONITOR-1: platform-wide connector usage + tenants nearing their cap.
+      { id: 'admin_limits', icon: Gauge, component: AdminLimitsSettings, superAdminOnly: true },
       // K-147 L1+L2: platform-wide Koios model registry — flavour→model map,
       // per-request-type routing, package flavour ceilings, tenant overrides.
       { id: 'koios_models', icon: Sparkles, component: KoiosModelsAdminSettings, superAdminOnly: true },
