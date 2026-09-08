@@ -161,12 +161,16 @@ describe('CreatableSelect · focus restoration on close', () => {
 // VAC-CLEAR-1 (Danny: "gekozen waarde weer leegmaken"): once a value was picked
 // there was no way back to empty — the vacancy cascade (klantlocatie/afdeling/
 // contactpersoon) and the land/provincie pair are all OPTIONAL, yet a mis-pick
-// was permanent. The clear affordance is OPT-IN because this component is shared
-// by ~90 call sites: it must be invisible (and layout-neutral) to every caller
-// that did not ask for it. No i18n resources are loaded in this suite, so
-// react-i18next falls back to the raw key ('clear' / 'clearField') — the same
-// convention ConfirmDialog.test.tsx uses.
-describe('CreatableSelect · clearable (opt-in)', () => {
+// was permanent. DROPDOWN-CLEAR-1 (Danny 08-09) made the clear affordance the
+// DEFAULT on every picker; a caller opts OUT only with a written reason. No i18n
+// resources are loaded in this suite, so react-i18next falls back to the raw key
+// ('clear' / 'clearField') — the same convention ConfirmDialog.test.tsx uses.
+describe('CreatableSelect · clearable (default on, DROPDOWN-CLEAR-1)', () => {
+  it('renders the clear control by default once a value is picked', () => {
+    render(<CreatableSelect value="A" onChange={() => {}} options={['A', 'B']} placeholder="Select" allowCreate={false} />)
+    expect(screen.getByRole('button', { name: 'clear' })).toBeInTheDocument()
+  })
+
   it('sends the EMPTY value to onChange when the clear button is pressed', async () => {
     const user = userEvent.setup()
     const onChange = vi.fn()
@@ -190,10 +194,10 @@ describe('CreatableSelect · clearable (opt-in)', () => {
     expect(screen.queryByRole('button', { name: 'clear' })).not.toBeInTheDocument()
   })
 
-  it('does not render the clear control at all for a caller that did not opt in', () => {
-    render(<CreatableSelect value="A" onChange={() => {}} options={['A', 'B']} placeholder="Select" allowCreate={false} />)
-    // The trigger is the ONLY button — no extra control appeared on the ~90
-    // existing call sites, and the label reserves no extra room either.
+  it('does not render the clear control for a caller that opted out', () => {
+    // DROPDOWN-CLEAR-1: the opt-out shape an in-place required editor uses.
+    render(<CreatableSelect value="A" onChange={() => {}} options={['A', 'B']} placeholder="Select" allowCreate={false} clearable={false} />)
+    // The trigger is the ONLY button, and the label reserves no extra room either.
     expect(screen.getAllByRole('button')).toHaveLength(1)
     expect(screen.queryByRole('button', { name: 'clear' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'A' }).querySelector('span')?.style.marginRight).toBe('')

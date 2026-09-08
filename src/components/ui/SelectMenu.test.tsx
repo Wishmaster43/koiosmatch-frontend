@@ -101,7 +101,7 @@ describe('SelectMenu · optional option icon (S-icon-1)', () => {
     expect(screen.getByTestId('icon-a')).toBeInTheDocument()
     expect(screen.queryByTestId('icon-b')).toBeNull()
 
-    await user.click(screen.getByRole('button'))
+    await user.click(screen.getAllByRole('button')[0])
     // Both rows render their own icon once the menu is open.
     expect(screen.getAllByTestId('icon-a').length).toBeGreaterThan(0)
     expect(screen.getByTestId('icon-b')).toBeInTheDocument()
@@ -109,7 +109,7 @@ describe('SelectMenu · optional option icon (S-icon-1)', () => {
 
   it('never changes output for callers without icon (backward compatible)', () => {
     render(<SelectMenu value="a" onChange={() => {}} options={['a', 'b']} />)
-    expect(screen.getByRole('button')).toHaveTextContent('a')
+    expect(screen.getAllByRole('button')[0]).toHaveTextContent('a')
   })
 })
 
@@ -181,3 +181,25 @@ describe('SelectMenu · FieldRow name + value description (ROLE-PICKER-LEFT-1)',
     expect(screen.getByRole('button', { name: 'Planner' })).not.toHaveAttribute('aria-describedby')
   })
 })
+
+// DROPDOWN-CLEAR-1 (Danny 08-09): SelectMenu had no clear at all — 25 pickers were
+// permanent once picked. The shared SelectClearButton now renders by default while a
+// value is set; clearing emits '' like a pick. Raw i18n keys ('clear') as above.
+describe('SelectMenu · clearable (default on, DROPDOWN-CLEAR-1)', () => {
+  it('renders the clear control once a value is picked and emits the empty value', async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    render(<SelectMenu value="a" onChange={onChange} options={['a', 'b']} placeholder="Pick" />)
+    await user.click(screen.getByRole('button', { name: 'clear' }))
+    expect(onChange).toHaveBeenCalledWith('')
+  })
+
+  it('renders no clear control while nothing is picked, nor when the caller opted out', () => {
+    const { rerender } = render(<SelectMenu value={null} onChange={() => {}} options={['a', 'b']} placeholder="Pick" />)
+    expect(screen.queryByRole('button', { name: 'clear' })).not.toBeInTheDocument()
+    // DROPDOWN-CLEAR-1: opt-out shape (in-place editor on a required field).
+    rerender(<SelectMenu value="a" onChange={() => {}} options={['a', 'b']} placeholder="Pick" clearable={false} />)
+    expect(screen.queryByRole('button', { name: 'clear' })).not.toBeInTheDocument()
+  })
+})
+

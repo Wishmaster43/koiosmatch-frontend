@@ -27,18 +27,16 @@
 import { useState, useRef, useEffect, useId } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import { useTranslation } from 'react-i18next'
-import { ChevronDown, Check, Plus, X } from 'lucide-react'
+import { ChevronDown, Check, Plus } from 'lucide-react'
 import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 import { useClickOutside } from '@/hooks/useClickOutside'
 import { matchesOptionQuery } from './optionFilter'
+import SelectClearButton, { CLEAR_BUTTON_SIZE } from './SelectClearButton'
 
 // Footprint of the opt-in clear button: a 24px WCAG 2.2 (2.5.8) target, parked
 // left of the chevron. The label span reserves exactly this much extra room so a
 // long value ellipsises BEFORE the X instead of sliding underneath it.
-const CLEAR_BUTTON_SIZE = 24
-const CLEAR_BUTTON_RIGHT = 26
 
 interface CreatableOption {
   value: string
@@ -65,10 +63,11 @@ interface CreatableSelectProps {
   allowCreate?: boolean
   menuWidth?: number
   style?: CSSProperties
-  // VAC-CLEAR-1: opt-in "unset this value" affordance. OFF by default because this
-  // component is shared by ~90 call sites — an always-on X would silently reshape
-  // every one of them (and clearing is only honest where the caller really persists
-  // an empty value). Renders only while a value is actually set.
+  // DROPDOWN-CLEAR-1 (Danny 08-09, supersedes VAC-CLEAR-1's opt-in): the X is ON by
+  // default on every picker and renders only while a value is actually set. Opt
+  // out ONLY where clearing would persist an empty value the record must not hold
+  // (an in-place editor on a required field) — with a `// DROPDOWN-CLEAR-1:` reason
+  // above the call site; dropdownClear.houseStyle.test.js enforces the comment.
   clearable?: boolean
   // Field name woven into the clear button's accessible name ("Klantlocatie
   // wissen"), so several clearable pickers on one card don't all announce as a
@@ -92,9 +91,8 @@ interface CreatableSelectProps {
 export default function CreatableSelect({
   id, 'aria-labelledby': ariaLabelledBy, 'aria-required': ariaRequired,
   value, options = [], onChange, placeholder, allowCreate = true, menuWidth = 220, style,
-  clearable = false, clearLabel, renderTrigger, onSearch,
+  clearable = true, clearLabel, renderTrigger, onSearch,
 }: CreatableSelectProps) {
-  const { t } = useTranslation('common')
   const listId = useId()
   const autoId = useId()
   const triggerId = id ?? autoId
@@ -176,8 +174,6 @@ export default function CreatableSelect({
   // every caller's form state already uses (never null: onChange is (string)=>void).
   const hasValue = value != null && value !== ''
   const showClear = clearable && hasValue
-  const clearId = `${triggerId}-clear`
-  const clearName = clearLabel ? t('clearField', { field: clearLabel }) : t('clear')
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
@@ -218,23 +214,11 @@ export default function CreatableSelect({
           <ChevronDown size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
         </button>
       )}
-      {/* Clear — a SIBLING of the trigger, never a child: a <button> inside a
-          <button> is invalid HTML and browsers drop the inner one from the tab
-          order. Absolutely positioned over the trigger's reserved slot, so it is
-          a real focusable control (Tab reaches it, Enter/Space fire it) with a
-          text accessible name — an icon-only div would have neither (§6).
-          Clearing is treated exactly like a pick: emit the empty value and close. */}
+      {/* DROPDOWN-CLEAR-1: the shared clear control; clearing is treated exactly like
+          a pick — emit the empty value and close. */}
       {showClear && (
-        <button type="button" id={clearId} title={clearName}
-          aria-labelledby={ariaLabelledBy && !clearLabel ? `${clearId} ${ariaLabelledBy}` : undefined}
-          onClick={() => { onChange(''); setOpen(false); setQuery('') }}
-          style={{ position: 'absolute', right: CLEAR_BUTTON_RIGHT, top: '50%', transform: 'translateY(-50%)',
-            width: CLEAR_BUTTON_SIZE, height: CLEAR_BUTTON_SIZE, display: 'flex', alignItems: 'center',
-            justifyContent: 'center', padding: 0, border: 'none', borderRadius: 6,
-            background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer' }}>
-          <X size={12} aria-hidden="true" />
-          <span className="sr-only">{clearName}</span>
-        </button>
+        <SelectClearButton triggerId={triggerId} clearLabel={clearLabel} aria-labelledby={ariaLabelledBy}
+          onClear={() => { onChange(''); setOpen(false); setQuery('') }} />
       )}
       {open && createPortal(
         <div ref={menuRef} {...{ [DROPDOWN_PORTAL_ATTR]: '' }} style={{

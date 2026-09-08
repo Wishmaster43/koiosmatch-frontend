@@ -155,12 +155,17 @@ export function TextArea({ id, value, onChange, placeholder, rows = 3, style, ..
 // reaches the trigger directly, since a <button> — unlike a native <select> — is
 // not labelable via `htmlFor`; `placeholder` still carries the name for callers
 // that render this standalone (no wrapping <Field>), same as TextField/TextArea.
-export function SelectField({ id, value, onChange, options = [], placeholder, style, 'aria-labelledby': ariaLabelledBy, ...req }: {
+// DROPDOWN-CLEAR-1 (Danny 08-09, measured on the WhatsApp-Web number form: "ik kan
+// vestiging niet wissen"): the kit forwards the X — a form field is cleared BEFORE
+// submit, so even a required pick can be undone; validation still runs on save.
+export function SelectField({ id, value, onChange, options = [], placeholder, style, 'aria-labelledby': ariaLabelledBy, clearable, clearLabel, ...req }: {
   id?: string; value?: string; onChange: (v: string) => void; options?: Array<string | SelectOption>; placeholder?: string; style?: CSSProperties; 'aria-labelledby'?: string
+  clearable?: boolean; clearLabel?: string
 } & RequiredProps) {
   return (
     <CreatableSelect id={id} aria-labelledby={ariaLabelledBy} aria-required={requiredAttrs(req)['aria-required']} value={value ?? ''} onChange={onChange}
       options={options as Array<string | { value: string; label: string }>} placeholder={placeholder} allowCreate={false}
+      clearable={clearable} clearLabel={clearLabel}
       style={{ ...inputStyle, cursor: 'pointer', ...style }} />
   )
 }

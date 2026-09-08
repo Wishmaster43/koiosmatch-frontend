@@ -388,13 +388,22 @@ same validation/UX, lookups via `useX()` hooks (never hardcoded option lists).
   standaard-afleiding) presenteert zich aan de eindgebruiker als Koios-voorstel
   met hetzelfde merkje — implementatie (regel of model) is voor de gebruiker
   onzichtbaar en irrelevant. Nooit een tweede "gewone-logica"-markering invoeren.
-- **Een OPTIONEEL kiesveld is altijd leeg te maken (Danny 2026-08-13, twee keer in
-  één uur: "kan vacature niet leeg maken?" / "ROOKIE MISTAKES!!").** Elke
-  CreatableSelect/SelectMenu die aan een optionele waarde hangt draagt het
-  VAC-CLEAR-1-wiskruis (`clearable` + `clearLabel`), en het wissen bereikt écht de
-  opgeslagen staat (een onChange die `''` negeert is een finding). Een VERPLICHT
-  veld krijgt juist géén wiskruis. Bij een SelectMenu zonder clear-support: een
-  expliciete "Geen …"-optie, nooit het component verbouwen. Elke gerepareerde
+- **DROPDOWN-CLEAR-1 — ELKE zoekbare keuzelijst heeft een wiskruis, standaard AAN
+  (Danny 08-09 op het WhatsApp-Web-nummerformulier: "ik kan vestiging niet wissen,
+  dit is een bekende bug, niet in elke zoekbare dropdown is een clear … we zouden
+  reusable components gebruiken"; vervangt VAC-CLEAR-1's opt-in van 13-08).**
+  Gemeten vóór de fix: 286 keuzelijsten, 142 zonder wiskruis — SelectMenu kende
+  het niet, CreatableSelect alleen als opt-in, en het formulier-kit `SelectField`
+  gaf het nooit door: precies zo ontstaat een kopie zonder clear. Sinds de fix
+  renderen CreatableSelect, SelectMenu en SearchSelect (enkelkeuze-rol) het
+  gedeelde `components/ui/SelectClearButton` zodra er een waarde staat; wissen is
+  een pick met `''` en de onChange MOET `''` echt verwerken (een onChange die `''`
+  negeert is een finding). Een formulierveld wist je vóór het opslaan, ook als het
+  verplicht is: validatie loopt bij Opslaan. Opt-out (`clearable={false}`) mag
+  ALLEEN waar een lege waarde de opgeslagen staat zou breken (in-place editor op
+  een verplicht veld dat direct persisteert) en draagt een `// DROPDOWN-CLEAR-1:
+  <reden>`-commentaar direct erboven (max. zes regels); `components/ui/dropdownClear.houseStyle.test.js` bewaakt
+  die reden én dat er nergens een rauwe `<select>` bestaat. Elke gerepareerde
   kiezer krijgt een pick→clear→placeholder-regressietest.
 - **Een toevoeg-actie IS een knop, geen tekstlink (Danny 2026-08-08).** Elke
   "+ X toevoegen"-affordance (vaardigheid, taal, opleiding, locatie, notitie, rij
@@ -876,6 +885,23 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   per feature.
 - **Locale-aware formatting** for the Dutch market: dates, numbers, and currency
   via `Intl` (`nl-NL`) in `lib/formatters` — never manual string formatting.
+- **GETALLEN-1 (Danny 08-09, verbatim: "op FE waar er duizendtallen zijn wil ik een . er
+  tussen, moet ook een audit ding zijn en opnemen in claude.md").** Every user-visible
+  NUMBER — counts, limits, amounts, percentages, hours, token counts, averages,
+  distances, file sizes — renders through `src/lib/formatters` on the ACTIVE locale:
+  `useNumberFormat()` inside components (`formatNumber` / `formatCurrency` /
+  `formatPercent` / `formatRatio` / `formatDistanceKm` / `formatFileSizeMb` /
+  `formatSeconds`), the pure functions with an explicit `locale` argument in helpers.
+  nl renders 1.000 / 1.000,50, en-GB 1,000 / 1,000.50; a coordinate is a CODE, not a
+  quantity, and goes through `formatCoord` (locale-independent). The API stays raw
+  (BE rule GETALLEN-1: ints in cents, floats with 2 decimals, never pre-formatted
+  strings) — formatting is FE-only, once. The guard: `eslint.config.js` block
+  `getallen/no-restricted-syntax` makes `.toFixed(`, `.toLocaleString(` and
+  `new Intl.NumberFormat` outside `src/lib/formatters.ts` a lint ERROR (the
+  `huisstijl:ceiling` gate fails on it). A raw number in JSX, a hand-built
+  `${n}%`, or a per-screen `Intl` call is a finding. Measured before the sweep
+  (08-09): 27 raw sites next to 335 correct ones — exactly how a rule without a
+  guard drifts.
 - Use **ICU plurals** and interpolation, never string concatenation.
 - New feature ⇒ new translation keys in **both** locales in the same change.
 - **Non-page surfaces are not exempt.** The workflow module registry (`src/modules/`)

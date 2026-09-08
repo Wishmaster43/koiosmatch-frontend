@@ -8,7 +8,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import 'react-datepicker/dist/react-datepicker.css'
-import { DateField } from './fields'
+import { DateField, SelectField } from './fields'
 
 // This project ships no @types/node; process.env.TZ is a genuine Node global at
 // test runtime (Vitest runs under Node) — this is a minimal local type shim for it.
@@ -45,3 +45,23 @@ describe('DateField · sends the LOCAL calendar day, never a UTC-shifted one', (
     expect(onChange).toHaveBeenCalledWith('2026-01-15')
   })
 })
+
+// DROPDOWN-CLEAR-1 (Danny 08-09, measured on the WhatsApp-Web number form): the kit's
+// SelectField inherits the shared clear control, so a picked value can be undone
+// before submit; it forwards clearable={false} for the reasoned opt-outs.
+describe('SelectField · clear affordance (DROPDOWN-CLEAR-1)', () => {
+  it('renders the clear control once a value is picked and emits the empty value', async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    render(<SelectField value="loc-1" onChange={onChange} options={[{ value: 'loc-1', label: 'Amsterdam' }]} placeholder="Vestiging" />)
+    await user.click(screen.getByRole('button', { name: /clear|wissen/i }))
+    expect(onChange).toHaveBeenCalledWith('')
+  })
+
+  it('forwards the opt-out', () => {
+    // DROPDOWN-CLEAR-1: opt-out shape, forwarded to the shared picker.
+    render(<SelectField value="loc-1" onChange={() => {}} options={[{ value: 'loc-1', label: 'Amsterdam' }]} placeholder="Vestiging" clearable={false} />)
+    expect(screen.queryByRole('button', { name: /clear|wissen/i })).not.toBeInTheDocument()
+  })
+})
+

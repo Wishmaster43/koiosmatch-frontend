@@ -18,6 +18,7 @@ import { useDropdownPlacement, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPla
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 import { useClickOutside } from '@/hooks/useClickOutside'
 import { matchesOptionQuery } from './optionFilter'
+import SelectClearButton, { CLEAR_BUTTON_SIZE } from './SelectClearButton'
 
 interface SelectOption {
   value: string
@@ -49,10 +50,15 @@ interface SelectMenuProps {
   menuWidth?: number
   // Optional trigger override (modal-sized fields honour style.fontSize too).
   style?: CSSProperties
+  // DROPDOWN-CLEAR-1 (Danny 08-09): the X is ON by default and renders only while a
+  // value is set; clearing emits '' exactly like a pick. Opt out only where an empty
+  // value must never persist, with a `// DROPDOWN-CLEAR-1:` reason above the call site.
+  clearable?: boolean
+  clearLabel?: string
 }
 
 // Trigger button + portal checklist; closes on outside click/Escape and returns focus to the trigger so keyboard users keep their place.
-export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, 'aria-required': ariaRequired, value, options = [], onChange, placeholder, leading, menuWidth = 170, style }: SelectMenuProps) {
+export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, 'aria-required': ariaRequired, value, options = [], onChange, placeholder, leading, menuWidth = 170, style, clearable = true, clearLabel }: SelectMenuProps) {
   const listId = useId()
   const autoId = useId()
   const triggerId = id ?? autoId
@@ -101,6 +107,8 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, 'ari
 
   const opts: SelectOption[] = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
   const current = opts.find(o => o.value === value)
+  // DROPDOWN-CLEAR-1: only a picked value can be unset (an empty field shows the placeholder).
+  const showClear = clearable && value != null && value !== ''
   // SEARCHABLE-ALWAYS (Danny 08-08, CLAUDE.md §4: "zoekbare dropdowns overal waar
   // we een dropdown hebben"): every menu filters, including the short ones — so a
   // picker feels the same wherever you meet it. Filtering happens here rather
@@ -127,11 +135,17 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, 'ari
         {current?.initials && <Avatar initials={current.initials} size={18} />}
         {current?.icon && !current.initials && <span style={{ display: 'flex', flexShrink: 0 }}>{current.icon}</span>}
         <span id={valueId} style={{ fontSize: (style as { fontSize?: number } | undefined)?.fontSize ?? 12, flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden',
-          textOverflow: 'ellipsis', color: current ? 'var(--text)' : 'var(--text-muted)' }}>
+          textOverflow: 'ellipsis', color: current ? 'var(--text)' : 'var(--text-muted)',
+          ...(showClear ? { marginRight: CLEAR_BUTTON_SIZE } : {}) }}>
           {current?.label ?? placeholder ?? '-'}
         </span>
         <ChevronDown size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
       </button>
+      {/* DROPDOWN-CLEAR-1: the shared clear control, a sibling of the trigger. */}
+      {showClear && (
+        <SelectClearButton triggerId={triggerId} clearLabel={clearLabel} aria-labelledby={ariaLabelledBy}
+          onClear={() => { onChange(''); setOpen(false) }} />
+      )}
       {open && createPortal(
         <div id={listId} ref={menuRef} {...{ [DROPDOWN_PORTAL_ATTR]: '' }}
           // HUISSTIJL-1: portalled dropdown menu — z-popover ladder tier, shadow-float role.

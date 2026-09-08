@@ -188,3 +188,28 @@ describe('SearchSelect · aria-required forwarding (REQUIRED-A11Y-2)', () => {
     expect(screen.getByRole('button', { name: 'Kies' })).not.toHaveAttribute('aria-required')
   })
 })
+
+// DROPDOWN-CLEAR-1 (Danny 08-09): the single-pick FIELD role (closeOnToggle) gets the
+// shared clear control while a value is selected; the X calls the caller's onClear,
+// or toggles every selected value off when no onClear is given.
+describe('SearchSelect · clearable on the single-pick field role (DROPDOWN-CLEAR-1)', () => {
+  it('toggles the selected value off when no onClear is given', () => {
+    const onToggle = vi.fn()
+    render(<SearchSelect triggerLabel="A" options={['A', 'B']} selected={['A']} onToggle={onToggle} closeOnToggle />)
+    fireEvent.click(screen.getByRole('button', { name: 'clear' }))
+    expect(onToggle).toHaveBeenCalledWith('A')
+  })
+
+  it('prefers the caller\'s onClear and hides the control while nothing is selected or on the add role', () => {
+    const onClear = vi.fn()
+    const { rerender } = render(<SearchSelect triggerLabel="A" options={['A', 'B']} selected={['A']} onToggle={() => {}} onClear={onClear} closeOnToggle />)
+    fireEvent.click(screen.getByRole('button', { name: 'clear' }))
+    expect(onClear).toHaveBeenCalledTimes(1)
+    rerender(<SearchSelect triggerLabel="Kies" options={['A', 'B']} selected={[]} onToggle={() => {}} closeOnToggle />)
+    expect(screen.queryByRole('button', { name: 'clear' })).not.toBeInTheDocument()
+    // The multi-select ADD role keeps its own "clear all" row instead of an X.
+    rerender(<SearchSelect triggerLabel="Toevoegen" options={['A', 'B']} selected={['A']} onToggle={() => {}} />)
+    expect(screen.queryByRole('button', { name: 'clear' })).not.toBeInTheDocument()
+  })
+})
+

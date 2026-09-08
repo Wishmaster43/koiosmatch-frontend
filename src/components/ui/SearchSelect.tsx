@@ -19,7 +19,7 @@
  * `overflow-y: auto` sized to match, so every item stays scrollable and
  * selectable, never truncated off.
  */
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useId } from 'react'
 import type { ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Check, ChevronDown } from 'lucide-react'
@@ -28,6 +28,7 @@ import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT, DROPDOWN_PORTAL_ATTR 
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 import { useClickOutside } from '@/hooks/useClickOutside'
 import { matchesOptionQuery } from './optionFilter'
+import SelectClearButton, { CLEAR_BUTTON_SIZE } from './SelectClearButton'
 import SelectAllRow, { SELECT_ALL_ROW_HEIGHT } from './SelectAllRow'
 import { useBatchToggle } from '@/hooks/useBatchToggle'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
@@ -81,15 +82,27 @@ interface SearchSelectProps {
   // pickers that never needed that flag opt out with `selectAll={false}` — a
   // select-all in a one-of-N list is meaningless (§3).
   selectAll?: boolean
+  // DROPDOWN-CLEAR-1 (Danny 08-09): on the SINGLE-PICK field role (`closeOnToggle`)
+  // an X unsets the picked value; on by default, rendered only while something is
+  // selected. `onClear` is the caller's own reset; omitted, the X toggles every
+  // selected value off through `onToggle` (the caller must treat a re-toggle as
+  // unset — most single-pick callers already do). The multi-select checklist keeps
+  // its "Alles wissen" row instead. The trigger needs an id for the X's own id.
+  clearable?: boolean
+  clearLabel?: string
+  onClear?: () => void
+  id?: string
 }
 
 // Searchable multi-select trigger + portalled popover — the shared component every
 // picker uses instead of a native <select> (§3A canon).
 export default function SearchSelect({
   triggerLabel, options = [], selected = [], onToggle, searchable = true, width = 280, onSearch, renderTrigger, menuAlign = 'left', closeOnToggle = false, disabled = false, selectAll, triggerAriaLabel,
-  'aria-required': ariaRequired,
+  'aria-required': ariaRequired, clearable = true, clearLabel, onClear, id,
 }: SearchSelectProps) {
   const { t } = useTranslation('common')
+  const autoId = useId()
+  const triggerId = id ?? autoId
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const ref = useRef<HTMLDivElement>(null)
@@ -142,6 +155,13 @@ export default function SearchSelect({
   // and any caller-supplied `renderTrigger` button, so `open` can never become
   // true while disabled, regardless of how the trigger tries to invoke it.
   const toggle = () => { if (!disabled) setOpen(o => !o) }
+  // DROPDOWN-CLEAR-1: single-pick field role only, and only while a value is picked.
+  const showClear = clearable && closeOnToggle && !disabled && selected.length > 0
+  const clearAll = () => {
+    if (onClear) onClear()
+    else selected.forEach(v => onToggle(String(v)))
+    setOpen(false)
+  }
 
   // Multi-select only (see the `selectAll` prop doc above), applied one value per
   // commit because most call sites' onToggle is a stale-closure setState.
@@ -176,12 +196,13 @@ export default function SearchSelect({
             // renderTrigger call site this default face replaces should adopt THIS,
             // never hand-paint its own copy. Block form: style spans several lines.
             /* eslint-disable huisstijlLegacy/no-restricted-syntax */
-            <button type="button" onClick={toggle} disabled={disabled} aria-label={triggerAriaLabel} aria-required={ariaRequired || undefined}
+            <button type="button" id={triggerId} onClick={toggle} disabled={disabled} aria-label={triggerAriaLabel} aria-required={ariaRequired || undefined}
               style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px',
                 border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)',
                 cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.6 : 1 }}>
               <span style={{ fontSize: 12, flex: 1, textAlign: 'left', whiteSpace: 'nowrap',
-                overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text)' }}>{triggerLabel}</span>
+                overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text)',
+                ...(showClear ? { marginRight: CLEAR_BUTTON_SIZE } : {}) }}>{triggerLabel}</span>
               <ChevronDown size={12} aria-hidden="true" style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
             </button>
             /* eslint-enable huisstijlLegacy/no-restricted-syntax */
@@ -189,6 +210,11 @@ export default function SearchSelect({
             <DrawerAddButton label={triggerLabel ?? ''} onClick={toggle} disabled={disabled} />
           )
         )}
+      {/* DROPDOWN-CLEAR-1: the shared clear control on the single-pick field role (also
+          over a caller-supplied trigger, whose right padding reserves the slot). */}
+      {showClear && (
+        <SelectClearButton triggerId={triggerId} clearLabel={clearLabel} onClear={clearAll} />
+      )}
       {open && createPortal(
         // minWidth + viewport cap: the menu grows with long option labels instead of
         // truncating. Flips upward + clamps to the available space (see doc comment).

@@ -38,7 +38,7 @@ export function renderFieldControl(f: FieldRow, ctx: {
   // scroll a 200-item country list. allowCreate stays off: these are tenant lookups,
   // adding a value belongs in Settings, not in a record's edit row.
   if (f.type === 'select') return <CreatableSelect value={(v as string) ?? ''} onChange={val => setF(f.key, val)} options={selectOptions(f.options)} placeholder={t('select')} allowCreate={false} style={compact}
-    clearable={f.clearable} clearLabel={f.clearable && typeof f.label === 'string' ? f.label : undefined} />
+    clearable={f.clearable} clearLabel={typeof f.label === 'string' ? f.label : undefined} />
   if (f.type === 'creatable') {
     // Lookup combobox that can also add a free-text value (tenant `allowCreate`).
     // KEY-ADOPTION: options may carry a `key` field; select by key when present,
@@ -53,7 +53,7 @@ export function renderFieldControl(f: FieldRow, ctx: {
     const selected = keyValue && opts.some(o => o.key === keyValue)
       ? opts.find(o => o.key === keyValue)
       : opts.find(o => o.value === v)
-    // VAC-CLEAR-1: an optional creatable row is clearable when the config says so.
+    // DROPDOWN-CLEAR-1: clearable by default (the diskette is the submit; validation runs on save); a field opts out via its config.
     return <CreatableSelect value={selected?.value ?? ''} onChange={val => {
       setF(f.key, val)
       // KEY-ADOPTION: resolve the picked option's key and store it alongside the name.
@@ -62,7 +62,7 @@ export function renderFieldControl(f: FieldRow, ctx: {
       const picked = opts.find(o => o.value === val)
       setF(keyField, picked?.key ?? null)
     }} options={opts} placeholder={t('select')} allowCreate={f.allowCreate !== false} style={compact}
-      clearable={f.clearable} clearLabel={f.clearable && typeof f.label === 'string' ? f.label : undefined} />
+      clearable={f.clearable} clearLabel={typeof f.label === 'string' ? f.label : undefined} />
   }
   if (f.type === 'date') return <DateField value={v as string | undefined} onChange={val => setF(f.key, val)} style={compact} />
   if (f.type === 'textarea') return <textarea value={(v as string) ?? ''} onChange={e => setF(f.key, e.target.value)} rows={3} style={{ ...compact, resize: 'vertical' }} />
