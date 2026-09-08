@@ -25,7 +25,7 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ComponentType } from 'react'
-import { BadgeCheck, Eye, Download, ArrowRight } from 'lucide-react'
+import { BadgeCheck } from 'lucide-react'
 import AddableSectionJs from '@/components/forms/AddableSection'
 import SafeHtml from '@/components/ui/SafeHtml'
 import SoftChip from '@/components/ui/SoftChip'
@@ -39,7 +39,8 @@ import { resolveLinkedExperience, useExperienceOptions, type LinkableExperience 
 import { LinkedExperienceLine, NoExperiencesNotice } from './LinkedExperience'
 import { useDateFormat } from '@/lib/datetime'
 import { useReferenceRelations } from '@/lib/useReferenceRelations'
-import { downloadFilesSequentially } from '@/lib/downloadFiles'
+// DOC-EDU-1 mirror: the shared DocEntryLinks component (preview/download/jump buttons).
+import { DocEntryLinks } from './sectionTabsShared'
 // DOC-1-EIGENAAR-1: the ONE shared option resolver every claimable section uses (§11)
 // — so all five sections offer exactly the same set of still-free documents.
 import { linkedDocumentOptions } from './documentLinkRules'
@@ -116,25 +117,6 @@ function resolveReferenceDocument(entry: RelItem, documents: RelItem[]): RelItem
     if (byId) return byId
   }
   return documents.find(d => d.reference_id != null && String(d.reference_id) === String(entry.id))
-}
-
-/** Three subtle icon-buttons for a row's linked reference letter — same muted
- * style as SectionTabs.tsx's DocEntryLinks (not imported: it isn't exported,
- * and that file is out of scope for this change). */
-function ReferenceLetterLink({ doc, onPreview, onJump }: { doc: RelItem; onPreview: () => void; onJump?: () => void }) {
-  const { t } = useTranslation('candidates')
-  const iconBtn = { background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' } as const
-  // Same download mechanics as DocumentsSection's own row action (one shared helper).
-  const download = () => { downloadFilesSequentially([{ url: (doc.url as string) ?? (doc.download_url as string), name: (doc.name as string) ?? '' }]) }
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 2, marginTop: 6 }}>
-      <button type="button" aria-label={t('documents.preview')} title={t('documents.preview')} onClick={onPreview} style={iconBtn}><Eye size={12} /></button>
-      <button type="button" aria-label={t('documents.download')} title={t('documents.download')} onClick={download} style={iconBtn}><Download size={12} /></button>
-      {onJump && (
-        <button type="button" aria-label={t('documents.jumpToDocuments')} title={t('documents.jumpToDocuments')} onClick={onJump} style={iconBtn}><ArrowRight size={12} /></button>
-      )}
-    </div>
-  )
 }
 
 // Third-party references list (see file docblock above): add/edit/remove/verify
@@ -258,7 +240,7 @@ export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onV
               {linkedExperience && <LinkedExperienceLine experience={linkedExperience} />}
               {/* REFERENTIE-VELDEN-1: the reference-letter icons only render once a
                   linked document actually resolves — no fake affordance. */}
-              {linkedDoc && <ReferenceLetterLink doc={linkedDoc} onPreview={() => setPreviewDoc(linkedDoc)} onJump={onJumpToDocuments} />}
+              {linkedDoc && <DocEntryLinks doc={linkedDoc} onPreview={() => setPreviewDoc(linkedDoc)} onJump={onJumpToDocuments} />}
               {/* Verified badge once the server has stamped it, else the verify action —
                   never both, and no action at all for an unpersisted (temp id) row. */}
               <div style={{ marginTop: 6 }}>

@@ -31,11 +31,10 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Edit2, Save, X } from 'lucide-react'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { composeAddressLine } from '@/components/forms/EditableFieldTable'
 import { GroupCard, GroupHeader, FieldRow, inputStyle } from './profileFieldShared'
-import Button from '@/components/ui/Button'
+import { CardEditControls } from '@/components/forms/CardEditControls'
 import { useProvinces } from '@/hooks/useProvinces'
 import { useCountriesLookup } from '@/lib/useCountriesLookup'
 import { getCountryName } from '@/lib/countries'
@@ -91,14 +90,7 @@ export default function ZzpAddressCard({ value, onSave }: { value: ZzpAddressVal
   return (
     <div>
       <GroupHeader title={t('zzp.groupAddress')}>
-        {editing ? (
-          <div style={{ display: 'flex', gap: 4 }}>
-            <Button variant="primary" size="sm" iconOnly onClick={save} title={tc('save')} aria-label={tc('save')}><Save size={13} /></Button>
-            <Button variant="secondary" size="sm" iconOnly onClick={cancel} title={tc('cancel')} aria-label={tc('cancel')}><X size={13} /></Button>
-          </div>
-        ) : (
-          <Button variant="secondary" size="sm" iconOnly onClick={start} title={tc('edit')} aria-label={tc('edit')}><Edit2 size={13} /></Button>
-        )}
+        <CardEditControls editing={editing} onStart={start} onSave={save} onCancel={cancel} saveLabel={tc('save')} cancelLabel={tc('cancel')} editLabel={tc('edit')} />
       </GroupHeader>
       <GroupCard>
         {editing ? (

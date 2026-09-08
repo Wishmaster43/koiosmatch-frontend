@@ -32,12 +32,11 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Edit2, Save, X } from 'lucide-react'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { GroupCard, GroupHeader, FieldRow, inputStyle } from './profileFieldShared'
 import { isValidPhoneFormat } from '../lib/contactFieldValidation'
 import { useEmergencyContactRelations } from '@/lib/useEmergencyContactRelations'
-import Button from '@/components/ui/Button'
+import { CardEditControls } from '@/components/forms/CardEditControls'
 
 export interface EmergencyContactValues {
   firstName: string
@@ -122,14 +121,7 @@ export default function EmergencyContactCard({ value, onSave }: {
   return (
     <div>
       <GroupHeader title={t('preferences.groupEmergencyContact')}>
-        {editing ? (
-          <div style={{ display: 'flex', gap: 4 }}>
-            <Button variant="primary" size="sm" iconOnly onClick={save} title={tc('save')} aria-label={tc('save')}><Save size={13} /></Button>
-            <Button variant="secondary" size="sm" iconOnly onClick={cancel} title={tc('cancel')} aria-label={tc('cancel')}><X size={13} /></Button>
-          </div>
-        ) : (
-          <Button variant="secondary" size="sm" iconOnly onClick={start} title={tc('edit')} aria-label={tc('edit')}><Edit2 size={13} /></Button>
-        )}
+        <CardEditControls editing={editing} onStart={start} onSave={save} onCancel={cancel} saveLabel={tc('save')} cancelLabel={tc('cancel')} editLabel={tc('edit')} />
       </GroupHeader>
       <GroupCard>
         {editing ? (

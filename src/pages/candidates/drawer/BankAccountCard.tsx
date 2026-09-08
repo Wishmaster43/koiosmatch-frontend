@@ -29,12 +29,11 @@
 import { useState } from 'react'
 import IbanDocumentSlot from './IbanDocumentSlot'
 import { useTranslation } from 'react-i18next'
-import { Edit2, Save, X } from 'lucide-react'
 import { GroupCard, GroupHeader, FieldRow, inputStyle } from './profileFieldShared'
 import { monoStyle } from '@/components/ui/typography'
 import { formatIban, normalizeIban } from '@/lib/iban'
 import { useAuth } from '@/context/AuthContext'
-import Button from '@/components/ui/Button'
+import { CardEditControls } from '@/components/forms/CardEditControls'
 import type { Loose } from '@/types/candidate'
 
 export interface BankAccountValues {
@@ -105,14 +104,7 @@ export default function BankAccountCard({ value, onSave, candidateId, bankDocume
   return (
     <div>
       <GroupHeader title={t('preferences.groupBankAccount')}>
-        {editing ? (
-          <div style={{ display: 'flex', gap: 4 }}>
-            <Button variant="primary" size="sm" iconOnly onClick={save} title={tc('save')} aria-label={tc('save')}><Save size={13} /></Button>
-            <Button variant="secondary" size="sm" iconOnly onClick={cancel} title={tc('cancel')} aria-label={tc('cancel')}><X size={13} /></Button>
-          </div>
-        ) : (
-          <Button variant="secondary" size="sm" iconOnly onClick={start} title={tc('edit')} aria-label={tc('edit')}><Edit2 size={13} /></Button>
-        )}
+        <CardEditControls editing={editing} onStart={start} onSave={save} onCancel={cancel} saveLabel={tc('save')} cancelLabel={tc('cancel')} editLabel={tc('edit')} />
       </GroupHeader>
       <GroupCard>
         <FieldRow label={t('preferences.iban')}>
