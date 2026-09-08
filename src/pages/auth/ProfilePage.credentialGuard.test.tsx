@@ -47,7 +47,7 @@ describe('ProfilePage · CredentialChangeGuard on PUT /auth/me (CMBE bundle B)',
     await user.click(screen.getByText('profile.saveChanges'))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/auth/me', {
-      firstname: 'Jan', lastname: 'Jansen', email: 'jan@bedrijf.nl', phone: '', default_per_page: 500,
+      firstname: 'Jan', lastname: 'Jansen', email: 'jan@bedrijf.nl', phone: '', default_per_page: 50,
     }))
   })
 
@@ -69,7 +69,7 @@ describe('ProfilePage · CredentialChangeGuard on PUT /auth/me (CMBE bundle B)',
     await user.click(screen.getByText('profile.saveChanges'))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/auth/me', {
-      firstname: 'Jan', lastname: 'Jansen', email: 'nieuw@bedrijf.nl', phone: '', default_per_page: 500,
+      firstname: 'Jan', lastname: 'Jansen', email: 'nieuw@bedrijf.nl', phone: '', default_per_page: 50,
       current_password: 'geheim',
     }))
   })
