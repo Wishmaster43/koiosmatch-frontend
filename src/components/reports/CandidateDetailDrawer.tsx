@@ -21,6 +21,8 @@ import SoftChip from '@/components/ui/SoftChip'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import SectionCard from '@/components/ui/SectionCard'
 import DrawerTabs from '@/components/drawer/DrawerTabs'
+import Button from '@/components/ui/Button'
+import { Caption, BodyText, PageTitle, SectionTitle, Mono, monoStyle } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat } from '@/lib/formatters'
 import { initialsOf } from '@/lib/initials'
@@ -28,14 +30,14 @@ import { SM_CANDIDATE_STATUS_COLORS } from '@/pages/shiftmanager/shared'
 import { endDateOf, noShowCountOf, cancellationsOf, featureNamesOf } from '@/pages/shiftmanager/shared'
 import type { ReportCandidate, GlobalRate } from '@/types/reports'
 
-// Label-above field row (§4 drawer card idiom): 11px muted label, 13px value, em-dash when empty.
+// Label-above field row (§4 drawer card idiom): caption label, body value, em-dash when empty.
 function Field({ label, value }: { label: ReactNode; value?: ReactNode }) {
   return (
     <div>
-      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 3 }}>{label}</div>
-      <div style={{ fontSize: 13, color: 'var(--text)', fontWeight: 500, wordBreak: 'break-word' }}>
+      <Caption style={{ marginBottom: 3 }}>{label}</Caption>
+      <BodyText style={{ wordBreak: 'break-word' }}>
         {value || <span style={{ color: 'var(--text-muted)' }}>—</span>}
-      </div>
+      </BodyText>
     </div>
   )
 }
@@ -104,8 +106,8 @@ function TabAlgemeen({ c }: { c: ReportCandidate }) {
             { label: t('candidateDrawer.stats.cancellations'), value: cancellationsOf(c) },
           ].map(stat => (
             <div key={stat.label} className="text-center rounded-lg" style={{ padding: '10px 8px', background: 'var(--hover-bg)' }}>
-              <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace' }}>{stat.value}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{stat.label}</div>
+              <Mono style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>{stat.value}</Mono>
+              <Caption style={{ marginTop: 2, display: 'block' }}>{stat.label}</Caption>
             </div>
           ))}
         </div>
@@ -129,13 +131,13 @@ function TabAlgemeen({ c }: { c: ReportCandidate }) {
               <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
                 padding: '9px 12px', borderBottom: i < rates.length - 1 ? '1px solid var(--border)' : 'none' }}>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{r.global_rate?.internal_description ?? '—'}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>{r.step_name ?? '—'}</div>
+                  <BodyText>{r.global_rate?.internal_description ?? '—'}</BodyText>
+                  <Caption style={{ marginTop: 1 }}>{r.step_name ?? '—'}</Caption>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace' }}>
+                  <SectionTitle as="span" style={monoStyle}>
                     {r.hour_rate != null ? formatCurrency(r.hour_rate, undefined, 2) : '—'}
-                  </div>
+                  </SectionTitle>
                   {r.is_default_step === 1 && (
                     <div style={{ marginTop: 2, display: 'inline-block' }}>
                       <SoftChip label={t('candidateDrawer.default')} color="var(--color-success)" />
@@ -195,22 +197,21 @@ export default function CandidateDetailDrawer({ candidate: c, onClose }: { candi
             status badge + reference, then the tab bar (§3A). */}
         <div className="flex-shrink-0" style={{ padding: '14px 16px 0', borderBottom: '1px solid var(--border)' }}>
           <div className="flex justify-end" style={{ marginBottom: 8 }}>
-            <button onClick={onClose} aria-label={t('common:close')}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}>
+            <Button variant="ghost" iconOnly size="sm" onClick={onClose} aria-label={t('common:close')}>
               <X size={15} />
-            </button>
+            </Button>
           </div>
 
           <div className="flex items-start gap-3" style={{ marginBottom: 12 }}>
             <Avatar initials={initialsOf(fullName)} size={44} soft />
             <div className="min-w-0" style={{ flex: 1 }}>
               <div className="flex flex-wrap items-center" style={{ gap: 8 }}>
-                <span className="truncate" style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{fullName}</span>
+                <PageTitle as="span" style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{fullName}</PageTitle>
                 {/* Colour-coded read-only status badge — never a picker wall (§3A). */}
                 <SoftChip label={statusLabel} color={statusColor} round />
                 <ReferenceNumberChip value={c.id != null ? String(c.id) : null} />
               </div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{c.position || '—'}</div>
+              <Caption style={{ marginTop: 2 }}>{c.position || '—'}</Caption>
             </div>
           </div>
 

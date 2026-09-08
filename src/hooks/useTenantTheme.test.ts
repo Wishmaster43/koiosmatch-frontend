@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- HUISSTIJL: this test converts hex inputs to tokens; hex fixtures are its subject */
 /**
  * useTenantTheme — the accent-readability contract, pinned with real WCAG maths.
  *

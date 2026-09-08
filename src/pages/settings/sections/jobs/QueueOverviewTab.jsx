@@ -10,7 +10,8 @@ import { RefreshCw, Layers, Building2 } from 'lucide-react'
 import StatusPill from '@/components/ui/StatusPill'
 import { formatDuration } from '@/components/reports/runFormat'
 import Button from '@/components/ui/Button'
-import { Mono } from '@/components/ui/typography'
+import { Mono, SectionTitle, Caption, GroupLabel, monoStyle } from '@/components/ui/typography'
+import { tintBorder } from '@/lib/tint'
 
 // Heartbeat status → semantic colour (never a plain grey "off" state — §4).
 const STATUS_COLOR = { active: 'var(--color-success)', stalled: 'var(--color-danger)', idle: 'var(--text-muted)' }
@@ -24,7 +25,7 @@ function BucketCard({ t, name, bucket }) {
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface)', padding: '12px 14px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <Mono style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{name}</Mono>
+        <SectionTitle as="span" style={monoStyle}>{name}</SectionTitle>
         <StatusPill label={t(`jobs.status.${bucket.status}`, bucket.status)} color={STATUS_COLOR[bucket.status] ?? 'var(--text-muted)'} />
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 12px', fontSize: 12 }}>
@@ -55,7 +56,7 @@ export default function QueueOverviewTab({ summary, phase, onRefresh, onGoToFail
           unknown driver (sync/sqs/…) still means "this screen inspects the wrong store". */}
       {summary?.driver && !['database', 'redis'].includes(summary.driver) && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', marginBottom: 12,
-          borderRadius: 8, background: 'var(--color-warning-bg)', border: '1px solid color-mix(in srgb, var(--color-warning) 40%, transparent)' }}>
+          borderRadius: 8, background: 'var(--color-warning-bg)', border: tintBorder('var(--color-warning)') }}>
           <span style={{ fontSize: 12, color: 'var(--text)' }}>{t('jobs.driverWarning', { driver: summary.driver })}</span>
         </div>
       )}
@@ -64,18 +65,15 @@ export default function QueueOverviewTab({ summary, phase, onRefresh, onGoToFail
         {summary?.status && (
           <StatusPill label={t(`jobs.status.${summary.status}`, summary.status)} color={STATUS_COLOR[summary.status] ?? 'var(--text-muted)'} />
         )}
-        <button type="button" onClick={onGoToFailed} disabled={!failedTotal}
-          style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 999, border: 'none', cursor: failedTotal ? 'pointer' : 'default',
-            color: failedTotal ? 'var(--color-danger)' : 'var(--text-muted)',
-            background: failedTotal ? 'color-mix(in srgb, var(--color-danger) 12%, transparent)' : 'var(--hover-bg)' }}>
+        <Button variant={failedTotal ? 'dangerSoft' : 'secondary'} size="sm" onClick={onGoToFailed} disabled={!failedTotal}>
           {t('jobs.failedTotal', { count: failedTotal })}
-        </button>
+        </Button>
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <Button variant="secondary" size="sm" onClick={onRefresh}
           style={{ marginLeft: 'auto' }}>
           <RefreshCw size={12} className={phase === 'loading' ? 'animate-spin' : undefined} /> {t('jobs.refresh')}
         </Button>
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('jobs.autoRefresh')}</span>
+        <Caption>{t('jobs.autoRefresh')}</Caption>
       </div>
 
       {phase === 'error' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('jobs.loadError')}</p>}
@@ -83,10 +81,9 @@ export default function QueueOverviewTab({ summary, phase, onRefresh, onGoToFail
       {phase !== 'error' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: 'var(--text-muted)',
-              textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
+            <GroupLabel style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
               <Layers size={12} /> {t('jobs.byQueue')}
-            </div>
+            </GroupLabel>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {phase === 'loading' && byQueue.length === 0 && <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>}
               {phase === 'ready' && byQueue.length === 0 && <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('jobs.noQueues')}</p>}
@@ -95,10 +92,9 @@ export default function QueueOverviewTab({ summary, phase, onRefresh, onGoToFail
           </div>
 
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: 'var(--text-muted)',
-              textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
+            <GroupLabel style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
               <Building2 size={12} /> {t('jobs.byTenant')}
-            </div>
+            </GroupLabel>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {phase === 'loading' && byTenant.length === 0 && <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>}
               {phase === 'ready' && byTenant.length === 0 && <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('jobs.noTenants')}</p>}

@@ -19,6 +19,9 @@ import type { PlanningOrderRow } from './hooks/usePlanningOrders'
 import AddOrderModal from './AddOrderModal'
 import { extractApiError } from '@/lib/extractApiError'
 import Button from '@/components/ui/Button'
+import SoftChip from '@/components/ui/SoftChip'
+import { PageTitle, SectionTitle, Caption } from '@/components/ui/typography'
+import { tintBorder } from '@/lib/tint'
 
 // Planning orders list + create/edit/delete, entirely real data (see the module doc comment above).
 export default function OrdersPanel() {
@@ -50,7 +53,7 @@ export default function OrdersPanel() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', padding: '14px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-        <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', flex: 1 }}>{t('order.listTitle')}</span>
+        <PageTitle as="span" style={{ flex: 1 }}>{t('order.listTitle')}</PageTitle>
         {canCreate && (
           <Button variant="primary" size="sm" onClick={() => setAddOpen(true)}>
             <Plus size={14} /> {t('order.addOrder')}
@@ -69,8 +72,8 @@ export default function OrdersPanel() {
         {!loading && !error && orders.length === 0 && (
           <div style={{ padding: 40, textAlign: 'center' }}>
             <ClipboardList size={28} style={{ color: 'var(--text-muted)', marginBottom: 8 }} />
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('order.empty')}</div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{t('order.emptyHint')}</div>
+            <SectionTitle style={{ textAlign: 'center' }}>{t('order.empty')}</SectionTitle>
+            <Caption style={{ marginTop: 4, display: 'block' }}>{t('order.emptyHint')}</Caption>
           </div>
         )}
         {!loading && !error && orders.length > 0 && (
@@ -79,21 +82,17 @@ export default function OrdersPanel() {
               <div key={String(o.id)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
                 border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface)' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
+                  <SectionTitle style={{ marginBottom: 0 }}>
                     {o.subject || o.function || o.reference || t('order.listTitle')}
-                  </div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                  </SectionTitle>
+                  <Caption style={{ marginTop: 2, display: 'block' }}>
                     {[o.client, o.location, o.department].filter(Boolean).join(' — ') || '—'}
-                  </div>
+                  </Caption>
                 </div>
-                <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 999,
-                  color: 'var(--color-primary-text)', background: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
-                  border: '1px solid color-mix(in srgb, var(--color-primary) 40%, transparent)' }}>
-                  {t(`order.status.${o.status}`, o.status)}
-                </span>
-                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                <SoftChip label={t(`order.status.${o.status}`, o.status)} color="var(--color-primary)" />
+                <Caption>
                   {t('order.shiftsCount', { count: o.shifts_count ?? 0 })}
-                </span>
+                </Caption>
                 <Button variant="secondary" iconOnly size="sm" onClick={() => setEditing(o)} aria-label={t('common:edit')} title={t('common:edit')}>
                   <Pencil size={13} />
                 </Button>
@@ -111,7 +110,7 @@ export default function OrdersPanel() {
 
       {pendingDelete && (
         <div role="dialog" aria-modal="true" aria-label={t('order.deleteConfirmTitle')}
-          style={{ position: 'fixed', inset: 0, background: 'color-mix(in srgb, #000 40%, transparent)',
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 'var(--z-confirm)' }}>
           <div style={{ width: 360, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>{t('order.deleteConfirmTitle')}</div>
@@ -119,7 +118,7 @@ export default function OrdersPanel() {
             {deleteError && (
               <div role="alert" style={{ padding: '8px 10px', fontSize: 12, borderRadius: 8, marginBottom: 12,
                 color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
-                border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
+                border: `1px solid ${tintBorder('var(--color-danger)')}` }}>
                 {deleteError}
               </div>
             )}
