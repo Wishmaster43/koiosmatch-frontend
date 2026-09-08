@@ -4,12 +4,13 @@
  * React Query (A-3: cached per filter/page, keepPreviousData). Returns setter wrappers
  * over the list cache so the container's optimistic bulk/drawer updates keep working.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { pickStatsScopeParams } from '@/lib/statsScopeParams'
+import { useRowsEpoch } from '@/hooks/useRowsEpoch'
 import { mapVacancy } from '../data/mapVacancy'
 import type { Vacancy, ApiVacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
@@ -117,26 +118,8 @@ export function useVacanciesData({ filterParams, page, pageSize, t, sort }: UseV
   const loading   = listQuery.isLoading
   const error     = listQuery.isError ? t('page.loadError') : null
 
-  // SELECT-RACE-1, content-aware (REFRESH-FIX-2, Opus F2 + B1): on every SETTLED
-  // render (not mid-fetch — with placeholderData the in-flight render still shows
-  // the previous rows) compare the row-id signature with the last settled one and
-  // bump the epoch only when it differs. The first settled render merely SEEDS
-  // the signature (nothing is selectable before rows land) — so a warm-cache
-  // mount, a same-ids refetch (cache invalidation after a field edit, a window-
-  // focus refetch) and a SAME-IDS local setQueryData write (a bulk field edit)
-  // never wipe the bulk selection; a local write that changes the id set (rows
-  // archived away, a created row prepended) and Danny's race (a filtered
-  // response replacing the rows) do — rows that left the page cannot stay selected.
-  const lastRowIdsRef = useRef<string | null>(null)
-  const [rowsEpoch, setRowsEpoch] = useState(0)
-  // Bump rowsEpoch only when the settled row-id set actually changes (never mid-fetch,
-  // never on a same-ids refetch) — see the block comment above for the full SELECT-RACE-1 reasoning.
-  useEffect(() => {
-    if (listQuery.isFetching) return
-    const sig = (listQuery.data?.vacancies ?? []).map(r => String(r.id)).join('|')
-    if (lastRowIdsRef.current !== null && sig !== lastRowIdsRef.current) setRowsEpoch(e => e + 1)
-    lastRowIdsRef.current = sig
-  }, [listQuery.isFetching, listQuery.data])
+  // SELECT-RACE-1 (REFRESH-FIX-2): bump epoch only when settled row-id set changes.
+  const rowsEpoch = useRowsEpoch(listQuery.isFetching, listQuery.data?.vacancies)
 
   // Stats — real SERVER-WIDE totals (§3B), narrowed only by the VIEW-SCOPE subset
   // of filterParams (STATS-SCOPE-1: include_archived, see pickStatsScopeParams) —

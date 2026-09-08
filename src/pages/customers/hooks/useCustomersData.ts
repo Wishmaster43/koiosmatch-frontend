@@ -4,12 +4,13 @@
  * filter/page, keepPreviousData). A missing endpoint (404) is an empty list, not an
  * error. Returns setter wrappers over the cache so optimistic updates keep working.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { pickStatsScopeParams } from '@/lib/statsScopeParams'
+import { useRowsEpoch } from '@/hooks/useRowsEpoch'
 import { mapCustomer } from '../data/mapCustomer'
 import type { Customer, ApiCustomer } from '@/types/customer'
 import type { Id } from '@/types/common'
@@ -64,25 +65,8 @@ export function useCustomersData({ filterParams, page, pageSize, t }: Args) {
   const loading   = listQuery.isLoading
   const error     = listQuery.isError ? t('page.loadError') : null
 
-  // SELECT-RACE-1, content-aware (REFRESH-FIX-2, Opus F2 + B1): on every SETTLED
-  // render (not mid-fetch — with placeholderData the in-flight render still shows
-  // the previous rows) compare the row-id signature with the last settled one and
-  // bump the epoch only when it differs. The first settled render merely SEEDS
-  // the signature (nothing is selectable before rows land) — so a warm-cache
-  // mount, a same-ids refetch (cache invalidation after a field edit, a window-
-  // focus refetch) and a SAME-IDS local setQueryData write (a bulk field edit)
-  // never wipe the bulk selection; a local write that changes the id set (rows
-  // archived away, a created row prepended) and Danny's race (a filtered
-  // response replacing the rows) do — rows that left the page cannot stay selected.
-  const lastRowIdsRef = useRef<string | null>(null)
-  const [rowsEpoch, setRowsEpoch] = useState(0)
-  // Bumps rowsEpoch only when the actual row-id set changes (not on a same-ids refetch), so a bulk selection survives a background refresh but drops when the underlying rows really changed.
-  useEffect(() => {
-    if (listQuery.isFetching) return
-    const sig = (listQuery.data?.customers ?? []).map(r => String(r.id)).join('|')
-    if (lastRowIdsRef.current !== null && sig !== lastRowIdsRef.current) setRowsEpoch(e => e + 1)
-    lastRowIdsRef.current = sig
-  }, [listQuery.isFetching, listQuery.data])
+  // SELECT-RACE-1 (REFRESH-FIX-2): bump epoch only when settled row-id set changes.
+  const rowsEpoch = useRowsEpoch(listQuery.isFetching, listQuery.data?.customers)
 
   // Stats — real SERVER-WIDE totals (§3B), narrowed only by the VIEW-SCOPE subset
   // of filterParams (STATS-SCOPE-1: include_archived, see pickStatsScopeParams) —
