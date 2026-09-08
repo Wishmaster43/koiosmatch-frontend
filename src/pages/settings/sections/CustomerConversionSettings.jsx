@@ -1,9 +1,7 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { useCustomerLookups } from '@/lib/useCustomerLookups'
-import { useAllSettings, useSettingsLoaded, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
-import { notifyError } from '@/lib/notify'
+import { useSettingKeyPick } from '../lib/useSettingKeyPick'
 import { SectionTitle } from '@/components/ui/typography'
 import SettingsLoadBanner from '../components/SettingsLoadBanner'
 
@@ -20,33 +18,8 @@ export const CONVERT_DEFAULT_STATUS_KEY = 'customer_default_status_on_convert'
  * for the candidate deployability axis), so every configured status is offered. */
 export function CustomerConversionSettings() {
   const { t } = useTranslation('settings')
-  const settings = useAllSettings()
-  const loaded = useSettingsLoaded()
   const { statuses } = useCustomerLookups()
-
-  // Current value (plain string setting); 'none' = leave the status empty — also
-  // the honest fallback when nothing is configured yet.
-  const saved = typeof settings?.[CONVERT_DEFAULT_STATUS_KEY] === 'string' ? settings[CONVERT_DEFAULT_STATUS_KEY] : 'none'
-  // STALE-INIT-1: nullable draft — see VacancyDefaultStatusSettings.jsx's own
-  // comment for the full cold-cache story this replaces (`useState(saved)` froze
-  // the fallback forever). `null` means "no local pick yet".
-  const [draft, setDraft] = useState(null)
-  const value = draft ?? saved
-
-  // Optimistic save + revert on failure (house pattern, mirrors the candidate screen);
-  // a no-op before the blob has loaded (see the vacancy screen's own comment).
-  const save = async (next) => {
-    if (!loaded) return
-    if (next === saved) { setDraft(next); return }
-    setDraft(next)
-    try {
-      await saveSettingsKeys({ [CONVERT_DEFAULT_STATUS_KEY]: next })
-      invalidateAllSettingsCache()
-    } catch {
-      setDraft(null)
-      notifyError(t('customerConversion.saveFailed'))
-    }
-  }
+  const { value, loaded, save } = useSettingKeyPick(CONVERT_DEFAULT_STATUS_KEY, 'none', t('customerConversion.saveFailed'))
 
   return (
     <div style={{ maxWidth: 560 }}>

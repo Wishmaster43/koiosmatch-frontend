@@ -1,9 +1,7 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
-import { useAllSettings, useSettingsLoaded, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
-import { notifyError } from '@/lib/notify'
+import { useSettingKeyPick } from '../lib/useSettingKeyPick'
 import { SectionTitle } from '@/components/ui/typography'
 import SettingsLoadBanner from '../components/SettingsLoadBanner'
 
@@ -31,36 +29,8 @@ export const VACANCY_DEFAULT_STATUS_KEY = 'vacancy_default_status_on_create'
  */
 function VacancyDefaultStatusEditor() {
   const { t } = useTranslation('settings')
-  const settings = useAllSettings()
-  const loaded = useSettingsLoaded()
   const { statuses } = useVacancyLookups()
-
-  // Current value (plain string setting); 'none' = leave the status empty.
-  const saved = typeof settings?.[VACANCY_DEFAULT_STATUS_KEY] === 'string' ? settings[VACANCY_DEFAULT_STATUS_KEY] : 'none'
-  // STALE-INIT-1: nullable draft — on a cold cache the settings blob is {} on
-  // first render, so freezing `saved` into state (the old `useState(saved)`)
-  // showed the seed fallback and never picked up the real stored value once the
-  // GET resolved (a re-render recomputes `saved`, not the already-initialised
-  // state). `null` means "no local pick yet", so the picker always shows the
-  // live `saved` until the user actually chooses.
-  const [draft, setDraft] = useState(null)
-  const value = draft ?? saved
-
-  // Optimistic save + revert on failure (house pattern, mirrors the candidate/customer
-  // screens); a no-op before the blob has loaded, so a pick can't overwrite the real
-  // stored value with a stale comparison.
-  const save = async (next) => {
-    if (!loaded) return
-    if (next === saved) { setDraft(next); return }
-    setDraft(next)
-    try {
-      await saveSettingsKeys({ [VACANCY_DEFAULT_STATUS_KEY]: next })
-      invalidateAllSettingsCache()
-    } catch {
-      setDraft(null)
-      notifyError(t('vacancyDefaultStatus.saveFailed'))
-    }
-  }
+  const { value, loaded, save } = useSettingKeyPick(VACANCY_DEFAULT_STATUS_KEY, 'none', t('vacancyDefaultStatus.saveFailed'))
 
   return (
     <div style={{ maxWidth: 560 }}>
