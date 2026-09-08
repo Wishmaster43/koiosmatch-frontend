@@ -256,6 +256,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setLoading(false))
   }, [applyAuthResponse, setupTenants])
 
+  // Pin the tenant an auth response names, else the first one /tenants lists (shared by
+  // login and verifyMfa — DRY-1 r6). Never pins a hardcoded tenant when the list fails.
+  const pinTenantAfterAuth = useCallback(async (tenant: Tenant | null | undefined) => {
+    if (tenant?.id) {
+      localStorage.setItem('active_tenant', tenant.id)
+      setActiveTenantState(tenant)
+      setTenants([tenant])
+      return
+    }
+    try {
+      const r    = await api.get('/tenants')
+      const list = unwrapList<Tenant>(r).rows
+      if (Array.isArray(list) && list.length > 0) {
+        setTenants(list)
+        const first = list[0]
+        localStorage.setItem('active_tenant', first.id)
+        setActiveTenantState(first)
+      }
+    } catch { /* fall through with no tenant list — never pin a hardcoded tenant */ }
+  }, [])
+
   // ── Login ────────────────────────────────────────────────────────────────────
   /**
    * Authenticates with email/password.
@@ -280,26 +301,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // (X-Auth-Mode makes the API send token:null; storing one would put an
     // XSS-readable credential in localStorage — Danny's 2026-07-04 catch, H3).
     const u = applyAuthResponse(res.data)
-
-    if (tenant?.id) {
-      localStorage.setItem('active_tenant', tenant.id)
-      setActiveTenantState(tenant)
-      setTenants([tenant])
-    } else {
-      try {
-        const r    = await api.get('/tenants')
-        const list = unwrapList<Tenant>(r).rows
-        if (Array.isArray(list) && list.length > 0) {
-          setTenants(list)
-          const first = list[0]
-          localStorage.setItem('active_tenant', first.id)
-          setActiveTenantState(first)
-        }
-      } catch { /* fall through with no tenant list — never pin a hardcoded tenant */ }
-    }
-
+    await pinTenantAfterAuth(tenant)
     return u
-  }, [applyAuthResponse])
+  }, [applyAuthResponse, pinTenantAfterAuth])
 
   // ── MFA step-up verify ───────────────────────────────────────────────────────
   /**
@@ -312,26 +316,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { tenant } = res.data
     // Same rule as login(): a body token is never stored (see above, H3).
     const u = applyAuthResponse(res.data)
-
-    if (tenant?.id) {
-      localStorage.setItem('active_tenant', tenant.id)
-      setActiveTenantState(tenant)
-      setTenants([tenant])
-    } else {
-      try {
-        const r    = await api.get('/tenants')
-        const list = unwrapList<Tenant>(r).rows
-        if (Array.isArray(list) && list.length > 0) {
-          setTenants(list)
-          const first = list[0]
-          localStorage.setItem('active_tenant', first.id)
-          setActiveTenantState(first)
-        }
-      } catch { /* fall through with no tenant list */ }
-    }
-
+    await pinTenantAfterAuth(tenant)
     return u
-  }, [applyAuthResponse])
+  }, [applyAuthResponse, pinTenantAfterAuth])
 
   // ── MFA management (called from Security settings tab) ───────────────────────
   /** Start MFA setup. Returns { secret, otpauth_url } — render otpauth_url as QR. */
