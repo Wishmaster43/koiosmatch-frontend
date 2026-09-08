@@ -22,7 +22,9 @@ describe('SelectField (SearchSelect-backed)', () => {
     render(<SelectField value="nl" onChange={onChange} options={options} />)
     fireEvent.click(screen.getByRole('button', { name: 'Nederland' }))
 
-    const search = screen.getByPlaceholderText('search')
+    // The kit now pulls the house formatters (NumberInput → lib/formatters → datetime → i18n init),
+    // so the placeholder renders translated; match the key or its Dutch/English text.
+    const search = screen.getByPlaceholderText(/^(search|zoek.*|search.*)$/i)
     fireEvent.change(search, { target: { value: 'duits' } })
     expect(screen.queryByText('Belgie')).not.toBeInTheDocument()
 

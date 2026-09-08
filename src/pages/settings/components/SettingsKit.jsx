@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Check, Save } from 'lucide-react'
 import { SettingsDirtyContext } from '../lib/settingsDirty'
 import ToggleUi from '@/components/ui/Toggle'
+import NumberInput from '@/components/ui/NumberInput'
 import Spinner from '@/components/ui/Spinner'
 import SearchSelect from '@/components/ui/SearchSelect'
 import SaveButton from '@/components/ui/SaveButton'
@@ -128,14 +129,16 @@ export const Toggle = ToggleUi
 const inputStyle = fieldInputStyle
 
 // Right-aligned numeric input with an optional unit suffix, for settings that store a plain number.
-export function NumberField({ value, onChange, min = 0, max, unit, width = 80, disabled = false }) {
+export function NumberField({ value, onChange, min = 0, max, unit, width = 96, disabled = false, step, ariaLabel, decimals }) {
+  // GETALLEN-1 also inside inputs: the house NumberInput shows 1.250, not 1250; `step`
+  // with a fraction implies the decimals a schema wants (0.01 → 2), an explicit
+  // `decimals` wins. The callers keep receiving a number (0 when the field is emptied),
+  // exactly what the old type="number" handed them.
+  const dec = decimals ?? (step && step < 1 ? Math.max(0, Math.ceil(-Math.log10(step))) : 0)
   return (
-    <>
-      <input type="number" min={min} max={max} value={value} disabled={disabled}
-        onChange={e => onChange(Number(e.target.value))}
-        style={{ ...inputStyle, width, textAlign: 'right', fontWeight: 600 }} />
-      {unit && <span style={{ fontSize: 12, color: 'var(--text-muted)', minWidth: 60 }}>{unit}</span>}
-    </>
+    <NumberInput value={value} onChange={n => onChange(n ?? 0)} min={min} max={max} decimals={dec}
+      width={width} unit={unit} disabled={disabled} ariaLabel={ariaLabel}
+      style={{ fontWeight: 600 }} />
   )
 }
 

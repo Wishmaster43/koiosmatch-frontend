@@ -4,7 +4,7 @@
  * (SettingsCatalogCompleteTest): a section without a screen is a guard failure.
  */
 import { describe, it, expect } from 'vitest'
-import { NAV_GROUPS } from './registry'
+import { NAV_GROUPS, CATALOG_NAV_GROUP } from './registry'
 
 describe('settings registry catalog sections', () => {
   it('every catalogue section id from the contract has a registry item', () => {
@@ -27,7 +27,9 @@ describe('settings registry catalog sections', () => {
 
     // Collect all registry item ids.
     const registryItemIds = new Set()
-    NAV_GROUPS.forEach(group => {
+    // The catalogue group is parked outside NAV_GROUPS until GET /settings/catalog is live.
+    const allGroups = [...NAV_GROUPS, CATALOG_NAV_GROUP]
+    allGroups.forEach(group => {
       group.items.forEach(item => {
         registryItemIds.add(item.id)
       })

@@ -208,18 +208,6 @@ export const NAV_GROUPS = [
     ],
   },
   {
-    // Generic catalogue settings — sections from GET /settings/catalog that are not
-    // already dedicated screens. The catalogue drives the FE screen from the contract (§2).
-    key: 'catalog', icon: SlidersHorizontal,
-    items: [
-      { id: 'windows', icon: Clock, render: () => <CatalogSection section="windows" /> },
-      { id: 'retention', icon: History, render: () => <CatalogSection section="retention" /> },
-      { id: 'messaging', icon: MessageCircle, render: () => <CatalogSection section="messaging" /> },
-      { id: 'email', icon: Mail, render: () => <CatalogSection section="email" /> },
-      { id: 'kpi', icon: Target, render: () => <CatalogSection section="kpi" /> },
-    ],
-  },
-  {
     // Personalisation = shared/general tenant lookups (used across candidates, customers, contacts, …).
     key: 'personalisation', icon: BookOpen,
     items: [
@@ -824,3 +812,21 @@ export const NAV_GROUPS = [
     ],
   },
 ]
+
+// CATALOG-NAV-PARKED (09-09 01:40): the generic catalogue screens (DRAFT-SETTINGS-CATALOG-1,
+// X-4 FE half) are built, but GET /settings/catalog lands with the BE bundle of 09-09;
+// until then the group stays OUT of NAV_GROUPS so no settings screen opens on an error
+// state (Danny 09-09 01:35 on #settings/catalog/windows). Re-add it to NAV_GROUPS the
+// moment the endpoint answers; the guard test reads it from here meanwhile.
+export const CATALOG_NAV_GROUP = {
+    // Generic catalogue settings — sections from GET /settings/catalog that are not
+    // already dedicated screens. The catalogue drives the FE screen from the contract (§2).
+    key: 'catalog', icon: SlidersHorizontal,
+    items: [
+      { id: 'windows', icon: Clock, render: () => <CatalogSection section="windows" /> },
+      { id: 'retention', icon: History, render: () => <CatalogSection section="retention" /> },
+      { id: 'messaging', icon: MessageCircle, render: () => <CatalogSection section="messaging" /> },
+      { id: 'email', icon: Mail, render: () => <CatalogSection section="email" /> },
+      { id: 'kpi', icon: Target, render: () => <CatalogSection section="kpi" /> },
+    ],
+  }

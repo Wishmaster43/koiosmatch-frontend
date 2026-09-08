@@ -27,6 +27,24 @@ export function formatNumber(value: NumberInput, locale: string = 'nl-NL', maxim
   return n === null ? '—' : new Intl.NumberFormat(locale, { maximumFractionDigits }).format(n)
 }
 
+// The group and decimal separators Intl uses for a locale (nl "." and ","; en "," and ".").
+// lib/numberParse reads typed input back with these — the inverse of formatNumber.
+export function localeSeparators(locale: string = 'nl-NL'): { group: string; decimal: string } {
+  const parts = new Intl.NumberFormat(locale).formatToParts(12345.6)
+  return {
+    group: parts.find(p => p.type === 'group')?.value ?? '.',
+    decimal: parts.find(p => p.type === 'decimal')?.value ?? ',',
+  }
+}
+
+// Fixed number of decimals on the active locale — e.g. 1250 → "1.250,00" (nl-NL, 2),
+// 1250.5 → "1.251" (nl-NL, 0). The number inputs render their resting value with this
+// so a euro field always shows its cents and a count never shows a fraction.
+export function formatFixed(value: NumberInput, locale: string = 'nl-NL', decimals: number = 0): string {
+  const n = toFiniteNumber(value)
+  return n === null ? '' : new Intl.NumberFormat(locale, { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(n)
+}
+
 /**
  * Percentages, the ONE house way (FMT-PROCENT-1, Danny 14-08: a matches KPI read
  * "5,882%" where it meant 5,9%).
@@ -136,6 +154,7 @@ export function useNumberFormat() {
   return {
     locale,
     formatNumber: (value: NumberInput, maximumFractionDigits?: number) => formatNumber(value, locale, maximumFractionDigits),
+    formatFixed: (value: NumberInput, decimals?: number) => formatFixed(value, locale, decimals),
     formatNumberCompact: (value: NumberInput, threshold?: number) => formatNumberCompact(value, locale, threshold),
     formatPercent: (value: NumberInput) => formatPercent(value, locale),
     formatRatio: (value: NumberInput) => formatRatio(value, locale),

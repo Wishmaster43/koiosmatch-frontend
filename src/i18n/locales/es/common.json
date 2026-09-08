@@ -1615,5 +1615,9 @@
     "noCandidate": "Sin candidato",
     "joinMeeting": "Unirse a la reunión",
     "pageOf": "Página {{page}} de {{lastPage}}"
+  },
+  "field": {
+    "maxNotice": "Máximo {{max}}",
+    "minNotice": "Mínimo {{min}}"
   }
 }

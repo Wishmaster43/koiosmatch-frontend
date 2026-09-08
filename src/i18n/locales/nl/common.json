@@ -1615,5 +1615,9 @@
     "noCandidate": "Geen kandidaat",
     "joinMeeting": "Deelnemen aan meeting",
     "pageOf": "Pagina {{page}} van {{lastPage}}"
+  },
+  "field": {
+    "maxNotice": "Maximaal {{max}}",
+    "minNotice": "Minimaal {{min}}"
   }
 }
