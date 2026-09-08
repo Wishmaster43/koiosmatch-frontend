@@ -15,9 +15,12 @@ export default {
   color: 'var(--module-info)',
   bg:    'var(--color-info-bg)',
   schema: [
-    { key: 'endpoint', label: 'Endpoint-slug', type: 'text',
-      hint: 'De tenant-instelling webhook_endpoint_<slug> bepaalt de URL.' },
-    { key: 'direction', label: 'Richting', type: 'text',
+    { key: 'url', label: 'Endpoint-URL (https)', type: 'text',
+      placeholder: 'https://hook.example.com/koios',
+      hint: 'Directe https-URL voor deze stap. Laat leeg om de gedeelde instelling webhook_endpoint_<slug> hieronder te gebruiken. Geen inloggegevens in de URL.' },
+    { key: 'endpoint', label: 'Endpoint-slug (gedeelde instelling)', type: 'text',
+      hint: 'Alleen gebruikt als hierboven geen URL staat: de tenant-instelling webhook_endpoint_<slug> bepaalt dan de URL.' },
+    { key: 'direction', label: 'Richting/label voor de ontvanger', type: 'text',
       hint: 'Vrije tekst/label voor de ontvanger.' },
   ],
 }

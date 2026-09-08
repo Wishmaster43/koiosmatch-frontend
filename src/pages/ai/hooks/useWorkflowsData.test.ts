@@ -108,6 +108,21 @@ describe('useWorkflowsData · handleSave error message (never raw axios/network 
     expect(alertSpy).toHaveBeenCalledWith('page.saveFailed::Step 2 has no connection.')
     alertSpy.mockRestore()
   })
+
+  it('surfaces a flat 422 message (no errors bag) verbatim — X-22 webhook_send validation', async () => {
+    seedList()
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
+    mockedPut.mockRejectedValue({ response: { data: { message: "Stap 2 ('Stuur naar Elanza'): De webhook-URL mag niet naar een intern of privé-adres wijzen." } } })
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => {
+      await result.current.handleSave({ id: 'wf-1', name: 'Welcome flow', status: 'active', steps: [{ id: 's1', type: 'webhook_send' }] })
+    })
+
+    expect(alertSpy).toHaveBeenCalledWith("page.saveFailed::Stap 2 ('Stuur naar Elanza'): De webhook-URL mag niet naar een intern of privé-adres wijzen.")
+    alertSpy.mockRestore()
+  })
 })
 
 // TRASH-OVERAL-1b: DELETE = archive (soft-delete), POST .../restore reverses it.

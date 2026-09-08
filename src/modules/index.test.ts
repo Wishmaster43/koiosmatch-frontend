@@ -32,3 +32,12 @@ describe('module registry · appointments start + calendar_invite step (B-10)', 
     expect(START_MODULE_TYPES.has('calendar_invite')).toBe(false)
   })
 })
+
+// X-22 (golf 3): the webhook_send step's schema keys mirror the backend module
+// exactly — `url` first, then `endpoint`, then `direction`.
+describe('module registry · webhook_send step (X-22)', () => {
+  it('webhook_send carries exactly the backend config keys url + endpoint + direction in that order', () => {
+    const keys = (MODULE_SCHEMAS.webhook_send as Array<{ key: string }>).map(f => f.key)
+    expect(keys).toEqual(['url', 'endpoint', 'direction'])
+  })
+})
