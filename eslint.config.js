@@ -96,7 +96,8 @@ const crossEntityBlocks = [
 ]
 
 export default defineConfig([
-  globalIgnores(['dist', 'dist-careersite']),
+  // .claude/** holds the agent worktrees (whole repo copies): never project sources, never linted or counted.
+  globalIgnores(['dist', 'dist-careersite', '.claude/**']),
   // typography.houseStyle.test.js (HUISSTIJL slotaudit T6/T7) walks the source
   // tree with node:fs/node:path at test time, so it needs `process`/Node globals
   // on top of the browser set every other test file runs under.
