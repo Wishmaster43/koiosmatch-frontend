@@ -14,18 +14,18 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { useConfirm } from '@/hooks/useConfirm'
 import { DefaultToggle } from '../components/SettingsControls'
 import VacancyGenerationProfileEditor from './VacancyGenerationProfileEditor'
-import Button from '@/components/ui/Button'
 import { Caption } from '@/components/ui/typography'
 import { toApiProfile, fromApiProfile } from './vacancyGeneration/profileShape'
 import EditorRowFooter from '@/components/ui/EditorRowFooter'
 import AddFormFooter from '@/components/ui/AddFormFooter'
 import AddCardTrigger from '@/components/ui/AddCardTrigger'
+import ExpandableCardListItem from '../components/ExpandableCardListItem'
 
 const ENDPOINT = '/vacancy-generation-profiles'
 const BLOCKS_ENDPOINT = '/vacancy-content-blocks'
@@ -178,41 +178,43 @@ export default function VacancyGenerationProfilesList() {
         const isOpen = expanded === profile.id
         const form = editForms[profile.id]
         return (
-          <div key={profile.id} style={cardStyle}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--text)' }}>{profile.name}</div>
-                <Caption as="div">{t('vacancyGenerationSettings.priorityLabel')}: {profile.priority ?? 10}</Caption>
-              </div>
-              <DefaultToggle active={!!profile.is_default} busy={settingDefaultId === profile.id}
-                onClick={() => setDefault(profile)} activeLabel={t('common.default')} inactiveLabel={t('common.setDefault')} />
-              <Button variant="ghost" size="sm" iconOnly onClick={() => (isOpen ? setExpanded(null) : openEdit(profile))}
-                aria-label={`${isOpen ? t('common.close') : t('common.edit')}: ${profile.name}`}>
-                {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-              </Button>
-            </div>
-
-            {isOpen && form && (
-              <div style={{ marginTop: 14, borderTop: '1px solid var(--border)', paddingTop: 14 }}>
-                <VacancyGenerationProfileEditor draft={form} onChange={p => patch(profile.id, p)} contentBlocks={contentBlocks} />
-                <div style={{ marginTop: 14 }}>
-                  <EditorRowFooter
-                    onDelete={() => handleDelete(profile)}
-                    deleteLabel={t('vacancyGenerationSettings.delete')}
-                    deleteDisabled={profile.in_use}
-                    deleteTitle={profile.in_use ? t('vacancyGenerationSettings.deleteBlocked') : undefined}
-                    onCancel={() => setExpanded(null)}
-                    cancelLabel={t('common.cancel')}
-                    onSave={() => handleSave(profile)}
-                    saveLabel={t('common.save')}
-                    savingLabel={t('common.saving')}
-                    saving={saving === profile.id}
-                    saveDisabled={!form.name?.trim()}
-                  />
+          <ExpandableCardListItem
+            key={profile.id}
+            item={profile}
+            isOpen={isOpen}
+            onToggleOpen={() => (isOpen ? setExpanded(null) : openEdit(profile))}
+            headerContent={
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--text)' }}>{profile.name}</div>
+                  <Caption as="div">{t('vacancyGenerationSettings.priorityLabel')}: {profile.priority ?? 10}</Caption>
                 </div>
+                <DefaultToggle active={!!profile.is_default} busy={settingDefaultId === profile.id}
+                  onClick={() => setDefault(profile)} activeLabel={t('common.default')} inactiveLabel={t('common.setDefault')} />
               </div>
+            }
+            ariaLabel={`${isOpen ? t('common.close') : t('common.edit')}: ${profile.name}`}
+            // The row form only exists while the row is open (openEdit seeds it); a closed row has no footer.
+            footer={form ? (
+              <EditorRowFooter
+                onDelete={() => handleDelete(profile)}
+                deleteLabel={t('vacancyGenerationSettings.delete')}
+                deleteDisabled={profile.in_use}
+                deleteTitle={profile.in_use ? t('vacancyGenerationSettings.deleteBlocked') : undefined}
+                onCancel={() => setExpanded(null)}
+                cancelLabel={t('common.cancel')}
+                onSave={() => handleSave(profile)}
+                saveLabel={t('common.save')}
+                savingLabel={t('common.saving')}
+                saving={saving === profile.id}
+                saveDisabled={!form.name?.trim()}
+              />
+            ) : null}
+          >
+            {isOpen && form && (
+              <VacancyGenerationProfileEditor draft={form} onChange={p => patch(profile.id, p)} contentBlocks={contentBlocks} />
             )}
-          </div>
+          </ExpandableCardListItem>
         )
       })}
 

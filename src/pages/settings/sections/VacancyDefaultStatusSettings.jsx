@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import SearchSelect from '@/components/ui/SearchSelect'
+import SettingLookupPicker from '../components/SettingLookupPicker'
 import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useSettingKeyPick } from '../lib/useSettingKeyPick'
 import { SectionTitle } from '@/components/ui/typography'
@@ -38,14 +38,14 @@ function VacancyDefaultStatusEditor() {
       <SectionTitle as="div" style={{ marginBottom: 4 }}>{t('vacancyDefaultStatus.title')}</SectionTitle>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('vacancyDefaultStatus.subtitle')}</div>
       {/* Searchable single-pick dropdown, like every other lookup filter (Danny 23-07). */}
-      <SearchSelect closeOnToggle width={300} disabled={!loaded}
-        options={[
-          { value: 'none', label: t('vacancyDefaultStatus.none') },
-          ...(statuses ?? []).map(s => ({ value: s.value, label: s.label })),
-        ]}
-        selected={[value]}
-        onToggle={next => { if (next !== value) save(next) }}
-        triggerLabel={value === 'none' ? t('vacancyDefaultStatus.none') : ((statuses ?? []).find(s => s.value === value)?.label ?? value)} />
+      <SettingLookupPicker
+        options={(statuses ?? []).map(s => ({ value: s.value, label: s.label }))}
+        value={value}
+        onPick={save}
+        disabled={!loaded}
+        width={300}
+        noneLabel={t('vacancyDefaultStatus.none')}
+      />
     </div>
   )
 }

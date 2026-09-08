@@ -11,7 +11,7 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import Slider from '@/components/ui/Slider'
@@ -21,11 +21,11 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { useContractTypes } from '@/lib/useContractTypes'
 import { useFunctions } from '@/lib/useFunctions'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
-import Button from '@/components/ui/Button'
 import { Mono } from '@/components/ui/typography'
 import EditorRowFooter from '@/components/ui/EditorRowFooter'
 import AddFormFooter from '@/components/ui/AddFormFooter'
 import AddCardTrigger from '@/components/ui/AddCardTrigger'
+import ExpandableCardListItem from '../components/ExpandableCardListItem'
 
 // The six scoring dimensions (mirrors the backend App\Enums\MatchDimension, single
 // source of truth there, and the vacancy Matching tab's picker). Duplicated here on
@@ -257,55 +257,53 @@ export default function MatchTemplatesSettings() {
         const form = editForms[tpl.id] ?? {}
         const linked = tpl.linked_vacancies_count ?? 0
         return (
-          <div key={tpl.id} style={cardStyle}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <ExpandableCardListItem
+            key={tpl.id}
+            item={tpl}
+            isOpen={isOpen}
+            onToggleOpen={() => (isOpen ? setExpanded(null) : openEdit(tpl))}
+            headerContent={
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--text)' }}>{tpl.name}</div>
                 <div style={{ marginTop: 4 }}><MiniWeightBars weights={buildWeights(tpl.weights)} /></div>
+                <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap',
+                  background: linked > 0 ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
+                  // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                  color: linked > 0 ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
+                  {t('matchTemplatesSettings.linkedCount', { count: linked })}
+                </span>
               </div>
-              <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap',
-                background: linked > 0 ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
-                // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-                color: linked > 0 ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
-                {t('matchTemplatesSettings.linkedCount', { count: linked })}
-              </span>
-              <Button variant="ghost" size="sm" iconOnly onClick={() => (isOpen ? setExpanded(null) : openEdit(tpl))}
-                aria-label={`${isOpen ? t('common.close') : t('common.edit')}: ${tpl.name}`}>
-                {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-              </Button>
+            }
+            ariaLabel={`${isOpen ? t('common.close') : t('common.edit')}: ${tpl.name}`}
+            footer={
+              <EditorRowFooter
+                onDelete={() => handleDelete(tpl)}
+                deleteLabel={t('matchTemplatesSettings.delete')}
+                deleteDisabled={linked > 0}
+                deleteTitle={linked > 0 ? t('matchTemplatesSettings.deleteBlocked') : undefined}
+                onCancel={() => setExpanded(null)}
+                cancelLabel={t('common.cancel')}
+                onSave={() => handleSave(tpl)}
+                saveLabel={t('common.save')}
+                savingLabel={t('common.saving')}
+                saving={saving === tpl.id}
+                saveDisabled={!form.name?.trim()}
+              />
+            }
+          >
+            <div>
+              <label style={labelStyle}>{t('matchTemplatesSettings.nameLabel')}</label>
+              <input value={form.name ?? ''} onChange={e => setEF(tpl.id, 'name', e.target.value)} style={inputStyle} />
             </div>
 
-            {isOpen && (
-              <div style={{ marginTop: 14, borderTop: '1px solid var(--border)', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <div>
-                  <label style={labelStyle}>{t('matchTemplatesSettings.nameLabel')}</label>
-                  <input value={form.name ?? ''} onChange={e => setEF(tpl.id, 'name', e.target.value)} style={inputStyle} />
-                </div>
+            {renderWeightSliders(form.weights, (d, val) => setEF(tpl.id, 'weights', { ...(form.weights ?? buildWeights()), [d]: val }))}
 
-                {renderWeightSliders(form.weights, (d, val) => setEF(tpl.id, 'weights', { ...(form.weights ?? buildWeights()), [d]: val }))}
-
-                {/* Optional default-assignment keys — auto-default a NEW vacancy of this
-                    type/function onto this template when exactly one template matches. */}
-                {renderContractTypesField(form.contract_types, v => setEF(tpl.id, 'contract_types', toggleInArray(form.contract_types, v)))}
-                {renderFunctionField(form.function_title, v => setEF(tpl.id, 'function_title', v))}
-                <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('matchTemplatesSettings.defaultAssignmentHint')}</p>
-
-                <EditorRowFooter
-                  onDelete={() => handleDelete(tpl)}
-                  deleteLabel={t('matchTemplatesSettings.delete')}
-                  deleteDisabled={linked > 0}
-                  deleteTitle={linked > 0 ? t('matchTemplatesSettings.deleteBlocked') : undefined}
-                  onCancel={() => setExpanded(null)}
-                  cancelLabel={t('common.cancel')}
-                  onSave={() => handleSave(tpl)}
-                  saveLabel={t('common.save')}
-                  savingLabel={t('common.saving')}
-                  saving={saving === tpl.id}
-                  saveDisabled={!form.name?.trim()}
-                />
-              </div>
-            )}
-          </div>
+            {/* Optional default-assignment keys — auto-default a NEW vacancy of this
+                type/function onto this template when exactly one template matches. */}
+            {renderContractTypesField(form.contract_types, v => setEF(tpl.id, 'contract_types', toggleInArray(form.contract_types, v)))}
+            {renderFunctionField(form.function_title, v => setEF(tpl.id, 'function_title', v))}
+            <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('matchTemplatesSettings.defaultAssignmentHint')}</p>
+          </ExpandableCardListItem>
         )
       })}
 

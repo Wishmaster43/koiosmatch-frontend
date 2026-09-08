@@ -7,7 +7,7 @@
  * prompt and can't be a default.
  */
 import { useTranslation } from 'react-i18next'
-import SearchSelect from '@/components/ui/SearchSelect'
+import SettingLookupPicker from '../components/SettingLookupPicker'
 import { useLookups } from '@/context/LookupsContext'
 import { useSettingKeyPick } from '../lib/useSettingKeyPick'
 import { SectionTitle } from '@/components/ui/typography'
@@ -35,14 +35,14 @@ export function CandidateConversionSettings() {
       <SectionTitle as="div" style={{ marginBottom: 4 }}>{t('candidateConversion.title')}</SectionTitle>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('candidateConversion.subtitle')}</div>
       {/* Searchable single-pick dropdown, like every other lookup filter (Danny 23-07). */}
-      <SearchSelect closeOnToggle width={300} disabled={!loaded}
-        options={[
-          { value: 'none', label: t('candidateConversion.none') },
-          ...plainStatuses.map(s => ({ value: s.value, label: s.label })),
-        ]}
-        selected={[value]}
-        onToggle={next => { if (next !== value) save(next) }}
-        triggerLabel={value === 'none' ? t('candidateConversion.none') : (plainStatuses.find(s => s.value === value)?.label ?? value)} />
+      <SettingLookupPicker
+        options={plainStatuses.map(s => ({ value: s.value, label: s.label }))}
+        value={value}
+        onPick={save}
+        disabled={!loaded}
+        width={300}
+        noneLabel={t('candidateConversion.none')}
+      />
     </div>
   )
 }

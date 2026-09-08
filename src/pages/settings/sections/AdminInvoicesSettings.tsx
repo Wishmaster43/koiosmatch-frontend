@@ -23,21 +23,12 @@ import Spinner from '@/components/ui/Spinner'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { card, th as thBase, td as tdBase, numCell as numCellBase, notice } from './usageCardStyles'
 import type { CSSProperties } from 'react'
-import type { operations } from '@/types/api-generated'
 import Button from '@/components/ui/Button'
 import { PageTitle } from '@/components/ui/typography'
+import type { AdminInvoice, GenerateResult } from './invoiceTypes'
 const th = thBase as CSSProperties
 const td = tdBase as CSSProperties
 const numCell = numCellBase as CSSProperties
-
-// Invoice row + generate-result shapes lifted from the generated spec
-// (RAPPORTEN-SUITE-1 portie 1 / 923-ops drop carries the 2xx invoice schemas) —
-// `Required` because the generated element type marks every field optional while
-// the backend always populates them for a real invoice row.
-type AdminInvoice = Required<
-  NonNullable<operations['getAdminInvoices']['responses'][200]['content']['application/json']['data']>[number]
->
-type GenerateResult = operations['postAdminInvoicesGenerate']['responses'][200]['content']['application/json']
 
 // Last 12 months as { value: 'YYYY-MM', label } — newest first (mirrors TenantUsageSettings).
 // Uses shared formatMonthYear helper so the month name follows the active UI language (§5).

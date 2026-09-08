@@ -14,7 +14,7 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import RichTextEditor from '@/components/ui/RichTextEditor'
@@ -22,11 +22,11 @@ import SafeHtml from '@/components/ui/SafeHtml'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { useConfirm } from '@/hooks/useConfirm'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
-import Button from '@/components/ui/Button'
 import { Caption } from '@/components/ui/typography'
 import EditorRowFooter from '@/components/ui/EditorRowFooter'
 import AddFormFooter from '@/components/ui/AddFormFooter'
 import AddCardTrigger from '@/components/ui/AddCardTrigger'
+import ExpandableCardListItem from '../components/ExpandableCardListItem'
 
 const ENDPOINT = '/vacancy-content-blocks'
 const KINDS = ['intro', 'cta', 'legal']
@@ -143,46 +143,19 @@ export default function VacancyContentBlocksSettings() {
         const isOpen = expanded === block.id
         const form = editForms[block.id] ?? {}
         return (
-          <div key={block.id} style={cardStyle}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--text)' }}>{block.name}</div>
-                <Caption as="div" style={{ marginTop: 2 }}>{t(`vacancyContentBlocksSettings.kind.${block.kind}`)}</Caption>
-              </div>
-              <Button variant="ghost" size="sm" iconOnly onClick={() => (isOpen ? setExpanded(null) : openEdit(block))}
-                aria-label={`${isOpen ? t('common.close') : t('common.edit')}: ${block.name}`}>
-                {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-              </Button>
-            </div>
-
-            {isOpen && (
-              <div style={{ marginTop: 14, borderTop: '1px solid var(--border)', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 160px', gap: 10 }}>
-                  <div>
-                    <label style={labelStyle}>{t('vacancyContentBlocksSettings.nameLabel')}</label>
-                    <input value={form.name ?? ''} onChange={e => setEF(block.id, 'name', e.target.value)} style={inputStyle} />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>{t('vacancyContentBlocksSettings.kindLabel')}</label>
-                    <SearchSelect
-                      options={KINDS.map(k => ({ value: k, label: t(`vacancyContentBlocksSettings.kind.${k}`) }))}
-                      selected={[form.kind ?? 'intro']}
-                      onToggle={v => setEF(block.id, 'kind', v)}
-                      closeOnToggle
-                      searchable={false}
-                      renderTrigger={toggle => (
-                        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- SearchSelect renderTrigger: form-field face from fieldMetrics, not a Button
-                        <button type="button" onClick={toggle} style={{ ...inputStyle, cursor: 'pointer', textAlign: 'left' }}>
-                          {t(`vacancyContentBlocksSettings.kind.${form.kind ?? 'intro'}`)}
-                        </button>
-                      )}
-                    />
-                  </div>
+          <div key={block.id}>
+            <ExpandableCardListItem
+              item={block}
+              isOpen={isOpen}
+              onToggleOpen={() => (isOpen ? setExpanded(null) : openEdit(block))}
+              headerContent={
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--text)' }}>{block.name}</div>
+                  <Caption as="div" style={{ marginTop: 2 }}>{t(`vacancyContentBlocksSettings.kind.${block.kind}`)}</Caption>
                 </div>
-                <div>
-                  <label style={labelStyle}>{t('vacancyContentBlocksSettings.bodyLabel')}</label>
-                  <RichTextEditor value={form.body ?? ''} onChange={v => setEF(block.id, 'body', v)} minHeight={90} />
-                </div>
+              }
+              ariaLabel={`${isOpen ? t('common.close') : t('common.edit')}: ${block.name}`}
+              footer={
                 <EditorRowFooter
                   onDelete={() => handleDelete(block)}
                   deleteLabel={t('vacancyContentBlocksSettings.delete')}
@@ -196,8 +169,35 @@ export default function VacancyContentBlocksSettings() {
                   saving={saving === block.id}
                   saveDisabled={!form.name?.trim()}
                 />
+              }
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 160px', gap: 10 }}>
+                <div>
+                  <label style={labelStyle}>{t('vacancyContentBlocksSettings.nameLabel')}</label>
+                  <input value={form.name ?? ''} onChange={e => setEF(block.id, 'name', e.target.value)} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>{t('vacancyContentBlocksSettings.kindLabel')}</label>
+                  <SearchSelect
+                    options={KINDS.map(k => ({ value: k, label: t(`vacancyContentBlocksSettings.kind.${k}`) }))}
+                    selected={[form.kind ?? 'intro']}
+                    onToggle={v => setEF(block.id, 'kind', v)}
+                    closeOnToggle
+                    searchable={false}
+                    renderTrigger={toggle => (
+                      // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- SearchSelect renderTrigger: form-field face from fieldMetrics, not a Button
+                      <button type="button" onClick={toggle} style={{ ...inputStyle, cursor: 'pointer', textAlign: 'left' }}>
+                        {t(`vacancyContentBlocksSettings.kind.${form.kind ?? 'intro'}`)}
+                      </button>
+                    )}
+                  />
+                </div>
               </div>
-            )}
+              <div>
+                <label style={labelStyle}>{t('vacancyContentBlocksSettings.bodyLabel')}</label>
+                <RichTextEditor value={form.body ?? ''} onChange={v => setEF(block.id, 'body', v)} minHeight={90} />
+              </div>
+            </ExpandableCardListItem>
 
             {/* Collapsed preview — one clamped line of sanitised body HTML. */}
             {!isOpen && block.body && (
