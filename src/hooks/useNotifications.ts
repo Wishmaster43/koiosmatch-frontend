@@ -39,6 +39,8 @@ export interface AppNotification {
   url?: string | null
   action_status?: string | null
   next_action?: string | null
+  // X-31: ready-made natural-language prompt for the "ask Koios" action.
+  koios_action?: { prompt: string } | null
   [k: string]: unknown
 }
 

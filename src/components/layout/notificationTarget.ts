@@ -14,7 +14,9 @@ export const ENTITY_PAGE: Record<string, string> = {
   opportunity: 'opportunities', customer: 'customers',
 }
 
-export interface NotificationTarget { page: string; id: string; intent?: Record<string, unknown> }
+// `hash` (LIMIET-MONITOR-1): a settings deep link ("#settings/<group>/<tab>") — those
+// screens have no `?open=<id>` drawer, so the raw hash IS the target.
+export interface NotificationTarget { page: string; id: string; intent?: Record<string, unknown>; hash?: string }
 
 // NOTIF-PAYLOAD (CMBE 8f0fcdb8, app/Support/NotificationActionStatus.php): the only
 // action_status values a workflow-run notification ever carries — 'cancelled'/no-run
@@ -63,6 +65,14 @@ export const CUSTOM_TYPE_TARGETS: Record<string, (meta: Record<string, unknown>)
   // carries match_id in meta and navigates to the match drawer with the pending-approval
   // quick view activated (intent: { pendingApprovalOnly: true }).
   'match.approval_pending': (meta) => (meta.match_id != null ? { page: 'matches', id: String(meta.match_id), intent: { pendingApprovalOnly: true } } : null),
+  // LIMIET-MONITOR-1: a connector limit warning opens the tenant's limits tab
+  // (scope tenant) or the super-admin platform limits section (scope platform).
+  'connector.limit_warning': (meta) => {
+    const scope = meta.scope as string | undefined
+    if (scope === 'tenant') return { page: 'settings', id: 'limits', hash: '#settings/integrations/limits' }
+    if (scope === 'platform') return { page: 'settings', id: 'admin_limits', hash: '#settings/superadmin/admin_limits' }
+    return null
+  },
 }
 
 // Pure: resolve a notification into a navigable {page, id}, or null when nothing
@@ -113,6 +123,13 @@ export function resolveNotificationTarget(n: AppNotification): NotificationTarge
 // pendingApprovalOnly), it is passed to DashboardLayout via the state so the
 // page receives it as the navIntent prop.
 export function navigateToNotificationTarget(target: NotificationTarget) {
+  // A settings deep link rides the shell's own hash routing (same as the sidebar's
+  // anchors); re-dispatching hashchange covers the "already on that hash" case.
+  if (target.hash) {
+    window.location.hash = target.hash
+    window.dispatchEvent(new HashChangeEvent('hashchange'))
+    return
+  }
   const hash = `#${target.page}?open=${encodeURIComponent(target.id)}`
   const state: Record<string, unknown> = { kmPage: target.page, drawerOpen: target.id }
   if (target.intent != null) state.kmIntentData = target.intent
@@ -123,6 +140,7 @@ export function navigateToNotificationTarget(target: NotificationTarget) {
 // The same-origin hash deep link EntityLink uses for its own new-tab icon —
 // shared here so an attention toast's trailing icon opens the exact same URL.
 export function buildNotificationDeepLink(target: NotificationTarget): string {
+  if (target.hash) return `${window.location.pathname}${target.hash}`
   return `${window.location.pathname}#${target.page}?open=${encodeURIComponent(target.id)}`
 }
 
@@ -156,4 +174,13 @@ export function resolveActionLine(n: AppNotification): NotificationActionLine | 
   const nextAction = rawNextAction && (KNOWN_NEXT_ACTIONS as readonly string[]).includes(rawNextAction)
     ? (rawNextAction as KnownNextAction) : null
   return { status: status as KnownActionStatus, nextAction }
+}
+
+// Pure: extract the Koios prompt from a notification row if it carries a non-empty
+// string; return null when koios_action is missing, null, or the prompt is empty.
+export function koiosPromptOf(n: AppNotification): string | null {
+  const koiosAction = (n as { koios_action?: { prompt: string } | null }).koios_action
+  if (!koiosAction) return null
+  const prompt = koiosAction.prompt?.trim()
+  return prompt ? prompt : null
 }

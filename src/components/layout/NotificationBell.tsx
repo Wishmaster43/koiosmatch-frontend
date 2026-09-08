@@ -26,13 +26,15 @@ import { useDateFormat } from '@/lib/datetime'
 import { Bell, ExternalLink } from 'lucide-react'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { askKoios } from '@/lib/koiosBridge'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 import { SectionTitle, BodyText, Caption } from '@/components/ui/typography'
+import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import Button from '@/components/ui/Button'
 import {
   resolveNotificationTarget, navigateToNotificationTarget, buildNotificationDeepLink, resolveActionLine,
-  resolveNotificationHref,
+  resolveNotificationHref, koiosPromptOf,
 } from './notificationTarget'
 import type { NotificationTarget } from './notificationTarget'
 
@@ -128,6 +130,7 @@ export default function NotificationBell() {
               const clickable = target != null || href != null
               // NOTIF-PAYLOAD: a workflow-run row also shows its status + next step.
               const action = resolveActionLine(n)
+              const koiosPrompt = koiosPromptOf(n)
               return (
                 <div
                   key={n.id ?? i}
@@ -152,6 +155,16 @@ export default function NotificationBell() {
                       </Caption>
                     )}
                     <Caption>{fmt(n.created_at)}</Caption>
+                    {/* X-31: "ask Koios" prefills the panel with the row's prompt (never auto-sent,
+                        API-CREDITS-1) — rendered only when the row carries one. */}
+                    {koiosPrompt && (
+                      <div style={{ marginTop: 4 }}>
+                        <Button variant="ghost" size="sm"
+                          onClick={(e: ReactMouseEvent) => { e.stopPropagation(); askKoios(koiosPrompt); setOpen(false) }}>
+                          <KoiosAiMark tone="soft" size={12} /> {t('notifications.askKoios')}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                   {/* EntityLink idiom: the row name navigates in-app, this icon opens
                       the same record's deep link in a new browser tab. */}
