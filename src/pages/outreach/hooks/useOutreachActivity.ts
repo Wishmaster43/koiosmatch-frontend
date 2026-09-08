@@ -8,9 +8,8 @@
  * arrive with a field-level `changes` diff bag. Mirrors useVacancyActivity /
  * useOpportunityActivity so every entity's changelog behaves the same (§3A).
  */
-import { useState, useEffect } from 'react'
-import api, { unwrapList } from '@/lib/api'
 import type { Id } from '@/types/common'
+import { useEntityActivity } from '@/hooks/useEntityActivity'
 
 /** One entry of the shared feed (LogsEntityActivity::formatActivityEntry). */
 export interface OutreachActivityEvent {
@@ -32,29 +31,6 @@ export interface OutreachActivityEvent {
 
 // Fetches one campaign's audit trail from the shared LogsEntityActivity feed, mirroring every other entity's changelog hook (see file header).
 export function useOutreachActivity(id?: Id | null): { items: OutreachActivityEvent[]; loading: boolean; error: boolean } {
-  const [items,   setItems]   = useState<OutreachActivityEvent[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error,   setError]   = useState(false)
-
-  // Entity-keyed load with an AbortController (§9) — a fast id switch must never let
-  // the previous campaign's response win.
-  useEffect(() => {
-    if (!id) { setItems([]); return }
-    const ctrl = new AbortController()
-    setLoading(true); setError(false)
-    api.get(`/outreach-campaigns/${id}/activity`, { signal: ctrl.signal })
-      .then(res => setItems(unwrapList<OutreachActivityEvent>(res).rows))
-      .catch(err => {
-        if (err?.code === 'ERR_CANCELED') return
-        // 404 = this id no longer resolves in the tenant (hard-deleted / stale drawer
-        // id) → render the calm empty state, not a failure banner. Every other failure
-        // (incl. a no-response network error) IS an error, mirroring the sibling hooks.
-        if (err?.response?.status !== 404) setError(true)
-        setItems([])
-      })
-      .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
-    return () => ctrl.abort()
-  }, [id])
-
+  const { items, loading, error } = useEntityActivity<OutreachActivityEvent>('outreach-campaigns', id ?? undefined)
   return { items, loading, error }
 }

@@ -34,6 +34,7 @@ import { FileText, IdCard, GraduationCap, FileSignature, ShieldCheck, BadgeCheck
 import { useCachedLookup } from './useCachedLookup'
 import { translateSeedList } from './lookupSeedI18n'
 import { toLookupOption } from './lookupOption'
+import { buildLookupHelpers } from './buildLookupHelpers'
 import type { LookupOption } from '@/types/common'
 import { unwrapList } from '@/lib/api'
 
@@ -104,15 +105,10 @@ export function useDocumentTypes(entity?: string) {
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const types = useMemo(() => translateSeedList(t, 'documentTypes', rawTypes), [rawTypes, t])
 
-  // Resolve a stored value/slug to its label/colour/icon; fall back to raw value / neutral grey.
-  const find = (value?: string | null) => {
-    const v = norm(value)
-    return v ? types.find(x => norm(x.value) === v || norm(x.label) === v) : undefined
-  }
-  const labelOf = (value?: string | null): string => find(value)?.label ?? value ?? ''
-  const colorOf = (value?: string | null): string => find(value)?.color ?? FALLBACK_COLOR
-  // The type's configured icon slug, or null — resolveDocTypeIcon owns the fallback.
-  const iconOf = (value?: string | null): string | null => (find(value)?.icon as string | undefined) ?? null
+  // Build resolver functions (find/labelOf/colorOf/iconOf) from the lookup list,
+  // but override colorOf to use the fallback colour for missing entries.
+  const { labelOf: _labelOf, colorOf: _colorOf, iconOf } = useMemo(() => buildLookupHelpers(types, norm), [types])
+  const colorOf = (value?: string | null): string => _colorOf(value) ?? FALLBACK_COLOR
 
-  return { types, labelOf, colorOf, iconOf }
+  return { types, labelOf: _labelOf, colorOf, iconOf }
 }

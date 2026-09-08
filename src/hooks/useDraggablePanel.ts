@@ -105,6 +105,20 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
     return () => { document.body.style.userSelect = previous }
   }, [])
 
+  // Attach the window pointermove/pointerup pair for one drag or resize gesture; the
+  // returned detach is called from the gesture's own `up` handler (DRY-1 r6 inline merge).
+  const setupPointerListeners = useCallback((
+    onMove: (ev: PointerEvent) => void,
+    onUp: () => void,
+  ) => {
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+    return () => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+    }
+  }, [])
+
   /** Attach to the header: pointer-drag moves the panel. */
   const onDragPointerDown = useCallback((e: React.PointerEvent) => {
     // Ignore drags starting on interactive elements (close button etc.).
@@ -135,16 +149,15 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
       setPlacement(next)
     }
     // Pointer up ends the drag: detach the listeners, restore text selection, and persist the final placement.
+    let detach = () => {}
     const up = () => {
-      window.removeEventListener('pointermove', move)
-      window.removeEventListener('pointerup', up)
+      detach()
       restoreSelection()
       setDragging(false)
       persist(placementRef.current)
     }
-    window.addEventListener('pointermove', move)
-    window.addEventListener('pointerup', up)
-  }, [persist, suppressSelection])
+    detach = setupPointerListeners(move, up)
+  }, [persist, suppressSelection, setupPointerListeners])
 
   /** Attach to the SE corner handle: pointer-drag resizes the panel. */
   const onResizePointerDown = useCallback((e: React.PointerEvent) => {
@@ -175,16 +188,15 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
       setPlacement(next)
     }
     // Pointer up ends the resize: detach the listeners, restore selection, and persist the new size.
+    let detach = () => {}
     const up = () => {
-      window.removeEventListener('pointermove', move)
-      window.removeEventListener('pointerup', up)
+      detach()
       restoreSelection()
       setDragging(false)
       persist(placementRef.current)
     }
-    window.addEventListener('pointermove', move)
-    window.addEventListener('pointerup', up)
-  }, [persist, resizable, suppressSelection])
+    detach = setupPointerListeners(move, up)
+  }, [persist, resizable, suppressSelection, setupPointerListeners])
 
   /** Double-click the handle: back to centered/default size (recovery hatch). */
   const onDragHandleDoubleClick = useCallback(() => {

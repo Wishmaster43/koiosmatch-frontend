@@ -41,6 +41,7 @@
  */
 import { useEffect, useRef } from 'react'
 import type { Id } from '@/types/common'
+import { setHashParam } from '@/lib/hashParams'
 
 // Pure: read the `open` param out of a hash string (no window access — testable).
 export function getOpenIdFromHash(hash: string): string | null {
@@ -51,16 +52,8 @@ export function getOpenIdFromHash(hash: string): string | null {
 }
 
 // Pure: rewrite a hash string's `open` param, keeping its page-path untouched.
-export function setOpenIdInHash(hash: string, id: string | null): string {
-  const raw = hash.replace(/^#/, '')
-  const qIdx = raw.indexOf('?')
-  const path = qIdx === -1 ? raw : raw.slice(0, qIdx)
-  const params = new URLSearchParams(qIdx === -1 ? '' : raw.slice(qIdx + 1))
-  if (id != null) params.set('open', id)
-  else params.delete('open')
-  const query = params.toString()
-  return `#${path}${query ? `?${query}` : ''}`
-}
+export const setOpenIdInHash = (hash: string, id: string | null): string =>
+  setHashParam(hash, 'open', id)
 
 // Pure: read the `tab` param out of a hash string — mirrors getOpenIdFromHash
 // (NOTITIE-POPOUT-1 F5's sub-tab deep-link, see the file comment).
@@ -73,16 +66,8 @@ export function getTabFromHash(hash: string): string | null {
 
 // Pure: rewrite a hash string's `tab` param, keeping everything else untouched —
 // mirrors setOpenIdInHash.
-export function setTabInHash(hash: string, tab: string | null): string {
-  const raw = hash.replace(/^#/, '')
-  const qIdx = raw.indexOf('?')
-  const path = qIdx === -1 ? raw : raw.slice(0, qIdx)
-  const params = new URLSearchParams(qIdx === -1 ? '' : raw.slice(qIdx + 1))
-  if (tab != null) params.set('tab', tab)
-  else params.delete('tab')
-  const query = params.toString()
-  return `#${path}${query ? `?${query}` : ''}`
-}
+export const setTabInHash = (hash: string, tab: string | null): string =>
+  setHashParam(hash, 'tab', tab)
 
 // Pure: decide push vs replace for a state→URL write — see the file comment.
 export function resolveWriteMode(curId: string | null, intentOpenId: Id | null | undefined): 'push' | 'replace' {

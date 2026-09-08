@@ -1,32 +1,5 @@
 // intus_candidates module — HTTP call to the Intus API for candidates.
-// Same fields as the generic HTTP Request, branded with the Intus mark.
-import IntusMark from '../components/ui/IntusMark'
+// Uses the shared Intus module factory; differs only in type and label.
+import { makeIntusModule } from './intusFactory'
 
-export default {
-  type:  'intus_candidates',
-  app:   'intus',
-  category: 'Intus',
-  label: 'Kandidaten',
-  Icon:  IntusMark,
-  color: 'var(--module-intus)',
-  bg:    'color-mix(in srgb, var(--module-intus) 9%, transparent)',
-  schema: [
-    { key: 'url',    label: 'URL',    type: 'text',   placeholder: 'https://api.intus.example/candidates', required: true },
-    { key: 'method', label: 'Method', type: 'select', options: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'], required: true },
-    { key: 'authentication_type', label: 'Authenticatie', type: 'select', options: ['Geen', 'API Key', 'Basic Auth', 'OAuth'] },
-    {
-      key: 'headers', label: 'Headers', type: 'keyvalue',
-      help: 'Naam / Waarde paren',
-    },
-    {
-      key: 'query_params', label: 'Query parameters', type: 'keyvalue',
-      help: 'Naam / Waarde paren',
-    },
-    { key: 'body_type', label: 'Body type', type: 'select', options: ['Geen', 'JSON', 'Form (urlencoded)', 'Multipart', 'Custom'] },
-    { key: 'body',    label: 'Body (JSON)', type: 'textarea', placeholder: '{"key": "value"}' },
-    { key: 'parse_response',    label: 'Response parsen',      type: 'boolean' },
-    { key: 'allow_redirects',   label: 'Redirects volgen',     type: 'boolean' },
-    { key: 'stop_on_http_error',label: 'Stop bij HTTP fout',   type: 'boolean' },
-    { key: 'timeout', label: 'Timeout (sec)', type: 'number', placeholder: '30' },
-  ],
-}
+export default makeIntusModule('intus_candidates', 'Kandidaten', 'color-mix(in srgb, var(--module-intus) 9%, transparent)', 'https://api.intus.example/candidates')

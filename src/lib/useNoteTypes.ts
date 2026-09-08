@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next'
 import { useQueries } from '@tanstack/react-query'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
+import { buildLookupHelpers } from './buildLookupHelpers'
 import type { LookupOption } from '@/types/common'
 import api, { getActiveTenantId, unwrapList } from '@/lib/api'
 import { translateSeedList } from './lookupSeedI18n'
@@ -76,13 +77,8 @@ const mapNoteTypes = (res: AxiosResponse): LookupOption[] | null => {
 // and useNoteTypesFor (the widened union below) derive identical behaviour instead
 // of two hand-copied resolvers drifting apart.
 function buildNoteTypeHelpers(types: LookupOption[]) {
-  // Resolve a stored value/slug to its label/colour; fall back to the raw value.
-  const find = (value?: string | null) => {
-    const v = norm(value)
-    return v ? types.find(x => norm(x.value) === v || norm(x.label) === v) : undefined
-  }
-  const labelOf = (value?: string | null): string => find(value)?.label ?? value ?? ''
-  const colorOf = (value?: string | null): string | undefined => find(value)?.color
+  // Build base resolvers from the lookup list.
+  const { labelOf, colorOf } = buildLookupHelpers(types, norm)
   // Composer options: system-written categories (Statuswissel) are never offered
   // as a writable type — the seeded lookup DOES contain them for display resolution.
   const writableTypes = types.filter(nt => !SYSTEM_NOTE_TYPES.has(nt.value))

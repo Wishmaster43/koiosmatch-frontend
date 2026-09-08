@@ -19,6 +19,7 @@ import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { translateSeedList } from './lookupSeedI18n'
 import { toLookupOption } from './lookupOption'
+import { buildLookupHelpers } from './buildLookupHelpers'
 import type { LookupOption } from '@/types/common'
 import { unwrapList } from '@/lib/api'
 
@@ -48,13 +49,8 @@ export function useCao() {
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const types = useMemo(() => translateSeedList(t, 'cao', rawTypes), [rawTypes, t])
 
-  // Resolve a stored value/slug to its label/colour; fall back to the raw value.
-  const find = (value?: string | null) => {
-    const v = norm(value)
-    return v ? types.find(x => norm(x.value) === v || norm(x.label) === v) : undefined
-  }
-  const labelOf = (value?: string | null): string => find(value)?.label ?? value ?? ''
-  const colorOf = (value?: string | null): string | undefined => find(value)?.color
+  // Build resolver functions (find/labelOf/colorOf) from the lookup list.
+  const { labelOf, colorOf } = useMemo(() => buildLookupHelpers(types, norm), [types])
 
   return { types, labelOf, colorOf }
 }

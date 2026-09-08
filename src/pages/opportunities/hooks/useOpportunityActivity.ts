@@ -4,9 +4,8 @@
  * activity('opportunities')). A 404 = read endpoint not built yet → treat as empty
  * (calm), not a hard error. Mirrors useCandidateActivity.
  */
-import { useState, useEffect } from 'react'
-import api, { unwrapList } from '@/lib/api'
 import type { Id } from '@/types/common'
+import { useEntityActivity } from '@/hooks/useEntityActivity'
 
 export interface OpportunityActivityEvent {
   id?: Id
@@ -22,27 +21,6 @@ export interface OpportunityActivityEvent {
 
 // Fetches one opportunity's audit trail; a 404 (read endpoint not built yet for this tenant) degrades to a calm empty list, not an error.
 export function useOpportunityActivity(id?: Id): { items: OpportunityActivityEvent[]; loading: boolean; error: boolean } {
-  const [items,   setItems]   = useState<OpportunityActivityEvent[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error,   setError]   = useState(false)
-
-  // Loads on mount/id change, aborting the in-flight request on unmount/id change so a stale response never lands.
-  useEffect(() => {
-    if (!id) { setItems([]); return }
-    const ctrl = new AbortController()
-    setLoading(true); setError(false)
-    api.get(`/opportunities/${id}/activity`, { signal: ctrl.signal })
-      .then(res => setItems(unwrapList<OpportunityActivityEvent>(res).rows))
-      .catch(err => {
-        if (err?.code === 'ERR_CANCELED') return
-        // 404 = endpoint not built yet → treat as empty (calm), not a hard error.
-        // Audit r5: no-response network failures DO count as errors (no truthy-status guard).
-        if (err?.response?.status !== 404) setError(true)
-        setItems([])
-      })
-      .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
-    return () => ctrl.abort()
-  }, [id])
-
+  const { items, loading, error } = useEntityActivity<OpportunityActivityEvent>('opportunities', id)
   return { items, loading, error }
 }

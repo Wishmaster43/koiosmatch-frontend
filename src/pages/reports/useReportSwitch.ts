@@ -16,6 +16,7 @@
  * pasted deep link is never silently overridden by the route's own default.
  */
 import { useEffect, useRef, useState } from 'react'
+import { setHashParam } from '@/lib/hashParams'
 
 // Pure: read `view` out of a hash string (no window access — testable, mirrors
 // useDrawerUrl's getOpenIdFromHash).
@@ -27,16 +28,8 @@ export function getViewFromHash(hash: string): string | null {
 }
 
 // Pure: rewrite a hash string's `view` param, keeping everything else untouched.
-export function setViewInHash(hash: string, view: string | null): string {
-  const raw = hash.replace(/^#/, '')
-  const qIdx = raw.indexOf('?')
-  const path = qIdx === -1 ? raw : raw.slice(0, qIdx)
-  const params = new URLSearchParams(qIdx === -1 ? '' : raw.slice(qIdx + 1))
-  if (view != null) params.set('view', view)
-  else params.delete('view')
-  const query = params.toString()
-  return `#${path}${query ? `?${query}` : ''}`
-}
+export const setViewInHash = (hash: string, view: string | null): string =>
+  setHashParam(hash, 'view', view)
 
 // Resolve the starting position: the URL wins when it names a valid position,
 // otherwise the caller's own default for this route.
