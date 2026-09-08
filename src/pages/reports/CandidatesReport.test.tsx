@@ -31,6 +31,10 @@ vi.mock('@/lib/api', () => ({
   getActiveTenantId: () => 'test-tenant',
 }))
 
+// Mock useReportKpiSelection hook to return custom KPI order per test
+const mockUseReportKpiSelection = vi.fn(() => ({ data: [] as string[], isLoading: false }))
+vi.mock('./hooks/useReportKpiSelection', () => ({ useReportKpiSelection: () => mockUseReportKpiSelection() }))
+
 // Tenant KPI-order settings (RAPPORT-KPI-INSTELBAAR) — empty blob = today's
 // default axis order, unless a test overrides it.
 const mockSettings = vi.hoisted(() => vi.fn(() => ({} as Record<string, unknown>)))
@@ -89,10 +93,20 @@ const suiteCards = [
   { key: 'status_stale', count: 0 }, { key: 'no_cv', count: 3 }, { key: 'document_expiring', count: 1 },
   { key: 'availability_due', count: 2 }, { key: 'no_contact', count: 4 }, { key: 'active_conversations', count: 6 },
 ]
-const mockSuiteResponse = (cards = suiteCards) => getSpy.mockImplementation((url: unknown) =>
-  Promise.resolve(url === '/reports/candidates/kpis'
-    ? { data: { data: cards } }
-    : { data: { data: [], meta: { total: 0 } } }))
+const mockSuiteResponse = (cards = suiteCards, kpiOrder?: string[]) => {
+  getSpy.mockImplementation((url: unknown) =>
+    Promise.resolve(
+      url === '/reports/candidates/kpis' ? { data: { data: cards } }
+      : url === '/reports/kpi-selection/candidates' ? { data: { data: kpiOrder ?? cards.map(c => c.key) } }
+      : { data: { data: [], meta: { total: 0 } } }
+    ))
+  // Set up the KPI ordering hook to return the custom order
+  const defaultOrder = cards.map(c => c.key)
+  mockUseReportKpiSelection.mockReturnValue({
+    data: kpiOrder ?? defaultOrder,
+    isLoading: false,
+  })
+}
 
 describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
   // Every section now defaults its own list on mount, firing extra drill/advice
@@ -102,6 +116,8 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
     getSpy.mockReset()
     getSpy.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
     mockSettings.mockReturnValue({})
+    mockUseReportKpiSelection.mockReset()
+    mockUseReportKpiSelection.mockImplementation(() => ({ data: suiteCards.map(c => c.key), isLoading: false }))
   })
 
   it('shows the loading state', () => {
@@ -222,10 +238,10 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
   // order, is the tenant's stored Settings → Reports choice, not the hardcoded
   // status→phase→source→owner→branch order.
   it('reorders the suite cards to the tenant-stored priority', async () => {
-    mockSuiteResponse()
-    mockSettings.mockReturnValue({ report_kpis_candidates: JSON.stringify([
+    const reorderedKeys = [
       'active_conversations', 'no_contact', 'availability_due', 'document_expiring',
-      'no_cv', 'status_stale', 'no_followup', 'outflow', 'inflow']) })
+      'no_cv', 'status_stale', 'no_followup', 'outflow', 'inflow']
+    mockSuiteResponse(suiteCards, reorderedKeys)
     mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
     const { container } = renderReport()
     await screen.findByText('Instroom')
@@ -236,8 +252,7 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
   // A vanished stored axis key falls back to the default order silently on the
   // report (still nine real cards, never a crash) but shows a visible notice.
   it('falls back a vanished stored key to the default suite order and shows a notice', async () => {
-    mockSuiteResponse()
-    mockSettings.mockReturnValue({ report_kpis_candidates: JSON.stringify(['ghost_key', 'inflow']) })
+    mockSuiteResponse(suiteCards, ['ghost_key', 'inflow'])
     mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     expect(await screen.findByText('Instroom')).toBeInTheDocument() // backfilled default

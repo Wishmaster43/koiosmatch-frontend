@@ -27,6 +27,10 @@ vi.mock('@/lib/api', () => ({
   getActiveTenantId: () => 'test-tenant',
 }))
 
+// Mock useReportKpiSelection hook to return default KPI order
+const mockUseReportKpiSelection = vi.fn(() => ({ data: ['overdue', 'created_in_period', 'by_status', 'by_type', 'by_priority', 'by_owner', 'by_candidate', 'by_vacancy', 'unscheduled'] as string[], isLoading: false }))
+vi.mock('./hooks/useReportKpiSelection', () => ({ useReportKpiSelection: () => mockUseReportKpiSelection() }))
+
 // Fixture per the portie-6 contract: status/type/priority key on the LOOKUP ID
 // (slugs are not unique-protected), each axis sums to total, and the server no
 // longer emits a ghost zero-bucket — series[0].date === from.

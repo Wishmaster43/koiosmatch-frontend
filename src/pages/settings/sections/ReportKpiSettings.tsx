@@ -3,53 +3,72 @@
  * slots (never a plus/minus — "which nine, not how many", RAPPORT-KPI-INSTELBAAR).
  * Each slot is reorderable (shared DragList) and swappable via a searchable
  * picker (CreatableSelect, allowCreate={false} — never a native <select>, §3A).
- * Persisted one JSON key per report (`report_kpis_<id>`) through the shared
- * free-form settings blob — no backend change needed (design doc §3/§5).
+ * Reads catalog from GET /reports/kpi-catalog, selection from GET /reports/kpi-selection/{scope}.
+ * Persists to PUT /reports/kpi-selection/{scope} with body {kpis: string[]}.
  *
- * Axis-family reports (candidates/applications/customers) offer their fixed axis
- * list as the catalogue, with card 1 ("total") pinned and out of the picker.
- * Fixed-family reports currently have no spare cards beyond their own nine — the
- * picker still lets a tenant reorder, but honestly says there is nothing else to
- * swap in yet (design doc: honest beats decorative) via `reportHasSpareKpiCards`.
+ * Pinned-first cards render as fixed cards outside the picker (no reorder);
+ * available cards show label via label_key with BE label as default fallback.
  */
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
-import { useAllSettings, useSettingsLoaded, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
+import { useState, useEffect } from 'react'
+import { useQuery, useMutation } from '@tanstack/react-query'
+import api from '@/lib/api'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import SectionCard from '@/components/ui/SectionCard'
 import { DragList } from '../components/SettingsControls'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import { REPORT_KPI_SCOPE_IDS, REPORT_KPI_FAMILY, REPORT_KPI_PINNED_FIRST, getReportKpiCatalog, getReportKpiDefaultOrder, reportHasSpareKpiCards, reportKpiSettingsKey } from '@/pages/reports/shared'
+import { REPORT_KPI_SCOPE_IDS, REPORT_KPI_FAMILY, resolveReportKpiOrder } from '@/pages/reports/shared'
 import type { ReportKpiScopeId } from '@/pages/reports/shared'
-import { resolveReportKpiOrder } from '@/pages/reports/shared'
 import { Caption } from '@/components/ui/typography'
-import SettingsLoadBanner from '../components/SettingsLoadBanner'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 
-// Only scopes with a known catalogue (axis or fixed) get a block — a scope
-// without a ReportKpiBand strip has nothing to configure here. Scopes are the
-// consolidation-proof identity (RAPPORTEN-CONSOLIDATIE-1): every switch
-// position on a merged page (Leads, Prospects, Recruiters/Accountmanagers,
-// Contacts/Locations/Departments, AI/Workflows) keeps its own tab here even
-// though several no longer have their own top-level route — see kpiCatalog.ts.
+// Scope with a known family (axis or fixed) from the catalog.
 const CONFIGURABLE_SCOPE_IDS: ReportKpiScopeId[] = REPORT_KPI_SCOPE_IDS.filter(id => REPORT_KPI_FAMILY[id] != null)
 
-// The Report cards settings screen: a sub-tab per configurable report scope,
-// each rendering its own nine-slot editor (ReportKpiBlock below).
+interface CatalogEntry {
+  key: string
+  label: string
+  label_key: string
+}
+
+interface CatalogScope {
+  report: string
+  family: 'axis' | 'fixed'
+  pinned_first: string | null
+  available: CatalogEntry[]
+  default: string[]
+}
+
+interface CatalogResponse {
+  data: Record<string, CatalogScope>
+}
+
+interface SelectionResponse {
+  data: string[]
+}
+
+// The Report cards settings screen: a sub-tab per configurable report scope.
 export default function ReportKpiSettings() {
   const { t } = useTranslation('settings')
-  const values = useAllSettings()
-  const loaded = useSettingsLoaded()
   const [active, setActive] = useState<ReportKpiScopeId>(CONFIGURABLE_SCOPE_IDS[0])
 
-  if (!loaded) {
-    // A failed GET /settings shows the retry banner instead of stalling forever on "loading".
-    // The loading text is passed as loadingFallback, so the banner renders it while loading
-    // and the error banner while failed.
-    return (
-      <div style={{ padding: 16 }}>
-        <SettingsLoadBanner loadingFallback={<Caption>{t('reportKpis.loading')}</Caption>} />
-      </div>
-    )
+  // Fetch the full catalog once, used by all scopes.
+  const { data: catalogData, isLoading: catalogLoading, isError: catalogError, refetch: refetchCatalog } = useQuery({
+    queryKey: ['reports', 'kpi-catalog'],
+    queryFn: async () => {
+      const { data } = await api.get<CatalogResponse>('/reports/kpi-catalog')
+      return data.data
+    },
+    staleTime: 60 * 1000,
+    retry: 1,
+  })
+
+  // Four states on the catalogue itself (§3): a load failure is retryable, never blank.
+  if (catalogError) {
+    return <ErrorBanner onRetry={() => { void refetchCatalog() }}>{t('common.loadError')}</ErrorBanner>
+  }
+  if (catalogLoading || !catalogData) {
+    return <Caption as="div">{t('reportKpis.loading')}</Caption>
   }
 
   return (
@@ -61,54 +80,99 @@ export default function ReportKpiSettings() {
         onChange={id => setActive(id as ReportKpiScopeId)}
       />
       <div style={{ marginTop: 12 }}>
-        <ReportKpiBlock key={active} reportId={active} values={values} />
+        <ReportKpiBlock key={active} scopeId={active} catalogData={catalogData} />
       </div>
     </div>
   )
 }
 
-// One scope's nine-slot editor. Keyed by scope id in the parent so switching
-// tabs never leaks local drag/save state between scopes.
-function ReportKpiBlock({ reportId, values }: { reportId: ReportKpiScopeId; values: Record<string, unknown> }) {
+// One scope's editor. Keyed by scope id in the parent so switching tabs never leaks state.
+function ReportKpiBlock({ scopeId, catalogData }: { scopeId: ReportKpiScopeId; catalogData: Record<string, CatalogScope> }) {
   const { t } = useTranslation('settings')
-  const family = REPORT_KPI_FAMILY[reportId]
-  const catalog = getReportKpiCatalog(reportId)
-  const defaultOrder = getReportKpiDefaultOrder(reportId)
-  const pinnedFirst = REPORT_KPI_PINNED_FIRST[reportId]
-  const hasSpares = reportHasSpareKpiCards(reportId)
-  const settingsKey = reportKpiSettingsKey(reportId)
+  const scopeCatalog = catalogData[scopeId]
 
-  const stored = getJsonSetting<string[] | undefined>(values, settingsKey, undefined)
-  const { order: resolved, fellBack } = resolveReportKpiOrder(stored, catalog.map(c => c.key), defaultOrder)
-  const [order, setOrder] = useState<string[]>(resolved)
-  const [saving, setSaving] = useState(false)
+  // Fetch selection for this scope.
+  const defaultOrder = scopeCatalog?.default ?? []
+  const { data: selection = defaultOrder, isLoading: selectionLoading } = useQuery({
+    queryKey: ['reports', 'kpi-selection', scopeId],
+    queryFn: async () => {
+      try {
+        const { data } = await api.get<SelectionResponse>(`/reports/kpi-selection/${scopeId}`)
+        return data.data
+      } catch (err: unknown) {
+        const axErr = err as { response?: { status?: number } }
+        if (axErr.response?.status === 404) {
+          return defaultOrder
+        }
+        throw err
+      }
+    },
+    staleTime: 60 * 1000,
+    retry: 1,
+    enabled: !!scopeCatalog,
+  })
+
+  const [order, setOrder] = useState<string[]>(selection)
+
+  // Sync order when selection loads.
+  useEffect(() => {
+    setOrder(selection)
+  }, [selection])
+
+  // Mutation to save order to the API.
+  const { mutate: saveOrder, isPending: saving } = useMutation({
+    mutationFn: async (kpis: string[]) => {
+      const { data } = await api.put<SelectionResponse>(`/reports/kpi-selection/${scopeId}`, { kpis })
+      return data.data
+    },
+    onSuccess: (newOrder) => {
+      setOrder(newOrder)
+    },
+  })
+
+  if (!scopeCatalog) return <Caption as="div">{t('reportKpis.notFound')}</Caption>
+
+  const pinnedFirst = scopeCatalog.pinned_first
+  const availableCards = scopeCatalog.available
+  const hasSpares = availableCards.length > defaultOrder.length
+
+  // Detect if the selection contains keys that are no longer in the catalog.
+  const { fellBack } = resolveReportKpiOrder(order, availableCards.map(c => c.key), defaultOrder)
 
   const labelFor = (key: string): string => {
-    const entry = catalog.find(c => c.key === key)
-    return entry ? t(entry.labelKey, { ns: 'analytics' }) : key
-  }
-
-  // Saves a new card order to this scope's settings key, updating local state
-  // first so the drag list never snaps back while the request is in flight.
-  const persist = async (next: string[]) => {
-    setOrder(next)
-    setSaving(true)
-    try {
-      await saveSettingsKeys({ [settingsKey]: next })
-    } finally {
-      setSaving(false)
+    const entry = availableCards.find(c => c.key === key)
+    if (entry) {
+      // Try to use i18n label_key; fall back to BE label.
+      try {
+        return t(entry.label_key, { ns: 'analytics', defaultValue: entry.label })
+      } catch {
+        return entry.label
+      }
     }
+    return key
   }
 
-  // Replaces one slot's card via the picker and persists the resulting order.
+  // Replaces one slot's card via picker.
   const swap = (index: number, newKey: string) => {
-    if (order.includes(newKey)) return // no duplicate card twice in one report
+    if (order.includes(newKey)) return // no duplicate
     const next = [...order]
     next[index] = newKey
-    persist(next)
+    setOrder(next)
+    saveOrder(next)
+  }
+
+  // Reorder via drag.
+  const handleReorder = (next: { key: string; index: number }[]) => {
+    const newOrder = next.map(it => it.key)
+    setOrder(newOrder)
+    saveOrder(newOrder)
   }
 
   const items = order.map((key, i) => ({ id: `${key}-${i}`, key, index: i }))
+
+  if (selectionLoading) {
+    return <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('reportKpis.loading')}</p>
+  }
 
   return (
     <div>
@@ -119,7 +183,7 @@ function ReportKpiBlock({ reportId, values }: { reportId: ReportKpiScopeId; valu
       )}
       {!hasSpares && (
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
-          {family === 'fixed' ? t('reportKpis.noSpareCards') : t('reportKpis.noSpareAxes')}
+          {scopeCatalog.family === 'fixed' ? t('reportKpis.noSpareCards') : t('reportKpis.noSpareAxes')}
         </p>
       )}
       {fellBack && (
@@ -130,7 +194,7 @@ function ReportKpiBlock({ reportId, values }: { reportId: ReportKpiScopeId; valu
       <SectionCard title={t('reportKpis.slotsTitle')}>
         <DragList
           items={items}
-          onReorder={(next: { key: string; index: number }[]) => persist(next.map(it => it.key))}
+          onReorder={handleReorder}
           renderItem={(item: { key: string; index: number }) => (
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
               <Caption style={{ width: 20, textAlign: 'right' }}>{item.index + 1}</Caption>
@@ -138,9 +202,9 @@ function ReportKpiBlock({ reportId, values }: { reportId: ReportKpiScopeId; valu
                 <CreatableSelect
                   value={item.key}
                   allowCreate={false}
-                  options={catalog
+                  options={availableCards
                     .filter(c => c.key === item.key || !order.includes(c.key))
-                    .map(c => ({ value: c.key, label: t(c.labelKey, { ns: 'analytics' }) }))}
+                    .map(c => ({ value: c.key, label: labelFor(c.key) }))}
                   onChange={val => swap(item.index, val)}
                 />
               </div>
@@ -148,7 +212,7 @@ function ReportKpiBlock({ reportId, values }: { reportId: ReportKpiScopeId; valu
           )}
         />
       </SectionCard>
-      {saving && <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>{t('reportKpis.saving')}</p>}
+      {saving && <Caption style={{ marginTop: 6 }}>{t('reportKpis.saving')}</Caption>}
     </div>
   )
 }

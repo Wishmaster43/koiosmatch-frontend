@@ -1,101 +1,224 @@
 /**
  * ReportKpiSettings — the per-report nine-slot KPI editor. Mutation test asserts
- * the REQUEST (route key + full nine-key body), not just that a callback fired
- * (§13). Also covers the vanished-key fallback notice.
+ * the REQUEST route and body (X-23 contract), not just that a callback fired (§13).
+ * Reads GET /reports/kpi-catalog and GET /reports/kpi-selection/{scope};
+ * writes via PUT /reports/kpi-selection/{scope} with body {kpis: string[]}.
  *
- * RAPPORTEN-DANNY10-1: the workhorse scope moved from `recruiters` (retired with
- * its report page) to `matches` — a surviving fixed-family scope with nine
- * defaults plus real spares (REPORTS-KPI-SPARE-1). `prospects` stays the
- * "still no spares" honesty control (its 'axis'-family sibling `customers` grew
- * signal spares that are deliberately NOT mirrored onto Prospects — see
- * kpiCatalog.ts's own note on why).
+ * RAPPORTEN-DANNY10-1: the workhorse scope moved from `recruiters` (retired)
+ * to `matches` — a surviving fixed-family scope with nine defaults.
+ * `prospects` stays the "still no spares" honesty control (axis-family).
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import React from 'react'
 import i18n from '@/i18n'
+import api from '@/lib/api'
 import ReportKpiSettings from './ReportKpiSettings'
-import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from '@/pages/reports/kpiCatalog'
+import { getReportKpiCatalog, getReportKpiDefaultOrder } from '@/pages/reports/kpiCatalog'
+
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual('@/lib/api')
+  return { ...actual, default: { get: vi.fn(), put: vi.fn() } }
+})
+
+afterEach(() => vi.clearAllMocks())
 
 const t = (key: string) => i18n.t(key, { ns: 'analytics' })
 const st = (key: string) => i18n.t(key, { ns: 'settings' })
 
-// Matches is not the first sub-tab (candidates is) — switch to it explicitly.
+// Build minimal catalog with matches (fixed) and prospects (axis) and leads (axis with spares).
+function buildTestCatalog() {
+  const matchesCatalog = getReportKpiCatalog('matches')
+  const matchesDefault = getReportKpiDefaultOrder('matches')
+  const leadsCatalog = getReportKpiCatalog('leads')
+  const leadsDefault = getReportKpiDefaultOrder('leads')
+  const prospectsCatalog = getReportKpiCatalog('prospects')
+  const prospectsDefault = getReportKpiDefaultOrder('prospects')
+
+  return {
+    matches: {
+      report: 'matches',
+      family: 'fixed' as const,
+      pinned_first: null,
+      available: matchesCatalog.map(c => ({ key: c.key, label: t(c.labelKey), label_key: c.labelKey })),
+      default: matchesDefault,
+    },
+    leads: {
+      report: 'candidates',
+      family: 'axis' as const,
+      pinned_first: 'total',
+      available: leadsCatalog.map(c => ({ key: c.key, label: t(c.labelKey), label_key: c.labelKey })),
+      default: leadsDefault,
+    },
+    prospects: {
+      report: 'customers',
+      family: 'axis' as const,
+      pinned_first: 'total',
+      available: prospectsCatalog.map(c => ({ key: c.key, label: t(c.labelKey), label_key: c.labelKey })),
+      default: prospectsDefault,
+    },
+  }
+}
+
 async function openMatchesTab() {
   const user = userEvent.setup()
   await user.click(screen.getByRole('tab', { name: st('reportKpis.reportNames.matches') }))
 }
 
-// Prospects is the "still no spares" control case (see file-top note).
+async function openLeadsTab() {
+  const user = userEvent.setup()
+  await user.click(screen.getByRole('tab', { name: st('reportKpis.reportNames.leads') }))
+}
+
 async function openProspectsTab() {
   const user = userEvent.setup()
   await user.click(screen.getByRole('tab', { name: st('reportKpis.reportNames.prospects') }))
 }
 
-const mockSettings = vi.hoisted(() => vi.fn(() => ({} as Record<string, unknown>)))
-const mockLoaded = vi.hoisted(() => vi.fn(() => true))
-// The call SIGNATURE is declared as a type argument rather than as a named-but-unused
-// parameter: the assertions below read the recorded payload off mock.calls, so the
-// signature has to carry that argument, while an unused parameter name would only
-// exist to be linted away.
-const saveSettingsKeys = vi.hoisted(() =>
-  vi.fn<(partial: Record<string, unknown>) => Promise<void>>(async () => {}))
-vi.mock('@/lib/settings/useAllSettings', async () => {
-  const actual = await vi.importActual('@/lib/settings/useAllSettings')
-  return {
-    ...actual,
-    useAllSettings: () => mockSettings(),
-    useSettingsLoaded: () => mockLoaded(),
-    saveSettingsKeys,
+function setupCatalogMock(catalog: ReturnType<typeof buildTestCatalog>) {
+  return (url: string) => {
+    if (url === '/reports/kpi-catalog') {
+      return Promise.resolve({ data: { data: catalog } })
+    }
+    // Return a default empty selection for any scope not explicitly tested.
+    if (url?.startsWith('/reports/kpi-selection/')) {
+      const scopeId = url.split('/').pop() as string
+      const scopeCatalog = (catalog as Record<string, { default: string[] } | undefined>)[scopeId]
+      if (scopeCatalog) {
+        return Promise.resolve({ data: { data: scopeCatalog.default } })
+      }
+    }
+    return Promise.reject(new Error(`Unexpected URL: ${url}`))
   }
-})
-
-afterEach(() => vi.clearAllMocks())
+}
 
 describe('ReportKpiSettings', () => {
   it('renders the matches report default nine-slot order when its tab is selected', async () => {
-    render(<ReportKpiSettings />)
+    const catalog = buildTestCatalog()
+    const matchesDefault = getReportKpiDefaultOrder('matches')
+
+    vi.mocked(api.get).mockImplementation(setupCatalogMock(catalog))
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      React.createElement(
+        QueryClientProvider,
+        { client: queryClient },
+        React.createElement(ReportKpiSettings)
+      )
+    )
+
+    // Wait for catalog to load - check that the SubTabBar appears
+    await waitFor(() => {
+      expect(screen.getByRole('tab', { name: st('reportKpis.reportNames.matches') })).toBeTruthy()
+    })
+
     await openMatchesTab()
-    const defaultOrder = getReportKpiDefaultOrder('matches')
-    expect(screen.getAllByText(t('matches.kpi.total')).length).toBeGreaterThan(0)
-    expect(defaultOrder).toHaveLength(9)
-    expect(defaultOrder[0]).toBe('total')
+    await waitFor(() => {
+      expect(screen.queryByText(t('matches.kpi.total'))).toBeTruthy()
+    })
+    expect(matchesDefault).toHaveLength(9)
+    expect(matchesDefault[0]).toBe('total')
   })
 
-  it('says there are no spare axes yet for an axis-family report with none (honest, not decorative)', async () => {
-    render(<ReportKpiSettings />)
+  it('says there are no spare axes for an axis-family report without spares (prospects)', async () => {
+    const catalog = buildTestCatalog()
+    vi.mocked(api.get).mockImplementation(setupCatalogMock(catalog))
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      React.createElement(
+        QueryClientProvider,
+        { client: queryClient },
+        React.createElement(ReportKpiSettings)
+      )
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('tab', { name: st('reportKpis.reportNames.prospects') })).toBeTruthy()
+    })
     await openProspectsTab()
-    expect(screen.getByText(st('reportKpis.noSpareAxes'))).toBeTruthy()
+    await waitFor(() => {
+      expect(screen.getByText(st('reportKpis.noSpareAxes'))).toBeTruthy()
+    })
   })
 
-  // KPI-MATCHES-1 supersede: the four ad-hoc spares retired with the server-suite
-  // flip — matches now shows the honest no-spares notice, and every suite entry
-  // carries a real i18n label. The spare-offering path stays covered by vacancies.
   it('shows the honest no-spares notice for matches after the server-suite flip', async () => {
-    render(<ReportKpiSettings />)
+    const catalog = buildTestCatalog()
+    vi.mocked(api.get).mockImplementation(setupCatalogMock(catalog))
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      React.createElement(
+        QueryClientProvider,
+        { client: queryClient },
+        React.createElement(ReportKpiSettings)
+      )
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('tab', { name: st('reportKpis.reportNames.matches') })).toBeTruthy()
+    })
     await openMatchesTab()
-    expect(screen.getByText(st('reportKpis.noSpareCards'))).toBeTruthy()
-    const catalog = getReportKpiCatalog('matches')
-    expect(catalog).toHaveLength(9)
-    for (const entry of catalog) {
+    await waitFor(() => {
+      expect(screen.getByText(st('reportKpis.noSpareCards'))).toBeTruthy()
+    })
+    const matchesCatalog = getReportKpiCatalog('matches')
+    expect(matchesCatalog).toHaveLength(9)
+    for (const entry of matchesCatalog) {
       expect(i18n.t(entry.labelKey, { ns: 'analytics' })).not.toBe(entry.labelKey)
     }
   })
-  // 28-08: vacancies flipped to its server suite too — leads is the one scope
-  // still carrying spares, so it keeps the spare-offering path covered.
+
   it('offers real spare cards for leads (REPORTS-KPI-SPARE-1 path stays covered)', async () => {
-    render(<ReportKpiSettings />)
-    const user = userEvent.setup()
-    await user.click(screen.getByRole('tab', { name: st('reportKpis.reportNames.leads') }))
-    expect(screen.queryByText(st('reportKpis.noSpareCards'))).toBeNull()
-    const catalog = getReportKpiCatalog('leads')
-    const defaultOrder = getReportKpiDefaultOrder('leads')
-    expect(catalog.length).toBeGreaterThan(defaultOrder.length)
+    const catalog = buildTestCatalog()
+    vi.mocked(api.get).mockImplementation(setupCatalogMock(catalog))
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      React.createElement(
+        QueryClientProvider,
+        { client: queryClient },
+        React.createElement(ReportKpiSettings)
+      )
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('tab', { name: st('reportKpis.reportNames.leads') })).toBeTruthy()
+    })
+    await openLeadsTab()
+    await waitFor(() => {
+      expect(screen.queryByText(st('reportKpis.noSpareCards'))).toBeNull()
+    })
+    const leadsCatalog = getReportKpiCatalog('leads')
+    const leadsDefaultOrder = getReportKpiDefaultOrder('leads')
+    expect(leadsCatalog.length).toBeGreaterThan(leadsDefaultOrder.length)
   })
 
-  it('reordering PUTs the exact settings key with the same nine keys in the new order', async () => {
-    const { container } = render(<ReportKpiSettings />)
+  it('reordering PUTs /reports/kpi-selection/matches with body {kpis: [...]} in the new order', async () => {
+    const catalog = buildTestCatalog()
+    const matchesDefault = getReportKpiDefaultOrder('matches')
+
+    vi.mocked(api.get).mockImplementation(setupCatalogMock(catalog))
+    vi.mocked(api.put).mockResolvedValue({ data: { data: matchesDefault } })
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const { container } = render(
+      React.createElement(
+        QueryClientProvider,
+        { client: queryClient },
+        React.createElement(ReportKpiSettings)
+      )
+    )
+
+    await waitFor(() => expect(vi.mocked(api.get)).toHaveBeenCalledWith('/reports/kpi-catalog'))
+    await waitFor(() => {
+      expect(screen.getByRole('tab', { name: st('reportKpis.reportNames.matches') })).toBeTruthy()
+    })
     await openMatchesTab()
+
     const rows = container.querySelectorAll('[draggable="true"]')
     expect(rows).toHaveLength(9)
 
@@ -104,21 +227,48 @@ describe('ReportKpiSettings', () => {
     fireEvent.dragOver(rows[1])
     fireEvent.drop(rows[1])
 
-    await waitFor(() => expect(saveSettingsKeys).toHaveBeenCalled())
-    const body = saveSettingsKeys.mock.calls.at(-1)?.[0] as Record<string, string[]>
-    const key = reportKpiSettingsKey('matches')
-    expect(body[key]).toHaveLength(9)
-    expect(body[key][0]).toBe('new_in_period')
-    expect(body[key][1]).toBe('total')
-    expect(new Set(body[key]).size).toBe(9) // still every card exactly once
+    await waitFor(() => expect(vi.mocked(api.put)).toHaveBeenCalled())
+    const putCall = vi.mocked(api.put).mock.calls[0]
+    expect(putCall[0]).toBe('/reports/kpi-selection/matches')
+    const body = putCall[1] as { kpis: string[] }
+    expect(body.kpis).toHaveLength(9)
+    expect(body.kpis[0]).toBe('new_in_period')
+    expect(body.kpis[1]).toBe('total')
+    expect(new Set(body.kpis).size).toBe(9) // still every card exactly once
   })
 
-  it('shows a visible fallback notice when a stored key no longer exists', async () => {
-    mockSettings.mockReturnValue({
-      [reportKpiSettingsKey('matches')]: JSON.stringify(['ghost', ...getReportKpiDefaultOrder('matches').slice(1)]),
+  it('shows a visible fallback notice when a stored key no longer exists in available', async () => {
+    const catalog = buildTestCatalog()
+    const matchesDefault = getReportKpiDefaultOrder('matches')
+    // Selection has a ghost key that doesn't exist in the catalog.
+    const ghostSelection = ['ghost', ...matchesDefault.slice(1)]
+
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/reports/kpi-catalog') {
+        return Promise.resolve({ data: { data: catalog } })
+      }
+      if (url === '/reports/kpi-selection/matches') {
+        return Promise.resolve({ data: { data: ghostSelection } })
+      }
+      return setupCatalogMock(catalog)(url)
     })
-    render(<ReportKpiSettings />)
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      React.createElement(
+        QueryClientProvider,
+        { client: queryClient },
+        React.createElement(ReportKpiSettings)
+      )
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('tab', { name: st('reportKpis.reportNames.matches') })).toBeTruthy()
+    })
     await openMatchesTab()
-    expect(screen.getByText(st('reportKpis.fellBackNotice'))).toBeTruthy()
+    // The component should show the fellBack notice when selection contains a key not in available.
+    await waitFor(() => {
+      expect(screen.getByText(st('reportKpis.fellBackNotice'))).toBeTruthy()
+    })
   })
 })

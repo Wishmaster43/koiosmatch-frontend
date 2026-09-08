@@ -33,6 +33,10 @@ vi.mock('@/lib/api', () => ({
   getActiveTenantId: () => 'test-tenant',
 }))
 
+// Mock useReportKpiSelection hook to return default KPI order
+const mockUseReportKpiSelection = vi.fn(() => ({ data: ['inflow', 'outflow', 'phase_conversion', 'no_followup', 'no_contact', 'no_cv', 'document_expiring', 'availability_due', 'active_conversations'] as string[], isLoading: false }))
+vi.mock('./hooks/useReportKpiSelection', () => ({ useReportKpiSelection: () => mockUseReportKpiSelection() }))
+
 // Tenant KPI-order settings (RAPPORT-KPI-INSTELBAAR) — empty blob = today's
 // default order, unless a test overrides it.
 const mockSettings = vi.hoisted(() => vi.fn(() => ({} as Record<string, unknown>)))
@@ -257,11 +261,12 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
   // RAPPORT-KPI-INSTELBAAR: which signal keys drive cards 2-9, and in what
   // priority order, is the tenant's stored Settings → Reports choice.
   it('reorders the signal KPI cards to the tenant-stored priority', () => {
-    mockSettings.mockReturnValue({ report_kpis_customers: JSON.stringify([
+    const reorderedKeys = [
       'matches_stopped_early', 'contract_ending', 'no_contact', 'task_overdue',
       'price_agreement_ending', 'vacancy_stale', 'departments_without_placement',
       'customers_without_vacancies', 'customers_without_applications',
-    ]) })
+    ]
+    mockUseReportKpiSelection.mockReturnValue({ data: reorderedKeys, isLoading: false })
     mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
     const { container } = renderReport()
     const text = container.textContent ?? ''
@@ -274,7 +279,7 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
   // A vanished stored signal key falls back to the default order silently on
   // the report (still the real nine cards, never a crash) but shows a notice.
   it('falls back a vanished stored signal key to the default and shows a notice', () => {
-    mockSettings.mockReturnValue({ report_kpis_customers: JSON.stringify(['ghost_signal', 'contract_ending']) })
+    mockUseReportKpiSelection.mockReturnValue({ data: ['ghost_signal', 'contract_ending'], isLoading: false })
     mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     expect(screen.getByText(i18n.t('customers.kpis.contractEnding', { ns: 'analytics' }))).toBeInTheDocument()
@@ -451,7 +456,8 @@ describe('CustomersReport — Klanten/Prospects switch (RAPPORTEN-CONSOLIDATIE-1
   // — supersedes the pre-conversion combined "reorders the axis-derived KPI
   // cards" pin, now scoped to the position that still has axis cards.
   it('reorders the axis-derived KPI cards to the tenant-stored priority on Prospects', () => {
-    mockSettings.mockReturnValue({ report_kpis_prospects: JSON.stringify(['branch', 'owner', 'industry', 'phase', 'status']) })
+    const reorderedKeys = ['branch', 'owner', 'industry', 'phase', 'status']
+    mockUseReportKpiSelection.mockReturnValue({ data: reorderedKeys, isLoading: false })
     mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
     const { container } = render(
       <QueryClientProvider client={new QueryClient()}>

@@ -20,6 +20,10 @@ vi.mock('@/lib/api', () => ({
   getActiveTenantId: () => 'test-tenant',
 }))
 
+// Mock useReportKpiSelection hook to return default KPI order
+const mockUseReportKpiSelection = vi.fn(() => ({ data: ['status', 'lead_source', 'region', 'required_function', 'contract_form', 'language', 'level', 'experience', 'no_cv'] as string[], isLoading: false }))
+vi.mock('./hooks/useReportKpiSelection', () => ({ useReportKpiSelection: () => mockUseReportKpiSelection() }))
+
 // Tenant KPI-order settings, controllable per test (RAPPORT-KPI-INSTELBAAR).
 const mockSettings = vi.hoisted(() => vi.fn(() => ({} as Record<string, unknown>)))
 vi.mock('@/lib/settings/useAllSettings', async () => {
@@ -458,11 +462,10 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     // RAPPORT-KPI-INSTELBAAR: which nine keys render, and in what order, is the
     // tenant's stored Settings → Reports choice, not the hardcoded default order.
     it('renders the KPI strip in the tenant-chosen stored order', () => {
-      mockSettings.mockReturnValue({
-        report_kpis_vacancies: JSON.stringify([
-          'customers_count', 'closing_soon', 'no_matches', 'long_concept', 'stale_online', 'fill_rate', 'filled', 'open', 'total',
-        ]),
-      })
+      const reorderedKeys = [
+        'customers_count', 'closing_soon', 'no_matches', 'long_concept', 'stale_online', 'fill_rate', 'filled', 'open', 'total',
+      ]
+      mockUseReportKpiSelection.mockReturnValue({ data: reorderedKeys, isLoading: false })
       mockUseVacanciesReport.mockReturnValue({ data: dataWithKpis, loading: false, error: false })
       const { container } = renderReport()
       const totalLabel = i18n.t('vacancies.kpi.total', { ns: 'analytics' })
@@ -477,10 +480,11 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     // A vanished stored key falls back silently on the report itself (never a
     // crash or a blank slot) but surfaces a visible notice via ReportKpiBand.
     it('falls back a vanished stored key to the default and shows a notice, never crashing', () => {
-      mockSettings.mockReturnValue({
-        report_kpis_vacancies: JSON.stringify([
+      mockUseReportKpiSelection.mockReturnValue({
+        data: [
           'ghost_key', 'open', 'filled', 'fill_rate', 'stale_online', 'long_concept', 'no_matches', 'closing_soon', 'customers_count',
-        ]),
+        ],
+        isLoading: false,
       })
       mockUseVacanciesReport.mockReturnValue({ data: dataWithKpis, loading: false, error: false })
       renderReport()

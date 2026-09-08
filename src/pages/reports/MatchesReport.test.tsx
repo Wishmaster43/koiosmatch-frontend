@@ -19,6 +19,10 @@ vi.mock('@/lib/api', () => ({
   getActiveTenantId: () => 'test-tenant',
 }))
 
+// Mock useReportKpiSelection hook to return default KPI order
+const mockUseReportKpiSelection = vi.fn(() => ({ data: ['under_contract', 'terminations', 'by_contract_form', 'by_customer', 'by_owner', 'by_function', 'by_candidate_phase', 'by_reason', 'active'] as string[], isLoading: false }))
+vi.mock('./hooks/useReportKpiSelection', () => ({ useReportKpiSelection: () => mockUseReportKpiSelection() }))
+
 // Tenant KPI-order settings, controllable per test (RAPPORT-KPI-INSTELBAAR).
 const mockSettings = vi.hoisted(() => vi.fn(() => ({} as Record<string, unknown>)))
 vi.mock('@/lib/settings/useAllSettings', async () => {

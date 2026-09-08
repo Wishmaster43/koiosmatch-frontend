@@ -1,18 +1,17 @@
 /**
- * useReportKpiOrdering — resolve KPI order from tenant settings with fallback.
- * Adopted on six report pages (Matches/Tasks/Outreach/Opportunities/Applications/Vacancies).
+ * useReportKpiOrdering — resolve KPI order from the API with fallback.
+ * Adopted on nine report pages (Candidates/Applications/Customers/Vacancies/Opportunities/Tasks/Matches/Outreach/WhatsApp).
  */
-import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
-import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey, type ReportKpiScopeId } from '../kpiCatalog'
+import { getReportKpiCatalog, getReportKpiDefaultOrder, type ReportKpiScopeId } from '../kpiCatalog'
 import { resolveReportKpiOrder } from '../resolveReportKpiOrder'
+import { useReportKpiSelection } from './useReportKpiSelection'
 
 export function useReportKpiOrdering(scopeId: string) {
-  const settingsValues = useAllSettings()
   const scope = scopeId as ReportKpiScopeId
   const catalogKeys = getReportKpiCatalog(scope).map(c => c.key)
   const defaultOrder = getReportKpiDefaultOrder(scope)
-  const stored = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey(scope), undefined)
+  const { data: stored, isLoading } = useReportKpiSelection(scope)
   const { order: kpiOrder, fellBack } = resolveReportKpiOrder(stored, catalogKeys, defaultOrder)
 
-  return { kpiOrder, fellBack }
+  return { kpiOrder, fellBack, isLoading }
 }
