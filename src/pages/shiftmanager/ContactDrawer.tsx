@@ -4,10 +4,10 @@
  * work-location cards. Pure presentation; the contact is passed in from ContactsPage.
  */
 import { useTranslation } from 'react-i18next'
-import { Mail, Phone, MessageCircle, MapPin, X, ChevronRight } from 'lucide-react'
+import { Mail, Phone, MessageCircle, MapPin, ChevronRight } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'
-import { PageTitle, Caption, BodyText, GroupLabel } from '@/components/ui/typography'
-import Button from '@/components/ui/Button'
+import { Caption, BodyText, GroupLabel } from '@/components/ui/typography'
+import SmDrawerShell from '@/components/shiftmanager/SmDrawerShell'
 import { ac, ContactAvatar } from './contactParts'
 import type { SmContactRow } from '@/types/shiftmanager'
 
@@ -18,18 +18,7 @@ export default function ContactDrawer({ contact, onClose }: { contact: SmContact
   const name = [contact.firstname, contact.lastname].filter(Boolean).join(' ')
 
   return (
-    <div style={{ width: 380, flexShrink: 0, borderLeft: '1px solid var(--border)',
-      background: 'var(--surface)', display: 'flex', flexDirection: 'column', height: '100%' }}>
-
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '14px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-        <PageTitle as="span">{t('contactsPage.drawerTitle')}</PageTitle>
-        <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}>
-          <X size={16} />
-        </Button>
-      </div>
-
-      <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
+    <SmDrawerShell title={t('contactsPage.drawerTitle')} onClose={onClose}>
         {/* Hero */}
         <div style={{ display: 'flex', gap: 14, marginBottom: 24 }}>
           <ContactAvatar name={name} size={52} />
@@ -119,7 +108,6 @@ export default function ContactDrawer({ contact, onClose }: { contact: SmContact
             <ChevronRight size={14} color="var(--text-muted)" />
           </div>
         </div>
-      </div>
-    </div>
+    </SmDrawerShell>
   )
 }

@@ -14,6 +14,7 @@ import Spinner from '@/components/ui/Spinner'
 import EntityListDrawer from '@/components/ui/EntityListDrawer'
 import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
 import type { SmDrillItem } from '@/types/shiftmanager'
+import SmReportStatusBadge from '@/components/shiftmanager/SmReportStatusBadge'
 
 // Flattens the SM customer→location tree into one location list, builds its KPI/
 // drill-down datasets, and registers the status filter with the shared right panel.
@@ -95,25 +96,30 @@ export default function LocationsReport() {
           <>
             <div style={{ width: 1, height: 18, background: 'var(--border)', flexShrink: 0 }} />
             <div className="flex items-center gap-2">
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                             background: 'var(--color-success-bg)', color: 'var(--color-on-success-bg)', borderRadius: 999,
-                             padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-success)' }} />
-                {active.length} {t('locationsReport.activeWord')}
-              </span>
+              <SmReportStatusBadge
+                count={active.length}
+                label={t('locationsReport.activeWord')}
+                color="var(--color-success)"
+                bg="var(--color-success-bg)"
+                withDot
+                withBg
+              />
               {inactive.length > 0 && (
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                               background: 'var(--color-warning-bg)', color: 'var(--color-warning-text)', borderRadius: 999,
-                               padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-warning)' }} />
-                  {inactive.length} {t('locationsReport.inactiveWord')}
-                </span>
+                <SmReportStatusBadge
+                  count={inactive.length}
+                  label={t('locationsReport.inactiveWord')}
+                  color="var(--color-warning)"
+                  bg="var(--color-warning-bg)"
+                  withDot
+                  withBg
+                />
               )}
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                             background: 'var(--hover-bg)', color: 'var(--text-muted)', borderRadius: 999,
-                             padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
-                {locations.length} {t('locationsReport.totalWord')}
-              </span>
+              <SmReportStatusBadge
+                count={locations.length}
+                label={t('locationsReport.totalWord')}
+                withDot={false}
+                withBg={false}
+              />
             </div>
           </>
         )}

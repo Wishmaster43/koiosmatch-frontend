@@ -19,6 +19,7 @@ import CandidatesKpiRow    from './CandidatesKpiRow'
 import DrillDownDrawer     from './DrillDownDrawer'
 import { useRightPanel }   from '@/context/RightPanelContext'
 import { SM_STATUS, statusOf, normalizeSmStatus } from '@/lib/smStatus'
+import SmReportStatusBadge from '@/components/shiftmanager/SmReportStatusBadge'
 
 // Fixed deregistered-status filter for the "end of employment" charts — never
 // changes via a setter, so it lives as a module-scope constant, not state.
@@ -250,26 +251,31 @@ export default function CandidatesReport() {
           <>
             <div style={{ width: 1, height: 18, background: 'var(--border)', flexShrink: 0 }} />
             <div className="flex items-center gap-2">
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                             background: 'var(--color-success-bg)', color: 'var(--color-on-success-bg)', borderRadius: 999,
-                             padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-success)', flexShrink: 0 }} />
-                {statsLoading || statsError || !candidateStats ? candidates.filter(c => statusOf(c) === SM_STATUS.ACTIVE).length : sumByStatus(SM_STATUS.ACTIVE)} {t('report.activeWord')}
-              </span>
+              <SmReportStatusBadge
+                count={statsLoading || statsError || !candidateStats ? candidates.filter(c => statusOf(c) === SM_STATUS.ACTIVE).length : sumByStatus(SM_STATUS.ACTIVE)}
+                label={t('report.activeWord')}
+                color="var(--color-success)"
+                bg="var(--color-success-bg)"
+                withDot
+                withBg
+              />
               {/* Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1
                   on its own pastel, AA fail (Opus r3.5). The dot stays full-strength
                   danger — a decorative fill, not text. */}
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                             background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)', borderRadius: 999,
-                             padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-danger)', flexShrink: 0 }} />
-                {statsLoading || statsError || !candidateStats ? candidates.filter(c => statusOf(c) === SM_STATUS.DELETED).length : sumByStatus(SM_STATUS.DELETED)} {t('report.deregisteredWord')}
-              </span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                             background: 'var(--hover-bg)', color: 'var(--text-muted)', borderRadius: 999,
-                             padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
-                {statsLoading || statsError || !candidateStats ? candidates.length : candidateStats.total} {t('report.totalWord')}
-              </span>
+              <SmReportStatusBadge
+                count={statsLoading || statsError || !candidateStats ? candidates.filter(c => statusOf(c) === SM_STATUS.DELETED).length : sumByStatus(SM_STATUS.DELETED)}
+                label={t('report.deregisteredWord')}
+                color="var(--color-danger)"
+                bg="var(--color-danger-bg)"
+                withDot
+                withBg
+              />
+              <SmReportStatusBadge
+                count={statsLoading || statsError || !candidateStats ? candidates.length : candidateStats.total}
+                label={t('report.totalWord')}
+                withDot={false}
+                withBg={false}
+              />
             </div>
           </>
         )}

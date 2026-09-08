@@ -23,6 +23,7 @@ import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import { calcAttention } from '@/components/reports/candidateAttention'
 import { useSmCandidateStats } from '@/components/reports/useSmCandidateStats'
 import { useDateFormat } from '@/lib/datetime'
+import { smRegistrationAverage } from '@/lib/smReporting'
 import { SM_CANDIDATE_STATUS_COLORS, SM_CANDIDATE_STATUS_KEYS } from './data/smCandidateStatus'
 import { endDateOf, noShowCountOf, cancellationsOf } from './data/smCandidateFields'
 import type { ReportCandidate } from '@/types/reports'
@@ -38,22 +39,13 @@ const pickKey = (d: unknown): string | undefined => {
 // ITEMS list still needs rows (feeds the tile's drill-down), the AVG is a plain
 // COUNT-derived number so it prefers the server's registrations_per_month below.
 function calcMonthStats(candidates: ReportCandidate[]) {
-  const now = new Date(); const month = now.getMonth(); const year = now.getFullYear()
+  const now = new Date()
+  const { avg } = smRegistrationAverage(candidates, now.getMonth(), now.getFullYear())
   const items = candidates.filter(c => {
     if (!c.registration_date) return false
     const d = new Date(c.registration_date)
-    return d.getMonth() === month && d.getFullYear() === year
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
   })
-  const grouped: Record<string, number> = {}
-  candidates.forEach(c => {
-    if (!c.registration_date) return
-    const d = new Date(c.registration_date)
-    if (d.getMonth() === month && d.getFullYear() === year) return
-    const key = `${d.getFullYear()}-${d.getMonth()}`
-    grouped[key] = (grouped[key] || 0) + 1
-  })
-  const values = Object.values(grouped)
-  const avg = values.length ? Math.round(values.reduce((s, v) => s + v, 0) / values.length) : 0
   return { items, avg }
 }
 

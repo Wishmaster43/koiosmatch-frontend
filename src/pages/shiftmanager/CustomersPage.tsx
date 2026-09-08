@@ -18,6 +18,7 @@ import type { SmCustomerRow } from '@/types/shiftmanager'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 
 import { initialsOf } from '@/lib/initials'
+import { STATUS_COLORS, deptCount } from './shared'
 
 // Raw API/form customer (snake_case + camelCase tolerant) before mapping.
 interface RawCustomer {
@@ -32,13 +33,6 @@ interface RawCustomer {
   created_at?: string; created?: string
   [k: string]: unknown
 }
-
-// Tokens only (§4) — never ad-hoc hex, so per-tenant theming (useTenantTheme) still applies here.
-const STATUS_COLORS: Record<string, string> = {
-  actief: 'var(--color-success)', prospect: 'var(--color-secondary)',
-  inactief: 'var(--color-warning)', geblokkeerd: 'var(--color-danger)',
-}
-const deptCount = (c: SmCustomerRow) => (c.locations ?? []).reduce((s, l) => s + (l.departments?.length ?? 0), 0)
 
 // Normalise a raw API customer into the shape the table/insights expect.
 const mapCustomer = (c: RawCustomer): SmCustomerRow => ({

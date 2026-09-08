@@ -7,3 +7,15 @@
  */
 export { cancellationsOf, endDateOf, featureNamesOf, noShowCountOf } from './data/smCandidateFields'
 export { SM_CANDIDATE_STATUS_COLORS } from './data/smCandidateStatus'
+
+// Shiftmanager customer status colours (tokens, never hardcoded hex).
+export const STATUS_COLORS: Record<string, string> = {
+  actief: 'var(--color-success)',
+  prospect: 'var(--color-secondary)',
+  inactief: 'var(--color-warning)',
+  geblokkeerd: 'var(--color-danger)',
+}
+
+// Count all departments across a customer's locations.
+export const deptCount = (c: { locations?: Array<{ departments?: unknown[] }> }): number =>
+  (c.locations ?? []).reduce((s, l) => s + (l.departments?.length ?? 0), 0)

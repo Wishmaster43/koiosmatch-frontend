@@ -9,17 +9,9 @@ import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
 import StatusPill from '@/components/ui/StatusPill'
 import type { SmCustomerRow } from '@/types/shiftmanager'
+import { STATUS_COLORS, deptCount } from './shared'
 
 const mutedCell: CSSProperties = { color: 'var(--text-muted)', fontSize: 12 }
-
-const STATUS_COLORS: Record<string, string> = {
-  actief:     'var(--color-success)',
-  prospect:   'var(--color-secondary)',
-  inactief:   'var(--color-warning)',
-  geblokkeerd:'var(--color-danger)',
-}
-
-const deptCount = (c: SmCustomerRow) => (c.locations ?? []).reduce((s, l) => s + (l.departments?.length ?? 0), 0)
 
 interface CustomersTableProps {
   rows: SmCustomerRow[]

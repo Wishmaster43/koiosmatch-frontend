@@ -15,6 +15,7 @@ import EntityListDrawer  from '@/components/ui/EntityListDrawer'
 import Spinner from '@/components/ui/Spinner'
 import { PageTitle } from '@/components/ui/typography'
 import type { SmDrillItem } from '@/types/shiftmanager'
+import SmReportStatusBadge from '@/components/shiftmanager/SmReportStatusBadge'
 
 // Renders the KPI blocks and shifts chart, registers filters into the right panel, and opens a drill-down drawer on KPI click.
 export default function CustomersReport() {
@@ -120,25 +121,30 @@ export default function CustomersReport() {
           <>
             <div style={{ width: 1, height: 18, background: 'var(--border)', flexShrink: 0 }} />
             <div className="flex items-center gap-2">
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                             background: 'var(--color-success-bg)', color: 'var(--color-on-success-bg)', borderRadius: 999,
-                             padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-success)', flexShrink: 0 }} />
-                {active.length} {t('customersReport.activeWord')}
-              </span>
+              <SmReportStatusBadge
+                count={active.length}
+                label={t('customersReport.activeWord')}
+                color="var(--color-success)"
+                bg="var(--color-success-bg)"
+                withDot
+                withBg
+              />
               {inactive.length > 0 && (
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                               background: 'var(--color-warning-bg)', color: 'var(--color-warning-text)', borderRadius: 999,
-                               padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-warning)', flexShrink: 0 }} />
-                  {inactive.length} {t('customersReport.inactiveWord')}
-                </span>
+                <SmReportStatusBadge
+                  count={inactive.length}
+                  label={t('customersReport.inactiveWord')}
+                  color="var(--color-warning)"
+                  bg="var(--color-warning-bg)"
+                  withDot
+                  withBg
+                />
               )}
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                             background: 'var(--hover-bg)', color: 'var(--text-muted)', borderRadius: 999,
-                             padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
-                {customers.length} {t('customersReport.totalWord')}
-              </span>
+              <SmReportStatusBadge
+                count={customers.length}
+                label={t('customersReport.totalWord')}
+                withDot={false}
+                withBg={false}
+              />
             </div>
           </>
         )}

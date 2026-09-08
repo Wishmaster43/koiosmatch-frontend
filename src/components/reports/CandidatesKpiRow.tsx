@@ -13,6 +13,8 @@ import type { ReportCandidate } from '@/types/reports'
 import { useLocale } from '@/lib/datetime'
 import { formatMonthYear } from '@/lib/localDate'
 
+import { smRegistrationAverage } from '@/lib/smReporting'
+
 // Count candidates whose status matches the given value, via the shared normalisation.
 const count = (candidates: ReportCandidate[], status: string) =>
   candidates.filter(c => statusOf(c) === status).length
@@ -24,33 +26,6 @@ function calcGepland(candidates: ReportCandidate[]) {
     if (statusOf(c) !== SM_STATUS.ACTIVE) return false
     return c.last_planned_shift && new Date(c.last_planned_shift) > new Date()
   })
-}
-
-// Compares this month's new-registration count against the average of every
-// other month present, so the trend KPI can show a real over/under-average delta.
-function calcMonthStats(candidates: ReportCandidate[]) {
-  const now          = new Date()
-  const currentMonth = now.getMonth()
-  const currentYear  = now.getFullYear()
-
-  const currentMonthCount = candidates.filter(c => {
-    if (!c.registration_date) return false
-    const d = new Date(c.registration_date)
-    return d.getMonth() === currentMonth && d.getFullYear() === currentYear
-  }).length
-
-  const grouped: Record<string, number> = {}
-  candidates.forEach(c => {
-    if (!c.registration_date) return
-    const d   = new Date(c.registration_date)
-    if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) return
-    const key = `${d.getFullYear()}-${d.getMonth()}`
-    grouped[key] = (grouped[key] || 0) + 1
-  })
-  const values = Object.values(grouped)
-  const avg    = values.length ? Math.round(values.reduce((s, v) => s + v, 0) / values.length) : 0
-  const delta  = avg > 0 ? Math.round(((currentMonthCount - avg) / avg) * 100) : 0
-  return { currentMonthCount, avg, delta }
 }
 
 // Renders the KPI card row above the candidates report.
@@ -76,8 +51,9 @@ export default function CandidatesKpiRow({ candidates = [], loading = false, onD
   const aandachtItems  = calcAttention(candidates)
   const actiefTotal    = count(candidates, SM_STATUS.ACTIVE)
   const geplandItems   = calcGepland(candidates)
-  const { currentMonthCount, avg, delta } = calcMonthStats(candidates)
-  const currentMonthLabel = formatMonthYear(new Date(), locale, 'long')
+  const now = new Date()
+  const { currentMonthCount, avg, delta } = smRegistrationAverage(candidates, now.getMonth(), now.getFullYear())
+  const currentMonthLabel = formatMonthYear(now, locale, 'long')
 
   return (
     <div className="grid gap-4 mb-6"
