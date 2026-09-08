@@ -616,5 +616,8 @@
     "recountThrottled": "Veuillez patienter, demande déjà en cours",
     "recountFailed": "L'actualisation a échoué",
     "recountInfo": "Recalcule les suggestions de candidats par l'IA pour cette offre ; cela peut prendre quelques minutes."
+  },
+  "appointments": {
+    "joinMeeting": "Rejoindre la réunion"
   }
 }

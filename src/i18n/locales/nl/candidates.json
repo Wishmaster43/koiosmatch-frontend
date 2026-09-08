@@ -1469,5 +1469,8 @@
       "refreshStarted": "OpenCage-update gestart. Coördinaten verschijnen zo",
       "refreshFailed": "Bijwerken mislukt"
     }
+  },
+  "appointments": {
+    "joinMeeting": "Deelnemen aan meeting"
   }
 }

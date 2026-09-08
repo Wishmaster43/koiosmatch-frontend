@@ -251,7 +251,9 @@
     "customer_contacts": "Ansprechpartner",
     "outreach_campaigns": "Anruflisten",
     "system_events": "Systemereignis",
-    "koios_advice": "Koios-Hinweis"
+    "koios_advice": "Koios-Hinweis",
+    "appointments": "Termine",
+    "calendar_invite": "Kalendereinladung (Google Meet)"
   },
   "status": {
     "active": "Aktiv",
@@ -657,7 +659,7 @@
     "E-mail": "E-Mail",
     "E-mail (ruw)": "E-Mail (roh)",
     "E-mail Sturen": "E-Mail senden",
-    "Eigenaar": "Inhaber",
+    "Eigenaar": "Eigentümer",
     "Eigenaar (recruiter-ID)": "Eigentümer (Recruiter-ID)",
     "Eigenaar / recruiter": "Inhaber / Recruiter",
     "Einddatum dienstverband": "Enddatum Beschäftigung",
@@ -925,7 +927,11 @@
     "Klantcorrecties (klant-id naar punten)": "Kundenkorrekturen (Kunden-ID zu Punkten)",
     "Venster vanaf (dagen)": "Fenster ab (Tage)",
     "Venster tot (dagen)": "Fenster bis (Tage)",
-    "Kennisbank in deze stap gebruiken": "Wissensdatenbank in diesem Schritt verwenden"
+    "Kennisbank in deze stap gebruiken": "Wissensdatenbank in diesem Schritt verwenden",
+    "Afspraken": "Termine",
+    "Geplande datum/tijd": "Geplantes Datum/Uhrzeit",
+    "Type": "Typ",
+    "Afspraak": "Termin"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (mehrere Bundles)",
@@ -1291,7 +1297,9 @@
     "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bonus oder Malus pro Kunden-ID, zum Beispiel 2 oder -3.",
     "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Pro Funktion die primären und sekundären Funktionsnamen, die als Treffer gelten, in Kleinbuchstaben.",
     "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Lässt den KI-Agenten während des Gesprächs die Mandanten-Dokumente/Wissensdatenbank konsultieren. Funktioniert nur, wenn der Agent selbst über Wissen verfügt.",
-    "Sla records over die al coördinaten hebben; aan te raden bij bulk": "Datensätze überspringen, die bereits Koordinaten haben; bei Massenläufen empfohlen."
+    "Sla records over die al coördinaten hebben; aan te raden bij bulk": "Datensätze überspringen, die bereits Koordinaten haben; bei Massenläufen empfohlen.",
+    "Titel van de agenda-afspraak (standaard \"Afspraak\")": "Titel des Kalendertermins (Standard \"Termin\").",
+    "Afspraak-id (bv {{triggerappointment_id}})": "Termin-ID (z.B. {{trigger.appointment_id}})."
   },
   "triggers": {
     "events": {

@@ -251,7 +251,9 @@
     "customer_contacts": "Contacts",
     "outreach_campaigns": "Listes d'appels",
     "system_events": "Événement système",
-    "koios_advice": "Conseil Koios"
+    "koios_advice": "Conseil Koios",
+    "appointments": "Rendez-vous",
+    "calendar_invite": "Invitation agenda (Google Meet)"
   },
   "status": {
     "active": "Actif",
@@ -925,7 +927,11 @@
     "Klantcorrecties (klant-id naar punten)": "Corrections client (id client vers points)",
     "Venster vanaf (dagen)": "Fenêtre à partir de (jours)",
     "Venster tot (dagen)": "Fenêtre jusqu'à (jours)",
-    "Kennisbank in deze stap gebruiken": "Utiliser la base de connaissances dans cette étape"
+    "Kennisbank in deze stap gebruiken": "Utiliser la base de connaissances dans cette étape",
+    "Afspraken": "Rendez-vous",
+    "Geplande datum/tijd": "Date/heure prévue",
+    "Type": "Type",
+    "Afspraak": "Rendez-vous"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Tableau (plusieurs bundles)",
@@ -1291,7 +1297,9 @@
     "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bonus ou malus par id client, par exemple 2 ou -3.",
     "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Par fonction, les noms de fonctions primaires et secondaires considérés comme correspondance, en minuscules.",
     "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Permet à l'agent IA de consulter les documents/la base de connaissances du client pendant la conversation. Ne fonctionne que si l'agent lui-même dispose de connaissances.",
-    "Sla records over die al coördinaten hebben; aan te raden bij bulk": "Ignorer les enregistrements qui ont déjà des coordonnées ; recommandé pour les traitements en masse."
+    "Sla records over die al coördinaten hebben; aan te raden bij bulk": "Ignorer les enregistrements qui ont déjà des coordonnées ; recommandé pour les traitements en masse.",
+    "Titel van de agenda-afspraak (standaard \"Afspraak\")": "Titre du rendez-vous calendaire (par défaut \"Rendez-vous\").",
+    "Afspraak-id (bv {{triggerappointment_id}})": "ID du rendez-vous (ex : {{trigger.appointment_id}})."
   },
   "triggers": {
     "events": {

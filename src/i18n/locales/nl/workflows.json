@@ -290,7 +290,9 @@
     "customer_contacts": "Contactpersonen",
     "outreach_campaigns": "Bellijsten",
     "system_events": "Systeemgebeurtenis",
-    "koios_advice": "Koios-advies"
+    "koios_advice": "Koios-advies",
+    "appointments": "Afspraken",
+    "calendar_invite": "Agenda-uitnodiging (Google Meet)"
   },
   "categories": {
     "all": "Alle",
@@ -958,7 +960,11 @@
     "Altijd vernieuwen": "Altijd vernieuwen",
     "Verversingstermijn (uren)": "Verversingstermijn (uren)",
     "Maximum records per run": "Maximum records per run",
-    "Kennisbank in deze stap gebruiken": "Kennisbank in deze stap gebruiken"
+    "Kennisbank in deze stap gebruiken": "Kennisbank in deze stap gebruiken",
+    "Afspraken": "Afspraken",
+    "Geplande datum/tijd": "Geplande datum/tijd",
+    "Type": "Type",
+    "Afspraak": "Afspraak"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (meerdere bundles)",
@@ -1289,7 +1295,9 @@
     "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bonus of malus per klant-id, bijvoorbeeld 2 of -3.",
     "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters.",
     "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek. Werkt alleen als de agent zelf kennis beschikbaar heeft.",
-    "Sla records over die al coördinaten hebben; aan te raden bij bulk": "Sla records over die al coördinaten hebben; aan te raden bij bulk."
+    "Sla records over die al coördinaten hebben; aan te raden bij bulk": "Sla records over die al coördinaten hebben; aan te raden bij bulk.",
+    "Titel van de agenda-afspraak (standaard \"Afspraak\")": "Titel van de agenda-afspraak (standaard \"Afspraak\").",
+    "Afspraak-id (bv {{triggerappointment_id}})": "Afspraak-id (bv. {{trigger.appointment_id}})."
   },
   "triggers": {
     "events": {

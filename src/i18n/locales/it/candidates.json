@@ -1469,5 +1469,8 @@
       "refreshStarted": "Aggiornamento OpenCage avviato. Le coordinate appariranno a breve",
       "refreshFailed": "Aggiornamento non riuscito"
     }
+  },
+  "appointments": {
+    "joinMeeting": "Partecipa alla riunione"
   }
 }

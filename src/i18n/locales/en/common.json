@@ -249,7 +249,8 @@
         "no_email_consent": "The candidate has no e-mail consent. The rest was executed.",
         "no_mobile_or_consent": "No mobile number or no consent for this channel.",
         "no_active_connection": "The required connection is not active.",
-        "send_failed": "Sending failed."
+        "send_failed": "Sending failed.",
+        "proposal_not_allowed": "This candidate cannot be proposed (blocked or archived)."
       },
       "partialTitle": "Partially executed",
       "budgetLine": "{{used}}/{{allowance}} {{unit}}",

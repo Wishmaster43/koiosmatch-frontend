@@ -382,7 +382,8 @@
       "completed": "Concluído",
       "noShow": "No-show",
       "cancelled": "Cancelado"
-    }
+    },
+    "joinMeeting": "Participar da reunião"
   },
   "notes": {
     "title": "Notas",

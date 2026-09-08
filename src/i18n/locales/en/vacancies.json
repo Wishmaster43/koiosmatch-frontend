@@ -616,5 +616,8 @@
     "recountThrottled": "Please wait, request already in progress",
     "recountFailed": "Refresh failed",
     "recountInfo": "Recomputes the AI candidate suggestions for this vacancy; this can take a few minutes."
+  },
+  "appointments": {
+    "joinMeeting": "Join meeting"
   }
 }

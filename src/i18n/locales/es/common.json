@@ -249,7 +249,8 @@
         "no_email_consent": "El candidato no tiene consentimiento de correo. El resto sí se ejecutó.",
         "no_mobile_or_consent": "Sin número móvil o sin consentimiento para este canal.",
         "no_active_connection": "La conexión necesaria no está activa.",
-        "send_failed": "No se pudo enviar."
+        "send_failed": "No se pudo enviar.",
+        "proposal_not_allowed": "Este candidato no puede ser propuesto (bloqueado o archivado)."
       },
       "partialTitle": "Ejecutado parcialmente",
       "budgetLine": "{{used}}/{{allowance}} {{unit}}",

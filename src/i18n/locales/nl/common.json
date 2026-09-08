@@ -249,7 +249,8 @@
         "no_email_consent": "De kandidaat heeft geen toestemming voor e-mail. De rest is wel uitgevoerd.",
         "no_mobile_or_consent": "Geen mobiel nummer of geen toestemming voor dit kanaal.",
         "no_active_connection": "De benodigde koppeling is niet actief.",
-        "send_failed": "Versturen is niet gelukt."
+        "send_failed": "Versturen is niet gelukt.",
+        "proposal_not_allowed": "Deze kandidaat kan niet worden voorgesteld (geblokkeerd of gearchiveerd)."
       },
       "partialTitle": "Gedeeltelijk uitgevoerd",
       "budgetLine": "{{used}}/{{allowance}} {{unit}}",

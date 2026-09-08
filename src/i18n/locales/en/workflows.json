@@ -255,7 +255,9 @@
     "customer_contacts": "Contacts",
     "outreach_campaigns": "Call lists",
     "system_events": "System event",
-    "koios_advice": "Koios advice"
+    "koios_advice": "Koios advice",
+    "appointments": "Appointments",
+    "calendar_invite": "Calendar invite (Google Meet)"
   },
   "status": {
     "active": "Active",
@@ -925,7 +927,11 @@
     "Altijd vernieuwen": "Always refresh",
     "Verversingstermijn (uren)": "Refresh window (hours)",
     "Maximum records per run": "Maximum records per run",
-    "Kennisbank in deze stap gebruiken": "Use the knowledge base in this step"
+    "Kennisbank in deze stap gebruiken": "Use the knowledge base in this step",
+    "Afspraken": "Appointments",
+    "Geplande datum/tijd": "Scheduled date/time",
+    "Type": "Type",
+    "Afspraak": "Appointment"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (multiple bundles)",
@@ -1291,7 +1297,9 @@
     "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bonus or malus per customer id, for example 2 or -3.",
     "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Per function the primary and secondary function names that count as a match, in lower case.",
     "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Lets the AI agent consult the tenant's documents/knowledge base during the conversation. Only works when the agent itself has knowledge available.",
-    "Sla records over die al coördinaten hebben; aan te raden bij bulk": "Skip records that already carry coordinates; recommended for bulk runs."
+    "Sla records over die al coördinaten hebben; aan te raden bij bulk": "Skip records that already carry coordinates; recommended for bulk runs.",
+    "Titel van de agenda-afspraak (standaard \"Afspraak\")": "Title of the calendar appointment (default \"Appointment\").",
+    "Afspraak-id (bv {{triggerappointment_id}})": "Appointment ID (e.g. {{trigger.appointment_id}})."
   },
   "triggers": {
     "events": {

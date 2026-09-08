@@ -1469,5 +1469,8 @@
       "refreshStarted": "Mise à jour OpenCage démarrée. Les coordonnées apparaîtront sous peu",
       "refreshFailed": "Mise à jour échouée"
     }
+  },
+  "appointments": {
+    "joinMeeting": "Rejoindre la réunion"
   }
 }

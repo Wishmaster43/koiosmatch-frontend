@@ -616,5 +616,8 @@
     "recountThrottled": "Even wachten, net al aangevraagd",
     "recountFailed": "Vernieuwen is mislukt",
     "recountInfo": "Vernieuwt de AI-kandidatensuggesties voor deze vacature; dit kan enkele minuten duren."
+  },
+  "appointments": {
+    "joinMeeting": "Deelnemen aan meeting"
   }
 }

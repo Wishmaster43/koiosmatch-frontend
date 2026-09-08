@@ -616,5 +616,8 @@
     "recountThrottled": "Bitte warten, Anfrage läuft bereits",
     "recountFailed": "Aktualisierung fehlgeschlagen",
     "recountInfo": "Berechnet die KI-Kandidatenvorschläge für diese Stelle neu; das kann einige Minuten dauern."
+  },
+  "appointments": {
+    "joinMeeting": "An Meeting teilnehmen"
   }
 }

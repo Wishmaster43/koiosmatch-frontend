@@ -616,5 +616,8 @@
     "recountThrottled": "Por favor aguarde, solicitação já em progresso",
     "recountFailed": "Falha na atualização",
     "recountInfo": "Recalcula as sugestões de candidatos da IA para esta vaga; pode demorar alguns minutos."
+  },
+  "appointments": {
+    "joinMeeting": "Participar da reunião"
   }
 }

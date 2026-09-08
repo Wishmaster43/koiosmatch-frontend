@@ -249,7 +249,8 @@
         "no_email_consent": "O candidato não deu consentimento para e-mail. O resto foi executado.",
         "no_mobile_or_consent": "Sem número de telemóvel ou sem consentimento para este canal.",
         "no_active_connection": "A ligação necessária não está ativa.",
-        "send_failed": "O envio falhou."
+        "send_failed": "O envio falhou.",
+        "proposal_not_allowed": "Este candidato não pode ser proposto (bloqueado ou arquivado)."
       },
       "partialTitle": "Executado parcialmente",
       "budgetLine": "{{used}}/{{allowance}} {{unit}}",

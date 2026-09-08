@@ -290,7 +290,9 @@
     "customer_contacts": "Referenti",
     "outreach_campaigns": "Liste di chiamate",
     "system_events": "Evento di sistema",
-    "koios_advice": "Consiglio Koios"
+    "koios_advice": "Consiglio Koios",
+    "appointments": "Appuntamenti",
+    "calendar_invite": "Invito calendario (Google Meet)"
   },
   "categories": {
     "all": "Tutti",
@@ -692,7 +694,7 @@
     "E-mail": "E-mail",
     "E-mail (ruw)": "E-mail (grezzo)",
     "E-mail Sturen": "Invia e-mail",
-    "Eigenaar": "Responsabile",
+    "Eigenaar": "Proprietario",
     "Eigenaar (recruiter-ID)": "Responsabile (ID recruiter)",
     "Eigenaar / recruiter": "Responsabile / recruiter",
     "Einddatum dienstverband": "Data di fine rapporto",
@@ -960,7 +962,11 @@
     "Klantcorrecties (klant-id naar punten)": "Correzioni cliente (id cliente a punti)",
     "Venster vanaf (dagen)": "Finestra da (giorni)",
     "Venster tot (dagen)": "Finestra fino a (giorni)",
-    "Kennisbank in deze stap gebruiken": "Usa la base di conoscenza in questo passaggio"
+    "Kennisbank in deze stap gebruiken": "Usa la base di conoscenza in questo passaggio",
+    "Afspraken": "Appuntamenti",
+    "Geplande datum/tijd": "Data/ora programmata",
+    "Type": "Tipo",
+    "Afspraak": "Appuntamento"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (più bundle)",
@@ -1291,7 +1297,9 @@
     "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bonus o malus per id cliente, ad esempio 2 o -3.",
     "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Per funzione i nomi delle funzioni primarie e secondarie che valgono come corrispondenza, in minuscolo.",
     "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Consente all'agente AI di consultare i documenti/la knowledge base del tenant durante la conversazione. Funziona solo se l'agente stesso ha conoscenza disponibile.",
-    "Sla records over die al coördinaten hebben; aan te raden bij bulk": "Salta i record che hanno già coordinate; consigliato per le esecuzioni in blocco."
+    "Sla records over die al coördinaten hebben; aan te raden bij bulk": "Salta i record che hanno già coordinate; consigliato per le esecuzioni in blocco.",
+    "Titel van de agenda-afspraak (standaard \"Afspraak\")": "Titolo dell'appuntamento del calendario (predefinito \"Appuntamento\").",
+    "Afspraak-id (bv {{triggerappointment_id}})": "ID appuntamento (es: {{trigger.appointment_id}})."
   },
   "triggers": {
     "events": {

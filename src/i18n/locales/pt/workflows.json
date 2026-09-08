@@ -290,7 +290,9 @@
     "customer_contacts": "Pessoas de contacto",
     "outreach_campaigns": "Listas de chamadas",
     "system_events": "Evento do sistema",
-    "koios_advice": "Aconselhamento Koios"
+    "koios_advice": "Aconselhamento Koios",
+    "appointments": "Compromissos",
+    "calendar_invite": "Convite de agenda (Google Meet)"
   },
   "categories": {
     "all": "Todas",
@@ -692,7 +694,7 @@
     "E-mail": "E-mail",
     "E-mail (ruw)": "E-mail (dados brutos)",
     "E-mail Sturen": "Enviar e-mail",
-    "Eigenaar": "Responsável",
+    "Eigenaar": "Proprietário",
     "Eigenaar (recruiter-ID)": "Responsável (ID do recrutador)",
     "Eigenaar / recruiter": "Responsável / recrutador",
     "Einddatum dienstverband": "Data de fim do contrato de trabalho",
@@ -856,7 +858,7 @@
     "Starttijd": "Hora de início",
     "Starttijd (ISO)": "Hora de início (ISO)",
     "Starttijd (NL)": "Hora de início (NL)",
-    "Status": "Estado",
+    "Status": "Status",
     "Status (afgeleid employeestatus of top-level)": "Estado (derivado: employee.status ou nível superior)",
     "Status (eigen bucket open/in_process/completed)": "Estado (open/in_process/completed)",
     "Status (inzetbaarheid)": "Estado (disponibilidade)",
@@ -960,7 +962,11 @@
     "Klantcorrecties (klant-id naar punten)": "Correções por cliente (id de cliente para pontos)",
     "Venster vanaf (dagen)": "Janela a partir de (dias)",
     "Venster tot (dagen)": "Janela até (dias)",
-    "Kennisbank in deze stap gebruiken": "Usar a base de conhecimento neste passo"
+    "Kennisbank in deze stap gebruiken": "Usar a base de conhecimento neste passo",
+    "Afspraken": "Compromissos",
+    "Geplande datum/tijd": "Data/hora agendada",
+    "Type": "Tipo",
+    "Afspraak": "Compromisso"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Matriz (vários bundles)",
@@ -1291,7 +1297,9 @@
     "Bonus of malus per klant-id, bijvoorbeeld 2 of -3": "Bónus ou penalização por id de cliente, por exemplo 2 ou -3.",
     "Per functie de primaire en secundaire functienamen die als match gelden, kleine letters": "Por função, os nomes de funções primárias e secundárias que contam como correspondência, em minúsculas.",
     "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek Werkt alleen als de agent zelf kennis beschikbaar heeft": "Permite que o agente de IA consulte os documentos/base de conhecimento da agência durante a conversa. Só funciona se o próprio agente tiver conhecimento disponível.",
-    "Sla records over die al coördinaten hebben; aan te raden bij bulk": "Ignorar registos que já têm coordenadas; recomendado para execuções em massa."
+    "Sla records over die al coördinaten hebben; aan te raden bij bulk": "Ignorar registos que já têm coordenadas; recomendado para execuções em massa.",
+    "Titel van de agenda-afspraak (standaard \"Afspraak\")": "Título do compromisso do calendário (padrão \"Compromisso\").",
+    "Afspraak-id (bv {{triggerappointment_id}})": "ID do compromisso (ex: {{trigger.appointment_id}})."
   },
   "triggers": {
     "events": {

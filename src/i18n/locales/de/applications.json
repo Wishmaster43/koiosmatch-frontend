@@ -382,7 +382,8 @@
       "completed": "Abgeschlossen",
       "noShow": "Nicht erschienen",
       "cancelled": "Storniert"
-    }
+    },
+    "joinMeeting": "An Meeting teilnehmen"
   },
   "notes": {
     "title": "Notizen",

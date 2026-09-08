@@ -249,7 +249,8 @@
         "no_email_consent": "Der Kandidat hat keine E-Mail-Einwilligung. Der Rest wurde ausgeführt.",
         "no_mobile_or_consent": "Keine Mobilnummer oder keine Einwilligung für diesen Kanal.",
         "no_active_connection": "Die erforderliche Verbindung ist nicht aktiv.",
-        "send_failed": "Senden fehlgeschlagen."
+        "send_failed": "Senden fehlgeschlagen.",
+        "proposal_not_allowed": "Dieser Kandidat kann nicht vorgeschlagen werden (gesperrt oder archiviert)."
       },
       "partialTitle": "Teilweise ausgeführt",
       "budgetLine": "{{used}}/{{allowance}} {{unit}}",

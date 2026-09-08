@@ -382,7 +382,8 @@
       "completed": "Afgerond",
       "noShow": "No-show",
       "cancelled": "Geannuleerd"
-    }
+    },
+    "joinMeeting": "Deelnemen aan meeting"
   },
   "notes": {
     "title": "Notities",
