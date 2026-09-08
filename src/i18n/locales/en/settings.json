@@ -3692,6 +3692,142 @@
       "outcomeTitle": "Outcomes",
       "outcomeSubtitle": "The result of one call attempt, separate from the call-list status.",
       "outcomeAdd": "Add outcome"
+    },
+    "windows": {
+      "proposal_link_ttl_days": {
+        "label": "Proposal link validity (days)"
+      },
+      "candidate_no_contact_days": {
+        "label": "Candidate without contact (days)"
+      },
+      "contact_no_contact_days": {
+        "label": "Contact person without contact (days)"
+      },
+      "customer_no_contact_days": {
+        "label": "Customer without contact (days)"
+      },
+      "customer_contract_ending_days": {
+        "label": "Customer contract ending (days ahead)"
+      },
+      "customer_price_agreement_ending_days": {
+        "label": "Price agreement ending (days ahead)"
+      },
+      "customer_task_overdue_grace_days": {
+        "label": "Customer task overdue grace (days)"
+      },
+      "match_expiring_alert_days": {
+        "label": "Match expiring alert (days ahead)"
+      },
+      "vacancy_advice_stale_days": {
+        "label": "Vacancy advice stale (days)"
+      },
+      "vacancy_stale_days": {
+        "label": "Vacancy stale (days)"
+      },
+      "application_stage_stale_days": {
+        "label": "Application too long in stage (days)"
+      },
+      "candidate_phase_stale_days": {
+        "label": "Candidate too long in phase (days)"
+      },
+      "candidate_status_stale_days": {
+        "label": "Candidate status unchanged (days)"
+      },
+      "conversation_unanswered_hours": {
+        "label": "Conversation unanswered (hours)"
+      },
+      "candidate_missing_cv_alert_days": {
+        "label": "Candidate without CV alert (days)"
+      },
+      "task_overdue_grace_days": {
+        "label": "Task overdue grace (days)"
+      },
+      "task_due_soon_workdays": {
+        "label": "Task due soon (workdays)"
+      },
+      "candidate_stale_online_days": {
+        "label": "Online registration unprocessed (days)"
+      },
+      "document_expiring_alert_days": {
+        "label": "Document expiring alert (days ahead)"
+      },
+      "customer_health_no_contact_days": {
+        "label": "Customer health: no contact (days)"
+      },
+      "customer_health_vacancy_open_days": {
+        "label": "Customer health: vacancy open (days)"
+      },
+      "customer_health_cancelled_shift_days": {
+        "label": "Customer health: cancelled shifts (days)"
+      },
+      "customer_match_early_termination_days": {
+        "label": "Early terminated match (days)"
+      },
+      "customer_department_no_placement_min_age_days": {
+        "label": "Department without placement: minimum age (days)"
+      },
+      "customer_vacancy_draft_stale_days": {
+        "label": "Draft vacancy stale (days)"
+      },
+      "vacancy_status_stale_days": {
+        "label": "Vacancy status unchanged (days)"
+      },
+      "dashboard_stale_lead_workdays": {
+        "label": "Lead stale on dashboard (workdays)"
+      },
+      "match_advice_renew_days": {
+        "label": "Match advice: renew (days ahead)"
+      }
+    },
+    "retention": {
+      "retention_candidate_months": {
+        "label": "Candidate retention (months)"
+      },
+      "message_retention_days": {
+        "label": "Message retention (days)"
+      },
+      "workflow_run_metadata_retention_days": {
+        "label": "Workflow run metadata retention (days)"
+      },
+      "koios_conversation_memory_days": {
+        "label": "Koios conversation memory (days)"
+      },
+      "ai_prompt_log_retention_days": {
+        "label": "AI prompt log retention (days)"
+      },
+      "retention_thanks_text": {
+        "label": "Thank-you text on deletion"
+      }
+    },
+    "messaging": {
+      "whatsapp": {
+        "known_hourly_limit": {
+          "label": "WhatsApp: messages per hour to known numbers"
+        },
+        "new_hourly_limit": {
+          "label": "WhatsApp: messages per hour to new numbers"
+        },
+        "new_daily_limit": {
+          "label": "WhatsApp: messages per day to new numbers"
+        },
+        "new_weekly_limit": {
+          "label": "WhatsApp: messages per week to new numbers"
+        },
+        "per_number_hourly_limit": {
+          "label": "WhatsApp: messages per hour per number"
+        }
+      },
+      "message_load_default_days": {
+        "label": "Default message load window (days)"
+      }
+    },
+    "email": {
+      "email_default_from": {
+        "label": "Default sender address"
+      },
+      "smtp_pass": {
+        "label": "SMTP password"
+      }
     }
   },
   "identifierValidation": {

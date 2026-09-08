@@ -3692,6 +3692,142 @@
       "outcomeTitle": "Resultados",
       "outcomeSubtitle": "O resultado de uma tentativa de chamada, à parte do estado da lista de chamadas.",
       "outcomeAdd": "Adicionar resultado"
+    },
+    "windows": {
+      "proposal_link_ttl_days": {
+        "label": "Validade do link de proposta (dias)"
+      },
+      "candidate_no_contact_days": {
+        "label": "Candidato sem contacto (dias)"
+      },
+      "contact_no_contact_days": {
+        "label": "Pessoa de contacto sem contacto (dias)"
+      },
+      "customer_no_contact_days": {
+        "label": "Cliente sem contacto (dias)"
+      },
+      "customer_contract_ending_days": {
+        "label": "Contrato de cliente a terminar (dias de antecedência)"
+      },
+      "customer_price_agreement_ending_days": {
+        "label": "Acordo de preços a terminar (dias de antecedência)"
+      },
+      "customer_task_overdue_grace_days": {
+        "label": "Tolerância tarefa de cliente em atraso (dias)"
+      },
+      "match_expiring_alert_days": {
+        "label": "Match a expirar: alerta (dias de antecedência)"
+      },
+      "vacancy_advice_stale_days": {
+        "label": "Conselho de vaga desatualizado (dias)"
+      },
+      "vacancy_stale_days": {
+        "label": "Vaga parada (dias)"
+      },
+      "application_stage_stale_days": {
+        "label": "Candidatura demasiado tempo na fase (dias)"
+      },
+      "candidate_phase_stale_days": {
+        "label": "Candidato demasiado tempo na fase (dias)"
+      },
+      "candidate_status_stale_days": {
+        "label": "Estado do candidato inalterado (dias)"
+      },
+      "conversation_unanswered_hours": {
+        "label": "Conversa sem resposta (horas)"
+      },
+      "candidate_missing_cv_alert_days": {
+        "label": "Candidato sem CV: alerta (dias)"
+      },
+      "task_overdue_grace_days": {
+        "label": "Tolerância tarefa em atraso (dias)"
+      },
+      "task_due_soon_workdays": {
+        "label": "Tarefa a vencer em breve (dias úteis)"
+      },
+      "candidate_stale_online_days": {
+        "label": "Inscrição online por tratar (dias)"
+      },
+      "document_expiring_alert_days": {
+        "label": "Documento a expirar: alerta (dias de antecedência)"
+      },
+      "customer_health_no_contact_days": {
+        "label": "Saúde do cliente: sem contacto (dias)"
+      },
+      "customer_health_vacancy_open_days": {
+        "label": "Saúde do cliente: vaga aberta (dias)"
+      },
+      "customer_health_cancelled_shift_days": {
+        "label": "Saúde do cliente: turnos cancelados (dias)"
+      },
+      "customer_match_early_termination_days": {
+        "label": "Match terminado antecipadamente (dias)"
+      },
+      "customer_department_no_placement_min_age_days": {
+        "label": "Departamento sem colocação: antiguidade mínima (dias)"
+      },
+      "customer_vacancy_draft_stale_days": {
+        "label": "Rascunho de vaga parado (dias)"
+      },
+      "vacancy_status_stale_days": {
+        "label": "Estado da vaga inalterado (dias)"
+      },
+      "dashboard_stale_lead_workdays": {
+        "label": "Lead parado no painel (dias úteis)"
+      },
+      "match_advice_renew_days": {
+        "label": "Conselho de match: renovar (dias de antecedência)"
+      }
+    },
+    "retention": {
+      "retention_candidate_months": {
+        "label": "Retenção de candidato (meses)"
+      },
+      "message_retention_days": {
+        "label": "Retenção de mensagens (dias)"
+      },
+      "workflow_run_metadata_retention_days": {
+        "label": "Retenção de metadados de execuções de workflow (dias)"
+      },
+      "koios_conversation_memory_days": {
+        "label": "Memória de conversas Koios (dias)"
+      },
+      "ai_prompt_log_retention_days": {
+        "label": "Retenção do registo de prompts de IA (dias)"
+      },
+      "retention_thanks_text": {
+        "label": "Texto de agradecimento na eliminação"
+      }
+    },
+    "messaging": {
+      "whatsapp": {
+        "known_hourly_limit": {
+          "label": "WhatsApp: mensagens por hora para números conhecidos"
+        },
+        "new_hourly_limit": {
+          "label": "WhatsApp: mensagens por hora para números novos"
+        },
+        "new_daily_limit": {
+          "label": "WhatsApp: mensagens por dia para números novos"
+        },
+        "new_weekly_limit": {
+          "label": "WhatsApp: mensagens por semana para números novos"
+        },
+        "per_number_hourly_limit": {
+          "label": "WhatsApp: mensagens por hora por número"
+        }
+      },
+      "message_load_default_days": {
+        "label": "Janela de carregamento de mensagens por defeito (dias)"
+      }
+    },
+    "email": {
+      "email_default_from": {
+        "label": "Endereço de remetente por defeito"
+      },
+      "smtp_pass": {
+        "label": "Palavra-passe SMTP"
+      }
     }
   },
   "identifierValidation": {

@@ -3692,6 +3692,142 @@
       "outcomeTitle": "Uitkomsten",
       "outcomeSubtitle": "Het resultaat van één belpoging, los van de bellijst-status.",
       "outcomeAdd": "Uitkomst toevoegen"
+    },
+    "windows": {
+      "proposal_link_ttl_days": {
+        "label": "Geldigheid voorstel-link (dagen)"
+      },
+      "candidate_no_contact_days": {
+        "label": "Kandidaat zonder contact (dagen)"
+      },
+      "contact_no_contact_days": {
+        "label": "Contactpersoon zonder contact (dagen)"
+      },
+      "customer_no_contact_days": {
+        "label": "Klant zonder contact (dagen)"
+      },
+      "customer_contract_ending_days": {
+        "label": "Klantcontract loopt af (dagen vooraf)"
+      },
+      "customer_price_agreement_ending_days": {
+        "label": "Prijsafspraak loopt af (dagen vooraf)"
+      },
+      "customer_task_overdue_grace_days": {
+        "label": "Respijt klanttaak over tijd (dagen)"
+      },
+      "match_expiring_alert_days": {
+        "label": "Match loopt af: signaal (dagen vooraf)"
+      },
+      "vacancy_advice_stale_days": {
+        "label": "Vacature-advies verouderd (dagen)"
+      },
+      "vacancy_stale_days": {
+        "label": "Vacature stilstaand (dagen)"
+      },
+      "application_stage_stale_days": {
+        "label": "Sollicitatie te lang in fase (dagen)"
+      },
+      "candidate_phase_stale_days": {
+        "label": "Kandidaat te lang in fase (dagen)"
+      },
+      "candidate_status_stale_days": {
+        "label": "Kandidaatstatus ongewijzigd (dagen)"
+      },
+      "conversation_unanswered_hours": {
+        "label": "Gesprek onbeantwoord (uren)"
+      },
+      "candidate_missing_cv_alert_days": {
+        "label": "Kandidaat zonder cv: signaal (dagen)"
+      },
+      "task_overdue_grace_days": {
+        "label": "Respijt taak over tijd (dagen)"
+      },
+      "task_due_soon_workdays": {
+        "label": "Taak bijna verlopen (werkdagen)"
+      },
+      "candidate_stale_online_days": {
+        "label": "Online inschrijving onbehandeld (dagen)"
+      },
+      "document_expiring_alert_days": {
+        "label": "Document verloopt: signaal (dagen vooraf)"
+      },
+      "customer_health_no_contact_days": {
+        "label": "Klantgezondheid: geen contact (dagen)"
+      },
+      "customer_health_vacancy_open_days": {
+        "label": "Klantgezondheid: vacature open (dagen)"
+      },
+      "customer_health_cancelled_shift_days": {
+        "label": "Klantgezondheid: geannuleerde diensten (dagen)"
+      },
+      "customer_match_early_termination_days": {
+        "label": "Vroegtijdig beëindigde match (dagen)"
+      },
+      "customer_department_no_placement_min_age_days": {
+        "label": "Afdeling zonder plaatsing: minimale ouderdom (dagen)"
+      },
+      "customer_vacancy_draft_stale_days": {
+        "label": "Conceptvacature stilstaand (dagen)"
+      },
+      "vacancy_status_stale_days": {
+        "label": "Vacaturestatus ongewijzigd (dagen)"
+      },
+      "dashboard_stale_lead_workdays": {
+        "label": "Lead stilstaand op dashboard (werkdagen)"
+      },
+      "match_advice_renew_days": {
+        "label": "Match-advies verlengen (dagen vooraf)"
+      }
+    },
+    "retention": {
+      "retention_candidate_months": {
+        "label": "Bewaartermijn kandidaat (maanden)"
+      },
+      "message_retention_days": {
+        "label": "Bewaartermijn berichten (dagen)"
+      },
+      "workflow_run_metadata_retention_days": {
+        "label": "Bewaartermijn metadata workflow-runs (dagen)"
+      },
+      "koios_conversation_memory_days": {
+        "label": "Geheugen Koios-gesprekken (dagen)"
+      },
+      "ai_prompt_log_retention_days": {
+        "label": "Bewaartermijn AI-promptlog (dagen)"
+      },
+      "retention_thanks_text": {
+        "label": "Bedanktekst bij verwijdering"
+      }
+    },
+    "messaging": {
+      "whatsapp": {
+        "known_hourly_limit": {
+          "label": "WhatsApp: berichten per uur naar bekende nummers"
+        },
+        "new_hourly_limit": {
+          "label": "WhatsApp: berichten per uur naar nieuwe nummers"
+        },
+        "new_daily_limit": {
+          "label": "WhatsApp: berichten per dag naar nieuwe nummers"
+        },
+        "new_weekly_limit": {
+          "label": "WhatsApp: berichten per week naar nieuwe nummers"
+        },
+        "per_number_hourly_limit": {
+          "label": "WhatsApp: berichten per uur per nummer"
+        }
+      },
+      "message_load_default_days": {
+        "label": "Standaard laadvenster berichten (dagen)"
+      }
+    },
+    "email": {
+      "email_default_from": {
+        "label": "Standaard afzenderadres"
+      },
+      "smtp_pass": {
+        "label": "SMTP-wachtwoord"
+      }
     }
   },
   "identifierValidation": {
