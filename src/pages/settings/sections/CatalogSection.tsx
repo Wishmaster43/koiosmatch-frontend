@@ -31,7 +31,7 @@ export default function CatalogSection({ section }: CatalogSectionProps) {
   if (isLoading) return <SkeletonRows />
   if (isError) {
     return (
-      <ErrorBanner onRetry={() => { void refetch() }} retryLabel={t('common:retry')}>
+      <ErrorBanner onRetry={() => { void refetch() }} retryLabel={t('common:error.retry')}>
         {t('common:error.loadFailed')}
       </ErrorBanner>
     )
