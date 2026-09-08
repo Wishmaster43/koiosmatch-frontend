@@ -26,6 +26,12 @@ export const SCOPE_ENTITIES = [
   'opportunities',
   'tasks',
   'call_lists',
+  // Dossier content scopes — see ExternalApiKey::ENTITIES (backend App\Models\ExternalApiKey).
+  'candidate_notes',
+  'candidate_documents',
+  'candidate_conversations',
+  'candidate_educations',
+  'candidate_references',
 ]
 
 // Permission level per scope. 'none' = the entity toggle is off (no access).

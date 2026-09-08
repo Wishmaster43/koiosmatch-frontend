@@ -44,4 +44,27 @@ describe('ScopeEditor', () => {
 
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ candidates: 'read_write' }))
   })
+
+  it('the five candidate dossier scopes render and toggle', async () => {
+    const onChange = vi.fn()
+    const user = userEvent.setup()
+    render(<ScopeEditor value={{}} onChange={onChange} />)
+
+    // The five new scopes should render with their labels.
+    expect(screen.getByRole('button', { name: st('apiKeys.scopes.candidate_notes') })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: st('apiKeys.scopes.candidate_documents') })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: st('apiKeys.scopes.candidate_conversations') })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: st('apiKeys.scopes.candidate_educations') })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: st('apiKeys.scopes.candidate_references') })).toBeInTheDocument()
+
+    // Toggling one of them on sends its key in the scopes body exactly like an existing one.
+    const switches = screen.getAllByRole('switch')
+    const candidateNotesSwitch = switches.find(s => {
+      const parent = s.closest('div')
+      return parent?.textContent?.includes(st('apiKeys.scopes.candidate_notes'))
+    })
+
+    await user.click(candidateNotesSwitch)
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ candidate_notes: 'read' }))
+  })
 })
