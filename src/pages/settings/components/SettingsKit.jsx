@@ -41,6 +41,10 @@ const CARD = {
 }
 
 // The one settings-section shell: title/subtitle, the shared dirty-aware save button, and loading/error/content states.
+/**
+ * The one settings page frame: title/subtitle, the shared Save button and the skeleton/load-error states.
+ * @param {{ title: React.ReactNode, subtitle?: React.ReactNode, form?: any, maxWidth?: number, actions?: React.ReactNode, children?: React.ReactNode }} props
+ */
 export function SettingsScaffold({ title, subtitle, form, maxWidth, actions, children }) {
   const { t } = useTranslation('settings')
   const dirtyCtx = useContext(SettingsDirtyContext)
@@ -87,6 +91,7 @@ export function SettingsScaffold({ title, subtitle, form, maxWidth, actions, chi
 }
 
 // The white bordered card every settings row/section renders inside.
+/** @param {{ children?: React.ReactNode, style?: React.CSSProperties }} props */
 export function SettingCard({ children, style }) {
   return <div style={{ ...CARD, padding: '14px 16px', ...style }}>{children}</div>
 }
@@ -97,6 +102,7 @@ export function SettingCardList({ children }) {
 }
 
 // One label+description/control row inside a SettingCard, the standard settings row layout.
+/** @param {{ label: React.ReactNode, description?: React.ReactNode, children?: React.ReactNode }} props */
 export function SettingRow({ label, description, children }) {
   return (
     <SettingCard style={{ display: 'flex', alignItems: 'center', gap: 16 }}>

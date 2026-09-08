@@ -669,3 +669,15 @@ describe('KoiosPanel · conversation mode (VOICE-MODE-1)', () => {
 })
 
 
+
+describe('KoiosPanel — AI transparency link', () => {
+  // X-32: the footer of the Koios panel carries a link to Settings → AI → AI Transparency
+  // (the principles, human oversight, tenant posture, and features page).
+  it('renders the About Koios AI link in the footer', async () => {
+    renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    await screen.findByText('common:koios.radar.empty')
+    const link = screen.getByText('koios.aboutLink')
+    expect(link).toBeInTheDocument()
+    expect(link).toHaveAttribute('href', '#settings/ai/ai_transparency')
+  })
+})

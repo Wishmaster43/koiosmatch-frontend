@@ -423,9 +423,18 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
         <div style={{ fontSize: 10, color: 'var(--sidebar-muted)', textAlign: 'center', marginTop: 7 }}>
           {t('koios.inputHint')}
         </div>
+
+        {/* X-32: a plain text link (same face as the hint above) to Settings → AI → AI transparency. */}
+        <div style={{ fontSize: 10, textAlign: 'center', marginTop: 4 }}>
+          <a href="#settings/ai/ai_transparency" className="km-koios-about-link">
+            {t('koios.aboutLink')}
+          </a>
+        </div>
       </div>
 
       <style>{`
+        .km-koios-about-link { color: var(--sidebar-muted); text-decoration: underline; }
+        .km-koios-about-link:hover, .km-koios-about-link:focus-visible { color: var(--sidebar-text, var(--text)); }
         @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} }
         @keyframes fadeSlideIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
         .km-koios-resize-handle:hover, .km-koios-resize-handle:focus-visible {
