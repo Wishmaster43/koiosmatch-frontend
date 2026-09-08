@@ -42,7 +42,7 @@ const profile = (over = {}) => ({
 })
 
 describe('profileShape — toApiProfile', () => {
-  it('flattens a nested draft to the flat API shape with all 12 matcher/content keys', () => {
+  it('sends a nested envelope {name, is_default, priority, matcher:{...}, content:{...}} with all 12 matcher/content keys', () => {
     const draft = emptyDraft()
     draft.name = 'Test Profile'
     draft.is_default = true
@@ -60,46 +60,46 @@ describe('profileShape — toApiProfile', () => {
     draft.content.forbidden_words = ['no', 'bad']
     draft.content.content_block_ids = ['b1', 'b2']
 
-    const flat = toApiProfile(draft)
+    const envelope = toApiProfile(draft)
 
     // Top-level identity fields
-    expect(flat.name).toBe('Test Profile')
-    expect(flat.is_default).toBe(true)
-    expect(flat.priority).toBe(20)
-    // Matcher fields (flattened)
-    expect(flat.location_ids).toEqual(['loc1', 'loc2'])
-    expect(flat.contract_types).toEqual(['ZZP', 'Flex'])
-    expect(flat.function_titles).toEqual(['Nurse'])
-    expect(flat.industries).toEqual(['Healthcare'])
-    // Content fields (flattened)
-    expect(flat.template).toBe('Template text')
-    expect(flat.tone_of_voice).toBe('friendly')
-    expect(flat.length).toBe('short')
-    expect(flat.language).toBe('Dutch')
-    expect(flat.allow_emoji).toBe(true)
-    expect(flat.brand_instructions).toBe('Brand rules')
-    expect(flat.forbidden_words).toEqual(['no', 'bad'])
-    expect(flat.content_block_ids).toEqual(['b1', 'b2'])
+    expect(envelope.name).toBe('Test Profile')
+    expect(envelope.is_default).toBe(true)
+    expect(envelope.priority).toBe(20)
+    // Matcher nested object
+    expect(envelope.matcher.location_ids).toEqual(['loc1', 'loc2'])
+    expect(envelope.matcher.contract_types).toEqual(['ZZP', 'Flex'])
+    expect(envelope.matcher.function_titles).toEqual(['Nurse'])
+    expect(envelope.matcher.industries).toEqual(['Healthcare'])
+    // Content nested object
+    expect(envelope.content.template).toBe('Template text')
+    expect(envelope.content.tone_of_voice).toBe('friendly')
+    expect(envelope.content.length).toBe('short')
+    expect(envelope.content.language).toBe('Dutch')
+    expect(envelope.content.allow_emoji).toBe(true)
+    expect(envelope.content.brand_instructions).toBe('Brand rules')
+    expect(envelope.content.forbidden_words).toEqual(['no', 'bad'])
+    expect(envelope.content.content_block_ids).toEqual(['b1', 'b2'])
   })
 
-  it('fills empty arrays and defaults for missing matcher/content keys', () => {
+  it('fills empty arrays and defaults for missing matcher/content keys in the nested envelope', () => {
     const draft = { name: 'Test', is_default: false, priority: 1, matcher: {}, content: {} }
-    const flat = toApiProfile(draft)
+    const envelope = toApiProfile(draft)
 
-    // Matcher arrays default to []
-    expect(flat.location_ids).toEqual([])
-    expect(flat.contract_types).toEqual([])
-    expect(flat.function_titles).toEqual([])
-    expect(flat.industries).toEqual([])
-    // Content values default to calm settings
-    expect(flat.template).toBe('')
-    expect(flat.tone_of_voice).toBe('neutral')
-    expect(flat.length).toBe('medium')
-    expect(flat.language).toBe('')
-    expect(flat.allow_emoji).toBe(false)
-    expect(flat.brand_instructions).toBe('')
-    expect(flat.forbidden_words).toEqual([])
-    expect(flat.content_block_ids).toEqual([])
+    // Matcher nested object with array defaults
+    expect(envelope.matcher.location_ids).toEqual([])
+    expect(envelope.matcher.contract_types).toEqual([])
+    expect(envelope.matcher.function_titles).toEqual([])
+    expect(envelope.matcher.industries).toEqual([])
+    // Content nested object with calm defaults
+    expect(envelope.content.template).toBe('')
+    expect(envelope.content.tone_of_voice).toBe('neutral')
+    expect(envelope.content.length).toBe('medium')
+    expect(envelope.content.language).toBe('')
+    expect(envelope.content.allow_emoji).toBe(false)
+    expect(envelope.content.brand_instructions).toBe('')
+    expect(envelope.content.forbidden_words).toEqual([])
+    expect(envelope.content.content_block_ids).toEqual([])
   })
 })
 
@@ -155,10 +155,54 @@ describe('profileShape — fromApiProfile', () => {
     expect(draft.is_default).toBe(true)
     expect(draft.content.allow_emoji).toBe(false)
   })
+
+  it('falls back to flat keys when nested matcher/content objects are absent (backward compat)', () => {
+    // Older profiles from the API have only flat keys, no nested objects
+    const flatOnly = {
+      id: 'p1',
+      name: 'Old Profile',
+      is_default: true,
+      priority: 12,
+      location_ids: ['loc1', 'loc2'],
+      contract_types: ['ZZP Flex'],
+      function_titles: ['Nurse', 'Doctor'],
+      industries: ['Healthcare'],
+      template: 'Old template text',
+      tone_of_voice: 'professional',
+      length: 'long',
+      language: 'Nederlands',
+      allow_emoji: false,
+      brand_instructions: 'Old brand rules',
+      forbidden_words: ['outdated'],
+      content_block_ids: ['block1'],
+      // No matcher or content nested objects
+    }
+
+    const draft = fromApiProfile(flatOnly)
+
+    // Verify all values extracted from flat keys
+    expect(draft.name).toBe('Old Profile')
+    expect(draft.is_default).toBe(true)
+    expect(draft.priority).toBe(12)
+    // Matcher reconstructed from flat keys
+    expect(draft.matcher.location_ids).toEqual(['loc1', 'loc2'])
+    expect(draft.matcher.contract_types).toEqual(['ZZP Flex'])
+    expect(draft.matcher.function_titles).toEqual(['Nurse', 'Doctor'])
+    expect(draft.matcher.industries).toEqual(['Healthcare'])
+    // Content reconstructed from flat keys
+    expect(draft.content.template).toBe('Old template text')
+    expect(draft.content.tone_of_voice).toBe('professional')
+    expect(draft.content.length).toBe('long')
+    expect(draft.content.language).toBe('Nederlands')
+    expect(draft.content.allow_emoji).toBe(false)
+    expect(draft.content.brand_instructions).toBe('Old brand rules')
+    expect(draft.content.forbidden_words).toEqual(['outdated'])
+    expect(draft.content.content_block_ids).toEqual(['block1'])
+  })
 })
 
-describe('profileShape — round-trip (draft → flat → draft)', () => {
-  it('a draft flattened and re-nested recovers the original structure', () => {
+describe('profileShape — round-trip (draft → envelope → draft)', () => {
+  it('a draft sent as nested envelope and read back recovers the original structure', () => {
     const original = emptyDraft()
     original.name = 'Round Trip'
     original.is_default = true
@@ -176,8 +220,10 @@ describe('profileShape — round-trip (draft → flat → draft)', () => {
     original.content.forbidden_words = ['bad']
     original.content.content_block_ids = ['b1']
 
-    const flat = toApiProfile(original)
-    const recovered = fromApiProfile(flat)
+    // toApiProfile sends the nested envelope (draft → envelope)
+    const envelope = toApiProfile(original)
+    // fromApiProfile reads the nested envelope and reconstructs the draft (envelope → draft)
+    const recovered = fromApiProfile(envelope)
 
     expect(recovered).toEqual(original)
   })

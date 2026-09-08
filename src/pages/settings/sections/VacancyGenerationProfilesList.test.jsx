@@ -93,7 +93,7 @@ describe('VacancyGenerationProfilesList', () => {
     expect(screen.getByText(`${st('vacancyGenerationSettings.priorityLabel')}: 15`)).toBeInTheDocument()
   })
 
-  it('creating a profile POSTs a flat body with all 12 matcher/content keys', async () => {
+  it('creating a profile POSTs the nested envelope {name, is_default, priority, matcher:{...}, content:{...}}', async () => {
     mockGet(Promise.resolve({ data: { data: [] } }))
     api.post.mockResolvedValue({ data: { data: profile({ id: 'new1', name: 'New profile' }) } })
     const user = userEvent.setup()
@@ -104,27 +104,31 @@ describe('VacancyGenerationProfilesList', () => {
     await user.type(screen.getByPlaceholderText(st('vacancyGenerationSettings.namePlaceholder')), 'New profile')
     await user.click(await screen.findByRole('button', { name: st('vacancyGenerationSettings.add') }))
 
-    // Verify the POST body is FLAT: top-level name/is_default/priority + all 12 matcher/content keys flat
+    // Verify the POST body is the nested envelope: {name, is_default, priority, matcher:{...}, content:{...}}
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/vacancy-generation-profiles', {
       name: 'New profile',
       is_default: false,
       priority: 10,
-      location_ids: [],
-      contract_types: [],
-      function_titles: [],
-      industries: [],
-      template: '',
-      tone_of_voice: 'neutral',
-      length: 'medium',
-      language: '',
-      allow_emoji: false,
-      brand_instructions: '',
-      forbidden_words: [],
-      content_block_ids: [],
+      matcher: {
+        location_ids: [],
+        contract_types: [],
+        function_titles: [],
+        industries: [],
+      },
+      content: {
+        template: '',
+        tone_of_voice: 'neutral',
+        length: 'medium',
+        language: '',
+        allow_emoji: false,
+        brand_instructions: '',
+        forbidden_words: [],
+        content_block_ids: [],
+      },
     }))
   })
 
-  it('saving an edited profile PUTs a flat body with all 12 keys to the profile-specific route', async () => {
+  it('saving an edited profile PUTs the nested envelope to the profile-specific route', async () => {
     mockGet(Promise.resolve({ data: { data: [profile()] } }))
     api.put.mockResolvedValue({ data: { data: profile({ name: 'Renamed' }) } })
     const user = userEvent.setup()
@@ -137,23 +141,27 @@ describe('VacancyGenerationProfilesList', () => {
     await user.type(nameInput, 'Renamed')
     await user.click(await screen.findByRole('button', { name: st('common.save') }))
 
-    // Verify the PUT body is FLAT with all 12 keys (the edited name is the only change)
+    // Verify the PUT body is the nested envelope: {name, is_default, priority, matcher:{...}, content:{...}}
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/vacancy-generation-profiles/p1', {
       name: 'Renamed',
       is_default: false,
       priority: 15,
-      location_ids: ['loc1'],
-      contract_types: ['ZZP Flex'],
-      function_titles: ['Verzorgende IG'],
-      industries: ['Zorg'],
-      template: 'A vacancy for {{title}}',
-      tone_of_voice: 'professional',
-      length: 'long',
-      language: 'Nederlands',
-      allow_emoji: true,
-      brand_instructions: 'Always be friendly',
-      forbidden_words: ['bad', 'words'],
-      content_block_ids: ['block1', 'block2'],
+      matcher: {
+        location_ids: ['loc1'],
+        contract_types: ['ZZP Flex'],
+        function_titles: ['Verzorgende IG'],
+        industries: ['Zorg'],
+      },
+      content: {
+        template: 'A vacancy for {{title}}',
+        tone_of_voice: 'professional',
+        length: 'long',
+        language: 'Nederlands',
+        allow_emoji: true,
+        brand_instructions: 'Always be friendly',
+        forbidden_words: ['bad', 'words'],
+        content_block_ids: ['block1', 'block2'],
+      },
     }))
   })
 
@@ -172,6 +180,62 @@ describe('VacancyGenerationProfilesList', () => {
 
     await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/vacancy-generation-profiles/p1'))
     expect(screen.getByText('Zorg — ochtenddiensten')).toBeInTheDocument()
+  })
+
+  it('reads profiles with nested matcher/content from the API response', async () => {
+    // GET returns the profile with both flat keys AND nested matcher/content mirrors.
+    const profileWithNested = profile({
+      matcher: { location_ids: ['loc1'], contract_types: ['ZZP Flex'], function_titles: ['Verzorgende IG'], industries: ['Zorg'] },
+      content: { template: 'A vacancy for {{title}}', tone_of_voice: 'professional', length: 'long', language: 'Nederlands', allow_emoji: true, brand_instructions: 'Always be friendly', forbidden_words: ['bad', 'words'], content_block_ids: ['block1', 'block2'] },
+    })
+    mockGet(Promise.resolve({ data: { data: [profileWithNested] } }))
+    const user = userEvent.setup()
+    render(<VacancyGenerationProfilesList />)
+
+    // Open the profile and verify the editor loads the nested matcher/content.
+    await waitFor(() => expect(screen.getByText('Zorg — ochtenddiensten')).toBeInTheDocument())
+    await user.click(screen.getByRole('button', { name: `${st('common.edit')}: Zorg — ochtenddiensten` }))
+    // The inputs should show the values from the nested shape (which mirrors the flat keys).
+    await waitFor(() => expect(screen.getByDisplayValue('Zorg — ochtenddiensten')).toBeInTheDocument())
+  })
+
+  it('falls back to flat keys when profile has no nested matcher/content (backward compat)', async () => {
+    // Older profiles have only flat keys, no nested shapes.
+    const flatProfile = profile()
+    delete flatProfile.matcher
+    delete flatProfile.content
+    mockGet(Promise.resolve({ data: { data: [flatProfile] } }))
+    const user = userEvent.setup()
+    render(<VacancyGenerationProfilesList />)
+
+    await waitFor(() => expect(screen.getByText('Zorg — ochtenddiensten')).toBeInTheDocument())
+    await user.click(screen.getByRole('button', { name: `${st('common.edit')}: Zorg — ochtenddiensten` }))
+    // The editor should load from flat keys and display them correctly.
+    await waitFor(() => expect(screen.getByDisplayValue('A vacancy for {{title}}')).toBeInTheDocument())
+  })
+
+  it('handles 422 validation error from nested field rejection', async () => {
+    mockGet(Promise.resolve({ data: { data: [profile()] } }))
+    // BE rejects an unknown field in the nested matcher with a 422.
+    api.put.mockRejectedValue({
+      response: {
+        status: 422,
+        data: { message: "Onbekend veld 'foo' in matcher.", errors: { 'matcher.foo': ["Onbekend veld 'foo' in matcher."] } },
+      },
+    })
+    const { notifyError } = await import('@/lib/notify')
+    const user = userEvent.setup()
+    render(<VacancyGenerationProfilesList />)
+
+    await waitFor(() => expect(screen.getByText('Zorg — ochtenddiensten')).toBeInTheDocument())
+    await user.click(screen.getByRole('button', { name: `${st('common.edit')}: Zorg — ochtenddiensten` }))
+    const nameInput = await screen.findByDisplayValue('Zorg — ochtenddiensten')
+    await user.clear(nameInput)
+    await user.type(nameInput, 'Renamed')
+    await user.click(await screen.findByRole('button', { name: st('common.save') }))
+
+    // Verify the error is handled (notified to the user).
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('vacancyGenerationSettings.saveFailed')))
   })
 })
 
