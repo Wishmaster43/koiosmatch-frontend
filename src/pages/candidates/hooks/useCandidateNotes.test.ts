@@ -30,7 +30,7 @@ describe('useCandidateNotes · onContactStamped (LAST-CONTACT-REFRESH-1)', () =>
     const { result } = renderHook(() => useCandidateNotes('c1', { onContactStamped }))
     act(() => { result.current.addNote({ type: 'general', title: '', body: 'Gebeld', channel: 'call' }) })
     // The POST carries the channel (the server stamps off it) …
-    expect(api.post).toHaveBeenCalledWith('/candidates/c1/notes', { type: 'general', text: 'Gebeld', channel: 'call' })
+    expect(api.post).toHaveBeenCalledWith('/candidates/c1/notes', { type: 'general', title: '', text: 'Gebeld', channel: 'call' })
     // … and only after it resolves does the refresh fire.
     await waitFor(() => expect(onContactStamped).toHaveBeenCalledTimes(1))
   })
@@ -51,7 +51,7 @@ describe('useCandidateNotes · language (NOTE-TAAL-1)', () => {
   it('carries the picked language on addNote', async () => {
     const { result } = renderHook(() => useCandidateNotes('c1'))
     act(() => { result.current.addNote({ type: 'general', title: '', body: 'Notitie', language: 'en' }) })
-    expect(api.post).toHaveBeenCalledWith('/candidates/c1/notes', { type: 'general', text: 'Notitie', channel: undefined, language: 'en' })
+    expect(api.post).toHaveBeenCalledWith('/candidates/c1/notes', { type: 'general', title: '', text: 'Notitie', channel: undefined, language: 'en' })
   })
 
   it('carries the picked language on editNote', async () => {
@@ -60,14 +60,15 @@ describe('useCandidateNotes · language (NOTE-TAAL-1)', () => {
     const { result } = renderHook(() => useCandidateNotes('c1'))
     await waitFor(() => expect(result.current.notes).toHaveLength(1))
     act(() => { result.current.editNote(0, { type: 'general', title: '', body: 'Updated', language: 'de' }) })
-    expect(api.patch).toHaveBeenCalledWith('/candidates/c1/notes/n1', { text: 'Updated', type: 'general', channel: undefined, language: 'de' })
+    expect(api.patch).toHaveBeenCalledWith('/candidates/c1/notes/n1', { text: 'Updated', title: '', type: 'general', channel: undefined, language: 'de' })
   })
 
   it('omits language (undefined) when the recruiter never touched the picker', async () => {
     const { result } = renderHook(() => useCandidateNotes('c1'))
     act(() => { result.current.addNote({ type: 'general', title: '', body: 'Notitie' }) })
-    // No `language` key set → the backend keeps its own tenant default.
-    expect(api.post).toHaveBeenCalledWith('/candidates/c1/notes', expect.not.objectContaining({ language: expect.anything() }))
+    // No `language` key set → the backend keeps its own tenant default. title is always present (NOTE-TITLE-1).
+    expect(api.post).toHaveBeenCalledWith('/candidates/c1/notes', expect.objectContaining({ type: 'general', title: '', text: 'Notitie', channel: undefined })
+    )
   })
 })
 

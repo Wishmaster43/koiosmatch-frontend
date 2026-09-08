@@ -24,6 +24,8 @@ export interface OpportunityNote {
   author?: string
   body?: string
   type?: string
+  // NOTE-TITLE-1 (golf 3): optional title on every note write/read.
+  title?: string
   created_at?: string
   // NOTE-TAAL-1: the note's own spellcheck/output language — null/absent = tenant default.
   language?: string
@@ -82,11 +84,11 @@ export function useOpportunityNotes(id?: Id) {
   // reason — never leave a failed note lingering as if it had saved.
   // NOTE-TAAL-1: `language` is optional and forwarded to the API as-is (undefined = tenant default).
   // NOTE-ACTION-ITEMS-1: forward the action_items panel only when present (present = the full wanted set; absent = untouched).
-  const addNote = useCallback((payload: { type: string; body: string; language?: string; action_items?: NoteActionItemWire[] }) => {
+  const addNote = useCallback((payload: { type: string; title?: string; body: string; language?: string; action_items?: NoteActionItemWire[] }) => {
     if (!id || !payload.body.trim()) return
-    const temp: OpportunityNote = { id: `tmp-${Date.now()}`, type: payload.type, body: payload.body, created_at: new Date().toISOString() }
+    const temp: OpportunityNote = { id: `tmp-${Date.now()}`, type: payload.type, title: payload.title, body: payload.body, created_at: new Date().toISOString() }
     setItems(prev => [temp, ...prev])
-    api.post(`/opportunities/${id}/notes`, { type: payload.type, body: payload.body, language: payload.language,
+    api.post(`/opportunities/${id}/notes`, { type: payload.type, title: payload.title, body: payload.body, language: payload.language,
       ...actionItemsWire(payload.action_items) })
       .then(() => load())
       .catch(err => {
@@ -100,13 +102,13 @@ export function useOpportunityNotes(id?: Id) {
   // useCandidateNotes.editNote); optimistic locally, then reload so the
   // server-resolved `updated_by`/`updated_at` (edited-by meta) shows at once.
   // NOTE-ACTION-ITEMS-1: forward the action_items panel only when present (present = the full wanted set; absent = untouched).
-  const editNote = useCallback((index: number, payload: { type: string; body: string; language?: string; action_items?: NoteActionItemWire[] }) => {
+  const editNote = useCallback((index: number, payload: { type: string; title?: string; body: string; language?: string; action_items?: NoteActionItemWire[] }) => {
     if (!id) return
     const target = items[index]
     if (!target?.id) return
     const snapshot = items
-    setItems(prev => prev.map((n, i) => (i === index ? { ...n, type: payload.type, body: payload.body, language: payload.language } : n)))
-    api.put(`/opportunities/${id}/notes/${target.id}`, { type: payload.type, body: payload.body, language: payload.language,
+    setItems(prev => prev.map((n, i) => (i === index ? { ...n, type: payload.type, title: payload.title, body: payload.body, language: payload.language } : n)))
+    api.put(`/opportunities/${id}/notes/${target.id}`, { type: payload.type, title: payload.title, body: payload.body, language: payload.language,
       ...actionItemsWire(payload.action_items) })
       .then(() => load())
       .catch(err => {

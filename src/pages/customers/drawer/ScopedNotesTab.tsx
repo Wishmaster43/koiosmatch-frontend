@@ -67,7 +67,7 @@ export default function ScopedNotesTab({ scope, id, customerId }: {
   // no scope field to resend, just the note id.
   const editNote = (noteId: Id | undefined, payload: { type: string; title: string; body: string; language?: string }) => {
     if (!customerId || noteId == null) return
-    api.patch(`/customers/${customerId}/notes/${noteId}`, { type: payload.type, text: payload.body, language: payload.language })
+    api.patch(`/customers/${customerId}/notes/${noteId}`, { type: payload.type, title: payload.title, text: payload.body, language: payload.language })
       .then(reload)
       .catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
   }

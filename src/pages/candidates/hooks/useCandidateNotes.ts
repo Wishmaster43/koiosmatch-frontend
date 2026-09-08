@@ -88,7 +88,7 @@ export function useCandidateNotes(candidateId: string | number | undefined, opts
       id: `tmp-${Date.now()}`, type: payload.type, channel: payload.channel, body: payload.body, created_at: new Date().toISOString(),
     }
     setNotes(prev => [temp, ...prev])
-    api.post(`/candidates/${candidateId}/notes`, { type: payload.type, text: payload.body, channel: payload.channel, language: payload.language,
+    api.post(`/candidates/${candidateId}/notes`, { type: payload.type, title: payload.title, text: payload.body, channel: payload.channel, language: payload.language,
       // NOTE-ACTION-ITEMS-1: present = the full wanted set; absent = untouched.
       ...actionItemsWire(payload.action_items) })
       .then(() => { load(); if (payload.channel) opts?.onContactStamped?.() })
@@ -104,8 +104,8 @@ export function useCandidateNotes(candidateId: string | number | undefined, opts
     const target = notes[index]
     if (!target) return Promise.resolve(false)
     const snapshot = notes
-    setNotes(prev => prev.map((n, i) => (i === index ? { ...n, type: payload.type, channel: payload.channel, body: payload.body, language: payload.language } : n)))
-    return api.patch(`/candidates/${candidateId}/notes/${target.id}`, { text: payload.body, type: payload.type, channel: payload.channel, language: payload.language,
+    setNotes(prev => prev.map((n, i) => (i === index ? { ...n, type: payload.type, channel: payload.channel, body: payload.body, language: payload.language, title: payload.title } : n)))
+    return api.patch(`/candidates/${candidateId}/notes/${target.id}`, { text: payload.body, title: payload.title, type: payload.type, channel: payload.channel, language: payload.language,
       // NOTE-ACTION-ITEMS-1: present = the full wanted set; absent = untouched.
       ...actionItemsWire(payload.action_items) })
       .then(() => { load(); return true })

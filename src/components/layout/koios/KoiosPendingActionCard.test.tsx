@@ -205,4 +205,14 @@ describe('KoiosPendingActionCard', () => {
     await waitFor(() => expect(screen.getByTestId('koios-pending-action')).toHaveAttribute('data-status', 'refused'))
     expect(screen.queryByText('koios.pendingAction.confirmed')).not.toBeInTheDocument()
   })
+
+  // NOTE-TITLE-1: proposal_not_allowed refusal slug for blocked/archived candidates
+  it('renders refused on proposal_not_allowed slug', async () => {
+    mockConfirm.mockResolvedValue({ status: 'executed', data: { gelukt: false, reden: 'proposal_not_allowed' } })
+    const user = userEvent.setup()
+    renderCard(action())
+    await user.click(screen.getByText('koios.pendingAction.confirm'))
+    await waitFor(() => expect(screen.getByTestId('koios-pending-action')).toHaveAttribute('data-status', 'refused'))
+    expect(screen.queryByText('koios.pendingAction.confirmed')).not.toBeInTheDocument()
+  })
 })

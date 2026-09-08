@@ -44,7 +44,7 @@ describe('usePopoutCustomerNotes', () => {
     act(() => { result.current.addNote({ type: 'general', title: '', body: 'A new note', language: 'nl' }) })
     // Optimistic prepend happens synchronously.
     expect(result.current.notes[0]).toMatchObject({ type: 'general', text: 'A new note' })
-    expect(apiPost).toHaveBeenCalledWith('/customers/cust-1/notes', { type: 'general', text: 'A new note', language: 'nl' })
+    expect(apiPost).toHaveBeenCalledWith('/customers/cust-1/notes', { type: 'general', title: '', text: 'A new note', language: 'nl' })
     await waitFor(() => expect(apiGet).toHaveBeenCalledTimes(2))
   })
 
@@ -76,7 +76,7 @@ describe('usePopoutCustomerNotes · editNote/deleteNote (K15NOTES)', () => {
 
     act(() => { result.current.editNote(0, { type: 'general', title: '', body: 'Bijgewerkt' }) })
 
-    expect(apiPatch).toHaveBeenCalledWith('/customers/cust-1/notes/n1', { type: 'general', text: 'Bijgewerkt', language: undefined })
+    expect(apiPatch).toHaveBeenCalledWith('/customers/cust-1/notes/n1', { type: 'general', title: '', text: 'Bijgewerkt', language: undefined })
     expect(result.current.notes[0]).toMatchObject({ text: 'Bijgewerkt' })
     await waitFor(() => expect(apiGet).toHaveBeenCalledTimes(2)) // the post-edit reload
   })

@@ -443,7 +443,7 @@ describe('useCustomerRecord · editNote/deleteNote (K15NOTES)', () => {
       r.result.current.record.editNote(1, 'n-1', { type: 'general', title: '', body: 'Bijgewerkt' })
     })
 
-    expect(mockedPatch).toHaveBeenCalledWith('/customers/1/notes/n-1', { type: 'general', text: 'Bijgewerkt', language: undefined })
+    expect(mockedPatch).toHaveBeenCalledWith('/customers/1/notes/n-1', { type: 'general', title: '', text: 'Bijgewerkt', language: undefined })
     expect(r.result.current.record.detail?.notes?.[0]).toMatchObject({ id: 'n-1', text: 'Bijgewerkt' })
   })
 

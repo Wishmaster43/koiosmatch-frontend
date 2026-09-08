@@ -308,7 +308,7 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
     setDetail(prev => (prev && prev.id === id
       ? ({ ...prev, notes: (prev.notes ?? []).map(n => (n.id === noteId ? { ...n, type: payload.type, title: payload.title, text: payload.body } : n)) } as Customer)
       : prev))
-    api.patch(`/customers/${id}/notes/${noteId}`, { type: payload.type, text: payload.body, language: payload.language,
+    api.patch(`/customers/${id}/notes/${noteId}`, { type: payload.type, title: payload.title, text: payload.body, language: payload.language,
       ...actionItemsWire(payload.action_items) })
       .catch(err => {
         setDetail(prev => (prev && prev.id === id ? snapshot : prev))

@@ -52,11 +52,11 @@ export function usePopoutCustomerNotes(customerId: string | undefined) {
   const addNote = useCallback((payload: NotePayload) => {
     if (!customerId) return
     const temp: CustomerNote = {
-      id: `tmp-${Date.now()}`, type: payload.type, title: '', text: payload.body, ago: new Date().toISOString(),
+      id: `tmp-${Date.now()}`, type: payload.type, title: payload.title, text: payload.body, ago: new Date().toISOString(),
       contactId: null, contactName: '', locationId: null, locationName: '', departmentId: null, departmentName: '', level: '',
     }
     setNotes(prev => [temp, ...prev])
-    api.post(`/customers/${customerId}/notes`, { type: payload.type, text: payload.body, language: payload.language,
+    api.post(`/customers/${customerId}/notes`, { type: payload.type, title: payload.title, text: payload.body, language: payload.language,
       ...actionItemsWire(payload.action_items) })
       .then(() => load())
       .catch(err => {
@@ -75,9 +75,9 @@ export function usePopoutCustomerNotes(customerId: string | undefined) {
     const target = notes[index]
     if (!target) return Promise.resolve(false)
     const snapshot = notes
-    setNotes(prev => prev.map((n, i) => (i === index ? { ...n, type: payload.type, text: payload.body } : n)))
+    setNotes(prev => prev.map((n, i) => (i === index ? { ...n, type: payload.type, title: payload.title, text: payload.body } : n)))
     return landedWrite(
-      api.patch(`/customers/${customerId}/notes/${target.id}`, { type: payload.type, text: payload.body, language: payload.language, ...actionItemsWire(payload.action_items) }),
+      api.patch(`/customers/${customerId}/notes/${target.id}`, { type: payload.type, title: payload.title, text: payload.body, language: payload.language, ...actionItemsWire(payload.action_items) }),
       load, () => setNotes(snapshot), t)
   }, [customerId, notes, load, t])
 

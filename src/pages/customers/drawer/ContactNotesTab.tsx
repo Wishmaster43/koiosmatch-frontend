@@ -54,7 +54,7 @@ export default function ContactNotesTab({ contactId, customerId }: {
   // ScopedNotesTab uses — the note's id is scope-agnostic (see that file).
   const editNote = (noteId: Id | undefined, payload: { type: string; title: string; body: string; language?: string }) => {
     if (!customerId || noteId == null) return
-    api.patch(`/customers/${customerId}/notes/${noteId}`, { type: payload.type, text: payload.body, language: payload.language })
+    api.patch(`/customers/${customerId}/notes/${noteId}`, { type: payload.type, title: payload.title, text: payload.body, language: payload.language })
       .then(reload)
       .catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
   }
