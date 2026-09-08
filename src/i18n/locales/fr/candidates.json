@@ -1242,7 +1242,12 @@
     "errFailed": "Échec de la fusion. Veuillez réessayer.",
     "duplicateLabel": "Candidat en double",
     "searchHint": "Saisissez au moins {{min}} caractères",
-    "errSearch": "La recherche a échoué. Réessayez."
+    "errSearch": "La recherche a échoué. Réessayez.",
+    "errLoadCustomFields": "Le chargement des champs personnalisés a échoué. Veuillez réessayer.",
+    "conflictsTitle": "Champs personnalisés en conflit",
+    "fieldConflictIntro": "Les deux dossiers ont une valeur différente pour ces champs personnalisés. Choisissez par champ la valeur à conserver dans le dossier restant.",
+    "chooseValue": "Valeur pour {{field}}",
+    "staysSummary": "Dossier conservé : {{name}}"
   },
   "duplicate": {
     "blockedTitle": "Cette personne existe déjà",

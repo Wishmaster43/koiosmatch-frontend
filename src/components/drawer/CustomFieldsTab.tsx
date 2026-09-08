@@ -10,6 +10,8 @@ import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
 import { useCustomFields } from '@/lib/useCustomFields'
 import type { CustomFieldDef, CustomFieldEntityType } from '@/lib/useCustomFields'
+// X-37: the read-only value rendering is shared with the merge modal's conflict step.
+import { displayCustomFieldValue } from '@/lib/customFieldDisplay'
 import { useDateFormat } from '@/lib/datetime'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
@@ -28,14 +30,6 @@ import { GroupLabel } from '@/components/ui/typography'
 
 // Canon field style (G33/fieldMetrics) — was its own padding-6/font-12/radius-6 copy.
 const inputStyle: CSSProperties = fieldInputStyle
-
-// Render one value read-only (boolean → yes/no, date → locale date, else string).
-function display(def: CustomFieldDef, raw: unknown, t: (k: string) => string, formatDate: (v: string) => string): string {
-  if (raw == null || raw === '') return '—'
-  if (def.type === 'boolean') return raw ? t('yes') : t('no')
-  if (def.type === 'date' && typeof raw === 'string') return formatDate(raw)
-  return String(raw)
-}
 
 // Render the edit control for one non-textarea field type.
 function FieldInput({ def, value, onChange, labelId }: { def: CustomFieldDef; value: unknown; onChange: (v: unknown) => void; labelId?: string }) {
@@ -157,7 +151,7 @@ export default function CustomFieldsTab({ entityType, values, onSave }: Props) {
                 <GroupLabel id={labelId} style={{ letterSpacing: '0.04em', marginBottom: 3 }}>{def.label}</GroupLabel>
                 {editing
                   ? <FieldInput def={def} value={draft[def.key] ?? values[def.key]} onChange={val => setVal(def.key, val)} labelId={labelId} />
-                  : <div style={{ fontSize: 13, color: 'var(--text)', minHeight: 18 }}>{display(def, values[def.key], t, formatDate)}</div>}
+                  : <div style={{ fontSize: 13, color: 'var(--text)', minHeight: 18 }}>{displayCustomFieldValue(def, values[def.key], t, formatDate)}</div>}
               </div>
             )
           })}

@@ -1242,7 +1242,12 @@
     "errFailed": "Samenvoegen mislukt. Probeer het opnieuw.",
     "duplicateLabel": "Dubbele kandidaat",
     "searchHint": "Typ minimaal {{min}} tekens",
-    "errSearch": "Zoeken mislukt. Probeer het opnieuw."
+    "errSearch": "Zoeken mislukt. Probeer het opnieuw.",
+    "errLoadCustomFields": "Eigen velden laden mislukt. Probeer het opnieuw.",
+    "conflictsTitle": "Botsende eigen velden",
+    "fieldConflictIntro": "Beide dossiers hebben een andere waarde voor deze eigen velden. Kies per veld welke waarde in het blijvende dossier komt.",
+    "chooseValue": "Waarde voor {{field}}",
+    "staysSummary": "Blijvend dossier: {{name}}"
   },
   "duplicate": {
     "blockedTitle": "Deze persoon bestaat al",

@@ -1242,7 +1242,12 @@
     "errFailed": "Falha ao unir. Tente novamente.",
     "duplicateLabel": "Candidato duplicado",
     "searchHint": "Digite pelo menos {{min}} caracteres",
-    "errSearch": "A pesquisa falhou. Tente novamente."
+    "errSearch": "A pesquisa falhou. Tente novamente.",
+    "errLoadCustomFields": "Não foi possível carregar os campos personalizados. Tente novamente.",
+    "conflictsTitle": "Campos personalizados em conflito",
+    "fieldConflictIntro": "Ambos os registos têm um valor diferente para estes campos personalizados. Escolha por campo qual valor fica no registo que permanece.",
+    "chooseValue": "Valor para {{field}}",
+    "staysSummary": "Registo que permanece: {{name}}"
   },
   "duplicate": {
     "blockedTitle": "Esta pessoa já existe",

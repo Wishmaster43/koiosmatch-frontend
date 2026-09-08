@@ -1242,7 +1242,12 @@
     "errFailed": "Zusammenführen fehlgeschlagen. Bitte erneut versuchen.",
     "duplicateLabel": "Doppelter Kandidat",
     "searchHint": "Mindestens {{min}} Zeichen eingeben",
-    "errSearch": "Suche fehlgeschlagen. Bitte erneut versuchen."
+    "errSearch": "Suche fehlgeschlagen. Bitte erneut versuchen.",
+    "errLoadCustomFields": "Eigene Felder konnten nicht geladen werden. Bitte erneut versuchen.",
+    "conflictsTitle": "Widersprüchliche eigene Felder",
+    "fieldConflictIntro": "Beide Datensätze haben für diese eigenen Felder einen anderen Wert. Wählen Sie pro Feld, welcher Wert in den verbleibenden Datensatz übernommen wird.",
+    "chooseValue": "Wert für {{field}}",
+    "staysSummary": "Verbleibender Datensatz: {{name}}"
   },
   "duplicate": {
     "blockedTitle": "Diese Person existiert bereits",

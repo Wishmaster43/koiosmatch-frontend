@@ -7,6 +7,16 @@
  * 09-08, permission candidates.delete) and hands the survivor id back to the
  * page, which reopens it fresh.
  *
+ * X-37 (Danny K-27, "no auto-merge on conflicting custom-field values — the user
+ * chooses per field"): confirming step 2 first loads both records' custom_fields
+ * (the LITE picker rows carry none). No collision → the merge fires straight away,
+ * the source's values filling the survivor's empty fields. A collision → step 3
+ * (MergeFieldConflicts) with a per-field two-way choice, preselected on the survivor.
+ * The resulting map travels INSIDE the merge call as `field_choices.custom_fields`
+ * (CandidateMerger applies field_choices in the merge transaction, fillable keys
+ * only) — one atomic write, never a separate PATCH that could land without the merge.
+ * When nothing would change, the request stays the plain `{ source_id }`.
+ *
  * MERGE-PICKER-1 (Danny 08-08 punt 20, "kandidaat samenvoegen: zoekbare dropdown
  * hebben die leesbaar is"): step 1 used to be a hand-rolled search input plus an
  * inline result list — the only picker in the app that was not the house dropdown.
@@ -24,16 +34,21 @@ import { useCallback, useEffect, useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { ChevronDown, GitMerge } from 'lucide-react'
-import api, { unwrapList } from '@/lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import Spinner from '@/components/ui/Spinner'
 import SearchSelect from '@/components/ui/SearchSelect'
 import SegmentedControl from '@/components/ui/SegmentedControl'
+import { Caption } from '@/components/ui/typography'
 import { Z } from '@/lib/zIndexScale'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
+import { useCustomFields } from '@/lib/useCustomFields'
+import MergeFieldConflicts from './MergeFieldConflicts'
+import { computeCustomFieldConflicts, customFieldsChanged, mergeCustomFieldMaps } from './mergeCustomFields'
+import type { ConflictChoice, CustomFieldMap } from './mergeCustomFields'
 
 // Modal body is 460 wide with 20px padding — the dropdown spans that inner width so
 // a full "name · number · e-mail" row is readable without truncating (punt 20).
@@ -53,7 +68,15 @@ const rowToLite = (r: ApiRow): LiteCandidate => ({
   email: r.email ?? undefined,
 })
 
-// Two-step merge flow (see the module doc above): a searchable duplicate picker, then a survivor choice, calling the real merge endpoint and handing the survivor id back to the page.
+// Both records' custom_fields maps, loaded on step-2 confirm (survivor side first).
+interface CustomMaps { survivor: CustomFieldMap; source: CustomFieldMap }
+// The detail payload's custom_fields map, tolerant of a missing key (older rows).
+const customMapOf = (res: unknown): CustomFieldMap =>
+  (unwrap<{ custom_fields?: CustomFieldMap } | null>(res as { data: unknown })?.custom_fields) ?? {}
+
+// Two-step merge flow with a conditional third step (see the module doc above): a
+// searchable duplicate picker, a survivor choice, then — only on colliding custom
+// fields — a per-field choice; the merge endpoint gets the survivor id + field_choices.
 export default function MergeCandidateModal({ current, onClose, onMerged, initialOther }: {
   current: LiteCandidate
   onClose: () => void
@@ -67,6 +90,8 @@ export default function MergeCandidateModal({ current, onClose, onMerged, initia
   const queryClient = useQueryClient()
   const labelId = useId()
   const triggerId = useId()
+  // allFields, not fields: an API-only (hidden) custom field can collide just the same.
+  const { allFields: customFieldDefs } = useCustomFields('candidate')
 
   // Step 1: server-side duplicate search (excluding the open candidate itself).
   const [query, setQuery] = useState('')
@@ -76,7 +101,19 @@ export default function MergeCandidateModal({ current, onClose, onMerged, initia
   const [other, setOther] = useState<LiteCandidate | null>(initialOther ?? null)
   // Step 2: which record remains — default: the candidate that is open now.
   const [survivorId, setSurvivorId] = useState<Id>(current.id)
+  // Step 3 (X-37): the loaded maps, the colliding keys and the per-key choice.
+  const [customMaps, setCustomMaps] = useState<CustomMaps | null>(null)
+  const [conflicts, setConflicts] = useState<string[]>([])
+  const [choices, setChoices] = useState<Record<string, ConflictChoice>>({})
+  const [loadingFields, setLoadingFields] = useState(false)
   const [merging, setMerging] = useState(false)
+
+  // The step is DERIVED, never stored: no duplicate yet → 1; maps loaded with at
+  // least one collision → 3; otherwise 2. "Back" from 3 just drops the maps.
+  const step: 1 | 2 | 3 = !other ? 1 : (customMaps && conflicts.length > 0) ? 3 : 2
+  const survivorIsCurrent = String(survivorId) === String(current.id)
+  const survivor = survivorIsCurrent ? current : (other ?? current)
+  const source = survivorIsCurrent ? other : current
 
   // SearchSelect owns the debounce (250ms) and hands the settled term down here —
   // stable identity so its own debounce effect never re-arms on every render.
@@ -122,23 +159,60 @@ export default function MergeCandidateModal({ current, onClose, onMerged, initia
     : (query.trim().length > 0 && query.trim().length < MIN_SEARCH_LENGTH) ? t('merge.searchHint', { min: MIN_SEARCH_LENGTH })
     : ''
 
-  // Fire the merge; the response is the merged detail but the page refetches itself.
-  const confirm = async () => {
-    if (!other || merging) return
-    const survivor = survivorId
-    const source = String(survivorId) === String(current.id) ? other.id : current.id
+  // Fire the merge. The survivor's wanted custom_fields map rides along as
+  // field_choices ONLY when it differs from what the survivor already holds — so the
+  // no-change case is byte-for-byte the pre-X-37 request. The response is the merged
+  // detail but the page refetches itself.
+  const runMerge = async (maps: CustomMaps, chosen: Record<string, ConflictChoice>) => {
+    if (!source || merging) return
+    const merged = mergeCustomFieldMaps(maps.survivor, maps.source, chosen)
+    const body = customFieldsChanged(maps.survivor, merged)
+      ? { source_id: source.id, field_choices: { custom_fields: merged } }
+      : { source_id: source.id }
     setMerging(true)
     try {
-      await api.post(`/candidates/${survivor}/merge`, { source_id: source })
+      await api.post(`/candidates/${survivorId}/merge`, body)
       // List + stats caches now hold a soft-deleted source row — refetch everything.
       queryClient.invalidateQueries({ queryKey: ['candidates'] })
       notifySuccess(t('merge.done'))
-      onMerged(survivor)
+      onMerged(survivorId)
     } catch (err) {
       const status = (err as { response?: { status?: number } })?.response?.status
       notifyError(status === 403 ? t('merge.errForbidden') : t('merge.errFailed'))
       setMerging(false)
     }
+  }
+
+  // Step-2 confirm: load both records' custom_fields, then either merge straight
+  // away (no collision) or open step 3 with every collision preselected on the survivor.
+  // A failed load reports and stays on step 2 — never a merge on unknown values.
+  const loadFieldsAndContinue = async () => {
+    if (!source || loadingFields || merging) return
+    setLoadingFields(true)
+    try {
+      const [survivorRes, sourceRes] = await Promise.all([api.get(`/candidates/${survivor.id}`), api.get(`/candidates/${source.id}`)])
+      const maps: CustomMaps = { survivor: customMapOf(survivorRes), source: customMapOf(sourceRes) }
+      const found = computeCustomFieldConflicts(maps.survivor, maps.source)
+      const preselected = Object.fromEntries(found.map(key => [key, 'survivor' as const]))
+      setCustomMaps(maps)
+      setConflicts(found)
+      setChoices(preselected)
+      if (found.length === 0) await runMerge(maps, preselected)
+    } catch {
+      notifyError(t('merge.errLoadCustomFields'))
+    } finally {
+      setLoadingFields(false)
+    }
+  }
+
+  // The confirm button routes by step: 2 loads (and maybe merges), 3 merges with the choices.
+  const confirm = () => (step === 3 && customMaps) ? runMerge(customMaps, choices) : loadFieldsAndContinue()
+
+  // "Back": from step 3 drop the maps (the survivor choice reopens, choices reset with
+  // it); from step 2 drop the duplicate and return to the picker.
+  const back = () => {
+    if (step === 3) { setCustomMaps(null); setConflicts([]); setChoices({}); return }
+    setOther(null); setSurvivorId(current.id); setCustomMaps(null)
   }
 
   // One radio option per side — label is the record's name, description is its meta
@@ -148,6 +222,8 @@ export default function MergeCandidateModal({ current, onClose, onMerged, initia
     label: c.name,
     description: [isCurrent ? t('merge.thisRecord') : t('merge.otherRecord'), c.code, c.email].filter(Boolean).join(' · '),
   })
+
+  const busy = loadingFields || merging
 
   return (
     // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
@@ -160,7 +236,7 @@ export default function MergeCandidateModal({ current, onClose, onMerged, initia
         {/* Step 1 — pick the duplicate through the house searchable dropdown
             (MERGE-PICKER-1). Label + live status share one row so the trigger never
             shifts while the menu is open (SearchSelect measures the anchor once). */}
-        {!other && (
+        {step === 1 && (
           <div style={{ marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8, minHeight: 16, marginBottom: 4 }}>
               <span id={labelId} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>{t('merge.duplicateLabel')}</span>
@@ -188,29 +264,42 @@ export default function MergeCandidateModal({ current, onClose, onMerged, initia
           </div>
         )}
 
-        {/* Step 2 — choose the survivor + danger summary. */}
-        {other && (
+        {/* Step 2 — choose the survivor; step 3 recaps that choice read-only ("Back"
+            reopens it) and lists the colliding custom fields. The danger summary
+            stays under BOTH, because the confirm that archives the source lives on
+            whichever step is the last one. */}
+        {step >= 2 && other && source && (
           <>
-            <div style={{ marginBottom: 10 }}>
-              {/* Visible caption doubles as the radiogroup's accessible name (matches
-                  the duplicateLabel caption above it in step 1). */}
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>{t('merge.stays')}</div>
-              <SegmentedControl
-                options={[survivorOption(current, true), survivorOption(other, false)]}
-                value={String(survivorId)}
-                onChange={id => setSurvivorId(id)}
-                ariaLabel={t('merge.stays')}
-              />
-            </div>
+            {step === 2 ? (
+              <div style={{ marginBottom: 10 }}>
+                {/* Visible caption doubles as the radiogroup's accessible name (matches
+                    the duplicateLabel caption above it in step 1). */}
+                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>{t('merge.stays')}</div>
+                <SegmentedControl
+                  options={[survivorOption(current, true), survivorOption(other, false)]}
+                  value={String(survivorId)}
+                  onChange={id => setSurvivorId(id)}
+                  ariaLabel={t('merge.stays')}
+                />
+              </div>
+            ) : (
+              <Caption as="div" style={{ marginBottom: 10 }}>{t('merge.staysSummary', { name: survivor.name })}</Caption>
+            )}
+            {step === 3 && customMaps && (
+              <MergeFieldConflicts conflicts={conflicts} defs={customFieldDefs}
+                survivor={{ name: survivor.name, values: customMaps.survivor }}
+                source={{ name: source.name, values: customMaps.source }}
+                choices={choices} onChoose={(key, choice) => setChoices(prev => ({ ...prev, [key]: choice }))} />
+            )}
             <div style={{ fontSize: 12, color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)', border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', borderRadius: 8, padding: '8px 10px', lineHeight: 1.5, marginBottom: 12 }}>
-              {t('merge.warning', { source: String(survivorId) === String(current.id) ? other.name : current.name })}
+              {t('merge.warning', { source: source.name })}
             </div>
           </>
         )}
 
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
           {other
-            ? <Button variant="secondary" size="sm" onClick={() => { setOther(null); setSurvivorId(current.id) }}>
+            ? <Button variant="secondary" size="sm" onClick={back} disabled={busy}>
                 {t('merge.back')}
               </Button>
             : <span />}
@@ -218,8 +307,8 @@ export default function MergeCandidateModal({ current, onClose, onMerged, initia
             <Button variant="secondary" size="sm" onClick={onClose}>
               {t('merge.cancel')}
             </Button>
-            <Button variant="danger" size="sm" onClick={confirm} disabled={!other || merging}>
-              {merging ? <Spinner size={13} /> : <GitMerge size={13} />} {t('merge.confirm')}
+            <Button variant="danger" size="sm" onClick={confirm} disabled={!other || busy}>
+              {busy ? <Spinner size={13} /> : <GitMerge size={13} />} {t('merge.confirm')}
             </Button>
           </div>
         </div>

@@ -1242,7 +1242,12 @@
     "errFailed": "Merge failed. Please try again.",
     "duplicateLabel": "Duplicate candidate",
     "searchHint": "Type at least {{min}} characters",
-    "errSearch": "Search failed. Please try again."
+    "errSearch": "Search failed. Please try again.",
+    "errLoadCustomFields": "Loading the custom fields failed. Please try again.",
+    "conflictsTitle": "Conflicting custom fields",
+    "fieldConflictIntro": "Both records hold a different value for these custom fields. Choose per field which value goes into the remaining record.",
+    "chooseValue": "Value for {{field}}",
+    "staysSummary": "Remaining record: {{name}}"
   },
   "duplicate": {
     "blockedTitle": "This person already exists",

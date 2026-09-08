@@ -1242,7 +1242,12 @@
     "errFailed": "Unione non riuscita. Riprova.",
     "duplicateLabel": "Candidato duplicato",
     "searchHint": "Digita almeno {{min}} caratteri",
-    "errSearch": "Ricerca non riuscita. Riprova."
+    "errSearch": "Ricerca non riuscita. Riprova.",
+    "errLoadCustomFields": "Caricamento dei campi personalizzati non riuscito. Riprova.",
+    "conflictsTitle": "Campi personalizzati in conflitto",
+    "fieldConflictIntro": "Entrambe le schede hanno un valore diverso per questi campi personalizzati. Scegli per ogni campo quale valore mantenere nella scheda che resta.",
+    "chooseValue": "Valore per {{field}}",
+    "staysSummary": "Scheda che resta: {{name}}"
   },
   "duplicate": {
     "blockedTitle": "Questa persona esiste già",

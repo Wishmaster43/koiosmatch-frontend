@@ -1242,7 +1242,12 @@
     "errFailed": "Error al fusionar. Inténtalo de nuevo.",
     "duplicateLabel": "Candidato duplicado",
     "searchHint": "Escribe al menos {{min}} caracteres",
-    "errSearch": "La búsqueda ha fallado. Inténtalo de nuevo."
+    "errSearch": "La búsqueda ha fallado. Inténtalo de nuevo.",
+    "errLoadCustomFields": "No se pudieron cargar los campos personalizados. Inténtalo de nuevo.",
+    "conflictsTitle": "Campos personalizados en conflicto",
+    "fieldConflictIntro": "Ambos registros tienen un valor distinto para estos campos personalizados. Elige por campo qué valor se conserva en el registro que permanece.",
+    "chooseValue": "Valor para {{field}}",
+    "staysSummary": "Registro que permanece: {{name}}"
   },
   "duplicate": {
     "blockedTitle": "Esta persona ya existe",
