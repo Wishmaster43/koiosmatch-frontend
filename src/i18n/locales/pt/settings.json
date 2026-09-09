@@ -688,7 +688,9 @@
     "isUnavailable": "Estado indisponível",
     "isUnavailableHint": "Este status significa não disponível para implantação.",
     "isInactive": "Inativo",
-    "isInactiveHint": "Este cliente/local/departamento/contato está inativo."
+    "isInactiveHint": "Este cliente/local/departamento/contato está inativo.",
+    "hasContractLines": "Mostrar linhas de contrato",
+    "hasContractLinesHint": "Um match com esta forma de contrato mostra linhas de contrato preenchíveis."
   },
   "vacancy": {
     "title": "Estados",
@@ -2619,7 +2621,8 @@
     "expiringAlertDaysTitle": "Aviso de expiração",
     "expiringAlertDaysHint": "Quantos dias antes da data de validade de um documento de candidato a automação de aviso de expiração dispara.",
     "expiringAlertDaysLabel": "Dias (1-365)",
-    "expiringAlertDaysSaveFailed": "Não foi possível guardar o aviso de expiração."
+    "expiringAlertDaysSaveFailed": "Não foi possível guardar o aviso de expiração.",
+    "isCv": "Marcação de CV"
   },
   "requiredFields": {
     "expandAll": "Expandir tudo",

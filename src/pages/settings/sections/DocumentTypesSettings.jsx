@@ -79,7 +79,11 @@ export default function DocumentTypesSettings({ entity }) {
         iconPicker={{ icons: DOC_TYPE_ICON_NAMES, resolve: resolveDocTypeIcon }}
         numberField={{ key: 'default_validity_months', label: t('documentTypes.defaultValidityMonths'),
           default: null, min: 1, max: 1200, suffix: t('documentTypes.validityMonthsSuffix') }}
-        flagField={{ key: 'requires_expiry', label: t('documentTypes.requiresExpiry'), description: t('documentTypes.requiresExpiryDesc') }} />
+        flagField={{ key: 'requires_expiry', label: t('documentTypes.requiresExpiry'), description: t('documentTypes.requiresExpiryDesc') }}
+        // DL-11: is_cv is a singleton flag several features read (missing-CV signal,
+        // dashboard/KPI, has_cv filter) but the screen offered no control — scoped to
+        // the candidate tab only, since every reader calls cvTypeNames('candidate').
+        defaultFields={entity === 'candidate' ? [{ field: 'is_cv', labelKey: 'documentTypes.isCv' }] : null} />
     </div>
   )
 }

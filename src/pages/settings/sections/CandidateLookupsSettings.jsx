@@ -28,6 +28,7 @@ import { Trash2, Pencil } from 'lucide-react'
 import Spinner from '@/components/ui/Spinner'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import { useConfirm } from '@/hooks/useConfirm'
 import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/SettingsControls'
 import IconPickerControl from './IconPickerControl'
@@ -64,7 +65,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
   const supportsIcon = isStatusBlock || isContractFormBlock
 
   // eslint-disable-next-line no-restricted-syntax -- DATA: default swatch colour pre-filled for a newly created lookup row, not UI chrome
-  const openAdd  = ()   => setModal({ mode: 'add',  value: '', label: '', color: '#3B8FD4', icon: null, requires_appointment: false, requires_reason: false, requires_match: false, expects_return_date: false, is_match: false, is_rejected: false, is_proposal: false, is_blacklist: false, is_applicant: false, customer_not_applicable: false, is_leave: false, is_unavailable: false })
+  const openAdd  = ()   => setModal({ mode: 'add',  value: '', label: '', color: '#3B8FD4', icon: null, requires_appointment: false, requires_reason: false, requires_match: false, expects_return_date: false, is_match: false, is_rejected: false, is_proposal: false, is_blacklist: false, is_applicant: false, customer_not_applicable: false, is_leave: false, is_unavailable: false, has_contract_lines: false })
   // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
   const openEdit = (it) => setModal({ mode: 'edit', id: it.id, value: it.value, label: it.label, color: it.color ?? '#6B7280', icon: it.icon ?? null,
     requires_appointment: it.requires_appointment === true, requires_reason: it.requires_reason === true,
@@ -72,7 +73,10 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
     is_match: it.is_match === true, is_rejected: it.is_rejected === true,
     is_proposal: it.is_proposal === true, is_blacklist: it.is_blacklist === true,
     is_applicant: it.is_applicant === true, customer_not_applicable: it.customer_not_applicable === true,
-    is_leave: it.is_leave === true, is_unavailable: it.is_unavailable === true })
+    is_leave: it.is_leave === true, is_unavailable: it.is_unavailable === true,
+    // SAC-10: hydrate the flag on edit-open so a save never silently clears it on
+    // an existing contract-form row (e.g. the seeded flex_services row).
+    has_contract_lines: it.has_contract_lines === true })
 
   // Persists the add/edit modal: creates or updates the lookup row, sending only the
   // per-type flag fields this lookup actually supports (the backend guards the rest).
@@ -85,9 +89,11 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
       ...(isStatusBlock ? { requires_reason: modal.requires_reason, requires_match: modal.requires_match, expects_return_date: modal.expects_return_date, is_blacklist: modal.is_blacklist, is_leave: modal.is_leave, is_unavailable: modal.is_unavailable } : {}),
       ...(isFunnelBlock ? { requires_appointment: modal.requires_appointment, is_match: modal.is_match, is_rejected: modal.is_rejected, is_proposal: modal.is_proposal } : {}),
       ...(isPhaseBlock  ? { is_applicant: modal.is_applicant } : {}),
-      // MATCH-KLANTLOOS-1: contract forms only — a match resolved to this form
-      // rejects customer/location/department/contact server-side and requires branch_id.
-      ...(isContractFormBlock ? { customer_not_applicable: modal.customer_not_applicable } : {}),
+      // Contract forms only: MATCH-KLANTLOOS-1's customer_not_applicable (a match
+      // resolved to this form rejects customer/location/department/contact
+      // server-side and requires branch_id) and SAC-10's has_contract_lines (the
+      // match form renders fillable contract lines for this contract form).
+      ...(isContractFormBlock ? { customer_not_applicable: modal.customer_not_applicable, has_contract_lines: modal.has_contract_lines } : {}),
     }
     try {
       if (modal.mode === 'add') {
@@ -99,7 +105,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
         setItems(p => p.map(x => x.id === modal.id ? { ...x, label: modal.label.trim(), color: modal.color, ...flagFields } : x))
       }
       setModal(null)
-    } catch { notifyError(t('statusList.saveFailed')) } finally { setBusy(false) }
+    } catch (e) { notifyError(extractApiError(e, t('statusList.saveFailed'))) } finally { setBusy(false) }
   }
 
   // In-row colour change: applies optimistically, reverts + notifies on failure.
@@ -109,7 +115,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
     // Revert the optimistic colour on failure — otherwise the row keeps showing an
     // unsaved colour as if it had persisted (§3: no silent state drift).
     try { await api.put(`${BASE}/${slug}/${it.id}`, { label: it.label, color }) }
-    catch { setItems(previous); notifyError(t('statusList.saveFailed')) }
+    catch (e) { setItems(previous); notifyError(extractApiError(e, t('statusList.saveFailed'))) }
   }
 
   // In-row icon change (statuses/contract forms) — same optimistic+revert shape as updateColor.
@@ -117,7 +123,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
     const previous = items
     setItems(p => p.map(x => x.id === it.id ? { ...x, icon } : x))
     try { await api.put(`${BASE}/${slug}/${it.id}`, { label: it.label, color: it.color, icon }) }
-    catch { setItems(previous); notifyError(t('statusList.saveFailed')) }
+    catch (e) { setItems(previous); notifyError(extractApiError(e, t('statusList.saveFailed'))) }
   }
 
   // Singleton flip (funnel stages only): promote one stage to is_default and clear
@@ -130,10 +136,10 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
     setItems(p => p.map(x => ({ ...x, is_default: x.id === it.id })))
     try {
       await api.put(`${BASE}/${slug}/${it.id}`, { label: it.label, color: it.color, is_default: true })
-    } catch {
+    } catch (e) {
       // Audit r4: revert alone read as "saved" — tell the user, like the siblings.
       setItems(previous)
-      notifyError(t('statusList.saveFailed'))
+      notifyError(extractApiError(e, t('statusList.saveFailed')))
     } finally {
       setSettingDefaultId(null)
     }
@@ -164,7 +170,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
     // Revert the optimistic order on failure — otherwise the list shows an order
     // that was never actually saved (§3: no silent state drift).
     try { await api.put(`${BASE}/${slug}/reorder`, { ids: next.map(x => x.id) }) }
-    catch { setItems(previous); notifyError(t('statusList.saveFailed')) }
+    catch (e) { setItems(previous); notifyError(extractApiError(e, t('statusList.saveFailed'))) }
   }
 
   return (

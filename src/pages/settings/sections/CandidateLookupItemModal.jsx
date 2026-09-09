@@ -136,6 +136,15 @@ export default function CandidateLookupItemModal({
           </div>
         )}
 
+        {/* Contract-lines toggle — contract forms only (SAC-10): a match resolved to
+            this Contractvorm shows the contract-lines block (ContractLinesSection reads
+            it via useMatchForm). Was persisted/returned by the backend but had no FE
+            control, so every tenant-created form was stuck false. */}
+        {isContractFormBlock && (
+          <FlagRow labelKey="lookups.hasContractLines" hintKey="lookups.hasContractLinesHint"
+            checked={!!modal.has_contract_lines} onChange={v => setModal(m => ({ ...m, has_contract_lines: v }))} />
+        )}
+
         {/* Applicant toggle — phases only. Not backend-singleton (verified against
             CandidateLookupController::update(), koiosmatch-api: ApplicationStage::
             SINGLETON_FLAGS does not include is_applicant for the phases config), so a

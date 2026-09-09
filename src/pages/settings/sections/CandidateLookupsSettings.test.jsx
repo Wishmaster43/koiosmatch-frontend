@@ -422,11 +422,75 @@ describe('CandidateLookupsSettings — customer_not_applicable flag (MATCH-KLANT
 
     await screen.findByText('ZZP')
     await user.click(screen.getByTitle(st('lookups.edit')))
-    // customer_not_applicable is the only toggle in the contract-form modal.
-    await user.click(screen.getByRole('switch'))
+    // customer_not_applicable renders first in the contract-form modal, ahead of
+    // has_contract_lines (SAC-10); it carries no accessible name yet (out of this
+    // fix's scope, mirrors the file's other unlabelled sibling toggles), so pick by order.
+    await user.click(screen.getAllByRole('switch')[0])
     await user.click(screen.getByText(st('common.save')))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith(
       '/settings/candidate-lookups/candidate-types/c1', expect.objectContaining({ customer_not_applicable: true })))
+  })
+})
+
+// SAC-10: has_contract_lines was persisted/returned by the backend but had no FE
+// control — a tenant-created contract form was stuck false forever. Covers the
+// write path and the edit-hydrate guard (openEdit must not silently clear it).
+describe('CandidateLookupsSettings — has_contract_lines flag (SAC-10)', () => {
+  it('saves has_contract_lines:true on a contract form via the edit modal', async () => {
+    api.get.mockResolvedValue({ data: {
+      candidate_types: [{ id: 'c1', value: 'flex_services', label: 'Flex diensten', customer_not_applicable: false, has_contract_lines: false }],
+    } })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<ContractFormsSettings />)
+
+    await screen.findByText('Flex diensten')
+    await user.click(screen.getByTitle(st('lookups.edit')))
+    // has_contract_lines carries an accessible name (ariaLabel); select by that.
+    await user.click(screen.getByRole('switch', { name: st('lookups.hasContractLines') }))
+    await user.click(screen.getByText(st('common.save')))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+      '/settings/candidate-lookups/candidate-types/c1', expect.objectContaining({ has_contract_lines: true })))
+  })
+
+  // Edit-hydrate guard: opening the modal on a row that already has the flag set
+  // must not silently PUT it back to false (the omitted-hydrate bug the finding warned about).
+  it('does not clear has_contract_lines on an unrelated edit save', async () => {
+    api.get.mockResolvedValue({ data: {
+      candidate_types: [{ id: 'c1', value: 'flex_services', label: 'Flex diensten', customer_not_applicable: false, has_contract_lines: true }],
+    } })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<ContractFormsSettings />)
+
+    await screen.findByText('Flex diensten')
+    await user.click(screen.getByTitle(st('lookups.edit')))
+    await user.click(screen.getByText(st('common.save')))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+      '/settings/candidate-lookups/candidate-types/c1', expect.objectContaining({ has_contract_lines: true })))
+  })
+})
+
+// SAC-04: the five handlers threw the server's 422 reason away and always showed
+// the generic saveFailed toast — extractApiError now surfaces the real message.
+describe('CandidateLookupsSettings — extractApiError surfaces the server reason (SAC-04)', () => {
+  it('save() shows the server validation message instead of the generic fallback', async () => {
+    api.get.mockResolvedValue({ data: { statuses: [
+      { id: 's1', value: 'available', label: 'Beschikbaar' },
+    ] } })
+    api.post.mockRejectedValue({ response: { data: { errors: { value: ['Deze waarde is al in gebruik.'] } } } })
+    const { notifyError } = await import('@/lib/notify')
+    const user = userEvent.setup()
+    render(<CandidateStatusesSettings />)
+
+    await screen.findByText('Beschikbaar')
+    await user.click(screen.getByRole('button', { name: st('lookups.add') }))
+    await user.type(screen.getByPlaceholderText(st('lookups.labelPlaceholder')), 'Duplicaat')
+    await user.click(screen.getByText(st('common.save')))
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith('Deze waarde is al in gebruik.'))
   })
 })

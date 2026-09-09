@@ -688,7 +688,9 @@
     "isUnavailable": "Stato non disponibile",
     "isUnavailableHint": "Questo stato significa non disponibile per la distribuzione.",
     "isInactive": "Inattivo",
-    "isInactiveHint": "Questo cliente/ubicazione/reparto/contatto è inattivo."
+    "isInactiveHint": "Questo cliente/ubicazione/reparto/contatto è inattivo.",
+    "hasContractLines": "Mostra righe di contratto",
+    "hasContractLinesHint": "Un match con questa forma contrattuale mostra righe di contratto compilabili."
   },
   "vacancy": {
     "title": "Stati",
@@ -2619,7 +2621,8 @@
     "expiringAlertDaysTitle": "Avviso di scadenza",
     "expiringAlertDaysHint": "Quanti giorni prima della data di scadenza di un documento del candidato scatta l'automazione di avviso di scadenza.",
     "expiringAlertDaysLabel": "Giorni (1-365)",
-    "expiringAlertDaysSaveFailed": "Salvataggio dell'avviso di scadenza non riuscito."
+    "expiringAlertDaysSaveFailed": "Salvataggio dell'avviso di scadenza non riuscito.",
+    "isCv": "Contrassegno CV"
   },
   "requiredFields": {
     "expandAll": "Espandi tutto",

@@ -138,4 +138,30 @@ describe('DocumentTypesSettings — per-entity tab', () => {
     await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/document-types/row-1'))
     expect(screen.getByText('CV')).toBeInTheDocument()
   })
+
+  // DL-11: is_cv was returned/persisted by the backend but had no FE control at
+  // all — scoped to the candidate tab only (every reader calls cvTypeNames('candidate')).
+  it('shows the is_cv DefaultToggle on the candidate tab and PUTs is_cv:true on promote', async () => {
+    api.get.mockResolvedValue({ data: [row(), row({ id: 'row-2', name: 'ID-bewijs', is_cv: false })] })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<DocumentTypesSettings entity="candidate" />)
+
+    await screen.findByText('ID-bewijs')
+    // Both rows render the same active/inactive label (labelKey wins over
+    // common.default/setDefault) — the second toggle belongs to 'ID-bewijs'.
+    const toggles = screen.getAllByRole('button', { name: st('documentTypes.isCv') })
+    await user.click(toggles[1])
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+      '/document-types/row-2', expect.objectContaining({ is_cv: true })))
+  })
+
+  it('does not render the is_cv toggle on a non-candidate tab', async () => {
+    api.get.mockResolvedValue({ data: [row({ id: 'row-2', name: 'Contract', entity: 'vacancy' })] })
+    render(<DocumentTypesSettings entity="vacancy" />)
+
+    await screen.findByText('Contract')
+    expect(screen.queryByRole('button', { name: st('documentTypes.isCv') })).not.toBeInTheDocument()
+  })
 })
