@@ -488,3 +488,31 @@ describe('useDashboardViewModel · vis() gates on PLANNING_BLOCKS, not a single 
     for (const id of planningIds) expect(result.current.vis(id)).toBe(true)
   })
 })
+
+// ENT2-07 — `net` is a sibling series INSIDE charts.timeseries, not a top-level
+// charts key; the trend row/series builder must read it from there.
+describe('useDashboardViewModel · ENT2-07 net series reads from charts.timeseries.net', () => {
+  it('includes the net series in trendData/trendSeries when timeseries.net is present', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      dash: { kpis: {} },
+      dashCharts: {
+        timeseries: {
+          candidates_in: [{ name: 'wk 36', value: 3 }],
+          net: [{ name: 'wk 36', value: 0 }, { name: 'wk 37', value: 1 }],
+        },
+      },
+    })))
+    expect(result.current.trendSeries.some(s => s.key === 'net')).toBe(true)
+    const row = result.current.trendData.find(r => r.name === 'wk 37')
+    expect(row?.net).toBe(1)
+  })
+
+  it('omits net from present series when timeseries carries no net key', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      dash: { kpis: {} },
+      dashCharts: { timeseries: { candidates_in: [{ name: 'wk 36', value: 3 }] } },
+    })))
+    const row = result.current.trendData.find(r => r.name === 'wk 36')
+    expect(row?.net).toBeUndefined()
+  })
+})

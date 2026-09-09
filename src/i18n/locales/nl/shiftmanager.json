@@ -264,6 +264,8 @@
     "recentConversations": "Recente conversaties",
     "viewAll": "Alles →",
     "candidates": "{{n}} kandidaten",
+    "runFailed": "Uitvoering mislukt",
+    "runInProgress": "Uitvoering bezig",
     "stats": {
       "openHours": "Openstaande aantal uur",
       "hoursThisMonth": "Uren huidige maand",

@@ -5,7 +5,7 @@
 import { useMemo, useState } from 'react'
 import { SM_STATUS, statusOf } from '@/lib/smStatus'
 import { useTranslation } from 'react-i18next'
-import { CheckCircle, AlertCircle } from 'lucide-react'
+import { CheckCircle, AlertCircle, Clock } from 'lucide-react'
 import { useKpiSettings } from '@/lib/useKpiSettings'
 import { useAuth } from '@/context/AuthContext'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
@@ -153,14 +153,16 @@ export default function ShiftmanagerDashboard() {
             <div key={i} className="flex items-center gap-3 px-4 py-3"
               style={{ borderBottom: i < runs.length - 1 ? '1px solid var(--hover-bg)' : 'none' }}>
               <div className="flex items-center justify-center flex-shrink-0 rounded-lg"
-                style={{ width: 28, height: 28, background: r.ok ? 'var(--color-success-bg)' : 'var(--color-danger-bg)' }}>
-                {r.ok
+                style={{ width: 28, height: 28, background: r.ok === true ? 'var(--color-success-bg)' : r.ok === false ? 'var(--color-danger-bg)' : 'var(--hover-bg)' }}>
+                {r.ok === true
                   ? <CheckCircle size={13} color="var(--color-success)" />
-                  : <AlertCircle size={13} color="var(--color-danger)" />}
+                  : r.ok === false
+                  ? <AlertCircle size={13} color="var(--color-danger)" />
+                  : <Clock size={13} color="var(--text-muted)" />}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="font-medium text-[var(--text)] truncate" style={{ fontSize: 13 }}>{r.name}</div>
-                <div className="text-xs text-[var(--text-muted)]">{r.ok ? t('dashboard.candidates', { n: r.n }) : r.err}</div>
+                <div className="text-xs text-[var(--text-muted)]">{r.ok === true ? t('dashboard.candidates', { n: r.n }) : r.ok === false ? (r.err ?? t('dashboard.runFailed')) : t('dashboard.runInProgress')}</div>
               </div>
               <span className="flex-shrink-0 text-xs text-[var(--text-muted)]">{r.time}</span>
             </div>

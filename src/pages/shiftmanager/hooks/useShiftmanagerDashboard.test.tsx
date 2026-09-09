@@ -4,6 +4,15 @@
  * configurable engine base URL (resolveWorkflowBaseURL), same as every other
  * run/cancel/logs call. Pins the route, the `per_page` param, and the resolved
  * baseURL together — a callback firing alone proves nothing about the request (§13).
+ *
+ * Also covers the ENT2-06/WFB-09 regression: the recent-runs mapper used to read
+ * field names (name/status='ok'/processed_count/error) the backend never emits,
+ * so every run rendered red with an empty title. Fixed to read the real
+ * RunPresenter contract (workflow_name/candidates_count/error_message/started_at)
+ * and to return a tri-state ok (true completed / false failed-cancelled / null
+ * in-flight) instead of collapsing "running" into "completed successfully". The
+ * actual RENDER of that tri-state (which colour paints) is asserted separately
+ * in ShiftmanagerDashboard.test.tsx, not here — this file only proves the mapper.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
@@ -12,9 +21,10 @@ import type { ReactNode } from 'react'
 import { useShiftmanagerDashboard } from './useShiftmanagerDashboard'
 import api from '@/lib/api'
 
+// Real unwrapList (pure) + a mocked api.get, mirroring the file's own siblings.
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
-  return { ...actual, default: { get: vi.fn() } }
+  return { default: { get: vi.fn() }, unwrapList: actual.unwrapList }
 })
 const mockedGet = vi.mocked(api.get)
 
@@ -98,5 +108,54 @@ describe('useShiftmanagerDashboard · recent runs tile (K-3 workflow-execution b
 
     await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/sm_candidates', expect.anything()))
     expect(mockedGet).not.toHaveBeenCalledWith('/workflow-runs', expect.anything())
+  })
+})
+
+describe('useShiftmanagerDashboard · recent-runs mapper reads the real RunPresenter contract', () => {
+  it('maps a completed run to its real name/count/time and ok=true', async () => {
+    mockedGet.mockImplementation((url: string) => Promise.resolve({
+      data: url === '/workflow-runs'
+        ? { data: [{ id: 'r1', workflow_name: 'Nachtelijke sync', status: 'success', candidates_count: 460, error_message: null, started_at: '2026-09-01T02:00:00Z' }] }
+        : { data: [] },
+    }))
+    const { result } = renderHook(() => useShiftmanagerDashboard(10, true), { wrapper })
+    await waitFor(() => expect(result.current.runs).toHaveLength(1))
+    expect(result.current.runs[0]).toMatchObject({ name: 'Nachtelijke sync', ok: true, n: 460, err: undefined })
+  })
+
+  it('marks a failed run as not-ok (false) and keeps its error message', async () => {
+    mockedGet.mockImplementation((url: string) => Promise.resolve({
+      data: url === '/workflow-runs'
+        ? { data: [{ id: 'r2', workflow_name: 'Failing sync', status: 'failed', candidates_count: 0, error_message: 'Timeout', started_at: '2026-09-01T02:00:00Z' }] }
+        : { data: [] },
+    }))
+    const { result } = renderHook(() => useShiftmanagerDashboard(10, true), { wrapper })
+    await waitFor(() => expect(result.current.runs).toHaveLength(1))
+    expect(result.current.runs[0]).toMatchObject({ ok: false, err: 'Timeout' })
+  })
+
+  it('marks an in-flight "running" run as the neutral ok=null state, distinct from a completed success', async () => {
+    mockedGet.mockImplementation((url: string) => Promise.resolve({
+      data: url === '/workflow-runs'
+        ? { data: [{ id: 'r3', workflow_name: 'Long sync', status: 'running', candidates_count: 12, error_message: null, started_at: '2026-09-01T02:00:00Z' }] }
+        : { data: [] },
+    }))
+    const { result } = renderHook(() => useShiftmanagerDashboard(10, true), { wrapper })
+    await waitFor(() => expect(result.current.runs).toHaveLength(1))
+    // Distinct from ok:true — SCHERMWAARHEID-1: a still-running sync must not be
+    // able to paint as a completed success. The RENDER of this null state (which
+    // colour/icon/copy it produces) is asserted in ShiftmanagerDashboard.test.tsx.
+    expect(result.current.runs[0]).toMatchObject({ ok: null, name: 'Long sync' })
+  })
+
+  it('marks an in-flight "waiting" run as the same neutral ok=null state', async () => {
+    mockedGet.mockImplementation((url: string) => Promise.resolve({
+      data: url === '/workflow-runs'
+        ? { data: [{ id: 'r4', workflow_name: 'Queued sync', status: 'waiting', candidates_count: 0, error_message: null, started_at: '2026-09-01T02:00:00Z' }] }
+        : { data: [] },
+    }))
+    const { result } = renderHook(() => useShiftmanagerDashboard(10, true), { wrapper })
+    await waitFor(() => expect(result.current.runs).toHaveLength(1))
+    expect(result.current.runs[0]).toMatchObject({ ok: null })
   })
 })

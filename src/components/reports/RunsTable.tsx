@@ -24,6 +24,20 @@ import { buildStatusGroup, buildWorkflowGroup } from './reportFilterDefs'
 import { Caption, bodyTextStyle } from '@/components/ui/typography'
 import type { RunRow, ReportFilterGroup } from '@/types/reports'
 
+// Display status → backend enum (WFB-14): RunPresenter maps its 'completed'
+// column value to the display string 'success' before it ever reaches the FE,
+// so forwarding the displayed value as-is would 422 against the API's `in:`
+// rule. Every other display status already matches its API value verbatim.
+const STATUS_DISPLAY_TO_API: Record<string, string> = { success: 'completed' }
+
+// WFB-14 (c): the FIXED five-value run-status vocabulary, never the statuses
+// present on the current page. Deriving the filter's options from `rows` traps
+// the filter: picking "failed" in a window with no failed run makes the server
+// return zero rows, which would empty `statusOptions`, unregister the status
+// group entirely, and leave the stale `selectedStatuses` riding every later
+// request with no UI left to clear it. A fixed list can never disappear.
+const RUN_STATUS_VALUES = ['success', 'failed', 'running', 'waiting', 'cancelled']
+
 // Pure: read the `workflow_id` param out of a hash string (no window access —
 // testable, mirrors useReportSwitch's getViewFromHash). WEBHOOK-RUN-CORRELATION-1:
 // a WorkflowRefs link lands here as `#details.runs?workflow_id=<id>`.
@@ -48,22 +62,30 @@ export default function RunsTable() {
   // inclusive bureau-local day edges (53fe3bb0) — sent only when set.
   const [rangeFrom, setRangeFrom] = useState('')
   const [rangeTo, setRangeTo] = useState('')
+  const [selectedStatuses,   setSelectedStatuses]   = useState<Array<string | number>>([])
+  const [selectedWorkflows,  setSelectedWorkflows]  = useState<Array<string | number>>([])
   const runsUrl = useMemo(() => {
     const params = new URLSearchParams()
     if (workflowIdFilter) params.set('workflow_id', workflowIdFilter)
     if (rangeFrom) params.set('from', rangeFrom)
     if (rangeTo) params.set('to', rangeTo)
+    // WFB-14: a single status selection is sent server-side (through the
+    // display→API map) rather than only ever filtering the fetched page.
+    // Multiple statuses at once stay a client-side refinement over the
+    // unfiltered page — the endpoint's `status` param is single-valued.
+    if (selectedStatuses.length === 1) {
+      const display = String(selectedStatuses[0])
+      params.set('status', STATUS_DISPLAY_TO_API[display] ?? display)
+    }
     const q = params.toString()
     return q ? `/workflow-runs?${q}` : '/workflow-runs'
-  }, [workflowIdFilter, rangeFrom, rangeTo])
+  }, [workflowIdFilter, rangeFrom, rangeTo, selectedStatuses])
   // Data (fetch) lives in the shared hook (§3); this component only derives + renders.
   const { rows, loading, error } = useReportList<RunRow>(runsUrl, resolveWorkflowBaseURL())
   // App-wide active locale (§5) — never a hardcoded 'nl-NL' toLocale*String call.
   const { formatDate, formatTime } = useDateFormat()
   const [search,  setSearch]  = useState('')
   const [drill,   setDrill]   = useState<RunRow | null>(null)
-  const [selectedStatuses,   setSelectedStatuses]   = useState<Array<string | number>>([])
-  const [selectedWorkflows,  setSelectedWorkflows]  = useState<Array<string | number>>([])
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
@@ -71,9 +93,10 @@ export default function RunsTable() {
   const workflowOptions = useMemo(() =>
     [...new Set(rows.map(r => r.workflow_name).filter((x): x is string => Boolean(x)))].sort(), [rows])
 
-  // Distinct statuses present in the run list, for the "Status" filter.
-  const statusOptions = useMemo(() =>
-    [...new Set(rows.map(r => r.status).filter((x): x is string => Boolean(x)))].sort(), [rows])
+  // WFB-14 (c): the "Status" filter's OPTIONS are the fixed vocabulary above,
+  // not whatever happens to be on the currently loaded page (see the comment
+  // on RUN_STATUS_VALUES) — the group always registers with all five choices.
+  const statusOptions = RUN_STATUS_VALUES
 
   // Apply the status/workflow filters and the free-text search over trigger/error fields.
   const filtered = useMemo(() => {
@@ -145,10 +168,9 @@ export default function RunsTable() {
   // a live count against the unfiltered run list.
   const filterGroups = useMemo(() => {
     const groups: ReportFilterGroup[] = []
-    if (statusOptions.length) {
-      groups.push(buildStatusGroup(t, statusOptions, selectedStatuses, rows, 'runs.filters.status',
-        v => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])))
-    }
+    // Fixed vocabulary (see RUN_STATUS_VALUES) — this group always registers.
+    groups.push(buildStatusGroup(t, statusOptions, selectedStatuses, rows, 'runs.filters.status',
+      v => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])))
     if (workflowOptions.length) {
       groups.push(buildWorkflowGroup(t, workflowOptions, selectedWorkflows, rows, 'runs.filters.workflow',
         v => setSelectedWorkflows(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])))

@@ -20,7 +20,10 @@ export interface SmDashStats {
   open_hours?: number; hours_this_month?: number; occupancy_pct?: number
   messages_sent?: number; response_rate_pct?: number; [k: string]: unknown
 }
-export interface RunItem { name?: string; ok: boolean; n?: number; err?: string; time: string }
+// ok: true = completed successfully, false = failed/cancelled, null = still in
+// flight (running/waiting) — a tri-state so an in-flight run can paint neutral
+// instead of borrowing the "completed" success colour (SCHERMWAARHEID-1).
+export interface RunItem { name?: string; ok: boolean | null; n?: number; err?: string; time: string }
 export interface ConvItem { name: string; msg: string; time: string }
 
 // House HH:mm numeric shape (DATUM-1) from an ISO timestamp — digits only,
@@ -57,15 +60,27 @@ export function useShiftmanagerDashboard(candidatesPerPage: number, hasAI: boole
     queryFn: async ({ signal }) => ((await api.get('/sm_reports/dashboard', { signal })).data ?? null) as SmDashStats | null,
   })
 
-  // Recent workflow runs — only for AI/Workflow packages.
+  // Recent workflow runs — only for AI/Workflow packages. Contract: RunPresenter
+  // emits workflow_name/candidates_count/error_message/started_at and a terminal
+  // status ('success'/'failed'/'cancelled', plus in-flight 'running'/'waiting') —
+  // failed/cancelled maps to not-ok, running/waiting maps to the neutral null
+  // state (never borrows the completed-success colour), everything else is ok.
   const runsQ = useQuery({
     queryKey: ['workflow-runs', 'dash'],
     enabled: hasAI,
     queryFn: async ({ signal }) => {
-      const { rows } = unwrapList<{ name?: string; status?: string; processed_count?: number; error?: string; started_at?: string }>(
+      const { rows } = unwrapList<{ workflow_name?: string; status?: string; candidates_count?: number; error_message?: string; started_at?: string }>(
         await api.get('/workflow-runs', { params: { per_page: 5 }, signal, baseURL: resolveWorkflowBaseURL() }),
       )
-      return rows.map(r => ({ name: r.name, ok: (r.status ?? 'ok') === 'ok', n: r.processed_count, err: r.error, time: hhmm(r.started_at) })) as RunItem[]
+      return rows.map(r => ({
+        name: r.workflow_name,
+        ok: (r.status === 'failed' || r.status === 'cancelled') ? false
+          : (r.status === 'running' || r.status === 'waiting') ? null
+          : true,
+        n: r.candidates_count,
+        err: r.error_message ?? undefined,
+        time: hhmm(r.started_at),
+      })) as RunItem[]
     },
   })
 

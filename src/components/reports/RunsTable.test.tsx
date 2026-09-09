@@ -114,3 +114,70 @@ describe('RunsTable — failed load is an error state', () => {
     expect(screen.queryByText('Geen uitvoeringen gevonden')).toBeNull()
   })
 })
+
+describe('RunsTable — WFB-14 status filter goes server-side through the display→API map', () => {
+  // Picking the display status "success" must forward the backend's real enum
+  // value 'completed' (RunPresenter maps completed -> 'success' for display) —
+  // sending 'success' verbatim would 422 against the API's `in:` rule.
+  it('requests /workflow-runs?status=completed when "success" is picked', async () => {
+    render(<RunsTable />)
+    const groups = lastRegisteredGroups()
+    const status = groups.find((g: { key: string }) => g.key === 'status') as
+      { onToggle: (v: string) => void }
+    expect(status).toBeDefined()
+    act(() => status.onToggle('success'))
+    await waitFor(() => expect(vi.mocked(useReportList))
+      .toHaveBeenCalledWith('/workflow-runs?status=completed', expect.any(String)))
+  })
+
+  // A status whose display value already matches the API enum (e.g. 'failed')
+  // passes through unchanged.
+  it('requests /workflow-runs?status=failed when "failed" is picked', async () => {
+    render(<RunsTable />)
+    const groups = lastRegisteredGroups()
+    const status = groups.find((g: { key: string }) => g.key === 'status') as
+      { onToggle: (v: string) => void }
+    act(() => status.onToggle('failed'))
+    await waitFor(() => expect(vi.mocked(useReportList))
+      .toHaveBeenCalledWith('/workflow-runs?status=failed', expect.any(String)))
+  })
+})
+
+describe('RunsTable — WFB-14 (c) the status filter cannot trap itself', () => {
+  // The verifier's finding: deriving `statusOptions` from the RETURNED rows
+  // means a status pick that yields zero rows on the server empties the option
+  // list, which unregisters the whole "status" group — the filter then
+  // disappears from the panel while the stale selection keeps riding every
+  // request, with no way back short of a reload. Options must come from the
+  // fixed vocabulary instead, so the group survives a zero-row response.
+  it('keeps the status group registered with all five options, even when the current page has zero runs', () => {
+    vi.mocked(useReportList).mockReturnValueOnce({ rows: [], loading: false, error: false })
+    render(<RunsTable />)
+    const groups = lastRegisteredGroups()
+    const status = groups.find((g: { key: string }) => g.key === 'status') as
+      { options: { value: string }[] } | undefined
+    expect(status).toBeDefined()
+    expect(status?.options.map(o => o.value).sort()).toEqual(
+      ['cancelled', 'failed', 'running', 'success', 'waiting'],
+    )
+  })
+
+  // Picking a second status must still be possible — proves the multi-select
+  // branch (comment at :64-67) is reachable, not dead code behind a collapsed
+  // one-entry option list.
+  it('lets a second status be picked after the first (multi-select stays reachable)', async () => {
+    render(<RunsTable />)
+    const groups = lastRegisteredGroups()
+    const status = groups.find((g: { key: string }) => g.key === 'status') as
+      { onToggle: (v: string) => void; options: { value: string }[] }
+    act(() => status.onToggle('success'))
+    await waitFor(() => expect(vi.mocked(useReportList))
+      .toHaveBeenCalledWith('/workflow-runs?status=completed', expect.any(String)))
+
+    const groupsAfter = lastRegisteredGroups()
+    const statusAfter = groupsAfter.find((g: { key: string }) => g.key === 'status') as
+      { options: { value: string }[] }
+    // The option list is still the full fixed vocabulary, not collapsed to one.
+    expect(statusAfter.options.length).toBe(5)
+  })
+})

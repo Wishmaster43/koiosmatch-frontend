@@ -264,6 +264,8 @@
     "recentConversations": "Conversazioni recenti",
     "viewAll": "Tutto →",
     "candidates": "{{n}} candidati",
+    "runFailed": "Esecuzione non riuscita",
+    "runInProgress": "Esecuzione in corso",
     "stats": {
       "openHours": "Ore aperte",
       "hoursThisMonth": "Ore mese corrente",

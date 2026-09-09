@@ -178,8 +178,8 @@ export function useDashboardViewModel({
     add(out.candidates_out,        'candidatesOut')
     add(out.applications_rejected, 'applicationsRejected')
     add(out.matches_ended,         'matchesEnded')
-    // Net = inflow − outflow (sibling of timeseries under charts).
-    add((dashCharts?.net ?? (dash?.charts as { net?: TimeseriesPoint[] } | undefined)?.net) as TimeseriesPoint[] | undefined, 'net')
+    // Net = inflow − outflow (sibling series INSIDE charts.timeseries, not top-level).
+    add(ts.net, 'net')
     return [...byName.values()]
   }, [dash, dashCharts])
   // Series `key`s are stable English internal identifiers (not user-facing —

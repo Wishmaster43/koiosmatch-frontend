@@ -26,7 +26,10 @@ vi.mock('@/components/shiftmanager/ShiftsChartsBlock', () => ({
   ),
 }))
 
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ activeTenant: { package: 'core' }, user: null }) }))
+// A mutable mock so one test (the AI-package runs panel) can opt into a package
+// that unlocks the recent-runs tile, without disturbing the other core-package tests.
+const mockUseAuth = vi.fn(() => ({ activeTenant: { package: 'core' }, user: null }))
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
 
 // Real, current-year monthly buckets: this-month total (5) is deliberately LOWER
 // than the row page's own "new this month" rows (8, simulated below the cap) so a
@@ -48,6 +51,14 @@ const rows = Array.from({ length: 8 }, (_, i) => ({
   registration_date: new Date(new Date().getFullYear(), thisMonth, 10).toISOString(),
 }))
 
+// One completed, one failed and one still-running run — mirrors the real
+// RunPresenter contract (workflow_name/candidates_count/error_message/started_at).
+const RUNS_RESPONSE = [
+  { id: 'r1', workflow_name: 'Completed sync', status: 'success', candidates_count: 40, error_message: null, started_at: new Date().toISOString() },
+  { id: 'r2', workflow_name: 'Failed sync', status: 'failed', candidates_count: 0, error_message: 'Timeout', started_at: new Date().toISOString() },
+  { id: 'r3', workflow_name: 'Running sync', status: 'running', candidates_count: 12, error_message: null, started_at: new Date().toISOString() },
+]
+
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
   return {
@@ -57,6 +68,8 @@ vi.mock('@/lib/api', async () => {
         if (url === '/sm_candidates')        return Promise.resolve({ data: { data: rows } })
         if (url === '/sm_candidates/stats')  return Promise.resolve({ data: STATS_RESPONSE })
         if (url === '/settings')             return Promise.resolve({ data: {} })
+        if (url === '/workflow-runs')        return Promise.resolve({ data: { data: RUNS_RESPONSE } })
+        if (url === '/whatsapp/messages')    return Promise.resolve({ data: { data: [] } })
         return Promise.resolve({ data: {} })
       }),
     },
@@ -89,5 +102,41 @@ describe('ShiftmanagerDashboard · new-this-month KPI (SM-STATS-2)', () => {
 
     const tile = await screen.findByTestId('kpi-new')
     await waitFor(() => expect(tile.textContent).toContain(t('dashboard.stats.avgOnly', { avg: 20 })))
+  })
+})
+
+// SCHERMWAARHEID-1 regression: an in-flight run must not borrow the completed-
+// success paint (ENT2-06/WFB-09 review finding) — asserts the actual RENDER
+// (icon box background) per row, not just the ok boolean the mapper returns.
+describe('ShiftmanagerDashboard · recent runs tile (tri-state ok render)', () => {
+  it('paints completed=success, failed=danger, running=neutral (not success)', async () => {
+    mockUseAuth.mockReturnValue({ activeTenant: { package: 'reporting_sm_ai' }, user: null })
+    renderDashboard()
+
+    const completedRow = (await screen.findByText('Completed sync')).closest('.flex.items-center.gap-3') as HTMLElement
+    const failedRow = screen.getByText('Failed sync').closest('.flex.items-center.gap-3') as HTMLElement
+    const runningRow = screen.getByText('Running sync').closest('.flex.items-center.gap-3') as HTMLElement
+
+    const iconBoxOf = (row: HTMLElement) => row.querySelector('div[style*="width: 28px"]') as HTMLElement
+
+    expect(iconBoxOf(completedRow).style.background).toBe('var(--color-success-bg)')
+    expect(iconBoxOf(failedRow).style.background).toBe('var(--color-danger-bg)')
+    // The neutral state must be neither the success nor the danger tint.
+    const runningBg = iconBoxOf(runningRow).style.background
+    expect(runningBg).not.toBe('var(--color-success-bg)')
+    expect(runningBg).not.toBe('var(--color-danger-bg)')
+    expect(runningBg).toBe('var(--hover-bg)')
+
+    // The subtitle text also differs: a running run shows neither the finished
+    // candidate count nor "run failed", but its own in-progress copy.
+    expect(runningRow.textContent).toContain(t('dashboard.runInProgress'))
+  })
+
+  it('never fetches /workflow-runs when the tenant has no AI/Workflow package (core stays disabled)', async () => {
+    mockUseAuth.mockReturnValue({ activeTenant: { package: 'core' }, user: null })
+    renderDashboard()
+
+    await screen.findByTestId('kpi-new')
+    expect(screen.queryByText('Completed sync')).toBeNull()
   })
 })
