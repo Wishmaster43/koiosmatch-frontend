@@ -43,15 +43,18 @@ export default function CandidateCustomRequiredFields({ phases }: { phases: Phas
   const phasesOf = (id: string, fallback: string[]) => applied[id] ?? fallback
 
   // Toggle one phase on the DEFINITION and persist it there (never in the setting blob).
+  // Optimistic (Danny 09-09, TOGGLE-SWEEP: a switch flips at once or gets a Save button):
+  // the matrix shows the new state immediately, the PATCH follows, a refusal reverts it.
   const toggle = async (id: string, current: string[], phase: string) => {
     const next = current.includes(phase) ? current.filter(p => p !== phase) : [...current, phase]
+    setApplied(prev => ({ ...prev, [id]: next }))
     setBusyId(id)
     setError(null)
     try {
       await api.patch(`/custom-fields/${id}`, { required_phases: next })
-      setApplied(prev => ({ ...prev, [id]: next }))
       invalidate()
     } catch (err) {
+      setApplied(prev => ({ ...prev, [id]: current }))
       setError(extractApiError(err, t('requiredFields.customSaveFailed')))
     } finally {
       setBusyId(null)
