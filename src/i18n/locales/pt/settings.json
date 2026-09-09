@@ -266,7 +266,9 @@
     "windows": "Janelas de tempo e alertas",
     "retention": "Retenção de dados",
     "messaging": "Mensagens",
-    "kpi": "Limiares de KPI"
+    "kpi": "Limiares de KPI",
+    "knowledge": "Base de conhecimento",
+    "faq": "FAQ"
   },
   "kpis": {
     "title": "Definições de KPI",

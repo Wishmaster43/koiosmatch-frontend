@@ -131,6 +131,10 @@ import BillingUsageSettings from './sections/BillingUsageSettings'
 import InvoiceCompanySettings from './sections/InvoiceCompanySettings'
 import AdminInvoicesSettings from './sections/AdminInvoicesSettings'
 import CatalogSection from './sections/CatalogSection'
+// KNOWLEDGE-BASE-1 (Danny 09-09, row 22: "Waar is interne FAQ en interne kennisbank …"): the
+// two AI-management tabs are reachable from Settings → Koios AI as well; the internal/
+// external scope arrives with the BE contract.
+import { FAQTab, KnowledgeTab } from '@/components/ai/AIManagementTabs'
 
 import {
   kpisLeads, kpisCandidates, kpisApplications, kpisCustomers, kpisLocations,
@@ -191,6 +195,9 @@ export const NAV_GROUPS = [
     items: [
       { id: 'koios', icon: Sparkles, component: KoiosSettings },
       { id: 'memory', icon: BookOpen, component: MemorySettings },
+      // Knowledge base + FAQ (row 22): the agents draw from these next to their own prompt.
+      { id: 'knowledge', icon: BookOpen, render: () => <KnowledgeTab /> },
+      { id: 'faq', icon: MessageSquare, render: () => <FAQTab /> },
       // AF:orphans-7-6 — vacancy-generation creation is gated on 'vacancy_generation.manage' permission.
       { id: 'vacancy_generation', icon: Sparkles, component: VacancyGenerationSettings, requiresPermission: 'vacancy_generation.manage' },
       // Koios advice thresholds (old open Danny item): the stale-vacancy and

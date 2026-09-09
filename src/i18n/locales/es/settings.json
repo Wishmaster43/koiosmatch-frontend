@@ -266,7 +266,9 @@
     "windows": "Ventanas de tiempo y alertas",
     "retention": "Retención de datos",
     "messaging": "Mensajería",
-    "kpi": "Umbrales de KPI"
+    "kpi": "Umbrales de KPI",
+    "knowledge": "Base de conocimiento",
+    "faq": "FAQ"
   },
   "kpis": {
     "title": "Configuración de KPI",

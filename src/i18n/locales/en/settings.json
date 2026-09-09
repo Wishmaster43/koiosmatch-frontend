@@ -266,7 +266,9 @@
     "windows": "Time windows and alerts",
     "retention": "Data retention",
     "messaging": "Messaging",
-    "kpi": "KPI thresholds"
+    "kpi": "KPI thresholds",
+    "knowledge": "Knowledge base",
+    "faq": "FAQ"
   },
   "kpis": {
     "title": "KPI settings",

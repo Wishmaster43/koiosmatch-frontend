@@ -266,7 +266,9 @@
     "windows": "Termijnen en signalen",
     "retention": "Bewaartermijnen",
     "messaging": "Berichten",
-    "kpi": "KPI-drempels"
+    "kpi": "KPI-drempels",
+    "knowledge": "Kennisbank",
+    "faq": "FAQ"
   },
   "kpis": {
     "title": "KPI-instellingen",

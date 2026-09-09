@@ -266,7 +266,9 @@
     "windows": "Finestre di tempo e avvisi",
     "retention": "Conservazione dei dati",
     "messaging": "Messaggistica",
-    "kpi": "Soglie KPI"
+    "kpi": "Soglie KPI",
+    "knowledge": "Base di conoscenza",
+    "faq": "FAQ"
   },
   "kpis": {
     "title": "Impostazioni KPI",

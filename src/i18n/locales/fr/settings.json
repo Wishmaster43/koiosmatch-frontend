@@ -266,7 +266,9 @@
     "windows": "Fenêtres de temps et alertes",
     "retention": "Conservation des données",
     "messaging": "Messagerie",
-    "kpi": "Seuils KPI"
+    "kpi": "Seuils KPI",
+    "knowledge": "Base de connaissances",
+    "faq": "FAQ"
   },
   "kpis": {
     "title": "Paramètres KPI",

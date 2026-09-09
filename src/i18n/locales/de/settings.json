@@ -266,7 +266,9 @@
     "windows": "Zeitfenster und Warnungen",
     "retention": "Datenspeicherung",
     "messaging": "Messaging",
-    "kpi": "KPI-Schwellwerte"
+    "kpi": "KPI-Schwellwerte",
+    "knowledge": "Wissensdatenbank",
+    "faq": "FAQ"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
