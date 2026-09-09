@@ -8,9 +8,9 @@
 import { useState, useMemo, useCallback } from 'react'
 import { bureauNow } from '@/lib/bureauTime'
 import { usePageMemory } from '@/lib/usePageMemory'
-import { geocodeLocation } from '@/lib/geocode'
 import { isReferenceQuery } from '@/lib/referenceNumber'
 import { toLocalIsoDate } from '@/lib/localDate'
+import { applyGeo as applyGeoFn } from '@/lib/geoFilter'
 
 export interface GeoFilter { q: string; km: number; lat: number; lng: number; label: string }
 export interface DateRangeFilter { param: 'created_between' | 'last_contact_between'; from: string; to: string }
@@ -68,11 +68,7 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
   // it — every captured setter is itself stable (usePageMemory/useState), only `t`
   // can genuinely change (mirrors CustomersPage/VacanciesPage's own applyGeo).
   const applyGeo = useCallback(async (q: string, km: number) => {
-    setGeoHint(null)
-    const hit = await geocodeLocation(q)
-    if (!hit) { setGeoHint(t('common:filters.notFound')); return }
-    setGeoFilter({ q, km, lat: hit.lat, lng: hit.lng, label: `${hit.label} · ${km} km` })
-    setMapCenter({ lat: hit.lat, lng: hit.lng }); setMapRadius(km)
+    return applyGeoFn(q, km, t('common:filters.notFound'), setGeoHint, setGeoFilter, setMapCenter, setMapRadius)
   }, [t, setGeoHint, setGeoFilter, setMapCenter, setMapRadius])
   const clearGeo = useCallback(() => { setGeoFilter(null); setGeoHint(null) }, [setGeoFilter, setGeoHint])
 

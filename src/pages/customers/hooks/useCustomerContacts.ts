@@ -28,6 +28,7 @@ import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { toLinkedinSlug } from '@/components/drawer/contactLinks'
 import { mapContact } from '../data/mapCustomer'
+import { useEntityChangeListener } from '@/hooks/useEntityChangeListener'
 import type { Contact, ApiContact } from '@/types/customer'
 import type { Id } from '@/types/common'
 
@@ -289,15 +290,8 @@ export function useCustomerContacts(customerId: Id | undefined) {
   }, [customerId])
   useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
 
-  // Refetch when an out-of-tree writer (the merge modal) changed this list. The listener
-  // is registered in the effect SETUP and torn down in its cleanup, so StrictMode's
-  // setup→cleanup→setup in dev re-arms it instead of leaving it permanently dead (§9).
-  useEffect(() => {
-    const ctrl = new AbortController()
-    const onChanged = () => load(ctrl.signal)
-    window.addEventListener(CONTACTS_CHANGED_EVENT, onChanged)
-    return () => { window.removeEventListener(CONTACTS_CHANGED_EVENT, onChanged); ctrl.abort() }
-  }, [load])
+  // Refetch when an out-of-tree writer (the merge modal) changed this list.
+  useEntityChangeListener(CONTACTS_CHANGED_EVENT, load)
 
   // Create — optimistic row with a temp id, swapped for the server row on success.
   // Only the Add-modal's create path calls this (couple/uncouple + inline edits go
@@ -402,12 +396,7 @@ export function useArchivedCustomerContacts(customerId: Id | undefined, active: 
   useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
 
   // Refetch archived contacts when another part of the app dispatches CONTACTS_CHANGED_EVENT (e.g. the merge modal).
-  useEffect(() => {
-    const ctrl = new AbortController()
-    const onChanged = () => load(ctrl.signal)
-    window.addEventListener(CONTACTS_CHANGED_EVENT, onChanged)
-    return () => { window.removeEventListener(CONTACTS_CHANGED_EVENT, onChanged); ctrl.abort() }
-  }, [load])
+  useEntityChangeListener(CONTACTS_CHANGED_EVENT, load)
 
   return { contacts, loading }
 }

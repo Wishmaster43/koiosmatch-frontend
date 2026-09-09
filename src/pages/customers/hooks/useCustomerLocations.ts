@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { mapLocation } from '../data/mapCustomer'
+import { useEntityChangeListener } from '@/hooks/useEntityChangeListener'
 import type { Location, ApiLocation } from '@/types/customer'
 import type { Id } from '@/types/common'
 import type { DeleteResult } from './subEntityDelete'
@@ -126,14 +127,8 @@ export function useCustomerLocations(customerId: Id | undefined) {
   useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
 
   // ARCHIVE-SUBENTITY-1: refetch when an out-of-tree writer (archive/restore/merge,
-  // fired from deep inside LocationDetail) changed this list. Registered in the
-  // effect SETUP so StrictMode's setup→cleanup→setup re-arms it (§9).
-  useEffect(() => {
-    const ctrl = new AbortController()
-    const onChanged = () => load(ctrl.signal)
-    window.addEventListener(LOCATIONS_CHANGED_EVENT, onChanged)
-    return () => { window.removeEventListener(LOCATIONS_CHANGED_EVENT, onChanged); ctrl.abort() }
-  }, [load])
+  // fired from deep inside LocationDetail) changed this list.
+  useEntityChangeListener(LOCATIONS_CHANGED_EVENT, load)
 
   // Create — optimistic row with a temp id, swapped for the server row on success.
   // Only the Add-modal's create path calls this (inline edits go through `update`
@@ -264,12 +259,7 @@ export function useArchivedCustomerLocations(customerId: Id | undefined, active:
   useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
 
   // Also refetches when another hook instance archives/restores/merges a location elsewhere (LOCATIONS_CHANGED_EVENT), keeping this archived-only view in sync with the live list.
-  useEffect(() => {
-    const ctrl = new AbortController()
-    const onChanged = () => load(ctrl.signal)
-    window.addEventListener(LOCATIONS_CHANGED_EVENT, onChanged)
-    return () => { window.removeEventListener(LOCATIONS_CHANGED_EVENT, onChanged); ctrl.abort() }
-  }, [load])
+  useEntityChangeListener(LOCATIONS_CHANGED_EVENT, load)
 
   return { locations, loading }
 }

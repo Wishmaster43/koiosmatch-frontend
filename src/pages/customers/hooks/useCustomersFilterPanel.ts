@@ -7,7 +7,7 @@
 import { useMemo, useCallback, useEffect } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
-import { geocodeLocation } from '@/lib/geocode'
+import { applyGeo as applyGeoFn } from '@/lib/geoFilter'
 import { buildCustomerStatusOptions } from '../data/customerInsights'
 import { buildCustomerFilterGroups } from '../data/customerFilterGroups'
 import type { CustomerDateRange } from '../data/customerFilterGroups'
@@ -98,11 +98,7 @@ export function useCustomersFilterPanel({
   // Stabilized (useCallback) so the filterGroups useMemo below can safely depend
   // on it — every captured setter is itself stable, only `t` can genuinely change.
   const applyGeo = useCallback(async (q: string, km: number) => {
-    setGeoHint(null)
-    const hit = await geocodeLocation(q)
-    if (!hit) { setGeoHint(t('common:filters.notFound')); return }
-    setGeoFilter({ q, km, lat: hit.lat, lng: hit.lng, label: `${hit.label} · ${km} km` })
-    setMapCenter({ lat: hit.lat, lng: hit.lng }); setMapRadius(km)
+    return applyGeoFn(q, km, t('common:filters.notFound'), setGeoHint, setGeoFilter, setMapCenter, setMapRadius)
   }, [t, setGeoHint, setGeoFilter, setMapCenter, setMapRadius])
 
   // Filter panel config lives in the data/ builder (mirrors buildCandidateFilterGroups).

@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { mapDepartment } from '../data/mapCustomer'
+import { useEntityChangeListener } from '@/hooks/useEntityChangeListener'
 import type { Department, ApiDepartment } from '@/types/customer'
 import type { Id } from '@/types/common'
 import type { DeleteResult } from './subEntityDelete'
@@ -176,12 +177,7 @@ export function useArchivedCustomerDepartments(customerId: Id | undefined, activ
   useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
 
   // Refetch whenever another part of the app (archive/restore, bulk import) changes departments.
-  useEffect(() => {
-    const ctrl = new AbortController()
-    const onChanged = () => load(ctrl.signal)
-    window.addEventListener(DEPARTMENTS_CHANGED_EVENT, onChanged)
-    return () => { window.removeEventListener(DEPARTMENTS_CHANGED_EVENT, onChanged); ctrl.abort() }
-  }, [load])
+  useEntityChangeListener(DEPARTMENTS_CHANGED_EVENT, load)
 
   return { departments, loading }
 }
