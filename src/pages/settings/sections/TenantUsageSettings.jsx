@@ -91,6 +91,9 @@ export default function TenantUsageSettings() {
             selected={[month]}
             onToggle={setMonth}
             closeOnToggle
+            // DROPDOWN-CLEAR-1: a month is always chosen here (the screen has no "no month"
+            // state); an empty pick would strand the usage tables, so the clear stays off.
+            clearable={false}
             renderTrigger={toggle => (
               // §4 2b: a dropdown TRIGGER is a FORM FIELD — its face comes from
               // fieldMetrics' select canon, never a hand-painted box.
