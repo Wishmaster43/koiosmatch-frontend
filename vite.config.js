@@ -1,5 +1,5 @@
 /// <reference types="vitest/config" />
-import { defineConfig } from 'vitest/config'
+import { defineConfig, configDefaults } from 'vitest/config'
 import { loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { fileURLToPath } from 'node:url'
@@ -67,6 +67,9 @@ export default defineConfig(({ mode }) => {
       globals: true,
       setupFiles: './src/test/setup.js',
       css: false,
+      // Agent worktrees under .claude/ carry their own stale copies of every suite;
+      // they must never run against this checkout's src (09-09: 67 phantom failures).
+      exclude: [...configDefaults.exclude, '.claude/**'],
     },
   }
 })
