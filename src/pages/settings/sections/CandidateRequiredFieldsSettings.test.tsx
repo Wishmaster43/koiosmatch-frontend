@@ -90,12 +90,19 @@ describe('requiredFieldsCatalog — what a tenant may mark required', () => {
     }
   })
 
-  it('omits place_of_birth — measured unwritable, so requiring it would block every create', () => {
-    // Measured live 2026-08-09: one PATCH /candidates/{id} carrying both `mobile` and
-    // `place_of_birth` wrote the mobile and left the birthplace untouched (no rule on
-    // CandidateProfileRequest). A create can never satisfy it → fake affordance (§3).
-    expect(CANDIDATE_FIELD_KEYS).not.toContain('place_of_birth')
-    expect(EXCLUDED_SYSTEM_FIELDS).toContain('place_of_birth')
+  it('offers place_of_birth again (writable since 03-09) and the twelve fields the 09-09 review found missing', () => {
+    for (const key of ['place_of_birth', 'address_line_2', 'source_detail', 'iban', 'account_holder_name', 'preferred_language',
+      'whatsapp_consent', 'email_consent', 'newsletter_consent', 'retention_consent']) {
+      expect(CANDIDATE_FIELD_KEYS).toContain(key)
+    }
+    // Still excluded: no backend rule (initials) or no input at all (facebook_leads_id).
+    expect(CANDIDATE_FIELD_KEYS).not.toContain('initials')
+    expect(CANDIDATE_FIELD_KEYS).not.toContain('facebook_leads_id')
+  })
+
+  it('puts the function in its own block, never under "Werk" (Danny 09-09)', () => {
+    const fn = CANDIDATE_FIELD_GROUPS.find(g => g.fields.some(f => f.key === 'function_title'))
+    expect(fn?.id).toBe('function')
   })
 
   it('uses the guard-readable WRITE keys, not the response aliases', () => {
