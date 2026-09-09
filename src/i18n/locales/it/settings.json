@@ -1000,8 +1000,8 @@
     "officeDesc": "Connetti tramite Microsoft OAuth2 o SMTP",
     "manualLabel": "SMTP manuale",
     "manualDesc": "Server di posta o provider personale",
-    "oauthWarningTitle": "Richiede il backend:",
-    "oauthWarning": "La connessione OAuth2 per {{provider}} deve essere configurata tramite il backend. Salva l'indirizzo mittente qui sotto: la connessione OAuth effettiva viene impostata dall'amministratore.",
+    "oauthWarningTitle": "Non collegato",
+    "oauthWarning": "{{provider}} non è ancora collegato per questo contesto. Fai clic su Collega per avviare l'autorizzazione OAuth.",
     "senderDetails": "Dati del mittente",
     "senderName": "Nome mittente",
     "senderNamePlaceholder": "Es. KoiosMatch",
@@ -1038,7 +1038,15 @@
     "signature": "Firma",
     "signatureHint": "Viene aggiunta in fondo a ogni e-mail di questo tipo.",
     "showPassword": "Mostra password",
-    "hidePassword": "Nascondi password"
+    "hidePassword": "Nascondi password",
+    "oauthConnectedTitle": "Collegato",
+    "oauthConnected": "Collegato con {{provider}} come {{address}}.",
+    "oauthConnect": "Collega",
+    "oauthDisconnect": "Scollega",
+    "oauthConnectFailed": "Collegamento non riuscito.",
+    "oauthDisconnectFailed": "Scollegamento non riuscito.",
+    "oauthCallbackConnected": "Account email collegato: {{email}}.",
+    "oauthCallbackError": "Il collegamento email non è riuscito."
   },
   "notifications": {
     "email": {
@@ -2891,7 +2899,10 @@
     "title": "Email",
     "searchPlaceholder": "Cerca per mittente, destinatario o oggetto…",
     "empty": "Ancora nessuna email registrata.",
-    "loadError": "Impossibile caricare il registro email."
+    "loadError": "Impossibile caricare il registro email.",
+    "bodyLoading": "Caricamento del contenuto...",
+    "pageScopedHint": "La ricerca copre solo la pagina caricata.",
+    "bodyError": "Impossibile caricare il contenuto."
   },
   "waLog": {
     "contact": "Contatto",

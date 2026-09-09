@@ -1000,8 +1000,8 @@
     "officeDesc": "Ligue via Microsoft OAuth2 ou SMTP",
     "manualLabel": "SMTP manual",
     "manualDesc": "Servidor de e-mail próprio ou de terceiros",
-    "oauthWarningTitle": "Backend necessário:",
-    "oauthWarning": "A ligação OAuth2 para {{provider}} tem de ser configurada através do backend. Guarde o endereço de envio abaixo; a ligação OAuth propriamente dita é configurada pelo administrador.",
+    "oauthWarningTitle": "Não associado",
+    "oauthWarning": "{{provider}} ainda não está associado a este contexto. Clique em Associar para iniciar a autorização OAuth.",
     "senderDetails": "Dados do remetente",
     "senderName": "Nome do remetente",
     "senderNamePlaceholder": "Ex.: KoiosMatch",
@@ -1038,7 +1038,15 @@
     "signature": "Assinatura",
     "signatureHint": "É adicionada no final de cada e-mail deste tipo.",
     "showPassword": "Mostrar palavra-passe",
-    "hidePassword": "Ocultar palavra-passe"
+    "hidePassword": "Ocultar palavra-passe",
+    "oauthConnectedTitle": "Associado",
+    "oauthConnected": "Associado com {{provider}} como {{address}}.",
+    "oauthConnect": "Associar",
+    "oauthDisconnect": "Desassociar",
+    "oauthConnectFailed": "Falha ao associar.",
+    "oauthDisconnectFailed": "Falha ao desassociar.",
+    "oauthCallbackConnected": "Conta de e-mail associada: {{email}}.",
+    "oauthCallbackError": "A associação de e-mail falhou."
   },
   "notifications": {
     "email": {
@@ -2891,7 +2899,10 @@
     "title": "E-mail",
     "searchPlaceholder": "Pesquisar por remetente, destinatário ou assunto…",
     "empty": "Ainda não há e-mails registados.",
-    "loadError": "Não foi possível carregar o registo de e-mail."
+    "loadError": "Não foi possível carregar o registo de e-mail.",
+    "bodyLoading": "A carregar o conteúdo...",
+    "pageScopedHint": "A pesquisa abrange apenas a página carregada.",
+    "bodyError": "Não foi possível carregar o conteúdo."
   },
   "waLog": {
     "contact": "Contacto",

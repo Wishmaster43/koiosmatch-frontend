@@ -10,7 +10,7 @@
  * improve+summarize-only default (ACTIONS-SCOPE-DEFAULT-FLIP), no per-field
  * override needed.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Save, Check, Mail, AlertTriangle, Eye, EyeOff } from 'lucide-react'
 import api from '@/lib/api'
@@ -24,10 +24,26 @@ import SaveButton from '@/components/ui/SaveButton'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { PageTitle, Caption } from '@/components/ui/typography'
+import { useAuth } from '@/context/AuthContext'
+import { setHashParam } from '@/lib/hashParams'
+
+// Pure: read this SPA's hash query string. The app is hash-routed (DashboardLayout
+// boots activePage from window.location.hash, there is no /instellingen path
+// route), so the OAuth callback lands as `#settings/...?email_oauth=...` — it
+// must be read from the hash, never from window.location.search.
+function getHashParams(hash) {
+  const raw = hash.replace(/^#/, '')
+  const qIdx = raw.indexOf('?')
+  return new URLSearchParams(qIdx === -1 ? '' : raw.slice(qIdx + 1))
+}
 
 // Email provider settings for one context (klanten/kandidaten); the context prefixes every settings key so the two contexts never share state.
 export default function EmailSettings({ context = 'klanten' }) {
   const { t } = useTranslation('settings')
+  const auth = useAuth()
+  // DL-10: the OAuth Koppelen/Ontkoppelen actions both require settings.update on
+  // the backend (route:list) — a settings.view-only caller must not see live buttons.
+  const canEditConn = Boolean(auth?.hasPermission?.('settings.update'))
   const K = `email_${context}_`   // settings-key prefix for this context
 
   const [provider,     setProvider]     = useState('manual')
@@ -48,6 +64,13 @@ export default function EmailSettings({ context = 'klanten' }) {
   const [testing,      setTesting]       = useState(false)
   const [testResult,   setTestResult]    = useState(null)
   const [loadError,    setLoadError]     = useState(false)
+  // DL-10: the real OAuth coupling state for this context — GET /settings/email/{context}/status.
+  const [connStatus,   setConnStatus]    = useState(null)
+  const [connLoading,  setConnLoading]   = useState(true)
+  const [connecting,   setConnecting]    = useState(false)
+  const [disconnecting, setDisconnecting] = useState(false)
+  // Banner from the OAuth callback landing (?email_oauth=connected|error) — shown once, then the params are stripped.
+  const [oauthBanner,  setOauthBanner]   = useState(null)
 
   // Loads this context's settings on mount, seeding every field from the stored keys (or a safe default when a key is absent).
   // An alive guard stops a stale response from a previous context tab overwriting a newer one.
@@ -73,6 +96,53 @@ export default function EmailSettings({ context = 'klanten' }) {
     return () => { alive = false }
   }, [K])
 
+  // DL-10: the real OAuth coupling state (connected/provider/address) for this
+  // context — fetched on mount and re-fetched after every save, so a provider
+  // switch or a freshly-completed OAuth flow reflects immediately. useCallback
+  // keeps the reference stable per `context`, so effects below can depend on it
+  // honestly instead of needing an exhaustive-deps disable.
+  const loadConnStatus = useCallback(async (alive = { current: true }) => {
+    setConnLoading(true)
+    try {
+      const res = await api.get(`/settings/email/${context}/status`)
+      if (alive.current) setConnStatus(res.data?.data ?? null)
+    } catch {
+      if (alive.current) setConnStatus(null)
+    } finally {
+      if (alive.current) setConnLoading(false)
+    }
+  }, [context])
+
+  useEffect(() => {
+    const alive = { current: true }
+    loadConnStatus(alive)
+    return () => { alive.current = false }
+  }, [loadConnStatus])
+
+  // DL-10: the OAuth callback lands back on this SPA's hash route with
+  // ?email_oauth=connected|error (EmailSettingsController::oauthCallback). Only
+  // the tab whose context matches consumes a `connected` result; an `error`
+  // result carries no context (a failed state decode never reached the group),
+  // so any mounted tab may show it. The params are stripped either way so a
+  // refresh never replays it — after the strip `outcome` is empty, so this
+  // effect safely no-ops on every later re-run, including a `t`/`context` change.
+  useEffect(() => {
+    const params = getHashParams(window.location.hash)
+    const outcome = params.get('email_oauth')
+    if (!outcome) return
+    const forThisTab = outcome === 'error' || params.get('context') === context
+    if (!forThisTab) return
+    setOauthBanner(outcome === 'connected'
+      ? { ok: true, msg: t('email.oauthCallbackConnected', { email: params.get('email') || '' }) }
+      : { ok: false, msg: t('email.oauthCallbackError') })
+    if (outcome === 'connected') loadConnStatus()
+    let nextHash = setHashParam(window.location.hash, 'email_oauth', null)
+    nextHash = setHashParam(nextHash, 'context', null)
+    nextHash = setHashParam(nextHash, 'email', null)
+    nextHash = setHashParam(nextHash, 'request_id', null)
+    window.history.replaceState(null, '', window.location.pathname + window.location.search + nextHash)
+  }, [context, loadConnStatus, t])
+
   // Persists the current form values under this context's prefixed keys, and flashes the saved state briefly on success.
   const save = async () => {
     setSaving(true)
@@ -86,8 +156,39 @@ export default function EmailSettings({ context = 'klanten' }) {
       await saveSettings(payload)
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
+      await loadConnStatus()
     } catch { notifyError(t('statusList.saveFailed')) }
     setSaving(false)
+  }
+
+  // DL-10: fetch the provider's consent URL and redirect the browser to it —
+  // mirrors useEmailConnection.connectOauth's fetch-then-redirect (a bare
+  // navigation would 401: the redirect route is sanctum + settings.update and
+  // returns JSON, not a 302).
+  const connectOauth = async () => {
+    setConnecting(true)
+    try {
+      const res = await api.get(`/settings/email/oauth/${context}/redirect`, { params: { provider } })
+      const url = res.data?.url
+      if (url) { window.location.href = url; return }
+      notifyError(t('email.oauthConnectFailed'))
+    } catch (err) {
+      notifyError(err.response?.data?.message ?? t('email.oauthConnectFailed'))
+    }
+    setConnecting(false)
+  }
+
+  // DL-10: drop the stored OAuth coupling for this context (pessimistic: only
+  // reflects locally once the server confirms, via the shared status refetch).
+  const disconnectOauth = async () => {
+    setDisconnecting(true)
+    try {
+      await api.delete(`/settings/email/oauth/${context}`)
+      await loadConnStatus()
+    } catch {
+      notifyError(t('email.oauthDisconnectFailed'))
+    }
+    setDisconnecting(false)
   }
 
   // Sends a live test email through the configured provider and surfaces the server outcome/error as a banner.
@@ -148,6 +249,18 @@ export default function EmailSettings({ context = 'klanten' }) {
         </div>
       )}
 
+      {/* DL-10: the OAuth callback landing banner (connected/error), shown once. */}
+      {oauthBanner && (
+        <div style={{ marginBottom: 14 }}>
+          <CalloutBox variant={oauthBanner.ok ? 'success' : 'danger'}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {oauthBanner.ok ? <Check size={14} /> : <AlertTriangle size={14} />}
+              {oauthBanner.msg}
+            </div>
+          </CalloutBox>
+        </div>
+      )}
+
       {loading && <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>{t('common.loading')}</p>}
       {loadError && <p style={{ fontSize: 13, color: 'var(--color-danger-text)', marginBottom: 12 }}>{t('statusList.loadError')}</p>}
 
@@ -169,11 +282,32 @@ export default function EmailSettings({ context = 'klanten' }) {
             onChange={setProvider}
           />
 
+          {/* DL-10: real coupling state + connect/disconnect — the old copy claimed
+              this "must be configured via the backend", which was false: the whole
+              OAuth flow already exists and works, the FE simply never called it. */}
           {(provider === 'gmail' || provider === 'office') && (
             <div style={{ marginTop: 14 }}>
-              <CalloutBox variant="warning" title={t('email.oauthWarningTitle')}>
-                {t('email.oauthWarning', { provider: provider === 'gmail' ? 'Google' : 'Microsoft' })}
-              </CalloutBox>
+              {connLoading ? (
+                <Caption>{t('common.loading')}</Caption>
+              ) : connStatus?.connected ? (
+                <CalloutBox variant="success" title={t('email.oauthConnectedTitle')}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                    <span>{t('email.oauthConnected', { provider: connStatus.provider === 'gmail' ? 'Google' : 'Microsoft', address: connStatus.address || '—' })}</span>
+                    <Button variant="dangerSoft" size="sm" onClick={disconnectOauth} disabled={disconnecting || !canEditConn}>
+                      {disconnecting ? <Spinner size={12} /> : t('email.oauthDisconnect')}
+                    </Button>
+                  </div>
+                </CalloutBox>
+              ) : (
+                <CalloutBox variant="warning" title={t('email.oauthWarningTitle')}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                    <span>{t('email.oauthWarning', { provider: provider === 'gmail' ? 'Google' : 'Microsoft' })}</span>
+                    <Button variant="secondary" size="sm" onClick={connectOauth} disabled={connecting || !canEditConn}>
+                      {connecting ? <Spinner size={12} /> : t('email.oauthConnect')}
+                    </Button>
+                  </div>
+                </CalloutBox>
+              )}
             </div>
           )}
         </div>
