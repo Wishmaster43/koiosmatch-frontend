@@ -38,6 +38,7 @@ import { Search } from 'lucide-react'
 import SectionCard from '@/components/ui/SectionCard'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import DrawerAddButton from './DrawerAddButton'
+import SubListEmpty from '@/components/drawer/SubListEmpty'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { MatchCard } from '@/pages/matches/shared'
 import { MatchListHeaderBar } from '@/pages/matches/shared'
@@ -108,7 +109,7 @@ export default function MatchesTab({ c, onEdit, onAdd }: { c: Candidate
           (KLANTEN 4, 21-08) so the customer/vacancy tabs render the same bar. */}
       <MatchListHeaderBar otherPartyLabel={t('matchesView.client')} />
       {matches.length === 0 ? (
-        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('matchesView.empty')}</div>
+        <SubListEmpty text={t('matchesView.empty')} />
       ) : matches.map((m, i) => {
         const statusMeta = matchStatusMeta(m.status ?? undefined)
         return (

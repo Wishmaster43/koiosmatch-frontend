@@ -12,25 +12,18 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQueryClient } from '@tanstack/react-query'
 import SectionCard from '@/components/ui/SectionCard'
 import AppointmentsList from '@/components/drawer/AppointmentsList'
 import { useAuth } from '@/context/AuthContext'
 import { useCustomerAppointments } from '../hooks/useCustomerAppointments'
 import { PlanIntakeModal } from '@/pages/candidates/shared'
-import type { ExistingAppointment } from '@/pages/candidates/shared'
-import type { VacancyAppointmentRow } from '@/types/vacancyAppointment'
+import { useAppointmentEditing } from '@/hooks/useAppointmentEditing'
 import type { Id } from '@/types/common'
-
-// The appointment being edited plus the candidate that owns it (every row can belong to a different candidate).
-interface EditingAppointment { candidateId: Id; appt: ExistingAppointment }
 
 export default function AppointmentsTab({ customerId }: { customerId?: Id }) {
   const { t } = useTranslation('customers')
   const auth = useAuth()
-  const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
-  const [editing, setEditing] = useState<EditingAppointment | null>(null)
 
   // UI-side mirror of the server gate on the appointments index; edit goes through
   // /candidates/{id}/appointments (candidates.update) like the vacancy tab.
@@ -39,13 +32,9 @@ export default function AppointmentsTab({ customerId }: { customerId?: Id }) {
 
   const { rows, total, lastPage, loading, error } = useCustomerAppointments(canView ? customerId : undefined, page)
 
-  // Re-fetch this customer's appointment pages after an edit (partial key match hits every page).
-  const reload = () => queryClient.invalidateQueries({ queryKey: ['customers', customerId, 'appointments'] })
-
-  // A stored row → the shape PlanIntakeModal edits (PATCH /candidates/{candidateId}/appointments/{id}).
-  const toExisting = (a: VacancyAppointmentRow): ExistingAppointment => ({
-    id: a.id, scheduled_at: a.scheduledAt ?? undefined, duration_min: a.durationMin, modality: a.modality ?? undefined,
-    owner_id: a.ownerId ?? undefined, type: a.type ?? undefined, location_id: a.locationId, appointment_location: a.appointmentLocation,
+  // Shared appointment editing state (editing + setEditing + reload + toExisting transform).
+  const { editing, setEditing, reload, toExisting } = useAppointmentEditing({
+    queryKey: ['customers', customerId, 'appointments'],
   })
 
   if (!canView) {

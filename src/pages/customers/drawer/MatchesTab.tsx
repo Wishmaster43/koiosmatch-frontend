@@ -33,6 +33,7 @@ import { Search } from 'lucide-react'
 import SectionCard from '@/components/ui/SectionCard'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
+import SubListEmpty from '@/components/drawer/SubListEmpty'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useApps } from '@/context/AppsContext'
 import { useAuth } from '@/context/AuthContext'
@@ -102,7 +103,7 @@ export default function MatchesTab({ customerId }: { customerId?: Id }) {
           shared column-header bar + collapsed flat rows the candidate tab has. */}
       <MatchListHeaderBar otherPartyLabel={t('matches:cols.candidate')} leadWithOtherParty />
       {matches.length === 0 ? (
-        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('candidates:matchesView.empty')}</div>
+        <SubListEmpty text={t('candidates:matchesView.empty')} />
       ) : matches.map((m, i) => {
         const statusMeta = matchStatusMeta(m.status ?? undefined)
         return (

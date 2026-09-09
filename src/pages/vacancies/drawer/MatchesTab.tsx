@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
 import SectionCard from '@/components/ui/SectionCard'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
+import SubListEmpty from '@/components/drawer/SubListEmpty'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useApps } from '@/context/AppsContext'
 import { MatchCard, MatchListHeaderBar } from '@/pages/matches/shared'
@@ -63,7 +64,7 @@ export default function MatchesTab({ vacancyId }: { vacancyId?: Id }) {
           candidate/customer tabs carry above their flat rows. */}
       <MatchListHeaderBar otherPartyLabel={t('matches:cols.candidate')} leadWithOtherParty showVacancyColumn={false} />
       {matches.length === 0 ? (
-        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('candidates:matchesView.empty')}</div>
+        <SubListEmpty text={t('candidates:matchesView.empty')} />
       ) : matches.map((m, i) => {
         const statusMeta = matchStatusMeta(m.status ?? undefined)
         return (
