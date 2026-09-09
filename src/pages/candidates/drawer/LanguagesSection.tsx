@@ -7,7 +7,7 @@ import { useState, useId } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X, Trash2, Eye, Download } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
@@ -29,15 +29,15 @@ import type { Id } from '@/types/common'
 // The edit buffer's row. `id` is the server row id (absent on a freshly added row)
 // and `documentId` is the TAAL-DOC-LINK-1 proof-document link ('' = none).
 interface LangRow { id?: Id; language: string; spoken: string; written: string; documentId: string }
-// The bulk save payload: language/levels persist through the candidate-level PATCH
-// exactly as before (the document link does NOT — see save()). `id` rides along for
-// a persisted row because the drawer OPTIMISTICALLY MERGES this payload over the
-// candidate it holds — without it the merged language rows lost their id, and every
-// linked document silently dropped off the chips until the next full refetch
-// (measured live 08-08). The API accepts and ignores it (200, row ids unchanged).
-interface LangSavePayload { id?: Id; language: string; spoken: string; written: string }
+// ENT1-03 (FE-BE contract audit 09-09): language + levels + document link persist
+// through the PER-ITEM routes only — POST/PATCH/DELETE /candidates/{c}/languages[/{item}]
+// (CandidateLanguageController: `language`, `spoken_level`, `written_level`,
+// `document_id`). The old candidate-level `languages: [...]` PATCH had no rule behind
+// it: 200 and nothing stored, while the drawer's optimistic merge showed the levels
+// as saved until the next refresh. `spoken`/`written` are the mapper's FE twins.
 interface ApiLanguage {
   id?: Id; language?: string; name?: string; spoken?: string; written?: string
+  spoken_level?: string | null; written_level?: string | null
   // TAAL-DOC-LINK-1: LanguageResource ships both the FK and the nested document.
   document_id?: Id | null; document?: LinkedDocument | null
 }
@@ -61,7 +61,7 @@ interface LinkedDocument {
  * previewed/downloaded from the read chip — mirroring what Opleiding /
  * Certificeringen / Vaardigheden / Referenties already offer.
  */
-export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEditSave?: (v: { languages: LangSavePayload[] }) => void }) {
+export default function LanguagesSection({ c, onSaved }: { c: Candidate; onSaved?: (v: { languages: ApiLanguage[] }) => void }) {
   const { t } = useTranslation('candidates')
   const { languages: langOpts, levels } = useLanguageLookups() as { languages: string[]; levels: string[] }
   // CreatableSelect's trigger is a <button>, which ignores a <label for> — a
@@ -122,13 +122,18 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
   const addRow    = ()        => setRows(r => [...r, { language: '', spoken: '', written: '', documentId: '' }])
   const removeRow = (i: number) => setRows(r => r.filter((_, idx) => idx !== i))
   const cancel = () => { setRows(initial()); setInvalidRows({}); setEditing(false) }
-  // Save in two paths, because the backend has two. Language + levels keep riding the
-  // existing candidate-level bulk payload (unchanged shape). The document link does
-  // NOT: MEASURED live 08-08 — PATCH /candidates/{id} answers 200 but silently drops
-  // `document_id` on a language row, while PATCH /candidates/{id}/languages/{row}
-  // persists it (and the reverse language_id then shows on the document). That is the
-  // exact per-item relation route the Documenten tab's link picker already uses.
-  const save = () => {
+  // The per-item body: levels and the document link ride together; '' clears (null —
+  // both level rules are `sometimes|nullable`, `document_id: null` unlinks).
+  const itemBody = (r: LangRow) => ({ language: r.language, spoken_level: r.spoken || null, written_level: r.written || null, document_id: r.documentId || null })
+  // A server row with the mapper's FE twins, so the drawer's local merge renders
+  // exactly like a fresh load (mapCandidate adds the same twins).
+  const toApiRow = (l: ApiLanguage): ApiLanguage => ({ ...l, spoken: l.spoken ?? l.spoken_level ?? '', written: l.written ?? l.written_level ?? '' })
+  const findPrev = (id: Id | undefined) => langs.find(l => String(l.id) === String(id))
+  // Save through the per-item routes (ENT1-03): one POST per new row, one PATCH per
+  // CHANGED row, one DELETE per removed row, untouched rows are neither re-sent nor
+  // re-read. The drawer merges the RETURNED rows (server truth, never the typed
+  // values); a refused row stays in the editor with the server's own reason.
+  const save = async () => {
     // KAND-ACHTERGROND-VERPLICHT-1: a row with content but no language used to be
     // silently dropped by the `kept` filter below — no error, no explanation, the
     // typed spoken/written level or picked document just vanished. Block Save
@@ -142,19 +147,55 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
       return
     }
     const kept = rows.filter(r => r.language)
-    onEditSave?.({ languages: kept.map(r => ({ ...(r.id != null ? { id: r.id } : {}), language: r.language, spoken: r.spoken, written: r.written })) })
     setInvalidRows({})
-    setEditing(false)
-    kept.forEach(r => {
-      if (r.id == null || r.documentId === (docLinks[String(r.id)] ?? '')) return
-      // DOC-1-EIGENAAR-1 (punt 5): a 422 here is the backend's own readable "already
-      // linked" reason — quietStatuses keeps api.ts's generic dev toast from burying it.
-      api.patch(`/candidates/${c.id}/languages/${r.id}`, { document_id: r.documentId || null }, { quietStatuses: [422] })
-        // Only a confirmed write updates the read state — a refused PATCH leaves the
-        // previous link on screen instead of pretending the new one saved.
-        .then(() => setDocLinks(prev => ({ ...prev, [String(r.id)]: r.documentId })))
-        .catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
+    const before = initial()
+    const beforeById = new Map(before.filter(b => b.id != null).map(b => [String(b.id), b]))
+    const keptIds = new Set(kept.filter(r => r.id != null).map(r => String(r.id)))
+    const removed = before.filter(b => b.id != null && !keptIds.has(String(b.id)))
+    const unchanged = (r: LangRow, b: LangRow) => r.language === b.language && r.spoken === b.spoken && r.written === b.written && r.documentId === b.documentId
+    // DOC-1-EIGENAAR-1 (punt 5): a 422 is the backend's own readable reason ("already
+    // linked", a level outside the lookup) — quietStatuses keeps the generic dev toast away.
+    const opts = { quietStatuses: [422] }
+    const writes = kept.map(r => {
+      if (r.id == null) return api.post(`/candidates/${c.id}/languages`, itemBody(r), opts).then(res => toApiRow(unwrap<ApiLanguage>(res)))
+      const b = beforeById.get(String(r.id))
+      if (b && unchanged(r, b)) return Promise.resolve(toApiRow(findPrev(r.id) ?? { id: r.id, language: r.language, spoken: r.spoken, written: r.written }))
+      return api.patch(`/candidates/${c.id}/languages/${r.id}`, itemBody(r), opts).then(res => toApiRow(unwrap<ApiLanguage>(res)))
     })
+    const deletes = removed.map(b => api.delete(`/candidates/${c.id}/languages/${b.id}`, opts))
+    const [writeResults, deleteResults] = await Promise.all([Promise.allSettled(writes), Promise.allSettled(deletes)])
+    // The server's truth per kept row (a refused write keeps its previous row) plus any
+    // row whose delete was refused; a created row's id lands on its editor row so a
+    // retry updates instead of duplicating.
+    const nextLangs: ApiLanguage[] = []
+    const nextRows: LangRow[] = []
+    let firstError: unknown = null
+    writeResults.forEach((res, i) => {
+      const r = kept[i]
+      if (res.status === 'fulfilled') {
+        nextLangs.push(res.value)
+        nextRows.push({ ...r, id: res.value.id ?? r.id })
+        return
+      }
+      if (firstError == null) firstError = res.reason
+      const prev = r.id != null ? findPrev(r.id) : undefined
+      if (prev) nextLangs.push(toApiRow(prev))
+      nextRows.push(r)
+    })
+    deleteResults.forEach((res, i) => {
+      if (res.status === 'fulfilled') return
+      if (firstError == null) firstError = res.reason
+      const prev = findPrev(removed[i].id)
+      if (prev) nextLangs.push(toApiRow(prev))
+    })
+    setDocLinks(Object.fromEntries(nextLangs.filter(l => l.id != null).map(l => [String(l.id), l.document_id != null ? String(l.document_id) : ''])))
+    onSaved?.({ languages: nextLangs })
+    if (firstError != null) {
+      notifyError(extractApiError(firstError, t('common:actionFailed')))
+      setRows(nextRows)
+      return
+    }
+    setEditing(false)
   }
   // Download a linked document through the one shared helper (same mechanics as the
   // Documenten list row) — the in-app stream url first, the signed url as fallback.

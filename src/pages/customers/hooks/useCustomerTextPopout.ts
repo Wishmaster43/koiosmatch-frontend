@@ -33,8 +33,9 @@ interface RawCustomerLite { id?: Id; name?: string; description?: string | null 
 interface RawDepartmentLite { id?: Id; name?: string; description?: string | null }
 interface RawLocationLite { id?: Id; name?: string; description?: string | null }
 // CONTACT-TEKST-1: the CustomerContactResource subset this popout reads (name is
-// composed server-side; notes is the free-text block, see Contact interface cite).
-interface RawContactLite { id?: Id; name?: string; notes?: string | null }
+// composed server-side). ENT1-06 (contract audit 09-09): the free-text block is
+// `description` — the resource never emitted a `notes` key, so the window opened empty.
+interface RawContactLite { id?: Id; name?: string; description?: string | null }
 
 // Light identity fetch for the popped-out customer bedrijfstekst window.
 export function useCustomerTextLite(id: string | undefined) {
@@ -149,7 +150,7 @@ export function useContactTextLite(customerId: string | undefined, contactId: st
     api.get(`/contacts/${contactId}`, { signal })
       .then(r => {
         const raw = unwrap<RawContactLite>(r)
-        setContact({ id: String(raw.id ?? contactId), customerId, name: raw.name ?? '?', description: raw.notes ?? '' })
+        setContact({ id: String(raw.id ?? contactId), customerId, name: raw.name ?? '?', description: raw.description ?? '' })
       })
       .catch((e) => { if (!signal?.aborted && e?.name !== 'CanceledError') setError(true) })
       .finally(() => setLoading(false))
@@ -192,12 +193,12 @@ export function patchDepartmentText(customerId: Id, departmentId: Id, html: stri
     .catch(err => { revert(); notifyError(extractApiError(err, t('common:actionFailed'))); return false })
 }
 
-// CONTACT-TEKST-1: standalone PATCH /customers/{cid}/contacts/{id} { notes } —
-// same field ContactTextSection's saveText writes through useCustomerContacts.update
-// inside the drawer; the popped-out window has no drawer state to route an
+// CONTACT-TEKST-1: standalone PATCH /customers/{cid}/contacts/{id} { description } —
+// the column CustomerContactRequest validates (ENT1-05: `notes` was silently dropped,
+// 200 and nothing stored). The popped-out window has no drawer state to route an
 // optimistic patch through, so it calls the route directly (mirrors the pair above).
 export function patchContactText(customerId: Id, contactId: Id, html: string, t: TFunction, revert: () => void): Promise<boolean> {
-  return api.patch(`/customers/${customerId}/contacts/${contactId}`, { notes: html })
+  return api.patch(`/customers/${customerId}/contacts/${contactId}`, { description: html })
     .then(() => true)
     .catch(err => { revert(); notifyError(extractApiError(err, t('common:actionFailed'))); return false })
 }

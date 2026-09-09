@@ -303,3 +303,42 @@ describe('useWorkflowsData · handleRunBulk (S1 run-bulk confirm)', () => {
     expect(notifyError).toHaveBeenCalledWith('common:actionFailed')
   })
 })
+
+// AIK-02 (contract audit 09-09): the list-row switch and the folder drag send a
+// PARTIAL PUT — the old full payload was rebuilt from the list row and re-tagged an
+// event workflow as a daily 09:00 schedule on every flip.
+describe('useWorkflowsData · list mutations are partial PUTs (AIK-02)', () => {
+  it('handleToggleStatus PUTs only status + active', async () => {
+    seedList()
+    mockedPut.mockResolvedValue({ data: {} })
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    act(() => { result.current.handleToggleStatus(result.current.workflows[0]) })
+
+    await waitFor(() => expect(mockedPut).toHaveBeenCalledWith('/workflows/wf-1', { status: 'inactive', active: false }))
+  })
+
+  it('moveToFolder PUTs only folder_id', async () => {
+    seedList()
+    mockedPut.mockResolvedValue({ data: {} })
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    act(() => { result.current.moveToFolder('wf-1', 'f1') })
+
+    await waitFor(() => expect(mockedPut).toHaveBeenCalledWith('/workflows/wf-1', { folder_id: 'f1' }))
+  })
+
+  // AIK-05: the backend's precise 422 reason reaches the planner, not one anonymous toast.
+  it('handleToggleStatus surfaces the server reason on a 422', async () => {
+    seedList()
+    mockedPut.mockRejectedValue({ response: { status: 422, data: { message: 'Geen geldige vertrekmodule.' } } })
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    act(() => { result.current.handleToggleStatus(result.current.workflows[0]) })
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith('Geen geldige vertrekmodule.'))
+  })
+})

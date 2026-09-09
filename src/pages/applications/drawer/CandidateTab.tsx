@@ -124,7 +124,9 @@ export default function CandidateTab({ application: a }: { application: Applicat
   const renderTab = (cc: Candidate) => {
     switch (tab) {
       case 'profile':        return <ProfilePanel c={cc} onEditSave={(v: Record<string, unknown>) => onUpdate(cc.id, v)} />
-      case 'background':     return <BackgroundTab c={cc} onEditSave={(v: Record<string, unknown>) => onUpdate(cc.id, v)} />
+      // ENT1-03: the languages sub-tab writes through its own per-item routes; the
+      // returned rows merge locally, exactly like the candidate drawer does.
+      case 'background':     return <BackgroundTab c={cc} onLocalMerge={(v: Record<string, unknown>) => setEdits(prev => ({ ...prev, ...v }))} />
       case 'work':           return <WorkTab c={cc} />
       case 'preferences':    return <PreferencesTab c={cc}
         onSave={(p: unknown) => onUpdate(cc.id, { preferences: { ...(cc.preferences ?? {}), ...(p as Record<string, unknown>) } })}

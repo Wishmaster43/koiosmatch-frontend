@@ -118,7 +118,8 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
   // paths → the same `description` wire key.
   if ('description'       in patch) body.description       = patch.description
   if ('summary'           in patch) body.description       = patch.summary
-  if ('languages'         in patch) body.languages         = patch.languages
+  // `languages` is NOT a candidate-level field (ENT1-03): CandidateProfileRequest has no
+  // rule for it and dropped it silently — the rows persist through the per-item routes.
   if ('preferences'       in patch) body.preferences       = patch.preferences
   // RATE-WISH-1: desired hourly rate, min-max ('' -> null so clearing persists).
   if ('desiredRateMin' in patch) body.desired_rate_min = patch.desiredRateMin === '' ? null : patch.desiredRateMin

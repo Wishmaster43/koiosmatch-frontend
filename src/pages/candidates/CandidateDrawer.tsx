@@ -205,7 +205,10 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
         // B15-flow: the contact-moment write already happened via its own endpoint —
         // merge the server's stamp into local state only, no second PATCH.
         onContactMoment={(v: Record<string, unknown>) => setProfileEdits(prev => ({ ...(prev ?? {}), ...v }))} />
-      case 'background':     return <BackgroundTab c={mergedC} onEditSave={(v: Record<string, unknown>) => { setProfileEdits(v); onUpdate?.(c.id, v) }} onJump={setTab} />
+      // ENT1-03: the languages sub-tab writes through its own per-item routes and hands
+      // the server rows up for the local merge only (the onContactMoment idiom above).
+      case 'background':     return <BackgroundTab c={mergedC}
+        onLocalMerge={(v: Record<string, unknown>) => setProfileEdits(prev => ({ ...(prev ?? {}), ...v }))} onJump={setTab} />
       case 'work':           return <WorkTab c={c} onRefresh={() => onRefresh?.(c.id)} initialSubTab={deepLink?.tab === 'work' ? deepLink.sub : undefined} />
       case 'vacancySearch':  return <VacancySearchTab candidate={c} />
       case 'planning':       return <PlanningPanel c={c} />

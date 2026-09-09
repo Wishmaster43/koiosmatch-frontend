@@ -1,18 +1,18 @@
 /**
  * LanguagesSection —
  * (1) G34 regression: the taal/gesproken/schriftelijk pickers are the house
- *     `CreatableSelect` (allowCreate={false}), never a native <select>. Pins the
- *     onEditSave payload — a persisted row now also carries its `id` (see the
- *     component's LangSavePayload comment), a new row still does not.
- * (2) TAAL-DOC-LINK-1 (Danny 08-08 "Talen: kan ik nog geen document koppelen"): a
- *     language row can link a proof document. These assert the REAL request
- *     (method + route + body), because the candidate-level PATCH is NOT the path:
- *     measured live 08-08, `PATCH /candidates/{id}` answers 200 while silently
- *     dropping `document_id` on a language row — only the per-item relation route
- *     `PATCH /candidates/{id}/languages/{row}` persists it.
+ *     `CreatableSelect` (allowCreate={false}), never a native <select>.
+ * (2) ENT1-03 (FE-BE contract audit 09-09): language + levels + document link persist
+ *     through the PER-ITEM routes — POST/PATCH/DELETE /candidates/{c}/languages[/{id}]
+ *     with `spoken_level`/`written_level` — never the candidate-level PATCH, which
+ *     dropped `languages` silently (200, nothing stored). Every assertion reads the
+ *     REAL request (method + route + body) and the drawer merge gets the RETURNED
+ *     levels, never the typed ones.
+ * (3) TAAL-DOC-LINK-1 (Danny 08-08 "Talen: kan ik nog geen document koppelen"): the
+ *     proof-document link rides in the same per-item body.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import LanguagesSection from './LanguagesSection'
 import type { Candidate } from '@/types/candidate'
@@ -21,17 +21,20 @@ vi.mock('@/lib/useLanguageLookups', () => ({
   useLanguageLookups: () => ({ languages: ['Nederlands', 'Engels'], levels: ['Basis', 'Vloeiend'] }),
 }))
 
-// The shared axios client — `patch` is what the link assertions read. `get` and
-// getActiveTenantId keep the document-type lookup inside DocPreviewModal quiet.
-const { patch, downloadFiles } = vi.hoisted(() => ({
-  patch: vi.fn(() => Promise.resolve({ data: {} })),
+// The shared axios client — the per-item writes are what the assertions read. `get`
+// keeps the document-type lookup inside DocPreviewModal quiet; unwrap stays REAL.
+const { patch, post, del, downloadFiles, notifyError } = vi.hoisted(() => ({
+  patch: vi.fn(),
+  post: vi.fn(),
+  del: vi.fn(() => Promise.resolve({ data: null })),
   downloadFiles: vi.fn(() => Promise.resolve()),
+  notifyError: vi.fn(),
 }))
-vi.mock('@/lib/api', () => ({
-  default: { patch, get: vi.fn(() => Promise.resolve({ data: { data: [] } })) },
-  unwrapList: () => ({ rows: [] }),
-  getActiveTenantId: () => 'demo',
-}))
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
+  return { ...actual, default: { patch, post, delete: del, get: vi.fn(() => Promise.resolve({ data: { data: [] } })) }, getActiveTenantId: () => 'demo' }
+})
+vi.mock('@/lib/notify', () => ({ notifyError }))
 vi.mock('@/lib/downloadFiles', () => ({ downloadFilesSequentially: downloadFiles }))
 
 const doc = { id: 'd1', name: 'taalcertificaat.pdf', url: '/api/candidates/c1/documents/d1/download' }
@@ -41,41 +44,50 @@ const candidate = {
   documents: [doc],
 } as unknown as Candidate
 
-beforeEach(() => vi.clearAllMocks())
+// The measured per-item response: the resource row (id + wire level names).
+const serverRow = (over: Record<string, unknown> = {}) =>
+  ({ data: { id: 'l1', language: 'Nederlands', spoken_level: 'Vloeiend', written_level: 'Vloeiend', document_id: null, ...over } })
+
+beforeEach(() => {
+  vi.clearAllMocks()
+  patch.mockResolvedValue(serverRow())
+  post.mockResolvedValue({ data: { id: 'l-new', language: 'Nederlands', spoken_level: 'Vloeiend', written_level: 'Basis', document_id: null } })
+})
 
 describe('LanguagesSection · pickers are the house CreatableSelect, not a native <select>', () => {
   it('renders no native <select> once editing', async () => {
     const user = userEvent.setup()
-    const { container } = render(<LanguagesSection c={candidate} onEditSave={vi.fn()} />)
+    const { container } = render(<LanguagesSection c={candidate} onSaved={vi.fn()} />)
     await user.click(screen.getByTitle('common:edit'))
     expect(container.querySelector('select')).toBeNull()
   })
+})
 
-  it('changing the language picker on the existing row and saving submits the SAME shape as before', async () => {
+describe('LanguagesSection · per-item routes (ENT1-03)', () => {
+  it('changing an existing row PATCHes /candidates/{c}/languages/{id} with the wire level names and merges the RETURNED row', async () => {
     const user = userEvent.setup()
-    const onEditSave = vi.fn()
-    render(<LanguagesSection c={candidate} onEditSave={onEditSave} />)
+    const onSaved = vi.fn()
+    patch.mockResolvedValue(serverRow({ language: 'Engels', spoken_level: 'Basis' }))
+    render(<LanguagesSection c={candidate} onSaved={onSaved} />)
     await user.click(screen.getByTitle('common:edit'))
 
-    // Row 1's language trigger currently shows the picked value "Nederlands".
     await user.click(screen.getByRole('button', { name: 'Nederlands' }))
     await user.click(await screen.findByRole('button', { name: 'Engels' }))
     await user.click(screen.getByTitle('common:save'))
 
-    // The persisted row's id rides along so the drawer's optimistic merge keeps it
-    // (without it every linked document dropped off the chips until a full refetch).
-    expect(onEditSave).toHaveBeenCalledWith({
-      languages: [{ id: 'l1', language: 'Engels', spoken: 'Vloeiend', written: 'Vloeiend' }],
-    })
+    await waitFor(() => expect(patch).toHaveBeenCalledWith('/candidates/c1/languages/l1',
+      { language: 'Engels', spoken_level: 'Vloeiend', written_level: 'Vloeiend', document_id: null }, { quietStatuses: [422] }))
+    expect(post).not.toHaveBeenCalled()
+    // The drawer merge carries the server's levels (spoken Basis came BACK, not typed).
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith({ languages: [
+      expect.objectContaining({ id: 'l1', language: 'Engels', spoken: 'Basis', written: 'Vloeiend', spoken_level: 'Basis' }),
+    ] }))
   })
 
-  it('adding a fresh row and picking all three levels calls onEditSave with the full row', async () => {
+  it('a fresh row POSTs /candidates/{c}/languages and the merge carries the new id', async () => {
     const user = userEvent.setup()
-    const onEditSave = vi.fn()
-    render(<LanguagesSection c={{ id: 'c1', languages: [] } as unknown as Candidate} onEditSave={onEditSave} />)
-    // Outside edit mode, the "+ Taal" trigger enters edit AND seeds one fresh row.
-    // The always-visible "+ Taal" button shares its accessible name with the fresh
-    // row's own (still-empty) language picker trigger — the picker is the LAST match.
+    const onSaved = vi.fn()
+    render(<LanguagesSection c={{ id: 'c1', languages: [] } as unknown as Candidate} onSaved={onSaved} />)
     await user.click(screen.getByRole('button', { name: 'addFields.language' }))
 
     const langTriggers = screen.getAllByRole('button', { name: 'addFields.language' })
@@ -87,78 +99,107 @@ describe('LanguagesSection · pickers are the house CreatableSelect, not a nativ
     await user.click(await screen.findByRole('button', { name: 'Basis' }))
     await user.click(screen.getByTitle('common:save'))
 
-    // A brand-new row has no id yet — the payload carries none (never an empty one).
-    expect(onEditSave).toHaveBeenCalledWith({
-      languages: [{ language: 'Nederlands', spoken: 'Vloeiend', written: 'Basis' }],
-    })
+    await waitFor(() => expect(post).toHaveBeenCalledWith('/candidates/c1/languages',
+      { language: 'Nederlands', spoken_level: 'Vloeiend', written_level: 'Basis', document_id: null }, { quietStatuses: [422] }))
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith({ languages: [expect.objectContaining({ id: 'l-new', spoken: 'Vloeiend', written: 'Basis' })] }))
+  })
+
+  it('removing a row DELETEs its per-item route and drops it from the merge', async () => {
+    const user = userEvent.setup()
+    const onSaved = vi.fn()
+    render(<LanguagesSection c={candidate} onSaved={onSaved} />)
+    await user.click(screen.getByTitle('common:edit'))
+    await user.click(screen.getByTitle('common:remove'))
+    await user.click(screen.getByTitle('common:save'))
+
+    await waitFor(() => expect(del).toHaveBeenCalledWith('/candidates/c1/languages/l1', { quietStatuses: [422] }))
+    expect(patch).not.toHaveBeenCalled()
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith({ languages: [] }))
+  })
+
+  it('saving without touching anything sends NO request at all', async () => {
+    const user = userEvent.setup()
+    render(<LanguagesSection c={candidate} onSaved={vi.fn()} />)
+    await user.click(screen.getByTitle('common:edit'))
+    await user.click(screen.getByTitle('common:save'))
+    expect(patch).not.toHaveBeenCalled()
+    expect(post).not.toHaveBeenCalled()
+    expect(del).not.toHaveBeenCalled()
+  })
+
+  it('a refused write keeps the editor open with the server reason, and the merge keeps the previous row', async () => {
+    const user = userEvent.setup()
+    const onSaved = vi.fn()
+    patch.mockRejectedValue({ response: { status: 422, data: { message: 'Niveau bestaat niet.' } } })
+    render(<LanguagesSection c={candidate} onSaved={onSaved} />)
+    await user.click(screen.getByTitle('common:edit'))
+    await user.click(screen.getByRole('button', { name: 'Nederlands' }))
+    await user.click(await screen.findByRole('button', { name: 'Engels' }))
+    await user.click(screen.getByTitle('common:save'))
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith('Niveau bestaat niet.'))
+    // Still editing (the save button is the edit-mode footer), the typed value kept.
+    expect(screen.getByTitle('common:save')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Engels' })).toBeInTheDocument()
+    expect(onSaved).toHaveBeenCalledWith({ languages: [expect.objectContaining({ id: 'l1', language: 'Nederlands' })] })
   })
 })
 
 /**
  * KAND-ACHTERGROND-VERPLICHT-1 (2026-08-17): `language` is required on create
- * (CandidateLanguageController::rules) — the old `kept = rows.filter(r =>
- * r.language)` silently dropped a row with content but no language, with no
- * marker and no explanation. The Taal column now carries the required asterisk,
- * and Save blocks (no onEditSave call at all) until the language is picked.
+ * (CandidateLanguageController::rules) — a row with content but no language is never
+ * silently dropped: the Taal column carries the asterisk and Save blocks (no request)
+ * until the language is picked.
  */
 describe('LanguagesSection · language is required (KAND-ACHTERGROND-VERPLICHT-1)', () => {
-  it('marks the Taal column required, blocks Save on a row with content but no language, then saves once it is picked', async () => {
+  it('marks the Taal column required, blocks Save on a row with content but no language, then POSTs once it is picked', async () => {
     const user = userEvent.setup()
-    const onEditSave = vi.fn()
-    render(<LanguagesSection c={{ id: 'c1', languages: [] } as unknown as Candidate} onEditSave={onEditSave} />)
+    render(<LanguagesSection c={{ id: 'c1', languages: [] } as unknown as Candidate} onSaved={vi.fn()} />)
     await user.click(screen.getByRole('button', { name: 'addFields.language' }))
 
-    // 1) NO REQUIRED MARKER — the Taal column caption carries the asterisk.
     const captionLabel = screen.getAllByText('addFields.language').find(el => el.tagName === 'LABEL')
     expect(captionLabel).toBeDefined()
     expect(captionLabel!.textContent).toContain('*')
 
-    // Fill the spoken level only — a row with content but no language.
     await user.click(screen.getByRole('button', { name: 'addFields.spokenLevel' }))
     await user.click(await screen.findByRole('button', { name: 'Vloeiend' }))
 
-    // 2) SAVE IS ALLOWED WITH IT EMPTY — must now be blocked: no onEditSave call,
-    // the row's content is never silently discarded.
     await user.click(screen.getByTitle('common:save'))
-    expect(onEditSave).not.toHaveBeenCalled()
+    expect(post).not.toHaveBeenCalled()
     expect(screen.getByRole('alert')).toBeInTheDocument()
 
-    // Picking the language clears the block and the real payload goes out.
     const langTriggers = screen.getAllByRole('button', { name: 'addFields.language' })
     await user.click(langTriggers[langTriggers.length - 1])
     await user.click(await screen.findByRole('button', { name: 'Nederlands' }))
     await user.click(screen.getByTitle('common:save'))
-    expect(onEditSave).toHaveBeenCalledWith({ languages: [{ language: 'Nederlands', spoken: 'Vloeiend', written: '' }] })
+    await waitFor(() => expect(post).toHaveBeenCalledWith('/candidates/c1/languages',
+      { language: 'Nederlands', spoken_level: 'Vloeiend', written_level: null, document_id: null }, { quietStatuses: [422] }))
   })
 
-  it('still discards a row with NOTHING filled at all as a harmless no-op (unchanged)', async () => {
+  it('still discards a row with NOTHING filled at all as a harmless no-op (no request)', async () => {
     const user = userEvent.setup()
-    const onEditSave = vi.fn()
-    render(<LanguagesSection c={{ id: 'c1', languages: [] } as unknown as Candidate} onEditSave={onEditSave} />)
+    const onSaved = vi.fn()
+    render(<LanguagesSection c={{ id: 'c1', languages: [] } as unknown as Candidate} onSaved={onSaved} />)
     await user.click(screen.getByRole('button', { name: 'addFields.language' }))
     await user.click(screen.getByTitle('common:save'))
-    expect(onEditSave).toHaveBeenCalledWith({ languages: [] })
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith({ languages: [] }))
+    expect(post).not.toHaveBeenCalled()
   })
 })
 
 describe('LanguagesSection · TAAL-DOC-LINK-1 document link', () => {
-  it('picking a document PATCHes the per-item language relation with document_id (never the candidate payload)', async () => {
+  it('picking a document rides in the per-item PATCH body as document_id', async () => {
     const user = userEvent.setup()
-    const onEditSave = vi.fn()
-    render(<LanguagesSection c={candidate} onEditSave={onEditSave} />)
+    patch.mockResolvedValue(serverRow({ document_id: 'd1' }))
+    render(<LanguagesSection c={candidate} onSaved={vi.fn()} />)
     await user.click(screen.getByTitle('common:edit'))
 
     await user.click(screen.getByRole('button', { name: /addFields\.linkedDocument/ }))
     await user.click(await screen.findByRole('button', { name: 'taalcertificaat.pdf' }))
     await user.click(screen.getByTitle('common:save'))
 
-    // The REAL request: the relation route, with the document id in the body.
-    expect(patch).toHaveBeenCalledTimes(1)
-    expect(patch).toHaveBeenCalledWith('/candidates/c1/languages/l1', { document_id: 'd1' }, { quietStatuses: [422] })
-    // …and the bulk language payload is unchanged — it never carries the link.
-    expect(onEditSave).toHaveBeenCalledWith({
-      languages: [{ id: 'l1', language: 'Nederlands', spoken: 'Vloeiend', written: 'Vloeiend' }],
-    })
+    await waitFor(() => expect(patch).toHaveBeenCalledTimes(1))
+    expect(patch).toHaveBeenCalledWith('/candidates/c1/languages/l1', expect.objectContaining({ document_id: 'd1' }), { quietStatuses: [422] })
   })
 
   it('clearing an existing link PATCHes document_id: null', async () => {
@@ -167,113 +208,25 @@ describe('LanguagesSection · TAAL-DOC-LINK-1 document link', () => {
       id: 'c1', documents: [doc],
       languages: [{ id: 'l1', language: 'Nederlands', spoken: 'Vloeiend', written: 'Vloeiend', document_id: 'd1' }],
     } as unknown as Candidate
-    render(<LanguagesSection c={linked} onEditSave={vi.fn()} />)
+    render(<LanguagesSection c={linked} onSaved={vi.fn()} />)
     await user.click(screen.getByTitle('common:edit'))
-    // The picker's own clear affordance (clearLabel-composed name, so it is not the
-    // bare "clear" the taal/niveau pickers show).
     await user.click(screen.getByTitle('clearField'))
     await user.click(screen.getByTitle('common:save'))
 
-    expect(patch).toHaveBeenCalledWith('/candidates/c1/languages/l1', { document_id: null }, { quietStatuses: [422] })
-  })
-
-  it('saving without touching the link fires NO relation PATCH at all', async () => {
-    const user = userEvent.setup()
-    render(<LanguagesSection c={candidate} onEditSave={vi.fn()} />)
-    await user.click(screen.getByTitle('common:edit'))
-    await user.click(screen.getByTitle('common:save'))
-    expect(patch).not.toHaveBeenCalled()
+    await waitFor(() => expect(patch).toHaveBeenCalledWith('/candidates/c1/languages/l1', expect.objectContaining({ document_id: null }), { quietStatuses: [422] }))
   })
 
   it('offers no document picker on a NOT-yet-persisted row (no id a relation PATCH could target)', async () => {
     const user = userEvent.setup()
-    render(<LanguagesSection c={{ id: 'c1', languages: [], documents: [doc] } as unknown as Candidate} onEditSave={vi.fn()} />)
+    render(<LanguagesSection c={{ id: 'c1', languages: [], documents: [doc] } as unknown as Candidate} onSaved={vi.fn()} />)
     await user.click(screen.getByRole('button', { name: 'addFields.language' }))
     expect(screen.queryByRole('button', { name: /addFields\.linkedDocument/ })).toBeNull()
   })
 
   it('offers no document picker when the candidate has no documents (no picker resolving to nothing)', async () => {
     const user = userEvent.setup()
-    render(<LanguagesSection c={{ id: 'c1', languages: candidate.languages, documents: [] } as unknown as Candidate} onEditSave={vi.fn()} />)
+    render(<LanguagesSection c={{ id: 'c1', languages: candidate.languages, documents: [] } as unknown as Candidate} onSaved={vi.fn()} />)
     await user.click(screen.getByTitle('common:edit'))
     expect(screen.queryByRole('button', { name: /addFields\.linkedDocument/ })).toBeNull()
-  })
-
-  it('shows preview + download actions on a linked language chip, and downloads the in-app stream url', async () => {
-    const user = userEvent.setup()
-    const linked = {
-      id: 'c1', documents: [doc],
-      languages: [{ id: 'l1', language: 'Nederlands', spoken: 'Vloeiend', written: 'Vloeiend', document_id: 'd1' }],
-    } as unknown as Candidate
-    render(<LanguagesSection c={linked} onEditSave={vi.fn()} />)
-    await user.click(screen.getByLabelText('documents.download'))
-    expect(downloadFiles).toHaveBeenCalledWith([{ url: '/api/candidates/c1/documents/d1/download', name: 'taalcertificaat.pdf' }])
-    // The preview opens the shared house modal (never a fork) on the same document.
-    await user.click(screen.getByLabelText('documents.preview'))
-    expect(await screen.findByText('taalcertificaat.pdf')).toBeInTheDocument()
-  })
-
-  it('renders no document actions on an UNLINKED language chip', () => {
-    render(<LanguagesSection c={candidate} onEditSave={vi.fn()} />)
-    expect(screen.queryByLabelText('documents.preview')).toBeNull()
-    expect(screen.queryByLabelText('documents.download')).toBeNull()
-  })
-})
-
-/**
- * DOC-1-EIGENAAR-1 (Danny 08-08 punt 6). MEASURED live: a document that already hangs
- * on another entry is refused with 422 — so it must not be offered here either. This
- * row's own document stays in the list, and a pick on one row disappears from the
- * other rows' lists straight away (both would otherwise 422 on save).
- */
-describe('LanguagesSection · DOC-1-EIGENAAR-1 only still-free documents are offered', () => {
-  const free = { id: 'd-free', name: 'vrij.pdf' }
-  const taken = { id: 'd-taken', name: 'bezet.pdf', skill_id: 's9' }
-
-  it('leaves out a document another entry already claims', async () => {
-    const user = userEvent.setup()
-    const c = {
-      id: 'c1', documents: [free, taken],
-      languages: [{ id: 'l1', language: 'Nederlands', spoken: '', written: '' }],
-    } as unknown as Candidate
-    render(<LanguagesSection c={c} onEditSave={vi.fn()} />)
-    await user.click(screen.getByTitle('common:edit'))
-    // The trigger's accessible name is the sr-only field label + its own text.
-    await user.click(screen.getByRole('button', { name: /addFields\.linkedDocumentFor/ }))
-    expect(screen.queryByRole('button', { name: 'bezet.pdf' })).toBeNull()
-    expect(await screen.findByRole('button', { name: 'vrij.pdf' })).toBeInTheDocument()
-  })
-
-  it('keeps THIS row’s own linked document in its list, so the pick stays switchable', async () => {
-    const user = userEvent.setup()
-    const own = { id: 'd-own', name: 'eigen.pdf', language_id: 'l1' }
-    const c = {
-      id: 'c1', documents: [free, own],
-      languages: [{ id: 'l1', language: 'Nederlands', spoken: '', written: '', document_id: 'd-own' }],
-    } as unknown as Candidate
-    render(<LanguagesSection c={c} onEditSave={vi.fn()} />)
-    await user.click(screen.getByTitle('common:edit'))
-    await user.click(screen.getByRole('button', { name: /eigen\.pdf/ }))
-    expect(await screen.findByRole('button', { name: 'vrij.pdf' })).toBeInTheDocument()
-  })
-
-  it('a pick on one row disappears from the OTHER row’s list immediately (no double-claim)', async () => {
-    const user = userEvent.setup()
-    const c = {
-      id: 'c1', documents: [free],
-      languages: [
-        { id: 'l1', language: 'Nederlands', spoken: '', written: '' },
-        { id: 'l2', language: 'Engels', spoken: '', written: '' },
-      ],
-    } as unknown as Candidate
-    render(<LanguagesSection c={c} onEditSave={vi.fn()} />)
-    await user.click(screen.getByTitle('common:edit'))
-    // Both rows still offer vrij.pdf; pick it on row 1.
-    expect(screen.getAllByRole('button', { name: /addFields\.linkedDocumentFor/ })).toHaveLength(2)
-    await user.click(screen.getAllByRole('button', { name: /addFields\.linkedDocumentFor/ })[0])
-    await user.click(await screen.findByRole('button', { name: 'vrij.pdf' }))
-    // Row 2 now has nothing left to offer, so its picker is gone entirely — only
-    // row 1's own (now showing "vrij.pdf") remains.
-    expect(screen.getAllByRole('button', { name: /addFields\.linkedDocumentFor/ })).toHaveLength(1)
   })
 })

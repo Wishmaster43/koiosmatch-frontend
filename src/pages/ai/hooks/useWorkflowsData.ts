@@ -156,7 +156,8 @@ export function useWorkflowsData(showArchived: boolean) {
         if (wf) openEditor(wf, e.response.data?.run_id ?? null)
         return
       }
-      notifyError(t('common:actionFailed'))
+      // AIK-05: the backend's own (already Dutch) reason, never one anonymous red toast.
+      notifyError(extractApiError(err, t('common:actionFailed')))
     }
   }
 
@@ -207,13 +208,15 @@ export function useWorkflowsData(showArchived: boolean) {
 
   // Active/draft toggle (list-row switch) — same semantics as the editor's status
   // button (active <-> inactive); optimistic, rolled back on failure (mirrors moveToFolder).
+  // AIK-02: a PARTIAL PUT — WorkflowController::update guards every field with
+  // $request->has(), so name/trigger/steps stay untouched; the old full payload was
+  // rebuilt from the list row and re-tagged the trigger on every flip.
   const handleToggleStatus = (wf: Workflow) => {
     const nextStatus = wf.status === 'active' ? 'inactive' : 'active'
     setWorkflows(prev => prev.map(w => w.id === wf.id ? { ...w, status: nextStatus } : w))
-    const payload = { ...denormalizeWorkflow({ ...wf, status: nextStatus }), folder_id: wf.folder_id ?? null }
-    api.put(`/workflows/${wf.id}`, payload).catch(() => {
+    api.put(`/workflows/${wf.id}`, { status: nextStatus, active: nextStatus === 'active' }).catch((err: unknown) => {
       setWorkflows(prev => prev.map(w => w.id === wf.id ? { ...w, status: wf.status } : w))
-      notifyError(t('common:actionFailed'))
+      notifyError(extractApiError(err, t('common:actionFailed')))
     })
   }
 
@@ -318,11 +321,11 @@ export function useWorkflowsData(showArchived: boolean) {
     setWorkflows(prev => prev.map(w => w.id === workflowId ? { ...w, folder_id: folderId } : w))
     const wf = workflows.find(w => w.id === workflowId)
     if (!wf) return
-    const payload = { ...denormalizeWorkflow(wf), folder_id: folderId }
-    api.put(`/workflows/${workflowId}`, payload).catch(() => {
+    // AIK-02: the folder is the only field that changes — a partial PUT (see handleToggleStatus).
+    api.put(`/workflows/${workflowId}`, { folder_id: folderId }).catch((err: unknown) => {
       // Roll back the optimistic move and say so — mirrors handleToggleStatus's rollback+toast.
       setWorkflows(prev => prev.map(w => w.id === workflowId ? { ...w, folder_id: wf.folder_id } : w))
-      notifyError(t('common:actionFailed'))
+      notifyError(extractApiError(err, t('common:actionFailed')))
     })
   }
 

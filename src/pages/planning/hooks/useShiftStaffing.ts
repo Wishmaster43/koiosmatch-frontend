@@ -34,7 +34,9 @@ export function useShiftEligibleCandidates(shiftId: string | null) {
     queryKey: ['planning', 'shift-candidates', shiftId],
     queryFn: async ({ signal }) => {
       const res = await api.get(`/planning/shifts/${shiftId}/candidates`, { signal })
-      const rows = unwrap<{ data: RawEligible[] }>(res).data ?? []
+      // ENT2-04 (contract audit 09-09): unwrap() already returns the array — the old
+      // second `.data` read always yielded undefined, so the pool rendered empty.
+      const rows = unwrapList<RawEligible>(res).rows
       return rows.map(r => ({ id: r.id, firstName: r.first_name, lastName: r.last_name, favourite: !!r.favourite, reason: r.reason })) as EligibleCandidate[]
     },
     enabled: !!shiftId,

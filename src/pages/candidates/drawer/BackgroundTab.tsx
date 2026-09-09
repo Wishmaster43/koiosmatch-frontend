@@ -103,7 +103,10 @@ const TO_API: Record<string, (v: RelItem) => Record<string, unknown>> = {
 }
 
 // Background sub-tabs (experience/education/certifications/skills/languages/references), each an optimistic local list that reverts on a failed persist (see file header).
-export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate; onEditSave?: (v: Record<string, unknown>) => void; onJump?: (tab: string) => void }) {
+// `onLocalMerge` (ENT1-03): a sub-tab that already wrote through its own per-item
+// routes hands the server rows up for the drawer's LOCAL merge only — no second PATCH.
+// (The old `onEditSave` candidate-level PATCH path had languages as its only caller.)
+export default function BackgroundTab({ c, onLocalMerge, onJump }: { c: Candidate; onLocalMerge?: (v: Record<string, unknown>) => void; onJump?: (tab: string) => void }) {
   const [experiences, setExperiences] = useState<RelItem[]>(c.experiences ?? [])
   const [educations,  setEducations]  = useState<RelItem[]>(c.educations ?? [])
   const [certs,       setCerts]        = useState<RelItem[]>(c.certifications ?? [])
@@ -293,7 +296,7 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
       {/* Talen ("Languages") already lived on this tab (moved here from Profiel,
           "Profile", earlier) — now its own sub-tab instead of a stacked block;
           persists via the drawer's onUpdate. */}
-      {subTab === 'languages'      && <LanguagesSection c={c} onEditSave={onEditSave} />}
+      {subTab === 'languages'      && <LanguagesSection c={c} onSaved={onLocalMerge} />}
     </div>
   )
 }

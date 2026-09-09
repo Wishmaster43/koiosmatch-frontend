@@ -33,6 +33,14 @@ vi.mock('@/context/TaskLookupsContext', () => ({
   }),
 }))
 
+// ENT2-02: the filter menu holds slugs, the wire wants uuids — the resolved maps. ONE
+// stable object (hoisted), exactly like the real hook's state: a fresh object per
+// render would re-create fetchRelated every render and loop the effect.
+const { LOOKUP_IDS } = vi.hoisted(() => ({
+  LOOKUP_IDS: { maps: { status: { 's-todo': 'uuid-todo', 's-done': 'uuid-done' }, type: { 't-call': 'uuid-call' }, priority: { 'p-high': 'uuid-high' } }, loading: false },
+}))
+vi.mock('../hooks/useTaskLookupIds', () => ({ useTaskLookupIds: () => LOOKUP_IDS }))
+
 import api from '@/lib/api'
 const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
 
@@ -137,7 +145,7 @@ describe('RelatedTasks (task drawer, T5: generalised beyond candidate-only)', ()
     // TASK-FILTER-MENU-1: the status picker now lives behind the shared Filter button.
     await user.click(screen.getByRole('button', { name: 'Filter' }))
     await user.click(screen.getByRole('checkbox', { name: 'Te doen' }))
-    await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/tasks', { params: { candidate: 'c1', status: ['s-todo'] } }))
+    await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/tasks', { params: { candidate: 'c1', status: ['uuid-todo'] } }))
     // Unchecking the same box clears the filter and re-fetches without `status`.
     await user.click(screen.getByRole('checkbox', { name: 'Te doen' }))
     await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/tasks', { params: { candidate: 'c1' } }))
@@ -156,7 +164,7 @@ describe('RelatedTasks · type/priority filter menu (TASK-FILTER-MENU-1)', () =>
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/tasks', { params: { candidate: 'c1' } }))
     await user.click(screen.getByRole('button', { name: 'Filter' }))
     await user.click(screen.getByRole('checkbox', { name: 'Belafspraak' }))
-    await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/tasks', { params: { candidate: 'c1', type: ['t-call'] } }))
+    await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/tasks', { params: { candidate: 'c1', type: ['uuid-call'] } }))
   })
 
   it('re-fetches with priority= once a priority is toggled on', async () => {
@@ -166,7 +174,7 @@ describe('RelatedTasks · type/priority filter menu (TASK-FILTER-MENU-1)', () =>
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/tasks', { params: { candidate: 'c1' } }))
     await user.click(screen.getByRole('button', { name: 'Filter' }))
     await user.click(screen.getByRole('checkbox', { name: 'Hoog' }))
-    await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/tasks', { params: { candidate: 'c1', priority: ['p-high'] } }))
+    await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/tasks', { params: { candidate: 'c1', priority: ['uuid-high'] } }))
   })
 
   it('the toolbar no longer renders a standing status dropdown — only ONE Filter button', async () => {
@@ -184,7 +192,7 @@ describe('RelatedTasks · type/priority filter menu (TASK-FILTER-MENU-1)', () =>
     await user.click(screen.getByRole('checkbox', { name: 'Te doen' }))
     await user.click(screen.getByRole('checkbox', { name: 'Hoog' }))
     expect(screen.getByText('2')).toBeInTheDocument()
-    await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/tasks', { params: { candidate: 'c1', status: ['s-todo'], priority: ['p-high'] } }))
+    await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/tasks', { params: { candidate: 'c1', status: ['uuid-todo'], priority: ['uuid-high'] } }))
 
     await user.click(screen.getByRole('button', { name: 'common:filters.clearAll' }))
     await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/tasks', { params: { candidate: 'c1' } }))

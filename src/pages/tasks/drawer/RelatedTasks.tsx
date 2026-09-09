@@ -32,6 +32,7 @@ import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
 import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
 import { useNavigation } from '@/context/NavigationContext'
 import { useTaskLookups } from '@/context/TaskLookupsContext'
+import { useTaskLookupIds } from '../hooks/useTaskLookupIds'
 import { useDateFormat } from '@/lib/datetime'
 import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
@@ -97,6 +98,10 @@ export default function RelatedTasks({ task }: { task: TaskDetail }) {
   const requestIdRef = useRef(0)
 
   const subject = resolveSubject(task)
+  // ENT2-02 (contract audit 09-09): TaskQuery validates status.*/type.*/priority.* as
+  // uuid; the filter menu holds the tenant SLUG, so every filtered fetch 422'd. The
+  // same slug → uuid maps the bulk bar already resolves through (BULK-WIRE-1).
+  const { maps: lookupIds, loading: loadingLookupIds } = useTaskLookupIds()
 
   // Load the subject's other tasks, server-filtered (search + status), own task
   // filtered out client-side. A failed load surfaces its OWN error state (mirrors
@@ -105,14 +110,27 @@ export default function RelatedTasks({ task }: { task: TaskDetail }) {
     if (!subject) { setRows([]); setLoading(false); setError(false); return }
     const requestId = ++requestIdRef.current
     setLoading(true); setError(false)
+    // The maps are not in yet: stay in the loading state rather than send slugs.
+    if (loadingLookupIds) return
+    // A selection whose slugs resolve to NOTHING must not become an empty param:
+    // `$request->filled()` is false for [] and the server would silently show every
+    // task while the badge claims a filter — show no rows instead of wrong rows.
+    const toIds = (slugs: string[], map: Record<string, string>) => slugs.map(v => map[v]).filter(Boolean)
+    const status = toIds(selectedStatus, lookupIds.status)
+    const type = toIds(selectedType, lookupIds.type)
+    const priority = toIds(selectedPriority, lookupIds.priority)
+    const unresolved = (selectedStatus.length > 0 && status.length === 0)
+      || (selectedType.length > 0 && type.length === 0)
+      || (selectedPriority.length > 0 && priority.length === 0)
+    if (unresolved) { setRows([]); setLoading(false); return }
     // Per-entity-type filter param (TaskQuery: one uuid filter per link-type token)
     // vs assignee_id[] (an array filter — the recruiter/user fallback subject).
     const params: Record<string, unknown> = subject.type === 'assignee'
       ? { assignee_id: [subject.id] }
       : { [subject.type]: subject.id }
-    if (selectedStatus.length > 0) params.status = selectedStatus
-    if (selectedType.length > 0) params.type = selectedType
-    if (selectedPriority.length > 0) params.priority = selectedPriority
+    if (status.length > 0) params.status = status
+    if (type.length > 0) params.type = type
+    if (priority.length > 0) params.priority = priority
     if (query.trim()) params.q = query.trim()
     api.get('/tasks', { params })
       .then(r => { if (requestIdRef.current === requestId) setRows(((unwrapList(r).rows) as Row[]).filter(x => String(x.id) !== String(task.id))) })
@@ -122,7 +140,7 @@ export default function RelatedTasks({ task }: { task: TaskDetail }) {
     // object every render, so depending on it would re-fetch on every parent
     // re-render — its two primitive fields (type/id) are the real dependency.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subject?.type, subject?.id, selectedStatus, selectedType, selectedPriority, query, task.id])
+  }, [subject?.type, subject?.id, selectedStatus, selectedType, selectedPriority, query, task.id, lookupIds, loadingLookupIds])
   // Refetches whenever the subject or any filter changes (via fetchRelated's own deps).
   useEffect(() => { fetchRelated() }, [fetchRelated])
 
