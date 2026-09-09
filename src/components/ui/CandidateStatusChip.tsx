@@ -6,9 +6,7 @@
  * not deployable — Danny 2026-06-29), renders a dash instead of a chip.
  */
 import { useLookups } from '@/context/LookupsContext'
-import SoftChip from './SoftChip'
-import StatusChipFallback from './StatusChipFallback'
-import { NEUTRAL_AVATAR } from './Avatar'
+import EntityStatusChip from './EntityStatusChip'
 
 interface CandidateStatusChipProps {
   status?: string | null
@@ -37,21 +35,16 @@ export default function CandidateStatusChip({ status, phase, plain = false, fall
   // Detect entry phase (first in the lookup array).
   const isEntryPhase = phase != null && phase === phases[0]?.value
 
-  // No slug or entry phase: the shared fallback renders the dash / pre-resolved chip (one
-  // component everywhere, DATA neutral grey = Avatar's NEUTRAL_AVATAR); otherwise the lookup.
-  if (!status || isEntryPhase) {
-    return <StatusChipFallback
-    status={status}
-    isEntryPhase={isEntryPhase}
-    fallbackLabel={fallbackLabel}
-    fallbackColor={fallbackColor || NEUTRAL_AVATAR}
-    plain={plain}
-    round={round}
+  // Delegate to the generic EntityStatusChip with candidate-specific lookup and entry-phase rule.
+  return (
+    <EntityStatusChip
+      status={status}
+      isEntryPhase={isEntryPhase}
+      statusMeta={statusMeta}
+      plain={plain}
+      fallbackLabel={fallbackLabel}
+      fallbackColor={fallbackColor}
+      round={round}
     />
-  }
-
-  // Status slug present and not entry phase: use the tenant lookup.
-  const m = statusMeta(status)
-  if (plain) return <span style={{ fontSize: 12.5, color: 'var(--text)' }}>{m.label}</span>
-  return <SoftChip label={m.label} color={m.color} round={round} />
+  )
 }

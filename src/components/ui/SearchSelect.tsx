@@ -27,6 +27,7 @@ import { useTranslation } from 'react-i18next'
 import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 import { useClickOutside } from '@/hooks/useClickOutside'
+import { useDropdownFocusRestore } from '@/hooks/useDropdownFocusRestore'
 import { matchesOptionQuery } from './optionFilter'
 import SelectClearButton, { CLEAR_BUTTON_SIZE } from './SelectClearButton'
 import SelectAllRow, { SELECT_ALL_ROW_HEIGHT } from './SelectAllRow'
@@ -128,16 +129,12 @@ export default function SearchSelect({
   // focus trap listens on the modal's own node, and a portal is not a descendant of
   // it, so from <body> neither Escape nor Tab reaches the dialog again (§6). Skipped
   // when some other element already claimed focus — same rule CreatableSelect
-  // documents for the identical situation; never a second behaviour for one idiom.
-  const wasOpenRef = useRef(false)
-  // Only the open→closed transition matters here, and only when focus fell all the
-  // way to <body> — if something else already claimed it, that choice is left alone.
-  useEffect(() => {
-    if (wasOpenRef.current && !open && (document.activeElement === document.body || document.activeElement == null)) {
-      ref.current?.querySelector<HTMLElement>('button, [tabindex]:not([tabindex="-1"])')?.focus()
-    }
-    wasOpenRef.current = open
-  }, [open])
+  // documents for the identical situation; shared hook (DUP), resolver looks up the
+  // first focusable element inside `ref` since `renderTrigger` may not expose one.
+  useDropdownFocusRestore(
+    () => ref.current?.querySelector<HTMLElement>('button, [tabindex]:not([tabindex="-1"])') ?? null,
+    open
+  )
 
   // Server-side search: when onSearch is given, debounce the query up to the parent
   // (which re-fetches a capped list) and skip the local filter — so we never pull

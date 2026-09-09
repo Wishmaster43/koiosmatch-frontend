@@ -17,6 +17,7 @@ import Avatar from './Avatar'
 import { useDropdownPlacement, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 import { useClickOutside } from '@/hooks/useClickOutside'
+import { useDropdownFocusRestore } from '@/hooks/useDropdownFocusRestore'
 import { matchesOptionQuery } from './optionFilter'
 import SelectClearButton, { CLEAR_BUTTON_SIZE } from './SelectClearButton'
 
@@ -91,19 +92,8 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, 'ari
   // underneath is untouched while the menu is open (PlanIntakeModal case).
   useEscapeLayer(open, () => setOpen(false))
 
-  // Restore focus to the trigger whenever the menu transitions open → closed
-  // (pick / Escape / outside click) — never on unmount, since that transition
-  // never runs this effect. Skipped if some OTHER element already claimed focus
-  // (e.g. the outside click landed on a different picker's own trigger) so this
-  // never yanks focus away from what the user just interacted with.
-  const wasOpenRef = useRef(false)
-  // Returns focus to the trigger when the menu just closed, unless some other element already claimed focus in the meantime.
-  useEffect(() => {
-    if (wasOpenRef.current && !open && (document.activeElement === document.body || document.activeElement == null)) {
-      triggerRef.current?.focus()
-    }
-    wasOpenRef.current = open
-  }, [open])
+  // Restore focus to the trigger when the menu closes (pick / Escape / outside click).
+  useDropdownFocusRestore(() => triggerRef.current, open)
 
   const opts: SelectOption[] = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
   const current = opts.find(o => o.value === value)

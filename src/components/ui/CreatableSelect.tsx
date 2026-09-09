@@ -31,6 +31,7 @@ import { ChevronDown, Check, Plus } from 'lucide-react'
 import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 import { useClickOutside } from '@/hooks/useClickOutside'
+import { useDropdownFocusRestore } from '@/hooks/useDropdownFocusRestore'
 import { matchesOptionQuery } from './optionFilter'
 import SelectClearButton, { CLEAR_BUTTON_SIZE } from './SelectClearButton'
 
@@ -139,23 +140,8 @@ export default function CreatableSelect({
   // focus has moved into the portalled search input, top layer first.
   useEscapeLayer(open, () => setOpen(false))
 
-  // Restore focus to the trigger whenever the popover transitions open → closed
-  // (pick / Escape / outside click — the search input unmounts with the portal
-  // on every one of those paths, so focus would otherwise land nowhere). Never
-  // on unmount, since that never runs this transition. Skipped if some OTHER
-  // element already claimed focus (e.g. the outside click landed on a
-  // different picker's own trigger) so this never yanks focus away from what
-  // the user just interacted with.
-  const wasOpenRef = useRef(false)
-  // Fires on every open/closed transition; the focus restore itself only runs on
-  // close (see the comment above), guarded so it never steals focus from something
-  // the user already interacted with elsewhere.
-  useEffect(() => {
-    if (wasOpenRef.current && !open && (document.activeElement === document.body || document.activeElement == null)) {
-      triggerRef.current?.focus()
-    }
-    wasOpenRef.current = open
-  }, [open])
+  // Restore focus to the trigger when the dropdown closes (pick / Escape / outside click).
+  useDropdownFocusRestore(() => triggerRef.current, open)
 
   const opts: CreatableOption[] = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
   const current = opts.find(o => o.value === value)
