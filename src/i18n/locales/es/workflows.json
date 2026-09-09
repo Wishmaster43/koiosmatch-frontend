@@ -541,6 +541,7 @@
     "routerNote": "Ninguna ruta coincidente → el flujo se detiene para esa rama.",
     "noConfig": "No se requiere configuración.",
     "noOutput": "Aún no hay datos de ejecución. Pulsa ▶ en el módulo para probar.",
+    "testFailed": "La prueba falló",
     "itemsCount_one": "{{count}} elemento",
     "itemsCount_other": "{{count}} elementos",
     "tabStandard": "Estándar",
@@ -1167,6 +1168,7 @@
     }
   },
   "runControl": {
+    "failed": "La ejecución falló",
     "stop": "Detener",
     "stopping": "Deteniendo…",
     "stopTitle": "Detener esta ejecución",

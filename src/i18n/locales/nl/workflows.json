@@ -576,6 +576,7 @@
     "routerNote": "Geen overeenkomende route → de flow stopt voor die tak.",
     "noConfig": "Geen configuratie vereist.",
     "noOutput": "Nog geen uitvoerdata. Druk op ▶ bij de module om te testen.",
+    "testFailed": "Testen mislukt",
     "itemsCount_one": "{{count}} item",
     "itemsCount_other": "{{count}} items",
     "tabStandard": "Standaard",
@@ -1165,6 +1166,7 @@
     "removeVariable": "Variabele verwijderen"
   },
   "runControl": {
+    "failed": "Uitvoeren mislukt",
     "stop": "Stoppen",
     "stopping": "Stoppen…",
     "stopTitle": "Stop deze run",

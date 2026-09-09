@@ -576,6 +576,7 @@
     "routerNote": "Nessuna route corrispondente: il flusso si ferma per quel ramo.",
     "noConfig": "Nessuna configurazione richiesta.",
     "noOutput": "Ancora nessun dato di esecuzione. Premi ▶ sul modulo per testare.",
+    "testFailed": "Test non riuscito",
     "itemsCount_one": "{{count}} elemento",
     "itemsCount_other": "{{count}} elementi",
     "tabStandard": "Standard",
@@ -1167,6 +1168,7 @@
     "removeVariable": "Rimuovi variabile"
   },
   "runControl": {
+    "failed": "Esecuzione non riuscita",
     "stop": "Ferma",
     "stopping": "Arresto in corso…",
     "stopTitle": "Ferma questa esecuzione",

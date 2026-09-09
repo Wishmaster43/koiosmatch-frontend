@@ -625,10 +625,13 @@ describe('useWorkflowEditor · handleNodeRun', () => {
       await result.current.handleNodeRun('n1', result.current.nodesWithFirst[0].data)
     })
 
+    // WORKFLOW-422: a third options arg ({ quietStatuses: [422] }) now travels
+    // on this POST too, so the api.ts dev interceptor doesn't double-toast a
+    // 422 the hook already surfaces itself.
     expect(mockPost).toHaveBeenCalledWith('/workflows/test-module', {
       module_type: 'candidates',
       config: { limit: 10, filters: { conditions: [{ field: 'status', value: 'Available' }] } },
-    })
+    }, { quietStatuses: [422] })
     expect(mockPost).not.toHaveBeenCalledWith(expect.stringContaining('/sm_candidates'), expect.anything())
   })
 })

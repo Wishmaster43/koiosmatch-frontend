@@ -6,12 +6,15 @@
  * stays a thin wiring layer. No trigger/schedule/panel-visibility state here.
  */
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { START_MODULE_TYPES } from '@/modules'
 import { addEdge, useNodesState, useEdgesState } from '@xyflow/react'
 import type { Connection } from '@xyflow/react'
 import { uid, mkEdge, NODE_W, NODE_H, stepsToFlow } from './serialization'
 import { defaultConfigFor } from './moduleDefaults'
 import { mkEdgePreservingData, buildVarFields } from './workflowEditorUtils'
+import { extractApiError } from '@/lib/extractApiError'
+import { notifyError } from '@/lib/notify'
 import type { Workflow, FlowNode, FlowEdge, FlowNodeData, EdgeFilters, FilterConditionGroup, WorkflowVarGroup } from '@/types/workflow'
 
 // Owns the graph (nodes/edges) for one workflow and every mutation on it.
@@ -21,6 +24,7 @@ export function useWorkflowGraph({ workflow, onNodeRunOutput }: {
   workflow: Workflow
   onNodeRunOutput?: (nodeId: string, output: unknown) => void
 }) {
+  const { t } = useTranslation('workflows')
   const initFlow = stepsToFlow(
     (workflow.steps || []).map(s => ({ ...s, id: s.id || uid() })),
   )
@@ -52,16 +56,21 @@ export function useWorkflowGraph({ workflow, onNodeRunOutput }: {
     try {
       // Generic module test-run — backend POST /workflows/test-module (G-9): previews the
       // module's output; 422 for an unknown or non-testable (really-sends) module type.
-      const res = await api.post('/workflows/test-module', { module_type: data.type, config: data.config })
+      // WORKFLOW-422: we surface the 422 reason ourselves (toast below), so keep it
+      // out of the api.ts dev interceptor's own double-toast.
+      const res = await api.post('/workflows/test-module', { module_type: data.type, config: data.config }, { quietStatuses: [422] })
       output = res.data?.output ?? res.data
     } catch (err) {
-      const e = err as { response?: { data?: { message?: string } }; message?: string }
-      output = { error: e.response?.data?.message ?? e.message }
+      // WORKFLOW-422: same extraction for the panel line and the toast, so the
+      // two never disagree (e.g. "no active WhatsApp number").
+      const reason = extractApiError(err, t('config.testFailed'))
+      output = { error: reason }
+      notifyError(reason)
     }
 
     setNodes(nds => nds.map(n => n.id === nodeId ? { ...n, data: { ...n.data, output } } : n))
     onNodeRunOutput?.(nodeId, output)
-  }, [setNodes, onNodeRunOutput])
+  }, [setNodes, onNodeRunOutput, t])
 
   // User removed a connector on the canvas — drop that one edge, nothing else.
   const handleEdgeDelete = useCallback((edgeId: string) => {

@@ -576,6 +576,7 @@
     "routerNote": "Nenhuma rota correspondente: o fluxo para nesse ramo.",
     "noConfig": "Não é necessária configuração.",
     "noOutput": "Ainda sem dados de execução. Prima ▶ no módulo para testar.",
+    "testFailed": "Teste falhou",
     "itemsCount_one": "{{count}} item",
     "itemsCount_other": "{{count}} itens",
     "tabStandard": "Padrão",
@@ -1167,6 +1168,7 @@
     "removeVariable": "Remover variável"
   },
   "runControl": {
+    "failed": "Execução falhou",
     "stop": "Parar",
     "stopping": "A parar…",
     "stopTitle": "Parar esta execução",

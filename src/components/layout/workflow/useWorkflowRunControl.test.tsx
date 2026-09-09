@@ -12,8 +12,16 @@ import type { ReactNode } from 'react'
 import { act } from 'react'
 import { useWorkflowRunControl } from './useWorkflowRunControl'
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 
 vi.mock('@/lib/api', () => ({ default: { post: vi.fn(), get: vi.fn() } }))
+// WORKFLOW-422: keep the i18n fallback quiet in tests (no i18next instance is
+// booted in this suite) while still returning the key so we can assert on it.
+vi.mock('react-i18next', async () => {
+  const actual = await vi.importActual<typeof import('react-i18next')>('react-i18next')
+  return { ...actual, useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k, i18n: { language: 'nl' } }) }
+})
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
 const mockedPost = vi.mocked(api.post)
 const mockedGet  = vi.mocked(api.get)
 
@@ -41,7 +49,7 @@ describe('useWorkflowRunControl', () => {
 
     await act(async () => { await result.current.handleRun() })
 
-    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run', undefined, { quietStatuses: [409], baseURL: 'http://engine.test/api' })
+    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run', undefined, { quietStatuses: [409, 422], baseURL: 'http://engine.test/api' })
     expect(result.current.activeRunId).toBe('r1')
     expect(result.current.runConflict).toBe(false)
     expect(result.current.runError).toBeNull()
@@ -61,7 +69,7 @@ describe('useWorkflowRunControl', () => {
 
     await act(async () => { await result.current.handleRun({ dryRun: true }) })
 
-    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run', { dry_run: true }, { quietStatuses: [409], baseURL: expect.any(String) })
+    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run', { dry_run: true }, { quietStatuses: [409, 422], baseURL: expect.any(String) })
     expect(result.current.activeRunId).toBe('r3')
   })
 
@@ -82,7 +90,7 @@ describe('useWorkflowRunControl', () => {
     expect(onRunStarted).toHaveBeenCalledTimes(1)
   })
 
-  it('a non-409 failure surfaces the backend message and never sets runConflict', async () => {
+  it('a non-409 failure surfaces the backend message, toasts it, and never sets runConflict', async () => {
     mockedPost.mockRejectedValue({ response: { status: 422, data: { message: 'Workflow is niet actief' } } })
     const onRunStarted = vi.fn()
     const { result } = renderHook(
@@ -96,6 +104,27 @@ describe('useWorkflowRunControl', () => {
     expect(result.current.runConflict).toBe(false)
     expect(result.current.activeRunId).toBeNull()
     expect(onRunStarted).not.toHaveBeenCalled()
+    // WORKFLOW-422: toast and visible header state carry the SAME string.
+    expect(notifyError).toHaveBeenCalledWith('Workflow is niet actief')
+  })
+
+  // WORKFLOW-422 (Danny 09-09, "Kan niet via whatsapp web berichten versturen
+  // via de agent"): a 422 carrying only a Laravel validation bag (no top-level
+  // message) must still surface the real reason on the toast AND runError —
+  // both read through the SAME extractApiError call.
+  it('a 422 validation-bag failure (no top-level message) surfaces the field error via runError and the toast', async () => {
+    mockedPost.mockRejectedValue({
+      response: { status: 422, data: { errors: { number: ['Geen actief WhatsApp-nummer.'] } } },
+    })
+    const { result } = renderHook(
+      () => useWorkflowRunControl({ workflowId: 'w1' }),
+      { wrapper },
+    )
+
+    await act(async () => { await result.current.handleRun() })
+
+    expect(result.current.runError).toBe('Geen actief WhatsApp-nummer.')
+    expect(notifyError).toHaveBeenCalledWith('Geen actief WhatsApp-nummer.')
   })
 
   // PRIJSMODEL-C 30-08: a 422 { status: 'budget_exceeded', budget } keeps
@@ -164,7 +193,7 @@ describe('useWorkflowRunControl', () => {
     expect(mockedPost).toHaveBeenCalledWith(
       '/workflows/w1/run',
       { subject: { entity_type: 'candidate', entity_id: 'c1' } },
-      { quietStatuses: [409], baseURL: expect.any(String) },
+      { quietStatuses: [409, 422], baseURL: expect.any(String) },
     )
   })
 })
@@ -184,7 +213,7 @@ describe('useWorkflowRunControl · runBulk', () => {
     let outcome
     await act(async () => { outcome = await result.current.runBulk() })
 
-    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run-bulk', undefined, { quietStatuses: [409], baseURL: expect.any(String) })
+    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run-bulk', undefined, { quietStatuses: [409, 422], baseURL: expect.any(String) })
     expect(outcome).toEqual({ status: 'started', runId: 'rb1', count: 12 })
     expect(result.current.activeRunId).toBe('rb1')
     expect(onRunStarted).toHaveBeenCalledTimes(1)
@@ -242,11 +271,11 @@ describe('useWorkflowRunControl · runBulk', () => {
     let outcome
     await act(async () => { outcome = await result.current.runBulk({ confirm: true }) })
 
-    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run-bulk', { confirm: true }, { quietStatuses: [409], baseURL: expect.any(String) })
+    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run-bulk', { confirm: true }, { quietStatuses: [409, 422], baseURL: expect.any(String) })
     expect(outcome).toEqual({ status: 'started', runId: 'rb2', count: 40 })
   })
 
-  it('a non-409 failure surfaces the backend message via runError', async () => {
+  it('a non-409 failure surfaces the backend message via runError and toasts it', async () => {
     mockedPost.mockRejectedValue({ response: { status: 422, data: { message: 'Workflow is niet actief' } } })
     const { result } = renderHook(
       () => useWorkflowRunControl({ workflowId: 'w1' }),
@@ -258,5 +287,7 @@ describe('useWorkflowRunControl · runBulk', () => {
 
     expect(outcome).toEqual({ status: 'error', message: 'Workflow is niet actief' })
     expect(result.current.runError).toBe('Workflow is niet actief')
+    // WORKFLOW-422: item (c) — toast and visible state carry the same string.
+    expect(notifyError).toHaveBeenCalledWith('Workflow is niet actief')
   })
 })

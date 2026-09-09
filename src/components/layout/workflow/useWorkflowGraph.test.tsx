@@ -6,11 +6,28 @@
  * insert-on-edge (insertModule) and node delete-and-relink (deleteNode) — this
  * is the regression test the split's acceptance criteria call for.
  */
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import type { Connection } from '@xyflow/react'
 import { useWorkflowGraph } from './useWorkflowGraph'
 import type { Workflow, WorkflowStep } from '@/types/workflow'
+import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
+
+// WORKFLOW-422: mock the module-level `api` import used by handleNodeRun's
+// dynamic import('@/lib/api') — vi.mock hoists so the dynamic import resolves
+// to this same mock.
+vi.mock('@/lib/api', () => ({ default: { post: vi.fn() } }))
+// WORKFLOW-422: keep the i18n fallback quiet in tests (no i18next instance is
+// booted in this suite) while still returning the key so we can assert on it.
+vi.mock('react-i18next', async () => {
+  const actual = await vi.importActual<typeof import('react-i18next')>('react-i18next')
+  return { ...actual, useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k, i18n: { language: 'nl' } }) }
+})
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
+const mockedPost = vi.mocked(api.post)
+
+afterEach(() => { vi.clearAllMocks() })
 
 const wf = (steps: WorkflowStep[]): Workflow =>
   ({ id: 'w1', name: 'wf', trigger: 'Manual', status: 'draft', steps })
@@ -85,5 +102,33 @@ describe('useWorkflowGraph · start-node resolution', () => {
     expect(result.current.firstNodeId).toBe('n1')
     act(() => result.current.setStartNodeId('n2'))
     expect(result.current.firstNodeId).toBe('n2')
+  })
+})
+
+// WORKFLOW-422 (Danny 09-09, "Kan niet via whatsapp web berichten versturen via
+// de agent"): a test-module 422 must reach the node's output panel AND toast,
+// with the SAME extracted string.
+describe('useWorkflowGraph · handleNodeRun surfaces a 422 reason', () => {
+  it('a rejected test-module POST puts the server message on the node output AND toasts it', async () => {
+    mockedPost.mockRejectedValue({ response: { status: 422, data: { message: 'Geen actief WhatsApp-nummer.' } } })
+    const onNodeRunOutput = vi.fn()
+    const { result } = renderHook(() => useWorkflowGraph({
+      workflow: wf([
+        { id: 'n1', type: 'whatsapp', config: {}, position: { x: 0, y: 0 } },
+      ]),
+      onNodeRunOutput,
+    }))
+
+    await act(async () => { await result.current.handleNodeRun('n1', { type: 'whatsapp', config: {} }) })
+
+    expect(mockedPost).toHaveBeenCalledWith(
+      '/workflows/test-module',
+      { module_type: 'whatsapp', config: {} },
+      { quietStatuses: [422] },
+    )
+    const node = result.current.nodes.find(n => n.id === 'n1')
+    expect(node?.data.output).toEqual({ error: 'Geen actief WhatsApp-nummer.' })
+    expect(onNodeRunOutput).toHaveBeenCalledWith('n1', { error: 'Geen actief WhatsApp-nummer.' })
+    expect(notifyError).toHaveBeenCalledWith('Geen actief WhatsApp-nummer.')
   })
 })

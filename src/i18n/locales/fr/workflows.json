@@ -541,6 +541,7 @@
     "routerNote": "Aucune route correspondante → le flux s'arrête pour cette branche.",
     "noConfig": "Aucune configuration requise.",
     "noOutput": "Pas encore de données d'exécution. Appuyez sur ▶ sur le module pour tester.",
+    "testFailed": "Échec du test",
     "itemsCount_one": "{{count}} élément",
     "itemsCount_other": "{{count}} éléments",
     "tabStandard": "Standard",
@@ -1167,6 +1168,7 @@
     }
   },
   "runControl": {
+    "failed": "Échec de l'exécution",
     "stop": "Arrêter",
     "stopping": "Arrêt…",
     "stopTitle": "Arrêter cette exécution",

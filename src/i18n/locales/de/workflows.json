@@ -541,6 +541,7 @@
     "routerNote": "Keine passende Route → der Flow stoppt für diesen Zweig.",
     "noConfig": "Keine Konfiguration erforderlich.",
     "noOutput": "Noch keine Ausführungsdaten. Drücken Sie ▶ am Modul zum Testen.",
+    "testFailed": "Test fehlgeschlagen",
     "itemsCount_one": "{{count}} Element",
     "itemsCount_other": "{{count}} Elemente",
     "tabStandard": "Standard",
@@ -1167,6 +1168,7 @@
     }
   },
   "runControl": {
+    "failed": "Ausführung fehlgeschlagen",
     "stop": "Stoppen",
     "stopping": "Wird gestoppt…",
     "stopTitle": "Diesen Lauf stoppen",

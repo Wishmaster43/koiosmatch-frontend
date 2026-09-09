@@ -6,9 +6,12 @@
  * behaviour, useWorkflowEditor stays the composer and callers are unchanged.
  */
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useWorkflowRun } from './useWorkflowRun'
 import api from '@/lib/api'
 import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
+import { extractApiError } from '@/lib/extractApiError'
+import { notifyError } from '@/lib/notify'
 import type { RunRow } from '@/types/reports'
 import type { ActionBudget } from '@/types/actionBudget'
 
@@ -23,6 +26,7 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
   // is also toggled independently of any run, so it stays out of this hook).
   onRunStarted?: () => void
 }) {
+  const { t } = useTranslation('workflows')
   const [running,        setRunning]        = useState(false)
   const [runError,       setRunError]       = useState<string | null>(null)
   // PRIJSMODEL-C 30-08: the staffel stand on a 422 { status: 'budget_exceeded',
@@ -93,8 +97,10 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
       const hasBody = Object.keys(body).length > 0
       // Start the queued run and keep its id so we can poll the REAL per-step status
       // (WF-R3) — replaces the old fixed 800ms fake walk. Shape: { run: { id } }.
-      // 409 (already running) gets its own inline feedback — keep the generic dev toast out.
-      const res = await api.post(`/workflows/${workflowId}/run`, hasBody ? body : undefined, { quietStatuses: [409], baseURL: resolveWorkflowBaseURL() })
+      // 409 (already running) gets its own inline feedback; 422 (WORKFLOW-422)
+      // is surfaced by this hook's own catch below — keep both out of the
+      // api.ts dev interceptor's generic double-toast.
+      const res = await api.post(`/workflows/${workflowId}/run`, hasBody ? body : undefined, { quietStatuses: [409, 422], baseURL: resolveWorkflowBaseURL() })
       const runId = (res.data?.run?.id ?? res.data?.data?.id ?? res.data?.id) as string | number | undefined
       if (runId != null) setActiveRunId(runId)
 
@@ -111,18 +117,21 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
         onRunStarted?.()
       } else {
         // Surface the backend reason (e.g. "Workflow is niet actief" / "Workflow
-        // is not active" on a draft); empty string = generic message via i18n
-        // in the component. PRIJSMODEL-C 30-08: a 422 { status: 'budget_exceeded',
-        // budget } already falls in here for the message — also thread the
-        // staffel stand through so the header can show its upgrade hint.
-        setRunError(e.response?.data?.message ?? '')
+        // is not active" on a draft) via the SAME extraction as the toast, so the
+        // header's visible error and the toast never disagree (WORKFLOW-422).
+        // PRIJSMODEL-C 30-08: a 422 { status: 'budget_exceeded', budget } already
+        // falls in here for the message — also thread the staffel stand through
+        // so the header can show its upgrade hint.
+        const reason = extractApiError(err, t('runControl.failed'))
+        setRunError(reason)
         setRunBudget(e.response?.data?.status === 'budget_exceeded' ? (e.response.data.budget ?? null) : null)
+        notifyError(reason)
       }
     } finally {
       setRunningNodeId(null)
       setRunning(false)
     }
-  }, [workflowId, onRunStarted])
+  }, [workflowId, onRunStarted, t])
 
   // S1 Lane C (KOIOS-ADVIES-OVERAL-1): starts a workflow's own filtered ENTRY
   // step over its whole matching set in one server-side pass (CONTRACT-CHANGELOG
@@ -154,7 +163,9 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
       // `filters` is deliberately never sent — the entry step's own saved
       // filters always decide the set (CONTRACT-CHANGELOG: sending one 422s).
       const body = opts?.confirm ? { confirm: true } : undefined
-      const res = await api.post(`/workflows/${workflowId}/run-bulk`, body, { quietStatuses: [409], baseURL: resolveWorkflowBaseURL() })
+      // WORKFLOW-422: 422 is surfaced by this hook's own catch below — keep it
+      // out of the api.ts dev interceptor's generic double-toast, same as 409.
+      const res = await api.post(`/workflows/${workflowId}/run-bulk`, body, { quietStatuses: [409, 422], baseURL: resolveWorkflowBaseURL() })
       const rawRunId = (res.data?.run_id ?? res.data?.run?.id) as string | number | undefined
       const runId = rawRunId != null ? String(rawRunId) : null
       const count = (res.data?.count ?? 0) as number
@@ -178,13 +189,17 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
         }
         return { status: 'confirm', count: d.count ?? 0, matchedRecords: d.matched_records ?? 0, threshold: d.threshold ?? 0 }
       }
-      const message = e.response?.data?.message ?? ''
-      setRunError(message)
-      return { status: 'error', message }
+      // WORKFLOW-422: same extraction as handleRun, so a validation-bag 422
+      // (only `errors`, no top-level `message`) still surfaces a real reason
+      // instead of the old empty-string fallback.
+      const reason = extractApiError(err, t('runControl.failed'))
+      setRunError(reason)
+      notifyError(reason)
+      return { status: 'error', message: reason }
     } finally {
       setRunning(false)
     }
-  }, [workflowId, onRunStarted])
+  }, [workflowId, onRunStarted, t])
 
   // RUN-CONTROL-1: the polled run can still be cancelled → show the stop button.
   const liveRunActive = liveRun != null && ['running', 'waiting'].includes(String(liveRun.status))

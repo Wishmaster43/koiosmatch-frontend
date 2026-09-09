@@ -541,6 +541,7 @@
     "routerNote": "No matching route → the flow stops for that branch.",
     "noConfig": "No configuration required.",
     "noOutput": "No execution data yet. Press ▶ on the module to test.",
+    "testFailed": "Test failed",
     "itemsCount_one": "{{count}} item",
     "itemsCount_other": "{{count}} items",
     "tabStandard": "Standard",
@@ -1167,6 +1168,7 @@
     }
   },
   "runControl": {
+    "failed": "Run failed",
     "stop": "Stop",
     "stopping": "Stopping…",
     "stopTitle": "Stop this run",
