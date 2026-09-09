@@ -6,8 +6,11 @@
  * Filter/Router between modules stays untouched (for multi-status branching).
  * Split out of the former fieldControls.tsx monolith (§3 400-line split trigger).
  */
+import { useId } from 'react'
 import { X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import SelectMenu from '@/components/ui/SelectMenu'
+import { isBooleanField, booleanValueKey, textValue } from '../booleanField'
 import { VALUELESS_OPERATORS, normalizeOperator } from '../constants'
 import { fieldLabel } from '../moduleI18n'
 import { FilterFieldPicker } from '../FilterFieldPicker'
@@ -20,6 +23,8 @@ import type { OnChange } from './types'
 // ── Filters field ───────────────────────────────────────────────────────────────
 export function FiltersField({ field, value, onChange }: { field: WorkflowField; value?: EdgeFilters; onChange: OnChange }) {
   const { t } = useTranslation('workflows')
+  // Names the yes/no value menu of a boolean condition (SelectMenu's trigger is a button).
+  const booleanLabelId = useId()
   const logic = value?.logic ?? 'AND'
   const conds: FilterCondition[] = Array.isArray(value?.conditions) ? value!.conditions! : []
   // This entity module's own filterable fields (its own type — not an upstream
@@ -36,10 +41,11 @@ export function FiltersField({ field, value, onChange }: { field: WorkflowField;
   const setLogic = (l: string)                => set({ logic: l, conditions: conds })
   const add      = ()                         => set({ logic, conditions: [...conds, { field: '', operator: '=', value: '' }] })
   const del      = (i: number)                => set({ logic, conditions: conds.filter((_, j) => j !== i) })
-  const upd      = (i: number, k: keyof FilterCondition, v: string) => set({ logic, conditions: conds.map((c, j) => j === i ? { ...c, [k]: v } : c) })
+  const upd      = (i: number, k: keyof FilterCondition, v: string | boolean) => set({ logic, conditions: conds.map((c, j) => j === i ? { ...c, [k]: v } : c) })
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <span id={booleanLabelId} hidden>{t('fields.valuePlaceholder')}</span>
       {/* AND / OR — verify round 22-08: a choice-switch is the shared
           SegmentedControl (compact), never hand-painted accent pills. */}
       {conds.length > 1 && (
@@ -58,8 +64,17 @@ export function FiltersField({ field, value, onChange }: { field: WorkflowField;
             <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
               <OperatorSelect value={normalizeOperator(c.operator)} onChange={v => upd(i, 'operator', v)}
                 style={{ padding: '5px 4px' }} />
-              {needsValue && (
-                <input value={c.value ?? ''} onChange={e => upd(i, 'value', e.target.value)} placeholder={t('fields.valuePlaceholder')} aria-label={t('fields.valuePlaceholder')}
+              {/* A yes/no field (consent flags) gets a yes/no menu that stores a real boolean
+                  (WORKFLOW-CONSENT-1); every other field keeps the text box. */}
+              {needsValue && isBooleanField(c.field) && (
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <SelectMenu aria-labelledby={booleanLabelId} value={booleanValueKey(c.value)} clearable={false}
+                    options={[{ value: 'true', label: t('common:yes') }, { value: 'false', label: t('common:no') }]}
+                    onChange={v => upd(i, 'value', v === 'true')} />
+                </div>
+              )}
+              {needsValue && !isBooleanField(c.field) && (
+                <input value={textValue(c.value)} onChange={e => upd(i, 'value', e.target.value)} placeholder={t('fields.valuePlaceholder')} aria-label={t('fields.valuePlaceholder')}
                   style={{ flex: 1, minWidth: 0, padding: '5px 7px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
               )}
               <button type="button" onClick={() => del(i)} aria-label={t('fields.removeCondition')} title={t('fields.removeCondition')}

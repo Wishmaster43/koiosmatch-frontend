@@ -211,3 +211,25 @@ describe('EdgeFilterPanel · no graph supplied', () => {
     expect(onSave).toHaveBeenCalledWith({ conditions: [{ field: '', operator: '=', value: '' }], logic: 'AND' }, '')
   })
 })
+
+// WORKFLOW-CONSENT-1 / Danny 09-09 ("WhatsApp-toestemming" showed a free text box): a
+// yes/no field gets a yes/no menu and persists a real boolean, never the text "true".
+describe('EdgeFilterPanel · boolean field', () => {
+  it('offers ja/nee for a consent field and saves the value as a boolean', () => {
+    const { onSave } = setup({
+      catalog: { candidate_filter: { emits: 'replace', outputFields: { whatsapp_consent: 'WhatsApp-toestemming' } } },
+    })
+    fireEvent.click(screen.getByText('fields.addCondition'))
+    pickField('1. Kandidaten ophalen · WhatsApp-toestemming')
+
+    // No free text box for this field: the value control is the yes/no menu.
+    expect(screen.queryByPlaceholderText('fields.valuePlaceholder')).not.toBeInTheDocument()
+    // SelectMenu names its trigger by the label PLUS its own current text — match the prefix.
+    fireEvent.click(screen.getByRole('button', { name: /^fields\.valuePlaceholder/ }))
+    fireEvent.click(screen.getByText('common:yes'))
+
+    fireEvent.click(screen.getByText('common:save'))
+    const [filters] = onSave.mock.calls[0]
+    expect(filters).toEqual({ conditions: [{ field: 'whatsapp_consent', operator: '=', value: true }], logic: 'AND' })
+  })
+})

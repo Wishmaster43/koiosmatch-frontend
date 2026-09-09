@@ -13,7 +13,7 @@
  * still renders (picker just empty, CreatableSelect's free-entry path covers it)
  * if a caller can't supply the graph.
  */
-import { useMemo, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Trash2 } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
@@ -22,6 +22,8 @@ import { VALUELESS_OPERATORS } from './constants'
 import { collectUpstreamFilterFields, toFilterFieldOptions, type ModuleCatalog } from './filterFieldCatalog'
 import { FilterFieldPicker } from './FilterFieldPicker'
 import { OperatorSelect } from './OperatorSelect'
+import SelectMenu from '@/components/ui/SelectMenu'
+import { isBooleanField, booleanValueKey, textValue } from './booleanField'
 import { MODULE_META } from '@/modules/index'
 import type { FilterCondition, FilterConditionGroup, EdgeFilters, FlowNode, FlowEdge } from '@/types/workflow'
 import Button from '@/components/ui/Button'
@@ -55,6 +57,8 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
   const [groups, setGroups] = useState<FilterConditionGroup[]>(() => parseEdgeFilterGroups(filters))
   const [name, setName] = useState(label ?? '')
   const { t } = useTranslation('workflows')
+  // Names the yes/no value menu of a boolean condition (SelectMenu's trigger is a button).
+  const booleanLabelId = useId()
 
   // Make-style numbered field options: walk the edge source's upstream chain
   // once per graph change, then flatten to "N. <module label> · <field>" options.
@@ -73,7 +77,7 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
   // Condition-level mutations, scoped to one group by index.
   const addCond = (gi: number) => setGroups(gs => gs.map((g, i) => (i === gi ? [...g, { field: '', operator: '=', value: '' }] : g)))
   const delCond = (gi: number, ci: number) => setGroups(gs => gs.map((g, i) => (i === gi ? g.filter((_, j) => j !== ci) : g)))
-  const updCond = (gi: number, ci: number, key: keyof FilterCondition, val: string) =>
+  const updCond = (gi: number, ci: number, key: keyof FilterCondition, val: string | boolean) =>
     setGroups(gs => gs.map((g, i) => (i === gi ? g.map((row, j) => (j === ci ? { ...row, [key]: val } : row)) : g)))
 
   // Persist: no non-empty group left → null (F5); exactly one non-empty group
@@ -104,6 +108,8 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
 
       {/* OR'ed groups — each group ANDs its own conditions; "+ OF-groep" adds another */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 12 }}>
+        {/* Accessible name for every boolean value menu below (hidden text, still read by aria-labelledby). */}
+        <span id={booleanLabelId} hidden>{t('fields.valuePlaceholder')}</span>
         {groups.map((group, gi) => (
           <div key={gi}>
             {gi > 0 && (
@@ -144,11 +150,19 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
                     {/* Row 2 — operator + value + delete */}
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center', paddingLeft: 34 }}>
                       <OperatorSelect value={c.operator} onChange={v => updCond(gi, ci, 'operator', v)} />
-                      {!VALUELESS_OPERATORS.includes(c.operator ?? '') && (
-                        <input value={c.value} onChange={e => updCond(gi, ci, 'value', e.target.value)}
+                      {!VALUELESS_OPERATORS.includes(c.operator ?? '') && (isBooleanField(c.field) ? (
+                        // A yes/no field gets a yes/no choice, never a free text box (Danny 09-09 on the
+                        // WhatsApp-consent route filter); the stored value is a real boolean.
+                        <div style={{ flex: 1 }}>
+                          <SelectMenu aria-labelledby={booleanLabelId} value={booleanValueKey(c.value)} clearable={false}
+                            options={[{ value: 'true', label: t('common:yes') }, { value: 'false', label: t('common:no') }]}
+                            onChange={v => updCond(gi, ci, 'value', v === 'true')} />
+                        </div>
+                      ) : (
+                        <input value={textValue(c.value)} onChange={e => updCond(gi, ci, 'value', e.target.value)}
                           placeholder={t('fields.valuePlaceholder')} aria-label={t('fields.valuePlaceholder')}
                           style={{ flex: 1, padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
-                      )}
+                      ))}
                       <button onClick={() => delCond(gi, ci)} aria-label={t('canvas.deleteCondition')} title={t('canvas.deleteCondition')}
                         // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- danger-ink ghost icon: no Button tone carries danger ink on a bare face (ProfileTab precedent)
                         style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger-text)', padding: 4 }}><Trash2 size={12} /></button>

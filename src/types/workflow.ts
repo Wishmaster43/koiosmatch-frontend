@@ -133,7 +133,9 @@ export interface FlowEdge {
 }
 
 // ── Editor config shapes (schedule · edge filters · config-panel fields) ──────
-export interface FilterCondition { field?: string; operator?: string; value?: string }
+// A boolean field (consent flags) stores a real boolean, the engine compares it as one
+// (WORKFLOW-CONSENT-1); every other field stores the typed text.
+export interface FilterCondition { field?: string; operator?: string; value?: string | boolean }
 export interface EdgeFilters { logic?: string; conditions?: FilterCondition[] }
 
 // One AND-group of conditions inside a router edge's OR'ed group set. A single
