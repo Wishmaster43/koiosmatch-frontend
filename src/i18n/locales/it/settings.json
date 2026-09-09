@@ -2313,6 +2313,7 @@
     "branchesNoLocations": "Nessuna sede ancora configurata.",
     "branchesSaveFailed": "Salvataggio del modello sedi non riuscito. Riprova.",
     "appearanceSaveFailed": "Salvataggio dell'aspetto non riuscito. Riprova.",
+    "permissionsSaveFailed": "Salvataggio dei permessi non riuscito. Riprova.",
     "pageAccess": "Pagina: {{label}}",
     "hints": {
       "candidatesSync": "Specchio SM"

@@ -14,6 +14,7 @@
  * (i18n key leak on 'vacancy_generation', duplicate labels, the 'page.details'
  * group mislabelled "Details") staying fixed under the new row-per-group layout.
  */
+import { useState } from 'react'
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -196,6 +197,64 @@ describe('PermissionMatrix — collapsed group rows, expand reveals every toggle
   })
 })
 
+// Stateful wrapper mirroring RoleDetail's own draft-permissions state, so
+// select-all/clear-all can be verified purely against the matrix (Danny 09-09:
+// "ik wil bij deze pagina een selecteer alles hebben").
+function DraftMatrix({ groups, initial }: { groups: PermissionGroups; initial: string[] }) {
+  const [draft, setDraft] = useState(() => new Set(initial))
+  const hasPermission = (name: string) => draft.has(name)
+  const onToggle = (name: string) => setDraft((prev: Set<string>) => {
+    const next = new Set(prev)
+    if (next.has(name)) next.delete(name); else next.add(name)
+    return next
+  })
+  const onSetMany = (names: string[], on: boolean) => setDraft((prev: Set<string>) => {
+    const next = new Set(prev)
+    for (const n of names) { if (on) next.add(n); else next.delete(n) }
+    return next
+  })
+  return <PermissionMatrix groups={groups} hasPermission={hasPermission} onToggle={onToggle} onSetMany={onSetMany} />
+}
+
+describe('PermissionMatrix — select-all / clear-all batches a whole group or the whole matrix into ONE draft update', () => {
+  const SELECT_GROUPS: PermissionGroups = [
+    ['candidates', [{ name: 'candidates.view' }, { name: 'candidates.create' }, { name: 'candidates.update' }]],
+    ['customers',  [{ name: 'customers.view' }, { name: 'customers.create' }]],
+  ]
+
+  it('a group-level select-all turns every permission of that group on in the draft', async () => {
+    mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [] })
+    const user = userEvent.setup()
+    render(<DraftMatrix groups={SELECT_GROUPS} initial={[]} />)
+
+    await user.click(screen.getByRole('button', { name: `${st('roles.groups.candidates')} — ${chipText(0, 3)}` }))
+    const groupSelectAll = i18n.t('multiSelect.selectVisible', { ns: 'common' })
+    // Two select-all rows exist now (global + this group's) — the group one sits
+    // inside the expanded panel, right above its own toggle grid.
+    const buttons = screen.getAllByRole('button', { name: new RegExp(groupSelectAll) })
+    await user.click(buttons[buttons.length - 1])
+
+    for (const name of ['candidates.view', 'candidates.create', 'candidates.update']) {
+      expect(screen.getByRole('switch', { name: `${st('roles.groups.candidates')} — ${st(`roles.actions.${name.split('.')[1]}`)}` })).toBeChecked()
+    }
+    // The untouched customers group stays as it was (batching is scoped to the group).
+    expect(screen.getByText(chipText(0, 2))).toBeInTheDocument()
+  })
+
+  it('the global clear-all empties every visible permission in the draft', async () => {
+    mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [] })
+    const user = userEvent.setup()
+    const ALL = SELECT_GROUPS.flatMap(([, perms]) => perms.map(p => p.name))
+    render(<DraftMatrix groups={SELECT_GROUPS} initial={ALL} />)
+
+    const clearAllLabel = i18n.t('multiSelect.clearVisible', { ns: 'common' })
+    await user.click(screen.getByRole('button', { name: new RegExp(clearAllLabel) }))
+
+    expect(screen.getByText(chipText(0, 3))).toBeInTheDocument()
+    expect(screen.getByText(chipText(0, 2))).toBeInTheDocument()
+  })
+})
+
 describe('PermissionMatrix — module gating (canAccessPage, same gate as the sidebar)', () => {
   it('hides the planning row when the tenant lacks the plan module', () => {
     mockAuth.mockReturnValue(AUTH_WITHOUT_PLAN)
@@ -222,9 +281,8 @@ describe('PermissionMatrix — module gating (canAccessPage, same gate as the si
   })
 })
 
-describe('RolesSettings — end-to-end toggle through the matrix', () => {
-  it('clicking a CRUD toggle PUTs the full updated permission list (request, not just callback)', async () => {
-    mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [], isSuperAdmin: () => true })
+describe('RolesSettings — end-to-end draft + Save through the matrix (Danny 09-09: toggle reacts instantly, Save sends one PUT)', () => {
+  const armPermissionsFixture = () => {
     // eslint-disable-next-line no-restricted-syntax -- DATA: a fixture role's tenant-picked colour, not a style rule.
     const role: Role = { id: 'r1', name: 'recruiter', color: '#3B8FD4', icon: 'shield', users_count: 0,
       permissions: [{ name: 'candidates.view' }] }
@@ -238,22 +296,74 @@ describe('RolesSettings — end-to-end toggle through the matrix', () => {
       if (url === '/roles/r1/branches') return Promise.resolve({ data: [] })
       return Promise.reject(new Error(`unexpected GET ${url}`))
     })
-    vi.mocked(api.put).mockResolvedValue({ data: { ...role, permissions: [{ name: 'candidates.view' }, { name: 'candidates.create' }] } })
+    return role
+  }
+
+  it('toggling three permissions sends NO request; Save then PUTs exactly one full set', async () => {
+    mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [], isSuperAdmin: () => true })
+    const role = armPermissionsFixture()
+    vi.mocked(api.put).mockResolvedValue({ data: { ...role, permissions: [
+      { name: 'candidates.create' }, { name: 'candidates.update' }, { name: 'candidates.delete' } ] } })
 
     const user = userEvent.setup()
     render(<RolesSettings />)
 
     await user.click(await screen.findByRole('button', { name: st('roles.edit') }))
-    // Open the candidates row (4/4 CRUD perms, 1 active) then click its create toggle.
     const row = await screen.findByRole('button', { name: `${st('roles.groups.candidates')} — ${chipText(1, 4)}` })
     await user.click(row)
-    const toggle = await screen.findByTitle('candidates.create')
-    await user.click(toggle)
 
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
-      '/roles/r1/permissions', { permissions: ['candidates.view', 'candidates.create'] }))
+    // Toggle candidates.view off and create/update/delete on — three clicks, zero requests.
+    await user.click(await screen.findByTitle('candidates.view'))
+    await user.click(await screen.findByTitle('candidates.create'))
+    await user.click(await screen.findByTitle('candidates.update'))
+    expect(api.put).not.toHaveBeenCalled()
+
+    // The Save button is now enabled (dirty) — one click sends the whole draft set.
+    const save = await screen.findByRole('button', { name: st('common.save') })
+    await user.click(save)
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledTimes(1))
+    expect(api.put).toHaveBeenCalledWith('/roles/r1/permissions', { permissions: ['candidates.create', 'candidates.update'] })
     // Retired group (SYNC-RETIRE-1): the BE still returns sync until removal — never rendered.
     expect(screen.queryByTitle('sync.refresh')).not.toBeInTheDocument()
+  })
+
+  it('Save is disabled until a toggle makes the draft dirty', async () => {
+    mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [], isSuperAdmin: () => true })
+    armPermissionsFixture()
+    const user = userEvent.setup()
+    render(<RolesSettings />)
+
+    await user.click(await screen.findByRole('button', { name: st('roles.edit') }))
+    expect(await screen.findByRole('button', { name: st('common.save') })).toBeDisabled()
+
+    const row = await screen.findByRole('button', { name: `${st('roles.groups.candidates')} — ${chipText(1, 4)}` })
+    await user.click(row)
+    await user.click(await screen.findByTitle('candidates.create'))
+
+    expect(screen.getByRole('button', { name: st('common.save') })).toBeEnabled()
+  })
+
+  it('the global select-all row flips every visible permission in the draft, and Save PUTs the full set', async () => {
+    mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [], isSuperAdmin: () => true })
+    const role = armPermissionsFixture()
+    vi.mocked(api.put).mockResolvedValue({ data: { ...role, permissions: [
+      { name: 'candidates.view' }, { name: 'candidates.create' }, { name: 'candidates.update' }, { name: 'candidates.delete' } ] } })
+
+    const user = userEvent.setup()
+    render(<RolesSettings />)
+    await user.click(await screen.findByRole('button', { name: st('roles.edit') }))
+
+    // Global select-all sits above the group rows and selects every visible permission.
+    const selectAllLabel = i18n.t('multiSelect.selectVisible', { ns: 'common' })
+    await user.click(await screen.findByRole('button', { name: new RegExp(selectAllLabel) }))
+    const save = await screen.findByRole('button', { name: st('common.save') })
+    await user.click(save)
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/roles/r1/permissions',
+      { permissions: expect.arrayContaining(['candidates.view', 'candidates.create', 'candidates.update', 'candidates.delete']) }))
+    const body = vi.mocked(api.put).mock.calls[0][1] as { permissions: string[] }
+    expect(body.permissions).toHaveLength(4)
   })
 })
 
@@ -468,5 +578,43 @@ describe('RolesSettings — branch authorization master switch', () => {
 
     const toggle = await screen.findByRole('switch', { name: st('roles.branchAuthz.label') })
     expect(toggle).toHaveAttribute('aria-checked', 'true')
+  })
+
+  // Danny 09-09 ("of fixen"): the switch must move on click, before the PUT resolves.
+  it('flips instantly on click, before the save request resolves', async () => {
+    arm()
+    mockSettings.mockReturnValue({})
+    let resolveSave: () => void = () => {}
+    saveSettingsKeys.mockReturnValue(new Promise<void>((resolve) => { resolveSave = resolve }))
+    const user = userEvent.setup()
+    render(<RolesSettings />)
+
+    const toggle = await screen.findByRole('switch', { name: st('roles.branchAuthz.label') })
+    expect(toggle).toHaveAttribute('aria-checked', 'false')
+
+    await user.click(toggle)
+    expect(toggle).toHaveAttribute('aria-checked', 'true')
+
+    resolveSave()
+    await waitFor(() => expect(saveSettingsKeys).toHaveBeenCalledWith({ branch_authz_enabled: true }))
+  })
+
+  // Same optimistic flip, but the save fails: the switch springs back and the admin is told.
+  it('reverts and notifies on a failed save', async () => {
+    arm()
+    mockSettings.mockReturnValue({})
+    let rejectSave: (err: Error) => void = () => {}
+    saveSettingsKeys.mockReturnValue(new Promise<void>((_resolve, reject) => { rejectSave = reject }))
+    const { notifyError } = await import('@/lib/notify')
+    const user = userEvent.setup()
+    render(<RolesSettings />)
+
+    const toggle = await screen.findByRole('switch', { name: st('roles.branchAuthz.label') })
+    await user.click(toggle)
+    expect(toggle).toHaveAttribute('aria-checked', 'true')
+
+    rejectSave(new Error('500'))
+    await waitFor(() => expect(toggle).toHaveAttribute('aria-checked', 'false'))
+    expect(notifyError).toHaveBeenCalled()
   })
 })

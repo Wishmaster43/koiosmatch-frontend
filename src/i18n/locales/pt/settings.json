@@ -2313,6 +2313,7 @@
     "branchesNoLocations": "Ainda não há filiais configuradas.",
     "branchesSaveFailed": "Não foi possível guardar o modelo de filiais. Tente novamente.",
     "appearanceSaveFailed": "Não foi possível guardar a aparência. Tente novamente.",
+    "permissionsSaveFailed": "Não foi possível guardar as permissões. Tente novamente.",
     "pageAccess": "Página: {{label}}",
     "hints": {
       "candidatesSync": "Espelho SM"

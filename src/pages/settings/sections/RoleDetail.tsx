@@ -4,12 +4,14 @@
  * (RolesPermissionMatrix). Thin container: wires data + renders the header
  * config, no business logic beyond its own save handlers.
  */
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Check, Save } from 'lucide-react'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { useConfirm } from '@/hooks/useConfirm'
+import { useSettingsDirty } from '../lib/useSettingsDirty'
 import { ColorSwatch } from '../components/SettingsControls'
 import { PermissionMatrix } from './RolesPermissionMatrix'
 import type { PermissionGroups } from './RolesPermissionMatrix'
@@ -17,12 +19,21 @@ import { RoleBranchTemplate } from './RoleBranchTemplate'
 import { roleIconEl } from '@/lib/roleIcons'
 import RoleChip from '@/components/ui/RoleChip'
 import Spinner from '@/components/ui/Spinner'
+import SaveButton from '@/components/ui/SaveButton'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { DASHBOARD_TYPES } from '@/pages/dashboard/shared'
 import type { Role, PermissionsByGroup, UpdateRoleBody, UpdatePermissionsBody } from './rolesTypes'
 import Button from '@/components/ui/Button'
 import { tintBg } from '@/lib/tint'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
+
+// True when two permission-name sets differ (used for the dirty check driving
+// the Save button + the SettingsDirtyContext report).
+function permSetsDiffer(a: Set<string>, b: Set<string>): boolean {
+  if (a.size !== b.size) return true
+  for (const name of a) if (!b.has(name)) return true
+  return false
+}
 
 interface IconPickerProps {
   value: string
@@ -88,8 +99,10 @@ interface RoleDetailProps {
   onUpdate: (role: Role) => void
 }
 
-// Renders one role's permission matrix + appearance/name editing; every change
-// persists immediately via its own PUT and bubbles up through onUpdate.
+// Renders one role's permission matrix + appearance/name editing. Appearance and
+// name persist immediately via their own PUT; permissions are a draft — toggles
+// only flip local state, and Save sends the whole set in one PUT. Every persisted
+// change bubbles up through onUpdate.
 export function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }: RoleDetailProps) {
   const { t } = useTranslation('settings')
   // Dashboard-namespace translator so the "start dashboard" options use the same labels as the switcher.
@@ -103,19 +116,58 @@ export function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }:
   const color    = localRole.color || '#6B7280'
   const iconName = localRole.icon || 'shield'
 
-  const hasPermission = (perm: string) => localRole.permissions?.some(p => p.name === perm) ?? false
+  // Permissions are a DRAFT (Danny 09-09: a toggle must react instantly, no
+  // round trip per click) — savedPermissions is the last-persisted set, seeded
+  // once from the role prop; draftPermissions is what the toggles/select-all
+  // flip locally until Save sends the whole set in ONE PUT.
+  const [savedPermissions, setSavedPermissions] = useState<Set<string>>(() => new Set(role.permissions?.map(p => p.name) ?? []))
+  const [draftPermissions, setDraftPermissions] = useState<Set<string>>(() => new Set(role.permissions?.map(p => p.name) ?? []))
+  const [savingPermissions, setSavingPermissions] = useState(false)
+  const [permissionsSaved,  setPermissionsSaved]  = useState(false)
+  // Holds the "saved" flash timer so it can be cleared on unmount (§9 alive-guard
+  // discipline) instead of firing setState after the section is gone.
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => () => { if (savedTimerRef.current) clearTimeout(savedTimerRef.current) }, [])
+  const permissionsDirty = permSetsDiffer(draftPermissions, savedPermissions)
 
-  // User toggled one permission checkbox: sends the full updated permission set
-  // and adopts the server's own row as the new source of truth.
-  const togglePermission = async (permName: string) => {
-    const current = localRole.permissions?.map(p => p.name) ?? []
-    const updated = current.includes(permName) ? current.filter(p => p !== permName) : [...current, permName]
-    setSaving(true)
+  const hasPermission = (perm: string) => draftPermissions.has(perm)
+
+  // User toggled one permission checkbox: flips the DRAFT only, no request —
+  // Save persists the whole set at once.
+  const togglePermission = (permName: string) => {
+    setDraftPermissions(prev => {
+      const next = new Set(prev)
+      if (next.has(permName)) next.delete(permName); else next.add(permName)
+      return next
+    })
+  }
+
+  // Group/global select-all: flips every named permission to `on` in the draft
+  // as ONE state update (never N stale-closure toggles, RolesPermissionMatrix).
+  const setManyPermissions = (names: string[], on: boolean) => {
+    setDraftPermissions(prev => {
+      const next = new Set(prev)
+      for (const name of names) { if (on) next.add(name); else next.delete(name) }
+      return next
+    })
+  }
+
+  // Save button: sends the draft set in ONE PUT and adopts the server's own row
+  // (including its permissions) as the new saved baseline.
+  const savePermissions = async () => {
+    setSavingPermissions(true)
     try {
-      const res = await api.put<Role>(`/roles/${localRole.id}/permissions`, { permissions: updated } satisfies UpdatePermissionsBody)
+      const res = await api.put<Role>(`/roles/${localRole.id}/permissions`, { permissions: [...draftPermissions] } satisfies UpdatePermissionsBody)
+      const saved = new Set(res.data.permissions?.map(p => p.name) ?? draftPermissions)
       setLocalRole(res.data); onUpdate(res.data)
-    } catch { /* noop */ }
-    setSaving(false)
+      setSavedPermissions(saved); setDraftPermissions(saved)
+      setPermissionsSaved(true)
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
+      savedTimerRef.current = setTimeout(() => setPermissionsSaved(false), 2000)
+    } catch {
+      notifyError(t('roles.permissionsSaveFailed'))
+    }
+    setSavingPermissions(false)
   }
 
   // Commits the in-place name edit; a blank or unchanged name just closes the editor.
@@ -157,13 +209,29 @@ export function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }:
   // Escape layer: cancels the in-place name edit, reverting the draft (one-stage).
   useEscapeLayer(editName, () => { setDraftName(localRole.name); setEditName(false) })
 
+  // Reports the permissions draft's dirtiness up to the settings shell (same
+  // contract SettingsScaffold uses) so navigating away with unsaved toggles warns.
+  const dirtyCtx = useSettingsDirty()
+  useEffect(() => {
+    dirtyCtx?.report(permissionsDirty)
+    return () => dirtyCtx?.report(false)
+  }, [permissionsDirty, dirtyCtx])
+
+  // Back button: an unsaved draft asks for confirmation first (in-page guard,
+  // mirroring the shell's own tab-switch guard) instead of silently discarding it.
+  const { confirm, dialog } = useConfirm()
+  const handleBack = () => {
+    if (permissionsDirty) confirm(t('common.unsavedConfirm'), onBack)
+    else onBack()
+  }
+
   return (
     <div>
-      {/* Back + role name header */}
+      {/* Back + role name + permissions Save header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
         {/* The previous raw 34px button was drift, and so was carrying its size
             into the migration (r5 finding 2): settings buttons ride the sm standard. */}
-        <Button variant="secondary" onClick={onBack}>
+        <Button variant="secondary" onClick={handleBack}>
           <ArrowLeft size={13} /> {t('common.back')}
         </Button>
         {roleIconEl(iconName, { size: 16, style: { color } })}
@@ -180,7 +248,17 @@ export function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }:
           </h2>
         )}
         {saving && <span style={{ color: 'var(--text-muted)' }}><Spinner size={13} /></span>}
+        {/* The ONE draft-permissions Save action — disabled while clean, ONE PUT
+            of the whole draft set on click (Danny 09-09: "of fixen of een opslaan knop"). */}
+        <div style={{ marginLeft: 'auto' }}>
+          <SaveButton saved={permissionsSaved} disabled={!permissionsDirty || savingPermissions} onClick={savePermissions}>
+            {permissionsSaved  ? <><Check size={13} /> {t('common.saved')}</>                                :
+             savingPermissions ? <><Spinner size={13} /> {t('common.saving')}</> :
+                                  <><Save size={13} /> {t('common.save')}</>}
+          </SaveButton>
+        </div>
       </div>
+      {dialog}
 
       {/* Appearance — colour + icon picker */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 22, padding: '12px 16px',
@@ -217,7 +295,7 @@ export function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }:
       <RoleBranchTemplate roleId={localRole.id} />
 
       {/* Rights list — HelloFlex-style expandable rows, one per permission group */}
-      <PermissionMatrix groups={groups} hasPermission={hasPermission} onToggle={togglePermission} />
+      <PermissionMatrix groups={groups} hasPermission={hasPermission} onToggle={togglePermission} onSetMany={setManyPermissions} />
     </div>
   )
 }

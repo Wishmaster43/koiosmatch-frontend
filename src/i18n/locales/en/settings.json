@@ -2313,6 +2313,7 @@
     "branchesNoLocations": "No branches configured yet.",
     "branchesSaveFailed": "Couldn't save the branch template. Please try again.",
     "appearanceSaveFailed": "Couldn't save the appearance. Please try again.",
+    "permissionsSaveFailed": "Couldn't save the permissions. Please try again.",
     "pageAccess": "Page: {{label}}",
     "hints": {
       "candidatesSync": "SM mirror"

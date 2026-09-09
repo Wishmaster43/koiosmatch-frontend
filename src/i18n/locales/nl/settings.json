@@ -2313,6 +2313,7 @@
     "branchesNoLocations": "Nog geen vestigingen ingericht.",
     "branchesSaveFailed": "Opslaan van de vestiging-template is mislukt. Probeer het opnieuw.",
     "appearanceSaveFailed": "Opslaan van het uiterlijk is mislukt. Probeer het opnieuw.",
+    "permissionsSaveFailed": "Opslaan van de rechten is mislukt. Probeer het opnieuw.",
     "pageAccess": "Pagina: {{label}}",
     "hints": {
       "candidatesSync": "SM-spiegel"

@@ -2052,6 +2052,7 @@
     "branchesNoLocations": "Noch keine Standorte angelegt.",
     "branchesSaveFailed": "Die Standortvorlage konnte nicht gespeichert werden. Bitte erneut versuchen.",
     "appearanceSaveFailed": "Das Erscheinungsbild konnte nicht gespeichert werden. Bitte erneut versuchen.",
+    "permissionsSaveFailed": "Die Berechtigungen konnten nicht gespeichert werden. Bitte erneut versuchen.",
     "pageAccess": "Seite: {{label}}",
     "hints": {
       "candidatesSync": "SM-Spiegel"

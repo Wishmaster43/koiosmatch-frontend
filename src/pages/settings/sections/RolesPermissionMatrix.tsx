@@ -20,6 +20,7 @@ import { canAccessPage } from '@/lib/access'
 import { PermissionToggle } from '../components/SettingsControls'
 import SoftChip from '@/components/ui/SoftChip'
 import { SectionTitle } from '@/components/ui/typography'
+import SelectAllRow from '@/components/ui/SelectAllRow'
 
 // Hand-written — GET /permissions carries no 2xx schema in api-generated.ts yet
 // (§10: only the 401 shape is documented for this route).
@@ -83,11 +84,15 @@ interface PermissionMatrixProps {
   groups: PermissionGroups
   hasPermission: (permName: string) => boolean
   onToggle: (permName: string) => void
+  // Batch flip (Danny 09-09, "select all" on the roles screen): one state
+  // update for a whole group or the whole matrix, never N stale-closure
+  // onToggle calls. Optional so a caller without a draft (none today) can skip it.
+  onSetMany?: (names: string[], on: boolean) => void
 }
 
 // The expandable permission-group matrix, filtered to modules the viewing admin
 // can actually see (canAccessPage), per the comment below.
-export function PermissionMatrix({ groups, hasPermission, onToggle }: PermissionMatrixProps) {
+export function PermissionMatrix({ groups, hasPermission, onToggle, onSetMany }: PermissionMatrixProps) {
   const { t } = useTranslation('settings')
   // Same gate as the sidebar: canAccessPage handles the tenant module flags,
   // package mapping and the super-admin bypass in ONE place — raw accessiblePages
@@ -140,8 +145,22 @@ export function PermissionMatrix({ groups, hasPermission, onToggle }: Permission
     return hint ? t(hint.key, { defaultValue: hint.defaultValue }) : perm.name
   }
 
+  // Every permission across every currently-visible group (module-gated groups
+  // excluded) — the universe the global select-all row acts on.
+  const allVisiblePermNames = visibleGroups.flatMap(([, perms]) => perms.map(p => p.name))
+  const allVisibleSelected  = allVisiblePermNames.filter(hasPermission)
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {/* Global "select all / clear all" over EVERY visible permission (Danny
+          09-09: "ik wil bij deze pagina een selecteer alles hebben"). */}
+      {onSetMany && (
+        <SelectAllRow
+          visibleValues={allVisiblePermNames}
+          selectedValues={allVisibleSelected}
+          onApply={(names, select) => onSetMany(names, select)}
+        />
+      )}
       {visibleGroups.map(([group, perms]) => {
         const activeCount = perms.filter(p => hasPermission(p.name)).length
         const isOpen = expandedGroups.has(group)
@@ -164,6 +183,16 @@ export function PermissionMatrix({ groups, hasPermission, onToggle }: Permission
             </button>
             {isOpen && (
               <div style={detailWrapStyle}>
+                {/* Per-group compact "Alles / Niets" — a nested interactive
+                    control can't live inside the row's own header <button>
+                    (§6), so it renders here, right above this group's toggles. */}
+                {onSetMany && (
+                  <SelectAllRow dense
+                    visibleValues={perms.map(p => p.name)}
+                    selectedValues={perms.filter(p => hasPermission(p.name)).map(p => p.name)}
+                    onApply={(names, select) => onSetMany(names, select)}
+                  />
+                )}
                 <div style={detailGridStyle}>
                   {perms.map(perm => {
                     const label = permissionLabel(group, perm)

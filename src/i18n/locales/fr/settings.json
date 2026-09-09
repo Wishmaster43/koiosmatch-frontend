@@ -2052,6 +2052,7 @@
     "branchesNoLocations": "Aucun site configuré pour le moment.",
     "branchesSaveFailed": "Impossible d'enregistrer le modèle de sites. Veuillez réessayer.",
     "appearanceSaveFailed": "Impossible d'enregistrer l'apparence. Veuillez réessayer.",
+    "permissionsSaveFailed": "Impossible d'enregistrer les autorisations. Veuillez réessayer.",
     "pageAccess": "Page : {{label}}",
     "hints": {
       "candidatesSync": "Miroir SM"

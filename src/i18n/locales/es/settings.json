@@ -2052,6 +2052,7 @@
     "branchesNoLocations": "Todavía no hay sedes configuradas.",
     "branchesSaveFailed": "No se pudo guardar la plantilla de sedes. Inténtalo de nuevo.",
     "appearanceSaveFailed": "No se pudo guardar la apariencia. Inténtalo de nuevo.",
+    "permissionsSaveFailed": "No se pudieron guardar los permisos. Inténtalo de nuevo.",
     "pageAccess": "Página: {{label}}",
     "hints": {
       "candidatesSync": "Espejo SM"

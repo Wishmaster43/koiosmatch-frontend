@@ -49,11 +49,18 @@ export default function RolesSettings() {
   const allSettings = useAllSettings()
   const settingsLoaded = useSettingsLoaded()
   const branchAuthzEnabled = getBoolSetting(allSettings, 'branch_authz_enabled', false)
+  // Optimistic override for the switch's own value (Danny 09-09: "of fixen" — the
+  // switch must move instantly, not wait for the PUT + settings-cache refetch);
+  // null means "trust the server value", set on click, cleared on failure so the
+  // toggle springs back to whatever the server actually holds.
+  const [branchAuthzOptimistic, setBranchAuthzOptimistic] = useState<boolean | null>(null)
   const toggleBranchAuthz = async (v: boolean) => {
+    setBranchAuthzOptimistic(v)
     try {
       await saveSettingsKeys({ branch_authz_enabled: v })
       invalidateAllSettingsCache()
     } catch (err) {
+      setBranchAuthzOptimistic(null)
       notifyError(extractApiError(err, t('common:actionFailed')))
     }
   }
@@ -141,7 +148,7 @@ export default function RolesSettings() {
           until the settings blob has loaded so it never flips a stale default. */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-3)', padding: 'var(--space-3) var(--space-4)',
                     border: '1px solid var(--border)', borderRadius: 8, marginBottom: 'var(--space-4)' }}>
-        <Toggle checked={branchAuthzEnabled} onChange={toggleBranchAuthz} disabled={!settingsLoaded}
+        <Toggle checked={branchAuthzOptimistic ?? branchAuthzEnabled} onChange={toggleBranchAuthz} disabled={!settingsLoaded}
           ariaLabel={t('roles.branchAuthz.label')} />
         <div>
           <SectionTitle style={{ marginBottom: 2 }}>{t('roles.branchAuthz.label')}</SectionTitle>
