@@ -49,7 +49,7 @@ export default function EditUserModal({ user, onClose, onSaved }: {
   const { t } = useTranslation('users')
   const auth = useAuth()
   const locationOptions = useLocations()
-  const { branches, loading: branchesLoading, saving: branchesSaving, error: branchesError, toggle: toggleBranch, setFlag: setBranchFlag } = useUserBranches(user.id)
+  const { branches, loading: branchesLoading, saving: branchesSaving, error: branchesError, toggle: toggleBranch, toggleMany: toggleManyBranches, setFlag: setBranchFlag } = useUserBranches(user.id)
   // Fallback: split `name` when firstname/lastname arrive as a single string.
   const nameParts = (user.name ?? '').split(' ')
   const [form, setForm] = useState({
@@ -200,6 +200,7 @@ export default function EditUserModal({ user, onClose, onSaved }: {
                 options={locationOptions.map(o => ({ value: String(o.value), label: o.label }))}
                 selected={branches.map(b => String(b.location_id))}
                 onToggle={toggleBranch}
+                onSelectAll={toggleManyBranches}
                 emptyText={t('branches.noLocations')}
               />
             )}

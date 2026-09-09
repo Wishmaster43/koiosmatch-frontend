@@ -618,3 +618,26 @@ describe('RolesSettings — branch authorization master switch', () => {
     expect(notifyError).toHaveBeenCalled()
   })
 })
+
+// USERS-SELECTALL root fix (Danny 09-09 "selecteer alles … werkt niet"): the branch template's
+// select-all sends ONE replace-set with every location, never N racing per-value PUTs.
+describe('RoleBranchTemplate — select-all is one replace-set PUT', () => {
+  it('PUTs every location in a single request and clears them in a single request', async () => {
+    mockLocations.mockReturnValue([{ value: 'l1', label: 'Noord' }, { value: 'l2', label: 'Zuid' }])
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [] } }) // role has no branches yet
+    mockAuth.mockReturnValue({ user: { is_super_admin: true }, accessiblePages: [], isSuperAdmin: () => true })
+    vi.mocked(api.put).mockResolvedValue({ data: {} })
+    // SelectAllRow translates in the common namespace; resolve its label the same way.
+    const ct = (key: string) => i18n.t(key, { ns: 'common' })
+    const user = userEvent.setup()
+    render(<RoleBranchTemplate roleId="r1" />)
+    await screen.findByRole('button', { name: 'Noord' })
+    // The accessible name carries the visible count, "(2)": match on the label part.
+    await user.click(screen.getByRole('button', { name: new RegExp(ct('multiSelect.selectVisible')) }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/roles/r1/branches', { location_ids: ['l1', 'l2'] }))
+    expect(api.put).toHaveBeenCalledTimes(1)
+    await user.click(await screen.findByRole('button', { name: new RegExp(ct('multiSelect.clearVisible')) }))
+    await waitFor(() => expect(api.put).toHaveBeenLastCalledWith('/roles/r1/branches', { location_ids: [] }))
+    expect(api.put).toHaveBeenCalledTimes(2)
+  })
+})

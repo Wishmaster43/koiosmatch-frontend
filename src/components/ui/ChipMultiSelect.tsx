@@ -36,20 +36,30 @@ interface ChipMultiSelectProps {
   // locations, industries) are exactly where ticking one by one hurts. Suppressed
   // for a one-option list, where the action would be pure noise.
   selectAll?: boolean
+  // Root fix for USERS-SELECTALL: hosts whose `onToggle` PERSISTS one value per
+  // call (a network PUT, not just local state) must not have select-all drain
+  // N values through `onToggle` one per commit — that fires N racing requests
+  // and whichever response lands last wins, regardless of which one actually
+  // carried the full selection. A host that can apply the whole batch in ONE
+  // request passes `onSelectAll`; when present, select-all calls it directly
+  // instead of draining through useBatchToggle. Hosts backed by plain local
+  // state (functional setState) never need this — the drain is safe for them.
+  onSelectAll?: (values: string[], select: boolean) => void
 }
 
 // The chip grid itself: unchosen chips stay neutral, chosen ones carry the tint + checkmark, so selection reads without relying on colour alone.
-export default function ChipMultiSelect({ options, values, selected, onToggle, color = 'var(--color-primary)', emptyText, ariaLabel, selectAll = true }: ChipMultiSelectProps) {
+export default function ChipMultiSelect({ options, values, selected, onToggle, color = 'var(--color-primary)', emptyText, ariaLabel, selectAll = true, onSelectAll }: ChipMultiSelectProps) {
   const active = values ?? selected ?? []
   // Hooks run before any early return — the batch is applied one value per commit
-  // because call sites hand us a per-value onToggle (see useBatchToggle).
+  // because most call sites hand us a per-value onToggle (see useBatchToggle);
+  // a host that supplies `onSelectAll` bypasses this drain entirely (see prop doc).
   const applyBatch = useBatchToggle<string>(onToggle)
   if (options.length === 0) return <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{emptyText ?? '—'}</span>
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       {selectAll && options.length > 1 && (
         <SelectAllRow dense visibleValues={options.map(o => o.value)} selectedValues={active}
-          onApply={batch => applyBatch(batch)} />
+          onApply={(batch, select) => (onSelectAll ? onSelectAll(batch, select) : applyBatch(batch))} />
       )}
       <div role="group" aria-label={ariaLabel} style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
       {options.map(o => {

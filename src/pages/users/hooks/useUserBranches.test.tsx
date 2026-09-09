@@ -40,6 +40,43 @@ describe('useUserBranches', () => {
     expect(result.current.saving).toBe(false)
   })
 
+  // USERS-SELECTALL root fix: select-all must not drain N values through the
+  // per-value `toggle` (N racing PUTs, last response wins regardless of which
+  // request actually carried the full set — the "select all snaps back"
+  // symptom Danny reported). `toggleMany` computes the final set once and
+  // fires exactly ONE PUT for it.
+  it('applies a select-all batch as ONE PUT carrying the full id set', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [{ location_id: 'loc-1', name: 'Amsterdam' }] } })
+    vi.mocked(api.put).mockResolvedValueOnce({ data: { data: [
+      { location_id: 'loc-1', name: 'Amsterdam' },
+      { location_id: 'loc-2', name: 'Rotterdam' },
+      { location_id: 'loc-3', name: 'Utrecht' },
+    ] } })
+    const { result } = renderHook(() => useUserBranches('u1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => { await result.current.toggleMany(['loc-2', 'loc-3'], true) })
+
+    // Exactly one PUT, carrying every id (the already-assigned one plus the batch).
+    expect(api.put).toHaveBeenCalledTimes(1)
+    expect(api.put).toHaveBeenCalledWith('/users/u1/branches', { location_ids: ['loc-1', 'loc-2', 'loc-3'] })
+    expect(result.current.branches.map(b => b.location_id)).toEqual(['loc-1', 'loc-2', 'loc-3'])
+  })
+
+  it('applies a clear-all batch as ONE PUT with the batch ids removed', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [
+      { location_id: 'loc-1', name: 'Amsterdam' }, { location_id: 'loc-2', name: 'Rotterdam' },
+    ] } })
+    vi.mocked(api.put).mockResolvedValueOnce({ data: { data: [] } })
+    const { result } = renderHook(() => useUserBranches('u1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => { await result.current.toggleMany(['loc-1', 'loc-2'], false) })
+
+    expect(api.put).toHaveBeenCalledTimes(1)
+    expect(api.put).toHaveBeenCalledWith('/users/u1/branches', { location_ids: [] })
+  })
+
   it('reverts to the previous set and notifies on a failed toggle', async () => {
     vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [{ location_id: 'loc-1', name: 'Amsterdam' }] } })
     vi.mocked(api.put).mockRejectedValueOnce(new Error('network'))

@@ -81,6 +81,33 @@ export function useUserBranches(userId: string | number | null | undefined) {
     }
   }
 
+  // Toggle a WHOLE batch (select-all / clear-all) in ONE request — the root fix
+  // for USERS-SELECTALL: `toggle` above is a per-value PUT, so a select-all that
+  // drained N values through it fired N concurrent replace-set PUTs, and whichever
+  // response landed last won, regardless of which request actually carried the
+  // full selection (a classic "select all lights up then snaps back"). A batch
+  // apply computes the final id set once and sends exactly one PUT for it.
+  const toggleMany = async (locationIds: Array<string | number>, select: boolean) => {
+    if (userId == null || error || locationIds.length === 0) return
+    const prev = branches
+    const ids = branches.map(b => b.location_id)
+    const batch = new Set(locationIds)
+    const nextIds = select
+      ? [...ids, ...locationIds.filter(id => !ids.includes(id))]
+      : ids.filter(id => !batch.has(id))
+    setBranches(nextIds.map(id => prev.find(b => b.location_id === id) ?? { location_id: id }))
+    setSaving(true)
+    try {
+      const res = await api.put(`/users/${userId}/branches`, { location_ids: nextIds })
+      setBranches(unwrapList<BranchRow>(res).rows)
+    } catch {
+      setBranches(prev)
+      notifyError(t('branches.saveFailed'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
   // Change one ability flag on one already-assigned branch — optimistic PUT
   // (replace-set carrying every current location_id, changed flag only on the
   // touched row so unrelated rows' flags are left untouched server-side; see
@@ -110,5 +137,5 @@ export function useUserBranches(userId: string | number | null | undefined) {
     }
   }
 
-  return { branches, loading, saving, error, toggle, setFlag }
+  return { branches, loading, saving, error, toggle, toggleMany, setFlag }
 }

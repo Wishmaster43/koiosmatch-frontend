@@ -52,6 +52,24 @@ export function RoleBranchTemplate({ roleId }: { roleId: Role['id'] }) {
     }
   }
 
+  // Select-all / clear-all: ONE replace-set PUT for the whole batch (the per-value
+  // toggle above would fire N racing PUTs; USERS-SELECTALL root fix, ChipMultiSelect.onSelectAll).
+  const setMany = async (ids: string[], on: boolean) => {
+    if (loadError) return
+    const prev = branchIds
+    const next = on ? Array.from(new Set([...prev, ...ids])) : prev.filter(id => !ids.includes(id))
+    setBranchIds(next)
+    setSaving(true)
+    try {
+      await api.put(`/roles/${roleId}/branches`, { location_ids: next } satisfies UpdateBranchesBody)
+    } catch {
+      setBranchIds(prev)
+      notifyError(t('roles.branchesSaveFailed'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <div style={{ marginBottom: 22, padding: '12px 16px', background: 'var(--surface)',
                   border: '1px solid var(--border)', borderRadius: 10 }}>
@@ -70,7 +88,7 @@ export function RoleBranchTemplate({ roleId }: { roleId: Role['id'] }) {
         // shared `Id` union useLocations returns) — normalise here (mirrors
         // EditUserModal's identical branch picker).
         <ChipMultiSelect options={locationOptions.map(o => ({ value: String(o.value), label: o.label }))}
-          selected={branchIds} onToggle={toggle} emptyText={t('roles.branchesNoLocations')} />
+          selected={branchIds} onToggle={toggle} onSelectAll={setMany} emptyText={t('roles.branchesNoLocations')} />
       )}
       {/* Honest empty-state note — an empty template does not restrict data today (branch-level
           authorization ships behind a tenant toggle, VESTIGING-1 fase 3, not yet enabled). */}

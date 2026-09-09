@@ -60,6 +60,31 @@ describe('UserRolesModal', () => {
     expect(onSaved).toHaveBeenCalled()
   })
 
+  it('select-all in the roles picker selects EVERY role and PUTs all ids (Danny 09-09: "zoals bij gebruikers alleen hij werkt niet")', async () => {
+    vi.mocked(api.put).mockResolvedValueOnce({ data: { data: { ...testUser, roles: [] } } })
+    const user = userEvent.setup()
+    const onSaved = vi.fn()
+    render(<UserRolesModal user={testUser} roles={roles} onSaved={onSaved} onClose={noop} />)
+
+    // Open the searchable checklist, then hit the select-all row above the options.
+    await user.click(screen.getByText('rolesModal.add'))
+    await user.click(await screen.findByRole('button', { name: /multiSelect\.selectVisible/ }))
+
+    // Every role becomes a removable chip — the currently pre-selected manager
+    // plus recruiter and backoffice, which were not selected before.
+    await waitFor(() => {
+      expect(screen.getByText('chip:manager')).toBeInTheDocument()
+      expect(screen.getByText('chip:recruiter')).toBeInTheDocument()
+      expect(screen.getByText('chip:backoffice')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByText('common:save'))
+
+    // Full set of ids, in their original numeric form.
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/users/u1/roles', { roles: [5, 6, 7] }))
+    expect(onSaved).toHaveBeenCalled()
+  })
+
   it('removing the last role disables save — the route rejects an empty set', async () => {
     const user = userEvent.setup()
     render(<UserRolesModal user={testUser} roles={roles} onSaved={noop} onClose={noop} />)

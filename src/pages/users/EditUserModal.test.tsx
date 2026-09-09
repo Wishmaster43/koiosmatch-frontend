@@ -3,6 +3,8 @@
  * (USERS-ROLES-LOC-1): current branches render through the shared
  * ChipMultiSelect, toggling PUTs a replace-set, and a failed PUT reverts +
  * surfaces notifyError — mirrors RoleBranchTemplate in RolesSettings.jsx.
+ * Also covers select-all (USERS-SELECTALL): the batch is applied as ONE PUT
+ * via `onSelectAll`/`toggleMany`, never N racing per-value PUTs.
  * Also covers CredentialChangeGuard (CMBE 03-09): a self-edit that touches
  * email/password carries `current_password` and the 403 code maps to copy.
  */
@@ -108,6 +110,32 @@ describe('EditUserModal · branches', () => {
     await user.click(screen.getByText('Amsterdam'))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/users/u1/branches', { location_ids: ['loc-1'] }))
+  })
+
+  // USERS-SELECTALL root fix (verifier finding, round 2): this is the ONE
+  // select-all on the users screen that PERSISTS per value — before the fix,
+  // clicking select-all drained every branch through `toggle` one per commit,
+  // firing N concurrent replace-set PUTs; whichever response landed last won,
+  // regardless of which request actually carried the full selection ("select
+  // all lights up then snaps back" — Danny 09-09). Now it goes through
+  // `onSelectAll` (toggleMany) and fires exactly ONE PUT with every id.
+  it('select-all PUTs the full branch set in ONE request, not one PUT per branch', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
+    // This file's mocks are module-scope with no shared beforeEach reset — clear the
+    // call history so earlier tests' PUTs do not inflate the "exactly one call" count.
+    vi.mocked(api.put).mockClear()
+    vi.mocked(api.put).mockResolvedValueOnce({ data: { data: [
+      { location_id: 'loc-1', name: 'Amsterdam' }, { location_id: 'loc-2', name: 'Rotterdam' },
+    ] } })
+    const user = userEvent.setup()
+    render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)
+
+    await screen.findByText('Amsterdam')
+    await user.click(screen.getByRole('button', { name: /multiSelect\.selectVisible/ }))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/users/u1/branches', { location_ids: ['loc-1', 'loc-2'] }))
+    // Exactly one request — never one racing PUT per drained value.
+    expect(api.put).toHaveBeenCalledTimes(1)
   })
 
   it('reverts and notifies on a failed toggle', async () => {

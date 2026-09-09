@@ -33,7 +33,7 @@ vi.mock('react-i18next', () => ({
   }),
 }))
 vi.mock('@/lib/api', () => ({
-  default: { post: vi.fn() },
+  default: { post: vi.fn(), put: vi.fn().mockResolvedValue({}) },
   unwrap: (r: { data?: { data?: unknown } }) => r?.data?.data,
 }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
@@ -100,6 +100,28 @@ describe('NewUserModal', () => {
     const rotterdam = await screen.findByRole('button', { name: /Rotterdam/ })
     await user.click(rotterdam)
     expect(rotterdam).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('select-all in the branches picker selects EVERY location and PUTs all ids (same select-all machinery as UserRolesModal)', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { data: { id: 'u1', email: 'jan@bedrijf.nl' } } })
+    const user = userEvent.setup()
+    render(<NewUserModal onClose={noop} onCreated={noop} />)
+
+    // planner's template pre-selects Amsterdam only; select-all must ALSO pick Rotterdam.
+    await screen.findByRole('button', { name: /Amsterdam/ })
+    await user.click(screen.getByRole('button', { name: /multiSelect\.selectVisible/ }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Amsterdam/ })).toHaveAttribute('aria-pressed', 'true')
+      expect(screen.getByRole('button', { name: /Rotterdam/ })).toHaveAttribute('aria-pressed', 'true')
+    })
+
+    await user.type(screen.getByLabelText('firstName', { exact: false }), 'Jan')
+    await user.type(screen.getByLabelText('email', { exact: false }), 'jan@bedrijf.nl')
+    await user.type(screen.getByLabelText('password', { exact: false }), 'wachtwoord123')
+    await user.click(screen.getByRole('button', { name: 'create' }))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/users/u1/branches', { location_ids: ['loc-1', 'loc-2'] }))
   })
 
   it('submits the picked role NAME (the API validates by name, not id)', async () => {
