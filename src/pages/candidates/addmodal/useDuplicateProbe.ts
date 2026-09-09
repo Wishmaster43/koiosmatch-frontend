@@ -14,7 +14,7 @@
  * (§9): only the server is the duplicate authority — this is advisory, the create
  * 409 (useRestoreDuplicate's sibling flow) stays the real gate.
  */
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
 import { queryClient } from '@/lib/queryClient'
@@ -23,47 +23,19 @@ import type { Id } from '@/types/common'
 // The duplicate shape lives with the shared DuplicateNotice panel (SHARED-DUP-1);
 // re-exported here so candidate-internal importers keep their existing path.
 import type { DuplicateMatch } from '@/components/forms/DuplicateNotice'
+import { useDuplicateProbe as useDuplicateProbeBase } from '@/hooks/useDuplicateProbe'
 export type { DuplicateMatch }
 
-// Wait this long after the last keystroke before probing — long enough that a
-// normal typing burst never fires more than one request.
-const PROBE_DEBOUNCE_MS = 500
+// Module-scope so the tuple reference stays stable across renders (the shared
+// hook depends on it — a fresh array literal per render would re-probe every time).
+const CANDIDATE_DUP_KEYS = ['email', 'mobile', 'phone'] as const
 
 // Debounced live probe: email/mobile/phone in, a possible match out. Every field
 // change (any of the three) clears the previous verdict — an edit means the last
-// answer no longer applies to what's on screen.
+// answer no longer applies to what's on screen. Delegates to the shared
+// hooks/useDuplicateProbe (DRY-1) — this wrapper only fixes the path/keys.
 export function useDuplicateProbe(email: string, mobile: string, phone: string) {
-  const [match, setMatch] = useState<DuplicateMatch | null>(null)
-  // Cancel the in-flight request when the inputs change again before it resolves.
-  const abortRef = useRef<AbortController | null>(null)
-
-  useEffect(() => {
-    // Nothing typed yet in any of the three probe fields — nothing to ask.
-    abortRef.current?.abort()
-    setMatch(null)
-    if (!email.trim() && !mobile.trim() && !phone.trim()) return undefined
-
-    const controller = new AbortController()
-    abortRef.current = controller
-    const timer = setTimeout(() => {
-      // POST body only — never a query string (§7, see the header note above).
-      api.post('/candidates/check-duplicate', {
-        email: email.trim() || undefined,
-        mobile: mobile.trim() || undefined,
-        phone: phone.trim() || undefined,
-      }, { signal: controller.signal })
-        .then(res => {
-          const data = res.data as { exists?: boolean; match?: DuplicateMatch | null }
-          setMatch(data?.exists ? (data.match ?? null) : null)
-        })
-        // Cancelled or failed probes stay silent — advisory only, never blocks typing.
-        .catch(() => {})
-    }, PROBE_DEBOUNCE_MS)
-
-    return () => { clearTimeout(timer); controller.abort() }
-  }, [email, mobile, phone])
-
-  return { probeMatch: match, clearProbeMatch: () => setMatch(null) }
+  return useDuplicateProbeBase<DuplicateMatch>('/candidates/check-duplicate', CANDIDATE_DUP_KEYS, email, mobile, phone)
 }
 
 // Restore an archived duplicate via the per-id route (§10: een record = de

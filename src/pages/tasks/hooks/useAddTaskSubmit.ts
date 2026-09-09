@@ -79,6 +79,22 @@ export function useAddTaskSubmit({
       .filter(l => (seen.has(`${l.type}|${l.id}`) ? false : seen.add(`${l.type}|${l.id}`) != null))
   }
 
+  // Shared field-mapping tail of the create/update request bodies (DRY-1, was
+  // duplicated verbatim). The two callers differ only in what an UNMAPPED status
+  // slug sends: create sends explicit `null`, update omits the key entirely (via
+  // the undefined-strip in handleUpdate, since UpdateTaskRequest can't clear it) —
+  // that single difference is the `statusUnmapped` param.
+  const buildTaskBody = (statusUnmapped: null | undefined) => ({
+    title: form.title.trim(),
+    type_id: form.type ? lookupIds.type[form.type] : null,
+    status_id: form.status ? lookupIds.status[form.status] : statusUnmapped,
+    priority_id: form.priority ? lookupIds.priority[form.priority] : null,
+    assignee_id: form.assigneeId || null, due_date: form.due || null, due_time: form.dueTime || null,
+    // TEAM-1: the internal department — always sent, null when none is picked.
+    assignee_team_id: form.teamId || null,
+    description: form.description || null, links: buildLinks(),
+  })
+
   // Create — TASKTYPE-ID-1: POSTs the real uuid FKs (type_id/status_id/priority_id),
   // Resolved from the form's slug via `lookupIds`.
   // StoreTaskRequest silently ignores the bare slugs `type`/`status`/`priority`
@@ -93,14 +109,7 @@ export function useAddTaskSubmit({
     setCreateError(null)
     try {
       const body = {
-        title: form.title.trim(),
-        type_id: form.type ? lookupIds.type[form.type] : null,
-        status_id: form.status ? lookupIds.status[form.status] : null,
-        priority_id: form.priority ? lookupIds.priority[form.priority] : null,
-        assignee_id: form.assigneeId || null, due_date: form.due || null, due_time: form.dueTime || null,
-        // TEAM-1: the internal department — always sent, null when none is picked.
-        assignee_team_id: form.teamId || null,
-        description: form.description || null, links: buildLinks(),
+        ...buildTaskBody(null),
         // SUBTASK-1: only present when this modal was opened as "+ subtask" — the
         // key is omitted (never sent as null) for a normal create, so the exact
         // request body existing callers assert never gains a stray key.
@@ -123,19 +132,12 @@ export function useAddTaskSubmit({
     setSaving(true)
     setCreateError(null)
     try {
-      const body: Record<string, unknown> = {
-        title: form.title.trim(),
-        type_id: form.type ? lookupIds.type[form.type] : null,
-        // status_id cannot be cleared server-side; an unmapped slug is omitted
-        // (via the undefined-strip below) rather than sent as an invalid value.
-        status_id: form.status ? lookupIds.status[form.status] : undefined,
-        priority_id: form.priority ? lookupIds.priority[form.priority] : null,
-        assignee_id: form.assigneeId || null, due_date: form.due || null, due_time: form.dueTime || null,
-        // TEAM-1: sent explicitly (never omitted) — omitting the key would leave a
-        // cleared department standing, since UpdateTaskRequest uses `sometimes`.
-        assignee_team_id: form.teamId || null,
-        description: form.description || null, links: buildLinks(),
-      }
+      // status_id cannot be cleared server-side; an unmapped slug is omitted
+      // (via the undefined-strip below) rather than sent as an invalid value.
+      // TEAM-1: assignee_team_id is sent explicitly (never omitted) — omitting the
+      // key would leave a cleared department standing, since UpdateTaskRequest
+      // uses `sometimes`.
+      const body: Record<string, unknown> = buildTaskBody(undefined)
       Object.keys(body).forEach(k => { if (body[k] === undefined) delete body[k] })
       const r = await api.patch(`/tasks/${editId}`, body)
       onSaved?.(unwrap(r))

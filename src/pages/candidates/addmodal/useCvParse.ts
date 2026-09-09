@@ -165,6 +165,18 @@ export function useCvParse({ onReady }: UseCvParseOptions) {
     void tick()
   }, [fail, failFromError])
 
+  // Shared tail of both start paths (file upload and paste-text): POST the payload,
+  // read the token off the response, and hand it to poll() — was duplicated verbatim
+  // in start()/startText() (DRY-1).
+  const postAndPoll = useCallback(async (payload: FormData | { raw_text: string }, controller: AbortController) => {
+    const body = unwrap<{ token?: string }>(await api.post('/candidates/parse-cv', payload, { signal: controller.signal }))
+    if (!aliveRef.current) return
+    const token = body?.token
+    if (!token) { fail(CV_ERROR_KEYS.generic); return }
+    setPhase('processing')
+    poll(token, Date.now() + CV_POLL_TIMEOUT_MS)
+  }, [fail, poll])
+
   // Upload a CV and start polling its token. Rejected files never leave the browser.
   const start = useCallback(async (file: File) => {
     if (timerRef.current) clearTimeout(timerRef.current)
@@ -187,16 +199,11 @@ export function useCvParse({ onReady }: UseCvParseOptions) {
     try {
       const form = new FormData()
       form.append('file', file)
-      const body = unwrap<{ token?: string }>(await api.post('/candidates/parse-cv', form, { signal: controller.signal }))
-      if (!aliveRef.current) return
-      const token = body?.token
-      if (!token) { fail(CV_ERROR_KEYS.generic); return }
-      setPhase('processing')
-      poll(token, Date.now() + CV_POLL_TIMEOUT_MS)
+      await postAndPoll(form, controller)
     } catch (err) {
       failFromError(err)
     }
-  }, [fail, failFromError, poll])
+  }, [fail, failFromError, postAndPoll])
 
   // Paste-CV path (PASTE-CV-1): same route/token/poll, `raw_text` JSON body instead
   // of a multipart file. Under-length text never fires a request — the caller shows
@@ -214,16 +221,11 @@ export function useCvParse({ onReady }: UseCvParseOptions) {
     const controller = new AbortController()
     abortRef.current = controller
     try {
-      const body = unwrap<{ token?: string }>(await api.post('/candidates/parse-cv', { raw_text: value }, { signal: controller.signal }))
-      if (!aliveRef.current) return
-      const token = body?.token
-      if (!token) { fail(CV_ERROR_KEYS.generic); return }
-      setPhase('processing')
-      poll(token, Date.now() + CV_POLL_TIMEOUT_MS)
+      await postAndPoll({ raw_text: value }, controller)
     } catch (err) {
       failFromError(err)
     }
-  }, [fail, failFromError, poll])
+  }, [failFromError, postAndPoll])
 
   // Back to idle: abort whatever is in flight and clear the widget. Deliberately does
   // NOT clear the form — values already prefilled belong to the recruiter now.

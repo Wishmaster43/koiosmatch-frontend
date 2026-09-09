@@ -14,6 +14,8 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { useSubEntitySave } from './hooks/useSubEntitySave'
+// DRY-1: one shared 422-bag mapper (field flags + server message text).
+import { extractFormErrorsWithMessages } from '@/lib/extractFormErrors'
 import type { ContactPayload } from './hooks/useCustomerContacts'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
@@ -166,18 +168,10 @@ export function useAddContactPersonForm({
       // Extract field errors and messages from the response; Laravel 422 payloads
       // carry an array of messages per field — keep the first (mirroring the old logic).
       const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
-      const apiErrors = e?.response?.data?.errors
-      if (apiErrors) {
-        const e2: Record<string, boolean> = {}
-        const m2: Record<string, string> = {}
-        Object.entries(apiErrors).forEach(([k, v]) => {
-          const field = API_TO_FORM[k] ?? k
-          e2[field] = true
-          const msg = Array.isArray(v) ? v[0] : v
-          if (typeof msg === 'string') m2[field] = msg
-        })
-        setErrors(e2)
-        setFieldMessages(m2)
+      const fieldErrors = extractFormErrorsWithMessages(err, API_TO_FORM)
+      if (fieldErrors) {
+        setErrors(fieldErrors.errors)
+        setFieldMessages(fieldErrors.messages)
       } else {
         setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
       }

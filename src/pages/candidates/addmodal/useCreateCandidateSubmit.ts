@@ -12,6 +12,8 @@ import { toLinkedinSlug } from '@/components/drawer/contactLinks'
 import { canonicalPhone } from '@/lib/phoneNumber'
 // DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
 import { extractApiError } from '@/lib/extractApiError'
+// DRY-1: one shared 422-bag mapper (field flags + server message text).
+import { extractFormErrorsWithMessages } from '@/lib/extractFormErrors'
 import type { Candidate } from '@/types/candidate'
 import type { FormState } from '../AddCandidateModal'
 import type { DuplicateMatch } from './useDuplicateProbe'
@@ -143,17 +145,9 @@ export function useCreateCandidateSubmit({
         // VALIDATIE-LIVE-1: keep the server's own per-field message (never wiped,
         // never silently discarded) alongside the red-border boolean flag — the
         // typed value stays exactly as-is, nothing here clears the form.
-        const e2: Record<string, boolean> = {}
-        const m2: Record<string, string> = {}
-        Object.entries(apiErrors).forEach(([k, v]) => {
-          const field = API_TO_FORM[k] ?? k
-          e2[field] = true
-          // Laravel 422 payloads carry an array of messages per field — keep the first.
-          const msg = Array.isArray(v) ? v[0] : v
-          if (typeof msg === 'string') m2[field] = msg
-        })
-        setErrors(e2)
-        setFieldMessages(m2)
+        const fieldErrors = extractFormErrorsWithMessages(ex, API_TO_FORM)
+        setErrors(fieldErrors?.errors ?? {})
+        setFieldMessages(fieldErrors?.messages ?? {})
       } else {
         // Fallback: show the server message or a generic error so the user isn't left guessing.
         setSubmitErr(extractApiError(ex, t('common:errorGeneric', 'Er is iets misgegaan')))

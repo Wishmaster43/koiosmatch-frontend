@@ -22,53 +22,25 @@
  * adds vat_number/debtor_number to customer_dedupe_keys still gets the hard 409
  * on create (the real gate) — just no pre-warning on those extra keys.
  */
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
 import { queryClient } from '@/lib/queryClient'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import type { Id } from '@/types/common'
 import type { DuplicateMatch } from '@/components/forms/DuplicateNotice'
+import { useDuplicateProbe as useDuplicateProbeBase } from '@/hooks/useDuplicateProbe'
 
-// Same debounce window as the candidate probe — long enough that a normal typing
-// burst never fires more than one request.
-const PROBE_DEBOUNCE_MS = 500
+// Module-scope so the tuple reference stays stable across renders (the shared
+// hook depends on it — a fresh array literal per render would re-probe every time).
+const CUSTOMER_DUP_KEYS = ['name', 'coc_number', 'billing_email'] as const
 
 // Debounced live probe: name/cocNumber/billingEmail in, a possible match out. Any
 // edit clears the previous verdict — it no longer applies to what's on screen.
+// Delegates to the shared hooks/useDuplicateProbe (DRY-1) — this wrapper only
+// fixes the path/keys.
 export function useCustomerDuplicateProbe(name: string, cocNumber: string, billingEmail: string) {
-  const [match, setMatch] = useState<DuplicateMatch | null>(null)
-  // Cancel the in-flight request when the inputs change again before it resolves.
-  const abortRef = useRef<AbortController | null>(null)
-
-  // Debounces the probe request and aborts a stale in-flight one when the
-  // watched fields change again before it resolves.
-  useEffect(() => {
-    abortRef.current?.abort()
-    setMatch(null)
-    if (!name.trim() && !cocNumber.trim() && !billingEmail.trim()) return undefined
-
-    const controller = new AbortController()
-    abortRef.current = controller
-    const timer = setTimeout(() => {
-      // POST body only — never a query string (§7).
-      api.post('/customers/check-duplicate', {
-        name: name.trim() || undefined,
-        coc_number: cocNumber.trim() || undefined,
-        billing_email: billingEmail.trim() || undefined,
-      }, { signal: controller.signal })
-        .then(res => {
-          const data = res.data as { exists?: boolean; match?: DuplicateMatch | null }
-          setMatch(data?.exists ? (data.match ?? null) : null)
-        })
-        // Cancelled or failed probes stay silent — advisory only, never blocks typing.
-        .catch(() => {})
-    }, PROBE_DEBOUNCE_MS)
-
-    return () => { clearTimeout(timer); controller.abort() }
-  }, [name, cocNumber, billingEmail])
-
-  return { probeMatch: match, clearProbeMatch: () => setMatch(null) }
+  return useDuplicateProbeBase<DuplicateMatch>('/customers/check-duplicate', CUSTOMER_DUP_KEYS, name, cocNumber, billingEmail)
 }
 
 // Restore an archived duplicate via the per-id route (§10: een record = de
