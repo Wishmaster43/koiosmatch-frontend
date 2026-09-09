@@ -31,7 +31,7 @@ import { useMemo } from 'react'
  * kan een prospect zijn of een klant") — leaving it here would have kept the very value
  * the split removes alive in every offline render.
  */
-export const DEFAULT_CUSTOMER_STATUSES: LookupOption[] = [
+const DEFAULT_CUSTOMER_STATUSES: LookupOption[] = [
   { value: 'active',   label: 'Actief',      color: '#16A34A' },
   { value: 'inactive', label: 'Inactief',    color: '#D97706' },
   { value: 'blocked',  label: 'Geblokkeerd', color: '#DC2626' },
@@ -41,7 +41,7 @@ export const DEFAULT_CUSTOMER_STATUSES: LookupOption[] = [
 // Seed defaults for the sub-entity statuses (location/department/contact) — a
 // simple active/inactive lifecycle until a tenant configures its own.
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
-export const DEFAULT_SUB_STATUSES: LookupOption[] = [
+const DEFAULT_SUB_STATUSES: LookupOption[] = [
   { value: 'active',   label: 'Actief',   color: '#16A34A' },
   { value: 'inactive', label: 'Inactief', color: '#9CA3AF' },
 ]

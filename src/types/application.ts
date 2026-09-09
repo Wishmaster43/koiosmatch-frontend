@@ -4,7 +4,7 @@
  * (`ApiApplication`), read defensively by mapApplication / mapApplicationDetail.
  */
 import type { NoteActionItemWire } from '@/components/drawer/tabs/notes/notesTabTypes'
-import type { Id, Loose } from './common'
+import type { Id } from './common'
 import type { InterviewWorkflow } from './interviewWorkflow'
 import type { InterviewWorkflowRef } from './vacancy'
 import type { ApiKoiosAiAdvice, KoiosAiAdvice } from '@/lib/koiosAdviceMap'
@@ -497,5 +497,3 @@ export interface ApiApplication {
   koios_ai_advice?: ApiKoiosAiAdvice | null
   [k: string]: unknown
 }
-
-export type { Loose }

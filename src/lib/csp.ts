@@ -9,7 +9,7 @@
 
 // Env shape this builder reads — a subset of import.meta.env, passed in so the
 // function stays pure and testable outside the Vite build pipeline.
-export interface CspEnv {
+interface CspEnv {
   VITE_API_URL?: string
   VITE_WORKFLOW_API_URL?: string
   VITE_CSRF_URL?: string

@@ -15,7 +15,7 @@ import { unwrap } from '@/lib/api'
 
 // Service / sector — the kind of engagement (seed for healthcare staffing).
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
-export const DEFAULT_SERVICE_TYPES: LookupOption[] = [
+const DEFAULT_SERVICE_TYPES: LookupOption[] = [
   { value: 'detachering',      label: 'Detachering',      color: '#6E8FD6' },
   { value: 'zorg',             label: 'Zorg',             color: '#5FB0AC' },
   { value: 'zorg_detachering', label: 'Zorg-detachering', color: '#A98AD1' },
@@ -24,7 +24,7 @@ export const DEFAULT_SERVICE_TYPES: LookupOption[] = [
 
 // Agreement type — the contract form the deal runs under.
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
-export const DEFAULT_AGREEMENT_TYPES: LookupOption[] = [
+const DEFAULT_AGREEMENT_TYPES: LookupOption[] = [
   { value: 'cooperation', label: 'Samenwerkingsovereenkomst', color: '#6FA8C4' },
   { value: 'framework',   label: 'Mantelovereenkomst',        color: '#DDA071' },
 ]

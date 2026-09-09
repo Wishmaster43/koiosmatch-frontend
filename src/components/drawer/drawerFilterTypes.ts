@@ -79,7 +79,7 @@ export interface DrawerDateFilterConfig {
 
 // Toggle row (K-288, linked-notes "Alleen directe notities" switch) — a single
 // boolean, the shared Toggle atom. Minimal by design: no options/all-label, just
-// value + onChange, mirrored on the NoteFeedList section's own Toggle usage.
+// value + onChange, the same Toggle contract the linked-notes tab uses.
 export interface DrawerToggleFilterConfig {
   type: 'toggle'
   key: string

@@ -15,7 +15,7 @@ import type { Id } from '@/types/common'
 // consumer can build both the i18n label (`nav.<entity>`) and the outgoing
 // context-ref `type` from it. `label` is optional — a page may override the
 // default nav-label-derived text; every current publisher omits it.
-export interface EntitySelection {
+interface EntitySelection {
   entity: string
   ids: Id[]
   label?: string

@@ -37,7 +37,7 @@ export interface DriverLicenseItem {
 }
 
 const SEED_NAMES = ['AM', 'A', 'B', 'BE', 'C', 'C1', 'CE', 'D', 'D1', 'DE', 'T']
-export const DEFAULT_DRIVER_LICENSES: DriverLicenseItem[] = SEED_NAMES.map(name => ({ value: name, label: name, icon: null, key: null }))
+const DEFAULT_DRIVER_LICENSES: DriverLicenseItem[] = SEED_NAMES.map(name => ({ value: name, label: name, icon: null, key: null }))
 
 type Named = { name?: string; label?: string; value?: string; icon?: string; key?: string }
 

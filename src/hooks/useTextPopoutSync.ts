@@ -31,7 +31,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 
 // The full message vocabulary — both windows implement the same three cases.
-export type TextPopoutMessage =
+type TextPopoutMessage =
   | { kind: 'hello' }
   | { kind: 'draft'; html: string }
   | { kind: 'saved'; html: string }

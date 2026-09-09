@@ -18,7 +18,7 @@
  * display string, so every consumer stays one `t(key, { ns: 'koios' })` away from
  * full translation with zero new keys.
  */
-export type ModelTierKey = 'fast' | 'smart' | 'max'
+type ModelTierKey = 'fast' | 'smart' | 'max'
 
 // Substring match against the raw model id — never an exact-id map, so a future
 // dated model id (e.g. a new Haiku release) still resolves to its tier.

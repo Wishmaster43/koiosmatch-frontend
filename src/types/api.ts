@@ -23,7 +23,7 @@ export type ModuleKey =
   | 'koios_assist'
 
 /** A role or permission can arrive as a bare string or an object with a name. */
-export type Named = string | { name: string }
+type Named = string | { name: string }
 
 export interface Tenant {
   id: string
@@ -76,7 +76,7 @@ export interface User {
 
 /** A user row in the tenant user-management page (User + its settable icon colour). */
 /** One branch link as GET /users/{id}/branches returns it (name resolved server-side). */
-export interface UserBranchLink {
+interface UserBranchLink {
   location_id: string | number
   name?: string | null
 }

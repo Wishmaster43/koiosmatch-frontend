@@ -15,7 +15,7 @@ import { useCachedLookup } from './useCachedLookup'
 import { lookupNames } from './lookupUtils'
 import { translateSeedLabel } from './lookupSeedI18n'
 
-export const DEFAULT_INDUSTRIES = [
+const DEFAULT_INDUSTRIES = [
   'Werving', 'Uitzendbureau', 'Horeca', 'Logistiek', 'Zorg',
   'IT', 'Bouw', 'Onderwijs', 'Financiën', 'Overig',
 ]

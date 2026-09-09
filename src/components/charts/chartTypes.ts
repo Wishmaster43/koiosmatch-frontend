@@ -14,7 +14,7 @@ export const CHART_SERIES_COLORS = [
 export interface ChartDatum { name: string; value: number; key?: string; color?: string; [k: string]: unknown }
 
 // A recharts tooltip payload entry (only the fields our tooltips read).
-export interface TipEntry {
+interface TipEntry {
   value?: number
   name?: string
   color?: string

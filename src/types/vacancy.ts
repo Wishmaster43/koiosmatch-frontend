@@ -17,7 +17,7 @@ export interface MatchCountState {
 }
 
 /** Owner/recruiter chip on a vacancy row. */
-export interface VacancyOwner {
+interface VacancyOwner {
   id: Id | null
   name: string
   initials: string
@@ -25,7 +25,7 @@ export interface VacancyOwner {
 }
 
 /** A raw job-board channel item (used by base + detail). */
-export interface ApiChannel {
+interface ApiChannel {
   value?: string | number
   // CHANNEL-ICON-1: the stable machine key + icon name so the FE maps publish
   // icons exactly (channelIcons.ts), never a heuristic on the editable label.

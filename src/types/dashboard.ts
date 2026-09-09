@@ -6,7 +6,7 @@
  */
 
 // A distribution/aggregate item (by_status / by_owner / by_funnel / by_stage).
-export interface StatItem {
+interface StatItem {
   value?: string
   status?: string
   key?: string
@@ -38,17 +38,17 @@ export interface DashOpp {
 // KD11 (DASHP36) widget feeds — sales/account-manager dashboard templates.
 // Present only for the matching view-permission; absent entirely (not `[]`)
 // means the block is not shown for this role, mirroring the attention keys.
-export interface ExpiringMatch { id?: string | number; candidate_id?: string | number; candidate_name?: string | null; customer_id?: string | number; customer_name?: string; end_date?: string; [k: string]: unknown }
-export interface StaleVacancy { id?: string | number; title?: string; published_at?: string; [k: string]: unknown }
-export interface KoiosSuggestion { vacancy_id?: string | number; vacancy_title?: string; suggestions_count?: number; [k: string]: unknown }
+interface ExpiringMatch { id?: string | number; candidate_id?: string | number; candidate_name?: string | null; customer_id?: string | number; customer_name?: string; end_date?: string; [k: string]: unknown }
+interface StaleVacancy { id?: string | number; title?: string; published_at?: string; [k: string]: unknown }
+interface KoiosSuggestion { vacancy_id?: string | number; vacancy_title?: string; suggestions_count?: number; [k: string]: unknown }
 // sales_manager only — the tenant-wide "where does business come from" breakdown.
-export interface CustomerByOwner { owner_id?: string | number; name?: string; count?: number; [k: string]: unknown }
+interface CustomerByOwner { owner_id?: string | number; name?: string; count?: number; [k: string]: unknown }
 
-export interface RecentCandidate { name?: string; status_value?: string; role?: string; last_activity_at?: string; [k: string]: unknown }
-export interface RecentApplication { candidate_name?: string; vacancy_title?: string; stage_value?: string; created_at?: string; [k: string]: unknown }
-export interface RecentLead { name?: string; contact_name?: string; status_value?: string; created_at?: string; [k: string]: unknown }
-export interface AiRun { name?: string; ran_at?: string; ok?: boolean; processed?: number; error?: string; [k: string]: unknown }
-export interface Conversation { name?: string; last_message?: string; at?: string; [k: string]: unknown }
+interface RecentCandidate { name?: string; status_value?: string; role?: string; last_activity_at?: string; [k: string]: unknown }
+interface RecentApplication { candidate_name?: string; vacancy_title?: string; stage_value?: string; created_at?: string; [k: string]: unknown }
+interface RecentLead { name?: string; contact_name?: string; status_value?: string; created_at?: string; [k: string]: unknown }
+interface AiRun { name?: string; ran_at?: string; ok?: boolean; processed?: number; error?: string; [k: string]: unknown }
+interface Conversation { name?: string; last_message?: string; at?: string; [k: string]: unknown }
 export interface TimeseriesPoint { name: string; value?: number; [k: string]: unknown }
 
 // K-173 fase 1 — the honest scope the server actually queried (never inferred
@@ -117,7 +117,7 @@ export interface ShiftUnconfirmedRow { schedule_id: string; candidate_id: string
 // K-193 fase 2b D — WhatsApp Web send-queue feed (CONTRACT f293cfec). Presence-based:
 // only present with module whatsapp_web + page.whatsapp; absent otherwise (not `[]`).
 // est_drain_hours null = no device connected (queue cannot drain).
-export interface WaWebQueueNumberRow { number_id: string; label: string | null; rate_limit: number; in_queue: number; est_drain: number | null }
+interface WaWebQueueNumberRow { number_id: string; label: string | null; rate_limit: number; in_queue: number; est_drain: number | null }
 export interface WaWebQueueFeed { in_queue: number; sending: number; failed: number; est_drain_hours: number | null; devices: number; numbers: WaWebQueueNumberRow[] }
 
 // GET /dashboard (single summary call).

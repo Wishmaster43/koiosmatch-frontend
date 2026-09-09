@@ -18,10 +18,10 @@ import { translateSeedList } from './lookupSeedI18n'
 // Index signature added (TAKEN-TOOLBAR-2/MATCHES-TOOLBAR-1): lets this list feed
 // straight into the shared StatusFilterSelect/useStatusFilter, which takes
 // LookupOption[] — a structural-typing requirement only, no runtime change.
-export interface MatchStatus { value: string; label: string; color?: string; is_closed: boolean; [k: string]: unknown }
+interface MatchStatus { value: string; label: string; color?: string; is_closed: boolean; [k: string]: unknown }
 
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
-export const DEFAULT_MATCH_STATUSES: MatchStatus[] = [
+const DEFAULT_MATCH_STATUSES: MatchStatus[] = [
   // M30 (Danny 05-08): label "Actief" — "Open" read as a to-do state; the slug stays
   // `open` (the stable machine key the BE core keys off, labels are tenant-editable).
   { value: 'open',   label: 'Actief',     color: '#6FA8C4', is_closed: false },

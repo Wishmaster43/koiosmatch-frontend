@@ -6,7 +6,7 @@
 
 import api from '@/lib/api'
 
-export interface GeoHit { lat: number; lng: number; label?: string | null }
+interface GeoHit { lat: number; lng: number; label?: string | null }
 
 /** Geocode a free-text location; returns null on empty input, miss, or error. */
 export async function geocodeLocation(query: string, country?: string): Promise<GeoHit | null> {

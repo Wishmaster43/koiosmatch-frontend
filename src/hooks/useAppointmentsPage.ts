@@ -11,7 +11,7 @@ import type { RawVacancyAppointment, VacancyAppointmentRow } from '@/types/vacan
 
 export const APPOINTMENTS_PER_PAGE = 20
 
-export interface AppointmentsPage { rows: VacancyAppointmentRow[]; total: number; page: number; lastPage: number; loading: boolean; error: boolean }
+interface AppointmentsPage { rows: VacancyAppointmentRow[]; total: number; page: number; lastPage: number; loading: boolean; error: boolean }
 
 // Fetch + map one page; `enabled` false (no id / no permission) returns an empty, idle page.
 export function useAppointmentsPage({ queryKey, url, params, page = 1, enabled = true }: {

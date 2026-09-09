@@ -11,7 +11,7 @@ import api, { unwrapList } from '@/lib/api'
 import type { Id } from '@/types/common'
 
 // The list contract's own shape (GET /ai/interview-flows → {data:[{id,name,channel,active}]}).
-export interface InterviewFlowOption { id: Id; name: string; channel?: string; active?: boolean }
+interface InterviewFlowOption { id: Id; name: string; channel?: string; active?: boolean }
 
 const NO_FLOWS: InterviewFlowOption[] = []
 

@@ -8,7 +8,7 @@
 import type { ReactNode } from 'react'
 
 // One selectable value in a report filter group (count shown as a small badge).
-export interface FilterOption {
+interface FilterOption {
   value: string | number
   label?: string
   count?: number

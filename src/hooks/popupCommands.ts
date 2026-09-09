@@ -17,7 +17,7 @@ export const POPUP_COMMANDS = [
   { keys: 'Tab / Shift+Tab', command: 'cycle-focus (within the popup)' },
 ] as const
 
-export interface PopupKeyHandlers {
+interface PopupKeyHandlers {
   // Focus cycle (Tab): only set by useFocusTrap, which knows the focusables.
   focusables?: () => HTMLElement[]
 }

@@ -57,7 +57,7 @@ const senderColor = (m: MessageRow) =>
 // delivered → double grey check, read → double check in the primary colour. The icon
 // SHAPE is the real signal (single vs. double tick) with an aria-label — colour is never
 // the only cue (§6).
-export function DeliveryTicks({ sentAt, deliveredAt, readAt }: { sentAt?: string | null; deliveredAt?: string | null; readAt?: string | null }) {
+function DeliveryTicks({ sentAt, deliveredAt, readAt }: { sentAt?: string | null; deliveredAt?: string | null; readAt?: string | null }) {
   const { t } = useTranslation('candidates')
   if (!sentAt) return null
   const state: 'sent' | 'delivered' | 'read' = readAt ? 'read' : deliveredAt ? 'delivered' : 'sent'

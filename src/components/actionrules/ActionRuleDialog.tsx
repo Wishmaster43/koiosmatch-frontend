@@ -12,7 +12,7 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 import type { ActionRuleDecision } from './actionRuleTypes'
 import Button from '@/components/ui/Button'
 
-export interface ActionRuleDialogProps {
+interface ActionRuleDialogProps {
   open: boolean
   decision: ActionRuleDecision | null | undefined
   onConfirm: () => void

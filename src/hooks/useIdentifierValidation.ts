@@ -24,7 +24,7 @@ export interface IdentifierNotice {
   severity: 'error' | 'warning'
 }
 
-export interface IdentifierValidation {
+interface IdentifierValidation {
   /** The tenant's current behaviour on a mismatch. */
   mode: IdentifierValidationMode
   /** Null when the value is empty or well-formed; otherwise what to show. */

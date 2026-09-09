@@ -18,7 +18,7 @@ export interface FlowPhase {
 }
 
 // One stage tally for a recruiter (key matches FlowPhase.key — shared map).
-export interface RecruiterPhaseCount { key: string; label: string; count: number }
+interface RecruiterPhaseCount { key: string; label: string; count: number }
 
 // ── Vacancies report (GET /reports/vacancies) ────────────────────────────────
 
@@ -37,7 +37,7 @@ export interface VacancyReportRow {
 }
 
 // The summary tile row at the top of the vacancies report.
-export interface VacancyReportSummary {
+interface VacancyReportSummary {
   total: number
   open: number
   filled: number
@@ -127,7 +127,7 @@ export interface MatchTerminationReasonSegment { key: string; value: string; lab
 // Match counts by HelloFlex contract status (MATCH-VOCABULAIRE-1 name). `total`
 // counts matches UNDER CONTRACT — the report total minus the 'none' bucket.
 // `none` explicit since 7925ce15; optional so a cached pre-update response still parses.
-export interface MatchUnderContract { sent: number; active: number; ended: number; none?: number; total: number }
+interface MatchUnderContract { sent: number; active: number; ended: number; none?: number; total: number }
 
 export interface MatchesReportData {
   period: string
@@ -176,13 +176,13 @@ export type ReportPeriod = 'day' | 'week' | 'month'
 // One pipeline status tally. Portie 6 added `value`/`label` ADDITIVELY next to
 // the legacy `status` slug: `value` is the drill XOR param — an "Onbekend"
 // orphan-string bar is a normal, drillable row.
-export interface OutreachStatusCount { status: string; value: string; label: string; count: number }
+interface OutreachStatusCount { status: string; value: string; label: string; count: number }
 
 // One outcome tally, projected over the tenant's outreach_outcomes lookup
 // (zero-count rows included) + the "Geen uitkomst" sentinel so the axis sums to
 // total. `value` (portie 6, additive next to the legacy `outcome`) is the drill
 // XOR param; `share_of_reached` is null while nothing was reached.
-export interface OutreachOutcomeCount { outcome: string; value: string; label: string; count: number; share_of_reached: number | null }
+interface OutreachOutcomeCount { outcome: string; value: string; label: string; count: number; share_of_reached: number | null }
 
 // GET /reports/outreach response. Windowed on `from`/`to` FROM THE RESPONSE;
 // `period` echoes the sibling ?period= preset (null when none was sent).
@@ -229,7 +229,7 @@ export interface WhatsappSegment { value: string; label: string; count: number }
 // One of the ten busiest threads in the period. Carries the candidate name
 // (server-gated, PII-minimised) — NOT a wa_number: the masked number exists only
 // in the per-KPI drill rows (§8/§9).
-export interface WhatsappTopConversation {
+interface WhatsappTopConversation {
   conversation_id: string | number
   candidate: string | null
   message_count: number
@@ -309,14 +309,14 @@ export interface ApplicationStageDurationSegment { value: string; label: string;
 // window). Server sends a `label` per card too — deliberately ignored (§5:
 // labels come from i18n, mirrors WhatsappReportData). `count` is an integer row
 // count for seven cards, a rounded float|null for conversion_pct/avg_days_to_match.
-export interface ApplicationKpiCard { key: string; label?: string; count: number | null }
+interface ApplicationKpiCard { key: string; label?: string; count: number | null }
 
 // INTAKE-IN-APPS-1 (Danny via CMFE 24-08): the intake-appointment numbers land
 // HERE, not on a separate reports.intakes endpoint. Windowed on scheduled_at
 // (is_intake-flagged appointment types), cancelled never counted.
 // `by_recruiter` is the CandidateOwnerSegment shape (appointment owner_id/name);
 // `by_branch` is the ApplicationTopSegment shape (value/label/count, 'none' = no vestiging).
-export interface ApplicationIntakesBlock {
+interface ApplicationIntakesBlock {
   planned: number
   done_in_period: number
   by_recruiter: CandidateOwnerSegment[]
@@ -389,7 +389,7 @@ export interface ConcentrationRow { customer_id: string | null; name: string; co
 // normalisation) and is the drill/advice XOR param — 'none' and a raw orphan uuid
 // (deleted stage, no FK on opportunity_stage_id) are both real, drillable rows.
 // `value_sum` is money (euro), deliberately separate from `count`.
-export interface OpportunityStageSegment {
+interface OpportunityStageSegment {
   key: string
   value: string
   label: string
@@ -402,7 +402,7 @@ export interface OpportunityStageSegment {
 // legacy customer_id/name pair — `customer_id` is NOT always a uuid anymore
 // ('none'/'others' are sentinels); a hard-deleted customer keeps its raw uuid
 // with an "Onbekend" label and must stay drillable.
-export interface OpportunityCustomerSegment {
+interface OpportunityCustomerSegment {
   customer_id: string
   value: string
   name: string
@@ -413,7 +413,7 @@ export interface OpportunityCustomerSegment {
 
 // Pipeline-health tallies. `win_rate` counts DECIDED deals only and is null while
 // nothing is decided (render a placeholder, never a fabricated 0%).
-export interface OpportunityTotals {
+interface OpportunityTotals {
   total: number
   open: number
   won: number
@@ -434,7 +434,7 @@ export interface OpportunityTotals {
 }
 
 // Open deals per expected-close month — the report's only forward-looking slice.
-export interface OpportunityForecastRow { month: string; count: number; value_sum: number }
+interface OpportunityForecastRow { month: string; count: number; value_sum: number }
 
 export interface OpportunitiesReportData {
   // Unlike the sibling reports, the window lives NESTED under `period` here.
@@ -464,12 +464,12 @@ export interface OpportunitiesReportData {
 // (task_statuses.value is not uniqueness-protected); 'none' (NULL/'' folding) and
 // a raw orphan uuid (deleted status) are both real, drillable rows. `is_done`
 // mirrors the flag the summary counts on; `color` comes from the tenant lookup.
-export interface TaskStatusSegment { value: string; label: string; color: string | null; is_done: boolean; count: number }
+interface TaskStatusSegment { value: string; label: string; color: string | null; is_done: boolean; count: number }
 
 // Flag-driven tallies: done/overdue always count via the status `is_done` flag,
 // never a slug. `done_rate` is null while nothing is countable (render a
 // placeholder, never a fabricated 0%).
-export interface TasksReportSummary { open: number; done: number; overdue: number; done_rate: number | null }
+interface TasksReportSummary { open: number; done: number; overdue: number; done_rate: number | null }
 
 export interface TasksReportData {
   period: string
@@ -513,6 +513,6 @@ export interface ThinSegment { value: string; label: string; count: number; colo
 // was computed with. `label` is the server's Dutch label — deliberately not the
 // primary source (DEMO-TAAL/§5): the frontend translates by `key` and falls back
 // to this only when a key has no i18n entry yet.
-export interface ReportsHubCard { key: string; label: string; count: number; report: string; filters: Record<string, unknown> }
+interface ReportsHubCard { key: string; label: string; count: number; report: string; filters: Record<string, unknown> }
 
 export interface ReportsHubData { signals: ReportsHubCard[] }

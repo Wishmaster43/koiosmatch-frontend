@@ -5,13 +5,13 @@
 
 // Stable English keys for the fixed "last login" bucket order — the display
 // label is resolved per-locale via t('report.loginGroups.<key>'), never hardcoded.
-export const LOGIN_GROUP_KEYS = [
+const LOGIN_GROUP_KEYS = [
   'lt7', 'd8to14', 'd15to21', 'd22to30', 'd31to60', 'd61to90', 'gt90', 'never',
 ] as const
 type LoginGroupKey = typeof LOGIN_GROUP_KEYS[number]
 
 // A bucketed chart datum (category name + count).
-export interface ChartDatum { name: string; value: number }
+interface ChartDatum { name: string; value: number }
 // A generic row with arbitrary fields (chart inputs come from many API shapes).
 type Row = Record<string, unknown>
 // Minimal shape needed from i18next's TFunction — just enough to translate a key.

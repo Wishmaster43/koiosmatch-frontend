@@ -15,7 +15,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-export interface PanelPlacement {
+interface PanelPlacement {
   // null = CSS-centered (walkthrough 21-08 POP-UPS 3.4: position never survives
   // a close; only size does). Real numbers appear once the user drags.
   x: number | null

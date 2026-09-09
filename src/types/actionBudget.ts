@@ -7,9 +7,9 @@
  * routes yet (CLAUDE.md §10). Prices are deliberately absent (no staffel PRICES
  * on koios.use surfaces, least privilege) — only usage/allowance/state.
  */
-export type ActionBudgetState = 'ok' | 'warn' | 'blocked'
+type ActionBudgetState = 'ok' | 'warn' | 'blocked'
 
-export interface ActionBudgetUpgradeHint {
+interface ActionBudgetUpgradeHint {
   next_tier_key?: string
   next_tier_label?: string
   // Workflow-run upgrade hints carry a contact CTA string (e.g. mailto:...).

@@ -4,7 +4,7 @@
  */
 import { useAuth } from '../context/AuthContext'
 
-export const DEFAULT_PAGE_SIZE = 500
+const DEFAULT_PAGE_SIZE = 500
 
 // Reads the saved page-size preference of the logged-in user.
 // Fallback: 500 when the field does not exist.

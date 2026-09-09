@@ -11,7 +11,7 @@ import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 
-export type AgentSessionAction = 'pause' | 'resume'
+type AgentSessionAction = 'pause' | 'resume'
 
 // One in-flight action at a time; `onChanged` is the caller's refetch (list + chip).
 // `failMessage` is the host's already-translated fallback for extractApiError (each host owns its namespace).

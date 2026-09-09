@@ -17,7 +17,7 @@ import { useCachedLookup } from '@/lib/useCachedLookup'
 import { translateSeedList } from '@/lib/lookupSeedI18n'
 import { unwrapList } from '@/lib/api'
 
-export interface ApplicationStageOption {
+interface ApplicationStageOption {
   id: string
   value: string
   label: string

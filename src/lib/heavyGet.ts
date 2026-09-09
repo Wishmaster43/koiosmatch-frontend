@@ -29,7 +29,7 @@ const isOutage = (e: unknown) => {
 }
 
 /** Error thrown while an endpoint is cooling down — callers fail soft on it. */
-export class CooldownError extends Error {
+class CooldownError extends Error {
   constructor(url: string) { super(`heavyGet cooldown: ${url}`); this.name = 'CooldownError' }
 }
 

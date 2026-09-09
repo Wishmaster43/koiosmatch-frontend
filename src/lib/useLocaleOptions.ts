@@ -10,8 +10,8 @@ import { useQuery } from '@tanstack/react-query'
 import api, { unwrap } from '@/lib/api'
 
 // Hand-written: the OpenAPI export documents the operation but no 2xx schema.
-export interface LocaleOption { code: string; label: string }
-export interface LocaleOptions { currencies: LocaleOption[]; timezones: LocaleOption[]; languages: LocaleOption[] }
+interface LocaleOption { code: string; label: string }
+interface LocaleOptions { currencies: LocaleOption[]; timezones: LocaleOption[]; languages: LocaleOption[] }
 
 const EMPTY: LocaleOptions = { currencies: [], timezones: [], languages: [] }
 

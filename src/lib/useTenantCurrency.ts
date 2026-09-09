@@ -7,7 +7,7 @@
  */
 import { useAuth } from '@/context/AuthContext'
 
-export const DEFAULT_TENANT_CURRENCY = 'EUR'
+const DEFAULT_TENANT_CURRENCY = 'EUR'
 
 // Reads the active tenant first (tenant switch), then the user's own tenant.
 export function useTenantCurrency(): string {

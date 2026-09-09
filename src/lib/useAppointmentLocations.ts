@@ -17,7 +17,7 @@ import { useCachedLookup } from './useCachedLookup'
 import { translateSeedList } from './lookupSeedI18n'
 import { unwrapList } from '@/lib/api'
 
-export interface AppointmentLocation {
+interface AppointmentLocation {
   value: string
   label: string
   color?: string
@@ -27,7 +27,7 @@ export interface AppointmentLocation {
 
 // Seed defaults — mirror the backend seed (CandidateLookupSeeder) 1:1.
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
-export const DEFAULT_APPOINTMENT_LOCATIONS: AppointmentLocation[] = [
+const DEFAULT_APPOINTMENT_LOCATIONS: AppointmentLocation[] = [
   { value: 'kantoor',     label: 'Kantoor',      color: '#6E8FD6', icon: 'building-2', is_default: true },
   { value: 'online',      label: 'Online',       color: '#79B58E', icon: 'video',      is_default: false },
   { value: 'telefonisch', label: 'Telefonisch',  color: '#DDA071', icon: 'phone',      is_default: false },

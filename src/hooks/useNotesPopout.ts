@@ -71,7 +71,7 @@ type NoteDraftMessage =
 
 // What one in-flight handoff IS — stored verbatim so it is also the wire message
 // (one shape, never a second mapping between state and protocol).
-export type NoteHandoff = { kind: 'draft'; note: NoteDraft } | { kind: 'edit'; noteId: string }
+type NoteHandoff = { kind: 'draft'; note: NoteDraft } | { kind: 'edit'; noteId: string }
 
 // Which record this notes surface belongs to, and which side of the glass it is on.
 export interface NotesPopoutTarget {

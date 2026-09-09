@@ -5,7 +5,7 @@
  */
 import type { LookupOption } from '@/types/common'
 
-export interface LookupHelpers {
+interface LookupHelpers {
   find: (value?: string | null) => LookupOption | undefined
   labelOf: (value?: string | null) => string
   colorOf: (value?: string | null) => string | undefined

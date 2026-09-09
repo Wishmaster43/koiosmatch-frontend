@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { MESSAGING_LANGUAGES } from '@/modules/messagingLanguages'
 import { languageDisplayName, ADDABLE_LANGUAGE_CODES } from '@/lib/languageNames'
 
-export interface MessagingLanguageOption {
+interface MessagingLanguageOption {
   value: string
   label: string
 }

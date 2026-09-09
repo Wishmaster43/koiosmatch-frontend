@@ -15,13 +15,13 @@ import { useCachedLookup } from './useCachedLookup'
 import { lookupNames } from './lookupUtils'
 import { translateSeedLabel } from './lookupSeedI18n'
 
-export const DEFAULT_LANGUAGES = [
+const DEFAULT_LANGUAGES = [
   'Nederlands', 'Engels', 'Duits', 'Frans', 'Spaans', 'Pools', 'Turks',
   'Arabisch', 'Papiaments', 'Portugees', 'Italiaans', 'Roemeens', 'Oekraïens',
 ]
 
 // "slecht → zeer goed" + Moedertaal (sluit aan op bestaande data).
-export const DEFAULT_LANGUAGE_LEVELS = ['Slecht', 'Matig', 'Goed', 'Zeer goed', 'Moedertaal']
+const DEFAULT_LANGUAGE_LEVELS = ['Slecht', 'Matig', 'Goed', 'Zeer goed', 'Moedertaal']
 
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
 const mapNames = (res: AxiosResponse): string[] | null => {

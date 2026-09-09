@@ -38,7 +38,7 @@ const inFlight = new Map<string, Promise<AxiosResponse>>()
 // the CURRENT tenant, mirroring how the axios interceptor derives X-Tenant.
 const tenantCacheKey = (url: string) => `${getActiveTenantId() ?? 'none'}:${url}`
 
-export interface CachedLookupResult<T> {
+interface CachedLookupResult<T> {
   data: T
   loading: boolean
   invalidate: () => void

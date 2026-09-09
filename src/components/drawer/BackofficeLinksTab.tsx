@@ -32,7 +32,7 @@ type BackofficeSystem = 'helloflex' | 'shiftmanager'
 // generic sync endpoint both systems share (paths['/api/sync/{entity}/{id}']).
 type SyncBody = operations['postSyncEntityId']['requestBody']['content']['application/json']
 
-export interface BackofficeLinksTabProps {
+interface BackofficeLinksTabProps {
   // URL plural token the generic sync endpoint expects: candidates/customers/
   // locations/departments/contacts/matches (§0.10 endpoint naming).
   entity: string

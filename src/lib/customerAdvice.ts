@@ -7,9 +7,9 @@
  */
 import type { Customer } from '@/types/customer'
 
-export type CustomerAdviceAction = 'follow_up' | 'none'
+type CustomerAdviceAction = 'follow_up' | 'none'
 
-export interface CustomerAdviceRule {
+interface CustomerAdviceRule {
   action: CustomerAdviceAction
   reasonKey: string
 }

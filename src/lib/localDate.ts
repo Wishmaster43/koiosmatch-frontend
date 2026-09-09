@@ -79,7 +79,7 @@ export function formatDateTimeStr(dt?: string | number | Date | null): string {
 // Month + year label in the active locale: 'long' = "september 2026" (invoice
 // pickers), 'short' = "sep 2026" (CV timelines), 'compact' = "sep 26" (roster
 // month chips). One helper so no screen hand-rolls its own month label.
-export type MonthYearVariant = 'long' | 'short' | 'compact'
+type MonthYearVariant = 'long' | 'short' | 'compact'
 export function formatMonthYear(d: Date, locale: string, variant: MonthYearVariant = 'long'): string {
   const opts: Intl.DateTimeFormatOptions =
     variant === 'long' ? { month: 'long', year: 'numeric' }

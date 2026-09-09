@@ -20,7 +20,7 @@ import { unwrapList } from '@/lib/api'
 import { translateSeedList } from './lookupSeedI18n'
 
 // Seed defaults (slugs English/stable; labels per-tenant, normally from the API).
-export const DEFAULT_LAST_CONTACT_TYPES: LookupOption[] = [
+const DEFAULT_LAST_CONTACT_TYPES: LookupOption[] = [
   { value: 'email',    label: 'Email' },
   { value: 'phone',    label: 'Telefonisch' },
   { value: 'whatsapp', label: 'WhatsApp' },

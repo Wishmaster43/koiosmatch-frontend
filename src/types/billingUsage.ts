@@ -39,21 +39,21 @@ import type { BillingPackageKey, BillingUsageAiMeter, BillingUsageWorkflowMeter,
 // GET /ai/koios/usage?period=today|month — own-organisation Koios AI usage.
 // BREAKING (CREDITS-1): totals.cost -> totals.amount; per_activity[].cost -> amount;
 // forecast.avg_daily_cost/projected_month_cost -> avg_daily_amount/projected_month_amount.
-export interface KoiosUsageTotals {
+interface KoiosUsageTotals {
   calls?: number
   input_tokens?: number
   output_tokens?: number
   amount?: number
   currency?: string
 }
-export interface KoiosUsagePerActivity {
+interface KoiosUsagePerActivity {
   activity: string
   calls?: number
   input_tokens?: number
   output_tokens?: number
   amount?: number
 }
-export interface KoiosUsageForecast {
+interface KoiosUsageForecast {
   avg_daily_amount?: number
   projected_month_amount?: number
   currency?: string
@@ -202,7 +202,7 @@ export interface AdminUsageDetailsRow {
 }
 // Month aggregate the server sends alongside the groups, so a bounded/scrolled
 // view still foots to the same total as the block above it.
-export interface AdminUsageDetailsTotals { tokens?: number; requests?: number; cost?: number }
+interface AdminUsageDetailsTotals { tokens?: number; requests?: number; cost?: number }
 export interface AdminUsageDetailsResponse {
   group_by: AdminUsageDetailsAxis
   month: string
@@ -222,7 +222,7 @@ export interface AdminUsageDetailsResponse {
 // legacy K0-D fields (ai.tokens/requests, whatsapp, planning, connectors,
 // workflow_tokens) stay unchanged alongside it. `history` carries the same
 // per-month shape (see AdminUsageMonth), oldest constraints unchanged.
-export interface AdminUsageMonth {
+interface AdminUsageMonth {
   month: string
   ai?: { tokens?: number; requests?: number; cost?: number }
   workflow_tokens?: { total_module_runs?: number; per_module?: Record<string, number> }
@@ -264,7 +264,7 @@ export interface AdminTenantUsage {
 // (Danny: "vul beiden en toon ze hier"), ModulesSettings' "Maandbudgetten" card.
 // HAND-WRITTEN: no 2xx schema yet for this route (CLAUDE.md §10).
 // BillingPackageKey lives in ./billingTiers (one source, re-exported above).
-export interface BillingBudgetValue {
+interface BillingBudgetValue {
   // EUR purchase/sale cost per unit — Caption-only display next to the two
   // editable budget fields, never itself editable here (MARGEGEHEIM stays
   // superadmin-only insight, same convention as the tenant-usage screen).
@@ -296,7 +296,7 @@ export interface BillingBudgetEntry {
 // 24-08, cited verbatim: "tenant_users: {<tenant_id>: {package, active_users}}").
 // No generated 2xx schema exists yet for this route (CLAUDE.md §10) so this is
 // hand-written from the brief, same convention as the rest of this file.
-export interface BillingTenantUsers {
+interface BillingTenantUsers {
   package?: BillingPackageKey
   active_users?: number
 }

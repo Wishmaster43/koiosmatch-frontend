@@ -8,7 +8,7 @@ export interface WaCandidate { first_name?: string; last_name?: string; [k: stri
 
 // A customer contact as referenced by a message (CONTACT-CONVERSATION-START) —
 // the thread's other possible owner besides a candidate, mutually exclusive.
-export interface WaCustomerContact {
+interface WaCustomerContact {
   id: string | number
   first_name?: string | null
   last_name?: string | null
@@ -28,7 +28,7 @@ export interface WaMessageType {
 }
 
 // The user who sent a message (null on the row itself = automatic/system send).
-export interface WaSentByUser { id: string | number; name?: string | null }
+interface WaSentByUser { id: string | number; name?: string | null }
 
 // One WhatsApp message in the feed (WHATSAPP-BERICHTEN-WIRE-1, K-194 — full wire
 // shape of WhatsappDashboardController::messages()).
@@ -92,7 +92,7 @@ export interface WaEscalation {
 // One point on the inbound/outbound activity chart.
 // K-197: each day may carry a per-channel split for the stacked channel chart
 // (older envelopes omit it; the chart then stays hidden).
-export type WaChannelKey = 'waba' | 'waba_coex' | 'wa_web'
+type WaChannelKey = 'waba' | 'waba_coex' | 'wa_web'
 export interface WaActivityDatum {
   date: string; inbound?: number; outbound?: number
   by_channel?: Partial<Record<WaChannelKey, { inbound?: number; outbound?: number }>>
@@ -126,7 +126,7 @@ export interface WhatsappConnectionRow {
 
 // The KPI stats block.
 // K-197: today's per-channel counts, all three channels always present, zero-filled.
-export interface WaChannelStat { channel: WaChannelKey | string; label?: string; sent?: number; received?: number; failed?: number }
+interface WaChannelStat { channel: WaChannelKey | string; label?: string; sent?: number; received?: number; failed?: number }
 
 export interface WaStats {
   messages_today?: number

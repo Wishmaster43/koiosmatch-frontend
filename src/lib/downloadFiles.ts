@@ -1,5 +1,5 @@
 // One shared multi-file download path (candidates + customers document lists).
-export interface DownloadableFile { url?: string | null; name?: string | null }
+interface DownloadableFile { url?: string | null; name?: string | null }
 
 // Trigger a single browser download via a transient, off-DOM anchor element.
 function triggerDownload(file: DownloadableFile): void {

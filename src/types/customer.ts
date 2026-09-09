@@ -344,7 +344,7 @@ export interface Customer {
 }
 
 /** A tenant lookup status as embedded on a location/department/contact (SUB-STATUS-1). */
-export interface ApiStatusRef { value?: string; label?: string; color?: string }
+interface ApiStatusRef { value?: string; label?: string; color?: string }
 
 /** Raw API contact (read defensively). CustomerContactResource sends first_name/last_name + a composed `name`. */
 export interface ApiContact {

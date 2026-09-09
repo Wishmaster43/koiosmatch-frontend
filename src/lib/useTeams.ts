@@ -35,7 +35,7 @@ export interface TeamOption {
 }
 
 /** The four UI states a picker has to render, plus the options themselves. */
-export interface TeamsState {
+interface TeamsState {
   teams: TeamOption[]
   loading: boolean
   error: boolean

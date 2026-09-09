@@ -6,7 +6,7 @@
  */
 import { useCustomFields } from './useCustomFields'
 
-export interface VacancyFieldDef {
+interface VacancyFieldDef {
   id?: string | number
   key: string
   label: string

@@ -76,7 +76,7 @@ interface LookupsValue {
 // Slugs are English/stable (they match the backend); labels/colours are
 // per-tenant configurable and normally come from GET /settings/candidate-lookups.
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
-export const DEFAULT_CANDIDATE_TYPES: LookupItem[] = [
+const DEFAULT_CANDIDATE_TYPES: LookupItem[] = [
   { value: 'on_call',     label: 'Oproepkracht',  color: '#6E8FD6' },
   { value: 'freelance',   label: 'ZZP',           color: '#5FB0AC' },
   { value: 'payroll',     label: 'Payroll',       color: '#A98AD1' },
@@ -92,7 +92,7 @@ export const DEFAULT_CANDIDATE_TYPES: LookupItem[] = [
 // Phase = relationship lifecycle (single value), seed Lead → Candidate. NEW axis
 // (model v2, split out of the old "status"). Lead → Candidate via automation.
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
-export const DEFAULT_PHASES: LookupItem[] = [
+const DEFAULT_PHASES: LookupItem[] = [
   { value: 'lead',      label: 'Lead',      color: '#94A3B8', is_default: true },
   { value: 'candidate', label: 'Kandidaat', color: '#79B58E' },
 ]

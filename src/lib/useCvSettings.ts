@@ -10,16 +10,16 @@ import { useAllSettings, getJsonSetting, saveSettingsKeys } from './settings/use
 
 // Where a section renders on the generated CV: the tinted sidebar column, the
 // main (white) column, or — for `summary` only — inline in the page header.
-export type CvSectionPlacement = 'sidebar' | 'main' | 'header'
+type CvSectionPlacement = 'sidebar' | 'main' | 'header'
 
 // One toggleable section of the generated CV. `label` is a LEGACY display
 // fallback only (a tenant may already have a saved blob carrying the old
 // hardcoded English label) — the live label always comes from the
 // `candidates:cv.<id>` i18n key, never this stored string (§5 i18n fix).
-export interface CvSection { id: string; label: string; enabled: boolean; placement: CvSectionPlacement }
+interface CvSection { id: string; label: string; enabled: boolean; placement: CvSectionPlacement }
 
 // Persisted CV branding + section configuration.
-export interface CvSettings {
+interface CvSettings {
   primaryColor: string
   secondaryColor: string
   logoUrl: string | null

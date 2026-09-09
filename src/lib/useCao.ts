@@ -24,7 +24,7 @@ import type { LookupOption } from '@/types/common'
 import { unwrapList } from '@/lib/api'
 
 // Seed defaults mirror the backend seed (healthcare CAOs); labels are tenant-facing.
-export const DEFAULT_CAO: LookupOption[] = [
+const DEFAULT_CAO: LookupOption[] = [
   { value: 'vvt', label: 'VVT' },
   { value: 'ziekenhuizen', label: 'Ziekenhuizen' },
   { value: 'ggz', label: 'GGZ' },

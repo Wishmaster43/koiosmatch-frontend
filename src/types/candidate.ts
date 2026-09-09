@@ -40,7 +40,7 @@ export interface CandidateStats {
 }
 
 /** Koios AI advice precomputed server-side (background job). */
-export interface CandidateAdvice {
+interface CandidateAdvice {
   action?: string
   label?: string
   reason?: string
@@ -68,7 +68,7 @@ export interface CandidateBranch {
 /** Channel consent (AVG): per-channel opt-in flag + the moment it was recorded.
  * Backend contract (C-11): nested under `consent`; WhatsApp/e-mail default true
  * (operational opt-out), newsletter false (opt-in). `_consent_at` is server-stamped. */
-export interface CandidateConsent {
+interface CandidateConsent {
   whatsapp_opt_in: boolean
   email_opt_in: boolean
   newsletter_opt_in: boolean
@@ -293,14 +293,14 @@ export interface Candidate {
 /** PDOK geocode provenance (CAND-PDOK-GEOCODE-META-1): when/by whom the last geocode
  * was REQUESTED, and when the coordinates were last WRITTEN (the automatic
  * address-change path also stamps updatedAt, without a requester). */
-export interface CandidateGeocode {
+interface CandidateGeocode {
   requestedAt: string | null
   requestedBy: string | null
   updatedAt: string | null
 }
 
 /** A raw match item as the API nests it under candidate.matches. */
-export interface ApiCandidateMatch {
+interface ApiCandidateMatch {
   vacancyTitle?: string
   vacancy?: { id?: Id; title?: string; url?: string }
   vacancy_id?: Id

@@ -5,7 +5,7 @@
  */
 
 // One outgoing edge of a step: a target step id + an optional edge filter.
-export interface StepConnection { target?: string | number | null; filters?: unknown; source_handle?: string; target_handle?: string; label?: string | null }
+interface StepConnection { target?: string | number | null; filters?: unknown; source_handle?: string; target_handle?: string; label?: string | null }
 
 // A normalized step in the editor graph.
 export interface WorkflowStep {
@@ -19,7 +19,7 @@ export interface WorkflowStep {
 }
 
 // The last-run summary shown on a workflow card.
-export interface WorkflowLastRun { time?: string; ok?: boolean; candidates?: number; error?: string; [k: string]: unknown }
+interface WorkflowLastRun { time?: string; ok?: boolean; candidates?: number; error?: string; [k: string]: unknown }
 
 // One row of a workflow's parent/child tree (WF-RELATIONS-FE-1,
 // GET /workflows/{id}/relations → { parents: [...], children: [...] }).
@@ -79,7 +79,7 @@ export interface Workflow {
 }
 
 // ── Raw API shapes (pre-normalize / post-denormalize) — deliberately permissive ──
-export interface RawConnection { target?: unknown; filters?: unknown; [k: string]: unknown }
+interface RawConnection { target?: unknown; filters?: unknown; [k: string]: unknown }
 export interface RawStep {
   id?: string | number
   module_type?: string

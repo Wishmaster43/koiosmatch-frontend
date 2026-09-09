@@ -7,10 +7,10 @@
  * surfaces lost their tint. The constants are the ONE house pair; passing an
  * ad-hoc percentage elsewhere is a finding.
  */
-export const TINT_BG = 10
-export const TINT_BG_ACTIVE = 16
+const TINT_BG = 10
+const TINT_BG_ACTIVE = 16
 export const TINT_BORDER = 33
-export const TINT_BORDER_ACTIVE = 50
+const TINT_BORDER_ACTIVE = 50
 
 // A translucent tint of `color` at `pct` percent — works for hex AND var() tokens.
 export const tint = (color: string, pct: number): string =>
@@ -28,7 +28,7 @@ export const tintBorder = (color: string, active = false): string =>
 // accent, on the 10% AND 16% tints over --bg and --surface, in BOTH themes:
 // 45% is the highest share that clears WCAG 4.5:1 everywhere (light worst 5.38,
 // dark worst 6.67 — 60%, the old QuickViewToggle recipe, failed accent at 3.75).
-export const TINT_INK = 45
+const TINT_INK = 45
 
 // The ONE ink for text sitting on its own tint (chips, pills, soft variants).
 // The raw colour itself reads 2.4-3.0:1 there — the herhaal-slotaudit measured

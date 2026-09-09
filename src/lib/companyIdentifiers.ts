@@ -31,7 +31,7 @@
 export type IdentifierKind = 'coc' | 'vat'
 
 /** Outcome of one check. `unverifiable` = we could not resolve a rule, never a failure. */
-export type IdentifierStatus = 'empty' | 'valid' | 'invalid' | 'unverifiable'
+type IdentifierStatus = 'empty' | 'valid' | 'invalid' | 'unverifiable'
 
 /** Tenant behaviour on a mismatch — the `company_identifier_validation` setting. */
 export type IdentifierValidationMode = 'warn' | 'block'
@@ -49,7 +49,7 @@ export const IDENTIFIER_VALIDATION_SETTING = 'company_identifier_validation'
  */
 export const DEFAULT_IDENTIFIER_VALIDATION_MODE: IdentifierValidationMode = 'warn'
 
-export interface IdentifierResult {
+interface IdentifierResult {
   status: IdentifierStatus
   /** ISO-2 the rule was resolved for; null when no rule could be resolved. */
   countryCode: string | null

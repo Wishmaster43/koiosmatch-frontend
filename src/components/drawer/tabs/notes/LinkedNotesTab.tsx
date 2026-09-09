@@ -1,6 +1,6 @@
 /**
  * LinkedNotesTab — K-288 (Danny 04-09, relayed): "Gekoppelde notities" as its
- * OWN subtab under Communicatie, not the inline section NoteFeedList renders
+ * OWN subtab under Communicatie, not the retired inline NoteFeedList section
  * today. Same underlying cross-source feed (useNoteFeed) and the same row
  * shape (LinkedNoteRow's FeedRow/SourceRef, §11 — nothing duplicated), plus
  * two things the inline section never had: a source-type filter and a per-row
@@ -18,7 +18,7 @@
  * useNoteFeed, which refetches page 1, so a filtered view never shows "5 of the
  * 25 loaded rows". "Alleen directe notities" moved INTO the filter panel too, as a
  * `type: 'toggle'` row (DrawerFilterMenu, K-288) — same honest-empty-state
- * behaviour as the NoteFeedList section it supersedes: ON shows nothing (this
+ * behaviour as the retired NoteFeedList section: ON shows nothing (this
  * feed only ever carries `is_direct:false` rows by construction), OFF shows
  * the linked rows.
  */
@@ -50,7 +50,7 @@ interface LinkedNotesTabProps {
   entity: NoteFeedEntity
   id: Id | null | undefined
   // Customer sub-entity principal (location/department/contact feed routes,
-  // CMBE 64d976ff) — `id` is then the OWNING customer's id (mirrors NoteFeedList).
+  // CMBE 64d976ff) — `id` is then the OWNING customer's id.
   sub?: NoteFeedSubScope
 }
 
@@ -106,7 +106,7 @@ export default function LinkedNotesTab({ entity, id, sub }: LinkedNotesTabProps)
       </div>
       {/* "Alleen directe notities" ON: this feed only ever carries is_direct:false
           rows by construction (only_linked=1 below), so honesty means the empty
-          state — never a fake filtered list (mirrors NoteFeedList's own rule). */}
+          state — never a fake filtered list. */}
       {onlyDirect ? (
         <Caption as="span">{t('notes.feed.empty')}</Caption>
       ) : (

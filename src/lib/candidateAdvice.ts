@@ -11,15 +11,15 @@
  */
 import type { Candidate } from '@/types/candidate'
 
-export type CandidateAdviceAction = 'contact' | 'plan_intake' | 'add_to_pool' | 'none'
+type CandidateAdviceAction = 'contact' | 'plan_intake' | 'add_to_pool' | 'none'
 
-export interface CandidateAdviceRule {
+interface CandidateAdviceRule {
   action: CandidateAdviceAction
   reasonKey: string
   reasonParams?: Record<string, string | number>
 }
 
-export interface CandidateAdviceOptions {
+interface CandidateAdviceOptions {
   staleMonths: number
   entryPhase: string
   isBlacklist: boolean

@@ -15,7 +15,7 @@ import { useCachedLookup } from './useCachedLookup'
 import { translateSeedList } from './lookupSeedI18n'
 import { unwrapList } from '@/lib/api'
 
-export interface PoolItem { id: string; name: string; color?: string | null }
+interface PoolItem { id: string; name: string; color?: string | null }
 
 interface PoolsLookupData { pools: string[]; poolItems: PoolItem[] }
 const FALLBACK: PoolsLookupData = { pools: [], poolItems: [] }

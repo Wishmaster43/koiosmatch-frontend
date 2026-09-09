@@ -25,7 +25,7 @@ import { unwrapList } from '@/lib/api'
 import { getFlagEmoji } from './countries'
 import { translateSeedLabel } from './lookupSeedI18n'
 
-export const DEFAULT_NATIONALITIES = [
+const DEFAULT_NATIONALITIES = [
   'Nederlands', 'Belgisch', 'Duits', 'Frans', 'Brits', 'Pools', 'Turks',
   'Marokkaans', 'Surinaams', 'Antilliaans', 'Overig',
 ]

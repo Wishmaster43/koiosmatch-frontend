@@ -5,7 +5,7 @@
  */
 import type { TFunction } from 'i18next'
 
-export interface FilterGroupConfig {
+interface FilterGroupConfig {
   customerLabelKey: string // e.g. 'departments.filters.customer'
   statusLabelKey: string // e.g. 'departments.filters.locationStatus'
   customerFieldKey: string // e.g. 'customer_id'

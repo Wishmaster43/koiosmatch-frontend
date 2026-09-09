@@ -55,9 +55,9 @@ export function isInsideDropdownPortal(target: Node | null): boolean {
 
 // A plain (serialisable, stable-shape) copy of the anchor's DOMRect — viewport
 // coordinates, exactly what `position: fixed` consumes directly.
-export interface AnchorRect { top: number; bottom: number; left: number; right: number; width: number }
+interface AnchorRect { top: number; bottom: number; left: number; right: number; width: number }
 
-export interface DropdownPlacement {
+interface DropdownPlacement {
   openUp: boolean
   maxHeight: number
   // Null until the anchor has been measured at least once (menu closed, or the

@@ -19,9 +19,9 @@ import type { Id } from '@/types/common'
 
 // Structural match for the shared NotesTab's NoteItem (typed fields + open index).
 // action_items (X-34): persisted panel items, returned on read, omitted on write when absent.
-export interface EntityNote { type?: string; title?: string; author?: string; text?: string; body?: string; created_at?: string; action_items?: NoteActionItemWire[] | null; [k: string]: unknown }
+interface EntityNote { type?: string; title?: string; author?: string; text?: string; body?: string; created_at?: string; action_items?: NoteActionItemWire[] | null; [k: string]: unknown }
 
-export interface UseEntityNotesResult {
+interface UseEntityNotesResult {
   notes: EntityNote[]
   loading: boolean
   error: boolean

@@ -1,9 +1,8 @@
 /**
  * LinkedNoteRow — the ONE note-feed row shape (NOTITIE-REFERENTIE: type chip +
- * author + date + source link), shared by NoteFeedList (the frozen candidate/
- * customer "Linked notes" section, read-only) and LinkedNotesTab (K-288, the new
- * Communicatie subtab, which adds a pencil/pop-out action cluster). Pulled out
- * of NoteFeedList.tsx so neither host re-implements the row (§11).
+ * author + date + source link), rendered by LinkedNotesTab (K-288, the
+ * Communicatie subtab with its pencil/pop-out action cluster). First extracted
+ * from the retired inline NoteFeedList section so no host re-implements the row (§11).
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -54,7 +53,7 @@ interface FeedRowProps {
   noteTypes: { value: string; label: string; color?: string | null }[]
   // LinkedNotesTab-only (K-288): passing this turns on the pencil/pop-out action
   // cluster and calls back after a successful save so the feed refetches.
-  // NoteFeedList never passes it — its rows stay exactly as before, read-only.
+  // A host that omits it renders the row read-only.
   onReload?: () => void
 }
 

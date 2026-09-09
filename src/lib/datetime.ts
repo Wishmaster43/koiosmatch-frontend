@@ -128,7 +128,7 @@ export function daysUntilBirthday(dob: DateInput, now: Date = new Date()): numbe
   return Math.round((next.getTime() - today.getTime()) / 86400000)
 }
 
-export type RelativeAgeUnit = 'days' | 'weeks' | 'months' | 'years'
+type RelativeAgeUnit = 'days' | 'weeks' | 'months' | 'years'
 
 // PDF-VACATURES point 4 (Danny 14-08): the age column shows a plain day count
 // (no unit letter, no week/month/year bucketing) — whole days since `value`,

@@ -22,7 +22,7 @@ import { unwrapList } from '@/lib/api'
 
 export type Modality = 'office' | 'remote' | 'phone'
 
-export interface AppointmentType {
+interface AppointmentType {
   value: string
   label: string
   color?: string
@@ -38,7 +38,7 @@ export interface AppointmentType {
 
 // Seed defaults — mirror the intended backend seed; slugs stable, labels tenant-facing.
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
-export const DEFAULT_APPOINTMENT_TYPES: AppointmentType[] = [
+const DEFAULT_APPOINTMENT_TYPES: AppointmentType[] = [
   { value: 'intake_flex', label: 'Intake Flex',       color: '#6E8FD6', icon: '📋', default_duration_min: 30, default_modality: 'office', is_intake: true, is_default: true, is_default_for_application: false },
   { value: 'intake_deta', label: 'Intake Detachering', color: '#8B5CF6', icon: '📋', default_duration_min: 45, default_modality: 'office', is_intake: true, is_default: false, is_default_for_application: false },
   { value: 'intake_online', label: 'Intake online',    color: '#19A5CA', icon: '💻', default_duration_min: 30, default_modality: 'remote', is_intake: true, is_default: false, is_default_for_application: false },

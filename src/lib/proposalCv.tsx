@@ -12,9 +12,9 @@ import type { CvCandidate, CvSettings, TranslateFn } from '@/pages/candidates/sh
 
 // 'proposal' = redacted (name visible, contact hidden — the default a tenant offers
 // when proposing to a customer); 'full' = the unredacted house-style CV.
-export type ProposalCvVariant = 'proposal' | 'full'
+type ProposalCvVariant = 'proposal' | 'full'
 
-export interface BuildProposalCvBlobArgs {
+interface BuildProposalCvBlobArgs {
   candidate: CvCandidate
   settings?: CvSettings
   locale?: string

@@ -11,7 +11,7 @@ export interface AiItem { id?: string | number; name?: string; body?: string; ve
 export interface AiKnowledgeLookupItem { value: string; label: string }
 
 // The recruiter/manager user an agent mirrors (AI-AGENTS-2: one agent per user).
-export interface AiAgentUser { id: string | number; name?: string | null }
+interface AiAgentUser { id: string | number; name?: string | null }
 
 // The tenant-configurable interview design an agent carries (AI-AGENTS-3). `statuses`
 // is the ordered lifecycle key list; `output_fields` maps a dossier field name to

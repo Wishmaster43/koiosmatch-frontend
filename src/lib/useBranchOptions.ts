@@ -24,7 +24,7 @@ export interface BranchOption { value: string; label: string }
 
 // BRANCH-FILTER-NO-BRANCH-1: the sentinel the backend understands as "rows
 // without a branch" (?branch_id[]=none) — combinable with real ids as a union.
-export const NO_BRANCH_VALUE = 'none'
+const NO_BRANCH_VALUE = 'none'
 
 // Branch filter options narrowed to the signed-in user's own scope; an empty branch_ids means unrestricted, not zero branches (see file header).
 export function useBranchOptions(): BranchOption[] {

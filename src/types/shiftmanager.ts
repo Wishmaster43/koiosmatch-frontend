@@ -72,7 +72,7 @@ export interface SmLocationRow {
 export interface ShiftSeries { key: string; color: string }
 
 // One selectable location in the shifts filter options.
-export interface ShiftLocationOption { id: string | number; name: string; customer?: string; [k: string]: unknown }
+interface ShiftLocationOption { id: string | number; name: string; customer?: string; [k: string]: unknown }
 
 // The filter options returned by /sm_reports/shifts-filter-options.
 export interface ShiftFilterOptions { job_types: string[]; locations: ShiftLocationOption[] }
@@ -99,7 +99,7 @@ export interface ShiftBar {
 }
 
 // A right-panel filter group (shifts charts + orders table).
-export interface ShiftFilterOption { value: string; label: string; count?: number }
+interface ShiftFilterOption { value: string; label: string; count?: number }
 export interface ShiftFilterGroup {
   key: string
   label: string
@@ -113,7 +113,7 @@ export interface ShiftFilterGroup {
 }
 
 // An invited candidate on a shift/order row.
-export interface OrderInvite {
+interface OrderInvite {
   id?: string | number
   candidate?: { first_name?: string; last_name?: string; email?: string; mobile?: string; [k: string]: unknown }
   status?: string

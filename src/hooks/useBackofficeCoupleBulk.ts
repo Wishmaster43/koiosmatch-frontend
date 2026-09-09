@@ -20,7 +20,7 @@ import type { TFunction } from 'i18next'
 import api, { isServiceUnavailable } from '@/lib/api'
 import type { Id } from '@/types/common'
 
-export type CoupleTarget = 'helloflex' | 'shiftmanager'
+type CoupleTarget = 'helloflex' | 'shiftmanager'
 
 interface UseBackofficeCoupleBulkArgs {
   // The /sync/{entity}/bulk path segment ('candidates' | 'customers' | 'matches').

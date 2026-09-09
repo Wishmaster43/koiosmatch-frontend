@@ -15,7 +15,7 @@ import type { LucideIcon } from 'lucide-react'
 import { Building2, Building, Home, Store, Warehouse, Landmark, MapPin, Briefcase } from 'lucide-react'
 
 // slug → lucide component (verified real lucide-react exports).
-export const LOCATION_ICON_MAP: Record<string, LucideIcon> = {
+const LOCATION_ICON_MAP: Record<string, LucideIcon> = {
   'building-2': Building2, building: Building, home: Home, store: Store,
   warehouse: Warehouse, landmark: Landmark, 'map-pin': MapPin, briefcase: Briefcase,
 }

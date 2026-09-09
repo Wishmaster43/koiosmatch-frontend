@@ -36,7 +36,7 @@ import nocoreLogo from '@/assets/integrations/nocore.png'
 import pivotonLogo from '@/assets/integrations/pivoton.png'
 
 // One integration connector shown in the Apps settings.
-export interface AppDef {
+interface AppDef {
   id: string
   label: string
   description: string

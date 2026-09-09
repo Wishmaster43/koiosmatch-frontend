@@ -30,7 +30,7 @@ import { resolveDashboardType } from '../pages/dashboard/templates'
 import type { Tenant, User } from '../types/api'
 
 // The auth user, plus the flat tenant_id the backend includes on the profile.
-export type AuthUser = User & { tenant_id?: string | number | null }
+type AuthUser = User & { tenant_id?: string | number | null }
 type LoginResult = AuthUser | { mfaRequired: boolean; mfaToken: unknown }
 
 export interface AuthContextValue {

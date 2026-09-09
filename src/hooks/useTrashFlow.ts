@@ -13,7 +13,7 @@ import { notifyError, notifySuccess } from '@/lib/notify'
 import { eraseAroundDate, useDeletionLifecycle } from '@/hooks/useDeletionLifecycle'
 
 // The row the preview modal is currently open for (id + human label for the intro).
-export interface TrashTarget { id: string; label: string }
+interface TrashTarget { id: string; label: string }
 
 interface Args {
   /** API path segment, e.g. 'matches' | 'outreach-campaigns' | 'workflows'. */

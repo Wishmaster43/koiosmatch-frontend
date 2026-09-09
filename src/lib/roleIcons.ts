@@ -14,7 +14,7 @@ import {
   GraduationCap, Stethoscope, Truck, Package, Sparkles, BookOpen, Globe, TrendingUp,
 } from 'lucide-react'
 
-export type RoleIcon = ComponentType<{ size?: number; color?: string; style?: CSSProperties }>
+type RoleIcon = ComponentType<{ size?: number; color?: string; style?: CSSProperties }>
 
 // name → lucide component. Names mirror config/roles.php (GET /roles/icons).
 const ICONS: Record<string, RoleIcon> = {
