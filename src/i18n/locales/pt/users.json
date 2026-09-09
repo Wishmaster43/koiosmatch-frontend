@@ -40,7 +40,9 @@
     "user": "Utilizador",
     "recruiter": "Recrutador",
     "manager": "Gestor",
-    "backoffice": "Back office"
+    "backoffice": "Back office",
+    "admin": "Gestão de definições",
+    "readonly": "Apenas leitura"
   },
   "noRoles": "Nenhuma função disponível",
   "rolesLoading": "A carregar funções…",

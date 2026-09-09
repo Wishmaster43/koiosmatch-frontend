@@ -29,7 +29,10 @@ import type { AvailableRole } from './usersParts'
 // The role-assignment modal: a full-set replace via PUT /users/{id}/roles, never a saveable empty set.
 export default function UserRolesModal({ user, roles, onSaved, onClose }: {
   user: ManagedUser
-  // Assignable roles from GET /roles (super_admin/tenant_admin already filtered out).
+  // Assignable roles from GET /roles (the backend hides super_admin; tenant_admin IS
+  // assignable and reads "Admin"). ROL-ADMIN-1's narrower `admin` role is labelled
+  // "Instellingenbeheer" (Danny 09-09, points 21/22: Kelly got that role, saw only
+  // settings/whatsapp/locations and could not manage users or workflows).
   roles: AvailableRole[]
   onSaved: (updated: ManagedUser) => void
   onClose: () => void

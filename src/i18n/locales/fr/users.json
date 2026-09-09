@@ -40,7 +40,9 @@
     "user": "Utilisateur",
     "recruiter": "Recruteur",
     "manager": "Manager",
-    "backoffice": "Back-office"
+    "backoffice": "Back-office",
+    "admin": "Gestion des paramètres",
+    "readonly": "Lecture seule"
   },
   "noRoles": "Aucun rôle disponible",
   "rolesLoading": "Chargement des rôles…",

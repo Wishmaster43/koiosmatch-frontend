@@ -40,7 +40,9 @@
     "user": "Usuario",
     "recruiter": "Reclutador",
     "manager": "Gerente",
-    "backoffice": "Back office"
+    "backoffice": "Back office",
+    "admin": "Gestión de ajustes",
+    "readonly": "Solo lectura"
   },
   "noRoles": "No hay roles disponibles",
   "rolesLoading": "Cargando roles…",

@@ -40,7 +40,9 @@
     "user": "User",
     "recruiter": "Recruiter",
     "manager": "Manager",
-    "backoffice": "Back office"
+    "backoffice": "Back office",
+    "admin": "Settings manager",
+    "readonly": "Read only"
   },
   "noRoles": "No roles available",
   "rolesLoading": "Loading roles…",
