@@ -10,6 +10,7 @@
 import { useState, useEffect, useRef } from 'react'
 import api, { unwrapList } from '@/lib/api'
 import { toCoord } from '@/lib/coords'
+import { mapSearchHit } from '@/lib/searchScore'
 import { canonicalizeToOptions, lookupValue } from '@/lib/lookupUtils'
 import { useLookups } from '@/context/LookupsContext'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
@@ -221,6 +222,7 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
         }
         const mapped: CandidateSearchRow[] = list.map(m => {
           const c = m.candidate ?? {}
+          const scoreData = mapSearchHit(m, c)
           return {
             id: c.id ?? '',
             name: c.name ?? '?',
@@ -229,12 +231,13 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
             status: lookupValue(c.status),
             statusLabel: c.status_label ?? '',
             statusColor: c.status_color ?? null,
-            lat: toCoord(c.lat), lng: toCoord(c.lng),
-            distanceKm: toCoord(m.distance_km),
-            score: typeof m.score === 'number' ? m.score : Number(m.score) || null,
-            criteria: Array.isArray(m.criteria) ? (m.criteria as Criterion[]) : [],
-            aiAdvised: Boolean(m.ai_advised),
-            aiAdviceReason: m.ai_advice_reason ?? null,
+            lat: scoreData.lat,
+            lng: scoreData.lng,
+            distanceKm: scoreData.distanceKm,
+            score: scoreData.score,
+            criteria: scoreData.criteria,
+            aiAdvised: scoreData.aiAdvised,
+            aiAdviceReason: scoreData.aiAdviceReason,
           }
         })
         // Server-sorted best score first (MatchExplorerService::candidateMatches)

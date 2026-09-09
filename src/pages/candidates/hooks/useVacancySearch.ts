@@ -14,6 +14,7 @@ import { useState, useEffect } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import api, { unwrapList } from '@/lib/api'
 import { toCoord } from '@/lib/coords'
+import { mapSearchHit } from '@/lib/searchScore'
 import { canonicalizeToOptions, lookupValue } from '@/lib/lookupUtils'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useLookups } from '@/context/LookupsContext'
@@ -26,7 +27,6 @@ import {
   defaultRadiusKm, matchFunctionOption, sameValues,
 } from './vacancySearchFilters'
 import type { HoursRange, VacancySearchRow } from './vacancySearchFilters'
-import type { Criterion } from '@/components/match/MatchScoreBlock'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
@@ -222,6 +222,7 @@ export function useVacancySearch(candidate: Candidate) {
         // counts, so the filter shows the moment the backend starts sending it.
         const mapped: VacancySearchRow[] = list.map(m => {
           const v = m.vacancy ?? {}
+          const scoreData = mapSearchHit(m, v)
           return {
             id: v.id ?? '',
             title: v.title ?? '',
@@ -229,12 +230,13 @@ export function useVacancySearch(candidate: Candidate) {
             city: v.location_city ?? v.city ?? '',
             status: lookupValue(v.status),
             functionTitle: v.function_title ?? '',
-            lat: toCoord(v.lat), lng: toCoord(v.lng),
-            distanceKm: toCoord(m.distance_km),
-            score: typeof m.score === 'number' ? m.score : Number(m.score) || null,
-            criteria: Array.isArray(m.criteria) ? (m.criteria as Criterion[]) : [],
-            aiAdvised: Boolean(m.ai_advised),
-            aiAdviceReason: m.ai_advice_reason ?? null,
+            lat: scoreData.lat,
+            lng: scoreData.lng,
+            distanceKm: scoreData.distanceKm,
+            score: scoreData.score,
+            criteria: scoreData.criteria,
+            aiAdvised: scoreData.aiAdvised,
+            aiAdviceReason: scoreData.aiAdviceReason,
             employmentType: v.employment_type ?? null,
             hoursMin: toCoord(v.hours_min),
             hoursMax: toCoord(v.hours_max),

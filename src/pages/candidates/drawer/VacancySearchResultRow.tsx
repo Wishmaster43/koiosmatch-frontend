@@ -6,14 +6,12 @@ import { ChevronRight } from 'lucide-react'
 import EntityLink from '@/components/ui/EntityLink'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import ScorePill from '@/components/match/ScorePill'
+import SearchResultRowFrame from '@/components/drawer/SearchResultRowFrame'
 import { Mono, Caption, SectionTitle } from '@/components/ui/typography'
 import { useNumberFormat } from '@/lib/formatters'
 import { formatRange } from './vacancySearchFormat'
-import type { CSSProperties } from 'react'
 import type { VacancySearchRow } from '../hooks/useVacancySearch'
 import type { Id } from '@/types/common'
-
-const rowStyle: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '8px 10px', borderRadius: 8, cursor: 'pointer' }
 
 export default function VacancySearchResultRow({ row, isSelected, onSelect }: {
   row: VacancySearchRow; isSelected: boolean; onSelect: (id: Id) => void
@@ -25,13 +23,7 @@ export default function VacancySearchResultRow({ row, isSelected, onSelect }: {
     // button+anchor, and interactive-inside-interactive is invalid HTML).
     // Danny 23-07: row click = summary card HERE; the title link/icon (Match-tab
     // style: primary name in-app, trailing icon new tab) navigates instead.
-    <div role="button" tabIndex={0}
-      onClick={() => onSelect(row.id)}
-      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(row.id) } }}
-      style={{ ...rowStyle, width: '100%',
-        background: isSelected ? 'var(--color-primary-bg)' : 'transparent' }}
-      onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'var(--hover-bg)' }}
-      onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}>
+    <SearchResultRowFrame isSelected={isSelected} onSelect={() => onSelect(row.id)}>
       <div style={{ minWidth: 0 }}>
         {/* Title clicks must not ALSO flip the summary selection; the AI mark
             signals a Koios-advised match (MATCH-EXPLORER-1 fase 2+3). */}
@@ -85,6 +77,6 @@ export default function VacancySearchResultRow({ row, isSelected, onSelect }: {
             EntityLink's title button uses, so it reads as one affordance family. */}
         <ChevronRight size={14} strokeWidth={3} aria-hidden="true" style={{ color: 'var(--color-primary-text)' }} />
       </div>
-    </div>
+    </SearchResultRowFrame>
   )
 }

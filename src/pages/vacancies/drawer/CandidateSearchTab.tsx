@@ -9,7 +9,6 @@
  * SAME GeoSearchShell (trigger pills, active-filter chips, radius chrome, map,
  * results) instead of two hand-drifted layouts.
  */
-import type { CSSProperties } from 'react'
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw, X, ChevronRight } from 'lucide-react'
@@ -21,6 +20,7 @@ import { useNumberFormat } from '@/lib/formatters'
 // the static import used to pull it into the page chunk via the drawer's tab list (§9).
 const RadiusMap = lazy(() => import('@/components/map/RadiusMap'))
 import DrillPager from '@/components/drawer/DrillPager'
+import SearchResultRowFrame from '@/components/drawer/SearchResultRowFrame'
 import EntityLink from '@/components/ui/EntityLink'
 import Button from '@/components/ui/Button'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
@@ -46,8 +46,6 @@ import { notify, notifyError } from '@/lib/notify'
 import { toCoord } from '@/lib/coords'
 import { useAuth } from '@/context/AuthContext'
 import type { VacancyDetail } from '@/types/vacancy'
-
-const rowStyle: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '8px 10px', borderRadius: 8, cursor: 'pointer' }
 
 // Thin container for the live scored candidate search (see file docblock above):
 // all data comes from useCandidateSearch, rendered through the shared GeoSearchShell.
@@ -289,12 +287,7 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
           // (Match-tab style — primary name opens in-app, trailing icon a new tab),
           // and interactive-inside-interactive is invalid HTML. Row click selects
           // the summary card; the title link/icon navigate instead.
-          <div role="button" tabIndex={0}
-            onClick={() => selectId(r.id)}
-            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectId(r.id) } }}
-            style={{ ...rowStyle, width: '100%', background: isSelected ? 'var(--color-primary-bg)' : 'transparent' }}
-            onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'var(--hover-bg)' }}
-            onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}>
+          <SearchResultRowFrame isSelected={isSelected} onSelect={() => selectId(r.id)}>
             <div style={{ minWidth: 0 }}>
               {/* Title clicks must not ALSO flip the summary selection; the AI mark
                   signals a Koios-advised match (MATCH-EXPLORER-1 fase 2+3). SectionTitle
@@ -322,7 +315,7 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
                   the row's own cursor:pointer + hover background. */}
               <ChevronRight size={14} strokeWidth={3} aria-hidden="true" style={{ color: 'var(--color-primary-text)' }} />
             </div>
-          </div>
+          </SearchResultRowFrame>
         )
       }}
     />
