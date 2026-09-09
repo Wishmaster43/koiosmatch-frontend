@@ -150,7 +150,7 @@
     "vacancy_employment": "Beschäftigungsart",
     "vacancy_seniority": "Senioritätslevel",
     "vacancy_education": "Ausbildung",
-    "vacancy_channels": "Jobbörsen",
+    "vacancy_channels": "Jobbörsen & Veröffentlichungskanäle",
     "vacancy_matching": "Matching",
     "vacancy_candidate_tab": "Kandidatensuche-Tab",
     "match_templates": "Match-Profile",
@@ -250,7 +250,6 @@
     "notif_conversations": "Gespräche",
     "notif_escalation": "Eskalation",
     "koios_advice": "Hinweis-Schwellenwerte",
-    "notif_my": "Meine Benachrichtigungen",
     "customer_identifier_validation": "Nummernprüfung",
     "automations": "Automatisierungen",
     "report_kpis": "Berichtskarten",
@@ -614,8 +613,8 @@
     "educationTitle": "Ausbildung",
     "educationSubtitle": "Verwalten Sie die Ausbildungsniveaus für Ihre Stellen.",
     "educationAdd": "Niveau hinzufügen",
-    "channelsTitle": "Jobbörsen",
-    "channelsSubtitle": "Verwalten Sie die Jobbörsen, auf denen Sie Ihre Stellen veröffentlichen können.",
+    "channelsTitle": "Jobbörsen & Veröffentlichungskanäle",
+    "channelsSubtitle": "Lege pro Jobbörse und Kanal (Karriereseite, Partner-API, Indeed, Werkzoeken, Google Jobs) fest, ob er verfügbar, vorausgewählt oder immer an ist.",
     "channelsAdd": "Jobbörse hinzufügen",
     "appDefaultsTitle": "Bewerbungseinstellungen",
     "appDefaultsSubtitle": "Der Standard, den eine neue Stelle übernimmt. Pro Stelle im Drawer anpassbar.",
@@ -626,7 +625,11 @@
     "channelActive": "Aktiv",
     "channelActiveDesc": "Verfügbar zum Veröffentlichen. Ausschalten, um eine eingestellte Jobbörse zu verbergen, ohne sie zu löschen.",
     "channelDefaultEnabled": "Vorab angehakt für neue Stellen",
-    "channelDefaultEnabledDesc": "Neue Stellen starten mit dieser Jobbörse aktiviert im Veröffentlichungspanel; pro Stelle weiterhin anpassbar."
+    "channelDefaultEnabledDesc": "Neue Stellen starten mit dieser Jobbörse aktiviert im Veröffentlichungspanel; pro Stelle weiterhin anpassbar.",
+    "channelLockedOn": "Immer an",
+    "channelLockedOnDesc": "Jede Stelle ist immer auf diesem Kanal; der Schalter pro Stelle ist fest an. Nur möglich, solange der Kanal aktiv ist.",
+    "appDefaultsChannelsLink": "Welche Jobbörsen und Kanäle sichtbar, vorausgewählt oder immer an sind, legst du fest unter",
+    "appDefaultsChannelsLinkLabel": "Jobbörsen & Veröffentlichungskanäle"
   },
   "rejection": {
     "title": "Ablehnungsgründe",
@@ -4281,6 +4284,18 @@
       "ai_workflow_steps": "KI in Workflows",
       "active": "Aktiv",
       "inactive": "Inaktiv"
+    },
+    "retention": {
+      "title": "KI-Aufbewahrungsfristen",
+      "unit": "Tage",
+      "promptLog": {
+        "label": "KI-Prompt-Protokoll aufbewahren",
+        "description": "Wie lange Koios gesendete Prompts und erhaltene Antworten zur Kontrolle aufbewahrt."
+      },
+      "conversationMemory": {
+        "label": "Gesprächsgedächtnis Koios-Chat",
+        "description": "Wie viele Tage frühere Gespräche als Kontext für den Assistenten zählen. Null bedeutet kein Gedächtnis."
+      }
     }
   },
   "limits": {

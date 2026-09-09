@@ -283,7 +283,7 @@ export function mapVacancyDetail(raw: ApiVacancy = {}): VacancyDetail {
     // along (undefined on a pre-migration row) so channelIcons.ts maps exactly.
     channels: (raw.channels ?? raw.published_channels ?? []).map(c => ({
       value: c.value ?? c.key ?? c.id, label: c.label ?? c.name ?? '', published: Boolean(c.published),
-      key: c.key != null ? String(c.key) : undefined, icon: c.icon ?? undefined,
+      locked: Boolean(c.locked), key: c.key != null ? String(c.key) : undefined, icon: c.icon ?? undefined,
     })),
     // Coupled applications (each links a real candidate at a funnel phase).
     applications: (raw.applications ?? []).map(a => {

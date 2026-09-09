@@ -230,12 +230,17 @@ export function useAddVacancyForm({
   useEffect(() => {
     // Seed the channel list once the tenant lookup resolves — never clobber a
     // recruiter's own toggles on a later re-render of the (rarely changing) lookup.
+    // Row 36 (Danny 09-09): a tenant's default_enabled channel starts pre-checked and an
+    // always-on one starts checked + locked — the create modal and the drawer's publish
+    // panel read the same three tenant flags.
     if (channels.length === 0 && channelLookup.length) {
-      setChannels(channelLookup.map(c => ({ value: c.value, label: c.label, published: false })))
+      setChannels(channelLookup.map(c => ({
+        value: c.value, label: c.label, locked: Boolean(c.locked_on), published: Boolean(c.locked_on || c.default_enabled),
+      })))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the lookup resolving
   }, [channelLookup])
-  const toggleChannel = (value: string, next: boolean) => setChannels(cs => cs.map(c => (c.value === value ? { ...c, published: next } : c)))
+  const toggleChannel = (value: string, next: boolean) => setChannels(cs => cs.map(c => (c.value === value && !c.locked ? { ...c, published: next } : c)))
   const [applicationSettings, setApplicationSettingsState] = useState<Record<string, unknown>>(() => ({ ...FALLBACK_APP_SETTINGS }))
   const [applicationSettingsTouched, setApplicationSettingsTouched] = useState(false)
   useEffect(() => {

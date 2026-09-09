@@ -340,7 +340,8 @@
       "sites": "Portales de empleo"
     },
     "siteLive": "El sitio público de empleo está activo. Estos interruptores determinan lo que se publica allí ahora mismo, incluidos los feeds de Indeed y Werkzoeken.",
-    "siteOffline": "El sitio público de empleo está actualmente desactivado (Ajustes → Sitio de empleo). Estos interruptores ya determinan qué se publicará en cuanto se active."
+    "siteOffline": "El sitio público de empleo está actualmente desactivado (Ajustes → Sitio de empleo). Estos interruptores ya determinan qué se publicará en cuanto se active.",
+    "lockedOn": "Siempre activo. Se cambia en Ajustes, Portales de empleo y canales de publicación."
   },
   "applicants": {
     "title": "Candidaturas",

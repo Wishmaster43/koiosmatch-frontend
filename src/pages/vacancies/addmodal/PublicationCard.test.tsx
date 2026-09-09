@@ -46,3 +46,19 @@ describe('PublicationCard · S-selectall-1 select-all above the channel list', (
     expect(onToggleChannel).toHaveBeenCalledWith('indeed', false)
   })
 })
+
+// Row 36: an always-on channel renders checked + disabled and never joins select-all.
+describe('PublicationCard · locked (always-on) channel', () => {
+  it('disables the locked switch and selects only the switchable channels', async () => {
+    const onToggleChannel = vi.fn()
+    const user = userEvent.setup()
+    render(<PublicationCard published={false} onPublishedChange={vi.fn()}
+      channels={[...channels, { value: 'api', label: 'Partner API', published: true, locked: true }]} onToggleChannel={onToggleChannel}
+      applicationSettings={{}} onSettingChange={vi.fn()} />)
+
+    expect(screen.getByRole('switch', { name: 'Partner API' })).toBeDisabled()
+    await user.click(screen.getByRole('button', { name: new RegExp(t('multiSelect.selectVisible'), 'i') }))
+    expect(onToggleChannel).toHaveBeenCalledTimes(2)
+    expect(onToggleChannel).not.toHaveBeenCalledWith('api', expect.anything())
+  })
+})

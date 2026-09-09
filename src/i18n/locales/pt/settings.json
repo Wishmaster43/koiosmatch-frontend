@@ -144,7 +144,7 @@
     "vacancy_employment": "Tipo de vínculo",
     "vacancy_seniority": "Senioridade",
     "vacancy_education": "Formação",
-    "vacancy_channels": "Sites de emprego",
+    "vacancy_channels": "Sites de emprego e canais de publicação",
     "vacancy_fields": "Campos personalizados",
     "vacancy_app_defaults": "Definições de candidatura",
     "vacancy_matching": "Matching",
@@ -250,7 +250,6 @@
     "notif_conversations": "Conversas",
     "notif_escalation": "Escalamento",
     "koios_advice": "Limiares de aconselhamento",
-    "notif_my": "As minhas notificações",
     "customer_identifier_validation": "Validação de número",
     "automations": "Automatizações",
     "report_kpis": "Cartões de relatório",
@@ -710,8 +709,8 @@
     "educationTitle": "Formação",
     "educationSubtitle": "Faça a gestão dos níveis de formação para as suas vagas.",
     "educationAdd": "Adicionar nível",
-    "channelsTitle": "Sites de emprego",
-    "channelsSubtitle": "Faça a gestão dos sites de emprego onde pode publicar as suas vagas.",
+    "channelsTitle": "Sites de emprego e canais de publicação",
+    "channelsSubtitle": "Defina por site de emprego e canal (página de carreira, API de parceiros, Indeed, Werkzoeken, Google Jobs) se está disponível, pré-selecionado ou sempre ativo.",
     "channelsAdd": "Adicionar site de emprego",
     "appDefaultsTitle": "Definições de candidatura",
     "appDefaultsSubtitle": "A predefinição que uma nova vaga herda. Substituível por vaga na drawer.",
@@ -722,7 +721,11 @@
     "channelActive": "Ativo",
     "channelActiveDesc": "Disponível para publicação. Desative para ocultar um site de emprego descontinuado sem o eliminar.",
     "channelDefaultEnabled": "Pré-selecionado para novas vagas",
-    "channelDefaultEnabledDesc": "As novas vagas começam com este site de emprego selecionado no painel de publicação; ainda ajustável por vaga."
+    "channelDefaultEnabledDesc": "As novas vagas começam com este site de emprego selecionado no painel de publicação; ainda ajustável por vaga.",
+    "channelLockedOn": "Sempre ativo",
+    "channelLockedOnDesc": "Cada vaga está sempre neste canal; o interruptor por vaga fica fixo em ativo. Só é possível enquanto o canal estiver ativo.",
+    "appDefaultsChannelsLink": "Quais sites de emprego e canais estão visíveis, pré-selecionados ou sempre ativos define-se em",
+    "appDefaultsChannelsLinkLabel": "Sites de emprego e canais de publicação"
   },
   "matches": {
     "statusTitle": "Estados",
@@ -4281,6 +4284,18 @@
       "ai_workflow_steps": "IA em fluxos de trabalho",
       "active": "Ativo",
       "inactive": "Inativo"
+    },
+    "retention": {
+      "title": "Prazos de retenção de IA",
+      "unit": "dias",
+      "promptLog": {
+        "label": "Manter o registo de prompts de IA",
+        "description": "Durante quanto tempo o Koios guarda os prompts enviados e as respostas recebidas para controlo."
+      },
+      "conversationMemory": {
+        "label": "Memória de conversa do chat Koios",
+        "description": "Quantos dias de conversas anteriores contam como contexto para o assistente. Zero significa sem memória."
+      }
     }
   },
   "limits": {

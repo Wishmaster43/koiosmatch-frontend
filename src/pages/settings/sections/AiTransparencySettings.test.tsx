@@ -4,7 +4,7 @@
  * The link in KoiosPanel footer navigates to this page.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import i18n from '@/i18n'
 import AiTransparencySettings from './AiTransparencySettings'
 
@@ -49,6 +49,16 @@ vi.mock('@tanstack/react-query', async (importOriginal) => {
     }),
   }
 })
+
+// Row 21: the two AI retention windows ride the shared settings form — mocked flat so
+// the read-only rows keep rendering without a /settings round-trip.
+const formSet = vi.fn()
+vi.mock('../lib/useSettingsForm', () => ({
+  useSettingsForm: () => ({
+    values: { ai_prompt_log_retention_days: 90, koios_conversation_memory_days: 0 },
+    set: formSet, dirty: false, loading: false, saving: false, saved: false, loadError: false, save: vi.fn(),
+  }),
+}))
 
 describe('AiTransparencySettings', () => {
   beforeEach(() => {
@@ -104,5 +114,28 @@ describe('AiTransparencySettings', () => {
       expect(activeChips.length).toBe(2)
       expect(screen.getByText(i18n.t('aiAct.features.inactive', { ns: 'settings' }))).toBeInTheDocument()
     })
+  })
+})
+
+// Row 21 (Danny 09-09, "Ik kan niets instellen??????"): the AI retention windows are
+// editable here — prompt log (1..3650 days) and chat conversation memory (0..365, 0 = off).
+describe('AiTransparencySettings · AI retention windows (row 21)', () => {
+  it('renders both retention rows with the stored values', async () => {
+    render(<AiTransparencySettings />)
+    await waitFor(() => {
+      expect(screen.getByText(i18n.t('aiAct.retention.title', { ns: 'settings' }))).toBeInTheDocument()
+    })
+    const promptLog = screen.getByRole('textbox', { name: i18n.t('aiAct.retention.promptLog.label', { ns: 'settings' }) })
+    const memory = screen.getByRole('textbox', { name: i18n.t('aiAct.retention.conversationMemory.label', { ns: 'settings' }) })
+    expect(promptLog).toHaveValue('90')
+    expect(memory).toHaveValue('0')
+  })
+
+  it('writes an edited prompt-log window onto the settings form key', async () => {
+    render(<AiTransparencySettings />)
+    const promptLog = await screen.findByRole('textbox', { name: i18n.t('aiAct.retention.promptLog.label', { ns: 'settings' }) })
+    fireEvent.change(promptLog, { target: { value: '120' } })
+    fireEvent.blur(promptLog)
+    expect(formSet).toHaveBeenCalledWith('ai_prompt_log_retention_days', 120)
   })
 })

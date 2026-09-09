@@ -340,7 +340,8 @@
       "sites": "Vacaturesites"
     },
     "siteLive": "De publieke carrière-site is live. Deze schakelaars bepalen wat daar nu gepubliceerd wordt, inclusief de Indeed- en Werkzoeken-feeds.",
-    "siteOffline": "De publieke carrière-site staat nu uit (Instellingen → Carrière-site). Deze schakelaars bepalen alvast wat live gaat zodra hij aan staat."
+    "siteOffline": "De publieke carrière-site staat nu uit (Instellingen → Carrière-site). Deze schakelaars bepalen alvast wat live gaat zodra hij aan staat.",
+    "lockedOn": "Altijd aan. Aan te passen bij Instellingen, Vacaturesites & publicatiekanalen."
   },
   "applicants": {
     "title": "Sollicitaties",

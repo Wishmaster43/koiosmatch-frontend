@@ -340,7 +340,8 @@
       "sites": "Sites de emprego"
     },
     "siteLive": "O site de carreira público está ativo. Estes interruptores determinam o que é publicado ali neste momento, incluindo os feeds Indeed e Werkzoeken.",
-    "siteOffline": "O site de carreira público está atualmente desativado (Definições → Site de carreira). Estes interruptores já determinam o que fica ativo assim que for ligado."
+    "siteOffline": "O site de carreira público está atualmente desativado (Definições → Site de carreira). Estes interruptores já determinam o que fica ativo assim que for ligado.",
+    "lockedOn": "Sempre ativo. Alterável em Definições, Sites de emprego e canais de publicação."
   },
   "applicants": {
     "title": "Candidaturas",

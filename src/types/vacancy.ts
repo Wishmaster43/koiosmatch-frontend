@@ -34,6 +34,8 @@ export interface ApiChannel {
   id?: Id
   label?: string
   name?: string
+  // Row 36: VacancyDetailResource marks a locked_on channel's row `locked: true`.
+  locked?: boolean
   published?: unknown
 }
 
@@ -211,7 +213,8 @@ export interface VacancyDetail extends Vacancy {
   // `location_id` key VacancyWriter's scalar passthrough already accepts.
   branchId: string
   branchName: string
-  channels: Array<{ value: string | number | undefined; label: string; published: boolean; key?: string; icon?: string }>
+  // `locked` (row 36): the tenant set this channel always-on — rendered checked + disabled.
+  channels: Array<{ value: string | number | undefined; label: string; published: boolean; locked?: boolean; key?: string; icon?: string }>
   applications: Array<{
     id: Id | undefined; candidateId: Id | null; candidateName: string; candidateInitials: string
     phaseValue: string | number | null; phaseLabel: string; phaseColor: string; source: string; created: string

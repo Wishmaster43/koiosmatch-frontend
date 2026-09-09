@@ -340,7 +340,8 @@
       "sites": "Siti di annunci"
     },
     "siteLive": "Il sito carriere pubblico è online. Questi interruttori determinano cosa viene pubblicato lì in questo momento, inclusi i feed Indeed e Werkzoeken.",
-    "siteOffline": "Il sito carriere pubblico è attualmente disattivato (Impostazioni → Sito carriere). Questi interruttori determinano già cosa andrà online non appena verrà attivato."
+    "siteOffline": "Il sito carriere pubblico è attualmente disattivato (Impostazioni → Sito carriere). Questi interruttori determinano già cosa andrà online non appena verrà attivato.",
+    "lockedOn": "Sempre attivo. Modificabile in Impostazioni, Portali di lavoro e canali di pubblicazione."
   },
   "applicants": {
     "title": "Candidature",

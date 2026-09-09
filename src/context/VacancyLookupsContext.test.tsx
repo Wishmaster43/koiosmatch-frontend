@@ -108,3 +108,22 @@ describe('VacancyLookupsContext channel flags', () => {
     expect(result.current.channels.map(c => c.value)).toEqual(['c1'])
   })
 })
+
+// Row 36: `locked_on` rides through like the other two channel flags (tinyint-tolerant).
+describe('VacancyLookupsContext channel locked_on', () => {
+  it('carries locked_on through, defaulting to false when absent', async () => {
+    mockLookups({
+      '/vacancy-channels?active=1': [
+        { id: 'c1', name: 'Career page', active: true, default_enabled: true, locked_on: 1 },
+        { id: 'c2', name: 'Indeed', active: true, default_enabled: true },
+      ],
+    })
+    const { result } = renderHook(() => useVacancyLookups(), { wrapper })
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.channels.map(c => ({ value: c.value, locked_on: c.locked_on }))).toEqual([
+      { value: 'c1', locked_on: true },
+      { value: 'c2', locked_on: false },
+    ])
+  })
+})

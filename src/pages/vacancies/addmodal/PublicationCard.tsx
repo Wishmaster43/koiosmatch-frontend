@@ -11,7 +11,8 @@ import Toggle from '@/components/ui/Toggle'
 import SelectAllRow from '@/components/ui/SelectAllRow'
 import { cardBox } from '@/components/ui/modalCards'
 
-export interface PublicationChannel { value: string; label: string; published: boolean }
+// `locked` (row 36): an always-on channel — checked, disabled, outside select-all.
+export interface PublicationChannel { value: string; label: string; published: boolean; locked?: boolean }
 
 const APP_FIELDS = ['cv', 'cover_letter', 'photo', 'remarks', 'interview_consent']
 
@@ -77,8 +78,8 @@ export default function PublicationCard({ published, onPublishedChange, channels
             change rides the SAME per-channel toggle callback (setChannels'
             functional updater makes a sequential apply safe). */}
         <SelectAllRow
-          visibleValues={channels.map(c => c.value)}
-          selectedValues={channels.filter(c => c.published).map(c => c.value)}
+          visibleValues={channels.filter(c => !c.locked).map(c => c.value)}
+          selectedValues={channels.filter(c => c.published && !c.locked).map(c => c.value)}
           onApply={(values, select) => values.forEach(v => onToggleChannel(v, select))}
         />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
@@ -90,7 +91,8 @@ export default function PublicationCard({ published, onPublishedChange, channels
                 <span style={{ fontSize: 11, color: c.published ? 'var(--color-success)' : 'var(--text-muted)' }}>
                   {c.published ? t('publishing.queuedOn') : t('publishing.notPublished')}
                 </span>
-                <Toggle checked={c.published} onChange={next => onToggleChannel(c.value, next)} ariaLabel={c.label} />
+                <Toggle checked={c.published} disabled={c.locked} title={c.locked ? t('publishing.lockedOn') : undefined}
+                  onChange={next => onToggleChannel(c.value, next)} ariaLabel={c.label} />
               </div>
             </div>
           ))}

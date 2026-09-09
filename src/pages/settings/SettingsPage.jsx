@@ -20,6 +20,7 @@ import { useApps } from '@/context/AppsContext'
 import { canAccessPage } from '@/lib/access'
 import { useConfirm } from '@/hooks/useConfirm'
 import { NAV_GROUPS } from './registry'
+import { useNavigation } from '@/context/NavigationContext'
 import { SettingsDirtyContext } from './lib/settingsDirty'
 import SettingItem from './components/SettingItem'
 import SettingsTabs from './components/SettingsTabs'
@@ -67,6 +68,14 @@ const SLUG_ALIASES = {
   // into the Integraties group — old bookmarks keep landing on the moved section.
   'modules/mod_shiftmanager': { category: 'integrations', tab: 'shiftmanager' },
   'modules/hf_contract_map': { category: 'integrations', tab: 'helloflex' },
+}
+
+// Settings slugs whose screen moved OUT of settings (row 32, Danny 09-09: Mijn
+// meldingen is a personal preference and lives on the profile). The old deep link
+// keeps resolving: SettingsPage sends it to the profile page with the tab intent.
+// eslint-disable-next-line react-refresh/only-export-components -- pure map exported for the deep-link regression test (mirrors parseHash below)
+export const MOVED_TO_PROFILE = {
+  'notifications/notif_my': { tab: 'notifications' },
 }
 
 // Parses the location hash into {category, tab}, accepting both the #settings/ prefix and legacy unprefixed links, and rewriting renamed slugs via SLUG_ALIASES.
@@ -149,6 +158,22 @@ export default function SettingsPage() {
   // Stable context value wrapping the dirty ref, so a section can report unsaved changes without forcing this component to re-render.
   const dirtyCtx = useMemo(() => ({ report: (d) => { dirtyRef.current = d } }), [])
   const { confirm, dialog } = useConfirm()
+  // The app shell's navigate (null in isolated unit renders) — used only for moved slugs.
+  const nav = useNavigation()
+
+  // A deep link to a moved slug (MOVED_TO_PROFILE) lands on the profile page instead of
+  // the silent first-tab fallback — on mount and on every later hash change.
+  useEffect(() => {
+    const redirectIfMoved = () => {
+      const loc = parseHash()
+      const moved = loc ? MOVED_TO_PROFILE[`${loc.category}/${loc.tab}`] : null
+      if (moved && nav?.navigate) nav.navigate('profile', moved)
+    }
+    redirectIfMoved()
+    window.addEventListener('hashchange', redirectIfMoved)
+    return () => window.removeEventListener('hashchange', redirectIfMoved)
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- nav is the stable shell context
+  }, [])
 
   // Apply the actual navigation — shared by the guarded and unguarded paths.
   const applyNav = (groupKey, tabId) => {

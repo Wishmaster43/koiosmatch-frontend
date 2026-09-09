@@ -340,7 +340,8 @@
       "sites": "Sites d'emploi"
     },
     "siteLive": "Le site carrière public est en ligne. Ces interrupteurs déterminent ce qui y est publié actuellement, y compris les flux Indeed et Werkzoeken.",
-    "siteOffline": "Le site carrière public est actuellement désactivé (Paramètres → Site carrière). Ces interrupteurs déterminent déjà ce qui sera publié dès son activation."
+    "siteOffline": "Le site carrière public est actuellement désactivé (Paramètres → Site carrière). Ces interrupteurs déterminent déjà ce qui sera publié dès son activation.",
+    "lockedOn": "Toujours actif. Modifiable sous Paramètres, Sites d'emploi & canaux de publication."
   },
   "applicants": {
     "title": "Candidatures",

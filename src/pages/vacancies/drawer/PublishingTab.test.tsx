@@ -229,3 +229,48 @@ describe('PublishingTab · V-pub-1 resyncs on vacancy switch', () => {
     expect(screen.getAllByRole('switch')[0]).toHaveAttribute('aria-checked', 'false')
   })
 })
+
+// Row 36 (Danny 09-09, "1 van de 2 altijd aan"): a locked channel — the tenant's
+// `locked_on` flag or the vacancy row's own `locked` — renders on and disabled, refuses
+// a flip, and stays out of select-all; the persisted shape never carries `locked`.
+describe('PublishingTab · locked (always-on) channels', () => {
+  it("renders the vacancy's own locked row checked + disabled and refuses the flip", async () => {
+    const onUpdate = vi.fn()
+    const user = userEvent.setup()
+    render(<PublishingTab vacancy={vacancy([
+      { value: 'career', label: 'Career page', published: true, locked: true },
+      { value: 'indeed', label: 'Indeed', published: false },
+    ])} onUpdate={onUpdate} />)
+    await openSitesTab()
+
+    const switches = screen.getAllByRole('switch')
+    expect(switches[0]).toHaveAttribute('aria-checked', 'true')
+    expect(switches[0]).toBeDisabled()
+    expect(switches[0]).toHaveAttribute('title', t('publishing.lockedOn'))
+    await user.click(switches[0])
+    expect(onUpdate).not.toHaveBeenCalled()
+  })
+
+  it('reads the tenant locked_on flag, keeps it out of select-all and off the wire', async () => {
+    const onUpdate = vi.fn()
+    const user = userEvent.setup()
+    CHANNELS.push({ value: 'api', label: 'Partner API', active: true, default_enabled: true, locked_on: true } as (typeof CHANNELS)[number])
+    try {
+      render(<PublishingTab vacancy={vacancy([])} onUpdate={onUpdate} />)
+      await openSitesTab()
+      const api = screen.getAllByRole('switch')[2]
+      expect(api).toHaveAttribute('aria-checked', 'true')
+      expect(api).toBeDisabled()
+      // Select-all counts the two switchable channels only; the payload is the flat
+      // value/label/published shape, the locked channel simply riding along as on.
+      await user.click(screen.getByRole('button', { name: new RegExp(i18n.t('multiSelect.selectVisible', { ns: 'common' }), 'i') }))
+      expect(onUpdate).toHaveBeenCalledWith('v1', { channels: [
+        { value: 'career', label: 'Career page', published: true },
+        { value: 'indeed', label: 'Indeed', published: true },
+        { value: 'api', label: 'Partner API', published: true },
+      ] })
+    } finally {
+      CHANNELS.pop()
+    }
+  })
+})

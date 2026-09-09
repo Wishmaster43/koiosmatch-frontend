@@ -9,6 +9,7 @@ import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings
 import StatusListEditor from './StatusListEditor'
 import { resolveGenericLookupIcon } from './lookupIcons'
 import SaveButton from '@/components/ui/SaveButton'
+import Button from '@/components/ui/Button'
 
 // Curated icon subset for job boards — channels are web portals/career listings,
 // so scope the picker to web/portal-ish glyphs instead of the full generic set
@@ -40,7 +41,13 @@ export function VacancyApplicationDefaultsSettings() {
   return (
     <div style={{ maxWidth: 640 }}>
       <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('vacancy.appDefaultsTitle')}</h3>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 16 }}>{t('vacancy.appDefaultsSubtitle')}</p>
+      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>{t('vacancy.appDefaultsSubtitle')}</p>
+      {/* Row 36: the channel flags live one screen over — this is where Danny looked
+          for them. A real link (§6) wearing the one Button identity (polymorphic href). */}
+      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+        {t('vacancy.appDefaultsChannelsLink')}
+        <Button variant="ghost" href="#settings/vacancies/vacancy_channels">{t('vacancy.appDefaultsChannelsLinkLabel')}</Button>
+      </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
         {APP_FIELDS.map(f => (
           <div key={f} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
@@ -154,6 +161,10 @@ export function VacancyChannelSettings() {
         flagFields={[
           { key: 'active', label: t('vacancy.channelActive'), description: t('vacancy.channelActiveDesc'), default: true },
           { key: 'default_enabled', label: t('vacancy.channelDefaultEnabled'), description: t('vacancy.channelDefaultEnabledDesc') },
+          // Row 36 (Danny 09-09, "welke zichtbaar moeten zijn en standaard aan moeten staan …
+          // 1 van de 2 altijd aan"): the third orthogonal flag, PUT /vacancy-channels/{id}
+          // `locked_on` — the backend 422s it without `active` (ChannelPolicy).
+          { key: 'locked_on', label: t('vacancy.channelLockedOn'), description: t('vacancy.channelLockedOnDesc') },
         ]} />
     </div>
   )

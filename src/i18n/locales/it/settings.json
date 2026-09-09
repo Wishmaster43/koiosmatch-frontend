@@ -144,7 +144,7 @@
     "vacancy_employment": "Tipo di impiego",
     "vacancy_seniority": "Livello di seniority",
     "vacancy_education": "Istruzione",
-    "vacancy_channels": "Portali di lavoro",
+    "vacancy_channels": "Portali di lavoro e canali di pubblicazione",
     "vacancy_fields": "Campi personalizzati",
     "vacancy_app_defaults": "Impostazioni candidatura",
     "vacancy_matching": "Matching",
@@ -250,7 +250,6 @@
     "notif_conversations": "Conversazioni",
     "notif_escalation": "Escalation",
     "koios_advice": "Soglie di consiglio",
-    "notif_my": "Le mie notifiche",
     "customer_identifier_validation": "Validazione numero",
     "automations": "Automazioni",
     "report_kpis": "Schede report",
@@ -710,8 +709,8 @@
     "educationTitle": "Istruzione",
     "educationSubtitle": "Gestisci i livelli di istruzione per le tue posizioni.",
     "educationAdd": "Aggiungi livello",
-    "channelsTitle": "Portali di lavoro",
-    "channelsSubtitle": "Gestisci i portali di lavoro su cui puoi pubblicare le posizioni.",
+    "channelsTitle": "Portali di lavoro e canali di pubblicazione",
+    "channelsSubtitle": "Imposta per portale di lavoro e canale (pagina carriere, API partner, Indeed, Werkzoeken, Google Jobs) se è disponibile, preselezionato o sempre attivo.",
     "channelsAdd": "Aggiungi portale di lavoro",
     "appDefaultsTitle": "Impostazioni candidatura",
     "appDefaultsSubtitle": "Il valore predefinito che una nuova posizione eredita. Modificabile per singola posizione nel pannello.",
@@ -722,7 +721,11 @@
     "channelActive": "Attivo",
     "channelActiveDesc": "Disponibile per la pubblicazione. Disattiva per nascondere un portale di lavoro dismesso senza eliminarlo.",
     "channelDefaultEnabled": "Preselezionato per le nuove posizioni",
-    "channelDefaultEnabledDesc": "Le nuove posizioni partono con questo portale di lavoro selezionato nel pannello di pubblicazione; comunque modificabile per singola posizione."
+    "channelDefaultEnabledDesc": "Le nuove posizioni partono con questo portale di lavoro selezionato nel pannello di pubblicazione; comunque modificabile per singola posizione.",
+    "channelLockedOn": "Sempre attivo",
+    "channelLockedOnDesc": "Ogni posizione è sempre su questo canale; l'interruttore per posizione resta fisso su attivo. Possibile solo finché il canale è attivo.",
+    "appDefaultsChannelsLink": "Quali portali di lavoro e canali sono visibili, preselezionati o sempre attivi si imposta in",
+    "appDefaultsChannelsLinkLabel": "Portali di lavoro e canali di pubblicazione"
   },
   "matches": {
     "statusTitle": "Stati",
@@ -4281,6 +4284,18 @@
       "ai_workflow_steps": "IA nei flussi di lavoro",
       "active": "Attivo",
       "inactive": "Inattivo"
+    },
+    "retention": {
+      "title": "Periodi di conservazione IA",
+      "unit": "giorni",
+      "promptLog": {
+        "label": "Conservare il registro dei prompt IA",
+        "description": "Per quanto tempo Koios conserva i prompt inviati e le risposte ricevute a fini di controllo."
+      },
+      "conversationMemory": {
+        "label": "Memoria delle conversazioni della chat Koios",
+        "description": "Quanti giorni di conversazioni precedenti contano come contesto per l'assistente. Zero significa nessuna memoria."
+      }
     }
   },
   "limits": {

@@ -340,7 +340,8 @@
       "sites": "Job boards"
     },
     "siteLive": "The public career site is live. These toggles control what's published there right now, including the Indeed and Werkzoeken feeds.",
-    "siteOffline": "The public career site is currently switched off (Settings → Career site). These toggles decide what goes live the moment it's switched on."
+    "siteOffline": "The public career site is currently switched off (Settings → Career site). These toggles decide what goes live the moment it's switched on.",
+    "lockedOn": "Always on. Change it under Settings, Job boards & publication channels."
   },
   "applicants": {
     "title": "Applications",

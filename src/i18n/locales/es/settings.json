@@ -150,7 +150,7 @@
     "vacancy_employment": "Tipo de contrato",
     "vacancy_seniority": "Nivel de experiencia",
     "vacancy_education": "Formación",
-    "vacancy_channels": "Portales de empleo",
+    "vacancy_channels": "Portales de empleo y canales de publicación",
     "vacancy_matching": "Matching",
     "vacancy_candidate_tab": "Pestaña Buscar candidatos",
     "match_templates": "Perfiles de matching",
@@ -250,7 +250,6 @@
     "notif_conversations": "Conversaciones",
     "notif_escalation": "Escalada",
     "koios_advice": "Umbrales de aviso",
-    "notif_my": "Mis notificaciones",
     "customer_identifier_validation": "Validación de números",
     "automations": "Automatizaciones",
     "report_kpis": "Tarjetas de informe",
@@ -614,8 +613,8 @@
     "educationTitle": "Formación",
     "educationSubtitle": "Gestiona los niveles de formación de tus vacantes.",
     "educationAdd": "Añadir nivel",
-    "channelsTitle": "Portales de empleo",
-    "channelsSubtitle": "Gestiona los portales de empleo donde publicar tus vacantes.",
+    "channelsTitle": "Portales de empleo y canales de publicación",
+    "channelsSubtitle": "Define por portal de empleo y canal (página de carrera, API de socios, Indeed, Werkzoeken, Google Jobs) si está disponible, premarcado o siempre activo.",
     "channelsAdd": "Añadir portal de empleo",
     "appDefaultsTitle": "Ajustes de candidatura",
     "appDefaultsSubtitle": "El valor predeterminado que hereda una nueva vacante. Ajustable por vacante en el panel.",
@@ -626,7 +625,11 @@
     "channelActive": "Activo",
     "channelActiveDesc": "Disponible para publicar. Desactívalo para ocultar un portal de empleo descontinuado sin eliminarlo.",
     "channelDefaultEnabled": "Preseleccionado para vacantes nuevas",
-    "channelDefaultEnabledDesc": "Las vacantes nuevas empiezan con este portal activado en el panel de publicación; sigue siendo ajustable por vacante."
+    "channelDefaultEnabledDesc": "Las vacantes nuevas empiezan con este portal activado en el panel de publicación; sigue siendo ajustable por vacante.",
+    "channelLockedOn": "Siempre activo",
+    "channelLockedOnDesc": "Cada vacante está siempre en este canal; el interruptor por vacante queda fijo en activado. Solo es posible mientras el canal esté activo.",
+    "appDefaultsChannelsLink": "Qué portales de empleo y canales están visibles, premarcados o siempre activos se define en",
+    "appDefaultsChannelsLinkLabel": "Portales de empleo y canales de publicación"
   },
   "rejection": {
     "title": "Motivos de rechazo",
@@ -4281,6 +4284,18 @@
       "ai_workflow_steps": "IA en flujos de trabajo",
       "active": "Activo",
       "inactive": "Inactivo"
+    },
+    "retention": {
+      "title": "Plazos de conservación de IA",
+      "unit": "días",
+      "promptLog": {
+        "label": "Conservar el registro de prompts de IA",
+        "description": "Cuánto tiempo conserva Koios los prompts enviados y las respuestas recibidas para su control."
+      },
+      "conversationMemory": {
+        "label": "Memoria de conversación del chat de Koios",
+        "description": "Cuántos días de conversaciones anteriores cuentan como contexto para el asistente. Cero significa sin memoria."
+      }
     }
   },
   "limits": {

@@ -144,7 +144,7 @@
     "vacancy_employment": "Employment types",
     "vacancy_seniority": "Seniority",
     "vacancy_education": "Education",
-    "vacancy_channels": "Job boards",
+    "vacancy_channels": "Job boards & publication channels",
     "vacancy_fields": "Custom fields",
     "vacancy_app_defaults": "Application settings",
     "vacancy_matching": "Matching",
@@ -250,7 +250,6 @@
     "notif_conversations": "Conversations",
     "notif_escalation": "Escalation",
     "koios_advice": "Advice thresholds",
-    "notif_my": "My notifications",
     "customer_identifier_validation": "Number validation",
     "automations": "Automations",
     "report_kpis": "Report cards",
@@ -710,8 +709,8 @@
     "educationTitle": "Education",
     "educationSubtitle": "Manage the education levels for your vacancies.",
     "educationAdd": "Add education level",
-    "channelsTitle": "Job boards",
-    "channelsSubtitle": "Manage the job boards you can publish vacancies on.",
+    "channelsTitle": "Job boards & publication channels",
+    "channelsSubtitle": "Per job board and channel (career site, partner API, Indeed, Werkzoeken, Google Jobs), set whether it is available, pre-checked or always on.",
     "channelsAdd": "Add job board",
     "appDefaultsTitle": "Application settings",
     "appDefaultsSubtitle": "The default a new vacancy inherits. Override it per vacancy in the drawer.",
@@ -722,7 +721,11 @@
     "channelActive": "Active",
     "channelActiveDesc": "Available to publish on. Turn off to hide a discontinued job board without deleting it.",
     "channelDefaultEnabled": "Pre-checked for new vacancies",
-    "channelDefaultEnabledDesc": "New vacancies start with this job board toggled on in the publish panel; still adjustable per vacancy."
+    "channelDefaultEnabledDesc": "New vacancies start with this job board toggled on in the publish panel; still adjustable per vacancy.",
+    "channelLockedOn": "Always on",
+    "channelLockedOnDesc": "Every vacancy is always on this channel; the per-vacancy switch is fixed on. Only possible while the channel is active.",
+    "appDefaultsChannelsLink": "Which job boards and channels are visible, pre-checked or always on is set under",
+    "appDefaultsChannelsLinkLabel": "Job boards & publication channels"
   },
   "matches": {
     "statusTitle": "Statuses",
@@ -4281,6 +4284,18 @@
       "ai_workflow_steps": "AI in workflows",
       "active": "Active",
       "inactive": "Inactive"
+    },
+    "retention": {
+      "title": "AI retention periods",
+      "unit": "days",
+      "promptLog": {
+        "label": "Keep AI prompt log",
+        "description": "How long Koios keeps the prompts sent and the answers received, for auditing."
+      },
+      "conversationMemory": {
+        "label": "Koios chat conversation memory",
+        "description": "How many days of earlier conversations count as context for the assistant. Zero means no memory."
+      }
     }
   },
   "limits": {

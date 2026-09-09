@@ -144,7 +144,7 @@
     "vacancy_employment": "Soort dienstverband",
     "vacancy_seniority": "Senioriteit",
     "vacancy_education": "Opleiding",
-    "vacancy_channels": "Vacaturesites",
+    "vacancy_channels": "Vacaturesites & publicatiekanalen",
     "vacancy_fields": "Aangepaste velden",
     "vacancy_app_defaults": "Sollicitatie-instellingen",
     "vacancy_matching": "Matching",
@@ -250,7 +250,6 @@
     "notif_conversations": "Gesprekken",
     "notif_escalation": "Escalatie",
     "koios_advice": "Advies-drempels",
-    "notif_my": "Mijn meldingen",
     "customer_identifier_validation": "Nummervalidatie",
     "automations": "Automatiseringen",
     "report_kpis": "Rapportkaarten",
@@ -710,8 +709,8 @@
     "educationTitle": "Opleiding",
     "educationSubtitle": "Beheer de opleidingsniveaus voor je vacatures.",
     "educationAdd": "Niveau toevoegen",
-    "channelsTitle": "Vacaturesites",
-    "channelsSubtitle": "Beheer de vacaturesites waarop je vacatures kunt publiceren.",
+    "channelsTitle": "Vacaturesites & publicatiekanalen",
+    "channelsSubtitle": "Beheer per vacaturesite en kanaal (carrièrepagina, partner-API, Indeed, Werkzoeken, Google Jobs) of hij beschikbaar is, vooraf aangevinkt staat of altijd aan staat.",
     "channelsAdd": "Vacaturesite toevoegen",
     "appDefaultsTitle": "Sollicitatie-instellingen",
     "appDefaultsSubtitle": "De standaard die een nieuwe vacature overneemt. Per vacature aanpasbaar in de drawer.",
@@ -722,7 +721,11 @@
     "channelActive": "Actief",
     "channelActiveDesc": "Beschikbaar om op te publiceren. Zet uit om een gestopte vacaturesite te verbergen zonder te verwijderen.",
     "channelDefaultEnabled": "Vooraf aangevinkt voor nieuwe vacatures",
-    "channelDefaultEnabledDesc": "Nieuwe vacatures starten met deze vacaturesite aangevinkt in het publicatiepaneel; per vacature nog aan te passen."
+    "channelDefaultEnabledDesc": "Nieuwe vacatures starten met deze vacaturesite aangevinkt in het publicatiepaneel; per vacature nog aan te passen.",
+    "channelLockedOn": "Altijd aan",
+    "channelLockedOnDesc": "Elke vacature staat altijd op dit kanaal; de schakelaar per vacature staat vast aan. Alleen mogelijk als het kanaal actief is.",
+    "appDefaultsChannelsLink": "Welke vacaturesites en kanalen zichtbaar, vooraf aangevinkt of altijd aan zijn, stel je in bij",
+    "appDefaultsChannelsLinkLabel": "Vacaturesites & publicatiekanalen"
   },
   "matches": {
     "statusTitle": "Statussen",
@@ -4281,6 +4284,18 @@
       "ai_workflow_steps": "AI in workflows",
       "active": "Actief",
       "inactive": "Inactief"
+    },
+    "retention": {
+      "title": "AI-bewaartermijnen",
+      "unit": "dagen",
+      "promptLog": {
+        "label": "AI-promptlog bewaren",
+        "description": "Hoe lang Koios de verstuurde prompts en ontvangen antwoorden bewaart voor controle."
+      },
+      "conversationMemory": {
+        "label": "Gespreksgeheugen Koios-chat",
+        "description": "Hoeveel dagen eerdere gesprekken meetellen als context voor de assistent. Nul betekent geen geheugen."
+      }
     }
   },
   "limits": {

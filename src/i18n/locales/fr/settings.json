@@ -150,7 +150,7 @@
     "vacancy_employment": "Type de contrat",
     "vacancy_seniority": "Niveau d'expérience",
     "vacancy_education": "Formation",
-    "vacancy_channels": "Sites d'emploi",
+    "vacancy_channels": "Sites d'emploi & canaux de publication",
     "vacancy_matching": "Matching",
     "vacancy_candidate_tab": "Onglet Recherche de candidats",
     "match_templates": "Profils de matching",
@@ -250,7 +250,6 @@
     "notif_conversations": "Conversations",
     "notif_escalation": "Escalade",
     "koios_advice": "Seuils de conseils",
-    "notif_my": "Mes notifications",
     "customer_identifier_validation": "Validation des numéros",
     "automations": "Automatisations",
     "report_kpis": "Cartes de rapport",
@@ -614,8 +613,8 @@
     "educationTitle": "Formation",
     "educationSubtitle": "Gérez les niveaux de formation pour vos postes.",
     "educationAdd": "Ajouter un niveau",
-    "channelsTitle": "Sites d'emploi",
-    "channelsSubtitle": "Gérez les sites d'emploi où publier vos postes.",
+    "channelsTitle": "Sites d'emploi & canaux de publication",
+    "channelsSubtitle": "Définissez par site d'emploi et canal (site carrière, API partenaire, Indeed, Werkzoeken, Google Jobs) s'il est disponible, pré-coché ou toujours actif.",
     "channelsAdd": "Ajouter un site d'emploi",
     "appDefaultsTitle": "Paramètres de candidature",
     "appDefaultsSubtitle": "La valeur par défaut héritée par une nouvelle offre. Ajustable par offre dans le tiroir.",
@@ -626,7 +625,11 @@
     "channelActive": "Actif",
     "channelActiveDesc": "Disponible pour publier. Désactivez pour masquer un site d'emploi abandonné sans le supprimer.",
     "channelDefaultEnabled": "Précoché pour les nouveaux postes",
-    "channelDefaultEnabledDesc": "Les nouveaux postes démarrent avec ce site d'emploi activé dans le panneau de publication ; toujours ajustable par poste."
+    "channelDefaultEnabledDesc": "Les nouveaux postes démarrent avec ce site d'emploi activé dans le panneau de publication ; toujours ajustable par poste.",
+    "channelLockedOn": "Toujours actif",
+    "channelLockedOnDesc": "Chaque offre est toujours sur ce canal ; l'interrupteur par offre reste activé. Possible uniquement tant que le canal est actif.",
+    "appDefaultsChannelsLink": "Les sites d'emploi et canaux visibles, pré-cochés ou toujours actifs se définissent sous",
+    "appDefaultsChannelsLinkLabel": "Sites d'emploi & canaux de publication"
   },
   "rejection": {
     "title": "Motifs de refus",
@@ -4281,6 +4284,18 @@
       "ai_workflow_steps": "IA dans les flux de travail",
       "active": "Actif",
       "inactive": "Inactif"
+    },
+    "retention": {
+      "title": "Durées de conservation IA",
+      "unit": "jours",
+      "promptLog": {
+        "label": "Conserver le journal des prompts IA",
+        "description": "Combien de temps Koios conserve les prompts envoyés et les réponses reçues, à des fins de contrôle."
+      },
+      "conversationMemory": {
+        "label": "Mémoire de conversation du chat Koios",
+        "description": "Combien de jours de conversations antérieures comptent comme contexte pour l'assistant. Zéro signifie aucune mémoire."
+      }
     }
   },
   "limits": {

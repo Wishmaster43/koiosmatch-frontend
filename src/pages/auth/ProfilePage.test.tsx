@@ -3,7 +3,7 @@
  * has the whatsapp_web module AND the role's page.whatsapp permission allows it.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import ProfilePage from './ProfilePage'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }), initReactI18next: { type: '3rdParty', init: () => {} } }))
@@ -16,6 +16,7 @@ vi.mock('./useProfileForm', () => ({
   }),
 }))
 vi.mock('./ProfileWhatsAppWeb', () => ({ default: () => <div>whatsapp-web-panel</div> }))
+vi.mock('../settings/sections/MyNotificationsSettings', () => ({ default: () => <div>my-notifications-panel</div> }))
 
 let hasModuleImpl: (key: string) => boolean = () => false
 let permissions: Array<string | { name?: string }> = []
@@ -71,5 +72,28 @@ describe('ProfilePage — WhatsApp Web tab gating', () => {
     render(<ProfilePage />)
     expect(screen.queryByText('profile.mfaNudge.title')).not.toBeInTheDocument()
     mfaFlags = {}
+  })
+})
+
+// Row 32 (Danny 09-09): Mijn meldingen is a personal preference — a profile tab, and the
+// moved settings deep link opens it through the navigation intent.
+describe('ProfilePage — Mijn meldingen tab (row 32)', () => {
+  it('lists the notifications tab and opens the per-user override screen on click', () => {
+    hasModuleImpl = () => false
+    permissions = []
+    render(<ProfilePage />)
+    expect(screen.queryByText('my-notifications-panel')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByText('profile.tabs.notifications'))
+    expect(screen.getByText('my-notifications-panel')).toBeInTheDocument()
+  })
+
+  it('opens the notifications tab directly from a navigation intent', () => {
+    render(<ProfilePage intent={{ tab: 'notifications' }} />)
+    expect(screen.getByText('my-notifications-panel')).toBeInTheDocument()
+  })
+
+  it('ignores an unknown intent tab and stays on the profile tab', () => {
+    render(<ProfilePage intent={{ tab: 'nope' }} />)
+    expect(screen.queryByText('my-notifications-panel')).not.toBeInTheDocument()
   })
 })

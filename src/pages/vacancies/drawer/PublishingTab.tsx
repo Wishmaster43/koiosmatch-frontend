@@ -18,7 +18,9 @@ import type { Id } from '@/types/common'
 type AnyProps = Record<string, unknown>
 const SelectMenu = SelectMenuJs as unknown as ComponentType<AnyProps>
 
-interface ChannelState { value: string; label: string; published: boolean }
+// `locked` (row 36, Danny 09-09): the tenant set the channel always-on — the switch
+// renders checked + disabled, select-all skips it and a toggle on it is refused.
+interface ChannelState { value: string; label: string; published: boolean; locked: boolean }
 
 const APP_FIELDS = ['cv', 'cover_letter', 'photo', 'remarks', 'interview_consent']
 
@@ -63,14 +65,21 @@ export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: Vacan
   // every channel (untouched ones stay off, never silently re-enabled).
   const hasSavedChannelState = (v.channels ?? []).length > 0
   const publishedMap: Record<string, unknown> = Object.fromEntries((v.channels ?? []).map(c => [c.value, c.published]))
+  // A channel is locked when the tenant flag says so OR the vacancy's own row came back
+  // `locked` (VacancyDetailResource) — either way it is on and not switchable here.
+  const lockedMap: Record<string, unknown> = Object.fromEntries((v.channels ?? []).map(c => [c.value, c.locked]))
   // Build the merged channel list from the current vacancy's own saved state.
   const buildChannels = (): ChannelState[] => channelLookup
     .filter(c => c.active !== false)
-    .map(c => ({
-      value: c.value,
-      label: c.label,
-      published: hasSavedChannelState ? Boolean(publishedMap[c.value]) : Boolean(c.default_enabled),
-    }))
+    .map(c => {
+      const locked = Boolean(c.locked_on) || Boolean(lockedMap[c.value])
+      return {
+        value: c.value,
+        label: c.label,
+        locked,
+        published: locked || (hasSavedChannelState ? Boolean(publishedMap[c.value]) : Boolean(c.default_enabled)),
+      }
+    })
   const [channels, setChannels] = useState<ChannelState[]>(buildChannels)
   // Vacancy's own settings win; the tenant default fills any gap.
   const buildSettings = (): Record<string, unknown> => ({ ...tenantDefaults, ...((v.applicationSettings ?? {}) as Record<string, unknown>) })
@@ -89,20 +98,25 @@ export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: Vacan
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [v.id])
 
+  // The persisted shape is value/label/published only — `locked` is panel state the
+  // backend derives itself (ChannelPolicy::reconcile), never a field we send.
+  const persistable = (cs: ChannelState[]) => cs.map(({ value, label, published }) => ({ value, label, published }))
   // Toggle a channel's published state and persist the full channel set.
   const toggleChannel = (value: string, next: boolean) => {
+    // An always-on channel refuses the flip (its switch is disabled; this is the belt).
+    if (channels.find(c => c.value === value)?.locked) return
     const updated = channels.map(c => c.value === value ? { ...c, published: next } : c)
     setChannels(updated)
-    onUpdate?.(v.id, { channels: updated })
+    onUpdate?.(v.id, { channels: persistable(updated) })
   }
   // S-selectall-1: batch-flip the given channels in ONE persisted patch (never a
   // per-channel loop — toggleChannel above reads `channels` from the render
   // closure, so a loop of single calls would only keep the LAST iteration's write).
   const toggleAllChannels = (values: string[], select: boolean) => {
     const set = new Set(values)
-    const updated = channels.map(c => set.has(c.value) ? { ...c, published: select } : c)
+    const updated = channels.map(c => set.has(c.value) && !c.locked ? { ...c, published: select } : c)
     setChannels(updated)
-    onUpdate?.(v.id, { channels: updated })
+    onUpdate?.(v.id, { channels: persistable(updated) })
   }
   // Set an application-field requirement (required|optional|hidden) and persist.
   const setField = (field: string, value: unknown) => {
@@ -162,8 +176,8 @@ export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: Vacan
           {/* S-selectall-1: alles/niets above the channel list — same shared
               SelectAllRow contract PublicationCard uses in the create modal. */}
           <SelectAllRow
-            visibleValues={channels.map(c => c.value)}
-            selectedValues={channels.filter(c => c.published).map(c => c.value)}
+            visibleValues={channels.filter(c => !c.locked).map(c => c.value)}
+            selectedValues={channels.filter(c => c.published && !c.locked).map(c => c.value)}
             onApply={toggleAllChannels}
           />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8, marginBottom: 20 }}>
@@ -181,7 +195,8 @@ export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: Vacan
                   <span style={{ fontSize: 12, color: 'var(--text)' }}>{c.label}</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontSize: 11, color: statusColor }}>{statusLabel}</span>
-                    <Toggle checked={c.published} onChange={next => toggleChannel(c.value, next)} ariaLabel={c.label} />
+                    <Toggle checked={c.published} disabled={c.locked} title={c.locked ? t('publishing.lockedOn') : undefined}
+                      onChange={next => toggleChannel(c.value, next)} ariaLabel={c.label} />
                   </div>
                 </div>
               )

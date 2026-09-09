@@ -166,7 +166,7 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
 
     // ── Core ──────────────────────────────────────────────────────────────
     case 'dashboard':   return <Dashboard onNavigate={goTo} viewType={dashView} />
-    case 'profile':     return <ProfilePage />
+    case 'profile':     return <ProfilePage intent={navIntent} />
     case 'users':       return <UsersPage />
     case 'settings':    return <SettingsPage />
 

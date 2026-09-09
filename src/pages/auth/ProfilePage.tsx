@@ -4,9 +4,9 @@
  * each tab to its own component. The header avatar is uploadable. Tabs:
  * Profile / Email / Display / WhatsApp Web / Security.
  */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation }      from 'react-i18next'
-import { User, Mail, Sun, Camera, Shield, MessageCircle } from 'lucide-react'
+import { User, Mail, Sun, Camera, Shield, MessageCircle, Bell } from 'lucide-react'
 import { useTheme }           from '@/context/ThemeContext'
 import { useAuth }            from '@/context/AuthContext'
 import Avatar                 from '@/components/ui/Avatar'
@@ -17,6 +17,7 @@ import { mfaSignals }         from '@/lib/mfaGate'
 import ProfileEmailConnect    from './ProfileEmailConnect'
 import ProfileWhatsAppWeb      from './ProfileWhatsAppWeb'
 import SecuritySettings        from '../settings/sections/SecuritySettings'
+import MyNotificationsSettings from '../settings/sections/MyNotificationsSettings'
 import { Section, ProfileTabs } from './profileParts'
 import ProfileDetailsTab       from './ProfileDetailsTab'
 import ProfileDisplayTab       from './ProfileDisplayTab'
@@ -38,13 +39,20 @@ function hasWhatsappWebPagePermission(auth: ReturnType<typeof useAuth>): boolean
   return pagePerms.length === 0 || pagePerms.some((p) => nameOf(p) === 'page.whatsapp')
 }
 
+// The tab ids a navigation intent may open (row 32: the moved Mijn meldingen deep link).
+const PROFILE_TABS = ['profile', 'email', 'display', 'notifications', 'whatsapp', 'security']
+const tabFromIntent = (intent?: { tab?: string } | null): string =>
+  intent?.tab && PROFILE_TABS.includes(intent.tab) ? intent.tab : 'profile'
+
 // The profile page container: form/avatar state + tab routing.
-export default function ProfilePage() {
+export default function ProfilePage({ intent = null }: { intent?: { tab?: string } | null }) {
   const { t } = useTranslation('auth')
   const { t: tSettings } = useTranslation('settings')
   const { theme, setTheme, language, setLanguage } = useTheme()
   const auth = useAuth()
-  const [tab, setTab] = useState('profile')
+  const [tab, setTab] = useState(() => tabFromIntent(intent))
+  // A later intent (already on the page, a deep link arrives) re-picks the tab.
+  useEffect(() => { if (intent?.tab) setTab(tabFromIntent(intent)) }, [intent])
 
   // Data layer: the profile form (synced from /auth/me), save, and avatar upload/remove.
   const { user, form, setForm, set, saving, saved, error, handleSave, savePageSize,
@@ -60,6 +68,9 @@ export default function ProfilePage() {
     { id: 'profile',  label: t('profile.tabs.profile'), icon: User },
     { id: 'email',    label: t('profile.tabs.email'),   icon: Mail },
     { id: 'display',  label: t('profile.tabs.display'), icon: Sun },
+    // Row 32 (Danny 09-09): the caller's own notification overrides are a personal
+    // preference, so they live here and not under the tenant settings.
+    { id: 'notifications', label: t('profile.tabs.notifications'), icon: Bell },
     ...(showWhatsAppWeb ? [{ id: 'whatsapp', label: t('profile.whatsappWeb.title'), icon: MessageCircle }] : []),
     { id: 'security', label: tSettings('nav.security'), icon: Shield },
   ]
@@ -128,6 +139,8 @@ export default function ProfilePage() {
           <ProfileEmailConnect />
         </Section>
       )}
+
+      {tab === 'notifications' && <MyNotificationsSettings />}
 
       {tab === 'whatsapp' && showWhatsAppWeb && (
         <Section title={t('profile.whatsappWeb.title')}>

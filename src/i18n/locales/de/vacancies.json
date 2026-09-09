@@ -340,7 +340,8 @@
       "sites": "Stellenbörsen"
     },
     "siteLive": "Die öffentliche Karriereseite ist live. Diese Schalter bestimmen, was dort jetzt veröffentlicht wird, einschließlich der Indeed- und Werkzoeken-Feeds.",
-    "siteOffline": "Die öffentliche Karriereseite ist derzeit ausgeschaltet (Einstellungen → Karriereseite). Diese Schalter legen fest, was live geht, sobald sie aktiviert ist."
+    "siteOffline": "Die öffentliche Karriereseite ist derzeit ausgeschaltet (Einstellungen → Karriereseite). Diese Schalter legen fest, was live geht, sobald sie aktiviert ist.",
+    "lockedOn": "Immer an. Änderbar unter Einstellungen, Jobbörsen & Veröffentlichungskanäle."
   },
   "applicants": {
     "title": "Bewerbungen",

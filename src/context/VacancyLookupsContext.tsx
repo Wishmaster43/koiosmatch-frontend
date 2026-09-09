@@ -27,7 +27,9 @@ import { translateSeedList } from '../lib/lookupSeedI18n'
 // `active`/`default_enabled` (CHANNEL-FLAGS-1, round-4 audit finding #3) are
 // channel-only: whether the job board is still offered, and whether a new
 // vacancy's publish panel pre-checks it (PublishingTab reads both).
-export interface VacancyLookupItem { value: string; label: string; color?: string; is_default?: boolean; active?: boolean; default_enabled?: boolean; [k: string]: unknown }
+// `locked_on` (row 36, Danny 09-09): the channel is always on — every vacancy's own
+// switch renders checked + disabled and the backend coerces the write.
+export interface VacancyLookupItem { value: string; label: string; color?: string; is_default?: boolean; active?: boolean; default_enabled?: boolean; locked_on?: boolean; [k: string]: unknown }
 
 interface VacancyLookupsValue {
   statuses: VacancyLookupItem[]
@@ -129,6 +131,7 @@ function normalize(raw: unknown, fallback: VacancyLookupItem[], pinId = false): 
       is_default: truthy(it.is_default),
       active: it.active !== false,
       default_enabled: truthy(it.default_enabled ?? true),
+      locked_on: truthy(it.locked_on),
     }))
 }
 
