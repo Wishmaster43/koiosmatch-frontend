@@ -27,7 +27,6 @@ import { useTranslation } from 'react-i18next'
 import type { ComponentType } from 'react'
 import { BadgeCheck } from 'lucide-react'
 import AddableSectionJs from '@/components/forms/AddableSection'
-import SafeHtml from '@/components/ui/SafeHtml'
 import SoftChip from '@/components/ui/SoftChip'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import DrawerAddButton from './DrawerAddButton'
@@ -40,7 +39,7 @@ import { LinkedExperienceLine, NoExperiencesNotice } from './LinkedExperience'
 import { useDateFormat } from '@/lib/datetime'
 import { useReferenceRelations } from '@/lib/useReferenceRelations'
 // DOC-EDU-1 mirror: the shared DocEntryLinks component (preview/download/jump buttons).
-import { DocEntryLinks } from './sectionTabsShared'
+import { DocEntryLinks, ProseField } from './sectionTabsShared'
 // DOC-1-EIGENAAR-1: the ONE shared option resolver every claimable section uses (§11)
 // — so all five sections offer exactly the same set of still-free documents.
 import { linkedDocumentOptions } from './documentLinkRules'
@@ -87,18 +86,6 @@ interface ReferencesTabProps {
 // the server has never heard of.
 const isPersisted = (id: unknown): id is string | number =>
   (typeof id === 'string' && id.length > 0) || (typeof id === 'number' && id > 0)
-
-/** Read-only prose line for the note field — the shared house rule (§3A): every
- * free-text field renders through SafeHtml, never a bare textarea in read mode. */
-function NoteField({ value }: { value?: string }) {
-  return (
-    <div style={{ marginTop: 6 }}>
-      {value
-        ? <SafeHtml html={value} style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }} />
-        : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>}
-    </div>
-  )
-}
 
 /**
  * DOC-EDU-1 mirror, inlined here since ReferencesTab is a standalone file (out
@@ -234,7 +221,7 @@ export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onV
               <SectionTitle as="div">{name || '-'}</SectionTitle>
               {secondary && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{secondary}</div>}
               {contact && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{contact}</div>}
-              <NoteField value={r.note} />
+              <ProseField value={r.note} />
               {/* REF-ERVARING-1: the linked experience reads as one calm line —
                   "werkgever · functie · periode", "heden" for a running job. */}
               {linkedExperience && <LinkedExperienceLine experience={linkedExperience} />}

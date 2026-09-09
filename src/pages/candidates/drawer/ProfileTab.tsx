@@ -14,13 +14,14 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ComponentType, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Edit2, Save, X, Trash2, ExternalLink } from 'lucide-react'
+import { Trash2, ExternalLink } from 'lucide-react'
 import { useTextPopoutHost } from '@/hooks/useTextPopoutHost'
 import { useSeedText } from '@/lib/demoSeedTexts'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
 // HUISSTIJL-1: the shared uppercase group-label atom (identity-only swap).
 import { GroupLabel } from '@/components/ui/typography'
+import { EditControls } from './profileFieldShared'
 import ProfilePersonalTab from './ProfilePersonalTab'
 import ProfileAddressTab from './ProfileAddressTab'
 import ProfileContactTab from './ProfileContactTab'
@@ -87,20 +88,6 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal, onContactMom
 
   const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
   const blockStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }
-  const editControls = (isEditing: boolean, onSave: () => void, onCancel: () => void, onStart: () => void) => isEditing ? (
-    <div style={{ display: 'flex', gap: 4 }}>
-      <Button variant="primary" size="sm" iconOnly onClick={onSave} title={t('common:save')} aria-label={t('common:save')}>
-        <Save size={13} />
-      </Button>
-      <Button variant="secondary" size="sm" iconOnly onClick={onCancel} title={t('common:cancel')} aria-label={t('common:cancel')}>
-        <X size={13} />
-      </Button>
-    </div>
-  ) : (
-    <Button variant="secondary" size="sm" iconOnly onClick={onStart} title={t('common:edit')} aria-label={t('common:edit')}>
-      <Edit2 size={13} />
-    </Button>
-  )
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -142,7 +129,7 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal, onContactMom
             <Button variant="secondary" size="sm" iconOnly onClick={openSummaryPopout} title={t('common:openSecondScreen')} aria-label={t('common:openSecondScreen')}>
               <ExternalLink size={13} />
             </Button>
-            {editControls(summaryEditing, saveSummary, cancelSummary, () => setSummaryEditing(true))}
+            <EditControls editing={summaryEditing} onSave={saveSummary} onCancel={cancelSummary} onStart={() => setSummaryEditing(true)} />
           </div>
         </div>
         {summaryEditing
