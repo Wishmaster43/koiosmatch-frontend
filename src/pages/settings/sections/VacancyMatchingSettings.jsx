@@ -17,7 +17,8 @@
 import { useState, useEffect, useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Save, Check } from 'lucide-react'
-import api, { unwrap, unwrapList } from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
+import { mapRoles } from './vacancyMatchingRoles'
 import { saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
 import Slider from '@/components/ui/Slider'
@@ -36,13 +37,6 @@ const MODES = [
   { value: 'on_deviation', key: 'deviation' },
   { value: 'always', key: 'always' },
 ]
-
-// GET /roles → picker rows. unwrapList reads the measured bare array AND a {data}
-// envelope, so a later Resource wrap cannot empty the picker again (SMZ-04).
-// eslint-disable-next-line react-refresh/only-export-components -- pure mapper exported for the contract test
-export function mapRoles(resp) {
-  return unwrapList(resp).rows.map(r => ({ name: r.name, label: r.label || r.name }))
-}
 
 // Settings screen for the global matching strictness slider, the match-approval
 // mode, and vacancy leads notification settings; per-vacancy dimension weights
@@ -98,8 +92,7 @@ export default function VacancyMatchingSettings() {
       .catch(() => { if (alive) { setLoadError(true); notifyError(t('statusList.loadError')) } })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- `t` from useTranslation is stable in the app; excluding it avoids a re-fetch loop
-  }, [])
+  }, [t])
 
   // Persist the strictness (its own resource) and the two notify keys (their owner,
   // POST /settings), flashing the saved-check briefly on success.

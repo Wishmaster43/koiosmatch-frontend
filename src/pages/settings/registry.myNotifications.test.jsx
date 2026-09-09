@@ -8,7 +8,7 @@
  */
 import { describe, it, expect } from 'vitest'
 import { NAV_GROUPS } from './registry'
-import { MOVED_TO_PROFILE } from './SettingsPage'
+import { MOVED_TO_PROFILE } from './movedToProfile'
 import settingsNl from '@/i18n/locales/nl/settings.json'
 import settingsEn from '@/i18n/locales/en/settings.json'
 import settingsDe from '@/i18n/locales/de/settings.json'

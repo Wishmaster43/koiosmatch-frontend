@@ -14,7 +14,8 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
-import VacancyMatchingSettings, { mapRoles } from './VacancyMatchingSettings'
+import VacancyMatchingSettings from './VacancyMatchingSettings'
+import { mapRoles } from './vacancyMatchingRoles'
 
 // Keep the real unwrap/unwrapList (importActual) — only the default client is stubbed.
 vi.mock('@/lib/api', async () => {

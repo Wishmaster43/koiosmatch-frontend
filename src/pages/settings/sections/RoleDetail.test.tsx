@@ -35,8 +35,7 @@ vi.mock('@/lib/useLocations', () => ({ useLocations: () => [] }))
 
 afterEach(() => vi.clearAllMocks())
 
-// eslint-disable-next-line no-restricted-syntax -- DATA: a fixture role's tenant-picked colour, not a style rule.
-const ROLE: Role = { id: 'r1', name: 'recruiter', color: '#3B8FD4', icon: 'shield', users_count: 0,
+const ROLE: Role = { id: 'r1', name: 'recruiter', color: 'var(--color-primary)', icon: 'shield', users_count: 0,
   permissions: [{ name: 'candidates.view' }] }
 const PERMISSIONS: PermissionsByGroup = {
   candidates: [{ name: 'candidates.view' }, { name: 'candidates.create' }],

@@ -21,6 +21,7 @@ import { canAccessPage } from '@/lib/access'
 import { useConfirm } from '@/hooks/useConfirm'
 import { NAV_GROUPS } from './registry'
 import { useNavigation } from '@/context/NavigationContext'
+import { MOVED_TO_PROFILE } from './movedToProfile'
 import { SettingsDirtyContext } from './lib/settingsDirty'
 import SettingItem from './components/SettingItem'
 import SettingsTabs from './components/SettingsTabs'
@@ -68,14 +69,6 @@ const SLUG_ALIASES = {
   // into the Integraties group — old bookmarks keep landing on the moved section.
   'modules/mod_shiftmanager': { category: 'integrations', tab: 'shiftmanager' },
   'modules/hf_contract_map': { category: 'integrations', tab: 'helloflex' },
-}
-
-// Settings slugs whose screen moved OUT of settings (row 32, Danny 09-09: Mijn
-// meldingen is a personal preference and lives on the profile). The old deep link
-// keeps resolving: SettingsPage sends it to the profile page with the tab intent.
-// eslint-disable-next-line react-refresh/only-export-components -- pure map exported for the deep-link regression test (mirrors parseHash below)
-export const MOVED_TO_PROFILE = {
-  'notifications/notif_my': { tab: 'notifications' },
 }
 
 // Parses the location hash into {category, tab}, accepting both the #settings/ prefix and legacy unprefixed links, and rewriting renamed slugs via SLUG_ALIASES.
@@ -172,8 +165,7 @@ export default function SettingsPage() {
     redirectIfMoved()
     window.addEventListener('hashchange', redirectIfMoved)
     return () => window.removeEventListener('hashchange', redirectIfMoved)
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- nav is the stable shell context
-  }, [])
+  }, [nav])
 
   // Apply the actual navigation — shared by the guarded and unguarded paths.
   const applyNav = (groupKey, tabId) => {

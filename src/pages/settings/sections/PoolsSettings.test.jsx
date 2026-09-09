@@ -19,8 +19,7 @@ vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() })
 
 const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
 
-// eslint-disable-next-line no-restricted-syntax -- DATA: a fixture pool's tenant-picked colour, not a style rule.
-const pool = (over = {}) => ({ id: 'p1', name: 'Zorg pool', color: '#3B8FD4', icon: '', in_use: false, ...over })
+const pool = (over = {}) => ({ id: 'p1', name: 'Zorg pool', color: 'var(--color-primary)', icon: '', in_use: false, ...over })
 
 afterEach(() => vi.clearAllMocks())
 
