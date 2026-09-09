@@ -44,10 +44,10 @@ import { useDateFormat } from '@/lib/datetime'
 import { sectionBlock } from '@/components/ui/SectionCard'
 import { useEntityDocuments, type EntityDoc } from '@/hooks/useEntityDocuments'
 import { useBulkDocumentDelete } from '@/hooks/useBulkDocumentDelete'
+import { useDocumentFiltering } from '@/hooks/useDocumentFiltering'
 import { useDocumentLinkPicker } from '../hooks/useDocumentLinkPicker'
 import { useDocumentUploadQueue } from '../hooks/useDocumentUploadQueue'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
-import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 // DOC-FILTER-PARITY-1 (08-08): the shared search-box + searchable TYPE filter
 // combo the candidate documents section already has — reused here verbatim,
@@ -58,10 +58,12 @@ import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
 // text+Plus button below; same click target (opens the hidden file input).
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import Button from '@/components/ui/Button'
+import DocumentDeleteDialog from '@/components/drawer/DocumentDeleteDialog'
 import PendingUploadCard from './PendingUploadCard'
 import DocumentRow from './DocumentRow'
 import { DOC_GRID_COLUMNS, docKey, docUrl, splitExt } from '../hooks/documentsTabUtils'
 import type { Id } from '@/types/common'
+import { docTypeFilterRow } from '@/lib/documentFilterRow'
 
 interface DocumentsTabProps {
   customerId: Id | undefined
@@ -127,11 +129,10 @@ export default function DocumentsTab({ customerId, locations = [], departments =
 
   // Rows currently visible under the search filter, with their original index kept.
   // DOC-FILTER-PARITY-1: the type filter narrows further, after the free-text search.
-  const filteredDocs = docs.map((d, i) => ({ ...d, _i: i }))
-    .filter(d => !docSearch || (d.name ?? d.file_name ?? '').toLowerCase().includes(docSearch.toLowerCase()) || (d.type ?? '').toLowerCase().includes(docSearch.toLowerCase()))
-    .filter(d => !docTypeFilter || (d.type ?? '') === docTypeFilter)
-  const filteredDownloadableKeys = filteredDocs.filter(d => docUrl(d)).map(d => docKey(d, d._i))
-  const allFilteredSelected = filteredDownloadableKeys.length > 0 && filteredDownloadableKeys.every(k => selected.has(k))
+  const { filteredDocs, filteredDownloadableKeys, allFilteredSelected: isAllFiltered } = useDocumentFiltering({
+    docs, docSearch, docTypeFilter, docUrl, docKey,
+  })
+  const allFilteredSelected = isAllFiltered(selected)
 
   // Select-all toggles every currently-filtered downloadable row at once.
   const toggleSelectAll = () => {
@@ -165,11 +166,7 @@ export default function DocumentsTab({ customerId, locations = [], departments =
   // DOC-FILTER-PARITY-1: the type filter row, behind the shared DrawerFilterMenu —
   // self-hides when the tenant has no document types configured for this scope
   // (DrawerFilterMenu renders null on empty).
-  const filterRows: DrawerFilterConfig[] = docTypes.length > 0 ? [{
-    type: 'single', key: 'docType', label: t('documents.type'), value: docTypeFilter, onChange: setDocTypeFilter,
-    allLabel: t('documents.allTypes'),
-    options: docTypes.map(dt => ({ value: String(dt.value ?? ''), label: docTypeLabel(String(dt.value ?? '')) })),
-  }] : []
+  const filterRows: DrawerFilterConfig[] = docTypeFilterRow(t, docTypes, docTypeFilter, setDocTypeFilter, docTypeLabel)
 
   return (
     <div>
@@ -247,14 +244,13 @@ export default function DocumentsTab({ customerId, locations = [], departments =
             hardcoded 'customer' once a location/department has its own scope. */}
         {previewDoc && <DocPreviewModal doc={previewDoc} docTypeScope={docTypeScope} onClose={() => setPreviewDoc(null)} />}
         {/* One shared destructive-confirm dialog for both single and bulk delete (never a native confirm()). */}
-        <ConfirmDialog
-          open={!!confirmDelete}
-          danger
+        <DocumentDeleteDialog
+          open={confirmDelete}
+          onConfirm={confirmDeleteAction}
+          onCancel={() => setConfirmDelete(null)}
           title={t('documents.deleteTitle')}
           message={confirmDelete?.kind === 'many' ? t('documents.deleteManyMessage', { count: selected.size }) : t('documents.deleteOneMessage', { name: confirmDeleteName })}
           confirmLabel={t('common:remove')}
-          onConfirm={confirmDeleteAction}
-          onCancel={() => setConfirmDelete(null)}
         />
       </div>
     </div>

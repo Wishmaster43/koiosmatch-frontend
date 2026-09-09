@@ -16,6 +16,7 @@ import { useDocumentTypes } from '@/lib/useDocumentTypes'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import { useAuth } from '@/context/AuthContext'
 import { useBulkDocumentDelete } from '@/hooks/useBulkDocumentDelete'
+import { useDocumentFiltering } from '@/hooks/useDocumentFiltering'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
 import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
@@ -26,7 +27,7 @@ import DocumentRow from './DocumentRow'
 import { hasSelectableEntry } from './documentLinkRules'
 import { docKey, docUrl, splitExt, DOC_GRID_COLUMNS } from './documentHelpers'
 import type { DocItem } from './documentHelpers'
-import ConfirmDialog from '@/components/ui/ConfirmDialog'
+import DocumentDeleteDialog from '@/components/drawer/DocumentDeleteDialog'
 import { useCandidateDocuments } from './hooks/useCandidateDocuments'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
@@ -88,11 +89,10 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
   const replaceFileRef = useRef<HTMLInputElement>(null)
 
   // Rows currently visible under the search filter, with their original index kept.
-  const filteredDocs = docs.map((d, i) => ({ ...d, _i: i }))
-    .filter(d => !docSearch || (d.name ?? d.file_name ?? '').toLowerCase().includes(docSearch.toLowerCase()) || (d.type ?? '').toLowerCase().includes(docSearch.toLowerCase()))
-    .filter(d => !docTypeFilter || (d.type ?? '') === docTypeFilter)
-  const filteredDownloadableKeys = filteredDocs.filter(d => docUrl(d)).map(d => docKey(d, d._i))
-  const allFilteredSelected = filteredDownloadableKeys.length > 0 && filteredDownloadableKeys.every(k => selected.has(k))
+  const { filteredDocs, filteredDownloadableKeys, allFilteredSelected: isAllFiltered } = useDocumentFiltering({
+    docs, docSearch, docTypeFilter, docUrl, docKey,
+  })
+  const allFilteredSelected = isAllFiltered(selected)
 
   // Select-all toggles every currently-filtered downloadable row at once.
   const toggleSelectAll = () => {
@@ -255,14 +255,13 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
         }} />
       {previewDoc && <DocPreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)} />}
       {/* One shared destructive-confirm dialog for both single and bulk delete (never a native confirm()). */}
-      <ConfirmDialog
-        open={!!confirmDelete}
-        danger
+      <DocumentDeleteDialog
+        open={confirmDelete}
+        onConfirm={confirmDeleteAction}
+        onCancel={() => setConfirmDelete(null)}
         title={t('documents.deleteTitle')}
         message={confirmDelete?.kind === 'many' ? t('documents.deleteManyMessage', { count: selected.size }) : t('documents.deleteOneMessage', { name: confirmDeleteName })}
         confirmLabel={t('common:remove')}
-        onConfirm={confirmDeleteAction}
-        onCancel={() => setConfirmDelete(null)}
       />
       </div>
     </div>

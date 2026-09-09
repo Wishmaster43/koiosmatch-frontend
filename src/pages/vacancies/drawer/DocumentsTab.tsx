@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, X, Download, Trash2 } from 'lucide-react'
+import { useDocumentFiltering } from '@/hooks/useDocumentFiltering'
 import type { VacancyDetail } from '@/types/vacancy'
 import { useEntityDocuments } from '@/hooks/useEntityDocuments'
 import { useDocumentTypes } from '@/lib/useDocumentTypes'
@@ -28,6 +29,7 @@ import Button from '@/components/ui/Button'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 // HUISSTIJL-1: the doc-type hint line (11px/muted) is the shared Caption atom.
 import { Caption } from '@/components/ui/typography'
+import { docTypeFilterRow } from '@/lib/documentFilterRow'
 
 // Hoisted: an inline accent literal under background: false-fires the accent-fill selector.
 const ACCENT = 'var(--color-primary)'
@@ -115,11 +117,10 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
   // mirrors the candidate documents section's own filtering logic exactly. `_i` keeps
   // the row's index into the unfiltered `docs` so rename/delete/select always target
   // the right record even while a filter is active.
-  const filteredDocs = docs.map((d, i) => ({ ...d, _i: i }))
-    .filter(d => (!docSearch || (d.name ?? '').toLowerCase().includes(docSearch.toLowerCase()) || (d.type ?? '').toLowerCase().includes(docSearch.toLowerCase())) &&
-      (!docTypeFilter || (d.type ?? '') === docTypeFilter))
-  const filteredDownloadableKeys = filteredDocs.filter(d => docUrl(d)).map(d => docKey(d, d._i))
-  const allFilteredSelected = filteredDownloadableKeys.length > 0 && filteredDownloadableKeys.every(k => selected.has(k))
+  const { filteredDocs, filteredDownloadableKeys, allFilteredSelected: isAllFiltered } = useDocumentFiltering({
+    docs, docSearch, docTypeFilter, docUrl, docKey,
+  })
+  const allFilteredSelected = isAllFiltered(selected)
 
   // Select-all toggles every currently-filtered downloadable row at once.
   const toggleSelectAll = () => {
@@ -172,11 +173,7 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
 
   // The type filter row, behind the shared DrawerFilterMenu — self-hides when the
   // tenant has no document types configured (DrawerFilterMenu renders null on empty).
-  const filterRows: DrawerFilterConfig[] = docTypes.length > 0 ? [{
-    type: 'single', key: 'docType', label: t('documents.type'), value: docTypeFilter, onChange: setDocTypeFilter,
-    allLabel: t('documents.allTypes'),
-    options: docTypes.map(dt => ({ value: String(dt.value ?? ''), label: docTypeLabel(String(dt.value ?? '')) })),
-  }] : []
+  const filterRows: DrawerFilterConfig[] = docTypeFilterRow(t, docTypes, docTypeFilter, setDocTypeFilter, docTypeLabel)
 
   // No linkable entries on a vacancy (the link cluster is a candidate-only axis) —
   // passed through unconditionally so DocumentRow renders no link controls at all.
