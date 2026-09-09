@@ -19,7 +19,7 @@ import { OrderedListField } from './fieldControls/OrderedListField'
 import { InstructionListField } from './fieldControls/InstructionListField'
 import type { InstructionOutputField } from './filterFieldCatalog'
 import type { OnChange } from './fieldControls/types'
-import { KeyValueField, GroupField } from './groupKeyValueFields'
+import { KeyValueField } from './groupKeyValueFields'
 import { FunctionMatrixField } from './fieldControls/FunctionMatrixField'
 import Button from '@/components/ui/Button'
 import { TextExpandModal } from './fieldControls/TextExpandModal'
@@ -179,10 +179,6 @@ export function FieldInput({ field, value, onChange, variables, config, instruct
     // shift_score's functie_matrix (OL:13 + AF:module-schema-reconcile-9) — a nested
     // record mapping position-name -> {primary: string[], secondary: string[]}.
     return <FunctionMatrixField value={value} onChange={onChange} fieldKey={field.key} />
-  }
-  if (field.type === 'group') {
-    // WA-SEND-FIELDS-2: a titled sub-card per named sub-field (after_send_updates).
-    return <GroupField field={field} value={value} onChange={onChange} />
   }
   if (field.type === 'keyvalue') {
     const pairs = (Array.isArray(value) ? value : []) as Array<{ name?: string; value?: string }>

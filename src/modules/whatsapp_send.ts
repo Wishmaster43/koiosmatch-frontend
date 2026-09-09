@@ -3,7 +3,6 @@ import { MessageCircle } from 'lucide-react'
 // HUISSTIJL-1: the §4 soft-tint formula lives in lib/tint, never a hand-rolled
 // color-mix literal per module (herhaal-slotaudit r3).
 import { tint } from '@/lib/tint'
-import type { SchemaField } from './types'
 import { MESSAGING_LANGUAGES } from './messagingLanguages'
 
 export default {
@@ -14,11 +13,6 @@ export default {
   Icon:  MessageCircle,
   color: 'var(--module-green)',
   bg:    tint('var(--module-green)', 12),
-  // WA-SEND-FIELDS-2: explicit SchemaField[] — the after_send_updates 'group'
-  // entry's per-sub-field `suggestions` shapes differ (conversation vs
-  // candidate), which without this annotation TS merges into one over-strict
-  // union across the whole array (fails a strict-typed consumer like
-  // whatsappSendChannelLabels.test.tsx's `find()` on an unrelated field).
   schema: [
     // WF-BUILDER-VELDEN-1: WhatsAppSendModule::configSchema()'s tenant-lookup-driven
     // message purpose (message_purposes, same lookup as email_send's `purpose`) — the
@@ -72,7 +66,6 @@ export default {
     { key: 'body_parameters',     label: 'Body parameters',        type: 'ordered_list',
       showIf: { key: 'message_type', value: 'flow' },
       help: 'bijv. {{firstname}} of extra bericht tekst' },
-    { key: 'language',            label: 'Taal',                   type: 'text',    placeholder: 'nl' },
     // Free-form session text — only shown (and sent) for the 'session' format.
     { key: 'session_text',        label: 'Berichttekst (sessie)',  type: 'textarea',
       placeholder: 'Hoi {{firstname}}, …', showIf: { key: 'message_type', value: 'session' } },
@@ -88,34 +81,10 @@ export default {
     // Danny's own message classification (NOT the send format above) — drives queue
     // order in the WABA batch (Wachtrij tab). Tenant lookup, CRUD'd via Settings.
     { key: 'priority_type',       label: 'Berichttype (classificatie)', type: 'lookup_select', endpoint: '/whatsapp-message-types' },
-    // WF-BUILDER-VELDEN-1: a static, closed logging category (WhatsAppSendModule's own
-    // fixed option set — never a tenant lookup, unlike `purpose` above).
-    { key: 'message_category',    label: 'Categorie (voor logging)', type: 'select', options: ['shift_offer','reminder','no_response','general'], default: 'general' },
     // WF-BUILDER-VELDEN-1: idempotency window — the same template is not re-sent to the
     // same candidate inside this many hours (0 = always send).
     { key: 'dedup_hours',         label: 'Niet opnieuw sturen binnen (uren)', type: 'number', default: 24,
       help: 'Idempotentie: dezelfde template gaat binnen dit venster niet nogmaals naar dezelfde kandidaat (0 = altijd sturen).' },
     { key: 'throttle_per_minute', label: 'Max. per minuut',        type: 'number',  placeholder: '30' },
-    // WF-BUILDER-VELDEN-1: P11-FASE4 fail-closed consent gate — sends ONLY when this
-    // bundle field is present AND truthy on the candidate row (missing = no send).
-    { key: 'require_consent_field', label: 'Vereist toestemmingsveld (fail-closed)', type: 'text',
-      help: 'Optioneel. Bijv. whatsapp_consent: verstuur ALLEEN als dit veld op de kandidaatrij aanwezig én waar is (ontbrekend veld = geen verzending).' },
-    // WA-SEND-FIELDS-2: WhatsAppSendModule::configSchema's `after_send_updates`
-    // (lines 641-664) — plain conversation/candidate key->value writes applied
-    // after a successful send (engine reads config.after_send_updates.conversation
-    // / .candidate directly, lines 145-146). No `showIf`: the BE schema does not
-    // gate it, so it stays always visible like its sibling group-less fields.
-    { key: 'after_send_updates', label: 'Database updates na verzending', type: 'group',
-      fields: [
-        { value: 'conversation', label: 'Conversation velden', type: 'key_value', suggestions: {
-          state_shifts_offered: ['AWAITING', 'SENT', 'DONE'],
-          state_shift_reminder: ['AWAITING', 'SENT', 'DONE'],
-          state_no_response: ['AWAITING', 'SENT', 'DONE'],
-          active_intent: ['AWAITING_SHIFTS_OFFERED', 'AWAITING_RESPONSE'],
-        } },
-        { value: 'candidate', label: 'Kandidaat velden', type: 'key_value', suggestions: {
-          last_offered_at: '{{now}}',
-        } },
-      ] },
-  ] as SchemaField[],
+  ],
 }

@@ -130,3 +130,21 @@ describe('ConfigPanel · whatsapp_send wa_web channel branch', () => {
     expect(screen.queryByText('fields.whatsappQueued')).not.toBeInTheDocument()
   })
 })
+
+// WA-MODULE (09-09, points 16-19): Danny named four fields that no longer
+// belong in this panel — pins the RENDERED behaviour (not just the schema
+// keys) so the panel can never reopen them silently.
+describe('ConfigPanel · whatsapp_send no longer renders the four removed fields', () => {
+  it('renders none of the Taal/Categorie/Vereist toestemmingsveld/Database updates labels', () => {
+    const node: FlowNode = { id: 'n1', position: { x: 0, y: 0 }, data: { type: 'whatsapp_send', config: {} } }
+    render(
+      <I18nextProvider i18n={i18n}>
+        <ConfigPanel node={node} onUpdate={vi.fn()} onDelete={vi.fn()} />
+      </I18nextProvider>,
+    )
+    expect(screen.queryByText('Taal', { selector: 'label' })).not.toBeInTheDocument()
+    expect(screen.queryByText('Categorie (voor logging)', { selector: 'label' })).not.toBeInTheDocument()
+    expect(screen.queryByText('Vereist toestemmingsveld (fail-closed)', { selector: 'label' })).not.toBeInTheDocument()
+    expect(screen.queryByText('Database updates na verzending', { selector: 'label' })).not.toBeInTheDocument()
+  })
+})

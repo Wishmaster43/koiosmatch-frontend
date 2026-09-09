@@ -58,14 +58,16 @@ describe('WF-MODULE-RECONCILE-FE-1 · the eight engine modules get a registry ca
  * fails loudly instead of silently reopening the gap.
  */
 const EXPECTED_SCHEMA_KEYS: Record<string, string[]> = {
-  // WA-SEND-FIELDS-2: body_parameters (ordered_list) and after_send_updates
-  // (group of key_value, GroupField/KeyValueField) both have real FE controls
-  // now and are pinned below. header_variables/variables are written by the
-  // composite WhatsappTemplateField.
+  // WA-SEND-FIELDS-2: body_parameters (ordered_list) has a real FE control and
+  // is pinned below. header_variables/variables/language are written by the
+  // composite WhatsappTemplateField (the template carries its own language).
+  // WA-MODULE (09-09, points 16-19): language, message_category,
+  // require_consent_field and after_send_updates are removed from the panel
+  // (see whatsapp_send.ts comments) so they are deliberately absent here too.
   whatsapp_send: [
-    'purpose', 'message_type', 'channel', 'whatsapp_number_id', 'phone_number_id', 'template_name', 'language',
-    'message_category', 'priority_type', 'dedup_hours', 'require_consent_field',
-    'throttle_per_minute', 'recipient_field', 'session_text', 'body_parameters', 'after_send_updates',
+    'purpose', 'message_type', 'channel', 'whatsapp_number_id', 'phone_number_id', 'template_name',
+    'priority_type', 'dedup_hours',
+    'throttle_per_minute', 'recipient_field', 'session_text', 'body_parameters',
   ],
   email_send: ['subject', 'body', 'sender_context', 'purpose', 'skip_if_consent_field', 'recipient_role'],
   notification_send: ['title', 'body', 'recipients', 'role', 'user_ids', 'type', 'link_entity'],
@@ -94,6 +96,16 @@ describe('WF-BUILDER-VELDEN-1 · registry config-schema mirrors the engine exact
     const keys = (MODULE_SCHEMAS.email_send ?? []).map(f => f.key)
     expect(keys).not.toContain('to')
     expect(keys).not.toContain('template')
+  })
+
+  // WA-MODULE (09-09, points 16-19): pins the removal so a future registry
+  // edit cannot silently reopen these four fields Danny explicitly killed.
+  it('whatsapp_send no longer carries language/message_category/require_consent_field/after_send_updates', () => {
+    const keys = (MODULE_SCHEMAS.whatsapp_send ?? []).map(f => f.key)
+    expect(keys).not.toContain('language')
+    expect(keys).not.toContain('message_category')
+    expect(keys).not.toContain('require_consent_field')
+    expect(keys).not.toContain('after_send_updates')
   })
 
   it("notification_send's recipients options include 'users' (required for user_ids to be reachable)", () => {

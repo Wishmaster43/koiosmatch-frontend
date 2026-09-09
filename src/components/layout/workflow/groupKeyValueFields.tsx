@@ -1,13 +1,12 @@
 /**
- * KeyValueField + GroupField — WA-SEND-FIELDS-2's 'key_value' and 'group' field
- * kit citizens. Extracted from fieldControls/ (§3 400-line split trigger) —
- * these two stay a pair since GroupField renders KeyValueField per sub-field.
+ * KeyValueField — the 'key_value' field kit citizen (a plain key->value record
+ * control, e.g. shift_score's punten/klant_aanpassingen). GroupField (the
+ * 'group' type) was removed with WA-MODULE point 19: after_send_updates was
+ * its only registry consumer and no module declares a 'group' field any more.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
-import type { WorkflowField, FieldOption } from '@/types/workflow'
-import { fieldLabel } from './moduleI18n'
 import type { OnChange } from './fieldControls/types'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
@@ -105,33 +104,6 @@ export function KeyValueField({ value, onChange, fieldKey, suggestions }: {
       {isDuplicate && <Caption style={{ color: 'var(--color-danger-text)' }}>{t('fields.duplicateKey')}</Caption>}
       {/* One pending row at a time: the record cannot hold two empty keys. */}
       <DrawerAddButton onClick={add} label={t('fields.add')} disabled={!!draft} />
-    </div>
-  )
-}
-
-// ── Group field ───────────────────────────────────────────────────────────────────
-// WA-SEND-FIELDS-2: whatsapp_send's `after_send_updates` (type 'group') — renders
-// each named sub-field (`field.fields`, e.g. conversation/candidate) as its own
-// titled sub-card, reading/writing the nested config shape
-// `{ groupKey: { subKey: value } }` exactly as the engine reads it (BE lines 145-146).
-export function GroupField({ field, value, onChange }: { field: WorkflowField; value?: unknown; onChange: OnChange }) {
-  const { t } = useTranslation('workflows')
-  const record = (value && typeof value === 'object') ? value as Record<string, unknown> : {}
-  const subFields = (field.fields ?? []).filter((f): f is FieldOption => typeof f === 'object')
-
-  // Writes one named sub-field's value back into the group's own record.
-  const setSub = (subKey: string, v: unknown) => onChange(field.key, { ...record, [subKey]: v })
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      {subFields.map(sub => (
-        <div key={sub.value} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 8 }}>
-          <Caption as="div" style={{ marginBottom: 4 }}>{fieldLabel(t, sub.label)}</Caption>
-          {sub.type === 'key_value'
-            ? <KeyValueField value={record[sub.value]} onChange={(_k, v) => setSub(sub.value, v)} fieldKey={sub.value} suggestions={sub.suggestions} />
-            : null}
-        </div>
-      ))}
     </div>
   )
 }
