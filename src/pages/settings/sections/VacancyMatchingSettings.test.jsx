@@ -1,21 +1,25 @@
 /**
- * VacancyMatchingSettings — Danny 22-07: the global matching-strictness slider now
- * shows a concrete number + % alongside the word label (position on the 3-step
- * scale), and the screen no longer renders the purchase→sale conversion factor
- * (moved to Settings → Matches → MatchRatesSettings, its own block). B-48: vacancy
- * leads notification settings added (mode: owner/team, and role picker when team).
+ * VacancyMatchingSettings — Danny 22-07: the global matching-strictness slider shows a
+ * concrete number + % alongside the word label; the purchase→sale conversion factor
+ * lives in MatchRatesSettings. B-48: vacancy leads notification settings (mode:
+ * owner/team, role picker when team).
+ *
+ * Wire shapes are the MEASURED ones (FE-BE contract audit 09-09, SMZ-01..04):
+ * GET /settings/matching is the object, GET /settings is the flat map whose
+ * `matching` row is a JSON STRING and whose notify keys sit top-level; the notify
+ * keys are written through POST /settings, strictness through PUT /settings/matching.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
-import VacancyMatchingSettings from './VacancyMatchingSettings'
+import VacancyMatchingSettings, { mapRoles } from './VacancyMatchingSettings'
 
-// Keep the real unwrap (importActual) — only the default client is stubbed.
+// Keep the real unwrap/unwrapList (importActual) — only the default client is stubbed.
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
-  return { ...actual, default: { get: vi.fn(), put: vi.fn() } }
+  return { ...actual, default: { get: vi.fn(), put: vi.fn(), post: vi.fn() } }
 })
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
 vi.mock('@tanstack/react-query', async (importOriginal) => {
@@ -39,89 +43,53 @@ vi.mock('@tanstack/react-query', async (importOriginal) => {
   }
 })
 
-// Add the new matching.leads keys to i18n for testing (they live in keys-H2.json, not yet merged into locale files).
-const testKeys = {
-  nl: {
-    'matching.leads.title': 'Meldingen bij nieuwe suggesties',
-    'matching.leads.subtitle': 'Bepaal wie wordt geïnformeerd wanneer de AI nieuwe kandidaten voor een vacature vindt.',
-    'matching.leads.modeLabel': 'Wie krijgt de melding',
-    'matching.leads.modeOwner': 'Eigenaar van de vacature',
-    'matching.leads.modeTeam': 'Team met rol',
-    'matching.leads.roleLabel': 'Rol',
-    'matching.leads.saveFailed': 'Instellingen konden niet worden opgeslagen',
-  },
-  en: {
-    'matching.leads.title': 'Notifications for new suggestions',
-    'matching.leads.subtitle': 'Determine who is notified when AI finds new candidates for a vacancy.',
-    'matching.leads.modeLabel': 'Who receives the notification',
-    'matching.leads.modeOwner': 'Vacancy owner',
-    'matching.leads.modeTeam': 'Team with role',
-    'matching.leads.roleLabel': 'Role',
-    'matching.leads.saveFailed': 'Settings could not be saved',
-  },
-}
-
-Object.entries(testKeys).forEach(([lang, keys]) => {
-  i18n.addResourceBundle(lang, 'settings', keys, true, true)
-})
-
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
+
+// The two GETs the screen makes, in their measured shapes: the matching object under
+// the usual {data} envelope, the flat settings map with the matching row as a STRING.
+function mockGets({ matching = { strictness: 'balanced', approval_mode: 'on_deviation' }, flat = {} } = {}) {
+  api.get.mockImplementation((url) => {
+    if (url === '/settings/matching') return Promise.resolve({ data: { data: matching } })
+    if (url === '/settings') return Promise.resolve({ data: { matching: JSON.stringify(matching), ...flat } })
+    return Promise.reject(new Error(`unexpected GET ${url}`))
+  })
+  api.put.mockResolvedValue({ data: {} })
+  api.post.mockResolvedValue({ data: {} })
+}
 
 afterEach(() => vi.clearAllMocks())
 
 describe('VacancyMatchingSettings', () => {
   it('shows the concrete level number + % alongside the word label for the loaded strictness', async () => {
-    api.get.mockResolvedValue({
-      data: { data: { matching: { strictness: 'balanced', approval_mode: 'on_deviation' } } },
-    })
+    mockGets({ matching: { strictness: 'strict', approval_mode: 'on_deviation' } })
     render(<VacancyMatchingSettings />)
-    await waitFor(() => expect(screen.getByText(st('matching.balanced'))).toBeInTheDocument())
-    // balanced = index 1 of 3 levels → "2/3 · 50%".
-    expect(screen.getByText('2/3 · 50%')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByText('3/3 · 100%')).toBeInTheDocument())
   })
 
   it('updates the number + % readout when a different strictness level is picked', async () => {
-    api.get.mockResolvedValue({
-      data: { data: { matching: { strictness: 'lenient', approval_mode: 'on_deviation' } } },
-    })
+    const user = userEvent.setup()
+    mockGets()
     render(<VacancyMatchingSettings />)
-    await waitFor(() => expect(screen.getByText('1/3 · 0%')).toBeInTheDocument())
-
-    // Drive the slider via its own keyboard support (arrow keys nudge by one step).
+    await waitFor(() => expect(screen.getByText('2/3 · 50%')).toBeInTheDocument())
     const slider = screen.getByRole('slider')
     slider.focus()
-    await userEvent.keyboard('{ArrowRight}')
-
-    expect(screen.getByText('2/3 · 50%')).toBeInTheDocument()
+    await user.keyboard('{ArrowLeft}')
+    expect(screen.getByText('1/3 · 0%')).toBeInTheDocument()
   })
 
   it('no longer renders the purchase→sale conversion factor input (moved to MatchRatesSettings)', async () => {
-    api.get.mockResolvedValue({ data: { data: { matching: { strictness: 'balanced' } } } })
+    mockGets()
     render(<VacancyMatchingSettings />)
-    await waitFor(() => expect(screen.getByText(st('matching.title'))).toBeInTheDocument())
-    // The conversion-factor number input was the only <input type="number"> here.
+    await waitFor(() => expect(screen.getByText('2/3 · 50%')).toBeInTheDocument())
     expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument()
   })
 
-  // §13 seam audit: the save button must PUT the exact strictness enum picked on
-  // the slider plus the vacancy leads notification settings — a callback-fired test
-  // alone would miss a wrong route/body.
-  it('PUTs /settings/matching with strictness, vacancy_leads_notify_mode, and vacancy_leads_notify_role', async () => {
+  // SMZ-01/02: Save writes strictness to its own resource and the two notify keys to
+  // THEIR owner (POST /settings) — PUT /settings/matching silently dropped them.
+  it('Save PUTs /settings/matching with strictness only and POSTs the notify keys to /settings', async () => {
     const user = userEvent.setup()
-    api.get.mockResolvedValue({
-      data: {
-        data: {
-          matching: {
-            strictness: 'balanced',
-            approval_mode: 'on_deviation',
-            vacancy_leads_notify_mode: 'owner',
-            vacancy_leads_notify_role: 'recruiter',
-          },
-        },
-      },
-    })
-    api.put.mockResolvedValue({ data: {} })
+    mockGets({ flat: { vacancy_leads_notify_mode: 'owner', vacancy_leads_notify_role: 'recruiter' } })
     render(<VacancyMatchingSettings />)
     await waitFor(() => expect(screen.getByText('2/3 · 50%')).toBeInTheDocument())
 
@@ -130,27 +98,15 @@ describe('VacancyMatchingSettings', () => {
     await user.keyboard('{ArrowRight}') // balanced → strict
     await user.click(screen.getByText(st('matching.save')))
 
-    await waitFor(() =>
-      expect(api.put).toHaveBeenCalledWith('/settings/matching', {
-        strictness: 'strict',
-        vacancy_leads_notify_mode: 'owner',
-        vacancy_leads_notify_role: 'recruiter',
-      })
-    )
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/settings/matching', { strictness: 'strict' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', { vacancy_leads_notify_mode: 'owner', vacancy_leads_notify_role: 'recruiter' }))
   })
 
   // Approval mode is a partial PUT fired straight from the radio click (no Save
   // button) — assert the exact route + body, not just that the UI re-renders.
   it('PUTs /settings/matching with only the picked approval_mode', async () => {
     const user = userEvent.setup()
-    api.get.mockResolvedValue({
-      data: {
-        data: {
-          matching: { strictness: 'balanced', approval_mode: 'on_deviation' },
-        },
-      },
-    })
-    api.put.mockResolvedValue({ data: {} })
+    mockGets()
     render(<VacancyMatchingSettings />)
     await waitFor(() => expect(screen.getByText(st('matching.approval.title'))).toBeInTheDocument())
 
@@ -159,45 +115,60 @@ describe('VacancyMatchingSettings', () => {
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/settings/matching', { approval_mode: 'always' }))
   })
 
-  it('renders vacancy leads notification settings section', async () => {
-    api.get.mockResolvedValue({
-      data: {
-        data: {
-          matching: {
-            strictness: 'balanced',
-            approval_mode: 'on_deviation',
-            vacancy_leads_notify_mode: 'owner',
-            vacancy_leads_notify_role: 'recruiter',
-          },
-        },
-      },
-    })
+  // SMZ-03: the notify keys are read TOP-LEVEL from the flat map — the matching row
+  // (a string there) never carried them, so the screen used to show its defaults.
+  it('reads the notify mode/role from the top level of GET /settings and shows the role picker in team mode', async () => {
+    mockGets({ flat: { vacancy_leads_notify_mode: 'team', vacancy_leads_notify_role: 'admin' } })
     render(<VacancyMatchingSettings />)
 
-    // Verify the leads section title and mode label are present.
     await waitFor(() => expect(screen.getByText(st('matching.leads.title'))).toBeInTheDocument())
     expect(screen.getByText(st('matching.leads.modeLabel'))).toBeInTheDocument()
+    expect(screen.getByText(st('matching.leads.roleLabel'))).toBeInTheDocument()
+    expect(screen.getByText(st('matching.leads.modeTeam'))).toBeInTheDocument()
+    expect(screen.getByText('Admin')).toBeInTheDocument()
   })
 
-  it('shows role picker label only when vacancy leads notification mode is team', async () => {
-    api.get.mockResolvedValue({
-      data: {
-        data: {
-          matching: {
-            strictness: 'balanced',
-            approval_mode: 'on_deviation',
-            vacancy_leads_notify_mode: 'team',
-            vacancy_leads_notify_role: 'recruiter',
-          },
-        },
-      },
+  it('hides the role picker while the notify mode is owner', async () => {
+    mockGets({ flat: { vacancy_leads_notify_mode: 'owner' } })
+    render(<VacancyMatchingSettings />)
+    await waitFor(() => expect(screen.getByText(st('matching.leads.modeLabel'))).toBeInTheDocument())
+    expect(screen.queryByText(st('matching.leads.roleLabel'))).not.toBeInTheDocument()
+  })
+
+  // SMZ-01: a pick on the mode menu POSTs its single key to /settings — the old
+  // single-key PUT /settings/matching 422'd on every click.
+  it('picking the notify mode POSTs { vacancy_leads_notify_mode } to /settings, never a PUT', async () => {
+    const user = userEvent.setup()
+    mockGets({ flat: { vacancy_leads_notify_mode: 'owner' } })
+    render(<VacancyMatchingSettings />)
+    await waitFor(() => expect(screen.getByText(st('matching.leads.modeOwner'))).toBeInTheDocument())
+
+    await user.click(screen.getByText(st('matching.leads.modeOwner')))
+    await user.click(screen.getByRole('button', { name: st('matching.leads.modeTeam') }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', { vacancy_leads_notify_mode: 'team' }))
+    expect(api.put).not.toHaveBeenCalled()
+  })
+
+  // SMZ-03: an unusable matching row (the flat STRING, or nothing) must block Save —
+  // otherwise the hardcoded defaults get written over the tenant's real setting.
+  it('blocks Save with a load error when /settings/matching does not yield an object', async () => {
+    api.get.mockImplementation((url) => {
+      if (url === '/settings/matching') return Promise.resolve({ data: { data: '{"strictness":"strict"}' } })
+      return Promise.resolve({ data: {} })
     })
     render(<VacancyMatchingSettings />)
+    await waitFor(() => expect(screen.getByText(st('statusList.loadError'))).toBeInTheDocument())
+    expect(screen.getByText(st('matching.save')).closest('button')).toBeDisabled()
+  })
+})
 
-    // In team mode, both mode label and role label should be visible.
-    await waitFor(() => {
-      expect(screen.getByText(st('matching.leads.modeLabel'))).toBeInTheDocument()
-      expect(screen.getByText(st('matching.leads.roleLabel'))).toBeInTheDocument()
-    })
+// SMZ-04: GET /roles is a BARE array (RoleController::index) — the old `resp.data?.data ?? []`
+// read left the role picker permanently empty in team mode.
+describe('mapRoles', () => {
+  it('reads a bare array and a {data} envelope alike, labelling rows by label or name', () => {
+    const rows = [{ id: 'r1', name: 'recruiter' }, { id: 'r2', name: 'admin', label: 'Beheerder' }]
+    expect(mapRoles({ data: rows })).toEqual([{ name: 'recruiter', label: 'recruiter' }, { name: 'admin', label: 'Beheerder' }])
+    expect(mapRoles({ data: { data: rows } })).toEqual([{ name: 'recruiter', label: 'recruiter' }, { name: 'admin', label: 'Beheerder' }])
   })
 })

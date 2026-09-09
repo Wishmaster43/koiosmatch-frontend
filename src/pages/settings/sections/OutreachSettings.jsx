@@ -12,7 +12,11 @@ export function OutreachStatusSettings() {
     <div style={{ maxWidth: 640 }}>
       {/* R-1b live: tenant-added statuses are write-usable; the is_reached FLAG (never the
           slug) drives behaviour — a reached status stamps contacted_at on the call entry. */}
-      <StatusListEditor compact withColor title={t('outreach.statusTitle')} subtitle={t('outreach.statusSubtitle')}
+      {/* withValueSlug (SMZ-05, contract audit 09-09): OutreachStatusController extends
+          SlugLookupController — `value` is REQUIRED on create, exactly like the outcomes
+          editor below; without it every "+ toevoegen" 422'd. Guarded by
+          statusListEditorSlug.houseStyle.test.js for every slug endpoint. */}
+      <StatusListEditor compact withColor withValueSlug title={t('outreach.statusTitle')} subtitle={t('outreach.statusSubtitle')}
         endpoint="/outreach-statuses" addLabel={t('outreach.statusAdd')}
         flagField={{ key: 'is_reached', label: t('outreach.flagReached'), description: t('outreach.flagReachedDesc') }} />
     </div>

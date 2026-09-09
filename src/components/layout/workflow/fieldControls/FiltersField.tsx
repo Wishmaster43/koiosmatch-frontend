@@ -65,7 +65,9 @@ export function FiltersField({ field, value, onChange }: { field: WorkflowField;
               <OperatorSelect value={normalizeOperator(c.operator)} onChange={v => upd(i, 'operator', v)}
                 style={{ padding: '5px 4px' }} />
               {/* A yes/no field (consent flags) gets a yes/no menu that stores a real boolean
-                  (WORKFLOW-CONSENT-1); every other field keeps the text box. */}
+                  (WORKFLOW-CONSENT-1); every other field keeps the text box.
+                  DROPDOWN-CLEAR-1: a yes/no condition has no empty state — dropping the
+                  condition is the row's own delete button, so the clear stays off. */}
               {needsValue && isBooleanField(c.field) && (
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <SelectMenu aria-labelledby={booleanLabelId} value={booleanValueKey(c.value)} clearable={false}

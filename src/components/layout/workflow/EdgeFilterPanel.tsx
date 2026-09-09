@@ -153,6 +153,8 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
                       {!VALUELESS_OPERATORS.includes(c.operator ?? '') && (isBooleanField(c.field) ? (
                         // A yes/no field gets a yes/no choice, never a free text box (Danny 09-09 on the
                         // WhatsApp-consent route filter); the stored value is a real boolean.
+                        // DROPDOWN-CLEAR-1: a yes/no condition has no empty state — dropping the
+                        // condition is the row's own delete button, so the clear stays off.
                         <div style={{ flex: 1 }}>
                           <SelectMenu aria-labelledby={booleanLabelId} value={booleanValueKey(c.value)} clearable={false}
                             options={[{ value: 'true', label: t('common:yes') }, { value: 'false', label: t('common:no') }]}

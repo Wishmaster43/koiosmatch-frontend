@@ -3,19 +3,28 @@
  * matcher is overall), the match APPROVAL mode (per-tenant: off = every match is
  * always OK), and vacancy leads notification settings (who gets alerted when AI
  * suggests new candidates for a vacancy). The per-vacancy dimension importance
- * (qualifications, location, …) lives on each vacancy itself, not here. Persists
- * to /settings/matching.
+ * (qualifications, location, …) lives on each vacancy itself, not here.
+ *
+ * Wire contract (measured, FE-BE contract audit 09-09, SMZ-01/02/03/04):
+ * · strictness + approval_mode are the `matching` object: GET/PUT /settings/matching.
+ *   The flat GET /settings serialises that row as a JSON STRING — never read it there.
+ * · vacancy_leads_notify_mode/_role are TOP-LEVEL tenant settings owned by
+ *   POST /settings (SettingController rules incl. the role existence check) and read
+ *   top-level from GET /settings; PUT /settings/matching silently DROPS them and a
+ *   single-key PUT with only them 422s.
+ * · GET /roles is a bare array (RoleController::index) — read through unwrapList.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Save, Check } from 'lucide-react'
-import api, { unwrap } from '@/lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
+import { saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
 import Slider from '@/components/ui/Slider'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import SaveButton from '@/components/ui/SaveButton'
+import SelectMenu from '@/components/ui/SelectMenu'
 import { PageTitle, SectionTitle, Mono } from '@/components/ui/typography'
-import SearchSelect from '@/components/ui/SearchSelect'
 import { useQuery } from '@tanstack/react-query'
 
 // The backend strictness is an enum; the slider is a 3-step index onto it.
@@ -27,6 +36,13 @@ const MODES = [
   { value: 'on_deviation', key: 'deviation' },
   { value: 'always', key: 'always' },
 ]
+
+// GET /roles → picker rows. unwrapList reads the measured bare array AND a {data}
+// envelope, so a later Resource wrap cannot empty the picker again (SMZ-04).
+// eslint-disable-next-line react-refresh/only-export-components -- pure mapper exported for the contract test
+export function mapRoles(resp) {
+  return unwrapList(resp).rows.map(r => ({ name: r.name, label: r.label || r.name }))
+}
 
 // Settings screen for the global matching strictness slider, the match-approval
 // mode, and vacancy leads notification settings; per-vacancy dimension weights
@@ -40,38 +56,44 @@ export default function VacancyMatchingSettings() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved]   = useState(false)
   const [loading, setLoading] = useState(true)
-  // A failed GET must never let the hardcoded defaults above pass as the tenant's
-  // real saved values — a persistent banner + disabled controls stop the
-  // compounding wrong-write the audit named.
+  // A failed or unusable GET must never let the hardcoded defaults above pass as the
+  // tenant's real saved values — a persistent banner + disabled controls stop the
+  // compounding wrong-write the audit named (SMZ-03).
   const [loadError, setLoadError] = useState(false)
+  // Names the two pickers (SelectMenu's trigger is a button, labelled via aria-labelledby).
+  const modeLabelId = useId()
+  const roleLabelId = useId()
 
   // Fetch roles for the vacancy leads notification role picker (team mode only).
   const { data: rolesData = [] } = useQuery({
     queryKey: ['roles'],
-    queryFn: async () => {
-      const resp = await api.get('/roles')
-      return (resp.data?.data ?? []).map((r) => ({ name: r.name, label: r.label || r.name }))
-    },
+    queryFn: async () => mapRoles(await api.get('/roles')),
     staleTime: 1000 * 60 * 5, // 5 minutes
   })
 
-  // Load the saved strictness enum → slider index, approval mode, and vacancy leads
-  // notification settings. The purchase→sale conversion factor moved to Settings →
-  // Matches → MatchRatesSettings (Danny 22-07: it's a match concept, not a vacancy
-  // one) — this screen no longer reads/writes it.
+  // Load both halves: the matching object (strictness + approval mode) and the flat
+  // settings map (the two top-level notify keys). The purchase→sale conversion
+  // factor moved to Settings → Matches → MatchRatesSettings (Danny 22-07).
   useEffect(() => {
     let alive = true
     setLoading(true)
     setLoadError(false)
-    api.get('/settings')
-      .then(r => {
+    Promise.all([api.get('/settings/matching'), api.get('/settings')])
+      .then(([matchingRes, settingsRes]) => {
         if (!alive) return
-        const d = (unwrap(r)) ?? {}
-        const matching = d.matching ?? {}
+        const matching = unwrap(matchingRes)
+        const flat = unwrap(settingsRes) ?? {}
+        // Anything but a real object (a JSON string, an empty body) means the defaults
+        // would be written back over the tenant's real setting — block instead.
+        if (!matching || typeof matching !== 'object' || Array.isArray(matching)) {
+          setLoadError(true)
+          notifyError(t('statusList.loadError'))
+          return
+        }
         const i = LEVELS.indexOf(matching.strictness); if (i >= 0) setLevel(i)
         if (MODES.some(m => m.value === matching.approval_mode)) setApproval(matching.approval_mode)
-        if (matching.vacancy_leads_notify_mode) setLeadsNotifyMode(matching.vacancy_leads_notify_mode)
-        if (matching.vacancy_leads_notify_role) setLeadsNotifyRole(matching.vacancy_leads_notify_role)
+        if (flat.vacancy_leads_notify_mode) setLeadsNotifyMode(String(flat.vacancy_leads_notify_mode))
+        if (flat.vacancy_leads_notify_role) setLeadsNotifyRole(String(flat.vacancy_leads_notify_role))
       })
       .catch(() => { if (alive) { setLoadError(true); notifyError(t('statusList.loadError')) } })
       .finally(() => { if (alive) setLoading(false) })
@@ -79,16 +101,14 @@ export default function VacancyMatchingSettings() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `t` from useTranslation is stable in the app; excluding it avoids a re-fetch loop
   }, [])
 
-  // Persist the strictness level (slider index mapped back to its enum slug), flashing the saved-check briefly on success.
+  // Persist the strictness (its own resource) and the two notify keys (their owner,
+  // POST /settings), flashing the saved-check briefly on success.
   const save = async () => {
     if (loadError) return
     setSaving(true)
     try {
-      await api.put('/settings/matching', {
-        strictness: LEVELS[level],
-        vacancy_leads_notify_mode: leadsNotifyMode,
-        vacancy_leads_notify_role: leadsNotifyRole,
-      })
+      await api.put('/settings/matching', { strictness: LEVELS[level] })
+      await saveSettingsKeys({ vacancy_leads_notify_mode: leadsNotifyMode, vacancy_leads_notify_role: leadsNotifyRole })
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch { notifyError(t('statusList.saveFailed')) } finally { setSaving(false) }
@@ -104,23 +124,24 @@ export default function VacancyMatchingSettings() {
     catch { setApproval(prev); notifyError(t('matching.approval.saveFailed')) }
   }
 
-  // Vacancy leads notification mode changes on click (partial PUT) — optimistic, revert + toast on failure.
+  // Vacancy leads notification mode saves on pick (POST /settings, the key's owner) —
+  // optimistic, revert + toast on failure.
   const setNotifyMode = async (mode) => {
     if (loadError) return
     const prev = leadsNotifyMode
-    if (mode === prev) return
+    if (!mode || mode === prev) return
     setLeadsNotifyMode(mode)
-    try { await api.put('/settings/matching', { vacancy_leads_notify_mode: mode }) }
+    try { await saveSettingsKeys({ vacancy_leads_notify_mode: mode }) }
     catch { setLeadsNotifyMode(prev); notifyError(t('matching.leads.saveFailed')) }
   }
 
-  // Vacancy leads notification role changes on click (partial PUT) — optimistic, revert + toast on failure.
+  // Vacancy leads notification role saves on pick (POST /settings) — optimistic, revert + toast on failure.
   const setNotifyRole = async (role) => {
     if (loadError) return
     const prev = leadsNotifyRole
-    if (role === prev) return
+    if (!role || role === prev) return
     setLeadsNotifyRole(role)
-    try { await api.put('/settings/matching', { vacancy_leads_notify_role: role }) }
+    try { await saveSettingsKeys({ vacancy_leads_notify_role: role }) }
     catch { setLeadsNotifyRole(prev); notifyError(t('matching.leads.saveFailed')) }
   }
 
@@ -181,34 +202,30 @@ export default function VacancyMatchingSettings() {
         <SectionTitle>{t('matching.leads.title')}</SectionTitle>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, marginBottom: 12 }}>{t('matching.leads.subtitle')}</p>
 
-        {/* Notification mode picker — owner or team. */}
+        {/* Notification mode picker — owner or team (the searchable single-pick atom, §3A). */}
         <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', fontSize: 12, fontWeight: 500, marginBottom: 8, color: 'var(--text)' }}>
+          <label id={modeLabelId} style={{ display: 'block', fontSize: 12, fontWeight: 500, marginBottom: 8, color: 'var(--text)' }}>
             {t('matching.leads.modeLabel')}
           </label>
-          <SearchSelect
-            value={leadsNotifyMode}
-            onChange={setNotifyMode}
+          {/* DROPDOWN-CLEAR-1: in-place editor on a required tenant setting that persists on
+              every pick — an empty mode has no meaning for the notifier, so no clear cross. */}
+          <SelectMenu aria-labelledby={modeLabelId} value={leadsNotifyMode} onChange={setNotifyMode} clearable={false}
             options={[
               { value: 'owner', label: t('matching.leads.modeOwner') },
               { value: 'team', label: t('matching.leads.modeTeam') },
-            ]}
-            placeholder={t('common:select')}
-          />
+            ]} menuWidth={240} />
         </div>
 
         {/* Role picker — only visible when team mode is selected. */}
         {leadsNotifyMode === 'team' && (
           <div>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 500, marginBottom: 8, color: 'var(--text)' }}>
+            <label id={roleLabelId} style={{ display: 'block', fontSize: 12, fontWeight: 500, marginBottom: 8, color: 'var(--text)' }}>
               {t('matching.leads.roleLabel')}
             </label>
-            <SearchSelect
-              value={leadsNotifyRole}
-              onChange={setNotifyRole}
-              options={rolesData.map(r => ({ value: r.name, label: r.label }))}
-              placeholder={t('common:select')}
-            />
+            {/* DROPDOWN-CLEAR-1: same in-place required setting — team mode without a role
+                would notify nobody, so the pick replaces, never clears. */}
+            <SelectMenu aria-labelledby={roleLabelId} value={leadsNotifyRole} onChange={setNotifyRole} clearable={false}
+              options={rolesData.map(r => ({ value: r.name, label: r.label }))} menuWidth={240} />
           </div>
         )}
       </div>
