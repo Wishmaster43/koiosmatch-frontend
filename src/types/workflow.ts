@@ -99,9 +99,7 @@ export interface RawWorkflow {
   active?: boolean
   folder_id?: string | number | null
   steps?: unknown[]
-  workflow_steps?: unknown[]
   last_run?: WorkflowLastRun | null
-  latest_run?: { created_at?: string; status?: string }
   created_at?: string
   updated_at?: string
   runs_count?: number

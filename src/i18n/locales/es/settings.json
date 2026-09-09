@@ -2383,10 +2383,7 @@
   "poolsSettings": {
     "title": "Grupos de talento",
     "subtitle": "Gestiona grupos con nombre y color. Para listas de candidatos.",
-    "add": "Añadir grupo",
-    "contextLabel": "Tipo de grupo",
-    "contextRecruitment": "Reclutamiento (grupo de talento)",
-    "contextPlanning": "Planificación (grupo de asignación)"
+    "add": "Añadir grupo"
   },
   "matches": {
     "statusTitle": "Estados",
@@ -3428,7 +3425,6 @@
     "blocksHint": "Elige bloques de texto fijos (intro, cta, legal) que este perfil incluye.",
     "blocksEmpty": "Aún no se han creado bloques reutilizables.",
     "delete": "Eliminar",
-    "deleteBlocked": "No se puede eliminar. El perfil está en uso.",
     "confirmDelete": "¿Eliminar el perfil \"{{name}}\"?"
   },
   "vacancyContentBlocksSettings": {

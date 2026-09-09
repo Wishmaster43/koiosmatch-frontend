@@ -44,9 +44,15 @@ export function normalizeWorkflow(wf: RawWorkflow): Workflow {
   // steps: normalize to { id, type, config, label, position, next } — next = outgoing
   // connections (graph), so Router branches + connection filters are preserved. The
   // per-step label (seeded templates name their steps) rides along or a save wipes it.
-  const rawSteps = (Array.isArray(wf.steps) ? wf.steps : (wf.workflow_steps ?? [])) as RawStep[]
+  // AIK-08 (2026-09-09): the API only ever emits `steps`; `workflow_steps` was a
+  // dead fallback (Workflow model has no such $append) and was removed.
+  const rawSteps = (Array.isArray(wf.steps) ? wf.steps : []) as RawStep[]
   const steps: WorkflowStep[] = rawSteps.map(s => ({
     id:       s.id ? String(s.id) : undefined,
+    // AIK-08 (2026-09-09): module_type/config are the live API shape; type/parameters
+    // are the wf_graph_<id> localStorage cache shape restored by useWorkflowsData.ts
+    // (that cache path does not pass through normalizeWorkflow, so keeping this
+    // fallback here is for future-proofing the shape name only, not a live payload).
     type:     s.module_type ?? s.type,
     config:   s.config ?? s.parameters ?? {},
     ...(s.label != null ? { label: String(s.label) } : {}),
@@ -62,10 +68,9 @@ export function normalizeWorkflow(wf: RawWorkflow): Workflow {
     })),
   }))
 
-  // last_run: from the latest WorkflowRun, or already present directly
-  const lastRun = wf.last_run ?? (wf.latest_run
-    ? { time: wf.latest_run.created_at, ok: wf.latest_run.status === 'success' }
-    : null)
+  // last_run: from the latest WorkflowRun (AIK-08: `latest_run` was a dead
+  // fallback the API never emits — the Workflow model has no such $append)
+  const lastRun = wf.last_run ?? null
 
   // TRASH-OVERAL-2: archived flag + trash lifecycle, tolerant of older payloads
   // (deleted_at implies archived; a missing lifecycle derives from that flag).

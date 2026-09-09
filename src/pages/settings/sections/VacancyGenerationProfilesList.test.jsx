@@ -36,6 +36,9 @@ const ct = (key, opts) => i18n.t(key, { ns: 'common', ...opts })
 
 // Profile fixture — FLAT keys as returned by the backend API (not nested).
 // Use this for mocking GET responses and API calls.
+// SMZ-10: the API never emits `in_use` — nothing references a profile
+// (VacancyProfileResolver matches live, never stores a link) — so the fixture
+// carries no such field.
 const profile = (over = {}) => ({
   id: 'p1', name: 'Zorg — ochtenddiensten', is_default: false, priority: 15,
   location_ids: ['loc1'],
@@ -50,7 +53,6 @@ const profile = (over = {}) => ({
   brand_instructions: 'Always be friendly',
   forbidden_words: ['bad', 'words'],
   content_block_ids: ['block1', 'block2'],
-  in_use: false,
   ...over,
 })
 
@@ -165,9 +167,12 @@ describe('VacancyGenerationProfilesList', () => {
     }))
   })
 
-  it('a 409 on delete keeps the row and blocks re-deletion instead of removing it', async () => {
+  // SMZ-10: the delete button is never disabled/gated on a made-up in-use flag
+  // (nothing references a profile) — the confirm() dialog is the real safeguard,
+  // and a confirmed delete actually removes the row.
+  it('the delete button is always enabled, and a confirmed delete removes the row', async () => {
     mockGet(Promise.resolve({ data: { data: [profile()] } }))
-    api.delete.mockRejectedValue({ response: { status: 409 } })
+    api.delete.mockResolvedValue({})
     const user = userEvent.setup()
     render(<VacancyGenerationProfilesList />)
 
@@ -175,11 +180,12 @@ describe('VacancyGenerationProfilesList', () => {
     await user.click(screen.getByRole('button', { name: `${st('common.edit')}: Zorg — ochtenddiensten` }))
     // Find the delete button in the footer (getAllByRole to avoid match with forbidden-word delete buttons)
     const deleteButtons = await screen.findAllByRole('button', { name: st('vacancyGenerationSettings.delete') })
+    expect(deleteButtons[deleteButtons.length - 1]).not.toBeDisabled()
     await user.click(deleteButtons[deleteButtons.length - 1])
     await user.click(await screen.findByRole('button', { name: ct('confirm') }))
 
     await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/vacancy-generation-profiles/p1'))
-    expect(screen.getByText('Zorg — ochtenddiensten')).toBeInTheDocument()
+    await waitFor(() => expect(screen.queryByText('Zorg — ochtenddiensten')).not.toBeInTheDocument())
   })
 
   it('reads profiles with nested matcher/content from the API response', async () => {

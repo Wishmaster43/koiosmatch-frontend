@@ -622,10 +622,7 @@
   "poolsSettings": {
     "title": "Pool di talenti",
     "subtitle": "Gestisci i pool con nome e colore. Per elenchi di candidati.",
-    "add": "Aggiungi pool",
-    "contextLabel": "Tipo di pool",
-    "contextRecruitment": "Recruitment (pool di talenti)",
-    "contextPlanning": "Pianificazione (pool di impiego)"
+    "add": "Aggiungi pool"
   },
   "lookups": {
     "title": "Lookup candidati",

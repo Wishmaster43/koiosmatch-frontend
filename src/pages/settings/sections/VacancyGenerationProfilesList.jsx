@@ -113,22 +113,18 @@ export default function VacancyGenerationProfilesList() {
     } finally { setSaving(null) }
   }
 
-  // Delete — blocked while the profile is still in use (409 keeps the row, flags it).
+  // Delete a profile. SMZ-10: no backend in-use guard exists (nothing references a
+  // profile — VacancyProfileResolver matches live, never stores a link), so the
+  // confirm() dialog below is the real, and only, safeguard.
   const handleDelete = (profile) => {
-    if (profile.in_use) return
     confirm(t('vacancyGenerationSettings.confirmDelete', { name: profile.name }), async () => {
       setSaving(profile.id)
       try {
         await api.delete(`${ENDPOINT}/${profile.id}`)
         setProfiles(p => p.filter(x => x.id !== profile.id))
         if (expanded === profile.id) setExpanded(null)
-      } catch (e) {
-        if (e?.response?.status === 409) {
-          setProfiles(p => p.map(x => x.id === profile.id ? { ...x, in_use: true } : x))
-          notifyError(t('vacancyGenerationSettings.deleteBlocked'))
-        } else {
-          notifyError(t('vacancyGenerationSettings.saveFailed'))
-        }
+      } catch {
+        notifyError(t('vacancyGenerationSettings.saveFailed'))
       } finally { setSaving(null) }
     }, { danger: true })
   }
@@ -195,12 +191,12 @@ export default function VacancyGenerationProfilesList() {
             }
             ariaLabel={`${isOpen ? t('common.close') : t('common.edit')}: ${profile.name}`}
             // The row form only exists while the row is open (openEdit seeds it); a closed row has no footer.
+            // SMZ-10: no backend in-use guard exists (nothing references a profile), so the
+            // delete action is always enabled here — confirm() above is the real safeguard.
             footer={form ? (
               <EditorRowFooter
                 onDelete={() => handleDelete(profile)}
                 deleteLabel={t('vacancyGenerationSettings.delete')}
-                deleteDisabled={profile.in_use}
-                deleteTitle={profile.in_use ? t('vacancyGenerationSettings.deleteBlocked') : undefined}
                 onCancel={() => setExpanded(null)}
                 cancelLabel={t('common.cancel')}
                 onSave={() => handleSave(profile)}

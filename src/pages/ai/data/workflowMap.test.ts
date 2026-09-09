@@ -37,10 +37,12 @@ describe('normalizeWorkflow', () => {
     expect(normalizeWorkflow({ steps: [] }).status).toBe('inactive') // active undefined → falsy
   })
 
-  it('reads steps from `steps`, falling back to `workflow_steps`', () => {
-    const raw: RawWorkflow = { workflow_steps: [{ id: 1, module_type: 'candidates' }] }
+  // AIK-08: `workflow_steps` is not part of the API contract (the Workflow
+  // model has no such $append) — an absent `steps` array normalizes to [].
+  it('normalizes to an empty step list when `steps` is absent', () => {
+    const raw: RawWorkflow = { name: 'X' }
     const wf = normalizeWorkflow(raw)
-    expect(wf.steps).toEqual([{ id: '1', type: 'candidates', config: {}, position: undefined, next: [] }])
+    expect(wf.steps).toEqual([])
   })
 
   it('maps module_type/type and config/parameters (module_type and config win when both are present)', () => {
@@ -88,12 +90,14 @@ describe('normalizeWorkflow', () => {
     expect(wf.name).toBe('X')
   })
 
-  it('derives last_run from latest_run when last_run itself is absent', () => {
-    const wf = normalizeWorkflow({ steps: [], latest_run: { created_at: '2026-07-01T10:00:00Z', status: 'success' } })
+  it('carries last_run through when present', () => {
+    const wf = normalizeWorkflow({ steps: [], last_run: { time: '2026-07-01T10:00:00Z', ok: true } })
     expect(wf.last_run).toEqual({ time: '2026-07-01T10:00:00Z', ok: true })
   })
 
-  it('is null when neither last_run nor latest_run is present', () => {
+  // AIK-08: `latest_run` is not part of the API contract (the Workflow model
+  // has no such $append) — last_run is null when the API omits it.
+  it('is null when last_run is absent', () => {
     expect(normalizeWorkflow({ steps: [] }).last_run).toBeNull()
   })
 })

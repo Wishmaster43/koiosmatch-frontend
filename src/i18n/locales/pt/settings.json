@@ -622,10 +622,7 @@
   "poolsSettings": {
     "title": "Pools de talentos",
     "subtitle": "Faça a gestão de pools com nome e cor. Para listas de candidatos.",
-    "add": "Adicionar pool",
-    "contextLabel": "Tipo de pool",
-    "contextRecruitment": "Recrutamento (pool de talentos)",
-    "contextPlanning": "Planeamento (pool de colocação)"
+    "add": "Adicionar pool"
   },
   "lookups": {
     "title": "Listas de referência do candidato",

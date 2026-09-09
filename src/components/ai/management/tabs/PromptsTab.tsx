@@ -21,7 +21,7 @@ export function PromptsTab() {
         </Field>
         <Field label={t('ai.field.content')}>
           <TextEditor value={body} onChange={setBody} onSave={save} saving={saving} saved={saved}
-            versions={versions} onRestore={v => setBody(v.body ?? v.content ?? '')}
+            versions={versions} onRestore={v => setBody(v.body ?? '')}
             placeholder={t('ai.prompts.bodyPlaceholder')} />
         </Field>
       </SideList>

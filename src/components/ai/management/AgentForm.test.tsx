@@ -12,6 +12,10 @@ vi.mock('@/lib/api', async () => {
   return { ...actual, default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }
 })
 
+// jsdom does not implement scrollIntoView — ChatTest's autoscroll effect calls it
+// on every message; stub it so the chat-test panel can mount in this environment.
+beforeEach(() => { window.HTMLElement.prototype.scrollIntoView = vi.fn() })
+
 // A saved agent shaped like the real GET /ai/agents response (WA_INTRO_TEMPLATE-1
 // contract — CMBE has landed wa_intro_template/faq_ids/use_knowledge as real fields;
 // B2-3 adds has_knowledge as a derived field).
@@ -45,6 +49,9 @@ const mockTemplates = [
 beforeEach(() => {
   vi.mocked(api.get).mockReset()
   vi.mocked(api.put).mockReset()
+  // AIK-08: the new chat-test describe block also calls api.post (the chat endpoint) —
+  // reset it here too, or a later test's `mock.calls[0]` picks up that stale call.
+  vi.mocked(api.post).mockReset()
   vi.mocked(api.get).mockImplementation((url: string) => {
     if (url === '/whatsapp-templates') return Promise.resolve({ data: { data: mockTemplates } })
     return Promise.resolve({ data: [] })
@@ -211,6 +218,49 @@ describe('AgentForm — delete button accessible name', () => {
     render(<AgentForm agent={mockAgent} prompts={[]} faqs={[]} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
     await screen.findByDisplayValue('Kelly')
     expect(screen.getByRole('button', { name: 'Verwijderen' })).toBeInTheDocument()
+  })
+})
+
+// AIK-08: the chat-test panel used to have a second, silent error path (a bare
+// `catch {}` bubble with a generic i18n message) next to the house error idiom
+// used everywhere else — a deliberate 422 from the backend never reached the
+// user. Assert the real upstream message now surfaces via notifyError AND the
+// chat bubble.
+describe('AgentForm — chat test surfaces the real upstream error (AIK-08)', () => {
+  it('toasts and shows the server 422 message instead of a silent generic bubble', async () => {
+    vi.mocked(api.post).mockRejectedValue({
+      isAxiosError: true,
+      response: { status: 422, data: { message: 'Agent heeft geen actief model.' } },
+    })
+    const dispatchSpy = vi.spyOn(window, 'dispatchEvent')
+
+    render(<AgentForm agent={mockAgent} prompts={[]} faqs={[]} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    await screen.findByDisplayValue('Kelly')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Test' }))
+    const input = await screen.findByPlaceholderText(/Typ een bericht/i)
+    fireEvent.change(input, { target: { value: 'Hoi' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Versturen' }))
+
+    await waitFor(() => expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
+      detail: { type: 'error', message: 'Agent heeft geen actief model.' },
+    })))
+    expect(await screen.findByText('Agent heeft geen actief model.')).toBeInTheDocument()
+  })
+
+  it('drops the dead `message`/`content` reply fallbacks — only `reply` is read on success', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: { message: 'dead-fallback', content: 'dead-fallback', reply: 'Hoi daar!' } })
+
+    render(<AgentForm agent={mockAgent} prompts={[]} faqs={[]} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    await screen.findByDisplayValue('Kelly')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Test' }))
+    const input = await screen.findByPlaceholderText(/Typ een bericht/i)
+    fireEvent.change(input, { target: { value: 'Hoi' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Versturen' }))
+
+    expect(await screen.findByText('Hoi daar!')).toBeInTheDocument()
+    expect(screen.queryByText('dead-fallback')).toBeNull()
   })
 })
 

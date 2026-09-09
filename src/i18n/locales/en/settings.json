@@ -622,10 +622,7 @@
   "poolsSettings": {
     "title": "Talent pools",
     "subtitle": "Manage pools with a name and colour. For candidate lists.",
-    "add": "Add pool",
-    "contextLabel": "Pool type",
-    "contextRecruitment": "Recruitment (talent pool)",
-    "contextPlanning": "Planning (staffing pool)"
+    "add": "Add pool"
   },
   "lookups": {
     "title": "Candidate lookups",
@@ -3428,7 +3425,6 @@
     "blocksHint": "Pick fixed text blocks (intro, cta, legal) this profile includes.",
     "blocksEmpty": "No reusable blocks created yet.",
     "delete": "Delete",
-    "deleteBlocked": "Cannot delete. Profile is in use.",
     "confirmDelete": "Delete profile \"{{name}}\"?"
   },
   "vacancyContentBlocksSettings": {

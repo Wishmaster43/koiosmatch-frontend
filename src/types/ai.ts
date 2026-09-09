@@ -3,8 +3,8 @@
  * panels map loosely-typed API payloads; these declare the fields they read.
  */
 
-// A prompt / FAQ / knowledge item (shared shape — all have id + name + body/content).
-export interface AiItem { id?: string | number; name?: string; body?: string; content?: string; version?: number; created_at?: string; [k: string]: unknown }
+// A prompt / FAQ / knowledge item (shared shape — all have id + name + body).
+export interface AiItem { id?: string | number; name?: string; body?: string; version?: number; created_at?: string; [k: string]: unknown }
 
 // A knowledge-item lookup row (GET /ai/knowledge/lookup, KNOWLEDGE-SCOPE-1) — the
 // pickable option set for an agent's own knowledge_ids coupling.

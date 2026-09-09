@@ -2383,10 +2383,7 @@
   "poolsSettings": {
     "title": "Viviers",
     "subtitle": "Gérez les viviers avec nom et couleur. Pour les listes de candidats.",
-    "add": "Ajouter un vivier",
-    "contextLabel": "Type de vivier",
-    "contextRecruitment": "Recrutement (vivier de talents)",
-    "contextPlanning": "Planning (vivier d'affectation)"
+    "add": "Ajouter un vivier"
   },
   "matches": {
     "statusTitle": "Statuts",
@@ -3428,7 +3425,6 @@
     "blocksHint": "Choisissez les blocs de texte fixes (intro, cta, mentions légales) inclus par ce profil.",
     "blocksEmpty": "Aucun bloc réutilisable créé pour le moment.",
     "delete": "Supprimer",
-    "deleteBlocked": "Impossible de supprimer. Le profil est utilisé.",
     "confirmDelete": "Supprimer le profil « {{name}} » ?"
   },
   "vacancyContentBlocksSettings": {

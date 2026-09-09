@@ -9,6 +9,7 @@ import { useDateFormat } from '@/lib/datetime'
 import { Brain, ChevronDown, Eye, EyeOff, MessageSquare, Send, Trash2 } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import Avatar from '@/components/ui/Avatar'
 // G34: the house searchable dropdown replaces the native prompt/WA-template <select>s.
 import CreatableSelect from '@/components/ui/CreatableSelect'
@@ -64,10 +65,14 @@ function ChatTest({ agent, onClose }: { agent: AiAgent; onClose?: () => void }) 
     setLoading(true)
     try {
       const res = await api.post(`/ai/agents/${agent.id}/chat`, { message: text, history: messages.slice(-10) })
-      const reply = res.data?.reply ?? res.data?.message ?? res.data?.content ?? t('ai.chat.noReply')
+      const reply = res.data?.reply ?? t('ai.chat.noReply')
       setMessages(prev => [...prev, { role: 'assistant', content: reply }])
-    } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: t('ai.chat.error'), error: true }])
+    } catch (err) {
+      // AIK-08: surface the real upstream message (e.g. a deliberate 422) via the
+      // house error idiom, instead of a second silent generic error path.
+      const message = extractApiError(err, t('ai.chat.error'))
+      notifyError(message)
+      setMessages(prev => [...prev, { role: 'assistant', content: message, error: true }])
     }
     setLoading(false)
   }

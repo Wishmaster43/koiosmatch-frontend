@@ -622,10 +622,7 @@
   "poolsSettings": {
     "title": "Talentenpools",
     "subtitle": "Beheer pools met naam en kleur. Voor lijsten van kandidaten.",
-    "add": "Pool toevoegen",
-    "contextLabel": "Soort pool",
-    "contextRecruitment": "Recruitment (talentenpool)",
-    "contextPlanning": "Planning (inzetpool)"
+    "add": "Pool toevoegen"
   },
   "lookups": {
     "title": "Kandidaat-lookups",
@@ -3428,7 +3425,6 @@
     "blocksHint": "Kies vaste tekstblokken (intro, cta, juridisch) die dit profiel meeneemt.",
     "blocksEmpty": "Nog geen herbruikbare blokken aangemaakt.",
     "delete": "Verwijderen",
-    "deleteBlocked": "Kan niet verwijderd worden. Profiel is in gebruik.",
     "confirmDelete": "Profiel \"{{name}}\" verwijderen?"
   },
   "vacancyContentBlocksSettings": {

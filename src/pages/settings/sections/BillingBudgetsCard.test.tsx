@@ -172,6 +172,24 @@ describe('BillingBudgetsCard', () => {
     })))
   })
 
+  // SAC-05: clearing the euro field must PUT an explicit 0, never silently drop
+  // the key — the package field is never nullable, so a dropped key left the
+  // stale stored cents in place behind a green save confirmation.
+  it('PUTs an explicit 0 base_price_cents when the euro field is cleared', async () => {
+    mockGet()
+    vi.mocked(api.put).mockResolvedValue({ data: budgets })
+    render(<BillingBudgetsCard />)
+
+    const baseInputs = await screen.findAllByLabelText(t('billingBudgets.baseFee'), { exact: false })
+    await userEvent.clear(baseInputs[0])
+
+    await userEvent.click(screen.getByRole('button', { name: t('common.save') }))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/billing-budgets', expect.objectContaining({
+      packages: expect.objectContaining({ core: expect.objectContaining({ base_price_cents: 0 }) }),
+    })))
+  })
+
   it('omits base_price_cents from packages that did not change', async () => {
     mockGet()
     vi.mocked(api.put).mockResolvedValue({ data: budgets })

@@ -34,7 +34,7 @@ export function useVersionedAiItem({ endpoint, refreshVersionsOnSave, confirmDel
 
   // Selecting an item loads the form fields plus its version history for the restore control.
   const select = (item: AiItem) => {
-    setSelected(item); setName(item.name ?? ''); setBody(item.body ?? item.content ?? '')
+    setSelected(item); setName(item.name ?? ''); setBody(item.body ?? '')
     api.get(`${endpoint}/${item.id}/versions`).then(r => setVersions(unwrapList<Version>(r).rows)).catch(() => setVersions([]))
   }
 

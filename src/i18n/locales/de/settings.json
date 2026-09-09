@@ -2383,10 +2383,7 @@
   "poolsSettings": {
     "title": "Talentpools",
     "subtitle": "Verwalten Sie Pools mit Name und Farbe. Für Kandidatenlisten.",
-    "add": "Pool hinzufügen",
-    "contextLabel": "Pool-Typ",
-    "contextRecruitment": "Recruitment (Talentpool)",
-    "contextPlanning": "Planung (Einsatzpool)"
+    "add": "Pool hinzufügen"
   },
   "matches": {
     "statusTitle": "Status",
@@ -3428,7 +3425,6 @@
     "blocksHint": "Wählen Sie feste Textblöcke (Intro, CTA, rechtlich), die dieses Profil einbindet.",
     "blocksEmpty": "Noch keine wiederverwendbaren Blöcke angelegt.",
     "delete": "Löschen",
-    "deleteBlocked": "Kann nicht gelöscht werden. Profil wird verwendet.",
     "confirmDelete": "Profil „{{name}}\" löschen?"
   },
   "vacancyContentBlocksSettings": {

@@ -28,7 +28,7 @@ export function KnowledgeTab() {
     api.get('/ai/knowledge').then(r => {
       const list = unwrapList<AiItem>(r).rows
       setItems(list)
-      if (list.length) { setSelected(list[0]); setName(list[0].name ?? ''); setBody(list[0].body ?? list[0].content ?? '') }
+      if (list.length) { setSelected(list[0]); setName(list[0].name ?? ''); setBody(list[0].body ?? '') }
     }).catch(() => setLoadError(true)).finally(() => setLoading(false))
   }, [])
 
@@ -52,11 +52,11 @@ export function KnowledgeTab() {
   return (
     <SideList
       title={t('ai.tabs.knowledge')} items={items} selected={selected}
-      onSelect={item => { setSelected(item); setName(item.name ?? ''); setBody(item.body ?? item.content ?? '') }}
+      onSelect={item => { setSelected(item); setName(item.name ?? ''); setBody(item.body ?? '') }}
       onNew={() => { setSelected(null); setName(''); setBody('') }} loading={loading} error={loadError}
       renderItem={(item, active) => (
         <ListRow key={item.id} item={item} active={active}
-          onSelect={i => { setSelected(i); setName(i.name ?? ''); setBody(i.body ?? i.content ?? '') }}
+          onSelect={i => { setSelected(i); setName(i.name ?? ''); setBody(i.body ?? '') }}
           label={item.name} />
       )}>
       <Field label={t('ai.field.name')}>

@@ -15,7 +15,7 @@ import { notifySuccess } from '@/lib/notify'
 import { fieldInputStyle, fieldTextareaStyle } from '@/components/forms/fieldMetrics'
 
 // One saved version of a prompt/agent config.
-export interface Version { version?: number; created_at?: string; body?: string; content?: string; [k: string]: unknown }
+export interface Version { version?: number; created_at?: string; body?: string; [k: string]: unknown }
 
 // Canon field style (G33/fieldMetrics) — was its own near-identical copy before the sweep.
 // eslint-disable-next-line react-refresh/only-export-components -- a style constant re-export alongside this file's components; only one external caller (AgentForm.tsx), not worth a new module for

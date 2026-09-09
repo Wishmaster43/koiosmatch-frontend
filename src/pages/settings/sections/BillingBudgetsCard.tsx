@@ -79,10 +79,13 @@ export default function BillingBudgetsCard() {
           included_workflow_runs: Number(drafts[key].included_workflow_runs) || 0,
         }
         // Include base_price_cents only if it changed: convert from euros to cents.
+        // SAC-05: the package field is never nullable (type: number, not number|null),
+        // so an emptied euro input sends an explicit 0 rather than being dropped from
+        // the body — a truthiness check here silently kept the old stored cents.
         if (drafts[key].base_price_cents !== saved.base_price_cents) {
-          if (drafts[key].base_price_cents) {
-            pkg.base_price_cents = Math.round(Number(drafts[key].base_price_cents) * 100)
-          }
+          pkg.base_price_cents = drafts[key].base_price_cents === ''
+            ? 0
+            : Math.round(Number(drafts[key].base_price_cents) * 100)
         }
         body.packages![key] = pkg
       }
