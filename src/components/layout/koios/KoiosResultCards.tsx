@@ -59,8 +59,9 @@ function dedupeRefs(refs: KoiosResultRef[]): KoiosResultRef[] {
   })
 }
 
-// One card for a referenced record.
-function ResultCard({ item }: { item: KoiosResultRef }) {
+// One card for a referenced record — exported as KoiosRefChip so the assistant block's
+// compact rows and the pending-action card link the SAME way (deep-link, DATUM-1).
+export function KoiosRefChip({ item }: { item: KoiosResultRef }) {
   const { openEntity } = useNavigation()
   const target = resolveTarget(item)
   const clickable = target != null
@@ -144,7 +145,7 @@ export default function KoiosResultCards({
             {/* Cards for this group. */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: hasMore ? 6 : 0 }}>
               {displayed.map((item) => (
-                <ResultCard key={`${item.type}:${item.id}`} item={item} />
+                <KoiosRefChip key={`${item.type}:${item.id}`} item={item} />
               ))}
             </div>
             {/* "Toon meer" / "Toon minder" button when group is truncated or expanded. */}

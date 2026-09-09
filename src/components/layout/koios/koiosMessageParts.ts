@@ -10,10 +10,19 @@ import type { KoiosChatMessage, TFn } from '@/types/koios'
 // Gradient used for the assistant avatar + user bubble (shared with TypingIndicator).
 export const GRADIENT = 'linear-gradient(135deg,var(--color-primary),var(--color-violet))'
 
+// What the welcome bubble knows about the reader (Danny 09-09: "Hoi Kelly wat kan ik
+// voor je doen" + "er zijn aandachtspunten voor je" — short, no feature list).
+export interface KoiosGreeting { name?: string | null; attentionCount?: number }
+
 // Resolve a message to its display text + whether it's a calm system notice
 // (notices carry no steps/usage). Keeps the JSX below readable.
-export function resolveMessage(msg: KoiosChatMessage, t: TFn) {
-  if (msg.kind === 'welcome')   return { text: t('koios.welcome'),       notice: false }
+export function resolveMessage(msg: KoiosChatMessage, t: TFn, greeting?: KoiosGreeting) {
+  if (msg.kind === 'welcome') {
+    const name = greeting?.name?.trim()
+    const hello = name ? t('koios.welcome', { name }) : t('koios.welcomeAnonymous')
+    const count = greeting?.attentionCount ?? 0
+    return { text: count > 0 ? `${hello}\n\n${t('koios.welcomeAttention', { count })}` : hello, notice: false }
+  }
   if (msg.kind === 'error')     return { text: t('koios.errorReply'),    notice: true }
   if (msg.kind === 'forbidden') return { text: t('koios.forbidden'),     notice: true }
   // A known backend error code (credit exhausted, temporary outage) gets its own

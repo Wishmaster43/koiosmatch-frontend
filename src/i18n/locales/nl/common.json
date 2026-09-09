@@ -184,9 +184,8 @@
     "addContext": "Context toevoegen",
     "taskPlaceholder": "Geef een taak op",
     "attachFile": "Bijlage toevoegen",
-    "welcome": "Hoi! Ik ben Koios, jouw AI-assistent voor KoiosMatch.\n\nIk help je met kandidaten, planning, klanten en rapportages. Wat kan ik voor je doen?",
+    "welcome": "Hoi {{name}}, wat kan ik voor je doen?",
     "newChatStarted": "Nieuwe chat gestart. Hoe kan ik je helpen?",
-    "inputHint": "Shift+Enter voor een nieuwe regel · @ voor context",
     "stepsToggle": "Details ({{count}})",
     "refusedOrg": "Niet toegestaan binnen je organisatie.",
     "refusedRights": "Je hebt onvoldoende rechten voor deze actie.",
@@ -269,8 +268,9 @@
       "title": "Koios stelt voor",
       "emptyState": "Niets dat nu je aandacht nodig heeft.",
       "askKoios": "In de chat afmaken",
-      "askIntent": "Help me hiermee: {{title}}",
-      "execute": "Uitvoeren"
+      "askIntent": "{{body}} Wat stel je voor?",
+      "execute": "Uitvoeren",
+      "createdTask": "Taak aangemaakt"
     },
     "feedback": {
       "up": "Nuttig",
@@ -323,7 +323,9 @@
       },
       "timeout": "Het advies is niet binnen een minuut binnengekomen. Vernieuw de pagina of probeer het later opnieuw."
     },
-    "aboutLink": "Over Koios AI"
+    "welcomeAnonymous": "Hoi, wat kan ik voor je doen?",
+    "welcomeAttention_one": "Er is 1 aandachtspunt voor je.",
+    "welcomeAttention_other": "Er zijn {{count}} aandachtspunten voor je."
   },
   "actionRules": {
     "title": "Actiecontrole",

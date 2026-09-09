@@ -41,6 +41,8 @@ interface UseKoiosComposerKeysArgs {
 // (see file docblock above); the panel keeps ownership of input/send/context chips.
 export function useKoiosComposerKeys({ input, setInput, addMentionRef, textareaRef }: UseKoiosComposerKeysArgs) {
   const [showMention, setShowMention] = useState(false)
+  // The draft as it stood right after the last picked mention ("…@Lieke Groen ").
+  const insertedMentionRef = useRef<string | null>(null)
   const [mentionQ, setMentionQ] = useState('')
   // The category the user drilled into ("@Vacatures ") for a scoped search
   // (KOIOS-SEARCH-1) — null while showing the default candidate-quick-search +
@@ -86,7 +88,11 @@ export function useKoiosComposerKeys({ input, setInput, addMentionRef, textareaR
   // uses for the same decision).
   const handleMentionInput = (val: string) => {
     const q = matchMentionQuery(val)
-    if (q === null) { setShowMention(false); setActiveCategory(null); return }
+    // The last picked mention still stands at its place and nothing new was typed after
+    // an '@' beyond it: stay closed — typing the rest of the sentence is not a new tag.
+    const ins = insertedMentionRef.current
+    const stale = ins != null && val.startsWith(ins) && val.lastIndexOf('@') < ins.length
+    if (q === null || stale) { setShowMention(false); setActiveCategory(null); return }
     setShowMention(true)
     setMentionQ(q)
     if (activeCategory && resolveScopedQuery(q, activeCategory.label) === null) setActiveCategory(null)
@@ -149,7 +155,9 @@ export function useKoiosComposerKeys({ input, setInput, addMentionRef, textareaR
     const refType = MENTION_CATEGORIES.find((c) => c.id === categoryId)?.search?.refType ?? categoryId
     const lastAt = input.lastIndexOf('@')
     const before = lastAt !== -1 ? input.slice(0, lastAt) : input
-    setInput(before + '@' + hit.name + ' ')
+    const next = before + '@' + hit.name + ' '
+    insertedMentionRef.current = next
+    setInput(next)
     addMentionRef({ type: refType, id: hit.id, label: hit.name })
     closeMentionMenu()
     textareaRef.current?.focus()

@@ -34,6 +34,8 @@ import Button from '@/components/ui/Button'
 import KoiosEffortPicker from './koios/KoiosEffortPicker'
 import { useKoiosRadarCollapse } from './koios/useKoiosRadarCollapse'
 import KoiosAssistantBlock from './koios/KoiosAssistantBlock'
+import { useKoiosAssistant } from './koios/useKoiosAssistant'
+import { refsFromAppLinks } from './koios/koiosAmbientContext'
 import KoiosVoiceButton from './koios/KoiosVoiceButton'
 import { useKoiosConversationMode } from './koios/useKoiosConversationMode'
 import type { KoiosContextRef } from '@/types/koios'
@@ -132,7 +134,10 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
   const submit = (text?: string) => {
     const trimmed = (text ?? '').trim()
     if (!trimmed || loading) return
-    send(trimmed, outgoingContextRefs)
+    // A pasted app link (Danny 09-09: "Koios AI snapt de link niet") rides along as the
+    // record it points at — the same ref shape the @-mention and the ambient chip use.
+    const linkRefs = refsFromAppLinks(trimmed).map(r => ({ ...r, label: t('koios.contextRecordFallback', { entity: t(`koios.mention.singular.${r.type}`), id: r.id }) }))
+    send(trimmed, linkRefs.reduce((acc, r) => addContextRef(acc, r), outgoingContextRefs))
     setInput('')
     setContextRefs([])
     if (textareaRef.current) textareaRef.current.style.height = 'auto'
@@ -147,6 +152,22 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
   // SPEECH-1 (BE bundle MISC Lane D): dictation + conversation mode are the `speech`
   // add-on — the mic and the speaker button render only when the tenant carries it.
   const auth = useAuth()
+  // The welcome bubble speaks to the reader by first name and names the open
+  // attention points (Danny 09-09) — the cached assistant list, fetched only while open.
+  const { suggestions: assistantSuggestions } = useKoiosAssistant(!!open)
+  const greeting = {
+    name: auth?.user?.firstname ?? auth?.user?.name?.split(' ')[0] ?? null,
+    attentionCount: assistantSuggestions.length,
+  }
+  // Danny 09-09 ("ben je een gesprek gestart dan zijn de icons weg"): the two blocks stay
+  // summonable DURING a conversation too — session-only visibility there (the persisted
+  // hidden flags keep governing the landing state), so a chat opens calm by default.
+  const [chatAssistantOpen, setChatAssistantOpen] = useState(false)
+  const [chatAdviceOpen, setChatAdviceOpen] = useState(false)
+  const assistantVisible = isLanding ? !suggestionsHidden : chatAssistantOpen
+  const adviceVisible = isLanding ? !adviceHidden : chatAdviceOpen
+  const toggleAssistant = () => (isLanding ? setSuggestionsHidden(!suggestionsHidden) : setChatAssistantOpen(v => !v))
+  const toggleAdvice = () => (isLanding ? setAdviceHidden(!adviceHidden) : setChatAdviceOpen(v => !v))
   const speechEnabled = auth?.hasModule?.('speech') ?? false
 
   // Composer onChange: update the draft text, then let the mention hook decide
@@ -248,20 +269,22 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
       {/* ── Messages ── */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '14px 12px',
         display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {isLanding ? (
-          // Assistant block ABOVE the radar (§0B: the assistant's opening move).
-          <>
-            {/* Chat-handoff (golf 2): a suggestion prefills the composer and
-                focuses it — SENDING stays the user's own explicit click. */}
-            {!suggestionsHidden && (
-              <KoiosAssistantBlock onClose={() => setSuggestionsHidden(true)}
-                onAskKoios={text => { setInput(text); setTimeout(() => textareaRef.current?.focus(), 50) }} />
-            )}
-            {!adviceHidden && <KoiosRadar onNavigate={onNavigate} onClose={() => setAdviceHidden(true)} />}
-          </>
-        ) : (
+        {/* Assistant block ABOVE the radar (§0B: the assistant's opening move) — on the
+            landing state instead of the welcome bubble, during a conversation when summoned
+            from the composer. Chat-handoff (golf 2): a suggestion prefills the composer with
+            the reason AND pins its record as a context chip — SENDING stays the user's click. */}
+        {assistantVisible && (
+          <KoiosAssistantBlock onClose={() => (isLanding ? setSuggestionsHidden(true) : setChatAssistantOpen(false))}
+            onAskKoios={(text, refs) => {
+              setInput(text)
+              if (refs.length) setContextRefs(prev => refs.reduce((acc, r) => addContextRef(acc, r), prev))
+              setTimeout(() => textareaRef.current?.focus(), 50)
+            }} />
+        )}
+        {adviceVisible && <KoiosRadar onNavigate={onNavigate} onClose={() => (isLanding ? setAdviceHidden(true) : setChatAdviceOpen(false))} />}
+        {isLanding ? null : (
           messages.map((msg, i) => (
-            <KoiosMessage key={i} msg={msg} isNew={i === messages.length - 1} t={t} locale={locale} modelOptions={settings?.models?.options} />
+            <KoiosMessage key={i} msg={msg} isNew={i === messages.length - 1} t={t} greeting={greeting} />
           ))
         )}
         {loading && <TypingIndicator />}
@@ -350,24 +373,21 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
                 verbatim: "een zichtbaar-dode knop is erger dan geen knop" —
                 "a visibly-dead button is worse than no button"). */}
 
-            {/* Danny 27-08: the two landing cards are summonable/dismissable from
-                the composer — visible = primary ink, closed = muted (aria-pressed). */}
-            {isLanding && (
-              <>
-                {/* Shared ghost Button carries the identity; the STATE rides in the
-                    glyph colour (primary = visible, muted = closed) + aria-pressed. */}
-                <Button variant="ghost" iconOnly size="sm" aria-pressed={!suggestionsHidden}
-                  aria-label={t('koios.assistant.title')} title={t('koios.assistant.title')}
-                  onClick={() => setSuggestionsHidden(!suggestionsHidden)}>
-                  <Sparkles size={14} color={suggestionsHidden ? 'var(--sidebar-muted)' : 'var(--color-primary)'} />
-                </Button>
-                <Button variant="ghost" iconOnly size="sm" aria-pressed={!adviceHidden}
-                  aria-label={t('koios.radar.title')} title={t('koios.radar.title')}
-                  onClick={() => setAdviceHidden(!adviceHidden)}>
-                  <Lightbulb size={14} color={adviceHidden ? 'var(--sidebar-muted)' : 'var(--color-primary)'} />
-                </Button>
-              </>
-            )}
+            {/* Danny 27-08: the two cards are summonable/dismissable from the composer —
+                visible = primary ink, closed = muted (aria-pressed). Danny 09-09: in a
+                conversation too, never only on the landing state. */}
+            {/* Shared ghost Button carries the identity; the STATE rides in the
+                glyph colour (primary = visible, muted = closed) + aria-pressed. */}
+            <Button variant="ghost" iconOnly size="sm" aria-pressed={assistantVisible}
+              aria-label={t('koios.assistant.title')} title={t('koios.assistant.title')}
+              onClick={toggleAssistant}>
+              <Sparkles size={14} color={assistantVisible ? 'var(--color-primary)' : 'var(--sidebar-muted)'} />
+            </Button>
+            <Button variant="ghost" iconOnly size="sm" aria-pressed={adviceVisible}
+              aria-label={t('koios.radar.title')} title={t('koios.radar.title')}
+              onClick={toggleAdvice}>
+              <Lightbulb size={14} color={adviceVisible ? 'var(--color-primary)' : 'var(--sidebar-muted)'} />
+            </Button>
 
             {/* Model picker — only renders when there is more than one selectable model */}
             <KoiosModelPicker
@@ -420,21 +440,9 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
           </div>
         </div>
 
-        <div style={{ fontSize: 10, color: 'var(--sidebar-muted)', textAlign: 'center', marginTop: 7 }}>
-          {t('koios.inputHint')}
-        </div>
-
-        {/* X-32: a plain text link (same face as the hint above) to Settings → AI → AI transparency. */}
-        <div style={{ fontSize: 10, textAlign: 'center', marginTop: 4 }}>
-          <a href="#settings/ai/ai_transparency" className="km-koios-about-link">
-            {t('koios.aboutLink')}
-          </a>
-        </div>
       </div>
 
       <style>{`
-        .km-koios-about-link { color: var(--sidebar-muted); text-decoration: underline; }
-        .km-koios-about-link:hover, .km-koios-about-link:focus-visible { color: var(--sidebar-text, var(--text)); }
         @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} }
         @keyframes fadeSlideIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
         .km-koios-resize-handle:hover, .km-koios-resize-handle:focus-visible {

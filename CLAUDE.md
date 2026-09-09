@@ -1230,9 +1230,14 @@ Be honest. If something is not done, say so — do not pretend.
   · **KANDIDAAT-EERST (Danny 27-08, matches-subtabellen):** in een drawer-subtabel
     begint de rij met de kandidaatnaam, met ruimte voor de volledige naam; een
     kolom die het drawer-onderwerp herhaalt vervalt daar.
-  · **GEEN KOSTEN IN DE CHAT (Danny 27-08: "Euro's moeten weg"):** de Koios-chat
-    toont model · tokens (gelokaliseerde duizendtallen), nooit kosten aan de
-    eindgebruiker.
+  · **GEEN USAGE IN DE CHAT (Danny 27-08: "Euro's moeten weg"; aangescherpt 09-09:
+    "Snel · 9.265 tokens nooit meer tonen, is intern iets"):** de Koios-chat toont
+    de eindgebruiker géén model, tokens of kosten — usage is intern (Instellingen →
+    Gebruik). De begroeting is persoonlijk en kort ("Hoi {naam}, wat kan ik voor je
+    doen?" + "Er zijn N aandachtspunten voor je."), nooit een feature-opsomming; de
+    componist draagt geen hint-/about-regels; "Koios stelt voor" is één compacte rij
+    per voorstel met op élke rij dezelfde twee acties, en een uitgevoerde actie toont
+    het aangemaakte record als deep-link-chip (§0B).
   · **TIJDLIJN-OVERAL (Danny 27-08, verbatim: "Alles moet een tijdlijn en
     statsietieken hebben. We willen alles meeten en altijd een tijdlijn zien wat
     er gebeurd is met een object"):** élke entiteit — klant, locatie, afdeling,

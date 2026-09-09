@@ -184,9 +184,8 @@
     "addContext": "Añadir contexto",
     "taskPlaceholder": "Introduce una tarea",
     "attachFile": "Adjuntar archivo",
-    "welcome": "¡Hola! Soy Koios, tu asistente de IA para KoiosMatch.\n\nPuedo ayudarte con candidatos, planificación, clientes e informes. ¿Qué puedo hacer por ti?",
+    "welcome": "Hola {{name}}, ¿qué puedo hacer por ti?",
     "newChatStarted": "Nuevo chat iniciado. ¿Cómo puedo ayudarte?",
-    "inputHint": "Mayús+Intro para una nueva línea · @ para contexto",
     "stepsToggle": "Detalles ({{count}})",
     "refusedOrg": "No permitido dentro de tu organización.",
     "refusedRights": "No tienes permisos suficientes para esta acción.",
@@ -269,8 +268,9 @@
       "title": "Koios sugiere",
       "emptyState": "Nada requiere tu atención por ahora.",
       "askKoios": "Terminar en el chat",
-      "askIntent": "Ayúdame con esto: {{title}}",
-      "execute": "Ejecutar"
+      "askIntent": "{{body}} ¿Qué propones?",
+      "execute": "Ejecutar",
+      "createdTask": "Tarea creada"
     },
     "feedback": {
       "up": "Útil",
@@ -323,7 +323,9 @@
       },
       "timeout": "El consejo no llegó en un minuto. Actualiza la página o inténtalo de nuevo más tarde."
     },
-    "aboutLink": "Acerca de Koios IA"
+    "welcomeAnonymous": "Hola, ¿qué puedo hacer por ti?",
+    "welcomeAttention_one": "Hay 1 punto que requiere tu atención.",
+    "welcomeAttention_other": "Hay {{count}} puntos que requieren tu atención."
   },
   "actionRules": {
     "title": "Verificación de acción",

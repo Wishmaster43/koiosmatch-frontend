@@ -10,14 +10,12 @@ import SafeHtml from '@/components/ui/SafeHtml'
 import { humanizeIsoDates } from '@/lib/localDate'
 import { koiosMarkdownToHtml } from './koiosMarkdown'
 import KoiosSteps from './KoiosSteps'
-import KoiosUsage from './KoiosUsage'
 import KoiosPendingActionCard from './KoiosPendingActionCard'
 import KoiosResultCards from './KoiosResultCards'
 import KoiosFeedback from './KoiosFeedback'
 import type { KoiosResultRef, KoiosSearchResultsGrouped } from './koiosTypes'
 import type { KoiosChatMessage, TFn } from '@/types/koios'
-import { GRADIENT, resolveMessage } from './koiosMessageParts'
-import type { KoiosModelOption } from '@/lib/koiosModelTiers'
+import { GRADIENT, resolveMessage, type KoiosGreeting } from './koiosMessageParts'
 
 // ── Group search results by entity type ────────────────────────────────────────
 // Maps backend entity keys to FE ref types.
@@ -78,9 +76,11 @@ function groupSearchResults(step: Record<string, unknown>, refs: KoiosResultRef[
 }
 
 // ── Chat bubble ───────────────────────────────────────────────────────────────
-export default function KoiosMessage({ msg, isNew, t, locale, modelOptions }: { msg: KoiosChatMessage; isNew?: boolean; t: TFn; locale?: string; modelOptions?: KoiosModelOption[] }) {
+// `greeting` feeds the welcome bubble (name + attention count); model/token usage is
+// never rendered to the end user (Danny 09-09: "nooit meer tonen is intern iets").
+export default function KoiosMessage({ msg, isNew, t, greeting }: { msg: KoiosChatMessage; isNew?: boolean; t: TFn; greeting?: KoiosGreeting }) {
   const isKoios = msg.role !== 'user'
-  const { text, notice } = resolveMessage(msg, t)
+  const { text, notice } = resolveMessage(msg, t, greeting)
   // Subtle tag under the bubble for a self-refusal or an unfinished (max_steps) run.
   const stopTag = isKoios && !notice && msg.stopReason === 'refusal' ? t('koios.stopRefused')
     : isKoios && !notice && msg.stopReason === 'max_steps' ? t('koios.stopMaxSteps') : null
@@ -124,9 +124,6 @@ export default function KoiosMessage({ msg, isNew, t, locale, modelOptions }: { 
         {/* Job 3: deep-link cards grouped by entity type, from a search tool step. */}
         {isKoios && !notice && (groupedResults.groups.length > 0 || groupedResults.skipped.length > 0) && <KoiosResultCards groups={groupedResults} t={t} />}
         {isKoios && !notice && <KoiosSteps steps={msg.steps} t={t} />}
-        {isKoios && !notice && msg.stopReason !== 'not_configured' && (
-          <KoiosUsage usage={msg.usage} model={msg.model} t={t} locale={locale} options={modelOptions} />
-        )}
         {/* KOIOS-FEEDBACK-FE-1: thumbs up/down, only when the backend logged this answer. */}
         {isKoios && !notice && msg.prompt_log_id && (
           <div style={{ marginTop: 4 }}>

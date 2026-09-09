@@ -29,6 +29,9 @@ import { Caption } from '@/components/ui/typography'
 import SoftChip from '@/components/ui/SoftChip'
 import { useNumberFormat } from '@/lib/formatters'
 import { confirmPendingAction, cancelPendingAction } from './koiosApi'
+import { createdRefFromToolResult } from './koiosToolResult'
+import { KoiosRefChip } from './KoiosResultCards'
+import type { KoiosContextRef } from '@/types/koios'
 import { entityIconEl } from './koiosEntityIcons'
 import { useKoiosToolCapabilities, findToolCapability, KOIOS_CONNECTION_HASH } from './useKoiosToolCapabilities'
 import type { KoiosPendingAction, KoiosPreviewRow } from './koiosTypes'
@@ -76,6 +79,8 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
   const [refusedReason, setRefusedReason] = useState<string | null>(null)
   // KOIOS-CONFIRM-DECLINE-1 (PRIJSMODEL-C): the staffel stand on a budget-full decline.
   const [budget, setBudget] = useState<ActionBudget | null>(null)
+  // The record the tool created (§0B; Danny 09-09 "ik mis de hyperlinks bij de gemaakte taken").
+  const [created, setCreated] = useState<KoiosContextRef | null>(null)
 
   // The tool's connection gate (KOIOS-AGENT-FE-1 rule 1): an integration tool with
   // an inactive connection is never offered as a silent-failing confirm.
@@ -133,6 +138,7 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
           setStatus('partial')
           return
         }
+        setCreated(createdRefFromToolResult(data, action.title))
         setStatus('confirmed')
       })
       .catch((e) => {
@@ -224,8 +230,10 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
 
       {/* Terminal states */}
       {status === 'confirmed' && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--color-success-text)' }}>
-          <Check size={14} /> {t('koios.pendingAction.confirmed')}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--color-success-text)', flexWrap: 'wrap' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Check size={14} /> {t('koios.pendingAction.confirmed')}</span>
+          {/* The record the tool created, as the shared deep-link chip (§0B). */}
+          {created && <KoiosRefChip item={created} />}
         </div>
       )}
       {status === 'cancelled' && (

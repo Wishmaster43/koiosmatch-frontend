@@ -35,12 +35,14 @@ export interface KoiosAssistantSuggestion {
 
 interface AssistantResponse { suggestions: KoiosAssistantSuggestion[] }
 
-// Fetches the assistant suggestions; the panel's landing branch mount-gates the call.
-export function useKoiosAssistant() {
+// Fetches the assistant suggestions. `enabled` lets the panel share the cached
+// list for its greeting ("er zijn N aandachtspunten") without a fetch while closed.
+export function useKoiosAssistant(enabled = true) {
   const query = useQuery({
     queryKey: ['koios', 'assistant'],
     queryFn: () => api.get('/ai/koios/assistant').then((res) => unwrap<AssistantResponse>(res)),
     staleTime: 60_000,
+    enabled,
   })
   return {
     suggestions: query.data?.suggestions ?? [],

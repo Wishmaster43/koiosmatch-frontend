@@ -184,9 +184,8 @@
     "addContext": "Ajouter du contexte",
     "taskPlaceholder": "Saisissez une tâche",
     "attachFile": "Joindre un fichier",
-    "welcome": "Bonjour ! Je suis Koios, votre assistant IA pour KoiosMatch.\n\nJe peux vous aider avec les candidats, la planification, les clients et les rapports. Que puis-je faire pour vous ?",
+    "welcome": "Bonjour {{name}}, que puis-je faire pour toi ?",
     "newChatStarted": "Nouveau chat démarré. Comment puis-je aider ?",
-    "inputHint": "Maj+Entrée pour une nouvelle ligne · @ pour le contexte",
     "stepsToggle": "Détails ({{count}})",
     "refusedOrg": "Non autorisé au sein de votre organisation.",
     "refusedRights": "Vous n'avez pas les droits suffisants pour cette action.",
@@ -269,8 +268,9 @@
       "title": "Koios suggère",
       "emptyState": "Rien ne nécessite votre attention pour le moment.",
       "askKoios": "Terminer dans le chat",
-      "askIntent": "Aide-moi avec ceci : {{title}}",
-      "execute": "Exécuter"
+      "askIntent": "{{body}} Que proposes-tu ?",
+      "execute": "Exécuter",
+      "createdTask": "Tâche créée"
     },
     "feedback": {
       "up": "Utile",
@@ -323,7 +323,9 @@
       },
       "timeout": "L'avis n'est pas arrivé dans la minute. Actualisez la page ou réessayez plus tard."
     },
-    "aboutLink": "À propos de Koios IA"
+    "welcomeAnonymous": "Bonjour, que puis-je faire pour toi ?",
+    "welcomeAttention_one": "Il y a 1 point qui demande ton attention.",
+    "welcomeAttention_other": "Il y a {{count}} points qui demandent ton attention."
   },
   "actionRules": {
     "title": "Vérification de l'action",

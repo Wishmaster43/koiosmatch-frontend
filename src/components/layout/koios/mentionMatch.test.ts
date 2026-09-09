@@ -19,8 +19,10 @@ describe('matchMentionQuery', () => {
   })
 
   // Multiple internal spaces are still a valid (if odd) in-progress query.
-  it('allows multiple spaces', () => {
-    expect(matchMentionQuery('@ahmed   vos')).toBe('ahmed   vos')
+  it('allows one inner space (first + last name) and closes on a third word — the sentence continued past the mention (Danny 09-09)', () => {
+    expect(matchMentionQuery('@lieke groen')).toBe('lieke groen')
+    expect(matchMentionQuery('@lieke groen bedoel')).toBeNull()
+    expect(matchMentionQuery('@lieke groen ')).toBeNull()
   })
 
   // Digits are allowed (e.g. a candidate reference number typed after "@").

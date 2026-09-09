@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getPagePathFromHash, deriveAmbientRef } from './koiosAmbientContext'
+import { getPagePathFromHash, deriveAmbientRef, refsFromAppLinks } from './koiosAmbientContext'
 
 describe('getPagePathFromHash', () => {
   // The page segment sits before either '/' or '?'.
@@ -47,5 +47,18 @@ describe('deriveAmbientRef', () => {
 
   it('returns null on an empty hash', () => {
     expect(deriveAmbientRef('')).toBeNull()
+  })
+})
+
+// Danny 09-09 ("Koios AI snapt de link niet"): a pasted Koios Match deep link becomes the
+// record it points at, so the chat receives the id instead of guessing from the text.
+describe('refsFromAppLinks', () => {
+  it('extracts the record behind a full app URL and a bare hash, deduped', () => {
+    const text = 'Kijk naar http://localhost:5173/#candidates?open=b6c81ca6-9aa5-4aad-847c-b2e0a66b9fee en #candidates?open=b6c81ca6-9aa5-4aad-847c-b2e0a66b9fee graag'
+    expect(refsFromAppLinks(text)).toEqual([{ type: 'candidate', id: 'b6c81ca6-9aa5-4aad-847c-b2e0a66b9fee' }])
+  })
+
+  it('returns nothing for text without an app link', () => {
+    expect(refsFromAppLinks('bel haar morgen')).toEqual([])
   })
 })

@@ -46,3 +46,20 @@ export function deriveAmbientRef(hash: string): AmbientContextRef | null {
   if (!id) return null
   return { type, id, page }
 }
+
+// Every Koios Match deep link pasted into a message ("http://…/#candidates?open=<id>",
+// or a bare "#vacancies?open=<id>") → the record it points at, deduped. Pure: the
+// panel adds the chip label. Danny 09-09: "Koios AI snapt de link niet".
+export function refsFromAppLinks(text: string): Array<{ type: string; id: string }> {
+  const out: Array<{ type: string; id: string }> = []
+  const seen = new Set<string>()
+  for (const m of text.matchAll(/#[a-z_]+\?[^\s)]*open=[^\s)&]+[^\s)]*/gi)) {
+    const ref = deriveAmbientRef(m[0])
+    if (!ref) continue
+    const key = `${ref.type}:${ref.id}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push({ type: ref.type, id: ref.id })
+  }
+  return out
+}

@@ -184,9 +184,8 @@
     "addContext": "Add context",
     "taskPlaceholder": "Enter a task",
     "attachFile": "Attach file",
-    "welcome": "Hi! I'm Koios, your AI assistant for KoiosMatch.\n\nI can help with candidates, planning, customers and reports. What can I do for you?",
+    "welcome": "Hi {{name}}, what can I do for you?",
     "newChatStarted": "New chat started. How can I help?",
-    "inputHint": "Shift+Enter for a new line · @ for context",
     "stepsToggle": "Details ({{count}})",
     "refusedOrg": "Not allowed within your organisation.",
     "refusedRights": "You don't have sufficient rights for this action.",
@@ -269,8 +268,9 @@
       "title": "Koios suggests",
       "emptyState": "Nothing needs your attention right now.",
       "askKoios": "Finish in the chat",
-      "askIntent": "Help me with this: {{title}}",
-      "execute": "Execute"
+      "askIntent": "{{body}} What do you suggest?",
+      "execute": "Execute",
+      "createdTask": "Task created"
     },
     "feedback": {
       "up": "Helpful",
@@ -323,7 +323,9 @@
       },
       "timeout": "The advice did not arrive within a minute. Refresh the page or try again later."
     },
-    "aboutLink": "About Koios AI"
+    "welcomeAnonymous": "Hi, what can I do for you?",
+    "welcomeAttention_one": "There is 1 point that needs your attention.",
+    "welcomeAttention_other": "There are {{count}} points that need your attention."
   },
   "actionRules": {
     "title": "Action check",

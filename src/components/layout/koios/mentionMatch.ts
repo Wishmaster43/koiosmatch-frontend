@@ -11,7 +11,10 @@
  * capped at 40 chars so a huge paste can't turn into an unbounded scan/search.
  */
 const MAX_QUERY_LENGTH = 40
-const ALLOWED_QUERY_RE = /^[\p{L}\p{N} ]*$/u
+// At most ONE inner space: a name is "voornaam achternaam"; a third word means the
+// sentence continued past the mention (Danny 09-09: "als je verder gaat typen wil hij
+// een 2e tag maken") — the menu closes instead of searching the rest of the sentence.
+const ALLOWED_QUERY_RE = /^[\p{L}\p{N}]*(?: [\p{L}\p{N}]*)?$/u
 
 // Returns the mention query (possibly '' right after typing "@"), or null when
 // there is no active mention (no "@", or the tail no longer looks like one).
