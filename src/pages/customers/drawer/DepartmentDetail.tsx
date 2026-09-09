@@ -64,6 +64,8 @@ import DepartmentSubTabPanels from './DepartmentSubTabPanels'
 import type { DepartmentSubTab } from './DepartmentSubTabPanels'
 // SUBENTITEIT-DELETE-1: the honest disabled-trash + 409-race counts dialog.
 import InUseCountsDialog from './InUseCountsDialog'
+// Delete handler pattern, shared with LocationDetail (clone [2]).
+import { handleSubEntityDelete } from '../hooks/subEntityDelete'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useAuth } from '@/context/AuthContext'
@@ -185,11 +187,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   // only close on a real success; a 409 race opens the counts dialog instead of
   // silently closing over a delete that never happened.
   const remove = () => confirm(t('departments.deleteConfirm'), () => {
-    Promise.resolve(onDelete(department.id as Id)).then(result => {
-      if (!result) { close(); return } // legacy void return (older callers/tests)
-      if (result.ok) { close(); return }
-      if (result.blocked) setBlockedCounts(result.blocked.counts)
-    })
+    handleSubEntityDelete(onDelete, department.id as Id, close, setBlockedCounts)
   }, { danger: true })
 
   // ARCHIVE-SUBENTITY-1: the shared mutation hook (§11 — mirrors LocationDetail/

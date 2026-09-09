@@ -56,6 +56,8 @@ import { useCustomFields } from '@/lib/useCustomFields'
 // (its `vacancyIds` mode) fed by this location's OWN vacancy ids.
 // SUBENTITEIT-DELETE-1: the honest disabled-trash + 409-race counts dialog.
 import InUseCountsDialog from './InUseCountsDialog'
+// Delete handler pattern, shared with DepartmentDetail (clone [2]).
+import { handleSubEntityDelete } from '../hooks/subEntityDelete'
 import type { Contact, Department, Location } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import { archiveLocation, restoreLocation } from '../hooks/useCustomerLocations'
@@ -178,11 +180,7 @@ export default function LocationDetail({
   // SUBENTITEIT-DELETE-1: awaits the hook's DeleteResult — only close on a real
   // success; a 409 race opens the counts dialog instead of closing over nothing.
   const remove = () => confirm(t('locations.detail.confirmDelete'), () => {
-    Promise.resolve(onDelete(l.id as Id)).then(result => {
-      if (!result) { close(); return } // legacy void return (older callers/tests)
-      if (result.ok) { close(); return }
-      if (result.blocked) setBlockedCounts(result.blocked.counts)
-    })
+    handleSubEntityDelete(onDelete, l.id as Id, close, setBlockedCounts)
   }, { danger: true })
 
   // ARCHIVE-SUBENTITY-1: the shared mutation hook (§11 — mirrors DepartmentDetail/
