@@ -1019,6 +1019,17 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   in a comment. This is a **gradual, opportunistic** adoption — do NOT mass-migrate existing
   files in one pass; adopt it when you touch a file for another reason, or when starting new
   API-touching code. Reference adoption: `src/pages/settings/sections/jobs/jobsApi.ts`.
+- **LABEL-NOOIT-TERUGPARSEN (WFB-01..05, CMBE contract-audit 09-09).** Een mapper
+  leidt een structureel veld NOOIT af uit een weergavelabel dat de API ernaast
+  meestuurt: `trigger` ("Wekelijks (ma, do) 08:00", "Bij gebeurtenis: …") is
+  display, `trigger_type` + `trigger_config` zijn de waarheid en reizen VERBATIM
+  terug (GET-shape == PUT-shape). De oude `parseTrigger` herschreef bij élke
+  status-toggle, mapverplaatsing en editor-save het type (event → scheduled) en
+  bouwde de config opnieuw uit het label (planning, `conditions`, `source`-lane
+  en per-stap `label` weg). Regel: de normalizer vertaalt type → editor-woord, de
+  denormalizer woord → type; wat de editor niet toont (conditions, source, label)
+  rijdt onzichtbaar mee. Een `toMatchObject` op een deelveld bewijst dit niet —
+  test `toEqual` op de hele config na normalize → denormalize.
 - **Een record = de per-id-route** (`DELETE /{entity}/{id}`, `POST /{entity}/{id}/restore`);
   bulk-routes zijn uitsluitend voor echte massa-mutaties — nooit een bulk-call met een id
   (enkelstuks-sweep 2026-07-18; elke soft-delete-entiteit heeft beide routes).

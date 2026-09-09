@@ -88,11 +88,21 @@ export function useScheduleForm(
     if (!canSave) return
     if (type === 'manual')  { onSave('Handmatig', null); return }
     if (type === 'instant') { onSave('Direct', null); return }
-    // Event trigger: carries the chosen event key, no schedule fields.
-    if (type === 'event')   { onSave('Event', { event: eventKey }); return }
-    // Webhook trigger (AI-agent flavor): carries only the chosen agent's name —
-    // the backend couples this workflow to that agent's own inbound webhook.
-    if (type === 'webhook') { onSave('Webhook', { agent: agentName }); return }
+    // Event trigger: the chosen event key, no schedule fields. Seeded `conditions`
+    // (e.g. mail.received filtered on a source) survive as long as the event itself
+    // is unchanged — a new event starts unconditioned (WFB-03).
+    if (type === 'event') {
+      const keepConditions = scheduleConfig?.event === eventKey && scheduleConfig?.conditions
+      onSave('Event', { event: eventKey, ...(keepConditions ? { conditions: scheduleConfig.conditions } : {}) })
+      return
+    }
+    // Webhook trigger (AI-agent flavor): the chosen agent's name — the backend couples
+    // this workflow to that agent's own inbound webhook, matched on name + the `source`
+    // lane (meta | wa_web). The lane has no picker here; it rides along (WFB-05).
+    if (type === 'webhook') {
+      onSave('Webhook', { agent: agentName, ...(scheduleConfig?.source ? { source: scheduleConfig.source } : {}) })
+      return
+    }
     // Date-relative trigger: the UI's positive "days before" becomes a negative
     // offset_days on the wire (contract: -28 = "28 days before" the date field).
     if (type === 'date_relative') {

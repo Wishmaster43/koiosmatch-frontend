@@ -6,7 +6,7 @@
  * workflow payload. No ReactFlow node/edge mutation lives here.
  */
 import { useState, useCallback, useRef } from 'react'
-import { computeWorkflowSnapshot, deriveStartTrigger } from './workflowEditorUtils'
+import { computeWorkflowSnapshot, deriveStartTrigger, buildHeaderTriggerConfig } from './workflowEditorUtils'
 import type { Workflow, FlowNode, FlowEdge, ScheduleConfig } from '@/types/workflow'
 import { flowToSteps } from './serialization'
 
@@ -48,10 +48,13 @@ export function useWorkflowTrigger({ workflow, nodes, edges, initialNodes, initi
     || 'times' in triggerConfig || triggerConfig.schedule === 'weekly'
   )
   const legacyWrappedSchedule = typeof triggerConfig?.schedule === 'object' ? triggerConfig.schedule : null
+  // Event/Webhook(agent)/DateRelative seed the WHOLE stored config, not just their
+  // headline key: a seeded Event carries `conditions`, an agent webhook its `source`
+  // lane, a DateRelative its date_field + offset_days — all lost before (WFB-03/05).
+  const isKeyed = !!(triggerConfig?.event || triggerConfig?.agent || triggerConfig?.date_field != null)
   const initialScheduleConfig: ScheduleConfig | null = hasFlatSchedule ? (triggerConfig as ScheduleConfig)
     : legacyWrappedSchedule
-    ?? (triggerConfig?.event ? { event: triggerConfig.event } : null)
-    ?? (triggerConfig?.agent ? { agent: triggerConfig.agent } : null)
+    ?? (isKeyed ? { ...(triggerConfig as ScheduleConfig) } : null)
 
   const [name,           setName]           = useState(workflow.name)
   const [trigger,        setTrigger]        = useState(workflow.trigger)
@@ -81,16 +84,8 @@ export function useWorkflowTrigger({ workflow, nodes, edges, initialNodes, initi
       if (!closeAfter) { setSaved(true); setTimeout(() => setSaved(false), 2000) }
       return
     }
-    let nextTriggerConfig: Record<string, unknown> | undefined = undefined
-    // Same branch order as computeWorkflowSnapshot — agent flavor first (see there).
-    if (trigger === 'Webhook' && scheduleConfig?.agent) nextTriggerConfig = { agent: scheduleConfig.agent }
-    else if (trigger === 'Webhook' && webhookId) nextTriggerConfig = { webhook_id: webhookId }
-    // WORKFLOW-SCHEMA-1: flat on trigger_config, no `schedule` wrapper (see
-    // workflowEditorUtils.computeWorkflowSnapshot for the matching read side).
-    else if (trigger === 'Scheduled' && scheduleConfig) nextTriggerConfig = { ...scheduleConfig }
-    // Event trigger (BIRTHDAY-FLOW-2): trigger_config carries only the event key,
-    // matching the backend contract (Workflow::trigger_config['event']).
-    else if (trigger === 'Event' && scheduleConfig?.event) nextTriggerConfig = { event: scheduleConfig.event }
+    // The ONE builder the dirty-check snapshot uses too (workflowEditorUtils).
+    const nextTriggerConfig = buildHeaderTriggerConfig(trigger, scheduleConfig, webhookId)
     onSave({ ...workflow, name, trigger, trigger_config: nextTriggerConfig, status, steps }, closeAfter)
     // A save just persisted the current state — it's the new dirty-check baseline.
     savedSnapshotRef.current = computeWorkflowSnapshot(nodes, edges, name, trigger, scheduleConfig, webhookId, status)

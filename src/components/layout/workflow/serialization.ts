@@ -34,7 +34,9 @@ export function stepsToFlow(steps: WorkflowStep[]): { nodes: FlowNode[]; edges: 
     id:       String(s.id),
     type:     'module',
     position: (s.position as { x: number; y: number } | undefined) ?? { x: 80 + i * GAP, y: 180 },
-    data:     { type: s.type, config: { ...s.config }, isFirst: i === 0 },
+    // The per-step label (seeded templates name their steps) rides on the node so a
+    // save round-trips it — flowToSteps below writes it back (WFB-04).
+    data:     { type: s.type, config: { ...s.config }, isFirst: i === 0, ...(s.label ? { label: s.label } : {}) },
     width:    NODE_W,
     height:   NODE_H,
   }))
@@ -97,6 +99,7 @@ export function flowToSteps(nodes: FlowNode[], edges: FlowEdge[]): WorkflowStep[
     id:       n.id,
     type:     n.data.type,
     config:   n.data.config,
+    ...(typeof n.data.label === 'string' && n.data.label ? { label: n.data.label } : {}),
     position: n.position,
     next:     edges.filter(e => e.source === n.id && validIds.has(e.target)).map(e => ({
       target:        e.target,

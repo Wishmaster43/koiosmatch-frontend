@@ -2,28 +2,54 @@
  * Workflow API-shape mapping — pure transforms between the backend payload and
  * the editor shape. normalize: API -> UI (steps with id/type/config/position/next);
  * denormalize: UI -> API. Extracted from WorkflowsPage; no React, easy to test.
+ *
+ * WFB-01..05 (CMBE contract audit, 09-09): the API emits `trigger` as a HUMAN label
+ * ('Bij gebeurtenis: …', 'Wekelijks (ma, do) 08:00') next to the structured
+ * `trigger_type` + `trigger_config`. The editor speaks its own trigger words
+ * (TRIGGER_WORD below), so normalize maps type -> word and denormalize maps word -> type,
+ * and `trigger_config` travels VERBATIM both ways (GET-shape == PUT-shape). Re-deriving
+ * it from the label, as before, wiped the schedule, the event conditions and the
+ * webhook source lane on every status toggle, folder move and editor save.
  */
 
 import type { RawWorkflow, RawStep, Workflow, WorkflowStep } from '@/types/workflow'
 
+// Backend trigger_type -> the editor's trigger word (useScheduleForm / scheduleLabel vocabulary).
+const TRIGGER_WORD: Record<string, string> = {
+  manual: 'Handmatig', scheduled: 'Scheduled', webhook: 'Webhook', event: 'Event', date_relative: 'DateRelative',
+}
+
+// The editor's trigger word -> backend trigger_type. 'Direct' ("zodra data binnenkomt")
+// has no backend type: a data-driven start is the webhook/applicant_event START CARD
+// (deriveStartTrigger), so the header word persists as manual — never as the phantom
+// daily 09:00 schedule the old fall-through produced.
+const TRIGGER_TYPE: Record<string, string> = {
+  Handmatig: 'manual', Manual: 'manual', Direct: 'manual', Scheduled: 'scheduled',
+  Webhook: 'webhook', Event: 'event', DateRelative: 'date_relative',
+}
+
 export function normalizeWorkflow(wf: RawWorkflow): Workflow {
-  // trigger: string composed from trigger_type + trigger_config, or already a string
-  const trigger = typeof wf.trigger === 'string'
-    ? wf.trigger
-    : wf.trigger_type ?? 'Handmatig'
+  // trigger: the editor word for the structured type; a payload without a type keeps
+  // its string (legacy caches), else manual. The API's human label stays available
+  // as `trigger_label` for display — it is never parsed again.
+  const typeWord = wf.trigger_type ? TRIGGER_WORD[wf.trigger_type] : undefined
+  const trigger = typeWord ?? (typeof wf.trigger === 'string' ? wf.trigger : 'Handmatig')
+  const trigger_label = typeof wf.trigger === 'string' ? wf.trigger : null
 
   // status: active boolean -> string
   const status = typeof wf.status === 'string'
     ? wf.status
     : (wf.active ? 'active' : 'inactive')
 
-  // steps: normalize to { id, type, config, position, next } — next = outgoing
-  // connections (graph), so Router branches + connection filters are preserved.
+  // steps: normalize to { id, type, config, label, position, next } — next = outgoing
+  // connections (graph), so Router branches + connection filters are preserved. The
+  // per-step label (seeded templates name their steps) rides along or a save wipes it.
   const rawSteps = (Array.isArray(wf.steps) ? wf.steps : (wf.workflow_steps ?? [])) as RawStep[]
   const steps: WorkflowStep[] = rawSteps.map(s => ({
     id:       s.id ? String(s.id) : undefined,
     type:     s.module_type ?? s.type,
     config:   s.config ?? s.parameters ?? {},
+    ...(s.label != null ? { label: String(s.label) } : {}),
     position: s.position ?? undefined,
     next:     (s.next ?? s.connections ?? []).map(n => ({
       target:  n.target != null ? String(n.target) : (n.target as null | undefined),
@@ -46,44 +72,37 @@ export function normalizeWorkflow(wf: RawWorkflow): Workflow {
   const archived = Boolean(wf.archived ?? wf.deleted_at)
   const lifecycle = (wf.lifecycle as Workflow['lifecycle']) ?? (archived ? 'archived' : 'active')
 
-  return { ...wf, trigger, status, steps, last_run: lastRun, archived, lifecycle,
+  return { ...wf, trigger, trigger_label, status, steps, last_run: lastRun, archived, lifecycle,
     pending_erase_at: (wf.pending_erase_at as string | null | undefined) ?? null }
 }
 
-// Translate the frontend trigger string -> trigger_type + trigger_config
-function parseTrigger(trigger?: string, config?: Record<string, unknown>): { trigger_type: string; trigger_config: Record<string, unknown> } {
-  if (!trigger || trigger === 'Handmatig') return { trigger_type: 'manual', trigger_config: {} }
-  // Webhook trigger: two flavors share trigger_type 'webhook' — an AI-agent's own
-  // inbound webhook (AI-AGENTS-3, config.agent) or the legacy generic inbound
-  // webhook resource (config.webhook_id). Keep whichever the editor set — dropping
-  // both to {} unconditionally here was the exact fall-through bug that already
-  // hit the Event branch once (see below); never repeat it for webhook either.
-  if (trigger.toLowerCase().includes('webhook')) {
-    return {
-      trigger_type: 'webhook',
-      trigger_config: config?.agent ? { agent: config.agent } : config?.webhook_id ? { webhook_id: config.webhook_id } : {},
-    }
-  }
-  // Event trigger (BIRTHDAY-FLOW-2): keep the editor's { event } config verbatim —
-  // falling through to the scheduled-regex would silently ship trigger_type 'scheduled'.
-  if (trigger.toLowerCase() === 'event') return { trigger_type: 'event', trigger_config: { event: config?.event ?? null } }
-  // Date-relative trigger (DATE-REL-RUNNER-1): keep date_field + the NEGATIVE
-  // offset_days verbatim — the same fall-through class as event/webhook above
-  // (this branch was missing; a builder save silently re-tagged it 'scheduled').
-  if (trigger === 'DateRelative') {
-    return { trigger_type: 'date_relative', trigger_config: { date_field: config?.date_field ?? null, offset_days: config?.offset_days ?? null } }
-  }
-  // e.g. "Dagelijks 08:00", "Elk uur", "Maandag 07:00" (tenant-facing schedule labels) -> scheduled
-  const timeMatch = trigger.match(/(\d{2}:\d{2})/)
-  return {
-    trigger_type: 'scheduled',
-    trigger_config: { schedule_label: trigger, schedule_time: timeMatch?.[1] ?? '09:00' },
-  }
+// The trigger word (or a legacy/human label) + the structured type -> backend trigger_type.
+function resolveTriggerType(trigger: string | undefined, triggerType: string | undefined): string {
+  if (trigger && TRIGGER_TYPE[trigger]) return TRIGGER_TYPE[trigger]
+  // Not an editor word: the structured type wins (a server label must never be re-parsed).
+  if (triggerType && TRIGGER_WORD[triggerType]) return triggerType
+  if (!trigger) return 'manual'
+  // Legacy strings with no structured type (pre-contract caches): "via webhook",
+  // "Dagelijks 08:00", "Elk uur".
+  return trigger.toLowerCase().includes('webhook') ? 'webhook' : 'scheduled'
+}
+
+// trigger word + config + structured type -> { trigger_type, trigger_config }. The
+// config is passed through untouched for every non-manual type; only a legacy schedule
+// label with no config at all still contributes its embedded time.
+function parseTrigger(
+  trigger: string | undefined, config: Record<string, unknown> | null | undefined, triggerType: string | undefined,
+): { trigger_type: string; trigger_config: Record<string, unknown> } {
+  const trigger_type = resolveTriggerType(trigger, triggerType)
+  if (trigger_type === 'manual') return { trigger_type, trigger_config: {} }
+  if (config && typeof config === 'object') return { trigger_type, trigger_config: { ...config } }
+  const time = trigger_type === 'scheduled' ? trigger?.match(/(\d{2}:\d{2})/)?.[1] : undefined
+  return { trigger_type, trigger_config: time ? { schedule_time: time } : {} }
 }
 
 // Translate the frontend shape -> backend shape for saving
 export function denormalizeWorkflow(wf: Workflow) {
-  const { trigger_type, trigger_config } = parseTrigger(wf.trigger, (wf as { trigger_config?: Record<string, unknown> }).trigger_config)
+  const { trigger_type, trigger_config } = parseTrigger(wf.trigger, wf.trigger_config, wf.trigger_type)
   return {
     name:           wf.name,
     trigger_type,

@@ -116,20 +116,31 @@ export function computeWorkflowSnapshot(
   // A webhook/applicant_event start card overrides the header trigger (see deriveStartTrigger).
   const start = deriveStartTrigger(steps)
   if (start) return JSON.stringify({ name, trigger: start.trigger, trigger_config: start.triggerConfig, status, steps })
-  let triggerConfig: Record<string, unknown> | undefined
-  // AI-AGENTS-3: a webhook trigger set via the ScheduleModal's agent picker carries
-  // scheduleConfig.agent — checked BEFORE the legacy webhook_id flavor (both share
-  // the 'Webhook' trigger label) so the new flow never falls through and silently
-  // loses its config, the exact fall-through bug the Event branch once had.
-  if (trigger === 'Webhook' && scheduleConfig?.agent) triggerConfig = { agent: scheduleConfig.agent }
-  else if (trigger === 'Webhook' && webhookId) triggerConfig = { webhook_id: webhookId }
-  // WORKFLOW-SCHEMA-1: the scheduled trigger's fields (frequency/times/weekdays/
-  // monthday/month/interval_minutes) sit FLAT on trigger_config — no `schedule`
-  // wrapper — matching how Event/Webhook already store flat, and matching the
-  // backend's own trigger_config[frequency] validation contract.
-  else if (trigger === 'Scheduled' && scheduleConfig) triggerConfig = { ...scheduleConfig }
-  // Event trigger (BIRTHDAY-FLOW-2): trigger_config carries only the event key,
-  // matching the backend contract (Workflow::trigger_config['event']).
-  else if (trigger === 'Event' && scheduleConfig?.event) triggerConfig = { event: scheduleConfig.event }
+  const triggerConfig = buildHeaderTriggerConfig(trigger, scheduleConfig, webhookId)
   return JSON.stringify({ name, trigger, trigger_config: triggerConfig, status, steps })
+}
+
+// The header trigger's persisted trigger_config, shared by handleSave and the
+// dirty-check snapshot so the two can never disagree. The ScheduleModal's config is
+// the flat backend contract already (WORKFLOW-SCHEMA-1), so it is passed through
+// WHOLE per trigger word — never re-picked field by field: that is how a reloaded
+// Event lost its `conditions`, a Webhook its `source` lane and a DateRelative its
+// date_field/offset_days on the very next save (WFB-02/03/05, 09-09).
+export function buildHeaderTriggerConfig(
+  trigger: string | undefined, scheduleConfig: ScheduleConfig | null, webhookId: string | number | null,
+): Record<string, unknown> | undefined {
+  // AI-AGENTS-3: the agent flavor is checked BEFORE the legacy webhook_id flavor
+  // (both share the 'Webhook' word) so it never falls through to the legacy branch.
+  if (trigger === 'Webhook' && scheduleConfig?.agent) return flatTriggerConfig(scheduleConfig)
+  if (trigger === 'Webhook' && webhookId) return { webhook_id: webhookId }
+  if ((trigger === 'Scheduled' || trigger === 'Event' || trigger === 'DateRelative') && scheduleConfig) return flatTriggerConfig(scheduleConfig)
+  return undefined
+}
+
+// The modal's config minus the pre-WORKFLOW-SCHEMA-1 `schedule_type` wrapper key, which
+// older editor state may still carry and the backend contract does not know.
+function flatTriggerConfig(cfg: ScheduleConfig): Record<string, unknown> {
+  const flat: Record<string, unknown> = { ...cfg }
+  delete flat.schedule_type
+  return flat
 }

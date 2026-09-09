@@ -94,3 +94,30 @@ describe('useScheduleForm · legacy shapes load into the right controls', () => 
     expect(onSave).toHaveBeenCalledWith('Scheduled', { frequency: 'weekly', times: ['09:00'], weekdays: [4] })
   })
 })
+
+// WFB-03/05 (09-09): the modal has no picker for a seeded event's `conditions` or an
+// agent webhook's `source` lane, so a re-save must carry them — and only while the
+// event itself is unchanged.
+describe('useScheduleForm · invisible contract fields ride along on re-save', () => {
+  it('event: keeps `conditions` when the event key is unchanged', () => {
+    const onSave = vi.fn()
+    const { result } = renderHook(() => useScheduleForm('Event', { event: 'mail.received', conditions: { source: 'sdb' } }, onSave))
+    act(() => result.current.handleSave())
+    expect(onSave).toHaveBeenCalledWith('Event', { event: 'mail.received', conditions: { source: 'sdb' } })
+  })
+
+  it('event: drops `conditions` once a different event is chosen', () => {
+    const onSave = vi.fn()
+    const { result } = renderHook(() => useScheduleForm('Event', { event: 'mail.received', conditions: { source: 'sdb' } }, onSave))
+    act(() => result.current.setEventKey('candidate.birthday'))
+    act(() => result.current.handleSave())
+    expect(onSave).toHaveBeenCalledWith('Event', { event: 'candidate.birthday' })
+  })
+
+  it('webhook: keeps the `source` lane next to the agent name', () => {
+    const onSave = vi.fn()
+    const { result } = renderHook(() => useScheduleForm('Webhook', { agent: 'Michelle', source: 'wa_web' }, onSave))
+    act(() => result.current.handleSave())
+    expect(onSave).toHaveBeenCalledWith('Webhook', { agent: 'Michelle', source: 'wa_web' })
+  })
+})

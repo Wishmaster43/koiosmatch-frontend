@@ -74,8 +74,10 @@ export default function WorkflowsListPanel({
     <div style={{ flex: 1, padding: 24, overflowY: 'auto' }}>
       {/* Toolbar — add on the LEFT, count + archived + view toggle on the RIGHT (mirror Kansen). */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+        {/* A new workflow starts on the flat schedule contract (WORKFLOW-SCHEMA-1), not
+            on a Dutch label the mapper would have to parse (WFB-01). */}
         <Button variant="primary"
-          onClick={() => openEditor({ name: t('page.newWorkflow'), trigger: 'Dagelijks 08:00', status: 'draft', last_run: null, steps: [], folder_id: selectedFolder === 'unassigned' ? null : (selectedFolder ?? null) })}
+          onClick={() => openEditor({ name: t('page.newWorkflow'), trigger: 'Scheduled', trigger_config: { frequency: 'daily', times: ['08:00'] }, status: 'draft', last_run: null, steps: [], folder_id: selectedFolder === 'unassigned' ? null : (selectedFolder ?? null) })}
         >
           <Plus size={14} /> {t('page.newWorkflow')}
         </Button>

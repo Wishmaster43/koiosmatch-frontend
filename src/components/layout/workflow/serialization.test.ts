@@ -368,3 +368,21 @@ describe('round-trip: steps -> flow -> steps', () => {
     expect(roundTripped.find(s => s.id === 'a')?.next?.[0]).toMatchObject({ target: 'b', filters: null })
   })
 })
+
+// WFB-04 (09-09): the per-step label (seeded templates name their steps, the backend
+// writer names its 422s by it) must survive steps -> flow -> steps, or every save
+// PUTs `label: null` for the whole graph.
+describe('step label round-trip', () => {
+  it('carries a step label onto the node and back into the step', () => {
+    const steps = [
+      { id: 'a', type: 'candidates', config: {}, label: 'Kandidaten ophalen', next: [{ target: 'b' }] },
+      { id: 'b', type: 'email', config: {} },
+    ]
+    const { nodes, edges } = stepsToFlow(steps)
+    expect(nodes[0].data.label).toBe('Kandidaten ophalen')
+    expect(nodes[1].data).not.toHaveProperty('label')
+    const back = flowToSteps(nodes, edges)
+    expect(back.find(s => s.id === 'a')?.label).toBe('Kandidaten ophalen')
+    expect(back.find(s => s.id === 'b')).not.toHaveProperty('label')
+  })
+})

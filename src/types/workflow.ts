@@ -45,6 +45,10 @@ export interface Workflow {
   name?: string
   trigger?: string
   trigger_type?: string       // 'scheduled' | 'webhook' | 'manual' — drives the list-row trigger icon
+  // WFB-01/02: the structured config travels verbatim (GET-shape == PUT-shape); the
+  // API's human trigger label is display-only and is never parsed back.
+  trigger_config?: Record<string, unknown> | null
+  trigger_label?: string | null
   status?: string
   archived?: boolean          // soft-deleted; hidden unless the Archived view is on
   // TRASH-OVERAL-2: trash lifecycle + pending-erase stamp (normalizeWorkflow derives

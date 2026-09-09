@@ -14,9 +14,21 @@ describe('normalizeWorkflow', () => {
     expect(wf.status).toBe('active')
   })
 
-  it('derives trigger from trigger_type, defaulting to "Handmatig" when absent', () => {
-    expect(normalizeWorkflow({ trigger_type: 'scheduled', steps: [] }).trigger).toBe('scheduled')
+  it('maps trigger_type onto the editor trigger word and keeps the API label aside as trigger_label (WFB-01)', () => {
+    const wf = normalizeWorkflow({ trigger: 'Wekelijks (ma, do) 08:00', trigger_type: 'scheduled', steps: [] })
+    expect(wf.trigger).toBe('Scheduled')
+    expect(wf.trigger_label).toBe('Wekelijks (ma, do) 08:00')
+    expect(normalizeWorkflow({ trigger: 'Bij gebeurtenis: application.created', trigger_type: 'event', steps: [] }).trigger).toBe('Event')
+    expect(normalizeWorkflow({ trigger: 'Datum-relatief', trigger_type: 'date_relative', steps: [] }).trigger).toBe('DateRelative')
+    expect(normalizeWorkflow({ trigger: 'Webhook', trigger_type: 'webhook', steps: [] }).trigger).toBe('Webhook')
+    expect(normalizeWorkflow({ trigger: 'Handmatig', trigger_type: 'manual', steps: [] }).trigger).toBe('Handmatig')
     expect(normalizeWorkflow({ steps: [] }).trigger).toBe('Handmatig')
+  })
+
+  it('keeps each step\'s label (seeded templates name their steps) — WFB-04', () => {
+    const wf = normalizeWorkflow({ steps: [{ id: 's1', module_type: 'experience_add', label: 'Werkervaring toevoegen' }, { id: 's2', module_type: 'email' }] })
+    expect(wf.steps[0].label).toBe('Werkervaring toevoegen')
+    expect(wf.steps[1]).not.toHaveProperty('label')
   })
 
   it('derives status from the boolean `active` flag when status is not already a string', () => {
@@ -104,13 +116,18 @@ describe('denormalizeWorkflow', () => {
     expect(denormalizeWorkflow(base({ trigger: 'via webhook' }))).toMatchObject({ trigger_type: 'webhook' })
   })
 
-  it('parses a scheduled label with an embedded time, defaulting to 09:00 without one', () => {
+  it('legacy: a schedule label with no structured type and no config contributes only its embedded time', () => {
     const withTime = denormalizeWorkflow(base({ trigger: 'Dagelijks 08:00' }))
     expect(withTime.trigger_type).toBe('scheduled')
-    expect(withTime.trigger_config).toMatchObject({ schedule_label: 'Dagelijks 08:00', schedule_time: '08:00' })
+    expect(withTime.trigger_config).toEqual({ schedule_time: '08:00' })
 
     const noTime = denormalizeWorkflow(base({ trigger: 'Elk uur' }))
-    expect(noTime.trigger_config).toMatchObject({ schedule_time: '09:00' })
+    expect(noTime.trigger_type).toBe('scheduled')
+    expect(noTime.trigger_config).toEqual({})
+  })
+
+  it('maps the header word "Direct" to manual — the backend has no instant type; a data-driven start is the start card', () => {
+    expect(denormalizeWorkflow(base({ trigger: 'Direct' }))).toMatchObject({ trigger_type: 'manual', trigger_config: {} })
   })
 
   it('merges an explicit wf.schedule object into trigger_config regardless of trigger type', () => {
@@ -194,5 +211,54 @@ describe('denormalizeWorkflow · webhook trigger (request body)', () => {
     const out = denormalizeWorkflow(wf as never)
     expect(out.trigger_type).toBe('webhook')
     expect(out.trigger_config).toEqual({})
+  })
+})
+
+// WFB-01/02/03/05 (CMBE contract audit 09-09): a workflow that came back from the API
+// carries the HUMAN trigger label plus the structured trigger_type/trigger_config. A
+// status toggle or folder move denormalizes that object as-is — it must ship the
+// structured type and the config VERBATIM, never a re-parse of the label.
+describe('denormalizeWorkflow · API round-trip keeps trigger_type + trigger_config verbatim', () => {
+  const fromApi = (raw: RawWorkflow) => normalizeWorkflow(raw)
+
+  it('scheduled: the whole flat schedule survives, not a {schedule_label, schedule_time} rebuild (WFB-02)', () => {
+    const cfg = { frequency: 'weekly', times: ['08:00'], weekdays: [1, 4] }
+    const out = denormalizeWorkflow(fromApi({ trigger: 'Wekelijks (ma, do) 08:00', trigger_type: 'scheduled', trigger_config: cfg, steps: [] }))
+    expect(out.trigger_type).toBe('scheduled')
+    expect(out.trigger_config).toEqual(cfg)
+  })
+
+  it('event: the label "Bij gebeurtenis: …" is never re-tagged scheduled and `conditions` ride along (WFB-01/03)', () => {
+    const cfg = { event: 'application.stage_changed', conditions: { stage_flag: 'is_rejected' } }
+    const out = denormalizeWorkflow(fromApi({ trigger: 'Bij gebeurtenis: application.stage_changed', trigger_type: 'event', trigger_config: cfg, steps: [] }))
+    expect(out.trigger_type).toBe('event')
+    expect(out.trigger_config).toEqual(cfg)
+  })
+
+  it('date_relative: "Datum-relatief" keeps date_field + offset_days (WFB-01)', () => {
+    const cfg = { date_field: 'match.end_date', offset_days: -28 }
+    const out = denormalizeWorkflow(fromApi({ trigger: 'Datum-relatief', trigger_type: 'date_relative', trigger_config: cfg, steps: [] }))
+    expect(out).toMatchObject({ trigger_type: 'date_relative', trigger_config: cfg })
+  })
+
+  it('webhook: the agent name AND the source lane survive (WFB-05)', () => {
+    const cfg = { agent: 'Michelle', source: 'wa_web' }
+    const out = denormalizeWorkflow(fromApi({ trigger: 'Webhook', trigger_type: 'webhook', trigger_config: cfg, steps: [] }))
+    expect(out).toMatchObject({ trigger_type: 'webhook', trigger_config: cfg })
+  })
+
+  it('manual: the label "Handmatig" ships an empty config even when a stale config is present', () => {
+    const out = denormalizeWorkflow(fromApi({ trigger: 'Handmatig', trigger_type: 'manual', trigger_config: { times: ['09:00'] }, steps: [] }))
+    expect(out).toMatchObject({ trigger_type: 'manual', trigger_config: {} })
+  })
+
+  it('a step label from the API is sent back on save, not nulled (WFB-04)', () => {
+    const out = denormalizeWorkflow(fromApi({ steps: [{ id: 's1', module_type: 'experience_add', label: 'Werkervaring toevoegen' }] }))
+    expect(out.steps[0].label).toBe('Werkervaring toevoegen')
+  })
+
+  it('the editor word still wins over a stale structured type (the modal switched the trigger)', () => {
+    const wf = { ...fromApi({ trigger: 'Wekelijks 08:00', trigger_type: 'scheduled', trigger_config: { frequency: 'weekly' }, steps: [] }), trigger: 'Event', trigger_config: { event: 'candidate.birthday' } }
+    expect(denormalizeWorkflow(wf)).toMatchObject({ trigger_type: 'event', trigger_config: { event: 'candidate.birthday' } })
   })
 })

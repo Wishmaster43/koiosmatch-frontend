@@ -56,3 +56,39 @@ describe('useWorkflowTrigger · isDirty (dirty-check baseline)', () => {
     expect(result.current.isDirty()).toBe(false)
   })
 })
+
+// WFB-02/03/05 (09-09): a workflow reloaded from the API re-saves its header trigger
+// config WHOLE — a DateRelative kept only its word (config wiped to nulls), an Event
+// lost its seeded `conditions`, an agent webhook its `source` lane.
+describe('useWorkflowTrigger · reload + immediate re-save is lossless', () => {
+  it('DateRelative: date_field + offset_days survive a save without reopening the modal', () => {
+    const onSave = vi.fn()
+    const cfg = { date_field: 'match.end_date', offset_days: -28 }
+    const { result } = renderHook(() => useWorkflowTrigger({
+      workflow: wf({ trigger: 'DateRelative', trigger_config: cfg }), nodes, edges, initialNodes: nodes, initialEdges: edges, onSave,
+    }))
+    expect(result.current.isDirty()).toBe(false)
+    act(() => result.current.handleSave())
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ trigger: 'DateRelative', trigger_config: cfg }), false)
+  })
+
+  it('Event: seeded conditions ride along on re-save', () => {
+    const onSave = vi.fn()
+    const cfg = { event: 'mail.received', conditions: { source: 'sdb', type: 'beschikbaar' } }
+    const { result } = renderHook(() => useWorkflowTrigger({
+      workflow: wf({ trigger: 'Event', trigger_config: cfg }), nodes, edges, initialNodes: nodes, initialEdges: edges, onSave,
+    }))
+    act(() => result.current.handleSave())
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ trigger_config: cfg }), false)
+  })
+
+  it('Webhook (agent flavor): the source lane rides along on re-save', () => {
+    const onSave = vi.fn()
+    const cfg = { agent: 'Michelle', source: 'wa_web' }
+    const { result } = renderHook(() => useWorkflowTrigger({
+      workflow: wf({ trigger: 'Webhook', trigger_config: cfg }), nodes, edges, initialNodes: nodes, initialEdges: edges, onSave,
+    }))
+    act(() => result.current.handleSave())
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ trigger_config: cfg }), false)
+  })
+})
