@@ -36,7 +36,7 @@ import OutreachBulkBar from './OutreachBulkBar'
 import OutreachCreate from './OutreachCreate'
 import OutreachDrawer from './OutreachDrawer'
 import PaginationBar from '@/components/ui/PaginationBar'
-import DeletionPreviewModal from '@/components/ui/DeletionPreviewModal'
+import TrashPreviewDialogSlot from '@/components/ui/TrashPreviewDialogSlot'
 import { useTrashFlow } from '@/hooks/useTrashFlow'
 
 // Right-panel multi-toggle for a filter dimension.
@@ -281,13 +281,7 @@ export default function OutreachPage({ intent }: { intent?: unknown } = {}) {
           onUnmark={canRestore ? (cid) => trash.unmark(cid) : undefined}
           expanded={drawerExpanded} onToggleExpand={() => setDrawerExpanded(e => !e)} />
       </div>
-      {/* TRASH-OVERAL-2: the ONE shared "Definitief verwijderen" preview dialog. */}
-      {trash.target && (
-        <DeletionPreviewModal open onClose={trash.close} entityLabel={trash.target.label}
-          preview={trash.preview} loading={trash.loading} error={trash.error}
-          users={[]} onConfirm={trash.confirmMark} busy={trash.busy} blocked={trash.blocked}
-          graceDays={trash.graceDays} />
-      )}
+      <TrashPreviewDialogSlot trash={trash} />
     </>
   )
 }

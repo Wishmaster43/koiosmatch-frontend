@@ -15,7 +15,7 @@ import { useState } from 'react'
 import WorkflowCanvasEditor from '@/components/layout/WorkflowCanvasEditor'
 import { useAuth } from '@/context/AuthContext'
 import { useTrashFlow } from '@/hooks/useTrashFlow'
-import DeletionPreviewModal from '@/components/ui/DeletionPreviewModal'
+import TrashPreviewDialogSlot from '@/components/ui/TrashPreviewDialogSlot'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { useSeedLabel } from '@/lib/useSeedLabel'
@@ -133,15 +133,7 @@ export default function WorkflowsPage({ intent }: { intent?: WorkflowsIntent } =
           or a typo, never a silent blank screen. */}
       {data.notFoundId != null && <WorkflowNotFound onClose={data.closeEditor} />}
       {data.dialog}
-      {/* TRASH-OVERAL-2: the ONE shared "Definitief verwijderen" preview dialog.
-          Workflows carry no transferable owner (preview.transferable stays null),
-          so the modal renders without the transfer picker by itself. */}
-      {trash.target && (
-        <DeletionPreviewModal open onClose={trash.close} entityLabel={trash.target.label}
-          preview={trash.preview} loading={trash.loading} error={trash.error}
-          users={[]} onConfirm={trash.confirmMark} busy={trash.busy} blocked={trash.blocked}
-          graceDays={trash.graceDays} />
-      )}
+      <TrashPreviewDialogSlot trash={trash} />
     </div>
   )
 }

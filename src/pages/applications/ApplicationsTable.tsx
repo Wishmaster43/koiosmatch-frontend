@@ -1,13 +1,13 @@
 // ApplicationsTable — declares the applications list COLUMNS only (§3A); sorting,
 // selection and the loading/empty/success states live in the shared DataTable.
 // Cell rendering reuses Avatar/StatusPill/soft-chip conventions, never custom chrome.
-import type { RefObject } from 'react'
 import { cellButton } from '@/components/ui/cellButton'
 import { useTranslation } from 'react-i18next'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import { Clock, CheckCircle2 } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
-import type { Column, ControlledSort } from '@/components/ui/DataTable'
+import type { Column } from '@/components/ui/DataTable'
+import type { TableSelectionProps, TableSortProps, TableVirtualizationProps } from '@/components/ui/dataTableTypes'
 import { stopPropagation } from '@/components/ui/dataTableUtils'
 import Avatar from '@/components/ui/Avatar'
 import EntityNameCell from '@/components/ui/EntityNameCell'
@@ -42,7 +42,7 @@ function ScorePill({ value, plain }: { value: number | null; plain?: boolean }) 
   return <span style={{ fontWeight: plain ? 400 : 600, fontSize: plain ? 12 : undefined, color: c }}>{value}%</span>
 }
 
-interface ApplicationsTableProps {
+interface ApplicationsTableProps extends TableSelectionProps, TableSortProps, TableVirtualizationProps {
   rows: Application[]
   loading?: boolean
   error?: unknown
@@ -52,22 +52,6 @@ interface ApplicationsTableProps {
   // (opens on the drawer's own default tab).
   onSelect?: (row: Application, tab?: string) => void
   stickyHeader?: boolean
-  // Row selection (checkboxes) — driven by the page for the bulk action bar.
-  selectable?: boolean
-  selectedIds?: Set<Id>
-  onToggleRow?: (id: Id) => void
-  onToggleAll?: (ids: Id[], allSelected: boolean) => void
-  // SELECT-RACE-1: forwarded to DataTable as-is — inert header checkbox while a
-  // new server result is in flight.
-  selectionBusy?: boolean
-  // Virtualization (F-7): the vertical scroll container this table lives in —
-  // opt-in, forwarded straight to DataTable (mirrors CustomersTable/VacanciesTable).
-  scrollParentRef?: RefObject<HTMLElement | null>
-  // DATATABLE-SORT-1: controlled-sort escape hatch — forwarded to DataTable
-  // as-is. Optional so a caller (or a test) that omits both keeps the
-  // pre-existing uncontrolled/defaultSort behaviour untouched.
-  sort?: ControlledSort | null
-  onSortChange?: (sort: ControlledSort) => void
 }
 
 /**

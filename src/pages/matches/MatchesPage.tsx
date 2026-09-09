@@ -42,7 +42,7 @@ import { useMatchesBulkActions } from './hooks/useMatchesBulkActions'
 import { useMatchMutations } from './hooks/useMatchMutations'
 import { useMatchesInsights } from './hooks/useMatchesInsights'
 import { useMatchesTrash } from './hooks/useMatchesTrash'
-import DeletionPreviewModal from '@/components/ui/DeletionPreviewModal'
+import TrashPreviewDialogSlot from '@/components/ui/TrashPreviewDialogSlot'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
@@ -397,15 +397,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
           cost center) with a candidate picker; refetch so server-derived fields land. */}
       {addOpen && <MatchModal onClose={() => setAddOpen(false)} onCreated={reloadAll} />}
       {archiveConfirmDialog}
-      {/* TRASH-OVERAL-2: the ONE shared "Definitief verwijderen" preview dialog.
-          Matches carry no transferable owner (preview.transferable stays null),
-          so the modal renders without the transfer picker by itself. */}
-      {trash.target && (
-        <DeletionPreviewModal open onClose={trash.close} entityLabel={trash.target.label}
-          preview={trash.preview} loading={trash.loading} error={trash.error}
-          users={[]} onConfirm={trash.confirmMark} busy={trash.busy} blocked={trash.blocked}
-          graceDays={trash.graceDays} />
-      )}
+      <TrashPreviewDialogSlot trash={trash} />
     </div>
   )
 }

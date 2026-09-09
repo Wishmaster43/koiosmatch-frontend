@@ -2,13 +2,13 @@
  * VacanciesTable — vacancy list as a loose component. See the fuller docblock
  * below, right above the component, for the column contract it declares.
  */
-import type { RefObject } from 'react'
 import { useState } from 'react'
+import type { TableSelectionProps, TableSortProps, TableVirtualizationProps } from '@/components/ui/dataTableTypes'
 import { cellButton } from '@/components/ui/cellButton'
 import { useTranslation } from 'react-i18next'
 import { Globe, ChevronRight, ChevronDown } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
-import type { Column, ControlledSort } from '@/components/ui/DataTable'
+import type { Column } from '@/components/ui/DataTable'
 import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import StatusPill from '@/components/ui/StatusPill'
 import SoftChip from '@/components/ui/SoftChip'
@@ -46,7 +46,7 @@ const plainCell = { color: 'var(--text)', fontSize: 12 }
 const leadsBtn = { display: 'inline-flex', ...monoStyle, fontSize: 12,
   color: 'var(--text)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }
 
-interface VacanciesTableProps {
+interface VacanciesTableProps extends TableSelectionProps, TableSortProps, TableVirtualizationProps {
   rows: Vacancy[]
   loading?: boolean
   selectedId?: Id | null
@@ -60,20 +60,7 @@ interface VacanciesTableProps {
   onOpenApplicants?: (id: Id) => void
   // V-table-2: the Matches count deep-links to the drawer's read-only "matches" tab.
   onOpenMatches?: (id: Id) => void
-  selectable?: boolean
-  selectedIds?: Set<Id>
-  onToggleRow?: (id: Id) => void
-  onToggleAll?: (ids: Id[], allSelected: boolean) => void
-  // SELECT-RACE-1: forwarded to DataTable as-is — inert header checkbox while a
-  // new server result is in flight.
-  selectionBusy?: boolean
   stickyHeader?: boolean
-  scrollParentRef?: RefObject<HTMLElement | null>
-  // SWEEP-TABLES / DATATABLE-SORT-1: controlled-sort escape hatch — forwarded to
-  // DataTable as-is. Optional so a caller (or a test) that omits both keeps the
-  // pre-existing uncontrolled/defaultSort behaviour untouched (mirrors ApplicationsTable).
-  sort?: ControlledSort | null
-  onSortChange?: (sort: ControlledSort) => void
 }
 
 /**

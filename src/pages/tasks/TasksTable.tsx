@@ -1,12 +1,12 @@
 // TasksTable — declares the tasks list COLUMNS only (§3A); sorting, selection and
 // the loading/empty/success states live in the shared DataTable.
-import type { RefObject } from 'react'
 import { cellButton } from '@/components/ui/cellButton'
 import { useTranslation } from 'react-i18next'
 import { Building2 } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import type { ReactNode } from 'react'
+import type { TableSelectionProps, TableVirtualizationProps } from '@/components/ui/dataTableTypes'
 import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import EntityNameCell from '@/components/ui/EntityNameCell'
 import SoftChip from '@/components/ui/SoftChip'
@@ -31,18 +31,13 @@ const bureauBubble = { width: 22, height: 22, borderRadius: '50%', display: 'fle
   flexShrink: 0, background: 'color-mix(in srgb, var(--text-muted) 12%, transparent)',
   border: '1px solid color-mix(in srgb, var(--text-muted) 40%, transparent)' }
 
-interface TasksTableProps {
+interface TasksTableProps extends TableSelectionProps, TableVirtualizationProps {
   rows: Task[]
   loading?: boolean
   error?: unknown
   selectedId?: Id | null
   onSelect?: (row: Task) => void
-  selectable?: boolean
-  selectedIds?: Set<Id>
-  onToggleRow?: (id: Id) => void
-  onToggleAll?: (ids: Id[], allSelected: boolean) => void
   stickyHeader?: boolean
-  scrollParentRef?: RefObject<HTMLElement | null>
 }
 
 /**

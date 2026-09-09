@@ -9,20 +9,10 @@ import PendingGeocodeBanner from '@/components/map/PendingGeocodeBanner'
 import { countPendingGeocode } from '@/lib/coords'
 import type { Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
+import type { MapViewProps } from '@/components/ui/mapTypes'
 
 // Thin adapter mapping vacancy rows to MapPoints for the shared RadiusMapPanel (see the module doc comment above).
-export default function VacanciesMapView({ rows, center, radiusKm, onCenterChange, onRadiusChange, onClearRadius, onPick, padded }: {
-  rows: Vacancy[]
-  center: { lat: number; lng: number }
-  radiusKm: number
-  onCenterChange: (lat: number, lng: number) => void
-  onRadiusChange: (km: number) => void
-  // Present while a straal is active — forwards the 'Wis straal' reset.
-  onClearRadius?: () => void
-  onPick: (id: Id) => void
-  // Off when the host embeds the panel in the split (map | table) layout.
-  padded?: boolean
-}) {
+export default function VacanciesMapView({ rows, center, radiusKm, onCenterChange, onRadiusChange, onClearRadius, onPick, padded }: MapViewProps<Vacancy>) {
   const { t } = useTranslation(['vacancies', 'common'])
 
   // Only rows with geocoded coordinates land on the map (PDOK fills them on save).

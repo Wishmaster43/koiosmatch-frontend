@@ -10,20 +10,10 @@ import { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import { useLookups } from '@/context/LookupsContext'
 import { countPendingGeocode, toCoord } from '@/lib/coords'
 import type { Candidate } from '@/types/candidate'
-import type { Id } from '@/types/common'
+import type { MapViewProps } from '@/components/ui/mapTypes'
 
 // Thin adapter from candidate rows to MapPoints for the shared RadiusMapPanel,
-export default function CandidatesMapView({ rows, center, radiusKm, onCenterChange, onRadiusChange, onClearRadius, onPick, padded }: {
-  rows: Candidate[]
-  center: { lat: number; lng: number }
-  radiusKm: number
-  onCenterChange: (lat: number, lng: number) => void
-  onRadiusChange: (km: number) => void
-  // Present while a straal is active — forwards the 'Wis straal' reset.
-  onClearRadius?: () => void
-  onPick: (id: Id) => void
-  padded?: boolean
-}) {
+export default function CandidatesMapView({ rows, center, radiusKm, onCenterChange, onRadiusChange, onClearRadius, onPick, padded }: MapViewProps<Candidate>) {
   const { t } = useTranslation(['candidates', 'common'])
   const { statusMeta } = useLookups() as unknown as { statusMeta: (v?: string | null) => { color: string } }
 

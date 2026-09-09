@@ -7,12 +7,13 @@ import { useMemo } from 'react'
 import { cellButton } from '@/components/ui/cellButton'
 import { useTranslation } from 'react-i18next'
 import { useSeedLabel } from '@/lib/useSeedLabel'
-import type { ComponentType, CSSProperties, RefObject } from 'react'
+import type { ComponentType, CSSProperties } from 'react'
+import type { TableSelectionProps, TableSortProps, TableVirtualizationProps } from '@/components/ui/dataTableTypes'
 import { Mail, MessageCircle, PhoneCall, Building2, Video, FileText, HelpCircle } from 'lucide-react' // HelpCircle = fallback for unknown contact channel
 import DataTable from '@/components/ui/DataTable'
 import CandidateStatusChip from '@/components/ui/CandidateStatusChip'
 import SoftChip from '@/components/ui/SoftChip'
-import type { Column, ControlledSort } from '@/components/ui/DataTable'
+import type { Column } from '@/components/ui/DataTable'
 import { CANDIDATE_SORT_KEYS } from './hooks/useCandidatesData'
 import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import BackofficeCouplingIndicator from '@/components/ui/BackofficeCouplingIndicator'
@@ -51,28 +52,14 @@ const CONTACT_TYPE_ICON: Record<string, LucideIcon> = {
   note:             FileText,
 }
 
-interface CandidatesTableProps {
+interface CandidatesTableProps extends TableSelectionProps, TableSortProps, TableVirtualizationProps {
   rows: Candidate[]
   loading?: boolean
   selectedId?: Id | null
   onSelect?: (row: Candidate) => void
   // Cell deep-link: open the drawer on a specific tab (contact → communication, funnel → work).
   onOpenTab?: (row: Candidate, tab: string) => void
-  selectable?: boolean
-  selectedIds?: Set<Id>
-  onToggleRow?: (id: Id) => void
-  onToggleAll?: (ids: Id[], allSelected: boolean) => void
-  // SELECT-RACE-1: forwarded to DataTable as-is — inert header checkbox while a
-  // new server result is in flight.
-  selectionBusy?: boolean
   stickyHeader?: boolean
-  // Virtualization (audit item 7): the vertical scroll container the table sits in.
-  scrollParentRef?: RefObject<HTMLElement | null>
-  // CAND-SORT-1: controlled-sort escape hatch — forwarded to DataTable as-is.
-  // Optional so a caller (or a test) that omits both keeps the pre-existing
-  // uncontrolled/defaultSort behaviour untouched.
-  sort?: ControlledSort | null
-  onSortChange?: (sort: ControlledSort) => void
 }
 
 /**
