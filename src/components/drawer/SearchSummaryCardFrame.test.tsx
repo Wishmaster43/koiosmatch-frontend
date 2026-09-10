@@ -188,8 +188,7 @@ describe('SearchSummaryCardFrame · byte-identical shell (rule F)', () => {
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          {/* eslint-disable-next-line no-restricted-syntax -- seed DATA mirroring a tenant lookup colour, not a UI styling choice */}
-          <StatusPill label="Beschikbaar" color="#79B58E" />
+          <StatusPill label="Beschikbaar" color="var(--color-success)" />
         </div>
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: 10 }}>
           <MatchScoreBlock score={82} criteria={[]} />
@@ -207,8 +206,7 @@ describe('SearchSummaryCardFrame · byte-identical shell (rule F)', () => {
         index={1} total={2} onPrev={undefined} onNext={() => {}}
         onClose={() => {}} closeLabel="Close"
         action={<DrawerAddButton onClick={() => {}} label="Apply" />}
-        // eslint-disable-next-line no-restricted-syntax -- seed DATA mirroring a tenant lookup colour, not a UI styling choice
-        chips={<StatusPill label="Beschikbaar" color="#79B58E" />}
+        chips={<StatusPill label="Beschikbaar" color="var(--color-success)" />}
         score={82} criteria={[]}
         aiAdviceReason="Sterke fit qua ervaring." aiAdvisedLabel="AI advised"
       />
