@@ -819,11 +819,11 @@ export const NAV_GROUPS = [
   },
 ]
 
-// CATALOG-NAV-PARKED (09-09 01:15): the generic catalogue screens (DRAFT-SETTINGS-CATALOG-1,
-// X-4 FE half) are built, but GET /settings/catalog lands with the BE bundle of 09-09;
-// until then the group stays OUT of NAV_GROUPS so no settings screen opens on an error
-// state (Danny 09-09 01:15 on #settings/catalog/windows). Re-add it to NAV_GROUPS the
-// moment the endpoint answers; the guard test reads it from here meanwhile.
+// SETTINGS-CATALOG-1 (BE 0d8dc7cd, measured 10-09 on demo: 12 sections, version
+// c02ad04a798c): the generic catalogue screens (DRAFT-SETTINGS-CATALOG-1, X-4 FE half)
+// are IN the nav since the endpoint answers (parked 09-09 01:15 while it 404'd). The
+// kpi section is `hidden` on the BE (its one generic row belongs to the KPI screens), so
+// it has no item here; the guard test maps it to the dedicated KPI items.
 export const CATALOG_NAV_GROUP = {
     // Generic catalogue settings — sections from GET /settings/catalog that are not
     // already dedicated screens. The catalogue drives the FE screen from the contract (§2).
@@ -833,6 +833,8 @@ export const CATALOG_NAV_GROUP = {
       { id: 'retention', icon: History, render: () => <CatalogSection section="retention" /> },
       { id: 'messaging', icon: MessageCircle, render: () => <CatalogSection section="messaging" /> },
       { id: 'email', icon: Mail, render: () => <CatalogSection section="email" /> },
-      { id: 'kpi', icon: Target, render: () => <CatalogSection section="kpi" /> },
     ],
   }
+
+// The catalogue group renders after every dedicated group (§2: generic rows come last).
+NAV_GROUPS.push(CATALOG_NAV_GROUP)

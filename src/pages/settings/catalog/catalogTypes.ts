@@ -12,7 +12,7 @@ export interface CatalogRow {
   type: 'boolean' | 'integer' | 'string' | 'enum' | 'json' | 'secret'
   rules: string[]
   default: unknown
-  options?: Array<{ value: string; label_key: string }>
+  options?: Array<{ value: string; label_key: string } | string>
   aliases: string[]
   label_key: string
   help_key?: string
@@ -23,13 +23,19 @@ export interface CatalogRow {
     step?: number
   }
   ui: 'generic' | 'dedicated'
-  fe_screen: string
+  fe_screen: string | null
+  // SETTINGS-CATALOG-1 (measured 10-09): a PATTERN row (`numbering.<entity>.start`,
+  // `email_<context>_<field>`) describes a family of keys, never one field — the generic
+  // screen skips it; the dedicated screen of that family owns it.
+  pattern?: boolean
 }
 
 // One catalogue section: a fixed §2 id with its rows.
 export interface CatalogSection {
   id: string
   keys: CatalogRow[]
+  // SETTINGS-CATALOG-1: a section the BE hides from the generic screens (kpi today).
+  hidden?: boolean
 }
 
 // The API response from GET /settings/catalog.

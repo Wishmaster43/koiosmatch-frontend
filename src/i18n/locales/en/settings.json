@@ -3836,6 +3836,21 @@
       },
       "message_load_default_days": {
         "label": "Default message load window (days)"
+      },
+      "whatsapp_known_hourly_limit": {
+        "label": "WhatsApp: known contacts per hour"
+      },
+      "whatsapp_new_hourly_limit": {
+        "label": "WhatsApp: new contacts per hour"
+      },
+      "whatsapp_new_daily_limit": {
+        "label": "WhatsApp: new contacts per day"
+      },
+      "whatsapp_new_weekly_limit": {
+        "label": "WhatsApp: new contacts per week"
+      },
+      "whatsapp_per_number_hourly_limit": {
+        "label": "WhatsApp: messages per number per hour"
       }
     },
     "email": {

@@ -22,12 +22,13 @@ describe('settings registry catalog sections', () => {
       matching: ['vacancy_matching'],
       vacancies: ['vacancy_statuses', 'vacancy_phases', 'vacancy_seniority', 'vacancy_education', 'vacancy_channels'],
       customers: ['customer_statuses', 'customer_phases'],
-      kpi: ['kpi'],
+      // kpi is `hidden` on the BE (SETTINGS-CATALOG-1): its rows live on the dedicated KPI screens.
+      kpi: ['kpis_leads', 'kpi'],
     }
 
     // Collect all registry item ids.
     const registryItemIds = new Set()
-    // The catalogue group is parked outside NAV_GROUPS until GET /settings/catalog is live.
+    // The catalogue group sits in NAV_GROUPS since SETTINGS-CATALOG-1 landed; the export stays for this guard.
     const allGroups = [...NAV_GROUPS, CATALOG_NAV_GROUP]
     allGroups.forEach(group => {
       group.items.forEach(item => {

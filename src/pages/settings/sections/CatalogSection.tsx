@@ -25,7 +25,8 @@ export default function CatalogSection({ section }: CatalogSectionProps) {
   // The schema is derived once per catalogue load; catalogToSchema drops dedicated rows.
   const schema = useMemo(() => {
     const found = sections.find(s => s.id === section)
-    return found ? catalogToSchema(section, found.keys) : null
+    // A section the BE hides has no generic screen — it reads as empty, never as raw rows.
+    return found && !found.hidden ? catalogToSchema(section, found.keys) : null
   }, [sections, section])
 
   if (isLoading) return <SkeletonRows />

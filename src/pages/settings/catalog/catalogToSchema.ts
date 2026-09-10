@@ -24,8 +24,8 @@ export interface Schema {
 }
 
 export function catalogToSchema(sectionId: string, rows: CatalogRow[]): Schema {
-  // Filter to generic rows only.
-  const genericRows = rows.filter(row => row.ui === 'generic')
+  // Generic rows only, and never a pattern row (a key family has no single field to render).
+  const genericRows = rows.filter(row => row.ui === 'generic' && !row.pattern)
 
   const fields: SchemaField[] = genericRows.map(row => {
     let fieldType: SchemaField['type'] = 'text'
@@ -54,8 +54,9 @@ export function catalogToSchema(sectionId: string, rows: CatalogRow[]): Schema {
         break
       case 'enum':
         fieldType = 'select'
-        // The contract carries the option label key itself (§1 options[].label_key).
-        options = (row.options ?? []).map(opt => ({ value: opt.value, label: opt.label_key }))
+        // The contract carries the option label key itself (§1 options[].label_key); a bare
+        // string option (measured on string_list rows) reads as its own label.
+        options = (row.options ?? []).map(opt => typeof opt === 'string' ? { value: opt, label: opt } : { value: opt.value, label: opt.label_key })
         break
       case 'json':
         fieldType = 'json'

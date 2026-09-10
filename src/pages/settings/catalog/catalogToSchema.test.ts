@@ -79,3 +79,17 @@ describe('catalogToSchema', () => {
     expect(jsonField?.format).toBe('kpi_order')
   })
 })
+
+// SETTINGS-CATALOG-1 (measured 10-09): pattern rows and bare string options.
+describe('catalogToSchema · landed envelope', () => {
+  it('skips a pattern row (a key family, no single field) and reads a bare string option as its own label', () => {
+    const rows = [
+      { key: 'email_<context>_<field>', section: 'email', type: 'string', rules: [], default: null, aliases: [], label_key: 'settings.email.field.label', ui: 'generic', fe_screen: null, pattern: true },
+      { key: 'email_default_from', section: 'email', type: 'string', rules: [], default: null, aliases: [], label_key: 'settings.email.email_default_from.label', ui: 'generic', fe_screen: null },
+      { key: 'candidate_dedupe_keys', section: 'action_rules', type: 'enum', rules: [], default: null, aliases: [], label_key: 'x', ui: 'generic', fe_screen: null, options: ['email', 'mobile'] },
+    ] as Parameters<typeof catalogToSchema>[1]
+    const schema = catalogToSchema('email', rows)
+    expect(schema.fields.map(f => f.key)).toEqual(['email_default_from', 'candidate_dedupe_keys'])
+    expect(schema.fields[1].options).toEqual([{ value: 'email', label: 'email' }, { value: 'mobile', label: 'mobile' }])
+  })
+})
