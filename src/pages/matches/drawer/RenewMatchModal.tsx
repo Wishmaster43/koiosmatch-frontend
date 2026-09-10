@@ -17,9 +17,8 @@ import { RefreshCw } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import ReasonModalHeader from '@/components/ui/ReasonModalHeader'
 import { Caption } from '@/components/ui/typography'
-import { notifySuccess, notifyError } from '@/lib/notify'
-import { extractApiError } from '@/lib/extractApiError'
 import { useDateFormat } from '@/lib/datetime'
+import { useReasonSubmit } from '@/hooks/useReasonSubmit'
 import { useMatchRenew } from '../hooks/useMatchRenew'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import type { MatchRow } from '@/types/match'
@@ -58,7 +57,6 @@ export default function RenewMatchModal({ match, onClose, onUpdate }: Props) {
   // the match's current end_date, so a blank field forces a deliberate pick
   // instead of showing a misleading pre-filled-but-invalid date on open.
   const [newEndDate, setNewEndDate] = useState('')
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   // Client-side mirror of the backend guard (MatchRenewalService): a null
   // current end_date accepts any date; otherwise the new date must be strictly
@@ -67,27 +65,16 @@ export default function RenewMatchModal({ match, onClose, onUpdate }: Props) {
   const dateTooEarly = Boolean(currentEndDate) && Boolean(newEndDate) && newEndDate <= (currentEndDate as string)
   const canSubmit = Boolean(newEndDate) && !dateTooEarly && !saving
 
-  // Submit: build the exact contract body, surface a 422 field error inline
-  // (modal stays open), else a generic toast; success notifies + closes so the
-  // caller's onUpdate (already fired inside the hook) is the single refresh path.
-  const submit = async () => {
-    if (!canSubmit) return
-    setFieldErrors({})
-    try {
-      await renew({ new_end_date: newEndDate })
-      notifySuccess(t('drawer.renew.success'))
-      onClose()
-    } catch (err) {
-      const body = (err as { response?: { data?: { errors?: Record<string, string[]> } } })?.response?.data
-      if (body?.errors) {
-        const next: Record<string, string> = {}
-        Object.entries(body.errors).forEach(([k, v]) => { if (v?.[0]) next[k] = v[0] })
-        setFieldErrors(next)
-      } else {
-        notifyError(extractApiError(err, t('drawer.renew.error')))
-      }
-    }
-  }
+  // Shared guard/success/422 submit flow (clone: also used by TerminateMatchModal) —
+  // builds the exact contract body, surfaces a 422 field error inline (modal stays
+  // open), else a generic toast; success notifies + closes.
+  const { submit, fieldErrors } = useReasonSubmit({
+    canSubmit,
+    action: () => renew({ new_end_date: newEndDate }),
+    successMessage: t('drawer.renew.success'),
+    errorMessage: t('drawer.renew.error'),
+    onClose,
+  })
 
   return (
     // POPUP-SLEEP-1 idiom (same shell TerminateMatchModal uses): the shared

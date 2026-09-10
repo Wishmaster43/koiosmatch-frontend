@@ -12,6 +12,7 @@
 import { useTranslation } from 'react-i18next'
 import { FieldRow, TextField, DateField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import BranchFieldRow from '@/components/forms/BranchFieldRow'
 import { getCountryOptions } from '@/lib/countries'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 import { postcodePlaceholder } from '@/lib/postcode'
@@ -95,10 +96,8 @@ export default function PlacementCard({
         </FieldRow>
         {/* Vestiging (bureau) — see this file's header comment for why this is a
             DIFFERENT field from the klant location above. */}
-        <FieldRow label={t('modal.fields.branch')}>
-          <CreatableSelect value={branchId || null} onChange={onBranchChange} allowCreate={false}
-            clearable clearLabel={t('modal.fields.branch')} placeholder={t('common:select')} options={branchOptions} />
-        </FieldRow>
+        <BranchFieldRow label={t('modal.fields.branch')} branchId={branchId} onBranchChange={onBranchChange}
+          branchOptions={branchOptions} clearLabel={t('modal.fields.branch')} placeholder={t('common:select')} />
       </div>
     </div>
   )

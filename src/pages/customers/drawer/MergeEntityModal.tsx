@@ -10,17 +10,17 @@
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, GitMerge } from 'lucide-react'
+import { GitMerge } from 'lucide-react'
 import { notifyError } from '@/lib/notify'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import Spinner from '@/components/ui/Spinner'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import { Z } from '@/lib/zIndexScale'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { tintBorder } from '@/lib/tint'
 import { captionStyle,Caption, Mono } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
-import Button from '@/components/ui/Button'
+import MergeModalFooter from '@/components/forms/MergeModalFooter'
+import MergeSearchInputBox from '@/components/forms/MergeSearchInputBox'
 
 // Only the fields the picker rows/survivor control ever show — never the whole
 // record (§8). `optionLabel` is the richer "Name — Function" label some callers
@@ -106,11 +106,7 @@ export default function MergeEntityModal({ i18nPrefix, persistKey, current, othe
         {/* Step 1 — pick the duplicate from the caller's own list. */}
         {!other && (
           <>
-            <div style={{ position: 'relative', marginBottom: 8 }}>
-              <Search size={13} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              <input autoFocus value={query} onChange={e => setQuery(e.target.value)}
-                placeholder={tk('searchPlaceholder')} aria-label={tk('searchPlaceholder')} style={inputStyle} />
-            </div>
+            <MergeSearchInputBox query={query} onQueryChange={setQuery} placeholder={tk('searchPlaceholder')} inputStyle={inputStyle} />
             <div style={{ maxHeight: 220, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
               {results.length === 0 && (
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic', padding: 6 }}>
@@ -156,21 +152,9 @@ export default function MergeEntityModal({ i18nPrefix, persistKey, current, othe
           </>
         )}
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-          {other
-            ? <Button variant="secondary" size="sm" onClick={() => { setOther(null); setSurvivorId(current.id) }}>
-                {tk('back')}
-              </Button>
-            : <span />}
-          <div style={{ display: 'flex', gap: 8 }}>
-            <Button variant="secondary" size="sm" onClick={onClose}>
-              {tk('cancel')}
-            </Button>
-            <Button variant="danger" size="sm" onClick={confirmMerge} disabled={!other || merging}>
-              {merging ? <Spinner size={13} /> : <GitMerge size={13} />} {tk('confirm')}
-            </Button>
-          </div>
-        </div>
+        <MergeModalFooter showBack={!!other} onBack={() => { setOther(null); setSurvivorId(current.id) }} backLabel={tk('back')}
+          onCancel={onClose} cancelLabel={tk('cancel')}
+          onConfirm={confirmMerge} confirmDisabled={!other || merging} busy={merging} confirmLabel={tk('confirm')} />
     </FloatingPanel>
   )
 }

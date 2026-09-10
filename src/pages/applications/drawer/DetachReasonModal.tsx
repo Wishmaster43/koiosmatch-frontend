@@ -10,9 +10,9 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Unlink } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import Button from '@/components/ui/Button'
 import DictationTextarea from '@/components/forms/DictationTextarea'
 import ReasonModalHeader from '@/components/ui/ReasonModalHeader'
+import ReasonPromptFooter from '@/components/forms/ReasonPromptFooter'
 import { Caption } from '@/components/ui/typography'
 
 const REASON_MAX = 1000
@@ -42,14 +42,9 @@ export default function DetachReasonModal({ onCancel, onConfirm, submitting }: P
         <DictationTextarea autoFocus value={reason} rows={3} aria-label={t('detach.reasonLabel')}
           onChange={v => setReason(v.slice(0, REASON_MAX))} placeholder={t('detach.reasonPlaceholder')} />
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 14 }}>
-          <Button variant="secondary" onClick={onCancel}>
-            {t('common:cancel')}
-          </Button>
-          <Button variant="danger" onClick={() => trimmed && onConfirm(trimmed)} disabled={!trimmed || submitting}>
-            {t('detach.confirm')}
-          </Button>
-        </div>
+        <ReasonPromptFooter onCancel={onCancel} cancelLabel={t('common:cancel')}
+          onConfirmClick={() => trimmed && onConfirm(trimmed)} confirmDisabled={!trimmed || submitting}
+          confirmContent={t('detach.confirm')} />
     </FloatingPanel>
   )
 }

@@ -94,6 +94,29 @@ describe('RenewMatchModal (G04/MATCH-RENEWAL-1)', () => {
     expect(onClose).not.toHaveBeenCalled()
   })
 
+  // Round 10 fix: HEAD's `if (body?.errors)` branch takes the field-error path even for
+  // an EMPTY errors object — clears field errors, shows NO toast, and keeps the modal
+  // open. A shared 422 extractor that collapsed "empty" and "absent" would show
+  // a generic toast here instead — this pins the correct HEAD-mirroring behaviour.
+  it('on a 422 with an empty errors object: shows no toast and keeps the modal open', async () => {
+    const { FreshModal, freshApi, freshNotify } = await setup({
+      postRejects: { response: { status: 422, data: { errors: {} } } },
+    })
+    const onClose = vi.fn()
+    const user = userEvent.setup()
+    render(<FreshModal match={match} onClose={onClose} />)
+    fireEvent.change(screen.getByLabelText('drawer.renew.newEndDateLabel'), { target: { value: '2026-09-15' } })
+    await user.click(screen.getByText('drawer.renew.confirm'))
+    await waitFor(() => expect(freshApi.post).toHaveBeenCalledTimes(1))
+    // Let the rejected promise's catch handler (and the setFieldErrors it fires) settle.
+    await new Promise(resolve => setTimeout(resolve, 0))
+    // The modal is still ON SCREEN (never closed) and the field is still there to fill.
+    expect(screen.getByLabelText('drawer.renew.newEndDateLabel')).toBeInTheDocument()
+    expect(onClose).not.toHaveBeenCalled()
+    expect(freshNotify.notifyError).not.toHaveBeenCalled()
+    expect(freshNotify.notifySuccess).not.toHaveBeenCalled()
+  })
+
   it('on a successful submit: hands the mapped match to onUpdate, notifies success, and closes', async () => {
     const { FreshModal, freshNotify } = await setup({
       postResolves: { data: { id: 'm1', status: 'open', end_date: '2026-09-15' } },

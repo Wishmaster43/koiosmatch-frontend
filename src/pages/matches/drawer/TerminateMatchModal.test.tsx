@@ -80,6 +80,31 @@ describe('TerminateMatchModal (MATCH-TERMINATE-1)', () => {
     expect(onClose).not.toHaveBeenCalled()
   })
 
+  // Round 10 fix: HEAD's `if (body?.errors)` branch takes the field-error path even for
+  // an EMPTY errors object — clears field errors, shows NO toast, and keeps the modal
+  // open. A shared 422 extractor that collapsed "empty" and "absent" would show
+  // a generic toast here instead — this pins the correct HEAD-mirroring behaviour.
+  it('on a 422 with an empty errors object: shows no toast and keeps the modal open', async () => {
+    const { FreshModal, freshApi, freshNotify } = await setup({
+      reasons: [REASON_ROW],
+      postRejects: { response: { status: 422, data: { errors: {} } } },
+    })
+    const onClose = vi.fn()
+    const user = userEvent.setup()
+    render(<FreshModal match={match} onClose={onClose} />)
+    await user.click(await screen.findByRole('button', { name: 'drawer.terminate.reasonPlaceholder' }))
+    await user.click(await screen.findByRole('button', { name: 'Einde contract' }))
+    await user.click(screen.getByText('drawer.terminate.confirm'))
+    await waitFor(() => expect(freshApi.post).toHaveBeenCalledTimes(1))
+    // Let the rejected promise's catch handler (and the setFieldErrors it fires) settle.
+    await new Promise(resolve => setTimeout(resolve, 0))
+    // The modal is still ON SCREEN (never closed) and the confirm button is still there.
+    expect(screen.getByText('drawer.terminate.confirm')).toBeInTheDocument()
+    expect(onClose).not.toHaveBeenCalled()
+    expect(freshNotify.notifyError).not.toHaveBeenCalled()
+    expect(freshNotify.notifySuccess).not.toHaveBeenCalled()
+  })
+
   it('on a successful submit: hands the mapped match to onUpdate, notifies success, and closes', async () => {
     const { FreshModal, freshNotify } = await setup({
       reasons: [REASON_ROW],

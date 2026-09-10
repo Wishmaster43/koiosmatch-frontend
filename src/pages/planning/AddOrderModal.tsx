@@ -27,7 +27,7 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { FieldRow, inputStyle } from '@/components/forms/fields'
 import { cardHead, cardBox, modalColumns } from '@/components/ui/modalCards'
-import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { WIDE_MODAL_PANEL_SIZE } from '@/components/ui/wideModalPanelSize'
 import { tintBorder } from '@/lib/tint'
 import { useCustomerCascade } from '@/hooks/useCustomerCascade'
 import { useShiftCustomers } from './hooks/useShiftLookups'
@@ -134,7 +134,7 @@ export default function AddOrderModal({ onClose, onCreated, order }: { onClose: 
   return (
     <FloatingPanel open onClose={onClose} ariaLabel={t('order.modal.title')}
       persistKey="planning-order-add" scrollBody={false}
-      width={`min(calc(100vw - 48px), ${WIDE_MODAL.maxWidth}px)`} maxWidth={`${WIDE_MODAL.maxWidth}px`}
+      {...WIDE_MODAL_PANEL_SIZE}
       header={
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
           <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--color-primary-bg)',

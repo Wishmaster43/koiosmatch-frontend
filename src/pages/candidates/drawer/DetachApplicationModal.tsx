@@ -17,19 +17,21 @@
  * content) — the same documented deviation from the rich-text rule as
  * StatusReasonModal: it is never rendered as HTML, only stored as note text.
  *
- * KNOWN DUPLICATION (reported, not hidden): `pages/applications/drawer/
- * DetachReasonModal.tsx` is the same prompt for the applications page. Promoting
- * it to `components/ui` is the right fix, but that file belongs to another lane's
- * page today (§2 forbids importing another entity page's internals), so this one
- * stays local until the two can be merged in one deliberate move.
+ * FORMER KNOWN DUPLICATION, now resolved (DRY round 10, MODALS): `pages/applications/
+ * drawer/DetachReasonModal.tsx` is the same prompt for the applications page — both
+ * files now share their Cancel/Confirm row via `components/forms/ReasonPromptFooter`.
+ * The header (icon badge + title) stays hand-rolled HERE on purpose: it carries an
+ * `aria-hidden="true"` on the icon badge that the shared `ReasonModalHeader` atom
+ * (used by DetachReasonModal) does not, and this file is part of the frozen
+ * candidate drawer (§14 SCHERMWAARHEID-1) — its DOM/aria must stay byte-identical.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Unlink } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { Z } from '@/lib/zIndexScale'
-import Button from '@/components/ui/Button'
 import DictationTextarea from '@/components/forms/DictationTextarea'
+import ReasonPromptFooter from '@/components/forms/ReasonPromptFooter'
 import { PageTitle, BodyText, Caption } from '@/components/ui/typography'
 
 // Mirrors the backend limit (ApplicationController::destroy — string|max:1000).
@@ -70,14 +72,9 @@ export default function DetachApplicationModal({ label, onCancel, onConfirm, sub
         <DictationTextarea id="detach-application-reason" autoFocus value={reason} rows={3}
           onChange={v => setReason(v.slice(0, REASON_MAX))} placeholder={t('work.detachReasonPlaceholder')} />
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 14 }}>
-          <Button variant="secondary" onClick={onCancel}>
-            {t('common:cancel')}
-          </Button>
-          <Button variant="danger" onClick={() => trimmed && onConfirm(trimmed)} disabled={disabled}>
-            {submitting ? t('common:saving') : t('work.detachConfirm')}
-          </Button>
-        </div>
+        <ReasonPromptFooter onCancel={onCancel} cancelLabel={t('common:cancel')}
+          onConfirmClick={() => trimmed && onConfirm(trimmed)} confirmDisabled={disabled}
+          confirmContent={submitting ? t('common:saving') : t('work.detachConfirm')} />
     </FloatingPanel>
   )
 }

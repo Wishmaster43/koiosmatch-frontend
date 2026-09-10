@@ -16,8 +16,7 @@ import { Ban } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import ReasonModalHeader from '@/components/ui/ReasonModalHeader'
-import { notifySuccess, notifyError } from '@/lib/notify'
-import { extractApiError } from '@/lib/extractApiError'
+import { useReasonSubmit } from '@/hooks/useReasonSubmit'
 import { useMatchStopReasons } from '@/hooks/useMatchStopReasons'
 import { useMatchTerminate } from '../hooks/useMatchTerminate'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
@@ -61,32 +60,20 @@ export default function TerminateMatchModal({ match, onClose, onUpdate }: Props)
   const [stopReason, setStopReason] = useState('')
   const [effectiveDate, setEffectiveDate] = useState(() => todayISO())
   const [note, setNote] = useState('')
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   const noReasonsConfigured = !reasonsLoading && reasons.length === 0
   const canSubmit = Boolean(stopReason) && Boolean(effectiveDate) && !saving
 
-  // Submit: build the exact contract body, surface 422 field errors inline
-  // (modal stays open), else a generic toast; success notifies + closes so the
-  // caller's onUpdate (already fired inside the hook) is the single refresh path.
-  const submit = async () => {
-    if (!canSubmit) return
-    setFieldErrors({})
-    try {
-      await terminate({ stop_reason: stopReason, effective_date: effectiveDate, note: note.trim() || undefined })
-      notifySuccess(t('drawer.terminate.success'))
-      onClose()
-    } catch (err) {
-      const body = (err as { response?: { data?: { errors?: Record<string, string[]> } } })?.response?.data
-      if (body?.errors) {
-        const next: Record<string, string> = {}
-        Object.entries(body.errors).forEach(([k, v]) => { if (v?.[0]) next[k] = v[0] })
-        setFieldErrors(next)
-      } else {
-        notifyError(extractApiError(err, t('drawer.terminate.error')))
-      }
-    }
-  }
+  // Shared guard/success/422 submit flow (clone: also used by RenewMatchModal) —
+  // builds the exact contract body, surfaces 422 field errors inline (modal stays
+  // open), else a generic toast; success notifies + closes.
+  const { submit, fieldErrors } = useReasonSubmit({
+    canSubmit,
+    action: () => terminate({ stop_reason: stopReason, effective_date: effectiveDate, note: note.trim() || undefined }),
+    successMessage: t('drawer.terminate.success'),
+    errorMessage: t('drawer.terminate.error'),
+    onClose,
+  })
 
   return (
     // POPUP-SLEEP-1: shell swapped onto the shared FloatingPanel (draggable/

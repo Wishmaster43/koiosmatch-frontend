@@ -19,7 +19,6 @@ import { useLocations } from '@/lib/useLocations'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import FieldNotice from '@/components/ui/FieldNotice'
-import Button from '@/components/ui/Button'
 import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { useUserBranches } from './hooks/useUserBranches'
@@ -31,6 +30,7 @@ import Toggle from '@/components/ui/Toggle'
 // PersonalCard/ContactCard (src/pages/candidates/addmodal/).
 import { FieldRow, TextField, CheckboxField } from '@/components/forms/fields'
 import { cardHead, cardBox, row2 } from '@/components/ui/modalCards'
+import ModalErrorSubmitFooter from '@/components/forms/ModalErrorSubmitFooter'
 
 // VALIDATIE-LIVE-1-rest: `email` is the only field here the backend validates
 // with a shape rule (UserController's inline PATCH rules — `'email' =>
@@ -273,17 +273,15 @@ export default function EditUserModal({ user, onClose, onSaved }: {
             </div>
           )}
 
-          {error && <p style={{ fontSize: 12, color: 'var(--color-danger-text)', marginBottom: 12 }}>{error}</p>}
-
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <Button variant="secondary" onClick={onClose}>
-              {t('common:cancel')}
-            </Button>
-            <Button type="submit" variant="primary"
-              disabled={saving || hasFormatError || (credentialChange && form.currentPassword === '')}>
-              {saving ? <><Spinner size={13} /> {t('saving')}</> : t('common:save')}
-            </Button>
-          </div>
+          <ModalErrorSubmitFooter
+            error={error}
+            onCancel={onClose}
+            cancelLabel={t('common:cancel')}
+            disabled={saving || hasFormatError || (credentialChange && form.currentPassword === '')}
+            saving={saving}
+            busyLabel={t('saving')}
+            idleLabel={t('common:save')}
+          />
         </form>
     </FloatingPanel>
   )

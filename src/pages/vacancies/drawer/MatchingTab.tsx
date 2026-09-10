@@ -12,21 +12,17 @@
  * (see useVacancyRecord.updateVacancy).
  */
 import { useState, useEffect } from 'react'
-import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Save, Check, Info } from 'lucide-react'
-import SliderJs from '@/components/ui/Slider'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import SaveButton from '@/components/ui/SaveButton'
-// HUISSTIJL-1: title/group-label/weight-readout are the shared typography atoms.
-import { SectionTitle, GroupLabel, Mono } from '@/components/ui/typography'
+import WeightSliderRow from '@/components/forms/WeightSliderRow'
+// HUISSTIJL-1: title/group-label are the shared typography atoms.
+import { SectionTitle, GroupLabel } from '@/components/ui/typography'
 import { useMatchWeightTemplates } from '../hooks/useMatchWeightTemplates'
 import { MATCH_DIMENSIONS as DIMENSIONS, buildMatchWeights as buildWeights } from '../data/matchWeights'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
-
-type AnyProps = Record<string, unknown>
-const Slider = SliderJs as unknown as ComponentType<AnyProps>
 
 // Match-weight sliders tab: local editable weights seeded from the vacancy, saved back through onUpdate.
 export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: VacancyDetail; onUpdate?: (id: Id | undefined, patch: Record<string, unknown>) => void | Promise<boolean> }) {
@@ -104,23 +100,14 @@ export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: Vacancy
         </p>
       </div>
 
+      {/* Canon (05-08): 12px weight readout here, matching the identical row-label
+          convention on the Publiceren tab (mirrors the add-modal's own 11px — see
+          WeightSliderRow's own doc comment for the shared 0-based/1..5 + no-% rationale). */}
       {DIMENSIONS.map(d => (
-        <div key={d}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-            {/* Canon (05-08): 12px, matching the identical row-label convention on the Publiceren tab. */}
-            <span style={{ fontSize: 12, color: 'var(--text)' }}>{t(`matching.dim.${d}`)}</span>
-            {/* Danny 22-07: the concrete 1..5 weight next to the word labels below the slider.
-                No %-of-total: on a 6-way split it can't be both equal for equal sliders AND
-                total 100 (100÷6=16,66…), so it read as "wrong" — the weight is the clean number;
-                relative importance already shows in the slider positions. */}
-            <Mono style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
-              {weights[d] ?? 3}/5
-            </Mono>
-          </div>
-          {/* Slider is 0-based (0..4); stored weight is 1..5. */}
-          <Slider value={(weights[d] ?? 3) - 1} max={4} step={1} onChange={(i: number) => setW(d, i + 1)}
-            labels={[t('matching.less'), t('matching.balanced'), t('matching.very')]} ariaLabel={t(`matching.dim.${d}`)} />
-        </div>
+        <WeightSliderRow key={d} label={t(`matching.dim.${d}`)} weight={weights[d] ?? 3}
+          onChange={w => setW(d, w)} weightFontSize={12}
+          sliderLabels={[t('matching.less'), t('matching.balanced'), t('matching.very')]}
+          ariaLabel={t(`matching.dim.${d}`)} />
       ))}
     </div>
   )

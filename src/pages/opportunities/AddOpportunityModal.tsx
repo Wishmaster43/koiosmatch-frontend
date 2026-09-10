@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 // DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
 import { extractApiError } from '@/lib/extractApiError'
+import { extractFormErrors } from '@/lib/extractFormErrors'
 import { useAuth } from '@/context/AuthContext'
 import { useOpportunityStages } from '@/lib/useOpportunityStages'
 import { useOpportunityServiceTypes, useOpportunityAgreementTypes } from '@/lib/useOpportunityLookups'
@@ -271,12 +272,9 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
       onCreated?.(mapOpportunity(unwrap<ApiOpportunity>(r)))
       onClose()
     } catch (err) {
-      const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
-      const apiErrors = e?.response?.data?.errors
-      if (apiErrors) {
-        const e2: Record<string, boolean> = {}
-        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
-        setErrors(e2)
+      const flags = extractFormErrors(err, API_TO_FORM)
+      if (flags) {
+        setErrors(flags)
       } else {
         // Fallback: no field-level 422 — surface the server message (or a generic
         // one) instead of failing silently.

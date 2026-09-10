@@ -10,6 +10,7 @@ import { Building2, Upload, CheckCircle2 } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 // DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
 import { extractApiError } from '@/lib/extractApiError'
+import { extractFormErrors } from '@/lib/extractFormErrors'
 import { useSafePermission } from '@/hooks/useSafePermission'
 import { useIndustries } from '@/lib/useIndustries'
 import { useCustomerSources } from '@/lib/useCustomerSources'
@@ -19,7 +20,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useAddCustomerForm } from './hooks/useAddCustomerForm'
 import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
-import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { WIDE_MODAL_PANEL_SIZE } from '@/components/ui/wideModalPanelSize'
 import { modalColumns, cardBox, cardHead } from '@/components/ui/modalCards'
 import CustomerCompanyCard from './addmodal/CustomerCompanyCard'
 import CustomerAddressCard from './addmodal/CustomerAddressCard'
@@ -239,11 +240,9 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
         // No payload (older API build): still our own translated line, never the server's.
         setCreateError(existing ? null : t('duplicate.blockedTitle'))
       } else {
-        const apiErrors = e?.response?.data?.errors
-        if (apiErrors) {
-          const e2: Record<string, boolean> = {}
-          Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
-          setErrors(e2)
+        const flags = extractFormErrors(err, API_TO_FORM)
+        if (flags) {
+          setErrors(flags)
         } else {
           setCreateError(extractApiError(err, t('common:errorGeneric')))
         }
@@ -266,7 +265,7 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
     // pills) rides along inside the drag handle via the `header` slot.
     <FloatingPanel open onClose={onClose} ariaLabel={t('modal.title')}
       persistKey="customer-add" scrollBody={false}
-      width={`min(calc(100vw - 48px), ${WIDE_MODAL.maxWidth}px)`} maxWidth={`${WIDE_MODAL.maxWidth}px`}
+      {...WIDE_MODAL_PANEL_SIZE}
       header={
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
           <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--color-primary-bg)',

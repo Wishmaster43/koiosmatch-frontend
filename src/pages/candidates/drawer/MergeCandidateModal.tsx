@@ -37,14 +37,13 @@ import { ChevronDown, GitMerge } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import Spinner from '@/components/ui/Spinner'
 import SearchSelect from '@/components/ui/SearchSelect'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import { Caption } from '@/components/ui/typography'
 import { Z } from '@/lib/zIndexScale'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import type { Id } from '@/types/common'
-import Button from '@/components/ui/Button'
+import MergeModalFooter from '@/components/forms/MergeModalFooter'
 import { useCustomFields } from '@/lib/useCustomFields'
 import MergeFieldConflicts from './MergeFieldConflicts'
 import { computeCustomFieldConflicts, customFieldsChanged, mergeCustomFieldMaps } from './mergeCustomFields'
@@ -297,21 +296,9 @@ export default function MergeCandidateModal({ current, onClose, onMerged, initia
           </>
         )}
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-          {other
-            ? <Button variant="secondary" size="sm" onClick={back} disabled={busy}>
-                {t('merge.back')}
-              </Button>
-            : <span />}
-          <div style={{ display: 'flex', gap: 8 }}>
-            <Button variant="secondary" size="sm" onClick={onClose}>
-              {t('merge.cancel')}
-            </Button>
-            <Button variant="danger" size="sm" onClick={confirm} disabled={!other || busy}>
-              {busy ? <Spinner size={13} /> : <GitMerge size={13} />} {t('merge.confirm')}
-            </Button>
-          </div>
-        </div>
+        <MergeModalFooter showBack={!!other} onBack={back} backDisabled={busy} backLabel={t('merge.back')}
+          onCancel={onClose} cancelLabel={t('merge.cancel')}
+          onConfirm={confirm} confirmDisabled={!other || busy} busy={busy} confirmLabel={t('merge.confirm')} />
     </FloatingPanel>
   )
 }

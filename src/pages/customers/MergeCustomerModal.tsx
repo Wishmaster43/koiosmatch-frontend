@@ -28,16 +28,16 @@ import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
-import { Search, GitMerge } from 'lucide-react'
+import { GitMerge } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import Spinner from '@/components/ui/Spinner'
 import { Z } from '@/lib/zIndexScale'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { Caption, Mono } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
-import Button from '@/components/ui/Button'
+import MergeModalFooter from '@/components/forms/MergeModalFooter'
+import MergeSearchInputBox from '@/components/forms/MergeSearchInputBox'
 
 // Only the fields the picker/summary show (§8 data minimization) — never the whole
 // customer record. `city` (not `email`, unlike the candidate/contact pickers) is what
@@ -139,11 +139,7 @@ export default function MergeCustomerModal({ current, onClose, onMerged }: {
         {/* Step 1 — find the duplicate to absorb. */}
         {!duplicate && (
           <>
-            <div style={{ position: 'relative', marginBottom: 8 }}>
-              <Search size={13} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              <input autoFocus value={query} onChange={e => setQuery(e.target.value)}
-                placeholder={t('merge.searchPlaceholder')} aria-label={t('merge.searchPlaceholder')} style={inputStyle} />
-            </div>
+            <MergeSearchInputBox query={query} onQueryChange={setQuery} placeholder={t('merge.searchPlaceholder')} inputStyle={inputStyle} />
             <div style={{ maxHeight: 220, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
               {searching && <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: 6 }}>{t('merge.searching')}</div>}
               {!searching && query.trim().length >= 2 && results.length === 0 && (
@@ -174,21 +170,9 @@ export default function MergeCustomerModal({ current, onClose, onMerged }: {
           </>
         )}
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-          {duplicate
-            ? <Button variant="secondary" size="sm" onClick={() => setDuplicate(null)}>
-                {t('merge.back')}
-              </Button>
-            : <span />}
-          <div style={{ display: 'flex', gap: 8 }}>
-            <Button variant="secondary" size="sm" onClick={onClose}>
-              {t('merge.cancel')}
-            </Button>
-            <Button variant="danger" size="sm" onClick={confirmMerge} disabled={!duplicate || merging}>
-              {merging ? <Spinner size={13} /> : <GitMerge size={13} />} {t('merge.confirm')}
-            </Button>
-          </div>
-        </div>
+        <MergeModalFooter showBack={!!duplicate} onBack={() => setDuplicate(null)} backLabel={t('merge.back')}
+          onCancel={onClose} cancelLabel={t('merge.cancel')}
+          onConfirm={confirmMerge} confirmDisabled={!duplicate || merging} busy={merging} confirmLabel={t('merge.confirm')} />
     </FloatingPanel>
   )
 }

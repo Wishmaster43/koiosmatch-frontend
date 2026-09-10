@@ -10,10 +10,8 @@ import type { CSSProperties, FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import Spinner from '@/components/ui/Spinner'
 // G34: the house searchable dropdown replaces the native role <select>.
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import Button from '@/components/ui/Button'
 import type { ManagedUser } from '@/types/api'
 import { useAssignableRoles } from './hooks/useAssignableRoles'
 import { useRoleBranchTemplate } from './hooks/useRoleBranchTemplate'
@@ -29,6 +27,7 @@ import { Caption, GroupLabel } from '@/components/ui/typography'
 // shared form kit — mirrors AddCandidateModal's cards (src/pages/candidates/addmodal/).
 import { FieldRow, TextField, CheckboxField } from '@/components/forms/fields'
 import FieldNotice from '@/components/ui/FieldNotice'
+import ModalErrorSubmitFooter from '@/components/forms/ModalErrorSubmitFooter'
 
 // VALIDATIE-LIVE-1-rest: `email` is the only field here the backend validates
 // with a shape rule (UserController's inline POST rules — `'email' =>
@@ -211,16 +210,15 @@ export default function NewUserModal({ onClose, onCreated }: {
             </div>
           )}
 
-          {error && <p style={{ fontSize: 12, color: 'var(--color-danger-text)', marginBottom: 12 }}>{error}</p>}
-
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <Button variant="secondary" onClick={onClose}>
-              {t('common:cancel')}
-            </Button>
-            <Button type="submit" variant="primary" disabled={saving || !form.role || hasFormatError}>
-              {saving ? <><Spinner size={13} /> {t('creating')}</> : t('create')}
-            </Button>
-          </div>
+          <ModalErrorSubmitFooter
+            error={error}
+            onCancel={onClose}
+            cancelLabel={t('common:cancel')}
+            disabled={saving || !form.role || hasFormatError}
+            saving={saving}
+            busyLabel={t('creating')}
+            idleLabel={t('create')}
+          />
         </form>
     </FloatingPanel>
   )

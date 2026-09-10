@@ -8,6 +8,7 @@
 import type { TFunction } from 'i18next'
 import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import BranchFieldRow from '@/components/forms/BranchFieldRow'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 
 interface Option { value: string; label: string }
@@ -89,11 +90,8 @@ export default function OpportunityGeneralCard({
         </FieldRow>
         {/* K2: Vestiging — the bureau's own branch handling this deal
             (`location_id`, distinct from the customer's site above). */}
-        <FieldRow label={t('modal.fields.branch')}>
-          <CreatableSelect value={branchId || null} onChange={onBranchChange} allowCreate={false}
-            clearable clearLabel={t('modal.fields.branch')}
-            placeholder={t('common:select')} options={branchOptions} />
-        </FieldRow>
+        <BranchFieldRow label={t('modal.fields.branch')} branchId={branchId} onBranchChange={onBranchChange}
+          branchOptions={branchOptions} clearLabel={t('modal.fields.branch')} placeholder={t('common:select')} />
       </div>
     </div>
   )
