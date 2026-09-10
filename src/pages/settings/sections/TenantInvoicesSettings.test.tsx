@@ -70,4 +70,46 @@ describe('TenantInvoicesSettings', () => {
     clickSpy.mockRestore()
     vi.unstubAllGlobals()
   })
+
+  // SMZ-13: the endpoint paginates at 20/page (GET /billing/invoices returns
+  // {data, meta}); page 2 must be requested explicitly and its rows rendered —
+  // never the empty state, which is reserved for total === 0.
+  it('requests page 2 (params.page = 2) on next-page and renders its rows, not the empty state', async () => {
+    api.get.mockResolvedValueOnce({ data: {
+      data: [{ id: 'inv-1', number: 'KM-000001', period: '2026-07', total: 121, vat_amount: 21, status: 'final', finalized_at: '2026-08-01', sent_at: '2026-08-01' }],
+      meta: { current_page: 1, last_page: 2, per_page: 20, total: 25 },
+    } })
+    api.get.mockResolvedValueOnce({ data: {
+      data: [{ id: 'inv-2', number: 'KM-000021', period: '2026-08', total: 121, vat_amount: 21, status: 'final', finalized_at: '2026-09-01', sent_at: '2026-09-01' }],
+      meta: { current_page: 2, last_page: 2, per_page: 20, total: 25 },
+    } })
+
+    renderScreen()
+    expect(await screen.findByText('KM-000001')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: i18n.t('nextPage', { ns: 'common' }) }))
+
+    await waitFor(() => expect(api.get).toHaveBeenLastCalledWith('/billing/invoices', expect.objectContaining({ params: { page: 2 } })))
+    expect(await screen.findByText('KM-000021')).toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('billing.invoices.empty', { ns: 'settings' }))).not.toBeInTheDocument()
+  })
+
+  // A page change must never unmount the table/pager while the next page is
+  // in flight or if it fails — the user still has rows to look at and a way
+  // to navigate back (verdict item 4).
+  it('keeps the table + pager mounted when a subsequent page request fails, without re-showing the spinner', async () => {
+    api.get.mockResolvedValueOnce({ data: {
+      data: [{ id: 'inv-1', number: 'KM-000001', period: '2026-07', total: 121, vat_amount: 21, status: 'final', finalized_at: '2026-08-01', sent_at: '2026-08-01' }],
+      meta: { current_page: 1, last_page: 2, per_page: 20, total: 25 },
+    } })
+    api.get.mockRejectedValueOnce(new Error('network'))
+
+    renderScreen()
+    expect(await screen.findByText('KM-000001')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: i18n.t('nextPage', { ns: 'common' }) }))
+
+    expect(await screen.findByText(i18n.t('billing.invoices.loadError', { ns: 'settings' }))).toBeInTheDocument()
+    // Stale row + the prev-page control stay mounted so the user can go back.
+    expect(screen.getByText('KM-000001')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: i18n.t('prevPage', { ns: 'common' }) })).toBeInTheDocument()
+  })
 })

@@ -374,7 +374,7 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
       ? {
           id: raw.interview_workflow.id ?? '',
           name: raw.interview_workflow.name ?? '',
-          folder: raw.interview_workflow.folder ? { id: raw.interview_workflow.folder.id ?? '', name: raw.interview_workflow.folder.name ?? '' } : null,
+          // WFB-08: no resource nests a folder object — dropped (types/vacancy.ts).
           agent: raw.interview_workflow.agent ? { id: raw.interview_workflow.agent.id ?? '', name: raw.interview_workflow.agent.name ?? '' } : null,
         }
       : null,

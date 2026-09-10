@@ -145,11 +145,11 @@ describe('denormalizeWorkflow', () => {
     expect(denormalizeWorkflow(base({ status: undefined }))).toMatchObject({ active: false, status: 'draft' })
   })
 
-  it('denormalizes steps: id passthrough (or null), module_type/config/label, 0-based order, and connections', () => {
+  it('denormalizes steps: id passthrough (or omitted), module_type/config/label, 0-based order, and connections', () => {
     const payload = denormalizeWorkflow(base({
       steps: [
         { id: 'a', type: 'candidates', config: { limit: 5 }, position: { x: 0, y: 0 }, next: [{ target: 'b', filters: { conditions: [], logic: 'AND' } }] },
-        { type: 'email' }, // no id → null; no config → {}
+        { type: 'email' }, // no id → key omitted entirely; no config → {}
       ],
     }))
     expect(payload.steps).toEqual([
@@ -157,8 +157,21 @@ describe('denormalizeWorkflow', () => {
         id: 'a', module_type: 'candidates', config: { limit: 5 }, label: null, order: 0, position: { x: 0, y: 0 },
         connections: [{ target: 'b', filters: { conditions: [], logic: 'AND' }, label: null, source_handle: 'out', target_handle: 'in' }],
       },
-      { id: null, module_type: 'email', config: {}, label: null, order: 1, position: null, connections: [] },
+      { module_type: 'email', config: {}, label: null, order: 1, position: null, connections: [] },
     ])
+  })
+
+  // WFB-10: the `steps.*.id` backend rule is `sometimes|uuid` — `sometimes` skips
+  // an ABSENT key but a present `null` still hits the uuid rule and 422s. A new
+  // step (no id yet) must therefore omit the key rather than send `id: null`.
+  it('omits the id key entirely for a step without one (never sends id: null — sometimes|uuid 422s on a present null)', () => {
+    const payload = denormalizeWorkflow(base({ steps: [{ type: 'email' }] }))
+    expect(payload.steps[0]).not.toHaveProperty('id')
+  })
+
+  it('keeps the id key for a step that already has one', () => {
+    const payload = denormalizeWorkflow(base({ steps: [{ id: 'step-1', type: 'email' }] }))
+    expect(payload.steps[0]).toHaveProperty('id', 'step-1')
   })
 
   // Router branch contract: a connection's label/source_handle/target_handle must

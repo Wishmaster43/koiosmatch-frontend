@@ -44,7 +44,8 @@ describe('useVacancyRecord · updateVacancy interview-workflow re-sync', () => {
     act(() => { hook.current.selectVacancy(vacancyRow) })
     await waitFor(() => expect(hook.current.detail).not.toBeNull())
 
-    const linkedWorkflow = { id: 'wf-1', name: 'Kelly-Helpende', folder: { id: 'fo-1', name: 'Kelly' }, agent: { id: 'a1', name: 'Kelly' } }
+    // WFB-08: WorkflowResource never emits a folder object — no `folder` key.
+    const linkedWorkflow = { id: 'wf-1', name: 'Kelly-Helpende', agent: { id: 'a1', name: 'Kelly' } }
     mockPatch.mockResolvedValue({ data: { data: rawDetail({ interview_workflow_id: 'wf-1', interview_workflow: linkedWorkflow }) } })
 
     let ok: boolean | undefined

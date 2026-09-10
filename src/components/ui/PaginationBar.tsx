@@ -18,7 +18,11 @@ interface PaginationBarProps {
   totalRows: number
   pageSize: number
   onPageChange: (page: number) => void
-  onPageSizeChange: (size: number) => void
+  // Omit (or pass a single-value pageSizeOptions) when the endpoint's page size
+  // is server-fixed — the rows-per-page control itself hides then (§3 no fake
+  // affordances: a dropdown offering only its own current value can change
+  // nothing, so it must not render at all).
+  onPageSizeChange?: (size: number) => void
   // Per-page override (useListPageSize's `options`) — some endpoints cap per_page
   // below the shared max (e.g. 200), so the dropdown must never offer a size the
   // server would reject. Defaults to the full shared list for unclamped callers.
@@ -74,17 +78,22 @@ export default function PaginationBar({ page, totalPages, totalRows, pageSize, o
           previous round deliberately kept a native select here for its compact
           footprint; SelectMenu now filters internally at the SAME trigger
           footprint (no portal needed for a 6-item list), so that trade-off no
-          longer applies. */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span id={rowsLabelId} style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('rowsPerPage')}</span>
-        {/* DROPDOWN-CLEAR-1: pageSize is required; clearing to '' would emit NaN and break pagination */}
-        <SelectMenu aria-labelledby={rowsLabelId} value={String(pageSize)}
-          clearable={false}
-          onChange={v => onPageSizeChange(Number(v))}
-          options={pageSizeOptions.map(n => ({ value: String(n), label: String(n) }))}
-          menuWidth={90}
-          style={{ fontSize: 12, padding: '3px 6px', width: 'auto' }} />
-      </div>
+          longer applies. Rendered only when there is an actual choice to make
+          (a handler AND more than one option) — a caller with a server-fixed
+          page size passes neither, and a dropdown offering only its own current
+          value would be a fake affordance (§3). */}
+      {typeof onPageSizeChange === 'function' && pageSizeOptions.length > 1 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span id={rowsLabelId} style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('rowsPerPage')}</span>
+          {/* DROPDOWN-CLEAR-1: pageSize is required; clearing to '' would emit NaN and break pagination */}
+          <SelectMenu aria-labelledby={rowsLabelId} value={String(pageSize)}
+            clearable={false}
+            onChange={v => onPageSizeChange(Number(v))}
+            options={pageSizeOptions.map(n => ({ value: String(n), label: String(n) }))}
+            menuWidth={90}
+            style={{ fontSize: 12, padding: '3px 6px', width: 'auto' }} />
+        </div>
+      )}
     </div>
   )
 }

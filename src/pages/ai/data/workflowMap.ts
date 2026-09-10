@@ -115,7 +115,10 @@ export function denormalizeWorkflow(wf: Workflow) {
     active:         wf.status === 'active',
     status:         wf.status ?? 'draft',
     steps:          (wf.steps ?? []).map((s, i) => ({
-      id:          s.id ?? null,
+      // WFB-10: `sometimes|uuid` skips an ABSENT key but 422s on a present
+      // null — emit `id` only when the step already has one (a brand-new
+      // step has none; syncSteps already treats a missing id as "new step").
+      ...(s.id ? { id: s.id } : {}),
       module_type: s.type,
       config:      s.config ?? {},
       label:       s.label ?? null,

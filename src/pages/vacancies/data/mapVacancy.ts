@@ -121,7 +121,7 @@ export function mapVacancy(v: ApiVacancy = {}): Vacancy {
       ? {
           id: v.interview_workflow.id ?? '',
           name: v.interview_workflow.name ?? '',
-          folder: v.interview_workflow.folder ? { id: v.interview_workflow.folder.id ?? '', name: v.interview_workflow.folder.name ?? '' } : null,
+          // WFB-08: no resource nests a folder object — dropped (types/vacancy.ts).
           agent: v.interview_workflow.agent ? { id: v.interview_workflow.agent.id ?? '', name: v.interview_workflow.agent.name ?? '' } : null,
         }
       : null,

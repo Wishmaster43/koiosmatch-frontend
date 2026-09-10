@@ -48,14 +48,14 @@ export default function InterviewWorkflowPicker({ value, onChange, options, load
   const currentId = value != null ? String(value) : null
   const missingFromOptions = !!currentId && !options.some(o => String(o.value) === currentId)
   // describe() (full list, carries inactive state) wins over the nested ref
-  // (folder+name only, no status) — both exist purely as fallbacks for a
-  // linked id the ACTIVE-only `options` list does not carry. Own useMemo (not
-  // inlined into resolvedOptions' deps) so the dependency array below stays stable.
+  // (name only, no status) — both exist purely as fallbacks for a linked id
+  // the ACTIVE-only `options` list does not carry. Own useMemo (not inlined
+  // into resolvedOptions' deps) so the dependency array below stays stable.
   const linkedInfo = useMemo(() => {
     if (!missingFromOptions) return null
     return describe?.(currentId as string)
       ?? (linkedRef && String(linkedRef.id) === currentId
-        ? { label: linkedRef.folder?.name ? `${linkedRef.folder.name} · ${linkedRef.name}` : linkedRef.name, inactive: false }
+        ? { label: linkedRef.name, inactive: false }
         : null)
   }, [missingFromOptions, describe, linkedRef, currentId])
 

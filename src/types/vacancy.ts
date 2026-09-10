@@ -118,11 +118,12 @@ export interface Vacancy {
   koiosAiAdvice: KoiosAiAdvice | null
 }
 
-/** A resolved interview-workflow reference, as nested on a vacancy/application. */
+/** A resolved interview-workflow reference, as nested on a vacancy/application.
+ * WFB-08: no resource nests a folder object (only `folder_id` on the workflow
+ * itself), so there is no `folder` field here. */
 export interface InterviewWorkflowRef {
   id: Id
   name: string
-  folder: { id: Id; name: string } | null
   agent: { id: Id; name: string } | null
 }
 

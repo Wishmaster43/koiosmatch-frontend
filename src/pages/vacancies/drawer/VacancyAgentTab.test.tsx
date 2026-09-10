@@ -291,7 +291,8 @@ describe('VacancyAgentTab · backfill existing applicants (INTERVIEW-BACKFILL-1)
 // presence-gated on whether GET /vacancies/{id} carries the
 // `interview_workflow_id` key at all — never inferred from its value.
 const WORKFLOW_UNAVAILABLE = 'Beschikbaar zodra de workflow-koppeling aan de backend is'
-const mockWorkflow = { id: 'wf-1', name: 'Kelly-Helpende', status: 'active', folder: { id: 'fo-1', name: 'Kelly' }, agent: { id: 'a1', name: 'Kelly' } }
+// WFB-08: WorkflowResource never emits a folder object — no `folder` key.
+const mockWorkflow = { id: 'wf-1', name: 'Kelly-Helpende', status: 'active', agent: { id: 'a1', name: 'Kelly' } }
 
 describe('VacancyAgentTab · interview-workflow link (INTERVIEW-WORKFLOW-1)', () => {
   it('presence gate absent: renders disabled with the honest notice, old agent picker untouched, no PATCH on interaction', async () => {
@@ -315,7 +316,7 @@ describe('VacancyAgentTab · interview-workflow link (INTERVIEW-WORKFLOW-1)', ()
     mockPatch.mockResolvedValue({ data: { data: rawDetail({ interview_workflow_id: 'wf-1' }) } })
     const user = userEvent.setup()
     await user.click(trigger)
-    await user.click(screen.getByRole('button', { name: 'Kelly · Kelly-Helpende' }))
+    await user.click(screen.getByRole('button', { name: 'Kelly-Helpende' }))
     expect(mockPatch).toHaveBeenCalledWith('/vacancies/v1', { interview_workflow_id: 'wf-1' })
 
     // HIGH fix (verdict finding 1): right after the pick, the derived line

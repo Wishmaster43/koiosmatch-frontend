@@ -19,9 +19,10 @@ vi.mock('@/lib/api', async (importOriginal) => {
 const wrapper = ({ children }: { children: ReactNode }) =>
   createElement(QueryClientProvider, { client: new QueryClient({ defaultOptions: { queries: { retry: false } } }) }, children)
 
+// WFB-08: WorkflowResource never emits a folder object — plain names only.
 const workflows = [
-  { id: 'wf-1', name: 'Kelly-Helpende', status: 'active', kind: 'interview', folder: { id: 'f1', name: 'Kelly' } },
-  { id: 'wf-2', name: 'Oude flow', status: 'inactive', kind: 'interview', folder: { id: 'f1', name: 'Kelly' } },
+  { id: 'wf-1', name: 'Kelly-Helpende', status: 'active', kind: 'interview' },
+  { id: 'wf-2', name: 'Oude flow', status: 'inactive', kind: 'interview' },
 ]
 
 beforeEach(() => vi.clearAllMocks())
@@ -31,16 +32,16 @@ describe('useInterviewWorkflows · active-only options (mirrors useInterviewFlow
     vi.mocked(api.get).mockResolvedValue({ data: { data: workflows } } as never)
     const { result } = renderHook(() => useInterviewWorkflows(true), { wrapper })
     await waitFor(() => expect(result.current.options.length).toBe(1))
-    expect(result.current.options).toEqual([{ value: 'wf-1', label: 'Kelly · Kelly-Helpende' }])
+    expect(result.current.options).toEqual([{ value: 'wf-1', label: 'Kelly-Helpende' }])
   })
 
   it('still resolves the inactive one via describe(), with its label + the inactive flag', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { data: workflows } } as never)
     const { result } = renderHook(() => useInterviewWorkflows(true), { wrapper })
     await waitFor(() => expect(result.current.loading).toBe(false))
-    expect(result.current.describe('wf-2')).toEqual({ label: 'Kelly · Oude flow', inactive: true })
+    expect(result.current.describe('wf-2')).toEqual({ label: 'Oude flow', inactive: true })
     // The active one describes as NOT inactive, same shape.
-    expect(result.current.describe('wf-1')).toEqual({ label: 'Kelly · Kelly-Helpende', inactive: false })
+    expect(result.current.describe('wf-1')).toEqual({ label: 'Kelly-Helpende', inactive: false })
   })
 
   it('describe() returns null for an id the fetched list never carried at all', async () => {

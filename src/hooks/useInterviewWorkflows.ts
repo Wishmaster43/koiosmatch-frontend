@@ -16,10 +16,8 @@ import api, { unwrapList } from '@/lib/api'
 import type { Workflow } from '@/types/workflow'
 import type { Id } from '@/types/common'
 
-// One pickable option, grouped by its folder name (Kelly -> Kelly-Helpende) so
-// the select label states provenance at a glance — there is no two-level select
-// atom in the shared component library yet (§3A: no reuse target found), so the
-// grouping is flattened into the label text itself.
+// One pickable option — plain workflow name (WFB-08: WorkflowResource never
+// emits a folder object, so there is no provenance prefix to render).
 export interface InterviewWorkflowOption { value: string; label: string }
 
 const NO_WORKFLOWS: Workflow[] = []
@@ -53,12 +51,11 @@ export function useInterviewWorkflows(enabled: boolean = true) {
   // inactive one that was linked BEFORE it went inactive, so the picker can
   // show the truth instead of an unexplained blank.
   const active = useMemo(() => workflows.filter(w => w.status !== 'inactive'), [workflows])
-  // Folder name prefixes the workflow's own name ("Kelly · Kelly-Helpende") —
-  // the TITELBALK-PILLS-style compact label, since no grouped-select atom exists.
+  // Plain workflow name (WFB-08: no folder object to prefix with).
   const options: InterviewWorkflowOption[] = useMemo(
     () => active.map(w => ({
       value: String(w.id ?? ''),
-      label: w.folder?.name ? `${w.folder.name} · ${w.name ?? ''}` : (w.name ?? ''),
+      label: w.name ?? '',
     })),
     [active],
   )
@@ -71,7 +68,7 @@ export function useInterviewWorkflows(enabled: boolean = true) {
     if (id == null || id === '') return null
     const w = byId.get(String(id))
     if (!w) return null
-    return { label: w.folder?.name ? `${w.folder.name} · ${w.name ?? ''}` : (w.name ?? ''), inactive: w.status === 'inactive' }
+    return { label: w.name ?? '', inactive: w.status === 'inactive' }
   }
 
   return { options, workflows, byId, describe, loading: isLoading, error: isError }

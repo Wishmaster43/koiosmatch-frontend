@@ -24,3 +24,35 @@ describe('PaginationBar', () => {
     }
   })
 })
+
+// §3 no fake affordances: a rows-per-page dropdown that can change nothing
+// (no handler, or a single option) must not render at all — the range text
+// and the step buttons stay regardless.
+describe('PaginationBar · rows-per-page control', () => {
+  it('hides the control when there is no onPageSizeChange handler (server-fixed page size)', () => {
+    const { queryByText } = render(
+      <PaginationBar page={1} totalPages={2} totalRows={25} pageSize={20}
+        onPageChange={vi.fn()} pageSizeOptions={[20]} />
+    )
+    const t = i18n.getFixedT(i18n.language, 'common')
+    expect(queryByText(t('rowsPerPage'))).not.toBeInTheDocument()
+  })
+
+  it('hides the control when only one page-size option exists, even with a handler', () => {
+    const { queryByText } = render(
+      <PaginationBar page={1} totalPages={2} totalRows={25} pageSize={20}
+        onPageChange={vi.fn()} onPageSizeChange={vi.fn()} pageSizeOptions={[20]} />
+    )
+    const t = i18n.getFixedT(i18n.language, 'common')
+    expect(queryByText(t('rowsPerPage'))).not.toBeInTheDocument()
+  })
+
+  it('renders the control when a handler is given with the default multi-option list', () => {
+    const { queryByText } = render(
+      <PaginationBar page={1} totalPages={5} totalRows={100} pageSize={20}
+        onPageChange={vi.fn()} onPageSizeChange={vi.fn()} />
+    )
+    const t = i18n.getFixedT(i18n.language, 'common')
+    expect(queryByText(t('rowsPerPage'))).toBeInTheDocument()
+  })
+})
