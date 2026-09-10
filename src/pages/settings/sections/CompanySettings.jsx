@@ -25,6 +25,7 @@ import SaveButton from '@/components/ui/SaveButton'
 import { PageTitle } from '@/components/ui/typography'
 import { fieldSelectStyle, fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { postcodePlaceholder } from '@/lib/postcode'
+import CatalogSection from './CatalogSection'
 
 // Option lists (data — kept as-is; only labels are translated). Industries and
 // countries are now backend-sourced (Settings → Personalisation → Industries;
@@ -306,6 +307,9 @@ export default function CompanySettings() {
           Settings → Bedrijf → Organisatiebeleid ("Company → Organisation policy")
           (Danny 23-07 — no longer crammed
           under the company-profile form). */}
+      {/* CATALOG-GROUPS-1: the company section's generic catalogue rows (address, region &
+          currency, billing e-mail) as titled blocks under the profile form. */}
+      <div style={{ marginTop: 24 }}><CatalogSection section="company" embedded /></div>
     </div>
   )
 }

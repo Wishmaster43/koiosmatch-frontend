@@ -3860,6 +3860,67 @@
       "smtp_pass": {
         "label": "SMTP-Passwort"
       }
+    },
+    "groups": {
+      "identity": "Identität",
+      "address": "Adresse",
+      "region": "Region & Währung",
+      "billing": "Abrechnung",
+      "branding": "Branding",
+      "career_site": "Karriereseite",
+      "defaults": "Standardwerte",
+      "dashboard": "Dashboard",
+      "personal": "Persönlich",
+      "candidates": "Kandidaten",
+      "contacts": "Kontaktpersonen",
+      "customers": "Kunden",
+      "vacancies": "Stellen",
+      "applications": "Bewerbungen",
+      "matches": "Matches",
+      "opportunities": "Chancen",
+      "tasks": "Aufgaben",
+      "conversations": "Gespräche",
+      "matching": "Matching",
+      "workflows": "Workflows",
+      "koios": "Koios AI",
+      "security": "Sicherheit",
+      "integrations": "Integrationen",
+      "system": "System",
+      "whatsapp_limits": "WhatsApp-Limits",
+      "inbox": "Posteingang",
+      "screens": "Bildschirme",
+      "lead_notifications": "Lead-Benachrichtigungen",
+      "chips": "Chips",
+      "filters": "Filter",
+      "rules": "Regeln",
+      "patterns": "Muster",
+      "mail": "E-Mail",
+      "required": "Pflichtfelder",
+      "kpi": "KPI"
+    },
+    "company": {
+      "billing_email": {
+        "label": "Rechnungs-E-Mail-Adresse"
+      }
+    },
+    "action_rules": {
+      "work_permit_block_matches": {
+        "label": "Fehlende Arbeitserlaubnis blockiert Matches"
+      },
+      "customer_dedupe_keys": {
+        "label": "Dedupe-Schlüssel für Kunden"
+      },
+      "rejection": {
+        "label": "Ablehnungsregeln"
+      },
+      "workflow_fallback_owner_id": {
+        "label": "Ersatzverantwortlicher für Workflows (Benutzer-ID)"
+      }
+    },
+    "matching": {
+      "matching": {
+        "label": "Matching-Konfiguration"
+      }
     }
   },
   "identifierValidation": {

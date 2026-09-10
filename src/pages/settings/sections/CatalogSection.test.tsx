@@ -64,3 +64,32 @@ describe('CatalogSection', () => {
     expect(screen.getByRole('button')).toBeTruthy()
   })
 })
+
+// CATALOG-GROUPS-1 (Danny 10-09: "zorg dat de goed staan onderverdeeld"): titled blocks in the
+// section's order; an embedded block carries no page title and vanishes when empty.
+describe('CatalogSection · groups and embedded', () => {
+  it('renders the groups as titled blocks in the section order with the translated group name', async () => {
+    const grouped = JSON.parse(JSON.stringify(catalogFixture))
+    const windows = grouped.data.sections[0]
+    windows.groups = ['contacts', 'candidates']
+    windows.color = 'var(--color-warning)'
+    windows.keys[0].group = 'candidates'; windows.keys[0].group_label_key = 'settings.groups.candidates'; windows.keys[0].group_icon = 'users'
+    windows.keys[1].group = 'contacts'; windows.keys[1].group_label_key = 'settings.groups.contacts'; windows.keys[1].group_icon = 'contact'
+    armApi(grouped)
+    renderSection('windows')
+    await waitFor(() => expect(screen.getByText('settings.windows.no_contact_days.label')).toBeTruthy())
+    const headings = screen.getAllByRole('heading', { level: 3 }).map(h => h.textContent?.trim())
+    expect(headings).toEqual([st('settings.groups.contacts'), st('settings.groups.candidates')])
+  })
+
+  it('embedded: no page title, the Save bar stays; nothing at all when the section has no generic rows', async () => {
+    armApi()
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const { container, rerender } = render(<QueryClientProvider client={client}><CatalogSection section="windows" embedded /></QueryClientProvider>)
+    await waitFor(() => expect(screen.getByText('settings.windows.no_contact_days.label')).toBeTruthy())
+    expect(screen.queryByText(st('catalog.sections.windows.title'))).toBeNull()
+    rerender(<QueryClientProvider client={client}><CatalogSection section="vacancies" embedded /></QueryClientProvider>)
+    await waitFor(() => expect(screen.queryByText('settings.windows.no_contact_days.label')).toBeNull())
+    expect(container.textContent?.trim()).toBe('')
+  })
+})

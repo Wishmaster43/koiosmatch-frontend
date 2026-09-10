@@ -3860,6 +3860,67 @@
       "smtp_pass": {
         "label": "SMTP password"
       }
+    },
+    "groups": {
+      "identity": "Identity",
+      "address": "Address",
+      "region": "Region & currency",
+      "billing": "Billing",
+      "branding": "Branding",
+      "career_site": "Careers site",
+      "defaults": "Defaults",
+      "dashboard": "Dashboard",
+      "personal": "Personal",
+      "candidates": "Candidates",
+      "contacts": "Contacts",
+      "customers": "Customers",
+      "vacancies": "Vacancies",
+      "applications": "Applications",
+      "matches": "Matches",
+      "opportunities": "Opportunities",
+      "tasks": "Tasks",
+      "conversations": "Conversations",
+      "matching": "Matching",
+      "workflows": "Workflows",
+      "koios": "Koios AI",
+      "security": "Security",
+      "integrations": "Integrations",
+      "system": "System",
+      "whatsapp_limits": "WhatsApp limits",
+      "inbox": "Inbox",
+      "screens": "Screens",
+      "lead_notifications": "Lead notifications",
+      "chips": "Chips",
+      "filters": "Filters",
+      "rules": "Rules",
+      "patterns": "Patterns",
+      "mail": "Email",
+      "required": "Required fields",
+      "kpi": "KPI"
+    },
+    "company": {
+      "billing_email": {
+        "label": "Billing email address"
+      }
+    },
+    "action_rules": {
+      "work_permit_block_matches": {
+        "label": "Missing work permit blocks matches"
+      },
+      "customer_dedupe_keys": {
+        "label": "Customer deduplication keys"
+      },
+      "rejection": {
+        "label": "Rejection rules"
+      },
+      "workflow_fallback_owner_id": {
+        "label": "Fallback owner for workflows (user id)"
+      }
+    },
+    "matching": {
+      "matching": {
+        "label": "Matching configuration"
+      }
     }
   },
   "identifierValidation": {

@@ -93,3 +93,22 @@ describe('catalogToSchema · landed envelope', () => {
     expect(schema.fields[1].options).toEqual([{ value: 'email', label: 'email' }, { value: 'mobile', label: 'mobile' }])
   })
 })
+
+// CATALOG-GROUPS-1: blocks in the section's declared order, unlisted groups appended, fields carry their group.
+describe('catalogToSchema · groups', () => {
+  const row = (key: string, group?: string, icon?: string) => ({ key, section: 'company', type: 'string', rules: [], default: null, aliases: [], label_key: `settings.company.${key}.label`, ui: 'generic', fe_screen: null, ...(group && { group, group_label_key: `settings.groups.${group}`, group_icon: icon ?? null }) })
+  it('orders the blocks by the section, appends a group the section did not list, and keeps ungrouped fields', () => {
+    const rows = [row('company_currency', 'region', 'globe'), row('company_street', 'address', 'map-pin'), row('billing_email', 'billing'), row('company_language', 'region'), row('loose')] as Parameters<typeof catalogToSchema>[1]
+    const schema = catalogToSchema('company', rows, { groups: ['address', 'region'], color: 'var(--color-info)' })
+    expect(schema.groups?.map(g => g.key)).toEqual(['address', 'region', 'billing'])
+    expect(schema.groups?.[0]).toEqual({ key: 'address', labelKey: 'settings.groups.address', icon: 'map-pin' })
+    expect(schema.color).toBe('var(--color-info)')
+    expect(schema.fields.find(f => f.key === 'company_language')?.group).toBe('region')
+    expect(schema.fields.find(f => f.key === 'loose')?.group).toBeUndefined()
+  })
+  it('carries no groups at all for an envelope without them (one headless list, as before)', () => {
+    const schema = catalogToSchema('company', [row('company_currency'), row('loose')] as Parameters<typeof catalogToSchema>[1])
+    expect(schema.groups).toBeUndefined()
+    expect(schema.color).toBeUndefined()
+  })
+})

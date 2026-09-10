@@ -18,6 +18,9 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
 import { useSettingsForm } from '../lib/useSettingsForm'
+import { SlidersHorizontal } from 'lucide-react'
+import { SectionTitle } from '@/components/ui/typography'
+import { lucideByName } from '@/lib/lucideByName'
 import {
   SettingsScaffold, SettingCardList, SettingRow,
   Toggle, NumberField, TextField, SelectField, ColorField,
@@ -57,13 +60,13 @@ function FieldControl({ field, value, onChange, t, base, label, disabled }) {
     default:
       return (
         <NumberField value={value} onChange={onChange} ariaLabel={label}
-          min={field.min} max={field.max} step={field.step} unit={t(`${base}.unit`, '')} disabled={disabled} />
+          min={field.min} max={field.max} step={field.step} unit={(() => { const u = t(`${base}.unit`); return u === `${base}.unit` ? undefined : u })()} disabled={disabled} />
       )
   }
 }
 
 // Renders an entire settings section from its declarative schema: field defaults, the shared settings-form hook, and the scaffold/card chrome.
-export default function SchemaSection({ schema }) {
+export default function SchemaSection({ schema, embedded = false }) {
   const { t } = useTranslation('settings')
   const auth = useAuth()
   const canEdit = auth?.hasPermission('settings.update') ?? false
@@ -87,29 +90,54 @@ export default function SchemaSection({ schema }) {
       .map(f => f.key),
   )
   // When user lacks permissions, hide Save and disable all fields.
-  const gatedForm = canEdit ? { ...form, save: saveEditable } : { ...form, save: undefined }
+  // An EMBEDDED block shows its Save only once it is dirty — the host screen's own Save
+  // stays the one button at rest, so a second "Opslaan" never sits next to it unasked.
+  const gatedForm = canEdit ? { ...form, save: embedded && !form.dirty ? undefined : saveEditable } : { ...form, save: undefined }
+
+  // One row per field; the label/help keys come from the field (catalogue rows) or the folder convention.
+  const renderRow = (field) => {
+    const base = `${k}.fields.${field.key}`
+    const label = t(field.labelKey ?? `${base}.label`)
+    return (
+      <SettingRow key={field.key}
+        label={label}
+        description={opt(field.helpKey ?? `${base}.help`)}>
+        <FieldControl field={field} value={form.values[field.key]}
+          onChange={v => form.set(field.key, v)} t={t} base={base} label={label} disabled={!canEdit} />
+      </SettingRow>
+    )
+  }
+  // CATALOG-GROUPS-1 (Danny 10-09: "zorg dat de goed staan onderverdeeld"): blocks in the
+  // section's order, each headed by its group icon in the section colour + translated name;
+  // fields the contract has not grouped yet render as one headless list (never a "rest" block).
+  const groups = schema.groups?.length ? schema.groups : []
+  const grouped = new Set(groups.map(g => g.key))
+  const ungrouped = schema.fields.filter(f => !f.group || !grouped.has(f.group))
 
   return (
     <SettingsScaffold
-      title={t(schema.titleI18n ?? `${k}.title`)}
-      subtitle={opt(schema.subtitleI18n ?? `${k}.subtitle`)}
+      title={embedded ? undefined : t(schema.titleI18n ?? `${k}.title`)}
+      subtitle={embedded ? undefined : opt(schema.subtitleI18n ?? `${k}.subtitle`)}
       maxWidth={schema.maxWidth ?? 720}
       form={gatedForm}>
-      <SettingCardList>
-        {schema.fields.map(field => {
-          // A field's own labelKey/helpKey (catalogue rows) wins over the folder convention.
-          const base = `${k}.fields.${field.key}`
-          const label = t(field.labelKey ?? `${base}.label`)
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {groups.map(group => {
+          const fields = schema.fields.filter(f => f.group === group.key)
+          if (fields.length === 0) return null
+          const Icon = lucideByName(group.icon, SlidersHorizontal)
           return (
-            <SettingRow key={field.key}
-              label={label}
-              description={opt(field.helpKey ?? `${base}.help`)}>
-              <FieldControl field={field} value={form.values[field.key]}
-                onChange={v => form.set(field.key, v)} t={t} base={base} label={label} disabled={!canEdit} />
-            </SettingRow>
+            <section key={group.key} aria-labelledby={`catalog-group-${group.key}`}>
+              <SectionTitle as="h3" id={`catalog-group-${group.key}`}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0 0 8px' }}>
+                <Icon size={14} color={schema.color ?? 'var(--color-primary-text)'} aria-hidden="true" />
+                {t(group.labelKey)}
+              </SectionTitle>
+              <SettingCardList>{fields.map(renderRow)}</SettingCardList>
+            </section>
           )
         })}
-      </SettingCardList>
+        {ungrouped.length > 0 && <SettingCardList>{ungrouped.map(renderRow)}</SettingCardList>}
+      </div>
     </SettingsScaffold>
   )
 }

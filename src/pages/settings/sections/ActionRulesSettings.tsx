@@ -34,6 +34,7 @@ import ActionRuleMatrixGrid, { type SelectedCell } from './actionrules/ActionRul
 import ActionRuleDetailPanel from './actionrules/ActionRuleDetailPanel'
 import ActionRuleLegend from './actionrules/ActionRuleLegend'
 import ActionRuleSaveBar from './actionrules/ActionRuleSaveBar'
+import CatalogSection from './CatalogSection'
 
 type Phase = 'loading' | 'error' | 'ready'
 // The three domain sub-tabs — one grid (or section) each; content only, no data split.
@@ -220,6 +221,9 @@ export default function ActionRulesSettings() {
         />
       )}
       {dialog}
+      {/* CATALOG-GROUPS-1: the action_rules section's generic catalogue rows (candidate,
+          customer, vacancy, workflow, security and billing rules) as titled blocks under the matrix. */}
+      <div style={{ marginTop: 24 }}><CatalogSection section="action_rules" embedded /></div>
     </div>
   )
 }

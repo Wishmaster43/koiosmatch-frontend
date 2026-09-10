@@ -64,8 +64,10 @@ export function SettingsScaffold({ title, subtitle, form, maxWidth, actions, chi
   return (
     <div style={{ maxWidth }}>
       <div className="flex items-center justify-between" style={{ marginBottom: 20, gap: 16 }}>
+        {/* CATALOG-GROUPS-1: an EMBEDDED block (a catalogue section under a dedicated screen)
+            passes no title — the host screen already has one; the Save bar still renders. */}
         <div style={{ minWidth: 0 }}>
-          <PageTitle>{title}</PageTitle>
+          {title && <PageTitle>{title}</PageTitle>}
           {subtitle && <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</p>}
         </div>
         <div className="flex items-center" style={{ gap: 8, flexShrink: 0 }}>

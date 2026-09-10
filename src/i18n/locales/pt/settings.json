@@ -3861,6 +3861,67 @@
       "smtp_pass": {
         "label": "Palavra-passe SMTP"
       }
+    },
+    "groups": {
+      "identity": "Identidade",
+      "address": "Morada",
+      "region": "Região e moeda",
+      "billing": "Faturação",
+      "branding": "Identidade visual",
+      "career_site": "Site de carreiras",
+      "defaults": "Predefinições",
+      "dashboard": "Painel",
+      "personal": "Pessoal",
+      "candidates": "Candidatos",
+      "contacts": "Contactos",
+      "customers": "Clientes",
+      "vacancies": "Vagas",
+      "applications": "Candidaturas",
+      "matches": "Matches",
+      "opportunities": "Oportunidades",
+      "tasks": "Tarefas",
+      "conversations": "Conversas",
+      "matching": "Matching",
+      "workflows": "Workflows",
+      "koios": "Koios AI",
+      "security": "Segurança",
+      "integrations": "Integrações",
+      "system": "Sistema",
+      "whatsapp_limits": "Limites do WhatsApp",
+      "inbox": "Caixa de entrada",
+      "screens": "Ecrãs",
+      "lead_notifications": "Notificações de leads",
+      "chips": "Chips",
+      "filters": "Filtros",
+      "rules": "Regras",
+      "patterns": "Padrões",
+      "mail": "E-mail",
+      "required": "Campos obrigatórios",
+      "kpi": "KPI"
+    },
+    "company": {
+      "billing_email": {
+        "label": "E-mail de faturação"
+      }
+    },
+    "action_rules": {
+      "work_permit_block_matches": {
+        "label": "Autorização de trabalho em falta bloqueia matches"
+      },
+      "customer_dedupe_keys": {
+        "label": "Chaves de desduplicação de clientes"
+      },
+      "rejection": {
+        "label": "Regras de rejeição"
+      },
+      "workflow_fallback_owner_id": {
+        "label": "Responsável de reserva para workflows (ID de utilizador)"
+      }
+    },
+    "matching": {
+      "matching": {
+        "label": "Configuração de matching"
+      }
     }
   },
   "identifierValidation": {

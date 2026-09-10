@@ -3860,6 +3860,67 @@
       "smtp_pass": {
         "label": "Mot de passe SMTP"
       }
+    },
+    "groups": {
+      "identity": "Identité",
+      "address": "Adresse",
+      "region": "Région et devise",
+      "billing": "Facturation",
+      "branding": "Identité visuelle",
+      "career_site": "Site carrières",
+      "defaults": "Valeurs par défaut",
+      "dashboard": "Tableau de bord",
+      "personal": "Personnel",
+      "candidates": "Candidats",
+      "contacts": "Contacts",
+      "customers": "Clients",
+      "vacancies": "Postes",
+      "applications": "Candidatures",
+      "matches": "Matches",
+      "opportunities": "Opportunités",
+      "tasks": "Tâches",
+      "conversations": "Conversations",
+      "matching": "Matching",
+      "workflows": "Workflows",
+      "koios": "Koios AI",
+      "security": "Sécurité",
+      "integrations": "Intégrations",
+      "system": "Système",
+      "whatsapp_limits": "Limites WhatsApp",
+      "inbox": "Boîte de réception",
+      "screens": "Écrans",
+      "lead_notifications": "Notifications de leads",
+      "chips": "Puces",
+      "filters": "Filtres",
+      "rules": "Règles",
+      "patterns": "Modèles",
+      "mail": "E-mail",
+      "required": "Champs obligatoires",
+      "kpi": "KPI"
+    },
+    "company": {
+      "billing_email": {
+        "label": "Adresse e-mail de facturation"
+      }
+    },
+    "action_rules": {
+      "work_permit_block_matches": {
+        "label": "Un permis de travail manquant bloque les matches"
+      },
+      "customer_dedupe_keys": {
+        "label": "Clés de dédoublonnage des clients"
+      },
+      "rejection": {
+        "label": "Règles de refus"
+      },
+      "workflow_fallback_owner_id": {
+        "label": "Responsable de repli des workflows (identifiant utilisateur)"
+      }
+    },
+    "matching": {
+      "matching": {
+        "label": "Configuration du matching"
+      }
     }
   },
   "identifierValidation": {

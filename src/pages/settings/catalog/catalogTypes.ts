@@ -28,6 +28,11 @@ export interface CatalogRow {
   // `email_<context>_<field>`) describes a family of keys, never one field — the generic
   // screen skips it; the dedicated screen of that family owns it.
   pattern?: boolean
+  // CATALOG-GROUPS-1 (Danny 10-09 22:50 "zorg dat de goed staan onderverdeeld"): the block a
+  // row renders in, its label key (settings.groups.<slug>) and its lucide icon name.
+  group?: string | null
+  group_label_key?: string | null
+  group_icon?: string | null
 }
 
 // One catalogue section: a fixed §2 id with its rows.
@@ -36,6 +41,10 @@ export interface CatalogSection {
   keys: CatalogRow[]
   // SETTINGS-CATALOG-1: a section the BE hides from the generic screens (kpi today).
   hidden?: boolean
+  // CATALOG-GROUPS-1: the ordered group slugs this section uses, its lucide icon and colour.
+  groups?: string[]
+  icon?: string | null
+  color?: string | null
 }
 
 // The API response from GET /settings/catalog.

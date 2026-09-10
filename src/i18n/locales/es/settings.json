@@ -3860,6 +3860,67 @@
       "smtp_pass": {
         "label": "Contraseña SMTP"
       }
+    },
+    "groups": {
+      "identity": "Identidad",
+      "address": "Dirección",
+      "region": "Región y moneda",
+      "billing": "Facturación",
+      "branding": "Imagen de marca",
+      "career_site": "Sitio de empleo",
+      "defaults": "Valores predeterminados",
+      "dashboard": "Panel",
+      "personal": "Personal",
+      "candidates": "Candidatos",
+      "contacts": "Contactos",
+      "customers": "Clientes",
+      "vacancies": "Vacantes",
+      "applications": "Solicitudes",
+      "matches": "Matches",
+      "opportunities": "Oportunidades",
+      "tasks": "Tareas",
+      "conversations": "Conversaciones",
+      "matching": "Matching",
+      "workflows": "Workflows",
+      "koios": "Koios AI",
+      "security": "Seguridad",
+      "integrations": "Integraciones",
+      "system": "Sistema",
+      "whatsapp_limits": "Límites de WhatsApp",
+      "inbox": "Bandeja de entrada",
+      "screens": "Pantallas",
+      "lead_notifications": "Notificaciones de leads",
+      "chips": "Chips",
+      "filters": "Filtros",
+      "rules": "Reglas",
+      "patterns": "Patrones",
+      "mail": "Correo",
+      "required": "Campos obligatorios",
+      "kpi": "KPI"
+    },
+    "company": {
+      "billing_email": {
+        "label": "Correo de facturación"
+      }
+    },
+    "action_rules": {
+      "work_permit_block_matches": {
+        "label": "Sin permiso de trabajo se bloquean los matches"
+      },
+      "customer_dedupe_keys": {
+        "label": "Claves de deduplicación de clientes"
+      },
+      "rejection": {
+        "label": "Reglas de rechazo"
+      },
+      "workflow_fallback_owner_id": {
+        "label": "Responsable de reserva para workflows (id de usuario)"
+      }
+    },
+    "matching": {
+      "matching": {
+        "label": "Configuración de matching"
+      }
     }
   },
   "identifierValidation": {

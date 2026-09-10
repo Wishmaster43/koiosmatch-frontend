@@ -13,6 +13,7 @@ import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
 import ActionRulesSettings from './ActionRulesSettings'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
   CANDIDATE_ACTIONS, CUSTOMER_ACTIONS, CANDIDATE_CONDITIONS, CUSTOMER_CONDITIONS,
   WHATSAPP_SEND_ACTION, NO_CONSENT_CONDITION, defaultEffectFor, popupCodeFor,
@@ -23,6 +24,9 @@ vi.mock('@/lib/api', async () => {
   return { ...actual, default: { get: vi.fn(), put: vi.fn() } }
 })
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
+
+// CATALOG-GROUPS-1: the screen embeds the section's catalogue block, which reads through react-query.
+const renderPage = () => render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><ActionRulesSettings /></QueryClientProvider>)
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
@@ -56,20 +60,20 @@ afterEach(() => vi.clearAllMocks())
 describe('ActionRulesSettings', () => {
   it('shows the loading state, then the error state on a failed fetch', async () => {
     ;(api.get as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('network down'))
-    render(<ActionRulesSettings />)
+    renderPage()
     expect(screen.getByText(st('common.loading'))).toBeInTheDocument()
     await waitFor(() => expect(screen.getByText(st('actionRules.loadError'))).toBeInTheDocument())
   })
 
   it('shows the empty state when the backend returns no rows', async () => {
     ;(api.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: { data: [] } })
-    render(<ActionRulesSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText(st('actionRules.empty'))).toBeInTheDocument())
   })
 
   it('renders the candidate and customer grids with the seed-default effects', async () => {
     ;(api.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: { data: fullDefaultMatrix() } })
-    render(<ActionRulesSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText(st('actionRules.title'))).toBeInTheDocument())
 
     // application.create × blacklist defaults to block (P3) — a hard, tenant-editable block.
@@ -83,7 +87,7 @@ describe('ActionRulesSettings', () => {
   it('clicking a cell cycles its effect (block → allow) and stages it as dirty', async () => {
     ;(api.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: { data: fullDefaultMatrix() } })
     const user = userEvent.setup()
-    render(<ActionRulesSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText(st('actionRules.title'))).toBeInTheDocument())
 
     const actionLabel = st('actionRules.actions.application_create')
@@ -99,7 +103,7 @@ describe('ActionRulesSettings', () => {
   it('a locked cell (archived, P4) is disabled and never cycles on click', async () => {
     ;(api.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: { data: fullDefaultMatrix() } })
     const user = userEvent.setup()
-    render(<ActionRulesSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText(st('actionRules.title'))).toBeInTheDocument())
 
     const actionLabel = st('actionRules.actions.application_create')
@@ -115,7 +119,7 @@ describe('ActionRulesSettings', () => {
   it('the AVG consent section renders whatsapp.send × no-consent as a locked hard block', async () => {
     ;(api.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: { data: fullDefaultMatrix() } })
     const user = userEvent.setup()
-    render(<ActionRulesSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText(st('actionRules.title'))).toBeInTheDocument())
 
     // The consent grid lives on its own AVG sub-tab — not visible until selected.
@@ -131,7 +135,7 @@ describe('ActionRulesSettings', () => {
   it('defaults to the Kandidaat tab and hides the Klant/AVG grids until selected', async () => {
     ;(api.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: { data: fullDefaultMatrix() } })
     const user = userEvent.setup()
-    render(<ActionRulesSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText(st('actionRules.title'))).toBeInTheDocument())
 
     // Kandidaat grid visible by default; Klant/AVG grids not yet mounted.
@@ -149,7 +153,7 @@ describe('ActionRulesSettings', () => {
   it('a staged edit on Kandidaat stays dirty (save bar spans all tabs) after switching to Klant, then back', async () => {
     ;(api.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: { data: fullDefaultMatrix() } })
     const user = userEvent.setup()
-    render(<ActionRulesSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText(st('actionRules.title'))).toBeInTheDocument())
 
     const actionLabel = st('actionRules.actions.application_create')
@@ -172,7 +176,7 @@ describe('ActionRulesSettings', () => {
   it('opening a cell detail panel shows its popup code, then reset restores the default', async () => {
     ;(api.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: { data: fullDefaultMatrix() } })
     const user = userEvent.setup()
-    render(<ActionRulesSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText(st('actionRules.title'))).toBeInTheDocument())
 
     const actionLabel = st('actionRules.actions.application_create')
@@ -192,7 +196,7 @@ describe('ActionRulesSettings', () => {
       r.action === 'application.create' && r.condition === 'blacklist' ? { ...r, effect: 'allow' } : r)
     ;(api.put as ReturnType<typeof vi.fn>).mockResolvedValue({ data: { data: savedMatrix } })
     const user = userEvent.setup()
-    render(<ActionRulesSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText(st('actionRules.title'))).toBeInTheDocument())
 
     const actionLabel = st('actionRules.actions.application_create')
@@ -212,7 +216,7 @@ describe('ActionRulesSettings', () => {
       r.action === 'application.create' && r.condition === 'blacklist' ? { ...r, effect: 'allow' } : r)
     ;(api.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: { data: overridden } })
     const user = userEvent.setup()
-    render(<ActionRulesSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText(st('actionRules.title'))).toBeInTheDocument())
 
     await user.click(screen.getByRole('button', { name: st('actionRules.saveBar.resetAll') }))

@@ -27,6 +27,7 @@ import SaveButton from '@/components/ui/SaveButton'
 import SelectMenu from '@/components/ui/SelectMenu'
 import { PageTitle, SectionTitle, Mono } from '@/components/ui/typography'
 import { useQuery } from '@tanstack/react-query'
+import CatalogSection from './CatalogSection'
 
 // The backend strictness is an enum; the slider is a 3-step index onto it.
 const LEVELS = ['lenient', 'balanced', 'strict']
@@ -222,6 +223,10 @@ export default function VacancyMatchingSettings() {
           </div>
         )}
       </div>
+      {/* CATALOG-GROUPS-1: the matching and vacancies sections' generic catalogue rows as
+          titled blocks under the matching form. */}
+      <div style={{ marginTop: 24 }}><CatalogSection section="matching" embedded /></div>
+      <div style={{ marginTop: 24 }}><CatalogSection section="vacancies" embedded /></div>
     </div>
   )
 }

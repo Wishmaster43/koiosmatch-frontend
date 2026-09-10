@@ -16,14 +16,33 @@ export interface SchemaField {
   labelKey: string
   helpKey?: string
   format?: string
+  // CATALOG-GROUPS-1: the block this field renders in.
+  group?: string
+}
+
+// One titled block on the screen (CATALOG-GROUPS-1): slug, label key and lucide icon name.
+export interface SchemaGroup {
+  key: string
+  labelKey: string
+  icon?: string | null
 }
 
 export interface Schema {
   i18nKey: string
   fields: SchemaField[]
+  // CATALOG-GROUPS-1: blocks in the section's own order; absent = one headless list.
+  groups?: SchemaGroup[]
+  // The section's colour (hex from the contract) paints the group icons.
+  color?: string | null
 }
 
-export function catalogToSchema(sectionId: string, rows: CatalogRow[]): Schema {
+// The section metadata the mapper needs beside its rows.
+export interface SchemaSectionMeta {
+  groups?: string[]
+  color?: string | null
+}
+
+export function catalogToSchema(sectionId: string, rows: CatalogRow[], meta: SchemaSectionMeta = {}): Schema {
   // Generic rows only, and never a pattern row (a key family has no single field to render).
   const genericRows = rows.filter(row => row.ui === 'generic' && !row.pattern)
 
@@ -80,13 +99,27 @@ export function catalogToSchema(sectionId: string, rows: CatalogRow[]): Schema {
       ...(step !== undefined && { step }),
       ...(options && { options }),
       ...(format && { format }),
+      ...(row.group && { group: row.group }),
     }
 
     return field
   })
 
+  // Blocks in the section's declared order; a group a row names but the section does not
+  // list still gets a block (appended in first-appearance order), so no row goes missing.
+  const groupMeta = new Map<string, SchemaGroup>()
+  genericRows.forEach(row => {
+    if (row.group && !groupMeta.has(row.group)) {
+      groupMeta.set(row.group, { key: row.group, labelKey: row.group_label_key ?? `settings.groups.${row.group}`, icon: row.group_icon ?? null })
+    }
+  })
+  const order = [...(meta.groups ?? []).filter(g => groupMeta.has(g)), ...[...groupMeta.keys()].filter(g => !(meta.groups ?? []).includes(g))]
+  const groups = order.map(g => groupMeta.get(g)!)
+
   return {
     i18nKey: `catalog.sections.${sectionId}`,
     fields,
+    ...(groups.length > 0 && { groups }),
+    ...(meta.color && { color: meta.color }),
   }
 }

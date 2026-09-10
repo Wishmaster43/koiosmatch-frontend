@@ -3861,6 +3861,67 @@
       "smtp_pass": {
         "label": "Password SMTP"
       }
+    },
+    "groups": {
+      "identity": "Identità",
+      "address": "Indirizzo",
+      "region": "Regione e valuta",
+      "billing": "Fatturazione",
+      "branding": "Immagine aziendale",
+      "career_site": "Sito carriere",
+      "defaults": "Valori predefiniti",
+      "dashboard": "Dashboard",
+      "personal": "Personale",
+      "candidates": "Candidati",
+      "contacts": "Contatti",
+      "customers": "Clienti",
+      "vacancies": "Posizioni",
+      "applications": "Candidature",
+      "matches": "Match",
+      "opportunities": "Opportunità",
+      "tasks": "Attività",
+      "conversations": "Conversazioni",
+      "matching": "Matching",
+      "workflows": "Workflow",
+      "koios": "Koios AI",
+      "security": "Sicurezza",
+      "integrations": "Integrazioni",
+      "system": "Sistema",
+      "whatsapp_limits": "Limiti WhatsApp",
+      "inbox": "Posta in arrivo",
+      "screens": "Schermate",
+      "lead_notifications": "Notifiche lead",
+      "chips": "Chip",
+      "filters": "Filtri",
+      "rules": "Regole",
+      "patterns": "Modelli",
+      "mail": "E-mail",
+      "required": "Campi obbligatori",
+      "kpi": "KPI"
+    },
+    "company": {
+      "billing_email": {
+        "label": "Indirizzo e-mail di fatturazione"
+      }
+    },
+    "action_rules": {
+      "work_permit_block_matches": {
+        "label": "Permesso di lavoro mancante blocca i match"
+      },
+      "customer_dedupe_keys": {
+        "label": "Chiavi di deduplica clienti"
+      },
+      "rejection": {
+        "label": "Regole di rifiuto"
+      },
+      "workflow_fallback_owner_id": {
+        "label": "Responsabile di riserva per i workflow (ID utente)"
+      }
+    },
+    "matching": {
+      "matching": {
+        "label": "Configurazione del matching"
+      }
     }
   },
   "identifierValidation": {

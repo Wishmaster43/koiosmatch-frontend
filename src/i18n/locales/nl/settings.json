@@ -3860,6 +3860,67 @@
       "smtp_pass": {
         "label": "SMTP-wachtwoord"
       }
+    },
+    "groups": {
+      "identity": "Identiteit",
+      "address": "Adres",
+      "region": "Regio & valuta",
+      "billing": "Facturatie",
+      "branding": "Huisstijl",
+      "career_site": "Werken-bij-site",
+      "defaults": "Standaarden",
+      "dashboard": "Dashboard",
+      "personal": "Persoonlijk",
+      "candidates": "Kandidaten",
+      "contacts": "Contactpersonen",
+      "customers": "Klanten",
+      "vacancies": "Vacatures",
+      "applications": "Sollicitaties",
+      "matches": "Matches",
+      "opportunities": "Kansen",
+      "tasks": "Taken",
+      "conversations": "Gesprekken",
+      "matching": "Matching",
+      "workflows": "Workflows",
+      "koios": "Koios AI",
+      "security": "Beveiliging",
+      "integrations": "Koppelingen",
+      "system": "Systeem",
+      "whatsapp_limits": "WhatsApp-limieten",
+      "inbox": "Inbox",
+      "screens": "Schermen",
+      "lead_notifications": "Leads-meldingen",
+      "chips": "Chips",
+      "filters": "Filters",
+      "rules": "Regels",
+      "patterns": "Patronen",
+      "mail": "E-mail",
+      "required": "Verplichte velden",
+      "kpi": "KPI"
+    },
+    "company": {
+      "billing_email": {
+        "label": "Factuur-e-mailadres"
+      }
+    },
+    "action_rules": {
+      "work_permit_block_matches": {
+        "label": "Werkvergunning ontbreekt blokkeert matches"
+      },
+      "customer_dedupe_keys": {
+        "label": "Ontdubbelsleutels klanten"
+      },
+      "rejection": {
+        "label": "Afwijzingsregels"
+      },
+      "workflow_fallback_owner_id": {
+        "label": "Reserve-eigenaar voor workflows (gebruikers-id)"
+      }
+    },
+    "matching": {
+      "matching": {
+        "label": "Matchingconfiguratie"
+      }
     }
   },
   "identifierValidation": {
