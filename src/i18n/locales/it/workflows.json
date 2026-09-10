@@ -69,7 +69,8 @@
     "router": {
       "addRoute": "Aggiungi percorso"
     },
-    "missingStartModule": "Modulo di partenza mancante: il primo passaggio deve essere un'entità Koios o un webhook"
+    "missingStartModule": "Modulo di partenza mancante: il primo passaggio deve essere un'entità Koios o un webhook",
+    "runSavesFirst": "Prima salva, poi esegue"
   },
   "fields": {
     "boolOn": "Attivo",
@@ -319,7 +320,8 @@
   "status": {
     "active": "Attivo",
     "draft": "Bozza",
-    "inactive": "Inattivo"
+    "inactive": "Inattivo",
+    "unsaved": "(non salvato)"
   },
   "list": {
     "updated": "Aggiornato {{date}}",

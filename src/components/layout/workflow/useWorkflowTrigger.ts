@@ -21,7 +21,7 @@ export function useWorkflowTrigger({ workflow, nodes, edges, initialNodes, initi
   // the moment its real edges land.
   initialNodes: FlowNode[]
   initialEdges: FlowEdge[]
-  onSave: (updated: Workflow, closeAfter?: boolean) => void
+  onSave: (updated: Workflow, closeAfter?: boolean) => void | boolean | Promise<void | boolean>
 }) {
   // Trigger config is opaque on the workflow; narrow it to the shapes we read.
   // WORKFLOW-SCHEMA-1: the scheduled trigger's fields sit FLAT on trigger_config
@@ -61,6 +61,10 @@ export function useWorkflowTrigger({ workflow, nodes, edges, initialNodes, initi
   const [scheduleConfig, setScheduleConfig] = useState<ScheduleConfig | null>(initialScheduleConfig)
   const [webhookId]                         = useState<string | number | null>(triggerConfig?.webhook_id ?? null)
   const [status,         setStatus]         = useState(workflow.status || 'draft')
+  // RUN-SAVES-FIRST-1: the status the SERVER holds — the pill reads "(niet
+  // opgeslagen)" while the local toggle differs from it, so a flipped-but-unsaved
+  // workflow can never look active (Danny 10-09: a 422 on Run nobody understood).
+  const [serverStatus,   setServerStatus]   = useState(workflow.status || 'draft')
   const [saved,          setSaved]          = useState(false)
 
   // Dirty-check baseline (item 19): the snapshot right after load, computed via the
@@ -73,26 +77,38 @@ export function useWorkflowTrigger({ workflow, nodes, edges, initialNodes, initi
 
   // Serialize the graph back into workflow.steps and persist it; also refreshes
   // the dirty-check baseline so the just-saved state no longer reads as unsaved.
-  const handleSave = useCallback((closeAfter = false) => {
+  // RUN-SAVES-FIRST-1: resolves true once the caller's onSave settled without
+  // reporting failure (a void onSave counts as success), false otherwise — the
+  // baseline, the server status and the "saved" flash only move on success, so
+  // a 422 on save leaves the editor honestly dirty and Run does not fire.
+  // Stays synchronous for a synchronous onSave (a boolean comes back at once) and
+  // only turns into a promise when the caller's onSave is one — so callers that
+  // never await keep their exact timing.
+  const handleSave = useCallback((closeAfter = false): boolean | Promise<boolean> => {
     const steps = flowToSteps(nodes, edges)
     // audit module-schema-reconcile-4: a webhook/applicant_event START card is the
     // trigger the inbound route and the dispatcher match on — persist it as such.
     const start = deriveStartTrigger(steps)
-    if (start) {
-      onSave({ ...workflow, name, trigger: start.trigger, trigger_config: start.triggerConfig, status, steps }, closeAfter)
-      savedSnapshotRef.current = computeWorkflowSnapshot(nodes, edges, name, trigger, scheduleConfig, webhookId, status)
-      if (!closeAfter) { setSaved(true); setTimeout(() => setSaved(false), 2000) }
-      return
-    }
     // The ONE builder the dirty-check snapshot uses too (workflowEditorUtils).
-    const nextTriggerConfig = buildHeaderTriggerConfig(trigger, scheduleConfig, webhookId)
-    onSave({ ...workflow, name, trigger, trigger_config: nextTriggerConfig, status, steps }, closeAfter)
-    // A save just persisted the current state — it's the new dirty-check baseline.
-    savedSnapshotRef.current = computeWorkflowSnapshot(nodes, edges, name, trigger, scheduleConfig, webhookId, status)
-    if (!closeAfter) {
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2000)
+    const nextTriggerConfig = start ? start.triggerConfig : buildHeaderTriggerConfig(trigger, scheduleConfig, webhookId)
+    const nextTrigger = start ? start.trigger : trigger
+    const result = onSave({ ...workflow, name, trigger: nextTrigger, trigger_config: nextTriggerConfig, status, steps }, closeAfter)
+    // Moves the baseline, the server status and the "saved" flash only on success.
+    const finish = (ok: boolean): boolean => {
+      if (!ok) return false
+      // A save just persisted the current state — it's the new dirty-check baseline.
+      savedSnapshotRef.current = computeWorkflowSnapshot(nodes, edges, name, trigger, scheduleConfig, webhookId, status)
+      setServerStatus(status)
+      if (!closeAfter) {
+        setSaved(true)
+        setTimeout(() => setSaved(false), 2000)
+      }
+      return true
     }
+    if (result != null && typeof (result as Promise<unknown>).then === 'function') {
+      return (result as Promise<void | boolean>).then(r => finish(r !== false), () => false)
+    }
+    return finish(result !== false)
   }, [nodes, edges, workflow, name, trigger, scheduleConfig, webhookId, status, onSave])
 
   // Dirty-check (item 19): true when the live graph/name/trigger/schedule/status
@@ -105,6 +121,6 @@ export function useWorkflowTrigger({ workflow, nodes, edges, initialNodes, initi
 
   return {
     name, setName, trigger, setTrigger, scheduleConfig, setScheduleConfig, webhookId, status, setStatus,
-    saved, handleSave, isDirty,
+    serverStatus, saved, handleSave, isDirty,
   }
 }

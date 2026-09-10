@@ -122,3 +122,20 @@ describe('WorkflowEditorHeader · missing start module warning (VERTREKMODULE-1)
   })
 })
 
+// RUN-SAVES-FIRST-1 (Danny 10-09): a flipped-but-unsaved status says so on the
+// pill, and Run announces that it saves first instead of firing a 422.
+describe('WorkflowEditorHeader · unsaved status (RUN-SAVES-FIRST-1)', () => {
+  it('the pill carries the unsaved suffix while the local status differs from the server', () => {
+    const { rerender } = render(<WorkflowEditorHeader {...baseProps} status="active" statusUnsaved />)
+    expect(screen.getByText('status.active').closest('button')).toHaveTextContent('status.unsaved')
+    rerender(<WorkflowEditorHeader {...baseProps} status="active" />)
+    expect(screen.queryByText('status.unsaved')).toBeNull()
+  })
+
+  it('an active but unsaved workflow keeps Run enabled and titles it with the save-first hint', () => {
+    render(<WorkflowEditorHeader {...baseProps} status="active" statusUnsaved />)
+    const run = screen.getByText('editor.run').closest('button')
+    expect(run).not.toBeDisabled()
+    expect(run).toHaveAttribute('title', 'editor.runSavesFirst')
+  })
+})

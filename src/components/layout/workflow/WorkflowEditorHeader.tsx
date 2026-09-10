@@ -34,7 +34,7 @@ export default function WorkflowEditorHeader({
   name, onNameChange,
   view, onViewChange,
   trigger, scheduleConfig, onOpenSchedule,
-  status, onToggleStatus,
+  status, onToggleStatus, statusUnsaved = false,
   showLogs, onToggleLogs,
   runError, runBudget, onRunError, runConflict,
   liveRunActive, activeRunId, onStopped,
@@ -57,6 +57,9 @@ export default function WorkflowEditorHeader({
   onOpenSchedule: () => void
   status: string
   onToggleStatus: () => void
+  // RUN-SAVES-FIRST-1: true while the local status differs from the server's —
+  // the pill says so, and Run announces that it saves first.
+  statusUnsaved?: boolean
   showLogs: boolean
   onToggleLogs: () => void
   // VERTREKMODULE-1: true when the first step is not a Koios entity/webhook.
@@ -175,6 +178,7 @@ export default function WorkflowEditorHeader({
         }}>
         <span style={{ width: 6, height: 6, borderRadius: '50%', background: status === 'active' ? 'var(--color-success)' : 'var(--border)' }} />
         {status === 'active' ? t('status.active') : t('status.inactive')}
+        {statusUnsaved && <span style={{ fontWeight: 400 }}>{t('status.unsaved')}</span>}
       </button>
       {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
 
@@ -271,7 +275,7 @@ export default function WorkflowEditorHeader({
           raw Dutch 422 from the server (useWorkflowRunControl's message fallback
           stays as the belt-and-braces path for any other rejection reason). */}
       <Button variant="primary" size="sm" onClick={onRun} disabled={running || status !== 'active'}
-        title={status !== 'active' ? t('editor.runRequiresActive') : undefined}>
+        title={status !== 'active' ? t('editor.runRequiresActive') : statusUnsaved ? t('editor.runSavesFirst') : undefined}>
         {running ? <Spinner size={13} /> : <Play size={13} />}
         {running ? t('editor.running') : t('editor.run')}
       </Button>

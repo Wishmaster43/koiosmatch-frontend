@@ -16,11 +16,12 @@
  * assertions target the real nl copy, not raw keys.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import WorkflowCanvasEditor from './WorkflowCanvasEditor'
 import type { Workflow } from '@/types/workflow'
+import api from '@/lib/api'
 
 // useWorkflowRun (live-run polling) needs a QueryClient in its tree.
 function wrapper({ children }: { children: ReactNode }) {
@@ -96,5 +97,37 @@ describe('WorkflowCanvasEditor · CurrentWorkflowContext root wiring', () => {
 
     expect(await screen.findByText('Andere workflow')).toBeInTheDocument()
     expect(screen.queryByText('Deze workflow')).not.toBeInTheDocument()
+  })
+})
+
+// RUN-SAVES-FIRST-1 (Danny 10-09): Run on a dirty editor saves first in the same
+// click; a refused save never posts the run.
+describe('WorkflowCanvasEditor · Run saves first (RUN-SAVES-FIRST-1)', () => {
+  const activeWorkflow: Workflow = { ...workflow, status: 'active' }
+
+  it('flipping the status and pressing Run saves before the run is posted, with the flipped status in the payload', async () => {
+    const calls: string[] = []
+    const onSave = vi.fn(async () => { calls.push('save'); return true })
+    ;(api.post as ReturnType<typeof vi.fn>).mockImplementation((url: string) => { calls.push('post ' + url); return Promise.resolve({ data: { run: { id: 'r1' } } }) })
+    render(<WorkflowCanvasEditor workflow={workflow} onClose={vi.fn()} onSave={onSave} />, { wrapper })
+    await screen.findByText('node-n1')
+    // Draft → active on the pill (local only until saved), then Run.
+    fireEvent.click(screen.getByText('Inactief').closest('button')!)
+    expect(screen.getByText('(niet opgeslagen)', { exact: false })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /^Uitvoeren$/ }))
+    await waitFor(() => expect(calls).toEqual(['save', 'post /workflows/wf-current/run']))
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ status: 'active' }), false)
+    await waitFor(() => expect(screen.queryByText('(niet opgeslagen)', { exact: false })).toBeNull())
+  })
+
+  it('a refused save stops the click: no run is posted', async () => {
+    const onSave = vi.fn(async () => false)
+    render(<WorkflowCanvasEditor workflow={activeWorkflow} onClose={vi.fn()} onSave={onSave} />, { wrapper })
+    await screen.findByText('node-n1')
+    fireEvent.click(screen.getByRole('textbox', { name: /naam|name/i }))
+    fireEvent.change(screen.getByRole('textbox', { name: /naam|name/i }), { target: { value: 'Renamed' } })
+    fireEvent.click(screen.getByRole('button', { name: /^Uitvoeren$/ }))
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1))
+    expect(api.post).not.toHaveBeenCalled()
   })
 })

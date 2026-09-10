@@ -224,10 +224,12 @@ export function useWorkflowsData(showArchived: boolean) {
   // backend persists the full graph losslessly (steps[].id/position/connections —
   // C-27 landed; measured live by the workflow-editor smoke flow 28-08); the
   // localStorage copy below is only a belt-and-braces cache, no longer the truth.
-  const handleSave = async (updated: Workflow, closeAfter = true) => {
+  // RUN-SAVES-FIRST-1: resolves false when nothing was saved (no steps, or the
+  // server refused) so the editor's save-then-run never runs a stale graph.
+  const handleSave = async (updated: Workflow, closeAfter = true): Promise<boolean> => {
     if (!updated.steps || updated.steps.length === 0) {
       alert(t('page.addModuleAlert'))
-      return
+      return false
     }
     const isNew = !updated.id || !workflows.some(w => w.id === updated.id)
     const payload = { ...denormalizeWorkflow(updated), folder_id: updated.folder_id ?? null }
@@ -250,11 +252,13 @@ export function useWorkflowsData(showArchived: boolean) {
         setEditingWorkflow(prev => prev ? { ...prev, id: savedWorkflow.id } : prev)
       }
       // else: editor keeps its own state; no prop change needed
+      return true
     } catch (err) {
       // WF-R2 saves validate the graph server-side (loop / disconnected step): surface
       // the SPECIFIC 422 detail via the shared extractApiError helper — never a raw
       // axios/network string in the user-facing message (§10).
       alert(t('page.saveFailed', { msg: extractApiError(err, t('common:actionFailed')) }))
+      return false
     }
   }
 

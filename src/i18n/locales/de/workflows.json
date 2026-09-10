@@ -30,7 +30,8 @@
     "router": {
       "addRoute": "Route hinzufügen"
     },
-    "missingStartModule": "Startmodul fehlt: der erste Schritt muss eine Koios-Entität oder ein Webhook sein"
+    "missingStartModule": "Startmodul fehlt: der erste Schritt muss eine Koios-Entität oder ein Webhook sein",
+    "runSavesFirst": "Speichert zuerst und führt dann aus"
   },
   "fields": {
     "boolOn": "An",
@@ -258,7 +259,8 @@
   "status": {
     "active": "Aktiv",
     "draft": "Entwurf",
-    "inactive": "Inaktiv"
+    "inactive": "Inaktiv",
+    "unsaved": "(nicht gespeichert)"
   },
   "list": {
     "updated": "Aktualisiert {{date}}",

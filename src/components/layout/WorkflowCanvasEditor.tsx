@@ -47,7 +47,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
   const {
     edges, onNodesChange, onEdgesChange, onConnect, nodesWithFirst, selectedNode, setSelectedNodeId,
     name, setName, trigger, setTrigger, scheduleConfig, setScheduleConfig, status, setStatus,
-    saved, running, runError, runBudget, setRunError, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
+    serverStatus, saved, running, runError, runBudget, setRunError, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
     liveRun, activeRunId, liveRunActive, runConflict, handleStopped,
     pickerState, setPickerState, filterState, setFilterState, outputState, setOutputState,
     firstNodeId, setStartNodeId, startInvalid, getUpstreamVariables,
@@ -60,6 +60,15 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
   // WF-DRYRUN-FE-1: an HONEST confirm before the dry run actually fires — it
   // names exactly which modules are skipped (the send modules) and states
   // plainly that everything else really mutates, same as a normal run.
+  // RUN-SAVES-FIRST-1 (Danny 10-09): Run on a dirty editor saves first, in the
+  // same click — the server can only run what it holds, so a flipped-but-unsaved
+  // status used to 422 ("Workflow is niet actief") on a pill that read Actief.
+  // A refused save (422 on the graph) stops here; the save's own message shows.
+  const handleRunSavingFirst = async () => {
+    if (isDirty() && !(await handleSave(false))) return
+    await handleRun()
+  }
+
   const handleRunDryRun = () =>
     confirm(t('editor.dryRunConfirmMessage'), () => handleRun({ dryRun: true }), { title: t('editor.dryRunConfirmTitle') })
 
@@ -112,11 +121,12 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
           view={view} onViewChange={setView}
           trigger={trigger} scheduleConfig={scheduleConfig} onOpenSchedule={() => setShowSchedule(true)}
           status={status} onToggleStatus={() => setStatus(s => s === 'active' ? 'inactive' : 'active')}
+          statusUnsaved={status !== serverStatus}
           startInvalid={startInvalid}
           showLogs={showLogs} onToggleLogs={() => setShowLogs(s => !s)}
           runError={runError} runBudget={runBudget} onRunError={setRunError} runConflict={runConflict}
           liveRunActive={liveRunActive} activeRunId={activeRunId} onStopped={handleStopped}
-          running={running} onRun={handleRun} onRunDryRun={handleRunDryRun}
+          running={running} onRun={handleRunSavingFirst} onRunDryRun={handleRunDryRun}
           saved={saved} onSave={() => handleSave(false)}
           // Save & close — back to the overview (live-run guard first)
           onSaveClose={() => (liveRunActive ? confirm(t('editor.liveRunConfirm'), () => handleSave(true)) : handleSave(true))}

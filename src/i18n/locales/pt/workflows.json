@@ -69,7 +69,8 @@
     "router": {
       "addRoute": "Adicionar rota"
     },
-    "missingStartModule": "Falta o módulo de partida: o primeiro passo tem de ser uma entidade Koios ou um webhook"
+    "missingStartModule": "Falta o módulo de partida: o primeiro passo tem de ser uma entidade Koios ou um webhook",
+    "runSavesFirst": "Guarda primeiro e depois executa"
   },
   "fields": {
     "boolOn": "Ligado",
@@ -319,7 +320,8 @@
   "status": {
     "active": "Ativo",
     "draft": "Rascunho",
-    "inactive": "Inativo"
+    "inactive": "Inativo",
+    "unsaved": "(não guardado)"
   },
   "list": {
     "updated": "Atualizado {{date}}",

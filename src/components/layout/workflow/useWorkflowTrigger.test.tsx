@@ -92,3 +92,31 @@ describe('useWorkflowTrigger · reload + immediate re-save is lossless', () => {
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ trigger_config: cfg }), false)
   })
 })
+
+// RUN-SAVES-FIRST-1 (Danny 10-09): a refused save leaves the editor dirty and the
+// server status untouched; a resolved save moves the server status along.
+describe('useWorkflowTrigger · handleSave reports success (RUN-SAVES-FIRST-1)', () => {
+  it('a synchronous onSave that returns false keeps the editor dirty and the server status as loaded', () => {
+    const onSave = vi.fn(() => false)
+    const { result } = renderHook(() => useWorkflowTrigger({ workflow: wf(), nodes, edges, initialNodes: nodes, initialEdges: edges, onSave }))
+    act(() => result.current.setStatus('active'))
+    let ok: boolean | Promise<boolean> = true
+    act(() => { ok = result.current.handleSave() })
+    expect(ok).toBe(false)
+    expect(result.current.isDirty()).toBe(true)
+    expect(result.current.serverStatus).toBe('draft')
+    expect(result.current.status).toBe('active')
+  })
+
+  it('an async onSave that resolves moves the server status to the saved one and clears the dirty flag', async () => {
+    const onSave = vi.fn(async () => true)
+    const { result } = renderHook(() => useWorkflowTrigger({ workflow: wf(), nodes, edges, initialNodes: nodes, initialEdges: edges, onSave }))
+    act(() => result.current.setStatus('active'))
+    expect(result.current.serverStatus).toBe('draft')
+    let ok: boolean | Promise<boolean> = false
+    await act(async () => { ok = await result.current.handleSave() })
+    expect(ok).toBe(true)
+    expect(result.current.serverStatus).toBe('active')
+    expect(result.current.isDirty()).toBe(false)
+  })
+})

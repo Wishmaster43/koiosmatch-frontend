@@ -69,7 +69,8 @@
     "router": {
       "addRoute": "Route toevoegen"
     },
-    "missingStartModule": "Vertrekmodule ontbreekt: de eerste stap moet een Koios-entiteit of webhook zijn"
+    "missingStartModule": "Vertrekmodule ontbreekt: de eerste stap moet een Koios-entiteit of webhook zijn",
+    "runSavesFirst": "Slaat eerst op en voert dan uit"
   },
   "fields": {
     "boolOn": "Aan",
@@ -319,7 +320,8 @@
   "status": {
     "active": "Actief",
     "draft": "Concept",
-    "inactive": "Inactief"
+    "inactive": "Inactief",
+    "unsaved": "(niet opgeslagen)"
   },
   "list": {
     "updated": "Bijgewerkt {{date}}",

@@ -23,7 +23,8 @@ export { flattenSample, buildVarFields, computeWorkflowSnapshot } from './workfl
 // control and dirty-checking, returned as one flat props object for the JSX to render.
 export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
   workflow: Workflow
-  onSave: (updated: Workflow, closeAfter?: boolean) => void
+  // RUN-SAVES-FIRST-1: may report failure (false) so Run never fires after a refused save.
+  onSave: (updated: Workflow, closeAfter?: boolean) => void | boolean | Promise<void | boolean>
   // RUN-CONTROL-1: open the editor already focused on an active run (the 409
   // "already running" path from the list page) — the logs panel opens on it.
   initialRunId?: string | number | null
@@ -104,7 +105,7 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
     onConnect: graph.onConnect, nodesWithFirst, selectedNode: graph.selectedNode, setSelectedNodeId: graph.setSelectedNodeId,
     name: trigger.name, setName: trigger.setName, trigger: trigger.trigger, setTrigger: trigger.setTrigger,
     scheduleConfig: trigger.scheduleConfig, setScheduleConfig: trigger.setScheduleConfig,
-    status: trigger.status, setStatus: trigger.setStatus,
+    status: trigger.status, setStatus: trigger.setStatus, serverStatus: trigger.serverStatus,
     saved: trigger.saved, running, runError, runBudget, setRunError,
     showSchedule: panels.showSchedule, setShowSchedule: panels.setShowSchedule,
     widePanelActive: panels.widePanelActive, setWidePanelActive: panels.setWidePanelActive,
