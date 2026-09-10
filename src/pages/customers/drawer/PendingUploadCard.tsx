@@ -10,6 +10,9 @@ import Button from '@/components/ui/Button'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
 import type { PendingItem } from '../hooks/useDocumentUploadQueue'
 import type { LookupOption } from '@/types/common'
+// DRY round 11, DOCS: the tinted card frame + row wrappers shared with the
+// candidate drawer's twin PendingUploadQueue.
+import { PendingUploadFrame, PendingUploadRows, PendingUploadRow } from '@/components/drawer/PendingUploadFrame'
 
 interface PendingUploadCardProps {
   pending: PendingItem[]
@@ -32,15 +35,13 @@ export default function PendingUploadCard({
   uploadAll, cancelPending, showLinkPicker, uploadLink, setUploadLink, linkOptions,
 }: PendingUploadCardProps) {
   const { t } = useTranslation('customers')
+  // Single file keeps the old name+size header; a multi-pick shows a count instead.
+  const title = pending.length === 1
+    ? <>{pending[0].name} <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>({pending[0].size})</span></>
+    : t('documents.pendingCount', { count: pending.length })
 
   return (
-    <div style={{ border: '1px solid var(--color-primary)', borderRadius: 10, padding: 12, marginBottom: 10, background: 'var(--color-primary-bg)' }}>
-      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>
-        {/* Single file keeps the old name+size header; a multi-pick shows a count instead. */}
-        {pending.length === 1
-          ? <>{pending[0].name} <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>({pending[0].size})</span></>
-          : t('documents.pendingCount', { count: pending.length })}
-      </div>
+    <PendingUploadFrame title={title}>
       <Caption as="div" style={{ marginBottom: 6 }}>
         {pending.length > 1 ? t('documents.applyTypeToAll') : t('documents.docType')}
       </Caption>
@@ -69,11 +70,9 @@ export default function PendingUploadCard({
         </div>
       )}
       {/* One compact row per queued file — its own type select + remove. */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
+      <PendingUploadRows>
         {pending.map((item, idx) => (
-          <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-            <Caption style={{ flexShrink: 0 }}>{item.size}</Caption>
+          <PendingUploadRow key={idx} name={item.name} size={item.size}>
             <span id={`${docTypeLabelBaseId}-${idx}`} className="sr-only">{t('documents.docTypeFor', { name: item.name })}</span>
             <div style={{ width: 130, flexShrink: 0 }}>
               <SelectMenu aria-labelledby={`${docTypeLabelBaseId}-${idx}`} value={item.type} onChange={v => setItemType(idx, v)}
@@ -89,9 +88,9 @@ export default function PendingUploadCard({
             <button onClick={() => removePending(idx)} aria-label={t('common:remove')}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex', flexShrink: 0 }}><X size={12} /></button>
             {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
-          </div>
+          </PendingUploadRow>
         ))}
-      </div>
+      </PendingUploadRows>
       <div style={{ display: 'flex', gap: 8 }}>
         {/* Herhaal-audit r4 finding 2: this is the card's primary action, so it
             reads Button's own primary identity — a hand-painted inverse fill
@@ -103,6 +102,6 @@ export default function PendingUploadCard({
         </Button>
         <Button variant="secondary" size="sm" onClick={cancelPending}>{t('drawer.cancel')}</Button>
       </div>
-    </div>
+    </PendingUploadFrame>
   )
 }

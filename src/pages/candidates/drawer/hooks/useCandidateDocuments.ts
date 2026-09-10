@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { useUploadQueueItems } from '@/hooks/useUploadQueueItems'
 import type { PendingItem } from '../PendingUploadQueue'
 import type { LinkKind, LinkedDocItem, ResolvedDocLink } from '../DocumentRow'
 import { docKey, isPersisted, splitExt, formatDocSize } from '../documentHelpers'
@@ -69,7 +70,9 @@ export function useCandidateDocuments(c: Candidate, onRefresh?: () => void) {
   const linkableLists = [educationsForLink, certificationsForLink, languagesForLink, skillsForLink, referencesForLink]
 
   const [docs, setDocs] = useState<LinkedDocItem[]>(c.documents ?? [])
-  const [pending, setPending] = useState<PendingItem[]>([])
+  // DRY round 11, DOCS: setItemType/setItemLink/removePending (with the blob-URL
+  // revoke) are shared with the customer drawer's useDocumentUploadQueue.
+  const { pending, setPending, setItemType, setAllTypes, setItemLink, removePending } = useUploadQueueItems<PendingItem>()
 
   // DOC-ENTRY-LINK-1 / DOC-LANG-SKILL-LINK-1: PATCH the chosen education/
   // certification/language/skill with the freshly uploaded document's id,
@@ -179,18 +182,7 @@ export function useCandidateDocuments(c: Candidate, onRefresh?: () => void) {
         })
     })
   }
-  // Set one item's doc type (its own select) without touching the others.
-  const setItemType = (idx: number, type: string) => setPending(items => items.map((it, i) => (i === idx ? { ...it, type } : it)))
   // Apply-to-all chip: set the SAME type on every queued item at once.
-  const setAllTypes = (type: string) => setPending(items => items.map(it => ({ ...it, type })))
-  // DOC-ENTRY-LINK-1: set one item's "Koppelen aan" pick without touching the others.
-  const setItemLink = (idx: number, linkTo: string) => setPending(items => items.map((it, i) => (i === idx ? { ...it, linkTo } : it)))
-  // Drop one queued item and revoke its blob preview URL so it never leaks.
-  const removePending = (idx: number) => setPending(items => {
-    const target = items[idx]
-    if (target) URL.revokeObjectURL(target.objectUrl)
-    return items.filter((_, i) => i !== idx)
-  })
   // Cancel the whole queue: revoke every blob URL, then clear.
   const cancelPending = () => { pending.forEach(p => URL.revokeObjectURL(p.objectUrl)); setPending([]) }
 

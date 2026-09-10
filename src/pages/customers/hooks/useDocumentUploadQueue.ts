@@ -1,8 +1,9 @@
 // Upload-queue state for DocumentsTab: the pending (not-yet-uploaded) files, each
 // with its own doc type, plus the actions that mutate that queue. Extracted
 // mechanically from DocumentsTab (§3 split trigger, 28-08) — no behavior change.
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import type { ChangeEvent } from 'react'
+import { useUploadQueueItems } from '@/hooks/useUploadQueueItems'
 
 // A queued-but-not-yet-uploaded file, each with its own document type (BUGFIX
 // 23-07: a multi-file pick used to collapse to a single pending slot, so picking
@@ -17,7 +18,9 @@ interface UseDocumentUploadQueueArgs {
 
 // Owns the queued-file list and every action that touches it (add/type/remove/upload).
 export function useDocumentUploadQueue({ upload, uploadExtraFields, setUploadLink }: UseDocumentUploadQueueArgs) {
-  const [pending, setPending] = useState<PendingItem[]>([])
+  // DRY round 11, DOCS: setItemType/removePending (with the blob-URL revoke) are
+  // shared with the candidate drawer's useCandidateDocuments.
+  const { pending, setPending, setItemType, setAllTypes, removePending } = useUploadQueueItems<PendingItem>()
   // Mirrors `pending` so the unmount cleanup below reads the latest queue without
   // depending on it (§9: a blob URL never explicitly revoked leaks for the tab's lifetime).
   const pendingRef = useRef(pending)
@@ -42,16 +45,7 @@ export function useDocumentUploadQueue({ upload, uploadExtraFields, setUploadLin
     // A fresh upload batch starts unlinked again unless the picker is used once more.
     setUploadLink('customer')
   }
-  // Set one item's doc type (its own select) without touching the others.
-  const setItemType = (idx: number, type: string) => setPending(items => items.map((it, i) => (i === idx ? { ...it, type } : it)))
   // Apply-to-all chip: set the SAME type on every queued item at once.
-  const setAllTypes = (type: string) => setPending(items => items.map(it => ({ ...it, type })))
-  // Drop one queued item and revoke its blob preview URL so it never leaks.
-  const removePending = (idx: number) => setPending(items => {
-    const target = items[idx]
-    if (target) URL.revokeObjectURL(target.objectUrl)
-    return items.filter((_, i) => i !== idx)
-  })
   // Cancel the whole queue: revoke every blob URL, then clear.
   const cancelPending = () => { pending.forEach(p => URL.revokeObjectURL?.(p.objectUrl)); setPending([]) }
   // File-input change handler: every picked file becomes its own queue entry

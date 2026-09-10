@@ -6,7 +6,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import DocumentVersionHistory from './DocumentVersionHistory'
 import DocumentLinkPicker from './DocumentLinkPicker'
 import { splitExt, isPersisted, computeDocExpiry, docUrl, DOC_GRID_COLUMNS } from './documentHelpers'
-import type { DocItem } from './documentHelpers'
+import type { DocItem, DocumentLinkSources } from './documentHelpers'
 import { Caption } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
 import { tintBg, chipInk } from '@/lib/tint'
@@ -36,7 +36,7 @@ export interface ResolvedDocLink { kind: LinkKind; id: Id; label: string }
 const LINK_KIND_ICON: Record<LinkKind, typeof GraduationCap> = { education: GraduationCap, certification: Award, language: Languages, skill: Sparkles, reference: UserCheck }
 const LINK_KIND_SECTION_KEY: Record<LinkKind, string> = { education: 'sections.education', certification: 'sections.certifications', language: 'sections.languages', skill: 'sections.skills', reference: 'sections.references' }
 
-interface DocumentRowProps {
+interface DocumentRowProps extends DocumentLinkSources {
   d: DocItem
   selected: boolean
   downloadable: boolean
@@ -71,12 +71,8 @@ interface DocumentRowProps {
   onLinkChange: (value: string) => void
   // DOC-1-EIGENAAR-1: each entry's own `document_id` rides along so DocumentLinkPicker
   // can drop the slots that are already taken (one rule, applied inside the picker).
-  educations: Array<{ id?: Id; title?: string; document_id?: Id | null }>
-  certifications: Array<{ id?: Id; name?: string; document_id?: Id | null }>
-  languages: Array<{ id?: Id; language?: string; name?: string; document_id?: Id | null }>
-  skills: Array<{ id?: Id; name?: string; document_id?: Id | null }>
-  // REFERENTIE-VELDEN-1: same mechanic, extended to references.
-  references: Array<{ id?: Id; first_name?: string; middle_name?: string; last_name?: string; document_id?: Id | null }>
+  // The five source-list shapes live in DocumentLinkSources (shared with
+  // PendingUploadQueue, DRY round 11, DOCS).
 }
 
 /**

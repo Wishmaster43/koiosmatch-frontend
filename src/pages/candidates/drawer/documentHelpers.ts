@@ -29,6 +29,18 @@ export interface DocItem {
   created_by?: string | { name?: string }
 }
 
+// DOC-LIST-LINK-1 / DOC-LANG-SKILL-LINK-1 / REFERENTIE-VELDEN-1: the "Koppelen aan"
+// picker's five source lists (each entry's own `document_id` lets DOC-1-EIGENAAR-1
+// filter out already-linked slots) — one shared prop shape so DocumentRow and
+// PendingUploadQueue don't each retype it (type-only, zero runtime).
+export interface DocumentLinkSources {
+  educations: Array<{ id?: Id; title?: string; document_id?: Id | null }>
+  certifications: Array<{ id?: Id; name?: string; document_id?: Id | null }>
+  languages: Array<{ id?: Id; language?: string; name?: string; document_id?: Id | null }>
+  skills: Array<{ id?: Id; name?: string; document_id?: Id | null }>
+  references: Array<{ id?: Id; first_name?: string; middle_name?: string; last_name?: string; document_id?: Id | null }>
+}
+
 // Split a filename into base + extension so rename never touches the extension.
 export const splitExt = (fn: string) => { const m = fn.match(/\.[^./\\]+$/); return { base: m ? fn.slice(0, -m[0].length) : fn, ext: m ? m[0] : '' } }
 

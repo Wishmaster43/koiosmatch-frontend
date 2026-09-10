@@ -13,9 +13,13 @@ import DocumentLinkPicker from './DocumentLinkPicker'
 import SelectMenu from '@/components/ui/SelectMenu'
 // HUISSTIJL-1: the shared muted-caption atom (identity-only swap).
 import { Caption } from '@/components/ui/typography'
-import type { Id, LookupOption } from '@/types/common'
+import type { LookupOption } from '@/types/common'
 import Button from '@/components/ui/Button'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
+import type { DocumentLinkSources } from './documentHelpers'
+// DRY round 11, DOCS: the tinted card frame + row wrappers shared with the
+// customer drawer's twin PendingUploadCard.
+import { PendingUploadFrame, PendingUploadRows, PendingUploadRow } from '@/components/drawer/PendingUploadFrame'
 
 // Hoisted: an inline accent literal under background: false-fires the accent-fill selector.
 const ACCENT = 'var(--color-primary)'
@@ -27,20 +31,15 @@ const ACCENT = 'var(--color-primary)'
 // pick from the "Koppelen aan" ("Link to") grouped select — '' means no link.
 export interface PendingItem { file: File; objectUrl: string; name: string; size: string; type: string; linkTo: string }
 
-interface PendingUploadQueueProps {
+// DOC-1-EIGENAAR-1 / DOC-LANG-SKILL-LINK-1 / REFERENTIE-VELDEN-1: the five source
+// lists mirror DocumentLinkSources, but `references` stays OPTIONAL here (empty-array
+// default so an older caller keeps rendering exactly as before) — DocumentRow's own
+// copy requires it, so this narrows it back to optional rather than widening the
+// shared type for every consumer.
+interface PendingUploadQueueProps extends Omit<DocumentLinkSources, 'references'> {
   pending: PendingItem[]
   docTypes: LookupOption[]
-  // DOC-1-EIGENAAR-1: each entry's own `document_id` rides along — DocumentLinkPicker
-  // drops the slots that are already taken (one rule, applied inside the picker).
-  educations: Array<{ id?: Id; title?: string; document_id?: Id | null }>
-  certifications: Array<{ id?: Id; name?: string; document_id?: Id | null }>
-  // DOC-LANG-SKILL-LINK-1: same "Koppelen aan" mechanic, extended to languages/skills
-  // — threaded straight through to DocumentLinkPicker (mirrors educations/certifications).
-  languages: Array<{ id?: Id; language?: string; name?: string; document_id?: Id | null }>
-  skills: Array<{ id?: Id; name?: string; document_id?: Id | null }>
-  // REFERENTIE-VELDEN-1: references are linkable at upload time too. Optional with an
-  // empty-array default so an older caller keeps rendering exactly as before.
-  references?: Array<{ id?: Id; first_name?: string; middle_name?: string; last_name?: string; document_id?: Id | null }>
+  references?: DocumentLinkSources['references']
   onSetType: (idx: number, type: string) => void
   onSetAllTypes: (type: string) => void
   onSetLink: (idx: number, linkTo: string) => void
@@ -59,14 +58,12 @@ export default function PendingUploadQueue({
   // exact same pattern in customers/drawer/DocumentsTab.tsx).
   const docTypeLabelBaseId = useId()
   if (pending.length === 0) return null
+  // Single file keeps the old name+size header; a multi-pick shows a count instead.
+  const title = pending.length === 1
+    ? <>{pending[0].name} <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>({pending[0].size})</span></>
+    : t('documents.pendingCount', { count: pending.length })
   return (
-    <div style={{ border: '1px solid var(--color-primary)', borderRadius: 10, padding: 12, marginBottom: 10, background: 'var(--color-primary-bg)' }}>
-      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>
-        {/* Single file keeps the old name+size header; a multi-pick shows a count instead. */}
-        {pending.length === 1
-          ? <>{pending[0].name} <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>({pending[0].size})</span></>
-          : t('documents.pendingCount', { count: pending.length })}
-      </div>
+    <PendingUploadFrame title={title}>
       {/* HUISSTIJL-1: identical 11/400/var(--text-muted) render as a div. */}
       <Caption as="div" style={{ marginBottom: 6 }}>
         {pending.length > 1 ? t('documents.applyTypeToAll') : t('documents.docType')}
@@ -90,12 +87,9 @@ export default function PendingUploadQueue({
         {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
       </div>
       {/* One compact row per queued file — its own type select + link picker + remove. */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
+      <PendingUploadRows>
         {pending.map((item, idx) => (
-          <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-            {/* HUISSTIJL-1: identical 11/400/var(--text-muted) render. */}
-            <Caption style={{ flexShrink: 0 }}>{item.size}</Caption>
+          <PendingUploadRow key={idx} name={item.name} size={item.size}>
             <span id={`${docTypeLabelBaseId}-${idx}`} className="sr-only">{t('documents.docTypeFor', { name: item.name })}</span>
             <div style={{ width: 130, flexShrink: 0 }}>
               <SelectMenu aria-labelledby={`${docTypeLabelBaseId}-${idx}`} value={item.type} onChange={v => onSetType(idx, v)}
@@ -115,9 +109,9 @@ export default function PendingUploadQueue({
             <button onClick={() => onRemove(idx)} aria-label={t('common:remove')}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex', flexShrink: 0 }}><X size={12} /></button>
             {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
-          </div>
+          </PendingUploadRow>
         ))}
-      </div>
+      </PendingUploadRows>
       <div style={{ display: 'flex', gap: 8 }}>
         {/* Herhaal-audit r4 finding 2's twin (customers DocumentsTab converted the
             same round): the inverse --text fill is retired — the card's primary
@@ -127,6 +121,6 @@ export default function PendingUploadQueue({
         </Button>
         <Button variant="secondary" size="sm" onClick={onCancel}>{t('common:cancel')}</Button>
       </div>
-    </div>
+    </PendingUploadFrame>
   )
 }
