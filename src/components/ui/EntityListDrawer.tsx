@@ -3,11 +3,13 @@
  */
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { X, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
-import { PageTitle, Caption } from '@/components/ui/typography'
+import { Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
+import DrawerBackdrop from '@/components/drawer/DrawerBackdrop'
+import DrawerHeaderRow from '@/components/drawer/DrawerHeaderRow'
 
 interface EntityListItem {
   primary: string
@@ -39,28 +41,17 @@ export default function EntityListDrawer({ title, items, onClose }: EntityListDr
 
   return (
     <>
-      {/* Backdrop + panel share the drawer rung; DOM order stacks the panel on top. */}
-      <div className="fixed inset-0" style={{ background: 'rgba(0,0,0,0.25)', zIndex: 'var(--z-drawer)' }} onClick={onClose} />
+      <DrawerBackdrop onClick={onClose} />
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} tabIndex={-1}
            className="fixed top-0 bottom-0 right-0 flex flex-col bg-white"
            // HUISSTIJL-1: aria-modal dialog panel — shadow-modal role.
            style={{ zIndex: 'var(--z-drawer)',  width: 480, boxShadow: 'var(--shadow-drawer)' }}>
 
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
-                      padding: '14px 18px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-          <div>
-            <PageTitle as="div">{title}</PageTitle>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('resultsCount', { count: items.length })}</div>
-          </div>
-          <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}
-            style={{ marginLeft: 10 }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
-            <X size={15} />
-          </Button>
-        </div>
+        {/* Header — DRY round 10, DRAWERSHELLS: shared via DrawerHeaderRow with
+            ShiftsDrillDownDrawer (clone [6]). */}
+        <DrawerHeaderRow title={title} onClose={onClose} closeAriaLabel={t('common:close')}
+          meta={<div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('resultsCount', { count: items.length })}</div>} />
 
         {/* Search */}
         <div style={{ flexShrink: 0, padding: '8px 14px', borderBottom: '1px solid var(--hover-bg)' }}>

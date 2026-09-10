@@ -6,15 +6,15 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Globe, Edit2, Save, X } from 'lucide-react'
+import { Globe, Edit2 } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
-import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
-import DetachedCountBadge from '@/components/ui/DetachedCountBadge'
+import DrawerTitleRow from '@/components/drawer/DrawerTitleRow'
 import GeocodeCard from '@/components/drawer/GeocodeCard'
 import { channelIcon } from './data/channelIcons'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import TitleEditInput from '@/components/drawer/TitleEditInput'
+import TitleEditActions from '@/components/drawer/TitleEditActions'
 import ChangelogTab from './drawer/ChangelogTab'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import TrashLifecycleSection from '@/components/drawer/TrashLifecycleSection'
@@ -25,6 +25,7 @@ import { isCandidateTabVisible } from './lib/candidateTabVisibility'
 import type { CandidateTabConfig } from './lib/candidateTabVisibility'
 import { useDateFormat } from '@/lib/datetime'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
+import { makeOwnerMetaPicker } from '@/lib/ownerMetaPicker'
 import DetailsTab from './drawer/DetailsTab'
 import DescriptionTab from './drawer/DescriptionTab'
 import ApplicantsTab from './drawer/ApplicantsTab'
@@ -43,7 +44,7 @@ import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { useVacancyCustomFields } from '@/lib/useVacancyCustomFields'
 import Button from '@/components/ui/Button'
 // HUISSTIJL-1: the footer's 11px/muted meta line is the shared Caption atom.
-import { Caption, PageTitle } from '@/components/ui/typography'
+import { Caption } from '@/components/ui/typography'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -271,16 +272,10 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
             // V7: inline title edit — mirror OpportunityDrawer's renderTitle swap.
             <TitleEditInput value={titleDraft} onChange={setTitleDraft} onSave={saveTitleEdit} />
           ) : (
-            <>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <PageTitle as="span" style={{ fontWeight: 700 }}>{v.title}</PageTitle>
-                {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
-                <ReferenceNumberChip value={v.referenceNumber} />
-                {/* ONTKOPPEL-TELLER-1: whole-history CURRENTLY-detached count, warning-only (hidden at 0). */}
-                <DetachedCountBadge count={v.detachedCount} />
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{v.clientName || '—'}</div>
-            </>
+            // DRY round 10, DRAWERSHELLS: title/reference-chip/detached-badge row shared
+            // via DrawerTitleRow with CandidateHeaderBits and CustomerDrawer (clone [10]).
+            <DrawerTitleRow title={v.title} referenceNumber={v.referenceNumber} detachedCount={v.detachedCount}
+              subtitle={v.clientName || '—'} />
           )}
           // Changelog icon (§3A(d)) — GET /vacancies/{id}/activity exists (measured:
           // routes/api/tenant/candidates.php). Danny 27-07: now the shared house
@@ -290,10 +285,10 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
           </>}
           // V7: title pencil → save/cancel, same spot as the changelog icon's row.
           actions={editingTitle ? (
-            <>
-              <Button variant="primary" iconOnly size="sm" onClick={saveTitleEdit} title={t('common:save')} aria-label={t('common:save')}><Save size={14} /></Button>
-              <Button variant="secondary" iconOnly size="sm" onClick={() => setEditingTitle(false)} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={14} /></Button>
-            </>
+            // DRY round 10, DRAWERSHELLS: save/cancel pair shared via TitleEditActions
+            // with TaskDrawer (clone [13]).
+            <TitleEditActions onSave={saveTitleEdit} onCancel={() => setEditingTitle(false)}
+              saveLabel={t('common:save')} cancelLabel={t('common:cancel')} />
           ) : (
             <Button variant="secondary" iconOnly size="sm" onClick={startTitleEdit} title={t('common:edit')} aria-label={t('common:edit')}><Edit2 size={13} /></Button>
           )}
@@ -304,9 +299,8 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
               onChange: val => onUpdate?.(v.id, { statusValue: val }), menuWidth: 170, width: 160 },
             // Client moved to the Details tab (P3: calm header — max status + owner,
             // mirror the candidate blueprint §3A(c)); the subtitle still shows it.
-            { key: 'owner', label: t('drawer.owner'), value: v.owner?.id,
-              options: ownerOptions, onChange: val => onUpdate?.(v.id, { ownerId: val || null }), menuWidth: 200, width: 190,
-              clearable: true, clearLabel: t('drawer.owner') },
+            makeOwnerMetaPicker({ entityId: v.id, value: v.owner?.id, options: ownerOptions,
+              onUpdate, label: t('drawer.owner'), clearLabel: t('drawer.owner') }),
           ]}
           tags={{ items: currentTags, onAdd: tag => setTagsAndSave([...currentTags, tag]),
             onRemove: tag => setTagsAndSave(currentTags.filter(x => x !== tag)), addLabel: t('drawer.tags') }}

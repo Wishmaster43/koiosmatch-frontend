@@ -3,10 +3,11 @@
  * useKpiSettings), the actual value, and the records behind it. Opened by
  * clicking a KPI card. Month names are derived from the active locale.
  */
-import { X, Search, TrendingUp, Target, Info } from 'lucide-react'
+import { Search, TrendingUp, Target, Info } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { PageTitle, BodyText, Caption, GroupLabel } from '@/components/ui/typography'
-import Button from '@/components/ui/Button'
+import DrawerCloseButton from '@/components/drawer/DrawerCloseButton'
+import DrawerBackdrop from '@/components/drawer/DrawerBackdrop'
 import StatusPill from '@/components/ui/StatusPill'
 import { tint, tintBorder } from '@/lib/tint'
 import type { ReactNode } from 'react'
@@ -318,7 +319,7 @@ export default function KpiDrillDownDrawer({ mode, title, candidates = [], onClo
   const shown = currentTab?.candidates ?? candidates
   return (
     <>
-      <div className="fixed inset-0" style={{ background: 'rgba(0,0,0,0.25)', zIndex: 'var(--z-drawer)' }} onClick={onClose} />
+      <DrawerBackdrop onClick={onClose} />
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} tabIndex={-1}
         className="fixed top-0 bottom-0 right-0 flex flex-col bg-[var(--surface)]"
@@ -345,11 +346,7 @@ export default function KpiDrillDownDrawer({ mode, title, candidates = [], onClo
                 </span>
               </div>
             )}
-            <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}
-              onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
-              <X size={15} />
-            </Button>
+            <DrawerCloseButton onClick={onClose} ariaLabel={t('common:close')} />
           </div>
         </div>
 

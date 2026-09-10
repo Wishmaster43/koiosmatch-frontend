@@ -14,6 +14,7 @@ import { PageTitle, Caption } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useSeedLabel } from '@/lib/useSeedLabel'
+import { makeOwnerMetaPicker } from '@/lib/ownerMetaPicker'
 import DetailsTab from './drawer/DetailsTab'
 import StatisticsTab from './drawer/StatisticsTab'
 import CustomerRelationTab from './drawer/CustomerRelationTab'
@@ -195,10 +196,9 @@ export default function OpportunityDrawer({
             { key: 'stage', label: t('drawer.stage'), value: o.stageValue,
               options: stageOptions, placeholder: t('drawer.selectStage'),
               onChange: (val: string) => onUpdate?.(o.id, { stageValue: val }), menuWidth: 170, width: 160 },
-            { key: 'owner', label: t('drawer.owner'), value: o.ownerId,
-              options: ownerOptions, placeholder: t('drawer.selectOwner'),
-              onChange: (val: string) => onUpdate?.(o.id, { ownerId: val || null }), menuWidth: 200, width: 190,
-              clearable: true, clearLabel: t('drawer.owner') },
+            makeOwnerMetaPicker({ entityId: o.id, value: o.ownerId, options: ownerOptions,
+              onUpdate, label: t('drawer.owner'), clearLabel: t('drawer.owner'),
+              placeholder: t('drawer.selectOwner') }),
           ]}
           // C-41: free-form tags — UpdateOpportunityRequest accepts `tags` (measured).
           tags={{ items: currentTags, onAdd: tag => setTagsAndSave([...currentTags, tag]),

@@ -3,10 +3,12 @@
  * a chart/KPI data point. Fetches the underlying shifts and shows them with a
  * status badge, searchable. STATUS_META maps a shift status to its label + colors.
  */
-import { X, Search, Clock, MapPin, Briefcase, User, Hash, Building2, CalendarCheck, Timer, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Search, Clock, MapPin, Briefcase, User, Hash, Building2, CalendarCheck, Timer, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
-import { PageTitle, BodyText, SectionTitle, Caption } from '@/components/ui/typography'
+import { BodyText, SectionTitle, Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
+import DrawerHeaderRow from '@/components/drawer/DrawerHeaderRow'
+import DrawerBackdrop from '@/components/drawer/DrawerBackdrop'
 import type { LucideIcon } from 'lucide-react'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
@@ -157,18 +159,17 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, 
 
   return (
     <>
-      <div className="fixed inset-0" style={{ background: 'rgba(0,0,0,0.25)', zIndex: 'var(--z-drawer)' }} onClick={onClose} />
+      <DrawerBackdrop onClick={onClose} />
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}
         onKeyDown={e => { if (e.target instanceof HTMLInputElement) return; if (e.key === 'ArrowLeft') goPeriod(-1); else if (e.key === 'ArrowRight') goPeriod(1) }}
         className="fixed top-0 bottom-0 right-0 flex flex-col bg-[var(--surface)]"
         style={{ width: 620, zIndex: 'var(--z-drawer)', boxShadow: 'var(--shadow-drawer)' }}>
 
-        {/* Header: title + month pager + count */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
-                      padding: '14px 18px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-          <div>
-            <PageTitle as="div">{title}</PageTitle>
+        {/* Header: title + month pager + count — DRY round 10, DRAWERSHELLS: shared
+            via DrawerHeaderRow with EntityListDrawer (clone [6]). */}
+        <DrawerHeaderRow title={title} onClose={onClose} closeAriaLabel={t('common:close')}
+          meta={
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
               {periods.length > 1 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -181,13 +182,7 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, 
                 {loading ? t('shiftsDrawer.loading') : t('shiftsDrawer.count', { count: shifts.length })}
               </span>
             </div>
-          </div>
-          <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')} style={{ marginLeft: 10 }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
-            <X size={15} />
-          </Button>
-        </div>
+          } />
 
         {/* Series chips (the standard switcher) — badge = count in the current period */}
         <div style={{ flexShrink: 0, padding: '8px 14px', borderBottom: '1px solid var(--hover-bg)' }}>

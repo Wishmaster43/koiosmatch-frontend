@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { PageTitle } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
+import DrawerBackdrop from '@/components/drawer/DrawerBackdrop'
 
 // See the file's top doc above; a dumb backdrop+focus-trap+header shell, callers render their own body as children.
 export default function RightDrawer({ title, subtitle, onClose, width = 480, children }: {
@@ -22,7 +23,7 @@ export default function RightDrawer({ title, subtitle, onClose, width = 480, chi
       {/* Backdrop */}
       {/* Backdrop + panel both live on the drawer rung; the panel renders after
           the backdrop, so DOM order stacks it on top within the rung. */}
-      <div className="fixed inset-0" style={{ background: 'rgba(0,0,0,0.25)', zIndex: 'var(--z-drawer)' }} onClick={onClose} />
+      <DrawerBackdrop onClick={onClose} />
 
       {/* Panel */}
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} tabIndex={-1}

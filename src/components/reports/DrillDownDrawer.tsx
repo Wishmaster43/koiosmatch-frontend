@@ -16,6 +16,7 @@ import { PageTitle } from '@/components/ui/typography'
 import { navigateToPage } from '@/lib/navigate'
 import type { ReportCandidate } from '@/types/reports'
 import { SM_STATUS, normalizeSmStatus } from '@/lib/smStatus'
+import DrawerBackdrop from '@/components/drawer/DrawerBackdrop'
 
 // Colored status pill (actief / nietactief / extern / ...) for a record.
 function StatusBadge({ status }: { status?: string }) {
@@ -91,7 +92,7 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
   return (
     <>
       {/* Backdrop */}
-      <div className="fixed inset-0" style={{ background: 'rgba(0,0,0,0.25)', zIndex: 'var(--z-drawer)' }} onClick={onClose} />
+      <DrawerBackdrop onClick={onClose} />
 
       {/* Drawer */}
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} tabIndex={-1}

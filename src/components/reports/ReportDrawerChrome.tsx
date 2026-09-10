@@ -4,10 +4,10 @@
  * Manages focus trap and escapes; content injected via children.
  */
 import { ReactNode } from 'react'
-import { X } from 'lucide-react'
-import Button from '@/components/ui/Button'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
+import DrawerCloseButton from '@/components/drawer/DrawerCloseButton'
+import DrawerBackdrop from '@/components/drawer/DrawerBackdrop'
 
 interface ReportDrawerChromeProps {
   title: string
@@ -32,7 +32,7 @@ export default function ReportDrawerChrome({
 
   return (
     <>
-      <div className="fixed inset-0" style={{ background: 'rgba(0,0,0,0.25)', zIndex }} onClick={onClose} />
+      <DrawerBackdrop onClick={onClose} zIndex={zIndex} />
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}
         className="fixed top-0 bottom-0 right-0 flex flex-col bg-[var(--surface)]"
@@ -49,12 +49,7 @@ export default function ReportDrawerChrome({
               )}
               {headerMeta}
             </div>
-            <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}
-              style={{ marginLeft: 10, flexShrink: 0 }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
-              <X size={15} />
-            </Button>
+            <DrawerCloseButton onClick={onClose} ariaLabel={t('common:close')} style={{ marginLeft: 10, flexShrink: 0 }} />
           </div>
         </div>
 

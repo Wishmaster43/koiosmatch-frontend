@@ -5,12 +5,14 @@
  */
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
-import { X, MapPin, Building2, Hash, User, Layers } from 'lucide-react'
+import { MapPin, Building2, Hash, User, Layers } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { PageTitle, Caption, SectionTitle } from '@/components/ui/typography'
 import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
 import InfoRow from './InfoRow'
 import CopyIconButton from '../ui/CopyIconButton'
+import DrawerCloseButton from '../drawer/DrawerCloseButton'
+import DrawerBackdrop from '../drawer/DrawerBackdrop'
 import type { ReportCustomer } from '@/types/reports'
 
 // Read-only slide-in with one customer's locations/departments/contacts, opened
@@ -23,7 +25,7 @@ export default function CustomerDetailDrawer({ customer, onClose }: { customer: 
 
   return (
     <>
-      <div className="fixed inset-0" style={{ background: 'rgba(0,0,0,0.25)', zIndex: 'var(--z-drawer)' }} onClick={onClose} />
+      <DrawerBackdrop onClick={onClose} />
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={customer?.name as string | undefined} tabIndex={-1}
         className="fixed top-0 bottom-0 right-0 flex flex-col bg-[var(--surface)]"
@@ -43,12 +45,7 @@ export default function CustomerDetailDrawer({ customer, onClose }: { customer: 
               <InfoRow icon={User}    label={t('customerDrawer.accountManager')} value={customer.account_manager} variant="inline" />
             </div>
           </div>
-          <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}
-            style={{ marginLeft: 10 }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
-            <X size={15} />
-          </Button>
+          <DrawerCloseButton onClick={onClose} ariaLabel={t('common:close')} style={{ marginLeft: 10 }} />
         </div>
 
         {/* Summary */}

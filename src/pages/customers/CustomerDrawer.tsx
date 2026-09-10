@@ -16,10 +16,9 @@ import EntityHeader from '@/components/drawer/EntityHeader'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import TrashLifecycleSection from '@/components/drawer/TrashLifecycleSection'
 import type { TrashSectionConfig } from '@/components/drawer/TrashLifecycleSection'
-import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
-import DetachedCountBadge from '@/components/ui/DetachedCountBadge'
+import DrawerTitleRow from '@/components/drawer/DrawerTitleRow'
 import SoftChip from '@/components/ui/SoftChip'
-import { Caption, PageTitle } from '@/components/ui/typography'
+import { Caption } from '@/components/ui/typography'
 import CustomerHeaderActions from './drawer/CustomerHeaderActions'
 import MergeCustomerModal from './MergeCustomerModal'
 import { useAuth } from '@/context/AuthContext'
@@ -229,18 +228,12 @@ export default function CustomerDrawer({
       onKeyDown={e => { if (e.key === 'Enter') saveHeader() }}
       style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: 14, fontWeight: 600, borderRadius: 6, border: '1px solid var(--border)', outline: 'none' }} />
   ) : (
-    <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        {/* Mirrors EntityHeader's own canonical title recipe (PageTitle + 700 override). */}
-        <PageTitle as="div" style={{ fontWeight: 700 }}>{c.name}</PageTitle>
-        {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
-        <ReferenceNumberChip value={c.referenceNumber} />
-        {/* ONTKOPPEL-TELLER-1: whole-history CURRENTLY-detached count across ALL this
-            customer's vacancies, warning-only (hidden at 0). */}
-        <DetachedCountBadge count={c.detachedCount} />
-      </div>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{[c.city, c.industry].filter(Boolean).join(' · ') || '—'}</div>
-    </>
+    // DRY round 10, DRAWERSHELLS: title/reference-chip/detached-badge row shared via
+    // DrawerTitleRow with CandidateHeaderBits and VacancyDrawer (clone [10]) — mirrors
+    // EntityHeader's own canonical title recipe (PageTitle + 700 override); this
+    // customer's detached count spans ALL its vacancies, not just this drawer.
+    <DrawerTitleRow title={c.name} titleAs="div" referenceNumber={c.referenceNumber} detachedCount={c.detachedCount}
+      subtitle={[c.city, c.industry].filter(Boolean).join(' · ') || '—'} />
   )
 
   // Header actions: convert (entry phase) plus the edit/save/cancel toggles — split

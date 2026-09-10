@@ -16,12 +16,10 @@ import { useFunctions } from '@/lib/useFunctions'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
-import DetachedCountBadge from '@/components/ui/DetachedCountBadge'
+import DrawerTitleRow from '@/components/drawer/DrawerTitleRow'
 import LookupIcon from '@/components/ui/LookupIcon'
 import Button from '@/components/ui/Button'
 import SoftChip from '@/components/ui/SoftChip'
-import { PageTitle } from '@/components/ui/typography'
 import { chipInk, tintBg, tintBorder } from '@/lib/tint'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
@@ -80,17 +78,11 @@ export function CandidateTitle({ c, editing, hf, setHF }: {
         allowCreate={allowFreeEntry} placeholder={t('columns.function')} menuWidth={260} />
     </div>
   )
+  // DRY round 10, DRAWERSHELLS: title/reference-chip/detached-badge row shared
+  // via DrawerTitleRow with CustomerDrawer and VacancyDrawer (clone [10]).
   return (
-    <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <PageTitle as="span" style={{ fontWeight: 700 }}>{c.name}</PageTitle>
-        {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
-        <ReferenceNumberChip value={c.referenceNumber} />
-        {/* ONTKOPPEL-TELLER-1: whole-history CURRENTLY-detached count, warning-only (hidden at 0). */}
-        <DetachedCountBadge count={c.detachedCount} />
-      </div>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{c.title ? seedLabel('functions', { label: c.title }) : '—'}</div>
-    </>
+    <DrawerTitleRow title={c.name} referenceNumber={c.referenceNumber} detachedCount={c.detachedCount}
+      subtitle={c.title ? seedLabel('functions', { label: c.title }) : '—'} />
   )
 }
 

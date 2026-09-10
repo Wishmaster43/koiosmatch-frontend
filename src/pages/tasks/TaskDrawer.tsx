@@ -7,7 +7,7 @@
 import type { ReactNode } from 'react'
 import { useState, Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CheckCircle2, Edit2, Save, X } from 'lucide-react'
+import { CheckCircle2, Edit2 } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import type { MetaPicker } from '@/components/drawer/EntityHeader'
@@ -37,6 +37,7 @@ import type { TrashSectionConfig } from '@/components/drawer/TrashLifecycleSecti
 import { initialsOf } from '@/lib/initials'
 import Button from '@/components/ui/Button'
 import TitleEditInput from '@/components/drawer/TitleEditInput'
+import TitleEditActions from '@/components/drawer/TitleEditActions'
 import { userName, type UserLike } from '@/lib/userDisplay'
 import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
@@ -232,10 +233,10 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
           // edit affordance in this drawer — restore first, a deliberate product
           // choice per the meta-picker comment below, not a technical necessity).
           actions={editingTitle ? (
-            <>
-              <Button variant="primary" iconOnly size="sm" onClick={saveTitleEdit} title={t('common:save')} aria-label={t('common:save')}><Save size={14} /></Button>
-              <Button variant="secondary" iconOnly size="sm" onClick={() => setEditingTitle(false)} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={14} /></Button>
-            </>
+            // DRY round 10, DRAWERSHELLS: save/cancel pair shared via TitleEditActions
+            // with VacancyDrawer (clone [13]).
+            <TitleEditActions onSave={saveTitleEdit} onCancel={() => setEditingTitle(false)}
+              saveLabel={t('common:save')} cancelLabel={t('common:cancel')} />
           ) : (
             <>
               {/* X-36: quick action "Afspraak plannen" (only for tasks linked to a candidate). */}
