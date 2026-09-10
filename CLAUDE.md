@@ -1081,7 +1081,8 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   kandidaten met bepaalde status, en die status staat rechts in het paneel als filters"):**
   every workflow STARTS with a Koios entity node, the vertrekmodule, that names the run's
   subject: candidate · customer · location · department · contact · task · call list ·
-  vacancy · application. That first node carries the trigger (event = "dit record", one run
+  vacancy · application · conversation (the inbound WhatsApp thread; WORKLIST O17: the
+  binding list of INTERVIEW-WORKFLOW-1 Appendix D has ten). That first node carries the trigger (event = "dit record", one run
   per record; schedule = "selectie", ONE run with N bundles, every step runs per bundle,
   as the engine already does) and its FILTERS in the
   right-hand panel ("kandidaten met status X"). A workflow whose first node is an action
