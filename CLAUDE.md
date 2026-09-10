@@ -199,6 +199,15 @@ Rules:
   laadt eager, en zodra één re-export `@/lib/datetime` raakt rijdt de i18n-init mee
   in elke barrel-consumer; twee ongerelateerde suites braken zo (NoteKoiosModeToggle,
   AddOpportunityModal). Bij twijfel: check met een HEAD-worktree of de breuk van jou is.
+  **DATETIME-IMPORT-LES (10-09, DRY-ronde 10, lane MISC):** dezelfde val zonder barrel:
+  een PURE helper (de AI-insight-bouwers) die bij adopt-first `daysSince` uit
+  `@/lib/datetime` gaat importeren, sleept de i18n-init mee in elke consument van
+  die helper — vier suites rood (ApplicationTab, DetailsTab, ContextSubTab,
+  RejectionModal) terwijl de directe unit-tests groen bleven. Regel: een
+  datumhelper zonder locale hoort in `lib/localDate` (bijwerkingsvrij; `datetime`
+  re-exporteert hem), en de testset van een wijziging die IMPORTS verandert is de
+  TRANSITIEVE consument (de paginamappen van elk scherm dat de module rendert),
+  nooit alleen `grep -rl <basename>`.
 - Shared UI in `components/ui` is **dumb**: no API calls, no business logic.
 - If a file doesn't clearly belong somewhere, the design is wrong — stop and fix.
 - A `features/`-style layout (per-domain barrels) remains the long-term target if
