@@ -273,7 +273,11 @@
       "createdTask": "Task created",
       "disabledForTenant": "Off for your organisation",
       "disabledForMe": "Off for you",
-      "settingsLink": "Configure"
+      "settingsLink": "Configure",
+      "moreActions": "More actions",
+      "call": "Call",
+      "email": "Email",
+      "message": "Send a message"
     },
     "feedback": {
       "up": "Helpful",

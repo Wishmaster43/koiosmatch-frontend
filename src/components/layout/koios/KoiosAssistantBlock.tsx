@@ -23,7 +23,8 @@
  * voor jou" refetch after every executed or cancelled action.
  */
 import { useTranslation } from 'react-i18next'
-import { Clock, UserX, Target, Briefcase, Sparkles, MessageSquare } from 'lucide-react'
+import { Clock, UserX, Target, Briefcase, Sparkles, MessageSquare, Phone, Mail, MessageCircle } from 'lucide-react'
+import ActionMenu from '@/components/ui/ActionMenu'
 import type { LucideIcon } from 'lucide-react'
 import KoiosCardFrame from './KoiosCardFrame'
 import { Caption } from '@/components/ui/typography'
@@ -43,7 +44,7 @@ import Spinner from '@/components/ui/Spinner'
 import { confirmPendingAction, cancelPendingAction, stagePendingAction } from './koiosApi'
 import { createdRefFromToolResult } from './koiosToolResult'
 import { extractApiError } from '@/lib/extractApiError'
-import type { KoiosAssistantKind, KoiosAssistantSuggestion } from './useKoiosAssistant'
+import type { KoiosAssistantAction, KoiosAssistantKind, KoiosAssistantSuggestion } from './useKoiosAssistant'
 import type { KoiosPreviewRow } from './koiosTypes'
 import type { KoiosContextRef } from '@/types/koios'
 import type { ActionBudget } from '@/types/actionBudget'
@@ -69,6 +70,13 @@ const TOOL_FOLLOW_UP: Record<string, { refType: string; tab: string }> = {
 }
 // The setting that switches a tool on or off for the organisation (Koios capabilities card).
 const KOIOS_TOOLS_SETTINGS_HASH = '#settings/ai/koios'
+
+// The row's choices: KOIOS-PANEL-2 `actions[]` (first = primary, rest = menu), else the
+// single `action` of the older envelope.
+const choicesOf = (s: KoiosAssistantSuggestion): KoiosAssistantAction[] =>
+  s.actions?.length ? s.actions : s.action ? [s.action] : []
+// The tool's own args under either key the envelope may use.
+const argsOf = (a: KoiosAssistantAction) => a.input ?? a.args ?? {}
 
 // The refs the chat can use as context: real records, never the parked-action handle.
 const contextRefsOf = (s: KoiosAssistantSuggestion) => s.refs.filter(r => r.type !== 'pending_action')
@@ -234,7 +242,21 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec, onDone }: {
   // two, enabled_for_* decides whether Uitvoeren is offered at all (never a refusal after
   // the click when the answer is known before it).
   const { tools: capabilityTools, isLoading: capsLoading } = useKoiosToolCapabilities()
-  const capability: KoiosCapabilityTool | undefined = findToolCapability(capabilityTools, suggestion.action?.tool)
+  const choices = choicesOf(suggestion)
+  const primary: KoiosAssistantAction | undefined = choices[0]
+  const capability: KoiosCapabilityTool | undefined = findToolCapability(capabilityTools, primary?.tool)
+  // The button text: the FE's own key first, then the server's human label, else "Uitvoeren".
+  const actionLabel = (a: KoiosAssistantAction) =>
+    a.label_key ? t(a.label_key, { defaultValue: a.label ?? t('koios.assistant.execute') }) : (a.label ?? t('koios.assistant.execute'))
+  const previewTitle = (a: KoiosAssistantAction) => (a.preview ?? []).filter(row => !isIdRow(row)).map(previewLine).join(' · ')
+  const toolAllowed = (tool: string) => {
+    const c = findToolCapability(capabilityTools, tool)
+    return c?.enabled_for_tenant !== false && c?.enabled_for_me !== false
+  }
+  // KOIOS-PANEL-2 (Danny: "contact is contact"): the person's channels as three icons —
+  // call, mail, and the conversation tab — when the envelope carries them.
+  const contactRef = contextRefsOf(suggestion).find(r => r.contact && (r.contact.phone || r.contact.mobile || r.contact.email))
+  const contactPage = contactRef ? pageForResultRef(contactRef.type) : null
   const disabledReason = capability?.enabled_for_tenant === false ? t('koios.assistant.disabledForTenant')
     : capability?.enabled_for_me === false ? t('koios.assistant.disabledForMe') : null
   // After an executed action: the response's own landing spot, else the tool's follow-up
@@ -257,16 +279,17 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec, onDone }: {
 
   // Golf 3 (CMBE 03f2630c): stage a descriptor's {tool,input} — parks only,
   // nothing executes; the preview + confirm step follow under the same row.
-  const stage = async () => {
-    if (!suggestion.action) return
+  const stage = async (chosen: KoiosAssistantAction | undefined = primary) => {
+    if (!chosen) return
     setExec({ phase: 'staging' })
     try {
-      const body = await stagePendingAction(suggestion.action.tool, suggestion.action.input ?? {})
+      const body = await stagePendingAction(chosen.tool, argsOf(chosen))
       if (body?.status === 'staged' && body?.action?.id) {
         const staged = body.action as StagedAction
         // KOIOS-ROW-2: one click when the registry says no confirm is required; the
         // preview + Bevestigen step stays for every confirm_required (or unknown) tool.
-        if (capability && !capability.confirm_required) { await run(staged.id, confirmPendingAction, 'executed', staged.title) ; return }
+        const chosenCapability = findToolCapability(capabilityTools, chosen.tool)
+        if (chosenCapability && !chosenCapability.confirm_required) { await run(staged.id, confirmPendingAction, 'executed', staged.title) ; return }
         setExec({ phase: 'staged', staged })
       }
       else setExec({ phase: 'error', message: body?.message ?? t('koios.pendingAction.error') })
@@ -291,19 +314,40 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec, onDone }: {
       </>
     )
   }
-  if (suggestion.action && (exec.phase === 'staged' || exec.phase === 'submitting')) return null
+  if (primary && (exec.phase === 'staged' || exec.phase === 'submitting')) return null
+  const extra = choices.slice(1).filter(a => toolAllowed(a.tool))
   return (
     <>
-      {suggestion.action && disabledReason && (
+      {contactRef?.contact && (
+        <>
+          {(contactRef.contact.mobile || contactRef.contact.phone) && (
+            <Button size="sm" variant="ghost" iconOnly href={`tel:${contactRef.contact.mobile || contactRef.contact.phone}`}
+              aria-label={t('koios.assistant.call')} title={t('koios.assistant.call')}><Phone size={13} /></Button>
+          )}
+          {contactRef.contact.email && (
+            <Button size="sm" variant="ghost" iconOnly href={`mailto:${contactRef.contact.email}`}
+              aria-label={t('koios.assistant.email')} title={t('koios.assistant.email')}><Mail size={13} /></Button>
+          )}
+          {contactPage && (
+            <Button size="sm" variant="ghost" iconOnly onClick={() => openEntity(contactPage, contactRef.id, 'communication')}
+              aria-label={t('koios.assistant.message')} title={t('koios.assistant.message')}><MessageCircle size={13} /></Button>
+          )}
+        </>
+      )}
+      {primary && disabledReason && (
         <a href={KOIOS_TOOLS_SETTINGS_HASH} className="no-underline" title={t('koios.assistant.settingsLink')}>
           <SoftChip label={disabledReason} color="var(--color-warning)" />
         </a>
       )}
-      {suggestion.action && (
-        <Button size="sm" variant="secondary" onClick={stage} disabled={exec.phase === 'staging' || capsLoading || !!disabledReason}
-          title={disabledReason ?? capability?.label_nl ?? undefined}>
-          {exec.phase === 'staging' ? <Spinner size={12} /> : null} {t('koios.assistant.execute')}
+      {primary && (
+        <Button size="sm" variant="secondary" onClick={() => stage(primary)} disabled={exec.phase === 'staging' || capsLoading || !!disabledReason}
+          title={disabledReason ?? previewTitle(primary) ?? capability?.label_nl ?? undefined}>
+          {exec.phase === 'staging' ? <Spinner size={12} /> : null} {actionLabel(primary)}
         </Button>
+      )}
+      {extra.length > 0 && (
+        <ActionMenu iconOnly ariaLabel={t('koios.assistant.moreActions')} align="right" menuWidth={220}
+          items={extra.map(a => ({ key: a.tool, label: actionLabel(a), onSelect: () => { void stage(a) } }))} />
       )}
       <AskKoiosButton suggestion={suggestion} onAskKoios={onAskKoios} t={t} />
     </>

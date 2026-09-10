@@ -331,3 +331,30 @@ describe('KoiosAssistantBlock · KOIOS-ROW-2', () => {
     expect(screen.getByText('koios.assistant.disabledForMe')).toBeInTheDocument()
   })
 })
+
+// KOIOS-PANEL-2 pre-adoption (tolerant): a row's actions[] — the first is the button, the
+// rest sit in the row menu — and the person's contact channels as three icons.
+describe('KoiosAssistantBlock · KOIOS-PANEL-2 envelope', () => {
+  it('renders the first action as the button (its label), the rest behind the row menu, and stages the picked one', async () => {
+    givenSuggestions([{ kind: 'task_overdue', title: 'Lieke Groen bellen', body: 'Taak is 609 dagen over tijd.', refs: [{ type: 'task', id: 't1', label: 'Lieke Groen bellen' }],
+      actions: [{ tool: 'wijzig_taak', label: 'Verzetten', args: { task_id: 't1' }, preview: [{ label: 'Deadline', before: '01-01-2025', after: '17-09-2026' }] }, { tool: 'maak_taak', label: 'Bellen', args: { titel: 'Bel Lieke' } }] }])
+    mockPost.mockResolvedValueOnce({ data: { status: 'staged', action: { id: 'pa-5', title: 'Bel Lieke', preview: [] } } })
+    renderBlock()
+    const primaryBtn = await screen.findByRole('button', { name: 'Verzetten' })
+    expect(primaryBtn).toHaveAttribute('title', 'Deadline · 01-01-2025 → 17-09-2026')
+    expect(screen.queryByRole('button', { name: /assistant\.execute/ })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'koios.assistant.moreActions' }))
+    fireEvent.click(await screen.findByText('Bellen'))
+    await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/ai/koios/actions/stage', { tool: 'maak_taak', input: { titel: 'Bel Lieke' } }))
+  })
+
+  it('shows call, mail and message icons when the candidate ref carries contact channels', async () => {
+    givenSuggestions([{ kind: 'candidate_no_contact', title: 'Youssef Postma', body: 'Bel Youssef Postma: 186 dagen geen contact.',
+      refs: [{ type: 'candidate', id: 'c7', label: 'Youssef Postma', contact: { mobile: '+31612345678', email: 'youssef@example.test' } }], action: null }])
+    renderBlock()
+    expect(await screen.findByRole('link', { name: 'koios.assistant.call' })).toHaveAttribute('href', 'tel:+31612345678')
+    expect(screen.getByRole('link', { name: 'koios.assistant.email' })).toHaveAttribute('href', 'mailto:youssef@example.test')
+    fireEvent.click(screen.getByRole('button', { name: 'koios.assistant.message' }))
+    expect(openEntity).toHaveBeenCalledWith('candidates', 'c7', 'communication')
+  })
+})

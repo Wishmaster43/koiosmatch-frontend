@@ -9,13 +9,20 @@
 import { useQuery } from '@tanstack/react-query'
 import api, { unwrap } from '@/lib/api'
 import type { KoiosContextRef } from '@/types/koios'
+import type { KoiosPreviewRow } from './koiosTypes'
 
 // One tool call the model proposes for a suggestion. Golf 2: parked actions
 // (pending_action + ref) confirm/cancel via koiosApi; descriptor kinds hand
 // their intent to the chat composer.
 export interface KoiosAssistantAction {
   tool: string
-  input: Record<string, unknown>
+  input?: Record<string, unknown>
+  // KOIOS-PANEL-2 (CMBE spec): a human label (NL) plus an optional i18n key the FE
+  // resolves first, the tool's args and the preview rows — all read tolerantly.
+  label?: string | null
+  label_key?: string | null
+  args?: Record<string, unknown>
+  preview?: KoiosPreviewRow[]
 }
 
 export type KoiosAssistantKind =
@@ -30,6 +37,9 @@ export interface KoiosAssistantSuggestion {
   title: string
   body: string
   action?: KoiosAssistantAction | null
+  // KOIOS-PANEL-2: the row's real choices (afronden / verzetten / bellen …); the first
+  // is the primary button, the rest sit in the row's menu. Absent → `action` as before.
+  actions?: KoiosAssistantAction[] | null
   refs: KoiosContextRef[]
 }
 

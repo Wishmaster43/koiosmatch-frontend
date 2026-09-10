@@ -273,7 +273,11 @@
       "createdTask": "Tarefa criada",
       "disabledForTenant": "Desativado para a sua organização",
       "disabledForMe": "Desativado para si",
-      "settingsLink": "Configurar"
+      "settingsLink": "Configurar",
+      "moreActions": "Mais ações",
+      "call": "Ligar",
+      "email": "E-mail",
+      "message": "Enviar uma mensagem"
     },
     "feedback": {
       "up": "Útil",

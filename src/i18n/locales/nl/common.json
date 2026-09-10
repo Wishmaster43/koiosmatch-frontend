@@ -273,7 +273,11 @@
       "createdTask": "Taak aangemaakt",
       "disabledForTenant": "Uit voor jouw organisatie",
       "disabledForMe": "Uit voor jou",
-      "settingsLink": "Instellen"
+      "settingsLink": "Instellen",
+      "moreActions": "Meer acties",
+      "call": "Bellen",
+      "email": "Mailen",
+      "message": "Bericht sturen"
     },
     "feedback": {
       "up": "Nuttig",

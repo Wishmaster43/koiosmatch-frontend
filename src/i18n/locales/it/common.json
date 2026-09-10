@@ -273,7 +273,11 @@
       "createdTask": "Attività creata",
       "disabledForTenant": "Disattivato per la tua organizzazione",
       "disabledForMe": "Disattivato per te",
-      "settingsLink": "Configura"
+      "settingsLink": "Configura",
+      "moreActions": "Altre azioni",
+      "call": "Chiama",
+      "email": "E-mail",
+      "message": "Invia un messaggio"
     },
     "feedback": {
       "up": "Utile",

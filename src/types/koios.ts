@@ -63,6 +63,9 @@ export interface KoiosContextRef {
   // KOIOS-RESULT-CARDS-6-FE-1: for a CHILD ref (appointment/note/document, which
   // have no page of their own) the owning parent record to route through instead.
   parent?: { type: string; id: string }
+  // KOIOS-PANEL-2 (Danny 10-09: "contact is contact — bellen, mailen of whatsapp"): the
+  // person's channels, present only when the caller may see them (candidates.view).
+  contact?: { phone?: string | null; mobile?: string | null; email?: string | null } | null
 }
 
 // Minimal translate signature for the Koios subcomponents.

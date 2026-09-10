@@ -273,7 +273,11 @@
       "createdTask": "Aufgabe erstellt",
       "disabledForTenant": "Für deine Organisation ausgeschaltet",
       "disabledForMe": "Für dich ausgeschaltet",
-      "settingsLink": "Einstellen"
+      "settingsLink": "Einstellen",
+      "moreActions": "Weitere Aktionen",
+      "call": "Anrufen",
+      "email": "E-Mail",
+      "message": "Nachricht senden"
     },
     "feedback": {
       "up": "Hilfreich",
