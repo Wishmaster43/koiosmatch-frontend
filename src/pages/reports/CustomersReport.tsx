@@ -42,6 +42,8 @@ import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateSegment, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
 import { useReportKpiOrdering } from './hooks/useReportKpiOrdering'
+import { orderKpis } from './lib/kpiOrder'
+import { reportWindowLabel } from './lib/reportWindowLabel'
 import { CUSTOMERS_SIGNAL_LABEL_KEYS, type ReportKpiScopeId } from './kpiCatalog'
 import { useReportCompareData } from './hooks/useReportCompareData'
 import ReportCompareMetric from './ReportCompareMetric'
@@ -118,19 +120,20 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
   // (`baseParams`), never just `period`, so the drawer counts the exact same set
   // the bar was drawn from. `baseParams` also carries the switch's own `phase` filter.
   const [drill, setDrill] = useState<DrillSpec | null>(null)
+  const windowSub = () => reportWindowLabel(formatDate, data?.from, data?.to)
   // Drill/advice population filter rides as phase_filter[] (CMBE a0d4627e) —
   // the XOR segment key `phase` stays free for the segment picker; the compare
   // params above keep `phase` (the report endpoint's own array contract).
   const baseParams = { ...buildReportQueryParams(period, 'customers', filters), ...(phaseFilter ? { phase_filter: [phaseFilter] } : {}) }
   const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
     setDrill({
-      title: seg.label, value: seg.count, subtitle: `${formatDate(data?.from)} – ${formatDate(data?.to)}`,
+      title: seg.label, value: seg.count, subtitle: windowSub(),
       entityPage: 'customers',
       rowsEndpoint: '/reports/customers/drill', rowsParams: { ...baseParams, ...xorParam },
       adviceEndpoint: '/reports/customers/advice', adviceParams: { ...baseParams, ...xorParam },
     })
   const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
-    title: pt.label, value: pt.value, subtitle: `${formatDate(data?.from)} – ${formatDate(data?.to)}`,
+    title: pt.label, value: pt.value, subtitle: windowSub(),
     // A week bar's `date` is the point's own key; the drawer then counts the WHOLE
     // week (bucket=week) so bar and drawer total always agree.
     rowsEndpoint: '/reports/customers/drill',
@@ -203,7 +206,9 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
       } satisfies KpiSpec]
     }),
   )
-  const signalKpis: KpiSpec[] = kpiOrder.map(key => signalKpiByKey[key]).filter((k): k is KpiSpec => k != null)
+  // orderKpis is the shared projection; the ordering hook stays a direct call
+  // because the Prospects strip below consumes the same order a second time.
+  const signalKpis: KpiSpec[] = orderKpis(kpiOrder, signalKpiByKey)
 
   // Prospects keeps the axis-topsegment strip: buildAxisKpis round-robins the
   // five configured axes' top segments in, a KPI-card click opening the SAME
