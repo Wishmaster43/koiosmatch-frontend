@@ -269,11 +269,15 @@
       "emptyState": "Rien ne nécessite votre attention pour le moment.",
       "askKoios": "Terminer dans le chat",
       "askIntent": "{{body}} Que proposes-tu ?",
+      "askIntentByKind": {
+        "task_overdue": "La tâche \"{{title}}\" est encore ouverte. Quel est son état et que proposes-tu : terminer, reporter ou prendre contact ?",
+        "candidate_no_contact": "Rédige un court message à {{title}} pour reprendre contact. Contexte : {{body}}",
+        "vacancy_zero_applications": "Cherche des candidats adaptés pour le poste \"{{title}}\" et explique ton choix.",
+        "opportunity_closing_soon": "Où en est l’opportunité \"{{title}}\" et quelle est la prochaine étape ?",
+        "pending_action": "{{body}} Que proposes-tu ?"
+      },
       "execute": "Exécuter",
       "createdTask": "Tâche créée",
-      "disabledForTenant": "Désactivé pour votre organisation",
-      "disabledForMe": "Désactivé pour vous",
-      "settingsLink": "Configurer",
       "moreActions": "Plus d’actions",
       "call": "Appeler",
       "email": "E-mail",

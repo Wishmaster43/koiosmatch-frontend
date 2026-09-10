@@ -784,6 +784,12 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   finding. And the general lesson: **whoever moves text onto a different fill re-checks
   the contrast pair** — `lib/tokenContrast.test.ts` gates the token pairs in CI, so a new
   fill/ink combination gets a line there in the same change.
+  **SUCCESS-BUTTON-INK-1 (Danny 10-09, op "Markeer afgerond": "groen snap ik van
+  goedkeuren maar tekst moet dan toch wit zijn?"):** a SOLID success button (`Button
+  variant="success"`) paints `--color-success-fill` (green-700) with `--color-on-success-fill`
+  (white, 5.02:1) — white on `--color-success` itself only reaches 3.3:1, and dark ink on
+  green reads as a foreign button next to the tenant's own accent. The chip/border colour
+  and the "aan/gelukt" pastel pair keep their exact values; only the solid button moved.
 - **IMPORT lives in the CREATE MODAL's header, never in the list toolbar (Danny
   2026-08-14, twice, with screenshots of the customers and the vacancies page: "Excel
   importeren moet in de pop-up + nieuwe vacature, niet hier boven de tabel").** The
@@ -1291,9 +1297,13 @@ Be honest. If something is not done, say so — do not pretend.
   · **KOIOS-ROW-2 (Danny 10-09, live review van Kelly's paneel, 18 punten):** élk
     record dat Koios noemt (chip in het paneel, resultaatkaart) opent bij klik de
     drilldown rechts op de juiste pagina en tab; een voorstelrij zegt wat Uitvoeren
-    DOET en doet het in één klik tenzij de tool-registry een bevestiging eist; een
-    tool die uit staat (organisatie/gebruiker) toont dat vóór de klik met een link naar
-    de instelling, nooit "Geweigerd" erna; een uitgevoerde actie laat de gebruiker
+    DOET (de knop draagt de toolnaam uit de registry, nooit een kaal "Uitvoeren" als
+    de naam bekend is) en doet het in één klik tenzij de tool-registry een bevestiging
+    eist; een tool die uit staat (organisatie/gebruiker) krijgt géén knop (Danny 10-09
+    15:30: een chip naast een dode knop "heeft geen toegevoegde waarde"), nooit
+    "Geweigerd" erna; het chat-icoon stelt een vraag die bij de rijsoort past (taak:
+    stand + keuzes, geen contact: bericht opstellen, vacature: kandidaten zoeken), nooit
+    "… Wat stel je voor?"; een uitgevoerde actie laat de gebruiker
     landen op het record (zoek_kandidaten → vacature, tab Kandidaten zoeken); de chat
     onthoudt de thread (history) en de records uit het vorige antwoord (context);
     contact = bellen, mailen of WhatsApp (drie iconen), nooit alleen "bellen"; een

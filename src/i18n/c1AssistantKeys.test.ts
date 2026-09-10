@@ -19,6 +19,12 @@ describe('C1 assistant/learning i18n keys resolve', () => {
     // Danny 09-09: the chat-handoff intent carries the REASON (the suggestion body), so
     // Koios knows why — the record itself rides along as a context chip.
     expect(i18n.t('koios.assistant.askIntent', { ns: 'common', lng: 'nl', body: 'Bel Ahmed: 90 dagen geen contact.' })).toBe('Bel Ahmed: 90 dagen geen contact. Wat stel je voor?')
+    // KOIOS-ROW-2 (Danny 10-09 15:30): the handoff asks a question that fits the row's kind.
+    expect(i18n.t('koios.assistant.askIntentByKind.task_overdue', { ns: 'common', lng: 'nl', title: 'Lieke Groen bellen' })).toBe('Taak "Lieke Groen bellen" staat nog open. Wat is de stand en wat stel je voor: afronden, verzetten of contact opnemen?')
+    expect(i18n.t('koios.assistant.askIntentByKind.vacancy_zero_applications', { ns: 'common', lng: 'nl', title: 'Verzorgende IG | Amsterdam' })).toContain('Zoek geschikte kandidaten voor vacature "Verzorgende IG | Amsterdam"')
+    for (const kind of ['task_overdue', 'candidate_no_contact', 'vacancy_zero_applications', 'opportunity_closing_soon', 'pending_action']) {
+      expect(i18n.exists(`koios.assistant.askIntentByKind.${kind}`, { ns: 'common', lng: 'en' }), kind).toBe(true)
+    }
     expect(i18n.t('koios.assistant.askKoios', { ns: 'common', lng: 'de' })).toBe('Im Chat abschließen')
   })
 

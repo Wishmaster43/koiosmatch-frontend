@@ -21,6 +21,14 @@
  * click; an executed search jumps to the record (the vacancy's candidate-search tab —
  * "gelukt maar er is niets gebeurd"); and the list plus the dashboard's "Koios deed dit
  * voor jou" refetch after every executed or cancelled action.
+ *
+ * Danny 10-09 15:30 (second look at Kelly's panel): the row aligns on its centre line
+ * again; a tool switched off for the organisation or the user gets NO Uitvoeren at all
+ * ("uit voor jouw organisatie … toegevoegde waarde?" — a chip explaining a dead button
+ * is worth nothing); the button wears the tool's own name from the capabilities
+ * registry ("wat gaat uitvoeren doen?"); a no-contact row carries the message icon to
+ * the person's Communicatie tab straight away; and the chat handoff asks a question
+ * that fits the row's kind instead of "… Wat stel je voor?".
  */
 import { useTranslation } from 'react-i18next'
 import { Clock, UserX, Target, Briefcase, Sparkles, MessageSquare, Phone, Mail, MessageCircle } from 'lucide-react'
@@ -35,7 +43,6 @@ import { useKoiosRadarCollapse } from './useKoiosRadarCollapse'
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigation } from '@/context/NavigationContext'
-import SoftChip from '@/components/ui/SoftChip'
 import { pageForResultRef } from './koiosResultLinks'
 import { useKoiosToolCapabilities, findToolCapability } from './useKoiosToolCapabilities'
 import type { KoiosCapabilityTool } from './useKoiosToolCapabilities'
@@ -68,9 +75,6 @@ const KIND_META: Record<KoiosAssistantKind, { Icon: LucideIcon; color: string }>
 const TOOL_FOLLOW_UP: Record<string, { refType: string; tab: string }> = {
   zoek_kandidaten: { refType: 'vacancy', tab: 'candidateSearch' },
 }
-// The setting that switches a tool on or off for the organisation (Koios capabilities card).
-const KOIOS_TOOLS_SETTINGS_HASH = '#settings/ai/koios'
-
 // The row's choices: KOIOS-PANEL-2 `actions[]` (first = primary, rest = menu), else the
 // single `action` of the older envelope.
 const choicesOf = (s: KoiosAssistantSuggestion): KoiosAssistantAction[] =>
@@ -139,7 +143,9 @@ function AskKoiosButton({ suggestion, onAskKoios, t }: { suggestion: KoiosAssist
   const label = t('koios.assistant.askKoios')
   return (
     <Button size="sm" variant="ghost" iconOnly aria-label={label} title={label}
-      onClick={() => onAskKoios(t('koios.assistant.askIntent', { title: suggestion.title, body: suggestion.body }), contextRefsOf(suggestion))}>
+      // A question that fits the row's kind (task: status + choices; no-contact: draft a
+      // message; vacancy: find candidates); the generic line only when no kind copy exists.
+      onClick={() => onAskKoios(t(`koios.assistant.askIntentByKind.${suggestion.kind}`, { title: suggestion.title, body: suggestion.body, defaultValue: t('koios.assistant.askIntent', { title: suggestion.title, body: suggestion.body }) }), contextRefsOf(suggestion))}>
       <MessageSquare size={13} />
     </Button>
   )
@@ -153,8 +159,8 @@ function SuggestionRow({ suggestion, onAskKoios, onDone }: { suggestion: KoiosAs
   const [exec, setExec] = useState<ExecState>({ phase: 'idle' })
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '6px 0', borderTop: '1px solid var(--border)' }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, minWidth: 0 }}>
-        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, width: 18, height: 26, color: meta.color }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, width: 18, color: meta.color }}>
           <Icon size={13} />
         </span>
         {/* The record chip is the title AND the deep link; a suggestion without a record
@@ -245,9 +251,13 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec, onDone }: {
   const choices = choicesOf(suggestion)
   const primary: KoiosAssistantAction | undefined = choices[0]
   const capability: KoiosCapabilityTool | undefined = findToolCapability(capabilityTools, primary?.tool)
-  // The button text: the FE's own key first, then the server's human label, else "Uitvoeren".
-  const actionLabel = (a: KoiosAssistantAction) =>
-    a.label_key ? t(a.label_key, { defaultValue: a.label ?? t('koios.assistant.execute') }) : (a.label ?? t('koios.assistant.execute'))
+  // The button text says what the click DOES: the FE's own key, the server's human label,
+  // the registry's tool name ("Taak aanmaken", "Kandidaten zoeken"), and only then "Uitvoeren".
+  const actionLabel = (a: KoiosAssistantAction) => {
+    const registryLabel = findToolCapability(capabilityTools, a.tool)?.label_nl
+    const fallback = a.label || registryLabel || t('koios.assistant.execute')
+    return a.label_key ? t(a.label_key, { defaultValue: fallback }) : fallback
+  }
   const previewTitle = (a: KoiosAssistantAction) => (a.preview ?? []).filter(row => !isIdRow(row)).map(previewLine).join(' · ')
   const toolAllowed = (tool: string) => {
     const c = findToolCapability(capabilityTools, tool)
@@ -256,9 +266,13 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec, onDone }: {
   // KOIOS-PANEL-2 (Danny: "contact is contact"): the person's channels as three icons —
   // call, mail, and the conversation tab — when the envelope carries them.
   const contactRef = contextRefsOf(suggestion).find(r => r.contact && (r.contact.phone || r.contact.mobile || r.contact.email))
-  const contactPage = contactRef ? pageForResultRef(contactRef.type) : null
-  const disabledReason = capability?.enabled_for_tenant === false ? t('koios.assistant.disabledForTenant')
-    : capability?.enabled_for_me === false ? t('koios.assistant.disabledForMe') : null
+  // The message icon needs no contact data — a no-contact row's person opens on their
+  // Communicatie tab (where "Conversatie starten" lives) from the record ref alone.
+  const personRef = contactRef ?? (suggestion.kind === 'candidate_no_contact' ? contextRefsOf(suggestion).find(r => r.type === 'candidate' || r.type === 'contact') : undefined)
+  const personPage = personRef ? pageForResultRef(personRef.type) : null
+  // A tool switched off for the organisation or for this user is simply not offered
+  // (Danny 10-09: a chip beside a dead button adds nothing); the row keeps its other actions.
+  const primaryOffered = Boolean(primary) && capability?.enabled_for_tenant !== false && capability?.enabled_for_me !== false
   // After an executed action: the response's own landing spot, else the tool's follow-up
   // on the row's record (a search opens the vacancy's candidate-search tab).
   const landAfterExecute = (navigate?: NavigateHint) => {
@@ -318,30 +332,21 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec, onDone }: {
   const extra = choices.slice(1).filter(a => toolAllowed(a.tool))
   return (
     <>
-      {contactRef?.contact && (
-        <>
-          {(contactRef.contact.mobile || contactRef.contact.phone) && (
-            <Button size="sm" variant="ghost" iconOnly href={`tel:${contactRef.contact.mobile || contactRef.contact.phone}`}
-              aria-label={t('koios.assistant.call')} title={t('koios.assistant.call')}><Phone size={13} /></Button>
-          )}
-          {contactRef.contact.email && (
-            <Button size="sm" variant="ghost" iconOnly href={`mailto:${contactRef.contact.email}`}
-              aria-label={t('koios.assistant.email')} title={t('koios.assistant.email')}><Mail size={13} /></Button>
-          )}
-          {contactPage && (
-            <Button size="sm" variant="ghost" iconOnly onClick={() => openEntity(contactPage, contactRef.id, 'communication')}
-              aria-label={t('koios.assistant.message')} title={t('koios.assistant.message')}><MessageCircle size={13} /></Button>
-          )}
-        </>
+      {contactRef?.contact && (contactRef.contact.mobile || contactRef.contact.phone) && (
+        <Button size="sm" variant="ghost" iconOnly href={`tel:${contactRef.contact.mobile || contactRef.contact.phone}`}
+          aria-label={t('koios.assistant.call')} title={t('koios.assistant.call')}><Phone size={13} /></Button>
       )}
-      {primary && disabledReason && (
-        <a href={KOIOS_TOOLS_SETTINGS_HASH} className="no-underline" title={t('koios.assistant.settingsLink')}>
-          <SoftChip label={disabledReason} color="var(--color-warning)" />
-        </a>
+      {contactRef?.contact?.email && (
+        <Button size="sm" variant="ghost" iconOnly href={`mailto:${contactRef.contact.email}`}
+          aria-label={t('koios.assistant.email')} title={t('koios.assistant.email')}><Mail size={13} /></Button>
       )}
-      {primary && (
-        <Button size="sm" variant="secondary" onClick={() => stage(primary)} disabled={exec.phase === 'staging' || capsLoading || !!disabledReason}
-          title={disabledReason ?? previewTitle(primary) ?? capability?.label_nl ?? undefined}>
+      {personRef && personPage && (
+        <Button size="sm" variant="ghost" iconOnly onClick={() => openEntity(personPage, personRef.id, 'communication')}
+          aria-label={t('koios.assistant.message')} title={t('koios.assistant.message')}><MessageCircle size={13} /></Button>
+      )}
+      {primary && primaryOffered && (
+        <Button size="sm" variant="secondary" onClick={() => stage(primary)} disabled={exec.phase === 'staging' || capsLoading}
+          title={previewTitle(primary) || undefined}>
           {exec.phase === 'staging' ? <Spinner size={12} /> : null} {actionLabel(primary)}
         </Button>
       )}

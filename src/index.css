@@ -109,6 +109,14 @@
   /* #1F2937 measured 4.45:1 on the success fill — a hair under AA; caught by
      the new token-contrast CI gate the moment it existed (fase 3). */
   --color-on-success:    #111827;
+  /* SUCCESS-BUTTON-INK-1 (Danny 10-09, on "Markeer afgerond": "groen snap ik van
+     goedkeuren maar tekst moet dan toch wit zijn?"): a SOLID success button paints
+     this darker green (green-700, the success-text value) so WHITE ink clears AA at
+     5.02:1 — white on --color-success itself only reaches 3.3:1. The chip/border
+     colour --color-success and the "aan/gelukt" pastel pair keep Danny's exact
+     values; only Button variant="success" reads this pair. Fixed in both themes. */
+  --color-success-fill:    #15803D;
+  --color-on-success-fill: #FFFFFF;
   /* Text on the success-bg PASTEL (§4 "aan/gelukt" pair: saved buttons, on-state
      cards). Needs its OWN token: the success colour itself reads 3.0:1 on this bg
      (WCAG fail, Opus slotaudit review 20-08) and no single ink works on both the

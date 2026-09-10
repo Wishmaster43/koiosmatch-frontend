@@ -269,11 +269,15 @@
       "emptyState": "Niets dat nu je aandacht nodig heeft.",
       "askKoios": "In de chat afmaken",
       "askIntent": "{{body}} Wat stel je voor?",
+      "askIntentByKind": {
+        "task_overdue": "Taak \"{{title}}\" staat nog open. Wat is de stand en wat stel je voor: afronden, verzetten of contact opnemen?",
+        "candidate_no_contact": "Stel een kort bericht op voor {{title}} om het contact te hervatten. Context: {{body}}",
+        "vacancy_zero_applications": "Zoek geschikte kandidaten voor vacature \"{{title}}\" en licht je keuze toe.",
+        "opportunity_closing_soon": "Wat is de stand van kans \"{{title}}\" en wat is de volgende stap?",
+        "pending_action": "{{body}} Wat stel je voor?"
+      },
       "execute": "Uitvoeren",
       "createdTask": "Taak aangemaakt",
-      "disabledForTenant": "Uit voor jouw organisatie",
-      "disabledForMe": "Uit voor jou",
-      "settingsLink": "Instellen",
       "moreActions": "Meer acties",
       "call": "Bellen",
       "email": "Mailen",

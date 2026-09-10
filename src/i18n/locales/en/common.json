@@ -269,11 +269,15 @@
       "emptyState": "Nothing needs your attention right now.",
       "askKoios": "Finish in the chat",
       "askIntent": "{{body}} What do you suggest?",
+      "askIntentByKind": {
+        "task_overdue": "Task \"{{title}}\" is still open. What is its status and what do you suggest: complete, reschedule or get in touch?",
+        "candidate_no_contact": "Draft a short message to {{title}} to resume contact. Context: {{body}}",
+        "vacancy_zero_applications": "Find suitable candidates for vacancy \"{{title}}\" and explain your choice.",
+        "opportunity_closing_soon": "What is the status of opportunity \"{{title}}\" and what is the next step?",
+        "pending_action": "{{body}} What do you suggest?"
+      },
       "execute": "Execute",
       "createdTask": "Task created",
-      "disabledForTenant": "Off for your organisation",
-      "disabledForMe": "Off for you",
-      "settingsLink": "Configure",
       "moreActions": "More actions",
       "call": "Call",
       "email": "Email",

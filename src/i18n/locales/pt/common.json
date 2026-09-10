@@ -269,11 +269,15 @@
       "emptyState": "Nada precisa da sua atenção agora.",
       "askKoios": "Concluir no chat",
       "askIntent": "{{body}} O que propões?",
+      "askIntentByKind": {
+        "task_overdue": "A tarefa \"{{title}}\" continua aberta. Qual é o estado e o que propõe: concluir, reagendar ou contactar?",
+        "candidate_no_contact": "Escreva uma mensagem curta para {{title}} para retomar o contacto. Contexto: {{body}}",
+        "vacancy_zero_applications": "Procure candidatos adequados para a vaga \"{{title}}\" e justifique a escolha.",
+        "opportunity_closing_soon": "Qual é o estado da oportunidade \"{{title}}\" e qual é o próximo passo?",
+        "pending_action": "{{body}} O que propõe?"
+      },
       "execute": "Executar",
       "createdTask": "Tarefa criada",
-      "disabledForTenant": "Desativado para a sua organização",
-      "disabledForMe": "Desativado para si",
-      "settingsLink": "Configurar",
       "moreActions": "Mais ações",
       "call": "Ligar",
       "email": "E-mail",

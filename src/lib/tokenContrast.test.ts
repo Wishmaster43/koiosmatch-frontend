@@ -64,6 +64,8 @@ describe('house token pairs stay readable (defaults, light theme)', () => {
   it('on-danger and on-success match their audited fills', () => {
     expect(ratio(token('color-on-danger'), token('color-danger'))).toBeGreaterThanOrEqual(3)
     expect(ratio(token('color-on-success'), token('color-success'))).toBeGreaterThanOrEqual(4.5)
+    // SUCCESS-BUTTON-INK-1: white on the solid success button fill (Danny 10-09).
+    expect(ratio(token('color-on-success-fill'), token('color-success-fill'))).toBeGreaterThanOrEqual(4.5)
   })
 
   // The §4 "aan/gelukt" pair (success-bg fill + success border) carries TEXT via

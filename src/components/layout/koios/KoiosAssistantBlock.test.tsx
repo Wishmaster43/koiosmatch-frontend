@@ -25,7 +25,7 @@ vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEnti
 // enabled_for_* → offered or disabled with a reason). Mutable per test, real findToolCapability.
 type CapTool = { name: string; label_nl: string; confirm_required: boolean; enabled_for_me: boolean; enabled_for_tenant: boolean; default_enabled: boolean; connection_active: boolean | null; connection: null }
 const capTool = (name: string, over: Partial<CapTool> = {}): CapTool =>
-  ({ name, label_nl: name, confirm_required: true, enabled_for_me: true, enabled_for_tenant: true, default_enabled: true, connection_active: null, connection: null, ...over })
+  ({ name, label_nl: '', confirm_required: true, enabled_for_me: true, enabled_for_tenant: true, default_enabled: true, connection_active: null, connection: null, ...over })
 const DEFAULT_CAP_TOOLS: CapTool[] = [capTool('zoek_kandidaten', { label_nl: 'Kandidaten zoeken', confirm_required: false }), capTool('wijzig_taak'), capTool('maak_taak')]
 let capTools: CapTool[] = DEFAULT_CAP_TOOLS
 vi.mock('./useKoiosToolCapabilities', async (importOriginal) => ({
@@ -280,7 +280,8 @@ describe('KoiosAssistantBlock · KOIOS-ROW-2', () => {
     mockPost.mockResolvedValueOnce({ data: { status: 'staged', action: { id: 'pa-1', title: 'Kandidaten zoeken', preview: [{ label: 'functie', text: 'Verzorgende IG' }] } } })
     mockPost.mockResolvedValueOnce({ data: { status: 'executed', data: { gelukt: true } } })
     renderBlock()
-    fireEvent.click(await screen.findByRole('button', { name: /assistant\.execute/ }))
+    // The button says what it does: the registry's own tool name, not a bare "Uitvoeren".
+    fireEvent.click(await screen.findByRole('button', { name: 'Kandidaten zoeken' }))
     await screen.findByText(/pendingAction\.confirmed/)
     expect(mockPost).toHaveBeenNthCalledWith(1, '/ai/koios/actions/stage', { tool: 'zoek_kandidaten', input: { vacature_id: 'v1' } })
     expect(mockPost).toHaveBeenNthCalledWith(2, '/ai/koios/actions/pa-1/confirm')
@@ -296,7 +297,7 @@ describe('KoiosAssistantBlock · KOIOS-ROW-2', () => {
     mockPost.mockResolvedValueOnce({ data: { status: 'staged', action: { id: 'pa-2', title: 'Kandidaten zoeken', preview: [] } } })
     mockPost.mockResolvedValueOnce({ data: { status: 'executed', data: { navigate: { type: 'candidate', id: 'c9', tab: 'communication' } } } })
     renderBlock()
-    fireEvent.click(await screen.findByRole('button', { name: /assistant\.execute/ }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Kandidaten zoeken' }))
     await screen.findByText(/pendingAction\.confirmed/)
     expect(openEntity).toHaveBeenCalledWith('candidates', 'c9', 'communication')
   })
@@ -311,24 +312,26 @@ describe('KoiosAssistantBlock · KOIOS-ROW-2', () => {
     expect(mockPost).toHaveBeenCalledTimes(1)
   })
 
-  it('a tool switched off for the organisation renders Uitvoeren disabled with the reason and a link to the setting', async () => {
-    capTools = [capTool('maak_taak', { enabled_for_tenant: false })]
-    givenSuggestions([{ kind: 'candidate_no_contact', title: 'Sanne Kuipers', body: 'Bel Sanne Kuipers: 382 dagen geen contact.', refs: [{ type: 'candidate', id: 'c1', label: 'Sanne Kuipers' }], action: { tool: 'maak_taak', input: {} } }])
-    renderBlock()
-    const execute = await screen.findByRole('button', { name: /assistant\.execute/ })
-    expect(execute).toBeDisabled()
-    expect(screen.getByText('koios.assistant.disabledForTenant')).toBeInTheDocument()
-    expect(screen.getByText('koios.assistant.disabledForTenant').closest('a')).toHaveAttribute('href', '#settings/ai/koios')
-    fireEvent.click(execute)
+  it('a tool switched off for the organisation or for this user gets no Uitvoeren at all; the chat handoff stays', async () => {
+    capTools = [capTool('maak_taak', { enabled_for_tenant: false }), capTool('wijzig_taak', { enabled_for_me: false })]
+    givenSuggestions([
+      { kind: 'candidate_no_contact', title: 'Sanne Kuipers', body: 'Bel Sanne Kuipers: 382 dagen geen contact.', refs: [{ type: 'candidate', id: 'c1', label: 'Sanne Kuipers' }], action: { tool: 'maak_taak', input: {} } },
+      { kind: 'task_overdue', title: 'Bel Ahmed', body: 'x', refs: [], action: { tool: 'wijzig_taak', input: {} } },
+    ])
+    const onAskKoios = vi.fn()
+    renderBlock({ onAskKoios })
+    expect(await screen.findAllByRole('button', { name: /assistant\.askKoios/ })).toHaveLength(2)
+    expect(screen.queryByRole('button', { name: /assistant\.execute/ })).toBeNull()
+    expect(screen.queryByText(/disabledFor/)).toBeNull()
     expect(mockPost).not.toHaveBeenCalled()
   })
 
-  it('a tool switched off for this user says so', async () => {
-    capTools = [capTool('maak_taak', { enabled_for_me: false })]
-    givenSuggestions([{ kind: 'candidate_no_contact', title: 'Sanne Kuipers', body: 'x', refs: [], action: { tool: 'maak_taak', input: {} } }])
+  it('a no-contact row carries the message icon to the person\'s Communicatie tab without any contact data', async () => {
+    givenSuggestions([{ kind: 'candidate_no_contact', title: 'Sanne Kuipers', body: 'Bel Sanne Kuipers: 382 dagen geen contact.', refs: [{ type: 'candidate', id: 'c1', label: 'Sanne Kuipers' }], action: { tool: 'maak_taak', input: {} } }])
     renderBlock()
-    expect(await screen.findByRole('button', { name: /assistant\.execute/ })).toBeDisabled()
-    expect(screen.getByText('koios.assistant.disabledForMe')).toBeInTheDocument()
+    fireEvent.click(await screen.findByRole('button', { name: 'koios.assistant.message' }))
+    expect(openEntity).toHaveBeenCalledWith('candidates', 'c1', 'communication')
+    expect(screen.queryByRole('link', { name: 'koios.assistant.call' })).toBeNull()
   })
 })
 

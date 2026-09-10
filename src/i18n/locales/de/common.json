@@ -269,11 +269,15 @@
       "emptyState": "Im Moment ist nichts zu erledigen.",
       "askKoios": "Im Chat abschließen",
       "askIntent": "{{body}} Was schlägst du vor?",
+      "askIntentByKind": {
+        "task_overdue": "Aufgabe \"{{title}}\" ist noch offen. Wie ist der Stand und was schlägst du vor: abschließen, verschieben oder Kontakt aufnehmen?",
+        "candidate_no_contact": "Entwirf eine kurze Nachricht an {{title}}, um den Kontakt wieder aufzunehmen. Kontext: {{body}}",
+        "vacancy_zero_applications": "Suche passende Kandidaten für die Stelle \"{{title}}\" und begründe deine Auswahl.",
+        "opportunity_closing_soon": "Wie ist der Stand der Chance \"{{title}}\" und was ist der nächste Schritt?",
+        "pending_action": "{{body}} Was schlägst du vor?"
+      },
       "execute": "Ausführen",
       "createdTask": "Aufgabe erstellt",
-      "disabledForTenant": "Für deine Organisation ausgeschaltet",
-      "disabledForMe": "Für dich ausgeschaltet",
-      "settingsLink": "Einstellen",
       "moreActions": "Weitere Aktionen",
       "call": "Anrufen",
       "email": "E-Mail",
