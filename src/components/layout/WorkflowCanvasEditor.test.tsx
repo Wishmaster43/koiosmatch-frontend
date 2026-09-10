@@ -131,3 +131,18 @@ describe('WorkflowCanvasEditor · Run saves first (RUN-SAVES-FIRST-1)', () => {
     expect(api.post).not.toHaveBeenCalled()
   })
 })
+
+// RUN-SAVES-FIRST-1 refinement: a draft flipped to active and back is a draft again,
+// not an unsaved "inactive".
+describe('WorkflowCanvasEditor · status pill flips back to the server status', () => {
+  it('draft → active → back reads clean, without the unsaved suffix', async () => {
+    render(<WorkflowCanvasEditor workflow={workflow} onClose={vi.fn()} onSave={vi.fn()} />, { wrapper })
+    await screen.findByText('node-n1')
+    const pill = () => screen.getByText(/Actief|Inactief/).closest('button')!
+    fireEvent.click(pill())
+    expect(pill()).toHaveTextContent('(niet opgeslagen)')
+    fireEvent.click(pill())
+    expect(pill()).not.toHaveTextContent('(niet opgeslagen)')
+    expect(pill()).toHaveTextContent('Inactief')
+  })
+})

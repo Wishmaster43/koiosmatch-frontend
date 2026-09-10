@@ -120,7 +120,9 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
           name={name} onNameChange={setName}
           view={view} onViewChange={setView}
           trigger={trigger} scheduleConfig={scheduleConfig} onOpenSchedule={() => setShowSchedule(true)}
-          status={status} onToggleStatus={() => setStatus(s => s === 'active' ? 'inactive' : 'active')}
+          // Flipping back lands on the server's own non-active status (a draft
+          // stays a draft), so a double flip reads clean instead of "(niet opgeslagen)".
+          status={status} onToggleStatus={() => setStatus(s => s === 'active' ? (serverStatus === 'active' ? 'inactive' : serverStatus) : 'active')}
           statusUnsaved={status !== serverStatus}
           startInvalid={startInvalid}
           showLogs={showLogs} onToggleLogs={() => setShowLogs(s => !s)}
