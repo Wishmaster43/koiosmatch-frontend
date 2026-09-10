@@ -13,7 +13,7 @@ const PROBE_DEBOUNCE_MS = 500
  * request on the next edit; this is advisory only, the create 409 stays the
  * real gate. `keys` maps the three watched values onto the API's own body field
  * names, in order — pass a MODULE-SCOPE constant tuple so the reference stays
- * stable across renders (no eslint-disable needed for the effect deps).
+ * stable across renders (the effect deps then need no exemption).
  */
 export function useDuplicateProbe<TMatch>(
   path: string,
