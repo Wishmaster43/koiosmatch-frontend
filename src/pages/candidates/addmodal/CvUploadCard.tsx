@@ -12,29 +12,15 @@
  */
 import { useTranslation } from 'react-i18next'
 import { CheckCircle2, AlertTriangle, RotateCcw } from 'lucide-react'
-import { BTN_H } from '@/config/buttonMetrics'
 import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
 import Spinner from '@/components/ui/Spinner'
-import type { CvPhase } from './useCvParse'
-import type { CvPrefillResult } from './cvPrefill'
+import { ghostBtn } from './cvCardStyles'
+import type { CvCardBaseProps } from './useCvParse'
 import { cardHead, cardBox } from './fields'
 
-interface CvUploadCardProps {
-  phase: CvPhase
-  /** i18n key of the honest failure message, or null. */
-  errorKey: string | null
+interface CvUploadCardProps extends CvCardBaseProps {
   fileName: string | null
-  /** What the parse actually did to the form — only present once ready. */
-  summary: CvPrefillResult | null
-  onReset: () => void
 }
-
-// Ghost button used for cancel / retry / another-CV — one style, three labels.
-const ghostBtn = {
-  height: BTN_H, padding: '0 12px', fontSize: 12, borderRadius: 8, cursor: 'pointer',
-  border: '1px solid var(--border)', background: 'none', color: 'var(--text)',
-  display: 'inline-flex', alignItems: 'center', gap: 6,
-} as const
 
 // Presentational progress/result strip (see the module doc above): renders nothing while idle, only prefills the form, never saves.
 export default function CvUploadCard({ phase, errorKey, fileName, summary, onReset }: CvUploadCardProps) {

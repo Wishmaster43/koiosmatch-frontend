@@ -14,16 +14,11 @@
  * (§9): only the server is the duplicate authority — this is advisory, the create
  * 409 (useRestoreDuplicate's sibling flow) stays the real gate.
  */
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import api from '@/lib/api'
-import { queryClient } from '@/lib/queryClient'
-import { notifyError, notifySuccess } from '@/lib/notify'
-import type { Id } from '@/types/common'
 // The duplicate shape lives with the shared DuplicateNotice panel (SHARED-DUP-1);
 // re-exported here so candidate-internal importers keep their existing path.
 import type { DuplicateMatch } from '@/components/forms/DuplicateNotice'
-import { useDuplicateProbe as useDuplicateProbeBase } from '@/hooks/useDuplicateProbe'
+import { useDuplicateProbe as useDuplicateProbeBase, useRestoreArchivedDuplicate } from '@/hooks/useDuplicateProbe'
 export type { DuplicateMatch }
 
 // Module-scope so the tuple reference stays stable across renders (the shared
@@ -38,28 +33,16 @@ export function useDuplicateProbe(email: string, mobile: string, phone: string) 
   return useDuplicateProbeBase<DuplicateMatch>('/candidates/check-duplicate', CANDIDATE_DUP_KEYS, email, mobile, phone)
 }
 
-// Restore an archived duplicate via the per-id route (§10: een record = de
-// per-id-route). The list/stats caches have no row for it yet, so invalidate them;
-// the caller opens the record afterwards.
+// Restore an archived duplicate via the per-id route — delegates to the shared
+// hooks/useDuplicateProbe (DRY round 11); this wrapper only fixes entity/messages.
 export function useRestoreDuplicate() {
   const { t } = useTranslation('candidates')
-  const [restoring, setRestoring] = useState(false)
-
-  const restore = async (id: Id): Promise<boolean> => {
-    setRestoring(true)
-    try {
-      await api.post(`/candidates/${id}/restore`)
-      queryClient.invalidateQueries({ queryKey: ['candidates'] })
-      notifySuccess(t('duplicate.restored'))
-      return true
-    } catch (err) {
-      const status = (err as { response?: { status?: number } })?.response?.status
-      notifyError(status === 403 ? t('duplicate.restoreForbidden') : t('duplicate.restoreFailed'))
-      return false
-    } finally {
-      setRestoring(false)
-    }
-  }
-
-  return { restore, restoring }
+  return useRestoreArchivedDuplicate({
+    entity: 'candidates',
+    messages: {
+      restored: t('duplicate.restored'),
+      restoreForbidden: t('duplicate.restoreForbidden'),
+      restoreFailed: t('duplicate.restoreFailed'),
+    },
+  })
 }

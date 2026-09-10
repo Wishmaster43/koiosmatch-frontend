@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import api from '@/lib/api'
+import { queryClient } from '@/lib/queryClient'
+import { notifyError, notifySuccess } from '@/lib/notify'
+import type { Id } from '@/types/common'
 
 // Wait this long after the last keystroke before probing — long enough that a
 // normal typing burst never fires more than one request.
@@ -50,4 +53,39 @@ export function useDuplicateProbe<TMatch>(
   }, [path, keys, a, b, c])
 
   return { probeMatch: match, clearProbeMatch: () => setMatch(null) }
+}
+
+interface UseRestoreArchivedDuplicateOptions {
+  entity: 'candidates' | 'customers'
+  // Resolved by the caller's own t() (rule C) — never resolved in this shared hook.
+  messages: { restored: string; restoreForbidden: string; restoreFailed: string }
+}
+
+/**
+ * useRestoreArchivedDuplicate — restore an archived duplicate via the per-id
+ * route (§10: een record = de per-id-route), shared by candidates and
+ * customers (was two near-identical copies, DRY round 11). The list/stats
+ * caches have no row for it yet, so invalidate them; the caller opens the
+ * record afterwards.
+ */
+export function useRestoreArchivedDuplicate({ entity, messages }: UseRestoreArchivedDuplicateOptions) {
+  const [restoring, setRestoring] = useState(false)
+
+  const restore = async (id: Id): Promise<boolean> => {
+    setRestoring(true)
+    try {
+      await api.post(`/${entity}/${id}/restore`)
+      queryClient.invalidateQueries({ queryKey: [entity] })
+      notifySuccess(messages.restored)
+      return true
+    } catch (err) {
+      const status = (err as { response?: { status?: number } })?.response?.status
+      notifyError(status === 403 ? messages.restoreForbidden : messages.restoreFailed)
+      return false
+    } finally {
+      setRestoring(false)
+    }
+  }
+
+  return { restore, restoring }
 }

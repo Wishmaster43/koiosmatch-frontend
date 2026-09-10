@@ -13,8 +13,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifySuccess } from '@/lib/notify'
-// DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
-import { extractApiError } from '@/lib/extractApiError'
+import { useSubmitState } from '@/hooks/useSubmitState'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
 import { useAppointmentTypes } from '@/lib/useAppointmentTypes'
@@ -136,11 +135,9 @@ export function usePlanIntakeForm({
   const vacancyFallback = (vacancyId && !vacancyKnown)
     ? { value: String(vacancyId), label: (extraVacancy && String(extraVacancy.value) === String(vacancyId)) ? extraVacancy.label : t('common:loading') }
     : null
-  const [saving, setSaving] = useState(false)
   // 422 field errors (house pattern, mirrors AddCandidateModal/AddCustomerModal) +
   // a non-field fallback banner — replaces the old generic-toast-only handling.
-  const [errors, setErrors] = useState<Record<string, boolean>>({})
-  const [submitErr, setSubmitErr] = useState<string | null>(null)
+  const { saving, errors, submitErr, setSaving, resetErrors, failWith } = useSubmitState()
   const editing = !!existing
 
   // AXIS-MATRIX-2 preflight (mirrors MatchModal's match.create wiring, the
@@ -272,7 +269,7 @@ export function usePlanIntakeForm({
   const submit = async () => {
     if (!when || !type) return
     setSaving(true)
-    setErrors({}); setSubmitErr(null)
+    resetErrors()
     // MODALITY-PHONE-CLEAR-1 (Opus verifier, HIGH): force null for a phone
     // appointment regardless of form state — the detail row is hidden and has
     // nothing to submit, and a stale on-location/remote value must never reach
@@ -300,15 +297,7 @@ export function usePlanIntakeForm({
     } catch (err) {
       // Show field-level errors from 422 validation responses; fall back to the
       // server's message (or a generic one) so the user isn't left guessing.
-      const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
-      const apiErrors = e?.response?.data?.errors
-      if (apiErrors) {
-        const e2: Record<string, boolean> = {}
-        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
-        setErrors(e2)
-      } else {
-        setSubmitErr(extractApiError(err, t('common:errorGeneric')))
-      }
+      failWith(err, API_TO_FORM, t('common:errorGeneric'))
     } finally { setSaving(false) }
   }
 

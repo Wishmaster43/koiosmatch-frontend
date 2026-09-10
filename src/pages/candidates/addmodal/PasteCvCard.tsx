@@ -8,25 +8,13 @@
  */
 import { useTranslation } from 'react-i18next'
 import { CheckCircle2, AlertTriangle, RotateCcw } from 'lucide-react'
-import { BTN_H } from '@/config/buttonMetrics'
 import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
 import Spinner from '@/components/ui/Spinner'
-import type { CvPhase } from './useCvParse'
-import type { CvPrefillResult } from './cvPrefill'
+import { ghostBtn } from './cvCardStyles'
+import type { CvCardBaseProps } from './useCvParse'
 import { cardHead, cardBox } from './fields'
 
-interface PasteCvCardProps {
-  phase: CvPhase
-  errorKey: string | null
-  summary: CvPrefillResult | null
-  onReset: () => void
-}
-
-const ghostBtn = {
-  height: BTN_H, padding: '0 12px', fontSize: 12, borderRadius: 8, cursor: 'pointer',
-  border: '1px solid var(--border)', background: 'none', color: 'var(--text)',
-  display: 'inline-flex', alignItems: 'center', gap: 6,
-} as const
+type PasteCvCardProps = CvCardBaseProps
 
 // See the file's top doc above; renders nothing while idle, only once a paste has actually been submitted.
 export default function PasteCvCard({ phase, errorKey, summary, onReset }: PasteCvCardProps) {

@@ -2,9 +2,11 @@
  * useProfileGenerate — GENERATE-FIELDS-1: "Genereer met Koios" for the create
  * form's profile-text card. Builds `fields` from the modal's OWN filled values
  * (never a second source of truth) and calls the generic /ai/koios/generate
- * endpoint. Mirrors useGenerateDescription's status machine (§3A pattern reuse).
+ * endpoint. The open/status/concept/errorKey state machine is the shared
+ * useGenerateFlowState (DRY round 11, mirrors useGenerateDescription's own use of it).
  */
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
+import { useGenerateFlowState } from '@/hooks/useGenerateFlowState'
 import { generateFromFields } from './candidateGenerateApi'
 import { apiErrorKey } from '@/lib/extractApiError'
 import type { FormState } from '../AddCandidateModal'
@@ -28,14 +30,7 @@ function buildFields(form: FormState): Record<string, string> {
 
 // State machine for the modal's Generate-with-Koios popup: open/closed, generate status, the returned concept text, and error handling.
 export function useProfileGenerate(form: FormState) {
-  const [open, setOpen] = useState(false)
-  const [status, setStatus] = useState<GenerateStatus>('idle')
-  const [concept, setConcept] = useState('')
-  const [errorKey, setErrorKey] = useState<string | null>(null)
-
-  // Opens the popup and resets it to a fresh idle state, so a previous concept/error never leaks into the next open.
-  const openFlow = useCallback(() => { setOpen(true); setStatus('idle'); setConcept(''); setErrorKey(null) }, [])
-  const closeFlow = useCallback(() => { setOpen(false); setStatus('idle'); setConcept(''); setErrorKey(null) }, [])
+  const { open, status, concept, errorKey, openFlow, closeFlow, discard, setStatus, setConcept, setErrorKey } = useGenerateFlowState<GenerateStatus>('idle')
 
   // One-shot generate — never auto-applies; only the caller's explicit "apply" reaches the form.
   const generate = useCallback(async () => {
@@ -51,10 +46,7 @@ export function useProfileGenerate(form: FormState) {
       else if (httpStatus === 503) { setStatus('unavailable'); setErrorKey(apiErrorKey(err) ?? 'errors.koiosUnavailable') }
       else setStatus('error')
     }
-  }, [form])
-
-  // Discards the generated concept without touching the form; the caller decides whether to re-open or apply instead.
-  const discard = useCallback(() => { setConcept(''); setStatus('idle'); setErrorKey(null) }, [])
+  }, [form, setStatus, setConcept, setErrorKey])
 
   return { open, openFlow, closeFlow, status, concept, errorKey, generate, discard }
 }

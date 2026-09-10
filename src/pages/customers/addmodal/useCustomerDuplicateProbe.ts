@@ -22,14 +22,9 @@
  * adds vat_number/debtor_number to customer_dedupe_keys still gets the hard 409
  * on create (the real gate) — just no pre-warning on those extra keys.
  */
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import api from '@/lib/api'
-import { queryClient } from '@/lib/queryClient'
-import { notifyError, notifySuccess } from '@/lib/notify'
-import type { Id } from '@/types/common'
 import type { DuplicateMatch } from '@/components/forms/DuplicateNotice'
-import { useDuplicateProbe as useDuplicateProbeBase } from '@/hooks/useDuplicateProbe'
+import { useDuplicateProbe as useDuplicateProbeBase, useRestoreArchivedDuplicate } from '@/hooks/useDuplicateProbe'
 
 // Module-scope so the tuple reference stays stable across renders (the shared
 // hook depends on it — a fresh array literal per render would re-probe every time).
@@ -43,28 +38,16 @@ export function useCustomerDuplicateProbe(name: string, cocNumber: string, billi
   return useDuplicateProbeBase<DuplicateMatch>('/customers/check-duplicate', CUSTOMER_DUP_KEYS, name, cocNumber, billingEmail)
 }
 
-// Restore an archived duplicate via the per-id route (§10: een record = de
-// per-id-route). The list/stats caches have no row for it yet, so invalidate them;
-// the caller opens the record afterwards.
+// Restore an archived duplicate via the per-id route — delegates to the shared
+// hooks/useDuplicateProbe (DRY round 11); this wrapper only fixes entity/messages.
 export function useRestoreCustomerDuplicate() {
   const { t } = useTranslation('customers')
-  const [restoring, setRestoring] = useState(false)
-
-  const restore = async (id: Id): Promise<boolean> => {
-    setRestoring(true)
-    try {
-      await api.post(`/customers/${id}/restore`)
-      queryClient.invalidateQueries({ queryKey: ['customers'] })
-      notifySuccess(t('duplicate.restored'))
-      return true
-    } catch (err) {
-      const status = (err as { response?: { status?: number } })?.response?.status
-      notifyError(status === 403 ? t('duplicate.restoreForbidden') : t('duplicate.restoreFailed'))
-      return false
-    } finally {
-      setRestoring(false)
-    }
-  }
-
-  return { restore, restoring }
+  return useRestoreArchivedDuplicate({
+    entity: 'customers',
+    messages: {
+      restored: t('duplicate.restored'),
+      restoreForbidden: t('duplicate.restoreForbidden'),
+      restoreFailed: t('duplicate.restoreFailed'),
+    },
+  })
 }

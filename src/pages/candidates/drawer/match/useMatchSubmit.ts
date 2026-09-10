@@ -21,7 +21,7 @@ import api, { unwrap } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import { useAllSettings, getStringSetting } from '@/lib/settings/useAllSettings'
 import { notifyError, notifySuccess } from '@/lib/notify'
-import { extractApiError } from '@/lib/extractApiError'
+import { useSubmitState } from '@/hooks/useSubmitState'
 import { API_TO_FORM } from './helpers'
 import type { CustomerCascadeDetail } from '@/hooks/useCustomerCascade'
 import type { Id } from '@/types/common'
@@ -111,9 +111,7 @@ export function useMatchSubmit({
 }) {
   // 422 field errors (house pattern, mirrors AddCandidateModal/AddCustomerModal) +
   // a non-field fallback banner — replaces the old generic-toast-only handling.
-  const [saving, setSaving] = useState(false)
-  const [errors, setErrors] = useState<Record<string, boolean>>({})
-  const [submitErr, setSubmitErr] = useState<string | null>(null)
+  const { saving, errors, submitErr, setSaving, setErrors, setSubmitErr, resetErrors, failWith } = useSubmitState()
 
   // EDIT-MATCH-1: fetch the full record once — the candidate's embedded `matches`
   // row (MATCH-EMBED-1) carries none of the match/contract/financial fields.
@@ -214,7 +212,7 @@ export function useMatchSubmit({
     if (customerNotApplicable) { if (!branchId) { setErrors({ branchId: true }); return } }
     else if (!customerId) return
     setSaving(true)
-    setErrors({}); setSubmitErr(null)
+    resetErrors()
     const match = {
       // The server LOUDLY rejects these four fields on a klant-loos match (422) —
       // never send them at all rather than rely on the server to ignore them.
@@ -285,17 +283,8 @@ export function useMatchSubmit({
       onCreated(); onClose()
     } catch (err) {
       // Show field-level errors from 422 validation responses; fall back to the
-      // server's message (or a generic one, via the shared extractApiError) so
-      // the user isn't left guessing.
-      const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
-      const apiErrors = e?.response?.data?.errors
-      if (apiErrors) {
-        const e2: Record<string, boolean> = {}
-        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
-        setErrors(e2)
-      } else {
-        setSubmitErr(extractApiError(err, t('common:errorGeneric')))
-      }
+      // server's message (or a generic one) so the user isn't left guessing.
+      failWith(err, API_TO_FORM, t('common:errorGeneric'))
     } finally { setSaving(false) }
   }
 

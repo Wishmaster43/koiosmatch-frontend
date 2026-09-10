@@ -17,7 +17,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import api, { unwrap } from '@/lib/api'
-import type { ParsedCvFields } from './cvPrefill'
+import type { ParsedCvFields, CvPrefillResult } from './cvPrefill'
 
 // Poll cadence + ceiling. The parse is a Claude call over a whole PDF: normally
 // 10–40s, so 2s polling is responsive without hammering, and 90s is the point where
@@ -59,6 +59,20 @@ export const CV_ERROR_KEYS = {
 } as const
 
 export type CvPhase = 'idle' | 'uploading' | 'processing' | 'ready' | 'error'
+
+/**
+ * CvCardBaseProps — the props every CV-parse progress/result card shares
+ * (CvUploadCard, PasteCvCard — DRY round 11); CvUploadCard extends this with
+ * its own `fileName`.
+ */
+export interface CvCardBaseProps {
+  phase: CvPhase
+  /** i18n key of the honest failure message, or null. */
+  errorKey: string | null
+  /** What the parse actually did to the form — only present once ready. */
+  summary: CvPrefillResult | null
+  onReset: () => void
+}
 
 // Backend failure reasons (ParseCandidateCvJob + CvParsingService) → our messages.
 const REASON_KEYS: Record<string, string> = {

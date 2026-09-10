@@ -6,10 +6,12 @@
  * so this hook builds `fields` straight from the form's own current values.
  * Reuses the SAME api layer (resolveGenerationProfile/generateVacancyText) —
  * only the trait/field builders differ because the input shape differs
- * (VacancyCreateForm, not VacancyDetail).
+ * (VacancyCreateForm, not VacancyDetail). The open/status/concept/errorKey
+ * state machine is the shared useGenerateFlowState (DRY round 11).
  */
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useGenerateFlowState } from '@/hooks/useGenerateFlowState'
 import { resolveGenerationProfile, generateVacancyText } from '../data/vacancyGenerateApi'
 import type { GenerationTraits } from '../data/vacancyGenerateApi'
 import { apiErrorKey } from '@/lib/extractApiError'
@@ -58,12 +60,7 @@ function buildFields(f: GenerateFormFields): Record<string, string> {
 // profile-resolve query, the one-shot generate action, and its 404/402/503
 // error classification below.
 export function useGenerateDescription(fields: GenerateFormFields) {
-  const [open, setOpen] = useState(false)
-  const [status, setStatus] = useState<GenerateStatus>('idle')
-  const [concept, setConcept] = useState('')
-  // The house-mapped `common:errors.*` key for the current failure (apiErrorKey,
-  // §10 code contract), or null when the caller falls back to a status-only copy.
-  const [errorKey, setErrorKey] = useState<string | null>(null)
+  const { open, status, concept, errorKey, openFlow, closeFlow, discard, setStatus, setConcept, setErrorKey } = useGenerateFlowState<GenerateStatus>('idle')
 
   const traits = useMemo(() => buildTraits(fields), [fields])
 
@@ -74,10 +71,6 @@ export function useGenerateDescription(fields: GenerateFormFields) {
     enabled: open,
     staleTime: 60_000,
   })
-
-  // Open the flow — reset any previous concept so re-opening never shows stale text.
-  const openFlow = useCallback(() => { setOpen(true); setStatus('idle'); setConcept(''); setErrorKey(null) }, [])
-  const closeFlow = useCallback(() => { setOpen(false); setStatus('idle'); setConcept(''); setErrorKey(null) }, [])
 
   // Generate — a one-shot action; the concept never auto-applies, only the
   // caller's explicit onApply (via "Toepassen") reaches the form's description.
@@ -100,10 +93,7 @@ export function useGenerateDescription(fields: GenerateFormFields) {
       else if (httpStatus === 503) { setStatus('unavailable'); setErrorKey(apiErrorKey(err) ?? 'errors.koiosUnavailable') }
       else setStatus('error')
     }
-  }, [resolveQuery.data, fields])
-
-  // Discard the concept but keep the flow open so the recruiter can regenerate.
-  const discard = useCallback(() => { setConcept(''); setStatus('idle'); setErrorKey(null) }, [])
+  }, [resolveQuery.data, fields, setStatus, setConcept, setErrorKey])
 
   return {
     open, openFlow, closeFlow,
