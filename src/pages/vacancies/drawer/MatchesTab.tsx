@@ -17,7 +17,7 @@ import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusF
 import MatchListBody from '@/components/drawer/MatchListBody'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useApps } from '@/context/AppsContext'
-import { MatchCard } from '@/pages/matches/shared'
+import { MatchCard, matchCardRowProps } from '@/pages/matches/shared'
 import { useVacancyMatches } from '../hooks/useVacancyMatches'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
@@ -68,18 +68,8 @@ export default function MatchesTab({ vacancyId }: { vacancyId?: Id }) {
           return (
             <MatchCard
               key={m.id ?? i}
-              id={m.id} vacancyId={m.vacancyId} vacancyTitle={m.vacancy || '—'}
-              stageLabel={statusMeta?.label ?? m.stage} stageColor={statusMeta?.color ?? m.stageColor}
-              score={m.score}
-              helloflexLink={m.helloflexLink} shiftmanagerLink={m.shiftmanagerLink}
-              showHelloflex={showHelloflex} showShiftmanager={showShiftmanager}
-              otherPartyLabel={t('matches:cols.candidate')}
-              otherParty={{ page: 'candidates', id: m.candidateId ?? null, label: m.candidate || '' }}
-              contractType={m.contractType} contractForm={m.contractForm}
-              functionTitle={m.functionTitle} branchName={m.branchName} ownerName={m.owner}
-              startDate={m.startDate} endDate={m.endDate}
-              isClosed={statusMeta?.is_closed} archived={m.archived}
-              collapsible flatRow leadWithOtherParty showVacancyColumn={false}
+              {...matchCardRowProps(m, { statusMeta, showHelloflex, showShiftmanager, otherPartyLabel: t('matches:cols.candidate') })}
+              contractForm={m.contractForm} showVacancyColumn={false}
             />
           )
         }}

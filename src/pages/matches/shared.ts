@@ -6,6 +6,8 @@
  * extend this list deliberately, never bypass it with a deep import.
  */
 export { default as MatchCard } from './MatchCard'
+// Shared MatchCard row-props builder, joined by the customer/vacancy MatchesTab (DRY round 11, CUSTTABS2).
+export { matchCardRowProps } from './matchCardRowProps'
 export { deriveMatchAdvice } from './data/matchAdvice'
 export { mapMatch } from './hooks/useMatches'
 export { computeMatchExpiry } from './matchExpiry'

@@ -8,7 +8,7 @@ import type { ExistingAppointment } from '@/pages/candidates/shared'
 import type { VacancyAppointmentRow } from '@/types/vacancyAppointment'
 import type { Id } from '@/types/common'
 
-interface EditingAppointment { candidateId: Id; appt: ExistingAppointment }
+export interface EditingAppointment { candidateId: Id; appt: ExistingAppointment }
 
 interface UseAppointmentEditingProps {
   /** React-query key array for the appointments list (e.g., ['vacancies', vacancyId, 'appointments'] or ['customers', customerId, 'appointments']). */

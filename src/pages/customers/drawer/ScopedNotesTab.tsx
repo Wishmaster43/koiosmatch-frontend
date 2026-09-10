@@ -11,18 +11,13 @@
  * CUSTTABS) so this tab fires exactly the one widened note-types request it
  * always did.
  */
-import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import NotesTabJs from '@/components/drawer/tabs/NotesTab'
 import { useNotesTabContent } from '@/hooks/useNotesTabContent'
 import { useNoteTypesFor } from '@/lib/useNoteTypes'
 import type { NoteTypeEntity } from '@/lib/useNoteTypes'
+import CustomerNotesView from './CustomerNotesView'
 import { useScopedCustomerNotes } from '../hooks/useCustomerDrawerData'
 import type { Id } from '@/types/common'
-
-type AnyProps = Record<string, unknown>
-// Still-untyped JS UI helper — accept any props at the boundary.
-const NotesTab = NotesTabJs as unknown as ComponentType<AnyProps>
 
 // Location/department-scoped notes tab: every note is pinned to this exact scope id.
 export default function ScopedNotesTab({ scope, id, customerId }: {
@@ -67,22 +62,10 @@ export default function ScopedNotesTab({ scope, id, customerId }: {
     return <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('scopedList.loadError')}</div>
   }
   return (
-    <NotesTab
-      notes={notes} onAddNote={addNote}
-      popout={customerId ? { entity: 'customer', id: customerId } : undefined}
-      onEditNote={(i: number, payload: { type: string; title: string; body: string; language?: string }) => editNote(i, payload)}
-      onDeleteNote={(i: number) => deleteNote(i)}
-      noteTypes={noteTypes} chipTypes={chipTypes}
-      authorInitials={authorInitials}
-      showTimeline={false} showConversations={false}
-      labels={{
-        notes: t('notes.notes'), newNote: t('notes.newNote'), type: t('notes.type'),
-        save: t('notes.save'), cancel: t('notes.cancel'), edit: t('notes.edit'),
-        notesEmpty: t('notes.notesEmpty'),
-        notePlaceholder: () => t('notes.notePlaceholder'),
-        searchPlaceholder: t('notes.searchPlaceholder'),
-        deleteNote: t('notes.deleteNote'), deleteConfirm: t('notes.deleteConfirm'),
-      }}
+    <CustomerNotesView
+      notes={notes} addNote={addNote} editNote={editNote} deleteNote={deleteNote}
+      customerId={customerId} noteTypes={noteTypes} chipTypes={chipTypes}
+      authorInitials={authorInitials} t={t}
     />
   )
 }

@@ -16,6 +16,8 @@ import { useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useTextPopoutDraft } from '@/pages/popout/shared'
 import SharedTextPopoutBody from './SharedTextPopoutBody'
+// Shared "unknown record" error shell, joined by CustomerContactTextPopout (DRY round 11, CUSTTABS2).
+import { unknownRecordPopoutBody } from './unknownRecordPopoutBody'
 import { useDepartmentTextLite, patchDepartmentText } from '../hooks/useCustomerTextPopout'
 import { textPopoutTopic, parseDepartmentPopoutId } from '@/lib/secondScreen'
 
@@ -50,13 +52,7 @@ export default function CustomerDepartmentTextPopout({ id }: { id: string | unde
   // A malformed/legacy id (no customer+department pair) is an honest "unknown
   // record" state, never a silent wrong fetch (§3).
   if (!parsed) {
-    return (
-      <SharedTextPopoutBody
-        loading={false} error onRetry={reload}
-        loadingLabel="" errorLabel={t('popout.loadError')} retryLabel={t('common:error.retry')}
-        name="" subtitle="" text="" dirty={false} onChange={() => {}} onSave={async () => false}
-      />
-    )
+    return unknownRecordPopoutBody(t, reload)
   }
 
   return (

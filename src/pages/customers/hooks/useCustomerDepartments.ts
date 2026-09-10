@@ -12,7 +12,10 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { mapDepartment } from '../data/mapCustomer'
-import { useEntityChangeListener } from '@/hooks/useEntityChangeListener'
+// Shared mount-effect + change-event refetch tail (archived list only — the live
+// list below keeps its own raw addEventListener), joined by useCustomerContacts/
+// useCustomerLocations (DRY round 11, CUSTTABS2).
+import { useAbortableListLoad } from './useAbortableListLoad'
 import type { Department, ApiDepartment } from '@/types/customer'
 import type { Id } from '@/types/common'
 import type { DeleteResult } from './subEntityDelete'
@@ -173,11 +176,12 @@ export function useArchivedCustomerDepartments(customerId: Id | undefined, activ
       .catch(() => { /* the toggle simply shows nothing rather than crashing (§3) */ })
       .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [customerId, active])
-  // Load once (and on customerId/active change), aborting any in-flight request on cleanup.
-  useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
-
-  // Refetch whenever another part of the app (archive/restore, bulk import) changes departments.
-  useEntityChangeListener(DEPARTMENTS_CHANGED_EVENT, load)
+  // Load once (and on customerId/active change, aborting a stale in-flight request);
+  // also refetches whenever another part of the app (archive/restore, bulk import)
+  // changes departments — shared with useCustomerContacts/useCustomerLocations
+  // (DRY round 11, CUSTTABS2). The LIVE list above keeps its own raw
+  // addEventListener wiring — a real, measured difference (notDone).
+  useAbortableListLoad(load, DEPARTMENTS_CHANGED_EVENT)
 
   return { departments, loading }
 }

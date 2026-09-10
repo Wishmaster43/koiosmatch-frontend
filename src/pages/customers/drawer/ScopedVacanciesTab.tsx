@@ -23,8 +23,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
-import { Pencil } from 'lucide-react'
-import StatusPill from '@/components/ui/StatusPill'
 import EntityLink from '@/components/ui/EntityLink'
 import { useNavigation } from '@/context/NavigationContext'
 import { useAuth } from '@/context/AuthContext'
@@ -35,10 +33,11 @@ import { useAllSettings, getStringSetting, useSettingsLoaded } from '@/lib/setti
 import api, { unwrapList } from '@/lib/api'
 import { mapVacancyRow } from '../hooks/useCustomerDrawerData'
 import type { VacancyRow } from '../hooks/useCustomerDrawerData'
+// Shared seed-status state + status/applications/pencil columns, joined by VacanciesTab (DRY round 11, CUSTTABS2).
+import { useSeedVacancyStatusOptions } from '../hooks/useSeedVacancyStatusOptions'
+import { vacancyStatusAndActionColumns } from './vacancyListColumns'
 import type { Id } from '@/types/common'
 import type { Column } from '@/components/ui/DataTable'
-import { Mono } from '@/components/ui/typography'
-import Button from '@/components/ui/Button'
 
 
 // Index signature (mirrors MatchStatus in useMatchStatuses.ts): lets this list feed
@@ -75,14 +74,8 @@ export default function ScopedVacanciesTab({ scope, id, customerId, customerName
   const queryClient = useQueryClient()
   const paramName = scope === 'department' ? 'customer_department_id' : 'customer_location_id'
   const [adding, setAdding] = useState(false)
-  // Translate every seed label in the LAZY state initialiser (per-value key, Dutch
-  // literal as fallback) so a failed/empty lookup never leaves a Dutch island in the
-  // status filter, and the map runs once instead of on every render.
-  const [statusOptions, setStatusOptions] = useState<StatusOpt[]>(() =>
-    SEED_STATUSES.map(s => ({ ...s, label: t(`lookupSeeds.vacancyStatuses.${s.value}`, { defaultValue: s.label }) })))
-  // Has the REAL lookup answered? The seed list must never decide the default
-  // selection — mirrors VacanciesTab's own guard (uuid vs seed-slug mismatch).
-  const [resolved, setResolved] = useState(false)
+  // Seeded-until-resolved status state, shared with VacanciesTab (DRY round 11, CUSTTABS2).
+  const { statusOptions, setStatusOptions, resolved, setResolved } = useSeedVacancyStatusOptions(t, SEED_STATUSES)
   // Tenant default for this filter — the same setting the customer-level tab reads.
   const settings = useAllSettings()
   const settingsLoaded = useSettingsLoaded()
@@ -98,34 +91,16 @@ export default function ScopedVacanciesTab({ scope, id, customerId, customerName
       if (opts.length) setStatusOptions(opts)
       setResolved(true)
     }).catch(() => setResolved(true))
-  }, [])
+    // setStatusOptions/setResolved are stable useState setters (now returned by the
+    // shared useSeedVacancyStatusOptions hook) — listing them satisfies exhaustive-deps
+    // without ever re-running this effect on a render.
+  }, [setStatusOptions, setResolved])
 
   const columns: Column<VacancyRow>[] = [
     { key: 'title', header: t('vacancies.col.title'), sortable: true, sortValue: v => v.title,
       render: v => <EntityLink tone="neutral" page="vacancies" id={v.id}>{v.title}</EntityLink> },
-    // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
-    { key: 'status', header: t('vacancies.col.status'), render: v => <StatusPill label={v.status.label} color={v.status.color || '#9CA3AF'} /> },
-    // K7c/S-custcount-1: ghost-button deep link to this vacancy's own Sollicitaties
-    // (applicants) tab — mirrors the customer-level VacanciesTab's own column.
-    { key: 'applications', header: t('vacancies.col.applications'), align: 'right', sortable: true, sortValue: v => v.applications,
-      render: v => (
-        <Button variant="ghost" size="sm" aria-label={t('vacancies.col.applicationsOpen')}
-          onClick={e => { e.stopPropagation(); openEntity('vacancies', v.id, 'applicants') }}
-          style={{ padding: 0, height: 'auto' }}>
-          <Mono style={{ fontSize: 12 }}>{v.applications}</Mono>
-        </Button>
-      ) },
-    // K7b: row pencil opening the vacancy's own drawer for editing (fields edit
-    // in-place there; no separate edit modal exists, so no fake affordance).
-    ...(canEditVacancies ? [{
-      key: 'actions', header: '', align: 'right' as const,
-      render: (v: VacancyRow) => (
-        <Button variant="ghost" size="sm" iconOnly onClick={e => { e.stopPropagation(); openEntity('vacancies', v.id) }}
-          title={t('vacancies.editVacancy')} aria-label={t('vacancies.editVacancy')}>
-          <Pencil size={12} />
-        </Button>
-      ),
-    }] : []),
+    // Status/applications/pencil columns, shared with VacanciesTab (DRY round 11, CUSTTABS2).
+    ...vacancyStatusAndActionColumns(t, { openEntity, canEditVacancies }),
   ]
 
   return (

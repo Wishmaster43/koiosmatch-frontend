@@ -54,12 +54,14 @@ import { useCustomFields } from '@/lib/useCustomFields'
 // SOLLICITATIES-SCOPE-1 (Danny asked 3x at customer level, then again here): the
 // location's own Sollicitaties sub-tab — reuses the shared CustomerApplicationsList
 // (its `vacancyIds` mode) fed by this location's OWN vacancy ids.
-// SUBENTITEIT-DELETE-1: the honest disabled-trash + 409-race counts dialog.
-import InUseCountsDialog from './InUseCountsDialog'
+// SUBENTITEIT-DELETE-1: the honest disabled-trash + 409-race counts dialog,
+// shared with DepartmentDetail (DRY round 11, CUSTTABS2).
+import SubEntityArchiveDialogs from './SubEntityArchiveDialogs'
 // Delete handler pattern, shared with DepartmentDetail (clone [2]).
 import { handleSubEntityDelete } from '../hooks/subEntityDelete'
 // Shared SubTabBar tab-list shape, joined by DepartmentDetail/ContactDetail (DRY round 11, CUSTDETAIL).
-import { buildSubEntityTabs } from '../hooks/subEntityTabs'
+// scopedSubEntityTabs: the ten scoped entries, joined by DepartmentDetail (DRY round 11, CUSTTABS2).
+import { buildSubEntityTabs, scopedSubEntityTabs } from '../hooks/subEntityTabs'
 // Shared merge-modal onClose/onMerged wiring, joined by DepartmentDetail (DRY round 11, CUSTDETAIL).
 import { mergeModalCallbacks } from '../hooks/mergeModalCallbacks'
 // Shared department-mutation callback prop shape, also used by LocationsTab (DRY round 11, CUSTDETAIL).
@@ -280,34 +282,14 @@ export default function LocationDetail({
       )}
 
       {/* Sub-tab strip — same shared bar as the candidate Communicatie tab; short labels.
-          Tab list built by the shared buildSubEntityTabs (DRY round 11, CUSTDETAIL) — same
-          shape as DepartmentDetail/ContactDetail's own call, see that helper's doc comment. */}
+          Tab list built by the shared buildSubEntityTabs (DRY round 11, CUSTDETAIL); the
+          scoped entries are the shared scopedSubEntityTabs (DRY round 11, CUSTTABS2) — this
+          location prepends its own leading 'departments' entry (a department has none) —
+          same shape as DepartmentDetail/ContactDetail's own call, see that helper's doc comment. */}
       <SubTabBar
         tabs={buildSubEntityTabs({
           first: { id: 'address', label: t('locations.detail.addressTitle') },
-          scoped: [
-            { id: 'departments', label: t('drawer.tabs.departments') },
-            { id: 'contacts', label: t('drawer.tabs.contacts') },
-            // SCOPED-LIST-TAB-1: read-only lists scoped to this location (§3A shared tab).
-            { id: 'vacancies', label: t('drawer.tabs.vacancies') },
-            // SOLLICITATIES-SCOPE-1: reuses the applications page's own title key —
-            // already carries full five-locale parity, verified in c0e0d900.
-            { id: 'applications', label: t('applications:title') },
-            // NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1: reuse the existing top-level
-            // drawer.tabs.notes/documents keys (already five-locale complete) —
-            // right after Sollicitaties, per Danny's ask.
-            { id: 'notes', label: t('drawer.tabs.notes') },
-            // K-288: linked-notes feed's own sub-tab, right after Notities.
-            { id: 'linkedNotes', label: t('notes.linkedNotes') },
-            { id: 'documents', label: t('drawer.tabs.documents') },
-            { id: 'matches', label: t('drawer.tabs.matches') },
-            // SCOPED-LIST-TAB-1: reuses the existing top-level drawer.tabs.opportunities
-            // key (already five-locale complete) — right after Matches, per Danny's ask.
-            { id: 'opportunities', label: t('drawer.tabs.opportunities') },
-            // TAKEN-OP-LOCATIE-1: TaskLinkResolver already knows 'customer_location' → task_links.
-            { id: 'tasks', label: t('drawer.tabs.tasks') },
-            ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
-          ],
+          scoped: [{ id: 'departments', label: t('drawer.tabs.departments') }, ...scopedSubEntityTabs(t, customFieldDefs)],
           // TIJDLIJN-SUBDRILL-1/DD-FE-6: see buildSubEntityTabs' own doc comment.
           timeline: { show: customerId != null, label: t('drawer.tabs.timeline') },
           // EXTRACT-1: this location shows Koppelingen ALWAYS (§3A/§11) — the shared
@@ -351,11 +333,8 @@ export default function LocationDetail({
           others={locations.map(x => ({ id: x.id, name: x.name }))}
           {...mergeModalCallbacks(setMerging, onMerged)} />
       )}
-      {dialog}
-      {/* ARCHIVE-SUBENTITY-1: "kan niet verwijderen, wél archiveren" — the 409-race
-          offers archiving as the way out; no second confirm (see archiveNow's doc). */}
-      <InUseCountsDialog open={blockedCounts != null} counts={blockedCounts ?? {}} onClose={() => setBlockedCounts(null)}
-        onArchive={() => { setBlockedCounts(null); void archiveNow() }} archiving={archiving} />
+      <SubEntityArchiveDialogs dialog={dialog} blockedCounts={blockedCounts} setBlockedCounts={setBlockedCounts}
+        archiveNow={archiveNow} archiving={archiving} />
     </div>
   )
 }

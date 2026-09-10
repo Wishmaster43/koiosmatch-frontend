@@ -5,12 +5,14 @@
  * add/update/remove, reconciled with the server row; reverts + toasts on failure
  * (mirrors usePriceAgreements — one shared shape for entity sub-resource CRUD).
  */
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { mapLocation } from '../data/mapCustomer'
-import { useEntityChangeListener } from '@/hooks/useEntityChangeListener'
+// Shared mount-effect + change-event refetch tail, joined by useCustomerContacts
+// (live + archived) and useCustomerDepartments (archived) (DRY round 11, CUSTTABS2).
+import { useAbortableListLoad } from './useAbortableListLoad'
 import type { Location, ApiLocation } from '@/types/customer'
 import type { Id } from '@/types/common'
 import type { DeleteResult } from './subEntityDelete'
@@ -124,11 +126,9 @@ export function useCustomerLocations(customerId: Id | undefined) {
       .catch(err => { if (err?.code !== 'ERR_CANCELED' && !signal?.aborted) setError(true) })
       .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [customerId])
-  useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
-
-  // ARCHIVE-SUBENTITY-1: refetch when an out-of-tree writer (archive/restore/merge,
-  // fired from deep inside LocationDetail) changed this list.
-  useEntityChangeListener(LOCATIONS_CHANGED_EVENT, load)
+  // Mount-effect + refetch-on-change tail (archive/restore/merge, fired from deep
+  // inside LocationDetail), shared with useCustomerContacts (DRY round 11, CUSTTABS2).
+  useAbortableListLoad(load, LOCATIONS_CHANGED_EVENT)
 
   // Create — optimistic row with a temp id, swapped for the server row on success.
   // Only the Add-modal's create path calls this (inline edits go through `update`
@@ -255,11 +255,11 @@ export function useArchivedCustomerLocations(customerId: Id | undefined, active:
       .catch(() => { /* the toggle simply shows nothing rather than crashing (§3) */ })
       .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [customerId, active])
-  // Loads once on mount/dependency change; the AbortController cancels an in-flight request if `load`'s identity changes before it resolves.
-  useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
-
-  // Also refetches when another hook instance archives/restores/merges a location elsewhere (LOCATIONS_CHANGED_EVENT), keeping this archived-only view in sync with the live list.
-  useEntityChangeListener(LOCATIONS_CHANGED_EVENT, load)
+  // Loads once on mount/dependency change (aborting a stale in-flight request) and
+  // also refetches when another hook instance archives/restores/merges a location
+  // elsewhere (LOCATIONS_CHANGED_EVENT) — shared with useCustomerContacts/
+  // useCustomerDepartments (DRY round 11, CUSTTABS2).
+  useAbortableListLoad(load, LOCATIONS_CHANGED_EVENT)
 
   return { locations, loading }
 }

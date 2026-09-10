@@ -63,6 +63,8 @@ import { getCountryOptions } from '@/lib/countries'
 import { useCustomerSources } from '@/lib/useCustomerSources'
 import EditableRichTextField from './EditableRichTextField'
 import { buildCustomerAdviceInsights } from './customerAiInsights'
+// Shared 'address' composite field entry, joined by LocationAddressTab (DRY round 11, CUSTTABS2).
+import { addressFieldGroup } from './addressFieldGroup'
 import type { Customer } from '@/types/customer'
 
 // The customer overview tab: grouped field cards.
@@ -170,16 +172,7 @@ export default function OverviewTab({ c, onSave, statuses = [] }: { c: Customer;
     // customers table had ONLY `city`, so this block was one lonely row; it now mirrors
     // the location/candidate exactly: street/no/suffix/postcode/city collapse into ONE
     // composed line in read mode and expand to loose fields while editing.
-    { key: 'address', label: gAddress, type: 'address', group: gAddress,
-      addressFields: [
-        { key: 'street', label: t('locations.detail.street'), type: 'text' },
-        { key: 'houseNumber', label: t('locations.detail.houseNumber'), type: 'text' },
-        { key: 'houseNumberSuffix', label: t('locations.detail.houseNumberSuffix'), type: 'text' },
-        // LANE-I1b: optional second address line.
-        { key: 'addressLine2', label: t('address.addressLine2'), type: 'text' },
-        { key: 'postalCode', label: t('locations.detail.postalCode'), type: 'text' },
-        { key: 'city', label: t('overview.city'), type: 'text' },
-      ] },
+    addressFieldGroup(t, { groupLabel: gAddress, cityLabel: t('overview.city') }),
     // Searchable pickers, not free text. Country stores the ISO-2 CODE (see the
     // comment above countryOptions) — the option value must stay code-based here.
     { key: 'state',   label: t('locations.detail.state'),   type: 'select', options: provinceOptions, group: gAddress },

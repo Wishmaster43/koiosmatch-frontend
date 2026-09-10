@@ -19,6 +19,8 @@ import LocationContactSection from './LocationContactSection'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import LocationBranchSection from './LocationBranchSection'
 import { kvkValue, vatValue } from '@/components/drawer/contactLinks'
+// Shared 'address' composite field entry, joined by OverviewTab (DRY round 11, CUSTTABS2).
+import { addressFieldGroup } from './addressFieldGroup'
 import { useIdentifierValidation } from '@/hooks/useIdentifierValidation'
 import { buildLocationAdviceInsights } from './locationAiInsights'
 import { isPrimaryForLocation } from '../hooks/useCustomerContacts'
@@ -127,16 +129,7 @@ export default function LocationAddressTab({
   // fields while editing; state/country stay their own rows.
   const generalFields: FieldRow[] = [
     { key: 'name', label: t('locations.detail.name'), type: 'text', group: t('overview.details') },
-    { key: 'address', label: t('subModal.groups.address'), type: 'address', group: t('subModal.groups.address'),
-      addressFields: [
-        { key: 'street', label: t('locations.detail.street'), type: 'text' },
-        { key: 'houseNumber', label: t('locations.detail.houseNumber'), type: 'text' },
-        { key: 'houseNumberSuffix', label: t('locations.detail.houseNumberSuffix'), type: 'text' },
-        // LANE-I1b: optional second address line.
-        { key: 'addressLine2', label: t('address.addressLine2'), type: 'text' },
-        { key: 'postalCode', label: t('locations.detail.postalCode'), type: 'text' },
-        { key: 'city', label: t('locations.detail.city'), type: 'text' },
-      ] },
+    addressFieldGroup(t, { groupLabel: t('subModal.groups.address'), cityLabel: t('locations.detail.city') }),
     // Searchable pickers, not free text (Danny 28-07). NOTE the value format: unlike the
     // candidate, a location stores the country NAME ("Nederland"), not an ISO-2 code.
     { key: 'state', label: t('locations.detail.state'), type: 'select', options: provinceOptions, group: t('subModal.groups.address') },

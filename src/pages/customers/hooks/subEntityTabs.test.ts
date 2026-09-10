@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { buildSubEntityTabs } from './subEntityTabs'
+import { buildSubEntityTabs, scopedSubEntityTabs } from './subEntityTabs'
+import type { TFunction } from 'i18next'
+import type { CustomFieldDef } from '@/lib/useCustomFields'
+
+// Identity translator — asserts the KEYS this shared unit resolves, not any locale copy.
+const t = ((key: string) => key) as unknown as TFunction
 
 describe('buildSubEntityTabs', () => {
   it('orders first, then scoped, then timeline, then links — all conditional tails shown', () => {
@@ -33,5 +38,23 @@ describe('buildSubEntityTabs', () => {
     })
 
     expect(tabs.map(x => x.id)).toEqual(['address', 'links'])
+  })
+})
+
+describe('scopedSubEntityTabs', () => {
+  it('orders the ten scoped entries and omits Extra without custom fields (DepartmentDetail/LocationDetail shared list)', () => {
+    const tabs = scopedSubEntityTabs(t, [])
+    expect(tabs.map(x => x.id)).toEqual([
+      'contacts', 'vacancies', 'applications', 'notes', 'linkedNotes',
+      'documents', 'matches', 'opportunities', 'tasks',
+    ])
+  })
+
+  it('appends Extra only when the tenant has defined custom fields (§3A(f))', () => {
+    const tabs = scopedSubEntityTabs(t, [{ key: 'x' } as unknown as CustomFieldDef])
+    expect(tabs.map(x => x.id)).toEqual([
+      'contacts', 'vacancies', 'applications', 'notes', 'linkedNotes',
+      'documents', 'matches', 'opportunities', 'tasks', 'extra',
+    ])
   })
 })

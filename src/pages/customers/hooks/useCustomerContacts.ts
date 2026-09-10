@@ -22,13 +22,15 @@
  *     backend demotes the previous primary of that ONE department only.
  * Anything that shows more than one on one screen must say which is which (ContactsPanel does).
  */
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { toLinkedinSlug } from '@/components/drawer/contactLinks'
 import { mapContact } from '../data/mapCustomer'
-import { useEntityChangeListener } from '@/hooks/useEntityChangeListener'
+// Shared mount-effect + change-event refetch tail, joined by useCustomerLocations (live)
+// and useCustomerLocations/useCustomerDepartments (archived) (DRY round 11, CUSTTABS2).
+import { useAbortableListLoad } from './useAbortableListLoad'
 import type { Contact, ApiContact } from '@/types/customer'
 import type { Id } from '@/types/common'
 
@@ -288,10 +290,9 @@ export function useCustomerContacts(customerId: Id | undefined) {
       .catch(err => { if (err?.code !== 'ERR_CANCELED' && !signal?.aborted) setError(true) })
       .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [customerId])
-  useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
-
-  // Refetch when an out-of-tree writer (the merge modal) changed this list.
-  useEntityChangeListener(CONTACTS_CHANGED_EVENT, load)
+  // Mount-effect + refetch-on-change tail (the merge modal changing this list
+  // out-of-tree), shared with useCustomerLocations (DRY round 11, CUSTTABS2).
+  useAbortableListLoad(load, CONTACTS_CHANGED_EVENT)
 
   // Create — optimistic row with a temp id, swapped for the server row on success.
   // Only the Add-modal's create path calls this (couple/uncouple + inline edits go
@@ -392,11 +393,10 @@ export function useArchivedCustomerContacts(customerId: Id | undefined, active: 
       .catch(() => { /* the toggle simply shows nothing rather than crashing (§3) */ })
       .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [customerId, active])
-  // Load archived contacts on mount and whenever the toggle/customer changes; aborts a stale in-flight request.
-  useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
-
-  // Refetch archived contacts when another part of the app dispatches CONTACTS_CHANGED_EVENT (e.g. the merge modal).
-  useEntityChangeListener(CONTACTS_CHANGED_EVENT, load)
+  // Load archived contacts on mount and whenever the toggle/customer changes; aborts a
+  // stale in-flight request. Also refetches on CONTACTS_CHANGED_EVENT (e.g. the merge
+  // modal) — shared with useCustomerLocations/useCustomerDepartments (DRY round 11, CUSTTABS2).
+  useAbortableListLoad(load, CONTACTS_CHANGED_EVENT)
 
   return { contacts, loading }
 }

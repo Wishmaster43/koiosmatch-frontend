@@ -5,12 +5,13 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import SectionCard from '@/components/ui/SectionCard'
 import AppointmentsList from '@/components/drawer/AppointmentsList'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+// Shared no-permission/loading/error gate + edit-modal wrapper, joined by the customer tab (DRY round 11, CUSTTABS2).
+import { appointmentsTabGate } from '@/components/drawer/appointmentsTabGate'
+import AppointmentEditModal from '@/components/drawer/AppointmentEditModal'
 import { useAuth } from '@/context/AuthContext'
 import { useVacancyAppointments } from '../hooks/useVacancyAppointments'
-import { PlanIntakeModal } from '@/pages/candidates/shared'
 import { useAppointmentEditing } from '@/hooks/useAppointmentEditing'
 import PickCandidateForAppointmentModal from './PickCandidateForAppointmentModal'
 import type { VacancyDetail } from '@/types/vacancy'
@@ -57,12 +58,9 @@ export default function AppointmentsTab({ vacancy: v }: { vacancy: VacancyDetail
     extra: { vacancy_id: v.id ?? null },
   })
 
-  if (!canView) {
-    return <SectionCard><div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('appointmentsTab.noPermission')}</div></SectionCard>
-  }
   // Four explicit UI states (§3): loading / error / empty / success.
-  if (loading) return <SectionCard><div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('page.loading')}</div></SectionCard>
-  if (error) return <SectionCard><div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('appointmentsTab.loadError')}</div></SectionCard>
+  const gate = appointmentsTabGate({ canView, loading, error, t })
+  if (gate) return gate
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -81,10 +79,7 @@ export default function AppointmentsTab({ vacancy: v }: { vacancy: VacancyDetail
         <PickCandidateForAppointmentModal vacancyId={v.id}
           onClose={() => setCreating(false)} onCreated={() => { setCreating(false); reload() }} />
       )}
-      {editing && (
-        <PlanIntakeModal candidateId={editing.candidateId} existing={editing.appt} mode="appointment"
-          onClose={() => setEditing(null)} onCreated={() => { setEditing(null); reload() }} />
-      )}
+      <AppointmentEditModal editing={editing} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); reload() }} />
     </div>
   )
 }

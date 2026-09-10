@@ -35,13 +35,12 @@ import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
-import { Search, Pencil } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { AddVacancyModal } from '@/pages/vacancies/shared'
 import { VacancyLookupsProvider } from '@/context/VacancyLookupsContext'
 import DataTable from '@/components/ui/DataTable'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import type { Column } from '@/components/ui/DataTable'
-import StatusPill from '@/components/ui/StatusPill'
 import EntityLink from '@/components/ui/EntityLink'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
@@ -53,13 +52,10 @@ import { useNavigation } from '@/context/NavigationContext'
 import api, { unwrapList } from '@/lib/api'
 import { mapVacancyRow } from '../hooks/useCustomerDrawerData'
 import type { VacancyRow } from '../hooks/useCustomerDrawerData'
+// Shared seed-status state + status/applications/pencil columns, joined by ScopedVacanciesTab (DRY round 11, CUSTTABS2).
+import { useSeedVacancyStatusOptions } from '../hooks/useSeedVacancyStatusOptions'
+import { vacancyStatusAndActionColumns } from './vacancyListColumns'
 import type { Id } from '@/types/common'
-import { Mono } from '@/components/ui/typography'
-import Button from '@/components/ui/Button'
-
-// K7c/K7b: the same ghost-button count deep-link VacanciesTable.tsx uses for its
-// own Applications/Matches columns (leadsBtn there) — reused here under its own
-// name since this file has no shared style import for it.
 
 // K2-FE (13-08): `VacancyRow` (useCustomerDrawerData) has no `published` field, but the
 // BE's open definition needs it (see below), so this tab carries its own extended row
@@ -126,14 +122,10 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
   // Free-text search over the title (Danny 28-07) — the list can run to dozens of rows.
   const [search, setSearch] = useState('')
   const queryClient = useQueryClient()
-  // Translate every seed label in the LAZY state initialiser (per-value key, Dutch
-  // literal as fallback) so a failed/empty lookup never leaves a Dutch island in the
-  // status filter, and the map runs once instead of on every render.
-  const [statusOptions, setStatusOptions] = useState<StatusOpt[]>(() =>
-    SEED_STATUSES.map(s => ({ ...s, label: t(`lookupSeeds.vacancyStatuses.${s.value}`, { defaultValue: s.label }) })))
-  // Has the REAL lookup answered? The seed list must never decide the default
-  // selection — see the id/name bug documented below.
-  const [resolved, setResolved] = useState(false)
+  // Seeded-until-resolved status state, shared with ScopedVacanciesTab (DRY round 11,
+  // CUSTTABS2). `resolved` gates deciding a default before the real lookup answers —
+  // see the id/name bug documented below.
+  const { statusOptions, setStatusOptions, resolved, setResolved } = useSeedVacancyStatusOptions(t, SEED_STATUSES)
 
   // Load the tenant vacancy-status lookup once.
   // BUG FIX (Danny 28-07: "Open maar staat niet aangevinkt?????" — "Open but it isn't
@@ -155,7 +147,10 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
       if (opts.length) setStatusOptions(opts)
       setResolved(true)
     }).catch(() => setResolved(true))
-  }, [])
+    // setStatusOptions/setResolved are stable useState setters (now returned by the
+    // shared useSeedVacancyStatusOptions hook) — listing them satisfies exhaustive-deps
+    // without ever re-running this effect on a render.
+  }, [setStatusOptions, setResolved])
 
   // Tenant-configured default status filter (TENANT-DEFAULT-1, Danny 02-08) — replaces
   // the old "active only" guess when Settings → Klanten → Tabelweergave → Vacatures has
@@ -204,32 +199,8 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
 
   const columns: Column<PublishedVacancyRow>[] = [
     { key: 'title', header: t('vacancies.col.title'), sortable: true, sortValue: v => v.title, render: v => <EntityLink page="vacancies" id={v.id}>{v.title}</EntityLink> },
-    // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
-    { key: 'status', header: t('vacancies.col.status'), render: v => <StatusPill label={v.status.label} color={v.status.color || '#9CA3AF'} /> },
-    // K7c/S-custcount-1: ghost-button deep link to this vacancy's own Sollicitaties
-    // (applicants) tab — same visual/intent as VacanciesTable.tsx's own applications
-    // count column, routed cross-page via openEntity's optional tab argument.
-    { key: 'applications', header: t('vacancies.col.applications'), align: 'right', sortable: true, sortValue: v => v.applications,
-      render: v => (
-        <Button variant="ghost" size="sm" aria-label={t('vacancies.col.applicationsOpen')}
-          onClick={e => { e.stopPropagation(); openEntity('vacancies', v.id, 'applicants') }}
-          style={{ padding: 0, height: 'auto' }}>
-          <Mono style={{ fontSize: 12 }}>{v.applications}</Mono>
-        </Button>
-      ) },
-    // K7b: row pencil opening the vacancy's own drawer for editing — mirrors
-    // CustomerApplicationsList's pencil action cluster (its edit lives in a modal;
-    // a vacancy's fields edit in-place inside its own drawer, so the pencil opens
-    // that drawer rather than a second, non-existent edit modal — no fake affordance).
-    ...(canEditVacancies ? [{
-      key: 'actions', header: '', align: 'right' as const,
-      render: (v: PublishedVacancyRow) => (
-        <Button variant="ghost" size="sm" iconOnly onClick={e => { e.stopPropagation(); openEntity('vacancies', v.id) }}
-          title={t('vacancies.editVacancy')} aria-label={t('vacancies.editVacancy')}>
-          <Pencil size={12} />
-        </Button>
-      ),
-    }] : []),
+    // Status/applications/pencil columns, shared with ScopedVacanciesTab (DRY round 11, CUSTTABS2).
+    ...vacancyStatusAndActionColumns(t, { openEntity, canEditVacancies }),
   ]
 
   return (

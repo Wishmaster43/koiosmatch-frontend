@@ -37,7 +37,7 @@ import MatchListBody from '@/components/drawer/MatchListBody'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useApps } from '@/context/AppsContext'
 import { useAuth } from '@/context/AuthContext'
-import { MatchCard } from '@/pages/matches/shared'
+import { MatchCard, matchCardRowProps } from '@/pages/matches/shared'
 import { MatchModal } from '@/pages/candidates/shared'
 import { useCustomerMatches } from '../hooks/useCustomerDrawerData'
 import type { CustomerMatchRow } from '../hooks/useCustomerDrawerData'
@@ -106,18 +106,8 @@ export default function MatchesTab({ customerId }: { customerId?: Id }) {
           return (
             <MatchCard
               key={m.id ?? i}
-              id={m.id} vacancyId={m.vacancyId} vacancyTitle={m.vacancy || '—'}
-              stageLabel={statusMeta?.label ?? m.stage} stageColor={statusMeta?.color ?? m.stageColor}
-              score={m.score}
-              helloflexLink={m.helloflexLink} shiftmanagerLink={m.shiftmanagerLink}
-              showHelloflex={showHelloflex} showShiftmanager={showShiftmanager}
-              otherPartyLabel={t('matches:cols.candidate')}
-              otherParty={{ page: 'candidates', id: m.candidateId ?? null, label: m.candidate || '' }}
-              contractType={m.contractType} contractStatus={m.contractStatus}
-              functionTitle={m.functionTitle} branchName={m.branchName} ownerName={m.owner}
-              startDate={m.startDate} endDate={m.endDate}
-              isClosed={statusMeta?.is_closed} archived={m.archived}
-              collapsible flatRow leadWithOtherParty
+              {...matchCardRowProps(m, { statusMeta, showHelloflex, showShiftmanager, otherPartyLabel: t('matches:cols.candidate') })}
+              contractStatus={m.contractStatus}
             />
           )
         }}
