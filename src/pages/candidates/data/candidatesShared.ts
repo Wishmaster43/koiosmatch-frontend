@@ -76,8 +76,6 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
   if ('match_id'       in patch) body.match_id        = patch.match_id
   // Owner (recruiter) change from the drawer picker — used to be local-only.
   if ('ownerId'        in patch) body.owner_id        = patch.ownerId
-  if ('availability'   in patch) body.availability    = patch.availability
-  if ('stage'          in patch) body.funnel_type     = patch.stage
   if ('firstname'      in patch) body.first_name      = patch.firstname
   if ('lastname'       in patch) body.last_name       = patch.lastname
   if ('middleName'     in patch) body.middle_name     = patch.middleName

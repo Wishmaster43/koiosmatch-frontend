@@ -83,12 +83,19 @@ describe('initialsOf', () => {
 describe('buildCandidatePatch', () => {
   it('maps the 3-layer model + header fields to API keys', () => {
     expect(buildCandidatePatch({
-      candidateTypes: ['on_call'], status: 'matched', stage: 'hired',
+      candidateTypes: ['on_call'], status: 'matched',
       firstname: 'A', lastname: 'B', title: 'Verzorgende IG',
     })).toEqual({
-      candidate_types: ['on_call'], status: 'matched', funnel_type: 'hired',
+      candidate_types: ['on_call'], status: 'matched',
       first_name: 'A', last_name: 'B', function_title: 'Verzorgende IG',
     })
+  })
+  // ENT1-08 (contract audit): the backend never validated availability or funnel_type on
+  // PATCH /candidates/{id} — availability folded into status, the funnel move has its own
+  // route — so the patch builder must not carry them either.
+  it('never sends the retired availability and funnel keys', () => {
+    expect(buildCandidatePatch({ stage: 'hired', availability: 'ja', status: 'available' }))
+      .toEqual({ status: 'available' })
   })
   it('maps profile/address fields', () => {
     expect(buildCandidatePatch({ dob: '1990-01-01', postalCode: '1234AB', houseNumber: '5' }))
