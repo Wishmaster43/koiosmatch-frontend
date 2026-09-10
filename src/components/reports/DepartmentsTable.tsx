@@ -8,15 +8,24 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import DepartmentDrawer       from './DepartmentDrawer'
-import PaginationBar          from '../ui/PaginationBar'
 import { useReportPaging }    from './useReportPaging'
-import { buildReportFilterGroups } from '@/lib/reportFilters'
-import { TD, SortableTableHead, ReportTableToolbar, ReportRow, ReportTableFrame } from './reportTableChrome'
+import { TD, ReportTableToolbar, ReportRow, ReportTableShell } from './reportTableChrome'
+import PaginationBar from '@/components/ui/PaginationBar'
 import { useReportTableFilter } from './useReportTableFilter'
+import { useReportTableFilterGroups } from './useReportTableFilterGroups'
 import { renderMonospaceCell } from './reportTableCells'
 import { useSmCustomerTree }  from '@/hooks/useSmCustomerTree'
 import { useCustomerOptions } from './useCustomerOptions'
 import type { ReportDepartment, SortState } from '@/types/reports'
+
+// Stable identity (module scope, not a per-render literal) so the shared
+// useReportTableFilterGroups memo only recomputes when the actual filter state changes.
+const FILTER_CONFIG = {
+  customerLabelKey: 'departments.filters.customer',
+  statusLabelKey: 'departments.filters.locationStatus',
+  customerFieldKey: 'customer_id',
+  statusFieldKey: 'location_status',
+}
 
 // Owns local search/sort/pagination state and derives the flattened department rows from
 // the shared customer→location→department tree, then registers its filters into the panel.
@@ -59,25 +68,12 @@ export default function DepartmentsTable() {
 
   // Declarative filter-group config via the shared builder (§3 consolidation); memoised
   // so the panel doesn't re-render on every keystroke.
-  const filterGroups = useMemo(() =>
-    buildReportFilterGroups({
-      t,
-      rows,
-      customerOptions,
-      statusOptions,
-      selectedCustomers,
-      selectedStatuses,
-      onToggleCustomer: (v) => setSelectedCustomers(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
-      onToggleStatus: (v) => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
-      config: {
-        customerLabelKey: 'departments.filters.customer',
-        statusLabelKey: 'departments.filters.locationStatus',
-        customerFieldKey: 'customer_id',
-        statusFieldKey: 'location_status',
-      },
-    }),
-    [t, rows, customerOptions, statusOptions, selectedCustomers, selectedStatuses]
-  )
+  const filterGroups = useReportTableFilterGroups({
+    t, rows, customerOptions, statusOptions,
+    selectedCustomers, setSelectedCustomers,
+    selectedStatuses, setSelectedStatuses,
+    config: FILTER_CONFIG,
+  })
 
   // Consolidates filtered/sorted memo and registers filter groups with the shared panel.
   const { filtered, sorted } = useReportTableFilter({
@@ -111,31 +107,27 @@ export default function DepartmentsTable() {
         searchPlaceholder={t('departments.search')}
       />
 
-      <ReportTableFrame
+      <ReportTableShell
         loading={loading}
         loadingLabel={t('departments.loading')}
         empty={sorted.length === 0}
         emptyLabel={t('departments.empty')}
-      >
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <SortableTableHead columns={COLS} sort={sort} onSort={setSort_} />
-          <tbody>
-            {paged.map((r, i) => (
-              <ReportRow key={r.id ?? i} onClick={() => setDrill(r)}>
-                <td style={TD}>{r.customer_name}</td>
-                <td style={TD}>{r.location_name}</td>
-                <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>{r.name}</td>
-                <td style={TD}>{renderMonospaceCell(r.cost_center)}</td>
-              </ReportRow>
-            ))}
-          </tbody>
-        </table>
-      </ReportTableFrame>
-
-      <PaginationBar page={page} totalPages={totalPages} totalRows={sorted.length}
-        pageSize={pageSize} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} />
-
-      {drill && <DepartmentDrawer department={drill} onClose={() => setDrill(null)} />}
+        columns={COLS} sort={sort} onSort={setSort_}
+        rows={paged}
+        renderRow={(r, i) => (
+          <ReportRow key={r.id ?? i} onClick={() => setDrill(r)}>
+            <td style={TD}>{r.customer_name}</td>
+            <td style={TD}>{r.location_name}</td>
+            <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>{r.name}</td>
+            <td style={TD}>{renderMonospaceCell(r.cost_center)}</td>
+          </ReportRow>
+        )}
+        pagination={
+          <PaginationBar page={page} totalPages={totalPages} totalRows={sorted.length}
+            pageSize={pageSize} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} />
+        }
+        drawer={drill && <DepartmentDrawer department={drill} onClose={() => setDrill(null)} />}
+      />
     </div>
   )
 }

@@ -162,3 +162,47 @@ export function ReportTableFrame({ loading, loadingLabel, empty, emptyLabel, emp
     </div>
   )
 }
+
+// Full table body shared by DepartmentsTable/LocationsTable: the ReportTableFrame
+// with the sortable head + one row per entry (cells are a render prop — they
+// differ per entity), then the pagination footer and the optional drill drawer,
+// both as slots. The footer stays a slot on purpose: PaginationBar reaches
+// lib/formatters and so lib/datetime and the i18n singleton, which this chrome
+// module must never pull into its consumers (DATETIME-IMPORT-LES, R10-COMMON 8).
+export function ReportTableShell<T extends { id?: string | number }>({
+  loading, loadingLabel, empty, emptyLabel,
+  columns, sort, onSort,
+  rows, renderRow,
+  pagination,
+  drawer,
+}: {
+  loading: boolean
+  loadingLabel: string
+  empty: boolean
+  emptyLabel: string
+  columns: ReportTableColumn[]
+  sort: SortState
+  onSort: (key: string) => void
+  rows: T[]
+  renderRow: (row: T, index: number) => ReactNode
+  // The caller's own <PaginationBar/> (see the note above the component).
+  pagination?: ReactNode
+  drawer?: ReactNode
+}) {
+  return (
+    <>
+      <ReportTableFrame loading={loading} loadingLabel={loadingLabel} empty={empty} emptyLabel={emptyLabel}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <SortableTableHead columns={columns} sort={sort} onSort={onSort} />
+          <tbody>
+            {rows.map((r, i) => renderRow(r, i))}
+          </tbody>
+        </table>
+      </ReportTableFrame>
+
+      {pagination}
+
+      {drawer}
+    </>
+  )
+}

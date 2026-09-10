@@ -10,11 +10,12 @@ import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { toggleInList } from '@/lib/selectionSet'
 import ContactsTable from './ContactsTable'
-import PaginationBar from '@/components/ui/PaginationBar'
 import ContactDrawer from './ContactDrawer'
+import { SmPaginationBar } from './SmPaginationBar'
 import { useSmContacts } from './hooks/useSmContacts'
 import type { SmContactRow } from '@/types/shiftmanager'
 import { Caption } from '@/components/ui/typography'
+import { ListPageShell } from '@/components/ui/ListPageShell'
 
 // Shiftmanager contacts list: filters/search/pagination in local state, filter groups pushed into the shared right panel, and a row click opens the contact drawer.
 export default function ContactsPage() {
@@ -77,31 +78,27 @@ export default function ContactsPage() {
   ]
 
   return (
-    <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
+    <ListPageShell minWidth={0} aside={<ContactDrawer contact={selected} onClose={() => setSelected(null)} />}>
 
-        {/* KPI strip */}
-        <div style={{ padding: '20px 24px 18px', display: 'flex', gap: 16, flexShrink: 0 }}>
-          {kpis.map(k => (
-            <div key={k.label} style={{ background: 'var(--surface)', border: '1px solid var(--border)',
-              borderRadius: 10, padding: '14px 18px', flex: 1 }}>
-              <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text)', lineHeight: 1 }}>{k.value}</div>
-              <Caption as="div" style={{ marginTop: 4 }}>{k.label}</Caption>
-            </div>
-          ))}
-        </div>
-
-        {/* Table — shared DataTable (sticky header, sorting, soft-chip planning flag) */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
-          <ContactsTable rows={paged} selectedId={selected?.id}
-            onSelect={c => setSelected(prev => prev?.id === c.id ? null : c)} />
-        </div>
-
-        <PaginationBar page={page} totalPages={totalPages} totalRows={filtered.length} pageSize={pageSize}
-          onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1) }} />
+      {/* KPI strip */}
+      <div style={{ padding: '20px 24px 18px', display: 'flex', gap: 16, flexShrink: 0 }}>
+        {kpis.map(k => (
+          <div key={k.label} style={{ background: 'var(--surface)', border: '1px solid var(--border)',
+            borderRadius: 10, padding: '14px 18px', flex: 1 }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text)', lineHeight: 1 }}>{k.value}</div>
+            <Caption as="div" style={{ marginTop: 4 }}>{k.label}</Caption>
+          </div>
+        ))}
       </div>
 
-      <ContactDrawer contact={selected} onClose={() => setSelected(null)} />
-    </div>
+      {/* Table — shared DataTable (sticky header, sorting, soft-chip planning flag) */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
+        <ContactsTable rows={paged} selectedId={selected?.id}
+          onSelect={c => setSelected(prev => prev?.id === c.id ? null : c)} />
+      </div>
+
+      <SmPaginationBar page={page} totalPages={totalPages} totalRows={filtered.length} pageSize={pageSize}
+        onPageChange={setPage} setPage={setPage} setPageSize={setPageSize} />
+    </ListPageShell>
   )
 }

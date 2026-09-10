@@ -11,16 +11,11 @@ export { ac }
 // so the drawer's status badge never drifts from the table's.
 import SoftChip from '@/components/ui/SoftChip'
 import { useTranslation } from 'react-i18next'
+import { SmInitialBubble } from './smParts'
 
-// Square initial-avatar.
+// Square initial-avatar (shared body lives in SmInitialBubble — DRY round 11, SHIFTMANAGER).
 export function Avatar({ label, size = 30, radius = 8 }: { label?: string; size?: number; radius?: number }) {
-  return (
-    <div style={{ width: size, height: size, borderRadius: radius, flexShrink: 0,
-      background: ac(label), display: 'flex', alignItems: 'center',
-      justifyContent: 'center', color: 'var(--surface)', fontSize: size * 0.34, fontWeight: 700 }}>
-      {(label || '?').charAt(0).toUpperCase()}
-    </div>
-  )
+  return <SmInitialBubble label={label} size={size} radius={radius} />
 }
 
 // Status → soft-chip colour (mirrors DepartmentsTable's STATUS_COLORS exactly).

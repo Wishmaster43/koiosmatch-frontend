@@ -12,16 +12,11 @@ export { ac }
 // The one soft-chip primitive (§4) — same tint formula as LocationsTable's StatusPill,
 // so the drawer's status badge never drifts from the table's.
 import SoftChip from '@/components/ui/SoftChip'
+import { SmInitialBubble } from './smParts'
 
-// Square initial-avatar.
+// Square initial-avatar (shared body lives in SmInitialBubble — DRY round 11, SHIFTMANAGER).
 export function Avatar({ label, size = 32 }: { label?: string; size?: number }) {
-  return (
-    <div style={{ width: size, height: size, borderRadius: 8, flexShrink: 0,
-      background: ac(label), display: 'flex', alignItems: 'center',
-      justifyContent: 'center', color: 'var(--surface)', fontSize: size * 0.34, fontWeight: 700 }}>
-      {(label || '?').charAt(0).toUpperCase()}
-    </div>
-  )
+  return <SmInitialBubble label={label} size={size} radius={8} />
 }
 
 // Status → soft-chip colour (mirrors LocationsTable's STATUS_COLORS exactly).

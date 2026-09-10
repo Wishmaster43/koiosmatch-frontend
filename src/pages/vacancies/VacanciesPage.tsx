@@ -19,6 +19,7 @@ import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLook
 import InsightsRow from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
 import ViewSwitch from '@/components/ui/ViewSwitch'
+import { ListPageShell } from '@/components/ui/ListPageShell'
 import VacanciesTable from './VacanciesTable'
 import VacanciesBulkBar from './VacanciesBulkBar'
 import VacanciesToolbar from './VacanciesToolbar'
@@ -339,141 +340,141 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
           onImported={refresh}
           users={users} customers={customerList} />
       )}
-      <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-
-          {/* KPI block: 7 donuts + 2 KPI cards (VAC-KPI-REDESIGN 22-07 — 9 tiles total).
-              V27: the published donut is a real server-wide aggregate, so no more
-              STATS-OOM-1 honesty notice here; the agent donut's own honest-gate lives
-              in useVacancyInsights.ts (agentData) until VAC-STATS-BYAGENT-1 lands. */}
-          <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')}
-            // VESTIGING-2: an explicit branch filter EXCLUDES records with no branch
-            // linked yet — a resulting empty list must say so, not read as "nothing here".
-            notice={selectedBranch.length > 0 && total === 0 ? t('common:filters.branchExcludesUnassigned') : undefined} />
-
-          {/* Toolbar (§0.3 split → VacanciesToolbar, mirrors CandidatesToolbar):
-              bulk bar (composed here — its data wiring stays in this container)
-              or add/search/clear + the archived/trash/map quick-view toggles. */}
-          <VacanciesToolbar
-            selectedCount={selectedIds.size}
-            bulkBar={
-              <VacanciesBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
-                onSetOwner={bulkSetOwner} onSetStatus={bulkSetStatus} onSetClient={bulkSetClient}
-                onPublish={() => bulkPublish(true)} onUnpublish={() => bulkPublish(false)}
-                onSetAiAgent={bulkSetAiAgent}
-                onRemoveTag={bulkRemoveTag} onAddNote={bulkAddNote} onArchive={bulkArchive}
-                canArchive={hasPermission('vacancies.delete')}
-                users={users} statuses={statuses} customers={customerList} aiAgents={aiAgents} selectedTags={selectedTags}
-                selectedVacancies={vacancies.filter((v): v is typeof v & { id: Id } => v.id != null && selectedIds.has(v.id)).map(v => ({ id: v.id, title: v.title }))}
-                onOpenCandidateSearch={openCandidateSearch} />
-            }
-            onAddOpen={() => setAddOpen(true)} canCreate={canCreateVacancy}
-            searchEpoch={searchEpoch} globalSearch={globalSearch} onSearch={setGlobalSearch}
-            anyFilterActive={anyFilterActive} onClearFilters={clearAllFilters}
-            showArchived={showArchived} onToggleArchived={() => { setShowArchived(v => !v); setShowTrash(false) }}
-            showTrash={showTrash} onToggleTrash={() => { setShowTrash(v => !v); setShowArchived(false) }}
-            mapActive={view === 'map'} onToggleView={() => setView(x => (x === 'map' ? 'table' : 'map'))}
+      <ListPageShell aside={
+        <>
+          {/* Drawer — remounts (key) when the full detail arrives so tabs re-init */}
+          <VacancyDrawer
+            key={selected ? `${selected.id}-${detail ? 'full' : 'lite'}` : 'none'}
+            vacancy={(detail ?? selected) as VacancyDetail | null}
+            onClose={closeDrawer}
+            expanded={drawerExpanded}
+            onToggleExpand={() => setDrawerExpanded(v => !v)}
+            onUpdate={updateVacancy}
+            onRestore={hasPermission('vacancies.update') ? restoreVacancy : undefined}
+            // TRASH-OVERAL-2: shared trash section (mark = vacancies.delete, unmark =
+            // vacancies.update; backend re-checks, §7). The patches are pure LOCAL
+            // merges — buildVacancyPatch maps none of these keys, so no stray PATCH.
+            trash={{
+              canMark: hasPermission('vacancies.delete'),
+              canUnmark: hasPermission('vacancies.update'),
+              users: users.map(u => ({ value: String(u.id), label: u.name })),
+              onMarked: id => updateVacancy(id, { archived: true, lifecycle: 'pending_erase', pendingEraseAt: new Date().toISOString() }),
+              onUnmarked: id => updateVacancy(id, { lifecycle: 'archived', pendingEraseAt: null }),
+            }}
+            users={users}
+            initialTab={drawerInitialTab}
           />
+          {bulkConfirmDialog}
+        </>
+      }>
 
-          {/* Transient feedback for bulk mutations — audit R1 item 5: this was a
-              copy-pasted role=status banner (mirrored in Candidates/Customers); now
-              the ONE shared component (§3A). */}
-          <ActionMessageBanner msg={actionMsg} onDismiss={() => setActionMsg(null)} dismissLabel={t('common:close')} />
+        {/* KPI block: 7 donuts + 2 KPI cards (VAC-KPI-REDESIGN 22-07 — 9 tiles total).
+            V27: the published donut is a real server-wide aggregate, so no more
+            STATS-OOM-1 honesty notice here; the agent donut's own honest-gate lives
+            in useVacancyInsights.ts (agentData) until VAC-STATS-BYAGENT-1 lands. */}
+        <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')}
+          // VESTIGING-2: an explicit branch filter EXCLUDES records with no branch
+          // linked yet — a resulting empty list must say so, not read as "nothing here".
+          notice={selectedBranch.length > 0 && total === 0 ? t('common:filters.branchExcludesUnassigned') : undefined} />
 
-          {/* Table ⇄ map — ViewSwitch keeps both mounted (display toggle, not
-              unmount) so the table's virtualizer never remeasures 0 on returning
-              from the map (§ViewSwitch, mirrors candidates/customers). Map LEFT,
-              filtered vacancy table RIGHT when active — one radius search drives
-              both panes. Lazy Leaflet load. */}
-          <ViewSwitch active={view} views={[
-            {
-              id: 'table',
-              render: () => (
-                <>
-                  <div ref={tableScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
+        {/* Toolbar (§0.3 split → VacanciesToolbar, mirrors CandidatesToolbar):
+            bulk bar (composed here — its data wiring stays in this container)
+            or add/search/clear + the archived/trash/map quick-view toggles. */}
+        <VacanciesToolbar
+          selectedCount={selectedIds.size}
+          bulkBar={
+            <VacanciesBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
+              onSetOwner={bulkSetOwner} onSetStatus={bulkSetStatus} onSetClient={bulkSetClient}
+              onPublish={() => bulkPublish(true)} onUnpublish={() => bulkPublish(false)}
+              onSetAiAgent={bulkSetAiAgent}
+              onRemoveTag={bulkRemoveTag} onAddNote={bulkAddNote} onArchive={bulkArchive}
+              canArchive={hasPermission('vacancies.delete')}
+              users={users} statuses={statuses} customers={customerList} aiAgents={aiAgents} selectedTags={selectedTags}
+              selectedVacancies={vacancies.filter((v): v is typeof v & { id: Id } => v.id != null && selectedIds.has(v.id)).map(v => ({ id: v.id, title: v.title }))}
+              onOpenCandidateSearch={openCandidateSearch} />
+          }
+          onAddOpen={() => setAddOpen(true)} canCreate={canCreateVacancy}
+          searchEpoch={searchEpoch} globalSearch={globalSearch} onSearch={setGlobalSearch}
+          anyFilterActive={anyFilterActive} onClearFilters={clearAllFilters}
+          showArchived={showArchived} onToggleArchived={() => { setShowArchived(v => !v); setShowTrash(false) }}
+          showTrash={showTrash} onToggleTrash={() => { setShowTrash(v => !v); setShowArchived(false) }}
+          mapActive={view === 'map'} onToggleView={() => setView(x => (x === 'map' ? 'table' : 'map'))}
+        />
+
+        {/* Transient feedback for bulk mutations — audit R1 item 5: this was a
+            copy-pasted role=status banner (mirrored in Candidates/Customers); now
+            the ONE shared component (§3A). */}
+        <ActionMessageBanner msg={actionMsg} onDismiss={() => setActionMsg(null)} dismissLabel={t('common:close')} />
+
+        {/* Table ⇄ map — ViewSwitch keeps both mounted (display toggle, not
+            unmount) so the table's virtualizer never remeasures 0 on returning
+            from the map (§ViewSwitch, mirrors candidates/customers). Map LEFT,
+            filtered vacancy table RIGHT when active — one radius search drives
+            both panes. Lazy Leaflet load. */}
+        <ViewSwitch active={view} views={[
+          {
+            id: 'table',
+            render: () => (
+              <>
+                <div ref={tableScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
+                  {error && (
+                    <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
+                  )}
+                  <VacanciesTable
+                    rows={visibleRows}
+                    loading={loading}
+                    selectedId={selected?.id}
+                    onSelect={openVacancy}
+                    onOpenCandidateSearch={openCandidateSearch}
+                    onOpenApplicants={openApplicants}
+                    onOpenMatches={openMatches}
+                    selectable
+                    selectedIds={selectedIds}
+                    onToggleRow={toggleRow}
+                    onToggleAll={toggleAll}
+                    selectionBusy={fetching}
+                    stickyHeader
+                    scrollParentRef={tableScrollRef}
+                    sort={sort as ControlledSort | null}
+                    onSortChange={next => setSort(next as VacancySort)}
+                  />
+                </div>
+
+                <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
+                  onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={pageSizeOptions} />
+              </>
+            ),
+          },
+          {
+            id: 'map',
+            render: () => (
+              <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 14, padding: '0 24px 16px' }}>
+                <div style={{ flex: '1.1 1 0', minWidth: 400, display: 'flex', flexDirection: 'column' }}>
+                  <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
+                    <VacanciesMapView rows={visibleRows} padded={false} center={mapCenter} radiusKm={mapStraalActive ? mapRadius : 0}
+                      onCenterChange={(lat, lng) => { setMapCenter({ lat, lng }); setMapStraalActive(true) }}
+                      onRadiusChange={(km: number) => { setMapRadius(km); setMapStraalActive(true) }}
+                      onClearRadius={mapStraalActive ? () => setMapStraalActive(false) : undefined}
+                      onPick={id => openVacancy({ id } as Parameters<typeof selectVacancy>[0])} />
+                  </Suspense>
+                </div>
+                {/* Right pane: the same server-filtered rows as a table (row click = drawer). */}
+                <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto' }}>
                     {error && (
                       <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
                     )}
-                    <VacanciesTable
-                      rows={visibleRows}
-                      loading={loading}
-                      selectedId={selected?.id}
-                      onSelect={openVacancy}
-                      onOpenCandidateSearch={openCandidateSearch}
-                      onOpenApplicants={openApplicants}
-                      onOpenMatches={openMatches}
-                      selectable
-                      selectedIds={selectedIds}
-                      onToggleRow={toggleRow}
-                      onToggleAll={toggleAll}
-                      selectionBusy={fetching}
-                      stickyHeader
-                      scrollParentRef={tableScrollRef}
-                      sort={sort as ControlledSort | null}
-                      onSortChange={next => setSort(next as VacancySort)}
-                    />
+                    <VacanciesTable rows={visibleRows} loading={loading} selectedId={selected?.id} onSelect={openVacancy}
+                      onOpenCandidateSearch={openCandidateSearch} onOpenApplicants={openApplicants} onOpenMatches={openMatches} />
                   </div>
-
                   <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
                     onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={pageSizeOptions} />
-                </>
-              ),
-            },
-            {
-              id: 'map',
-              render: () => (
-                <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 14, padding: '0 24px 16px' }}>
-                  <div style={{ flex: '1.1 1 0', minWidth: 400, display: 'flex', flexDirection: 'column' }}>
-                    <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
-                      <VacanciesMapView rows={visibleRows} padded={false} center={mapCenter} radiusKm={mapStraalActive ? mapRadius : 0}
-                        onCenterChange={(lat, lng) => { setMapCenter({ lat, lng }); setMapStraalActive(true) }}
-                        onRadiusChange={(km: number) => { setMapRadius(km); setMapStraalActive(true) }}
-                        onClearRadius={mapStraalActive ? () => setMapStraalActive(false) : undefined}
-                        onPick={id => openVacancy({ id } as Parameters<typeof selectVacancy>[0])} />
-                    </Suspense>
-                  </div>
-                  {/* Right pane: the same server-filtered rows as a table (row click = drawer). */}
-                  <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto' }}>
-                      {error && (
-                        <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
-                      )}
-                      <VacanciesTable rows={visibleRows} loading={loading} selectedId={selected?.id} onSelect={openVacancy}
-                        onOpenCandidateSearch={openCandidateSearch} onOpenApplicants={openApplicants} onOpenMatches={openMatches} />
-                    </div>
-                    <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
-                      onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={pageSizeOptions} />
-                  </div>
                 </div>
-              ),
-            },
-          ]} />
-        </div>
-
-        {/* Drawer — remounts (key) when the full detail arrives so tabs re-init */}
-        <VacancyDrawer
-          key={selected ? `${selected.id}-${detail ? 'full' : 'lite'}` : 'none'}
-          vacancy={(detail ?? selected) as VacancyDetail | null}
-          onClose={closeDrawer}
-          expanded={drawerExpanded}
-          onToggleExpand={() => setDrawerExpanded(v => !v)}
-          onUpdate={updateVacancy}
-          onRestore={hasPermission('vacancies.update') ? restoreVacancy : undefined}
-          // TRASH-OVERAL-2: shared trash section (mark = vacancies.delete, unmark =
-          // vacancies.update; backend re-checks, §7). The patches are pure LOCAL
-          // merges — buildVacancyPatch maps none of these keys, so no stray PATCH.
-          trash={{
-            canMark: hasPermission('vacancies.delete'),
-            canUnmark: hasPermission('vacancies.update'),
-            users: users.map(u => ({ value: String(u.id), label: u.name })),
-            onMarked: id => updateVacancy(id, { archived: true, lifecycle: 'pending_erase', pendingEraseAt: new Date().toISOString() }),
-            onUnmarked: id => updateVacancy(id, { lifecycle: 'archived', pendingEraseAt: null }),
-          }}
-          users={users}
-          initialTab={drawerInitialTab}
-        />
-        {bulkConfirmDialog}
-      </div>
+              </div>
+            ),
+          },
+        ]} />
+      </ListPageShell>
     </>
   )
 }

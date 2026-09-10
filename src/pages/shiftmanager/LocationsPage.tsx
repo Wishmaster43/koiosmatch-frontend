@@ -9,11 +9,12 @@ import { MapPin, Building2, Layers } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { toggleInList } from '@/lib/selectionSet'
 import LocationsTable from './LocationsTable'
-import PaginationBar from '@/components/ui/PaginationBar'
 import LocationDrawer from './LocationDrawer'
 import SmKpiStrip from './SmKpiStrip'
+import { SmPaginationBar } from './SmPaginationBar'
 import { useSmLocations } from './hooks/useSmLocations'
 import type { SmLocationRow } from '@/types/shiftmanager'
+import { ListPageShell } from '@/components/ui/ListPageShell'
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function LocationsPage() {
@@ -86,23 +87,19 @@ export default function LocationsPage() {
   ]
 
   return (
-    <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
+    <ListPageShell minWidth={0} aside={<LocationDrawer loc={selected} onClose={() => setSelected(null)} />}>
 
-        {/* KPI strip — shared SmKpiStrip (§3 consolidation) */}
-        <SmKpiStrip kpis={kpis} />
+      {/* KPI strip — shared SmKpiStrip (§3 consolidation) */}
+      <SmKpiStrip kpis={kpis} />
 
-        {/* Table — shared DataTable (sticky header, sorting, soft-chip status colours) */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
-          <LocationsTable rows={paged} selectedId={selected?.id}
-            onSelect={loc => setSelected(prev => prev?.id === loc.id ? null : loc)} />
-        </div>
-
-        <PaginationBar page={page} totalPages={totalPages} totalRows={filtered.length} pageSize={pageSize}
-          onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1) }} />
+      {/* Table — shared DataTable (sticky header, sorting, soft-chip status colours) */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
+        <LocationsTable rows={paged} selectedId={selected?.id}
+          onSelect={loc => setSelected(prev => prev?.id === loc.id ? null : loc)} />
       </div>
 
-      <LocationDrawer loc={selected} onClose={() => setSelected(null)} />
-    </div>
+      <SmPaginationBar page={page} totalPages={totalPages} totalRows={filtered.length} pageSize={pageSize}
+        onPageChange={setPage} setPage={setPage} setPageSize={setPageSize} />
+    </ListPageShell>
   )
 }

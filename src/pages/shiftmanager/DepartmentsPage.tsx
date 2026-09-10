@@ -9,14 +9,15 @@ import { Layers, Building2, Users } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { toggleInList } from '@/lib/selectionSet'
 import DepartmentsTable from './DepartmentsTable'
-import PaginationBar from '@/components/ui/PaginationBar'
 import DepartmentDrawer from './DepartmentDrawer'
 import SmKpiStrip from './SmKpiStrip'
+import { SmPaginationBar } from './SmPaginationBar'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import { TOOLBAR_ROW_STYLE } from '@/components/ui/toolbarRow'
 import { useListPageSize } from '@/hooks/useListPageSize'
 import { useSmDepartments } from './hooks/useSmDepartments'
 import type { SmDepartmentRow } from '@/types/shiftmanager'
+import { ListPageShell } from '@/components/ui/ListPageShell'
 
 // Thin container: reads the SM mirror, derives filter option lists + KPI totals, and composes the table + drawer.
 export default function DepartmentsPage() {
@@ -89,28 +90,24 @@ export default function DepartmentsPage() {
   ]
 
   return (
-    <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
+    <ListPageShell minWidth={0} aside={<DepartmentDrawer dep={selected} onClose={() => setSelected(null)} />}>
 
-        {/* KPI strip — shared SmKpiStrip (§3 consolidation) */}
-        <SmKpiStrip kpis={kpis} />
+      {/* KPI strip — shared SmKpiStrip (§3 consolidation) */}
+      <SmKpiStrip kpis={kpis} />
 
-        {/* Toolbar — free-text search only (read-only mirror, no add button); matches the shared spacing spec (§4). */}
-        <div style={TOOLBAR_ROW_STYLE}>
-          <HeaderSearch onSearch={setSearch} defaultValue={search} width={300} />
-        </div>
-
-        {/* Table — shared DataTable (sticky header, sorting, soft-chip status colours) */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
-          <DepartmentsTable rows={paged} selectedId={selected?.id}
-            onSelect={dep => setSelected(prev => prev?.id === dep.id ? null : dep)} />
-        </div>
-
-        <PaginationBar page={page} totalPages={totalPages} totalRows={filtered.length} pageSize={pageSize}
-          onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1) }} />
+      {/* Toolbar — free-text search only (read-only mirror, no add button); matches the shared spacing spec (§4). */}
+      <div style={TOOLBAR_ROW_STYLE}>
+        <HeaderSearch onSearch={setSearch} defaultValue={search} width={300} />
       </div>
 
-      <DepartmentDrawer dep={selected} onClose={() => setSelected(null)} />
-    </div>
+      {/* Table — shared DataTable (sticky header, sorting, soft-chip status colours) */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
+        <DepartmentsTable rows={paged} selectedId={selected?.id}
+          onSelect={dep => setSelected(prev => prev?.id === dep.id ? null : dep)} />
+      </div>
+
+      <SmPaginationBar page={page} totalPages={totalPages} totalRows={filtered.length} pageSize={pageSize}
+        onPageChange={setPage} setPage={setPage} setPageSize={setPageSize} />
+    </ListPageShell>
   )
 }

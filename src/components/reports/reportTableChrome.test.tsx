@@ -1,9 +1,11 @@
 /**
- * reportTableChrome.test — unit tests for ReportRow and ReportTableFrame.
+ * reportTableChrome.test — unit tests for ReportRow, ReportTableFrame and
+ * ReportTableShell.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { ReportRow, ReportTableFrame } from './reportTableChrome'
+import { ReportRow, ReportTableFrame, ReportTableShell } from './reportTableChrome'
+import type { ReportTableColumn } from './reportTableChrome'
 
 describe('ReportRow', () => {
   it('fires onClick when row is clicked', () => {
@@ -185,5 +187,79 @@ describe('ReportTableFrame', () => {
     const innerDiv = container.querySelector('.flex-1.min-w-0.overflow-auto')
     expect(outerDiv).toBeInTheDocument()
     expect(innerDiv).toBeInTheDocument()
+  })
+})
+
+describe('ReportTableShell', () => {
+  const columns: ReportTableColumn[] = [{ key: 'name', label: 'Name', sortable: true }]
+  type Row = { id: number; name: string }
+  const rows: Row[] = [{ id: 1, name: 'Alpha' }, { id: 2, name: 'Beta' }]
+
+  it('renders one row per entry via renderRow, with the sortable head and pagination footer', () => {
+    render(
+      <ReportTableShell
+        loading={false} loadingLabel="Loading..." empty={false} emptyLabel="No data"
+        columns={columns} sort={{ key: 'name', dir: 'asc' }} onSort={() => {}}
+        rows={rows}
+        renderRow={(r: Row) => <tr key={r.id}><td>{r.name}</td></tr>}
+        pagination={<div data-testid="pagination-slot" />}
+      />
+    )
+    expect(screen.getByText('Alpha')).toBeInTheDocument()
+    expect(screen.getByText('Beta')).toBeInTheDocument()
+    expect(screen.getByText('Name')).toBeInTheDocument()
+  })
+
+  it('renders the drawer node when supplied, and nothing when falsy', () => {
+    const { rerender } = render(
+      <ReportTableShell
+        loading={false} loadingLabel="Loading..." empty={false} emptyLabel="No data"
+        columns={columns} sort={{ key: 'name', dir: 'asc' }} onSort={() => {}}
+        rows={[]} renderRow={() => null}
+        pagination={<div data-testid="pagination-slot" />}
+        drawer={<div data-testid="drawer">Drawer open</div>}
+      />
+    )
+    expect(screen.getByTestId('drawer')).toBeInTheDocument()
+
+    rerender(
+      <ReportTableShell
+        loading={false} loadingLabel="Loading..." empty={false} emptyLabel="No data"
+        columns={columns} sort={{ key: 'name', dir: 'asc' }} onSort={() => {}}
+        rows={[]} renderRow={() => null}
+        pagination={<div data-testid="pagination-slot" />}
+        drawer={null}
+      />
+    )
+    expect(screen.queryByTestId('drawer')).not.toBeInTheDocument()
+  })
+
+  it('shows the loading label instead of rows while loading', () => {
+    render(
+      <ReportTableShell
+        loading={true} loadingLabel="Loading rows..." empty={false} emptyLabel="No data"
+        columns={columns} sort={{ key: 'name', dir: 'asc' }} onSort={() => {}}
+        rows={rows}
+        renderRow={(r: Row) => <tr key={r.id}><td>{r.name}</td></tr>}
+        pagination={<div data-testid="pagination-slot" />}
+      />
+    )
+    expect(screen.getByText('Loading rows...')).toBeInTheDocument()
+    expect(screen.queryByText('Alpha')).not.toBeInTheDocument()
+  })
+
+  it('calls onSort with the clicked column key', () => {
+    const onSort = vi.fn()
+    render(
+      <ReportTableShell
+        loading={false} loadingLabel="Loading..." empty={false} emptyLabel="No data"
+        columns={columns} sort={{ key: 'name', dir: 'asc' }} onSort={onSort}
+        rows={rows}
+        renderRow={(r: Row) => <tr key={r.id}><td>{r.name}</td></tr>}
+        pagination={<div data-testid="pagination-slot" />}
+      />
+    )
+    fireEvent.click(screen.getByRole('button', { name: /Name/ }))
+    expect(onSort).toHaveBeenCalledWith('name')
   })
 })

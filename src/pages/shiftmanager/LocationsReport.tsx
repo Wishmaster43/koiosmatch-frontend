@@ -10,8 +10,8 @@ import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useNumberFormat } from '@/lib/formatters'
 import KpiBlock         from '@/components/ui/KpiBlock'
-import Spinner from '@/components/ui/Spinner'
 import EntityListDrawer from '@/components/ui/EntityListDrawer'
+import { SmReportHeader, SmKpiGrid } from './SmReportHeader'
 import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
 import type { SmDrillItem } from '@/types/shiftmanager'
 import SmReportStatusBadge from '@/components/shiftmanager/SmReportStatusBadge'
@@ -88,46 +88,37 @@ export default function LocationsReport() {
     <div style={{ padding: 24 }}>
 
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.3px', flexShrink: 0 }}>
-          {t('locationsReport.title')}
-        </h2>
-        {!loading && (
-          <>
-            <div style={{ width: 1, height: 18, background: 'var(--border)', flexShrink: 0 }} />
-            <div className="flex items-center gap-2">
-              <SmReportStatusBadge
-                count={active.length}
-                label={t('locationsReport.activeWord')}
-                color="var(--color-success)"
-                bg="var(--color-success-bg)"
-                withDot
-                withBg
-              />
-              {inactive.length > 0 && (
-                <SmReportStatusBadge
-                  count={inactive.length}
-                  label={t('locationsReport.inactiveWord')}
-                  color="var(--color-warning)"
-                  bg="var(--color-warning-bg)"
-                  withDot
-                  withBg
-                />
-              )}
-              <SmReportStatusBadge
-                count={locations.length}
-                label={t('locationsReport.totalWord')}
-                withDot={false}
-                withBg={false}
-              />
-            </div>
-          </>
-        )}
-        {loading && <span style={{ color: 'var(--border)' }}><Spinner size={14} /></span>}
-      </div>
+      <SmReportHeader title={t('locationsReport.title')} loading={loading}>
+        <div className="flex items-center gap-2">
+          <SmReportStatusBadge
+            count={active.length}
+            label={t('locationsReport.activeWord')}
+            color="var(--color-success)"
+            bg="var(--color-success-bg)"
+            withDot
+            withBg
+          />
+          {inactive.length > 0 && (
+            <SmReportStatusBadge
+              count={inactive.length}
+              label={t('locationsReport.inactiveWord')}
+              color="var(--color-warning)"
+              bg="var(--color-warning-bg)"
+              withDot
+              withBg
+            />
+          )}
+          <SmReportStatusBadge
+            count={locations.length}
+            label={t('locationsReport.totalWord')}
+            withDot={false}
+            withBg={false}
+          />
+        </div>
+      </SmReportHeader>
 
       {/* KPI blocks */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 28 }}>
+      <SmKpiGrid>
         <KpiBlock
           label={t('locationsReport.kpi.activeLocations')}
           value={active.length}
@@ -160,7 +151,7 @@ export default function LocationsReport() {
             ? () => setDrawer({ title: t('locationsReport.drill.locationsWithoutDepartment'), items: drillNoDept })
             : undefined}
         />
-      </div>
+      </SmKpiGrid>
 
       {/* Charts */}
       <ShiftsChartsBlock filterKey="locations-shifts-main" />

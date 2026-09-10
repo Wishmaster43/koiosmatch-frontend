@@ -8,17 +8,26 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import LocationDrawer         from './LocationDrawer'
-import PaginationBar          from '../ui/PaginationBar'
 import { useReportPaging }    from './useReportPaging'
 import useNumericColumnSort   from '@/hooks/useNumericColumnSort'
-import { buildReportFilterGroups } from '@/lib/reportFilters'
-import { TD, SortableTableHead, ReportTableToolbar, ReportRow, ReportTableFrame } from './reportTableChrome'
+import { TD, ReportTableToolbar, ReportRow, ReportTableShell } from './reportTableChrome'
+import PaginationBar from '@/components/ui/PaginationBar'
 import { useReportTableFilter } from './useReportTableFilter'
+import { useReportTableFilterGroups } from './useReportTableFilterGroups'
 import CopyIconButton from '../ui/CopyIconButton'
 import { renderStatusCell, renderCountCell } from './reportTableCells'
 import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
 import { useCustomerOptions } from './useCustomerOptions'
 import type { ReportLocation, SortState } from '@/types/reports'
+
+// Stable identity (module scope, not a per-render literal) so the shared
+// useReportTableFilterGroups memo only recomputes when the actual filter state changes.
+const FILTER_CONFIG = {
+  customerLabelKey: 'locations.filters.customer',
+  statusLabelKey: 'locations.filters.status',
+  customerFieldKey: 'customer_id',
+  statusFieldKey: 'status',
+}
 
 // Searchable, sortable, paginated locations table; filters live in local state and are pushed into the shared right-panel context, and a row click opens the location drawer.
 export default function LocationsTable() {
@@ -56,25 +65,12 @@ export default function LocationsTable() {
   }, [selectedStatuses, selectedCustomers])
 
   // Builds the customer/status filter definitions via the shared builder.
-  const filterGroups = useMemo(() =>
-    buildReportFilterGroups({
-      t,
-      rows,
-      customerOptions,
-      statusOptions,
-      selectedCustomers,
-      selectedStatuses,
-      onToggleCustomer: (v) => setSelectedCustomers(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
-      onToggleStatus: (v) => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
-      config: {
-        customerLabelKey: 'locations.filters.customer',
-        statusLabelKey: 'locations.filters.status',
-        customerFieldKey: 'customer_id',
-        statusFieldKey: 'status',
-      },
-    }),
-    [t, rows, customerOptions, statusOptions, selectedCustomers, selectedStatuses]
-  )
+  const filterGroups = useReportTableFilterGroups({
+    t, rows, customerOptions, statusOptions,
+    selectedCustomers, setSelectedCustomers,
+    selectedStatuses, setSelectedStatuses,
+    config: FILTER_CONFIG,
+  })
 
   // Consolidates filtered/sorted memo and registers filter groups with the shared panel.
   const { filtered, sorted: sortedAll } = useReportTableFilter({
@@ -113,40 +109,36 @@ export default function LocationsTable() {
         searchPlaceholder={t('locations.search')}
       />
 
-      <ReportTableFrame
+      <ReportTableShell
         loading={loading}
         loadingLabel={t('locations.loading')}
         empty={sorted.length === 0}
         emptyLabel={t('locations.empty')}
-      >
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <SortableTableHead columns={COLS} sort={sort} onSort={setSort_} />
-          <tbody>
-            {paged.map((r, i) => (
-              <ReportRow key={r.id ?? i} onClick={() => setDrill(r)}>
-                <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>{r.name}</td>
-                <td style={TD}>{r.customer_name}</td>
-                <td style={{ ...TD, color: 'var(--text-muted)', fontSize: 12 }}>
-                  {r.address ? (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                      {r.address}
-                      {/* Stop the row-click drill-down from also firing when the copy icon is used. */}
-                      <span onClick={e => e.stopPropagation()}><CopyIconButton label={t('common:copyAddress.copy')} copiedLabel={t('common:copyAddress.copied')} value={r.address} /></span>
-                    </span>
-                  ) : <span style={{ color: 'var(--border)' }}>—</span>}
-                </td>
-                <td style={TD}>{renderStatusCell(r.status)}</td>
-                <td style={TD}>{renderCountCell(r.dept_count)}</td>
-              </ReportRow>
-            ))}
-          </tbody>
-        </table>
-      </ReportTableFrame>
-
-      <PaginationBar page={page} totalPages={totalPages} totalRows={sorted.length}
-        pageSize={pageSize} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} />
-
-      {drill && <LocationDrawer location={drill} onClose={() => setDrill(null)} />}
+        columns={COLS} sort={sort} onSort={setSort_}
+        rows={paged}
+        renderRow={(r, i) => (
+          <ReportRow key={r.id ?? i} onClick={() => setDrill(r)}>
+            <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>{r.name}</td>
+            <td style={TD}>{r.customer_name}</td>
+            <td style={{ ...TD, color: 'var(--text-muted)', fontSize: 12 }}>
+              {r.address ? (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  {r.address}
+                  {/* Stop the row-click drill-down from also firing when the copy icon is used. */}
+                  <span onClick={e => e.stopPropagation()}><CopyIconButton label={t('common:copyAddress.copy')} copiedLabel={t('common:copyAddress.copied')} value={r.address} /></span>
+                </span>
+              ) : <span style={{ color: 'var(--border)' }}>—</span>}
+            </td>
+            <td style={TD}>{renderStatusCell(r.status)}</td>
+            <td style={TD}>{renderCountCell(r.dept_count)}</td>
+          </ReportRow>
+        )}
+        pagination={
+          <PaginationBar page={page} totalPages={totalPages} totalRows={sorted.length}
+            pageSize={pageSize} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} />
+        }
+        drawer={drill && <LocationDrawer location={drill} onClose={() => setDrill(null)} />}
+      />
     </div>
   )
 }

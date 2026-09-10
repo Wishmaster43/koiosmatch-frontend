@@ -38,6 +38,7 @@ import OutreachDrawer from './OutreachDrawer'
 import PaginationBar from '@/components/ui/PaginationBar'
 import TrashPreviewDialogSlot from '@/components/ui/TrashPreviewDialogSlot'
 import { useTrashFlow } from '@/hooks/useTrashFlow'
+import { ListPageShell } from '@/components/ui/ListPageShell'
 
 // Right-panel multi-toggle for a filter dimension.
 const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) =>
@@ -204,66 +205,11 @@ export default function OutreachPage({ intent }: { intent?: unknown } = {}) {
       {/* + Bellijst is a MODAL over the list (Danny 27-07: "geen popup???") —
           the list stays mounted behind it instead of being swapped out. */}
       {creating && <OutreachCreate onClose={() => setCreating(false)} onCreated={add} />}
-      <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-
-          {/* Insights strip (donuts + KPIs) */}
-          <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
-
-          {/* Toolbar — create on the LEFT, archived toggle + view toggle on the RIGHT (mirror Opportunities) */}
-          <OutreachToolbar
-            onCreate={handleCreateOpen}
-            canCreate={canCreateOutreach}
-            searchEpoch={filters.searchEpoch}
-            onSearch={filters.setQuery}
-            anyFilterActive={filters.anyFilterActive}
-            onClearFilters={clearAllFilters}
-            showArchived={showArchived}
-            onToggleArchived={() => { setShowArchived((v) => !v); setShowTrash(false) }}
-            showTrash={showTrash}
-            onToggleTrash={() => { setShowTrash((v) => !v); setShowArchived(false) }}
-            view={view}
-            onViewChange={setView}
-          />
-
-          {/* Bulk action bar — active table view only, when ≥1 row is selected */}
-          {view === 'table' && !showArchived && !showTrash && selectedIds.size > 0 && (
-            <div style={{ padding: '8px 24px', flexShrink: 0 }}>
-              <OutreachBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
-                onSetStatus={bulkSetStatus} onArchive={bulkArchive} canArchive={canArchive}
-                statuses={columns.map((c) => ({ value: c.key, label: c.label, color: c.color }))} />
-            </div>
-          )}
-
-          {/* Content */}
-          {view === 'board' ? (
-            <OutreachBoard rows={filtered} columns={columns} onMove={handleMove} />
-          ) : (
-            <>
-            <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
-              <OutreachList
-                campaigns={paged}
-                loading={showArchived || showTrash ? archLoading : loading}
-                error={showArchived || showTrash ? archError : error}
-                onReload={showArchived || showTrash ? refetchArchived : reload}
-                emptyText={showArchived || showTrash ? t('archivedEmpty') : undefined}
-                selectable={!showArchived && !showTrash}
-                selectedIds={selectedIds}
-                onToggleRow={toggleRow}
-                onToggleAll={toggleAll}
-                onOpen={setOpenId}
-              />
-            </div>
-            <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
-              pageSize={pageSize} onPageChange={setPage} pageSizeOptions={pageSizeOptions}
-              onPageSizeChange={n => { setPageSize(n); setPage(1) }} />
-            </>
-          )}
-        </div>
-        {/* Per-bellijst drill-down (the call list itself) — row click opens it. An
-            archived row feeds the drawer its banner + name/status fallbacks; W2
-            delivered (measured: OutreachCampaignController::show is now withTrashed)
-            so the drawer fetches the real detail instead of skipping the call. */}
+      <ListPageShell aside={
+        // Per-bellijst drill-down (the call list itself) — row click opens it. An
+        // archived row feeds the drawer its banner + name/status fallbacks; W2
+        // delivered (measured: OutreachCampaignController::show is now withTrashed)
+        // so the drawer fetches the real detail instead of skipping the call.
         <OutreachDrawer id={openId} createdAt={openRow?.created_at}
           onClose={() => { setOpenId(null); if (drawerDirtyRef.current) { drawerDirtyRef.current = false; reload() } }}
           // DRILL-REFRESH-AUDIT-1: an owner change patches the row instantly; every
@@ -280,7 +226,61 @@ export default function OutreachPage({ intent }: { intent?: unknown } = {}) {
           onMarkDeletion={canMarkDeletion ? (cid) => trash.openFor(cid, openRow?.name ?? String(cid)) : undefined}
           onUnmark={canRestore ? (cid) => trash.unmark(cid) : undefined}
           expanded={drawerExpanded} onToggleExpand={() => setDrawerExpanded(e => !e)} />
-      </div>
+      }>
+
+        {/* Insights strip (donuts + KPIs) */}
+        <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
+
+        {/* Toolbar — create on the LEFT, archived toggle + view toggle on the RIGHT (mirror Opportunities) */}
+        <OutreachToolbar
+          onCreate={handleCreateOpen}
+          canCreate={canCreateOutreach}
+          searchEpoch={filters.searchEpoch}
+          onSearch={filters.setQuery}
+          anyFilterActive={filters.anyFilterActive}
+          onClearFilters={clearAllFilters}
+          showArchived={showArchived}
+          onToggleArchived={() => { setShowArchived((v) => !v); setShowTrash(false) }}
+          showTrash={showTrash}
+          onToggleTrash={() => { setShowTrash((v) => !v); setShowArchived(false) }}
+          view={view}
+          onViewChange={setView}
+        />
+
+        {/* Bulk action bar — active table view only, when ≥1 row is selected */}
+        {view === 'table' && !showArchived && !showTrash && selectedIds.size > 0 && (
+          <div style={{ padding: '8px 24px', flexShrink: 0 }}>
+            <OutreachBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
+              onSetStatus={bulkSetStatus} onArchive={bulkArchive} canArchive={canArchive}
+              statuses={columns.map((c) => ({ value: c.key, label: c.label, color: c.color }))} />
+          </div>
+        )}
+
+        {/* Content */}
+        {view === 'board' ? (
+          <OutreachBoard rows={filtered} columns={columns} onMove={handleMove} />
+        ) : (
+          <>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
+            <OutreachList
+              campaigns={paged}
+              loading={showArchived || showTrash ? archLoading : loading}
+              error={showArchived || showTrash ? archError : error}
+              onReload={showArchived || showTrash ? refetchArchived : reload}
+              emptyText={showArchived || showTrash ? t('archivedEmpty') : undefined}
+              selectable={!showArchived && !showTrash}
+              selectedIds={selectedIds}
+              onToggleRow={toggleRow}
+              onToggleAll={toggleAll}
+              onOpen={setOpenId}
+            />
+          </div>
+          <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
+            pageSize={pageSize} onPageChange={setPage} pageSizeOptions={pageSizeOptions}
+            onPageSizeChange={n => { setPageSize(n); setPage(1) }} />
+          </>
+        )}
+      </ListPageShell>
       <TrashPreviewDialogSlot trash={trash} />
     </>
   )

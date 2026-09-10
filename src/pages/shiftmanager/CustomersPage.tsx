@@ -13,12 +13,13 @@ import ErrorBanner from '@/components/ui/ErrorBanner'
 import { isAbortError } from '@/lib/abortError'
 import CustomersTable from './CustomersTable'
 import InsightsRow from '@/components/insights/InsightsRow'
-import PaginationBar from '@/components/ui/PaginationBar'
+import { SmPaginationBar } from './SmPaginationBar'
 import type { SmCustomerRow } from '@/types/shiftmanager'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 
 import { initialsOf } from '@/lib/initials'
 import { STATUS_COLORS, deptCount } from './shared'
+import { ListPageShell } from '@/components/ui/ListPageShell'
 
 // Raw API/form customer (snake_case + camelCase tolerant) before mapping.
 interface RawCustomer {
@@ -178,25 +179,21 @@ export default function CustomersPage() {
   // coupling contract from them and makes us responsible for data in someone else's system.
 
   return (
-    <>
-      <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <ListPageShell>
 
-          {/* Shared InsightsRow (§3A) — replaces the stale CustomersInsightsRow fork,
-              which had drifted from the active-donut border, the picked-segment dim
-              and the §4 button-trio clear-chip fixes already made upstream. */}
-          <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
+      {/* Shared InsightsRow (§3A) — replaces the stale CustomersInsightsRow fork,
+          which had drifted from the active-donut border, the picked-segment dim
+          and the §4 button-trio clear-chip fixes already made upstream. */}
+      <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
 
 
-          <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
-            {error && <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>}
-            <CustomersTable rows={filtered} loading={loading} selectedId={selected?.id} onSelect={setSelected} />
-          </div>
-
-          <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
-            onPageChange={setPage} onPageSizeChange={(s) => { setPageSize(s); setPage(1) }} />
-        </div>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
+        {error && <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>}
+        <CustomersTable rows={filtered} loading={loading} selectedId={selected?.id} onSelect={setSelected} />
       </div>
-    </>
+
+      <SmPaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
+        onPageChange={setPage} setPage={setPage} setPageSize={setPageSize} />
+    </ListPageShell>
   )
 }
