@@ -13,9 +13,9 @@ import { useAllSettings, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { extractApiError } from '@/lib/extractApiError'
 import { notifyError } from '@/lib/notify'
 import SearchSelect from '@/components/ui/SearchSelect'
-import { SectionTitle, Caption, BodyText } from '@/components/ui/typography'
+import { BodyText, Caption } from '@/components/ui/typography'
+import { DefaultChoiceCard } from './DefaultChoiceCard'
 
-const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' }
 const EFFORT_KEY = 'koios_default_effort'
 const EFFORT_LEVELS = ['low', 'medium', 'high', 'xhigh', 'max']
 
@@ -47,10 +47,11 @@ export default function KoiosEffortDefaultCard() {
   const current = options.find(o => o.value === effort)
 
   return (
-    <div style={card}>
-      <SectionTitle>{t('effortDefault.title') as string}</SectionTitle>
-      <Caption style={{ display: 'block', margin: '4px 0 12px' }}>{t('effortDefault.hint') as string}</Caption>
-
+    <DefaultChoiceCard
+      title={t('effortDefault.title') as string}
+      hint={t('effortDefault.hint') as string}
+      error={error}
+    >
       <div style={{ marginBottom: 14 }}>
         {canEdit ? (
           // The searchable dropdown (its own field face, no custom trigger) renders only for who
@@ -73,8 +74,6 @@ export default function KoiosEffortDefaultCard() {
           </>
         )}
       </div>
-
-      {error && <div role="status" style={{ display: 'block', marginTop: 6, color: 'var(--color-danger-text)', fontSize: 12 }}>{error}</div>}
-    </div>
+    </DefaultChoiceCard>
   )
 }

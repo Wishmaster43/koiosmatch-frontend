@@ -18,12 +18,13 @@ import { inputStyle, Field, CopyableValue, SaveBar } from './shared'
 import { InterviewFlowSection } from './InterviewFlowSection'
 import { AgentKnowledgeSection } from './AgentKnowledgeSection'
 import { KNOWLEDGE_IDS_MAX } from './agentLimits'
+import { FormHeader } from './FormHeader'
 import type { AiAgent, AiItem, AiKnowledgeLookupItem, ChatMessage } from '@/types/ai'
 // Reuse the WhatsApp-templates option shape from the workflow module's template
 // picker (GET /whatsapp-templates) instead of re-declaring it (§11 — one truth).
 import type { WaTemplateOption } from '@/components/layout/workflow/whatsappTemplate'
 import Button from '@/components/ui/Button'
-import { groupLabelStyle, SectionTitle } from '@/components/ui/typography'
+import { groupLabelStyle } from '@/components/ui/typography'
 
 // Mirrors shared.tsx's `Field` label style — used directly (not via `Field`) for the
 // two CreatableSelect pickers below, which need their own aria-labelledby wiring
@@ -256,23 +257,20 @@ export function AgentForm({ agent, prompts, faqs, knowledgeItems, onSaved, onDel
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
       {/* Header row */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--color-violet-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Brain size={15} color="var(--color-violet)" />
+      <FormHeader
+        icon={Brain}
+        title={isNew ? t('ai.agent.newAgent') : form.name || t('ai.agent.fallback')}
+        // AgentForm always wraps its title in a div on main, even for a user-less agent
+        // (the '+ New agent' path) — unlike InterviewFlowsPanel, which never does.
+        wrapTitle
+        // AI-AGENTS-2: the agent mirrors this recruiter/manager user — same Avatar as elsewhere
+        titleSubtitle={agent?.user && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 2 }}>
+            <Avatar initials={initialsOf(agent.user.name)} size={14} soft />
+            <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{agent.user.name}</span>
           </div>
-          <div>
-            <SectionTitle as="div">{isNew ? t('ai.agent.newAgent') : form.name || t('ai.agent.fallback')}</SectionTitle>
-            {/* AI-AGENTS-2: the agent mirrors this recruiter/manager user — same Avatar as elsewhere */}
-            {agent?.user && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 2 }}>
-                <Avatar initials={initialsOf(agent.user.name)} size={14} soft />
-                <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{agent.user.name}</span>
-              </div>
-            )}
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: 6 }}>
+        )}
+        rightActions={<>
           {!isNew && (
             // Pre-existing bespoke toggle-state control (own on/off fill), out of this
             // ink/tint task's scope; not converted to avoid a size/identity regression.
@@ -295,8 +293,8 @@ export function AgentForm({ agent, prompts, faqs, knowledgeItems, onSaved, onDel
             </button>
           )}
           <SaveBar saving={saving} saved={saved} onSave={save} />
-        </div>
-      </div>
+        </>}
+      />
 
       {chatOpen && !isNew ? (
         <div style={{ height: 320 }}>

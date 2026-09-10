@@ -18,9 +18,9 @@ import { extractApiError } from '@/lib/extractApiError'
 import { notifyError } from '@/lib/notify'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import Toggle from '@/components/ui/Toggle'
-import { SectionTitle, Caption, BodyText } from '@/components/ui/typography'
+import { BodyText, Caption } from '@/components/ui/typography'
+import { DefaultChoiceCard } from './DefaultChoiceCard'
 
-const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' }
 const MODE_KEY = 'koios.mode_default'
 const AUTO_MESSAGES_KEY = 'koios.auto_messages_default'
 
@@ -56,10 +56,17 @@ export default function KoiosModeDefaultCard() {
   }
 
   return (
-    <div style={card}>
-      <SectionTitle>{t('modeDefault.title')}</SectionTitle>
-      <Caption style={{ display: 'block', margin: '4px 0 12px' }}>{t('modeDefault.desc')}</Caption>
-
+    <DefaultChoiceCard
+      title={t('modeDefault.title')}
+      hint={t('modeDefault.desc')}
+      error={error}
+      // On main this card's error was a plain Caption span at 11px with no role,
+      // unlike KoiosEffortDefaultCard's div/role="status" (rule B/F: carry the
+      // difference, never unify on one copy).
+      renderError={(msg) => (
+        <Caption style={{ display: 'block', marginTop: 6, color: 'var(--color-danger-text)' }}>{msg}</Caption>
+      )}
+    >
       <div style={{ marginBottom: 14 }}>
         {canEdit ? (
           // The chooser only renders for who may write (§3: never a control that swallows
@@ -94,7 +101,6 @@ export default function KoiosModeDefaultCard() {
       </label>
 
       <Caption style={{ display: 'block', marginTop: 10 }}>{t('modeDefault.deviationHint')}</Caption>
-      {error && <Caption style={{ display: 'block', marginTop: 6, color: 'var(--color-danger-text)' }}>{error}</Caption>}
-    </div>
+    </DefaultChoiceCard>
   )
 }

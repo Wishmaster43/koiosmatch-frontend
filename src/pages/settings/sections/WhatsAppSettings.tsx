@@ -157,6 +157,30 @@ export default function WhatsAppSettings() {
   ]
   const connectionOptions = connections.map(c => ({ value: c.id, label: c.label?.trim() || c.waba_id }))
 
+  // Local helper (DRY round 10 SETTINGS): the last-sync banner + connection picker
+  // were byte-identical between the numbers and templates tab bodies below.
+  const renderSyncBanner = () => (
+    <>
+      {syncMsg && (
+        <div style={{ marginBottom: 12, padding: '10px 14px', borderRadius: 8, fontSize: 12,
+                      background: syncMsg.ok ? 'var(--color-success-bg)' : 'var(--color-danger-bg)',
+                      color: syncMsg.ok ? 'var(--color-success)' : 'var(--color-danger)' }}>
+          {syncMsg.text}
+        </div>
+      )}
+      {connectionOptions.length > 1 && (
+        <div style={{ marginBottom: 12, maxWidth: 260 }}>
+          {/* §6 (Opus F5): the picker's accessible name must survive a picked
+              value — Field wires label → trigger via id/aria-labelledby. */}
+          <Field label={t('whatsapp.selectConnection')}>
+            <SelectField value={selectedConnId ?? ''} onChange={setSelectedConnId} options={connectionOptions}
+              placeholder={t('whatsapp.selectConnection')} />
+          </Field>
+        </div>
+      )}
+    </>
+  )
+
   return (
     <div style={{ maxWidth: 800 }}>
 
@@ -177,23 +201,7 @@ export default function WhatsAppSettings() {
       {/* ── Phone numbers ── */}
       {tab === 'numbers' && (
       <div>
-        {syncMsg && (
-          <div style={{ marginBottom: 12, padding: '10px 14px', borderRadius: 8, fontSize: 12,
-                        background: syncMsg.ok ? 'var(--color-success-bg)' : 'var(--color-danger-bg)',
-                        color: syncMsg.ok ? 'var(--color-success)' : 'var(--color-danger)' }}>
-            {syncMsg.text}
-          </div>
-        )}
-        {connectionOptions.length > 1 && (
-          <div style={{ marginBottom: 12, maxWidth: 260 }}>
-            {/* §6 (Opus F5): the picker's accessible name must survive a picked
-                value — Field wires label → trigger via id/aria-labelledby. */}
-            <Field label={t('whatsapp.selectConnection')}>
-              <SelectField value={selectedConnId ?? ''} onChange={setSelectedConnId} options={connectionOptions}
-                placeholder={t('whatsapp.selectConnection')} />
-            </Field>
-          </div>
-        )}
+        {renderSyncBanner()}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 12 }}>
           {selectedConnId && canManage && (
             <Button variant="secondary" size="sm" onClick={syncNumbers} disabled={syncing === 'numbers'}>
@@ -259,23 +267,7 @@ export default function WhatsAppSettings() {
       {/* ── Templates ── */}
       {tab === 'templates' && (
       <div>
-        {syncMsg && (
-          <div style={{ marginBottom: 12, padding: '10px 14px', borderRadius: 8, fontSize: 12,
-                        background: syncMsg.ok ? 'var(--color-success-bg)' : 'var(--color-danger-bg)',
-                        color: syncMsg.ok ? 'var(--color-success)' : 'var(--color-danger)' }}>
-            {syncMsg.text}
-          </div>
-        )}
-        {connectionOptions.length > 1 && (
-          <div style={{ marginBottom: 12, maxWidth: 260 }}>
-            {/* §6 (Opus F5): the picker's accessible name must survive a picked
-                value — Field wires label → trigger via id/aria-labelledby. */}
-            <Field label={t('whatsapp.selectConnection')}>
-              <SelectField value={selectedConnId ?? ''} onChange={setSelectedConnId} options={connectionOptions}
-                placeholder={t('whatsapp.selectConnection')} />
-            </Field>
-          </div>
-        )}
+        {renderSyncBanner()}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 12 }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             {selectedConnId && canManage && (

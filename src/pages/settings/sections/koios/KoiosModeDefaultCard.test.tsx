@@ -76,6 +76,11 @@ describe('KoiosModeDefaultCard — saves', () => {
     fireEvent.click(screen.getByRole('radio', { name: st('modeDefault.auto') }))
 
     await waitFor(() => expect(notifyError).toHaveBeenCalled())
+    // The card's own error shape (rule B, DRY round 10): a plain 11px caption span, no status role.
+    const err = await screen.findByText('Ongeldige waarde.')
+    expect(err.tagName).toBe('SPAN')
+    expect(err).not.toHaveAttribute('role')
+    expect(err).toHaveStyle({ fontSize: '11px' })
   })
 })
 

@@ -52,7 +52,7 @@
  * Row rendering lives in StatusListRow.tsx, the create/edit form in
  * StatusListModal.tsx (SIZE-SPLIT-B extraction, zero behaviour change).
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIcons'
 import { AlertTriangle } from 'lucide-react'
@@ -75,6 +75,15 @@ const slugify = (s: string): string => {
   const base = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 64)
   return base || `item_${Date.now().toString(36)}`
+}
+
+// Shared title rendering across the not-found/error/loaded states (was repeated
+// three times in this file, DRY round 10 SETTINGS): compact hosts get a plain h3,
+// full settings pages get the PageTitle atom.
+function renderEditorTitle(title: ReactNode, compact: boolean) {
+  return compact
+    ? <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</h3>
+    : <PageTitle>{title}</PageTitle>
 }
 
 export default function StatusListEditor({
@@ -277,9 +286,7 @@ export default function StatusListEditor({
   if (notFound) {
     return (
       <div style={{ maxWidth: 640 }}>
-        {compact
-          ? <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</h3>
-          : <PageTitle>{title}</PageTitle>}
+        {renderEditorTitle(title, compact)}
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{notFoundNotice}</p>
       </div>
     )
@@ -290,9 +297,7 @@ export default function StatusListEditor({
   if (loadError) {
     return (
       <div style={{ maxWidth: 640 }}>
-        {compact
-          ? <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</h3>
-          : <PageTitle>{title}</PageTitle>}
+        {renderEditorTitle(title, compact)}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, color: 'var(--color-danger-text)', fontSize: 13 }}>
           <AlertTriangle size={14} /> {t('statusList.loadError')}
         </div>
@@ -304,9 +309,7 @@ export default function StatusListEditor({
     <div style={{ maxWidth: 640 }}>
       <div className="flex items-start justify-between" style={{ marginBottom: 20, gap: 16 }}>
         <div style={{ minWidth: 0 }}>
-          {compact
-            ? <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</h3>
-            : <PageTitle>{title}</PageTitle>}
+          {renderEditorTitle(title, compact)}
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>

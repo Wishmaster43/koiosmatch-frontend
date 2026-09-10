@@ -170,70 +170,39 @@ export default function WorkflowEndpointsCard() {
   // Extract the new endpoint slug from the errors if one exists (for displaying errors on the new form).
   const newEndpointError = Object.entries(errors).find(([k]) => k.startsWith('_new_'))?.[1]
 
-  const handleUrlChange = async (slug: string, newUrl: string) => {
-    setSaving((s) => new Set([...s, slug]))
+  // Local helper (DRY round 10 SETTINGS): the three handlers below persisted one
+  // settings key with byte-identical error/saving-set bookkeeping, differing only
+  // in the key used for both the saving-set and the errors map, the value saved,
+  // and (handleAddSave only) an extra success side effect.
+  const persistEndpoint = async (key: string, slug: string, value: string, onSuccess?: () => void) => {
+    setSaving((s) => new Set([...s, key]))
     try {
-      await saveSettingsKeys({ [`webhook_endpoint_${slug}`]: newUrl })
+      await saveSettingsKeys({ [`webhook_endpoint_${slug}`]: value })
       setErrors((e) => {
         const next = { ...e }
-        delete next[slug]
+        delete next[key]
         return next
       })
+      onSuccess?.()
     } catch (err) {
       const msg = extractApiError(err, t('common:actionFailed'))
-      setErrors((e) => ({ ...e, [slug]: msg }))
+      setErrors((e) => ({ ...e, [key]: msg }))
     } finally {
       setSaving((s) => {
         const next = new Set(s)
-        next.delete(slug)
+        next.delete(key)
         return next
       })
     }
   }
 
-  const handleRemove = async (slug: string) => {
-    setSaving((s) => new Set([...s, slug]))
-    try {
-      // Save empty string to delete the setting.
-      await saveSettingsKeys({ [`webhook_endpoint_${slug}`]: '' })
-      setErrors((e) => {
-        const next = { ...e }
-        delete next[slug]
-        return next
-      })
-    } catch (err) {
-      const msg = extractApiError(err, t('common:actionFailed'))
-      setErrors((e) => ({ ...e, [slug]: msg }))
-    } finally {
-      setSaving((s) => {
-        const next = new Set(s)
-        next.delete(slug)
-        return next
-      })
-    }
-  }
+  const handleUrlChange = (slug: string, newUrl: string) => persistEndpoint(slug, slug, newUrl)
 
-  const handleAddSave = async (slug: string, url: string) => {
-    setSaving((s) => new Set([...s, `_new_${slug}`]))
-    try {
-      await saveSettingsKeys({ [`webhook_endpoint_${slug}`]: url })
-      setErrors((e) => {
-        const next = { ...e }
-        delete next[`_new_${slug}`]
-        return next
-      })
-      setIsAdding(false)
-    } catch (err) {
-      const msg = extractApiError(err, t('common:actionFailed'))
-      setErrors((e) => ({ ...e, [`_new_${slug}`]: msg }))
-    } finally {
-      setSaving((s) => {
-        const next = new Set(s)
-        next.delete(`_new_${slug}`)
-        return next
-      })
-    }
-  }
+  // Save empty string to delete the setting.
+  const handleRemove = (slug: string) => persistEndpoint(slug, slug, '')
+
+  const handleAddSave = (slug: string, url: string) =>
+    persistEndpoint(`_new_${slug}`, slug, url, () => setIsAdding(false))
 
   return (
     <SectionCard title={t('webhooks.endpoints.title')}>

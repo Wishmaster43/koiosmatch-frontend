@@ -13,11 +13,12 @@ import { Brain, Plus, X, Trash2 } from 'lucide-react'
 import Toggle from '@/components/ui/Toggle'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { DragList } from '@/pages/settings/shared'
-import { SectionTitle, GroupLabel, groupLabelStyle, monoStyle } from '@/components/ui/typography'
+import { GroupLabel, groupLabelStyle, monoStyle } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import { fieldTextareaStyle } from '@/components/forms/fieldMetrics'
 import { useAiAgents } from '@/hooks/useAiAgents'
 import { inputStyle, Field, SaveBar } from './shared'
+import { FormHeader } from './FormHeader'
 import type { InterviewFlow } from '@/types/ai'
 
 // One editable status chip row — id keeps DragList's key stable across reorders (index alone would rebind on every move).
@@ -94,14 +95,10 @@ export function InterviewFlowsPanel({ flow, onSaved, onDelete, saving }: {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
       {/* Header row — mirrors AgentForm's icon + title + SaveBar layout */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--color-violet-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Brain size={15} color="var(--color-violet)" />
-          </div>
-          <SectionTitle as="div">{isNew ? t('ai.flows.newFlow') : form.name || t('ai.flows.fallback')}</SectionTitle>
-        </div>
-        <div style={{ display: 'flex', gap: 6 }}>
+      <FormHeader
+        icon={Brain}
+        title={isNew ? t('ai.flows.newFlow') : form.name || t('ai.flows.fallback')}
+        rightActions={<>
           {!isNew && flow && onDelete && (
             <Button variant="ghost" iconOnly onClick={() => onDelete(flow)}
               aria-label={t('common:delete')} title={t('common:delete')} style={{ color: 'var(--color-danger-text)' }}>
@@ -109,8 +106,8 @@ export function InterviewFlowsPanel({ flow, onSaved, onDelete, saving }: {
             </Button>
           )}
           <SaveBar saving={saving} saved={saved} onSave={save} disabled={!canSave} />
-        </div>
-      </div>
+        </>}
+      />
 
       <Field label={t('ai.field.name')}>
         <input value={form.name} onChange={e => set('name', e.target.value)} style={inputStyle} placeholder={t('ai.flows.namePlaceholder')} />
