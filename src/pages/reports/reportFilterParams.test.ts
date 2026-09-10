@@ -129,8 +129,16 @@ describe('buildReportQueryParams — WAVE 1c per-page dimensions', () => {
   it('attaches direction/escalated/type for whatsapp, and drops status/location_id even when set', () => {
     const filters: ReportFilterState = { ...EMPTY_REPORT_FILTERS, status: ['x'], locationId: ['l1'], direction: ['inbound'], escalated: true, messageType: ['template', 'none'] }
     expect(buildReportQueryParams('month', 'whatsapp', filters)).toEqual({
-      period: 'month', direction: ['inbound'], escalated: true, type: ['template', 'none'],
+      period: 'month', direction: ['inbound'], escalated: 1, type: ['template', 'none'],
     })
+  })
+
+  // Laravel's boolean rule rejects the string "true"/"false" a JS boolean serialises to: 0/1, sent only when the filter is actually set.
+  it('sends escalated as 0/1, and omits it entirely for "any"', () => {
+    const nee: ReportFilterState = { ...EMPTY_REPORT_FILTERS, escalated: false }
+    expect(buildReportQueryParams('month', 'whatsapp', nee)).toEqual({ period: 'month', escalated: 0 })
+    const any: ReportFilterState = { ...EMPTY_REPORT_FILTERS, escalated: null }
+    expect(buildReportQueryParams('month', 'whatsapp', any)).toEqual({ period: 'month' })
   })
 
   it('attaches value_min/value_max for opportunities', () => {

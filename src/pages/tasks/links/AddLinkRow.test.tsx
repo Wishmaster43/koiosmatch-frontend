@@ -24,11 +24,9 @@ describe('AddLinkRow — customer_location', () => {
     mockGet.mockResolvedValue({ data: [] })
   })
 
-  it('fetches /customer-locations with q and per_page on the initial load', async () => {
+  it('fetches /customer-locations with per_page only on the initial (empty-query) load — no q/search key at all', async () => {
     render(<AddLinkRow existing={[]} onAdd={vi.fn()} onClose={vi.fn()} types={['customer_location']} />)
-    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/customer-locations', {
-      params: expect.objectContaining({ q: '', search: '', per_page: 25 }),
-    }))
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/customer-locations', { params: { per_page: 25 } }))
   })
 
   it('re-searches /customer-locations with the typed q after the debounce', async () => {

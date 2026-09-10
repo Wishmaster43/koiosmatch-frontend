@@ -41,7 +41,10 @@ export default function NoteLinkPicker({ existing, onAdd, onClose, busy }: {
     const cfg = PRINCIPAL_ENDPOINTS[type]
     const requestId = ++requestIdRef.current
     setError(false)
-    api.get(cfg.url, { params: { q: query, search: query, per_page: 25 } })
+    // An empty query must send NEITHER q nor search — several PRINCIPAL_ENDPOINTS
+    // (customers, customer-locations, departments, contacts) 422 on a null value
+    // from a plain empty string (contract audit ENT2-01, same fix as AddLinkRow).
+    api.get(cfg.url, { params: { ...(query ? { q: query, search: query } : {}), per_page: 25 } })
       .then(r => { if (requestIdRef.current === requestId) setRows(unwrapList<PickerRow>(r).rows) })
       .catch(() => { if (requestIdRef.current === requestId) setError(true) })
   }, [type, query])

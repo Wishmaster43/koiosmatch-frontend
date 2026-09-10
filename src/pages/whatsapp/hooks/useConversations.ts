@@ -51,9 +51,10 @@ export function useConversations(filters: WaConversationFilters) {
       const params = {
         per_page: 50,
         ...(filters.status ? { status: filters.status } : {}),
-        ...(filters.escalated ? { escalated: true } : {}),
-        ...(filters.unanswered ? { unanswered: true } : {}),
-        ...(filters.active ? { active: true } : {}),
+        // Laravel's boolean rule rejects the string "true" a JS boolean serialises to: send 1, same idiom as useWhatsAppData.ts's `priority`.
+        ...(filters.escalated ? { escalated: 1 } : {}),
+        ...(filters.unanswered ? { unanswered: 1 } : {}),
+        ...(filters.active ? { active: 1 } : {}),
         ...(filters.search ? { search: filters.search } : {}),
       }
       const res = await api.get('/conversations', { params, signal })

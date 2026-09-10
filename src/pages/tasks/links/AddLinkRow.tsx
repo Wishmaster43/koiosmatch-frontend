@@ -54,7 +54,10 @@ export default function AddLinkRow({ existing, onAdd, onClose, types = TASK_LINK
     if (!cfg) { setRows([]); return }
     const requestId = ++requestIdRef.current
     setError(false)
-    api.get(cfg.url, { params: { q: query, search: query, per_page: 25 } })
+    // An empty query must send NEITHER q nor search — ConvertEmptyStringsToNull
+    // turns "" into null, and ten of the fourteen link endpoints' 'string' rule
+    // (no 'nullable') 422s on that (contract audit ENT2-01).
+    api.get(cfg.url, { params: { ...(query ? { q: query, search: query } : {}), per_page: 25 } })
       .then(r => { if (requestIdRef.current === requestId) setRows(unwrapList<LinkRow>(r).rows) })
       .catch(() => { if (requestIdRef.current === requestId) setError(true) })
   }, [type, query])

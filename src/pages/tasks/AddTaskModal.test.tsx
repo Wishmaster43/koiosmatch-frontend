@@ -725,7 +725,8 @@ describe('AddTaskModal · PUNT 15 — a new task couples to the full shared link
     await user.click(screen.getByRole('button', { name: 'links.department' }))
     // The picker searches the department endpoint server-side (capped page).
     const api = (await import('@/lib/api')).default
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/departments', { params: { q: '', search: '', per_page: 25 } }))
+    // An empty query sends neither q nor search (contract audit ENT2-01: the empty string turns into null and 422s).
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/departments', { params: { per_page: 25 } }))
 
     await user.click(screen.getByRole('button', { name: 'links.selectEntity' }))
     await user.click(await screen.findByRole('button', { name: 'Backoffice Zorg' }))

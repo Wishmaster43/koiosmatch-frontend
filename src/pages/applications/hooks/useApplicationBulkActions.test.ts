@@ -18,17 +18,39 @@ vi.mock('@/lib/api', async () => {
   return { ...actual, default: { post: vi.fn() } }
 })
 vi.mock('@/lib/notify', () => ({ notify: vi.fn(), notifyError: vi.fn(), notifySuccess: vi.fn() }))
+// A vi.fn() (not a static factory) so individual tests can override the return
+// value — the seed-shaped-list test below needs a DIFFERENT stage list than the
+// happy-path tests (contract audit ENT1-01 follow-up).
+vi.mock('@/hooks/useApplicationStages', () => ({ useApplicationStages: vi.fn() }))
 import api from '@/lib/api'
-import { notify } from '@/lib/notify'
+import { notify, notifyError } from '@/lib/notify'
+import { useApplicationStages } from '@/hooks/useApplicationStages'
 
 const post = api.post as unknown as ReturnType<typeof vi.fn>
 const notifyMock = notify as unknown as ReturnType<typeof vi.fn>
+const notifyErrorMock = notifyError as unknown as ReturnType<typeof vi.fn>
+const mockedUseApplicationStages = useApplicationStages as unknown as ReturnType<typeof vi.fn>
 // Records interpolation params too, so the reason-breakdown assertion can inspect them.
 const t = ((k: string, params?: Record<string, unknown>) => (params ? `${k}:${JSON.stringify(params)}` : k)) as unknown as import('i18next').TFunction
 
 const FUNNEL: LookupItem[] = [
   { value: 'applied', label: 'Applied', color: 'slate' },
   { value: 'hired',    label: 'Hired',   color: 'slate', is_match: true },
+]
+
+// Real backend stage ids (uuid-shaped) — the happy-path default for every test
+// below unless a test overrides it. isUuid() rejects anything else, so these
+// must actually match the canonical uuid format, not a placeholder string.
+const REAL_STAGES = [
+  { id: '2f1c6d2e-0d7e-4b7a-9c1e-1a2b3c4d5e6f', value: 'applied', label: 'Applied', color: 'slate', is_default: true },
+  { id: '9b3a2c1d-4e5f-4a6b-8c7d-0e1f2a3b4c5d', value: 'hired', label: 'Hired', color: 'slate', is_default: false },
+]
+// Seed-shaped stage list (useApplicationStages.ts's own seed: ids fall back to the
+// slug) — what the lookup looks like while GET /application-stages is in flight
+// or failed.
+const SEED_STAGES = [
+  { id: 'applied', value: 'applied', label: 'Applied', color: 'slate', is_default: true },
+  { id: 'hired', value: 'hired', label: 'Hired', color: 'slate', is_default: false },
 ]
 
 const app = (overrides: Partial<Application> = {}): Application => ({
@@ -53,7 +75,10 @@ function harness(initial: Application[]) {
 }
 const rowOf = (r: { result: { current: { applications: Application[] } } }, id: Id) => r.result.current.applications.find(a => a.id === id)
 
-beforeEach(() => { post.mockReset(); notifyMock.mockReset() })
+beforeEach(() => {
+  post.mockReset(); notifyMock.mockReset(); notifyErrorMock.mockReset()
+  mockedUseApplicationStages.mockReturnValue({ stages: REAL_STAGES, defaultStage: REAL_STAGES[0] })
+})
 
 describe('useApplicationBulkActions · bulkDetach', () => {
   it('sends ONE POST to the bulk-detach route with application_ids + reason', async () => {
@@ -100,15 +125,28 @@ describe('useApplicationBulkActions · bulkDetach', () => {
 })
 
 describe('useApplicationBulkActions · bulkSetPhase', () => {
-  it('sends ONE POST to the bulk-stage route with application_ids + phase_key', async () => {
+  it('sends ONE POST to the bulk-stage route with application_ids + the real stage uuid (ENT1-01: the endpoint validates stage_id, not phase_key)', async () => {
     post.mockResolvedValue({ data: { updated: [1, 2], skipped: [] } })
     const r = harness([app({ id: 1, phaseKey: 'applied' }), app({ id: 2, phaseKey: 'applied' })])
     act(() => r.result.current.setSelectedIds(new Set([1, 2])))
     act(() => r.result.current.actions.bulkSetPhase('hired'))
+    // The picked funnel KEY still drives the optimistic local write (phaseKey/bucket) —
+    // only the outgoing request resolves to the backend's uuid.
     expect(rowOf(r, 1)?.phaseKey).toBe('hired')
     expect(rowOf(r, 1)?.bucket).toBe('matched')
     expect(post).toHaveBeenCalledTimes(1)
-    expect(post).toHaveBeenCalledWith('/applications/bulk/stage', { application_ids: [1, 2], phase_key: 'hired' })
+    expect(post).toHaveBeenCalledWith('/applications/bulk/stage', { application_ids: [1, 2], stage_id: '9b3a2c1d-4e5f-4a6b-8c7d-0e1f2a3b4c5d' })
+  })
+
+  it('blocks entirely while the stage lookup is still its slug-seed — no POST, no optimistic row move, a real error toast', () => {
+    mockedUseApplicationStages.mockReturnValue({ stages: SEED_STAGES, defaultStage: SEED_STAGES[0] })
+    const r = harness([app({ id: 1, phaseKey: 'applied' }), app({ id: 2, phaseKey: 'applied' })])
+    act(() => r.result.current.setSelectedIds(new Set([1, 2])))
+    act(() => r.result.current.actions.bulkSetPhase('hired'))
+    expect(post).not.toHaveBeenCalled()
+    expect(rowOf(r, 1)?.phaseKey).toBe('applied')
+    expect(rowOf(r, 2)?.phaseKey).toBe('applied')
+    expect(notifyErrorMock).toHaveBeenCalledWith('common:actionFailed')
   })
 
   it('reverts only the row the server skipped, keeps the rest, and reports the reason', async () => {

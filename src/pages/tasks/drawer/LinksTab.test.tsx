@@ -27,7 +27,8 @@ describe('LinksTab — add-link entity picker (audit finding 2026-08-05: four UI
     const user = userEvent.setup()
     render(<LinksTab task={task()} onAddLink={vi.fn()} onRemoveLink={vi.fn()} />)
     await user.click(screen.getByRole('button', { name: 'links.add' }))
-    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/candidates', { params: { q: '', search: '', per_page: 25 } }))
+    // An empty query sends neither q nor search (contract audit ENT2-01: the empty string turns into null and 422s).
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/candidates', { params: { per_page: 25 } }))
   })
 
   // §3 — a failed entity search must surface its OWN error line, distinct from
@@ -53,7 +54,7 @@ describe('LinksTab — add-link entity picker (audit finding 2026-08-05: four UI
     expect(await screen.findByText('links.loadError')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'common:error.retry' }))
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(2))
-    expect(mockGet).toHaveBeenNthCalledWith(2, '/candidates', { params: { q: '', search: '', per_page: 25 } })
+    expect(mockGet).toHaveBeenNthCalledWith(2, '/candidates', { params: { per_page: 25 } })
     expect(screen.queryByText('links.loadError')).toBeNull()
   })
 })

@@ -23,7 +23,12 @@ interface ApplicationsBulkBarProps {
 // See the file's top doc above for the bulk-actions menu this assembles; funnel options come from the tenant lookup, never hardcoded.
 export default function ApplicationsBulkBar({ count, onClear, onSetPhase, onDetach, canManage = false, phases = [] }: ApplicationsBulkBarProps) {
   const { t } = useTranslation('applications')
-  // Phase options from the funnel lookup (never hardcoded).
+  // Phase options from the funnel lookup (never hardcoded). `value` stays the
+  // funnel KEY here — this shape (LookupsContext funnelTypes) never carries the
+  // row's real backend id (see useApplicationStages.ts's own doc comment), so
+  // resolving the key to the POST /applications/bulk/stage `stage_id` uuid
+  // happens one layer down, in useApplicationBulkActions (contract audit ENT1-01)
+  // — this bar stays a thin, props-only assembler and never fetches its own data.
   const phaseOptions = phases.map(p => ({ value: p.value, label: p.label, color: p.color }))
 
   // Declarative action tree; detach only when the user may manage (server re-checks).

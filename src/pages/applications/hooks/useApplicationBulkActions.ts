@@ -11,6 +11,7 @@
  * per row — drives an honest "N of M, reason breakdown" toast, mirroring the
  * candidate stage-bulk pattern (useCandidateStageBulk's reasonBreakdown).
  */
+import { useMemo } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import api from '@/lib/api'
@@ -25,6 +26,16 @@ import { toggleInSet, toggleAllInSet } from '@/lib/selectionSet'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
 import type { LookupItem } from '@/context/LookupsContext'
+// The bulk-stage endpoint validates stage_id (uuid), not phase_key (contract audit
+// ENT1-01) — LookupsContext's funnelTypes shape only carries the row's `value`
+// (key), never its real id, so this hook resolves the key to the backend uuid
+// itself via the one hook that DOES fetch the real id (its own doc comment names
+// this exact gap).
+import { useApplicationStages } from '@/hooks/useApplicationStages'
+// Same real-vs-seed check useApplicationOwnerAndStage.ts already uses to filter
+// stage options — while the lookup is still its seed, ids are SLUGS ('hired'),
+// not uuids, and the server would 422 on those.
+import { isUuid } from '@/lib/uuid'
 
 interface Args {
   // The current rows — bulkSetPhase/bulkDetach snapshot the fields they overwrite so
@@ -46,6 +57,12 @@ export function useApplicationBulkActions({ applications, setApplications, setTo
   // Row-selection handlers for the table checkboxes + bulk bar.
   const toggleRow = (id: Id) => setSelectedIds(prev => toggleInSet(prev, id))
   const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => toggleAllInSet(prev, ids, allSelected))
+
+  // Real backend stage id per funnel key (ENT1-01) — the funnel picker itself
+  // still deals in keys (bucket/label resolution, local optimistic state), only
+  // the outgoing request needs the uuid.
+  const { stages } = useApplicationStages()
+  const stageIdByKey = useMemo(() => new Map(stages.map(s => [s.value, s.id])), [stages])
 
   // Normalize whatever `skipped` shape the response carries into SkippedRow[].
   const parseSkipped = (raw: unknown): SkippedRow[] => {
@@ -74,12 +91,19 @@ export function useApplicationBulkActions({ applications, setApplications, setTo
   const bulkSetPhase = (phaseKey: string) => {
     const ids = [...selectedIds]
     if (!ids.length) return
+    // The validator requires stage_id (uuid, exists:application_stages,id) and rejects
+    // phase_key on this route (contract audit ENT1-01). While the stage lookup is
+    // still its seed (or failed to load), useApplicationStages' ids ARE the slugs
+    // ('hired') — a non-uuid stageId is a GUARANTEED 422, so bail out BEFORE the
+    // optimistic write rather than moving rows and snapping them back on failure.
+    const stageId = stageIdByKey.get(phaseKey)
+    if (!isUuid(stageId)) { notifyError(t('common:actionFailed')); return }
     const before = new Map(applications
       .filter(a => a.id != null && selectedIds.has(a.id as Id))
       .map(a => [String(a.id), { phaseKey: a.phaseKey, bucket: a.bucket }]))
     setApplications(prev => prev.map(a => a.id != null && selectedIds.has(a.id as Id) ? { ...a, phaseKey, bucket: bucketOfPhase(phaseKey, funnelTypes) } : a))
     setSelectedIds(new Set())
-    api.post('/applications/bulk/stage', { application_ids: ids, phase_key: phaseKey })
+    api.post('/applications/bulk/stage', { application_ids: ids, stage_id: stageId })
       .then(res => {
         const updated = Array.isArray(res.data?.updated) ? new Set(res.data.updated.map(String)) : new Set(ids.map(String))
         const skipped = parseSkipped(res.data?.skipped)

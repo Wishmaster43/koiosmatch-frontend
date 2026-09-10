@@ -150,7 +150,8 @@ export interface ReportQueryParams {
   priority?: Array<string | number>
   team_id?: Array<string | number>
   direction?: Array<string | number>
-  escalated?: boolean
+  // Laravel's boolean rule rejects the string "true" a JS boolean serialises to: 0/1, never a raw boolean.
+  escalated?: 0 | 1
   customer_ids?: Array<string | number>
   origin?: Array<string | number>
   stop_reason?: Array<string | number>
@@ -203,7 +204,7 @@ export function buildReportQueryParams(
   }
   if (reportId === 'whatsapp') {
     if (filters.direction?.length) params.direction = filters.direction
-    if (filters.escalated != null) params.escalated = filters.escalated
+    if (filters.escalated != null) params.escalated = filters.escalated ? 1 : 0
     if (filters.messageType?.length) params.type = filters.messageType
   }
   if (reportId === 'opportunities') {

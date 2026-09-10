@@ -26,11 +26,20 @@ describe('useConversations', () => {
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/conversations', { params: { per_page: 50 }, signal: expect.anything() }))
   })
 
-  it('forwards escalated/unanswered/active/search as real boolean/string params', async () => {
+  it('forwards escalated/unanswered/active as 1 (Laravel boolean rule rejects the string "true"), search as a string', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
     renderHook(() => useConversations({ escalated: true, unanswered: true, active: true, search: 'jane' }), { wrapper })
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/conversations', {
-      params: { per_page: 50, escalated: true, unanswered: true, active: true, search: 'jane' },
+      params: { per_page: 50, escalated: 1, unanswered: 1, active: 1, search: 'jane' },
+      signal: expect.anything(),
+    }))
+  })
+
+  it('sends no key for an unset flag even when a sibling flag is active', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
+    renderHook(() => useConversations({ escalated: true }), { wrapper })
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/conversations', {
+      params: { per_page: 50, escalated: 1 },
       signal: expect.anything(),
     }))
   })
