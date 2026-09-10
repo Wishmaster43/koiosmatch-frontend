@@ -16,7 +16,7 @@ import { notify } from '@/lib/notify'
 import type { ToastType } from '@/lib/notify'
 import { reasonBreakdown as computeReasonBreakdown } from '@/lib/bulkSkipReasons'
 import { useBackofficeCoupleBulk } from '@/hooks/useBackofficeCoupleBulk'
-import { toggleInSet, toggleAllInSet } from '@/lib/selectionSet'
+import { useBulkSelectionToggles } from '@/hooks/useBulkSelectionToggles'
 import type { Id } from '@/types/common'
 
 export type CoupleTarget = 'helloflex' | 'shiftmanager'
@@ -33,8 +33,7 @@ interface UseMatchesBulkActionsArgs {
 
 export function useMatchesBulkActions({ selectedIds, setSelectedIds, t }: UseMatchesBulkActionsArgs) {
   // ── Bulk selection ──
-  const toggleRow = (id: Id) => setSelectedIds(prev => toggleInSet(prev, id))
-  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => toggleAllInSet(prev, ids, allSelected))
+  const { toggleRow, toggleAll } = useBulkSelectionToggles(setSelectedIds)
 
   // HF-CONTRACTMAP-1: `skipped` may carry [{id, reason}] (mirrors the candidate
   // bulk BULK-SKIP-REASONS-1 pattern) — the resolver skips a match whose contract

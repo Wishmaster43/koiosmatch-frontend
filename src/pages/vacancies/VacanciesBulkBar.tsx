@@ -6,11 +6,11 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, UserCog, CircleDot, Building2, Globe, GlobeLock, Bot, BotOff, Tag, StickyNote } from 'lucide-react'
+import { Search, CircleDot, Building2, Globe, GlobeLock, Bot, BotOff, Tag } from 'lucide-react'
 import type { MenuNode } from '@/components/ui/ActionMenu'
 import BulkActionsBar from '@/components/ui/BulkActionsBar'
 import BulkNoteModal from '@/components/ui/BulkNoteModal'
-import { archiveNode, pickById, removeTagNode } from '@/components/ui/bulk/bulkNodes'
+import { archiveNode, ownerNode, noteNode, bulkBarLabels, pickById, removeTagNode } from '@/components/ui/bulk/bulkNodes'
 import type { Id, LookupOption } from '@/types/common'
 
 interface BulkUser { id: Id; name: string }
@@ -63,8 +63,8 @@ export default function VacanciesBulkBar({
   const tagOptions = selectedTags.map(tg => ({ value: tg, label: tg }))
   const vacancyOptions = selectedVacancies.map(v => ({ value: v.id, label: v.title }))
 
-  // Resolve a picked user/customer/agent id back to the full object the parent needs.
-  const pickUserHandler = pickById(users, onSetOwner)
+  // Resolve a picked customer/agent id back to the full object the parent needs
+  // (the owner picker's own pickById lives inside ownerNode below).
   const pickCustomerHandler = pickById(customers, onSetClient)
   const pickAgentHandler = pickById(aiAgents, onSetAiAgent)
 
@@ -81,8 +81,7 @@ export default function VacanciesBulkBar({
             searchPlaceholder: t('bulk.searchVacancy'), emptyText: t('bulk.noVacancies'),
             options: vacancyOptions, onPick: onOpenCandidateSearch },
     ] as MenuNode[] : []),
-    { key: 'owner', label: t('bulk.changeOwner'), icon: UserCog,
-      searchPlaceholder: t('bulk.searchOwner'), emptyText: t('bulk.noUsers'), options: userOptions, onPick: pickUserHandler },
+    ownerNode(t, { users, onSetOwner, userOptions }),
     { key: 'status', label: t('bulk.changeStatus'), icon: CircleDot,
       searchPlaceholder: t('bulk.searchStatus'), options: statusOptions, onPick: onSetStatus },
     { key: 'client', label: t('bulk.changeClient'), icon: Building2,
@@ -102,7 +101,7 @@ export default function VacanciesBulkBar({
       { key: 'aiAgentUnlink', label: t('bulk.unlinkAgent'), icon: BotOff, onSelect: () => onSetAiAgent(null) },
     ] }] : []),
     removeTagNode(t, { tagOptions, onRemoveTag }, { key: 'tag', labelKey: 'bulk.removeTag', iconType: Tag }),
-    { key: 'note', label: t('bulk.addNote'), icon: StickyNote, onSelect: () => setNoteModalOpen(true) },
+    noteNode(t, () => setNoteModalOpen(true)),
     ...archiveNode(t, { canArchive, onArchive }),
   ]
 
@@ -110,7 +109,7 @@ export default function VacanciesBulkBar({
     <BulkActionsBar
       onClear={onClear}
       items={items}
-      labels={{ selected: t('bulk.selected', { count }), clear: t('bulk.deselect'), actions: t('bulk.actions') }}
+      labels={bulkBarLabels(t, count)}
     >
       <BulkNoteModal open={noteModalOpen} onClose={() => setNoteModalOpen(false)}
         onSubmit={html => { onAddNote(html); setNoteModalOpen(false) }}

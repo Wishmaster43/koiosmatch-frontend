@@ -15,7 +15,7 @@ import ErrorBanner from '@/components/ui/ErrorBanner'
 import ViewSwitch from '@/components/ui/ViewSwitch'
 import PaginationBar from '@/components/ui/PaginationBar'
 import CandidatesTable from './CandidatesTable'
-import CandidatesToolbar, { type BulkBarProps } from './CandidatesToolbar'
+import CandidatesToolbar, { type CandidatesToolbarProps } from './CandidatesToolbar'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 import type { ControlledSort } from '@/components/ui/DataTable'
@@ -25,7 +25,11 @@ const InsightsRow = InsightsRowJs as ComponentType<{ donuts?: unknown[]; kpis?: 
 // STRAAL-1: the map view lazy-loads so Leaflet stays out of the main bundle (§9).
 const CandidatesMapView = lazy(() => import('./CandidatesMapView'))
 
-interface CandidatesListPanelProps {
+// Extends the toolbar's own prop shape (selection, bulk bar, add/search/clear,
+// quick-view toggles) instead of re-declaring the same twenty fields here.
+// BULK-FILTERSET-1: the bulk scope is owned by useCandidateBulkActions and threaded
+// through as plain props — this panel stays dumb.
+interface CandidatesListPanelProps extends CandidatesToolbarProps {
   // Insights row
   insightDonuts: unknown[]
   insightKpis: unknown[]
@@ -35,31 +39,6 @@ interface CandidatesListPanelProps {
   // Transient action-feedback banner
   actionMsg: ActionMessage | null
   onDismissMessage: () => void
-  // Toolbar: selection, bulk bar, add/search/clear, quick-view toggles
-  selectedCount: number
-  onClearSelection: () => void
-  bulkBar: BulkBarProps
-  // BULK-FILTERSET-1: the bulk bar's ids-vs-filters scope choice — owned by
-  // useCandidateBulkActions, threaded through as plain props (this panel stays dumb).
-  bulkScope: 'selected' | 'filtered'
-  onSetBulkScope: (scope: 'selected' | 'filtered') => void
-  filteredTotal: number
-  onAddOpen: () => void
-  // OPENERS-HIDE-1: the "+ Add" opener renders only when the reader holds candidates.create.
-  canCreate: boolean
-  searchEpoch: number
-  globalSearch: string
-  onSearch: (v: string) => void
-  anyFilterActive: boolean
-  onClearFilters: () => void
-  blacklistActive: boolean
-  onToggleBlacklist: () => void
-  showArchived: boolean
-  onToggleArchived: () => void
-  showTrash: boolean
-  onToggleTrash: () => void
-  view: 'table' | 'map'
-  onToggleView: () => void
   // Table ⇄ map content
   tableScrollRef: RefObject<HTMLDivElement | null>
   error: string | null

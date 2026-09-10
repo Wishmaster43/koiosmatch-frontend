@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { archiveNode, mergeNode, removeTagNode, detachNode, pickById, pickPool } from './bulkNodes'
+import { archiveNode, mergeNode, removeTagNode, detachNode, ownerNode, geocodeNode, coupleBackofficeNode, noteNode, bulkBarLabels, pickById, pickPool } from './bulkNodes'
 import type { Id } from '@/types/common'
 
 // Mock translation function — returns the key itself so assertions can work on keys.
@@ -238,6 +238,102 @@ describe('bulkNodes builders', () => {
       const picker = pickById(agents, handler)
       picker('a999')
       expect(handler).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('ownerNode', () => {
+    it('builds the owner menu node with the given user options', () => {
+      const onSetOwner = vi.fn()
+      const users = [{ id: 'u1', name: 'Alice' }, { id: 'u2', name: 'Bob' }]
+      const userOptions = users.map(u => ({ value: u.id, label: u.name }))
+      const node = ownerNode(t, { users, onSetOwner, userOptions })
+      expect(node).toMatchObject({
+        key: 'owner',
+        label: 'bulk.changeOwner',
+        searchPlaceholder: 'bulk.searchOwner',
+        emptyText: 'bulk.noUsers',
+        options: userOptions,
+      })
+    })
+
+    it('resolves the picked id back to the full user object', () => {
+      const onSetOwner = vi.fn()
+      const users = [{ id: 'u1', name: 'Alice' }, { id: 'u2', name: 'Bob' }]
+      const userOptions = users.map(u => ({ value: u.id, label: u.name }))
+      const node = ownerNode(t, { users, onSetOwner, userOptions })
+      node.onPick?.('u2')
+      expect(onSetOwner).toHaveBeenCalledWith({ id: 'u2', name: 'Bob' })
+    })
+  })
+
+  describe('geocodeNode', () => {
+    it('returns a geocode node when canGeocode is true and onGeocode is wired', () => {
+      const onGeocode = () => {}
+      const result = geocodeNode(t, { canGeocode: true, onGeocode })
+      expect(result).toHaveLength(1)
+      expect(result[0]).toMatchObject({ key: 'geocode', label: 'common:geocode.refresh', onSelect: onGeocode })
+    })
+
+    it('returns an empty array when canGeocode is false', () => {
+      expect(geocodeNode(t, { canGeocode: false, onGeocode: () => {} })).toEqual([])
+    })
+
+    it('returns an empty array when onGeocode is undefined', () => {
+      expect(geocodeNode(t, { canGeocode: true })).toEqual([])
+    })
+  })
+
+  describe('coupleBackofficeNode', () => {
+    it('returns a couple node with both systems when both are enabled', () => {
+      const onCoupleBackoffice = vi.fn()
+      const result = coupleBackofficeNode(t, { canCouple: true, onCoupleBackoffice, showHelloflex: true, showShiftmanager: true })
+      expect(result).toHaveLength(1)
+      expect(result[0].items).toHaveLength(2)
+    })
+
+    it('offers only the enabled system', () => {
+      const onCoupleBackoffice = vi.fn()
+      const result = coupleBackofficeNode(t, { canCouple: true, onCoupleBackoffice, showHelloflex: true, showShiftmanager: false })
+      expect(result[0].items).toHaveLength(1)
+      expect(result[0].items?.[0]).toMatchObject({ key: 'helloflex' })
+    })
+
+    it('fires onCoupleBackoffice with the picked system', () => {
+      const onCoupleBackoffice = vi.fn()
+      const result = coupleBackofficeNode(t, { canCouple: true, onCoupleBackoffice, showHelloflex: true, showShiftmanager: true })
+      result[0].items?.[1].onSelect?.()
+      expect(onCoupleBackoffice).toHaveBeenCalledWith('shiftmanager')
+    })
+
+    it('returns an empty array when canCouple is false', () => {
+      expect(coupleBackofficeNode(t, { canCouple: false, onCoupleBackoffice: () => {}, showHelloflex: true, showShiftmanager: true })).toEqual([])
+    })
+
+    it('returns an empty array when no system is enabled', () => {
+      expect(coupleBackofficeNode(t, { canCouple: true, onCoupleBackoffice: () => {}, showHelloflex: false, showShiftmanager: false })).toEqual([])
+    })
+  })
+
+  describe('noteNode', () => {
+    it('builds the add-note menu node and fires onOpen on select', () => {
+      const onOpen = vi.fn()
+      const node = noteNode(t, onOpen)
+      expect(node).toMatchObject({ key: 'note', label: 'bulk.addNote' })
+      node.onSelect?.()
+      expect(onOpen).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('bulkBarLabels', () => {
+    it('resolves the selected/clear/actions labels via the given t', () => {
+      const result = bulkBarLabels(t, 3)
+      expect(result).toEqual({ selected: 'bulk.selected', clear: 'bulk.deselect', actions: 'bulk.actions' })
+    })
+
+    it('passes the count through as interpolation options', () => {
+      const spyT = vi.fn((key: string) => key)
+      bulkBarLabels(spyT, 5)
+      expect(spyT).toHaveBeenCalledWith('bulk.selected', { count: 5 })
     })
   })
 })

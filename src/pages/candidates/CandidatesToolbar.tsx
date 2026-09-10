@@ -3,53 +3,35 @@
 // the fuller doc comment on the component below.
 import { useTranslation } from 'react-i18next'
 import { Ban, Archive, Trash2, Map as MapIcon } from 'lucide-react'
-import HeaderSearch from '@/components/ui/HeaderSearch'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
-import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
-import CandidatesBulkBar from './CandidatesBulkBar'
-import type { CandidatePool } from '@/types/candidate'
-import type { Id, LookupOption } from '@/types/common'
-import Button from '@/components/ui/Button'
+import ListToolbarCore from '@/components/ui/ListToolbarCore'
+import CandidatesBulkBar, { type CandidatesBulkBarProps } from './CandidatesBulkBar'
 import { TOOLBAR_ROW_STYLE } from '@/components/ui/toolbarRow'
 
-interface BulkUser { id: Id; name: string }
-
 // The bulk-mutation props CandidatesBulkBar needs — passed through as one group
-// (composition over a 15-prop flat toolbar interface, §3). Exported so
-// CandidatesListPanel can type its own `bulkBar` pass-through prop.
-export interface BulkBarProps {
-  onAddToPool: (pool: CandidatePool) => void
-  onRemoveFromPool: (pool: CandidatePool) => void
-  onSetOwner: (user: BulkUser) => void
-  onSetStage: (stage: string) => void
-  onSetTypes: (types: string[]) => void
-  onSetConsent: (consent: Record<string, boolean>, label: string) => void
-  onConvertPhase: (phase: string) => void
-  onSetStatus: (status: string, label: string) => void
-  onAddTag: (tag: string) => void
-  onRemoveTag: (tag: string) => void
-  onAddNote: (text: string) => void
-  onArchive: () => void
+// (composition over a 15-prop flat toolbar interface, §3). Derived from the bar's
+// own prop type (never re-declared): the bar's selection-scope fields live on the
+// toolbar itself instead, and `canArchive`/`onMerge`/`canMerge` are genuinely
+// required here (the bar only makes them optional for its own default values).
+// Exported so CandidatesListPanel can type its own `bulkBar` pass-through prop.
+export type BulkBarProps = Omit<CandidatesBulkBarProps,
+  'count' | 'onClear' | 'bulkScope' | 'onSetBulkScope' | 'filteredTotal' | 'anyFilterActive' |
+  'canArchive' | 'onMerge' | 'canMerge' | 'users' | 'funnelTypes' | 'candidateTypes' | 'phases' | 'statuses' | 'selectedTags'
+> & {
   canArchive: boolean
   onMerge: () => void
   canMerge: boolean
-  // 11.1: deep-link to the Applications page carrying the current selection
-  // (honest gate: the menu entry only renders once this is wired — see CandidatesBulkBar).
-  onManageByApplication?: () => void
-  // GEO-REGEOCODE-1: bulk "PDOK opnieuw ophalen" (queued + async, gated on candidates.update).
-  onGeocode?: () => void
-  canGeocode?: boolean
-  // SYNC-BULK-1: bulk backoffice coupling — see CandidatesBulkBar for the gating.
-  onCoupleBackoffice?: (system: 'helloflex' | 'shiftmanager') => void
-  users: BulkUser[]
-  funnelTypes: LookupOption[]
-  candidateTypes: LookupOption[]
-  phases: LookupOption[]
-  statuses: LookupOption[]
-  selectedTags: string[]
+  users: NonNullable<CandidatesBulkBarProps['users']>
+  funnelTypes: NonNullable<CandidatesBulkBarProps['funnelTypes']>
+  candidateTypes: NonNullable<CandidatesBulkBarProps['candidateTypes']>
+  phases: NonNullable<CandidatesBulkBarProps['phases']>
+  statuses: NonNullable<CandidatesBulkBarProps['statuses']>
+  selectedTags: NonNullable<CandidatesBulkBarProps['selectedTags']>
 }
 
-interface CandidatesToolbarProps {
+// Exported so CandidatesListPanel derives its own props from this shape instead
+// of re-declaring the same toolbar-row field list.
+export interface CandidatesToolbarProps {
   selectedCount: number
   onClearSelection: () => void
   bulkBar: BulkBarProps
@@ -108,16 +90,11 @@ export default function CandidatesToolbar({
         <>
           {/* Add on the left (like Applications) — BTN_H (§4/§9, KANDIDAAT-100 #50): one
               explicit height for every text/action button, everywhere. OPENERS-HIDE-1:
-              hidden (not just click-gated) without candidates.create. */}
-          {canCreate && (
-            <Button variant="primary" size="md" onClick={onAddOpen}>
-              + {t('page.add')}
-            </Button>
-          )}
-          {/* Shared header search (T10) — debounced, drives the same server-side ?search=. */}
-          <HeaderSearch key={searchEpoch} onSearch={onSearch} defaultValue={globalSearch}
-            placeholder={t('page.searchPlaceholder')} width={300} />
-          <ClearFiltersButton active={anyFilterActive} onClear={onClearFilters} />
+              hidden (not just click-gated) without candidates.create.
+              Shared header search (T10) — debounced, drives the same server-side ?search=. */}
+          <ListToolbarCore canCreate={canCreate} onAdd={onAddOpen} addContent={<>+ {t('page.add')}</>}
+            searchEpoch={searchEpoch} defaultSearch={globalSearch} onSearch={onSearch} searchPlaceholder={t('page.searchPlaceholder')}
+            anyFilterActive={anyFilterActive} onClearFilters={onClearFilters} />
           {/* Quick-view toggles on the right: blacklisted-only + archived-only */}
           <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
             {/* Shared quick-view toggles (§4 soft convention) — one component everywhere. */}

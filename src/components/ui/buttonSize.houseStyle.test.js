@@ -27,22 +27,23 @@ function walkSourceFiles(dir, out = []) {
   return out
 }
 
-// The NINE legitimate page-toolbar "+ Nieuw" sites (maatwet: md beside the 34px
-// search chrome) — frozen; a file may only DROP OFF this list, never grow.
+// The page-toolbar "+ Nieuw" sites (maatwet: md beside the 34px search chrome) —
+// frozen; a file may only DROP OFF this list, never grow. DRY round 11
+// (BULKBARS): eight of these page-toolbar Buttons collapsed into the ONE shared
+// `ListToolbarCore` trio (add + HeaderSearch + ClearFiltersButton) — their own
+// entries drop off (count now 0 in each) and the single canonical md site moves
+// to ListToolbarCore.tsx (still exactly one occurrence, now shared instead of
+// copy-pasted eight times). That one new entry is the only growth this list has
+// ever taken, and it replaces eight.
 const MD_ALLOWLIST = {
-  // A-5 (3f5640f0): the page toolbar moved into the list panel with its one md '+ Nieuw'.
-  'src/pages/applications/ApplicationsListPanel.tsx': 1,
-  'src/pages/candidates/CandidatesToolbar.tsx': 1,
+  // DRY round 11 (BULKBARS): the shared trio's one md '+ Nieuw', replacing the
+  // eight page-toolbar copies (ApplicationsListPanel, CandidatesToolbar,
+  // CustomersToolbar, MatchesPage, OpportunitiesPage, OutreachToolbar/parts,
+  // TasksPage, VacanciesToolbar).
+  'src/components/ui/ListToolbarCore.tsx': 1,
     // Auth submits (r2): the page's one primary action, full-width — md replaced a hand-painted 44px, a shrink toward canon.
     'src/pages/auth/LoginPage.tsx': 2,
-  'src/pages/customers/CustomersToolbar.tsx': 1,
-  'src/pages/matches/MatchesPage.tsx': 1,
-  'src/pages/opportunities/OpportunitiesPage.tsx': 1,
-  // SPLITS-R2 (d6353084): the outreach toolbar (one md '+ Nieuw') lives in parts/ now.
-  'src/pages/outreach/parts/OutreachToolbar.tsx': 1,
-  'src/pages/tasks/TasksPage.tsx': 1,
   'src/pages/users/UsersPage.tsx': 1,
-  'src/pages/vacancies/VacanciesToolbar.tsx': 1,
   // Doc mention, not a render: buttonMetrics' own docblock NAMES size="md" while
   // defining BTN_H (the simple text count cannot tell prose from JSX).
   'src/config/buttonMetrics.ts': 1,

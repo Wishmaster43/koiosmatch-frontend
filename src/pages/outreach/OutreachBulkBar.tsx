@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { Activity } from 'lucide-react'
 import type { MenuNode } from '@/components/ui/ActionMenu'
 import BulkActionsBar from '@/components/ui/BulkActionsBar'
-import { archiveNode } from '@/components/ui/bulk/bulkNodes'
+import { archiveNode, bulkBarLabels } from '@/components/ui/bulk/bulkNodes'
 
 interface StatusOption { value: string; label: string; color: string }
 
@@ -37,7 +37,7 @@ export default function OutreachBulkBar({ count, onClear, onSetStatus, onArchive
     <BulkActionsBar
       onClear={onClear}
       items={items}
-      labels={{ selected: t('bulk.selected', { count }), clear: t('bulk.deselect'), actions: t('bulk.actions') }}
+      labels={bulkBarLabels(t, count)}
     />
   )
 }

@@ -22,7 +22,7 @@ import { notify as notifyTyped, notifyError } from '@/lib/notify'
 // ToastType ('error'|'success'|'info') doesn't carry yet.
 const notify = notifyTyped as unknown as (type: string, message: string) => void
 import { bucketOfPhase } from '../data/applicationsShared'
-import { toggleInSet, toggleAllInSet } from '@/lib/selectionSet'
+import { useBulkSelectionToggles } from '@/hooks/useBulkSelectionToggles'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
 import type { LookupItem } from '@/context/LookupsContext'
@@ -55,8 +55,7 @@ interface SkippedRow { id: Id; reason?: string; code?: string }
 
 export function useApplicationBulkActions({ applications, setApplications, setTotal, selectedIds, setSelectedIds, funnelTypes, t }: Args) {
   // Row-selection handlers for the table checkboxes + bulk bar.
-  const toggleRow = (id: Id) => setSelectedIds(prev => toggleInSet(prev, id))
-  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => toggleAllInSet(prev, ids, allSelected))
+  const { toggleRow, toggleAll } = useBulkSelectionToggles(setSelectedIds)
 
   // Real backend stage id per funnel key (ENT1-01) — the funnel picker itself
   // still deals in keys (bucket/label resolution, local optimistic state), only

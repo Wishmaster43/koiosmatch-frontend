@@ -16,6 +16,7 @@ import type { MenuNode } from '@/components/ui/ActionMenu'
 import BulkActionsBar from '@/components/ui/BulkActionsBar'
 import { useAuth } from '@/context/AuthContext'
 import { useApps } from '@/context/AppsContext'
+import { bulkBarLabels } from '@/components/ui/bulk/bulkNodes'
 
 interface MatchesBulkBarProps {
   count: number
@@ -51,7 +52,7 @@ export default function MatchesBulkBar({
     <BulkActionsBar
       onClear={onClear}
       items={items}
-      labels={{ selected: t('bulk.selected', { count }), clear: t('bulk.deselect'), actions: t('bulk.actions') }}
+      labels={bulkBarLabels(t, count)}
     >
       {items.length === 0 && (
         // Two honest empty reasons: no permission at all, vs a permission but

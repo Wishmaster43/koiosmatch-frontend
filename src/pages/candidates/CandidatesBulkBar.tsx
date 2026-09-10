@@ -6,21 +6,23 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Folder, FolderPlus, FolderMinus, UserCog, Milestone, Briefcase, Tag, Tags, StickyNote, ShieldCheck, UserCheck, Activity, RefreshCw, ExternalLink, Link2, Building2, Layers } from 'lucide-react'
+import { Folder, FolderPlus, FolderMinus, Milestone, Briefcase, Tag, Tags, ShieldCheck, UserCheck, Activity, ExternalLink } from 'lucide-react'
 import { BTN_H_SM } from '@/config/buttonMetrics'
 import type { MenuNode } from '@/components/ui/ActionMenu'
 import BulkActionsBar from '@/components/ui/BulkActionsBar'
 import BulkNoteModal from '@/components/ui/BulkNoteModal'
 import { useAuth } from '@/context/AuthContext'
 import { useApps } from '@/context/AppsContext'
-import { archiveNode, mergeNode, pickById, pickPool } from '@/components/ui/bulk/bulkNodes'
+import { archiveNode, mergeNode, ownerNode, geocodeNode, coupleBackofficeNode, noteNode, bulkBarLabels, pickPool } from '@/components/ui/bulk/bulkNodes'
 import { useTenantPools } from './hooks/useCandidatePools'
 import type { CandidatePool } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
 
 interface BulkUser { id: Id; name: string }
 
-interface CandidatesBulkBarProps {
+// Exported so CandidatesToolbar (BulkBarProps) and CandidatesListPanel derive
+// their pass-through prop types from this one shape instead of re-declaring it.
+export interface CandidatesBulkBarProps {
   count: number
   onClear: () => void
   // BULK-FILTERSET-1: which rows the menu's actions target — checked rows (ids)
@@ -111,16 +113,14 @@ export default function CandidatesBulkBar({
     .map(s => ({ value: s.value, label: s.label, color: s.color }))
   const tagOptions = selectedTags.map(tg => ({ value: tg, label: tg }))
 
-  // Resolve a picked pool/user id back to the full object the parent needs.
+  // Resolve a picked pool id back to the full object the parent needs.
   const pickPoolHandler = pickPool(pools, onAddToPool)
   const pickPoolRemoveHandler = pickPool(pools, onRemoveFromPool)
-  const pickUserHandler = pickById(users, onSetOwner)
 
   // Declarative bulk-action tree; extend with more actions as extra nodes.
   // Archive is gated: only present when the user may delete (server re-checks).
   const items: MenuNode[] = [
-    { key: 'owner', label: t('bulk.changeOwner'), icon: UserCog,
-      searchPlaceholder: t('bulk.searchOwner'), emptyText: t('bulk.noUsers'), options: userOptions, onPick: pickUserHandler },
+    ownerNode(t, { users, onSetOwner, userOptions }),
     { key: 'pool', label: t('bulk.pool'), icon: Folder, items: [
       { key: 'add-pool', label: t('bulk.addToPool'), icon: FolderPlus,
         searchPlaceholder: t('bulk.searchPool'), emptyText: t('bulk.noPools'), options: poolOptions, onPick: pickPoolHandler },
@@ -150,7 +150,7 @@ export default function CandidatesBulkBar({
       placeholder: t('bulk.addTagPlaceholder'), submitLabel: t('bulk.typeSubmit'), onSubmit: (v) => onAddTag(String(v)) },
     { key: 'tag', label: t('bulk.removeTag'), icon: Tag,
       searchPlaceholder: t('bulk.searchTag'), emptyText: t('bulk.noTags'), options: tagOptions, onPick: (v) => onRemoveTag(String(v)) },
-    { key: 'note', label: t('bulk.addNote'), icon: StickyNote, onSelect: () => setNoteModalOpen(true) },
+    noteNode(t, () => setNoteModalOpen(true)),
     { key: 'consent', label: t('bulk.consent'), icon: ShieldCheck, items: [
       { key: 'wa', label: t('communication.consentWhatsapp'), items: [
         { key: 'wa-on',  label: t('bulk.consentOn'),  onSelect: () => onSetConsent({ whatsapp_opt_in: true },  `WhatsApp — ${t('bulk.consentOn')}`) },
@@ -168,17 +168,8 @@ export default function CandidatesBulkBar({
     // Bulk-merge (punt 4): only offered with EXACTLY 2 rows selected — merging is
     // pairwise (one survivor absorbs one duplicate), so any other count is ambiguous.
     ...mergeNode(t, { count, canMerge, onMerge }),
-    // GEO-REGEOCODE-1: reuses the ONE shared common:geocode.refresh label (no
-    // per-entity i18n key) — mirrors the per-record GeocodeButton's tooltip text.
-    ...(canGeocode && onGeocode ? [{ key: 'geocode', label: t('common:geocode.refresh'), icon: RefreshCw, onSelect: onGeocode }] : []),
-    // SYNC-BULK-1: bulk backoffice coupling — drills into whichever systems are
-    // actually enabled for this tenant (never offer a switched-off system).
-    ...(canCouple && onCoupleBackoffice && (showHelloflex || showShiftmanager) ? [{
-      key: 'couple', label: t('bulk.couple'), icon: Link2, items: [
-        ...(showHelloflex ? [{ key: 'helloflex', label: t('common:backofficeLinks.helloflex.name'), icon: Building2, onSelect: () => onCoupleBackoffice('helloflex') }] : []),
-        ...(showShiftmanager ? [{ key: 'shiftmanager', label: t('common:backofficeLinks.shiftmanager.name'), icon: Layers, onSelect: () => onCoupleBackoffice('shiftmanager') }] : []),
-      ],
-    }] : []),
+    ...geocodeNode(t, { canGeocode, onGeocode }),
+    ...coupleBackofficeNode(t, { canCouple, onCoupleBackoffice, showHelloflex, showShiftmanager }),
     ...archiveNode(t, { canArchive, onArchive }),
   ]
 
@@ -191,7 +182,7 @@ export default function CandidatesBulkBar({
     <BulkActionsBar
       onClear={onClear}
       items={items}
-      labels={{ selected: label, clear: t('bulk.deselect'), actions: t('bulk.actions') }}
+      labels={{ ...bulkBarLabels(t, count), selected: label }}
     >
       {/* BULK-FILTERSET-1: only offered when a filter narrows the list — an empty
           filter set is never sent as "all" (the backend 422s it too, see the hook). */}

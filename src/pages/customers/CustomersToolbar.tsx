@@ -7,9 +7,7 @@ import type { Dispatch, SetStateAction, ComponentProps } from 'react'
 import type { TFunction } from 'i18next'
 import { Archive, Map as MapIcon, Trash2 } from 'lucide-react'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
-import HeaderSearch from '@/components/ui/HeaderSearch'
-import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
-import Button from '@/components/ui/Button'
+import ListToolbarCore from '@/components/ui/ListToolbarCore'
 import { TOOLBAR_ROW_STYLE } from '@/components/ui/toolbarRow'
 import CustomersBulkBar from './CustomersBulkBar'
 import type { Id, LookupOption } from '@/types/common'
@@ -74,16 +72,11 @@ export default function CustomersToolbar({
           {/* Add on the left (like Applications/Candidates) — BTN_H (§4/§9): one
               explicit height for every text/action button, everywhere. Hidden
               without the create permission (OPENERS-HIDE-1, Danny 05-09), same
-              as every other page toolbar. */}
-          {canCreate && (
-            <Button variant="primary" size="md" onClick={onAdd}>
-              + {t('page.add')}
-            </Button>
-          )}
-          {/* Shared header search (T10) — debounced, drives the same server-side ?search=. */}
-          <HeaderSearch key={searchEpoch} onSearch={onSearch} defaultValue={globalSearch}
-            placeholder={t('page.searchPlaceholder')} width={300} />
-          <ClearFiltersButton active={anyFilterActive} onClear={onClearAllFilters} />
+              as every other page toolbar. Shared header search (T10) — debounced,
+              drives the same server-side ?search=. */}
+          <ListToolbarCore canCreate={canCreate} onAdd={onAdd} addContent={<>+ {t('page.add')}</>}
+            searchEpoch={searchEpoch} defaultSearch={globalSearch} onSearch={onSearch} searchPlaceholder={t('page.searchPlaceholder')}
+            anyFilterActive={anyFilterActive} onClearFilters={onClearAllFilters} />
           {/* Archived + map quick-views on the right — shared toggles (§4), map last
               to mirror the candidate blueprint's toggle order (§3A). */}
           <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>

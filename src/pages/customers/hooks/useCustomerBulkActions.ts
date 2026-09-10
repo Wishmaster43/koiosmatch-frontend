@@ -15,7 +15,8 @@ import api from '@/lib/api'
 import { initialsOf } from '@/lib/initials'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useBackofficeCoupleBulk } from '@/hooks/useBackofficeCoupleBulk'
-import { toggleInSet, toggleAllInSet } from '@/lib/selectionSet'
+import { useBulkSelectionToggles } from '@/hooks/useBulkSelectionToggles'
+import { bulkNotesPost, bulkArchivePost } from '@/lib/bulkEntityPost'
 import type { Customer } from '@/types/customer'
 import type { Id } from '@/types/common'
 
@@ -43,8 +44,7 @@ export function useCustomerBulkActions({ customers, setCustomers, setTotal, sele
   // query) must never go stale after a bulk field mutation — invalidated below on every
   // successful bulkMutate call, never on a failed one.
   const queryClient = useQueryClient()
-  const toggleRow = (id: Id) => setSelectedIds(prev => toggleInSet(prev, id))
-  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => toggleAllInSet(prev, ids, allSelected))
+  const { toggleRow, toggleAll } = useBulkSelectionToggles(setSelectedIds)
 
   // Generic optimistic bulk field mutation (apply → reconcile on `updated` → revert).
   const bulkMutate = ({ url, body, patch, keys, onSuccess }: { url: string; body: Record<string, unknown>; patch: Record<string, unknown>; keys: string[]; onSuccess: (n: number) => void }) => {
@@ -100,25 +100,11 @@ export function useCustomerBulkActions({ customers, setCustomers, setTotal, sele
     setSelectedIds(new Set())
   }
   // Post one note to every selected customer; no optimistic patch since notes don't show on the row.
-  const bulkAddNote = (text: string) => {
-    const ids = [...selectedIds]; if (!ids.length || !text.trim()) return
-    api.post('/customers/bulk/notes', { customer_ids: ids, text: text.trim() })
-      .then(res => notify('success', t('bulk.noteAdded', { count: Array.isArray(res.data?.updated) ? res.data.updated.length : ids.length })))
-      .catch(() => notify('error', t('bulk.mutateError')))
-    setSelectedIds(new Set())
-  }
+  const bulkAddNote = bulkNotesPost({ entity: 'customers', idsKey: 'customer_ids', selectedIds, setSelectedIds, notify, t })
   // Archive every selected customer after a danger-confirm; drops the archived rows from the list and adjusts the total.
-  const bulkArchive = () => {
-    const ids = [...selectedIds]; if (!ids.length) return
-    confirm(t('bulk.archiveConfirm', { count: ids.length }), () => {
-      api.post('/customers/bulk/archive', { customer_ids: ids })
-        .then(res => { const archived: Id[] = Array.isArray(res.data?.archived) ? res.data.archived : ids; const set = new Set(archived)
-          setCustomers(prev => prev.filter(c => !set.has(c.id!))); setTotal(tt => Math.max(0, tt - archived.length))
-          notify('success', t('bulk.archived', { count: archived.length })) })
-        .catch(() => notify('error', t('bulk.archiveError')))
-      setSelectedIds(new Set())
-    }, { danger: true })
-  }
+  const bulkArchive = bulkArchivePost({
+    entity: 'customers', idsKey: 'customer_ids', selectedIds, setSelectedIds, setItems: setCustomers, setTotal, confirm, notify, t,
+  })
 
   // GEO-REGEOCODE-1: manual "PDOK opnieuw ophalen" for the selection. Queued +
   // rate-limited (202) — no optimistic row patch, no reconcile, just fire the

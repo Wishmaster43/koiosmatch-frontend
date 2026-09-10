@@ -9,10 +9,8 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Archive, Map as MapIcon, Trash2 } from 'lucide-react'
-import HeaderSearch from '@/components/ui/HeaderSearch'
-import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
+import ListToolbarCore from '@/components/ui/ListToolbarCore'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
-import Button from '@/components/ui/Button'
 import { TOOLBAR_ROW_STYLE } from '@/components/ui/toolbarRow'
 
 interface VacanciesToolbarProps {
@@ -51,20 +49,16 @@ export default function VacanciesToolbar({
         {selectedCount > 0 ? bulkBar : (
           <>
             {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
-                OPENERS-HIDE-1: hidden without vacancies.create (RIGHTS-GATE-OPENERS-1 idiom). */}
-            {canCreate && (
-              <Button variant="primary" size="md" onClick={onAddOpen}>
-                + {t('page.add')}
-              </Button>
-            )}
-            {/* EXCEL-VACATURES-1 (Danny 14-08, screenshot: "Excel importeren moet in de
+                OPENERS-HIDE-1: hidden without vacancies.create (RIGHTS-GATE-OPENERS-1 idiom).
+                EXCEL-VACATURES-1 (Danny 14-08, screenshot: "Excel importeren moet in de
                 pop-up + nieuwe vacature niet hier boven de tabel!!"): the Excel/CSV
                 import button moved off this toolbar into AddVacancyModal's header —
-                mirrors KLANT-LAYOUT-3's identical move on the customer modal. */}
-            {/* Shared header search (T10) — debounced, drives the same server-side ?search=. */}
-            <HeaderSearch key={searchEpoch} onSearch={onSearch} defaultValue={globalSearch}
-              placeholder={t('page.searchPlaceholder')} width={300} />
-            <ClearFiltersButton active={anyFilterActive} onClear={onClearFilters} />
+                mirrors KLANT-LAYOUT-3's identical move on the customer modal.
+                Shared header search (T10) — debounced, drives the same server-side ?search=.
+                The trio is the shared ListToolbarCore (DRY round 11, BULKBARS). */}
+            <ListToolbarCore canCreate={canCreate} onAdd={onAddOpen} addContent={<>+ {t('page.add')}</>}
+              searchEpoch={searchEpoch} defaultSearch={globalSearch} onSearch={onSearch} searchPlaceholder={t('page.searchPlaceholder')}
+              anyFilterActive={anyFilterActive} onClearFilters={onClearFilters} />
           </>
         )}
       </div>

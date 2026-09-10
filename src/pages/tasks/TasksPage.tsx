@@ -7,16 +7,16 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { LayoutList, Kanban, Archive, Plus, Trash2 } from 'lucide-react'
+import { Archive, Plus, Trash2 } from 'lucide-react'
 import ViewModeToggle from '@/components/ui/ViewModeToggle'
+import { tableBoardViewOptions } from '@/components/ui/listViewOptions'
 import { useUsers } from '@/lib/queries'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { TaskLookupsProvider, useTaskLookups } from '@/context/TaskLookupsContext'
 import { useAuth } from '@/context/AuthContext'
 import { usePublishSelection } from '@/context/SelectionContext'
 import InsightsRow from '@/components/insights/InsightsRow'
-import HeaderSearch from '@/components/ui/HeaderSearch'
-import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
+import ListToolbarCore from '@/components/ui/ListToolbarCore'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import ViewSwitch from '@/components/ui/ViewSwitch'
 import TasksTable from './TasksTable'
@@ -40,7 +40,7 @@ import { buildTaskFilterGroups } from './data/taskFilterGroups'
 import { buildTaskInsights } from './data/taskInsights'
 import type { Task, ApiTask } from '@/types/task'
 import type { Id } from '@/types/common'
-import Button from '@/components/ui/Button'
+import { usePageSlice } from '@/hooks/usePageSlice'
 import { TOOLBAR_ROW_STYLE } from '@/components/ui/toolbarRow'
 
 interface UserLike { id: Id; name: string; avatar_color?: string | null }
@@ -155,9 +155,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
     : true,
   ), [all, matchesFilters, showArchived, showTrash])
 
-  const totalRows = filteredAll.length
-  const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))
-  const filtered  = useMemo(() => filteredAll.slice((page - 1) * pageSize, page * pageSize), [filteredAll, page, pageSize])
+  const { totalRows, lastPage, filtered } = usePageSlice(filteredAll, page, pageSize)
 
   // Drawer open/close + single-record mutations (§0.3 split → hook).
   const {
@@ -215,13 +213,9 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
         {/* Toolbar — add on the LEFT, archived toggle + view toggle on the RIGHT (mirror Opportunities) */}
         <div style={{ ...TOOLBAR_ROW_STYLE, flexShrink: 0 }}>
           {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-          {canCreateTask && (
-            <Button variant="primary" size="md" onClick={() => setAddOpen(true)}>
-              <Plus size={15} /> {t('add')}
-            </Button>
-          )}
-          <HeaderSearch key={searchEpoch} onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={280} />
-            <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
+          <ListToolbarCore canCreate={canCreateTask} onAdd={() => setAddOpen(true)} addContent={<><Plus size={15} /> {t('add')}</>}
+            searchEpoch={searchEpoch} onSearch={setQuery} searchPlaceholder={t('page.searchPlaceholder')} searchWidth={280}
+            anyFilterActive={anyFilterActive} onClearFilters={clearAllFilters} />
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
             {/* Archived ⇄ trash are mutually exclusive views (mirrors candidates). */}
             <QuickViewToggle active={showArchived} onToggle={() => { setShowArchived(v => !v); setShowTrash(false) }}
@@ -229,10 +223,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
             <QuickViewToggle active={showTrash} onToggle={() => { setShowTrash(v => !v); setShowArchived(false) }}
               label={t('common:trash.view')} color="var(--color-trash)" icon={Trash2} />
             {/* Table/board switcher — shared soft-tint component (§4), never a solid fill. */}
-            <ViewModeToggle value={view} onChange={setView} options={[
-              { id: 'table', icon: LayoutList, label: t('view.table') },
-              { id: 'board', icon: Kanban, label: t('view.board') },
-            ]} />
+            <ViewModeToggle value={view} onChange={setView} options={tableBoardViewOptions(t)} />
           </div>
         </div>
 

@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { Milestone } from 'lucide-react'
 import type { MenuNode } from '@/components/ui/ActionMenu'
 import BulkActionsBar from '@/components/ui/BulkActionsBar'
-import { detachNode } from '@/components/ui/bulk/bulkNodes'
+import { detachNode, bulkBarLabels } from '@/components/ui/bulk/bulkNodes'
 import type { LookupOption } from '@/types/common'
 
 interface ApplicationsBulkBarProps {
@@ -46,7 +46,7 @@ export default function ApplicationsBulkBar({ count, onClear, onSetPhase, onDeta
     <BulkActionsBar
       onClear={onClear}
       items={items}
-      labels={{ selected: t('bulk.selected', { count }), clear: t('bulk.deselect'), actions: t('bulk.actions') }}
+      labels={bulkBarLabels(t, count)}
     />
   )
 }

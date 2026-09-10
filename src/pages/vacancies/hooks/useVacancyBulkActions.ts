@@ -12,7 +12,8 @@ import type { TFunction } from 'i18next'
 import api from '@/lib/api'
 import { initialsOf, subsetOf } from '../data/vacanciesShared'
 import { useConfirm } from '@/hooks/useConfirm'
-import { toggleInSet, toggleAllInSet } from '@/lib/selectionSet'
+import { useBulkSelectionToggles } from '@/hooks/useBulkSelectionToggles'
+import { bulkNotesPost, bulkArchivePost } from '@/lib/bulkEntityPost'
 import type { Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -43,8 +44,7 @@ export function useVacancyBulkActions({ vacancies, setVacancies, setTotal, selec
   // successful bulkMutate call, never on a failed one.
   const queryClient = useQueryClient()
   // ── Bulk selection ──
-  const toggleRow = (id: Id) => setSelectedIds(prev => toggleInSet(prev, id))
-  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => toggleAllInSet(prev, ids, allSelected))
+  const { toggleRow, toggleAll } = useBulkSelectionToggles(setSelectedIds)
 
   // Generic optimistic bulk mutation: apply `patch`, persist, reconcile on the
   // server's `updated` list, revert on failure.
@@ -131,31 +131,11 @@ export function useVacancyBulkActions({ vacancies, setVacancies, setTotal, selec
     setSelectedIds(new Set())
   }
   // Add the same note to every selected vacancy (no table column → toast only).
-  const bulkAddNote = (text: string) => {
-    const ids = [...selectedIds]
-    if (!ids.length || !text.trim()) return
-    api.post('/vacancies/bulk/notes', { vacancy_ids: ids, text: text.trim() })
-      .then(res => notify('success', t('bulk.noteAdded', { count: Array.isArray(res.data?.updated) ? res.data.updated.length : ids.length })))
-      .catch(() => notify('error', t('bulk.mutateError')))
-    setSelectedIds(new Set())
-  }
+  const bulkAddNote = bulkNotesPost({ entity: 'vacancies', idsKey: 'vacancy_ids', selectedIds, setSelectedIds, notify, t })
   // Archive (soft-delete) the selection — confirm first; rows drop on server confirm.
-  const bulkArchive = () => {
-    const ids = [...selectedIds]
-    if (!ids.length) return
-    confirm(t('bulk.archiveConfirm', { count: ids.length }), () => {
-      api.post('/vacancies/bulk/archive', { vacancy_ids: ids })
-        .then(res => {
-          const archived: Id[] = Array.isArray(res.data?.archived) ? res.data.archived : ids
-          const set = new Set(archived)
-          setVacancies(prev => prev.filter(v => !set.has(v.id!)))
-          setTotal(tt => Math.max(0, tt - archived.length))
-          notify('success', t('bulk.archived', { count: archived.length }))
-        })
-        .catch(() => notify('error', t('bulk.archiveError')))
-      setSelectedIds(new Set())
-    }, { danger: true })
-  }
+  const bulkArchive = bulkArchivePost({
+    entity: 'vacancies', idsKey: 'vacancy_ids', selectedIds, setSelectedIds, setItems: setVacancies, setTotal, confirm, notify, t,
+  })
 
   // Union of tags across the selected vacancies — the "remove tag" option list.
   const selectedTags = useMemo(() => {

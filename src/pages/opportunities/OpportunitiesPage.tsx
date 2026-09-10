@@ -6,16 +6,16 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { LayoutList, Kanban, Archive, Trash2 } from 'lucide-react'
+import { Archive, Trash2 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { usePublishSelection } from '@/context/SelectionContext'
 import { useBranchOptions } from '@/lib/useBranchOptions'
 import OpportunitiesInsightsRow from './OpportunitiesInsightsRow'
-import HeaderSearch from '@/components/ui/HeaderSearch'
-import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
+import ListToolbarCore from '@/components/ui/ListToolbarCore'
 import ViewSwitch from '@/components/ui/ViewSwitch'
 import ViewModeToggle from '@/components/ui/ViewModeToggle'
+import { tableBoardViewOptions } from '@/components/ui/listViewOptions'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import OpportunitiesTable from './OpportunitiesTable'
 import OpportunitiesBoard from './OpportunitiesBoard'
@@ -32,6 +32,7 @@ import { useListPageSize } from '@/hooks/useListPageSize'
 import { isReferenceQuery } from '@/lib/referenceNumber'
 import { buildOpportunityFilterGroups } from './data/opportunityFilterGroups'
 import Button from '@/components/ui/Button'
+import { usePageSlice } from '@/hooks/usePageSlice'
 import { TOOLBAR_ROW_STYLE } from '@/components/ui/toolbarRow'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 
@@ -245,9 +246,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
     })
   }, [rows, stage, owner, client, query, refQuery, expiringOnly, dayStart, showArchived, showTrash])
 
-  const totalRows = filteredAll.length
-  const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))
-  const filtered  = useMemo(() => filteredAll.slice((page - 1) * pageSize, page * pageSize), [filteredAll, page, pageSize])
+  const { totalRows, lastPage, filtered } = usePageSlice(filteredAll, page, pageSize)
   // Board rows never include archived deals: dragging one to a new stage would
   // PATCH /opportunities/{id}, which 404s once soft-deleted (OpportunityController::
   // update has no withTrashed()) — the archived-mixed view is table-only.
@@ -278,13 +277,9 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
             {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
                 hidden without the create permission (OPENERS-HIDE-1, Danny 05-09),
                 same as every other page toolbar. */}
-            {canCreateOpportunity && (
-              <Button variant="primary" size="md" onClick={() => setAddOpen(true)}>
-                + {t('page.add')}
-              </Button>
-            )}
-            <HeaderSearch key={searchEpoch} onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={280} />
-            <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
+            <ListToolbarCore canCreate={canCreateOpportunity} onAdd={() => setAddOpen(true)} addContent={<>+ {t('page.add')}</>}
+              searchEpoch={searchEpoch} onSearch={setQuery} searchPlaceholder={t('page.searchPlaceholder')} searchWidth={280}
+              anyFilterActive={anyFilterActive} onClearFilters={clearAllFilters} />
             {/* Selection strip — count + clear (bulk actions land with C-41). */}
             {selectedIds.size > 0 && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--text)' }}>
@@ -304,10 +299,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
                 label={t('common:trash.view')} color="var(--color-trash)" icon={Trash2} />
               {/* Table/board switcher — shared soft-tint component (§4), never a solid
                   fill (last hand-rolled instance across the entity pages, audit sweep). */}
-              <ViewModeToggle value={view} onChange={setView} options={[
-                { id: 'table', icon: LayoutList, label: t('view.table') },
-                { id: 'board', icon: Kanban, label: t('view.board') },
-              ]} />
+              <ViewModeToggle value={view} onChange={setView} options={tableBoardViewOptions(t)} />
             </div>
           </div>
 

@@ -7,8 +7,9 @@
  */
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, LayoutList, Kanban, Archive, Trash2, ClipboardCheck } from 'lucide-react'
+import { Plus, Archive, Trash2, ClipboardCheck } from 'lucide-react'
 import ViewModeToggle from '@/components/ui/ViewModeToggle'
+import { tableBoardViewOptions } from '@/components/ui/listViewOptions'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { usePublishSelection } from '@/context/SelectionContext'
@@ -31,8 +32,7 @@ import { MatchModal } from '@/pages/candidates/shared'
 import { useListPageSize } from '@/hooks/useListPageSize'
 import PaginationBar from '@/components/ui/PaginationBar'
 import ViewSwitch from '@/components/ui/ViewSwitch'
-import HeaderSearch from '@/components/ui/HeaderSearch'
-import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
+import ListToolbarCore from '@/components/ui/ListToolbarCore'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { useMatchesDeepLink } from './hooks/useMatchesDeepLink'
 import { useMatches, MATCHES_MAX_PER_PAGE } from './hooks/useMatches'
@@ -45,7 +45,7 @@ import { useMatchesTrash } from './hooks/useMatchesTrash'
 import TrashPreviewDialogSlot from '@/components/ui/TrashPreviewDialogSlot'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
-import Button from '@/components/ui/Button'
+import { usePageSlice } from '@/hooks/usePageSlice'
 import { TOOLBAR_ROW_STYLE } from '@/components/ui/toolbarRow'
 
 // MatchesPage — loads matches, shows an insights strip and paginates the table.
@@ -198,9 +198,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // picker/approval actions the drawer already hides for an archived match.
   const boardRows = useMemo(() => filteredAll.filter(r => !r.archived), [filteredAll])
 
-  const totalRows = filteredAll.length
-  const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))
-  const paged     = useMemo(() => filteredAll.slice((page - 1) * pageSize, page * pageSize), [filteredAll, page, pageSize])
+  const { totalRows, lastPage, filtered: paged } = usePageSlice(filteredAll, page, pageSize)
 
   // Direct-match creation modal (§3B "direct match" path).
   const [addOpen, setAddOpen] = useState(false)
@@ -279,34 +277,31 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
       {/* Toolbar — bulk bar or add button (left) + segmented view/archive selector (right) */}
       <div style={{ ...TOOLBAR_ROW_STYLE, flexShrink: 0 }}>
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
-          {selectedIds.size > 0 ? (
+          {selectedIds.size > 0 && (
             <MatchesBulkBar
               count={selectedIds.size}
               onClear={() => setSelectedIds(new Set())}
               onCoupleHelloFlex={bulkCoupleHelloFlex}
               onCoupleShiftmanager={bulkCoupleShiftmanager}
             />
-          ) : hasPermission('matches.update') && (
-            // Create a direct match (candidate + vacancy) from the Matches page.
-            // BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
-            // POST /matches is gated on matches.update on the backend (there is no
-            // matches.create permission — routes/api/tenant/applications-matches.php),
-            // so the opener is hidden without it (OPENERS-HIDE-1, Danny 05-09).
-            <Button variant="primary" size="md"
-              onClick={() => setAddOpen(true)}>
-              <Plus size={15} aria-hidden="true" /> {t('add.button')}
-            </Button>
           )}
-          {/* Shared search — mirror the other list pages (§3A). */}
-          <HeaderSearch key={searchEpoch} onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={260} />
-          {/* RIGHTPANEL-FILTERS-1 (Danny 2026-08-14, "rode filters moeten naar rechts
-              filter menu"): stage/owner/client/branch/score/date-range/archived all
-              live in the right-hand filter panel now (useMatchesInsights above) —
-              the toolbar's own MatchFilterBar (stage/owner triggers + a "More filters"
-              popover for client) was an exact duplicate of that panel and is deleted,
-              not moved: both copies drove the SAME stageFilter/ownerFilter/clientFilter
-              state, so nothing here changes which rows a user sees. */}
-          <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
+          {/* Create a direct match (candidate + vacancy) from the Matches page.
+              BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
+              POST /matches is gated on matches.update on the backend (there is no
+              matches.create permission — routes/api/tenant/applications-matches.php),
+              so the opener is hidden without it (OPENERS-HIDE-1, Danny 05-09). Shared
+              search — mirror the other list pages (§3A). RIGHTPANEL-FILTERS-1 (Danny
+              2026-08-14, "rode filters moeten naar rechts filter menu"): stage/owner/
+              client/branch/score/date-range/archived all live in the right-hand filter
+              panel now (useMatchesInsights above) — the toolbar's own MatchFilterBar
+              (stage/owner triggers + a "More filters" popover for client) was an exact
+              duplicate of that panel and is deleted, not moved: both copies drove the
+              SAME stageFilter/ownerFilter/clientFilter state, so nothing here changes
+              which rows a user sees. */}
+          <ListToolbarCore canCreate={selectedIds.size === 0 && hasPermission('matches.update')} onAdd={() => setAddOpen(true)}
+            addContent={<><Plus size={15} aria-hidden="true" /> {t('add.button')}</>}
+            searchEpoch={searchEpoch} onSearch={setQuery} searchPlaceholder={t('page.searchPlaceholder')} searchWidth={260}
+            anyFilterActive={anyFilterActive} onClearFilters={clearAllFilters} />
         </div>
 
         {/* Right — archived toggle + icon-only view toggle (mirror vacancies/opportunities). */}
@@ -326,10 +321,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
           <QuickViewToggle active={showTrash} onToggle={() => { setShowTrash(v => !v); setShowArchived(false) }}
             label={t('common:trash.view')} color="var(--color-trash)" icon={Trash2} />
           {/* View toggle — shared soft-tint component (§4), never a solid fill. */}
-          <ViewModeToggle value={view} onChange={setView} options={[
-            { id: 'table', icon: LayoutList, label: t('view.matches') },
-            { id: 'board', icon: Kanban, label: t('view.board') },
-          ]} />
+          <ViewModeToggle value={view} onChange={setView} options={tableBoardViewOptions(t, 'view.matches')} />
         </div>
       </div>
 

@@ -30,7 +30,7 @@ import { extractApiError } from '@/lib/extractApiError'
 import { useUsers } from '@/lib/queries'
 import { useOpportunityStages } from '@/lib/useOpportunityStages'
 import { useOpportunityLostReasons } from '@/lib/useOpportunityLostReasons'
-import { toggleInSet, toggleAllInSet } from '@/lib/selectionSet'
+import { useBulkSelectionToggles } from '@/hooks/useBulkSelectionToggles'
 import { needsLostReason as stageNeedsLostReason } from './lostReasonGuard'
 import { mapOpportunity } from '../data/mapOpportunity'
 import type { Opportunity, ApiOpportunity } from '@/types/opportunity'
@@ -126,8 +126,7 @@ export function useOpportunitiesData(includeArchived: boolean = false, branchIds
   const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
 
   // Row selection for the checkbox column (drives the future bulk bar, worklist C-41).
-  const toggleRow = (id: Id) => setSelectedIds(prev => toggleInSet(prev, id))
-  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => toggleAllInSet(prev, ids, allSelected))
+  const { toggleRow, toggleAll } = useBulkSelectionToggles(setSelectedIds)
   const clearSelection = () => setSelectedIds(new Set())
 
   // Customer picker options for the drawer/modal pickers (r2-react-query-2: was a raw

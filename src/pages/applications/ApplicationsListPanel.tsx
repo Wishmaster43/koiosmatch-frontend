@@ -8,8 +8,9 @@
  */
 import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
-import { LayoutList, Kanban, Plus, Archive, MessageCircle, Pause, Users, X } from 'lucide-react'
+import { Plus, Archive, MessageCircle, Pause, Users, X } from 'lucide-react'
 import ViewModeToggle from '@/components/ui/ViewModeToggle'
+import { tableBoardViewOptions } from '@/components/ui/listViewOptions'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import ApplicationsTable from './ApplicationsTable'
@@ -17,8 +18,7 @@ import ApplicationsBoard from './ApplicationsBoard'
 import type { BoardPhase } from './ApplicationsBoard'
 import ApplicationsBulkBar from './ApplicationsBulkBar'
 import PaginationBar from '@/components/ui/PaginationBar'
-import HeaderSearch from '@/components/ui/HeaderSearch'
-import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
+import ListToolbarCore from '@/components/ui/ListToolbarCore'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import Button from '@/components/ui/Button'
 import { BTN_H } from '@/config/buttonMetrics'
@@ -134,15 +134,11 @@ export default function ApplicationsListPanel({
       <div style={{ ...TOOLBAR_ROW_STYLE, justifyContent: 'space-between', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
-              Hidden without the create permission (OPENERS-HIDE-1, Danny 05-09). */}
-          {canCreate && (
-            <Button variant="primary" size="md" onClick={onAddOpen}>
-              <Plus size={14} /> {t('add.button')}
-            </Button>
-          )}
-          {/* Shared header search (T10) — debounced, client-side text filter. */}
-          <HeaderSearch key={searchEpoch} onSearch={onSearch} placeholder={t('page.searchPlaceholder')} width={300} />
-          <ClearFiltersButton active={anyFilterActive} onClear={onClearFilters} />
+              Hidden without the create permission (OPENERS-HIDE-1, Danny 05-09).
+              Shared header search (T10) — debounced, client-side text filter. */}
+          <ListToolbarCore canCreate={canCreate} onAdd={onAddOpen} addContent={<><Plus size={14} /> {t('add.button')}</>}
+            searchEpoch={searchEpoch} onSearch={onSearch} searchPlaceholder={t('page.searchPlaceholder')}
+            anyFilterActive={anyFilterActive} onClearFilters={onClearFilters} />
           {/* 11.1: the candidates-bulk deep-link scope — a soft chip (§4 convention)
               showing the selection-based filter is active, clearable on its own
               (independent of the general clear-filters button above). */}
@@ -178,10 +174,7 @@ export default function ApplicationsListPanel({
         <QuickViewToggle active={interviewPaused} onToggle={onToggleInterviewPaused}
           label={t('interview.category.paused')} color={interviewCategoryColor('paused')} icon={Pause} />
         {/* Table/board switcher — shared soft-tint component (§4), never a solid fill. */}
-        <ViewModeToggle value={view} onChange={onViewChange} options={[
-          { id: 'table', icon: LayoutList, label: t('view.table') },
-          { id: 'board', icon: Kanban, label: t('view.board') },
-        ]} />
+        <ViewModeToggle value={view} onChange={onViewChange} options={tableBoardViewOptions(t)} />
         </div>
       </div>
 

@@ -6,13 +6,13 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { UserCog, CircleDot, Tag, Tags, StickyNote, RefreshCw, Link2, Building2, Layers } from 'lucide-react'
+import { CircleDot, Tag, Tags } from 'lucide-react'
 import type { MenuNode } from '@/components/ui/ActionMenu'
 import BulkActionsBar from '@/components/ui/BulkActionsBar'
 import BulkNoteModal from '@/components/ui/BulkNoteModal'
 import { useAuth } from '@/context/AuthContext'
 import { useApps } from '@/context/AppsContext'
-import { archiveNode, pickById, removeTagNode } from '@/components/ui/bulk/bulkNodes'
+import { archiveNode, ownerNode, geocodeNode, coupleBackofficeNode, noteNode, bulkBarLabels, removeTagNode } from '@/components/ui/bulk/bulkNodes'
 import type { Id, LookupOption } from '@/types/common'
 
 interface BulkUser { id: Id; name: string }
@@ -69,30 +69,17 @@ export default function CustomersBulkBar({
   const statusOptions = statuses.map(s => ({ value: s.value, label: s.label, color: s.color }))
   const tagOptions    = selectedTags.map(tg => ({ value: tg, label: tg }))
 
-  // Resolve a picked user id back to the full object the parent needs.
-  const pickUserHandler = pickById(users, onSetOwner)
-
   // Declarative bulk-action tree; archive is gated (server re-checks).
   const items: MenuNode[] = [
-    { key: 'owner', label: t('bulk.changeOwner'), icon: UserCog,
-      searchPlaceholder: t('bulk.searchOwner'), emptyText: t('bulk.noUsers'), options: userOptions, onPick: pickUserHandler },
+    ownerNode(t, { users, onSetOwner, userOptions }),
     { key: 'status', label: t('bulk.changeStatus'), icon: CircleDot,
       searchPlaceholder: t('bulk.searchStatus'), options: statusOptions, onPick: v => onSetStatus(String(v)) },
     { key: 'add-tag', label: t('bulk.addTag'), icon: Tag, input: true,
       placeholder: t('bulk.tagPlaceholder'), submitLabel: t('bulk.tagSubmit'), onSubmit: v => onAddTag(String(v)) },
     removeTagNode(t, { tagOptions, onRemoveTag }, { key: 'remove-tag', labelKey: 'bulk.removeTag', iconType: Tags }),
-    { key: 'note', label: t('bulk.addNote'), icon: StickyNote, onSelect: () => setNoteModalOpen(true) },
-    // GEO-REGEOCODE-1: reuses the ONE shared common:geocode.refresh label (no
-    // per-entity i18n key) — mirrors the per-record GeocodeButton's tooltip text.
-    ...(canGeocode && onGeocode ? [{ key: 'geocode', label: t('common:geocode.refresh'), icon: RefreshCw, onSelect: onGeocode }] : []),
-    // SYNC-BULK-1: bulk backoffice coupling — drills into whichever systems are
-    // actually enabled for this tenant (never offer a switched-off system).
-    ...(canCouple && onCoupleBackoffice && (showHelloflex || showShiftmanager) ? [{
-      key: 'couple', label: t('bulk.couple'), icon: Link2, items: [
-        ...(showHelloflex ? [{ key: 'helloflex', label: t('common:backofficeLinks.helloflex.name'), icon: Building2, onSelect: () => onCoupleBackoffice('helloflex') }] : []),
-        ...(showShiftmanager ? [{ key: 'shiftmanager', label: t('common:backofficeLinks.shiftmanager.name'), icon: Layers, onSelect: () => onCoupleBackoffice('shiftmanager') }] : []),
-      ],
-    }] : []),
+    noteNode(t, () => setNoteModalOpen(true)),
+    ...geocodeNode(t, { canGeocode, onGeocode }),
+    ...coupleBackofficeNode(t, { canCouple, onCoupleBackoffice, showHelloflex, showShiftmanager }),
     ...archiveNode(t, { canArchive, onArchive }),
   ]
 
@@ -100,7 +87,7 @@ export default function CustomersBulkBar({
     <BulkActionsBar
       onClear={onClear}
       items={items}
-      labels={{ selected: t('bulk.selected', { count }), clear: t('bulk.deselect'), actions: t('bulk.actions') }}
+      labels={bulkBarLabels(t, count)}
     >
       <BulkNoteModal open={noteModalOpen} onClose={() => setNoteModalOpen(false)}
         onSubmit={html => { onAddNote(html); setNoteModalOpen(false) }}
