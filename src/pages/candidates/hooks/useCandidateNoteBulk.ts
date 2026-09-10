@@ -5,16 +5,10 @@
  * `notifyOutcome` is owned by the parent hook (shared across every bulk
  * cluster) and passed in so there is exactly one implementation of it.
  */
-import type { Dispatch, SetStateAction } from 'react'
-import type { TFunction } from 'i18next'
 import api from '@/lib/api'
-import type { Id } from '@/types/common'
+import type { CandidateBulkSelectionBase } from './candidateBulkTypes'
 
-interface UseCandidateNoteBulkParams {
-  selectedIds: Set<Id>
-  setSelectedIds: Dispatch<SetStateAction<Set<Id>>>
-  notify: (type: string, msg: string) => void
-  t: TFunction
+interface UseCandidateNoteBulkParams extends CandidateBulkSelectionBase {
   notifyOutcome: (successKey: string, params: Record<string, unknown>, updated: number, total: number) => void
 }
 

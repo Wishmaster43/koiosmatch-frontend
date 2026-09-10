@@ -9,7 +9,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import SharedBranchSection from '@/components/drawer/BranchSection'
-import { useCandidateBranches } from '../hooks/useCandidateDrawerData'
+import { useCandidateBranches } from './useCandidateBranches'
 import type { Candidate } from '@/types/candidate'
 
 // Candidate-side adapter onto the shared BranchSection.

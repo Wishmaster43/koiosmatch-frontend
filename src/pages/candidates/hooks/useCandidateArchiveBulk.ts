@@ -10,13 +10,13 @@
  */
 import { useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
-import type { TFunction } from 'i18next'
 import api from '@/lib/api'
 import { needsLiveCheck, fetchLiveBlockers, liveFromError } from '../data/archiveGuard'
 import type { BlockingApplication, BlockingMatch } from '../data/archiveGuard'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 import type { LookupItem } from '@/context/LookupsContext'
+import type { CandidateBulkSelectionBase } from './candidateBulkTypes'
 
 // Bulk archive-guard modal state (§3B) — aggregate mode: N of the selection
 // carry a live application/match; the same resolutions apply to all of them.
@@ -36,14 +36,13 @@ const BULK_GUARD_CHECK_CAP = 25
 // compatible with the real (broader-optioned) function passed in by the parent.
 type ConfirmFn = (message: string, onConfirm: () => void, options?: { danger?: boolean }) => void
 
-interface UseCandidateArchiveBulkParams {
+// DRY (CANDHOOKS r10): selectedIds/setSelectedIds/notify/t now come from the
+// shared CandidateBulkSelectionBase (jscpd CANDHOOKS #3) — only the fields
+// unique to this cluster are declared here.
+interface UseCandidateArchiveBulkParams extends CandidateBulkSelectionBase {
   candidates: Candidate[]
   setCandidates: Dispatch<SetStateAction<Candidate[]>>
   setTotal: Dispatch<SetStateAction<number>>
-  selectedIds: Set<Id>
-  setSelectedIds: Dispatch<SetStateAction<Set<Id>>>
-  notify: (type: string, msg: string) => void
-  t: TFunction
   funnelTypes: LookupItem[]
   confirm: ConfirmFn
   notifyOutcome: (successKey: string, params: Record<string, unknown>, updated: number, total: number) => void

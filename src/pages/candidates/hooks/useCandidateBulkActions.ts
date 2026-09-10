@@ -19,7 +19,6 @@
 import { useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import type { TFunction } from 'i18next'
 import api from '@/lib/api'
 import { toggleInSet, toggleAllInSet } from '@/lib/selectionSet'
 import { metaOf, initialsOf } from '../data/candidatesShared'
@@ -35,20 +34,20 @@ import { useCandidateMergeBulk } from './useCandidateMergeBulk'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
 import type { LookupItem } from '@/context/LookupsContext'
+import type { CandidateBulkSelectionBase } from './candidateBulkTypes'
 
 // Re-exported so CandidateLifecycleModals (and any other outside caller) keeps
 // importing these two types from this file's own path unchanged.
 export type { BulkArchiveGuardTarget } from './useCandidateArchiveBulk'
 export type { BulkMergeLite, BulkMergeTarget } from './useCandidateMergeBulk'
 
-interface UseCandidateBulkActionsParams {
+// DRY (CANDHOOKS r10): selectedIds/setSelectedIds/notify/t now come from the
+// shared CandidateBulkSelectionBase (jscpd CANDHOOKS #3, shared with
+// useCandidateArchiveBulk's own param shape) — only this hook's own fields follow.
+interface UseCandidateBulkActionsParams extends CandidateBulkSelectionBase {
   candidates: Candidate[]
   setCandidates: Dispatch<SetStateAction<Candidate[]>>
   setTotal: Dispatch<SetStateAction<number>>
-  selectedIds: Set<Id>
-  setSelectedIds: Dispatch<SetStateAction<Set<Id>>>
-  notify: (type: string, msg: string) => void
-  t: TFunction
   funnelTypes: LookupItem[]
   candidateTypes: LookupOption[]
   // BULK-FILTERSET-1: the server-side filter params of the currently visible list

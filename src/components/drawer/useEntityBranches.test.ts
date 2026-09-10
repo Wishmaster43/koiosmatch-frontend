@@ -5,7 +5,7 @@
  * embedded branches field, unlike a candidate) and the BUG CLASS FIX contract:
  * a failed add/remove reverts ONLY the toggled branch chip (§13 — asserts the
  * exact request, never just that a callback fired), mirroring
- * useCandidateDrawerData.test.tsx's coverage of the candidate-side hook.
+ * pages/candidates/drawer/useCandidateBranches.test.tsx's coverage of the candidate-side hook.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'

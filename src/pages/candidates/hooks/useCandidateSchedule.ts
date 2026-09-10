@@ -50,66 +50,67 @@ const unwrapRows = (r: { data?: unknown }): unknown[] => {
   return (Array.isArray(body.data) ? body.data : Array.isArray(r?.data) ? (r.data as unknown[]) : []) as unknown[]
 }
 
-// The candidate's scheduled shifts (agenda) — its own load/error/reload, independent
-// of the open-shifts source below.
-function useCandidateAgenda(candidateId: Id | undefined, locale: string) {
-  const [roster,  setRoster]  = useState<RosterShift[]>([])
+// Row mappers, pure and MODULE-LEVEL (not an inline closure per render) so their
+// identity is stable across renders — required for the exhaustive-deps fix below
+// (a fresh arrow every render previously had to be OMITTED from the effect's deps,
+// which the r9 review flagged as the extraction's one real behaviour risk).
+function mapAgendaRows(rows: unknown[], loc: string): RosterShift[] {
+  return (rows as RawAgenda[]).map<RosterShift>(s => ({
+    date: fmtDate(s.start_time, loc), time: fmtTime(s.start_time, s.end_time, loc),
+    client: s.customer ?? '—', function: s.function, location: s.location ?? '',
+    color: colorFor(s.customer ?? ''), workedBefore: 0, favorite: false,
+  }))
+}
+function mapOpenShiftRows(rows: unknown[], loc: string): OpenShift[] {
+  return (rows as RawOpen[]).map<OpenShift>(s => ({
+    id: s.id as Id, date: fmtDate(s.start_time, loc), time: fmtTime(s.start_time, s.end_time, loc),
+    client: s.customer ?? '—', function: s.function ?? '', location: s.location ?? '',
+    color: colorFor(s.customer ?? ''), distance: 0, level: 0,
+    shiftType: s.shift_type ?? '', openSpots: s.number_persons ?? 1, pool: '',
+  }))
+}
+
+// Shared "GET /candidates/{id}/{path} → mapped list" load/error/abort/retry shape —
+// the agenda and open-shifts loads below both follow it identically (jscpd CANDHOOKS
+// #9); local + unexported since both call sites live in this file.
+function useScheduleLoadState<T>(candidateId: Id | undefined, path: string, locale: string, mapRows: (rows: unknown[], locale: string) => T[]) {
+  const [items,   setItems]   = useState<T[]>([])
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(false)
   const [attempt, setAttempt] = useState(0)
 
-  // Fetches and maps the candidate's roster; retriable via attempt, and aborted on unmount/id change so a stale response never lands.
+  // Fetches and maps the source; retriable via attempt, and aborted on unmount/id change so a stale response never lands.
   useEffect(() => {
     if (!candidateId) { setLoading(false); return }
     const ctrl = new AbortController()
     setLoading(true); setError(false)
-    api.get(`/candidates/${candidateId}/agenda`, { signal: ctrl.signal })
-      .then(r => setRoster((unwrapRows(r) as RawAgenda[]).map<RosterShift>(s => ({
-        date: fmtDate(s.start_time, locale), time: fmtTime(s.start_time, s.end_time, locale),
-        client: s.customer ?? '—', function: s.function, location: s.location ?? '',
-        color: colorFor(s.customer ?? ''), workedBefore: 0, favorite: false,
-      }))))
+    api.get(`/candidates/${candidateId}/${path}`, { signal: ctrl.signal })
+      .then(r => setItems(mapRows(unwrapRows(r), locale)))
       .catch(err => {
         if (isAbortError(err)) return
         setError(true)
-        setRoster([])
+        setItems([])
       })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
-  }, [candidateId, locale, attempt])
+    // mapRows is now always a stable module-level function reference (see above),
+    // so listing it here satisfies exhaustive-deps without ever causing an extra fetch.
+  }, [candidateId, path, locale, attempt, mapRows])
 
-  return { roster, loading, error, reload: useCallback(() => setAttempt(a => a + 1), []) }
+  return { items, loading, error, reload: useCallback(() => setAttempt(a => a + 1), []) }
+}
+
+// The candidate's scheduled shifts (agenda) — its own load/error/reload, independent
+// of the open-shifts source below.
+function useCandidateAgenda(candidateId: Id | undefined, locale: string) {
+  const { items: roster, loading, error, reload } = useScheduleLoadState<RosterShift>(candidateId, 'agenda', locale, mapAgendaRows)
+  return { roster, loading, error, reload }
 }
 
 // The open shifts this candidate could still be scheduled for — its own load/error/reload.
 function useCandidateOpenShifts(candidateId: Id | undefined, locale: string) {
-  const [openShifts, setOpenShifts] = useState<OpenShift[]>([])
-  const [loading,    setLoading]    = useState(true)
-  const [error,      setError]      = useState(false)
-  const [attempt,    setAttempt]    = useState(0)
-
-  // Fetches and maps the open shifts this candidate could still take; retriable via attempt, and aborted on unmount/id change so a stale response never lands.
-  useEffect(() => {
-    if (!candidateId) { setLoading(false); return }
-    const ctrl = new AbortController()
-    setLoading(true); setError(false)
-    api.get(`/candidates/${candidateId}/open-shifts`, { signal: ctrl.signal })
-      .then(r => setOpenShifts((unwrapRows(r) as RawOpen[]).map<OpenShift>(s => ({
-        id: s.id as Id, date: fmtDate(s.start_time, locale), time: fmtTime(s.start_time, s.end_time, locale),
-        client: s.customer ?? '—', function: s.function ?? '', location: s.location ?? '',
-        color: colorFor(s.customer ?? ''), distance: 0, level: 0,
-        shiftType: s.shift_type ?? '', openSpots: s.number_persons ?? 1, pool: '',
-      }))))
-      .catch(err => {
-        if (isAbortError(err)) return
-        setError(true)
-        setOpenShifts([])
-      })
-      .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
-    return () => ctrl.abort()
-  }, [candidateId, locale, attempt])
-
-  return { openShifts, loading, error, reload: useCallback(() => setAttempt(a => a + 1), []) }
+  const { items: openShifts, loading, error, reload } = useScheduleLoadState<OpenShift>(candidateId, 'open-shifts', locale, mapOpenShiftRows)
+  return { openShifts, loading, error, reload }
 }
 
 export function useCandidateSchedule(candidateId?: Id) {

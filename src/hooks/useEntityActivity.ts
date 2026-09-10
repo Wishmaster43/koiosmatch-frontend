@@ -20,6 +20,18 @@ export interface EntityActivityEvent {
   created_at?: string
   description?: string
   log_name?: string
+  // C-16/CHANGELOG-3: field-level diff (Spatie Activitylog shape) — `attributes` = the
+  // new values, `old` = the previous values; the tab renders one "field: old → new" row
+  // per change. Optional so entities without a diff-rendering changelog tab ignore it.
+  properties?: { attributes?: Record<string, unknown>; old?: Record<string, unknown>; [k: string]: unknown }
+  // The current backend resource exposes that diff bag as `changes` (properties = legacy key).
+  changes?: { attributes?: Record<string, unknown>; old?: Record<string, unknown>; [k: string]: unknown }
+  // Spatie event verb (created/updated/deleted/restored) — drives the friendly action line.
+  event?: string
+  // C-16: some entities' audit entries carry the subject + originating IP.
+  subject_type?: string
+  subject_id?: Id
+  ip?: string
   [k: string]: unknown
 }
 

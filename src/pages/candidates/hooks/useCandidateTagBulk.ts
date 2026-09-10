@@ -8,18 +8,16 @@
  */
 import { useMemo } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
-import type { TFunction } from 'i18next'
 import api from '@/lib/api'
 import type { Candidate } from '@/types/candidate'
-import type { Id } from '@/types/common'
+import type { CandidateBulkSelectionBase } from './candidateBulkTypes'
 
-interface UseCandidateTagBulkParams {
+// DRY (CANDHOOKS r10): selectedIds/setSelectedIds/notify/t now come from the
+// shared CandidateBulkSelectionBase (jscpd CANDHOOKS #5/#7) — only the fields
+// unique to this cluster are declared here.
+interface UseCandidateTagBulkParams extends CandidateBulkSelectionBase {
   candidates: Candidate[]
   setCandidates: Dispatch<SetStateAction<Candidate[]>>
-  selectedIds: Set<Id>
-  setSelectedIds: Dispatch<SetStateAction<Set<Id>>>
-  notify: (type: string, msg: string) => void
-  t: TFunction
   notifyOutcome: (successKey: string, params: Record<string, unknown>, updated: number, total: number) => void
 }
 

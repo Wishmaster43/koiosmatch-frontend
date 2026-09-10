@@ -4,14 +4,18 @@
  * rejected. These assert the SEAM (§13): the exact request, and that a FAILED
  * request puts the exact branch chip back (never the whole list, so a parallel
  * chip is never clobbered) while a resolved one keeps the new membership.
- * (useCandidateActivity/useBranchLocationOptions are plain read-only GETs with
- * no optimistic write, so they carry no instance of this bug — untouched here.)
+ * (useBranchLocationOptions, the module-local sibling, is a plain read-only GET
+ * with no optimistic write, so it carries no instance of this bug — untouched here.)
+ * DRY (CANDHOOKS r10): moved verbatim from
+ * pages/candidates/hooks/useCandidateDrawerData.test.tsx, alongside the hook's
+ * own move to pages/candidates/drawer/useCandidateBranches.ts (fold-back, single
+ * consumer BranchSection.tsx) — only the import path changed.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
-import { useCandidateBranches } from './useCandidateDrawerData'
+import { useCandidateBranches } from './useCandidateBranches'
 import type { Candidate, CandidateBranch } from '@/types/candidate'
 
 vi.mock('@/lib/api', async () => {

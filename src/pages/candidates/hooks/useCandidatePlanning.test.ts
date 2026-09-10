@@ -101,6 +101,24 @@ describe('useCandidatePlanningPreferences', () => {
     expect(get).toHaveBeenLastCalledWith('/candidates/c1/planning-preferences', expect.objectContaining({ signal: expect.anything() }))
     expect(r.result.current.error).toBe(false)
   })
+
+  // DRY (CANDHOOKS r10): exercises the shared usePlanningLoadState factory's own
+  // dependency array (candidateId/path/attempt/mapRow) directly — a candidateId
+  // change must both fire a NEW request at the new candidate's route AND apply the
+  // mapper to that new response, proving the exhaustive-deps fix (mapRow added to
+  // the effect's deps) never causes a stale fetch or a stale mapper to linger.
+  it('re-fetches the new candidate route and re-maps its rows when candidateId changes', async () => {
+    get.mockImplementation((url: string) => (url.includes('/c2/')
+      ? Promise.resolve({ data: [{ id: 9, kind: 'favorite', linkable_type: 'customer', linkable_id: 1, linkable_name: 'B' }] })
+      : Promise.resolve({ data: [] })))
+    const r = renderHook(({ id }: { id: string }) => useCandidatePlanningPreferences(id), { initialProps: { id: 'c1' } })
+    await waitFor(() => expect(r.result.current.loading).toBe(false))
+    expect(get).toHaveBeenLastCalledWith('/candidates/c1/planning-preferences', expect.objectContaining({ signal: expect.anything() }))
+    r.rerender({ id: 'c2' })
+    await waitFor(() => expect(r.result.current.favorites).toHaveLength(1))
+    expect(get).toHaveBeenLastCalledWith('/candidates/c2/planning-preferences', expect.objectContaining({ signal: expect.anything() }))
+    expect(r.result.current.favorites[0].linkable_name).toBe('B')
+  })
 })
 
 describe('useCandidateAvailability', () => {

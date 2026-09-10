@@ -93,37 +93,47 @@ function useRetryable() {
   return { attempt, reload }
 }
 
-// Load + mutate a candidate's planning preferences (favourite + blacklist).
-export function useCandidatePlanningPreferences(candidateId?: Id) {
-  const { t } = useTranslation('candidates')
-  const [prefs,   setPrefs]   = useState<Preference[]>([])
+// Shared "GET /candidates/{id}/{path} → mapped list" load/error/abort shape — the
+// preferences load and the availability load below both follow it identically
+// (jscpd CANDHOOKS #6); local + unexported since both call sites live in this file.
+// HONEST-PLANNING-1: neither route carries a planning_configured split yet, so a
+// 404 is a REAL failure (not "endpoint not built") and renders the error+retry
+// state rather than a silent empty list — only a genuinely empty 200 does that.
+function usePlanningLoadState<T, Raw>(candidateId: Id | undefined, path: string, mapRow: (row: Raw) => T, attempt: number) {
+  const [items,   setItems]   = useState<T[]>([])
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(false)
-  const { attempt, reload } = useRetryable()
 
-  // Load all preferences once per candidate. HONEST-PLANNING-1: this route carries no
-  // planning_configured split yet (unlike the customer side) — a 404 here is a REAL
-  // failure (candidate not found / out of tenant scope), not "endpoint not built", so it
-  // is no longer swallowed into a silent empty list. Only a genuinely empty answer
-  // (200 with zero rows) renders the empty state; any request failure renders the error
-  // state with retry, so a broken load can never look identical to "no preferences yet".
   useEffect(() => {
     if (!candidateId) { setLoading(false); return }
     const ctrl = new AbortController()
     setLoading(true); setError(false)
-    api.get(`/candidates/${candidateId}/planning-preferences`, { signal: ctrl.signal })
+    api.get(`/candidates/${candidateId}/${path}`, { signal: ctrl.signal })
       .then(res => {
-        const rows = (unwrapList(res).rows) as RawPreference[]
-        setPrefs((Array.isArray(rows) ? rows : []).map(toPreference))
+        const rows = (unwrapList(res).rows) as Raw[]
+        setItems((Array.isArray(rows) ? rows : []).map(mapRow))
       })
       .catch(err => {
         if (isAbortError(err)) return
         setError(true)
-        setPrefs([])
+        setItems([])
       })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
-  }, [candidateId, attempt])
+    // mapRow is always a module-level pure function (toPreference/toAvailability
+    // below) — a stable reference, so listing it here satisfies exhaustive-deps
+    // without ever causing an extra re-fetch.
+  }, [candidateId, path, attempt, mapRow])
+
+  return { items, setItems, loading, error }
+}
+
+// Load + mutate a candidate's planning preferences (favourite + blacklist).
+export function useCandidatePlanningPreferences(candidateId?: Id) {
+  const { t } = useTranslation('candidates')
+  const { attempt, reload } = useRetryable()
+  const { items: prefs, setItems: setPrefs, loading, error } =
+    usePlanningLoadState<Preference, RawPreference>(candidateId, 'planning-preferences', toPreference, attempt)
 
   // Optimistically add a preference; reconcile with the server row, roll back + toast on failure.
   const add = async (kind: PrefKind, target: { linkable_type: LinkableType; linkable_id: Id; linkable_name: string; reason?: string }) => {
@@ -229,31 +239,9 @@ function toAvailability(row: RawAvailability): Availability {
 // Load + mutate a candidate's availability exceptions (holiday/sick/…).
 export function useCandidateAvailability(candidateId?: Id) {
   const { t } = useTranslation('candidates')
-  const [entries, setEntries] = useState<Availability[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error,   setError]   = useState(false)
   const { attempt, reload } = useRetryable()
-
-  // Load once per candidate. HONEST-PLANNING-1: no planning_configured split on this route
-  // yet, so a failure (404 included — it now means "candidate not found", the route is
-  // built) renders the honest error state with retry instead of a silent empty list.
-  useEffect(() => {
-    if (!candidateId) { setLoading(false); return }
-    const ctrl = new AbortController()
-    setLoading(true); setError(false)
-    api.get(`/candidates/${candidateId}/availability`, { signal: ctrl.signal })
-      .then(res => {
-        const rows = (unwrapList(res).rows) as RawAvailability[]
-        setEntries((Array.isArray(rows) ? rows : []).map(toAvailability))
-      })
-      .catch(err => {
-        if (isAbortError(err)) return
-        setError(true)
-        setEntries([])
-      })
-      .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
-    return () => ctrl.abort()
-  }, [candidateId, attempt])
+  const { items: entries, setItems: setEntries, loading, error } =
+    usePlanningLoadState<Availability, RawAvailability>(candidateId, 'availability', toAvailability, attempt)
 
   // Optimistically add an entry; reconcile with the server row, roll back + toast on failure (409 = slot taken).
   const add = async (entry: { date: string; part: DayPart; status: AvailStatus; reason?: string }) => {

@@ -1,39 +1,26 @@
 /**
  * Candidate-drawer data hooks — per-tab fetches live here so the tab components
- * (ChangelogTab, BranchSection) stay presentational (§3: logic in hooks, not JSX).
+ * (ChangelogTab) stay presentational (§3: logic in hooks, not JSX).
  * GET-loads go through React Query (A-3: cached + dedup + signal-cancel), disabled
  * until their inputs exist and tolerant of a missing endpoint (empty, never a hard error).
+ *
+ * DRY (CANDHOOKS r10): the branch-membership hooks (useCandidateBranches,
+ * useBranchLocationOptions) moved out of this file into
+ * pages/candidates/drawer/useCandidateBranches.ts, co-located with their one real
+ * consumer (BranchSection.tsx) — this file had exported them with no second consumer,
+ * which read as shared infrastructure it never was.
  */
-import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
-import { notifyError } from '@/lib/notify'
-import { extractApiError } from '@/lib/extractApiError'
-import type { Candidate, CandidateBranch } from '@/types/candidate'
+import type { EntityActivityEvent } from '@/hooks/useEntityActivity'
 import type { Id } from '@/types/common'
 
-/** One entry in the candidate audit trail (GET /candidates/{id}/activity, C-16). */
-export interface ActivityEvent {
-  id?: Id
-  causer_name?: string
-  // Koios-performed action label ("<name>-KoiosAI") — wins over causer_name when present.
-  actor_label?: string
-  created_at?: string
-  description?: string
-  log_name?: string
-  // C-16: audit entries carry the subject + originating IP.
-  subject_type?: string
-  subject_id?: Id
-  ip?: string
-  // C-16: field-level diff (Spatie Activitylog shape) — `attributes` = the new values,
-  // `old` = the previous values; the tab renders one "field: old → new" row per change.
-  properties?: { attributes?: Record<string, unknown>; old?: Record<string, unknown>; [k: string]: unknown }
-  // The current backend resource exposes that diff bag as `changes` (properties = legacy key).
-  changes?: { attributes?: Record<string, unknown>; old?: Record<string, unknown>; [k: string]: unknown }
-  // Spatie event verb (created/updated/deleted/restored) — drives the friendly action line.
-  event?: string
-}
+// DRY (CANDHOOKS r9): every field this entity's audit entry carries (id, causer,
+// the C-16 subject/ip pair, the changes/properties diff, the Spatie event verb)
+// now lives once on the shared EntityActivityEvent (hooks/useEntityActivity,
+// also used by useVacancyActivity/useOpportunityActivity/useApplicationActivity/
+// useMatchActivity) — this alias keeps this file's own name for its consumers.
+export type ActivityEvent = EntityActivityEvent
 
 // Candidate audit trail (C-16). 404 = endpoint not built yet → empty (calm), not an
 // error. Returns the four-state building blocks the tab renders.
@@ -56,66 +43,4 @@ export function useCandidateActivity(id?: Id): { items: ActivityEvent[]; loading
     },
   })
   return { items: data, loading, error }
-}
-
-export interface BranchOption { value: string; label: string }
-
-interface LocationLite { name?: string; id?: Id }
-
-// Tenant vestigingen (GET /locations — the settings/company/locations lookup) as
-// id-keyed {value,label} options for the
-// branch link — value is the location id so membership can persist by id (C-4).
-// Danny ronde-2 punt 1: this listed CUSTOMERS (wrong entity — the backend's
-// exists:locations rule 422'd every save); branches ARE the tenant's own
-// vestigingen from settings/company/locations.
-export function useBranchLocationOptions(): BranchOption[] {
-  const { data = [] } = useQuery({
-    queryKey: ['locations', 'branch-options'],
-    queryFn: async ({ signal }): Promise<BranchOption[]> => {
-      const rows = unwrapList<LocationLite>(await api.get('/locations', { signal })).rows
-      return rows
-        .map(l => { const name = String(l.name ?? l.id ?? ''); return { value: String(l.id ?? name), label: name } })
-        .filter(o => o.value && o.label)
-    },
-  })
-  return data
-}
-
-// A candidate's branch membership (C-4, M2M): local optimistic chips + persisted
-// add/remove via /candidates/{id}/branches; notifyError on failure (ERR-1). Tolerant
-// while the backend endpoint is being (re)built — the options GET soft-fails too.
-export function useCandidateBranches(candidate: Candidate) {
-  const { t } = useTranslation('candidates')
-  const options = useBranchLocationOptions()
-  const [branches, setBranches] = useState<CandidateBranch[]>(candidate.branches ?? [])
-
-  // Membership key: prefer the id, fall back to the name for bare-slug branches.
-  const keyOf = (b: CandidateBranch) => String(b.id ?? b.name)
-  const selectedIds = branches.map(keyOf)
-
-  // Optimistic add/remove, persisted to the pivot route. Body key is location_id —
-  // the controller validates exists:locations (the old branch_id key 422'd silently).
-  // BUG CLASS FIX: a failed request used to only toast — the chip stayed in the
-  // state the server rejected. Snapshot only the ONE branch being toggled (never
-  // the whole list, so a parallel toggle of another branch is never clobbered by
-  // this revert) and put it back on failure.
-  const toggle = (id: string) => {
-    if (selectedIds.includes(id)) {
-      const removed = branches.find(b => keyOf(b) === id)
-      setBranches(prev => prev.filter(b => keyOf(b) !== id))
-      api.delete(`/candidates/${candidate.id}/branches/${id}`).catch(err => {
-        if (removed) setBranches(prev => (prev.some(b => keyOf(b) === id) ? prev : [...prev, removed]))
-        notifyError(extractApiError(err, t('common:actionFailed')))
-      })
-    } else {
-      const name = options.find(o => o.value === id)?.label ?? id
-      setBranches(prev => [...prev, { id, name }])
-      api.post(`/candidates/${candidate.id}/branches`, { location_id: id }).catch(err => {
-        setBranches(prev => prev.filter(b => keyOf(b) !== id))
-        notifyError(extractApiError(err, t('common:actionFailed')))
-      })
-    }
-  }
-
-  return { branches, options, selectedIds, toggle }
 }

@@ -9,16 +9,10 @@ import { useEntityActivity } from '@/hooks/useEntityActivity'
 import type { EntityActivityEvent, UseEntityActivityResult } from '@/hooks/useEntityActivity'
 import type { Id } from '@/types/common'
 
-export interface VacancyActivityEvent extends EntityActivityEvent {
-  // CHANGELOG-3: field-level diff (Spatie Activitylog shape) — `attributes` = the new
-  // values, `old` = the previous values; the changelog tab renders one "field: old →
-  // new" row per change. The current backend resource exposes this as `changes`
-  // (`properties` kept for the legacy key, same as the candidate/opportunity feeds).
-  properties?: { attributes?: Record<string, unknown>; old?: Record<string, unknown>; [k: string]: unknown }
-  changes?: { attributes?: Record<string, unknown>; old?: Record<string, unknown>; [k: string]: unknown }
-  // Spatie event verb (created/updated/deleted/restored) — drives the friendly action line.
-  event?: string
-}
+// DRY (CANDHOOKS r9): the changes/properties/event diff fields now live on the
+// shared EntityActivityEvent (hooks/useEntityActivity) itself — this alias keeps
+// the entity's own named type for callers/tests without redeclaring the fields.
+export type VacancyActivityEvent = EntityActivityEvent
 
 // Fetches the vacancy's audit trail (see file docblock above).
 export function useVacancyActivity(id?: Id): UseEntityActivityResult<VacancyActivityEvent> {
