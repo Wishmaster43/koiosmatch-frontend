@@ -25,8 +25,11 @@ vi.mock('@/lib/api', () => ({
   getActiveTenantId: vi.fn(() => null),
 }))
 // t() echoes the key so assertions read as the contract, not as Dutch copy.
+// The settings kit's NumberInput reaches the i18n singleton through lib/formatters, so
+// the flat mock must also carry the plugin hook the singleton registers on import.
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k: string) => k, i18n: { language: 'nl' } }),
+  initReactI18next: { type: '3rdParty', init: () => {} },
 }))
 
 beforeEach(() => { blobRef.current = {}; postMock.mockClear() })
