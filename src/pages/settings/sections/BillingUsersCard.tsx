@@ -7,7 +7,6 @@
  * above the included seats. null included_users means unlimited and renders
  * as text, never an invented infinity glyph (worker brief, verbatim).
  */
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Save } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
@@ -18,7 +17,7 @@ import SaveButton from '@/components/ui/SaveButton'
 import Spinner from '@/components/ui/Spinner'
 import { SectionTitle, Caption, GroupLabel, monoStyle } from '@/components/ui/typography'
 import BillingCardShell from './billing/BillingCardShell'
-import { useAdminBillingBudgets } from './useAdminBillingBudgets'
+import { useBillingCardState } from './useBillingCardState'
 import type { AdminBillingBudgetsResponse, AdminBillingBudgetsUpdate, BillingBudgetEntry } from '@/types/billingUsage'
 import { PACKAGE_KEYS } from './billingCardStyles'
 import { SettingCardList, SettingRow } from '../components/SettingsKit'
@@ -42,9 +41,7 @@ export default function BillingUsersCard() {
   const { t } = useTranslation('settings')
   const { formatCurrency } = useNumberFormat()
 
-  const { data, setData, phase, drafts, setDrafts } = useAdminBillingBudgets(draftFromEntry)
-  const [saving, setSaving] = useState(false)
-  const [savedOk, setSavedOk] = useState(false)
+  const { data, setData, phase, drafts, setDrafts, saving, setSaving, savedOk, setSavedOk } = useBillingCardState(draftFromEntry)
 
   const hasChange = PACKAGE_KEYS.some((key) => {
     const saved = draftFromEntry(data?.packages?.[key])

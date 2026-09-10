@@ -35,7 +35,10 @@ describe('AppsSettings', () => {
     // design): at least one PUT carries 'hf' and none ever carries 'helloflex'.
     for (const b of screen.getAllByTitle('apps.enable')) fireEvent.click(b)
     // Toggles only edit the draft; the one Save carries the whole list (Danny 09-09).
-    fireEvent.click(screen.getByRole('button', { name: /common\.save/ }))
+    // DRY round 11 SETTINGS2: SaveButton's own default face resolves 'save' from
+    // the 'common' namespace (identical text under real i18n) — this file's
+    // naive t = k => k mock surfaces that unprefixed key instead of 'common.save'.
+    fireEvent.click(screen.getByRole('button', { name: /^save$/ }))
     await waitFor(() => expect(mockPut).toHaveBeenCalled())
     const bodies = mockPut.mock.calls.map(([url, body]) => ({ url, body }))
     expect(bodies.every(({ url }) => url === '/settings/apps')).toBe(true)
@@ -47,7 +50,10 @@ describe('AppsSettings', () => {
     mockPut.mockRejectedValue({ response: { data: { message: 'Ongeldige app(s): x' } } })
     render(<AppsSettings />)
     fireEvent.click(screen.getAllByTitle('apps.enable')[0])
-    fireEvent.click(screen.getByRole('button', { name: /common\.save/ }))
+    // DRY round 11 SETTINGS2: SaveButton's own default face resolves 'save' from
+    // the 'common' namespace (identical text under real i18n) — this file's
+    // naive t = k => k mock surfaces that unprefixed key instead of 'common.save'.
+    fireEvent.click(screen.getByRole('button', { name: /^save$/ }))
     await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('Ongeldige app(s): x'))
     expect(mockSetApps).not.toHaveBeenCalled()
   })

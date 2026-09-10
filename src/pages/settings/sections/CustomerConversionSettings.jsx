@@ -1,9 +1,7 @@
 import { useTranslation } from 'react-i18next'
-import SettingLookupPicker from '../components/SettingLookupPicker'
+import SingleLookupSettingCard from './SingleLookupSettingCard'
 import { useCustomerLookups } from '@/lib/useCustomerLookups'
 import { useSettingKeyPick } from '../lib/useSettingKeyPick'
-import { SectionTitle } from '@/components/ui/typography'
-import SettingsLoadBanner from '../components/SettingsLoadBanner'
 
 // The tenant-setting key; CustomerDrawer's doConvertPhase applies it the SAME
 // way useCandidateStatus.ts applies the candidate counterpart (mirrors DEFAULT-STATUS-1).
@@ -22,19 +20,14 @@ export function CustomerConversionSettings() {
   const { value, loaded, save } = useSettingKeyPick(CONVERT_DEFAULT_STATUS_KEY, 'none', t('customerConversion.saveFailed'))
 
   return (
-    <div style={{ maxWidth: 560 }}>
-      <SettingsLoadBanner />
-      <SectionTitle as="div" style={{ marginBottom: 4 }}>{t('customerConversion.title')}</SectionTitle>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('customerConversion.subtitle')}</div>
-      {/* Searchable single-pick dropdown, like every other lookup filter (Danny 23-07). */}
-      <SettingLookupPicker
-        options={(statuses ?? []).map(s => ({ value: s.value, label: s.label }))}
-        value={value}
-        onPick={save}
-        disabled={!loaded}
-        width={300}
-        noneLabel={t('customerConversion.none')}
-      />
-    </div>
+    <SingleLookupSettingCard
+      title={t('customerConversion.title')}
+      subtitle={t('customerConversion.subtitle')}
+      options={(statuses ?? []).map(s => ({ value: s.value, label: s.label }))}
+      value={value}
+      onPick={save}
+      loaded={loaded}
+      noneLabel={t('customerConversion.none')}
+    />
   )
 }

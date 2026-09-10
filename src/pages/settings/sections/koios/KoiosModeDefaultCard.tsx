@@ -10,16 +10,15 @@
  * Gated on `settings.update`; a user without it sees the current values but a
  * disabled control with an honest reason (§0 no fake affordances).
  */
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useAuth } from '@/context/AuthContext'
-import { useAllSettings, saveSettingsKeys } from '@/lib/settings/useAllSettings'
+import { saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { extractApiError } from '@/lib/extractApiError'
 import { notifyError } from '@/lib/notify'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import Toggle from '@/components/ui/Toggle'
 import { BodyText, Caption } from '@/components/ui/typography'
 import { DefaultChoiceCard } from './DefaultChoiceCard'
+import { useKoiosDefaultCard } from './useKoiosDefaultCard'
+import { useTranslation } from 'react-i18next'
 
 const MODE_KEY = 'koios.mode_default'
 const AUTO_MESSAGES_KEY = 'koios.auto_messages_default'
@@ -32,11 +31,7 @@ function readAutoMessagesDefault(raw: unknown): boolean {
 // Bureau-wide Koios Wizard/Auto default card — first (status/models) settings tab, per the slice spec.
 export default function KoiosModeDefaultCard() {
   const { t } = useTranslation('koios')
-  const auth = useAuth()
-  const canEdit = auth?.hasPermission('settings.update') ?? false
-  const values = useAllSettings()
-  const [saving, setSaving] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const { canEdit, values, saving, setSaving, error, setError } = useKoiosDefaultCard()
 
   const mode = values[MODE_KEY] === 'auto' ? 'auto' : 'wizard'
   const autoMessages = readAutoMessagesDefault(values[AUTO_MESSAGES_KEY])

@@ -1,9 +1,7 @@
 import { useTranslation } from 'react-i18next'
-import SettingLookupPicker from '../components/SettingLookupPicker'
+import SingleLookupSettingCard from './SingleLookupSettingCard'
 import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useSettingKeyPick } from '../lib/useSettingKeyPick'
-import { SectionTitle } from '@/components/ui/typography'
-import SettingsLoadBanner from '../components/SettingsLoadBanner'
 
 // The tenant-setting key; VacancyDefaultStatusResolver (backend) applies it on every
 // status-less vacancy create (VACSTATUS-DEFAULT-1) — the FE never has to replicate
@@ -33,20 +31,15 @@ function VacancyDefaultStatusEditor() {
   const { value, loaded, save } = useSettingKeyPick(VACANCY_DEFAULT_STATUS_KEY, 'none', t('vacancyDefaultStatus.saveFailed'))
 
   return (
-    <div style={{ maxWidth: 560 }}>
-      <SettingsLoadBanner />
-      <SectionTitle as="div" style={{ marginBottom: 4 }}>{t('vacancyDefaultStatus.title')}</SectionTitle>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('vacancyDefaultStatus.subtitle')}</div>
-      {/* Searchable single-pick dropdown, like every other lookup filter (Danny 23-07). */}
-      <SettingLookupPicker
-        options={(statuses ?? []).map(s => ({ value: s.value, label: s.label }))}
-        value={value}
-        onPick={save}
-        disabled={!loaded}
-        width={300}
-        noneLabel={t('vacancyDefaultStatus.none')}
-      />
-    </div>
+    <SingleLookupSettingCard
+      title={t('vacancyDefaultStatus.title')}
+      subtitle={t('vacancyDefaultStatus.subtitle')}
+      options={(statuses ?? []).map(s => ({ value: s.value, label: s.label }))}
+      value={value}
+      onPick={save}
+      loaded={loaded}
+      noneLabel={t('vacancyDefaultStatus.none')}
+    />
   )
 }
 

@@ -1,9 +1,7 @@
 /** AppsSettings — toggle external app connectors (with monthly-cost + package warnings). */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, Save } from 'lucide-react'
 import SaveButton from '@/components/ui/SaveButton'
-import Spinner from '@/components/ui/Spinner'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
@@ -160,12 +158,10 @@ export default function AppsSettings() {
 
       {canEdit && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 20 }}>
-          <SaveButton onClick={save} disabled={saving || !dirty} saved={saved}
-            style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            {saved ? <><Check size={13} /> {t('common.saved')}</>
-            : saving ? <><Spinner size={13} /> {t('common.saving')}</>
-            :          <><Save size={13} /> {t('common.save')}</>}
-          </SaveButton>
+          {/* No explicit children: SaveButton's own saved/saving/save face (DRY round 11, SETTINGS2)
+              renders the identical Check/Spinner/Save + common:saved/saving/save this screen used to hand-roll. */}
+          <SaveButton onClick={save} disabled={saving || !dirty} saved={saved} saving={saving}
+            style={{ display: 'flex', alignItems: 'center', gap: 6 }} />
         </div>
       )}
     </div>

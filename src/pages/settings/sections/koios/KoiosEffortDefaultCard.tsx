@@ -6,15 +6,14 @@
  * Gated on `settings.update` (§0 no fake affordances: a user without permission
  * sees the stored value disabled + reason).
  */
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useAuth } from '@/context/AuthContext'
-import { useAllSettings, saveSettingsKeys } from '@/lib/settings/useAllSettings'
+import { saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { extractApiError } from '@/lib/extractApiError'
 import { notifyError } from '@/lib/notify'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { BodyText, Caption } from '@/components/ui/typography'
 import { DefaultChoiceCard } from './DefaultChoiceCard'
+import { useKoiosDefaultCard } from './useKoiosDefaultCard'
+import { useTranslation } from 'react-i18next'
 
 const EFFORT_KEY = 'koios_default_effort'
 const EFFORT_LEVELS = ['low', 'medium', 'high', 'xhigh', 'max']
@@ -22,11 +21,7 @@ const EFFORT_LEVELS = ['low', 'medium', 'high', 'xhigh', 'max']
 // Tenant default Koios effort level picker — saves through the shared writer.
 export default function KoiosEffortDefaultCard() {
   const { t } = useTranslation('koios')
-  const auth = useAuth()
-  const canEdit = auth?.hasPermission('settings.update') ?? false
-  const values = useAllSettings()
-  const [saving, setSaving] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const { canEdit, values, saving, setSaving, error, setError } = useKoiosDefaultCard()
 
   const effort = String(values[EFFORT_KEY] ?? 'high')
 

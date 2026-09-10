@@ -27,7 +27,7 @@ import Spinner from '@/components/ui/Spinner'
 import { SectionTitle, Caption, GroupLabel } from '@/components/ui/typography'
 import TenantBudgetOverride from './TenantBudgetOverride'
 import BillingCardShell from './billing/BillingCardShell'
-import { useAdminBillingBudgets } from './useAdminBillingBudgets'
+import { useBillingCardState } from './useBillingCardState'
 import type {
   AdminBillingBudgetsResponse, AdminBillingBudgetsUpdate, BillingBudgetEntry,
 } from '@/types/billingUsage'
@@ -50,9 +50,7 @@ export default function BillingBudgetsCard() {
   const { t } = useTranslation('settings')
   const { formatCurrency } = useNumberFormat()
 
-  const { data, setData, phase, drafts, setDrafts } = useAdminBillingBudgets(draftFromEntry)
-  const [saving, setSaving] = useState(false)
-  const [savedOk, setSavedOk] = useState(false)
+  const { data, setData, phase, drafts, setDrafts, saving, setSaving, savedOk, setSavedOk } = useBillingCardState(draftFromEntry)
 
   // Per-tenant override state, owned by the child so this card stays under the
   // §3 400-line split trigger; lifted here only for the shared Save action.

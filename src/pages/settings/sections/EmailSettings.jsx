@@ -12,7 +12,7 @@
  */
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Save, Check, Mail, AlertTriangle, Eye, EyeOff } from 'lucide-react'
+import { Check, Mail, AlertTriangle, Eye, EyeOff } from 'lucide-react'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
@@ -229,12 +229,10 @@ export default function EmailSettings({ context = 'klanten' }) {
             {testing ? <Spinner size={13} /> : <Mail size={13} />}
             {t('email.testConnection')}
           </Button>
-          {/* SaveButton — the ONE saved-state save action (§4 success token pair). */}
-          <SaveButton saved={saved} onClick={save} disabled={saving}>
-            {saved   ? <><Check size={13} /> {t('common.saved')}</>                         :
-             saving  ? <><Spinner size={13} /> {t('common.saving')}</> :
-                       <><Save size={13} /> {t('common.save')}</>}
-          </SaveButton>
+          {/* SaveButton — the ONE saved-state save action (§4 success token pair). No
+              explicit children: SaveButton's own saved/saving/save face (DRY round 11,
+              SETTINGS2) renders the identical Check/Spinner/Save + common:saved/saving/save. */}
+          <SaveButton saved={saved} saving={saving} onClick={save} disabled={saving} />
         </div>
       </div>
 
