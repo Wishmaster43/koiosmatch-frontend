@@ -143,19 +143,24 @@ export function useTaskDrawerActions({ setTasks, archivedTasks, setArchivedTasks
     setTasks(prev => prev.map(x => x.id === id ? { ...x, links: detail.links, linkLabel: detail.linkLabel } : x))
   }
 
-  // Add a polymorphic link from the drawer; show it optimistically, then POST and
-  // re-sync. Bug class fix: a rejected POST used to only toast, leaving a link in
-  // the drawer the backend never persisted — the user believed it was added.
+  // Shared tail of a link POST/DELETE (handleAddLink/handleRemoveLink below): apply
+  // the server's authoritative detail on success, or revert the snapshotted `links`
+  // array and surface the server's own message on failure. Bug class fix: a
+  // rejected write used to only toast, leaving the drawer's optimistic link state
+  // out of sync with what the backend actually persisted.
+  const syncLinks = (id: Id | undefined, request: Promise<{ data: unknown }>, beforeLinks: TaskDetail['links'] | undefined) => {
+    request.then(r => applyDetail(id, r)).catch(err => {
+      if (beforeLinks !== undefined) setSelected(prev => (prev && prev.id === id ? ({ ...prev, links: beforeLinks } as TaskDetail) : prev))
+      notifyError(extractApiError(err, t('common:actionFailed')))
+    })
+  }
+
+  // Add a polymorphic link from the drawer; show it optimistically, then POST and re-sync.
   // Snapshot the pre-add `links` array (only that field) and restore it on failure.
   const handleAddLink = (id: Id | undefined, link: NewLink) => {
     const beforeLinks = selected && selected.id === id ? selected.links : undefined
     setSelected(prev => (prev && prev.id === id ? ({ ...prev, links: [...(prev.links ?? []), { type: link.type, id: link.id, label: link.label }] } as TaskDetail) : prev))
-    api.post(`/tasks/${id}/links`, { type: link.type, id: link.id })
-      .then(r => applyDetail(id, r))
-      .catch(err => {
-        if (beforeLinks !== undefined) setSelected(prev => (prev && prev.id === id ? ({ ...prev, links: beforeLinks } as TaskDetail) : prev))
-        notifyError(extractApiError(err, t('common:actionFailed')))
-      })
+    syncLinks(id, api.post(`/tasks/${id}/links`, { type: link.type, id: link.id }), beforeLinks)
   }
 
   // Remove a link from the drawer; drop it optimistically, then DELETE and re-sync.
@@ -166,12 +171,7 @@ export function useTaskDrawerActions({ setTasks, archivedTasks, setArchivedTasks
     setSelected(prev => (prev && prev.id === id
       ? ({ ...prev, links: (prev.links ?? []).filter(l => !(l.type === link.type && String(l.id) === String(link.id))) } as TaskDetail)
       : prev))
-    api.delete(`/tasks/${id}/links`, { data: { type: link.type, id: link.id } })
-      .then(r => applyDetail(id, r))
-      .catch(err => {
-        if (beforeLinks !== undefined) setSelected(prev => (prev && prev.id === id ? ({ ...prev, links: beforeLinks } as TaskDetail) : prev))
-        notifyError(extractApiError(err, t('common:actionFailed')))
-      })
+    syncLinks(id, api.delete(`/tasks/${id}/links`, { data: { type: link.type, id: link.id } }), beforeLinks)
   }
 
   // Enkelstuks-sweep: un-archive ONE task via the per-id route (POST /tasks/{id}/restore,

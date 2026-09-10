@@ -7,6 +7,7 @@
  */
 import SharedNotesTab from '@/components/drawer/tabs/NotesTab'
 import { useNotesTabSetup } from '@/hooks/useNotesTabSetup'
+import { entityNoteLabels } from './notes/entityNoteLabels'
 
 interface EntityNotesTabProps {
   entity: 'match' | 'task'
@@ -44,14 +45,7 @@ export default function EntityNotesTab({ entity, id, basePath, ns }: EntityNotes
       // routes exist for both match and task notes.
       popout={{ entity, id }}
       labels={{
-        notes: t('notes.title'),
-        newNote: t('notes.new'),
-        type: t('notes.type'),
-        save: t('notes.save'),
-        cancel: t('notes.cancel'),
-        notesEmpty: t('notes.empty'),
-        notePlaceholder: () => t('notes.placeholder'),
-        searchPlaceholder: t('notes.searchPlaceholder'),
+        ...entityNoteLabels(t),
         loadError: t('notes.loadError'),
         retry: t('common:error.retry'),
         edit: t('notes.edit'),

@@ -9,19 +9,9 @@
  * re-export (and every deep test mock targeting this exact path) keeps working
  * without a call-site change.
  */
-import { AddApplicationModal as SharedAddApplicationModal } from '@/pages/applications/shared'
-import type { Id } from '@/types/common'
+import { AddApplicationModal as SharedAddApplicationModal, type DrawerAddApplicationModalProps } from '@/pages/applications/shared'
 
-export default function AddApplicationModal({ candidateId, candidateOwnerId, candidateOwnerName, initialVacancyId, suggestedVacancyId, editApplicationId, onClose, onCreated }: {
-  candidateId: Id
-  candidateOwnerId?: Id | null
-  candidateOwnerName?: string
-  initialVacancyId?: Id
-  suggestedVacancyId?: Id | null
-  editApplicationId?: Id
-  onClose: () => void
-  onCreated: () => void
-}) {
+export default function AddApplicationModal({ candidateId, candidateOwnerId, candidateOwnerName, initialVacancyId, suggestedVacancyId, editApplicationId, onClose, onCreated }: DrawerAddApplicationModalProps) {
   return (
     <SharedAddApplicationModal context="drawer" candidateId={candidateId} candidateOwnerId={candidateOwnerId}
       candidateOwnerName={candidateOwnerName} initialVacancyId={initialVacancyId} suggestedVacancyId={suggestedVacancyId}

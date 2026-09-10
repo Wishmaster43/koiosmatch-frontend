@@ -137,20 +137,23 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
   // DROPDOWN-CLEAR-1: empty string clears the owner (ownerId: null on the wire).
   const handleOwner = (id: Id, ownerId: string | null) => {
     const before = applications.find(a => a.id === id) ?? wideRows.find(a => a.id === id)
+    // Shared revert for a failed owner PATCH (both the clear and the set-owner arm
+    // below end up here) — restores the snapshotted owner in both the list row and
+    // the open detail, then surfaces the server's own message.
+    const revertOwner = (err: unknown) => {
+      if (before) {
+        setApplications(prev => prev.map(a => a.id === id ? { ...a, owner: before.owner } : a))
+        setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, owner: before.owner } as ApplicationDetail) : prev))
+      }
+      notifyError(extractApiError(err, t('common:actionFailed')))
+    }
     if (!ownerId) {
       // Clear the owner: the UI model keeps an EMPTY owner object (mapApplication's own shape
       // for an unassigned application), never null — the row/header render it as unassigned.
       const unassigned: ApplicationOwner = { id: null, name: '', initials: '', color: null }
       setApplications(prev => prev.map(a => a.id === id ? { ...a, owner: unassigned } : a))
       setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, owner: unassigned } as ApplicationDetail) : prev))
-      api.patch(`/applications/${id}`, { owner_id: null })
-        .catch(err => {
-          if (before) {
-            setApplications(prev => prev.map(a => a.id === id ? { ...a, owner: before.owner } : a))
-            setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, owner: before.owner } as ApplicationDetail) : prev))
-          }
-          notifyError(extractApiError(err, t('common:actionFailed')))
-        })
+      api.patch(`/applications/${id}`, { owner_id: null }).catch(revertOwner)
       return
     }
     const u = users.find(x => String(x.id) === String(ownerId))
@@ -158,14 +161,7 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
     const owner = { id: ownerId, name: u.name, initials: initialsOf(u.name), color: null }
     setApplications(prev => prev.map(a => a.id === id ? { ...a, owner } : a))
     setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, owner } as ApplicationDetail) : prev))
-    api.patch(`/applications/${id}`, { owner_id: ownerId })
-      .catch(err => {
-        if (before) {
-          setApplications(prev => prev.map(a => a.id === id ? { ...a, owner: before.owner } : a))
-          setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, owner: before.owner } as ApplicationDetail) : prev))
-        }
-        notifyError(extractApiError(err, t('common:actionFailed')))
-      })
+    api.patch(`/applications/${id}`, { owner_id: ownerId }).catch(revertOwner)
   }
 
   // Re-link (or unlink, null) an application's vacancy — shared by the Sollicitatie

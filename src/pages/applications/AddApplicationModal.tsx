@@ -38,16 +38,30 @@ interface PageContextProps {
 interface DrawerContextProps {
   context: 'drawer'
   candidateId: Id
+  // OWNER-DEVIATION-1: the candidate's own owner, passed down from the already-
+  // loaded drawer record (WorkTab's `c.ownerId`/`c.owner`) — never refetched.
   candidateOwnerId?: Id | null
   candidateOwnerName?: string
+  // VACANCY-PREFILL-1: a vacancy already chosen by the caller (e.g. the score panel
+  // in VacancySearchTab) — seeds the picker once, still freely changeable.
   initialVacancyId?: Id
+  // KOIOS-VOORSTEL-1 (Danny 13-08): vacancy Koios suggests from the candidate's
+  // history — seeds the picker AND shows the Koios mark while it still holds
+  // initialVacancyId (score panel: user clicked THAT vacancy) stays badge-less:
+  // explicit context is the user's own choice, not a proposal.
   suggestedVacancyId?: Id | null
+  // Punt 5: set from an application row's pencil — prefill + PATCH instead of POST.
   editApplicationId?: Id
   onClose: () => void
   onCreated: () => void
 }
 
 export type AddApplicationModalProps = PageContextProps | DrawerContextProps
+
+// The candidate-drawer entry point's own props, sans the `context` discriminant
+// (DrawerAddApplicationModal and the candidate-drawer thin adapter each declared
+// this exact object type inline — export it once here, §2 barrel rule).
+export type DrawerAddApplicationModalProps = Omit<DrawerContextProps, 'context'>
 
 // Dispatch on `context` — a discriminated union keeps each entry point's own
 // props (and TS narrowing) exactly as strict as before the merge.

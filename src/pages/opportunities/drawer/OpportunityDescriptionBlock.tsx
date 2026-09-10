@@ -32,7 +32,7 @@ import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
 import Button from '@/components/ui/Button'
 import { GroupLabel } from '@/components/ui/typography'
-import { useTextPopoutHost } from '@/hooks/useTextPopoutHost'
+import { useTextBlockPopout } from '@/hooks/useTextBlockPopout'
 import type { Id } from '@/types/common'
 
 interface OpportunityDescriptionBlockProps {
@@ -56,14 +56,9 @@ export default function OpportunityDescriptionBlock({ opportunityId, value, onSa
 
   // TEKST-POPOUT-1: one shared draft between drawer and popped-out window
   // (mirrors MatchTextBlock).
-  const popout = useTextPopoutHost({
-    entity: 'opportunity', id: opportunityId != null ? String(opportunityId) : '', field: 'description',
-    value: draft, dirty: editing && draft !== shown,
-    onDraft: (html: string) => { setDraft(html); setEditing(true) },
-    onSaved: (html: string) => { setDraft(html); setShown(html); setEditing(false) },
+  const { changeDraft, openPopout } = useTextBlockPopout({
+    entity: 'opportunity', id: opportunityId, field: 'description', draft, shown, editing, setDraft, setShown, setEditing,
   })
-  const changeDraft = (html: string) => { setDraft(html); popout.publishDraft(html) }
-  const openPopout = () => { if (opportunityId == null) return; setEditing(true); popout.open() }
 
   // Enter edit mode with a fresh draft (in case `value` changed since last edit).
   const start  = () => { setDraft(shown); setEditing(true) }

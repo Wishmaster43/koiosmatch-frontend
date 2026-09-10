@@ -7,6 +7,7 @@
  * has now landed).
  */
 import { actionItemsWire } from '@/components/drawer/tabs/notes/notesTabTypes'
+import { entityNoteLabels } from '@/components/drawer/tabs/notes/entityNoteLabels'
 import type { NoteActionItemWire } from '@/components/drawer/tabs/NotesTab'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -103,14 +104,7 @@ export default function NotesTab({ vacancy: v }: { vacancy: VacancyDetail }) {
       // really persists a handed-over note.
       popout={{ entity: 'vacancy', id: String(v.id) }}
       labels={{
-        notes: t('notes.title'),
-        newNote: t('notes.new'),
-        type: t('notes.type'),
-        save: t('notes.save'),
-        cancel: t('notes.cancel'),
-        notesEmpty: t('notes.empty'),
-        notePlaceholder: () => t('notes.placeholder'),
-        searchPlaceholder: t('notes.searchPlaceholder'),
+        ...entityNoteLabels(t),
         edit: t('notes.edit'),
         deleteNote: t('notes.deleteNote'),
         deleteConfirm: t('notes.deleteConfirm'),

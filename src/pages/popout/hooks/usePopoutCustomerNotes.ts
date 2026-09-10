@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { noteEditGuard } from '@/hooks/noteEditGuard'
 import { mapCustomerNoteRow, type ApiCustomerNoteRow } from '@/pages/customers/shared'
 import type { CustomerNote } from '@/types/customer'
 
@@ -71,10 +72,9 @@ export function usePopoutCustomerNotes(customerId: string | undefined) {
   // PopoutSaveFooter contract requires an honest signal (§3).
   // NOTE-ACTION-ITEMS-1: forward the action_items panel only when present (present = the full wanted set; absent = untouched).
   const editNote = useCallback((index: number, payload: NotePayload): Promise<boolean> => {
-    if (!customerId) return Promise.resolve(false)
-    const target = notes[index]
-    if (!target) return Promise.resolve(false)
-    const snapshot = notes
+    const guard = noteEditGuard(customerId, notes, index)
+    if (!guard) return Promise.resolve(false)
+    const { target, snapshot } = guard
     setNotes(prev => prev.map((n, i) => (i === index ? { ...n, type: payload.type, title: payload.title, text: payload.body } : n)))
     return landedWrite(
       api.patch(`/customers/${customerId}/notes/${target.id}`, { type: payload.type, title: payload.title, text: payload.body, language: payload.language, ...actionItemsWire(payload.action_items) }),

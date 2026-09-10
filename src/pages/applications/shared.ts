@@ -6,5 +6,6 @@
  * extend this list deliberately, never bypass it with a deep import.
  */
 export { default as AddApplicationModal } from './AddApplicationModal'
+export type { DrawerAddApplicationModalProps } from './AddApplicationModal'
 export { mapApplication, mapInterview } from './data/mapApplication'
 export { default as InterviewStatusCard } from './drawer/InterviewStatusCard'

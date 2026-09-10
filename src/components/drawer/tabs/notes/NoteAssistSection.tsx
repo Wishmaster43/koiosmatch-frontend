@@ -29,7 +29,7 @@
  */
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Wand2, AlignLeft, Check, X } from 'lucide-react'
+import { Wand2, AlignLeft, Check } from 'lucide-react'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import Spinner from '@/components/ui/Spinner'
 import CalloutBox from '@/components/ui/CalloutBox'
@@ -42,7 +42,7 @@ import { useNoteAssist } from './useNoteAssist'
 const AssistActionsResultsPanel = lazy(() => import('@/components/ui/richtext/AssistActionsResultsPanel'))
 import { applyAssistResult, toPlainText } from './noteAssistApply'
 import AssistTextPreview from '@/components/ui/richtext/AssistTextPreview'
-import KoiosFeedback from '@/components/layout/koios/KoiosFeedback'
+import { AssistDiscardButton, AssistFeedbackSlot } from '@/components/drawer/AssistResultFooter'
 import NoteKoiosModeToggle from './NoteKoiosModeToggle'
 import { Caption, GroupLabel } from '@/components/ui/typography'
 import { ACTION_TYPE_LABEL_NL } from './noteAssistApi'
@@ -162,7 +162,7 @@ export default function NoteAssistSection({ body, onApply, language, onItems, kn
           <AssistTextPreview text={result.text} compareWith={plainBody} />
           <div style={{ display: 'flex', gap: 8 }}>
             <Button variant="primary" size="sm" onClick={handleApply}><Check size={13} /> {t('notesAssist.apply', { defaultValue: 'Overnemen' })}</Button>
-            <Button variant="secondary" size="sm" onClick={discard}><X size={13} /> {t('notesAssist.discard', { defaultValue: 'Verwerpen' })}</Button>
+            <AssistDiscardButton onDiscard={discard} label={t('notesAssist.discard', { defaultValue: 'Verwerpen' })} />
           </div>
         </div>
       )}
@@ -170,9 +170,7 @@ export default function NoteAssistSection({ body, onApply, language, onItems, kn
       {/* KOIOS-FEEDBACK-FE-1, second surface: the server logs every assist answer
           (prompt_log_id in every mode arm) — thumbs tie back to exactly this one. */}
       {status === 'success' && result?.promptLogId && (
-        <div style={{ marginTop: 6 }}>
-          <KoiosFeedback promptLogId={result.promptLogId} surface="note_assist" t={t} />
-        </div>
+        <AssistFeedbackSlot promptLogId={result.promptLogId} surface="note_assist" t={t} />
       )}
     </div>
   )

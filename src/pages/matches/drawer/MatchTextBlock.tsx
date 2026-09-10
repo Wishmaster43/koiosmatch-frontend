@@ -48,7 +48,7 @@ import SafeHtmlJs from '@/components/ui/SafeHtml'
 import Button from '@/components/ui/Button'
 import { GroupLabel } from '@/components/ui/typography'
 import { notifySuccess, notifyError } from '@/lib/notify'
-import { useTextPopoutHost } from '@/hooks/useTextPopoutHost'
+import { useTextBlockPopout } from '@/hooks/useTextBlockPopout'
 import type { Id } from '@/types/common'
 import type { MatchContract } from '../hooks/useMatchContract'
 
@@ -88,13 +88,9 @@ export default function MatchTextBlock({ matchId, value, present, loading, save 
 
   // TEKST-POPOUT-1: the profile-text second-screen affordance, one shared draft
   // between drawer and popped-out window (mirrors useVacancyDescription).
-  const popout = useTextPopoutHost({
-    entity: 'match', id: matchId != null ? String(matchId) : '', field: 'text', value: draft, dirty: editing && draft !== (shown ?? ''),
-    onDraft: (html: string) => { setDraft(html); setEditing(true) },
-    onSaved: (html: string) => { setDraft(html); setShown(html); setEditing(false) },
+  const { changeDraft, openPopout } = useTextBlockPopout({
+    entity: 'match', id: matchId, field: 'text', draft, shown, editing, setDraft, setShown, setEditing,
   })
-  const changeDraft = (html: string) => { setDraft(html); popout.publishDraft(html) }
-  const openPopout = () => { if (matchId == null) return; setEditing(true); popout.open() }
 
   const startEdit  = () => { setDraft(shown ?? ''); setEditing(true) }
   const cancelEdit = () => { setDraft(shown ?? ''); setEditing(false) }

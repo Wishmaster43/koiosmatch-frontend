@@ -6,15 +6,15 @@
  * file private to the tasks feature, and this picker's own vocabulary is a
  * smaller, different table (5 principal tokens, see noteLinksApi's docblock).
  */
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
-import api, { unwrapList } from '@/lib/api'
 import Button from '@/components/ui/Button'
 import SelectMenu from '@/components/ui/SelectMenu'
 import SearchSelect from '@/components/ui/SearchSelect'
 import FieldNotice from '@/components/ui/FieldNotice'
 import Spinner from '@/components/ui/Spinner'
+import { usePrincipalSearch } from '@/hooks/usePrincipalSearch'
 import type { NoteLinkItem, NoteLinkPrincipalType } from './noteLinksApi'
 import { PRINCIPAL_ENDPOINTS, PRINCIPAL_TYPES, type PickerRow } from './noteLinkPickerHelpers'
 import type { Id } from '@/types/common'
@@ -29,27 +29,10 @@ export default function NoteLinkPicker({ existing, onAdd, onClose, busy }: {
 }) {
   const { t } = useTranslation('common')
   const [type, setType] = useState<NoteLinkPrincipalType>('candidate')
-  const [rows, setRows] = useState<PickerRow[]>([])
   const [query, setQuery] = useState('')
-  const [error, setError] = useState(false)
-  // Freshness guard (mirrors AddLinkRow): the retry button can re-run this exact
-  // fetch without a stale in-flight response overwriting a newer one.
-  const requestIdRef = useRef(0)
-
-  // Load a capped, server-searched page for the chosen type — never the whole table.
-  const fetchOptions = useCallback(() => {
-    const cfg = PRINCIPAL_ENDPOINTS[type]
-    const requestId = ++requestIdRef.current
-    setError(false)
-    // An empty query must send NEITHER q nor search — several PRINCIPAL_ENDPOINTS
-    // (customers, customer-locations, departments, contacts) 422 on a null value
-    // from a plain empty string (contract audit ENT2-01, same fix as AddLinkRow).
-    api.get(cfg.url, { params: { ...(query ? { q: query, search: query } : {}), per_page: 25 } })
-      .then(r => { if (requestIdRef.current === requestId) setRows(unwrapList<PickerRow>(r).rows) })
-      .catch(() => { if (requestIdRef.current === requestId) setError(true) })
-  }, [type, query])
-  // Re-runs on type/query change, clearing stale rows first so the previous type's options never flash.
-  useEffect(() => { setRows([]); fetchOptions() }, [fetchOptions])
+  // Server-searched, capped, requestId-guarded fetch for the chosen type (ENT2-01: an
+  // empty query sends neither q nor search) — see usePrincipalSearch's own doc.
+  const { rows, error, fetchOptions } = usePrincipalSearch<PickerRow>(PRINCIPAL_ENDPOINTS[type].url, query)
 
   const cfg = PRINCIPAL_ENDPOINTS[type]
   const linkedIds = new Set(existing.filter(l => l.linkable_type === type).map(l => String(l.linkable_id)))

@@ -36,6 +36,7 @@ import AddTaskModal from '../AddTaskModal'
 import SubtaskQuickView from './SubtaskQuickView'
 import { useNavigation } from '@/context/NavigationContext'
 import { useAuth } from '@/context/AuthContext'
+import { taskStatusMeta } from '../data/taskStatusMeta'
 import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
 
@@ -151,9 +152,7 @@ export default function SubtasksSection({ task, onSubtaskCreated }: {
           ) : rows.length === 0 ? (
             <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('details.subtasks.empty')}</div>
           ) : rows.map(r => {
-            const st = r.status
-            const label = typeof st === 'object' ? st?.label : st
-            const color = (typeof st === 'object' ? st?.color : null) ?? 'var(--text-muted)'
+            const { label, color } = taskStatusMeta(r.status)
             return (
               // TAKEN 3: a subtask row opens the compact quick view, never the full
               // drawer (that is the parent-reference row's job, above).

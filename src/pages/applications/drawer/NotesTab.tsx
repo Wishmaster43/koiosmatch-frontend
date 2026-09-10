@@ -4,6 +4,7 @@ import { useNoteTypes } from '@/lib/useNoteTypes'
 import { initialsOf } from '@/lib/initials'
 import { useApplicationNotes } from '../hooks/useApplicationNotes'
 import type { ApplicationDetail } from '@/types/application'
+import { entityNoteLabels } from '@/components/drawer/tabs/notes/entityNoteLabels'
 
 /**
  * NotesTab — internal notes for an application. Reuses the shared NotesTab so it
@@ -45,20 +46,15 @@ export default function NotesTab({ application: a }: { application: ApplicationD
       showConversations={false}
       popout={a.id ? { entity: 'application', id: String(a.id) } : undefined}
       labels={{
-        notes: t('notes.title'),
-        newNote: t('notes.new'),
-        type: t('notes.type'),
-        save: t('notes.save'),
-        cancel: t('notes.cancel'),
+        // The eight shared keys resolve through this tab's own applications t()
+        // (DRY round 11, NOTES2); the extras below stay this surface's own.
+        ...entityNoteLabels(t),
         // applications.json (sister-agent namespace, reuse-only) has no dedicated
         // `notes.edit` key — mirrors ApplicationNotesPopout.tsx, which already
         // reuses this same generic key for the identical pencil label.
         edit: t('common:edit'),
         deleteNote: t('notes.deleteNote'),
         deleteConfirm: t('notes.deleteConfirm'),
-        notesEmpty: t('notes.empty'),
-        notePlaceholder: () => t('notes.placeholder'),
-        searchPlaceholder: t('notes.searchPlaceholder'),
         restorePrevious: t('common:notes.restorePrevious'),
         restoreConfirmTitle: t('common:notes.restoreConfirmTitle'),
       }}

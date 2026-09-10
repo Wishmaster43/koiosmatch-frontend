@@ -4,18 +4,15 @@
  * original tab — same pencil/save/cancel, same PATCH bodies via
  * onLinkVacancy/onUpdateSource.
  */
-import ApplicationDetailsCard from '../ApplicationDetailsCard'
+import ApplicationDetailsCard, { type LinkVacancyFn, type UpdateSourceFn } from '../ApplicationDetailsCard'
 import type { ApplicationDetail } from '@/types/application'
-import type { Id } from '@/types/common'
 
 interface DetailsSubTabProps {
   application: ApplicationDetail
-  // Re-link (or unlink, null) the vacancy this application is coupled to —
-  // forwarded verbatim to ApplicationDetailsCard, same PATCH body as before.
-  onLinkVacancy?: (id: Id | undefined, vacancyId: Id | null, meta?: { title?: string; client?: string }) => void
-  // S7: PATCH the Bron field — shares ApplicationDetailsCard's own pencil/save/
-  // cancel with onLinkVacancy.
-  onUpdateSource?: (id: Id | undefined, source: string, sourceKey?: string | null) => void
+  // Forwarded verbatim to ApplicationDetailsCard, same PATCH bodies as before
+  // (see ApplicationDetailsCard's own doc comment on each callback type).
+  onLinkVacancy?: LinkVacancyFn
+  onUpdateSource?: UpdateSourceFn
 }
 
 // Thin passthrough (see the module doc above): renders the unchanged editable card, forwarding the two PATCH callbacks as-is.

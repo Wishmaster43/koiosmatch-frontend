@@ -89,10 +89,16 @@ function Row({ label, children }: { label: ReactNode; children: ReactNode }) {
 // Canon field style (G33/fieldMetrics) — was its own padding-7/font-12/radius-6 copy.
 const inputStyle = fieldInputStyle
 
+// Re-link (or unlink, null) the vacancy this application is coupled to — the
+// same PATCH body DetailsSubTab forwards its own copy of this prop through.
+export type LinkVacancyFn = (id: Id | undefined, vacancyId: Id | null, meta?: { title?: string; client?: string }) => void
+// S7: PATCH the Bron field — shares this card's own pencil/save/cancel with onLinkVacancy.
+export type UpdateSourceFn = (id: Id | undefined, source: string, sourceKey?: string | null) => void
+
 interface ApplicationDetailsCardProps {
   application: ApplicationDetail
-  onLinkVacancy?: (id: Id | undefined, vacancyId: Id | null, meta?: { title?: string; client?: string }) => void
-  onUpdateSource?: (id: Id | undefined, source: string, sourceKey?: string | null) => void
+  onLinkVacancy?: LinkVacancyFn
+  onUpdateSource?: UpdateSourceFn
 }
 
 // Vacancy-link + Bron (source) card for the application: shows the linked vacancy's cascade (customer/location/contact) and shares one pencil-edit mode for both fields.

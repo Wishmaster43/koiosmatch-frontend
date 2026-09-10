@@ -33,6 +33,7 @@ import type { NotePayload } from '@/components/drawer/tabs/NotesTab'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { noteEditGuard } from '@/hooks/noteEditGuard'
 
 // One note as the drawer renders it — matches NotesTab's NoteItem + the API shape.
 export interface CandidateNote {
@@ -100,10 +101,9 @@ export function useCandidateNotes(candidateId: string | number | undefined, opts
   // Returns whether the write LANDED (NOTITIE-POPOUT-URL-1: the per-note window may
   // only close itself on a landed save); existing hosts simply ignore the promise.
   const editNote = useCallback((index: number, payload: NotePayload): Promise<boolean> => {
-    if (!candidateId) return Promise.resolve(false)
-    const target = notes[index]
-    if (!target) return Promise.resolve(false)
-    const snapshot = notes
+    const guard = noteEditGuard(candidateId, notes, index)
+    if (!guard) return Promise.resolve(false)
+    const { target, snapshot } = guard
     setNotes(prev => prev.map((n, i) => (i === index ? { ...n, type: payload.type, channel: payload.channel, body: payload.body, language: payload.language, title: payload.title } : n)))
     return api.patch(`/candidates/${candidateId}/notes/${target.id}`, { text: payload.body, title: payload.title, type: payload.type, channel: payload.channel, language: payload.language,
       // NOTE-ACTION-ITEMS-1: present = the full wanted set; absent = untouched.

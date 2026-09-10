@@ -34,6 +34,7 @@ import { useNavigation } from '@/context/NavigationContext'
 import { useTaskLookups } from '@/context/TaskLookupsContext'
 import { useTaskLookupIds } from '../hooks/useTaskLookupIds'
 import { useDateFormat } from '@/lib/datetime'
+import { taskStatusMeta } from '../data/taskStatusMeta'
 import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
 
@@ -195,9 +196,7 @@ export default function RelatedTasks({ task }: { task: TaskDetail }) {
       ) : rows.length === 0 ? (
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('related.empty')}</div>
       ) : rows.map(r => {
-        const st = r.status
-        const label = typeof st === 'object' ? st?.label : st
-        const color = (typeof st === 'object' ? st?.color : null) ?? 'var(--text-muted)'
+        const { label, color } = taskStatusMeta(r.status)
         return (
           <button key={String(r.id)} onClick={() => openEntity('tasks', r.id)}
             // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- NECESSITY: clickable record-row card (list gateway), not an action button — Button's face would mislabel it

@@ -11,13 +11,13 @@
  * tokens as dedicated fields (the create modal keeps candidate/customer/contact
  * as their own pickers, so it passes the remaining tokens here).
  */
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
-import api, { unwrapList } from '@/lib/api'
 import { SelectField } from '@/components/forms/fields'
 import SearchSelectJs from '@/components/ui/SearchSelect'
+import { usePrincipalSearch } from '@/hooks/usePrincipalSearch'
 import { TASK_LINK_ENDPOINTS, TASK_LINK_TYPES } from './taskLinkTypes'
 import type { LinkRow } from './taskLinkTypes'
 import type { Id } from '@/types/common'
@@ -37,32 +37,12 @@ export default function AddLinkRow({ existing, onAdd, onClose, types = TASK_LINK
 }) {
   const { t } = useTranslation(['tasks', 'common'])
   const [type, setType] = useState(types[0] ?? '')
-  const [rows, setRows] = useState<LinkRow[]>([])
   const [query, setQuery] = useState('')
-  const [error, setError] = useState(false)
-  // Freshness guard (mirrors RelatedTasks.tsx/NotesTab.tsx in this same drawer):
-  // lets the retry button re-run this exact fetch without a stale in-flight
-  // response overwriting a newer one.
-  const requestIdRef = useRef(0)
-
-  // Load a capped, server-searched page for the chosen type — never the whole
-  // table. A failed load surfaces its OWN error line (audit finding 2026-08-05:
-  // this used to silently swallow the failure, leaving the picker at zero
-  // options — indistinguishable from "no matches for this search").
-  const fetchOptions = useCallback(() => {
-    const cfg = TASK_LINK_ENDPOINTS[type]
-    if (!cfg) { setRows([]); return }
-    const requestId = ++requestIdRef.current
-    setError(false)
-    // An empty query must send NEITHER q nor search — ConvertEmptyStringsToNull
-    // turns "" into null, and ten of the fourteen link endpoints' 'string' rule
-    // (no 'nullable') 422s on that (contract audit ENT2-01).
-    api.get(cfg.url, { params: { ...(query ? { q: query, search: query } : {}), per_page: 25 } })
-      .then(r => { if (requestIdRef.current === requestId) setRows(unwrapList<LinkRow>(r).rows) })
-      .catch(() => { if (requestIdRef.current === requestId) setError(true) })
-  }, [type, query])
-  // Re-runs the search whenever type/query changes, clearing stale rows first so the previous type's options never flash before the new page lands.
-  useEffect(() => { setRows([]); fetchOptions() }, [fetchOptions])
+  // Server-searched, capped, requestId-guarded fetch for the chosen type — a
+  // failed load surfaces its OWN error line (audit finding 2026-08-05: this used
+  // to silently swallow the failure, indistinguishable from "no matches"); see
+  // usePrincipalSearch's own doc for the ENT2-01 empty-query rule.
+  const { rows, error, fetchOptions } = usePrincipalSearch<LinkRow>(TASK_LINK_ENDPOINTS[type]?.url, query)
 
   const cfg = TASK_LINK_ENDPOINTS[type]
   const linked = new Set(existing.filter(l => l.type === type).map(l => String(l.id)))

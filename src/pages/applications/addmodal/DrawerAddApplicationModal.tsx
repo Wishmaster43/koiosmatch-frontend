@@ -50,9 +50,9 @@ import { useAddApplicationForm } from '../hooks/useAddApplicationForm'
 import CustomFieldsSection from './CustomFieldsSection'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import { requiredMark } from '@/components/forms/fields'
-import type { Id } from '@/types/common'
 import ModalFooter from '@/components/ui/ModalFooter'
 import { tintBg, tintBorder } from '@/lib/tint'
+import type { DrawerAddApplicationModalProps } from '../AddApplicationModal'
 
 // Label-left canon (P32, batch 5): label column fixed at CANON_LABEL_WIDTH, control fills the rest.
 const fieldRow: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10 }
@@ -67,25 +67,7 @@ const fieldFootprint: React.CSSProperties = { padding: '8px 11px', borderRadius:
 // Create-or-edit modal for one candidate's application: wires the tenant lookups
 // (vacancies/stages/users/sources/settings/custom fields) and the AXIS-MATRIX
 // preflight into useAddApplicationForm, then renders the shared field layout.
-export default function DrawerAddApplicationModal({ candidateId, candidateOwnerId, candidateOwnerName, initialVacancyId, suggestedVacancyId, editApplicationId, onClose, onCreated }: {
-  candidateId: Id
-  // OWNER-DEVIATION-1: the candidate's own owner, passed down from the already-
-  // loaded drawer record (WorkTab's `c.ownerId`/`c.owner`) — never refetched.
-  candidateOwnerId?: Id | null
-  candidateOwnerName?: string
-  // VACANCY-PREFILL-1: a vacancy already chosen by the caller (e.g. the score panel
-  // in VacancySearchTab) — seeds the picker once, still freely changeable.
-  initialVacancyId?: Id
-  // KOIOS-VOORSTEL-1 (Danny 13-08): vacancy Koios suggests from the candidate's
-  // history — seeds the picker AND shows the Koios mark while it still holds
-  // initialVacancyId (score panel: user clicked THAT vacancy) stays badge-less:
-  // explicit context is the user's own choice, not a proposal.
-  suggestedVacancyId?: Id | null
-  // Punt 5: set from an application row's pencil — prefill + PATCH instead of POST.
-  editApplicationId?: Id
-  onClose: () => void
-  onCreated: () => void
-}) {
+export default function DrawerAddApplicationModal({ candidateId, candidateOwnerId, candidateOwnerName, initialVacancyId, suggestedVacancyId, editApplicationId, onClose, onCreated }: DrawerAddApplicationModalProps) {
   const { t } = useTranslation('candidates')
   const editing = editApplicationId != null
   // §6: stable id pairs linking each row's label to its combobox trigger.

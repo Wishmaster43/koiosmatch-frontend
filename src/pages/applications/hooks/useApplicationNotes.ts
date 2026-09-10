@@ -42,6 +42,7 @@ import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { actionItemsWire } from '@/components/drawer/tabs/notes/notesTabTypes'
+import { noteEditGuard } from '@/hooks/noteEditGuard'
 import type { NoteActionItemWire } from '@/components/drawer/tabs/NotesTab'
 import type { ApplicationDetail } from '@/types/application'
 import type { Id } from '@/types/common'
@@ -121,10 +122,9 @@ export function useApplicationNotes(applicationId: Id | undefined, initialNotes:
   // the promise, same as every other host.
   // NOTE-ACTION-ITEMS-1: forward the action_items panel only when present (present = the full wanted set; absent = untouched).
   const editNote = useCallback((index: number, payload: NotePayload): Promise<boolean> => {
-    if (!applicationId) return Promise.resolve(false)
-    const target = notes[index]
-    if (!target) return Promise.resolve(false)
-    const snapshot = notes
+    const guard = noteEditGuard(applicationId, notes, index)
+    if (!guard) return Promise.resolve(false)
+    const { target, snapshot } = guard
     setNotes(prev => prev.map((n, i) => (i === index
       // absent = untouched: the row keeps its items when the composer sent none.
       ? { ...n, type: payload.type, title: payload.title, text: payload.body, language: payload.language, ...(payload.action_items ? { action_items: payload.action_items } : {}) }

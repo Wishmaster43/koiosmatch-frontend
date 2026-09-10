@@ -14,6 +14,7 @@ import PopoutShell from './PopoutShell'
 import { useNoteTypes } from '@/lib/useNoteTypes'
 import { useApplicationLite } from './hooks/useApplicationLite'
 import { usePopoutApplicationNotes } from './hooks/usePopoutApplicationNotes'
+import { entityNoteLabels } from '@/components/drawer/tabs/notes/entityNoteLabels'
 
 type AnyProps = Record<string, unknown>
 // Still-untyped JS component — accept any props at the boundary (mirrors applications/drawer/NotesTab.tsx).
@@ -48,13 +49,7 @@ export default function ApplicationNotesPopout({ id }: { id: string | undefined 
     // drawer's own NotesTab.tsx uses. It has no "edit" key, so this borrows the
     // generic common:edit (see the file-level comment) — no applications.json
     // edit was made for this task.
-    labels: {
-      notes: t('notes.title'), newNote: t('notes.new'), type: t('notes.type'),
-      save: t('notes.save'), cancel: t('notes.cancel'), edit: t('common:edit'),
-      notesEmpty: t('notes.empty'),
-      notePlaceholder: () => t('notes.placeholder'),
-      searchPlaceholder: t('notes.searchPlaceholder'),
-    },
+    labels: { ...entityNoteLabels(t), edit: t('common:edit') },
   }
 
   return (

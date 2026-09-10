@@ -14,6 +14,7 @@ import { initialsOf } from '@/lib/initials'
 import { useAuth } from '@/context/AuthContext'
 import { useVacancyLite } from './hooks/useVacancyLite'
 import { usePopoutVacancyNotes } from './hooks/usePopoutVacancyNotes'
+import { entityNoteLabels } from '@/components/drawer/tabs/notes/entityNoteLabels'
 
 type AnyProps = Record<string, unknown>
 // Still-untyped JS component — accept any props at the boundary (mirrors vacancies/drawer/NotesTab.tsx).
@@ -46,13 +47,7 @@ export default function VacancyNotesPopout({ id }: { id: string | undefined }) {
   const notesProps = {
     // Edit/delete per row, same as the drawer's own tab (NOTITIE-REFERENTIE: all seven identical).
     notes, onAddNote: addNote, onEditNote: editNote, onDeleteNote: deleteNote, noteTypes, authorInitials: initials,
-    labels: {
-      notes: t('notes.title'), newNote: t('notes.new'), type: t('notes.type'),
-      save: t('notes.save'), cancel: t('notes.cancel'),
-      notesEmpty: t('notes.empty'),
-      notePlaceholder: () => t('notes.placeholder'),
-      searchPlaceholder: t('notes.searchPlaceholder'),
-    },
+    labels: entityNoteLabels(t),
   }
 
   return (
