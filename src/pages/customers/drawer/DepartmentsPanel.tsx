@@ -30,7 +30,7 @@
  */
 import { useState, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, Building, Archive } from 'lucide-react'
+import { Building, Archive } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
@@ -47,13 +47,13 @@ import { useAllSettings, useSettingsLoaded, getBoolSetting, getStringSetting } f
 import type { Crumb } from '@/components/drawer/DrillBreadcrumb'
 import SoftChipJs from '@/components/ui/SoftChip'
 import DepartmentDetail from './DepartmentDetail'
-import type { DrillPagerProps } from '@/components/drawer/DrillPager'
+import DrawerSearchField from '@/components/drawer/DrawerSearchField'
+import { useDrillPager } from '@/hooks/useDrillPager'
 import AddDepartmentModal from '../AddDepartmentModal'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
-import { PANEL_SEARCH_WRAP as searchWrap, PANEL_SEARCH_INPUT as searchInput } from '@/lib/panelSearchStyles'
 
 type AnyProps = Record<string, unknown>
 const SoftChip = SoftChipJs as unknown as ComponentType<AnyProps>
@@ -172,13 +172,7 @@ export default function DepartmentsPanel({
   const visible = q ? rows.filter(d => [d.name, d.locationName].some(v => String(v ?? '').toLowerCase().includes(q))) : rows
   // Pager: 1-based position of the OPEN department within `visible`; none when the open
   // record fell out of the filtered set — nothing sane to page to then.
-  const openIndex = selected ? visible.findIndex(d => String(d.id) === String(selected.id)) : -1
-  const pager: DrillPagerProps | undefined = openIndex >= 0 ? {
-    index: openIndex + 1,
-    total: visible.length,
-    onPrev: openIndex > 0 ? () => onOpenChange(visible[openIndex - 1].id as Id) : undefined,
-    onNext: openIndex < visible.length - 1 ? () => onOpenChange(visible[openIndex + 1].id as Id) : undefined,
-  } : undefined
+  const pager = useDrillPager(visible, selected, onOpenChange)
 
   // ── Detail view: DepartmentDetail draws the breadcrumb itself (exactly ONE nav on
   //    screen), from the ancestors this panel hands it plus its own list crumb — so every
@@ -206,11 +200,7 @@ export default function DepartmentsPanel({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <div style={searchWrap}>
-          <Search size={13} color="var(--text-muted)" />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder={t('departments.searchPlaceholder')} aria-label={t('departments.searchPlaceholder')} style={searchInput} />
-        </div>
+        <DrawerSearchField value={search} onChange={setSearch} placeholder={t('departments.searchPlaceholder')} />
         <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={statuses} />
         {/* ARCHIVE-SUBENTITY-1: the shared quick-view toggle (§4) — never hand-rolled. */}
         <QuickViewToggle iconOnly active={showArchived} onToggle={() => setShowArchived(v => !v)}

@@ -17,11 +17,15 @@ import ContactNotesTab from './ContactNotesTab'
 // Capture the entity argument: the acceptance criterion is that this tab asks
 // for the CONTACT vocabulary, and an argument-blind mock cannot prove that.
 const noteTypesArg = vi.fn()
+// DRY round 10, CUSTTABS: spy on the OTHER note-types hook too — the shared
+// useNotesTabContent hook must never fire both requests on one mount.
+const useNoteTypesForSpy = vi.fn()
 vi.mock('@/lib/useNoteTypes', () => ({
   useNoteTypes: (entity?: string) => {
     noteTypesArg(entity)
     return { types: [{ value: 'call', label: 'Call' }], writableTypes: [{ value: 'call', label: 'Call' }] }
   },
+  useNoteTypesFor: (...args: unknown[]) => useNoteTypesForSpy(...args),
   SYSTEM_NOTE_TYPES: new Set(['status_change', 'lifecycle']),
 }))
 vi.mock('@/lib/abortError', () => ({ isAbortError: () => false }))
@@ -115,5 +119,16 @@ describe('ContactNotesTab · create path (CONTACT-NOTITIES-2)', () => {
     })))
     // The vocabulary really is the CONTACT entity's own (NOTE-TYPES-3).
     expect(noteTypesArg).toHaveBeenCalledWith('contact')
+  })
+})
+
+describe('ContactNotesTab · shared useNotesTabContent fires exactly one note-types request (DRY round 10, CUSTTABS)', () => {
+  it('calls useNoteTypes only, never useNoteTypesFor', async () => {
+    mockGet.mockResolvedValue({ data: { data: [] } })
+    render(<ContactNotesTab contactId="c1" customerId="cust-1" />, { wrapper: queryWrapper })
+    await screen.findByText(ct('notes.notesEmpty'))
+
+    expect(noteTypesArg).toHaveBeenCalledWith('contact')
+    expect(useNoteTypesForSpy).not.toHaveBeenCalled()
   })
 })

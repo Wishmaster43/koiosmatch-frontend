@@ -23,7 +23,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, Link2, Archive } from 'lucide-react'
+import { Link2, Archive } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import DataTable from '@/components/ui/DataTable'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
@@ -46,8 +46,8 @@ import { CONTACTS_CHANGED_EVENT } from '../hooks/useCustomerContacts'
 // prop (couple pickers etc.) keeps seeing today's archived-excluded set.
 import { useArchivedCustomerContacts } from '../hooks/useCustomerContacts'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
-import type { DrillPagerProps } from '@/components/drawer/DrillPager'
-import { PANEL_SEARCH_WRAP as searchWrap, PANEL_SEARCH_INPUT as searchInput } from '@/lib/panelSearchStyles'
+import DrawerSearchField from '@/components/drawer/DrawerSearchField'
+import { useDrillPager } from '@/hooks/useDrillPager'
 
 export type ContactScope = 'customer' | 'location' | 'department'
 
@@ -146,13 +146,7 @@ export default function ContactsPanel({
   // Pager: 1-based position of the OPEN contact within `visible`. No pager at all when
   // the open contact fell out of `visible` (e.g. an edit changed its status while the
   // status filter is active) — there is nothing sane to page to in that case.
-  const openIndex = selected ? visible.findIndex(c => String(c.id) === String(selected.id)) : -1
-  const pager: DrillPagerProps | undefined = openIndex >= 0 ? {
-    index: openIndex + 1,
-    total: visible.length,
-    onPrev: openIndex > 0 ? () => onOpenChange(visible[openIndex - 1].id as Id) : undefined,
-    onNext: openIndex < visible.length - 1 ? () => onOpenChange(visible[openIndex + 1].id as Id) : undefined,
-  } : undefined
+  const pager = useDrillPager(visible, selected, onOpenChange)
 
   // Columns (chips, last-contact icon, primary star, uncouple) — extracted to their own
   // hook (ContactsPanelColumns.tsx) so this file stays the thin list/detail assembler.
@@ -190,11 +184,7 @@ export default function ContactsPanel({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <div style={searchWrap}>
-          <Search size={13} color="var(--text-muted)" />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder={t('contacts.searchHere')} aria-label={t('contacts.searchHere')} style={searchInput} />
-        </div>
+        <DrawerSearchField value={search} onChange={setSearch} placeholder={t('contacts.searchHere')} />
         <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={statuses} />
         {/* ARCHIVE-SUBENTITY-1: the shared quick-view toggle (§4) — never hand-rolled. */}
         <QuickViewToggle iconOnly active={showArchived} onToggle={() => setShowArchived(v => !v)}

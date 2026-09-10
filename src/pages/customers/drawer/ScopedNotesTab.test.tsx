@@ -26,15 +26,20 @@ vi.mock('@/components/drawer/tabs/NotesTab', () => ({
       createElement('span', { key: i }, chipTypes.find(ct => ct.value === n.type)?.label ?? n.type)))
   },
 }))
-vi.mock('@/lib/useNoteTypes', () => ({ useNoteTypesFor: vi.fn(() => ({ writableTypes: [], types: [] })) }))
+// DRY round 10, CUSTTABS: mock the OTHER note-types hook too — the shared
+// useNotesTabContent hook must never fire both requests on one mount.
+vi.mock('@/lib/useNoteTypes', () => ({
+  useNoteTypesFor: vi.fn(() => ({ writableTypes: [], types: [] })),
+  useNoteTypes: vi.fn(() => ({ writableTypes: [], types: [] })),
+}))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { name: 'Kelly' } }) }))
 vi.mock('../hooks/useCustomerDrawerData', () => ({
   useScopedCustomerNotes: vi.fn(() => ({ notes: [], loading: false, error: false, reload: vi.fn() })),
 }))
 import { useScopedCustomerNotes } from '../hooks/useCustomerDrawerData'
-import { useNoteTypesFor } from '@/lib/useNoteTypes'
+import { useNoteTypesFor, useNoteTypes } from '@/lib/useNoteTypes'
 
-beforeEach(() => { vi.mocked(useNoteTypesFor).mockClear() })
+beforeEach(() => { vi.mocked(useNoteTypesFor).mockClear(); vi.mocked(useNoteTypes).mockClear() })
 
 describe('ScopedNotesTab · NOTE-TYPE-WIDEN-1 (BUG-NOTE-SCOPE-1)', () => {
   it('scope=location widens useNoteTypesFor to [customer,location], and a historical "contract" note (a customer-level type) renders its resolved label, not the raw slug', () => {
@@ -58,5 +63,13 @@ describe('ScopedNotesTab · NOTE-TYPE-WIDEN-1 (BUG-NOTE-SCOPE-1)', () => {
   it('scope=department widens useNoteTypesFor to [customer,location,department]', () => {
     render(createElement(ScopedNotesTab, { scope: 'department', id: 'dep3', customerId: 'cu1' }))
     expect(useNoteTypesFor).toHaveBeenCalledWith(['customer', 'location', 'department'])
+  })
+})
+
+describe('ScopedNotesTab · shared useNotesTabContent fires exactly one note-types request (DRY round 10, CUSTTABS)', () => {
+  it('calls useNoteTypesFor only, never useNoteTypes', () => {
+    render(createElement(ScopedNotesTab, { scope: 'location', id: 'loc9', customerId: 'cu1' }))
+    expect(useNoteTypesFor).toHaveBeenCalled()
+    expect(useNoteTypes).not.toHaveBeenCalled()
   })
 })
