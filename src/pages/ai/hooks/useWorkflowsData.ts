@@ -20,6 +20,7 @@ import { useSeedLabel } from '@/lib/useSeedLabel'
 import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import { normalizeWorkflow, denormalizeWorkflow } from '../data/workflowMap'
 import type { Workflow, RawWorkflow } from '@/types/workflow'
+import { canDo } from '@/lib/access'
 
 // A workflow folder (left sidebar grouping).
 // FOLDER-SLOT-1 was reversed (31-08): the server no longer lists app-gated folders at
@@ -35,8 +36,10 @@ export function useWorkflowsData(showArchived: boolean) {
   // LOOKUP-I18N-1: a seeded folder/workflow name renders in the user language in the
   // confirm dialogs too, so the name they see there matches the row they clicked.
   const seedLabel = useSeedLabel()
-  // Folder create/delete is settings.update-gated on the backend (R-3); mirror it in the UI.
-  const canManageFolders = useAuth()?.hasPermission('settings.update') ?? false
+  // WORKFLOW-PERMS-1 (BE 29b86bd4): folder writes, restore and unmark are workflows.update-
+  // gated now (settings.* no longer gates those routes); canDo stays open until the
+  // family is seeded, exact once it is (lib/access).
+  const canManageFolders = canDo(useAuth(), 'workflows', 'update')
   const [workflows, setWorkflows] = useState<Workflow[]>([])
   const [folders,   setFolders]   = useState<WorkflowFolder[]>([])
   const [loading,   setLoading]   = useState(true)
