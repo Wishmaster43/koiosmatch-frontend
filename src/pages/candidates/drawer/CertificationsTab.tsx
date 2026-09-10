@@ -4,13 +4,10 @@
  * DocPreviewModal. Split out of the former SectionTabs.tsx verbatim (§3 size
  * discipline) — no behaviour change, only file boundaries.
  */
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRelationSort } from '@/components/forms/useRelationSort'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import { useDateFormat } from '@/lib/datetime'
-// DOC-1-EIGENAAR-1: the one shared "which document is still free" rule (measured 08-08).
-import { linkedDocumentOptions } from './documentLinkRules'
 // HUISSTIJL-1: the shared 13/600 title atom + the JetBrains Mono atom (identity-only swaps).
 import { captionStyle,SectionTitle, Mono } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
@@ -18,18 +15,16 @@ import {
   AddableSection, DocEntryLinks, ProseField, renderAddButton, resolveLinkedDocument,
 } from './sectionTabsShared'
 import type { RelItem, RelTabProps } from './sectionTabsShared'
+import { linkedDocumentField, useLinkedDocPreview } from './useLinkedDocPreview'
 
 // Certifications list tab: add/edit/remove/reorder rows, each optionally previewing an already-linked proof document via the shared DocPreviewModal.
 export function CertificationsTab({ items = [], onAdd, onEdit, onRemove, documents = [], onJumpToDocuments, onReorder }: RelTabProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   const fmt = (d?: string) => (d ? formatDate(d) : '')
-  // DOC-GELDIGHEID-1: preview overlay for a row's linked proof document — the
-  // shared house DocPreviewModal (never a fork).
-  const [previewDoc, setPreviewDoc] = useState<RelItem | null>(null)
-  // "Koppelen aan" picker options, resolved PER ROW — only documents no other entry
-  // has claimed, plus this row's own pick (DOC-1-EIGENAAR-1).
-  const documentOptions = linkedDocumentOptions(documents, items)
+  // DOC-GELDIGHEID-1: preview overlay + "Koppelen aan" picker options for a row's
+  // linked proof document (shared house DocPreviewModal, never a fork).
+  const { previewDoc, openPreview, closePreview, documentOptions } = useLinkedDocPreview(documents, items)
   // Compact layout: name+org pair; issued–expires stay a "tot" pair (separator).
   // The description renders as a `richtext` field in this same form (one
   // pencil per entry, Danny 05-08) — see ProseField (view-only) below.
@@ -44,7 +39,7 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove, documen
     { key: 'license', label: t('addFields.licenseNumber') },
     // DOC-GELDIGHEID-1: optionally link an already-uploaded proof document to this entry
     // (only offered once the candidate HAS documents — §3, no fake affordance).
-    ...(documents.length > 0 ? [{ key: 'document_id', label: t('addFields.linkedDocument'), options: documentOptions }] : []),
+    ...linkedDocumentField(t('addFields.linkedDocument'), documents, documentOptions),
     { key: 'desc',    label: t('addFields.description'), richtext: true },
   ]
   // Sub-tab sort notes: candidate_certifications has no columns literally named
@@ -90,12 +85,12 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove, documen
               {/* Mono family + caption identity via the raw style object (stijlfabriek pattern). */}
               {cert.license && <Mono as="div" style={captionStyle}>{t('addFields.licenseNumber')}: {cert.license}</Mono>}
               <ProseField value={cert.desc} />
-              {linkedDoc && <DocEntryLinks doc={linkedDoc} onPreview={() => setPreviewDoc(linkedDoc)} onJump={onJumpToDocuments} />}
+              {linkedDoc && <DocEntryLinks doc={linkedDoc} onPreview={() => openPreview(linkedDoc)} onJump={onJumpToDocuments} />}
             </div>
           </div>
         )
       }} />
-    {previewDoc && <DocPreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)} />}
+    {previewDoc && <DocPreviewModal doc={previewDoc} onClose={closePreview} />}
     </>
   )
 }

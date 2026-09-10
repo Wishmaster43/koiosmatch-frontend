@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { createRef } from 'react'
 import { useClickOutside } from './useClickOutside'
+import { DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
 
 // Spies on addEventListener/removeEventListener('mousedown', ...) calls only.
 function spyOnMousedownListeners() {
@@ -73,5 +74,36 @@ describe('useClickOutside', () => {
     expect(countMousedown(remove)).toBe(0)
     add.mockRestore()
     remove.mockRestore()
+  })
+
+  // DRY round 11, CANDTABS: PoolsSection/DashboardSwitcher both hand-rolled this
+  // exact "ignore a click inside ANY portalled dropdown menu" guard before adopting
+  // the shared hook — the option must keep that behaviour identical.
+  it('with ignoreDropdownPortal, treats a click inside ANY dropdown-portal-marked node as inside too, even outside every tracked ref', () => {
+    const onOutside = vi.fn()
+    const triggerRef = createRef<HTMLDivElement>()
+    triggerRef.current = document.createElement('div')
+    document.body.appendChild(triggerRef.current)
+    const otherPortal = document.createElement('div')
+    otherPortal.setAttribute(DROPDOWN_PORTAL_ATTR, '')
+    document.body.appendChild(otherPortal)
+    renderHook(() => useClickOutside([triggerRef], true, onOutside, { ignoreDropdownPortal: true }))
+    otherPortal.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
+    expect(onOutside).not.toHaveBeenCalled()
+    triggerRef.current.remove(); otherPortal.remove()
+  })
+
+  it('without ignoreDropdownPortal, a click inside a dropdown-portal-marked node that is not a tracked ref still fires onOutside', () => {
+    const onOutside = vi.fn()
+    const triggerRef = createRef<HTMLDivElement>()
+    triggerRef.current = document.createElement('div')
+    document.body.appendChild(triggerRef.current)
+    const otherPortal = document.createElement('div')
+    otherPortal.setAttribute(DROPDOWN_PORTAL_ATTR, '')
+    document.body.appendChild(otherPortal)
+    renderHook(() => useClickOutside([triggerRef], true, onOutside))
+    otherPortal.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
+    expect(onOutside).toHaveBeenCalledTimes(1)
+    triggerRef.current.remove(); otherPortal.remove()
   })
 })

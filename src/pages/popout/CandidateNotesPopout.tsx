@@ -11,9 +11,9 @@ import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
 import PopoutShell from './PopoutShell'
-import { useNoteTypes, SYSTEM_NOTE_TYPES } from '@/lib/useNoteTypes'
+import { useNoteTypes } from '@/lib/useNoteTypes'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
-import { useCandidateNotes } from '@/pages/candidates/shared'
+import { candidateNoteLabels, useCandidateNotes, useUserNotesThread } from '@/pages/candidates/shared'
 import { useCandidateLite } from './hooks/useCandidateLite'
 
 type AnyProps = Record<string, unknown>
@@ -30,14 +30,9 @@ export default function CandidateNotesPopout({ id }: { id: string | undefined })
   const { types: channels } = useLastContactTypes()
   // Notes persist via the API — same hook, same host as CommunicationTab.
   const { notes, addNote, editNote, deleteNote } = useCandidateNotes(id)
-  // System notes (status/phase changes) never belong in the notes thread — filtered
-  // out exactly like CommunicationTab, so edit/delete indexes stay aligned.
-  const isSystem = (n: { type?: string; is_system?: unknown }) => Boolean(n.is_system) || SYSTEM_NOTE_TYPES.has(String(n.type ?? ''))
-  const indexed = notes.map((n, i) => ({ ...n, __idx: i }))
-  const userNotes = indexed.filter(n => !isSystem(n))
-  const editUserNote = (fi: number, payload: { type: string; title: string; body: string; channel?: string }) =>
-    editNote(userNotes[fi].__idx, payload)
-  const deleteUserNote = (fi: number) => deleteNote(userNotes[fi].__idx)
+  // NOTES-THREAD-1: user vs. system notes + the filtered-index remap, shared with
+  // CommunicationTab's own Notities sub-tab (see useUserNotesThread's own doc).
+  const { userNotes, editUserNote, deleteUserNote } = useUserNotesThread(notes, { editNote, deleteNote })
 
   // Window title — "Notes — <candidate name>" while this popout is open; restored
   // on unmount so a reused/closed OS window slot never keeps a stale title.
@@ -53,15 +48,7 @@ export default function CandidateNotesPopout({ id }: { id: string | undefined })
   const notesProps = {
     notes: userNotes, onAddNote: addNote, onEditNote: editUserNote, onDeleteNote: deleteUserNote,
     noteTypes: writableTypes, chipTypes: allNoteTypes, channels, authorInitials: candidate?.initials,
-    labels: {
-      notes: '', newNote: t('communication.newNote'),
-      deleteNote: t('communication.deleteNote'), deleteConfirm: t('communication.deleteConfirm'),
-      type: t('communication.type'), channel: t('communication.channel'), channelNone: t('communication.channelNone'),
-      save: t('common:save'), cancel: t('common:cancel'),
-      notesEmpty: t('sections.notesEmpty'),
-      notePlaceholder: (typeLabel: string) => t('communication.notePlaceholder', { type: typeLabel }),
-      searchPlaceholder: t('communication.searchPlaceholder'),
-    },
+    labels: candidateNoteLabels(t),
   }
 
   return (

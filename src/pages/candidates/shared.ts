@@ -40,6 +40,10 @@ export type { DocItem } from './drawer/documentHelpers'
 export { useCandidateRecord } from './hooks/useCandidateMutations'
 export { useCandidateNotes } from './hooks/useCandidateNotes'
 export type { CandidateNote } from './hooks/useCandidateNotes'
+// NOTES-THREAD-1 (DRY round 11, CANDTABS): shared by CommunicationTab and the
+// second-screen CandidateNotesPopout window (a deliberate barrel extension, not
+// a bypass — mirrors useCandidateNotes above).
+export { candidateNoteLabels, useUserNotesThread } from './drawer/useUserNotesThread'
 export { useVacancyOptions } from './hooks/useVacancyOptions'
 // ADDAPPLICATION-TWIN-1: the merged applications/AddApplicationModal's drawer-context
 // hooks (now living under pages/applications/hooks) read the vacancy option shape

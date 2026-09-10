@@ -9,6 +9,7 @@ import { MessageCircle, Mail, Phone } from 'lucide-react'
 import { waDigits } from '@/lib/waDigits'
 import { LinkedinMark, toLinkedinSlug } from '@/components/drawer/contactLinks'
 import { FieldRow, EditControls, GroupCard, GroupHeader, inputStyle } from './profileFieldShared'
+import { useProfileEditState } from './useProfileEditState'
 import { useProfileRequiredKeys } from './useProfileRequiredKeys'
 import { isValidEmailFormat, isValidPhoneFormat, isValidLinkedinFormat } from '../lib/contactFieldValidation'
 import { useContactMomentConfirm } from '../hooks/useContactMomentConfirm'
@@ -55,18 +56,12 @@ export default function ProfileContactTab({ c, onSave, autoEditSignal, onContact
   const emptyForm = (): ContactForm => ({
     email: c.email ?? '', phone: c.phone ?? '', mobile: c.mobile ?? '', linkedin: c.linkedin ?? '',
   })
-  const [editing, setEditing] = useState(false)
-  // Open edit mode when the parent bumps the signal (e.g. right after Lead→Kandidaat convert).
-  const [prevAutoEdit, setPrevAutoEdit] = useState(autoEditSignal ?? 0)
-  if ((autoEditSignal ?? 0) !== prevAutoEdit) { setPrevAutoEdit(autoEditSignal ?? 0); setEditing(true) }
-  const [form, setForm] = useState<ContactForm>(emptyForm)
-  const [errors, setErrors] = useState<Partial<Record<ContactKey, boolean>>>({})
+  const { editing, setEditing, form, setForm, errors, setErrors, setF } = useProfileEditState<ContactForm, ContactKey>(emptyForm, autoEditSignal)
   // VALIDATIE-LIVE-1: which fields the user has already left (blurred) — a format
   // error only renders once the user has actually finished typing into that field,
   // never on the very first keystroke. `save()` also marks the offending field(s)
   // touched, so a paste-then-immediate-Save still shows the message.
   const [touched, setTouched] = useState<Partial<Record<ContactKey, boolean>>>({})
-  const setF = (k: ContactKey, v: string) => { setForm(p => ({ ...p, [k]: v })); if (errors[k]) setErrors(e => ({ ...e, [k]: false })) }
   const markTouched = (k: ContactKey) => setTouched(prev => ({ ...prev, [k]: true }))
   const liveInvalid = (k: ContactKey): boolean => { const check = FORMAT_VALIDATORS[k]; return !!check && !check(form[k]) }
 

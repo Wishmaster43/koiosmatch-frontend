@@ -3,12 +3,11 @@
  * role templates (like the TenantSwitcher). Shown next to the profile avatar, only
  * when the user may see more than one view (super-admin + management see everything).
  */
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LayoutDashboard, ChevronDown } from 'lucide-react'
 import type { DashboardType } from './templates'
-// PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
-import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
+import { useClickOutside } from '@/hooks/useClickOutside'
 import Button from '@/components/ui/Button'
 
 // Compact dropdown to switch the dashboard's role view (see file docblock above);
@@ -22,13 +21,8 @@ export default function DashboardSwitcher({ value, options, onChange }: {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
-  // Close on an outside click.
-  useEffect(() => {
-    if (!open) return
-    const h = (e: MouseEvent) => { if (isInsideDropdownPortal(e.target as Node)) return; if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
-    document.addEventListener('mousedown', h)
-    return () => document.removeEventListener('mousedown', h)
-  }, [open])
+  // Close on an outside click (DRY round 11, CANDTABS).
+  useClickOutside([ref], open, () => setOpen(false), { ignoreDropdownPortal: true })
 
   if (options.length <= 1) return null
 

@@ -21,7 +21,7 @@
  */
 import { useState, useMemo, useCallback } from 'react'
 import { chipInk, tintBg, tintBorder } from '@/lib/tint'
-import type { ComponentType } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2 } from 'lucide-react'
 import EditableFieldTableJs from '@/components/forms/EditableFieldTable'
@@ -59,6 +59,15 @@ const toArray = (v: unknown): string[] =>
 
 // Weekday slugs in ISO order; labels come from Intl so they stay locale-correct.
 const DAY_SLUGS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+
+// The arr/empty-dash/wrapper preamble shared by every multi-value chip row's
+// renderValue override below (contract_forms / driver_licenses) — each field's
+// own renderChip body stays exactly as it was (DRY round 11, CANDTABS).
+function chipRowValue(v: unknown, renderChip: (x: string) => ReactNode): ReactNode {
+  const arr = (Array.isArray(v) ? v : []).map(String)
+  if (arr.length === 0) return <span style={{ color: 'var(--text-muted)' }}>-</span>
+  return <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>{arr.map(renderChip)}</div>
+}
 
 export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: Candidate; onSave?: (v: Record<string, unknown>) => void; onTypesChange?: (types: string[]) => void
   // Optional (Danny 2026-07-20, job A): reopens the status modal prefilled to edit
@@ -157,30 +166,22 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
     // keeps the generic ChipMultiSelect) — each contract-form chip gets its
     // tenant-set icon in front of the label, mirroring the driver_licenses pattern below.
     { key: 'contract_forms',    label: t('drawer.candidateType'),      group: t('preferences.groupAvailability'), type: 'chips', chipOptions: candidateTypeOptions,
-      renderValue: (v: unknown) => {
-        const arr = (Array.isArray(v) ? v : []).map(String)
-        if (arr.length === 0) return <span style={{ color: 'var(--text-muted)' }}>-</span>
+      renderValue: (v: unknown) => chipRowValue(v, x => {
+        const opt = candidateTypeOptions.find(o => o.value === x)
+        const col = opt?.color
+        const icon = candidateTypeIconOf(x)
+        // SoftChip — the ONE chip component (§4, HUISSTIJL-1). Per-value colour
+        // when set (e.g. contract forms), else the primary accent — mirrors
+        // EditableFieldTable's own default chip-read style.
         return (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-            {arr.map(x => {
-              const opt = candidateTypeOptions.find(o => o.value === x)
-              const col = opt?.color
-              const icon = candidateTypeIconOf(x)
-              // SoftChip — the ONE chip component (§4, HUISSTIJL-1). Per-value colour
-              // when set (e.g. contract forms), else the primary accent — mirrors
-              // EditableFieldTable's own default chip-read style.
-              return (
-                <SoftChip key={x} color={col ?? 'var(--color-primary)'} round label={
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                    {icon && <LookupIcon icon={icon} size={11} color={col} />}
-                    {opt?.label ?? x}
-                  </span>
-                } />
-              )
-            })}
-          </div>
+          <SoftChip key={x} color={col ?? 'var(--color-primary)'} round label={
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              {icon && <LookupIcon icon={icon} size={11} color={col} />}
+              {opt?.label ?? x}
+            </span>
+          } />
         )
-      } },
+      }) },
     { key: 'available_from', label: t('preferences.availableFrom'), group: t('preferences.groupAvailability'), type: 'date' },
     // KAND-OPZEGTERMIJN-2 (Danny 2026-08-08, punt 9): the notice period sits DIRECTLY
     // under "Inzetbaar vanaf" instead of in its own Overig card — they are one thing
@@ -196,28 +197,23 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
     // LOOKUP-ICON-1: renderValue overrides ONLY the read-mode chip row (edit mode
     // keeps the generic ChipMultiSelect) — each chip gets its tenant-set icon
     // (lucide slug or emoji) in front of the label, same pattern as the candidate
-    // table's last-contact icon.
-    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- licence DATA-chips render inside this entry's renderValue: 11px pills on the primary bg/text pair, not muted caption text
+    // table's last-contact icon. Licence DATA-chips render inside this entry's
+    // renderValue: 11px pills on the primary bg/text pair, not muted caption text
+    // (the eslint-disable this line used to need is gone: extracting chipRowValue's
+    // empty-state span out of THIS object literal is what tripped the old
+    // ObjectExpression:has(…) selector — DRY round 11, CANDTABS, measured).
     { key: 'driver_licenses',       label: t('preferences.license'),       group: t('preferences.groupTravel'), type: 'chips', chipOptions: licenseOptions,
-      renderValue: (v: unknown) => {
-        const arr = (Array.isArray(v) ? v : []).map(String)
-        if (arr.length === 0) return <span style={{ color: 'var(--text-muted)' }}>-</span>
+      renderValue: (v: unknown) => chipRowValue(v, x => {
+        const icon = licenseIconOf(x)
         return (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-            {arr.map(x => {
-              const icon = licenseIconOf(x)
-              return (
-                <span key={x}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 9px', borderRadius: 999, fontSize: 11, fontWeight: 500,
-                  background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', border: '1px solid var(--color-primary)' }}>
-                  {icon && <LookupIcon icon={icon} size={11} />}
-                  {x}
-                </span>
-              )
-            })}
-          </div>
+          <span key={x}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 9px', borderRadius: 999, fontSize: 11, fontWeight: 500,
+            background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', border: '1px solid var(--color-primary)' }}>
+            {icon && <LookupIcon icon={icon} size={11} />}
+            {x}
+          </span>
         )
-      } },
+      }) },
     { key: 'wage_tax',      label: t('preferences.wageTax'),       group: t('preferences.groupPayroll'), type: 'checkbox' },
     { key: 'wage_tax_from', label: t('preferences.wageTaxFrom'),  group: t('preferences.groupPayroll'), type: 'date' },
     { key: 'desiredRateMin', label: t('preferences.desiredRateMin'), group: t('preferences.groupDesiredRate'), inputType: 'number', step: '0.01', mono: true },

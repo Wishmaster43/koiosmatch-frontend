@@ -4,17 +4,15 @@
  * any. Split out of the former SectionTabs.tsx verbatim (§3 size discipline) —
  * no behaviour change, only file boundaries.
  */
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRelationSort } from '@/components/forms/useRelationSort'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import LookupIcon from '@/components/ui/LookupIcon'
 import { useSkillLevels } from '@/lib/useSkillLevels'
-// DOC-1-EIGENAAR-1: the one shared "which document is still free" rule (measured 08-08).
-import { linkedDocumentOptions } from './documentLinkRules'
 import type { Id } from '@/types/common'
 import { AddableSection, DocEntryLinks, renderAddButton, resolveLinkedDocument } from './sectionTabsShared'
 import type { RelItem, RelTabProps } from './sectionTabsShared'
+import { linkedDocumentField, useLinkedDocPreview } from './useLinkedDocPreview'
 
 // Skills list tab: level is a tenant lookup, and a row can optionally link an already-uploaded proof document once the candidate has any.
 export function SkillsTab({ items = [], onAdd, onEdit, onRemove, documents = [], onJumpToDocuments, onReorder }: RelTabProps) {
@@ -35,12 +33,10 @@ export function SkillsTab({ items = [], onAdd, onEdit, onRemove, documents = [],
   }
   const wrappedOnAdd = onAdd ? (v: RelItem) => onAdd(resolveSkillLevel(v)) : undefined
   const wrappedOnEdit = onEdit ? (i: number, v: RelItem) => onEdit(i, resolveSkillLevel(v)) : undefined
-  // DOC-LANG-SKILL-LINK-1: preview overlay for a row's linked proof document — the
-  // shared house DocPreviewModal (never a fork), mirrors Education/Certifications.
-  const [previewDoc, setPreviewDoc] = useState<RelItem | null>(null)
-  // "Koppelen aan" picker options, resolved PER ROW — only documents no other entry
-  // has claimed, plus this row's own pick (DOC-1-EIGENAAR-1).
-  const documentOptions = linkedDocumentOptions(documents, items)
+  // DOC-LANG-SKILL-LINK-1: preview overlay + "Koppelen aan" picker options for a
+  // row's linked proof document (shared house DocPreviewModal, mirrors
+  // Education/Certifications, never a fork).
+  const { previewDoc, openPreview, closePreview, documentOptions } = useLinkedDocPreview(documents, items)
   const fields = [
     // KAND-ACHTERGROND-VERPLICHT-1: `name` is required on create
     // (CandidateSkillController::rules, measured 2026-08-17) — `level` is a tenant
@@ -49,7 +45,7 @@ export function SkillsTab({ items = [], onAdd, onEdit, onRemove, documents = [],
     { key: 'level', label: t('addFields.skillLevel'), options: levelNames },
     // DOC-LANG-SKILL-LINK-1: optionally link an already-uploaded proof document to this
     // entry (only offered once the candidate HAS documents — §3, no fake affordance).
-    ...(documents.length > 0 ? [{ key: 'document_id', label: t('addFields.linkedDocument'), options: documentOptions }] : []),
+    ...linkedDocumentField(t('addFields.linkedDocument'), documents, documentOptions),
   ]
   // Sub-tab sort notes: candidate_skills has no date column and no function/
   // title field — nothing in the start date / end date / function set applies
@@ -85,12 +81,12 @@ export function SkillsTab({ items = [], onAdd, onEdit, onRemove, documents = [],
                   </span>
                 )}
               </div>
-              {linkedDoc && <DocEntryLinks doc={linkedDoc} onPreview={() => setPreviewDoc(linkedDoc)} onJump={onJumpToDocuments} />}
+              {linkedDoc && <DocEntryLinks doc={linkedDoc} onPreview={() => openPreview(linkedDoc)} onJump={onJumpToDocuments} />}
             </div>
           </div>
         )
       }} />
-    {previewDoc && <DocPreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)} />}
+    {previewDoc && <DocPreviewModal doc={previewDoc} onClose={closePreview} />}
     </>
   )
 }

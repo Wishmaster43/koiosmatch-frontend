@@ -4,7 +4,7 @@
  * membership writes live in useCandidatePools (§3). `source: 'koios'` pools get a
  * subtle AI marker so manual vs AI-suggested membership stays distinguishable.
  */
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Sparkles } from 'lucide-react'
 import { useCandidatePools } from '../hooks/useCandidatePools'
@@ -13,8 +13,7 @@ import DrawerAddButton from './DrawerAddButton'
 import LookupIcon from '@/components/ui/LookupIcon'
 import SoftChip from '@/components/ui/SoftChip'
 import type { Candidate } from '@/types/candidate'
-// PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
-import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
+import { useClickOutside } from '@/hooks/useClickOutside'
 import { Z } from '@/lib/zIndexScale'
 
 // Presentational pool chips (see the module doc above): the fetch/optimistic membership writes live in useCandidatePools, this file only renders and dispatches toggles.
@@ -25,12 +24,8 @@ export default function PoolsSection({ c }: { c: Candidate }) {
   const [search, setSearch] = useState('')
   const ref = useRef<HTMLDivElement>(null)
 
-  // Close the add-dropdown on an outside click.
-  useEffect(() => {
-    if (!open) return
-    const h = (e: MouseEvent) => { if (isInsideDropdownPortal(e.target as Node)) return; if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
-    document.addEventListener('mousedown', h); return () => document.removeEventListener('mousedown', h)
-  }, [open])
+  // Close the add-dropdown on an outside click (DRY round 11, CANDTABS).
+  useClickOutside([ref], open, () => setOpen(false), { ignoreDropdownPortal: true })
 
   return (
     // No section title (Danny addendum 4): this only renders inside the Match

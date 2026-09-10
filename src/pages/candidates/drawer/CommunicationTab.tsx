@@ -22,10 +22,11 @@ import CandidateTasks from './CandidateTasks'
 import ConversationsSection from '@/components/drawer/ConversationsSection'
 import DrawerAddButton from './DrawerAddButton'
 import StartConversationModal from './StartConversationModal'
-import { useNoteTypes, SYSTEM_NOTE_TYPES } from '@/lib/useNoteTypes'
+import { useNoteTypes } from '@/lib/useNoteTypes'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import { useCandidateNotes } from '@/pages/candidates/hooks/useCandidateNotes'
+import { candidateNoteLabels, useUserNotesThread } from './useUserNotesThread'
 import { mergeTimelineEvents } from './mergeTimelineEvents'
 import { useAuth } from '@/context/AuthContext'
 import type { Candidate } from '@/types/candidate'
@@ -75,21 +76,11 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   // Notes persist via the API (G-1) — add/edit/delete hit /candidates/{id}/notes.
   const { notes, error: notesError, addNote, editNote, deleteNote, reload: reloadNotes, fetchPreviousVersion, restorePreviousVersion } = useCandidateNotes(c.id, { onContactStamped: () => onRefresh?.(c.id) })
 
-  // SYSTEM notes (status/phase changes, BE-written) are EVENTS, not notes (Danny
-  // 2026-07-13): they render in the Tijdlijn, never in the Notities thread. Keep the
-  // original index on user notes so edits still hit the right row in the hook's list.
-  const isSystem = (n: { type?: string; is_system?: unknown }) => Boolean(n.is_system) || SYSTEM_NOTE_TYPES.has(String(n.type ?? ''))
-  const indexed = notes.map((n, i) => ({ ...n, __idx: i }))
-  const userNotes = indexed.filter(n => !isSystem(n))
-  const systemNotes = indexed.filter(isSystem)
-  const editUserNote = (fi: number, payload: { type: string; title: string; body: string; channel?: string }) =>
-    editNote(userNotes[fi].__idx, payload)
-  // RECHTEN-NOTES-1: same filtered-index remap as edit — NotesTab hands the USER-list
-  // index, the hook wants the full-thread index.
-  const deleteUserNote = (fi: number) => deleteNote(userNotes[fi].__idx)
-  // NOTE-UNDO-FE-1: same filtered-index remap as edit/delete above.
-  const fetchUserPreviousVersion = (fi: number) => fetchPreviousVersion(userNotes[fi].__idx)
-  const restoreUserPreviousVersion = (fi: number) => restorePreviousVersion(userNotes[fi].__idx)
+  // NOTES-THREAD-1: user vs. system notes + the filtered-index remap, shared with
+  // the second-screen CandidateNotesPopout window (Danny 2026-07-13 / RECHTEN-NOTES-1
+  // / NOTE-UNDO-FE-1 — see useUserNotesThread's own doc for the full WHY).
+  const { userNotes, systemNotes, editUserNote, deleteUserNote, fetchUserPreviousVersion, restoreUserPreviousVersion } =
+    useUserNotesThread(notes, { editNote, deleteNote, fetchPreviousVersion, restorePreviousVersion })
   // Active sub-tab — notes is the daily surface, consent/tasks/timeline one click away.
   // Deep-link default: an unknown/stale target falls back to Notities rather than
   // blanking the tab — this component is the sub-tab validator.
@@ -237,28 +228,16 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
     // NOTITIE-DOORLINK-1 (Danny GO 28-08): the manual koppel-picker chips on each note.
     noteLinks: { host: 'candidates' as const, hostId: c.id },
     labels: {
-      // No section titles (Danny addendum 4): notes/timeline/conversations each
-      // render as the SOLE visible NotesTab section for their own sub-tab, whose
-      // bar already carries that exact label ("Notities"/"Tijdlijn"/"Conversaties") —
-      // an in-content heading would just repeat it. The *Empty strings still
-      // show (they're the empty-state copy, not a title).
-      notes: '',
-      newNote: t('communication.newNote'),
-      deleteNote: t('communication.deleteNote'), deleteConfirm: t('communication.deleteConfirm'),
-      type: t('communication.type'),
-      channel: t('communication.channel'),
-      channelNone: t('communication.channelNone'),
-      save: t('common:save'),
-      cancel: t('common:cancel'),
-      notesEmpty: t('sections.notesEmpty'),
+      // The *Empty strings still show (they're the empty-state copy, not a title);
+      // the shared subset's own WHY comment (no repeated in-content heading, Danny
+      // addendum 4) lives on candidateNoteLabels now.
+      ...candidateNoteLabels(t),
       timeline: '',
       timelineEmpty: t('sections.timelineEmpty'),
       conversations: '',
       conversationsEmpty: t('sections.conversationsEmpty'),
-      notePlaceholder: (typeLabel: string) => t('communication.notePlaceholder', { type: typeLabel }),
       openChangelog: t('drawer.changelog'),
       editStatusEvent: t('drawer.editStatusReason'),
-      searchPlaceholder: t('communication.searchPlaceholder'),
       // NOTE-UNDO-FE-1 (K-172) — shared common:notes.* namespace, see NotesTab.
       restorePrevious: t('common:notes.restorePrevious'),
       restoreConfirmTitle: t('common:notes.restoreConfirmTitle'),

@@ -4,7 +4,6 @@
  * discards an in-progress edit in the Address or Contact sub-tab (each has
  * its own).
  */
-import { useState } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BodyText, Caption } from '@/components/ui/typography'
@@ -17,7 +16,9 @@ import { useNationalities } from '@/lib/useNationalities'
 import { useMessagingLanguageOptions } from '@/lib/useMessagingLanguageOptions'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
 import LookupIcon from '@/components/ui/LookupIcon'
-import { FieldRow, EditControls, GroupCard, GroupHeader, inputStyle } from './profileFieldShared'
+import { EditControls, GroupCard, GroupHeader, inputStyle } from './profileFieldShared'
+import { makeFieldRenderer } from './makeFieldRenderer'
+import { useProfileEditState } from './useProfileEditState'
 import { useProfileRequiredKeys } from './useProfileRequiredKeys'
 import type { Candidate } from '@/types/candidate'
 import SoftChip from '@/components/ui/SoftChip'
@@ -61,13 +62,7 @@ export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
     gender: c.gender ?? '', nationality: c.nationality ?? '', dob: c.dob ?? '', placeOfBirth: c.placeOfBirth ?? '',
     preferredLanguage: c.preferredLanguage ?? '',
   })
-  const [editing, setEditing] = useState(false)
-  // Open edit mode when the parent bumps the signal (e.g. right after Lead→Kandidaat convert).
-  const [prevAutoEdit, setPrevAutoEdit] = useState(autoEditSignal ?? 0)
-  if ((autoEditSignal ?? 0) !== prevAutoEdit) { setPrevAutoEdit(autoEditSignal ?? 0); setEditing(true) }
-  const [form, setForm] = useState<PersonalForm>(emptyForm)
-  const [errors, setErrors] = useState<Partial<Record<PersonalKey, boolean>>>({})
-  const setF = (k: PersonalKey, v: string) => { setForm(p => ({ ...p, [k]: v })); if (errors[k]) setErrors(e => ({ ...e, [k]: false })) }
+  const { editing, setEditing, form, setForm, errors, setErrors, setF } = useProfileEditState<PersonalForm, PersonalKey>(emptyForm, autoEditSignal)
 
   // Block save when a required field of THIS tab is empty; flag the offenders.
   const save = () => {
@@ -176,11 +171,7 @@ export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
     return <span style={{ fontSize: 12, color: v ? 'var(--text)' : 'var(--text-muted)' }}>{v || '-'}</span>
   }
 
-  const field = (key: PersonalKey, label: string) => (
-    <FieldRow key={key} label={label} required={isReq(key)} errorText={errors[key] ? t('common:required') : undefined}>
-      {editing ? renderInput(key) : renderValue(key)}
-    </FieldRow>
-  )
+  const field = makeFieldRenderer<PersonalKey>({ isReq, errors, editing, requiredText: t('common:required'), renderInput, renderValue })
 
   return (
     <div>

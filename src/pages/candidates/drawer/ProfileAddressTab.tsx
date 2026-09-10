@@ -5,14 +5,16 @@
  *  The street/no/suffix/postcode/city cluster keeps its exact composed
  *  one-line-read + expand-on-edit behaviour (mirrors the shared
  *  EditableFieldTable `type: 'address'` row — same pattern, same author). */
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { composeAddressLine } from '@/components/forms/EditableFieldTable'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useProvinces } from '@/hooks/useProvinces'
 import { getCountryOptions, getCountryName } from '@/lib/countries'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
-import { FieldRow, EditControls, GroupCard, GroupHeader, inputStyle } from './profileFieldShared'
+import { EditControls, FieldRow, GroupCard, GroupHeader, inputStyle } from './profileFieldShared'
+import { makeFieldRenderer } from './makeFieldRenderer'
+import { useProfileEditState } from './useProfileEditState'
 import { useProfileRequiredKeys } from './useProfileRequiredKeys'
 import type { Candidate } from '@/types/candidate'
 import CopyIconButton from '@/components/ui/CopyIconButton'
@@ -46,13 +48,7 @@ export default function ProfileAddressTab({ c, onSave, autoEditSignal }: {
     street: c.street ?? '', houseNumber: c.houseNumber ?? '', houseNumberSuffix: c.houseNumberSuffix ?? '', addressLine2: c.addressLine2 ?? '',
     postalCode: c.postalCode ?? '', city: c.city ?? '', province: c.province ?? '', country: c.country ?? '',
   })
-  const [editing, setEditing] = useState(false)
-  // Open edit mode when the parent bumps the signal (e.g. right after Lead→Kandidaat, "Candidate", convert).
-  const [prevAutoEdit, setPrevAutoEdit] = useState(autoEditSignal ?? 0)
-  if ((autoEditSignal ?? 0) !== prevAutoEdit) { setPrevAutoEdit(autoEditSignal ?? 0); setEditing(true) }
-  const [form, setForm] = useState<AddressForm>(emptyForm)
-  const [errors, setErrors] = useState<Partial<Record<AddressKey, boolean>>>({})
-  const setF = (k: AddressKey, v: string) => { setForm(p => ({ ...p, [k]: v })); if (errors[k]) setErrors(e => ({ ...e, [k]: false })) }
+  const { editing, setEditing, form, setForm, errors, setErrors, setF } = useProfileEditState<AddressForm, AddressKey>(emptyForm, autoEditSignal)
 
   // Province list CASCADES on the picked country (Danny addendum) — its own cache
   // slot per country (useProvinces), so switching country never leaks another
@@ -103,11 +99,7 @@ export default function ProfileAddressTab({ c, onSave, autoEditSignal }: {
     return <span style={{ fontSize: 12, color: v ? 'var(--text)' : 'var(--text-muted)' }}>{v || '-'}</span>
   }
 
-  const field = (key: AddressKey, label: string) => (
-    <FieldRow key={key} label={label} required={isReq(key)} errorText={errors[key] ? t('common:required') : undefined}>
-      {editing ? renderInput(key) : renderValue(key)}
-    </FieldRow>
-  )
+  const field = makeFieldRenderer<AddressKey>({ isReq, errors, editing, requiredText: t('common:required'), renderInput, renderValue })
 
   // Address: read = one composed comma line; edit = the structured fields (always
   // saved structured — no backend change).

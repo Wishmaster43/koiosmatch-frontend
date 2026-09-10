@@ -4,7 +4,6 @@
  * DocPreviewModal. Split out of the former SectionTabs.tsx verbatim (§3 size
  * discipline) — no behaviour change, only file boundaries.
  */
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRelationSort } from '@/components/forms/useRelationSort'
 import SoftChip from '@/components/ui/SoftChip'
@@ -12,8 +11,6 @@ import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import LookupIcon from '@/components/ui/LookupIcon'
 import { useDateFormat } from '@/lib/datetime'
 import { useEducationLevels } from '@/lib/useEducationLevels'
-// DOC-1-EIGENAAR-1: the one shared "which document is still free" rule (measured 08-08).
-import { linkedDocumentOptions } from './documentLinkRules'
 // HUISSTIJL-1: the shared 13/600 title atom.
 import { SectionTitle } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
@@ -21,18 +18,16 @@ import {
   AddableSection, DocEntryLinks, ProseField, renderAddButton, resolveEducationStartDate, resolveLinkedDocument,
 } from './sectionTabsShared'
 import type { RelItem, RelTabProps } from './sectionTabsShared'
+import { linkedDocumentField, useLinkedDocPreview } from './useLinkedDocPreview'
 
 // Education list tab: add/edit/remove/reorder rows, each optionally previewing an already-linked proof document via the shared DocPreviewModal.
 export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = [], onJumpToDocuments, onReorder }: RelTabProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   const fmt = (d?: string) => (d ? formatDate(d) : '')
-  // DOC-EDU-1: preview overlay for a row's linked proof document — the shared
-  // house DocPreviewModal (never a fork).
-  const [previewDoc, setPreviewDoc] = useState<RelItem | null>(null)
-  // "Koppelen aan" picker options, resolved PER ROW — only documents no other entry
-  // has claimed, plus this row's own pick (DOC-1-EIGENAAR-1).
-  const documentOptions = linkedDocumentOptions(documents, items)
+  // DOC-EDU-1: preview overlay + "Koppelen aan" picker options for a row's linked
+  // proof document (shared house DocPreviewModal, never a fork).
+  const { previewDoc, openPreview, closePreview, documentOptions } = useLinkedDocPreview(documents, items)
   // KAND-NIVEAU-1: the tenant education-level lookup (id-based — level_id on
   // candidate_educations, never the name, so a tenant rename never breaks a row).
   const { levels } = useEducationLevels()
@@ -56,7 +51,7 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = 
     // DOC-EDU-1: optionally link an already-uploaded proof document to this entry.
     // Offered only once the candidate HAS documents — an always-empty dropdown is a
     // fake affordance (§3).
-    ...(documents.length > 0 ? [{ key: 'document_id', label: t('addFields.linkedDocument'), options: documentOptions }] : []),
+    ...linkedDocumentField(t('addFields.linkedDocument'), documents, documentOptions),
     // Description renders as a `richtext` field in this same form, mirroring
     // Experience/Certifications — one pencil per entry (Danny 05-08).
     { key: 'desc',      label: t('addFields.description'), richtext: true },
@@ -133,12 +128,12 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = 
               </div>
               {secondary && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{secondary}</div>}
               <ProseField value={(o as { desc?: string }).desc} />
-              {linkedDoc && <DocEntryLinks doc={linkedDoc} onPreview={() => setPreviewDoc(linkedDoc)} onJump={onJumpToDocuments} />}
+              {linkedDoc && <DocEntryLinks doc={linkedDoc} onPreview={() => openPreview(linkedDoc)} onJump={onJumpToDocuments} />}
             </div>
           </div>
         )
       }} />
-    {previewDoc && <DocPreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)} />}
+    {previewDoc && <DocPreviewModal doc={previewDoc} onClose={closePreview} />}
     </>
   )
 }
