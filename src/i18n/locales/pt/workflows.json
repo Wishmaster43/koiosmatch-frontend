@@ -396,6 +396,9 @@
     },
     "agent": {
       "newAgent": "Novo agente",
+      "saveNoPermission": "Não tem permissão para guardar agentes",
+      "deleteNoPermission": "Não tem permissão para eliminar agentes",
+      "runNoPermission": "Não tem permissão para testar agentes",
       "fallback": "Agente",
       "namePlaceholder": "P. ex. Yessy AI",
       "apiEndpoint": "Endpoint da API",
@@ -1159,6 +1162,7 @@
     "tokensTotal": "{{count}} tokens no total",
     "clear": "Limpar conversa",
     "inputPlaceholder": "Envie uma mensagem... (Enter = enviar, Shift+Enter = nova linha)",
+    "noPermission": "Não tem permissão para testar agentes",
     "send": "Enviar",
     "noConnection": "⚠️ Sem ligação ao agente. Verifique se o backend está a funcionar.",
     "removeVariable": "Remover variável"

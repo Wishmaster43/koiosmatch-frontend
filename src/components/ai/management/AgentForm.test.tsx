@@ -7,6 +7,10 @@ import type { AiAgent, AiItem } from '@/types/ai'
 // AgentForm fetches the tenant's WhatsApp templates on mount and PUTs the whole form
 // on save — stub the whole default client (keep unwrap/unwrapList real), mirrors the
 // mocking pattern already used in AIManagementTabs.test.tsx for this same module.
+// WORKFLOW-PERMS-1: the auth payload per test — null = no provider (open), a permission list = the seeded family.
+const mockAuth = vi.fn<() => unknown>(() => null)
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockAuth() }))
+
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
   return { ...actual, default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }
@@ -317,3 +321,14 @@ describe('AgentForm · use_knowledge default and has_knowledge caption (B2-3)', 
   })
 })
 
+// WORKFLOW-PERMS-1: once the aiagents.* family is seeded, the verbs gate save, delete and the chat test.
+describe('AgentForm · WORKFLOW-PERMS-1', () => {
+  it('disables save, delete and the chat test with the reason when the seeded family lacks the verbs', async () => {
+    mockAuth.mockReturnValue({ user: { permissions: ['aiagents.view'] } })
+    render(<AgentForm agent={mockAgent} prompts={[]} faqs={[]} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    expect(await screen.findByTitle(i18n.t('ai.agent.deleteNoPermission', { ns: 'workflows' }))).toBeDisabled()
+    expect(screen.getByTitle(i18n.t('ai.agent.runNoPermission', { ns: 'workflows' }))).toBeDisabled()
+    expect(screen.getByRole('button', { name: i18n.t('save', { ns: 'common' }) })).toBeDisabled()
+    mockAuth.mockReturnValue(null)
+  })
+})

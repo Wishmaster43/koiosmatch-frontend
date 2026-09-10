@@ -20,6 +20,10 @@ vi.mock('react-i18next', async () => {
 })
 
 const postMock = vi.fn().mockResolvedValue({ data: { response: 'ok' } })
+// WORKFLOW-PERMS-1: null = no provider (open), a permission list = the seeded family.
+const mockAuth = vi.fn<() => unknown>(() => null)
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockAuth() }))
+
 vi.mock('@/lib/api', () => ({
   default: { post: (...args: unknown[]) => postMock(...args) },
   unwrap: (res: { data: unknown }) => res.data,
@@ -51,5 +55,18 @@ describe('AgentTestPanel · POST body', () => {
     const body = postMock.mock.calls[0][1]
     expect(body.config.instruction).toBe('1. Vraag 1')
     expect('instructions' in body.config).toBe(false)
+  })
+})
+
+// WORKFLOW-PERMS-1: a test run is aiagents.run — disabled with the reason once the family is seeded without it.
+describe('AgentTestPanel · WORKFLOW-PERMS-1', () => {
+  it('disables Send with the reason when the seeded family lacks aiagents.run', () => {
+    mockAuth.mockReturnValue({ user: { permissions: ['aiagents.view'] } })
+    render(<AgentTestPanel config={{ instruction: 'persona', instructions: [{ id: 'q1', text: '<p>Vraag 1</p>' }] }} />)
+    fireEvent.change(screen.getByPlaceholderText('agentTest.inputPlaceholder'), { target: { value: 'hoi' } })
+    const send = screen.getByRole('button', { name: 'agentTest.send' })
+    expect(send).toBeDisabled()
+    expect(send).toHaveAttribute('title', 'agentTest.noPermission')
+    mockAuth.mockReturnValue(null)
   })
 })

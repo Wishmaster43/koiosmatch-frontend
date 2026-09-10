@@ -15,6 +15,8 @@ import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import Spinner from '@/components/ui/Spinner'
 import { Caption } from '@/components/ui/typography'
 import { buildTestConfig } from './agentTestConfig'
+import { useAuth } from '@/context/AuthContext'
+import { canDo } from '@/lib/access'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -58,7 +60,10 @@ export default function AgentTestPanel({ config }: {
 
   // Send the typed message, the conversation so far, and any test variables to the
   // test endpoint, then append the agent's reply with its token/latency stats.
+  // WORKFLOW-PERMS-1: a test run is aiagents.run — open until the BE seeds the family.
+  const canRunAgent = canDo(useAuth(), 'aiagents', 'run')
   const sendMessage = async () => {
+    if (!canRunAgent) return
     if (!input.trim() || loading) return
     const userMsg: Message = { role: 'user', content: input.trim() }
     setMessages(prev => [...prev, userMsg])
@@ -212,7 +217,8 @@ export default function AgentTestPanel({ config }: {
           rows={2}
           style={{ flex: 1, padding: '7px 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', resize: 'none', background: 'var(--surface)', color: 'var(--text)', lineHeight: 1.5, fontFamily: 'inherit' }}
         />
-        <Button variant="primary" onClick={sendMessage} disabled={!input.trim() || loading} aria-label={t('agentTest.send')}
+        <Button variant="primary" onClick={sendMessage} disabled={!input.trim() || loading || !canRunAgent} aria-label={t('agentTest.send')}
+          title={canRunAgent ? undefined : t('agentTest.noPermission')}
           style={{ width: 36, alignSelf: 'flex-end' }}>
           {/* Active fill is the tenant accent (on-accent token); disabled fill is neutral
               border, so the icon falls back to text-muted instead of a raw white that

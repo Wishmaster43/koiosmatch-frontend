@@ -25,6 +25,8 @@ import type { AiAgent, AiItem, AiKnowledgeLookupItem, ChatMessage } from '@/type
 import type { WaTemplateOption } from '@/components/layout/workflow/whatsappTemplate'
 import Button from '@/components/ui/Button'
 import { groupLabelStyle } from '@/components/ui/typography'
+import { useAuth } from '@/context/AuthContext'
+import { canDo } from '@/lib/access'
 
 // Mirrors shared.tsx's `Field` label style — used directly (not via `Field`) for the
 // two CreatableSelect pickers below, which need their own aria-labelledby wiring
@@ -155,6 +157,12 @@ export function AgentForm({ agent, prompts, faqs, knowledgeItems, onSaved, onDel
   // House date formatting (DATUM-1) for the inbound stamps below.
   const { formatDateTime } = useDateFormat()
   const isNew = !agent?.id
+  // WORKFLOW-PERMS-1: the aiagents.* verbs gate save (create|update), delete and the chat
+  // test (run) — open until the BE seeds the family, exact once it has (lib/access canDo).
+  const auth = useAuth()
+  const canSaveAgent = canDo(auth, 'aiagents', isNew ? 'create' : 'update')
+  const canDeleteAgent = canDo(auth, 'aiagents', 'delete')
+  const canRunAgent = canDo(auth, 'aiagents', 'run')
   const [form, setForm] = useState<AgentFormState>({
     name:            agent?.name            ?? '',
     custom_endpoint: agent?.custom_endpoint ?? '',
@@ -274,7 +282,8 @@ export function AgentForm({ agent, prompts, faqs, knowledgeItems, onSaved, onDel
           {!isNew && (
             // Pre-existing bespoke toggle-state control (own on/off fill), out of this
             // ink/tint task's scope; not converted to avoid a size/identity regression.
-            <button onClick={() => setChatOpen(o => !o)}
+            <button onClick={() => setChatOpen(o => !o)} disabled={!canRunAgent}
+              title={canRunAgent ? undefined : t('ai.agent.runNoPermission')}
               // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
               style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px', fontSize: 12, fontWeight: 500,
                 borderRadius: 8, border: '1px solid var(--border)',
@@ -285,14 +294,14 @@ export function AgentForm({ agent, prompts, faqs, knowledgeItems, onSaved, onDel
             </button>
           )}
           {!isNew && (
-            <button onClick={() => agent && onDelete(agent)}
-              aria-label={t('common:delete')} title={t('common:delete')}
+            <button onClick={() => agent && onDelete(agent)} disabled={!canDeleteAgent}
+              aria-label={t('common:delete')} title={canDeleteAgent ? t('common:delete') : t('ai.agent.deleteNoPermission')}
               // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- pre-existing bespoke-size icon button, out of this ink/tint task's scope
               style={{ padding: '5px 8px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--color-danger-text)', cursor: 'pointer', display: 'flex' }}>
               <Trash2 size={12} />
             </button>
           )}
-          <SaveBar saving={saving} saved={saved} onSave={save} />
+          <SaveBar saving={saving} saved={saved} onSave={save} disabled={!canSaveAgent} />
         </>}
       />
 

@@ -396,6 +396,9 @@
     },
     "agent": {
       "newAgent": "Nieuwe agent",
+      "saveNoPermission": "Je hebt geen recht om agents op te slaan",
+      "deleteNoPermission": "Je hebt geen recht om agents te verwijderen",
+      "runNoPermission": "Je hebt geen recht om agents te testen",
       "fallback": "Agent",
       "namePlaceholder": "Bijv. Yessy AI",
       "apiEndpoint": "API Endpoint",
@@ -1157,6 +1160,7 @@
     "tokensTotal": "{{count}} tokens totaal",
     "clear": "Chat wissen",
     "inputPlaceholder": "Stuur een bericht... (Enter = versturen, Shift+Enter = nieuwe regel)",
+    "noPermission": "Je hebt geen recht om agents te testen",
     "send": "Versturen",
     "noConnection": "⚠️ Geen verbinding met de agent. Controleer of de backend draait.",
     "removeVariable": "Variabele verwijderen"

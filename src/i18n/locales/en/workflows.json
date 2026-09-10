@@ -339,6 +339,9 @@
     },
     "agent": {
       "newAgent": "New agent",
+      "saveNoPermission": "You have no permission to save agents",
+      "deleteNoPermission": "You have no permission to delete agents",
+      "runNoPermission": "You have no permission to test agents",
       "fallback": "Agent",
       "namePlaceholder": "E.g. Yessy AI",
       "apiEndpoint": "API Endpoint",
@@ -1124,6 +1127,7 @@
     "tokensTotal": "{{count}} tokens total",
     "clear": "Clear chat",
     "inputPlaceholder": "Send a message... (Enter = send, Shift+Enter = new line)",
+    "noPermission": "You have no permission to test agents",
     "send": "Send",
     "noConnection": "⚠️ No connection to the agent. Check that the backend is running.",
     "removeVariable": "Remove variable"
