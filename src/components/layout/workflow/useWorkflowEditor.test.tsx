@@ -635,3 +635,16 @@ describe('useWorkflowEditor · handleNodeRun', () => {
     expect(mockPost).not.toHaveBeenCalledWith(expect.stringContaining('/sm_candidates'), expect.anything())
   })
 })
+
+// VERTREKMODULE-1 proof (CMBE 10-09, point 3): a workflow whose only step is a
+// send step has no Koios start module and says so in the header.
+describe('useWorkflowEditor · start hint for a send-only workflow', () => {
+  it('flags a single whatsapp_send step as an invalid start, and a single entity step as valid', async () => {
+    const sendOnly = setup([{ id: 'n1', type: 'whatsapp_send', config: {}, position: { x: 0, y: 0 } }])
+    await waitFor(() => expect(sendOnly.result.current.nodesWithFirst).toHaveLength(1))
+    expect(sendOnly.result.current.startInvalid).toBe(true)
+    const entityOnly = setup([{ id: 'n1', type: 'candidates', config: {}, position: { x: 0, y: 0 } }])
+    await waitFor(() => expect(entityOnly.result.current.nodesWithFirst).toHaveLength(1))
+    expect(entityOnly.result.current.startInvalid).toBe(false)
+  })
+})

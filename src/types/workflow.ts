@@ -209,5 +209,12 @@ export interface WorkflowField {
   // K-193: a field the user must fill before the step can run (the builder marks
   // it and shows a hint; the backend still fails a missing value visibly).
   required?: boolean
+  // WA-RECIPIENT-FIELD-1: how the variable picker inserts into a text field —
+  // 'token' ({{field}}, the default) or 'path' (a bare field name).
+  insertMode?: 'token' | 'path'
+  // WA-RECIPIENT-FIELD-1: a value check the builder shows under the field as a
+  // danger caption; returns the registry (Dutch) message, translated on render
+  // through fieldHints.*, or null when the value is fine.
+  validate?: (value: unknown) => string | null
   [k: string]: unknown
 }

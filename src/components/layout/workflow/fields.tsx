@@ -207,7 +207,7 @@ export function FieldInput({ field, value, onChange, variables, config, instruct
   }
   // Plain single-line text gets the variable picker too (numbers/dates never do).
   if ((field.type === 'text' || field.type == null) && variables?.length) {
-    return <TextFieldWithVars field={field} value={value} onChange={onChange} variables={variables} />
+    return <TextFieldWithVars field={field} value={value} onChange={onChange} variables={variables} insertMode={field.insertMode} />
   }
   return (
     <input type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}

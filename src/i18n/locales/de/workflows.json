@@ -1203,7 +1203,6 @@
     "bijv Yesway": "z. B. Yesway",
     "bijv {{klant_id}} — leeg laten voor één grote groep": "z. B. {{klant_id}}. Leer lassen für eine große Gruppe",
     "klantnaam": "Kundenname",
-    "leeg = mobiel van de kandidaat · eigen 06 = testmodus": "leer = Handynummer des Kandidaten · eigene Nummer = Testmodus",
     "leeg = één groep": "leer = eine Gruppe",
     "mijn-element of #id": ".mein-element oder #id",
     "mijn_variabele": "meine_variable",
@@ -1217,7 +1216,8 @@
     "Standaard van de vacature/sollicitatie": "Standard aus Stelle/Bewerbung",
     "-30": "-30",
     "180": "180",
-    "https//hookexamplecom/koios": "https://hook.example.com/koios"
+    "https//hookexamplecom/koios": "https://hook.example.com/koios",
+    "leeg = mobiel van de kandidaat · anders de veldnaam, bijv mobile": "leer = Handynummer des Kandidaten · sonst der Feldname, z. B. mobile"
   },
   "fieldHints": {
     "Array stuurt elk item apart door naar de volgende module (zoals een Iterator)": "Array sendet jedes Element einzeln an das nächste Modul (wie ein Iterator).",
@@ -1298,7 +1298,9 @@
     "Titel van de agenda-afspraak (standaard \"Afspraak\")": "Titel des Kalendertermins (Standard \"Termin\").",
     "Afspraak-id (bv {{triggerappointment_id}})": "Termin-ID (z.B. {{trigger.appointment_id}}).",
     "Directe https-URL voor deze stap Laat leeg om de gedeelde instelling webhook_endpoint_<slug> hieronder te gebruiken Geen inloggegevens in de URL": "Direkte HTTPS-URL für diesen Schritt. Lassen Sie leer, um die gemeinsame Einstellung webhook_endpoint_<slug> unten zu verwenden. Keine Anmeldedaten in der URL.",
-    "Alleen gebruikt als hierboven geen URL staat de tenant-instelling webhook_endpoint_<slug> bepaalt dan de URL": "Wird nur verwendet, wenn oben keine URL angegeben ist: die Mandanten-Einstellung webhook_endpoint_<slug> bestimmt dann die URL."
+    "Alleen gebruikt als hierboven geen URL staat de tenant-instelling webhook_endpoint_<slug> bepaalt dan de URL": "Wird nur verwendet, wenn oben keine URL angegeben ist: die Mandanten-Einstellung webhook_endpoint_<slug> bestimmt dann die URL.",
+    "Een veldnaam van het bronrecord (mobile, phone, …), nooit een telefoonnummer Handmatig versturen doe je vanaf het record zelf": "Ein Feldname des Quelldatensatzes (mobile, phone, …), nie eine Telefonnummer. Manuell senden Sie vom Datensatz selbst.",
+    "Dit lijkt een telefoonnummer Vul de veldnaam van het bronrecord in, bijv mobile": "Das sieht wie eine Telefonnummer aus. Geben Sie den Feldnamen des Quelldatensatzes ein, z. B. mobile."
   },
   "triggers": {
     "events": {

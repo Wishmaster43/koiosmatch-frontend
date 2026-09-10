@@ -1203,7 +1203,6 @@
     "bijv Yesway": "e.g. Yesway",
     "bijv {{klant_id}} — leeg laten voor één grote groep": "e.g. {{klant_id}}. Leave empty for one big group",
     "klantnaam": "customer name",
-    "leeg = mobiel van de kandidaat · eigen 06 = testmodus": "empty = candidate's mobile · your own number = test mode",
     "leeg = één groep": "empty = one group",
     "mijn-element of #id": ".my-element or #id",
     "mijn_variabele": "my_variable",
@@ -1217,7 +1216,8 @@
     "Standaard van de vacature/sollicitatie": "Default from the vacancy/application",
     "-30": "-30",
     "180": "180",
-    "https//hookexamplecom/koios": "https://hook.example.com/koios"
+    "https//hookexamplecom/koios": "https://hook.example.com/koios",
+    "leeg = mobiel van de kandidaat · anders de veldnaam, bijv mobile": "empty = candidate's mobile · otherwise the field name, e.g. mobile"
   },
   "fieldHints": {
     "Array stuurt elk item apart door naar de volgende module (zoals een Iterator)": "Array sends each item to the next module separately (like an Iterator).",
@@ -1298,7 +1298,9 @@
     "Titel van de agenda-afspraak (standaard \"Afspraak\")": "Title of the calendar appointment (default \"Appointment\").",
     "Afspraak-id (bv {{triggerappointment_id}})": "Appointment ID (e.g. {{trigger.appointment_id}}).",
     "Directe https-URL voor deze stap Laat leeg om de gedeelde instelling webhook_endpoint_<slug> hieronder te gebruiken Geen inloggegevens in de URL": "Direct https URL for this step. Leave blank to use the shared setting webhook_endpoint_<slug> below. No credentials in the URL.",
-    "Alleen gebruikt als hierboven geen URL staat de tenant-instelling webhook_endpoint_<slug> bepaalt dan de URL": "Only used if no URL is set above: the tenant setting webhook_endpoint_<slug> then determines the URL."
+    "Alleen gebruikt als hierboven geen URL staat de tenant-instelling webhook_endpoint_<slug> bepaalt dan de URL": "Only used if no URL is set above: the tenant setting webhook_endpoint_<slug> then determines the URL.",
+    "Een veldnaam van het bronrecord (mobile, phone, …), nooit een telefoonnummer Handmatig versturen doe je vanaf het record zelf": "A field name of the source record (mobile, phone, …), never a phone number. Manual sending happens from the record itself.",
+    "Dit lijkt een telefoonnummer Vul de veldnaam van het bronrecord in, bijv mobile": "This looks like a phone number. Enter the source record’s field name, e.g. mobile."
   },
   "triggers": {
     "events": {

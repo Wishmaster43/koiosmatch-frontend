@@ -1203,7 +1203,6 @@
     "bijv Yesway": "p. ex. Yesway",
     "bijv {{klant_id}} — leeg laten voor één grote groep": "p. ex. {{klant_id}}. Laisser vide pour un seul grand groupe",
     "klantnaam": "nom du client",
-    "leeg = mobiel van de kandidaat · eigen 06 = testmodus": "vide = portable du candidat · votre propre numéro = mode test",
     "leeg = één groep": "vide = un seul groupe",
     "mijn-element of #id": ".mon-element ou #id",
     "mijn_variabele": "ma_variable",
@@ -1217,7 +1216,8 @@
     "Standaard van de vacature/sollicitatie": "Par défaut de l’offre/candidature",
     "-30": "-30",
     "180": "180",
-    "https//hookexamplecom/koios": "https://hook.example.com/koios"
+    "https//hookexamplecom/koios": "https://hook.example.com/koios",
+    "leeg = mobiel van de kandidaat · anders de veldnaam, bijv mobile": "vide = portable du candidat · sinon le nom du champ, p. ex. mobile"
   },
   "fieldHints": {
     "Array stuurt elk item apart door naar de volgende module (zoals een Iterator)": "Array envoie chaque élément séparément au module suivant (comme un Iterator).",
@@ -1298,7 +1298,9 @@
     "Titel van de agenda-afspraak (standaard \"Afspraak\")": "Titre du rendez-vous calendaire (par défaut \"Rendez-vous\").",
     "Afspraak-id (bv {{triggerappointment_id}})": "ID du rendez-vous (ex : {{trigger.appointment_id}}).",
     "Directe https-URL voor deze stap Laat leeg om de gedeelde instelling webhook_endpoint_<slug> hieronder te gebruiken Geen inloggegevens in de URL": "URL HTTPS directe pour cette étape. Laissez vide pour utiliser le paramètre partagé webhook_endpoint_<slug> ci-dessous. Aucune information d'identification dans l'URL.",
-    "Alleen gebruikt als hierboven geen URL staat de tenant-instelling webhook_endpoint_<slug> bepaalt dan de URL": "Utilisé uniquement si aucune URL n'est définie ci-dessus : le paramètre locataire webhook_endpoint_<slug> détermine alors l'URL."
+    "Alleen gebruikt als hierboven geen URL staat de tenant-instelling webhook_endpoint_<slug> bepaalt dan de URL": "Utilisé uniquement si aucune URL n'est définie ci-dessus : le paramètre locataire webhook_endpoint_<slug> détermine alors l'URL.",
+    "Een veldnaam van het bronrecord (mobile, phone, …), nooit een telefoonnummer Handmatig versturen doe je vanaf het record zelf": "Un nom de champ de l’enregistrement source (mobile, phone, …), jamais un numéro de téléphone. L’envoi manuel se fait depuis l’enregistrement lui-même.",
+    "Dit lijkt een telefoonnummer Vul de veldnaam van het bronrecord in, bijv mobile": "Cela ressemble à un numéro de téléphone. Saisissez le nom du champ de l’enregistrement source, p. ex. mobile."
   },
   "triggers": {
     "events": {

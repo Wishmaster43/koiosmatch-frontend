@@ -5,6 +5,12 @@ import { MessageCircle } from 'lucide-react'
 import { tint } from '@/lib/tint'
 import { MESSAGING_LANGUAGES } from './messagingLanguages'
 
+// WA-RECIPIENT-FIELD-1 (CMBE addendum 3, 10-09): the backend answers 422
+// recipient_field_not_a_field on a literal number; a value that reads as one
+// (digits, +, spaces, dashes, parentheses) is named here before the save.
+const looksLikePhoneNumber = (value: unknown): string | null =>
+  typeof value === 'string' && /^\s*\+?[0-9][0-9\s().-]{5,}\s*$/.test(value) ? 'Dit lijkt een telefoonnummer. Vul de veldnaam van het bronrecord in, bijv. mobile.' : null
+
 export default {
   type:  'whatsapp_send',
   module: 'whatsapp',
@@ -50,10 +56,15 @@ export default {
       showIf: { key: 'channel', value: ['waba', 'waba_coex', undefined] },
       // WA-SCOPE-2: an empty sender falls back automatically (branch first, then the tenant default).
       help: 'Leeg laten betekent automatisch: eerst de vestiging, anders de standaard.' },
-    // Recipient override: empty = each bundle's own mobile; a literal 06-number
-    // redirects EVERY message there (dry-run testing, Danny 2026-07-09).
-    { key: 'recipient_field',     label: 'Ontvanger',              type: 'text',
-      placeholder: 'leeg = mobiel van de kandidaat · eigen 06 = testmodus' },
+    // Recipient override: empty = each bundle's own mobile; otherwise the NAME of
+    // the source record's field that holds the number (mobile, phone, …). The
+    // 2026-07-09 "own 06 = test mode" redirect is gone: the backend rejects a
+    // literal number (WA-RECIPIENT-FIELD-1) and manual sending is its own route
+    // (WA-SEND-1, rows 52/54). The picker inserts a bare field name ('path').
+    { key: 'recipient_field',     label: 'Ontvanger',              type: 'text', insertMode: 'path' as const,
+      placeholder: 'leeg = mobiel van de kandidaat · anders de veldnaam, bijv. mobile',
+      help: 'Een veldnaam van het bronrecord (mobile, phone, …), nooit een telefoonnummer. Handmatig versturen doe je vanaf het record zelf.',
+      validate: looksLikePhoneNumber },
     // Template picker + per-{{n}} variable mapping + live preview (WhatsappTemplateField).
     // Persists template_name/header_variables/variables/language in the same shape as the
     // old lookup_select + two textareas (ONE PER LINE → {{1}},{{2}},…); only shown for the

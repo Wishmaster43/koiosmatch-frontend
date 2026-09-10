@@ -175,6 +175,8 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
       {fields.map(field => {
         const isRequired = !!(field as WorkflowField & { required?: boolean }).required
         const isEmpty    = fieldValue(field.key) == null || fieldValue(field.key) === ''
+        // WA-RECIPIENT-FIELD-1: a registry validator's message for the current value (null = fine).
+        const invalidMsg = (field as WorkflowField).validate?.(fieldValue(field.key)) ?? null
         // 02-09: the translations tab IS the field's label — no repeated
         // "VERTALINGEN" caption above the content (MODULE-FACE-BEVRIES).
         const isTranslations = field.type === 'translations'
@@ -194,6 +196,10 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
               onChange={(key, val) => onUpdate(node.id, key, val)} />
             {/* Helper text under the field — registry `hint:`/`help:` through the render-layer i18n (§5). */}
             {(field.hint ?? field.help) ? <Caption style={{ display: 'block', marginTop: 4 }}>{fieldHint(t, (field.hint ?? field.help) as string)}</Caption> : null}
+            {/* WA-RECIPIENT-FIELD-1: the value the server would refuse is named here, before the 422. */}
+            {invalidMsg && (
+              <Caption style={{ display: 'block', marginTop: 4, color: 'var(--color-danger-text)' }}>{fieldHint(t, invalidMsg)}</Caption>
+            )}
             {/* Required-and-empty hint shows regardless of a registry hint, so a required field with a hint still surfaces it (SCHERMWAARHEID-1). */}
             {isRequired && isEmpty && (
               <Caption style={{ display: 'block', marginTop: 4, color: 'var(--color-danger-text)' }}>{t('fields.requiredHint')}</Caption>

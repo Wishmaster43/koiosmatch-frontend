@@ -1203,7 +1203,6 @@
     "bijv Yesway": "p. ej. Yesway",
     "bijv {{klant_id}} — leeg laten voor één grote groep": "p. ej. {{klant_id}}. Dejar vacío para un solo grupo grande",
     "klantnaam": "nombre del cliente",
-    "leeg = mobiel van de kandidaat · eigen 06 = testmodus": "vacío = móvil del candidato · tu propio número = modo de prueba",
     "leeg = één groep": "vacío = un solo grupo",
     "mijn-element of #id": ".mi-elemento o #id",
     "mijn_variabele": "mi_variable",
@@ -1217,7 +1216,8 @@
     "Standaard van de vacature/sollicitatie": "Predeterminado de la vacante/candidatura",
     "-30": "-30",
     "180": "180",
-    "https//hookexamplecom/koios": "https://hook.example.com/koios"
+    "https//hookexamplecom/koios": "https://hook.example.com/koios",
+    "leeg = mobiel van de kandidaat · anders de veldnaam, bijv mobile": "vacío = móvil del candidato · si no, el nombre del campo, p. ej. mobile"
   },
   "fieldHints": {
     "Array stuurt elk item apart door naar de volgende module (zoals een Iterator)": "Array envía cada elemento por separado al siguiente módulo (como un Iterator).",
@@ -1298,7 +1298,9 @@
     "Titel van de agenda-afspraak (standaard \"Afspraak\")": "Título de la cita del calendario (predeterminado \"Cita\").",
     "Afspraak-id (bv {{triggerappointment_id}})": "ID de cita (ej: {{trigger.appointment_id}}).",
     "Directe https-URL voor deze stap Laat leeg om de gedeelde instelling webhook_endpoint_<slug> hieronder te gebruiken Geen inloggegevens in de URL": "URL HTTPS directa para este paso. Déjelo en blanco para usar la configuración compartida webhook_endpoint_<slug> a continuación. Sin credenciales en la URL.",
-    "Alleen gebruikt als hierboven geen URL staat de tenant-instelling webhook_endpoint_<slug> bepaalt dan de URL": "Solo se usa si no hay URL arriba: la configuración de inquilino webhook_endpoint_<slug> determina entonces la URL."
+    "Alleen gebruikt als hierboven geen URL staat de tenant-instelling webhook_endpoint_<slug> bepaalt dan de URL": "Solo se usa si no hay URL arriba: la configuración de inquilino webhook_endpoint_<slug> determina entonces la URL.",
+    "Een veldnaam van het bronrecord (mobile, phone, …), nooit een telefoonnummer Handmatig versturen doe je vanaf het record zelf": "Un nombre de campo del registro de origen (mobile, phone, …), nunca un número de teléfono. El envío manual se hace desde el propio registro.",
+    "Dit lijkt een telefoonnummer Vul de veldnaam van het bronrecord in, bijv mobile": "Esto parece un número de teléfono. Introduce el nombre del campo del registro de origen, p. ej. mobile."
   },
   "triggers": {
     "events": {

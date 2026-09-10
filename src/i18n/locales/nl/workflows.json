@@ -1201,7 +1201,6 @@
     "bijv Yesway": "bijv. Yesway",
     "bijv {{klant_id}} — leeg laten voor één grote groep": "bijv. {{klant_id}}. Leeg laten voor één grote groep",
     "klantnaam": "klantnaam",
-    "leeg = mobiel van de kandidaat · eigen 06 = testmodus": "leeg = mobiel van de kandidaat · eigen 06 = testmodus",
     "leeg = één groep": "leeg = één groep",
     "mijn-element of #id": ".mijn-element of #id",
     "mijn_variabele": "mijn_variabele",
@@ -1215,7 +1214,8 @@
     "Standaard van de vacature/sollicitatie": "Standaard van de vacature/sollicitatie",
     "-30": "-30",
     "180": "180",
-    "https//hookexamplecom/koios": "https://hook.example.com/koios"
+    "https//hookexamplecom/koios": "https://hook.example.com/koios",
+    "leeg = mobiel van de kandidaat · anders de veldnaam, bijv mobile": "leeg = mobiel van de kandidaat · anders de veldnaam, bijv. mobile"
   },
   "fieldHints": {
     "Array stuurt elk item apart door naar de volgende module (zoals een Iterator)": "Array stuurt elk item apart door naar de volgende module (zoals een Iterator).",
@@ -1296,7 +1296,9 @@
     "Titel van de agenda-afspraak (standaard \"Afspraak\")": "Titel van de agenda-afspraak (standaard \"Afspraak\").",
     "Afspraak-id (bv {{triggerappointment_id}})": "Afspraak-id (bv. {{trigger.appointment_id}}).",
     "Directe https-URL voor deze stap Laat leeg om de gedeelde instelling webhook_endpoint_<slug> hieronder te gebruiken Geen inloggegevens in de URL": "Directe https-URL voor deze stap. Laat leeg om de gedeelde instelling webhook_endpoint_<slug> hieronder te gebruiken. Geen inloggegevens in de URL.",
-    "Alleen gebruikt als hierboven geen URL staat de tenant-instelling webhook_endpoint_<slug> bepaalt dan de URL": "Alleen gebruikt als hierboven geen URL staat: de tenant-instelling webhook_endpoint_<slug> bepaalt dan de URL."
+    "Alleen gebruikt als hierboven geen URL staat de tenant-instelling webhook_endpoint_<slug> bepaalt dan de URL": "Alleen gebruikt als hierboven geen URL staat: de tenant-instelling webhook_endpoint_<slug> bepaalt dan de URL.",
+    "Een veldnaam van het bronrecord (mobile, phone, …), nooit een telefoonnummer Handmatig versturen doe je vanaf het record zelf": "Een veldnaam van het bronrecord (mobile, phone, …), nooit een telefoonnummer. Handmatig versturen doe je vanaf het record zelf.",
+    "Dit lijkt een telefoonnummer Vul de veldnaam van het bronrecord in, bijv mobile": "Dit lijkt een telefoonnummer. Vul de veldnaam van het bronrecord in, bijv. mobile."
   },
   "triggers": {
     "events": {
