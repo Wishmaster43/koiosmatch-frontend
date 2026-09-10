@@ -35,13 +35,13 @@
   },
   "roles": {
     "super_admin": "Super admin",
-    "tenant_admin": "Admin",
+    "tenant_admin": "Tenant admin",
     "planner": "Planner",
     "user": "User",
     "recruiter": "Recruiter",
     "manager": "Manager",
     "backoffice": "Back office",
-    "admin": "Settings manager",
+    "admin": "Admin",
     "readonly": "Read only"
   },
   "noRoles": "No roles available",
