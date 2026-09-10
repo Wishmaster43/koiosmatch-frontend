@@ -17,7 +17,6 @@ import { interactive } from '@/lib/a11y'
 import ReportKpiBand from './ReportKpiBand'
 import { reportCardStyle as card, reportSectionHeadStyle } from './ReportSectionCard'
 import ReportGrid, { ReportGridItem } from './ReportGrid'
-import type { KpiSpec } from '@/components/insights/InsightsRow'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import SoftChip from '@/components/ui/SoftChip'
@@ -32,15 +31,16 @@ import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterPara
 import type { ReportFilterState } from './reportFilterParams'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, VacancyReportRow, CandidateTimeseriesPoint } from '@/types/analytics'
-import { useReportKpiOrdering } from './hooks/useReportKpiOrdering'
+import { useOrderedReportKpis } from './hooks/useOrderedReportKpis'
 import { useReportCompareData } from './hooks/useReportCompareData'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
 import { renderKpiValue } from './renderKpiValue'
-import { buildKpiSpecs } from './lib/kpiSpecs'
+import { serverKpiSpecs, unitMapFor } from './lib/kpiSpecs'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
+import { reportWindowLabel } from './lib/reportWindowLabel'
 
 // Number cell: emphasised when > 0, muted when zero (mirrors the SM entity tables).
 const numCell = (n: number) => (
@@ -62,7 +62,7 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
   // ALWAYS layered on top of the report's own active panel filters (`baseParams`),
   // never just `period`, so the lade counts the exact same set the bar was drawn from.
   const [drill, setDrill] = useState<DrillSpec | null>(null)
-  const windowSub = () => `${formatDate(data?.from)} – ${formatDate(data?.to)}`
+  const windowSub = () => reportWindowLabel(formatDate, data?.from, data?.to)
   const baseParams = buildReportQueryParams(period, 'vacancies', filters)
 
   // Legacy per-vacancy drill (row click): the APPLICATION rows behind one vacancy.
@@ -127,7 +127,7 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
 
   // KPI-VAC-1 (CMBE 28-08, BuildsVacancyKpis): the strip reads the server's
   // own nine-card kpis[] suite verbatim — mirrors KPI-MATCHES-1/KPI-OPP-1's
-  // idiom (kpiByServerKey Map, one predicate shared by value and drill). A key
+  // idiom (the server-keyed Map serverKpiSpecs builds, one predicate shared by value and drill). A key
   // the server omitted (or a pre-suite cached envelope) renders the house dash
   // with no drill — never a value from another population. The retired
   // topIndustry/topOwner/topFunction/topBranch cards keep their DATA surface:
@@ -137,7 +137,6 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
   // left the strip; VacancyDepthSections still surfaces time-to-fill via its
   // median phase decomposition (ttf_decomposition) — a related but not
   // identical aggregate, flagged for Danny below.
-  const kpiByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.count]))
   const openKpiDrill = (kpi: string, label: string, value: string | number, subtitle?: string) =>
     gateDrillClick('vacancies', () => setDrill({
       title: label, value, subtitle: subtitle ?? windowSub(), entityPage: 'vacancies',
@@ -159,16 +158,14 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
   // field on each kpis[] entry decides the formatting; the local map is only the
   // tolerant fallback for a cached pre-unit envelope (§10) — never the source.
   const KPI_UNIT_FALLBACK: Partial<Record<string, unknown>> = { fill_rate: 'ratio' }
-  const unitByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.unit ?? KPI_UNIT_FALLBACK[k.key]]))
-  const openKpiParams = drill?.rowsParams as Record<string, unknown> | undefined
+  const unitByServerKey = unitMapFor(data?.kpis, KPI_UNIT_FALLBACK)
   // PARITY EXCEPTION (documented BE-side, KPI-VAC-1): customers_count counts
   // DISTINCT customers while its drill lists those customers' VACANCIES (rows
   // ≥ card value) — an explicit subtitle names the divergence instead of the
   // default window text.
-  const kpiByKey = buildKpiSpecs({
-    kpis: kpiByServerKey, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t,
+  const kpiByKey = serverKpiSpecs({
+    data, drill, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t,
     openKpiDrill: (key, label, value) => openKpiDrill(key, label, value, key === 'customers_count' ? t('vacancies.kpi.customersCountDrillSub') : undefined),
-    keyBy: 'server', activeKey: openKpiParams?.kpi as string | undefined, clickOnlyWhenHas: true,
     valueFor: (key, raw, has) => renderKpiValue(raw, has, unitByServerKey.get(key) as string | undefined),
     // KPI-DREMPELS-FE-1: threshold cards keep their tenant-threshold caption.
     subFor: key => key === 'total' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" />
@@ -179,8 +176,7 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key
   // has vanished — RAPPORT-KPI-INSTELBAAR).
-  const { kpiOrder, fellBack } = useReportKpiOrdering('vacancies')
-  const kpis: KpiSpec[] = kpiOrder.map(key => kpiByKey[key]).filter((k): k is KpiSpec => k != null)
+  const { kpis, fellBack } = useOrderedReportKpis('vacancies', kpiByKey)
 
   // Columns — soft chips for status/filled (§4), numeric cols right-aligned + sortable.
   const columns: Column<VacancyReportRow>[] = [

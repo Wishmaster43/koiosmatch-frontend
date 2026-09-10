@@ -9,6 +9,7 @@
 import type { ReactNode } from 'react'
 import type { TFunction } from 'i18next'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
+import type { DrillSpec } from '../ReportDrillDrawer'
 
 export interface BuildKpiSpecsOpts {
   // Server KPI values by server key (the `kpis[]` envelope, mapped once by the caller).
@@ -54,4 +55,44 @@ export function buildKpiSpecs(o: BuildKpiSpecsOpts): Record<string, KpiSpec> {
       return [key, spec]
     }),
   )
+}
+
+// The server-keyed idiom five report pages share: build the kpiByServerKey Map
+// from the plain envelope's own kpis[] array, derive the open drill's activeKey
+// from drill.rowsParams.kpi, and call buildKpiSpecs with the fixed
+// keyBy:'server'/clickOnlyWhenHas:true trio (DRY round 11). labelKeys/colors/t/
+// openKpiDrill/valueFor/subFor stay per-page (rule B) — each report's own KPI
+// vocabulary, colour map, drill wiring and value/caption formatting.
+export interface ServerKpiSpecsOpts {
+  // The plain report envelope's own kpis[] array (key/count pairs; unit read separately, see unitMapFor).
+  data: { kpis?: Array<{ key: string; count: number | null }> } | null | undefined
+  // The page's currently open drill — only rowsParams.kpi is read, for the active-card flag.
+  drill: DrillSpec | null
+  labelKeys: Record<string, string>
+  colors: Partial<Record<string, string>>
+  t: TFunction
+  openKpiDrill: (serverKey: string, label: string, value: string | number) => (() => void) | undefined
+  valueFor?: BuildKpiSpecsOpts['valueFor']
+  subFor?: BuildKpiSpecsOpts['subFor']
+}
+
+export function serverKpiSpecs(o: ServerKpiSpecsOpts): Record<string, KpiSpec> {
+  const kpiByServerKey = new Map((o.data?.kpis ?? []).map(k => [k.key, k.count]))
+  const openKpiParams = o.drill?.rowsParams as Record<string, unknown> | undefined
+  return buildKpiSpecs({
+    kpis: kpiByServerKey, labelKeys: o.labelKeys, colors: o.colors, t: o.t, openKpiDrill: o.openKpiDrill,
+    keyBy: 'server', activeKey: openKpiParams?.kpi as string | undefined, clickOnlyWhenHas: true,
+    valueFor: o.valueFor, subFor: o.subFor,
+  })
+}
+
+// UNIT-CANON tolerant-fallback Map three report pages build the same way: the
+// server's own `unit` per kpis[] entry, falling back to a per-page
+// KPI_UNIT_FALLBACK map only for a cached pre-unit envelope (§10) — never the
+// source of truth. `fallback` stays per-page (rule B).
+export function unitMapFor(
+  kpis: Array<{ key: string; unit?: unknown }> | undefined,
+  fallback: Partial<Record<string, unknown>>,
+): Map<string, unknown> {
+  return new Map((kpis ?? []).map(k => [k.key, k.unit ?? fallback[k.key]]))
 }

@@ -16,7 +16,6 @@ import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import ReportGrid from './ReportGrid'
 import ReportChartCard from './ReportChartCard'
-import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useMatchesReport } from './useMatchesReport'
@@ -25,11 +24,11 @@ import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterPara
 import type { ReportFilterState } from './reportFilterParams'
 import PieChartCard from '@/components/charts/PieChartCard'
 import { donutData } from './lib/chartData'
-import { buildKpiSpecs } from './lib/kpiSpecs'
+import { serverKpiSpecs, unitMapFor } from './lib/kpiSpecs'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateTimeseriesPoint, CandidateSegment, MatchTerminationReasonSegment } from '@/types/analytics'
-import { useReportKpiOrdering } from './hooks/useReportKpiOrdering'
+import { useOrderedReportKpis } from './hooks/useOrderedReportKpis'
 import { useReportCompareData } from './hooks/useReportCompareData'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
@@ -38,6 +37,7 @@ import SharedStatTile from '@/components/ui/StatTile'
 import { renderKpiValue } from './renderKpiValue'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
+import { reportWindowLabel } from './lib/reportWindowLabel'
 
 // One match stat tile; with an onClick it becomes a drillable surface (keyboard
 // operable — same affordance pattern as SegmentBars).
@@ -65,7 +65,7 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
   // just `period`, so the lade counts the exact same set the bar was drawn from.
   const [drill, setDrill] = useState<DrillSpec | null>(null)
   // The report window from the RESPONSE, DD-MM-YYYY (§3B DATUM-1) — drawer subtitle.
-  const windowSub = () => `${formatDate(data?.from)} – ${formatDate(data?.to)}`
+  const windowSub = () => reportWindowLabel(formatDate, data?.from, data?.to)
   const baseParams = buildReportQueryParams(period, 'matches', filters)
 
   // Soort-as (MATCH-SOORT-1): by_contract_form — a lookup axis with its own
@@ -150,14 +150,13 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
 
   // KPI-MATCHES-1 (CMBE 27-08, BuildsMatchKpis): the strip reads the server's
   // own nine-card kpis[] suite verbatim — mirrors TasksReport/OutreachReport's
-  // KPI-TAKEN-1 idiom (kpiByServerKey Map, one predicate shared by value and
+  // KPI-TAKEN-1 idiom (the server-keyed Map serverKpiSpecs builds, one predicate shared by value and
   // drill). A key the server omitted (or a pre-suite cached envelope) renders
   // the house dash with no drill — never a value from another population. The
   // origin/contract-status/terminations DATA keeps a chart surface below: the
   // origin DONUT (restored when the old origin KPI cards retired — its panel
   // filter and drill leg predate the strip flip), the StatTiles and the
   // terminations donut.
-  const kpiByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.count]))
   const openKpiDrill = (kpi: string, label: string, value: string | number) =>
     gateDrillClick('matches', () => setDrill({
       title: label, value, subtitle: windowSub(), entityPage: 'matches',
@@ -179,19 +178,16 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
   // field on each kpis[] entry decides the formatting; the local map is only the
   // tolerant fallback for a cached pre-unit envelope (§10) — never the source.
   const KPI_UNIT_FALLBACK: Partial<Record<string, unknown>> = { avg_duration_days: 'days', reach_rate: 'ratio' }
-  const unitByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.unit ?? KPI_UNIT_FALLBACK[k.key]]))
-  const openKpiParams = drill?.rowsParams as Record<string, unknown> | undefined
-  const kpiByKey = buildKpiSpecs({
-    kpis: kpiByServerKey, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t, openKpiDrill,
-    keyBy: 'server', activeKey: openKpiParams?.kpi as string | undefined, clickOnlyWhenHas: true,
+  const unitByServerKey = unitMapFor(data?.kpis, KPI_UNIT_FALLBACK)
+  const kpiByKey = serverKpiSpecs({
+    data, drill, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t, openKpiDrill,
     valueFor: (key, raw, has) => renderKpiValue(raw, has, unitByServerKey.get(key) as string | undefined),
     subFor: key => (key === 'total' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined),
   })
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key
   // has vanished — RAPPORT-KPI-INSTELBAAR).
-  const { kpiOrder, fellBack } = useReportKpiOrdering('matches')
-  const kpis: KpiSpec[] = kpiOrder.map(key => kpiByKey[key]).filter((k): k is KpiSpec => k != null)
+  const { kpis, fellBack } = useOrderedReportKpis('matches', kpiByKey)
 
   return (
     <div>

@@ -11,7 +11,7 @@
  * uuid (an archived campaign keeps its real name) and 'others' drills the exact
  * top-20 complement. KPI-OUTREACH-1 (CMBE K-191, commit 00e72f45): the strip is
  * now the server's own nine-card kpis[] suite, mirroring TasksReport's
- * KPI-TAKEN-1 idiom (kpiByServerKey Map, one predicate shared by value and
+ * KPI-TAKEN-1 idiom (the server-keyed Map serverKpiSpecs builds, one predicate shared by value and
  * drill). Drill rows carry candidate names (outreach.view), so a 403 keeps the
  * calm degrade in the drawer. entityPage is deliberately NOT set on any drill
  * here: outreach drill rows are call-list targets, not a single unambiguous
@@ -24,7 +24,6 @@ import { buildReportQueryParams, EMPTY_REPORT_FILTERS } from './reportFilterPara
 import ReportKpiBand from './ReportKpiBand'
 import ReportGrid from './ReportGrid'
 import ReportChartCard from './ReportChartCard'
-import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useOutreachReport } from './useOutreachReport'
@@ -32,15 +31,15 @@ import { gateDrillClick } from './reportDrillGate'
 import { useSeriesDrill } from './hooks/useSeriesDrill'
 import { donutData, barData, ownerBarData } from './lib/chartData'
 import { segmentClick, ownerClick } from './lib/drillClick'
-import { buildKpiSpecs } from './lib/kpiSpecs'
+import { serverKpiSpecs } from './lib/kpiSpecs'
 import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateOwnerSegment } from '@/types/analytics'
-import { useReportKpiOrdering } from './hooks/useReportKpiOrdering'
+import { useOrderedReportKpis } from './hooks/useOrderedReportKpis'
+import { useTotalCompare } from './hooks/useTotalCompare'
 import { getCompareSlug } from './reportCompareSupport'
-import { useReportCompare } from './useReportCompare'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
@@ -48,6 +47,7 @@ import type { ReportFilterState } from './reportFilterParams'
 import OutreachDepthSections from './depth/OutreachDepthSections'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
+import { reportWindowLabel } from './lib/reportWindowLabel'
 
 // The plain single-value XOR axes; `assignee` has its own D2 shape below.
 type Axis = 'campaign' | 'channel' | 'status' | 'outcome'
@@ -71,14 +71,13 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
 
   // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
   const compareSlug = getCompareSlug('outreach')
-  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compare, { period })
-  const totalCompare = compare.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
+  const totalCompare = useTotalCompare(compareSlug, data?.from, data?.to, compare, { period })
 
   // One shared drawer for the whole page — a KPI-card click and an axis/bucket
   // click both open the SAME drawer (replacing whatever was open before). Exactly
   // one XOR param per open drill.
   const [drill, setDrill] = useState<DrillSpec | null>(null)
-  const windowSub = () => `${formatDate(data?.from)} – ${formatDate(data?.to)}`
+  const windowSub = () => reportWindowLabel(formatDate, data?.from, data?.to)
   const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
     setDrill({
       title: seg.label, value: seg.count, subtitle: windowSub(),
@@ -110,7 +109,6 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
   // backend predicate per key, so a card's number and its drill rows can never
   // diverge. A key the server omitted (or a pre-suite cached envelope) renders
   // the house dash with no drill — never a value from another population.
-  const kpiByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.count]))
   const openKpiDrill = (kpi: string, label: string, value: string | number) =>
     gateDrillClick('outreach', () => setDrill({
       title: label, value, subtitle: windowSub(),
@@ -129,10 +127,8 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
     campaigns_active: 'outreach.kpi.campaignsActive', campaigns_done_in_period: 'outreach.kpi.campaignsDoneInPeriod',
     due_today: 'outreach.kpi.dueToday',
   }
-  const openKpiParams = drill?.rowsParams as Record<string, unknown> | undefined
-  const kpiByKey = buildKpiSpecs({
-    kpis: kpiByServerKey, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t, openKpiDrill,
-    keyBy: 'server', activeKey: openKpiParams?.kpi as string | undefined, clickOnlyWhenHas: true,
+  const kpiByKey = serverKpiSpecs({
+    data, drill, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t, openKpiDrill,
     // conversion_pct is a float percentage, not a row count.
     valueFor: (key, raw, has) => (!has ? '—' : key === 'conversion_pct' ? formatPercent(raw as number) : (raw as number)),
     subFor: key => (key === 'total_targets' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined),
@@ -140,8 +136,7 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key
   // has vanished — RAPPORT-KPI-INSTELBAAR).
-  const { kpiOrder, fellBack } = useReportKpiOrdering('outreach')
-  const kpis: KpiSpec[] = kpiOrder.map(key => kpiByKey[key]).filter((k): k is KpiSpec => k != null)
+  const { kpis, fellBack } = useOrderedReportKpis('outreach', kpiByKey)
 
   return (
     <div>

@@ -16,7 +16,6 @@ import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import ReportGrid from './ReportGrid'
 import ReportChartCard from './ReportChartCard'
-import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useTasksReport } from './useTasksReport'
@@ -29,7 +28,7 @@ import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateOwnerSegment } from '@/types/analytics'
-import { useReportKpiOrdering } from './hooks/useReportKpiOrdering'
+import { useOrderedReportKpis } from './hooks/useOrderedReportKpis'
 import { useReportCompareData } from './hooks/useReportCompareData'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
@@ -37,8 +36,9 @@ import type { ReportCompareMode } from './reportCompareMode'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
 import { donutData, barData, ownerBarData } from './lib/chartData'
-import { buildKpiSpecs } from './lib/kpiSpecs'
+import { serverKpiSpecs } from './lib/kpiSpecs'
 import { segmentClick, ownerClick } from './lib/drillClick'
+import { reportWindowLabel } from './lib/reportWindowLabel'
 
 // The plain single-value XOR axes; `assignee` has its own D2 shape below.
 type Axis = 'status' | 'type' | 'priority' | 'team' | 'branch'
@@ -65,7 +65,7 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, co
   // active filters (`baseParams`), never just `period`, so the drawer counts the
   // exact same set the bar was drawn from.
   const [drill, setDrill] = useState<DrillSpec | null>(null)
-  const windowSub = () => `${formatDate(data?.from)} – ${formatDate(data?.to)}`
+  const windowSub = () => reportWindowLabel(formatDate, data?.from, data?.to)
   const baseParams = buildReportQueryParams(period, 'tasks', filters)
   // Rows are tasks with an id, so the drawer deep-links to the task drilldown
   // (§3A entityPage).
@@ -105,7 +105,6 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, co
   // completed_at drills, the exact mismatch that got this strip rejected).
   // The drill accepts the full panel-filter vocabulary (measured:
   // getReportsTasksKpisDrill), so baseParams rides along like the axis drills.
-  const kpiByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.count]))
   const openKpiDrill = (kpi: string, label: string, value: string | number) =>
     gateDrillClick('tasks', () => setDrill({
       title: label, value, subtitle: windowSub(), entityPage: 'tasks',
@@ -124,10 +123,8 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, co
     due_today: 'tasks.kpi.dueToday', due_this_week: 'tasks.kpi.dueThisWeek',
     without_assignee: 'tasks.kpi.withoutAssignee', avg_completion_days: 'tasks.kpi.avgCompletionDays',
   }
-  const openKpiParams = drill?.rowsParams as Record<string, unknown> | undefined
-  const kpiByKey = buildKpiSpecs({
-    kpis: kpiByServerKey, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t, openKpiDrill,
-    keyBy: 'server', activeKey: openKpiParams?.kpi as string | undefined, clickOnlyWhenHas: true,
+  const kpiByKey = serverKpiSpecs({
+    data, drill, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t, openKpiDrill,
     // avg_completion_days is a computed average in days, not a row count.
     valueFor: (key, raw, has) => (!has ? '—' : key === 'avg_completion_days' ? t('tasks.kpi.daysValue', { days: Math.round(raw as number) }) : (raw as number)),
     subFor: key => (key === 'total' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined),
@@ -135,8 +132,7 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, co
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key
   // has vanished — RAPPORT-KPI-INSTELBAAR).
-  const { kpiOrder, fellBack } = useReportKpiOrdering('tasks')
-  const kpis: KpiSpec[] = kpiOrder.map(key => kpiByKey[key]).filter((k): k is KpiSpec => k != null)
+  const { kpis, fellBack } = useOrderedReportKpis('tasks', kpiByKey)
 
   return (
     <div>

@@ -28,7 +28,6 @@ import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import ReportGrid from './ReportGrid'
 import ReportChartCard from './ReportChartCard'
-import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useWhatsappReport } from './useWhatsappReport'
@@ -41,11 +40,12 @@ import { BodyText, Caption, Mono } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat } from '@/lib/formatters'
 import type { ReportPeriod, WhatsappSegment } from '@/types/analytics'
-import { useReportKpiOrdering } from './hooks/useReportKpiOrdering'
+import { useOrderedReportKpis } from './hooks/useOrderedReportKpis'
 import type { ReportFilterState } from './reportFilterParams'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
 import { buildKpiSpecs } from './lib/kpiSpecs'
+import { reportWindowLabel } from './lib/reportWindowLabel'
 
 // Semantic colour per server key, applied only when the count is non-zero (§4:
 // colour carries meaning — a calm zero stays uncoloured). avg_first_response_
@@ -84,7 +84,7 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
   // shared drawer on GET /reports/whatsapp/kpis/drill?kpi=<key> — rows carry the
   // server-masked wa_number, rendered verbatim by the drawer.
   const [kpiDrill, setKpiDrill] = useState<DrillSpec | null>(null)
-  const windowSub = () => `${formatDate(data?.meta.from)} – ${formatDate(data?.meta.to)}`
+  const windowSub = () => reportWindowLabel(formatDate, data?.meta.from, data?.meta.to)
   const openKpiDrill = (serverKey: string, label: string, value: string | number) =>
     gateDrillClick('whatsapp', () => setKpiDrill({
       title: label, value, subtitle: windowSub(),
@@ -163,8 +163,7 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
 
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored).
-  const { kpiOrder, fellBack } = useReportKpiOrdering('whatsapp')
-  const kpis: KpiSpec[] = kpiOrder.map(key => kpiByKey[key]).filter((k): k is KpiSpec => k != null)
+  const { kpis, fellBack } = useOrderedReportKpis('whatsapp', kpiByKey)
 
   return (
     <div>

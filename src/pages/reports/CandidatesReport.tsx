@@ -48,6 +48,7 @@ import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
 import { donutData, barData, ownerBarData } from './lib/chartData'
 import { segmentClick, ownerClick } from './lib/drillClick'
+import { reportWindowLabel } from './lib/reportWindowLabel'
 
 // The five drillable axes; `param` is the XOR query key the drill/advice endpoints expect.
 type Axis = 'status' | 'phase' | 'source' | 'owner' | 'branch'
@@ -116,13 +117,13 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
   const baseParams = { ...buildReportQueryParams(period, 'candidates', filters), ...(phaseFilter ? { phase_filter: [phaseFilter] } : {}) }
   const openSegment = (_axis: Axis, seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
     setDrill({
-      title: seg.label, value: seg.count, subtitle: `${formatDate(data?.from)} – ${formatDate(data?.to)}`,
+      title: seg.label, value: seg.count, subtitle: reportWindowLabel(formatDate, data?.from, data?.to),
       entityPage: 'candidates',
       rowsEndpoint: '/reports/candidates/drill', rowsParams: { ...baseParams, ...xorParam },
       adviceEndpoint: '/reports/candidates/advice', adviceParams: { ...baseParams, ...xorParam },
     })
   const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
-    title: pt.label, value: pt.value, subtitle: `${formatDate(data?.from)} – ${formatDate(data?.to)}`,
+    title: pt.label, value: pt.value, subtitle: reportWindowLabel(formatDate, data?.from, data?.to),
     entityPage: 'candidates',
     // A week bar's `date` is the point's own key; the drawer then counts the
     // WHOLE week (bucket=week) so bar and drawer total always agree.
@@ -135,7 +136,7 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
   // (CandidatesReport::kpiSegmentQuery), so number and drawer always agree.
   const openSuiteDrill = (kpi: string, label: string, value: string | number) =>
     gateDrillClick('candidates', () => setDrill({
-      title: label, value, subtitle: `${formatDate(data?.from)} – ${formatDate(data?.to)}`,
+      title: label, value, subtitle: reportWindowLabel(formatDate, data?.from, data?.to),
       entityPage: 'candidates',
       rowsEndpoint: '/reports/candidates/kpis/drill',
       rowsParams: { ...buildReportQueryParams(period, 'candidates', filters), kpi },

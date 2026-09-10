@@ -5,7 +5,8 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import type { TFunction } from 'i18next'
-import { buildKpiSpecs } from './kpiSpecs'
+import { buildKpiSpecs, serverKpiSpecs, unitMapFor } from './kpiSpecs'
+import type { DrillSpec } from '../ReportDrillDrawer'
 
 const t = ((key: string) => `L:${key}`) as unknown as TFunction
 const labelKeys = { total: 'x.kpi.total', avg_days: 'x.kpi.avgDays', open_now: 'x.kpi.openNow' }
@@ -45,5 +46,48 @@ describe('buildKpiSpecs', () => {
   it('omits the click when the report has no drill for that key', () => {
     const out = buildKpiSpecs({ kpis: new Map([['total', 1]]), labelKeys: { total: 'x.total' }, colors: {}, t, openKpiDrill: () => undefined })
     expect(out.total).not.toHaveProperty('onClick')
+  })
+})
+
+describe('serverKpiSpecs', () => {
+  it('builds kpiByServerKey from data.kpis and derives activeKey from drill.rowsParams.kpi', () => {
+    const openKpiDrill = vi.fn(() => () => {})
+    const out = serverKpiSpecs({
+      data: { kpis: [{ key: 'total', count: 5 }, { key: 'avg_days', count: null }] },
+      drill: { title: 't', value: 1, rowsParams: { kpi: 'total' } } as DrillSpec,
+      labelKeys, colors, t, openKpiDrill,
+    })
+    expect(out.total).toMatchObject({ key: 'total', active: true, value: 5 })
+    // clickOnlyWhenHas: a NULL server value never wires a click, and never marks active.
+    expect(out.avg_days).toMatchObject({ active: false, value: '—' })
+    expect(out.avg_days.onClick).toBeUndefined()
+  })
+
+  it('marks nothing active when no drill is open', () => {
+    const openKpiDrill = vi.fn(() => () => {})
+    const out = serverKpiSpecs({ data: { kpis: [{ key: 'total', count: 1 }] }, drill: null, labelKeys, colors, t, openKpiDrill })
+    expect(out.total.active).toBe(false)
+  })
+
+  it('forwards valueFor/subFor to buildKpiSpecs untouched', () => {
+    const openKpiDrill = vi.fn(() => () => {})
+    const out = serverKpiSpecs({
+      data: { kpis: [{ key: 'total', count: 5 }] }, drill: null, labelKeys, colors, t, openKpiDrill,
+      valueFor: () => 'custom', subFor: () => 'sub',
+    })
+    expect(out.total.value).toBe('custom')
+    expect(out.total.sub).toBe('sub')
+  })
+})
+
+describe('unitMapFor', () => {
+  it('reads the server unit per key, falling back to the per-page map only when unit is absent', () => {
+    const map = unitMapFor([{ key: 'a', unit: 'euro' }, { key: 'b' }], { b: 'days', a: 'ratio' })
+    expect(map.get('a')).toBe('euro') // server unit wins even when a fallback exists.
+    expect(map.get('b')).toBe('days')
+  })
+
+  it('returns an empty map for an undefined kpis array', () => {
+    expect(unitMapFor(undefined, {})).toEqual(new Map())
   })
 })

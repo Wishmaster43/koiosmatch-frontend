@@ -15,7 +15,6 @@ import ReportKpiBand from './ReportKpiBand'
 import { ReportSectionCard, ReportSectionCardBody, ReportSection } from './ReportSectionCard'
 import ReportGrid, { ReportGridItem } from './ReportGrid'
 import ReportChartCard from './ReportChartCard'
-import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useApplicationsReport } from './useApplicationsReport'
@@ -36,16 +35,16 @@ import type {
   ReportPeriod, CandidateSegment, CandidateOwnerSegment,
   ApplicationTopSegment, ApplicationBucketCounts, ApplicationStageDurationSegment, ApplicationStageSegment,
 } from '@/types/analytics'
-import { useReportKpiOrdering } from './hooks/useReportKpiOrdering'
+import { useOrderedReportKpis } from './hooks/useOrderedReportKpis'
 import { useReportCompareData } from './hooks/useReportCompareData'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
-import { orderKpis } from './lib/kpiOrder'
 
 import { buildKpiSpecs } from './lib/kpiSpecs'
+import { reportWindowLabel } from './lib/reportWindowLabel'
 import { segmentClick, ownerClick } from './lib/drillClick'
 import { barData, ownerBarData } from './lib/chartData'
 // The nine fixed KPI keys the live backend returns (ApplicationKpisReport::CARDS,
@@ -106,7 +105,7 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
   // timeseries click both open the SAME drawer (replacing whatever was open
   // before), never two independent drill mechanisms.
   const [drill, setDrill] = useState<DrillSpec | null>(null)
-  const windowSub = () => `${formatDate(data?.from)} – ${formatDate(data?.to)}`
+  const windowSub = () => reportWindowLabel(formatDate, data?.from, data?.to)
   const baseParams = buildReportQueryParams(period, 'applications', filters)
   const openKpiDrill = (serverKey: string, label: string, value: string | number) =>
     gateDrillClick('applications', () => setDrill({
@@ -120,7 +119,7 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
   // the drawer deep-links to the application drilldown (§3A entityPage).
   const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
     setDrill({
-      title: seg.label, value: seg.count, subtitle: `${formatDate(data?.from)} – ${formatDate(data?.to)}`,
+      title: seg.label, value: seg.count, subtitle: windowSub(),
       entityPage: 'applications',
       rowsEndpoint: '/reports/applications/drill', rowsParams: { ...baseParams, ...xorParam },
       adviceEndpoint: '/reports/applications/advice', adviceParams: { ...baseParams, ...xorParam },
@@ -223,12 +222,11 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
       raw != null && serverKey === 'avg_days_to_match' ? t('applications.kpi.daysUnit') : undefined,
   })
 
-  // Which nine keys render, and in what order, is the tenant's Settings → Reports
-  // choice (falls back to today's order when nothing is stored) — mirrors whatsapp.
-  const { kpiOrder, fellBack } = useReportKpiOrdering('applications')
   // Total applications rising is unambiguously good, mirrors CandidatesReport.
   if (totalCompare && kpiByKey.total) kpiByKey.total = { ...kpiByKey.total, sub: <ReportCompareMetric metric={totalCompare} polarity="up-good" /> }
-  const kpis: KpiSpec[] = orderKpis(kpiOrder, kpiByKey)
+  // Which nine keys render, and in what order, is the tenant's Settings → Reports
+  // choice (falls back to today's order when nothing is stored) — mirrors whatsapp.
+  const { kpis, fellBack } = useOrderedReportKpis('applications', kpiByKey)
 
   return (
     <div>

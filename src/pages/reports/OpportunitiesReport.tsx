@@ -17,31 +17,30 @@ import ReportKpiBand from './ReportKpiBand'
 import ReportGrid from './ReportGrid'
 import ReportChartCard from './ReportChartCard'
 import ReportDrillDrawer from './ReportDrillDrawer'
-import type { KpiSpec } from '@/components/insights/InsightsRow'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useOpportunitiesReport } from './useOpportunitiesReport'
 import { gateDrillClick } from './reportDrillGate'
-import { orderKpis } from './lib/kpiOrder'
 import { useSeriesDrill } from './hooks/useSeriesDrill'
 import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateOwnerSegment } from '@/types/analytics'
-import { useReportKpiOrdering } from './hooks/useReportKpiOrdering'
+import { useOrderedReportKpis } from './hooks/useOrderedReportKpis'
+import { useTotalCompare } from './hooks/useTotalCompare'
 import { getCompareSlug } from './reportCompareSupport'
-import { useReportCompare } from './useReportCompare'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
 import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterParams'
 import type { ReportFilterState } from './reportFilterParams'
 import { renderKpiValue } from './renderKpiValue'
-import { buildKpiSpecs } from './lib/kpiSpecs'
+import { serverKpiSpecs, unitMapFor } from './lib/kpiSpecs'
 import { donutData, barData, ownerBarData } from './lib/chartData'
 import { segmentClick, ownerClick } from './lib/drillClick'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
+import { reportWindowLabel } from './lib/reportWindowLabel'
 
 // The three plain single-value XOR axes; `owner` has its own D2 shape below.
 type Axis = 'stage' | 'customer' | 'branch'
@@ -62,14 +61,13 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
 
   // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
   const compareSlug = getCompareSlug('opportunities')
-  const { data: compareData } = useReportCompare(compareSlug, data?.period.from, data?.period.to, compare, { period })
-  const totalCompare = compare.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
+  const totalCompare = useTotalCompare(compareSlug, data?.period.from, data?.period.to, compare, { period })
 
   // Drill-down: one shared drawer for the whole page — a segment/bucket click
   // opens it fresh, replacing whatever was open before. Exactly one XOR param
   // per open drill.
   const [drill, setDrill] = useState<DrillSpec | null>(null)
-  const windowSub = () => `${formatDate(data?.period.from)} – ${formatDate(data?.period.to)}`
+  const windowSub = () => reportWindowLabel(formatDate, data?.period.from, data?.period.to)
   // Every drill (axis segment, bucket, KPI card) layers on top of the report's own
   // active panel filters (status/owner/branch/customer + value_min/value_max),
   // never just `period` — mirrors VacanciesReport's baseParams so bar and drawer
@@ -107,12 +105,11 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
 
   // KPI-OPP-1 (CMBE 27-08, commit eb3af985): the strip reads the server's own
   // nine-card kpis[] suite verbatim — mirrors MatchesReport/TasksReport's
-  // KPI-MATCHES-1 idiom (kpiByServerKey Map, one predicate shared by value and
+  // KPI-MATCHES-1 idiom (the server-keyed Map serverKpiSpecs builds, one predicate shared by value and
   // drill). A key the server omitted (or a pre-suite cached envelope) renders
   // the house dash with no drill — never a value from another population. The
   // stage/customer/owner/branch DATA keeps a chart surface below (donut/bars);
   // forecast_count/forecast_value have no such surface and drop with the strip.
-  const kpiByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.count]))
   const openKpiDrill = (kpi: string, label: string, value: string | number) =>
     gateDrillClick('opportunities', () => setDrill({
       title: label, value, subtitle: windowSub(), entityPage: 'opportunities',
@@ -133,11 +130,9 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
   // field on each kpis[] entry decides the formatting; the local map is only the
   // tolerant fallback for a cached pre-unit envelope (§10) — never the source.
   const KPI_UNIT_FALLBACK: Partial<Record<string, unknown>> = { win_rate: 'pct', open_value: 'euro' }
-  const unitByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.unit ?? KPI_UNIT_FALLBACK[k.key]]))
-  const openKpiParams = drill?.rowsParams as Record<string, unknown> | undefined
-  const kpiByKey = buildKpiSpecs({
-    kpis: kpiByServerKey, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t, openKpiDrill,
-    keyBy: 'server', activeKey: openKpiParams?.kpi as string | undefined, clickOnlyWhenHas: true,
+  const unitByServerKey = unitMapFor(data?.kpis, KPI_UNIT_FALLBACK)
+  const kpiByKey = serverKpiSpecs({
+    data, drill, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t, openKpiDrill,
     valueFor: (key, raw, has) => renderKpiValue(raw, has, unitByServerKey.get(key) as string | undefined),
     // KPI-DREMPELS-FE-1: threshold cards keep their tenant-threshold caption
     // (the envelope still carries the configured day counts).
@@ -149,8 +144,7 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key
   // has vanished — RAPPORT-KPI-INSTELBAAR).
-  const { kpiOrder, fellBack } = useReportKpiOrdering('opportunities')
-  const kpis: KpiSpec[] = orderKpis(kpiOrder, kpiByKey)
+  const { kpis, fellBack } = useOrderedReportKpis('opportunities', kpiByKey)
 
   return (
     <div>
