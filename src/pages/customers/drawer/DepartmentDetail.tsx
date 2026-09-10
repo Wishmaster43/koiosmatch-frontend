@@ -66,6 +66,10 @@ import type { DepartmentSubTab } from './DepartmentSubTabPanels'
 import InUseCountsDialog from './InUseCountsDialog'
 // Delete handler pattern, shared with LocationDetail (clone [2]).
 import { handleSubEntityDelete } from '../hooks/subEntityDelete'
+// Shared SubTabBar tab-list shape, joined by LocationDetail/ContactDetail (DRY round 11, CUSTDETAIL).
+import { buildSubEntityTabs } from '../hooks/subEntityTabs'
+// Shared merge-modal onClose/onMerged wiring, joined by LocationDetail (DRY round 11, CUSTDETAIL).
+import { mergeModalCallbacks } from '../hooks/mergeModalCallbacks'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useAuth } from '@/context/AuthContext'
@@ -200,19 +204,25 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   })
   const doArchive = () => confirm(t('departments.detail.confirmArchive', { name: department.name }), archiveNow)
 
+  // The SAME panel the customer tab and a location render — one contact surface.
+  // `trail` carries only the ANCESTORS: the panel appends this department itself as its
+  // own list crumb (its scopeName IS department.name), so passing it here too printed
+  // "Dagbesteding › Dagbesteding" — measured live 28-07. One element, rendered at both
+  // the contact-open early return below and the Contactpersonen sub-tab body.
+  const contactsPanel = (
+    <ContactsPanel scope="department" scopeId={department.id as Id} scopeName={department.name} customerId={customerId}
+      contacts={contacts} locations={locations} departments={departments} statuses={contactStatuses}
+      trail={trail}
+      openId={openContactId} onOpenChange={setOpenContactId}
+      onAdd={onAddContact} onUpdate={onUpdateContact} onRemove={onRemoveContact} />
+  )
+
   // A contact opened from this department's list brings its own full trail, so the
   // department steps aside — one title, one delete button, one way back.
   if (contactOpen) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {/* `trail` carries only the ANCESTORS: ContactsPanel appends this department itself
-            as its own list crumb (its scopeName IS department.name), so passing it here too
-            printed "Dagbesteding › Dagbesteding" — measured live 28-07. */}
-        <ContactsPanel scope="department" scopeId={department.id as Id} scopeName={department.name} customerId={customerId}
-          contacts={contacts} locations={locations} departments={departments} statuses={contactStatuses}
-          trail={trail}
-          openId={openContactId} onOpenChange={setOpenContactId}
-          onAdd={onAddContact} onUpdate={onUpdateContact} onRemove={onRemoveContact} />
+        {contactsPanel}
       </div>
     )
   }
@@ -253,37 +263,39 @@ export default function DepartmentDetail({ department, locations, statuses, cont
           restoreLabel={t('departments.archivedBanner.restore')} />
       )}
 
-      {/* Sub-tab strip — same shared bar as LocationDetail / the candidate Communicatie tab. */}
+      {/* Sub-tab strip — same shared bar as LocationDetail / the candidate Communicatie tab.
+          Tab list built by the shared buildSubEntityTabs (DRY round 11, CUSTDETAIL) — same
+          shape as LocationDetail/ContactDetail's own call, see that helper's doc comment. */}
       <SubTabBar
-        tabs={[
-          { id: 'data',     label: t('departments.detail.subtabs.data') },
-          { id: 'contacts', label: t('drawer.tabs.contacts') },
-          // SCOPED-LIST-TAB-1: read-only lists scoped to this department (§3A shared tab).
-          { id: 'vacancies', label: t('drawer.tabs.vacancies') },
-          // SOLLICITATIES-SCOPE-1: reuses the applications page's own title key —
-          // already carries full five-locale parity, verified in c0e0d900.
-          { id: 'applications', label: t('applications:title') },
-          // NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1: reuse the existing top-level
-          // drawer.tabs.notes/documents keys (already five-locale complete) —
-          // right after Sollicitaties, per Danny's ask.
-          { id: 'notes',     label: t('drawer.tabs.notes') },
-          // K-288: linked-notes feed's own sub-tab, right after Notities.
-          { id: 'linkedNotes', label: t('notes.linkedNotes') },
-          { id: 'documents', label: t('drawer.tabs.documents') },
-          { id: 'matches',   label: t('drawer.tabs.matches') },
-          // SCOPED-LIST-TAB-1: reuses the existing top-level drawer.tabs.opportunities
-          // key (already five-locale complete) — right after Matches, per Danny's ask.
-          { id: 'opportunities', label: t('drawer.tabs.opportunities') },
-          // TAKEN-OP-AFDELING-1: TaskLinkResolver already knows 'department' → task_links.
-          { id: 'tasks',     label: t('drawer.tabs.tasks') },
-          ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
-          // TIJDLIJN-SUBDRILL-1: timeline second-to-last, before Koppelingen (§3A(d)).
-          // DD-FE-6 (no empty tabs): the panel needs the customer id for the nested /activity route.
-          ...(customerId != null ? [{ id: 'timeline', label: t('drawer.tabs.timeline') }] : []),
-          // EXTRACT-1: the shared Koppelingen sub-tab, last when it has content.
-          // DD-FE-6 ("no empty tabs"): hidden when no connector app is enabled.
-          ...(showKoppelingen ? [{ id: 'links', label: t('common:backofficeLinks.tabLabel') }] : []),
-        ]}
+        tabs={buildSubEntityTabs({
+          first: { id: 'data', label: t('departments.detail.subtabs.data') },
+          scoped: [
+            { id: 'contacts', label: t('drawer.tabs.contacts') },
+            // SCOPED-LIST-TAB-1: read-only lists scoped to this department (§3A shared tab).
+            { id: 'vacancies', label: t('drawer.tabs.vacancies') },
+            // SOLLICITATIES-SCOPE-1: reuses the applications page's own title key —
+            // already carries full five-locale parity, verified in c0e0d900.
+            { id: 'applications', label: t('applications:title') },
+            // NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1: reuse the existing top-level
+            // drawer.tabs.notes/documents keys (already five-locale complete) —
+            // right after Sollicitaties, per Danny's ask.
+            { id: 'notes', label: t('drawer.tabs.notes') },
+            // K-288: linked-notes feed's own sub-tab, right after Notities.
+            { id: 'linkedNotes', label: t('notes.linkedNotes') },
+            { id: 'documents', label: t('drawer.tabs.documents') },
+            { id: 'matches', label: t('drawer.tabs.matches') },
+            // SCOPED-LIST-TAB-1: reuses the existing top-level drawer.tabs.opportunities
+            // key (already five-locale complete) — right after Matches, per Danny's ask.
+            { id: 'opportunities', label: t('drawer.tabs.opportunities') },
+            // TAKEN-OP-AFDELING-1: TaskLinkResolver already knows 'department' → task_links.
+            { id: 'tasks', label: t('drawer.tabs.tasks') },
+            ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
+          ],
+          // TIJDLIJN-SUBDRILL-1/DD-FE-6: see buildSubEntityTabs' own doc comment.
+          timeline: { show: customerId != null, label: t('drawer.tabs.timeline') },
+          // EXTRACT-1: hidden without an enabled connector app (DD-FE-6).
+          links: { show: showKoppelingen, label: t('common:backofficeLinks.tabLabel') },
+        })}
         active={subTab}
         onChange={id => setSubTab(id as typeof subTab)}
       />
@@ -301,16 +313,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
           onSave={onSave} t={t} />
       )}
 
-      {/* The SAME panel the customer tab and a location render — one contact surface.
-          `trail` carries only the ANCESTORS: the panel appends this department itself as its
-          own list crumb (its scopeName IS department.name). */}
-      {subTab === 'contacts' && (
-        <ContactsPanel scope="department" scopeId={department.id as Id} scopeName={department.name} customerId={customerId}
-          contacts={contacts} locations={locations} departments={departments} statuses={contactStatuses}
-          trail={trail}
-          openId={openContactId} onOpenChange={setOpenContactId}
-          onAdd={onAddContact} onUpdate={onUpdateContact} onRemove={onRemoveContact} />
-      )}
+      {subTab === 'contacts' && contactsPanel}
       {/* AFDELING-SAMENVOEGEN-1 — `others` is the customer-wide department list
           (already available as a prop), never a fresh search endpoint (see the
           modal's own doc). */}
@@ -318,8 +321,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
         <MergeSubEntityModal scope="department" customerId={customerId}
           current={{ id: department.id as Id, name: department.name }}
           others={departments.map(d => ({ id: d.id as Id, name: d.name, code: d.referenceNumber }))}
-          onClose={() => setMerging(false)}
-          onMerged={survivorId => { setMerging(false); onMerged?.(survivorId) }} />
+          {...mergeModalCallbacks(setMerging, onMerged)} />
       )}
       {dialog}
       {/* ARCHIVE-SUBENTITY-1: "kan niet verwijderen, wél archiveren" — the 409-race

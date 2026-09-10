@@ -31,8 +31,9 @@ import type { LocationPayload } from '../hooks/useCustomerLocations'
 // quick-view — a SEPARATE fetch so every OTHER consumer of the live `locations`
 // prop (add-modal pickers etc.) keeps seeing today's archived-excluded set.
 import { useArchivedCustomerLocations } from '../hooks/useCustomerLocations'
-import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
+// Shared department-mutation callback prop shape, also used by LocationDetail (DRY round 11, CUSTDETAIL).
+import type { DepartmentCallbacks } from '../hooks/departmentCallbacks'
 
 type AnyProps = Record<string, unknown>
 const SoftChip = SoftChipJs as unknown as ComponentType<AnyProps>
@@ -53,7 +54,7 @@ const searchWrap = {
 } as const
 const searchInput = { flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' } as const
 
-interface Props {
+interface Props extends DepartmentCallbacks {
   customerId?: Id
   customerName?: string
   locations?: Location[]
@@ -68,9 +69,6 @@ interface Props {
   onAddLocation: (payload: LocationPayload) => void
   onSaveLocation: (id: Id, payload: Partial<LocationPayload>) => void
   onDeleteLocation: (id: Id) => void
-  onAddDepartment: (payload: DepartmentPayload, locationName?: string) => void
-  onUpdateDepartment: (id: Id, payload: Partial<DepartmentPayload>, locationName?: string) => void
-  onRemoveDepartment: (id: Id) => void
   // CONTACT-PRIMAIR-LOCATIE-2: widened from `=> void` — the real `useCustomerContacts().add`
   // (threaded in from CustomerDrawer) already resolves with the saved contact row; AddLocationModal
   // needs that id to couple a brand-new typed name as the location's primary contact.

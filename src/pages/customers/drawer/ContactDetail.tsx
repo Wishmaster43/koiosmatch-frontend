@@ -54,6 +54,8 @@ import MergeContactModal from './MergeContactModal'
 // through links), extracted the same way DepartmentSubTabPanels/
 // LocationSubTabPanels were split off their own details.
 import ContactSubTabPanels from './ContactSubTabPanels'
+// Shared SubTabBar tab-list shape, joined by Department/LocationDetail (DRY round 11, CUSTDETAIL).
+import { buildSubEntityTabs } from '../hooks/subEntityTabs'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useContactFunctions } from '@/lib/useContactFunctions'
 import { useGenders } from '@/lib/useGenders'
@@ -343,27 +345,30 @@ export default function ContactDetail({ contact, locations, departments, statuse
 
       {/* Sub-tab strip — DD-FE-6 ("no empty tabs"): Koppelingen only lists when a
           connector app is enabled (its body would otherwise render nothing);
-          Extra still only appears with ≥1 active custom field. */}
+          Extra still only appears with ≥1 active custom field. Tab list built by the
+          shared buildSubEntityTabs (DRY round 11, CUSTDETAIL) — same shape as
+          Department/LocationDetail's own call, see that helper's doc comment. */}
       <SubTabBar
-        tabs={[
-          { id: 'data',  label: t('contacts.detail.subtabs.data') },
-          // SCOPED-LIST-TAB-1: reuses the existing top-level drawer.tabs.opportunities
-          // key (already five-locale complete) — same shared label Location/DepartmentDetail use.
-          { id: 'opportunities', label: t('drawer.tabs.opportunities') },
-          { id: 'tasks', label: t('contacts.detail.subtabs.tasks') },
-          // GESPREK-CONTACT-1: local-only label, mirrors the 'data'/'tasks' siblings above.
-          { id: 'conversations', label: t('contacts.detail.subtabs.conversations') },
-          ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
-          // CONTACT-NOTITIES-2: always visible (mirrors the 'data'/'tasks' siblings,
-          // never gated on data presence) and BEFORE 'links', per tab-order canon.
-          { id: 'notes', label: t('contacts.detail.subtabs.notes') },
-          // K-288: linked-notes feed's own sub-tab, right after Notities.
-          { id: 'linkedNotes', label: t('notes.linkedNotes') },
-          // TIJDLIJN-SUBDRILL-1: timeline second-to-last, before Koppelingen (§3A(d)).
-          // DD-FE-6 (no empty tabs): the panel needs the customer id for the nested /activity route.
-          ...(contact.customerId != null ? [{ id: 'timeline', label: t('drawer.tabs.timeline') }] : []),
-          ...(showKoppelingen ? [{ id: 'links', label: t('common:backofficeLinks.tabLabel') }] : []),
-        ]}
+        tabs={buildSubEntityTabs({
+          first: { id: 'data', label: t('contacts.detail.subtabs.data') },
+          scoped: [
+            // SCOPED-LIST-TAB-1: reuses the existing top-level drawer.tabs.opportunities
+            // key (already five-locale complete) — same shared label Location/DepartmentDetail use.
+            { id: 'opportunities', label: t('drawer.tabs.opportunities') },
+            { id: 'tasks', label: t('contacts.detail.subtabs.tasks') },
+            // GESPREK-CONTACT-1: local-only label, mirrors the 'data'/'tasks' siblings above.
+            { id: 'conversations', label: t('contacts.detail.subtabs.conversations') },
+            ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
+            // CONTACT-NOTITIES-2: always visible (mirrors the 'data'/'tasks' siblings,
+            // never gated on data presence) and BEFORE 'links', per tab-order canon.
+            { id: 'notes', label: t('contacts.detail.subtabs.notes') },
+            // K-288: linked-notes feed's own sub-tab, right after Notities.
+            { id: 'linkedNotes', label: t('notes.linkedNotes') },
+          ],
+          // TIJDLIJN-SUBDRILL-1/DD-FE-6: see buildSubEntityTabs' own doc comment.
+          timeline: { show: contact.customerId != null, label: t('drawer.tabs.timeline') },
+          links: { show: showKoppelingen, label: t('common:backofficeLinks.tabLabel') },
+        })}
         active={subTab}
         onChange={id => setSubTab(id as typeof subTab)}
       />
