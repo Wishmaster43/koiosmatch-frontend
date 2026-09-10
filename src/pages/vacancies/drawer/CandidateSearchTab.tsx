@@ -32,6 +32,7 @@ import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import ActiveFilterChip from '@/components/search/ActiveFilterChip'
 import { SearchListBody } from '@/components/drawer/search/SearchListBody'
 import { useSearchSelection } from '@/components/drawer/search/useSearchSelection'
+import { useResultPager } from '@/hooks/useResultPager'
 // Reuse the candidate-anchored "+ Solliciteren" ("+ Apply") flow (mirrors ApplicantsTab's own
 // CandidateAddApplicationModal reuse, §2 sanctioned cross-entity import for this
 // exact shared flow) — never a second apply form.
@@ -82,12 +83,8 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
   const [showApply, setShowApply] = useState(false)
   useEffect(() => { setShowApply(false) }, [selectedId])
 
-  // Browse (point 19, mirrors VacancySearchTab): prev/next through the CURRENT
-  // result list via the shared DrillPager — undefined at the ends disables the
-  // matching button, never a cycle.
-  const selectedIndex = rows.findIndex(r => r.id === selectedId)
-  const goPrev = selectedIndex > 0 ? () => selectId(rows[selectedIndex - 1].id) : undefined
-  const goNext = selectedIndex >= 0 && selectedIndex < rows.length - 1 ? () => selectId(rows[selectedIndex + 1].id) : undefined
+  // Browse (point 19, mirrors VacancySearchTab): prev/next through the CURRENT result list.
+  const { selectedIndex, goPrev, goNext } = useResultPager(rows, selectedId, selectId)
 
   const toggleFunction = (name: string) =>
     setFunctions(selectedFunctions.includes(name) ? selectedFunctions.filter(f => f !== name) : [...selectedFunctions, name])

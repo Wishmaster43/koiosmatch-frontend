@@ -21,6 +21,7 @@ import type { VacancyDetail, LookupChip } from './VacancySearchSummaryCard'
 import VacancySearchResultRow from './VacancySearchResultRow'
 import { SearchListBody } from '@/components/drawer/search/SearchListBody'
 import { useSearchSelection } from '@/components/drawer/search/useSearchSelection'
+import { useResultPager } from '@/hooks/useResultPager'
 import api, { unwrap } from '@/lib/api'
 import { useVacancySearch } from '../hooks/useVacancySearch'
 import { useFunctions } from '@/lib/useFunctions'
@@ -111,13 +112,8 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
   }, [selectedId])
 
 
-  // Browse (Danny 05-08, point 3): prev/next through the CURRENT result list,
-  // reusing the shared DrillPager anatomy (mirrors LocationDetail/ContactDetail).
-  // Disabled at the ends — no cycling, and undefined (never a no-op handler) is
-  // what makes DrillPager itself render the button disabled.
-  const selectedIndex = rows.findIndex(r => r.id === selectedId)
-  const goPrev = selectedIndex > 0 ? () => selectId(rows[selectedIndex - 1].id) : undefined
-  const goNext = selectedIndex >= 0 && selectedIndex < rows.length - 1 ? () => selectId(rows[selectedIndex + 1].id) : undefined
+  // Browse (Danny 05-08, point 3): prev/next through the CURRENT result list.
+  const { selectedIndex, goPrev, goNext } = useResultPager(rows, selectedId, selectId)
 
   const center = { lat: toCoord(candidate.lat) as number, lng: toCoord(candidate.lng) as number }
   const points = rows

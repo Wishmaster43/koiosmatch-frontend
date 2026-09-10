@@ -3,6 +3,7 @@
  * below, right above the component, for the column contract it declares.
  */
 import { useState } from 'react'
+import type { MouseEvent, ReactNode } from 'react'
 import type { TableSelectionProps, TableSortProps, TableVirtualizationProps } from '@/components/ui/dataTableTypes'
 import { cellButton } from '@/components/ui/cellButton'
 import { useTranslation } from 'react-i18next'
@@ -45,6 +46,23 @@ const plainCell = { color: 'var(--text)', fontSize: 12 }
 // Cell deep-link reset (HOUSE RECIPE, CandidatesTable.tsx) — no visual identity of
 const leadsBtn = { display: 'inline-flex', ...monoStyle, fontSize: 12,
   color: 'var(--text)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }
+
+// Local shared count-link cell (DRY round 11, DRAWERS): the Sollicitaties and
+// Matches count columns' identical underline-on-hover/focus button, one
+// necessity-disable instead of two. Local — only this file's two count columns use it.
+function CountLink({ ariaLabel, onClick, children }: { ariaLabel: string; onClick: (e: MouseEvent<HTMLButtonElement>) => void; children: ReactNode }) {
+  return (
+    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- count deep-link rendered AS the cell's own mono number; Button's fixed sm footprint cannot sit inside a 12px table cell (§14 r7 necessity)
+    <button type="button" style={leadsBtn} aria-label={ariaLabel}
+      onClick={onClick}
+      onFocus={e => { e.currentTarget.style.textDecoration = 'underline' }}
+      onBlur={e => { e.currentTarget.style.textDecoration = 'none' }}
+      onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
+      onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none' }}>
+      {children}
+    </button>
+  )
+}
 
 interface VacanciesTableProps extends TableSelectionProps, TableSortProps, TableVirtualizationProps {
   rows: Vacancy[]
@@ -243,15 +261,9 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
       // (applicants) tab instead of the default tab. stopPropagation so it never
       // double-fires the row's own onSelect.
       render: r => onOpenApplicants ? (
-        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- count deep-link rendered AS the cell's own mono number; Button's fixed sm footprint cannot sit inside a 12px table cell (§14 r7 necessity)
-        <button type="button" style={leadsBtn} aria-label={t('columns.applicationsOpen')}
-          onClick={e => { e.stopPropagation(); onOpenApplicants(r.id as Id) }}
-          onFocus={e => { e.currentTarget.style.textDecoration = 'underline' }}
-          onBlur={e => { e.currentTarget.style.textDecoration = 'none' }}
-          onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
-          onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none' }}>
+        <CountLink ariaLabel={t('columns.applicationsOpen')} onClick={e => { e.stopPropagation(); onOpenApplicants(r.id as Id) }}>
           {r.applicationsCount ?? 0}
-        </button>
+        </CountLink>
       ) : (r.applicationsCount ?? 0),
     },
     {
@@ -260,15 +272,9 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
       key: 'matches', header: t('columns.matches'), sortable: true, sortValue: r => r.matchesCount,
       cellStyle: { ...monoStyle, fontSize: 12, color: 'var(--text)' },
       render: r => onOpenMatches ? (
-        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- count deep-link rendered AS the cell's own mono number; Button's fixed sm footprint cannot sit inside a 12px table cell (§14 r7 necessity)
-        <button type="button" style={leadsBtn} aria-label={t('columns.matchesOpen')}
-          onClick={e => { e.stopPropagation(); onOpenMatches(r.id as Id) }}
-          onFocus={e => { e.currentTarget.style.textDecoration = 'underline' }}
-          onBlur={e => { e.currentTarget.style.textDecoration = 'none' }}
-          onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
-          onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none' }}>
+        <CountLink ariaLabel={t('columns.matchesOpen')} onClick={e => { e.stopPropagation(); onOpenMatches(r.id as Id) }}>
           {r.matchesCount ?? 0}
-        </button>
+        </CountLink>
       ) : (r.matchesCount ?? 0),
     },
     {

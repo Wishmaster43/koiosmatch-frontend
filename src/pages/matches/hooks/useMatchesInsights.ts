@@ -10,14 +10,14 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import { buildMatchFilterGroups } from '../data/matchFilterGroups'
-import type { MatchDateRange } from '../data/matchFilterGroups'
+import type { MatchDateRange, MatchListFilters } from '../data/matchFilterGroups'
 import type { MatchRow } from '@/types/match'
 import type { FilterGroup } from '@/context/RightPanelContext'
 
 // Shape of a match-status lookup entry (label/colour/is_closed) as returned by useMatchStatuses.
 type MatchStatusMeta = (status: string) => { label?: string; color?: string; is_closed?: boolean } | undefined
 
-interface UseMatchesInsightsArgs {
+interface UseMatchesInsightsArgs extends MatchListFilters {
   rows: MatchRow[]
   t: TFunction
   matchStatusMeta: MatchStatusMeta
@@ -25,12 +25,6 @@ interface UseMatchesInsightsArgs {
   monthStart: number
   query: string
   setQuery: Dispatch<SetStateAction<string>>
-  stageFilter: string[]; setStageFilter: Dispatch<SetStateAction<string[]>>
-  ownerFilter: string[]; setOwnerFilter: Dispatch<SetStateAction<string[]>>
-  clientFilter: string[]; setClientFilter: Dispatch<SetStateAction<string[]>>
-  branchFilter: string[]; setBranchFilter: Dispatch<SetStateAction<string[]>>
-  contractFormFilter: string[]; setContractFormFilter: Dispatch<SetStateAction<string[]>>
-  contractTypeFilter: string[]; setContractTypeFilter: Dispatch<SetStateAction<string[]>>
   contractTypeLookupOptions: { value: string; label: string }[]
   kpiScored: boolean; setKpiScored: Dispatch<SetStateAction<boolean>>
   kpiUnscored: boolean; setKpiUnscored: Dispatch<SetStateAction<boolean>>

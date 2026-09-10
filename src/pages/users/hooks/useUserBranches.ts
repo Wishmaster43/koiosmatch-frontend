@@ -60,15 +60,10 @@ export function useUserBranches(userId: string | number | null | undefined) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `t` from useTranslation is stable in the app; excluding it avoids a re-fetch loop
   }, [userId])
 
-  // Toggle one branch — optimistic PUT (replace-set), revert + notify on failure.
-  // Refuses to run against a failed load: the current [] would not be the real
-  // server set, so a toggle from it would PUT a wrong replace-set (§8 security).
-  const toggle = async (locationId: string | number) => {
-    if (userId == null || error) return
-    const prev = branches
-    const ids = branches.map(b => b.location_id)
-    const nextIds = ids.includes(locationId) ? ids.filter(id => id !== locationId) : [...ids, locationId]
-    setBranches(nextIds.map(id => prev.find(b => b.location_id === id) ?? { location_id: id }))
+  // Shared optimistic replace-set PUT (DRY round 11, DRAWERS): toggle and
+  // toggleMany each compute their own next id list, then share this exact
+  // persist/revert/notify tail.
+  const putBranches = async (nextIds: Array<string | number>, prev: BranchRow[]) => {
     setSaving(true)
     try {
       const res = await api.put(`/users/${userId}/branches`, { location_ids: nextIds })
@@ -79,6 +74,18 @@ export function useUserBranches(userId: string | number | null | undefined) {
     } finally {
       setSaving(false)
     }
+  }
+
+  // Toggle one branch — optimistic PUT (replace-set), revert + notify on failure.
+  // Refuses to run against a failed load: the current [] would not be the real
+  // server set, so a toggle from it would PUT a wrong replace-set (§8 security).
+  const toggle = async (locationId: string | number) => {
+    if (userId == null || error) return
+    const prev = branches
+    const ids = branches.map(b => b.location_id)
+    const nextIds = ids.includes(locationId) ? ids.filter(id => id !== locationId) : [...ids, locationId]
+    setBranches(nextIds.map(id => prev.find(b => b.location_id === id) ?? { location_id: id }))
+    await putBranches(nextIds, prev)
   }
 
   // Toggle a WHOLE batch (select-all / clear-all) in ONE request — the root fix
@@ -96,16 +103,7 @@ export function useUserBranches(userId: string | number | null | undefined) {
       ? [...ids, ...locationIds.filter(id => !ids.includes(id))]
       : ids.filter(id => !batch.has(id))
     setBranches(nextIds.map(id => prev.find(b => b.location_id === id) ?? { location_id: id }))
-    setSaving(true)
-    try {
-      const res = await api.put(`/users/${userId}/branches`, { location_ids: nextIds })
-      setBranches(unwrapList<BranchRow>(res).rows)
-    } catch {
-      setBranches(prev)
-      notifyError(t('branches.saveFailed'))
-    } finally {
-      setSaving(false)
-    }
+    await putBranches(nextIds, prev)
   }
 
   // Change one ability flag on one already-assigned branch — optimistic PUT

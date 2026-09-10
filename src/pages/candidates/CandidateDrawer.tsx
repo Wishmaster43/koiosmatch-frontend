@@ -10,6 +10,7 @@ import { Trash2, GitMerge } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import EntityDrawerJs from '@/components/drawer/EntityDrawer'
 import EntityHeaderJs from '@/components/drawer/EntityHeader'
+import DrawerGlyphButton from '@/components/drawer/DrawerGlyphButton'
 import { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import { useGenders } from '@/lib/useGenders'
 import { useAllSettings, getBoolSetting, getJsonSetting } from '@/lib/settings/useAllSettings'
@@ -316,24 +317,18 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
             {/* Merge a duplicate into this record (punt 4) — same permission signal
                 as archive (candidates.delete via the page); not on archived dossiers. */}
             {onMerged && !c.archived && (
-              <button onClick={() => setShowMerge(true)}
-                title={t('merge.title')} aria-label={t('merge.title')}
-                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- frozen calm-header glyph control (Danny 08-08): deliberate bare 14px icon; Button iconOnly’s 28px chrome would change the frozen look
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--text-muted)', opacity: 0.8 }}>
+              <DrawerGlyphButton onClick={() => setShowMerge(true)} title={t('merge.title')} tone="muted" opacity={0.8}>
                 <GitMerge size={14} />
-              </button>
+              </DrawerGlyphButton>
             )}
             {/* Soft-delete → Gearchiveerd (§3B: soft-delete only). The confirm (or, when
                 live applications/matches hang on the candidate, the ArchiveGuardModal)
                 lives in useCandidateDrawerActions.archiveOne — never re-confirm here.
                 candidates.archive-gated (RECHTEN-DETAIL-1, was update-driven). */}
             {onArchive && canArchive && !c.archived && (
-              <button onClick={() => onArchive(c.id)}
-                title={t('drawer.archive')} aria-label={t('drawer.archive')}
-                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- frozen calm-header glyph control (Danny 08-08): deliberate bare 14px icon; Button iconOnly’s 28px chrome would change the frozen look
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger-text)', opacity: 0.7 }}>
+              <DrawerGlyphButton onClick={() => onArchive(c.id)} title={t('drawer.archive')} tone="danger" opacity={0.7}>
                 <Trash2 size={14} />
-              </button>
+              </DrawerGlyphButton>
             )}
           </>}
           actions={

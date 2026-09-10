@@ -38,6 +38,7 @@ import { Trash2, Ban, RefreshCw } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import type { EntityTab } from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
+import DrawerGlyphButton from '@/components/drawer/DrawerGlyphButton'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import PendingEraseBanner from '@/components/drawer/PendingEraseBanner'
 import { buildTrashNote } from '@/hooks/useTrashFlow'
@@ -277,22 +278,16 @@ export default function MatchDrawer({
             {/* ARCHIVE-1: per-id soft-delete (mirrors candidates' trash icon in the
                 title row) — hidden once already archived; the banner below takes over. */}
             {onArchive && !match.archived && (
-              <button onClick={() => onArchive(match.id)}
-                title={t('drawer.archive')} aria-label={t('drawer.archive')}
-                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- danger-ink ghost icon: no Button tone carries danger ink on a bare face (ghost=neutral, dangerSoft=tinted); ProfileTab precedent
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger-text)', opacity: 0.7 }}>
+              <DrawerGlyphButton onClick={() => onArchive(match.id)} title={t('drawer.archive')} tone="danger" opacity={0.7}>
                 <Trash2 size={14} />
-              </button>
+              </DrawerGlyphButton>
             )}
             {/* TRASH-OVERAL-2: archived → trash (matches.delete-gated at the page; the
                 shared preview modal confirms). Hidden once already in the trash. */}
             {onMarkDeletion && match.archived && !inTrash && (
-              <button onClick={() => onMarkDeletion(match.id)}
-                title={t('common:trash.markAction')} aria-label={t('common:trash.markAction')}
-                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- danger-ink ghost icon: no Button tone carries danger ink on a bare face (ghost=neutral, dangerSoft=tinted); ProfileTab precedent
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger-text)' }}>
+              <DrawerGlyphButton onClick={() => onMarkDeletion(match.id)} title={t('common:trash.markAction')} tone="danger">
                 <Trash2 size={14} />
-              </button>
+              </DrawerGlyphButton>
             )}
           </>}
           renderTitle={() => (

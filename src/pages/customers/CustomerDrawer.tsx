@@ -13,6 +13,7 @@ import { Trash2, GitMerge } from 'lucide-react'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
+import DrawerGlyphButton from '@/components/drawer/DrawerGlyphButton'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import TrashLifecycleSection from '@/components/drawer/TrashLifecycleSection'
 import type { TrashSectionConfig } from '@/components/drawer/TrashLifecycleSection'
@@ -279,22 +280,16 @@ export default function CustomerDrawer({
                 as the candidate drawer's own merge icon (klok · samenvoegen · prullenbak),
                 permission-gated, hidden once already archived. */}
             {canMerge && !c.archived && (
-              <button onClick={() => setShowMerge(true)}
-                title={t('merge.title')} aria-label={t('merge.title')}
-                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- frozen calm-header glyph control (Danny 08-08): deliberate bare 14px icon; Button iconOnly’s 28px chrome would change the frozen look
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--text-muted)', opacity: 0.8 }}>
+              <DrawerGlyphButton onClick={() => setShowMerge(true)} title={t('merge.title')} tone="muted" opacity={0.8}>
                 <GitMerge size={14} />
-              </button>
+              </DrawerGlyphButton>
             )}
             {/* DELETE-ICON-1: soft-delete (§3B), same position/style as the candidate
                 drawer's own trash icon — permission-gated, hidden once already archived. */}
             {canDelete && !c.archived && (
-              <button onClick={requestDelete}
-                title={t('drawer.delete')} aria-label={t('drawer.delete')}
-                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- frozen calm-header glyph control (Danny 08-08): deliberate bare 14px icon; Button iconOnly’s 28px chrome would change the frozen look
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger-text)', opacity: 0.7 }}>
+              <DrawerGlyphButton onClick={requestDelete} title={t('drawer.delete')} tone="danger" opacity={0.7}>
                 <Trash2 size={14} />
-              </button>
+              </DrawerGlyphButton>
             )}
           </>}
           actions={headerActions}

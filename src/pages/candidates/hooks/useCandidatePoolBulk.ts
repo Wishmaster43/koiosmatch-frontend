@@ -20,6 +20,17 @@ interface UseCandidatePoolBulkParams extends CandidateBulkSelectionBase {
   notifyOutcome: (successKey: string, params: Record<string, unknown>, updated: number, total: number) => void
 }
 
+// Shared add/remove preamble (DRY round 11, DRAWERS): resolve the pool id + chip
+// payload and the ids that would actually change, using the caller's own
+// membership predicate — the one difference between add (lacks the pool) and
+// remove (has the pool). Local since both call sites live in this file.
+function poolTargets(candidates: Candidate[], ids: Candidate['id'][], pool: CandidatePool, predicate: (c: Candidate, poolId: CandidatePool['id'] | string) => boolean) {
+  const poolId = pool.id ?? pool.name
+  const chip: CandidatePool = { id: pool.id, name: pool.name, color: pool.color }
+  const changedIds = candidates.filter(c => ids.includes(c.id) && predicate(c, poolId)).map(c => c.id)
+  return { poolId, chip, changedIds }
+}
+
 export function useCandidatePoolBulk({
   candidates, setCandidates, selectedIds, setSelectedIds, notify, t, notifyOutcome,
 }: UseCandidatePoolBulkParams) {
@@ -28,9 +39,7 @@ export function useCandidatePoolBulk({
   const bulkAddToPool = (pool: CandidatePool) => {
     const ids = [...selectedIds]
     if (!ids.length || !pool) return
-    const poolId = pool.id ?? pool.name
-    const chip: CandidatePool = { id: pool.id, name: pool.name, color: pool.color }
-    const changedIds = candidates.filter(c => ids.includes(c.id) && !(c.pools ?? []).some(p => (p.id ?? p.name) === poolId)).map(c => c.id)
+    const { poolId, chip, changedIds } = poolTargets(candidates, ids, pool, (c, poolId) => !(c.pools ?? []).some(p => (p.id ?? p.name) === poolId))
     setCandidates(prev => prev.map(c => changedIds.includes(c.id) ? { ...c, pools: [...(c.pools ?? []), chip] } : c))
     api.post(`/pools/${poolId}/candidates`, { candidate_ids: ids })
       .then((res) => {
@@ -49,9 +58,7 @@ export function useCandidatePoolBulk({
   const bulkRemoveFromPool = (pool: CandidatePool) => {
     const ids = [...selectedIds]
     if (!ids.length || !pool) return
-    const poolId = pool.id ?? pool.name
-    const chip: CandidatePool = { id: pool.id, name: pool.name, color: pool.color }
-    const changedIds = candidates.filter(c => ids.includes(c.id) && (c.pools ?? []).some(p => (p.id ?? p.name) === poolId)).map(c => c.id)
+    const { poolId, chip, changedIds } = poolTargets(candidates, ids, pool, (c, poolId) => (c.pools ?? []).some(p => (p.id ?? p.name) === poolId))
     setCandidates(prev => prev.map(c => changedIds.includes(c.id) ? { ...c, pools: (c.pools ?? []).filter(p => (p.id ?? p.name) !== poolId) } : c))
     api.delete(`/pools/${poolId}/candidates`, { data: { candidate_ids: ids } })
       .then((res) => {

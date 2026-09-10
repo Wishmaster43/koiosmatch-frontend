@@ -7,6 +7,7 @@ import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import TrashLifecycleSection from '@/components/drawer/TrashLifecycleSection'
 import type { TrashSectionConfig } from '@/components/drawer/TrashLifecycleSection'
 import TitleBadge from '@/components/drawer/TitleBadge'
+import { entityTagsProps } from '@/components/drawer/entityTagsProps'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import Button from '@/components/ui/Button'
@@ -201,9 +202,7 @@ export default function OpportunityDrawer({
               placeholder: t('drawer.selectOwner') }),
           ]}
           // C-41: free-form tags — UpdateOpportunityRequest accepts `tags` (measured).
-          tags={{ items: currentTags, onAdd: tag => setTagsAndSave([...currentTags, tag]),
-            onRemove: tag => setTagsAndSave(currentTags.filter(x => x !== tag)), addLabel: t('drawer.tags') }}
-          tagsLabel={t('drawer.tags')}
+          {...entityTagsProps(currentTags, setTagsAndSave, t('drawer.tags'))}
         >
           {/* Archived banner (ARCHIVE-1): since-when + restore, right under the header —
               server-backed (mapOpportunity reads archived/deleted_at, see the type

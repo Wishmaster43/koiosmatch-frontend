@@ -11,6 +11,7 @@ import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import DrawerTitleRow from '@/components/drawer/DrawerTitleRow'
 import GeocodeCard from '@/components/drawer/GeocodeCard'
+import { entityTagsProps } from '@/components/drawer/entityTagsProps'
 import { channelIcon } from './data/channelIcons'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import TitleEditInput from '@/components/drawer/TitleEditInput'
@@ -302,9 +303,7 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
             makeOwnerMetaPicker({ entityId: v.id, value: v.owner?.id, options: ownerOptions,
               onUpdate, label: t('drawer.owner'), clearLabel: t('drawer.owner') }),
           ]}
-          tags={{ items: currentTags, onAdd: tag => setTagsAndSave([...currentTags, tag]),
-            onRemove: tag => setTagsAndSave(currentTags.filter(x => x !== tag)), addLabel: t('drawer.tags') }}
-          tagsLabel={t('drawer.tags')}
+          {...entityTagsProps(currentTags, setTagsAndSave, t('drawer.tags'))}
         >
           {/* Archived banner (audit R1 item 8) — mirrors the application/candidate
               drawer's in-body archived state; the table already shows the soft chip,

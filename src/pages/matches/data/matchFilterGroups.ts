@@ -17,9 +17,10 @@ type Tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string | number) => 
 
 export interface MatchDateRange { from: string; to: string }
 
-interface BuildArgs {
-  t: TFunction
-  tog: Tog
+// The six list-filter dimensions shared by the filter-panel builder below and
+// useMatchesInsights (DRY round 11, DRAWERS) — one declared shape instead of
+// two hand-kept copies.
+export interface MatchListFilters {
   stageFilter: string[]; setStageFilter: Dispatch<SetStateAction<string[]>>
   ownerFilter: string[]; setOwnerFilter: Dispatch<SetStateAction<string[]>>
   clientFilter: string[]; setClientFilter: Dispatch<SetStateAction<string[]>>
@@ -29,6 +30,11 @@ interface BuildArgs {
   // MATCH-AXIS-FIX: filters by the match's contract TYPE (distinct axis, see
   // matchFilterGroups.ts header comment for the lookup-value/label tolerance).
   contractTypeFilter: string[]; setContractTypeFilter: Dispatch<SetStateAction<string[]>>
+}
+
+interface BuildArgs extends MatchListFilters {
+  t: TFunction
+  tog: Tog
   kpiScored: boolean; setKpiScored: (fn: (v: boolean) => boolean) => void
   kpiUnscored: boolean; setKpiUnscored: (fn: (v: boolean) => boolean) => void
   dateRange: MatchDateRange | null; setDateRange: (v: MatchDateRange | null) => void

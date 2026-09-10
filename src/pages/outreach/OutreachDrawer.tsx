@@ -35,6 +35,7 @@ import { useCustomFields } from '@/lib/useCustomFields'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import type { EntityTab } from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
+import DrawerGlyphButton from '@/components/drawer/DrawerGlyphButton'
 import TitleBadge from '@/components/drawer/TitleBadge'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
@@ -206,11 +207,9 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
             {/* TRASH-OVERAL-2: archived → trash (outreach.delete-gated at the page;
                 the shared preview modal confirms). Hidden once already in the trash. */}
             {onMarkDeletion && archived && !inTrash && (
-              <button onClick={() => onMarkDeletion(id)}
-                title={t('common:trash.markAction')} aria-label={t('common:trash.markAction')}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger-text)' }}>
+              <DrawerGlyphButton onClick={() => onMarkDeletion(id)} title={t('common:trash.markAction')} tone="danger">
                 <Trash2 size={14} />
-              </button>
+              </DrawerGlyphButton>
             )}
           </>}
           renderTitle={() => (
