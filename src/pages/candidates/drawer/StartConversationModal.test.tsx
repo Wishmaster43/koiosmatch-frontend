@@ -5,7 +5,7 @@
  * carries exactly candidate_id + phone_number_id + template_name(+language).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import StartConversationModal from './StartConversationModal'
 import api from '@/lib/api'
@@ -22,11 +22,20 @@ const NUMBER = { value: 'PN-1', label: 'Bureau (+31612345678)' }
 // GET /ai/agents raw shape ({id,name}) — the component maps this to {value,label} itself.
 const AGENT = { id: 'agent-1', name: 'Kelly' }
 
-const mockLookups = (templates: unknown[] = [TEMPLATE], numbers: unknown[] = [NUMBER], agents: unknown[] = []) => {
+// WA-SEND-1: the user's own devices (GET /profile/whatsapp-web) and every connected
+// device (GET /whatsapp-web-numbers) — none by default, so the template path is the
+// preselect and the earlier cases stay byte-identical.
+const OWN_DEVICE = { id: 'd-own', type: 'wa_web', label: 'Kelly', phone_number: '+31611111111', status: 'connected' }
+const OWN_OPTION = { value: 'd-own', label: 'Kelly (+31611111111)', scope: 'user', owner: 'Kelly Yesway' }
+const BRANCH_OPTION = { value: 'd-branch', label: 'Hoofdkantoor (+31622222222)', scope: 'location', owner: 'Hoofdkantoor' }
+
+const mockLookups = (templates: unknown[] = [TEMPLATE], numbers: unknown[] = [NUMBER], agents: unknown[] = [], own: unknown[] = [], webNumbers: unknown[] = []) => {
   vi.mocked(api.get).mockImplementation((url: string) => {
     if (url === '/whatsapp-templates') return Promise.resolve({ data: { data: templates } })
     if (url === '/whatsapp-phone-numbers') return Promise.resolve({ data: { data: numbers } })
     if (url === '/ai/agents') return Promise.resolve({ data: { data: agents } })
+    if (url === '/profile/whatsapp-web') return Promise.resolve({ data: { data: own } })
+    if (url === '/whatsapp-web-numbers') return Promise.resolve({ data: { data: webNumbers } })
     return Promise.reject(new Error(`unexpected GET ${url}`))
   })
 }
@@ -213,5 +222,55 @@ describe('StartConversationModal · AI-agent picker (CONV-START-AGENT-1)', () =>
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Het gekozen ai-agent id is ongeldig.')
     expect(notifyError).not.toHaveBeenCalled()
+  })
+})
+
+// WA-SEND-1 (Danny 10-09): the channel pill row, the WhatsApp Web free-text path over the
+// own device, the branch-device fallback, and the honest no-device state.
+describe('StartConversationModal · WhatsApp Web channel (WA-SEND-1)', () => {
+  it('preselects WhatsApp Web on the own connected device and posts channel + message + device; 202 reads as scheduled', async () => {
+    mockLookups([TEMPLATE], [NUMBER], [], [OWN_DEVICE], [OWN_OPTION, BRANCH_OPTION])
+    vi.mocked(api.post).mockResolvedValue({ status: 202, data: { outbox_id: 'ob-1', status: 'queued' } })
+    const onStarted = vi.fn(); const onClose = vi.fn()
+    render(<StartConversationModal candidateId={7} onClose={onClose} onStarted={onStarted} />)
+    // The WA Web pill is active, the free-text field is there, the template picker is not.
+    await waitFor(() => expect(screen.getByRole('button', { name: 'conversations.channelWaWeb' })).toHaveAttribute('aria-pressed', 'true'))
+    const field = await screen.findByPlaceholderText('conversations.messagePlaceholder')
+    expect(screen.queryByText('conversations.pickTemplate')).toBeNull()
+    fireEvent.change(field, { target: { value: 'Hoi Niels, kun je morgen?' } })
+    // Own + branch device → the picker shows with the own device picked silently.
+    expect(screen.getByText('conversations.pickDevice')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'conversations.send' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/conversations/start', { candidate_id: 7, channel: 'wa_web', message: 'Hoi Niels, kun je morgen?', whatsapp_number_id: 'd-own' }))
+    await waitFor(() => expect(notifySuccess).toHaveBeenCalledWith('conversations.queued'))
+    expect(onStarted).toHaveBeenCalled(); expect(onClose).toHaveBeenCalled()
+  })
+
+  it('with branch devices only, WhatsApp Web needs a picked device before Send enables', async () => {
+    mockLookups([TEMPLATE], [NUMBER], [], [], [BRANCH_OPTION])
+    render(<StartConversationModal subject={{ kind: 'customer_contact', id: 'ct-1' }} onClose={() => {}} onStarted={() => {}} />)
+    await waitFor(() => expect(screen.getByRole('button', { name: 'conversations.channelWaWeb' })).toHaveAttribute('aria-pressed', 'true'))
+    fireEvent.change(await screen.findByPlaceholderText('conversations.messagePlaceholder'), { target: { value: 'Goedemiddag' } })
+    expect(screen.getByRole('button', { name: 'conversations.send' })).toBeDisabled()
+  })
+
+  it('without any linked device the template path stays preselected and WhatsApp Web says so with a link', async () => {
+    mockLookups()
+    render(<StartConversationModal candidateId={7} onClose={() => {}} onStarted={() => {}} />)
+    expect(await screen.findByText('conversations.pickTemplate')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'conversations.channelWaba' })).toHaveAttribute('aria-pressed', 'true')
+    fireEvent.click(screen.getByRole('button', { name: 'conversations.channelWaWeb' }))
+    expect(await screen.findByText('conversations.devicesEmpty')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'conversations.linkDevice' })).toHaveAttribute('href', '#profile')
+    expect(screen.getByRole('button', { name: 'conversations.send' })).toBeDisabled()
+  })
+
+  it('surfaces the server\'s 409 (no consent) reason on a WhatsApp Web send, never a generic string', async () => {
+    mockLookups([TEMPLATE], [NUMBER], [], [OWN_DEVICE], [OWN_OPTION])
+    vi.mocked(api.post).mockRejectedValue({ response: { status: 409, data: { message: 'Geen WhatsApp-toestemming voor deze kandidaat.' } } })
+    render(<StartConversationModal candidateId={7} onClose={() => {}} onStarted={() => {}} />)
+    fireEvent.change(await screen.findByPlaceholderText('conversations.messagePlaceholder'), { target: { value: 'Hoi' } })
+    fireEvent.click(screen.getByRole('button', { name: 'conversations.send' }))
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith('Geen WhatsApp-toestemming voor deze kandidaat.'))
   })
 })

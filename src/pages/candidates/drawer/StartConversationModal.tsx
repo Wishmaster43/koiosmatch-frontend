@@ -34,6 +34,16 @@
  * picker has nothing to do with whether the template itself can send. An unknown or
  * another tenant's agent id comes back as a 422 field error (`errors.agent_id`),
  * shown next to the picker, never folded into the generic failure toast.
+ *
+ * WA-SEND-1 (Danny 10-09, Q1/Q4/Q5 via CMBE; BE DANNY-AVOND-BE-1 item 6): the modal now
+ * carries a CHANNEL pill row in its title bar (TITELBALK-PILLS): WhatsApp Business = the
+ * template path above, WhatsApp Web = a free-text message (max 1000) over a linked and
+ * connected WhatsApp Web device — the logged-in user's own device preselected, the
+ * tenant's branch devices as the fallback picker. POST /conversations/start with
+ * `channel: 'wa_web'` answers 202 { outbox_id, status: 'queued' } (the drainer sends on
+ * its own schedule), so the toast says "ingepland", never "verzonden"; a 409 (no consent)
+ * or 422 (no mobile, no device) surfaces the server's own reason. No AI-agent field on
+ * that path (the BE branch takes none).
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -47,6 +57,17 @@ import type { ConversationSubject } from '@/components/drawer/useWhatsAppTemplat
 import type { Id } from '@/types/common'
 import type { AiAgent } from '@/types/ai'
 import Button from '@/components/ui/Button'
+import TitleBarPills from '@/components/ui/TitleBarPills'
+import { PageTitle } from '@/components/ui/typography'
+import { TextArea } from '@/components/forms/fields'
+import { useWaWebSendDevices } from './useWaWebSendDevices'
+
+// The two start channels — WABA's template send and WA Web's free text (WA-SEND-1).
+type StartChannel = 'waba' | 'wa_web'
+// The BE caps a manual WhatsApp Web message at 1000 characters (DANNY-AVOND-BE-1 item 6).
+const WA_WEB_MESSAGE_MAX = 1000
+// Where the user links their own WhatsApp Web device (Profiel → WhatsApp Web).
+const PROFILE_HASH = '#profile'
 
 // GET /whatsapp-phone-numbers option shape — the tenant's active WhatsApp senders.
 interface PhoneNumberOption { value: string; label: string }
@@ -102,6 +123,21 @@ export default function StartConversationModal({ candidateId, subject, onClose, 
   const [agentId, setAgentId] = useState('')
   const [agentError, setAgentError] = useState<string | null>(null)
   const [sending, setSending] = useState(false)
+  // WA-SEND-1: the channel, the free-text message and the sending device for WA Web.
+  const { devices, ownId, loading: devicesLoading } = useWaWebSendDevices()
+  const [channel, setChannel] = useState<StartChannel>('waba')
+  const [message, setMessage] = useState('')
+  const [deviceId, setDeviceId] = useState('')
+  const [channelChosen, setChannelChosen] = useState(false)
+
+  // Preselect once the devices are known (Danny Q4): own connected device → WA Web on
+  // that device; branch devices only → WA Web with the picker; none → the template path.
+  useEffect(() => {
+    if (devicesLoading || channelChosen) return
+    setChannelChosen(true)
+    if (ownId) { setChannel('wa_web'); setDeviceId(ownId); return }
+    if (devices.length > 0) setChannel('wa_web')
+  }, [devicesLoading, channelChosen, ownId, devices])
 
   // Load the tenant's approved templates + active sender numbers once — the exact
   // lookups the workflow builder's WhatsApp step reads (never a second source).
@@ -127,7 +163,13 @@ export default function StartConversationModal({ candidateId, subject, onClose, 
   const selected = templates.find(tpl => tpl.value === templateName)
   const texts = templateTexts(selected?.components)
   const hasPreview = Boolean(texts.header || texts.body || texts.footer)
-  const canSend = Boolean(resolvedSubject) && Boolean(templateName && phoneNumberId) && !sending
+  // The picker's options: every connected device, or the own device alone when the
+  // tenant list hiccuped but the profile read did not (never a silently empty picker).
+  const deviceOptions = devices.length > 0 ? devices : ownId ? [{ value: ownId, label: t('conversations.deviceOwn') }] : []
+  const trimmedMessage = message.trim()
+  const canSend = Boolean(resolvedSubject) && !sending && (channel === 'wa_web'
+    ? Boolean(trimmedMessage) && trimmedMessage.length <= WA_WEB_MESSAGE_MAX && Boolean(deviceId)
+    : Boolean(templateName && phoneNumberId))
 
   // Send the opening template — the server validates it against the synced+approved
   // set and only writes the thread once the send itself succeeded (CONV-START-1).
@@ -138,16 +180,24 @@ export default function StartConversationModal({ candidateId, subject, onClose, 
     if (!canSend || !resolvedSubject) return
     setSending(true)
     setAgentError(null)
+    const owner = resolvedSubject.kind === 'customer_contact'
+      ? { customer_contact_id: resolvedSubject.id }
+      : { candidate_id: resolvedSubject.id }
     try {
-      await api.post('/conversations/start', {
-        ...(resolvedSubject.kind === 'customer_contact'
-          ? { customer_contact_id: resolvedSubject.id }
-          : { candidate_id: resolvedSubject.id }),
-        phone_number_id: phoneNumberId, template_name: templateName,
-        language: selected?.language,
-        ...(agentId ? { agent_id: agentId } : {}),
-      })
-      notifySuccess(t('conversations.started'))
+      if (channel === 'wa_web') {
+        // WA-SEND-1: the queued outbox path — 202 { outbox_id, status: 'queued' }: the toast
+        // says scheduled, never sent; the thread shows the outbox status (WA-SEND-STATUS-1).
+        await api.post('/conversations/start', { ...owner, channel: 'wa_web', message: trimmedMessage, whatsapp_number_id: deviceId })
+        notifySuccess(t('conversations.queued'))
+      } else {
+        await api.post('/conversations/start', {
+          ...owner,
+          phone_number_id: phoneNumberId, template_name: templateName,
+          language: selected?.language,
+          ...(agentId ? { agent_id: agentId } : {}),
+        })
+        notifySuccess(t('conversations.started'))
+      }
       onStarted(); onClose()
     } catch (err) {
       // CONV-START-AGENT-1: an unknown/foreign agent id is its OWN 422 field error
@@ -168,11 +218,55 @@ export default function StartConversationModal({ candidateId, subject, onClose, 
     // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
     // remembered position; same 420px footprint as the old panel.
     <FloatingPanel open onClose={onClose} title={t('conversations.startModalTitle')} ariaLabel={t('conversations.startModalTitle')}
-      persistKey="start-conversation" width={420} maxWidth="92vw" bodyStyle={{ padding: 22 }}>
+      persistKey="start-conversation" width={420} maxWidth="92vw" bodyStyle={{ padding: 22 }}
+      header={
+        // TITELBALK-PILLS: the channel is the short choice in the title bar, one shared pill row.
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minWidth: 0 }}>
+          <PageTitle as="span">{t('conversations.startModalTitle')}</PageTitle>
+          <div style={{ marginLeft: 'auto', flexShrink: 0 }}>
+            <TitleBarPills value={channel} onChange={v => { setChannel(v as StartChannel); setChannelChosen(true) }} ariaLabel={t('conversations.channel')}
+              options={[{ value: 'waba', label: t('conversations.channelWaba') }, { value: 'wa_web', label: t('conversations.channelWaWeb') }]} />
+          </div>
+        </div>
+      }>
 
-        {loading && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{t('common:loading')}</div>}
+        {(loading || devicesLoading) && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{t('common:loading')}</div>}
 
-        {!loading && (
+        {/* WA-SEND-1: WhatsApp Web — free text over a linked device, no template, no agent field. */}
+        {!devicesLoading && channel === 'wa_web' && (
+          <>
+            <div style={{ marginBottom: 14 }}>
+              <div style={fieldLabel}>{t('conversations.message')}</div>
+              {/* Plain text on purpose: a WhatsApp message travels as text, never HTML (the
+                  reply composer on the thread is the same plain field). */}
+              <TextArea value={message} onChange={setMessage} placeholder={t('conversations.messagePlaceholder')} rows={4} style={fieldFootprint} />
+              <div style={{ fontSize: 11, color: trimmedMessage.length > WA_WEB_MESSAGE_MAX ? 'var(--color-danger-text)' : 'var(--text-muted)', marginTop: 3, textAlign: 'right' }}>
+                {/* GETALLEN-1 through i18next's own number formatting ({{n, number}}) — lib/formatters
+                    would drag lib/datetime and the i18n init into every consumer of this modal
+                    (DATETIME-IMPORT-LES). */}
+                {t('conversations.messageCount', { count: trimmedMessage.length, max: WA_WEB_MESSAGE_MAX })}
+              </div>
+            </div>
+            {/* The sending device: the own device is picked silently; more than one connected
+                device (own + branch) shows the picker, the own device first (Danny Q4). */}
+            {deviceOptions.length > 1 && (
+              <div style={{ marginBottom: 14 }}>
+                <div style={fieldLabel}>{t('conversations.pickDevice')}</div>
+                <CreatableSelect value={deviceId || null} onChange={setDeviceId}
+                  placeholder={t('conversations.numberPlaceholder')} allowCreate={false} menuWidth={pickerMenuWidth}
+                  style={fieldFootprint} options={deviceOptions.map(d => ({ value: d.value, label: d.owner ? `${d.label} · ${d.owner}` : d.label }))} />
+              </div>
+            )}
+            {deviceOptions.length === 0 && (
+              <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3, marginBottom: 14, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                <span>{t('conversations.devicesEmpty')}</span>
+                <Button href={PROFILE_HASH} variant="ghostAccent" size="sm" style={{ padding: 0, height: 'auto' }}>{t('conversations.linkDevice')}</Button>
+              </div>
+            )}
+          </>
+        )}
+
+        {!loading && channel === 'waba' && (
           <>
             {/* Template — searchable pick-only combobox: approved templates only, never a typed name. */}
             <div style={{ marginBottom: 14 }}>
@@ -223,7 +317,7 @@ export default function StartConversationModal({ candidateId, subject, onClose, 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <Button variant="secondary" onClick={onClose}>{t('common:cancel')}</Button>
           <Button variant="primary" onClick={submit} disabled={!canSend}>
-            {sending ? t('common:saving') : t('conversations.start')}
+            {sending ? t('common:saving') : channel === 'wa_web' ? t('conversations.send') : t('conversations.start')}
           </Button>
         </div>
     </FloatingPanel>
