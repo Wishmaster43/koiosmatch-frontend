@@ -93,7 +93,24 @@ export interface RunStep {
   output?: unknown
   duration_ms?: number
   operations?: number
+  // RUN-MESSAGES-1 (Danny 10-09 12:30: "ik moet het bericht hier terug kunnen zien"): the
+  // messages a send step produced — recipient, channel, status (+ reason), a PII-gated
+  // preview, and the record the thread belongs to for the deep link. Absent on older runs.
+  messages?: RunStepMessage[] | null
   [key: string]: unknown
+}
+
+// One message a send step wrote (RUN-MESSAGES-1 contract, read tolerantly).
+export interface RunStepMessage {
+  recipient_label?: string | null
+  channel?: string | null
+  status?: string | null
+  reason?: string | null
+  message_id?: string | number | null
+  outbox_id?: string | number | null
+  preview?: string | null
+  conversation_id?: string | number | null
+  subject?: { type: string; id: string | number } | null
 }
 
 // One workflow run (execution) row.

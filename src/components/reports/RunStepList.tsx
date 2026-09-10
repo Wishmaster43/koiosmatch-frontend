@@ -15,7 +15,11 @@ import { hhmm } from '@/lib/localDate'
 import StepOutputSlice from '@/components/layout/workflow/StepOutputSlice'
 import { useModuleCatalog } from '@/components/layout/workflow/useModuleCatalog'
 import { Caption, BodyText } from '@/components/ui/typography'
-import type { RunStep } from '@/types/reports'
+import SoftChip from '@/components/ui/SoftChip'
+import Button from '@/components/ui/Button'
+import { useNavigation } from '@/context/NavigationContext'
+import { pageForResultRef } from '@/components/layout/koios/koiosResultLinks'
+import type { RunStep, RunStepMessage } from '@/types/reports'
 
 // Pretty-print a data bundle as JSON, or null when there is nothing to show.
 function stringifyBundle(v: unknown): string | null {
@@ -42,6 +46,56 @@ function BundleBlock({ label, value }: { label: string; value: unknown }) {
                         padding: 10, overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
             {text}
           </pre>}
+    </div>
+  )
+}
+
+// A message status → its semantic colour (WA-SEND-STATUS-1: queued is honest, never "sent").
+const MESSAGE_STATUS_COLOR: Record<string, string> = {
+  sent: 'var(--color-success)', delivered: 'var(--color-success)', read: 'var(--color-success)',
+  queued: 'var(--color-info)', scheduled: 'var(--color-info)',
+  failed: 'var(--color-danger)', skipped: 'var(--color-warning)',
+}
+
+// The send step's counters as the engine reports them (whatsapp_sent / _queued / _skipped / _errors).
+function sendCounters(output: unknown): { sent: number; queued: number; skipped: number; errors: number; noRecipients: boolean } | null {
+  if (!output || typeof output !== 'object') return null
+  const o = output as Record<string, unknown>
+  if (!('whatsapp_sent' in o) && !('whatsapp_queued' in o)) return null
+  const n = (v: unknown) => (Array.isArray(v) ? v.length : Number(v ?? 0)) || 0
+  return { sent: n(o.whatsapp_sent), queued: n(o.whatsapp_queued), skipped: n(o.whatsapp_skipped), errors: n(o.whatsapp_errors), noRecipients: o.no_recipients === true }
+}
+
+// RUN-MESSAGES-1: the messages a send step produced — one row per recipient with the
+// channel, an honest status chip (+ reason), the preview, and a deep link to the thread
+// on the record it belongs to (the same navigation the Koios chips use).
+function StepMessages({ messages, counters }: { messages: RunStepMessage[]; counters: ReturnType<typeof sendCounters> }) {
+  const { t } = useTranslation('reports')
+  const { openEntity } = useNavigation()
+  const statusLabel = (s: string | null | undefined) => (s ? t(`runs.drawer.messages.status.${s}`, { defaultValue: s }) : '')
+  return (
+    <div style={{ padding: '0 12px 10px 33px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <Caption as="div" style={{ fontWeight: 600 }}>
+        {t('runs.drawer.messages.title')} ({messages.length})
+        {counters && (counters.noRecipients || (messages.length === 0 && counters.sent + counters.queued === 0)) && (
+          <> · {t('runs.drawer.messages.noRecipients')}</>
+        )}
+      </Caption>
+      {messages.map((m, i) => {
+        const page = m.subject ? pageForResultRef(m.subject.type) : null
+        return (
+          <div key={String(m.message_id ?? m.outbox_id ?? i)} style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, fontSize: 12 }}>
+            {page && m.subject
+              ? <Button variant="ghostAccent" size="sm" style={{ padding: 0, height: 'auto' }} onClick={() => openEntity(page, String(m.subject!.id), 'communication')}>
+                  {m.recipient_label}
+                </Button>
+              : <span style={{ fontWeight: 500 }}>{m.recipient_label}</span>}
+            {m.channel && <Caption>{m.channel}</Caption>}
+            {m.status && <SoftChip label={statusLabel(m.status)} color={MESSAGE_STATUS_COLOR[m.status] ?? 'var(--text-muted)'} title={m.reason ?? undefined} />}
+            {m.preview && <Caption style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={m.preview}>{m.preview}</Caption>}
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -110,6 +164,11 @@ function StepCard({ step, index, catalog }: { step: RunStep; index: number; cata
         </div>
       )}
 
+      {/* RUN-MESSAGES-1: the messages of a send step (always visible when the run carries them),
+          with the engine's honest counters — zero recipients says so. */}
+      {(Array.isArray(step.messages) || sendCounters(step.output)) && (
+        <StepMessages messages={Array.isArray(step.messages) ? step.messages : []} counters={sendCounters(step.output)} />
+      )}
       {/* Expanded detail: FIRST the readable Make-style output table (which
           candidates, per column — HIST-DETAIL-1), then the raw I/O bundles. */}
       {open && hasIO && (

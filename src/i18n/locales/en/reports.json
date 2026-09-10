@@ -383,6 +383,19 @@
       "input": "Input",
       "output": "Output",
       "noData": "No data",
+      "messages": {
+        "title": "Messages",
+        "noRecipients": "no recipients",
+        "status": {
+          "queued": "Scheduled",
+          "scheduled": "Scheduled",
+          "sent": "Sent",
+          "delivered": "Delivered",
+          "read": "Read",
+          "failed": "Failed",
+          "skipped": "Skipped"
+        }
+      },
       "error": "Error message",
       "workflowFallback": "Workflow #{{id}}",
       "attempts": "Attempt {{count}}",

@@ -383,6 +383,19 @@
       "input": "Input",
       "output": "Output",
       "noData": "Geen data",
+      "messages": {
+        "title": "Berichten",
+        "noRecipients": "geen ontvangers",
+        "status": {
+          "queued": "Ingepland",
+          "scheduled": "Ingepland",
+          "sent": "Verzonden",
+          "delivered": "Afgeleverd",
+          "read": "Gelezen",
+          "failed": "Mislukt",
+          "skipped": "Overgeslagen"
+        }
+      },
       "error": "Foutmelding",
       "workflowFallback": "Workflow #{{id}}",
       "attempts": "Poging {{count}}",

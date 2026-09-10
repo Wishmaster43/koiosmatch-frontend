@@ -6,6 +6,8 @@ import type { RunStep } from '@/types/reports'
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string; n?: number; count?: number; time?: string }) => opts?.defaultValue ?? k, i18n: { language: 'nl' } }) }))
 vi.mock('@/lib/formatters', () => ({ formatSeconds: (ms: number) => String((ms / 1000).toFixed(1)).replace('.', ',') }))
 vi.mock('@/components/layout/workflow/useModuleCatalog', () => ({ useModuleCatalog: () => ({ catalog: {} }) }))
+const openEntity = vi.fn()
+vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity, navigate: vi.fn() }) }))
 
 // i18n is not initialised in tests, so t() returns the raw key — assertions
 // check for the keys (e.g. 'runs.drawer.input').
@@ -59,5 +61,31 @@ describe('RunStepList · WF-DRYRUN-FE-1 skipped rows', () => {
     expect(screen.getByText('Dry-run: niet verzonden')).toBeInTheDocument()
     // The real outcome next to it still reads as a normal success badge.
     expect(screen.getByText('success')).toBeInTheDocument()
+  })
+})
+
+// RUN-MESSAGES-1 (Danny 10-09): a send step lists the messages it wrote, with an honest
+// status per row and a deep link to the thread; zero recipients says so.
+describe('RunStepList · RUN-MESSAGES-1', () => {
+  it('lists a send step\'s messages with status chips and deep-links a row to its record', () => {
+    const step: RunStep = { label: 'WhatsApp sturen', status: 'completed', ok: true,
+      output: { whatsapp_sent: 0, whatsapp_queued: 1, whatsapp_skipped: [], whatsapp_errors: [] },
+      messages: [{ recipient_label: 'Niels Groen', channel: 'wa_web', status: 'queued', outbox_id: 'ob-1', preview: 'Hoi Niels, kun je morgen?', conversation_id: 'cv-1', subject: { type: 'candidate', id: 'c-1' } }] }
+    render(<RunStepList steps={[step]} />)
+    expect(screen.getByText(/runs\.drawer\.messages\.title/)).toBeInTheDocument()
+    // This suite's t() mock returns the defaultValue, i.e. the raw status; the real catalogue labels it.
+    expect(screen.getByText('queued')).toBeInTheDocument()
+    expect(screen.getByText('Hoi Niels, kun je morgen?')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Niels Groen' }))
+    expect(openEntity).toHaveBeenCalledWith('candidates', 'c-1', 'communication')
+  })
+
+  it('says "no recipients" when the engine counted none, and stays silent on a step without send counters', () => {
+    render(<RunStepList steps={[
+      { label: 'WhatsApp sturen', status: 'completed', ok: true, output: { whatsapp_sent: 0, whatsapp_queued: 0, whatsapp_skipped: [], whatsapp_errors: [], no_recipients: true }, messages: [] },
+      { label: 'Kandidaten ophalen', status: 'completed', ok: true, output: { rows: 3 } },
+    ]} />)
+    expect(screen.getByText(/runs\.drawer\.messages\.noRecipients/)).toBeInTheDocument()
+    expect(screen.getAllByText(/runs\.drawer\.messages\.title/)).toHaveLength(1)
   })
 })
