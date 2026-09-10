@@ -50,6 +50,7 @@ import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { modalColumns, cardBox, cardHead } from '@/components/ui/modalCards'
 import SubEntityImportCard from './SubEntityImportCard'
 import SubEntityModalFrame from './addmodal/SubEntityModalFrame'
+import { subEntityFrameProps } from './addmodal/subEntityFrameProps'
 import CreateErrorAlert from './addmodal/CreateErrorAlert'
 import { useSubEntitySave } from './hooks/useSubEntitySave'
 import LocationGeneralCard from './addmodal/LocationGeneralCard'
@@ -292,27 +293,15 @@ export default function AddLocationModal({
 
   return (
     <SubEntityModalFrame
-      open
-      onClose={onClose}
-      ariaLabel={isEdit ? t('subModal.editLocation') : t('subModal.addLocation')}
-      persistKey="customer-add-location"
-      isEdit={isEdit}
-      title={isEdit ? t('subModal.editLocation') : t('subModal.addLocation')}
-      subtitle={customerName}
+      {...subEntityFrameProps({
+        t, isEdit, editTitle: t('subModal.editLocation'), addTitle: t('subModal.addLocation'),
+        entityLabel: t('settings:import.entities.locations.label'), persistKey: 'customer-add-location',
+        customerName, importOpen, setImportOpen, alert: alertElement, importCard: importCardElement,
+        onClose, submit, canSubmit,
+      })}
       icon={MapPin}
       iconColor="var(--color-secondary)"
       iconBg="var(--color-secondary-bg)"
-      importOpen={importOpen}
-      setImportOpen={setImportOpen}
-      importButtonTitle={t('subModal.import.title', { entity: t('settings:import.entities.locations.label') })}
-      importCardTitle={t('subModal.import.title', { entity: t('settings:import.entities.locations.label') })}
-      alert={alertElement}
-      importCard={importCardElement}
-      onCancel={onClose}
-      onSubmit={submit}
-      cancelLabel={t('subModal.cancel')}
-      submitLabel={isEdit ? t('subModal.save') : t('subModal.create')}
-      submitDisabled={!canSubmit}
     >
       {/* Two-column section split (Danny 03-08 A+D decision): six cards stacked
           in ONE column left half the wide 1060px frame idle and forced a

@@ -37,6 +37,7 @@ import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { cardHead, cardBox, row2, row3Even } from '@/components/ui/modalCards'
 import SubEntityImportCard from './SubEntityImportCard'
 import SubEntityModalFrame from './addmodal/SubEntityModalFrame'
+import { subEntityFrameProps } from './addmodal/subEntityFrameProps'
 import CreateErrorAlert from './addmodal/CreateErrorAlert'
 import { useSubEntitySave } from './hooks/useSubEntitySave'
 import type { DepartmentPayload } from './hooks/useCustomerDepartments'
@@ -139,27 +140,15 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
 
   return (
     <SubEntityModalFrame
-      open
-      onClose={onClose}
-      ariaLabel={isEdit ? t('subModal.editDepartment') : t('subModal.addDepartment')}
-      persistKey="customer-add-department"
-      isEdit={isEdit}
-      title={isEdit ? t('subModal.editDepartment') : t('subModal.addDepartment')}
-      subtitle={customerName}
+      {...subEntityFrameProps({
+        t, isEdit, editTitle: t('subModal.editDepartment'), addTitle: t('subModal.addDepartment'),
+        entityLabel: t('settings:import.entities.departments.label'), persistKey: 'customer-add-department',
+        customerName, importOpen, setImportOpen, alert: alertElement, importCard: importCardElement,
+        onClose, submit, canSubmit,
+      })}
       icon={Building}
       iconColor="var(--color-violet)"
       iconBg="var(--color-violet-bg)"
-      importOpen={importOpen}
-      setImportOpen={setImportOpen}
-      importButtonTitle={t('subModal.import.title', { entity: t('settings:import.entities.departments.label') })}
-      importCardTitle={t('subModal.import.title', { entity: t('settings:import.entities.departments.label') })}
-      alert={alertElement}
-      importCard={importCardElement}
-      onCancel={onClose}
-      onSubmit={submit}
-      cancelLabel={t('subModal.cancel')}
-      submitLabel={isEdit ? t('subModal.save') : t('subModal.create')}
-      submitDisabled={!canSubmit}
     >
       {/* Algemeen — name, locatie (searchable, hidden when locked), status.
           Location+status pair in one row when both show; status alone stays

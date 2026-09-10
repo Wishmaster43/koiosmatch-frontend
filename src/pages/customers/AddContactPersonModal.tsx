@@ -64,6 +64,7 @@ import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { modalColumns } from '@/components/ui/modalCards'
 import SubEntityImportCard from './SubEntityImportCard'
 import SubEntityModalFrame from './addmodal/SubEntityModalFrame'
+import { subEntityFrameProps } from './addmodal/subEntityFrameProps'
 import CreateErrorAlert from './addmodal/CreateErrorAlert'
 import ContactIdentityCard from './addmodal/ContactIdentityCard'
 import ContactDetailsCard from './addmodal/ContactDetailsCard'
@@ -140,27 +141,15 @@ export default function AddContactPersonModal({
 
   return (
     <SubEntityModalFrame
-      open
-      onClose={onClose}
-      ariaLabel={isEdit ? t('subModal.editContact') : t('subModal.addContact')}
-      persistKey="customer-add-contact"
-      isEdit={isEdit}
-      title={isEdit ? t('subModal.editContact') : t('subModal.addContact')}
-      subtitle={customerName}
+      {...subEntityFrameProps({
+        t, isEdit, editTitle: t('subModal.editContact'), addTitle: t('subModal.addContact'),
+        entityLabel: t('settings:import.entities.contacts.label'), persistKey: 'customer-add-contact',
+        customerName, importOpen, setImportOpen, alert: alertElement, importCard: importCardElement,
+        onClose, submit, canSubmit,
+      })}
       icon={Users}
       iconColor="var(--color-primary)"
       iconBg="var(--color-primary-bg)"
-      importOpen={importOpen}
-      setImportOpen={setImportOpen}
-      importButtonTitle={t('subModal.import.title', { entity: t('settings:import.entities.contacts.label') })}
-      importCardTitle={t('subModal.import.title', { entity: t('settings:import.entities.contacts.label') })}
-      alert={alertElement}
-      importCard={importCardElement}
-      onCancel={onClose}
-      onSubmit={submit}
-      cancelLabel={t('subModal.cancel')}
-      submitLabel={isEdit ? t('subModal.save') : t('subModal.create')}
-      submitDisabled={!canSubmit}
     >
       {/* HET-RECEPT (Danny 14-08): two responsive columns, same idiom as
           AddCustomerModal/AddLocationModal — LEFT keeps the identity fields
