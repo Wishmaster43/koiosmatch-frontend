@@ -176,15 +176,22 @@ export default function DashboardLayout() {
 
       {/* ── Koios AI panel ── */}
       {/* onNavigate wires the landing-state radar's deep-links to the same page-switch
-          the sidebar uses (KoiosPanel renders outside NavigationProvider's scope). */}
-      <KoiosPanel
-        open={koiosOpen}
-        onClose={() => setKoiosOpen(false)}
-        onNavigate={goTo}
-        initialQuestion={koiosQuestion}
-        initialContextRef={koiosContextRef}
-        onInitialQuestionConsumed={() => setKoiosQuestion(null)}
-      />
+          the sidebar uses. KOIOS-CHIP-NAV-1 (Danny 10-09, verbatim "ik kan niet op een
+          klant kandidaat vacature sollicitatie etc klikken in Koios AI en dan gebeurt er
+          niets"): the record chips inside the panel navigate through useNavigation(), and
+          the panel rendered OUTSIDE the page's NavigationProvider, so every chip click hit
+          the context's no-op default. The panel gets its own provider on the same goTo:
+          a chip jumps to the record's page and opens its drawer (and tab) at the right. */}
+      <NavigationProvider goTo={goTo}>
+        <KoiosPanel
+          open={koiosOpen}
+          onClose={() => setKoiosOpen(false)}
+          onNavigate={goTo}
+          initialQuestion={koiosQuestion}
+          initialContextRef={koiosContextRef}
+          onInitialQuestionConsumed={() => setKoiosQuestion(null)}
+        />
+      </NavigationProvider>
 
       {/* ── Right column: topbar + content + filter panel ── */}
       <div className="km-main-bg flex flex-col flex-1 overflow-hidden" style={{ background: 'var(--bg)' }}>

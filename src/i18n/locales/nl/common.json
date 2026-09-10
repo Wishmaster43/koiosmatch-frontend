@@ -270,7 +270,10 @@
       "askKoios": "In de chat afmaken",
       "askIntent": "{{body}} Wat stel je voor?",
       "execute": "Uitvoeren",
-      "createdTask": "Taak aangemaakt"
+      "createdTask": "Taak aangemaakt",
+      "disabledForTenant": "Uit voor jouw organisatie",
+      "disabledForMe": "Uit voor jou",
+      "settingsLink": "Instellen"
     },
     "feedback": {
       "up": "Nuttig",

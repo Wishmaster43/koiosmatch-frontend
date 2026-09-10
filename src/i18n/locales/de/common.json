@@ -270,7 +270,10 @@
       "askKoios": "Im Chat abschließen",
       "askIntent": "{{body}} Was schlägst du vor?",
       "execute": "Ausführen",
-      "createdTask": "Aufgabe erstellt"
+      "createdTask": "Aufgabe erstellt",
+      "disabledForTenant": "Für deine Organisation ausgeschaltet",
+      "disabledForMe": "Für dich ausgeschaltet",
+      "settingsLink": "Einstellen"
     },
     "feedback": {
       "up": "Hilfreich",

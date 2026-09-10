@@ -24,6 +24,60 @@ import { apiErrorKey } from '@/lib/extractApiError'
 import type { KoiosChatMessage, KoiosContextRef } from '@/types/koios'
 import type { KoiosEffort } from './koiosTypes'
 import './koiosTypes' // module augmentation: KoiosChatMessage.pendingAction, KoiosStep.refs
+import type { KoiosChatTurn } from './koiosTypes'
+
+// KOIOS-MEMORY-1 (Danny 10-09, verbatim: "Koios AI heeft geen geschiedenis het lijkt wel
+// of elke bericht hij niet meer snapt wat het vorige bericht was"): measured, the chat
+// endpoint received only the new message, so "kan je hem een bericht sturen?" had no
+// "hem". Two carriers now: the last turns as text (history, read by the BE once its
+// half lands) and the records the previous answer named, sent as context so the
+// follow-up resolves against them today. Bounded for data minimisation (§9).
+export const KOIOS_HISTORY_TURNS = 8
+export const KOIOS_CONTEXT_MAX = 5
+
+// The last turns as [{ role, content }] — user text and assistant answers only, never a
+// welcome/error bubble, never tool steps.
+export function historyOf(messages: KoiosChatMessage[]): KoiosChatTurn[] {
+  const turns: KoiosChatTurn[] = []
+  for (const m of messages) {
+    if (m.role === 'user' && m.content) turns.push({ role: 'user', content: m.content })
+    else if (m.role === 'assistant' && m.answer) turns.push({ role: 'assistant', content: m.answer })
+  }
+  return turns.slice(-KOIOS_HISTORY_TURNS)
+}
+
+// The records the most recent answer referenced (deduped by type:id), the anchor for
+// a follow-up like "hem"; an answer that listed more than the context cap names too
+// many to guess from, so it carries none and the user picks one.
+export function carriedRefsOf(messages: KoiosChatMessage[]): KoiosContextRef[] {
+  const last = [...messages].reverse().find(m => m.role === 'assistant' && Array.isArray(m.steps))
+  if (!last) return []
+  const seen = new Set<string>()
+  const refs: KoiosContextRef[] = []
+  for (const step of last.steps ?? []) {
+    for (const ref of step.refs ?? []) {
+      const key = `${ref.type}:${ref.id}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      refs.push(ref)
+    }
+  }
+  return refs.length > KOIOS_CONTEXT_MAX ? [] : refs
+}
+
+// Explicit @-mentions first, then the carried records, capped to what the endpoint accepts.
+function mergeContext(explicit: KoiosContextRef[] | undefined, carried: KoiosContextRef[]): KoiosContextRef[] | undefined {
+  const merged: KoiosContextRef[] = [...(explicit ?? [])]
+  const seen = new Set(merged.map(r => `${r.type}:${r.id}`))
+  for (const ref of carried) {
+    if (merged.length >= KOIOS_CONTEXT_MAX) break
+    const key = `${ref.type}:${ref.id}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    merged.push(ref)
+  }
+  return merged.length ? merged : explicit
+}
 
 const welcomeMessage = (): KoiosChatMessage => ({ role: 'assistant', kind: 'welcome' })
 
@@ -44,10 +98,13 @@ export function useKoiosChat() {
   const send = useCallback(async (text: string, context?: KoiosContextRef[]) => {
     const trimmed = text.trim()
     if (!trimmed || loading) return
+    // Snapshot the thread BEFORE the optimistic bubble: the history is what came before.
+    const history = historyOf(messages)
+    const mergedContext = mergeContext(context, carriedRefsOf(messages))
     setMessages((prev) => [...prev, { role: 'user', content: trimmed }])
     setLoading(true)
     try {
-      const data = await sendChat(trimmed, model, context, flavor, effort, voiceMode)
+      const data = await sendChat(trimmed, model, mergedContext, flavor, effort, voiceMode, history.length ? history : undefined)
       setMessages((prev) => [...prev, {
         role:       'assistant',
         answer:     data?.answer ?? '',
@@ -73,7 +130,7 @@ export function useKoiosChat() {
     } finally {
       setLoading(false)
     }
-  }, [loading, model, flavor, effort, voiceMode])
+  }, [loading, messages, model, flavor, effort, voiceMode])
 
   // Start over with just the welcome bubble.
   const reset = useCallback(() => setMessages([welcomeMessage()]), [])

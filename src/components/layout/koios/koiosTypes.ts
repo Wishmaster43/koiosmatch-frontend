@@ -79,6 +79,9 @@ declare module '@/types/koios' {
   }
 }
 
+// KOIOS-MEMORY-1: one earlier turn of the conversation as the chat endpoint receives it (text only, §9).
+export interface KoiosChatTurn { role: 'user' | 'assistant'; content: string }
+
 // K-147: the per-chat reasoning-effort override, the server's own scale (POST /ai/koios/chat `effort`).
 export type KoiosEffort = 'low' | 'medium' | 'high' | 'xhigh' | 'max'
 // The scale in ascending order — the picker ranks levels against the package ceiling with it.

@@ -21,6 +21,25 @@ const mockPost = api.post as unknown as ReturnType<typeof vi.fn>
 const openEntity = vi.fn()
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity, navigate: vi.fn() }) }))
 
+// KOIOS-ROW-2: the tool registry's word per tool (confirm_required → one click or two,
+// enabled_for_* → offered or disabled with a reason). Mutable per test, real findToolCapability.
+type CapTool = { name: string; label_nl: string; confirm_required: boolean; enabled_for_me: boolean; enabled_for_tenant: boolean; default_enabled: boolean; connection_active: boolean | null; connection: null }
+const capTool = (name: string, over: Partial<CapTool> = {}): CapTool =>
+  ({ name, label_nl: name, confirm_required: true, enabled_for_me: true, enabled_for_tenant: true, default_enabled: true, connection_active: null, connection: null, ...over })
+const DEFAULT_CAP_TOOLS: CapTool[] = [capTool('zoek_kandidaten', { label_nl: 'Kandidaten zoeken', confirm_required: false }), capTool('wijzig_taak'), capTool('maak_taak')]
+let capTools: CapTool[] = DEFAULT_CAP_TOOLS
+vi.mock('./useKoiosToolCapabilities', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('./useKoiosToolCapabilities')>()),
+  useKoiosToolCapabilities: () => ({ tools: capTools, isLoading: false, isError: false, capabilities: null }),
+}))
+
+// The assistant list as a PERSISTENT answer (the block refetches after an executed or
+// cancelled action, so a one-shot value would leave the refetch unmocked).
+const givenSuggestions = (suggestions: unknown[]) =>
+  mockGet.mockImplementation((url: string) => url === '/ai/koios/assistant'
+    ? Promise.resolve({ data: { data: { suggestions } } })
+    : Promise.reject(new Error(`unmocked GET ${url}`)))
+
 // Fresh QueryClient per test so cache never leaks between cases.
 function renderBlock(props: { onAskKoios?: (text: string) => void } = {}) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -31,15 +50,16 @@ beforeEach(() => {
   mockGet.mockReset()
   mockPost.mockReset()
   openEntity.mockReset()
+  capTools = DEFAULT_CAP_TOOLS
   localStorage.clear()
 })
 
 describe('KoiosAssistantBlock', () => {
   it('renders suggestion cards in the exact server order', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+    givenSuggestions([
       { kind: 'task_overdue', title: 'First task', body: 'Body one', refs: [] },
       { kind: 'candidate_no_contact', title: 'Second lead', body: 'Body two', refs: [] },
-    ] } } })
+    ])
     renderBlock()
     const titles = await screen.findAllByText(/First task|Second lead/)
     expect(titles.map((el) => el.textContent)).toEqual(['First task', 'Second lead'])
@@ -48,9 +68,9 @@ describe('KoiosAssistantBlock', () => {
   })
 
   it('deep-links a suggestion ref via openEntity', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+    givenSuggestions([
       { kind: 'pending_action', title: 'Follow up', body: 'Do it', refs: [{ type: 'candidate', id: '42', label: 'Jane Doe' }] },
-    ] } } })
+    ])
     renderBlock()
     const card = await screen.findByText('Jane Doe')
     fireEvent.click(card)
@@ -58,14 +78,14 @@ describe('KoiosAssistantBlock', () => {
   })
 
   it('shows the empty state when there are zero suggestions', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [] } } })
+    givenSuggestions([])
     renderBlock()
     expect(await screen.findByText('koios.assistant.emptyState')).toBeInTheDocument()
   })
 
   it('shows a subtle error with retry, and retry refetches', async () => {
     mockGet.mockRejectedValueOnce(new Error('network'))
-    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [] } } })
+    givenSuggestions([])
     renderBlock()
     await screen.findByText('error.body')
     fireEvent.click(screen.getByText('error.retry'))
@@ -77,9 +97,9 @@ describe('KoiosAssistantBlock', () => {
 
   // Golf 2 (contract CMBE-gepind): a parked action executes via the REAL seam.
   it('confirms a parked action via POST /ai/koios/actions/{id}/confirm and shows the executed state', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+    givenSuggestions([
       { kind: 'pending_action', title: 'Parked', body: 'Ready', refs: [{ type: 'pending_action', id: 'pa-7', label: 'Parked' }] },
-    ] } } })
+    ])
     mockPost.mockResolvedValueOnce({ data: { status: 'executed', data: {} } })
     renderBlock()
     fireEvent.click(await screen.findByRole('button', { name: /pendingAction\.confirm/ }))
@@ -88,9 +108,9 @@ describe('KoiosAssistantBlock', () => {
   })
 
   it('shows the SERVER message unvarnished when confirm is refused', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+    givenSuggestions([
       { kind: 'pending_action', title: 'Parked', body: 'Ready', refs: [{ type: 'pending_action', id: 'pa-8', label: 'Parked' }] },
-    ] } } })
+    ])
     mockPost.mockRejectedValueOnce({ response: { status: 422, data: { message: 'Uitvoering mislukt: tool niet bedraad.' } } })
     renderBlock()
     fireEvent.click(await screen.findByRole('button', { name: /pendingAction\.confirm/ }))
@@ -100,9 +120,9 @@ describe('KoiosAssistantBlock', () => {
   // PRIJSMODEL-C 30-08: a declined confirm's message still renders unvarnished
   // (asserted above); the budget's upgrade_hint must ALSO surface, not be dropped.
   it('shows the upgrade hint from data.budget on a budget_exceeded decline', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+    givenSuggestions([
       { kind: 'pending_action', title: 'Parked', body: 'Ready', refs: [{ type: 'pending_action', id: 'pa-10', label: 'Parked' }] },
-    ] } } })
+    ])
     mockPost.mockRejectedValueOnce({ response: { status: 422, data: {
       status: 'declined', message: 'Workflow-staffel is vol.',
       data: { budget: { state: 'blocked', allowance: 100, used: 100, upgrade_hint: { next_tier_label: 'Pro' } } },
@@ -114,9 +134,9 @@ describe('KoiosAssistantBlock', () => {
   })
 
   it('cancel posts to /cancel and shows the cancelled state', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+    givenSuggestions([
       { kind: 'pending_action', title: 'Parked', body: 'Ready', refs: [{ type: 'pending_action', id: 'pa-9', label: 'Parked' }] },
-    ] } } })
+    ])
     mockPost.mockResolvedValueOnce({ data: { status: 'cancelled' } })
     renderBlock()
     fireEvent.click(await screen.findByRole('button', { name: /pendingAction\.cancel/ }))
@@ -125,9 +145,9 @@ describe('KoiosAssistantBlock', () => {
   })
 
   it('a descriptor kind hands off to the chat: prefills via onAskKoios, never an API call', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+    givenSuggestions([
       { kind: 'task_overdue', title: 'Bel Ahmed terug', body: 'Taak verlopen', refs: [], action: { tool: 'wijzig_taak', input: {} } },
-    ] } } })
+    ])
     const onAskKoios = vi.fn()
     renderBlock({ onAskKoios })
     fireEvent.click(await screen.findByRole('button', { name: /assistant\.askKoios/ }))
@@ -143,18 +163,18 @@ describe('KoiosAssistantBlock', () => {
   // Regression for the Opus golf-2 blocker: terminal state may NEVER survive a
   // list swap onto a DIFFERENT action — stable identity keys remount the row.
   it('a refetch that swaps in a different parked action shows live buttons, never the previous verdict', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+    givenSuggestions([
       { kind: 'pending_action', title: 'Eerste', body: 'a', refs: [{ type: 'pending_action', id: 'pa-x', label: 'Eerste' }] },
-    ] } } })
+    ])
     mockPost.mockResolvedValueOnce({ data: { status: 'executed', data: {} } })
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     render(<QueryClientProvider client={client}><KoiosAssistantBlock /></QueryClientProvider>)
     fireEvent.click(await screen.findByRole('button', { name: /pendingAction\.confirm/ }))
     await screen.findByText(/pendingAction\.confirmed/)
     // The next fetch returns a DIFFERENT parked action in the same slot.
-    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+    givenSuggestions([
       { kind: 'pending_action', title: 'Tweede', body: 'b', refs: [{ type: 'pending_action', id: 'pa-y', label: 'Tweede' }] },
-    ] } } })
+    ])
     await client.refetchQueries({ queryKey: ['koios', 'assistant'] })
     await screen.findAllByText('Tweede')
     expect(screen.getByRole('button', { name: /pendingAction\.confirm/ })).toBeInTheDocument()
@@ -163,9 +183,9 @@ describe('KoiosAssistantBlock', () => {
 
   // SERVER truth beats HTTP truth: a 200 whose status is not the verdict errors honestly.
   it('a 200 without status=executed lands in the error branch with the server message', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+    givenSuggestions([
       { kind: 'pending_action', title: 'Parked', body: 'x', refs: [{ type: 'pending_action', id: 'pa-z', label: 'Parked' }] },
-    ] } } })
+    ])
     mockPost.mockResolvedValueOnce({ data: { status: 'failed', message: 'tool niet bedraad' } })
     renderBlock()
     fireEvent.click(await screen.findByRole('button', { name: /pendingAction\.confirm/ }))
@@ -174,9 +194,9 @@ describe('KoiosAssistantBlock', () => {
   })
 
   it('a parked action WITHOUT its pending_action ref stages like any descriptor (golf 3)', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+    givenSuggestions([
       { kind: 'pending_action', title: 'Old BE', body: 'No ref', refs: [], action: { tool: 'x', input: {} } },
-    ] } } })
+    ])
     renderBlock()
     await screen.findByText('Old BE')
     expect(screen.getByRole('button', { name: /assistant\.execute/ })).toBeInTheDocument()
@@ -186,9 +206,9 @@ describe('KoiosAssistantBlock', () => {
   // Golf 3: one-click staging — Uitvoeren parks {tool,input}, the preview + the
   // REAL confirm follow on the card; nothing executes before Bevestigen.
   it('Uitvoeren stages the descriptor, shows the preview and confirms with the staged id', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+    givenSuggestions([
       { kind: 'task_overdue', title: 'Bel Ahmed', body: 'x', refs: [], action: { tool: 'wijzig_taak', input: { task_id: 't1' } } },
-    ] } } })
+    ])
     mockPost.mockResolvedValueOnce({ data: { status: 'staged', action: { id: 'pa-77', title: 'Bel Ahmed', preview: [{ label: 'Deadline', before: '26-08-2026', after: '28-08-2026' }] } } })
     renderBlock()
     fireEvent.click(await screen.findByRole('button', { name: /assistant\.execute/ }))
@@ -201,9 +221,9 @@ describe('KoiosAssistantBlock', () => {
   })
 
   it('a refused stage (403) shows the server message and executes nothing', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+    givenSuggestions([
       { kind: 'task_overdue', title: 'Bel Ahmed', body: 'x', refs: [], action: { tool: 'wijzig_taak', input: {} } },
-    ] } } })
+    ])
     mockPost.mockRejectedValueOnce({ response: { status: 403, data: { message: 'Je mag deze tool niet uitvoeren.' } } })
     renderBlock()
     fireEvent.click(await screen.findByRole('button', { name: /assistant\.execute/ }))
@@ -216,10 +236,10 @@ describe('KoiosAssistantBlock', () => {
 // the created record linked after a confirm, and raw id rows kept out of the preview.
 describe('KoiosAssistantBlock · Danny 09-09 row behaviour', () => {
   it('a suggestion without any action still offers the SAME chat handoff button (never a filled variant)', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+    givenSuggestions([
       { kind: 'opportunity_closing_soon', title: 'Uitbreiding flexpool', body: 'Kans sluit over 8 dagen.', refs: [{ type: 'opportunity', id: 'o1', label: 'Uitbreiding flexpool' }], action: null },
       { kind: 'candidate_no_contact', title: 'Sanne Kuipers', body: 'Bel Sanne Kuipers: 382 dagen geen contact.', refs: [{ type: 'candidate', id: 'c1', label: 'Sanne Kuipers' }], action: { tool: 'maak_taak', input: { titel: 'Bel Sanne Kuipers', kandidaat_id: 'c1' } } },
-    ] } } })
+    ])
     const onAskKoios = vi.fn()
     renderBlock({ onAskKoios })
     const chatButtons = await screen.findAllByRole('button', { name: /assistant\.askKoios/ })
@@ -232,9 +252,9 @@ describe('KoiosAssistantBlock · Danny 09-09 row behaviour', () => {
   })
 
   it('a confirmed maak_taak shows the created task as a deep-link chip and hides raw id rows from the preview', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+    givenSuggestions([
       { kind: 'candidate_no_contact', title: 'Sem Timmermans', body: 'Bel Sem Timmermans: 181 dagen geen contact.', refs: [{ type: 'candidate', id: 'c2', label: 'Sem Timmermans' }], action: { tool: 'maak_taak', input: { titel: 'Bel Sem Timmermans', kandidaat_id: 'c2' } } },
-    ] } } })
+    ])
     mockPost.mockResolvedValueOnce({ data: { status: 'staged', action: { id: 'pa-9', title: 'Bel Sem Timmermans', preview: [{ label: 'titel', text: 'Bel Sem Timmermans' }, { label: 'kandidaat_id', text: '9120a898-9e4c-40cb-896e-295c04a6baef' }] } } })
     renderBlock()
     fireEvent.click(await screen.findByRole('button', { name: /assistant\.execute/ }))
@@ -247,5 +267,67 @@ describe('KoiosAssistantBlock · Danny 09-09 row behaviour', () => {
     const taskChips = screen.getAllByRole('button', { name: /Bel Sem Timmermans/ })
     fireEvent.click(taskChips[taskChips.length - 1])
     expect(openEntity).toHaveBeenCalledWith('tasks', 't-55')
+  })
+})
+
+// Danny 10-09 (live review, Kelly's panel): one click where the registry needs no confirm,
+// the landing after an executed search, an honest disabled state, and the refetch after.
+describe('KoiosAssistantBlock · KOIOS-ROW-2', () => {
+  const vacancyRow = { kind: 'vacancy_zero_applications', title: 'Verzorgende IG | Amsterdam', body: 'Vacature "Verzorgende IG | Amsterdam" heeft nog geen kandidaten. Zoeken?', refs: [{ type: 'vacancy', id: 'v1', label: 'Verzorgende IG | Amsterdam' }], action: { tool: 'zoek_kandidaten', input: { vacature_id: 'v1' } } }
+
+  it('Uitvoeren executes in ONE click when the tool needs no confirm, then opens the vacancy on its candidate-search tab', async () => {
+    givenSuggestions([vacancyRow])
+    mockPost.mockResolvedValueOnce({ data: { status: 'staged', action: { id: 'pa-1', title: 'Kandidaten zoeken', preview: [{ label: 'functie', text: 'Verzorgende IG' }] } } })
+    mockPost.mockResolvedValueOnce({ data: { status: 'executed', data: { gelukt: true } } })
+    renderBlock()
+    fireEvent.click(await screen.findByRole('button', { name: /assistant\.execute/ }))
+    await screen.findByText(/pendingAction\.confirmed/)
+    expect(mockPost).toHaveBeenNthCalledWith(1, '/ai/koios/actions/stage', { tool: 'zoek_kandidaten', input: { vacature_id: 'v1' } })
+    expect(mockPost).toHaveBeenNthCalledWith(2, '/ai/koios/actions/pa-1/confirm')
+    // No second Bevestigen step, and the user lands on the record.
+    expect(screen.queryByRole('button', { name: /pendingAction\.confirm$/ })).toBeNull()
+    expect(openEntity).toHaveBeenCalledWith('vacancies', 'v1', 'candidateSearch')
+    // The list reads the server again after the action.
+    await waitFor(() => expect(mockGet.mock.calls.filter(c => c[0] === '/ai/koios/assistant').length).toBeGreaterThanOrEqual(2))
+  })
+
+  it("the confirm response's own navigate hint wins over the tool's follow-up", async () => {
+    givenSuggestions([vacancyRow])
+    mockPost.mockResolvedValueOnce({ data: { status: 'staged', action: { id: 'pa-2', title: 'Kandidaten zoeken', preview: [] } } })
+    mockPost.mockResolvedValueOnce({ data: { status: 'executed', data: { navigate: { type: 'candidate', id: 'c9', tab: 'communication' } } } })
+    renderBlock()
+    fireEvent.click(await screen.findByRole('button', { name: /assistant\.execute/ }))
+    await screen.findByText(/pendingAction\.confirmed/)
+    expect(openEntity).toHaveBeenCalledWith('candidates', 'c9', 'communication')
+  })
+
+  it('a confirm_required tool keeps the preview + Bevestigen step', async () => {
+    givenSuggestions([{ kind: 'task_overdue', title: 'Bel Ahmed', body: 'x', refs: [], action: { tool: 'wijzig_taak', input: { task_id: 't1' } } }])
+    mockPost.mockResolvedValueOnce({ data: { status: 'staged', action: { id: 'pa-3', title: 'Bel Ahmed', preview: [{ label: 'Deadline', before: '26-08-2026', after: '28-08-2026' }] } } })
+    renderBlock()
+    fireEvent.click(await screen.findByRole('button', { name: /assistant\.execute/ }))
+    await screen.findByText(/Deadline · 26-08-2026 → 28-08-2026/)
+    expect(screen.getByRole('button', { name: /pendingAction\.confirm$/ })).toBeInTheDocument()
+    expect(mockPost).toHaveBeenCalledTimes(1)
+  })
+
+  it('a tool switched off for the organisation renders Uitvoeren disabled with the reason and a link to the setting', async () => {
+    capTools = [capTool('maak_taak', { enabled_for_tenant: false })]
+    givenSuggestions([{ kind: 'candidate_no_contact', title: 'Sanne Kuipers', body: 'Bel Sanne Kuipers: 382 dagen geen contact.', refs: [{ type: 'candidate', id: 'c1', label: 'Sanne Kuipers' }], action: { tool: 'maak_taak', input: {} } }])
+    renderBlock()
+    const execute = await screen.findByRole('button', { name: /assistant\.execute/ })
+    expect(execute).toBeDisabled()
+    expect(screen.getByText('koios.assistant.disabledForTenant')).toBeInTheDocument()
+    expect(screen.getByText('koios.assistant.disabledForTenant').closest('a')).toHaveAttribute('href', '#settings/ai/koios')
+    fireEvent.click(execute)
+    expect(mockPost).not.toHaveBeenCalled()
+  })
+
+  it('a tool switched off for this user says so', async () => {
+    capTools = [capTool('maak_taak', { enabled_for_me: false })]
+    givenSuggestions([{ kind: 'candidate_no_contact', title: 'Sanne Kuipers', body: 'x', refs: [], action: { tool: 'maak_taak', input: {} } }])
+    renderBlock()
+    expect(await screen.findByRole('button', { name: /assistant\.execute/ })).toBeDisabled()
+    expect(screen.getByText('koios.assistant.disabledForMe')).toBeInTheDocument()
   })
 })

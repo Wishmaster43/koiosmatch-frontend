@@ -270,7 +270,10 @@
       "askKoios": "Finish in the chat",
       "askIntent": "{{body}} What do you suggest?",
       "execute": "Execute",
-      "createdTask": "Task created"
+      "createdTask": "Task created",
+      "disabledForTenant": "Off for your organisation",
+      "disabledForMe": "Off for you",
+      "settingsLink": "Configure"
     },
     "feedback": {
       "up": "Helpful",

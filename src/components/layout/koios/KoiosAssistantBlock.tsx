@@ -11,6 +11,16 @@
  * one row and a link on the next; a confirmed action shows the record it created as
  * a chip (§0B), and the chat handoff carries the record ref + the reason, so Koios
  * knows who and why ("Koios snapt er niets van").
+ *
+ * Danny 10-09 (live review, Kelly's panel): KOIOS-ROW-2 — the reason wraps to two lines
+ * instead of being cut; Uitvoeren executes in ONE click when the tool registry does not
+ * require a confirm (a descriptor stages and confirms in the same click — "waarom moet ik
+ * na uitvoeren weer op bevestigen klikken?"), the two-step stays for confirm_required
+ * tools; a tool switched off for the organisation or for this user renders Uitvoeren
+ * disabled with the reason and a link to the setting instead of a refusal after the
+ * click; an executed search jumps to the record (the vacancy's candidate-search tab —
+ * "gelukt maar er is niets gebeurd"); and the list plus the dashboard's "Koios deed dit
+ * voor jou" refetch after every executed or cancelled action.
  */
 import { useTranslation } from 'react-i18next'
 import { Clock, UserX, Target, Briefcase, Sparkles, MessageSquare } from 'lucide-react'
@@ -22,6 +32,12 @@ import { KoiosRefChip } from './KoiosResultCards'
 import { useKoiosAssistant } from './useKoiosAssistant'
 import { useKoiosRadarCollapse } from './useKoiosRadarCollapse'
 import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useNavigation } from '@/context/NavigationContext'
+import SoftChip from '@/components/ui/SoftChip'
+import { pageForResultRef } from './koiosResultLinks'
+import { useKoiosToolCapabilities, findToolCapability } from './useKoiosToolCapabilities'
+import type { KoiosCapabilityTool } from './useKoiosToolCapabilities'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import { confirmPendingAction, cancelPendingAction, stagePendingAction } from './koiosApi'
@@ -43,6 +59,16 @@ const KIND_META: Record<KoiosAssistantKind, { Icon: LucideIcon; color: string }>
   opportunity_closing_soon:  { Icon: Target,     color: 'var(--color-info)' },
   vacancy_zero_applications: { Icon: Briefcase,  color: 'var(--text-muted)' },
 }
+
+// Where an executed tool leaves the user (KOIOS-ROW-2, Danny: "je zou verwachten dat de
+// drilldown van de juiste vacature wordt geopend en tabblad kandidaten zoeken direct
+// getoond"): the row's ref of that type opens on that drawer tab. The confirm response
+// may also carry `data.navigate` {type,id,tab}; that wins when present.
+const TOOL_FOLLOW_UP: Record<string, { refType: string; tab: string }> = {
+  zoek_kandidaten: { refType: 'vacancy', tab: 'candidateSearch' },
+}
+// The setting that switches a tool on or off for the organisation (Koios capabilities card).
+const KOIOS_TOOLS_SETTINGS_HASH = '#settings/ai/koios'
 
 // The refs the chat can use as context: real records, never the parked-action handle.
 const contextRefsOf = (s: KoiosAssistantSuggestion) => s.refs.filter(r => r.type !== 'pending_action')
@@ -112,15 +138,15 @@ function AskKoiosButton({ suggestion, onAskKoios, t }: { suggestion: KoiosAssist
 }
 
 // One suggestion row: kind icon · deep-link chip (the title) · the reason · the actions.
-function SuggestionRow({ suggestion, onAskKoios }: { suggestion: KoiosAssistantSuggestion; onAskKoios?: AskKoios }) {
+function SuggestionRow({ suggestion, onAskKoios, onDone }: { suggestion: KoiosAssistantSuggestion; onAskKoios?: AskKoios; onDone?: () => void }) {
   const meta = KIND_META[suggestion.kind] ?? KIND_META.pending_action
   const Icon = meta.Icon
   const primaryRef = contextRefsOf(suggestion)[0]
   const [exec, setExec] = useState<ExecState>({ phase: 'idle' })
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '6px 0', borderTop: '1px solid var(--border)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, width: 18, color: meta.color }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, minWidth: 0 }}>
+        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, width: 18, height: 26, color: meta.color }}>
           <Icon size={13} />
         </span>
         {/* The record chip is the title AND the deep link; a suggestion without a record
@@ -128,27 +154,28 @@ function SuggestionRow({ suggestion, onAskKoios }: { suggestion: KoiosAssistantS
         {primaryRef
           ? <span style={{ flexShrink: 0 }}><KoiosRefChip item={primaryRef} /></span>
           : <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', flexShrink: 0 }}>{suggestion.title}</span>}
-        <Caption title={suggestion.body} style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {/* KOIOS-ROW-2: two lines, never a cut sentence ("is niet leesbaar indien 2 regels"). */}
+        <Caption title={suggestion.body} style={{ flex: 1, minWidth: 0, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', whiteSpace: 'normal' }}>
           {suggestion.body}
         </Caption>
         <span style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
-          <SuggestionActions suggestion={suggestion} onAskKoios={onAskKoios} exec={exec} setExec={setExec} />
+          <SuggestionActions suggestion={suggestion} onAskKoios={onAskKoios} exec={exec} setExec={setExec} onDone={onDone} />
         </span>
       </div>
       {/* The staged leg (golf 3) sits under the row: the server's own preview of what
           WOULD happen — nothing ran yet — then Bevestigen/Annuleren. */}
       {suggestion.action && (exec.phase === 'staged' || (exec.phase === 'submitting' && exec.staged)) && (
-        <StagedPreview exec={exec} setExec={setExec} />
+        <StagedPreview exec={exec} setExec={setExec} onDone={onDone} />
       )}
     </div>
   )
 }
 
 // The preview + confirm/cancel of a staged descriptor action.
-function StagedPreview({ exec, setExec }: { exec: ExecState; setExec: (s: ExecState) => void }) {
+function StagedPreview({ exec, setExec, onDone }: { exec: ExecState; setExec: (s: ExecState) => void; onDone?: () => void }) {
   const { t } = useTranslation('common')
   const st = exec.staged
-  const run = useRun(setExec)
+  const run = useRun(setExec, onDone)
   return (
     <div style={{ marginLeft: 26, display: 'flex', flexDirection: 'column', gap: 4 }}>
       <Caption style={{ display: 'block' }}>
@@ -171,7 +198,10 @@ function StagedPreview({ exec, setExec }: { exec: ExecState; setExec: (s: ExecSt
 // The verdict stays visible while the row stays rendered; a collapse/re-open or list
 // swap remounts the row to live buttons — re-confirming then gets the server's own
 // honest 410/422 ("al afgehandeld"), never a silent double-write.
-function useRun(setExec: (s: ExecState) => void) {
+// A confirm response's optional landing spot (KOIOS-ROW-2): the record and drawer tab to open.
+type NavigateHint = { type?: string; id?: string; tab?: string } | null | undefined
+
+function useRun(setExec: (s: ExecState) => void, onDone?: (navigate?: NavigateHint) => void) {
   const { t } = useTranslation('common')
   return async (id: string, call: (id: string) => Promise<{ status?: string; message?: string; data?: unknown }>, done: 'executed' | 'cancelled', fallbackLabel?: string) => {
     setExec({ phase: 'submitting', staged: undefined })
@@ -179,6 +209,7 @@ function useRun(setExec: (s: ExecState) => void) {
       const body = await call(id)
       if (body?.status === done) {
         setExec({ phase: done, created: done === 'executed' ? createdRefFromToolResult(body.data, fallbackLabel ?? t('koios.assistant.createdTask')) : null })
+        onDone?.(done === 'executed' ? (body.data as { navigate?: NavigateHint } | undefined)?.navigate : undefined)
       } else {
         setExec({ phase: 'error', message: body?.message ?? t('koios.pendingAction.error') })
       }
@@ -194,11 +225,32 @@ function useRun(setExec: (s: ExecState) => void) {
 // The action cluster on one row. kind=pending_action + its "pending_action" ref →
 // confirm/cancel against POST /ai/koios/actions/{id}/confirm|cancel; a descriptor kind →
 // stage (golf 3) next to the chat handoff; no action at all → the chat handoff only.
-function SuggestionActions({ suggestion, onAskKoios, exec, setExec }: {
-  suggestion: KoiosAssistantSuggestion; onAskKoios?: AskKoios; exec: ExecState; setExec: (s: ExecState) => void
+function SuggestionActions({ suggestion, onAskKoios, exec, setExec, onDone }: {
+  suggestion: KoiosAssistantSuggestion; onAskKoios?: AskKoios; exec: ExecState; setExec: (s: ExecState) => void; onDone?: () => void
 }) {
   const { t } = useTranslation('common')
-  const run = useRun(setExec)
+  const { openEntity } = useNavigation()
+  // The tool registry's own word on this action: confirm_required decides one click or
+  // two, enabled_for_* decides whether Uitvoeren is offered at all (never a refusal after
+  // the click when the answer is known before it).
+  const { tools: capabilityTools, isLoading: capsLoading } = useKoiosToolCapabilities()
+  const capability: KoiosCapabilityTool | undefined = findToolCapability(capabilityTools, suggestion.action?.tool)
+  const disabledReason = capability?.enabled_for_tenant === false ? t('koios.assistant.disabledForTenant')
+    : capability?.enabled_for_me === false ? t('koios.assistant.disabledForMe') : null
+  // After an executed action: the response's own landing spot, else the tool's follow-up
+  // on the row's record (a search opens the vacancy's candidate-search tab).
+  const landAfterExecute = (navigate?: NavigateHint) => {
+    const hint = navigate?.type && navigate.id ? navigate : undefined
+    const follow = suggestion.action ? TOOL_FOLLOW_UP[suggestion.action.tool] : undefined
+    const ref = hint ? { type: hint.type!, id: hint.id!, tab: hint.tab } : follow ? (() => {
+      const r = suggestion.refs.find(x => x.type === follow.refType)
+      return r ? { type: r.type, id: r.id, tab: follow.tab } : undefined
+    })() : undefined
+    const page = ref ? pageForResultRef(ref.type) : null
+    if (ref && page) openEntity(page, ref.id, ref.tab)
+    onDone?.()
+  }
+  const run = useRun(setExec, landAfterExecute)
   const pendingRef = suggestion.kind === 'pending_action'
     ? suggestion.refs.find(r => r.type === 'pending_action')
     : undefined
@@ -210,7 +262,13 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec }: {
     setExec({ phase: 'staging' })
     try {
       const body = await stagePendingAction(suggestion.action.tool, suggestion.action.input ?? {})
-      if (body?.status === 'staged' && body?.action?.id) setExec({ phase: 'staged', staged: body.action as StagedAction })
+      if (body?.status === 'staged' && body?.action?.id) {
+        const staged = body.action as StagedAction
+        // KOIOS-ROW-2: one click when the registry says no confirm is required; the
+        // preview + Bevestigen step stays for every confirm_required (or unknown) tool.
+        if (capability && !capability.confirm_required) { await run(staged.id, confirmPendingAction, 'executed', staged.title) ; return }
+        setExec({ phase: 'staged', staged })
+      }
       else setExec({ phase: 'error', message: body?.message ?? t('koios.pendingAction.error') })
     } catch (err) {
       setExec({ phase: 'error', message: extractApiError(err, t('koios.pendingAction.error')) })
@@ -236,8 +294,14 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec }: {
   if (suggestion.action && (exec.phase === 'staged' || exec.phase === 'submitting')) return null
   return (
     <>
+      {suggestion.action && disabledReason && (
+        <a href={KOIOS_TOOLS_SETTINGS_HASH} className="no-underline" title={t('koios.assistant.settingsLink')}>
+          <SoftChip label={disabledReason} color="var(--color-warning)" />
+        </a>
+      )}
       {suggestion.action && (
-        <Button size="sm" variant="secondary" onClick={stage} disabled={exec.phase === 'staging'}>
+        <Button size="sm" variant="secondary" onClick={stage} disabled={exec.phase === 'staging' || capsLoading || !!disabledReason}
+          title={disabledReason ?? capability?.label_nl ?? undefined}>
           {exec.phase === 'staging' ? <Spinner size={12} /> : null} {t('koios.assistant.execute')}
         </Button>
       )}
@@ -252,6 +316,13 @@ export default function KoiosAssistantBlock({ onAskKoios, onClose }: { onAskKoio
   const { collapsed, setCollapsed } = useKoiosRadarCollapse('koios.assistant.collapsed')
   const { suggestions, loading, error, refetch } = useKoiosAssistant()
   const hasSuggestions = !loading && !error && suggestions.length > 0
+  const queryClient = useQueryClient()
+  // After an executed or cancelled action the list and the dashboard's "Koios deed dit
+  // voor jou" read the server again (a resolved parked action must leave the list).
+  const onDone = () => {
+    void refetch()
+    void queryClient.invalidateQueries({ queryKey: ['koios', 'for-you'] })
+  }
 
   return (
     <KoiosCardFrame title={t('koios.assistant.title')} filled={hasSuggestions} open={!collapsed}
@@ -272,7 +343,7 @@ export default function KoiosAssistantBlock({ onAskKoios, onClose }: { onAskKoio
         // The list scrolls inside the block (max ~half the panel) so the advice block
         // below stays reachable when the backend returns its full ten suggestions.
         <div style={{ margin: '4px 0 0', display: 'flex', flexDirection: 'column', maxHeight: '48vh', overflowY: 'auto' }}>
-          {suggestions.map(s => <SuggestionRow key={suggestionKey(s)} suggestion={s} onAskKoios={onAskKoios} />)}
+          {suggestions.map(s => <SuggestionRow key={suggestionKey(s)} suggestion={s} onAskKoios={onAskKoios} onDone={onDone} />)}
         </div>
       )}
     </KoiosCardFrame>

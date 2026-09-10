@@ -273,7 +273,7 @@ describe('KoiosPanel — context chips (seam)', () => {
     await waitFor(() => expect(sendChat).toHaveBeenCalledWith('hello', null, expect.arrayContaining([
       expect.objectContaining({ type: 'candidate', id: 'c-1' }),
       expect.objectContaining({ type: 'candidate', id: '9' }),
-    ]), null, null, false))
+    ]), null, null, false, undefined))
   })
 
   // (d2) a manual @-mention of the SAME record as the ambient chip (c-1) dedupes
@@ -332,7 +332,7 @@ describe('KoiosPanel — context chips (seam)', () => {
     const textarea = screen.getByPlaceholderText('koios.taskPlaceholder')
     fireEvent.change(textarea, { target: { value: 'hello' } })
     fireEvent.keyDown(textarea, { key: 'Enter' })
-    await waitFor(() => expect(sendChat).toHaveBeenCalledWith('hello', null, [], null, null, false))
+    await waitFor(() => expect(sendChat).toHaveBeenCalledWith('hello', null, [], null, null, false, undefined))
   })
 })
 
@@ -532,7 +532,7 @@ describe('KoiosPanel · effort picker', () => {
     fireEvent.click(screen.getByRole('button', { name: 'koios.taskPlaceholder' }))
     await waitFor(() => expect(sendChat).toHaveBeenCalled())
     // Check the call carried effort: 'high'
-    expect(sendChat).toHaveBeenCalledWith('test', null, [], null, 'high', false)
+    expect(sendChat).toHaveBeenCalledWith('test', null, [], null, 'high', false, undefined)
   })
 
   it('does not send effort in the request body when set to default', async () => {
@@ -545,7 +545,7 @@ describe('KoiosPanel · effort picker', () => {
     fireEvent.click(screen.getByRole('button', { name: 'koios.taskPlaceholder' }))
     await waitFor(() => expect(sendChat).toHaveBeenCalled())
     // Check the call carried effort: null (5th arg after model/context/flavor)
-    expect(sendChat).toHaveBeenCalledWith('hello', null, [], null, null, false)
+    expect(sendChat).toHaveBeenCalledWith('hello', null, [], null, null, false, undefined)
   })
 
   it('the effort trigger is named by its label AND its current value (§6)', async () => {
@@ -637,7 +637,7 @@ describe('KoiosPanel · conversation mode (VOICE-MODE-1)', () => {
     const textarea = screen.getByPlaceholderText('koios.taskPlaceholder')
     fireEvent.change(textarea, { target: { value: 'hello' } })
     fireEvent.click(screen.getByRole('button', { name: 'koios.taskPlaceholder' }))
-    await waitFor(() => expect(sendChat).toHaveBeenCalledWith('hello', null, [], null, null, true))
+    await waitFor(() => expect(sendChat).toHaveBeenCalledWith('hello', null, [], null, null, true, undefined))
   })
 
   // (d) with the mode on, the reply is read aloud exactly once.

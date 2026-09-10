@@ -1287,6 +1287,19 @@ Be honest. If something is not done, say so — do not pretend.
     invullen. Gespiegeld met CMBE (engine-schemawijzigingen die FE-velden
     zouden tonen wachten op hetzelfde akkoord); referentiecasus:
     MODULE-TERUG-1, commit met die naam.
+  · **KOIOS-ROW-2 (Danny 10-09, live review van Kelly's paneel, 18 punten):** élk
+    record dat Koios noemt (chip in het paneel, resultaatkaart) opent bij klik de
+    drilldown rechts op de juiste pagina en tab; een voorstelrij zegt wat Uitvoeren
+    DOET en doet het in één klik tenzij de tool-registry een bevestiging eist; een
+    tool die uit staat (organisatie/gebruiker) toont dat vóór de klik met een link naar
+    de instelling, nooit "Geweigerd" erna; een uitgevoerde actie laat de gebruiker
+    landen op het record (zoek_kandidaten → vacature, tab Kandidaten zoeken); de chat
+    onthoudt de thread (history) en de records uit het vorige antwoord (context);
+    contact = bellen, mailen of WhatsApp (drie iconen), nooit alleen "bellen"; een
+    voorstelregel loopt over twee regels, wordt nooit afgekapt. Koios is geen
+    "super search": zoeken over álles binnen de rechten van de gebruiker, met
+    genormaliseerde telefoonnummers — een "nummer niet gevonden" op een bekend
+    nummer is een tool-gat (BE, KOIOS-PANEL-2).
   · **TITELBALK-PILLS (Danny 27-08, twee screenshots: "in de title bar dus!! …
     laten we 1 type chips aanhouden — zo moeten we de pop-ups doen"):** de korte
     keuze bovenin een create-pop-up (Lead/Kandidaat-modus, vacaturestatus,

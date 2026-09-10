@@ -112,4 +112,13 @@ describe('sendChat', () => {
     await sendChat('hello')
     expect(mockPost.mock.calls[1][1]).not.toHaveProperty('voice_mode')
   })
+
+  // KOIOS-MEMORY-1: the earlier turns ride along as `history`; an empty thread sends none.
+  it('includes history when provided, never an empty one', async () => {
+    mockPost.mockResolvedValue({ data: {} })
+    await sendChat('wie is hem?', null, [], null, null, false, [{ role: 'user', content: 'welke kandidaat hoort bij +316?' }, { role: 'assistant', content: 'Niels Groen' }])
+    expect(mockPost).toHaveBeenLastCalledWith('/ai/koios/chat', { message: 'wie is hem?', history: [{ role: 'user', content: 'welke kandidaat hoort bij +316?' }, { role: 'assistant', content: 'Niels Groen' }] })
+    await sendChat('hallo', null, [], null, null, false, [])
+    expect(mockPost).toHaveBeenLastCalledWith('/ai/koios/chat', { message: 'hallo' })
+  })
 })

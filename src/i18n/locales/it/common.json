@@ -270,7 +270,10 @@
       "askKoios": "Completa nella chat",
       "askIntent": "{{body}} Cosa proponi?",
       "execute": "Esegui",
-      "createdTask": "Attività creata"
+      "createdTask": "Attività creata",
+      "disabledForTenant": "Disattivato per la tua organizzazione",
+      "disabledForMe": "Disattivato per te",
+      "settingsLink": "Configura"
     },
     "feedback": {
       "up": "Utile",

@@ -3,6 +3,8 @@
  *
  * Backend contract:
  *   POST /api/ai/koios/chat      { message, model?, context?, history?, voice_mode? }
+ *     history (KOIOS-MEMORY-1, Danny 10-09: "Koios AI heeft geen geschiedenis"): the
+ *     last turns as [{ role, content }], text only — the BE reads it once it lands its half.
  *     → { answer, steps[], model, stop_reason, usage{input_tokens,output_tokens,calls,cost,currency},
  *         pending_action? }                                            — KOIOS-AGENT-PLAN §6, dormant
  *   GET  /api/ai/koios/settings  → { models{active,selectable[],options[]{id,label,hint,cost_rank},cost_note},
@@ -19,7 +21,7 @@
 import api from '@/lib/api'
 import type { KoiosContextRef } from '@/types/koios'
 import { isContextResolvable } from './koiosContextTypes'
-import type { KoiosConfirmActionResponse, KoiosEffort } from './koiosTypes'
+import type { KoiosChatTurn, KoiosConfirmActionResponse, KoiosEffort } from './koiosTypes'
 import { normalizeFlavorKey } from '@/lib/koiosModelTiers'
 
 // Send one chat turn. `model` is optional (defaults to the tenant's active
@@ -35,8 +37,10 @@ export const sendChat = (
   flavor?: string | null,
   effort?: KoiosEffort | null,
   voiceMode?: boolean,
+  history?: KoiosChatTurn[],
 ) => {
   const body: Record<string, unknown> = { message }
+  if (history?.length) body.history = history
   if (model) body.model = model
   if (flavor) body.flavor = flavor
   if (effort) body.effort = effort
