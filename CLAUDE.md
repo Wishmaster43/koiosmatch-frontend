@@ -998,6 +998,13 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   effect SETUP** (`mountedRef.current = true; return () => { … = false }`): StrictMode
   runs setup→cleanup→setup in dev, so a cleanup-only effect leaves the ref permanently
   false and silently kills every poll/refresh (the PDOK "needs CMD+R" bug, 2026-07-22).
+- **GEO-POLL-1 (Danny 10-09, verbatim: "scherm moet zich zelf verversen zodra de update
+  klaar is zonder dat cmd r nodig is"):** a screen that waits for an ASYNC server result (a
+  queued geocode, a workflow run) polls until the result lands or an honest cap, with
+  backoff, and resumes on mount while the request is still open — never a fixed window
+  sized to yesterday's latency (the candidate card gave up after 11 s while the run took
+  15 s, measured). `hooks/useGeocodePoll` is the reference; a new "refetch a few times"
+  loop beside it is a finding.
 - Keep an eye on bundle size; lazy-load heavy deps (charts) per route.
 
 ---

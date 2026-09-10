@@ -132,7 +132,7 @@ export default function CustomerDrawerTabPanels({
             there is no city yet — the customer's own address is city-only here.
             lat/lng were never passed (CMBE 04-08) — the card decides "geocoded" on
             them, so this ALWAYS said "nog niet gegeocodeerd" regardless of the data. */}
-        <GeocodeCard lat={c.lat} lng={c.lng} endpoint={`/customers/${c.id}/geocode`} permission="customers.update" disabled={!c.city} />
+        <GeocodeCard lat={c.lat} lng={c.lng} endpoint={`/customers/${c.id}/geocode`} fetchEndpoint={`/customers/${c.id}`} permission="customers.update" disabled={!c.city} />
       </BackofficeLinksTab>
     )
     default: return null

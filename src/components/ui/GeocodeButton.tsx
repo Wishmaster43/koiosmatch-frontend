@@ -36,10 +36,13 @@ export interface GeocodeButtonProps {
   // per-id geocode route is async by design and answers 202 {status:queued}, so
   // this does NOT fire today — it is a tolerant path, not the normal one.
   onResult?: (lat: number, lng: number) => void
+  // Fires when the route answered 202 (queued) — the host starts its background poll
+  // (GEO-POLL-1) so the card refreshes itself once the worker has written the result.
+  onQueued?: () => void
 }
 
 // Fires the queued per-id geocode POST and only ever claims 'started' (see the module doc above — every route answers 202, so completion is never rendered as done here).
-export default function GeocodeButton({ endpoint, permission, disabled = false, variant = 'ghost', onResult }: GeocodeButtonProps) {
+export default function GeocodeButton({ endpoint, permission, disabled = false, variant = 'ghost', onResult, onQueued }: GeocodeButtonProps) {
   const { t } = useTranslation('common')
   const auth = useAuth()
   const hasPermission = auth?.hasPermission ?? (() => false)
@@ -67,6 +70,7 @@ export default function GeocodeButton({ endpoint, permission, disabled = false, 
         notifyError(t('geocode.notFound'))
       } else {
         notifySuccess(t('geocode.started'))
+        onQueued?.()
       }
     } catch {
       // Failures are surfaced by api.ts's own error handling (§10) — only stop the spinner.

@@ -9,7 +9,7 @@
  * component itself gates HelloFlex/Shiftmanager on the tenant's connector app
  * flag. No fake affordances (§3): every button fires a real request.
  */
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw, Compass } from 'lucide-react'
 import Button from '@/components/ui/Button'
@@ -18,8 +18,8 @@ import SoftChip from '@/components/ui/SoftChip'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
-import api, { unwrap } from '@/lib/api'
-import { toCoord } from '@/lib/coords'
+import api from '@/lib/api'
+import { useGeocodePoll } from '@/hooks/useGeocodePoll'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { formatCoord } from '@/lib/formatters'
@@ -66,30 +66,26 @@ export default function IntegrationsTab({ c, onUpdate }: {
   const auth = useAuth()
   const hasPermission = auth?.hasPermission ?? (() => false)
 
-  // GEO-GEOCODE-FE-1: manual "Bijwerken" trigger for the async geocode
-  // workflow (POST .../geocode, 202 queued). Once it resolves we poll the
-  // candidate a few times so the fresh lat/lng show up without a full drawer
-  // reload; guarded so a stray poll tick after unmount never sets state.
   // One write-permission check, used by BOTH the geocode refresh and the Koppelen buttons.
   const canUpdate = hasPermission('candidates.update')
   const [pdokRefreshing, setPdokRefreshing] = useState(false)
-  const [coordsOverride, setCoordsOverride] = useState<{ lat: number | null; lng: number | null } | null>(null)
-  // PDOK-REFRESH-2 (Danny 22-07 "moet CMD-R doen"): the poll must also refresh the
-  // provenance line ("Bijgewerkt … door …") — coords alone often DON'T change on a
-  // re-geocode (same address → same pin), so without this nothing visibly updates.
-  const [geocodeOverride, setGeocodeOverride] = useState<Candidate['geocode']>(null)
-  const mountedRef = useRef(true)
-  // PDOK-REFRESH-3 (Danny 22-07 "MOET CMD+R???"): the setup MUST re-arm the ref.
-  // StrictMode runs setup → cleanup → setup in dev; the old cleanup-only effect
-  // left mountedRef permanently false after the simulated remount, so every poll
-  // tick bailed instantly — the panel never updated in dev, only after a reload.
-  useEffect(() => {
-    mountedRef.current = true
-    return () => { mountedRef.current = false }
-  }, [])
+  // GEO-POLL-1: the background poll after a queued re-geocode lives in the shared hook
+  // (with the PDOK-REFRESH-2/3 and GEO-REFRESH-2 lessons); it also resumes on mount while
+  // a request is still open, so a tab switch mid-request never loses the update.
+  const poll = useGeocodePoll({
+    fetchEndpoint: `/candidates/${c.id}`,
+    base: { lat: c.lat, lng: c.lng, geocode: c.geocode },
+    // GEO-REFRESH-2b (Danny: "nog steeds CMD+R"): merge the landed values into the PAGE
+    // record too — list/map/other tabs update in place, and the panel survives a tab
+    // switch. Pure local merge: patchCandidate maps none of these keys, so this never
+    // fires an API write (buildCandidatePatch → empty body → skipped).
+    onLanded: patch => onUpdate?.(c.id, { lat: patch.lat, lng: patch.lng, geocode: patch.geocode }),
+  })
 
-  // Kick off the async geocode job, drop the spinner as soon as it's queued (202),
-  // then poll a few times in the background so fresh coords/provenance land without a full reload.
+  // GEO-GEOCODE-FE-1: manual "Bijwerken" trigger for the async geocode workflow
+  // (POST .../geocode, 202 queued). GEO-LATLNG-1 (CMBE 22-07): the 202 means "queued" —
+  // the spinner stops HERE (Danny saw an "eternal" spinner riding the whole poll) and
+  // the poll refreshes the card in the background until the write lands.
   const onRefreshPdok = async () => {
     if (pdokRefreshing) return
     setPdokRefreshing(true)
@@ -98,60 +94,16 @@ export default function IntegrationsTab({ c, onUpdate }: {
       notifySuccess(t('backofficeLinks.geocode.refreshStarted'))
     } catch (err) {
       notifyError(extractApiError(err, t('backofficeLinks.geocode.refreshFailed')))
-      setPdokRefreshing(false)
       return
+    } finally {
+      setPdokRefreshing(false)
     }
-    // GEO-LATLNG-1 (CMBE 22-07): the 202 means "queued" — stop the spinner HERE
-    // (Danny saw an "eternal" spinner riding the whole poll) and refresh in the
-    // background: the job writes lat/lng within ~1s, so re-fetch at ~3s (one
-    // retry at 6s). Values are coerced via toCoord — Laravel sends decimals as
-    // strings, which the old !== comparison and the mapper both mishandled.
-    setPdokRefreshing(false)
-    // GEO-REFRESH-2: always ADOPT the fresh values (coords + provenance) — a re-geocode
-    // of the same address keeps the same pin, but the "Bijgewerkt … door …" meta DID
-    // change; the old changed-coords-only guard made that invisible until a page reload.
-    const baseUpdatedAt = c.geocode?.updatedAt ?? null
-    // Slightly longer window (~11s) so a slower dev queue-worker still lands in view.
-    for (const delayMs of [2000, 2000, 3000, 4000]) {
-      await new Promise(resolve => setTimeout(resolve, delayMs))
-      if (!mountedRef.current) return
-      try {
-        const fresh = unwrap<{ lat?: unknown; lng?: unknown; geocode?: { requested_at?: string | null; requested_by?: string | null; updated_at?: string | null } | null }>(
-          await api.get(`/candidates/${c.id}`),
-        )
-        if (!mountedRef.current) return
-        const lat = toCoord(fresh?.lat)
-        const lng = toCoord(fresh?.lng)
-        if (lat != null && lng != null) {
-          setCoordsOverride({ lat, lng })
-        }
-        const meta = fresh?.geocode
-          ? {
-              requestedAt: fresh.geocode.requested_at ?? null,
-              requestedBy: fresh.geocode.requested_by ?? null,
-              updatedAt: fresh.geocode.updated_at ?? null,
-            }
-          : null
-        if (meta) setGeocodeOverride(meta)
-        // Done once the write actually landed (a fresh updated_at stamp); else poll once more.
-        if (meta?.updatedAt && meta.updatedAt !== baseUpdatedAt) {
-          // GEO-REFRESH-2b (Danny: "nog steeds CMD+R"): merge the fresh values into the
-          // PAGE record too — list/map/other tabs update in place, and the panel survives
-          // a tab switch. Pure local merge: patchCandidate maps none of these keys, so
-          // this never fires an API write (buildCandidatePatch → empty body → skipped).
-          onUpdate?.(c.id, { lat, lng, geocode: meta })
-          return
-        }
-      } catch {
-        // Silent — a poll failure just keeps the last-known coordinates; the
-        // manual trigger already reported "started" above.
-      }
-    }
+    poll.start()
   }
 
-  // Effective coordinates: the just-polled override wins, else the candidate prop.
-  const effectiveLat = coordsOverride?.lat ?? c.lat
-  const effectiveLng = coordsOverride?.lng ?? c.lng
+  // Effective coordinates: the just-polled values win, else the candidate prop.
+  const effectiveLat = poll.lat
+  const effectiveLng = poll.lng
   const hasCoords = effectiveLat != null && effectiveLng != null
 
   return (
@@ -191,7 +143,7 @@ export default function IntegrationsTab({ c, onUpdate }: {
           )}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
-          <PdokMetaLine geocode={geocodeOverride ?? c.geocode} />
+          <PdokMetaLine geocode={poll.geocode} />
           <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>
             {t('backofficeLinks.geocode.autoInfo')}
           </p>
