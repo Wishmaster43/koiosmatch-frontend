@@ -169,14 +169,18 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
     return Array.isArray(want) ? want.includes(cur) : cur === want
   })
 
+  // Per-field flags both field loops below read: the K-193 required mark, the
+  // empty check and the registry validator's message (WA-RECIPIENT-FIELD-1).
+  const fieldFlags = (field: WorkflowField) => {
+    const value = fieldValue(field.key)
+    return { isRequired: !!field.required, isEmpty: value == null || value === '', invalidMsg: field.validate?.(value) ?? null }
+  }
+
   // Shared field list renderer
   const renderFields = (fields: typeof schema) => (
     <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
       {fields.map(field => {
-        const isRequired = !!(field as WorkflowField & { required?: boolean }).required
-        const isEmpty    = fieldValue(field.key) == null || fieldValue(field.key) === ''
-        // WA-RECIPIENT-FIELD-1: a registry validator's message for the current value (null = fine).
-        const invalidMsg = (field as WorkflowField).validate?.(fieldValue(field.key)) ?? null
+        const { isRequired, isEmpty, invalidMsg } = fieldFlags(field as WorkflowField)
         // 02-09: the translations tab IS the field's label — no repeated
         // "VERTALINGEN" caption above the content (MODULE-FACE-BEVRIES).
         const isTranslations = field.type === 'translations'
@@ -307,8 +311,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
               // path — the settings path silently dropped the asterisk. Honest
               // now on both, plus a hint when a required select is still empty
               // (no save-blocking: the editor has none, the engine fails visibly).
-              const isRequired = !!(field as WorkflowField & { required?: boolean }).required
-              const isEmpty    = fieldValue(field.key) == null || fieldValue(field.key) === ''
+              const { isRequired, isEmpty, invalidMsg } = fieldFlags(field as WorkflowField)
               return (
                 <div key={field.key}>
                   {/* REQUIRED-A11Y-1: shared house asterisk (fields.tsx); see the
@@ -329,6 +332,10 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
                       ? <Caption style={{ display: 'block', marginTop: 4 }}>{fieldHint(t, (field.hint ?? field.help) as string)}</Caption>
                       : null
                   })()}
+                  {/* WA-RECIPIENT-FIELD-1: the value the server would refuse is named here, before the 422. */}
+                  {invalidMsg && (
+                    <Caption style={{ display: 'block', marginTop: 4, color: 'var(--color-danger-text)' }}>{fieldHint(t, invalidMsg)}</Caption>
+                  )}
                   {/* K-193 fase 2b: WhatsApp Web only ever sends a session message. */}
                   {type === 'whatsapp_send' && field.key === 'message_type' && config?.channel === 'wa_web' && (
                     <Caption style={{ display: 'block', marginTop: 4 }}>{t('fields.waWebSessionOnly')}</Caption>

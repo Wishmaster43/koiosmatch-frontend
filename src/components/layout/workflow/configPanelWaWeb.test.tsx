@@ -148,3 +148,18 @@ describe('ConfigPanel · whatsapp_send no longer renders the four removed fields
     expect(screen.queryByText('Database updates na verzending', { selector: 'label' })).not.toBeInTheDocument()
   })
 })
+
+// WA-RECIPIENT-FIELD-1 (Danny 10-09): a literal phone number in the recipient
+// field is named under the field before the server's 422; a field name is not.
+describe('ConfigPanel · whatsapp_send recipient_field validation', () => {
+  it('shows the danger caption for a phone number and not for a field name', () => {
+    const node: FlowNode = { id: 'n1', position: { x: 0, y: 0 }, data: { type: 'whatsapp_send', config: { recipient_field: '0612345678' } } }
+    const { rerender } = render(
+      <I18nextProvider i18n={i18n}><ConfigPanel node={node} onUpdate={vi.fn()} onDelete={vi.fn()} /></I18nextProvider>,
+    )
+    expect(screen.getByText(/Dit lijkt een telefoonnummer/)).toBeInTheDocument()
+    const named: FlowNode = { ...node, data: { type: 'whatsapp_send', config: { recipient_field: 'mobile' } } }
+    rerender(<I18nextProvider i18n={i18n}><ConfigPanel node={named} onUpdate={vi.fn()} onDelete={vi.fn()} /></I18nextProvider>)
+    expect(screen.queryByText(/Dit lijkt een telefoonnummer/)).toBeNull()
+  })
+})
