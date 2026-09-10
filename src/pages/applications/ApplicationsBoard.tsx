@@ -15,8 +15,7 @@ import { SectionTitle, Caption } from '@/components/ui/typography'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
 import { scoreColor } from '@/components/match/scoreColor'
-import { activatableCardProps } from '@/components/ui/activatableCard'
-import { BoardColumnHeader, useBoardDrag } from '@/components/ui/board'
+import { BoardCardShell, BoardColumnHeader, BoardScrollArea, useBoardDrag } from '@/components/ui/board'
 
 export interface BoardPhase { key: string; label: string; color: string }
 
@@ -29,11 +28,8 @@ function BoardCard({ app, onDragStart, onClick, selected }: {
   // namespace for the placed-badge label (PLACED-1).
   const { t } = useTranslation(['common', 'applications'])
   return (
-    <div draggable onDragStart={e => onDragStart(e, app.id)} onClick={() => onClick(app)}
-      {...activatableCardProps(() => onClick(app), [app.candidateName, app.vacancyTitle].filter(Boolean).join(' · '))}
-      style={{ background: 'var(--surface)', borderRadius: 10, padding: '12px 14px', marginBottom: 8,
-        cursor: 'grab', userSelect: 'none',
-        border: `1px solid ${selected ? 'var(--color-primary)' : 'var(--border)'}` }}>
+    <BoardCardShell onDragStart={e => onDragStart(e, app.id)} onClick={() => onClick(app)} selected={selected}
+      ariaLabel={[app.candidateName, app.vacancyTitle].filter(Boolean).join(' · ')}>
 
       {/* Header: avatar + name + new-dot */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
@@ -86,7 +82,7 @@ function BoardCard({ app, onDragStart, onClick, selected }: {
         <Avatar initials={app.owner?.initials} size={18} color={app.owner?.color} />
         <Caption>{formatDate(app.created)}</Caption>
       </div>
-    </div>
+    </BoardCardShell>
   )
 }
 
@@ -140,15 +136,13 @@ export default function ApplicationsBoard({ rows, phases, onMove, onSelect, sele
   }
 
   return (
-    <div ref={boardScrollRef} onDragOver={boardAutoScroll} style={{ flex: 1, overflow: 'auto', padding: '0 24px 20px' }}>
-      <div style={{ display: 'flex', gap: 16, minWidth: 'max-content', paddingBottom: 8 }}>
-        {phases.map(phase => (
-          <BoardColumn key={phase.key} phase={phase}
-            items={rows.filter(r => r.phaseKey === phase.key)}
-            onDragStart={handleDragStart} onDrop={handleDrop} onDragOver={handleDragOver}
-            onSelect={onSelect} selectedId={selectedId} />
-        ))}
-      </div>
-    </div>
+    <BoardScrollArea scrollRef={boardScrollRef} onDragOver={boardAutoScroll}>
+      {phases.map(phase => (
+        <BoardColumn key={phase.key} phase={phase}
+          items={rows.filter(r => r.phaseKey === phase.key)}
+          onDragStart={handleDragStart} onDrop={handleDrop} onDragOver={handleDragOver}
+          onSelect={onSelect} selectedId={selectedId} />
+      ))}
+    </BoardScrollArea>
   )
 }

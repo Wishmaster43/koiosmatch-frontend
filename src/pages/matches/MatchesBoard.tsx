@@ -1,13 +1,12 @@
 // MatchesBoard — kanban view of matches, one column per match status, with
 // drag-and-drop between columns. See the fuller doc comment on the component below.
-import type { DragEvent, ReactNode } from 'react'
+import type { DragEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import Avatar from '@/components/ui/Avatar'
 import ScorePill from './ScorePill'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
-import { activatableCardProps } from '@/components/ui/activatableCard'
-import { BoardColumnHeader, useBoardDrag } from '@/components/ui/board'
+import { BoardCardShell, BoardColumnShell, BoardScrollArea, useBoardDrag } from '@/components/ui/board'
 
 export interface BoardColumn { key: string; label: string; color: string }
 
@@ -17,11 +16,8 @@ function BoardCard({ match, onDragStart, onClick, selected }: {
   onClick: (m: MatchRow) => void; selected: boolean
 }) {
   return (
-    <div draggable onDragStart={e => onDragStart(e, match.id)} onClick={() => onClick(match)}
-      {...activatableCardProps(() => onClick(match), [match.candidateName, match.vacancy].filter(Boolean).map(String).join(' · '))}
-      style={{ background: 'var(--surface)', borderRadius: 10, padding: '12px 14px', marginBottom: 8,
-        cursor: 'grab', userSelect: 'none',
-        border: `1px solid ${selected ? 'var(--color-primary)' : 'var(--border)'}` }}>
+    <BoardCardShell onDragStart={e => onDragStart(e, match.id)} onClick={() => onClick(match)} selected={selected}
+      ariaLabel={[match.candidateName, match.vacancy].filter(Boolean).map(String).join(' · ')}>
 
       {/* Candidate (avatar + name) + score */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
@@ -43,34 +39,7 @@ function BoardCard({ match, onDragStart, onClick, selected }: {
         <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{match.client !== '—' ? match.client : ''}</span>
         {match.owner && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{match.owner}</span>}
       </div>
-    </div>
-  )
-}
-
-// A single stage column with its cards.
-function BoardColumnView({ column, items, onDragStart, onDrop, onDragOver, onSelect, selectedId, emptyText }: {
-  column: BoardColumn; items: MatchRow[]
-  onDragStart: (e: DragEvent<HTMLDivElement>, id: Id | undefined) => void
-  onDrop: (e: DragEvent<HTMLDivElement>, stageKey: string) => void
-  onDragOver: (e: DragEvent<HTMLDivElement>) => void
-  onSelect: (m: MatchRow) => void
-  selectedId?: Id | null
-  emptyText: ReactNode
-}) {
-  return (
-    <div style={{ width: 270, flexShrink: 0, display: 'flex', flexDirection: 'column' }}
-      onDrop={e => onDrop(e, column.key)} onDragOver={onDragOver}>
-      <BoardColumnHeader label={column.label} count={items.length} color={column.color} showDot />
-      <div style={{ flex: 1, minHeight: 80, borderRadius: 10,
-        border: items.length === 0 ? '1px dashed var(--border)' : 'none' }}>
-        {items.length === 0 ? (
-          <div style={{ padding: '24px 12px', fontSize: 12, color: 'var(--text-muted)', textAlign: 'center' }}>{emptyText}</div>
-        ) : items.map(match => (
-          <BoardCard key={match.id} match={match} onDragStart={onDragStart}
-            onClick={onSelect} selected={match.id === selectedId} />
-        ))}
-      </div>
-    </div>
+    </BoardCardShell>
   )
 }
 
@@ -92,15 +61,19 @@ export default function MatchesBoard({ rows, columns, onMove, onSelect, selected
   const inColumn = (r: MatchRow, c: BoardColumn) => norm(r.status) === norm(c.key) || norm(r.status) === norm(c.label)
 
   return (
-    <div ref={boardScrollRef} onDragOver={boardAutoScroll} style={{ flex: 1, overflow: 'auto', padding: '0 24px 20px' }}>
-      <div style={{ display: 'flex', gap: 16, minWidth: 'max-content', paddingBottom: 8 }}>
-        {columns.map(column => (
-          <BoardColumnView key={column.key} column={column}
-            items={rows.filter(r => inColumn(r, column))}
-            onDragStart={handleDragStart} onDrop={handleDrop} onDragOver={handleDragOver}
-            onSelect={onSelect} selectedId={selectedId} emptyText={t('board.empty')} />
-        ))}
-      </div>
-    </div>
+    <BoardScrollArea scrollRef={boardScrollRef} onDragOver={boardAutoScroll}>
+      {columns.map(column => {
+        const items = rows.filter(r => inColumn(r, column))
+        return (
+          <BoardColumnShell key={column.key} label={column.label} color={column.color} showDot
+            onDrop={e => handleDrop(e, column.key)} onDragOver={handleDragOver}
+            items={items} emptyText={t('board.empty')}
+            renderItem={match => (
+              <BoardCard key={match.id} match={match} onDragStart={handleDragStart}
+                onClick={onSelect} selected={match.id === selectedId} />
+            )} />
+        )
+      })}
+    </BoardScrollArea>
   )
 }

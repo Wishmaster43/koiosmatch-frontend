@@ -9,8 +9,7 @@ import type { Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
 import { opportunityValueOf, formatOpportunityValue } from './data/opportunityValue'
 import { useSeedLabel } from '@/lib/useSeedLabel'
-import { activatableCardProps } from '@/components/ui/activatableCard'
-import { useBoardDrag } from '@/components/ui/board'
+import { BoardCardShell, useBoardDrag } from '@/components/ui/board'
 
 interface StageCol { value: string | number; label: string; color?: string }
 
@@ -24,11 +23,8 @@ function BoardCard({ opp, onDragStart, onClick, selected }: {
   const { currency, locale } = useNumberFormat()
   const o = opp as Opportunity & { ownerInitials?: string; ownerColor?: string | null; created?: string }
   return (
-    <div draggable onDragStart={e => onDragStart(e, opp.id)} onClick={() => onClick(opp)}
-      {...activatableCardProps(() => onClick(opp), [opp.title, opp.client].filter(Boolean).join(' · '))}
-      style={{ background: 'var(--surface)', borderRadius: 10, padding: '12px 14px', marginBottom: 8,
-        cursor: 'grab', userSelect: 'none',
-        border: `1px solid ${selected ? 'var(--color-primary)' : 'var(--border)'}` }}>
+    <BoardCardShell onDragStart={e => onDragStart(e, opp.id)} onClick={() => onClick(opp)} selected={selected}
+      ariaLabel={[opp.title, opp.client].filter(Boolean).join(' · ')}>
 
       {/* Title + client */}
       <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)', marginBottom: 4 }}>{opp.title || '—'}</div>
@@ -47,7 +43,7 @@ function BoardCard({ opp, onDragStart, onClick, selected }: {
         <Avatar initials={o.ownerInitials} size={18} color={o.ownerColor} />
         <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{o.created}</span>
       </div>
-    </div>
+    </BoardCardShell>
   )
 }
 

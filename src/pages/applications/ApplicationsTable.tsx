@@ -10,6 +10,7 @@ import type { Column } from '@/components/ui/DataTable'
 import type { TableSelectionProps, TableSortProps, TableVirtualizationProps } from '@/components/ui/dataTableTypes'
 import { stopPropagation } from '@/components/ui/dataTableUtils'
 import Avatar from '@/components/ui/Avatar'
+import OwnerCell from '@/components/ui/OwnerCell'
 import EntityNameCell from '@/components/ui/EntityNameCell'
 import StatusPill from '@/components/ui/StatusPill'
 import SoftChip from '@/components/ui/SoftChip'
@@ -236,13 +237,12 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
     // holds the "Koios" header label (legacy key name, correct value — reused
     // as-is rather than adding a duplicate key).
     makeKoiosColumn({ adviceOf, colored: colorKoios, label: t('cols.task') }),
-    // Owner — avatar + name. LAST column (§3A convention).
+    // Owner — avatar + name. LAST column (§3A convention). ApplicationsTable never
+    // shows a "bureau" fallback (unlike TasksTable's assignee) — it always passes a
+    // resolved owner object, so OwnerCell's fallback branch never triggers here.
     { key: 'owner', header: t('cols.owner'), sortable: true, sortValue: r => r.owner?.name,
       render: r => (
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Avatar initials={r.owner?.initials} size={22} color={colorOwner ? r.owner?.color : 'var(--text-muted)'} soft />
-          <span style={{ fontSize: 12, color: 'var(--text)' }}>{r.owner?.name}</span>
-        </span>
+        <OwnerCell owner={{ initials: r.owner?.initials, name: r.owner?.name, color: colorOwner ? r.owner?.color : 'var(--text-muted)' }} />
       ) },
   ]
 

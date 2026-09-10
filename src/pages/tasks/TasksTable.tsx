@@ -2,12 +2,12 @@
 // the loading/empty/success states live in the shared DataTable.
 import { cellButton } from '@/components/ui/cellButton'
 import { useTranslation } from 'react-i18next'
-import { Building2 } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import type { ReactNode } from 'react'
 import type { TableSelectionProps, TableVirtualizationProps } from '@/components/ui/dataTableTypes'
-import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
+import { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
+import OwnerCell from '@/components/ui/OwnerCell'
 import EntityNameCell from '@/components/ui/EntityNameCell'
 import SoftChip from '@/components/ui/SoftChip'
 import { makeKoiosColumn } from '@/components/ui/koiosColumn'
@@ -24,12 +24,9 @@ import type { Id } from '@/types/common'
 const dash = <span style={{ color: 'var(--text-muted)' }}>—</span>
 // Single-line title truncation (never wrap to 2 lines) — task titles can run long.
 const titleEllipsis = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const, display: 'block' as const, maxWidth: 250 }
-// "Bureau" (no assignee) icon bubble — same 22px footprint as the person Avatar, so
-// the row never jumps between an avatar-shaped and a bare-text look (Danny 2026-07-14:
-// the tasks resource has NO location/branch on the list row yet — BE gap, see below).
-const bureauBubble = { width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-  flexShrink: 0, background: 'color-mix(in srgb, var(--text-muted) 12%, transparent)',
-  border: '1px solid color-mix(in srgb, var(--text-muted) 40%, transparent)' }
+// The "Bureau" (no assignee) icon-bubble fallback moved into the shared OwnerCell
+// (DRY round 11, PAGES) — the tasks resource has NO location/branch on the list
+// row yet (BE gap, see below), so the fallback keeps the same 22px footprint.
 
 interface TasksTableProps extends TableSelectionProps, TableVirtualizationProps {
   rows: Task[]
@@ -155,16 +152,10 @@ export default function TasksTable({
     // on the list row yet, so this can't show the vestiging until that ships).
     // LAST column (§3A convention).
     { key: 'assignee', header: t('cols.assignee'), sortable: true, sortValue: r => r.assignee?.name ?? '',
-      render: r => r.assignee ? (
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Avatar initials={r.assignee.initials} size={22} color={colorAssignee ? (r.assignee.color || NEUTRAL_AVATAR) : NEUTRAL_AVATAR} soft />
-          <span style={{ fontSize: 12, color: 'var(--text)' }}>{r.assignee.name}</span>
-        </span>
-      ) : (
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={bureauBubble}><Building2 size={12} style={{ color: 'var(--text-muted)' }} /></span>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('bureau')}</span>
-        </span>
+      render: r => (
+        <OwnerCell
+          owner={r.assignee ? { initials: r.assignee.initials, name: r.assignee.name, color: colorAssignee ? (r.assignee.color || NEUTRAL_AVATAR) : NEUTRAL_AVATAR } : null}
+          fallbackLabel={t('bureau')} />
       ) },
   ]
 

@@ -14,8 +14,7 @@ import { useDateFormat } from '@/lib/datetime'
 import { isTaskOverdue, dueDateTime } from './data/mapTask'
 import type { Task } from '@/types/task'
 import type { Id } from '@/types/common'
-import { activatableCardProps } from '@/components/ui/activatableCard'
-import { BoardColumnHeader, useBoardDrag } from '@/components/ui/board'
+import { BoardCardShell, BoardColumnShell, BoardScrollArea, useBoardDrag } from '@/components/ui/board'
 
 export interface BoardColumn { key: string | number; label: string; color: string }
 type FormatDate = (v?: string | number | Date | null) => string
@@ -26,11 +25,7 @@ function BoardCard({ task, onDragStart, onClick, selected, formatDate, formatDat
   selected: boolean; formatDate: FormatDate; formatDateTime: FormatDate; bureauLabel: ReactNode
 }) {
   return (
-    <div draggable onDragStart={e => onDragStart(e, task.id)} onClick={() => onClick(task)}
-      {...activatableCardProps(() => onClick(task), task.title ?? '')}
-      style={{ background: 'var(--surface)', borderRadius: 10, padding: '12px 14px', marginBottom: 8,
-        cursor: 'grab', userSelect: 'none',
-        border: `1px solid ${selected ? 'var(--color-primary)' : 'var(--border)'}` }}>
+    <BoardCardShell onDragStart={e => onDragStart(e, task.id)} onClick={() => onClick(task)} selected={selected} ariaLabel={task.title ?? ''}>
 
       {/* Title + priority dot */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 8 }}>
@@ -71,37 +66,7 @@ function BoardCard({ task, onDragStart, onClick, selected, formatDate, formatDat
           </span>
         )}
       </div>
-    </div>
-  )
-}
-
-// A single status column with its cards.
-function BoardColumnView({ column, items, onDragStart, onDrop, onDragOver, onSelect, selectedId, emptyText, formatDate, formatDateTime, bureauLabel }: {
-  column: BoardColumn; items: Task[]
-  onDragStart: (e: DragEvent<HTMLDivElement>, id: Id | undefined) => void
-  onDrop: (e: DragEvent<HTMLDivElement>, statusKey: string | number) => void
-  onDragOver: (e: DragEvent<HTMLDivElement>) => void
-  onSelect: (t: Task) => void
-  selectedId?: Id | null
-  emptyText: ReactNode
-  formatDate: FormatDate
-  formatDateTime: FormatDate
-  bureauLabel: ReactNode
-}) {
-  return (
-    <div style={{ width: 270, flexShrink: 0, display: 'flex', flexDirection: 'column' }}
-      onDrop={e => onDrop(e, column.key)} onDragOver={onDragOver}>
-      <BoardColumnHeader label={column.label} count={items.length} color={column.color} showDot={false} />
-      <div style={{ flex: 1, minHeight: 80, borderRadius: 10,
-        border: items.length === 0 ? '1px dashed var(--border)' : 'none' }}>
-        {items.length === 0 ? (
-          <div style={{ padding: '24px 12px', fontSize: 12, color: 'var(--text-muted)', textAlign: 'center' }}>{emptyText}</div>
-        ) : items.map(task => (
-          <BoardCard key={task.id} task={task} onDragStart={onDragStart}
-            onClick={onSelect} selected={task.id === selectedId} formatDate={formatDate} formatDateTime={formatDateTime} bureauLabel={bureauLabel} />
-        ))}
-      </div>
-    </div>
+    </BoardCardShell>
   )
 }
 
@@ -115,16 +80,19 @@ export default function TasksBoard({ rows, columns, onMove, onSelect, selectedId
   const { boardScrollRef, boardAutoScroll, handleDragStart, handleDragOver, handleDrop } = useBoardDrag<HTMLDivElement, string | number>({ onMove })
 
   return (
-    <div ref={boardScrollRef} onDragOver={boardAutoScroll} style={{ flex: 1, overflow: 'auto', padding: '0 24px 20px' }}>
-      <div style={{ display: 'flex', gap: 16, minWidth: 'max-content', paddingBottom: 8 }}>
-        {columns.map(column => (
-          <BoardColumnView key={column.key} column={column}
-            items={rows.filter(r => r.statusKey === column.key)}
-            onDragStart={handleDragStart} onDrop={handleDrop} onDragOver={handleDragOver}
-            onSelect={onSelect} selectedId={selectedId} emptyText={t('board.empty')}
-            formatDate={formatDate} formatDateTime={formatDateTime} bureauLabel={t('bureau')} />
-        ))}
-      </div>
-    </div>
+    <BoardScrollArea scrollRef={boardScrollRef} onDragOver={boardAutoScroll}>
+      {columns.map(column => {
+        const items = rows.filter(r => r.statusKey === column.key)
+        return (
+          <BoardColumnShell key={column.key} label={column.label} color={column.color} showDot={false}
+            onDrop={e => handleDrop(e, column.key)} onDragOver={handleDragOver}
+            items={items} emptyText={t('board.empty')}
+            renderItem={task => (
+              <BoardCard key={task.id} task={task} onDragStart={handleDragStart}
+                onClick={onSelect} selected={task.id === selectedId} formatDate={formatDate} formatDateTime={formatDateTime} bureauLabel={t('bureau')} />
+            )} />
+        )
+      })}
+    </BoardScrollArea>
   )
 }
