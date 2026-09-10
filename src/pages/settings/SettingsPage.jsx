@@ -156,11 +156,15 @@ export default function SettingsPage() {
 
   // A deep link to a moved slug (MOVED_TO_PROFILE) lands on the profile page instead of
   // the silent first-tab fallback — on mount and on every later hash change.
+  // Once redirected, this page must not write its own fallback hash over the shell's
+  // `#profile` (the sync effect below runs after the redirect and would leave a reload
+  // landing on the first settings tab instead of the profile — screen-checked 10-09).
+  const redirectedRef = useRef(false)
   useEffect(() => {
     const redirectIfMoved = () => {
       const loc = parseHash()
       const moved = loc ? MOVED_TO_PROFILE[`${loc.category}/${loc.tab}`] : null
-      if (moved && nav?.navigate) nav.navigate('profile', moved)
+      if (moved && nav?.navigate) { redirectedRef.current = true; nav.navigate('profile', moved) }
     }
     redirectIfMoved()
     window.addEventListener('hashchange', redirectIfMoved)
@@ -200,7 +204,7 @@ export default function SettingsPage() {
 
   // Keep the URL hash in sync (deep-link / bookmark / back button).
   useEffect(() => {
-    if (!category || !tab) return
+    if (!category || !tab || redirectedRef.current) return
     const next = `#settings/${category}/${tab}`
     if (window.location.hash !== next) window.history.replaceState(null, '', next)
   }, [category, tab])
