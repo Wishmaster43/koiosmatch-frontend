@@ -273,6 +273,11 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
             landing state instead of the welcome bubble, during a conversation when summoned
             from the composer. Chat-handoff (golf 2): a suggestion prefills the composer with
             the reason AND pins its record as a context chip — SENDING stays the user's click. */}
+        {/* Danny 09-09 (point 1): the landing opens with the one-line personal greeting
+            ("Hoi Kelly, wat kan ik voor je doen?" + the attention count) ABOVE the two
+            cards — never a feature list, and never an empty panel when both cards are
+            closed away. In a conversation the same bubble stays as the first message. */}
+        {isLanding && <KoiosMessage msg={messages[0]} t={t} greeting={greeting} />}
         {assistantVisible && (
           <KoiosAssistantBlock onClose={() => (isLanding ? setSuggestionsHidden(true) : setChatAssistantOpen(false))}
             onAskKoios={(text, refs) => {

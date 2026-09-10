@@ -60,13 +60,15 @@ const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
 const speechModule = vi.hoisted(() => ({ enabled: true }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true, hasModule: (m: string) => (m === 'speech' ? speechModule.enabled : true) }) }))
 
-// Landing state (Danny 21/7): the radar REPLACES the generic welcome bubble, it
-// never sits alongside it, and only while no real conversation has started yet.
+// Landing state (Danny 21/7): the radar REPLACES the old feature-list welcome, and only
+// while no real conversation has started yet. Danny 09-09 (point 1): the one-line
+// personal greeting ("Hoi Kelly, wat kan ik voor je doen?") opens the landing above it.
 describe('KoiosPanel — landing state', () => {
-  it('shows the Koios Advies radar instead of the welcome bubble when opened', async () => {
+  it('shows the one-line greeting and the Koios Advies radar when opened', async () => {
     renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
     expect(screen.getByText('common:koios.radar.title')).toBeInTheDocument()
-    expect(screen.queryByText('koios.welcome')).toBeNull()
+    // The mocked auth has no user, so the anonymous variant renders — one line, no feature list.
+    expect(screen.getByText(/koios\.welcome(Anonymous)?/)).toBeInTheDocument()
     // Let the radar's own stats fetch settle (mocked all-zero → empty state) so
     // the async state update lands inside RTL's act(), not after the test ends.
     await screen.findByText('common:koios.radar.empty')
