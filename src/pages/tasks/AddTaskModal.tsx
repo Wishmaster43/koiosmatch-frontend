@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useTaskLookups } from '@/context/TaskLookupsContext'
 import { useAuth } from '@/context/AuthContext'
 import { useTaskLookupIds } from './hooks/useTaskLookupIds'
-import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { WIDE_MODAL_PANEL_SIZE } from '@/components/ui/wideModalPanelSize'
 import { tintBorder } from '@/lib/tint'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import TitleBarPills from '@/components/ui/TitleBarPills'
@@ -212,7 +212,7 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
     // to resize the wide trio stays components/ui/modalMetrics.ts.
     <FloatingPanel open onClose={onClose} ariaLabel={modalTitle}
       persistKey="add-task" scrollBody={false}
-      width={`min(calc(100vw - 48px), ${WIDE_MODAL.maxWidth}px)`} maxWidth={`${WIDE_MODAL.maxWidth}px`}
+      {...WIDE_MODAL_PANEL_SIZE}
       header={
         // TITELBALK-PILLS (Danny 27-08): the Soort activiteit choice moves OUT of
         // TaskCard and into the title bar, via the shared TitleBarPills atom —

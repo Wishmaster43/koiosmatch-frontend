@@ -9,7 +9,7 @@ import { LucideIcon } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import Button from '@/components/ui/Button'
 import ModalFooter from '@/components/ui/ModalFooter'
-import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { WIDE_MODAL_PANEL_SIZE } from '@/components/ui/wideModalPanelSize'
 import { cardBox, cardHead } from '@/components/ui/modalCards'
 
 interface SubEntityModalFrameProps {
@@ -46,8 +46,7 @@ export default function SubEntityModalFrame({
 }: SubEntityModalFrameProps) {
   return (
     <FloatingPanel open={open} onClose={onClose} ariaLabel={ariaLabel} persistKey={persistKey}
-      scrollBody={false} width={`min(calc(100vw - 48px), ${WIDE_MODAL.maxWidth}px)`}
-      maxWidth={`${WIDE_MODAL.maxWidth}px`}
+      scrollBody={false} {...WIDE_MODAL_PANEL_SIZE}
       header={
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{

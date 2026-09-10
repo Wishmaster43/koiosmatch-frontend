@@ -27,7 +27,7 @@ import api from '@/lib/api'
 import { createCampaign } from './data/outreachApi'
 import type { Campaign } from './hooks/useOutreachCampaigns'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { WIDE_MODAL_PANEL_SIZE } from '@/components/ui/wideModalPanelSize'
 import { cardHead, cardBox, row2, cardPair } from '@/components/ui/modalCards'
 import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
@@ -83,7 +83,7 @@ export default function OutreachCreate({ onClose, onCreated }: Props) {
   return (
     <FloatingPanel open onClose={onClose} ariaLabel={title} title={title}
       persistKey="outreach-create" scrollBody={false}
-      width={`min(calc(100vw - 48px), ${WIDE_MODAL.maxWidth}px)`} maxWidth={`${WIDE_MODAL.maxWidth}px`}>
+      {...WIDE_MODAL_PANEL_SIZE}>
       <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
         {/* Two titled cards side by side: Algemeen (name + channel) and Bron
             (optional pool) — the shared cardPair grid (§11), not a stack

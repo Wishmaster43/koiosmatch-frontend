@@ -21,7 +21,7 @@
  * 'vacancies' importer (never a second upload implementation, §11).
  */
 import { useEffect, useState } from 'react'
-import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { WIDE_MODAL_PANEL_SIZE } from '@/components/ui/wideModalPanelSize'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { tintBorder } from '@/lib/tint'
 import { cardBox, cardHead } from '@/components/ui/modalCards'
@@ -147,7 +147,7 @@ export default function AddVacancyModal({
       // FloatingPanel shell (its own persistKey — it is its own window).
       <FloatingPanel open onClose={onClose} title={f.t('modal.attachments.resultsTitle')}
         ariaLabel={f.t('modal.attachments.resultsTitle')} persistKey="add-vacancy-results"
-        scrollBody={false} width={`min(calc(100vw - 48px), ${WIDE_MODAL.maxWidth}px)`} maxWidth={`${WIDE_MODAL.maxWidth}px`}>
+        scrollBody={false} {...WIDE_MODAL_PANEL_SIZE}>
           <PostCreateResultsPanel files={attachments.files} noteText={attachments.noteText}
             noteStatus={attachments.noteStatus} noteError={attachments.noteError} running={attachments.running}
             onRetryFile={attachments.retryFile} onRetryNote={attachments.retryNote} onClose={onClose} />

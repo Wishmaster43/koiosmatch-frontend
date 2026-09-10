@@ -26,7 +26,7 @@ import { useCreateCandidate } from './hooks/useCandidateMutations'
 import { useLocations } from '@/lib/useLocations'
 import { useFunctions } from '@/lib/useFunctions'
 import { useProvinces } from '@/hooks/useProvinces'
-import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { WIDE_MODAL_PANEL_SIZE } from '@/components/ui/wideModalPanelSize'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { cardBox, cardHead, modalColumns } from '@/components/ui/modalCards'
 // CAND-IMPORT-FE-1 (23-08): the compact "create these from file" card and its
@@ -268,7 +268,7 @@ export default function AddCandidateModal({ onClose, onCreated, onImported }: Ad
     // edge-to-edge via negative margins; hideClose avoids a second X.
     <FloatingPanel open onClose={onClose} ariaLabel={t('modal.candidateData')}
       persistKey="add-candidate" scrollBody={false} hideClose
-      width={`min(calc(100vw - 48px), ${WIDE_MODAL.maxWidth}px)`} maxWidth={`${WIDE_MODAL.maxWidth}px`}
+      {...WIDE_MODAL_PANEL_SIZE}
       header={
         <div style={{ flex: '1 1 100%', margin: '-12px -16px -13px' }}>
           <ModalHeader status={status} pickStatuses={pickStatuses} selectedStatus={selectedStatus} statusLabel={statusLabel}
