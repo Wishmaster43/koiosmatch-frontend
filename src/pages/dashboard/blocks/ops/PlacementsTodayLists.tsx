@@ -7,8 +7,8 @@
  */
 import { useTranslation } from 'react-i18next'
 import { Block } from '@/pages/dashboard/DashboardPrimitives'
-import { GroupLabel, BodyText, Caption } from '@/components/ui/typography'
-import { interactive } from '@/lib/a11y'
+import { GroupLabel } from '@/components/ui/typography'
+import DashboardListRow from '../DashboardListRow'
 import type { PlacementsStartedEndedToday, PlacementTodayRow } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
@@ -24,20 +24,12 @@ function TodaySubList({ label, rows, onNavigate }: {
     <div>
       <GroupLabel style={{ padding: '10px 16px 4px' }}>{label}</GroupLabel>
       {rows.map((r, i) => (
-        <div key={r.match_id}
-          // Only wired when onNavigate is actually provided, so a row doesn't render clickable for nothing.
-          {...(onNavigate ? interactive(() => onNavigate('matches', { open: r.match_id })) : {})}
-          style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', cursor: onNavigate ? 'pointer' : 'default',
-            borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none' }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <BodyText as="div" style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {r.candidate || r.customer || t('widget.unknown')}
-            </BodyText>
-            {r.candidate && r.customer && (
-              <Caption as="div" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.customer}</Caption>
-            )}
-          </div>
-        </div>
+        // Only wired when onNavigate is actually provided, so a row doesn't render clickable for nothing.
+        <DashboardListRow key={r.match_id} isLast={i === rows.length - 1}
+          onClick={onNavigate ? () => onNavigate('matches', { open: r.match_id }) : undefined}
+          title={r.candidate || r.customer || t('widget.unknown')}
+          subtitle={r.candidate && r.customer ? r.customer : undefined}
+        />
       ))}
     </div>
   )

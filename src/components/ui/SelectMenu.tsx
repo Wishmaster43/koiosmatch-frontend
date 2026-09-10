@@ -14,6 +14,7 @@ import type { ReactNode } from 'react'
 import { ChevronDown, Check } from 'lucide-react'
 import Avatar from './Avatar'
 import { useDropdownPopover } from '@/hooks/useDropdownPopover'
+import { menuShellStyle } from '@/lib/useDropdownPlacement'
 import { matchesOptionQuery } from './optionFilter'
 import SelectClearButton, { CLEAR_BUTTON_SIZE } from './SelectClearButton'
 import DropdownPopover from './DropdownPopover'
@@ -124,16 +125,7 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, 'ari
           picker must never build this option list at all. */}
       {open && (
       <DropdownPopover menuRef={menuRef} id={listId}
-        // HUISSTIJL-1: portalled dropdown menu — z-popover ladder tier, shadow-float role.
-        style={{ position: 'fixed', zIndex: 'var(--z-popover)', minWidth: menuWidth,
-          // Hidden until the first measurement lands — never painted at (0,0).
-          visibility: rect ? 'visible' : 'hidden',
-          left: rect ? rect.left : 0,
-          ...(rect
-            ? (openUp ? { bottom: window.innerHeight - rect.top + 4 } : { top: rect.bottom + 4 })
-            : {}),
-          background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
-          boxShadow: 'var(--shadow-float)', overflow: 'hidden', maxHeight: menuMaxHeight, overflowY: 'auto' }}>
+        style={{ ...menuShellStyle(rect, openUp, menuWidth, menuMaxHeight, true), overflowY: 'auto' }}>
         {/* Filter box — autofocused so typing narrows immediately, Escape-safe
             (the outside-click/Escape handling above owns closing). */}
         <div style={{ padding: 6, borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, background: 'var(--surface)' }}>

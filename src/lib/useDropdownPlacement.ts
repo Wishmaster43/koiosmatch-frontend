@@ -20,7 +20,7 @@
  * coordinates are always relative to the viewport.
  */
 import { useState, useLayoutEffect } from 'react'
-import type { RefObject } from 'react'
+import type { RefObject, CSSProperties } from 'react'
 
 // Hard cap on menu height, the margin kept clear of the viewport edge, and a
 // floor so a very cramped viewport still shows a usable (if short) menu.
@@ -112,4 +112,39 @@ export function useDropdownPlacement(anchorRef: RefObject<HTMLElement | null>, o
   }, [open])
 
   return placement
+}
+
+// menuShellStyle — the base fixed-position dropdown-menu shell every portalled
+// picker (CreatableSelect, SelectMenu) builds from `useDropdownPlacement`'s own
+// openUp/rect: HUISSTIJL-1 z-popover stacking, hidden until the first
+// measurement lands (never painted at an unpositioned (0,0) spot — see this
+// module's own doc comment above), the flip/clamp position, and the shared
+// surface/border/radius/shadow/overflow recipe (DRY round 11, LAYOUT; UIATOMS
+// round 11 left this menu-shell block open).
+//
+// `menuMaxHeight` is the one remaining measured difference between the two
+// callers: CreatableSelect inserts it right after `minWidth`, SelectMenu
+// layers it in AFTER `overflow` so it can add its own `overflowY: 'auto'`
+// straight after — `maxHeightAtEnd` selects which. This is not cosmetic: React's
+// server renderer writes the `style` HTML attribute in the object's OWN key
+// insertion order, and MODULE-FACE-BEVRIES requires byte-identical markup on
+// every touched surface, so each caller's original key order is preserved
+// exactly (verified with react-dom/server in menuShellStyle.test.ts).
+export function menuShellStyle(
+  rect: AnchorRect | null, openUp: boolean, menuWidth: number, menuMaxHeight: number,
+  maxHeightAtEnd = false,
+): CSSProperties {
+  return {
+    position: 'fixed', zIndex: 'var(--z-popover)', minWidth: menuWidth,
+    ...(maxHeightAtEnd ? {} : { maxHeight: menuMaxHeight }),
+    // Hidden until the first measurement lands — never painted at an unpositioned (0,0) spot.
+    visibility: rect ? 'visible' : 'hidden',
+    left: rect ? rect.left : 0,
+    ...(rect
+      ? (openUp ? { bottom: window.innerHeight - rect.top + 4 } : { top: rect.bottom + 4 })
+      : {}),
+    background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
+    boxShadow: 'var(--shadow-float)', overflow: 'hidden',
+    ...(maxHeightAtEnd ? { maxHeight: menuMaxHeight } : {}),
+  }
 }

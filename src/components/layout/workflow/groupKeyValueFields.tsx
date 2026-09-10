@@ -31,6 +31,29 @@ export function RowRemoveButton({ onClick, label }: { onClick: () => void; label
   )
 }
 
+// PendingRowTail — the duplicate-key/position notice + the shared "+ add"
+// affordance that follow a key/value-style field's pending draft row
+// (KeyValueField here, FunctionMatrixField): an honest reason while a duplicate
+// blocks the commit, then the one add button, disabled while a row is pending.
+// `duplicateText`/`addLabel` are resolved by the caller's own t() (§5). The
+// draft row's own remove button stays local to each field — its wrapping div
+// differs per field (blur/keydown wiring, alignment), so it cannot share this
+// unit without changing that markup (DRY round 11, LAYOUT).
+export function PendingRowTail({ isDuplicate, duplicateText, onAdd, addLabel, addDisabled }: {
+  isDuplicate: boolean
+  duplicateText: string
+  onAdd: () => void
+  addLabel: string
+  addDisabled: boolean
+}) {
+  return (
+    <>
+      {isDuplicate && <Caption style={{ color: 'var(--color-danger-text)' }}>{duplicateText}</Caption>}
+      <DrawerAddButton onClick={onAdd} label={addLabel} disabled={addDisabled} />
+    </>
+  )
+}
+
 export function KeyValueField({ value, onChange, fieldKey, suggestions }: {
   value?: unknown; onChange: OnChange; fieldKey: string; suggestions?: Record<string, string | string[]>
 }) {
@@ -100,10 +123,10 @@ export function KeyValueField({ value, onChange, fieldKey, suggestions }: {
           <RowRemoveButton onClick={() => setDraft(null)} label={t('common:remove')} />
         </div>
       )}
-      {/* A duplicate key never commits silently — say why the row stays pending. */}
-      {isDuplicate && <Caption style={{ color: 'var(--color-danger-text)' }}>{t('fields.duplicateKey')}</Caption>}
-      {/* One pending row at a time: the record cannot hold two empty keys. */}
-      <DrawerAddButton onClick={add} label={t('fields.add')} disabled={!!draft} />
+      {/* A duplicate key never commits silently — say why the row stays pending;
+          one pending row at a time, since the record cannot hold two empty keys. */}
+      <PendingRowTail isDuplicate={isDuplicate} duplicateText={t('fields.duplicateKey')}
+        onAdd={add} addLabel={t('fields.add')} addDisabled={!!draft} />
     </div>
   )
 }

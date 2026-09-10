@@ -15,9 +15,8 @@ import { BTN_H_SM } from '@/config/buttonMetrics'
 import Button from './Button'
 import { Caption } from './typography'
 import SelectAllRow from './SelectAllRow'
-// PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
-import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
+import { useClickOutside } from '@/hooks/useClickOutside'
 
 // Icon contract shared by the trigger, nodes and options (lucide-compatible).
 type IconComponent = ComponentType<{ size?: number; style?: CSSProperties; color?: string }>
@@ -116,13 +115,8 @@ export default function ActionMenu({
   const close = () => { setOpen(false); setPath([]); setQuery(''); setMultiValues([]) }
   const back = () => { setPath(p => p.slice(0, -1)); setQuery(''); setMultiValues([]) }
 
-  // Close on outside click while open.
-  useEffect(() => {
-    if (!open) return
-    const h = (e: MouseEvent) => { if (isInsideDropdownPortal(e.target as Node)) return; if (ref.current && !ref.current.contains(e.target as Node)) close() }
-    document.addEventListener('mousedown', h)
-    return () => document.removeEventListener('mousedown', h)
-  }, [open])
+  // Close on outside click while open (DRY round 11, LAYOUT).
+  useClickOutside([ref], open, close, { ignoreDropdownPortal: true })
 
   // Move focus into the panel on open/drill: the search box autofocuses itself,
   // otherwise the first menu item, so the menu is keyboard-operable immediately.

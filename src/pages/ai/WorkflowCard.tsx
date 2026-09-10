@@ -3,7 +3,6 @@
  * the shared module registry), last-run state and run/edit actions. Extracted from WorkflowsPage.
  * The whole card opens the editor (AW-list); the run/edit buttons stop propagation.
  */
-import { useState } from 'react'
 import type { MouseEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertCircle, ArchiveRestore, CheckCircle, MoreHorizontal, Play, Trash2, Zap } from 'lucide-react'
@@ -13,6 +12,7 @@ import { MODULE_META } from '@/modules/index'
 import { interactive } from '@/lib/a11y'
 import { useDateFormat } from '@/lib/datetime'
 import { useSeedLabel } from '@/lib/useSeedLabel'
+import { useWorkflowRowState } from './hooks/useWorkflowRowState'
 import { buildTrashNote } from '@/hooks/useTrashFlow'
 import type { Workflow } from '@/types/workflow'
 import Spinner from '@/components/ui/Spinner'
@@ -78,9 +78,7 @@ export default function WorkflowCard({ workflow, onRun, onEdit, canManageFolders
   const { t } = useTranslation('workflows')
   const { formatDate, formatDateTime } = useDateFormat()
   const seedLabel = useSeedLabel()
-  const [running, setRunning] = useState(false)
-  const [restoring, setRestoring] = useState(false)
-  const [hover, setHover] = useState(false)
+  const { running, setRunning, restoring, setRestoring, hover, setHover } = useWorkflowRowState()
   const status = STATUS_STYLES[workflow.status ?? ''] || STATUS_STYLES.draft
   const archived = Boolean(workflow.archived)
   // TRASH-OVERAL-2: trashed cards swap restore/mark for the erase note + unmark.

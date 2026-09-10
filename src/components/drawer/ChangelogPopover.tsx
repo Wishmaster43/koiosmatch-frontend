@@ -22,8 +22,7 @@ import { useTranslation } from 'react-i18next'
 import { History } from 'lucide-react'
 import { GroupLabel } from '@/components/ui/typography'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-// PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
-import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
+import { useClickOutside } from '@/hooks/useClickOutside'
 
 // The shared modeless changelog icon-popover shell (chrome only); each entity supplies its own translated label and content as children (see file header).
 export default function ChangelogPopover({ label, children }: { label?: string; children: ReactNode }) {
@@ -46,14 +45,10 @@ export default function ChangelogPopover({ label, children }: { label?: string; 
   }, [])
 
   // Close on outside click while the popover is open (Escape is handled by the
-  // panel's own focus trap). The panel renders INSIDE this wrapper, so a click on
-  // its chrome — including a drag on the header — never counts as "outside".
-  useEffect(() => {
-    if (!open) return
-    const onClick = (e: MouseEvent) => { if (isInsideDropdownPortal(e.target as Node)) return; if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
-    document.addEventListener('mousedown', onClick)
-    return () => document.removeEventListener('mousedown', onClick)
-  }, [open])
+  // panel's own focus trap; DRY round 11, LAYOUT). The panel renders INSIDE this
+  // wrapper, so a click on its chrome — including a drag on the header — never
+  // counts as "outside".
+  useClickOutside([ref], open, () => setOpen(false), { ignoreDropdownPortal: true })
 
   return (
     <div ref={ref} style={{ position: 'relative', display: 'flex' }}>

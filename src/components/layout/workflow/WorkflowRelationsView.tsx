@@ -19,10 +19,11 @@ import { GitBranch, ArrowDownToLine, ArrowUpFromLine, ListOrdered, ChevronRight,
 import { useTranslation } from 'react-i18next'
 import { useWorkflowRelations } from './useWorkflowRelations'
 import Button from '@/components/ui/Button'
-import { PageTitle, SectionTitle, Caption } from '@/components/ui/typography'
+import { PageTitle, Caption } from '@/components/ui/typography'
 import EntityLink from '@/components/ui/EntityLink'
 import StatusPill from '@/components/ui/StatusPill'
 import SoftChip from '@/components/ui/SoftChip'
+import SectionIconTitle from '@/components/ui/SectionIconTitle'
 import { StatusBadge } from '@/components/reports/runFormat'
 import Toggle from '@/components/ui/Toggle'
 import ErrorBanner from '@/components/ui/ErrorBanner'
@@ -166,10 +167,7 @@ function RelationSection({ title, Icon, rows, emptyLabel, onToggle }: {
 }) {
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-        <Icon size={14} color="var(--text-muted)" />
-        <SectionTitle as="span">{title}</SectionTitle>
-      </div>
+      <SectionIconTitle icon={Icon} title={title} />
       {rows.length === 0
         ? <Caption>{emptyLabel}</Caption>
         : <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -219,10 +217,7 @@ export default function WorkflowRelationsView({ workflowId }: { workflowId?: str
                 served, no lazy fetch. parents stay flat — upward chains read
                 better as a plain list. */}
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-                <ArrowDownToLine size={14} color="var(--text-muted)" />
-                <SectionTitle as="span">{t('relations.children')}</SectionTitle>
-              </div>
+              <SectionIconTitle icon={ArrowDownToLine} title={t('relations.children')} />
               {!tree || (tree.children?.length ?? 0) === 0
                 ? <Caption>{t('relations.noChildren')}</Caption>
                 : <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

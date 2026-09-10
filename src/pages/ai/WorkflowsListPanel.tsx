@@ -22,6 +22,40 @@ import type { WorkflowFolder, FolderId } from './hooks/useWorkflowsData'
 import type { ViewMode } from './hooks/useWorkflowsFilters'
 import Button from '@/components/ui/Button'
 
+// The archive/restore/mark-deletion/unmark prop bag every workflow row/card
+// needs, built once per workflow from the panel's own handlers (DRY round 11,
+// LAYOUT) — two call sites (grid card, list row) passed the same six props
+// built from `wf` the same way.
+function workflowRowActions(wf: Workflow, {
+  canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, graceDays,
+}: {
+  canManageFolders: boolean
+  handleArchive: (wf: Workflow) => void
+  handleRestore: (wf: Workflow) => void | Promise<void>
+  onMarkDeletion?: (wf: Workflow) => void
+  onUnmark?: (wf: Workflow) => void | Promise<void>
+  graceDays: number | null
+}) {
+  return {
+    canManageFolders,
+    onArchive: () => handleArchive(wf),
+    onRestore: () => handleRestore(wf),
+    onMarkDeletion: onMarkDeletion ? () => onMarkDeletion(wf) : undefined,
+    onUnmark: onUnmark ? () => onUnmark(wf) : undefined,
+    graceDays,
+  }
+}
+
+// The "no workflows" notice, shared by the grid and list views — only the grid
+// spans every column (`gridColumn`, absent in the list).
+function WorkflowsEmptyState({ label, gridColumn }: { label: string; gridColumn?: string }) {
+  return (
+    <div style={{ gridColumn, textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)', fontSize: 14 }}>
+      {label}
+    </div>
+  )
+}
+
 // Props: everything needed to render the toolbar + the visible workflow list.
 interface WorkflowsListPanelProps {
   loading: boolean
@@ -138,19 +172,12 @@ export default function WorkflowsListPanel({
               style={{ cursor: 'grab' }}
             >
               <WorkflowCard workflow={wf} onRun={handleRun} onEdit={() => openEditor(wf)}
-                canManageFolders={canManageFolders}
-                onArchive={() => handleArchive(wf)}
-                onRestore={() => handleRestore(wf)}
-                onMarkDeletion={onMarkDeletion ? () => onMarkDeletion(wf) : undefined}
-                onUnmark={onUnmark ? () => onUnmark(wf) : undefined}
-                graceDays={graceDays}
+                {...workflowRowActions(wf, { canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, graceDays })}
               />
             </div>
           ))}
           {visibleWorkflows.length === 0 && (
-            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)', fontSize: 14 }}>
-              {t('page.empty')}
-            </div>
+            <WorkflowsEmptyState label={t('page.empty')} gridColumn="1/-1" />
           )}
         </div>
       ) : (
@@ -165,19 +192,12 @@ export default function WorkflowsListPanel({
                 onRun={handleRun}
                 onEdit={() => openEditor(wf)}
                 onToggleStatus={() => handleToggleStatus(wf)}
-                canManageFolders={canManageFolders}
-                onArchive={() => handleArchive(wf)}
-                onRestore={() => handleRestore(wf)}
-                onMarkDeletion={onMarkDeletion ? () => onMarkDeletion(wf) : undefined}
-                onUnmark={onUnmark ? () => onUnmark(wf) : undefined}
-                graceDays={graceDays}
+                {...workflowRowActions(wf, { canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, graceDays })}
               />
             </div>
           ))}
           {visibleWorkflows.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)', fontSize: 14 }}>
-              {t('page.empty')}
-            </div>
+            <WorkflowsEmptyState label={t('page.empty')} />
           )}
         </div>
       )}

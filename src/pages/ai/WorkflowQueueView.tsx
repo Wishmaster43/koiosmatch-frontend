@@ -17,7 +17,8 @@ import KpiCard from '@/components/ui/KpiCard'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
-import { SectionTitle, Caption } from '@/components/ui/typography'
+import { Caption } from '@/components/ui/typography'
+import SectionIconTitle from '@/components/ui/SectionIconTitle'
 import { canAccessPage } from '@/lib/access'
 import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
@@ -68,11 +69,9 @@ function QueueSection<T>({ icon: Icon, title, rows, emptyLabel, renderRow }: {
 }) {
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-        <Icon size={14} color="var(--text-muted)" />
-        <SectionTitle as="span">{title}</SectionTitle>
+      <SectionIconTitle icon={Icon} title={title}>
         <Caption>({rows.length})</Caption>
-      </div>
+      </SectionIconTitle>
       {rows.length === 0
         ? <Caption>{emptyLabel}</Caption>
         : <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

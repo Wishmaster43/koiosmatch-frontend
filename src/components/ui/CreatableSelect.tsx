@@ -27,7 +27,7 @@
 import { useState, useRef, useEffect, useId } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { ChevronDown, Check, Plus } from 'lucide-react'
-import { DROPDOWN_SEARCH_ROW_HEIGHT } from '@/lib/useDropdownPlacement'
+import { DROPDOWN_SEARCH_ROW_HEIGHT, menuShellStyle } from '@/lib/useDropdownPlacement'
 import { useDropdownPopover } from '@/hooks/useDropdownPopover'
 import { matchesOptionQuery } from './optionFilter'
 import SelectClearButton, { CLEAR_BUTTON_SIZE } from './SelectClearButton'
@@ -196,18 +196,7 @@ export default function CreatableSelect({
       {/* PERF (r11 v2): short-circuit here, not inside DropdownPopover — a closed
           picker must never build this option list at all. */}
       {open && (
-      <DropdownPopover menuRef={menuRef} style={{
-          // HUISSTIJL-1: portalled dropdown menu — z-popover ladder tier, shadow-float role.
-          position: 'fixed', zIndex: 'var(--z-popover)', minWidth: menuWidth, maxHeight: menuMaxHeight,
-          // Hidden until the first measurement lands (see useDropdownPlacement's
-          // doc comment) — never painted at an unpositioned (0,0) spot.
-          visibility: rect ? 'visible' : 'hidden',
-          left: rect ? rect.left : 0,
-          ...(rect
-            ? (openUp ? { bottom: window.innerHeight - rect.top + 4 } : { top: rect.bottom + 4 })
-            : {}),
-          background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
-          boxShadow: 'var(--shadow-float)', overflow: 'hidden' }}>
+      <DropdownPopover menuRef={menuRef} style={menuShellStyle(rect, openUp, menuWidth, menuMaxHeight)}>
           {/* Search / type-to-create */}
           <div style={{ padding: 6, borderBottom: '1px solid var(--border)' }}>
             <input ref={inputRef} value={query} onChange={e => setQuery(e.target.value)}

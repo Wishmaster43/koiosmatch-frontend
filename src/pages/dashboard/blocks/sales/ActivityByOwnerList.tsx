@@ -10,6 +10,7 @@
 import { useTranslation } from 'react-i18next'
 import { Block } from '@/pages/dashboard/DashboardPrimitives'
 import Avatar from '@/components/ui/Avatar'
+import MiniProgressBar from '@/components/ui/MiniProgressBar'
 import { BodyText, Caption, Mono } from '@/components/ui/typography'
 import { initialsOf } from '@/lib/initials'
 import { interactive } from '@/lib/a11y'
@@ -45,9 +46,7 @@ export default function ActivityByOwnerList({ rows, onNavigate }: {
                 </BodyText>
                 <Mono style={{ fontVariantNumeric: 'tabular-nums' }}>{r.activity}</Mono>
               </div>
-              <div style={{ height: 8, borderRadius: 4, background: 'var(--hover-bg)', overflow: 'hidden', marginBottom: 5 }}>
-                <div style={{ height: '100%', width: `${pct}%`, background: 'var(--button-fill)', borderRadius: 4, transition: 'width 0.3s' }} />
-              </div>
+              <MiniProgressBar pct={pct} />
               <Caption as="span">{t('feed.activityCount', { count: r.activity })}</Caption>
             </div>
           )

@@ -5,6 +5,7 @@
  * renders the Standard/Advanced/Test/Output tabs. Extracted from WorkflowCanvasEditor.
  */
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
+import type { ReactNode } from 'react'
 import { Zap, Trash2, Play } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -28,6 +29,33 @@ import type { FlowNode, WorkflowField, WorkflowVarGroup } from '@/types/workflow
 // suite even for non-webhook nodes. Loaded only when this step's Verzoeken tab
 // actually renders.
 const WebhookRequestsLog = lazy(() => import('@/components/webhooks/WebhookRequestsPanel').then(m => ({ default: m.WebhookRequestsLog })))
+
+// ExecutionOutputPane — the execution tab's empty/output block, shared by the agent
+// and non-agent branches below: no run yet -> a calm placeholder; a run -> the
+// fanout summary (when present), any extra notices the caller supplies as children
+// (the non-agent branch's WhatsApp-queued/item-count captions), then the output
+// tree. `noOutputLabel` is resolved by the caller's own t() (§5).
+function ExecutionOutputPane({ output, fanout, noOutputLabel, children }: {
+  output: unknown
+  fanout?: WaFanout
+  noOutputLabel: string
+  children?: ReactNode
+}) {
+  return (
+    <div style={{ flex: 1, overflowY: 'auto' }}>
+      {!output
+        ? <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 10, padding: 24 }}>
+            <Play size={24} color="var(--border)" />
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.5 }}>{noOutputLabel}</p>
+          </div>
+        : <div style={{ padding: 12 }}>
+            {fanout && <FanoutSummary fanout={fanout} />}
+            {children}
+            <OutputTree data={output} />
+          </div>}
+    </div>
+  )
+}
 
 // The workflow editor's right-side module configuration panel.
 export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, variables = [] }: {
@@ -278,17 +306,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
         <AgentTestPanel config={config} />
       )}
       {isAgent && activeTab === 'execution'  && (
-        <div style={{ flex: 1, overflowY: 'auto' }}>
-          {!output
-            ? <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 10, padding: 24 }}>
-                <Play size={24} color="var(--border)" />
-                <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.5 }}>{t('config.noOutput')}</p>
-              </div>
-            : <div style={{ padding: 12 }}>
-                {fanout && <FanoutSummary fanout={fanout} />}
-                <OutputTree data={output} />
-              </div>}
-        </div>
+        <ExecutionOutputPane output={output} fanout={fanout} noOutputLabel={t('config.noOutput')} />
       )}
 
       {/* ── Standard settings + execution (non-agent) ───────────────────── */}
@@ -390,19 +408,10 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
           required decoration stays identical to the main settings list. */}
       {!isAgent && activeTab === 'translations' && renderFields(fieldsForTab('translations'))}
       {!isAgent && activeTab === 'execution' && (
-        <div style={{ flex: 1, overflowY: 'auto' }}>
-          {!output
-            ? <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 10, padding: 24 }}>
-                <Play size={24} color="var(--border)" />
-                <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.5 }}>{t('config.noOutput')}</p>
-              </div>
-            : <div style={{ padding: 12 }}>
-                {fanout && <FanoutSummary fanout={fanout} />}
-                {waQueued != null && <Caption style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>{t('fields.whatsappQueued', { count: waQueued })}</Caption>}
-                {Array.isArray(output) && <Caption style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>{t('config.itemsCount', { count: output.length })}</Caption>}
-                <OutputTree data={output} />
-              </div>}
-        </div>
+        <ExecutionOutputPane output={output} fanout={fanout} noOutputLabel={t('config.noOutput')}>
+          {waQueued != null && <Caption style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>{t('fields.whatsappQueued', { count: waQueued })}</Caption>}
+          {Array.isArray(output) && <Caption style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>{t('config.itemsCount', { count: output.length })}</Caption>}
+        </ExecutionOutputPane>
       )}
     </div>
   )

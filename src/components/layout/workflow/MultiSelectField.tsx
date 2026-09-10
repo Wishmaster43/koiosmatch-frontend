@@ -11,7 +11,7 @@
  *   4. none of the above (e.g. Plaats) — free entry: type a value + Enter adds it as a chip.
  * Selected values render as removable chips; the dropdown filters as you type.
  */
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, X } from 'lucide-react'
 import { useLookups } from '@/context/LookupsContext'
@@ -20,7 +20,7 @@ import { optionLabel } from './moduleI18n'
 import { unwrapList } from '@/lib/api'
 import type { WorkflowField } from '@/types/workflow'
 import type { OnChange } from './fieldControls/types'
-import { useEscapeLayer } from '@/hooks/useEscapeLayer'
+import { usePopoverBox } from './usePopoverBox'
 
 type Opt = { value: string; label: string }
 
@@ -32,7 +32,7 @@ export default function MultiSelectField({ field, value, onChange }: {
   const lookups = useLookups()
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
-  const boxRef = useRef<HTMLDivElement>(null)
+  const { boxRef, onBlur } = usePopoverBox(open, setOpen)
   const endpoint = typeof field.endpoint === 'string' ? field.endpoint : undefined
   const valueKey = typeof field.valueKey === 'string' ? field.valueKey : undefined
   // Endpoint-backed options (fetched once per endpoint) — mirrors LookupSelectField's
@@ -94,12 +94,8 @@ export default function MultiSelectField({ field, value, onChange }: {
       ? [...selected, ...values.filter(v => !selected.includes(v))]
       : selected.filter(s => !values.includes(s)))
 
-  // Escape layer: closes this dropdown (one-stage).
-  useEscapeLayer(open, () => setOpen(false))
-
   return (
-    <div ref={boxRef} style={{ position: 'relative' }}
-      onBlur={e => { if (!boxRef.current?.contains(e.relatedTarget as Node)) setOpen(false) }}>
+    <div ref={boxRef} style={{ position: 'relative' }} onBlur={onBlur}>
       {/* Control: selected chips + the search input, dropdown-styled. */}
       <div onClick={() => setOpen(true)}
         style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 5, minHeight: 34,

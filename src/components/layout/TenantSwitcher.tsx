@@ -14,10 +14,9 @@ import type { Tenant } from '@/types/api'
 // each list row shows a DIFFERENT tenant's own brand colour, never the active
 // tenant's --color-on-accent token (which only reflects the active tenant).
 import { readableOn } from '@/hooks/useTenantTheme'
-// PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
-import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 import Spinner from '@/components/ui/Spinner'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
+import { useClickOutside } from '@/hooks/useClickOutside'
 import { initialsOf } from '@/lib/initials'
 
 // Only a real 6-digit hex is safe to feed into readableOn's luminance maths.
@@ -90,13 +89,8 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
     return () => ctrl.abort()
   }, [open, canSwitch, debounced, page])
 
-  // Close on outside click; reset state when closing.
-  useEffect(() => {
-    if (!open) return
-    const onDoc = (e: MouseEvent) => { if (isInsideDropdownPortal(e.target as Node)) return; if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
-    document.addEventListener('mousedown', onDoc)
-    return () => document.removeEventListener('mousedown', onDoc)
-  }, [open])
+  // Close on outside click (DRY round 11, LAYOUT).
+  useClickOutside([ref], open, () => setOpen(false), { ignoreDropdownPortal: true })
 
   // Escape layer: closes this picker when it is the top-most layer (one-stage).
   useEscapeLayer(open, () => setOpen(false))

@@ -33,7 +33,7 @@
  * in here is ever a real Tab stop.
  */
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
-import type { Ref, RefObject } from 'react'
+import type { Ref, RefObject, ReactNode } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { formatNumber } from '@/lib/formatters'
 import ErrorBanner from '@/components/ui/ErrorBanner'
@@ -86,28 +86,44 @@ interface KoiosMentionMenuProps {
   onOpenChange?: (open: boolean) => void
 }
 
-// One search-result row — icon-in-circle (entityIconFor) + name/subtitle, shared
-// shape for every fan-out group and the scoped category search. `highlighted`
-// is the keyboard roving state; `hovered` is plain mouse state — either lights
-// the row the same way, so a keyboard highlight never gets silently cleared by
-// an unrelated mouseleave.
-function EntityRow({ hit, refType, onPick, optionId, highlighted }: {
-  hit: KoiosEntityHit; refType: string; onPick: () => void; optionId: string; highlighted: boolean
+// MentionOptionRow — the shared listbox-option button shell (role/aria/tabIndex/
+// hover state/style) for both EntityRow and CategoryRow below; each renders its own
+// leading icon + text as children. `highlighted` is the keyboard roving state passed
+// in by the caller; `hovered` is local mouse state — either lights the row the same
+// way, so a keyboard highlight never gets silently cleared by an unrelated mouseleave.
+//
+// A LISTBOX OPTION, not a standalone action — role="option" + aria-selected drive
+// its own highlight styling, which none of Button's static variants model; same
+// "dropdown option row" exemption SearchSelect's own option rows already document
+// (herhaal-audit precedent). The exemption covers the shell below AND the plain
+// (not BodyText/Caption) text divs EntityRow/CategoryRow render as its children —
+// one option row, one identity, never a mix of atom + local style (DRY round 11,
+// LAYOUT: previously one disable/enable pair around a single <button>; now one pair
+// around all three, since the row's own text moved out into its callers).
+/* eslint-disable huisstijlLegacy/no-restricted-syntax */
+function MentionOptionRow({ optionId, highlighted, onPick, children }: {
+  optionId: string; highlighted: boolean; onPick: () => void; children: ReactNode
 }) {
   const [hovered, setHovered] = useState(false)
   const active = highlighted || hovered
   return (
-    // A search-result LISTBOX OPTION, not a standalone action — role="option" +
-    // aria-selected drive its own highlight styling, which none of Button's
-    // static variants model; same "dropdown option row" exemption SearchSelect's
-    // own option rows already document (herhaal-audit precedent). Block form:
-    // style spans several lines.
-    /* eslint-disable huisstijlLegacy/no-restricted-syntax */
     <button id={optionId} role="option" aria-selected={highlighted} tabIndex={-1}
       onClick={onPick} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
       style={{ width: '100%', textAlign: 'left', padding: '8px 12px', border: 'none',
         background: active ? 'var(--hover-bg)' : 'none', cursor: 'pointer', display: 'flex', alignItems: 'center',
         gap: 10, transition: 'background 0.1s' }}>
+      {children}
+    </button>
+  )
+}
+
+// One search-result row — icon-in-circle (entityIconFor) + name/subtitle, shared
+// shape for every fan-out group and the scoped category search.
+function EntityRow({ hit, refType, onPick, optionId, highlighted }: {
+  hit: KoiosEntityHit; refType: string; onPick: () => void; optionId: string; highlighted: boolean
+}) {
+  return (
+    <MentionOptionRow optionId={optionId} highlighted={highlighted} onPick={onPick}>
       <span style={{ width: 26, height: 26, borderRadius: '50%', flexShrink: 0, display: 'flex',
         alignItems: 'center', justifyContent: 'center', background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)' }}>
         {entityIconEl(refType, { size: 13 })}
@@ -120,8 +136,7 @@ function EntityRow({ hit, refType, onPick, optionId, highlighted }: {
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hit.subtitle}</div>
         )}
       </div>
-    </button>
-    /* eslint-enable huisstijlLegacy/no-restricted-syntax */
+    </MentionOptionRow>
   )
 }
 
@@ -130,17 +145,8 @@ function EntityRow({ hit, refType, onPick, optionId, highlighted }: {
 function CategoryRow({ label, desc, onPick, optionId, highlighted }: {
   label: string; desc?: string; onPick: () => void; optionId: string; highlighted: boolean
 }) {
-  const [hovered, setHovered] = useState(false)
-  const active = highlighted || hovered
   return (
-    // A category-picker LISTBOX OPTION — same role="option"/aria-selected
-    // exemption as EntityRow above. Block form: style spans several lines.
-    /* eslint-disable huisstijlLegacy/no-restricted-syntax */
-    <button id={optionId} role="option" aria-selected={highlighted} tabIndex={-1}
-      onClick={onPick} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
-      style={{ width: '100%', textAlign: 'left', padding: '8px 12px', border: 'none',
-        background: active ? 'var(--hover-bg)' : 'none', cursor: 'pointer', display: 'flex', alignItems: 'center',
-        gap: 10, transition: 'background 0.1s' }}>
+    <MentionOptionRow optionId={optionId} highlighted={highlighted} onPick={onPick}>
       <div style={{ width: 28, height: 28, borderRadius: 8, flexShrink: 0,
         background: 'linear-gradient(135deg,var(--color-primary-bg),var(--color-violet-bg))',
         display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -150,10 +156,10 @@ function CategoryRow({ label, desc, onPick, optionId, highlighted }: {
         <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{label}</div>
         {desc && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{desc}</div>}
       </div>
-    </button>
-    /* eslint-enable huisstijlLegacy/no-restricted-syntax */
+    </MentionOptionRow>
   )
 }
+/* eslint-enable huisstijlLegacy/no-restricted-syntax */
 
 // See the file's top doc above for the two modes; wrapped in forwardRef below so the composer can imperatively drive keyboard navigation.
 function KoiosMentionMenu({

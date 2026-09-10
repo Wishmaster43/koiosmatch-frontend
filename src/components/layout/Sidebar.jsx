@@ -24,6 +24,19 @@ import {
 // fallback, so a future id without a key degrades to readable text, not a raw key.
 const navLabel = (t, id, fallback) => t(`nav.${id.replace(/\./g, '_')}`, { defaultValue: fallback })
 
+// Filters a nav-item list down to pages this user's role can access (children too),
+// resolving each item's (and child's) label from i18n by id — shared by the core
+// and module nav lists, both filtered/mapped the same way (DRY round 11, LAYOUT).
+function resolveVisibleNavItems(items, auth, t) {
+  return items
+    .filter(item => canAccessPage(item.id, auth))
+    .map(item => {
+      if (!item.children) return { ...item, label: navLabel(t, item.id, item.label) }
+      return { ...item, label: navLabel(t, item.id, item.label),
+        children: item.children.filter(child => canAccessPage(child.id, auth)).map(c => ({ ...c, label: navLabel(t, c.id, c.label) })) }
+    })
+}
+
 // Koios entitlement (cosmetic only — the backend still enforces 403). Fail-open:
 // hide the toggle only when the auth payload explicitly excludes the `koios_ai`
 // module or the `koios.use` permission, mirroring the "absence = open" convention
@@ -232,20 +245,8 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
   // Show only the pages/modules this user may access, driven by accessible_pages.
   // For items with children (e.g. Details), also filter each child by canAccessPage.
   // Labels are resolved from i18n (common.nav.*) by id at the same time.
-  const visibleNavItems = NAV_ITEMS
-    .filter(item => canAccessPage(item.id, auth))
-    .map(item => {
-      if (!item.children) return { ...item, label: navLabel(t, item.id, item.label) }
-      return { ...item, label: navLabel(t, item.id, item.label),
-        children: item.children.filter(child => canAccessPage(child.id, auth)).map(c => ({ ...c, label: navLabel(t, c.id, c.label) })) }
-    })
-  const visibleModuleItems = MODULE_NAV_ITEMS
-    .filter(item => canAccessPage(item.id, auth))
-    .map(item => {
-      if (!item.children) return { ...item, label: navLabel(t, item.id, item.label) }
-      return { ...item, label: navLabel(t, item.id, item.label),
-        children: item.children.filter(child => canAccessPage(child.id, auth)).map(c => ({ ...c, label: navLabel(t, c.id, c.label) })) }
-    })
+  const visibleNavItems = resolveVisibleNavItems(NAV_ITEMS, auth, t)
+  const visibleModuleItems = resolveVisibleNavItems(MODULE_NAV_ITEMS, auth, t)
   const showSettings       = canAccessPage('settings', auth)
 
   return (

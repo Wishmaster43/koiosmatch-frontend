@@ -10,9 +10,7 @@
 import { useState, type CSSProperties, type FocusEvent, type KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { OnChange } from './types'
-import { RowRemoveButton } from '../groupKeyValueFields'
-import DrawerAddButton from '@/components/drawer/DrawerAddButton'
-import { Caption } from '@/components/ui/typography'
+import { RowRemoveButton, PendingRowTail } from '../groupKeyValueFields'
 
 type MatrixEntry = { primary: string[]; secondary: string[] }
 type Draft = { position: string; primary: string; secondary: string }
@@ -85,8 +83,8 @@ export function FunctionMatrixField({ value, onChange, fieldKey }: {
         </div>
       )}
       {/* A duplicate position never commits silently: say why the row stays pending. */}
-      {isDuplicate && <Caption style={{ color: 'var(--color-danger-text)' }}>{t('fields.duplicateKey')}</Caption>}
-      <DrawerAddButton onClick={add} label={t('fields.add')} disabled={!!draft} />
+      <PendingRowTail isDuplicate={isDuplicate} duplicateText={t('fields.duplicateKey')}
+        onAdd={add} addLabel={t('fields.add')} addDisabled={!!draft} />
     </div>
   )
 }

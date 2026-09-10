@@ -61,6 +61,14 @@ export interface KoiosContextChips {
 }
 
 
+// Shared "kandidaat · vacature" pick (KANDIDAAT-EERST) for both application and
+// match records: the candidate's name, plus the vacancy title when present.
+const candidateVacancyPick = (d: Record<string, unknown>): string | null => {
+  const cand = ((d.candidate as Record<string, unknown>)?.name ?? d.candidate_name) as string | undefined
+  const vac  = ((d.vacancy as Record<string, unknown>)?.title ?? d.vacancy_title) as string | undefined
+  return cand ? (vac ? `${cand} · ${vac}` : cand) : null
+}
+
 // Per-type record-label fetch for the ambient chip: application = "kandidaat ·
 // vacature" (KANDIDAAT-EERST), the rest their own display name. Unknown types
 // and failures resolve to null so the honest fallback stays; the query caches
@@ -71,16 +79,8 @@ const REF_LABEL_SOURCES: Record<string, { path: (id: string) => string; pick: (d
   vacancy:     { path: id => `/vacancies/${id}`,    pick: d => (d.title as string) ?? (d.name as string) ?? null },
   task:        { path: id => `/tasks/${id}`,        pick: d => (d.title as string) ?? null },
   opportunity: { path: id => `/opportunities/${id}`, pick: d => (d.title as string) ?? (d.name as string) ?? null },
-  application: { path: id => `/applications/${id}`, pick: d => {
-    const cand = ((d.candidate as Record<string, unknown>)?.name ?? d.candidate_name) as string | undefined
-    const vac  = ((d.vacancy as Record<string, unknown>)?.title ?? d.vacancy_title) as string | undefined
-    return cand ? (vac ? `${cand} · ${vac}` : cand) : null
-  } },
-  match:       { path: id => `/matches/${id}`,      pick: d => {
-    const cand = ((d.candidate as Record<string, unknown>)?.name ?? d.candidate_name) as string | undefined
-    const vac  = ((d.vacancy as Record<string, unknown>)?.title ?? d.vacancy_title) as string | undefined
-    return cand ? (vac ? `${cand} · ${vac}` : cand) : null
-  } },
+  application: { path: id => `/applications/${id}`, pick: candidateVacancyPick },
+  match:       { path: id => `/matches/${id}`,      pick: candidateVacancyPick },
 }
 
 // Resolves the open record's display label; null while loading/failed/unknown type.

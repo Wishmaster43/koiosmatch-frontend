@@ -6,7 +6,6 @@
  * the "…" menu. The whole row opens the editor (AW-list); interactive children
  * stop propagation so they don't also fire the row click.
  */
-import { useState } from 'react'
 import type { MouseEvent } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -14,6 +13,7 @@ import { AlertCircle, ArchiveRestore, CheckCircle, Clock, HelpCircle, MoreHorizo
 import { interactive } from '@/lib/a11y'
 import { useDateFormat } from '@/lib/datetime'
 import { useSeedLabel } from '@/lib/useSeedLabel'
+import { useWorkflowRowState } from './hooks/useWorkflowRowState'
 import { buildTrashNote } from '@/hooks/useTrashFlow'
 import { MODULE_META } from '@/modules/index'
 import Toggle from '@/components/ui/Toggle'
@@ -106,9 +106,7 @@ export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, o
   const { t } = useTranslation('workflows')
   const { formatDate, formatDateTime } = useDateFormat()
   const seedLabel = useSeedLabel()
-  const [running, setRunning] = useState(false)
-  const [restoring, setRestoring] = useState(false)
-  const [hover, setHover] = useState(false)
+  const { running, setRunning, restoring, setRestoring, hover, setHover } = useWorkflowRowState()
   const active = workflow.status === 'active'
   const archived = Boolean(workflow.archived)
   // TRASH-OVERAL-2: trashed rows swap restore/mark for the erase note + unmark.

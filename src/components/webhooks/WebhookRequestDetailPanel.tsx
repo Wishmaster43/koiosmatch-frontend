@@ -67,6 +67,11 @@ function KeyValueRow({ label, value, maskedTitle }: { label: string; value: stri
   )
 }
 
+// Maps header/query entries to KeyValueRow, sharing the masked-tooltip text —
+// two call sites (headers, query params) below (DRY round 11, LAYOUT).
+const KeyValueRows = (entries: [string, string][], maskedTitle: string) =>
+  entries.map(([k, v]) => <KeyValueRow key={k} label={k} value={v} maskedTitle={maskedTitle} />)
+
 // Floating panel showing one webhook request full detail (headers/query/body/response), fetched by id with an explicit notFound/error phase alongside loading/ready.
 export default function WebhookRequestDetailPanel({ webhookId, requestId, onClose }: {
   webhookId: string | number
@@ -139,9 +144,7 @@ export default function WebhookRequestDetailPanel({ webhookId, requestId, onClos
             <GroupLabel style={{ marginBottom: 6 }}>{t('webhooks.incoming.requests.detail.headers')}</GroupLabel>
             {headerEntries.length === 0
               ? <Caption>{t('webhooks.incoming.requests.detail.noHeaders')}</Caption>
-              : headerEntries.map(([k, v]) => (
-                  <KeyValueRow key={k} label={k} value={v} maskedTitle={t('webhooks.incoming.requests.detail.maskedTooltip')} />
-                ))}
+              : KeyValueRows(headerEntries, t('webhooks.incoming.requests.detail.maskedTooltip'))}
           </div>
 
           {/* Query parameters */}
@@ -149,9 +152,7 @@ export default function WebhookRequestDetailPanel({ webhookId, requestId, onClos
             <GroupLabel style={{ marginBottom: 6 }}>{t('webhooks.incoming.requests.detail.query')}</GroupLabel>
             {queryEntries.length === 0
               ? <Caption>{t('webhooks.incoming.requests.detail.noQuery')}</Caption>
-              : queryEntries.map(([k, v]) => (
-                  <KeyValueRow key={k} label={k} value={v} maskedTitle={t('webhooks.incoming.requests.detail.maskedTooltip')} />
-                ))}
+              : KeyValueRows(queryEntries, t('webhooks.incoming.requests.detail.maskedTooltip'))}
           </div>
 
           {/* Body — capped at 64KB server-side. */}

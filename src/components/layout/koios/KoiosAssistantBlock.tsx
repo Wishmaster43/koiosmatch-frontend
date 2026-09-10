@@ -13,9 +13,9 @@
  * knows who and why ("Koios snapt er niets van").
  */
 import { useTranslation } from 'react-i18next'
-import { Clock, UserX, Target, Briefcase, Sparkles, X, MessageSquare } from 'lucide-react'
+import { Clock, UserX, Target, Briefcase, Sparkles, MessageSquare } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import CollapsedCard from '@/components/ui/CollapsedCard'
+import KoiosCardFrame from './KoiosCardFrame'
 import { Caption } from '@/components/ui/typography'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import { KoiosRefChip } from './KoiosResultCards'
@@ -254,38 +254,27 @@ export default function KoiosAssistantBlock({ onAskKoios, onClose }: { onAskKoio
   const hasSuggestions = !loading && !error && suggestions.length > 0
 
   return (
-    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', padding: '10px 14px' }}>
-      <CollapsedCard
-        title={<span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{t('koios.assistant.title')}</span>}
-        filled={hasSuggestions}
-        open={!collapsed}
-        onOpenChange={(open) => setCollapsed(!open)}
-        action={onClose && (
-          <Button variant="ghost" iconOnly size="sm" aria-label={t('close')} title={t('close')} onClick={onClose}>
-            <X size={13} />
-          </Button>
-        )}
-      >
-        {/* Four explicit UI states: loading / error / empty / non-zero suggestion rows. */}
-        {loading && (
-          <Caption style={{ display: 'block', margin: '6px 0 0' }}>{t('loading')}</Caption>
-        )}
-        {!loading && error && (
-          <ErrorBanner variant="subtle" onRetry={() => refetch()} style={{ margin: '4px 0 0' }}>
-            {t('error.body')}
-          </ErrorBanner>
-        )}
-        {!loading && !error && suggestions.length === 0 && (
-          <Caption style={{ display: 'block', margin: '6px 0 0' }}>{t('koios.assistant.emptyState')}</Caption>
-        )}
-        {!loading && !error && suggestions.length > 0 && (
-          // The list scrolls inside the block (max ~half the panel) so the advice block
-          // below stays reachable when the backend returns its full ten suggestions.
-          <div style={{ margin: '4px 0 0', display: 'flex', flexDirection: 'column', maxHeight: '48vh', overflowY: 'auto' }}>
-            {suggestions.map(s => <SuggestionRow key={suggestionKey(s)} suggestion={s} onAskKoios={onAskKoios} />)}
-          </div>
-        )}
-      </CollapsedCard>
-    </div>
+    <KoiosCardFrame title={t('koios.assistant.title')} filled={hasSuggestions} open={!collapsed}
+      onOpenChange={(open) => setCollapsed(!open)} onClose={onClose} closeLabel={t('close')}>
+      {/* Four explicit UI states: loading / error / empty / non-zero suggestion rows. */}
+      {loading && (
+        <Caption style={{ display: 'block', margin: '6px 0 0' }}>{t('loading')}</Caption>
+      )}
+      {!loading && error && (
+        <ErrorBanner variant="subtle" onRetry={() => refetch()} style={{ margin: '4px 0 0' }}>
+          {t('error.body')}
+        </ErrorBanner>
+      )}
+      {!loading && !error && suggestions.length === 0 && (
+        <Caption style={{ display: 'block', margin: '6px 0 0' }}>{t('koios.assistant.emptyState')}</Caption>
+      )}
+      {!loading && !error && suggestions.length > 0 && (
+        // The list scrolls inside the block (max ~half the panel) so the advice block
+        // below stays reachable when the backend returns its full ten suggestions.
+        <div style={{ margin: '4px 0 0', display: 'flex', flexDirection: 'column', maxHeight: '48vh', overflowY: 'auto' }}>
+          {suggestions.map(s => <SuggestionRow key={suggestionKey(s)} suggestion={s} onAskKoios={onAskKoios} />)}
+        </div>
+      )}
+    </KoiosCardFrame>
   )
 }

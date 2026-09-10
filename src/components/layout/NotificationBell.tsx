@@ -19,16 +19,15 @@
  * A row that resolves to a target also renders the EntityLink-style trailing
  * new-tab icon, opening that record's deep link in a new tab.
  */
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import type { MouseEvent as ReactMouseEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
 import { Bell, ExternalLink } from 'lucide-react'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { useClickOutside } from '@/hooks/useClickOutside'
 import { askKoios } from '@/lib/koiosBridge'
-// PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
-import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 import { SectionTitle, BodyText, Caption } from '@/components/ui/typography'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import Button from '@/components/ui/Button'
@@ -56,13 +55,8 @@ export default function NotificationBell() {
   const ref = useRef<HTMLDivElement>(null)
   const panelRef = useFocusTrap<HTMLDivElement>(() => setOpen(false))
 
-  // Close the panel on an outside click.
-  useEffect(() => {
-    if (!open) return
-    const onDoc = (e: MouseEvent) => { if (isInsideDropdownPortal(e.target as Node)) return; if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
-    document.addEventListener('mousedown', onDoc)
-    return () => document.removeEventListener('mousedown', onDoc)
-  }, [open])
+  // Close the panel on an outside click (DRY round 11, LAYOUT).
+  useClickOutside([ref], open, () => setOpen(false), { ignoreDropdownPortal: true })
 
   // Toggle open; opening with unseen items marks them seen.
   const toggle = () => setOpen(o => { const next = !o; if (next && unseen) markAllSeen(); return next })

@@ -13,9 +13,9 @@
  */
 import { useTranslation } from 'react-i18next'
 import Spinner from '@/components/ui/Spinner'
-import { interactive } from '@/lib/a11y'
 import { Block } from '../DashboardPrimitives'
-import { BodyText, Caption } from '@/components/ui/typography'
+import { Caption } from '@/components/ui/typography'
+import DashboardListRow from './DashboardListRow'
 
 export interface WidgetRow {
   key: string | number
@@ -48,20 +48,9 @@ export default function WidgetListBlock({ title, action, onAction, rows, loading
   return (
     <Block title={title} action={action} onAction={onAction}>
       {rows.map((r, i) => (
-        <div key={r.key} {...interactive(r.onClick)}
-          style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', cursor: r.onClick ? 'pointer' : 'default',
-            borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none' }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            {/* Typography atoms carry the identity; only layout lives in the style prop (HUISSTIJL r6). */}
-            <BodyText as="div" style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {r.primary || t('widget.unknown')}
-            </BodyText>
-            {r.secondary && (
-              <Caption as="div" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.secondary}</Caption>
-            )}
-          </div>
-          {r.meta && <Caption style={{ flexShrink: 0 }}>{r.meta}</Caption>}
-        </div>
+        <DashboardListRow key={r.key} isLast={i === rows.length - 1} onClick={r.onClick}
+          title={r.primary || t('widget.unknown')} subtitle={r.secondary}
+          trailing={r.meta && <Caption style={{ flexShrink: 0 }}>{r.meta}</Caption>} />
       ))}
     </Block>
   )

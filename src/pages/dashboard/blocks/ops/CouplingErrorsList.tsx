@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import { Block } from '@/pages/dashboard/DashboardPrimitives'
-import { BodyText, Caption } from '@/components/ui/typography'
-import { interactive } from '@/lib/a11y'
+import { Caption } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import type { CouplingErrorRow } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
+import DashboardListRow from '../DashboardListRow'
 
 // Known entity types → the page that owns their drawer. An unmapped type keeps the row inert.
 const ENTITY_PAGE: Record<string, string> = {
@@ -35,17 +35,9 @@ export default function CouplingErrorsList({ rows, onNavigate }: {
         const onClick = page && onNavigate ? () => onNavigate(page, { open: r.entity_id }) : undefined
         const secondary = t(`feed.system.${r.system}`) + (r.error ? `: ${r.error}` : '')
         return (
-          <div key={`${r.entity_type}-${r.entity_id}`} {...interactive(onClick)}
-            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', cursor: onClick ? 'pointer' : 'default',
-              borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none' }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <BodyText as="div" style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {r.entity_label || t('widget.unknown')}
-              </BodyText>
-              <Caption as="div" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{secondary}</Caption>
-            </div>
-            <Caption style={{ flexShrink: 0 }}>{r.synced_at ? formatDateTime(r.synced_at) : '—'}</Caption>
-          </div>
+          <DashboardListRow key={`${r.entity_type}-${r.entity_id}`} isLast={i === rows.length - 1} onClick={onClick}
+            title={r.entity_label || t('widget.unknown')} subtitle={secondary}
+            trailing={<Caption style={{ flexShrink: 0 }}>{r.synced_at ? formatDateTime(r.synced_at) : '—'}</Caption>} />
         )
       })}
     </Block>

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Block } from '../DashboardPrimitives'
 import Avatar from '@/components/ui/Avatar'
+import MiniProgressBar from '@/components/ui/MiniProgressBar'
 import SoftChip from '@/components/ui/SoftChip'
 import { BodyText, Caption, Mono } from '@/components/ui/typography'
 import { initialsOf } from '@/lib/initials'
@@ -52,9 +53,7 @@ export default function RecruiterLoad({ rows, onNavigate }: {
                 <Mono style={{ fontVariantNumeric: 'tabular-nums' }}>{r.open_tasks}</Mono>
                 <Caption as="span">{t('recruiterLoad.openTasks')}</Caption>
               </div>
-              <div style={{ height: 8, borderRadius: 4, background: 'var(--hover-bg)', overflow: 'hidden', marginBottom: 5 }}>
-                <div style={{ height: '100%', width: `${pct}%`, background: 'var(--button-fill)', borderRadius: 4, transition: 'width 0.3s' }} />
-              </div>
+              <MiniProgressBar pct={pct} />
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Caption as="span">{t('recruiterLoad.intakesCount', { count: r.intakes_planned })}</Caption>
                 {r.too_long_in_stage > 0 && (

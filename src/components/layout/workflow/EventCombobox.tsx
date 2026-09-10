@@ -24,12 +24,12 @@
  * around a document-level listener there — it is kept on `useEscapeLayer` because
  * that IS the current, correct mechanism for a non-portalled popover like this one.
  */
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, ChevronDown, Check } from 'lucide-react'
 import { WORKFLOW_EVENT_KEYS, eventKeyToI18nKey } from './eventCatalog'
 import { Mono, bodyTextStyle } from '@/components/ui/typography'
-import { useEscapeLayer } from '@/hooks/useEscapeLayer'
+import { usePopoverBox } from './usePopoverBox'
 
 // Searchable dropdown over the workflow event catalogue; see the module doc
 // comment above for why its Escape closes via the window-capture escape layer.
@@ -39,18 +39,14 @@ export function EventCombobox({ value, onChange, label }: {
   const { t } = useTranslation('workflows')
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
-  const boxRef = useRef<HTMLDivElement>(null)
+  const { boxRef, onBlur } = usePopoverBox(open, setOpen)
 
   const labelFor = (key: string) => t(`triggers.events.${eventKeyToI18nKey(key)}`)
   const filtered = WORKFLOW_EVENT_KEYS.filter(key =>
     !search || labelFor(key).toLowerCase().includes(search.toLowerCase()) || key.includes(search.toLowerCase()))
 
-  // Escape layer: closes this popover before the surrounding focus-trapped modal ever sees the key (one-stage).
-  useEscapeLayer(open, () => setOpen(false))
-
   return (
-    <div ref={boxRef} style={{ position: 'relative' }}
-      onBlur={e => { if (!boxRef.current?.contains(e.relatedTarget as Node)) setOpen(false) }}>
+    <div ref={boxRef} style={{ position: 'relative' }} onBlur={onBlur}>
       {/* Control: the selected event, or the live filter while open. */}
       <div onClick={() => setOpen(true)}
         style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 12px', borderRadius: 8,
