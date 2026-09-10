@@ -39,7 +39,7 @@ import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { BodyText, Caption, Mono } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat } from '@/lib/formatters'
-import type { ReportPeriod, WhatsappSegment } from '@/types/analytics'
+import type { ReportPeriod, WhatsappReportData, WhatsappSegment } from '@/types/analytics'
 import { useOrderedReportKpis } from './hooks/useOrderedReportKpis'
 import type { ReportFilterState } from './reportFilterParams'
 import { ReportStateFlow } from './components/ReportStateFlow'
@@ -100,6 +100,14 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
       title: label, value, subtitle: windowSub(),
       rowsEndpoint: '/reports/whatsapp/axes/drill', rowsParams: { axis, value: rawValue, period },
     })
+  // WA-REPORT-TOLERANT-1 (measured on the demo tenant, 10-09): the server sends
+  // `timeseries` either as { bucket, series } (the typed contract) or as a flat
+  // array of day points; both read as one series here, a missing one as empty.
+  const rawTimeseries = data?.timeseries as WhatsappReportData['timeseries'] | WhatsappReportData['timeseries']['series'] | undefined
+  const timeseries = Array.isArray(rawTimeseries)
+    ? { bucket: 'day' as const, series: rawTimeseries }
+    : { bucket: rawTimeseries?.bucket ?? 'day', series: rawTimeseries?.series ?? [] }
+
   // Timeseries bucket drill — value = the clicked point's own count, title =
   // chart label + DD-MM-YYYY date (DATUM-1), and the server bucket granularity
   // forwarded so a week bar's drawer counts the whole week.
@@ -108,7 +116,7 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
       title: `${chartLabel} · ${formatDate(dateKey)}`, value: count, subtitle: windowSub(),
       rowsEndpoint: '/reports/whatsapp/axes/drill',
       rowsParams: { axis: 'timeseries', value: dateKey, period,
-        ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
+        ...(timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
     })
 
   // RAPPORT-GEZICHT-WAVE2 chart-type rule: all three axes are few-value
@@ -123,11 +131,13 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
   // `type` (message_type) is NOT a fixed enum — it is an open per-message column
   // with a `none` sentinel (WhatsappReport.php ~380-385) — so it deliberately
   // stays on the server-label passthrough here rather than a translated map.
-  const donutData = (axis: 'direction' | 'type' | 'escalated', segs: WhatsappSegment[]): { data: ChartDatum[]; colors: string[] } => ({
+  // WA-REPORT-TOLERANT-1: an axis the envelope leaves out (measured on the demo
+  // tenant, 10-09: no by_type) draws an empty donut instead of crashing the page.
+  const donutData = (axis: 'direction' | 'type' | 'escalated', segs: WhatsappSegment[] = []): { data: ChartDatum[]; colors: string[] } => ({
     data: segs.map(s => ({ name: t(`whatsapp.axes.${axis}Values.${s.value}`, { defaultValue: s.label }), value: s.count, key: s.value })),
     colors: segs.map((_, i) => CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]),
   })
-  const pickSegment = (axis: 'direction' | 'type' | 'escalated' | 'channel', segs: WhatsappSegment[]) =>
+  const pickSegment = (axis: 'direction' | 'type' | 'escalated' | 'channel', segs: WhatsappSegment[] = []) =>
     gateDrillClick('whatsapp', (d: unknown) => {
       const key = (d as { key?: string })?.key ?? (d as { payload?: { key?: string } })?.payload?.key
       const seg = segs.find(s => s.value === key)
@@ -138,7 +148,7 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
   // Channel donut labels: per-enum-value translation (nl "WABA" / "WABA · lokaal"
   // / "WA Web"), falling back to the server's own label only when a locale key
   // is missing — never the raw server value verbatim (§ contract discipline).
-  const channelDonutData = (segs: WhatsappSegment[]): { data: ChartDatum[]; colors: string[] } => ({
+  const channelDonutData = (segs: WhatsappSegment[] = []): { data: ChartDatum[]; colors: string[] } => ({
     data: segs.map(s => ({ name: t(`whatsapp.channel.${s.value}`, { defaultValue: s.label }), value: s.count, key: s.value })),
     colors: segs.map((_, i) => CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]),
   })
@@ -206,17 +216,17 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
                   title says which number the user clicked. */}
               <div>
                 <Caption style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>{t('whatsapp.inbound')}</Caption>
-                <ReportTimeseriesChart series={data.timeseries.series.map(p => ({ date: p.date, label: p.date, value: p.inbound }))}
+                <ReportTimeseriesChart series={timeseries.series.map(p => ({ date: p.date, label: p.date, value: p.inbound }))}
                   onPick={gateDrillClick('whatsapp', (dateKey: string) => {
-                    const pt = data.timeseries.series.find(p => p.date === dateKey)
+                    const pt = timeseries.series.find(p => p.date === dateKey)
                     if (pt) openBucketDrill(t('whatsapp.inbound'), pt.inbound, dateKey)
                   })} />
               </div>
               <div>
                 <Caption style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>{t('whatsapp.outbound')}</Caption>
-                <ReportTimeseriesChart series={data.timeseries.series.map(p => ({ date: p.date, label: p.date, value: p.outbound }))}
+                <ReportTimeseriesChart series={timeseries.series.map(p => ({ date: p.date, label: p.date, value: p.outbound }))}
                   onPick={gateDrillClick('whatsapp', (dateKey: string) => {
-                    const pt = data.timeseries.series.find(p => p.date === dateKey)
+                    const pt = timeseries.series.find(p => p.date === dateKey)
                     if (pt) openBucketDrill(t('whatsapp.outbound'), pt.outbound, dateKey)
                   })} />
               </div>
@@ -245,7 +255,7 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
               no numbers, no message content here (§8/§9). */}
           <ReportChartCard span={2} title={t('whatsapp.topConversations')} chart={
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {data.top_conversations.map(c => {
+              {(data.top_conversations ?? []).map(c => {
                 const onPick = gateDrillClick('whatsapp', () =>
                   openAxisDrill('conversation', c.candidate || '—', c.message_count, String(c.conversation_id)))
                 return (

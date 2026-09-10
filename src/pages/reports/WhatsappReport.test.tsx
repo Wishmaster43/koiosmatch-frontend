@@ -140,6 +140,24 @@ describe('WhatsappReport (RAPPORTEN-WHATSAPP-FE-1)', () => {
     expect(screen.getByText('Geen WhatsApp-gesprekken in deze periode')).toBeInTheDocument()
   })
 
+  // WA-REPORT-TOLERANT-1: the demo envelope carried no by_type (10-09 sweep) and the
+  // page hit the error boundary; a missing axis is an empty donut, never a crash.
+  it('renders the measured demo shape (a flat timeseries array, no top list) without crashing', () => {
+    const { top_conversations: _omittedTop, ...partial } = data
+    void _omittedTop
+    const flat = { ...partial, timeseries: data.timeseries.series }
+    mockUseWhatsappReport.mockReturnValue({ data: flat as unknown as WhatsappReportData, loading: false, error: false })
+    expect(() => renderReport()).not.toThrow()
+    expect(screen.queryByText(/Er ging iets mis/)).toBeNull()
+  })
+
+  it('renders without crashing when the envelope leaves out an axis', () => {
+    const { by_type: _omitted, ...partial } = data
+    void _omitted
+    mockUseWhatsappReport.mockReturnValue({ data: partial as unknown as WhatsappReportData, loading: false, error: false })
+    expect(() => renderReport()).not.toThrow()
+  })
+
   it('renders exactly nine KPI cards with real values from the fixture', () => {
     mockUseWhatsappReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
