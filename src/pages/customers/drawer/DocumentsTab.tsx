@@ -44,10 +44,9 @@ import { useDateFormat } from '@/lib/datetime'
 import { sectionBlock } from '@/components/ui/SectionCard'
 import { useEntityDocuments, type EntityDoc } from '@/hooks/useEntityDocuments'
 import { useBulkDocumentDelete } from '@/hooks/useBulkDocumentDelete'
-import { useDocumentFiltering } from '@/hooks/useDocumentFiltering'
+import { useDocumentSelection } from '@/hooks/useDocumentSelection'
 import { useDocumentLinkPicker } from '../hooks/useDocumentLinkPicker'
 import { useDocumentUploadQueue } from '../hooks/useDocumentUploadQueue'
-import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 // DOC-FILTER-PARITY-1 (08-08): the shared search-box + searchable TYPE filter
 // combo the candidate documents section already has — reused here verbatim,
@@ -127,32 +126,13 @@ export default function DocumentsTab({ customerId, locations = [], departments =
   // trigger is a <button>, so it needs aria-labelledby (never a plain aria-label prop).
   const docTypeLabelBaseId = useId()
 
-  // Rows currently visible under the search filter, with their original index kept.
-  // DOC-FILTER-PARITY-1: the type filter narrows further, after the free-text search.
-  const { filteredDocs, filteredDownloadableKeys, allFilteredSelected: isAllFiltered } = useDocumentFiltering({
-    docs, docSearch, docTypeFilter, docUrl, docKey,
+  // Rows currently visible under the search filter, with their original index
+  // kept, plus the bulk select/download behaviour shared with the candidate and
+  // vacancy documents tabs (DRY round 11, DOCTABS). DOC-FILTER-PARITY-1: the
+  // type filter narrows further, after the free-text search.
+  const { filteredDocs, filteredDownloadableKeys, allFilteredSelected, toggleSelectAll, toggleSelectedRow, downloadSelected } = useDocumentSelection({
+    docs, docSearch, docTypeFilter, docUrl, docKey, nameOf: d => d.name ?? d.file_name, selected, setSelected,
   })
-  const allFilteredSelected = isAllFiltered(selected)
-
-  // Select-all toggles every currently-filtered downloadable row at once.
-  const toggleSelectAll = () => {
-    setSelected(prev => {
-      const next = new Set(prev)
-      if (allFilteredSelected) filteredDownloadableKeys.forEach(k => next.delete(k))
-      else filteredDownloadableKeys.forEach(k => next.add(k))
-      return next
-    })
-  }
-  // Flips one row's selection for the bulk-download set.
-  const toggleSelectedRow = (key: string) => {
-    setSelected(prev => { const next = new Set(prev); if (next.has(key)) next.delete(key); else next.add(key); return next })
-  }
-  // Start the sequential download for every selected doc, in list order, then clear.
-  const downloadSelected = async () => {
-    const items = docs.map((d, i) => ({ d, key: docKey(d, i) })).filter(({ key }) => selected.has(key)).map(({ d }) => ({ url: docUrl(d), name: d.name ?? d.file_name }))
-    await downloadFilesSequentially(items)
-    setSelected(new Set())
-  }
 
   // Commit a rename: re-attach the original extension, then persist by id.
   const doRename = (d: EntityDoc, base: string) => {

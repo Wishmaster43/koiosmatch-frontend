@@ -1,5 +1,9 @@
 import type { ReactNode } from 'react'
+import { X } from 'lucide-react'
 import { Caption } from '@/components/ui/typography'
+import SelectMenu from '@/components/ui/SelectMenu'
+import Button from '@/components/ui/Button'
+import type { LookupOption } from '@/types/common'
 
 interface PendingUploadFrameProps {
   title: ReactNode
@@ -45,6 +49,78 @@ export function PendingUploadRow({ name, size, children }: PendingUploadRowProps
       <span style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
       <Caption style={{ flexShrink: 0 }}>{size}</Caption>
       {children}
+    </div>
+  )
+}
+
+interface PendingUploadTypeSelectProps {
+  labelId: string
+  label: string
+  value: string
+  onChange: (value: string) => void
+  options: LookupOption[]
+}
+
+/** Shared per-row type picker for a queued file: the sr-only label (SelectMenu's
+ * trigger is a <button>, so it needs aria-labelledby, never a plain aria-label
+ * prop) plus the 130px-wide SelectMenu. G34: the house searchable dropdown
+ * replaces the native per-file type <select>. The label text is resolved by
+ * the caller's own t() (rule C).
+ */
+export function PendingUploadTypeSelect({ labelId, label, value, onChange, options }: PendingUploadTypeSelectProps) {
+  return (
+    <>
+      <span id={labelId} className="sr-only">{label}</span>
+      <div style={{ width: 130, flexShrink: 0 }}>
+        <SelectMenu aria-labelledby={labelId} value={value} onChange={onChange}
+          options={options} menuWidth={160}
+          style={{ fontSize: 11, padding: '4px 8px', border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', color: 'var(--text)' }} />
+      </div>
+    </>
+  )
+}
+
+interface PendingUploadRemoveButtonProps {
+  onClick: () => void
+  ariaLabel: string
+}
+
+/** Shared per-row remove glyph for a queued file. 12px inline glyph in a dense
+ * queue row, not a Button copy (mirrors EntityHeader's chip-remove precedent) —
+ * Button's smallest footprint (28px) would tower over this icon in a tightly
+ * packed row. Block form (not -next-line): the flagged style attribute sits a
+ * line into this opening tag, and a bare comment can't sit inside a JSX
+ * attribute list.
+ */
+/* eslint-disable huisstijlLegacy/no-restricted-syntax */
+export function PendingUploadRemoveButton({ onClick, ariaLabel }: PendingUploadRemoveButtonProps) {
+  return (
+    <button onClick={onClick} aria-label={ariaLabel}
+      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex', flexShrink: 0 }}>
+      <X size={12} />
+    </button>
+  )
+}
+/* eslint-enable huisstijlLegacy/no-restricted-syntax */
+
+interface PendingUploadFooterProps {
+  addLabel: ReactNode
+  cancelLabel: ReactNode
+  onAdd: () => void
+  onCancel: () => void
+}
+
+/** Shared upload/cancel action row under the queued-file list — labels arrive
+ * already resolved by the caller's own t() (rule C: the add label differs per
+ * consumer's key, singular vs "add all N"). Herhaal-audit r4 finding 2 and its
+ * twin: the inverse --text fill is retired on both cards — the primary action
+ * wears the house Button, next to a real secondary Button for cancel.
+ */
+export function PendingUploadFooter({ addLabel, cancelLabel, onAdd, onCancel }: PendingUploadFooterProps) {
+  return (
+    <div style={{ display: 'flex', gap: 8 }}>
+      <Button variant="primary" size="sm" onClick={onAdd}>{addLabel}</Button>
+      <Button variant="secondary" size="sm" onClick={onCancel}>{cancelLabel}</Button>
     </div>
   )
 }

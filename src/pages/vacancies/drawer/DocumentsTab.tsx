@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, X, Download, Trash2 } from 'lucide-react'
-import { useDocumentFiltering } from '@/hooks/useDocumentFiltering'
+import { useDocumentSelection } from '@/hooks/useDocumentSelection'
 import type { VacancyDetail } from '@/types/vacancy'
 import { useEntityDocuments } from '@/hooks/useEntityDocuments'
 import { useDocumentTypes } from '@/lib/useDocumentTypes'
@@ -10,8 +10,8 @@ import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
 import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
-import ConfirmDialog from '@/components/ui/ConfirmDialog'
-import { downloadFilesSequentially } from '@/lib/downloadFiles'
+import DocumentDeleteDialog from '@/components/drawer/DocumentDeleteDialog'
+import DocTypeChipRow from '@/components/drawer/DocTypeChipRow'
 // PDF-VACATURES-26: the vacancy documents list now uses the SAME row component the
 // candidate documents section renders (never a second, forked row) — mirrors the
 // S-vacapp-1 precedent in ApplicantsTab.tsx (this drawer already reuses the
@@ -26,13 +26,9 @@ import { DocumentRow } from '@/pages/candidates/shared'
 import { docKey, docUrl, splitExt, DOC_GRID_COLUMNS } from '@/pages/candidates/shared'
 import type { DocItem } from '@/pages/candidates/shared'
 import Button from '@/components/ui/Button'
-import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 // HUISSTIJL-1: the doc-type hint line (11px/muted) is the shared Caption atom.
 import { Caption } from '@/components/ui/typography'
 import { docTypeFilterRow } from '@/lib/documentFilterRow'
-
-// Hoisted: an inline accent literal under background: false-fires the accent-fill selector.
-const ACCENT = 'var(--color-primary)'
 
 // A picked-but-not-yet-uploaded file, staged so its type can be chosen first.
 interface PendingDoc { file: File; objectUrl: string; name: string; size: string; type: string }
@@ -116,31 +112,13 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
   // DOC-FILTER-PARITY-1: search matches name + type; the type filter narrows further —
   // mirrors the candidate documents section's own filtering logic exactly. `_i` keeps
   // the row's index into the unfiltered `docs` so rename/delete/select always target
-  // the right record even while a filter is active.
-  const { filteredDocs, filteredDownloadableKeys, allFilteredSelected: isAllFiltered } = useDocumentFiltering({
-    docs, docSearch, docTypeFilter, docUrl, docKey,
+  // the right record even while a filter is active. Bulk select/download behaviour
+  // shared with the candidate and customer documents tabs (DRY round 11, DOCTABS) —
+  // rule B: this entity never had the candidate/customer file_name fallback, so
+  // nameOf stays `d.name` only.
+  const { filteredDocs, filteredDownloadableKeys, allFilteredSelected, toggleSelectAll, toggleSelectedRow, downloadSelected } = useDocumentSelection({
+    docs, docSearch, docTypeFilter, docUrl, docKey, nameOf: d => d.name, selected, setSelected,
   })
-  const allFilteredSelected = isAllFiltered(selected)
-
-  // Select-all toggles every currently-filtered downloadable row at once.
-  const toggleSelectAll = () => {
-    setSelected(prev => {
-      const next = new Set(prev)
-      if (allFilteredSelected) filteredDownloadableKeys.forEach(k => next.delete(k))
-      else filteredDownloadableKeys.forEach(k => next.add(k))
-      return next
-    })
-  }
-  // Row-level checkbox toggle for the multi-select download; independent of the select-all above, which acts on the whole filtered set at once.
-  const toggleSelectedRow = (key: string) => {
-    setSelected(prev => { const next = new Set(prev); if (next.has(key)) next.delete(key); else next.add(key); return next })
-  }
-  // Start the sequential download for every selected doc, in list order, then clear.
-  const downloadSelected = async () => {
-    const items = docs.map((d, i) => ({ d, key: docKey(d, i) })).filter(({ key }) => selected.has(key)).map(({ d }) => ({ url: docUrl(d), name: d.name }))
-    await downloadFilesSequentially(items)
-    setSelected(new Set())
-  }
 
   // Rename persists via useEntityDocuments' own optimistic rename (it owns `docs`,
   // so this component never keeps a second copy of the list to reconcile).
@@ -223,23 +201,10 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
             {pending.name} <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>({pending.size})</span>
           </div>
           <Caption as="div" style={{ marginBottom: 6 }}>{t('documents.docType')}</Caption>
-          {/* Choice-chips (CHIP-TINT-1): the lib/tint house pair + chipInk — was a
-              hand-rolled 14/45 pair with RAW accent ink. Block form: the style
-              attr spans the tag. */}
-          {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
-            {docTypes.map(dt => {
-              const active = pending.type === dt.value
-              return (
-                <button key={dt.value} onClick={() => setPending(p => (p ? { ...p, type: dt.value } : p))}
-                  style={{ padding: '4px 10px', fontSize: 11, borderRadius: 99, cursor: 'pointer', fontWeight: active ? 600 : 400,
-                    border: active ? tintBorder(ACCENT, true) : '1px solid var(--border)',
-                    background: active ? tintBg(ACCENT, true) : 'var(--surface)',
-                    color: active ? chipInk(ACCENT) : 'var(--text)' }}>{dt.label}</button>
-              )
-            })}
-          </div>
-          {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
+          {/* DRY round 11, DOCTABS: the shared chip row (CHIP-TINT-1) — a single
+              staged file, so "active" compares that one file's own type. */}
+          <DocTypeChipRow options={docTypes} isActive={value => pending.type === value}
+            onPick={value => setPending(p => (p ? { ...p, type: value } : p))} />
           <div style={{ display: 'flex', gap: 8 }}>
             {/* Herhaal-audit r4 finding 2's twin (customers DocumentsTab converted
                 the same round): the inverse --text fill is retired — the card's
@@ -300,16 +265,19 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
 
       <input ref={fileRef} type="file" style={{ display: 'none' }} onChange={onPick} />
       {previewDoc && <DocPreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)} />}
-      <ConfirmDialog
-        open={!!confirmDelete}
-        danger
+      {/* One shared destructive-confirm dialog for both single and bulk delete
+          (never a native confirm()) — adopted from the raw ConfirmDialog this
+          tab used to render (byte-identical props: DocumentDeleteDialog passes
+          `danger` and `open={!!open}` through unchanged). */}
+      <DocumentDeleteDialog
+        open={confirmDelete}
+        onConfirm={confirmDeleteAction}
+        onCancel={() => setConfirmDelete(null)}
         title={t('documents.deleteTitle', { defaultValue: 'Delete document' })}
         message={confirmDelete?.kind === 'many'
           ? t('documents.deleteManyMessage', { count: selected.size, defaultValue: 'Delete {{count}} selected documents?' })
           : t('documents.deleteOneMessage', { name: confirmDeleteName, defaultValue: 'Delete "{{name}}"?' })}
         confirmLabel={t('common:remove')}
-        onConfirm={confirmDeleteAction}
-        onCancel={() => setConfirmDelete(null)}
       />
     </div>
   )

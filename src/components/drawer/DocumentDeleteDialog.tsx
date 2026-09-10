@@ -13,7 +13,7 @@ interface DocumentDeleteDialogProps {
   confirmLabel: string
 }
 
-/** Shared document delete confirmation dialog for the candidates and customers
+/** Shared document delete confirmation dialog for the candidates, customers and
  * vacancies documents tabs. Wraps ConfirmDialog; every string is translated by
  * the caller's own t() and passed in, so the unit carries no i18n dependency.
  */

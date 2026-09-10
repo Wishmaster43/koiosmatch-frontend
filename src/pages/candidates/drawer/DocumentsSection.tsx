@@ -13,10 +13,9 @@ import { useTranslation } from 'react-i18next'
 import { Search, X, Download, Trash2 } from 'lucide-react'
 import { sectionBlock } from './constants'
 import { useDocumentTypes } from '@/lib/useDocumentTypes'
-import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import { useAuth } from '@/context/AuthContext'
 import { useBulkDocumentDelete } from '@/hooks/useBulkDocumentDelete'
-import { useDocumentFiltering } from '@/hooks/useDocumentFiltering'
+import { useDocumentSelection } from '@/hooks/useDocumentSelection'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
 import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
@@ -88,31 +87,12 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
   const [replaceTargetId, setReplaceTargetId] = useState<Id | null>(null)
   const replaceFileRef = useRef<HTMLInputElement>(null)
 
-  // Rows currently visible under the search filter, with their original index kept.
-  const { filteredDocs, filteredDownloadableKeys, allFilteredSelected: isAllFiltered } = useDocumentFiltering({
-    docs, docSearch, docTypeFilter, docUrl, docKey,
+  // Rows currently visible under the search filter, with their original index
+  // kept, plus the bulk select/download behaviour shared with the customer and
+  // vacancy documents tabs (DRY round 11, DOCTABS).
+  const { filteredDocs, filteredDownloadableKeys, allFilteredSelected, toggleSelectAll, toggleSelectedRow, downloadSelected } = useDocumentSelection({
+    docs, docSearch, docTypeFilter, docUrl, docKey, nameOf: d => d.name ?? d.file_name, selected, setSelected,
   })
-  const allFilteredSelected = isAllFiltered(selected)
-
-  // Select-all toggles every currently-filtered downloadable row at once.
-  const toggleSelectAll = () => {
-    setSelected(prev => {
-      const next = new Set(prev)
-      if (allFilteredSelected) filteredDownloadableKeys.forEach(k => next.delete(k))
-      else filteredDownloadableKeys.forEach(k => next.add(k))
-      return next
-    })
-  }
-  // Flips one row's selection for the bulk-download picker.
-  const toggleSelectedRow = (key: string) => {
-    setSelected(prev => { const next = new Set(prev); if (next.has(key)) next.delete(key); else next.add(key); return next })
-  }
-  // Start the sequential download for every selected doc, in list order, then clear.
-  const downloadSelected = async () => {
-    const items = docs.map((d, i) => ({ d, key: docKey(d, i) })).filter(({ key }) => selected.has(key)).map(({ d }) => ({ url: docUrl(d), name: d.name ?? d.file_name }))
-    await downloadFilesSequentially(items)
-    setSelected(new Set())
-  }
 
   // DOC-TYPE-FILTER-1 / NOTES-DOC-FILTER-MENU-1 (Danny 08-08): the document-type
   // filter moved BEHIND the shared DrawerFilterMenu instead of an inline dropdown
