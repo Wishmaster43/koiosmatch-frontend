@@ -9,11 +9,12 @@
  */
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CalendarPlus, Search, ChevronLeft, ChevronRight } from 'lucide-react'
+import { CalendarPlus, ChevronLeft, ChevronRight } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import EntityLink from '@/components/ui/EntityLink'
 import Button from '@/components/ui/Button'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import DrawerSearchField from '@/components/drawer/DrawerSearchField'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import api, { unwrap } from '@/lib/api'
 import { PlanIntakeModal } from '@/pages/candidates/shared'
@@ -211,13 +212,8 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
           the sub-tab already names the entity, DRAWER-ADD-SHORT-1). No heading
           above it: the tab bar already says "Sollicitaties" (Danny 20-08, dubbel). */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 120, padding: '6px 10px',
-          background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
-          <Search size={13} color="var(--text-muted)" />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder={t('applicants.searchPlaceholder')} aria-label={t('applicants.searchPlaceholder')}
-            style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
-        </div>
+        {/* Toolbar search frame — the shared DrawerSearchField (DRY round 11, MATCHLISTS). */}
+        <DrawerSearchField value={search} onChange={setSearch} placeholder={t('applicants.searchPlaceholder')} minWidth={120} />
         <StatusFilterSelect value={phaseFilter} onToggle={togglePhase} statuses={phases} optionKey={s => s.value} />
         {v.id != null && canCreateApplication && (
           <DrawerAddButton onClick={() => setAddOpen(true)} label={t('applicants.addApplication')} short />

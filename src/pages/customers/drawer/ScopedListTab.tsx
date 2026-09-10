@@ -20,10 +20,10 @@
  * still resolving) keeps today's toolbar unchanged — no filter pill at all.
  */
 import { useState, useMemo } from 'react'
-import { Search } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import DrawerSearchField from '@/components/drawer/DrawerSearchField'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import { useScopedEntityList } from '../hooks/useScopedEntityList'
 import type { Id, LookupOption } from '@/types/common'
@@ -87,13 +87,8 @@ export default function ScopedListTab<T>({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 120, padding: '6px 10px',
-          background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
-          <Search size={13} color="var(--text-muted)" />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder={searchPlaceholder} aria-label={searchPlaceholder}
-            style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
-        </div>
+        {/* Toolbar search frame — the shared DrawerSearchField (DRY round 11, MATCHLISTS). */}
+        <DrawerSearchField value={search} onChange={setSearch} placeholder={searchPlaceholder} minWidth={120} />
         {statuses && statuses.length > 0 && (
           <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={statuses} />
         )}

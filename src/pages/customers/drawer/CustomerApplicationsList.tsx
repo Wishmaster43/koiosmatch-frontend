@@ -59,13 +59,14 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSeedLabel } from '@/lib/useSeedLabel'
-import { Search, Pencil, ChevronRight, ChevronDown, AlertTriangle } from 'lucide-react'
+import { Pencil, ChevronRight, ChevronDown, AlertTriangle } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
 import StatusPill from '@/components/ui/StatusPill'
 import EntityLink from '@/components/ui/EntityLink'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import DrawerSearchField from '@/components/drawer/DrawerSearchField'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import { useNavigation } from '@/context/NavigationContext'
 import { useLookups } from '@/context/LookupsContext'
@@ -224,13 +225,8 @@ export default function CustomerApplicationsList(props: Props) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {/* Toolbar mirrors the sibling sub-entity lists: search left, phase filter right. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 120, padding: '6px 10px',
-          background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
-          <Search size={13} color="var(--text-muted)" />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder={t('applications:page.searchPlaceholder')} aria-label={t('applications:page.searchPlaceholder')}
-            style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
-        </div>
+        {/* Toolbar search frame — the shared DrawerSearchField (DRY round 11, MATCHLISTS). */}
+        <DrawerSearchField value={search} onChange={setSearch} placeholder={t('applications:page.searchPlaceholder')} minWidth={120} />
         <StatusFilterSelect value={phaseFilter} onToggle={togglePhase} statuses={funnelTypes} />
       </div>
       <DataTable columns={columns} rows={filteredRows} loading={loading} loadingText={t('applications:loading')}

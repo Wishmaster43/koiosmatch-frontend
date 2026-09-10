@@ -34,14 +34,12 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search } from 'lucide-react'
-import SectionCard from '@/components/ui/SectionCard'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import DrawerAddButton from './DrawerAddButton'
-import SubListEmpty from '@/components/drawer/SubListEmpty'
+import DrawerSearchField from '@/components/drawer/DrawerSearchField'
+import MatchListBody from '@/components/drawer/MatchListBody'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { MatchCard } from '@/pages/matches/shared'
-import { MatchListHeaderBar } from '@/pages/matches/shared'
 import { rememberReturnTab } from './constants'
 import type { Candidate, CandidateMatch } from '@/types/candidate'
 import type { Id } from '@/types/common'
@@ -91,55 +89,51 @@ export default function MatchesTab({ c, onEdit, onAdd }: { c: Candidate
           status filter, then "+ Match" (when the host wires onAdd) — ALL ON ONE
           LINE (Danny live review, 04-08). */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 120, padding: '6px 10px',
-          background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
-          <Search size={13} color="var(--text-muted)" />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder={t('matchesView.searchPlaceholder')} aria-label={t('matchesView.searchPlaceholder')}
-            style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
-        </div>
+        {/* Toolbar search frame — the shared DrawerSearchField (DRY round 11, MATCHLISTS),
+            with minWidth:120 so it keeps width against the status filter + add button. */}
+        <DrawerSearchField value={search} onChange={setSearch} placeholder={t('matchesView.searchPlaceholder')} minWidth={120} />
         <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={matchStatuses} />
         {/* "+ Match" stays a FULL-label named action (05-08 short-label decision
             list) — never the drawer sub-tab's shortened "Nieuw". */}
         {onAdd && <DrawerAddButton onClick={onAdd} label={t('work.addMatch')} />}
       </div>
-      <SectionCard>
-      {/* Column header bar (Danny 09-08 "Match heeft geen titelbalk en
-          sollicitaties wel") — promoted to the shared MatchListHeaderBar
-          (KLANTEN 4, 21-08) so the customer/vacancy tabs render the same bar. */}
-      <MatchListHeaderBar otherPartyLabel={t('matchesView.client')} />
-      {matches.length === 0 ? (
-        <SubListEmpty text={t('matchesView.empty')} />
-      ) : matches.map((m, i) => {
-        const statusMeta = matchStatusMeta(m.status ?? undefined)
-        return (
-          <MatchCard
-            key={m.id ?? i}
-            id={m.id} vacancyId={m.vacancyId} vacancyTitle={m.vacancyTitle || m.client || '—'} vacancyUrl={m.vacancyUrl}
-            // NAV-BACK-1: remember this subtab (Work/Match) so BACK from the
-            // opened match lands on the same drawer tab instead of Profile.
-            onBeforeOpen={() => rememberReturnTab(c.id, 'work')}
-            stageLabel={statusMeta?.label ?? m.stage} stageColor={statusMeta?.color ?? m.stageColor}
-            score={m.score}
-            helloflexGuid={m.helloflex_contract_guid}
-            // Point 2 (Danny live P1): reopens MatchModal in EDIT mode.
-            onEdit={onEdit && m.id != null ? () => onEdit(m.id as Id) : undefined}
-            otherPartyLabel={t('matchesView.client')}
-            otherParty={{ page: 'customers', id: m.customerId ?? null, label: m.client || '' }}
-            contractType={m.contractType} contractForm={m.contractForm} contractStatus={m.contractStatus}
-            functionTitle={m.functionTitle} startDate={m.startDate} endDate={m.endDate}
-            isClosed={statusMeta?.is_closed}
-            // Compact mode (Danny live review, 04-08): collapsed by default, one
-            // summary row per match, expanding in place — see MatchCard's own prop doc.
-            collapsible
-            // Flat row background (Danny 09-08): matches ApplicationRow's own flat
-            // rows now that this list has its own tinted column-header bar above —
-            // see MatchCard's own prop doc for why this is opt-in.
-            flatRow
-          />
-        )
-      })}
-      </SectionCard>
+      {/* Column header + empty/populated shell — the shared MatchListBody (DRY
+          round 11, MATCHLISTS; column header bar itself promoted KLANTEN 4,
+          21-08) so the customer/vacancy tabs render the same bar and shell. */}
+      <MatchListBody
+        otherPartyLabel={t('matchesView.client')}
+        matches={matches}
+        emptyText={t('matchesView.empty')}
+        renderRow={(m, i) => {
+          const statusMeta = matchStatusMeta(m.status ?? undefined)
+          return (
+            <MatchCard
+              key={m.id ?? i}
+              id={m.id} vacancyId={m.vacancyId} vacancyTitle={m.vacancyTitle || m.client || '—'} vacancyUrl={m.vacancyUrl}
+              // NAV-BACK-1: remember this subtab (Work/Match) so BACK from the
+              // opened match lands on the same drawer tab instead of Profile.
+              onBeforeOpen={() => rememberReturnTab(c.id, 'work')}
+              stageLabel={statusMeta?.label ?? m.stage} stageColor={statusMeta?.color ?? m.stageColor}
+              score={m.score}
+              helloflexGuid={m.helloflex_contract_guid}
+              // Point 2 (Danny live P1): reopens MatchModal in EDIT mode.
+              onEdit={onEdit && m.id != null ? () => onEdit(m.id as Id) : undefined}
+              otherPartyLabel={t('matchesView.client')}
+              otherParty={{ page: 'customers', id: m.customerId ?? null, label: m.client || '' }}
+              contractType={m.contractType} contractForm={m.contractForm} contractStatus={m.contractStatus}
+              functionTitle={m.functionTitle} startDate={m.startDate} endDate={m.endDate}
+              isClosed={statusMeta?.is_closed}
+              // Compact mode (Danny live review, 04-08): collapsed by default, one
+              // summary row per match, expanding in place — see MatchCard's own prop doc.
+              collapsible
+              // Flat row background (Danny 09-08): matches ApplicationRow's own flat
+              // rows now that this list has its own tinted column-header bar above —
+              // see MatchCard's own prop doc for why this is opt-in.
+              flatRow
+            />
+          )
+        }}
+      />
     </div>
   )
 }
