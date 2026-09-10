@@ -17,6 +17,8 @@ import '@xyflow/react/dist/style.css'
 import { Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useConfirm } from '@/hooks/useConfirm'
+import { useAuth } from '@/context/AuthContext'
+import { canDo } from '@/lib/access'
 import { MODULE_META } from '@/modules/index'
 import { ScheduleModal } from './workflow/ScheduleModal'
 import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext, StartContext, CurrentWorkflowContext, RouterAddBranchContext } from './workflow/contexts'
@@ -55,6 +57,10 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
     insertModule, addRouterBranch, updateNodeConfig, deleteNode, handleSave, handleRun, isDirty,
   } = useWorkflowEditor({ workflow, onSave, initialRunId })
   const { t } = useTranslation('workflows')
+  // WORKFLOW-PERMS-1: Run and Save gate on the workflows.* verbs (open until the BE seeds them).
+  const auth = useAuth()
+  const canRunWorkflow = canDo(auth, 'workflows', 'run')
+  const canSaveWorkflow = canDo(auth, 'workflows', 'update') || canDo(auth, 'workflows', 'create')
   const { confirm, dialog } = useConfirm()
 
   // WF-DRYRUN-FE-1: an HONEST confirm before the dry run actually fires — it
@@ -129,6 +135,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
           runError={runError} runBudget={runBudget} onRunError={setRunError} runConflict={runConflict}
           liveRunActive={liveRunActive} activeRunId={activeRunId} onStopped={handleStopped}
           running={running} onRun={handleRunSavingFirst} onRunDryRun={handleRunDryRun}
+          canRun={canRunWorkflow} canSave={canSaveWorkflow}
           saved={saved} onSave={() => handleSave(false)}
           // Save & close — back to the overview (live-run guard first)
           onSaveClose={() => (liveRunActive ? confirm(t('editor.liveRunConfirm'), () => handleSave(true)) : handleSave(true))}

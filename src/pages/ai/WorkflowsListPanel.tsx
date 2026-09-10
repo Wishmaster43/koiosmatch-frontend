@@ -76,6 +76,9 @@ interface WorkflowsListPanelProps {
   handleRun: (id?: string | number) => void | Promise<void>
   handleToggleStatus: (wf: Workflow) => void
   canManageFolders: boolean
+  // WORKFLOW-PERMS-1: the workflows.run / workflows.create verbs (open until the BE seeds them).
+  canRun?: boolean
+  canCreate?: boolean
   handleArchive: (wf: Workflow) => void
   handleRestore: (wf: Workflow) => void | Promise<void>
   // TRASH-OVERAL-2: mark (workflows.delete) / unmark (settings.update) — absent =
@@ -90,7 +93,7 @@ interface WorkflowsListPanelProps {
 export default function WorkflowsListPanel({
   loading, error, retryLoad, visibleWorkflows, folders, viewMode, setViewMode,
   showArchived, onToggleArchived, showTrash, onToggleTrash, selectedFolder, dragWf, openEditor, handleRun, handleToggleStatus,
-  canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, graceDays = null,
+  canManageFolders, canRun = true, canCreate = true, handleArchive, handleRestore, onMarkDeletion, onUnmark, graceDays = null,
 }: WorkflowsListPanelProps) {
   const { t } = useTranslation(['workflows', 'common'])
   // WF-WACHTRIJ-FE-1: the page's own list⇄queue switch — mirrors the app-wide
@@ -110,7 +113,7 @@ export default function WorkflowsListPanel({
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
         {/* A new workflow starts on the flat schedule contract (WORKFLOW-SCHEMA-1), not
             on a Dutch label the mapper would have to parse (WFB-01). */}
-        <Button variant="primary"
+        <Button variant="primary" disabled={!canCreate} title={canCreate ? undefined : t('page.createNoPermission')}
           onClick={() => openEditor({ name: t('page.newWorkflow'), trigger: 'Scheduled', trigger_config: { frequency: 'daily', times: ['08:00'] }, status: 'draft', last_run: null, steps: [], folder_id: selectedFolder === 'unassigned' ? null : (selectedFolder ?? null) })}
         >
           <Plus size={14} /> {t('page.newWorkflow')}
@@ -171,7 +174,7 @@ export default function WorkflowsListPanel({
               onDragEnd={() => { dragWf.current = null }}
               style={{ cursor: 'grab' }}
             >
-              <WorkflowCard workflow={wf} onRun={handleRun} onEdit={() => openEditor(wf)}
+              <WorkflowCard workflow={wf} onRun={handleRun} onEdit={() => openEditor(wf)} canRun={canRun}
                 {...workflowRowActions(wf, { canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, graceDays })}
               />
             </div>
@@ -190,6 +193,7 @@ export default function WorkflowsListPanel({
               <WorkflowListRow workflow={wf}
                 folderName={folderLabel(wf.folder_id)}
                 onRun={handleRun}
+                canRun={canRun}
                 onEdit={() => openEditor(wf)}
                 onToggleStatus={() => handleToggleStatus(wf)}
                 {...workflowRowActions(wf, { canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, graceDays })}

@@ -66,6 +66,8 @@
     "dryRunConfirmTitle": "Proefdraaien?",
     "dryRunConfirmMessage": "Verzendstappen (WhatsApp, e-mail, Facebook, webhooks en Shiftmanager-koppelingen) worden overgeslagen. Alle andere stappen voeren écht wijzigingen door, net als bij een normale uitvoering.",
     "runRequiresActive": "Alleen een actieve workflow kan draaien",
+    "runNoPermission": "Je hebt geen recht om workflows uit te voeren",
+    "saveNoPermission": "Je hebt geen recht om workflows te wijzigen",
     "router": {
       "addRoute": "Route toevoegen"
     },
@@ -354,6 +356,8 @@
     "unassigned": "Niet toegewezen",
     "countWorkflows": "{{n}} workflows",
     "newWorkflow": "Nieuwe Workflow",
+    "runNoPermission": "Je hebt geen recht om workflows uit te voeren",
+    "createNoPermission": "Je hebt geen recht om workflows aan te maken",
     "archived": "Gearchiveerd",
     "archivedView": "Toon gearchiveerde workflows",
     "viewGrid": "Kaarten",

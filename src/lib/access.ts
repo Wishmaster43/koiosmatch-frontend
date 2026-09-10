@@ -218,3 +218,29 @@ export function canUseKoiosAssist(auth?: AuthLike | null): boolean {
   const isSuperAdmin = auth?.user?.is_super_admin === true
   return hasModule('koios_ai', tenant, { isSuperAdmin }) || hasModule('koios_assist', tenant, { isSuperAdmin })
 }
+
+/**
+ * canDo — WORKFLOW-PERMS-1 (Danny 10-09, verbatim: "AI en workflow moet ook in een rol
+ * zitten: weergeven, uitvoeren alleen, weergeven en uitvoeren, wijzigingen, verwijderen"):
+ * one verb-level check for a permission family (`workflows.*`, `aiagents.*`). Tolerant by
+ * the same "absence = open" convention as the page.* whitelist above: a payload that
+ * carries NO permission of that family comes from a backend that has not seeded the
+ * family yet, so nothing is gated; once any `<family>.` permission is present, the exact
+ * verb decides. Super admins bypass; the backend re-checks every route (§7).
+ */
+const permissionNames = (auth?: AuthLike | null): string[] => {
+  const raw = auth?.user?.permissions
+  return Array.isArray(raw) ? raw.map(p => (typeof p === 'string' ? p : (p as { name?: string })?.name ?? '')) : []
+}
+
+// True when the auth payload carries at least one permission of this family (the BE has seeded it).
+export function hasPermissionFamily(auth: AuthLike | null | undefined, family: string): boolean {
+  return permissionNames(auth).some(n => n.startsWith(`${family}.`))
+}
+
+// Verb-level check: open while the family is absent, exact once it is present; super admins always may.
+export function canDo(auth: AuthLike | null | undefined, family: string, verb: string): boolean {
+  if (auth?.user?.is_super_admin === true) return true
+  if (!hasPermissionFamily(auth, family)) return true
+  return permissionNames(auth).includes(`${family}.${verb}`)
+}

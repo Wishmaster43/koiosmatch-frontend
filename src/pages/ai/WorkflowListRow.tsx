@@ -27,6 +27,8 @@ interface WorkflowListRowProps {
   workflow: Workflow
   folderName?: string
   onRun: (id?: string | number) => void | Promise<void>
+  // WORKFLOW-PERMS-1: false renders Run disabled with the reason (workflows.run missing).
+  canRun?: boolean
   onEdit: () => void
   onToggleStatus: () => void
   // Archive/restore lifecycle (TRASH-OVERAL-1b) — both settings.update-gated.
@@ -102,7 +104,7 @@ function triggerMeta(triggerType?: string): { Icon: LucideIcon; key: string } {
 }
 
 // One row in the workflow list: status/trigger badges plus its run/edit/archive/restore actions, gated on canManageFolders where relevant.
-export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, onToggleStatus, canManageFolders, onArchive, onRestore, onMarkDeletion, onUnmark, graceDays = null }: WorkflowListRowProps) {
+export default function WorkflowListRow({ workflow, folderName, onRun, canRun = true, onEdit, onToggleStatus, canManageFolders, onArchive, onRestore, onMarkDeletion, onUnmark, graceDays = null }: WorkflowListRowProps) {
   const { t } = useTranslation('workflows')
   const { formatDate, formatDateTime } = useDateFormat()
   const seedLabel = useSeedLabel()
@@ -226,7 +228,8 @@ export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, o
           {/* Run is this row's primary action — the solid house accent (also fixes the
               ink-twin: this used to read raw --color-primary on a tinted bg, unlike
               WorkflowCard's already-correct --color-primary-text). */}
-          <Button variant="soft" onClick={handleRun} disabled={running} style={{ flexShrink: 0 }}>
+          <Button variant="soft" onClick={handleRun} disabled={running || !canRun} style={{ flexShrink: 0 }}
+            title={canRun ? undefined : t('page.runNoPermission')}>
             {running ? <Spinner size={11} /> : <Play size={11} />}
             {running ? t('page.running') : t('page.run')}
           </Button>

@@ -27,6 +27,8 @@
     "dryRunConfirmTitle": "¿Iniciar simulación?",
     "dryRunConfirmMessage": "Los pasos de envío (WhatsApp, correo electrónico, Facebook, webhooks y vínculos de Shiftmanager) se omiten. El resto de los pasos se ejecutan de verdad, igual que en una ejecución normal.",
     "runRequiresActive": "Solo un flujo de trabajo activo puede ejecutarse",
+    "runNoPermission": "No tienes permiso para ejecutar workflows",
+    "saveNoPermission": "No tienes permiso para modificar workflows",
     "router": {
       "addRoute": "Agregar ruta"
     },
@@ -293,6 +295,8 @@
     "unassigned": "Sin asignar",
     "countWorkflows": "{{n}} workflows",
     "newWorkflow": "Nuevo workflow",
+    "runNoPermission": "No tienes permiso para ejecutar workflows",
+    "createNoPermission": "No tienes permiso para crear workflows",
     "archived": "Archivado",
     "archivedView": "Mostrar workflows archivados",
     "viewGrid": "Tarjetas",

@@ -193,3 +193,19 @@ describe('WorkflowListRow · relations_summary counters', () => {
     expect(screen.queryByText(/workflows? aan/)).not.toBeInTheDocument()
   })
 })
+
+// WORKFLOW-PERMS-1: without workflows.run the Run button is disabled with the reason.
+describe('WorkflowListRow · WORKFLOW-PERMS-1', () => {
+  it('renders Run disabled with the reason when canRun is false, enabled by default', () => {
+    const onRun = vi.fn()
+    const { rerender } = render(<WorkflowListRow workflow={baseWorkflow} onRun={onRun} canRun={false} onEdit={vi.fn()} onToggleStatus={vi.fn()} />)
+    // This suite runs the real i18n (see the imports above), so the title is the resolved copy.
+    const reason = i18n.t('page.runNoPermission', { ns: 'workflows' })
+    const run = screen.getByTitle(reason)
+    expect(run).toBeDisabled()
+    fireEvent.click(run)
+    expect(onRun).not.toHaveBeenCalled()
+    rerender(<WorkflowListRow workflow={baseWorkflow} onRun={onRun} onEdit={vi.fn()} onToggleStatus={vi.fn()} />)
+    expect(screen.queryByTitle(reason)).toBeNull()
+  })
+})

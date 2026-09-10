@@ -139,3 +139,16 @@ describe('WorkflowEditorHeader · unsaved status (RUN-SAVES-FIRST-1)', () => {
     expect(run).toHaveAttribute('title', 'editor.runSavesFirst')
   })
 })
+
+// WORKFLOW-PERMS-1: the verbs gate Run and both Save buttons, each with its reason.
+describe('WorkflowEditorHeader · WORKFLOW-PERMS-1', () => {
+  it('disables Run without workflows.run and both saves without workflows.update, with the reason as title', () => {
+    render(<WorkflowEditorHeader {...baseProps} status="active" canRun={false} canSave={false} />)
+    const run = screen.getByText('editor.run').closest('button')!
+    expect(run).toBeDisabled()
+    expect(run).toHaveAttribute('title', 'editor.runNoPermission')
+    // Not in its saved state, SaveButton passes disabled through to the native attribute.
+    expect(screen.getByText('editor.save').closest('button')).toBeDisabled()
+    expect(screen.getByText('editor.saveClose').closest('button')).toBeDisabled()
+  })
+})

@@ -66,6 +66,8 @@
     "dryRunConfirmTitle": "Eseguire una prova?",
     "dryRunConfirmMessage": "I passaggi di invio (WhatsApp, e-mail, Facebook, webhook e collegamenti Shiftmanager) vengono saltati. Tutti gli altri passaggi eseguono davvero le modifiche, come in un'esecuzione normale.",
     "runRequiresActive": "Solo una workflow attiva può essere eseguita",
+    "runNoPermission": "Non hai il permesso di eseguire workflow",
+    "saveNoPermission": "Non hai il permesso di modificare workflow",
     "router": {
       "addRoute": "Aggiungi percorso"
     },
@@ -354,6 +356,8 @@
     "unassigned": "Non assegnato",
     "countWorkflows": "{{n}} workflow",
     "newWorkflow": "Nuova workflow",
+    "runNoPermission": "Non hai il permesso di eseguire workflow",
+    "createNoPermission": "Non hai il permesso di creare workflow",
     "archived": "Archiviato",
     "archivedView": "Mostra workflow archiviate",
     "viewGrid": "Schede",

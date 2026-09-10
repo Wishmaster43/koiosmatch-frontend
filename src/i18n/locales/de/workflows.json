@@ -27,6 +27,8 @@
     "dryRunConfirmTitle": "Testlauf starten?",
     "dryRunConfirmMessage": "Versandschritte (WhatsApp, E-Mail, Facebook, Webhooks und Shiftmanager-Kopplungen) werden übersprungen. Alle anderen Schritte führen wie bei einer normalen Ausführung wirklich Änderungen durch.",
     "runRequiresActive": "Nur ein aktiver Workflow kann ausgeführt werden",
+    "runNoPermission": "Du hast kein Recht, Workflows auszuführen",
+    "saveNoPermission": "Du hast kein Recht, Workflows zu ändern",
     "router": {
       "addRoute": "Route hinzufügen"
     },
@@ -293,6 +295,8 @@
     "unassigned": "Nicht zugewiesen",
     "countWorkflows": "{{n}} Workflows",
     "newWorkflow": "Neuer Workflow",
+    "runNoPermission": "Du hast kein Recht, Workflows auszuführen",
+    "createNoPermission": "Du hast kein Recht, Workflows anzulegen",
     "archived": "Archiviert",
     "archivedView": "Archivierte Workflows anzeigen",
     "viewGrid": "Karten",

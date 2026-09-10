@@ -27,6 +27,8 @@
     "dryRunConfirmTitle": "Lancer une simulation ?",
     "dryRunConfirmMessage": "Les étapes d'envoi (WhatsApp, e-mail, Facebook, webhooks et liaisons Shiftmanager) sont ignorées. Toutes les autres étapes s'exécutent réellement, comme lors d'une exécution normale.",
     "runRequiresActive": "Seul un workflow actif peut s’exécuter",
+    "runNoPermission": "Vous n’avez pas le droit d’exécuter des workflows",
+    "saveNoPermission": "Vous n’avez pas le droit de modifier des workflows",
     "router": {
       "addRoute": "Ajouter une route"
     },
@@ -293,6 +295,8 @@
     "unassigned": "Non attribué",
     "countWorkflows": "{{n}} workflows",
     "newWorkflow": "Nouveau workflow",
+    "runNoPermission": "Vous n’avez pas le droit d’exécuter des workflows",
+    "createNoPermission": "Vous n’avez pas le droit de créer des workflows",
     "archived": "Archivé",
     "archivedView": "Afficher les workflows archivés",
     "viewGrid": "Cartes",

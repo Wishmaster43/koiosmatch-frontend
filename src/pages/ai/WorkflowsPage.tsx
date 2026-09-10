@@ -14,6 +14,7 @@
 import { useState } from 'react'
 import WorkflowCanvasEditor from '@/components/layout/WorkflowCanvasEditor'
 import { useAuth } from '@/context/AuthContext'
+import { canDo } from '@/lib/access'
 import { useTrashFlow } from '@/hooks/useTrashFlow'
 import TrashPreviewDialogSlot from '@/components/ui/TrashPreviewDialogSlot'
 import { useOpenFromIntent } from '@/context/NavigationContext'
@@ -59,6 +60,10 @@ export default function WorkflowsPage({ intent }: { intent?: WorkflowsIntent } =
   // affordances); unmark reuses settings.update, the same gate the archive/restore
   // actions carry here (canManageFolders). A mark/unmark refetches the list.
   const canMarkDeletion = useAuth()?.hasPermission('workflows.delete') ?? false
+  // WORKFLOW-PERMS-1: run and create gate on the workflows.* family (open until the BE seeds it).
+  const auth = useAuth()
+  const canRunWorkflows = canDo(auth, 'workflows', 'run')
+  const canCreateWorkflows = canDo(auth, 'workflows', 'create')
   const trash = useTrashFlow({
     entityPath: 'workflows',
     onMarked: () => data.retryLoad(),
@@ -109,6 +114,8 @@ export default function WorkflowsPage({ intent }: { intent?: WorkflowsIntent } =
         handleRun={data.handleRun}
         handleToggleStatus={data.handleToggleStatus}
         canManageFolders={data.canManageFolders}
+        canRun={canRunWorkflows}
+        canCreate={canCreateWorkflows}
         handleArchive={data.handleArchive}
         handleRestore={data.handleRestore}
         onMarkDeletion={canMarkDeletion ? openMarkDeletion : undefined}

@@ -38,7 +38,7 @@ export default function WorkflowEditorHeader({
   showLogs, onToggleLogs,
   runError, runBudget, onRunError, runConflict,
   liveRunActive, activeRunId, onStopped,
-  running, onRun, onRunDryRun,
+  running, onRun, onRunDryRun, canRun = true, canSave = true,
   saved, onSave, onSaveClose,
   startInvalid,
   onClose,
@@ -76,6 +76,9 @@ export default function WorkflowEditorHeader({
   onStopped: () => void
   running: boolean
   onRun: () => void
+  // WORKFLOW-PERMS-1: false renders Run / Save disabled with the reason (verb missing).
+  canRun?: boolean
+  canSave?: boolean
   // WF-DRYRUN-FE-1: the "Proefdraaien" action next to Run — stages the honest
   // confirm dialog before actually starting the dry run (the confirm itself
   // lives in the editor composer, which owns `useConfirm`).
@@ -274,21 +277,21 @@ export default function WorkflowEditorHeader({
           up front with an honest i18n title, rather than firing and showing the
           raw Dutch 422 from the server (useWorkflowRunControl's message fallback
           stays as the belt-and-braces path for any other rejection reason). */}
-      <Button variant="primary" size="sm" onClick={onRun} disabled={running || status !== 'active'}
-        title={status !== 'active' ? t('editor.runRequiresActive') : statusUnsaved ? t('editor.runSavesFirst') : undefined}>
+      <Button variant="primary" size="sm" onClick={onRun} disabled={running || status !== 'active' || !canRun}
+        title={!canRun ? t('editor.runNoPermission') : status !== 'active' ? t('editor.runRequiresActive') : statusUnsaved ? t('editor.runSavesFirst') : undefined}>
         {running ? <Spinner size={13} /> : <Play size={13} />}
         {running ? t('editor.running') : t('editor.run')}
       </Button>
 
       {/* Opslaan — blijft in editor. §4's "aan/gelukt" token pair (never
           re-approximated per screen) lives in the shared SaveButton. */}
-      <SaveButton variant="secondary" size="sm" saved={saved} onClick={onSave}>
+      <SaveButton variant="secondary" size="sm" saved={saved} onClick={onSave} disabled={!canSave} title={canSave ? undefined : t('editor.saveNoPermission')}>
         <Save size={13} />
         {saved ? t('editor.saved') : t('editor.save')}
       </SaveButton>
 
       {/* Opslaan & sluiten — terug naar overzicht (live-run guard eerst) */}
-      <Button variant="primary" size="sm" onClick={onSaveClose}>
+      <Button variant="primary" size="sm" onClick={onSaveClose} disabled={!canSave} title={canSave ? undefined : t('editor.saveNoPermission')}>
         <Save size={13} />
         {t('editor.saveClose')}
       </Button>

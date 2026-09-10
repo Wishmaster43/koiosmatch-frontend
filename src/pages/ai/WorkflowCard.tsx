@@ -23,6 +23,8 @@ import Button from '@/components/ui/Button'
 interface WorkflowCardProps {
   workflow: Workflow
   onRun: (id?: string | number) => void | Promise<void>
+  // WORKFLOW-PERMS-1: false renders Run disabled with the reason (workflows.run missing).
+  canRun?: boolean
   onEdit: () => void
   canManageFolders?: boolean
   onArchive?: () => void
@@ -74,7 +76,7 @@ function StepPill({ type }: { type?: string }) {
 }
 
 // One card in the workflow list/board: status badge, step pills, and the run/edit/archive/restore/delete actions for that workflow.
-export default function WorkflowCard({ workflow, onRun, onEdit, canManageFolders, onArchive, onRestore, onMarkDeletion, onUnmark, graceDays = null }: WorkflowCardProps) {
+export default function WorkflowCard({ workflow, onRun, canRun = true, onEdit, canManageFolders, onArchive, onRestore, onMarkDeletion, onUnmark, graceDays = null }: WorkflowCardProps) {
   const { t } = useTranslation('workflows')
   const { formatDate, formatDateTime } = useDateFormat()
   const seedLabel = useSeedLabel()
@@ -210,7 +212,7 @@ export default function WorkflowCard({ workflow, onRun, onEdit, canManageFolders
           ) : (
             <>
               {/* Run is this row's primary action — the solid house accent. */}
-              <Button variant="soft" onClick={handleRun} disabled={running}>
+              <Button variant="soft" onClick={handleRun} disabled={running || !canRun} title={canRun ? undefined : t('page.runNoPermission')}>
                 {running ? <Spinner size={12} /> : <Play size={12} />}
                 {running ? t('page.running') : t('page.run')}
               </Button>

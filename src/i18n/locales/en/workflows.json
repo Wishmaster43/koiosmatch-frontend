@@ -31,6 +31,8 @@
     "dryRunConfirmTitle": "Dry run?",
     "dryRunConfirmMessage": "Send steps (WhatsApp, email, Facebook, webhooks and Shiftmanager links) are skipped. Every other step still runs for real, exactly like a normal run.",
     "runRequiresActive": "Only an active workflow can run",
+    "runNoPermission": "You have no permission to run workflows",
+    "saveNoPermission": "You have no permission to change workflows",
     "router": {
       "addRoute": "Add route"
     },
@@ -297,6 +299,8 @@
     "unassigned": "Unassigned",
     "countWorkflows": "{{n}} workflows",
     "newWorkflow": "New workflow",
+    "runNoPermission": "You have no permission to run workflows",
+    "createNoPermission": "You have no permission to create workflows",
     "archived": "Archived",
     "archivedView": "Show archived workflows",
     "viewGrid": "Cards",

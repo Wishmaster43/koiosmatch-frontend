@@ -66,6 +66,8 @@
     "dryRunConfirmTitle": "Executar em ensaio?",
     "dryRunConfirmMessage": "Os passos de envio (WhatsApp, e-mail, Facebook, webhooks e ligações Shiftmanager) são ignorados. Todos os outros passos aplicam alterações reais, tal como numa execução normal.",
     "runRequiresActive": "Só uma workflow ativa pode ser executada",
+    "runNoPermission": "Não tem permissão para executar workflows",
+    "saveNoPermission": "Não tem permissão para alterar workflows",
     "router": {
       "addRoute": "Adicionar rota"
     },
@@ -354,6 +356,8 @@
     "unassigned": "Não atribuído",
     "countWorkflows": "{{n}} workflows",
     "newWorkflow": "Nova workflow",
+    "runNoPermission": "Não tem permissão para executar workflows",
+    "createNoPermission": "Não tem permissão para criar workflows",
     "archived": "Arquivado",
     "archivedView": "Mostrar workflows arquivadas",
     "viewGrid": "Cartões",
