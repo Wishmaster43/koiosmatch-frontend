@@ -54,6 +54,17 @@ function WeightDots({ weight, title }: { weight: number; title: string }) {
   )
 }
 
+// The "hard criterion" badge (a candidate failing a hard criterion is
+// disqualified regardless of overall score) — identical in the read and edit view.
+function HardBadge({ hardLabel, hardHint }: { hardLabel: string; hardHint: string }) {
+  return (
+    // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1
+    // on its own pastel, AA fail (Opus r3.5).
+    <span title={hardHint} aria-label={`${hardLabel}: ${hardHint}`} style={{ fontSize: 10, fontWeight: 600, padding: '1px 7px', borderRadius: 99, cursor: 'help',
+      background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}>{hardLabel}</span>
+  )
+}
+
 // One criterion: read = label + weight + ring + % + note; edit = label + weight + slider + %.
 function CriterionCard({ criterion, hardLabel, hardHint, weightTitle, editing, onScore }: { criterion: Criterion; hardLabel: string; hardHint: string; weightTitle: string; editing: boolean; onScore: (v: number) => void }) {
   const [open, setOpen] = useState(false)
@@ -63,12 +74,7 @@ function CriterionCard({ criterion, hardLabel, hardHint, weightTitle, editing, o
       <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px', background: 'var(--surface)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
           <SectionTitle as="span" style={{ flex: 1 }}>{criterion.label}</SectionTitle>
-          {criterion.hard && (
-            // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1
-            // on its own pastel, AA fail (Opus r3.5).
-            <span title={hardHint} aria-label={`${hardLabel}: ${hardHint}`} style={{ fontSize: 10, fontWeight: 600, padding: '1px 7px', borderRadius: 99, cursor: 'help',
-              background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}>{hardLabel}</span>
-          )}
+          {criterion.hard && <HardBadge hardLabel={hardLabel} hardHint={hardHint} />}
           {criterion.weight != null && <WeightDots weight={criterion.weight} title={weightTitle} />}
           {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- DATA-coloured score value (scoreColor), not a title */}
           <span style={{ fontSize: 13, fontWeight: 600, color: scoreColor(criterion.score), minWidth: 36, textAlign: 'right' }}>{criterion.score}%</span>
@@ -88,12 +94,7 @@ function CriterionCard({ criterion, hardLabel, hardHint, weightTitle, editing, o
           style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
           <SectionTitle as="span">{criterion.label}</SectionTitle>
         </button>
-        {criterion.hard && (
-          // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1
-          // on its own pastel, AA fail (Opus r3.5).
-          <span title={hardHint} aria-label={`${hardLabel}: ${hardHint}`} style={{ fontSize: 10, fontWeight: 600, padding: '1px 7px', borderRadius: 99, cursor: 'help',
-            background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}>{hardLabel}</span>
-        )}
+        {criterion.hard && <HardBadge hardLabel={hardLabel} hardHint={hardHint} />}
         {criterion.weight != null && <WeightDots weight={criterion.weight} title={weightTitle} />}
         <ScoreRing value={criterion.score} />
         {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- DATA-coloured score value (scoreColor), not a title */}

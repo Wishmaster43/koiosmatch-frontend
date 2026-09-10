@@ -21,18 +21,16 @@
  */
 import { useState, useRef, useEffect, useId } from 'react'
 import type { ReactNode } from 'react'
-import { createPortal } from 'react-dom'
 import { Check, ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
-import { useEscapeLayer } from '@/hooks/useEscapeLayer'
-import { useClickOutside } from '@/hooks/useClickOutside'
-import { useDropdownFocusRestore } from '@/hooks/useDropdownFocusRestore'
+import { DROPDOWN_SEARCH_ROW_HEIGHT } from '@/lib/useDropdownPlacement'
+import { useDropdownPopover } from '@/hooks/useDropdownPopover'
 import { matchesOptionQuery } from './optionFilter'
 import SelectClearButton, { CLEAR_BUTTON_SIZE } from './SelectClearButton'
 import SelectAllRow, { SELECT_ALL_ROW_HEIGHT } from './SelectAllRow'
 import { useBatchToggle } from '@/hooks/useBatchToggle'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import DropdownPopover from './DropdownPopover'
 
 interface SearchSelectOption {
   value: string
@@ -107,33 +105,15 @@ export default function SearchSelect({
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const ref = useRef<HTMLDivElement>(null)
-  // The portalled popover lives outside `ref`'s DOM subtree — its own ref must
-  // ALSO count as "inside" for the outside-click check below, or toggling an
-  // option (a click that lands inside the portal, not inside `ref`) would
-  // immediately self-close before the click handler even runs.
-  const menuRef = useRef<HTMLDivElement>(null)
-  // Shared flip + clamp + rect placement (see the module doc comment above).
-  const { openUp, maxHeight: menuMaxHeight, rect } = useDropdownPlacement(ref, open)
-
-  // Close the popover on an outside click (shared DUP-03 hook); the portalled menu
-  // counts as "inside" too, or toggling an option would self-close before the click registers.
-  useClickOutside([ref, menuRef], open, () => setOpen(false))
-
-  // Overlay-close layer: closes the popover no matter which element inside it
-  // holds focus — an option button, not just the search input.
-  useEscapeLayer(open, () => setOpen(false))
-
-  // Restore focus to the trigger whenever the popover transitions open → closed —
-  // the search input lives in a PORTAL and unmounts on every close path, so focus
-  // would otherwise land on <body>. Inside a modal that is not cosmetic: the house
-  // focus trap listens on the modal's own node, and a portal is not a descendant of
-  // it, so from <body> neither Escape nor Tab reaches the dialog again (§6). Skipped
-  // when some other element already claimed focus — same rule CreatableSelect
-  // documents for the identical situation; shared hook (DUP), resolver looks up the
-  // first focusable element inside `ref` since `renderTrigger` may not expose one.
-  useDropdownFocusRestore(
+  // Shared portal/placement/close-on-outside-click/Escape/focus-restore wiring
+  // (see the hook's own doc comment, incl. why focus-restore matters inside a
+  // modal) — menuRef must ALSO count as "inside" for the outside-click check,
+  // or toggling an option would self-close before the click handler runs. The
+  // resolver looks up the first focusable element inside `ref` since a
+  // caller-supplied `renderTrigger` may not expose a stable ref.
+  const { menuRef, openUp, maxHeight: menuMaxHeight, rect } = useDropdownPopover(
+    ref, open, () => setOpen(false),
     () => ref.current?.querySelector<HTMLElement>('button, [tabindex]:not([tabindex="-1"])') ?? null,
-    open
   )
 
   // Server-side search: when onSearch is given, debounce the query up to the parent
@@ -212,10 +192,12 @@ export default function SearchSelect({
       {showClear && (
         <SelectClearButton triggerId={triggerId} clearLabel={clearLabel} onClear={clearAll} />
       )}
-      {open && createPortal(
-        // minWidth + viewport cap: the menu grows with long option labels instead of
-        // truncating. Flips upward + clamps to the available space (see doc comment).
-        <div ref={menuRef} {...{ [DROPDOWN_PORTAL_ATTR]: '' }} style={{
+      {/* minWidth + viewport cap: the menu grows with long option labels instead of
+          truncating. Flips upward + clamps to the available space (see doc comment).
+          PERF (r11 v2): short-circuit here, not inside DropdownPopover — a
+          closed picker must never build this option list at all. */}
+      {open && (
+      <DropdownPopover menuRef={menuRef} style={{
           // HUISSTIJL-1: portalled dropdown menu — z-popover ladder tier, shadow-float role.
           position: 'fixed', zIndex: 'var(--z-popover)', minWidth: width, maxWidth: 'min(420px, 90vw)', maxHeight: menuMaxHeight,
           // Hidden until the first measurement lands — never painted at an
@@ -267,8 +249,7 @@ export default function SearchSelect({
               )
             })}
           </div>
-        </div>,
-        document.body,
+      </DropdownPopover>
       )}
     </div>
   )

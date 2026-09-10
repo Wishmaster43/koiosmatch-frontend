@@ -65,6 +65,43 @@ function LinkedByLine({ link }: { link: BackofficeLink | null }) {
 
 interface CardProps { status: string | null; link: BackofficeLink | null; canLink: boolean; busy: boolean; onLink: () => void }
 
+// The two backoffice systems this drawer couples to — every per-system i18n
+// key family (alt/name/notLinked/lastSynced/externalId) is built from this.
+type BackofficeSystem = 'helloflex' | 'shiftmanager'
+
+// "Sinds gesynchroniseerd op …" — shared by both linked cards, only the i18n
+// key family (helloflex vs shiftmanager) differs (digest clone [1]).
+function LastSyncedLine({ system, date }: { system: BackofficeSystem; date: string }) {
+  const { t } = useTranslation('common')
+  return (
+    <Caption as="span">
+      {t(`backofficeLinks.${system}.lastSynced`, { date })}
+    </Caption>
+  )
+}
+
+// The shared pending/not-linked/failed rendering for both cards — identical
+// structure end to end, only the "not linked" i18n key family differs
+// (digest clone [2], widened: the pending branch and the failed/error lines
+// were ALSO byte-identical between the two cards, just outside jscpd's window).
+function NonLinkedBody({ system, status, link, canLink, busy, onLink }: CardProps & { system: BackofficeSystem }) {
+  const { t } = useTranslation('common')
+  if (status === 'pending') {
+    return <SoftChip label={t('backofficeLinks.common.statusPending')} color="var(--color-warning)" />
+  }
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+        {status === 'failed'
+          ? <SoftChip label={t('backofficeLinks.common.statusFailed')} color="var(--color-danger)" />
+          : <p style={mutedItalic}>{t(`backofficeLinks.${system}.notLinked`)}</p>}
+        <LinkButton onClick={onLink} busy={busy} retry={status === 'failed'} disabled={!canLink} />
+      </div>
+      {status === 'failed' && link?.lastError && <p style={errorLine}>{link.lastError}</p>}
+    </div>
+  )
+}
+
 // HelloFlex card body — gated on module/app by the caller; links through the
 // generic sync POST (real endpoint today, even though it commonly fails clean
 // until Settings → Integraties holds HelloFlex credentials — that failure is a
@@ -89,24 +126,10 @@ export function HelloflexCard({ status, link, canLink, busy, onLink }: CardProps
           <LinkedByLine link={link} />
           {/* MATCHES 16 (21-08): sync metadata lives with the coupling, not on the
               Overview tab — mirrors ShiftmanagerCard's own lastSynced line. */}
-          {link?.lastSyncedAt && (
-            <Caption as="span">
-              {t('backofficeLinks.helloflex.lastSynced', { date: formatDateTime(link.lastSyncedAt) })}
-            </Caption>
-          )}
+          {link?.lastSyncedAt && <LastSyncedLine system="helloflex" date={formatDateTime(link.lastSyncedAt)} />}
         </div>
-      ) : status === 'pending' ? (
-        <SoftChip label={t('backofficeLinks.common.statusPending')} color="var(--color-warning)" />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-            {status === 'failed'
-              ? <SoftChip label={t('backofficeLinks.common.statusFailed')} color="var(--color-danger)" />
-              : <p style={mutedItalic}>{t('backofficeLinks.helloflex.notLinked')}</p>}
-            <LinkButton onClick={onLink} busy={busy} retry={status === 'failed'} disabled={!canLink} />
-          </div>
-          {status === 'failed' && link?.lastError && <p style={errorLine}>{link.lastError}</p>}
-        </div>
+        <NonLinkedBody system="helloflex" status={status} link={link} canLink={canLink} busy={busy} onLink={onLink} />
       )}
     </SectionCard>
   )
@@ -136,24 +159,10 @@ export function ShiftmanagerCard({ status, link, canLink, busy, syncing, canSync
             )}
           </div>
           <LinkedByLine link={link} />
-          {link?.lastSyncedAt && (
-            <Caption as="span">
-              {t('backofficeLinks.shiftmanager.lastSynced', { date: formatDateTime(link.lastSyncedAt) })}
-            </Caption>
-          )}
+          {link?.lastSyncedAt && <LastSyncedLine system="shiftmanager" date={formatDateTime(link.lastSyncedAt)} />}
         </div>
-      ) : status === 'pending' ? (
-        <SoftChip label={t('backofficeLinks.common.statusPending')} color="var(--color-warning)" />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-            {status === 'failed'
-              ? <SoftChip label={t('backofficeLinks.common.statusFailed')} color="var(--color-danger)" />
-              : <p style={mutedItalic}>{t('backofficeLinks.shiftmanager.notLinked')}</p>}
-            <LinkButton onClick={onLink} busy={busy} retry={status === 'failed'} disabled={!canLink} />
-          </div>
-          {status === 'failed' && link?.lastError && <p style={errorLine}>{link.lastError}</p>}
-        </div>
+        <NonLinkedBody system="shiftmanager" status={status} link={link} canLink={canLink} busy={busy} onLink={onLink} />
       )}
     </SectionCard>
   )

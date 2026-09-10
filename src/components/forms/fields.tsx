@@ -43,6 +43,20 @@ function requiredChildProps(required: boolean | undefined, child: ReactElement):
   return { 'aria-required': true, ...(isNativeControl ? { required: true } : {}) }
 }
 
+// Shared id/labelId/cloneElement plumbing behind FieldRow and Field: both wire
+// a single child to its own generated id + labelId (accessible name/description)
+// plus the required flags (REQUIRED-A11Y-1) — only the surrounding label JSX
+// (the label layout itself) differs between the two callers.
+function useLabeledChild(children: ReactNode, required: boolean | undefined) {
+  const id = useId()
+  const labelId = `${id}-label`
+  const child = isValidElement(children)
+    ? cloneElement(children as ReactElement<{ id?: string; 'aria-labelledby'?: string; 'aria-required'?: true; required?: true }>,
+        { id, 'aria-labelledby': labelId, ...requiredChildProps(required, children) })
+    : children
+  return { id, labelId, child }
+}
+
 /** Parse any date-ish value into a Date, or null when invalid/empty. */
 export function parseDate(value?: string | number | Date | null): Date | null {
   if (!value) return null
@@ -65,12 +79,7 @@ export function Label({ children, required, htmlFor, id }: { children: ReactNode
 // field takes the rest. Same id/aria-labelledby wiring as Field below; ONE
 // implementation, so no modal restyles it privately (§3A field-layout rule).
 export function FieldRow({ label, required, children }: { label: ReactNode; required?: boolean; children: ReactNode }) {
-  const id = useId()
-  const labelId = `${id}-label`
-  const child = isValidElement(children)
-    ? cloneElement(children as ReactElement<{ id?: string; 'aria-labelledby'?: string; 'aria-required'?: true; required?: true }>,
-        { id, 'aria-labelledby': labelId, ...requiredChildProps(required, children) })
-    : children
+  const { id, labelId, child } = useLabeledChild(children, required)
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
       <label id={labelId} htmlFor={id} style={{ ...CANON_LABEL_STYLE, paddingTop: 8 }}>
@@ -84,18 +93,13 @@ export function FieldRow({ label, required, children }: { label: ReactNode; requ
 // Associates the label with its single input via a generated id (§6) — works for
 // every Field child that forwards `id` (TextField/SelectField/DateField/…).
 export function Field({ label, required, children }: { label: ReactNode; required?: boolean; children: ReactNode }) {
-  const id = useId()
   // `htmlFor` only names LABELABLE elements — an <input> hears it, a <button> does
   // not. The custom pickers (CreatableSelect/SelectMenu) render a button, so their
   // visible label was orphaned: a screen reader announced "Beschikbaar, button" with
   // no field name (measured 27-07, across every picker in every modal). Handing the
   // label's own id down as aria-labelledby names those too; labelable children simply
   // resolve to the same text, so nothing regresses.
-  const labelId = `${id}-label`
-  const child = isValidElement(children)
-    ? cloneElement(children as ReactElement<{ id?: string; 'aria-labelledby'?: string; 'aria-required'?: true; required?: true }>,
-        { id, 'aria-labelledby': labelId, ...requiredChildProps(required, children) })
-    : children
+  const { id, labelId, child } = useLabeledChild(children, required)
   return (
     <div>
       <Label id={labelId} htmlFor={id} required={required}>{label}</Label>

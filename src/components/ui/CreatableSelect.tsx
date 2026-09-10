@@ -26,14 +26,12 @@
  */
 import { useState, useRef, useEffect, useId } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
-import { createPortal } from 'react-dom'
 import { ChevronDown, Check, Plus } from 'lucide-react'
-import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
-import { useEscapeLayer } from '@/hooks/useEscapeLayer'
-import { useClickOutside } from '@/hooks/useClickOutside'
-import { useDropdownFocusRestore } from '@/hooks/useDropdownFocusRestore'
+import { DROPDOWN_SEARCH_ROW_HEIGHT } from '@/lib/useDropdownPlacement'
+import { useDropdownPopover } from '@/hooks/useDropdownPopover'
 import { matchesOptionQuery } from './optionFilter'
 import SelectClearButton, { CLEAR_BUTTON_SIZE } from './SelectClearButton'
+import DropdownPopover from './DropdownPopover'
 
 // Footprint of the opt-in clear button: a 24px WCAG 2.2 (2.5.8) target, parked
 // left of the chevron. The label span reserves exactly this much extra room so a
@@ -113,18 +111,14 @@ export default function CreatableSelect({
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const ref = useRef<HTMLDivElement>(null)
-  // The portalled popover lives outside `ref`'s DOM subtree — its own ref must
-  // ALSO count as "inside" for the outside-click check below, or picking an
-  // option (a click that lands inside the portal, not inside `ref`) would
-  // immediately self-close before the click handler even runs.
-  const menuRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
-  // Shared flip + clamp + rect placement (see the module doc comment above).
-  const { openUp, maxHeight: menuMaxHeight, rect } = useDropdownPlacement(ref, open)
+  // Shared portal/placement/close-on-outside-click/Escape/focus-restore wiring
+  // (see the hook's own doc comment) — menuRef must ALSO count as "inside" for
+  // the outside-click check, or picking an option would self-close first.
+  const { menuRef, openUp, maxHeight: menuMaxHeight, rect } = useDropdownPopover(ref, open, () => setOpen(false), () => triggerRef.current)
 
-  // Close on outside click (shared DUP-03 hook); focus the search box when opening.
-  useClickOutside([ref, menuRef], open, () => setOpen(false))
+  // Focus the search box when opening.
   useEffect(() => { if (open) inputRef.current?.focus() }, [open])
 
   // W30: server-side search — when `onSearch` is given, debounce the typed query
@@ -135,13 +129,6 @@ export default function CreatableSelect({
     const id = setTimeout(() => onSearch(query), 250)
     return () => clearTimeout(id)
   }, [query, onSearch])
-
-  // Overlay-close layer: closes the popover even right after opening, before
-  // focus has moved into the portalled search input, top layer first.
-  useEscapeLayer(open, () => setOpen(false))
-
-  // Restore focus to the trigger when the dropdown closes (pick / Escape / outside click).
-  useDropdownFocusRestore(() => triggerRef.current, open)
 
   const opts: CreatableOption[] = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
   const current = opts.find(o => o.value === value)
@@ -206,8 +193,10 @@ export default function CreatableSelect({
         <SelectClearButton triggerId={triggerId} clearLabel={clearLabel} aria-labelledby={ariaLabelledBy}
           onClear={() => { onChange(''); setOpen(false); setQuery('') }} />
       )}
-      {open && createPortal(
-        <div ref={menuRef} {...{ [DROPDOWN_PORTAL_ATTR]: '' }} style={{
+      {/* PERF (r11 v2): short-circuit here, not inside DropdownPopover — a closed
+          picker must never build this option list at all. */}
+      {open && (
+      <DropdownPopover menuRef={menuRef} style={{
           // HUISSTIJL-1: portalled dropdown menu — z-popover ladder tier, shadow-float role.
           position: 'fixed', zIndex: 'var(--z-popover)', minWidth: menuWidth, maxHeight: menuMaxHeight,
           // Hidden until the first measurement lands (see useDropdownPlacement's
@@ -255,8 +244,7 @@ export default function CreatableSelect({
               <div style={{ padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>—</div>
             )}
           </div>
-        </div>,
-        document.body,
+      </DropdownPopover>
       )}
     </div>
   )

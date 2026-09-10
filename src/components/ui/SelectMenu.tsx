@@ -9,17 +9,14 @@
  */
 import type { CSSProperties } from 'react'
 import { useState, useRef, useEffect, useId } from 'react'
-import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
 import { ChevronDown, Check } from 'lucide-react'
 import Avatar from './Avatar'
-import { useDropdownPlacement, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
-import { useEscapeLayer } from '@/hooks/useEscapeLayer'
-import { useClickOutside } from '@/hooks/useClickOutside'
-import { useDropdownFocusRestore } from '@/hooks/useDropdownFocusRestore'
+import { useDropdownPopover } from '@/hooks/useDropdownPopover'
 import { matchesOptionQuery } from './optionFilter'
 import SelectClearButton, { CLEAR_BUTTON_SIZE } from './SelectClearButton'
+import DropdownPopover from './DropdownPopover'
 
 interface SelectOption {
   value: string
@@ -73,27 +70,14 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, 'ari
   const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-  // The portalled menu lives outside `ref`'s subtree — it must ALSO count as
-  // "inside" for the outside-click check, or picking an option self-closes first.
-  const menuRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
   // PORTAL (S24a class fix, 13-08): the menu used to be position:absolute inside
   // the tree, so ANY overflow ancestor (FloatingPanel scroll body, drawer tab)
   // clipped it at its own box. Same cure as CreatableSelect: portal into
-  // document.body + fixed positioning off the shared flip/clamp hook.
-  const { openUp, maxHeight: menuMaxHeight, rect } = useDropdownPlacement(ref, open)
-
-  // Close on outside click (shared DUP-03 hook) — Escape now goes through the
-  // layered stack below. Only active while open, so a CLOSED menu never
-  // swallows an outside click meant for something else.
-  useClickOutside([ref, menuRef], open, () => setOpen(false))
-
-  // Overlay-close layer: Escape closes this menu, top layer first, so a modal
-  // underneath is untouched while the menu is open (PlanIntakeModal case).
-  useEscapeLayer(open, () => setOpen(false))
-
-  // Restore focus to the trigger when the menu closes (pick / Escape / outside click).
-  useDropdownFocusRestore(() => triggerRef.current, open)
+  // document.body + fixed positioning off the shared flip/clamp hook — all
+  // wired by the shared useDropdownPopover hook (menuRef, placement, close-on-
+  // outside-click/Escape, focus-restore; see its own doc comment).
+  const { menuRef, openUp, maxHeight: menuMaxHeight, rect } = useDropdownPopover(ref, open, () => setOpen(false), () => triggerRef.current)
 
   const opts: SelectOption[] = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
   const current = opts.find(o => o.value === value)
@@ -136,10 +120,12 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, 'ari
         <SelectClearButton triggerId={triggerId} clearLabel={clearLabel} aria-labelledby={ariaLabelledBy}
           onClear={() => { onChange(''); setOpen(false) }} />
       )}
-      {open && createPortal(
-        <div id={listId} ref={menuRef} {...{ [DROPDOWN_PORTAL_ATTR]: '' }}
-          // HUISSTIJL-1: portalled dropdown menu — z-popover ladder tier, shadow-float role.
-          style={{ position: 'fixed', zIndex: 'var(--z-popover)', minWidth: menuWidth,
+      {/* PERF (r11 v2): short-circuit here, not inside DropdownPopover — a closed
+          picker must never build this option list at all. */}
+      {open && (
+      <DropdownPopover menuRef={menuRef} id={listId}
+        // HUISSTIJL-1: portalled dropdown menu — z-popover ladder tier, shadow-float role.
+        style={{ position: 'fixed', zIndex: 'var(--z-popover)', minWidth: menuWidth,
           // Hidden until the first measurement lands — never painted at (0,0).
           visibility: rect ? 'visible' : 'hidden',
           left: rect ? rect.left : 0,
@@ -148,34 +134,33 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, 'ari
             : {}),
           background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
           boxShadow: 'var(--shadow-float)', overflow: 'hidden', maxHeight: menuMaxHeight, overflowY: 'auto' }}>
-          {/* Filter box — autofocused so typing narrows immediately, Escape-safe
-              (the outside-click/Escape handling above owns closing). */}
-          <div style={{ padding: 6, borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, background: 'var(--surface)' }}>
-            <input autoFocus value={query} onChange={e => setQuery(e.target.value)}
-              aria-label={t('search')} placeholder={t('search')}
-              style={{ width: '100%', boxSizing: 'border-box', padding: '5px 8px', fontSize: 12, borderRadius: 6,
-                border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', outline: 'none' }} />
-          </div>
-          {opts.length === 0 && <div style={{ padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>{placeholder ?? '—'}</div>}
-          {opts.length > 0 && shown.length === 0 && (
-            <div style={{ padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>{t('noResults')}</div>
-          )}
-          {shown.map(o => (
-            <button key={o.value} type="button" onClick={() => { if (o.disabled) return; onChange(o.value); setOpen(false) }}
-              aria-current={value === o.value} disabled={o.disabled} aria-disabled={o.disabled || undefined}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%',
-                padding: '8px 12px', textAlign: 'left', fontSize: 12,
-                cursor: o.disabled ? 'default' : 'pointer', border: 'none',
-                background: value === o.value ? 'var(--color-primary-bg)' : 'none',
-                color: o.disabled ? 'var(--text-muted)' : 'var(--text)' }}>
-              {o.initials && <Avatar initials={o.initials} size={20} />}
-              {o.icon && !o.initials && <span style={{ display: 'flex', flexShrink: 0 }}>{o.icon}</span>}
-              <span style={{ flex: 1 }}>{o.label}</span>
-              {value === o.value && <Check size={13} style={{ color: 'var(--color-primary-text)', flexShrink: 0 }} />}
-            </button>
-          ))}
-        </div>,
-        document.body,
+        {/* Filter box — autofocused so typing narrows immediately, Escape-safe
+            (the outside-click/Escape handling above owns closing). */}
+        <div style={{ padding: 6, borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, background: 'var(--surface)' }}>
+          <input autoFocus value={query} onChange={e => setQuery(e.target.value)}
+            aria-label={t('search')} placeholder={t('search')}
+            style={{ width: '100%', boxSizing: 'border-box', padding: '5px 8px', fontSize: 12, borderRadius: 6,
+              border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', outline: 'none' }} />
+        </div>
+        {opts.length === 0 && <div style={{ padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>{placeholder ?? '—'}</div>}
+        {opts.length > 0 && shown.length === 0 && (
+          <div style={{ padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>{t('noResults')}</div>
+        )}
+        {shown.map(o => (
+          <button key={o.value} type="button" onClick={() => { if (o.disabled) return; onChange(o.value); setOpen(false) }}
+            aria-current={value === o.value} disabled={o.disabled} aria-disabled={o.disabled || undefined}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+              padding: '8px 12px', textAlign: 'left', fontSize: 12,
+              cursor: o.disabled ? 'default' : 'pointer', border: 'none',
+              background: value === o.value ? 'var(--color-primary-bg)' : 'none',
+              color: o.disabled ? 'var(--text-muted)' : 'var(--text)' }}>
+            {o.initials && <Avatar initials={o.initials} size={20} />}
+            {o.icon && !o.initials && <span style={{ display: 'flex', flexShrink: 0 }}>{o.icon}</span>}
+            <span style={{ flex: 1 }}>{o.label}</span>
+            {value === o.value && <Check size={13} style={{ color: 'var(--color-primary-text)', flexShrink: 0 }} />}
+          </button>
+        ))}
+      </DropdownPopover>
       )}
     </div>
   )

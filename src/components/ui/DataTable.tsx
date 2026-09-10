@@ -302,6 +302,26 @@ export default function DataTable<Row>({
   const paddingTop    = virtualItems.length ? virtualItems[0].start : 0
   const paddingBottom = virtualItems.length ? rowVirtualizer.getTotalSize() - virtualItems[virtualItems.length - 1].end : 0
 
+  // Shared TableRow render for the virtualized and plain body below — identical
+  // in both, except the virtualization props (virtualIndex/measureElement),
+  // added only by the virtualized branch; TableRow already treats them as
+  // optional (undefined = "not virtualized"), so spreading `undefined` here
+  // renders exactly like omitting them.
+  const renderRow = (row: Row, virtualExtra?: { virtualIndex: number; measureElement: (el: Element | null) => void }) => {
+    const id = getRowId(row)
+    return (
+      <TableRow key={id} row={row} columns={columns} rowId={id}
+        isSelected={selectedId != null && id === selectedId}
+        isChecked={!!(selectable && selectedIds?.has(id))}
+        selectable={selectable} stickyOffsets={stickyOffsets}
+        onRowClick={onRowClick ? stableRowClick : undefined} onToggleRow={stableToggleRow}
+        {...virtualExtra}
+        selectRowLabel={selectRowLabel} renderExpanded={renderExpanded}
+        isExpanded={expandedIds.has(id)} onToggleExpand={stableToggleExpand}
+        expandLabel={expandLabel} totalCols={totalCols} />
+    )
+  }
+
   return (
     <table aria-busy={loading} style={{ width: 'max-content', minWidth: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
       {/* Screen-reader-only loading announcement — the skeleton rows below carry no
@@ -317,37 +337,11 @@ export default function DataTable<Row>({
         ) : virtualize ? (
           <>
             {paddingTop > 0 && <tr style={{ height: paddingTop }}><td colSpan={totalCols} style={{ padding: 0, border: 'none' }} /></tr>}
-            {virtualItems.map(vi => {
-              const row = sortedRows[vi.index]
-              const id  = getRowId(row)
-              return (
-                <TableRow key={id} row={row} columns={columns} rowId={id}
-                  isSelected={selectedId != null && id === selectedId}
-                  isChecked={!!(selectable && selectedIds?.has(id))}
-                  selectable={selectable} stickyOffsets={stickyOffsets}
-                  onRowClick={onRowClick ? stableRowClick : undefined} onToggleRow={stableToggleRow}
-                  virtualIndex={vi.index} measureElement={rowVirtualizer.measureElement}
-                  selectRowLabel={selectRowLabel} renderExpanded={renderExpanded}
-                  isExpanded={expandedIds.has(id)} onToggleExpand={stableToggleExpand}
-                  expandLabel={expandLabel} totalCols={totalCols} />
-              )
-            })}
+            {virtualItems.map(vi => renderRow(sortedRows[vi.index], { virtualIndex: vi.index, measureElement: rowVirtualizer.measureElement }))}
             {paddingBottom > 0 && <tr style={{ height: paddingBottom }}><td colSpan={totalCols} style={{ padding: 0, border: 'none' }} /></tr>}
           </>
         ) : (
-          sortedRows.map(row => {
-            const id = getRowId(row)
-            return (
-              <TableRow key={id} row={row} columns={columns} rowId={id}
-                isSelected={selectedId != null && id === selectedId}
-                isChecked={!!(selectable && selectedIds?.has(id))}
-                selectable={selectable} stickyOffsets={stickyOffsets}
-                onRowClick={onRowClick ? stableRowClick : undefined} onToggleRow={stableToggleRow}
-                selectRowLabel={selectRowLabel} renderExpanded={renderExpanded}
-                isExpanded={expandedIds.has(id)} onToggleExpand={stableToggleExpand}
-                expandLabel={expandLabel} totalCols={totalCols} />
-            )
-          })
+          sortedRows.map(row => renderRow(row))
         )}
         {!loading && sortedRows.length === 0 && (
           <tr>

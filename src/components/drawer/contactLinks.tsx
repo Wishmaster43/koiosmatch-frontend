@@ -27,6 +27,28 @@ const hover = (to: string) => ({
 // The empty state every drawer field uses.
 const dash = () => <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>
 
+/**
+ * Shared "value + shortcut icon" span for a link that opens in a NEW TAB
+ * (website/KvK/VAT/LinkedIn) — only the href, display text, hover colour and
+ * icon genuinely differ between them; `emailValue`/`phoneValue` stay local
+ * (mailto:/tel: links carry no target/rel, and phoneValue's icon anchor can
+ * point at a DIFFERENT href than the main link — a real shape difference, not
+ * carried by this prop set).
+ */
+function ExternalLinkSpan({ href, displayText, openLabel, hoverColor, icon }: {
+  href: string; displayText: string; openLabel: string; hoverColor: string; icon: ReactNode
+}): ReactNode {
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+      <a href={href} target="_blank" rel="noopener noreferrer" style={linkStyle}>{displayText}</a>
+      <a href={href} target="_blank" rel="noopener noreferrer" title={openLabel} aria-label={openLabel}
+        style={iconStyle} {...hover(hoverColor)}>
+        {icon}
+      </a>
+    </span>
+  )
+}
+
 /** Mailto link + a mail shortcut icon. `sendLabel` is the already-translated tooltip. */
 export function emailValue(v: unknown, sendLabel: string): ReactNode {
   const value = typeof v === 'string' ? v.trim() : ''
@@ -76,15 +98,7 @@ export function websiteValue(v: unknown, openLabel: string): ReactNode {
   const value = typeof v === 'string' ? v.trim() : ''
   if (!value) return dash()
   const href = /^https?:\/\//i.test(value) ? value : `https://${value}`
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-      <a href={href} target="_blank" rel="noopener noreferrer" style={linkStyle}>{value}</a>
-      <a href={href} target="_blank" rel="noopener noreferrer" title={openLabel} aria-label={openLabel}
-        style={iconStyle} {...hover('var(--color-info)')}>
-        <ExternalLink size={13} />
-      </a>
-    </span>
-  )
+  return <ExternalLinkSpan href={href} displayText={value} openLabel={openLabel} hoverColor="var(--color-info)" icon={<ExternalLink size={13} />} />
 }
 
 /**
@@ -98,15 +112,7 @@ export function kvkValue(v: unknown, openLabel: string): ReactNode {
   const digits = value.replace(/\D/g, '')
   if (!digits) return <span style={{ fontSize: 12, color: 'var(--text)' }}>{value}</span>
   const href = `https://www.kvk.nl/zoeken/?handelsnaam=${encodeURIComponent(digits)}`
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-      <a href={href} target="_blank" rel="noopener noreferrer" style={linkStyle}>{value}</a>
-      <a href={href} target="_blank" rel="noopener noreferrer" title={openLabel} aria-label={openLabel}
-        style={iconStyle} {...hover('var(--color-info)')}>
-        <ExternalLink size={13} />
-      </a>
-    </span>
-  )
+  return <ExternalLinkSpan href={href} displayText={value} openLabel={openLabel} hoverColor="var(--color-info)" icon={<ExternalLink size={13} />} />
 }
 
 /**
@@ -120,15 +126,7 @@ export function vatValue(v: unknown, openLabel: string): ReactNode {
   const value = typeof v === 'string' ? v.trim() : ''
   if (!value) return dash()
   const href = 'https://ec.europa.eu/taxation_customs/vies/#/vat-validation'
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-      <a href={href} target="_blank" rel="noopener noreferrer" style={linkStyle}>{value}</a>
-      <a href={href} target="_blank" rel="noopener noreferrer" title={openLabel} aria-label={openLabel}
-        style={iconStyle} {...hover('var(--color-info)')}>
-        <ExternalLink size={13} />
-      </a>
-    </span>
-  )
+  return <ExternalLinkSpan href={href} displayText={value} openLabel={openLabel} hoverColor="var(--color-info)" icon={<ExternalLink size={13} />} />
 }
 
 // LinkedIn's official brand blue — not a themeable UI colour, so it is exempt from
@@ -161,15 +159,7 @@ export function linkedinValue(v: unknown, openLabel: string): ReactNode {
   const slug = typeof v === 'string' ? v.trim() : ''
   if (!slug) return dash()
   const href = `https://www.linkedin.com/in/${slug}`
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-      <a href={href} target="_blank" rel="noopener noreferrer" style={linkStyle}>{slug}</a>
-      <a href={href} target="_blank" rel="noopener noreferrer" title={openLabel} aria-label={openLabel}
-        style={iconStyle} {...hover(LINKEDIN_BLUE)}>
-        <LinkedinMark size={13} />
-      </a>
-    </span>
-  )
+  return <ExternalLinkSpan href={href} displayText={slug} openLabel={openLabel} hoverColor={LINKEDIN_BLUE} icon={<LinkedinMark size={13} />} />
 }
 
 /**
