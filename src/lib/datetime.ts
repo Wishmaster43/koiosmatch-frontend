@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { LOCALE_BY_LANG } from '../i18n'
 // Re-exported so existing importers keep working; it lives in localDate because
 // it needs no locale and this module's i18n import has an initialising side effect.
-export { toLocalIsoDate, humanizeIsoDates } from './localDate'
+export { toLocalIsoDate, humanizeIsoDates, daysSince } from './localDate'
 
 type DateInput = string | number | Date | null | undefined
 
@@ -130,17 +130,6 @@ export function daysUntilBirthday(dob: DateInput, now: Date = new Date()): numbe
 
 type RelativeAgeUnit = 'days' | 'weeks' | 'months' | 'years'
 
-// PDF-VACATURES point 4 (Danny 14-08): the age column shows a plain day count
-// (no unit letter, no week/month/year bucketing) — whole days since `value`,
-// or null for a missing/unparseable/future date. Pure + `now`-injectable.
-export function daysSince(value: DateInput, now: Date = new Date()): number | null {
-  if (!value) return null
-  const d = new Date(value)
-  if (isNaN(d.getTime())) return null
-  const diffMs = now.getTime() - d.getTime()
-  if (diffMs < 0) return null
-  return Math.floor(diffMs / 86400000)
-}
 
 // V2 (vacatures-tabel-cluster): compact relative age (days → weeks → months →
 // years), e.g. for "how old is this vacancy" columns. Pure + `now`-injectable

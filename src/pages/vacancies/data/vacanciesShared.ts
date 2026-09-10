@@ -4,6 +4,7 @@
  * used when saving header/picker edits.
  */
 import type { Dispatch, SetStateAction } from 'react'
+import { mapAddressPatch } from '@/lib/mapAddressPatch'
 
 // Set exactly one value in a multi-select, or clear when it's already the only one.
 export const toggleOneValue = (set: Dispatch<SetStateAction<string[]>>, value: string) =>
@@ -108,18 +109,14 @@ export const buildVacancyPatch = (patch: Record<string, unknown>): Record<string
   if ('educationValue'  in patch) body.education          = patch.educationValue
   if ('industry'        in patch) body.industry           = patch.industry
   if ('category'        in patch) body.category           = patch.category
-  if ('street'          in patch) body.street             = patch.street
-  if ('houseNumber'     in patch) body.house_number       = patch.houseNumber
-  if ('houseNumberSuffix' in patch) body.house_number_suffix = patch.houseNumberSuffix
-  if ('addressLine2'    in patch) body.address_line_2     = patch.addressLine2
-  if ('postalCode'      in patch) body.postcode           = patch.postalCode
-  if ('city'            in patch) body.city               = patch.city
-  if ('province'        in patch) body.province           = patch.province
-  // VAC-COUNTRY-1: mirrors the province convention above — plain field name, the
-  // backend maps it onto location_country (VacancyWriter). LIVE since CMBE shipped
-  // VAC-COUNTRY-WRITE-1 (22-07): the request rule + writer mapping + detail emit
-  // all exist, so this persists for real now (audit 22-07: comment was stale).
-  if ('country'         in patch) body.country            = patch.country
+  // Address fields map to snake_case API keys (DRY round 10, MISC — shared with
+  // candidatesShared.ts via mapAddressPatch). VAC-COUNTRY-1: mirrors the province
+  // convention above — plain field name, the backend maps it onto location_country
+  // (VacancyWriter). LIVE since CMBE shipped VAC-COUNTRY-WRITE-1 (22-07): the
+  // request rule + writer mapping + detail emit all exist, so this persists for
+  // real now (audit 22-07: comment was stale). Vacancies never clear country on
+  // empty (clearCountryOnEmpty: false) — unlike candidates' COUNTRY-1.
+  mapAddressPatch(patch, body, { clearCountryOnEmpty: false })
   if ('location'        in patch) body.location           = patch.location
   if ('experienceMin'   in patch) body.experience_min_years = patch.experienceMin
   if ('experienceMax'   in patch) body.experience_max_years = patch.experienceMax

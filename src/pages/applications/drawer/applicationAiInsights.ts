@@ -3,18 +3,13 @@
 // below for the full reasoning and what deliberately moved to useApplicationAdvice.
 import type { ApplicationDetail } from '@/types/application'
 import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
+// Shared day count from lib/localDate (side-effect-free; the datetime module would
+// drag the i18n init into this pure builder). `futureAsZero` keeps the clamp this
+// builder always had: a future `created` reads as 0 days, never as unknown.
+import { daysSince } from '@/lib/localDate'
 
 // A bound-namespace translate function (the caller already resolved the namespace).
 type Tx = (key: string, opts?: Record<string, unknown>) => string
-
-// Whole days between an ISO date and now; null when the date is missing/unparseable
-// so a bad or absent `created` never leaks into the copy as NaN.
-function daysSince(iso: string | undefined, now: Date = new Date()): number | null {
-  if (!iso) return null
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return null
-  return Math.max(0, Math.floor((now.getTime() - d.getTime()) / 86400000))
-}
 
 // A funnel is "done" once it lands in matched/rejected — staleness only applies
 // while it is still moving (bucketOfPhase in applicationsShared.ts).
@@ -39,7 +34,7 @@ const STALE_AFTER_DAYS = 14
 export function buildApplicationAdviceInsights(a: ApplicationDetail, t: Tx, now: Date = new Date()): KoiosAdviceInsight[] {
   const insights: KoiosAdviceInsight[] = []
 
-  const days = daysSince(a.created, now)
+  const days = daysSince(a.created, now, true)
   const phase = a.phaseLabel || a.phaseKey || '—'
   const stale = !isTerminalBucket(a.bucket) && days !== null && days > STALE_AFTER_DAYS
 

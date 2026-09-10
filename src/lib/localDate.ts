@@ -99,3 +99,20 @@ export function formatMonthName(d: Date, locale: string, variant: 'long' | 'shor
 export function formatWeekday(d: Date, locale: string): string {
   return d.toLocaleDateString(locale, { weekday: 'short' })
 }
+
+type DateInput = string | number | Date | null | undefined
+
+// PDF-VACATURES point 4 (Danny 14-08): whole days since `value` (no unit letter, no
+// week/month/year bucketing); null for a missing or unparseable date. A FUTURE date
+// is null by default (the age column shows nothing) or 0 when the caller asks
+// (`futureAsZero`: the AI-insight builders always clamped, "0 dagen open"). Pure,
+// `now`-injectable, and in THIS module so importing it never drags the i18n init
+// along (DRY round 10, MISC — the datetime import broke four suites).
+export function daysSince(value: DateInput, now: Date = new Date(), futureAsZero = false): number | null {
+  if (!value) return null
+  const d = new Date(value)
+  if (isNaN(d.getTime())) return null
+  const diffMs = now.getTime() - d.getTime()
+  if (diffMs < 0) return futureAsZero ? 0 : null
+  return Math.floor(diffMs / 86400000)
+}

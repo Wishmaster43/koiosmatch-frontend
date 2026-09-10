@@ -11,25 +11,18 @@
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
  */
-import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from '@/lib/useCachedLookup'
 import type { LookupOption } from '@/types/common'
-import { unwrapList } from '@/lib/api'
-import { toLookupOption } from '@/lib/lookupOption'
+// mapLookupResponse lives in lookupUtils.ts (DRY round 10, MISC — adopted next
+// to lookupNames/normalizeOptions, its natural home).
+import { mapLookupResponse } from '@/lib/lookupUtils'
 
 // No seed — see the module doc comment above for why this hook is the exception.
 const NO_STOP_REASONS: LookupOption[] = []
 
-// null = nothing usable in this response — useCachedLookup keeps the empty
-// fallback and retries on the next mount (mirrors every other lookup hook).
-const mapMatchStopReasons = (res: AxiosResponse): LookupOption[] | null => {
-  const rows = (unwrapList(res).rows) as Record<string, unknown>[]
-  return Array.isArray(rows) && rows.length ? rows.map(r => toLookupOption(r)) : null
-}
-
 // The tenant's match termination reasons — no seed fallback on purpose (see file
 // doc): an empty result must read as "not configured yet", never faked options.
 export function useMatchStopReasons() {
-  const { data: reasons, loading } = useCachedLookup('/match-stop-reasons?active=1', mapMatchStopReasons, NO_STOP_REASONS)
+  const { data: reasons, loading } = useCachedLookup('/match-stop-reasons?active=1', mapLookupResponse, NO_STOP_REASONS)
   return { reasons, loading }
 }

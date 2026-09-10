@@ -32,6 +32,19 @@ describe('buildCandidatePatch · addressLine2', () => {
   })
 })
 
+// COUNTRY-1: only `country` clears on an empty string; `postalCode` (and every
+// other address field) passes through verbatim, empty string included — locks
+// the flag mapAddressPatch(patch, body, { clearCountryOnEmpty: true }) is called
+// with here, so flipping it silently would break this test (DRY round 10, MISC).
+describe('buildCandidatePatch · address (COUNTRY-1)', () => {
+  it('clears country to null on an empty string', () => {
+    expect(buildCandidatePatch({ country: '' })).toEqual({ country: null })
+  })
+  it('leaves postalCode as sent, even an empty string', () => {
+    expect(buildCandidatePatch({ postalCode: '' })).toEqual({ postcode: '' })
+  })
+})
+
 // KEY-ADOPTION: stable lookup keys for nationality, source, and blacklist_reason.
 describe('buildCandidatePatch · KEY-ADOPTION', () => {
   it('includes nationality_key alongside the name', () => {

@@ -3,19 +3,17 @@
 // buildVacancyAdviceInsights below for the full field list and reasoning.
 import type { VacancyDetail } from '@/types/vacancy'
 import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
+// Shared day count from lib/localDate (side-effect-free; the datetime module would
+// drag the i18n init into this pure builder). `futureAsZero` keeps the clamp this
+// builder always had: a future `created` reads as 0 days, never as unknown.
+import { daysSince } from '@/lib/localDate'
 
 // A bound-namespace translate function (the caller already resolved the namespace).
 type Tx = (key: string, opts?: Record<string, unknown>) => string
 
-// Whole days between an ISO date and now; null when the date is missing/unparseable
-// so a bad or absent `created` never leaks into the copy as NaN. Exported (V25):
-// StatisticsTab's "days open" tile reuses this exact calculation — single source.
-export function daysSince(iso: string | undefined, now: Date = new Date()): number | null {
-  if (!iso) return null
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return null
-  return Math.max(0, Math.floor((now.getTime() - d.getTime()) / 86400000))
-}
+// Export daysSince so StatisticsTab's "days open" tile can reuse it (not a lane
+// file — Rule E leaves the forward in place rather than editing it directly).
+export { daysSince }
 
 /**
  * buildVacancyAdviceInsights — Koios AI insights for the vacancy drawer:
@@ -35,7 +33,7 @@ export function buildVacancyAdviceInsights(v: VacancyDetail, t: Tx, now: Date = 
   ]
   const filledPct = Math.round((coreFields.filter(Boolean).length / coreFields.length) * 100)
 
-  const days = daysSince(v.created, now)
+  const days = daysSince(v.created, now, true)
   const appsCount = v.applicationsCount ?? 0
 
   return [

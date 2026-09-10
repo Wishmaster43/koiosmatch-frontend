@@ -13,6 +13,13 @@ const base = (over: Partial<ApplicationDetail> = {}) => ({
 } as unknown as ApplicationDetail)
 
 describe('buildApplicationAdviceInsights', () => {
+  it('clamps a future created date to 0 days instead of reporting the progress as unknown', () => {
+    const now = new Date('2026-07-14T00:00:00Z')
+    const a = base({ created: '2026-07-20T00:00:00Z', phaseLabel: 'Voorgesteld' })
+    const [progress] = buildApplicationAdviceInsights(a, t, now)
+    expect(progress.text).toBe('ai.progressOk|{"days":0,"phase":"Voorgesteld"}')
+  })
+
   it('flags a stale non-terminal application past 14 days', () => {
     const now = new Date('2026-07-14T00:00:00Z')
     const a = base({ created: '2026-06-01T00:00:00Z', phaseLabel: 'Voorgesteld' })

@@ -15,6 +15,13 @@ const base = (over: Partial<VacancyDetail> = {}) => ({
 } as unknown as VacancyDetail)
 
 describe('buildVacancyAdviceInsights', () => {
+  it('clamps a future created date to 0 days open instead of reporting the flow as unknown', () => {
+    const now = new Date('2026-07-14T00:00:00Z')
+    const v = base({ created: '2026-07-20T00:00:00Z', applicationsCount: 2 })
+    const [, flow] = buildVacancyAdviceInsights(v, t, now)
+    expect(flow.text).toBe('ai.flowOpen|{"days":0,"count":2}')
+  })
+
   it('reports a low completeness % when every measured field is empty', () => {
     const [completeness] = buildVacancyAdviceInsights(base(), t)
     expect(completeness.text).toBe('ai.completePartial|{"pct":0}')

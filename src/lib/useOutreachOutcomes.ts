@@ -11,12 +11,12 @@
  */
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { translateSeedList } from './lookupSeedI18n'
-import { toLookupOption } from './lookupOption'
+// mapLookupResponse lives in lookupUtils.ts (DRY round 10, MISC — adopted next
+// to lookupNames/normalizeOptions, its natural home).
+import { mapLookupResponse } from './lookupUtils'
 import type { LookupOption } from '@/types/common'
-import { unwrapList } from '@/lib/api'
 
 const DEFAULT_OUTREACH_OUTCOMES: LookupOption[] = [
   // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
@@ -28,17 +28,11 @@ const DEFAULT_OUTREACH_OUTCOMES: LookupOption[] = [
   { value: 'interested',     label: 'Interesse',      color: 'var(--color-success)' },
 ]
 
-// null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
-const mapOutreachOutcomes = (res: AxiosResponse): LookupOption[] | null => {
-  const rows = (unwrapList(res).rows) as Record<string, unknown>[]
-  return Array.isArray(rows) && rows.length ? rows.map(r => toLookupOption(r)) : null
-}
-
 // The outreach-outcome tenant lookup, translating seeded defaults into the user language while a tenant's own value stays exactly as typed.
 export function useOutreachOutcomes() {
   const { t } = useTranslation('common')
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
-  const { data: rawOutcomes } = useCachedLookup('/outreach-outcomes?active=1', mapOutreachOutcomes, DEFAULT_OUTREACH_OUTCOMES)
+  const { data: rawOutcomes } = useCachedLookup('/outreach-outcomes?active=1', mapLookupResponse, DEFAULT_OUTREACH_OUTCOMES)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const outcomes = useMemo(() => translateSeedList(t, 'outcomes', rawOutcomes), [rawOutcomes, t])
 

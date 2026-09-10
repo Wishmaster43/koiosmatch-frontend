@@ -4,6 +4,7 @@
  * the UI-patch → API-body mapping used when saving drawer/header edits.
  */
 import type { Candidate } from '@/types/candidate'
+import { mapAddressPatch } from '@/lib/mapAddressPatch'
 
 // Not contacted > N months: never contacted, or last contact older than the threshold. The
 // threshold is the tenant setting `no_contact_alert_months` (Settings → KPI's → Candidates),
@@ -93,16 +94,11 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
   // Split field (BE 2026-07-20): mobile is validated separately on
   // CandidateProfileRequest (`mobile`), distinct from the landline `phone`.
   if ('mobile'            in patch) body.mobile            = patch.mobile
-  if ('street'            in patch) body.street            = patch.street
-  if ('houseNumber'       in patch) body.house_number      = patch.houseNumber
-  if ('houseNumberSuffix' in patch) body.house_number_suffix = patch.houseNumberSuffix
-  // I18N-1 (BE 5a109b00): optional second address line, own column on the backend.
-  if ('addressLine2'      in patch) body.address_line_2    = patch.addressLine2
-  if ('postalCode'        in patch) body.postcode          = patch.postalCode
-  if ('city'              in patch) body.city              = patch.city
-  if ('province'          in patch) body.province          = patch.province
-  // COUNTRY-1: home-address country (ISO-2 code); '' clears it (never send an empty string).
-  if ('country'           in patch) body.country           = patch.country === '' ? null : patch.country
+  // Address fields map to snake_case API keys (DRY round 10, MISC — shared with
+  // vacanciesShared.ts via mapAddressPatch). I18N-1 (BE 5a109b00): addressLine2
+  // is an optional second address line, its own column on the backend. COUNTRY-1:
+  // country ('' -> null) clears it, never sends an empty string.
+  mapAddressPatch(patch, body, { clearCountryOnEmpty: true })
   if ('linkedin'          in patch) body.linkedin_slug     = patch.linkedin
   // DANNY-6: acquisition source (free-text column, CandidateProfileRequest max:64).
   // Without this mapping the Herkomst card's save silently dropped the field.

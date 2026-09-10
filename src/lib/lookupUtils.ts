@@ -7,6 +7,7 @@
 import type { AxiosResponse } from 'axios'
 import type { LookupOption } from '@/types/common'
 import { unwrapList } from '@/lib/api'
+import { toLookupOption } from '@/lib/lookupOption'
 
 type Named = { name?: string; label?: string; value?: string }
 
@@ -16,6 +17,17 @@ export function lookupNames(res: AxiosResponse): string[] {
   return raw
     .map(x => (typeof x === 'string' ? x : ((x as Named).name ?? (x as Named).label ?? (x as Named).value)))
     .filter((v): v is string => Boolean(v))
+}
+
+// Generic mapper for API responses with a .rows[] of lookup items (DRY round 10,
+// MISC — adopted here from a standalone module, its natural home next to
+// lookupNames/normalizeOptions). Unwraps the response, maps each row to a
+// LookupOption via toLookupOption, and returns null if no usable rows are
+// present (e.g., when an endpoint is not yet implemented). Used by
+// useMatchStopReasons and useOutreachOutcomes.
+export function mapLookupResponse(res: AxiosResponse): LookupOption[] | null {
+  const rows = (unwrapList(res).rows) as Record<string, unknown>[]
+  return Array.isArray(rows) && rows.length ? rows.map(r => toLookupOption(r)) : null
 }
 
 /** Normalise option rows → {id?, value, label, color}; drop inactive, sort by order. */
