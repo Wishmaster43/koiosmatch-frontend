@@ -13,6 +13,7 @@ import GeoSearchShell from '@/components/search/GeoSearchShell'
 // the static import used to pull it into the page chunk via the drawer's tab list (§9).
 const RadiusMap = lazy(() => import('@/components/map/RadiusMap'))
 import GeocodeButton from '@/components/ui/GeocodeButton'
+import GeocodeMissingRow from '@/components/drawer/GeocodeMissingRow'
 import AddApplicationModal from './AddApplicationModal'
 import VacancySearchFilters, { VacancySearchActiveFilters } from './VacancySearchFilters'
 import VacancySearchSummaryCard from './VacancySearchSummaryCard'
@@ -151,11 +152,9 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
   // the radius chrome (GeoSearchShell's own `radius` prop) is omitted entirely too —
   // there is nothing to measure a radius from.
   const mapPane: ReactNode = noLocation ? (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 16, border: '1px dashed var(--border)', borderRadius: 10 }}>
-      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('vacancySearch.noLocation')}</span>
-      <GeocodeButton endpoint={`/candidates/${candidate.id}/geocode`} permission="candidates.update"
-        variant="row" disabled={!candidate.address} />
-    </div>
+    <GeocodeMissingRow message={t('vacancySearch.noLocation')}
+      endpoint={`/candidates/${candidate.id}/geocode`} permission="candidates.update"
+      disabled={!candidate.address} />
   ) : (
     <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
       <RadiusMap points={points} center={center} radiusKm={radiusKm} height="100%"

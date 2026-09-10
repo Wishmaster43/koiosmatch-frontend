@@ -11,16 +11,16 @@
  */
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { RefreshCw, X, ChevronRight } from 'lucide-react'
+import { RefreshCw, ChevronRight } from 'lucide-react'
 import GeoSearchShell from '@/components/search/GeoSearchShell'
 import ScorePill from '@/components/match/ScorePill'
-import MatchScoreBlock from '@/components/match/MatchScoreBlock'
 import { useNumberFormat } from '@/lib/formatters'
 // audit scalability-3: Leaflet only downloads when this tab actually renders the map —
 // the static import used to pull it into the page chunk via the drawer's tab list (§9).
 const RadiusMap = lazy(() => import('@/components/map/RadiusMap'))
-import DrillPager from '@/components/drawer/DrillPager'
 import SearchResultRowFrame from '@/components/drawer/SearchResultRowFrame'
+import SearchSummaryCardFrame from '@/components/drawer/SearchSummaryCardFrame'
+import GeocodeMissingRow from '@/components/drawer/GeocodeMissingRow'
 import EntityLink from '@/components/ui/EntityLink'
 import Button from '@/components/ui/Button'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
@@ -196,10 +196,8 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
   // place instead of blanking the whole tab. The candidate search itself keeps working;
   // the radius chrome (GeoSearchShell's own `radius` prop) is omitted entirely too.
   const mapPane = noLocation ? (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 16, border: '1px dashed var(--border)', borderRadius: 10 }}>
-      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('candidateSearch.noLocation')}</span>
-      <GeocodeButton endpoint={`/vacancies/${vacancy.id}/geocode`} permission="vacancies.update" variant="row" />
-    </div>
+    <GeocodeMissingRow message={t('candidateSearch.noLocation')}
+      endpoint={`/vacancies/${vacancy.id}/geocode`} permission="vacancies.update" />
   ) : (
     <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
       <RadiusMap points={points} center={center} radiusKm={radiusKm} height="100%"
@@ -212,57 +210,34 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
   )
 
   // Compact summary card for the SELECTED candidate — shown before navigating
-  // away, never an immediate jump (mirrors VacancySearchTab's card 1:1).
+  // away, never an immediate jump (mirrors VacancySearchTab's card 1:1). The
+  // shared wrapper/header/score/AI-advice chrome now lives in
+  // SearchSummaryCardFrame (DRY round 11, SEARCHTABS); only the candidate-
+  // specific title/subtitle/chips/action are composed here.
   const summaryCard = selectedRow && (
-    <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: 12, marginBottom: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
-        <div style={{ minWidth: 0 }}>
-          {/* The title IS the link (Match-tab style): orange name opens in-app,
-              trailing icon a new tab. No separate action row. */}
-          <SectionTitle as="div">
-            <EntityLink page="candidates" id={selectedRow.id}>{selectedRow.name}</EntityLink>
-          </SectionTitle>
-          <Caption as="div">{[selectedRow.functionTitle, selectedRow.city].filter(Boolean).join(' · ') || '—'}</Caption>
-        </div>
-        {/* Right column (mirrors VacancySearchTab's own layout): pager+close on top,
-            Solliciteren beneath — the title row keeps its full width so long
-            candidate names never truncate against the primary action. */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <DrillPager index={selectedIndex + 1} total={rows.length} onPrev={goPrev} onNext={goNext} />
-            <Button variant="ghost" iconOnly size="sm" onClick={clearSelection} aria-label={t('common:close')}>
-              <X size={14} />
-            </Button>
-          </div>
-          {/* Solliciteren (point 18): the primary action for this candidate score
-              panel — opens the shared candidate-anchored apply flow with this
-              vacancy prefilled (reuses candidates:vacancySearch.apply's label —
-              same action, one i18n key, no vacancies.json duplicate). */}
-          {canCreateApplication && (
-            <DrawerAddButton onClick={() => setShowApply(true)} label={t('candidates:vacancySearch.apply')} />
-          )}
-        </div>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+    <SearchSummaryCardFrame
+      title={<EntityLink page="candidates" id={selectedRow.id}>{selectedRow.name}</EntityLink>}
+      subtitle={[selectedRow.functionTitle, selectedRow.city].filter(Boolean).join(' · ') || '—'}
+      index={selectedIndex + 1} total={rows.length} onPrev={goPrev} onNext={goNext}
+      onClose={clearSelection} closeLabel={t('common:close')}
+      // Solliciteren (point 18): the primary action for this candidate score
+      // panel — opens the shared candidate-anchored apply flow with this
+      // vacancy prefilled (reuses candidates:vacancySearch.apply's label —
+      // same action, one i18n key, no vacancies.json duplicate).
+      action={canCreateApplication && (
+        <DrawerAddButton onClick={() => setShowApply(true)} label={t('candidates:vacancySearch.apply')} />
+      )}
+      chips={<>
         {/* HUISSTIJL-1: Caption owns the 11/muted identity; Mono only adds the font-family. */}
         {selectedRow.distanceKm != null && (
           <Caption><Mono>{formatDistanceKm(selectedRow.distanceKm)} km</Mono></Caption>
         )}
         <StatusPill label={selectedRow.statusLabel || selectedRow.status} color={selectedRow.statusColor} />
-      </div>
-      {/* Read-only LIVE score — no onSave, so MatchScoreBlock renders without its edit controls. */}
-      {selectedRow.score != null && (
-        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 10 }}>
-          <MatchScoreBlock score={selectedRow.score} criteria={selectedRow.criteria} />
-        </div>
-      )}
-      {selectedRow.aiAdviceReason && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11.5, color: 'var(--text-muted)' }}>
-          <KoiosAiMark size={16} title={t('candidateSearch.aiAdvised')} />
-          <span>{selectedRow.aiAdviceReason}</span>
-        </div>
-      )}
-    </div>
+      </>}
+      score={selectedRow.score} criteria={selectedRow.criteria}
+      aiAdviceReason={selectedRow.aiAdviceReason}
+      aiAdvisedLabel={t('candidateSearch.aiAdvised')}
+    />
   )
 
   // Four explicit states: loading, error (+ retry), empty, success list — delegated to shared component.
