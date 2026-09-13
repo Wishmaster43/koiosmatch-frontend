@@ -32,6 +32,7 @@
       "max": "La meilleure qualité pour le plus difficile. Tarif le plus élevé."
     },
     "saveError": "Le changement de modèle a échoué. Réessayez.",
+    "saved": "Modèle enregistré.",
     "unknownTier": "Modèle inconnu",
     "activeUnknown": "Aucune variante active connue. Choisissez-en une ci-dessous.",
     "tierHint": {

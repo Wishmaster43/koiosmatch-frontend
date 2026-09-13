@@ -25,6 +25,7 @@ import SubTabBar from '@/components/drawer/SubTabBar'
 // KOIOS-DEFAULT-SYNC-1: the floating panel reads the same settings from the
 // shared query cache — invalidate it so its picker follows a new default.
 import { invalidateKoiosSettings } from '@/components/layout/koios/useKoiosSettings'
+import { SETTINGS_MAX_W_WIDE } from '@/pages/settings/components/settingsMetrics'
 
 const notice = { fontSize: 13, color: 'var(--text-muted)' }
 
@@ -52,7 +53,9 @@ export default function KoiosSettings() {
   }, [])
 
   return (
-    <div style={{ maxWidth: 640 }}>
+    // SETTINGS-INCON-B1b: house-wide container (matches the widest settings screen,
+    // CvTemplateSettings) — 640 was cramped for the models/mode/effort/budget cards.
+    <div style={{ maxWidth: SETTINGS_MAX_W_WIDE }}>
       <div className="mb-6">
         <PageTitle>{t('title')}</PageTitle>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('subtitle')}</p>

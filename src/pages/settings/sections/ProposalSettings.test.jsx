@@ -145,6 +145,17 @@ describe('ProposalSettings · template, phase, variant, notice', () => {
     }))
   })
 
+  // SETTINGS-INCON-B1b: the chosen variant reads as chosen via the §4 "aan/gelukt"
+  // success pair (activeFill + activeOnly), same green as the super-admin package picker.
+  it('paints the chosen CV variant in the success pair', () => {
+    mockSettings.mockReturnValue({ application_proposal: JSON.stringify(STORED) })
+    render(<ProposalSettings />)
+    const radios = screen.getAllByRole('radio')
+    expect(radios[0].style.background).toBe('var(--color-success-bg)') // proposal (stored)
+    expect(radios[0].style.border).toBe('1px solid var(--color-success)')
+    expect(radios[1].style.background).toBe('var(--surface)') // full (inactive)
+  })
+
   it('saving the template POSTs the edited subject/body', async () => {
     mockSettings.mockReturnValue({ application_proposal: JSON.stringify(STORED) })
     const user = userEvent.setup()

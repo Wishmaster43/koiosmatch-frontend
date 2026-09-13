@@ -26,6 +26,7 @@ import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { PageTitle, Caption } from '@/components/ui/typography'
 import { useAuth } from '@/context/AuthContext'
 import { setHashParam } from '@/lib/hashParams'
+import { SETTINGS_MAX_W_WIDE } from '@/pages/settings/components/settingsMetrics'
 
 // Pure: read this SPA's hash query string. The app is hash-routed (DashboardLayout
 // boots activePage from window.location.hash, there is no /instellingen path
@@ -218,7 +219,10 @@ export default function EmailSettings({ context = 'klanten' }) {
   ]
 
   return (
-    <div style={{ maxWidth: 940 }}>
+    // SETTINGS-INCON-B1b: house-wide container (matches the widest settings screen,
+    // CvTemplateSettings) so the connection column and the signature column sit side
+    // by side legibly instead of being crushed at 940.
+    <div style={{ maxWidth: SETTINGS_MAX_W_WIDE }}>
       <div className="flex items-center justify-between" style={{ marginBottom: 20, gap: 16 }}>
         <div style={{ minWidth: 0 }}>
           <PageTitle>{t(`email.context.${context}.title`)}</PageTitle>
@@ -272,9 +276,15 @@ export default function EmailSettings({ context = 'klanten' }) {
         {/* Provider choice */}
         <div style={cardStyle}>
           <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 10 }}>{t('email.provider')}</div>
-          {/* Provider choice — shared SegmentedControl option-card radiogroup, one group for the three providers. */}
+          {/* Provider choice — shared SegmentedControl option-card radiogroup, one group
+              for the three providers. SETTINGS-INCON-B1b: the chosen provider reads as
+              chosen via the §4 "aan/gelukt" success pair, same green as the super-admin
+              package picker. */}
           <SegmentedControl
             ariaLabel={t('email.provider')}
+            color="var(--color-success)"
+            activeOnly
+            activeFill="var(--color-success-bg)"
             options={PROVIDERS.map(p => ({ value: p.id, label: p.label, description: p.desc }))}
             value={provider}
             onChange={setProvider}

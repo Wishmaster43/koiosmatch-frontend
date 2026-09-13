@@ -32,6 +32,7 @@
       "max": "Migliore qualità per il lavoro più difficile. Tariffa più alta."
     },
     "saveError": "La modifica del modello non è riuscita. Riprova.",
+    "saved": "Modello salvato.",
     "unknownTier": "Modello sconosciuto",
     "activeUnknown": "Nessun livello attivo noto. Scegline uno qui sotto.",
     "tierHint": {

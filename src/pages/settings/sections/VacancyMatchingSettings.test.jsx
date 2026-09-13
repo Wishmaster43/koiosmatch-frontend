@@ -116,6 +116,20 @@ describe('VacancyMatchingSettings', () => {
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/settings/matching', { approval_mode: 'always' }))
   })
 
+  // SETTINGS-INCON-B1b: the chosen approval mode reads as chosen via the §4
+  // "aan/gelukt" success pair, same green as the super-admin package picker.
+  it('paints the chosen approval mode in the success pair', async () => {
+    mockGets({ matching: { strictness: 'balanced', approval_mode: 'always' } })
+    render(<VacancyMatchingSettings />)
+    await waitFor(() => expect(screen.getByText(st('matching.approval.title'))).toBeInTheDocument())
+
+    const active = screen.getByText(st('matching.approval.always')).closest('[role="radio"]')
+    const inactive = screen.getByText(st('matching.approval.off')).closest('[role="radio"]')
+    expect(active.style.background).toBe('var(--color-success-bg)')
+    expect(active.style.border).toBe('1px solid var(--color-success)')
+    expect(inactive.style.background).toBe('var(--surface)')
+  })
+
   // SMZ-03: the notify keys are read TOP-LEVEL from the flat map — the matching row
   // (a string there) never carried them, so the screen used to show its defaults.
   it('reads the notify mode/role from the top level of GET /settings and shows the role picker in team mode', async () => {

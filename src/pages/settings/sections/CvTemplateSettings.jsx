@@ -20,6 +20,7 @@ import CvHtmlPreview from './cvTemplate/CvHtmlPreview'
 import CvSectionList from './cvTemplate/CvSectionList'
 import Button from '@/components/ui/Button'
 import { Caption } from '@/components/ui/typography'
+import { SETTINGS_MAX_W_WIDE } from '@/pages/settings/components/settingsMetrics'
 
 // Thin composer: colour pickers + section list on the left, live A4 preview on the right (see the module doc above for where each piece lives).
 export default function CvTemplateSettings() {
@@ -80,7 +81,7 @@ export default function CvTemplateSettings() {
   const labelStyle = { fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 5, display: 'block' }
 
   return (
-    <div style={{ padding: '28px 32px', maxWidth: 1220 }}>
+    <div style={{ padding: '28px 32px', maxWidth: SETTINGS_MAX_W_WIDE }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <div>
           <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)', margin: 0 }}>{t('cvTemplate.title')}</h2>

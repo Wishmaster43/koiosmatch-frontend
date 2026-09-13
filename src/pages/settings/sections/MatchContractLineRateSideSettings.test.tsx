@@ -97,3 +97,29 @@ describe('MatchContractLineRateSideSettings · the consequence line sits next to
     expect(screen.getByText(t('matchContractLineRateSide.purchaseDescription'))).toBeInTheDocument()
   })
 })
+
+// SETTINGS-INCON-B1b: the chosen side reads as chosen via the §4 "aan/gelukt" success
+// pair, same green as the super-admin package picker, plus a SaveButton saved-state
+// flash after a real persist — request shape stays exactly the same POST.
+describe('MatchContractLineRateSideSettings · SETTINGS-INCON-B1b success pair + saved flash', () => {
+  it('paints the active side in the success pair', () => {
+    blobRef.current = { match_contract_line_rate_side: 'sale' }
+    render(<MatchContractLineRateSideSettings />)
+    const active = radioFor(t('matchContractLineRateSide.saleLabel'))
+    const inactive = radioFor(t('matchContractLineRateSide.purchaseLabel'))
+    expect(active.style.background).toBe('var(--color-success-bg)')
+    expect(active.style.border).toBe('1px solid var(--color-success)')
+    expect(inactive.style.background).toBe('var(--surface)')
+  })
+
+  it('flashes the shared saved-state after picking, and still POSTs the same body', async () => {
+    blobRef.current = { match_contract_line_rate_side: 'purchase' }
+    const user = userEvent.setup()
+    render(<MatchContractLineRateSideSettings />)
+
+    await user.click(screen.getByText(t('matchContractLineRateSide.saleLabel')))
+
+    await waitFor(() => expect(postMock).toHaveBeenCalledWith('/settings', { match_contract_line_rate_side: 'sale' }))
+    await waitFor(() => expect(screen.getByText(t('common:saved'))).toBeInTheDocument())
+  })
+})

@@ -21,6 +21,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import SegmentedControl from '@/components/ui/SegmentedControl'
+import SaveButton from '@/components/ui/SaveButton'
 import { notifyError } from '@/lib/notify'
 import { useAllSettings, getStringSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { PageTitle } from '@/components/ui/typography'
@@ -43,6 +44,8 @@ export default function MatchContractLineRateSideSettings() {
   const values = useAllSettings()
   const [side, setSide] = useState<Side>(() => resolveSide(getStringSetting(values, KEY, PURCHASE)))
   const [saving, setSaving] = useState(false)
+  // SETTINGS-INCON-B1b: transient saved-state flash (SaveButton, §4 success pair) after a real persist.
+  const [saved, setSaved] = useState(false)
 
   // Stay in sync with the shared /settings cache (e.g. a save made in another tab).
   useEffect(() => { setSide(resolveSide(getStringSetting(values, KEY, PURCHASE))) }, [values])
@@ -56,6 +59,9 @@ export default function MatchContractLineRateSideSettings() {
     setSaving(true)
     try {
       await saveSettingsKeys({ [KEY]: next })
+      // Flash the shared saved-state (SaveButton, §4 success pair) briefly after a real persist.
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
     } catch {
       setSide(prev)
       notifyError(t('matchContractLineRateSide.saveFailed'))
@@ -76,7 +82,16 @@ export default function MatchContractLineRateSideSettings() {
     <div style={{ maxWidth: 640 }}>
       <PageTitle>{t('matchContractLineRateSide.title')}</PageTitle>
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, marginBottom: 14 }}>{t('matchContractLineRateSide.subtitle')}</p>
-      <SegmentedControl ariaLabel={t('matchContractLineRateSide.title')} value={side} onChange={pick} options={options} />
+      {/* SETTINGS-INCON-B1b: the chosen side reads as chosen via the §4 "aan/gelukt"
+          success pair, same green as the super-admin package picker. */}
+      <SegmentedControl ariaLabel={t('matchContractLineRateSide.title')} value={side} onChange={pick} options={options}
+        color="var(--color-success)" activeOnly activeFill="var(--color-success-bg)" />
+      {/* Transient saved-state flash (SaveButton, §4 success pair) after a real persist. */}
+      {saved && (
+        <div role="status" style={{ marginTop: 12 }}>
+          <SaveButton saved disabled />
+        </div>
+      )}
     </div>
   )
 }

@@ -32,6 +32,7 @@
       "max": "Beste Qualität für die schwierigste Arbeit. Höchster Tarif."
     },
     "saveError": "Modellwechsel fehlgeschlagen. Bitte erneut versuchen.",
+    "saved": "Modell gespeichert.",
     "unknownTier": "Unbekanntes Modell",
     "activeUnknown": "Keine aktive Variante bekannt. Wählen Sie unten eine aus.",
     "tierHint": {

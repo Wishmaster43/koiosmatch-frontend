@@ -184,9 +184,15 @@ export default function ProposalSettings() {
       {/* Default CV variant */}
       <div style={cardStyle}>
         <label style={labelStyle}>{t('proposal.defaultVariantLabel')}</label>
-        {/* Replaces bare radio inputs — shared SegmentedControl, identical values/onChange */}
+        {/* SETTINGS-INCON-B1b: the chosen variant reads as chosen via the §4 "aan/gelukt"
+            success pair (activeFill + activeOnly) — same green the super-admin package
+            picker uses, never a re-approximated tint per screen. Save flow unchanged
+            (chooseVariant already persists immediately on pick). */}
         <SegmentedControl
           ariaLabel={t('proposal.defaultVariantLabel')}
+          color="var(--color-success)"
+          activeOnly
+          activeFill="var(--color-success-bg)"
           value={persisted.default_cv_variant}
           onChange={chooseVariant}
           options={[

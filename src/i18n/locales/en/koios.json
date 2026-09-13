@@ -32,6 +32,7 @@
       "max": "Best quality for the hardest work. Highest rate."
     },
     "saveError": "Changing the model failed. Please try again.",
+    "saved": "Model saved.",
     "unknownTier": "Unknown model",
     "activeUnknown": "No active flavour known. Pick one below.",
     "tierHint": {

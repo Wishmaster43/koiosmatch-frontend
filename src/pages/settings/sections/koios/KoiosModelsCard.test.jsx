@@ -193,4 +193,30 @@ describe('KoiosModelsCard', () => {
     await waitFor(() => expect(mockUpdateKoiosModel).toHaveBeenCalledWith('snel'))
     expect(onChanged).toHaveBeenCalledWith('snel')
   })
+
+  // SETTINGS-INCON-B1b: the confirmed active model reads as chosen via the §4
+  // "aan/gelukt" success pair, same green as the super-admin package picker.
+  it('paints the active (confirmed) model in the success pair', () => {
+    render(<KoiosModelsCard models={models} t={t} />)
+    const active = screen.getByRole('radio', { name: /models\.tier\.smart/ })
+    expect(active.style.background).toBe('var(--color-success-bg)')
+    expect(active.style.border).toBe('1px solid var(--color-success)')
+  })
+
+  // An unconfirmed costlier candidate must never be painted as if it already
+  // succeeded — the success pair is suspended while a pick awaits confirmation.
+  it('does not paint an unconfirmed costlier pending pick in the success pair', () => {
+    render(<KoiosModelsCard models={models} t={t} />)
+    fireEvent.click(screen.getByRole('radio', { name: /models\.tier\.max/ }))
+    const pending = screen.getByRole('radio', { name: /models\.tier\.max/ })
+    expect(pending.style.background).not.toBe('var(--color-success-bg)')
+  })
+
+  // SETTINGS-INCON-B1b: a real persist flashes the shared saved-state (SaveButton).
+  it('flashes the saved state after a successful pick', async () => {
+    mockUpdateKoiosModel.mockResolvedValue({})
+    render(<KoiosModelsCard models={models} t={t} />)
+    fireEvent.click(screen.getByRole('radio', { name: /models\.tier\.fast/ })) // cheaper, immediate
+    await waitFor(() => expect(screen.getByText('models.saved')).toBeInTheDocument())
+  })
 })

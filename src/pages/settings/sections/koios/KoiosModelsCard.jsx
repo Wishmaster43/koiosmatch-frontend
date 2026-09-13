@@ -20,12 +20,13 @@
  * only for an id the server didn't list.
  */
 import { useState, useMemo } from 'react'
-import { Zap, Sparkles, Crown } from 'lucide-react'
+import { Zap, Sparkles, Crown, Check } from 'lucide-react'
 import { updateKoiosModel } from './koiosApi'
 import { tierKeyForModel, findModelOption, resolveModelLabel, resolveModelHint } from '@/lib/koiosModelTiers'
 import { useAuth } from '@/context/AuthContext'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import Button from '@/components/ui/Button'
+import SaveButton from '@/components/ui/SaveButton'
 import { SectionTitle, Caption, Mono } from '@/components/ui/typography'
 
 // Frozen empty lists so a missing payload keeps one stable identity (memo deps).
@@ -50,6 +51,9 @@ export default function KoiosModelsCard({ models, t, onChanged }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
   const [pendingPick, setPendingPick] = useState(null)
+  // SETTINGS-INCON-B1b: transient "saved" flash after a successful persist (SaveButton,
+  // §4 success pair) — mirrors the other settings screens' saved-state feedback.
+  const [saved, setSaved] = useState(false)
   // MODEL-IDS PLATFORM-ONLY: only a super admin sees the raw vendor id — Danny's
   // own platform config, never a tenant fact (mirrors the SettingsPage/AppsSettings
   // isSuperAdmin() gate).
@@ -103,6 +107,9 @@ export default function KoiosModelsCard({ models, t, onChanged }) {
     try {
       await updateKoiosModel(model)
       onChanged?.(model)
+      // Flash the shared saved-state (SaveButton, §4 success pair) briefly after a real persist.
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
     } catch {
       setError(t('models.saveError'))
     }
@@ -146,10 +153,28 @@ export default function KoiosModelsCard({ models, t, onChanged }) {
       {activeUnknown && (
         <div role="status" style={{ fontSize: 12, color: 'var(--color-warning-text)', marginBottom: 8 }}>{t('models.activeUnknown')}</div>
       )}
-      <SegmentedControl commitOnFocus={false} options={modelOptions} value={pendingPick ?? active ?? ''} onChange={handleChange} ariaLabel={t('models.title')} />
+      {/* SETTINGS-INCON-B1b: the CONFIRMED active model reads as chosen via the §4
+          "aan/gelukt" success pair — only while nothing is pending confirmation, so an
+          unconfirmed costlier candidate is never painted as if it already succeeded.
+          Two branches (not a spread object) so the colour stays a direct JSX attribute. */}
+      {pendingPick ? (
+        <SegmentedControl commitOnFocus={false} options={modelOptions} value={pendingPick} onChange={handleChange} ariaLabel={t('models.title')} />
+      ) : (
+        <SegmentedControl commitOnFocus={false} options={modelOptions} value={active ?? ''} onChange={handleChange} ariaLabel={t('models.title')}
+          color="var(--color-success)" activeOnly activeFill="var(--color-success-bg)" />
+      )}
 
       {costNote && (
         <Caption style={{ marginTop: 8, display: 'block' }}>{costNote}</Caption>
+      )}
+
+      {/* Transient saved-state flash (SaveButton, §4 success pair) after a real persist. */}
+      {saved && (
+        <div role="status" style={{ marginTop: 8 }}>
+          <SaveButton saved disabled>
+            <Check size={13} /> {t('models.saved')}
+          </SaveButton>
+        </div>
       )}
 
       {pendingPick && (

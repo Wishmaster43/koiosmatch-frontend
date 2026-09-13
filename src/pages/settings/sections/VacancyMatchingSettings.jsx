@@ -28,6 +28,7 @@ import SelectMenu from '@/components/ui/SelectMenu'
 import { PageTitle, SectionTitle, Mono } from '@/components/ui/typography'
 import { useQuery } from '@tanstack/react-query'
 import CatalogSection from './CatalogSection'
+import { SETTINGS_MAX_W_WIDE } from '@/pages/settings/components/settingsMetrics'
 
 // The backend strictness is an enum; the slider is a 3-step index onto it.
 const LEVELS = ['lenient', 'balanced', 'strict']
@@ -145,7 +146,9 @@ export default function VacancyMatchingSettings() {
   const levelPct = Math.round((level / (LEVELS.length - 1)) * 100)
 
   return (
-    <div style={{ maxWidth: 560 }}>
+    // SETTINGS-INCON-B1b: house-wide container (matches the widest settings screen,
+    // CvTemplateSettings) — 560 was the narrowest in the group and cramped the slider/approval/leads blocks.
+    <div style={{ maxWidth: SETTINGS_MAX_W_WIDE }}>
       <div className="flex items-start justify-between" style={{ marginBottom: 16, gap: 16 }}>
         <div style={{ minWidth: 0 }}>
           <PageTitle>{t('matching.title')}</PageTitle>
@@ -179,8 +182,14 @@ export default function VacancyMatchingSettings() {
       <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid var(--border)', opacity: loading || loadError ? 0.5 : 1, pointerEvents: loading || loadError ? 'none' : 'auto' }}>
         <SectionTitle>{t('matching.approval.title')}</SectionTitle>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, marginBottom: 12 }}>{t('matching.approval.subtitle')}</p>
+        {/* SETTINGS-INCON-B1b: the chosen mode reads as chosen via the §4 "aan/gelukt"
+            success pair (activeFill + activeOnly), same green as the super-admin
+            package picker. Nothing else on this screen changes. */}
         <SegmentedControl
           ariaLabel={t('matching.approval.title')}
+          color="var(--color-success)"
+          activeOnly
+          activeFill="var(--color-success-bg)"
           value={approval}
           onChange={setApprovalMode}
           options={MODES.map(({ value, key }) => ({

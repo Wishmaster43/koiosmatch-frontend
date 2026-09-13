@@ -67,6 +67,17 @@ describe('EmailSettings · connection status (DL-10)', () => {
     ).toBeInTheDocument())
   })
 
+  // SETTINGS-INCON-B1b: the chosen provider reads as chosen via the §4 "aan/gelukt"
+  // success pair (activeFill + activeOnly), same green as the super-admin package picker.
+  it('paints the chosen provider in the success pair', async () => {
+    loadSettings.mockResolvedValue({ email_klanten_provider: 'gmail' })
+    mockedGet.mockResolvedValue({ data: { data: { connected: false, provider: 'gmail', address: null } } })
+    renderPanel('klanten')
+    const active = await screen.findByRole('radio', { name: /Gmail/ })
+    expect(active.style.background).toBe('var(--color-success-bg)')
+    expect(active.style.border).toBe('1px solid var(--color-success)')
+  })
+
   it('re-fetches the status after a successful save', async () => {
     loadSettings.mockResolvedValue({ email_klanten_provider: 'manual' })
     mockedGet.mockResolvedValue({ data: { data: { context: 'klanten', connected: false, provider: null, address: null } } })

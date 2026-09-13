@@ -32,6 +32,7 @@
       "max": "Beste kwaliteit voor het moeilijkste werk. Hoogste tarief."
     },
     "saveError": "Model wijzigen is niet gelukt. Probeer het opnieuw.",
+    "saved": "Model opgeslagen.",
     "unknownTier": "Onbekend model",
     "activeUnknown": "Geen actieve smaak bekend. Kies hieronder een smaak.",
     "tierHint": {
