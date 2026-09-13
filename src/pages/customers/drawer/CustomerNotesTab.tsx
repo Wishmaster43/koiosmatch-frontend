@@ -42,8 +42,9 @@
  * customer actually HAS a record at it (no dead-end options, §3).
  */
 import { useState, useEffect, useCallback } from 'react'
-import { tintBg, tintBorder } from '@/lib/tint'
 import type { ComponentType, ReactNode } from 'react'
+import { NoteLinkChip } from '@/components/ui/NoteLinkChip'
+import { withNoteLinkChips } from '../data/mapCustomer'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
 import { isAbortError } from '@/lib/abortError'
@@ -207,22 +208,11 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
   // extension point and is out of scope for this change (owned by a parallel
   // lane) — but its title cell already renders whatever ReactNode it is given
   // (`{n.title ?? who}`), so this stays entirely inside THIS file.
-  const linkChip = (name: string) => (
-    <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: 10, fontWeight: 600,
-      padding: '1px 6px', borderRadius: 99, marginRight: 6,
-      background: tintBg('var(--color-info)'), color: 'var(--color-info)',
-      border: `1px solid ${tintBorder('var(--color-info)')}` }}>
-      {t('notes.linkedTo', { name })}
-    </span>
-  )
   // Notes with a linked location/department/contact show the chip where the
-  // (never-persisted) title would sit — department wins over location (the
-  // deepest level, mirrors the backend's own CustomerNote::levelContext()
-  // priority), then the independent contact link; every other note is untouched.
-  const notesWithChip: Array<Omit<CustomerNote, 'title'> & { title: ReactNode }> = notes.map(n => {
-    const linkedName = n.departmentName || n.locationName || n.contactName
-    return linkedName ? { ...n, title: linkChip(linkedName) } : n
-  })
+  // (never-persisted) title would sit — shared mapper (department > location >
+  // contact priority); every other note is untouched.
+  const notesWithChip = withNoteLinkChips(notes, (name) => <NoteLinkChip>{t('notes.linkedTo', { name })}</NoteLinkChip>) as
+    Array<Omit<CustomerNote, 'title'> & { title: ReactNode }>
 
   // K15NOTES: NotesTab hands back the note's INDEX in the array it was given
   // (notesWithChip above) — resolve that to the note's own id before calling up,

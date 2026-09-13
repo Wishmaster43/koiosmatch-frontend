@@ -10,6 +10,10 @@
  */
 import { actionItemsWire } from '@/components/drawer/tabs/notes/notesTabTypes'
 import type { NoteActionItemWire } from '@/components/drawer/tabs/NotesTab'
+// DRY: this import block matches useTaskDrawerActions' own — both are single-record
+// drawer hooks pulling the same standard toolkit (api/notify/extractApiError/mergePatch);
+// the two hooks' actual bodies (customer CRUD + notes vs task CRUD + polymorphic links)
+// share no logic to extract.
 import { useState, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'

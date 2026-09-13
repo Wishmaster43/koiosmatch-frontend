@@ -8,6 +8,7 @@
  * every row carries the CV badge and every value is shown exactly as read — no
  * reformatting that would launder a misread into something that looks parsed.
  */
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import SoftChip from '@/components/ui/SoftChip'
 import { Caption } from '@/components/ui/typography'
@@ -19,6 +20,21 @@ const listTitle = { fontSize: 11, fontWeight: 600 as const, color: 'var(--text)'
 interface CvProposalRepeatablesProps {
   experiences: CvProposalExperience[]
   educations: CvProposalEducation[]
+}
+
+// One titled repeatable list (experiences or educations) — the SAME title/ul/li/
+// badge shell for both, only the per-row content differs (renderRow).
+function RepeatableList<T>({ title, rows, renderKey, renderRow }: {
+  title: string; rows: T[]; renderKey: (row: T, index: number) => string; renderRow: (row: T) => ReactNode
+}) {
+  return (
+    <div>
+      <div style={listTitle}>{title}</div>
+      <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {rows.map((row, index) => <li key={renderKey(row, index)} style={rowStyle}>{renderRow(row)}</li>)}
+      </ul>
+    </div>
+  )
 }
 
 // See the file's top doc above; renders nothing when the CV proposed no work-history/education rows.
@@ -35,36 +51,30 @@ export default function CvProposalRepeatables({ experiences, educations }: CvPro
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {experiences.length > 0 && (
-        <div>
-          <div style={listTitle}>{t('cvProposal.experiences.title', { count: experiences.length })}</div>
-          <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {experiences.map((row, index) => (
-              <li key={`${row.company}-${index}`} style={rowStyle}>
-                <span style={{ color: 'var(--text)', fontWeight: 500 }}>{row.company}</span>
-                {row.position && <Caption>{row.position}</Caption>}
-                {row.location && <Caption>{row.location}</Caption>}
-                {period(row.startDate, row.endDate) && <Caption>{period(row.startDate, row.endDate)}</Caption>}
-                <SoftChip label={t('cvProposal.badge')} color="var(--color-primary)" title={t('cvProposal.badgeTitle')} />
-              </li>
-            ))}
-          </ul>
-        </div>
+        <RepeatableList title={t('cvProposal.experiences.title', { count: experiences.length })}
+          rows={experiences} renderKey={(row, index) => `${row.company}-${index}`}
+          renderRow={row => (
+            <>
+              <span style={{ color: 'var(--text)', fontWeight: 500 }}>{row.company}</span>
+              {row.position && <Caption>{row.position}</Caption>}
+              {row.location && <Caption>{row.location}</Caption>}
+              {period(row.startDate, row.endDate) && <Caption>{period(row.startDate, row.endDate)}</Caption>}
+              <SoftChip label={t('cvProposal.badge')} color="var(--color-primary)" title={t('cvProposal.badgeTitle')} />
+            </>
+          )} />
       )}
 
       {educations.length > 0 && (
-        <div>
-          <div style={listTitle}>{t('cvProposal.educations.title', { count: educations.length })}</div>
-          <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {educations.map((row, index) => (
-              <li key={`${row.degree}-${index}`} style={rowStyle}>
-                <span style={{ color: 'var(--text)', fontWeight: 500 }}>{row.degree}</span>
-                {row.school && <Caption>{row.school}</Caption>}
-                {row.issueDate && <Caption>{row.issueDate}</Caption>}
-                <SoftChip label={t('cvProposal.badge')} color="var(--color-primary)" title={t('cvProposal.badgeTitle')} />
-              </li>
-            ))}
-          </ul>
-        </div>
+        <RepeatableList title={t('cvProposal.educations.title', { count: educations.length })}
+          rows={educations} renderKey={(row, index) => `${row.degree}-${index}`}
+          renderRow={row => (
+            <>
+              <span style={{ color: 'var(--text)', fontWeight: 500 }}>{row.degree}</span>
+              {row.school && <Caption>{row.school}</Caption>}
+              {row.issueDate && <Caption>{row.issueDate}</Caption>}
+              <SoftChip label={t('cvProposal.badge')} color="var(--color-primary)" title={t('cvProposal.badgeTitle')} />
+            </>
+          )} />
       )}
     </div>
   )

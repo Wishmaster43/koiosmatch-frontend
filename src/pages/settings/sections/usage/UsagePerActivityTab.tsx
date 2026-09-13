@@ -15,6 +15,7 @@ import api, { unwrap } from '@/lib/api'
 import { useNumberFormat } from '@/lib/formatters'
 import { SectionTitle, Mono } from '@/components/ui/typography'
 import { card, sub, notice } from '../usageCardStyles'
+import { usagePhaseOnError } from './dailyUsageTypes'
 import type { KoiosUsageResponse } from '@/types/billingUsage'
 import type { BillingUsageWorkflow } from '@/types/billingUsage'
 import DataTable from '@/components/ui/DataTable'
@@ -55,10 +56,7 @@ export default function UsagePerActivityTab({ overviewPeriod, workflow, workflow
         setAi(data)
         setPhase((data?.totals?.calls ?? 0) > 0 ? 'ready' : 'empty')
       })
-      .catch((err) => {
-        if (ctrl.signal.aborted) return
-        setPhase(err?.response?.status === 403 ? 'unavailable' : 'error')
-      })
+      .catch((err) => usagePhaseOnError(err, ctrl.signal.aborted, setPhase))
     return () => ctrl.abort()
   }, [aiPeriod])
 

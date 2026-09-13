@@ -139,6 +139,11 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
 
             {error && <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('apiKeys.createError')}</div>}
 
+            {/* DRY: mirrors WebhookCreate's own inline error+button footer — both
+                predate the shared ModalFooter atom and sit INSIDE the scrollable
+                body (not a sticky bottom bar), so adopting ModalFooter here would
+                change the render (border-top, padding, background), out of scope
+                for a same-behaviour DRY pass. */}
             <div style={{ display: 'flex', gap: 10 }}>
               <Button variant="primary" onClick={submit} disabled={saving || !form.friendly_name.trim()}>
                 {saving ? t('apiKeys.creating') : t('apiKeys.create')}

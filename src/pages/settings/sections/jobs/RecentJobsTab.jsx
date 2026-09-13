@@ -8,14 +8,14 @@
  */
 import { useEffect, useMemo, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { RefreshCw, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
 import api from '@/lib/api'
 import StatusPill from '@/components/ui/StatusPill'
 import { formatDuration } from '@/components/reports/runFormat'
 import { BTN_H } from '@/config/buttonMetrics'
 import SearchSelect from '@/components/ui/SearchSelect'
-import Button from '@/components/ui/Button'
 import { Caption, Mono } from '@/components/ui/typography'
+import { JobsRefreshButton, JobsErrorNotice } from './jobsShared'
 // House numeric shape (DATUM-1): digits only, so no locale is needed here.
 import { hhmmss } from '@/lib/localDate'
 import { useVisiblePoll } from '@/hooks/useVisiblePoll'
@@ -83,14 +83,11 @@ export default function RecentJobsTab() {
           <input value={jobSearch} onChange={e => setJobSearch(e.target.value)} placeholder={t('jobs.recent.jobSearch')}
             style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: 12, color: 'var(--text)', width: 160 }} />
         </div>
-        <Button variant="secondary" size="sm" onClick={load}
-          style={{ marginLeft: 'auto' }}>
-          <RefreshCw size={12} className={phase === 'loading' ? 'animate-spin' : undefined} /> {t('jobs.refresh')}
-        </Button>
+        <JobsRefreshButton phase={phase} onRefresh={load} label={t('jobs.refresh')} />
         <Caption>{t('jobs.recent.window')}</Caption>
       </div>
 
-      {phase === 'error' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('jobs.loadError')}</p>}
+      {phase === 'error' && <JobsErrorNotice label={t('jobs.loadError')} />}
       {phase === 'ready' && rows.length === 0 && <p style={{ fontSize: 12, color: 'var(--text-muted)', padding: 8 }}>{t('jobs.recent.empty')}</p>}
 
       {rows.length > 0 && (

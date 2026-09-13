@@ -8,6 +8,7 @@ import { ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveCont
 import type { ChartDatum, TipProps } from './chartTypes'
 import ErrorBoundary from '../ui/ErrorBoundary'
 import { useNumberFormat } from '@/lib/formatters'
+import { ChartCardTitle, ChartCardEmpty } from './ChartCardChrome'
 
 // A series is a grouped bar by default; `line: true` overlays it as a line (e.g. a net trend).
 // `axis: 'right'` plots the series on a second Y axis (RIGHT-AXIS-1): a rate
@@ -51,15 +52,15 @@ export default function WeeklyBarChartCard({ title, data = [], series = [], heig
   if (!data.length || !series.length) {
     return (
       <div className="flex flex-col flex-1 min-w-0">
-        <div className="mb-4 text-sm font-medium" style={{ color: 'var(--text-muted)' }}>{title}</div>
-        <div className="flex items-center justify-center text-xs" style={{ height, color: 'var(--text-muted)' }}>—</div>
+        <ChartCardTitle title={title} />
+        <ChartCardEmpty height={height}>—</ChartCardEmpty>
       </div>
     )
   }
 
   return (
     <div className="flex flex-col flex-1 min-w-0">
-      <div className="mb-4 text-sm font-medium" style={{ color: 'var(--text-muted)' }}>{title}</div>
+      <ChartCardTitle title={title} />
       <ErrorBoundary compact>
       <ResponsiveContainer width="100%" height={height}>
         <ComposedChart data={data} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>

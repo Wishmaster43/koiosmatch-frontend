@@ -12,7 +12,7 @@
  * improve+summarize-only default (ACTIONS-SCOPE-DEFAULT-FLIP), no per-field
  * override needed.
  */
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
@@ -21,7 +21,7 @@ import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { useConfirm } from '@/hooks/useConfirm'
-import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import { cardStyle, labelStyle, inputStyle, useSettingsListUiState, useSettingsListLoad, runSettingsListCreate } from './settingsListCardStyles'
 import { Caption } from '@/components/ui/typography'
 import EditorRowFooter from '@/components/ui/EditorRowFooter'
 import AddFormFooter from '@/components/ui/AddFormFooter'
@@ -30,11 +30,6 @@ import ExpandableCardListItem from '../components/ExpandableCardListItem'
 
 const ENDPOINT = '/vacancy-content-blocks'
 const KINDS = ['intro', 'cta', 'legal']
-
-const cardStyle = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 8 }
-const labelStyle = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }
-// Canon field style (G33/fieldMetrics) — was its own padding-6/radius-6 copy.
-const inputStyle = fieldInputStyle
 
 // A fresh draft for the create card / an opened edit card.
 const emptyDraft = () => ({ name: '', kind: 'intro', body: '' })
@@ -46,44 +41,27 @@ export default function VacancyContentBlocksSettings() {
   const [blocks, setBlocks] = useState([])
   // Four explicit UI states, plus 'unavailable' for a not-yet-deployed backend route.
   const [phase, setPhase] = useState('loading') // loading | unavailable | error | ready
-  const [expanded, setExpanded] = useState(null)
-  const [adding, setAdding] = useState(false)
-  const [saving, setSaving] = useState(null) // 'new' | block id | null
+  const { expanded, setExpanded, adding, setAdding, saving, setSaving, editForms, setEditForms } = useSettingsListUiState()
   const [newForm, setNewForm] = useState(emptyDraft())
-  const [editForms, setEditForms] = useState({})
   const { confirm, dialog } = useConfirm()
 
   // Load the reusable blocks once; a 404 means the backend route isn't live yet.
-  useEffect(() => {
-    let alive = true
-    api.get(ENDPOINT).then((res) => {
-      if (!alive) return
-      setBlocks(unwrapList(res).rows)
-      setPhase('ready')
-    }).catch((e) => {
-      if (!alive) return
-      setPhase(e?.response?.status === 404 ? 'unavailable' : 'error')
-    })
-    return () => { alive = false }
-  }, [])
+  useSettingsListLoad(async () => {
+    const res = await api.get(ENDPOINT)
+    return () => setBlocks(unwrapList(res).rows)
+  }, setPhase)
 
   const setEF = (id, k, v) => setEditForms(p => ({ ...p, [id]: { ...(p[id] ?? emptyDraft()), [k]: v } }))
   const openEdit = (block) => { setEditForms(p => ({ ...p, [block.id]: { name: block.name, kind: block.kind, body: block.body ?? '' } })); setExpanded(block.id) }
 
   // Create a new reusable block.
-  const handleCreate = async () => {
-    const name = newForm.name.trim()
-    if (!name) return
-    setSaving('new')
-    try {
-      const res = await api.post(ENDPOINT, { name, kind: newForm.kind, body: newForm.body })
-      setBlocks(p => [...p, unwrap(res)])
-      setNewForm(emptyDraft())
-      setAdding(false)
-    } catch {
-      notifyError(t('vacancyContentBlocksSettings.saveFailed'))
-    } finally { setSaving(null) }
-  }
+  const handleCreate = () => runSettingsListCreate({
+    name: newForm.name,
+    endpoint: ENDPOINT,
+    body: { name: newForm.name.trim(), kind: newForm.kind, body: newForm.body },
+    setSaving, setList: setBlocks, setNewForm, emptyDraft, setAdding,
+    errorMessage: t('vacancyContentBlocksSettings.saveFailed'),
+  })
 
   // Save an edit to an existing block.
   const handleSave = async (block) => {

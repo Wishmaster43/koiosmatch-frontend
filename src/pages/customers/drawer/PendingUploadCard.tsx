@@ -70,7 +70,12 @@ export default function PendingUploadCard({
           </div>
         </div>
       )}
-      {/* One compact row per queued file — its own type select + remove. */}
+      {/* One compact row per queued file — its own type select + remove.
+          DRY: mirrors the candidate PendingUploadQueue's row markup, but that
+          one also renders a per-item DocumentLinkPicker this level doesn't have
+          (the customer card's own link-level picker above covers the whole
+          batch instead) — the shared atoms (PendingUploadRow(s)/TypeSelect) are
+          already extracted, so this is composition, not a copy to fix. */}
       <PendingUploadRows>
         {pending.map((item, idx) => (
           <PendingUploadRow key={idx} name={item.name} size={item.size}>

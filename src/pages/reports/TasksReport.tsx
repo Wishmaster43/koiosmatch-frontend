@@ -182,7 +182,10 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, co
         </ReportGrid>
       )}
 
-      {/* One shared drill drawer for the whole page. */}
+      {/* One shared drill drawer for the whole page. DRY: mirrors CandidatesReport's
+          own tail (ReportChartCard/BarChartCard/ReportDrillDrawer are already the
+          shared atoms) — the per-page axis set/labels are real report content,
+          not a copy to merge. */}
       <ReportDrillDrawer drill={drill} onClose={() => setDrill(null)} />
     </div>
   )

@@ -5,40 +5,27 @@
  * stored value stays visible even if it falls outside that filter (§3 no
  * silent clear of a saved value). Split out of the former fieldControls.tsx monolith (§3 400-line split trigger).
  */
-import { useState, useEffect, useId } from 'react'
+import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
-import { unwrapList } from '@/lib/api'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { Caption } from '@/components/ui/typography'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import type { OnChange } from './types'
+import { useLookupOptions } from './useLookupOptions'
 
 // ── WhatsApp phone number field ─────────────────────────────────────────────────
 export function WhatsappPhoneNumberField({ value, onChange, fieldKey, endpoint, config }: {
   value?: unknown; onChange: OnChange; fieldKey: string; endpoint: string; config?: Record<string, unknown>
 }) {
   const { t } = useTranslation('workflows')
-  const [opts, setOpts] = useState<Array<{ value: string; label: string; coexistence: boolean }>>([])
-  // A failed load must read as an error, never as an honestly-empty number list (R8/§3 four states).
-  const [error, setError] = useState(false)
-  const [retryTick, setRetryTick] = useState(0)
   const phoneLabelId = useId()
 
   // Load the tenant's WABA sender numbers, keeping the coexistence flag per option.
-  useEffect(() => {
-    if (!endpoint) return
-    let alive = true
-    setError(false)
-    import('@/lib/api').then(m => m.default.get(endpoint))
-      .then(r => {
-        const rows = unwrapList<Record<string, unknown>>(r).rows
-        if (alive) setOpts(rows
-          .map(o => ({ value: String(o.value ?? o.id ?? ''), label: String(o.label ?? o.name ?? o.value ?? ''), coexistence: !!o.coexistence }))
-          .filter(o => o.value))
-      })
-      .catch(() => { if (alive) setError(true) })
-    return () => { alive = false }
-  }, [endpoint, retryTick])
+  const { opts, error, retry } = useLookupOptions(endpoint, o => {
+    const value = String(o.value ?? o.id ?? '')
+    if (!value) return null
+    return { value, label: String(o.label ?? o.name ?? o.value ?? ''), coexistence: !!o.coexistence }
+  })
 
   const filterActive = config?.channel === 'waba_coex'
   const filtered = filterActive ? opts.filter(o => o.coexistence) : opts
@@ -48,7 +35,7 @@ export function WhatsappPhoneNumberField({ value, onChange, fieldKey, endpoint, 
     ? [...filtered, ...opts.filter(o => o.value === current)]
     : filtered
 
-  if (error) return <ErrorBanner onRetry={() => setRetryTick(n => n + 1)}>{t('common:errorGeneric')}</ErrorBanner>
+  if (error) return <ErrorBanner onRetry={retry}>{t('common:errorGeneric')}</ErrorBanner>
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>

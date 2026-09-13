@@ -24,9 +24,8 @@ import PlanIntakeModal from './PlanIntakeModal'
 import type { ExistingAppointment } from './PlanIntakeModal'
 import MatchModal from './MatchModal'
 import api, { unwrap, unwrapList } from '@/lib/api'
-import { notifyError, notifySuccess } from '@/lib/notify'
-import { extractApiError } from '@/lib/extractApiError'
 import { useAuth } from '@/context/AuthContext'
+import { useDetachApplication } from '@/hooks/useDetachApplication'
 import { sectionBlock } from './constants'
 import { APPLICATION_COL_STATUS, APPLICATION_COL_DATE, APPLICATION_COL_ACTIONS, APPLICATION_COL_TITLE, APPLICATION_COL_CLIENT } from './applicationRowColumns'
 import type { Candidate } from '@/types/candidate'
@@ -69,7 +68,6 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
   const [editApplicationId, setEditApplicationId] = useState<Id | null>(null)
   // Punt 7: the application being detached + the in-flight flag of that DELETE.
   const [detachRow, setDetachRow] = useState<AppRow | null>(null)
-  const [detaching, setDetaching] = useState(false)
   // Reset the local list when the drawer switches to another candidate / fuller detail.
   useEffect(() => { setApps((c.applications ?? []) as unknown as AppRow[]); setPage(1) }, [c.id, c.applications])
   // Load the candidate's appointments once per candidate (separate structured entity).
@@ -98,23 +96,13 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
     await onRefresh?.()
   }
 
-  // Punt 7 — detach: measured live 08-08, DELETE /applications/{id} REQUIRES a
-  // `reason` body (422 "The reason field is required." without it, 204 with it),
-  // which the backend stores as an application note. Non-optimistic on purpose:
-  // a 422/403 must never look like it succeeded (the dead-bulk-unlink lesson, §13).
-  const detachApplication = async (reason: string) => {
-    const id = detachRow?.id
-    if (id == null) return
-    setDetaching(true)
-    try {
-      await api.delete(`/applications/${id}`, { data: { reason } })
-      notifySuccess(t('work.detachDone'))
-      setDetachRow(null)
-      await reload()
-    } catch (err) {
-      notifyError(extractApiError(err, t('common:actionFailed')))
-    } finally { setDetaching(false) }
-  }
+  // Punt 7 — detach: shared mutation, see useDetachApplication doc comment.
+  const { detaching, detachApplication } = useDetachApplication({
+    getId: () => detachRow?.id,
+    doneLabel: t('work.detachDone'),
+    onDone: async () => { setDetachRow(null); await reload() },
+  })
+  const onDetachConfirm = (reason: string) => detachApplication(reason, t('common:actionFailed'))
 
   // The appointment linked to an application row (by application_id).
   const apptFor = (appId?: Id | null) => appId != null ? appts.find(a => String(a.application_id) === String(appId)) : undefined
@@ -284,7 +272,7 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
       {/* Punt 7: unlink on an application row — reason prompt, then the DELETE. */}
       {detachRow && (
         <DetachApplicationModal label={vacancyLabelOf(detachRow) ?? '—'} submitting={detaching}
-          onCancel={() => setDetachRow(null)} onConfirm={detachApplication} />
+          onCancel={() => setDetachRow(null)} onConfirm={onDetachConfirm} />
       )}
       {/* Pencil on a MatchesTab row (point 2) — same modal, in EDIT mode: prefills
           from GET /matches/{id} (the candidate's own embedded row is thin) and

@@ -44,6 +44,7 @@ import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
 import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
+import { buildTaskFilterRows } from '@/components/drawer/drawerFilterTypes'
 import { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import { AddTaskModal } from '@/pages/tasks/shared'
 import { TaskLookupsProvider, useTaskLookups } from '@/context/TaskLookupsContext'
@@ -142,17 +143,10 @@ function EntityTasksTabBody({ linkType, id, labels, extraLinks = [] }: Props) {
   // TASK-FILTER-MENU-1: the DrawerFilterMenu rows — status always offered (the
   // lookup always carries the seed fallback), type/priority only when the tenant
   // actually has entries (no fake affordance, §3).
-  const filterRows: DrawerFilterConfig[] = [
-    { type: 'multi', key: 'status', label: t('cols.status'), selected: statusFilter,
-      options: statuses.map(s => ({ value: s.value, label: s.label })), onToggle: toggleStatus,
-      searchPlaceholder: t('common:search'), noResultsLabel: t('common:noResults') },
-    ...(types.length > 0 ? [{ type: 'multi' as const, key: 'type', label: t('cols.type'), selected: typeFilter,
-      options: types.map(ty => ({ value: ty.value, label: ty.label })), onToggle: toggleType,
-      searchPlaceholder: t('common:search'), noResultsLabel: t('common:noResults') }] : []),
-    ...(priorities.length > 0 ? [{ type: 'multi' as const, key: 'priority', label: t('cols.priority'), selected: priorityFilter,
-      options: priorities.map(p => ({ value: p.value, label: p.label })), onToggle: togglePriority,
-      searchPlaceholder: t('common:search'), noResultsLabel: t('common:noResults') }] : []),
-  ]
+  const filterRows: DrawerFilterConfig[] = buildTaskFilterRows({
+    t, statuses, types, priorities, statusFilter, typeFilter, priorityFilter,
+    toggleStatus, toggleType, togglePriority,
+  })
 
   // Status-chip colour toggle (CHIPKLEUR-INSTELBAAR-1 pattern, Settings → Klanten →
   // Weergave → Taken). Only wired for the customer embedding today — this shared tab

@@ -23,7 +23,7 @@ import { MessageCircle } from 'lucide-react'
 import ConversationsSection from '@/components/drawer/ConversationsSection'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { StartConversationModal } from '@/pages/candidates/shared'
-import { useAuth } from '@/context/AuthContext'
+import { useCanStartConversation } from '@/hooks/useCanStartConversation'
 import type { Id } from '@/types/common'
 
 // See the file's top doc above; a thin wrapper pointing the shared ConversationsSection at the contact-scoped endpoint.
@@ -35,12 +35,7 @@ export default function ContactConversationsSection({ customerId, contactId, mob
   mobile?: string | null
 }) {
   const { t } = useTranslation('candidates')
-  const auth = useAuth()
-  // Two gates, both hide (OPENERS-HIDE-1): POST /conversations/start sits in the
-  // page.whatsapp route group (communication-ai.php:77-80), and a contact thread is
-  // customer data on top of that (§8 PII gate), so customers.view is required too.
-  const can = auth?.hasPermission ?? (() => false)
-  const canStartConversation = can('page.whatsapp') && can('customers.view')
+  const canStartConversation = useCanStartConversation()
   const [showStartModal, setShowStartModal] = useState(false)
   // Bumped on a successful start so the thread list re-fetches from the server.
   const [refreshKey, setRefreshKey] = useState(0)

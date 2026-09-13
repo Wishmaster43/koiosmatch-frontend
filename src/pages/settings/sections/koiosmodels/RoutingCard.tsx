@@ -84,6 +84,8 @@ export default function RoutingCard({ data, onSaved }: { data: KoiosModelsAdminD
         })}
       </div>
 
+      {/* DRY: identical SaveRow call to the sibling PackagesCard — SaveRow is already
+          the shared save-row atom; the two cards' own bodies above differ. */}
       <SaveRow error={error} saved={saved} saving={saving} dirty={dirty} onSave={save} label={t('koiosModelsAdmin.save')} />
     </div>
   )

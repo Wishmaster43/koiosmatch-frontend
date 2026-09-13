@@ -45,7 +45,7 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Edit2, Save, X } from 'lucide-react'
+import { InlineEditActions } from '@/components/ui/InlineEditActions'
 import EntityLink from '@/components/ui/EntityLink'
 import SectionCard from '@/components/ui/SectionCard'
 import SoftChip from '@/components/ui/SoftChip'
@@ -54,7 +54,6 @@ import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { useDateFormat } from '@/lib/datetime'
 import { useApplicationSources } from '@/lib/useApplicationSources'
-import Button from '@/components/ui/Button'
 // HUISSTIJL-1: shared typography atom — both muted secondary lines below are
 // exact 11px/muted matches for the house Caption scale.
 import { Caption } from '@/components/ui/typography'
@@ -144,14 +143,8 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
   }
 
   // Edit-mode toggle: pencil → diskette + ✕, shown as the card's action row (§3A pattern).
-  const action = (onLinkVacancy || onUpdateSource) && (editing ? (
-    <div style={{ display: 'flex', gap: 4 }}>
-      <Button variant="primary" iconOnly size="sm" onClick={saveEdit} title={t('common:save')} aria-label={t('common:save')}><Save size={13} /></Button>
-      <Button variant="secondary" iconOnly size="sm" onClick={cancelEdit} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={13} /></Button>
-    </div>
-  ) : (
-    <Button variant="ghost" iconOnly size="sm" onClick={startEdit} title={t('common:edit')} aria-label={t('common:edit')}><Edit2 size={13} /></Button>
-  ))
+  const action = (onLinkVacancy || onUpdateSource) &&
+    <InlineEditActions editing={editing} onSave={saveEdit} onCancel={cancelEdit} onStartEdit={startEdit} />
 
   return (
     <SectionCard title={t('drawer.detailsTitle')} action={action} style={calmCardStyle}>

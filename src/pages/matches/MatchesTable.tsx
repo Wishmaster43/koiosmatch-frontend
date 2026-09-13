@@ -113,6 +113,9 @@ export default function MatchesTable({
       render: r => r.vacancy || '—' },
     // Customer — soft avatar + name (AVATAR-CHIP-1: same chip as the candidate identity
     // column), muted text keeps it reading as a secondary reference.
+    // DRY: the client cell's EntityNameCell usage mirrors ApplicationsTable's own client
+    // column, but the two behave differently by design (this one is never a gateway,
+    // ApplicationsTable's IS one when an id resolves) — real variance, not a copy.
     { key: 'client',  header: t('cols.client'),  sortable: true, nowrap: true,
       render: r => {
         const content = <EntityNameCell name={r.client} textStyle={{ color: 'var(--text-muted)' }} />

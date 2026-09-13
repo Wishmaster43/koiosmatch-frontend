@@ -13,6 +13,20 @@ import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { requiredMark } from '@/components/forms/fields'
 import Button from '@/components/ui/Button'
+import type { Candidate } from '@/types/candidate'
+
+// Shared prop shape for ProfileTab and its ProfilePanel wrapper — both compose
+// the same candidate/edit-save/contact-moment handlers, just at different
+// levels of the tree (ProfilePanel adds the KoiosAI + branch blocks around it).
+export interface ProfileEditableProps {
+  c: Candidate
+  onEditSave?: (v: Record<string, unknown>) => void
+  autoEditSignal?: number
+  // B15-flow: a confirmed contact moment updates local state ONLY (the write
+  // already happened via its own endpoint) — never re-routed through onEditSave,
+  // which would fire a redundant/incorrect candidate PATCH.
+  onContactMoment?: (v: Record<string, unknown>) => void
+}
 // HUISSTIJL-1: the shared uppercase group-label atom (identity-only swap).
 import { GroupLabel } from '@/components/ui/typography'
 

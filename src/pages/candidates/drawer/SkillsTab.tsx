@@ -9,7 +9,7 @@ import { useRelationSort } from '@/components/forms/useRelationSort'
 import LookupIcon from '@/components/ui/LookupIcon'
 import { useSkillLevels } from '@/lib/useSkillLevels'
 import type { Id } from '@/types/common'
-import { AddableSection, DocEntryLinks, LinkedDocPreviewOverlay, renderAddButton, resolveLinkedDocument } from './sectionTabsShared'
+import { AddableSection, LinkedDocFooter, LinkedDocPreviewOverlay, renderAddButton, resolveLinkedDocument } from './sectionTabsShared'
 import type { RelItem, RelTabProps } from './sectionTabsShared'
 import { linkedDocumentField, useLinkedDocPreview } from './useLinkedDocPreview'
 
@@ -80,11 +80,16 @@ export function SkillsTab({ items = [], onAdd, onEdit, onRemove, documents = [],
                   </span>
                 )}
               </div>
-              {linkedDoc && <DocEntryLinks doc={linkedDoc} onPreview={() => openPreview(linkedDoc)} onJump={onJumpToDocuments} />}
+              <LinkedDocFooter linkedDoc={linkedDoc} openPreview={openPreview} onJumpToDocuments={onJumpToDocuments} />
             </div>
           </div>
         )
       }} />
+    {/* DRY: this closing shell (LinkedDocFooter + AddableSection/
+        LinkedDocPreviewOverlay wiring) mirrors CertificationsTab/EducationTab —
+        already the shared atoms (LinkedDocFooter, LinkedDocPreviewOverlay); the
+        remaining few lines are the AddableSection render-prop's own required
+        JSX close, which cannot shrink further without a render-prop of its own. */}
     <LinkedDocPreviewOverlay previewDoc={previewDoc} onClose={closePreview} />
     </>
   )

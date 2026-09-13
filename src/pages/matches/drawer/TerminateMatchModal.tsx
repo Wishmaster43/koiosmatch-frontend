@@ -21,7 +21,7 @@ import { useMatchStopReasons } from '@/hooks/useMatchStopReasons'
 import { useMatchTerminate } from '../hooks/useMatchTerminate'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import type { MatchRow } from '@/types/match'
-import Button from '@/components/ui/Button'
+import MatchConfirmFooter from './MatchConfirmFooter'
 import DictationTextarea from '@/components/forms/DictationTextarea'
 import { Caption } from '@/components/ui/typography'
 
@@ -125,14 +125,8 @@ export default function TerminateMatchModal({ match, onClose, onUpdate }: Props)
           </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
-          <Button variant="secondary" onClick={onClose}>
-            {t('common:cancel')}
-          </Button>
-          <Button variant="danger" onClick={submit} disabled={!canSubmit}>
-            {t('drawer.terminate.confirm')}
-          </Button>
-        </div>
+        <MatchConfirmFooter onCancel={onClose} cancelLabel={t('common:cancel')}
+          onSubmit={submit} submitLabel={t('drawer.terminate.confirm')} danger disabled={!canSubmit} />
     </FloatingPanel>
   )
 }

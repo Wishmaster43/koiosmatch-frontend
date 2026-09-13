@@ -20,7 +20,7 @@ import { EditControls, GroupCard, GroupHeader, inputStyle } from './profileField
 import { makeFieldRenderer } from './makeFieldRenderer'
 import { useProfileEditState } from './useProfileEditState'
 import { useProfileRequiredKeys } from './useProfileRequiredKeys'
-import type { Candidate } from '@/types/candidate'
+import type { CandidateFieldCardProps } from '@/types/candidate'
 import SoftChip from '@/components/ui/SoftChip'
 
 type AnyProps = Record<string, unknown>
@@ -42,9 +42,7 @@ type PersonalForm = Record<PersonalKey, string>
 const REQ_MAP: Partial<Record<PersonalKey, string>> = { gender: 'gender', dob: 'date_of_birth' }
 
 // The personal-details sub-tab, with its own independent pencil/draft/error state.
-export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
-  c: Candidate; onSave?: (v: Record<string, unknown>) => void; autoEditSignal?: number
-}) {
+export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: CandidateFieldCardProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   // Gender + nationality come from tenant lookups (CFG-1), never hardcoded lists.

@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { runAliveGuarded } from '@/lib/aliveGuard'
 
 export type KoiosMode = 'wizard' | 'auto'
 export interface MyKoiosModeData { mode: KoiosMode; auto_messages: boolean }
@@ -61,16 +62,12 @@ export function useMyKoiosMode() {
   // Load once on mount.
   useEffect(() => {
     let alive = true
-    api.get('/settings/my-koios-mode')
-      .then((res) => {
-        if (!alive) return
-        const raw = unwrap(res) as { tenant_default?: unknown; user_choice?: unknown }
-        setData(normalize(raw))
-        setTenantDefault(normalizeTenantDefault(raw?.tenant_default))
-        setUserChoice(normalizeUserChoice(raw?.user_choice))
-      })
-      .catch(() => { if (alive) setError(true) })
-      .finally(() => { if (alive) setLoading(false) })
+    runAliveGuarded(api.get('/settings/my-koios-mode'), () => alive, (res) => {
+      const raw = unwrap(res) as { tenant_default?: unknown; user_choice?: unknown }
+      setData(normalize(raw))
+      setTenantDefault(normalizeTenantDefault(raw?.tenant_default))
+      setUserChoice(normalizeUserChoice(raw?.user_choice))
+    }, setError, setLoading)
     return () => { alive = false }
   }, [])
 

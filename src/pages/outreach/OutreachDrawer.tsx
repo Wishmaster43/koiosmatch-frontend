@@ -35,7 +35,7 @@ import { useCustomFields } from '@/lib/useCustomFields'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import type { EntityTab } from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
-import DrawerGlyphButton from '@/components/drawer/DrawerGlyphButton'
+import { MarkDeletionGlyphButton } from '@/components/drawer/DrawerGlyphButton'
 import TitleBadge from '@/components/drawer/TitleBadge'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
@@ -51,7 +51,6 @@ import CampaignStatsTab from './drawer/CampaignStatsTab'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import PendingEraseBanner from '@/components/drawer/PendingEraseBanner'
 import { buildTrashNote } from '@/hooks/useTrashFlow'
-import { Trash2 } from 'lucide-react'
 import { userName, type UserLike } from '@/lib/userDisplay'
 import type { TargetFilter } from './drawer/targetFilter'
 
@@ -206,11 +205,7 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
             <ChangelogPopover><ChangelogTab campaignId={id} /></ChangelogPopover>
             {/* TRASH-OVERAL-2: archived → trash (outreach.delete-gated at the page;
                 the shared preview modal confirms). Hidden once already in the trash. */}
-            {onMarkDeletion && archived && !inTrash && (
-              <DrawerGlyphButton onClick={() => onMarkDeletion(id)} title={t('common:trash.markAction')} tone="danger">
-                <Trash2 size={14} />
-              </DrawerGlyphButton>
-            )}
+            <MarkDeletionGlyphButton onMarkDeletion={onMarkDeletion} id={id} archived={archived} inTrash={inTrash} />
           </>}
           renderTitle={() => (
             <>

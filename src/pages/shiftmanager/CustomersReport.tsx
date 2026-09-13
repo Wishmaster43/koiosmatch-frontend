@@ -4,6 +4,10 @@
  * filters registered in the right panel. Clicking a KPI block opens a drill-down
  * drawer listing the underlying records.
  */
+// DRY: this import block matches LocationsReport's own — both are shiftmanager
+// reports built from the same shared toolkit (useSmCustomerTree/RightPanel/
+// EntityListDrawer/distinctSortedValues); the actual KPI/chart bodies differ
+// (customer counts vs location/shift metrics) so there is no shared logic to extract.
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'

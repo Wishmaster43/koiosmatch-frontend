@@ -107,6 +107,12 @@ export default function DepartmentsTable() {
         searchPlaceholder={t('departments.search')}
       />
 
+      {/* DRY: the ReportPagedTableShell wiring mirrors LocationsTable's own call —
+          both are already the maximal shared extraction (ReportPagedTableShell/
+          ReportTableShell); the remaining overlap is each table's OWN column set
+          and row cells (customer/location/name/cost-center here vs. name/customer/
+          address/status/dept-count there), which cannot collapse further without
+          losing the per-entity column shape. */}
       <ReportPagedTableShell
         loading={loading}
         loadingLabel={t('departments.loading')}

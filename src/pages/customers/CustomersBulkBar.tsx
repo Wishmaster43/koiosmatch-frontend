@@ -56,6 +56,11 @@ export default function CustomersBulkBar({
   // gate so a disabled system (hf/shiftmanager app off for this tenant) is never offered.
   const { canCouple, showHelloflex, showShiftmanager } = useBackofficeCouplePermissions('customers.update')
 
+  // DRY: this option-list mapping mirrors VacanciesBulkBar's own — each entity's
+  // BulkBar is a THIN assembler (§3A) over its own props/lookups, so the shape
+  // repeats by design; a shared helper here would need a generic option-list
+  // type per entity's lookup shape (users/statuses/customers/agents/tags/
+  // vacancies differ), which is bigger than the two lines it would save.
   // Option lists built from props.
   const userOptions   = users.map(u => ({ value: u.id, label: u.name }))
   const statusOptions = statuses.map(s => ({ value: s.value, label: s.label, color: s.color }))

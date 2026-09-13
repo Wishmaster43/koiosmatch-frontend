@@ -98,6 +98,21 @@ export const splitContactName = (raw: string): Pick<ContactPayload, 'firstName' 
 }
 
 /**
+ * ONE-CLICK-COUPLE-2: the full ContactPayload for the "type a brand-new name"
+ * quick-create path — shared by AddLocationModal's own-card create and
+ * LocationContactSection's "create contact and link" fallback (same fields,
+ * same defaults, never a second drifting copy). No LinkedIn field on this
+ * quick path (CONTACT-LINKEDIN-1), no location/department yet (the caller
+ * links those right after via setLocationPrimaryContact/the coupling call).
+ */
+export const quickContactPayload = (name: string, email: string, phone: string): ContactPayload => ({
+  ...splitContactName(name), middleName: '', email, phone, mobile: '',
+  linkedin: '',
+  gender: '', role: '', locationId: null, departmentId: null, locationIds: [], departmentIds: [],
+  statusId: null, isPrimary: false, customFields: {},
+})
+
+/**
  * Broadcast name for "this customer's contact list changed underneath you".
  * A MERGE rewrites two rows at once (the survivor absorbs the duplicate, which then
  * disappears) and is fired from the drill-down, five ContactsPanel call sites away from

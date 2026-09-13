@@ -10,7 +10,7 @@ import { bureauNow } from '@/lib/bureauTime'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { isReferenceQuery } from '@/lib/referenceNumber'
 import { toLocalIsoDate } from '@/lib/localDate'
-import { applyGeo as applyGeoFn } from '@/lib/geoFilter'
+import { useApplyGeoFilter } from '@/lib/geoFilter'
 
 export interface GeoFilter { q: string; km: number; lat: number; lng: number; label: string }
 export interface DateRangeFilter { param: 'created_between' | 'last_contact_between'; from: string; to: string }
@@ -63,13 +63,9 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
   const [mapStraalActive, setMapStraalActive] = usePageMemory('cand.mapStraal', false)
   const [geoHint, setGeoHint] = useState<string | null>(null)
 
-  // Straal-blok apply: geocode the input; not found → hint, found → filter + map sync.
-  // Stabilized (useCallback) so the page's filterGroups useMemo can safely depend on
-  // it — every captured setter is itself stable (usePageMemory/useState), only `t`
-  // can genuinely change (mirrors CustomersPage/VacanciesPage's own applyGeo).
-  const applyGeo = useCallback(async (q: string, km: number) => {
-    return applyGeoFn(q, km, t('common:filters.notFound'), setGeoHint, setGeoFilter, setMapCenter, setMapRadius)
-  }, [t, setGeoHint, setGeoFilter, setMapCenter, setMapRadius])
+  // Straal-blok apply: geocode the input; not found → hint, found → filter + map sync
+  // (shared useApplyGeoFilter — mirrors CustomersPage/VacanciesPage's own applyGeo).
+  const applyGeo = useApplyGeoFilter(t, setGeoHint, setGeoFilter, setMapCenter, setMapRadius)
   const clearGeo = useCallback(() => { setGeoFilter(null); setGeoHint(null) }, [setGeoFilter, setGeoHint])
 
   // Anything narrowing the default view → the shared clear-button shows; one click resets.

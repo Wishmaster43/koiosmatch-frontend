@@ -8,15 +8,13 @@
  * as text, never an invented infinity glyph (worker brief, verbatim).
  */
 import { useTranslation } from 'react-i18next'
-import { Check, Save } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { useNumberFormat } from '@/lib/formatters'
-import SaveButton from '@/components/ui/SaveButton'
-import Spinner from '@/components/ui/Spinner'
 import { SectionTitle, Caption, GroupLabel, monoStyle } from '@/components/ui/typography'
 import BillingCardShell from './billing/BillingCardShell'
+import BillingSaveRow from './billing/BillingSaveRow'
 import { useBillingCardState } from './useBillingCardState'
 import type { AdminBillingBudgetsResponse, AdminBillingBudgetsUpdate, BillingBudgetEntry } from '@/types/billingUsage'
 import { PACKAGE_KEYS } from './billingCardStyles'
@@ -112,14 +110,9 @@ export default function BillingUsersCard() {
         ))}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-        <SaveButton onClick={save} disabled={saving || !hasChange} saved={savedOk}
-          style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {savedOk ? <><Check size={13} /> {t('billingUsers.saved')}</>
-          : saving  ? <><Spinner size={13} /> {t('common.saving')}</>
-          :           <><Save size={13} /> {t('common.save')}</>}
-        </SaveButton>
-      </div>
+      <BillingSaveRow onClick={save} disabled={saving || !hasChange} saving={saving} savedOk={savedOk}
+        savedLabel={t('billingUsers.saved')} savingLabel={t('common.saving')} saveLabel={t('common.save')}
+        style={{ marginBottom: 24 }} />
 
       <GroupLabel style={{ marginBottom: 10 }}>{t('billingUsers.tenantsHeading')}</GroupLabel>
       {tenantIds.length === 0 ? (

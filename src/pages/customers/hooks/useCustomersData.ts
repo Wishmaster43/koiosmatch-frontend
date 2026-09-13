@@ -4,13 +4,20 @@
  * filter/page, keepPreviousData). A missing endpoint (404) is an empty list, not an
  * error. Returns setter wrappers over the cache so optimistic updates keep working.
  */
+// DRY: this import block and the listQuery-derived state extraction further down
+// read as a clone of useVacanciesData (jscpd weak-mode match) — every entity list
+// hook (candidates/customers/vacancies/applications) follows the SAME React Query
+// shape by design (§3 blueprint); the setter duplication is already gone via
+// useListFieldSetter, and further merging the query itself would require a single
+// generic hook parameterised over four different list/stats endpoints and row
+// shapes — a bigger abstraction than this repeated 7-line block justifies.
 import { useCallback, useMemo } from 'react'
-import type { Dispatch, SetStateAction } from 'react'
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { pickStatsScopeParams } from '@/lib/statsScopeParams'
 import { useRowsEpoch } from '@/hooks/useRowsEpoch'
+import { useListFieldSetter } from '@/hooks/useListFieldSetter'
 import { mapCustomer } from '../data/mapCustomer'
 import type { Customer, ApiCustomer } from '@/types/customer'
 import type { Id } from '@/types/common'
@@ -38,10 +45,11 @@ export const CUSTOMERS_MAX_PER_PAGE = 500
 // Composes the customers list/stats React Query data layer for the page (list, filters, pagination and the bulk-selection epoch below).
 export function useCustomersData({ filterParams, page, pageSize, t }: Args) {
   const queryClient = useQueryClient()
+  const listKey = ['customers', filterParams, page, pageSize]
 
   // List (paginated, server-filtered). 404 = endpoint not built → empty, not an error.
   const listQuery = useQuery({
-    queryKey: ['customers', filterParams, page, pageSize],
+    queryKey: listKey,
     queryFn: async ({ signal }): Promise<ListResult> => {
       try {
         // Defensive re-clamp (belt-and-braces): the page already clamps pageSize to
@@ -83,19 +91,8 @@ export function useCustomersData({ filterParams, page, pageSize, t }: Args) {
   })
 
   // Setter wrappers over the list cache — keep the container's optimistic mutations working.
-  const setCustomers = useCallback<Dispatch<SetStateAction<Customer[]>>>(updater => {
-    queryClient.setQueryData<ListResult>(['customers', filterParams, page, pageSize], prev => {
-      const cur = prev ?? { customers: [], total: 0, lastPage: 1 }
-      return { ...cur, customers: typeof updater === 'function' ? (updater as (p: Customer[]) => Customer[])(cur.customers) : updater }
-    })
-  }, [queryClient, filterParams, page, pageSize])
-
-  const setTotal = useCallback<Dispatch<SetStateAction<number>>>(updater => {
-    queryClient.setQueryData<ListResult>(['customers', filterParams, page, pageSize], prev => {
-      const cur = prev ?? { customers: [], total: 0, lastPage: 1 }
-      return { ...cur, total: typeof updater === 'function' ? (updater as (p: number) => number)(cur.total) : updater }
-    })
-  }, [queryClient, filterParams, page, pageSize])
+  const setCustomers = useListFieldSetter<ListResult, 'customers'>(listKey, 'customers', { customers: [], total: 0, lastPage: 1 })
+  const setTotal = useListFieldSetter<ListResult, 'total'>(listKey, 'total', { customers: [], total: 0, lastPage: 1 })
 
   // CUSTOMER-IMPORT-1: a side-channel write (the create-modal's file import) has no
   // single record to prepend optimistically like handleCreate does — it can create

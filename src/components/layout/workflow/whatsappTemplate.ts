@@ -32,6 +32,14 @@ export function templateTexts(components?: WaComponent[] | null): { header?: str
   }
 }
 
+// Find the selected template by value and derive its header/body/footer texts in
+// one call — the pair every consumer (workflow mapping field, start-conversation
+// modal, useWhatsAppTemplateSend) needs right after loading the template list.
+export function selectedTemplateTexts(templates: WaTemplateOption[], value: string | undefined) {
+  const selected = templates.find(tpl => tpl.value === value)
+  return { selected, texts: templateTexts(selected?.components) }
+}
+
 // Highest {{n}} slot number in a template text ("Hoi {{1}}, om {{2}}" → 2).
 export function slotCount(text?: string): number {
   let max = 0

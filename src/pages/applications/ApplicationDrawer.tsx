@@ -35,7 +35,7 @@ import Button from '@/components/ui/Button'
 // HUISSTIJL-1: shared typography atom — the footer's created-at line is an
 // exact 11px/muted match for the house Caption scale.
 import { Caption } from '@/components/ui/typography'
-import type { ApplicationDetail } from '@/types/application'
+import type { ApplicationDetail, ApplicationLinkSourceProps } from '@/types/application'
 import type { RejectPayload } from './drawer/RejectionModal'
 import type { Criterion } from '@/components/match/MatchScoreBlock'
 import type { Id } from '@/types/common'
@@ -48,7 +48,7 @@ import EntityLink from '@/components/ui/EntityLink'
 // below only when the tenant has ≥1 active application custom field.
 const TAB_IDS = ['application', 'candidate', 'vacancy', 'interviews', 'appointments', 'notes', 'timeline', 'statistics']
 
-interface ApplicationDrawerProps {
+interface ApplicationDrawerProps extends ApplicationLinkSourceProps {
   // Detail-fetch phase from the drawer hook — tabs gate their empty states on it.
   detailPhase?: 'idle' | 'loading' | 'ready' | 'error'
   application: ApplicationDetail | null
@@ -60,11 +60,6 @@ interface ApplicationDrawerProps {
   onPhaseChange?: (id: Id | undefined, phaseKey: string) => void
   // DROPDOWN-CLEAR-1: null = unassign (the header owner picker's clear X).
   onOwnerChange?: (id: Id | undefined, ownerId: string | null) => void
-  // Re-link (or unlink, null) the vacancy this application is coupled to — shared
-  // by the Sollicitatie tab's Details block and the Vacature tab (§3A).
-  onLinkVacancy?: (id: Id | undefined, vacancyId: Id | null, meta?: { title?: string; client?: string }) => void
-  // S7: PATCH the editable Bron field from the Sollicitatie tab's Details block.
-  onUpdateSource?: (id: Id | undefined, source: string, sourceKey?: string | null) => void
   users?: Array<{ id: Id; name: string }>
   // S15: detaching REQUIRES a reason (BE 422s without one) — the drawer collects
   // it via DetachReasonModal before calling this.

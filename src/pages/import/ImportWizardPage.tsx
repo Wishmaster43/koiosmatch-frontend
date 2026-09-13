@@ -13,13 +13,12 @@
  * (§3A reuse) — this screen adds the column-mapping + editable-preview steps that
  * screen does not have; it does not reinvent what already works.
  */
-import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { ImportEntityNav } from '@/pages/settings/shared'
-import { useImportTemplates } from '@/pages/settings/shared'
-import { groupTemplates, importPermissionsFor, orderedTemplates } from '@/pages/settings/shared'
+import { useImportTemplates, useDefaultImportSelection } from '@/pages/settings/shared'
+import { groupTemplates, importPermissionsFor } from '@/pages/settings/shared'
 import type { ImportTemplateSummary } from './api'
 import EntityImportWizard from './EntityImportWizard'
 
@@ -38,17 +37,10 @@ export default function ImportWizardPage({ intent }: ImportWizardPageProps = {})
   // Auth context can be null pre-boot — an honest fallback, mirrors ImporterenSettings.tsx.
   const hasPermission = useAuth()?.hasPermission ?? (() => false)
   const { templates, phase, reload } = useImportTemplates()
-  const [selected, setSelected] = useState<string | null>(null)
-
   // Land on the requested entity (if its template exists) or the first template in
   // display order (the combined file first when the backend serves one); never
   // overrides a user's own pick once one has been made.
-  useEffect(() => {
-    if (phase === 'ready' && templates.length > 0 && !selected) {
-      const wanted = intent?.entity && templates.some(tpl => tpl.entity === intent.entity) ? intent.entity : null
-      setSelected(wanted ?? orderedTemplates(templates)[0]?.entity ?? null)
-    }
-  }, [phase, templates, selected, intent])
+  const [selected, setSelected] = useDefaultImportSelection(templates, phase, intent?.entity)
 
   // Gated on the SELECTED entity's own permission pair (importPermissionsFor mirrors
   // exports.php): vacancies needs vacancies.view/create, every other entity (a

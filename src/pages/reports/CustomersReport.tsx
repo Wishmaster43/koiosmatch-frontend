@@ -25,6 +25,7 @@ import ReportKpiBand from './ReportKpiBand'
 import ReportSwitchBar from './ReportSwitchBar'
 import ReportGrid from './ReportGrid'
 import ReportChartCard from './ReportChartCard'
+import { PieAxisCard } from './lib/PieAxisCard'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import type { DrillSpec } from './ReportDrillDrawer'
@@ -36,7 +37,6 @@ import { buildAxisKpis } from './buildAxisKpis'
 import type { AxisKpiConfig } from './buildAxisKpis'
 import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterParams'
 import type { ReportFilterState } from './reportFilterParams'
-import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
@@ -52,7 +52,7 @@ import type { ReportCompareMode } from './reportCompareMode'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { useNavigation } from '@/context/NavigationContext'
 import CustomerDepthSections from './depth/CustomerDepthSections'
-import { donutData, barData, ownerBarData } from './lib/chartData'
+import { barData, ownerBarData } from './lib/chartData'
 import { makeOpenSegment } from './lib/drillFactories'
 import { segmentClick, ownerClick } from './lib/drillClick'
 
@@ -276,14 +276,12 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
             chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
 
           {/* Coloured lookup axes → donuts (each slice wears its tenant colour). */}
-          <ReportChartCard title={t('customers.axes.status')} chart={
-            <PieChartCard {...donutData(data.by_status)} onItemClick={pickSegment('status', data.by_status)} />} />
+          <PieAxisCard title={t('customers.axes.status')} segments={data.by_status} onItemClick={pickSegment('status', data.by_status)} />
 
           {/* Leads surface HERE, not on a status value (PROSPECT-DEDUP-1 retired
               the old 'prospect' status) — flag-driven, same principle as the
               dashboard leads KPI. */}
-          <ReportChartCard title={t('customers.axes.phase')} chart={
-            <PieChartCard {...donutData(data.by_phase)} onItemClick={pickSegment('phase', data.by_phase)} />} />
+          <PieAxisCard title={t('customers.axes.phase')} segments={data.by_phase} onItemClick={pickSegment('phase', data.by_phase)} />
 
           {/* Rankings → bar charts. */}
           <ReportChartCard title={t('customers.axes.industry')} chart={

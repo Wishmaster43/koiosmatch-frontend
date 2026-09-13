@@ -41,6 +41,8 @@ import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useVacancyBulkActions } from './hooks/useVacancyBulkActions'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
+import { useArchivedTrashToggle } from '@/hooks/useArchivedTrashToggle'
+import { useActionMessage } from '@/hooks/useActionMessage'
 
 // STRAAL-1: Leaflet only loads when the map view opens (§9 — lazy heavy deps).
 const VacanciesMapView = lazy(() => import('./VacanciesMapView'))
@@ -82,26 +84,19 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     filterParams, filterKey, searchEpoch,
     toggleWithoutAgent, anyFilterActive, clearAllFilters,
   } = useVacanciesFilterState()
+  const { onToggleArchived, onToggleTrash } = useArchivedTrashToggle(setShowArchived, setShowTrash)
 
   const [addOpen,        setAddOpen]        = useState(false)
   const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
   // KOIOS-SELECTIE-CONTEXT-1: mirror the selection into Koios AI's context chip.
   usePublishSelection('vacancies', selectedIds)
-  const [actionMsg,      setActionMsg]      = useState<{ type: string; text: string } | null>(null)
-  const msgTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Transient feedback for bulk mutations (success/error), auto-dismissed (§3 shared hook).
+  const { actionMsg, setActionMsg, notify } = useActionMessage()
 
   // Filters changed → back to page 1; the visible rows change → drop the selection.
   useEffect(() => { setPage(1) }, [filterKey, setPage])
   // Column sort item 4: a new sort also resets to page 1 (mirrors ApplicationsPage).
   useEffect(() => { setPage(1) }, [sort, setPage])
-
-  // Shows a transient action-result banner and auto-dismisses it after 4s, clearing any pending timer first so an overlapping call can't cut a new message short.
-  const notify = (type: string, text: string) => {
-    setActionMsg({ type, text })
-    if (msgTimer.current) clearTimeout(msgTimer.current)
-    msgTimer.current = setTimeout(() => setActionMsg(null), 4000)
-  }
-  useEffect(() => () => { if (msgTimer.current) clearTimeout(msgTimer.current) }, [])
 
   // ── Data layer ──
   const { vacancies, setVacancies, loading, error, total, setTotal, lastPage, stats, customers, refresh, rowsEpoch, fetching } =
@@ -284,8 +279,8 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
           onAddOpen={() => setAddOpen(true)} canCreate={canCreateVacancy}
           searchEpoch={searchEpoch} globalSearch={globalSearch} onSearch={setGlobalSearch}
           anyFilterActive={anyFilterActive} onClearFilters={clearAllFilters}
-          showArchived={showArchived} onToggleArchived={() => { setShowArchived(v => !v); setShowTrash(false) }}
-          showTrash={showTrash} onToggleTrash={() => { setShowTrash(v => !v); setShowArchived(false) }}
+          showArchived={showArchived} onToggleArchived={onToggleArchived}
+          showTrash={showTrash} onToggleTrash={onToggleTrash}
           mapActive={view === 'map'} onToggleView={() => setView(x => (x === 'map' ? 'table' : 'map'))}
         />
 

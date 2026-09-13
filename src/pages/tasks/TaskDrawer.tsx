@@ -29,7 +29,7 @@ import ChangelogTab from './drawer/ChangelogTab'
 import TimelineTab from './drawer/TimelineTab'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { PlanIntakeModal } from '@/pages/candidates/shared'
-import { Caption } from '@/components/ui/typography'
+import { EntityDrawerCreatedAtFooter } from '@/components/drawer/EntityDrawerCreatedAtFooter'
 import { PageTitle } from '@/components/ui/typography'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import TrashLifecycleSection from '@/components/drawer/TrashLifecycleSection'
@@ -193,14 +193,8 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
       entity={task}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
-      // Two-sided footer (§3A(8)): created-at left, empty right (consistent spacing
-      // with the candidate/other drawers even when there is no right-side content).
-      footer={
-        <Caption as="div" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-          <span>{t('drawer.createdAt', { date: formatDateTime(task.createdAt) })}</span>
-          <span />
-        </Caption>
-      }
+      // Two-sided footer (§3A(8), shared EntityDrawerCreatedAtFooter).
+      footer={<EntityDrawerCreatedAtFooter createdAtLabel={t('drawer.createdAt', { date: formatDateTime(task.createdAt) })} />}
       tabs={tabIds.map(id => ({ id, label: t(`drawer.tabs.${id}`), render: () => renderTab(id) }))}
       header={() => (
         <EntityHeader

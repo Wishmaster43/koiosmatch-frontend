@@ -46,6 +46,9 @@ export function WorkflowSelectField({ value, onChange, fieldKey }: { value?: unk
           .map(w => ({ value: String(w.id ?? ''), label: String(w.name ?? w.id ?? '') }))
           .filter(o => o.value))
       })
+      // DRY: shares the alive-guard/error/finally shape with WaConversationPanel's
+      // thread load, but the two effects fetch and map genuinely different data
+      // (a workflow option list vs a message thread) — no shared body to extract.
       .catch(() => { if (alive) setError(true) })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }

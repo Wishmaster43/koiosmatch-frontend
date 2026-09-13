@@ -42,11 +42,9 @@
 import { useState, useEffect } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Edit2, Save, X, ExternalLink } from 'lucide-react'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
-import Button from '@/components/ui/Button'
-import { GroupLabel } from '@/components/ui/typography'
+import { RichTextBlockHeader } from '@/components/ui/RichTextBlockHeader'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { useTextBlockPopout } from '@/hooks/useTextBlockPopout'
 import type { Id } from '@/types/common'
@@ -114,31 +112,8 @@ export default function MatchTextBlock({ matchId, value, present, loading, save 
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <GroupLabel>{t('drawer.matchText.title')}</GroupLabel>
-        {editing ? (
-          <div style={{ display: 'flex', gap: 4 }}>
-            <Button variant="primary" iconOnly size="sm" onClick={saveEdit} title={t('common:save')} aria-label={t('common:save')}>
-              <Save size={13} />
-            </Button>
-            <Button variant="secondary" iconOnly size="sm" onClick={cancelEdit} title={t('common:cancel')} aria-label={t('common:cancel')}>
-              <X size={13} />
-            </Button>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', gap: 4 }}>
-          {matchId != null && (
-            <Button variant="secondary" iconOnly size="sm" onClick={openPopout}
-              title={t('common:openSecondScreen')} aria-label={t('common:openSecondScreen')}>
-              <ExternalLink size={13} />
-            </Button>
-          )}
-          <Button variant="secondary" iconOnly size="sm" onClick={startEdit} title={t('common:edit')} aria-label={t('common:edit')}>
-            <Edit2 size={13} />
-          </Button>
-          </div>
-        )}
-      </div>
+      <RichTextBlockHeader t={t} title={t('drawer.matchText.title')} editing={editing}
+        onSave={saveEdit} onCancel={cancelEdit} onStartEdit={startEdit} onPopout={openPopout} id={matchId} />
       {loading ? (
         <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>{t('drawer.contract.loading')}</div>
       ) : editing ? (

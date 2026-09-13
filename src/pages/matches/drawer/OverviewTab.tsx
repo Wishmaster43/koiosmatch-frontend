@@ -90,6 +90,7 @@ import MatchClientRow from './MatchClientRow'
 import { Field } from './MatchFieldRow'
 import { dash } from '@/components/drawer/fieldRowCanon'
 import type { MatchRow } from '@/types/match'
+import { extractApiError } from '@/lib/extractApiError'
 
 // Render a plain text value, or an em dash when empty (never blank per §3 states).
 function textOrDash(value: string): ReactNode {
@@ -197,8 +198,7 @@ export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTa
       })
       notifySuccess(t('drawer.contract.saved'))
     } catch (err) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-      notifyError(msg || t('drawer.contract.saveError'))
+      notifyError(extractApiError(err, t('drawer.contract.saveError')))
     }
   }
 

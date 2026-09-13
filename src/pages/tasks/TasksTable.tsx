@@ -160,6 +160,9 @@ export default function TasksTable({
   ]
 
   return (
+    // DRY: this DataTable wiring mirrors every other <Entity>Table (ApplicationsTable
+    // included) — it IS the shared DataTable contract every table composes the same
+    // way (§3A); the columns above are what actually differs per entity.
     <DataTable
       columns={columns}
       rows={rows}

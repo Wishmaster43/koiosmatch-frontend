@@ -34,6 +34,19 @@ interface GenerateFlowStatusProps {
 // Layout override for the ghost-variant retry action: link-like footprint (no height/padding).
 const linkBtn: CSSProperties = { height: 'auto', padding: 0, fontSize: 11, fontWeight: 600, color: 'var(--color-primary-text)', textDecoration: 'underline' }
 
+// Shared warning callout + retry link for the two soft-failure states (503
+// unavailable, 402 credit-exhausted) — identical shape, only the message differs.
+function RetryCallout({ message, onRetry, t }: { message: string; onRetry: () => void; t: TFunction }) {
+  return (
+    <CalloutBox variant="warning">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span>{message}</span>
+        <Button variant="ghost" size="sm" type="button" onClick={onRetry} style={linkBtn}>{t('common:error.retry')}</Button>
+      </div>
+    </CalloutBox>
+  )
+}
+
 // Renders the loading/unavailable/creditExhausted/error/success states of a generate flow (see file doc above); idle/noProfile stay caller-owned.
 export default function GenerateFlowStatus({ status, concept, onRetry, onApply, onDiscard, t }: GenerateFlowStatusProps) {
   if (status === 'loading') {
@@ -46,26 +59,12 @@ export default function GenerateFlowStatus({ status, concept, onRetry, onApply, 
 
   // 503 — genuinely down right now; honest outage copy, no credit wording.
   if (status === 'unavailable') {
-    return (
-      <CalloutBox variant="warning">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span>{t('common:errors.koiosUnavailable')}</span>
-          <Button variant="ghost" size="sm" type="button" onClick={onRetry} style={linkBtn}>{t('common:error.retry')}</Button>
-        </div>
-      </CalloutBox>
-    )
+    return <RetryCallout message={t('common:errors.koiosUnavailable')} onRetry={onRetry} t={t} />
   }
 
   // 402 — tenant AI credit spent/not activated; calm warning tone (never red), retry stays enabled.
   if (status === 'creditExhausted') {
-    return (
-      <CalloutBox variant="warning">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span>{t('common:errors.koiosCreditExhausted')}</span>
-          <Button variant="ghost" size="sm" type="button" onClick={onRetry} style={linkBtn}>{t('common:error.retry')}</Button>
-        </div>
-      </CalloutBox>
-    )
+    return <RetryCallout message={t('common:errors.koiosCreditExhausted')} onRetry={onRetry} t={t} />
   }
 
   if (status === 'error') {

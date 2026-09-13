@@ -13,6 +13,19 @@ import type { ApiBackofficeLink, BackofficeLink } from '@/lib/backofficeLink'
 import type { ApiKoiosAiAdvice, KoiosAiAdvice } from '@/lib/koiosAdviceMap'
 export type { Loose }
 
+/**
+ * The props every independent profile-tab field card shares (ProfilePersonalTab,
+ * ProfileContactTab, ProfileAddressTab, WorkPermitBlock, …) — each owns its own
+ * pencil/draft/error state, so this is only the wiring INTO that card: the
+ * candidate to read, an optional save callback, and the shared "start editing
+ * now" signal from the tab's own auto-edit affordance.
+ */
+export interface CandidateFieldCardProps {
+  c: Candidate
+  onSave?: (v: Record<string, unknown>) => void
+  autoEditSignal?: number
+}
+
 /** A tenant-defined custom field definition (GET /custom-fields?entity_type=candidate). */
 export interface CandidateCustomFieldDef {
   id: string | number

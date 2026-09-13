@@ -234,7 +234,9 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
           if (file && targetId != null) replaceDoc(targetId, file)
         }} />
       {previewDoc && <DocPreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)} />}
-      {/* One shared destructive-confirm dialog for both single and bulk delete (never a native confirm()). */}
+      {/* One shared destructive-confirm dialog for both single and bulk delete (never a native confirm()).
+          DRY: this invocation is already the shared component's full prop
+          contract; nothing left to extract without changing the component. */}
       <DocumentDeleteDialog
         open={confirmDelete}
         onConfirm={confirmDeleteAction}

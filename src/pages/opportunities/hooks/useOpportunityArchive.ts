@@ -9,13 +9,10 @@
  * restore needs the looser opportunities.update — the page passes onArchive/
  * onRestore accordingly, never a single combined flag. Enkelstuks: the per-id
  * route, never bulk-with-one-id (there IS a bulk/archive route, C-41, but a
- * single record uses its own DELETE, mirroring candidates BE 5970c03).
+ * single record uses its own DELETE, mirroring candidates BE 5970c03). Thin
+ * wrapper around the shared useEntityArchive factory (DRY round).
  */
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import api from '@/lib/api'
-import { notify } from '@/lib/notify'
-import { useConfirm } from '@/hooks/useConfirm'
+import { useEntityArchive } from '@/hooks/useEntityArchive'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
 
@@ -30,46 +27,8 @@ interface Args {
 }
 
 export function useOpportunityArchive({ onPatch, onReload }: Args) {
-  const { t } = useTranslation('opportunities')
-  const [archiving, setArchiving] = useState(false)
-  const [restoring, setRestoring] = useState(false)
-  const { confirm, dialog } = useConfirm()
-
-  // DELETE /opportunities/{id} — reversible soft-delete, no extra guard server-side.
-  const archiveOpportunity = (id: Id | undefined) => {
-    if (id == null || archiving) return
-    confirm(t('drawer.archiveConfirm'), async () => {
-      setArchiving(true)
-      try {
-        await api.delete(`/opportunities/${id}`)
-        onPatch(id, { archived: true, archivedAt: new Date().toISOString() })
-        onReload()
-        notify('success', t('drawer.archived'))
-      } catch {
-        notify('error', t('drawer.archiveFailed'))
-      } finally {
-        setArchiving(false)
-      }
-    }, { danger: true })
-  }
-
-  // POST /opportunities/{id}/restore — un-archive. The response is only
-  // `{ restored: true }` (no fresh detail, unlike matches) — clearing the two
-  // local flags is all the drawer needs (mirrors VacancyDrawer's restoreVacancy).
-  const restoreOpportunity = async (id: Id | undefined) => {
-    if (id == null || restoring) return
-    setRestoring(true)
-    try {
-      await api.post(`/opportunities/${id}/restore`)
-      onPatch(id, { archived: false, archivedAt: null })
-      onReload()
-      notify('success', t('drawer.archivedBanner.restored'))
-    } catch {
-      notify('error', t('drawer.archivedBanner.restoreFailed'))
-    } finally {
-      setRestoring(false)
-    }
-  }
-
-  return { archiveOpportunity, restoreOpportunity, archiving, restoring, dialog }
+  const { archive, restore, archiving, restoring, dialog } = useEntityArchive<Id | undefined>({
+    resource: 'opportunities', namespace: 'opportunities', onPatch, onReload,
+  })
+  return { archiveOpportunity: archive, restoreOpportunity: restore, archiving, restoring, dialog }
 }

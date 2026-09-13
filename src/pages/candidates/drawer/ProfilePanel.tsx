@@ -6,16 +6,10 @@
 import ProfileTab from './ProfileTab'
 import KoiosAiBlock from './KoiosAiBlock'
 import BranchSection from './BranchSection'
-import type { Candidate } from '@/types/candidate'
+import type { ProfileEditableProps } from './profileFieldShared'
 
 // Composes the profile tab's three fixed blocks (fields, Koios AI, branch); each block owns its own edit state (see file header).
-export default function ProfilePanel({ c, onEditSave, autoEditSignal, onContactMoment }: {
-  c: Candidate; onEditSave?: (v: Record<string, unknown>) => void; autoEditSignal?: number
-  // B15-flow: a confirmed contact moment updates local state ONLY (the write
-  // already happened via its own endpoint) — never re-routed through onEditSave,
-  // which would fire a redundant/incorrect candidate PATCH.
-  onContactMoment?: (v: Record<string, unknown>) => void
-}) {
+export default function ProfilePanel({ c, onEditSave, autoEditSignal, onContactMoment }: ProfileEditableProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <ProfileTab c={c} onEditSave={onEditSave} autoEditSignal={autoEditSignal} onContactMoment={onContactMoment} />

@@ -52,7 +52,7 @@ import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import { templateTexts, type WaTemplateOption } from '@/components/layout/workflow/whatsappTemplate'
+import { selectedTemplateTexts, type WaTemplateOption } from '@/components/layout/workflow/whatsappTemplate'
 import type { ConversationSubject } from '@/components/drawer/useWhatsAppTemplateSend'
 import type { Id } from '@/types/common'
 import type { AiAgent } from '@/types/ai'
@@ -160,8 +160,7 @@ export default function StartConversationModal({ candidateId, subject, onClose, 
     return () => { alive = false }
   }, [])
 
-  const selected = templates.find(tpl => tpl.value === templateName)
-  const texts = templateTexts(selected?.components)
+  const { selected, texts } = selectedTemplateTexts(templates, templateName)
   const hasPreview = Boolean(texts.header || texts.body || texts.footer)
   // The picker's options: every connected device, or the own device alone when the
   // tenant list hiccuped but the profile read did not (never a silently empty picker).

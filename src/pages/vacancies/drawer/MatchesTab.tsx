@@ -55,7 +55,11 @@ export default function MatchesTab({ vacancyId }: { vacancyId?: Id }) {
       />
       {/* KLANTEN 4 (Danny 21-08): the shared MatchListBody shell (column-header
           bar + collapsed flat rows), same as the candidate/customer tabs
-          (DRY round 11, MATCHLISTS). */}
+          (DRY round 11, MATCHLISTS). DRY: mirrors the customer MatchesTab's own
+          MatchListBody call — already sharing MatchListBody/MatchCard/
+          matchCardRowProps; the remaining lines differ in the per-entity extra
+          MatchCard props (contractForm+showVacancyColumn here vs contractStatus
+          on the customer side), which is real variance, not copy-paste. */}
       <MatchListBody
         otherPartyLabel={t('matches:cols.candidate')}
         leadWithOtherParty

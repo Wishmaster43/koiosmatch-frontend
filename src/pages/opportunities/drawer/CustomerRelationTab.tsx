@@ -20,13 +20,13 @@ import { useState } from 'react'
 import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { contactOptionLabel } from '@/lib/contactLabel'
-import { Building2, Edit2, Save, X } from 'lucide-react'
+import { Building2 } from 'lucide-react'
+import { InlineEditActions } from '@/components/ui/InlineEditActions'
 import DetailTableJs from '@/components/ui/DetailTable'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import SelectMenu from '@/components/ui/SelectMenu'
 import EntityLink from '@/components/ui/EntityLink'
 import { GroupLabel, Caption } from '@/components/ui/typography'
-import Button from '@/components/ui/Button'
 import { useCustomerCascade} from '../hooks/useCustomerCascade'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
@@ -148,14 +148,7 @@ export default function CustomerRelationTab({ opportunity: o, customers = [], on
           <span style={{ fontSize: 14, fontWeight: 700 }}>{o.client || '—'}</span>
         </div>
         {/* In-place edit toggle: pencil → diskette + ✕, same spot (§0.3 pattern). */}
-        {onUpdate && (editing ? (
-          <div style={{ display: 'flex', gap: 4 }}>
-            <Button variant="primary" iconOnly size="sm" onClick={save} title={t('common:save')} aria-label={t('common:save')}><Save size={13} /></Button>
-            <Button variant="secondary" iconOnly size="sm" onClick={cancel} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={13} /></Button>
-          </div>
-        ) : (
-          <Button variant="ghost" iconOnly size="sm" onClick={startEdit} title={t('common:edit')} aria-label={t('common:edit')}><Edit2 size={13} /></Button>
-        ))}
+        {onUpdate && <InlineEditActions editing={editing} onSave={save} onCancel={cancel} onStartEdit={startEdit} />}
       </div>
 
       <Card title={t('drawer.tabs.customer')} clip={!editing}>

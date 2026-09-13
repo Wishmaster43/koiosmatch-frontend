@@ -366,6 +366,12 @@ export default function ContactDetail({ contact, locations, departments, statuse
             { id: 'linkedNotes', label: t('notes.linkedNotes') },
           ],
           // TIJDLIJN-SUBDRILL-1/DD-FE-6: see buildSubEntityTabs' own doc comment.
+          // DRY: this timeline/links pair + the SubTabBar wiring below already runs
+          // through the shared buildSubEntityTabs() — the remaining resemblance to
+          // Department/LocationDetail's own call is each detail's own condition
+          // (contact.customerId vs department/location's customerId) and its own
+          // `subTab` state type, not extractable without coupling three unrelated
+          // state shapes together.
           timeline: { show: contact.customerId != null, label: t('drawer.tabs.timeline') },
           links: { show: showKoppelingen, label: t('common:backofficeLinks.tabLabel') },
         })}

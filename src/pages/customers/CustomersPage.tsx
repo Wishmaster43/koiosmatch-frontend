@@ -306,7 +306,11 @@ export default function CustomersPage({ intent }: { intent?: CustomerIntent } = 
           {/* Table ⇄ map — ViewSwitch keeps both mounted (display toggle, not unmount)
               so the table's virtualizer never remeasures 0 on returning from the map
               (§ViewSwitch, mirrors candidates). Map LEFT, filtered customer table
-              RIGHT when active — one radius search drives both panes. Lazy Leaflet load. */}
+              RIGHT when active — one radius search drives both panes. Lazy Leaflet load.
+              DRY: this ViewSwitch scaffold matches OpportunitiesPage's own (§3A entity
+              pages deliberately mirror one shape) — the actual table component + props
+              differ per entity, so there is no generic body to extract without coupling
+              unrelated entity tables together. */}
           <ViewSwitch active={view} views={[
             {
               id: 'table',

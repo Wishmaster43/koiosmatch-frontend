@@ -22,7 +22,7 @@ import { useReasonSubmit } from '@/hooks/useReasonSubmit'
 import { useMatchRenew } from '../hooks/useMatchRenew'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import type { MatchRow } from '@/types/match'
-import Button from '@/components/ui/Button'
+import MatchConfirmFooter from './MatchConfirmFooter'
 
 // Canon field style (G33/fieldMetrics) — was its own padding-8/radius-8 copy.
 const fieldBox: CSSProperties = fieldInputStyle
@@ -111,14 +111,8 @@ export default function RenewMatchModal({ match, onClose, onUpdate }: Props) {
           </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
-          <Button variant="secondary" onClick={onClose}>
-            {t('common:cancel')}
-          </Button>
-          <Button variant="primary" onClick={submit} disabled={!canSubmit}>
-            {t('drawer.renew.confirm')}
-          </Button>
-        </div>
+        <MatchConfirmFooter onCancel={onClose} cancelLabel={t('common:cancel')}
+          onSubmit={submit} submitLabel={t('drawer.renew.confirm')} disabled={!canSubmit} />
     </FloatingPanel>
   )
 }

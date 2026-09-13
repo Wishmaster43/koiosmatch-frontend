@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { runAliveGuarded } from '@/lib/aliveGuard'
 import { PageTitle } from '@/components/ui/typography'
 
 // See the file's top doc above; the purchase-to-sale conversion factor, persisted to the shared tenant matching settings resource.
@@ -34,18 +35,14 @@ export default function MatchRatesSettings() {
   // S-1: presence-gate the field — only render it if the response includes the key.
   useEffect(() => {
     let alive = true
-    api.get('/settings/matching')
-      .then(r => {
-        if (!alive) return
-        const d = (unwrap(r)) ?? {}
-        // S-1: check if conversion_factor key is present in the response.
-        const hasField = 'conversion_factor' in d
-        setHasConversionFactorField(hasField)
-        const cf = d.conversion_factor != null ? String(d.conversion_factor) : ''
-        setConversionFactor(cf); setSavedFactor(cf)
-      })
-      .catch(() => { if (alive) setLoadError(true) })
-      .finally(() => { if (alive) setLoading(false) })
+    runAliveGuarded(api.get('/settings/matching'), () => alive, (r) => {
+      const d = (unwrap(r)) ?? {}
+      // S-1: check if conversion_factor key is present in the response.
+      const hasField = 'conversion_factor' in d
+      setHasConversionFactorField(hasField)
+      const cf = d.conversion_factor != null ? String(d.conversion_factor) : ''
+      setConversionFactor(cf); setSavedFactor(cf)
+    }, setLoadError, setLoading)
     return () => { alive = false }
   }, [])
 

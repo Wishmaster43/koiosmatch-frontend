@@ -9,12 +9,14 @@ import SoftChip from '@/components/ui/SoftChip'
 import Button from '@/components/ui/Button'
 import { Plus } from 'lucide-react'
 import { PlanIntakeModal } from '@/pages/candidates/shared'
-import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
+import { CanonFieldRow } from '@/components/drawer/CanonFieldRow'
 // HUISSTIJL-1: shared typography atom — every muted secondary line in this
 // strip is an exact 11px/muted match for Caption.
 import { Caption } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import { translateInterviewStatus } from '@/lib/interviewStatus'
+// Pure date helper (no locale) — importing it never drags the i18n init in (DATETIME-IMPORT-LES).
+import { daysSince } from '@/lib/localDate'
 import type { ApplicationDetail } from '@/types/application'
 
 // One label-LEFT/value-RIGHT row (DRILLDOWN-VOLGORDE-CANON, Danny 21-08 ruling
@@ -24,25 +26,13 @@ import type { ApplicationDetail } from '@/types/application'
 // Every row still renders something calm even when its own data is missing
 // (§0.3, four UI states — never a blank row).
 function Row({ label, children }: { label: ReactNode; children: ReactNode }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, minHeight: 26 }}>
-      <span style={{ ...CANON_LABEL_STYLE, marginTop: 2 }}>{label}</span>
-      <div style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'var(--text)', lineHeight: 1.4 }}>{children}</div>
-    </div>
-  )
+  return <CanonFieldRow label={label} align="flex-start">{children}</CanonFieldRow>
 }
 
 const mutedItalic: CSSProperties = { color: 'var(--text-muted)', fontStyle: 'italic' }
 // HUISSTIJL-1: layout only (marginTop) — fontSize/colour come from the Caption
 // atom's own default identity, never redeclared locally.
 
-// Whole days between an ISO date and now; null when the date is missing/unparseable.
-function daysSince(iso: string | undefined, now: Date = new Date()): number | null {
-  if (!iso) return null
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return null
-  return Math.max(0, Math.floor((now.getTime() - d.getTime()) / 86400000))
-}
 
 type Appointment = ApplicationDetail['appointments'][number]
 // The first FUTURE appointment (server order not guaranteed) — a past one is
@@ -125,8 +115,8 @@ export default function ApplicationStatusStrip({ application: a, onNavigateTab }
   // days-since-created IS days-in-phase (that conflation was the old bug).
   const currentStage = a.stageDurations?.find(s => s.leftAt === null)
   const phaseEnteredAt = currentStage?.enteredAt ?? a.currentStageEnteredAt ?? null
-  const daysInPhase = currentStage?.days ?? daysSince(phaseEnteredAt ?? undefined)
-  const daysInProcess = daysSince(a.created)
+  const daysInPhase = currentStage?.days ?? daysSince(phaseEnteredAt ?? undefined, new Date(), true)
+  const daysInProcess = daysSince(a.created, new Date(), true)
   const nextAppointment = nextFutureAppointment(a.appointments ?? [])
 
   return (

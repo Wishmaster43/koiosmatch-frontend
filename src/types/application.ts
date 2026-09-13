@@ -10,6 +10,23 @@ import type { InterviewWorkflowRef } from './vacancy'
 import type { ApiKoiosAiAdvice, KoiosAiAdvice } from '@/lib/koiosAdviceMap'
 
 /**
+ * The vacancy-link + source-edit callback pair shared by ApplicationDrawer and
+ * its Sollicitatie tab (ApplicationTab) — both thread the SAME two optional
+ * handlers down to the Details block, so one type keeps their signatures and
+ * doc comments from drifting apart.
+ */
+export interface ApplicationLinkSourceProps {
+  // Re-link (or unlink, null) the vacancy this application is coupled to — shared
+  // by the Sollicitatie tab's Details block and the Vacature tab (§3A). The customer
+  // is derived from the picked option so the caller can update it optimistically
+  // before the PATCH response reconciles it. Undefined hides the pencil (read-only caller).
+  onLinkVacancy?: (id: Id | undefined, vacancyId: Id | null, meta?: { title?: string; client?: string }) => void
+  // S7: PATCH the editable Bron field from the Sollicitatie tab's Details block.
+  // Undefined hides the pencil (read-only caller, mirrors onLinkVacancy).
+  onUpdateSource?: (id: Id | undefined, source: string, sourceKey?: string | null) => void
+}
+
+/**
  * APP-STAGE-DURATIONS-1 (landed): one entry per phase the application has
  * passed through — chronological, `leftAt` null on the CURRENT stage. Backs
  * the status strip's real "days in phase" line instead of guessing from the

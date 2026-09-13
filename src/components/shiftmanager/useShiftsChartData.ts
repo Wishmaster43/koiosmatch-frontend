@@ -10,7 +10,7 @@
  * refetches a combo we already have (was: a raw useEffect that cleared rows to
  * [] and re-hit the aggregation on every change → felt like a full reload).
  */
-import { useMemo } from "react"
+import { useMemo, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { useQuery, keepPreviousData } from "@tanstack/react-query"
 import api, { unwrapList } from "@/lib/api"
@@ -181,35 +181,26 @@ export function useShiftsChartData({
   // Bar descriptors for the shifts chart (count) and the hours chart. In multi-year
   // mode the bar `name` carries the year (Totaal 2025 / Totaal 2026) so the legend and
   // tooltip stay unambiguous with only one metric on screen.
-  const shiftBars = useMemo<ShiftBar[]>(() =>
+  // Shared bar-descriptor builder for the shifts (count) and hours charts — only
+  // the dataKey/seriesKey suffix ('' vs '_uren') differs between the two.
+  const buildBars = useCallback((suffix: string): ShiftBar[] =>
     selectedYears.flatMap((year) => {
       const rank = yearRank.get(year) ?? 0
       return barSeries.map((s): ShiftBar => ({
-        dataKey:    `${year}_${s.key}`,
+        dataKey:    `${year}_${s.key}${suffix}`,
         name:       multiYear ? `${seriesLabel(s.key)} ${year}` : seriesLabel(s.key),
         color:      s.color,
         fill:       yearTint(s.color, rank),
         opacity:    YEAR_OPACITY[rank] ?? 0.3,
         legendType: "square",
         year,
-        seriesKey:  s.key,
+        seriesKey:  `${s.key}${suffix}`,
       }))
     }), [selectedYears, barSeries, yearRank, multiYear, seriesLabel])
 
-  const hoursBars = useMemo<ShiftBar[]>(() =>
-    selectedYears.flatMap((year) => {
-      const rank = yearRank.get(year) ?? 0
-      return barSeries.map((s): ShiftBar => ({
-        dataKey:    `${year}_${s.key}_uren`,
-        name:       multiYear ? `${seriesLabel(s.key)} ${year}` : seriesLabel(s.key),
-        color:      s.color,
-        fill:       yearTint(s.color, rank),
-        opacity:    YEAR_OPACITY[rank] ?? 0.3,
-        legendType: "square",
-        year,
-        seriesKey:  `${s.key}_uren`,
-      }))
-    }), [selectedYears, barSeries, yearRank, multiYear, seriesLabel])
+  const shiftBars = useMemo<ShiftBar[]>(() => buildBars(''), [buildBars])
+
+  const hoursBars = useMemo<ShiftBar[]>(() => buildBars('_uren'), [buildBars])
 
   // Filter-driven hour KPIs for the dashboard tiles (derived from the same filtered
   // chartData): open hours = geen-kandidaat uren · this-month = prognose of the current

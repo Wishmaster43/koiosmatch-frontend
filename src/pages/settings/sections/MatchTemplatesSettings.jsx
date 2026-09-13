@@ -20,7 +20,7 @@ import SearchSelect from '@/components/ui/SearchSelect'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useContractTypes } from '@/lib/useContractTypes'
 import { useFunctions } from '@/lib/useFunctions'
-import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import { cardStyle, labelStyle, inputStyle, useSettingsListUiState } from './settingsListCardStyles'
 import { Mono } from '@/components/ui/typography'
 import EditorRowFooter from '@/components/ui/EditorRowFooter'
 import AddFormFooter from '@/components/ui/AddFormFooter'
@@ -39,11 +39,6 @@ const buildWeights = (w) => Object.fromEntries(DIMENSIONS.map(d => [d, Number((w
 
 // Add/remove a value in a multi-select array (Soort dienstverband).
 const toggleInArray = (arr, value) => (arr ?? []).includes(value) ? arr.filter(x => x !== value) : [...(arr ?? []), value]
-
-const cardStyle = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 8 }
-const labelStyle = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }
-// Canon field style (G33/fieldMetrics) — was its own padding-6/radius-6 copy.
-const inputStyle = fieldInputStyle
 
 // Compact read-only preview of a template's six weights (row summary) — five ticks
 // per dimension, filled up to the stored value, so the list is scannable at a glance.
@@ -76,10 +71,7 @@ export default function MatchTemplatesSettings() {
   const [templates, setTemplates] = useState([])
   // Four explicit UI states, no blank screen on failure.
   const [phase, setPhase] = useState('loading') // loading | error | ready
-  const [expanded, setExpanded] = useState(null)
-  const [adding, setAdding] = useState(false)
-  const [saving, setSaving] = useState(null) // 'new' | template id | null
-  const [editForms, setEditForms] = useState({})
+  const { expanded, setExpanded, adding, setAdding, saving, setSaving, editForms, setEditForms } = useSettingsListUiState()
   const [newForm, setNewForm] = useState({ name: '', weights: buildWeights(), contract_types: [], function_title: '' })
   const { confirm, dialog } = useConfirm()
 
@@ -323,6 +315,10 @@ export default function MatchTemplatesSettings() {
             {renderFunctionField(newForm.function_title, v => setNewForm(p => ({ ...p, function_title: v })))}
             <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('matchTemplatesSettings.defaultAssignmentHint')}</p>
 
+            {/* DRY: this AddFormFooter/AddCardTrigger swap matches VacancyContentBlocksSettings/
+                VacancyGenerationProfilesList — all three already reuse the shared atoms
+                (AddFormFooter/AddCardTrigger); the remaining resemblance is consistent
+                usage of those atoms with each screen's own fields between, not a body to extract. */}
             <AddFormFooter
               onCancel={() => setAdding(false)}
               cancelLabel={t('common.cancel')}

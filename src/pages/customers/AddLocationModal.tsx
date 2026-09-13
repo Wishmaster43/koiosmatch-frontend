@@ -58,7 +58,7 @@ import LocationAddressCard from './addmodal/LocationAddressCard'
 import LocationBusinessCard from './addmodal/LocationBusinessCard'
 import ContactOnSiteCard from './addmodal/ContactOnSiteCard'
 import LocationDescriptionCard from './addmodal/LocationDescriptionCard'
-import { setLocationPrimaryContact, splitContactName } from './hooks/useCustomerContacts'
+import { setLocationPrimaryContact, quickContactPayload } from './hooks/useCustomerContacts'
 import type { LocationPayload } from './hooks/useCustomerLocations'
 import type { ContactPayload } from './hooks/useCustomerContacts'
 import type { Location, Contact } from '@/types/customer'
@@ -247,13 +247,7 @@ export default function AddLocationModal({
         // ter plaatse" card so the new record is not a bare name-only shell; the free-
         // text columns on the location itself are untouched (still written above).
         try {
-          const newContact = await onAddContact?.({
-            ...splitContactName(form.contactName), middleName: '', email: form.email, phone: form.phone, mobile: '',
-            // CONTACT-LINKEDIN-1: no LinkedIn field on this quick-create path.
-            linkedin: '',
-            gender: '', role: '', locationId: null, departmentId: null, locationIds: [], departmentIds: [],
-            statusId: null, isPrimary: false, customFields: {},
-          })
+          const newContact = await onAddContact?.(quickContactPayload(form.contactName, form.email, form.phone))
           if (newContact?.id) {
             try {
               const applied = await setLocationPrimaryContact(customerId, newContact.id, created.id)

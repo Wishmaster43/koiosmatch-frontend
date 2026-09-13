@@ -8,20 +8,15 @@
  * Note: hand-traced approximation of the mark — swap the two <path> definitions
  * for the official vector when available; nothing else needs to change.
  */
-import type { SVGProps } from 'react'
+import { BrandMarkSvg, type BrandMarkProps } from './brandMarkSvg'
 
 // eslint-disable-next-line no-restricted-syntax -- DATA: Shiftmanager brand-mark colour, must match their logo exactly, not a themeable UI colour
 const SM_RED = '#E11D2A'
 
-// Props mirror the lucide icon contract so the mark is interchangeable with one.
-type ShiftManagerMarkProps = { size?: number; color?: string; cut?: string; title?: string } & SVGProps<SVGSVGElement>
-
 // eslint-disable-next-line no-restricted-syntax -- DATA: fixed white glyph, must read against the solid brand-colour hexagon in any theme, not a themeable UI colour
-export default function ShiftManagerMark({ size = 24, color = SM_RED, cut = '#FFFFFF', title = 'Shiftmanager', ...rest }: ShiftManagerMarkProps) {
+export default function ShiftManagerMark({ size = 24, color = SM_RED, cut = '#FFFFFF', title = 'Shiftmanager', ...rest }: BrandMarkProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 96 96" fill="none"
-      role="img" aria-label={title} xmlns="http://www.w3.org/2000/svg" {...rest}>
-      <title>{title}</title>
+    <BrandMarkSvg size={size} title={title} {...rest}>
       {/* Hexagon body — flat-top, centred in the 96×96 box */}
       <path d="M92 48 L70 9.9 L26 9.9 L4 48 L26 86.1 L70 86.1 Z" fill={color} />
       {/* Interlocking glyph — one hook (a top bar + diagonal leg) plus its 180°
@@ -30,6 +25,6 @@ export default function ShiftManagerMark({ size = 24, color = SM_RED, cut = '#FF
         <path d="M20 21 L52 21 L60 58 L46 58 L40 33 L20 33 Z" />
         <path d="M20 21 L52 21 L60 58 L46 58 L40 33 L20 33 Z" transform="rotate(180 48 48)" />
       </g>
-    </svg>
+    </BrandMarkSvg>
   )
 }

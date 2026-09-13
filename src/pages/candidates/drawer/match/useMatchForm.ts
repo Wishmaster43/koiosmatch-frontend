@@ -319,6 +319,9 @@ export function useMatchForm({
   // submit + 422 mapping) — own sibling hook, fed every value it needs to
   // assemble the request body and every RAW setter it needs for the one-shot
   // edit prefill (never the touched-aware ones, see its own docblock).
+  // DRY: this call site's argument names necessarily mirror useMatchSubmit's own
+  // destructured parameter names (it is a plain field pass-through) — the jscpd
+  // hit here is caller/callee naming symmetry, not duplicated logic.
   const { saving, errors, submitErr, handleSubmitClick } = useMatchSubmit({
     editing, editMatchId, candidateId, t, onClose, onCreated,
     customerId, locationId, departmentId, contactId, branchId,

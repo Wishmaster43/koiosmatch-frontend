@@ -10,6 +10,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { runAliveGuarded } from '@/lib/aliveGuard'
 import type { MessageRow } from '@/components/drawer/ConversationMessage'
 import type { Id } from '@/types/common'
 
@@ -29,15 +30,11 @@ export function useConversationThread(conversationId: Id | null) {
     if (conversationId == null) return
     let alive = true
     setLoading(true); setError(false); setMessages([]); setHasOlder(false)
-    api.get(`/conversations/${conversationId}/messages`)
-      .then(r => {
-        if (!alive) return
-        const body = r.data as { has_older?: boolean }
-        setMessages(unwrapList<MessageRow>(r).rows)
-        setHasOlder(Boolean(body?.has_older))
-      })
-      .catch(() => { if (alive) setError(true) })
-      .finally(() => { if (alive) setLoading(false) })
+    runAliveGuarded(api.get(`/conversations/${conversationId}/messages`), () => alive, (r) => {
+      const body = r.data as { has_older?: boolean }
+      setMessages(unwrapList<MessageRow>(r).rows)
+      setHasOlder(Boolean(body?.has_older))
+    }, setError, setLoading)
     return () => { alive = false }
   }, [conversationId])
 

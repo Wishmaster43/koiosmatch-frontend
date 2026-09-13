@@ -156,6 +156,49 @@ function CandidateNoteEditPopout() {
   )
 }
 
+// Shared shell for the two branches whose loading/error copy and note-editor wiring
+// are IDENTICAL down to the key names (ApplicationNoteEditPopout and
+// GenericNoteEditPopout) — only the record/name/subtitle/permission differ.
+// Candidate/customer stay their own branches: they use their OWN i18n namespace's
+// popout keys (not `common:`) and pass a `links` prop these two never do.
+function SimpleNotePopoutShell({ loading, error, record, reload, name, initials, subtitle, note, noteId, onSave, managePermission, writableTypes, t }: {
+  loading: boolean
+  error: unknown
+  record: unknown
+  reload: () => void
+  name: string
+  initials: string
+  subtitle?: string
+  note: EditableNote | null
+  noteId: string | undefined
+  // Caller pre-binds its own editNote(noteIndex, payload) — keeps this shell's
+  // signature free of each entity's own return type (Promise<boolean> vs void).
+  onSave: (payload: { type: string; title: string; body: string; channel?: string; language?: string }) => Promise<boolean>
+  managePermission: string
+  writableTypes: NoteType[]
+  t: (k: string, o?: Record<string, unknown>) => string
+}) {
+  const notFound = !loading && !error && (!note || isSystemNote(note))
+  const labels: NotesLabels = { type: t('notes.type'), notePlaceholder: () => t('notes.placeholder') }
+  return (
+    <PopoutShell
+      loading={loading}
+      error={Boolean(error) || !record || notFound}
+      onRetry={reload}
+      loadingLabel={t('common:loading')}
+      errorLabel={notFound ? t('common:popout.noteNotFound') : t('common:popout.loadError')}
+      retryLabel={t('common:error.retry')}
+      name={name} initials={initials} subtitle={subtitle || t('notes.title')}
+    >
+      {note && (
+        <NoteEditor key={String(noteId)} note={note} managePermission={managePermission}
+          onSave={onSave}
+          noteTypes={writableTypes} channels={[]} labels={labels} readOnlyCopy={t('common:popout.noteReadOnly')} />
+      )}
+    </PopoutShell>
+  )
+}
+
 // --- Application branch (A-popout-1) -----------------------------------------
 function ApplicationNoteEditPopout() {
   const { id, noteId } = useParams()
@@ -164,9 +207,9 @@ function ApplicationNoteEditPopout() {
   const { notes, editNote } = usePopoutApplicationNotes(id)
   const { writableTypes } = useNoteTypes('application')
   // No standalone GET for application notes (see usePopoutApplicationNotes'
-  // own docblock) — "loaded" is simply "the lite fetch settled", the same
-  // signal that also gates the note list itself (both ride the same request).
-  const loaded = !loading && !error
+  // own docblock) — "loaded" (loading/error settled) is the same signal that
+  // also gates the note list itself (both ride the same request); computed
+  // inside SimpleNotePopoutShell from the loading/error passed below.
 
   const noteIndex = notes.findIndex(n => String(n.id) === String(noteId))
   const note = noteIndex >= 0 ? (notes[noteIndex] as PopoutApplicationNote) : null
@@ -174,26 +217,11 @@ function ApplicationNoteEditPopout() {
   // Sets the OS window title to the application candidate name while this popout is open, restoring the previous title on close.
   usePopoutWindowTitle(application, t('common:popout.windowTitle', { name: application?.candidateName }))
 
-  const notFound = loaded && (!note || isSystemNote(note))
-  const labels: NotesLabels = { type: t('notes.type'), notePlaceholder: () => t('notes.placeholder') }
-
   return (
-    <PopoutShell
-      loading={loading}
-      error={Boolean(error) || !application || notFound}
-      onRetry={reload}
-      loadingLabel={t('common:loading')}
-      errorLabel={notFound ? t('common:popout.noteNotFound') : t('common:popout.loadError')}
-      retryLabel={t('common:error.retry')}
-      name={application?.candidateName ?? ''} initials={application?.initials ?? ''}
-      subtitle={application?.vacancyTitle || t('notes.title')}
-    >
-      {note && (
-        <NoteEditor key={String(noteId)} note={note} managePermission="applications.notes.manage_all"
-          onSave={payload => editNote(noteIndex, payload)}
-          noteTypes={writableTypes} channels={[]} labels={labels} readOnlyCopy={t('common:popout.noteReadOnly')} />
-      )}
-    </PopoutShell>
+    <SimpleNotePopoutShell loading={loading} error={error} record={application} reload={reload}
+      name={application?.candidateName ?? ''} initials={application?.initials ?? ''} subtitle={application?.vacancyTitle}
+      note={note} noteId={noteId} onSave={payload => editNote(noteIndex, payload)}
+      managePermission="applications.notes.manage_all" writableTypes={writableTypes} t={t} />
   )
 }
 
@@ -265,7 +293,6 @@ function GenericNoteEditPopout<R extends { loading: boolean; error: boolean; rel
   // namespace (a coincidental coupling), and opportunities' route is PUT-only.
   const { notes, editNote } = useEntityNotes({ id, basePath: `${ENTITY_API_BASE[entity]}/${id}`, updateMethod: entity === 'opportunity' ? 'put' : 'patch' })
   const { writableTypes } = useNoteTypes(entity)
-  const loaded = !loading && !error
 
   const noteIndex = notes.findIndex(n => String(n.id) === String(noteId))
   const note = noteIndex >= 0 ? (notes[noteIndex] as EditableNote) : null
@@ -273,25 +300,11 @@ function GenericNoteEditPopout<R extends { loading: boolean; error: boolean; rel
   // Sets the OS window title to the record's identity while this popout is open, restoring the previous title on close.
   usePopoutWindowTitle(record, t('common:popout.windowTitle', { name }))
 
-  const notFound = loaded && (!note || isSystemNote(note))
-  const labels: NotesLabels = { type: t('notes.type'), notePlaceholder: () => t('notes.placeholder') }
-
   return (
-    <PopoutShell
-      loading={loading}
-      error={Boolean(error) || !record || notFound}
-      onRetry={reload}
-      loadingLabel={t('common:loading')}
-      errorLabel={notFound ? t('common:popout.noteNotFound') : t('common:popout.loadError')}
-      retryLabel={t('common:error.retry')}
-      name={name} initials={initials} subtitle={subtitle || t('notes.title')}
-    >
-      {note && (
-        <NoteEditor key={String(noteId)} note={note} managePermission="candidates.notes.manage_all"
-          onSave={payload => editNote(noteIndex, payload)}
-          noteTypes={writableTypes} channels={[]} labels={labels} readOnlyCopy={t('common:popout.noteReadOnly')} />
-      )}
-    </PopoutShell>
+    <SimpleNotePopoutShell loading={loading} error={error} record={record} reload={reload}
+      name={name} initials={initials} subtitle={subtitle}
+      note={note} noteId={noteId} onSave={payload => editNote(noteIndex, payload)}
+      managePermission="candidates.notes.manage_all" writableTypes={writableTypes} t={t} />
   )
 }
 

@@ -25,6 +25,14 @@ export const VACANCY_DEFAULT_STATUS_KEY = 'vacancy_default_status_on_create'
  * VacancyLookupsContext already normalises each status's `value` to that id (no
  * `value` column exists on this lookup), so this component reads/writes the same id.
  */
+// DRY: this component's shape (useSettingKeyPick + SingleLookupSettingCard call)
+// reads as a near-clone of CustomerConversionSettings (jscpd weak-mode match) —
+// that is the intended shape of a "one thin config file per single-lookup
+// setting" screen (mirrors the §0.11 workflow-module pattern): the shared
+// behaviour already lives in SingleLookupSettingCard/useSettingKeyPick, and each
+// file only supplies its own tenant-setting key, lookup source and i18n keys.
+// Merging these two into one generic wrapper would just re-introduce a second
+// config layer for no behavioural gain.
 function VacancyDefaultStatusEditor() {
   const { t } = useTranslation('settings')
   const { statuses } = useVacancyLookups()

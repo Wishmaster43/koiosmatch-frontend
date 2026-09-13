@@ -12,7 +12,7 @@ import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
 import Spinner from '@/components/ui/Spinner'
 import { ghostBtn } from './cvCardStyles'
 import type { CvCardBaseProps } from './useCvParse'
-import { cardHead, cardBox } from './fields'
+import { CvCardShell } from './CvCardShell'
 
 type PasteCvCardProps = CvCardBaseProps
 
@@ -25,10 +25,7 @@ export default function PasteCvCard({ phase, errorKey, summary, onReset }: Paste
   if (phase === 'idle') return null
 
   return (
-    <div style={{ gridColumn: '1 / -1' }}>
-      <div style={cardHead}>{t('modal.cvPaste.title')}</div>
-      <div style={{ ...cardBox, gap: 8, padding: 10 }}>
-
+    <CvCardShell title={t('modal.cvPaste.title')}>
         {busy && (
           <div role="status" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-muted)' }}>
             <Spinner size={14} />
@@ -60,7 +57,6 @@ export default function PasteCvCard({ phase, errorKey, summary, onReset }: Paste
             </button>
           </div>
         )}
-      </div>
-    </div>
+    </CvCardShell>
   )
 }

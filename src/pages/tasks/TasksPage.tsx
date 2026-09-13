@@ -5,7 +5,6 @@
  * drawer.
  */
 import { useState, useEffect, useMemo, useRef } from 'react'
-import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Archive, Plus, Trash2 } from 'lucide-react'
 import ViewModeToggle from '@/components/ui/ViewModeToggle'
@@ -42,11 +41,12 @@ import type { Task, ApiTask } from '@/types/task'
 import type { Id } from '@/types/common'
 import { usePageSlice } from '@/hooks/usePageSlice'
 import { TOOLBAR_ROW_STYLE } from '@/components/ui/toolbarRow'
+import { makeArrayToggle } from '@/lib/selectionSet'
 
 interface UserLike { id: Id; name: string; avatar_color?: string | null }
 
 // Right-panel multi-toggle for a filter dimension.
-const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
+const tog = makeArrayToggle
 
 // Page wrapper: scopes the task lookups (statuses/types/priorities) to this screen.
 export default function TasksPage({ intent }: { intent?: unknown } = {}) {

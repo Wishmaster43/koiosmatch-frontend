@@ -16,7 +16,7 @@ import { PageTitle } from '@/components/ui/typography'
 import { navigateToPage } from '@/lib/navigate'
 import type { ReportCandidate } from '@/types/reports'
 import { SM_STATUS, normalizeSmStatus } from '@/lib/smStatus'
-import DrawerBackdrop from '@/components/drawer/DrawerBackdrop'
+import DrawerPanelShell from '@/components/drawer/DrawerPanelShell'
 
 // Colored status pill (actief / nietactief / extern / ...) for a record.
 function StatusBadge({ status }: { status?: string }) {
@@ -90,14 +90,10 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
   })
 
   return (
-    <>
-      {/* Backdrop */}
-      <DrawerBackdrop onClick={onClose} />
-
-      {/* Drawer */}
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} tabIndex={-1}
-        className="fixed top-0 bottom-0 right-0 flex flex-col bg-[var(--surface)]"
-        style={{ width: expanded ? 900 : 560, zIndex: 'var(--z-drawer)', transition: 'width 0.2s ease', boxShadow: 'var(--shadow-drawer)' }}>
+    <DrawerPanelShell panelRef={panelRef} onClose={onClose}
+      ariaLabel={typeof title === 'string' ? title : undefined}
+      className="fixed top-0 bottom-0 right-0 flex flex-col bg-[var(--surface)]"
+      style={{ width: expanded ? 900 : 560, zIndex: 'var(--z-drawer)', transition: 'width 0.2s ease', boxShadow: 'var(--shadow-drawer)' }}>
 
         {/* Header */}
         <div className="flex items-start justify-between flex-shrink-0"
@@ -226,7 +222,6 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
             </Button>
           </div>
         </div>
-      </div>
-    </>
+    </DrawerPanelShell>
   )
 }

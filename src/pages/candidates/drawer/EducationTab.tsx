@@ -12,7 +12,7 @@ import { useEducationLevels } from '@/lib/useEducationLevels'
 import { SectionTitle } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
 import {
-  AddableSection, DocEntryLinks, LinkedDocPreviewOverlay, ProseField, renderAddButton, resolveEducationStartDate, resolveLinkedDocument,
+  AddableSection, LinkedDocPreviewOverlay, RelItemDescAndDocFooter, renderAddButton, resolveEducationStartDate, resolveLinkedDocument,
 } from './sectionTabsShared'
 import type { RelItem, RelTabProps } from './sectionTabsShared'
 import { linkedDocumentField } from './useLinkedDocPreview'
@@ -123,8 +123,7 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = 
                 )}
               </div>
               {secondary && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{secondary}</div>}
-              <ProseField value={(o as { desc?: string }).desc} />
-              {linkedDoc && <DocEntryLinks doc={linkedDoc} onPreview={() => openPreview(linkedDoc)} onJump={onJumpToDocuments} />}
+              <RelItemDescAndDocFooter desc={(o as { desc?: string }).desc} linkedDoc={linkedDoc} openPreview={openPreview} onJumpToDocuments={onJumpToDocuments} />
             </div>
           </div>
         )

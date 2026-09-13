@@ -8,7 +8,7 @@ import { useDateFormat } from '@/lib/datetime'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import { Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
-import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
+import { CanonFieldRow } from '@/components/drawer/CanonFieldRow'
 import { useCandidateCvDocument } from '../hooks/useCandidateCvDocument'
 import type { Id } from '@/types/common'
 
@@ -21,12 +21,7 @@ const iconBtnDisabled = { width: 26, height: 26, display: 'flex', alignItems: 'c
 // own Row byte-for-byte (Danny 22-08: "CV en tekst geen cv beschikbaar links en
 // rechts uitlijnen!" — this block was the last label-above holdout on the tab).
 function Row({ label, children }: { label: ReactNode; children: ReactNode }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26 }}>
-      <span style={{ ...CANON_LABEL_STYLE, display: 'flex', alignItems: 'center', gap: 5 }}>{label}</span>
-      <div style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'var(--text)', lineHeight: 1.4 }}>{children}</div>
-    </div>
-  )
+  return <CanonFieldRow label={label} labelStyle={{ display: 'flex', alignItems: 'center', gap: 5 }}>{children}</CanonFieldRow>
 }
 
 /**

@@ -36,6 +36,7 @@ import { useMatchContract } from '../hooks/useMatchContract'
 import type { MatchContract } from '../hooks/useMatchContract'
 import { numOrNull } from './matchContractFieldUtils'
 import type { MatchRow } from '@/types/match'
+import { extractApiError } from '@/lib/extractApiError'
 
 interface Props {
   matchId: MatchRow['id'] | undefined
@@ -113,8 +114,7 @@ export default function MatchContractSection({ matchId, onUpdate, archived }: Pr
       await save(patch)
       notifySuccess(t('drawer.contract.saved'))
     } catch (err) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-      notifyError(msg || t('drawer.contract.saveError'))
+      notifyError(extractApiError(err, t('drawer.contract.saveError')))
     }
   }
 

@@ -67,6 +67,11 @@ export function buildApplicationFilterGroups({ t, tog, filters: f, options: o }:
     { key: 'client',  type: 'search-select', category: catOrg,       label: t('cols.client'),     selected: f.selectedClient, options: o.clientOptions, onToggle: tog(f.setSelectedClient) },
     // VESTIGING-2: inherited from the candidate; values limited to the user's own
     // branch scope — never a widening.
+    // DRY: owner+branch search-select shape matches customerFilterGroups' pair, but
+    // here they are not adjacent (source/vacancy/client sit between them in this
+    // panel's category order) — extracting a shared builder would force a reorder
+    // of the rendered filter panel (SCHERMWAARHEID: render must stay byte-identical),
+    // so the two-line duplication is kept as the safer, render-preserving choice.
     { key: 'branch',  type: 'search-select', category: catOrg,       label: t('common:filters.branch'), selected: f.selectedBranch, options: o.branchOptions, onToggle: tog(f.setSelectedBranch) },
     // Archived + trash mirrors (quick-view toggles share one server flag include_archived).
     archivedCheckboxGroup(t, catDisplay, f.showArchived, f.setShowArchived, 'archived.toggle'),

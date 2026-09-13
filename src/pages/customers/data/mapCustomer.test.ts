@@ -8,8 +8,8 @@
  * differently than ''. Colour/label are deliberately NOT mapped here: they come from
  * the /customer-phases lookup, so a tenant rename needs no re-fetch of the list.
  */
-import { describe, it, expect } from 'vitest'
-import { mapCustomer, mapCustomerNoteRow, mapLocation, mapContact } from './mapCustomer'
+import { describe, it, expect, vi } from 'vitest'
+import { mapCustomer, mapCustomerNoteRow, mapLocation, mapContact, resolveNoteLinkedName, withNoteLinkChips } from './mapCustomer'
 import type { ApiCustomer, ApiLocation } from '@/types/customer'
 
 describe('mapCustomer · phase (KLANT-FASE-1)', () => {
@@ -211,5 +211,43 @@ describe('mapContact · retention_expires_at', () => {
   it('maps the ISO deadline and defaults to null', () => {
     expect(mapContact({ id: 'c1', retention_expires_at: '2028-09-08T00:00:00Z' }).retentionExpiresAt).toBe('2028-09-08T00:00:00Z')
     expect(mapContact({ id: 'c2' }).retentionExpiresAt).toBeNull()
+  })
+})
+
+// The department/location/contact link priority a note's chip name resolves
+// from — mirrors the backend's own CustomerNote::levelContext() priority order.
+describe('resolveNoteLinkedName', () => {
+  it('prefers department over location and contact', () => {
+    expect(resolveNoteLinkedName({ departmentName: 'Verpleging', locationName: 'Hoofdlocatie', contactName: 'Jan Jansen' })).toBe('Verpleging')
+  })
+
+  it('falls back to location when there is no department', () => {
+    expect(resolveNoteLinkedName({ locationName: 'Hoofdlocatie', contactName: 'Jan Jansen' })).toBe('Hoofdlocatie')
+  })
+
+  it('falls back to contact when there is neither department nor location', () => {
+    expect(resolveNoteLinkedName({ contactName: 'Jan Jansen' })).toBe('Jan Jansen')
+  })
+
+  it('is undefined for a company-level note with no link at all', () => {
+    expect(resolveNoteLinkedName({})).toBeUndefined()
+  })
+})
+
+// withNoteLinkChips — shared by the notes tab and its second-screen popout, so
+// both read the exact same "linked to X" chip title.
+describe('withNoteLinkChips', () => {
+  it('leaves an unlinked note completely untouched — its own title stays, never undefined', () => {
+    const notes = [{ title: 'General note', text: 'x' }]
+    const result = withNoteLinkChips(notes, (name) => `chip:${name}`)
+    expect(result[0].title).toBe('General note')
+  })
+
+  it('replaces the title with the rendered chip for a linked note', () => {
+    const renderChip = vi.fn((name: string) => `chip:${name}`)
+    const notes = [{ title: 'Old title', locationName: 'Hoofdlocatie' }]
+    const result = withNoteLinkChips(notes, renderChip)
+    expect(renderChip).toHaveBeenCalledWith('Hoofdlocatie')
+    expect(result[0].title).toBe('chip:Hoofdlocatie')
   })
 })

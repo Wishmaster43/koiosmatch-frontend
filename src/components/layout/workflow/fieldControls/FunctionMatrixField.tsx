@@ -82,7 +82,11 @@ export function FunctionMatrixField({ value, onChange, fieldKey }: {
           <RowRemoveButton onClick={() => setDraft(null)} label={t('common:remove')} />
         </div>
       )}
-      {/* A duplicate position never commits silently: say why the row stays pending. */}
+      {/* A duplicate position never commits silently: say why the row stays pending.
+          DRY: this tail is already the shared PendingRowTail/RowRemoveButton atoms —
+          the remaining overlap with groupKeyValueFields is each field's own draft
+          shape (position/primary/secondary here vs. a single key/value pair
+          there), which is the whole reason each field has its own component. */}
       <PendingRowTail isDuplicate={isDuplicate} duplicateText={t('fields.duplicateKey')}
         onAdd={add} addLabel={t('fields.add')} addDisabled={!!draft} />
     </div>

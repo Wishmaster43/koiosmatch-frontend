@@ -27,11 +27,9 @@
 import { useState, useEffect } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Edit2, Save, X, ExternalLink } from 'lucide-react'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
-import Button from '@/components/ui/Button'
-import { GroupLabel } from '@/components/ui/typography'
+import { RichTextBlockHeader } from '@/components/ui/RichTextBlockHeader'
 import { useTextBlockPopout } from '@/hooks/useTextBlockPopout'
 import type { Id } from '@/types/common'
 
@@ -69,31 +67,8 @@ export default function OpportunityDescriptionBlock({ opportunityId, value, onSa
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <GroupLabel>{t('details.groups.opportunityDescription')}</GroupLabel>
-        {editing ? (
-          <div style={{ display: 'flex', gap: 4 }}>
-            <Button variant="primary" iconOnly size="sm" onClick={save} title={t('common:save')} aria-label={t('common:save')}>
-              <Save size={13} />
-            </Button>
-            <Button variant="secondary" iconOnly size="sm" onClick={cancel} title={t('common:cancel')} aria-label={t('common:cancel')}>
-              <X size={13} />
-            </Button>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', gap: 4 }}>
-            {opportunityId != null && (
-              <Button variant="secondary" iconOnly size="sm" onClick={openPopout}
-                title={t('common:openSecondScreen')} aria-label={t('common:openSecondScreen')}>
-                <ExternalLink size={13} />
-              </Button>
-            )}
-            <Button variant="secondary" iconOnly size="sm" onClick={start} title={t('common:edit')} aria-label={t('common:edit')}>
-              <Edit2 size={13} />
-            </Button>
-          </div>
-        )}
-      </div>
+      <RichTextBlockHeader t={t} title={t('details.groups.opportunityDescription')} editing={editing}
+        onSave={save} onCancel={cancel} onStartEdit={start} onPopout={openPopout} id={opportunityId} />
       {editing
         ? <RichTextEditor value={draft} onChange={changeDraft} expanded={expanded} onToggleExpand={() => setExpanded(v => !v)} />
         : (shown

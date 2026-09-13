@@ -9,7 +9,7 @@ import { useRelationSort } from '@/components/forms/useRelationSort'
 import { captionStyle,SectionTitle, Mono } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
 import {
-  AddableSection, DocEntryLinks, LinkedDocPreviewOverlay, ProseField, renderAddButton, resolveLinkedDocument,
+  AddableSection, LinkedDocPreviewOverlay, RelItemDescAndDocFooter, renderAddButton, resolveLinkedDocument,
 } from './sectionTabsShared'
 import type { RelItem, RelTabProps } from './sectionTabsShared'
 import { linkedDocumentField } from './useLinkedDocPreview'
@@ -80,8 +80,7 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove, documen
                   HUISSTIJL-1: identical fontFamily/size/colour render as a div. */}
               {/* Mono family + caption identity via the raw style object (stijlfabriek pattern). */}
               {cert.license && <Mono as="div" style={captionStyle}>{t('addFields.licenseNumber')}: {cert.license}</Mono>}
-              <ProseField value={cert.desc} />
-              {linkedDoc && <DocEntryLinks doc={linkedDoc} onPreview={() => openPreview(linkedDoc)} onJump={onJumpToDocuments} />}
+              <RelItemDescAndDocFooter desc={cert.desc} linkedDoc={linkedDoc} openPreview={openPreview} onJumpToDocuments={onJumpToDocuments} />
             </div>
           </div>
         )

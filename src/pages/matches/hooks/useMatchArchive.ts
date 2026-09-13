@@ -9,14 +9,13 @@
  * onRestore when the user actually has that permission (never a disabled-but-
  * present affordance). List-level archived VISIBILITY (toggle/chip) is now covered
  * too (MATCH-ARCHIVED-LIST-1 — see useMatches); this hook only covers the
- * single-record action reachable from an already-open drawer.
+ * single-record action reachable from an already-open drawer. Thin wrapper
+ * around the shared useEntityArchive factory (DRY round, adds the 409 "active
+ * contract" message matches alone needs on archive failure).
  */
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import api from '@/lib/api'
-import { notify } from '@/lib/notify'
-import { useConfirm } from '@/hooks/useConfirm'
+import { useEntityArchive } from '@/hooks/useEntityArchive'
 import type { MatchRow } from '@/types/match'
+import { useTranslation } from 'react-i18next'
 
 interface Args {
   // Patch the row/selected copy (MatchesPage.patchRow) for instant banner feedback.
@@ -26,53 +25,16 @@ interface Args {
   onReload: () => void
 }
 
-// Per-record archive/restore lifecycle for one open match (see file docblock
-// above) — the drawer's own action, distinct from list-level archived visibility.
 export function useMatchArchive({ onPatch, onReload }: Args) {
   const { t } = useTranslation('matches')
-  const [archiving, setArchiving] = useState(false)
-  const [restoring, setRestoring] = useState(false)
-  const { confirm, dialog } = useConfirm()
-
-  // DELETE /matches/{id} — reversible soft-delete. The backend refuses with 409
-  // while the match's HelloFlex contract is still active (end it first) —
-  // surfaced as its own message rather than the generic failure toast.
-  const archiveMatch = (id: MatchRow['id']) => {
-    if (id == null || archiving) return
-    confirm(t('drawer.archiveConfirm'), async () => {
-      setArchiving(true)
-      try {
-        await api.delete(`/matches/${id}`)
-        onPatch(id, { archived: true, archivedAt: new Date().toISOString() })
-        onReload()
-        notify('success', t('drawer.archived'))
-      } catch (e) {
-        const status = (e as { response?: { status?: number } })?.response?.status
-        notify('error', status === 409 ? t('drawer.archiveBlockedActiveContract') : t('drawer.archiveFailed'))
-      } finally {
-        setArchiving(false)
-      }
-    }, { danger: true })
-  }
-
-  // POST /matches/{id}/restore — un-archive. The response carries the fresh
-  // detail (MatchController::restore returns via show()), but clearing the two
-  // local flags is all the drawer needs (mirrors VacancyDrawer's restoreVacancy) —
-  // the reload brings the row back into the table with its real, server-side data.
-  const restoreMatch = async (id: MatchRow['id']) => {
-    if (id == null || restoring) return
-    setRestoring(true)
-    try {
-      await api.post(`/matches/${id}/restore`)
-      onPatch(id, { archived: false, archivedAt: null })
-      onReload()
-      notify('success', t('drawer.archivedBanner.restored'))
-    } catch {
-      notify('error', t('drawer.archivedBanner.restoreFailed'))
-    } finally {
-      setRestoring(false)
-    }
-  }
-
-  return { archiveMatch, restoreMatch, archiving, restoring, dialog }
+  // The backend refuses with 409 while the match's HelloFlex contract is still
+  // active (end it first) — surfaced as its own message rather than the generic one.
+  const { archive, restore, archiving, restoring, dialog } = useEntityArchive<MatchRow['id']>({
+    resource: 'matches', namespace: 'matches', onPatch, onReload,
+    mapArchiveError: (e) => {
+      const status = (e as { response?: { status?: number } })?.response?.status
+      return status === 409 ? t('drawer.archiveBlockedActiveContract') : null
+    },
+  })
+  return { archiveMatch: archive, restoreMatch: restore, archiving, restoring, dialog }
 }

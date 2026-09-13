@@ -3,7 +3,7 @@
  * below, right above the component, for the column contract it declares.
  */
 import { useState } from 'react'
-import type { MouseEvent, ReactNode } from 'react'
+import type { MouseEvent, ReactNode, CSSProperties } from 'react'
 import type { TableSelectionProps, TableSortProps, TableVirtualizationProps } from '@/components/ui/dataTableTypes'
 import { cellButton } from '@/components/ui/cellButton'
 import { useTranslation } from 'react-i18next'
@@ -47,13 +47,15 @@ const plainCell = { color: 'var(--text)', fontSize: 12 }
 const leadsBtn = { display: 'inline-flex', ...monoStyle, fontSize: 12,
   color: 'var(--text)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }
 
-// Local shared count-link cell (DRY round 11, DRAWERS): the Sollicitaties and
-// Matches count columns' identical underline-on-hover/focus button, one
-// necessity-disable instead of two. Local — only this file's two count columns use it.
-function CountLink({ ariaLabel, onClick, children }: { ariaLabel: string; onClick: (e: MouseEvent<HTMLButtonElement>) => void; children: ReactNode }) {
+// Local shared count-link cell (DRY round 11, DRAWERS; extended DRY round 11 P2
+// for the leads count, which needed its own title/muted colour): the Leads,
+// Sollicitaties and Matches count columns' identical underline-on-hover/focus
+// button, one necessity-disable instead of three. Local — only this file's
+// three count columns use it.
+function CountLink({ ariaLabel, onClick, children, title, style }: { ariaLabel: string; onClick: (e: MouseEvent<HTMLButtonElement>) => void; children: ReactNode; title?: string; style?: CSSProperties }) {
   return (
     // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- count deep-link rendered AS the cell's own mono number; Button's fixed sm footprint cannot sit inside a 12px table cell (§14 r7 necessity)
-    <button type="button" style={leadsBtn} aria-label={ariaLabel}
+    <button type="button" style={style ?? leadsBtn} aria-label={ariaLabel} title={title}
       onClick={onClick}
       onFocus={e => { e.currentTarget.style.textDecoration = 'underline' }}
       onBlur={e => { e.currentTarget.style.textDecoration = 'none' }}
@@ -212,16 +214,11 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
         const countCell = onOpenCandidateSearch ? (
           // A not-yet-computed count stays muted: the dash is genuinely less
           // certain than a real number, which is a meaning worth colouring.
-          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- count deep-link rendered AS the cell's own mono number; Button's fixed sm footprint cannot sit inside a 12px table cell (§14 r7 necessity)
-          <button type="button" style={{ ...leadsBtn, color: known ? 'var(--text)' : 'var(--text-muted)' }}
-            aria-label={t('columns.leadsOpenSearch')} title={title}
-            onClick={e => { e.stopPropagation(); onOpenCandidateSearch(id) }}
-            onFocus={e => { e.currentTarget.style.textDecoration = 'underline' }}
-            onBlur={e => { e.currentTarget.style.textDecoration = 'none' }}
-            onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
-            onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none' }}>
+          <CountLink ariaLabel={t('columns.leadsOpenSearch')} title={title}
+            style={{ ...leadsBtn, color: known ? 'var(--text)' : 'var(--text-muted)' }}
+            onClick={e => { e.stopPropagation(); onOpenCandidateSearch(id) }}>
             {label}{dot}
-          </button>
+          </CountLink>
         ) : <span title={title} style={!known ? { color: 'var(--text-muted)' } : undefined}>{label}{dot}</span>
         return (
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2, position: 'relative' }}>

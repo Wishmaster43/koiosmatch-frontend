@@ -53,6 +53,11 @@ export function buildCustomerFilterGroups({ t, tog, filters: f, options: o }: Bu
     { key: 'geo', type: 'geo-radius', category: catGeneral, label: t('common:filters.radius'),
       applied: f.geoFilter ? { label: f.geoFilter.label } : null, hint: f.geoHint, km: f.geoFilter?.km ?? 30,
       onApply: f.applyGeo, onClear: f.clearGeo },
+    // DRY: owner+branch search-select shape matches applicationFilterGroups' pair,
+    // but there they are not adjacent (source/vacancy/client sit between them in
+    // that panel's category order) — extracting a shared builder would force a
+    // reorder of that rendered filter panel (SCHERMWAARHEID: render must stay
+    // byte-identical), so the two-line duplication is kept here too.
     { key: 'owner',    type: 'search-select', category: catOrg, label: t('filters.accountManager'), selected: f.selectedOwner,  options: o.ownerOptions,  onToggle: tog(f.setSelectedOwner) },
     { key: 'branch',   type: 'search-select', category: catOrg, label: t('common:filters.branch'),  selected: f.selectedBranch, options: o.branchOptions, onToggle: tog(f.setSelectedBranch) },
     // Archived mirrors the quick-view toggle.

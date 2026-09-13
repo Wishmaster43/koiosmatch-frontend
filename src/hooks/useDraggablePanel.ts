@@ -119,6 +119,23 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
     }
   }, [])
 
+  // Wires one pointer gesture (drag or resize): suppresses selection, marks dragging, attaches
+  // the move/up listeners, and on pointerup detaches + restores selection + persists the final
+  // placement. Shared by onDragPointerDown and onResizePointerDown — they differ only in how
+  // `move` computes the next placement.
+  const beginGesture = useCallback((move: (ev: PointerEvent) => void) => {
+    const restoreSelection = suppressSelection()
+    setDragging(true)
+    let detach = () => {}
+    const up = () => {
+      detach()
+      restoreSelection()
+      setDragging(false)
+      persist(placementRef.current)
+    }
+    detach = setupPointerListeners(move, up)
+  }, [persist, suppressSelection, setupPointerListeners])
+
   /** Attach to the header: pointer-drag moves the panel. */
   const onDragPointerDown = useCallback((e: React.PointerEvent) => {
     // Ignore drags starting on interactive elements (close button etc.).
@@ -133,8 +150,6 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
       : { x: rect.left, y: rect.top, w: stored?.w ?? null, h: stored?.h ?? null }
     const offsetX = e.clientX - rect.left
     const offsetY = e.clientY - rect.top
-    const restoreSelection = suppressSelection()
-    setDragging(true)
     // Clamp against the panel's real width: a user-resized panel keeps its stored
     // `w`, an untouched one is measured from the DOM (0 in jsdom → fall back).
     const clampWidth = start.w ?? (rect.width || null)
@@ -148,16 +163,8 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
       placementRef.current = next
       setPlacement(next)
     }
-    // Pointer up ends the drag: detach the listeners, restore text selection, and persist the final placement.
-    let detach = () => {}
-    const up = () => {
-      detach()
-      restoreSelection()
-      setDragging(false)
-      persist(placementRef.current)
-    }
-    detach = setupPointerListeners(move, up)
-  }, [persist, suppressSelection, setupPointerListeners])
+    beginGesture(move)
+  }, [beginGesture])
 
   /** Attach to the SE corner handle: pointer-drag resizes the panel. */
   const onResizePointerDown = useCallback((e: React.PointerEvent) => {
@@ -172,8 +179,6 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
     const baseH = rect.height
     const fromX = e.clientX
     const fromY = e.clientY
-    const restoreSelection = suppressSelection()
-    setDragging(true)
 
     // Pointer move while resizing: grow/shrink from the starting rect, clamped to sane min/viewport-max bounds.
     const move = (ev: PointerEvent) => {
@@ -187,16 +192,8 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
       placementRef.current = next
       setPlacement(next)
     }
-    // Pointer up ends the resize: detach the listeners, restore selection, and persist the new size.
-    let detach = () => {}
-    const up = () => {
-      detach()
-      restoreSelection()
-      setDragging(false)
-      persist(placementRef.current)
-    }
-    detach = setupPointerListeners(move, up)
-  }, [persist, resizable, suppressSelection, setupPointerListeners])
+    beginGesture(move)
+  }, [beginGesture, resizable])
 
   /** Double-click the handle: back to centered/default size (recovery hatch). */
   const onDragHandleDoubleClick = useCallback(() => {

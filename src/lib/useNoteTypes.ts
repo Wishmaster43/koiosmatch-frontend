@@ -85,18 +85,24 @@ function buildNoteTypeHelpers(types: LookupOption[]) {
   return { labelOf, colorOf, writableTypes }
 }
 
-// entity is required — every caller scopes to its own owning entity (candidate/
-// application/customer/opportunity/…), never the old flat cross-entity fetch.
-export function useNoteTypes(entity: NoteTypeEntity) {
-  // Cross-entity lookup (candidates/customers/matches/applications/tasks/…) — the
-  // 'common' namespace is its shared home, mirroring common.json's own 'notes' keys.
+// Translates the seeded defaults (LOOKUP-I18N-1) and derives the label/colour resolvers +
+// writable-types filter from the raw lookup rows — the final assembly step shared by
+// useNoteTypes and useNoteTypesFor, so their two return shapes never drift apart.
+function useResolvedNoteTypes(rawTypes: LookupOption[]) {
   const { t } = useTranslation('common')
-  const { data: rawTypes } = useCachedLookup(`/note-types?entity=${entity}`, mapNoteTypes, DEFAULT_NOTE_TYPES)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const types = useMemo(() => translateSeedList(t, 'noteTypes', rawTypes), [rawTypes, t])
   const { labelOf, colorOf, writableTypes } = useMemo(() => buildNoteTypeHelpers(types), [types])
-
   return { types, writableTypes, labelOf, colorOf }
+}
+
+// entity is required — every caller scopes to its own owning entity (candidate/
+// application/customer/opportunity/…), never the old flat cross-entity fetch.
+export function useNoteTypes(entity: NoteTypeEntity) {
+  // Cross-entity lookup (candidates/customers/matches/applications/tasks/…) fetched
+  // via the shared cache; resolved into label/colour helpers by useResolvedNoteTypes.
+  const { data: rawTypes } = useCachedLookup(`/note-types?entity=${entity}`, mapNoteTypes, DEFAULT_NOTE_TYPES)
+  return useResolvedNoteTypes(rawTypes)
 }
 
 /**
@@ -121,7 +127,6 @@ export function useNoteTypes(entity: NoteTypeEntity) {
  * switch never leaks another tenant's rows.
  */
 export function useNoteTypesFor(entities: NoteTypeEntity[]) {
-  const { t } = useTranslation('common')
   const tenantId = getActiveTenantId() ?? 'none'
   const results = useQueries({
     queries: entities.map(entity => ({
@@ -151,9 +156,5 @@ export function useNoteTypesFor(entities: NoteTypeEntity[]) {
     return out
   }, [results])
 
-  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
-  const types = useMemo(() => translateSeedList(t, 'noteTypes', rawTypes), [rawTypes, t])
-  const { labelOf, colorOf, writableTypes } = useMemo(() => buildNoteTypeHelpers(types), [types])
-
-  return { types, writableTypes, labelOf, colorOf, loading }
+  return { ...useResolvedNoteTypes(rawTypes), loading }
 }

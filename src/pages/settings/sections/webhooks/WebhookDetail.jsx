@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, MoreHorizontal, Pencil, Power, RefreshCw, Save, Trash2, Webhook, X } from 'lucide-react'
+import { Check, Pencil, Save, Webhook, X } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
 import Spinner from '@/components/ui/Spinner'
-import ActionMenu from '@/components/ui/ActionMenu'
+import { CredentialActionMenu } from '@/pages/settings/components/CredentialActionMenu'
 import CalloutBox from '@/components/ui/CalloutBox'
 import { useConfirm } from '@/hooks/useConfirm'
 import { getSubscription, updateSubscription, deleteSubscription, regenerateSecret } from './webhooksApi'
@@ -99,16 +99,16 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
         statusBadge={<StatusBadge status={sub.status ?? 'active'} map={statusMap} />}
         loading={loading}
         actions={
-          <ActionMenu
-            label={t('webhooks.outgoing.action')}
-            icon={MoreHorizontal}
-            align="right"
-            menuWidth={220}
-            items={[
-              { key: 'regenerate', label: t('webhooks.outgoing.regenerate'), icon: RefreshCw, onSelect: regenerate },
-              { key: 'toggle', label: (sub.status ?? 'active') === 'active' ? t('webhooks.outgoing.deactivate') : t('webhooks.outgoing.activate'), icon: Power, onSelect: toggleStatus },
-              { key: 'delete', label: t('webhooks.outgoing.delete'), icon: Trash2, danger: true, onSelect: remove },
-            ]}
+          <CredentialActionMenu
+            actionLabel={t('webhooks.outgoing.action')}
+            regenerateLabel={t('webhooks.outgoing.regenerate')}
+            activateLabel={t('webhooks.outgoing.activate')}
+            deactivateLabel={t('webhooks.outgoing.deactivate')}
+            deleteLabel={t('webhooks.outgoing.delete')}
+            status={sub.status}
+            onRegenerate={regenerate}
+            onToggleStatus={toggleStatus}
+            onDelete={remove}
           />
         }
       />

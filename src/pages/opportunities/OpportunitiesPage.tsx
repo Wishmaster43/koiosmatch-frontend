@@ -36,6 +36,7 @@ import Button from '@/components/ui/Button'
 import { usePageSlice } from '@/hooks/usePageSlice'
 import { TOOLBAR_ROW_STYLE } from '@/components/ui/toolbarRow'
 import { useSeedLabel } from '@/lib/useSeedLabel'
+import { makeArrayToggle } from '@/lib/selectionSet'
 
 // Single-select donut pick: clicking the active segment clears it.
 const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
@@ -45,8 +46,7 @@ const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
 }
 
 // Right-panel multi-toggle for a filter dimension.
-const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) =>
-  set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
+const tog = makeArrayToggle
 
 // Thin container: filters/pagination/selection state, seeded from a navigation intent, composing the insights/table/board + drawer (data lives in useOpportunitiesData).
 export default function OpportunitiesPage({ intent }: { intent?: unknown } = {}) {

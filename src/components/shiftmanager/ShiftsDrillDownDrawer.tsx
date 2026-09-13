@@ -7,6 +7,7 @@ import { Search, Clock, MapPin, Briefcase, User, Hash, Building2, CalendarCheck,
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { BodyText, SectionTitle, Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
+import { DrawerListFooter } from '@/components/ui/DrawerListFooter'
 import DrawerHeaderRow from '@/components/drawer/DrawerHeaderRow'
 import DrawerBackdrop from '@/components/drawer/DrawerBackdrop'
 import type { LucideIcon } from 'lucide-react'
@@ -319,17 +320,10 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, 
           })}
         </div>
 
-        {/* Footer */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '8px 16px', borderTop: '1px solid var(--border)', background: 'var(--hover-bg)',
-                      flexShrink: 0 }}>
-          <Caption as="span">
-            {loading ? '…' : t('shiftsDrawer.shownOf', { shown: filtered.length, total: shifts.length })}
-          </Caption>
-          <Button variant="secondary" onClick={onClose}>
-            {t('shiftsDrawer.close')}
-          </Button>
-        </div>
+        {/* Footer — shared shown-of-count + close (§3, DrawerListFooter) */}
+        <DrawerListFooter
+          summary={loading ? '…' : t('shiftsDrawer.shownOf', { shown: filtered.length, total: shifts.length })}
+          onClose={onClose} closeLabel={t('shiftsDrawer.close')} />
       </div>
     </>
   )

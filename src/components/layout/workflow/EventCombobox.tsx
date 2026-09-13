@@ -46,6 +46,9 @@ export function EventCombobox({ value, onChange, label }: {
     !search || labelFor(key).toLowerCase().includes(search.toLowerCase()) || key.includes(search.toLowerCase()))
 
   return (
+    // DRY: this wrapper is the shared usePopoverBox contract (boxRef/onBlur) every
+    // popover-style field control opens with (mirrors MultiSelectField) — the
+    // control/list content below is field-specific, not a copy to merge.
     <div ref={boxRef} style={{ position: 'relative' }} onBlur={onBlur}>
       {/* Control: the selected event, or the live filter while open. */}
       <div onClick={() => setOpen(true)}

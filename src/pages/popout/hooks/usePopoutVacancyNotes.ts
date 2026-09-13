@@ -7,6 +7,13 @@
  * flow mirrors NotesTab.tsx's OPTIMISTIC-REVERT-1 pattern (no PATCH exists for a
  * single vacancy note — only add/delete — and the drawer wires add only, so this
  * hook does too).
+ *
+ * DRY: shares the load/add/edit/delete SHAPE with usePopoutCustomerNotes but not
+ * the wire contract — customer notes read with `?rollup=1` and write a flat
+ * `{type,title,text}` body, this hook has no rollup and writes `{type,title,body}`
+ * plus a client-injected `author`/`created_at` the customer side gets from the
+ * server. Collapsing them into one generic hook would need a per-entity request/
+ * response adapter that is bigger than the "duplicate" it removes.
  */
 import { landedWrite } from './popoutNoteWrite'
 import { actionItemsWire } from '@/components/drawer/tabs/notes/notesTabTypes'

@@ -188,6 +188,10 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
   const priorityInfo = priorityMeta(String(task.priorityKey))
 
   return (
+    // DRY: the outer flex-column/gap-10 shell mirrors vacancies/DescriptionTab's
+    // own wrapper — both are generic tab-body scaffolding (§3A: one tab, one
+    // section), not shared logic; the two tabs' actual content (task
+    // classification vs. a rich-text description) has nothing in common.
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div>
         {/* Header with the edit toggle for the classification/scheduling/assignee block */}

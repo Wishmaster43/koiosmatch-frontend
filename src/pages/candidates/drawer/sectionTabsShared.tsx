@@ -98,6 +98,35 @@ export function DocEntryLinks({ doc, onPreview, onJump }: { doc: RelItem; onPrev
   )
 }
 
+// The linked-document footer row for one item: renders DocEntryLinks only when a
+// document is actually linked — the exact conditional every rel-tab (skills,
+// certifications, education) repeated at the bottom of its item row.
+export function LinkedDocFooter({ linkedDoc, openPreview, onJumpToDocuments }: {
+  linkedDoc: RelItem | null | undefined
+  openPreview: (doc: RelItem) => void
+  onJumpToDocuments?: () => void
+}) {
+  if (!linkedDoc) return null
+  return <DocEntryLinks doc={linkedDoc} onPreview={() => openPreview(linkedDoc)} onJump={onJumpToDocuments} />
+}
+
+// The description + linked-document tail every item row ends with (certifications,
+// education): the free-text ProseField, then LinkedDocFooter — always rendered
+// together, in this order, so this pairs them into one call.
+export function RelItemDescAndDocFooter({ desc, linkedDoc, openPreview, onJumpToDocuments }: {
+  desc?: string
+  linkedDoc: RelItem | null | undefined
+  openPreview: (doc: RelItem) => void
+  onJumpToDocuments?: () => void
+}) {
+  return (
+    <>
+      <ProseField value={desc} />
+      <LinkedDocFooter linkedDoc={linkedDoc} openPreview={openPreview} onJumpToDocuments={onJumpToDocuments} />
+    </>
+  )
+}
+
 // Resolves the education "start" date for BOTH the read line and the edit form:
 // the real start date first, else — only for an in-progress row — the issue/diploma
 // date stands in (legacy rows that recorded a diploma date but never a start date,

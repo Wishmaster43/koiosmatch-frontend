@@ -13,34 +13,20 @@ import { AlertCircle, ArchiveRestore, CheckCircle, Clock, HelpCircle, MoreHorizo
 import { interactive } from '@/lib/a11y'
 import { useDateFormat } from '@/lib/datetime'
 import { useSeedLabel } from '@/lib/useSeedLabel'
-import { useWorkflowRowState } from './hooks/useWorkflowRowState'
+import { useWorkflowRowState, type WorkflowRowLifecycleProps } from './hooks/useWorkflowRowState'
 import { buildTrashNote } from '@/hooks/useTrashFlow'
 import { MODULE_META } from '@/modules/index'
+import { triggerKeyForType } from './data/workflowTrigger'
 import Toggle from '@/components/ui/Toggle'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
-import type { Workflow, WorkflowStep } from '@/types/workflow'
+import type { WorkflowStep } from '@/types/workflow'
 
-// One workflow row's props — mirrors WorkflowCard's shared shape, plus the
-// status toggle and the folder name already resolved by the parent page.
-interface WorkflowListRowProps {
-  workflow: Workflow
+// One workflow row's props — the shared lifecycle shape (mirrors WorkflowCard),
+// plus the status toggle and the folder name already resolved by the parent page.
+interface WorkflowListRowProps extends WorkflowRowLifecycleProps {
   folderName?: string
-  onRun: (id?: string | number) => void | Promise<void>
-  // WORKFLOW-PERMS-1: false renders Run disabled with the reason (workflows.run missing).
-  canRun?: boolean
-  onEdit: () => void
   onToggleStatus: () => void
-  // Archive/restore lifecycle (TRASH-OVERAL-1b) — both settings.update-gated.
-  canManageFolders?: boolean
-  onArchive?: () => void
-  onRestore?: () => void | Promise<void>
-  // TRASH-OVERAL-2: mark for erasure (workflows.delete) shows on an archived row;
-  // unmark (settings.update) shows on a trashed row. Absent prop = hidden (§7).
-  onMarkDeletion?: () => void
-  onUnmark?: () => void | Promise<void>
-  // Tenant grace window — feeds the trashed row's erase note (DD-MM-YYYY).
-  graceDays?: number | null
 }
 
 const BUBBLE_SIZE = 24
@@ -97,10 +83,11 @@ function StepIconStack({ steps }: { steps: WorkflowStep[] }) {
 // start condition): a clock for a schedule, a webhook glyph for an inbound
 // hook, a pointer for manual/on-demand.
 function triggerMeta(triggerType?: string): { Icon: LucideIcon; key: string } {
-  if (triggerType === 'scheduled') return { Icon: Clock, key: 'list.triggerScheduled' }
-  if (triggerType === 'webhook') return { Icon: Webhook, key: 'list.triggerWebhook' }
-  if (triggerType === 'event') return { Icon: Bell, key: 'list.triggerEvent' }
-  return { Icon: MousePointerClick, key: 'list.triggerManual' }
+  const key = triggerKeyForType(triggerType)
+  if (key === 'list.triggerScheduled') return { Icon: Clock, key }
+  if (key === 'list.triggerWebhook') return { Icon: Webhook, key }
+  if (key === 'list.triggerEvent') return { Icon: Bell, key }
+  return { Icon: MousePointerClick, key }
 }
 
 // One row in the workflow list: status/trigger badges plus its run/edit/archive/restore actions, gated on canManageFolders where relevant.

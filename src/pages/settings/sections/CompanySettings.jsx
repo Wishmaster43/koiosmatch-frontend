@@ -13,6 +13,7 @@ import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { useIndustries } from '@/lib/useIndustries'
 import { useCountriesLookup } from '@/lib/useCountriesLookup'
 import { useProvinces } from '@/hooks/useProvinces'
+import { useSettingsSectionState } from '@/hooks/useSettingsSectionState'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { useLocaleOptions } from '@/lib/useLocaleOptions'
 import { cardHead } from '@/components/ui/modalCards'
@@ -153,11 +154,7 @@ export default function CompanySettings() {
   const provinceOptions = (provinces ?? []).map(p => (typeof p === 'string' ? { value: p, label: p } : p))
 
   const [bannerUrl,  setBannerUrl]  = useState(null)
-  const [saved,      setSaved]      = useState(false)
-  const [saving,     setSaving]     = useState(false)
-  const [loading,    setLoading]    = useState(true)
-  const [loadError,  setLoadError]  = useState(false)
-  const [reloadKey,  setReloadKey]  = useState(0)
+  const { saved, setSaved, saving, setSaving, loading, setLoading, loadError, setLoadError, reloadKey, setReloadKey } = useSettingsSectionState()
   const bannerRef = useRef(null)
 
   // Loads the saved company settings once on mount, migrating a legacy single-line
@@ -186,7 +183,7 @@ export default function CompanySettings() {
       // tab/session/user (§3: no fake affordance surviving a reload).
       if (s.company_banner_url && !String(s.company_banner_url).startsWith('blob:')) setBannerUrl(s.company_banner_url)
     }).catch(() => setLoadError(true)).finally(() => setLoading(false))
-  }, [reloadKey])
+  }, [reloadKey, setLoadError, setLoading])
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 

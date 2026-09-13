@@ -42,8 +42,8 @@ import { Caption } from '@/components/ui/typography'
 import type { DrillPagerProps } from '@/components/drawer/DrillPager'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useAuth } from '@/context/AuthContext'
-import { notifyError, notifySuccess } from '@/lib/notify'
-import { extractApiError } from '@/lib/extractApiError'
+import { notifyError } from '@/lib/notify'
+import { useDetachApplication } from '@/hooks/useDetachApplication'
 import { mapVacancyDetail } from '../data/mapVacancy'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
@@ -99,7 +99,6 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
   // Punt 5/7 reuse: the application being edited (pencil) / detached (unlink).
   const [editApplicationId, setEditApplicationId] = useState<Id | null>(null)
   const [detachRow, setDetachRow] = useState<ApplicantRow | null>(null)
-  const [detaching, setDetaching] = useState(false)
   const [page, setPage] = useState(1)
   // Local override of the vacancy detail, refetched after "+ Sollicitatie" — reset
   // whenever a different vacancy is shown so a stale override never leaks across.
@@ -167,22 +166,13 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
     }
   }
 
-  // Punt 7 reuse: DELETE /applications/{id} requires a `reason` body (measured on
-  // the candidate side, WorkTab.detachApplication) — non-optimistic, so a 422/403
-  // never looks like it succeeded.
-  const detachApplication = async (reason: string) => {
-    const id = detachRow?.id
-    if (id == null) return
-    setDetaching(true)
-    try {
-      await api.delete(`/applications/${id}`, { data: { reason } })
-      notifySuccess(t('applicants.detachDone'))
-      setDetachRow(null)
-      refresh()
-    } catch (err) {
-      notifyError(extractApiError(err, t('common:actionFailed')))
-    } finally { setDetaching(false) }
-  }
+  // Punt 7 reuse: shared mutation, see useDetachApplication doc comment.
+  const { detaching, detachApplication } = useDetachApplication({
+    getId: () => detachRow?.id,
+    doneLabel: t('applicants.detachDone'),
+    onDone: () => { setDetachRow(null); refresh() },
+  })
+  const onDetachConfirm = (reason: string) => detachApplication(reason, t('common:actionFailed'))
 
   // Build the AppRow shape ApplicationRow expects — the vacancy IS this vacancy
   // (v), so the row's own title cell resolves to the real vacancy title/url
@@ -312,7 +302,7 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
       {/* Punt 7 reuse: same reason-collecting unlink prompt, then DELETE. */}
       {detachRow && (
         <DetachApplicationModal label={vacancyLabelOf(toApplicationRow(detachRow)) ?? v.title ?? '—'} submitting={detaching}
-          onCancel={() => setDetachRow(null)} onConfirm={detachApplication} />
+          onCancel={() => setDetachRow(null)} onConfirm={onDetachConfirm} />
       )}
     </div>
   )

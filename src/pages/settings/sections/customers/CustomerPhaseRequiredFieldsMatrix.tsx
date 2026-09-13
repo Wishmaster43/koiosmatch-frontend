@@ -16,7 +16,7 @@
 import { useTranslation } from 'react-i18next'
 import { useAllSettings, useSettingsLoaded, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { useCustomerPhases } from '@/lib/useCustomerPhases'
-import { PermissionToggle } from '@/pages/settings/components/SettingsControls'
+import { RequiredFieldsMatrixTable } from '@/pages/settings/components/RequiredFieldsMatrixTable'
 import { CUSTOMER_FIELDS } from './requiredFieldsCatalog'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
@@ -48,7 +48,6 @@ export default function CustomerPhaseRequiredFieldsMatrix() {
     saveSettingsKeys({ [KEY]: { ...cfg, [phase]: next } }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
   }
 
-  const cell = { padding: '8px 12px', fontSize: 13, borderBottom: '1px solid var(--border)', textAlign: 'center' as const }
   return (
     <div>
       <SettingsLoadBanner />
@@ -56,29 +55,8 @@ export default function CustomerPhaseRequiredFieldsMatrix() {
           phase is never blocked, however incomplete the record already is otherwise. */}
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{t('customerRequiredFields.phaseHint')}</p>
       <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ background: 'var(--bg)' }}>
-              <th style={{ ...cell, textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>{t('requiredFields.field')}</th>
-              {phases.map(p => (
-                <th key={String(p.value)} style={{ ...cell, fontWeight: 600, color: 'var(--text)' }}>{p.label}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {CUSTOMER_FIELDS.map(f => (
-              <tr key={f.key}>
-                <td style={{ ...cell, textAlign: 'left', color: 'var(--text)' }}>{t(f.labelKey)}</td>
-                {phases.map(p => (
-                  <td key={String(p.value)} style={cell}>
-                    <PermissionToggle checked={isReq(String(p.value), f.key)} onChange={() => toggle(String(p.value), f.key)}
-                      disabled={!loaded} aria-label={`${t(f.labelKey)} — ${p.label}`} />
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <RequiredFieldsMatrixTable fields={CUSTOMER_FIELDS} phases={phases.map(p => ({ value: String(p.value), label: p.label }))}
+          isRequired={isReq} onToggle={toggle} disabled={!loaded} headerRowStyle={{ background: 'var(--bg)' }} />
       </div>
     </div>
   )

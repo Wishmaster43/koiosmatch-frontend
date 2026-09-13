@@ -4,34 +4,14 @@
  * Keeps the list state in one place so the container can switch between list and
  * detail without refetching, while create/update/delete keep the table in sync.
  */
-import { useState, useEffect, useCallback } from 'react'
+import { useOptimisticList } from '@/hooks/useOptimisticList'
 import { listApiKeys } from './apiKeysApi'
 
 // Owns the key list state (see the module doc above) so the container can switch list/detail views without refetching, while mutations keep it in sync.
+// K-282: add/patch also refetch the whole list — a type PATCH auto-demotes the
+// previous primary key server-side, so a sibling row can change too; the
+// optimistic update keeps the UI snappy while the reload corrects any drift.
 export function useApiKeys() {
-  const [keys, setKeys]       = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState(false)
-
-  // Fetch (or refetch) the list, resetting the error/loading flags.
-  const load = useCallback(() => {
-    setLoading(true)
-    setError(false)
-    listApiKeys()
-      .then((res) => setKeys(res.rows ?? []))
-      .catch(() => setError(true))
-      .finally(() => setLoading(false))
-  }, [])
-
-  useEffect(() => { load() }, [load])
-
-  // Optimistic list helpers used by the list/detail views after a mutation.
-  // K-282: add/patch also refetch the whole list — a type PATCH auto-demotes the
-  // previous primary key server-side, so a sibling row can change too; the
-  // optimistic update keeps the UI snappy while the reload corrects any drift.
-  const add   = (key)        => { setKeys((p) => [key, ...p]); load() }
-  const patch = (id, data)   => { setKeys((p) => p.map((k) => (k.id === id ? { ...k, ...data } : k))); load() }
-  const drop  = (id)         => setKeys((p) => p.filter((k) => k.id !== id))
-
-  return { keys, loading, error, reload: load, add, patch, drop }
+  const { items: keys, loading, error, reload, add, patch, drop } = useOptimisticList(listApiKeys, { refetchOnAdd: true, refetchOnPatch: true })
+  return { keys, loading, error, reload, add, patch, drop }
 }

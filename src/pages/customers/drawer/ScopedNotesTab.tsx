@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next'
 import { useNotesTabContent } from '@/hooks/useNotesTabContent'
 import { useNoteTypesFor } from '@/lib/useNoteTypes'
 import type { NoteTypeEntity } from '@/lib/useNoteTypes'
-import CustomerNotesView from './CustomerNotesView'
+import NotesTabBody from './NotesTabBody'
 import { useScopedCustomerNotes } from '../hooks/useCustomerDrawerData'
 import type { Id } from '@/types/common'
 
@@ -52,17 +52,10 @@ export default function ScopedNotesTab({ scope, id, customerId }: {
     apiEndpoint: `/customers/${customerId}/notes`,
   })
 
-  // Four explicit UI states (§3) for the OWN-notes fetch.
   // K-288: the linked-notes feed (NOTITIE-DOORLINK-1) that used to render as a
   // sibling here moved to its own sub-tab on the host (LocationDetail/DepartmentDetail).
-  if (loading) {
-    return <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('page.loading')}</div>
-  }
-  if (error) {
-    return <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('scopedList.loadError')}</div>
-  }
   return (
-    <CustomerNotesView
+    <NotesTabBody loading={loading} error={error} errorKey="scopedList.loadError"
       notes={notes} addNote={addNote} editNote={editNote} deleteNote={deleteNote}
       customerId={customerId} noteTypes={noteTypes} chipTypes={chipTypes}
       authorInitials={authorInitials} t={t}

@@ -315,7 +315,11 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
                 filter, CSV export); this drawer stays the reference implementation. */}
             <ChangelogPopover><ChangelogTab c={c} bare /></ChangelogPopover>
             {/* Merge a duplicate into this record (punt 4) — same permission signal
-                as archive (candidates.delete via the page); not on archived dossiers. */}
+                as archive (candidates.delete via the page); not on archived dossiers.
+                DRY: mirrors CustomerDrawer's own merge-icon block, both already
+                composed from the shared DrawerGlyphButton atom — the §3A convention
+                is to render the SAME icon/slot on every entity, so this is
+                deliberate consistency, not a copy to merge further. */}
             {onMerged && !c.archived && (
               <DrawerGlyphButton onClick={() => setShowMerge(true)} title={t('merge.title')} tone="muted" opacity={0.8}>
                 <GitMerge size={14} />

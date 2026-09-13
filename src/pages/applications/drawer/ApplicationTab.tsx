@@ -10,21 +10,12 @@ import MatchScoreSection from './MatchScoreSection'
 import ContextSubTab from './applicationTab/ContextSubTab'
 import ApplicationBranchSection from './ApplicationBranchSection'
 import type { Criterion } from '@/components/match/MatchScoreBlock'
-import type { ApplicationDetail } from '@/types/application'
+import type { ApplicationDetail, ApplicationLinkSourceProps } from '@/types/application'
 import type { Id } from '@/types/common'
 
-interface ApplicationTabProps {
+interface ApplicationTabProps extends ApplicationLinkSourceProps {
   application: ApplicationDetail
   onAdjustScore?: (id: Id | undefined, payload: { score: number | null; criteria: Criterion[] }) => void
-  // Re-link (or unlink, null) the vacancy this application is coupled to (BE:
-  // PATCH /applications/{id} vacancy_id, nullable). The customer is derived from
-  // the picked option so the caller can update it optimistically before the PATCH
-  // response reconciles it. Undefined hides the pencil (read-only caller).
-  onLinkVacancy?: (id: Id | undefined, vacancyId: Id | null, meta?: { title?: string; client?: string }) => void
-  // S7: PATCH the source field (`Bron` in the UI, PATCH /applications/{id}
-  // {source}) — shares the Details block's edit mode/pencil with onLinkVacancy.
-  // Undefined hides the pencil (read-only caller, mirrors onLinkVacancy).
-  onUpdateSource?: (id: Id | undefined, source: string, sourceKey?: string | null) => void
   // S2/S3: switch the drawer to another of ITS OWN tabs (Appointments/Interviews)
   // — threaded down from ApplicationDrawer's EntityDrawer render callback.
   // Undefined (e.g. no drawer context) makes the strip's cells render as plain text.

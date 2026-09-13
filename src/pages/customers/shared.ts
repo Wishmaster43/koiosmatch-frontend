@@ -5,7 +5,7 @@
  * Whoever changes a module re-exported here knows outsiders ride along —
  * extend this list deliberately, never bypass it with a deep import.
  */
-export { mapCustomerNoteRow } from './data/mapCustomer'
+export { mapCustomerNoteRow, resolveNoteLinkedName, withNoteLinkChips } from './data/mapCustomer'
 export type { ApiCustomerNoteRow } from './data/mapCustomer'
 export { useCustomerDepartments } from './hooks/useCustomerDepartments'
 export { default as CustomerCompanyTextPopout } from './popout/CustomerCompanyTextPopout'

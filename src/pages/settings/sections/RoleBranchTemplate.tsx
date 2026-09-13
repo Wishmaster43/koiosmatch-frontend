@@ -35,11 +35,11 @@ export function RoleBranchTemplate({ roleId }: { roleId: Role['id'] }) {
     return () => { cancelled = true }
   }, [roleId])
 
-  // Toggle one branch — optimistic PUT (replace-set), revert + notify on failure.
-  const toggle = async (locationId: string) => {
-    if (loadError) return // the current set is unknown, never PUT a replace-set built on it
+  // Shared optimistic replace-set PUT: set the new list first, revert + notify on
+  // failure. Both toggle() (one value) and setMany() (select-all/clear-all) only
+  // differ in how they compute `next` — the persist/revert dance is identical.
+  const putBranches = async (next: string[]) => {
     const prev = branchIds
-    const next = prev.includes(locationId) ? prev.filter(id => id !== locationId) : [...prev, locationId]
     setBranchIds(next)
     setSaving(true)
     try {
@@ -52,22 +52,19 @@ export function RoleBranchTemplate({ roleId }: { roleId: Role['id'] }) {
     }
   }
 
+  // Toggle one branch — optimistic PUT (replace-set), revert + notify on failure.
+  const toggle = async (locationId: string) => {
+    if (loadError) return // the current set is unknown, never PUT a replace-set built on it
+    const next = branchIds.includes(locationId) ? branchIds.filter(id => id !== locationId) : [...branchIds, locationId]
+    await putBranches(next)
+  }
+
   // Select-all / clear-all: ONE replace-set PUT for the whole batch (the per-value
   // toggle above would fire N racing PUTs; USERS-SELECTALL root fix, ChipMultiSelect.onSelectAll).
   const setMany = async (ids: string[], on: boolean) => {
     if (loadError) return
-    const prev = branchIds
-    const next = on ? Array.from(new Set([...prev, ...ids])) : prev.filter(id => !ids.includes(id))
-    setBranchIds(next)
-    setSaving(true)
-    try {
-      await api.put(`/roles/${roleId}/branches`, { location_ids: next } satisfies UpdateBranchesBody)
-    } catch {
-      setBranchIds(prev)
-      notifyError(t('roles.branchesSaveFailed'))
-    } finally {
-      setSaving(false)
-    }
+    const next = on ? Array.from(new Set([...branchIds, ...ids])) : branchIds.filter(id => !ids.includes(id))
+    await putBranches(next)
   }
 
   return (

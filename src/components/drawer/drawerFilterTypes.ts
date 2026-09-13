@@ -92,3 +92,42 @@ export interface DrawerToggleFilterConfig {
 }
 
 export type DrawerFilterConfig = DrawerSingleFilterConfig | DrawerMultiFilterConfig | DrawerRangeFilterConfig | DrawerDateFilterConfig | DrawerToggleFilterConfig
+
+// One `{ value, label }` lookup option (statuses/types/priorities on a tasks
+// table) turned into a multi-select filter row — the exact shape every
+// tasks-table filter panel (EntityTasksTab, RelatedTasks) built by hand.
+export interface TaskLookupOption { value: string; label: string }
+
+// Builds the status/type/priority filter-row array shared by every tasks
+// table filter panel. `type`/`priority` rows only appear when that lookup has
+// options (an empty tenant lookup means the dimension does not exist there).
+export function buildTaskFilterRows({
+  t, statuses, types, priorities,
+  statusFilter, typeFilter, priorityFilter,
+  toggleStatus, toggleType, togglePriority,
+}: {
+  t: (key: string) => string
+  statuses: TaskLookupOption[]
+  types: TaskLookupOption[]
+  priorities: TaskLookupOption[]
+  statusFilter: string[]
+  typeFilter: string[]
+  priorityFilter: string[]
+  toggleStatus: (v: string) => void
+  toggleType: (v: string) => void
+  togglePriority: (v: string) => void
+}): DrawerFilterConfig[] {
+  const searchPlaceholder = t('common:search')
+  const noResultsLabel = t('common:noResults')
+  return [
+    { type: 'multi', key: 'status', label: t('cols.status'), selected: statusFilter,
+      options: statuses.map(s => ({ value: s.value, label: s.label })), onToggle: toggleStatus,
+      searchPlaceholder, noResultsLabel },
+    ...(types.length > 0 ? [{ type: 'multi' as const, key: 'type', label: t('cols.type'), selected: typeFilter,
+      options: types.map(ty => ({ value: ty.value, label: ty.label })), onToggle: toggleType,
+      searchPlaceholder, noResultsLabel }] : []),
+    ...(priorities.length > 0 ? [{ type: 'multi' as const, key: 'priority', label: t('cols.priority'), selected: priorityFilter,
+      options: priorities.map(p => ({ value: p.value, label: p.label })), onToggle: togglePriority,
+      searchPlaceholder, noResultsLabel }] : []),
+  ]
+}

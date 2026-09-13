@@ -11,6 +11,7 @@ import type { TFunction } from 'i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { pickStatsScopeParams } from '@/lib/statsScopeParams'
 import { useRowsEpoch } from '@/hooks/useRowsEpoch'
+import { useListFieldSetter } from '@/hooks/useListFieldSetter'
 import { mapVacancy } from '../data/mapVacancy'
 import type { Vacancy, ApiVacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
@@ -78,6 +79,7 @@ export const VACANCIES_MAX_PER_PAGE = 500
 export function useVacanciesData({ filterParams, page, pageSize, t, sort }: UseVacanciesDataArgs): UseVacanciesDataResult {
   const queryClient = useQueryClient()
   const sortQuery = vacancySortParams(sort)
+  const listKey = ['vacancies', filterParams, page, pageSize, sort]
 
   // Customers once, for the filters/drawer/modal/bulk pickers.
   const { data: customers = EMPTY_CUSTOMERS } = useQuery({
@@ -94,7 +96,7 @@ export function useVacanciesData({ filterParams, page, pageSize, t, sort }: UseV
   // sort rides in the key too (DATATABLE-SORT-1 reference adoption) — a header
   // click that maps to a real sort_by cleanly refetches.
   const listQuery = useQuery({
-    queryKey: ['vacancies', filterParams, page, pageSize, sort],
+    queryKey: listKey,
     queryFn: async ({ signal }): Promise<ListResult> => {
       try {
         // Defensive re-clamp (belt-and-braces): the page already clamps pageSize to
@@ -136,19 +138,8 @@ export function useVacanciesData({ filterParams, page, pageSize, t, sort }: UseV
   })
 
   // Setter wrappers over the list cache — keep the container's optimistic mutations working.
-  const setVacancies = useCallback<Dispatch<SetStateAction<Vacancy[]>>>(updater => {
-    queryClient.setQueryData<ListResult>(['vacancies', filterParams, page, pageSize, sort], prev => {
-      const cur = prev ?? { vacancies: [], total: 0, lastPage: 1 }
-      return { ...cur, vacancies: typeof updater === 'function' ? (updater as (p: Vacancy[]) => Vacancy[])(cur.vacancies) : updater }
-    })
-  }, [queryClient, filterParams, page, pageSize, sort])
-
-  const setTotal = useCallback<Dispatch<SetStateAction<number>>>(updater => {
-    queryClient.setQueryData<ListResult>(['vacancies', filterParams, page, pageSize, sort], prev => {
-      const cur = prev ?? { vacancies: [], total: 0, lastPage: 1 }
-      return { ...cur, total: typeof updater === 'function' ? (updater as (p: number) => number)(cur.total) : updater }
-    })
-  }, [queryClient, filterParams, page, pageSize, sort])
+  const setVacancies = useListFieldSetter<ListResult, 'vacancies'>(listKey, 'vacancies', { vacancies: [], total: 0, lastPage: 1 })
+  const setTotal = useListFieldSetter<ListResult, 'total'>(listKey, 'total', { vacancies: [], total: 0, lastPage: 1 })
 
   // EXCEL-VACATURES-1: a side-channel write (the create-modal's file import) has no
   // single record to prepend optimistically like handleCreated does — it can create

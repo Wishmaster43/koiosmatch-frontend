@@ -17,16 +17,14 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, Save } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { useNumberFormat } from '@/lib/formatters'
-import SaveButton from '@/components/ui/SaveButton'
-import Spinner from '@/components/ui/Spinner'
 import { SectionTitle, Caption, GroupLabel } from '@/components/ui/typography'
 import TenantBudgetOverride from './TenantBudgetOverride'
 import BillingCardShell from './billing/BillingCardShell'
+import BillingSaveRow from './billing/BillingSaveRow'
 import { useBillingCardState } from './useBillingCardState'
 import type {
   AdminBillingBudgetsResponse, AdminBillingBudgetsUpdate, BillingBudgetEntry,
@@ -184,14 +182,9 @@ export default function BillingBudgetsCard() {
         draft={tenantDraft} onDraftChange={(next) => { setTenantDraft(next); setTenantDirty(true) }}
       />
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 20 }}>
-        <SaveButton onClick={save} disabled={saving || !hasChange} saved={savedOk}
-          style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {savedOk ? <><Check size={13} /> {t('billingBudgets.saved')}</>
-          : saving  ? <><Spinner size={13} /> {t('common.saving')}</>
-          :           <><Save size={13} /> {t('common.save')}</>}
-        </SaveButton>
-      </div>
+      <BillingSaveRow onClick={save} disabled={saving || !hasChange} saving={saving} savedOk={savedOk}
+        savedLabel={t('billingBudgets.saved')} savingLabel={t('common.saving')} saveLabel={t('common.save')}
+        style={{ marginTop: 20 }} />
     </BillingCardShell>
   )
 }

@@ -223,7 +223,9 @@ export default function DocumentsTab({ customerId, locations = [], departments =
             resolves against this level's own document-type lookup, never a
             hardcoded 'customer' once a location/department has its own scope. */}
         {previewDoc && <DocPreviewModal doc={previewDoc} docTypeScope={docTypeScope} onClose={() => setPreviewDoc(null)} />}
-        {/* One shared destructive-confirm dialog for both single and bulk delete (never a native confirm()). */}
+        {/* One shared destructive-confirm dialog for both single and bulk delete (never a native confirm()).
+            DRY: this invocation is already the shared component's full prop
+            contract; nothing left to extract without changing the component. */}
         <DocumentDeleteDialog
           open={confirmDelete}
           onConfirm={confirmDeleteAction}

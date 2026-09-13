@@ -25,7 +25,7 @@ import SubTabBar from '@/components/drawer/SubTabBar'
 import LookupChipSelect from '../components/LookupChipSelect'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
-import { toggleInList } from '@/lib/selectionSet'
+import { makeToggleIn } from '@/lib/selectionSet'
 // audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 const KEY = 'candidate_vacancy_tab'
@@ -60,8 +60,7 @@ function CandidateVacancyTabSettingsInner() {
   // config (all four keys explicit), never a partial write — immediate-save, no
   // separate save button (Danny confirmed).
   const persist = (patch) => saveSettingsKeys({ [KEY]: { ...cfg, ...patch } }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
-  const toggleIn = (key) => (value) =>
-    persist({ [key]: toggleInList(cfg[key], value) })
+  const toggleIn = makeToggleIn(cfg, persist)
 
   // Four sub-tabs — one per checkbox block, reusing the shared underline SubTabBar.
   // TAB-STRIP-WIDTH-1 (F3, mirrors VacancyCandidateTabSettings): the tab bar used

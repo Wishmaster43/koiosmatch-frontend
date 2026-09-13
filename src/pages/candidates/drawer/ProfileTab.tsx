@@ -21,14 +21,13 @@ import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
 // HUISSTIJL-1: the shared uppercase group-label atom (identity-only swap).
 import { GroupLabel } from '@/components/ui/typography'
-import { EditControls } from './profileFieldShared'
+import { EditControls, type ProfileEditableProps } from './profileFieldShared'
 import ProfilePersonalTab from './ProfilePersonalTab'
 import ProfileAddressTab from './ProfileAddressTab'
 import ProfileContactTab from './ProfileContactTab'
 import WorkPermitBlock from './WorkPermitBlock'
 import CandidateOriginCard from './CandidateOriginCard'
 import Button from '@/components/ui/Button'
-import type { Candidate } from '@/types/candidate'
 
 type AnyProps = Record<string, unknown>
 // Still-untyped JS UI helpers — accept any props at the boundary.
@@ -37,10 +36,7 @@ const SafeHtml = SafeHtmlJs as unknown as ComponentType<AnyProps>
 
 // The candidate drawer's Profile tab: three independently-editable field cards
 // plus the profile free-text block (with its own second-screen pop-out).
-export default function ProfileTab({ c, onEditSave, autoEditSignal, onContactMoment }: {
-  c: Candidate; onEditSave?: (v: Record<string, unknown>) => void; autoEditSignal?: number
-  onContactMoment?: (v: Record<string, unknown>) => void
-}) {
+export default function ProfileTab({ c, onEditSave, autoEditSignal, onContactMoment }: ProfileEditableProps) {
   const { t } = useTranslation('candidates')
 
   const [summaryEditing, setSummaryEditing] = useState(false)

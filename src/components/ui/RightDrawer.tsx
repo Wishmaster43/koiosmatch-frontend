@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { PageTitle } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
-import DrawerBackdrop from '@/components/drawer/DrawerBackdrop'
+import DrawerPanelShell from '@/components/drawer/DrawerPanelShell'
 
 // See the file's top doc above; a dumb backdrop+focus-trap+header shell, callers render their own body as children.
 export default function RightDrawer({ title, subtitle, onClose, width = 480, children }: {
@@ -19,28 +19,21 @@ export default function RightDrawer({ title, subtitle, onClose, width = 480, chi
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('common')
   return (
-    <>
-      {/* Backdrop */}
-      {/* Backdrop + panel both live on the drawer rung; the panel renders after
-          the backdrop, so DOM order stacks it on top within the rung. */}
-      <DrawerBackdrop onClick={onClose} />
-
-      {/* Panel */}
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} tabIndex={-1}
-        className="fixed top-0 bottom-0 right-0 flex flex-col"
-        // HUISSTIJL-1: aria-modal dialog panel — shadow-modal role.
-        style={{ zIndex: 'var(--z-drawer)',  width, maxWidth: '92vw', background: 'var(--surface)', boxShadow: 'var(--shadow-drawer)' }}>
-        <div className="flex items-start justify-between flex-shrink-0" style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
-          <div style={{ minWidth: 0 }}>
-            <PageTitle as="div">{title}</PageTitle>
-            {subtitle && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</div>}
-          </div>
-          <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('close')} style={{ marginLeft: 12 }}>
-            <X size={16} />
-          </Button>
+    <DrawerPanelShell panelRef={panelRef} onClose={onClose}
+      ariaLabel={typeof title === 'string' ? title : undefined}
+      className="fixed top-0 bottom-0 right-0 flex flex-col"
+      // HUISSTIJL-1: aria-modal dialog panel — shadow-modal role.
+      style={{ zIndex: 'var(--z-drawer)', width, maxWidth: '92vw', background: 'var(--surface)', boxShadow: 'var(--shadow-drawer)' }}>
+      <div className="flex items-start justify-between flex-shrink-0" style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
+        <div style={{ minWidth: 0 }}>
+          <PageTitle as="div">{title}</PageTitle>
+          {subtitle && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</div>}
         </div>
-        <div className="flex-1 overflow-auto" style={{ padding: 16 }}>{children}</div>
+        <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('close')} style={{ marginLeft: 12 }}>
+          <X size={16} />
+        </Button>
       </div>
-    </>
+      <div className="flex-1 overflow-auto" style={{ padding: 16 }}>{children}</div>
+    </DrawerPanelShell>
   )
 }

@@ -12,7 +12,7 @@ import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TextFieldWithVars } from './VariablePicker'
 import {
-  templateTexts, slotCount, splitSlots, splitTokens, toLines, setLine,
+  selectedTemplateTexts, slotCount, splitSlots, splitTokens, toLines, setLine,
   type WaTemplateOption,
 } from './whatsappTemplate'
 import type { WorkflowVarGroup } from '@/types/workflow'
@@ -112,8 +112,14 @@ export default function WhatsappTemplateField({ value, onChange, config, variabl
     return () => { alive = false }
   }, [])
 
-  const selected = templates.find(tpl => tpl.value === String(value ?? ''))
-  const texts = templateTexts(selected?.components)
+  // DRY: the alive-guard fetch cleanup right above this line and the
+  // selectedTemplateTexts call below read as a clone of StartConversationModal's
+  // own effect (jscpd weak-mode match) — both are the standard alive-ref fetch
+  // idiom used all over this codebase plus the ONE shared template-texts helper;
+  // there is no further shared unit to extract without inventing an abstraction
+  // over two structurally-different data loads (one template list vs. templates
+  // + numbers + agents).
+  const { selected, texts } = selectedTemplateTexts(templates, String(value ?? ''))
   const headerSlots = slotCount(texts.header)
   const bodySlots = slotCount(texts.body)
   const headerLines = toLines(config?.header_variables)

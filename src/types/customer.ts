@@ -387,27 +387,34 @@ export interface ApiContact {
   [k: string]: unknown
 }
 
+// The lifecycle/status fields every customer sub-entity (department/location)
+// carries identically — status lookup, custom fields, a backoffice link set,
+// the in-use delete-guard flag and the archive timestamp pair. Extracted so
+// the two interfaces below only spell out their own entity-specific fields.
+interface ApiSubEntityLifecycle {
+  status?: ApiStatusRef | null; status_id?: Id | null
+  custom_fields?: Record<string, unknown>
+  // EXTRACT-1: the shared raw shape (src/lib/backofficeLink).
+  backoffice_links?: ApiBackofficeLink[]
+  // SUBENTITEIT-DELETE-1: index-only flag (Customer{Department,Location}Resource).
+  in_use?: boolean
+  // ARCHIVE-SUBENTITY-1: derived boolean + the raw timestamp (Customer{Department,Location}Resource).
+  archived?: boolean; deleted_at?: string | null
+}
+
 /** Raw API department (read defensively). */
-export interface ApiDepartment {
+export interface ApiDepartment extends ApiSubEntityLifecycle {
   id?: Id; reference_number?: string; name?: string; description?: string
   location_id?: Id; locationId?: Id; location_name?: string; location?: { name?: string }; locationName?: string
   departments?: ApiDepartment[]; contacts?: ApiContact[]
   // Kostenplaats (Danny 2026-07-22) — the middle cascade level. billing_email
   // joined it (K-249 C.4): the match billing resolver reads a department's own too.
   cost_center?: string; billing_email?: string
-  status?: ApiStatusRef | null; status_id?: Id | null
-  custom_fields?: Record<string, unknown>
-  // EXTRACT-1: the shared raw shape (src/lib/backofficeLink).
-  backoffice_links?: ApiBackofficeLink[]
-  // SUBENTITEIT-DELETE-1: index-only flag (CustomerDepartmentResource.php:35).
-  in_use?: boolean
-  // ARCHIVE-SUBENTITY-1: derived boolean + the raw timestamp (CustomerDepartmentResource).
-  archived?: boolean; deleted_at?: string | null
   [k: string]: unknown
 }
 
 /** Raw API location (read defensively). The BE field is `postcode` (not `postal_code`). */
-export interface ApiLocation {
+export interface ApiLocation extends ApiSubEntityLifecycle {
   id?: Id; reference_number?: string; name?: string; street?: string; house_number?: string; house_number_suffix?: string
   // LANE-I1b: optional second address line (address_line_2 on the backend).
   address_line_2?: string
@@ -425,14 +432,6 @@ export interface ApiLocation {
   // the old or the new branch.
   branch?: { id?: Id; name?: string } | null; branch_id?: Id | null
   departments?: ApiDepartment[]; contacts?: ApiContact[]
-  status?: ApiStatusRef | null; status_id?: Id | null
-  custom_fields?: Record<string, unknown>
-  // EXTRACT-1: the shared raw shape (src/lib/backofficeLink).
-  backoffice_links?: ApiBackofficeLink[]
-  // SUBENTITEIT-DELETE-1: index-only flag (CustomerLocationResource.php:66).
-  in_use?: boolean
-  // ARCHIVE-SUBENTITY-1: derived boolean + the raw timestamp (CustomerLocationResource).
-  archived?: boolean; deleted_at?: string | null
   [k: string]: unknown
 }
 

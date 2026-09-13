@@ -24,17 +24,17 @@ import { buildReportQueryParams, EMPTY_REPORT_FILTERS } from './reportFilterPara
 import ReportKpiBand from './ReportKpiBand'
 import ReportGrid from './ReportGrid'
 import ReportChartCard from './ReportChartCard'
+import { PieAxisCard } from './lib/PieAxisCard'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useOutreachReport } from './useOutreachReport'
 import { gateDrillClick } from './reportDrillGate'
 import { useSeriesDrill } from './hooks/useSeriesDrill'
-import { donutData, barData, ownerBarData } from './lib/chartData'
+import { barData, ownerBarData } from './lib/chartData'
 import { segmentClick, ownerClick } from './lib/drillClick'
 import { serverKpiSpecs } from './lib/kpiSpecs'
 import { makeOpenKpiDrill, makeOpenSegment } from './lib/drillFactories'
 import { totalCompareSubFor } from './lib/kpiCompareSub'
-import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
@@ -174,18 +174,15 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
 
           {/* Channel axis, zero-filled over the tenant channels + 'none' — few
               categorical values → donut. */}
-          <ReportChartCard title={t('outreach.axes.channel')} chart={
-            <PieChartCard {...donutData(data.by_channel)} onItemClick={pickSegment('channel', data.by_channel)} />} />
+          <PieAxisCard title={t('outreach.axes.channel')} segments={data.by_channel} onItemClick={pickSegment('channel', data.by_channel)} />
 
           {/* Status axis — the fase-1 breakdown, now summing to total with
               value/label pairs ("Onbekend" orphan bars included) → donut. */}
-          <ReportChartCard title={t('customers.axes.status')} chart={
-            <PieChartCard {...donutData(data.by_status)} onItemClick={pickSegment('status', data.by_status)} />} />
+          <PieAxisCard title={t('customers.axes.status')} segments={data.by_status} onItemClick={pickSegment('status', data.by_status)} />
 
           {/* Outcome axis — incl. the "Geen uitkomst" sentinel so it sums to
               total → donut. Last odd card spans the full row (no grid hole). */}
-          <ReportChartCard span={2} title={t('outreach.axes.outcome')} chart={
-            <PieChartCard {...donutData(data.by_outcome)} onItemClick={pickSegment('outcome', data.by_outcome)} />} />
+          <PieAxisCard span={2} title={t('outreach.axes.outcome')} segments={data.by_outcome} onItemClick={pickSegment('outcome', data.by_outcome)} />
 
           {/* DASH-FEEDS-V3 depth: channel funnel + best-contact heatmap (halves,
               even parity) + the campaign timeseries last, span 2. */}

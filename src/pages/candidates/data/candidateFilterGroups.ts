@@ -11,31 +11,37 @@ import { Opt, archivedCheckboxGroup, fmtD } from '@/lib/filterGroups/common'
 // Plural toggle for candidates (generic type parameter, unlike applications).
 type Tog = <T,>(set: Dispatch<SetStateAction<T[]>>) => (v: T) => void
 
+// The candidate-page filter selections + their setters — shared between the
+// group-config builder (nested under `filters`) and useCandidateFilterPanel
+// (flat props), so the field list and its types stay in exactly one place.
+export interface CandidateFilterFields {
+  selectedStatus: string[]; setSelectedStatus: Dispatch<SetStateAction<string[]>>
+  selectedPhase: string[]; setSelectedPhase: Dispatch<SetStateAction<string[]>>
+  selectedFunnel: string[]; setSelectedFunnel: Dispatch<SetStateAction<string[]>>
+  selectedType: string[]; setSelectedType: Dispatch<SetStateAction<string[]>>
+  selectedTitle: string[]; setSelectedTitle: Dispatch<SetStateAction<string[]>>
+  selectedPool: string[]; setSelectedPool: Dispatch<SetStateAction<string[]>>
+  selectedCity: string[]; setSelectedCity: Dispatch<SetStateAction<string[]>>
+  selectedProvince: string[]; setSelectedProvince: Dispatch<SetStateAction<string[]>>
+  selectedGeslacht: string[]; setSelectedGeslacht: Dispatch<SetStateAction<string[]>>
+  selectedOwner: Array<string | number>; setSelectedOwner: Dispatch<SetStateAction<Array<string | number>>>
+  selectedLocation: Array<string | number>; setSelectedLocation: Dispatch<SetStateAction<Array<string | number>>>
+  selectedSource: string[]; setSelectedSource: Dispatch<SetStateAction<string[]>>
+  showArchived: boolean; setShowArchived: (fn: (v: boolean) => boolean) => void
+  missingAppointmentFilter: boolean; setMissingAppointmentFilter: (fn: (v: boolean) => boolean) => void
+  dateRange: DateRangeFilter | null; setDateRange: (v: DateRangeFilter | null) => void
+  geoFilter: GeoFilter | null; geoHint: string | null
+  applyGeo: (q: string, km: number) => void; clearGeo: () => void
+}
+
 interface BuildArgs {
   t: (k: string, o?: Record<string, unknown>) => string
   tog: Tog
-  filters: {
-    selectedStatus: string[]; setSelectedStatus: Dispatch<SetStateAction<string[]>>
-    selectedPhase: string[]; setSelectedPhase: Dispatch<SetStateAction<string[]>>
-    selectedFunnel: string[]; setSelectedFunnel: Dispatch<SetStateAction<string[]>>
-    selectedType: string[]; setSelectedType: Dispatch<SetStateAction<string[]>>
-    selectedTitle: string[]; setSelectedTitle: Dispatch<SetStateAction<string[]>>
-    selectedPool: string[]; setSelectedPool: Dispatch<SetStateAction<string[]>>
-    selectedCity: string[]; setSelectedCity: Dispatch<SetStateAction<string[]>>
-    selectedProvince: string[]; setSelectedProvince: Dispatch<SetStateAction<string[]>>
-    selectedGeslacht: string[]; setSelectedGeslacht: Dispatch<SetStateAction<string[]>>
-    selectedOwner: Array<string | number>; setSelectedOwner: Dispatch<SetStateAction<Array<string | number>>>
-    selectedLocation: Array<string | number>; setSelectedLocation: Dispatch<SetStateAction<Array<string | number>>>
-    selectedSource: string[]; setSelectedSource: Dispatch<SetStateAction<string[]>>
-    showArchived: boolean; setShowArchived: (fn: (v: boolean) => boolean) => void
-    missingAppointmentFilter: boolean; setMissingAppointmentFilter: (fn: (v: boolean) => boolean) => void
+  filters: CandidateFilterFields & {
     // NOTE-DOCS-DRILL (Opus lane-3 B3): the dashboard's missingDocs drill sets
     // attention 'missingDocs' — this checkbox is its VISIBLE panel twin, so the
     // narrowed list never reads as unfiltered.
     attentionFilter: string | null; setAttentionFilter: (v: string | null) => void
-    dateRange: DateRangeFilter | null; setDateRange: (v: DateRangeFilter | null) => void
-    geoFilter: GeoFilter | null; geoHint: string | null
-    applyGeo: (q: string, km: number) => void; clearGeo: () => void
   }
   options: Record<string, Opt[]>
 }

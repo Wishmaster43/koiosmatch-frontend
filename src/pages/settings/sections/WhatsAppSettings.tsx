@@ -7,6 +7,7 @@
  * meta maps below only carry the colours per quality/status/category key.
  */
 import { useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw, Search } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
@@ -58,6 +59,17 @@ const TEMPLATE_STATUS_META: Record<string, { color: string; bg: string }> = {
   PENDING:  { color: 'var(--color-warning-text)', bg: 'var(--color-warning-bg)' },
   REJECTED: { color: 'var(--color-danger-text)',  bg: 'var(--color-danger-bg)' },
   PAUSED:   { color: 'var(--text-muted)',              bg: 'var(--hover-bg)' },
+}
+
+// Shared empty-state card for the numbers/templates sub-views — same box, only
+// the message differs (no connection selected vs a selected connection with none).
+function EmptyNotice({ children }: { children: ReactNode }) {
+  return (
+    <div style={{ padding: '16px 18px', background: 'var(--hover-bg)', border: '1px solid var(--border)',
+                  borderRadius: 12, fontSize: 13, color: 'var(--text-muted)' }}>
+      {children}
+    </div>
+  )
 }
 
 // Settings → WhatsApp: manages the tenant's connections plus each connection's
@@ -219,15 +231,9 @@ export default function WhatsAppSettings() {
           )}
         </div>
         {!selectedConnId ? (
-          <div style={{ padding: '16px 18px', background: 'var(--hover-bg)', border: '1px solid var(--border)',
-                        borderRadius: 12, fontSize: 13, color: 'var(--text-muted)' }}>
-            {t('whatsapp.noConnections')}
-          </div>
+          <EmptyNotice>{t('whatsapp.noConnections')}</EmptyNotice>
         ) : phones.length === 0 ? (
-          <div style={{ padding: '16px 18px', background: 'var(--hover-bg)', border: '1px solid var(--border)',
-                        borderRadius: 12, fontSize: 13, color: 'var(--text-muted)' }}>
-            {t('whatsapp.noNumbers')}
-          </div>
+          <EmptyNotice>{t('whatsapp.noNumbers')}</EmptyNotice>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {phones.map((p, i) => {
@@ -298,15 +304,9 @@ export default function WhatsAppSettings() {
         </div>
 
         {!selectedConnId ? (
-          <div style={{ padding: '16px 18px', background: 'var(--hover-bg)', border: '1px solid var(--border)',
-                        borderRadius: 12, fontSize: 13, color: 'var(--text-muted)' }}>
-            {t('whatsapp.noConnections')}
-          </div>
+          <EmptyNotice>{t('whatsapp.noConnections')}</EmptyNotice>
         ) : templates.length === 0 ? (
-          <div style={{ padding: '16px 18px', background: 'var(--hover-bg)', border: '1px solid var(--border)',
-                        borderRadius: 12, fontSize: 13, color: 'var(--text-muted)' }}>
-            {t('whatsapp.noTemplates')}
-          </div>
+          <EmptyNotice>{t('whatsapp.noTemplates')}</EmptyNotice>
         ) : (
           <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>

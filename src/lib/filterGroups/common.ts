@@ -6,7 +6,13 @@
  * filter state, returns a complete filter-group config object ready for the
  * right-panel (or [] if the group is conditional and the condition is not met).
  */
+import type { Dispatch, SetStateAction } from 'react'
 import { ddmmyyyy } from '@/lib/localDate'
+
+// Shared string multi-select toggle shape — the same signature repeated across
+// every entity's filter-groups builder (adopted here by opportunity/outreach;
+// other callers keep their own local copy until they too are touched).
+export type Tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => void
 
 /**
  * Filter group option shape — label + value, with optional count (for tallies)

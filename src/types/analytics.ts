@@ -5,6 +5,12 @@
  * colour/label map covers both reports.
  */
 
+// Shared shapes repeated across nearly every report envelope below: the
+// day/week timeseries block, and the nine-card KPI suite (KPI-MATCHES-1 idiom
+// — key/label/count/unit, unit optional since not every card carries one).
+export interface ReportTimeseries { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
+export interface ReportKpiCard { key: string; label?: string; count: number | null; unit?: 'pct' | 'ratio' | 'euro' | 'days' }
+
 // One funnel stage in the flow report. `reached_count` = cohort (distinct
 // applications that ever reached this stage → the real funnel); `current_count` =
 // pipeline-now occupancy (the FE fallback while the cohort is still filling).
@@ -79,7 +85,7 @@ export interface VacanciesReportData {
   vacancies: VacancyReportRow[]
   total: number
   // ?bucket=day|week overrides granularity; the default 3-month window buckets weekly.
-  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
+  timeseries: ReportTimeseries
   // Zero-filled over the vacancy_statuses lookup (with color); orphan-uuid bars + 'none'.
   by_status: CandidateSegment[]
   // Top-10 + 'others' + 'none'; an archived customer keeps its real name.
@@ -108,7 +114,7 @@ export interface VacanciesReportData {
   // KPI-VAC-1 (CMBE 28-08): the server's own nine-card kpis[] suite (mirrors
   // matches/opportunities/tasks) — optional: a cached pre-suite envelope omits
   // it, and the strip renders the house dash with no drill for a missing key.
-  kpis?: { key: string; label?: string; count: number | null; unit?: 'pct' | 'ratio' | 'euro' | 'days' }[]
+  kpis?: ReportKpiCard[]
 }
 
 // ── Matches report (GET /reports/matches) ────────────────────────────────────
@@ -139,7 +145,7 @@ export interface MatchesReportData {
   // Portie 7: the shared day/week timeseries over the same cohort. With week
   // buckets series[0].date is the MONDAY of the week containing `from` (a
   // pre-from Monday is the contract, not an error); day opens exactly on `from`.
-  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
+  timeseries: ReportTimeseries
   // Soort-as (MATCH-SOORT-1): contract_form segments, sums to total. Includes a
   // 'none' sentinel for matches without a contract form, and any orphaned
   // (deleted-lookup) slug as its own segment — same shape/handling as the other
@@ -159,7 +165,7 @@ export interface MatchesReportData {
   // RAPPORT-KAARTDRILLS-2: the full KPI suite (GET /reports/matches/kpis/drill's
   // enum). Optional so a cached pre-update response still parses. Server sends a
   // `label` per card too — deliberately ignored (§5: labels come from i18n).
-  kpis?: { key: string; label?: string; count: number | null; unit?: 'pct' | 'ratio' | 'euro' | 'days' }[]
+  kpis?: ReportKpiCard[]
 }
 
 // ── Intakes report (GET /reports/intakes, C-22) ──────────────────────────────
@@ -194,12 +200,12 @@ export interface OutreachReportData {
   reached: number
   reach_rate: number | null
   total: number
-  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
+  timeseries: ReportTimeseries
   // CMBE K-191 (commit 00e72f45): the envelope now carries the nine-card suite
   // in catalog order (total_targets/open_todo/called_in_period/reached/
   // not_reached/conversion_pct/campaigns_active/campaigns_done_in_period/
   // due_today) — counts identical to the flat fields, one predicate per card.
-  kpis?: { key: string; label?: string; count: number | null; unit?: 'pct' | 'ratio' | 'euro' | 'days' }[]
+  kpis?: ReportKpiCard[]
   by_status: OutreachStatusCount[]
   by_outcome: OutreachOutcomeCount[]
   // Top-20 + 'others' (the exact complement — a real, drillable row); an archived
@@ -240,7 +246,7 @@ export interface WhatsappReportData {
   meta: { period: string | null; from: string; to: string; total: number }
   // Server sends a `label` per card too — deliberately ignored (§5: labels come
   // from i18n, never server-composed).
-  kpis: { key: string; label?: string; count: number | null; unit?: 'pct' | 'ratio' | 'euro' | 'days' }[]
+  kpis: ReportKpiCard[]
   timeseries: { bucket: 'day' | 'week'; series: { date: string; inbound: number; outbound: number }[] }
   by_direction: WhatsappSegment[]
   by_type: WhatsappSegment[]
@@ -271,7 +277,7 @@ export interface CandidatesReportData {
   from: string
   to: string
   total: number
-  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
+  timeseries: ReportTimeseries
   by_status: CandidateSegment[]
   by_phase: CandidateSegment[]
   by_source: CandidateSegment[]
@@ -328,7 +334,7 @@ export interface ApplicationsReportData {
   from: string
   to: string
   total: number
-  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
+  timeseries: ReportTimeseries
   by_bucket: ApplicationBucketCounts
   by_stage: ApplicationStageSegment[]
   by_source: CandidateSegment[]
@@ -350,7 +356,7 @@ export interface CustomersReportData {
   from: string
   to: string
   total: number
-  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
+  timeseries: ReportTimeseries
   by_status: CandidateSegment[]
   by_phase: CandidateSegment[]
   by_industry: CandidateSegment[]
@@ -440,11 +446,11 @@ export interface OpportunitiesReportData {
   // Unlike the sibling reports, the window lives NESTED under `period` here.
   period: { from: string; to: string }
   total: number
-  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
+  timeseries: ReportTimeseries
   // KPI-OPP-1 (CMBE 27-08, commit eb3af985): the nine-card suite in catalog
   // order (total/open/won/lost/win_rate/open_value/stale/closing_soon/overdue) —
   // mirrors matches/tasks/outreach's kpis[] idiom (KPI-MATCHES-1).
-  kpis?: { key: string; label?: string; count: number | null; unit?: 'pct' | 'ratio' | 'euro' | 'days' }[]
+  kpis?: ReportKpiCard[]
   totals: OpportunityTotals
   by_stage: OpportunityStageSegment[]
   by_owner: CandidateOwnerSegment[]
@@ -476,7 +482,7 @@ export interface TasksReportData {
   from: string
   to: string
   total: number
-  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
+  timeseries: ReportTimeseries
   summary: TasksReportSummary
   by_status: TaskStatusSegment[]
   // Type/priority key on the lookup ID too (+ 'none'); same {value,label,count}
@@ -490,7 +496,7 @@ export interface TasksReportData {
   // RAPPORT-KAARTDRILLS-2: the full KPI suite (GET /reports/tasks/kpis/drill's
   // enum). Optional so a cached pre-update response still parses. Server sends a
   // `label` per card too — deliberately ignored (§5: labels come from i18n).
-  kpis?: { key: string; label?: string; count: number | null; unit?: 'pct' | 'ratio' | 'euro' | 'days' }[]
+  kpis?: ReportKpiCard[]
 }
 
 // ── Sources report (GET /reports/sources, REPORTS-2 fase 2) ──────────────────

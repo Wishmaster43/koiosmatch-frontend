@@ -169,6 +169,32 @@ function useSoundSetting() {
   return { enabled, toggle: setEnabled }
 }
 
+// One toggle column (in-app or popup): a muted "not active yet" marker when the context
+// has no working backend emitter (NOTIF-PARITY-1), otherwise the working SegmentedControl.
+// Shared by the in-app and popup columns below — they differ only in label/value/onChange.
+function ChannelToggleColumn({ label, noEmitterYet, notYetActiveLabel, notYetActiveReason, ariaLabel, value, onChange, options, captionStyle }: {
+  label: string
+  noEmitterYet: boolean
+  notYetActiveLabel: string
+  notYetActiveReason: string
+  ariaLabel: string
+  value: string
+  onChange: (next: string) => void
+  options: { value: string; label: string }[]
+  captionStyle: CSSProperties
+}) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+      <span style={captionStyle}>{label}</span>
+      {noEmitterYet ? (
+        <SoftChip label={notYetActiveLabel} color="var(--text-muted)" title={notYetActiveReason} />
+      ) : (
+        <SegmentedControl size="compact" ariaLabel={ariaLabel} value={value} onChange={onChange} options={options} />
+      )}
+    </div>
+  )
+}
+
 // Per-user notification preferences: per-context in-app/email toggles, browser push subscription and the sound setting.
 export default function MyNotificationsSettings() {
   const { t } = useTranslation('settings')
@@ -239,37 +265,19 @@ export default function MyNotificationsSettings() {
                     real working popup override (NOTIF-POPUP-1, same request shape as
                     in-app, its own `popup` map). */}
                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: 16 }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                    <span style={captionStyle}>{t('notifications.inApp.label')}</span>
-                    {noEmitterYet ? (
-                      <SoftChip label={t('notifications.inApp.notYetActive')} color="var(--text-muted)"
-                        title={t('notifications.inApp.notYetActiveReason')} />
-                    ) : (
-                      <SegmentedControl size="compact"
-                        ariaLabel={`${title} ${t('notifications.inApp.label')}`}
-                        value={toUi(contexts[context])}
-                        onChange={next => setContext(context, fromUi(next))}
-                        options={options} />
-                    )}
-                  </div>
+                  <ChannelToggleColumn label={t('notifications.inApp.label')} noEmitterYet={noEmitterYet}
+                    notYetActiveLabel={t('notifications.inApp.notYetActive')} notYetActiveReason={t('notifications.inApp.notYetActiveReason')}
+                    ariaLabel={`${title} ${t('notifications.inApp.label')}`} value={toUi(contexts[context])}
+                    onChange={next => setContext(context, fromUi(next))} options={options} captionStyle={captionStyle} />
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                     <span style={captionStyle}>{t('notifications.email.label')}</span>
                     <SoftChip label={t('notifications.my.emailNotAvailable')} color="var(--text-muted)"
                       title={t('notifications.my.emailNotAvailableReason')} />
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                    <span style={captionStyle}>{t('notifications.popup.label')}</span>
-                    {noEmitterYet ? (
-                      <SoftChip label={t('notifications.inApp.notYetActive')} color="var(--text-muted)"
-                        title={t('notifications.inApp.notYetActiveReason')} />
-                    ) : (
-                      <SegmentedControl size="compact"
-                        ariaLabel={`${title} ${t('notifications.popup.label')}`}
-                        value={toUi(popup[context])}
-                        onChange={next => setPopupContext(context, fromUi(next))}
-                        options={options} />
-                    )}
-                  </div>
+                  <ChannelToggleColumn label={t('notifications.popup.label')} noEmitterYet={noEmitterYet}
+                    notYetActiveLabel={t('notifications.inApp.notYetActive')} notYetActiveReason={t('notifications.inApp.notYetActiveReason')}
+                    ariaLabel={`${title} ${t('notifications.popup.label')}`} value={toUi(popup[context])}
+                    onChange={next => setPopupContext(context, fromUi(next))} options={options} captionStyle={captionStyle} />
                 </div>
               </SettingRow>
             )

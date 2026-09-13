@@ -22,13 +22,12 @@
  * exactly that on top, reusing this screen's own ImportEntityNav/banners/ResultStep
  * rather than duplicating them. Both stay: neither is a mockup of the other.
  */
-import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, ArrowRight } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { tintBg, tintBorder } from '@/lib/tint'
 import { useNavigation } from '@/context/NavigationContext'
-import { useImportTemplates } from './import/useImportTemplates'
+import { useImportTemplates, useDefaultImportSelection } from './import/useImportTemplates'
 import { useImportWizard } from './import/useImportWizard'
 import ImportEntityNav from './import/ImportEntityNav'
 import ImportOrderBanner from './import/ImportOrderBanner'
@@ -36,7 +35,7 @@ import WholeTreeBanner from './import/WholeTreeBanner'
 import UploadStep from './import/UploadStep'
 import PreviewStep from './import/PreviewStep'
 import ResultStep from './import/ResultStep'
-import { groupTemplates, importPermissionsFor, isWholeTreeTemplate, orderedTemplates } from './import/importTemplateShape'
+import { groupTemplates, importPermissionsFor, isWholeTreeTemplate } from './import/importTemplateShape'
 import { iconForTemplate } from './import/importEntityIcon'
 import type { ImportTemplateSummary } from './import/importApi'
 import { PageTitle } from '@/components/ui/typography'
@@ -105,16 +104,10 @@ export default function ImportSettings() {
   // column mapping + an editable preview on top of this screen's own dry-run flow.
   const { navigate } = useNavigation()
   const { templates, phase, reload } = useImportTemplates()
-  const [selected, setSelected] = useState<string | null>(null)
-
   // Land on the first template in DISPLAY order — the combined whole-customer file
   // when the backend serves one, since that is the answer for a new customer; never
   // overrides a user pick.
-  useEffect(() => {
-    if (phase === 'ready' && templates.length > 0 && !selected) {
-      setSelected(orderedTemplates(templates)[0]?.entity ?? null)
-    }
-  }, [phase, templates, selected])
+  const [selected, setSelected] = useDefaultImportSelection(templates, phase)
 
   // Gated on the SELECTED entity's own permission pair (importPermissionsFor mirrors
   // exports.php): vacancies needs vacancies.view/create, every other entity (a

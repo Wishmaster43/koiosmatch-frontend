@@ -5,6 +5,7 @@
  * Takes setters as arguments (never managing state itself) so it works with
  * both useState and usePageMemory in different callers.
  */
+import { useCallback } from 'react'
 import { geocodeLocation } from './geocode'
 
 export interface GeoFilter {
@@ -36,4 +37,20 @@ export async function applyGeo(
   setGeoFilter({ q, km, lat: hit.lat, lng: hit.lng, label: `${hit.label} · ${km} km` })
   setMapCenter({ lat: hit.lat, lng: hit.lng })
   setMapRadius(km)
+}
+
+// useApplyGeoFilter — stabilized applyGeo() call shared by every filter-panel
+// hook (candidates, customers, …): wraps the raw applyGeo() in a useCallback so
+// a page's filterGroups useMemo can safely depend on it (every captured setter
+// is itself stable — usePageMemory/useState — only `t` can genuinely change).
+export function useApplyGeoFilter(
+  t: (k: string) => string,
+  setGeoHint: (hint: string | null) => void,
+  setGeoFilter: (filter: GeoFilter | null) => void,
+  setMapCenter: (pt: { lat: number; lng: number }) => void,
+  setMapRadius: (r: number) => void,
+) {
+  return useCallback(async (q: string, km: number) => {
+    return applyGeo(q, km, t('common:filters.notFound'), setGeoHint, setGeoFilter, setMapCenter, setMapRadius)
+  }, [t, setGeoHint, setGeoFilter, setMapCenter, setMapRadius])
 }

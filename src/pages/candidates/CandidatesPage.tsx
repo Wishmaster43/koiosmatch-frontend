@@ -19,12 +19,13 @@ import CandidateDrawerJs from './CandidateDrawer'
 import CandidateLifecycleModals from './CandidateLifecycleModals'
 import AddCandidateModal from './AddCandidateModal'
 import CandidatesListPanel from './CandidatesListPanel'
-import type { ActionMessage } from '@/components/ui/ActionMessageBanner'
 import { isStale, isNeverContacted, optsFrom } from './data/candidatesShared'
 import { usePools } from '@/lib/usePools'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { useListPageSize } from '@/hooks/useListPageSize'
 import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
+import { useArchivedTrashToggle } from '@/hooks/useArchivedTrashToggle'
+import { useActionMessage } from '@/hooks/useActionMessage'
 import { useCandidateFilters } from './hooks/useCandidateFilters'
 import { useCandidatesData, CANDIDATES_MAX_PER_PAGE } from './hooks/useCandidatesData'
 import type { CandidateSort } from './hooks/useCandidatesData'
@@ -94,9 +95,10 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const [selectedIds,      setSelectedIds]      = useState<Set<Id>>(() => new Set())
   // KOIOS-SELECTIE-CONTEXT-1: mirror the selection into Koios AI's context chip.
   usePublishSelection('candidates', selectedIds)
-  // Transient feedback for bulk mutations (success/error), auto-dismissed.
-  const [actionMsg,        setActionMsg]        = useState<ActionMessage | null>(null)
-  const msgTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Transient feedback for bulk mutations (success/error), auto-dismissed (§3 shared hook).
+  // GONE-BANNER-1: the drawer's 404/"gone" branch routes through `notify` too instead of
+  // writing actionMsg directly, so its message also expires after 4s instead of sticking.
+  const { actionMsg, setActionMsg, notify } = useActionMessage()
   // Virtualization scroll parent (audit item 7): the table body only renders the
   // visible window of rows — mirrors CustomersPage/VacanciesPage/TasksPage.
   const tableScrollRef = useRef<HTMLDivElement>(null)
@@ -120,6 +122,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     dateRange, setDateRange, geoFilter, geoHint, applyGeo, clearGeo,
     anyFilterActive, clearAllFilters, searchEpoch, filterParams, filterKey,
   } = useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius, setMapCenter, setMapRadius })
+  const { onToggleArchived, onToggleTrash } = useArchivedTrashToggle(setShowArchived, setShowTrash)
 
   // Seed filters from a navigation intent (e.g. a dashboard KPI/chart click).
   useEffect(() => {
@@ -139,18 +142,6 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   useEffect(() => { setPage(1) }, [filterKey, setPage])
   // Column sort also resets to page 1 (mirrors VacanciesPage).
   useEffect(() => { setPage(1) }, [sort, setPage])
-
-  // Show a transient success/error message; replaces any previous one. `action`
-  // is optional (e.g. the "Openen" follow-up after a restore/archive) so this
-  // stays the ONE banner mechanism — GONE-BANNER-1: the drawer's 404/"gone"
-  // branch routes through here too instead of writing actionMsg directly, so
-  // its message also expires after 4s instead of sticking until dismissed.
-  const notify = (type: string, text: string, action?: ActionMessage['action']) => {
-    setActionMsg({ type, text, action })
-    if (msgTimer.current) clearTimeout(msgTimer.current)
-    msgTimer.current = setTimeout(() => setActionMsg(null), 4000)
-  }
-  useEffect(() => () => { if (msgTimer.current) clearTimeout(msgTimer.current) }, [])
 
   // hidden without the create permission (OPENERS-HIDE-1, Danny 05-09), same
   // as every other page toolbar (measured — POST /candidates requires it).
@@ -352,8 +343,8 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
           searchEpoch={searchEpoch} globalSearch={globalSearch} onSearch={setGlobalSearch}
           anyFilterActive={anyFilterActive} onClearFilters={clearAllFilters}
           blacklistActive={blacklistActive} onToggleBlacklist={toggleBlacklist}
-          showArchived={showArchived} onToggleArchived={() => { setShowArchived(v => !v); setShowTrash(false) }}
-          showTrash={showTrash} onToggleTrash={() => { setShowTrash(v => !v); setShowArchived(false) }}
+          showArchived={showArchived} onToggleArchived={onToggleArchived}
+          showTrash={showTrash} onToggleTrash={onToggleTrash}
           view={view} onToggleView={() => setView(v => (v === 'map' ? 'table' : 'map'))}
           tableScrollRef={tableScrollRef} error={error} filtered={filtered} loading={loading}
           selectedId={selected?.id} onSelectCandidate={selectCandidate}

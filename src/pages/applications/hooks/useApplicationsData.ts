@@ -30,6 +30,7 @@ import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-quer
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { pickStatsScopeParams } from '@/lib/statsScopeParams'
 import { useRowsEpoch } from '@/hooks/useRowsEpoch'
+import { useListFieldSetter } from '@/hooks/useListFieldSetter'
 import { mapApplication } from '../data/mapApplication'
 import type { ApiApplication, Application } from '@/types/application'
 import type { LookupItem } from '@/context/LookupsContext'
@@ -118,11 +119,12 @@ function sortParams(sort?: AppSort | null): Record<string, string> {
 export function useApplicationsData({ view, filterParams, bucketParam, page, pageSize, funnelTypes, sort }: UseApplicationsDataParams) {
   const queryClient = useQueryClient()
 
-  // TABLE — server-paginated; only active in table view. Memoized so the
-  // setApplications/setTotal callbacks below don't re-create on every render
-  // (react-hooks/exhaustive-deps — a fresh array identity each render would
-  // otherwise churn their useCallback deps). DATATABLE-SORT-1: `sort` rides in the
-  // key too, so a header click that maps to a real sort_by cleanly refetches.
+  // TABLE — server-paginated; only active in table view. Memoized so this stays a
+  // stable identity: react-query reads it as the cache key for this query, and
+  // setApplications below (its own useCallback) depends on it not churning every
+  // render (setTotal no longer needs this — useListFieldSetter reads the key from
+  // a ref instead). DATATABLE-SORT-1: `sort` rides in the key too, so a header
+  // click that maps to a real sort_by cleanly refetches.
   const listKey = useMemo(() => ['applications', 'list', filterParams, bucketParam, page, pageSize, sort] as const,
     [filterParams, bucketParam, page, pageSize, sort])
   const listQuery = useQuery({
@@ -228,12 +230,7 @@ export function useApplicationsData({ view, filterParams, bucketParam, page, pag
   }, [queryClient, listKey, wideKey])
 
   // Adjust the table's total (create/detach optimistic count changes).
-  const setTotal = useCallback<Dispatch<SetStateAction<number>>>(updater => {
-    queryClient.setQueryData<ListResult>(listKey, prev => {
-      const cur = prev ?? { applications: [], total: 0, lastPage: 1 }
-      return { ...cur, total: typeof updater === 'function' ? (updater as (p: number) => number)(cur.total) : updater }
-    })
-  }, [queryClient, listKey])
+  const setTotal = useListFieldSetter<ListResult, 'total'>(listKey, 'total', { applications: [], total: 0, lastPage: 1 })
 
   return {
     applications, setApplications, loading, error, total, setTotal, lastPage,

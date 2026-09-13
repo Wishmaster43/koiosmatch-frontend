@@ -12,7 +12,7 @@
  * do not exist yet (VACGEN-1 is a backend-Claude hand-off) — a 404 on the initial
  * GET degrades to a calm notice with no Add button, never a dead CRUD affordance.
  */
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
@@ -26,11 +26,10 @@ import EditorRowFooter from '@/components/ui/EditorRowFooter'
 import AddFormFooter from '@/components/ui/AddFormFooter'
 import AddCardTrigger from '@/components/ui/AddCardTrigger'
 import ExpandableCardListItem from '../components/ExpandableCardListItem'
+import { cardStyle, useSettingsListUiState, useSettingsListLoad, runSettingsListCreate } from './settingsListCardStyles'
 
 const ENDPOINT = '/vacancy-generation-profiles'
 const BLOCKS_ENDPOINT = '/vacancy-content-blocks'
-
-const cardStyle = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 8 }
 
 // A fresh draft for the create card / an opened edit card — matcher fields default
 // to "matches anything" (empty arrays); content defaults to the calmest settings.
@@ -46,32 +45,23 @@ export default function VacancyGenerationProfilesList() {
   const [profiles, setProfiles] = useState([])
   const [contentBlocks, setContentBlocks] = useState([])
   const [phase, setPhase] = useState('loading') // loading | unavailable | error | ready
-  const [expanded, setExpanded] = useState(null)
-  const [adding, setAdding] = useState(false)
-  const [saving, setSaving] = useState(null) // 'new' | profile id | null
+  const { expanded, setExpanded, adding, setAdding, saving, setSaving, editForms, setEditForms } = useSettingsListUiState()
   const [settingDefaultId, setSettingDefaultId] = useState(null)
   const [newForm, setNewForm] = useState(emptyDraft())
-  const [editForms, setEditForms] = useState({})
   const { confirm, dialog } = useConfirm()
 
   // Load profiles + the reusable-blocks picker data. The blocks fetch is best-effort
   // (its own 404 only empties the picker, it never blocks the profiles CRUD itself).
-  useEffect(() => {
-    let alive = true
-    Promise.all([
+  useSettingsListLoad(async () => {
+    const [pRes, bRes] = await Promise.all([
       api.get(ENDPOINT),
       api.get(BLOCKS_ENDPOINT).catch(() => ({ data: { data: [] } })),
-    ]).then(([pRes, bRes]) => {
-      if (!alive) return
+    ])
+    return () => {
       setProfiles(unwrapList(pRes).rows)
       setContentBlocks(unwrapList(bRes).rows)
-      setPhase('ready')
-    }).catch((e) => {
-      if (!alive) return
-      setPhase(e?.response?.status === 404 ? 'unavailable' : 'error')
-    })
-    return () => { alive = false }
-  }, [])
+    }
+  }, setPhase)
 
   // Shallow-merge a patch from the editor into one profile's draft (top-level keys;
   // the editor itself already rebuilds the full nested matcher/content object).
@@ -84,19 +74,13 @@ export default function VacancyGenerationProfilesList() {
   }
 
   // Create a new profile, flattening the nested draft to the API's flat validation shape.
-  const handleCreate = async () => {
-    const name = newForm.name.trim()
-    if (!name) return
-    setSaving('new')
-    try {
-      const res = await api.post(ENDPOINT, toApiProfile(newForm))
-      setProfiles(p => [...p, unwrap(res)])
-      setNewForm(emptyDraft())
-      setAdding(false)
-    } catch {
-      notifyError(t('vacancyGenerationSettings.saveFailed'))
-    } finally { setSaving(null) }
-  }
+  const handleCreate = () => runSettingsListCreate({
+    name: newForm.name,
+    endpoint: ENDPOINT,
+    body: toApiProfile(newForm),
+    setSaving, setList: setProfiles, setNewForm, emptyDraft, setAdding,
+    errorMessage: t('vacancyGenerationSettings.saveFailed'),
+  })
 
   // Save an edit to an existing profile, flattening the nested draft to the API's flat shape.
   const handleSave = async (profile) => {

@@ -3,12 +3,12 @@
  * /whatsapp-message-types) instead of a hardcoded list (§10: no hardcoded
  * vocabularies in workflow nodes). Split out of the former fieldControls.tsx monolith (§3 400-line split trigger).
  */
-import { useState, useEffect, useId } from 'react'
+import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
-import { unwrap, unwrapList } from '@/lib/api'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import type { OnChange } from './types'
+import { useLookupOptions } from './useLookupOptions'
 
 // ── Lookup-backed select ────────────────────────────────────────────────────────
 export function LookupSelectField({ value, onChange, fieldKey, endpoint, valueKey, responseKey, emptyLabel }: {
@@ -24,42 +24,24 @@ export function LookupSelectField({ value, onChange, fieldKey, endpoint, valueKe
   value?: unknown; onChange: OnChange; fieldKey: string; endpoint: string; valueKey?: string; responseKey?: string; emptyLabel?: string
 }) {
   const { t } = useTranslation('workflows')
-  const [opts, setOpts] = useState<Array<{ value: string; label: string }>>([])
-  // A failed load must read as an error, never as an honestly-empty lookup (R8/§3 four states).
-  const [error, setError] = useState(false)
-  const [retryTick, setRetryTick] = useState(0)
   // CreatableSelect's trigger is a <button>, which a plain aria-label cannot
   // name — a sr-only span + aria-labelledby names it instead (§4).
   const lookupLabelId = useId()
 
-  // Load the lookup values once; accept the common {value|id, label|name} shapes.
+  // Load the lookup values; accept the common {value|id, label|name} shapes.
   // K-193 fase 2b: an endpoint may also carry `owner` (user or branch name) and
   // `scope` ('user'|'location') per option (GET /whatsapp-web-numbers) — kept
   // additively onto the server's own label, never dropped, so the picker reads
   // "<label> · <owner>" instead of a bare device name.
-  useEffect(() => {
-    if (!endpoint) return
-    let alive = true
-    setError(false)
-    import('@/lib/api').then(m => m.default.get(endpoint))
-      .then(r => {
-        const rows = (responseKey
-          ? ((unwrap(r) as Record<string, unknown> | null)?.[responseKey] ?? [])
-          : unwrapList(r).rows) as Array<Record<string, unknown>>
-        if (alive) setOpts(rows
-          .map(o => {
-            const value = String((valueKey ? o[valueKey] : undefined) ?? o.value ?? o.id ?? '')
-            const label = String(o.label ?? o.name ?? o.value ?? '')
-            const owner = typeof o.owner === 'string' && o.owner ? o.owner : undefined
-            return { value, label: owner ? `${label} · ${owner}` : label }
-          })
-          .filter(o => o.value))
-      })
-      .catch(() => { if (alive) setError(true) })
-    return () => { alive = false }
-  }, [endpoint, valueKey, responseKey, retryTick])
+  const { opts, error, retry } = useLookupOptions(endpoint, o => {
+    const value = String((valueKey ? o[valueKey] : undefined) ?? o.value ?? o.id ?? '')
+    if (!value) return null
+    const label = String(o.label ?? o.name ?? o.value ?? '')
+    const owner = typeof o.owner === 'string' && o.owner ? o.owner : undefined
+    return { value, label: owner ? `${label} · ${owner}` : label }
+  }, [valueKey], responseKey)
 
-  if (error) return <ErrorBanner onRetry={() => setRetryTick(n => n + 1)}>{t('common:errorGeneric')}</ErrorBanner>
+  if (error) return <ErrorBanner onRetry={retry}>{t('common:errorGeneric')}</ErrorBanner>
 
   // CMBE delta 2026-08-30: ai_agent's `agent` field was renamed `agent_id`
   // (a real id-valued lookup), but the engine still resolves the OLD name-valued

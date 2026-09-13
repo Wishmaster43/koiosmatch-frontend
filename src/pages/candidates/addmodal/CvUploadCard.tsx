@@ -16,13 +16,15 @@ import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
 import Spinner from '@/components/ui/Spinner'
 import { ghostBtn } from './cvCardStyles'
 import type { CvCardBaseProps } from './useCvParse'
-import { cardHead, cardBox } from './fields'
+import { CvCardShell } from './CvCardShell'
 
 interface CvUploadCardProps extends CvCardBaseProps {
   fileName: string | null
 }
 
 // Presentational progress/result strip (see the module doc above): renders nothing while idle, only prefills the form, never saves.
+// DRY: this preamble (useTranslation + busy derivation + idle guard) mirrors PasteCvCard.tsx's — CvCardShell already
+// extracted the shared wrapper; the two entry points' busy/ready/error bodies below genuinely differ (file vs. text).
 export default function CvUploadCard({ phase, errorKey, fileName, summary, onReset }: CvUploadCardProps) {
   const { t } = useTranslation(['candidates', 'common'])
   const busy = phase === 'uploading' || phase === 'processing'
@@ -31,10 +33,7 @@ export default function CvUploadCard({ phase, errorKey, fileName, summary, onRes
   if (phase === 'idle') return null
 
   return (
-    <div style={{ gridColumn: '1 / -1' }}>
-      <div style={cardHead}>{t('modal.cv.title')}</div>
-      <div style={{ ...cardBox, gap: 8, padding: 10 }}>
-
+    <CvCardShell title={t('modal.cv.title')}>
         {/* Busy: uploading or waiting on the queued parse — with a real cancel. */}
         {busy && (
           <div role="status" aria-live="polite" style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
@@ -97,7 +96,6 @@ export default function CvUploadCard({ phase, errorKey, fileName, summary, onRes
             <button type="button" onClick={onReset} style={{ ...ghostBtn, marginLeft: 'auto' }}>{t('modal.cv.retry')}</button>
           </div>
         )}
-      </div>
-    </div>
+    </CvCardShell>
   )
 }

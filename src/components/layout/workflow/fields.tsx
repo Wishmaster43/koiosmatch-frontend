@@ -6,7 +6,7 @@
  * Extracted from WorkflowCanvasEditor.
  */
 import { useId, useState } from 'react'
-import { X, Maximize2 } from 'lucide-react'
+import { X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { WorkflowField, EdgeFilters, WorkflowVarGroup } from '@/types/workflow'
 import { FaqSelectField } from './fieldControls/FaqSelectField'
@@ -21,8 +21,7 @@ import type { InstructionOutputField } from './filterFieldCatalog'
 import type { OnChange } from './fieldControls/types'
 import { KeyValueField } from './groupKeyValueFields'
 import { FunctionMatrixField } from './fieldControls/FunctionMatrixField'
-import Button from '@/components/ui/Button'
-import { TextExpandModal } from './fieldControls/TextExpandModal'
+import { TextExpandControl } from './fieldControls/TextExpandControl'
 import { TextFieldWithVars } from './VariablePicker'
 import { fieldLabel, fieldPlaceholder, optionLabel } from './moduleI18n'
 import WhatsappTemplateField from './WhatsappTemplateField'
@@ -51,15 +50,10 @@ export function ExpandableTextarea({ field, value, onChange }: { field: Workflow
         style={{ width: '100%', padding: '7px 30px 7px 9px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12, color: 'var(--text)', background: 'var(--surface)', outline: 'none', boxSizing: 'border-box', fontFamily: 'monospace', resize: 'vertical' }}
         onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
         onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
-      <Button iconOnly variant="ghost" size="sm" onClick={() => setExpanded(true)}
-        aria-label={t('fields.textExpand')} title={t('fields.textExpand')}
-        style={{ position: 'absolute', top: 4, right: 4 }}>
-        <Maximize2 size={12} />
-      </Button>
-      {expanded && (
-        <TextExpandModal label={fieldLabel(t, field.label)} value={(value as string) || ''}
-          onChange={next => onChange(field.key, next)} onClose={() => setExpanded(false)} />
-      )}
+      <TextExpandControl label={fieldLabel(t, field.label)} expandLabel={t('fields.textExpand')}
+        value={(value as string) || ''} onChange={next => onChange(field.key, next)}
+        expanded={expanded} onExpand={() => setExpanded(true)} onClose={() => setExpanded(false)}
+        style={{ position: 'absolute', top: 4, right: 4 }} />
     </div>
   )
 }

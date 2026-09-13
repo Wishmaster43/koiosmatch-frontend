@@ -109,10 +109,18 @@ type DateInput = string | number | Date | null | undefined
 // `now`-injectable, and in THIS module so importing it never drags the i18n init
 // along (DRY round 10, MISC — the datetime import broke four suites).
 export function daysSince(value: DateInput, now: Date = new Date(), futureAsZero = false): number | null {
+  const diffMs = parseDiffMs(value, now)
+  if (diffMs === null) return null
+  if (diffMs < 0) return futureAsZero ? 0 : null
+  return Math.floor(diffMs / 86400000)
+}
+
+// Shared parse + diff step behind daysSince (here) and relativeAge (datetime.ts):
+// parses `value`, returns null for a missing/unparseable date, else the
+// milliseconds elapsed since it (negative when `value` is in the future).
+export function parseDiffMs(value: DateInput, now: Date = new Date()): number | null {
   if (!value) return null
   const d = new Date(value)
   if (isNaN(d.getTime())) return null
-  const diffMs = now.getTime() - d.getTime()
-  if (diffMs < 0) return futureAsZero ? 0 : null
-  return Math.floor(diffMs / 86400000)
+  return now.getTime() - d.getTime()
 }

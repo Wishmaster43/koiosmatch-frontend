@@ -22,6 +22,17 @@ const AI_PACKAGES = ['reporting_sm_ai', 'reporting_hf_ai', 'reporting_sm_hf_ai',
 // Loosely-typed SM candidate row (mirrors external data).
 type Rec = Record<string, unknown>
 
+// Shared card header (title + "view all" link) for the recent-runs/recent-
+// conversations panels — identical shape, only the title differs.
+function DashboardCardHeader({ title, viewAllLabel }: { title: string; viewAllLabel: string }) {
+  return (
+    <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
+      <span className="font-medium text-[var(--text)]" style={{ fontSize: 13 }}>{title}</span>
+      <span className="text-xs text-[var(--text-muted)] cursor-pointer">{viewAllLabel}</span>
+    </div>
+  )
+}
+
 // Shiftmanager report dashboard: KPI cards, activity buckets and drill-down popups, gated on the tenant's AI/workflow package.
 export default function ShiftmanagerDashboard() {
   const { t } = useTranslation('shiftmanager')
@@ -142,10 +153,7 @@ export default function ShiftmanagerDashboard() {
 
         {/* Recent runs */}
         <div className="overflow-hidden bg-[var(--surface)] rounded-xl" style={{ border: '1px solid var(--border)' }}>
-          <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
-            <span className="font-medium text-[var(--text)]" style={{ fontSize: 13 }}>{t('dashboard.recentRuns')}</span>
-            <span className="text-xs text-[var(--text-muted)] cursor-pointer">{t('dashboard.viewAll')}</span>
-          </div>
+          <DashboardCardHeader title={t('dashboard.recentRuns')} viewAllLabel={t('dashboard.viewAll')} />
           {runs.length === 0 && (
             <div className="px-4 py-6 text-xs text-center text-[var(--text-muted)]">{t('charts.empty', { defaultValue: '—' })}</div>
           )}
@@ -171,10 +179,7 @@ export default function ShiftmanagerDashboard() {
 
         {/* Recent conversations */}
         <div className="overflow-hidden bg-[var(--surface)] rounded-xl" style={{ border: '1px solid var(--border)' }}>
-          <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
-            <span className="font-medium text-[var(--text)]" style={{ fontSize: 13 }}>{t('dashboard.recentConversations')}</span>
-            <span className="text-xs text-[var(--text-muted)] cursor-pointer">{t('dashboard.viewAll')}</span>
-          </div>
+          <DashboardCardHeader title={t('dashboard.recentConversations')} viewAllLabel={t('dashboard.viewAll')} />
           {conversations.length === 0 && (
             <div className="px-4 py-6 text-xs text-center text-[var(--text-muted)]">{t('charts.empty', { defaultValue: '—' })}</div>
           )}

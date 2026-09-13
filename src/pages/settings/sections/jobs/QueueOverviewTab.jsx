@@ -6,12 +6,13 @@
  * visible-tab only).
  */
 import { useTranslation } from 'react-i18next'
-import { RefreshCw, Layers, Building2 } from 'lucide-react'
+import { Layers, Building2 } from 'lucide-react'
 import StatusPill from '@/components/ui/StatusPill'
 import { formatDuration } from '@/components/reports/runFormat'
 import Button from '@/components/ui/Button'
 import { Mono, SectionTitle, Caption, GroupLabel, monoStyle } from '@/components/ui/typography'
 import { tintBorder } from '@/lib/tint'
+import { JobsRefreshButton, JobsErrorNotice } from './jobsShared'
 
 // Heartbeat status → semantic colour (never a plain grey "off" state — §4).
 const STATUS_COLOR = { active: 'var(--color-success)', stalled: 'var(--color-danger)', idle: 'var(--text-muted)' }
@@ -68,15 +69,11 @@ export default function QueueOverviewTab({ summary, phase, onRefresh, onGoToFail
         <Button variant={failedTotal ? 'dangerSoft' : 'secondary'} size="sm" onClick={onGoToFailed} disabled={!failedTotal}>
           {t('jobs.failedTotal', { count: failedTotal })}
         </Button>
-        {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-        <Button variant="secondary" size="sm" onClick={onRefresh}
-          style={{ marginLeft: 'auto' }}>
-          <RefreshCw size={12} className={phase === 'loading' ? 'animate-spin' : undefined} /> {t('jobs.refresh')}
-        </Button>
+        <JobsRefreshButton phase={phase} onRefresh={onRefresh} label={t('jobs.refresh')} />
         <Caption>{t('jobs.autoRefresh')}</Caption>
       </div>
 
-      {phase === 'error' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('jobs.loadError')}</p>}
+      {phase === 'error' && <JobsErrorNotice label={t('jobs.loadError')} />}
 
       {phase !== 'error' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>

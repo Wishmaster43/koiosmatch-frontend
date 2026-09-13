@@ -31,6 +31,7 @@ import { SectionTitle, Caption } from '@/components/ui/typography'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
 import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
+import { buildTaskFilterRows } from '@/components/drawer/drawerFilterTypes'
 import { useNavigation } from '@/context/NavigationContext'
 import { useTaskLookups } from '@/context/TaskLookupsContext'
 import { useTaskLookupIds } from '../hooks/useTaskLookupIds'
@@ -154,17 +155,11 @@ export default function RelatedTasks({ task }: { task: TaskDetail }) {
   const toggleStatus = (v: string) => setSelectedStatus(p => (p.includes(v) ? p.filter(x => x !== v) : [...p, v]))
   const toggleType = (v: string) => setSelectedType(p => (p.includes(v) ? p.filter(x => x !== v) : [...p, v]))
   const togglePriority = (v: string) => setSelectedPriority(p => (p.includes(v) ? p.filter(x => x !== v) : [...p, v]))
-  const filterRows: DrawerFilterConfig[] = [
-    { type: 'multi', key: 'status', label: t('cols.status'), selected: selectedStatus,
-      options: statuses.map(s => ({ value: s.value, label: s.label })), onToggle: toggleStatus,
-      searchPlaceholder: t('common:search'), noResultsLabel: t('common:noResults') },
-    ...(types.length > 0 ? [{ type: 'multi' as const, key: 'type', label: t('cols.type'), selected: selectedType,
-      options: types.map(ty => ({ value: ty.value, label: ty.label })), onToggle: toggleType,
-      searchPlaceholder: t('common:search'), noResultsLabel: t('common:noResults') }] : []),
-    ...(priorities.length > 0 ? [{ type: 'multi' as const, key: 'priority', label: t('cols.priority'), selected: selectedPriority,
-      options: priorities.map(p => ({ value: p.value, label: p.label })), onToggle: togglePriority,
-      searchPlaceholder: t('common:search'), noResultsLabel: t('common:noResults') }] : []),
-  ]
+  const filterRows: DrawerFilterConfig[] = buildTaskFilterRows({
+    t, statuses, types, priorities,
+    statusFilter: selectedStatus, typeFilter: selectedType, priorityFilter: selectedPriority,
+    toggleStatus, toggleType, togglePriority,
+  })
 
   return (
     <div>

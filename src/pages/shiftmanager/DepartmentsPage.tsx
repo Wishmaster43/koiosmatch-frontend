@@ -11,15 +11,15 @@ import { toggleInList } from '@/lib/selectionSet'
 import DepartmentsTable from './DepartmentsTable'
 import DepartmentDrawer from './DepartmentDrawer'
 import SmKpiStrip from './SmKpiStrip'
-import { SmPaginationBar } from './SmPaginationBar'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import { TOOLBAR_ROW_STYLE } from '@/components/ui/toolbarRow'
 import { useListPageSize } from '@/hooks/useListPageSize'
 import { usePagedRows } from '@/hooks/usePagedRows'
+import { useToggleSelected } from '@/hooks/useToggleSelected'
 import { useSmDepartments } from './hooks/useSmDepartments'
 import type { SmDepartmentRow } from '@/types/shiftmanager'
 import { ListPageShell } from '@/components/ui/ListPageShell'
-import { SmLoadErrorBanner } from './SmLoadErrorBanner'
+import { SmTableSection } from './SmTableSection'
 
 // Thin container: reads the SM mirror, derives filter option lists + KPI totals, and composes the table + drawer.
 export default function DepartmentsPage() {
@@ -27,7 +27,7 @@ export default function DepartmentsPage() {
   // Data (fetch + transform) lives in the shared hook (§3).
   const { departments, isLoading, isError, refetch } = useSmDepartments()
   const [search,      setSearch]      = useState('')
-  const [selected,    setSelected]    = useState<SmDepartmentRow | null>(null)
+  const { selected, setSelected, toggleSelected } = useToggleSelected<SmDepartmentRow>()
   // Shared list page-size: honours the tenant's default_per_page, sticky across navigation (§9).
   const { pageSize, setPageSize } = useListPageSize('sm.departments')
   const [selStatuses,  setSelStatuses]  = useState<string[]>([])
@@ -100,16 +100,12 @@ export default function DepartmentsPage() {
         <HeaderSearch onSearch={setSearch} defaultValue={search} width={300} />
       </div>
 
-      {/* Table — shared DataTable (sticky header, sorting, soft-chip status colours) */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
-        {/* Error state (§3): the mirror fetch failed, say so and offer a retry. */}
-        <SmLoadErrorBanner isError={isError} onRetry={refetch} />
-        <DepartmentsTable rows={paged} loading={isLoading} selectedId={selected?.id}
-          onSelect={dep => setSelected(prev => prev?.id === dep.id ? null : dep)} />
-      </div>
-
-      <SmPaginationBar page={page} totalPages={totalPages} totalRows={filtered.length} pageSize={pageSize}
-        onPageChange={setPage} setPage={setPage} setPageSize={setPageSize} />
+      {/* DRY: this SmTableSection call mirrors Contacts/Locations verbatim — it IS the
+          shared component's full prop contract; only the table inside differs. */}
+      <SmTableSection isError={isError} onRetry={refetch} page={page} totalPages={totalPages}
+        totalRows={filtered.length} pageSize={pageSize} onPageChange={setPage} setPage={setPage} setPageSize={setPageSize}>
+        <DepartmentsTable rows={paged} loading={isLoading} selectedId={selected?.id} onSelect={toggleSelected} />
+      </SmTableSection>
     </ListPageShell>
   )
 }

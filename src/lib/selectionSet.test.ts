@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { toggleInSet, toggleAllInSet, toggleInList } from './selectionSet'
+import { describe, it, expect, vi } from 'vitest'
+import { toggleInSet, toggleAllInSet, toggleInList, makeToggleIn, makeArrayToggle } from './selectionSet'
 
 describe('toggleInSet', () => {
   it('adds an id to an empty set', () => {
@@ -121,5 +121,39 @@ describe('toggleInList', () => {
     const prev = ['x', 'y', 'z']
     const next = toggleInList(prev, 'y')
     expect(next).toEqual(['x', 'z'])
+  })
+})
+
+describe('makeToggleIn', () => {
+  it('persists the toggled key with the value added', () => {
+    const cfg = { phases: ['a', 'b'], statuses: ['x'] }
+    const persist = vi.fn()
+    const toggleIn = makeToggleIn(cfg, persist)
+    toggleIn('phases')('c')
+    expect(persist).toHaveBeenCalledWith({ phases: ['a', 'b', 'c'] })
+  })
+
+  it('persists the toggled key with the value removed when already present', () => {
+    const cfg = { phases: ['a', 'b'] }
+    const persist = vi.fn()
+    const toggleIn = makeToggleIn(cfg, persist)
+    toggleIn('phases')('a')
+    expect(persist).toHaveBeenCalledWith({ phases: ['b'] })
+  })
+})
+
+describe('makeArrayToggle', () => {
+  it('calls the setter with an updater that adds a missing value', () => {
+    const set = vi.fn((fn: (p: string[]) => string[]) => fn(['a']))
+    const toggle = makeArrayToggle(set)
+    const result = toggle('b')
+    expect(result).toEqual(['a', 'b'])
+  })
+
+  it('calls the setter with an updater that removes an existing value', () => {
+    const set = vi.fn((fn: (p: string[]) => string[]) => fn(['a', 'b']))
+    const toggle = makeArrayToggle(set)
+    const result = toggle('a')
+    expect(result).toEqual(['b'])
   })
 })

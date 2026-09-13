@@ -41,7 +41,7 @@ import CreatableSelectJs from '@/components/ui/CreatableSelect'
 import { FieldRow, EditControls, GroupCard, GroupHeader, inputStyle } from './profileFieldShared'
 import { useWorkPermitVisibility } from './useWorkPermitVisibility'
 import type { WorkPermitDataState } from './workPermitVisibility'
-import type { Candidate } from '@/types/candidate'
+import type { CandidateFieldCardProps } from '@/types/candidate'
 
 type AnyProps = Record<string, unknown>
 // CreatableSelect is still untyped JS — accept any props at the boundary (mirrors ProfilePersonalTab).
@@ -54,9 +54,7 @@ type WPForm = Record<WPKey, string>
 
 // One EditableFieldTable-style card for the work-permit type + expiry, visibility-gated
 // on nationality per useWorkPermitVisibility (see the DANNY-PUNT-1 note below).
-export default function WorkPermitBlock({ c, onSave, autoEditSignal }: {
-  c: Candidate; onSave?: (v: Record<string, unknown>) => void; autoEditSignal?: number
-}) {
+export default function WorkPermitBlock({ c, onSave, autoEditSignal }: CandidateFieldCardProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   // Work-permit kind now comes from a tenant lookup (KAND-WERKVERGUNNING-LOOKUP-1),

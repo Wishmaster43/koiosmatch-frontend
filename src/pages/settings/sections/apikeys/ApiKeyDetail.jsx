@@ -8,10 +8,10 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Key, MoreHorizontal, Power, RefreshCw, Trash2 } from 'lucide-react'
+import { Key } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
 import Spinner from '@/components/ui/Spinner'
-import ActionMenu from '@/components/ui/ActionMenu'
+import { CredentialActionMenu } from '@/pages/settings/components/CredentialActionMenu'
 import CalloutBox from '@/components/ui/CalloutBox'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -107,21 +107,24 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
         title={apiKey.friendly_name ?? apiKey.name}
         statusBadge={<StatusBadge status={apiKey.status ?? 'active'} map={statusMap} />}
         actions={
-          <ActionMenu
-            label={t('apiKeys.action')}
-            icon={MoreHorizontal}
-            align="right"
-            menuWidth={220}
-            items={[
-              { key: 'regenerate', label: t('apiKeys.regenerate'), icon: RefreshCw, onSelect: regenerate },
-              { key: 'toggle', label: (apiKey.status ?? 'active') === 'active' ? t('apiKeys.deactivate') : t('apiKeys.activate'), icon: Power, onSelect: toggleStatus },
-              { key: 'delete', label: t('apiKeys.delete'), icon: Trash2, danger: true, onSelect: remove },
-            ]}
+          <CredentialActionMenu
+            actionLabel={t('apiKeys.action')}
+            regenerateLabel={t('apiKeys.regenerate')}
+            activateLabel={t('apiKeys.activate')}
+            deactivateLabel={t('apiKeys.deactivate')}
+            deleteLabel={t('apiKeys.delete')}
+            status={apiKey.status}
+            onRegenerate={regenerate}
+            onToggleStatus={toggleStatus}
+            onDelete={remove}
           />
         }
       />
 
-      {/* One-time secret banner after regenerate */}
+      {/* One-time secret banner after regenerate.
+          DRY: the CredentialActionMenu call above and this CalloutBox opening are
+          already the shared component's own prop contract, mirrored on the
+          WebhookDetail side — the secret's own content below differs per screen. */}
       {secret && (
         <div style={{ margin: '14px 0' }}>
           <CalloutBox

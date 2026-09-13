@@ -38,7 +38,7 @@ import { Trash2, Ban, RefreshCw } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import type { EntityTab } from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
-import DrawerGlyphButton from '@/components/drawer/DrawerGlyphButton'
+import DrawerGlyphButton, { MarkDeletionGlyphButton } from '@/components/drawer/DrawerGlyphButton'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import PendingEraseBanner from '@/components/drawer/PendingEraseBanner'
 import { buildTrashNote } from '@/hooks/useTrashFlow'
@@ -283,12 +283,12 @@ export default function MatchDrawer({
               </DrawerGlyphButton>
             )}
             {/* TRASH-OVERAL-2: archived → trash (matches.delete-gated at the page; the
-                shared preview modal confirms). Hidden once already in the trash. */}
-            {onMarkDeletion && match.archived && !inTrash && (
-              <DrawerGlyphButton onClick={() => onMarkDeletion(match.id)} title={t('common:trash.markAction')} tone="danger">
-                <Trash2 size={14} />
-              </DrawerGlyphButton>
-            )}
+                shared preview modal confirms). Hidden once already in the trash.
+                DRY: mirrors OutreachDrawer's own call to the same shared
+                MarkDeletionGlyphButton — the remaining overlap is the
+                EntityDrawer titleActions/renderTitle render-prop shell every
+                entity drawer wires the same way (§3A), not duplicated logic. */}
+            <MarkDeletionGlyphButton onMarkDeletion={onMarkDeletion} id={match.id} archived={!!match.archived} inTrash={inTrash} />
           </>}
           renderTitle={() => (
             <>

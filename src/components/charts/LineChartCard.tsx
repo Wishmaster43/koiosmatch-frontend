@@ -9,6 +9,7 @@ import type { ChartDatum, TipProps } from './chartTypes'
 import { captionStyle } from '@/components/ui/typography'
 import ErrorBoundary from '../ui/ErrorBoundary'
 import { useNumberFormat } from '@/lib/formatters'
+import { ChartCardTitle, ChartCardEmpty } from './ChartCardChrome'
 
 // Tooltip showing the point value + a caller-supplied unit (e.g. "candidates").
 // `formatNumber` is passed in (the tooltip is a plain function, not a component,
@@ -43,10 +44,8 @@ export default function LineChartCard({ title, data = [], color = 'var(--color-p
   if (!data.length) {
     return (
       <div className="flex flex-col flex-1 min-w-0">
-        <div className="mb-4 text-sm font-medium" style={{ color: 'var(--text-muted)' }}>{title}</div>
-        <div className="flex items-center justify-center text-xs" style={{ height, color: 'var(--text-muted)' }}>
-          {t('noData')}
-        </div>
+        <ChartCardTitle title={title} />
+        <ChartCardEmpty height={height}>{t('noData')}</ChartCardEmpty>
       </div>
     )
   }

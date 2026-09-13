@@ -11,7 +11,9 @@ import { render, screen } from '@testing-library/react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import userEvent from '@testing-library/user-event'
 import { GitMerge } from 'lucide-react'
-import DrawerGlyphButton from './DrawerGlyphButton'
+import DrawerGlyphButton, { MarkDeletionGlyphButton } from './DrawerGlyphButton'
+
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
 
 describe('DrawerGlyphButton', () => {
   it('clicking the button calls onClick', async () => {
@@ -47,5 +49,38 @@ describe('DrawerGlyphButton', () => {
     const html = renderToStaticMarkup(<DrawerGlyphButton onClick={vi.fn()} title="Delete" tone="danger"><GitMerge size={14} /></DrawerGlyphButton>)
     const styleAttr = html.match(/^<button[^>]*style="([^"]*)"/)?.[1]
     expect(styleAttr).toBe('background:none;border:none;cursor:pointer;padding:4px;display:flex;color:var(--color-danger-text)')
+  })
+})
+
+// MarkDeletionGlyphButton (TRASH-OVERAL-2) — the "mark for deletion" glyph
+// shared by every entity drawer's title row: hidden once the permission is
+// absent, once already archived-off/in-trash, or without an id (§3 no fake affordance).
+describe('MarkDeletionGlyphButton', () => {
+  it('renders nothing when onMarkDeletion is absent', () => {
+    const { container } = render(<MarkDeletionGlyphButton id="c1" archived inTrash={false} />)
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('renders nothing when archived is false', () => {
+    const { container } = render(<MarkDeletionGlyphButton onMarkDeletion={vi.fn()} id="c1" archived={false} inTrash={false} />)
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('renders nothing when inTrash is true', () => {
+    const { container } = render(<MarkDeletionGlyphButton onMarkDeletion={vi.fn()} id="c1" archived inTrash />)
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('renders nothing when id is null/undefined', () => {
+    const { container } = render(<MarkDeletionGlyphButton onMarkDeletion={vi.fn()} id={undefined} archived inTrash={false} />)
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('renders the glyph and fires onMarkDeletion(id) once archived, out of trash, with an id', async () => {
+    const onMarkDeletion = vi.fn()
+    const user = userEvent.setup()
+    render(<MarkDeletionGlyphButton onMarkDeletion={onMarkDeletion} id="c1" archived inTrash={false} />)
+    await user.click(screen.getByRole('button'))
+    expect(onMarkDeletion).toHaveBeenCalledWith('c1')
   })
 })

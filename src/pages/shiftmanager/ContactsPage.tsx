@@ -10,14 +10,14 @@ import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { toggleInList } from '@/lib/selectionSet'
 import { usePagedRows } from '@/hooks/usePagedRows'
+import { useToggleSelected } from '@/hooks/useToggleSelected'
 import ContactsTable from './ContactsTable'
 import ContactDrawer from './ContactDrawer'
-import { SmPaginationBar } from './SmPaginationBar'
 import { useSmContacts } from './hooks/useSmContacts'
 import type { SmContactRow } from '@/types/shiftmanager'
 import { Caption } from '@/components/ui/typography'
 import { ListPageShell } from '@/components/ui/ListPageShell'
-import { SmLoadErrorBanner } from './SmLoadErrorBanner'
+import { SmTableSection } from './SmTableSection'
 
 // Shiftmanager contacts list: filters/search/pagination in local state, filter groups pushed into the shared right panel, and a row click opens the contact drawer.
 export default function ContactsPage() {
@@ -25,7 +25,7 @@ export default function ContactsPage() {
   // Data (fetch + transform) lives in the shared hook (§3).
   const { contacts, isLoading, isError, refetch } = useSmContacts()
   const [search]                      = useState('')
-  const [selected,    setSelected]    = useState<SmContactRow | null>(null)
+  const { selected, setSelected, toggleSelected } = useToggleSelected<SmContactRow>()
   const [selCustomers,  setSelCustomers]  = useState<string[]>([])
   const [selPlanning, setSelPlanning] = useState<string[]>([])
 
@@ -91,16 +91,10 @@ export default function ContactsPage() {
         ))}
       </div>
 
-      {/* Table — shared DataTable (sticky header, sorting, soft-chip planning flag) */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
-        {/* Error state (§3): the mirror fetch failed, say so and offer a retry. */}
-        <SmLoadErrorBanner isError={isError} onRetry={refetch} />
-        <ContactsTable rows={paged} loading={isLoading} selectedId={selected?.id}
-          onSelect={c => setSelected(prev => prev?.id === c.id ? null : c)} />
-      </div>
-
-      <SmPaginationBar page={page} totalPages={totalPages} totalRows={filtered.length} pageSize={pageSize}
-        onPageChange={setPage} setPage={setPage} setPageSize={setPageSize} />
+      <SmTableSection isError={isError} onRetry={refetch} page={page} totalPages={totalPages}
+        totalRows={filtered.length} pageSize={pageSize} onPageChange={setPage} setPage={setPage} setPageSize={setPageSize}>
+        <ContactsTable rows={paged} loading={isLoading} selectedId={selected?.id} onSelect={toggleSelected} />
+      </SmTableSection>
     </ListPageShell>
   )
 }

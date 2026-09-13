@@ -45,3 +45,13 @@ export function mergeDailyRows(data: BillingUsageResponse['data'] | undefined): 
   rows.sort((a, b) => a.date.localeCompare(b.date))
   return rows
 }
+
+// The abort-aware error→phase mapping every usage tab's load effect repeats: an
+// aborted request (fires on every period switch) is never a failure, a 403
+// means the tenant/user lacks the usage permission, anything else is a real
+// load error.
+export function usagePhaseOnError(err: unknown, aborted: boolean, setPhase: (p: 'unavailable' | 'error') => void): void {
+  if (aborted) return
+  const status = (err as { response?: { status?: number } })?.response?.status
+  setPhase(status === 403 ? 'unavailable' : 'error')
+}

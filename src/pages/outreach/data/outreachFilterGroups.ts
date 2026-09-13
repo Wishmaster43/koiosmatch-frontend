@@ -8,9 +8,7 @@
  */
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
-import { Opt, archivedCheckboxGroup } from '@/lib/filterGroups/common'
-
-type Tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => void
+import { Opt, archivedCheckboxGroup, type Tog } from '@/lib/filterGroups/common'
 
 interface BuildArgs {
   t: TFunction

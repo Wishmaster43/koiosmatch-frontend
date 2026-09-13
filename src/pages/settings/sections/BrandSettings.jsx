@@ -13,6 +13,7 @@ import { useNumberFormat } from '@/lib/formatters'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { BTN_H } from '@/config/buttonMetrics'
 import SaveButton from '@/components/ui/SaveButton'
+import { useSettingsSectionState } from '@/hooks/useSettingsSectionState'
 import Button from '@/components/ui/Button'
 import { PageTitle, Caption } from '@/components/ui/typography'
 import { tintBg, tintBorder } from '@/lib/tint'
@@ -44,11 +45,7 @@ export default function BrandSettings() {
   const [logoPreview,  setLogoPreview]    = useState(null)
   const [logoFile,     setLogoFile]       = useState(null)
   const [companyName,  setCompanyName]    = useState('')
-  const [saved,        setSaved]          = useState(false)
-  const [saving,       setSaving]         = useState(false)
-  const [loading,      setLoading]        = useState(true)
-  const [loadError,    setLoadError]      = useState(false)
-  const [reloadKey,    setReloadKey]      = useState(0)
+  const { saved, setSaved, saving, setSaving, loading, setLoading, loadError, setLoadError, reloadKey, setReloadKey } = useSettingsSectionState()
   // Server-side upload error (422 — bad type/size, or the SVG-script-scan rejection) —
   // shown inline near the logo block instead of swallowed (was a silent catch {}).
   const [logoError,    setLogoError]      = useState(null)
@@ -67,7 +64,7 @@ export default function BrandSettings() {
       })
       .catch(() => setLoadError(true))
       .finally(() => setLoading(false))
-  }, [reloadKey])
+  }, [reloadKey, setLoadError, setLoading])
 
   // Reads the picked logo file into a data-URL preview; the actual upload happens on save.
   const handleLogoChange = (e) => {

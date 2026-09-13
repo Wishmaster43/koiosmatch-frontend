@@ -25,6 +25,34 @@ function StatusIcon({ status }: { status: AttachmentStatus }) {
   return null
 }
 
+// One result row — a boxed status/label/error/retry line, shared by every
+// pending file AND the optional note (only the label's ellipsis truncation
+// differs: a filename can be long, the fixed note label never is).
+function ResultRow({ status, label, ellipsis, error, retryLabel, onRetry }: {
+  status: AttachmentStatus
+  label: string
+  ellipsis?: boolean
+  error?: string
+  retryLabel: string
+  onRetry: () => void
+}) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)' }}>
+      <StatusIcon status={status} />
+      <span style={{ flex: 1, fontSize: 12, color: 'var(--text)', ...(ellipsis ? { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } : {}) }}>{label}</span>
+      {status === 'error' && (
+        <>
+          <span style={{ fontSize: 11, color: 'var(--color-danger-text)' }}>{error}</span>
+          <button type="button" onClick={onRetry}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary-text)', fontSize: 11, fontWeight: 600 }}>
+            {retryLabel}
+          </button>
+        </>
+      )}
+    </div>
+  )
+}
+
 /**
  * PostCreateResultsPanel — punten 21+22: shown INSTEAD of the form cards once
  * Create has succeeded and there was at least one pending file/note. The
@@ -42,34 +70,12 @@ export default function PostCreateResultsPanel({ files, noteText, noteStatus, no
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {files.map(f => (
-          <div key={f.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)' }}>
-            <StatusIcon status={f.status} />
-            <span style={{ flex: 1, fontSize: 12, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.name}</span>
-            {f.status === 'error' && (
-              <>
-                <span style={{ fontSize: 11, color: 'var(--color-danger-text)' }}>{f.error}</span>
-                <button type="button" onClick={() => onRetryFile(f.id)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary-text)', fontSize: 11, fontWeight: 600 }}>
-                  {t('common:error.retry')}
-                </button>
-              </>
-            )}
-          </div>
+          <ResultRow key={f.id} status={f.status} label={f.name} ellipsis error={f.error}
+            retryLabel={t('common:error.retry')} onRetry={() => onRetryFile(f.id)} />
         ))}
         {noteText.trim() && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)' }}>
-            <StatusIcon status={noteStatus} />
-            <span style={{ flex: 1, fontSize: 12, color: 'var(--text)' }}>{t('modal.attachments.noteLabel')}</span>
-            {noteStatus === 'error' && (
-              <>
-                <span style={{ fontSize: 11, color: 'var(--color-danger-text)' }}>{noteError}</span>
-                <button type="button" onClick={onRetryNote}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary-text)', fontSize: 11, fontWeight: 600 }}>
-                  {t('common:error.retry')}
-                </button>
-              </>
-            )}
-          </div>
+          <ResultRow status={noteStatus} label={t('modal.attachments.noteLabel')} error={noteError}
+            retryLabel={t('common:error.retry')} onRetry={onRetryNote} />
         )}
       </div>
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>

@@ -75,6 +75,16 @@ function getWeekNumber(date: Date): number {
   return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
 }
 
+// Parses a row's date field, skipping rows with no value or (when `year` is given)
+// a date outside the scoped year — the guard both groupByMonth and groupByWeek need
+// before bucketing.
+function parseYearScopedDate(row: Row, dateField: string, year?: string | number | null): Date | null {
+  if (!row[dateField]) return null
+  const date = new Date(row[dateField] as string)
+  if (year && date.getFullYear() !== parseInt(String(year))) return null
+  return date
+}
+
 // Buckets rows by month (optionally scoped to one year) using a sortable year-month
 // key so the chart can order chronologically while still displaying the short month
 // label in the caller's locale (Intl, never a hardcoded language's month names).
@@ -82,9 +92,8 @@ export function groupByMonth(items: Row[], year?: string | number | null, dateFi
   const monthFmt = new Intl.DateTimeFormat(locale, { month: 'short' })
   const grouped: Record<string, ChartDatum> = {}
   items.forEach(c => {
-    if (!c[dateField]) return
-    const date = new Date(c[dateField] as string)
-    if (year && date.getFullYear() !== parseInt(String(year))) return
+    const date = parseYearScopedDate(c, dateField, year)
+    if (!date) return
     const sortKey = `${date.getFullYear()}-${String(date.getMonth()).padStart(2,'0')}`
     const label   = monthFmt.format(date)
     if (!grouped[sortKey]) grouped[sortKey] = { name: label, value: 0 }
@@ -98,9 +107,8 @@ export function groupByMonth(items: Row[], year?: string | number | null, dateFi
 export function groupByWeek(items: Row[], year?: string | number | null, dateField = 'registration_date'): ChartDatum[] {
   const grouped: Record<string, number> = {}
   items.forEach(c => {
-    if (!c[dateField]) return
-    const date = new Date(c[dateField] as string)
-    if (year && date.getFullYear() !== parseInt(String(year))) return
+    const date = parseYearScopedDate(c, dateField, year)
+    if (!date) return
     const w = `W${getWeekNumber(date)}`
     grouped[w] = (grouped[w] || 0) + 1
   })

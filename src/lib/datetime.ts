@@ -29,7 +29,7 @@ export { formatDateOnly, formatDateTimeStr } from './localDate'
 // locale can reshape them; only the option set that asks for pure digits takes this path.
 // Single-sourced from localDate.ts (the init-free module) — re-exported here so existing
 // importers of `ddmmyyyy`/`hhmm` from this module keep working.
-import { ddmmyyyy, hhmm } from './localDate'
+import { ddmmyyyy, hhmm, parseDiffMs } from './localDate'
 export { ddmmyyyy, hhmm, hhmmss, formatMonthYear } from './localDate'
 const NUMERIC_DATE: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric' }
 const isNumericDate = (o: Intl.DateTimeFormatOptions) =>
@@ -136,11 +136,8 @@ type RelativeAgeUnit = 'days' | 'weeks' | 'months' | 'years'
 // for deterministic tests, mirrors calcAge/daysUntilBirthday above. Returns null
 // for a missing/unparseable value or a future date (never a negative age).
 export function relativeAge(value: DateInput, now: Date = new Date()): { value: number; unit: RelativeAgeUnit } | null {
-  if (!value) return null
-  const d = new Date(value)
-  if (isNaN(d.getTime())) return null
-  const diffMs = now.getTime() - d.getTime()
-  if (diffMs < 0) return null
+  const diffMs = parseDiffMs(value, now)
+  if (diffMs === null || diffMs < 0) return null
   const days = Math.floor(diffMs / 86400000)
   if (days < 7) return { value: days, unit: 'days' }
   if (days < 30) return { value: Math.floor(days / 7), unit: 'weeks' }

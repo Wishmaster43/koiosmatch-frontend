@@ -344,6 +344,9 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
     onOpenTab,
   ])
 
+  // DRY: this <DataTable> prop block matches VacanciesTable's 1:1 — both entities
+  // feed the same props to the one shared table component (§3A blueprint); the
+  // duplication is inherent to that reuse, not something to further extract.
   return (
     <DataTable
       columns={columns}

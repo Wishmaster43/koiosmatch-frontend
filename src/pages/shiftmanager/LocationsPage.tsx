@@ -9,15 +9,15 @@ import { MapPin, Building2, Layers } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { toggleInList } from '@/lib/selectionSet'
 import { usePagedRows } from '@/hooks/usePagedRows'
+import { useToggleSelected } from '@/hooks/useToggleSelected'
 import { distinctSortedValues } from '@/components/reports/distinctSortedValues'
 import LocationsTable from './LocationsTable'
 import LocationDrawer from './LocationDrawer'
 import SmKpiStrip from './SmKpiStrip'
-import { SmPaginationBar } from './SmPaginationBar'
 import { useSmLocations } from './hooks/useSmLocations'
 import type { SmLocationRow } from '@/types/shiftmanager'
 import { ListPageShell } from '@/components/ui/ListPageShell'
-import { SmLoadErrorBanner } from './SmLoadErrorBanner'
+import { SmTableSection } from './SmTableSection'
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function LocationsPage() {
@@ -25,7 +25,7 @@ export default function LocationsPage() {
   // Data (fetch + transform) lives in the shared hook (§3).
   const { locations, isLoading, isError, refetch } = useSmLocations()
   const [search]                  = useState('')
-  const [selected,  setSelected]  = useState<SmLocationRow | null>(null)
+  const { selected, setSelected, toggleSelected } = useToggleSelected<SmLocationRow>()
   const [selStatuses,  setSelStatuses]  = useState<string[]>([])
   const [selCustomers,   setSelCustomers]   = useState<string[]>([])
   const [selCities,    setSelCities]    = useState<string[]>([])
@@ -92,16 +92,10 @@ export default function LocationsPage() {
       {/* KPI strip — shared SmKpiStrip (§3 consolidation) */}
       <SmKpiStrip kpis={kpis} />
 
-      {/* Table — shared DataTable (sticky header, sorting, soft-chip status colours) */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
-        {/* Error state (§3): the mirror fetch failed, say so and offer a retry. */}
-        <SmLoadErrorBanner isError={isError} onRetry={refetch} />
-        <LocationsTable rows={paged} loading={isLoading} selectedId={selected?.id}
-          onSelect={loc => setSelected(prev => prev?.id === loc.id ? null : loc)} />
-      </div>
-
-      <SmPaginationBar page={page} totalPages={totalPages} totalRows={filtered.length} pageSize={pageSize}
-        onPageChange={setPage} setPage={setPage} setPageSize={setPageSize} />
+      <SmTableSection isError={isError} onRetry={refetch} page={page} totalPages={totalPages}
+        totalRows={filtered.length} pageSize={pageSize} onPageChange={setPage} setPage={setPage} setPageSize={setPageSize}>
+        <LocationsTable rows={paged} loading={isLoading} selectedId={selected?.id} onSelect={toggleSelected} />
+      </SmTableSection>
     </ListPageShell>
   )
 }

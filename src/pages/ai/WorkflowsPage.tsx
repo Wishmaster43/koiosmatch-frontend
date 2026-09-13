@@ -16,6 +16,7 @@ import WorkflowCanvasEditor from '@/components/layout/WorkflowCanvasEditor'
 import { useAuth } from '@/context/AuthContext'
 import { canDo } from '@/lib/access'
 import { useTrashFlow } from '@/hooks/useTrashFlow'
+import { useArchivedTrashToggle } from '@/hooks/useArchivedTrashToggle'
 import TrashPreviewDialogSlot from '@/components/ui/TrashPreviewDialogSlot'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
@@ -38,6 +39,7 @@ export default function WorkflowsPage({ intent }: { intent?: WorkflowsIntent } =
   // TRASH-OVERAL-2: the Prullenbak view (lifecycle pending_erase) — exclusive with
   // the archived view; both ride the same include_archived fetch.
   const [showTrash, setShowTrash] = useState(false)
+  const { onToggleArchived, onToggleTrash } = useArchivedTrashToggle(setShowArchived, setShowTrash)
 
   const data = useWorkflowsData(showArchived || showTrash)
   const { viewMode, setViewMode, visibleWorkflows } = useWorkflowsFilters(data.workflows, showArchived, data.selectedFolder, showTrash)
@@ -105,9 +107,9 @@ export default function WorkflowsPage({ intent }: { intent?: WorkflowsIntent } =
         setViewMode={setViewMode}
         showArchived={showArchived}
         // The two lifecycle views are exclusive (TRASH-OVERAL-2, mirrors candidates).
-        onToggleArchived={() => { setShowArchived(v => !v); setShowTrash(false) }}
+        onToggleArchived={onToggleArchived}
         showTrash={showTrash}
-        onToggleTrash={() => { setShowTrash(v => !v); setShowArchived(false) }}
+        onToggleTrash={onToggleTrash}
         selectedFolder={data.selectedFolder}
         dragWf={data.dragWf}
         openEditor={data.openEditor}

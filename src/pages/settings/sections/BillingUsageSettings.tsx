@@ -31,6 +31,7 @@ import { FileSpreadsheet } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { usagePhaseOnError } from './usage/dailyUsageTypes'
 import { useRightPanel } from '@/context/RightPanelContext'
 import type { FilterGroup } from '@/context/RightPanelContext'
 import Button from '@/components/ui/Button'
@@ -94,11 +95,7 @@ export default function BillingUsageSettings() {
           || hasWhatsappActivity
         setPhase(hasActivity ? 'ready' : 'empty')
       })
-      .catch((err) => {
-        // An ABORTED request is not a failure (fires on every period switch).
-        if (ctrl.signal.aborted) return
-        setPhase(err?.response?.status === 403 ? 'unavailable' : 'error')
-      })
+      .catch((err) => usagePhaseOnError(err, ctrl.signal.aborted, setPhase))
     return () => ctrl.abort()
   }, [period])
 

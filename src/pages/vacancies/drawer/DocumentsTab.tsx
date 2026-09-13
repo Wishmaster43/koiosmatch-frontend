@@ -267,7 +267,9 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
       {previewDoc && <DocPreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)} />}
       {/* One shared destructive-confirm dialog for both single and bulk delete
           (never a native confirm()) — the same DocumentDeleteDialog the
-          candidate and customer documents tabs use (CANDTABS DRY round). */}
+          candidate and customer documents tabs use (CANDTABS DRY round).
+          DRY: this invocation is already the shared component's full prop
+          contract; nothing left to extract without changing the component. */}
       <DocumentDeleteDialog
         open={confirmDelete}
         onConfirm={confirmDeleteAction}

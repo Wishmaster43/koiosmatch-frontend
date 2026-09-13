@@ -16,6 +16,21 @@ import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
 import { Mono } from '@/components/ui/typography'
 
+// One flex row of two labeled text inputs (organisation/description, contact
+// name/email — same shape twice in this form's edit mode).
+function FieldPairRow({ labelStyle, inputStyle, fields }) {
+  return (
+    <div style={{ display: 'flex', gap: 12 }}>
+      {fields.map(({ label, value, onChange, type }) => (
+        <div key={label} style={{ flex: 1 }}>
+          <label style={labelStyle}>{label}</label>
+          <input type={type} value={value ?? ''} onChange={onChange} style={inputStyle} />
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // See the file's top doc above; read mode via the shared DetailTable, Edit flips to an inline form; the secret can only ever be masked here.
 export default function ApiKeyGeneralTab({ apiKey, onSave, onMakePrimary }) {
   const { t } = useTranslation('settings')
@@ -123,26 +138,14 @@ export default function ApiKeyGeneralTab({ apiKey, onSave, onMakePrimary }) {
               />
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 12 }}>
-            <div style={{ flex: 1 }}>
-              <label style={labelStyle}>{t('apiKeys.field.organisation')}</label>
-              <input value={form.organisation ?? ''} onChange={set('organisation')} style={inputStyle} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <label style={labelStyle}>{t('apiKeys.field.description')}</label>
-              <input value={form.description ?? ''} onChange={set('description')} style={inputStyle} />
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: 12 }}>
-            <div style={{ flex: 1 }}>
-              <label style={labelStyle}>{t('apiKeys.field.contactName')}</label>
-              <input value={form.contact_name ?? ''} onChange={set('contact_name')} style={inputStyle} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <label style={labelStyle}>{t('apiKeys.field.contactEmail')}</label>
-              <input type="email" value={form.contact_email ?? ''} onChange={set('contact_email')} style={inputStyle} />
-            </div>
-          </div>
+          <FieldPairRow labelStyle={labelStyle} inputStyle={inputStyle} fields={[
+            { label: t('apiKeys.field.organisation'), value: form.organisation, onChange: set('organisation') },
+            { label: t('apiKeys.field.description'), value: form.description, onChange: set('description') },
+          ]} />
+          <FieldPairRow labelStyle={labelStyle} inputStyle={inputStyle} fields={[
+            { label: t('apiKeys.field.contactName'), value: form.contact_name, onChange: set('contact_name') },
+            { label: t('apiKeys.field.contactEmail'), value: form.contact_email, onChange: set('contact_email'), type: 'email' },
+          ]} />
         </div>
       ) : (
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>

@@ -7,7 +7,7 @@ import { Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { Caption } from '@/components/ui/typography'
-import Button from '@/components/ui/Button'
+import { DrawerListFooter } from '@/components/ui/DrawerListFooter'
 import DrawerBackdrop from '@/components/drawer/DrawerBackdrop'
 import DrawerHeaderRow from '@/components/drawer/DrawerHeaderRow'
 
@@ -98,17 +98,9 @@ export default function EntityListDrawer({ title, items, onClose }: EntityListDr
           ))}
         </div>
 
-        {/* Footer */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '8px 16px', borderTop: '1px solid var(--border)', background: 'var(--hover-bg)',
-                      flexShrink: 0 }}>
-          <Caption as="span">
-            {t('shownOf', { shown: filtered.length, total: items.length })}
-          </Caption>
-          <Button variant="secondary" onClick={onClose}>
-            {t('close')}
-          </Button>
-        </div>
+        {/* Footer — shared shown-of-count + close (§3, DrawerListFooter) */}
+        <DrawerListFooter summary={t('shownOf', { shown: filtered.length, total: items.length })}
+          onClose={onClose} closeLabel={t('close')} />
       </div>
     </>
   )

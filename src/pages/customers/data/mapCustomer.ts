@@ -372,3 +372,23 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     customFields: c.custom_fields ?? {},
   }
 }
+
+// The department/location/contact link priority a note reads its chip name from
+// (mirrors the backend's own CustomerNote::levelContext() priority) — shared by
+// the customer notes tab and its second-screen popout so the two never drift.
+export function resolveNoteLinkedName(n: { departmentName?: string; locationName?: string; contactName?: string }): string | undefined {
+  return n.departmentName || n.locationName || n.contactName || undefined
+}
+
+// Maps a customer-note list to the read-parity "linked to X" chip title, shared
+// by the drawer's own notes tab and its second-screen popout so the two never
+// drift. `renderChip` is the shared NoteLinkChip element for one note.
+export function withNoteLinkChips<N extends { departmentName?: string; locationName?: string; contactName?: string; title?: unknown }>(
+  notes: N[],
+  renderChip: (linkedName: string) => unknown,
+): Array<Omit<N, 'title'> & { title: unknown }> {
+  return notes.map((n): Omit<N, 'title'> & { title: unknown } => {
+    const linkedName = resolveNoteLinkedName(n)
+    return linkedName ? { ...n, title: renderChip(linkedName) } : { ...n, title: n.title }
+  })
+}

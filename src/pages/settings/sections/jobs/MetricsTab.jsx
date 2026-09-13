@@ -6,10 +6,9 @@
  */
 import { useEffect, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { RefreshCw } from 'lucide-react'
 import { fetchJobMetrics } from './jobsApi'
-import Button from '@/components/ui/Button'
 import { SectionTitle } from '@/components/ui/typography'
+import { JobsRefreshButton, JobsErrorNotice } from './jobsShared'
 import { useVisiblePoll } from '@/hooks/useVisiblePoll'
 
 const TH = { padding: '9px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
@@ -68,13 +67,10 @@ export default function MetricsTab() {
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
-        <Button variant="secondary" size="sm" onClick={load}
-          style={{ marginLeft: 'auto' }}>
-          <RefreshCw size={12} className={phase === 'loading' ? 'animate-spin' : undefined} /> {t('jobs.refresh')}
-        </Button>
+        <JobsRefreshButton phase={phase} onRefresh={load} label={t('jobs.refresh')} />
       </div>
 
-      {phase === 'error' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('jobs.loadError')}</p>}
+      {phase === 'error' && <JobsErrorNotice label={t('jobs.loadError')} />}
 
       {phase !== 'error' && (
         <>

@@ -6,6 +6,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { fetchImportTemplates, type ImportTemplateSummary } from './importApi'
+import { orderedTemplates } from './importTemplateShape'
 
 type Phase = 'loading' | 'ready' | 'error'
 
@@ -34,4 +35,25 @@ export function useImportTemplates() {
   }, [load])
 
   return { templates, phase, reload: load }
+}
+
+/**
+ * useDefaultImportSelection — auto-picks the first template in display order once
+ * the list is ready, shared by ImportWizardPage and ImportSettings (both used to
+ * hand-roll the identical effect). `wantedEntity` lets a caller (the wizard's own
+ * `intent` prop) pre-steer the pick to a specific entity when its template exists;
+ * ImportSettings simply passes none and always lands on the first template. Never
+ * overrides a selection the user already made.
+ */
+export function useDefaultImportSelection(
+  templates: ImportTemplateSummary[], phase: Phase, wantedEntity?: string | null,
+) {
+  const [selected, setSelected] = useState<string | null>(null)
+  useEffect(() => {
+    if (phase === 'ready' && templates.length > 0 && !selected) {
+      const wanted = wantedEntity && templates.some(tpl => tpl.entity === wantedEntity) ? wantedEntity : null
+      setSelected(wanted ?? orderedTemplates(templates)[0]?.entity ?? null)
+    }
+  }, [phase, templates, selected, wantedEntity])
+  return [selected, setSelected] as const
 }

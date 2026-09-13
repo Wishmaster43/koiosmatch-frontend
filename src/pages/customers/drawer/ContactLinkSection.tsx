@@ -19,9 +19,7 @@
  * uncoupled pair would be invalid data, not a cosmetic problem.
  */
 import { useTranslation } from 'react-i18next'
-import SearchSelect from '@/components/ui/SearchSelect'
-import DrawerAddButton from '@/components/drawer/DrawerAddButton'
-import { cardHead, cardBox } from '@/components/ui/modalCards'
+import BranchSection from '@/components/drawer/BranchSection'
 import type { Department } from '@/types/customer'
 import type { Id } from '@/types/common'
 
@@ -34,42 +32,22 @@ interface Props {
   onChange: (patch: { locationIds?: Id[]; departmentIds?: Id[] }) => void
 }
 
-// One labelled row: the add-trigger on the right, every linked value as a removable chip.
+// One labelled row: the add-trigger on the right, every linked value as a removable
+// chip — adopts the shared BranchSection (§11: same look BOTH here and on "+ Vestiging",
+// Danny 28-07) instead of re-rendering the identical chip-list/empty-state markup.
 function LinkRow({ label, addLabel, emptyLabel, options, selectedIds, onToggle }: {
   label: string; addLabel: string; emptyLabel: string
   options: { value: string; label: string }[]
   selectedIds: string[]
   onToggle: (id: string) => void
 }) {
-  const { t } = useTranslation('common')
   const chips = selectedIds
     .map(id => options.find(o => o.value === id) ?? { value: id, label: id })
     .filter(o => o.label !== o.value || options.length === 0)
+    .map(o => ({ id: o.value, name: o.label }))
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <div style={cardHead}>{label}</div>
-        <SearchSelect triggerLabel={addLabel} options={options} selected={selectedIds}
-          onToggle={onToggle} menuAlign="right"
-          renderTrigger={(toggleOpen: () => void) => <DrawerAddButton onClick={toggleOpen} label={addLabel} />} />
-      </div>
-      <div style={cardBox}>
-        {chips.length > 0 ? (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {chips.map(o => (
-              <span key={o.value} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, padding: '3px 8px',
-                borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
-                {o.label}
-                <button onClick={() => onToggle(o.value)} aria-label={t('remove')}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
-              </span>
-            ))}
-          </div>
-        ) : (
-          <span style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{emptyLabel}</span>
-        )}
-      </div>
-    </div>
+    <BranchSection label={label} addLabel={addLabel} emptyLabel={emptyLabel}
+      options={options} selectedIds={selectedIds} branches={chips} onToggle={onToggle} />
   )
 }
 

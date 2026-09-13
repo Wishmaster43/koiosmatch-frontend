@@ -10,31 +10,14 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { toggleOneValue } from '../data/candidatesShared'
 import { buildCandidateFilterGroups } from '../data/candidateFilterGroups'
-import type { GeoFilter, DateRangeFilter } from './useCandidateFilters'
+import type { CandidateFilterFields } from '../data/candidateFilterGroups'
 import type { Opt } from '@/lib/filterGroups/common'
 import type { LookupItem } from '@/context/LookupsContext'
 
-interface UseCandidateFilterPanelArgs {
+interface UseCandidateFilterPanelArgs extends CandidateFilterFields {
   t: (k: string) => string
   statuses: LookupItem[]
-  selectedStatus: string[]; setSelectedStatus: Dispatch<SetStateAction<string[]>>
-  selectedPhase: string[]; setSelectedPhase: Dispatch<SetStateAction<string[]>>
-  selectedFunnel: string[]; setSelectedFunnel: Dispatch<SetStateAction<string[]>>
-  selectedType: string[]; setSelectedType: Dispatch<SetStateAction<string[]>>
-  selectedTitle: string[]; setSelectedTitle: Dispatch<SetStateAction<string[]>>
-  selectedPool: string[]; setSelectedPool: Dispatch<SetStateAction<string[]>>
-  selectedCity: string[]; setSelectedCity: Dispatch<SetStateAction<string[]>>
-  selectedProvince: string[]; setSelectedProvince: Dispatch<SetStateAction<string[]>>
-  selectedGeslacht: string[]; setSelectedGeslacht: Dispatch<SetStateAction<string[]>>
-  selectedOwner: Array<string | number>; setSelectedOwner: Dispatch<SetStateAction<Array<string | number>>>
-  selectedLocation: Array<string | number>; setSelectedLocation: Dispatch<SetStateAction<Array<string | number>>>
-  selectedSource: string[]; setSelectedSource: Dispatch<SetStateAction<string[]>>
-  showArchived: boolean; setShowArchived: (fn: (v: boolean) => boolean) => void
-  missingAppointmentFilter: boolean; setMissingAppointmentFilter: (fn: (v: boolean) => boolean) => void
   attentionFilter: string | null; setAttentionFilter: Dispatch<SetStateAction<string | null>>
-  dateRange: DateRangeFilter | null; setDateRange: (v: DateRangeFilter | null) => void
-  geoFilter: GeoFilter | null; geoHint: string | null
-  applyGeo: (q: string, km: number) => void; clearGeo: () => void
   statusOptions: Opt[]; phaseOptions: Opt[]; funnelOptions: Opt[]; typeOptions: Opt[]; titleOptions: Opt[]
   poolOptions: Opt[]; cityOptions: Opt[]; provinceOptions: Opt[]; genderOptions: Opt[]; ownerOptions: Opt[]
   locationOptions: Opt[]; sourceOptions: Opt[]

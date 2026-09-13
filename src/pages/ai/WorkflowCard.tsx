@@ -12,39 +12,16 @@ import { MODULE_META } from '@/modules/index'
 import { interactive } from '@/lib/a11y'
 import { useDateFormat } from '@/lib/datetime'
 import { useSeedLabel } from '@/lib/useSeedLabel'
-import { useWorkflowRowState } from './hooks/useWorkflowRowState'
+import { useWorkflowRowState, type WorkflowRowLifecycleProps } from './hooks/useWorkflowRowState'
+import { triggerKeyForType } from './data/workflowTrigger'
 import { buildTrashNote } from '@/hooks/useTrashFlow'
-import type { Workflow } from '@/types/workflow'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
 
 // One workflow card's props — mirrors WorkflowListRow's archive/restore lifecycle
-// (TRASH-OVERAL-1b, same gates/handlers, no fork).
-interface WorkflowCardProps {
-  workflow: Workflow
-  onRun: (id?: string | number) => void | Promise<void>
-  // WORKFLOW-PERMS-1: false renders Run disabled with the reason (workflows.run missing).
-  canRun?: boolean
-  onEdit: () => void
-  canManageFolders?: boolean
-  onArchive?: () => void
-  onRestore?: () => void | Promise<void>
-  // TRASH-OVERAL-2: mark for erasure (workflows.delete) on an archived card;
-  // unmark (settings.update) on a trashed card. Absent prop = hidden (§7).
-  onMarkDeletion?: () => void
-  onUnmark?: () => void | Promise<void>
-  // Tenant grace window — feeds the trashed card's erase note (DD-MM-YYYY).
-  graceDays?: number | null
-}
-
-// Workflow-level trigger → i18n key, mirroring WorkflowListRow's triggerMeta so the
-// card subtitle reads a translated trigger label instead of the raw server value.
-function triggerKey(triggerType?: string): string {
-  if (triggerType === 'scheduled') return 'list.triggerScheduled'
-  if (triggerType === 'webhook') return 'list.triggerWebhook'
-  if (triggerType === 'event') return 'list.triggerEvent'
-  return 'list.triggerManual'
-}
+// (TRASH-OVERAL-1b, same gates/handlers, no fork): the shared lifecycle shape,
+// no extra fields of its own.
+type WorkflowCardProps = WorkflowRowLifecycleProps
 
 // Status badge colours; label = t('status.<key>').
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string }> = {
@@ -124,7 +101,7 @@ export default function WorkflowCard({ workflow, onRun, canRun = true, onEdit, c
             <div className="font-medium text-[var(--text)] truncate" style={{ fontSize: 14 }}>
               {displayName}
             </div>
-            <div className="text-xs text-[var(--text-muted)] mt-0.5">{t(triggerKey(workflow.trigger_type))}</div>
+            <div className="text-xs text-[var(--text-muted)] mt-0.5">{t(triggerKeyForType(workflow.trigger_type))}</div>
           </div>
         </div>
         {archived ? (

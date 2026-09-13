@@ -23,6 +23,7 @@ import NotesTab from './drawer/NotesTab'
 import ConversationTab from './drawer/ConversationTab'
 import TasksTab from './drawer/TasksTab'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
+import { EntityDrawerCreatedAtFooter } from '@/components/drawer/EntityDrawerCreatedAtFooter'
 import ChangelogTab from './drawer/ChangelogTab'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 import type { Opportunity } from '@/types/opportunity'
@@ -159,14 +160,8 @@ export default function OpportunityDrawer({
       entity={o}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
-      // Two-sided footer (§3A(8)): created-at left, empty right (consistent spacing
-      // with the candidate/other drawers even when there is no right-side content).
-      footer={
-        <Caption as="div" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-          <span>{t('drawer.createdAt', { date: formatDateTime(o.date) })}</span>
-          <span />
-        </Caption>
-      }
+      // Two-sided footer (§3A(8), shared EntityDrawerCreatedAtFooter).
+      footer={<EntityDrawerCreatedAtFooter createdAtLabel={t('drawer.createdAt', { date: formatDateTime(o.date) })} />}
       tabs={tabs}
       header={() => (
         <EntityHeader

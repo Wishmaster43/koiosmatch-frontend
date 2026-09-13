@@ -10,9 +10,8 @@
  */
 import { useMemo, useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Braces, Search, ChevronRight, Maximize2 } from 'lucide-react'
-import Button from '@/components/ui/Button'
-import { TextExpandModal } from './fieldControls/TextExpandModal'
+import { Braces, Search, ChevronRight } from 'lucide-react'
+import { TextExpandControl } from './fieldControls/TextExpandControl'
 import { MODULE_META } from '@/modules/index'
 import { fieldLabel, fieldPlaceholder } from './moduleI18n'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
@@ -253,15 +252,10 @@ export function TextFieldWithVars({ field, value, onChange, variables, multiline
 
       {/* Danny 31-08: enlarge popup for long multiline values (persona, variables). */}
       {multiline && (
-        <Button iconOnly variant="ghost" size="sm" onClick={() => setExpanded(true)}
-          aria-label={t('fields.textExpand')} title={t('fields.textExpand')}
-          style={{ position: 'absolute', top: 28, right: 2 }}>
-          <Maximize2 size={12} />
-        </Button>
-      )}
-      {expanded && (
-        <TextExpandModal label={fieldLabel(t, field.label)} value={(value as string) || ''}
-          onChange={next => onChange(field.key, next)} onClose={() => setExpanded(false)} />
+        <TextExpandControl label={fieldLabel(t, field.label)} expandLabel={t('fields.textExpand')}
+          value={(value as string) || ''} onChange={next => onChange(field.key, next)}
+          expanded={expanded} onExpand={() => setExpanded(true)} onClose={() => setExpanded(false)}
+          style={{ position: 'absolute', top: 28, right: 2 }} />
       )}
       {open && <PickerPopover variables={variables} onInsert={insert} onClose={() => setOpen(false)} />}
     </div>

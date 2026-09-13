@@ -4,10 +4,10 @@
  * the shared RightPanelContext. Pure extraction from CustomersPage (§0.3
  * split) — no behavior change.
  */
-import { useMemo, useCallback, useEffect } from 'react'
+import { useMemo, useEffect } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
-import { applyGeo as applyGeoFn } from '@/lib/geoFilter'
+import { useApplyGeoFilter } from '@/lib/geoFilter'
 import { buildCustomerStatusOptions } from '../data/customerInsights'
 import { buildCustomerFilterGroups } from '../data/customerFilterGroups'
 import type { CustomerDateRange } from '../data/customerFilterGroups'
@@ -94,12 +94,9 @@ export function useCustomersFilterPanel({
 
   const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
 
-  // Straal-blok apply: PDOK-geocode; found → filter + map sync, not found → hint.
-  // Stabilized (useCallback) so the filterGroups useMemo below can safely depend
-  // on it — every captured setter is itself stable, only `t` can genuinely change.
-  const applyGeo = useCallback(async (q: string, km: number) => {
-    return applyGeoFn(q, km, t('common:filters.notFound'), setGeoHint, setGeoFilter, setMapCenter, setMapRadius)
-  }, [t, setGeoHint, setGeoFilter, setMapCenter, setMapRadius])
+  // Straal-blok apply: PDOK-geocode; found → filter + map sync, not found → hint
+  // (shared useApplyGeoFilter, mirrors CandidatesPage's own applyGeo).
+  const applyGeo = useApplyGeoFilter(t, setGeoHint, setGeoFilter, setMapCenter, setMapRadius)
 
   // Filter panel config lives in the data/ builder (mirrors buildCandidateFilterGroups).
   const filterGroups = useMemo(() => buildCustomerFilterGroups({

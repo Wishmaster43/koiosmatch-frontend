@@ -11,6 +11,7 @@ import { useAuth } from '@/context/AuthContext'
 import Spinner from '@/components/ui/Spinner'
 import { SettingRow, Toggle } from '../components/SettingsKit'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
+import { runAliveGuarded } from '@/lib/aliveGuard'
 
 const KEY = 'mfa.enforced'
 
@@ -28,10 +29,9 @@ export default function MfaEnforcementSetting() {
   // Load the current tenant flag once ('1' = enforced; tolerate 'true' just in case).
   useEffect(() => {
     let alive = true
-    loadSettings()
-      .then(s => { if (alive) setEnforced(['1', 'true'].includes(String(s?.[KEY]))) })
-      .catch(() => { if (alive) setLoadError(true) })
-      .finally(() => { if (alive) setLoading(false) })
+    runAliveGuarded(loadSettings(), () => alive, (s) => {
+      setEnforced(['1', 'true'].includes(String(s?.[KEY])))
+    }, setLoadError, setLoading)
     return () => { alive = false }
   }, [])
 

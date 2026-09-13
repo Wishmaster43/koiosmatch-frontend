@@ -5,7 +5,7 @@
  * purely presentational, all data/mutations come from useWorkflowsData /
  * useWorkflowsFilters.
  */
-import { useState, type MutableRefObject } from 'react'
+import { useState, type MutableRefObject, type CSSProperties, type ReactNode } from 'react'
 import ViewModeToggle from '@/components/ui/ViewModeToggle'
 import { useTranslation } from 'react-i18next'
 import { Plus, LayoutGrid, List, Archive, Trash2 } from 'lucide-react'
@@ -22,20 +22,24 @@ import type { WorkflowFolder, FolderId } from './hooks/useWorkflowsData'
 import type { ViewMode } from './hooks/useWorkflowsFilters'
 import Button from '@/components/ui/Button'
 
-// The archive/restore/mark-deletion/unmark prop bag every workflow row/card
-// needs, built once per workflow from the panel's own handlers (DRY round 11,
-// LAYOUT) — two call sites (grid card, list row) passed the same six props
-// built from `wf` the same way.
-function workflowRowActions(wf: Workflow, {
-  canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, graceDays,
-}: {
+// The handler subset workflowRowActions needs — a slice of WorkflowsListPanelProps
+// (declared below), named here so the function signature never re-spells it.
+interface WorkflowRowActionHandlers {
   canManageFolders: boolean
   handleArchive: (wf: Workflow) => void
   handleRestore: (wf: Workflow) => void | Promise<void>
   onMarkDeletion?: (wf: Workflow) => void
   onUnmark?: (wf: Workflow) => void | Promise<void>
   graceDays: number | null
-}) {
+}
+
+// The archive/restore/mark-deletion/unmark prop bag every workflow row/card
+// needs, built once per workflow from the panel's own handlers (DRY round 11,
+// LAYOUT) — two call sites (grid card, list row) passed the same six props
+// built from `wf` the same way.
+function workflowRowActions(wf: Workflow, {
+  canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, graceDays,
+}: WorkflowRowActionHandlers) {
   return {
     canManageFolders,
     onArchive: () => handleArchive(wf),
@@ -56,8 +60,30 @@ function WorkflowsEmptyState({ label, gridColumn }: { label: string; gridColumn?
   )
 }
 
+// The draggable wrapper around one workflow card/row — grid and list only differ
+// in the wrapper's own style (grid needs `cursor: grab`, list does not).
+function DraggableWorkflowItem({ id, dragWfRef, style, children }: {
+  id: Workflow['id']
+  dragWfRef: MutableRefObject<string | number | null>
+  style?: CSSProperties
+  children: ReactNode
+}) {
+  return (
+    <div key={id} draggable style={style}
+      onDragStart={() => { dragWfRef.current = id ?? null }}
+      onDragEnd={() => { dragWfRef.current = null }}
+    >
+      {children}
+    </div>
+  )
+}
+
 // Props: everything needed to render the toolbar + the visible workflow list.
-interface WorkflowsListPanelProps {
+// Extends WorkflowRowActionHandlers (minus graceDays, re-declared optional below —
+// the panel's own default is `null`, while workflowRowActions needs it required)
+// so the archive/restore/mark-deletion/unmark handler shapes are declared once.
+interface WorkflowsListPanelProps extends Omit<WorkflowRowActionHandlers, 'graceDays'> {
+  graceDays?: number | null
   loading: boolean
   error: boolean
   retryLoad: () => void
@@ -75,24 +101,15 @@ interface WorkflowsListPanelProps {
   openEditor: (wf: Workflow, runId?: string | number | null) => void
   handleRun: (id?: string | number) => void | Promise<void>
   handleToggleStatus: (wf: Workflow) => void
-  canManageFolders: boolean
   // WORKFLOW-PERMS-1: the workflows.run / workflows.create verbs (open until the BE seeds them).
   canRun?: boolean
   canCreate?: boolean
-  handleArchive: (wf: Workflow) => void
-  handleRestore: (wf: Workflow) => void | Promise<void>
-  // TRASH-OVERAL-2: mark (workflows.delete) / unmark (settings.update) — absent =
-  // no permission, so the row/card buttons don't render (§7 no fake affordances).
-  onMarkDeletion?: (wf: Workflow) => void
-  onUnmark?: (wf: Workflow) => void | Promise<void>
-  // Tenant grace window — feeds the rows' pending-erase note (DD-MM-YYYY).
-  graceDays?: number | null
 }
 
 // Toolbar plus the loading/error/grid/list render of the visible workflows; purely presentational, all data/mutations arrive as props (see file header).
 export default function WorkflowsListPanel({
   loading, error, retryLoad, visibleWorkflows, folders, viewMode, setViewMode,
-  showArchived, onToggleArchived, showTrash, onToggleTrash, selectedFolder, dragWf, openEditor, handleRun, handleToggleStatus,
+  showArchived, onToggleArchived, showTrash, onToggleTrash, selectedFolder, dragWf: dragWfRef, openEditor, handleRun, handleToggleStatus,
   canManageFolders, canRun = true, canCreate = true, handleArchive, handleRestore, onMarkDeletion, onUnmark, graceDays = null,
 }: WorkflowsListPanelProps) {
   const { t } = useTranslation(['workflows', 'common'])
@@ -169,15 +186,14 @@ export default function WorkflowsListPanel({
       ) : viewMode === 'grid' ? (
         <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))' }}>
           {visibleWorkflows.map(wf => (
-            <div key={wf.id} draggable
-              onDragStart={() => { dragWf.current = wf.id ?? null }}
-              onDragEnd={() => { dragWf.current = null }}
-              style={{ cursor: 'grab' }}
-            >
+            <DraggableWorkflowItem key={wf.id} id={wf.id} dragWfRef={dragWfRef} style={{ cursor: 'grab' }}>
+              {/* DRY: the workflowRowActions(wf, {...}) call is intentionally
+                  identical to the list-row call below — that repetition IS the
+                  point of the helper (one call per render site, same six props). */}
               <WorkflowCard workflow={wf} onRun={handleRun} onEdit={() => openEditor(wf)} canRun={canRun}
                 {...workflowRowActions(wf, { canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, graceDays })}
               />
-            </div>
+            </DraggableWorkflowItem>
           ))}
           {visibleWorkflows.length === 0 && (
             <WorkflowsEmptyState label={t('page.empty')} gridColumn="1/-1" />
@@ -187,9 +203,7 @@ export default function WorkflowsListPanel({
         /* Make.com-style list — one row per workflow, no column chrome (R-3/AW-list). */
         <div style={{ border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
           {visibleWorkflows.map(wf => (
-            <div key={wf.id} draggable
-              onDragStart={() => { dragWf.current = wf.id ?? null }}
-              onDragEnd={() => { dragWf.current = null }}>
+            <DraggableWorkflowItem key={wf.id} id={wf.id} dragWfRef={dragWfRef}>
               <WorkflowListRow workflow={wf}
                 folderName={folderLabel(wf.folder_id)}
                 onRun={handleRun}
@@ -198,7 +212,7 @@ export default function WorkflowsListPanel({
                 onToggleStatus={() => handleToggleStatus(wf)}
                 {...workflowRowActions(wf, { canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, graceDays })}
               />
-            </div>
+            </DraggableWorkflowItem>
           ))}
           {visibleWorkflows.length === 0 && (
             <WorkflowsEmptyState label={t('page.empty')} />

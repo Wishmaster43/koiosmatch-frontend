@@ -2,6 +2,8 @@
  * DrawerGlyphButton — the raw title-row icon glyph shared by candidate/customer
  * merge+archive, match archive+mark-deletion and outreach mark-deletion.
  */
+import { Trash2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { MouseEventHandler, ReactNode } from 'react'
 
 // Tone → ink colour (frozen calm-header glyph control, Danny 08-08): muted for the
@@ -32,5 +34,24 @@ export default function DrawerGlyphButton({ onClick, title, tone, opacity, child
       style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: TONE_COLOR[tone], opacity }}>
       {children}
     </button>
+  )
+}
+
+// TRASH-OVERAL-2: the "mark for deletion" glyph — archived → trash — shared by
+// every entity drawer's title row (matches, outreach, …). Hidden once the
+// permission is absent (§7: no fake affordance) or the record is already in
+// the trash.
+export function MarkDeletionGlyphButton<TId extends string | number>({ onMarkDeletion, id, archived, inTrash }: {
+  onMarkDeletion?: (id: TId) => void
+  id: TId | undefined
+  archived: boolean
+  inTrash: boolean
+}) {
+  const { t } = useTranslation('common')
+  if (!onMarkDeletion || !archived || inTrash || id == null) return null
+  return (
+    <DrawerGlyphButton onClick={() => onMarkDeletion(id)} title={t('trash.markAction')} tone="danger">
+      <Trash2 size={14} />
+    </DrawerGlyphButton>
   )
 }

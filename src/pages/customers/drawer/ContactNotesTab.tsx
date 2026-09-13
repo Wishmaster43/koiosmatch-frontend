@@ -14,7 +14,7 @@
 import { useTranslation } from 'react-i18next'
 import { useNoteTypes } from '@/lib/useNoteTypes'
 import { useNotesTabContent } from '@/hooks/useNotesTabContent'
-import CustomerNotesView from './CustomerNotesView'
+import NotesTabBody from './NotesTabBody'
 import { useContactNotes } from '../hooks/useCustomerDrawerData'
 import type { Id } from '@/types/common'
 
@@ -36,13 +36,9 @@ export default function ContactNotesTab({ contactId, customerId }: {
     apiEndpoint: `/customers/${customerId}/notes`,
   })
 
-  // Four explicit UI states (§3) — never a blank screen while the scoped fetch is in flight or failed.
-  if (loading) return <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('page.loading')}</div>
-  // Neutral copy: the shared scopedList.loadError names a LOCATION, untrue here.
-  if (error) return <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('scopedList.loadErrorGeneric')}</div>
-
   return (
-    <CustomerNotesView
+    // Neutral copy: the shared scopedList.loadError names a LOCATION, untrue here.
+    <NotesTabBody loading={loading} error={error} errorKey="scopedList.loadErrorGeneric"
       notes={notes} addNote={addNote} editNote={editNote} deleteNote={deleteNote}
       customerId={customerId} noteTypes={noteTypes} chipTypes={chipTypes}
       authorInitials={authorInitials} t={t}

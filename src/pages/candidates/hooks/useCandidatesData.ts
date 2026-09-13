@@ -13,14 +13,14 @@
  * whitelist this maps into; an unmapped column reorders the loaded page locally
  * (DataTable's own sortedRows) without ever reaching the request.
  */
-import { useCallback, useMemo } from 'react'
-import type { Dispatch, SetStateAction } from 'react'
-import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
+import { useMemo } from 'react'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { heavyGet } from '@/lib/heavyGet'
 import { pickStatsScopeParams } from '@/lib/statsScopeParams'
 import { useRowsEpoch } from '@/hooks/useRowsEpoch'
+import { useListFieldSetter } from '@/hooks/useListFieldSetter'
 import { mapCandidate } from '../data/mapCandidate'
 import type { ApiCandidate, Candidate, CandidateStats } from '@/types/candidate'
 import type { Id } from '@/types/common'
@@ -92,13 +92,13 @@ function sortParams(sort?: CandidateSort | null): Record<string, string> {
 // plus the SELECT-RACE-1 row-signature tracking that decides when bulk selection
 // must be dropped (see the comment above that effect below).
 export function useCandidatesData({ filterParams, page, pageSize, t, setActionMsg, sort, locale = 'nl-NL' }: UseCandidatesDataParams) {
-  const queryClient = useQueryClient()
+  const listKey = ['candidates', filterParams, page, pageSize, sort]
 
   // List (paginated, server-filtered). 422 = the backend rejected a filter value → keep the
   // page usable (empty + soft notice, filters stay visible), never a hard failure. CAND-SORT-1:
   // `sort` rides in the query key too, so a header click that maps to a real sort_by cleanly refetches.
   const listQuery = useQuery({
-    queryKey: ['candidates', filterParams, page, pageSize, sort],
+    queryKey: listKey,
     queryFn: async ({ signal }): Promise<ListResult> => {
       try {
         const res = await api.get('/candidates', { params: { ...filterParams, ...sortParams(sort), page, per_page: pageSize }, signal })
@@ -156,19 +156,8 @@ export function useCandidatesData({ filterParams, page, pageSize, t, setActionMs
   // Setter wrappers over the list cache — keep the container's optimistic mutations working.
   // CAND-SORT-1: `sort` joined the query key above, so it must match here too, or an
   // optimistic update would write into a cache entry the active query never reads from.
-  const setCandidates = useCallback<Dispatch<SetStateAction<Candidate[]>>>(updater => {
-    queryClient.setQueryData<ListResult>(['candidates', filterParams, page, pageSize, sort], prev => {
-      const cur = prev ?? { candidates: [], total: 0, lastPage: 1 }
-      return { ...cur, candidates: typeof updater === 'function' ? (updater as (p: Candidate[]) => Candidate[])(cur.candidates) : updater }
-    })
-  }, [queryClient, filterParams, page, pageSize, sort])
-
-  const setTotal = useCallback<Dispatch<SetStateAction<number>>>(updater => {
-    queryClient.setQueryData<ListResult>(['candidates', filterParams, page, pageSize, sort], prev => {
-      const cur = prev ?? { candidates: [], total: 0, lastPage: 1 }
-      return { ...cur, total: typeof updater === 'function' ? (updater as (p: number) => number)(cur.total) : updater }
-    })
-  }, [queryClient, filterParams, page, pageSize, sort])
+  const setCandidates = useListFieldSetter<ListResult, 'candidates'>(listKey, 'candidates', { candidates: [], total: 0, lastPage: 1 })
+  const setTotal = useListFieldSetter<ListResult, 'total'>(listKey, 'total', { candidates: [], total: 0, lastPage: 1 })
 
   return {
     candidates, setCandidates, loading, error, total, setTotal, lastPage, stats, statsFailed, locations,

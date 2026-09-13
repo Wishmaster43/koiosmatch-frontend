@@ -11,7 +11,7 @@ import ContactNameLink from './ContactNameLink'
 import { emailValue, phoneValue, linkedinValue, LinkedinMark } from '@/components/drawer/contactLinks'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import { notifyError, notifySuccess } from '@/lib/notify'
-import { setLocationPrimaryContact, splitContactName } from '../hooks/useCustomerContacts'
+import { setLocationPrimaryContact, quickContactPayload } from '../hooks/useCustomerContacts'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
 import type { Contact } from '@/types/customer'
 import type { Id } from '@/types/common'
@@ -167,13 +167,7 @@ export default function LocationContactSection({
     setCreating(true)
     let newContact: Contact | void
     try {
-      newContact = await onAddContact({
-        ...splitContactName(typedName), middleName: '', email: legacyEmail.trim(), phone: legacyPhone.trim(), mobile: '',
-        // CONTACT-LINKEDIN-1: no LinkedIn field on this quick-create path.
-        linkedin: '',
-        gender: '', role: '', locationId: null, departmentId: null, locationIds: [], departmentIds: [],
-        statusId: null, isPrimary: false, customFields: {},
-      })
+      newContact = await onAddContact(quickContactPayload(typedName, legacyEmail.trim(), legacyPhone.trim()))
     } catch {
       notifyError(t('locations.detail.createContactFailed'))
       setCreating(false)

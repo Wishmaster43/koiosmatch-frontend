@@ -19,25 +19,12 @@ import { initialsOf } from '@/lib/initials'
 import { useCustomerLite } from './hooks/useCustomerLite'
 import { usePopoutCustomerNotes } from './hooks/usePopoutCustomerNotes'
 import type { CustomerNote } from '@/types/customer'
-import { tintBg, tintBorder } from '@/lib/tint'
+import { NoteLinkChip } from '@/components/ui/NoteLinkChip'
+import { withNoteLinkChips } from '@/pages/customers/shared'
 
 type AnyProps = Record<string, unknown>
 // Still-untyped JS component — accept any props at the boundary (mirrors CustomerNotesTab).
 const NotesTab = NotesTabJs as unknown as ComponentType<AnyProps>
-
-// Soft-tint "linked to {name}" chip (§4 convention) — mirrors CustomerNotesTab's
-// own linkChip exactly, so a location/department/contact-linked note reads the
-// same in the popout as it does in the drawer.
-function linkChip(label: string) {
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: 10, fontWeight: 600,
-      padding: '1px 6px', borderRadius: 99, marginRight: 6,
-      background: tintBg('var(--color-info)'), color: 'var(--color-info)',
-      border: tintBorder('var(--color-info)') }}>
-      {label}
-    </span>
-  )
-}
 
 // Standalone second-screen customer notes window (see file docblock above) —
 // a notes-only simplification of the drawer's notes sub-tab, read-parity intact.
@@ -73,10 +60,8 @@ export default function CustomerNotesPopout({ id }: { id: string | undefined }) 
   // Read-parity chip decoration — department wins over location (the deepest
   // level, mirrors the backend's own CustomerNote::levelContext() priority),
   // then the independent contact link; every other note is untouched.
-  const notesWithChip: Array<Omit<CustomerNote, 'title'> & { title: ReactNode }> = notes.map(n => {
-    const linkedName = n.departmentName || n.locationName || n.contactName
-    return linkedName ? { ...n, title: linkChip(t('notes.linkedTo', { name: linkedName })) } : n
-  })
+  const notesWithChip = withNoteLinkChips(notes, (name) => <NoteLinkChip>{t('notes.linkedTo', { name })}</NoteLinkChip>) as
+    Array<Omit<CustomerNote, 'title'> & { title: ReactNode }>
 
   const notesProps = {
     notes: notesWithChip, onAddNote: addNote, onEditNote: editNote, onDeleteNote: deleteNote,

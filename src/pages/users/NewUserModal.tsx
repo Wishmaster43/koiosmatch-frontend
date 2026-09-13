@@ -149,7 +149,10 @@ export default function NewUserModal({ onClose, onCreated }: {
         <form onSubmit={handleSubmit}>
           <UserModalColumns
             left={<>
-              {/* Personal — first/last name, shared with EditUserModal (UserNameCard). */}
+              {/* Personal — first/last name, shared with EditUserModal (UserNameCard).
+                  DRY: the two modals' column shells are already the shared
+                  UserModalColumns/UserNameCard atoms — the account/permission
+                  fields below are genuinely different per modal. */}
               <UserNameCard firstname={form.firstname} lastname={form.lastname}
                 onFirstname={set('firstname')} onLastname={set('lastname')} />
               <div>
