@@ -7,7 +7,6 @@
  */
 import { useState, useContext, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { MouseEvent, DragEvent } from 'react'
 import { Handle, Position, BaseEdge, EdgeLabelRenderer, getStraightPath } from '@xyflow/react'
 import { AlertTriangle, CheckCircle, Filter, HelpCircle, Play, Plus, X } from 'lucide-react'
@@ -22,6 +21,7 @@ import type { FlowNodeData, EdgeFilters } from '@/types/workflow'
 import { tint } from '@/lib/tint'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 
 // PICKER-INTERSECT: trigger-role modules (registry category 'Triggers' — webhook,
 // applicant_event, gateway_mail_hook) start a workflow run rather than execute as an
@@ -313,29 +313,16 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
 
 export function OutputPanel({ output, onClose }: { output?: unknown; onClose: () => void }) {
   const { t } = useTranslation('workflows')
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
+  const titleText = `${t('canvas.outputTitle')} — ${Array.isArray(output) ? t('canvas.records', { n: output.length }) : t('canvas.response')}`
 
+  // POPUP-AUDIT-1: migrated onto the shared FloatingPanel (drag/resize/remember-size)
+  // instead of a hand-rolled fixed-centred dialog. Read-only viewer, so a backdrop
+  // click closing it as before is unchanged (default closeOnBackdrop).
   return (
-    // HUISSTIJL-1: modal dialog — z-overlay ladder tier, shadow-modal role.
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 'var(--z-overlay)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'rgba(0,0,0,0.4)',
-    }} onClick={onClose}>
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('canvas.outputTitle')} tabIndex={-1} style={{
-        background: 'var(--surface)', borderRadius: 14, width: 680, maxHeight: '80vh',
-        display: 'flex', flexDirection: 'column', overflow: 'hidden',
-        boxShadow: 'var(--shadow-modal)',
-      }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderBottom: '1px solid var(--border)' }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('canvas.outputTitle')} — {Array.isArray(output) ? t('canvas.records', { n: output.length }) : t('canvas.response')}</div>
-          {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- bare close glyph in the output panel header, not a Button copy */}
-          <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
-        </div>
-        <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
-          <OutputTree data={output} />
-        </div>
-      </div>
-    </div>
+    <FloatingPanel open onClose={onClose} ariaLabel={titleText} title={titleText}
+      width={680} persistKey="workflow-output-panel" resizable bodyStyle={{ padding: 16 }}>
+      <OutputTree data={output} />
+    </FloatingPanel>
   )
 }
 

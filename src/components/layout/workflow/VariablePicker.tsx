@@ -143,6 +143,13 @@ function PickerPopover({ variables, onInsert, onClose }: {
   // "{ }" toggle button on close — the public useFocusTrap contract (§6).
   const trapRef = useFocusTrap<HTMLDivElement>(onClose)
 
+  // POPUP-AUDIT-1 necessity (verifier fix, reverting the FloatingPanel attempt):
+  // this is an in-field token DROPDOWN, not a window — it must stay ANCHORED under
+  // its own "{ }" toggle (BUTTON-GRENS-LES, §4: listbox-style pickers are not
+  // Button/FloatingPanel work). FloatingPanel has no anchor support and always
+  // centres on the viewport, which silently relocated this picker away from the
+  // field it inserts into — a face change MODULE-FACE-BEVRIES (§14) does not permit
+  // without asking Danny first. Kept hand-rolled, anchored, on the original recipe.
   return (
     <>
       {/* Click-away backdrop — HUISSTIJL-1: same z-popover tier as the panel below it;
@@ -158,7 +165,7 @@ function PickerPopover({ variables, onInsert, onClose }: {
         {/* Search */}
         <div style={{ position: 'relative', padding: 8, borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <Search size={12} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-          {/* No `autoFocus` here — useFocusTrap now owns moving focus into the panel
+          {/* No `autoFocus` here — useFocusTrap owns moving focus into the panel
               on open. The two used to race (autoFocus fires synchronously at DOM
               insertion, before the trap's effect runs), which made the trap capture
               this input — not the real trigger — as "previously focused", so

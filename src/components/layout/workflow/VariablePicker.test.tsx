@@ -67,6 +67,9 @@ describe('TextFieldWithVars', () => {
     render(<TextFieldWithVars field={field} value="" onChange={() => {}} variables={variables} multiline />)
     fireEvent.click(screen.getByLabelText('vars.title'))
     const dialog = screen.getByRole('dialog')
+    // Verifier fix: reverted off FloatingPanel (anchor was silently lost — see the
+    // necessity comment on PickerPopover) — back to the hand-rolled anchored dialog,
+    // which is a real modal trap.
     expect(dialog).toHaveAttribute('aria-modal', 'true')
     // jsdom never lays out elements, so useFocusTrap's `offsetParent !== null`
     // visibility filter finds no "visible" focusable and falls back to focusing
@@ -74,5 +77,19 @@ describe('TextFieldWithVars', () => {
     // engaging, proof the trap ran (a real browser instead focuses the search
     // input, covered by the manual-focus Escape test above).
     expect(dialog).toHaveFocus()
+  })
+
+  // Verifier fix: the picker is back to its own click-away backdrop (anchored
+  // dropdown, not a FloatingPanel) — clicking the backdrop itself closes it.
+  // jsdom does no hit-testing/overlap, so the real regression here is on the
+  // backdrop element directly (a real browser click anywhere outside the panel
+  // hits this same fixed full-viewport backdrop, which paints beneath the panel).
+  it('closes on a click on its own backdrop', () => {
+    render(<TextFieldWithVars field={field} value="" onChange={() => {}} variables={variables} multiline />)
+    fireEvent.click(screen.getByLabelText('vars.title'))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    const backdrop = document.querySelector('[style*="position: fixed"][style*="inset"]') as Element
+    fireEvent.click(backdrop)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 })

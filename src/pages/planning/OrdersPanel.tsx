@@ -21,6 +21,7 @@ import { extractApiError } from '@/lib/extractApiError'
 import Button from '@/components/ui/Button'
 import SoftChip from '@/components/ui/SoftChip'
 import { PageTitle, SectionTitle, Caption } from '@/components/ui/typography'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { tintBorder } from '@/lib/tint'
 
 // Planning orders list + create/edit/delete, entirely real data (see the module doc comment above).
@@ -40,7 +41,10 @@ export default function OrdersPanel() {
   // Cancel-shifts-first is a real, honest 409 reason from the backend (never a
   // generic failure) — surfaced via the shared extractApiError (§3/§13).
   const handleDeleteConfirm = async () => {
-    if (!pendingDelete) return
+    // Verifier fix: ConfirmDialog has no disabled/busy prop, so its confirm button
+    // stays clickable while the DELETE is in flight — guard here so a second click
+    // never fires a second destructive request (§3A bulk/destructive discipline).
+    if (!pendingDelete || deleteOrder.isPending) return
     try {
       await deleteOrder.mutateAsync(pendingDelete.id)
       setPendingDelete(null)
@@ -108,32 +112,21 @@ export default function OrdersPanel() {
       {addOpen && <AddOrderModal onClose={() => setAddOpen(false)} />}
       {editing && <AddOrderModal order={editing} onClose={() => setEditing(null)} />}
 
-      {pendingDelete && (
-        <div role="dialog" aria-modal="true" aria-label={t('order.deleteConfirmTitle')}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 'var(--z-confirm)' }}>
-          <div style={{ width: 360, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>{t('order.deleteConfirmTitle')}</div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('order.deleteConfirmBody')}</div>
-            {deleteError && (
-              <div role="alert" style={{ padding: '8px 10px', fontSize: 12, borderRadius: 8, marginBottom: 12,
-                color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
-                border: `1px solid ${tintBorder('var(--color-danger)')}` }}>
-                {deleteError}
-              </div>
-            )}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-              {/* Dialog footer = md, matching every other confirm footer (Opus batch B R2). */}
-              <Button variant="secondary" onClick={() => { setPendingDelete(null); setDeleteError(null) }}>
-                {t('common:cancel')}
-              </Button>
-              <Button variant="danger" onClick={handleDeleteConfirm} disabled={deleteOrder.isPending}>
-                {deleteOrder.isPending ? t('common:saving') : t('common:delete')}
-              </Button>
-            </div>
+      {/* POPUP-AUDIT-1: the hand-rolled centred dialog is now the house ConfirmDialog
+          (FloatingPanel underneath) — same request/error recovery, now draggable.
+          Stays open on a rejected delete (409 "cancel shifts first") so the honest
+          reason is visible; only a real success or Cancel clears pendingDelete. */}
+      <ConfirmDialog open={!!pendingDelete} title={t('order.deleteConfirmTitle')} message={t('order.deleteConfirmBody')}
+        danger confirmLabel={deleteOrder.isPending ? t('common:saving') : t('common:delete')} cancelLabel={t('common:cancel')}
+        onConfirm={handleDeleteConfirm} onCancel={() => { setPendingDelete(null); setDeleteError(null) }}>
+        {deleteError && (
+          <div role="alert" style={{ padding: '8px 10px', fontSize: 12, borderRadius: 8,
+            color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
+            border: `1px solid ${tintBorder('var(--color-danger)')}` }}>
+            {deleteError}
           </div>
-        </div>
-      )}
+        )}
+      </ConfirmDialog>
     </div>
   )
 }

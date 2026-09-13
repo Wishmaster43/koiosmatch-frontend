@@ -87,3 +87,19 @@ describe('ModulePicker · PICKER-INTERSECT executability gate', () => {
     expect(screen.queryByTitle(APPLICANT_MESSAGE_LABEL)).not.toBeInTheDocument()
   })
 })
+
+// POPUP-AUDIT-1: migrated onto the shared FloatingPanel shell — drag handle +
+// resize grip present, picking a tile still calls onSelect/onClose unchanged.
+describe('ModulePicker · POPUP-AUDIT-1 FloatingPanel migration', () => {
+  it('renders inside FloatingPanel chrome and picking a tile still selects + closes', () => {
+    mockCatalog = {}
+    const onSelect = vi.fn()
+    const onClose = vi.fn()
+    render(<ModulePicker insertAfterEdgeId="e1" onSelect={onSelect} onClose={onClose} />)
+    expect(document.querySelector('[data-drag-handle]')).toBeInTheDocument()
+    expect(document.querySelector('[aria-hidden][style*="nwse-resize"]')).toBeInTheDocument()
+    screen.getByTitle(CANDIDATES_LABEL).click()
+    expect(onSelect).toHaveBeenCalledWith('candidates', 'e1')
+    expect(onClose).toHaveBeenCalled()
+  })
+})

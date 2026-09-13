@@ -12,8 +12,8 @@
  * — irrelevant to this marker and out of scope here.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
-import { NODE_TYPES } from './canvas'
+import { render, screen, fireEvent } from '@testing-library/react'
+import { NODE_TYPES, OutputPanel } from './canvas'
 import { MODULE_META } from '@/modules/index'
 import type { FlowNodeData } from '@/types/workflow'
 import type { ModuleCatalog } from './filterFieldCatalog'
@@ -90,5 +90,21 @@ describe('ModuleNode · WF-MODULE-RECONCILE-FE-1 (no more "Onbekende module")', 
     // label; an unresolved one would render the literal key 'canvas.unknownModule'.
     expect(screen.getByText(MODULE_META[type].label)).toBeInTheDocument()
     expect(screen.queryByText('canvas.unknownModule')).not.toBeInTheDocument()
+  })
+})
+
+// POPUP-AUDIT-1: OutputPanel migrated onto the shared FloatingPanel shell —
+// still a real modal (default overlay), drag handle + resize grip present,
+// content (OutputTree over the raw output) unchanged.
+describe('OutputPanel · POPUP-AUDIT-1 FloatingPanel migration', () => {
+  it('renders inside FloatingPanel chrome and the close button calls onClose', () => {
+    const onClose = vi.fn()
+    render(<OutputPanel output={[{ id: 1 }, { id: 2 }]} onClose={onClose} />)
+    const dialog = screen.getByRole('dialog')
+    expect(dialog).toHaveAttribute('aria-modal', 'true')
+    expect(document.querySelector('[data-drag-handle]')).toBeInTheDocument()
+    expect(document.querySelector('[aria-hidden][style*="nwse-resize"]')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'close' }))
+    expect(onClose).toHaveBeenCalled()
   })
 })

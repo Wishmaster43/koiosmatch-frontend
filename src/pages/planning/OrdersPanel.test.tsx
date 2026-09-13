@@ -6,7 +6,7 @@
  * states plus the edit/delete entry points and the honest 409 message.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import OrdersPanel from './OrdersPanel'
 import { useAuth } from '@/context/AuthContext'
@@ -19,9 +19,12 @@ vi.mock('@/context/AuthContext', () => ({ useAuth: vi.fn(() => ({ hasPermission:
 
 const mockOrders = vi.fn()
 const mockDelete = vi.fn()
+// isPending is mutable so the double-click regression test can prove the
+// in-flight guard actually reads a live pending state, not a fixed false.
+const deleteState = { isPending: false }
 vi.mock('./hooks/usePlanningOrders', () => ({
   usePlanningOrdersList: () => mockOrders(),
-  useDeletePlanningOrder: () => ({ mutateAsync: mockDelete, isPending: false }),
+  useDeletePlanningOrder: () => ({ mutateAsync: mockDelete, get isPending() { return deleteState.isPending } }),
 }))
 
 vi.mock('./AddOrderModal', () => ({
@@ -36,7 +39,7 @@ vi.mock('./AddOrderModal', () => ({
 const ROW = { id: 'o1', client: 'Rivas Zorggroep', location: 'Locatie A', department: null,
   subject: 'ICU dayshift', function: null, reference: null, status: 'open', shifts_count: 2 }
 
-beforeEach(() => vi.clearAllMocks())
+beforeEach(() => { vi.clearAllMocks(); deleteState.isPending = false })
 
 describe('OrdersPanel · four UI states', () => {
   it('loading', () => {
@@ -77,6 +80,17 @@ describe('OrdersPanel · edit entry point', () => {
 })
 
 describe('OrdersPanel · delete + honest 409', () => {
+  // POPUP-AUDIT-1: the hand-rolled centred dialog is now the house ConfirmDialog
+  // (FloatingPanel underneath) — drag handle present, same delete request.
+  it('renders the delete confirm inside the shared ConfirmDialog/FloatingPanel chrome', async () => {
+    const user = userEvent.setup()
+    mockOrders.mockReturnValue({ orders: [ROW], loading: false, error: false })
+    render(<OrdersPanel />)
+    await user.click(screen.getByRole('button', { name: 'common:delete' }))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(document.querySelector('[data-drag-handle]')).toBeInTheDocument()
+  })
+
   it('confirms and deletes the order', async () => {
     const user = userEvent.setup()
     mockDelete.mockResolvedValue(undefined)
@@ -85,6 +99,26 @@ describe('OrdersPanel · delete + honest 409', () => {
     await user.click(screen.getByRole('button', { name: 'common:delete' }))
     await user.click(screen.getAllByRole('button', { name: 'common:delete' })[1])
     expect(mockDelete).toHaveBeenCalledWith('o1')
+  })
+
+  // Verifier fix: ConfirmDialog has no disabled/busy prop, so the confirm button
+  // stays clickable while the DELETE is in flight — the panel itself must guard
+  // against a second click firing a second DELETE (§3A destructive discipline).
+  it('a double click on confirm fires only one DELETE while the mutation is pending', async () => {
+    const user = userEvent.setup()
+    let resolveDelete: () => void = () => {}
+    mockDelete.mockImplementation(() => {
+      deleteState.isPending = true
+      return new Promise<void>(res => { resolveDelete = () => { deleteState.isPending = false; res() } })
+    })
+    mockOrders.mockReturnValue({ orders: [ROW], loading: false, error: false })
+    render(<OrdersPanel />)
+    await user.click(screen.getByRole('button', { name: 'common:delete' }))
+    const confirmButton = screen.getAllByRole('button', { name: 'common:delete' })[1]
+    await user.click(confirmButton)
+    await user.click(confirmButton)
+    expect(mockDelete).toHaveBeenCalledTimes(1)
+    await act(async () => { resolveDelete() })
   })
 
   it('shows the real "cancel its shifts first" reason on a 409, not a generic failure', async () => {

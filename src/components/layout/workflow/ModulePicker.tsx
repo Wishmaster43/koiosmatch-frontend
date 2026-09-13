@@ -3,17 +3,15 @@
  * add-on apps the tenant has), grouped by category with search, and inserts the
  * picked module into the flow. Extracted from WorkflowCanvasEditor.
  */
-import { useId, useState } from 'react'
-import { X } from 'lucide-react'
+import { useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { MODULE_META, MODULE_APP_MAP, MODULE_REQUIRED_MODULE } from '@/modules/index'
 import { useApps } from '@/context/AppsContext'
 import { useAuth } from '@/context/AuthContext'
 import { categorySlug } from './moduleI18n'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useModuleCatalog } from './useModuleCatalog'
-import Button from '@/components/ui/Button'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 
 // One [type, meta] pair from the module registry (used by the picker rows).
 type ModuleMetaEntry = [string, (typeof MODULE_META)[string]]
@@ -33,10 +31,6 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
   onSelect: (type: string, edgeId: string | null) => void
   onClose: () => void
 }) {
-  // Esc closes + Tab stays inside (useFocusTrap owns both, §6).
-  const trapRef = useFocusTrap<HTMLDivElement>(onClose)
-  // Names the dialog via aria-labelledby, linking the title span below.
-  const titleId = useId()
   const { t } = useTranslation('workflows')
   const [search, setSearch] = useState('')
   const [tab,    setTab]    = useState('Alle')
@@ -144,54 +138,44 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
   }
 
   return (
-    // HUISSTIJL-1: modal dialog — z-overlay ladder tier, shadow-modal role.
-    <div style={{ position: 'fixed', inset: 0, zIndex: 'var(--z-overlay)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.35)' }}
-      onClick={onClose}>
-      {/* Esc + focus trap via the §6-canonical hook (blok 1 punt 3.3). */}
-      <div ref={trapRef} role="dialog" aria-modal="true" aria-labelledby={titleId} style={{ width: 1100, maxWidth: '94vw', maxHeight: '82vh', background: 'var(--surface)', borderRadius: 16, overflow: 'hidden', boxShadow: 'var(--shadow-modal)', display: 'flex', flexDirection: 'column' }}
-        onClick={e => e.stopPropagation()}>
-
-        {/* Header + zoeken */}
-        <div style={{ padding: '14px 16px 0', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <span id={titleId} style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('picker.title')}</span>
-            <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}>
-              <X size={16} />
-            </Button>
-          </div>
-          <input autoFocus value={search} onChange={e => setSearch(e.target.value)}
-            placeholder={t('picker.search')}
-            style={{ width: '100%', padding: '7px 10px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, outline: 'none', background: 'var(--hover-bg)', boxSizing: 'border-box', marginBottom: 12 }} />
-        </div>
-
-        {/* Tabs */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', borderBottom: '1px solid var(--border)', flexShrink: 0, padding: '0 8px' }}>
-          {CATEGORY_ORDER.filter(c => c === 'Alle' || counts[c]).map(cat => (
-            <button key={cat} type="button" onClick={() => { setTab(cat); }}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- rustende categorie-TAB (plaatsmarkering, PRIMAIR-VLAK-1): underline-actief, geen actieknop
-              style={{
-                padding: '7px 12px', fontSize: 12, fontWeight: tab === cat ? 700 : 400,
-                // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-                color: tab === cat ? 'var(--color-primary-text)' : 'var(--text-muted)',
-                background: 'none', border: 'none', borderBottom: tab === cat ? '2px solid var(--color-primary)' : '2px solid transparent',
-                cursor: 'pointer', whiteSpace: 'nowrap', marginBottom: -1,
-              }}>
-              {catLabel(cat)}
-            </button>
-          ))}
-        </div>
-
-        {/* Lijst */}
-        <div style={{ overflowY: 'auto', flex: 1, paddingBottom: 8 }}>
-          {visible.length === 0 && (
-            <p style={{ padding: '32px 16px', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>{t('picker.empty')}</p>
-          )}
-          {visible.length > 0 && (tab === 'Alle' || search)
-            ? renderGrouped()
-            : renderGrid(visible)
-          }
-        </div>
+    // POPUP-AUDIT-1: migrated onto the shared FloatingPanel (drag/resize/remember-size)
+    // instead of a hand-rolled fixed-centred dialog. Content/behaviour below is unchanged.
+    <FloatingPanel open onClose={onClose} ariaLabel={t('picker.title')} title={t('picker.title')}
+      width={1100} maxWidth="94vw" persistKey="workflow-module-picker" resizable scrollBody={false}>
+      {/* Zoeken */}
+      <div style={{ padding: '12px 16px 0', flexShrink: 0 }}>
+        <input autoFocus value={search} onChange={e => setSearch(e.target.value)}
+          placeholder={t('picker.search')}
+          style={{ width: '100%', padding: '7px 10px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, outline: 'none', background: 'var(--hover-bg)', boxSizing: 'border-box', marginBottom: 12 }} />
       </div>
-    </div>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', borderBottom: '1px solid var(--border)', flexShrink: 0, padding: '0 8px' }}>
+        {CATEGORY_ORDER.filter(c => c === 'Alle' || counts[c]).map(cat => (
+          <button key={cat} type="button" onClick={() => { setTab(cat); }}
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- rustende categorie-TAB (plaatsmarkering, PRIMAIR-VLAK-1): underline-actief, geen actieknop
+            style={{
+              padding: '7px 12px', fontSize: 12, fontWeight: tab === cat ? 700 : 400,
+              // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+              color: tab === cat ? 'var(--color-primary-text)' : 'var(--text-muted)',
+              background: 'none', border: 'none', borderBottom: tab === cat ? '2px solid var(--color-primary)' : '2px solid transparent',
+              cursor: 'pointer', whiteSpace: 'nowrap', marginBottom: -1,
+            }}>
+            {catLabel(cat)}
+          </button>
+        ))}
+      </div>
+
+      {/* Lijst */}
+      <div style={{ overflowY: 'auto', flex: 1, paddingBottom: 8 }}>
+        {visible.length === 0 && (
+          <p style={{ padding: '32px 16px', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>{t('picker.empty')}</p>
+        )}
+        {visible.length > 0 && (tab === 'Alle' || search)
+          ? renderGrouped()
+          : renderGrid(visible)
+        }
+      </div>
+    </FloatingPanel>
   )
 }

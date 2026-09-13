@@ -3,6 +3,11 @@
  * the tenant does not have (WF-EDITOR-DEEPLINK-1): a stale `?open=<id>` link, a
  * typo'd id, or a workflow another tenant owns. Never a silent blank screen —
  * §3's four UI states apply to a deep link exactly as to any fetch.
+ *
+ * POPUP-AUDIT-1 necessity: NOT migrated onto FloatingPanel — there is nothing to
+ * drag/resize/reposition here; it is a full-viewport honest error STATE (like a
+ * 404 page), not a window over other content, and no other surface uses this
+ * pattern to reconcile with.
  */
 import { SearchX } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
