@@ -28,8 +28,8 @@ export function MiniTooltip({ active, payload, total }: TipProps & { total?: num
   const val  = item.value ?? 0
   const pct  = total ? Math.round((val / total) * 100) : 0
   return (
-    <div style={{ padding: '5px 9px', fontSize: 11, background: 'white', borderRadius: 8,
-      border: '1px solid var(--border)', boxShadow: '0 4px 16px rgba(0,0,0,0.10)', whiteSpace: 'nowrap' }}>
+    <div style={{ padding: '5px 9px', fontSize: 11, background: 'var(--surface)', borderRadius: 8,
+      border: '1px solid var(--border)', boxShadow: 'var(--shadow-float)', whiteSpace: 'nowrap' }}>
       <span style={{ fontWeight: 600, color: 'var(--text)' }}>{item.name}</span>
       <span style={{ color: item.payload?.fill, marginLeft: 6 }}>{formatNumber(val, locale)} · {pct}%</span>
     </div>

@@ -62,8 +62,8 @@ function IconPicker({ value, color, options, onPick }: IconPickerProps) {
       </Button>
       {open && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div ref={trapRef} tabIndex={-1} className="z-50" style={{ position: 'absolute', top: '110%', left: 0, marginTop: 4,
+          <div className="fixed inset-0" style={{ zIndex: 'var(--z-overlay)' }} onClick={() => setOpen(false)} />
+          <div ref={trapRef} tabIndex={-1} style={{ zIndex: 'var(--z-popover)', position: 'absolute', top: '110%', left: 0, marginTop: 4,
             display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 4, padding: 8, width: 300,
             background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
             boxShadow: 'var(--shadow-float)' }}>

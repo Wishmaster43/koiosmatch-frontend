@@ -56,7 +56,7 @@ export default function SearchSelectGroup({ group }: { group: ReportFilterGroup 
       {/* Dropdown */}
       {open && (
         <div style={{ marginTop: 4, border: '1px solid var(--border)', borderRadius: 6,
-                      background: 'var(--surface)', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
+                      background: 'var(--surface)', boxShadow: 'var(--shadow-float)' }}>
           {/* Search bar */}
           <div style={{ padding: '6px 8px', borderBottom: '1px solid var(--border)',
                         display: 'flex', alignItems: 'center', gap: 6 }}>

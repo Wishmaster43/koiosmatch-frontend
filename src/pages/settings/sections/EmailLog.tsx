@@ -111,9 +111,9 @@ function EmailLogDrawer({ entry, onClose }: { entry: EmailLogEntry; onClose: () 
       {/* SETTINGS-INCON-B2 (13-09): right-anchored slide-in drawer, same family as
           RightDrawer — not a pop-up, so it stays off FloatingPanel (see the task
           audit's inventory for the reasoning). */}
-      <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={onClose} />
+      <div className="fixed inset-0" style={{ zIndex: 'var(--z-drawer)', background: 'rgba(0,0,0,0.2)' }} onClick={onClose} />
       <div ref={trapRef} role="dialog" aria-modal="true" aria-label={entry.subject || t('emailLog.title')} tabIndex={-1}
-        className="fixed top-0 bottom-0 right-0 z-50 flex flex-col" style={{ width: 460, background: 'var(--surface)', boxShadow: '-4px 0 30px rgba(0,0,0,0.1)' }}>
+        className="fixed top-0 bottom-0 right-0 flex flex-col" style={{ zIndex: 'var(--z-drawer)', width: 460, background: 'var(--surface)', boxShadow: 'var(--shadow-drawer)' }}>
         <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{entry.subject || t('emailLog.title')}</span>
           <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')} title={t('common:close')}><X size={16} /></Button>

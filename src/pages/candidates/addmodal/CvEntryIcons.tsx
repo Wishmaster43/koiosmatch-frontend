@@ -89,8 +89,8 @@ export default function CvEntryIcons({ onFile, onSubmitText }: CvEntryIconsProps
 
       {pasteOpen && (
         <div ref={popoverRef}
-          style={{ position: 'absolute', top: 32, right: 0, zIndex: 20, width: 320, padding: 10, borderRadius: 8,
-            border: '1px solid var(--border)', background: 'var(--surface)', boxShadow: '0 8px 24px rgba(0,0,0,0.16)',
+          style={{ position: 'absolute', top: 32, right: 0, zIndex: 'var(--z-popover)', width: 320, padding: 10, borderRadius: 8,
+            border: '1px solid var(--border)', background: 'var(--surface)', boxShadow: 'var(--shadow-float)',
             display: 'flex', flexDirection: 'column', gap: 8 }}>
           <textarea value={text} onChange={e => setText(e.target.value)}
             aria-label={t('modal.cvPaste.title')} placeholder={t('modal.cvPaste.placeholder')}

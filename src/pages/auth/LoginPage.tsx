@@ -78,7 +78,7 @@ function LoginShell({ children }: { children: ReactNode }) {
             <Wordmark />
           </div>
           <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 18,
-            padding: '32px 30px 34px', boxShadow: '0 12px 40px rgba(15,23,42,0.10)' }}>
+            padding: '32px 30px 34px', boxShadow: 'var(--shadow-modal)' }}>
             {children}
           </div>
           <p className="mt-6 text-xs text-center lg:hidden" style={{ color: 'var(--text-muted)' }}>© {year} KoiosMatch</p>

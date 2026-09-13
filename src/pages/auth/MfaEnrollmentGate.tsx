@@ -21,7 +21,7 @@ export default function MfaEnrollmentGate() {
       style={{ background: 'linear-gradient(160deg, color-mix(in srgb, var(--color-primary) 7%, var(--bg)) 0%, var(--bg) 55%)' }}>
       <main className="w-full" style={{ maxWidth: 520 }}>
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 18,
-                      padding: '32px 30px 34px', boxShadow: '0 12px 40px rgba(15,23,42,0.10)' }}>
+                      padding: '32px 30px 34px', boxShadow: 'var(--shadow-modal)' }}>
           {/* Why the user is blocked — icon + title + one-line explanation. */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
             <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--color-primary-bg)', flexShrink: 0,
