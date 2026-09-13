@@ -1357,3 +1357,76 @@ A change is done only when: it follows §0; it is modular and under the size cap
 every block has its English comment; all strings are translated (nl+en); it is
 keyboard-accessible; it leaks no secrets/PII; loading/error/empty/success are
 handled; relevant tests exist; and the Self-Audit block is attached.
+
+---
+
+## 16. Lessons from JOINT-DEEP-AUDIT-1 (13/14-09-2026, step 4 of ONIX-PAD-1: "alle audit-issues die voorkomen hadden kunnen worden → CLAUDE.md zodat Fable ervan leert")
+
+Each rule below was paid for with a measured breakage on 13-09 or 14-09. They bind every lane,
+verifier and manager from now on.
+
+- **LANDING-GATES-1 — every landing runs the full gate list, in a clean worktree holding ONLY
+  that bucket.** The list: `tsc --noEmit` (0), eslint vs HEAD per file (one eslint run per
+  tree, never per file), the bucket's own test files plus the suites of every touched module,
+  `npm run dry:ceiling`, `node scripts/huisstijl-ceiling.mjs`, and `npx vitest run src/i18n`
+  after any locale change. Measured 13-09: f87a3a7e added one identical error block to three
+  Shiftmanager pages and put the dry ceiling red on main because that gate was not in the
+  landing list; the shared working copy with eight lanes made every gate fluctuate
+  (knip 144→82→89, tsc red in files nobody in the bucket touched). A gate result measured
+  in a shared tree proves nothing; a clean worktree with the bucket copied in proves the bucket.
+- **CLONE-BY-CONSTRUCTION-1 — a block added identically to N surfaces is a clone the moment
+  it is written.** Extract the shared unit in the same change (the three mirror pages got one
+  `SmLoadErrorBanner`), never "the DRY lane will pick it up".
+- **CEILING-FORMAT-1 — jscpd does not compare `.jsx` with `.tsx`.** Converting a file to
+  TypeScript can make a pre-existing clone visible and raise the dry ceiling without any new
+  duplicate code. Such a conversion lands TOGETHER with the extraction of the clone it reveals;
+  a ceiling is never raised to let a conversion through (the ceiling only goes down). Measured
+  14-09: seven of 167 converted settings files revealed seven clones against `.tsx` neighbours.
+- **CEILING-MOVE-1 — a renamed file is a "new" file to the huisstijl snapshot.** Rewrite the
+  snapshot with `--write --force` only for moved debt, after proving the per-file counts are
+  identical under the old and the new path and the total did not grow.
+- **PATH-PREFIX-1 — every file list used to partition or exclude work carries repo-relative
+  paths (`src/…`).** jscpd reports paths relative to the scanned folder; a "0 overlap" check
+  that compared `pages/…` against `src/pages/…` was silently wrong and let a rename lane and
+  a DRY lane meet in the same 34 files (14-09). Normalise before comparing, and print the
+  intersection, never only its count.
+- **DEAD-CODE-PROOF-1 — a deletion proof greps the whole estate: `src`, `e2e`, `scripts`,
+  `careersite`, `package.json` scripts, the configs AND the shared docs tree
+  `/Users/danny/Herd/koiosmatch-api/docs`.** This repo has no `docs/` folder; a lane that
+  grepped `docs` here found nothing and deleted three probes the worklist archive names as
+  SCHERMWAARHEID-1 / DEMO-SEED-TAAL-1 tooling. Tooling named in the docs, a service worker
+  referenced by string, a `shared.ts` barrel export, a contract type and anything a test
+  imports is not dead. knip's "unused export" list is a lead, never a verdict.
+- **SHARED-UNIT-TEST-1 — a new shared unit ships with its own behaviour test in the same
+  change, and a mutation helper's test asserts the request (§13).** The DRY-3 verifiers found
+  ten shared hooks/helpers extracted without a test (useListFieldSetter, useOptimisticList,
+  useEntityArchive, runAliveGuarded, …); "the adopters' suites still pass" proves the
+  adopters, not the unit's own branches (flags, empty inputs, the unmounted case).
+- **GATE-HONESTY-1 — a lane never reports `gatesGreen` while any repo gate is red.** It
+  reports the red gate with its measured attribution ("19 clone pairs, none in my 45 files,
+  listed") and leaves the verdict to the verifier; blaming sibling churn without the
+  measurement is the same claim the ceiling exists to catch. The manager re-runs the gate in
+  the clean worktree (LANDING-GATES-1) before believing either.
+- **REFS-IN-EFFECTS-1 — a ref is written inside an effect or a handler, never during render**
+  (`react-hooks/refs` is an ERROR since eslint-plugin-react-hooks 6). The mount-once load that
+  must read the latest callbacks keeps them in refs updated by a dependency-less effect that
+  runs before the load effect; that removes the `exhaustive-deps` disable instead of excusing it.
+- **LANE-PROTOCOL-1 (parallel lanes in one working copy):** never `git add/commit/push/stash/
+  checkout/restore`; never restore a file from HEAD (a bigger diff means a sibling is in that
+  file — leave their lines; on 13-09 one restore wiped four sibling lanes out of seven locale
+  files); locale JSON only under the `mkdir` lock with surgical edits (candidates.json carries
+  duplicate keys and shiftmanager.json is not round-trip identical, so `json.dump` of a whole
+  file loses data); one vitest at a time, waiting on `pgrep -f "vites[t] run"` (the bracket
+  keeps the waiting shell from matching itself — three lanes deadlocked for 20 minutes on the
+  plain pattern) and running ONLY the lane's own test files; new shared units checked against
+  `git status` first so two lanes do not create the same helper twice.
+- **SESSION-LIMIT-PACT-1 (Danny 13-09 23:40, verbatim: "Hou sessie limit in de gaten samen
+  met FE en zorg dat het werk doorgaat en af komt zonder dat we tegen limit aan komen"):**
+  CMFE and CMBE share one account. When a screenshot shows the session window filling faster
+  than the remaining hours allow, both sides drop to the agreed count of concurrent lanes
+  (FE 2 → 1, BE 3), start no new rounds, verify with one Opus lens instead of two, exchange
+  the meter every 30 minutes (Danny's screenshots are the measurement) and keep the weekly
+  stop line (65 % all-models overnight). What costs no tokens keeps going: landings, gates,
+  `dev:reset`, hand merges. Paused workflows resume with `resumeFromRunId` after the reset;
+  a builder killed mid-work leaves its edits in the working copy, and the resumed lane is
+  told so ("continue from this state, never restore").
