@@ -15,7 +15,7 @@ describe('AiGeneratedLabel', () => {
 
   it('carries the explanatory hint as a real tooltip, not just an icon', () => {
     render(<AiGeneratedLabel />)
-    expect(screen.getAllByTitle('Door Koios AI gegenereerd — controleer voor gebruik.').length).toBeGreaterThan(0)
+    expect(screen.getAllByTitle('Door Koios AI gegenereerd. Controleer voor gebruik.').length).toBeGreaterThan(0)
   })
 
   it('scales the icon with the one size prop', () => {
