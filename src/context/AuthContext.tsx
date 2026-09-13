@@ -23,14 +23,17 @@ import { createContext, useContext, useState, useEffect, useCallback, useMemo } 
 import { setBureauTimezone } from '@/lib/bureauTime'
 import type { ReactNode } from 'react'
 import api, { primeCsrf, unwrapList } from '../lib/api'
-import { hasModule as tenantHasModule } from '../lib/modules'
 import { queryClient } from '../lib/queryClient'
 import { unsubscribe as unsubscribePush } from '../lib/pushSubscription'
 import { resolveDashboardType } from '../pages/dashboard/templates'
-import type { Tenant, User } from '../types/api'
+import type { Tenant } from '../types/api'
+import {
+  userIsSuperAdmin, checkHasRole, checkIsAdmin, checkIsSuperAdmin,
+  checkHasModule, extractDashboardTypes, checkHasPermission,
+} from './auth/permissions'
+import type { AuthUser } from './auth/permissions'
+import { shapeAuthResponse } from './auth/session'
 
-// The auth user, plus the flat tenant_id the backend includes on the profile.
-type AuthUser = User & { tenant_id?: string | number | null }
 type LoginResult = AuthUser | { mfaRequired: boolean; mfaToken: unknown }
 
 export interface AuthContextValue {
@@ -58,9 +61,6 @@ export interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
-
-// Decides whether we may call the super-admin-only /tenants endpoint (pure — no closures).
-const userIsSuperAdmin = (u?: AuthUser | null) => u?.is_super_admin === true
 
 // AUTH-RETRY-STORM-1: one boot probe at a time, module-wide — remounts (StrictMode,
 // HMR, provider re-creation) share the in-flight /auth/me instead of stacking calls
@@ -90,16 +90,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    * functional setState form, so it never needs to close over `user`/`activeTenant`.
    */
   const applyAuthResponse = useCallback((data: unknown): AuthUser => {
-    const d = data as { user?: AuthUser; data?: AuthUser; accessible_pages?: string[]; tenant?: Tenant } | null | undefined
-    const raw   = (d?.user ?? d?.data ?? data) as AuthUser
-    // SUPERADMIN-FALLBACK-1 (04-09, measured as the readonly demo user): /auth/me
-    // carries the tenant as a SIBLING of `user`, never as user.tenant_id, so the
-    // "user without a tenant" heuristic in isSuperAdmin() fired for every tenant
-    // user and opened every permission gate. Stamp the sibling tenant onto the
-    // stored profile so the profile itself says which tenant it belongs to.
-    const sibling = d?.tenant
-    const u: AuthUser = raw && sibling?.id && raw.tenant_id == null && !raw.tenant ? { ...raw, tenant_id: sibling.id } : raw
-    const pages = d?.accessible_pages ?? u?.accessible_pages ?? []
+    // Pure shaping (session.ts): stamps the sibling tenant id onto the user
+    // (SUPERADMIN-FALLBACK-1) and extracts pages/tenant from either response shape.
+    const { user: u, accessiblePages: pages, tenant: t } = shapeAuthResponse(data)
     setUser(u)
     setAccessiblePages(pages)
     // D1 (Danny 2026-07-04): the profile stays in MEMORY only — no user PII,
@@ -109,7 +102,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // If the response carries a tenant (non-super-admin or /auth/me), keep the
     // active tenant state in sync so tenant.package + tenant.modules stay fresh.
-    const t = d?.tenant ?? u?.tenant
     if (t?.id) {
       // BUREAU-KLOK-FE-1: feed the resolved bureau timezone (server-degraded
       // IANA string) into the boundary module — day filters must be computed
@@ -365,64 +357,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   // ── Role / permission helpers (UI gating only — NOT security) ────────────────
+  // Pure checks live in ./auth/permissions — these useCallback wrappers only bind
+  // the current user/activeTenant so consumers get stable identities (PERF, top of file).
 
-  const hasRole = useCallback((role: string) =>
-    user?.roles?.some(r => (typeof r === 'string' ? r : r.name) === role) ?? false, [user])
-  // True for any of the admin-ish roles; built from hasRole so the role list stays the single source.
-  const isAdmin = useCallback(() =>
-    hasRole('admin') || hasRole('tenant_admin') || hasRole('super_admin'), [hasRole])
-  // Super admin = the explicit flag, the super_admin role, or a profile that EXPLICITLY
-  // says it has no tenant (`tenant_id: null` present). A profile that merely omits the
-  // key is a tenant user (SUPERADMIN-FALLBACK-1): "missing" must never mean "platform".
-  const isSuperAdmin = useCallback(() =>
-    user?.is_super_admin === true || hasRole('super_admin')
-      || (!!user && 'tenant_id' in user && user.tenant_id === null && !user.tenant), [user, hasRole])
-
-  // Capability check for paid add-on modules ('sm', 'hf', 'ai', 'ats', 'plan').
-  // Module gating is uniform: an off module is unprovisioned for the tenant, so it stays
-  // hidden for EVERYONE incl. super-admins (Danny 2026-07-02) — mirrors lib/access.ts. The
-  // server still 403s the endpoints. No isSuperAdmin bypass here on purpose.
-  const hasModule = useCallback((key: string) =>
-    tenantHasModule(key, activeTenant ?? user?.tenant), [activeTenant, user])
-
-  // Start-dashboard type for a (possibly multi-role) user (C-35). The shape is live
-  // (roles are objects), but the seeded dashboard_type values read null until a
-  // dev:reset. DASHBOARD-KIEZER-1 chain audit: this used to return the FIRST role
-  // that carried a dashboard_type — but /auth/me (AuthPayloadService) never sorts
-  // roles by precedence, so a user holding BOTH 'recruitment' and 'recruitment_manager'
-  // could land on the poorer own-scoped view purely by DB row order. Resolving through
-  // the SAME richest-wins TYPE_PRECEDENCE the switcher/templates use (resolveDashboardType)
-  // makes this deterministic and consistent with the rest of the dashboard-type chain.
-  // Falls back to 'readonly' (least privilege) when no role carries one. Still tolerant
-  // of the legacy string[] shape defensively (untrusted client, §7).
-  const dashboardType = useCallback((): string => {
-    const types = (user?.roles ?? [])
-      .map(r => (typeof r === 'object' ? r.dashboard_type : undefined))
-      .filter((t): t is string => !!t)
-    return resolveDashboardType(types)
-  }, [user])
-
-  // Checks the user's own permissions, then any role's permissions, then the sync/refresh fallback for tenant_admin/planner.
-  const hasPermission = useCallback((permName: string) => {
-    if (!user) return false
-    if (isSuperAdmin()) return true
-
-    if (Array.isArray(user.permissions)) {
-      return user.permissions.some(p => (typeof p === 'string' ? p : p.name) === permName)
-    }
-
-    const roles = user.roles ?? []
-    for (const r of roles) {
-      if (typeof r === 'object' && Array.isArray(r.permissions)) {
-        if (r.permissions.some(p => (typeof p === 'string' ? p : p.name) === permName)) return true
-      }
-    }
-
-    if (permName.endsWith('.sync') || permName.endsWith('.refresh')) {
-      return hasRole('tenant_admin') || hasRole('planner')
-    }
-    return false
-  }, [user, isSuperAdmin, hasRole])
+  const hasRole = useCallback((role: string) => checkHasRole(user, role), [user])
+  const isAdmin = useCallback(() => checkIsAdmin(user), [user])
+  const isSuperAdmin = useCallback(() => checkIsSuperAdmin(user), [user])
+  const hasModule = useCallback((key: string) => checkHasModule(activeTenant, user, key), [activeTenant, user])
+  const dashboardType = useCallback((): string => resolveDashboardType(extractDashboardTypes(user)), [user])
+  const hasPermission = useCallback((permName: string) =>
+    checkHasPermission(user, permName, checkIsSuperAdmin(user)), [user])
 
   // Memoized so consumers that only read a stable helper (hasPermission, hasRole, …)
   // don't re-render on every AuthProvider render — only when a field they actually

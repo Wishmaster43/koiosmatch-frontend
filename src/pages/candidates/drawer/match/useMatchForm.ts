@@ -61,8 +61,6 @@
  */
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import api, { unwrap } from '@/lib/api'
-import { notifyError, notifySuccess } from '@/lib/notify'
 import { useUsers } from '@/lib/queries'
 import { useLookups } from '@/context/LookupsContext'
 import { useCustomerOptions } from '@/hooks/useCustomerOptions'
@@ -83,10 +81,11 @@ import { useVacancyPrefillApply } from './useVacancyPrefillApply'
 import { useRecruiterDefault } from './useRecruiterDefault'
 import { useMatchConflicts } from './useMatchConflicts'
 import { useMatchSubmit } from './useMatchSubmit'
-import { todayISO, findDuplicateContact } from './helpers'
-import type { CascadeOption } from '@/hooks/useCustomerCascade'
+import { useCandidatePicker } from './useCandidatePicker'
+import { useContractFormState } from './useContractFormState'
+import { useInlineContactCreate } from './useInlineContactCreate'
+import { todayISO } from './helpers'
 import type { Id } from '@/types/common'
-import type { MatchContractLine } from '@/types/match'
 
 interface UserLike { id?: Id; name?: string }
 
@@ -124,65 +123,20 @@ export function useMatchForm({
   // MATCH-SOORT-1: Contractvorm (candidateTypes lookup) — the FIRST choice in the
   // Relaties card. `hasContractLines` reads the picked value's own flag, never a
   // hardcoded slug — a tenant can point the flag at any Contractvorm row.
+  // Own sibling hook (§3 size split): Contractvorm pick + its two derived flags
+  // plus the conditional CONTRACTREGELS draft.
   const { candidateTypes } = useLookups()
-  const [contractForm, setContractFormRaw] = useState('')
-  const setContractForm = (v: string) => setContractFormRaw(v)
-  const hasContractLines = Boolean(candidateTypes.find(ct => ct.value === contractForm)?.has_contract_lines)
-  // MATCH-KLANTLOOS-1: a Contractvorm flagged `customer_not_applicable` means this
-  // match has no customer — the Relaties ("Relations") card hides four fields:
-  // klant (customer), locatie (location),
-  // afdeling (department), contactpersoon (contact),
-  // and requires a branch instead (the server rejects
-  // the four fields + requires branch_id).
-  const customerNotApplicable = Boolean(candidateTypes.find(ct => ct.value === contractForm)?.customer_not_applicable)
-  const [contractLines, setContractLinesRaw] = useState<MatchContractLine[]>([])
-  // Switching AWAY from a flagged Contractvorm clears the local draft — the
-  // section disappears (§1 of the changelog: the backend cleans up orphaned
-  // rows server-side, this is only the FE's own visible-state hygiene).
-  useEffect(() => { if (!hasContractLines && contractLines.length) setContractLinesRaw([]) }, [hasContractLines]) // eslint-disable-line react-hooks/exhaustive-deps -- only react to the flag flipping, never to the recruiter's own row edits
-  const setContractLines = (v: MatchContractLine[]) => setContractLinesRaw(v)
+  const { contractForm, setContractForm, hasContractLines, customerNotApplicable, contractLines, setContractLines } =
+    useContractFormState(candidateTypes)
 
-  // Candidate picker (only when no fixed candidate): server-side search list.
-  const [pickedCandidateId, setPickedCandidateIdRaw] = useState('')
-  const [candidateOptions, setCandidateOptions] = useState<Array<{ id?: Id; name?: string }>>([])
-  // MATCH-PICK-LABEL-1: a pick's own label must survive the debounce below —
-  // CreatableSelect.pick() resets its typed query to '' right after picking,
-  // which (via the onSearch debounce) clears candidateOptions for the too-short
-  // query and would otherwise leave the trigger unable to resolve the picked
-  // option's label, rendering the raw candidate UUID instead. Captured once, at
-  // pick time, from whatever list was showing.
-  const [pickedCandidateLabel, setPickedCandidateLabel] = useState<string | undefined>(undefined)
-  const setPickedCandidateId = (v: string) => {
-    setPickedCandidateLabel(candidateOptions.find(c => String(c.id) === v)?.name)
-    setPickedCandidateIdRaw(v)
-  }
-  // A failed load must not read the same as "no candidates" (R8) — surfaced via candidateOptionsError below.
-  const [candidateOptionsError, setCandidateOptionsError] = useState(false)
-  // PRIV-1: the picker used to eagerly load 200 full candidate records (incl.
-  // special-category data, §8) on every mount with no search term — a data-
-  // minimization violation. It now only fetches once the recruiter has typed a
-  // real search term, capped to a small page (mirrors useVacancyOptions' own
-  // `search` param contract).
-  const [candidateSearch, setCandidateSearch] = useState('')
-  const CANDIDATE_SEARCH_MIN_CHARS = 2
-  // Loads the candidate option list for the picker only when the candidate is not
-  // already fixed by the caller AND the recruiter has typed ≥2 chars. PRIV-2: an
-  // AbortController + alive guard (§9 "every entity-keyed load effect carries
-  // one") so a fast-typed later search can never be overwritten by a slower,
-  // now-stale response.
-  useEffect(() => {
-    if (fixedCandidateId) return
-    if (candidateSearch.trim().length < CANDIDATE_SEARCH_MIN_CHARS) { setCandidateOptions([]); setCandidateOptionsError(false); return }
-    let alive = true
-    const controller = new AbortController()
-    setCandidateOptionsError(false)
-    // AUDIT: light=1 → GET /candidates returns only id/name/initials (data minimization, §8).
-    api.get('/candidates', { params: { per_page: 25, search: candidateSearch.trim(), light: 1 }, signal: controller.signal })
-      .then(r => { if (alive) setCandidateOptions((r.data?.data ?? []) as Array<{ id?: Id; name?: string }>) })
-      .catch(() => { if (alive) { setCandidateOptions([]); setCandidateOptionsError(true) } })
-    return () => { alive = false; controller.abort() }
-  }, [fixedCandidateId, candidateSearch])
-  const candidateId = fixedCandidateId ?? (pickedCandidateId || '')
+  // Candidate picker (only when no fixed candidate): server-side search list —
+  // own sibling hook (§3 size split): debounce, data-minimization (PRIV-1),
+  // stale-response guarding (PRIV-2) and the picked-label survival trick.
+  const {
+    candidateId, pickedCandidateId, setPickedCandidateId,
+    candidateOptions: exposedCandidateOptions, candidateOptionsError,
+    candidateSearch, setCandidateSearch, CANDIDATE_SEARCH_MIN_CHARS,
+  } = useCandidatePicker(fixedCandidateId)
   const { functions } = useFunctions()
   const { options: contractTypeOptions } = useContractTypes()
   // CAO (Danny 24-07 point 5) — the same tenant lookup every other CAO field in
@@ -244,17 +198,6 @@ export function useMatchForm({
   // original position so `candOwnerId`/`candBranch` are ready for the two hooks below.
   const { candBranch, candOwnerId, mismatchChoice, setMismatchChoice, branchMismatch } = useBranchMismatch(candidateId, detail)
 
-  // Inline contact-create (Danny): when a customer has no matching contact, add one
-  // and couple it to the picked location right here (POST /customers/{id}/contacts)
-  // function/phone/mobile (Danny 24-07 addendum) are all accepted by the backend's
-  // CustomerContactController::validateContact — verified directly against the
-  // koiosmatch-api source, never assumed.
-  const [creatingContact, setCreatingContact] = useState(false)
-  const [nc, setNc] = useState({ first_name: '', last_name: '', email: '', phone: '', mobile: '', function: '' })
-  // Duplicate-contact preflight result (Danny 24-07): set by saveContact() below
-  // when the entered email/phone/mobile already matches a contact already loaded
-  // for this customer; null once cleared (cancel, or a fresh non-duplicate attempt).
-  const [duplicateContact, setDuplicateContact] = useState<CascadeOption | null>(null)
   const [func, setFunc] = useState('')
   const [vacancyId, setVacancyIdRaw] = useState('')
   // RECRUITER-DEFAULT-1 (point 3): candidate's own owner > logged-in user, seeded
@@ -393,47 +336,14 @@ export function useMatchForm({
     setContractType: setContractTypeRaw, setStartDateRaw, setEndDateRaw, setEndDateDirty, setHoursRaw,
     setCao: setCaoRaw, setScale, setStep, setPurchase, setSell,
     setCostCenter, setCostCenterDirty, setBillingEmails, setBillingDirty, setRemarks,
-    setContractFormRaw, setContractLinesRaw,
+    setContractFormRaw: setContractForm, setContractLinesRaw: setContractLines,
   })
 
-  // Create a contact for the current customer, coupled to the picked location, then
-  // refetch the cascade (shared hook) and select the new contact.
-  const saveContact = async () => {
-    if (!customerId || !nc.first_name.trim() || !nc.last_name.trim()) return
-    // Duplicate preflight (Danny 24-07): block BEFORE posting when the email or
-    // either phone number already belongs to a contact already loaded for this
-    // customer — the backend does NOT enforce this uniqueness itself (verified:
-    // CustomerContactController::validateContact carries no unique: rule on
-    // email/phone/mobile, a real gap worth a backend ticket), so the FE is the
-    // only guard against creating a second record for the same person.
-    const dup = findDuplicateContact(nc, contacts)
-    if (dup) { setDuplicateContact(dup); return }
-    setDuplicateContact(null)
-    try {
-      // customer_location_id (NOT location_id — a silent-drop bug found while
-      // verifying the backend contract: CustomerContact's fillable/validated key
-      // is customer_location_id; the old `location_id` key was never recognised
-      // by CustomerContactController::validateContact, so the picked location
-      // never actually reached a newly created inline contact).
-      const r = await api.post(`/customers/${customerId}/contacts`, { ...nc, customer_location_id: locationId || undefined })
-      const created = (unwrap(r)) as { id?: Id }
-      await refetchCustomer()
-      if (created?.id) setContactId(String(created.id))
-      setCreatingContact(false); setNc({ first_name: '', last_name: '', email: '', phone: '', mobile: '', function: '' })
-      notifySuccess(t('placement.contactCreated'))
-    } catch {
-      notifyError(t('placement.contactFailed'))
-    }
-  }
-
-  // MATCH-PICK-LABEL-1: re-add the picked candidate to the exposed list whenever
-  // the debounced empty-query search has cleared it out from under the trigger
-  // (see setPickedCandidateId above) — CreatableSelect resolves its trigger label
-  // by finding `value` in `options`, so without this the picked candidate would
-  // render as its raw UUID the moment the debounce fires.
-  const exposedCandidateOptions = pickedCandidateId && !candidateOptions.some(c => String(c.id) === pickedCandidateId)
-    ? [{ id: pickedCandidateId, name: pickedCandidateLabel }, ...candidateOptions]
-    : candidateOptions
+  // Inline contact-create (Danny) — own sibling hook (§3 size split): the
+  // draft fields, the client-side duplicate-contact preflight and the create
+  // call, coupled to the picked location and this cascade's own refetch.
+  const { creatingContact, setCreatingContact, nc, setNc, saveContact, duplicateContact, setDuplicateContact } =
+    useInlineContactCreate({ customerId, locationId, contacts, refetchCustomer, setContactId })
 
   return {
     t, editing,

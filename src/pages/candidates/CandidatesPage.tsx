@@ -6,10 +6,9 @@
  * drawer. Heavy logic lives in the hooks under ./hooks and ./data.
  */
 import { useState, useEffect, useMemo, useRef } from 'react'
-import type { ComponentType, Dispatch, SetStateAction } from 'react'
+import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
-import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useLookups } from '@/context/LookupsContext'
 import { usePublishSelection } from '@/context/SelectionContext'
@@ -21,20 +20,20 @@ import CandidateLifecycleModals from './CandidateLifecycleModals'
 import AddCandidateModal from './AddCandidateModal'
 import CandidatesListPanel from './CandidatesListPanel'
 import type { ActionMessage } from '@/components/ui/ActionMessageBanner'
-import { toggleOneValue, isStale, isNeverContacted, optsFrom } from './data/candidatesShared'
-import { mergePatch } from '@/lib/mergePatch'
+import { isStale, isNeverContacted, optsFrom } from './data/candidatesShared'
 import { usePools } from '@/lib/usePools'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { useListPageSize } from '@/hooks/useListPageSize'
 import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
 import { useCandidateFilters } from './hooks/useCandidateFilters'
-import { buildCandidateFilterGroups } from './data/candidateFilterGroups'
 import { useCandidatesData, CANDIDATES_MAX_PER_PAGE } from './hooks/useCandidatesData'
 import type { CandidateSort } from './hooks/useCandidatesData'
 import type { ControlledSort } from '@/components/ui/DataTable'
 import { useCandidateOptions } from './hooks/useCandidateOptions'
 import { useCandidateBulkActions } from './hooks/useCandidateBulkActions'
 import { useCandidateDrawerActions } from './hooks/useCandidateDrawerActions'
+import { useCandidateFilterPanel } from './hooks/useCandidateFilterPanel'
+import { useCandidateUpdate } from './hooks/useCandidateUpdate'
 import { buildCandidateInsights } from './data/candidateInsights'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
@@ -75,7 +74,6 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const { candidateTypes, funnelTypes, statuses, phases } = useLookups()
   const { genders } = useGenders()
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
-  const { registerFilters, unregisterFilters } = useRightPanel() as { registerFilters: (id: string, groups: unknown) => void; unregisterFilters: (id: string) => void }
 
   const [page,           setPage]           = usePageMemory('cand.page', 1)
   // Column sort (DATATABLE-SORT-1 reference adoption): lifted controlled sort,
@@ -192,56 +190,22 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const sourceOptions = useMemo(() => optsFrom(candidates.map(c => (c as { source?: string | null }).source ?? '').filter(Boolean)), [candidates])
 
 
-  const tog = <T,>(set: Dispatch<SetStateAction<T[]>>) => (v: T) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
-  // Click-on-chart → sets exactly one value, or clears it on a second click (toggle).
-  const pickOne = <T,>(set: Dispatch<SetStateAction<T[]>>) => (v: T | null | undefined) => { if (v != null) toggleOneValue(set, v) }
-  const pickStatus = pickOne(setSelectedStatus)
-  const pickPhase  = pickOne(setSelectedPhase)
-  const pickFunnel = pickOne(setSelectedFunnel)
-  const pickOwner  = pickOne(setSelectedOwner)
-  const toggleAttention = (key: string) => setAttentionFilter(prev => prev === key ? null : key)
-  // Blacklist quick-view: the blacklist status is flag-driven (§3B: is_blacklist), never a
-  // hardcoded value key. Set/clear the status filter to just that value.
-  const blacklistValue = statuses.find(s => s.is_blacklist)?.value ?? 'blacklist'
-  const blacklistActive = selectedStatus.length === 1 && selectedStatus[0] === blacklistValue
-  const toggleBlacklist = () => setSelectedStatus(blacklistActive ? [] : [blacklistValue])
-
-  // Panel groups are config built by a pure helper (§0.3 size split) — the memo
-  // only re-runs when a selection or option list actually changes.
-  const filterGroups = useMemo(() => buildCandidateFilterGroups({
-    t, tog, filters: {
-      selectedStatus, setSelectedStatus, selectedPhase, setSelectedPhase, selectedFunnel, setSelectedFunnel,
-      selectedType, setSelectedType, selectedTitle, setSelectedTitle,
-      selectedPool, setSelectedPool, selectedCity, setSelectedCity,
-      selectedProvince, setSelectedProvince, selectedGeslacht, setSelectedGeslacht,
-      selectedOwner, setSelectedOwner, selectedLocation, setSelectedLocation,
-      selectedSource, setSelectedSource,
-      showArchived, setShowArchived, missingAppointmentFilter, setMissingAppointmentFilter, attentionFilter, setAttentionFilter, dateRange, setDateRange,
-      geoFilter, geoHint, applyGeo, clearGeo,
-    },
-    options: { statusOptions, phaseOptions, funnelOptions, typeOptions, titleOptions, poolOptions, cityOptions,
-      provinceOptions, genderOptions, ownerOptions, locationOptions, sourceOptions },
-  }),
-  // Complete dep array (CANDPAGE-DISABLE-REASON-1, mirrors CustomersPage/VacanciesPage):
-  // every setSelectedX/setShowArchived/setDateRange/… is a usePageMemory/useState
-  // setter — React-stable for the component's lifetime — and applyGeo/clearGeo are
-  // now useCallback-wrapped in useCandidateFilters, so none of these ever change
-  // identity; only the actual selections/options/`t` drive a recompute. `tog` is
-  // intentionally omitted — it closes over nothing from render scope (same as the
-  // customers/vacancies `tog`), so its identity is irrelevant to the memo's output.
-  [t, showArchived, setShowArchived, missingAppointmentFilter, setMissingAppointmentFilter, attentionFilter, setAttentionFilter, dateRange, setDateRange, geoFilter, geoHint, applyGeo, clearGeo,
-   selectedStatus, setSelectedStatus, selectedPhase, setSelectedPhase, selectedFunnel, setSelectedFunnel,
-   selectedType, setSelectedType, selectedTitle, setSelectedTitle, selectedGeslacht, setSelectedGeslacht,
-   selectedProvince, setSelectedProvince, selectedOwner, setSelectedOwner, selectedLocation, setSelectedLocation,
-   selectedPool, setSelectedPool, selectedCity, setSelectedCity, selectedSource, setSelectedSource,
-   poolOptions, cityOptions, sourceOptions,
-   statusOptions, phaseOptions, funnelOptions, typeOptions, titleOptions, genderOptions, provinceOptions, ownerOptions, locationOptions])
-
-  // Registers this page's filter groups with the shared right panel, and unregisters them on unmount so they do not leak into another page filter list.
-  useEffect(() => {
-    registerFilters('candidates-page', filterGroups)
-    return () => unregisterFilters('candidates-page')
-  }, [filterGroups, registerFilters, unregisterFilters])
+  // Click-to-filter helpers, blacklist quick-view and right-panel registration
+  // live in one hook (§0.3 size split).
+  const { pickStatus, pickPhase, pickFunnel, pickOwner, toggleAttention, blacklistActive, toggleBlacklist } = useCandidateFilterPanel({
+    t, statuses,
+    selectedStatus, setSelectedStatus, selectedPhase, setSelectedPhase, selectedFunnel, setSelectedFunnel,
+    selectedType, setSelectedType, selectedTitle, setSelectedTitle,
+    selectedPool, setSelectedPool, selectedCity, setSelectedCity,
+    selectedProvince, setSelectedProvince, selectedGeslacht, setSelectedGeslacht,
+    selectedOwner, setSelectedOwner, selectedLocation, setSelectedLocation,
+    selectedSource, setSelectedSource,
+    showArchived, setShowArchived, missingAppointmentFilter, setMissingAppointmentFilter,
+    attentionFilter, setAttentionFilter, dateRange, setDateRange,
+    geoFilter, geoHint, applyGeo, clearGeo,
+    statusOptions, phaseOptions, funnelOptions, typeOptions, titleOptions, poolOptions, cityOptions,
+    provinceOptions, genderOptions, ownerOptions, locationOptions, sourceOptions,
+  })
 
   // The only client-side refinement left is the attention tile (no server filter yet).
   const filtered = useMemo(() => {
@@ -308,52 +272,9 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     selectCandidate(c)
   }
 
-  // Header/profile edits in the drawer flow back here: optimistic locally, then PATCH.
-  // `patch` is a dynamic UI edit (UI field names, some outside Candidate) → cast on merge.
-  // STATUS-OVERRIDE-REVERT-1: returns patchCandidate's resolved boolean (true =
-  // saved, false = reverted) so a caller-side local override can clear itself.
-  const updateCandidate = (id: Id, patch: Record<string, unknown>): Promise<boolean> => {
-    // OPTIMISTIC-REVERT-1 (audit 2026-07-27): snapshot ONLY the keys this patch
-    // overwrites, in every slice that shows them, so a refused PATCH puts the old
-    // values back instead of leaving a rejected edit on screen until the drawer is
-    // reopened. Never the whole record — a parallel edit to another field must survive.
-    const keys = Object.keys(patch)
-    // Snapshots only the patched keys from a given record, so a rejected PATCH can revert precisely instead of rolling back the whole row.
-    const pick = (c: Candidate | null | undefined) => {
-      if (!c) return null
-      const snap: Record<string, unknown> = {}
-      keys.forEach(k => { snap[k] = (c as unknown as Record<string, unknown>)[k] })
-      return snap
-    }
-    const beforeRow = pick(candidates.find(x => x.id === id))
-    const beforeSelected = selected?.id === id ? pick(selected) : null
-    const beforeDetail = detail?.id === id ? pick(detail) : null
-
-    // ZZP-MERGE-1: deep-merge (never shallow-spread) so a patch touching only one
-    // nested block (e.g. the ZZP tab's Facturatie save, `{ zzp: { iban, ... } }`)
-    // keeps that object's other keys (Bedrijf/Adres) instead of wiping them locally.
-    setCandidates(prev => prev.map(x => x.id === id ? mergePatch(x as unknown as Record<string, unknown>, patch) as unknown as Candidate : x))
-    setSelected(prev => (prev && prev.id === id ? mergePatch(prev as unknown as Record<string, unknown>, patch) as unknown as Candidate : prev))
-    setDetail(prev  => (prev && prev.id === id ? mergePatch(prev as unknown as Record<string, unknown>, patch) as unknown as Candidate : prev))
-
-    return patchCandidate(id, patch, () => {
-      if (beforeRow) setCandidates(prev => prev.map(x => x.id === id ? { ...x, ...beforeRow } as Candidate : x))
-      if (beforeSelected) setSelected(prev => (prev && prev.id === id ? { ...prev, ...beforeSelected } as Candidate : prev))
-      if (beforeDetail) setDetail(prev => (prev && prev.id === id ? { ...prev, ...beforeDetail } as Candidate : prev))
-    }, serverCandidate => {
-      // REFRESH-FIX-2: adopt the server-composed values for the patched keys only
-      // (e.g. a name assembled server-side from first/last name), never the whole
-      // record — a parallel edit to another field must survive. Guarded with
-      // `k in server`: a patched key mapCandidate never produces (e.g. a UI-only
-      // key from useCandidatePlacedMatch) is skipped instead of writing `undefined`.
-      const server = serverCandidate as unknown as Record<string, unknown>
-      const fromServer: Record<string, unknown> = {}
-      keys.forEach(k => { if (k in server) fromServer[k] = server[k] })
-      setCandidates(prev => prev.map(x => x.id === id ? { ...x, ...fromServer } as Candidate : x))
-      setSelected(prev => (prev && prev.id === id ? { ...prev, ...fromServer } as Candidate : prev))
-      setDetail(prev => (prev && prev.id === id ? { ...prev, ...fromServer } as Candidate : prev))
-    })
-  }
+  // Header/profile edit flow (optimistic patch + precise revert) lives in its
+  // own hook (§0.3 size split) — see useCandidateUpdate for the full recipe.
+  const { updateCandidate } = useCandidateUpdate({ candidates, setCandidates, selected, setSelected, detail, setDetail, patchCandidate })
 
   // ── Bulk actions ──
   // BULK-FILTERSET-1: invalidate the cached list/stats queries after a

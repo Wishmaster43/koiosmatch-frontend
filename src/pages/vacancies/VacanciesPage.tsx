@@ -5,7 +5,7 @@
  * + filters, and renders the insights row + status tabs + table + drawer. Page-
  * scoped VacancyLookupsProvider so the table/drawer/modal/bulk share one fetch.
  */
-import { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react'
+import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '@/context/RightPanelContext'
@@ -29,14 +29,11 @@ import { toggleOneValue } from './data/vacanciesShared'
 import { buildVacancyInsightsConfig } from './data/vacancyInsightsConfig'
 import { useNavigation } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
-import { usePageMemory } from '@/lib/usePageMemory'
-import { useListPageSize } from '@/hooks/useListPageSize'
-import { useVacanciesData, VACANCIES_MAX_PER_PAGE } from './hooks/useVacanciesData'
+import { useVacanciesData } from './hooks/useVacanciesData'
 import type { VacancySort } from './hooks/useVacanciesData'
 import type { ControlledSort } from '@/components/ui/DataTable'
-import { useVacancyFilterParams } from './hooks/useVacancyFilterParams'
-import { buildVacancyFilterGroups } from './data/vacancyFilterGroups'
-import { geocodeLocation } from '@/lib/geocode'
+import { useVacanciesFilterState } from './hooks/useVacanciesFilterState'
+import { useVacanciesFilterGroups } from './hooks/useVacanciesFilterGroups'
 import { useAiAgents } from './hooks/useAiAgents'
 import { useVacancyRecord } from './hooks/useVacancyRecord'
 import { useVacancyInsights } from './hooks/useVacancyInsights'
@@ -71,79 +68,27 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   // why an empty scope means unrestricted rather than none.
   const branchOptions = useBranchOptions()
 
-  const [page,      setPage]      = usePageMemory('vac.page', 1)
-  // Column sort item 4 (DATATABLE-SORT-1 reference adoption): lifted controlled
-  // sort, mirrors ApplicationsPage's `sort`/`setSort`. Unmapped columns (see
-  // VACANCY_SORT_KEYS) still reorder the loaded page locally via DataTable.
-  const [sort, setSort] = usePageMemory<VacancySort | null>('vac.sort', null)
-  // Shared page-size hook (§ audit 2026-08-05): seeds from the user's
-  // default_per_page, clamps to VacancyQuery's real per_page ceiling (200) so a
-  // 500 preference never 422s ("klapt eruit"), and stays sticky across the
-  // shell's unmount-on-navigate — this page used to hardcode 50, ignoring the
-  // tenant preference entirely.
-  const { pageSize, setPageSize, options: pageSizeOptions } = useListPageSize('vac', VACANCIES_MAX_PER_PAGE)
+  // Filter/view UI-state + derived server params (§3 split): search, status/owner/
+  // client/category/branch pickers, archived/trash/agent quick views, map/geo state.
+  const {
+    page, setPage, sort, setSort, pageSize, pageSizeOptions, handlePageSizeChange,
+    statusBucket, setStatusBucket, selectedOwner, setSelectedOwner, selectedClient, setSelectedClient,
+    selectedCategory, setSelectedCategory, selectedBranch, setSelectedBranch,
+    globalSearch, setGlobalSearch, showArchived, setShowArchived, showTrash, setShowTrash,
+    showWithoutAgent, setShowWithoutAgent, selectedAgentId, setSelectedAgentId,
+    hasApplications, setHasApplications, publishedBucket, setPublishedBucket,
+    view, setView, mapCenter, setMapCenter, mapRadius, setMapRadius, mapStraalActive, setMapStraalActive,
+    setAttention, geoFilter, geoHint, applyGeo, clearGeo,
+    filterParams, filterKey, searchEpoch,
+    toggleWithoutAgent, anyFilterActive, clearAllFilters,
+  } = useVacanciesFilterState()
+
   const [addOpen,        setAddOpen]        = useState(false)
   const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
   // KOIOS-SELECTIE-CONTEXT-1: mirror the selection into Koios AI's context chip.
   usePublishSelection('vacancies', selectedIds)
   const [actionMsg,      setActionMsg]      = useState<{ type: string; text: string } | null>(null)
   const msgTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  // Server-side filter dimensions. Status is driven by the tab bar (single value).
-  const [statusBucket,   setStatusBucket]   = usePageMemory('vac.status', 'all')
-  const [selectedOwner,  setSelectedOwner]  = usePageMemory<string[]>('vac.owner', [])
-  const [selectedClient, setSelectedClient] = usePageMemory<string[]>('vac.client', [])
-  // V28: functie filter — the by_category donut's click-to-filter target (existing
-  // BE `category[]` param, VacancyQuery::filtered()).
-  const [selectedCategory, setSelectedCategory] = usePageMemory<string[]>('vac.category', [])
-  // VESTIGING-2: explicit branch filter (narrows within what the user may already
-  // see — server excludes records with no branch, see the notice below).
-  const [selectedBranch, setSelectedBranch] = usePageMemory<string[]>('vac.branch', [])
-  const [globalSearch,   setGlobalSearch]   = usePageMemory('vac.search', '')
-  const [showArchived,   setShowArchived]   = usePageMemory('vac.archived', false)
-  // TRASH-OVERAL-2: Prullenbak view (lifecycle pending_erase) — same include_archived
-  // request, split client-side; mutually exclusive with the archived view (mirrors candidates).
-  const [showTrash,      setShowTrash]      = usePageMemory('vac.trash', false)
-  // VAC-AGENT-1: "online without an AI agent" quick view (?without_agent=1).
-  const [showWithoutAgent, setShowWithoutAgent] = usePageMemory('vac.withoutAgent', false)
-  // VAC-KPI-REDESIGN 22-07: the AI-agent donut's "real agent" segment click (?agent_id=).
-  // Mutually exclusive with showWithoutAgent — see toggleWithoutAgent + the 'agent'
-  // donut's onPick below, which keep only one of the two ever set.
-  const [selectedAgentId, setSelectedAgentId] = usePageMemory<string | null>('vac.agent', null)
-  // VAC-HAS-APPLICATIONS-1: "only vacancies with applications" — a real server-side
-  // filter (VacancyQuery BOOLEAN_FILTERS → whereHas('applications')), driven by the
-  // applications KPI card. Before this landed the card could not filter at all.
-  const [hasApplications, setHasApplications] = usePageMemory('vac.hasApplications', false)
-  // V27: Gepubliceerd/Niet-gepubliceerd — a real server-side filter (VacancyQuery::
-  // rules()/filtered() already accept a `published` boolean on both /vacancies and
-  // /vacancies/stats), just never wired into the UI before.
-  const [publishedBucket, setPublishedBucket] = usePageMemory<'all' | 'published' | 'unpublished'>('vac.published', 'all')
-  // STRAAL-1: map view + radius-search state (server-side ?lat=&lng=&radius=).
-  const [view,      setView]      = usePageMemory<'table' | 'map'>('vac.viewMode', 'table')
-  const [mapCenter, setMapCenter] = usePageMemory('vac.mapCenter', { lat: 52.09, lng: 5.12 })
-  const [mapRadius, setMapRadius] = usePageMemory('vac.mapRadius', 30)
-  // The straal filters ONLY after the user activates it (map click / radius
-  // change) — switching to Kaart used to hide everything outside a silent
-  // 30km-Utrecht circle (Danny 14/7).
-  const [mapStraalActive, setMapStraalActive] = usePageMemory('vac.mapStraal', false)
-  // D1(a): the dashboard tiles' semantic attention intent — null | 'closingSoon' | 'staleStatus'.
-  const [attention, setAttention] = usePageMemory<string | null>('vac.attention', null)
-  // FILTER-PARITY-1: sidebar radius filter (mirrors the customer page's geoFilter),
-  // separate from the map view's own straal control above.
-  const [geoFilter, setGeoFilter] = usePageMemory<{ q: string; km: number; lat: number; lng: number; label: string } | null>('vac.geo', null)
-  const [geoHint, setGeoHint] = useState<string | null>(null)
-
-  const handlePageSizeChange = (newSize: number) => { setPageSize(newSize); setPage(1) }
-
-  // Server-side filter params (axios serialises arrays as `key[]`). The exact wire
-  // shape lives in its own hook so it stays unit-testable (§3 size discipline).
-  const filterParams = useVacancyFilterParams({
-    globalSearch, statusBucket, selectedOwner, selectedClient, selectedCategory, selectedBranch,
-    showArchived, showTrash, showWithoutAgent, selectedAgentId, hasApplications, publishedBucket,
-    view, mapCenter, mapRadius, mapStraalActive, attention,
-    geoFilter: geoFilter ? { lat: geoFilter.lat, lng: geoFilter.lng, km: geoFilter.km } : null,
-  })
-  const filterKey = JSON.stringify(filterParams)
 
   // Filters changed → back to page 1; the visible rows change → drop the selection.
   useEffect(() => { setPage(1) }, [filterKey, setPage])
@@ -230,60 +175,18 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const { statusData, ownerData, clientData, publishedData, categoryData, funnelData, agentData, applicationsTotal } =
     useVacancyInsights({ stats, vacancies, statuses, phases, statusMeta, t })
 
-  // Option lists for the right-panel filters.
-  const ownerOptions    = useMemo(() => ownerData.map(d => ({ value: d.key, label: d.name, count: d.value })), [ownerData])
-  // Same value/label/count mapping as ownerOptions, for the client filter dropdown.
-  const clientOptions   = useMemo(() => clientData.map(d => ({ value: d.key, label: d.name, count: d.value })), [clientData])
-  // Same mapping, for the category filter dropdown.
-  const categoryOptions = useMemo(() => categoryData.map(d => ({ value: d.key, label: d.name, count: d.value })), [categoryData])
-  // Status options also carry their configured color, for the status filter chips.
-  const statusOptions   = useMemo(() => statuses.map(s => ({ value: s.value, label: s.label, color: s.color })), [statuses])
-  // Same mapping, for the AI-agent filter dropdown.
-  const agentOptions    = useMemo(() => agentData.map(d => ({ value: d.key, label: d.name, count: d.value })), [agentData])
-
-  const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
+  // Right-panel filter groups: option lists (from insights donuts + status lookup)
+  // + the assembled group config (§3 split — see useVacanciesFilterGroups).
+  const { filterGroups } = useVacanciesFilterGroups({
+    t, ownerData, clientData, categoryData, agentData, statuses, branchOptions,
+    selectedOwner, setSelectedOwner, selectedClient, setSelectedClient,
+    selectedCategory, setSelectedCategory, selectedBranch, setSelectedBranch,
+    statusBucket, setStatusBucket, publishedBucket, setPublishedBucket,
+    selectedAgentId, setSelectedAgentId, showWithoutAgent, setShowWithoutAgent,
+    hasApplications, setHasApplications, showArchived, setShowArchived,
+    geoFilter, geoHint, applyGeo, clearGeo,
+  })
   const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (v: string | undefined) => { if (v != null) toggleOneValue(set, v) }
-
-  // FILTER-PARITY-1: PDOK-geocode a place/postcode for the sidebar radius filter
-  // (mirrors CustomersPage's own applyGeo). Stabilized (useCallback) so the
-  // filterGroups useMemo below can safely depend on it — every captured setter
-  // is itself stable, only `t` can genuinely change.
-  const applyGeo = useCallback(async (q: string, km: number) => {
-    setGeoHint(null)
-    const hit = await geocodeLocation(q)
-    if (!hit) { setGeoHint(t('common:filters.notFound')); return }
-    setGeoFilter({ q, km, lat: hit.lat, lng: hit.lng, label: `${hit.label} · ${km} km` })
-  }, [t, setGeoHint, setGeoFilter])
-  const clearGeo = useCallback(() => { setGeoFilter(null); setGeoHint(null) }, [setGeoFilter, setGeoHint])
-
-  // Register the right-panel filters. Config lives in the data/ builder (mirrors
-  // buildCandidateFilterGroups/buildCustomerFilterGroups) — owner/client/functie/
-  // branch here, status/published/agent/has-applications/archived/geo there.
-  // ONE builder owns every group and the canonical contiguous category order
-  // (general → organisation → display) — page-level prepending split the
-  // categories and made the sidebar render duplicate headings (Opus-verify).
-  const filterGroups = useMemo(() => [
-    ...buildVacancyFilterGroups({
-      org: {
-        owner:    { selected: selectedOwner,    options: ownerOptions,    onToggle: tog(setSelectedOwner) },
-        client:   { selected: selectedClient,   options: clientOptions,   onToggle: tog(setSelectedClient) },
-        category: { selected: selectedCategory, options: categoryOptions, onToggle: tog(setSelectedCategory) },
-        branch:   { selected: selectedBranch,   options: branchOptions,   onToggle: tog(setSelectedBranch) },
-      },
-      t,
-      filters: {
-        statusBucket, setStatusBucket, publishedBucket, setPublishedBucket,
-        selectedAgentId, setSelectedAgentId, showWithoutAgent, setShowWithoutAgent,
-        hasApplications, setHasApplications, showArchived, setShowArchived,
-        geoFilter, geoHint, applyGeo, clearGeo,
-      },
-      options: { statusOptions, agentOptions },
-    }),
-  ], [t, selectedOwner, setSelectedOwner, selectedClient, setSelectedClient, selectedCategory, setSelectedCategory,
-    selectedBranch, setSelectedBranch, ownerOptions, clientOptions, categoryOptions, branchOptions,
-    statusBucket, setStatusBucket, publishedBucket, setPublishedBucket, selectedAgentId, setSelectedAgentId,
-    showWithoutAgent, setShowWithoutAgent, hasApplications, setHasApplications, showArchived, setShowArchived,
-    geoFilter, geoHint, applyGeo, clearGeo, statusOptions, agentOptions])
 
   // Publishes the assembled filter groups to the shared right panel, and unregisters them on unmount/change so a stale filter set doesn't linger after leaving this page.
   useEffect(() => {
@@ -301,11 +204,6 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const { options: aiAgentOptions } = useAiAgents(hasPermission('vacancies.update'))
   const aiAgents = aiAgentOptions.map(o => ({ id: o.value, name: o.label }))
 
-  // VAC-KPI-REDESIGN 22-07: toggling "no agent" always clears the picked real-agent
-  // id (mutually exclusive) — shared by the toolbar QuickViewToggle, the agent
-  // donut's "Geen agent" segment and the "Zonder AI-agent" KPI card below.
-  const toggleWithoutAgent = () => { setSelectedAgentId(null); setShowWithoutAgent(v => !v) }
-
   // ── Insights strip: 7 donuts + 2 KPI cards (VAC-KPI-REDESIGN 22-07 — was 5
   // donuts + 6 funnel-KPI cards = 11 tiles; the array/onPick wiring itself lives in
   // vacancyInsightsConfig.ts, extracted once this page crossed ~400 lines). ──
@@ -319,16 +217,6 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     selectedAgentId, setSelectedAgentId, showWithoutAgent, setShowWithoutAgent, toggleWithoutAgent,
     applicationsTotal, hasApplications, setHasApplications,
   })
-  // Shared clear-all (page memory keeps filters sticky).
-  const anyFilterActive = Boolean(globalSearch.trim() || showArchived || showTrash || showWithoutAgent || Boolean(selectedAgentId) || statusBucket !== 'all'
-    || selectedOwner.length || selectedClient.length || selectedCategory.length || selectedBranch.length || publishedBucket !== 'all' || hasApplications || attention || geoFilter)
-  const [searchEpoch, setSearchEpoch] = useState(0)
-  // Resets every filter dimension (search, quick-views, pickers, geo) and the page back to default, bumping searchEpoch so the search input itself clears too.
-  const clearAllFilters = () => {
-    setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setShowTrash(false); setShowWithoutAgent(false); setSelectedAgentId(null); setStatusBucket('all')
-    setSelectedOwner([]); setSelectedClient([]); setSelectedCategory([]); setSelectedBranch([]); setPublishedBucket('all'); setHasApplications(false); setAttention(null)
-    clearGeo(); setPage(1)
-  }
 
   return (
     <>
