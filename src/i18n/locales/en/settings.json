@@ -3070,9 +3070,7 @@
     "subtitle": "Define extra fields for this entity. Values are stored per record.",
     "add": "Add field",
     "label": "Label",
-    "labelPlaceholder": "e.g. Licence plate",
     "key": "Key (slug)",
-    "keyPlaceholder": "e.g. licence_plate",
     "immutable": "cannot be changed after creation",
     "type": "Type",
     "options": "Options",
@@ -3094,7 +3092,33 @@
       "boolean": "Yes / No",
       "select": "Choice"
     },
-    "optionsRequired": "This field requires at least one option"
+    "optionsRequired": "This field requires at least one option",
+    "examples": {
+      "text": {
+        "label": "e.g. Driving licence category",
+        "key": "driving_licence_category"
+      },
+      "textarea": {
+        "label": "e.g. Deployment notes",
+        "key": "deployment_notes"
+      },
+      "number": {
+        "label": "e.g. Years of experience",
+        "key": "years_experience"
+      },
+      "date": {
+        "label": "e.g. Available from",
+        "key": "available_from"
+      },
+      "boolean": {
+        "label": "e.g. Own transport",
+        "key": "own_transport"
+      },
+      "select": {
+        "label": "e.g. Shift preference",
+        "key": "shift_preference"
+      }
+    }
   },
   "usage": {
     "tabs": {

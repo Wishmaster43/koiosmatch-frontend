@@ -3070,9 +3070,7 @@
     "subtitle": "Defina campos adicionais para esta secção. Os valores são guardados por registo.",
     "add": "Adicionar campo",
     "label": "Etiqueta",
-    "labelPlaceholder": "Por exemplo, Matrícula",
     "key": "Chave (slug)",
-    "keyPlaceholder": "por exemplo, matricula",
     "immutable": "não pode ser alterado após a criação",
     "type": "Tipo",
     "options": "Opções",
@@ -3094,7 +3092,33 @@
       "boolean": "Sim / Não",
       "select": "Escolha"
     },
-    "optionsRequired": "Este campo requer pelo menos uma opção"
+    "optionsRequired": "Este campo requer pelo menos uma opção",
+    "examples": {
+      "text": {
+        "label": "ex. Categoria de carta de condução",
+        "key": "driving_licence_category"
+      },
+      "textarea": {
+        "label": "ex. Notas de destacamento",
+        "key": "deployment_notes"
+      },
+      "number": {
+        "label": "ex. Anos de experiência",
+        "key": "years_experience"
+      },
+      "date": {
+        "label": "ex. Disponível a partir de",
+        "key": "available_from"
+      },
+      "boolean": {
+        "label": "ex. Transporte próprio",
+        "key": "own_transport"
+      },
+      "select": {
+        "label": "ex. Preferência de turno",
+        "key": "shift_preference"
+      }
+    }
   },
   "usage": {
     "tabs": {

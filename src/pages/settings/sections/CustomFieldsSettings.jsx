@@ -266,10 +266,12 @@ export default function CustomFieldsSettings({ entityType }) {
               {/* Expanded edit form */}
               {isOpen && (
                 <div style={{ marginTop: 14, borderTop: '1px solid var(--border)', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {/* Label */}
+                  {/* Label — placeholder mirrors the currently chosen type, so switching
+                      type (Danny 13-09, row 17) swaps the example without touching the value. */}
                   <div>
                     <label style={labelStyle}>{t('customFieldsSettings.label')}</label>
-                    <input value={ef.label ?? field.label} onChange={e => setEF(field.id, 'label', e.target.value)} style={inputStyle} />
+                    <input value={ef.label ?? field.label} onChange={e => setEF(field.id, 'label', e.target.value)}
+                      placeholder={t(`customFieldsSettings.examples.${currentType}.label`)} style={inputStyle} />
                   </div>
 
                   {/* Key (immutable) */}
@@ -342,13 +344,15 @@ export default function CustomFieldsSettings({ entityType }) {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               <div>
                 <label style={labelStyle}>{t('customFieldsSettings.label')} *</label>
+                {/* Placeholder mirrors the chosen type (Danny 13-09, row 17) — switching
+                    type swaps the example immediately, never the typed value. */}
                 <input value={newForm.label} onChange={e => setNewForm(p => ({ ...p, label: e.target.value, key: toSlug(e.target.value) }))}
-                  placeholder={t('customFieldsSettings.labelPlaceholder')} style={inputStyle} autoFocus />
+                  placeholder={t(`customFieldsSettings.examples.${newForm.type}.label`)} style={inputStyle} autoFocus />
               </div>
               <div>
                 <label style={labelStyle}>{t('customFieldsSettings.key')}</label>
                 <input value={newForm.key} onChange={e => setNewForm(p => ({ ...p, key: e.target.value }))}
-                  placeholder={t('customFieldsSettings.keyPlaceholder')} style={{ ...inputStyle, fontFamily: 'JetBrains Mono, monospace' }} />
+                  placeholder={t(`customFieldsSettings.examples.${newForm.type}.key`)} style={{ ...inputStyle, fontFamily: 'JetBrains Mono, monospace' }} />
               </div>
             </div>
             <div>

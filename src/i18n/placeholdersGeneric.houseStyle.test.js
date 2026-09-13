@@ -15,7 +15,7 @@ import { readFileSync, readdirSync } from 'node:fs'
 // Healthcare vocabulary per shipped language (word-boundary aware where a substring is common).
 const HEALTHCARE = /zorg|verpleeg|verzorg|ziekenhuis|kliniek|patiënt|thuiszorg|\bhealthcare\b|\bcare\b|\bnurse\b|\bhospital\b|\bclinic\b|pflege|krankenhaus|krankenpfleg|\bsoins\b|soignant|infirmi|hôpital|enfermer|sanitari|\bsanidad\b|cuidador|\bcuidados?\b|ospedal|infermier|\bsaúde\b|assistenza domiciliare|atención domiciliaria|apoio domiciliário/i
 // A key is a placeholder/example when its name says so (last segment or a `placeholders` group).
-const isPlaceholderKey = path => /placeholder|example/i.test(path[path.length - 1]) || path.includes('placeholders') || path.includes('fieldPlaceholders')
+const isPlaceholderKey = path => /placeholder|example/i.test(path[path.length - 1]) || path.includes('placeholders') || path.includes('fieldPlaceholders') || path.includes('examples')
 
 describe('PLACEHOLDER-GENERIEK-1: example placeholders never carry healthcare framing', () => {
   it('no placeholder/example key in any locale uses healthcare vocabulary', () => {

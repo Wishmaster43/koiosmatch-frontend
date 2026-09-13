@@ -182,6 +182,52 @@ describe('CustomFieldsSettings — drag-reorder (K11)', () => {
   })
 })
 
+// WORKLIST row 17 (Danny 13-09): the label/key example placeholders follow the
+// currently chosen type, in both the create form and an existing field's edit form —
+// switching type swaps the examples immediately without touching the typed value.
+describe('CustomFieldsSettings — per-type example placeholders (row 17)', () => {
+  it('swaps the create-form label/key placeholders when the type toggle changes', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [] } })
+    render(<CustomFieldsSettings entityType="vacancy" />)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalled())
+
+    fireEvent.click(screen.getByText(st('customFieldsSettings.add')))
+    // Default type is 'text' — its examples show first.
+    expect(screen.getByPlaceholderText(st('customFieldsSettings.examples.text.label'))).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(st('customFieldsSettings.examples.text.key'))).toBeInTheDocument()
+
+    // Switch to 'date' — the examples swap, the options placeholder stays absent.
+    fireEvent.click(screen.getByRole('button', { name: st('customFieldsSettings.types.text') }))
+    fireEvent.click(screen.getByText(st('customFieldsSettings.types.date')))
+    expect(screen.getByPlaceholderText(st('customFieldsSettings.examples.date.label'))).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(st('customFieldsSettings.examples.date.key'))).toBeInTheDocument()
+
+    // Switch to 'select' — its examples show, and the options placeholder appears too.
+    fireEvent.click(screen.getByRole('button', { name: st('customFieldsSettings.types.date') }))
+    fireEvent.click(screen.getByText(st('customFieldsSettings.types.select')))
+    expect(screen.getByPlaceholderText(st('customFieldsSettings.examples.select.label'))).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(st('customFieldsSettings.examples.select.key'))).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(st('customFieldsSettings.optionsPlaceholder'))).toBeInTheDocument()
+  })
+
+  it('swaps the edit-form label placeholder when an existing field\'s type is changed', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [FIELD] } })
+    render(<CustomFieldsSettings entityType="vacancy" />)
+    await waitFor(() => expect(screen.getByText('Plate')).toBeInTheDocument())
+
+    // Expand the field's edit form (chevron is the last button in the row).
+    const row = screen.getByText('Plate').parentElement.parentElement
+    const buttons = within(row).getAllByRole('button')
+    fireEvent.click(buttons[buttons.length - 1])
+    expect(screen.getByPlaceholderText(st('customFieldsSettings.examples.text.label'))).toBeInTheDocument()
+
+    // Switch the type to 'number' — the label placeholder follows it.
+    fireEvent.click(screen.getByRole('button', { name: st('customFieldsSettings.types.text') }))
+    fireEvent.click(screen.getByText(st('customFieldsSettings.types.number')))
+    expect(screen.getByPlaceholderText(st('customFieldsSettings.examples.number.label'))).toBeInTheDocument()
+  })
+})
+
 // B-36: options field validation — options REQUIRED for select, PROHIBITED for others.
 describe('CustomFieldsSettings — B-36 options field validation', () => {
   it('POSTs a select field with options key in the body', async () => {
@@ -196,7 +242,7 @@ describe('CustomFieldsSettings — B-36 options field validation', () => {
     fireEvent.click(screen.getByText(st('customFieldsSettings.add')))
 
     // Fill the form: label, type=select, options
-    fireEvent.change(screen.getByPlaceholderText(st('customFieldsSettings.labelPlaceholder')), { target: { value: 'Preference' } })
+    fireEvent.change(screen.getByPlaceholderText(st('customFieldsSettings.examples.text.label')), { target: { value: 'Preference' } })
     fireEvent.click(screen.getByRole('button', { name: st('customFieldsSettings.types.text') }))
     fireEvent.click(screen.getByText(st('customFieldsSettings.types.select')))
 
@@ -226,7 +272,7 @@ describe('CustomFieldsSettings — B-36 options field validation', () => {
     fireEvent.click(screen.getByText(st('customFieldsSettings.add')))
 
     // Fill the form: label, type=text (default)
-    fireEvent.change(screen.getByPlaceholderText(st('customFieldsSettings.labelPlaceholder')), { target: { value: 'Name' } })
+    fireEvent.change(screen.getByPlaceholderText(st('customFieldsSettings.examples.text.label')), { target: { value: 'Name' } })
 
     // Submit
     fireEvent.click(screen.getByRole('button', { name: st('customFieldsSettings.add') }))
@@ -248,7 +294,7 @@ describe('CustomFieldsSettings — B-36 options field validation', () => {
     fireEvent.click(screen.getByText(st('customFieldsSettings.add')))
 
     // Fill the form: label, type=select, leave options empty
-    fireEvent.change(screen.getByPlaceholderText(st('customFieldsSettings.labelPlaceholder')), { target: { value: 'Preference' } })
+    fireEvent.change(screen.getByPlaceholderText(st('customFieldsSettings.examples.text.label')), { target: { value: 'Preference' } })
     fireEvent.click(screen.getByRole('button', { name: st('customFieldsSettings.types.text') }))
     fireEvent.click(screen.getByText(st('customFieldsSettings.types.select')))
 

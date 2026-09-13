@@ -3070,9 +3070,7 @@
     "subtitle": "Definieer extra velden voor dit onderdeel. Waarden worden per record opgeslagen.",
     "add": "Veld toevoegen",
     "label": "Label",
-    "labelPlaceholder": "Bijv. Kenteken",
     "key": "Sleutel (slug)",
-    "keyPlaceholder": "bijv. kenteken",
     "immutable": "niet wijzigbaar na aanmaken",
     "type": "Type",
     "options": "Opties",
@@ -3094,7 +3092,33 @@
       "boolean": "Ja / Nee",
       "select": "Keuze"
     },
-    "optionsRequired": "Dit veld vereist minimaal een optie"
+    "optionsRequired": "Dit veld vereist minimaal een optie",
+    "examples": {
+      "text": {
+        "label": "Bijv. Rijbewijs categorie",
+        "key": "driving_licence_category"
+      },
+      "textarea": {
+        "label": "Bijv. Bijzonderheden inzet",
+        "key": "deployment_notes"
+      },
+      "number": {
+        "label": "Bijv. Ervaringsjaren",
+        "key": "years_experience"
+      },
+      "date": {
+        "label": "Bijv. Beschikbaar vanaf",
+        "key": "available_from"
+      },
+      "boolean": {
+        "label": "Bijv. Eigen vervoer",
+        "key": "own_transport"
+      },
+      "select": {
+        "label": "Bijv. Ploegendienst",
+        "key": "shift_preference"
+      }
+    }
   },
   "usage": {
     "tabs": {

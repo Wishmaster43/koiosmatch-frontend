@@ -3070,9 +3070,7 @@
     "subtitle": "Definisci campi aggiuntivi per questa entità. I valori vengono salvati per record.",
     "add": "Aggiungi campo",
     "label": "Etichetta",
-    "labelPlaceholder": "Es. Targa",
     "key": "Chiave (slug)",
-    "keyPlaceholder": "es. targa",
     "immutable": "non modificabile dopo la creazione",
     "type": "Tipo",
     "options": "Opzioni",
@@ -3094,7 +3092,33 @@
       "boolean": "Sì / No",
       "select": "Scelta"
     },
-    "optionsRequired": "Questo campo richiede almeno un'opzione"
+    "optionsRequired": "Questo campo richiede almeno un'opzione",
+    "examples": {
+      "text": {
+        "label": "es. Categoria patente",
+        "key": "driving_licence_category"
+      },
+      "textarea": {
+        "label": "es. Note sull'incarico",
+        "key": "deployment_notes"
+      },
+      "number": {
+        "label": "es. Anni di esperienza",
+        "key": "years_experience"
+      },
+      "date": {
+        "label": "es. Disponibile da",
+        "key": "available_from"
+      },
+      "boolean": {
+        "label": "es. Trasporto proprio",
+        "key": "own_transport"
+      },
+      "select": {
+        "label": "es. Preferenza turno",
+        "key": "shift_preference"
+      }
+    }
   },
   "usage": {
     "tabs": {

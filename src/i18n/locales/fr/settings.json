@@ -3070,9 +3070,7 @@
     "subtitle": "Définissez des champs supplémentaires pour cette section. Les valeurs sont stockées par enregistrement.",
     "add": "Ajouter un champ",
     "label": "Libellé",
-    "labelPlaceholder": "ex. Plaque d'immatriculation",
     "key": "Clé (slug)",
-    "keyPlaceholder": "ex. plaque",
     "immutable": "non modifiable après création",
     "type": "Type",
     "options": "Options",
@@ -3094,7 +3092,33 @@
       "boolean": "Oui / Non",
       "select": "Choix"
     },
-    "optionsRequired": "Ce champ nécessite au moins une option"
+    "optionsRequired": "Ce champ nécessite au moins une option",
+    "examples": {
+      "text": {
+        "label": "ex. Catégorie de permis de conduire",
+        "key": "driving_licence_category"
+      },
+      "textarea": {
+        "label": "ex. Particularités de mission",
+        "key": "deployment_notes"
+      },
+      "number": {
+        "label": "ex. Années d'expérience",
+        "key": "years_experience"
+      },
+      "date": {
+        "label": "ex. Disponible à partir de",
+        "key": "available_from"
+      },
+      "boolean": {
+        "label": "ex. Transport personnel",
+        "key": "own_transport"
+      },
+      "select": {
+        "label": "ex. Préférence d'équipe",
+        "key": "shift_preference"
+      }
+    }
   },
   "usage": {
     "tabs": {

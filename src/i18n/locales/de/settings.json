@@ -3070,9 +3070,7 @@
     "subtitle": "Definieren Sie zusätzliche Felder für diesen Bereich. Werte werden pro Datensatz gespeichert.",
     "add": "Feld hinzufügen",
     "label": "Bezeichnung",
-    "labelPlaceholder": "z.B. Kennzeichen",
     "key": "Schlüssel (Slug)",
-    "keyPlaceholder": "z.B. kennzeichen",
     "immutable": "nach Erstellung nicht änderbar",
     "type": "Typ",
     "options": "Optionen",
@@ -3094,7 +3092,33 @@
       "boolean": "Ja / Nein",
       "select": "Auswahl"
     },
-    "optionsRequired": "Dieses Feld erfordert mindestens eine Option"
+    "optionsRequired": "Dieses Feld erfordert mindestens eine Option",
+    "examples": {
+      "text": {
+        "label": "z. B. Führerscheinklasse",
+        "key": "driving_licence_category"
+      },
+      "textarea": {
+        "label": "z. B. Einsatzbesonderheiten",
+        "key": "deployment_notes"
+      },
+      "number": {
+        "label": "z. B. Erfahrungsjahre",
+        "key": "years_experience"
+      },
+      "date": {
+        "label": "z. B. Verfügbar ab",
+        "key": "available_from"
+      },
+      "boolean": {
+        "label": "z. B. Eigener Transport",
+        "key": "own_transport"
+      },
+      "select": {
+        "label": "z. B. Schichtpräferenz",
+        "key": "shift_preference"
+      }
+    }
   },
   "usage": {
     "tabs": {
