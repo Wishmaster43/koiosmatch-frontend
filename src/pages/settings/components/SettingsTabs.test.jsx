@@ -4,7 +4,7 @@
  * scrolled into view on mount/change, edge fades signalling more content.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { act, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import '@/i18n'
 import SettingsTabs from './SettingsTabs'
 
@@ -62,6 +62,37 @@ describe('SettingsTabs · overflow handling', () => {
   it('renders nothing at all for a single-item category (existing short-circuit preserved)', () => {
     const { container } = render(<SettingsTabs items={[items[0]]} active="apps" onSelect={vi.fn()} />)
     expect(container).toBeEmptyDOMElement()
+  })
+
+  it('paints an item icon in its own palette colour, falling back to the group colour, then inheriting', () => {
+    const Bell = (props) => <svg data-testid="icon-bell" {...props} />
+    const paletteItems = [
+      { id: 'a', icon: Bell }, { id: 'b', icon: Bell }, { id: 'c', icon: Bell },
+    ]
+    const itemOf = (groupKey, id) => (id === 'a' ? { color: 'var(--color-danger-text)' } : undefined)
+    const colorOf = () => 'var(--color-info)'
+    render(<SettingsTabs items={paletteItems} active="a" onSelect={vi.fn()} groupKey="notifications" colorOf={colorOf} itemOf={itemOf} />)
+    const icons = screen.getAllByTestId('icon-bell')
+    // Item 'a' has its own colour; 'b'/'c' fall back to the group colour.
+    expect(icons[0].style.color).toBe('var(--color-danger-text)')
+    expect(icons[1].style.color).toBe('var(--color-info)')
+    // With neither an item nor a group colour, the icon inherits (unset), never a hardcoded grey.
+    const { container: bare } = render(<SettingsTabs items={paletteItems} active="a" onSelect={vi.fn()} groupKey="notifications" colorOf={() => undefined} itemOf={() => undefined} />)
+    expect(bare.querySelector('svg').style.color).toBe('')
+  })
+
+  it('resolves a BE-declared icon name over the registry icon, and never recolours the icon on hover', () => {
+    const RegistryIcon = (props) => <svg data-testid="icon-registry" {...props} />
+    const itemOf = () => ({ icon: 'mail', color: 'var(--color-info)' })
+    render(<SettingsTabs items={[{ id: 'a', icon: RegistryIcon }, { id: 'b', icon: RegistryIcon }]} active="b" onSelect={vi.fn()} groupKey="communication" colorOf={() => undefined} itemOf={itemOf} />)
+    // The registry icon is replaced by the resolved lucide icon (Mail), not the fallback.
+    expect(screen.queryByTestId('icon-registry')).not.toBeInTheDocument()
+    const inactiveTab = screen.getAllByRole('tab')[0]
+    const icon = inactiveTab.querySelector('svg')
+    expect(icon.style.color).toBe('var(--color-info)')
+    fireEvent.mouseEnter(inactiveTab)
+    // Hover recolours only the label text (existing behaviour), never the icon.
+    expect(icon.style.color).toBe('var(--color-info)')
   })
 
   it('re-scrolls the active tab into view on a viewport resize, not only on mount/change (verdict finding 3)', () => {

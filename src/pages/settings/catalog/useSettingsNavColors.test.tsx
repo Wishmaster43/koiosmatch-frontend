@@ -3,7 +3,7 @@
 // palette wins once it is published.
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook } from '@testing-library/react'
-import { navColorMap, useSettingsNavColors } from './useSettingsNavColors'
+import { navColorMap, navItemMap, useSettingsNavColors } from './useSettingsNavColors'
 
 vi.mock('./useSettingsCatalog', () => ({
   useSettingsCatalog: () => ({
@@ -12,6 +12,7 @@ vi.mock('./useSettingsCatalog', () => ({
       { id: 'kpi', color: 'var(--color-warning-text)' },
       { id: 'windows', color: null },
     ],
+    nav: [{ key: 'company', color: 'var(--color-info)', items: [{ id: 'branding', icon: 'palette', color: 'var(--color-danger-text)' }] }],
     version: 'v', aliasToCanonical: {}, isLoading: false, isError: false, refetch: () => {},
   }),
 }))
@@ -36,5 +37,29 @@ describe('useSettingsNavColors', () => {
     expect(result.current.colorOf('company')).toBe('var(--color-info)')
     expect(result.current.colorOf('kpis')).toBe('var(--color-warning-text)')
     expect(result.current.colorOf('tasks')).toBeUndefined()
+  })
+
+  it('answers itemOf per group+item key from the loaded catalogue nav palette', () => {
+    const { result } = renderHook(() => useSettingsNavColors())
+    expect(result.current.itemOf('company', 'branding')).toEqual({ id: 'branding', icon: 'palette', color: 'var(--color-danger-text)' })
+    expect(result.current.itemOf('company', 'nope')).toBeUndefined()
+    expect(result.current.itemOf('tasks', 'x')).toBeUndefined()
+  })
+})
+
+describe('navItemMap', () => {
+  it('maps group+item keys to their palette entry, undefined for unknown groups/items', () => {
+    const nav = [
+      { key: 'notifications', color: 'var(--color-info)', items: [{ id: 'candidates', icon: 'bell', color: 'var(--color-danger-text)' }] },
+      { key: 'communication', color: 'var(--color-success-text)' },
+    ]
+    const map = navItemMap(nav)
+    expect(map['notifications/candidates']).toEqual({ id: 'candidates', icon: 'bell', color: 'var(--color-danger-text)' })
+    expect(map['notifications/unknown']).toBeUndefined()
+    expect(map['communication/anything']).toBeUndefined()
+  })
+
+  it('returns an empty map when nav is absent (BE without the palette)', () => {
+    expect(navItemMap(undefined)).toEqual({})
   })
 })

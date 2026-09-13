@@ -47,11 +47,20 @@ export interface CatalogSection {
   color?: string | null
 }
 
-// NAV-PALETTE (BE e72b19fa): one icon + colour per settings navigation group key.
+// NAV-PALETTE-2: one icon + colour per settings ITEM inside a nav group (BE not served yet).
+export interface CatalogNavItemEntry {
+  id: string
+  icon?: string | null
+  color?: string | null
+}
+
+// NAV-PALETTE (BE e72b19fa): one icon + colour per settings navigation group key, plus
+// (NAV-PALETTE-2) the per-item palette for the sub-tab strip of that group.
 export interface CatalogNavEntry {
   key: string
   icon?: string | null
   color?: string | null
+  items?: CatalogNavItemEntry[]
 }
 
 // The API response from GET /settings/catalog.

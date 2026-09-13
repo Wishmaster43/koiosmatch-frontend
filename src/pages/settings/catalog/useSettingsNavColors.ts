@@ -6,10 +6,13 @@
  * customers, numbering, required_fields) or maps to one (kpis → kpi) takes that colour.
  * The BE publishes `nav: [{ key, icon, color }]` for every nav group (NAV-PALETTE
  * e72b19fa); the map reads it tolerantly and lets it win over the section colour.
+ * NAV-PALETTE-2 (Danny 13-09, not served by the BE yet): the same contract will carry
+ * `items: [{ id, icon, color }]` per nav group, one entry per sub-tab — `itemOf` reads
+ * it tolerantly and is undefined until the BE ships it, so the FE degrades honestly.
  */
 import { useMemo } from 'react'
 import { useSettingsCatalog } from './useSettingsCatalog'
-import type { CatalogNavEntry } from './catalogTypes'
+import type { CatalogNavEntry, CatalogNavItemEntry } from './catalogTypes'
 
 // The minimum a section needs to contribute a colour.
 export interface ColouredSection {
@@ -32,10 +35,22 @@ export function navColorMap(sections: ColouredSection[], nav?: CatalogNavEntry[]
   return map
 }
 
-// Hook: `colorOf(groupKey)` for the settings sidebar; undefined keeps the muted default.
+// Pure: `${groupKey}/${itemId}` → { color, icon } for every nav group's sub-items.
+export function navItemMap(nav?: CatalogNavEntry[] | null): Record<string, CatalogNavItemEntry> {
+  const map: Record<string, CatalogNavItemEntry> = {}
+  ;(nav ?? []).forEach(group => {
+    (group.items ?? []).forEach(item => { map[`${group.key}/${item.id}`] = item })
+  })
+  return map
+}
+
+// Hook: `colorOf(groupKey)` for the settings sidebar; `itemOf(groupKey, itemId)` for the
+// sub-tab strip. Both undefined-safe — a BE without the palette yields empty maps.
 export function useSettingsNavColors() {
   const { sections, nav } = useSettingsCatalog()
   const map = useMemo(() => navColorMap(sections, nav), [sections, nav])
+  const itemMap = useMemo(() => navItemMap(nav), [nav])
   const colorOf = (groupKey: string): string | undefined => map[groupKey]
-  return { colorOf, map }
+  const itemOf = (groupKey: string, itemId: string): CatalogNavItemEntry | undefined => itemMap[`${groupKey}/${itemId}`]
+  return { colorOf, map, itemOf }
 }

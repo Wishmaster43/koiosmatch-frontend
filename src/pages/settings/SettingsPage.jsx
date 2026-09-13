@@ -98,7 +98,7 @@ export default function SettingsPage() {
   const { isSuperAdmin, hasModule, hasPermission } = auth
   const { t } = useTranslation('settings')
   // NAV-PALETTE (F3): each sidebar group icon wears the colour the catalogue gives its key.
-  const { colorOf } = useSettingsNavColors()
+  const { colorOf, itemOf } = useSettingsNavColors()
   // Shiftmanager settings (SM-MODULE-TABS-1) reads the app/koppeling flag from
   // AppsContext — a nav item may declare requiresModuleOrApp to be visible on
   // EITHER signal (a plain requiresPage ANDs on the module only). isAppEnabled is
@@ -352,7 +352,8 @@ export default function SettingsPage() {
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <SettingsTabs items={currentGroup.items} active={tab}
-                    onSelect={(id) => goTo(category, id)} />
+                    onSelect={(id) => goTo(category, id)}
+                    groupKey={currentGroup.key} colorOf={colorOf} itemOf={itemOf} />
                 </div>
                 <div style={{ flexShrink: 0, paddingBottom: 6 }}>
                   <SettingsChangelogButton logName={currentItem.logName} />

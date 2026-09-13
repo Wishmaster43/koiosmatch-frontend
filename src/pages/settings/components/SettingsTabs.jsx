@@ -11,12 +11,21 @@
  * (whiteSpace nowrap). The overflow/scroll/fade machinery is the shared
  * useTabStripOverflow hook (lifted into SubTabBar too, per the tool-matrix
  * verdict finding 1) — one implementation for every scrolling tab strip.
+ *
+ * NAV-PALETTE-2 (Danny 13-09): every item wears its own icon in its own colour, the way
+ * the sidebar group icons already do — the caller passes `groupKey` plus the catalogue's
+ * `colorOf`/`itemOf` resolvers (SettingsTabs stays a dumb organism, no catalogue read of
+ * its own) so its existing overflow tests need no QueryClient. Per item: colour = the
+ * item's own palette colour, else the group colour, else inherit (unchanged default);
+ * icon = the BE-declared lucide name resolved via lucideByName when present, else the
+ * registry icon already on the item. Hover only ever touched the label colour.
  */
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useTabStripOverflow } from '@/components/drawer/useTabStripOverflow'
+import { lucideByName } from '@/lib/lucideByName'
 
-export default function SettingsTabs({ items, active, onSelect }) {
+export default function SettingsTabs({ items, active, onSelect, groupKey, colorOf, itemOf }) {
   const { t } = useTranslation('settings')
   const containerRef = useRef(null)
   const activeRef = useRef(null)
@@ -30,7 +39,10 @@ export default function SettingsTabs({ items, active, onSelect }) {
         display: 'flex', gap: 4, borderBottom: '1px solid var(--border)', overflowX: 'auto',
       }}>
         {items.map(item => {
-          const Icon = item.icon
+          // Per-item palette entry (BE-declared icon name + colour) over the group fallback.
+          const paletteEntry = groupKey ? itemOf?.(groupKey, item.id) : undefined
+          const Icon = paletteEntry?.icon ? lucideByName(paletteEntry.icon, item.icon) : item.icon
+          const iconColor = paletteEntry?.color ?? (groupKey ? colorOf?.(groupKey) : undefined)
           const isActive = item.id === active
           return (
             <button key={item.id} ref={isActive ? activeRef : undefined} role="tab" aria-selected={isActive}
@@ -46,7 +58,7 @@ export default function SettingsTabs({ items, active, onSelect }) {
               }}
               onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = 'var(--text)' }}
               onMouseLeave={e => { if (!isActive) e.currentTarget.style.color = 'var(--text-muted)' }}>
-              {Icon && <Icon size={14} style={{ flexShrink: 0 }} />}
+              {Icon && <Icon size={14} style={{ flexShrink: 0, color: iconColor }} />}
               {t(`nav.${item.id}`)}
             </button>
           )
