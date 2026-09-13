@@ -64,7 +64,7 @@
     "appointments": "Afspraken",
     "workflows": "Workflows",
     "reports": "Rapporten",
-    "catalog": "Algemene regels"
+    "candidates": "Kandidaten"
   },
   "nav": {
     "candidate_display": "Tabelweergave",
@@ -98,7 +98,6 @@
     "notif_applications": "Sollicitaties",
     "notif_vacancies": "Vacatures",
     "notif_billing": "Facturering",
-    "email": "E-mail",
     "whatsapp": "WhatsApp Business",
     "appstore": "App store",
     "apikeys": "API-keys",
@@ -262,12 +261,18 @@
     "ai_transparency": "AI-transparantie",
     "limits": "Verbruik & limieten",
     "admin_limits": "Platformlimieten",
-    "windows": "Termijnen en signalen",
-    "retention": "Bewaartermijnen",
-    "messaging": "Berichten",
     "kpi": "KPI-drempels",
     "knowledge": "Kennisbank",
-    "faq": "FAQ"
+    "faq": "FAQ",
+    "candidate_windows": "Termijnen en signalen",
+    "contact_windows": "Termijnen en signalen",
+    "customer_windows": "Termijnen en signalen",
+    "vacancy_windows": "Termijnen en signalen",
+    "application_windows": "Termijnen en signalen",
+    "match_windows": "Termijnen en signalen",
+    "task_windows": "Termijnen en signalen",
+    "system": "Systeem",
+    "email_general": "E-mail algemeen"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -4435,5 +4440,9 @@
         "subtitle": "Configureer KPI-doelstellingen en drempels."
       }
     }
+  },
+  "emailGeneral": {
+    "title": "E-mail algemeen",
+    "subtitle": "Algemene instellingen voor e-mail en postvak in."
   }
 }

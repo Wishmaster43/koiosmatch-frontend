@@ -64,7 +64,7 @@
     "appointments": "Termine",
     "workflows": "Workflows",
     "reports": "Berichte",
-    "catalog": "Allgemeine Regeln"
+    "candidates": "Kandidaten"
   },
   "nav": {
     "candidate_display": "Tabellenansicht",
@@ -95,7 +95,6 @@
     "notif_applications": "Bewerbungen",
     "notif_vacancies": "Stellen",
     "notif_billing": "Abrechnung",
-    "email": "E-Mail",
     "whatsapp": "WhatsApp Business",
     "appstore": "App Store",
     "apikeys": "API-Schlüssel",
@@ -262,12 +261,18 @@
     "ai_transparency": "KI-Transparenz",
     "limits": "Verbrauch & Limits",
     "admin_limits": "Plattform-Limits",
-    "windows": "Zeitfenster und Warnungen",
-    "retention": "Datenspeicherung",
-    "messaging": "Messaging",
     "kpi": "KPI-Schwellwerte",
     "knowledge": "Wissensdatenbank",
-    "faq": "FAQ"
+    "faq": "FAQ",
+    "candidate_windows": "Zeitfenster und Warnungen",
+    "contact_windows": "Zeitfenster und Warnungen",
+    "customer_windows": "Zeitfenster und Warnungen",
+    "vacancy_windows": "Zeitfenster und Warnungen",
+    "application_windows": "Zeitfenster und Warnungen",
+    "match_windows": "Zeitfenster und Warnungen",
+    "task_windows": "Zeitfenster und Warnungen",
+    "system": "System",
+    "email_general": "Allgemeine E-Mail"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -4435,5 +4440,9 @@
         "subtitle": "Konfigurieren Sie KPI-Ziele und Schwellwerte."
       }
     }
+  },
+  "emailGeneral": {
+    "title": "Allgemeine E-Mail",
+    "subtitle": "Allgemeine E-Mail- und Posteingangseinstellungen."
   }
 }

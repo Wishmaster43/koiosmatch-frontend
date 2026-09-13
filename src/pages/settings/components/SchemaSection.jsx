@@ -27,6 +27,17 @@ import {
 } from './SettingsKit'
 import JsonField from './JsonField'
 
+// i18n runs with returnEmptyString:false (see the `opt` comment below) — that setting
+// also swallows an explicit '' defaultValue passed as t(key, ''), so a missing
+// placeholder/unit key echoed the raw key back into the UI (Danny 13-09, row 2.2:
+// company/billing_email showed "catalog.sections.company.fields.billing_email.placeholder"
+// as its placeholder). Compare the result against the key instead — the same trick the
+// unit lookup already used inline — so a field with nothing translated renders nothing.
+function optionalT(t, key) {
+  const v = t(key)
+  return v === key ? undefined : v
+}
+
 // Picks the right input widget for one schema field, by its declared type.
 function FieldControl({ field, value, onChange, t, base, label, disabled }) {
   switch (field.type) {
@@ -42,11 +53,11 @@ function FieldControl({ field, value, onChange, t, base, label, disabled }) {
       return <SelectField value={value} onChange={onChange} options={options} ariaLabel={label} disabled={disabled} />
     }
     case 'text':
-      return <TextField value={value} onChange={onChange} placeholder={t(`${base}.placeholder`, '')} disabled={disabled} />
+      return <TextField value={value} onChange={onChange} placeholder={optionalT(t, `${base}.placeholder`)} disabled={disabled} />
     case 'secret':
       // A secret arrives masked (§1 '••••••••') and is typed blind; an unchanged mask is
       // never posted back (see the save wrapper below).
-      return <TextField type="password" value={value} onChange={onChange} placeholder={t(`${base}.placeholder`, '')} disabled={disabled} />
+      return <TextField type="password" value={value} onChange={onChange} placeholder={optionalT(t, `${base}.placeholder`)} disabled={disabled} />
     case 'color':
       // Free-text validated colour (CHIPKLEUR-INSTELBAAR-1) — the field itself shows
       // the backend's validation message so a tenant gets a useful error, not a 422.
@@ -55,12 +66,12 @@ function FieldControl({ field, value, onChange, t, base, label, disabled }) {
     case 'json':
       // Structured value edited as text per its catalogue format (jsonFormat).
       return <JsonField value={value} onChange={onChange} format={field.format} ariaLabel={label}
-        placeholder={t(`${base}.placeholder`, '')} invalidLabel={t('catalog.invalidJson')} disabled={disabled} />
+        placeholder={optionalT(t, `${base}.placeholder`)} invalidLabel={t('catalog.invalidJson')} disabled={disabled} />
     case 'number':
     default:
       return (
         <NumberField value={value} onChange={onChange} ariaLabel={label}
-          min={field.min} max={field.max} step={field.step} unit={(() => { const u = t(`${base}.unit`); return u === `${base}.unit` ? undefined : u })()} disabled={disabled} />
+          min={field.min} max={field.max} step={field.step} unit={optionalT(t, `${base}.unit`)} disabled={disabled} />
       )
   }
 }
@@ -79,8 +90,8 @@ export default function SchemaSection({ schema, embedded = false }) {
   const k = schema.i18nKey
   // i18n runs with returnEmptyString:false, so t() echoes the key back when there is
   // no translation. Optional text (subtitle/description) must show NOTHING then —
-  // never the raw key. `opt` collapses a missing translation to undefined.
-  const opt = (key) => { const v = t(key); return v === key ? undefined : v }
+  // never the raw key. `opt` delegates to the same optionalT the field placeholders/units use.
+  const opt = (key) => optionalT(t, key)
 
   // Persist every field except a secret the user did not touch: its value is the
   // server's mask, and writing that back would replace the real secret with dots.
@@ -125,9 +136,14 @@ export default function SchemaSection({ schema, embedded = false }) {
           const fields = schema.fields.filter(f => f.group === group.key)
           if (fields.length === 0) return null
           const Icon = lucideByName(group.icon, SlidersHorizontal)
+          // F6 (Opus review 13-09): the DOM id is namespaced by SECTION + group, not
+          // the bare group slug — two different sections can share a group slug (e.g.
+          // "windows/candidates" and "retention/candidates"), and a host embedding
+          // both would otherwise collide on the same aria-labelledby/id.
+          const domId = `catalog-group-${schema.sectionId ?? ''}-${group.key}`
           return (
-            <section key={group.key} aria-labelledby={`catalog-group-${group.key}`}>
-              <SectionTitle as="h3" id={`catalog-group-${group.key}`}
+            <section key={group.key} aria-labelledby={domId}>
+              <SectionTitle as="h3" id={domId}
                 style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0 0 8px' }}>
                 <Icon size={14} color={schema.color ?? 'var(--color-primary-text)'} aria-hidden="true" />
                 {t(group.labelKey)}

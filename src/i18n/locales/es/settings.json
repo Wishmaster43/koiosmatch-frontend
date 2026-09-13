@@ -64,7 +64,7 @@
     "appointments": "Citas",
     "workflows": "Workflows",
     "reports": "Informes",
-    "catalog": "Reglas generales"
+    "candidates": "Candidatos"
   },
   "nav": {
     "candidate_display": "Visualización de la tabla",
@@ -95,7 +95,6 @@
     "notif_applications": "Candidaturas",
     "notif_vacancies": "Vacantes",
     "notif_billing": "Facturación",
-    "email": "Correo electrónico",
     "whatsapp": "WhatsApp Business",
     "appstore": "App store",
     "apikeys": "Claves API",
@@ -262,12 +261,18 @@
     "ai_transparency": "Transparencia de IA",
     "limits": "Uso y límites",
     "admin_limits": "Límites de plataforma",
-    "windows": "Ventanas de tiempo y alertas",
-    "retention": "Retención de datos",
-    "messaging": "Mensajería",
     "kpi": "Umbrales de KPI",
     "knowledge": "Base de conocimiento",
-    "faq": "FAQ"
+    "faq": "FAQ",
+    "candidate_windows": "Ventanas de tiempo y alertas",
+    "contact_windows": "Ventanas de tiempo y alertas",
+    "customer_windows": "Ventanas de tiempo y alertas",
+    "vacancy_windows": "Ventanas de tiempo y alertas",
+    "application_windows": "Ventanas de tiempo y alertas",
+    "match_windows": "Ventanas de tiempo y alertas",
+    "task_windows": "Ventanas de tiempo y alertas",
+    "system": "Sistema",
+    "email_general": "Correo general"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -4435,5 +4440,9 @@
         "subtitle": "Configure objetivos y umbrales de KPI."
       }
     }
+  },
+  "emailGeneral": {
+    "title": "Correo general",
+    "subtitle": "Ajustes generales de correo y bandeja de entrada."
   }
 }

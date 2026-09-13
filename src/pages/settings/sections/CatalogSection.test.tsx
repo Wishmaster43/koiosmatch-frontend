@@ -93,3 +93,70 @@ describe('CatalogSection · groups and embedded', () => {
     expect(container.textContent?.trim()).toBe('')
   })
 })
+
+// CATALOG-EMBED-1 (Danny 13-09): a `group` prop narrows the section to ONE block
+// hosted under its own entity's screen. F1 (Opus review 13-09): PAGE mode renders
+// it HEADLESS (its own PageTitle already names the section elsewhere on that
+// page, e.g. the settings shell's tab header) — only embedded mode gets the h3
+// block heading, by the section title (default) or the row's own group label
+// (`headedBy="group"`). An empty group never renders a blank pane (F4).
+describe('CatalogSection · group filtering (CATALOG-EMBED-1)', () => {
+  function armGroupedFixture() {
+    const grouped = JSON.parse(JSON.stringify(catalogFixture))
+    const windows = grouped.data.sections[0]
+    // A design token stands in for the contract's own hex (ceiling gate reasons: see catalogToSchema.test.ts).
+    windows.color = 'var(--color-warning-text)'
+    windows.keys[0].group = 'candidates'
+    windows.keys[0].group_label_key = 'settings.groups.candidates'
+    windows.keys[0].group_icon = 'users'
+    windows.keys[1].group = 'customers'
+    armApi(grouped)
+  }
+
+  it('page mode: the requested group\'s rows render headless — no h3 block, no repeated title', async () => {
+    armGroupedFixture()
+    renderSection2('windows', 'candidates')
+    await waitFor(() => expect(screen.getByText('settings.windows.no_contact_days.label')).toBeTruthy())
+    // Only the requested group's row shows — the other group's row stays out.
+    expect(screen.queryByText('settings.windows.stale_candidate_days.label')).toBeNull()
+    expect(screen.queryAllByRole('heading', { level: 3 })).toHaveLength(0)
+  })
+
+  it('embedded mode: one block, headed by the section title by default', async () => {
+    armGroupedFixture()
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(<QueryClientProvider client={client}><CatalogSection section="windows" group="candidates" embedded /></QueryClientProvider>)
+    await waitFor(() => expect(screen.getByText('settings.windows.no_contact_days.label')).toBeTruthy())
+    const headings = screen.getAllByRole('heading', { level: 3 }).map(h => h.textContent?.trim())
+    expect(headings).toEqual([st('catalog.sections.windows.title')])
+  })
+
+  it('embedded mode with headedBy="group": the block heading reads the row\'s own group label instead', async () => {
+    armGroupedFixture()
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(<QueryClientProvider client={client}><CatalogSection section="windows" group="candidates" headedBy="group" embedded /></QueryClientProvider>)
+    await waitFor(() => expect(screen.getByText('settings.windows.no_contact_days.label')).toBeTruthy())
+    const headings = screen.getAllByRole('heading', { level: 3 }).map(h => h.textContent?.trim())
+    expect(headings).toEqual([st('settings.groups.candidates')])
+  })
+
+  it('an empty group in embedded mode renders nothing at all', async () => {
+    armApi(catalogFixture)
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const { container } = render(<QueryClientProvider client={client}><CatalogSection section="windows" group="opportunities" embedded /></QueryClientProvider>)
+    await waitFor(() => expect(container.textContent?.trim()).toBe(''))
+  })
+
+  it('an empty group in PAGE mode shows the section title plus the honest empty notice, never a blank pane', async () => {
+    armApi(catalogFixture)
+    renderSection2('windows', 'opportunities')
+    await waitFor(() => expect(screen.getByText(st('catalog.sections.windows.title'))).toBeTruthy())
+    expect(screen.getByText(st('catalog.empty'))).toBeTruthy()
+  })
+})
+
+// Renders with an explicit `group`, for the tests above.
+function renderSection2(section: string, group: string) {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(<QueryClientProvider client={client}><CatalogSection section={section} group={group} /></QueryClientProvider>)
+}

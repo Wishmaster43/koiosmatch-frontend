@@ -69,6 +69,12 @@ const SLUG_ALIASES = {
   // into the Integraties group — old bookmarks keep landing on the moved section.
   'modules/mod_shiftmanager': { category: 'integrations', tab: 'shiftmanager' },
   'modules/hf_contract_map': { category: 'integrations', tab: 'helloflex' },
+  // CATALOG-EMBED-1 (Danny 13-09): the four generic catalogue nav screens retired —
+  // every group moved under its own entity's screen (registry CATALOG_GROUP_HOSTS).
+  'catalog/windows': { category: 'candidate', tab: 'candidate_windows' },
+  'catalog/retention': { category: 'candidate', tab: 'candidate_retention' },
+  'catalog/messaging': { category: 'whatsapp', tab: 'whatsapp' },
+  'catalog/email': { category: 'communication', tab: 'email_general' },
 }
 
 // Parses the location hash into {category, tab}, accepting both the #settings/ prefix and legacy unprefixed links, and rewriting renamed slugs via SLUG_ALIASES.

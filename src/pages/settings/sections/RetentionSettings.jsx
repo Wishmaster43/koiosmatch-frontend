@@ -18,6 +18,7 @@
 import { useTranslation } from 'react-i18next'
 import { useSettingsForm } from '../lib/useSettingsForm'
 import { SettingsScaffold, SettingCardList, SettingRow, NumberField } from '../components/SettingsKit'
+import CatalogSection from './CatalogSection'
 
 // Tenant-wide AVG retention windows editor (see the module doc above): the only screen that edits the policy the backend derives retention_expires_at from.
 export default function RetentionSettings() {
@@ -44,6 +45,7 @@ export default function RetentionSettings() {
   })
 
   return (
+    <>
     <SettingsScaffold title={t('retention.title')} subtitle={t('retention.subtitle')} maxWidth={640} form={form}>
       <SettingCardList>
         <SettingRow label={t('retention.neverPlaced.label')} description={t('retention.neverPlaced.description')}>
@@ -89,5 +91,13 @@ export default function RetentionSettings() {
         </SettingRow>
       </SettingCardList>
     </SettingsScaffold>
+    {/* CATALOG-EMBED-1 (Danny 13-09: "Hoort bij kandidaten"): the catalogue's
+        "retention" section, candidates group (the legacy retention_candidate_months
+        alias plus the after-care thank-you text) — every generic row gets a home
+        under its own entity instead of a dedicated catalogue nav screen.
+        F1 (Opus review 13-09): headedBy="group" reads "Kandidaten", not the section's
+        own "Bewaartermijnen" — this page's OWN title already says that. */}
+    <div style={{ marginTop: 24, maxWidth: 640 }}><CatalogSection section="retention" group="candidates" headedBy="group" embedded /></div>
+    </>
   )
 }

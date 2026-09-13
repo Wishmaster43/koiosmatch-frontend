@@ -15,6 +15,7 @@ import { Field, SelectField } from '@/components/forms/fields'
 import { useWhatsAppConnections } from './whatsapp/useWhatsAppConnections'
 import WhatsAppConnectionsList from './whatsapp/WhatsAppConnectionsList'
 import EmbeddedSignupCard from './whatsapp/EmbeddedSignupCard'
+import CatalogSection from './CatalogSection'
 import SubTabBar, { type SubTab } from '@/components/drawer/SubTabBar'
 import Button from '@/components/ui/Button'
 import SoftChip from '@/components/ui/SoftChip'
@@ -195,6 +196,13 @@ export default function WhatsAppSettings() {
               token list below stays the second path, never replaced. */}
           <EmbeddedSignupCard onLinked={conn.reload} canManage={canManage} />
           <WhatsAppConnectionsList {...conn} canManage={canManage} />
+          {/* CATALOG-EMBED-1 (Danny 13-09: "Whatsapp hoort bij Whatsapp"): the
+              catalogue's rate limits (messaging/whatsapp_limits) and the
+              conversation-unanswered signal window (windows/conversations) are
+              tenant-wide WhatsApp connection settings, so they live here rather
+              than on a retired generic catalogue nav screen. */}
+          <div style={{ marginTop: 24 }}><CatalogSection section="messaging" group="whatsapp_limits" embedded /></div>
+          <div style={{ marginTop: 24 }}><CatalogSection section="windows" group="conversations" embedded /></div>
         </>
       )}
 

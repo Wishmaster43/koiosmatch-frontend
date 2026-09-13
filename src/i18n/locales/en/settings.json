@@ -64,7 +64,7 @@
     "appointments": "Appointments",
     "workflows": "Workflows",
     "reports": "Reports",
-    "catalog": "General rules"
+    "candidates": "Candidates"
   },
   "nav": {
     "candidate_display": "Table display",
@@ -98,7 +98,6 @@
     "notif_applications": "Applications",
     "notif_vacancies": "Vacancies",
     "notif_billing": "Billing",
-    "email": "Email",
     "whatsapp": "WhatsApp Business",
     "appstore": "App store",
     "apikeys": "API keys",
@@ -262,12 +261,18 @@
     "ai_transparency": "AI Transparency",
     "limits": "Usage & limits",
     "admin_limits": "Platform limits",
-    "windows": "Time windows and alerts",
-    "retention": "Data retention",
-    "messaging": "Messaging",
     "kpi": "KPI thresholds",
     "knowledge": "Knowledge base",
-    "faq": "FAQ"
+    "faq": "FAQ",
+    "candidate_windows": "Time windows and alerts",
+    "contact_windows": "Time windows and alerts",
+    "customer_windows": "Time windows and alerts",
+    "vacancy_windows": "Time windows and alerts",
+    "application_windows": "Time windows and alerts",
+    "match_windows": "Time windows and alerts",
+    "task_windows": "Time windows and alerts",
+    "system": "System",
+    "email_general": "General email"
   },
   "kpis": {
     "title": "KPI settings",
@@ -4435,5 +4440,9 @@
         "subtitle": "Configure KPI targets and thresholds."
       }
     }
+  },
+  "emailGeneral": {
+    "title": "General email",
+    "subtitle": "General email and inbox settings."
   }
 }

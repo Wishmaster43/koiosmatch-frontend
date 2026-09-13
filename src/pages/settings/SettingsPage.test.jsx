@@ -85,4 +85,17 @@ describe('parseHash — SLUG_ALIASES resolves renamed Dutch slugs to their Engli
     window.location.hash = '#settings/candidate/functions'
     expect(parseHash()).toEqual({ category: 'candidate', tab: 'functions' })
   })
+
+  // CATALOG-EMBED-1 (Danny 13-09): the retired generic catalogue nav screens keep
+  // resolving — every group moved under its own entity's screen.
+  it('the retired generic catalogue nav screens resolve to their new entity-hosted screens', () => {
+    window.location.hash = '#settings/catalog/windows'
+    expect(parseHash()).toEqual({ category: 'candidate', tab: 'candidate_windows' })
+    window.location.hash = '#settings/catalog/retention'
+    expect(parseHash()).toEqual({ category: 'candidate', tab: 'candidate_retention' })
+    window.location.hash = '#settings/catalog/messaging'
+    expect(parseHash()).toEqual({ category: 'whatsapp', tab: 'whatsapp' })
+    window.location.hash = '#settings/catalog/email'
+    expect(parseHash()).toEqual({ category: 'communication', tab: 'email_general' })
+  })
 })

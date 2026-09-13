@@ -64,7 +64,7 @@
     "appointments": "Marcações",
     "workflows": "Workflows",
     "reports": "Relatórios",
-    "catalog": "Regras gerais"
+    "candidates": "Candidatos"
   },
   "nav": {
     "candidate_display": "Vista de tabela",
@@ -98,7 +98,6 @@
     "notif_applications": "Candidaturas",
     "notif_vacancies": "Vagas",
     "notif_billing": "Faturação",
-    "email": "Email",
     "whatsapp": "WhatsApp Business",
     "appstore": "App store",
     "apikeys": "Chaves de API",
@@ -262,12 +261,18 @@
     "ai_transparency": "Transparência de IA",
     "limits": "Uso e limites",
     "admin_limits": "Limites da plataforma",
-    "windows": "Janelas de tempo e alertas",
-    "retention": "Retenção de dados",
-    "messaging": "Mensagens",
     "kpi": "Limiares de KPI",
     "knowledge": "Base de conhecimento",
-    "faq": "FAQ"
+    "faq": "FAQ",
+    "candidate_windows": "Janelas de tempo e alertas",
+    "contact_windows": "Janelas de tempo e alertas",
+    "customer_windows": "Janelas de tempo e alertas",
+    "vacancy_windows": "Janelas de tempo e alertas",
+    "application_windows": "Janelas de tempo e alertas",
+    "match_windows": "Janelas de tempo e alertas",
+    "task_windows": "Janelas de tempo e alertas",
+    "system": "Sistema",
+    "email_general": "E-mail geral"
   },
   "kpis": {
     "title": "Definições de KPI",
@@ -4436,5 +4441,9 @@
         "subtitle": "Configure metas e limiares de KPI."
       }
     }
+  },
+  "emailGeneral": {
+    "title": "E-mail geral",
+    "subtitle": "Definições gerais de e-mail e caixa de entrada."
   }
 }

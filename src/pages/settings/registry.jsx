@@ -29,7 +29,7 @@ import {
   ClipboardList, Clock, CreditCard, Download, EyeOff, Factory, FileText, Flag, GraduationCap, Hash, History, Key, LayoutGrid,
   ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Megaphone, Package, Palette, Percent, Phone, Radio, Scale, Shield, SlidersHorizontal, Sparkles, Star, Gauge,
   Boxes, Globe, Store, Tags, Target, Upload, UserCheck, Users, Webhook, XCircle,
-  ShieldOff, AlertTriangle, ListTree, CheckCircle,
+  ShieldOff, AlertTriangle, ListTree, CheckCircle, ShieldCheck,
 } from 'lucide-react'
 import CustomFieldsSettings from './sections/CustomFieldsSettings'
 import VacancyGenerationSettings from './sections/VacancyGenerationSettings'
@@ -130,6 +130,9 @@ import BillingUsageSettings from './sections/BillingUsageSettings'
 import InvoiceCompanySettings from './sections/InvoiceCompanySettings'
 import AdminInvoicesSettings from './sections/AdminInvoicesSettings'
 import CatalogSection from './sections/CatalogSection'
+// CATALOG-EMBED-1 (Danny 13-09): "E-mail" and "Inbox" generic catalogue rows merge
+// into one small host screen under Communication, replacing the retired catalog/email nav item.
+import EmailGeneralSettings from './sections/EmailGeneralSettings'
 // KNOWLEDGE-BASE-1 (Danny 09-09, row 22: "Waar is interne FAQ en interne kennisbank …"): the
 // two AI-management tabs are reachable from Settings → Koios AI as well; the internal/
 // external scope arrives with the BE contract.
@@ -272,6 +275,10 @@ export const NAV_GROUPS = [
       // AVG-RET-2 (Danny 22-07 punt 8): tenant retention windows (never-placed /
       // ever-placed) behind the candidate's read-only "Bewaren tot" derivation.
       { id: 'candidate_retention', icon: Clock, component: RetentionSettings },
+      // CATALOG-EMBED-1 (Danny 13-09): the catalogue's "windows" section, candidates
+      // group — signal/alert day-windows scoped to the candidate, own page rather
+      // than the retired catalog/windows nav item.
+      { id: 'candidate_windows', icon: Clock, render: () => <CatalogSection section="windows" group="candidates" /> },
     ],
   },
   {
@@ -296,6 +303,8 @@ export const NAV_GROUPS = [
       // as the candidate/customer required-fields items, so it reads as "the
       // same thing on another entity".
       { id: 'application_required_fields', icon: Flag, component: ApplicationRequiredFieldsSettings },
+      // CATALOG-EMBED-1: the catalogue's "windows" section, applications group.
+      { id: 'application_windows', icon: Clock, render: () => <CatalogSection section="windows" group="applications" /> },
     ],
   },
   {
@@ -337,6 +346,8 @@ export const NAV_GROUPS = [
       // Tenant-wide default for the customer's vacancy-visibility flags (Danny 27-07) —
       // VacancySettingsTab (customer drawer) reads these same keys for comparison.
       { id: 'customer_vacancy_defaults', icon: EyeOff, schema: customerVacancyDefaults },
+      // CATALOG-EMBED-1: the catalogue's "windows" section, customers group.
+      { id: 'customer_windows', icon: Clock, render: () => <CatalogSection section="windows" group="customers" /> },
     ],
   },
   {
@@ -348,6 +359,8 @@ export const NAV_GROUPS = [
     items: [
       { id: 'contact_functions', icon: Briefcase, component: ContactFunctionsSettings, logName: 'contact_functions' },
       { id: 'contact_statuses', icon: Users, component: ContactStatusesSettings, logName: 'customer_contact_statuses' },
+      // CATALOG-EMBED-1: the catalogue's "windows" section, contacts group.
+      { id: 'contact_windows', icon: Clock, render: () => <CatalogSection section="windows" group="contacts" /> },
     ],
   },
   {
@@ -401,6 +414,8 @@ export const NAV_GROUPS = [
       // Matching tab's picker reads (read-only there); managed here.
       { id: 'match_templates', icon: SlidersHorizontal, component: MatchTemplatesSettings },
       { id: 'vacancy_display', icon: Palette, schema: vacancyDisplay },
+      // CATALOG-EMBED-1: the catalogue's "windows" section, vacancies group.
+      { id: 'vacancy_windows', icon: Clock, render: () => <CatalogSection section="windows" group="vacancies" /> },
     ],
   },
   {
@@ -411,6 +426,8 @@ export const NAV_GROUPS = [
       { id: 'task_types', icon: Tags, component: TaskTypeSettings, logName: 'task_types' },
       { id: 'task_priorities', icon: Flag, component: TaskPrioritySettings, logName: 'task_priorities' },
       { id: 'task_display', icon: Palette, schema: taskDisplay },
+      // CATALOG-EMBED-1: the catalogue's "windows" section, tasks group.
+      { id: 'task_windows', icon: Clock, render: () => <CatalogSection section="windows" group="tasks" /> },
     ],
   },
   {
@@ -434,6 +451,8 @@ export const NAV_GROUPS = [
       // rate line means — sale (open) or purchase (gated behind matches.financial.view).
       { id: 'match_contract_line_rate_side', icon: EyeOff, component: MatchContractLineRateSideSettings },
       { id: 'match_display', icon: Palette, schema: matchDisplay },
+      // CATALOG-EMBED-1: the catalogue's "windows" section, matches group.
+      { id: 'match_windows', icon: Clock, render: () => <CatalogSection section="windows" group="matches" /> },
     ],
   },
   {
@@ -687,6 +706,10 @@ export const NAV_GROUPS = [
       { id: 'email_log', icon: ClipboardList, component: EmailLog },
       // AVG-RET-2-TAAL-1: agency-wide candidate/contact messaging-language default.
       { id: 'messaging_language', icon: Languages, component: MessagingLanguageSettings },
+      // CATALOG-EMBED-1 (Danny 13-09: "Inbox mail hoort bij email instellingen"):
+      // merges the catalogue's "email"/mail group and "messaging"/inbox group —
+      // both replace the retired catalog/email and catalog/messaging nav items.
+      { id: 'email_general', icon: Mail, render: () => <EmailGeneralSettings /> },
     ],
   },
   {
@@ -808,6 +831,11 @@ export const NAV_GROUPS = [
     items: [
       { id: 'roles', icon: Shield, component: RolesSettings },
       { id: 'users', icon: Users, component: UsersPage },
+      // CATALOG-EMBED-1 (Danny 13-09: "hoort onderdeel te zijn bij alle
+      // instellingen"): the catalogue's "retention" section, system group —
+      // message/workflow-run/Koios-memory/AI-prompt-log retention windows, a
+      // platform concern rather than any one entity's own screen.
+      { id: 'system', icon: ShieldCheck, render: () => <CatalogSection section="retention" group="system" /> },
     ],
   },
   {
@@ -819,22 +847,41 @@ export const NAV_GROUPS = [
   },
 ]
 
-// SETTINGS-CATALOG-1 (BE 0d8dc7cd, measured 10-09 on demo: 12 sections, version
-// c02ad04a798c): the generic catalogue screens (DRAFT-SETTINGS-CATALOG-1, X-4 FE half)
-// are IN the nav since the endpoint answers (parked 09-09 01:15 while it 404'd). The
-// kpi section is `hidden` on the BE (its one generic row belongs to the KPI screens), so
-// it has no item here; the guard test maps it to the dedicated KPI items.
-export const CATALOG_NAV_GROUP = {
-    // Generic catalogue settings — sections from GET /settings/catalog that are not
-    // already dedicated screens. The catalogue drives the FE screen from the contract (§2).
-    key: 'catalog', icon: SlidersHorizontal,
-    items: [
-      { id: 'windows', icon: Clock, render: () => <CatalogSection section="windows" /> },
-      { id: 'retention', icon: History, render: () => <CatalogSection section="retention" /> },
-      { id: 'messaging', icon: MessageCircle, render: () => <CatalogSection section="messaging" /> },
-      { id: 'email', icon: Mail, render: () => <CatalogSection section="email" /> },
-    ],
-  }
-
-// The catalogue group renders after every dedicated group (§2: generic rows come last).
-NAV_GROUPS.push(CATALOG_NAV_GROUP)
+// CATALOG-EMBED-1 (Danny 13-09, rows 21-24: "Whatsapp hoort bij Whatsapp · Inbox
+// mail hoort bij email instellingen", "Hoort bij kandidaten en systemen", "Hoort
+// bij email!", "Hoort onderdeel te zijn bij alle instellingen!!"): the four
+// generic catalogue nav screens (windows/retention/messaging/email — SETTINGS-
+// CATALOG-1) are RETIRED. Every catalogue group now renders under its own
+// entity's screen via <CatalogSection section group /> (page mode) or embedded
+// under an existing screen — see CATALOG_GROUP_HOSTS below for the full map.
+// windows/opportunities is a section group the BE declares but has 0 generic
+// rows for today (measured, catalogue version 34eb93dcaec0) — no item hosts it
+// yet; add one the day the backend ships a real opportunities/windows row.
+export const CATALOG_GROUP_HOSTS = {
+  windows: {
+    candidates: 'candidate/candidate_windows',
+    contacts: 'contacts/contact_windows',
+    customers: 'customers/customer_windows',
+    vacancies: 'vacancies/vacancy_windows',
+    applications: 'applications/application_windows',
+    matches: 'matches/match_windows',
+    tasks: 'tasks/task_windows',
+    // Embedded at the bottom of the WhatsApp connection screen (Connection tab).
+    conversations: 'whatsapp/whatsapp',
+  },
+  retention: {
+    // Embedded at the bottom of the candidate retention screen.
+    candidates: 'candidate/candidate_retention',
+    system: 'administration/system',
+  },
+  messaging: {
+    // Embedded at the bottom of the WhatsApp connection screen (Connection tab).
+    whatsapp_limits: 'whatsapp/whatsapp',
+    // Embedded inside the merged E-mail algemeen screen.
+    inbox: 'communication/email_general',
+  },
+  email: {
+    // Embedded inside the merged E-mail algemeen screen.
+    mail: 'communication/email_general',
+  },
+}

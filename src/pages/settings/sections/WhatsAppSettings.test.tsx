@@ -9,10 +9,18 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
 import WhatsAppSettings from './WhatsAppSettings'
+
+// CATALOG-EMBED-1: the Connection tab now also embeds two <CatalogSection embedded />
+// blocks, whose useSettingsCatalog() needs a real QueryClient (mirrors
+// CompanySettings.test.jsx/ActionRulesSettings.test.tsx) — the existing api.get mocks
+// below already fall back to an empty `{ data: { data: [] } }` for any unmatched URL
+// (including /settings/catalog), so the catalogue resolves to "nothing to show".
+const renderPage = () => render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><WhatsAppSettings /></QueryClientProvider>)
 
 // Partial mock: fake the HTTP verbs, keep the real unwrap/unwrapList helpers.
 vi.mock('@/lib/api', async (importOriginal) => {
@@ -65,7 +73,7 @@ describe('WhatsAppSettings · Numbers tab reflects a WABA switch (F2)', () => {
     vi.mocked(api.post).mockResolvedValue({ data: {} })
 
     const user = userEvent.setup()
-    render(<WhatsAppSettings />)
+    renderPage()
 
     // Wait for the connection list to load, then open the edit form.
     await screen.findByText('10229012934')
@@ -101,7 +109,7 @@ describe('WhatsAppSettings · Numbers tab reflects a WABA switch (F2)', () => {
     })
 
     const user = userEvent.setup()
-    render(<WhatsAppSettings />)
+    renderPage()
     await screen.findByText('10229012934')
 
     await user.click(screen.getByRole('tab', { name: new RegExp(st('whatsapp.phoneNumbers')) }))

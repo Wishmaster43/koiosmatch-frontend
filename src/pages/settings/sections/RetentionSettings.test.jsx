@@ -5,6 +5,13 @@
  * only that a callback fired): the retention windows load with tenant defaults,
  * coerce stored strings to numbers, and save all seven keys on a single POST.
  * The legacy `retention_candidate_months` key is never rendered as a field.
+ *
+ * CATALOG-EMBED-1: this screen now embeds <CatalogSection section="retention"
+ * group="candidates" embedded /> at the bottom, whose useSettingsCatalog() runs its
+ * own useQuery — mocked here (mirrors VacancyMatchingSettings.test.jsx) to an empty
+ * catalogue so it never interferes with this file's OWN /settings GET/POST
+ * assertions (a QueryClientProvider wrapper would still route every api.get call
+ * this file already stubs into the catalogue fetch too).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -16,6 +23,10 @@ import RetentionSettings from './RetentionSettings'
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
   return { ...actual, default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }
+})
+vi.mock('@tanstack/react-query', async (importOriginal) => {
+  const actual = await importOriginal()
+  return { ...actual, useQuery: () => ({ data: { sections: [], version: '' }, isLoading: false, isError: false, refetch: vi.fn() }) }
 })
 
 const t = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
