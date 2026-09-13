@@ -1,12 +1,14 @@
 // Extracted from StatusListEditor (SIZE-SPLIT-B, zero behaviour change): the
 // create/edit modal form.
-import type { RefObject } from 'react'
+// SETTINGS-INCON-B2 (Danny 13-09, "AUDIT op alle pop-ups!!"): migrated off a
+// hand-rolled fixed/centered div onto the shared FloatingPanel — draggable
+// header, resizable, remembered position; it arms its own focus trap now, so
+// the caller no longer passes a modalPanelRef.
 import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
 import SearchSelect from '@/components/ui/SearchSelect'
-import Button from '@/components/ui/Button'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import ModalFooter from '@/components/ui/ModalFooter'
-import { PageTitle, BodyText } from '@/components/ui/typography'
+import { BodyText } from '@/components/ui/typography'
 import { ColorSwatch } from '../components/SettingsControls'
 import { Toggle } from '../components/SettingsKit'
 import IconPickerControl from './IconPickerControl'
@@ -14,10 +16,9 @@ import { FALLBACK_SWATCH } from './statusListEditorTypes'
 import type { StatusListDraft, StatusListItem, ExtraFieldDef, FlagFieldDef, NumberFieldDef, IconPickerDef } from './statusListEditorTypes'
 
 export default function StatusListModal({
-  modalPanelRef, editing, addLabel, draft, setDraft, withColor, resolvedIconPicker, numberField, extraField, flagList,
+  editing, addLabel, draft, setDraft, withColor, resolvedIconPicker, numberField, extraField, flagList,
   saving, onClose, onSubmit,
 }: {
-  modalPanelRef: RefObject<HTMLDivElement | null>
   editing: StatusListItem | null; addLabel: React.ReactNode
   draft: StatusListDraft; setDraft: (updater: (d: StatusListDraft) => StatusListDraft) => void
   withColor: boolean; resolvedIconPicker: IconPickerDef | null
@@ -25,16 +26,18 @@ export default function StatusListModal({
   saving: boolean; onClose: () => void; onSubmit: () => void
 }) {
   const { t } = useTranslation('settings')
+  // F2 (Opus review, 13-09): `addLabel` is a ReactNode (every real caller passes a
+  // plain translated string, but the type is generous) — render it AS A NODE in
+  // the header, exactly as the pre-migration header did; only the aria-label
+  // (which FloatingPanel requires as a plain string) stringifies it.
+  const titleNode = editing ? t('statusList.editTitle') : addLabel
+  const ariaLabel = editing ? t('statusList.editTitle') : String(addLabel)
   return (
-    <>
-      {/* Backdrop + panel stack on the shared overlay token, never a raw Tailwind z-40/z-50. */}
-      <div className="fixed inset-0" style={{ zIndex: 'var(--z-overlay)', background: 'rgba(0,0,0,0.3)' }} onClick={onClose} />
-      <div ref={modalPanelRef} role="dialog" aria-modal="true" aria-label={editing ? t('statusList.editTitle') : String(addLabel)} tabIndex={-1}
-        className="fixed" style={{ zIndex: 'var(--z-overlay)', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: '24px 24px 0', width: 400, boxShadow: 'var(--shadow-modal)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-          <PageTitle as="span">{editing ? t('statusList.editTitle') : addLabel}</PageTitle>
-          <Button variant="ghost" iconOnly size="sm" onClick={onClose} title={t('common:close')} aria-label={t('common:close')}><X size={16} /></Button>
-        </div>
+    <FloatingPanel open onClose={onClose} ariaLabel={ariaLabel}
+      header={<div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', flex: 1 }}>{titleNode}</div>}
+      persistKey="status-list-item" resizable
+      scrollBody={false} width={400}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 0' }}>
         <div style={{ marginBottom: 14 }}>
           <label htmlFor="status-list-name" style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('statusList.nameLabel')}</label>
           <input id="status-list-name" value={draft.name} onChange={e => setDraft(d => ({ ...d, name: e.target.value }))}
@@ -90,13 +93,11 @@ export default function StatusListModal({
             </span>
           </div>
         ))}
-        {/* Shared modal footer (§4/HUISSTIJL-1) — spans the panel's full width past the body padding. */}
-        <div style={{ margin: '20px -24px 0' }}>
-          <ModalFooter onCancel={onClose} onSubmit={onSubmit}
-            disabled={saving || !draft.name.trim()} busy={saving}
-            cancelLabel={t('common.cancel')} submitLabel={editing ? t('common.save') : t('statusList.addBtn') as string} />
-        </div>
       </div>
-    </>
+      {/* Shared modal footer (§4/HUISSTIJL-1) — pinned outside the scrolling body. */}
+      <ModalFooter onCancel={onClose} onSubmit={onSubmit}
+        disabled={saving || !draft.name.trim()} busy={saving}
+        cancelLabel={t('common.cancel')} submitLabel={editing ? t('common.save') : t('statusList.addBtn') as string} />
+    </FloatingPanel>
   )
 }

@@ -591,7 +591,9 @@
     "loadError": "No se pudo cargar la lista.",
     "deleteFailed": "Error al eliminar.",
     "saveFailed": "Error al guardar.",
-    "clearDefault": "Haga clic para quitar el valor predeterminado"
+    "clearDefault": "Haga clic para quitar el valor predeterminado",
+    "valueMark": "Icono y color: {{label}}",
+    "colorMark": "Color: {{label}}"
   },
   "phases": {
     "title": "Fases",

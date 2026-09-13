@@ -5,8 +5,8 @@ import { Trash2, Pencil } from 'lucide-react'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
 import { Caption, BodyText, monoStyle } from '@/components/ui/typography'
-import { ColorSwatch, ColorBadge, DefaultToggle } from '../components/SettingsControls'
-import IconPickerControl from './IconPickerControl'
+import { DefaultToggle } from '../components/SettingsControls'
+import LookupValueMark from './LookupValueMark'
 import { FALLBACK_SWATCH } from './statusListEditorTypes'
 import type { StatusListItem, ExtraFieldDef, FlagFieldDef, NumberFieldDef, DefaultFieldDef, IconPickerDef } from './statusListEditorTypes'
 
@@ -48,23 +48,23 @@ export default function StatusListRow({
                    color: 'var(--text)', background: 'var(--surface)', border: '1px solid var(--border)',
                    borderRadius: 6, flexShrink: 0, outline: 'none' }} />
       )}
-      {withColor && <ColorSwatch color={item.color ?? FALLBACK_SWATCH} onChange={(c: string) => updateColor(item, c)} />}
-      {/* Curated icon picker IN the row, next to the colour (Danny 23-07). withIcon=true
-          without an explicit iconPicker prop now ALSO renders the picker, fed by the
-          generic curated set — the old free-text lucide-key input is retired (it
-          silently accepted wrong keys). */}
-      {/* A row with its own adornment (the nationality flag) carries no icon box on top of
-          it — one glyph per row (Danny 09-09: "Een vlag en een icon overkill"). */}
-      {resolvedIconPicker && !rowPrefix && (
-        <IconPickerControl icons={resolvedIconPicker.icons} resolve={resolvedIconPicker.resolve} value={item.icon}
-          color={item.color ?? FALLBACK_SWATCH} label={labelOf(item)} onPick={(icon: string) => updateIcon(item, icon)} />
+      {/* LOOKUP-ONE-ELEMENT-1 (Danny 10-09 23:20): one coloured mark per value — an
+          icon in its own colour, or the colour fill itself — never a swatch dot next
+          to a separate icon box, and never a coloured label chip alongside it. A row
+          with its own adornment (the nationality flag) carries no mark at all — one
+          glyph per row (Danny 09-09: "Een vlag en een icon overkill"). */}
+      {(withColor || resolvedIconPicker) && !rowPrefix && (
+        <LookupValueMark
+          color={item.color ?? FALLBACK_SWATCH} icon={item.icon} withColor={withColor}
+          icons={resolvedIconPicker?.icons ?? null} resolve={resolvedIconPicker?.resolve}
+          label={labelOf(item)}
+          onPickColor={(c: string) => updateColor(item, c)} onPickIcon={(icon: string) => updateIcon(item, icon)}
+        />
       )}
       {/* Bespoke row adornment (NATION-FLAG-1: a flag emoji) — before the name,
-          same slot a colour swatch would otherwise occupy. */}
+          same slot the value mark would otherwise occupy. */}
       {rowPrefix && rowPrefix(item)}
-      {withColor
-        ? <ColorBadge label={labelOf(item)} color={item.color ?? FALLBACK_SWATCH} />
-        : <BodyText as="span">{labelOf(item)}</BodyText>}
+      <BodyText as="span">{labelOf(item)}</BodyText>
       {/* One badge per active flag (flagFields) — independent booleans, no singleton rule. */}
       {flagList.map(f => item[f.key] && (
         <span key={f.key} style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-primary-text)',

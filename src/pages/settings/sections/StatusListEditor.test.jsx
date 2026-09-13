@@ -280,7 +280,12 @@ describe('StatusListEditor — entity scoping (note types)', () => {
 
     await user.click(screen.getByRole('button', { name: 'Type toevoegen' }))
     // MODAL-HERBOUW-1: the create modal is a real dialog with an accessible name input.
-    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    const dialog = screen.getByRole('dialog')
+    expect(dialog).toBeInTheDocument()
+    // SETTINGS-INCON-B2 (Danny 13-09, "AUDIT op alle pop-ups!!"): the create/edit
+    // modal is now the shared FloatingPanel — draggable header, no longer the old
+    // hand-rolled fixed/centered div with no way to move or resize it.
+    expect(dialog.querySelector('[data-drag-handle]')).toBeInTheDocument()
     const nameInput = screen.getByRole('textbox', { name: st('statusList.nameLabel') })
     await user.type(nameInput, 'Intake')
     await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))

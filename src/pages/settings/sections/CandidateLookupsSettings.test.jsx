@@ -9,6 +9,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
+import { tintBg } from '@/lib/tint'
 import { FunnelStagesSettings, ContractFormsSettings, CandidateStatusesSettings, CandidatePhasesSettings } from './CandidateLookupsSettings'
 
 vi.mock('@/lib/api', async () => {
@@ -123,7 +124,10 @@ describe('CandidateLookupsSettings — funnel stage default singleton', () => {
     await screen.findByText('Lead')
     const swatchBtn = container.querySelector('button[style*="rgb(59, 143, 212)"]')
     await user.click(swatchBtn)
-    const preset = container.querySelector('button[style*="rgb(100, 116, 139)"]') // preset #64748B
+    // SETTINGS-INCON-B2 F1 (Opus review, 13-09): the palette popover is now
+    // portalled into document.body (escapes a hosting modal/scroll ancestor's
+    // overflow) — it no longer lives inside the render `container`.
+    const preset = document.body.querySelector('button[style*="rgb(100, 116, 139)"]') // preset #64748B
     await user.click(preset)
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith(
@@ -312,22 +316,25 @@ describe('CandidateLookupsSettings — icon support (statuses + contract forms)'
     render(<CandidateStatusesSettings />)
 
     await screen.findByText('Available')
-    // The in-row IconPickerControl trigger is labelled "<icon-label>: <row label>".
-    await user.click(screen.getByRole('button', { name: `${st('documentTypes.icon')}: Available` }))
+    // LOOKUP-ONE-ELEMENT-1: the in-row trigger is the shared LookupValueMark now,
+    // labelled "<icon+colour label>: <row label>".
+    await user.click(screen.getByRole('button', { name: st('statusList.valueMark', { label: 'Available' }) }))
     await user.click(screen.getAllByRole('menuitem')[0])
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith(
       '/settings/candidate-lookups/statuses/s1', expect.objectContaining({ icon: 'calendar' })))
   })
 
-  it('does not render the icon picker on funnel stages', async () => {
+  it('renders only the colour-only mark on funnel stages (no icon vocabulary)', async () => {
     api.get.mockResolvedValue({ data: {
       funnel_types: [stage({ id: 'f1', label: 'Gesolliciteerd' })],
     } })
     render(<FunnelStagesSettings />)
 
     await screen.findByText('Gesolliciteerd')
-    expect(screen.queryByRole('button', { name: `${st('documentTypes.icon')}: Gesolliciteerd` })).not.toBeInTheDocument()
+    // Funnel stages carry no icon vocabulary — the mark is colour-only, never icon-tinted.
+    expect(screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Gesolliciteerd' }) })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: st('statusList.valueMark', { label: 'Gesolliciteerd' }) })).not.toBeInTheDocument()
   })
 
   it('saves a picked icon on a contract form via the edit modal', async () => {
@@ -341,10 +348,10 @@ describe('CandidateLookupsSettings — icon support (statuses + contract forms)'
 
     await screen.findByText('ZZP')
     await user.click(screen.getByTitle(st('lookups.edit')))
-    // Both the row and the modal render an icon-picker trigger with the same
-    // accessible name once the modal is open — the modal's is the last one.
-    const triggers = screen.getAllByRole('button', { name: `${st('documentTypes.icon')}: ZZP` })
-    await user.click(triggers[triggers.length - 1])
+    // LOOKUP-ONE-ELEMENT-1: the row's own trigger is now labelled via
+    // statusList.valueMark — only the MODAL's IconPickerControl still carries
+    // the old documentTypes.icon label, so this now resolves to one match.
+    await user.click(screen.getByRole('button', { name: `${st('documentTypes.icon')}: ZZP` }))
     await user.click(screen.getAllByRole('menuitem')[1])
     await user.click(screen.getByText(st('common.save')))
 
@@ -354,28 +361,38 @@ describe('CandidateLookupsSettings — icon support (statuses + contract forms)'
 })
 
 describe('CandidateLookupsSettings — colour + reorder revert on failure', () => {
+  // Single source for the fixture's colour (LOOKUP-ONE-ELEMENT-1: contract forms
+  // support icons, so the row's mark is now icon-tinted, not a solid swatch fill —
+  // the revert assertion below reads this same value through tintBg, never a
+  // re-typed literal).
+  // eslint-disable-next-line no-restricted-syntax -- DATA: a fixture contract-form's tenant-picked colour, not a style rule.
+  const ZZP_COLOR = '#3B8FD4'
+
   it('reverts the colour and notifies when the colour PUT fails', async () => {
-    // eslint-disable-next-line no-restricted-syntax -- DATA: a fixture contract-form's tenant-picked colour, not a style rule.
-    api.get.mockResolvedValue({ data: { candidate_types: [{ id: 'c1', value: 'zzp', label: 'ZZP', color: '#3B8FD4' }] } })
+    api.get.mockResolvedValue({ data: { candidate_types: [{ id: 'c1', value: 'zzp', label: 'ZZP', color: ZZP_COLOR }] } })
     api.put.mockRejectedValue(new Error('network down'))
     const { notifyError } = await import('@/lib/notify')
     const user = userEvent.setup()
-    const { container } = render(<ContractFormsSettings />)
+    render(<ContractFormsSettings />)
 
     await screen.findByText('ZZP')
-    // The ColorSwatch trigger is an unlabelled button whose own background IS the
-    // current colour — select it by that inline style instead of an accessible name.
-    const swatchBtn = container.querySelector('button[style*="rgb(59, 143, 212)"]')
-    await user.click(swatchBtn)
-    const preset = container.querySelector('button[style*="rgb(100, 116, 139)"]') // first preset, #64748B
+    // LOOKUP-ONE-ELEMENT-1: the mark trigger, not a bare ColorSwatch fill —
+    // contract forms support icons, so it opens the icon grid + colour palette.
+    const markBtn = screen.getByRole('button', { name: st('statusList.valueMark', { label: 'ZZP' }) })
+    await user.click(markBtn)
+    // SETTINGS-INCON-B2 F1 (Opus review, 13-09): the palette popover is now
+    // portalled into document.body (escapes a hosting modal/scroll ancestor's
+    // overflow) — it no longer lives inside the render `container`.
+    const preset = document.body.querySelector('button[style*="rgb(100, 116, 139)"]') // first preset, #64748B
     await user.click(preset)
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith(
       // eslint-disable-next-line no-restricted-syntax -- DATA: asserting the preset colour the test picked, not a style rule.
       '/settings/candidate-lookups/candidate-types/c1', { label: 'ZZP', color: '#64748B' }))
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('statusList.saveFailed')))
-    // Reverted: the swatch shows the original colour again, not the rejected one.
-    expect(container.querySelector('button[style*="rgb(59, 143, 212)"]')).toBeTruthy()
+    // Reverted: the trigger tints the ORIGINAL colour again, not the rejected pick.
+    expect(screen.getByRole('button', { name: st('statusList.valueMark', { label: 'ZZP' }) }))
+      .toHaveStyle({ background: tintBg(ZZP_COLOR, true) })
   })
 
   it('reverts the order and notifies when the reorder PUT fails', async () => {

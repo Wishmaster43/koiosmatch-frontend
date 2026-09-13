@@ -121,16 +121,15 @@ describe('VacancyChannelSettings', () => {
   // eslint-disable-next-line no-restricted-syntax -- DATA: a fixture row's tenant-picked colour, not a style rule.
   const channel = (over = {}) => ({ id: 'ch1', name: 'Indeed', color: '#6E8FD6', icon: 'globe', active: true, default_enabled: true, ...over })
 
-  it('renders the colour badge and the curated icon picker (the migration carries both)', async () => {
+  it('renders a plain label and the curated icon+colour mark (the migration carries both)', async () => {
     api.get.mockResolvedValue({ data: [channel()] })
     render(<VacancyChannelSettings />)
 
-    // ColorBadge (withColor) has a distinctive pill shape the plain withColor=false span never had.
-    // HUISSTIJL-1: ColorBadge now delegates to the shared SoftChip, whose round=true
-    // pill radius is 99px (still fully rounded — the exact px only matters as "pill or not").
-    const badge = await screen.findByText('Indeed')
-    expect(badge).toHaveStyle({ borderRadius: '99px' })
-    expect(screen.getByRole('button', { name: `${st('documentTypes.icon')}: Indeed` })).toBeInTheDocument()
+    // LOOKUP-ONE-ELEMENT-1: the colour now lives on the LookupValueMark trigger —
+    // the row's own label is plain text, never the old ColorBadge pill (99px radius).
+    const label = await screen.findByText('Indeed')
+    expect(label).not.toHaveStyle({ borderRadius: '99px' })
+    expect(screen.getByRole('button', { name: st('statusList.valueMark', { label: 'Indeed' }) })).toBeInTheDocument()
   })
 
   it('PUTs active:false to /vacancy-channels/{id} when the flag is toggled off in the edit modal', async () => {

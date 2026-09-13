@@ -77,6 +77,17 @@ describe('NewUserModal', () => {
     expect(container.querySelector('select')).toBeNull()
   })
 
+  // SETTINGS-INCON-B2 (Danny 13-09): the panel used to hardcode a 420px width —
+  // a single narrow column. It now shares the wide-form footprint every create
+  // modal uses (WIDE_MODAL_PANEL_SIZE), and both name fields render as full,
+  // untruncated labelled inputs inside their own titled card.
+  it('opens at the wide-form footprint, not the old cramped 420px column', () => {
+    render(<NewUserModal onClose={noop} onCreated={noop} />)
+    expect(screen.getByRole('dialog')).toHaveStyle({ maxWidth: '1320px' })
+    expect(screen.getByLabelText('firstName', { exact: false })).toBeInTheDocument()
+    expect(screen.getByLabelText('lastName', { exact: false })).toBeInTheDocument()
+  })
+
   it('offers every live role (custom roles included) and defaults to planner', async () => {
     const user = userEvent.setup()
     render(<NewUserModal onClose={noop} onCreated={noop} />)

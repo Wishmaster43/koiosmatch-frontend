@@ -2,53 +2,74 @@
  * SettingsControls — small shared UI controls reused across settings sections:
  * a colour picker (swatch + popup), a colour badge, and a drag-to-reorder list.
  */
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { GripVertical, Check, ChevronUp, ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { COLOR_PRESETS } from '@/lib/colorPresets'
 import Toggle from '@/components/ui/Toggle'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useClickOutside } from '@/hooks/useClickOutside'
-import SoftChip from '@/components/ui/SoftChip'
+import { useDropdownPlacement } from '@/lib/useDropdownPlacement'
 import { tintBg, tintBorder } from '@/lib/tint'
+
+// ColorPaletteGrid — the curated soft-palette swatch grid (LOOKUP-ONE-ELEMENT-1):
+// ONE copy shared by ColorPickerPopup below and by LookupValueMark's popover, so
+// picking a colour looks and behaves identically everywhere it is offered.
+export function ColorPaletteGrid({ value, onPick }) {
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+      {COLOR_PRESETS.map(c => (
+        <button key={c} type="button" aria-label={c} onClick={() => onPick(c)}
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- palette swatch cell (its own fill IS the colour value), not a Button
+          style={{ width: 26, height: 26, borderRadius: 6, background: c, border: c === value ? '2px solid var(--text)' : '2px solid transparent', cursor: 'pointer' }} />
+      ))}
+    </div>
+  )
+}
 
 // The curated-palette popover anchored under ColorSwatch; outside click closes it,
 // and Escape closes ONLY the popover: useFocusTrap handles the key at this element
 // (stopPropagation), so a hosting dialog's own trap never fires for it.
-function ColorPickerPopup({ color, onChange, onClose }) {
+// SETTINGS-INCON-B2 F1 (Opus review, 13-09): portalled into document.body so it
+// escapes a hosting modal's `overflow: hidden`/`overflow: auto` panel — the same
+// clipping FloatingPanel's own body wrapper would otherwise cause, mirrors the
+// house recipe in CreatableSelect.tsx (createPortal + fixed coords off the
+// trigger's own measured rect via the shared useDropdownPlacement).
+function ColorPickerPopup({ triggerRef, color, onChange, onClose }) {
   const [hex, setHex] = useState(color)
   const ref = useFocusTrap(onClose)
-  // Close the popup on any outside mousedown, not just its own trigger (shared useClickOutside, CLICK-OUTSIDE-2).
-  useClickOutside([ref], true, onClose)
+  // Positioned off the TRIGGER's rect (not the popup's own, portalled-out position).
+  const { rect } = useDropdownPlacement(triggerRef, true)
+  // Close the popup on any outside mousedown — both the trigger AND the portalled
+  // panel itself count as "inside" (shared useClickOutside, CLICK-OUTSIDE-2).
+  useClickOutside([triggerRef, ref], true, onClose)
   const apply = (c) => { setHex(c); onChange(c) }
   // Curated soft palette only — no free colour wheel/hex, so labels stay calm and
   // consistent in light + dark across statuses / funnel / candidate types / pools / …
-  return (
+  return createPortal(
     // Floating popup under its trigger; used both on plain settings rows and inside
     // modals (LocationFormModal, CandidateLookupItemModal) — the CSS popover rung
     // mirrors SelectMenu/CreatableSelect so it always beats a hosting dialog's band.
-    <div ref={ref} tabIndex={-1} style={{ position: 'absolute', zIndex: 'var(--z-popover)', background: 'var(--surface)', border: '1px solid var(--border)',
-                             borderRadius: 10, padding: 12, boxShadow: 'var(--shadow-float)', top: 36, left: 0, width: 192 }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-        {COLOR_PRESETS.map(c => (
-          <button key={c} onClick={() => apply(c)}
-            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- palette swatch cell (its own fill IS the colour value), not a Button
-            style={{ width: 26, height: 26, borderRadius: 6, background: c, border: c === hex ? '2px solid var(--text)' : '2px solid transparent', cursor: 'pointer' }} />
-        ))}
-      </div>
-    </div>
+    <div ref={ref} tabIndex={-1} style={{ position: 'fixed', zIndex: 'var(--z-popover)', background: 'var(--surface)', border: '1px solid var(--border)',
+                             borderRadius: 10, padding: 12, boxShadow: 'var(--shadow-float)', width: 192,
+                             visibility: rect ? 'visible' : 'hidden', top: rect ? rect.bottom + 4 : 0, left: rect ? rect.left : 0 }}>
+      <ColorPaletteGrid value={hex} onPick={apply} />
+    </div>,
+    document.body,
   )
 }
 
 // Swatch trigger plus its picker popup; the only state it owns is whether the popup is open.
 export function ColorSwatch({ color, onChange }) {
   const [open, setOpen] = useState(false)
+  const triggerRef = useRef(null)
   return (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
+    <div ref={triggerRef} style={{ position: 'relative', display: 'inline-block' }}>
       <button onClick={() => setOpen(o => !o)}
         // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- swatch trigger (its own fill IS the picked colour value), not a Button
         style={{ width: 28, height: 28, borderRadius: 6, background: color, border: '1px solid rgba(0,0,0,0.1)', cursor: 'pointer' }} />
-      {open && <ColorPickerPopup color={color} onChange={c => { onChange(c) }} onClose={() => setOpen(false)} />}
+      {open && <ColorPickerPopup triggerRef={triggerRef} color={color} onChange={c => { onChange(c) }} onClose={() => setOpen(false)} />}
     </div>
   )
 }
@@ -64,14 +85,6 @@ export function ColorSwatch({ color, onChange }) {
 // attributes some of them pass — so none of them need to change.
 export function PermissionToggle({ checked, onChange, 'aria-label': ariaLabel, ...rest }) {
   return <Toggle checked={checked} onChange={() => onChange()} ariaLabel={ariaLabel} {...rest} />
-}
-
-// ColorBadge — a lookup row's own label+colour chip (statuses/funnel/candidate
-// types/pools/…). HUISSTIJL-1: this used to hand-roll its own hex-concat tint;
-// it now delegates to SoftChip — the ONE chip component (§4) — so every one of
-// its many call sites gets the house tintBg/tintBorder formula for free.
-export function ColorBadge({ label, color }) {
-  return <SoftChip label={label} color={color} round />
 }
 
 // Per-row "Standaard" (is_default) singleton toggle — soft-chip convention (§4):

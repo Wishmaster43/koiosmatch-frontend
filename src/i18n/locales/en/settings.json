@@ -613,7 +613,9 @@
     "loadError": "Could not load the list.",
     "saveFailed": "Saving failed.",
     "deleteFailed": "Deleting failed.",
-    "clearDefault": "Click to clear default"
+    "clearDefault": "Click to clear default",
+    "valueMark": "Icon and colour: {{label}}",
+    "colorMark": "Colour: {{label}}"
   },
   "phases": {
     "title": "Phases",

@@ -2,6 +2,8 @@
   "newUser": "Nieuwe gebruiker",
   "cardPersonal": "Persoonlijk",
   "cardContact": "Contact",
+  "cardAccount": "Account",
+  "cardRoleAccess": "Rol & toegang",
   "firstName": "Voornaam",
   "lastName": "Achternaam",
   "email": "E-mailadres",

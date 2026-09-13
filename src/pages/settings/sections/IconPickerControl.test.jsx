@@ -38,4 +38,22 @@ describe('IconPickerControl popover', () => {
     act(() => { document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })) })
     expect(screen.queryByRole('menu')).not.toBeInTheDocument()
   })
+
+  // SETTINGS-INCON-B2 F1 (Opus review, 13-09): the popover used to render
+  // `position: absolute` inside its trigger's own subtree — clipped by a hosting
+  // modal's `overflow: hidden`/`auto` panel. It now portals into document.body,
+  // so it lives OUTSIDE the render container regardless of what overflow
+  // ancestor wraps the trigger.
+  it('portals the popover into document.body, not inside the trigger\'s own subtree', async () => {
+    const user = userEvent.setup()
+    const { container } = render(
+      <I18nextProvider i18n={i18n}>
+        <IconPickerControl icons={icons} resolve={resolve} value="file" color="var(--color-primary)" label="Contract" onPick={vi.fn()} />
+      </I18nextProvider>
+    )
+    await user.click(screen.getByRole('button', { name: 'documentTypes.icon: Contract' }))
+    const menu = screen.getByRole('menu')
+    expect(container.contains(menu)).toBe(false)
+    expect(document.body.contains(menu)).toBe(true)
+  })
 })

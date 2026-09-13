@@ -24,11 +24,13 @@ interface Props {
  * <form onSubmit={...}> modal (clone: EditUserModal + NewUserModal). Submit is
  * type="submit" — it never calls a handler itself, so Enter in any field still
  * triggers the host form's own onSubmit; this component only renders the row.
- * A Fragment (no wrapping div), matching both consumers' original DOM exactly.
+ * SETTINGS-INCON-B2 (13-09): both callers now sit below a two-column card grid
+ * (UserModalColumns) and wrapped this in an identical `marginTop: 20` div —
+ * the top margin now lives here once instead of copied at both call sites.
  */
 export default function ModalErrorSubmitFooter({ error, onCancel, cancelLabel, disabled, saving, busyLabel, idleLabel }: Props) {
   return (
-    <>
+    <div style={{ marginTop: 20 }}>
       {error && <p style={{ fontSize: 12, color: 'var(--color-danger-text)', marginBottom: 12 }}>{error}</p>}
       <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
         <Button variant="secondary" onClick={onCancel}>{cancelLabel}</Button>
@@ -36,6 +38,6 @@ export default function ModalErrorSubmitFooter({ error, onCancel, cancelLabel, d
           {saving ? <><Spinner size={13} /> {busyLabel}</> : idleLabel}
         </Button>
       </div>
-    </>
+    </div>
   )
 }

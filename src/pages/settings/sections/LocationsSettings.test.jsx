@@ -340,6 +340,23 @@ describe('LocationsSettings', () => {
     })))
   })
 
+  it('SETTINGS-INCON-B2: the create dialog is the shared FloatingPanel — draggable header, resizable, wide-form width (no longer a fixed, undraggable popup)', async () => {
+    api.get.mockResolvedValue({ data: { data: [] } })
+    const user = userEvent.setup()
+    render(<LocationsSettings />)
+    await waitFor(() => expect(screen.getByText(st('locations.empty'))).toBeInTheDocument())
+
+    await user.click(screen.getByRole('button', { name: st('locations.create') }))
+    const dialog = await screen.findByRole('dialog', { name: st('locations.create') })
+
+    // FloatingPanel's own drag handle (POPUP-SLEEP-1) — the old header was a
+    // static row with no way to move the panel.
+    expect(dialog.querySelector('[data-drag-handle]')).toBeInTheDocument()
+    // Same wide-form footprint every create modal shares (WIDE_MODAL_PANEL_SIZE),
+    // not the old inline 94vw/WIDE_MODAL.maxWidth sizing on a plain fixed div.
+    expect(dialog).toHaveStyle({ maxWidth: '1320px' })
+  })
+
   it('LOC-FOCUS-TRAP-1: opening the create modal moves focus in, Escape closes it, and focus returns to the trigger', async () => {
     // Regression guard for a focus trap that was structurally dead: useFocusTrap
     // was previously armed in the always-mounted container, so its effect ran once

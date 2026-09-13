@@ -1,29 +1,26 @@
 /**
- * LocationFormModal — the "+ Vestiging" / edit-branch dialog: overlay, wide-form
- * frame and the four titled cards (Algemeen incl. branding, Adres, Zakelijk,
- * Contact) plus its Cancel/Save footer.
+ * LocationFormModal — the "+ Vestiging" / edit-branch dialog: the shared
+ * FloatingPanel shell (wide-form frame, draggable header, SE-resize, remembered
+ * position) around the four titled cards (Algemeen incl. branding, Adres,
+ * Zakelijk, Contact) plus its Cancel/Save footer.
  *
  * The form VALUE stays in LocationsSettings (it owns the create/update payload);
  * this component only renders it and reports edits back through `setForm`, so the
- * container keeps one source of truth. Pulled out of that container (28-07) —
- * it was more than a third of the file and has nothing to do with loading or
- * deleting locations.
+ * container keeps one source of truth.
  *
- * The focus trap is armed HERE, not in the always-mounted container (fixed
- * 30-07): useFocusTrap's effect attaches to `ref.current` on mount, so it needs
- * a component that only exists while the dialog is open — mirrors
- * ConfirmDialog's DialogPanel / AddLocationModal. The container previously called
- * useFocusTrap unconditionally above its `showModal &&` branch, so the ref was
- * still null the one time the effect ever ran (page mount) and never fired
- * again: no trap, no Escape-to-close, no focus restore, despite this docblock's
- * promise of all three.
+ * SETTINGS-INCON-B2 (Danny 13-09, verbatim on #settings/company/locations:
+ * "Pop-up is niet de standaard!! Ik kan niet slepen/verplaatsen groter of
+ * kleiner maken"): this was a hand-rolled `position:fixed` dialog with no
+ * drag/resize — migrated onto the shared FloatingPanel (§4 HUISSTIJL-1), the
+ * ONE popup shell every dialog in the app shares. The focus trap, Escape-to-
+ * close and focus-restore now live inside FloatingPanel itself (mirrors every
+ * other migrated modal — NewUserModal/EditUserModal/AddCandidateModal), so this
+ * file no longer arms its own useFocusTrap.
  */
 import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
-import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { WIDE_MODAL_PANEL_SIZE } from '@/components/ui/wideModalPanelSize'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 import { LOCATION_ICON_NAMES, resolveLocationIcon, DEFAULT_LOCATION_COLOR } from '@/lib/locationIcons'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { ColorSwatch } from '../../components/SettingsControls'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useCountriesLookup } from '@/lib/useCountriesLookup'
@@ -33,7 +30,8 @@ import Toggle from '@/components/ui/Toggle'
 import { BodyText, Caption } from '@/components/ui/typography'
 import { useIdentifierValidation } from '@/hooks/useIdentifierValidation'
 import IconPickerControl from '../IconPickerControl'
-import Button from '@/components/ui/Button'
+import FloatingPanel from '@/components/ui/FloatingPanel'
+import ModalFooter from '@/components/ui/ModalFooter'
 
 // House field footprint (Danny 27-07 point D): 11px uppercase muted label above
 // each input, fontSize 13 / borderRadius 8 — mirrors match/styles.ts'
@@ -41,13 +39,9 @@ import Button from '@/components/ui/Button'
 const lbl = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 5 }
 const inp = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
 
-// The location create/edit modal; the focus trap is safe to attach unconditionally since this component only ever mounts while the dialog is actually open.
+// The location create/edit modal, on the shared FloatingPanel shell.
 export default function LocationFormModal({ editingId, form, setForm, saving, onClose, onSubmit }) {
   const { t } = useTranslation(['settings', 'common'])
-  // This component is only mounted while the dialog is open (the container
-  // renders it behind `showModal &&`), so this effect attaches to a real node
-  // every time it opens — Esc-to-close, tab-trap and focus-restore all work.
-  const panelRef = useFocusTrap(onClose)
 
   const setF = (k) => (e) => setForm(x => ({ ...x, [k]: e.target.value }))
   // Called as a function (not <F/>) so inputs keep focus while typing.
@@ -85,23 +79,15 @@ export default function LocationFormModal({ editingId, form, setForm, saving, on
   const identifierBlocked = cocNotice?.severity === 'error' || vatNotice?.severity === 'error'
 
   return (
-    <>
-      <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={onClose} />
-      {/* Wide-form frame (Danny 27-07: "+ vestiging... moet net zo breed en hoog
-          worden als + match of + nieuwe kandidaat") — same WIDE_MODAL footprint
-          as AddCandidateModal/MatchModal, `94vw` cap so it still breathes
-          on narrow viewports (mirrors match/styles.ts' `panel`, this
-          component being `position: fixed` with no flex-centering overlay of its
-          own). role="dialog" + useFocusTrap (§6): focus trap, Escape-to-close,
-          focus restore — this panel had none of that before. */}
-      <div ref={panelRef} role="dialog" aria-modal="true" tabIndex={-1}
-        aria-label={editingId ? t('locations.editTitle') : t('locations.create')}
-        className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: '94vw', maxWidth: WIDE_MODAL.maxWidth, maxHeight: WIDE_MODAL.maxHeight, overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-          <span style={{ fontSize: 15, fontWeight: 700 }}>{editingId ? t('locations.editTitle') : t('locations.create')}</span>
-          <button onClick={onClose} aria-label={t('common.cancel')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
-        </div>
-
+    // POPUP-SLEEP-1 / SETTINGS-INCON-B2: the shared draggable/resizable shell —
+    // same wide-form footprint as AddCandidateModal/MatchModal (Danny 27-07:
+    // "+ vestiging... moet net zo breed en hoog worden als + match of + nieuwe
+    // kandidaat"), now also draggable and resizable like every other popup.
+    <FloatingPanel open onClose={onClose}
+      title={editingId ? t('locations.editTitle') : t('locations.create')}
+      persistKey="location-form" resizable scrollBody={false}
+      {...WIDE_MODAL_PANEL_SIZE}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* Algemeen — name, branding, and default flag (B-43).
               Titled-card chrome (Danny 27-07 point B: "kaders om elk blokje") via
@@ -189,15 +175,12 @@ export default function LocationFormModal({ editingId, form, setForm, saving, on
             </div>
           </div>
         </div>
-
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
-          <Button variant="secondary" onClick={onClose}>{t('common.cancel')}</Button>
-          {/* KVK/BTW-PER-LAND-1: only a BLOCKING mismatch gates Save — a warning still saves. */}
-          <Button variant="primary" onClick={onSubmit} disabled={saving || !form.name.trim() || identifierBlocked}>
-            {saving ? t('common.saving') : (editingId ? t('common.save') : t('locations.createBtn'))}
-          </Button>
-        </div>
       </div>
-    </>
+
+      {/* KVK/BTW-PER-LAND-1: only a BLOCKING mismatch gates Save — a warning still saves. */}
+      <ModalFooter onCancel={onClose} onSubmit={onSubmit}
+        disabled={saving || !form.name.trim() || identifierBlocked} busy={saving}
+        cancelLabel={t('common.cancel')} submitLabel={editingId ? t('common.save') : t('locations.createBtn')} />
+    </FloatingPanel>
   )
 }

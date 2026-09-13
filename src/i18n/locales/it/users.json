@@ -2,6 +2,8 @@
   "newUser": "Nuovo utente",
   "cardPersonal": "Personale",
   "cardContact": "Contatto",
+  "cardAccount": "Account",
+  "cardRoleAccess": "Ruolo e accesso",
   "firstName": "Nome",
   "lastName": "Cognome",
   "email": "Indirizzo e-mail",

@@ -613,7 +613,9 @@
     "loadError": "Impossibile caricare l'elenco.",
     "saveFailed": "Salvataggio non riuscito.",
     "deleteFailed": "Eliminazione non riuscita.",
-    "clearDefault": "Clicca per annullare il predefinito"
+    "clearDefault": "Clicca per annullare il predefinito",
+    "valueMark": "Icona e colore: {{label}}",
+    "colorMark": "Colore: {{label}}"
   },
   "phases": {
     "title": "Fasi",

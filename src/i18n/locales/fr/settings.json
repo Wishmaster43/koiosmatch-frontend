@@ -591,7 +591,9 @@
     "loadError": "Impossible de charger la liste.",
     "deleteFailed": "Échec de la suppression.",
     "saveFailed": "Échec de l'enregistrement.",
-    "clearDefault": "Cliquer pour retirer la valeur par défaut"
+    "clearDefault": "Cliquer pour retirer la valeur par défaut",
+    "valueMark": "Icône et couleur : {{label}}",
+    "colorMark": "Couleur : {{label}}"
   },
   "phases": {
     "title": "Phases",

@@ -591,7 +591,9 @@
     "loadError": "Die Liste konnte nicht geladen werden.",
     "deleteFailed": "Löschen fehlgeschlagen.",
     "saveFailed": "Speichern fehlgeschlagen.",
-    "clearDefault": "Klicken, um Standard aufzuheben"
+    "clearDefault": "Klicken, um Standard aufzuheben",
+    "valueMark": "Symbol und Farbe: {{label}}",
+    "colorMark": "Farbe: {{label}}"
   },
   "phases": {
     "title": "Phasen",

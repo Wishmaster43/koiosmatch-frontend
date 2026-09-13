@@ -4,17 +4,19 @@
  * CandidateLookupsSettings (batch 12, P22-30) once the parent crossed the
  * ~400-line split trigger; this file only renders the modal body — all state
  * and persistence stay in the parent (`modal`/`setModal`/`save`/`busy`).
+ *
+ * SETTINGS-INCON-B2 (Danny 13-09, "AUDIT op alle pop-ups!!"): migrated off a
+ * hand-rolled fixed/centered div onto the shared FloatingPanel — draggable
+ * header, resizable, remembered position; it arms its own focus trap now.
  */
 import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
 import { ColorSwatch } from '../components/SettingsControls'
 import { Toggle } from '../components/SettingsKit'
 import IconPickerControl from './IconPickerControl'
 import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIcons'
-import Button from '@/components/ui/Button'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import ModalFooter from '@/components/ui/ModalFooter'
-import { Caption, BodyText, PageTitle, SectionTitle } from '@/components/ui/typography'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { Caption, BodyText, SectionTitle } from '@/components/ui/typography'
 
 // "Niet actief" ("Not active") → "niet_actief" — a stable English-ish slug suggestion (mirrors
 // the parent's slugify; duplicated here to avoid a cross-file import cycle).
@@ -44,22 +46,12 @@ export default function CandidateLookupItemModal({
   isStatusBlock, isFunnelBlock, isPhaseBlock, isContractFormBlock, supportsIcon,
 }) {
   const { t } = useTranslation('settings')
-
-  // Single-source dialog behaviour (Escape + Tab-trap, guarded against a nested
-  // popup's Escape bubbling past its own scope) via the shared useFocusTrap,
-  // instead of a hand-rolled document-level Escape listener.
-  const trapRef = useFocusTrap(onClose)
+  const title = modal.mode === 'add' ? t('lookups.add') : t('lookups.edit')
 
   return (
-    <>
-      <div className="fixed inset-0" style={{ zIndex: 'var(--z-overlay)', background: 'rgba(0,0,0,0.3)' }} onClick={onClose} />
-      <div ref={trapRef} role="dialog" aria-modal="true" aria-label={modal.mode === 'add' ? t('lookups.add') : t('lookups.edit')} tabIndex={-1}
-        className="fixed" style={{ zIndex: 'var(--z-overlay)', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: 400, boxShadow: 'var(--shadow-modal)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-          <PageTitle as="span">{modal.mode === 'add' ? t('lookups.add') : t('lookups.edit')}</PageTitle>
-          <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}><X size={16} /></Button>
-        </div>
-
+    <FloatingPanel open onClose={onClose} title={title} persistKey="candidate-lookup-item" resizable
+      scrollBody={false} width={400}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 0' }}>
         <div style={{ marginBottom: 14 }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('lookups.labelField')}</div>
           {/* Phase label lock (P21/KANDIDATEN-13, mirrors the BE 422 in
@@ -218,13 +210,11 @@ export default function CandidateLookupItemModal({
             checked={modal.is_proposal} onChange={v => setModal(m => ({ ...m, is_proposal: v }))} />
         )}
 
-        {/* Shared modal footer row (§4) — spans the modal's full width past the body padding. */}
-        <div style={{ margin: '20px -24px -24px' }}>
-          <ModalFooter onCancel={onClose} onSubmit={onSave} busy={busy}
-            disabled={busy || !modal.label.trim()}
-            cancelLabel={t('common.cancel')} submitLabel={busy ? t('common.saving') : t('common.save')} />
-        </div>
       </div>
-    </>
+      {/* Shared modal footer row (§4) — pinned outside the scrolling body. */}
+      <ModalFooter onCancel={onClose} onSubmit={onSave} busy={busy}
+        disabled={busy || !modal.label.trim()}
+        cancelLabel={t('common.cancel')} submitLabel={busy ? t('common.saving') : t('common.save')} />
+    </FloatingPanel>
   )
 }

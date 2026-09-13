@@ -45,7 +45,7 @@
  * the flag prefix already conveys the country, a trailing "Netherlands" text chip
  * would be redundant clutter)
  * rowPrefix (optioneel): (item) => ReactNode, rendered right before the name/
- * ColorBadge — a small row-adornment hook for a lookup whose "extra" value needs
+ * value mark — a small row-adornment hook for a lookup whose "extra" value needs
  * a bespoke glyph rather than the generic extraField/flagField/numberField badges
  * (NATION-FLAG-1: a flag emoji derived from item.country_code).
  *
@@ -63,7 +63,6 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { DragList } from '../components/SettingsControls'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { PageTitle } from '@/components/ui/typography'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
 import StatusListRow from './StatusListRow'
 import StatusListModal from './StatusListModal'
 import type { StatusListEditorProps, StatusListItem, StatusListDraft, DefaultFieldDef } from './statusListEditorTypes'
@@ -122,9 +121,9 @@ export default function StatusListEditor({
   const [busyDefaultKey, setBusyDefaultKey] = useState<string | null>(null)
   // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
   const { confirm, dialog } = useConfirm()
-  // MODAL-HERBOUW-1: shared focus-trap (arm-on-attach, Escape-to-close, restores
-  // focus on close) — the trap's own close callback always reads the latest one.
-  const modalPanelRef = useFocusTrap(() => setShowModal(false))
+  // SETTINGS-INCON-B2: the create/edit modal is the shared FloatingPanel now —
+  // it arms its own focus trap (Escape-to-close, focus-restore) internally, so
+  // this container no longer owns a modalPanelRef.
 
   useEffect(() => {
     // Reset every previous-load flag when the endpoint/entity identity changes —
@@ -338,7 +337,7 @@ export default function StatusListEditor({
 
       {showModal && (
         <StatusListModal
-          modalPanelRef={modalPanelRef} editing={editing} addLabel={addLabel} draft={draft} setDraft={setDraft}
+          editing={editing} addLabel={addLabel} draft={draft} setDraft={setDraft}
           withColor={withColor} resolvedIconPicker={resolvedIconPicker} numberField={numberField} extraField={extraField}
           flagList={flagList} saving={saving} onClose={() => setShowModal(false)} onSubmit={submit}
         />

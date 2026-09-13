@@ -87,7 +87,8 @@ describe('DocumentTypesSettings — per-entity tab', () => {
     render(<DocumentTypesSettings entity="candidate" />)
 
     await screen.findByText('CV')
-    await user.click(screen.getByRole('button', { name: `${st('documentTypes.icon')}: CV` }))
+    // LOOKUP-ONE-ELEMENT-1: the row's colour+icon trigger is the shared LookupValueMark now.
+    await user.click(screen.getByRole('button', { name: st('statusList.valueMark', { label: 'CV' }) }))
     await user.click(screen.getByRole('menuitem', { name: `${st('documentTypes.icon')}: id-card` }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/document-types/row-1', expect.objectContaining({ icon: 'id-card' })))

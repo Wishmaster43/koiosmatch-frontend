@@ -81,6 +81,10 @@ export default function SettingsSearch({ open, onClose, groups, onSelect }: Sett
       position: 'fixed', inset: 0, zIndex: 'var(--z-overlay)', background: 'rgba(17,24,39,0.35)',
       display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '12vh',
     }}>
+      {/* SETTINGS-INCON-B2 audit (13-09): stays off FloatingPanel on purpose — a
+          ⌘K command palette is a fixed-position, keyboard-driven omnibar (auto-
+          focused input, arrow-key nav, closes on pick); dragging/resizing it or
+          remembering a position would fight that idiom, not serve it. */}
       <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t('shell.search')} tabIndex={-1}
         onMouseDown={e => e.stopPropagation()} style={{
           width: 'min(560px, 92vw)', background: 'var(--surface)', borderRadius: 14,

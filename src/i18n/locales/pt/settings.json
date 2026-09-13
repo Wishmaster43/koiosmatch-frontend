@@ -613,7 +613,9 @@
     "loadError": "Não foi possível carregar a lista.",
     "saveFailed": "Falha ao guardar.",
     "deleteFailed": "Falha ao eliminar.",
-    "clearDefault": "Clique para remover a predefinição"
+    "clearDefault": "Clique para remover a predefinição",
+    "valueMark": "Ícone e cor: {{label}}",
+    "colorMark": "Cor: {{label}}"
   },
   "phases": {
     "title": "Fases",

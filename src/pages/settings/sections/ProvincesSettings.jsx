@@ -11,18 +11,19 @@
  */
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AlertTriangle, Check, Save, X, Trash2, RefreshCw, Pencil, Plus } from 'lucide-react'
+import { AlertTriangle, Check, Save, Trash2, RefreshCw, Pencil, Plus } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { DragList } from '../components/SettingsControls'
 import SearchSelect from '@/components/ui/SearchSelect'
 import Spinner from '@/components/ui/Spinner'
 import { useConfirm } from '@/hooks/useConfirm'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { getCountryOptions } from '@/lib/countries'
 import Button from '@/components/ui/Button'
 import SaveButton from '@/components/ui/SaveButton'
 import { PageTitle } from '@/components/ui/typography'
+import FloatingPanel from '@/components/ui/FloatingPanel'
+import ModalFooter from '@/components/ui/ModalFooter'
 
 // Bespoke per-country province lookup editor (see file doc for why it isn't
 // the shared StatusListEditor): country picker + drag-reorderable, CRUD list.
@@ -42,10 +43,6 @@ export default function ProvincesSettings() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [deleting, setDeleting] = useState(null)
-
-  // Single-source dialog behaviour (Escape + Tab-trap + focus restore) for the
-  // add/edit modal via the shared useFocusTrap.
-  const modalTrapRef = useFocusTrap(() => setShowModal(false))
 
   // Fetch the selected country's provinces. An alive guard drops a stale response
   // when the country switches (or the component unmounts) before it lands (§9).
@@ -176,28 +173,24 @@ export default function ProvincesSettings() {
       )}
 
       {showModal && (
-        <>
-          <div className="fixed inset-0" style={{ zIndex: 'var(--z-overlay)', background: 'rgba(0,0,0,0.3)' }} onClick={() => setShowModal(false)} />
-          <div ref={modalTrapRef} role="dialog" aria-modal="true" aria-label={editing ? t('statusList.editTitle') : t('provinces.add')} tabIndex={-1}
-            className="fixed" style={{ zIndex: 'var(--z-overlay)', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: 400, boxShadow: 'var(--shadow-modal)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-              <PageTitle style={{ fontWeight: 700 }}>{editing ? t('statusList.editTitle') : t('provinces.add')}</PageTitle>
-              <Button variant="ghost" iconOnly onClick={() => setShowModal(false)} aria-label={t('common.close')}><X size={16} /></Button>
-            </div>
+        // SETTINGS-INCON-B2 (Danny 13-09, "AUDIT op alle pop-ups!!"): migrated off
+        // a hand-rolled fixed/centered div onto the shared FloatingPanel —
+        // draggable header, resizable, remembered position, own focus trap.
+        <FloatingPanel open onClose={() => setShowModal(false)}
+          title={editing ? t('statusList.editTitle') : t('provinces.add')}
+          persistKey="province-item" resizable scrollBody={false} width={400}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 0' }}>
             <div style={{ marginBottom: 14 }}>
               <label htmlFor="province-name" style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('statusList.nameLabel')}</label>
               <input id="province-name" value={name} onChange={e => setName(e.target.value)}
                 placeholder={t('statusList.namePlaceholder')}
                 style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box' }} />
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
-              <Button variant="secondary" onClick={() => setShowModal(false)}>{t('common.cancel')}</Button>
-              <Button variant="primary" onClick={submit} disabled={saving || !name.trim()}>
-                {saving ? t('common.saving') : (editing ? t('common.save') : t('statusList.addBtn'))}
-              </Button>
-            </div>
           </div>
-        </>
+          <ModalFooter onCancel={() => setShowModal(false)} onSubmit={submit}
+            disabled={saving || !name.trim()} busy={saving}
+            cancelLabel={t('common.cancel')} submitLabel={editing ? t('common.save') : t('statusList.addBtn')} />
+        </FloatingPanel>
       )}
 
       {dialog}

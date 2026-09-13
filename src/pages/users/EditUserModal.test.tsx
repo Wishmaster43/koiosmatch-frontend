@@ -36,6 +36,19 @@ const testUser: ManagedUser = { id: 'u1', firstname: 'Jan', lastname: 'Jansen', 
 const noop = () => {}
 
 describe('EditUserModal · profile save', () => {
+  // SETTINGS-INCON-B2 (Danny 13-09, verbatim: "Pop-up wijzigen gebruiker is te
+  // smal maak dit breeder ... Naam niet leesbaar"): the panel used to hardcode
+  // a 420px width, squeezing firstname/lastname into an unreadable column each.
+  // It now shares the wide-form footprint (WIDE_MODAL_PANEL_SIZE) every create
+  // modal uses, and both name fields render as full, untruncated labelled inputs.
+  it('opens at the wide-form footprint, not the old cramped 420px column, with the full name readable', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
+    render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)
+    expect(screen.getByRole('dialog')).toHaveStyle({ maxWidth: '1320px' })
+    expect(await screen.findByDisplayValue('Jan')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Jansen')).toBeInTheDocument()
+  })
+
   it('PUTs (not PATCHes) the profile fields — /users/{id} is documented PUT-only, a PATCH 405s silently', async () => {
     vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
     vi.mocked(api.put).mockResolvedValueOnce({ data: { data: { ...testUser, firstname: 'Piet' } } })

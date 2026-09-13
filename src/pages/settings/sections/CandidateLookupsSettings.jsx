@@ -30,13 +30,14 @@ import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { useConfirm } from '@/hooks/useConfirm'
-import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/SettingsControls'
-import IconPickerControl from './IconPickerControl'
+import { DragList, DefaultToggle } from '../components/SettingsControls'
+import LookupValueMark from './LookupValueMark'
 import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIcons'
+import { FALLBACK_SWATCH } from './statusListEditorTypes'
 import CandidateLookupItemModal from './CandidateLookupItemModal'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import Button from '@/components/ui/Button'
-import { Caption } from '@/components/ui/typography'
+import { Caption, BodyText } from '@/components/ui/typography'
 
 const BASE = '/settings/candidate-lookups'
 
@@ -199,17 +200,18 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
         sortable={!locked}
         renderItem={(item) => (
           <>
-            {/* eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome */}
-            <ColorSwatch color={item.color ?? '#6B7280'} onChange={c => updateColor(item, c)} />
-            {/* Icon picker IN the row, next to the colour (mirrors StatusListEditor,
-                batch 12 P22-30) — statuses + contract forms only. */}
-            {supportsIcon && (
-              <IconPickerControl icons={GENERIC_LOOKUP_ICON_NAMES} resolve={resolveGenericLookupIcon} value={item.icon}
-                // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
-                color={item.color ?? '#6B7280'} label={item.label} onPick={icon => updateIcon(item, icon)} />
-            )}
-            {/* eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome */}
-            <ColorBadge label={item.label} color={item.color ?? '#6B7280'} />
+            {/* LOOKUP-ONE-ELEMENT-1 (Danny 10-09 23:20, rows 26/27/31: "Ik mis icon en
+                kleur"): one coloured mark per value — an icon in its own colour
+                (statuses/contract forms), or the colour fill itself (funnel stages/
+                phases) — never a swatch dot next to a separate icon box, and never a
+                coloured label chip alongside it (mirrors StatusListRow). */}
+            <LookupValueMark
+              color={item.color ?? FALLBACK_SWATCH} icon={item.icon} withColor
+              icons={supportsIcon ? GENERIC_LOOKUP_ICON_NAMES : null} resolve={supportsIcon ? resolveGenericLookupIcon : undefined}
+              label={item.label}
+              onPickColor={c => updateColor(item, c)} onPickIcon={icon => updateIcon(item, icon)}
+            />
+            <BodyText as="span">{item.label}</BodyText>
             {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- <code> renders the lookup's raw stored value/slug (an ID field, §3A), not a Caption/label copy */}
             <code style={{ fontSize: 11, color: 'var(--text-muted)' }}>{item.value}</code>
             {/* Reason badge: marks a status that requires a reason when set (e.g. Inactive). */}

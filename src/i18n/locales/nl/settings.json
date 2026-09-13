@@ -613,7 +613,9 @@
     "loadError": "Kon de lijst niet laden.",
     "saveFailed": "Opslaan mislukt.",
     "deleteFailed": "Verwijderen mislukt.",
-    "clearDefault": "Klik om standaard op te heffen"
+    "clearDefault": "Klik om standaard op te heffen",
+    "valueMark": "Icoon en kleur: {{label}}",
+    "colorMark": "Kleur: {{label}}"
   },
   "phases": {
     "title": "Fasen",

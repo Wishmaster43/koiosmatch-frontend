@@ -28,6 +28,13 @@ import { Caption, GroupLabel } from '@/components/ui/typography'
 import { FieldRow, TextField, CheckboxField } from '@/components/forms/fields'
 import FieldNotice from '@/components/ui/FieldNotice'
 import ModalErrorSubmitFooter from '@/components/forms/ModalErrorSubmitFooter'
+// SETTINGS-INCON-B2 (Danny 13-09): the wide-form footprint + titled two-column
+// card layout every create modal shares (mirrors AddCandidateModal) — the old
+// 420px single column left the name fields cramped.
+import { WIDE_MODAL_PANEL_SIZE } from '@/components/ui/wideModalPanelSize'
+import { cardHead, cardBox } from '@/components/ui/modalCards'
+import UserNameCard from './UserNameCard'
+import UserModalColumns from './UserModalColumns'
 
 // VALIDATIE-LIVE-1-rest: `email` is the only field here the backend validates
 // with a shape rule (UserController's inline POST rules — `'email' =>
@@ -134,81 +141,87 @@ export default function NewUserModal({ onClose, onCreated }: {
   const input: CSSProperties = fieldInputStyle
 
   return (
-    // POPUP-SLEEP-1: migrated onto the shared FloatingPanel shell — draggable
-    // header, SE-resize, remembered position; same 420px footprint as before.
+    // SETTINGS-INCON-B2 (Danny 13-09): the wide-form footprint (mirrors
+    // AddCandidateModal/AddCustomerModal), two titled-card columns instead of
+    // one cramped stack — the name fields get real room to read.
     <FloatingPanel open onClose={onClose} title={t('newUser')} ariaLabel={t('newUser')}
-      persistKey="new-user" width={420} bodyStyle={{ padding: '20px 24px 24px' }}>
+      persistKey="new-user" {...WIDE_MODAL_PANEL_SIZE} bodyStyle={{ padding: '20px 24px 24px' }}>
         <form onSubmit={handleSubmit}>
-          {/* Name row (FIELD-LAYOUT canon: label left of every field). */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
-            <FieldRow label={t('firstName')} required>
-              <TextField value={form.firstname} onChange={set('firstname')} placeholder={t('common:placeholders.firstName')} />
-            </FieldRow>
-            <FieldRow label={t('lastName')}>
-              <TextField value={form.lastname} onChange={set('lastname')} placeholder={t('common:placeholders.lastName')} />
-            </FieldRow>
-          </div>
-          {/* E-mail — VALIDATIE-LIVE-1-rest: blur marks it touched so a live
-              format error renders inline instead of only bouncing back as a 422. */}
-          <div style={{ marginBottom: 12 }} onBlur={() => markTouched('email')}>
-            <FieldRow label={t('email')} required>
-              <TextField type="email" value={form.email} onChange={set('email')} placeholder={t('common:placeholders.emailExample')} error={!!fieldMessage('email')} />
-            </FieldRow>
-            <FieldNotice text={fieldMessage('email')} />
-          </div>
-          <div style={{ marginBottom: 12 }}>
-            <FieldRow label={t('password')} required>
-              <TextField type="password" autoComplete="new-password" value={form.password} onChange={set('password')} placeholder={t('pwPlaceholder')} />
-            </FieldRow>
-          </div>
-          <div style={{ marginBottom: 12 }}>
-            {/* ROLE-PICKER-LEFT-1: the shared FieldRow, like every sibling field
-                (§3A field-layout canon) — no private restyle. Not `required`:
-                nothing here validates the role as required (the create button is
-                merely disabled without one, no aria-required existed before this
-                row was hand-rolled). Loading/empty is honest by having nothing to
-                pick (§3 — no fake affordance); the dimmed style blocks interaction
-                while there is nothing selectable yet, mirroring the old select's
-                disabled look. */}
-            <FieldRow label={t('role')}>
-              <CreatableSelect value={form.role || null} onChange={setRole} allowCreate={false}
-                placeholder={rolesLoading ? t('rolesLoading') : (roles.length === 0 ? t('noRoles') : undefined)}
-                options={roles.map(r => ({ value: r.name, label: roleLabel(t, r.name) }))}
-                style={(rolesLoading || roles.length === 0) ? { ...input, opacity: 0.6, pointerEvents: 'none' } : input} />
-            </FieldRow>
-          </div>
+          <UserModalColumns
+            left={<>
+              {/* Personal — first/last name, shared with EditUserModal (UserNameCard). */}
+              <UserNameCard firstname={form.firstname} lastname={form.lastname}
+                onFirstname={set('firstname')} onLastname={set('lastname')} />
+              <div>
+                <div style={cardHead}>{t('cardAccount')}</div>
+                <div style={cardBox}>
+                  {/* E-mail — VALIDATIE-LIVE-1-rest: blur marks it touched so a live
+                      format error renders inline instead of only bouncing back as a 422. */}
+                  <div onBlur={() => markTouched('email')}>
+                    <FieldRow label={t('email')} required>
+                      <TextField type="email" value={form.email} onChange={set('email')} placeholder={t('common:placeholders.emailExample')} error={!!fieldMessage('email')} />
+                    </FieldRow>
+                    <FieldNotice text={fieldMessage('email')} />
+                  </div>
+                  <FieldRow label={t('password')} required>
+                    <TextField type="password" autoComplete="new-password" value={form.password} onChange={set('password')} placeholder={t('pwPlaceholder')} />
+                  </FieldRow>
+                </div>
+              </div>
+            </>}
+            right={
+              <div>
+                <div style={cardHead}>{t('cardRoleAccess')}</div>
+                <div style={cardBox}>
+                  {/* ROLE-PICKER-LEFT-1: the shared FieldRow, like every sibling field
+                      (§3A field-layout canon) — no private restyle. Not `required`:
+                      nothing here validates the role as required (the create button is
+                      merely disabled without one, no aria-required existed before this
+                      row was hand-rolled). Loading/empty is honest by having nothing to
+                      pick (§3 — no fake affordance); the dimmed style blocks interaction
+                      while there is nothing selectable yet, mirroring the old select's
+                      disabled look. */}
+                  <FieldRow label={t('role')}>
+                    <CreatableSelect value={form.role || null} onChange={setRole} allowCreate={false}
+                      placeholder={rolesLoading ? t('rolesLoading') : (roles.length === 0 ? t('noRoles') : undefined)}
+                      options={roles.map(r => ({ value: r.name, label: roleLabel(t, r.name) }))}
+                      style={(rolesLoading || roles.length === 0) ? { ...input, opacity: 0.6, pointerEvents: 'none' } : input} />
+                  </FieldRow>
 
-          {/* AGENT-META-SETUP: only asked for a recruiter/manager — the two roles the
-              backend actually provisions an AI agent for. Default on; unchecking sends
-              create_agent: false so the recruiter can opt out per user. */}
-          {isAgentRole && (
-            <div style={{ marginBottom: 12, padding: '10px 12px', borderRadius: 8, background: 'var(--hover-bg)' }}>
-              <FieldRow label={t('agent.label')}>
-                <CheckboxField checked={createAgent} onChange={setCreateAgent} />
-              </FieldRow>
-              <Caption as="p" style={{ marginTop: 6 }}>{t('agent.hint')}</Caption>
-            </div>
-          )}
+                  {/* AGENT-META-SETUP: only asked for a recruiter/manager — the two roles the
+                      backend actually provisions an AI agent for. Default on; unchecking sends
+                      create_agent: false so the recruiter can opt out per user. */}
+                  {isAgentRole && (
+                    <div style={{ padding: '10px 12px', borderRadius: 8, background: 'var(--hover-bg)' }}>
+                      <FieldRow label={t('agent.label')}>
+                        <CheckboxField checked={createAgent} onChange={setCreateAgent} />
+                      </FieldRow>
+                      <Caption as="p" style={{ marginTop: 6 }}>{t('agent.hint')}</Caption>
+                    </div>
+                  )}
 
-          {/* Vestigingen — seeded from the role template, adjustable before create
-              (Danny ronde-2 punt 1.1: kies er 1 of meerdere bij het aanmaken). */}
-          {form.role && (
-            <div style={{ marginBottom: 20, padding: '10px 12px', borderRadius: 8, background: 'var(--hover-bg)' }}>
-              <GroupLabel style={{ marginBottom: 6 }}>
-                {t('branches.previewTitle')}
-              </GroupLabel>
-              {templateLoading ? (
-                <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('branches.loading')}</p>
-              ) : (
-                <ChipMultiSelect
-                  options={locations.map(o => ({ value: String(o.value), label: o.label }))}
-                  selected={effectiveBranches}
-                  onToggle={toggleBranch}
-                  emptyText={t('branches.noLocations')}
-                />
-              )}
-            </div>
-          )}
+                  {/* Vestigingen — seeded from the role template, adjustable before create
+                      (Danny ronde-2 punt 1.1: kies er 1 of meerdere bij het aanmaken). */}
+                  {form.role && (
+                    <div style={{ padding: '10px 12px', borderRadius: 8, background: 'var(--hover-bg)' }}>
+                      <GroupLabel style={{ marginBottom: 6 }}>
+                        {t('branches.previewTitle')}
+                      </GroupLabel>
+                      {templateLoading ? (
+                        <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('branches.loading')}</p>
+                      ) : (
+                        <ChipMultiSelect
+                          options={locations.map(o => ({ value: String(o.value), label: o.label }))}
+                          selected={effectiveBranches}
+                          onToggle={toggleBranch}
+                          emptyText={t('branches.noLocations')}
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            } />
 
           <ModalErrorSubmitFooter
             error={error}
