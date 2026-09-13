@@ -17,7 +17,7 @@ import { SmPaginationBar } from './SmPaginationBar'
 import { useSmLocations } from './hooks/useSmLocations'
 import type { SmLocationRow } from '@/types/shiftmanager'
 import { ListPageShell } from '@/components/ui/ListPageShell'
-import ErrorBanner from '@/components/ui/ErrorBanner'
+import { SmLoadErrorBanner } from './SmLoadErrorBanner'
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function LocationsPage() {
@@ -94,10 +94,8 @@ export default function LocationsPage() {
 
       {/* Table — shared DataTable (sticky header, sorting, soft-chip status colours) */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
-        {/* Error state (§3): the mirror fetch failed — say so and offer a retry, never an empty table that looks like success. */}
-        {isError && (
-          <ErrorBanner onRetry={() => { void refetch() }} retryLabel={t('mirror.retry')} style={{ marginBottom: 12 }}>{t('mirror.loadError')}</ErrorBanner>
-        )}
+        {/* Error state (§3): the mirror fetch failed, say so and offer a retry. */}
+        <SmLoadErrorBanner isError={isError} onRetry={refetch} />
         <LocationsTable rows={paged} loading={isLoading} selectedId={selected?.id}
           onSelect={loc => setSelected(prev => prev?.id === loc.id ? null : loc)} />
       </div>

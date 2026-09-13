@@ -17,7 +17,7 @@ import { useSmContacts } from './hooks/useSmContacts'
 import type { SmContactRow } from '@/types/shiftmanager'
 import { Caption } from '@/components/ui/typography'
 import { ListPageShell } from '@/components/ui/ListPageShell'
-import ErrorBanner from '@/components/ui/ErrorBanner'
+import { SmLoadErrorBanner } from './SmLoadErrorBanner'
 
 // Shiftmanager contacts list: filters/search/pagination in local state, filter groups pushed into the shared right panel, and a row click opens the contact drawer.
 export default function ContactsPage() {
@@ -93,10 +93,8 @@ export default function ContactsPage() {
 
       {/* Table — shared DataTable (sticky header, sorting, soft-chip planning flag) */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
-        {/* Error state (§3): the mirror fetch failed — say so and offer a retry, never an empty table that looks like success. */}
-        {isError && (
-          <ErrorBanner onRetry={() => { void refetch() }} retryLabel={t('mirror.retry')} style={{ marginBottom: 12 }}>{t('mirror.loadError')}</ErrorBanner>
-        )}
+        {/* Error state (§3): the mirror fetch failed, say so and offer a retry. */}
+        <SmLoadErrorBanner isError={isError} onRetry={refetch} />
         <ContactsTable rows={paged} loading={isLoading} selectedId={selected?.id}
           onSelect={c => setSelected(prev => prev?.id === c.id ? null : c)} />
       </div>
