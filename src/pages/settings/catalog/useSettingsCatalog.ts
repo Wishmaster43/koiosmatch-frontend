@@ -6,7 +6,7 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import api from '@/lib/api'
-import type { CatalogSection, SettingsCatalogResponse } from './catalogTypes'
+import type { CatalogNavEntry, CatalogSection, SettingsCatalogResponse } from './catalogTypes'
 
 // Query key shared by every consumer so one fetch serves all catalogue screens.
 export const SETTINGS_CATALOG_QUERY_KEY = ['settings', 'catalog'] as const
@@ -32,5 +32,7 @@ export function useSettingsCatalog() {
     sections.forEach(section => section.keys.forEach(row => row.aliases.forEach(alias => { map[alias] = row.key })))
     return map
   }, [sections])
-  return { sections, version: data?.version ?? '', aliasToCanonical, isLoading, isError, refetch }
+  // The nav palette (one colour per settings nav group) — empty until the BE serves it.
+  const nav: CatalogNavEntry[] = useMemo(() => data?.nav ?? [], [data])
+  return { sections, nav, version: data?.version ?? '', aliasToCanonical, isLoading, isError, refetch }
 }

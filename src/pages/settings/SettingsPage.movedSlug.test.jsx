@@ -19,6 +19,8 @@ vi.mock('@/context/AuthContext', () => ({
   useAuth: () => ({ isSuperAdmin: () => true, hasModule: () => true, hasPermission: () => true }),
 }))
 vi.mock('@/context/AppsContext', () => ({ useApps: () => ({ isAppEnabled: () => true }) }))
+// NAV-PALETTE (F3): the shell tests mock every data source; the sidebar colour hook too.
+vi.mock('./catalog/useSettingsNavColors', () => ({ useSettingsNavColors: () => ({ colorOf: () => undefined, map: {} }) }))
 
 afterEach(() => { window.location.hash = '' })
 

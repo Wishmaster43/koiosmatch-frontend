@@ -33,6 +33,7 @@ import SelectMenu from '@/components/ui/SelectMenu'
 import Button from '@/components/ui/Button'
 import { PageTitle } from '@/components/ui/typography'
 import { FIELD_HEIGHT, FIELD_FONT_SIZE } from '@/components/forms/fieldMetrics'
+import { useSettingsNavColors } from './catalog/useSettingsNavColors'
 
 // SM-MODULE-TABS-1: a nav item may declare `requiresModuleOrApp: { module, app }` to
 // stay visible when EITHER the tenant module OR the app/koppeling flag is on (a plain
@@ -96,6 +97,8 @@ export default function SettingsPage() {
   const auth = useAuth()
   const { isSuperAdmin, hasModule, hasPermission } = auth
   const { t } = useTranslation('settings')
+  // NAV-PALETTE (F3): each sidebar group icon wears the colour the catalogue gives its key.
+  const { colorOf } = useSettingsNavColors()
   // Shiftmanager settings (SM-MODULE-TABS-1) reads the app/koppeling flag from
   // AppsContext — a nav item may declare requiresModuleOrApp to be visible on
   // EITHER signal (a plain requiresPage ANDs on the module only). isAppEnabled is
@@ -307,7 +310,7 @@ export default function SettingsPage() {
                 }}
                 onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'var(--hover-bg)' }}
                 onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent' }}>
-                {Icon && <Icon size={15} style={{ flexShrink: 0, color: isActive ? 'var(--color-primary-text)' : 'var(--text-muted)' }} />}
+                {Icon && <Icon size={15} style={{ flexShrink: 0, color: colorOf(group.key) ?? (isActive ? 'var(--color-primary-text)' : 'var(--text-muted)') }} />}
                 {t(`groups.${group.key}`)}
               </button>
             )
