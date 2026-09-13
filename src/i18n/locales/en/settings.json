@@ -615,7 +615,8 @@
     "deleteFailed": "Deleting failed.",
     "clearDefault": "Click to clear default",
     "valueMark": "Icon and colour: {{label}}",
-    "colorMark": "Colour: {{label}}"
+    "colorMark": "Colour: {{label}}",
+    "systemValueLocked": "System value: a screen depends on this phase"
   },
   "phases": {
     "title": "Phases",
@@ -643,7 +644,6 @@
     "valueField": "Slug (value)",
     "valueHint": "Stable key; leave empty to generate one from the label.",
     "valueImmutable": "The slug cannot be changed after creation.",
-    "labelLocked": "The label is locked because this phase is structural. Automations rely on it. Colour and other flags stay editable.",
     "colorField": "Colour",
     "confirmDelete": "Delete \"{{name}}\"? If it is in use it will be archived.",
     "isApplicant": "Reveals the application funnel",

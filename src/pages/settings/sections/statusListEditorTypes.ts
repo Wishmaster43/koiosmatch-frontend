@@ -86,8 +86,11 @@ export interface StatusListEditorProps {
   withValueSlug?: boolean
   reorderable?: boolean
   rowPrefix?: ((item: StatusListItem) => ReactNode) | null
-  // System values (phases): rename/colour/order allowed, never add or delete.
-  locked?: boolean
+  // System values a screen depends on (Danny 13-09, rows 45/46): the pencil,
+  // delete and add controls render DISABLED (grey, always present — never
+  // hidden), reason statusList.systemValueLocked; colour/icon and drag-reorder
+  // stay editable. Supersedes the old `locked` (which hid add/delete outright).
+  readOnly?: boolean
 }
 
 export type StatusListDraft = Record<string, unknown> & { name: string; color?: string }

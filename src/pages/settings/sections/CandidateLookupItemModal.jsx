@@ -39,10 +39,13 @@ function FlagRow({ labelKey, hintKey, checked, onChange, disabled, isDanger }) {
   )
 }
 
-// Props: modal state + setter, save/close callbacks, block-kind flags and the
-// `locked` (system list) flag that disables the label field in edit mode.
+// Props: modal state + setter, save/close callbacks, block-kind flags.
+// The old `locked` (system-list read-only label) flag was retired here (Danny
+// 13-09, F2): the phases block's pencil is now fully disabled by StatusListRow's
+// own readOnly gate, so this modal never opens on a locked list any more — the
+// label-lock branch and the is_applicant disabled-switch it drove were dead code.
 export default function CandidateLookupItemModal({
-  modal, setModal, onClose, onSave, busy, locked,
+  modal, setModal, onClose, onSave, busy,
   isStatusBlock, isFunnelBlock, isPhaseBlock, isContractFormBlock, supportsIcon,
 }) {
   const { t } = useTranslation('settings')
@@ -54,32 +57,12 @@ export default function CandidateLookupItemModal({
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 0' }}>
         <div style={{ marginBottom: 14 }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('lookups.labelField')}</div>
-          {/* Phase label lock (P21/KANDIDATEN-13, mirrors the BE 422 in
-              CandidateLookupController::update()): a locked lookup's label is structural
-              (automations/matrix read it by slug, but tenants renaming the seeded
-              Lead/Candidate label breaks recognisability across screens) — so on a locked
-              list in edit mode the label renders as READ-ONLY DATA, never a disabled form
-              control (§3: no fake editable field). Colour/is_applicant/is_default stay
-              editable (04-08 audit re-enabled the pencil deliberately) — this is a
-              narrower lock, not a re-disable of the whole modal. */}
-          {locked && modal.mode === 'edit' ? (
-            <div data-testid="locked-label-value"
-              style={{ width: '100%', minHeight: 36, display: 'flex', alignItems: 'center', padding: '0 10px',
-                       fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, boxSizing: 'border-box',
-                       background: 'var(--hover-bg)', color: 'var(--text-muted)' }}>
-              {modal.label}
-            </div>
-          ) : (
-            <input value={modal.label} autoFocus
-              onChange={e => setModal(m => ({ ...m, label: e.target.value }))}
-              placeholder={t('lookups.labelPlaceholder')}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- native form <input> text size/colour; BodyText renders a span/div and cannot replace an editable form control
-              style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box',
-                       background: 'var(--surface)', color: 'var(--text)' }} />
-          )}
-          {locked && modal.mode === 'edit' && (
-            <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.labelLocked')}</Caption>
-          )}
+          <input value={modal.label} autoFocus
+            onChange={e => setModal(m => ({ ...m, label: e.target.value }))}
+            placeholder={t('lookups.labelPlaceholder')}
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- native form <input> text size/colour; BodyText renders a span/div and cannot replace an editable form control
+            style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box',
+                     background: 'var(--surface)', color: 'var(--text)' }} />
         </div>
 
         <div style={{ marginBottom: 14 }}>
@@ -141,13 +124,12 @@ export default function CandidateLookupItemModal({
             CandidateLookupController::update(), koiosmatch-api: ApplicationStage::
             SINGLETON_FLAGS does not include is_applicant for the phases config), so a
             plain toggle — multiple phases may carry it, ApplicantStatusTransition just
-            reads the first active match. Verify round 22-08: on a LOCKED list the flag
-            is read-only — this delivery removed reorder, the only tiebreaker when
-            several phases carry it, so leaving it editable created an unfixable state. */}
+            reads the first active match. This modal no longer opens on the phases
+            block at all (its pencil is disabled by readOnly, F2), so the toggle stays
+            simply interactive here — the old "locked" disabled-state was dead code. */}
         {isPhaseBlock && (
           <FlagRow labelKey="lookups.phaseApplicant" hintKey="lookups.phaseApplicantHint"
-            checked={modal.is_applicant} onChange={v => setModal(m => ({ ...m, is_applicant: v }))}
-            disabled={locked} />
+            checked={modal.is_applicant} onChange={v => setModal(m => ({ ...m, is_applicant: v }))} />
         )}
 
         {/* Reason-required toggle — statuses only (e.g. Inactive needs a reason). */}

@@ -15,6 +15,10 @@ interface DrawerAddButtonProps {
   icon?: ComponentType<{ size?: number }>
   disabled?: boolean
   title?: string
+  /** Accessible description for a DISABLED-but-present button (Danny 13-09, rows
+   * 45/46: a system-locked add affordance stays visible/grey, never hidden — the
+   * reason rides both the hover title and this ARIA description). */
+  ariaDescription?: string
   /** Icon-only rendering for SECONDARY actions in tight toolbars (Danny 03-08: the
    * location-scoped contacts row overflowed). The 28-07 "label must be readable"
    * rule still holds for the primary add button — never pass this on the main
@@ -42,7 +46,7 @@ interface DrawerAddButtonProps {
  * add button keeps the full label, unchanged. Either way "readable text without
  * hovering" still holds — this never goes icon-only for the primary add action.
  */
-export default function DrawerAddButton({ onClick, label, icon: Icon = Plus, disabled, title, iconOnly, short }: DrawerAddButtonProps) {
+export default function DrawerAddButton({ onClick, label, icon: Icon = Plus, disabled, title, ariaDescription, iconOnly, short }: DrawerAddButtonProps) {
   const { t } = useTranslation('common')
   // The accessible name: the caller's label when it is plain text, else the shared "add".
   const name = typeof label === 'string' ? label : t('add')
@@ -50,6 +54,7 @@ export default function DrawerAddButton({ onClick, label, icon: Icon = Plus, dis
   const visibleText = short ? t('new') : (label ?? t('add'))
   return (
     <button type="button" onClick={onClick} disabled={disabled} title={title ?? name} aria-label={name}
+      aria-description={ariaDescription}
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 5, height: 26, padding: iconOnly ? '0 7px' : '0 10px',
         whiteSpace: 'nowrap', flexShrink: 0, fontSize: 11.5, fontWeight: 500, borderRadius: 6,

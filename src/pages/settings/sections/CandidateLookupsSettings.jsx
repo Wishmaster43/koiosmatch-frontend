@@ -45,7 +45,7 @@ const BASE = '/settings/candidate-lookups'
 const slugify = (s) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
 
 // One lookup list (contract forms / funnel stages / statuses) with inline CRUD.
-export function LookupBlock({ slug, title, subtitle, items, setItems, locked = false }) {
+export function LookupBlock({ slug, title, subtitle, items, setItems, readOnly = false }) {
   const { t } = useTranslation('settings')
   const [modal,    setModal]    = useState(null) // null | { mode, id?, value, label, color, is_applicant, requires_appointment }
   const [busy,     setBusy]     = useState(false)
@@ -181,23 +181,27 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
           <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</h3>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</p>
           {/* KANDIDATEN-13 (Danny): everything hangs off these two phases (automation,
-              KPIs) — the list stays locked (no add/remove/reorder) and only the colour
-              is tenant-adjustable. Shown here so the reason is visible without opening
-              the edit modal. */}
+              KPIs) — reordering two fixed rows carries no meaning, so the list stays
+              non-reorderable, and only the colour/icon mark is tenant-adjustable in
+              place (readOnly, Danny 13-09 rows 45/46, disables rename/delete/add —
+              see below). Shown here so the reason is visible without opening the edit modal. */}
           {isPhaseBlock && <Caption as="p" style={{ marginTop: 4 }}>{t('lookups.phaseLockedHint')}</Caption>}
         </div>
-        {/* HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A). */}
-        {!locked && <DrawerAddButton onClick={openAdd} label={t('lookups.add')} />}
+        {/* HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A). readOnly (Danny
+            13-09, rows 45/46): renders DISABLED, never hidden — grey, present. */}
+        <DrawerAddButton onClick={openAdd} label={t('lookups.add')} disabled={readOnly}
+          title={readOnly ? t('statusList.systemValueLocked') : undefined}
+          ariaDescription={readOnly ? t('statusList.systemValueLocked') : undefined} />
       </div>
 
       <DragList
         items={items}
         onReorder={reorder}
-        // KANDIDATEN-13: add is already blocked so this set can never grow past its two
-        // seeded phases — reordering two fixed rows carries no meaning, so hide the
-        // drag handle and the keyboard move buttons entirely.
-        // One lock concept (verify round 22-08): reorder follows `locked`, like add/delete.
-        sortable={!locked}
+        // KANDIDATEN-13: reordering two fixed phases carries no meaning, so the drag
+        // handle and the keyboard move buttons stay hidden on the phase block only —
+        // tied to isPhaseBlock, NOT to readOnly (Danny 13-09: drag-reorder is
+        // untouched by that ask; every other block here stays reorderable).
+        sortable={!isPhaseBlock}
         renderItem={(item) => (
           <>
             {/* LOOKUP-ONE-ELEMENT-1 (Danny 10-09 23:20, rows 26/27/31: "Ik mis icon en
@@ -256,23 +260,25 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
                 activeLabel={t('common.default')} inactiveLabel={t('common.setDefault')} />
             )}
             <div style={{ flex: 1 }} />
-            {/* Locked (system) list: only ADD/DELETE are blocked here — CandidateLookupController
+            {/* readOnly (Danny 13-09, rows 45/46): CandidateLookupController
                 (koiosmatch-api) only abort_if($type === 'phases') inside store()/destroy()
-                (PHASE-LOCK-1); update() carries NO phases restriction, so rename/colour/flag
-                edits stay open on a system phase. The edit pencil must therefore stay enabled
-                (audit finding, 04-08 — it used to be wrongly disabled here too). */}
-            <Button variant="secondary" iconOnly onClick={() => openEdit(item)} title={t('lookups.edit')} aria-label={t('lookups.edit')}>
+                (PHASE-LOCK-1) — the BACKEND still allows a rename PUT on a system phase.
+                The pencil now renders DISABLED anyway (never hidden): Danny wants it grey
+                on a screen-dependent phase, superseding the 04-08 "keep it enabled" finding. */}
+            <Button variant="secondary" iconOnly disabled={readOnly} onClick={() => openEdit(item)}
+              title={readOnly ? t('statusList.systemValueLocked') : t('lookups.edit')} aria-label={t('lookups.edit')}
+              aria-description={readOnly ? t('statusList.systemValueLocked') : undefined}>
               <Pencil size={11} />
             </Button>
-            {/* Accessible name stays the plain "delete" verb even while disabled —
-                title carries the in-use reason as a tooltip, aria-label never goes
-                undefined (VAC-CLEAR-style regression: name must survive both states). */}
-            {!locked && (
-              <Button variant="dangerSoft" iconOnly onClick={() => remove(item)} disabled={deleting === item.id || inUse(item)}
-                title={inUse(item) ? t('lookups.inUse') : undefined} aria-label={t('common:delete')}>
-                {deleting === item.id ? <Spinner size={11} /> : <Trash2 size={11} />}
-              </Button>
-            )}
+            {/* Delete: always PRESENT (never hidden), disabled when in use OR readOnly.
+                Accessible name stays the plain "delete" verb even while disabled —
+                title carries the reason as a tooltip, aria-label never goes undefined
+                (VAC-CLEAR-style regression: name must survive both states). */}
+            <Button variant="dangerSoft" iconOnly onClick={() => remove(item)} disabled={readOnly || deleting === item.id || inUse(item)}
+              title={readOnly ? t('statusList.systemValueLocked') : (inUse(item) ? t('lookups.inUse') : undefined)}
+              aria-label={t('common:delete')} aria-description={readOnly ? t('statusList.systemValueLocked') : undefined}>
+              {deleting === item.id ? <Spinner size={11} /> : <Trash2 size={11} />}
+            </Button>
           </>
         )}
       />
@@ -280,10 +286,13 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
 
       {/* Add/edit modal — extracted to its own file once this block crossed the
           ~400-line split trigger (batch 12, P22-30). Thin container passes state
-          + block-kind flags down; the modal itself owns no persistence. */}
+          + block-kind flags down; the modal itself owns no persistence. It no
+          longer takes a `locked` prop (Danny 13-09, F2): the phases block's
+          pencil is disabled by readOnly above, so this modal never opens there
+          any more — the old label-lock branch it drove is retired. */}
       {modal && (
         <CandidateLookupItemModal
-          modal={modal} setModal={setModal} onClose={() => setModal(null)} onSave={save} busy={busy} locked={locked}
+          modal={modal} setModal={setModal} onClose={() => setModal(null)} onSave={save} busy={busy}
           isStatusBlock={isStatusBlock} isFunnelBlock={isFunnelBlock} isPhaseBlock={isPhaseBlock} isContractFormBlock={isContractFormBlock} supportsIcon={supportsIcon}
         />
       )}
@@ -294,7 +303,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
 
 // One candidate-lookup type rendered as its own settings tab. Each tab loads the
 // combined endpoint and renders only its slice, so the tabs stay independent.
-function CandidateLookupSection({ typeKey, slug, locked = false }) {
+function CandidateLookupSection({ typeKey, slug, readOnly = false }) {
   const { t } = useTranslation('settings')
   const [items,   setItems]   = useState([])
   const [loading, setLoading] = useState(true)
@@ -319,7 +328,7 @@ function CandidateLookupSection({ typeKey, slug, locked = false }) {
         ? <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>
         : error
           ? <p style={{ fontSize: 13, color: 'var(--color-danger-text)' }}>{t('statusList.loadError')}</p>
-          : <LookupBlock slug={slug} title={t(`lookups.${typeKey}.title`)} subtitle={t(`lookups.${typeKey}.subtitle`)} items={items} setItems={setItems} locked={locked} />}
+          : <LookupBlock slug={slug} title={t(`lookups.${typeKey}.title`)} subtitle={t(`lookups.${typeKey}.subtitle`)} items={items} setItems={setItems} readOnly={readOnly} />}
     </div>
   )
 }
@@ -336,10 +345,11 @@ export function FunnelStagesSettings() {
 
 // Candidate phase (relationship lifecycle: Lead → Kandidaat) — model v2 axis.
 export function CandidatePhasesSettings() {
-  // Lead/Kandidaat are SYSTEM values (automations + the matrix depend on them):
-  // no add, no delete — rename/colour/flags only (Danny 23-07; BE guard ticketed;
-  // the edit pencil itself must stay enabled, audit finding fixed 04-08).
-  return <CandidateLookupSection typeKey="phases" slug="phases" locked />
+  // Lead/Kandidaat are SYSTEM values a screen depends on (Danny 23-07; Danny
+  // 13-09 rows 45/46: "Potlootje altijd grijs · Delete altijd grijs") — the
+  // pencil/delete/add render disabled (grey, always present); colour/icon and
+  // drag-reorder (unaffected here — see KANDIDATEN-13 above) stay editable.
+  return <CandidateLookupSection typeKey="phases" slug="phases" readOnly />
 }
 
 // Candidate deployability ("status": Beschikbaar/Geplaatst/… ) — model v2 axis.

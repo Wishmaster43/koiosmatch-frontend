@@ -615,7 +615,8 @@
     "deleteFailed": "Verwijderen mislukt.",
     "clearDefault": "Klik om standaard op te heffen",
     "valueMark": "Icoon en kleur: {{label}}",
-    "colorMark": "Kleur: {{label}}"
+    "colorMark": "Kleur: {{label}}",
+    "systemValueLocked": "Systeemwaarde: een scherm hangt aan deze fase"
   },
   "phases": {
     "title": "Fasen",
@@ -643,7 +644,6 @@
     "valueField": "Slug (waarde)",
     "valueHint": "Stabiele sleutel; leeg laten genereert er een uit het label.",
     "valueImmutable": "De slug kan na aanmaken niet meer gewijzigd worden.",
-    "labelLocked": "Het label is vergrendeld omdat deze fase structureel is. Automatiseringen leunen erop. Kleur en andere vlaggen blijven bewerkbaar.",
     "colorField": "Kleur",
     "confirmDelete": "\"{{name}}\" verwijderen? Als deze in gebruik is, wordt hij gearchiveerd.",
     "isApplicant": "Toont de sollicitatie-funnel",

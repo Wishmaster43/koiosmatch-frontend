@@ -8,6 +8,17 @@
  * while StatusListEditor only ever sent name/label — "+ fase toevoegen" would have
  * 422'd on every tenant. The `withValueSlug` opt-in is what makes the button real,
  * so the create test checks the exact POST body (slug + label + the is_customer flag).
+ *
+ * SMZ-05 CONTRACT GUARD vs SCREEN TESTS (Danny 13-09, F1): the add/delete-body
+ * contract tests below render the shared StatusListEditor DIRECTLY (not the
+ * CustomerPhasesSettings screen) — that screen is readOnly since Danny 13-09 rows
+ * 45/46 disabled its own add/delete controls (a UI-only lock, §CustomerSettings.jsx
+ * comment), which would make those two buttons unreachable here. The contract this
+ * file guards (a valid slug/body reaches the API) is a property of StatusListEditor
+ * itself, independent of which screen currently exposes the action — a prop flip on
+ * an exported component must be checked against every suite that renders it. The
+ * read/promote tests below are unaffected (no add/delete involved) and still render
+ * the real screen.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -15,6 +26,7 @@ import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
 import { CustomerPhasesSettings } from './CustomerSettings'
+import StatusListEditor from './StatusListEditor'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
@@ -31,6 +43,18 @@ const klant = (over = {}) => ({ id: 'f2', value: 'klant', label: 'Klant', color:
 
 afterEach(() => vi.clearAllMocks())
 
+// The bare editor, same props CustomerPhasesSettings passes MINUS readOnly — the
+// contract guard's own concern (a valid POST/DELETE body) is unrelated to whether
+// this particular screen currently exposes the button.
+const renderContractEditor = () => render(
+  <StatusListEditor
+    title={st('customerLookups.phases.title')} subtitle={st('customerLookups.phases.subtitle')}
+    endpoint="/customer-phases" addLabel={st('customerLookups.phases.add')} withValueSlug
+    flagField={{ key: 'is_customer', label: st('customerLookups.phases.isCustomer'), description: st('customerLookups.phases.isCustomerHint') }}
+    defaultField={{ key: 'is_default' }}
+  />,
+)
+
 describe('CustomerPhasesSettings', () => {
   it('loads the phases from /customer-phases and shows the is_default toggle', async () => {
     api.get.mockResolvedValue({ data: [prospect(), klant()] })
@@ -43,11 +67,13 @@ describe('CustomerPhasesSettings', () => {
     expect(screen.getByRole('button', { name: st('common.default') })).not.toBeDisabled() // DEFAULT-UNDO 04-08: active pill stays clickable (click = clear)
   })
 
+  // SMZ-05 contract guard — renders the bare editor (see renderContractEditor's
+  // own comment above): CustomerPhasesSettings' add button is disabled (readOnly).
   it('adding a phase POSTs a valid slug + label + the is_customer flag (the body the API requires)', async () => {
     api.get.mockResolvedValue({ data: [prospect(), klant()] })
     api.post.mockResolvedValue({ data: { id: 'f3', value: 'vaste_klant', label: 'Vaste klant', is_customer: true } })
     const user = userEvent.setup()
-    render(<CustomerPhasesSettings />)
+    renderContractEditor()
     await screen.findByText('Prospect')
 
     await user.click(screen.getByRole('button', { name: st('customerLookups.phases.add') }))
@@ -80,11 +106,13 @@ describe('CustomerPhasesSettings', () => {
     expect(body.is_default).toBe(true)
   })
 
+  // SMZ-05 contract guard — renders the bare editor (see renderContractEditor's
+  // own comment above): CustomerPhasesSettings' delete button is disabled (readOnly).
   it('keeps an in-use phase on a 409 delete instead of removing it from the list', async () => {
     api.get.mockResolvedValue({ data: [klant()] })
     api.delete.mockRejectedValue({ response: { status: 409 } })
     const user = userEvent.setup()
-    render(<CustomerPhasesSettings />)
+    renderContractEditor()
     await screen.findByText('Klant')
 
     // Row layout is [swatch, badge, …, edit, delete] — delete is the last button.

@@ -615,7 +615,8 @@
     "deleteFailed": "Eliminazione non riuscita.",
     "clearDefault": "Clicca per annullare il predefinito",
     "valueMark": "Icona e colore: {{label}}",
-    "colorMark": "Colore: {{label}}"
+    "colorMark": "Colore: {{label}}",
+    "systemValueLocked": "Valore di sistema: una schermata dipende da questa fase"
   },
   "phases": {
     "title": "Fasi",
@@ -643,7 +644,6 @@
     "valueField": "Slug (valore)",
     "valueHint": "Chiave stabile; lascia vuoto per generarne una dall'etichetta.",
     "valueImmutable": "Lo slug non può essere modificato dopo la creazione.",
-    "labelLocked": "L'etichetta è bloccata perché questa fase è strutturale. Le automazioni vi fanno affidamento. Colore e altri flag restano modificabili.",
     "colorField": "Colore",
     "confirmDelete": "Eliminare \"{{name}}\"? Se è in uso, verrà archiviato.",
     "isApplicant": "Mostra il funnel di candidatura",

@@ -415,3 +415,55 @@ describe('StatusListEditor — save failures notify the user', () => {
   // "StatusListEditor — reorder persists on drop" describe block below (the Save
   // button that used to trigger this no longer exists, per the 04-08 decision).
 })
+
+// readOnly (Danny 13-09, rows 45/46, verbatim: "Potlootje altijd grijs · Delete
+// altijd grijs · Plus fase toevoegen grijs"): a system value a screen depends on
+// disables the pencil/delete/add — grey, always PRESENT, never hidden — while the
+// colour/icon mark and drag-reorder stay fully working. Supersedes the old `locked`
+// prop (which hid add/delete outright and kept the pencil enabled).
+describe('StatusListEditor — readOnly (system value locked)', () => {
+  it('renders the pencil, delete and add controls DISABLED with the systemValueLocked reason, never hidden', async () => {
+    api.get.mockResolvedValue({ data: [type({ id: 't1', name: 'Lead' })] })
+    render(<StatusListEditor title="Fasen" subtitle="" endpoint="/phases" addLabel="Fase toevoegen" readOnly />)
+
+    await screen.findByText('Lead')
+    const editBtn = screen.getByRole('button', { name: st('statusList.edit') })
+    const deleteBtn = editBtn.nextElementSibling
+    const addBtn = screen.getByRole('button', { name: 'Fase toevoegen' })
+
+    expect(editBtn).toBeDisabled()
+    expect(editBtn).toHaveAttribute('title', st('statusList.systemValueLocked'))
+    expect(editBtn).toHaveAttribute('aria-description', st('statusList.systemValueLocked'))
+    // Present, not hidden — disabled is the only signal, never a missing element.
+    expect(deleteBtn).toBeDisabled()
+    expect(deleteBtn).toHaveAttribute('title', st('statusList.systemValueLocked'))
+    expect(deleteBtn).toHaveAttribute('aria-description', st('statusList.systemValueLocked'))
+    expect(addBtn).toBeDisabled()
+    expect(addBtn).toHaveAttribute('title', st('statusList.systemValueLocked'))
+    expect(addBtn).toHaveAttribute('aria-description', st('statusList.systemValueLocked'))
+  })
+
+  it('the value mark still opens its popover under readOnly — colour/icon stay editable', async () => {
+    api.get.mockResolvedValue({ data: [type({ id: 't1', name: 'Lead' })] })
+    const user = userEvent.setup()
+    render(<StatusListEditor title="Fasen" subtitle="" endpoint="/phases" addLabel="Fase toevoegen" readOnly />)
+
+    await screen.findByText('Lead')
+    await user.click(screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Lead' }) }))
+    // No icon vocabulary here (withIcon not set) — the popover's role is "dialog",
+    // not "menu" (LookupValueMark's ValueMarkPopover picks the role by hasIcons).
+    expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Lead' }) })).toBeInTheDocument()
+  })
+
+  it('without readOnly the pencil/delete/add stay fully enabled (regression guard)', async () => {
+    api.get.mockResolvedValue({ data: [type({ id: 't1', name: 'Lead' })] })
+    render(<StatusListEditor title="Fasen" subtitle="" endpoint="/phases" addLabel="Fase toevoegen" />)
+
+    await screen.findByText('Lead')
+    const editBtn = screen.getByRole('button', { name: st('statusList.edit') })
+    expect(editBtn).not.toBeDisabled()
+    expect(editBtn).not.toHaveAttribute('aria-description')
+    expect(editBtn.nextElementSibling).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Fase toevoegen' })).not.toBeDisabled()
+  })
+})

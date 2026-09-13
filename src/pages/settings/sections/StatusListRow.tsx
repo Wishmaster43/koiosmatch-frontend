@@ -12,7 +12,7 @@ import type { StatusListItem, ExtraFieldDef, FlagFieldDef, NumberFieldDef, Defau
 
 export default function StatusListRow({
   item, items, showRank, withColor, resolvedIconPicker, rowPrefix, flagList, numberField, extraField, singletons,
-  busyDefaultKey, deleting, labelOf, commitRank, updateColor, updateIcon, setDefault, openEdit, remove, inUse, locked = false,
+  busyDefaultKey, deleting, labelOf, commitRank, updateColor, updateIcon, setDefault, openEdit, remove, inUse, readOnly = false,
 }: {
   item: StatusListItem; items: StatusListItem[]; showRank: boolean; withColor: boolean
   resolvedIconPicker: IconPickerDef | null; rowPrefix: ((item: StatusListItem) => React.ReactNode) | null
@@ -26,8 +26,9 @@ export default function StatusListRow({
   openEdit: (item: StatusListItem) => void
   remove: (item: StatusListItem) => void
   inUse: (item: StatusListItem) => boolean
-  // A locked list (system values such as phases) keeps rename/colour but never delete.
-  locked?: boolean
+  // A read-only list (system values a screen depends on) keeps colour/icon and
+  // drag-reorder, but the pencil/delete render disabled — never hidden (Danny 13-09).
+  readOnly?: boolean
 }) {
   const { t } = useTranslation('settings')
   return (
@@ -96,19 +97,23 @@ export default function StatusListRow({
         )
       })}
       <div style={{ flex: 1 }} />
-      <Button variant="secondary" iconOnly onClick={() => openEdit(item)} title={t('statusList.edit')} aria-label={t('statusList.edit')}>
+      {/* readOnly (Danny 13-09, rows 45/46): pencil renders DISABLED, never hidden —
+          title/aria-description carry the reason; aria-label stays the plain verb. */}
+      <Button variant="secondary" iconOnly disabled={readOnly} onClick={() => openEdit(item)}
+        title={readOnly ? t('statusList.systemValueLocked') : t('statusList.edit')} aria-label={t('statusList.edit')}
+        aria-description={readOnly ? t('statusList.systemValueLocked') : undefined}>
         <Pencil size={11} />
       </Button>
-      {/* Delete is disabled when the item is still referenced by existing data.
+      {/* Delete is disabled when the item is still referenced by existing data, OR
+          when the list is readOnly — always PRESENT (never hidden, Danny 13-09).
           Accessible name stays the plain "delete" verb even while disabled —
-          title carries the in-use reason as a tooltip, aria-label never goes
-          undefined (VAC-CLEAR-style regression: name must survive both states). */}
-      {!locked && (
-        <Button variant="dangerSoft" iconOnly onClick={() => remove(item)} disabled={deleting === item.id || inUse(item)}
-          title={inUse(item) ? t('statusList.inUse') : undefined} aria-label={t('common:delete')}>
-          {deleting === item.id ? <Spinner size={11} /> : <Trash2 size={11} />}
-        </Button>
-      )}
+          title carries the reason as a tooltip, aria-label never goes undefined
+          (VAC-CLEAR-style regression: name must survive both states). */}
+      <Button variant="dangerSoft" iconOnly onClick={() => remove(item)} disabled={readOnly || deleting === item.id || inUse(item)}
+        title={readOnly ? t('statusList.systemValueLocked') : (inUse(item) ? t('statusList.inUse') : undefined)}
+        aria-label={t('common:delete')} aria-description={readOnly ? t('statusList.systemValueLocked') : undefined}>
+        {deleting === item.id ? <Spinner size={11} /> : <Trash2 size={11} />}
+      </Button>
     </>
   )
 }

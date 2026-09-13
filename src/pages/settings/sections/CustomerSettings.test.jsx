@@ -15,6 +15,7 @@ import i18n from '@/i18n'
 import api from '@/lib/api'
 import {
   CustomerStatusesSettings,
+  CustomerPhasesSettings,
   LocationStatusesSettings,
   DepartmentStatusesSettings,
   ContactStatusesSettings,
@@ -84,6 +85,48 @@ describe('CustomerStatusesSettings', () => {
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings/customer-lookups/statuses',
       expect.objectContaining({ name: 'Prospect', value: 'prospect' })))
+  })
+})
+
+// readOnly (Danny 13-09, rows 45/46, verbatim: "Aangezien we dit niet moeten
+// wijzigen omdat er een scherm aan vast hangt · Potlootje altijd grijs · Delete
+// altijd grijs · Plus fase toevoegen grijs"): the pencil/delete/add render
+// DISABLED — grey, always PRESENT, never hidden; colour/icon and drag-reorder
+// stay editable. CustomerPhasesSettings previously passed nothing (fully open).
+describe('CustomerPhasesSettings — readOnly (system value locked)', () => {
+  // Reuses mockStatus (already carrying the one house fixture-colour disable
+  // above) instead of a second hex literal — is_customer is the extra field
+  // this lookup carries on top of the shared status/phase shape.
+  const phase = (over = {}) => mockStatus('p1', 'Prospect', { is_customer: false, ...over })
+
+  it('renders the pencil, delete and add controls DISABLED with the systemValueLocked reason, never hidden', async () => {
+    api.get.mockResolvedValue({ data: [phase()] })
+    render(<CustomerPhasesSettings />)
+
+    await screen.findByText('Prospect')
+    const editBtn = screen.getByRole('button', { name: st('statusList.edit') })
+    const deleteBtn = editBtn.nextElementSibling
+    const addBtn = screen.getByRole('button', { name: st('customerLookups.phases.add') })
+
+    expect(editBtn).toBeDisabled()
+    expect(editBtn).toHaveAttribute('title', st('statusList.systemValueLocked'))
+    expect(editBtn).toHaveAttribute('aria-description', st('statusList.systemValueLocked'))
+    // Present, never hidden — a system-locked control is grey, not gone.
+    expect(deleteBtn).toBeDisabled()
+    expect(deleteBtn).toHaveAttribute('title', st('statusList.systemValueLocked'))
+    expect(addBtn).toBeDisabled()
+    expect(addBtn).toHaveAttribute('title', st('statusList.systemValueLocked'))
+    expect(addBtn).toHaveAttribute('aria-description', st('statusList.systemValueLocked'))
+  })
+
+  it('the value mark still opens its popover — colour stays editable (he did not name it)', async () => {
+    api.get.mockResolvedValue({ data: [phase()] })
+    const user = userEvent.setup()
+    render(<CustomerPhasesSettings />)
+
+    await screen.findByText('Prospect')
+    await user.click(screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Prospect' }) }))
+    expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Prospect' }) })).toBeInTheDocument()
   })
 })
 

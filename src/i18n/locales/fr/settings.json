@@ -593,7 +593,8 @@
     "saveFailed": "Échec de l'enregistrement.",
     "clearDefault": "Cliquer pour retirer la valeur par défaut",
     "valueMark": "Icône et couleur : {{label}}",
-    "colorMark": "Couleur : {{label}}"
+    "colorMark": "Couleur : {{label}}",
+    "systemValueLocked": "Valeur système : un écran dépend de cette phase"
   },
   "phases": {
     "title": "Phases",
@@ -2260,7 +2261,6 @@
     "valueField": "Slug (valeur)",
     "valueHint": "Clé stable ; laissez vide pour en générer une à partir du libellé.",
     "valueImmutable": "Le slug ne peut plus être modifié après la création.",
-    "labelLocked": "Le libellé est verrouillé car cette phase est structurelle. Les automatisations s'appuient dessus. La couleur et les autres indicateurs restent modifiables.",
     "candidate_types": {
       "title": "Types de contrat",
       "subtitle": "Plusieurs par candidat (ex. Extra, Indépendant, Payroll)."

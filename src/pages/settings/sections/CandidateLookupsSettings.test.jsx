@@ -156,77 +156,7 @@ describe('CandidateLookupsSettings — phase is_applicant flag', () => {
     expect(screen.getByText(st('lookups.phaseApplicantBadge'))).toBeInTheDocument()
   })
 
-  // Verify round 22-08 (Opus): the flag is READ-ONLY on the locked phases list —
-  // this delivery removed reorder, the only tiebreaker when several phases carry
-  // it, so an editable flag created a state the tenant could never fix.
-  it('renders the is_applicant switch DISABLED on a locked phase — no write path', async () => {
-    api.get.mockResolvedValue({ data: {
-      // eslint-disable-next-line no-restricted-syntax -- DATA: fixture phase colour, not a style rule.
-      phases: [{ id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_applicant: false }],
-    } })
-    api.put.mockResolvedValue({ data: {} })
-    const user = userEvent.setup()
-    render(<CandidatePhasesSettings />)
-
-    await screen.findByText('Lead')
-    await user.click(screen.getByTitle(st('lookups.edit')))
-    expect(screen.getByRole('switch')).toBeDisabled()
-    await user.click(screen.getByText(st('common.save')))
-
-    await waitFor(() => expect(api.put).toHaveBeenCalled())
-    expect(api.put.mock.calls[0][1]).toEqual(expect.objectContaining({ is_applicant: false }))
-  })
-
-  // P21/KANDIDATEN-13: the label renders as READ-ONLY DATA (not a disabled input) on a
-  // structural phase (the server 422s a label rename), but every other modal field —
-  // colour, is_applicant, is_default — stays interactive (04-08 audit re-enabled the
-  // pencil deliberately; Danny 22-08 asked for the label itself to stop looking editable).
-  it('renders the label as static text (with a hint) on a locked phase, and the switch read-only', async () => {
-    api.get.mockResolvedValue({ data: {
-      // eslint-disable-next-line no-restricted-syntax -- DATA: fixture phase colour, not a style rule.
-      phases: [{ id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_applicant: false }],
-    } })
-    const user = userEvent.setup()
-    render(<CandidatePhasesSettings />)
-
-    await screen.findByText('Lead')
-    await user.click(screen.getByTitle(st('lookups.edit')))
-
-    // No input carries the label anymore — it is a static value, never a fake field (§3).
-    expect(screen.queryByDisplayValue('Lead')).not.toBeInTheDocument()
-    const labelValue = screen.getByTestId('locked-label-value')
-    expect(labelValue.tagName).toBe('DIV')
-    expect(labelValue).toHaveTextContent('Lead')
-    expect(screen.getByText(st('lookups.labelLocked'))).toBeInTheDocument()
-    // Verify round 22-08: read-only on the locked list (see the disabled-switch test above).
-    expect(screen.getByRole('switch')).toBeDisabled()
-  })
-
-  it('keeps the edit pencil enabled on the locked phases block while hiding add/delete/reorder', async () => {
-    api.get.mockResolvedValue({ data: {
-      /* eslint-disable no-restricted-syntax -- DATA: fixture phase colours, not a style rule. */
-      phases: [
-        { id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_applicant: false },
-        { id: 'p2', value: 'candidate', label: 'Candidate', color: '#6E8FD6', is_applicant: true },
-      ],
-      /* eslint-enable no-restricted-syntax */
-    } })
-    render(<CandidatePhasesSettings />)
-
-    await screen.findByText('Lead')
-    // Locked list: no "add" button, no delete button — but the edit pencil stays enabled
-    // (CandidateLookupController::update() carries no phases restriction, only store()/
-    // destroy() abort_if — audit finding, 04-08).
-    expect(screen.queryByRole('button', { name: st('lookups.add') })).not.toBeInTheDocument()
-    const editBtn = screen.getAllByTitle(st('lookups.edit'))[0]
-    expect(editBtn).not.toBeDisabled()
-    // KANDIDATEN-13: two fixed, locked phases have nothing meaningful to reorder — the
-    // drag handle and its keyboard up/down equivalent (§6) are both absent.
-    expect(screen.queryByRole('button', { name: i18n.t('dragList.moveUp', { ns: 'common' }) })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: i18n.t('dragList.moveDown', { ns: 'common' }) })).not.toBeInTheDocument()
-  })
-
-  it('shows the colour-only lock hint on the phases list without opening the edit modal', async () => {
+  it('shows the colour-only lock hint on the phases list', async () => {
     api.get.mockResolvedValue({ data: {
       // eslint-disable-next-line no-restricted-syntax -- DATA: fixture phase colour, not a style rule.
       phases: [{ id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_applicant: false }],
@@ -235,6 +165,60 @@ describe('CandidateLookupsSettings — phase is_applicant flag', () => {
 
     await screen.findByText('Lead')
     expect(screen.getByText(st('lookups.phaseLockedHint'))).toBeInTheDocument()
+  })
+})
+
+// readOnly (Danny 13-09, rows 45/46, verbatim: "Potlootje altijd grijs · Delete
+// altijd grijs"): a screen-dependent phase disables the pencil/delete/add — grey,
+// always PRESENT, never hidden. Supersedes the retired 04-08 "keep the pencil
+// enabled" finding and the old add/delete-HIDING behaviour. Since the pencil is
+// now unreachable, the is_applicant-switch/label-lock MODAL assertions that used
+// to open it (verify round 22-08) are retired too — that path is dead here now;
+// the modal's own `locked` behaviour (label read-only) still exists for the OTHER
+// call site that can still open it (none currently do, kept for contract parity).
+describe('CandidateLookupsSettings — readOnly (system value locked)', () => {
+  it('renders the pencil, delete and add controls DISABLED with the systemValueLocked reason, never hidden', async () => {
+    api.get.mockResolvedValue({ data: {
+      // eslint-disable-next-line no-restricted-syntax -- DATA: fixture phase colour, not a style rule.
+      phases: [{ id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_applicant: false }],
+    } })
+    render(<CandidatePhasesSettings />)
+
+    await screen.findByText('Lead')
+    const editBtn = screen.getByRole('button', { name: st('lookups.edit') })
+    const deleteBtn = editBtn.nextElementSibling
+    const addBtn = screen.getByRole('button', { name: st('lookups.add') })
+
+    expect(editBtn).toBeDisabled()
+    expect(editBtn).toHaveAttribute('title', st('statusList.systemValueLocked'))
+    expect(editBtn).toHaveAttribute('aria-description', st('statusList.systemValueLocked'))
+    // Present, never hidden — the old 04-08/KANDIDATEN-13 hiding behaviour is retired.
+    expect(deleteBtn).toBeDisabled()
+    expect(deleteBtn).toHaveAttribute('title', st('statusList.systemValueLocked'))
+    expect(addBtn).toBeDisabled()
+    expect(addBtn).toHaveAttribute('title', st('statusList.systemValueLocked'))
+
+    // KANDIDATEN-13: two fixed phases have nothing meaningful to reorder — unrelated
+    // to readOnly, this drag/keyboard-move absence is its own, unchanged reason.
+    expect(screen.queryByRole('button', { name: i18n.t('dragList.moveUp', { ns: 'common' }) })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: i18n.t('dragList.moveDown', { ns: 'common' }) })).not.toBeInTheDocument()
+  })
+
+  // The colour/icon mark stays fully editable under readOnly (Danny did not name
+  // it) — already covered end-to-end by "saves a phase COLOUR via the row swatch"
+  // above (click mark → popover → pick preset → PUT), re-asserted here as an
+  // explicit readOnly-scoped regression guard.
+  it('the value mark still opens its popover — colour stays editable', async () => {
+    api.get.mockResolvedValue({ data: {
+      // eslint-disable-next-line no-restricted-syntax -- DATA: fixture phase colour, not a style rule.
+      phases: [{ id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_applicant: false }],
+    } })
+    const user = userEvent.setup()
+    render(<CandidatePhasesSettings />)
+
+    await screen.findByText('Lead')
+    await user.click(screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Lead' }) }))
+    expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Lead' }) })).toBeInTheDocument()
   })
 })
 

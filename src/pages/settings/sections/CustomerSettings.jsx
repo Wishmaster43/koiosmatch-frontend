@@ -41,8 +41,16 @@ export function CustomerPhasesSettings() {
       subtitle={t('customerLookups.phases.subtitle')}
       endpoint="/customer-phases"
       addLabel={t('customerLookups.phases.add')}
-      // Danny 09-09 (row 19): phases drive the pop-ups and the dashboard donuts — the editor can lock
-      // add/delete (`locked`); switched on together with the BE guard once Danny confirms.
+      // Danny 13-09 (rows 45/46): phases drive the pop-ups and the dashboard donuts
+      // and a screen depends on them — the pencil/delete/add render disabled (grey,
+      // always present); colour/icon and drag-reorder stay editable. This is a
+      // UI-ONLY lock: /customer-phases (SlugLookupController) still permits
+      // store()/destroy() server-side — unlike candidate phases, which the backend
+      // itself blocks (PHASE-LOCK-1, CandidateLookupController::store()/destroy()
+      // abort_if($type === 'phases')). Until CMBE adds an equivalent guard here, a
+      // direct API call could still add/remove a customer phase; readOnly only
+      // stops it from this screen.
+      readOnly
       withValueSlug
       flagField={{ key: 'is_customer', label: t('customerLookups.phases.isCustomer'), description: t('customerLookups.phases.isCustomerHint') }}
       defaultField={{ key: 'is_default' }}
