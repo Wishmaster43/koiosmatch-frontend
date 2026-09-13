@@ -5,8 +5,12 @@
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import i18n from '@/i18n'
 import api from '@/lib/api'
 import RejectionSettings from './RejectionSettings'
+
+const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
@@ -31,5 +35,19 @@ describe('RejectionSettings', () => {
     fireEvent.drop(rowOf('No response'))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/candidate-rejection-reasons/reorder', { ids: ['r2', 'r1'] }))
+  })
+
+  // LOOKUP-ICONS-FE-2 fix (13-09): CandidateRejectionReasonController has no icon
+  // column/validation — the mark stays colour-only.
+  it('the value mark stays colour-only', async () => {
+    api.get.mockResolvedValue({ data: [row()] })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<RejectionSettings />)
+
+    await screen.findByText('No response')
+    const trigger = screen.getByRole('button', { name: st('statusList.colorMark', { label: 'No response' }) })
+    await user.click(trigger)
+    expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'No response' }) })).toBeInTheDocument()
   })
 })

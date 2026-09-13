@@ -63,6 +63,20 @@ describe('TaskStatusSettings', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/task-statuses',
       expect.objectContaining({ name: 'In progress', value: 'in_progress' })))
   })
+
+  // LOOKUP-ICONS-FE-2 fix (13-09): task_statuses has no icon column/validation —
+  // the mark stays colour-only.
+  it('the value mark stays colour-only', async () => {
+    api.get.mockResolvedValue({ data: [status()] })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<TaskStatusSettings />)
+
+    await screen.findByText('Afgerond')
+    const trigger = screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Afgerond' }) })
+    await user.click(trigger)
+    expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Afgerond' }) })).toBeInTheDocument()
+  })
 })
 
 describe('TaskTypeSettings', () => {
@@ -94,5 +108,19 @@ describe('TaskPrioritySettings', () => {
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/task-priorities',
       expect.objectContaining({ name: 'Low', value: 'low' })))
+  })
+
+  // LOOKUP-ICONS-FE-2 fix (13-09): task_priorities has no icon column/validation —
+  // the mark stays colour-only.
+  it('the value mark stays colour-only', async () => {
+    api.get.mockResolvedValue({ data: [{ id: 'tp1', name: 'Low', color: 'var(--color-primary)' }] })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<TaskPrioritySettings />)
+
+    await screen.findByText('Low')
+    const trigger = screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Low' }) })
+    await user.click(trigger)
+    expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Low' }) })).toBeInTheDocument()
   })
 })

@@ -11,6 +11,8 @@
 import { useCustomerSources } from '@/lib/useCustomerSources'
 import FreeEntryLookupSettings from '@/pages/settings/components/FreeEntryLookupSettings'
 
+// No withIcon/withColor: customer_sources has neither column yet on the backend
+// (LOOKUP-ICONS-FE-2 round-4 hash, ±19:30 13-09) — revisit once that lands.
 export default function CustomerSourcesSettings() {
   return (
     <FreeEntryLookupSettings

@@ -80,5 +80,19 @@ describe('WaMessageTypeSettings — priority flag and daily cap', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/whatsapp-message-types',
       expect.objectContaining({ name: 'Bulk SMS', value: 'bulk_sms' })))
   })
+
+  // LOOKUP-ICONS-FE-2 fix (13-09): whatsapp_message_types has no icon column/
+  // validation — the mark stays colour-only.
+  it('the value mark stays colour-only', async () => {
+    api.get.mockResolvedValue({ data: [type()] })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<WaMessageTypeSettings />)
+
+    await screen.findByText('Sollicitatie')
+    const trigger = screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Sollicitatie' }) })
+    await user.click(trigger)
+    expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Sollicitatie' }) })).toBeInTheDocument()
+  })
 })
 

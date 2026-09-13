@@ -28,6 +28,8 @@
 import { useApplicationSources } from '@/lib/useApplicationSources'
 import FreeEntryLookupSettings from '../components/FreeEntryLookupSettings'
 
+// No withIcon/withColor: candidate_sources has neither column yet on the backend
+// (LOOKUP-ICONS-FE-2 round-4 hash, ±19:30 13-09) — revisit once that lands.
 export default function ApplicationSourcesSettings() {
   return (
     <FreeEntryLookupSettings

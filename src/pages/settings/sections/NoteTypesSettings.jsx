@@ -46,6 +46,9 @@ export default function NoteTypesSettings({ entity = null }) {
         fetchEntity={entity ?? undefined}
         postFilter={postFilter}
         withValueSlug
+        // withColor only (LOOKUP-ICONS-FE-2 fix, 13-09): NoteTypeController has no
+        // icon column/validation — withIcon reverted.
+        withColor
         title={t('noteTypes.title', { entity: entityLabel })} subtitle={t('noteTypes.subtitle')}
         endpoint="/note-types" addLabel={t('noteTypes.add')} />
     </div>

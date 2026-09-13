@@ -15,7 +15,9 @@ export function AppointmentLocationSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      <StatusListEditor compact withColor withValueSlug
+      {/* withIcon (LOOKUP-ICONS-FE-2, 13-09): appointment_locations carries an icon
+          column/seed on the backend now — each location gets its own icon-in-colour mark. */}
+      <StatusListEditor compact withColor withIcon withValueSlug
         title={t('appointmentLocations.title')} subtitle={t('appointmentLocations.subtitle')}
         endpoint="/appointment-locations" addLabel={t('appointmentLocations.add')}
         defaultField={{ key: 'is_default' }} />

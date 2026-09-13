@@ -73,6 +73,27 @@ describe('CandidateLookupsSettings — funnel stage default singleton', () => {
     expect(screen.getAllByRole('button', { name: st('common.default') })).toHaveLength(1)
   })
 
+  // LOOKUP-ICONS-FE-2 (13-09): funnel stages now render the icon-carrying mark
+  // (application_stages carries icon/color on the backend), and picking an icon
+  // PATCHes {icon} through PUT /settings/candidate-lookups/funnel-types/{id}.
+  it('renders the icon-and-colour mark and picking an icon PUTs {icon}', async () => {
+    api.get.mockResolvedValue({ data: {
+      funnel_types: [stage({ id: 'f1', label: 'Gesolliciteerd', is_default: true })],
+    } })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<FunnelStagesSettings />)
+
+    await screen.findByText('Gesolliciteerd')
+    const trigger = screen.getByRole('button', { name: st('statusList.valueMark', { label: 'Gesolliciteerd' }) })
+    await user.click(trigger)
+    const iconCell = (await screen.findAllByRole('menuitem'))[0]
+    await user.click(iconCell)
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+      '/settings/candidate-lookups/funnel-types/f1', expect.objectContaining({ icon: expect.any(String) })))
+  })
+
   it('does not render the DefaultToggle on the contract-forms (candidate_types) block', async () => {
     api.get.mockResolvedValue({ data: {
       // eslint-disable-next-line no-restricted-syntax -- DATA: a fixture contract-form's tenant-picked colour, not a style rule.
@@ -208,7 +229,10 @@ describe('CandidateLookupsSettings — readOnly (system value locked)', () => {
   // it) — already covered end-to-end by "saves a phase COLOUR via the row swatch"
   // above (click mark → popover → pick preset → PUT), re-asserted here as an
   // explicit readOnly-scoped regression guard.
-  it('the value mark still opens its popover — colour stays editable', async () => {
+  // LOOKUP-ICONS-FE-2 fix (13-09): CandidateLookupController.php TYPES declares
+  // 'phases' => icon:false (candidate_phases has no icon column) — phases stays
+  // colour-only (a 'dialog' popover), unlike funnel-types which does carry icon.
+  it('the value mark still opens its popover — colour only, no icon column on phases', async () => {
     api.get.mockResolvedValue({ data: {
       // eslint-disable-next-line no-restricted-syntax -- DATA: fixture phase colour, not a style rule.
       phases: [{ id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_applicant: false }],
@@ -309,16 +333,19 @@ describe('CandidateLookupsSettings — icon support (statuses + contract forms)'
       '/settings/candidate-lookups/statuses/s1', expect.objectContaining({ icon: 'calendar' })))
   })
 
-  it('renders only the colour-only mark on funnel stages (no icon vocabulary)', async () => {
+  // Updated LOOKUP-ICONS-FE-2 (13-09): funnel stages (application_stages) gained
+  // an icon vocabulary on the backend — the mark is now icon-carrying, not
+  // colour-only (was the pre-13-09 contract, see the FunnelStagesSettings icon-mark
+  // test above for the PATCH regression).
+  it('renders the icon-carrying mark on funnel stages (icon vocabulary added 13-09)', async () => {
     api.get.mockResolvedValue({ data: {
       funnel_types: [stage({ id: 'f1', label: 'Gesolliciteerd' })],
     } })
     render(<FunnelStagesSettings />)
 
     await screen.findByText('Gesolliciteerd')
-    // Funnel stages carry no icon vocabulary — the mark is colour-only, never icon-tinted.
-    expect(screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Gesolliciteerd' }) })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: st('statusList.valueMark', { label: 'Gesolliciteerd' }) })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: st('statusList.valueMark', { label: 'Gesolliciteerd' }) })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: st('statusList.colorMark', { label: 'Gesolliciteerd' }) })).not.toBeInTheDocument()
   })
 
   it('saves a picked icon on a contract form via the edit modal', async () => {

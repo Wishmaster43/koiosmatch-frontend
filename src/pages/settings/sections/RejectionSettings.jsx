@@ -14,6 +14,8 @@ export default function RejectionSettings() {
   // Drag-reorder on: candidate_rejection_reasons carries sort_order + PUT
   // /candidate-rejection-reasons/reorder (BE ea4d2ebb, CandidateRejectionReasonController
   // on ReordersLookup) — mirrors BlacklistReasonsSettings (LOOKUP-REORDER-1).
+  // withIcon reverted (LOOKUP-ICONS-FE-2 fix, 13-09): CandidateRejectionReasonController
+  // has no icon column/validation — stays colour-only.
   return (
     <StatusListEditor title={t('rejection.title')} subtitle={t('rejection.subtitle')}
       endpoint="/candidate-rejection-reasons" addLabel={t('rejection.add')} withColor />

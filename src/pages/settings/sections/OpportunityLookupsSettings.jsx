@@ -48,6 +48,9 @@ export default function OpportunityLookupsSettings() {
   return (
     <div style={{ maxWidth: 640 }}>
       <SubTabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
+      {/* withIcon reverted across all five tabs (LOOKUP-ICONS-FE-2 fix, 13-09): none
+          of the five opportunity_* tables has an icon column/validation rule yet —
+          every tab stays colour-only until CMBE ships the columns. */}
       <div style={{ marginTop: 14 }}>
         {activeTab === 'stages' && (
           <StatusListEditor withColor withValueSlug

@@ -69,4 +69,21 @@ describe('AppointmentLocationSettings', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/appointment-locations',
       expect.objectContaining({ name: 'Bij klant', value: 'bij_klant' })))
   })
+
+  // LOOKUP-ICONS-FE-2 (13-09): appointment locations now render the icon-carrying
+  // mark, and picking an icon PATCHes {icon} through PUT /appointment-locations/{id}.
+  it('renders the icon-and-colour mark and picking an icon PUTs {icon}', async () => {
+    api.get.mockResolvedValue({ data: [location()] })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<AppointmentLocationSettings />)
+
+    await screen.findByText('Kantoor')
+    const trigger = screen.getByRole('button', { name: st('statusList.valueMark', { label: 'Kantoor' }) })
+    await user.click(trigger)
+    const iconCell = (await screen.findAllByRole('menuitem'))[0]
+    await user.click(iconCell)
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/appointment-locations/l1', expect.objectContaining({ icon: expect.any(String) })))
+  })
 })

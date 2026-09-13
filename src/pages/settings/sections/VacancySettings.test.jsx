@@ -10,11 +10,11 @@
  * `active` flag gets `default: true` so new channels start active.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
-import { VacancySenioritySettings, VacancyEducationSettings, VacancyStatusSettings, VacancyChannelSettings } from './VacancySettings'
+import { VacancySenioritySettings, VacancyEducationSettings, VacancyStatusSettings, VacancyPhaseSettings, VacancyChannelSettings } from './VacancySettings'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
@@ -52,6 +52,20 @@ describe('VacancySenioritySettings', () => {
 
     const pill = await screen.findByRole('button', { name: st('common.default') })
     expect(pill).not.toBeDisabled() // DEFAULT-UNDO 04-08: active pill stays clickable (click = clear)
+  })
+
+  // LOOKUP-ICONS-FE-2 fix (13-09): vacancy_seniority_levels has no icon column/
+  // validation — the mark stays colour-only.
+  it('the value mark stays colour-only', async () => {
+    api.get.mockResolvedValue({ data: [row({ id: 'sen-1', name: 'Starter' })] })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<VacancySenioritySettings />)
+
+    await screen.findByText('Starter')
+    const trigger = screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Starter' }) })
+    await user.click(trigger)
+    expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Starter' }) })).toBeInTheDocument()
   })
 })
 
@@ -162,4 +176,27 @@ describe('VacancyChannelSettings', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/vacancy-channels',
       expect.objectContaining({ name: 'LinkedIn', active: true })))
   })
+})
+
+// LOOKUP-ICONS-FE-2 (Danny 13-09 15:25, "de opties onder dat kopje"): vacancy statuses and
+// phases carry icon + colour (VacancyStatusController / VacancyPhaseController validate
+// `icon`), so the row wears the icon-and-colour mark and an icon pick PUTs {icon}.
+describe('vacancy statuses and phases — icon-and-colour mark (LOOKUP-ICONS-FE-2)', () => {
+  const cases = [
+    { name: 'VacancyStatusSettings', Comp: VacancyStatusSettings, endpoint: '/vacancy-statuses', label: 'Open' },
+    { name: 'VacancyPhaseSettings', Comp: VacancyPhaseSettings, endpoint: '/vacancy-phases', label: 'Werving' },
+  ]
+  for (const c of cases) {
+    it(`${c.name}: the row wears the icon-and-colour mark and picking an icon PUTs {icon} on ${c.endpoint}/{id}`, async () => {
+      api.get.mockResolvedValue({ data: [row({ id: 'r1', name: c.label, icon: 'globe' })] })
+      api.put.mockResolvedValue({ data: {} })
+      render(<c.Comp />)
+      await screen.findByText(c.label)
+      const mark = screen.getByRole('button', { name: st('statusList.valueMark', { label: c.label }) })
+      fireEvent.click(mark)
+      const iconOption = await screen.findByRole('menuitem', { name: `${st('documentTypes.icon')}: tag` })
+      fireEvent.click(iconOption)
+      await waitFor(() => expect(api.put).toHaveBeenCalledWith(`${c.endpoint}/r1`, expect.objectContaining({ icon: 'tag' })))
+    })
+  }
 })

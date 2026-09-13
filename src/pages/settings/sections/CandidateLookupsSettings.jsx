@@ -62,8 +62,11 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, readOnly =
   // Default flag is settable on both funnel stages and phases (04-08: phases list stays
   // add/remove-locked, but the default toggle becomes interactive on it).
   const supportsDefault = isFunnelBlock || isPhaseBlock
-  // Icon support (batch 12, P22-30): statuses + contract forms only, for now.
-  const supportsIcon = isStatusBlock || isContractFormBlock
+  // Icon support: statuses + contract forms (batch 12, P22-30), extended to funnel
+  // stages only (LOOKUP-ICONS-FE-2 fix, 13-09) — CandidateLookupController.php
+  // TYPES declares 'funnel-types' => icon:true (application_stages) but
+  // 'phases' => icon:false (candidate_phases has no icon column): phases stays off.
+  const supportsIcon = isStatusBlock || isContractFormBlock || isFunnelBlock
 
   // eslint-disable-next-line no-restricted-syntax -- DATA: default swatch colour pre-filled for a newly created lookup row, not UI chrome
   const openAdd  = ()   => setModal({ mode: 'add',  value: '', label: '', color: '#3B8FD4', icon: null, requires_appointment: false, requires_reason: false, requires_match: false, expects_return_date: false, is_match: false, is_rejected: false, is_proposal: false, is_blacklist: false, is_applicant: false, customer_not_applicable: false, is_leave: false, is_unavailable: false, has_contract_lines: false })

@@ -25,6 +25,9 @@ import SaveButton from '@/components/ui/SaveButton'
 import { PageTitle } from '@/components/ui/typography'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import ModalFooter from '@/components/ui/ModalFooter'
+import LookupValueMark from './LookupValueMark'
+import { FALLBACK_SWATCH } from './statusListEditorTypes'
+import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIcons'
 
 // Bespoke per-country province lookup editor (see file doc for why it isn't
 // the shared StatusListEditor): country picker + drag-reorderable, CRUD list.
@@ -100,6 +103,22 @@ export default function ProvincesSettings() {
     }, { danger: true })
   }
 
+  // LOOKUP-CODES-1 (BE f7b6d529): optimistic per-row icon/colour PATCH, same
+  // revert-on-failure contract as the shared StatusListEditor's own updateIcon/
+  // updateColor — this bespoke screen keeps the province's own endpoint shape.
+  const updateIcon = async (item, icon) => {
+    const previous = items
+    setItems(p => p.map(x => x.id === item.id ? { ...x, icon } : x))
+    try { await api.put(`/provinces/${item.id}`, { name: item.name, icon }) }
+    catch { setItems(previous); notifyError(t('statusList.saveFailed')) }
+  }
+  const updateColor = async (item, color) => {
+    const previous = items
+    setItems(p => p.map(x => x.id === item.id ? { ...x, color } : x))
+    try { await api.put(`/provinces/${item.id}`, { name: item.name, color }) }
+    catch { setItems(previous); notifyError(t('statusList.saveFailed')) }
+  }
+
   // Persist the drag-reordered position within the current country only — the
   // list only ever holds that country's rows, so other countries stay untouched.
   const saveOrder = async () => {
@@ -155,11 +174,20 @@ export default function ProvincesSettings() {
           onReorder={setItems}
           renderItem={(item) => (
             <>
-              {/* Row 84: the province flag before the name, from the BE-served ISO 3166-2
-                  code; decorative (the name carries the meaning), absent when no code ships. */}
-              {provinceFlagSrc(item.code) && (
+              {/* LOOKUP-ONE-ELEMENT-1: one glyph per row (Danny 09-09, "Een vlag en een
+                  icon overkill") — a row with its own BE-served ISO 3166-2 flag shows
+                  ONLY the flag; the colour/icon mark is the fallback for a row without
+                  a code, mirroring StatusListRow's per-item rowPrefix suppression. */}
+              {provinceFlagSrc(item.code) ? (
                 <img src={provinceFlagSrc(item.code)} alt="" aria-hidden="true" width={18} height={12} data-testid={`province-flag-${item.code}`}
                   style={{ flexShrink: 0, borderRadius: 2, objectFit: 'cover', border: '1px solid var(--border)' }} />
+              ) : (
+                <LookupValueMark
+                  color={item.color ?? FALLBACK_SWATCH} icon={item.icon} withColor
+                  icons={GENERIC_LOOKUP_ICON_NAMES} resolve={resolveGenericLookupIcon}
+                  label={item.name}
+                  onPickColor={(c) => updateColor(item, c)} onPickIcon={(icon) => updateIcon(item, icon)}
+                />
               )}
               <span style={{ fontSize: 13, color: 'var(--text)' }}>{item.name}</span>
               <div style={{ flex: 1 }} />

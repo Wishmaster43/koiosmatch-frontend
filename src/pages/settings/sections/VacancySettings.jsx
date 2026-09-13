@@ -81,7 +81,7 @@ export function VacancyStatusSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      <StatusListEditor compact withColor title={t('vacancy.title')} subtitle={t('vacancy.subtitle')}
+      <StatusListEditor compact withColor withIcon title={t('vacancy.title')} subtitle={t('vacancy.subtitle')}
         endpoint="/vacancy-statuses" addLabel={t('vacancy.add')}
         flagFields={[
           { key: 'is_open', label: t('vacancy.flagOpen'), description: t('vacancy.flagOpenDesc') },
@@ -97,7 +97,7 @@ export function VacancyPhaseSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      <StatusListEditor compact withColor title={t('vacancy.phasesTitle')} subtitle={t('vacancy.phasesSubtitle')}
+      <StatusListEditor compact withColor withIcon title={t('vacancy.phasesTitle')} subtitle={t('vacancy.phasesSubtitle')}
         endpoint="/vacancy-phases" addLabel={t('vacancy.phasesAdd')} />
     </div>
   )
@@ -114,6 +114,8 @@ export function VacancySenioritySettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
+      {/* withIcon reverted (LOOKUP-ICONS-FE-2 fix, 13-09): no icon column/validation
+          on vacancy_seniority_levels — stays colour-only. */}
       <StatusListEditor compact withColor title={t('vacancy.seniorityTitle')} subtitle={t('vacancy.senioritySubtitle')}
         endpoint="/vacancy-seniority-levels" addLabel={t('vacancy.seniorityAdd')}
         defaultField={{ key: 'is_default' }} />
@@ -130,6 +132,8 @@ export function VacancyEducationSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
+      {/* withIcon reverted (LOOKUP-ICONS-FE-2 fix, 13-09): no icon column/validation
+          on vacancy_education_levels — stays colour-only. */}
       <StatusListEditor compact withColor title={t('vacancy.educationTitle')} subtitle={t('vacancy.educationSubtitle')}
         endpoint="/vacancy-education-levels" addLabel={t('vacancy.educationAdd')}
         defaultField={{ key: 'is_default' }} />

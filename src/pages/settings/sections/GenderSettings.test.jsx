@@ -32,3 +32,19 @@ it('GenderSettings: create POST to /genders carries the slugged value', async ()
   await waitFor(() => expect(api.post).toHaveBeenCalledWith('/genders',
     expect.objectContaining({ name: 'Male', value: 'male' })))
 })
+
+// LOOKUP-ICONS-FE-2 fix (13-09): candidate_genders has no icon column — the mark
+// stays colour-only ('dialog', not 'menu').
+it('GenderSettings: row renders the colour-only mark', async () => {
+  api.get.mockResolvedValue({ data: [{ id: 'g1', name: 'Male', value: 'male', color: 'var(--color-primary)' }] })
+  api.put.mockResolvedValue({ data: {} })
+  const user = userEvent.setup()
+  render(<GenderSettings />)
+
+  await screen.findByText('Male')
+  const trigger = screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Male' }) })
+  expect(trigger).toBeTruthy()
+
+  await user.click(trigger)
+  expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Male' }) })).toBeInTheDocument()
+})

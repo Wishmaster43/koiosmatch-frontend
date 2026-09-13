@@ -31,9 +31,9 @@
 import { useFunctions } from '@/lib/useFunctions'
 import FreeEntryLookupSettings from '../components/FreeEntryLookupSettings'
 
-// withIcon (batch 12, P22-30): colourless lookup — the icon still renders, tinted
-// with the shared FALLBACK_SWATCH grey (StatusListEditor's `item.color ?? FALLBACK_SWATCH`),
-// so no colour meaning is implied.
+// withIcon only (LOOKUP-ICONS-FE-2 fix, 13-09): job_functions has an icon
+// column/fillable but NO color column — JobFunction::$fillable lists icon, not
+// color, so a withColor PUT would be mass-assignment-dropped (§3 fake affordance).
 export default function FunctionsSettings() {
   return (
     <FreeEntryLookupSettings

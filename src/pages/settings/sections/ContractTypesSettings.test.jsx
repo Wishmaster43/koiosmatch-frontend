@@ -12,7 +12,7 @@
  * CustomerPhasesSettings.test.jsx's regression guard for the same bug class).
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
@@ -55,5 +55,20 @@ describe('ContractTypesSettings', () => {
     // slug SlugLookupController::store() requires; missing it would 422 in real life.
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/contract-types',
       expect.objectContaining({ name: 'ZZP Flex', default_duration_days: 90, value: 'zzp_flex' })))
+  })
+})
+
+// LOOKUP-ICONS-FE-2 (13-09): contract types carry icon + colour (ContractTypeController
+// validates `icon`), so the row wears the icon-and-colour mark and an icon pick PUTs {icon}.
+describe('ContractTypesSettings — icon-and-colour mark (LOOKUP-ICONS-FE-2)', () => {
+  it('renders the mark and PUTs {icon} on /contract-types/{id} when an icon is picked', async () => {
+    api.get.mockResolvedValue({ data: [type({ icon: 'globe' })] })
+    api.put.mockResolvedValue({ data: {} })
+    render(<ContractTypesSettings />)
+    await screen.findByText('Fase 1-2')
+    fireEvent.click(screen.getByRole('button', { name: st('statusList.valueMark', { label: 'Fase 1-2' }) }))
+    const iconOption = await screen.findByRole('menuitem', { name: `${st('documentTypes.icon')}: tag` })
+    fireEvent.click(iconOption)
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/contract-types/ct1', expect.objectContaining({ icon: 'tag' })))
   })
 })

@@ -101,6 +101,26 @@ describe('ProvincesSettings', () => {
   })
 })
 
+// LOOKUP-CODES-1 (13-09): a province row without a shipped flag carries the shared
+// icon-and-colour mark (LOOKUP-ONE-ELEMENT-1: one glyph per row, so a flagged row
+// shows the flag alone); the mark's popover PUTs {icon}/{color} on the province.
+describe('ProvincesSettings — icon/colour mark (LOOKUP-CODES-1)', () => {
+  it('renders the mark and PATCHes {icon} on the province endpoint when an icon is picked', async () => {
+    api.get.mockResolvedValue({ data: [province({ color: 'var(--color-primary)', icon: 'globe' })] })
+    api.put.mockResolvedValue({ data: {} })
+    render(<ProvincesSettings />)
+
+    await screen.findByText('Utrecht')
+    const mark = screen.getByRole('button', { name: st('statusList.valueMark', { label: 'Utrecht' }) })
+    const user = userEvent.setup()
+    await user.click(mark)
+    const iconOption = await screen.findByRole('menuitem', { name: `${st('documentTypes.icon')}: tag` })
+    await user.click(iconOption)
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/provinces/p1', { name: 'Utrecht', icon: 'tag' }))
+  })
+})
+
 // Row 84 (Danny 13-09): a province with a BE-served ISO 3166-2 code wears its flag before the
 // name; a row without a code shows no flag at all (never a guessed one).
 describe('ProvincesSettings — province flag (row 84)', () => {
@@ -110,5 +130,16 @@ describe('ProvincesSettings — province flag (row 84)', () => {
     const flag = await screen.findByTestId('province-flag-NL-ZH')
     expect(flag).toHaveAttribute('src', '/flags/provinces/NL-ZH.svg')
     expect(screen.queryAllByTestId(/^province-flag-/)).toHaveLength(1)
+  })
+
+  // LOOKUP-ONE-ELEMENT-1 (Danny 09-09, "Een vlag en een icon overkill"): the icon/colour
+  // mark and the flag never both render on the same row — BE dacba999 measured every
+  // NL province carrying a code, so this is the real seeded case, not an edge case.
+  it('a coded row shows only the flag, never the icon/colour mark alongside it', async () => {
+    api.get.mockResolvedValue({ data: [province({ id: 'p1', name: 'Zuid-Holland', code: 'NL-ZH' })] })
+    render(<ProvincesSettings />)
+
+    await screen.findByTestId('province-flag-NL-ZH')
+    expect(screen.queryByRole('button', { name: st('statusList.valueMark', { label: 'Zuid-Holland' }) })).not.toBeInTheDocument()
   })
 })

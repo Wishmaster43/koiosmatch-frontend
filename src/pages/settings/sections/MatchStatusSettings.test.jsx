@@ -44,3 +44,19 @@ describe.each(createAsserts)('$name · withValueSlug (§13)', ({ Comp, endpoint,
       expect.objectContaining({ name: typed, value: slug })))
   })
 })
+
+// LOOKUP-ICONS-FE-2 fix (13-09): neither MatchStatusController nor the
+// stop-reasons endpoint has an icon column/validation — both stay colour-only.
+describe.each(createAsserts)('$name · colour-only mark (LOOKUP-ICONS-FE-2 fix)', ({ Comp }) => {
+  it('the value mark stays colour-only', async () => {
+    api.get.mockResolvedValue({ data: [{ id: 'ms1', name: 'Actief', color: 'var(--color-primary)' }] })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<Comp />)
+
+    await screen.findByText('Actief')
+    const trigger = screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Actief' }) })
+    await user.click(trigger)
+    expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Actief' }) })).toBeInTheDocument()
+  })
+})

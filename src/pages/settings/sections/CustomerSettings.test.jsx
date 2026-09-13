@@ -86,6 +86,21 @@ describe('CustomerStatusesSettings', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings/customer-lookups/statuses',
       expect.objectContaining({ name: 'Prospect', value: 'prospect' })))
   })
+
+  // LOOKUP-ICONS-FE-2 fix (13-09): CustomerLookupController.php validates `color`
+  // only for customer_statuses (no icon column/rule) — colour-only mark stays.
+  it('the value mark stays colour-only and PUTs {color} when a colour is picked', async () => {
+    const active = mockStatus('s1', 'Active', { is_default: true })
+    api.get.mockResolvedValue({ data: [active] })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<CustomerStatusesSettings />)
+
+    await screen.findByText('Active')
+    const trigger = screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Active' }) })
+    await user.click(trigger)
+    expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Active' }) })).toBeInTheDocument()
+  })
 })
 
 // readOnly (Danny 13-09, rows 45/46, verbatim: "Aangezien we dit niet moeten
@@ -119,6 +134,8 @@ describe('CustomerPhasesSettings — readOnly (system value locked)', () => {
     expect(addBtn).toHaveAttribute('aria-description', st('statusList.systemValueLocked'))
   })
 
+  // LOOKUP-ICONS-FE-2 fix (13-09): the customer-phases endpoint validates color
+  // only — colour/icon mark stays colour-only ('dialog', not 'menu').
   it('the value mark still opens its popover — colour stays editable (he did not name it)', async () => {
     api.get.mockResolvedValue({ data: [phase()] })
     const user = userEvent.setup()
@@ -262,5 +279,19 @@ describe('ContactStatusesSettings', () => {
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings/customer-lookups/contact-statuses',
       expect.objectContaining({ name: 'Retired', value: 'retired' })))
+  })
+})
+
+// LOOKUP-ICONS-FE-2 (13-09): contact statuses gained withColor like the four sibling
+// blocks (colour column + `color` validation on the customer lookup controller).
+describe('ContactStatusesSettings — colour mark (LOOKUP-ICONS-FE-2)', () => {
+  it('the value mark is colour-only and opens its palette', async () => {
+    const lead = mockStatus('cs1', 'Contactpersoon actief', { is_default: true })
+    api.get.mockResolvedValue({ data: [lead] })
+    const user = userEvent.setup()
+    render(<ContactStatusesSettings />)
+    await screen.findByText('Contactpersoon actief')
+    await user.click(screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Contactpersoon actief' }) }))
+    expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Contactpersoon actief' }) })).toBeInTheDocument()
   })
 })

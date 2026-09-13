@@ -89,6 +89,35 @@ describe('FunctionsSettings — free-entry toggle (real dedicated route)', () =>
   })
 })
 
+// LOOKUP-ICONS-FE-2 fix (13-09): job_functions has an icon column/fillable but
+// no color column (JobFunction::$fillable has no `color`) — the mark stays
+// icon-only, never colour.
+describe('FunctionsSettings — icon mark (LOOKUP-ICONS-FE-2 fix, 13-09)', () => {
+  it('renders the icon-only mark (no colour column) and picking an icon PUTs {icon}', async () => {
+    vi.resetModules()
+    const apiModule = await import('@/lib/api')
+    // StatusListEditor GETs the plain '/functions' endpoint (no query) for its own
+    // row list, separate from useFunctions' '/functions?active=1' free-entry read.
+    apiModule.default.get.mockImplementation(url => {
+      if (url === '/functions?active=1') return Promise.resolve({ data: { data: [], allow_free_entry: false } })
+      if (url === '/functions') return Promise.resolve({ data: [{ id: 'fn1', label: 'Verpleger', icon: null }] })
+      return Promise.resolve({ data: {} })
+    })
+    apiModule.default.put.mockResolvedValue({ data: {} })
+    const { default: FunctionsSettings } = await import('./FunctionsSettings')
+    const user = userEvent.setup()
+    render(<FunctionsSettings />)
+
+    await screen.findByText('Verpleger')
+    const trigger = screen.getByRole('button', { name: i18n.t('statusList.valueMark', { ns: 'settings', label: 'Verpleger' }) })
+    await user.click(trigger)
+    const iconCell = (await screen.findAllByRole('menuitem'))[0]
+    await user.click(iconCell)
+
+    await waitFor(() => expect(apiModule.default.put).toHaveBeenCalledWith('/functions/fn1', expect.objectContaining({ icon: expect.any(String) })))
+  })
+})
+
 describe('FunctionsSettings — strict preflight (FUNC-STRICT-PREFLIGHT-1)', () => {
   it('tightening with off-list values runs the preflight and shows them before any PUT', async () => {
     const api = await renderWithFunctions([], true)

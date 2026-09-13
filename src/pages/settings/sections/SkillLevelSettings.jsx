@@ -15,8 +15,9 @@ export function SkillLevelSettings() {
           (routes/api/tenant/candidate-lookups.php) — no PUT /skill-levels/reorder —
           so a drag-drop here would optimistically reorder, then 404-toast on the
           PUT and revert (§3: no dead CRUD affordance). */}
-      {/* withIcon (batch 12, P22-30): colourless lookup — icon renders with the shared
-          FALLBACK_SWATCH grey tint, no colour meaning implied. */}
+      {/* withIcon only (LOOKUP-ICONS-FE-2 fix, 13-09): skill_levels has an icon
+          column/fillable but NO color column on the backend — a withColor PUT
+          would be mass-assignment-dropped (§3 fake affordance). icon stays on. */}
       <StatusListEditor compact withColor={false} withIcon reorderable={false}
         title={t('skillLevels.title')} subtitle={t('skillLevels.subtitle')}
         endpoint="/skill-levels" addLabel={t('skillLevels.add')} />

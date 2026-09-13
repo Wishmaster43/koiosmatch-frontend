@@ -10,9 +10,13 @@ export function LanguageListSettings() {
   return (
     <div style={{ maxWidth: 640 }}>
       {/* Danny 09-09 ("geen vlag lekker consistent"): a language row wears its flag the way a
-          nationality does — derived from the row's `country_code` (CMBE icon round 2 adds the
-          column and seeds it); a row without a code simply shows no flag. */}
-      <StatusListEditor compact withColor={false}
+          nationality does — derived from the row's `country_code`; a row without a code
+          simply shows no flag. LOOKUP-CODES-1 (BE f7b6d529) also serves icon+color on
+          /languages, so — mirroring NationalitiesSettings — withIcon/withColor turn on:
+          the flag stays the ONE adornment on rows that carry a country_code
+          (rowPrefix suppresses the value mark, LOOKUP-ONE-ELEMENT-1), the icon-in-colour
+          mark is what a flagless row shows. */}
+      <StatusListEditor compact withColor withIcon
         title={t('languageSettings.languagesTitle')} subtitle={t('languageSettings.languagesSubtitle')}
         endpoint="/languages" addLabel={t('languageSettings.addLanguage')}
         rowPrefix={(item) => item.country_code ? (
@@ -22,7 +26,9 @@ export function LanguageListSettings() {
   )
 }
 
-/** Levels — the proficiency levels (spoken/written), its own sub-tab. */
+/** Levels — the proficiency levels (spoken/written), its own sub-tab.
+ * No withIcon/withColor: language_levels has neither column yet on the backend
+ * (LOOKUP-ICONS-FE-2 round-4 hash, ±19:30 13-09) — revisit once that lands. */
 export function LanguageLevelSettings() {
   const { t } = useTranslation('settings')
   return (

@@ -49,22 +49,34 @@ export default function StatusListRow({
                    color: 'var(--text)', background: 'var(--surface)', border: '1px solid var(--border)',
                    borderRadius: 6, flexShrink: 0, outline: 'none' }} />
       )}
-      {/* LOOKUP-ONE-ELEMENT-1 (Danny 10-09 23:20): one coloured mark per value — an
-          icon in its own colour, or the colour fill itself — never a swatch dot next
-          to a separate icon box, and never a coloured label chip alongside it. A row
-          with its own adornment (the nationality flag) carries no mark at all — one
-          glyph per row (Danny 09-09: "Een vlag en een icon overkill"). */}
-      {(withColor || resolvedIconPicker) && !rowPrefix && (
-        <LookupValueMark
-          color={item.color ?? FALLBACK_SWATCH} icon={item.icon} withColor={withColor}
-          icons={resolvedIconPicker?.icons ?? null} resolve={resolvedIconPicker?.resolve}
-          label={labelOf(item)}
-          onPickColor={(c: string) => updateColor(item, c)} onPickIcon={(icon: string) => updateIcon(item, icon)}
-        />
-      )}
-      {/* Bespoke row adornment (NATION-FLAG-1: a flag emoji) — before the name,
-          same slot the value mark would otherwise occupy. */}
-      {rowPrefix && rowPrefix(item)}
+      {/* rowPrefix is evaluated PER ITEM (LOOKUP-ICONS-FE-2, 13-09) — a row whose
+          prefix returns nothing (e.g. a language without a country_code) still
+          gets the value mark; only a row that actually renders its own adornment
+          (a flag) suppresses it, so the "one glyph per row" rule holds per row,
+          not per family. */}
+      {(() => {
+        const prefixNode = rowPrefix ? rowPrefix(item) : null
+        return (
+          <>
+            {/* LOOKUP-ONE-ELEMENT-1 (Danny 10-09 23:20): one coloured mark per value — an
+                icon in its own colour, or the colour fill itself — never a swatch dot next
+                to a separate icon box, and never a coloured label chip alongside it. A row
+                with its own adornment (the nationality flag) carries no mark at all — one
+                glyph per row (Danny 09-09: "Een vlag en een icon overkill"). */}
+            {(withColor || resolvedIconPicker) && !prefixNode && (
+              <LookupValueMark
+                color={item.color ?? FALLBACK_SWATCH} icon={item.icon} withColor={withColor}
+                icons={resolvedIconPicker?.icons ?? null} resolve={resolvedIconPicker?.resolve}
+                label={labelOf(item)}
+                onPickColor={(c: string) => updateColor(item, c)} onPickIcon={(icon: string) => updateIcon(item, icon)}
+              />
+            )}
+            {/* Bespoke row adornment (NATION-FLAG-1: a flag emoji) — before the name,
+                same slot the value mark would otherwise occupy. */}
+            {prefixNode}
+          </>
+        )
+      })()}
       <BodyText as="span">{labelOf(item)}</BodyText>
       {/* One badge per active flag (flagFields) — independent booleans, no singleton rule. */}
       {flagList.map(f => item[f.key] && (
