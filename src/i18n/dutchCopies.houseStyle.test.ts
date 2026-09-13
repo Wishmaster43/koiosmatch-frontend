@@ -327,6 +327,15 @@ const ALLOWLIST: string[] = [
   // import-entity/Koios-chat entries above, verified via the sibling singular
   // "Kandidat" translating differently elsewhere in this same locale file.
   'de/settings:webhooks.events.groups.candidates',
+
+  // 13-09 settings landings: German "Kandidaten" is the identical loanword (catalogue group
+  // label, CATALOG-EMBED-1 f919beb9) and es/it/pt "Fase" = "phase" on the short vacancy
+  // sub-tab name (SETTINGS-INCON-B1a 9decc3bc) — same roots as the entries above
+  'de/settings:groups.candidates',
+  'de/settings:settings.groups.candidates',
+  'es/settings:vacancyTab.tabs.phases',
+  'it/settings:vacancyTab.tabs.phases',
+  'pt/settings:vacancyTab.tabs.phases',
 ]
 
 describe('i18n house style — no smuggled Dutch copies in translated locales', () => {
