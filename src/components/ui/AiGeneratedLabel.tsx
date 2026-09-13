@@ -28,7 +28,7 @@ export default function AiGeneratedLabel({ size = 11 }: AiGeneratedLabelProps) {
   // i18n key while the real translations land in the locale files (§5 — the
   // keys still need translating in all five locales; this is only the
   // fallback for the interim).
-  const hint = t('aiGeneratedHint', { defaultValue: 'Door Koios AI gegenereerd — controleer voor gebruik.' })
+  const hint = t('aiGeneratedHint', { defaultValue: 'Door Koios AI gegenereerd. Controleer voor gebruik.' })
   const label = t('aiGenerated', { defaultValue: 'AI-gegenereerd' })
 
   return (

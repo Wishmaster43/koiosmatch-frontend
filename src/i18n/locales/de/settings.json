@@ -2740,7 +2740,7 @@
   },
   "functionsSettings": {
     "title": "Funktionen (Kandidat)",
-    "subtitle": "Verwalten Sie die Funktionsliste, die Sie KANDIDATEN zuweisen (z. B. Pflegehelfer), und ob Recruiter freie Werte eingeben dürfen. Dies ist eine andere Liste als die Kontaktpersonen-Funktionen.",
+    "subtitle": "Verwalte die Funktionsliste, die du KANDIDATEN zuweist (z. B. Staplerfahrer), und ob Recruiter freie Werte eingeben dürfen. Dies ist eine andere Liste als die Kontaktfunktionen.",
     "add": "Funktion hinzufügen",
     "freeEntry": "Freie Eingabe erlauben",
     "freeEntryHint": "An: Recruiter können eine eigene Funktion eingeben (Combobox). Aus: nur aus der Liste wählen (strikte Auswahl).",

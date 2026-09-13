@@ -2740,7 +2740,7 @@
   },
   "functionsSettings": {
     "title": "Functions (candidate)",
-    "subtitle": "Manage the function list assigned to CANDIDATES (e.g. Verzorgende IG) and whether recruiters can enter free values. This is a separate list from contact-person functions.",
+    "subtitle": "Manage the function list you assign to CANDIDATES (e.g. Forklift driver) and whether recruiters may enter free values. This is a different list from the contact functions.",
     "add": "Add function",
     "freeEntry": "Allow free entry",
     "freeEntryHint": "On: recruiters can type their own function (combobox). Off: pick from the list only (strict dropdown).",

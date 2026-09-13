@@ -2740,7 +2740,7 @@
   },
   "functionsSettings": {
     "title": "Funzioni (candidato)",
-    "subtitle": "Gestisci l'elenco delle funzioni assegnate ai CANDIDATI (ad es. Verzorgende IG) e se i recruiter possono inserire valori liberi. È un elenco diverso da quello delle funzioni dei referenti.",
+    "subtitle": "Gestisci l'elenco delle funzioni assegnate ai CANDIDATI (ad es. Carrellista) e se i recruiter possono inserire valori liberi. È un elenco diverso da quello delle funzioni dei referenti.",
     "add": "Aggiungi funzione",
     "freeEntry": "Consenti inserimento libero",
     "freeEntryHint": "Attivo: i recruiter possono digitare una funzione propria (combobox). Disattivo: si può scegliere solo dall'elenco (menu a tendina rigido).",

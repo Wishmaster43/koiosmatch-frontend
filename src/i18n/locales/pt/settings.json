@@ -2740,7 +2740,7 @@
   },
   "functionsSettings": {
     "title": "Funções (candidato)",
-    "subtitle": "Faça a gestão da lista de funções atribuídas a CANDIDATOS (por exemplo, Verzorgende IG) e se os recrutadores podem introduzir valores livres. Esta é uma lista diferente das funções de pessoa de contacto.",
+    "subtitle": "Gere a lista de funções que atribui aos CANDIDATOS (p. ex. Operador de empilhador) e se os recrutadores podem introduzir valores livres. É uma lista diferente da das funções de contacto.",
     "add": "Adicionar função",
     "freeEntry": "Permitir entrada livre",
     "freeEntryHint": "Ativado: os recrutadores podem escrever a sua própria função (combobox). Desativado: só é possível escolher da lista (dropdown estrita).",

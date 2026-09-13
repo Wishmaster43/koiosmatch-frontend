@@ -945,7 +945,7 @@
     "completeGood": "O perfil está bem preenchido. Não foram detetados campos essenciais em falta.",
     "completePartial": "O perfil está {{pct}}% completo. Adicione a sinopse, a morada e a data de nascimento para melhores resultados de match.",
     "matchLabel": "Match de função",
-    "matchText": "Com base no perfil, o melhor match esperado é: Verzorgende IG e Helpende Plus em instituições de saúde na região.",
+    "matchText": "Com base no perfil, a melhor correspondência esperada é: Operador de empilhador e Preparador de encomendas em clientes de logística na região.",
     "engagementLabel": "Envolvimento",
     "engagementContacted": "Último contacto registado a {{date}}. O perfil está a ser acompanhado ativamente.",
     "engagementNone": "Não há contacto recente registado. Um seguimento aumenta a probabilidade de um match bem-sucedido.",

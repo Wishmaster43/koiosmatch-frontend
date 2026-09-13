@@ -945,7 +945,7 @@
     "completeGood": "Profile is well filled. No missing core fields detected.",
     "completePartial": "Profile is {{pct}}% complete. Add summary, address and date of birth for better match results.",
     "matchLabel": "Job match",
-    "matchText": "Based on the profile, the expected best match is: Verzorgende IG and Helpende Plus at care institutions in the region.",
+    "matchText": "Based on the profile the expected best match is: Forklift driver and Order picker at logistics clients in the region.",
     "engagementLabel": "Engagement",
     "engagementContacted": "Last contact recorded on {{date}}. Profile is actively monitored.",
     "engagementNone": "No recent contact recorded. A follow-up increases the chance of a successful match.",

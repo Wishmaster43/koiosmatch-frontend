@@ -2740,7 +2740,7 @@
   },
   "functionsSettings": {
     "title": "Fonctions (candidat)",
-    "subtitle": "Gérez la liste des fonctions attribuées aux CANDIDATS (ex. Aide-soignant) et si les recruteurs peuvent saisir des valeurs libres. Cette liste est distincte des fonctions des contacts.",
+    "subtitle": "Gérez la liste des fonctions attribuées aux CANDIDATS (p. ex. Cariste) et si les recruteurs peuvent saisir des valeurs libres. Cette liste est distincte des fonctions des contacts.",
     "add": "Ajouter une fonction",
     "freeEntry": "Autoriser la saisie libre",
     "freeEntryHint": "Activé : les recruteurs peuvent saisir leur propre fonction (combobox). Désactivé : choisir uniquement dans la liste.",
