@@ -1,0 +1,128 @@
+/**
+ * CustomerPhasesSettings (KLANT-FASE-1) — the tenant editor for the customer
+ * lifecycle-phase lookup, mounted on the shared StatusListEditor against
+ * /customer-phases.
+ *
+ * These assert the REQUESTS, because that is where this class of bug hides: the
+ * endpoint is a SlugLookupController, whose store() validates `value` as REQUIRED,
+ * while StatusListEditor only ever sent name/label — "+ fase toevoegen" would have
+ * 422'd on every tenant. The `withValueSlug` opt-in is what makes the button real,
+ * so the create test checks the exact POST body (slug + label + the is_customer flag).
+ *
+ * SMZ-05 CONTRACT GUARD vs SCREEN TESTS (Danny 13-09, F1): the add/delete-body
+ * contract tests below render the shared StatusListEditor DIRECTLY (not the
+ * CustomerPhasesSettings screen) — that screen is readOnly since Danny 13-09 rows
+ * 45/46 disabled its own add/delete controls (a UI-only lock, §CustomerSettings.jsx
+ * comment), which would make those two buttons unreachable here. The contract this
+ * file guards (a valid slug/body reaches the API) is a property of StatusListEditor
+ * itself, independent of which screen currently exposes the action — a prop flip on
+ * an exported component must be checked against every suite that renders it. The
+ * read/promote tests below are unaffected (no add/delete involved) and still render
+ * the real screen.
+ */
+import { describe, it, expect, afterEach, vi } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import i18n from '@/i18n'
+import api from '@/lib/api'
+// vi.mocked() gives the mocked-module factory's plain vi.fn()s their real Mock typing at every call site.
+const mockedApi = vi.mocked(api, true)
+import { CustomerPhasesSettings } from './CustomerSettings'
+import StatusListEditor from './StatusListEditor'
+
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual('@/lib/api')
+  return { ...actual, default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }
+})
+
+const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
+
+// Fixture rows in the shape /customer-phases really returns (value slug + flags + in_use).
+/* eslint-disable no-restricted-syntax -- DATA: the tenant's own seeded phase colours, not a style rule. */
+const prospect = (over = {}) => ({ id: 'f1', value: 'prospect', label: 'Prospect', color: '#1B60A9', is_customer: false, is_default: true, in_use: true, ...over })
+const klant = (over = {}) => ({ id: 'f2', value: 'klant', label: 'Klant', color: '#16A34A', is_customer: true, is_default: false, in_use: false, ...over })
+/* eslint-enable no-restricted-syntax */
+
+afterEach(() => vi.clearAllMocks())
+
+// The bare editor, same props CustomerPhasesSettings passes MINUS readOnly — the
+// contract guard's own concern (a valid POST/DELETE body) is unrelated to whether
+// this particular screen currently exposes the button.
+const renderContractEditor = () => render(
+  <StatusListEditor
+    title={st('customerLookups.phases.title')} subtitle={st('customerLookups.phases.subtitle')}
+    endpoint="/customer-phases" addLabel={st('customerLookups.phases.add')} withValueSlug
+    flagField={{ key: 'is_customer', label: st('customerLookups.phases.isCustomer'), description: st('customerLookups.phases.isCustomerHint') }}
+    defaultField={{ key: 'is_default' }}
+  />,
+)
+
+describe('CustomerPhasesSettings', () => {
+  it('loads the phases from /customer-phases and shows the is_default toggle', async () => {
+    mockedApi.get.mockResolvedValue({ data: [prospect(), klant()] })
+    render(<CustomerPhasesSettings />)
+
+    await screen.findByText('Prospect')
+    expect(mockedApi.get).toHaveBeenCalledWith('/customer-phases', undefined)
+    expect(screen.getByText('Klant')).toBeInTheDocument()
+    // The is_default row renders the active (disabled) "Standaard" pill.
+    expect(screen.getByRole('button', { name: st('common.default') })).not.toBeDisabled() // DEFAULT-UNDO 04-08: active pill stays clickable (click = clear)
+  })
+
+  // SMZ-05 contract guard — renders the bare editor (see renderContractEditor's
+  // own comment above): CustomerPhasesSettings' add button is disabled (readOnly).
+  it('adding a phase POSTs a valid slug + label + the is_customer flag (the body the API requires)', async () => {
+    mockedApi.get.mockResolvedValue({ data: [prospect(), klant()] })
+    mockedApi.post.mockResolvedValue({ data: { id: 'f3', value: 'vaste_klant', label: 'Vaste klant', is_customer: true } })
+    const user = userEvent.setup()
+    renderContractEditor()
+    await screen.findByText('Prospect')
+
+    await user.click(screen.getByRole('button', { name: st('customerLookups.phases.add') }))
+    await user.type(screen.getByPlaceholderText(st('statusList.namePlaceholder')), 'Vaste klant')
+    // Flip the behaviour flag the app binds on (is_customer), then save.
+    await user.click(screen.getByRole('switch', { name: st('customerLookups.phases.isCustomer') }))
+    await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
+
+    await waitFor(() => expect(mockedApi.post).toHaveBeenCalled())
+    const [url, body] = mockedApi.post.mock.calls[0] as [string, Record<string, unknown>]
+    expect(url).toBe('/customer-phases')
+    // ^[a-z0-9_]+$ is the backend rule; "Vaste klant" must arrive as a valid slug.
+    expect(body.value).toBe('vaste_klant')
+    expect(body.label).toBe('Vaste klant')
+    expect(body.is_customer).toBe(true)
+  })
+
+  it('promoting a phase to default PUTs is_default:true on that row', async () => {
+    mockedApi.get.mockResolvedValue({ data: [prospect(), klant()] })
+    mockedApi.put.mockResolvedValue({ data: klant({ is_default: true }) })
+    const user = userEvent.setup()
+    render(<CustomerPhasesSettings />)
+    await screen.findByText('Klant')
+
+    await user.click(screen.getByRole('button', { name: st('common.setDefault') }))
+
+    await waitFor(() => expect(mockedApi.put).toHaveBeenCalled())
+    const [url, body] = mockedApi.put.mock.calls[0] as [string, Record<string, unknown>]
+    expect(url).toBe('/customer-phases/f2')
+    expect(body.is_default).toBe(true)
+  })
+
+  // SMZ-05 contract guard — renders the bare editor (see renderContractEditor's
+  // own comment above): CustomerPhasesSettings' delete button is disabled (readOnly).
+  it('keeps an in-use phase on a 409 delete instead of removing it from the list', async () => {
+    mockedApi.get.mockResolvedValue({ data: [klant()] })
+    mockedApi.delete.mockRejectedValue({ response: { status: 409 } })
+    const user = userEvent.setup()
+    renderContractEditor()
+    await screen.findByText('Klant')
+
+    // Row layout is [swatch, badge, …, edit, delete] — delete is the last button.
+    const rowButtons = screen.getByText('Klant').closest('div')!.querySelectorAll('button')
+    await user.click(rowButtons[rowButtons.length - 1])
+    await user.click(await screen.findByRole('button', { name: i18n.t('confirm', { ns: 'common' }) }))
+
+    await waitFor(() => expect(mockedApi.delete).toHaveBeenCalledWith('/customer-phases/f2'))
+    expect(screen.getByText('Klant')).toBeInTheDocument()
+  })
+})

@@ -1,0 +1,207 @@
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import CandidatesBulkBar from './CandidatesBulkBar'
+
+// The bar fetches /pools on mount; stub the api client so no real request runs.
+vi.mock('../../lib/api', () => ({ default: { get: vi.fn(() => Promise.resolve({ data: [] })) } }))
+// SYNC-BULK-1: the couple-to-backoffice node gates itself on permission (useAuth)
+// + tenant app availability (useApps) — mocked so each test can drive both.
+const mockUseAuth = vi.fn()
+const mockUseApps = vi.fn()
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
+vi.mock('@/context/AppsContext', () => ({ useApps: () => mockUseApps() }))
+
+// i18n is not initialised in tests → t() returns the key, so we drive/assert on keys.
+const baseProps = () => ({
+  count: 3, onClear: vi.fn(),
+  bulkScope: 'selected' as const, onSetBulkScope: vi.fn(), filteredTotal: 42, anyFilterActive: false,
+  onAddToPool: vi.fn(), onRemoveFromPool: vi.fn(),
+  onSetOwner: vi.fn(), onSetStage: vi.fn(), onSetTypes: vi.fn(),
+  onSetConsent: vi.fn(), onConvertPhase: vi.fn(), onSetStatus: vi.fn(), onAddTag: vi.fn(),
+  onRemoveTag: vi.fn(), onAddNote: vi.fn(), onArchive: vi.fn(),
+  users: [{ id: 'u1', name: 'Bente de Jong' }, { id: 'u2', name: 'Kelly van Vliet' }],
+  funnelTypes: [{ value: 'pool', label: 'Pool' }, { value: 'intake', label: 'Intake' }],
+  candidateTypes: [{ value: 'freelance', label: 'ZZP' }],
+  selectedTags: ['Amsterdam', 'MBO'],
+})
+
+describe('CandidatesBulkBar', () => {
+  it('hides the filter-set scope toggle when no filter is active', () => {
+    render(<CandidatesBulkBar {...baseProps()} anyFilterActive={false} />)
+    expect(screen.queryByText('bulk.scopeUseFilters')).toBeNull()
+  })
+
+  it('offers switching to the whole filtered set and back when a filter is active', async () => {
+    const user = userEvent.setup()
+    const props = { ...baseProps(), anyFilterActive: true }
+    render(<CandidatesBulkBar {...props} />)
+    const toggle = screen.getByText('bulk.scopeUseFilters')
+    await user.click(toggle)
+    expect(props.onSetBulkScope).toHaveBeenCalledWith('filtered')
+  })
+
+  it('shows the filtered total (not the checked count) once the filtered scope is active', () => {
+    render(<CandidatesBulkBar {...baseProps()} anyFilterActive bulkScope="filtered" />)
+    expect(screen.getByText('bulk.scopeSelected')).toBeInTheDocument()
+    expect(screen.getByText('bulk.scopeUseSelection')).toBeInTheDocument()
+  })
+
+  it('hides Archive unless the user may delete', async () => {
+    const user = userEvent.setup()
+    render(<CandidatesBulkBar {...baseProps()} canArchive={false} />)
+    await user.click(screen.getByText('bulk.actions'))
+    expect(screen.getByText('bulk.changeOwner')).toBeInTheDocument()
+    expect(screen.queryByText('bulk.archive')).toBeNull()
+  })
+
+  it('shows Archive and fires onArchive when permitted', async () => {
+    const user = userEvent.setup()
+    const props = { ...baseProps(), canArchive: true }
+    render(<CandidatesBulkBar {...props} />)
+    await user.click(screen.getByText('bulk.actions'))
+    await user.click(screen.getByText('bulk.archive'))
+    expect(props.onArchive).toHaveBeenCalledTimes(1)
+  })
+
+  it('resolves a picked owner back to the full user object', async () => {
+    const user = userEvent.setup()
+    const props = baseProps()
+    render(<CandidatesBulkBar {...props} />)
+    await user.click(screen.getByText('bulk.actions'))
+    await user.click(screen.getByText('bulk.changeOwner'))
+    await user.click(screen.getByText('Bente de Jong'))
+    expect(props.onSetOwner).toHaveBeenCalledWith({ id: 'u1', name: 'Bente de Jong' })
+  })
+
+  it('passes the chosen funnel stage value through', async () => {
+    const user = userEvent.setup()
+    const props = baseProps()
+    render(<CandidatesBulkBar {...props} />)
+    await user.click(screen.getByText('bulk.actions'))
+    await user.click(screen.getByText('bulk.changeStage'))
+    await user.click(screen.getByText('Pool'))
+    expect(props.onSetStage).toHaveBeenCalledWith('pool')
+  })
+
+  // Job 35: the bulk funnel-stage action moves each candidate's LATEST application
+  // (the BE has no vacancy scope) — the drill-in must say so instead of reading as
+  // if a vacancy could be picked.
+  it('shows the BE-scope info line when drilling into "change funnel stage"', async () => {
+    const user = userEvent.setup()
+    render(<CandidatesBulkBar {...baseProps()} />)
+    await user.click(screen.getByText('bulk.actions'))
+    await user.click(screen.getByText('bulk.changeStage'))
+    expect(screen.getByText('bulk.stageNote')).toBeInTheDocument()
+  })
+
+  it('applies the exact candidate-type set via the multi-select (add/remove)', async () => {
+    const user = userEvent.setup()
+    const props = baseProps()
+    render(<CandidatesBulkBar {...props} />)
+    await user.click(screen.getByText('bulk.actions'))
+    await user.click(screen.getByText('bulk.changeType'))
+    await user.click(screen.getByText('ZZP'))            // toggle the type on
+    await user.click(screen.getByText(/bulk\.typeSubmit/)) // confirm bar shows "key (1)"
+    expect(props.onSetTypes).toHaveBeenCalledWith(['freelance'])
+  })
+
+  // Punt 4 (bulk-merge entry): pairwise only — the menu item must never appear
+  // for a selection size other than exactly 2, regardless of permission.
+  it('hides Samenvoegen when the selection is not exactly 2, even with permission', async () => {
+    const user = userEvent.setup()
+    render(<CandidatesBulkBar {...baseProps()} count={3} canMerge onMerge={vi.fn()} />)
+    await user.click(screen.getByText('bulk.actions'))
+    expect(screen.queryByText('bulk.merge')).toBeNull()
+  })
+
+  it('hides Samenvoegen with exactly 2 selected but no delete permission', async () => {
+    const user = userEvent.setup()
+    render(<CandidatesBulkBar {...baseProps()} count={2} canMerge={false} onMerge={vi.fn()} />)
+    await user.click(screen.getByText('bulk.actions'))
+    expect(screen.queryByText('bulk.merge')).toBeNull()
+  })
+
+  it('shows Samenvoegen and fires onMerge with exactly 2 selected + permission', async () => {
+    const user = userEvent.setup()
+    const onMerge = vi.fn()
+    render(<CandidatesBulkBar {...baseProps()} count={2} canMerge onMerge={onMerge} />)
+    await user.click(screen.getByText('bulk.actions'))
+    await user.click(screen.getByText('bulk.merge'))
+    expect(onMerge).toHaveBeenCalledTimes(1)
+  })
+
+  // 11.1: the funnel-node's "manage per application" deep-link — a thin action
+  // node next to "change funnel stage", gated on the callback being wired (honest
+  // gate: CandidatesToolbar/CandidatesPage don't wire it yet, out of this task's scope).
+  it('hides the "manage by application" deep-link when no callback is provided', async () => {
+    const user = userEvent.setup()
+    render(<CandidatesBulkBar {...baseProps()} />)
+    await user.click(screen.getByText('bulk.actions'))
+    expect(screen.queryByText('bulk.manageByApplication')).toBeNull()
+  })
+
+  it('shows the "manage by application" deep-link and fires the callback when provided', async () => {
+    const user = userEvent.setup()
+    const onManageByApplication = vi.fn()
+    render(<CandidatesBulkBar {...baseProps()} onManageByApplication={onManageByApplication} />)
+    await user.click(screen.getByText('bulk.actions'))
+    await user.click(screen.getByText('bulk.manageByApplication'))
+    expect(onManageByApplication).toHaveBeenCalledTimes(1)
+  })
+
+  // GEO-REGEOCODE-1: bulk "PDOK opnieuw ophalen" — gated on candidates.update
+  // (canGeocode, set by the page from hasPermission), reuses the ONE shared
+  // common:geocode.refresh label rather than a per-entity i18n key.
+  it('hides the geocode action without candidates.update', async () => {
+    const user = userEvent.setup()
+    render(<CandidatesBulkBar {...baseProps()} canGeocode={false} onGeocode={vi.fn()} />)
+    await user.click(screen.getByText('bulk.actions'))
+    expect(screen.queryByText('common:geocode.refresh')).toBeNull()
+  })
+
+  it('shows the geocode action and fires onGeocode when permitted', async () => {
+    const user = userEvent.setup()
+    const onGeocode = vi.fn()
+    render(<CandidatesBulkBar {...baseProps()} canGeocode onGeocode={onGeocode} />)
+    await user.click(screen.getByText('bulk.actions'))
+    await user.click(screen.getByText('common:geocode.refresh'))
+    expect(onGeocode).toHaveBeenCalledTimes(1)
+  })
+
+  // SYNC-BULK-1: bulk backoffice coupling — gated on the SAME permission as the
+  // per-record BackofficeLinksTab (candidates.update) + tenant app availability
+  // (hf/shiftmanager), never a new permission and never a switched-off system.
+  describe('SYNC-BULK-1 · couple to backoffice', () => {
+    it('hides the couple action without candidates.update, even with both systems enabled', async () => {
+      mockUseAuth.mockReturnValue({ hasPermission: () => false })
+      mockUseApps.mockReturnValue({ isAppEnabled: () => true })
+      const user = userEvent.setup()
+      render(<CandidatesBulkBar {...baseProps()} onCoupleBackoffice={vi.fn()} />)
+      await user.click(screen.getByText('bulk.actions'))
+      expect(screen.queryByText('bulk.couple')).toBeNull()
+    })
+
+    it('hides the couple action when permitted but neither backoffice app is enabled', async () => {
+      mockUseAuth.mockReturnValue({ hasPermission: () => true })
+      mockUseApps.mockReturnValue({ isAppEnabled: () => false })
+      const user = userEvent.setup()
+      render(<CandidatesBulkBar {...baseProps()} onCoupleBackoffice={vi.fn()} />)
+      await user.click(screen.getByText('bulk.actions'))
+      expect(screen.queryByText('bulk.couple')).toBeNull()
+    })
+
+    it('offers only the enabled system (HelloFlex off, Shiftmanager on) and fires the callback with the right system', async () => {
+      mockUseAuth.mockReturnValue({ hasPermission: () => true })
+      mockUseApps.mockReturnValue({ isAppEnabled: (id: string) => id === 'shiftmanager' })
+      const user = userEvent.setup()
+      const onCoupleBackoffice = vi.fn()
+      render(<CandidatesBulkBar {...baseProps()} onCoupleBackoffice={onCoupleBackoffice} />)
+      await user.click(screen.getByText('bulk.actions'))
+      await user.click(screen.getByText('bulk.couple'))
+      expect(screen.queryByText('common:backofficeLinks.helloflex.name')).toBeNull()
+      await user.click(screen.getByText('common:backofficeLinks.shiftmanager.name'))
+      expect(onCoupleBackoffice).toHaveBeenCalledWith('shiftmanager')
+    })
+  })
+})

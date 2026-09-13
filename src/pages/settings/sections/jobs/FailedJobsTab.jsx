@@ -16,7 +16,7 @@ import { tintBorder } from '@/lib/tint'
 import { notify } from '@/lib/notify'
 import JobsFilterBar from './JobsFilterBar'
 import JobsTableFrame from './JobsTableFrame'
-import { jobColumns } from './jobColumns.jsx'
+import { jobColumns } from './jobColumns'
 
 // Failure log with per-row retry/forget and two destructive bulk actions, both gated behind the shared confirm dialog naming the exact count (see file header).
 export default function FailedJobsTab() {

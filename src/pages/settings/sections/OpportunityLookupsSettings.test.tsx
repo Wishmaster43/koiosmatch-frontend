@@ -1,0 +1,138 @@
+/**
+ * OpportunityLookupsSettings — four sub-tabs (stages/serviceTypes/agreementTypes/
+ * dealTypes), each a StatusListEditor with `withValueSlug` (these controllers accept
+ * a slugged `value`, so the create button must actually send one — mirrors
+ * CustomerPhasesSettings' regression guard). Asserts each tab's own endpoint and
+ * the create REQUEST body (§13), plus the deal-type `unit` extraField.
+ */
+import { describe, it, expect, afterEach, vi } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import i18n from '@/i18n'
+import apiClient from '@/lib/api'
+import OpportunityLookupsSettings from './OpportunityLookupsSettings'
+
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual('@/lib/api')
+  return { ...actual, default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }
+})
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
+
+// The mocked axios instance, typed as its four mocked methods (established pattern).
+const api = apiClient as unknown as { get: ReturnType<typeof vi.fn>; post: ReturnType<typeof vi.fn>; put: ReturnType<typeof vi.fn>; delete: ReturnType<typeof vi.fn> }
+
+const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
+
+// A fixture opportunity-lookup row, overridable per test.
+interface RowFixture { id: string; value: string; label: string; color: string; in_use: boolean; is_won?: boolean; is_lost?: boolean }
+// eslint-disable-next-line no-restricted-syntax -- DATA: fixture row's tenant colour, not a style rule.
+const row = (over: Partial<RowFixture> = {}): RowFixture => ({ id: 's1', value: 'lead', label: 'Lead', color: '#94A3B8', in_use: false, ...over })
+
+afterEach(() => vi.clearAllMocks())
+
+describe('OpportunityLookupsSettings', () => {
+  it('defaults to the stages tab, GETting /opportunity-stages', async () => {
+    api.get.mockResolvedValue({ data: [row()] })
+    render(<OpportunityLookupsSettings />)
+
+    await screen.findByText('Lead')
+    expect(api.get).toHaveBeenCalledWith('/opportunity-stages', undefined)
+  })
+
+  it('creating a stage POSTs label + a slugged value to /opportunity-stages', async () => {
+    api.get.mockResolvedValue({ data: [row()] })
+    api.post.mockResolvedValue({ data: row({ id: 's2', value: 'won', label: 'Won' }) })
+    const user = userEvent.setup()
+    render(<OpportunityLookupsSettings />)
+
+    await screen.findByText('Lead')
+    await user.click(screen.getByRole('button', { name: st('opportunityLookups.add') }))
+    await user.type(screen.getByPlaceholderText(st('statusList.namePlaceholder')), 'Won')
+    await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/opportunity-stages', expect.objectContaining({ name: 'Won', value: 'won' })))
+  })
+
+  it('switching to the deal-types tab GETs /opportunity-deal-types and shows the unit field', async () => {
+    api.get.mockImplementation((endpoint: string) => {
+      if (endpoint === '/opportunity-deal-types') {
+        return Promise.resolve({ data: [{ id: 'd1', value: 'project', label: 'Project', color: '#6E8FD6', unit: 'euro', in_use: false }] })
+      }
+      return Promise.resolve({ data: [row()] })
+    })
+    const user = userEvent.setup()
+    render(<OpportunityLookupsSettings />)
+
+    await screen.findByText('Lead')
+    await user.click(screen.getByRole('tab', { name: st('opportunityLookups.tabs.dealTypes') }))
+
+    await screen.findByText('Project')
+    expect(api.get).toHaveBeenCalledWith('/opportunity-deal-types', undefined)
+  })
+
+  // OPP-LOST-FE-1: fifth sub-tab, the lost-reason lookup a recruiter picks from
+  // when a Kans moves to an is_lost stage (rejection-reasons contract, reorderable off).
+  it('switching to the lost-reasons tab GETs /opportunity-lost-reasons', async () => {
+    api.get.mockImplementation((endpoint: string) => {
+      if (endpoint === '/opportunity-lost-reasons') {
+        return Promise.resolve({ data: [{ id: 'r1', name: 'Budget', in_use: false }] })
+      }
+      return Promise.resolve({ data: [row()] })
+    })
+    const user = userEvent.setup()
+    render(<OpportunityLookupsSettings />)
+
+    await screen.findByText('Lead')
+    await user.click(screen.getByRole('tab', { name: st('opportunityLookups.tabs.lostReasons') }))
+
+    await screen.findByText('Budget')
+    expect(api.get).toHaveBeenCalledWith('/opportunity-lost-reasons', undefined)
+  })
+
+  // is_won/is_lost (04-08): real consumers — OpportunitiesInsightsRow's won/lost/open
+  // KPI counts and OpportunitiesTable's isTerminalStage() both key off these flags
+  // (via useOpportunityStages), so the stages tab wires them as flagFields.
+  describe('OpportunityLookupsSettings — stage is_won/is_lost flagFields', () => {
+    it('shows the won badge on a stage flagged is_won, not the lost badge', async () => {
+      api.get.mockResolvedValue({ data: [row({ id: 's2', value: 'won', label: 'Won', is_won: true, is_lost: false })] })
+      render(<OpportunityLookupsSettings />)
+
+      // These two keys aren't in the locale bundles yet (reported separately, §5) —
+      // the component supplies the same defaultValue, so resolve it the same way here.
+      await screen.findByText('Won')
+      expect(screen.getByText(st('opportunityLookups.stages.isWon', { defaultValue: 'Won stage' }))).toBeInTheDocument()
+      expect(screen.queryByText(st('opportunityLookups.stages.isLost', { defaultValue: 'Lost stage' }))).not.toBeInTheDocument()
+    })
+
+    it('editing a stage PUTs is_won:true when its toggle is switched on', async () => {
+      api.get.mockResolvedValue({ data: [row({ id: 's2', value: 'won', label: 'Won', is_won: false, is_lost: false })] })
+      api.put.mockResolvedValue({ data: {} })
+      const user = userEvent.setup()
+      render(<OpportunityLookupsSettings />)
+
+      await screen.findByText('Won')
+      await user.click(screen.getByRole('button', { name: st('statusList.edit') }))
+      // is_won is the first of the two stage modal toggles in render order.
+      const switches = screen.getAllByRole('switch')
+      await user.click(switches[0])
+      await user.click(screen.getByText(st('common.save')))
+
+      await waitFor(() => expect(api.put).toHaveBeenCalledWith('/opportunity-stages/s2',
+        expect.objectContaining({ is_won: true, is_lost: false })))
+    })
+
+    // LOOKUP-ICONS-FE-2 fix (13-09): opportunity_stages has no icon column/
+    // validation — the mark stays colour-only.
+    it('the value mark stays colour-only', async () => {
+      api.get.mockResolvedValue({ data: [row()] })
+      api.put.mockResolvedValue({ data: {} })
+      const user = userEvent.setup()
+      render(<OpportunityLookupsSettings />)
+
+      await screen.findByText('Lead')
+      const trigger = screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Lead' }) })
+      await user.click(trigger)
+      expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Lead' }) })).toBeInTheDocument()
+    })
+  })
+})

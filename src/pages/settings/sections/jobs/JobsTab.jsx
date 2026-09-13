@@ -8,7 +8,7 @@ import Button from '@/components/ui/Button'
 import { tintBorder } from '@/lib/tint'
 import JobsFilterBar from './JobsFilterBar'
 import JobsTableFrame from './JobsTableFrame'
-import { jobColumns } from './jobColumns.jsx'
+import { jobColumns } from './jobColumns'
 
 const STATE_COLOR = { pending: 'var(--text-muted)', reserved: 'var(--color-warning)' }
 
