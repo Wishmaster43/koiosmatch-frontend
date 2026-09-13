@@ -19,6 +19,7 @@ import SearchSelect from '@/components/ui/SearchSelect'
 import Spinner from '@/components/ui/Spinner'
 import { useConfirm } from '@/hooks/useConfirm'
 import { getCountryOptions } from '@/lib/countries'
+import { provinceFlagSrc } from '@/lib/provinceFlag'
 import Button from '@/components/ui/Button'
 import SaveButton from '@/components/ui/SaveButton'
 import { PageTitle } from '@/components/ui/typography'
@@ -154,6 +155,12 @@ export default function ProvincesSettings() {
           onReorder={setItems}
           renderItem={(item) => (
             <>
+              {/* Row 84: the province flag before the name, from the BE-served ISO 3166-2
+                  code; decorative (the name carries the meaning), absent when no code ships. */}
+              {provinceFlagSrc(item.code) && (
+                <img src={provinceFlagSrc(item.code)} alt="" aria-hidden="true" width={18} height={12} data-testid={`province-flag-${item.code}`}
+                  style={{ flexShrink: 0, borderRadius: 2, objectFit: 'cover', border: '1px solid var(--border)' }} />
+              )}
               <span style={{ fontSize: 13, color: 'var(--text)' }}>{item.name}</span>
               <div style={{ flex: 1 }} />
               <Button variant="secondary" iconOnly onClick={() => openEdit(item)} title={t('statusList.edit')} aria-label={t('statusList.edit')}>

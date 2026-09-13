@@ -100,3 +100,15 @@ describe('ProvincesSettings', () => {
     expect(screen.getByText('Utrecht')).toBeInTheDocument()
   })
 })
+
+// Row 84 (Danny 13-09): a province with a BE-served ISO 3166-2 code wears its flag before the
+// name; a row without a code shows no flag at all (never a guessed one).
+describe('ProvincesSettings — province flag (row 84)', () => {
+  it('renders the shipped flag for a coded row and nothing for an uncoded row', async () => {
+    api.get.mockResolvedValue({ data: [province({ id: 'p1', name: 'Zuid-Holland', code: 'NL-ZH' }), province({ id: 'p2', name: 'Onbekend', position: 1 })] })
+    render(<ProvincesSettings />)
+    const flag = await screen.findByTestId('province-flag-NL-ZH')
+    expect(flag).toHaveAttribute('src', '/flags/provinces/NL-ZH.svg')
+    expect(screen.queryAllByTestId(/^province-flag-/)).toHaveLength(1)
+  })
+})
