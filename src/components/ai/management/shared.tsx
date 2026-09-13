@@ -124,18 +124,24 @@ export function VersionList({ versions, onRestore }: { versions?: Version[]; onR
 }
 
 // A large text field (prompt/agent body) paired with its own version history and save bar.
-export function TextEditor({ value, onChange, onSave, saving, saved, versions, onRestore, placeholder, height = 220 }: {
+// `mono` (default true) picks the code-like look for prompt/agent bodies (fixed
+// 220px, monospace 12px) — prose consumers (FAQ/Knowledge, Danny 13-09: "veel te
+// groot") pass `mono={false}` for the house field font (13px, fieldTextareaStyle)
+// at a modest starting height that still grows with `resize: vertical`.
+export function TextEditor({ value, onChange, onSave, saving, saved, versions, onRestore, placeholder, height, mono = true }: {
   value?: string; onChange: (v: string) => void; onSave?: () => void; saving?: boolean; saved?: boolean
   // FAKE-AFFORDANCE (14-08): optional — a caller with no versions endpoint (e.g.
   // KnowledgeTab) omits both rather than pass a no-op restore handler.
-  versions?: Version[]; onRestore?: (v: Version) => void; placeholder?: string; height?: number
+  versions?: Version[]; onRestore?: (v: Version) => void; placeholder?: string; height?: number; mono?: boolean
 }) {
+  const resolvedHeight = height ?? (mono ? 220 : 140)
   return (
     <div>
       {/* Multi-line control: base off the textarea canon (vertical padding, no fixed
           height) rather than the single-line inputStyle, which is now height-locked. */}
       <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-        style={{ ...fieldTextareaStyle, height, fontFamily: 'monospace', fontSize: 12, lineHeight: 1.6 }} />
+        style={{ ...fieldTextareaStyle, height: resolvedHeight, lineHeight: 1.6,
+          ...(mono ? { fontFamily: 'monospace', fontSize: 12 } : null) }} />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 }}>
         <VersionList versions={versions} onRestore={onRestore} />
         <SaveBar saving={saving} saved={saved} onSave={onSave} />

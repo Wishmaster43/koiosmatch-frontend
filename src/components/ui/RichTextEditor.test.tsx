@@ -33,4 +33,14 @@ describe('RichTextEditor · external value sync', () => {
     render(<RichTextEditor value="" onChange={vi.fn()} toolbarExtra={<button type="button">mic-slot</button>} />)
     expect(screen.getByRole('button', { name: 'mic-slot' })).toBeInTheDocument()
   })
+
+  // 13-09 regression: the `resizable` branch (MemorySettings) set the content
+  // element's minHeight to '100%' of an ancestor with no explicit height, which
+  // collapsed to the empty content's own size (19.5px measured) instead of the
+  // requested 240px — Danny: "Tekst is heel klein".
+  it('gives the resizable editor content its real pixel minHeight, not a percentage', () => {
+    const { container } = render(<RichTextEditor value="" onChange={vi.fn()} resizable minHeight={240} />)
+    const content = container.querySelector('.ProseMirror')?.parentElement as HTMLElement
+    expect(content.style.minHeight).toBe('240px')
+  })
 })

@@ -66,7 +66,7 @@ export function KnowledgeTab() {
         {/* FAKE-AFFORDANCE (14-08): no /ai/knowledge/{id}/versions endpoint exists, so
             versions/onRestore are omitted entirely rather than faked with an empty
             list + a no-op handler (same honest gate as management/tabs/ToolsTab.tsx). */}
-        <TextEditor value={body} onChange={setBody} onSave={save} saving={saving} saved={saved}
+        <TextEditor value={body} onChange={setBody} onSave={save} saving={saving} saved={saved} mono={false}
           placeholder={t('ai.knowledge.bodyPlaceholder')} />
       </Field>
     </SideList>

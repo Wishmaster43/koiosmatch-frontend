@@ -216,11 +216,14 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
             fontSize: 12, ...monoStyle, color: 'var(--text)', background: 'var(--surface)',
             border: 'none', outline: 'none', resize: 'vertical', ...(fill ? { flex: 1 } : null) }} />
       ) : resizable ? (
-        // Drag-to-grow: CSS resize needs an overflow container — the editor itself
-        // then fills whatever height the user drags this wrapper to.
-        <div style={{ resize: 'vertical', overflow: 'auto', minHeight: expanded ? 320 : minHeight }}>
-          <EditorContent editor={editor}
-            style={{ ...bodyTextStyle, minHeight: '100%', padding: '10px 12px', cursor: 'text' }} />
+        // Drag-to-grow: CSS resize needs an overflow container. The wrapper is a flex
+        // column and the editor fills it (km-editor-fill, the same recipe as fill
+        // mode), so the whole dragged area stays clickable text — a percentage
+        // min-height here resolved against the unsized wrapper and collapsed to the
+        // content box (13-09 measurement: 19.5px instead of 240px), hence the px floor.
+        <div style={{ resize: 'vertical', overflow: 'auto', minHeight: expanded ? 320 : minHeight, display: 'flex', flexDirection: 'column' }}>
+          <EditorContent editor={editor} className="km-editor-fill"
+            style={{ ...bodyTextStyle, minHeight: expanded ? 320 : minHeight, padding: '10px 12px', cursor: 'text', flex: 1 }} />
         </div>
       ) : (
         <EditorContent editor={editor} className={fill ? 'km-editor-fill' : undefined}
