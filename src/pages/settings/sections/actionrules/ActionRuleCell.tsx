@@ -69,9 +69,10 @@ export default function ActionRuleCell({
       </button>
 
       {/* Subtle dot: this cell's effect deviates from the seed-default (best-effort local
-          computation — see catalogMeta.ts's documented gap; the API itself carries no flag). */}
+          computation — see catalogMeta.ts's documented gap; the API itself carries no flag).
+          It is a real signal, so it carries an accessible name (§6), not aria-hidden. */}
       {overridden && (
-        <span aria-hidden title={t('actionRules.cellOverrideTitle')}
+        <span role="img" aria-label={t('actionRules.cellOverrideTitle')} title={t('actionRules.cellOverrideTitle')}
           style={{ position: 'absolute', top: -3, right: 14, width: 6, height: 6, borderRadius: '50%',
                    background: 'var(--color-primary)' }} />
       )}
