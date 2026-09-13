@@ -48,6 +48,7 @@ export function useDocumentFiltering<T extends DocItem>({
     [docs, docSearch, docTypeFilter]
   )
 
+  // Keys of only the filtered docs that actually have a download URL, for bulk-select-all.
   const filteredDownloadableKeys = useMemo(
     () => filteredDocs.filter((d) => docUrl(d)).map((d) => docKey(d, d._i)),
     [filteredDocs, docUrl, docKey]

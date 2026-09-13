@@ -52,6 +52,7 @@ interface RunState {
 const runStates = new Map<string, RunState>()
 const keyOf = (entityPath: string, id: Id | undefined) => `${entityPath}:${id}`
 
+// Get-or-create the shared state slot for a run key, so all subscribers see one snapshot.
 function getState(key: string): RunState {
   let s = runStates.get(key)
   if (!s) { s = { snapshot: EMPTY_SNAPSHOT, bootstrapRunId: undefined, gen: 0, listeners: new Set() }; runStates.set(key, s) }

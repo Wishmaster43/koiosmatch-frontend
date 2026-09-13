@@ -14,6 +14,7 @@ import MatchScoreBlock from '@/components/match/MatchScoreBlock'
 import type { Criterion } from '@/components/match/MatchScoreBlock'
 import { Caption, SectionTitle } from '@/components/ui/typography'
 
+// Thin shell component: renders the shared chrome and slots in caller-provided nodes.
 export default function SearchSummaryCardFrame({
   title, subtitle, index, total, onPrev, onNext, onClose, closeLabel, action,
   chips, extra, description, score, criteria, aiAdviceReason, aiAdvisedLabel,

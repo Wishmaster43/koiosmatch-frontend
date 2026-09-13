@@ -12,6 +12,7 @@ interface MessagingLanguageOption {
   label: string
 }
 
+// Build the one shared messaging-language option list, localized to the current UI language.
 export function useMessagingLanguageOptions() {
   const { i18n } = useTranslation()
   const uiLocale = i18n?.language || 'nl'

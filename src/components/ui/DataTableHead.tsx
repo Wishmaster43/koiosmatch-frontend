@@ -8,6 +8,7 @@ import type { Column } from './DataTable'
 
 interface SortState { key: string; dir: 'asc' | 'desc' }
 
+// Renders the sortable/select-all header row for the shared DataTable.
 export default function DataTableHead<Row>({
   columns, selectable, expandable, stickyHeader, stickyColStyle, sort, toggleSort,
   allSelected, someSelected, selectionBusy, pageIds, onToggleAll,

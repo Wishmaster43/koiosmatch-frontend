@@ -33,11 +33,13 @@ export function useBoardDrag<T extends HTMLElement = HTMLDivElement, TTarget = s
     e.dataTransfer.effectAllowed = 'move'
   }
 
+  // Allow the drop by cancelling the default (native DnD blocks drops otherwise).
   const handleDragOver = (e: DragEvent<T>) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
   }
 
+  // Commit the move to the target column/lane and clear the dragged id.
   const handleDrop = (e: DragEvent<T>, target: TTarget) => {
     e.preventDefault()
     if (dragId.current != null) {

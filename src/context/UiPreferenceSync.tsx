@@ -52,6 +52,7 @@ export function UiPreferenceSync() {
   }, [auth, theme, serverTheme, setServerTheme])
 
   const prevLanguageRef = useRef(language)
+  // Mirrors the theme effect above, but for language: only PUTs on a real post-mount change.
   useEffect(() => {
     const changed = prevLanguageRef.current !== language
     prevLanguageRef.current = language

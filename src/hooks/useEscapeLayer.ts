@@ -36,6 +36,7 @@ function onKeyDown(e: KeyboardEvent) {
 function ensureListener() {
   if (!listening) { window.addEventListener('keydown', onKeyDown, true); listening = true }
 }
+// Removes the shared keydown listener once the last layer has popped, so no listener lingers when nothing is stacked.
 function dropListenerIfIdle() {
   if (listening && stack.length === 0) { window.removeEventListener('keydown', onKeyDown, true); listening = false }
 }

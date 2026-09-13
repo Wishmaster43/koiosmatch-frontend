@@ -40,6 +40,7 @@ export function useClickOutside(
     onOutsideRef.current = onOutside
     optionsRef.current = options
   })
+  // Attaches (and tears down) the outside-click listener only when enabled toggles.
   useEffect(() => {
     if (!enabled) return
     // Ignores a click inside a portalled dropdown menu (when asked to), then any
