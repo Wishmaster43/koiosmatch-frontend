@@ -22,6 +22,17 @@
  * the four original keys as seed fallback. The catalogue resolves BEFORE the
  * form mounts: useSettingsForm snapshots its defaults once, so a form mounted
  * on the seed list would never load the stored values of the other signals.
+ *
+ * GROUPED BLOCKS (Danny 13-09, verbatim: "Lijst is te lang geef netter weer"):
+ * a flat 15-row stack read as one long list — the rows now bucket into titled
+ * per-subject blocks (mirrors the catalogue screens' `<section
+ * aria-labelledby>` + `<SectionTitle as="h3">` idiom, CATALOG-GROUPS-1) and
+ * each row itself renders as ONE compact SettingRow (label+desc left, the two
+ * controls right) instead of a stacked title-then-controls card. The endpoint
+ * returns only `{signals: string[]}` — no entity/context field — so the group
+ * is a fixed lookup by key, with a prefix-derived fallback for a signal the
+ * lookup does not yet know, reusing the same `settings.groups.<slug>` label
+ * space the catalogue grouping already established.
  */
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -29,12 +40,13 @@ import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/context/AuthContext'
 import api from '@/lib/api'
 import { useSettingsForm } from '../lib/useSettingsForm'
-import { SettingsScaffold, SettingCard } from '../components/SettingsKit'
+import { SettingsScaffold, SettingRow } from '../components/SettingsKit'
+import { SETTINGS_MAX_W_WIDE } from '@/pages/settings/components/settingsMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { useUsers } from '@/lib/queries'
 import { useAssignableRoles } from '@/pages/users/shared'
-import { Caption } from '@/components/ui/typography'
+import { Caption, SectionTitle } from '@/components/ui/typography'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 
 // Seed fallback: the four original stilstand signals (in use before X-6) —
@@ -45,8 +57,55 @@ type Signal = string
 const DAYS_MIN = 1
 const DAYS_MAX = 90
 
-// One escalation row: the day-threshold input (empty = off) + the target picker.
-// `error` renders the atomic-pair hint when days is set but no target is chosen.
+// Fixed signal → group-slug lookup (the catalogue endpoint carries no entity/context
+// field to derive this from). Reuses the SAME settings.groups.<slug> label space
+// CATALOG-GROUPS-1 already established for the generic settings screens.
+const SIGNAL_GROUP: Record<string, string> = {
+  customer_match_ending: 'customers',
+  conversation_unanswered: 'conversations',
+  document_expiring: 'candidate',
+  certification_expiring: 'candidate',
+  match_expiring: 'matches',
+  candidate_phase_stale: 'candidate',
+  missing_cv: 'candidate',
+  candidate_status_stale: 'candidate',
+  task_overdue: 'tasks',
+  candidate_availability_upcoming: 'candidate',
+  candidate_availability_overdue: 'candidate',
+  candidate_leave_ending_soon: 'candidate',
+  candidate_leave_overdue: 'candidate',
+  candidate_unavailable_ending_soon: 'candidate',
+  candidate_unavailable_overdue: 'candidate',
+}
+// Fallback for a signal the fixed lookup above does not (yet) know: derive the
+// group from its underscore-prefix, mirroring the same slugs.
+const PREFIX_GROUP: Record<string, string> = {
+  candidate: 'candidate', customer: 'customers', match: 'matches', task: 'tasks',
+  contact: 'contacts', opportunity: 'opportunities', vacancy: 'vacancies',
+  application: 'applications', conversation: 'conversations',
+}
+function groupForSignal(signal: Signal): string {
+  return SIGNAL_GROUP[signal] ?? PREFIX_GROUP[signal.split('_')[0]] ?? 'other'
+}
+
+// Buckets the flat signal list into ordered groups, each keeping the signals'
+// original relative order; groups themselves are ordered by first appearance
+// so the seed fallback (4 keys) and the full catalogue (15 keys) both render
+// deterministically without a separately hand-kept group order.
+function groupSignals(signals: readonly Signal[]): Array<{ key: string; signals: Signal[] }> {
+  const order: string[] = []
+  const buckets = new Map<string, Signal[]>()
+  for (const signal of signals) {
+    const key = groupForSignal(signal)
+    if (!buckets.has(key)) { buckets.set(key, []); order.push(key) }
+    buckets.get(key)!.push(signal)
+  }
+  return order.map(key => ({ key, signals: buckets.get(key) as Signal[] }))
+}
+
+// One escalation row, as a single compact SettingRow (label+desc left, the day
+// threshold + target picker right) instead of a stacked title-then-controls card.
+// `error` renders the atomic-pair hint below the row when days is set but no target.
 function EscalationRow({ signal, days, target, onDays, onTarget, options, error, disabled = false }: {
   signal: Signal
   days: string
@@ -61,57 +120,55 @@ function EscalationRow({ signal, days, target, onDays, onTarget, options, error,
   const current = options.find(o => o.value === target)
 
   return (
-    <SettingCard style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div>
-        <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{t(`escalation.signal.${signal}.title`)}</div>
-        <Caption as="div" style={{ marginTop: 2 }}>{t(`escalation.signal.${signal}.desc`)}</Caption>
-      </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 16, opacity: disabled ? 0.6 : 1 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <label htmlFor={`escalate-days-${signal}`} style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)' }}>
-            {t('escalation.afterDaysLabel')}
-          </label>
-          <input id={`escalate-days-${signal}`} type="number" min={DAYS_MIN} max={DAYS_MAX} disabled={disabled}
-            placeholder={t('escalation.afterDaysOff')}
-            value={days}
-            onChange={e => onDays(e.target.value)}
-            onBlur={e => {
-              // Empty stays empty (off); anything typed gets clamped into range.
-              const raw = e.target.value.trim()
-              if (raw === '') { onDays(''); return }
-              onDays(String(Math.min(DAYS_MAX, Math.max(DAYS_MIN, Number(raw) || DAYS_MIN))))
-            }}
-            style={{ ...fieldInputStyle, width: 90, textAlign: 'right' }} />
-          {/* Unit suffix (Danny 13-08: "er staat niet bij wat het is, alleen een
-              getal") — the number is DAYS, and the field must say so itself. */}
-          <Caption>{t('escalation.daysUnit')}</Caption>
+    <div data-testid={`escalation-row-${signal}`}>
+      <SettingRow label={t(`escalation.signal.${signal}.title`)} description={t(`escalation.signal.${signal}.desc`)}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 16, opacity: disabled ? 0.6 : 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <label htmlFor={`escalate-days-${signal}`} style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)' }}>
+              {t('escalation.afterDaysLabel')}
+            </label>
+            <input id={`escalate-days-${signal}`} type="number" min={DAYS_MIN} max={DAYS_MAX} disabled={disabled}
+              placeholder={t('escalation.afterDaysOff')}
+              value={days}
+              onChange={e => onDays(e.target.value)}
+              onBlur={e => {
+                // Empty stays empty (off); anything typed gets clamped into range.
+                const raw = e.target.value.trim()
+                if (raw === '') { onDays(''); return }
+                onDays(String(Math.min(DAYS_MAX, Math.max(DAYS_MIN, Number(raw) || DAYS_MIN))))
+              }}
+              style={{ ...fieldInputStyle, width: 90, textAlign: 'right' }} />
+            {/* Unit suffix (Danny 13-08: "er staat niet bij wat het is, alleen een
+                getal") — the number is DAYS, and the field must say so itself. */}
+            <Caption>{t('escalation.daysUnit')}</Caption>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)' }}>{t('escalation.targetLabel')}</span>
+            <SearchSelect
+              closeOnToggle
+              options={options}
+              selected={target ? [target] : []}
+              onToggle={next => onTarget(next === target ? '' : next)}
+              disabled={disabled}
+              triggerLabel={current?.label ?? t('escalation.targetPlaceholder')}
+              renderTrigger={toggle => (
+                <button type="button" onClick={toggle} aria-label={t('escalation.targetLabel')} disabled={disabled}
+                  style={{ ...fieldInputStyle, paddingRight: 28, cursor: disabled ? 'default' : 'pointer', background: 'var(--surface)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: 220 }}>
+                  {current?.label ?? <span style={{ color: 'var(--text-muted)' }}>{t('escalation.targetPlaceholder')}</span>}
+                </button>
+              )}
+            />
+          </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)' }}>{t('escalation.targetLabel')}</span>
-          <SearchSelect
-            closeOnToggle
-            options={options}
-            selected={target ? [target] : []}
-            onToggle={next => onTarget(next === target ? '' : next)}
-            disabled={disabled}
-            triggerLabel={current?.label ?? t('escalation.targetPlaceholder')}
-            renderTrigger={toggle => (
-              <button type="button" onClick={toggle} aria-label={t('escalation.targetLabel')} disabled={disabled}
-                style={{ ...fieldInputStyle, paddingRight: 28, cursor: disabled ? 'default' : 'pointer', background: 'var(--surface)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: 220 }}>
-                {current?.label ?? <span style={{ color: 'var(--text-muted)' }}>{t('escalation.targetPlaceholder')}</span>}
-              </button>
-            )}
-          />
-        </div>
-      </div>
+      </SettingRow>
       {/* Inline block reason: half a pair is never sent — the field alone won't say why Save did nothing. */}
       {error && (
-        <span role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)' }}>
+        <span role="alert" style={{ display: 'block', fontSize: 11, color: 'var(--color-danger-text)', padding: '2px 16px 0' }}>
           {t('escalation.missingTargetHint')}
         </span>
       )}
-    </SettingCard>
+    </div>
   )
 }
 
@@ -130,10 +187,11 @@ export default function EscalationSettings() {
   })
 
   // Loading: the scaffold's own skeleton, no form yet (see the file doc for why).
+  // SETTINGS_MAX_W_WIDE (F4, 13-09): matches the loaded scaffold's width below.
   if (catalog.isPending) {
     return (
       <SettingsScaffold title={t('escalation.title')} subtitle={t('escalation.subtitle')}
-        maxWidth={720} form={{ loading: true }} actions={undefined} />
+        maxWidth={SETTINGS_MAX_W_WIDE} form={{ loading: true }} actions={undefined} />
     )
   }
 
@@ -141,7 +199,7 @@ export default function EscalationSettings() {
   return <EscalationForm signals={signals} catalogFailed={catalog.isError} onRetry={() => { void catalog.refetch() }} />
 }
 
-// One row per stilstand signal, day count + target (user or role); owns the settings form.
+// One row per stilstand signal, grouped into titled per-subject blocks; owns the settings form.
 function EscalationForm({ signals, catalogFailed, onRetry }: { signals: readonly Signal[]; catalogFailed: boolean; onRetry: () => void }) {
   const { t } = useTranslation('settings')
   const auth = useAuth()
@@ -237,6 +295,9 @@ function EscalationForm({ signals, catalogFailed, onRetry }: { signals: readonly
     return [...userOpts, ...roleOpts]
   }, [users, roles, t])
 
+  // Bucket the signals into their titled per-subject groups once per signal list.
+  const groups = useMemo(() => groupSignals(signals), [signals])
+
   return (
     <SettingsScaffold
       title={t('escalation.title')}
@@ -244,23 +305,36 @@ function EscalationForm({ signals, catalogFailed, onRetry }: { signals: readonly
       // Pass a proxy form: same load/dirty/saving state, but `save` runs the
       // atomic-pair gate first — the shared Save button stays the one control.
       // When user lacks permissions, gate the form to hide Save.
-      maxWidth={720} form={{ ...(canEdit ? { ...form, save: requestSave } : gatedForm) }} actions={undefined}>
+      // F4 (13-09): 720 left only ≈196px for label+description next to the
+      // ≈476px fixed-width control pair, wrapping most rows to ~5 lines — the
+      // opposite of "list is too long". SETTINGS_MAX_W_WIDE gives the label
+      // room to breathe on one line again.
+      maxWidth={SETTINGS_MAX_W_WIDE} form={{ ...(canEdit ? { ...form, save: requestSave } : gatedForm) }} actions={undefined}>
       {/* Catalogue outage: the seed rows stay editable, but the user is told the list is incomplete. */}
       {catalogFailed && (
         <ErrorBanner variant="subtle" onRetry={onRetry} style={{ marginBottom: 12 }}>
           {t('escalation.catalogUnavailable')}
         </ErrorBanner>
       )}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {signals.map(signal => (
-          <EscalationRow key={signal} signal={signal}
-            days={String(form.values[`${signal}_escalate_after_days`] ?? '')}
-            target={String(form.values[`${signal}_escalate_to`] ?? '')}
-            onDays={v => form.set(`${signal}_escalate_after_days`, v)}
-            onTarget={v => form.set(`${signal}_escalate_to`, v)}
-            options={targetOptions}
-            error={blocked.has(signal)}
-            disabled={!canEdit} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {groups.map(group => (
+          <section key={group.key} aria-labelledby={`escalation-group-${group.key}`}>
+            <SectionTitle as="h3" id={`escalation-group-${group.key}`} style={{ margin: '0 0 8px' }}>
+              {group.key === 'other' ? t('escalation.groupOther') : t(`groups.${group.key}`)}
+            </SectionTitle>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {group.signals.map(signal => (
+                <EscalationRow key={signal} signal={signal}
+                  days={String(form.values[`${signal}_escalate_after_days`] ?? '')}
+                  target={String(form.values[`${signal}_escalate_to`] ?? '')}
+                  onDays={v => form.set(`${signal}_escalate_after_days`, v)}
+                  onTarget={v => form.set(`${signal}_escalate_to`, v)}
+                  options={targetOptions}
+                  error={blocked.has(signal)}
+                  disabled={!canEdit} />
+              ))}
+            </div>
+          </section>
         ))}
       </div>
     </SettingsScaffold>

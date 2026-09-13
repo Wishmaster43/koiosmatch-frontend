@@ -64,12 +64,19 @@ function CandidateVacancyTabSettingsInner() {
     persist({ [key]: toggleInList(cfg[key], value) })
 
   // Four sub-tabs — one per checkbox block, reusing the shared underline SubTabBar.
+  // TAB-STRIP-WIDTH-1 (F3, mirrors VacancyCandidateTabSettings): the tab bar used
+  // to reuse each block's long descriptive sentence as its label (up to ≈734px nl /
+  // ≈827px fr/es summed at 4 tabs — wider than this 720px strip). The bar now gets
+  // its own short 2-3 word name (`vacancyTab.tabs.<id>`, new keys); the original
+  // long sentence still shows, now as the in-tab heading via LookupChipSelect's
+  // `label` prop. Measured (Inter 12px ≈ 6.2px/char + 24px/tab): the four short
+  // labels sum to ≤ 412px in every locale, well under 720px.
   const [activeTab, setActiveTab] = useState('phases')
   const tabs = [
-    { id: 'phases', label: t('vacancyTab.phasesTitle') },
-    { id: 'statuses', label: t('vacancyTab.statusesTitle') },
-    { id: 'types', label: t('vacancyTab.typesTitle') },
-    { id: 'vacancy_statuses', label: t('vacancyTab.vacancyStatusesTitle') },
+    { id: 'phases', label: t('vacancyTab.tabs.phases') },
+    { id: 'statuses', label: t('vacancyTab.tabs.statuses') },
+    { id: 'types', label: t('vacancyTab.tabs.types') },
+    { id: 'vacancy_statuses', label: t('vacancyTab.tabs.vacancy_statuses') },
   ]
 
   return (
@@ -79,10 +86,10 @@ function CandidateVacancyTabSettingsInner() {
 
       <SubTabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
       <div style={{ marginTop: 14 }}>
-        {activeTab === 'phases' && <LookupChipSelect items={phases} selected={cfg.phases} onToggle={toggleIn('phases')} ariaLabel={t('vacancyTab.phasesTitle')} />}
-        {activeTab === 'statuses' && <LookupChipSelect items={statuses} selected={cfg.hidden_statuses} onToggle={toggleIn('hidden_statuses')} ariaLabel={t('vacancyTab.statusesTitle')} />}
-        {activeTab === 'types' && <LookupChipSelect items={candidateTypes} selected={cfg.candidate_types} onToggle={toggleIn('candidate_types')} ariaLabel={t('vacancyTab.typesTitle')} />}
-        {activeTab === 'vacancy_statuses' && <LookupChipSelect items={vacancyStatuses} selected={cfg.vacancy_statuses} onToggle={toggleIn('vacancy_statuses')} ariaLabel={t('vacancyTab.vacancyStatusesTitle')} />}
+        {activeTab === 'phases' && <LookupChipSelect items={phases} selected={cfg.phases} onToggle={toggleIn('phases')} label={t('vacancyTab.phasesTitle')} ariaLabel={t('vacancyTab.phasesTitle')} />}
+        {activeTab === 'statuses' && <LookupChipSelect items={statuses} selected={cfg.hidden_statuses} onToggle={toggleIn('hidden_statuses')} label={t('vacancyTab.statusesTitle')} ariaLabel={t('vacancyTab.statusesTitle')} />}
+        {activeTab === 'types' && <LookupChipSelect items={candidateTypes} selected={cfg.candidate_types} onToggle={toggleIn('candidate_types')} label={t('vacancyTab.typesTitle')} ariaLabel={t('vacancyTab.typesTitle')} />}
+        {activeTab === 'vacancy_statuses' && <LookupChipSelect items={vacancyStatuses} selected={cfg.vacancy_statuses} onToggle={toggleIn('vacancy_statuses')} label={t('vacancyTab.vacancyStatusesTitle')} ariaLabel={t('vacancyTab.vacancyStatusesTitle')} />}
       </div>
     </div>
   )

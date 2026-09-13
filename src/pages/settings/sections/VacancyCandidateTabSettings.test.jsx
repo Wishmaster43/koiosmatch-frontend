@@ -65,8 +65,9 @@ describe('VacancyCandidateTabSettings — leads criteria', () => {
     blobRef.current = { vacancy_candidate_tab: JSON.stringify(STORED) }
     const user = userEvent.setup()
     render(<VacancyCandidateTabSettings />)
-    // SETTINGS-SUBTABS-1: this control now lives under its own sub-tab.
-    await user.click(screen.getByRole('tab', { name: t('candidateTab.leadsCriteria.excludeAlreadyAppliedLabel') }))
+    // SETTINGS-SUBTABS-1: this control now lives under its own sub-tab (short
+    // tab-bar name since TAB-STRIP-WIDTH-1 — see the bottom describe block).
+    await user.click(screen.getByRole('tab', { name: t('candidateTab.tabs.exclusions') }))
     await user.click(screen.getByRole('switch', { name: t('candidateTab.leadsCriteria.includeExpiringPlacementsLabel') }))
     expect(postMock).toHaveBeenCalledWith('/settings', {
       vacancy_candidate_tab: JSON.stringify({ ...STORED, include_expiring_placements: false }),
@@ -77,7 +78,7 @@ describe('VacancyCandidateTabSettings — leads criteria', () => {
     blobRef.current = { vacancy_candidate_tab: JSON.stringify(STORED) }
     const user = userEvent.setup()
     render(<VacancyCandidateTabSettings />)
-    await user.click(screen.getByRole('tab', { name: t('candidateTab.leadsCriteria.excludeAlreadyAppliedLabel') }))
+    await user.click(screen.getByRole('tab', { name: t('candidateTab.tabs.exclusions') }))
     const daysInput = screen.getByLabelText(t('candidateTab.leadsCriteria.expiringWithinDaysLabel'))
     // A single change event (not user.type — this input is fully controlled by
     // the stored blob, which this mock never reflects back, so per-keystroke
@@ -92,7 +93,7 @@ describe('VacancyCandidateTabSettings — leads criteria', () => {
     blobRef.current = { vacancy_candidate_tab: JSON.stringify(STORED) }
     const user = userEvent.setup()
     render(<VacancyCandidateTabSettings />)
-    await user.click(screen.getByRole('tab', { name: t('candidateTab.leadsCriteria.title') }))
+    await user.click(screen.getByRole('tab', { name: t('candidateTab.tabs.radius_function') }))
     expect(screen.getByLabelText(t('candidateTab.defaultRadiusLabel'))).not.toBeDisabled()
     await user.click(screen.getByRole('switch', { name: t('candidateTab.leadsCriteria.applyRadiusLabel') }))
     expect(postMock).toHaveBeenCalledWith('/settings', {
@@ -104,7 +105,7 @@ describe('VacancyCandidateTabSettings — leads criteria', () => {
     blobRef.current = { vacancy_candidate_tab: JSON.stringify({ ...STORED, apply_radius: false }) }
     const user = userEvent.setup()
     render(<VacancyCandidateTabSettings />)
-    await user.click(screen.getByRole('tab', { name: t('candidateTab.leadsCriteria.title') }))
+    await user.click(screen.getByRole('tab', { name: t('candidateTab.tabs.radius_function') }))
     expect(screen.getByLabelText(t('candidateTab.defaultRadiusLabel'))).toBeDisabled()
   })
 
@@ -114,8 +115,81 @@ describe('VacancyCandidateTabSettings — leads criteria', () => {
     blobRef.current = { vacancy_candidate_tab: JSON.stringify({ ...STORED, function_match: 'category' }) }
     const user = userEvent.setup()
     render(<VacancyCandidateTabSettings />)
-    await user.click(screen.getByRole('tab', { name: t('candidateTab.leadsCriteria.title') }))
+    await user.click(screen.getByRole('tab', { name: t('candidateTab.tabs.radius_function') }))
     expect(screen.queryByText(t('candidateTab.leadsCriteria.functionMatchCategory'))).toBeNull()
     expect(screen.getByRole('radio', { name: new RegExp(t('candidateTab.leadsCriteria.functionMatchExact')) })).toBeChecked()
+  })
+})
+
+// TAB-STRIP-WIDTH-1 (Danny 13-09, verbatim: "de regel van de subtabjes kan
+// breeder worden voor de titel"): the tab bar used to reuse each block's long
+// descriptive sentence as its label (up to ~50 chars in nl/fr/es), which never
+// fit a 720px strip. Fix (F1, Opus review): the tab BAR gets a short 2-3 word
+// name per tab; the original long sentence still shows, now as the heading
+// INSIDE that tab's own content. Measured (Inter 12px ≈ 6.2px/char + 24px/tab):
+// the six short labels fit inside 720px in every locale, so the strip stays
+// inside the same 720px container as the rest of the form.
+//
+// NOTE: jsdom never lays out real pixel widths, so this suite cannot itself
+// prove the six SHORT labels fit on one row at 1440px — that real width guard
+// belongs in the smoke suite (`tablist.scrollWidth <= tablist.clientWidth` at
+// 1440, all 7 locales). This suite only proves the two things it CAN prove:
+// the tab bar shows the short names, and the original long sentence is not
+// lost — it now renders inside the tab body instead.
+describe('VacancyCandidateTabSettings — short tab names, long titles moved in-body (TAB-STRIP-WIDTH-1)', () => {
+  it('uses the short tab-bar labels as the tab names, not the long section titles', () => {
+    blobRef.current = { vacancy_candidate_tab: JSON.stringify(STORED) }
+    render(<VacancyCandidateTabSettings />)
+    const shortLabels = [
+      t('candidateTab.tabs.vacancy_statuses'),
+      t('candidateTab.tabs.candidate_statuses'),
+      t('candidateTab.tabs.contract_forms'),
+      t('candidateTab.tabs.countable_statuses'),
+      t('candidateTab.tabs.radius_function'),
+      t('candidateTab.tabs.exclusions'),
+    ]
+    for (const label of shortLabels) {
+      expect(screen.getByRole('tab', { name: label })).toBeInTheDocument()
+    }
+    // None of the long section titles leak into the tab BAR itself — they only
+    // appear once the user opens the matching tab (checked below).
+    expect(screen.queryByRole('tab', { name: t('candidateTab.leadsCriteria.excludeAlreadyAppliedLabel') })).toBeNull()
+  })
+
+  it('renders the original long section title inside each tab body once opened', async () => {
+    blobRef.current = { vacancy_candidate_tab: JSON.stringify(STORED) }
+    const user = userEvent.setup()
+    render(<VacancyCandidateTabSettings />)
+
+    // vacancy_statuses is the default tab — its long title is already visible.
+    expect(screen.getByText(t('candidateTab.vacancyStatusesTitle'))).toBeInTheDocument()
+
+    await user.click(screen.getByRole('tab', { name: t('candidateTab.tabs.candidate_statuses') }))
+    expect(screen.getByText(t('candidateTab.candidateStatusesTitle'))).toBeInTheDocument()
+
+    await user.click(screen.getByRole('tab', { name: t('candidateTab.tabs.contract_forms') }))
+    expect(screen.getByText(t('candidateTab.contractFormsTitle'))).toBeInTheDocument()
+
+    await user.click(screen.getByRole('tab', { name: t('candidateTab.tabs.countable_statuses') }))
+    expect(screen.getByText(t('candidateTab.leadsCriteria.countableStatusesTitle'))).toBeInTheDocument()
+
+    await user.click(screen.getByRole('tab', { name: t('candidateTab.tabs.radius_function') }))
+    expect(screen.getByText(t('candidateTab.leadsCriteria.title'))).toBeInTheDocument()
+  })
+
+  it('keeps the tab strip inside the same 720px container as the rest of the form', () => {
+    blobRef.current = { vacancy_candidate_tab: JSON.stringify(STORED) }
+    render(<VacancyCandidateTabSettings />)
+    const strip = screen.getByRole('tablist')
+    // The short labels fit at 720px (see the measured comment above), so the
+    // strip lives inside the SAME maxWidth:720 ancestor as the form fields —
+    // a regression back to a separate wide wrapper would fail this.
+    let el = strip.parentElement
+    let found = false
+    while (el && el !== document.body) {
+      if (el.style.maxWidth === '720px') { found = true; break }
+      el = el.parentElement
+    }
+    expect(found).toBe(true)
   })
 })

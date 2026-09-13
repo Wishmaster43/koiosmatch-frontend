@@ -64,7 +64,8 @@
     "appointments": "Rendez-vous",
     "workflows": "Workflows",
     "reports": "Rapports",
-    "candidates": "Candidats"
+    "candidates": "Candidats",
+    "conversations": "Conversations"
   },
   "nav": {
     "candidate_display": "Affichage du tableau",
@@ -957,7 +958,8 @@
     },
     "missingTargetHint": "Choisissez une personne ou un rôle vers qui escalader, ou videz « Escalader après » pour désactiver.",
     "daysUnit": "jours",
-    "catalogUnavailable": "Le catalogue des signaux n’a pas pu être chargé. Seuls les quatre signaux par défaut sont affichés."
+    "catalogUnavailable": "Le catalogue des signaux n’a pas pu être chargé. Seuls les quatre signaux par défaut sont affichés.",
+    "groupOther": "Autre"
   },
   "billing": {
     "usage": {
@@ -2631,7 +2633,13 @@
     "phasesTitle": "Visible selon la phase",
     "statusesTitle": "Masquer selon la disponibilité",
     "typesTitle": "Visible selon la forme contractuelle",
-    "vacancyStatusesTitle": "Statuts de poste dans l'onglet"
+    "vacancyStatusesTitle": "Statuts de poste dans l'onglet",
+    "tabs": {
+      "phases": "Phase",
+      "statuses": "Disponibilité",
+      "types": "Type de contrat",
+      "vacancy_statuses": "Statut du poste"
+    }
   },
   "candidateTab": {
     "title": "Onglet Recherche de candidats sur les postes",
@@ -2662,6 +2670,14 @@
       "includeExpiringPlacementsHint": "Les candidats actuellement placés mais dont le match se termine dans le nombre de jours configuré comptent aussi comme lead.",
       "expiringWithinDaysLabel": "Nombre de jours",
       "expiringWithinDaysHint": "Combien de jours à l'avance un match expirant compte déjà comme lead (1–365)."
+    },
+    "tabs": {
+      "vacancy_statuses": "Statut du poste",
+      "candidate_statuses": "Disponibilité",
+      "contract_forms": "Type de contrat",
+      "countable_statuses": "Comptage",
+      "radius_function": "Rayon et fonction",
+      "exclusions": "Exclusions"
     }
   },
   "viewConfig": {
@@ -3488,7 +3504,10 @@
     "urlLabel": "URL du site carrière personnalisé",
     "urlHint": "URL absolue avec le placeholder {ref} à la place du numéro d'emploi, par exemple https://emplois.example.fr/offres/{ref}",
     "urlInvalid": "Utilisez une URL absolue contenant {ref}.",
-    "urlPlaceholder": "https://emplois.exemple.fr/offre/{ref}"
+    "urlPlaceholder": "https://emplois.exemple.fr/offre/{ref}",
+    "tabs": {
+      "settings": "Paramètres"
+    }
   },
   "caoSettings": {
     "title": "Conventions collectives",
@@ -4389,6 +4408,9 @@
         "label": "Mémoire de conversation du chat Koios",
         "description": "Combien de jours de conversations antérieures comptent comme contexte pour l'assistant. Zéro signifie aucune mémoire."
       }
+    },
+    "tabs": {
+      "principles": "Principes"
     }
   },
   "limits": {

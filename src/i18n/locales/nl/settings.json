@@ -64,7 +64,8 @@
     "appointments": "Afspraken",
     "workflows": "Workflows",
     "reports": "Rapporten",
-    "candidates": "Kandidaten"
+    "candidates": "Kandidaten",
+    "conversations": "Gesprekken"
   },
   "nav": {
     "candidate_display": "Tabelweergave",
@@ -1217,7 +1218,8 @@
     },
     "missingTargetHint": "Kies een persoon of rol om te escaleren, of laat 'Escaleer na' leeg om uit te zetten.",
     "daysUnit": "dagen",
-    "catalogUnavailable": "De signaalcatalogus kon niet worden geladen. Alleen de vier standaardsignalen worden getoond."
+    "catalogUnavailable": "De signaalcatalogus kon niet worden geladen. Alleen de vier standaardsignalen worden getoond.",
+    "groupOther": "Overig"
   },
   "billing": {
     "usage": {
@@ -2653,7 +2655,13 @@
     "phasesTitle": "Zichtbaar bij fase",
     "statusesTitle": "Verbergen bij inzetbaarheid",
     "typesTitle": "Zichtbaar bij contractvorm",
-    "vacancyStatusesTitle": "Vacaturestatussen in het tabblad"
+    "vacancyStatusesTitle": "Vacaturestatussen in het tabblad",
+    "tabs": {
+      "phases": "Fase",
+      "statuses": "Inzetbaarheid",
+      "types": "Contractvorm",
+      "vacancy_statuses": "Vacaturestatus"
+    }
   },
   "candidateTab": {
     "title": "Kandidaten zoeken-tabblad bij vacatures",
@@ -2684,6 +2692,14 @@
       "includeExpiringPlacementsHint": "Kandidaten die nu geplaatst zijn maar van wie de match binnen het ingestelde aantal dagen afloopt, tellen ook mee als lead.",
       "expiringWithinDaysLabel": "Aantal dagen",
       "expiringWithinDaysHint": "Hoeveel dagen van tevoren een aflopende match al als lead meetelt (1–365)."
+    },
+    "tabs": {
+      "vacancy_statuses": "Vacaturestatus",
+      "candidate_statuses": "Inzetbaarheid",
+      "contract_forms": "Contractvorm",
+      "countable_statuses": "Telling",
+      "radius_function": "Straal & functie",
+      "exclusions": "Uitsluitingen"
     }
   },
   "viewConfig": {
@@ -3488,7 +3504,10 @@
     "urlLabel": "Eigen vacaturesite-URL",
     "urlHint": "Absolute URL met {ref} op de plek van het vacaturenummer, bijvoorbeeld https://werkenbij.example.nl/vacature/{ref}",
     "urlInvalid": "Gebruik een absolute URL met {ref}.",
-    "urlPlaceholder": "https://werkenbij.voorbeeld.nl/vacature/{ref}"
+    "urlPlaceholder": "https://werkenbij.voorbeeld.nl/vacature/{ref}",
+    "tabs": {
+      "settings": "Instellingen"
+    }
   },
   "caoSettings": {
     "title": "CAO's",
@@ -4389,6 +4408,9 @@
         "label": "Gespreksgeheugen Koios-chat",
         "description": "Hoeveel dagen eerdere gesprekken meetellen als context voor de assistent. Nul betekent geen geheugen."
       }
+    },
+    "tabs": {
+      "principles": "Beginselen"
     }
   },
   "limits": {

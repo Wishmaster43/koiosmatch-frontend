@@ -7,9 +7,15 @@
  * set but no target is BLOCKED client-side with an inline hint instead of
  * being sent half-configured. Tests the 15 signals from the catalogue endpoint
  * and the 4-signal fallback when the endpoint fails.
+ *
+ * SIGNAL-GROUPS-1 (13-09): rows now bucket into titled per-subject sections, so
+ * a signal's on-page order is GROUP order, not catalogue-flat order — every row
+ * is located via its own `data-testid="escalation-row-<signal>"` + `within()`
+ * instead of a positional array index (an index would silently point at the
+ * wrong signal the moment the grouping reorders the DOM).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import i18n from '@/i18n'
@@ -58,6 +64,10 @@ const ALL_SIGNALS = [
 
 const renderPage = (queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })) =>
   render(<QueryClientProvider client={queryClient}><EscalationSettings /></QueryClientProvider>)
+
+// Locates one signal's row (data-testid="escalation-row-<signal>") and returns
+// scoped queries into it — robust to whichever group order the row now renders in.
+const rowFor = (signal: string) => within(screen.getByTestId(`escalation-row-${signal}`))
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -110,20 +120,35 @@ describe('EscalationSettings', () => {
     expect(screen.getAllByText(t('escalation.targetPlaceholder'))).toHaveLength(15)
   })
 
+  it('groups the signals into titled per-subject sections', async () => {
+    renderPage()
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/settings/signal-catalog'))
+
+    // Each expected group renders its own titled section (reusing the shared groups.* labels).
+    expect(await screen.findByRole('heading', { name: t('groups.customers') })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: t('groups.conversations') })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: t('groups.candidate') })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: t('groups.matches') })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: t('groups.tasks') })).toBeInTheDocument()
+
+    // A row still resolves via its own testid regardless of its group position.
+    expect(rowFor('task_overdue').getByLabelText(t('escalation.afterDaysLabel'))).toBeInTheDocument()
+    expect(rowFor('customer_match_ending').getByLabelText(t('escalation.afterDaysLabel'))).toBeInTheDocument()
+  })
+
   it('pair set: POSTs the exact contract keys for the chosen signal on save (user target)', async () => {
     const user = userEvent.setup()
     renderPage()
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/settings'))
     await screen.findAllByRole('button', { name: t('escalation.targetLabel') })
 
-    // task_overdue is at index 8 in the ALL_SIGNALS catalogue.
-    const input = document.getElementById('escalate-days-task_overdue') as HTMLInputElement
+    const row = rowFor('task_overdue')
+    const input = row.getByLabelText(t('escalation.afterDaysLabel')) as HTMLInputElement
     await user.type(input, '5')
     await user.tab()
 
-    // Pick the user target for task_overdue (index 8 in the signal list).
-    const triggers = screen.getAllByRole('button', { name: t('escalation.targetLabel') })
-    await user.click(triggers[8])
+    // Pick the user target for task_overdue.
+    await user.click(row.getByRole('button', { name: t('escalation.targetLabel') }))
     await user.click(await screen.findByText(t('escalation.targetUserOption', { name: 'Jan Jansen' })))
 
     await user.click(screen.getByRole('button', { name: t('common.save') }))
@@ -143,12 +168,12 @@ describe('EscalationSettings', () => {
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/settings'))
     await screen.findAllByRole('button', { name: t('escalation.targetLabel') })
 
-    // Set up a full pair on candidate_status_stale (index 7 in the signal list).
-    const daysInput = document.getElementById('escalate-days-candidate_status_stale') as HTMLInputElement
+    // Set up a full pair on candidate_status_stale.
+    const row = rowFor('candidate_status_stale')
+    const daysInput = row.getByLabelText(t('escalation.afterDaysLabel')) as HTMLInputElement
     await user.type(daysInput, '3')
     await user.tab()
-    const triggers = screen.getAllByRole('button', { name: t('escalation.targetLabel') })
-    await user.click(triggers[7])
+    await user.click(row.getByRole('button', { name: t('escalation.targetLabel') }))
     await user.click(await screen.findByText(t('escalation.targetRoleOption', { name: 'recruiter' })))
 
     // Now clear the days field back to off — the picker's stale selection must
@@ -172,8 +197,9 @@ describe('EscalationSettings', () => {
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/settings'))
     await screen.findAllByRole('button', { name: t('escalation.targetLabel') })
 
-    // Set days on conversation_unanswered (index 1 in the signal list) but never pick a target.
-    const daysInput = document.getElementById('escalate-days-conversation_unanswered') as HTMLInputElement
+    // Set days on conversation_unanswered but never pick a target.
+    const row = rowFor('conversation_unanswered')
+    const daysInput = row.getByLabelText(t('escalation.afterDaysLabel')) as HTMLInputElement
     await user.type(daysInput, '7')
     await user.tab()
 
@@ -184,8 +210,7 @@ describe('EscalationSettings', () => {
     expect(await screen.findByText(t('escalation.missingTargetHint'))).toBeInTheDocument()
 
     // Picking a target now clears the block and lets the save through.
-    const triggers = screen.getAllByRole('button', { name: t('escalation.targetLabel') })
-    await user.click(triggers[1])
+    await user.click(row.getByRole('button', { name: t('escalation.targetLabel') }))
     await user.click(await screen.findByText(t('escalation.targetUserOption', { name: 'Jan Jansen' })))
     await user.click(screen.getByRole('button', { name: t('common.save') }))
 
@@ -200,7 +225,7 @@ describe('EscalationSettings', () => {
     renderPage()
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/settings'))
     await screen.findAllByRole('button', { name: t('escalation.targetLabel') })
-    const daysInput = document.getElementById('escalate-days-task_overdue') as HTMLInputElement
+    const daysInput = rowFor('task_overdue').getByLabelText(t('escalation.afterDaysLabel')) as HTMLInputElement
     await user.type(daysInput, '999')
     await user.tab()
     expect(daysInput).toHaveValue(90)
@@ -212,11 +237,11 @@ describe('EscalationSettings', () => {
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/settings'))
     await screen.findAllByRole('button', { name: t('escalation.targetLabel') })
 
-    const daysInput = document.getElementById('escalate-days-candidate_status_stale') as HTMLInputElement
+    const row = rowFor('candidate_status_stale')
+    const daysInput = row.getByLabelText(t('escalation.afterDaysLabel')) as HTMLInputElement
     await user.type(daysInput, '3')
     await user.tab()
-    const triggers = screen.getAllByRole('button', { name: t('escalation.targetLabel') })
-    await user.click(triggers[7]) // candidate_status_stale row (index 7 in signal list)
+    await user.click(row.getByRole('button', { name: t('escalation.targetLabel') }))
     await user.click(await screen.findByText(t('escalation.targetRoleOption', { name: 'recruiter' })))
 
     await user.click(screen.getByRole('button', { name: t('common.save') }))

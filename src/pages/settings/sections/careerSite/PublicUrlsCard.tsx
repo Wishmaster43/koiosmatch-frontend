@@ -7,6 +7,12 @@
  * there is no separate career-site CMS to browse them from otherwise. Mirrors the
  * house copy-URL pattern (FacebookLeadsSettings/IncomingWebhooks.jsx), grouped in
  * the shared SectionCard (§3A/§11 reuse) instead of a hand-rolled bordered div.
+ *
+ * F2 (13-09): this card's own SectionCard title used to repeat `careerSite.urls.title`
+ * — the SAME text CareerSiteSettings now also shows as the "Public URLs" tab label
+ * right above it, so the text rendered twice in a row. Card has exactly one caller
+ * (CareerSiteSettings) and always sits inside that tab, so the inner title is
+ * dropped unconditionally rather than made a conditional prop.
  */
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
@@ -33,7 +39,7 @@ export default function PublicUrlsCard({ active }: PublicUrlsCardProps) {
   // honest empty state instead of URLs built on an "undefined" tenant segment (§3).
   if (urls.length === 0) {
     return (
-      <SectionCard title={t('careerSite.urls.title')}>
+      <SectionCard>
         <p style={{ margin: 0, padding: '4px 0', fontSize: 12.5, color: 'var(--text-muted)' }}>
           {t('careerSite.urls.noTenant')}
         </p>
@@ -42,7 +48,7 @@ export default function PublicUrlsCard({ active }: PublicUrlsCardProps) {
   }
 
   return (
-    <SectionCard title={t('careerSite.urls.title')}>
+    <SectionCard>
       <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 4px' }}>{t('careerSite.urls.subtitle')}</p>
       <div>
         {urls.map((u) => (

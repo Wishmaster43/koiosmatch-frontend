@@ -64,7 +64,8 @@
     "appointments": "Marcações",
     "workflows": "Workflows",
     "reports": "Relatórios",
-    "candidates": "Candidatos"
+    "candidates": "Candidatos",
+    "conversations": "Conversas"
   },
   "nav": {
     "candidate_display": "Vista de tabela",
@@ -1217,7 +1218,8 @@
     },
     "missingTargetHint": "Escolha uma pessoa ou função para escalar, ou limpe 'Escalar após' para desligar.",
     "daysUnit": "dias",
-    "catalogUnavailable": "Não foi possível carregar o catálogo de sinais. Apenas os quatro sinais padrão são apresentados."
+    "catalogUnavailable": "Não foi possível carregar o catálogo de sinais. Apenas os quatro sinais padrão são apresentados.",
+    "groupOther": "Outro"
   },
   "billing": {
     "usage": {
@@ -2653,7 +2655,13 @@
     "phasesTitle": "Visível na fase",
     "statusesTitle": "Ocultar para disponibilidade",
     "typesTitle": "Visível para tipo de contrato",
-    "vacancyStatusesTitle": "Estados de vaga no separador"
+    "vacancyStatusesTitle": "Estados de vaga no separador",
+    "tabs": {
+      "phases": "Fase",
+      "statuses": "Disponibilidade",
+      "types": "Tipo de contrato",
+      "vacancy_statuses": "Estado da vaga"
+    }
   },
   "candidateTab": {
     "title": "Separador Procurar candidatos nas vagas",
@@ -2684,6 +2692,14 @@
       "includeExpiringPlacementsHint": "Os candidatos que estão colocados neste momento mas cujo match termina dentro do número de dias definido também contam como lead.",
       "expiringWithinDaysLabel": "Número de dias",
       "expiringWithinDaysHint": "Quantos dias de antecedência um match a terminar já conta como lead (1-365)."
+    },
+    "tabs": {
+      "vacancy_statuses": "Estado da vaga",
+      "candidate_statuses": "Disponibilidade",
+      "contract_forms": "Tipo de contrato",
+      "countable_statuses": "Contagem",
+      "radius_function": "Raio e função",
+      "exclusions": "Exclusões"
     }
   },
   "viewConfig": {
@@ -3489,7 +3505,10 @@
     "urlLabel": "URL do site de carreira personalizado",
     "urlHint": "URL absoluta com placeholder {ref} onde o número da vaga deve aparecer, por exemplo https://carreiras.example.pt/vagas/{ref}",
     "urlInvalid": "Use uma URL absoluta contendo {ref}.",
-    "urlPlaceholder": "https://empregos.exemplo.pt/vaga/{ref}"
+    "urlPlaceholder": "https://empregos.exemplo.pt/vaga/{ref}",
+    "tabs": {
+      "settings": "Definições"
+    }
   },
   "caoSettings": {
     "title": "Convenções coletivas (CAO)",
@@ -4390,6 +4409,9 @@
         "label": "Memória de conversa do chat Koios",
         "description": "Quantos dias de conversas anteriores contam como contexto para o assistente. Zero significa sem memória."
       }
+    },
+    "tabs": {
+      "principles": "Princípios"
     }
   },
   "limits": {

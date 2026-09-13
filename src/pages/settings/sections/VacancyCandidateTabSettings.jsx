@@ -24,7 +24,7 @@
  * itself as doing more than 'exact' does today.
  */
 import { useState } from 'react'
-import { Caption } from '@/components/ui/typography'
+import { Caption, SectionTitle } from '@/components/ui/typography'
 import { useTranslation } from 'react-i18next'
 import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { useLookups } from '@/context/LookupsContext'
@@ -132,31 +132,46 @@ function VacancyCandidateTabSettingsInner() {
   // the top chip-select block — the leads-criteria section used to render as one
   // long always-visible list below a divider. Six sub-tabs, one per concern,
   // reusing the shared underline SubTabBar (mirrors every other settings screen).
+  //
+  // TAB-STRIP-WIDTH-1 (Danny 13-09, verbatim: "de regel van de subtabjes kan
+  // breeder worden voor de titel"): the tab BAR used to reuse each section's long
+  // descriptive sentence as its label (up to ~50 chars in nl/fr/es) — six of those
+  // never fit a 720px strip, so most tabs sat scrolled off-screen behind only a
+  // subtle edge-fade. Fix: the tab bar gets its OWN short 2-3 word name
+  // (`candidateTab.tabs.<id>`, new keys); the original long sentence still shows,
+  // now as the heading INSIDE that tab's own content (via LookupChipSelect's
+  // `label` prop, or a SectionTitle for the combined radius/function tab). Measured
+  // (Inter 12px ≈ 6.2px/char + 24px/tab): the six short labels sum to ≤ 609px in
+  // every locale, comfortably under the 720px strip — so the strip stays INSIDE
+  // the same maxWidth wrapper as the rest of the form (no separate wide column).
   const [activeTab, setActiveTab] = useState('vacancy_statuses')
   const tabs = [
-    { id: 'vacancy_statuses', label: t('candidateTab.vacancyStatusesTitle') },
-    { id: 'candidate_statuses', label: t('candidateTab.candidateStatusesTitle') },
-    { id: 'contract_forms', label: t('candidateTab.contractFormsTitle') },
-    { id: 'countable_statuses', label: t('candidateTab.leadsCriteria.countableStatusesTitle') },
-    { id: 'radius_function', label: t('candidateTab.leadsCriteria.title') },
-    { id: 'exclusions', label: t('candidateTab.leadsCriteria.excludeAlreadyAppliedLabel') },
+    { id: 'vacancy_statuses', label: t('candidateTab.tabs.vacancy_statuses') },
+    { id: 'candidate_statuses', label: t('candidateTab.tabs.candidate_statuses') },
+    { id: 'contract_forms', label: t('candidateTab.tabs.contract_forms') },
+    { id: 'countable_statuses', label: t('candidateTab.tabs.countable_statuses') },
+    { id: 'radius_function', label: t('candidateTab.tabs.radius_function') },
+    { id: 'exclusions', label: t('candidateTab.tabs.exclusions') },
   ]
 
   return (
     <div style={{ maxWidth: 720 }}>
-      <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('candidateTab.title')}</h3>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{t('candidateTab.subtitle')}</p>
+      <SectionTitle style={{ marginBottom: 4 }}>{t('candidateTab.title')}</SectionTitle>
+      <Caption as="p" style={{ marginBottom: 14 }}>{t('candidateTab.subtitle')}</Caption>
 
       <SubTabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
       <div style={{ marginTop: 14 }}>
         {activeTab === 'vacancy_statuses' && (
-          <LookupChipSelect items={vacancyStatuses} selected={cfg.vacancy_statuses} onToggle={toggleIn('vacancy_statuses')} ariaLabel={t('candidateTab.vacancyStatusesTitle')} />
+          <LookupChipSelect items={vacancyStatuses} selected={cfg.vacancy_statuses} onToggle={toggleIn('vacancy_statuses')}
+            label={t('candidateTab.vacancyStatusesTitle')} ariaLabel={t('candidateTab.vacancyStatusesTitle')} />
         )}
         {activeTab === 'candidate_statuses' && (
-          <LookupChipSelect items={candidateStatuses} selected={cfg.candidate_statuses} onToggle={toggleIn('candidate_statuses')} ariaLabel={t('candidateTab.candidateStatusesTitle')} />
+          <LookupChipSelect items={candidateStatuses} selected={cfg.candidate_statuses} onToggle={toggleIn('candidate_statuses')}
+            label={t('candidateTab.candidateStatusesTitle')} ariaLabel={t('candidateTab.candidateStatusesTitle')} />
         )}
         {activeTab === 'contract_forms' && (
-          <LookupChipSelect items={candidateTypes} selected={cfg.contract_forms} onToggle={toggleIn('contract_forms')} ariaLabel={t('candidateTab.contractFormsTitle')} />
+          <LookupChipSelect items={candidateTypes} selected={cfg.contract_forms} onToggle={toggleIn('contract_forms')}
+            label={t('candidateTab.contractFormsTitle')} ariaLabel={t('candidateTab.contractFormsTitle')} />
         )}
 
         {/* LEADS-CRITERIA-1: every control below is read by the SAME backend
@@ -175,6 +190,9 @@ function VacancyCandidateTabSettingsInner() {
 
         {activeTab === 'radius_function' && (
           <div>
+            {/* The tab's own long title now lives HERE (in-tab heading), since the
+                tab bar carries the short name only (TAB-STRIP-WIDTH-1). */}
+            <SectionTitle style={{ marginBottom: 8 }}>{t('candidateTab.leadsCriteria.title')}</SectionTitle>
             {/* apply_radius gates default_radius_km (RADIUS-SETTING-1's input): OFF
                 means distance is ignored entirely, so the radius input renders
                 disabled (never hidden) to keep that relationship visible. */}

@@ -2,9 +2,14 @@
  * AiTransparencySettings tests — renders from mocked /ai/transparency-info endpoint,
  * displays five principles, human oversight, tenant posture (read-only), and active features.
  * The link in KoiosPanel footer navigates to this page.
+ *
+ * SUB-TABS (13-09): the four blocks now render one at a time behind a SubTabBar
+ * (Principles is the default tab); the oversight/posture, retention and features
+ * assertions below click into their own tab first.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import AiTransparencySettings from './AiTransparencySettings'
 
@@ -85,7 +90,10 @@ describe('AiTransparencySettings', () => {
   })
 
   it('displays human oversight as always', async () => {
+    const user = userEvent.setup()
     render(<AiTransparencySettings />)
+    // SUB-TABS: oversight + posture live under their own tab now.
+    await user.click(await screen.findByRole('tab', { name: i18n.t('aiAct.tenantPosture.title', { ns: 'settings' }) }))
     await waitFor(() => {
       expect(screen.getByText(i18n.t('aiAct.humanOversight', { ns: 'settings' }))).toBeInTheDocument()
       expect(screen.getByText(i18n.t('aiAct.humanOversightValue', { ns: 'settings' }))).toBeInTheDocument()
@@ -93,9 +101,10 @@ describe('AiTransparencySettings', () => {
   })
 
   it('displays tenant posture (default mode and auto messages)', async () => {
+    const user = userEvent.setup()
     render(<AiTransparencySettings />)
+    await user.click(await screen.findByRole('tab', { name: i18n.t('aiAct.tenantPosture.title', { ns: 'settings' }) }))
     await waitFor(() => {
-      expect(screen.getByText(i18n.t('aiAct.tenantPosture.title', { ns: 'settings' }))).toBeInTheDocument()
       expect(screen.getByText(i18n.t('aiAct.tenantPosture.defaultMode.label', { ns: 'settings' }))).toBeInTheDocument()
       expect(screen.getByText(i18n.t('aiAct.tenantPosture.defaultMode.wizard', { ns: 'settings' }))).toBeInTheDocument()
       expect(screen.getByText(i18n.t('aiAct.tenantPosture.autoMessages.label', { ns: 'settings' }))).toBeInTheDocument()
@@ -103,9 +112,11 @@ describe('AiTransparencySettings', () => {
   })
 
   it('displays features with active/inactive status via SoftChip', async () => {
+    const user = userEvent.setup()
     render(<AiTransparencySettings />)
+    // SUB-TABS: the features block lives under its own tab now.
+    await user.click(await screen.findByRole('tab', { name: i18n.t('aiAct.features.title', { ns: 'settings' }) }))
     await waitFor(() => {
-      expect(screen.getByText(i18n.t('aiAct.features.title', { ns: 'settings' }))).toBeInTheDocument()
       expect(screen.getByText(i18n.t('aiAct.features.koios_chat', { ns: 'settings' }))).toBeInTheDocument()
       expect(screen.getByText(i18n.t('aiAct.features.ai_agent_interviews', { ns: 'settings' }))).toBeInTheDocument()
       expect(screen.getByText(i18n.t('aiAct.features.ai_workflow_steps', { ns: 'settings' }))).toBeInTheDocument()
@@ -117,14 +128,28 @@ describe('AiTransparencySettings', () => {
   })
 })
 
+describe('AiTransparencySettings · sub-tabs (13-09)', () => {
+  it('defaults to the Principles tab', async () => {
+    render(<AiTransparencySettings />)
+    const principlesTab = await screen.findByRole('tab', { name: i18n.t('aiAct.tabs.principles', { ns: 'settings' }) })
+    expect(principlesTab).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('renders exactly four tabs, one per existing block', async () => {
+    render(<AiTransparencySettings />)
+    await screen.findByRole('tablist')
+    expect(screen.getAllByRole('tab')).toHaveLength(4)
+  })
+})
+
 // Row 21 (Danny 09-09, "Ik kan niets instellen??????"): the AI retention windows are
 // editable here — prompt log (1..3650 days) and chat conversation memory (0..365, 0 = off).
 describe('AiTransparencySettings · AI retention windows (row 21)', () => {
   it('renders both retention rows with the stored values', async () => {
+    const user = userEvent.setup()
     render(<AiTransparencySettings />)
-    await waitFor(() => {
-      expect(screen.getByText(i18n.t('aiAct.retention.title', { ns: 'settings' }))).toBeInTheDocument()
-    })
+    // SUB-TABS: the retention block lives under its own tab now.
+    await user.click(await screen.findByRole('tab', { name: i18n.t('aiAct.retention.title', { ns: 'settings' }) }))
     const promptLog = screen.getByRole('textbox', { name: i18n.t('aiAct.retention.promptLog.label', { ns: 'settings' }) })
     const memory = screen.getByRole('textbox', { name: i18n.t('aiAct.retention.conversationMemory.label', { ns: 'settings' }) })
     expect(promptLog).toHaveValue('90')
@@ -132,7 +157,9 @@ describe('AiTransparencySettings · AI retention windows (row 21)', () => {
   })
 
   it('writes an edited prompt-log window onto the settings form key', async () => {
+    const user = userEvent.setup()
     render(<AiTransparencySettings />)
+    await user.click(await screen.findByRole('tab', { name: i18n.t('aiAct.retention.title', { ns: 'settings' }) }))
     const promptLog = await screen.findByRole('textbox', { name: i18n.t('aiAct.retention.promptLog.label', { ns: 'settings' }) })
     fireEvent.change(promptLog, { target: { value: '120' } })
     fireEvent.blur(promptLog)

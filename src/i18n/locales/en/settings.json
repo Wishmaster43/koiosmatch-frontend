@@ -64,7 +64,8 @@
     "appointments": "Appointments",
     "workflows": "Workflows",
     "reports": "Reports",
-    "candidates": "Candidates"
+    "candidates": "Candidates",
+    "conversations": "Conversations"
   },
   "nav": {
     "candidate_display": "Table display",
@@ -1217,7 +1218,8 @@
     },
     "missingTargetHint": "Choose a person or role to escalate to, or clear 'Escalate after' to turn it off.",
     "daysUnit": "days",
-    "catalogUnavailable": "The signal catalogue could not be loaded. Only the four default signals are shown."
+    "catalogUnavailable": "The signal catalogue could not be loaded. Only the four default signals are shown.",
+    "groupOther": "Other"
   },
   "billing": {
     "usage": {
@@ -2653,7 +2655,13 @@
     "phasesTitle": "Visible for phase",
     "statusesTitle": "Hide for deployability status",
     "typesTitle": "Visible for contract form",
-    "vacancyStatusesTitle": "Vacancy statuses in the tab"
+    "vacancyStatusesTitle": "Vacancy statuses in the tab",
+    "tabs": {
+      "phases": "Phase",
+      "statuses": "Deployability",
+      "types": "Contract form",
+      "vacancy_statuses": "Vacancy status"
+    }
   },
   "candidateTab": {
     "title": "Find-candidates tab on vacancies",
@@ -2684,6 +2692,14 @@
       "includeExpiringPlacementsHint": "Candidates who are placed right now but whose match ends within the configured number of days also count as a lead.",
       "expiringWithinDaysLabel": "Number of days",
       "expiringWithinDaysHint": "How many days ahead an expiring match already counts as a lead (1–365)."
+    },
+    "tabs": {
+      "vacancy_statuses": "Vacancy status",
+      "candidate_statuses": "Deployability",
+      "contract_forms": "Contract form",
+      "countable_statuses": "Leads count",
+      "radius_function": "Radius & function",
+      "exclusions": "Exclusions"
     }
   },
   "viewConfig": {
@@ -3488,7 +3504,10 @@
     "urlLabel": "Custom career site URL",
     "urlHint": "Absolute URL with {ref} placeholder where the vacancy number should appear, for example https://careers.example.com/jobs/{ref}",
     "urlInvalid": "Use an absolute URL containing {ref}.",
-    "urlPlaceholder": "https://jobs.example.com/vacancy/{ref}"
+    "urlPlaceholder": "https://jobs.example.com/vacancy/{ref}",
+    "tabs": {
+      "settings": "Settings"
+    }
   },
   "caoSettings": {
     "title": "Collective agreements (CLA)",
@@ -4389,6 +4408,9 @@
         "label": "Koios chat conversation memory",
         "description": "How many days of earlier conversations count as context for the assistant. Zero means no memory."
       }
+    },
+    "tabs": {
+      "principles": "Principles"
     }
   },
   "limits": {

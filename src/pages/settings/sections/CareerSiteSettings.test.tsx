@@ -5,6 +5,9 @@
  * the PublicUrlsCard wiring: the `active` flag it derives from the coerced setting
  * value reaches the card (own dedicated tests in careerSite/PublicUrlsCard.test.tsx
  * cover the card's own four states in depth).
+ *
+ * SUB-TABS (13-09): the screen now splits into "Settings" (default tab) and
+ * "Public URLs" — the public-URLs assertions below click into that second tab first.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
@@ -99,19 +102,42 @@ describe('CareerSiteSettings — the career_site_url field', () => {
 })
 
 describe('CareerSiteSettings — the public URLs card', () => {
-  it('renders the site-info URL live regardless of the toggle state', () => {
+  it('renders the site-info URL live regardless of the toggle state', async () => {
+    const user = userEvent.setup()
     render(<CareerSiteSettings />)
+    // SUB-TABS: the public-URLs card lives under its own tab now.
+    await user.click(screen.getByRole('tab', { name: t('careerSite.urls.title') }))
     expect(screen.getByText(`${API_BASE}/public/yesway/site`)).toBeInTheDocument()
   })
 
-  it('marks the gated routes with the inactive notice while the toggle is off', () => {
+  it('marks the gated routes with the inactive notice while the toggle is off', async () => {
+    const user = userEvent.setup()
     render(<CareerSiteSettings />)
+    await user.click(screen.getByRole('tab', { name: t('careerSite.urls.title') }))
     expect(screen.getAllByText(t('careerSite.urls.inactiveNotice')).length).toBeGreaterThan(0)
   })
 
-  it('drops the inactive notice once the toggle is on', () => {
+  it('drops the inactive notice once the toggle is on', async () => {
+    const user = userEvent.setup()
     blobRef.current = { career_site_active: true }
     render(<CareerSiteSettings />)
+    await user.click(screen.getByRole('tab', { name: t('careerSite.urls.title') }))
     expect(screen.queryByText(t('careerSite.urls.inactiveNotice'))).not.toBeInTheDocument()
+  })
+})
+
+describe('CareerSiteSettings — sub-tabs (13-09)', () => {
+  it('defaults to the settings tab, with the toggle and URL field visible', () => {
+    render(<CareerSiteSettings />)
+    expect(screen.getByRole('tab', { name: t('careerSite.tabs.settings') })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('switch')).toBeInTheDocument()
+  })
+
+  it('switches to the public-URLs tab on click, hiding the settings fields', async () => {
+    const user = userEvent.setup()
+    render(<CareerSiteSettings />)
+    await user.click(screen.getByRole('tab', { name: t('careerSite.urls.title') }))
+    expect(screen.queryByRole('switch')).not.toBeInTheDocument()
+    expect(screen.getByText(t('careerSite.urls.subtitle'))).toBeInTheDocument()
   })
 })

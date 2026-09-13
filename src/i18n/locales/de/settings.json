@@ -64,7 +64,8 @@
     "appointments": "Termine",
     "workflows": "Workflows",
     "reports": "Berichte",
-    "candidates": "Kandidaten"
+    "candidates": "Kandidaten",
+    "conversations": "Gespräche"
   },
   "nav": {
     "candidate_display": "Tabellenansicht",
@@ -957,7 +958,8 @@
     },
     "missingTargetHint": "Wählen Sie eine Person oder Rolle zum Eskalieren, oder leeren Sie \"Eskalieren nach\", um es auszuschalten.",
     "daysUnit": "Tage",
-    "catalogUnavailable": "Der Signalkatalog konnte nicht geladen werden. Nur die vier Standardsignale werden angezeigt."
+    "catalogUnavailable": "Der Signalkatalog konnte nicht geladen werden. Nur die vier Standardsignale werden angezeigt.",
+    "groupOther": "Sonstiges"
   },
   "billing": {
     "usage": {
@@ -2631,7 +2633,13 @@
     "phasesTitle": "Sichtbar bei Phase",
     "statusesTitle": "Ausblenden bei Einsatzbereitschaft",
     "typesTitle": "Sichtbar bei Vertragsform",
-    "vacancyStatusesTitle": "Stellenstatus im Tab"
+    "vacancyStatusesTitle": "Stellenstatus im Tab",
+    "tabs": {
+      "phases": "Phase",
+      "statuses": "Verfügbarkeit",
+      "types": "Vertragsform",
+      "vacancy_statuses": "Stellenstatus"
+    }
   },
   "candidateTab": {
     "title": "Kandidatensuche-Tab bei Stellen",
@@ -2662,6 +2670,14 @@
       "includeExpiringPlacementsHint": "Kandidaten, die aktuell platziert sind, deren Match aber innerhalb der eingestellten Tage endet, zählen ebenfalls als Lead.",
       "expiringWithinDaysLabel": "Anzahl Tage",
       "expiringWithinDaysHint": "Wie viele Tage im Voraus ein auslaufender Match bereits als Lead zählt (1–365)."
+    },
+    "tabs": {
+      "vacancy_statuses": "Stellenstatus",
+      "candidate_statuses": "Verfügbarkeit",
+      "contract_forms": "Vertragsform",
+      "countable_statuses": "Zählung",
+      "radius_function": "Radius & Funktion",
+      "exclusions": "Ausschlüsse"
     }
   },
   "viewConfig": {
@@ -3488,7 +3504,10 @@
     "urlLabel": "Benutzerdefinierte Karrieresite-URL",
     "urlHint": "Absolute URL mit {ref} Platzhalter an der Stelle der Stellennummer, zum Beispiel https://karrieren.example.de/stellen/{ref}",
     "urlInvalid": "Verwenden Sie eine absolute URL mit {ref}.",
-    "urlPlaceholder": "https://karriere.beispiel.de/stelle/{ref}"
+    "urlPlaceholder": "https://karriere.beispiel.de/stelle/{ref}",
+    "tabs": {
+      "settings": "Einstellungen"
+    }
   },
   "caoSettings": {
     "title": "Tarifverträge",
@@ -4389,6 +4408,9 @@
         "label": "Gesprächsgedächtnis Koios-Chat",
         "description": "Wie viele Tage frühere Gespräche als Kontext für den Assistenten zählen. Null bedeutet kein Gedächtnis."
       }
+    },
+    "tabs": {
+      "principles": "Grundsätze"
     }
   },
   "limits": {

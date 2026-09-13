@@ -64,7 +64,8 @@
     "appointments": "Appuntamenti",
     "workflows": "Workflow",
     "reports": "Report",
-    "candidates": "Candidati"
+    "candidates": "Candidati",
+    "conversations": "Conversazioni"
   },
   "nav": {
     "candidate_display": "Visualizzazione tabella",
@@ -1217,7 +1218,8 @@
     },
     "missingTargetHint": "Scegli una persona o un ruolo a cui escalare, oppure svuota 'Escala dopo' per disattivare.",
     "daysUnit": "giorni",
-    "catalogUnavailable": "Impossibile caricare il catalogo dei segnali. Vengono mostrati solo i quattro segnali predefiniti."
+    "catalogUnavailable": "Impossibile caricare il catalogo dei segnali. Vengono mostrati solo i quattro segnali predefiniti.",
+    "groupOther": "Altro"
   },
   "billing": {
     "usage": {
@@ -2653,7 +2655,13 @@
     "phasesTitle": "Visibile per fase",
     "statusesTitle": "Nascondi per disponibilità",
     "typesTitle": "Visibile per tipo di contratto",
-    "vacancyStatusesTitle": "Stati posizione nella scheda"
+    "vacancyStatusesTitle": "Stati posizione nella scheda",
+    "tabs": {
+      "phases": "Fase",
+      "statuses": "Disponibilità",
+      "types": "Tipo di contratto",
+      "vacancy_statuses": "Stato posizione"
+    }
   },
   "candidateTab": {
     "title": "Scheda Cerca candidati sulle posizioni",
@@ -2684,6 +2692,14 @@
       "includeExpiringPlacementsHint": "I candidati attualmente collocati ma il cui match scade entro il numero di giorni impostato contano anch'essi come lead.",
       "expiringWithinDaysLabel": "Numero di giorni",
       "expiringWithinDaysHint": "Quanti giorni prima un match in scadenza conta già come lead (1-365)."
+    },
+    "tabs": {
+      "vacancy_statuses": "Stato posizione",
+      "candidate_statuses": "Disponibilità",
+      "contract_forms": "Tipo di contratto",
+      "countable_statuses": "Conteggio",
+      "radius_function": "Raggio e funzione",
+      "exclusions": "Esclusioni"
     }
   },
   "viewConfig": {
@@ -3489,7 +3505,10 @@
     "urlLabel": "URL del sito carriere personalizzato",
     "urlHint": "URL assoluto con il placeholder {ref} dove deve apparire il numero di posizione, ad esempio https://carriere.example.it/offerte/{ref}",
     "urlInvalid": "Utilizzare un URL assoluto contenente {ref}.",
-    "urlPlaceholder": "https://lavoro.esempio.it/annuncio/{ref}"
+    "urlPlaceholder": "https://lavoro.esempio.it/annuncio/{ref}",
+    "tabs": {
+      "settings": "Impostazioni"
+    }
   },
   "caoSettings": {
     "title": "CCNL",
@@ -4390,6 +4409,9 @@
         "label": "Memoria delle conversazioni della chat Koios",
         "description": "Quanti giorni di conversazioni precedenti contano come contesto per l'assistente. Zero significa nessuna memoria."
       }
+    },
+    "tabs": {
+      "principles": "Principi"
     }
   },
   "limits": {
