@@ -28,7 +28,7 @@ import { dateRelativeFieldLabel } from './dateRelativeFieldOptions'
 // Localized short day/month names from Intl. `dayIndex` is Sunday=0 (Intl/Date
 // convention); `dayNameIso` below is the ISO-weekday (Monday=1..Sunday=7) wrapper
 // the schedule fields actually use, so callers never hand-roll the 7→0 remap.
-export const dayName   = (locale: string, dayIndex: number) => new Date(Date.UTC(2024, 0, 7 + dayIndex)).toLocaleDateString(locale, { weekday: 'short', timeZone: 'UTC' })
+const dayName   = (locale: string, dayIndex: number) => new Date(Date.UTC(2024, 0, 7 + dayIndex)).toLocaleDateString(locale, { weekday: 'short', timeZone: 'UTC' })
 export const monthName = (locale: string, m: number) => new Date(Date.UTC(2024, m, 1)).toLocaleDateString(locale, { month: 'short', timeZone: 'UTC' })
 // ISO weekday (Monday=1 .. Sunday=7) → localized short name.
 export const dayNameIso = (locale: string, iso: number) => dayName(locale, iso === 7 ? 0 : iso)

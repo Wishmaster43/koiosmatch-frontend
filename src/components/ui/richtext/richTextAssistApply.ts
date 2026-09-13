@@ -20,7 +20,7 @@ export function escapeHtml(s: string): string {
 }
 
 // Plain prose → one <p> per non-empty line/paragraph.
-export function textToHtml(text: string): string {
+function textToHtml(text: string): string {
   return text.split(/\n+/).map(line => line.trim()).filter(Boolean)
     .map(line => `<p>${escapeHtml(line)}</p>`).join('')
 }

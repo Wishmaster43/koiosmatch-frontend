@@ -27,11 +27,11 @@ export const CV_POLL_TIMEOUT_MS = 90000
 // Mirrors ParseCvRequest's `mimes:pdf,jpg,jpeg,png,gif,webp,docx,xlsx` + `max:10240` (KB).
 // Client-side is UX only — the server re-validates, and CvParsingService even
 // re-checks the PDF magic bytes for the pdf case (§7).
-export const CV_MAX_BYTES = 10 * 1024 * 1024
+const CV_MAX_BYTES = 10 * 1024 * 1024
 // Extensions accepted by the backend, used both for the file-picker `accept` attribute
 // and for the client-side pre-flight guard (name-based, since MIME sniffing is unreliable
 // across browsers/OSes for these types).
-export const CV_ACCEPT_EXTENSIONS = ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'docx', 'xlsx'] as const
+const CV_ACCEPT_EXTENSIONS = ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'docx', 'xlsx'] as const
 // Dotted-extension list for the <input accept> attribute — a string of suffixes, not MIME
 // types (the name used to say MIME while holding extensions; renamed to match reality).
 export const CV_ACCEPT_ATTR = CV_ACCEPT_EXTENSIONS.map((ext) => `.${ext}`).join(',')
@@ -45,7 +45,7 @@ export const CV_TEXT_MIN_CHARS = 30
 export const CV_TEXT_MAX_CHARS = 50000
 
 /** Every message this hook can produce, as literal i18n keys (greppable, one place). */
-export const CV_ERROR_KEYS = {
+const CV_ERROR_KEYS = {
   notPdf: 'modal.cv.error.notPdf',
   tooLarge: 'modal.cv.error.tooLarge',
   throttled: 'modal.cv.error.throttled',

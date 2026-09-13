@@ -40,18 +40,6 @@ function lazyFor(slug: string): LazyExoticComponent<IconComponent> {
   return Icon
 }
 
-/**
- * The lucide component for a slug, or null when the value is emoji/free text. The house
- * set returns a static component; any other lucide slug returns a lazy one, so a caller
- * that renders it must sit under a Suspense boundary (LookupIcon below brings its own).
- */
-export function lucideFor(icon?: string | null): IconComponent | null {
-  if (!icon) return null
-  const slug = icon.trim().toLowerCase()
-  if (STATIC_ICONS[slug]) return STATIC_ICONS[slug]
-  return slug in dynamicIconImports ? lazyFor(slug) : null
-}
-
 // Renders the actual icon for a lookup: any lucide slug, or the raw value (emoji/free text) as-is.
 export default function LookupIcon({ icon, size = 13, color }: { icon?: string | null; size?: number; color?: string }) {
   if (!icon) return null

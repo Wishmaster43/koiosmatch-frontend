@@ -16,7 +16,7 @@ import Button from './Button'
 // ghost sm Button's own footprint — and the X's distance from the trigger's right
 // edge (clear of the chevron).
 export const CLEAR_BUTTON_SIZE = 28
-export const CLEAR_BUTTON_RIGHT = 22
+const CLEAR_BUTTON_RIGHT = 22
 
 interface SelectClearButtonProps {
   // The trigger's id; the button takes `${id}-clear` so tests and labels can reference it.

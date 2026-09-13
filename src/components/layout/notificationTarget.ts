@@ -22,13 +22,13 @@ export interface NotificationTarget { page: string; id: string; intent?: Record<
 // action_status values a workflow-run notification ever carries — 'cancelled'/no-run
 // stay null server-side and never reach the FE. An unknown/unlisted value must render
 // nothing rather than a raw un-translated string.
-export const KNOWN_ACTION_STATUSES = ['done', 'pending', 'failed'] as const
+const KNOWN_ACTION_STATUSES = ['done', 'pending', 'failed'] as const
 export type KnownActionStatus = (typeof KNOWN_ACTION_STATUSES)[number]
 
 // K-192: next_action is now a KEY, not prose — the only two values a workflow-run
 // notification ever carries (NotificationActionStatus::fromRunStatus, backend).
 // An unknown/unlisted value must render nothing, never the raw key.
-export const KNOWN_NEXT_ACTIONS = ['auto_processing', 'check_followup_task'] as const
+const KNOWN_NEXT_ACTIONS = ['auto_processing', 'check_followup_task'] as const
 export type KnownNextAction = (typeof KNOWN_NEXT_ACTIONS)[number]
 
 // Parse the backend-resolved hash deep link ("#candidates?open=42" or
@@ -148,7 +148,7 @@ export function buildNotificationDeepLink(target: NotificationTarget): string {
 // signed URL (meta.download_url), not a record target — resolved separately so
 // the {page,id} model stays untouched. Only http(s) strings pass; anything else
 // leaves the row non-clickable (§3 no fake affordances).
-export const CUSTOM_HREF_TYPES: Record<string, (meta: Record<string, unknown>) => string | null> = {
+const CUSTOM_HREF_TYPES: Record<string, (meta: Record<string, unknown>) => string | null> = {
   'documents.zip_ready': (meta) =>
     typeof meta.download_url === 'string' && /^https?:\/\//i.test(meta.download_url) ? meta.download_url : null,
 }

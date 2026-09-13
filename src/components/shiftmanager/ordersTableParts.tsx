@@ -16,7 +16,7 @@ export const PAD = (n: number) => String(n).padStart(2, '0')
 
 // Shift status → badge colours. Label = t('orders.status.<key>').
 /* eslint-disable no-restricted-syntax -- fixed status→colour mapping (DATA), mirrors the lookup-colour pattern used elsewhere; these shades have no exact token equivalent */
-export const STATUS_LABELS: Record<string, { bg: string; color: string }> = {
+const STATUS_LABELS: Record<string, { bg: string; color: string }> = {
   open:       { bg: '#F0F9FF', color: '#0369A1' },
   prognosis:  { bg: '#F5F3FF', color: '#6D28D9' },
   completed:  { bg: 'var(--color-success-bg)', color: 'var(--color-on-success-bg)' },

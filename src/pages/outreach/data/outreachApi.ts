@@ -33,13 +33,6 @@ export const deleteCampaign = (id: string) => api.delete(`/outreach-campaigns/${
 // {id}/restore, gated outreach.update). Returns the fresh campaign detail.
 export const restoreCampaign = (id: string) => api.post(`/outreach-campaigns/${id}/restore`).then(unwrap)
 
-// (Re)fill targets from a pool; idempotent on the backend. Intentionally NOT
-// unwrapped (mirrors assignTargets below) — the backend returns the fresh
-// campaign `data` plus `meta.added` (how many targets got created), and a
-// future caller needs both, not just the record.
-export const generateTargets = (id: string, poolId?: string) =>
-  api.post(`/outreach-campaigns/${id}/generate`, poolId ? { pool_id: poolId } : {}).then((r) => r.data)
-
 // Target-status/outcome/assignee distribution for a campaign (G31). Accepts an
 // optional AbortSignal so an entity-keyed load effect can cancel a stale request.
 export const getCampaignStats = (id: string, opts?: { signal?: AbortSignal }) =>

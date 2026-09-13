@@ -341,5 +341,3 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
     </div>
   )
 }
-
-export default ZzpTab

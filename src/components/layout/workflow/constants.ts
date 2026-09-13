@@ -46,7 +46,7 @@ export const VALUELESS_OPERATORS = ['empty', 'not_empty']
 
 // Legacy persisted operator values (pre-2026-07-09 configs) → backend keys.
 // They never functioned server-side, so normalising on read loses nothing.
-export const LEGACY_OPERATOR_MAP: Record<string, string> = {
+const LEGACY_OPERATOR_MAP: Record<string, string> = {
   '≠': '!=', '≥': '>=', '≤': '<=',
   'bevat': 'contains', 'bevat niet': 'not_contains',
   'is leeg': 'empty', 'is gevuld': 'not_empty',

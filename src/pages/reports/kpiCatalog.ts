@@ -135,7 +135,7 @@ export const REPORT_KPI_FAMILY: Partial<Record<ReportKpiScopeId, ReportKpiFamily
 // exactly — same axes, same labels, same underlying report component; only the
 // STORED ORDER (its own settings key) and the live data (server-side `phase`
 // filter) differ per position.
-export const REPORT_KPI_AXIS_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatalogEntry[]>> = {
+const REPORT_KPI_AXIS_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatalogEntry[]>> = {
   // 'candidates'/'leads' spares (REPORTS-KPI-SPARE-3): single-segment pseudo-axes
   // built from the report's own by_owner/by_branch/by_source distributions
   // (GET /reports/candidates already returns their real 'none' sentinel rows —
@@ -174,7 +174,7 @@ export const REPORT_KPI_AXIS_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatalo
 // always the report's current default order (see getReportKpiDefaultOrder below,
 // which slices to that fixed length) — a spare is only ever appended, never
 // inserted before position nine, so the default strip never silently changes.
-export const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatalogEntry[]>> = {
+const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatalogEntry[]>> = {
   // The candidates suite (CandidatesReport::kpis, K-169 family) — nine real
   // attention/flow KPIs, each sharing its predicate with its own drill.
   candidates: [

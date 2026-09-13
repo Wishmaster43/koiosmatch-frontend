@@ -11,14 +11,14 @@ import ProductivityByRecruiterBars from './ProductivityByRecruiterBars'
 import FillRateTimeseriesLine from './FillRateTimeseriesLine'
 
 // K-173 fase 6 — the recruitment_manager team-load block, now a registry tile.
-export const recruiterLoadTile: FeedTileEntry = {
+const recruiterLoadTile: FeedTileEntry = {
   blockId: 'block.recruiterLoad',
   feedKey: 'recruiter_load',
   hasData: arrayFeed('recruiter_load'),
   render: (dash, ctx) => <RecruiterLoad rows={dash.recruiter_load!} onNavigate={ctx.onNavigate} />,
 }
 
-export const fillRateTimeseriesTile: FeedTileEntry = {
+const fillRateTimeseriesTile: FeedTileEntry = {
   blockId: 'block.fillRateTimeseries',
   feedKey: 'fill_rate_timeseries',
   // Custom predicate: the feed can be a non-empty array of all-null-rate points

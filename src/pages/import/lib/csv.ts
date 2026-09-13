@@ -21,11 +21,6 @@ export interface ParsedCsv {
 // source file — mirrors CsvFile.php stripping the same mark Excel writes.
 const UTF8_BOM = String.fromCharCode(0xfeff)
 
-// Hard caps mirrored from the backend so the upload step can warn BEFORE a POST
-// that would 422 anyway (koiosmatch-api CsvFile::MAX_ROWS, ImportUploadRequest 'max:5120').
-export const MAX_IMPORT_ROWS = 2000
-export const MAX_IMPORT_FILE_BYTES = 5120 * 1024
-
 // Mirrors CsvFile::normaliseHeader — lower-case, accents stripped, non-alphanumeric
 // runs collapsed to one underscore, so "Klant Naam " / "Klant-Naam" / "café" all
 // compare equal to the backend's own column keys.

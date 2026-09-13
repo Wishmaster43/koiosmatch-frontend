@@ -30,7 +30,6 @@
  */
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { TFunction } from 'i18next'
 import { AlertTriangle } from 'lucide-react'
 import { useConfirm } from '@/hooks/useConfirm'
 import EntityImportCard from '@/components/import/EntityImportCard'
@@ -41,14 +40,6 @@ import type { useImportWizard } from '@/pages/settings/shared'
 // The three per-entity importers this card can drive — verified against the
 // backend's ImportRegistry::IMPORTERS keys, never guessed from a display label.
 export type SubEntityImportEntity = 'locations' | 'departments' | 'contacts'
-
-// Shared title text for the CollapsedCard wrapping this card — the three caller
-// modals (Location/Department/Contact) all need the exact same string for the
-// collapsed header, so it lives here once instead of three duplicated t() calls.
-// eslint-disable-next-line react-refresh/only-export-components -- the card and its title helper ship together by design; HMR-nicety warning only (house precedent: FreeEntryMismatchDialog.jsx)
-export function subEntityImportTitle(t: TFunction, entity: SubEntityImportEntity): string {
-  return t('subModal.import.title', { entity: t(`settings:import.entities.${entity}.label`) })
-}
 
 type Wizard = ReturnType<typeof useImportWizard>
 

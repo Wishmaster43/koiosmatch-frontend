@@ -9,7 +9,7 @@
  * CustomerLocationImporter::rules()'s own docblock) — flagged here for the same reason:
  * a backend change to requiredColumns() needs this list updated too.
  */
-export const REQUIRED_COLUMNS_BY_ENTITY: Record<string, string[]> = {
+const REQUIRED_COLUMNS_BY_ENTITY: Record<string, string[]> = {
   // CustomerImporter::requiredColumns()
   customers: ['naam'],
   // CustomerLocationImporter::requiredColumns()

@@ -15,7 +15,7 @@ import type { Id } from '@/types/common'
 type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 
 // Normalise a skill entry (string, or an object shape some seeds still carry) to plain text.
-export const skillStr = (s: unknown): string => (typeof s === 'string' ? s : ((s as { name?: string; label?: string })?.name ?? (s as { label?: string })?.label ?? ''))
+const skillStr = (s: unknown): string => (typeof s === 'string' ? s : ((s as { name?: string; label?: string })?.name ?? (s as { label?: string })?.label ?? ''))
 
 // The vacancy required-skills list; every change
 // persists immediately (no sibling pencil to ride along with anymore).

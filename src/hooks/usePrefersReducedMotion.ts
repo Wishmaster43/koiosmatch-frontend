@@ -29,5 +29,3 @@ export function usePrefersReducedMotion(): boolean {
 
   return reduced
 }
-
-export default usePrefersReducedMotion

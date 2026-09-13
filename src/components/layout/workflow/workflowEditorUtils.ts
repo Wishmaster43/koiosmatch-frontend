@@ -78,7 +78,7 @@ export function buildVarFields(nodeId: string, out: unknown): WorkflowVarField[]
 // stage_changed and filters a stage change on `trigger_config.conditions.stage_flag`,
 // a FLAG of the stage moved to (is_rejected / is_match) — never a slug, because stage
 // slugs are tenant-configurable (§3B). No application.rejected/hired event exists.
-export const APPLICANT_EVENT_KEYS: Record<string, Record<string, unknown>> = {
+const APPLICANT_EVENT_KEYS: Record<string, Record<string, unknown>> = {
   'nieuwe sollicitatie': { event: 'application.created' },
   'fase gewijzigd':      { event: 'application.stage_changed' },
   'afgewezen':           { event: 'application.stage_changed', conditions: { stage_flag: 'is_rejected' } },

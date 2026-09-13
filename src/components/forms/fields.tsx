@@ -9,12 +9,10 @@ import { useId, cloneElement, isValidElement } from 'react'
 import type { CSSProperties, ReactNode, ReactElement, KeyboardEvent } from 'react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
-import { useTranslation } from 'react-i18next'
 import { fieldInputStyle } from './fieldMetrics'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import { toLocalIsoDate } from '@/lib/localDate'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import Button from '@/components/ui/Button'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 
 /* eslint-disable react-refresh/only-export-components -- the shared form KIT
@@ -221,23 +219,4 @@ export function CheckboxField({ id, checked, onChange, disabled, ...req }: {
  */
 export function AddButton({ onClick, label }: { onClick: () => void; label?: ReactNode }) {
   return <DrawerAddButton onClick={onClick} label={label} />
-}
-
-// Save/Cancel button pair for a form footer, on the house Button variants with translated defaults.
-export function SaveCancel({ onSave, onCancel, saveLabel, cancelLabel }: {
-  onSave: () => void; onCancel: () => void; saveLabel?: ReactNode; cancelLabel?: ReactNode
-}) {
-  const { t } = useTranslation('common')
-  return (
-    <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-      {/* Herhaal-audit r4 finding 2's twin: the inverse --text fill is retired —
-          the primary action of a form footer wears the house Button. */}
-      <Button variant="primary" size="sm" onClick={onSave}>
-        {saveLabel ?? t('save')}
-      </Button>
-      <Button variant="secondary" size="sm" onClick={onCancel}>
-        {cancelLabel ?? t('cancel')}
-      </Button>
-    </div>
-  )
 }

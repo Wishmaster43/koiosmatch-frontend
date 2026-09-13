@@ -67,7 +67,7 @@ const isPersistedId = (id?: Id | null): boolean =>
   (typeof id === 'string' && id.length > 0) || (typeof id === 'number' && id > 0)
 
 /** The experiences a reference may be linked to — persisted rows only. */
-export const linkableExperiences = (experiences: LinkableExperience[]): LinkableExperience[] =>
+const linkableExperiences = (experiences: LinkableExperience[]): LinkableExperience[] =>
   experiences.filter(e => isPersistedId(e.id))
 
 /**

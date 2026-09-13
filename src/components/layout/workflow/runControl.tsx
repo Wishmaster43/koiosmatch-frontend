@@ -16,7 +16,7 @@ export const CANCELLABLE = new Set(['running', 'waiting'])
 
 // Cancel one run. Resolves on success; rejects with the backend's message
 // (e.g. the 422 "already finished") so callers can surface the real reason.
-export async function cancelWorkflowRun(runId: string | number): Promise<void> {
+async function cancelWorkflowRun(runId: string | number): Promise<void> {
   const { default: api } = await import('@/lib/api')
   const { resolveWorkflowBaseURL } = await import('@/lib/workflowApi')
   try {

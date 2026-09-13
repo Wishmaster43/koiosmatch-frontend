@@ -42,7 +42,7 @@ export interface EmergencyContactRelationOption extends LookupOption {
 // UI styling choice, hence the ad-hoc hex (CLAUDE.md §4 DATA exemption). `id`
 // here is a synthetic placeholder (see file header), never a real server row id.
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
-export const DEFAULT_EMERGENCY_CONTACT_RELATIONS: EmergencyContactRelationOption[] = [
+const DEFAULT_EMERGENCY_CONTACT_RELATIONS: EmergencyContactRelationOption[] = [
   { id: 'partner',   value: 'partner',   label: 'Partner',    color: '#6E8FD6' },
   { id: 'ouder',     value: 'ouder',     label: 'Ouder',      color: '#79B58E' },
   { id: 'kind',      value: 'kind',      label: 'Kind',       color: '#DDA071' },

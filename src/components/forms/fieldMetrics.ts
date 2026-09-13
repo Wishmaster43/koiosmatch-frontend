@@ -30,8 +30,8 @@ import { BTN_H } from '@/config/buttonMetrics'
 // The canon numbers.
 export const FIELD_HEIGHT = BTN_H // 34 — matches the one app-wide button height
 export const FIELD_FONT_SIZE = 13
-export const FIELD_RADIUS = 8
-export const FIELD_PADDING_X = 10
+const FIELD_RADIUS = 8
+const FIELD_PADDING_X = 10
 
 // Canon single-line control: text/number/date input, native <select>. Explicit
 // height + box-sizing:border-box makes the rendered box pixel-exact regardless

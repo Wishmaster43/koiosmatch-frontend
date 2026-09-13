@@ -86,7 +86,7 @@ export function findOverlappingMatches(
 }
 
 // A standard full-time week — the threshold for Danny's hours-sum escalation.
-export const FULL_TIME_HOURS_PER_WEEK = 40
+const FULL_TIME_HOURS_PER_WEEK = 40
 
 /**
  * overlapHoursSum — Danny's hours-sum escalation on top of `findOverlappingMatches`.

@@ -70,7 +70,7 @@ export function defaultAvailableFrom(candidate: Candidate): string {
 // Range-overlap test for the "Uren per week" filter — a vacancy carrying NEITHER
 // hours_min NOR hours_max is never excluded (no data to filter on), and a handle at
 // a domain end drops that side's bound entirely (see HOURS_RANGE_MAX).
-export function hoursOverlap(row: VacancySearchRow, [lower, upper]: HoursRange): boolean {
+function hoursOverlap(row: VacancySearchRow, [lower, upper]: HoursRange): boolean {
   if (row.hoursMin == null && row.hoursMax == null) return true
   const vMin = row.hoursMin ?? -Infinity
   const vMax = row.hoursMax ?? Infinity
@@ -82,7 +82,7 @@ export function hoursOverlap(row: VacancySearchRow, [lower, upper]: HoursRange):
 // "Inzetbaar vanaf" filter: keep vacancies whose start_date is on/after the chosen
 // date. A vacancy without its own start_date is never excluded (no data to filter
 // on); date-only string comparison is safe since both sides are ISO 'YYYY-MM-DD'.
-export function afterAvailableFrom(row: VacancySearchRow, chosen: string): boolean {
+function afterAvailableFrom(row: VacancySearchRow, chosen: string): boolean {
   if (!chosen || !row.startDate) return true
   return row.startDate.slice(0, 10) >= chosen
 }

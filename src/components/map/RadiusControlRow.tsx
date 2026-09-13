@@ -11,9 +11,9 @@ import Slider from '@/components/ui/Slider'
 
 // Slider domain: 5km floor (a 0-radius circle is meaningless), 150 ceiling on
 // the slider (the exact input allows up to 300), 5km steps.
-export const RADIUS_SLIDER_MIN = 5
-export const RADIUS_SLIDER_MAX = 150
-export const RADIUS_SLIDER_STEP = 5
+const RADIUS_SLIDER_MIN = 5
+const RADIUS_SLIDER_MAX = 150
+const RADIUS_SLIDER_STEP = 5
 
 // The shared radius row (label + slider + exact-km input); owns the slider
 // domain and clamps a dragged/typed value back onto the 5km floor.

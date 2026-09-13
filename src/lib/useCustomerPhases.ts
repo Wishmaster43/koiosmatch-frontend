@@ -36,7 +36,7 @@ export interface CustomerPhaseOption extends LookupOption {
 // before/without the API. Slugs are the stable English-ish backend values; the
 // labels/colours a tenant sees normally come from the API.
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
-export const DEFAULT_CUSTOMER_PHASES: CustomerPhaseOption[] = [
+const DEFAULT_CUSTOMER_PHASES: CustomerPhaseOption[] = [
   { value: 'prospect', label: 'Prospect', color: '#1B60A9', isCustomer: false, isDefault: true },
   { value: 'customer', label: 'Klant',    color: '#16A34A', isCustomer: true,  isDefault: false },
 ]

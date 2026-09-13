@@ -33,7 +33,7 @@ import type { KoiosChatTurn } from './koiosTypes'
 // half lands) and the records the previous answer named, sent as context so the
 // follow-up resolves against them today. Bounded for data minimisation (§9).
 export const KOIOS_HISTORY_TURNS = 8
-export const KOIOS_CONTEXT_MAX = 5
+const KOIOS_CONTEXT_MAX = 5
 
 // The last turns as [{ role, content }] — user text and assistant answers only, never a
 // welcome/error bubble, never tool steps.

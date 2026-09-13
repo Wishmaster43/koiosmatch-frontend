@@ -265,22 +265,3 @@ export interface BranchRow {
   is_default?: boolean
 }
 
-// BranchChips — read-only soft-tinted chips for a fixed branch set (no toggle):
-// the role-template preview in NewUserModal and, at a glance, "what this user is
-// currently coupled to". Editing itself happens via the shared ChipMultiSelect
-// (components/ui) against the full location list — this is display-only.
-export function BranchChips({ branches, emptyText }: { branches: BranchRow[]; emptyText?: string }) {
-  if (branches.length === 0) return <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{emptyText ?? '—'}</span>
-  return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-      {branches.map(b => (
-        <span key={b.location_id}
-          style={{ padding: '3px 10px', borderRadius: 999, fontSize: 12, fontWeight: 600,
-                   background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)',
-                   border: '1px solid var(--color-primary)' }}>
-          {b.name ?? '—'}
-        </span>
-      ))}
-    </div>
-  )
-}

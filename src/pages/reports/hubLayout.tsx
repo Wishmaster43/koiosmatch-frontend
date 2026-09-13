@@ -9,7 +9,7 @@
 import type { ReactNode } from 'react'
 
 // Fixed content height shared by every hub block (charts are ≤ 240px tall).
-export const HUB_BLOCK_HEIGHT = 260
+const HUB_BLOCK_HEIGHT = 260
 
 // The block title row: title left, optional action right, and ALWAYS the
 // Button-sm height (28px) — a block without an action must not end up 10px

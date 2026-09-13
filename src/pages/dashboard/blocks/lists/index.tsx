@@ -9,23 +9,23 @@ import { WidgetFeedList, RecentCandidatesList, RecentApplicationsList, LeadsPipe
 const listRows = <K extends keyof FeedTileLists>(key: K) => (_dash: unknown, ctx?: { lists?: FeedTileLists }) =>
   (ctx?.lists?.[key]?.length ?? 0) > 0
 
-export const expiringMatchesTile: FeedTileEntry = {
+const expiringMatchesTile: FeedTileEntry = {
   blockId: 'block.expiringMatches', feedKey: 'expiring_matches', hasData: listRows('expiringMatchesRows'),
   render: (_d, ctx) => <WidgetFeedList titleKey="block.expiringMatches" rows={ctx.lists?.expiringMatchesRows ?? []} />,
 }
-export const staleVacanciesTile: FeedTileEntry = {
+const staleVacanciesTile: FeedTileEntry = {
   blockId: 'block.staleVacancies', feedKey: 'stale_vacancies', hasData: listRows('staleVacanciesRows'),
   render: (_d, ctx) => <WidgetFeedList titleKey="block.staleVacancies" rows={ctx.lists?.staleVacanciesRows ?? []} />,
 }
-export const koiosSuggestionsTile: FeedTileEntry = {
+const koiosSuggestionsTile: FeedTileEntry = {
   blockId: 'block.koiosSuggestions', feedKey: 'koios_suggestions', hasData: listRows('koiosSuggestionsRows'),
   render: (_d, ctx) => <WidgetFeedList titleKey="block.koiosSuggestions" rows={ctx.lists?.koiosSuggestionsRows ?? []} />,
 }
-export const recentCandidatesTile: FeedTileEntry = {
+const recentCandidatesTile: FeedTileEntry = {
   blockId: 'list.candidates', feedKey: 'recent', hasData: listRows('recentCandidates'),
   render: (_d, ctx) => <RecentCandidatesList rows={ctx.lists?.recentCandidates ?? []} onNavigate={ctx.onNavigate} />,
 }
-export const recentApplicationsTile: FeedTileEntry = {
+const recentApplicationsTile: FeedTileEntry = {
   blockId: 'list.applications', feedKey: 'recent', hasData: listRows('recentApplications'),
   render: (_d, ctx) => <RecentApplicationsList rows={ctx.lists?.recentApplications ?? []} onNavigate={ctx.onNavigate} />,
 }
@@ -33,11 +33,11 @@ export const leadsPipelineTile: FeedTileEntry = {
   blockId: 'list.leads', feedKey: 'recent', hasData: listRows('recentLeads'),
   render: (_d, ctx) => <LeadsPipelineList rows={ctx.lists?.recentLeads ?? []} onNavigate={ctx.onNavigate} />,
 }
-export const recentRunsTile: FeedTileEntry = {
+const recentRunsTile: FeedTileEntry = {
   blockId: 'list.runs', feedKey: 'ai_runs', hasData: listRows('runs'),
   render: (_d, ctx) => <RecentRunsList rows={ctx.lists?.runs ?? []} onNavigate={ctx.onNavigate} />,
 }
-export const recentConversationsTile: FeedTileEntry = {
+const recentConversationsTile: FeedTileEntry = {
   blockId: 'list.conversations', feedKey: 'conversations', hasData: listRows('conversations'),
   render: (_d, ctx) => <RecentConversationsList rows={ctx.lists?.conversations ?? []} onNavigate={ctx.onNavigate} />,
 }

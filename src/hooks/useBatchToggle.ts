@@ -38,5 +38,3 @@ export function useBatchToggle<T extends string | number>(onToggle?: (value: T) 
   // Queue a batch of values to toggle; an empty batch never triggers a render.
   return (values: T[]) => { if (values.length > 0) setQueue(prev => [...prev, ...values]) }
 }
-
-export default useBatchToggle

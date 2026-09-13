@@ -61,6 +61,3 @@ export function heavyGet(url: string, config: AxiosRequestConfig = {}): Promise<
   inflight.set(key, p)
   return p
 }
-
-/** Test hook: clear all guard state between test cases. */
-export function _resetHeavyGet() { inflight.clear(); cooldown.clear() }

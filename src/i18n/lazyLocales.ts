@@ -25,11 +25,6 @@ export const ALL_NAMESPACES = [...new Set(
   Object.keys(localeModules).map(p => p.match(PATH_RE)?.[2]).filter((n): n is string => !!n),
 )]
 
-// Every locale folder present on disk (drives the language picker + wiring guards).
-export const ALL_LANGUAGES = [...new Set(
-  Object.keys(localeModules).map(p => p.match(PATH_RE)?.[1]).filter((l): l is string => !!l),
-)]
-
 /**
  * Explicit preload of one language (tests, eager warm-ups): delegates to i18next's own
  * loadLanguages(), which goes through the backend above and resolves once every

@@ -46,7 +46,7 @@ export interface ReferenceRelationOption extends LookupOption {
 // UI styling choice, hence the ad-hoc hex (CLAUDE.md §4 DATA exemption). `id`
 // here is a synthetic placeholder (see file header), never a real server row id.
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
-export const DEFAULT_REFERENCE_RELATIONS: ReferenceRelationOption[] = [
+const DEFAULT_REFERENCE_RELATIONS: ReferenceRelationOption[] = [
   { id: 'manager',       value: 'manager',       label: 'Manager',       color: '#6E8FD6' },
   { id: 'collega',       value: 'collega',       label: 'Collega',       color: '#5FB0AC' },
   { id: 'klant',         value: 'klant',         label: 'Klant',         color: '#DDA071' },

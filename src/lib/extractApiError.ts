@@ -65,12 +65,3 @@ export function apiErrorKey(err: unknown): string | null {
   const code = (err as { response?: { data?: ServerErrorBody } })?.response?.data?.code
   return (code && ERROR_CODE_KEYS[code]) ?? null
 }
-
-/**
- * A known-code error is EXPECTED, not a crash: an empty credit balance (402) or a
- * temporary outage (503) is something the recruiter can act on or wait out, so the
- * UI shows it as a calm warning rather than a red failure.
- */
-export function isExpectedApiError(err: unknown): boolean {
-  return apiErrorKey(err) !== null
-}

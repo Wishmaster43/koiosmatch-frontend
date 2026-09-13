@@ -21,7 +21,7 @@ export type DashboardType = typeof DASHBOARD_TYPES[number]
 export const TYPE_PRECEDENCE: DashboardType[] = ['admin', 'management', 'recruitment_manager', 'recruitment', 'backoffice', 'sales_manager', 'sales', 'accountmanager', 'planning', 'readonly']
 
 // Types allowed to switch/preview every role's view (see everything).
-export const SUPER_VIEWS: DashboardType[] = ['admin', 'management']
+const SUPER_VIEWS: DashboardType[] = ['admin', 'management']
 
 // DASHBOARD-KIEZER-1 — types a user may manually PICK from the switcher dropdown.
 // admin/sales/readonly stay resolvable (TYPE_PRECEDENCE) but are not chooser options

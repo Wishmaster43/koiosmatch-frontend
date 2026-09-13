@@ -27,7 +27,7 @@ import { unwrapList } from '@/lib/api'
 // Seed DATA mirroring CandidateLookupSeeder::run() (koiosmatch-api) 1:1 — not a
 // UI styling choice, hence the ad-hoc hex (CLAUDE.md §4 DATA exemption).
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
-export const DEFAULT_WORK_PERMIT_TYPES: LookupOption[] = [
+const DEFAULT_WORK_PERMIT_TYPES: LookupOption[] = [
   { value: 'geen_vergunning_nodig', label: 'Geen vergunning nodig (NL/EU)', color: '#79B58E' },
   { value: 'twv', label: 'Tewerkstellingsvergunning (TWV)', color: '#DDA071' },
   { value: 'gvva', label: 'Gecombineerde vergunning (GVVA)', color: '#6E8FD6' },

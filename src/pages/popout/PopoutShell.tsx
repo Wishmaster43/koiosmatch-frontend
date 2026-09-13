@@ -39,7 +39,7 @@ interface PopoutShellProps {
 
 // Header + notes-area placeholder while the entity identity loads — never a
 // blank window (§3: always handle loading explicitly).
-export function PopoutSkeleton({ loadingLabel }: { loadingLabel: string }) {
+function PopoutSkeleton({ loadingLabel }: { loadingLabel: string }) {
   return (
     <div aria-busy="true" aria-live="polite" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
       <span className="sr-only">{loadingLabel}</span>

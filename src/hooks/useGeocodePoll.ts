@@ -59,7 +59,7 @@ export interface GeocodePoll extends GeocodeSnapshot {
 export const GEOCODE_POLL_DELAYS_MS = [2000, 2000, 3000, 4000, 5000, 6000, 8000, 10000, 10000, 15000, 15000, 20000, 20000, 30000, 30000]
 // A request older than this is not resumed on mount: it failed server-side (a 402 from
 // the provider, say) and polling it again on every open would never land anything.
-export const GEOCODE_RESUME_WINDOW_MS = 10 * 60 * 1000
+const GEOCODE_RESUME_WINDOW_MS = 10 * 60 * 1000
 
 // Server → snapshot: coordinates tolerant of Laravel decimal strings (§10), provenance in camelCase.
 function readSnapshot(raw: RawGeocodeRecord | null | undefined): GeocodeSnapshot {

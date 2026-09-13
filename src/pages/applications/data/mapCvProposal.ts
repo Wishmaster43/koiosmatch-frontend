@@ -53,7 +53,7 @@ export type CvProposalScalarField = (typeof CV_PROPOSAL_SCALAR_FIELDS)[number]
  * 02-08). Reading `postcode` off the candidate response would make a filled
  * postcode look empty and promise a fill that the applier then skips.
  */
-export const CANDIDATE_FIELD_ALIASES: Partial<Record<CvProposalScalarField, string>> = {
+const CANDIDATE_FIELD_ALIASES: Partial<Record<CvProposalScalarField, string>> = {
   postcode: 'postal_code',
 }
 

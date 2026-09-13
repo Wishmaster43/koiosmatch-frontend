@@ -200,7 +200,7 @@ export function mapApplication(a: ApiApplication = {}, funnelTypes: LookupItem[]
  * per-entry reads so a missing field never crashes the strip; `days` stays
  * null (never fabricated) when the backend omits it.
  */
-export function mapStageDurations(raw?: ApiApplication['stage_durations']): ApplicationStageDuration[] {
+function mapStageDurations(raw?: ApiApplication['stage_durations']): ApplicationStageDuration[] {
   return (raw ?? []).map(s => ({
     stageKey: s.stage_key ?? '',
     stageLabel: s.stage_label ?? '',
