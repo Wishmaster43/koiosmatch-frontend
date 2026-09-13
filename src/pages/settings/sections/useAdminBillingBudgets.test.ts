@@ -3,7 +3,7 @@
  * Tests: GET route + drafts built per package through the given mapper;
  * error phase on a rejected GET; no state write after unmount (alive guard).
  */
-import { renderHook, waitFor } from '@testing-library/react'
+import { renderHook, waitFor, act } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import api from '@/lib/api'
 import { useAdminBillingBudgets } from './useAdminBillingBudgets'
@@ -81,8 +81,12 @@ describe('useAdminBillingBudgets', () => {
 
     vi.mocked(api.get).mockReturnValueOnce(apiPromise as unknown as ReturnType<typeof api.get>)
 
-    const draftFromEntry = () => ({})
+    // A spy: the hook only builds drafts from a response it is still alive to receive.
+    const draftFromEntry = vi.fn(() => ({}))
     const { unmount } = renderHook(() => useAdminBillingBudgets(draftFromEntry))
+
+    // The initial-state seed calls it once per package; a live response would add three more.
+    const callsAtMount = draftFromEntry.mock.calls.length
 
     // Unmount before the API call resolves
     unmount()
@@ -95,10 +99,8 @@ describe('useAdminBillingBudgets', () => {
       } as AdminBillingBudgetsResponse,
     })
 
-    // Wait a bit to ensure no state updates would have happened
-    await new Promise((resolve) => setTimeout(resolve, 100))
-
-    // If the test gets here without errors, the alive guard worked
-    expect(true).toBe(true)
+    // Flush the resolved promise chain; the guard must have dropped the response.
+    await act(async () => { await apiPromise })
+    expect(draftFromEntry).toHaveBeenCalledTimes(callsAtMount)
   })
 })

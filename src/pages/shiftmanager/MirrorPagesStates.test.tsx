@@ -4,6 +4,7 @@
  * shared ErrorBanner and its retry really refetches; while loading, the table is told so.
  */
 import { render, screen, waitFor } from '@testing-library/react'
+import type { ReactElement } from 'react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -29,7 +30,7 @@ const sm = (key: string) => i18n.t(key, { ns: 'shiftmanager' })
 const mockedGet = vi.mocked(api.get)
 
 // A fresh client per render: no retries, so a rejected fetch surfaces as isError at once.
-const renderPage = (Page: () => JSX.Element) => {
+const renderPage = (Page: () => ReactElement) => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(<QueryClientProvider client={client}><Page /></QueryClientProvider>)
 }

@@ -46,6 +46,8 @@ describe('useVacancyBulkActions · bulkMutate optimistic/reconcile', () => {
     act(() => r.result.current.setSelectedIds(new Set([1, 2])))
     act(() => r.result.current.actions.bulkSetStatus('open'))
     expect(status(r, 1)).toBe('open')                       // optimistic
+    // §13: the seam — method, route and body — not merely that the toast fired.
+    expect(post).toHaveBeenCalledWith('/vacancies/bulk/status', { vacancy_ids: [1, 2], status: 'open' })
     await waitFor(() => expect(notify).toHaveBeenCalledWith('success', 'bulk.statusChanged'))
     expect(status(r, 1)).toBe('open')
     expect(status(r, 2)).toBe('open')
@@ -127,6 +129,8 @@ describe('useVacancyBulkActions · archive + tag removal', () => {
     const r = harness()
     act(() => r.result.current.setSelectedIds(new Set([1, 2])))
     act(() => r.result.current.actions.bulkRemoveTag('x'))
+    // §13: the tag-removal request itself is what the bulk bar owes the API.
+    expect(post).toHaveBeenCalledWith('/vacancies/bulk/tags/remove', { vacancy_ids: [1, 2], tag: 'x' })
     await waitFor(() => expect(notify).toHaveBeenCalledWith('success', 'bulk.tagRemoved'))
     expect(tagsOf(r, 1)).toEqual([])      // confirmed
     expect(tagsOf(r, 2)).toEqual(['x'])   // skipped → reverted
