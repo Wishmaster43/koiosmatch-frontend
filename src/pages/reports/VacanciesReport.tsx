@@ -33,14 +33,14 @@ import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, VacancyReportRow, CandidateTimeseriesPoint } from '@/types/analytics'
 import { useOrderedReportKpis } from './hooks/useOrderedReportKpis'
 import { useReportCompareData } from './hooks/useReportCompareData'
-import ReportCompareMetric from './ReportCompareMetric'
+import { totalCompareSubFor } from './lib/kpiCompareSub'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
-import { renderKpiValue } from './renderKpiValue'
-import { serverKpiSpecs, unitMapFor } from './lib/kpiSpecs'
+import { unitAwareServerKpiSpecs, thresholdCaption } from './lib/kpiSpecs'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
 import { reportWindowLabel } from './lib/reportWindowLabel'
+import { makeOpenSegment, makeOpenKpiDrill } from './lib/drillFactories'
 
 // Number cell: emphasised when > 0, muted when zero (mirrors the SM entity tables).
 const numCell = (n: number) => (
@@ -77,12 +77,7 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
   })
   // Portie-4 segment drill: exactly one XOR param per open drill (vacancy rows
   // behind it) — entityPage deep-links the drawer's rows to the vacancy drilldown.
-  const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) => setDrill({
-    title: seg.label, value: seg.count, subtitle: windowSub(),
-    entityPage: 'vacancies',
-    rowsEndpoint: '/reports/vacancies/drill', rowsParams: { ...baseParams, ...xorParam },
-    adviceEndpoint: '/reports/vacancies/advice', adviceParams: { ...baseParams, ...xorParam },
-  })
+  const openSegment = makeOpenSegment({ entityPage: 'vacancies', rowsEndpoint: '/reports/vacancies/drill', adviceEndpoint: '/reports/vacancies/advice', baseParams, windowSub, setDrill })
   // DASH-FEEDS-V3 depth: the aging table's row click, same endpoints/window as
   // openVacancyRow. The headline value is now row.applications (CMBE 0ecd0bf5) —
   // the drawer's rows are ALL applications of the vacancy (rowsEndpoint has no
@@ -137,11 +132,7 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
   // left the strip; VacancyDepthSections still surfaces time-to-fill via its
   // median phase decomposition (ttf_decomposition) — a related but not
   // identical aggregate, flagged for Danny below.
-  const openKpiDrill = (kpi: string, label: string, value: string | number, subtitle?: string) =>
-    gateDrillClick('vacancies', () => setDrill({
-      title: label, value, subtitle: subtitle ?? windowSub(), entityPage: 'vacancies',
-      rowsEndpoint: '/reports/vacancies/kpis/drill', rowsParams: { ...baseParams, kpi },
-    }))
+  const openKpiDrill = makeOpenKpiDrill({ report: 'vacancies', rowsEndpoint: '/reports/vacancies/kpis/drill', baseParams, windowSub, setDrill })
   // Semantic colour only where the number is a SIGNAL and non-zero (§4: colour
   // carries meaning; a calm zero stays uncoloured).
   const KPI_COLOR: Partial<Record<string, string>> = {
@@ -157,21 +148,17 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
   // UNIT-CANON (FRONTEND-CONTRACT §13, REPORT-KPI-STRIP-1): the SERVER's unit
   // field on each kpis[] entry decides the formatting; the local map is only the
   // tolerant fallback for a cached pre-unit envelope (§10) — never the source.
-  const KPI_UNIT_FALLBACK: Partial<Record<string, unknown>> = { fill_rate: 'ratio' }
-  const unitByServerKey = unitMapFor(data?.kpis, KPI_UNIT_FALLBACK)
   // PARITY EXCEPTION (documented BE-side, KPI-VAC-1): customers_count counts
   // DISTINCT customers while its drill lists those customers' VACANCIES (rows
   // ≥ card value) — an explicit subtitle names the divergence instead of the
   // default window text.
-  const kpiByKey = serverKpiSpecs({
+  const kpiByKey = unitAwareServerKpiSpecs({
     data, drill, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t,
     openKpiDrill: (key, label, value) => openKpiDrill(key, label, value, key === 'customers_count' ? t('vacancies.kpi.customersCountDrillSub') : undefined),
-    valueFor: (key, raw, has) => renderKpiValue(raw, has, unitByServerKey.get(key) as string | undefined),
+    unitFallback: { fill_rate: 'ratio' },
     // KPI-DREMPELS-FE-1: threshold cards keep their tenant-threshold caption.
-    subFor: key => key === 'total' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" />
-      : key === 'stale_online' && data?.summary?.advice_stale_days != null ? t('thresholdDays', { n: data.summary.advice_stale_days })
-      : key === 'closing_soon' && data?.summary?.closing_soon_days != null ? t('thresholdDays', { n: data.summary.closing_soon_days })
-      : undefined,
+    subFor: key => totalCompareSubFor(totalCompare)(key)
+      ?? thresholdCaption(t, key, { stale_online: data?.summary?.advice_stale_days, closing_soon: data?.summary?.closing_soon_days }),
   })
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key

@@ -43,7 +43,8 @@ import type { ReportCompareMode } from './reportCompareMode'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
 
-import { buildKpiSpecs } from './lib/kpiSpecs'
+import { camelKpiSpecs } from './lib/kpiSpecs'
+import { makeOpenKpiDrill, makeOpenSegment } from './lib/drillFactories'
 import { reportWindowLabel } from './lib/reportWindowLabel'
 import { segmentClick, ownerClick } from './lib/drillClick'
 import { barData, ownerBarData } from './lib/chartData'
@@ -107,23 +108,13 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
   const [drill, setDrill] = useState<DrillSpec | null>(null)
   const windowSub = () => reportWindowLabel(formatDate, data?.from, data?.to)
   const baseParams = buildReportQueryParams(period, 'applications', filters)
-  const openKpiDrill = (serverKey: string, label: string, value: string | number) =>
-    gateDrillClick('applications', () => setDrill({
-      title: label, value, subtitle: windowSub(), entityPage: 'applications',
-      rowsEndpoint: '/reports/applications/kpis/drill', rowsParams: { ...baseParams, kpi: serverKey },
-    }))
+  const openKpiDrill = makeOpenKpiDrill({ report: 'applications', rowsEndpoint: '/reports/applications/kpis/drill', baseParams, windowSub, setDrill })
 
   // Every XOR param per open drill is ALWAYS layered on top of the report's own
   // active filters (`baseParams`), never just `period`, so the drawer counts the
   // exact same set the bar was drawn from. Rows are applications with an id, so
   // the drawer deep-links to the application drilldown (§3A entityPage).
-  const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
-    setDrill({
-      title: seg.label, value: seg.count, subtitle: windowSub(),
-      entityPage: 'applications',
-      rowsEndpoint: '/reports/applications/drill', rowsParams: { ...baseParams, ...xorParam },
-      adviceEndpoint: '/reports/applications/advice', adviceParams: { ...baseParams, ...xorParam },
-    })
+  const openSegment = makeOpenSegment({ entityPage: 'applications', rowsEndpoint: '/reports/applications/drill', adviceEndpoint: '/reports/applications/advice', baseParams, windowSub, setDrill })
 
   // INTAKE-IN-APPS-1: the intake axis drill (GET /reports/applications/intakes/drill,
   // operation getReportsApplicationsIntakesDrill) — its documented request body only
@@ -209,9 +200,8 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
   // Semantic colour per KPI key, applied only when the count is non-zero (§4:
   // colour carries meaning — a calm zero stays uncoloured). Conversion/avg-days
   // are debatable-meaning metrics and stay uncoloured (per brief).
-  const kpiByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.count]))
-  const kpiByKey = buildKpiSpecs({
-    kpis: kpiByServerKey,
+  const kpiByKey = camelKpiSpecs({
+    data,
     labelKeys: KPI_LABEL_KEYS,
     colors: KPI_COLOR,
     t,

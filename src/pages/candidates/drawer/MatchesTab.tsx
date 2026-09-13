@@ -34,9 +34,9 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
+import { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import DrawerAddButton from './DrawerAddButton'
-import DrawerSearchField from '@/components/drawer/DrawerSearchField'
+import SearchStatusToolbar from '@/components/drawer/SearchStatusToolbar'
 import MatchListBody from '@/components/drawer/MatchListBody'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { MatchCard } from '@/pages/matches/shared'
@@ -87,16 +87,16 @@ export default function MatchesTab({ c, onEdit, onAdd }: { c: Candidate
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {/* Toolbar mirrors the customer's own Matches tab — search left (grows),
           status filter, then "+ Match" (when the host wires onAdd) — ALL ON ONE
-          LINE (Danny live review, 04-08). */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        {/* Toolbar search frame — the shared DrawerSearchField (DRY round 11, MATCHLISTS),
-            with minWidth:120 so it keeps width against the status filter + add button. */}
-        <DrawerSearchField value={search} onChange={setSearch} placeholder={t('matchesView.searchPlaceholder')} minWidth={120} />
-        <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={matchStatuses} />
-        {/* "+ Match" stays a FULL-label named action (05-08 short-label decision
-            list) — never the drawer sub-tab's shortened "Nieuw". */}
-        {onAdd && <DrawerAddButton onClick={onAdd} label={t('work.addMatch')} />}
-      </div>
+          LINE (Danny live review, 04-08). Shared SearchStatusToolbar (DRY round,
+          CANDTABS) — minWidth:120 keeps the search frame's width against the
+          status filter + add button. */}
+      <SearchStatusToolbar
+        search={search} onSearchChange={setSearch} searchPlaceholder={t('matchesView.searchPlaceholder')} searchMinWidth={120}
+        statusValue={statusFilter} onToggleStatus={toggleStatus} statuses={matchStatuses}
+        // "+ Match" stays a FULL-label named action (05-08 short-label decision
+        // list) — never the drawer sub-tab's shortened "Nieuw".
+        trailing={onAdd && <DrawerAddButton onClick={onAdd} label={t('work.addMatch')} />}
+      />
       {/* Column header + empty/populated shell — the shared MatchListBody (DRY
           round 11, MATCHLISTS; column header bar itself promoted KLANTEN 4,
           21-08) so the customer/vacancy tabs render the same bar and shell. */}

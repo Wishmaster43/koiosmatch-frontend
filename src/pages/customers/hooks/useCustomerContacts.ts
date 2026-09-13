@@ -31,6 +31,7 @@ import { mapContact } from '../data/mapCustomer'
 // Shared mount-effect + change-event refetch tail, joined by useCustomerLocations (live)
 // and useCustomerLocations/useCustomerDepartments (archived) (DRY round 11, CUSTTABS2).
 import { useAbortableListLoad } from './useAbortableListLoad'
+import { fetchAbortableList } from './fetchAbortableList'
 import type { Contact, ApiContact } from '@/types/customer'
 import type { Id } from '@/types/common'
 
@@ -285,9 +286,8 @@ export function useCustomerContacts(customerId: Id | undefined) {
   const load = useCallback((signal?: AbortSignal) => {
     if (!customerId) { setContacts([]); setLoading(false); return }
     setLoading(true); setError(false)
-    api.get(`/customers/${customerId}/contacts`, { signal })
-      .then(res => { if (!signal?.aborted) setContacts(dedupeById(unwrapList<ApiContact>(res).rows.map(mapContactRow))) })
-      .catch(err => { if (err?.code !== 'ERR_CANCELED' && !signal?.aborted) setError(true) })
+    fetchAbortableList(`/customers/${customerId}/contacts`, signal,
+      res => dedupeById(unwrapList<ApiContact>(res).rows.map(mapContactRow)), setContacts, setError)
       .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [customerId])
   // Mount-effect + refetch-on-change tail (the merge modal changing this list

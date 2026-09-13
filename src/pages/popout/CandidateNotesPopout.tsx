@@ -6,7 +6,6 @@
  * window. Extracted out of NotesPopoutPage (F5-uitbreiding) so the dispatcher
  * only picks an entity; each entity's own wiring lives in its own thin page.
  */
-import { useEffect } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
@@ -15,6 +14,7 @@ import { useNoteTypes } from '@/lib/useNoteTypes'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import { candidateNoteLabels, useCandidateNotes, useUserNotesThread } from '@/pages/candidates/shared'
 import { useCandidateLite } from './hooks/useCandidateLite'
+import { usePopoutWindowTitle } from './usePopoutWindowTitle'
 
 type AnyProps = Record<string, unknown>
 // Still-untyped JS component — accept any props at the boundary (mirrors CommunicationTab).
@@ -36,12 +36,7 @@ export default function CandidateNotesPopout({ id }: { id: string | undefined })
 
   // Window title — "Notes — <candidate name>" while this popout is open; restored
   // on unmount so a reused/closed OS window slot never keeps a stale title.
-  useEffect(() => {
-    if (!candidate) return
-    const previous = document.title
-    document.title = t('popout.windowTitle', { name: candidate.name })
-    return () => { document.title = previous }
-  }, [candidate, t])
+  usePopoutWindowTitle(candidate, t('popout.windowTitle', { name: candidate?.name }))
 
   // Success — shared NotesTab props, mirroring CommunicationTab's 'notes' sub-tab
   // (empty state is handled BY NotesTab itself via labels.notesEmpty).

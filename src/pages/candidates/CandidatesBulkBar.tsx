@@ -4,15 +4,13 @@
  * holds every bulk mutation. Each action is one config node; the data it needs
  * (users, lookups, tags) comes in via props so this stays a thin assembler.
  */
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Folder, FolderPlus, FolderMinus, Milestone, Briefcase, Tag, Tags, ShieldCheck, UserCheck, Activity, ExternalLink } from 'lucide-react'
 import { BTN_H_SM } from '@/config/buttonMetrics'
 import type { MenuNode } from '@/components/ui/ActionMenu'
 import BulkActionsBar from '@/components/ui/BulkActionsBar'
-import BulkNoteModal from '@/components/ui/BulkNoteModal'
-import { useAuth } from '@/context/AuthContext'
-import { useApps } from '@/context/AppsContext'
+import { useBulkNoteModal } from '@/hooks/useBulkNoteModal'
+import { useBackofficeCouplePermissions } from '@/hooks/useBackofficeCouplePermissions'
 import { archiveNode, mergeNode, ownerNode, geocodeNode, coupleBackofficeNode, noteNode, bulkBarLabels, pickPool } from '@/components/ui/bulk/bulkNodes'
 import { useTenantPools } from './hooks/useCandidatePools'
 import type { CandidatePool } from '@/types/candidate'
@@ -85,19 +83,13 @@ export default function CandidatesBulkBar({
   // Talent pools for the add/remove option lists (fetch lives in the hook, §3).
   const pools = useTenantPools()
   // NOTITIE-RTE-VRAAG-1: bulk note opens the shared rich-text modal.
-  const [noteModalOpen, setNoteModalOpen] = useState(false)
+  const { setOpen: setNoteModalOpen, node: bulkNoteModalNode } = useBulkNoteModal(onAddNote, t)
 
   // SYNC-BULK-1: same permission as the per-record BackofficeLinksTab's `canLink`
   // (BackofficeEntityRegistry maps the "candidate" entity to candidates.update) —
   // never a new permission. Module availability mirrors that same tab's `useApps()`
   // gate so a disabled system (hf/shiftmanager app off for this tenant) is never offered.
-  const auth = useAuth()
-  const hasPermission = auth?.hasPermission ?? (() => false)
-  const apps = useApps()
-  const isAppEnabled = apps?.isAppEnabled ?? (() => false)
-  const canCouple = hasPermission('candidates.update')
-  const showHelloflex = isAppEnabled('hf')
-  const showShiftmanager = isAppEnabled('shiftmanager')
+  const { canCouple, showHelloflex, showShiftmanager } = useBackofficeCouplePermissions('candidates.update')
 
   // Build the menu option lists from props/state.
   const poolOptions = pools.map(p => ({ value: p.id ?? p.name ?? '', label: p.name, color: p.color || 'var(--text-muted)' }))
@@ -199,9 +191,7 @@ export default function CandidatesBulkBar({
         /* eslint-enable huisstijlLegacy/no-restricted-syntax */
       )}
 
-      <BulkNoteModal open={noteModalOpen} onClose={() => setNoteModalOpen(false)}
-        onSubmit={html => { onAddNote(html); setNoteModalOpen(false) }}
-        title={t('bulk.addNote')} submitLabel={t('bulk.noteSubmit')} />
+      {bulkNoteModalNode}
     </BulkActionsBar>
   )
 }

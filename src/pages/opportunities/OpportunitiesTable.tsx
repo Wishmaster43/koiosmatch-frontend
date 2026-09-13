@@ -7,13 +7,12 @@ import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
 import DataTable from '@/components/ui/DataTable'
 import StatusPill from '@/components/ui/StatusPill'
-import SoftChip from '@/components/ui/SoftChip'
+import { lifecycleStatusChip } from '@/lib/lifecycleStatusChip'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import EntityNameCell from '@/components/ui/EntityNameCell'
 import { Mono } from '@/components/ui/typography'
 import { makeKoiosColumn } from '@/components/ui/koiosColumn'
-import { initialsOf } from '@/lib/initials'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useOpportunityAdvice } from '@/lib/useOpportunityAdvice'
 import { useNavigation } from '@/context/NavigationContext'
@@ -97,11 +96,9 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
     { key: 'stage',  header: t('cols.stage'), sortable: true, sortValue: r => r.stage,
       // Phase axis — round chip (StatusPill), mirrors candidates/applications (Danny 2026-07-14).
       render: r => {
-        // ARCHIVE-1: archive state wins over the stage pill (mirrors VacanciesTable/
-        // MatchesTable) — a soft-deleted row shown via include_archived=1 reads as
-        // "Archived", not its stale stage. TRASH-OVERAL-2: pending_erase → "Prullenbak".
-        if (r.lifecycle === 'pending_erase') return <SoftChip label={t('common:trash.view')} color="var(--color-trash)" round />
-        if (r.archived) return <SoftChip label={t('view.archived')} color="var(--text-muted)" round />
+        // ARCHIVE-1/TRASH-OVERAL-2: archive/trash wins over the stage pill (mirrors VacanciesTable/MatchesTable).
+        const lifecycleChip = lifecycleStatusChip(r, t)
+        if (lifecycleChip) return lifecycleChip
         if (!r.stage) return <span style={{ color: 'var(--text-muted)' }}>—</span>
         const stageLabel = seedLabel('opportunityStages', { label: r.stage })
         return colorStage ? <StatusPill label={stageLabel} color={r.stageColor} /> : <span style={{ color: 'var(--text)', fontSize: 12 }}>{stageLabel}</span>
@@ -148,14 +145,7 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
     // toggles between Avatar's own deterministic name-hash palette (on, distinct per
     // owner) and a flat neutral grey (off) — swap in `r.ownerColor` once BE adds it.
     { key: 'owner',  header: t('cols.owner'), sortable: true, sortValue: r => r.owner,
-      render: r => r.owner
-        ? (
-          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Avatar initials={initialsOf(r.owner)} size={18} color={colorOwner ? undefined : NEUTRAL_AVATAR} soft />
-            <span style={{ color: 'var(--text)', fontSize: 12 }}>{r.owner}</span>
-          </span>
-        )
-        : <span style={{ color: 'var(--text-muted)' }}>—</span> },
+      render: r => <EntityNameCell name={r.owner} size={18} color={colorOwner ? undefined : NEUTRAL_AVATAR} /> },
   ]
 
   // No surface-card wrapper: the DataTable renders directly on the page background

@@ -9,6 +9,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import type { AppDateRangeFilter } from '../hooks/useApplicationFilters'
 import { Opt, archivedCheckboxGroup, trashCheckboxGroup, periodCreatedGroup } from '@/lib/filterGroups/common'
+import { filterCategoryLabels } from '@/lib/filterGroups/categories'
 
 type SetBucket = Dispatch<SetStateAction<string>>
 type Tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => void
@@ -44,8 +45,7 @@ interface BuildArgs {
 // (Werving/lifecycle · Organisatie · Weergave — mirrors the candidate axes).
 export function buildApplicationFilterGroups({ t, tog, filters: f, options: o }: BuildArgs) {
   const catLifecycle = t('filters.categories.lifecycle')
-  const catOrg        = t('filters.categories.organisation')
-  const catDisplay     = t('filters.categories.display')
+  const { catOrg, catDisplay } = filterCategoryLabels(t)
 
   // Bucket — single-value dimension (never multi, unlike the tog() groups below):
   // picking a slice REPLACES the current bucket; picking the active one again

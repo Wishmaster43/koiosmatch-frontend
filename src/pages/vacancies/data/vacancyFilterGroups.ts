@@ -9,6 +9,7 @@
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import { pickAgentSegment } from './insightPicks'
+import { filterCategoryLabels } from '@/lib/filterGroups/categories'
 
 interface Opt { value?: string | number; label?: string; count?: number; color?: string }
 
@@ -42,9 +43,7 @@ interface BuildArgs {
 // Pure builder: composes the vacancy filter panel's category groups (status/
 // published/AI-agent/has-applications/archived/geo-radius — all real BE params).
 export function buildVacancyFilterGroups({ t, filters: f, options: o, org }: BuildArgs) {
-  const catGeneral = t('filters.categories.general')
-  const catOrg      = t('filters.categories.organisation')
-  const catDisplay  = t('filters.categories.display')
+  const { catGeneral, catOrg, catDisplay } = filterCategoryLabels(t)
 
   return [
     { key: 'status', type: 'search-select', category: catGeneral, label: t('filters.status'),

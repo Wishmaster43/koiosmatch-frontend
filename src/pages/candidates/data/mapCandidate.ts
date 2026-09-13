@@ -11,20 +11,12 @@ import { initialsOf } from '@/lib/initials'
 import { toCoord } from '@/lib/coords'
 import { backofficeLinkOf } from '@/lib/backofficeLink'
 import { mapKoiosAiAdvice } from '@/lib/koiosAdviceMap'
-import { formatFileSizeMb } from '@/lib/formatters'
+import { formatByteSize } from '@/pages/candidates/data/byteSize'
 import type { ApiCandidate, Candidate, CandidatePool, CandidateBranch, CandidateMatch, Loose } from '@/types/candidate'
 
 // Bytes → human size ("44856" → "44 KB"). Backend sends documents.size in bytes.
 // Note: locale passed by callers so bytes can be rendered with tenant-appropriate formatting.
-const fmtSize = (b: unknown, locale?: string): string => {
-  if (b == null || b === '') return ''
-  const n = Number(b)
-  if (Number.isNaN(n)) return String(b)
-  if (n < 1024)        return `${n} B`
-  if (n < 1024 * 1024) return `${Math.round(n / 1024)} KB`
-  // Format MB with locale-aware grouping — caller passes useNumberFormat().locale
-  return `${formatFileSizeMb(n, locale ?? 'nl-NL')} MB`
-}
+const fmtSize = (b: unknown, locale?: string): string => formatByteSize(b, locale ?? 'nl-NL')
 
 // Newest-first sort for dated lists. Unparseable dates (dummy "period" strings)
 // fall back to keeping order (stable sort); ongoing items sort to the top.

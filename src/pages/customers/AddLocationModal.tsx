@@ -40,7 +40,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MapPin } from 'lucide-react'
-import { useSafePermission } from '@/hooks/useSafePermission'
+import { useSubEntityImportPermissions } from './hooks/useSubEntityImportPermissions'
 import { useProvinces } from '@/hooks/useProvinces'
 import { notifyError } from '@/lib/notify'
 import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
@@ -51,7 +51,7 @@ import { modalColumns, cardBox, cardHead } from '@/components/ui/modalCards'
 import SubEntityImportCard from './SubEntityImportCard'
 import SubEntityModalFrame from './addmodal/SubEntityModalFrame'
 import { subEntityFrameProps } from './addmodal/subEntityFrameProps'
-import CreateErrorAlert from './addmodal/CreateErrorAlert'
+import CreateErrorAlert from '@/components/forms/CreateErrorAlert'
 import { useSubEntitySave } from './hooks/useSubEntitySave'
 import LocationGeneralCard from './addmodal/LocationGeneralCard'
 import LocationAddressCard from './addmodal/LocationAddressCard'
@@ -117,9 +117,7 @@ export default function AddLocationModal({
   onAddContact?: (payload: ContactPayload) => Promise<Contact | void> | void
 }) {
   const { t } = useTranslation(['customers', 'common'])
-  const hasPermission = useSafePermission()
-  const canViewImportTemplate = hasPermission('customers.view')
-  const canRunImport = hasPermission('customers.create')
+  const { canViewImportTemplate, canRunImport } = useSubEntityImportPermissions()
   // Shared state/error management (DRY-SUBENTITY-1): import wizard
   // and 422 error handling extracted into a reusable hook.
   const { isEdit, importWizard, importOpen, setImportOpen, errors, setErrors, createError, setCreateError, handleApiError } =

@@ -16,6 +16,7 @@ import Spinner from '@/components/ui/Spinner'
 import { PageTitle } from '@/components/ui/typography'
 import type { SmDrillItem } from '@/types/shiftmanager'
 import SmReportStatusBadge from '@/components/shiftmanager/SmReportStatusBadge'
+import { distinctSortedValues } from '@/components/reports/distinctSortedValues'
 
 // Renders the KPI blocks and shifts chart, registers filters into the right panel, and opens a drill-down drawer on KPI click.
 export default function CustomersReport() {
@@ -88,8 +89,7 @@ export default function CustomersReport() {
   // Right-panel filter
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([])
   // Distinct status values present in the loaded customers, sorted, for the status filter options.
-  const statusOptions = useMemo(() =>
-    [...new Set(customers.map(c => c.status).filter((x): x is string => Boolean(x)))].sort(), [customers])
+  const statusOptions = useMemo(() => distinctSortedValues(customers, c => c.status), [customers])
 
   // Builds the single status filter definition, with live counts, handed to the shared right-panel filter UI; empty when no status value occurs at all.
   const filterGroups = useMemo(() => statusOptions.length === 0 ? [] : [{

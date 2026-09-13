@@ -66,8 +66,8 @@ import Avatar from '@/components/ui/Avatar'
 import StatusPill from '@/components/ui/StatusPill'
 import EntityLink from '@/components/ui/EntityLink'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import DrawerSearchField from '@/components/drawer/DrawerSearchField'
-import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
+import SearchStatusToolbar from '@/components/drawer/SearchStatusToolbar'
+import { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import { useNavigation } from '@/context/NavigationContext'
 import { useLookups } from '@/context/LookupsContext'
 import { useAuth } from '@/context/AuthContext'
@@ -224,11 +224,10 @@ export default function CustomerApplicationsList(props: Props) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {/* Toolbar mirrors the sibling sub-entity lists: search left, phase filter right. */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        {/* Toolbar search frame — the shared DrawerSearchField (DRY round 11, MATCHLISTS). */}
-        <DrawerSearchField value={search} onChange={setSearch} placeholder={t('applications:page.searchPlaceholder')} minWidth={120} />
-        <StatusFilterSelect value={phaseFilter} onToggle={togglePhase} statuses={funnelTypes} />
-      </div>
+      <SearchStatusToolbar
+        search={search} onSearchChange={setSearch} searchPlaceholder={t('applications:page.searchPlaceholder')} searchMinWidth={120}
+        statusValue={phaseFilter} onToggleStatus={togglePhase} statuses={funnelTypes}
+      />
       <DataTable columns={columns} rows={filteredRows} loading={loading} loadingText={t('applications:loading')}
         emptyText={t('applications:empty')} onRowClick={r => r.id != null && openEntity('applications', r.id)} />
 

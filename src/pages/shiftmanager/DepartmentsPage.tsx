@@ -15,6 +15,7 @@ import { SmPaginationBar } from './SmPaginationBar'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import { TOOLBAR_ROW_STYLE } from '@/components/ui/toolbarRow'
 import { useListPageSize } from '@/hooks/useListPageSize'
+import { usePagedRows } from '@/hooks/usePagedRows'
 import { useSmDepartments } from './hooks/useSmDepartments'
 import type { SmDepartmentRow } from '@/types/shiftmanager'
 import { ListPageShell } from '@/components/ui/ListPageShell'
@@ -26,7 +27,6 @@ export default function DepartmentsPage() {
   const { departments } = useSmDepartments()
   const [search,      setSearch]      = useState('')
   const [selected,    setSelected]    = useState<SmDepartmentRow | null>(null)
-  const [page,        setPage]        = useState(1)
   // Shared list page-size: honours the tenant's default_per_page, sticky across navigation (§9).
   const { pageSize, setPageSize } = useListPageSize('sm.departments')
   const [selStatuses,  setSelStatuses]  = useState<string[]>([])
@@ -78,8 +78,7 @@ export default function DepartmentsPage() {
     return rows
   }, [departments, search, selStatuses, selCustomers, selLocations])
 
-  const totalPages = Math.ceil(filtered.length / pageSize)
-  const paged = filtered.slice((page - 1) * pageSize, page * pageSize)
+  const { page, setPage, totalPages, paged } = usePagedRows(filtered, { pageSize, setPageSize })
 
   // KPI cards — translated labels; values derived from the live list.
   const kpis = [

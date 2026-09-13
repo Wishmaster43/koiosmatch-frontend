@@ -228,9 +228,9 @@ export default function DocumentsTab({ customerId, locations = [], departments =
           open={confirmDelete}
           onConfirm={confirmDeleteAction}
           onCancel={() => setConfirmDelete(null)}
-          title={t('documents.deleteTitle')}
-          message={confirmDelete?.kind === 'many' ? t('documents.deleteManyMessage', { count: selected.size }) : t('documents.deleteOneMessage', { name: confirmDeleteName })}
-          confirmLabel={t('common:remove')}
+          selectedCount={selected.size}
+          confirmDeleteName={confirmDeleteName}
+          t={t}
         />
       </div>
     </div>

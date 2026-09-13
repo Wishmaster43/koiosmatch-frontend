@@ -6,7 +6,6 @@
  * PATCH /applications/{id}/notes/{note} now exists (A-popout-1) so this window
  * can really edit an existing note — no DELETE route yet, so no delete button.
  */
-import { useEffect } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
@@ -15,6 +14,7 @@ import { useNoteTypes } from '@/lib/useNoteTypes'
 import { useApplicationLite } from './hooks/useApplicationLite'
 import { usePopoutApplicationNotes } from './hooks/usePopoutApplicationNotes'
 import { entityNoteLabels } from '@/components/drawer/tabs/notes/entityNoteLabels'
+import { usePopoutWindowTitle } from './usePopoutWindowTitle'
 
 type AnyProps = Record<string, unknown>
 // Still-untyped JS component — accept any props at the boundary (mirrors applications/drawer/NotesTab.tsx).
@@ -35,12 +35,7 @@ export default function ApplicationNotesPopout({ id }: { id: string | undefined 
   // keeps a stale title (mirrors the other entity popouts). applications.json has
   // no dedicated popout.windowTitle key (out of this lane's locale ownership,
   // see the popout-labels note below) so this reuses the generic common:popout key.
-  useEffect(() => {
-    if (!application) return
-    const previous = document.title
-    document.title = t('common:popout.windowTitle', { name: application.candidateName })
-    return () => { document.title = previous }
-  }, [application, t])
+  usePopoutWindowTitle(application, t('common:popout.windowTitle', { name: application?.candidateName }))
 
   const notesProps = {
     notes, onAddNote: addNote, onEditNote: editNote, noteTypes, authorInitials: initials,

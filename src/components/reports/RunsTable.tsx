@@ -21,6 +21,7 @@ import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import { formatDuration, StatusBadge } from './runFormat'
 import RunDetailDrawer from './RunDetailDrawer'
 import { buildStatusGroup, buildWorkflowGroup } from './reportFilterDefs'
+import { distinctSortedValues } from './distinctSortedValues'
 import { Caption, bodyTextStyle } from '@/components/ui/typography'
 import type { RunRow, ReportFilterGroup } from '@/types/reports'
 
@@ -90,8 +91,7 @@ export default function RunsTable() {
   const { registerFilters, unregisterFilters } = useRightPanel()
 
   // Distinct workflow names present in the run list, for the "Workflow" filter.
-  const workflowOptions = useMemo(() =>
-    [...new Set(rows.map(r => r.workflow_name).filter((x): x is string => Boolean(x)))].sort(), [rows])
+  const workflowOptions = useMemo(() => distinctSortedValues(rows, r => r.workflow_name), [rows])
 
   // WFB-14 (c): the "Status" filter's OPTIONS are the fixed vocabulary above,
   // not whatever happens to be on the currently loaded page (see the comment

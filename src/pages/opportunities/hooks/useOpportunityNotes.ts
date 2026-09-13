@@ -14,9 +14,10 @@ import { actionItemsWire } from '@/components/drawer/tabs/notes/notesTabTypes'
 import type { NoteActionItemWire } from '@/components/drawer/tabs/NotesTab'
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import api, { unwrapList } from '@/lib/api'
+import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { fetchCalmList } from '@/hooks/fetchCalmList'
 import type { Id } from '@/types/common'
 
 export interface OpportunityNote {
@@ -55,15 +56,9 @@ export function useOpportunityNotes(id?: Id) {
   const load = useCallback((signal?: AbortSignal) => {
     if (!id) { setItems([]); return }
     setLoading(true); setError(false)
-    api.get(`/opportunities/${id}/notes`, { signal })
-      .then(res => setItems(unwrapList<OpportunityNote>(res).rows))
-      .catch(err => {
-        if (err?.code === 'ERR_CANCELED') return
-        // No-response network failures count as errors too (the truthy-status
-        // guard elsewhere silently missed them — same class as the tasks fix).
-        if (err?.response?.status !== 404) setError(true)
-        setItems([])
-      })
+    // No-response network failures count as errors too (the truthy-status
+    // guard elsewhere silently missed them — same class as the tasks fix).
+    fetchCalmList<OpportunityNote>(`/opportunities/${id}/notes`, signal, setItems, setError)
       .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [id])
 

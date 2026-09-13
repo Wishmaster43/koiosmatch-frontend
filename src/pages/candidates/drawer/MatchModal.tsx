@@ -80,8 +80,10 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 import type { Id } from '@/types/common'
 import ModalFooter from '@/components/ui/ModalFooter'
+import ModalScrollBody from '@/components/forms/ModalScrollBody'
 import { tintBorder } from '@/lib/tint'
 import TitleBarPills from '@/components/ui/TitleBarPills'
+import ModalTitleBarPillsRow from '@/components/forms/ModalTitleBarPillsRow'
 
 // Thin container wiring useMatchForm's state/submit to the shared drawer chrome
 // and the four titled card sections (Relaties/Contract/Financieel/Opmerkingen).
@@ -154,16 +156,14 @@ export default function MatchModal({
         // Relaties card and into the title bar, via the shared TitleBarPills atom —
         // same idiom as AddCandidateModal/AddVacancyModal. Optional field: clearable
         // keeps the VAC-CLEAR-1 re-click-clears semantics the card row had.
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: '1 1 100%' }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', whiteSpace: 'nowrap' }}>{title}</div>
+        <ModalTitleBarPillsRow title={title}>
           <TitleBarPills options={form.candidateTypes} value={form.contractForm} onChange={form.setContractForm}
             ariaLabel={t('placement.contractForm')} clearable
             error={form.errors.contractForm ? t('common:required') : null} />
-        </div>
+        </ModalTitleBarPillsRow>
       }>
 
-      {/* Fields scroll in their own area so the footer buttons stay pinned (mirrors PlanIntakeModal, Danny 13-08). */}
-      <div style={{ overflow: 'auto', flex: 1, minHeight: 0, padding: 22 }}>
+      <ModalScrollBody>
 
         {/* AXIS-MATRIX-2 preflight — warn/block on this candidate before the recruiter fills in the rest. */}
         {form.matchRuleDecision && form.matchRuleDecision.effect !== 'allow' && (
@@ -286,7 +286,7 @@ export default function MatchModal({
           <RateDeviationWarning proposal={form.proposal} purchase={form.purchase} sell={form.sell} onCancel={() => form.setConfirmDeviation(false)} />
         )}
 
-      </div>
+      </ModalScrollBody>
 
       {/* Pinned footer — the shared ModalFooter (§4) owns this footer layout.
           MATCH-KLANTLOOS-1: the relational requirement flips with the picked

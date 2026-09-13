@@ -51,6 +51,7 @@ import CustomFieldsSection from './CustomFieldsSection'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import { requiredMark } from '@/components/forms/fields'
 import ModalFooter from '@/components/ui/ModalFooter'
+import ModalScrollBody from '@/components/forms/ModalScrollBody'
 import { tintBg, tintBorder } from '@/lib/tint'
 import type { DrawerAddApplicationModalProps } from '../AddApplicationModal'
 
@@ -63,6 +64,27 @@ const pickerMenuWidth = 340
 // (mirrors addmodal/fields.tsx's CreatableSelect wrapper) — every searchable
 // picker in this modal must render at the same height as the reference modal.
 const fieldFootprint: React.CSSProperties = { padding: '8px 11px', borderRadius: 8, fontSize: 13 }
+
+// ApplicationFieldRow — the shared label-left row + inline required-error line
+// used by the phase/owner/source pickers below (each keeps its own domain
+// comment and CreatableSelect at the call site; this only carries the markup).
+function ApplicationFieldRow({ fieldId, label, required, error, errorText, children }: {
+  fieldId: string; label: React.ReactNode; required?: boolean; error?: boolean; errorText: React.ReactNode; children: React.ReactNode
+}) {
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <div style={fieldRow}>
+        <div id={`${fieldId}-label`} style={CANON_LABEL_STYLE}>{label}{required && requiredMark}</div>
+        <div style={fieldControl}>{children}</div>
+      </div>
+      {error && (
+        <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>
+          {errorText}
+        </div>
+      )}
+    </div>
+  )
+}
 
 // Create-or-edit modal for one candidate's application: wires the tenant lookups
 // (vacancies/stages/users/sources/settings/custom fields) and the AXIS-MATRIX
@@ -107,8 +129,7 @@ export default function DrawerAddApplicationModal({ candidateId, candidateOwnerI
     <FloatingPanel open onClose={onClose} title={title} ariaLabel={title}
       persistKey="candidate-add-application" width={560} maxWidth="92vw" scrollBody={false} bodyStyle={{ padding: 0 }}>
 
-      {/* Fields scroll in their own area so the footer buttons stay pinned and never clip (Danny 13-08). */}
-      <div style={{ overflow: 'auto', flex: 1, minHeight: 0, padding: 22 }}>
+      <ModalScrollBody>
 
         {/* AXIS-MATRIX-2 preflight — warn/block on this candidate before the recruiter
             picks a vacancy. Create only: editing an existing application is not a create. */}
@@ -158,62 +179,38 @@ export default function DrawerAddApplicationModal({ candidateId, candidateOwnerI
             No clear cross here (never had one): unlike vacancy/source this field
             never carried a VAC-CLEAR-1 affordance, and retrofitting one is a
             separate change — only the required-marker is added here. */}
-        <div style={{ marginBottom: 14 }}>
-          <div style={fieldRow}>
-            <div id={`${phaseFieldId}-label`} style={CANON_LABEL_STYLE}>{t('work.phase')}{phaseRequired && requiredMark}</div>
-            <div style={fieldControl}>
-              <CreatableSelect id={phaseFieldId} aria-labelledby={`${phaseFieldId}-label`} aria-required={phaseRequired}
-                value={phaseId || null} onChange={setPhaseId} allowCreate={false} menuWidth={pickerMenuWidth}
-                style={fieldFootprint} options={stages.map(s => ({ value: s.id, label: s.label }))} />
-            </div>
-          </div>
-          {errors.phase && (
-            <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>
-              {!phaseId && phaseRequired ? t('common:errors.fieldRequired', { field: t('work.phase') }) : t('work.applicationFailed')}
-            </div>
-          )}
-        </div>
+        <ApplicationFieldRow fieldId={phaseFieldId} label={t('work.phase')} required={phaseRequired}
+          error={!!errors.phase}
+          errorText={!phaseId && phaseRequired ? t('common:errors.fieldRequired', { field: t('work.phase') }) : t('work.applicationFailed')}>
+          <CreatableSelect id={phaseFieldId} aria-labelledby={`${phaseFieldId}-label`} aria-required={phaseRequired}
+            value={phaseId || null} onChange={setPhaseId} allowCreate={false} menuWidth={pickerMenuWidth}
+            style={fieldFootprint} options={stages.map(s => ({ value: s.id, label: s.label }))} />
+        </ApplicationFieldRow>
         {/* APP-OWNER-1: recruiter picker, seeded from the derivation chain above
             (vacancy recruiter > candidate owner > logged-in user) but always
             changeable via the house user-picker, same footprint as the fields above.
             No clear cross here either, for the same reason as phase above. */}
-        <div style={{ marginBottom: 14 }}>
-          <div style={fieldRow}>
-            <div id={`${ownerFieldId}-label`} style={CANON_LABEL_STYLE}>{t('work.owner')}{ownerRequired && requiredMark}</div>
-            <div style={fieldControl}>
-              <CreatableSelect id={ownerFieldId} aria-labelledby={`${ownerFieldId}-label`} aria-required={ownerRequired}
-                value={ownerId || null} onChange={setOwnerId} placeholder={t('work.pickOwner')}
-                allowCreate={false} menuWidth={pickerMenuWidth} style={fieldFootprint} options={userOptions} />
-            </div>
-          </div>
-          {errors.ownerId && (
-            <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>
-              {!ownerId && ownerRequired ? t('common:errors.fieldRequired', { field: t('work.owner') }) : t('work.applicationFailed')}
-            </div>
-          )}
-        </div>
+        <ApplicationFieldRow fieldId={ownerFieldId} label={t('work.owner')} required={ownerRequired}
+          error={!!errors.ownerId}
+          errorText={!ownerId && ownerRequired ? t('common:errors.fieldRequired', { field: t('work.owner') }) : t('work.applicationFailed')}>
+          <CreatableSelect id={ownerFieldId} aria-labelledby={`${ownerFieldId}-label`} aria-required={ownerRequired}
+            value={ownerId || null} onChange={setOwnerId} placeholder={t('work.pickOwner')}
+            allowCreate={false} menuWidth={pickerMenuWidth} style={fieldFootprint} options={userOptions} />
+        </ApplicationFieldRow>
         {/* Bron (APP-REQUIRED-FE-1) — searchable/creatable tenant-lookup picker,
             mirrors ApplicationDetailsCard/PageAddApplicationModal's own source
             field. Optional unless the tenant requires it in Settings. */}
-        <div style={{ marginBottom: 14 }}>
-          <div style={fieldRow}>
-            <div id={`${sourceFieldId}-label`} style={CANON_LABEL_STYLE}>{t('filters.source')}{sourceRequired && requiredMark}</div>
-            <div style={fieldControl}>
-              {/* §6: the picker's accessible name is the LABEL, never the picked
-                  raw value — same id/aria-labelledby wiring as the sibling modal. */}
-              <CreatableSelect id={sourceFieldId} aria-labelledby={`${sourceFieldId}-label`} aria-required={sourceRequired}
-                value={source || null} onChange={setSource} placeholder={t('filters.source')}
-                clearable={!sourceRequired} clearLabel={t('filters.source')}
-                allowCreate={sourceAllowFreeEntry} menuWidth={pickerMenuWidth} style={fieldFootprint}
-                options={sourceOptions} />
-            </div>
-          </div>
-          {errors.source && (
-            <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>
-              {!source.trim() && sourceRequired ? t('common:errors.fieldRequired', { field: t('filters.source') }) : t('work.applicationFailed')}
-            </div>
-          )}
-        </div>
+        <ApplicationFieldRow fieldId={sourceFieldId} label={t('filters.source')} required={sourceRequired}
+          error={!!errors.source}
+          errorText={!source.trim() && sourceRequired ? t('common:errors.fieldRequired', { field: t('filters.source') }) : t('work.applicationFailed')}>
+          {/* §6: the picker's accessible name is the LABEL, never the picked
+              raw value — same id/aria-labelledby wiring as the sibling modal. */}
+          <CreatableSelect id={sourceFieldId} aria-labelledby={`${sourceFieldId}-label`} aria-required={sourceRequired}
+            value={source || null} onChange={setSource} placeholder={t('filters.source')}
+            clearable={!sourceRequired} clearLabel={t('filters.source')}
+            allowCreate={sourceAllowFreeEntry} menuWidth={pickerMenuWidth} style={fieldFootprint}
+            options={sourceOptions} />
+        </ApplicationFieldRow>
         {/* W30: tenant custom fields — only rendered once ≥1 active def exists (§3A(f)).
             Reuses the applications addmodal CustomFieldsSection (ADDAPPLICATION-TWIN-1:
             byte-identical to the old local ApplicationCustomFieldsSection; `hasError`
@@ -249,7 +246,7 @@ export default function DrawerAddApplicationModal({ candidateId, candidateOwnerI
             </div>
           </div>
         )}
-      </div>
+      </ModalScrollBody>
 
       {/* Pinned footer — buttons stay visible whatever the content height (Danny 13-08). */}
       <ModalFooter

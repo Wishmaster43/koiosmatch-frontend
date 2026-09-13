@@ -9,6 +9,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { toggleInList } from '@/lib/selectionSet'
+import { usePagedRows } from '@/hooks/usePagedRows'
 import ContactsTable from './ContactsTable'
 import ContactDrawer from './ContactDrawer'
 import { SmPaginationBar } from './SmPaginationBar'
@@ -24,8 +25,6 @@ export default function ContactsPage() {
   const { contacts } = useSmContacts()
   const [search]                      = useState('')
   const [selected,    setSelected]    = useState<SmContactRow | null>(null)
-  const [page,        setPage]        = useState(1)
-  const [pageSize,    setPageSize]    = useState(50)
   const [selCustomers,  setSelCustomers]  = useState<string[]>([])
   const [selPlanning, setSelPlanning] = useState<string[]>([])
 
@@ -68,8 +67,8 @@ export default function ContactsPage() {
     return rows
   }, [contacts, search, selCustomers, selPlanning])
 
-  const totalPages = Math.ceil(filtered.length / pageSize) || 1
-  const paged      = filtered.slice((page - 1) * pageSize, page * pageSize)
+  const { page, setPage, pageSize, setPageSize, totalPages: rawTotalPages, paged } = usePagedRows(filtered)
+  const totalPages = rawTotalPages || 1
 
   const kpis = [
     { label: t('contactsPage.kpi.contacts'),         value: contacts.length },

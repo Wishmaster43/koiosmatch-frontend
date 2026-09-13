@@ -90,8 +90,7 @@ export default function OpportunityGeneralCard({
         </FieldRow>
         {/* K2: Vestiging — the bureau's own branch handling this deal
             (`location_id`, distinct from the customer's site above). */}
-        <BranchFieldRow label={t('modal.fields.branch')} branchId={branchId} onBranchChange={onBranchChange}
-          branchOptions={branchOptions} clearLabel={t('modal.fields.branch')} placeholder={t('common:select')} />
+        <BranchFieldRow t={t} branchId={branchId} onBranchChange={onBranchChange} branchOptions={branchOptions} />
       </div>
     </div>
   )

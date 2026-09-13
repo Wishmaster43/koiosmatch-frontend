@@ -23,7 +23,6 @@
 import { useEffect, useState } from 'react'
 import { WIDE_MODAL_PANEL_SIZE } from '@/components/ui/wideModalPanelSize'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import { tintBorder } from '@/lib/tint'
 import { cardBox, cardHead } from '@/components/ui/modalCards'
 import CollapsedCard from '@/components/ui/CollapsedCard'
 import DrawerTabs from '@/components/drawer/DrawerTabs'
@@ -48,6 +47,7 @@ import RecruiterCard from './addmodal/RecruiterCard'
 import type { Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 import ModalFooter from '@/components/ui/ModalFooter'
+import CreateErrorAlert from '@/components/forms/CreateErrorAlert'
 
 interface ModalUser { id: Id; name: string }
 interface ModalCustomer { id: Id; name: string }
@@ -294,13 +294,7 @@ export default function AddVacancyModal({
         </div>
 
         {/* Server-side rejection (validation / matrix-guard) — shown in place, modal stays open. */}
-        {f.createError && (
-          <div role="alert" style={{ margin: '0 22px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
-            color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
-            border: tintBorder('var(--color-danger)', true), flexShrink: 0 }}>
-            {f.createError}
-          </div>
-        )}
+        {f.createError && <CreateErrorAlert message={f.createError} bottomGap={0} />}
 
         {/* Footer — the shared ModalFooter (§4) owns this footer layout. */}
         <ModalFooter

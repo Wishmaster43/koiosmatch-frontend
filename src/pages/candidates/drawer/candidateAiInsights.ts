@@ -8,6 +8,7 @@
 import type { Candidate } from '@/types/candidate'
 import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
 import { ADVICE_META, type KoiosAdvice } from '@/lib/koiosAdviceMeta'
+import { completenessInsight } from '@/components/ai/completenessInsight'
 
 // A bound-namespace translate function (the caller already resolved the namespace).
 type Tx = (key: string, opts?: Record<string, unknown>) => string
@@ -19,7 +20,6 @@ export function buildCandidateAdviceInsights(c: Candidate, t: Tx, formatDate: (v
   // (Danny point 47).
   const filled = (v: unknown) => Boolean(v) && v !== '-' && v !== '—'
   const coreFields = [c.email, c.phone, c.dob, c.address, c.gender, c.nationality, c.summary]
-  const filledPct = Math.round((coreFields.filter(filled).length / coreFields.length) * 100)
 
   // Same advice as the table's "Koios" column — resolved once via useCandidateAdvice.
   const adviceColor = advice?.action ? (ADVICE_META[advice.action] ?? ADVICE_META.default).color : ADVICE_META.default.color
@@ -31,11 +31,7 @@ export function buildCandidateAdviceInsights(c: Candidate, t: Tx, formatDate: (v
 
   return [
     adviceRow,
-    {
-      type: t('ai.completeness'),
-      color: filledPct >= 80 ? 'var(--color-success)' : 'var(--color-warning)',
-      text: filledPct >= 80 ? t('ai.completeGood') : t('ai.completePartial', { pct: filledPct }),
-    },
+    completenessInsight(coreFields, t, {}, filled),
     {
       type: t('ai.engagementLabel'),
       color: 'var(--color-secondary)',

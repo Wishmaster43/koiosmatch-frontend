@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from '@/lib/useCachedLookup'
 import { translateSeedList } from '@/lib/lookupSeedI18n'
-import { unwrapList } from '@/lib/api'
+import { mapLookupRows } from '@/lib/lookupUtils'
 import type { LookupOption } from '@/types/common'
 
 // No seed — see the module doc comment above for why.
@@ -30,10 +30,7 @@ const toOption = (r: Record<string, unknown>): LookupOption => ({
 
 // null = nothing usable in this response — useCachedLookup keeps the empty
 // fallback and retries on the next mount.
-const mapRejectionReasons = (res: AxiosResponse): LookupOption[] | null => {
-  const rows = (unwrapList(res).rows) as Record<string, unknown>[]
-  return Array.isArray(rows) && rows.length ? rows.map(toOption) : null
-}
+const mapRejectionReasons = (res: AxiosResponse): LookupOption[] | null => mapLookupRows(res, toOption)
 
 // Cached tenant rejection-reasons lookup shared by the report filter panel and RejectionModal (see the module doc above); no seed fallback since an unknown reason set renders honestly empty.
 export function useRejectionReasons() {

@@ -53,7 +53,8 @@ import api, { unwrapList } from '@/lib/api'
 import { mapVacancyRow } from '../hooks/useCustomerDrawerData'
 import type { VacancyRow } from '../hooks/useCustomerDrawerData'
 // Shared seed-status state + status/applications/pencil columns, joined by ScopedVacanciesTab (DRY round 11, CUSTTABS2).
-import { useSeedVacancyStatusOptions } from '../hooks/useSeedVacancyStatusOptions'
+import { useSeedVacancyStatusOptions, mapVacancyStatusOptions } from '../hooks/useSeedVacancyStatusOptions'
+import type { RawVacancyStatusRow } from '../hooks/useSeedVacancyStatusOptions'
 import { vacancyStatusAndActionColumns } from './vacancyListColumns'
 import type { Id } from '@/types/common'
 
@@ -140,10 +141,8 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
   // NOT is_closed), so the tab's default must key off the same flag, not a slug guess.
   useEffect(() => {
     api.get('/vacancy-statuses').then(r => {
-      const raw = (unwrapList(r).rows) as Array<{ id?: string; value?: string; label?: string; name?: string; active?: boolean; is_closed?: boolean }>
-      const opts = raw.filter(o => o.active !== false)
-        .map(o => ({ value: String(o.id ?? o.value ?? o.name ?? ''), label: String(o.label ?? o.name ?? ''), isClosed: o.is_closed === true }))
-        .filter(o => o.value)
+      const raw = (unwrapList(r).rows) as RawVacancyStatusRow[]
+      const opts = mapVacancyStatusOptions<StatusOpt>(raw, o => ({ isClosed: o.is_closed === true }))
       if (opts.length) setStatusOptions(opts)
       setResolved(true)
     }).catch(() => setResolved(true))

@@ -33,7 +33,7 @@ import CustomerBranchesCard from './addmodal/CustomerBranchesCard'
 import DuplicateNotice from '@/components/forms/DuplicateNotice'
 import type { DuplicateMatch } from '@/components/forms/DuplicateNotice'
 import { useCustomerDuplicateGuard } from './addmodal/useCustomerDuplicateGuard'
-import CreateErrorAlert from './addmodal/CreateErrorAlert'
+import CreateErrorAlert from '@/components/forms/CreateErrorAlert'
 // EXCEL-VACATURES-1 (2026-08-14): the compact "create from file" card and its
 // wizard/permission wiring generalised out of this page into a shared component —
 // vacancies now reuses the exact same two, never a second copy (CLAUDE.md §11).
@@ -42,6 +42,7 @@ import { useEntityImportCard } from '@/components/import/useEntityImportCard'
 import type { Id, LookupOption } from '@/types/common'
 import Button from '@/components/ui/Button'
 import ModalFooter from '@/components/ui/ModalFooter'
+import ModalHeaderIconBadge from '@/components/forms/ModalHeaderIconBadge'
 import TitleBarPills from '@/components/ui/TitleBarPills'
 
 // The ONE backend importer that builds a whole customer tree (customer + locations +
@@ -268,10 +269,9 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
       {...WIDE_MODAL_PANEL_SIZE}
       header={
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
-          <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--color-primary-bg)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <ModalHeaderIconBadge>
             <Building2 size={16} color="var(--color-primary)" />
-          </div>
+          </ModalHeaderIconBadge>
           <div>
             {/* The chosen phase is in the TITLE, exactly as the candidate modal reads
                 "Nieuwe — Lead" ("New — Lead") (Danny 02-08: "die fase moet zijn zoals

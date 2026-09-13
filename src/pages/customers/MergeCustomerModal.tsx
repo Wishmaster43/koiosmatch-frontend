@@ -28,7 +28,6 @@ import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
-import { GitMerge } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import FloatingPanel from '@/components/ui/FloatingPanel'
@@ -37,6 +36,8 @@ import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { Caption, Mono } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
 import MergeModalFooter from '@/components/forms/MergeModalFooter'
+import { MergeModalHeaderTitle, MergeModalIntroLine } from '@/components/forms/MergeModalParts'
+import { reportMergeError } from '@/components/forms/mergeError'
 import MergeSearchInputBox from '@/components/forms/MergeSearchInputBox'
 
 // Only the fields the picker/summary show (§8 data minimization) — never the whole
@@ -97,8 +98,7 @@ export default function MergeCustomerModal({ current, onClose, onMerged }: {
       notifySuccess(t('merge.done'))
       onMerged()
     } catch (err) {
-      const status = (err as { response?: { status?: number } })?.response?.status
-      notifyError(status === 403 ? t('merge.errForbidden') : t('merge.errFailed'))
+      reportMergeError(err, t, notifyError)
       setMerging(false)
     }
   }
@@ -129,12 +129,8 @@ export default function MergeCustomerModal({ current, onClose, onMerged }: {
     <FloatingPanel open onClose={onClose} ariaLabel={t('merge.title')}
       persistKey="customer-merge" zIndex={Z.confirm} width={460}
       bodyStyle={{ padding: 20 }}
-      header={
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>
-          <GitMerge size={15} /> {t('merge.title')}
-        </div>
-      }>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 12 }}>{t('merge.intro', { name: current.name })}</div>
+      header={<MergeModalHeaderTitle title={t('merge.title')} />}>
+        <MergeModalIntroLine>{t('merge.intro', { name: current.name })}</MergeModalIntroLine>
 
         {/* Step 1 — find the duplicate to absorb. */}
         {!duplicate && (

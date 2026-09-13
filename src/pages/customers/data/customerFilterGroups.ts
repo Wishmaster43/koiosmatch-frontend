@@ -7,6 +7,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import { NO_STATUS_KEY } from './customerInsights'
 import { Opt, archivedCheckboxGroup, periodCreatedGroup } from '@/lib/filterGroups/common'
+import { filterCategoryLabels } from '@/lib/filterGroups/categories'
 
 type Tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => void
 
@@ -38,9 +39,7 @@ interface BuildArgs {
 // Pure builder: composes the customer filter panel's category groups. Reads the
 // candidate page's category shape (§3A) so the panel feels identical entity-to-entity.
 export function buildCustomerFilterGroups({ t, tog, filters: f, options: o }: BuildArgs) {
-  const catGeneral = t('filters.categories.general')
-  const catOrg      = t('filters.categories.organisation')
-  const catDisplay  = t('filters.categories.display')
+  const { catGeneral, catOrg, catDisplay } = filterCategoryLabels(t)
 
   return [
     // The '__none' (entry-phase) bucket is donut-only — never a selectable status here.

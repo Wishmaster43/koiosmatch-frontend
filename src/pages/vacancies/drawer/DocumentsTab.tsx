@@ -266,18 +266,15 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
       <input ref={fileRef} type="file" style={{ display: 'none' }} onChange={onPick} />
       {previewDoc && <DocPreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)} />}
       {/* One shared destructive-confirm dialog for both single and bulk delete
-          (never a native confirm()) — adopted from the raw ConfirmDialog this
-          tab used to render (byte-identical props: DocumentDeleteDialog passes
-          `danger` and `open={!!open}` through unchanged). */}
+          (never a native confirm()) — the same DocumentDeleteDialog the
+          candidate and customer documents tabs use (CANDTABS DRY round). */}
       <DocumentDeleteDialog
         open={confirmDelete}
         onConfirm={confirmDeleteAction}
         onCancel={() => setConfirmDelete(null)}
-        title={t('documents.deleteTitle', { defaultValue: 'Delete document' })}
-        message={confirmDelete?.kind === 'many'
-          ? t('documents.deleteManyMessage', { count: selected.size, defaultValue: 'Delete {{count}} selected documents?' })
-          : t('documents.deleteOneMessage', { name: confirmDeleteName, defaultValue: 'Delete "{{name}}"?' })}
-        confirmLabel={t('common:remove')}
+        selectedCount={selected.size}
+        confirmDeleteName={confirmDeleteName}
+        t={t}
       />
     </div>
   )

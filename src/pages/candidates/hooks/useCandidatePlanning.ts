@@ -15,11 +15,12 @@
  *     also accepts a FQCN morph type ("App\\Models\\Customer").
  *   - GET without `?kind=` returns both kinds; POST echoes back the created row.
  */
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
+import type { AxiosResponse } from 'axios'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
-import { isAbortError } from '@/lib/abortError'
 import { notifyError } from '@/lib/notify'
+import { useCandidateIndexFetch } from './useCandidateIndexFetch'
 import type { Id } from '@/types/common'
 import type { FavLists } from '../drawer/planningTypes'
 
@@ -86,54 +87,21 @@ export function namesByType(prefs: Preference[]): FavLists {
   return out
 }
 
-// Retry trigger for failed data fetches — bumps attempt state to re-run load effects.
-function useRetryable() {
-  const [attempt, setAttempt] = useState(0)
-  const reload = useCallback(() => setAttempt(a => a + 1), [])
-  return { attempt, reload }
-}
-
-// Shared "GET /candidates/{id}/{path} → mapped list" load/error/abort shape — the
-// preferences load and the availability load below both follow it identically
-// (jscpd CANDHOOKS #6); local + unexported since both call sites live in this file.
 // HONEST-PLANNING-1: neither route carries a planning_configured split yet, so a
 // 404 is a REAL failure (not "endpoint not built") and renders the error+retry
 // state rather than a silent empty list — only a genuinely empty 200 does that.
-function usePlanningLoadState<T, Raw>(candidateId: Id | undefined, path: string, mapRow: (row: Raw) => T, attempt: number) {
-  const [items,   setItems]   = useState<T[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error,   setError]   = useState(false)
-
-  useEffect(() => {
-    if (!candidateId) { setLoading(false); return }
-    const ctrl = new AbortController()
-    setLoading(true); setError(false)
-    api.get(`/candidates/${candidateId}/${path}`, { signal: ctrl.signal })
-      .then(res => {
-        const rows = (unwrapList(res).rows) as Raw[]
-        setItems((Array.isArray(rows) ? rows : []).map(mapRow))
-      })
-      .catch(err => {
-        if (isAbortError(err)) return
-        setError(true)
-        setItems([])
-      })
-      .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
-    return () => ctrl.abort()
-    // mapRow is always a module-level pure function (toPreference/toAvailability
-    // below) — a stable reference, so listing it here satisfies exhaustive-deps
-    // without ever causing an extra re-fetch.
-  }, [candidateId, path, attempt, mapRow])
-
-  return { items, setItems, loading, error }
+// mapPreferences/mapAvailability are module-level pure functions passed as the
+// fetch's mapResponse, so their identity stays stable across renders.
+const mapPreferences = (res: AxiosResponse): Preference[] => {
+  const rows = (unwrapList(res).rows) as RawPreference[]
+  return (Array.isArray(rows) ? rows : []).map(toPreference)
 }
 
 // Load + mutate a candidate's planning preferences (favourite + blacklist).
 export function useCandidatePlanningPreferences(candidateId?: Id) {
   const { t } = useTranslation('candidates')
-  const { attempt, reload } = useRetryable()
-  const { items: prefs, setItems: setPrefs, loading, error } =
-    usePlanningLoadState<Preference, RawPreference>(candidateId, 'planning-preferences', toPreference, attempt)
+  const { items: prefs, setItems: setPrefs, loading, error, reload } =
+    useCandidateIndexFetch<Preference>(candidateId, 'planning-preferences', mapPreferences)
 
   // Optimistically add a preference; reconcile with the server row, roll back + toast on failure.
   const add = async (kind: PrefKind, target: { linkable_type: LinkableType; linkable_id: Id; linkable_name: string; reason?: string }) => {
@@ -236,12 +204,17 @@ function toAvailability(row: RawAvailability): Availability {
   }
 }
 
+// mapAvailability is a module-level pure function passed as the fetch's mapResponse (stable identity).
+const mapAvailability = (res: AxiosResponse): Availability[] => {
+  const rows = (unwrapList(res).rows) as RawAvailability[]
+  return (Array.isArray(rows) ? rows : []).map(toAvailability)
+}
+
 // Load + mutate a candidate's availability exceptions (holiday/sick/…).
 export function useCandidateAvailability(candidateId?: Id) {
   const { t } = useTranslation('candidates')
-  const { attempt, reload } = useRetryable()
-  const { items: entries, setItems: setEntries, loading, error } =
-    usePlanningLoadState<Availability, RawAvailability>(candidateId, 'availability', toAvailability, attempt)
+  const { items: entries, setItems: setEntries, loading, error, reload } =
+    useCandidateIndexFetch<Availability>(candidateId, 'availability', mapAvailability)
 
   // Optimistically add an entry; reconcile with the server row, roll back + toast on failure (409 = slot taken).
   const add = async (entry: { date: string; part: DayPart; status: AvailStatus; reason?: string }) => {

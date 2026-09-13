@@ -22,7 +22,7 @@ import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from '@/lib/useCachedLookup'
 import { translateSeedList } from '@/lib/lookupSeedI18n'
-import { unwrapList } from '@/lib/api'
+import { mapLookupRows } from '@/lib/lookupUtils'
 import type { LookupOption } from '@/types/common'
 
 // Seed mirrors MessagingLookupSeeder's own defaults 1:1 (name + hex) — DATA, not
@@ -48,10 +48,7 @@ const toOption = (r: Record<string, unknown>): LookupOption => ({
 })
 
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
-const mapEscalationReasons = (res: AxiosResponse): LookupOption[] | null => {
-  const rows = (unwrapList(res).rows) as Record<string, unknown>[]
-  return Array.isArray(rows) && rows.length ? rows.map(toOption) : null
-}
+const mapEscalationReasons = (res: AxiosResponse): LookupOption[] | null => mapLookupRows(res, toOption)
 
 // Tenant escalation-reason lookup, cached with a seed fallback so the picker never renders empty before the API answers.
 export function useEscalationReasons() {

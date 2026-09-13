@@ -8,15 +8,9 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import { pickCustomerStatusSegment } from './customerInsights'
+import { pickKey, toggleOneValue } from '@/lib/chartSelection'
 
-// Recharts hands the clicked segment both at top level and under `.payload`.
-const pickKey = (d: unknown): string | undefined => {
-  const o = d as { key?: string; name?: string; payload?: { key?: string } } | null | undefined
-  return o?.key ?? o?.payload?.key ?? o?.name
-}
 // Single-select toggle: clicking the active segment clears it again.
-const toggleOneValue = (set: Dispatch<SetStateAction<string[]>>, value: string) =>
-  set(p => (p.length === 1 && p[0] === value) ? [] : [value])
 const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (v: string | undefined) => { if (v != null) toggleOneValue(set, v) }
 
 // The server-wide stats aggregate (fallback: sum the loaded page).

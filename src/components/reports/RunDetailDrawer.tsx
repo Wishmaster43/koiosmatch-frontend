@@ -8,9 +8,10 @@ import { useState, useEffect, useCallback } from 'react'
 import api from '@/lib/api'
 import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import { useTranslation } from 'react-i18next'
-import { Zap, Clock, Users, AlertTriangle } from 'lucide-react'
+import { Zap, Clock, Users } from 'lucide-react'
 import { formatDT, formatDuration, StatusBadge, DryRunBanner } from './runFormat'
 import ReportDrawerChrome from './ReportDrawerChrome'
+import { DrawerErrorBlock } from './DrawerErrorBlock'
 import RunStepList from './RunStepList'
 import RunLineage from './RunLineage'
 import { StopRunButton, CANCELLABLE } from '@/components/layout/workflow/runControl'
@@ -205,20 +206,7 @@ export default function RunDetailDrawer({ run, onClose, zIndex }: {
 
       {/* Error message */}
       {shown.error_message && (
-        // eslint-disable-next-line no-restricted-syntax -- DATA: danger-border companion colour, mirrors the same literal used in MessageDrawer/EmailSettings/WhatsAppSettings
-        <div style={{ background: 'var(--color-danger-bg)', border: '1px solid #FCA5A5', borderRadius: 8,
-                      padding: '12px 14px' }}>
-          {/* Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1
-              on its own pastel, AA fail (Opus r3.5). */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-            <AlertTriangle size={13} color="var(--color-on-danger-bg)" />
-            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-on-danger-bg)' }}>{t('runs.drawer.error')}</span>
-          </div>
-          <pre style={{ fontSize: 11, color: 'var(--text)', whiteSpace: 'pre-wrap',
-                        wordBreak: 'break-all', margin: 0, fontFamily: 'monospace' }}>
-            {shown.error_message}
-          </pre>
-        </div>
+        <DrawerErrorBlock label={t('runs.drawer.error')} message={shown.error_message} />
       )}
     </ReportDrawerChrome>
   )

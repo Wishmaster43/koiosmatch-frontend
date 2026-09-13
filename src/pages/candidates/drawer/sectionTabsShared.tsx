@@ -11,6 +11,7 @@ import type { ComponentType } from 'react'
 import { Eye, Download, ArrowRight } from 'lucide-react'
 import AddableSectionJs from '@/components/forms/AddableSection'
 import SafeHtml from '@/components/ui/SafeHtml'
+import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import DrawerAddButton from './DrawerAddButton'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
 
@@ -128,4 +129,14 @@ export function ProseField({ value }: { value?: string }) {
         : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>}
     </div>
   )
+}
+
+/**
+ * LinkedDocPreviewOverlay — the trailing "open linked proof document" modal
+ * every Achtergrond list tab renders once `previewDoc` is set (DRY round,
+ * CANDTABS package): a plain `{previewDoc && <DocPreviewModal .../>}` guard,
+ * shared so Certifications/Education/Skills stop repeating it verbatim.
+ */
+export function LinkedDocPreviewOverlay({ previewDoc, onClose }: { previewDoc: RelItem | null; onClose: () => void }) {
+  return previewDoc ? <DocPreviewModal doc={previewDoc} onClose={onClose} /> : null
 }

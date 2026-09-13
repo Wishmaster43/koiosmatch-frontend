@@ -52,6 +52,7 @@ import NotesTabJs from '@/components/drawer/tabs/NotesTab'
 // K-288: linked-notes feed moved out of the Notities section into its own sub-tab.
 import LinkedNotesTab from '@/components/drawer/tabs/notes/LinkedNotesTab'
 import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
+import { taskTabLabels } from '@/components/drawer/tabs/taskTabLabels'
 import VacancySettingsTab from './VacancySettingsTab'
 import SelectMenu from '@/components/ui/SelectMenu'
 import { useNoteTypes } from '@/lib/useNoteTypes'
@@ -329,11 +330,7 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
       {/* The customer's Taken surface — moved here from the top-level drawer tab
           (Danny 03-08); the shared tab brings its own search/status-filter/add toolbar. */}
       {active === 'tasks' && (
-        <EntityTasksTab linkType="customer" id={customerId} labels={{
-          newTask: t('tasks.newTask'),
-          empty: t('tasks.empty'), loading: t('tasks.loading'), error: t('tasks.error'),
-          openTask: t('tasks.openTask'), searchPlaceholder: t('tasks.searchPlaceholder'),
-        }} />
+        <EntityTasksTab linkType="customer" id={customerId} labels={taskTabLabels(t)} />
       )}
       {/* K17: LOADING state only ever fires on the fallback path (the embed is
           already loaded with the record) — an honest skeleton row, never a

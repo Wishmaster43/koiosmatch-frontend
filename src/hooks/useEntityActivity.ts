@@ -8,7 +8,7 @@
  * its own hook name) that just calls this with its own `entityPath`.
  */
 import { useState, useEffect } from 'react'
-import api, { unwrapList } from '@/lib/api'
+import { fetchCalmList } from '@/hooks/fetchCalmList'
 import type { Id } from '@/types/common'
 
 /** The fields every entity's activity feed carries (LogsEntityActivity trait). */
@@ -49,15 +49,9 @@ export function useEntityActivity<T extends EntityActivityEvent = EntityActivity
     if (!id) { setItems([]); return }
     const ctrl = new AbortController()
     setLoading(true); setError(false)
-    api.get(`/${entityPath}/${id}/activity`, { signal: ctrl.signal })
-      .then(res => setItems(unwrapList<T>(res).rows))
-      .catch(err => {
-        if (err?.code === 'ERR_CANCELED') return
-        // 404 = endpoint not built yet → treat as empty (calm), not a hard error.
-        // Audit r5: a no-response network failure DOES count as an error (no truthy-status guard).
-        if (err?.response?.status !== 404) setError(true)
-        setItems([])
-      })
+    // 404 = endpoint not built yet → treat as empty (calm), not a hard error.
+    // Audit r5: a no-response network failure DOES count as an error (no truthy-status guard).
+    fetchCalmList<T>(`/${entityPath}/${id}/activity`, ctrl.signal, setItems, setError)
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
   }, [entityPath, id])

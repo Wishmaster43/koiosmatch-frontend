@@ -9,8 +9,9 @@ import { useState, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import DepartmentDrawer       from './DepartmentDrawer'
 import { useReportPaging }    from './useReportPaging'
-import { TD, ReportTableToolbar, ReportRow, ReportTableShell } from './reportTableChrome'
-import PaginationBar from '@/components/ui/PaginationBar'
+import { TD, ReportTableToolbar, ReportRow } from './reportTableChrome'
+import { ReportPagedTableShell } from './ReportPagedTableShell'
+import { distinctSortedValues } from './distinctSortedValues'
 import { useReportTableFilter } from './useReportTableFilter'
 import { useReportTableFilterGroups } from './useReportTableFilterGroups'
 import { renderMonospaceCell } from './reportTableCells'
@@ -63,8 +64,7 @@ export default function DepartmentsTable() {
   }, [selectedCustomers, selectedStatuses])
 
   // Distinct location statuses seen in the data, for the panel's status filter chips.
-  const statusOptions = useMemo(() =>
-    [...new Set(rows.map(r => r.location_status).filter((x): x is string => Boolean(x)))].sort(), [rows])
+  const statusOptions = useMemo(() => distinctSortedValues(rows, r => r.location_status), [rows])
 
   // Declarative filter-group config via the shared builder (§3 consolidation); memoised
   // so the panel doesn't re-render on every keystroke.
@@ -107,7 +107,7 @@ export default function DepartmentsTable() {
         searchPlaceholder={t('departments.search')}
       />
 
-      <ReportTableShell
+      <ReportPagedTableShell
         loading={loading}
         loadingLabel={t('departments.loading')}
         empty={sorted.length === 0}
@@ -122,10 +122,8 @@ export default function DepartmentsTable() {
             <td style={TD}>{renderMonospaceCell(r.cost_center)}</td>
           </ReportRow>
         )}
-        pagination={
-          <PaginationBar page={page} totalPages={totalPages} totalRows={sorted.length}
-            pageSize={pageSize} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} />
-        }
+        page={page} totalPages={totalPages} totalRows={sorted.length}
+        pageSize={pageSize} onPageChange={setPage} onPageSizeChange={handlePageSizeChange}
         drawer={drill && <DepartmentDrawer department={drill} onClose={() => setDrill(null)} />}
       />
     </div>

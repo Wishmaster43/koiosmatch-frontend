@@ -11,6 +11,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
+import { taskTabLabels } from '@/components/drawer/tabs/taskTabLabels'
 import type { Opportunity } from '@/types/opportunity'
 
 // See the file's top doc above; thin wrapper over the shared EntityTasksTab scoped to this opportunity link type.
@@ -21,13 +22,9 @@ export default function TasksTab({ opportunity: o }: { opportunity: Opportunity 
     <EntityTasksTab
       linkType="opportunity"
       id={o?.id}
-      labels={{
-        // TAKEN-TOOLBAR-2: open/history dropped — the shared tab now filters by real
-        // task status (StatusFilterSelect), not a hardcoded open/history split.
-        newTask: t('tasks.newTask'),
-        empty: t('tasks.empty'), loading: t('tasks.loading'), error: t('tasks.error'),
-        openTask: t('tasks.openTask'), searchPlaceholder: t('tasks.searchPlaceholder'),
-      }}
+      // TAKEN-TOOLBAR-2: open/history dropped — the shared tab now filters by real
+      // task status (StatusFilterSelect), not a hardcoded open/history split.
+      labels={taskTabLabels(t)}
     />
   )
 }

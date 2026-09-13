@@ -9,7 +9,6 @@ import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import type { TableSelectionProps, TableSortProps, TableVirtualizationProps } from '@/components/ui/dataTableTypes'
 import { stopPropagation } from '@/components/ui/dataTableUtils'
-import Avatar from '@/components/ui/Avatar'
 import OwnerCell from '@/components/ui/OwnerCell'
 import EntityNameCell from '@/components/ui/EntityNameCell'
 import StatusPill from '@/components/ui/StatusPill'
@@ -90,12 +89,8 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
       serverKey: APPLICATION_SORT_KEYS.candidate,
       sticky: true, width: 200, nowrap: true,
       render: r => {
-        const content = (
-          <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-            <Avatar initials={r.candidateInitials} size={24} soft />
-            <span style={{ fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 150 }} title={r.candidateName}>{r.candidateName}</span>
-          </span>
-        )
+        // Shared avatar+name cell (AVATAR-CHIP-1) — same identity chip as matches/customers.
+        const content = <EntityNameCell name={r.candidateName} initials={r.candidateInitials} size={24} maxWidth={150} textStyle={{ fontWeight: 500, fontSize: 13 }} />
         // LABEL-GUARD (K-292 O1): no id, or an id with no visible name, renders plain.
         if (r.candidateId == null || !r.candidateName) return content
         // CEL-DOORKLIK-CANON: candidate identity cell deep-links to the candidate drilldown.

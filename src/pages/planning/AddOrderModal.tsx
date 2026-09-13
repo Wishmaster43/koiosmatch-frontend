@@ -28,7 +28,7 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import { FieldRow, inputStyle } from '@/components/forms/fields'
 import { cardHead, cardBox, modalColumns } from '@/components/ui/modalCards'
 import { WIDE_MODAL_PANEL_SIZE } from '@/components/ui/wideModalPanelSize'
-import { tintBorder } from '@/lib/tint'
+import CreateErrorAlert from '@/components/forms/CreateErrorAlert'
 import { useCustomerCascade } from '@/hooks/useCustomerCascade'
 import { useShiftCustomers } from './hooks/useShiftLookups'
 import { useFunctions } from '@/lib/useFunctions'
@@ -38,6 +38,7 @@ import type { PlanningOrderInput, PlanningOrderRow } from './hooks/usePlanningOr
 import { extractApiError } from '@/lib/extractApiError'
 import ModalFooter from '@/components/ui/ModalFooter'
 import DictationTextarea from '@/components/forms/DictationTextarea'
+import ModalHeaderIconBadge from '@/components/forms/ModalHeaderIconBadge'
 
 // The three status values PlanningOrder::STATUSES accepts — a fixed backend enum
 // (not yet a tenant lookup), so the values stay literal but every LABEL still runs
@@ -137,10 +138,9 @@ export default function AddOrderModal({ onClose, onCreated, order }: { onClose: 
       {...WIDE_MODAL_PANEL_SIZE}
       header={
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
-          <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--color-primary-bg)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <ModalHeaderIconBadge>
             <ClipboardList size={16} color="var(--color-primary)" />
-          </div>
+          </ModalHeaderIconBadge>
           <div>
             <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>
               {isEditing ? t('order.modal.editTitle') : t('order.modal.title')}
@@ -220,11 +220,7 @@ export default function AddOrderModal({ onClose, onCreated, order }: { onClose: 
       </div>
 
       {error && (
-        <div role="alert" style={{ margin: '0 24px 8px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
-          color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
-          border: tintBorder('var(--color-danger)', true), flexShrink: 0 }}>
-          {error}
-        </div>
+        <CreateErrorAlert inset={24}>{error}</CreateErrorAlert>
       )}
 
       <ModalFooter

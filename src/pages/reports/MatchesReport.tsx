@@ -24,17 +24,16 @@ import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterPara
 import type { ReportFilterState } from './reportFilterParams'
 import PieChartCard from '@/components/charts/PieChartCard'
 import { donutData } from './lib/chartData'
-import { serverKpiSpecs, unitMapFor } from './lib/kpiSpecs'
+import { unitAwareServerKpiSpecs } from './lib/kpiSpecs'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateTimeseriesPoint, CandidateSegment, MatchTerminationReasonSegment } from '@/types/analytics'
 import { useOrderedReportKpis } from './hooks/useOrderedReportKpis'
 import { useReportCompareData } from './hooks/useReportCompareData'
-import ReportCompareMetric from './ReportCompareMetric'
+import { totalCompareSubFor } from './lib/kpiCompareSub'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
 import SharedStatTile from '@/components/ui/StatTile'
-import { renderKpiValue } from './renderKpiValue'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
 import { reportWindowLabel } from './lib/reportWindowLabel'
@@ -177,12 +176,10 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
   // UNIT-CANON (FRONTEND-CONTRACT §13, REPORT-KPI-STRIP-1): the SERVER's unit
   // field on each kpis[] entry decides the formatting; the local map is only the
   // tolerant fallback for a cached pre-unit envelope (§10) — never the source.
-  const KPI_UNIT_FALLBACK: Partial<Record<string, unknown>> = { avg_duration_days: 'days', reach_rate: 'ratio' }
-  const unitByServerKey = unitMapFor(data?.kpis, KPI_UNIT_FALLBACK)
-  const kpiByKey = serverKpiSpecs({
+  const kpiByKey = unitAwareServerKpiSpecs({
     data, drill, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t, openKpiDrill,
-    valueFor: (key, raw, has) => renderKpiValue(raw, has, unitByServerKey.get(key) as string | undefined),
-    subFor: key => (key === 'total' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined),
+    unitFallback: { avg_duration_days: 'days', reach_rate: 'ratio' },
+    subFor: totalCompareSubFor(totalCompare),
   })
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key

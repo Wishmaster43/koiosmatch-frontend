@@ -7,6 +7,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Archive, Trash2 } from 'lucide-react'
+import { matchesLifecycleView } from '@/lib/lifecycleFilter'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { usePublishSelection } from '@/context/SelectionContext'
@@ -226,9 +227,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   // archived = archived only (so pending rows never double-show), default = active.
   const filteredAll = useMemo(() => {
     return rows.filter(r => {
-      if (showTrash) { if (r.lifecycle !== 'pending_erase') return false }
-      else if (showArchived) { if (r.lifecycle !== 'archived') return false }
-      else if (r.archived) return false
+      if (!matchesLifecycleView(r, showTrash, showArchived)) return false
       // LOOKUP-I18N-1: compare on the raw stageValue, never the (possibly translated) label.
       if (stage.length  && !stage.includes(String(r.stageValue ?? '')))   return false
       // Owner filter compares IDs, not names (a dashboard click narrows by id).

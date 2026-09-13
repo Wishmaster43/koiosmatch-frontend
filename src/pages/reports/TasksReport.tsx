@@ -30,13 +30,14 @@ import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateOwnerSegment } from '@/types/analytics'
 import { useOrderedReportKpis } from './hooks/useOrderedReportKpis'
 import { useReportCompareData } from './hooks/useReportCompareData'
-import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
 import { donutData, barData, ownerBarData } from './lib/chartData'
 import { serverKpiSpecs } from './lib/kpiSpecs'
+import { makeOpenKpiDrill, makeOpenSegment } from './lib/drillFactories'
+import { totalCompareSubFor } from './lib/kpiCompareSub'
 import { segmentClick, ownerClick } from './lib/drillClick'
 import { reportWindowLabel } from './lib/reportWindowLabel'
 
@@ -69,12 +70,7 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, co
   const baseParams = buildReportQueryParams(period, 'tasks', filters)
   // Rows are tasks with an id, so the drawer deep-links to the task drilldown
   // (§3A entityPage).
-  const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
-    setDrill({
-      title: seg.label, value: seg.count, subtitle: windowSub(), entityPage: 'tasks',
-      rowsEndpoint: '/reports/tasks/drill', rowsParams: { ...baseParams, ...xorParam },
-      adviceEndpoint: '/reports/tasks/advice', adviceParams: { ...baseParams, ...xorParam },
-    })
+  const openSegment = makeOpenSegment({ entityPage: 'tasks', rowsEndpoint: '/reports/tasks/drill', adviceEndpoint: '/reports/tasks/advice', baseParams, windowSub, setDrill })
 
   // Donut data for a coloured/few-value axis (§chart-type-rule): each slice
   // wears its own tenant colour, falling back to the house series. 'none'
@@ -105,11 +101,7 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, co
   // completed_at drills, the exact mismatch that got this strip rejected).
   // The drill accepts the full panel-filter vocabulary (measured:
   // getReportsTasksKpisDrill), so baseParams rides along like the axis drills.
-  const openKpiDrill = (kpi: string, label: string, value: string | number) =>
-    gateDrillClick('tasks', () => setDrill({
-      title: label, value, subtitle: windowSub(), entityPage: 'tasks',
-      rowsEndpoint: '/reports/tasks/kpis/drill', rowsParams: { ...baseParams, kpi },
-    }))
+  const openKpiDrill = makeOpenKpiDrill({ report: 'tasks', rowsEndpoint: '/reports/tasks/kpis/drill', baseParams, windowSub, setDrill })
   // Semantic colour only where the number is a SIGNAL and non-zero (§4: colour
   // carries meaning; a calm zero stays uncoloured).
   const KPI_COLOR: Partial<Record<string, string>> = {
@@ -127,7 +119,7 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, co
     data, drill, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t, openKpiDrill,
     // avg_completion_days is a computed average in days, not a row count.
     valueFor: (key, raw, has) => (!has ? '—' : key === 'avg_completion_days' ? t('tasks.kpi.daysValue', { days: Math.round(raw as number) }) : (raw as number)),
-    subFor: key => (key === 'total' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined),
+    subFor: totalCompareSubFor(totalCompare),
   })
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key

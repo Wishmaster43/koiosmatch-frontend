@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
-import { noteEditGuard } from '@/hooks/noteEditGuard'
+import { runGuardedNoteEdit } from '@/hooks/runGuardedNoteEdit'
 import { mapCustomerNoteRow, type ApiCustomerNoteRow } from '@/pages/customers/shared'
 import type { CustomerNote } from '@/types/customer'
 
@@ -71,15 +71,12 @@ export function usePopoutCustomerNotes(customerId: string | undefined) {
   // POPOUT-PARITEIT-1: resolves TRUE only on a landed write — the per-note popout's
   // PopoutSaveFooter contract requires an honest signal (§3).
   // NOTE-ACTION-ITEMS-1: forward the action_items panel only when present (present = the full wanted set; absent = untouched).
-  const editNote = useCallback((index: number, payload: NotePayload): Promise<boolean> => {
-    const guard = noteEditGuard(customerId, notes, index)
-    if (!guard) return Promise.resolve(false)
-    const { target, snapshot } = guard
+  const editNote = useCallback((index: number, payload: NotePayload): Promise<boolean> => runGuardedNoteEdit(customerId, notes, index, (target, snapshot) => {
     setNotes(prev => prev.map((n, i) => (i === index ? { ...n, type: payload.type, title: payload.title, text: payload.body } : n)))
     return landedWrite(
       api.patch(`/customers/${customerId}/notes/${target.id}`, { type: payload.type, title: payload.title, text: payload.body, language: payload.language, ...actionItemsWire(payload.action_items) }),
       load, () => setNotes(snapshot), t)
-  }, [customerId, notes, load, t])
+  }), [customerId, notes, load, t])
 
   // K15NOTES: delete — optimistic remove with revert (mirrors useCandidateNotes.deleteNote).
   const deleteNote = useCallback((index: number) => {

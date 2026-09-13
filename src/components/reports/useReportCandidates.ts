@@ -5,9 +5,9 @@
  * a translated message so i18n stays in the view (§3, §5). Refetches when the
  * configured page size changes; cancels on unmount.
  */
-import { useState, useEffect } from 'react'
-import api from '@/lib/api'
+import type { AxiosResponse } from 'axios'
 import type { ReportCandidate } from '@/types/reports'
+import { useAliveListFetch } from './useAliveListFetch'
 
 // Normalise API field spellings: the resource returns first_name/last_name while
 // the report reads firstname/lastname ("Onbekend" otherwise). Accept both so a
@@ -36,27 +36,17 @@ export const normalizeSmCandidate = (r: Record<string, unknown>): ReportCandidat
 // soon/last-login granularity) SmCandidatesInsightsRow and ShiftmanagerDashboard still
 // need rows for.
 
+// Response shape for /sm_candidates: a plain array or a { data: [...] } envelope,
+// each row normalised through normalizeSmCandidate. Module-scope (stable
+// reference) so useAliveListFetch's effect never sees it as a changed dep.
+const mapSmCandidatesResponse = (res: AxiosResponse): ReportCandidate[] => {
+  const body = res.data
+  const rows = (Array.isArray(body) ? body : (body?.data ?? [])) as Array<Record<string, unknown>>
+  return rows.map(normalizeSmCandidate)
+}
+
 // Data layer for the SM candidates report (see the module doc above); normalises the two known field spellings so a backend rename never blanks the drill-down.
 export function useReportCandidates(perPage: number): { candidates: ReportCandidate[]; loading: boolean; error: boolean } {
-  const [candidates, setCandidates] = useState<ReportCandidate[]>([])
-  const [loading,    setLoading]    = useState(true)
-  const [error,      setError]      = useState(false)
-
-  // Refetches whenever the configured page size changes; the alive guard drops the response if a new perPage arrives (or the component unmounts) before it resolves.
-  useEffect(() => {
-    let active = true
-    setLoading(true); setError(false)
-    api.get(`/sm_candidates?per_page=${perPage}`)
-      .then(res => {
-        if (!active) return
-        const body = res.data
-        const rows = (Array.isArray(body) ? body : (body?.data ?? [])) as Array<Record<string, unknown>>
-        setCandidates(rows.map(normalizeSmCandidate))
-      })
-      .catch(() => { if (active) setError(true) })
-      .finally(() => { if (active) setLoading(false) })
-    return () => { active = false }
-  }, [perPage])
-
+  const { data: candidates, loading, error } = useAliveListFetch(`/sm_candidates?per_page=${perPage}`, mapSmCandidatesResponse)
   return { candidates, loading, error }
 }

@@ -6,11 +6,10 @@
  */
 import { useTranslation } from 'react-i18next'
 import { useRelationSort } from '@/components/forms/useRelationSort'
-import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import LookupIcon from '@/components/ui/LookupIcon'
 import { useSkillLevels } from '@/lib/useSkillLevels'
 import type { Id } from '@/types/common'
-import { AddableSection, DocEntryLinks, renderAddButton, resolveLinkedDocument } from './sectionTabsShared'
+import { AddableSection, DocEntryLinks, LinkedDocPreviewOverlay, renderAddButton, resolveLinkedDocument } from './sectionTabsShared'
 import type { RelItem, RelTabProps } from './sectionTabsShared'
 import { linkedDocumentField, useLinkedDocPreview } from './useLinkedDocPreview'
 
@@ -86,7 +85,7 @@ export function SkillsTab({ items = [], onAdd, onEdit, onRemove, documents = [],
           </div>
         )
       }} />
-    {previewDoc && <DocPreviewModal doc={previewDoc} onClose={closePreview} />}
+    <LinkedDocPreviewOverlay previewDoc={previewDoc} onClose={closePreview} />
     </>
   )
 }

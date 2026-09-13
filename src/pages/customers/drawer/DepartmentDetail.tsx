@@ -43,7 +43,8 @@ import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { useBackofficeLinksVisible } from '@/components/drawer/useBackofficeLinksVisible'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
-import MergeSubEntityModal from './MergeSubEntityModal'
+import SubEntityMergeFooter from './SubEntityMergeFooter'
+import SubEntityPanelWrapper from './SubEntityPanelWrapper'
 // JOB-STATUS-1: name + reference chip + status badge/picker, now the shared
 // SubEntityStatusTitleRow (§0.3 split, LocationDetail.tsx 2026-08-03 — this file
 // carried a near-verbatim copy of the same block, adopted here in the same pass).
@@ -64,14 +65,12 @@ import DepartmentSubTabPanels from './DepartmentSubTabPanels'
 import type { DepartmentSubTab } from './DepartmentSubTabPanels'
 // SUBENTITEIT-DELETE-1: the honest disabled-trash + 409-race counts dialog,
 // shared with LocationDetail (DRY round 11, CUSTTABS2).
-import SubEntityArchiveDialogs from './SubEntityArchiveDialogs'
 // Delete handler pattern, shared with LocationDetail (clone [2]).
 import { handleSubEntityDelete } from '../hooks/subEntityDelete'
 // Shared SubTabBar tab-list shape, joined by LocationDetail/ContactDetail (DRY round 11, CUSTDETAIL).
 // scopedSubEntityTabs: the ten scoped entries, joined by LocationDetail (DRY round 11, CUSTTABS2).
 import { buildSubEntityTabs, scopedSubEntityTabs } from '../hooks/subEntityTabs'
 // Shared merge-modal onClose/onMerged wiring, joined by LocationDetail (DRY round 11, CUSTDETAIL).
-import { mergeModalCallbacks } from '../hooks/mergeModalCallbacks'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useAuth } from '@/context/AuthContext'
@@ -222,11 +221,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   // A contact opened from this department's list brings its own full trail, so the
   // department steps aside — one title, one delete button, one way back.
   if (contactOpen) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {contactsPanel}
-      </div>
-    )
+    return <SubEntityPanelWrapper>{contactsPanel}</SubEntityPanelWrapper>
   }
 
   return (
@@ -298,14 +293,12 @@ export default function DepartmentDetail({ department, locations, statuses, cont
       {subTab === 'contacts' && contactsPanel}
       {/* AFDELING-SAMENVOEGEN-1 — `others` is the customer-wide department list
           (already available as a prop), never a fresh search endpoint (see the
-          modal's own doc). */}
-      {merging && customerId != null && (
-        <MergeSubEntityModal scope="department" customerId={customerId}
-          current={{ id: department.id as Id, name: department.name }}
-          others={departments.map(d => ({ id: d.id as Id, name: d.name, code: d.referenceNumber }))}
-          {...mergeModalCallbacks(setMerging, onMerged)} />
-      )}
-      <SubEntityArchiveDialogs dialog={dialog} blockedCounts={blockedCounts} setBlockedCounts={setBlockedCounts}
+          modal's own doc). Shared SubEntityMergeFooter (DRY round, CANDTABS). */}
+      <SubEntityMergeFooter scope="department" customerId={customerId}
+        merging={merging} setMerging={setMerging} onMerged={onMerged}
+        current={{ id: department.id as Id, name: department.name }}
+        others={departments.map(d => ({ id: d.id as Id, name: d.name, code: d.referenceNumber }))}
+        dialog={dialog} blockedCounts={blockedCounts} setBlockedCounts={setBlockedCounts}
         archiveNow={archiveNow} archiving={archiving} />
     </div>
   )

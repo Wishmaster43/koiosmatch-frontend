@@ -10,7 +10,9 @@ import { useTranslation } from 'react-i18next'
 import type { CustomerForm } from '../AddCustomerModal'
 import SearchSelect from '@/components/ui/SearchSelect'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
-import { cardHead, cardBox } from '@/components/ui/modalCards'
+import { cardBox } from '@/components/ui/modalCards'
+import RemovableChip from '@/components/forms/RemovableChip'
+import CardHeaderWithAddTrigger from '@/components/forms/CardHeaderWithAddTrigger'
 
 interface OptionRow { value: string; label: string }
 
@@ -28,8 +30,7 @@ export default function CustomerBranchesCard({ form, set, branchOptions }: Custo
           trigger on the right, chips below, and the sentence saying what
           LEAVING IT EMPTY means. That sentence is the point: empty is a real,
           useful choice here, not an unfinished field. */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
-        <div style={{ ...cardHead, marginBottom: 0 }}>{t('overview.branch')}</div>
+      <CardHeaderWithAddTrigger title={t('overview.branch')}>
         {/* selectAll={false}: a customer carries exactly ONE branch here, so this is a
             single-choice picker despite reusing the multi-select control (§3). */}
         <SearchSelect triggerLabel={t('modal.fields.branchAdd')} options={branchOptions}
@@ -37,16 +38,13 @@ export default function CustomerBranchesCard({ form, set, branchOptions }: Custo
           onToggle={(id: string) => set('branchId', form.branchId === id ? '' : id)}
           menuAlign="right" selectAll={false}
           renderTrigger={(toggleOpen: () => void) => <DrawerAddButton onClick={toggleOpen} label={t('modal.fields.branchAdd')} />} />
-      </div>
+      </CardHeaderWithAddTrigger>
       <div style={cardBox}>
         {form.branchId ? (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, padding: '3px 8px',
-              borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
+            <RemovableChip onRemove={() => set('branchId', '')}>
               {branchOptions.find(o => String(o.value) === form.branchId)?.label ?? form.branchId}
-              <button type="button" onClick={() => set('branchId', '')} aria-label={t('common:remove')}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
-            </span>
+            </RemovableChip>
           </div>
         ) : (
           <p style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic', margin: 0 }}>{t('modal.fields.branchAutoHint')}</p>

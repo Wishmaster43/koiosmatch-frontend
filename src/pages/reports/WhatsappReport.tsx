@@ -44,7 +44,7 @@ import { useOrderedReportKpis } from './hooks/useOrderedReportKpis'
 import type { ReportFilterState } from './reportFilterParams'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
-import { buildKpiSpecs } from './lib/kpiSpecs'
+import { camelKpiSpecs } from './lib/kpiSpecs'
 import { reportWindowLabel } from './lib/reportWindowLabel'
 
 // Semantic colour per server key, applied only when the count is non-zero (§4:
@@ -158,9 +158,8 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
 
   // The nine fixed cards straight off the server's kpis[] array — each label from
   // the local i18n catalogue, each card clickable into its own drill.
-  const kpiByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.count]))
-  const kpiByKey = buildKpiSpecs({
-    kpis: kpiByServerKey,
+  const kpiByKey = camelKpiSpecs({
+    data,
     labelKeys: KPI_LABEL_KEYS,
     colors: KPI_COLOR,
     t,

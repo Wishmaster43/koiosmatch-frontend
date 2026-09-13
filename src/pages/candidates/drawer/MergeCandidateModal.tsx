@@ -33,7 +33,7 @@
 import { useCallback, useEffect, useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
-import { ChevronDown, GitMerge } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import FloatingPanel from '@/components/ui/FloatingPanel'
@@ -44,6 +44,8 @@ import { Z } from '@/lib/zIndexScale'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import type { Id } from '@/types/common'
 import MergeModalFooter from '@/components/forms/MergeModalFooter'
+import { MergeModalHeaderTitle, MergeModalIntroLine } from '@/components/forms/MergeModalParts'
+import { reportMergeError } from '@/components/forms/mergeError'
 import { useCustomFields } from '@/lib/useCustomFields'
 import MergeFieldConflicts from './MergeFieldConflicts'
 import { computeCustomFieldConflicts, customFieldsChanged, mergeCustomFieldMaps } from './mergeCustomFields'
@@ -176,8 +178,7 @@ export default function MergeCandidateModal({ current, onClose, onMerged, initia
       notifySuccess(t('merge.done'))
       onMerged(survivorId)
     } catch (err) {
-      const status = (err as { response?: { status?: number } })?.response?.status
-      notifyError(status === 403 ? t('merge.errForbidden') : t('merge.errFailed'))
+      reportMergeError(err, t, notifyError)
       setMerging(false)
     }
   }
@@ -228,9 +229,9 @@ export default function MergeCandidateModal({ current, onClose, onMerged, initia
     // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
     // remembered position; keeps its above-everything layer via Z.confirm.
     <FloatingPanel open onClose={onClose} ariaLabel={t('merge.title')}
-      header={<div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 700, color: 'var(--text)' }}><GitMerge size={15} /> {t('merge.title')}</div>}
+      header={<MergeModalHeaderTitle title={t('merge.title')} />}
       persistKey="merge-candidate" width={460} zIndex={Z.confirm} bodyStyle={{ padding: 20 }}>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 12 }}>{t('merge.intro', { name: current.name })}</div>
+        <MergeModalIntroLine>{t('merge.intro', { name: current.name })}</MergeModalIntroLine>
 
         {/* Step 1 — pick the duplicate through the house searchable dropdown
             (MERGE-PICKER-1). Label + live status share one row so the trigger never

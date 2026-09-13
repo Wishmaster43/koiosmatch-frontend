@@ -4,9 +4,10 @@ import { useTaskLookups } from '@/context/TaskLookupsContext'
 import { useAuth } from '@/context/AuthContext'
 import { useTaskLookupIds } from './hooks/useTaskLookupIds'
 import { WIDE_MODAL_PANEL_SIZE } from '@/components/ui/wideModalPanelSize'
-import { tintBorder } from '@/lib/tint'
+import CreateErrorAlert from '@/components/forms/CreateErrorAlert'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import TitleBarPills from '@/components/ui/TitleBarPills'
+import ModalTitleBarPillsRow from '@/components/forms/ModalTitleBarPillsRow'
 import { modalColumns } from '@/components/ui/modalCards'
 import TaskCard from './addmodal/TaskCard'
 import PlanningCard from './addmodal/PlanningCard'
@@ -218,12 +219,11 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
         // TaskCard and into the title bar, via the shared TitleBarPills atom —
         // same idiom as AddCandidateModal/AddVacancyModal/MatchModal. Required
         // field: no `clearable`, the active pill always stays picked.
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: '1 1 100%' }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', whiteSpace: 'nowrap' }}>{modalTitle}</div>
+        <ModalTitleBarPillsRow title={modalTitle}>
           <TitleBarPills
             options={types.map(x => ({ value: x.value, label: x.icon ? `${x.icon} ${x.label}` : x.label, color: x.color }))}
             value={form.type} onChange={v => set('type', v)} ariaLabel={t('modal.type')} />
-        </div>
+        </ModalTitleBarPillsRow>
       }>
 
         {/* Body: titled cards — Taak full-width, then Planning+Toewijzing (left,
@@ -260,11 +260,7 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
 
         {/* Server-side rejection (validation / matrix-guard) — shown in place, modal stays open. */}
         {createError && (
-          <div role="alert" style={{ margin: '0 24px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
-            color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
-            border: tintBorder('var(--color-danger)', true), flexShrink: 0 }}>
-            {createError}
-          </div>
+          <CreateErrorAlert inset={24} bottomGap={0}>{createError}</CreateErrorAlert>
         )}
 
         {/* Footer — the shared ModalFooter (§4) owns this footer layout. */}

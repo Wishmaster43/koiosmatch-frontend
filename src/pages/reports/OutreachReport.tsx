@@ -32,6 +32,8 @@ import { useSeriesDrill } from './hooks/useSeriesDrill'
 import { donutData, barData, ownerBarData } from './lib/chartData'
 import { segmentClick, ownerClick } from './lib/drillClick'
 import { serverKpiSpecs } from './lib/kpiSpecs'
+import { makeOpenKpiDrill, makeOpenSegment } from './lib/drillFactories'
+import { totalCompareSubFor } from './lib/kpiCompareSub'
 import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
@@ -40,7 +42,6 @@ import type { ReportPeriod, CandidateOwnerSegment } from '@/types/analytics'
 import { useOrderedReportKpis } from './hooks/useOrderedReportKpis'
 import { useTotalCompare } from './hooks/useTotalCompare'
 import { getCompareSlug } from './reportCompareSupport'
-import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
 import type { ReportFilterState } from './reportFilterParams'
@@ -78,12 +79,7 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
   // one XOR param per open drill.
   const [drill, setDrill] = useState<DrillSpec | null>(null)
   const windowSub = () => reportWindowLabel(formatDate, data?.from, data?.to)
-  const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
-    setDrill({
-      title: seg.label, value: seg.count, subtitle: windowSub(),
-      rowsEndpoint: '/reports/outreach/drill', rowsParams: { ...baseParams, ...xorParam },
-      adviceEndpoint: '/reports/outreach/advice', adviceParams: { ...baseParams, ...xorParam },
-    })
+  const openSegment = makeOpenSegment({ rowsEndpoint: '/reports/outreach/drill', adviceEndpoint: '/reports/outreach/advice', baseParams, windowSub, setDrill })
 
   // Chart datum builders (RAPPORT-GEZICHT-WAVE2 chart-type rule): 'none'/'others'
   // sentinels, "Onbekend"/"Geen uitkomst" rows and orphan strings are all normal
@@ -109,11 +105,7 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
   // backend predicate per key, so a card's number and its drill rows can never
   // diverge. A key the server omitted (or a pre-suite cached envelope) renders
   // the house dash with no drill — never a value from another population.
-  const openKpiDrill = (kpi: string, label: string, value: string | number) =>
-    gateDrillClick('outreach', () => setDrill({
-      title: label, value, subtitle: windowSub(),
-      rowsEndpoint: '/reports/outreach/kpis/drill', rowsParams: { ...baseParams, kpi },
-    }))
+  const openKpiDrill = makeOpenKpiDrill({ report: 'outreach', rowsEndpoint: '/reports/outreach/kpis/drill', baseParams, windowSub, setDrill, entityPage: null })
   // Semantic colour only where the number is a SIGNAL and non-zero (§4: colour
   // carries meaning; a calm zero stays uncoloured).
   const KPI_COLOR: Partial<Record<string, string>> = {
@@ -131,7 +123,7 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
     data, drill, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t, openKpiDrill,
     // conversion_pct is a float percentage, not a row count.
     valueFor: (key, raw, has) => (!has ? '—' : key === 'conversion_pct' ? formatPercent(raw as number) : (raw as number)),
-    subFor: key => (key === 'total_targets' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined),
+    subFor: totalCompareSubFor(totalCompare, 'total_targets'),
   })
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key

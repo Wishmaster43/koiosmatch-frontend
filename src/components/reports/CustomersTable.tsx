@@ -13,6 +13,7 @@ import PaginationBar          from '../ui/PaginationBar'
 import { useReportPaging }    from './useReportPaging'
 import useNumericColumnSort   from '@/hooks/useNumericColumnSort'
 import { TD, SortableTableHead, ReportTableToolbar, ReportRow, ReportTableFrame } from './reportTableChrome'
+import { distinctSortedValues } from './distinctSortedValues'
 import { useReportTableFilter } from './useReportTableFilter'
 import { useReportCustomers } from './useReportCustomers'
 import { renderStatusCell, renderCountCell, renderMonospaceCell } from './reportTableCells'
@@ -29,9 +30,7 @@ export default function CustomersTable() {
   const [detail,            setDetail]            = useState<ReportCustomer | null>(null)
 
   // Unique, sorted status values found in the current data set, used to build the filter panel options.
-  const statusOptions = useMemo(() =>
-    [...new Set(customers.map(c => c.status).filter((x): x is string => Boolean(x)))].sort(),
-    [customers])
+  const statusOptions = useMemo(() => distinctSortedValues(customers, c => c.status), [customers])
 
   const toggle = (setter: Dispatch<SetStateAction<Array<string | number>>>) => (val: string | number) =>
     setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])

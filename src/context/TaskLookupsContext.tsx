@@ -1,10 +1,10 @@
 /* eslint-disable react-refresh/only-export-components -- a context module exports its provider and its hooks together by design (§2: contexts live in context/); moving the hooks would change every consumer import for a dev-only HMR nicety */
 import { createContext, useContext, useState, useEffect, useMemo } from 'react'
-import type { Dispatch, ReactNode, SetStateAction } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import api, { unwrap } from '../lib/api'
 import { sortActiveRows, makeMetaResolver } from '../lib/lookupUtils'
 import { translateSeedList } from '../lib/lookupSeedI18n'
+import { loadTenantLookups } from './lookupLoader'
 
 /**
  * TaskLookupsContext — the tenant-configurable task (activity) lookups.
@@ -98,13 +98,11 @@ export function TaskLookupsProvider({ children }: { children: ReactNode }) {
 
   // Fetch each lookup once; a 404/empty keeps the seed fallback so the UI never breaks.
   useEffect(() => {
-    const load = (url: string, fallback: TaskLookupItem[], set: Dispatch<SetStateAction<TaskLookupItem[]>>) =>
-      api.get(url).then(r => set(normalize(unwrap(r), fallback))).catch(() => {})
-    Promise.allSettled([
-      load('/task-statuses',   DEFAULT_TASK_STATUSES,   setStatuses),
-      load('/task-types',      DEFAULT_TASK_TYPES,      setTypes),
-      load('/task-priorities', DEFAULT_TASK_PRIORITIES, setPriorities),
-    ]).finally(() => setLoading(false))
+    loadTenantLookups<TaskLookupItem[]>([
+      { url: '/task-statuses',   fallback: DEFAULT_TASK_STATUSES,   set: setStatuses },
+      { url: '/task-types',      fallback: DEFAULT_TASK_TYPES,      set: setTypes },
+      { url: '/task-priorities', fallback: DEFAULT_TASK_PRIORITIES, set: setPriorities },
+    ], normalize, () => setLoading(false))
   }, [])
 
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).

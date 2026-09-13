@@ -5,6 +5,7 @@
  */
 import type { Customer, Location } from '@/types/customer'
 import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
+import { completenessInsight } from '@/components/ai/completenessInsight'
 
 // A bound-namespace translate function (the caller already resolved the namespace).
 type Tx = (key: string, opts?: Record<string, unknown>) => string
@@ -41,18 +42,12 @@ export function buildCustomerAdviceInsights(c: Customer, t: Tx): KoiosAdviceInsi
     (c.street && c.city) || loc?.address,
     c.phone || c.email || loc?.phone || loc?.email || loc?.contactName,
   ]
-  const filledPct = Math.round((coreFields.filter(Boolean).length / coreFields.length) * 100)
-
   const openVacancies = c.openVacanciesCount ?? 0
   const activeMatches = c.activeMatchesCount ?? 0
   const hasActivity = openVacancies > 0 || activeMatches > 0
 
   return [
-    {
-      type: t('ai.completeness'),
-      color: filledPct >= 80 ? 'var(--color-success)' : 'var(--color-warning)',
-      text: filledPct >= 80 ? t('ai.completeGood') : t('ai.completePartial', { pct: filledPct }),
-    },
+    completenessInsight(coreFields, t),
     {
       type: t('ai.relationshipLabel'),
       color: 'var(--color-secondary)',

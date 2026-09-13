@@ -12,6 +12,7 @@ import { useDateFormat }      from '@/lib/datetime'
 import PaginationBar          from '../ui/PaginationBar'
 import { useReportPaging }    from './useReportPaging'
 import { TD, SortableTableHead, ReportTableToolbar, ReportRow } from './reportTableChrome'
+import { distinctSortedValues } from './distinctSortedValues'
 import { useReportTableFilter } from './useReportTableFilter'
 import { BodyText, Caption } from '@/components/ui/typography'
 import { useReportList }      from './useReportList'
@@ -45,11 +46,11 @@ export default function MessagesTable() {
   const [selectedWorkflows, setSelectedWorkflows] = useState<Array<string | number>>([])
 
   // Distinct channel values already loaded client-side seed the right-panel filter — no separate lookup fetch needed.
-  const channelOptions  = useMemo(() => [...new Set(rows.map(r => r.channel).filter((x): x is string => Boolean(x)))].sort(), [rows])
+  const channelOptions  = useMemo(() => distinctSortedValues(rows, r => r.channel), [rows])
   // Same derivation for status: built from the current row set, not a lookup table.
-  const statusOptions   = useMemo(() => [...new Set(rows.map(r => r.status).filter((x): x is string => Boolean(x)))].sort(), [rows])
+  const statusOptions   = useMemo(() => distinctSortedValues(rows, r => r.status), [rows])
   // Workflow names vary per tenant automation, so the filter list is built from what actually appears in the loaded rows.
-  const workflowOptions = useMemo(() => [...new Set(rows.map(r => r.workflow_name).filter((x): x is string => Boolean(x)))].sort(), [rows])
+  const workflowOptions = useMemo(() => distinctSortedValues(rows, r => r.workflow_name), [rows])
 
   // Filter predicate: checks panel's status/channel/workflow selections.
   const filterPredicate = useCallback((r: MessageRow) => {

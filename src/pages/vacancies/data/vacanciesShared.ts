@@ -3,21 +3,13 @@
  * picker, an optimistic-subset snapshot, and the UI-patch → API-body mapping
  * used when saving header/picker edits.
  */
-import type { Dispatch, SetStateAction } from 'react'
 import { mapAddressPatch } from '@/lib/mapAddressPatch'
 
-// Set exactly one value in a multi-select, or clear when it's already the only one.
-export const toggleOneValue = (set: Dispatch<SetStateAction<string[]>>, value: string) =>
-  set(p => (p.length === 1 && p[0] === value) ? [] : [value])
+// Chart click-to-filter helpers — shared with customers (§ chartSelection).
+export { toggleOneValue, pickKey } from '@/lib/chartSelection'
 
 // Two-letter initials — re-exported from the shared util (single source).
 export { initialsOf } from '@/lib/initials'
-
-// Recharts hands the clicked segment back at top level AND under `.payload`.
-export const pickKey = (d: unknown): string | undefined => {
-  const o = d as { key?: string; name?: string; payload?: { key?: string } } | null | undefined
-  return o?.key ?? o?.payload?.key ?? o?.name
-}
 
 // One raw `/vacancies/stats` by_status row — the backend already resolves a label/
 // colour itself (real name, or its own 'Onbekend'/'Geen status' copy), which the FE

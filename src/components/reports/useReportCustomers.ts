@@ -4,30 +4,16 @@
  * is a boolean; the view maps it to a translated message so i18n stays in the
  * component (§3, §5). Cancels on unmount.
  */
-import { useState, useEffect } from 'react'
-import api, { unwrapList } from '@/lib/api'
+import type { AxiosResponse } from 'axios'
+import { unwrapList } from '@/lib/api'
 import type { ReportCustomer } from '@/types/reports'
+import { useAliveListFetch } from './useAliveListFetch'
+
+// Module-scope (stable reference) so useAliveListFetch's effect never sees it as a changed dep.
+const mapSmCustomersResponse = (res: AxiosResponse): ReportCustomer[] => unwrapList<ReportCustomer>(res).rows
 
 // Fetches Shiftmanager customers for the reports table.
 export function useReportCustomers(): { customers: ReportCustomer[]; loading: boolean; error: boolean } {
-  const [customers, setCustomers] = useState<ReportCustomer[]>([])
-  const [loading,   setLoading]   = useState(true)
-  const [error,     setError]     = useState(false)
-
-  // Loads once on mount; the alive flag stops a late response from writing into state after this hook has unmounted.
-  useEffect(() => {
-    let active = true
-    setLoading(true); setError(false)
-    api.get('/sm_customers')
-      .then(res => {
-        if (!active) return
-        const { rows } = unwrapList<ReportCustomer>(res)
-        setCustomers(rows)
-      })
-      .catch(() => { if (active) { setError(true); setCustomers([]) } })
-      .finally(() => { if (active) setLoading(false) })
-    return () => { active = false }
-  }, [])
-
+  const { data: customers, loading, error } = useAliveListFetch('/sm_customers', mapSmCustomersResponse)
   return { customers, loading, error }
 }

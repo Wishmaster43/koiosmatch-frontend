@@ -12,6 +12,7 @@
  */
 import type { Location } from '@/types/customer'
 import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
+import { completenessInsight } from '@/components/ai/completenessInsight'
 
 // A bound-namespace translate function (the caller already resolved the namespace).
 type Tx = (key: string, opts?: Record<string, unknown>) => string
@@ -27,13 +28,7 @@ export function buildLocationAdviceInsights(l: Location, t: Tx): KoiosAdviceInsi
     l.contactName,
     l.phone || l.email,
   ]
-  const filledPct = Math.round((coreFields.filter(Boolean).length / coreFields.length) * 100)
-
   return [
-    {
-      type: t('ai.completeness'),
-      color: filledPct >= 80 ? 'var(--color-success)' : 'var(--color-warning)',
-      text: filledPct >= 80 ? t('ai.locationComplete') : t('ai.locationPartial', { pct: filledPct }),
-    },
+    completenessInsight(coreFields, t, { good: 'ai.locationComplete', partial: 'ai.locationPartial' }),
   ]
 }

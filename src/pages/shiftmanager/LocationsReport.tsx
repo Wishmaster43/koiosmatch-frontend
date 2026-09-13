@@ -9,6 +9,7 @@ import { MapPin, Layers, Building2, AlertCircle } from 'lucide-react'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useNumberFormat } from '@/lib/formatters'
+import { distinctSortedValues } from '@/components/reports/distinctSortedValues'
 import KpiBlock         from '@/components/ui/KpiBlock'
 import EntityListDrawer from '@/components/ui/EntityListDrawer'
 import { SmReportHeader, SmKpiGrid } from './SmReportHeader'
@@ -63,8 +64,7 @@ export default function LocationsReport() {
   }))
 
   // Distinct location statuses present, sorted alphabetically, for the status filter's option list.
-  const statusOptions = useMemo(() =>
-    [...new Set(locations.map(l => l.status).filter((x): x is string => Boolean(x)))].sort(), [locations])
+  const statusOptions = useMemo(() => distinctSortedValues(locations, l => l.status), [locations])
 
   // Single filter group (status), in the shape the shared right panel expects; empty until locations load.
   const filterGroups = useMemo(() => statusOptions.length === 0 ? [] : [{

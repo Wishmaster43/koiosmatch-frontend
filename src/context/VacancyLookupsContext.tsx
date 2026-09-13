@@ -1,10 +1,10 @@
 /* eslint-disable react-refresh/only-export-components -- a context module exports its provider and its hooks together by design (§2: contexts live in context/); moving the hooks would change every consumer import for a dev-only HMR nicety */
 import { createContext, useContext, useState, useEffect, useMemo } from 'react'
-import type { Dispatch, ReactNode, SetStateAction } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import api, { unwrap } from '../lib/api'
 import { sortActiveRows, makeMetaResolver } from '../lib/lookupUtils'
 import { translateSeedList } from '../lib/lookupSeedI18n'
+import { loadTenantLookups } from './lookupLoader'
 
 /**
  * VacancyLookupsContext — the tenant-configurable vacancy lookups.
@@ -153,15 +153,13 @@ export function VacancyLookupsProvider({ children }: { children: ReactNode }) {
 
   // Fetch each lookup once; a 404/empty keeps the seed fallback so the UI never breaks.
   useEffect(() => {
-    const load = (url: string, fallback: VacancyLookupItem[], set: Dispatch<SetStateAction<VacancyLookupItem[]>>, pinId = false) =>
-      api.get(url).then(r => set(normalize(unwrap(r), fallback, pinId))).catch(() => {})
-    Promise.allSettled([
-      load('/vacancy-statuses?active=1',         DEFAULT_VACANCY_STATUSES, setStatuses),
-      load('/vacancy-phases?active=1',           DEFAULT_VACANCY_PHASES,   setPhases),
-      load('/vacancy-seniority-levels?active=1', DEFAULT_SENIORITY_LEVELS, setSeniorityLevels),
-      load('/vacancy-education-levels?active=1', DEFAULT_EDUCATION_LEVELS, setEducationLevels),
-      load('/vacancy-channels?active=1',         DEFAULT_CHANNELS,         setChannels, true),
-    ]).finally(() => setLoading(false))
+    loadTenantLookups<VacancyLookupItem[]>([
+      { url: '/vacancy-statuses?active=1',         fallback: DEFAULT_VACANCY_STATUSES, set: setStatuses },
+      { url: '/vacancy-phases?active=1',           fallback: DEFAULT_VACANCY_PHASES,   set: setPhases },
+      { url: '/vacancy-seniority-levels?active=1', fallback: DEFAULT_SENIORITY_LEVELS, set: setSeniorityLevels },
+      { url: '/vacancy-education-levels?active=1', fallback: DEFAULT_EDUCATION_LEVELS, set: setEducationLevels },
+      { url: '/vacancy-channels?active=1',         fallback: DEFAULT_CHANNELS,         set: setChannels, pinId: true },
+    ], normalize, () => setLoading(false))
   }, [])
 
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).

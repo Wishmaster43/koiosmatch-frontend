@@ -11,10 +11,10 @@
  * status buttons stay entity-specific.
  */
 import { useTranslation } from 'react-i18next'
-import { Sparkles, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import Button from '@/components/ui/Button'
-import GenerateFlowStatus from '@/components/ui/GenerateFlowStatus'
 import GenerateFlowFrame from '@/components/forms/GenerateFlowFrame'
+import GenerateApplyStatus, { GenerateCtaButton } from '@/components/forms/GenerateApplyStatus'
 import { useProfileGenerate } from './useProfileGenerate'
 import type { FormState } from '../AddCandidateModal'
 
@@ -41,14 +41,10 @@ export default function ProfileGenerateFlow({ form, onApply }: ProfileGenerateFl
         </div>
       }
     >
-      {status === 'idle' && (
-        <Button variant="primary" size="sm" onClick={generate} style={{ alignSelf: 'flex-start' }}>
-          <Sparkles size={13} /> {t('generate.cta')}
-        </Button>
-      )}
+      {status === 'idle' && <GenerateCtaButton onClick={generate} label={t('generate.cta')} />}
 
-      <GenerateFlowStatus status={status} concept={concept} onRetry={generate}
-        onApply={() => { onApply(concept); closeFlow() }} onDiscard={discard} t={t} />
+      <GenerateApplyStatus status={status} concept={concept} generate={generate}
+        onApply={onApply} discard={discard} closeFlow={closeFlow} t={t} />
     </GenerateFlowFrame>
   )
 }

@@ -27,7 +27,8 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ListChecks, ArrowUpRight } from 'lucide-react'
-import api, { unwrapList } from '@/lib/api'
+import api from '@/lib/api'
+import { runGuardedTasksRequest } from './guardedTasksRequest'
 import SoftChip from '@/components/ui/SoftChip'
 import { GroupLabel, Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
@@ -87,10 +88,9 @@ export default function SubtasksSection({ task, onSubtaskCreated }: {
     if (!hasSubtasks) { setRows([]); setLoading(false); setError(false); return }
     const requestId = ++requestIdRef.current
     setLoading(true); setError(false)
-    api.get('/tasks', { params: { parent_id: task.id } })
-      .then(r => { if (requestIdRef.current === requestId) setRows(unwrapList(r).rows as SubtaskRow[]) })
-      .catch(err => { if (requestIdRef.current === requestId && err?.response?.status !== 404) setError(true) })
-      .finally(() => { if (requestIdRef.current === requestId) setLoading(false) })
+    runGuardedTasksRequest<SubtaskRow>(api.get('/tasks', { params: { parent_id: task.id } }), {
+      requestIdRef, requestId, setRows, setError, setLoading,
+    })
   }, [hasSubtasks, task.id])
   useEffect(() => { fetchSubtasks() }, [fetchSubtasks])
 

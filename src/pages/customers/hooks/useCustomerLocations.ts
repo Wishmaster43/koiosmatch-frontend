@@ -13,6 +13,7 @@ import { mapLocation } from '../data/mapCustomer'
 // Shared mount-effect + change-event refetch tail, joined by useCustomerContacts
 // (live + archived) and useCustomerDepartments (archived) (DRY round 11, CUSTTABS2).
 import { useAbortableListLoad } from './useAbortableListLoad'
+import { fetchAbortableList } from './fetchAbortableList'
 import type { Location, ApiLocation } from '@/types/customer'
 import type { Id } from '@/types/common'
 import type { DeleteResult } from './subEntityDelete'
@@ -121,9 +122,8 @@ export function useCustomerLocations(customerId: Id | undefined) {
   const load = useCallback((signal?: AbortSignal) => {
     if (!customerId) { setLocations([]); setLoading(false); return }
     setLoading(true); setError(false)
-    api.get(`/customers/${customerId}/locations`, { signal })
-      .then(res => { if (!signal?.aborted) setLocations(unwrapList<ApiLocation>(res).rows.map(mapLocation)) })
-      .catch(err => { if (err?.code !== 'ERR_CANCELED' && !signal?.aborted) setError(true) })
+    fetchAbortableList(`/customers/${customerId}/locations`, signal,
+      res => unwrapList<ApiLocation>(res).rows.map(mapLocation), setLocations, setError)
       .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [customerId])
   // Mount-effect + refetch-on-change tail (archive/restore/merge, fired from deep

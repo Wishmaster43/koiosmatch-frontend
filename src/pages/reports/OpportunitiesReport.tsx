@@ -29,18 +29,18 @@ import type { ReportPeriod, CandidateOwnerSegment } from '@/types/analytics'
 import { useOrderedReportKpis } from './hooks/useOrderedReportKpis'
 import { useTotalCompare } from './hooks/useTotalCompare'
 import { getCompareSlug } from './reportCompareSupport'
-import ReportCompareMetric from './ReportCompareMetric'
+import { totalCompareSubFor } from './lib/kpiCompareSub'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
 import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterParams'
 import type { ReportFilterState } from './reportFilterParams'
-import { renderKpiValue } from './renderKpiValue'
-import { serverKpiSpecs, unitMapFor } from './lib/kpiSpecs'
+import { unitAwareServerKpiSpecs, thresholdCaption } from './lib/kpiSpecs'
 import { donutData, barData, ownerBarData } from './lib/chartData'
 import { segmentClick, ownerClick } from './lib/drillClick'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
 import { reportWindowLabel } from './lib/reportWindowLabel'
+import { makeOpenKpiDrill, makeOpenSegment } from './lib/drillFactories'
 
 // The three plain single-value XOR axes; `owner` has its own D2 shape below.
 type Axis = 'stage' | 'customer' | 'branch'
@@ -74,17 +74,11 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
   // total always agree on the same underlying set. buildReportQueryParams already
   // attaches value_min/value_max for 'opportunities' (reportFilterParams.ts).
   const baseParams = buildReportQueryParams(period, 'opportunities', filters)
-  const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
-    setDrill({
-      title: seg.label, value: seg.count, subtitle: windowSub(),
-      entityPage: 'opportunities',
-      rowsEndpoint: '/reports/opportunities/drill', rowsParams: { ...baseParams, ...xorParam },
-      // K-192: advice now validates the panel filters exactly like the drill (see
-      // getReportsOpportunitiesAdvice, api-generated.ts:46593 — owner_id/location_id/
-      // status/customer_id/value_min/value_max all listed) — so advice and drawer
-      // rows share one population. baseParams already carries period.
-      adviceEndpoint: '/reports/opportunities/advice', adviceParams: { ...baseParams, ...xorParam },
-    })
+  // K-192: advice validates the panel filters exactly like the drill (see
+  // getReportsOpportunitiesAdvice, api-generated.ts:46593 — owner_id/location_id/
+  // status/customer_id/value_min/value_max all listed) — so advice and drawer
+  // rows share one population. baseParams already carries period.
+  const openSegment = makeOpenSegment({ entityPage: 'opportunities', rowsEndpoint: '/reports/opportunities/drill', adviceEndpoint: '/reports/opportunities/advice', baseParams, windowSub, setDrill })
 
   // Stage axis: a lookup axis with its own colour per value (CHART-TYPE RULE) →
   // donut. 'none'/'others' sentinels and orphaned (deleted-lookup) values are
@@ -110,11 +104,7 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
   // the house dash with no drill — never a value from another population. The
   // stage/customer/owner/branch DATA keeps a chart surface below (donut/bars);
   // forecast_count/forecast_value have no such surface and drop with the strip.
-  const openKpiDrill = (kpi: string, label: string, value: string | number) =>
-    gateDrillClick('opportunities', () => setDrill({
-      title: label, value, subtitle: windowSub(), entityPage: 'opportunities',
-      rowsEndpoint: '/reports/opportunities/kpis/drill', rowsParams: { ...baseParams, kpi },
-    }))
+  const openKpiDrill = makeOpenKpiDrill({ report: 'opportunities', rowsEndpoint: '/reports/opportunities/kpis/drill', baseParams, windowSub, setDrill })
   // Semantic colour only where the number is a SIGNAL and non-zero (§4: colour
   // carries meaning; a calm zero stays uncoloured).
   const KPI_COLOR: Partial<Record<string, string>> = {
@@ -129,17 +119,13 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
   // UNIT-CANON (FRONTEND-CONTRACT §13, REPORT-KPI-STRIP-1): the SERVER's unit
   // field on each kpis[] entry decides the formatting; the local map is only the
   // tolerant fallback for a cached pre-unit envelope (§10) — never the source.
-  const KPI_UNIT_FALLBACK: Partial<Record<string, unknown>> = { win_rate: 'pct', open_value: 'euro' }
-  const unitByServerKey = unitMapFor(data?.kpis, KPI_UNIT_FALLBACK)
-  const kpiByKey = serverKpiSpecs({
+  const kpiByKey = unitAwareServerKpiSpecs({
     data, drill, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t, openKpiDrill,
-    valueFor: (key, raw, has) => renderKpiValue(raw, has, unitByServerKey.get(key) as string | undefined),
+    unitFallback: { win_rate: 'pct', open_value: 'euro' },
     // KPI-DREMPELS-FE-1: threshold cards keep their tenant-threshold caption
     // (the envelope still carries the configured day counts).
-    subFor: key => key === 'total' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" />
-      : key === 'stale' && data?.totals?.stale_days != null ? t('thresholdDays', { n: data.totals.stale_days })
-      : key === 'closing_soon' && data?.totals?.closing_soon_days != null ? t('thresholdDays', { n: data.totals.closing_soon_days })
-      : undefined,
+    subFor: key => totalCompareSubFor(totalCompare)(key)
+      ?? thresholdCaption(t, key, { stale: data?.totals?.stale_days, closing_soon: data?.totals?.closing_soon_days }),
   })
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key

@@ -7,10 +7,12 @@
  * add/update/remove, reconciled with the server row; reverts + toasts on failure
  * (mirrors useEntityDocuments — one shared shape for entity sub-resource CRUD).
  */
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { fetchAbortableList } from './fetchAbortableList'
+import { useMountAbortableLoad } from './useMountAbortableLoad'
 import type { Id } from '@/types/common'
 
 export interface PriceAgreement {
@@ -86,12 +88,11 @@ export function usePriceAgreements(customerId: Id | undefined) {
   const load = useCallback((signal?: AbortSignal) => {
     if (!customerId) { setAgreements([]); setLoading(false); return }
     setLoading(true); setError(false)
-    api.get(`/customers/${customerId}/price-agreements`, { signal })
-      .then(res => { if (!signal?.aborted) setAgreements(unwrapList<ApiPriceAgreement>(res).rows.map(toUi)) })
-      .catch(err => { if (err?.code !== 'ERR_CANCELED' && !signal?.aborted) setError(true) })
+    fetchAbortableList(`/customers/${customerId}/price-agreements`, signal,
+      res => unwrapList<ApiPriceAgreement>(res).rows.map(toUi), setAgreements, setError)
       .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [customerId])
-  useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
+  useMountAbortableLoad(load)
 
   // Create — optimistic row with a temp id, swapped for the server row on success.
   const add = useCallback((payload: PriceAgreementPayload) => {

@@ -34,7 +34,8 @@ import api, { unwrapList } from '@/lib/api'
 import { mapVacancyRow } from '../hooks/useCustomerDrawerData'
 import type { VacancyRow } from '../hooks/useCustomerDrawerData'
 // Shared seed-status state + status/applications/pencil columns, joined by VacanciesTab (DRY round 11, CUSTTABS2).
-import { useSeedVacancyStatusOptions } from '../hooks/useSeedVacancyStatusOptions'
+import { useSeedVacancyStatusOptions, mapVacancyStatusOptions } from '../hooks/useSeedVacancyStatusOptions'
+import type { RawVacancyStatusRow } from '../hooks/useSeedVacancyStatusOptions'
 import { vacancyStatusAndActionColumns } from './vacancyListColumns'
 import type { Id } from '@/types/common'
 import type { Column } from '@/components/ui/DataTable'
@@ -84,10 +85,8 @@ export default function ScopedVacanciesTab({ scope, id, customerId, customerName
   // Load the tenant vacancy-status lookup once — same endpoint/shape VacanciesTab reads.
   useEffect(() => {
     api.get('/vacancy-statuses').then(r => {
-      const raw = (unwrapList(r).rows) as Array<{ id?: string; value?: string; label?: string; name?: string; active?: boolean }>
-      const opts = raw.filter(o => o.active !== false)
-        .map(o => ({ value: String(o.id ?? o.value ?? o.name ?? ''), label: String(o.label ?? o.name ?? '') }))
-        .filter(o => o.value)
+      const raw = (unwrapList(r).rows) as RawVacancyStatusRow[]
+      const opts = mapVacancyStatusOptions<StatusOpt>(raw)
       if (opts.length) setStatusOptions(opts)
       setResolved(true)
     }).catch(() => setResolved(true))

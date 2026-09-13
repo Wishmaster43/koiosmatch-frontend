@@ -17,7 +17,9 @@ import { useTranslation } from 'react-i18next'
 import SearchSelect from '@/components/ui/SearchSelect'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import type { Id } from '@/types/common'
-import { cardHead, cardBox } from './fields'
+import { cardBox } from './fields'
+import RemovableChip from '@/components/forms/RemovableChip'
+import CardHeaderWithAddTrigger from '@/components/forms/CardHeaderWithAddTrigger'
 
 interface BranchesCardProps {
   branchIds: string[]
@@ -33,24 +35,20 @@ export default function BranchesCard({ branchIds, setBranchIds, locations }: Bra
     // side by side with ProfileTextCard instead of stacking full-width below it.
     <div>
       {/* Header row: card title left, "+ Vestiging" trigger right (drill-down parity). */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
-        <div style={{ ...cardHead, marginBottom: 0 }}>{t('modal.fields.branches')}</div>
+      <CardHeaderWithAddTrigger title={t('modal.fields.branches')}>
         <SearchSelect triggerLabel={t('modal.fields.branchesAdd')}
           options={locations.map(o => ({ value: String(o.value), label: o.label }))}
           selected={branchIds}
           onToggle={(id: string) => setBranchIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id])}
           menuAlign="right" renderTrigger={(toggleOpen: () => void) => <DrawerAddButton onClick={toggleOpen} label={t('modal.fields.branchesAdd')} />} />
-      </div>
+      </CardHeaderWithAddTrigger>
       <div style={cardBox}>
         {branchIds.length > 0 && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {branchIds.map(id => (
-              <span key={id} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, padding: '3px 8px',
-                borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
+              <RemovableChip key={id} onRemove={() => setBranchIds(p => p.filter(x => x !== id))}>
                 {locations.find(o => String(o.value) === id)?.label ?? id}
-                <button type="button" onClick={() => setBranchIds(p => p.filter(x => x !== id))} aria-label={t('common:remove')}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
-              </span>
+              </RemovableChip>
             ))}
           </div>
         )}

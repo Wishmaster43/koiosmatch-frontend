@@ -4,30 +4,26 @@
  * DocPreviewModal. Split out of the former SectionTabs.tsx verbatim (§3 size
  * discipline) — no behaviour change, only file boundaries.
  */
-import { useTranslation } from 'react-i18next'
 import { useRelationSort } from '@/components/forms/useRelationSort'
 import SoftChip from '@/components/ui/SoftChip'
-import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import LookupIcon from '@/components/ui/LookupIcon'
-import { useDateFormat } from '@/lib/datetime'
 import { useEducationLevels } from '@/lib/useEducationLevels'
 // HUISSTIJL-1: the shared 13/600 title atom.
 import { SectionTitle } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
 import {
-  AddableSection, DocEntryLinks, ProseField, renderAddButton, resolveEducationStartDate, resolveLinkedDocument,
+  AddableSection, DocEntryLinks, LinkedDocPreviewOverlay, ProseField, renderAddButton, resolveEducationStartDate, resolveLinkedDocument,
 } from './sectionTabsShared'
 import type { RelItem, RelTabProps } from './sectionTabsShared'
-import { linkedDocumentField, useLinkedDocPreview } from './useLinkedDocPreview'
+import { linkedDocumentField } from './useLinkedDocPreview'
+import { useRelTabBase } from './useRelTabBase'
 
 // Education list tab: add/edit/remove/reorder rows, each optionally previewing an already-linked proof document via the shared DocPreviewModal.
 export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = [], onJumpToDocuments, onReorder }: RelTabProps) {
-  const { t } = useTranslation('candidates')
-  const { formatDate } = useDateFormat()
-  const fmt = (d?: string) => (d ? formatDate(d) : '')
   // DOC-EDU-1: preview overlay + "Koppelen aan" picker options for a row's linked
-  // proof document (shared house DocPreviewModal, never a fork).
-  const { previewDoc, openPreview, closePreview, documentOptions } = useLinkedDocPreview(documents, items)
+  // proof document (shared house DocPreviewModal, never a fork) — shared
+  // useRelTabBase (DRY round, CANDTABS package).
+  const { t, fmt, previewDoc, openPreview, closePreview, documentOptions } = useRelTabBase(documents, items)
   // KAND-NIVEAU-1: the tenant education-level lookup (id-based — level_id on
   // candidate_educations, never the name, so a tenant rename never breaks a row).
   const { levels } = useEducationLevels()
@@ -133,7 +129,7 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = 
           </div>
         )
       }} />
-    {previewDoc && <DocPreviewModal doc={previewDoc} onClose={closePreview} />}
+    <LinkedDocPreviewOverlay previewDoc={previewDoc} onClose={closePreview} />
     </>
   )
 }

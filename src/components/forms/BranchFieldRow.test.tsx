@@ -12,6 +12,7 @@ const OPTIONS = [{ value: 'b1', label: 'Amsterdam' }, { value: 'b2', label: 'Rot
 
 describe('BranchFieldRow', () => {
   const defaultProps = {
+    t: ((key: string) => key) as unknown as import('i18next').TFunction,
     label: 'Vestiging',
     branchId: '',
     onBranchChange: vi.fn(),
@@ -45,5 +46,13 @@ describe('BranchFieldRow', () => {
     render(<BranchFieldRow {...defaultProps} branchId="b1" onBranchChange={onBranchChange} />)
     await user.click(screen.getByRole('button', { name: 'clearField' }))
     expect(onBranchChange).toHaveBeenCalledWith('')
+  })
+
+  // Both real callers (OpportunityGeneralCard, PlacementCard) omit label/clearLabel/
+  // placeholder and rely on the `t`-derived defaults.
+  it('defaults label/clearLabel/placeholder from t when omitted', () => {
+    const t = ((key: string) => key) as unknown as import('i18next').TFunction
+    render(<BranchFieldRow t={t} branchId="" onBranchChange={vi.fn()} branchOptions={OPTIONS} />)
+    expect(screen.getByText('modal.fields.branch')).toBeInTheDocument()
   })
 })

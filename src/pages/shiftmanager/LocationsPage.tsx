@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next'
 import { MapPin, Building2, Layers } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { toggleInList } from '@/lib/selectionSet'
+import { usePagedRows } from '@/hooks/usePagedRows'
+import { distinctSortedValues } from '@/components/reports/distinctSortedValues'
 import LocationsTable from './LocationsTable'
 import LocationDrawer from './LocationDrawer'
 import SmKpiStrip from './SmKpiStrip'
@@ -23,8 +25,6 @@ export default function LocationsPage() {
   const { locations } = useSmLocations()
   const [search]                  = useState('')
   const [selected,  setSelected]  = useState<SmLocationRow | null>(null)
-  const [page,      setPage]      = useState(1)
-  const [pageSize,  setPageSize]  = useState(50)
   const [selStatuses,  setSelStatuses]  = useState<string[]>([])
   const [selCustomers,   setSelCustomers]   = useState<string[]>([])
   const [selCities,    setSelCities]    = useState<string[]>([])
@@ -32,11 +32,11 @@ export default function LocationsPage() {
   const { registerFilters, unregisterFilters } = useRightPanel()
 
   // Distinct status values present in the loaded locations, sorted, for the status filter options.
-  const statusOptions = useMemo(() => [...new Set(locations.map(l => l.status).filter((x): x is string => Boolean(x)))].sort(), [locations])
+  const statusOptions = useMemo(() => distinctSortedValues(locations, l => l.status), [locations])
   // Distinct customer names present in the loaded locations, sorted, for the customer filter options.
-  const customerOptions  = useMemo(() => [...new Set(locations.map(l => l.customer).filter((x): x is string => Boolean(x)))].sort(), [locations])
+  const customerOptions  = useMemo(() => distinctSortedValues(locations, l => l.customer), [locations])
   // Distinct city values present in the loaded locations, sorted, for the city filter options.
-  const cityOptions  = useMemo(() => [...new Set(locations.map(l => l.city).filter((x): x is string => Boolean(x)))].sort(), [locations])
+  const cityOptions  = useMemo(() => distinctSortedValues(locations, l => l.city), [locations])
 
   // Builds the status/customer/city filter definitions handed to the shared right-panel filter UI.
   const filterGroups = useMemo(() => [
@@ -75,8 +75,7 @@ export default function LocationsPage() {
     return rows
   }, [locations, search, selStatuses, selCustomers, selCities])
 
-  const totalPages = Math.ceil(filtered.length / pageSize)
-  const paged = filtered.slice((page - 1) * pageSize, page * pageSize)
+  const { page, setPage, pageSize, setPageSize, totalPages, paged } = usePagedRows(filtered)
 
   // KPI cards — translated labels; values are derived from the live list.
   const kpis = [

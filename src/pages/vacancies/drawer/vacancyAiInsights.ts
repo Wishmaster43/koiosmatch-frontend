@@ -3,6 +3,7 @@
 // buildVacancyAdviceInsights below for the full field list and reasoning.
 import type { VacancyDetail } from '@/types/vacancy'
 import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
+import { completenessInsight } from '@/components/ai/completenessInsight'
 // Shared day count from lib/localDate (side-effect-free; the datetime module would
 // drag the i18n init into this pure builder). `futureAsZero` keeps the clamp this
 // builder always had: a future `created` reads as 0 days, never as unknown.
@@ -31,17 +32,11 @@ export function buildVacancyAdviceInsights(v: VacancyDetail, t: Tx, now: Date = 
     v.street || v.city || v.location,
     v.statusValue,
   ]
-  const filledPct = Math.round((coreFields.filter(Boolean).length / coreFields.length) * 100)
-
   const days = daysSince(v.created, now, true)
   const appsCount = v.applicationsCount ?? 0
 
   return [
-    {
-      type: t('ai.completeness'),
-      color: filledPct >= 80 ? 'var(--color-success)' : 'var(--color-warning)',
-      text: filledPct >= 80 ? t('ai.completeGood') : t('ai.completePartial', { pct: filledPct }),
-    },
+    completenessInsight(coreFields, t),
     {
       type: t('ai.flowLabel'),
       color: 'var(--color-secondary)',

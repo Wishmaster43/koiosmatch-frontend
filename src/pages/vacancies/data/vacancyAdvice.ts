@@ -1,4 +1,5 @@
 import type { Vacancy } from '@/types/vacancy'
+import { daysSince } from '@/lib/localDate'
 
 /**
  * vacancyAdvice — the ONE deterministic rule engine behind the vacancies table's
@@ -46,11 +47,4 @@ export function deriveVacancyAdvice(v: Vacancy, opts: VacancyAdviceOptions): Vac
 
   // Rule 4: nothing to flag.
   return NONE_RULE
-}
-
-// Whole-day difference between a date string and now; null when the date is unreadable.
-function daysSince(dateStr: string, now: Date): number | null {
-  const d = new Date(dateStr)
-  if (Number.isNaN(d.getTime())) return null
-  return Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24))
 }

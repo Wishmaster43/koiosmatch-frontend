@@ -22,7 +22,8 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ListChecks } from 'lucide-react'
-import api, { unwrapList } from '@/lib/api'
+import api from '@/lib/api'
+import { runGuardedTasksRequest } from './guardedTasksRequest'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import SoftChip from '@/components/ui/SoftChip'
 import Button from '@/components/ui/Button'
@@ -133,10 +134,10 @@ export default function RelatedTasks({ task }: { task: TaskDetail }) {
     if (type.length > 0) params.type = type
     if (priority.length > 0) params.priority = priority
     if (query.trim()) params.q = query.trim()
-    api.get('/tasks', { params })
-      .then(r => { if (requestIdRef.current === requestId) setRows(((unwrapList(r).rows) as Row[]).filter(x => String(x.id) !== String(task.id))) })
-      .catch(err => { if (requestIdRef.current === requestId && err?.response?.status !== 404) setError(true) })
-      .finally(() => { if (requestIdRef.current === requestId) setLoading(false) })
+    runGuardedTasksRequest<Row>(api.get('/tasks', { params }), {
+      requestIdRef, requestId, setRows, setError, setLoading,
+      mapRows: rows => rows.filter(x => String(x.id) !== String(task.id)),
+    })
     // `subject` is deliberately NOT a dep: resolveSubject(task) returns a fresh
     // object every render, so depending on it would re-fetch on every parent
     // re-render — its two primitive fields (type/id) are the real dependency.

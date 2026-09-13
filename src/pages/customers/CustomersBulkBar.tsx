@@ -4,14 +4,12 @@
  * mutation; data per action arrives via props so this stays a thin assembler.
  * Mirrors CandidatesBulkBar.
  */
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CircleDot, Tag, Tags } from 'lucide-react'
 import type { MenuNode } from '@/components/ui/ActionMenu'
 import BulkActionsBar from '@/components/ui/BulkActionsBar'
-import BulkNoteModal from '@/components/ui/BulkNoteModal'
-import { useAuth } from '@/context/AuthContext'
-import { useApps } from '@/context/AppsContext'
+import { useBulkNoteModal } from '@/hooks/useBulkNoteModal'
+import { useBackofficeCouplePermissions } from '@/hooks/useBackofficeCouplePermissions'
 import { archiveNode, ownerNode, geocodeNode, coupleBackofficeNode, noteNode, bulkBarLabels, removeTagNode } from '@/components/ui/bulk/bulkNodes'
 import type { Id, LookupOption } from '@/types/common'
 
@@ -50,19 +48,13 @@ export default function CustomersBulkBar({
   const { t } = useTranslation('customers')
   // NOTITIE-RTE-VRAAG-1: the bulk note action opens the shared rich-text modal
   // instead of ActionMenu's bare input node.
-  const [noteModalOpen, setNoteModalOpen] = useState(false)
+  const { setOpen: setNoteModalOpen, node: bulkNoteModalNode } = useBulkNoteModal(onAddNote, t)
 
   // SYNC-BULK-1: same permission as the per-record BackofficeLinksTab's `canLink`
   // (BackofficeEntityRegistry maps the "customer" entity to customers.update) —
   // never a new permission. Module availability mirrors that same tab's `useApps()`
   // gate so a disabled system (hf/shiftmanager app off for this tenant) is never offered.
-  const auth = useAuth()
-  const hasPermission = auth?.hasPermission ?? (() => false)
-  const apps = useApps()
-  const isAppEnabled = apps?.isAppEnabled ?? (() => false)
-  const canCouple = hasPermission('customers.update')
-  const showHelloflex = isAppEnabled('hf')
-  const showShiftmanager = isAppEnabled('shiftmanager')
+  const { canCouple, showHelloflex, showShiftmanager } = useBackofficeCouplePermissions('customers.update')
 
   // Option lists built from props.
   const userOptions   = users.map(u => ({ value: u.id, label: u.name }))
@@ -89,9 +81,7 @@ export default function CustomersBulkBar({
       items={items}
       labels={bulkBarLabels(t, count)}
     >
-      <BulkNoteModal open={noteModalOpen} onClose={() => setNoteModalOpen(false)}
-        onSubmit={html => { onAddNote(html); setNoteModalOpen(false) }}
-        title={t('bulk.addNote')} submitLabel={t('bulk.noteSubmit')} />
+      {bulkNoteModalNode}
     </BulkActionsBar>
   )
 }

@@ -9,6 +9,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Archive, Trash2, ClipboardCheck } from 'lucide-react'
 import ViewModeToggle from '@/components/ui/ViewModeToggle'
+import { matchesLifecycleView } from '@/lib/lifecycleFilter'
 import { tableBoardViewOptions } from '@/components/ui/listViewOptions'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
@@ -158,9 +159,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
     return rows.filter(r => {
       // Three lifecycle views (TRASH-OVERAL-2, mirrors candidates): trash =
       // pending_erase only, archived = archived only, default = active only.
-      if (showTrash) { if (r.lifecycle !== 'pending_erase') return false }
-      else if (showArchived) { if (r.lifecycle !== 'archived') return false }
-      else if (r.archived) return false
+      if (!matchesLifecycleView(r, showTrash, showArchived)) return false
       if (stageFilter.length && !stageFilter.includes(r.status)) return false
       if (kpiScored && typeof r.score !== 'number') return false
       if (kpiUnscored && typeof r.score === 'number') return false

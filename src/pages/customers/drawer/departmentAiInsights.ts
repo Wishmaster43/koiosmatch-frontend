@@ -4,6 +4,7 @@
  * a component file exports only components (react-refresh), helpers live here.
  */
 import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
+import { completenessInsight } from '@/components/ai/completenessInsight'
 import type { Department } from '@/types/customer'
 
 // A bound-namespace translate function (mirrors locationAiInsights.ts/customerAiInsights.ts).
@@ -18,13 +19,8 @@ export type Tx = (key: string, opts?: Record<string, unknown>) => string
  */
 export function buildDepartmentAdviceInsights(d: Department, t: Tx): KoiosAdviceInsight[] {
   const coreFields = [d.description, d.statusId, d.costCenter]
-  const filledPct = Math.round((coreFields.filter(Boolean).length / coreFields.length) * 100)
   return [
-    {
-      type: t('ai.completeness'),
-      color: filledPct >= 80 ? 'var(--color-success)' : 'var(--color-warning)',
-      text: filledPct >= 80 ? t('ai.departmentComplete') : t('ai.departmentPartial', { pct: filledPct }),
-    },
+    completenessInsight(coreFields, t, { good: 'ai.departmentComplete', partial: 'ai.departmentPartial' }),
   ]
 }
 

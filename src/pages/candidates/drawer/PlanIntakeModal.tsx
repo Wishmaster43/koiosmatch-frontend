@@ -51,6 +51,7 @@ import { usePlanIntakeForm } from './planIntake/usePlanIntakeForm'
 import type { PlanIntakeFormOptions } from './planIntake/usePlanIntakeForm'
 import { input, fieldFootprint, errMsg, labelLeftRow, rowLabel, rowField } from './planIntake/styles'
 import ModalFooter from '@/components/ui/ModalFooter'
+import ModalScrollBody from '@/components/forms/ModalScrollBody'
 import { tintBorder } from '@/lib/tint'
 import type { Modality } from '@/lib/useAppointmentTypes'
 
@@ -65,6 +66,23 @@ export type { ExistingAppointment } from './planIntake/usePlanIntakeForm'
 // keys statically greppable for the i18n key-exists test (no computed t() key).
 const MODALITY_LABEL_KEY: Record<Modality, string> = {
   office: 'work.modalityOffice', remote: 'work.modalityRemote', phone: 'work.modalityPhone',
+}
+
+// Shared "label left, control, optional required-error line" row (P33 canon) —
+// collapses the Type/Duration rows' identical shape into one place; a plain
+// span label when there is no htmlFor, a real <label> when there is.
+function LabeledFieldRow({ label, htmlFor, error, requiredLabel, children }:
+  { label: string; htmlFor?: string; error?: boolean; requiredLabel: string; children: React.ReactNode }) {
+  const Tag = htmlFor ? 'label' : 'span'
+  return (
+    <div style={labelLeftRow}>
+      <Tag htmlFor={htmlFor} style={rowLabel as React.CSSProperties}>{label}</Tag>
+      <div style={rowField}>
+        {children}
+        {error && <div style={errMsg}>{requiredLabel}</div>}
+      </div>
+    </div>
+  )
 }
 
 // Thin container for the shared appointment modal (see file docblock above) — all
@@ -86,8 +104,7 @@ export default function PlanIntakeModal(props: PlanIntakeFormOptions) {
     <FloatingPanel open onClose={onClose} title={heading} ariaLabel={heading}
       persistKey="plan-intake" width={580} maxWidth="92vw" scrollBody={false} bodyStyle={{ padding: 0 }}>
 
-      {/* Fields scroll in their own area so the footer buttons stay pinned and never clip (Danny 13-08). */}
-      <div style={{ overflow: 'auto', flex: 1, minHeight: 0, padding: 22 }}>
+      <ModalScrollBody>
 
         {/* AXIS-MATRIX-2 preflight — warn/block on this candidate before scheduling (create only). */}
         {form.apptRuleDecision && form.apptRuleDecision.effect !== 'allow' && (
@@ -96,14 +113,10 @@ export default function PlanIntakeModal(props: PlanIntakeFormOptions) {
 
         {/* P33: every field its own full-width label-left row (canon 120px label). */}
         {/* Type → proposes duration + modality. */}
-        <div style={labelLeftRow}>
-          <span style={rowLabel}>{t('work.appointmentType')}</span>
-          <div style={rowField}>
-            <SelectMenu style={fieldFootprint} value={form.type || null} onChange={form.pickType} placeholder={t('work.pickType')}
-              options={form.typeOptions.map(x => ({ value: x.value, label: x.label }))} />
-            {errors.type && <div style={errMsg}>{t('common:required')}</div>}
-          </div>
-        </div>
+        <LabeledFieldRow label={t('work.appointmentType')} error={errors.type} requiredLabel={t('common:required')}>
+          <SelectMenu style={fieldFootprint} value={form.type || null} onChange={form.pickType} placeholder={t('work.pickType')}
+            options={form.typeOptions.map(x => ({ value: x.value, label: x.label }))} />
+        </LabeledFieldRow>
 
         {/* Afspraak-as (C.14, Danny 31-08 — verifier point 3): the modality the
             chosen type proposes is a FIXED axis, shown as read-only plain text
@@ -126,14 +139,10 @@ export default function PlanIntakeModal(props: PlanIntakeFormOptions) {
         </div>
 
         {/* Duration override. */}
-        <div style={labelLeftRow}>
-          <label htmlFor="intake-dur" style={rowLabel as React.CSSProperties}>{t('work.duration')}</label>
-          <div style={rowField}>
-            <input id="intake-dur" type="number" min={5} max={480} step={5} value={form.duration}
-              onChange={e => form.setDuration(Number(e.target.value) || 0)} style={{ ...input, width: 90 }} />
-            {errors.duration && <div style={errMsg}>{t('common:required')}</div>}
-          </div>
-        </div>
+        <LabeledFieldRow label={t('work.duration')} htmlFor="intake-dur" error={errors.duration} requiredLabel={t('common:required')}>
+          <input id="intake-dur" type="number" min={5} max={480} step={5} value={form.duration}
+            onChange={e => form.setDuration(Number(e.target.value) || 0)} style={{ ...input, width: 90 }} />
+        </LabeledFieldRow>
 
         {/* End time — read-only, still box-modeled (padding + border, S24c) so it
             lines up with the other rows; the floating "tot 19:15" text read as
@@ -224,7 +233,7 @@ export default function PlanIntakeModal(props: PlanIntakeFormOptions) {
           </div>
         )}
 
-      </div>
+      </ModalScrollBody>
 
       {/* Pinned footer — buttons stay visible whatever the content height (Danny 13-08). */}
       {/* Disabled when `when` OR `type` is missing (no hardcoded type fallback —

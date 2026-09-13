@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
-import CreateErrorAlert from './CreateErrorAlert'
+import CreateErrorAlert from '@/components/forms/CreateErrorAlert'
 
 describe('CreateErrorAlert', () => {
   it('renders the error message with role=alert', () => {

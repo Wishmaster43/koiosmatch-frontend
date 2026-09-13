@@ -12,8 +12,8 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import SectionCard from '@/components/ui/SectionCard'
-import DrawerSearchField from '@/components/drawer/DrawerSearchField'
-import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
+import SearchStatusToolbar from '@/components/drawer/SearchStatusToolbar'
+import { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import MatchListBody from '@/components/drawer/MatchListBody'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useApps } from '@/context/AppsContext'
@@ -49,11 +49,10 @@ export default function MatchesTab({ vacancyId }: { vacancyId?: Id }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        {/* Toolbar search frame — the shared DrawerSearchField (DRY round 11, MATCHLISTS). */}
-        <DrawerSearchField value={search} onChange={setSearch} placeholder={t('candidates:matchesView.searchPlaceholder')} />
-        <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={matchStatuses} />
-      </div>
+      <SearchStatusToolbar
+        search={search} onSearchChange={setSearch} searchPlaceholder={t('candidates:matchesView.searchPlaceholder')}
+        statusValue={statusFilter} onToggleStatus={toggleStatus} statuses={matchStatuses}
+      />
       {/* KLANTEN 4 (Danny 21-08): the shared MatchListBody shell (column-header
           bar + collapsed flat rows), same as the candidate/customer tabs
           (DRY round 11, MATCHLISTS). */}

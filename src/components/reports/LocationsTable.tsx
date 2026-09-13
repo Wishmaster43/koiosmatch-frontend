@@ -10,8 +10,9 @@ import { useTranslation } from 'react-i18next'
 import LocationDrawer         from './LocationDrawer'
 import { useReportPaging }    from './useReportPaging'
 import useNumericColumnSort   from '@/hooks/useNumericColumnSort'
-import { TD, ReportTableToolbar, ReportRow, ReportTableShell } from './reportTableChrome'
-import PaginationBar from '@/components/ui/PaginationBar'
+import { TD, ReportTableToolbar, ReportRow } from './reportTableChrome'
+import { ReportPagedTableShell } from './ReportPagedTableShell'
+import { distinctSortedValues } from './distinctSortedValues'
 import { useReportTableFilter } from './useReportTableFilter'
 import { useReportTableFilterGroups } from './useReportTableFilterGroups'
 import CopyIconButton from '../ui/CopyIconButton'
@@ -51,8 +52,7 @@ export default function LocationsTable() {
   ), [customers])
 
   // Distinct status values present in the flattened rows, sorted, so the status filter only ever offers values that actually occur.
-  const statusOptions = useMemo(() =>
-    [...new Set(rows.map(r => r.status).filter((x): x is string => Boolean(x)))].sort(), [rows])
+  const statusOptions = useMemo(() => distinctSortedValues(rows, r => r.status), [rows])
 
   // One option per customer, deduped via a Map keyed by id, for the customer filter list.
   const customerOptions = useCustomerOptions(rows)
@@ -109,7 +109,7 @@ export default function LocationsTable() {
         searchPlaceholder={t('locations.search')}
       />
 
-      <ReportTableShell
+      <ReportPagedTableShell
         loading={loading}
         loadingLabel={t('locations.loading')}
         empty={sorted.length === 0}
@@ -133,10 +133,8 @@ export default function LocationsTable() {
             <td style={TD}>{renderCountCell(r.dept_count)}</td>
           </ReportRow>
         )}
-        pagination={
-          <PaginationBar page={page} totalPages={totalPages} totalRows={sorted.length}
-            pageSize={pageSize} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} />
-        }
+        page={page} totalPages={totalPages} totalRows={sorted.length}
+        pageSize={pageSize} onPageChange={setPage} onPageSizeChange={handlePageSizeChange}
         drawer={drill && <LocationDrawer location={drill} onClose={() => setDrill(null)} />}
       />
     </div>

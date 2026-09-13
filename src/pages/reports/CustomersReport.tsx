@@ -53,6 +53,7 @@ import { ReportStateFlow } from './components/ReportStateFlow'
 import { useNavigation } from '@/context/NavigationContext'
 import CustomerDepthSections from './depth/CustomerDepthSections'
 import { donutData, barData, ownerBarData } from './lib/chartData'
+import { makeOpenSegment } from './lib/drillFactories'
 import { segmentClick, ownerClick } from './lib/drillClick'
 
 // The four plain axes; `param` is the XOR query key the drill/advice endpoints expect.
@@ -125,13 +126,7 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
   // the XOR segment key `phase` stays free for the segment picker; the compare
   // params above keep `phase` (the report endpoint's own array contract).
   const baseParams = { ...buildReportQueryParams(period, 'customers', filters), ...(phaseFilter ? { phase_filter: [phaseFilter] } : {}) }
-  const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
-    setDrill({
-      title: seg.label, value: seg.count, subtitle: windowSub(),
-      entityPage: 'customers',
-      rowsEndpoint: '/reports/customers/drill', rowsParams: { ...baseParams, ...xorParam },
-      adviceEndpoint: '/reports/customers/advice', adviceParams: { ...baseParams, ...xorParam },
-    })
+  const openSegment = makeOpenSegment({ entityPage: 'customers', rowsEndpoint: '/reports/customers/drill', adviceEndpoint: '/reports/customers/advice', baseParams, windowSub, setDrill })
   const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
     title: pt.label, value: pt.value, subtitle: windowSub(),
     // A week bar's `date` is the point's own key; the drawer then counts the WHOLE

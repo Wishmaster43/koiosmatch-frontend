@@ -19,15 +19,21 @@ export function lookupNames(res: AxiosResponse): string[] {
     .filter((v): v is string => Boolean(v))
 }
 
+// Generic "unwrap the response rows, map each with the caller's own toOption(),
+// null when nothing usable" shape shared by every useCachedLookup consumer
+// (useRejectionReasons, useEscalationReasons, useMatchStopReasons,
+// useOutreachOutcomes, …). `null` tells useCachedLookup to keep its existing
+// seed/empty fallback and retry next mount.
+export function mapLookupRows<T>(res: AxiosResponse, toOption: (r: Record<string, unknown>) => T): T[] | null {
+  const rows = (unwrapList(res).rows) as Record<string, unknown>[]
+  return Array.isArray(rows) && rows.length ? rows.map(toOption) : null
+}
+
 // Generic mapper for API responses with a .rows[] of lookup items (DRY round 10,
 // MISC — adopted here from a standalone module, its natural home next to
-// lookupNames/normalizeOptions). Unwraps the response, maps each row to a
-// LookupOption via toLookupOption, and returns null if no usable rows are
-// present (e.g., when an endpoint is not yet implemented). Used by
-// useMatchStopReasons and useOutreachOutcomes.
+// lookupNames/normalizeOptions). Used by useMatchStopReasons and useOutreachOutcomes.
 export function mapLookupResponse(res: AxiosResponse): LookupOption[] | null {
-  const rows = (unwrapList(res).rows) as Record<string, unknown>[]
-  return Array.isArray(rows) && rows.length ? rows.map(r => toLookupOption(r)) : null
+  return mapLookupRows(res, toLookupOption)
 }
 
 /** Normalise option rows → {id?, value, label, color}; drop inactive, sort by order. */

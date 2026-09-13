@@ -9,10 +9,10 @@
  * is resolved live rather than seeded server-side).
  */
 import { useTranslation } from 'react-i18next'
-import { Sparkles, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import Button from '@/components/ui/Button'
-import GenerateFlowStatus from '@/components/ui/GenerateFlowStatus'
 import GenerateFlowFrame from '@/components/forms/GenerateFlowFrame'
+import GenerateApplyStatus, { GenerateCtaButton } from '@/components/forms/GenerateApplyStatus'
 // HUISSTIJL-1: the status chip line (11px/muted) is the shared Caption atom.
 import { Caption } from '@/components/ui/typography'
 import { useGenerateDescription } from './useGenerateDescription'
@@ -62,17 +62,15 @@ export default function GenerateDescriptionFlow({ fields, onApply }: GenerateDes
       )}
 
       {status === 'idle' && !noProfileConfigured && (
-        <Button variant="primary" size="sm" onClick={generate} disabled={resolving || resolveFailed} style={{ alignSelf: 'flex-start' }}>
-          <Sparkles size={13} /> {t('generate.cta')}
-        </Button>
+        <GenerateCtaButton onClick={generate} disabled={resolving || resolveFailed} label={t('generate.cta')} />
       )}
 
       {status === 'noProfile' && (
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('generate.noProfile')}</div>
       )}
 
-      <GenerateFlowStatus status={status} concept={concept} onRetry={generate}
-        onApply={() => { onApply(concept); closeFlow() }} onDiscard={discard} t={t} />
+      <GenerateApplyStatus status={status} concept={concept} generate={generate}
+        onApply={onApply} discard={discard} closeFlow={closeFlow} t={t} />
     </GenerateFlowFrame>
   )
 }

@@ -5,7 +5,7 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import type { TFunction } from 'i18next'
-import { buildKpiSpecs, serverKpiSpecs, unitMapFor } from './kpiSpecs'
+import { buildKpiSpecs, serverKpiSpecs, camelKpiSpecs, unitAwareServerKpiSpecs, thresholdCaption, unitMapFor } from './kpiSpecs'
 import type { DrillSpec } from '../ReportDrillDrawer'
 
 const t = ((key: string) => `L:${key}`) as unknown as TFunction
@@ -77,6 +77,61 @@ describe('serverKpiSpecs', () => {
     })
     expect(out.total.value).toBe('custom')
     expect(out.total.sub).toBe('sub')
+  })
+})
+
+describe('camelKpiSpecs', () => {
+  it('builds the camel-keyed record straight from data.kpis, same shape as calling buildKpiSpecs by hand', () => {
+    const openKpiDrill = vi.fn(() => () => {})
+    const out = camelKpiSpecs({
+      data: { kpis: [{ key: 'total', count: 12 }, { key: 'avg_days', count: null }] },
+      labelKeys, colors, t, openKpiDrill,
+    })
+    expect(Object.keys(out)).toEqual(['total', 'avgDays', 'openNow'])
+    expect(out.total).toMatchObject({ key: 'total', value: 12, color: 'var(--color-chart-1)' })
+    expect(out.total).not.toHaveProperty('active')
+  })
+})
+
+describe('unitAwareServerKpiSpecs', () => {
+  it('renders through renderKpiValue using the server-sent unit', () => {
+    const openKpiDrill = vi.fn(() => () => {})
+    const out = unitAwareServerKpiSpecs({
+      data: { kpis: [{ key: 'total', count: 5, unit: 'days' } as unknown as { key: string; count: number | null }] },
+      drill: null, labelKeys, colors, t, openKpiDrill, unitFallback: {},
+    })
+    // renderKpiValue formats a 'days'-unit value as "N days" rather than a bare number.
+    expect(out.total.value).not.toBe(5)
+    expect(String(out.total.value)).toContain('5')
+  })
+
+  it('falls back to the per-page unit map when the envelope carries no per-kpi unit', () => {
+    const openKpiDrill = vi.fn(() => () => {})
+    const out = unitAwareServerKpiSpecs({
+      data: { kpis: [{ key: 'total', count: 5 }] }, drill: null, labelKeys, colors, t, openKpiDrill,
+      unitFallback: { total: 'days' },
+    })
+    expect(String(out.total.value)).toContain('5')
+  })
+
+  it('a NULL server value stays the house dash and wires no click (server idiom still applies)', () => {
+    const openKpiDrill = vi.fn(() => () => {})
+    const out = unitAwareServerKpiSpecs({
+      data: { kpis: [{ key: 'total', count: null }] }, drill: null, labelKeys, colors, t, openKpiDrill, unitFallback: {},
+    })
+    expect(out.total.value).toBe('—')
+    expect(out.total.onClick).toBeUndefined()
+  })
+})
+
+describe('thresholdCaption', () => {
+  it('renders the "N days" caption when the tenant threshold is set', () => {
+    expect(thresholdCaption(t, 'stale', { stale: 14 })).toBe('L:thresholdDays')
+  })
+
+  it('returns undefined when the key has no configured threshold (null or missing)', () => {
+    expect(thresholdCaption(t, 'stale', { stale: null })).toBeUndefined()
+    expect(thresholdCaption(t, 'missing', {})).toBeUndefined()
   })
 })
 

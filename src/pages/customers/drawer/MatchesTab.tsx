@@ -31,8 +31,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import SectionCard from '@/components/ui/SectionCard'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
-import DrawerSearchField from '@/components/drawer/DrawerSearchField'
-import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
+import SearchStatusToolbar from '@/components/drawer/SearchStatusToolbar'
+import { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import MatchListBody from '@/components/drawer/MatchListBody'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useApps } from '@/context/AppsContext'
@@ -81,18 +81,17 @@ export default function MatchesTab({ customerId }: { customerId?: Id }) {
       {/* Toolbar in the house order (Danny, live 04-08): search left, status
           filter middle, "+ Match" right (point 1: a match CAN now be created
           from this list) — mirrors Locaties/Afdelingen/Contactpersonen. */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        {/* Toolbar search frame — the shared DrawerSearchField (DRY round 11, MATCHLISTS). */}
-        <DrawerSearchField value={search} onChange={setSearch} placeholder={t('customers:matches.searchPlaceholder')} />
-        <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={matchStatuses} />
-        {/* DRAWER-ADD-SHORT-1 (Danny 05-08): short — this is "Nieuwe match" (new
-            record), unlike WorkTab's bare "Match" named-action button which stays
-            full (see DrawerAddButton's own docblock). Hidden without the create
-            permission (OPENERS-HIDE-1, Danny 05-09). */}
-        {canCreateMatch && (
+      <SearchStatusToolbar
+        search={search} onSearchChange={setSearch} searchPlaceholder={t('customers:matches.searchPlaceholder')}
+        statusValue={statusFilter} onToggleStatus={toggleStatus} statuses={matchStatuses}
+        // DRAWER-ADD-SHORT-1 (Danny 05-08): short — this is "Nieuwe match" (new
+        // record), unlike WorkTab's bare "Match" named-action button which stays
+        // full (see DrawerAddButton's own docblock). Hidden without the create
+        // permission (OPENERS-HIDE-1, Danny 05-09).
+        trailing={canCreateMatch && (
           <DrawerAddButton onClick={() => setAdding(true)} label={t('customers:matches.add')} short />
         )}
-      </div>
+      />
       {/* KLANTEN 4 (Danny 21-08 "Weergeven zoals bij de kandidaat"): the shared
           MatchListBody shell (column-header bar + collapsed flat rows), same
           as the candidate/vacancy tabs (DRY round 11, MATCHLISTS). */}

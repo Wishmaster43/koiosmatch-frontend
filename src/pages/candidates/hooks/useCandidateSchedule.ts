@@ -18,10 +18,10 @@
  * so an unconfigured agency renders its own calm "not configured" copy instead of reusing
  * the empty-state text a genuinely empty roster would show.
  */
-import { useCallback, useEffect, useState } from 'react'
-import api from '@/lib/api'
-import { isAbortError } from '@/lib/abortError'
+import { useCallback } from 'react'
+import type { AxiosResponse } from 'axios'
 import { useLocale } from '@/lib/datetime'
+import { useCandidateIndexFetch } from './useCandidateIndexFetch'
 import type { Id } from '@/types/common'
 import type { OpenShift, RosterShift } from '../drawer/planningTypes'
 
@@ -70,46 +70,19 @@ function mapOpenShiftRows(rows: unknown[], loc: string): OpenShift[] {
   }))
 }
 
-// Shared "GET /candidates/{id}/{path} → mapped list" load/error/abort/retry shape —
-// the agenda and open-shifts loads below both follow it identically (jscpd CANDHOOKS
-// #9); local + unexported since both call sites live in this file.
-function useScheduleLoadState<T>(candidateId: Id | undefined, path: string, locale: string, mapRows: (rows: unknown[], locale: string) => T[]) {
-  const [items,   setItems]   = useState<T[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error,   setError]   = useState(false)
-  const [attempt, setAttempt] = useState(0)
-
-  // Fetches and maps the source; retriable via attempt, and aborted on unmount/id change so a stale response never lands.
-  useEffect(() => {
-    if (!candidateId) { setLoading(false); return }
-    const ctrl = new AbortController()
-    setLoading(true); setError(false)
-    api.get(`/candidates/${candidateId}/${path}`, { signal: ctrl.signal })
-      .then(r => setItems(mapRows(unwrapRows(r), locale)))
-      .catch(err => {
-        if (isAbortError(err)) return
-        setError(true)
-        setItems([])
-      })
-      .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
-    return () => ctrl.abort()
-    // mapRows is now always a stable module-level function reference (see above),
-    // so listing it here satisfies exhaustive-deps without ever causing an extra fetch.
-  }, [candidateId, path, locale, attempt, mapRows])
-
-  return { items, loading, error, reload: useCallback(() => setAttempt(a => a + 1), []) }
-}
-
 // The candidate's scheduled shifts (agenda) — its own load/error/reload, independent
-// of the open-shifts source below.
+// of the open-shifts source below. mapResponse is memoized on `locale` (it feeds the
+// date/time formatters), matching useCandidateIndexFetch's stable-identity contract.
 function useCandidateAgenda(candidateId: Id | undefined, locale: string) {
-  const { items: roster, loading, error, reload } = useScheduleLoadState<RosterShift>(candidateId, 'agenda', locale, mapAgendaRows)
+  const mapResponse = useCallback((r: AxiosResponse) => mapAgendaRows(unwrapRows(r), locale), [locale])
+  const { items: roster, loading, error, reload } = useCandidateIndexFetch<RosterShift>(candidateId, 'agenda', mapResponse)
   return { roster, loading, error, reload }
 }
 
 // The open shifts this candidate could still be scheduled for — its own load/error/reload.
 function useCandidateOpenShifts(candidateId: Id | undefined, locale: string) {
-  const { items: openShifts, loading, error, reload } = useScheduleLoadState<OpenShift>(candidateId, 'open-shifts', locale, mapOpenShiftRows)
+  const mapResponse = useCallback((r: AxiosResponse) => mapOpenShiftRows(unwrapRows(r), locale), [locale])
+  const { items: openShifts, loading, error, reload } = useCandidateIndexFetch<OpenShift>(candidateId, 'open-shifts', mapResponse)
   return { openShifts, loading, error, reload }
 }
 

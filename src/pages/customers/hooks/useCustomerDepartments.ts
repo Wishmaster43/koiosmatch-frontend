@@ -16,6 +16,8 @@ import { mapDepartment } from '../data/mapCustomer'
 // list below keeps its own raw addEventListener), joined by useCustomerContacts/
 // useCustomerLocations (DRY round 11, CUSTTABS2).
 import { useAbortableListLoad } from './useAbortableListLoad'
+import { fetchAbortableList } from './fetchAbortableList'
+import { useMountAbortableLoad } from './useMountAbortableLoad'
 import type { Department, ApiDepartment } from '@/types/customer'
 import type { Id } from '@/types/common'
 import type { DeleteResult } from './subEntityDelete'
@@ -70,12 +72,11 @@ export function useCustomerDepartments(customerId: Id | undefined) {
   const load = useCallback((signal?: AbortSignal) => {
     if (!customerId) { setDepartments([]); setLoading(false); return }
     setLoading(true); setError(false)
-    api.get(`/customers/${customerId}/departments`, { signal })
-      .then(res => { if (!signal?.aborted) setDepartments(unwrapList<ApiDepartment>(res).rows.map(mapDepartment)) })
-      .catch(err => { if (err?.code !== 'ERR_CANCELED' && !signal?.aborted) setError(true) })
+    fetchAbortableList(`/customers/${customerId}/departments`, signal,
+      res => unwrapList<ApiDepartment>(res).rows.map(mapDepartment), setDepartments, setError)
       .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [customerId])
-  useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
+  useMountAbortableLoad(load)
 
   // Refetch when something outside this hook created departments in bulk (import).
   useEffect(() => {

@@ -96,8 +96,7 @@ export default function PlacementCard({
         </FieldRow>
         {/* Vestiging (bureau) — see this file's header comment for why this is a
             DIFFERENT field from the klant location above. */}
-        <BranchFieldRow label={t('modal.fields.branch')} branchId={branchId} onBranchChange={onBranchChange}
-          branchOptions={branchOptions} clearLabel={t('modal.fields.branch')} placeholder={t('common:select')} />
+        <BranchFieldRow t={t} branchId={branchId} onBranchChange={onBranchChange} branchOptions={branchOptions} />
       </div>
     </div>
   )

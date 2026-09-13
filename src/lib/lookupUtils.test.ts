@@ -5,7 +5,7 @@
  */
 import { describe, it, expect } from 'vitest'
 import type { AxiosResponse } from 'axios'
-import { normalizeOptions, mapLookupResponse } from './lookupUtils'
+import { normalizeOptions, mapLookupResponse, mapLookupRows } from './lookupUtils'
 
 describe('normalizeOptions · is_blacklist pass-through', () => {
   it('maps is_blacklist to isBlacklist on a lookup row that carries it', () => {
@@ -55,5 +55,21 @@ describe('mapLookupResponse', () => {
   it('returns null when data is not an array', () => {
     const response = { data: { data: undefined } } as AxiosResponse
     expect(mapLookupResponse(response)).toBeNull()
+  })
+})
+
+// mapLookupRows (moved from the short-lived lookupRowMapper module): the
+// caller-supplied toOption() shape behind useRejectionReasons/useEscalationReasons.
+describe('mapLookupRows', () => {
+  const toOption = (r: Record<string, unknown>) => ({ value: String(r.id), label: String(r.name) })
+
+  it('maps each row through toOption when the response carries rows', () => {
+    const res = { data: { data: [{ id: '1', name: 'A' }, { id: '2', name: 'B' }] } }
+    expect(mapLookupRows(res as never, toOption)).toEqual([{ value: '1', label: 'A' }, { value: '2', label: 'B' }])
+  })
+
+  it('returns null when the response has no usable rows', () => {
+    const res = { data: { data: [] } }
+    expect(mapLookupRows(res as never, toOption)).toBeNull()
   })
 })

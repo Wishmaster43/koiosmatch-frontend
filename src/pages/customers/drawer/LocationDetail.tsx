@@ -19,7 +19,8 @@ import { useTranslation } from 'react-i18next'
 import SectionCard from '@/components/ui/SectionCard'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
-import MergeSubEntityModal from './MergeSubEntityModal'
+import SubEntityMergeFooter from './SubEntityMergeFooter'
+import SubEntityPanelWrapper from './SubEntityPanelWrapper'
 import { getCountryOptions } from '@/lib/countries'
 import { useProvinces } from '@/hooks/useProvinces'
 import { useDateFormat } from '@/lib/datetime'
@@ -56,14 +57,12 @@ import { useCustomFields } from '@/lib/useCustomFields'
 // (its `vacancyIds` mode) fed by this location's OWN vacancy ids.
 // SUBENTITEIT-DELETE-1: the honest disabled-trash + 409-race counts dialog,
 // shared with DepartmentDetail (DRY round 11, CUSTTABS2).
-import SubEntityArchiveDialogs from './SubEntityArchiveDialogs'
 // Delete handler pattern, shared with DepartmentDetail (clone [2]).
 import { handleSubEntityDelete } from '../hooks/subEntityDelete'
 // Shared SubTabBar tab-list shape, joined by DepartmentDetail/ContactDetail (DRY round 11, CUSTDETAIL).
 // scopedSubEntityTabs: the ten scoped entries, joined by DepartmentDetail (DRY round 11, CUSTTABS2).
 import { buildSubEntityTabs, scopedSubEntityTabs } from '../hooks/subEntityTabs'
 // Shared merge-modal onClose/onMerged wiring, joined by DepartmentDetail (DRY round 11, CUSTDETAIL).
-import { mergeModalCallbacks } from '../hooks/mergeModalCallbacks'
 // Shared department-mutation callback prop shape, also used by LocationsTab (DRY round 11, CUSTDETAIL).
 import type { DepartmentCallbacks } from '../hooks/departmentCallbacks'
 import type { Contact, Department, Location } from '@/types/customer'
@@ -225,19 +224,11 @@ export default function LocationDetail({
   // title, sub-tab bar and delete button underneath would mean two titles and two delete
   // buttons with different blast radii on one narrow panel.
   if (departmentOpen) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {departmentsPanel}
-      </div>
-    )
+    return <SubEntityPanelWrapper>{departmentsPanel}</SubEntityPanelWrapper>
   }
 
   if (contactOpen) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {contactsPanel}
-      </div>
-    )
+    return <SubEntityPanelWrapper>{contactsPanel}</SubEntityPanelWrapper>
   }
 
   return (
@@ -326,14 +317,13 @@ export default function LocationDetail({
         </SectionCard>
       )}
       {/* LOCATIE-SAMENVOEGEN-1 — `others` is the customer-wide location list (already
-          available as a prop), never a fresh search endpoint (see the modal's own doc). */}
-      {merging && customerId != null && (
-        <MergeSubEntityModal scope="location" customerId={customerId}
-          current={{ id: l.id as Id, name: l.name }}
-          others={locations.map(x => ({ id: x.id, name: x.name }))}
-          {...mergeModalCallbacks(setMerging, onMerged)} />
-      )}
-      <SubEntityArchiveDialogs dialog={dialog} blockedCounts={blockedCounts} setBlockedCounts={setBlockedCounts}
+          available as a prop), never a fresh search endpoint (see the modal's own doc).
+          Shared SubEntityMergeFooter (DRY round, CANDTABS). */}
+      <SubEntityMergeFooter scope="location" customerId={customerId}
+        merging={merging} setMerging={setMerging} onMerged={onMerged}
+        current={{ id: l.id as Id, name: l.name }}
+        others={locations.map(x => ({ id: x.id, name: x.name }))}
+        dialog={dialog} blockedCounts={blockedCounts} setBlockedCounts={setBlockedCounts}
         archiveNow={archiveNow} archiving={archiving} />
     </div>
   )

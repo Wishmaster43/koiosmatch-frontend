@@ -27,7 +27,6 @@
  * same rule the list uses): someone else's note renders read-only with a notice,
  * never a form whose save the server would 403 (§7: UI gate, BE re-checks).
  */
-import { useEffect } from 'react'
 import { useMemo, useState } from 'react'
 import NoteActionsPanel from '@/components/drawer/tabs/notes/NoteActionsPanel'
 import type { NoteActionPanelItem } from '@/components/drawer/tabs/notes/NoteActionsPanel'
@@ -37,6 +36,7 @@ import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import PopoutShell from './PopoutShell'
 import PopoutSaveFooter from './PopoutSaveFooter'
+import { usePopoutWindowTitle } from './usePopoutWindowTitle'
 import NoteFields from '@/components/drawer/tabs/notes/NoteFields'
 // KOPPELEN-IN-POPOUT-1 (Danny 05-09): linking a note to its principals happens HERE, in the
 // second-screen editor, never as a control inside the note row (the row only shows chips).
@@ -128,12 +128,7 @@ function CandidateNoteEditPopout() {
   const note = noteIndex >= 0 ? (notes[noteIndex] as CandidateNote) : null
 
   // Sets the OS window title to the candidate name while this popout is open, restoring the previous title on close.
-  useEffect(() => {
-    if (!candidate) return
-    const previous = document.title
-    document.title = t('popout.windowTitle', { name: candidate.name })
-    return () => { document.title = previous }
-  }, [candidate, t])
+  usePopoutWindowTitle(candidate, t('popout.windowTitle', { name: candidate?.name }))
 
   const notFound = loaded && (!note || isSystemNote(note))
   const labels: NotesLabels = {
@@ -177,12 +172,7 @@ function ApplicationNoteEditPopout() {
   const note = noteIndex >= 0 ? (notes[noteIndex] as PopoutApplicationNote) : null
 
   // Sets the OS window title to the application candidate name while this popout is open, restoring the previous title on close.
-  useEffect(() => {
-    if (!application) return
-    const previous = document.title
-    document.title = t('common:popout.windowTitle', { name: application.candidateName })
-    return () => { document.title = previous }
-  }, [application, t])
+  usePopoutWindowTitle(application, t('common:popout.windowTitle', { name: application?.candidateName }))
 
   const notFound = loaded && (!note || isSystemNote(note))
   const labels: NotesLabels = { type: t('notes.type'), notePlaceholder: () => t('notes.placeholder') }
@@ -224,12 +214,7 @@ function CustomerNoteEditPopout() {
   const note = noteIndex >= 0 ? (notes[noteIndex] as EditableNote) : null
 
   // Sets the OS window title to the customer name while this popout is open, restoring the previous title on close.
-  useEffect(() => {
-    if (!customer) return
-    const previous = document.title
-    document.title = t('common:popout.windowTitle', { name: customer.name })
-    return () => { document.title = previous }
-  }, [customer, t])
+  usePopoutWindowTitle(customer, t('common:popout.windowTitle', { name: customer?.name }))
 
   const notFound = loaded && (!note || isSystemNote(note))
   const labels: NotesLabels = { type: t('notes.type'), notePlaceholder: () => t('notes.notePlaceholder') }
@@ -286,12 +271,7 @@ function GenericNoteEditPopout<R extends { loading: boolean; error: boolean; rel
   const note = noteIndex >= 0 ? (notes[noteIndex] as EditableNote) : null
 
   // Sets the OS window title to the record's identity while this popout is open, restoring the previous title on close.
-  useEffect(() => {
-    if (!record) return
-    const previous = document.title
-    document.title = t('common:popout.windowTitle', { name })
-    return () => { document.title = previous }
-  }, [record, name, t])
+  usePopoutWindowTitle(record, t('common:popout.windowTitle', { name }))
 
   const notFound = loaded && (!note || isSystemNote(note))
   const labels: NotesLabels = { type: t('notes.type'), notePlaceholder: () => t('notes.placeholder') }

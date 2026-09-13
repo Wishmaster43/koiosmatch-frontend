@@ -32,7 +32,7 @@ import OpportunityDealStageCard from './addmodal/OpportunityDealStageCard'
 import OpportunityDescriptionCard from './addmodal/OpportunityDescriptionCard'
 import OpportunityLostReasonModal from './drawer/OpportunityLostReasonModal'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
-import { tintBorder } from '@/lib/tint'
+import CreateErrorAlert from '@/components/forms/CreateErrorAlert'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { modalColumns } from '@/components/ui/modalCards'
 import type { ApiOpportunity, Opportunity } from '@/types/opportunity'
@@ -378,11 +378,7 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
 
         {/* Server-side rejection (validation / matrix-guard) — shown in place, modal stays open. */}
         {createError && (
-          <div role="alert" style={{ margin: '0 22px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
-            color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
-            border: tintBorder('var(--color-danger)', true), flexShrink: 0 }}>
-            {createError}
-          </div>
+          <CreateErrorAlert inset={22} bottomGap={0}>{createError}</CreateErrorAlert>
         )}
 
         {/* Footer — the shared ModalFooter (§4) owns the layout/height, everywhere. */}

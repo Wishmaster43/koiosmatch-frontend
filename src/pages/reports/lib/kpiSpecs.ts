@@ -10,6 +10,7 @@ import type { ReactNode } from 'react'
 import type { TFunction } from 'i18next'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import type { DrillSpec } from '../ReportDrillDrawer'
+import { renderKpiValue } from '../renderKpiValue'
 
 export interface BuildKpiSpecsOpts {
   // Server KPI values by server key (the `kpis[]` envelope, mapped once by the caller).
@@ -63,17 +64,32 @@ export function buildKpiSpecs(o: BuildKpiSpecsOpts): Record<string, KpiSpec> {
 // keyBy:'server'/clickOnlyWhenHas:true trio (DRY round 11). labelKeys/colors/t/
 // openKpiDrill/valueFor/subFor stay per-page (rule B) — each report's own KPI
 // vocabulary, colour map, drill wiring and value/caption formatting.
-export interface ServerKpiSpecsOpts {
+// The label/colour/t/drill/format fields are identical to BuildKpiSpecsOpts —
+// picked instead of re-typed so the two option shapes cannot drift apart.
+type SharedKpiFieldOpts = Pick<BuildKpiSpecsOpts, 'labelKeys' | 'colors' | 't' | 'openKpiDrill' | 'valueFor' | 'subFor'>
+
+export interface ServerKpiSpecsOpts extends SharedKpiFieldOpts {
   // The plain report envelope's own kpis[] array (key/count pairs; unit read separately, see unitMapFor).
   data: { kpis?: Array<{ key: string; count: number | null }> } | null | undefined
   // The page's currently open drill — only rowsParams.kpi is read, for the active-card flag.
   drill: DrillSpec | null
-  labelKeys: Record<string, string>
-  colors: Partial<Record<string, string>>
-  t: TFunction
-  openKpiDrill: (serverKey: string, label: string, value: string | number) => (() => void) | undefined
-  valueFor?: BuildKpiSpecsOpts['valueFor']
-  subFor?: BuildKpiSpecsOpts['subFor']
+}
+
+// The camel-keyed idiom applications/whatsapp share: build the kpiByServerKey
+// Map from the plain envelope's own kpis[] array and call buildKpiSpecs with the
+// default keyBy:'camel' (label-key tail) — labelKeys/colors/t/openKpiDrill/
+// valueFor/subFor stay per-page (rule B).
+export interface CamelKpiSpecsOpts extends SharedKpiFieldOpts {
+  // The plain report envelope's own kpis[] array (key/count pairs).
+  data: { kpis?: Array<{ key: string; count: number | null }> } | null | undefined
+}
+
+export function camelKpiSpecs(o: CamelKpiSpecsOpts): Record<string, KpiSpec> {
+  const kpis = new Map((o.data?.kpis ?? []).map(k => [k.key, k.count]))
+  return buildKpiSpecs({
+    kpis, labelKeys: o.labelKeys, colors: o.colors, t: o.t, openKpiDrill: o.openKpiDrill,
+    valueFor: o.valueFor, subFor: o.subFor,
+  })
 }
 
 export function serverKpiSpecs(o: ServerKpiSpecsOpts): Record<string, KpiSpec> {
@@ -83,6 +99,33 @@ export function serverKpiSpecs(o: ServerKpiSpecsOpts): Record<string, KpiSpec> {
     kpis: kpiByServerKey, labelKeys: o.labelKeys, colors: o.colors, t: o.t, openKpiDrill: o.openKpiDrill,
     keyBy: 'server', activeKey: openKpiParams?.kpi as string | undefined, clickOnlyWhenHas: true,
     valueFor: o.valueFor, subFor: o.subFor,
+  })
+}
+
+// Threshold caption: "N days" for a KPI card whose column carries a
+// tenant-configured day threshold (stale/closing-soon-style cards) — the same
+// ternary-by-key shape opportunities and vacancies both build (DRY round).
+export function thresholdCaption(
+  t: TFunction, key: string, byKey: Partial<Record<string, number | null | undefined>>,
+): ReactNode | undefined {
+  const days = byKey[key]
+  return days != null ? t('thresholdDays', { n: days }) : undefined
+}
+
+// The unit-aware server-keyed idiom matches/opportunities/vacancies all share:
+// build the unit fallback Map (unitMapFor) and call serverKpiSpecs with
+// valueFor wired to renderKpiValue — labelKeys/colors/t/openKpiDrill/subFor
+// stay per-page (rule B; DRY round, jscpd pair on MatchesReport/OpportunitiesReport).
+export interface UnitAwareServerKpiSpecsOpts extends Omit<ServerKpiSpecsOpts, 'valueFor'> {
+  // Server key → unit fallback, only used when the envelope has no per-kpi unit (§10).
+  unitFallback: Partial<Record<string, unknown>>
+}
+
+export function unitAwareServerKpiSpecs(o: UnitAwareServerKpiSpecsOpts): Record<string, KpiSpec> {
+  const unitByServerKey = unitMapFor(o.data?.kpis as Array<{ key: string; unit?: unknown }> | undefined, o.unitFallback)
+  return serverKpiSpecs({
+    ...o,
+    valueFor: (key, raw, has) => renderKpiValue(raw, has, unitByServerKey.get(key) as string | undefined),
   })
 }
 

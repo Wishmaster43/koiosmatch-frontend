@@ -33,7 +33,7 @@ import type { NotePayload } from '@/components/drawer/tabs/NotesTab'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
-import { noteEditGuard } from '@/hooks/noteEditGuard'
+import { runGuardedNoteEdit } from '@/hooks/runGuardedNoteEdit'
 
 // One note as the drawer renders it — matches NotesTab's NoteItem + the API shape.
 export interface CandidateNote {
@@ -100,17 +100,14 @@ export function useCandidateNotes(candidateId: string | number | undefined, opts
   // Edit — NotesTab passes a list index; optimistic, then reload so "edited by ·when" shows.
   // Returns whether the write LANDED (NOTITIE-POPOUT-URL-1: the per-note window may
   // only close itself on a landed save); existing hosts simply ignore the promise.
-  const editNote = useCallback((index: number, payload: NotePayload): Promise<boolean> => {
-    const guard = noteEditGuard(candidateId, notes, index)
-    if (!guard) return Promise.resolve(false)
-    const { target, snapshot } = guard
+  const editNote = useCallback((index: number, payload: NotePayload): Promise<boolean> => runGuardedNoteEdit(candidateId, notes, index, (target, snapshot) => {
     setNotes(prev => prev.map((n, i) => (i === index ? { ...n, type: payload.type, channel: payload.channel, body: payload.body, language: payload.language, title: payload.title } : n)))
     return api.patch(`/candidates/${candidateId}/notes/${target.id}`, { text: payload.body, title: payload.title, type: payload.type, channel: payload.channel, language: payload.language,
       // NOTE-ACTION-ITEMS-1: present = the full wanted set; absent = untouched.
       ...actionItemsWire(payload.action_items) })
       .then(() => { load(); return true })
       .catch(() => { setNotes(snapshot); notifyError(t('common:actionFailed')); return false })
-  }, [candidateId, notes, load, t])
+  }), [candidateId, notes, load, t])
 
   // NOTE-UNDO-FE-1 (K-172): peek the one-slot undo — GET /candidates/{id}/notes/{note}/previous-version
   // → { data: { previous_body, previous_saved_at } }, nulls when there is no slot yet.

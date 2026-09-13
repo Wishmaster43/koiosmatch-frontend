@@ -5,6 +5,7 @@
  * target count, created_at, archived) — no new fetch, no invented data.
  */
 import type { Campaign } from '../hooks/useOutreachCampaigns'
+import { daysSince } from '@/lib/localDate'
 
 export type CampaignAdviceAction = 'attention' | 'none'
 
@@ -39,11 +40,4 @@ export function deriveCampaignAdvice(c: Campaign, now: Date = new Date()): Campa
 
   // Rule 4: nothing to flag.
   return NONE_RULE
-}
-
-// Whole-day difference between a date string and now; null when the date is unreadable.
-function daysSince(dateStr: string, now: Date): number | null {
-  const d = new Date(dateStr)
-  if (Number.isNaN(d.getTime())) return null
-  return Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24))
 }

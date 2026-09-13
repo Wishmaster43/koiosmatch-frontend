@@ -29,7 +29,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Building } from 'lucide-react'
-import { useSafePermission } from '@/hooks/useSafePermission'
+import { useSubEntityImportPermissions } from './hooks/useSubEntityImportPermissions'
 import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import CollapsibleRichText from '@/components/ui/CollapsibleRichText'
@@ -38,7 +38,7 @@ import { cardHead, cardBox, row2, row3Even } from '@/components/ui/modalCards'
 import SubEntityImportCard from './SubEntityImportCard'
 import SubEntityModalFrame from './addmodal/SubEntityModalFrame'
 import { subEntityFrameProps } from './addmodal/subEntityFrameProps'
-import CreateErrorAlert from './addmodal/CreateErrorAlert'
+import CreateErrorAlert from '@/components/forms/CreateErrorAlert'
 import { useSubEntitySave } from './hooks/useSubEntitySave'
 import type { DepartmentPayload } from './hooks/useCustomerDepartments'
 import type { Department } from '@/types/customer'
@@ -68,9 +68,7 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
   lockLocationId?: Id
 }) {
   const { t } = useTranslation(['customers', 'common'])
-  const hasPermission = useSafePermission()
-  const canViewImportTemplate = hasPermission('customers.view')
-  const canRunImport = hasPermission('customers.create')
+  const { canViewImportTemplate, canRunImport } = useSubEntityImportPermissions()
   // Shared state/error management (DRY-SUBENTITY-1): import wizard
   // and 422 error handling extracted into a reusable hook.
   const { isEdit, importWizard, importOpen, setImportOpen, errors, setErrors, createError, handleApiError } =

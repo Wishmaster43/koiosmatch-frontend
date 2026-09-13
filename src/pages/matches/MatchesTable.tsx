@@ -7,10 +7,11 @@ import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
-import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
+import { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import EntityNameCell from '@/components/ui/EntityNameCell'
 import StatusPill from '@/components/ui/StatusPill'
 import SoftChip from '@/components/ui/SoftChip'
+import { lifecycleStatusChip } from '@/lib/lifecycleStatusChip'
 import BackofficeCouplingIndicator from '@/components/ui/BackofficeCouplingIndicator'
 import { makeKoiosColumn } from '@/components/ui/koiosColumn'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
@@ -82,12 +83,8 @@ export default function MatchesTable({
     { key: 'candidate', header: t('cols.candidate'), sortable: true,
       sticky: true, width: 200, nowrap: true,
       render: r => {
-        const content = (
-          <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-            <Avatar initials={r.initials} size={24} soft />
-            <span style={{ fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 150 }} title={r.candidate}>{r.candidate}</span>
-          </span>
-        )
+        // Shared avatar+name cell (AVATAR-CHIP-1) — same identity chip as applications/customers.
+        const content = <EntityNameCell name={r.candidate} initials={r.initials} size={24} maxWidth={150} textStyle={{ fontWeight: 500, fontSize: 13 }} />
         // Danny 07-09 (verbatim: "bij de match tabel als je drukt op de kandidaat moet je
         // toch de match openen"): the candidate identity cell is NOT a gateway here — the
         // row opens the match, and the candidate link lives inside the match drilldown.
@@ -154,12 +151,9 @@ export default function MatchesTable({
     { key: 'stage',   header: t('cols.status'),
       // Status axis (R-1b): resolve label+colour from the lookup; stage fell out of the resource.
       render: r => {
-        // MATCH-ARCHIVED-LIST-1: archive state wins over the status pill (mirrors
-        // VacanciesTable/CandidatesTable) — a soft-deleted row shown via
-        // include_archived=1 reads as "Archived", not its stale status.
-        // TRASH-OVERAL-2: a trashed row reads as pending erase (danger), mirrors candidates.
-        if (r.lifecycle === 'pending_erase') return <SoftChip label={t('common:trash.view')} color="var(--color-trash)" round />
-        if (r.archived) return <SoftChip label={t('view.archived')} color="var(--text-muted)" round />
+        // MATCH-ARCHIVED-LIST-1/TRASH-OVERAL-2: archive/trash wins over the status pill.
+        const lifecycleChip = lifecycleStatusChip(r, t)
+        if (lifecycleChip) return lifecycleChip
         const m = statusMeta(r.status)
         const label = m?.label ?? r.stage
         const color = m?.color ?? r.stageColor
@@ -183,12 +177,8 @@ export default function MatchesTable({
     // Owner — avatar + name, colour if the mapper resolved one AND the toggle is on,
     // else neutral grey. LAST column (§3A convention).
     { key: 'owner', header: t('cols.owner'), sortable: true, sortValue: r => r.owner,
-      render: r => r.owner ? (
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Avatar initials={r.ownerInitials} size={18} color={colorOwner ? (r.ownerColor || NEUTRAL_AVATAR) : NEUTRAL_AVATAR} soft />
-          <span style={{ fontSize: 12, color: 'var(--text)' }}>{r.owner}</span>
-        </span>
-      ) : <span style={{ color: 'var(--text-muted)' }}>—</span> },
+      render: r => <EntityNameCell name={r.owner} initials={r.ownerInitials} size={18}
+        color={colorOwner ? (r.ownerColor || NEUTRAL_AVATAR) : NEUTRAL_AVATAR} /> },
   ]
 
   // No surface-card wrapper: the DataTable renders directly on the page background,
