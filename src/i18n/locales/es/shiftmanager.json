@@ -438,5 +438,9 @@
     "save": "Guardar",
     "delete": "Eliminar",
     "setDefault": "Predeterminado"
+  },
+  "mirror": {
+    "loadError": "No se pudieron cargar los datos de Shiftmanager.",
+    "retry": "Reintentar"
   }
 }

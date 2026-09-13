@@ -25,9 +25,9 @@ interface RawDepartment {
 // (LocationsPage's registerFilters loop — 'Maximum update depth exceeded', measured 03-09).
 const EMPTY: SmDepartmentRow[] = []
 
-export function useSmDepartments(): { departments: SmDepartmentRow[] } {
+export function useSmDepartments(): { departments: SmDepartmentRow[]; isLoading: boolean; isError: boolean; refetch: () => void } {
   // Fetch + flatten the raw rows into the shape the table renders (signal = cancel).
-  const { data } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['sm_departments'],
     queryFn: async ({ signal }) => {
       const { rows } = unwrapList<RawDepartment>(await api.get('/sm_departments', { signal }))
@@ -47,5 +47,6 @@ export function useSmDepartments(): { departments: SmDepartmentRow[] } {
     },
   })
 
-  return { departments: data ?? EMPTY }
+  // The page owns the four UI states (§3): loading/error ride along, never swallowed.
+  return { departments: data ?? EMPTY, isLoading, isError, refetch }
 }

@@ -24,9 +24,9 @@ interface RawLocation {
 // (LocationsPage's registerFilters loop — 'Maximum update depth exceeded', measured 03-09).
 const EMPTY: SmLocationRow[] = []
 
-export function useSmLocations(): { locations: SmLocationRow[] } {
+export function useSmLocations(): { locations: SmLocationRow[]; isLoading: boolean; isError: boolean; refetch: () => void } {
   // Fetch + flatten the raw rows into the shape the table renders (signal = cancel).
-  const { data } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['sm_locations'],
     queryFn: async ({ signal }) => {
       const { rows } = unwrapList<RawLocation>(await api.get('/sm_locations', { signal }))
@@ -45,5 +45,6 @@ export function useSmLocations(): { locations: SmLocationRow[] } {
     },
   })
 
-  return { locations: data ?? EMPTY }
+  // The page owns the four UI states (§3): loading/error ride along, never swallowed.
+  return { locations: data ?? EMPTY, isLoading, isError, refetch }
 }

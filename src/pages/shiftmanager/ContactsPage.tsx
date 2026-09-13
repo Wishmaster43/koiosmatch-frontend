@@ -17,12 +17,13 @@ import { useSmContacts } from './hooks/useSmContacts'
 import type { SmContactRow } from '@/types/shiftmanager'
 import { Caption } from '@/components/ui/typography'
 import { ListPageShell } from '@/components/ui/ListPageShell'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 
 // Shiftmanager contacts list: filters/search/pagination in local state, filter groups pushed into the shared right panel, and a row click opens the contact drawer.
 export default function ContactsPage() {
   const { t } = useTranslation('shiftmanager')
   // Data (fetch + transform) lives in the shared hook (§3).
-  const { contacts } = useSmContacts()
+  const { contacts, isLoading, isError, refetch } = useSmContacts()
   const [search]                      = useState('')
   const [selected,    setSelected]    = useState<SmContactRow | null>(null)
   const [selCustomers,  setSelCustomers]  = useState<string[]>([])
@@ -92,7 +93,11 @@ export default function ContactsPage() {
 
       {/* Table — shared DataTable (sticky header, sorting, soft-chip planning flag) */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
-        <ContactsTable rows={paged} selectedId={selected?.id}
+        {/* Error state (§3): the mirror fetch failed — say so and offer a retry, never an empty table that looks like success. */}
+        {isError && (
+          <ErrorBanner onRetry={() => { void refetch() }} retryLabel={t('mirror.retry')} style={{ marginBottom: 12 }}>{t('mirror.loadError')}</ErrorBanner>
+        )}
+        <ContactsTable rows={paged} loading={isLoading} selectedId={selected?.id}
           onSelect={c => setSelected(prev => prev?.id === c.id ? null : c)} />
       </div>
 

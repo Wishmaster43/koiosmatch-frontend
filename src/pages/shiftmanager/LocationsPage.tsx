@@ -17,12 +17,13 @@ import { SmPaginationBar } from './SmPaginationBar'
 import { useSmLocations } from './hooks/useSmLocations'
 import type { SmLocationRow } from '@/types/shiftmanager'
 import { ListPageShell } from '@/components/ui/ListPageShell'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function LocationsPage() {
   const { t } = useTranslation('shiftmanager')
   // Data (fetch + transform) lives in the shared hook (§3).
-  const { locations } = useSmLocations()
+  const { locations, isLoading, isError, refetch } = useSmLocations()
   const [search]                  = useState('')
   const [selected,  setSelected]  = useState<SmLocationRow | null>(null)
   const [selStatuses,  setSelStatuses]  = useState<string[]>([])
@@ -93,7 +94,11 @@ export default function LocationsPage() {
 
       {/* Table — shared DataTable (sticky header, sorting, soft-chip status colours) */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
-        <LocationsTable rows={paged} selectedId={selected?.id}
+        {/* Error state (§3): the mirror fetch failed — say so and offer a retry, never an empty table that looks like success. */}
+        {isError && (
+          <ErrorBanner onRetry={() => { void refetch() }} retryLabel={t('mirror.retry')} style={{ marginBottom: 12 }}>{t('mirror.loadError')}</ErrorBanner>
+        )}
+        <LocationsTable rows={paged} loading={isLoading} selectedId={selected?.id}
           onSelect={loc => setSelected(prev => prev?.id === loc.id ? null : loc)} />
       </div>
 

@@ -441,5 +441,9 @@
     "save": "Salva",
     "delete": "Elimina",
     "setDefault": "Imposta come predefinito"
+  },
+  "mirror": {
+    "loadError": "Impossibile caricare i dati di Shiftmanager.",
+    "retry": "Riprova"
   }
 }

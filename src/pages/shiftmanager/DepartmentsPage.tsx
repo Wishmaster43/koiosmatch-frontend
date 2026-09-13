@@ -19,12 +19,13 @@ import { usePagedRows } from '@/hooks/usePagedRows'
 import { useSmDepartments } from './hooks/useSmDepartments'
 import type { SmDepartmentRow } from '@/types/shiftmanager'
 import { ListPageShell } from '@/components/ui/ListPageShell'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 
 // Thin container: reads the SM mirror, derives filter option lists + KPI totals, and composes the table + drawer.
 export default function DepartmentsPage() {
   const { t } = useTranslation('shiftmanager')
   // Data (fetch + transform) lives in the shared hook (§3).
-  const { departments } = useSmDepartments()
+  const { departments, isLoading, isError, refetch } = useSmDepartments()
   const [search,      setSearch]      = useState('')
   const [selected,    setSelected]    = useState<SmDepartmentRow | null>(null)
   // Shared list page-size: honours the tenant's default_per_page, sticky across navigation (§9).
@@ -101,7 +102,11 @@ export default function DepartmentsPage() {
 
       {/* Table — shared DataTable (sticky header, sorting, soft-chip status colours) */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
-        <DepartmentsTable rows={paged} selectedId={selected?.id}
+        {/* Error state (§3): the mirror fetch failed — say so and offer a retry, never an empty table that looks like success. */}
+        {isError && (
+          <ErrorBanner onRetry={() => { void refetch() }} retryLabel={t('mirror.retry')} style={{ marginBottom: 12 }}>{t('mirror.loadError')}</ErrorBanner>
+        )}
+        <DepartmentsTable rows={paged} loading={isLoading} selectedId={selected?.id}
           onSelect={dep => setSelected(prev => prev?.id === dep.id ? null : dep)} />
       </div>
 

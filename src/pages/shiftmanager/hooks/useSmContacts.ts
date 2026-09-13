@@ -23,9 +23,9 @@ interface RawContact {
 // (LocationsPage's registerFilters loop — 'Maximum update depth exceeded', measured 03-09).
 const EMPTY: SmContactRow[] = []
 
-export function useSmContacts(): { contacts: SmContactRow[] } {
+export function useSmContacts(): { contacts: SmContactRow[]; isLoading: boolean; isError: boolean; refetch: () => void } {
   // Fetch + flatten the raw rows into the shape the table renders (signal = cancel).
-  const { data } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['sm_contacts'],
     queryFn: async ({ signal }) => {
       const { rows } = unwrapList<RawContact>(await api.get('/sm_contacts', { signal }))
@@ -43,5 +43,6 @@ export function useSmContacts(): { contacts: SmContactRow[] } {
     },
   })
 
-  return { contacts: data ?? EMPTY }
+  // The page owns the four UI states (§3): loading/error ride along, never swallowed.
+  return { contacts: data ?? EMPTY, isLoading, isError, refetch }
 }

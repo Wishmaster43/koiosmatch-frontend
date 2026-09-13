@@ -438,5 +438,9 @@
     "save": "Opslaan",
     "delete": "Verwijder",
     "setDefault": "Als default"
+  },
+  "mirror": {
+    "loadError": "Kon de Shiftmanager-gegevens niet laden.",
+    "retry": "Opnieuw proberen"
   }
 }
