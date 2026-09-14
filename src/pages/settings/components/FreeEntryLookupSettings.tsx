@@ -123,7 +123,7 @@ export default function FreeEntryLookupSettings({ useLookup, endpoint, i18nPrefi
           subtitle={t(`${i18nPrefix}.subtitle`)}
           endpoint={endpoint}
           addLabel={t(`${i18nPrefix}.add`)}
-          withColor={false}
+          withColor withIcon
           {...statusListEditorProps}
         />
       </div>

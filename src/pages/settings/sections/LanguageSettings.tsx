@@ -37,7 +37,7 @@ export function LanguageLevelSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      <StatusListEditor compact withColor={false}
+      <StatusListEditor compact withColor withIcon
         title={t('languageSettings.levelsTitle')} subtitle={t('languageSettings.levelsSubtitle')}
         endpoint="/language-levels" addLabel={t('languageSettings.addLevel')} />
     </div>

@@ -14,9 +14,7 @@ export default function GenderSettings() {
       subtitle={t('genderSettings.subtitle')}
       endpoint="/genders"
       addLabel={t('genderSettings.add')}
-      // withIcon reverted (LOOKUP-ICONS-FE-2 fix, 13-09): candidate_genders has
-      // value/label/color/sort_order/active only — no icon column/validation.
-      withValueSlug withColor
+      withValueSlug withColor withIcon
     />
   )
 }

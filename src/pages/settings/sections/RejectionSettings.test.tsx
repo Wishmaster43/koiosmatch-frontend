@@ -43,16 +43,15 @@ describe('RejectionSettings', () => {
   })
 
   // LOOKUP-ICONS-FE-2 fix (13-09): CandidateRejectionReasonController has no icon
-  // column/validation — the mark stays colour-only.
-  it('the value mark stays colour-only', async () => {
+  it('the value mark carries icon and colour (LOOKUP-ICONEN-1)', async () => {
     api.get.mockResolvedValue({ data: [row()] })
     api.put.mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<RejectionSettings />)
 
     await screen.findByText('No response')
-    const trigger = screen.getByRole('button', { name: st('statusList.colorMark', { label: 'No response' }) })
+    const trigger = screen.getByRole('button', { name: st('statusList.valueMark', { label: 'No response' }) })
     await user.click(trigger)
-    expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'No response' }) })).toBeInTheDocument()
+    expect(screen.getByRole('menu', { name: st('statusList.valueMark', { label: 'No response' }) })).toBeInTheDocument()
   })
 })

@@ -118,9 +118,7 @@ export function VacancySenioritySettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      {/* withIcon reverted (LOOKUP-ICONS-FE-2 fix, 13-09): no icon column/validation
-          on vacancy_seniority_levels — stays colour-only. */}
-      <StatusListEditor compact withColor title={t('vacancy.seniorityTitle')} subtitle={t('vacancy.senioritySubtitle')}
+      <StatusListEditor compact withColor withIcon title={t('vacancy.seniorityTitle')} subtitle={t('vacancy.senioritySubtitle')}
         endpoint="/vacancy-seniority-levels" addLabel={t('vacancy.seniorityAdd')}
         defaultField={{ key: 'is_default' }} />
     </div>
@@ -136,9 +134,7 @@ export function VacancyEducationSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      {/* withIcon reverted (LOOKUP-ICONS-FE-2 fix, 13-09): no icon column/validation
-          on vacancy_education_levels — stays colour-only. */}
-      <StatusListEditor compact withColor title={t('vacancy.educationTitle')} subtitle={t('vacancy.educationSubtitle')}
+      <StatusListEditor compact withColor withIcon title={t('vacancy.educationTitle')} subtitle={t('vacancy.educationSubtitle')}
         endpoint="/vacancy-education-levels" addLabel={t('vacancy.educationAdd')}
         defaultField={{ key: 'is_default' }} />
     </div>

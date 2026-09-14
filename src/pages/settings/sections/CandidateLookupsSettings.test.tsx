@@ -227,14 +227,7 @@ describe('CandidateLookupsSettings — readOnly (system value locked)', () => {
     expect(screen.queryByRole('button', { name: i18n.t('dragList.moveDown', { ns: 'common' }) })).not.toBeInTheDocument()
   })
 
-  // The colour/icon mark stays fully editable under readOnly (Danny did not name
-  // it) — already covered end-to-end by "saves a phase COLOUR via the row swatch"
-  // above (click mark → popover → pick preset → PUT), re-asserted here as an
-  // explicit readOnly-scoped regression guard.
-  // LOOKUP-ICONS-FE-2 fix (13-09): CandidateLookupController.php TYPES declares
-  // 'phases' => icon:false (candidate_phases has no icon column) — phases stays
-  // colour-only (a 'dialog' popover), unlike funnel-types which does carry icon.
-  it('the value mark still opens its popover — colour only, no icon column on phases', async () => {
+  it('the value mark still opens its popover — icon and colour (phases serve icon since LOOKUP-ICONEN-1)', async () => {
     mockedApi.get.mockResolvedValue({ data: {
       // eslint-disable-next-line no-restricted-syntax -- DATA: fixture phase colour, not a style rule.
       phases: [{ id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_applicant: false }],
@@ -243,8 +236,8 @@ describe('CandidateLookupsSettings — readOnly (system value locked)', () => {
     render(<CandidatePhasesSettings />)
 
     await screen.findByText('Lead')
-    await user.click(screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Lead' }) }))
-    expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Lead' }) })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: st('statusList.valueMark', { label: 'Lead' }) }))
+    expect(screen.getByRole('menu', { name: st('statusList.valueMark', { label: 'Lead' }) })).toBeInTheDocument()
   })
 })
 
@@ -337,7 +330,6 @@ describe('CandidateLookupsSettings — icon support (statuses + contract forms)'
 
   // Updated LOOKUP-ICONS-FE-2 (13-09): funnel stages (application_stages) gained
   // an icon vocabulary on the backend — the mark is now icon-carrying, not
-  // colour-only (was the pre-13-09 contract, see the FunnelStagesSettings icon-mark
   // test above for the PATCH regression).
   it('renders the icon-carrying mark on funnel stages (icon vocabulary added 13-09)', async () => {
     mockedApi.get.mockResolvedValue({ data: {

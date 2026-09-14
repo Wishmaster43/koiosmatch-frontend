@@ -89,9 +89,7 @@ describe('CustomerStatusesSettings', () => {
       expect.objectContaining({ name: 'Prospect', value: 'prospect' })))
   })
 
-  // LOOKUP-ICONS-FE-2 fix (13-09): CustomerLookupController.php validates `color`
-  // only for customer_statuses (no icon column/rule) — colour-only mark stays.
-  it('the value mark stays colour-only and PUTs {color} when a colour is picked', async () => {
+  it('the value mark carries icon and colour and PUTs {color} when a colour is picked', async () => {
     const active = mockStatus('s1', 'Active', { is_default: true })
     mockedApi.get.mockResolvedValue({ data: [active] })
     mockedApi.put.mockResolvedValue({ data: {} })
@@ -99,9 +97,9 @@ describe('CustomerStatusesSettings', () => {
     render(<CustomerStatusesSettings />)
 
     await screen.findByText('Active')
-    const trigger = screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Active' }) })
+    const trigger = screen.getByRole('button', { name: st('statusList.valueMark', { label: 'Active' }) })
     await user.click(trigger)
-    expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Active' }) })).toBeInTheDocument()
+    expect(screen.getByRole('menu', { name: st('statusList.valueMark', { label: 'Active' }) })).toBeInTheDocument()
   })
 })
 
@@ -136,16 +134,14 @@ describe('CustomerPhasesSettings — readOnly (system value locked)', () => {
     expect(addBtn).toHaveAttribute('aria-description', st('statusList.systemValueLocked'))
   })
 
-  // LOOKUP-ICONS-FE-2 fix (13-09): the customer-phases endpoint validates color
-  // only — colour/icon mark stays colour-only ('dialog', not 'menu').
-  it('the value mark still opens its popover — colour stays editable (he did not name it)', async () => {
+  it('the value mark still opens its popover — icon and colour stay editable (he did not name them)', async () => {
     mockedApi.get.mockResolvedValue({ data: [phase()] })
     const user = userEvent.setup()
     render(<CustomerPhasesSettings />)
 
     await screen.findByText('Prospect')
-    await user.click(screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Prospect' }) }))
-    expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Prospect' }) })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: st('statusList.valueMark', { label: 'Prospect' }) }))
+    expect(screen.getByRole('menu', { name: st('statusList.valueMark', { label: 'Prospect' }) })).toBeInTheDocument()
   })
 })
 
@@ -286,14 +282,14 @@ describe('ContactStatusesSettings', () => {
 
 // LOOKUP-ICONS-FE-2 (13-09): contact statuses gained withColor like the four sibling
 // blocks (colour column + `color` validation on the customer lookup controller).
-describe('ContactStatusesSettings — colour mark (LOOKUP-ICONS-FE-2)', () => {
-  it('the value mark is colour-only and opens its palette', async () => {
+describe('ContactStatusesSettings — icon-and-colour mark (LOOKUP-ICONEN-1)', () => {
+  it('the value mark carries icon and colour and opens its menu', async () => {
     const lead = mockStatus('cs1', 'Contactpersoon actief', { is_default: true })
     mockedApi.get.mockResolvedValue({ data: [lead] })
     const user = userEvent.setup()
     render(<ContactStatusesSettings />)
     await screen.findByText('Contactpersoon actief')
-    await user.click(screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Contactpersoon actief' }) }))
-    expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Contactpersoon actief' }) })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: st('statusList.valueMark', { label: 'Contactpersoon actief' }) }))
+    expect(screen.getByRole('menu', { name: st('statusList.valueMark', { label: 'Contactpersoon actief' }) })).toBeInTheDocument()
   })
 })

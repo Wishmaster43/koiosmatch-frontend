@@ -15,9 +15,6 @@
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
 
-// The CAO lookup editor; withValueSlug is required since CaoController validates `value`.
-// No withIcon: CAO has a color column only, no icon column/validation on the
-// backend (LOOKUP-ICONS-FE-2 round-4 hash, ±19:30 13-09) — colour-only stays.
 export default function CaoSettings() {
   const { t } = useTranslation('settings')
   return (
@@ -27,7 +24,7 @@ export default function CaoSettings() {
         subtitle={t('caoSettings.subtitle')}
         endpoint="/cao"
         addLabel={t('caoSettings.add')}
-        withColor
+        withColor withIcon
         withValueSlug
       />
     </div>

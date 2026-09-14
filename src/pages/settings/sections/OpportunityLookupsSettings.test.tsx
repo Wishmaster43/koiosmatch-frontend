@@ -121,18 +121,16 @@ describe('OpportunityLookupsSettings', () => {
         expect.objectContaining({ is_won: true, is_lost: false })))
     })
 
-    // LOOKUP-ICONS-FE-2 fix (13-09): opportunity_stages has no icon column/
-    // validation — the mark stays colour-only.
-    it('the value mark stays colour-only', async () => {
+    it('the value mark carries icon and colour (LOOKUP-ICONEN-1)', async () => {
       api.get.mockResolvedValue({ data: [row()] })
       api.put.mockResolvedValue({ data: {} })
       const user = userEvent.setup()
       render(<OpportunityLookupsSettings />)
 
       await screen.findByText('Lead')
-      const trigger = screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Lead' }) })
+      const trigger = screen.getByRole('button', { name: st('statusList.valueMark', { label: 'Lead' }) })
       await user.click(trigger)
-      expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Lead' }) })).toBeInTheDocument()
+      expect(screen.getByRole('menu', { name: st('statusList.valueMark', { label: 'Lead' }) })).toBeInTheDocument()
     })
   })
 })

@@ -24,9 +24,7 @@ export function TaskStatusSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      {/* withIcon reverted (LOOKUP-ICONS-FE-2 fix, 13-09): no icon column/validation
-          on task_statuses — stays colour-only. */}
-      <StatusListEditor compact withColor withValueSlug title={t('tasks.statusTitle')} subtitle={t('tasks.statusSubtitle')}
+      <StatusListEditor compact withColor withIcon withValueSlug title={t('tasks.statusTitle')} subtitle={t('tasks.statusSubtitle')}
         endpoint="/task-statuses" addLabel={t('tasks.statusAdd')}
         flagField={{ key: 'is_done', label: t('tasks.flagDone'), description: t('tasks.flagDoneDesc') }} />
     </div>
@@ -58,9 +56,7 @@ export function TaskPrioritySettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      {/* withIcon reverted (LOOKUP-ICONS-FE-2 fix, 13-09): no icon column/validation
-          on task_priorities — stays colour-only. */}
-      <StatusListEditor compact withColor withValueSlug title={t('tasks.priorityTitle')} subtitle={t('tasks.prioritySubtitle')}
+      <StatusListEditor compact withColor withIcon withValueSlug title={t('tasks.priorityTitle')} subtitle={t('tasks.prioritySubtitle')}
         endpoint="/task-priorities" addLabel={t('tasks.priorityAdd')}
         defaultField={{ key: 'is_default', labelKey: 'tasks.priorityDefault' }} />
     </div>

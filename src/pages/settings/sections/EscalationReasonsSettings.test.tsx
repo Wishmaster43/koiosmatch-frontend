@@ -65,16 +65,15 @@ describe('EscalationReasonsSettings', () => {
   })
 
   // LOOKUP-ICONS-FE-2 fix (13-09): EscalationReasonController has no icon
-  // column/validation — the mark stays colour-only ('dialog', not 'menu').
-  it('the value mark stays colour-only', async () => {
+  it('the value mark carries icon and colour (LOOKUP-ICONEN-1)', async () => {
     mockedApi.get.mockResolvedValue({ data: [row()] })
     mockedApi.put.mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<EscalationReasonsSettings />)
 
     await screen.findByText('Boos')
-    const trigger = screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Boos' }) })
+    const trigger = screen.getByRole('button', { name: st('statusList.valueMark', { label: 'Boos' }) })
     await user.click(trigger)
-    expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Boos' }) })).toBeInTheDocument()
+    expect(screen.getByRole('menu', { name: st('statusList.valueMark', { label: 'Boos' }) })).toBeInTheDocument()
   })
 })

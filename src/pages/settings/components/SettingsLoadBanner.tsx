@@ -1,7 +1,7 @@
 /**
  * SettingsLoadBanner — SETTINGS-LOAD-ERROR-1: the shared banner+retry for the
  * screens gated on useAllSettings()/useSettingsLoaded() directly — a group
- * distinct from SettingsScaffold's own `loadError` prop (SettingsKit.jsx), which
+ * distinct from SettingsScaffold's own `loadError` prop (SettingsKit.tsx), which
  * already renders a load-failure state for the `useSettingsForm` screens. These
  * 10+ screens only used `loaded` to disable controls, so a failed GET /settings
  * left them silently inert forever with no visible error and no way to retry.

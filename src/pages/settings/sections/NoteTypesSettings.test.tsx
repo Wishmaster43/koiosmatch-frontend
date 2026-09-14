@@ -80,20 +80,16 @@ describe('NoteTypesSettings — per-entity tab', () => {
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/note-types/reorder', { ids: ['t2', 't1'] }))
   })
 
-  // The backend merges global (entity=null) rows into every `?entity=X` response —
-  // an entity tab keeps only ITS OWN rows client-side so a global row doesn't render twice.
-  // LOOKUP-ICONS-FE-2 fix (13-09): NoteTypeController has no icon column/
-  // validation — the mark stays colour-only.
-  it('the value mark stays colour-only', async () => {
+  it('the value mark carries icon and colour (LOOKUP-ICONEN-1)', async () => {
     api.get.mockResolvedValue({ data: [row()] })
     api.put.mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<NoteTypesSettings entity="candidate" />)
 
     await screen.findByText('Intake')
-    const trigger = screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Intake' }) })
+    const trigger = screen.getByRole('button', { name: st('statusList.valueMark', { label: 'Intake' }) })
     await user.click(trigger)
-    expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Intake' }) })).toBeInTheDocument()
+    expect(screen.getByRole('menu', { name: st('statusList.valueMark', { label: 'Intake' }) })).toBeInTheDocument()
   })
 
   it('filters out a global (entity=null) row on an entity tab', async () => {

@@ -57,17 +57,15 @@ describe('OutreachOutcomeSettings', () => {
       expect.objectContaining({ name: 'Not interested', label: 'Not interested', value: 'not_interested' })))
   })
 
-  // LOOKUP-ICONS-FE-2 fix (13-09): outreach_outcomes has no icon column/
-  // validation — the mark stays colour-only.
-  it('the value mark stays colour-only', async () => {
+  it('the value mark carries icon and colour (LOOKUP-ICONEN-1)', async () => {
     api.get.mockResolvedValue({ data: [outcome()] })
     api.put.mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<OutreachOutcomeSettings />)
 
     await screen.findByText('Interested')
-    const trigger = screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Interested' }) })
+    const trigger = screen.getByRole('button', { name: st('statusList.valueMark', { label: 'Interested' }) })
     await user.click(trigger)
-    expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Interested' }) })).toBeInTheDocument()
+    expect(screen.getByRole('menu', { name: st('statusList.valueMark', { label: 'Interested' }) })).toBeInTheDocument()
   })
 })

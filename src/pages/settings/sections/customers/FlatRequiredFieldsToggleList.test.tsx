@@ -5,7 +5,7 @@
  * cannot tell the runtime `if (!loaded) return` guard from the attribute. Here the
  * toggle is deliberately stubbed as an ALWAYS-ENABLED plain button, so the click
  * genuinely reaches toggle() while loaded=false — proving the guard line itself
- * (defence-in-depth: PermissionToggle lives in untyped SettingsControls.jsx, so the
+ * (defence-in-depth: PermissionToggle lives in SettingsControls.tsx, so the
  * type system cannot prove the disabled forwarding).
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'

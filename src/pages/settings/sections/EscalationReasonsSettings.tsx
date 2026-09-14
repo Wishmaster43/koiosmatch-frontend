@@ -13,15 +13,12 @@
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
 
-// Thin wrapper over the shared StatusListEditor (see the module doc above): plain name+colour CRUD with reorder now enabled since the backend added sort_order.
-// withIcon reverted (LOOKUP-ICONS-FE-2 fix, 13-09): EscalationReasonController has
-// no icon column/validation — escalation_reasons stays colour-only.
 export default function EscalationReasonsSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
       <StatusListEditor title={t('escalationReasons.title')} subtitle={t('escalationReasons.subtitle')}
-        endpoint="/escalation-reasons" addLabel={t('escalationReasons.add')} withColor />
+        endpoint="/escalation-reasons" addLabel={t('escalationReasons.add')} withColor withIcon />
     </div>
   )
 }

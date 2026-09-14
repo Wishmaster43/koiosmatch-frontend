@@ -16,9 +16,7 @@ export function OutreachStatusSettings() {
           SlugLookupController — `value` is REQUIRED on create, exactly like the outcomes
           editor below; without it every "+ toevoegen" 422'd. Guarded by
           statusListEditorSlug.houseStyle.test.js for every slug endpoint. */}
-      {/* withIcon reverted (LOOKUP-ICONS-FE-2 fix, 13-09): no icon column/validation
-          on outreach_statuses — stays colour-only. */}
-      <StatusListEditor compact withColor withValueSlug title={t('outreach.statusTitle')} subtitle={t('outreach.statusSubtitle')}
+      <StatusListEditor compact withColor withIcon withValueSlug title={t('outreach.statusTitle')} subtitle={t('outreach.statusSubtitle')}
         endpoint="/outreach-statuses" addLabel={t('outreach.statusAdd')}
         flagField={{ key: 'is_reached', label: t('outreach.flagReached'), description: t('outreach.flagReachedDesc') }} />
     </div>
@@ -41,9 +39,7 @@ export function OutreachOutcomeSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      {/* withIcon reverted (LOOKUP-ICONS-FE-2 fix, 13-09): no icon column/validation
-          on outreach_outcomes — stays colour-only. */}
-      <StatusListEditor compact withColor withValueSlug title={t('outreach.outcomeTitle')} subtitle={t('outreach.outcomeSubtitle')}
+      <StatusListEditor compact withColor withIcon withValueSlug title={t('outreach.outcomeTitle')} subtitle={t('outreach.outcomeSubtitle')}
         endpoint="/outreach-outcomes" addLabel={t('outreach.outcomeAdd')} />
     </div>
   )

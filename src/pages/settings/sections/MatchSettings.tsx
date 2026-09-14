@@ -16,9 +16,7 @@ export function MatchStatusSettings() {
     <div style={{ maxWidth: 640 }}>
       {/* R-1b live: tenant-added statuses are write-usable; the is_closed FLAG (never the
           slug) drives behaviour — a closed status ends the match (ended_at + open count). */}
-      {/* withIcon reverted (LOOKUP-ICONS-FE-2 fix, 13-09): MatchStatusController has
-          no icon column/validation — match_statuses stays colour-only. */}
-      <StatusListEditor compact withColor withValueSlug title={t('matches.statusTitle')} subtitle={t('matches.statusSubtitle')}
+      <StatusListEditor compact withColor withIcon withValueSlug title={t('matches.statusTitle')} subtitle={t('matches.statusSubtitle')}
         endpoint="/match-statuses" addLabel={t('matches.statusAdd')}
         flagField={{ key: 'is_closed', label: t('matches.flagClosed'), description: t('matches.flagClosedDesc') }} />
     </div>
@@ -73,9 +71,7 @@ export function MatchStopReasonSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      {/* withIcon reverted (LOOKUP-ICONS-FE-2 fix, 13-09): no icon column/validation
-          on match_stop_reasons — stays colour-only. */}
-      <StatusListEditor compact withColor withValueSlug title={t('matches.stopReasonTitle')} subtitle={t('matches.stopReasonSubtitle')}
+      <StatusListEditor compact withColor withIcon withValueSlug title={t('matches.stopReasonTitle')} subtitle={t('matches.stopReasonSubtitle')}
         endpoint="/match-stop-reasons" addLabel={t('matches.stopReasonAdd')} />
     </div>
   )

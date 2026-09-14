@@ -20,9 +20,7 @@ export function WaMessageTypeSettings() {
       {/* X-27 (07-09): the backend validates `is_priority` (boolean) and `daily_cap`
           (1..10000, nullable) on this lookup — the editor exposes both, otherwise the
           queue's priority lane and the per-type cap would be unreachable from the UI. */}
-      {/* withIcon reverted (LOOKUP-ICONS-FE-2 fix, 13-09): no icon column/validation
-          on whatsapp_message_types — stays colour-only. */}
-      <StatusListEditor compact withColor withValueSlug showRank
+      <StatusListEditor compact withColor withIcon withValueSlug showRank
         title={t('waMessageTypes.title')} subtitle={t('waMessageTypes.subtitle')}
         endpoint="/whatsapp-message-types" addLabel={t('waMessageTypes.add')}
         flagFields={[{ key: 'is_priority', label: t('waMessageTypes.isPriority'), description: t('waMessageTypes.isPriorityDesc') }]}

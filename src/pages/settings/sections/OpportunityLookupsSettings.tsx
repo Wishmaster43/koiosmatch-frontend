@@ -48,12 +48,9 @@ export default function OpportunityLookupsSettings() {
   return (
     <div style={{ maxWidth: 640 }}>
       <SubTabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
-      {/* withIcon reverted across all five tabs (LOOKUP-ICONS-FE-2 fix, 13-09): none
-          of the five opportunity_* tables has an icon column/validation rule yet —
-          every tab stays colour-only until CMBE ships the columns. */}
       <div style={{ marginTop: 14 }}>
         {activeTab === 'stages' && (
-          <StatusListEditor withColor withValueSlug
+          <StatusListEditor withColor withIcon withValueSlug
             title={t('opportunityLookups.stages.title')} subtitle={t('opportunityLookups.stages.subtitle')}
             endpoint="/opportunity-stages" addLabel={t('opportunityLookups.add')}
             // defaultValue: the ns/key pair is reported to the owning lane for the
@@ -67,17 +64,17 @@ export default function OpportunityLookupsSettings() {
             ]} />
         )}
         {activeTab === 'serviceTypes' && (
-          <StatusListEditor withColor withValueSlug
+          <StatusListEditor withColor withIcon withValueSlug
             title={t('opportunityLookups.serviceTypes.title')} subtitle={t('opportunityLookups.serviceTypes.subtitle')}
             endpoint="/opportunity-service-types" addLabel={t('opportunityLookups.add')} />
         )}
         {activeTab === 'agreementTypes' && (
-          <StatusListEditor withColor withValueSlug
+          <StatusListEditor withColor withIcon withValueSlug
             title={t('opportunityLookups.agreementTypes.title')} subtitle={t('opportunityLookups.agreementTypes.subtitle')}
             endpoint="/opportunity-agreement-types" addLabel={t('opportunityLookups.add')} />
         )}
         {activeTab === 'dealTypes' && (
-          <StatusListEditor withColor withValueSlug
+          <StatusListEditor withColor withIcon withValueSlug
             title={t('opportunityLookups.dealTypes.title')} subtitle={t('opportunityLookups.dealTypes.subtitle')}
             endpoint="/opportunity-deal-types" addLabel={t('opportunityLookups.add')}
             extraField={{ key: 'unit', label: t('opportunityLookups.dealTypes.unit'), default: 'euro',
@@ -90,7 +87,7 @@ export default function OpportunityLookupsSettings() {
         {activeTab === 'lostReasons' && (
           // OPP-LOST-FE-1: rejection-reasons contract ({id, name, color, in_use}) —
           // reorderable off, mirrors RejectionSettings.jsx (SimpleLookupController family).
-          <StatusListEditor reorderable={false} withColor
+          <StatusListEditor reorderable={false} withColor withIcon
             title={t('opportunityLookups.lostReasons.title')} subtitle={t('opportunityLookups.lostReasons.subtitle')}
             endpoint="/opportunity-lost-reasons" addLabel={t('opportunityLookups.add')} />
         )}

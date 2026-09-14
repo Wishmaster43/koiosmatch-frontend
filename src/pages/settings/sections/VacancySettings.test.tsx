@@ -60,18 +60,16 @@ describe('VacancySenioritySettings', () => {
     expect(pill).not.toBeDisabled() // DEFAULT-UNDO 04-08: active pill stays clickable (click = clear)
   })
 
-  // LOOKUP-ICONS-FE-2 fix (13-09): vacancy_seniority_levels has no icon column/
-  // validation — the mark stays colour-only.
-  it('the value mark stays colour-only', async () => {
+  it('the value mark carries icon and colour (LOOKUP-ICONEN-1)', async () => {
     api.get.mockResolvedValue({ data: [row({ id: 'sen-1', name: 'Starter' })] })
     api.put.mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<VacancySenioritySettings />)
 
     await screen.findByText('Starter')
-    const trigger = screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Starter' }) })
+    const trigger = screen.getByRole('button', { name: st('statusList.valueMark', { label: 'Starter' }) })
     await user.click(trigger)
-    expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Starter' }) })).toBeInTheDocument()
+    expect(screen.getByRole('menu', { name: st('statusList.valueMark', { label: 'Starter' }) })).toBeInTheDocument()
   })
 })
 

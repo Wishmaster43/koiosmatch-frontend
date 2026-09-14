@@ -11,13 +11,8 @@ import StatusListEditor from './StatusListEditor'
 // templates now live in the workflow engine — this only manages the reasons themselves).
 export default function RejectionSettings() {
   const { t } = useTranslation('settings')
-  // Drag-reorder on: candidate_rejection_reasons carries sort_order + PUT
-  // /candidate-rejection-reasons/reorder (BE ea4d2ebb, CandidateRejectionReasonController
-  // on ReordersLookup) — mirrors BlacklistReasonsSettings (LOOKUP-REORDER-1).
-  // withIcon reverted (LOOKUP-ICONS-FE-2 fix, 13-09): CandidateRejectionReasonController
-  // has no icon column/validation — stays colour-only.
   return (
     <StatusListEditor title={t('rejection.title')} subtitle={t('rejection.subtitle')}
-      endpoint="/candidate-rejection-reasons" addLabel={t('rejection.add')} withColor />
+      endpoint="/candidate-rejection-reasons" addLabel={t('rejection.add')} withColor withIcon />
   )
 }

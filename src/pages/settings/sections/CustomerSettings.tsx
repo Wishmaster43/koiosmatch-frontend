@@ -20,10 +20,7 @@ export function CustomerStatusesSettings() {
       endpoint="/settings/customer-lookups/statuses"
       addLabel={t('customerLookups.statuses.add')}
       withValueSlug
-      // withColor only (LOOKUP-ICONS-FE-2 fix, 13-09): CustomerLookupController.php
-      // validates `color` but never `icon` for customer_statuses — no icon column,
-      // no icon validation rule; a withIcon flip here would be a fake affordance (§3).
-      withColor
+      withColor withIcon
       flagFields={[{ key: 'is_inactive', label: t('lookups.isInactive'), description: t('lookups.isInactiveHint') }]}
       defaultField={{ key: 'is_default' }}
     />
@@ -56,9 +53,7 @@ export function CustomerPhasesSettings() {
       // stops it from this screen.
       readOnly
       withValueSlug
-      // withColor only (LOOKUP-ICONS-FE-2 fix, 13-09): the customer-phases endpoint
-      // (SlugLookupController) validates color, not icon — no icon column exists yet.
-      withColor
+      withColor withIcon
       flagField={{ key: 'is_customer', label: t('customerLookups.phases.isCustomer'), description: t('customerLookups.phases.isCustomerHint') }}
       defaultField={{ key: 'is_default' }}
     />
@@ -77,9 +72,7 @@ export function LocationStatusesSettings() {
       endpoint="/settings/customer-lookups/location-statuses"
       addLabel={t('customerLookups.locationStatuses.add')}
       withValueSlug
-      // withColor only (LOOKUP-ICONS-FE-2 fix, 13-09): location statuses have a color
-      // column but no icon column/validation on the backend yet.
-      withColor
+      withColor withIcon
       defaultField={{ key: 'is_default' }}
     />
   )
@@ -97,9 +90,7 @@ export function DepartmentStatusesSettings() {
       endpoint="/settings/customer-lookups/department-statuses"
       addLabel={t('customerLookups.departmentStatuses.add')}
       withValueSlug
-      // withColor only (LOOKUP-ICONS-FE-2 fix, 13-09): department statuses have a color
-      // column but no icon column/validation on the backend yet.
-      withColor
+      withColor withIcon
       defaultField={{ key: 'is_default' }}
     />
   )
@@ -116,10 +107,7 @@ export function ContactStatusesSettings() {
       subtitle={t('customerLookups.contactStatuses.subtitle')}
       endpoint="/settings/customer-lookups/contact-statuses"
       addLabel={t('customerLookups.contactStatuses.add')}
-      withValueSlug withColor
-      // LOOKUP-ICONS-FE-2 (13-09, measured): customer_contact_statuses carries a colour
-      // column and CustomerLookupController validates `color`; no icon column or rule
-      // yet (icons round 4), so the mark stays colour-only like its four siblings.
+      withValueSlug withColor withIcon
       defaultField={{ key: 'is_default' }}
     />
   )

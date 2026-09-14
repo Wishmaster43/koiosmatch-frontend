@@ -19,7 +19,7 @@ export default function JargonSettings() {
       subtitle={t('jargonSettings.subtitle')}
       endpoint="/jargon-terms"
       addLabel={t('jargonSettings.add')}
-      withColor={false}
+      withColor withIcon
     />
   )
 }

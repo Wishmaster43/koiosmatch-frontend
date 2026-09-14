@@ -69,18 +69,16 @@ describe('TaskStatusSettings', () => {
       expect.objectContaining({ name: 'In progress', value: 'in_progress' })))
   })
 
-  // LOOKUP-ICONS-FE-2 fix (13-09): task_statuses has no icon column/validation —
-  // the mark stays colour-only.
-  it('the value mark stays colour-only', async () => {
+  it('the value mark carries icon and colour (LOOKUP-ICONEN-1)', async () => {
     api.get.mockResolvedValue({ data: [status()] })
     api.put.mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<TaskStatusSettings />)
 
     await screen.findByText('Afgerond')
-    const trigger = screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Afgerond' }) })
+    const trigger = screen.getByRole('button', { name: st('statusList.valueMark', { label: 'Afgerond' }) })
     await user.click(trigger)
-    expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Afgerond' }) })).toBeInTheDocument()
+    expect(screen.getByRole('menu', { name: st('statusList.valueMark', { label: 'Afgerond' }) })).toBeInTheDocument()
   })
 })
 
@@ -115,17 +113,15 @@ describe('TaskPrioritySettings', () => {
       expect.objectContaining({ name: 'Low', value: 'low' })))
   })
 
-  // LOOKUP-ICONS-FE-2 fix (13-09): task_priorities has no icon column/validation —
-  // the mark stays colour-only.
-  it('the value mark stays colour-only', async () => {
+  it('the value mark carries icon and colour (LOOKUP-ICONEN-1)', async () => {
     api.get.mockResolvedValue({ data: [{ id: 'tp1', name: 'Low', color: 'var(--color-primary)' }] })
     api.put.mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<TaskPrioritySettings />)
 
     await screen.findByText('Low')
-    const trigger = screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Low' }) })
+    const trigger = screen.getByRole('button', { name: st('statusList.valueMark', { label: 'Low' }) })
     await user.click(trigger)
-    expect(screen.getByRole('dialog', { name: st('statusList.colorMark', { label: 'Low' }) })).toBeInTheDocument()
+    expect(screen.getByRole('menu', { name: st('statusList.valueMark', { label: 'Low' }) })).toBeInTheDocument()
   })
 })

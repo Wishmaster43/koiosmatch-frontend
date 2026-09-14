@@ -13,7 +13,7 @@ export default function IndustrySettings() {
       subtitle={t('industrySettings.subtitle')}
       endpoint="/industries"
       addLabel={t('industrySettings.add')}
-      withColor={false}
+      withColor withIcon
     />
   )
 }
