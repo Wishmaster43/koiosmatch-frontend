@@ -19,7 +19,7 @@ const isDutch = (line) => {
 // Nav pages (sidebar ids that are plain hashes) + settings category/tab pairs parsed
 // from the registry source (the probe cannot import JSX).
 const NAV = ['dashboard', 'candidates', 'applications', 'vacancies', 'matches', 'opportunities', 'tasks', 'outreach', 'customers', 'planning', 'aiagents', 'whatsapp', 'reports']
-const registry = fs.readFileSync(new URL('../src/pages/settings/registry.jsx', import.meta.url), 'utf8')
+const registry = fs.readFileSync(new URL('../src/pages/settings/registry.tsx', import.meta.url), 'utf8')
 const SETTINGS = []
 for (const m of registry.matchAll(/key:\s*'([a-z_]+)'[\s\S]*?items:\s*\[([\s\S]*?)\n\s*\]/g)) {
   for (const id of m[2].matchAll(/\bid:\s*'([a-z_]+)'/g)) SETTINGS.push([m[1], id[1]])

@@ -30,7 +30,7 @@ const LABELS = [...new Set(
 )].filter(l => l.length > 3)
 
 const NAV = ['dashboard', 'candidates', 'applications', 'vacancies', 'matches', 'opportunities', 'tasks', 'outreach', 'customers', 'planning', 'aiagents', 'whatsapp', 'reports']
-const registry = fs.readFileSync(new URL('../src/pages/settings/registry.jsx', import.meta.url), 'utf8')
+const registry = fs.readFileSync(new URL('../src/pages/settings/registry.tsx', import.meta.url), 'utf8')
 const SETTINGS = []
 for (const m of registry.matchAll(/key:\s*'([a-z_]+)'[\s\S]*?items:\s*\[([\s\S]*?)\n\s*\]/g)) {
   for (const id of m[2].matchAll(/\bid:\s*'([a-z_]+)'/g)) SETTINGS.push(`settings/${m[1]}/${id[1]}`)
