@@ -1433,6 +1433,14 @@ verifier and manager from now on.
   rendered).** A screen probe that times out on the login form after renames is a dev-server
   restart, not an app bug; verify on a fresh `npx vite` first. Cookie sessions are stateful for
   `localhost:5173` only, so probes never move to another port.
+- **WORKFLOW-CAP-1 — a read pass or refute loop carries a hard agent cap and ONE verifier per
+  finding.** Measured 14-09: the D8/D9 read pass (43 Opus readers, three Opus refuters per
+  finding over several hundred findings) ran into the workflow's 1000-agent ceiling, burned
+  45 million tokens and ±35 % of the weekly budget, and still failed 477 agents on the session
+  limit. Rule: readers per folder, at most ONE Opus refuter per finding, a `budget` or an
+  explicit iteration cap in the script, and chunks of at most four concurrent readers; a
+  full build round (Sonnet builder + one Opus lens + fix) costs ±25 % of a session window
+  ≈ 5 % of the week — plan the day in those units, never in "lanes".
 - **SESSION-LIMIT-PACT-1 (Danny 13-09 23:40, verbatim: "Hou sessie limit in de gaten samen
   met FE en zorg dat het werk doorgaat en af komt zonder dat we tegen limit aan komen"):**
   CMFE and CMBE share one account. When a screenshot shows the session window filling faster
