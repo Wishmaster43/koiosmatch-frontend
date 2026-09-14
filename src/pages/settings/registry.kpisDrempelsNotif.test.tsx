@@ -6,9 +6,17 @@
  * backend's own English context keys 1:1 — CMBE 23-08).
  */
 import { describe, it, expect } from 'vitest'
+import { isValidElement, type ReactNode } from 'react'
 import { Bell } from 'lucide-react'
 import { NAV_GROUPS } from './registry'
 import { kpisOpportunities, kpisVacancies } from './schemas/kpis'
+
+// A render item returns a ReactNode; narrow to the element carrying `context` before
+// reading its prop — never `any`, and it fails loudly if render ever returns non-element.
+function contextProp(node: ReactNode): string | undefined {
+  if (isValidElement<{ context?: string }>(node)) return node.props.context
+  return undefined
+}
 
 describe('registry — kpis_opportunities / kpis_vacancies (KPI-DREMPELS-FE-1)', () => {
   const kpisGroup = NAV_GROUPS.find((g) => g.key === 'kpis')
@@ -29,12 +37,12 @@ describe('registry — notif_calllists / notif_opportunities (NOTIF-CONTEXTEN-FE
 
   it('renders NotificationsSettings with context="calllists"', () => {
     const item = notifGroup?.items.find((i) => i.id === 'notif_calllists')
-    expect(item?.render?.().props.context).toBe('calllists')
+    expect(contextProp(item?.render?.())).toBe('calllists')
   })
 
   it('renders NotificationsSettings with context="opportunities"', () => {
     const item = notifGroup?.items.find((i) => i.id === 'notif_opportunities')
-    expect(item?.render?.().props.context).toBe('opportunities')
+    expect(contextProp(item?.render?.())).toBe('opportunities')
   })
 
   // SETTINGS-TABS-FIX-1 review: every row in this group reads Bell — a

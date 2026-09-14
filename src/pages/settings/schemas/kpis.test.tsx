@@ -16,16 +16,29 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import i18n from '@/i18n'
 import api from '@/lib/api'
 import SchemaSection from '../components/SchemaSection'
+import type { Schema } from '../components/SchemaSection'
 import {
-  kpisCandidates,
-  kpisApplications,
-  kpisCustomers,
-  kpisLocations,
-  kpisDepartments,
-  kpisTasks,
-  kpisOpportunities,
-  kpisVacancies,
+  kpisCandidates as kpisCandidatesRaw,
+  kpisApplications as kpisApplicationsRaw,
+  kpisCustomers as kpisCustomersRaw,
+  kpisLocations as kpisLocationsRaw,
+  kpisDepartments as kpisDepartmentsRaw,
+  kpisTasks as kpisTasksRaw,
+  kpisOpportunities as kpisOpportunitiesRaw,
+  kpisVacancies as kpisVacanciesRaw,
 } from './kpis'
+
+// ./kpis.js is plain untyped JS (not on this migration's list); its exports lose their
+// literal `type` shape under TS's best-effort JS inference — cast once, here, to the
+// real Schema type SchemaSection itself declares.
+const kpisCandidates = kpisCandidatesRaw as unknown as Schema
+const kpisApplications = kpisApplicationsRaw as unknown as Schema
+const kpisCustomers = kpisCustomersRaw as unknown as Schema
+const kpisLocations = kpisLocationsRaw as unknown as Schema
+const kpisDepartments = kpisDepartmentsRaw as unknown as Schema
+const kpisTasks = kpisTasksRaw as unknown as Schema
+const kpisOpportunities = kpisOpportunitiesRaw as unknown as Schema
+const kpisVacancies = kpisVacanciesRaw as unknown as Schema
 
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn(), post: vi.fn() } }))
 // SchemaSection gates its Save button on settings.update (X-29/AF:orphans-4-2, 713175d3):
@@ -33,12 +46,12 @@ vi.mock('@/lib/api', () => ({ default: { get: vi.fn(), post: vi.fn() } }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
-const st = (key) => i18n.t(key, { ns: 'settings' })
+const st = (key: string) => i18n.t(key, { ns: 'settings' })
 
 beforeEach(() => {
   vi.clearAllMocks()
-  api.get.mockResolvedValue({ data: {} })
-  api.post.mockResolvedValue({})
+  vi.mocked(api.get).mockResolvedValue({ data: {} } as Awaited<ReturnType<typeof api.get>>)
+  vi.mocked(api.post).mockResolvedValue({} as Awaited<ReturnType<typeof api.post>>)
 })
 
 // Field shape + defaults pinned as data — exactly the two backend-confirmed
@@ -82,7 +95,7 @@ describe('kpisOpportunities · defaults + persists the exact backend keys', () =
     fireEvent.click(saveBtn)
 
     await waitFor(() => expect(api.post).toHaveBeenCalled())
-    const [url, body] = api.post.mock.calls[0]
+    const [url, body] = vi.mocked(api.post).mock.calls[0] as [string, Record<string, string>]
     expect(url).toBe('/settings')
     // settingsApi stringifies every value on the way out (POST body is all strings).
     expect(body.opportunity_stale_days).toBe('45')
@@ -90,7 +103,7 @@ describe('kpisOpportunities · defaults + persists the exact backend keys', () =
   })
 
   it('loads a previously saved value back from GET /settings', async () => {
-    api.get.mockResolvedValue({ data: { opportunity_stale_days: '90' } })
+    vi.mocked(api.get).mockResolvedValue({ data: { opportunity_stale_days: '90' } } as Awaited<ReturnType<typeof api.get>>)
     render(<SchemaSection schema={kpisOpportunities} />)
     const inputs = await screen.findAllByRole('textbox')
     await waitFor(() => expect(inputs[0]).toHaveValue('90'))
@@ -119,7 +132,7 @@ describe('kpisVacancies · defaults + persists the exact backend key', () => {
     fireEvent.click(saveBtn)
 
     await waitFor(() => expect(api.post).toHaveBeenCalled())
-    const [url, body] = api.post.mock.calls[0]
+    const [url, body] = vi.mocked(api.post).mock.calls[0] as [string, Record<string, string>]
     expect(url).toBe('/settings')
     expect(body.vacancy_closing_soon_days).toBe('10')
     // ONE SOURCE PER KEY (SETTINGS-TABS-FIX-1): the staleness key must never be

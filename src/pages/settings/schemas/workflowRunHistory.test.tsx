@@ -12,7 +12,12 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import i18n from '@/i18n'
 import api from '@/lib/api'
 import SchemaSection from '../components/SchemaSection'
-import workflowRunHistory from './workflowRunHistory'
+import type { Schema } from '../components/SchemaSection'
+import workflowRunHistoryRaw from './workflowRunHistory'
+
+// ./workflowRunHistory.js is plain untyped JS (not on this migration's list); cast once
+// to the real Schema type SchemaSection itself declares.
+const workflowRunHistory = workflowRunHistoryRaw as unknown as Schema
 
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn(), post: vi.fn() } }))
 // SchemaSection gates its Save button on settings.update (X-29/AF:orphans-4-2, 713175d3):
@@ -20,12 +25,12 @@ vi.mock('@/lib/api', () => ({ default: { get: vi.fn(), post: vi.fn() } }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
-const st = (key) => i18n.t(key, { ns: 'settings' })
+const st = (key: string) => i18n.t(key, { ns: 'settings' })
 
 beforeEach(() => {
   vi.clearAllMocks()
-  api.get.mockResolvedValue({ data: {} })
-  api.post.mockResolvedValue({})
+  vi.mocked(api.get).mockResolvedValue({ data: {} } as Awaited<ReturnType<typeof api.get>>)
+  vi.mocked(api.post).mockResolvedValue({} as Awaited<ReturnType<typeof api.post>>)
 })
 
 describe('workflowRunHistory · defaults to the platform ceiling when unset', () => {
@@ -60,14 +65,14 @@ describe('workflowRunHistory · save persists the exact backend key', () => {
     fireEvent.click(saveBtn)
 
     await waitFor(() => expect(api.post).toHaveBeenCalled())
-    const [url, body] = api.post.mock.calls[0]
+    const [url, body] = vi.mocked(api.post).mock.calls[0] as [string, Record<string, string>]
     expect(url).toBe('/settings')
     // settingsApi stringifies every value on the way out (POST body is all strings).
     expect(body.workflow_run_retention_days).toBe('10')
   })
 
   it('loads a previously saved value back from GET /settings', async () => {
-    api.get.mockResolvedValue({ data: { workflow_run_retention_days: '7' } })
+    vi.mocked(api.get).mockResolvedValue({ data: { workflow_run_retention_days: '7' } } as Awaited<ReturnType<typeof api.get>>)
     render(<SchemaSection schema={workflowRunHistory} />)
     await waitFor(() => expect(screen.getByRole('textbox')).toHaveValue('7'))
   })

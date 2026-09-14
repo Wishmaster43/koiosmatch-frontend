@@ -5,8 +5,9 @@
  * the search-palette entry. This covers all three so a re-deletion fails loudly.
  */
 import { describe, it, expect } from 'vitest'
-import { createInstance } from 'i18next'
+import { createInstance, type i18n as I18nInstance, type Resource, type ResourceLanguage } from 'i18next'
 import { initReactI18next } from 'react-i18next'
+import { isValidElement, type ReactNode } from 'react'
 import { NAV_GROUPS } from './registry'
 import { buildSettingsSearchEntries, filterSettingsSearchEntries } from './components/settingsSearchIndex'
 import settingsNl from '@/i18n/locales/nl/settings.json'
@@ -14,13 +15,20 @@ import settingsEn from '@/i18n/locales/en/settings.json'
 import settingsSearchNl from '@/i18n/locales/nl/settingsSearch.json'
 import settingsSearchEn from '@/i18n/locales/en/settingsSearch.json'
 
+// A render item returns a ReactNode; narrow to the element carrying `context` before
+// reading its prop — never `any`, and it fails loudly if render ever returns non-element.
+function contextProp(node: ReactNode): string | undefined {
+  if (isValidElement<{ context?: string }>(node)) return node.props.context
+  return undefined
+}
+
 describe('registry — notif_conversations (settings-coherence-11 fix)', () => {
   const notifGroup = NAV_GROUPS.find((g) => g.key === 'notifications')
 
   it('registers notif_conversations rendering NotificationsSettings with context="gesprekken"', () => {
     const item = notifGroup?.items.find((i) => i.id === 'notif_conversations')
     expect(item).toBeTruthy()
-    expect(item?.render?.().props.context).toBe('gesprekken')
+    expect(contextProp(item?.render?.())).toBe('gesprekken')
   })
 
   // SETTINGS-TABS-FIX-1: every row in this group shares one Bell icon, not a
@@ -35,7 +43,7 @@ describe('registry — notif_conversations (settings-coherence-11 fix)', () => {
 
 // Build a minimal real i18next instance from the actual locale JSON (no mocks —
 // a stubbed t() that echoes the key back would prove nothing about a missing key).
-function makeI18n(lng, resources, ns = ['settings']) {
+function makeI18n(lng: string, resources: Resource, ns: string[] = ['settings']): I18nInstance {
   const i18n = createInstance()
   i18n.use(initReactI18next).init({
     lng,
@@ -64,9 +72,9 @@ describe('nav.notif_conversations label (i18n, §5 — no silent key fallback)',
 describe('settings search palette finds notif_conversations (§3A — always searchable)', () => {
   const notifGroup = NAV_GROUPS.find((g) => g.key === 'notifications')
 
-  function entriesFor(lng, settingsRes, settingsSearchRes) {
+  function entriesFor(lng: string, settingsRes: ResourceLanguage, settingsSearchRes: ResourceLanguage) {
     const i18n = makeI18n(lng, { [lng]: { settings: settingsRes, settingsSearch: settingsSearchRes } }, ['settings', 'settingsSearch'])
-    return buildSettingsSearchEntries([notifGroup], i18n.t.bind(i18n))
+    return buildSettingsSearchEntries(notifGroup ? [notifGroup] : [], i18n.t.bind(i18n))
   }
 
   it('finds the tab in Dutch by its own translated label', () => {

@@ -169,7 +169,7 @@ const AUDITED_TABLES = new Set([
 
 describe('Settings registry logName validation', () => {
   it('every item has a valid logName (null or audited table name)', () => {
-    const invalid = []
+    const invalid: string[] = []
 
     NAV_GROUPS.forEach(group => {
       group.items.forEach(item => {
@@ -188,13 +188,13 @@ describe('Settings registry logName validation', () => {
       })
     })
 
-    expect(invalid).toEqual([], invalid.join('\n'))
+    expect(invalid, invalid.join('\n')).toEqual([])
   })
 
   it('every non-null logName appears in the audited tables list', () => {
     // Sanity check: extract all non-null logName values from the registry
     // and verify they're all in AUDITED_TABLES
-    const found = new Set()
+    const found = new Set<string>()
     NAV_GROUPS.forEach(group => {
       group.items.forEach(item => {
         if (typeof item.logName === 'string') {
@@ -204,6 +204,6 @@ describe('Settings registry logName validation', () => {
     })
 
     const invalid = Array.from(found).filter(name => !AUDITED_TABLES.has(name))
-    expect(invalid).toEqual([], `These logName values are not in AUDITED_TABLES: ${invalid.join(', ')}`)
+    expect(invalid, `These logName values are not in AUDITED_TABLES: ${invalid.join(', ')}`).toEqual([])
   })
 })

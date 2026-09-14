@@ -29,30 +29,24 @@
  * bellijsten, which waits on its backend token/route (NOTE-CALLLIST-1).
  */
 import { describe, it, expect } from 'vitest'
-import fs from 'node:fs'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { NAV_GROUPS } from './registry'
 
-// Walk the real src/ tree (ESM-safe path, no __dirname) to measure consumers.
-const SRC = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
+// Walk the real src/ tree via Vite's import.meta.glob (no node:fs — this tsconfig
+// carries no @types/node, and eager raw imports give tsc/vitest one agreeing view).
+const SOURCE_MODULES = import.meta.glob('/src/**/*.{ts,tsx,js,jsx}', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>
 
 // Collect the product source (tests excluded — a test double is not a consumer).
-function sourceFiles(dir = SRC, acc = []) {
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name)
-    if (entry.isDirectory()) { sourceFiles(full, acc); continue }
-    if (!/\.(ts|tsx|js|jsx)$/.test(entry.name)) continue
-    if (/\.test\.|\/test\//.test(full)) continue
-    acc.push(fs.readFileSync(full, 'utf8'))
-  }
-  return acc
-}
-const SOURCES = sourceFiles()
+const SOURCES: string[] = Object.entries(SOURCE_MODULES)
+  .filter(([full]) => !/\.test\.|\/test\//.test(full))
+  .map(([, src]) => src)
 
 // Every value X in a real `useNoteTypes('X')` call / `<ModuleView module="X">` render.
-function matchAll(pattern) {
-  const found = new Set()
+function matchAll(pattern: RegExp): Set<string> {
+  const found = new Set<string>()
   SOURCES.forEach(src => { for (const m of src.matchAll(pattern)) found.add(m[1]) })
   return found
 }
@@ -70,7 +64,7 @@ const DOC_TYPE_DIRECT_READERS = matchAll(/useDocumentTypes\(\s*['"]([a-z_]+)['"]
 // the `docTypeScope` identifier, and (b) some file actually assigns one of the two
 // customer_location/customer_department literals to a `docTypeScope` variable/prop.
 const SOME_READER_USES_DOC_TYPE_SCOPE_PROP = SOURCES.some(src => /useDocumentTypes\(\s*docTypeScope\s*\)/.test(src))
-const DOC_TYPE_SCOPE_FORWARDED_LITERALS = new Set()
+const DOC_TYPE_SCOPE_FORWARDED_LITERALS = new Set<string>()
 SOURCES.forEach(src => {
   const assignments = src.match(/docTypeScope\s*=[^\n;]+/g) ?? []
   assignments.forEach(a => { for (const m of a.matchAll(/['"](customer_location|customer_department)['"]/g)) DOC_TYPE_SCOPE_FORWARDED_LITERALS.add(m[1]) })
@@ -86,7 +80,7 @@ const DOC_TYPE_READERS = new Set([
 // file assigns one of the two literals to the `scope` parameter when calling
 // ScopedNotesTab (mirroring DOCTYPE-SCOPE-1's pattern).
 const SOME_READER_USES_NOTE_SCOPE_PROP = SOURCES.some(src => /useNoteTypes\(\s*scope\s*\)/.test(src))
-const NOTE_SCOPE_FORWARDED_LITERALS = new Set()
+const NOTE_SCOPE_FORWARDED_LITERALS = new Set<string>()
 SOURCES.forEach(src => {
   const assignments = src.match(/<ScopedNotesTab[^>]*\bscope\s*=\s*[^\s>]+/g) ?? []
   assignments.forEach(a => { for (const m of a.matchAll(/['"](location|department)['"]/g)) NOTE_SCOPE_FORWARDED_LITERALS.add(m[1]) })
@@ -96,7 +90,12 @@ const NOTE_TYPE_READERS_WITH_SCOPE = new Set([
   ...(SOME_READER_USES_NOTE_SCOPE_PROP ? NOTE_SCOPE_FORWARDED_LITERALS : []),
 ])
 
-const itemIds = key => NAV_GROUPS.find(g => g.key === key).items.map(i => i.id)
+// Item ids of one nav group; throws (loudly, not silently) if the group is missing.
+function itemIds(key: string): string[] {
+  const group = NAV_GROUPS.find(g => g.key === key)
+  if (!group) throw new Error(`nav group not found: ${key}`)
+  return group.items.map(i => i.id)
+}
 
 describe('settings registry offers no screen without a consumer', () => {
   it('measured the source tree (guards the regexes themselves against silent zero-matches)', () => {
