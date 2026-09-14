@@ -59,7 +59,16 @@ export function useWorkflowGraph({ workflow, onNodeRunOutput }: {
       // WORKFLOW-422: we surface the 422 reason ourselves (toast below), so keep it
       // out of the api.ts dev interceptor's own double-toast.
       const res = await api.post('/workflows/test-module', { module_type: data.type, config: data.config }, { quietStatuses: [422] })
-      output = res.data?.output ?? res.data
+      // AVOND4-12 (CMBE c253fac6): a wa_web config state (no device chosen, device not
+      // linked or disconnected) answers 200 with top-level `no_recipients`/`reason`/
+      // `message` beside a zero-count output — keep the sentence on the node, or the
+      // panel would show bare zeros for a step that honestly did nothing.
+      const body = res.data as { output?: unknown; no_recipients?: boolean; reason?: string; message?: string } | undefined
+      const preview = body?.output ?? body
+      const previewObj = preview && typeof preview === 'object' && !Array.isArray(preview) ? preview as Record<string, unknown> : {}
+      output = body?.no_recipients === true
+        ? { ...previewObj, no_recipients: true, reason: body.reason, message: body.message }
+        : preview
     } catch (err) {
       // WORKFLOW-422: same extraction for the panel line and the toast, so the
       // two never disagree (e.g. "no active WhatsApp number").

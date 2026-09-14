@@ -23,7 +23,7 @@ const NUMBER = { value: 'PN-1', label: 'Bureau (+31612345678)' }
 const AGENT = { id: 'agent-1', name: 'Kelly' }
 
 // WA-SEND-1: the user's own devices (GET /profile/whatsapp-web) and every connected
-// device (GET /whatsapp-web-numbers) — none by default, so the template path is the
+// device (GET /whatsapp-web-numbers?scope=usable) — none by default, so the template path is the
 // preselect and the earlier cases stay byte-identical.
 const OWN_DEVICE = { id: 'd-own', type: 'wa_web', label: 'Kelly', phone_number: '+31611111111', status: 'connected' }
 const OWN_OPTION = { value: 'd-own', label: 'Kelly (+31611111111)', scope: 'user', owner: 'Kelly Yesway' }
@@ -35,7 +35,7 @@ const mockLookups = (templates: unknown[] = [TEMPLATE], numbers: unknown[] = [NU
     if (url === '/whatsapp-phone-numbers') return Promise.resolve({ data: { data: numbers } })
     if (url === '/ai/agents') return Promise.resolve({ data: { data: agents } })
     if (url === '/profile/whatsapp-web') return Promise.resolve({ data: { data: own } })
-    if (url === '/whatsapp-web-numbers') return Promise.resolve({ data: { data: webNumbers } })
+    if (url === '/whatsapp-web-numbers?scope=usable') return Promise.resolve({ data: { data: webNumbers } })
     return Promise.reject(new Error(`unexpected GET ${url}`))
   })
 }
@@ -240,6 +240,8 @@ describe('StartConversationModal · WhatsApp Web channel (WA-SEND-1)', () => {
     fireEvent.change(field, { target: { value: 'Hoi Niels, kun je morgen?' } })
     // Own + branch device → the picker shows with the own device picked silently.
     expect(screen.getByText('conversations.pickDevice')).toBeInTheDocument()
+    // The manual picker asks for the `usable` set (DANNY-AVOND-BE-1 round 3), never the builder's full roster.
+    expect(api.get).toHaveBeenCalledWith('/whatsapp-web-numbers?scope=usable')
     fireEvent.click(screen.getByRole('button', { name: 'conversations.send' }))
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/conversations/start', { candidate_id: 7, channel: 'wa_web', message: 'Hoi Niels, kun je morgen?', whatsapp_number_id: 'd-own' }))
     await waitFor(() => expect(notifySuccess).toHaveBeenCalledWith('conversations.queued'))

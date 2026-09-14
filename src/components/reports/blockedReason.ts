@@ -11,12 +11,11 @@ import type { RunRow } from '@/types/reports'
 // prefer step_results over steps for the K-111 reason LogsPanel.tsx:128-130
 // gives on a dry-run — the engine settles a blocked send step green in
 // steps[] and writes the honest 'skipped' only to the log rows. The BE
-// contract does not yet pin which field on that step carries the cap
-// sentence (CONTRACT-CHANGELOG.md:440; sibling row F6 step_results[].reason
-// is still open on the BE hash, HANDOVER-CMBE-2026-09-10.md:92) — the only
-// documented precedent (WF-DRYRUN-1, archive/WORKLIST-DONE.md:23) puts a
-// skipped step's human sentence in its `error` field, so this is a tolerant
-// read across `message`/`error`/`error_message`, not a pinned contract field.
+// contract since STEP-OUTCOMES-1 (CMBE c253fac6): `step_results[].reason`
+// carries the stable KEY (`cap_reached`, …) and `message` the human sentence;
+// the older precedent (WF-DRYRUN-1, archive/WORKLIST-DONE.md:23) put a skipped
+// step's sentence in `error`, so the read stays tolerant across
+// `message`/`error`/`error_message` for runs persisted before that hash.
 export function blockedReason(run: RunRow): string | null {
   if (run.status !== 'blocked') return null
   const steps = (run.step_results?.length ? run.step_results : run.steps) ?? []

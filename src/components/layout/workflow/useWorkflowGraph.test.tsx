@@ -131,4 +131,32 @@ describe('useWorkflowGraph · handleNodeRun surfaces a 422 reason', () => {
     expect(onNodeRunOutput).toHaveBeenCalledWith('n1', { error: 'Geen actief WhatsApp-nummer.' })
     expect(notifyError).toHaveBeenCalledWith('Geen actief WhatsApp-nummer.')
   })
+
+  // AVOND4-12 (CMBE c253fac6): the three wa_web config states answer 200 with
+  // `no_recipients`/`reason`/`message` next to a zero-count output — the sentence
+  // must reach the node output; it is an honest preview, never an error toast.
+  it('a 200 no_recipients answer keeps reason and message on the node output without toasting', async () => {
+    mockedPost.mockResolvedValue({ data: { output: { whatsapp_sent: 0, whatsapp_queued: 0 }, no_recipients: true, reason: 'no_device', message: 'Testvoorbeeld: Geen apparaat gekozen.' } })
+    const onNodeRunOutput = vi.fn()
+    const { result } = renderHook(() => useWorkflowGraph({
+      workflow: wf([
+        { id: 'n1', type: 'whatsapp_send', config: { channel: 'wa_web' }, position: { x: 0, y: 0 } },
+      ]),
+      onNodeRunOutput,
+    }))
+
+    await act(async () => { await result.current.handleNodeRun('n1', { type: 'whatsapp_send', config: { channel: 'wa_web' } }) })
+
+    const expected = { whatsapp_sent: 0, whatsapp_queued: 0, no_recipients: true, reason: 'no_device', message: 'Testvoorbeeld: Geen apparaat gekozen.' }
+    expect(result.current.nodes.find(n => n.id === 'n1')?.data.output).toEqual(expected)
+    expect(onNodeRunOutput).toHaveBeenCalledWith('n1', expected)
+    expect(notifyError).not.toHaveBeenCalled()
+  })
+
+  it('a plain 200 answer still unwraps `output` as before', async () => {
+    mockedPost.mockResolvedValue({ data: { output: [{ id: 1 }] } })
+    const { result } = renderHook(() => useWorkflowGraph({ workflow: wf([{ id: 'n1', type: 'candidates', config: {}, position: { x: 0, y: 0 } }]) }))
+    await act(async () => { await result.current.handleNodeRun('n1', { type: 'candidates', config: {} }) })
+    expect(result.current.nodes.find(n => n.id === 'n1')?.data.output).toEqual([{ id: 1 }])
+  })
 })

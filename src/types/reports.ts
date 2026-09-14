@@ -89,6 +89,11 @@ export interface RunStep {
   status?: string
   ok?: boolean
   message?: string
+  // STEP-OUTCOMES-1 (CMBE c253fac6): the stable skip/outcome KEY of a side-effect step
+  // (no_recipients · consent_missing · no_phone · no_email · no_device ·
+  // device_not_connected · no_template · cap_reached · no_effect) — branch on this,
+  // never on the sentence; the human sentence travels in `message`.
+  reason?: string | null
   input?: unknown
   output?: unknown
   duration_ms?: number

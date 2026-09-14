@@ -3,8 +3,8 @@
  * (WA-SEND-1, Danny 10-09 Q4: preselect the logged-in user's own device, the picker
  * lists branch devices as the fallback). Two reads, both configuration: the user's
  * own devices (GET /profile/whatsapp-web, a status per device) decide the PRESELECT —
- * the first connected one — and GET /whatsapp-web-numbers (every connected device in
- * the tenant, own and branch, with scope + owner) feeds the picker. A hiccup on either
+ * the first connected one — and GET /whatsapp-web-numbers?scope=usable (the connected
+ * devices THIS caller may send from, own and branch, with scope + owner) feeds the picker. A hiccup on either
  * degrades to "no devices" rather than blocking the modal: the WABA path stays.
  */
 import { useEffect, useState } from 'react'
@@ -29,7 +29,10 @@ export function useWaWebSendDevices() {
     let alive = true
     Promise.all([
       api.get('/profile/whatsapp-web').then(r => unwrapList<WhatsAppDevice>(r).rows).catch(() => [] as WhatsAppDevice[]),
-      api.get('/whatsapp-web-numbers').then(r => unwrapList<WaWebDeviceOption>(r).rows).catch(() => [] as WaWebDeviceOption[]),
+      // DANNY-AVOND-BE-1 round 3 (CMBE c253fac6): the bare roster is the workflow builder's
+      // (every connected device, a colleague's too); the manual picker asks for the narrower
+      // `usable` set — only a device this caller may actually send from. [] = nothing usable.
+      api.get('/whatsapp-web-numbers?scope=usable').then(r => unwrapList<WaWebDeviceOption>(r).rows).catch(() => [] as WaWebDeviceOption[]),
     ]).then(([own, all]) => {
       if (!alive) return
       const connected = own.find(d => d.status === 'connected')
