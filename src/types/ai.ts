@@ -3,12 +3,18 @@
  * panels map loosely-typed API payloads; these declare the fields they read.
  */
 
+// Who can see a FAQ/knowledge item (AUDIENCE-FE-1, BE contract KNOWLEDGE-BASE-1):
+// 'internal' = staff only, 'external' = candidates/customers, 'both' = everyone (default).
+export type AiAudience = 'internal' | 'external' | 'both'
+
 // A prompt / FAQ / knowledge item (shared shape — all have id + name + body).
-export interface AiItem { id?: string | number; name?: string; body?: string; version?: number; created_at?: string; [k: string]: unknown }
+// `audience` is FAQ/knowledge only (prompts never carry it); defaults to 'both' server-side.
+export interface AiItem { id?: string | number; name?: string; body?: string; version?: number; created_at?: string; audience?: AiAudience; [k: string]: unknown }
 
 // A knowledge-item lookup row (GET /ai/knowledge/lookup, KNOWLEDGE-SCOPE-1) — the
-// pickable option set for an agent's own knowledge_ids coupling.
-export interface AiKnowledgeLookupItem { value: string; label: string }
+// pickable option set for an agent's own knowledge_ids coupling. `audience`/`active`
+// let a picker tell entries apart (AUDIENCE-FE-1); both optional for older callers.
+export interface AiKnowledgeLookupItem { value: string; label: string; audience?: AiAudience; active?: boolean }
 
 // The recruiter/manager user an agent mirrors (AI-AGENTS-2: one agent per user).
 interface AiAgentUser { id: string | number; name?: string | null }

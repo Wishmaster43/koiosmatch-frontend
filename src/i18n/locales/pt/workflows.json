@@ -523,6 +523,13 @@
       "inUse": "Este fluxo está em utilização e não pode ser eliminado.",
       "noPermission": "Não tem permissões para gerir fluxos.",
       "selectOrNew": "Selecione um fluxo ou crie um novo."
+    },
+    "audience": {
+      "internal": "Interno",
+      "external": "Externo",
+      "both": "Ambos",
+      "label": "Público",
+      "hint": "Interno = apenas equipa, Externo = candidatos/clientes, Ambos = todos."
     }
   },
   "canvas": {

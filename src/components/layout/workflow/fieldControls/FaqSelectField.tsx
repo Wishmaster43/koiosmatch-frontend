@@ -6,11 +6,12 @@ import { useTranslation } from 'react-i18next'
 import { unwrapList } from '@/lib/api'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import type { OnChange } from './types'
+import type { AiAudience } from '@/types/ai'
 
 // ── FAQ multi-select field ─────────────────────────────────────────────────────
 export function FaqSelectField({ value, onChange, fieldKey }: { value?: unknown; onChange: OnChange; fieldKey: string }) {
   const { t } = useTranslation('workflows')
-  const [faqs,    setFaqs]    = useState<Array<{ id?: string | number; name?: string; title?: string }>>([])
+  const [faqs,    setFaqs]    = useState<Array<{ id?: string | number; name?: string; title?: string; audience?: AiAudience }>>([])
   const [loading, setLoading] = useState(true)
   // A failed load must read as an error, never as "no FAQs configured" (R8/§3 four states).
   const [error,   setError]   = useState(false)
@@ -21,7 +22,7 @@ export function FaqSelectField({ value, onChange, fieldKey }: { value?: unknown;
   useEffect(() => {
     setLoading(true); setError(false)
     import('@/lib/api').then(m => m.default.get('/ai/faqs'))
-      .then(r => setFaqs(unwrapList<{ id?: string | number; name?: string; title?: string }>(r).rows))
+      .then(r => setFaqs(unwrapList<{ id?: string | number; name?: string; title?: string; audience?: AiAudience }>(r).rows))
       .catch(() => setError(true))
       .finally(() => setLoading(false))
   }, [retryTick])
@@ -48,6 +49,8 @@ export function FaqSelectField({ value, onChange, fieldKey }: { value?: unknown;
             <input type="checkbox" checked={active} onChange={() => toggle(faq.id as string | number)}
               style={{ accentColor: 'var(--color-primary)', width: 14, height: 14, cursor: 'pointer' }} />
             <span style={{ fontSize: 12, color: 'var(--text)' }}>{faq.name ?? faq.title ?? t('fields.faqFallback', { id: faq.id })}</span>
+            {/* Audience label lets a picker tell internal/external FAQs apart (AUDIENCE-FE-1) — no filtering, just a hint. */}
+            {faq.audience && <span style={{ fontSize: 10.5, color: 'var(--text-muted)' }}>({t(`ai.audience.${faq.audience}`)})</span>}
           </label>
         )
       })}

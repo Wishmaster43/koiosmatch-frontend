@@ -9,5 +9,6 @@ export function useFaqsData() {
     endpoint: '/ai/faqs',
     refreshVersionsOnSave: false,
     confirmDeleteKey: 'ai.faqs.confirmDelete',
+    hasAudience: true,
   })
 }

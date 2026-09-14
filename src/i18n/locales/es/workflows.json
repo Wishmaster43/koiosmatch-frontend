@@ -462,6 +462,13 @@
       "inUse": "Este flujo está en uso y no se puede eliminar.",
       "noPermission": "No tienes permiso para gestionar flujos.",
       "selectOrNew": "Elige un flujo o crea uno nuevo."
+    },
+    "audience": {
+      "internal": "Interno",
+      "external": "Externo",
+      "both": "Ambos",
+      "label": "Público",
+      "hint": "Interno = solo personal, Externo = candidatos/clientes, Ambos = todos."
     }
   },
   "filters": {

@@ -6,7 +6,20 @@
  */
 import { describe, it, expect } from 'vitest'
 import { render } from '@testing-library/react'
-import { TextEditor } from './shared'
+import { TextEditor, AudienceChip } from './shared'
+
+// AUDIENCE-FE-1: the per-row badge in the FAQ/knowledge lists renders the right label per value.
+describe('AudienceChip', () => {
+  it('renders the Intern label for audience="internal"', () => {
+    const { getByText } = render(<AudienceChip audience="internal" />)
+    expect(getByText('Intern')).toBeTruthy()
+  })
+
+  it('falls back to Beide when no audience is served (audience ?? \'both\')', () => {
+    const { getByText } = render(<AudienceChip />)
+    expect(getByText('Beide')).toBeTruthy()
+  })
+})
 
 describe('TextEditor · mono prop', () => {
   it('defaults to the monospace code-like look (prompt/agent bodies)', () => {

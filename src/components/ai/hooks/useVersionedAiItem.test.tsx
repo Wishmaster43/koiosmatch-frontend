@@ -63,7 +63,7 @@ describe('usePromptsData — select fetches the versions route, save PUTs to the
   })
 })
 
-describe('useFaqsData — save POSTs a new FAQ to /ai/faqs with {name, body}, no versions refetch', () => {
+describe('useFaqsData — save POSTs a new FAQ to /ai/faqs with {name, body, audience}, no versions refetch', () => {
   beforeEach(() => {
     vi.mocked(api.get).mockReset()
     vi.mocked(api.post).mockReset()
@@ -80,7 +80,8 @@ describe('useFaqsData — save POSTs a new FAQ to /ai/faqs with {name, body}, no
 
     await act(async () => { fireEvent.click(screen.getByText('save')) })
 
-    expect(api.post).toHaveBeenCalledWith('/ai/faqs', { name: '', body: '' })
+    // AUDIENCE-FE-1: a new FAQ defaults to 'both' (visible to everyone) unless changed.
+    expect(api.post).toHaveBeenCalledWith('/ai/faqs', { name: '', body: '', audience: 'both' })
     // With NOTHING selected there is no version fetch; selecting a FAQ does fetch
     // /ai/faqs/{id}/versions (routes/api/tenant/communication-ai.php) — see the next case.
     expect(vi.mocked(api.get).mock.calls.some(([url]) => String(url).includes('/versions'))).toBe(false)
@@ -93,5 +94,19 @@ describe('useFaqsData — save POSTs a new FAQ to /ai/faqs with {name, body}, no
     })
     render(<FaqsHarness />)
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/ai/faqs/f1/versions'))
+  })
+
+  it('preselecting a FAQ seeds its served audience, and saving round-trips it (AUDIENCE-FE-1)', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/ai/faqs') return Promise.resolve({ data: [{ id: 'f1', name: 'Vraag', body: 'Antwoord', audience: 'internal' }] })
+      return Promise.resolve({ data: [] })
+    })
+    vi.mocked(api.put).mockResolvedValue({ data: { id: 'f1', name: 'Vraag', body: 'Antwoord', audience: 'internal' } })
+    render(<FaqsHarness />)
+    await waitFor(() => expect(screen.getByTestId('name')).toHaveTextContent('Vraag'))
+
+    await act(async () => { fireEvent.click(screen.getByText('save')) })
+
+    expect(api.put).toHaveBeenCalledWith('/ai/faqs/f1', { name: 'Vraag', body: 'Antwoord', audience: 'internal' })
   })
 })

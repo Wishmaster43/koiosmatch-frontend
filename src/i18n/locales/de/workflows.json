@@ -462,6 +462,13 @@
       "inUse": "Dieser Flow wird verwendet und kann nicht gelöscht werden.",
       "noPermission": "Keine Berechtigung zum Verwalten von Flows.",
       "selectOrNew": "Flow wählen oder neu anlegen."
+    },
+    "audience": {
+      "internal": "Intern",
+      "external": "Extern",
+      "both": "Beide",
+      "label": "Zielgruppe",
+      "hint": "Intern = nur Mitarbeitende, Extern = Kandidaten/Kunden, Beide = alle."
     }
   },
   "filters": {

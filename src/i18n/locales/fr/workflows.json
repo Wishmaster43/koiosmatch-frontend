@@ -462,6 +462,13 @@
       "inUse": "Ce flux est utilisé et ne peut pas être supprimé.",
       "noPermission": "Vous n’avez pas le droit de gérer les flux.",
       "selectOrNew": "Choisissez un flux ou créez-en un."
+    },
+    "audience": {
+      "internal": "Interne",
+      "external": "Externe",
+      "both": "Les deux",
+      "label": "Public",
+      "hint": "Interne = collaborateurs uniquement, Externe = candidats/clients, Les deux = tout le monde."
     }
   },
   "filters": {

@@ -10,9 +10,12 @@ import { Check, ChevronDown, Clock, Copy, Plus, Save, Trash2 } from 'lucide-reac
 import { interactive } from '@/lib/a11y'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
+import SoftChip from '@/components/ui/SoftChip'
+import SegmentedControl from '@/components/ui/SegmentedControl'
 import { useDateFormat } from '@/lib/datetime'
 import { notifySuccess } from '@/lib/notify'
 import { fieldInputStyle, fieldTextareaStyle } from '@/components/forms/fieldMetrics'
+import type { AiAudience } from '@/types/ai'
 
 // One saved version of a prompt/agent config.
 export interface Version { version?: number; created_at?: string; body?: string; [k: string]: unknown }
@@ -44,6 +47,36 @@ export function Badge({ label, color, bg }: { label?: ReactNode; color?: string;
       {label}
     </span>
   )
+}
+
+// Semantic tint per audience value (AUDIENCE-FE-1) — internal reads as info, external
+// as the primary accent, both stays neutral since it is the "no restriction" default.
+const AUDIENCE_COLOR: Record<AiAudience, string> = {
+  internal: 'var(--color-info)',
+  external: 'var(--color-primary)',
+  both: 'var(--text-muted)',
+}
+
+// AudienceControl — the shared three-way "who can see this" picker for FAQ/knowledge
+// items (AUDIENCE-FE-1). A compact SegmentedControl, never a raw <select> (§3A).
+export function AudienceControl({ value, onChange }: { value: AiAudience; onChange: (v: AiAudience) => void }) {
+  const { t } = useTranslation('workflows')
+  const options = (['internal', 'external', 'both'] as AiAudience[]).map(v => ({ value: v, label: t(`ai.audience.${v}`) }))
+  return (
+    <div>
+      <SegmentedControl options={options} value={value} onChange={v => onChange(v as AiAudience)}
+        size="compact" ariaLabel={t('ai.audience.label')} />
+      <p style={{ fontSize: 10.5, color: 'var(--text-muted)', marginTop: 4 }}>{t('ai.audience.hint')}</p>
+    </div>
+  )
+}
+
+// AudienceChip — the small soft-chip badge shown per row in the FAQ/knowledge lists,
+// tinted by AUDIENCE_COLOR so internal/external/both read apart at a glance.
+export function AudienceChip({ audience }: { audience?: AiAudience }) {
+  const { t } = useTranslation('workflows')
+  const value = audience ?? 'both'
+  return <SoftChip label={t(`ai.audience.${value}`)} color={AUDIENCE_COLOR[value]} size={10} />
 }
 
 // Save control shared by every AI-management tab: a transient saved checkmark plus a save button disabled while saving.
@@ -192,8 +225,10 @@ export function SideList<T extends { id?: string | number }>({ title, items, sel
 }
 
 // One row in the SideList left column: click to select; delete (when provided) reveals on hover and on keyboard focus.
-export function ListRow<T>({ item, active, onSelect, label, sublabel, leading, onDelete }: {
-  item: T; active?: boolean; onSelect: (item: T) => void; label?: ReactNode; sublabel?: ReactNode; leading?: ReactNode; onDelete?: (item: T) => void
+export function ListRow<T>({ item, active, onSelect, label, sublabel, leading, badge, onDelete }: {
+  item: T; active?: boolean; onSelect: (item: T) => void; label?: ReactNode; sublabel?: ReactNode; leading?: ReactNode
+  // Trailing soft-chip badge shown before the delete control (e.g. AudienceChip, AUDIENCE-FE-1).
+  badge?: ReactNode; onDelete?: (item: T) => void
 }) {
   const { t } = useTranslation('common')
   return (
@@ -210,6 +245,7 @@ export function ListRow<T>({ item, active, onSelect, label, sublabel, leading, o
         <div style={{ fontWeight: 500, color: active ? 'var(--color-primary-text)' : 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</div>
         {sublabel && <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 1 }}>{sublabel}</div>}
       </div>
+      {badge}
       {onDelete && (
         // Icon-only control: needs an accessible name (§6). It also reveals on
         // keyboard focus, not just mouse hover — a colour-only reveal that never
