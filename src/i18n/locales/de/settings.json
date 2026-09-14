@@ -273,7 +273,8 @@
     "match_windows": "Zeitfenster und Warnungen",
     "task_windows": "Zeitfenster und Warnungen",
     "system": "System",
-    "email_general": "Allgemeine E-Mail"
+    "email_general": "Allgemeine E-Mail",
+    "opportunity_windows": "Zeitfenster und Warnungen"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -3844,6 +3845,105 @@
       },
       "match_advice_renew_days": {
         "label": "Match-Empfehlung verlängern (Tage im Voraus)"
+      },
+      "candidate_no_contact_days_unit": {
+        "label": "Kandidat ohne Kontakt: Einheit"
+      },
+      "contact_no_contact_days_unit": {
+        "label": "Ansprechpartner ohne Kontakt: Einheit"
+      },
+      "customer_no_contact_days_unit": {
+        "label": "Kunde ohne Kontakt: Einheit"
+      },
+      "customer_contract_ending_days_unit": {
+        "label": "Kundenvertrag läuft aus: Einheit"
+      },
+      "customer_price_agreement_ending_days_unit": {
+        "label": "Preisvereinbarung läuft aus: Einheit"
+      },
+      "customer_task_overdue_grace_days_unit": {
+        "label": "Kulanz überfällige Kundenaufgabe: Einheit"
+      },
+      "match_expiring_alert_days_unit": {
+        "label": "Match läuft aus: Hinweis: Einheit"
+      },
+      "opportunity_closing_soon_days_unit": {
+        "label": "Chance schließt bald: Einheit"
+      },
+      "opportunity_stale_days_unit": {
+        "label": "Chance ohne Bewegung: Einheit"
+      },
+      "vacancy_closing_soon_days_unit": {
+        "label": "Stelle schließt bald: Einheit"
+      },
+      "vacancy_advice_stale_days_unit": {
+        "label": "Stellenempfehlung veraltet: Einheit"
+      },
+      "vacancy_koios_advice_stale_days": {
+        "label": "Koios-Stellenempfehlung veraltet (Tage)"
+      },
+      "vacancy_koios_advice_stale_days_unit": {
+        "label": "Koios-Stellenempfehlung veraltet: Einheit"
+      },
+      "vacancy_stale_days_unit": {
+        "label": "Stelle ohne Bewegung: Einheit"
+      },
+      "application_stage_stale_days_unit": {
+        "label": "Bewerbung zu lange in Phase: Einheit"
+      },
+      "candidate_phase_stale_days_unit": {
+        "label": "Kandidat zu lange in Phase: Einheit"
+      },
+      "candidate_status_stale_days_unit": {
+        "label": "Kandidatenstatus unverändert: Einheit"
+      },
+      "conversation_unanswered_hours_unit": {
+        "label": "Gespräch unbeantwortet: Einheit"
+      },
+      "candidate_missing_cv_alert_days_unit": {
+        "label": "Kandidat ohne Lebenslauf: Hinweis: Einheit"
+      },
+      "task_overdue_grace_days_unit": {
+        "label": "Kulanz überfällige Aufgabe: Einheit"
+      },
+      "task_due_soon_workdays_unit": {
+        "label": "Aufgabe bald fällig: Einheit"
+      },
+      "candidate_stale_online_days_unit": {
+        "label": "Online-Registrierung unbearbeitet: Einheit"
+      },
+      "document_expiring_alert_days_unit": {
+        "label": "Dokument läuft ab: Hinweis: Einheit"
+      },
+      "candidate_no_followup_workdays_unit": {
+        "label": "Kandidat ohne Nachverfolgung: Einheit"
+      },
+      "customer_health_no_contact_days_unit": {
+        "label": "Kundengesundheit: kein Kontakt: Einheit"
+      },
+      "customer_health_vacancy_open_days_unit": {
+        "label": "Kundengesundheit: Stelle offen: Einheit"
+      },
+      "customer_health_cancelled_shift_days_unit": {
+        "label": "Kundengesundheit: abgesagte Schichten: Einheit"
+      },
+      "customer_match_early_termination_days_unit": {
+        "label": "Vorzeitig beendeter Match: Einheit"
+      },
+      "customer_department_no_placement_min_age_days_unit": {
+        "label": "Abteilung ohne Vermittlung: Mindestalter: Einheit"
+      },
+      "customer_vacancy_draft_stale_days_unit": {
+        "label": "Stellenentwurf ohne Bewegung: Einheit"
+      },
+      "vacancy_status_stale_days_unit": {
+        "label": "Stellenstatus unverändert: Einheit"
+      },
+      "no_contact_alert_months_unit": {
+        "label": "Signal kein Kontakt: Einheit"
+      },
+      "conversation_active_weeks_unit": {
+        "label": "Gespräch aktiv: Einheit"
       }
     },
     "retention": {
@@ -3864,6 +3964,27 @@
       },
       "retention_thanks_text": {
         "label": "Danktext bei Löschung"
+      },
+      "retention_warning_days_unit": {
+        "label": "Aufbewahrung: Warnung: Einheit"
+      },
+      "retention_escalation_days_unit": {
+        "label": "Aufbewahrung: Eskalation: Einheit"
+      },
+      "deletion_grace_days_unit": {
+        "label": "Frist vor Löschung: Einheit"
+      },
+      "message_retention_days_unit": {
+        "label": "Aufbewahrung Nachrichten: Einheit"
+      },
+      "workflow_run_retention_days_unit": {
+        "label": "Aufbewahrung Workflow-Läufe: Einheit"
+      },
+      "workflow_run_metadata_retention_days_unit": {
+        "label": "Aufbewahrung Metadaten Workflow-Läufe: Einheit"
+      },
+      "koios_conversation_memory_days_unit": {
+        "label": "Gedächtnis Koios-Gespräche: Einheit"
       }
     },
     "messaging": {
@@ -3901,6 +4022,9 @@
       },
       "whatsapp_per_number_hourly_limit": {
         "label": "WhatsApp: Nachrichten pro Nummer pro Stunde"
+      },
+      "message_load_default_days_unit": {
+        "label": "Standard-Ladefenster Nachrichten: Einheit"
       }
     },
     "email": {
@@ -3970,6 +4094,15 @@
     "matching": {
       "matching": {
         "label": "Matching-Konfiguration"
+      }
+    },
+    "options": {
+      "window_unit": {
+        "days": "Tage",
+        "workdays": "Werktage",
+        "weeks": "Wochen",
+        "months": "Monate",
+        "hours": "Stunden"
       }
     }
   },

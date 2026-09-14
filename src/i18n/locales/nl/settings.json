@@ -273,7 +273,8 @@
     "match_windows": "Termijnen en signalen",
     "task_windows": "Termijnen en signalen",
     "system": "Systeem",
-    "email_general": "E-mail algemeen"
+    "email_general": "E-mail algemeen",
+    "opportunity_windows": "Termijnen en signalen"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -3844,6 +3845,105 @@
       },
       "match_advice_renew_days": {
         "label": "Match-advies verlengen (dagen vooraf)"
+      },
+      "candidate_no_contact_days_unit": {
+        "label": "Kandidaat zonder contact: eenheid"
+      },
+      "contact_no_contact_days_unit": {
+        "label": "Contactpersoon zonder contact: eenheid"
+      },
+      "customer_no_contact_days_unit": {
+        "label": "Klant zonder contact: eenheid"
+      },
+      "customer_contract_ending_days_unit": {
+        "label": "Klantcontract loopt af: eenheid"
+      },
+      "customer_price_agreement_ending_days_unit": {
+        "label": "Prijsafspraak loopt af: eenheid"
+      },
+      "customer_task_overdue_grace_days_unit": {
+        "label": "Respijt klanttaak over tijd: eenheid"
+      },
+      "match_expiring_alert_days_unit": {
+        "label": "Match loopt af: signaal: eenheid"
+      },
+      "opportunity_closing_soon_days_unit": {
+        "label": "Kans sluit binnenkort: eenheid"
+      },
+      "opportunity_stale_days_unit": {
+        "label": "Kans stilstaand: eenheid"
+      },
+      "vacancy_closing_soon_days_unit": {
+        "label": "Vacature sluit binnenkort: eenheid"
+      },
+      "vacancy_advice_stale_days_unit": {
+        "label": "Vacature-advies verouderd: eenheid"
+      },
+      "vacancy_koios_advice_stale_days": {
+        "label": "Koios-vacatureadvies verouderd (dagen)"
+      },
+      "vacancy_koios_advice_stale_days_unit": {
+        "label": "Koios-vacatureadvies verouderd: eenheid"
+      },
+      "vacancy_stale_days_unit": {
+        "label": "Vacature stilstaand: eenheid"
+      },
+      "application_stage_stale_days_unit": {
+        "label": "Sollicitatie te lang in fase: eenheid"
+      },
+      "candidate_phase_stale_days_unit": {
+        "label": "Kandidaat te lang in fase: eenheid"
+      },
+      "candidate_status_stale_days_unit": {
+        "label": "Kandidaatstatus ongewijzigd: eenheid"
+      },
+      "conversation_unanswered_hours_unit": {
+        "label": "Gesprek onbeantwoord: eenheid"
+      },
+      "candidate_missing_cv_alert_days_unit": {
+        "label": "Kandidaat zonder cv: signaal: eenheid"
+      },
+      "task_overdue_grace_days_unit": {
+        "label": "Respijt taak over tijd: eenheid"
+      },
+      "task_due_soon_workdays_unit": {
+        "label": "Taak bijna verlopen: eenheid"
+      },
+      "candidate_stale_online_days_unit": {
+        "label": "Online inschrijving onbehandeld: eenheid"
+      },
+      "document_expiring_alert_days_unit": {
+        "label": "Document verloopt: signaal: eenheid"
+      },
+      "candidate_no_followup_workdays_unit": {
+        "label": "Kandidaat zonder opvolging: eenheid"
+      },
+      "customer_health_no_contact_days_unit": {
+        "label": "Klantgezondheid: geen contact: eenheid"
+      },
+      "customer_health_vacancy_open_days_unit": {
+        "label": "Klantgezondheid: vacature open: eenheid"
+      },
+      "customer_health_cancelled_shift_days_unit": {
+        "label": "Klantgezondheid: geannuleerde diensten: eenheid"
+      },
+      "customer_match_early_termination_days_unit": {
+        "label": "Vroegtijdig beëindigde match: eenheid"
+      },
+      "customer_department_no_placement_min_age_days_unit": {
+        "label": "Afdeling zonder plaatsing: minimale ouderdom: eenheid"
+      },
+      "customer_vacancy_draft_stale_days_unit": {
+        "label": "Conceptvacature stilstaand: eenheid"
+      },
+      "vacancy_status_stale_days_unit": {
+        "label": "Vacaturestatus ongewijzigd: eenheid"
+      },
+      "no_contact_alert_months_unit": {
+        "label": "Signaal geen contact: eenheid"
+      },
+      "conversation_active_weeks_unit": {
+        "label": "Gesprek actief: eenheid"
       }
     },
     "retention": {
@@ -3864,6 +3964,27 @@
       },
       "retention_thanks_text": {
         "label": "Bedanktekst bij verwijdering"
+      },
+      "retention_warning_days_unit": {
+        "label": "Bewaartermijn: waarschuwing: eenheid"
+      },
+      "retention_escalation_days_unit": {
+        "label": "Bewaartermijn: escalatie: eenheid"
+      },
+      "deletion_grace_days_unit": {
+        "label": "Respijt vóór verwijdering: eenheid"
+      },
+      "message_retention_days_unit": {
+        "label": "Bewaartermijn berichten: eenheid"
+      },
+      "workflow_run_retention_days_unit": {
+        "label": "Bewaartermijn workflow-runs: eenheid"
+      },
+      "workflow_run_metadata_retention_days_unit": {
+        "label": "Bewaartermijn metadata workflow-runs: eenheid"
+      },
+      "koios_conversation_memory_days_unit": {
+        "label": "Geheugen Koios-gesprekken: eenheid"
       }
     },
     "messaging": {
@@ -3901,6 +4022,9 @@
       },
       "whatsapp_per_number_hourly_limit": {
         "label": "WhatsApp: berichten per nummer per uur"
+      },
+      "message_load_default_days_unit": {
+        "label": "Standaard laadvenster berichten: eenheid"
       }
     },
     "email": {
@@ -3970,6 +4094,15 @@
     "matching": {
       "matching": {
         "label": "Matchingconfiguratie"
+      }
+    },
+    "options": {
+      "window_unit": {
+        "days": "dagen",
+        "workdays": "werkdagen",
+        "weeks": "weken",
+        "months": "maanden",
+        "hours": "uren"
       }
     }
   },

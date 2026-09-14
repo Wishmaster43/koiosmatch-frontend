@@ -92,6 +92,8 @@ export const customerGroups: NavGroup[] = [
       // per-tab audit logs (each tab would need its own logName parameter).
       { id: 'opportunity_lookups', icon: ListTree, component: OpportunityLookupsSettings, logName: null },
       { id: 'opportunity_display', icon: Palette, schema: opportunityDisplay },
+      // CATALOG-EMBED-1 host for windows/opportunities — first rows shipped with KPI-BUILDER-1 (BE 5e3c7a24).
+      { id: 'opportunity_windows', icon: Clock, render: () => <CatalogSection section="windows" group="opportunities" /> },
     ],
   },
 ]

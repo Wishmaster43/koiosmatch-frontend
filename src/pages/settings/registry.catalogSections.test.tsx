@@ -28,7 +28,7 @@ describe('settings registry catalog sections', () => {
       action_rules: ['action_rules'],
       required_fields: ['candidate_required_fields', 'application_required_fields', 'customer_required_fields'],
       // CATALOG-EMBED-1: these four sections now live as per-group hosts (below).
-      windows: ['candidate_windows', 'contact_windows', 'customer_windows', 'vacancy_windows', 'application_windows', 'match_windows', 'task_windows'],
+      windows: ['candidate_windows', 'contact_windows', 'customer_windows', 'vacancy_windows', 'application_windows', 'match_windows', 'task_windows', 'opportunity_windows'],
       retention: ['candidate_retention', 'system'],
       messaging: ['whatsapp', 'email_general'],
       email: ['email_general'],

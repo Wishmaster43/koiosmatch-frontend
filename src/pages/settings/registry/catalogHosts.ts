@@ -8,9 +8,8 @@
 // CATALOG-1) are RETIRED. Every catalogue group now renders under its own
 // entity's screen via <CatalogSection section group /> (page mode) or embedded
 // under an existing screen — see CATALOG_GROUP_HOSTS below for the full map.
-// windows/opportunities is a section group the BE declares but has 0 generic
-// rows for today (measured, catalogue version 34eb93dcaec0) — no item hosts it
-// yet; add one the day the backend ships a real opportunities/windows row.
+// windows/opportunities gained its first generic rows with KPI-BUILDER-1 (BE 5e3c7a24,
+// catalogue 0c40bd856b76: the two <key>_unit pickers) — hosted by opportunity_windows.
 export const CATALOG_GROUP_HOSTS: Record<string, Record<string, string>> = {
   windows: {
     candidates: 'candidate/candidate_windows',
@@ -19,6 +18,7 @@ export const CATALOG_GROUP_HOSTS: Record<string, Record<string, string>> = {
     vacancies: 'vacancies/vacancy_windows',
     applications: 'applications/application_windows',
     matches: 'matches/match_windows',
+    opportunities: 'opportunities/opportunity_windows',
     tasks: 'tasks/task_windows',
     // Embedded at the bottom of the WhatsApp connection screen (Connection tab).
     conversations: 'whatsapp/whatsapp',
