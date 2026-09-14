@@ -126,3 +126,17 @@ describe('RunDetailDrawer — run detail fetch', () => {
     expect(await screen.findByText('Kind-runs')).toBeInTheDocument()
   })
 })
+
+describe('RunDetailDrawer — blocked run (F7)', () => {
+  it("shows the capped step's sentence from its `error` field in the warning callout", () => {
+    render(
+      <I18nextProvider i18n={i18n}>
+        <RunDetailDrawer
+          run={{ ...baseRun, status: 'blocked', step_results: [{ status: 'skipped', error: 'Shiftmanager-limiet bereikt (500/dag)' }] } as RunRow}
+          onClose={() => {}}
+        />
+      </I18nextProvider>,
+    )
+    expect(screen.getAllByText('Shiftmanager-limiet bereikt (500/dag)').length).toBeGreaterThanOrEqual(1)
+  })
+})

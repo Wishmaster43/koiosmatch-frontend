@@ -361,7 +361,8 @@
       "pending": "In coda",
       "cancelled": "Interrotta",
       "waiting": "In attesa",
-      "skipped": "Saltata"
+      "skipped": "Saltata",
+      "blocked": "Bloccato"
     },
     "filters": {
       "status": "Stato",
@@ -405,7 +406,8 @@
       "processed": "Elaborati",
       "lineage": "Origine",
       "parentRunId": "ID esecuzione padre",
-      "childRuns": "Esecuzioni figlie"
+      "childRuns": "Esecuzioni figlie",
+      "blockedReason": "Motivo del blocco"
     },
     "openHistory": "Visualizza nella cronologia",
     "dryRun": {

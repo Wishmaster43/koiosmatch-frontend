@@ -4461,7 +4461,55 @@
       "day": "par jour",
       "week": "par semaine",
       "month": "par mois"
-    }
+    },
+    "mode": {
+      "signal": "continuer",
+      "queue": "file d'attente",
+      "block": "bloqué"
+    },
+    "at_cap_prefix": "À la limite :",
+    "not_settable_notice": "Ceci passe par le forfait (niveau), pas par les limites.",
+    "not_tenant_scoped_notice": "Ce connecteur n'a pas de limite par locataire ; seulement une limite de plateforme.",
+    "no_cap_hint": "Vide = pas de limite",
+    "inherit_platform": "Suit la plateforme",
+    "cap_source": "La limite provient de : {{source}}",
+    "cap_source_value": {
+      "tenant": "ce locataire",
+      "platform": "valeur par défaut de la plateforme",
+      "tier": "niveau",
+      "config": "paramètre système",
+      "none": "aucune"
+    },
+    "platform": {
+      "capLabel": "Limite pour {{label}}"
+    },
+    "tenant_drawer": {
+      "title": "Limites pour {{tenant}}",
+      "pick_label": "Consulter un locataire",
+      "pick_placeholder": "Rechercher un locataire…"
+    },
+    "approval": {
+      "title": "Accorder une autorisation",
+      "until": "Jusqu'au",
+      "extra_cap": "Limite supplémentaire",
+      "surcharge": "Supplément",
+      "note": "Note (facultatif)",
+      "grant": "Accorder l'autorisation",
+      "revoke": "Révoquer",
+      "revoke_confirm": "Révoquer cette autorisation ? Le locataire revient à la limite normale.",
+      "active": "Jusqu'au {{date}} · supplément {{extra}}",
+      "approved_by": "Approuvé par {{name}}",
+      "surcharge_line": "Supplément : {{amount}}",
+      "error": "La demande a échoué."
+    },
+    "request": {
+      "button": "Demander une augmentation",
+      "disabled_notice": "Demander une augmentation n'est pas disponible pour ce connecteur.",
+      "requested": "Demandé",
+      "already_requested_today": "Déjà demandé aujourd'hui",
+      "no_recipient": "Demandé, mais personne ne peut le recevoir"
+    },
+    "save_error": "L'enregistrement a échoué."
   },
   "catalog": {
     "empty": "Aucun paramètre disponible pour cette section.",

@@ -4462,7 +4462,55 @@
       "day": "por dia",
       "week": "por semana",
       "month": "por mês"
-    }
+    },
+    "mode": {
+      "signal": "continuar",
+      "queue": "fila",
+      "block": "bloqueado"
+    },
+    "at_cap_prefix": "Ao atingir o limite:",
+    "not_settable_notice": "Isso funciona através do plano (nível), não através de limites.",
+    "not_tenant_scoped_notice": "Este conector não tem limite por inquilino; apenas um limite de plataforma.",
+    "no_cap_hint": "Vazio = sem limite",
+    "inherit_platform": "Segue a plataforma",
+    "cap_source": "O limite vem de: {{source}}",
+    "cap_source_value": {
+      "tenant": "este inquilino",
+      "platform": "padrão da plataforma",
+      "tier": "nível",
+      "config": "configuração do sistema",
+      "none": "nenhum"
+    },
+    "platform": {
+      "capLabel": "Limite para {{label}}"
+    },
+    "tenant_drawer": {
+      "title": "Limites para {{tenant}}",
+      "pick_label": "Ver um inquilino",
+      "pick_placeholder": "Pesquisar um inquilino…"
+    },
+    "approval": {
+      "title": "Conceder autorização",
+      "until": "Até",
+      "extra_cap": "Limite extra",
+      "surcharge": "Sobretaxa",
+      "note": "Nota (opcional)",
+      "grant": "Conceder autorização",
+      "revoke": "Revogar",
+      "revoke_confirm": "Revogar esta autorização? O inquilino volta ao limite normal.",
+      "active": "Até {{date}} · extra {{extra}}",
+      "approved_by": "Aprovado por {{name}}",
+      "surcharge_line": "Sobretaxa: {{amount}}",
+      "error": "O pedido falhou."
+    },
+    "request": {
+      "button": "Solicitar um aumento",
+      "disabled_notice": "Solicitar um aumento não está disponível para este conector.",
+      "requested": "Solicitado",
+      "already_requested_today": "Já solicitado hoje",
+      "no_recipient": "Solicitado, mas não há ninguém para receber"
+    },
+    "save_error": "Falha ao salvar."
   },
   "catalog": {
     "empty": "Nenhuma configuração disponível para esta seção.",

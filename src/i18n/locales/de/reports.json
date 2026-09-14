@@ -361,7 +361,8 @@
       "pending": "In Warteschlange",
       "cancelled": "Abgebrochen",
       "waiting": "Wartet",
-      "skipped": "Übersprungen"
+      "skipped": "Übersprungen",
+      "blocked": "Blockiert"
     },
     "filters": {
       "status": "Status",
@@ -405,7 +406,8 @@
       "processed": "Verarbeitet",
       "lineage": "Herkunft",
       "parentRunId": "Übergeordnete Run-ID",
-      "childRuns": "Kind-Runs"
+      "childRuns": "Kind-Runs",
+      "blockedReason": "Blockierungsgrund"
     },
     "openHistory": "In Verlauf anzeigen",
     "dryRun": {

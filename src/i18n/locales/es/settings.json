@@ -4461,7 +4461,55 @@
       "day": "por día",
       "week": "por semana",
       "month": "por mes"
-    }
+    },
+    "mode": {
+      "signal": "continuar",
+      "queue": "cola",
+      "block": "bloqueado"
+    },
+    "at_cap_prefix": "Al alcanzar el límite:",
+    "not_settable_notice": "Esto funciona a través del plan (nivel), no a través de límites.",
+    "not_tenant_scoped_notice": "Este conector no tiene límite por inquilino; solo un límite de plataforma.",
+    "no_cap_hint": "Vacío = sin límite",
+    "inherit_platform": "Sigue a la plataforma",
+    "cap_source": "El límite proviene de: {{source}}",
+    "cap_source_value": {
+      "tenant": "este inquilino",
+      "platform": "valor predeterminado de la plataforma",
+      "tier": "nivel",
+      "config": "ajuste del sistema",
+      "none": "ninguno"
+    },
+    "platform": {
+      "capLabel": "Límite para {{label}}"
+    },
+    "tenant_drawer": {
+      "title": "Límites para {{tenant}}",
+      "pick_label": "Ver un inquilino",
+      "pick_placeholder": "Buscar un inquilino…"
+    },
+    "approval": {
+      "title": "Conceder autorización",
+      "until": "Hasta",
+      "extra_cap": "Límite adicional",
+      "surcharge": "Recargo",
+      "note": "Nota (opcional)",
+      "grant": "Conceder autorización",
+      "revoke": "Revocar",
+      "revoke_confirm": "¿Revocar esta autorización? El inquilino vuelve al límite normal.",
+      "active": "Hasta {{date}} · adicional {{extra}}",
+      "approved_by": "Aprobado por {{name}}",
+      "surcharge_line": "Recargo: {{amount}}",
+      "error": "La solicitud ha fallado."
+    },
+    "request": {
+      "button": "Solicitar un aumento",
+      "disabled_notice": "Solicitar un aumento no está disponible para este conector.",
+      "requested": "Solicitado",
+      "already_requested_today": "Ya solicitado hoy",
+      "no_recipient": "Solicitado, pero no hay nadie para recibirlo"
+    },
+    "save_error": "Error al guardar."
   },
   "catalog": {
     "empty": "No hay configuración disponible para esta sección.",

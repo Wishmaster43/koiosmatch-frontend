@@ -10,8 +10,10 @@ import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import { useTranslation } from 'react-i18next'
 import { Zap, Clock, Users } from 'lucide-react'
 import { formatDT, formatDuration, StatusBadge, DryRunBanner } from './runFormat'
+import { blockedReason } from './blockedReason'
 import ReportDrawerChrome from './ReportDrawerChrome'
 import { DrawerErrorBlock } from './DrawerErrorBlock'
+import CalloutBox from '@/components/ui/CalloutBox'
 import RunStepList from './RunStepList'
 import RunLineage from './RunLineage'
 import { StopRunButton, CANCELLABLE } from '@/components/layout/workflow/runControl'
@@ -102,7 +104,9 @@ export default function RunDetailDrawer({ run, onClose, zIndex }: {
   const headerMeta = (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-        <StatusBadge status={shown.status} />
+        {/* F7: the badge's own title/sr-only text carries the block reason on a
+            blocked run — read from the capped step, not the still-empty error_message. */}
+        <StatusBadge status={shown.status} reason={blockedReason(shown)} />
         {/* RUN-CONTROL-1: this Make-style inspector stays read-only otherwise —
             the stop button is the one exception for a still-live run. */}
         {CANCELLABLE.has(String(shown.status)) && shown.id != null && (
@@ -204,8 +208,16 @@ export default function RunDetailDrawer({ run, onClose, zIndex }: {
         </>
       )}
 
-      {/* Error message */}
-      {shown.error_message && (
+      {/* F7: a blocked run gets its own warning-toned callout (it is a connector
+          cap, not a failed step) instead of the danger-tinted error block. Reason
+          comes from blockedReason() (the capped step) — run.error_message stays
+          empty for a blocked run today (BE gap, RunPresenter only reads 'failed'
+          log rows; hash-back open with CMBE). */}
+      {shown.status === 'blocked' && blockedReason(shown) ? (
+        <CalloutBox variant="warning" title={t('runs.drawer.blockedReason')}>
+          {blockedReason(shown)}
+        </CalloutBox>
+      ) : shown.error_message && (
         <DrawerErrorBlock label={t('runs.drawer.error')} message={shown.error_message} />
       )}
     </ReportDrawerChrome>

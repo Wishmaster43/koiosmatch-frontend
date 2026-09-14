@@ -74,7 +74,8 @@ export function useShiftmanagerDashboard(candidatesPerPage: number, hasAI: boole
       )
       return rows.map(r => ({
         name: r.workflow_name,
-        ok: (r.status === 'failed' || r.status === 'cancelled') ? false
+        // F7: a run halted by a connector limit synced nothing — never a green tick.
+        ok: (r.status === 'failed' || r.status === 'cancelled' || r.status === 'blocked') ? false
           : (r.status === 'running' || r.status === 'waiting') ? null
           : true,
         n: r.candidates_count,

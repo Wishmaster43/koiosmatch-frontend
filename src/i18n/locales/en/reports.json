@@ -361,7 +361,8 @@
       "pending": "Queued",
       "cancelled": "Cancelled",
       "waiting": "Waiting",
-      "skipped": "Skipped"
+      "skipped": "Skipped",
+      "blocked": "Blocked"
     },
     "filters": {
       "status": "Status",
@@ -405,7 +406,8 @@
       "processed": "Processed",
       "lineage": "Lineage",
       "parentRunId": "Parent run ID",
-      "childRuns": "Child runs"
+      "childRuns": "Child runs",
+      "blockedReason": "Block reason"
     },
     "openHistory": "View in history",
     "dryRun": {

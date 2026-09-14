@@ -10,8 +10,10 @@ import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import type { RunRow } from '@/types/reports'
 
 // Statuses that mean the run is finished — polling stops here. Exported so the
-// editor can seed node outputs from the finished run's steps.
-export const TERMINAL = new Set(['success', 'failed', 'error', 'cancelled', 'completed'])
+// editor can seed node outputs from the finished run's steps. F7: 'blocked'
+// (a connector-limit halt, WorkflowRun::STATUSES) is terminal too — the run
+// never resumes itself, a human decides whether to re-run.
+export const TERMINAL = new Set(['success', 'failed', 'error', 'cancelled', 'completed', 'blocked'])
 
 // Polls this run's live status via React Query; polling stops once its status lands in TERMINAL.
 export function useWorkflowRun(runId: string | number | null | undefined) {

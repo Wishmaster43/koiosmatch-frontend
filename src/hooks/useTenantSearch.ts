@@ -15,17 +15,23 @@ export function useTenantSearch(): {
   onSearch: (q: string) => void
 } {
   const [query, setQuery] = useState('')
+  const [debounced, setDebounced] = useState('')
   const [rows, setRows] = useState<TenantOption[]>([])
 
-  // Debounce-free server search with an abort guard against stale responses.
+  // Debounce the search term (~250ms, mirrors TenantSwitcher) before it hits the server.
   useEffect(() => {
-    const q = query.trim()
+    const id = setTimeout(() => setDebounced(query.trim()), 250)
+    return () => clearTimeout(id)
+  }, [query])
+
+  // Server search on the debounced term, with an abort guard against stale responses.
+  useEffect(() => {
     const ctrl = new AbortController()
-    api.get('/tenants', { params: { search: q || undefined, per_page: 25 }, signal: ctrl.signal })
+    api.get('/tenants', { params: { search: debounced || undefined, per_page: 25 }, signal: ctrl.signal })
       .then((res) => setRows(unwrapList<TenantOption>(res).rows))
       .catch(() => { if (!ctrl.signal.aborted) setRows([]) })
     return () => ctrl.abort()
-  }, [query])
+  }, [debounced])
 
   return { options: rows.map((o) => ({ value: String(o.id), label: o.name })), onSearch: setQuery }
 }

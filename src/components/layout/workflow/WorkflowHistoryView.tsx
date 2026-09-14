@@ -12,6 +12,7 @@ import { useReportList } from '@/components/reports/useReportList'
 import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import { useDateFormat } from '@/lib/datetime'
 import { formatDuration, StatusBadge, DryRunBanner } from '@/components/reports/runFormat'
+import { blockedReason } from '@/components/reports/blockedReason'
 import RunDetailDrawer from '@/components/reports/RunDetailDrawer'
 import { PageTitle, Caption, GroupLabel, captionStyle, bodyTextStyle } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
@@ -144,7 +145,9 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
                         {r.triggered_by ? ` · ${r.triggered_by}` : ''}
                       </span>
                     </td>
-                    <td style={TD}><StatusBadge status={r.status} /></td>
+                    {/* F7: the badge's own title/sr-only text carries the block reason on a
+                        blocked run — read from the capped step, not the still-empty error_message. */}
+                    <td style={TD}><StatusBadge status={r.status} reason={blockedReason(r)} /></td>
                     <td style={{ ...TD, fontSize: 12, color: 'var(--text-muted)' }}>
                       {formatDuration(r.duration_ms ?? r.duration)}
                     </td>

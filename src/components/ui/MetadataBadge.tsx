@@ -18,11 +18,15 @@ export default function MetadataBadge({
   meta,
   labelOf,
   fallbackIcon: FallbackIcon,
+  title,
 }: {
   value?: string
   meta: Record<string, BadgeMeta>
   labelOf: (key: string | undefined) => ReactNode
   fallbackIcon?: LucideIcon
+  // Optional hover text (F7: a blocked run's reason), also read as sr-only text
+  // AFTER the visible label — never replaces the badge's accessible name.
+  title?: string
 }) {
   const key = value?.toLowerCase()
   // Unknown or missing value: the neutral pill the three former badges fell back to.
@@ -33,6 +37,7 @@ export default function MetadataBadge({
 
   return (
     <span
+      title={title}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
@@ -48,6 +53,9 @@ export default function MetadataBadge({
     >
       {Icon && <Icon size={10} />}
       {label}
+      {/* sr-only reason text AFTER the visible label — the accessible name stays
+          total (label + reason), never replaced by an aria-label override. */}
+      {title && <span className="sr-only">{title}</span>}
     </span>
   )
 }

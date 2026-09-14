@@ -4461,7 +4461,55 @@
       "day": "per day",
       "week": "per week",
       "month": "per month"
-    }
+    },
+    "mode": {
+      "signal": "continue",
+      "queue": "queue",
+      "block": "blocked"
+    },
+    "at_cap_prefix": "At the cap:",
+    "not_settable_notice": "This runs via the package (tier), not via limits.",
+    "not_tenant_scoped_notice": "This connector has no per-tenant limit; a platform limit only.",
+    "no_cap_hint": "Empty = no limit",
+    "inherit_platform": "Inherits platform",
+    "cap_source": "Limit comes from: {{source}}",
+    "cap_source_value": {
+      "tenant": "this tenant",
+      "platform": "platform default",
+      "tier": "tier",
+      "config": "system setting",
+      "none": "none"
+    },
+    "platform": {
+      "capLabel": "Limit for {{label}}"
+    },
+    "tenant_drawer": {
+      "title": "Limits for {{tenant}}",
+      "pick_label": "View a tenant",
+      "pick_placeholder": "Search a tenant…"
+    },
+    "approval": {
+      "title": "Grant approval",
+      "until": "Until",
+      "extra_cap": "Extra cap",
+      "surcharge": "Surcharge",
+      "note": "Note (optional)",
+      "grant": "Grant approval",
+      "revoke": "Revoke",
+      "revoke_confirm": "Revoke this approval? The tenant falls back to the regular limit.",
+      "active": "Until {{date}} · extra {{extra}}",
+      "approved_by": "Approved by {{name}}",
+      "surcharge_line": "Surcharge: {{amount}}",
+      "error": "The request failed."
+    },
+    "request": {
+      "button": "Request an increase",
+      "disabled_notice": "Requesting an increase is not available for this connector.",
+      "requested": "Requested",
+      "already_requested_today": "Already requested today",
+      "no_recipient": "Requested, but there is no one to receive it"
+    },
+    "save_error": "Saving failed."
   },
   "catalog": {
     "empty": "No settings available for this section.",

@@ -17,6 +17,17 @@ vi.mock('@/lib/api', async () => {
 
 const t = (k: string, o?: Record<string, unknown>) => i18n.t(k, { ns: 'settings', ...o })
 
+// The page's tenant picker (useTenantSearch) also GETs /tenants on mount, in parallel
+// with the page's own /admin/limits query — route by URL so neither call can eat the
+// other's mocked response, whichever effect happens to fire first.
+const mockGetByUrl = (adminLimitsPayload: unknown) => {
+  vi.mocked(api.get).mockImplementation((url: string) => {
+    if (url === '/tenants') return Promise.resolve({ data: { data: [] } })
+    if (url === '/admin/limits') return Promise.resolve(adminLimitsPayload)
+    return Promise.reject(new Error(`unexpected GET ${url}`))
+  })
+}
+
 const payload = (over: Record<string, unknown> = {}) => ({ data: { data: {
   platform: [
     { key: 'opencage', label: 'OpenCage geocoding', scope: 'platform', window: 'day', used: 9000, cap: 9000, percent: 100, cap_reached: true, source: 'x', enforced: true },
@@ -38,7 +49,7 @@ beforeEach(() => vi.clearAllMocks())
 
 describe('AdminLimitsSettings', () => {
   it('GETs /admin/limits and renders the platform meters', async () => {
-    vi.mocked(api.get).mockResolvedValueOnce(payload())
+    mockGetByUrl(payload())
     renderPage()
     expect(await screen.findByText('OpenCage geocoding')).toBeInTheDocument()
     expect(api.get).toHaveBeenCalledWith('/admin/limits')
@@ -46,7 +57,7 @@ describe('AdminLimitsSettings', () => {
   })
 
   it('an unenforced row at its cap reads as a signal, never as a hard limit', async () => {
-    vi.mocked(api.get).mockResolvedValueOnce(payload())
+    mockGetByUrl(payload())
     renderPage()
     await screen.findByText('WhatsApp Business (Meta)')
     expect(screen.getByText(t('limits.signal_not_blocked'))).toBeInTheDocument()
@@ -54,7 +65,7 @@ describe('AdminLimitsSettings', () => {
   })
 
   it('lists tenants near their cap in both contract shapes', async () => {
-    vi.mocked(api.get).mockResolvedValueOnce(payload())
+    mockGetByUrl(payload())
     renderPage()
     expect(await screen.findByText('Yesway Flex B.V.')).toBeInTheDocument()
     expect(screen.getByText('ai · 92%')).toBeInTheDocument()
@@ -63,7 +74,7 @@ describe('AdminLimitsSettings', () => {
   })
 
   it('shows the empty tenants line and the skipped notice', async () => {
-    vi.mocked(api.get).mockResolvedValueOnce(payload({ tenants_near_cap: [], skipped_tenants: { count: 2, ids: ['a', 'b'] } }))
+    mockGetByUrl(payload({ tenants_near_cap: [], skipped_tenants: { count: 2, ids: ['a', 'b'] } }))
     renderPage()
     expect(await screen.findByText(t('limits.tenantsAtLimitEmpty'))).toBeInTheDocument()
     expect(screen.getByText(t('limits.skipped_tenants_notice', { count: 2 }))).toBeInTheDocument()

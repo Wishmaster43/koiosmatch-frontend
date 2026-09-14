@@ -150,7 +150,7 @@ describe('RunsTable — WFB-14 (c) the status filter cannot trap itself', () => 
   // disappears from the panel while the stale selection keeps riding every
   // request, with no way back short of a reload. Options must come from the
   // fixed vocabulary instead, so the group survives a zero-row response.
-  it('keeps the status group registered with all five options, even when the current page has zero runs', () => {
+  it('keeps the status group registered with all six options, even when the current page has zero runs', () => {
     vi.mocked(useReportList).mockReturnValueOnce({ rows: [], loading: false, error: false })
     render(<RunsTable />)
     const groups = lastRegisteredGroups()
@@ -158,7 +158,7 @@ describe('RunsTable — WFB-14 (c) the status filter cannot trap itself', () => 
       { options: { value: string }[] } | undefined
     expect(status).toBeDefined()
     expect(status?.options.map(o => o.value).sort()).toEqual(
-      ['cancelled', 'failed', 'running', 'success', 'waiting'],
+      ['blocked', 'cancelled', 'failed', 'running', 'success', 'waiting'],
     )
   })
 
@@ -178,6 +178,33 @@ describe('RunsTable — WFB-14 (c) the status filter cannot trap itself', () => 
     const statusAfter = groupsAfter.find((g: { key: string }) => g.key === 'status') as
       { options: { value: string }[] }
     // The option list is still the full fixed vocabulary, not collapsed to one.
-    expect(statusAfter.options.length).toBe(5)
+    expect(statusAfter.options.length).toBe(6)
+  })
+})
+
+// LIMITS-FE-F7: 'blocked' (a run halted by a connector limit, WorkflowRun::STATUSES)
+// joins the fixed status vocabulary and forwards verbatim (already an API enum value).
+describe('RunsTable — LIMITS-FE-F7 blocked status', () => {
+  it('requests /workflow-runs?status=blocked when "blocked" is picked', async () => {
+    render(<RunsTable />)
+    const groups = lastRegisteredGroups()
+    const status = groups.find((g: { key: string }) => g.key === 'status') as
+      { onToggle: (v: string) => void }
+    act(() => status.onToggle('blocked'))
+    await waitFor(() => expect(vi.mocked(useReportList))
+      .toHaveBeenCalledWith('/workflow-runs?status=blocked', expect.any(String)))
+  })
+
+  it('renders the blocked badge with the block reason as its title, read from the capped step (not error_message, which the BE never populates for blocked runs)', () => {
+    vi.mocked(useReportList).mockReturnValueOnce({
+      rows: [{
+        id: 'r3', workflow_name: 'Limietflow', status: 'blocked',
+        step_results: [{ status: 'skipped', message: 'Limiet bereikt (sm, modus block) — stap overgeslagen, niets gesynchroniseerd.' }],
+      }],
+      loading: false, error: false,
+    })
+    render(<RunsTable />)
+    expect(screen.getByText('Geblokkeerd').closest('span'))
+      .toHaveAttribute('title', 'Limiet bereikt (sm, modus block) — stap overgeslagen, niets gesynchroniseerd.')
   })
 })

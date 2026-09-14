@@ -29,6 +29,25 @@ describe('resolveNotificationTarget — connector.limit_warning', () => {
   })
 })
 
+// LIMITS-FE-F7: a real refusal/queue today (limits:check 'blocked' level) —
+// two distinct notification types, each pointing at its own limits screen.
+describe('resolveNotificationTarget — connector.limit_blocked / connector.limit_blocked_platform', () => {
+  const blockedRow = (meta: Record<string, unknown>): AppNotification =>
+    ({ id: 2, type: 'connector.limit_blocked', meta } as unknown as AppNotification)
+  const blockedPlatformRow = (meta: Record<string, unknown>): AppNotification =>
+    ({ id: 3, type: 'connector.limit_blocked_platform', meta } as unknown as AppNotification)
+
+  it('connector.limit_blocked (tenant-facing) opens the integrations limits tab', () => {
+    expect(resolveNotificationTarget(blockedRow({ connector: 'sm' })))
+      .toEqual({ page: 'settings', id: 'limits', hash: '#settings/integrations/limits' })
+  })
+
+  it('connector.limit_blocked_platform (super-admin-facing) opens the platform limits section', () => {
+    expect(resolveNotificationTarget(blockedPlatformRow({ connector: 'sm' })))
+      .toEqual({ page: 'settings', id: 'admin_limits', hash: '#settings/superadmin/admin_limits' })
+  })
+})
+
 describe('navigateToNotificationTarget — hash targets', () => {
   it('sets the hash and re-dispatches hashchange instead of the ?open= drawer route', () => {
     const dispatch = vi.spyOn(window, 'dispatchEvent')

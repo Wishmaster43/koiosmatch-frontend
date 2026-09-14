@@ -361,7 +361,8 @@
       "pending": "En file d'attente",
       "cancelled": "Annulée",
       "waiting": "En attente",
-      "skipped": "Ignoré"
+      "skipped": "Ignoré",
+      "blocked": "Bloqué"
     },
     "filters": {
       "status": "Statut",
@@ -405,7 +406,8 @@
       "processed": "Traité",
       "lineage": "Origine",
       "parentRunId": "ID de l'exécution parente",
-      "childRuns": "Runs enfants"
+      "childRuns": "Runs enfants",
+      "blockedReason": "Motif du blocage"
     },
     "openHistory": "Voir dans l'historique",
     "dryRun": {

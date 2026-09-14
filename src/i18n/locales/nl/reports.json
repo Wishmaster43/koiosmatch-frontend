@@ -361,7 +361,8 @@
       "pending": "In wachtrij",
       "cancelled": "Gestopt",
       "waiting": "Wachten",
-      "skipped": "Overgeslagen"
+      "skipped": "Overgeslagen",
+      "blocked": "Geblokkeerd"
     },
     "filters": {
       "status": "Status",
@@ -405,7 +406,8 @@
       "processed": "Verwerkt",
       "lineage": "Herkomst",
       "parentRunId": "Ouder-run-ID",
-      "childRuns": "Kind-runs"
+      "childRuns": "Kind-runs",
+      "blockedReason": "Reden blokkering"
     },
     "openHistory": "Bekijk in geschiedenis",
     "dryRun": {

@@ -4461,7 +4461,55 @@
       "day": "pro Tag",
       "week": "pro Woche",
       "month": "pro Monat"
-    }
+    },
+    "mode": {
+      "signal": "weiter",
+      "queue": "Warteschlange",
+      "block": "blockiert"
+    },
+    "at_cap_prefix": "Bei Erreichen:",
+    "not_settable_notice": "Dies läuft über das Paket (Stufen), nicht über Limits.",
+    "not_tenant_scoped_notice": "Dieser Konnektor hat kein Pro-Tenant-Limit; nur ein Plattform-Limit.",
+    "no_cap_hint": "Leer = kein Limit",
+    "inherit_platform": "Folgt Plattform",
+    "cap_source": "Limit stammt von: {{source}}",
+    "cap_source_value": {
+      "tenant": "dieser Tenant",
+      "platform": "Plattformstandard",
+      "tier": "Stufe",
+      "config": "Systemeinstellung",
+      "none": "keine"
+    },
+    "platform": {
+      "capLabel": "Limit für {{label}}"
+    },
+    "tenant_drawer": {
+      "title": "Limits für {{tenant}}",
+      "pick_label": "Tenant ansehen",
+      "pick_placeholder": "Tenant suchen…"
+    },
+    "approval": {
+      "title": "Genehmigung erteilen",
+      "until": "Bis",
+      "extra_cap": "Zusätzliches Limit",
+      "surcharge": "Aufschlag",
+      "note": "Notiz (optional)",
+      "grant": "Genehmigung erteilen",
+      "revoke": "Widerrufen",
+      "revoke_confirm": "Diese Genehmigung widerrufen? Der Tenant fällt auf das normale Limit zurück.",
+      "active": "Bis {{date}} · zusätzlich {{extra}}",
+      "approved_by": "Genehmigt von {{name}}",
+      "surcharge_line": "Aufschlag: {{amount}}",
+      "error": "Die Anfrage ist fehlgeschlagen."
+    },
+    "request": {
+      "button": "Erhöhung anfragen",
+      "disabled_notice": "Eine Erhöhung anzufragen ist für diesen Konnektor nicht möglich.",
+      "requested": "Angefragt",
+      "already_requested_today": "Heute bereits angefragt",
+      "no_recipient": "Angefragt, aber niemand kann es empfangen"
+    },
+    "save_error": "Speichern fehlgeschlagen."
   },
   "catalog": {
     "empty": "Für diesen Bereich sind keine Einstellungen verfügbar.",

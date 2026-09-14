@@ -4,7 +4,7 @@
  * consistent and is never duplicated. Labels resolve via the `reports` namespace.
  */
 import { useTranslation } from 'react-i18next'
-import { Ban, CheckCircle, XCircle, RotateCcw, Clock } from 'lucide-react'
+import { Ban, CheckCircle, XCircle, RotateCcw, Clock, ShieldAlert } from 'lucide-react'
 import { formatDateTimeStr } from '@/lib/localDate'
 import { formatSeconds } from '@/lib/formatters'
 import SoftChip from '@/components/ui/SoftChip'
@@ -40,10 +40,16 @@ export const STATUS_META: Record<string, BadgeMeta> = {
   pending:   { bg: 'var(--hover-bg)',         color: 'var(--text-muted)',    Icon: Clock },
   waiting:   { bg: 'var(--hover-bg)',         color: 'var(--text-muted)',    Icon: Clock },
   cancelled: { bg: 'var(--hover-bg)',         color: 'var(--text-muted)',    Icon: Ban },
+  // LIMITS-FE-F7: a run halted by a connector limit (BE WorkflowRun::STATUSES)
+  // — warning token (not danger: it is a cap, not a failed step) + its own icon.
+  blocked:   { bg: 'var(--color-warning-bg)', color: 'var(--color-on-warning-bg)', Icon: ShieldAlert },
 }
 
-// Coloured pill with icon + translated label for a run/step status.
-export function StatusBadge({ status }: { status?: string }) {
+
+// Coloured pill with icon + translated label for a run/step status. `reason`
+// (the run's block reason when blocked, see blockedReason above) rides the
+// badge's title/aria so the cap reason is reachable without opening the run drawer.
+export function StatusBadge({ status, reason }: { status?: string; reason?: string | null }) {
   const { t } = useTranslation('reports')
   return (
     <MetadataBadge
@@ -51,6 +57,7 @@ export function StatusBadge({ status }: { status?: string }) {
       meta={STATUS_META}
       labelOf={(key) => t(`runs.status.${key}`, { defaultValue: status })}
       fallbackIcon={Clock}
+      title={reason ?? undefined}
     />
   )
 }

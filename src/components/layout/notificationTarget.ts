@@ -73,6 +73,12 @@ export const CUSTOM_TYPE_TARGETS: Record<string, (meta: Record<string, unknown>)
     if (scope === 'platform') return { page: 'settings', id: 'admin_limits', hash: '#settings/superadmin/admin_limits' }
     return null
   },
+  // LIMITS-FE-F7 (limits:check 'blocked' level, ConnectorGate): a real refusal/
+  // queue today — two distinct types, each pointing at ITS OWN limits screen
+  // (never `scope`-branched like the warning above: the tenant-facing type
+  // never reaches a super-admin viewer and vice versa).
+  'connector.limit_blocked': () => ({ page: 'settings', id: 'limits', hash: '#settings/integrations/limits' }),
+  'connector.limit_blocked_platform': () => ({ page: 'settings', id: 'admin_limits', hash: '#settings/superadmin/admin_limits' }),
 }
 
 // Pure: resolve a notification into a navigable {page, id}, or null when nothing

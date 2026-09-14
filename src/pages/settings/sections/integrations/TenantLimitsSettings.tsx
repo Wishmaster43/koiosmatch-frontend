@@ -16,6 +16,7 @@ import { useApps } from '@/context/AppsContext'
 import { useAuth } from '@/context/AuthContext'
 import { canAccessPage } from '@/lib/access'
 import type { BillingTierRef } from '@/types/billingTiers'
+import TenantLimitRequestRow from './TenantLimitRequestRow'
 
 // The tier a meter row is priced on. Two contract shapes (CMBE 08-09): the flat tier
 // block itself (`prices.tier.key` or null — the intended shape, landed with CMFE-MEET-1
@@ -59,6 +60,7 @@ export default function TenantLimitsSettings() {
           {rows.map(row => (
             <SettingCard key={row.key} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <LimitMeterRow meter={row} />
+              <TenantLimitRequestRow row={row} />
               {/* Billing tier (billing.view only): the chosen tier, else the package baseline. */}
               {tierOf(row) && (
                 <Caption as="div">

@@ -19,6 +19,7 @@ import type { Column } from '../ui/DataTable'
 import { useReportList } from './useReportList'
 import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import { formatDuration, StatusBadge } from './runFormat'
+import { blockedReason } from './blockedReason'
 import RunDetailDrawer from './RunDetailDrawer'
 import { buildStatusGroup, buildWorkflowGroup } from './reportFilterDefs'
 import { distinctSortedValues } from './distinctSortedValues'
@@ -31,13 +32,15 @@ import type { RunRow, ReportFilterGroup } from '@/types/reports'
 // rule. Every other display status already matches its API value verbatim.
 const STATUS_DISPLAY_TO_API: Record<string, string> = { success: 'completed' }
 
-// WFB-14 (c): the FIXED five-value run-status vocabulary, never the statuses
-// present on the current page. Deriving the filter's options from `rows` traps
-// the filter: picking "failed" in a window with no failed run makes the server
+// WFB-14 (c): the FIXED run-status vocabulary, never the statuses present on
+// the current page. Deriving the filter's options from `rows` traps the
+// filter: picking "failed" in a window with no failed run makes the server
 // return zero rows, which would empty `statusOptions`, unregister the status
 // group entirely, and leave the stale `selectedStatuses` riding every later
 // request with no UI left to clear it. A fixed list can never disappear.
-const RUN_STATUS_VALUES = ['success', 'failed', 'running', 'waiting', 'cancelled']
+// LIMITS-FE-F7: 'blocked' (a run halted by a connector limit) joins the
+// vocabulary — it is a real terminal value on WorkflowRun::STATUSES (backend).
+const RUN_STATUS_VALUES = ['success', 'failed', 'running', 'waiting', 'cancelled', 'blocked']
 
 // Pure: read the `workflow_id` param out of a hash string (no window access —
 // testable, mirrors useReportSwitch's getViewFromHash). WEBHOOK-RUN-CORRELATION-1:
@@ -95,7 +98,7 @@ export default function RunsTable() {
 
   // WFB-14 (c): the "Status" filter's OPTIONS are the fixed vocabulary above,
   // not whatever happens to be on the currently loaded page (see the comment
-  // on RUN_STATUS_VALUES) — the group always registers with all five choices.
+  // on RUN_STATUS_VALUES) — the group always registers with all six choices.
   const statusOptions = RUN_STATUS_VALUES
 
   // Apply the status/workflow filters and the free-text search over trigger/error fields.
@@ -146,7 +149,9 @@ export default function RunsTable() {
     {
       key: 'status', header: t('runs.cols.status'), sortable: true,
       sortValue: r => r.status ?? null,
-      render: r => <StatusBadge status={r.status} />,
+      // F7: the badge's own title/sr-only text carries the block reason on a
+      // blocked run — read from the capped step, not the still-empty error_message.
+      render: r => <StatusBadge status={r.status} reason={blockedReason(r)} />,
     },
     {
       key: 'candidates_count', header: t('runs.cols.candidates'), sortable: true,

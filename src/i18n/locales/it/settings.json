@@ -4462,7 +4462,55 @@
       "day": "al giorno",
       "week": "per settimana",
       "month": "al mese"
-    }
+    },
+    "mode": {
+      "signal": "continua",
+      "queue": "coda",
+      "block": "bloccato"
+    },
+    "at_cap_prefix": "Al raggiungimento del limite:",
+    "not_settable_notice": "Questo passa dal piano (livello), non dai limiti.",
+    "not_tenant_scoped_notice": "Questo connettore non ha un limite per tenant; solo un limite di piattaforma.",
+    "no_cap_hint": "Vuoto = nessun limite",
+    "inherit_platform": "Segue la piattaforma",
+    "cap_source": "Il limite proviene da: {{source}}",
+    "cap_source_value": {
+      "tenant": "questo tenant",
+      "platform": "predefinito della piattaforma",
+      "tier": "livello",
+      "config": "impostazione di sistema",
+      "none": "nessuno"
+    },
+    "platform": {
+      "capLabel": "Limite per {{label}}"
+    },
+    "tenant_drawer": {
+      "title": "Limiti per {{tenant}}",
+      "pick_label": "Visualizza un tenant",
+      "pick_placeholder": "Cerca un tenant…"
+    },
+    "approval": {
+      "title": "Concedi autorizzazione",
+      "until": "Fino al",
+      "extra_cap": "Limite extra",
+      "surcharge": "Supplemento",
+      "note": "Nota (facoltativa)",
+      "grant": "Concedi autorizzazione",
+      "revoke": "Revoca",
+      "revoke_confirm": "Revocare questa autorizzazione? Il tenant torna al limite normale.",
+      "active": "Fino al {{date}} · extra {{extra}}",
+      "approved_by": "Approvato da {{name}}",
+      "surcharge_line": "Supplemento: {{amount}}",
+      "error": "La richiesta non è riuscita."
+    },
+    "request": {
+      "button": "Richiedi un aumento",
+      "disabled_notice": "Richiedere un aumento non è disponibile per questo connettore.",
+      "requested": "Richiesto",
+      "already_requested_today": "Già richiesto oggi",
+      "no_recipient": "Richiesto, ma non c'è nessuno per riceverlo"
+    },
+    "save_error": "Salvataggio non riuscito."
   },
   "catalog": {
     "empty": "Nessuna impostazione disponibile per questa sezione.",

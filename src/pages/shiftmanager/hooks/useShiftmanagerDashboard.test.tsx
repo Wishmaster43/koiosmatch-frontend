@@ -134,6 +134,17 @@ describe('useShiftmanagerDashboard · recent-runs mapper reads the real RunPrese
     expect(result.current.runs[0]).toMatchObject({ ok: false, err: 'Timeout' })
   })
 
+  it('marks a run blocked by a connector limit as not-ok (F7) — it synced nothing, never a green tick', async () => {
+    mockedGet.mockImplementation((url: string) => Promise.resolve({
+      data: url === '/workflow-runs'
+        ? { data: [{ id: 'r4', workflow_name: 'Capped sync', status: 'blocked', candidates_count: 0, error_message: null, started_at: '2026-09-01T02:00:00Z' }] }
+        : { data: [] },
+    }))
+    const { result } = renderHook(() => useShiftmanagerDashboard(10, true), { wrapper })
+    await waitFor(() => expect(result.current.runs).toHaveLength(1))
+    expect(result.current.runs[0]).toMatchObject({ ok: false })
+  })
+
   it('marks an in-flight "running" run as the neutral ok=null state, distinct from a completed success', async () => {
     mockedGet.mockImplementation((url: string) => Promise.resolve({
       data: url === '/workflow-runs'

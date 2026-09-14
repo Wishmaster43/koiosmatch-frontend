@@ -4461,7 +4461,55 @@
       "day": "per dag",
       "week": "per week",
       "month": "per maand"
-    }
+    },
+    "mode": {
+      "signal": "doorgaan",
+      "queue": "wachtrij",
+      "block": "geblokkeerd"
+    },
+    "at_cap_prefix": "Bij bereiken:",
+    "not_settable_notice": "Dit onderdeel loopt via het pakket (Pakket/Staffels), niet via limieten.",
+    "not_tenant_scoped_notice": "Deze koppeling heeft geen per-tenant limiet; alleen een platformlimiet.",
+    "no_cap_hint": "Leeg = geen limiet",
+    "inherit_platform": "Volgt platform",
+    "cap_source": "Limiet komt van: {{source}}",
+    "cap_source_value": {
+      "tenant": "deze tenant",
+      "platform": "platformstandaard",
+      "tier": "staffel",
+      "config": "systeeminstelling",
+      "none": "geen"
+    },
+    "platform": {
+      "capLabel": "Limiet voor {{label}}"
+    },
+    "tenant_drawer": {
+      "title": "Limieten voor {{tenant}}",
+      "pick_label": "Tenant bekijken",
+      "pick_placeholder": "Zoek een tenant…"
+    },
+    "approval": {
+      "title": "Toestemming geven",
+      "until": "Tot",
+      "extra_cap": "Extra limiet",
+      "surcharge": "Toeslag",
+      "note": "Notitie (optioneel)",
+      "grant": "Toestemming geven",
+      "revoke": "Intrekken",
+      "revoke_confirm": "Deze toestemming intrekken? De tenant valt terug op de gewone limiet.",
+      "active": "Tot {{date}} · extra {{extra}}",
+      "approved_by": "Goedgekeurd door {{name}}",
+      "surcharge_line": "Toeslag: {{amount}}",
+      "error": "De aanvraag is mislukt."
+    },
+    "request": {
+      "button": "Verhoging aanvragen",
+      "disabled_notice": "Verhoging aanvragen is niet beschikbaar voor deze koppeling.",
+      "requested": "Aangevraagd",
+      "already_requested_today": "Vandaag al aangevraagd",
+      "no_recipient": "Aangevraagd, maar er is niemand om het te ontvangen"
+    },
+    "save_error": "Opslaan is mislukt."
   },
   "catalog": {
     "empty": "Geen instellingen beschikbaar voor deze sectie.",
