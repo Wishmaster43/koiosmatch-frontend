@@ -1420,6 +1420,19 @@ verifier and manager from now on.
   keeps the waiting shell from matching itself — three lanes deadlocked for 20 minutes on the
   plain pattern) and running ONLY the lane's own test files; new shared units checked against
   `git status` first so two lanes do not create the same helper twice.
+- **LANE-BATCH-1 — a low-effort lane gets a batch it can hold in one head: at most ~8–9 files,
+  the component before its test, and the measured facts a worker cannot derive (per component
+  the caller list from `grep -rn '<Name' src`, the API-shape source or an explicit "hand-written:
+  the spec carries no 2xx schema" note, the explicit-extension import sites or the measured
+  "none").** Measured 14-09: a 64-file conversion brief produced zero files (the lane declined
+  it as a manager-sized job and its fixer did the same), while the same files in batches of 4–9
+  converted first time with one Opus lens each. A file that ten tests depend on (the settings
+  registry) converts last and alone, so an intermediate `tsc` still means something.
+- **DEV-SERVER-STALE-1 — after a mass rename the running Vite serves a stale module graph
+  (it kept requesting `Sidebar.jsx` after the file became `.tsx`, and the login form never
+  rendered).** A screen probe that times out on the login form after renames is a dev-server
+  restart, not an app bug; verify on a fresh `npx vite` first. Cookie sessions are stateful for
+  `localhost:5173` only, so probes never move to another port.
 - **SESSION-LIMIT-PACT-1 (Danny 13-09 23:40, verbatim: "Hou sessie limit in de gaten samen
   met FE en zorg dat het werk doorgaat en af komt zonder dat we tegen limit aan komen"):**
   CMFE and CMBE share one account. When a screenshot shows the session window filling faster
