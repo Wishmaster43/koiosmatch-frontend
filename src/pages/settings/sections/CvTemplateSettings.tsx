@@ -32,14 +32,14 @@ export default function CvTemplateSettings() {
   const { t: tCommon } = useTranslation('common')
   const locale = useLocale()
   const [generating,   setGenerating]   = useState(false)
-  const [brandLogoUrl, setBrandLogoUrl] = useState(null)
+  const [brandLogoUrl, setBrandLogoUrl] = useState<string | null>(null)
   const [brandName,    setBrandName]    = useState('')
   const [brandLoadError, setBrandLoadError] = useState(false)
   // Local text drafts for the two hex inputs: lets the user type freely (no
   // caret fighting) while only PERSISTING a syntactically complete colour —
   // resynced whenever the stored value changes from OUTSIDE this input
   // (swatch click, reset, initial load), never while the draft itself differs.
-  const [hexDrafts, setHexDrafts] = useState({ primaryColor: '', secondaryColor: '' })
+  const [hexDrafts, setHexDrafts] = useState<Record<'primaryColor' | 'secondaryColor', string>>({ primaryColor: '', secondaryColor: '' })
   useEffect(() => {
     setHexDrafts({ primaryColor: settings.primaryColor ?? '', secondaryColor: settings.secondaryColor ?? '' })
   }, [settings.primaryColor, settings.secondaryColor])
@@ -50,16 +50,16 @@ export default function CvTemplateSettings() {
   useEffect(() => {
     let alive = true
     loadSettings()
-      .then(s => {
+      .then((s: Record<string, unknown>) => {
         if (!alive) return
-        if (s.logo_url)     setBrandLogoUrl(s.logo_url)
-        if (s.company_name) setBrandName(s.company_name)
+        if (s.logo_url)     setBrandLogoUrl(s.logo_url as string)
+        if (s.company_name) setBrandName(s.company_name as string)
       })
       .catch(() => { if (alive) setBrandLoadError(true) })
     return () => { alive = false }
   }, [])
 
-  const settingsWithBrand = { ...settings, logoUrl: brandLogoUrl, companyName: brandName }
+  const settingsWithBrand = { ...settings, logoUrl: brandLogoUrl ?? undefined, companyName: brandName }
 
   // Renders the sample CV to a PDF blob and triggers a browser download via a throwaway anchor element, so recruiters can preview the template before it's used on a real candidate.
   const handleDownloadPreview = async () => {
@@ -117,10 +117,10 @@ export default function CvTemplateSettings() {
             <div style={labelStyle}>{t('cvTemplate.accentColors')}</div>
             <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 14 }}>{t('cvTemplate.accentColorsHint')}</p>
 
-            {[
+            {([
               { key: 'primaryColor',   label: t('cvTemplate.color1') },
               { key: 'secondaryColor', label: t('cvTemplate.color2') },
-            ].map(({ key, label }) => {
+            ] as Array<{ key: 'primaryColor' | 'secondaryColor'; label: string }>).map(({ key, label }) => {
               const hexInputId = `cv-accent-${key}-hex`
               const draft = hexDrafts[key] ?? ''
               return (

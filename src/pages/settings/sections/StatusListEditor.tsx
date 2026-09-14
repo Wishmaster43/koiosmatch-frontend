@@ -60,6 +60,7 @@ import api, { unwrap, unwrapList } from '@/lib/api'
 import { extractApiError } from '@/lib/extractApiError'
 import { notifyError } from '@/lib/notify'
 import { useConfirm } from '@/hooks/useConfirm'
+import { deleteLookupRow } from '../lib/deleteLookupRow'
 import { DragList } from '../components/SettingsControls'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { PageTitle } from '@/components/ui/typography'
@@ -194,18 +195,9 @@ export default function StatusListEditor({
   // Confirms and deletes a row, blocked upfront when it is in use; a 409 from the server still keeps the row and flags it, since another change could have made it in-use meanwhile.
   const remove = (item: StatusListItem) => {
     if (inUse(item)) return
-    confirm(t('statusList.confirmDelete', { name: labelOf(item) }), async () => {
-      setDeleting(item.id)
-      // 409 = backend rejects deletion of an in-use item; keep the row and flag it.
-      // Any OTHER failure (500/network) still needs a visible signal — otherwise the
-      // row silently stays in the list with no explanation (§3: no silent catch).
-      try { await api.delete(`${endpoint}/${item.id}`); setItems(p => p.filter(x => x.id !== item.id)) }
-      catch (e) {
-        const status = (e as { response?: { status?: number } })?.response?.status
-        if (status === 409) setItems(p => p.map(x => x.id === item.id ? { ...x, in_use: true } : x))
-        else notifyError(t('statusList.deleteFailed'))
-      } finally { setDeleting(null) }
-    }, { danger: true })
+    confirm(t('statusList.confirmDelete', { name: labelOf(item) }), () =>
+      deleteLookupRow(endpoint, item, setItems, setDeleting, () => notifyError(t('statusList.deleteFailed'))),
+    { danger: true })
   }
 
   // Optimistic per-row icon update (iconPicker mode) — same revert rule as colour.

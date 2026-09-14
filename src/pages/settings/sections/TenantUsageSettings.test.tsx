@@ -10,13 +10,13 @@ import { render, screen, waitFor } from '@testing-library/react'
 import TenantUsageSettings from './TenantUsageSettings'
 
 const mockGet = vi.fn()
-vi.mock('@/lib/api', () => ({ default: { get: (...a) => mockGet(...a) }, unwrap: (res) => res?.data }))
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k) => k }) }))
+vi.mock('@/lib/api', () => ({ default: { get: (...a: unknown[]) => mockGet(...a) }, unwrap: (res: { data?: unknown }) => res?.data }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
 vi.mock('@/i18n', () => ({ LOCALE_BY_LANG: { nl: 'nl-NL', en: 'en-GB' } }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ activeTenant: { id: 't1', name: 'Yesway Flex' } }) }))
 // Breakdown table fetches its own data independently; stub it out so this
 // suite only exercises the tab shell + shared state.
-vi.mock('./TenantUsageBreakdownTable', () => ({ default: ({ month }) => <div data-testid="breakdown-table">{month}</div> }))
+vi.mock('./TenantUsageBreakdownTable', () => ({ default: ({ month }: { month: string }) => <div data-testid="breakdown-table">{month}</div> }))
 
 beforeEach(() => {
   mockGet.mockReset()
@@ -60,19 +60,19 @@ describe('TenantUsageSettings — subtabs', () => {
     // Pick a month via the trigger button (renders the current label initially).
     // getAllByRole to skip the clear X button that SearchSelect now renders.
     const monthTrigger = screen.getAllByRole('button')[0]
-    const initialLabel = monthTrigger.textContent.trim()
+    const initialLabel = monthTrigger.textContent?.trim()
     await userEvent.click(monthTrigger)
     // The option list renders as buttons too (SearchSelect); pick one that
     // differs from the currently selected month so the change is observable.
     // Skip the clear button (which SearchSelect now renders) by excluding buttons with id ending in '-clear'.
     const options = await screen.findAllByRole('button')
-    const otherMonth = options.find(o => o !== monthTrigger && !o.id.endsWith('-clear') && o.textContent && o.textContent.trim() !== initialLabel)
+    const otherMonth = options.find(o => o !== monthTrigger && !o.id.endsWith('-clear') && o.textContent && o.textContent.trim() !== initialLabel) as HTMLElement
     await userEvent.click(otherMonth)
-    const chosenLabel = otherMonth.textContent.trim()
+    const chosenLabel = otherMonth.textContent?.trim()
 
     await userEvent.click(screen.getByRole('tab', { name: 'usage.tabs.breakdown' }))
     await userEvent.click(screen.getByRole('tab', { name: 'usage.tabs.kpis' }))
 
-    expect(screen.getAllByRole('button')[0].textContent.trim()).toBe(chosenLabel)
+    expect(screen.getAllByRole('button')[0].textContent?.trim()).toBe(chosenLabel)
   })
 })

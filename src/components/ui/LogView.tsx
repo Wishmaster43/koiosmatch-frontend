@@ -7,14 +7,13 @@
  */
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Download } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import DataTable from '@/components/ui/DataTable'
 import type { Column, RowId } from '@/components/ui/DataTable'
 import { escapeCsvCell } from '@/lib/csv'
 import { toLocalIsoDate } from '@/lib/localDate'
 import CalloutBox from '@/components/ui/CalloutBox'
-import Button from '@/components/ui/Button'
+import LogCountToolbar from './LogCountToolbar'
 
 export interface LogExportCol<Row> { header: string; value: (row: Row) => string }
 
@@ -68,14 +67,9 @@ export default function LogView<Row>({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Toolbar — count + export (search/filters live in the right panel). */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flexShrink: 0 }}>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-          {loading ? t('audit.loading') : t('audit.countSummary', { shown: rows.length, total: totalCount ?? rows.length })}
-        </p>
-        <Button variant="secondary" size="sm" onClick={exportCsv} disabled={rows.length === 0}>
-          <Download size={13} /> {t('audit.export')}
-        </Button>
-      </div>
+      <LogCountToolbar loading={loading} shown={rows.length} total={totalCount ?? rows.length}
+        onExport={exportCsv} exportDisabled={rows.length === 0} />
+
 
       {error && (
         <div style={{ marginBottom: 12 }}>

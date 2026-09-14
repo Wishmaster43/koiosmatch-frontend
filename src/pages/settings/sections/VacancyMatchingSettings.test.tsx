@@ -13,7 +13,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
-import api from '@/lib/api'
+import apiClient from '@/lib/api'
 import VacancyMatchingSettings from './VacancyMatchingSettings'
 import { mapRoles } from './vacancyMatchingRoles'
 
@@ -24,10 +24,10 @@ vi.mock('@/lib/api', async () => {
 })
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
 vi.mock('@tanstack/react-query', async (importOriginal) => {
-  const actual = await importOriginal()
+  const actual = await importOriginal<typeof import('@tanstack/react-query')>()
   return {
     ...actual,
-    useQuery: vi.fn((config) => {
+    useQuery: vi.fn((config: { queryKey: unknown[] }) => {
       // Mock roles query to return recruiter and admin roles.
       if (config.queryKey[0] === 'roles') {
         return {
@@ -44,13 +44,16 @@ vi.mock('@tanstack/react-query', async (importOriginal) => {
   }
 })
 
+// The mocked axios instance, typed as its three mocked methods.
+const api = apiClient as unknown as { get: ReturnType<typeof vi.fn>; post: ReturnType<typeof vi.fn>; put: ReturnType<typeof vi.fn> }
+
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
-const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
+const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 
 // The two GETs the screen makes, in their measured shapes: the matching object under
 // the usual {data} envelope, the flat settings map with the matching row as a STRING.
-function mockGets({ matching = { strictness: 'balanced', approval_mode: 'on_deviation' }, flat = {} } = {}) {
-  api.get.mockImplementation((url) => {
+function mockGets({ matching = { strictness: 'balanced', approval_mode: 'on_deviation' }, flat = {} }: { matching?: { strictness: string; approval_mode: string }; flat?: Record<string, unknown> } = {}) {
+  api.get.mockImplementation((url: string) => {
     if (url === '/settings/matching') return Promise.resolve({ data: { data: matching } })
     if (url === '/settings') return Promise.resolve({ data: { matching: JSON.stringify(matching), ...flat } })
     return Promise.reject(new Error(`unexpected GET ${url}`))
@@ -123,8 +126,8 @@ describe('VacancyMatchingSettings', () => {
     render(<VacancyMatchingSettings />)
     await waitFor(() => expect(screen.getByText(st('matching.approval.title'))).toBeInTheDocument())
 
-    const active = screen.getByText(st('matching.approval.always')).closest('[role="radio"]')
-    const inactive = screen.getByText(st('matching.approval.off')).closest('[role="radio"]')
+    const active = screen.getByText(st('matching.approval.always')).closest('[role="radio"]') as HTMLElement
+    const inactive = screen.getByText(st('matching.approval.off')).closest('[role="radio"]') as HTMLElement
     expect(active.style.background).toBe('var(--color-success-bg)')
     expect(active.style.border).toBe('1px solid var(--color-success)')
     expect(inactive.style.background).toBe('var(--surface)')
@@ -168,7 +171,7 @@ describe('VacancyMatchingSettings', () => {
   // SMZ-03: an unusable matching row (the flat STRING, or nothing) must block Save —
   // otherwise the hardcoded defaults get written over the tenant's real setting.
   it('blocks Save with a load error when /settings/matching does not yield an object', async () => {
-    api.get.mockImplementation((url) => {
+    api.get.mockImplementation((url: string) => {
       if (url === '/settings/matching') return Promise.resolve({ data: { data: '{"strictness":"strict"}' } })
       return Promise.resolve({ data: {} })
     })

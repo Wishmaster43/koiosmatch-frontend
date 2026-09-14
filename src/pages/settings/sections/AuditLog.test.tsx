@@ -18,12 +18,14 @@ vi.mock('@/lib/api', async () => {
   return { ...actual, default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }
 })
 import api from '@/lib/api'
+// vi.mocked() gives the mocked-module factory's plain vi.fn()s their real Mock typing at every call site.
+const mockedApi = vi.mocked(api, true)
 
 // Mock settings with controllable return value.
 const mockSettings = vi.fn(() => ({}))
 vi.mock('@/lib/settings/useAllSettings', () => ({
   useAllSettings: () => mockSettings(),
-  getNumberSetting: (values, key, fallback) => {
+  getNumberSetting: (values: Record<string, unknown> | null | undefined, key: string, fallback: number) => {
     const raw = values?.[key]
     if (raw == null) return fallback
     const n = typeof raw === 'number' ? raw : Number(raw)
@@ -31,7 +33,7 @@ vi.mock('@/lib/settings/useAllSettings', () => ({
   },
 }))
 
-const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
+const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 
 function renderAuditLog() {
   return render(<RightPanelProvider><AuditLog /></RightPanelProvider>)
@@ -45,7 +47,7 @@ afterEach(() => {
 // A promise the test controls the resolution timing of, so a language switch
 // can be simulated WHILE the request is still in flight.
 function deferred() {
-  let resolve
+  let resolve: (value: unknown) => void = () => {}
   const promise = new Promise(res => { resolve = res })
   return { promise, resolve }
 }
@@ -68,7 +70,7 @@ describe('AuditLog — request seam', () => {
   // the human causer_name on the central audit surface.
   it('renders actor_label instead of causer_name when the feed carries both', async () => {
     mockSettings.mockReturnValue({})
-    api.get.mockResolvedValue({ data: { data: [{
+    mockedApi.get.mockResolvedValue({ data: { data: [{
       id: 1, description: 'updated', log_name: 'candidate',
       causer_name: 'Danny Polak', actor_label: 'Vacature Flow-KoiosAI',
       created_at: '2026-08-01T10:00:00Z',
@@ -80,18 +82,18 @@ describe('AuditLog — request seam', () => {
 
   it('GETs /activity-log with the default per_page limit (200) when no setting is configured', async () => {
     mockSettings.mockReturnValue({})
-    api.get.mockResolvedValue({ data: [] })
+    mockedApi.get.mockResolvedValue({ data: [] })
     await act(async () => { renderAuditLog() })
     // THE SEAM: exact route and per_page param from tenant settings default (activity_log_limit=200).
-    expect(api.get).toHaveBeenCalledWith('/activity-log', { params: { per_page: 200 } })
+    expect(mockedApi.get).toHaveBeenCalledWith('/activity-log', { params: { per_page: 200 } })
   })
 
   it('GETs /activity-log with the custom per_page limit when activity_log_limit is configured', async () => {
     mockSettings.mockReturnValue({ activity_log_limit: 50 })
-    api.get.mockResolvedValue({ data: [] })
+    mockedApi.get.mockResolvedValue({ data: [] })
     await act(async () => { renderAuditLog() })
     // THE SEAM: passes the tenant-configured activity_log_limit as per_page.
-    expect(api.get).toHaveBeenCalledWith('/activity-log', { params: { per_page: 50 } })
+    expect(mockedApi.get).toHaveBeenCalledWith('/activity-log', { params: { per_page: 50 } })
   })
 })
 
@@ -99,25 +101,25 @@ describe('AuditLog — activity-log fetch does not re-run on language switch', (
   it('calls /activity-log exactly once even if the language changes while the request is pending', async () => {
     mockSettings.mockReturnValue({})
     const { promise, resolve } = deferred()
-    api.get.mockReturnValue(promise)
+    mockedApi.get.mockReturnValue(promise)
 
     await act(async () => { renderAuditLog() })
-    expect(api.get).toHaveBeenCalledTimes(1)
+    expect(mockedApi.get).toHaveBeenCalledTimes(1)
 
     // Switch language while the fetch is still pending — this used to re-run
     // the effect (dep on `t`) and fire a second, racing request.
     await act(async () => { await i18n.changeLanguage('en') })
-    expect(api.get).toHaveBeenCalledTimes(1)
+    expect(mockedApi.get).toHaveBeenCalledTimes(1)
 
     await act(async () => { resolve({ data: [] }); await flushMicrotasks() })
     expect(screen.getByText(st('audit.noEntries'))).toBeInTheDocument()
     // Still exactly one call after the response lands.
-    expect(api.get).toHaveBeenCalledTimes(1)
+    expect(mockedApi.get).toHaveBeenCalledTimes(1)
   })
 
   it('shows the translated unavailable message in whatever language is active when the request fails, even without `t` in the deps', async () => {
     mockSettings.mockReturnValue({})
-    api.get.mockRejectedValue(new Error('network down'))
+    mockedApi.get.mockRejectedValue(new Error('network down'))
     await act(async () => {
       renderAuditLog()
       await flushMicrotasks()
@@ -130,7 +132,7 @@ describe('AuditLog — unmounting before the fetch resolves does not throw', () 
   it('drops a response that arrives after unmount instead of updating state', async () => {
     mockSettings.mockReturnValue({})
     const { promise, resolve } = deferred()
-    api.get.mockReturnValue(promise)
+    mockedApi.get.mockReturnValue(promise)
 
     const { unmount } = renderAuditLog()
     unmount()

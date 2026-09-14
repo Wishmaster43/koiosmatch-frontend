@@ -18,6 +18,14 @@ import RecentJobsTab from './RecentJobsTab'
 import FailedJobsTab from './FailedJobsTab'
 import MetricsTab from './MetricsTab'
 import { PageTitle } from '@/components/ui/typography'
+import type { QueueSummary } from './jobsApi'
+
+// useQueueSummary is still a plain .js hook (untyped); its shape matches jobsApi's own QueueSummary.
+interface UseQueueSummaryResult {
+  summary: QueueSummary | null
+  phase: 'loading' | 'ready' | 'error'
+  refetch: () => void
+}
 
 // TAAKBEHEER-HORIZON-1 fase 1: Recent = Horizon's zojuist-verwerkte jobs per tenant.
 // TAAKBEHEER-HORIZON-1 fase 2: Metrics = Horizon's snapshotted throughput/runtime.
@@ -27,7 +35,7 @@ const TABS = ['overview', 'recent', 'jobs', 'failed', 'metrics']
 export default function JobQueueSettings() {
   const { t } = useTranslation('settings')
   const [tab, setTab] = useState('overview')
-  const { summary, phase, refetch } = useQueueSummary()
+  const { summary, phase, refetch } = useQueueSummary() as UseQueueSummaryResult
 
   const tabs = TABS.map(id => ({ id, label: t(`jobs.tab.${id}`) }))
 

@@ -23,6 +23,7 @@
  * there is no clear path to mirror here.
  */
 import { useState, useEffect } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Trash2, Pencil } from 'lucide-react'
 import Spinner from '@/components/ui/Spinner'
@@ -34,23 +35,48 @@ import { DragList, DefaultToggle } from '../components/SettingsControls'
 import LookupValueMark from './LookupValueMark'
 import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIcons'
 import { FALLBACK_SWATCH } from './statusListEditorTypes'
-import CandidateLookupItemModal from './CandidateLookupItemModal'
+import { type CandidateLookupFlags, slugify } from './candidateLookupFlags'
+import CandidateLookupItemModal, { type LookupModalState } from './CandidateLookupItemModal'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import Button from '@/components/ui/Button'
 import { Caption, BodyText } from '@/components/ui/typography'
 
 const BASE = '/settings/candidate-lookups'
 
-// "Niet actief" → "niet_actief" — a stable English-ish slug suggestion.
-const slugify = (s) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
+// One row of a candidate lookup (contract form / funnel stage / phase / status) as
+// the combined endpoint returns it — a superset of every per-type flag, since only
+// the flags matching the active block's type are ever populated by the backend.
+export interface LookupItem extends CandidateLookupFlags {
+  id: string | number
+  value: string
+  label: string
+  color?: string | null
+  icon?: string | null
+  is_default?: boolean
+  in_use?: boolean
+  is_used?: boolean
+  locked?: boolean
+  usage_count?: number
+  candidates_count?: number
+}
+
+// Props for one lookup list block (contract forms / funnel stages / statuses / phases).
+interface LookupBlockProps {
+  slug: string
+  title: string
+  subtitle: string
+  items: LookupItem[]
+  setItems: Dispatch<SetStateAction<LookupItem[]>>
+  readOnly?: boolean
+}
 
 // One lookup list (contract forms / funnel stages / statuses) with inline CRUD.
-export function LookupBlock({ slug, title, subtitle, items, setItems, readOnly = false }) {
+export function LookupBlock({ slug, title, subtitle, items, setItems, readOnly = false }: LookupBlockProps) {
   const { t } = useTranslation('settings')
-  const [modal,    setModal]    = useState(null) // null | { mode, id?, value, label, color, is_applicant, requires_appointment }
+  const [modal,    setModal]    = useState<LookupModalState | null>(null)
   const [busy,     setBusy]     = useState(false)
-  const [deleting, setDeleting] = useState(null)
-  const [settingDefaultId, setSettingDefaultId] = useState(null)
+  const [deleting, setDeleting] = useState<string | number | null>(null)
+  const [settingDefaultId, setSettingDefaultId] = useState<string | number | null>(null)
   // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
   const { confirm, dialog } = useConfirm()
 
@@ -71,7 +97,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, readOnly =
   // eslint-disable-next-line no-restricted-syntax -- DATA: default swatch colour pre-filled for a newly created lookup row, not UI chrome
   const openAdd  = ()   => setModal({ mode: 'add',  value: '', label: '', color: '#3B8FD4', icon: null, requires_appointment: false, requires_reason: false, requires_match: false, expects_return_date: false, is_match: false, is_rejected: false, is_proposal: false, is_blacklist: false, is_applicant: false, customer_not_applicable: false, is_leave: false, is_unavailable: false, has_contract_lines: false })
   // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
-  const openEdit = (it) => setModal({ mode: 'edit', id: it.id, value: it.value, label: it.label, color: it.color ?? '#6B7280', icon: it.icon ?? null,
+  const openEdit = (it: LookupItem) => setModal({ mode: 'edit', id: it.id, value: it.value, label: it.label, color: it.color ?? '#6B7280', icon: it.icon ?? null,
     requires_appointment: it.requires_appointment === true, requires_reason: it.requires_reason === true,
     requires_match: it.requires_match === true, expects_return_date: it.expects_return_date === true,
     is_match: it.is_match === true, is_rejected: it.is_rejected === true,
@@ -85,10 +111,10 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, readOnly =
   // Persists the add/edit modal: creates or updates the lookup row, sending only the
   // per-type flag fields this lookup actually supports (the backend guards the rest).
   const save = async () => {
-    if (!modal.label.trim()) return
+    if (!modal || !modal.label.trim()) return
     setBusy(true)
     // Only send the flag that exists on this lookup; the backend guards the rest.
-    const flagFields = {
+    const flagFields: Partial<LookupItem> = {
       ...(supportsIcon  ? { icon: modal.icon || null } : {}),
       ...(isStatusBlock ? { requires_reason: modal.requires_reason, requires_match: modal.requires_match, expects_return_date: modal.expects_return_date, is_blacklist: modal.is_blacklist, is_leave: modal.is_leave, is_unavailable: modal.is_unavailable } : {}),
       ...(isFunnelBlock ? { requires_appointment: modal.requires_appointment, is_match: modal.is_match, is_rejected: modal.is_rejected, is_proposal: modal.is_proposal } : {}),
@@ -102,7 +128,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, readOnly =
     try {
       if (modal.mode === 'add') {
         const value = modal.value.trim() || slugify(modal.label)
-        const created = unwrap(await api.post(`${BASE}/${slug}`, { value, label: modal.label.trim(), color: modal.color, ...flagFields }))
+        const created = unwrap(await api.post(`${BASE}/${slug}`, { value, label: modal.label.trim(), color: modal.color, ...flagFields })) as LookupItem
         setItems(p => [...p, created])
       } else {
         await api.put(`${BASE}/${slug}/${modal.id}`, { label: modal.label.trim(), color: modal.color, ...flagFields })
@@ -113,7 +139,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, readOnly =
   }
 
   // In-row colour change: applies optimistically, reverts + notifies on failure.
-  const updateColor = async (it, color) => {
+  const updateColor = async (it: LookupItem, color: string) => {
     const previous = items
     setItems(p => p.map(x => x.id === it.id ? { ...x, color } : x))
     // Revert the optimistic colour on failure — otherwise the row keeps showing an
@@ -123,7 +149,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, readOnly =
   }
 
   // In-row icon change (statuses/contract forms) — same optimistic+revert shape as updateColor.
-  const updateIcon = async (it, icon) => {
+  const updateIcon = async (it: LookupItem, icon: string) => {
     const previous = items
     setItems(p => p.map(x => x.id === it.id ? { ...x, icon } : x))
     try { await api.put(`${BASE}/${slug}/${it.id}`, { label: it.label, color: it.color, icon }) }
@@ -133,7 +159,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, readOnly =
   // Singleton flip (funnel stages only): promote one stage to is_default and clear
   // every other row optimistically — mirrors the backend's model-enforced max-one
   // rule so the UI doesn't need a refetch. Roll back the local state on failure.
-  const setDefault = async (it) => {
+  const setDefault = async (it: LookupItem) => {
     if (it.is_default || settingDefaultId) return
     const previous = items
     setSettingDefaultId(it.id)
@@ -150,25 +176,25 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, readOnly =
   }
 
   // An item is protected when the backend marks it as referenced by existing data.
-  const inUse = (i) => Boolean(i.in_use ?? i.is_used ?? i.locked ?? ((i.usage_count ?? i.candidates_count ?? 0) > 0))
+  const inUse = (i: LookupItem) => Boolean(i.in_use ?? i.is_used ?? i.locked ?? ((i.usage_count ?? i.candidates_count ?? 0) > 0))
 
   // Confirms then deletes a lookup row; an in-use item is never sent (guarded above by
   // the caller's disabled state too) and a 409 from the backend flags it in_use instead
   // of silently failing.
-  const remove = (it) => {
+  const remove = (it: LookupItem) => {
     if (inUse(it)) return
     confirm(t('lookups.confirmDelete', { name: it.label }), async () => {
       setDeleting(it.id)
       // 409 = backend rejects deletion of an in-use item; keep the row and flag it.
       try { await api.delete(`${BASE}/${slug}/${it.id}`); setItems(p => p.filter(x => x.id !== it.id)) }
       catch (e) {
-        if (e?.response?.status === 409) setItems(p => p.map(x => x.id === it.id ? { ...x, in_use: true } : x))
+        if ((e as { response?: { status?: number } })?.response?.status === 409) setItems(p => p.map(x => x.id === it.id ? { ...x, in_use: true } : x))
       } finally { setDeleting(null) }
     }, { danger: true })
   }
 
   // Drag-reorder: applies the new order optimistically, reverts + notifies on failure.
-  const reorder = async (next) => {
+  const reorder = async (next: LookupItem[]) => {
     const previous = items
     setItems(next)
     // Revert the optimistic order on failure — otherwise the list shows an order
@@ -205,7 +231,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, readOnly =
         // tied to isPhaseBlock, NOT to readOnly (Danny 13-09: drag-reorder is
         // untouched by that ask; every other block here stays reorderable).
         sortable={!isPhaseBlock}
-        renderItem={(item) => (
+        renderItem={(item: LookupItem) => (
           <>
             {/* LOOKUP-ONE-ELEMENT-1 (Danny 10-09 23:20, rows 26/27/31: "Ik mis icon en
                 kleur"): one coloured mark per value — an icon in its own colour
@@ -306,9 +332,9 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, readOnly =
 
 // One candidate-lookup type rendered as its own settings tab. Each tab loads the
 // combined endpoint and renders only its slice, so the tabs stay independent.
-function CandidateLookupSection({ typeKey, slug, readOnly = false }) {
+function CandidateLookupSection({ typeKey, slug, readOnly = false }: { typeKey: string; slug: string; readOnly?: boolean }) {
   const { t } = useTranslation('settings')
-  const [items,   setItems]   = useState([])
+  const [items,   setItems]   = useState<LookupItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(false)
 
@@ -319,7 +345,7 @@ function CandidateLookupSection({ typeKey, slug, readOnly = false }) {
     setLoading(true)
     setError(false)
     api.get(BASE)
-      .then(r => { if (!alive) return; const d = unwrap(r) ?? {}; setItems(d[typeKey] ?? []) })
+      .then(r => { if (!alive) return; const d = (unwrap(r) ?? {}) as Record<string, LookupItem[]>; setItems(d[typeKey] ?? []) })
       .catch(() => { if (alive) setError(true) })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }

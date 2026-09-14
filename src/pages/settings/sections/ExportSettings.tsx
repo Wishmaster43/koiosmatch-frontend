@@ -18,12 +18,24 @@ import {
   StickyNote, MessageSquare, FileText, FolderArchive,
 } from 'lucide-react'
 import api from '@/lib/api'
+import { triggerBlobDownload } from '@/lib/downloadBlob'
 import { useAuth } from '@/context/AuthContext'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import { PageTitle } from '@/components/ui/typography'
+import SubNavButton from '../components/SubNavButton'
+import type { LucideIcon } from 'lucide-react'
+
+// One exportable entity: its nav icon, the base export route (extension appended
+// per-format) and the view/export permission that gates its buttons.
+interface ExportEntity {
+  id: string
+  icon: LucideIcon
+  base: string
+  permission: string
+}
 
 // Entity → icon + its export route + the view-permission that gates it (mirrors
 // routes/api/tenant/exports.php exactly). "Leads" = candidates in a Lead phase,
@@ -32,7 +44,7 @@ import { PageTitle } from '@/components/ui/typography'
 // from Sidebar.jsx NAV_ITEMS; contacts/locations/departments from their customer-drawer
 // row icon + Add<Entity>Modal header (ContactsPanel.tsx/AddContactPersonModal.tsx,
 // LocationsTab.tsx/AddLocationModal.tsx, DepartmentsPanel.tsx/AddDepartmentModal.tsx).
-const ENTITIES = [
+const ENTITIES: ExportEntity[] = [
   { id: 'candidates', icon: Users, base: '/exports/candidates', permission: 'candidates.view' },
   { id: 'applications', icon: ClipboardList, base: '/exports/applications', permission: 'applications.view' },
   { id: 'vacancies', icon: Briefcase, base: '/exports/vacancies', permission: 'vacancies.view' },
@@ -62,7 +74,7 @@ const ENTITIES = [
 // streamDownload default). Only visible on a same-origin response — the API's
 // cors.php currently exposes no headers cross-origin (see Self-Audit) — so this
 // is a "use it when present" nicety, never the only path to a filename.
-function parseFilename(header) {
+function parseFilename(header?: string | null): string | null {
   if (!header) return null
   const match = /filename\*?=(?:UTF-8''|")?([^";]+)"?/i.exec(header)
   return match ? decodeURIComponent(match[1]) : null
@@ -70,9 +82,9 @@ function parseFilename(header) {
 
 // Client-side fallback filename, matching the backend's OWN convention exactly
 // (`{entity}-YYYY-MM-DD-HHmm.csv`, see ExportController::streamCsv).
-function fallbackFilename(entityId, ext) {
+function fallbackFilename(entityId: string, ext: string): string {
   const now = new Date()
-  const pad = (n) => String(n).padStart(2, '0')
+  const pad = (n: number) => String(n).padStart(2, '0')
   const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}`
   return `${entityId}-${stamp}.${ext}`
 }
@@ -82,27 +94,22 @@ function fallbackFilename(entityId, ext) {
  * GET through the shared axios client (cookie + CSRF already attached), never a
  * bare `<a href>` navigation (that would skip the client's auth handling).
  */
-export async function downloadCsv(route, entityId) {
+export async function downloadCsv(route: string, entityId: string) {
   const res = await api.get(route, { responseType: 'blob' })
   // FORMATEN (31-08): the same helper streams both twins — extension follows the route.
   const ext = route.endsWith('.xlsx') ? 'xlsx' : 'csv'
   const filename = parseFilename(res.headers?.['content-disposition']) ?? fallbackFilename(entityId, ext)
-  const url = URL.createObjectURL(res.data)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
+  triggerBlobDownload(res.data, filename)
 }
 
 // Per-entity CSV export screen, each button gated on the same view-permission its list uses since exporting is bulk reading (see file header).
 export default function ExportSettings() {
   const { t } = useTranslation('settings')
-  const { hasPermission } = useAuth()
+  // Settings routes only render once authenticated — auth is never null here in
+  // practice, but hasPermission stays a safe no-op if it ever were.
+  const hasPermission = useAuth()?.hasPermission ?? (() => false)
   const [selected, setSelected] = useState(ENTITIES[0].id)
-  const [pendingId, setPendingId] = useState(null)
+  const [pendingId, setPendingId] = useState<string | null>(null)
   // TRANSFER-FAMILIES ZIP: the real files ride a QUEUED build (too heavy for a
   // direct download) — this requests it; the bell later delivers the signed URL.
   const [zipPending, setZipPending] = useState(false)
@@ -114,8 +121,9 @@ export default function ExportSettings() {
     } catch (err) {
       // A 422 carries the server's own honest reason (build already running, or
       // the >5000-files/2GB refusal) — prefer it over a generic key (K-236 ZIP).
-      const serverMsg = err?.response?.status === 422 ? extractApiError(err) : null
-      notifyError(serverMsg || t(err?.response?.status === 422 ? 'export.zipAlreadyRunning' : 'export.error'))
+      const status = (err as { response?: { status?: number } })?.response?.status
+      const serverMsg = status === 422 ? extractApiError(err, t('export.zipAlreadyRunning')) : null
+      notifyError(serverMsg || t(status === 422 ? 'export.zipAlreadyRunning' : 'export.error'))
     } finally {
       setZipPending(false)
     }
@@ -124,12 +132,13 @@ export default function ExportSettings() {
   // Trigger one entity's export; a 429 (rate limit) gets its own message, any
   // other failure a generic one — never a raw server string (§10).
   // One handler for both format twins (identical permissions, extension differs).
-  const handleExport = async (entity, ext) => {
+  const handleExport = async (entity: ExportEntity, ext: string) => {
     setPendingId(`${entity.id}.${ext}`)
     try {
       await downloadCsv(`${entity.base}.${ext}`, entity.id)
     } catch (err) {
-      notifyError(t(err?.response?.status === 429 ? 'export.rateLimited' : 'export.error'))
+      const status = (err as { response?: { status?: number } })?.response?.status
+      notifyError(t(status === 429 ? 'export.rateLimited' : 'export.error'))
     } finally {
       setPendingId(null)
     }
@@ -147,22 +156,10 @@ export default function ExportSettings() {
     <div style={{ display: 'flex', gap: 0, minHeight: 400 }}>
       {/* Sub-nav — one entity per row (mirrors Importeren's type list). */}
       <div style={{ width: 200, flexShrink: 0, borderRight: '1px solid var(--border)', paddingRight: 16, marginRight: 32 }}>
-        {ENTITIES.map(e => {
-          const EIcon = e.icon
-          const active = e.id === selected
-          return (
-            <button key={e.id} onClick={() => setSelected(e.id)}
-              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px',
-                       borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 13, textAlign: 'left',
-                       fontWeight: active ? 600 : 400, marginBottom: 2,
-                       background: active ? 'var(--color-primary-bg)' : 'transparent',
-                       // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-                       color: active ? 'var(--color-primary-text)' : 'var(--text)' }}>
-              <EIcon size={14} style={{ color: active ? 'var(--color-primary-text)' : 'var(--text-muted)' }} />
-              {t(`export.entities.${e.id}.title`)}
-            </button>
-          )
-        })}
+        {ENTITIES.map(e => (
+          <SubNavButton key={e.id} icon={e.icon} active={e.id === selected}
+            onClick={() => setSelected(e.id)} label={t(`export.entities.${e.id}.title`)} />
+        ))}
       </div>
 
       {/* Content — header + a card whose action sits on the right (mirrors Importeren). */}

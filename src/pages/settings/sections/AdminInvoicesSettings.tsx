@@ -14,8 +14,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download, FileSpreadsheet, RefreshCw, Send } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
+import { triggerBlobDownload } from '@/lib/downloadBlob'
 import { useNumberFormat } from '@/lib/formatters'
-import { useLocale, formatMonthYear } from '@/lib/datetime'
+import { useLocale, buildLast12Months } from '@/lib/datetime'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import StatusPill from '@/components/ui/StatusPill'
@@ -30,31 +31,12 @@ const th = thBase as CSSProperties
 const td = tdBase as CSSProperties
 const numCell = numCellBase as CSSProperties
 
-// Last 12 months as { value: 'YYYY-MM', label } — newest first (mirrors TenantUsageSettings).
-// Uses shared formatMonthYear helper so the month name follows the active UI language (§5).
-function buildMonths(locale: string) {
-  return Array.from({ length: 12 }, (_, i) => {
-    const d = new Date()
-    d.setDate(1)
-    d.setMonth(d.getMonth() - i)
-    const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-    const label = formatMonthYear(d, locale)
-    return { value, label }
-  })
-}
 
 // Stream a blob response to disk via a temporary object URL (never a bare <a
 // href> navigation) — the download URL itself is never logged, only the id (§8).
 async function downloadBlob(route: string, params: Record<string, string>, filename: string) {
   const res = await api.get(route, { params, responseType: 'blob' })
-  const url = URL.createObjectURL(res.data)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
+  triggerBlobDownload(res.data, filename)
 }
 
 // The super-admin invoice console: month picker
@@ -64,7 +46,7 @@ export default function AdminInvoicesSettings() {
   const { formatCurrency } = useNumberFormat()
   const locale = useLocale()
   // Rebuilds the 12-month picker options only when the active locale changes.
-  const months = useMemo(() => buildMonths(locale), [locale])
+  const months = useMemo(() => buildLast12Months(locale), [locale])
   const [month, setMonth] = useState(months[0].value)
   const [invoices, setInvoices] = useState<AdminInvoice[]>([])
   const [phase, setPhase] = useState<'loading' | 'error' | 'empty' | 'ready'>('loading')

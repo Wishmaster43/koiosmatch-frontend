@@ -17,40 +17,31 @@ import { Mono, GroupLabel, SectionTitle, BodyText } from '@/components/ui/typogr
 import { useNumberFormat } from '@/lib/formatters'
 import { card } from './usageCardStyles'
 import { fieldSelectStyle } from '@/components/forms/fieldMetrics'
-import AdminSubscriptionCard from './usage/AdminSubscriptionCard'
+import AdminSubscriptionCard, { type AdminSubscription } from './usage/AdminSubscriptionCard'
 // App-wide active locale (DATUM-1/LANE-B) — feeds the month-picker labels.
-import { useLocale } from '@/lib/datetime'
+import { useLocale, buildLast12Months } from '@/lib/datetime'
+import type { AdminTenantUsage } from '@/types/billingUsage'
 
 // Connector key → brand label (proper nouns, not translatable).
-const CONNECTOR_LABELS = { sm: 'Shiftmanager', hf: 'HelloFlex', intus: 'Intus', elanza: 'Elanza', aelio: 'Aelio' }
+const CONNECTOR_LABELS: Record<string, string> = { sm: 'Shiftmanager', hf: 'HelloFlex', intus: 'Intus', elanza: 'Elanza', aelio: 'Aelio' }
 
-// Build the last 12 months as { value: 'YYYY-MM', label } — newest first.
-// `locale` is required (a pure module-scope helper never hardcodes nl-NL).
-function buildMonths(locale) {
-  return Array.from({ length: 12 }, (_, i) => {
-    const d = new Date()
-    d.setDate(1)
-    d.setMonth(d.getMonth() - i)
-    const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-    const label = d.toLocaleDateString(locale, { month: 'long', year: 'numeric' })
-    return { value, label }
-  })
-}
+type Phase = 'loading' | 'ready' | 'error'
+type SubTab = 'kpis' | 'monthly' | 'breakdown'
 
 // Usage screen for the active tenant only (see the module doc above): the month selector browses history, never an all-tenants list.
 export default function TenantUsageSettings() {
   const { t } = useTranslation('settings')
   const { formatNumber } = useNumberFormat()
-  const { activeTenant } = useAuth()
+  const activeTenant = useAuth()?.activeTenant ?? null
   const locale = useLocale()
   // Rebuilt only when the app locale changes (§9: never a fresh array per render).
-  const months = useMemo(() => buildMonths(locale), [locale])
+  const months = useMemo(() => buildLast12Months(locale), [locale])
   const [month, setMonth] = useState(months[0].value) // current month by default
-  const [usage, setUsage] = useState(null)
-  const [phase, setPhase] = useState('loading') // loading | ready | error
+  const [usage, setUsage] = useState<AdminTenantUsage | null>(null)
+  const [phase, setPhase] = useState<Phase>('loading')
   // SA-USAGE-SUBTABS-1: which of the three groups is on screen. Shared state
   // (tenant/month) stays above the tabs, so switching tabs resets nothing.
-  const [subTab, setSubTab] = useState('kpis')
+  const [subTab, setSubTab] = useState<SubTab>('kpis')
 
   // Fetch the ACTIVE tenant's usage for the selected month — refetch on tenant or month change.
   useEffect(() => {
@@ -58,7 +49,7 @@ export default function TenantUsageSettings() {
     const ctrl = new AbortController()
     setPhase('loading')
     api.get(`/admin/tenants/${activeTenant.id}/usage`, { params: { month }, signal: ctrl.signal })
-      .then(res => { setUsage(unwrap(res) ?? {}); setPhase('ready') })
+      .then(res => { setUsage(unwrap<AdminTenantUsage>(res) ?? {}); setPhase('ready') })
       .catch(() => setPhase('error'))
     return () => ctrl.abort()
   }, [activeTenant?.id, month])
@@ -111,7 +102,7 @@ export default function TenantUsageSettings() {
           SubTabBar idiom as ModulesSettings (MODULES-SUBTABS-1). Tenant/month
           selection stays above the tabs, so switching tabs resets nothing. */}
       <div style={{ marginBottom: 20 }}>
-        <SubTabBar active={subTab} onChange={setSubTab} tabs={[
+        <SubTabBar active={subTab} onChange={(id: string) => setSubTab(id as SubTab)} tabs={[
           { id: 'kpis', label: t('usage.tabs.kpis') },
           { id: 'monthly', label: t('usage.tabs.monthly') },
           { id: 'breakdown', label: t('usage.tabs.breakdown') },
@@ -137,7 +128,8 @@ export default function TenantUsageSettings() {
             {/* BILLING-FACTUUR-1: the subscription split (package · users · add-ons
                 · total) straight from the usage payload; renders nothing on an
                 older BE without the block. */}
-            <AdminSubscriptionCard subscription={usage?.subscription} />
+            {/* `subscription` (BILLING-FACTUUR-1, BE d6629eb4) is not yet on the shared AdminTenantUsage type — hand-cast here rather than widening that shared type from this touch. */}
+            <AdminSubscriptionCard subscription={(usage as (AdminTenantUsage & { subscription?: AdminSubscription | null }) | null)?.subscription} />
 
             {/* Connectors (per connector — for invoicing), a real card. */}
             <div style={card}>

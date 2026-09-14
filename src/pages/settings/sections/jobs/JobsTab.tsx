@@ -10,7 +10,32 @@ import JobsFilterBar from './JobsFilterBar'
 import JobsTableFrame from './JobsTableFrame'
 import { jobColumns } from './jobColumns'
 
-const STATE_COLOR = { pending: 'var(--text-muted)', reserved: 'var(--color-warning)' }
+const STATE_COLOR: Record<string, string> = { pending: 'var(--text-muted)', reserved: 'var(--color-warning)' }
+
+// useJobsList is still a plain .js hook (untyped) — its actual return shape, used to cast below.
+interface UseJobsListResult {
+  filters: { queue: string; tenant: string; status: string }
+  setFilter: (key: string, value: string) => void
+  page: number
+  setPage: (updater: number | ((p: number) => number)) => void
+  result: { rows: PendingJobRow[]; total: number; page: number; lastPage: number }
+  phase: 'loading' | 'ready' | 'error'
+  cancel: (id: string) => void
+  cancelError: { id: string; message: string | null } | null
+  setCancelError: (v: null) => void
+}
+
+// One row of the pending/reserved backlog table (JobRow + the job-specific extras).
+interface PendingJobRow {
+  id: string
+  queue?: string
+  tenant_id?: string
+  job?: string
+  attempts?: number
+  created_at?: string
+  reserved_at?: string | null
+  runtime_seconds?: number
+}
 
 /**
  * JobsTab — Taakbeheer → Taken: the live pending/reserved backlog, filterable by
@@ -21,22 +46,22 @@ const STATE_COLOR = { pending: 'var(--text-muted)', reserved: 'var(--color-warni
  */
 export default function JobsTab() {
   const { t } = useTranslation('settings')
-  const { filters, setFilter, page, setPage, result, phase, cancel, cancelError, setCancelError } = useJobsList()
+  const { filters, setFilter, page, setPage, result, phase, cancel, cancelError, setCancelError } = useJobsList() as UseJobsListResult
 
   // Shared columns (queue, tenant, job) + tab-specific columns.
   const columns = [
     ...jobColumns(t),
-    { key: 'attempts', header: t('jobs.col.attempts'), align: 'right' },
-    { key: 'created_at', header: t('jobs.col.createdAt'), nowrap: true, render: (r) => formatDT(r.created_at) },
+    { key: 'attempts', header: t('jobs.col.attempts'), align: 'right' as const },
+    { key: 'created_at', header: t('jobs.col.createdAt'), nowrap: true, render: (r: PendingJobRow) => formatDT(r.created_at) },
     { key: 'state', header: t('jobs.col.status'), nowrap: true,
-      render: (r) => {
+      render: (r: PendingJobRow) => {
         const state = r.reserved_at ? 'reserved' : 'pending'
         return <StatusPill label={t(`jobs.state.${state}`)} color={STATE_COLOR[state]} />
       } },
-    { key: 'runtime', header: t('jobs.col.runtime'), align: 'right', nowrap: true,
-      render: (r) => r.reserved_at ? formatDuration((r.runtime_seconds ?? 0) * 1000) : '—' },
-    { key: 'actions', header: t('jobs.col.actions'), align: 'right', nowrap: true,
-      render: (r) => r.reserved_at ? null : (
+    { key: 'runtime', header: t('jobs.col.runtime'), align: 'right' as const, nowrap: true,
+      render: (r: PendingJobRow) => r.reserved_at ? formatDuration((r.runtime_seconds ?? 0) * 1000) : '—' },
+    { key: 'actions', header: t('jobs.col.actions'), align: 'right' as const, nowrap: true,
+      render: (r: PendingJobRow) => r.reserved_at ? null : (
         <Button variant="dangerSoft" size="sm" onClick={() => cancel(r.id)}>{t('jobs.cancel')}</Button>
       ) },
   ]
@@ -77,7 +102,7 @@ export default function JobsTab() {
         </div>
       )}
 
-      <JobsTableFrame phase={phase} columns={columns} rows={result.rows} emptyText={t('jobs.empty')} getRowId={(r) => r.id} />
+      <JobsTableFrame phase={phase} columns={columns} rows={result.rows as PendingJobRow[]} emptyText={t('jobs.empty')} getRowId={(r: PendingJobRow) => r.id} />
 
       {/* Pagination — server-paginated (max 100/page; we ask for 25). A simple
           prev/next (no page-size picker) doesn't fit the shared PaginationBar's

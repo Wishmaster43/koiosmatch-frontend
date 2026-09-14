@@ -9,6 +9,8 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
+// vi.mocked() gives the mocked-module factory's plain vi.fn()s their real Mock typing at every call site.
+const mockedApi = vi.mocked(api, true)
 import { tintBg } from '@/lib/tint'
 import { FunnelStagesSettings, ContractFormsSettings, CandidateStatusesSettings, CandidatePhasesSettings } from './CandidateLookupsSettings'
 
@@ -18,7 +20,7 @@ vi.mock('@/lib/api', async () => {
 })
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
-const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
+const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 
 // eslint-disable-next-line no-restricted-syntax -- DATA: a fixture funnel stage's tenant-picked colour, not a style rule.
 const stage = (over = {}) => ({ id: 'f1', value: 'applied', label: 'Gesolliciteerd', color: '#3B8FD4', is_default: false, ...over })
@@ -27,7 +29,7 @@ afterEach(() => vi.clearAllMocks())
 
 describe('CandidateLookupsSettings — funnel stage default singleton', () => {
   it('shows the DefaultToggle on funnel stages, with the seeded default disabled', async () => {
-    api.get.mockResolvedValue({ data: {
+    mockedApi.get.mockResolvedValue({ data: {
       funnel_types: [stage({ id: 'f1', label: 'Gesolliciteerd', is_default: true }), stage({ id: 'f2', label: 'Aangenomen', value: 'hired' })],
     } })
     render(<FunnelStagesSettings />)
@@ -38,17 +40,17 @@ describe('CandidateLookupsSettings — funnel stage default singleton', () => {
   })
 
   it('promoting a funnel stage PUTs is_default:true and clears the previous default optimistically', async () => {
-    api.get.mockResolvedValue({ data: {
+    mockedApi.get.mockResolvedValue({ data: {
       funnel_types: [stage({ id: 'f1', label: 'Gesolliciteerd', is_default: true }), stage({ id: 'f2', label: 'Aangenomen', value: 'hired' })],
     } })
-    api.put.mockResolvedValue({ data: {} })
+    mockedApi.put.mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<FunnelStagesSettings />)
 
     await screen.findByText('Aangenomen')
     await user.click(screen.getByRole('button', { name: st('common.setDefault') }))
 
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+    await waitFor(() => expect(mockedApi.put).toHaveBeenCalledWith(
       '/settings/candidate-lookups/funnel-types/f2', expect.objectContaining({ is_default: true })))
     await waitFor(() => expect(screen.getAllByRole('button', { name: st('common.default') })).toHaveLength(1))
   })
@@ -56,10 +58,10 @@ describe('CandidateLookupsSettings — funnel stage default singleton', () => {
   // Audit r4: a failed default-flip must revert AND tell the user (the revert
   // alone read as "saved" — the siblings updateColor/reorder already notify).
   it('reverts the default flip and notifies when the PUT fails', async () => {
-    api.get.mockResolvedValue({ data: {
+    mockedApi.get.mockResolvedValue({ data: {
       funnel_types: [stage({ id: 'f1', label: 'Gesolliciteerd', is_default: true }), stage({ id: 'f2', label: 'Aangenomen', value: 'hired' })],
     } })
-    api.put.mockRejectedValue(new Error('network down'))
+    mockedApi.put.mockRejectedValue(new Error('network down'))
     const { notifyError } = await import('@/lib/notify')
     const user = userEvent.setup()
     render(<FunnelStagesSettings />)
@@ -77,10 +79,10 @@ describe('CandidateLookupsSettings — funnel stage default singleton', () => {
   // (application_stages carries icon/color on the backend), and picking an icon
   // PATCHes {icon} through PUT /settings/candidate-lookups/funnel-types/{id}.
   it('renders the icon-and-colour mark and picking an icon PUTs {icon}', async () => {
-    api.get.mockResolvedValue({ data: {
+    mockedApi.get.mockResolvedValue({ data: {
       funnel_types: [stage({ id: 'f1', label: 'Gesolliciteerd', is_default: true })],
     } })
-    api.put.mockResolvedValue({ data: {} })
+    mockedApi.put.mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<FunnelStagesSettings />)
 
@@ -90,12 +92,12 @@ describe('CandidateLookupsSettings — funnel stage default singleton', () => {
     const iconCell = (await screen.findAllByRole('menuitem'))[0]
     await user.click(iconCell)
 
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+    await waitFor(() => expect(mockedApi.put).toHaveBeenCalledWith(
       '/settings/candidate-lookups/funnel-types/f1', expect.objectContaining({ icon: expect.any(String) })))
   })
 
   it('does not render the DefaultToggle on the contract-forms (candidate_types) block', async () => {
-    api.get.mockResolvedValue({ data: {
+    mockedApi.get.mockResolvedValue({ data: {
       // eslint-disable-next-line no-restricted-syntax -- DATA: a fixture contract-form's tenant-picked colour, not a style rule.
       candidate_types: [{ id: 'c1', value: 'zzp', label: 'ZZP', color: '#3B8FD4' }],
     } })
@@ -108,7 +110,7 @@ describe('CandidateLookupsSettings — funnel stage default singleton', () => {
 
   // 04-08 decision: phases stays add/remove-locked, but the default flag becomes settable.
   it('renders the DefaultToggle on the locked phases block and PUTs is_default:true', async () => {
-    api.get.mockResolvedValue({ data: {
+    mockedApi.get.mockResolvedValue({ data: {
       /* eslint-disable no-restricted-syntax -- DATA: fixture phase colours, not a style rule. */
       phases: [
         { id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_default: true },
@@ -116,14 +118,14 @@ describe('CandidateLookupsSettings — funnel stage default singleton', () => {
       ],
       /* eslint-enable no-restricted-syntax */
     } })
-    api.put.mockResolvedValue({ data: {} })
+    mockedApi.put.mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<CandidatePhasesSettings />)
 
     await screen.findByText('Candidate')
     await user.click(screen.getByRole('button', { name: st('common.setDefault') }))
 
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+    await waitFor(() => expect(mockedApi.put).toHaveBeenCalledWith(
       '/settings/candidate-lookups/phases/p2', expect.objectContaining({ is_default: true })))
   })
 
@@ -131,27 +133,27 @@ describe('CandidateLookupsSettings — funnel stage default singleton', () => {
   // colour is adjustable" on the locked phases list — asserted on the SEAM:
   // the row swatch PUTs the new colour with the label untouched (§13).
   it('saves a phase COLOUR via the row swatch — label unchanged in the PUT body', async () => {
-    api.get.mockResolvedValue({ data: {
+    mockedApi.get.mockResolvedValue({ data: {
       /* eslint-disable no-restricted-syntax -- DATA: fixture phase colours, not a style rule. */
       phases: [
         { id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_default: true },
       ],
       /* eslint-enable no-restricted-syntax */
     } })
-    api.put.mockResolvedValue({ data: {} })
+    mockedApi.put.mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     const { container } = render(<CandidatePhasesSettings />)
 
     await screen.findByText('Lead')
     const swatchBtn = container.querySelector('button[style*="rgb(59, 143, 212)"]')
-    await user.click(swatchBtn)
+    await user.click(swatchBtn!)
     // SETTINGS-INCON-B2 F1 (Opus review, 13-09): the palette popover is now
     // portalled into document.body (escapes a hosting modal/scroll ancestor's
     // overflow) — it no longer lives inside the render `container`.
     const preset = document.body.querySelector('button[style*="rgb(100, 116, 139)"]') // preset #64748B
-    await user.click(preset)
+    await user.click(preset!)
 
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+    await waitFor(() => expect(mockedApi.put).toHaveBeenCalledWith(
       // eslint-disable-next-line no-restricted-syntax -- DATA: asserting the picked preset colour, not a style rule.
       '/settings/candidate-lookups/phases/p1', { label: 'Lead', color: '#64748B' }))
   })
@@ -163,7 +165,7 @@ describe('CandidateLookupsSettings — funnel stage default singleton', () => {
 // phases (ApplicationStage::SINGLETON_FLAGS excludes is_applicant there) — plain toggle.
 describe('CandidateLookupsSettings — phase is_applicant flag', () => {
   it('shows the applicant badge on the flagged phase row', async () => {
-    api.get.mockResolvedValue({ data: {
+    mockedApi.get.mockResolvedValue({ data: {
       /* eslint-disable no-restricted-syntax -- DATA: fixture phase colours, not a style rule. */
       phases: [
         { id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_applicant: false },
@@ -178,7 +180,7 @@ describe('CandidateLookupsSettings — phase is_applicant flag', () => {
   })
 
   it('shows the colour-only lock hint on the phases list', async () => {
-    api.get.mockResolvedValue({ data: {
+    mockedApi.get.mockResolvedValue({ data: {
       // eslint-disable-next-line no-restricted-syntax -- DATA: fixture phase colour, not a style rule.
       phases: [{ id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_applicant: false }],
     } })
@@ -199,7 +201,7 @@ describe('CandidateLookupsSettings — phase is_applicant flag', () => {
 // call site that can still open it (none currently do, kept for contract parity).
 describe('CandidateLookupsSettings — readOnly (system value locked)', () => {
   it('renders the pencil, delete and add controls DISABLED with the systemValueLocked reason, never hidden', async () => {
-    api.get.mockResolvedValue({ data: {
+    mockedApi.get.mockResolvedValue({ data: {
       // eslint-disable-next-line no-restricted-syntax -- DATA: fixture phase colour, not a style rule.
       phases: [{ id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_applicant: false }],
     } })
@@ -233,7 +235,7 @@ describe('CandidateLookupsSettings — readOnly (system value locked)', () => {
   // 'phases' => icon:false (candidate_phases has no icon column) — phases stays
   // colour-only (a 'dialog' popover), unlike funnel-types which does carry icon.
   it('the value mark still opens its popover — colour only, no icon column on phases', async () => {
-    api.get.mockResolvedValue({ data: {
+    mockedApi.get.mockResolvedValue({ data: {
       // eslint-disable-next-line no-restricted-syntax -- DATA: fixture phase colour, not a style rule.
       phases: [{ id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_applicant: false }],
     } })
@@ -253,7 +255,7 @@ describe('CandidateLookupsSettings — readOnly (system value locked)', () => {
 // discriminated-union flip that requires aria-label on every iconOnly Button.
 describe('CandidateLookupsSettings — delete button accessible name', () => {
   it('exposes an accessible name on the not-in-use delete button', async () => {
-    api.get.mockResolvedValue({ data: {
+    mockedApi.get.mockResolvedValue({ data: {
       // eslint-disable-next-line no-restricted-syntax -- DATA: fixture contract-form colour, not a style rule.
       candidate_types: [{ id: 'c1', value: 'zzp', label: 'ZZP', color: '#3B8FD4', in_use: false }],
     } })
@@ -266,11 +268,11 @@ describe('CandidateLookupsSettings — delete button accessible name', () => {
 
 describe('CandidateLookupsSettings — status is_blacklist flag', () => {
   it('saves is_blacklist:true on a status via the edit modal', async () => {
-    api.get.mockResolvedValue({ data: {
+    mockedApi.get.mockResolvedValue({ data: {
       // eslint-disable-next-line no-restricted-syntax -- DATA: fixture status colour, not a style rule.
       statuses: [{ id: 's1', value: 'blacklist', label: 'Blacklist', color: '#DC2626', is_blacklist: false }],
     } })
-    api.put.mockResolvedValue({ data: {} })
+    mockedApi.put.mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<CandidateStatusesSettings />)
 
@@ -282,17 +284,17 @@ describe('CandidateLookupsSettings — status is_blacklist flag', () => {
     await user.click(screen.getByRole('switch', { name: st('lookups.isBlacklist') }))
     await user.click(screen.getByText(st('common.save')))
 
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+    await waitFor(() => expect(mockedApi.put).toHaveBeenCalledWith(
       '/settings/candidate-lookups/statuses/s1', expect.objectContaining({ is_blacklist: true })))
   })
 })
 
 describe('CandidateLookupsSettings — funnel is_proposal flag', () => {
   it('saves is_proposal:true on a funnel stage via the edit modal', async () => {
-    api.get.mockResolvedValue({ data: {
+    mockedApi.get.mockResolvedValue({ data: {
       funnel_types: [stage({ id: 'f1', label: 'Voorgesteld', is_proposal: false })],
     } })
-    api.put.mockResolvedValue({ data: {} })
+    mockedApi.put.mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<FunnelStagesSettings />)
 
@@ -303,7 +305,7 @@ describe('CandidateLookupsSettings — funnel is_proposal flag', () => {
     await user.click(switches[switches.length - 1])
     await user.click(screen.getByText(st('common.save')))
 
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+    await waitFor(() => expect(mockedApi.put).toHaveBeenCalledWith(
       '/settings/candidate-lookups/funnel-types/f1', expect.objectContaining({ is_proposal: true })))
   })
 })
@@ -315,11 +317,11 @@ describe('CandidateLookupsSettings — funnel is_proposal flag', () => {
 // Batch 12 (P22-30): icon support on statuses + contract forms only.
 describe('CandidateLookupsSettings — icon support (statuses + contract forms)', () => {
   it('shows the in-row icon picker on statuses and saves a picked icon via PUT', async () => {
-    api.get.mockResolvedValue({ data: {
+    mockedApi.get.mockResolvedValue({ data: {
       // eslint-disable-next-line no-restricted-syntax -- DATA: fixture status colour, not a style rule.
       statuses: [{ id: 's1', value: 'available', label: 'Available', color: '#16A34A', icon: null }],
     } })
-    api.put.mockResolvedValue({ data: {} })
+    mockedApi.put.mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<CandidateStatusesSettings />)
 
@@ -329,7 +331,7 @@ describe('CandidateLookupsSettings — icon support (statuses + contract forms)'
     await user.click(screen.getByRole('button', { name: st('statusList.valueMark', { label: 'Available' }) }))
     await user.click(screen.getAllByRole('menuitem')[0])
 
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+    await waitFor(() => expect(mockedApi.put).toHaveBeenCalledWith(
       '/settings/candidate-lookups/statuses/s1', expect.objectContaining({ icon: 'calendar' })))
   })
 
@@ -338,7 +340,7 @@ describe('CandidateLookupsSettings — icon support (statuses + contract forms)'
   // colour-only (was the pre-13-09 contract, see the FunnelStagesSettings icon-mark
   // test above for the PATCH regression).
   it('renders the icon-carrying mark on funnel stages (icon vocabulary added 13-09)', async () => {
-    api.get.mockResolvedValue({ data: {
+    mockedApi.get.mockResolvedValue({ data: {
       funnel_types: [stage({ id: 'f1', label: 'Gesolliciteerd' })],
     } })
     render(<FunnelStagesSettings />)
@@ -349,11 +351,11 @@ describe('CandidateLookupsSettings — icon support (statuses + contract forms)'
   })
 
   it('saves a picked icon on a contract form via the edit modal', async () => {
-    api.get.mockResolvedValue({ data: {
+    mockedApi.get.mockResolvedValue({ data: {
       // eslint-disable-next-line no-restricted-syntax -- DATA: fixture contract-form colour, not a style rule.
       candidate_types: [{ id: 'c1', value: 'zzp', label: 'ZZP', color: '#3B8FD4', icon: null }],
     } })
-    api.put.mockResolvedValue({ data: {} })
+    mockedApi.put.mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<ContractFormsSettings />)
 
@@ -366,7 +368,7 @@ describe('CandidateLookupsSettings — icon support (statuses + contract forms)'
     await user.click(screen.getAllByRole('menuitem')[1])
     await user.click(screen.getByText(st('common.save')))
 
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+    await waitFor(() => expect(mockedApi.put).toHaveBeenCalledWith(
       '/settings/candidate-lookups/candidate-types/c1', expect.objectContaining({ icon: 'clock' })))
   })
 })
@@ -380,8 +382,8 @@ describe('CandidateLookupsSettings — colour + reorder revert on failure', () =
   const ZZP_COLOR = '#3B8FD4'
 
   it('reverts the colour and notifies when the colour PUT fails', async () => {
-    api.get.mockResolvedValue({ data: { candidate_types: [{ id: 'c1', value: 'zzp', label: 'ZZP', color: ZZP_COLOR }] } })
-    api.put.mockRejectedValue(new Error('network down'))
+    mockedApi.get.mockResolvedValue({ data: { candidate_types: [{ id: 'c1', value: 'zzp', label: 'ZZP', color: ZZP_COLOR }] } })
+    mockedApi.put.mockRejectedValue(new Error('network down'))
     const { notifyError } = await import('@/lib/notify')
     const user = userEvent.setup()
     render(<ContractFormsSettings />)
@@ -395,9 +397,9 @@ describe('CandidateLookupsSettings — colour + reorder revert on failure', () =
     // portalled into document.body (escapes a hosting modal/scroll ancestor's
     // overflow) — it no longer lives inside the render `container`.
     const preset = document.body.querySelector('button[style*="rgb(100, 116, 139)"]') // first preset, #64748B
-    await user.click(preset)
+    await user.click(preset!)
 
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+    await waitFor(() => expect(mockedApi.put).toHaveBeenCalledWith(
       // eslint-disable-next-line no-restricted-syntax -- DATA: asserting the preset colour the test picked, not a style rule.
       '/settings/candidate-lookups/candidate-types/c1', { label: 'ZZP', color: '#64748B' }))
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('statusList.saveFailed')))
@@ -408,12 +410,12 @@ describe('CandidateLookupsSettings — colour + reorder revert on failure', () =
 
   it('reverts the order and notifies when the reorder PUT fails', async () => {
     /* eslint-disable no-restricted-syntax -- DATA: fixture contract-forms' tenant-picked colours, not a style rule. */
-    api.get.mockResolvedValue({ data: { candidate_types: [
+    mockedApi.get.mockResolvedValue({ data: { candidate_types: [
       { id: 'c1', value: 'zzp', label: 'ZZP', color: '#3B8FD4' },
       { id: 'c2', value: 'payroll', label: 'Payroll', color: '#6E8FD6' },
     ] } })
     /* eslint-enable no-restricted-syntax */
-    api.put.mockRejectedValue(new Error('network down'))
+    mockedApi.put.mockRejectedValue(new Error('network down'))
     const { notifyError } = await import('@/lib/notify')
     const { container } = render(<ContractFormsSettings />)
 
@@ -427,7 +429,7 @@ describe('CandidateLookupsSettings — colour + reorder revert on failure', () =
     fireEvent.drop(rows[1])
     fireEvent.dragEnd(rows[0])
 
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+    await waitFor(() => expect(mockedApi.put).toHaveBeenCalledWith(
       '/settings/candidate-lookups/candidate-types/reorder', { ids: ['c2', 'c1'] }))
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('statusList.saveFailed')))
     // Reverted: ZZP is back in its original (first) position.
@@ -440,11 +442,11 @@ describe('CandidateLookupsSettings — colour + reorder revert on failure', () =
 // mirrors the is_blacklist/is_proposal flag tests above, same shared modal pattern.
 describe('CandidateLookupsSettings — customer_not_applicable flag (MATCH-KLANTLOOS-1)', () => {
   it('saves customer_not_applicable:true on a contract form via the edit modal', async () => {
-    api.get.mockResolvedValue({ data: {
+    mockedApi.get.mockResolvedValue({ data: {
       // eslint-disable-next-line no-restricted-syntax -- DATA: fixture contract-form colour, not a style rule.
       candidate_types: [{ id: 'c1', value: 'zzp', label: 'ZZP', color: '#3B8FD4', customer_not_applicable: false }],
     } })
-    api.put.mockResolvedValue({ data: {} })
+    mockedApi.put.mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<ContractFormsSettings />)
 
@@ -456,7 +458,7 @@ describe('CandidateLookupsSettings — customer_not_applicable flag (MATCH-KLANT
     await user.click(screen.getAllByRole('switch')[0])
     await user.click(screen.getByText(st('common.save')))
 
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+    await waitFor(() => expect(mockedApi.put).toHaveBeenCalledWith(
       '/settings/candidate-lookups/candidate-types/c1', expect.objectContaining({ customer_not_applicable: true })))
   })
 })
@@ -466,10 +468,10 @@ describe('CandidateLookupsSettings — customer_not_applicable flag (MATCH-KLANT
 // write path and the edit-hydrate guard (openEdit must not silently clear it).
 describe('CandidateLookupsSettings — has_contract_lines flag (SAC-10)', () => {
   it('saves has_contract_lines:true on a contract form via the edit modal', async () => {
-    api.get.mockResolvedValue({ data: {
+    mockedApi.get.mockResolvedValue({ data: {
       candidate_types: [{ id: 'c1', value: 'flex_services', label: 'Flex diensten', customer_not_applicable: false, has_contract_lines: false }],
     } })
-    api.put.mockResolvedValue({ data: {} })
+    mockedApi.put.mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<ContractFormsSettings />)
 
@@ -479,17 +481,17 @@ describe('CandidateLookupsSettings — has_contract_lines flag (SAC-10)', () => 
     await user.click(screen.getByRole('switch', { name: st('lookups.hasContractLines') }))
     await user.click(screen.getByText(st('common.save')))
 
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+    await waitFor(() => expect(mockedApi.put).toHaveBeenCalledWith(
       '/settings/candidate-lookups/candidate-types/c1', expect.objectContaining({ has_contract_lines: true })))
   })
 
   // Edit-hydrate guard: opening the modal on a row that already has the flag set
   // must not silently PUT it back to false (the omitted-hydrate bug the finding warned about).
   it('does not clear has_contract_lines on an unrelated edit save', async () => {
-    api.get.mockResolvedValue({ data: {
+    mockedApi.get.mockResolvedValue({ data: {
       candidate_types: [{ id: 'c1', value: 'flex_services', label: 'Flex diensten', customer_not_applicable: false, has_contract_lines: true }],
     } })
-    api.put.mockResolvedValue({ data: {} })
+    mockedApi.put.mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<ContractFormsSettings />)
 
@@ -497,7 +499,7 @@ describe('CandidateLookupsSettings — has_contract_lines flag (SAC-10)', () => 
     await user.click(screen.getByTitle(st('lookups.edit')))
     await user.click(screen.getByText(st('common.save')))
 
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+    await waitFor(() => expect(mockedApi.put).toHaveBeenCalledWith(
       '/settings/candidate-lookups/candidate-types/c1', expect.objectContaining({ has_contract_lines: true })))
   })
 })
@@ -506,10 +508,10 @@ describe('CandidateLookupsSettings — has_contract_lines flag (SAC-10)', () => 
 // the generic saveFailed toast — extractApiError now surfaces the real message.
 describe('CandidateLookupsSettings — extractApiError surfaces the server reason (SAC-04)', () => {
   it('save() shows the server validation message instead of the generic fallback', async () => {
-    api.get.mockResolvedValue({ data: { statuses: [
+    mockedApi.get.mockResolvedValue({ data: { statuses: [
       { id: 's1', value: 'available', label: 'Beschikbaar' },
     ] } })
-    api.post.mockRejectedValue({ response: { data: { errors: { value: ['Deze waarde is al in gebruik.'] } } } })
+    mockedApi.post.mockRejectedValue({ response: { data: { errors: { value: ['Deze waarde is al in gebruik.'] } } } })
     const { notifyError } = await import('@/lib/notify')
     const user = userEvent.setup()
     render(<CandidateStatusesSettings />)

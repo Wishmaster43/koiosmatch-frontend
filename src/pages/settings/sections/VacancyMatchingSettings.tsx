@@ -23,7 +23,7 @@ import { saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
 import Slider from '@/components/ui/Slider'
 import SegmentedControl from '@/components/ui/SegmentedControl'
-import SaveButton from '@/components/ui/SaveButton'
+import SaveableSectionHeader from '@/components/ui/SaveableSectionHeader'
 import SelectMenu from '@/components/ui/SelectMenu'
 import { PageTitle, SectionTitle, Mono } from '@/components/ui/typography'
 import { useQuery } from '@tanstack/react-query'
@@ -86,10 +86,12 @@ export default function VacancyMatchingSettings() {
           notifyError(t('statusList.loadError'))
           return
         }
-        const i = LEVELS.indexOf(matching.strictness); if (i >= 0) setLevel(i)
-        if (MODES.some(m => m.value === matching.approval_mode)) setApproval(matching.approval_mode)
-        if (flat.vacancy_leads_notify_mode) setLeadsNotifyMode(String(flat.vacancy_leads_notify_mode))
-        if (flat.vacancy_leads_notify_role) setLeadsNotifyRole(String(flat.vacancy_leads_notify_role))
+        const matchingObj = matching as { strictness?: string; approval_mode?: string }
+        const flatObj = flat as Record<string, unknown>
+        const i = LEVELS.indexOf(matchingObj.strictness ?? ''); if (i >= 0) setLevel(i)
+        if (MODES.some(m => m.value === matchingObj.approval_mode)) setApproval(matchingObj.approval_mode as string)
+        if (flatObj.vacancy_leads_notify_mode) setLeadsNotifyMode(String(flatObj.vacancy_leads_notify_mode))
+        if (flatObj.vacancy_leads_notify_role) setLeadsNotifyRole(String(flatObj.vacancy_leads_notify_role))
       })
       .catch(() => { if (alive) { setLoadError(true); notifyError(t('statusList.loadError')) } })
       .finally(() => { if (alive) setLoading(false) })
@@ -110,7 +112,7 @@ export default function VacancyMatchingSettings() {
   }
 
   // Approval mode saves on click (partial PUT) — optimistic, revert + toast on failure.
-  const setApprovalMode = async (mode) => {
+  const setApprovalMode = async (mode: string) => {
     if (loadError) return
     const prev = approval
     if (mode === prev) return
@@ -121,7 +123,7 @@ export default function VacancyMatchingSettings() {
 
   // Vacancy leads notification mode saves on pick (POST /settings, the key's owner) —
   // optimistic, revert + toast on failure.
-  const setNotifyMode = async (mode) => {
+  const setNotifyMode = async (mode: string | null) => {
     if (loadError) return
     const prev = leadsNotifyMode
     if (!mode || mode === prev) return
@@ -131,7 +133,7 @@ export default function VacancyMatchingSettings() {
   }
 
   // Vacancy leads notification role saves on pick (POST /settings) — optimistic, revert + toast on failure.
-  const setNotifyRole = async (role) => {
+  const setNotifyRole = async (role: string | null) => {
     if (loadError) return
     const prev = leadsNotifyRole
     if (!role || role === prev) return
@@ -149,17 +151,14 @@ export default function VacancyMatchingSettings() {
     // SETTINGS-INCON-B1b: house-wide container (matches the widest settings screen,
     // CvTemplateSettings) — 560 was the narrowest in the group and cramped the slider/approval/leads blocks.
     <div style={{ maxWidth: SETTINGS_MAX_W_WIDE }}>
-      <div className="flex items-start justify-between" style={{ marginBottom: 16, gap: 16 }}>
-        <div style={{ minWidth: 0 }}>
-          <PageTitle>{t('matching.title')}</PageTitle>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('matching.subtitle')}</p>
-        </div>
-        {/* SaveButton — the ONE saved-state save action (§4 success token pair). Disabled
-            while the load failed so a guessed default can never overwrite the real setting. */}
-        <SaveButton saved={saved} onClick={save} disabled={saving || loadError}>
-          {saved ? <><Check size={13} /> {t('matching.saved')}</> : <><Save size={13} /> {t('matching.save')}</>}
-        </SaveButton>
-      </div>
+      {/* SaveButton — the ONE saved-state save action (§4 success token pair). Disabled
+          while the load failed so a guessed default can never overwrite the real setting. */}
+      <SaveableSectionHeader
+        wrapperClassName="flex items-start justify-between" wrapperStyle={{ marginBottom: 16 }}
+        title={<PageTitle>{t('matching.title')}</PageTitle>} subtitle={t('matching.subtitle')}
+        saved={saved} onSave={save} disabled={!!(saving || loadError)}
+        savedLabel={<><Check size={13} /> {t('matching.saved')}</>}
+        saveLabel={<><Save size={13} /> {t('matching.save')}</>} />
 
       {/* Honest load states — a failed GET must never silently show the hardcoded
           defaults as if they were the tenant's saved values. */}

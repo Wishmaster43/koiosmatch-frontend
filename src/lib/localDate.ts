@@ -88,6 +88,18 @@ export function formatMonthYear(d: Date, locale: string, variant: MonthYearVaria
   return d.toLocaleDateString(locale, opts)
 }
 
+// Last 12 months as { value: 'YYYY-MM', label }, newest first — the shared shape
+// for every month picker (invoices, tenant usage) so they never drift on this list.
+export function buildLast12Months(locale: string): Array<{ value: string; label: string }> {
+  return Array.from({ length: 12 }, (_, i) => {
+    const d = new Date()
+    d.setDate(1)
+    d.setMonth(d.getMonth() - i)
+    const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    return { value, label: formatMonthYear(d, locale) }
+  })
+}
+
 // Month name only (no year): 'long' = "september", 'short' = "sep". Used for
 // calendar labels, chart axes, and month selectors — where year is shown separately.
 export function formatMonthName(d: Date, locale: string, variant: 'long' | 'short' = 'long'): string {

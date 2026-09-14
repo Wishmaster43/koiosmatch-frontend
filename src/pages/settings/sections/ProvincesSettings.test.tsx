@@ -7,7 +7,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
-import api from '@/lib/api'
+import apiClient from '@/lib/api'
 import ProvincesSettings from './ProvincesSettings'
 
 vi.mock('@/lib/api', async () => {
@@ -16,12 +16,17 @@ vi.mock('@/lib/api', async () => {
 })
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
-// Resolve the active locale's own copy so assertions never guess/hardcode a language.
-const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
-// Same, for the shared ConfirmDialog's own labels (common namespace).
-const ct = (key, opts) => i18n.t(key, { ns: 'common', ...opts })
+// The mocked axios instance, typed as its four mocked methods (established pattern).
+const api = apiClient as unknown as { get: ReturnType<typeof vi.fn>; post: ReturnType<typeof vi.fn>; put: ReturnType<typeof vi.fn>; delete: ReturnType<typeof vi.fn> }
 
-const province = (over = {}) => ({ id: 'p1', country: 'NL', name: 'Utrecht', position: 0, active: true, in_use: false, ...over })
+// Resolve the active locale's own copy so assertions never guess/hardcode a language.
+const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
+// Same, for the shared ConfirmDialog's own labels (common namespace).
+const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'common', ...opts })
+
+// A fixture province row, overridable per test.
+interface ProvinceFixture { id: string; country: string; name: string; position: number; active: boolean; in_use: boolean; color?: string; icon?: string; code?: string }
+const province = (over: Partial<ProvinceFixture> = {}): ProvinceFixture => ({ id: 'p1', country: 'NL', name: 'Utrecht', position: 0, active: true, in_use: false, ...over })
 
 afterEach(() => vi.clearAllMocks())
 
@@ -90,7 +95,7 @@ describe('ProvincesSettings', () => {
 
     await screen.findByText('Utrecht')
     // Row layout is [name, edit, delete] — delete is reliably the last button.
-    const row = screen.getByText('Utrecht').closest('div')
+    const row = screen.getByText('Utrecht').closest('div')!
     const rowButtons = row.querySelectorAll('button')
     await user.click(rowButtons[rowButtons.length - 1])
     // Confirm the delete via the shared ConfirmDialog.

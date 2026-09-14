@@ -23,23 +23,23 @@ import { loadSettings } from '../lib/settingsApi'
 // just no network — saveSettingsKeys mutates the fake blob and notifies
 // subscribers exactly like the real module does (§13: mutation tests must
 // assert the actual persisted shape, not just that a callback fired).
-let fakeBlob = {}
-const listeners = new Set()
+let fakeBlob: Record<string, unknown> = {}
+const listeners = new Set<(v: Record<string, unknown>) => void>()
 vi.mock('@/lib/settings/useAllSettings', async (importOriginal) => {
-  const actual = await importOriginal()
+  const actual = await importOriginal() as Record<string, unknown>
   return {
     ...actual,
     useAllSettings: () => {
-      const [v, setV] = useState(() => fakeBlob)
+      const [v, setV] = useState<Record<string, unknown>>(() => fakeBlob)
       useEffect(() => {
-        const l = (nv) => setV(nv)
+        const l = (nv: Record<string, unknown>) => setV(nv)
         listeners.add(l)
-        return () => listeners.delete(l)
+        return () => { listeners.delete(l) }
       }, [])
       return v
     },
-    saveSettingsKeys: vi.fn(async (partial) => {
-      const stringified = {}
+    saveSettingsKeys: vi.fn(async (partial: Record<string, unknown>) => {
+      const stringified: Record<string, unknown> = {}
       for (const [k, v] of Object.entries(partial)) stringified[k] = typeof v === 'string' ? v : JSON.stringify(v)
       fakeBlob = { ...fakeBlob, ...stringified }
       listeners.forEach(l => l(fakeBlob))
@@ -50,9 +50,9 @@ vi.mock('@/lib/settings/useAllSettings', async (importOriginal) => {
 vi.mock('../lib/settingsApi', () => ({ loadSettings: vi.fn(async () => ({})) }))
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
-const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
-const ct = (key, opts) => i18n.t(key, { ns: 'candidates', ...opts })
-const cmt = (key, opts) => i18n.t(key, { ns: 'common', ...opts })
+const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
+const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'candidates', ...opts })
+const cmt = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'common', ...opts })
 
 // A legacy blob exactly as it would have been saved BEFORE per-section
 // placement AND i18n section labels existed: hardcoded English labels, no
@@ -125,14 +125,14 @@ describe('CvTemplateSettings — moving a section between regions', () => {
     // radiogroup named after the section itself, with each option's own visible
     // text ("Zijbalk"/"Hoofdkolom") as its accessible name.
     const languagesLabel = within(screen.getByTestId('cv-section-group-sidebar')).getByText(ct('cv.languages'))
-    const languagesRow = languagesLabel.closest('div')
+    const languagesRow = languagesLabel.closest('div') as HTMLElement
     const moveToMainBtn = within(languagesRow).getByRole('radio', { name: st('cvTemplate.regionMain') })
     fireEvent.click(moveToMainBtn)
 
     // Assert the REQUEST (§13): the persisted blob actually carries the new placement.
     await waitFor(() => {
-      const stored = JSON.parse(fakeBlob.candidate_cv_template)
-      const languages = stored.sections.find(s => s.id === 'languages')
+      const stored = JSON.parse(fakeBlob.candidate_cv_template as string)
+      const languages = stored.sections.find((s: { id: string }) => s.id === 'languages')
       expect(languages.placement).toBe('main')
     })
 
@@ -153,7 +153,7 @@ describe('CvTemplateSettings — moving a section between regions', () => {
     render(<CvTemplateSettings />)
     const mainGroup = screen.getByTestId('cv-section-group-main')
     // No region radiogroup exists anywhere in the Experience row.
-    const experienceRow = within(mainGroup).getByText(ct('cv.experience')).closest('div')
+    const experienceRow = within(mainGroup).getByText(ct('cv.experience')).closest('div') as HTMLElement
     expect(within(experienceRow).queryByRole('radiogroup')).not.toBeInTheDocument()
     // Instead a plain, non-interactive region badge is shown.
     expect(within(mainGroup).getAllByText(st('cvTemplate.regionMain')).length).toBeGreaterThan(0)
@@ -164,7 +164,7 @@ describe('CvTemplateSettings — moving a section between regions', () => {
 // the same accessible name (they edit the same value) — getByLabelText
 // legitimately returns both, so tests that need the TEXT field specifically
 // disambiguate by control type.
-const getHexTextInput = (label) => screen.getAllByLabelText(label).find(el => el.type === 'text')
+const getHexTextInput = (label: string) => screen.getAllByLabelText(label).find((el): el is HTMLInputElement => (el as HTMLInputElement).type === 'text') as HTMLInputElement
 
 /* eslint-disable no-restricted-syntax -- DATA: hex values asserted/typed by the test (seed default, arbitrary complete value, fixed swatch colour), not a style rule. */
 describe('CvTemplateSettings — hex field only persists a complete colour', () => {
@@ -174,13 +174,13 @@ describe('CvTemplateSettings — hex field only persists a complete colour', () 
 
     // Half-typed input: must never reach saveSettingsKeys / the persisted blob.
     fireEvent.change(hexInput, { target: { value: '#1' } })
-    expect(JSON.parse(fakeBlob.candidate_cv_template).primaryColor).toBe('#19A5CA')
+    expect(JSON.parse(fakeBlob.candidate_cv_template as string).primaryColor).toBe('#19A5CA')
     // The field itself must still show what the user typed — no caret fight.
     expect(hexInput.value).toBe('#1')
 
     // Finishing the value to a complete #RRGGBB now persists it.
     fireEvent.change(hexInput, { target: { value: '#123ABC' } })
-    expect(JSON.parse(fakeBlob.candidate_cv_template).primaryColor).toBe('#123ABC')
+    expect(JSON.parse(fakeBlob.candidate_cv_template as string).primaryColor).toBe('#123ABC')
   })
 
   it('resyncs the draft from the persisted value when changed from outside the text field (swatch pick)', () => {
@@ -212,7 +212,7 @@ describe('CvTemplateSettings — accent swatch accessibility', () => {
 
 describe('CvTemplateSettings — brand-settings load failure is distinguishable from "not configured"', () => {
   it('shows a notice when the brand-settings load fails (never silently reads as empty)', async () => {
-    loadSettings.mockRejectedValueOnce(new Error('network down'))
+    vi.mocked(loadSettings).mockRejectedValueOnce(new Error('network down'))
     render(<CvTemplateSettings />)
     await waitFor(() => {
       expect(screen.getByText(cmt('errorGeneric'))).toBeInTheDocument()

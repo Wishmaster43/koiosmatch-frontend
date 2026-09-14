@@ -9,21 +9,41 @@
  * hand-rolled fixed/centered div onto the shared FloatingPanel — draggable
  * header, resizable, remembered position; it arms its own focus trap now.
  */
+import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ColorSwatch } from '../components/SettingsControls'
 import { Toggle } from '../components/SettingsKit'
 import IconPickerControl from './IconPickerControl'
 import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIcons'
+import { type CandidateLookupFlags, slugify } from './candidateLookupFlags'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import ModalFooter from '@/components/ui/ModalFooter'
 import { Caption, BodyText, SectionTitle } from '@/components/ui/typography'
 
-// "Niet actief" ("Not active") → "niet_actief" — a stable English-ish slug suggestion (mirrors
-// the parent's slugify; duplicated here to avoid a cross-file import cycle).
-const slugify = (s) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
+// The full add/edit modal state — one shared shape across every candidate-lookup
+// block (statuses/funnel-types/phases/candidate-types); each block only reads/writes
+// the flags relevant to it (isStatusBlock/isFunnelBlock/… below), the rest ride along.
+export interface LookupModalState extends CandidateLookupFlags {
+  mode: 'add' | 'edit'
+  id?: string | number
+  value: string
+  label: string
+  color: string
+  icon: string | null
+}
+
+// Props for one flag toggle row: the label/hint translation keys, checked state and its setter.
+interface FlagRowProps {
+  labelKey: string
+  hintKey: string
+  checked?: boolean
+  onChange: (v: boolean) => void
+  disabled?: boolean
+  isDanger?: boolean
+}
 
 // FlagRow renders a consistent flag toggle row (Toggle + label + Caption) for all flag types.
-function FlagRow({ labelKey, hintKey, checked, onChange, disabled, isDanger }) {
+function FlagRow({ labelKey, hintKey, checked, onChange, disabled, isDanger }: FlagRowProps) {
   const { t } = useTranslation('settings')
   const LabelComponent = isDanger ? SectionTitle : BodyText
   const labelColor = isDanger ? { color: 'var(--color-danger-text)' } : {}
@@ -31,7 +51,7 @@ function FlagRow({ labelKey, hintKey, checked, onChange, disabled, isDanger }) {
   return (
     <div style={{ marginBottom: 14 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Toggle checked={checked} onChange={onChange} disabled={disabled} ariaLabel={t(labelKey)} />
+        <Toggle checked={!!checked} onChange={onChange} disabled={disabled} ariaLabel={t(labelKey)} />
         <LabelComponent as="span" style={labelColor}>{t(labelKey)}</LabelComponent>
       </div>
       <Caption as="div" style={{ marginTop: 4 }}>{t(hintKey)}</Caption>
@@ -44,10 +64,23 @@ function FlagRow({ labelKey, hintKey, checked, onChange, disabled, isDanger }) {
 // 13-09, F2): the phases block's pencil is now fully disabled by StatusListRow's
 // own readOnly gate, so this modal never opens on a locked list any more — the
 // label-lock branch and the is_applicant disabled-switch it drove were dead code.
+interface CandidateLookupItemModalProps {
+  modal: LookupModalState
+  setModal: Dispatch<SetStateAction<LookupModalState | null>>
+  onClose: () => void
+  onSave: () => void
+  busy: boolean
+  isStatusBlock: boolean
+  isFunnelBlock: boolean
+  isPhaseBlock: boolean
+  isContractFormBlock: boolean
+  supportsIcon: boolean
+}
+
 export default function CandidateLookupItemModal({
   modal, setModal, onClose, onSave, busy,
   isStatusBlock, isFunnelBlock, isPhaseBlock, isContractFormBlock, supportsIcon,
-}) {
+}: CandidateLookupItemModalProps) {
   const { t } = useTranslation('settings')
   const title = modal.mode === 'add' ? t('lookups.add') : t('lookups.edit')
 
@@ -58,7 +91,7 @@ export default function CandidateLookupItemModal({
         <div style={{ marginBottom: 14 }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('lookups.labelField')}</div>
           <input value={modal.label} autoFocus
-            onChange={e => setModal(m => ({ ...m, label: e.target.value }))}
+            onChange={e => setModal(m => m && ({ ...m, label: e.target.value }))}
             placeholder={t('lookups.labelPlaceholder')}
             // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- native form <input> text size/colour; BodyText renders a span/div and cannot replace an editable form control
             style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box',
@@ -69,7 +102,7 @@ export default function CandidateLookupItemModal({
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('lookups.valueField')}</div>
           <input value={modal.value}
             disabled={modal.mode === 'edit'}
-            onChange={e => setModal(m => ({ ...m, value: e.target.value }))}
+            onChange={e => setModal(m => m && ({ ...m, value: e.target.value }))}
             placeholder={modal.label ? slugify(modal.label) : 'slug'}
             style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, fontFamily: 'monospace',
                      border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box',
@@ -81,7 +114,7 @@ export default function CandidateLookupItemModal({
 
         <div style={{ marginBottom: 14 }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('lookups.colorField')}</div>
-          <ColorSwatch color={modal.color} onChange={c => setModal(m => ({ ...m, color: c }))} />
+          <ColorSwatch color={modal.color} onChange={(c: string) => setModal(m => m && ({ ...m, color: c }))} />
         </div>
 
         {/* Icon picker — statuses + contract forms only (batch 12, P22-30). Same
@@ -94,7 +127,7 @@ export default function CandidateLookupItemModal({
             <IconPickerControl color={modal.color ?? '#6B7280'}
               icons={GENERIC_LOOKUP_ICON_NAMES} resolve={resolveGenericLookupIcon} value={modal.icon}
               label={modal.label || t('lookups.iconField')}
-              onPick={icon => setModal(m => ({ ...m, icon }))} />
+              onPick={(icon: string) => setModal(m => m && ({ ...m, icon }))} />
           </div>
         )}
 
@@ -104,7 +137,7 @@ export default function CandidateLookupItemModal({
         {isContractFormBlock && (
           <div style={{ marginBottom: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Toggle checked={modal.customer_not_applicable} onChange={v => setModal(m => ({ ...m, customer_not_applicable: v }))} />
+              <Toggle checked={!!modal.customer_not_applicable} onChange={(v: boolean) => setModal(m => m && ({ ...m, customer_not_applicable: v }))} />
               <BodyText as="span">{t('lookups.customerNotApplicable')}</BodyText>
             </div>
             <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.customerNotApplicableHint')}</Caption>
@@ -117,7 +150,7 @@ export default function CandidateLookupItemModal({
             control, so every tenant-created form was stuck false. */}
         {isContractFormBlock && (
           <FlagRow labelKey="lookups.hasContractLines" hintKey="lookups.hasContractLinesHint"
-            checked={!!modal.has_contract_lines} onChange={v => setModal(m => ({ ...m, has_contract_lines: v }))} />
+            checked={!!modal.has_contract_lines} onChange={(v: boolean) => setModal(m => m && ({ ...m, has_contract_lines: v }))} />
         )}
 
         {/* Applicant toggle — phases only. Not backend-singleton (verified against
@@ -129,67 +162,67 @@ export default function CandidateLookupItemModal({
             simply interactive here — the old "locked" disabled-state was dead code. */}
         {isPhaseBlock && (
           <FlagRow labelKey="lookups.phaseApplicant" hintKey="lookups.phaseApplicantHint"
-            checked={modal.is_applicant} onChange={v => setModal(m => ({ ...m, is_applicant: v }))} />
+            checked={modal.is_applicant} onChange={(v: boolean) => setModal(m => m && ({ ...m, is_applicant: v }))} />
         )}
 
         {/* Reason-required toggle — statuses only (e.g. Inactive needs a reason). */}
         {isStatusBlock && (
           <FlagRow labelKey="lookups.requiresReason" hintKey="lookups.requiresReasonHint"
-            checked={modal.requires_reason} onChange={v => setModal(m => ({ ...m, requires_reason: v }))} />
+            checked={modal.requires_reason} onChange={(v: boolean) => setModal(m => m && ({ ...m, requires_reason: v }))} />
         )}
 
         {/* Match-required toggle — statuses only (e.g. Placed needs a linked Match). */}
         {isStatusBlock && (
           <FlagRow labelKey="lookups.requiresMatch" hintKey="lookups.requiresMatchHint"
-            checked={modal.requires_match} onChange={v => setModal(m => ({ ...m, requires_match: v }))} />
+            checked={modal.requires_match} onChange={(v: boolean) => setModal(m => m && ({ ...m, requires_match: v }))} />
         )}
 
         {/* Return-date toggle — statuses only (e.g. Unavailable asks "available again on"). */}
         {isStatusBlock && (
           <FlagRow labelKey="lookups.expectsReturnDate" hintKey="lookups.expectsReturnDateHint"
-            checked={modal.expects_return_date} onChange={v => setModal(m => ({ ...m, expects_return_date: v }))} />
+            checked={modal.expects_return_date} onChange={(v: boolean) => setModal(m => m && ({ ...m, expects_return_date: v }))} />
         )}
 
         {/* Blacklist toggle — statuses only (§3B: Blacklist is a deployability value, danger-styled). */}
         {isStatusBlock && (
           <FlagRow labelKey="lookups.isBlacklist" hintKey="lookups.isBlacklistHint"
-            checked={modal.is_blacklist} onChange={v => setModal(m => ({ ...m, is_blacklist: v }))} isDanger />
+            checked={modal.is_blacklist} onChange={(v: boolean) => setModal(m => m && ({ ...m, is_blacklist: v }))} isDanger />
         )}
 
         {/* Leave status toggle — statuses only (B-38: candidate status flags round-trip). */}
         {isStatusBlock && (
           <FlagRow labelKey="lookups.isLeave" hintKey="lookups.isLeaveHint"
-            checked={modal.is_leave} onChange={v => setModal(m => ({ ...m, is_leave: v }))} />
+            checked={modal.is_leave} onChange={(v: boolean) => setModal(m => m && ({ ...m, is_leave: v }))} />
         )}
 
         {/* Unavailable status toggle — statuses only (B-38: candidate status flags round-trip). */}
         {isStatusBlock && (
           <FlagRow labelKey="lookups.isUnavailable" hintKey="lookups.isUnavailableHint"
-            checked={modal.is_unavailable} onChange={v => setModal(m => ({ ...m, is_unavailable: v }))} />
+            checked={modal.is_unavailable} onChange={(v: boolean) => setModal(m => m && ({ ...m, is_unavailable: v }))} />
         )}
 
         {/* Appointment toggle — funnel stages only; flags the intake stage. */}
         {isFunnelBlock && (
           <FlagRow labelKey="lookups.requiresAppointment" hintKey="lookups.requiresAppointmentHint"
-            checked={modal.requires_appointment} onChange={v => setModal(m => ({ ...m, requires_appointment: v }))} />
+            checked={modal.requires_appointment} onChange={(v: boolean) => setModal(m => m && ({ ...m, requires_appointment: v }))} />
         )}
 
         {/* Match toggle — funnel stages only; this stage turns the application into a Match (matched bucket). */}
         {isFunnelBlock && (
           <FlagRow labelKey="lookups.isMatch" hintKey="lookups.isMatchHint"
-            checked={modal.is_match} onChange={v => setModal(m => ({ ...m, is_match: v }))} />
+            checked={modal.is_match} onChange={(v: boolean) => setModal(m => m && ({ ...m, is_match: v }))} />
         )}
 
         {/* Rejected toggle — funnel stages only; this stage is the rejected bucket. */}
         {isFunnelBlock && (
           <FlagRow labelKey="lookups.isRejected" hintKey="lookups.isRejectedHint"
-            checked={modal.is_rejected} onChange={v => setModal(m => ({ ...m, is_rejected: v }))} />
+            checked={modal.is_rejected} onChange={(v: boolean) => setModal(m => m && ({ ...m, is_rejected: v }))} />
         )}
 
         {/* Proposal toggle — funnel stages only; this stage represents the "proposed to customer" step. */}
         {isFunnelBlock && (
           <FlagRow labelKey="lookups.isProposal" hintKey="lookups.isProposalHint"
-            checked={modal.is_proposal} onChange={v => setModal(m => ({ ...m, is_proposal: v }))} />
+            checked={modal.is_proposal} onChange={(v: boolean) => setModal(m => m && ({ ...m, is_proposal: v }))} />
         )}
 
       </div>

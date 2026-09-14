@@ -11,6 +11,8 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
+// vi.mocked() gives the mocked-module factory's plain vi.fn()s their real Mock typing at every call site.
+const mockedApi = vi.mocked(api, true)
 import ExportSettings, { downloadCsv } from './ExportSettings'
 
 vi.mock('@/lib/api', async () => {
@@ -21,7 +23,7 @@ vi.mock('@/lib/api', async () => {
 const mockUseAuth = vi.fn()
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
 
-const t = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
+const t = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 
 // jsdom has no real blob: URL support — stub with predictable values (mirrors EntityHeader.test.tsx).
 const createObjectURL = vi.fn(() => 'blob:mock-url')
@@ -38,12 +40,12 @@ afterEach(() => {
 describe('downloadCsv (the real per-entity export request)', () => {
   it('GETs the given route as a blob and triggers a download', async () => {
     vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL })
-    api.get.mockResolvedValue({ data: new Blob(['a,b\n1,2'], { type: 'text/csv' }), headers: {} })
+    mockedApi.get.mockResolvedValue({ data: new Blob(['a,b\n1,2'], { type: 'text/csv' }), headers: {} })
     const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
 
     await downloadCsv('/exports/candidates.csv', 'candidates')
 
-    expect(api.get).toHaveBeenCalledWith('/exports/candidates.csv', { responseType: 'blob' })
+    expect(mockedApi.get).toHaveBeenCalledWith('/exports/candidates.csv', { responseType: 'blob' })
     expect(createObjectURL).toHaveBeenCalled()
     expect(clickSpy).toHaveBeenCalled()
     expect(revokeObjectURL).toHaveBeenCalledWith('blob:mock-url')
@@ -54,12 +56,12 @@ describe('downloadCsv (the real per-entity export request)', () => {
 
   it('prefers the server Content-Disposition filename when the header is visible', async () => {
     vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL })
-    api.get.mockResolvedValue({
+    mockedApi.get.mockResolvedValue({
       data: new Blob(['a,b\n1,2'], { type: 'text/csv' }),
       headers: { 'content-disposition': 'attachment; filename="candidates-2026-07-20-1943.csv"' },
     })
-    let downloadedAs = null
-    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function mockClick() { downloadedAs = this.download })
+    let downloadedAs: string | null = null
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function mockClick(this: HTMLAnchorElement) { downloadedAs = this.download })
 
     await downloadCsv('/exports/candidates.csv', 'candidates')
 
@@ -69,9 +71,9 @@ describe('downloadCsv (the real per-entity export request)', () => {
 
   it('falls back to a client-built filename in the same convention when no header is visible (CORS)', async () => {
     vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL })
-    api.get.mockResolvedValue({ data: new Blob(['a,b\n1,2'], { type: 'text/csv' }), headers: {} })
-    let downloadedAs = null
-    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function mockClick() { downloadedAs = this.download })
+    mockedApi.get.mockResolvedValue({ data: new Blob(['a,b\n1,2'], { type: 'text/csv' }), headers: {} })
+    let downloadedAs: string | null = null
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function mockClick(this: HTMLAnchorElement) { downloadedAs = this.download })
 
     await downloadCsv('/exports/leads.csv', 'leads')
 
@@ -106,7 +108,7 @@ describe('ExportSettings screen', () => {
   })
 
   it('disables (never hides) the export button for a selected entity the user lacks view-permission for', async () => {
-    mockUseAuth.mockReturnValue({ hasPermission: (perm) => perm !== 'vacancies.view' })
+    mockUseAuth.mockReturnValue({ hasPermission: (perm: string) => perm !== 'vacancies.view' })
     const user = userEvent.setup()
     render(<ExportSettings />)
 
@@ -123,7 +125,7 @@ describe('ExportSettings screen', () => {
   it('disables (never hides) the export button for a NEW entity the user lacks its own view-permission for', async () => {
     // Matches is gated on matches.view (a different permission than the others), so
     // this proves the new rows are wired to their OWN entity permission, not a shared one.
-    mockUseAuth.mockReturnValue({ hasPermission: (perm) => perm !== 'matches.view' })
+    mockUseAuth.mockReturnValue({ hasPermission: (perm: string) => perm !== 'matches.view' })
     const user = userEvent.setup()
     render(<ExportSettings />)
 
@@ -134,7 +136,7 @@ describe('ExportSettings screen', () => {
   })
 
   it('GETs the exact new route when a new entity row triggers its export', async () => {
-    api.get.mockResolvedValue({ data: new Blob(['a,b\n1,2'], { type: 'text/csv' }), headers: {} })
+    mockedApi.get.mockResolvedValue({ data: new Blob(['a,b\n1,2'], { type: 'text/csv' }), headers: {} })
     vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL })
     const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
     const user = userEvent.setup()
@@ -145,7 +147,7 @@ describe('ExportSettings screen', () => {
     await user.click(screen.getByRole('button', { name: t('export.entities.outreach.title') }))
     await user.click(screen.getByRole('button', { name: t('export.formatCsv') }))
 
-    expect(api.get).toHaveBeenCalledWith('/exports/outreach.csv', { responseType: 'blob' })
+    expect(mockedApi.get).toHaveBeenCalledWith('/exports/outreach.csv', { responseType: 'blob' })
 
     clickSpy.mockRestore()
     vi.unstubAllGlobals()
@@ -156,13 +158,13 @@ describe('ExportSettings screen', () => {
 describe('downloadCsv · xlsx twin', () => {
   it('GETs the .xlsx route as blob and falls back to an .xlsx filename', async () => {
     vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL })
-    api.get.mockResolvedValue({ data: new Blob(['x']), headers: {} })
-    let capturedName
-    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function () { capturedName = this.download })
+    mockedApi.get.mockResolvedValue({ data: new Blob(['x']), headers: {} })
+    let capturedName: string | undefined
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) { capturedName = this.download })
 
     await downloadCsv('/exports/candidates.xlsx', 'candidates')
 
-    expect(api.get).toHaveBeenCalledWith('/exports/candidates.xlsx', { responseType: 'blob' })
+    expect(mockedApi.get).toHaveBeenCalledWith('/exports/candidates.xlsx', { responseType: 'blob' })
     expect(capturedName).toMatch(/^candidates-\d{4}-\d{2}-\d{2}-\d{4}\.xlsx$/)
 
     clickSpy.mockRestore()
@@ -176,7 +178,7 @@ describe('downloadCsv · xlsx twin', () => {
 // the conversations twins disabled (never hidden), proving the AVG lock is real.
 describe('ExportSettings · transfer-family rights gating', () => {
   it('disables the conversations twins without conversations.export, even with all view rights', async () => {
-    mockUseAuth.mockReturnValue({ hasPermission: (perm) => perm !== 'conversations.export' })
+    mockUseAuth.mockReturnValue({ hasPermission: (perm: string) => perm !== 'conversations.export' })
     const user = userEvent.setup()
     render(<ExportSettings />)
 
@@ -204,7 +206,7 @@ describe('ExportSettings · transfer-family rights gating', () => {
 // request, and the honest already-running message on 422.
 describe('ExportSettings · documents files-ZIP request', () => {
   it('shows the ZIP button only on the documents row and POSTs the queue request', async () => {
-    api.post.mockResolvedValue({ status: 202, data: { status: 'queued' } })
+    mockedApi.post.mockResolvedValue({ status: 202, data: { status: 'queued' } })
     const user = userEvent.setup()
     render(<ExportSettings />)
 
@@ -212,11 +214,11 @@ describe('ExportSettings · documents files-ZIP request', () => {
     expect(screen.queryByRole('button', { name: t('export.zipButton') })).toBeNull()
     await user.click(screen.getByRole('button', { name: t('export.entities.documents.title') }))
     await user.click(screen.getByRole('button', { name: t('export.zipButton') }))
-    expect(api.post).toHaveBeenCalledWith('/exports/documents-zip')
+    expect(mockedApi.post).toHaveBeenCalledWith('/exports/documents-zip')
   })
 
   it('reports the already-running 422 honestly instead of a generic error', async () => {
-    api.post.mockRejectedValue({ response: { status: 422 } })
+    mockedApi.post.mockRejectedValue({ response: { status: 422 } })
     const user = userEvent.setup()
     render(<ExportSettings />)
 
@@ -224,6 +226,6 @@ describe('ExportSettings · documents files-ZIP request', () => {
     await user.click(screen.getByRole('button', { name: t('export.zipButton') }))
     // The i18n key resolves to real copy; presence of the toast text is asserted
     // via the notify spy the suite's api mock cannot reach — assert the POST ran.
-    expect(api.post).toHaveBeenCalledWith('/exports/documents-zip')
+    expect(mockedApi.post).toHaveBeenCalledWith('/exports/documents-zip')
   })
 })

@@ -15,7 +15,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Save, Check, Info } from 'lucide-react'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import SaveButton from '@/components/ui/SaveButton'
+import SaveableSectionHeader from '@/components/ui/SaveableSectionHeader'
 import WeightSliderRow from '@/components/forms/WeightSliderRow'
 // HUISSTIJL-1: title/group-label are the shared typography atoms.
 import { SectionTitle, GroupLabel } from '@/components/ui/typography'
@@ -62,17 +62,17 @@ export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: Vacancy
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
-        <div style={{ minWidth: 0 }}>
-          <SectionTitle as="div">{t('matching.title')}</SectionTitle>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('matching.subtitle')}</p>
-        </div>
-        {/* HUISSTIJL-1: the shared SaveButton paints the §4 success pair while `saved`
-            is true — a plain Button would grey it out via its disabled recipe. */}
-        <SaveButton saved={saved} onClick={save} style={{ flexShrink: 0 }}>
-          {saved ? <><Check size={13} /> {t('matching.saved')}</> : <><Save size={13} /> {t('matching.save')}</>}
-        </SaveButton>
-      </div>
+      {/* HUISSTIJL-1: the shared SaveButton paints the §4 success pair while `saved`
+          is true — a plain Button would grey it out via its disabled recipe. */}
+      {/* DRY: the savedLabel/saveLabel JSX mirrors VacancyMatchingSettings' own header
+          call — both are the "matching" feature's save action, same t() keys and
+          icons; the shared markup already lives in SaveableSectionHeader, so this
+          is the caller's own two-line label, not a third copy of the header itself. */}
+      <SaveableSectionHeader
+        title={<SectionTitle as="div">{t('matching.title')}</SectionTitle>} subtitle={t('matching.subtitle')}
+        saved={saved} onSave={save} buttonStyle={{ flexShrink: 0 }}
+        savedLabel={<><Check size={13} /> {t('matching.saved')}</>}
+        saveLabel={<><Save size={13} /> {t('matching.save')}</>} />
 
       {/* Template picker (MATCH-TEMPLATE-1) — four explicit UI states: loading,
           error, empty (no templates configured yet) and the ready select. V18

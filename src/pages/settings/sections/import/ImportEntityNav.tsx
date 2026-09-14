@@ -13,6 +13,7 @@ import { groupTemplates } from './importTemplateShape'
 import { iconForTemplate } from './importEntityIcon'
 import type { ImportTemplateSummary } from './importApi'
 import Spinner from '@/components/ui/Spinner'
+import SubNavButton from '@/pages/settings/components/SubNavButton'
 
 interface ImportEntityNavProps {
   templates: ImportTemplateSummary[]
@@ -29,21 +30,14 @@ export default function ImportEntityNav({ templates, phase, selected, onSelect, 
   // Headings only earn their space when both paths actually exist.
   const showHeadings = wholeTree.length > 0 && perEntity.length > 0
 
-  // One nav button — same markup for both groups, so they can never drift apart.
+  // One nav button — the shared SubNavButton, so this and ExportSettings never drift apart.
   const renderTemplate = (tpl: ImportTemplateSummary) => {
     const Icon = iconForTemplate(tpl)
     const active = tpl.entity === selected
     return (
-      <button key={tpl.entity} type="button" onClick={() => onSelect(tpl.entity)} aria-current={active ? 'true' : undefined}
-        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px',
-                 borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 13, textAlign: 'left',
-                 fontWeight: active ? 600 : 400, marginBottom: 2,
-                 background: active ? 'var(--color-primary-bg)' : 'transparent',
-                 // Text/icon colour uses the AA-contrast primary-text token, not the raw accent (P2b).
-                 color: active ? 'var(--color-primary-text)' : 'var(--text)' }}>
-        <Icon size={14} style={{ color: active ? 'var(--color-primary-text)' : 'var(--text-muted)', flexShrink: 0 }} />
-        {t(`import.entities.${tpl.entity}.label`, { defaultValue: tpl.entity })}
-      </button>
+      <SubNavButton key={tpl.entity} icon={Icon} active={active} ariaCurrent={active}
+        onClick={() => onSelect(tpl.entity)}
+        label={t(`import.entities.${tpl.entity}.label`, { defaultValue: tpl.entity })} />
     )
   }
 
