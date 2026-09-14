@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
 import ApiKeyDetail from './ApiKeyDetail'
+import type { ApiKeyRow } from './ApiKeyList'
 
 // Keep the real unwrap/unwrapList (importActual) — only the default client is stubbed.
 vi.mock('@/lib/api', async () => {
@@ -19,11 +20,11 @@ vi.mock('@/lib/api', async () => {
 })
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
-const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
+const st = (key: string, opts?: object) => i18n.t(key, { ns: 'settings', ...opts })
 // The house ConfirmDialog (useConfirm) renders Confirm/Cancel from 'common' top-level keys.
-const ct = (key, opts) => i18n.t(key, { ns: 'common', ...opts })
+const ct = (key: string, opts?: object) => i18n.t(key, { ns: 'common', ...opts })
 
-const listRow = (over = {}) => ({
+const listRow = (over: Partial<ApiKeyRow> = {}): ApiKeyRow => ({
   id: 'k1', friendly_name: 'Backoffice key', status: 'active', organisation: 'Yesway',
   type: 'additional', guid: 'abcd1234-5678-90ab-cdef-1234567890ab',
   created_at: '2026-08-01T10:00:00Z', updated_at: '2026-08-01T10:00:00Z', ...over,
@@ -33,7 +34,7 @@ afterEach(() => { vi.clearAllMocks(); vi.restoreAllMocks() })
 
 // Click "Maak primair", then resolve the house confirm dialog it stages (never
 // native window.confirm) by clicking Confirm or Cancel inside it.
-const makePrimary = async (user, { accept = true } = {}) => {
+const makePrimary = async (user: ReturnType<typeof userEvent.setup>, { accept = true }: { accept?: boolean } = {}) => {
   await user.click(screen.getByRole('button', { name: st('apiKeys.makePrimary') }))
   const dialog = await screen.findByRole('dialog', { name: st('apiKeys.makePrimaryConfirm') })
   await user.click(within(dialog).getByRole('button', { name: accept ? ct('confirm') : ct('cancel') }))
@@ -41,8 +42,8 @@ const makePrimary = async (user, { accept = true } = {}) => {
 
 describe('ApiKeyDetail — K-282 make-primary flow', () => {
   it('PATCHes /api-keys/{id} with { type: "primary" }, updates the open detail and notifies success', async () => {
-    api.get.mockResolvedValue({ data: listRow() })
-    api.patch.mockResolvedValue({ data: listRow({ type: 'primary' }) })
+    vi.mocked(api.get).mockResolvedValue({ data: listRow() })
+    vi.mocked(api.patch).mockResolvedValue({ data: listRow({ type: 'primary' }) })
     const { notifySuccess } = await import('@/lib/notify')
     const onPatch = vi.fn()
     const user = userEvent.setup()
@@ -52,7 +53,7 @@ describe('ApiKeyDetail — K-282 make-primary flow', () => {
 
     await makePrimary(user)
 
-    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/api-keys/k1', { type: 'primary' }))
+    await waitFor(() => expect(vi.mocked(api.patch)).toHaveBeenCalledWith('/api-keys/k1', { type: 'primary' }))
     await waitFor(() => expect(onPatch).toHaveBeenCalledWith('k1', expect.objectContaining({ type: 'primary' })))
     expect(notifySuccess).toHaveBeenCalledWith(st('apiKeys.makePrimarySuccess'))
     // The button disappears once the open detail itself reflects the new type.
@@ -60,8 +61,8 @@ describe('ApiKeyDetail — K-282 make-primary flow', () => {
   })
 
   it('a failed promotion surfaces the server error via notifyError, never a silent failure', async () => {
-    api.get.mockResolvedValue({ data: listRow() })
-    api.patch.mockRejectedValue({ response: { status: 409, data: { message: 'Already has a primary key.' } } })
+    vi.mocked(api.get).mockResolvedValue({ data: listRow() })
+    vi.mocked(api.patch).mockRejectedValue({ response: { status: 409, data: { message: 'Already has a primary key.' } } })
     const { notifyError } = await import('@/lib/notify')
     const user = userEvent.setup()
 
@@ -76,7 +77,7 @@ describe('ApiKeyDetail — K-282 make-primary flow', () => {
   })
 
   it('declining the confirm dialog never sends the PATCH', async () => {
-    api.get.mockResolvedValue({ data: listRow() })
+    vi.mocked(api.get).mockResolvedValue({ data: listRow() })
     const user = userEvent.setup()
 
     render(<ApiKeyDetail keyId="k1" listRow={listRow()} onBack={vi.fn()} onPatch={vi.fn()} onDelete={vi.fn()} />)
@@ -84,12 +85,12 @@ describe('ApiKeyDetail — K-282 make-primary flow', () => {
 
     await makePrimary(user, { accept: false })
 
-    expect(api.patch).not.toHaveBeenCalled()
+    expect(vi.mocked(api.patch)).not.toHaveBeenCalled()
     expect(screen.getByRole('button', { name: st('apiKeys.makePrimary') })).toBeInTheDocument()
   })
 
   it('a key that is already primary never shows "Maak primair"', async () => {
-    api.get.mockResolvedValue({ data: listRow({ type: 'primary' }) })
+    vi.mocked(api.get).mockResolvedValue({ data: listRow({ type: 'primary' }) })
     render(<ApiKeyDetail keyId="k1" listRow={listRow({ type: 'primary' })} onBack={vi.fn()} onPatch={vi.fn()} onDelete={vi.fn()} />)
 
     await screen.findByRole('heading', { name: 'Backoffice key' })

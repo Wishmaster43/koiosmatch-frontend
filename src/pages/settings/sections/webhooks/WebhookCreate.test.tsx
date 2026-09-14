@@ -6,9 +6,11 @@
  * catch live, but every unit test here stayed green because none of them ever
  * inspected the POST body.
  */
+import type { ReactElement } from 'react'
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import type { UserEvent } from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import i18n from '@/i18n'
 import WebhookCreate from './WebhookCreate'
@@ -21,24 +23,24 @@ vi.mock('@/lib/api', async () => {
 import api from '@/lib/api'
 
 // Resolve the active locale's own copy so assertions never hardcode a language.
-const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
+const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 
 // EventCatalog fetches the live GET /webhook-events catalog — one event is enough for select-all.
 beforeEach(() => {
-  api.get.mockResolvedValue({ data: { data: [
+  vi.mocked(api.get).mockResolvedValue({ data: { data: [
     { key: 'candidate.created', label: 'Candidate created', group: 'candidates', pii: false },
   ] } })
 })
 afterEach(() => vi.clearAllMocks())
 
 // Fresh QueryClient per render — no cross-test cache bleed, no retries slowing failures.
-function renderWithQueryClient(ui) {
+function renderWithQueryClient(ui: ReactElement) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>)
 }
 
 // Fill name + URL, select every event via the catalog's own "select all", then submit.
-const fillAndSubmit = async (user) => {
+const fillAndSubmit = async (user: UserEvent) => {
   await user.type(screen.getByLabelText(st('webhooks.outgoing.field.name')), 'ATS integration')
   await user.type(screen.getByLabelText(st('webhooks.outgoing.field.url')), 'https://example.test/hook')
   await waitFor(() => screen.getByRole('button', { name: st('webhooks.events.selectAll') }))
@@ -48,14 +50,14 @@ const fillAndSubmit = async (user) => {
 
 describe('WebhookCreate — the create request', () => {
   it('POSTs /webhook-subscriptions with an `events` array in the body, never `event_types`', async () => {
-    api.post.mockResolvedValue({ data: { id: 'wh-1', name: 'ATS integration', url: 'https://example.test/hook', events: ['candidate.created'], secret: 'shh' } })
+    vi.mocked(api.post).mockResolvedValue({ data: { id: 'wh-1', name: 'ATS integration', url: 'https://example.test/hook', events: ['candidate.created'], secret: 'shh' } })
     const user = userEvent.setup()
     renderWithQueryClient(<WebhookCreate onBack={vi.fn()} onCreated={vi.fn()} />)
 
     await fillAndSubmit(user)
 
     await waitFor(() => expect(api.post).toHaveBeenCalledTimes(1))
-    const [route, body] = api.post.mock.calls[0]
+    const [route, body] = vi.mocked(api.post).mock.calls[0] as [string, { events: string[]; event_types?: unknown }]
     expect(route).toBe('/webhook-subscriptions')
     expect(body).toHaveProperty('events')
     expect(Array.isArray(body.events)).toBe(true)
@@ -64,7 +66,7 @@ describe('WebhookCreate — the create request', () => {
   })
 
   it('carries the exact name/url alongside the events array', async () => {
-    api.post.mockResolvedValue({ data: { id: 'wh-1', secret: 'shh' } })
+    vi.mocked(api.post).mockResolvedValue({ data: { id: 'wh-1', secret: 'shh' } })
     const user = userEvent.setup()
     renderWithQueryClient(<WebhookCreate onBack={vi.fn()} onCreated={vi.fn()} />)
 
@@ -75,7 +77,7 @@ describe('WebhookCreate — the create request', () => {
   })
 
   it('displays the signing_secret from the create response in the one-time reveal', async () => {
-    api.post.mockResolvedValue({ data: { id: 'wh-1', name: 'ATS integration', signing_secret: 'sk_live_xyz123abc' } })
+    vi.mocked(api.post).mockResolvedValue({ data: { id: 'wh-1', name: 'ATS integration', signing_secret: 'sk_live_xyz123abc' } })
     const user = userEvent.setup()
     renderWithQueryClient(<WebhookCreate onBack={vi.fn()} onCreated={vi.fn()} />)
 
@@ -88,7 +90,7 @@ describe('WebhookCreate — the create request', () => {
   })
 
   it('falls back to legacy secret field when signing_secret is absent', async () => {
-    api.post.mockResolvedValue({ data: { id: 'wh-1', name: 'ATS integration', secret: 'legacy_secret_xyz' } })
+    vi.mocked(api.post).mockResolvedValue({ data: { id: 'wh-1', name: 'ATS integration', secret: 'legacy_secret_xyz' } })
     const user = userEvent.setup()
     renderWithQueryClient(<WebhookCreate onBack={vi.fn()} onCreated={vi.fn()} />)
 

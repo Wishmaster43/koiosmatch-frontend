@@ -11,10 +11,13 @@ import OutgoingWebhooks from './OutgoingWebhooks'
 import IncomingWebhooks from './IncomingWebhooks'
 import WhatsAppMetaWebhookCard from './WhatsAppMetaWebhookCard'
 
+// Which direction sub-tab is active.
+type WebhookDirectionTab = 'outgoing' | 'incoming'
+
 // The Webhooks section: outgoing/incoming sub-tabs.
 export default function WebhooksSettings() {
   const { t } = useTranslation('settings')
-  const [tab, setTab] = useState('outgoing')
+  const [tab, setTab] = useState<WebhookDirectionTab>('outgoing')
 
   const tabs = [
     { id: 'outgoing', label: t('webhooks.tab.outgoing') },
@@ -26,7 +29,7 @@ export default function WebhooksSettings() {
       {/* Direction sub-tabs */}
       {/* Direction sub-tabs — the shared SubTabBar (DRY-1 O5); the wrapper keeps the old outer margin. */}
       <div style={{ marginBottom: 24 }}>
-        <SubTabBar tabs={tabs} active={tab} onChange={setTab} />
+        <SubTabBar tabs={tabs} active={tab} onChange={(id) => setTab(id as WebhookDirectionTab)} />
       </div>
 
       {/* Danny 2026-08-31 (verbatim, Dutch: "het Meta-adresblok hoort vindbaar bij de inkomende webhooks"): the Meta address block belongs findable next to incoming webhooks. */}

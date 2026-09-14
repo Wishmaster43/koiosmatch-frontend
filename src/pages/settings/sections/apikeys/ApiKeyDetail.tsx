@@ -18,35 +18,57 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { getApiKey, updateApiKey, deleteApiKey, regenerateApiKey, setApiKeyPrimary } from './apiKeysApi'
 import ApiKeyGeneralTab from './ApiKeyGeneralTab'
 import ApiKeyAccessTab from './ApiKeyAccessTab'
+import type { ScopeMap } from './ScopeEditor'
 import SettingsDetailHeader from '@/pages/settings/components/SettingsDetailHeader'
 import SecretRevealBox from '@/pages/settings/components/SecretRevealBox'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import type { ApiKeyRow } from './ApiKeyList'
 // audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
+// The full key detail (list row + fields only the detail fetch/edit carries).
+// hand-written: the spec carries no 2xx schema for GET/PUT /api-keys/{id}
+export interface ApiKey extends ApiKeyRow {
+  scopes?: ScopeMap
+  allowed_ips?: string[]
+  contact_name?: string
+  contact_email?: string
+  description?: string
+}
+// A partial patch of the fields above, as sent to updateApiKey/onPatch.
+export type ApiKeyPatch = Partial<ApiKey>
+
+interface ApiKeyDetailProps {
+  keyId: string // the key being viewed/edited
+  listRow?: ApiKeyRow // the row already known from the list, shown while the full fetch resolves
+  onBack: () => void // return to the list
+  onPatch: (id: string, merged: ApiKey) => void // bubble a persisted change up to the list
+  onDelete: (id: string) => void // bubble a deletion up to the list
+}
+
 // Owns one API key's full lifecycle: fetch full detail, edit, status toggle, secret regeneration and deletion, bubbling changes back to the list.
-export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete }) {
+export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete }: ApiKeyDetailProps) {
   const { t } = useTranslation('settings')
-  const [apiKey, setApiKey]   = useState(listRow ?? null)
+  const [apiKey, setApiKey]   = useState<ApiKey | null>(listRow ?? null)
   const [loading, setLoading] = useState(true)
   const [tab, setTab]         = useState('general')
-  const [secret, setSecret]   = useState(null)   // one-time secret after regenerate
+  const [secret, setSecret]   = useState<string | null>(null)   // one-time secret after regenerate
   const { confirm, dialog } = useConfirm()
 
   // Fetch full detail (scopes/ips/contact); fall back to the list row on failure.
   useEffect(() => {
     let active = true
     getApiKey(keyId)
-      .then((full) => { if (active) setApiKey((prev) => ({ ...prev, ...full })) })
+      .then((full) => { if (active) setApiKey((prev) => ({ ...prev, ...(full as ApiKey) })) })
       .catch(() => { /* keep listRow */ })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [keyId])
 
   // Persist a partial change and reflect it locally + in the parent list.
-  const applyUpdate = async (patch) => {
-    const updated = await updateApiKey(keyId, patch)
-    const merged = { ...apiKey, ...patch, ...updated }
+  const applyUpdate = async (patch: ApiKeyPatch): Promise<ApiKey> => {
+    const updated = await updateApiKey(keyId, patch) as ApiKey
+    const merged = { ...apiKey, ...patch, ...updated } as ApiKey
     setApiKey(merged)
     onPatch?.(keyId, merged)
     return merged
@@ -59,7 +81,7 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
 
   // Header actions.
   const regenerate = async () => {
-    try { const res = await regenerateApiKey(keyId); setSecret(res?.secret ?? null) } catch { /* noop */ }
+    try { const res = await regenerateApiKey(keyId) as { secret?: string }; setSecret(res?.secret ?? null) } catch { /* noop */ }
   }
   // Flip active ⇄ disabled and persist it immediately.
   const toggleStatus = () => {
@@ -78,8 +100,8 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
   const makePrimary = () => {
     confirm(t('apiKeys.makePrimaryConfirm'), async () => {
       try {
-        const updated = await setApiKeyPrimary(keyId)
-        const merged = { ...apiKey, type: 'primary', ...updated }
+        const updated = await setApiKeyPrimary(keyId) as ApiKey
+        const merged = { ...apiKey, type: 'primary', ...updated } as ApiKey
         setApiKey(merged)
         onPatch?.(keyId, merged)
         notifySuccess(t('apiKeys.makePrimarySuccess'))
@@ -104,7 +126,7 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
         onBack={onBack}
         backLabel={t('common.back')}
         icon={Key}
-        title={apiKey.friendly_name ?? apiKey.name}
+        title={apiKey.friendly_name ?? apiKey.name ?? ''}
         statusBadge={<StatusBadge status={apiKey.status ?? 'active'} map={statusMap} />}
         actions={
           <CredentialActionMenu

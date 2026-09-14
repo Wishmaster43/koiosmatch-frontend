@@ -16,7 +16,20 @@ import { tintBorder } from '@/lib/tint'
 import { notify } from '@/lib/notify'
 import JobsFilterBar from './JobsFilterBar'
 import JobsTableFrame from './JobsTableFrame'
-import { jobColumns } from './jobColumns'
+import { jobColumns, type JobRow } from './jobColumns'
+import type { Column } from '@/components/ui/DataTable'
+
+// One row of the failed-jobs list — hand-written: useFailedJobs (still .js) carries
+// no exported row type, and the spec has no 2xx schema for GET /admin/jobs/failed.
+// Extends JobRow so it also satisfies the shared queue/tenant/job columns.
+interface FailedJobRow extends JobRow {
+  uuid: string
+  workflow?: string | null
+  requested_by?: string | null
+  subject?: { type: string; reference: string } | null
+  exception_summary?: string
+  failed_at?: string
+}
 
 // Failure log with per-row retry/forget and two destructive bulk actions, both gated behind the shared confirm dialog naming the exact count (see file header).
 export default function FailedJobsTab() {
@@ -41,7 +54,7 @@ export default function FailedJobsTab() {
 
   // Determine the confirmation key based on which filters are active (X-41).
   // The dialog message must match the action's actual scope.
-  const getConfirmKey = (baseKey) => {
+  const getConfirmKey = (baseKey: string): string => {
     const hasQueue = Boolean(filters.queue)
     const hasTenant = Boolean(filters.tenant)
 
@@ -54,7 +67,7 @@ export default function FailedJobsTab() {
   // Bulk actions are irreversible — confirm with the exact scope before firing.
   const confirmRetryAll = () => {
     const key = getConfirmKey('jobs.retryAll')
-    const opts = { count: result.total }
+    const opts: Record<string, unknown> = { count: result.total }
     if (filters.queue) opts.queue = filters.queue
     if (filters.tenant) opts.tenant = filters.tenant
     confirm(t(key, opts), runRetryAll)
@@ -63,26 +76,26 @@ export default function FailedJobsTab() {
   // Confirm flush with the exact scope — the queue/tenant params are sent to the API.
   const confirmFlush = () => {
     const key = getConfirmKey('jobs.flush')
-    const opts = { count: result.total }
+    const opts: Record<string, unknown> = { count: result.total }
     if (filters.queue) opts.queue = filters.queue
     if (filters.tenant) opts.tenant = filters.tenant
     confirm(t(key, opts), flush, { danger: true })
   }
 
   // Shared columns (queue, tenant, job) + tab-specific columns.
-  const columns = [
+  const columns: Column<FailedJobRow>[] = [
     ...jobColumns(t),
     // TAAKBEHEER-HORIZON-1b: the workflow:<key> tag off the failing job's payload, or a dash when it isn't a workflow run.
-    { key: 'workflow', header: t('jobs.col.workflow'), nowrap: true, render: (r) => r.workflow ?? '—' },
+    { key: 'workflow', header: t('jobs.col.workflow'), nowrap: true, render: (r: FailedJobRow) => r.workflow ?? '—' },
     // JOB-PROVENANCE-1: wie de job aanvroeg + over welk record hij ging.
-    { key: 'requested_by', header: t('jobs.recent.colBy'), nowrap: true, render: (r) => r.requested_by ?? '—' },
+    { key: 'requested_by', header: t('jobs.recent.colBy'), nowrap: true, render: (r: FailedJobRow) => r.requested_by ?? '—' },
     { key: 'subject', header: t('jobs.recent.colSubject'), nowrap: true,
-      render: (r) => r.subject ? <Mono style={{ fontSize: 12 }}>{r.subject.type} {r.subject.reference}</Mono> : '—' },
+      render: (r: FailedJobRow) => r.subject ? <Mono style={{ fontSize: 12 }}>{r.subject.type} {r.subject.reference}</Mono> : '—' },
     { key: 'exception_summary', header: t('jobs.col.exception'),
-      render: (r) => <span style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{r.exception_summary}</span> },
-    { key: 'failed_at', header: t('jobs.col.failedAt'), nowrap: true, render: (r) => formatDT(r.failed_at) },
-    { key: 'actions', header: t('jobs.col.actions'), align: 'right', nowrap: true,
-      render: (r) => (
+      render: (r: FailedJobRow) => <span style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{r.exception_summary}</span> },
+    { key: 'failed_at', header: t('jobs.col.failedAt'), nowrap: true, render: (r: FailedJobRow) => formatDT(r.failed_at) },
+    { key: 'actions', header: t('jobs.col.actions'), align: 'right' as const, nowrap: true,
+      render: (r: FailedJobRow) => (
         <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
           <Button variant="secondary" disabled={busyId === r.uuid} onClick={() => retry(r.uuid)}>
             {t('jobs.retry')}
@@ -128,15 +141,15 @@ export default function FailedJobsTab() {
         </p>
       )}
 
-      <JobsTableFrame phase={phase} columns={columns} rows={result.rows} emptyText={t('jobs.emptyFailed')} getRowId={(r) => r.uuid} />
+      <JobsTableFrame phase={phase} columns={columns} rows={result.rows as FailedJobRow[]} emptyText={t('jobs.emptyFailed')} getRowId={(r: FailedJobRow) => r.uuid} />
 
       {result.lastPage > 1 && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, marginTop: 10 }}>
-          <Button variant="secondary" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+          <Button variant="secondary" disabled={page <= 1} onClick={() => setPage(page - 1)}>
             {t('jobs.pagination.prev')}
           </Button>
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('jobs.pagination.page', { page: result.page, last: result.lastPage })}</span>
-          <Button variant="secondary" disabled={page >= result.lastPage} onClick={() => setPage((p) => p + 1)}>
+          <Button variant="secondary" disabled={page >= result.lastPage} onClick={() => setPage(page + 1)}>
             {t('jobs.pagination.next')}
           </Button>
         </div>

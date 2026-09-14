@@ -18,7 +18,7 @@ vi.mock('@/lib/api', async () => {
 // The panel itself is covered by its own tests; stub it here so this test
 // only proves the open wiring, not the log's internals.
 vi.mock('@/components/webhooks/WebhookRequestsPanel', () => ({
-  default: ({ webhookName, onClose }) => (
+  default: ({ webhookName, onClose }: { webhookName: string; onClose: () => void }) => (
     <div>
       <span>panel-open: {webhookName}</span>
       <button onClick={onClose}>close</button>
@@ -31,13 +31,16 @@ vi.mock('@/lib/notify', () => ({ notifyError, notifySuccess: vi.fn(), notify: vi
 
 import api from '@/lib/api'
 
-const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
+const mockedApi = vi.mocked(api, true)
+
+// Small i18n shorthand for this test's assertions against rendered button names.
+const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 
 afterEach(() => vi.clearAllMocks())
 
 describe('IncomingWebhooks — request-log open wiring', () => {
   it('opens WebhookRequestsPanel for the clicked webhook on "Verzoeken bekijken"', async () => {
-    api.get.mockResolvedValue({ data: [{ id: 'wh-1', name: 'ATS integration', token: 'tok-1' }] })
+    mockedApi.get.mockResolvedValue({ data: [{ id: 'wh-1', name: 'ATS integration', token: 'tok-1' }] })
     const user = userEvent.setup()
     render(<IncomingWebhooks />)
 
@@ -52,14 +55,14 @@ describe('IncomingWebhooks — request-log open wiring', () => {
 // audit r2-ui-states-3: a rejected delete must surface a notice — it used to be swallowed.
 describe('IncomingWebhooks — a failed delete tells the admin', () => {
   it('calls notifyError when the DELETE rejects after the confirm dialog', async () => {
-    api.get.mockResolvedValue({ data: [{ id: 'wh-1', name: 'ATS integration', token: 'tok-1' }] })
-    api.delete.mockRejectedValueOnce(new Error('boom'))
+    mockedApi.get.mockResolvedValue({ data: [{ id: 'wh-1', name: 'ATS integration', token: 'tok-1' }] })
+    mockedApi.delete.mockRejectedValueOnce(new Error('boom'))
     const user = userEvent.setup()
     render(<IncomingWebhooks />)
     await waitFor(() => expect(screen.getByText('ATS integration')).toBeInTheDocument())
     await user.click(screen.getByRole('button', { name: st('webhooks.incoming.removeConfirm') }))
     await user.click(screen.getByRole('button', { name: i18n.t('confirm') }))
-    await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/webhooks/wh-1'))
+    await waitFor(() => expect(mockedApi.delete).toHaveBeenCalledWith('/webhooks/wh-1'))
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith(expect.any(String)))
   })
 })

@@ -5,6 +5,7 @@
  * it is shown only once at create/regenerate — so this tab can only mask it.
  */
 import { useState } from 'react'
+import type { ChangeEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pencil, Plus, Save, X } from 'lucide-react'
 import DetailTable from '@/components/ui/DetailTable'
@@ -15,10 +16,23 @@ import SearchSelect from '@/components/ui/SearchSelect'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
 import { Mono } from '@/components/ui/typography'
+import type { ApiKey, ApiKeyPatch } from './ApiKeyDetail'
 
+// One field pair row's field description (organisation/description, contact name/email).
+interface PairField {
+  label: string
+  value?: string
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void
+  type?: string
+}
+interface FieldPairRowProps {
+  labelStyle: React.CSSProperties
+  inputStyle: React.CSSProperties
+  fields: PairField[]
+}
 // One flex row of two labeled text inputs (organisation/description, contact
 // name/email — same shape twice in this form's edit mode).
-function FieldPairRow({ labelStyle, inputStyle, fields }) {
+function FieldPairRow({ labelStyle, inputStyle, fields }: FieldPairRowProps) {
   return (
     <div style={{ display: 'flex', gap: 12 }}>
       {fields.map(({ label, value, onChange, type }) => (
@@ -31,18 +45,24 @@ function FieldPairRow({ labelStyle, inputStyle, fields }) {
   )
 }
 
+interface ApiKeyGeneralTabProps {
+  apiKey: ApiKey // the persisted key this tab reads/edits
+  onSave: (patch: ApiKeyPatch) => Promise<unknown> // persist the edited fields
+  onMakePrimary: () => void // K-282: promote this (non-primary) key
+}
 // See the file's top doc above; read mode via the shared DetailTable, Edit flips to an inline form; the secret can only ever be masked here.
-export default function ApiKeyGeneralTab({ apiKey, onSave, onMakePrimary }) {
+export default function ApiKeyGeneralTab({ apiKey, onSave, onMakePrimary }: ApiKeyGeneralTabProps) {
   const { t } = useTranslation('settings')
   const { formatDate } = useDateFormat()
   const [editing, setEditing] = useState(false)
   const [saving, setSaving]   = useState(false)
-  const [form, setForm]       = useState(apiKey)
+  const [form, setForm]       = useState<ApiKey>(apiKey)
   const [ipDraft, setIpDraft] = useState('')
   // K-282: the "Maak primair" action only makes sense on a non-primary key.
   const isPrimary = (apiKey.type ?? 'additional') === 'primary'
 
-  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
+  // Structural param (not ChangeEvent) so the same setter also drives the SearchSelect toggle below (ApiKeyCreate.tsx idiom).
+  const set = (k: keyof ApiKey) => (e: { target: { value: string } }) => setForm((f) => ({ ...f, [k]: e.target.value }))
   const ips = form.allowed_ips ?? []
 
   // Add a typed IP/CIDR to the whitelist if it passes the light client check.
@@ -52,7 +72,7 @@ export default function ApiKeyGeneralTab({ apiKey, onSave, onMakePrimary }) {
     setForm((f) => ({ ...f, allowed_ips: [...ips, v] }))
     setIpDraft('')
   }
-  const removeIp = (ip) => setForm((f) => ({ ...f, allowed_ips: ips.filter((x) => x !== ip) }))
+  const removeIp = (ip: string) => setForm((f) => ({ ...f, allowed_ips: ips.filter((x) => x !== ip) }))
 
   // Persist the edited fields, then leave edit mode on success.
   const save = async () => {
@@ -72,10 +92,10 @@ export default function ApiKeyGeneralTab({ apiKey, onSave, onMakePrimary }) {
 
   // Canon field style (G33/fieldMetrics) — was its own height-32/radius-7 copy.
   const inputStyle = fieldInputStyle
-  const labelStyle = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 4, display: 'block' }
+  const labelStyle = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 4, display: 'block' as const }
 
   // Read-only field rows for DetailTable.
-  const rows = [
+  const rows: [string, ReactNode][] = [
     [t('apiKeys.field.type'), t(`apiKeys.type.${apiKey.type ?? 'additional'}`, { defaultValue: apiKey.type })],
     [t('apiKeys.field.name'), apiKey.friendly_name ?? apiKey.name],
     [t('apiKeys.field.organisation'), apiKey.organisation],

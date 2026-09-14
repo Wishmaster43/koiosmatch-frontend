@@ -6,16 +6,24 @@
  */
 import { useEffect, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { fetchJobMetrics } from './jobsApi'
+import type { TFunction } from 'i18next'
+import { fetchJobMetrics, type JobMetrics, type JobMetricRow } from './jobsApi'
 import { SectionTitle } from '@/components/ui/typography'
 import { JobsRefreshButton, JobsErrorNotice } from './jobsShared'
 import { useVisiblePoll } from '@/hooks/useVisiblePoll'
 
-const TH = { padding: '9px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
+const TH = { padding: '9px 12px', textAlign: 'left' as const, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' as const }
 const TD = { padding: '9px 12px', fontSize: 12.5, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
 
+// Props for one metrics table (jobs or queues) — same column shape either way.
+interface MetricsTableProps {
+  rows: JobMetricRow[] // the snapshot rows for this table
+  nameHeader: string // translated header for the name column
+  t: TFunction // settings namespace translator
+}
+
 // One metrics table (jobs or queues) — same column shape either way.
-function MetricsTable({ rows, nameHeader, t }) {
+function MetricsTable({ rows, nameHeader, t }: MetricsTableProps) {
   if (rows.length === 0) return <p style={{ fontSize: 12, color: 'var(--text-muted)', padding: 8 }}>{t('jobs.metrics.empty')}</p>
 
   return (
@@ -40,11 +48,14 @@ function MetricsTable({ rows, nameHeader, t }) {
   )
 }
 
+// Empty snapshot shape, used until the first fetch resolves.
+const EMPTY_METRICS: JobMetrics = { jobs: [], queues: [] }
+
 // Polls Horizon's per-job/per-queue throughput snapshot every 15s while the tab is visible (see the module doc above for what's actually measured).
 export default function MetricsTab() {
   const { t } = useTranslation('settings')
-  const [metrics, setMetrics] = useState({ jobs: [], queues: [] })
-  const [phase, setPhase] = useState('loading')
+  const [metrics, setMetrics] = useState<JobMetrics>(EMPTY_METRICS)
+  const [phase, setPhase] = useState<'loading' | 'ready' | 'error'>('loading')
 
   // Refetches the snapshot; keeps the phase at 'ready' during a background poll so the table doesn't flash back to a loading state on every refresh.
   const load = useCallback(async () => {

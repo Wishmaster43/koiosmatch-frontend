@@ -6,6 +6,7 @@
  * visible-tab only).
  */
 import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { Layers, Building2 } from 'lucide-react'
 import StatusPill from '@/components/ui/StatusPill'
 import { formatDuration } from '@/components/reports/runFormat'
@@ -13,16 +14,24 @@ import Button from '@/components/ui/Button'
 import { Mono, SectionTitle, Caption, GroupLabel, monoStyle } from '@/components/ui/typography'
 import { tintBorder } from '@/lib/tint'
 import { JobsRefreshButton, JobsErrorNotice } from './jobsShared'
+import type { QueueSummary, QueueBucket } from './jobsApi'
 
 // Heartbeat status → semantic colour (never a plain grey "off" state — §4).
-const STATUS_COLOR = { active: 'var(--color-success)', stalled: 'var(--color-danger)', idle: 'var(--text-muted)' }
+const STATUS_COLOR: Record<string, string> = { active: 'var(--color-success)', stalled: 'var(--color-danger)', idle: 'var(--text-muted)' }
 
 // The API reports ages in whole seconds (or null); formatDuration expects ms —
 // null * 1000 would silently become 0 in JS, so convert explicitly.
-const ageMs = (seconds) => (seconds == null ? null : seconds * 1000)
+const ageMs = (seconds?: number | null): number | null => (seconds == null ? null : seconds * 1000)
+
+// Props for one queue or tenant bucket card.
+interface BucketCardProps {
+  t: TFunction // settings namespace translator
+  name: string // queue name, or tenant id / label
+  bucket: QueueBucket // counts + ages + heartbeat status for this bucket
+}
 
 // One queue or tenant bucket card — counts + ages + heartbeat pill.
-function BucketCard({ t, name, bucket }) {
+function BucketCard({ t, name, bucket }: BucketCardProps) {
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface)', padding: '12px 14px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -43,8 +52,16 @@ function BucketCard({ t, name, bucket }) {
   )
 }
 
+// Props: summary comes from the parent's useQueueSummary poll; phase drives loading/error, onRefresh/onGoToFailed are toolbar actions.
+interface QueueOverviewTabProps {
+  summary: QueueSummary | null // latest backlog snapshot, or null before the first load
+  phase: 'loading' | 'ready' | 'error' // parent-owned load phase
+  onRefresh: () => void // manual refresh (also polled automatically)
+  onGoToFailed: () => void // switch the parent's sub-tab to Failed
+}
+
 // See the file's top doc above; read-only backlog health, polled every 15s while visible.
-export default function QueueOverviewTab({ summary, phase, onRefresh, onGoToFailed }) {
+export default function QueueOverviewTab({ summary, phase, onRefresh, onGoToFailed }: QueueOverviewTabProps) {
   const { t } = useTranslation('settings')
   const byQueue = summary?.by_queue ?? []
   const byTenant = summary?.by_tenant ?? []

@@ -23,6 +23,21 @@ import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 // audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
+// hand-written: the spec carries no 2xx schema for GET/POST /webhooks (responses: never).
+interface Webhook {
+  id: string
+  name: string
+  description?: string | null
+  token: string
+  last_triggered_at?: string | null
+}
+
+// Which webhook's request log is open — the drill-in target.
+interface RequestsTarget {
+  id: string
+  name: string
+}
+
 // Inbound webhook URLs are pasted into external systems — absolute, never /api-relative.
 const BASE_URL = publicApiUrl('/webhook')
 
@@ -31,36 +46,36 @@ const BASE_URL = publicApiUrl('/webhook')
 export default function IncomingWebhooks() {
   const { t } = useTranslation('settings')
   const { formatDateTime } = useDateFormat()
-  const [webhooks, setWebhooks] = useState([])
+  const [webhooks, setWebhooks] = useState<Webhook[]>([])
   const [loading,  setLoading]  = useState(true)
   const [name,     setName]     = useState('')
   const [desc,     setDesc]     = useState('')
   const [creating, setCreating] = useState(false)
-  const [copied,   setCopied]   = useState(null)
-  const [editId,   setEditId]   = useState(null)
+  const [copied,   setCopied]   = useState<string | null>(null)
+  const [editId,   setEditId]   = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [editDesc, setEditDesc] = useState('')
   // Which webhook's request log is open ({ id, name }) — the new drill-in.
-  const [requestsFor, setRequestsFor] = useState(null)
+  const [requestsFor, setRequestsFor] = useState<RequestsTarget | null>(null)
   // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
   const { confirm, dialog } = useConfirm()
 
   // Start / save an in-place edit of an existing webhook (name + description).
-  const startEdit = (wh) => { setEditId(wh.id); setEditName(wh.name ?? ''); setEditDesc(wh.description ?? '') }
+  const startEdit = (wh: Webhook) => { setEditId(wh.id); setEditName(wh.name ?? ''); setEditDesc(wh.description ?? '') }
   // Commits the in-place edit: updates local state optimistically, then persists.
-  const saveEdit = async (id) => {
+  const saveEdit = async (id: string) => {
     const nm = editName.trim(); if (!nm) return
     const description = editDesc.trim() || null
     setWebhooks((prev) => prev.map((w) => (w.id === id ? { ...w, name: nm, description } : w)))
     setEditId(null)
-    await api.patch(`/webhooks/${id}`, { name: nm, description }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
+    await api.patch(`/webhooks/${id}`, { name: nm, description }).catch((err) => notifyError(extractApiError(err, t('common:actionFailed'))))
   }
 
   // Load the inbound webhooks for the active tenant.
   useEffect(() => {
     api.get('/webhooks')
-      .then((res) => setWebhooks(unwrapList(res).rows))
-      .catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
+      .then((res) => setWebhooks(unwrapList<Webhook>(res).rows))
+      .catch((err) => notifyError(extractApiError(err, t('common:actionFailed'))))
       .finally(() => setLoading(false))
     // `t` is stable per language; a language switch re-runs the load, which is harmless.
   }, [t])
@@ -71,7 +86,7 @@ export default function IncomingWebhooks() {
     setCreating(true)
     try {
       const res = await api.post('/webhooks', { name: name.trim(), description: desc.trim() || null })
-      setWebhooks((prev) => [...prev, unwrap(res)])
+      setWebhooks((prev) => [...prev, unwrap<Webhook>(res)])
       setName('')
       setDesc('')
     } catch { /* noop */ }
@@ -79,15 +94,15 @@ export default function IncomingWebhooks() {
   }
 
   // User asked to delete a webhook: confirms first (destructive), then removes it.
-  const remove = (id) => {
+  const remove = (id: string) => {
     confirm(t('webhooks.incoming.removeConfirm'), async () => {
-      await api.delete(`/webhooks/${id}`).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
+      await api.delete(`/webhooks/${id}`).catch((err) => notifyError(extractApiError(err, t('common:actionFailed'))))
       setWebhooks((prev) => prev.filter((w) => w.id !== id))
     }, { danger: true })
   }
 
   // Copies the full webhook URL to the clipboard and shows temporary "copied" feedback.
-  const copyUrl = (token) => {
+  const copyUrl = (token: string) => {
     navigator.clipboard.writeText(`${BASE_URL}/${token}`)
     setCopied(token)
     setTimeout(() => setCopied(null), 2000)

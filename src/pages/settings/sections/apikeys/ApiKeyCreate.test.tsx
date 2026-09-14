@@ -19,7 +19,7 @@ vi.mock('@/lib/api', async () => {
 })
 vi.mock('@/lib/notify', () => ({ notifySuccess: vi.fn(), notifyError: vi.fn() }))
 
-const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
+const st = (key: string, opts?: object) => i18n.t(key, { ns: 'settings', ...opts })
 
 afterEach(() => { vi.clearAllMocks(); vi.restoreAllMocks() })
 // restoreAllMocks drops the factory's GET implementation; re-arm the level-hint 404 per test.
@@ -37,7 +37,7 @@ describe('ApiKeyCreate — scope request', () => {
       contact_email: 'john@example.com',
       secret: 'secret-plaintext-once',
     }
-    api.post.mockResolvedValue({ data: createdKey })
+    vi.mocked(api.post).mockResolvedValue({ data: createdKey })
     const onCreated = vi.fn()
     const user = userEvent.setup()
 
@@ -74,7 +74,7 @@ describe('ApiKeyCreate — scope request', () => {
 
     // Verify the POST request was made with scopes included.
     await waitFor(() => {
-      expect(api.post).toHaveBeenCalledWith('/api-keys', expect.objectContaining({
+      expect(vi.mocked(api.post)).toHaveBeenCalledWith('/api-keys', expect.objectContaining({
         friendly_name: 'Test key',
         scopes: expect.objectContaining({ candidates: 'read' }),
       }))
@@ -88,7 +88,7 @@ describe('ApiKeyCreate — scope request', () => {
       type: 'additional',
       secret: 'secret-plaintext-once',
     }
-    api.post.mockResolvedValue({ data: createdKey })
+    vi.mocked(api.post).mockResolvedValue({ data: createdKey })
     const user = userEvent.setup()
 
     render(<ApiKeyCreate onBack={vi.fn()} onCreated={vi.fn()} />)
@@ -123,7 +123,7 @@ describe('ApiKeyCreate — scope request', () => {
 
     // Verify the POST request includes all five scopes with 'read' level.
     await waitFor(() => {
-      expect(api.post).toHaveBeenCalledWith('/api-keys', expect.objectContaining({
+      expect(vi.mocked(api.post)).toHaveBeenCalledWith('/api-keys', expect.objectContaining({
         friendly_name: 'Dossier key',
         scopes: expect.objectContaining({
           candidate_notes: 'read',

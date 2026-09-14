@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Pencil, Save, Webhook, X } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
@@ -18,38 +19,66 @@ import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 // audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
+// hand-written: the spec carries no 2xx schema for GET/PUT /webhook-subscriptions/{id}
+interface WebhookSubscription {
+  id: string
+  name: string
+  url: string
+  events: string[]
+  status?: 'active' | 'disabled'
+}
+
+// hand-written: the spec carries no 2xx schema for POST .../regenerate-secret
+interface RegenerateSecretResponse {
+  signing_secret?: string
+  secret?: string
+}
+
+interface WebhookDetailProps {
+  /** The subscription id to load full detail for. */
+  subId: string
+  /** The list's own row, shown immediately while the full detail loads. */
+  listRow?: WebhookSubscription
+  /** Returns to the list view. */
+  onBack: () => void
+  /** Notifies the parent list of a merged patch, so the row stays in sync. */
+  onPatch?: (id: string, merged: WebhookSubscription) => void
+  /** Notifies the parent list that this subscription was deleted. */
+  onDelete?: (id: string) => void
+}
+
 /**
  * WebhookDetail — the per-subscription detail (replaces the list). A header
  * (back, name, status, Action menu) over two cards: the editable name + URL, and
  * the event filter. Status toggle, secret regeneration (one-time banner) and
  * deletion live in the Action menu and bubble back to the list via onPatch/onDelete.
  */
-export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelete }) {
+export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelete }: WebhookDetailProps) {
   const { t } = useTranslation('settings')
-  const [sub, setSub]         = useState(listRow ?? null)
+  const [sub, setSub]         = useState<WebhookSubscription | null>(listRow ?? null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
-  const [form, setForm]       = useState(listRow ?? { name: '', url: '' })
-  const [events, setEvents]   = useState(listRow?.events ?? [])
+  const [form, setForm]       = useState<Partial<WebhookSubscription>>(listRow ?? { name: '', url: '' })
+  const [events, setEvents]   = useState<string[]>(listRow?.events ?? [])
   const [savingEv, setSavingEv] = useState(false)
   const [savedEv, setSavedEv]   = useState(false)
-  const [secret, setSecret]   = useState(null)
+  const [secret, setSecret]   = useState<string | null>(null)
   const { confirm, dialog } = useConfirm()
 
   // Fetch full detail; fall back to the list row on failure.
   useEffect(() => {
     let active = true
     getSubscription(subId)
-      .then((full) => { if (active) { setSub((p) => ({ ...p, ...full })); setForm((f) => ({ ...f, ...full })); setEvents(full.events ?? []) } })
+      .then((res: unknown) => { const full = res as WebhookSubscription; if (active) { setSub((p) => ({ ...p, ...full })); setForm((f) => ({ ...f, ...full })); setEvents(full.events ?? []) } })
       .catch(() => { /* keep listRow */ })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [subId])
 
   // Persist a partial change and reflect it locally + in the parent list.
-  const applyUpdate = async (patch) => {
-    const updated = await updateSubscription(subId, patch)
-    const merged = { ...sub, ...patch, ...updated }
+  const applyUpdate = async (patch: Partial<WebhookSubscription>) => {
+    const updated = await updateSubscription(subId, patch) as Partial<WebhookSubscription>
+    const merged = { ...sub, ...patch, ...updated } as WebhookSubscription
     setSub(merged)
     onPatch?.(subId, merged)
     return merged
@@ -73,8 +102,8 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
 
   // Header actions.
   // The backend returns the key as signing_secret; secret is a legacy fallback.
-  const regenerate = async () => { try { const res = await regenerateSecret(subId); setSecret(res?.signing_secret ?? res?.secret ?? null) } catch { /* noop */ } }
-  const toggleStatus = () => applyUpdate({ status: (sub?.status ?? 'active') === 'active' ? 'disabled' : 'active' }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
+  const regenerate = async () => { try { const res: RegenerateSecretResponse = await regenerateSecret(subId); setSecret(res?.signing_secret ?? res?.secret ?? null) } catch { /* noop */ } }
+  const toggleStatus = () => applyUpdate({ status: (sub?.status ?? 'active') === 'active' ? 'disabled' : 'active' }).catch((err: unknown) => notifyError(extractApiError(err, t('common:actionFailed'))))
   // Confirms then deletes the subscription, bubbling the removal back to the list.
   const remove = () => {
     confirm(t('webhooks.outgoing.deleteConfirm', { name: sub?.name ?? '' }), async () => {
@@ -149,13 +178,13 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div>
               <label style={labelStyle}>{t('webhooks.outgoing.field.name')}</label>
-              <input value={form.name ?? ''} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} style={inputStyle} />
+              <input value={form.name ?? ''} onChange={(e: ChangeEvent<HTMLInputElement>) => setForm((f) => ({ ...f, name: e.target.value }))} style={inputStyle} />
             </div>
             <div>
               <label style={labelStyle}>{t('webhooks.outgoing.field.url')}</label>
               <input
                 value={form.url ?? ''}
-                onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setForm((f) => ({ ...f, url: e.target.value }))}
                 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the input element itself must carry the font; the Mono atom renders a separate element and cannot apply to native input text
                 style={{ ...inputStyle, fontFamily: "'JetBrains Mono', monospace" }}
               />

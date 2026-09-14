@@ -6,6 +6,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import type { ReactNode } from 'react'
 import { useWebhookEventCatalog } from './useWebhookEventCatalog'
 import { ALL_EVENTS as FALLBACK_ALL_EVENTS, EVENT_GROUPS as FALLBACK_EVENT_GROUPS, actionOf } from './webhookEvents'
 import api from '@/lib/api'
@@ -18,14 +19,17 @@ vi.mock('@/lib/api', async () => {
 afterEach(() => vi.clearAllMocks())
 
 // Fresh QueryClient per render — no cross-test cache bleed, no retries slowing failures.
-function wrapper({ children }) {
+function wrapper({ children }: { children: ReactNode }) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>
 }
 
+// Typed mock handle so every `.mockResolvedValue(...)` call below is checked.
+const mockedGet = vi.mocked(api.get)
+
 describe('useWebhookEventCatalog', () => {
   it('fetches GET /webhook-events', async () => {
-    vi.mocked(api.get).mockResolvedValue({ data: { data: [
+    mockedGet.mockResolvedValue({ data: { data: [
       { key: 'candidate.created', label: 'Candidate created', group: 'candidates', pii: false },
     ] } })
     const { result } = renderHook(() => useWebhookEventCatalog(), { wrapper })
@@ -34,7 +38,7 @@ describe('useWebhookEventCatalog', () => {
   })
 
   it('groups the flat response by `group`, preserving order', async () => {
-    vi.mocked(api.get).mockResolvedValue({ data: { data: [
+    mockedGet.mockResolvedValue({ data: { data: [
       { key: 'candidate.created', label: 'Candidate created', group: 'candidates', pii: false },
       { key: 'candidate.updated', label: 'Candidate updated', group: 'candidates', pii: false },
       { key: 'match.created', label: 'Match created', group: 'matches', pii: false },
@@ -49,7 +53,7 @@ describe('useWebhookEventCatalog', () => {
   })
 
   it('an event key the static list lacks is still selectable (server is the live source of truth)', async () => {
-    vi.mocked(api.get).mockResolvedValue({ data: { data: [
+    mockedGet.mockResolvedValue({ data: { data: [
       { key: 'candidate.brand_new_signal', label: 'Brand new signal', group: 'candidates', pii: false },
     ] } })
     const { result } = renderHook(() => useWebhookEventCatalog(), { wrapper })
@@ -63,7 +67,7 @@ describe('useWebhookEventCatalog', () => {
     // here we only assert the LIVE hook reproduces it faithfully from a full response.
     const fullResponse = FALLBACK_EVENT_GROUPS.flatMap(({ group, events }) =>
       events.map((key) => ({ key, label: actionOf(key), group, pii: false })))
-    vi.mocked(api.get).mockResolvedValue({ data: { data: fullResponse } })
+    mockedGet.mockResolvedValue({ data: { data: fullResponse } })
     const { result } = renderHook(() => useWebhookEventCatalog(), { wrapper })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.isFallback).toBe(false)
@@ -74,7 +78,7 @@ describe('useWebhookEventCatalog', () => {
   })
 
   it('falls back to the bundled static catalogue on a network error, flagged via isFallback', async () => {
-    vi.mocked(api.get).mockRejectedValue(new Error('network down'))
+    mockedGet.mockRejectedValue(new Error('network down'))
     const { result } = renderHook(() => useWebhookEventCatalog(), { wrapper })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(result.current.isFallback).toBe(true)

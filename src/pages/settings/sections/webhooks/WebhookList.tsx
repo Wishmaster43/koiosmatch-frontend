@@ -5,14 +5,40 @@
  */
 import { useTranslation } from 'react-i18next'
 import { Plus, RefreshCw } from 'lucide-react'
-import DataTable from '@/components/ui/DataTable'
+import DataTable, { type Column } from '@/components/ui/DataTable'
 import StatusBadge from '@/components/ui/StatusBadge'
 import { useDateFormat } from '@/lib/datetime'
 import Button from '@/components/ui/Button'
 import { PageTitle } from '@/components/ui/typography'
 
+// hand-written: mirrors WebhookDetail's own WebhookSubscription shape (the spec
+// carries no 2xx schema for GET /webhook-subscriptions).
+export interface WebhookSubscriptionRow {
+  id: string
+  name: string
+  url: string
+  events: string[]
+  status?: 'active' | 'disabled'
+  last_triggered_at?: string | null
+}
+
+interface WebhookListProps {
+  /** Outgoing-webhook rows for the table. */
+  subs: WebhookSubscriptionRow[]
+  /** Table is still loading its first page. */
+  loading: boolean
+  /** The list load failed — shows a retry state instead of the table. */
+  error: boolean
+  /** Retries the failed load. */
+  onReload: () => void
+  /** Opens the detail view for the clicked row's id. */
+  onOpen: (id: string) => void
+  /** Opens the inline create view. */
+  onNew: () => void
+}
+
 // The outgoing-webhook overview table; handles all four UI states explicitly.
-export default function WebhookList({ subs, loading, error, onReload, onOpen, onNew }) {
+export default function WebhookList({ subs, loading, error, onReload, onOpen, onNew }: WebhookListProps) {
   const { t } = useTranslation('settings')
   const { formatDate } = useDateFormat()
 
@@ -23,7 +49,7 @@ export default function WebhookList({ subs, loading, error, onReload, onOpen, on
   }
 
   // Column model: name, url, status, event count, last triggered.
-  const columns = [
+  const columns: Column<WebhookSubscriptionRow>[] = [
     { key: 'name', header: t('webhooks.outgoing.col.name'), sortable: true,
       render: (r) => <span style={{ fontWeight: 600, color: 'var(--text)' }}>{r.name ?? '—'}</span> },
     { key: 'url', header: t('webhooks.outgoing.col.url'),

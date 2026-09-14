@@ -8,14 +8,26 @@
  */
 import { useState } from 'react'
 import { useWebhookSubscriptions } from './useWebhookSubscriptions'
-import WebhookList from './WebhookList'
+import WebhookList, { type WebhookSubscriptionRow } from './WebhookList'
 import WebhookDetail from './WebhookDetail'
 import WebhookCreate from './WebhookCreate'
 import WorkflowEndpointsCard from './WorkflowEndpointsCard'
 
 export default function OutgoingWebhooks() {
-  const { subs, loading, error, reload, add, patch, drop } = useWebhookSubscriptions()
-  const [selectedId, setSelectedId] = useState(null)
+  // useWebhookSubscriptions() reads its row type from the still-untyped
+  // useWebhookSubscriptions.js — cast once at this boundary (house precedent:
+  // apikeys/index.tsx), payload types stay unknown since the real shapes
+  // (WebhookSubscriptionCreated/WebhookSubscriptionRow) are owned by the callees.
+  const { subs, loading, error, reload, add, patch, drop } = useWebhookSubscriptions() as {
+    subs: WebhookSubscriptionRow[]
+    loading: boolean
+    error: boolean
+    reload: () => void
+    add: (item: unknown) => void
+    patch: (id: string, merged: unknown) => void
+    drop: (id: string) => void
+  }
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
 
   // Create view replaces the list (inline, no modal) — same pattern as detail.
@@ -31,7 +43,7 @@ export default function OutgoingWebhooks() {
         listRow={subs.find((s) => s.id === selectedId)}
         onBack={() => setSelectedId(null)}
         onPatch={patch}
-        onDelete={(id) => { drop(id); setSelectedId(null) }}
+        onDelete={(id: string) => { drop(id); setSelectedId(null) }}
       />
     )
   }

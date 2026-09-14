@@ -11,9 +11,10 @@
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { isAxiosError } from 'axios'
 import { getKoiosSettings } from './koiosApi'
 import KoiosStatusCard from './KoiosStatusCard'
-import KoiosModelsCard from './KoiosModelsCard'
+import KoiosModelsCard, { type KoiosModelsData } from './KoiosModelsCard'
 import KoiosModeDefaultCard from './KoiosModeDefaultCard'
 import KoiosEffortDefaultCard from './KoiosEffortDefaultCard'
 import KoiosBudgetCard from './KoiosBudgetCard'
@@ -29,11 +30,18 @@ import { SETTINGS_MAX_W_WIDE } from '@/pages/settings/components/settingsMetrics
 
 const notice = { fontSize: 13, color: 'var(--text-muted)' }
 
+// The full settings payload — hand-written: the spec carries no 2xx schema for
+// GET /ai/koios/settings (see koiosApi.ts's own module doc).
+interface KoiosSettingsData {
+  status?: { claude_configured?: boolean; policy_loaded?: boolean; api_ok?: boolean; api_error?: string }
+  models?: KoiosModelsData
+}
+
 // Koios AI settings screen (status/models/rates); a 403 degrades to a calm unavailable notice rather than an error (see file header).
 export default function KoiosSettings() {
   const { t } = useTranslation('koios')
-  const [settings, setSettings] = useState(null)
-  const [phase, setPhase] = useState('loading') // loading | ready | unavailable | error
+  const [settings, setSettings] = useState<KoiosSettingsData | null>(null)
+  const [phase, setPhase] = useState<'loading' | 'ready' | 'unavailable' | 'error'>('loading')
   // Sub-tab state: overview (status+models) vs the new learning report (C1-lane 2).
   const [tab, setTab] = useState('overview')
   const TABS = [
@@ -47,8 +55,8 @@ export default function KoiosSettings() {
   useEffect(() => {
     let alive = true
     getKoiosSettings()
-      .then((d) => { if (alive) { setSettings(d); setPhase('ready') } })
-      .catch((e) => { if (alive) setPhase(e?.response?.status === 403 ? 'unavailable' : 'error') })
+      .then((d: KoiosSettingsData) => { if (alive) { setSettings(d); setPhase('ready') } })
+      .catch((e: unknown) => { if (alive) setPhase(isAxiosError(e) && e.response?.status === 403 ? 'unavailable' : 'error') })
     return () => { alive = false }
   }, [])
 
@@ -74,7 +82,7 @@ export default function KoiosSettings() {
             <>
               <KoiosStatusCard status={settings?.status} t={t} />
               <KoiosModelsCard models={settings?.models} t={t}
-                onChanged={(model) => { setSettings((s) => ({ ...s, models: { ...s.models, active: model } })); invalidateKoiosSettings() }} />
+                onChanged={(model) => { setSettings((s) => (s ? { ...s, models: { ...s.models, active: model } } : s)); invalidateKoiosSettings() }} />
               <KoiosModeDefaultCard />
               <KoiosEffortDefaultCard />
               <KoiosBudgetCard />

@@ -9,26 +9,27 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import KoiosModelsCard from './KoiosModelsCard'
+import KoiosModelsCard, { type KoiosModelsData } from './KoiosModelsCard'
+import type { TFn } from '@/types/koios'
 
 // The API call itself is mocked — no live /api/ai/koios/* call ever fires (API-CREDITS-1).
 const mockUpdateKoiosModel = vi.fn()
-vi.mock('./koiosApi', () => ({ updateKoiosModel: (...a) => mockUpdateKoiosModel(...a) }))
+vi.mock('./koiosApi', () => ({ updateKoiosModel: (...a: unknown[]) => mockUpdateKoiosModel(...a) }))
 
 // mock-prefixed so Vitest allows access inside the hoisted vi.mock factory
 // (mirrors CandidateDrawer.test.tsx's mockUseAuth) — toggled per test below.
-const mockUseAuth = vi.fn(() => ({ isSuperAdmin: () => false }))
+const mockUseAuth = vi.fn((): { isSuperAdmin: () => boolean } => ({ isSuperAdmin: () => false }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
 
 // t stub returns the raw key so assertions read exactly what the component asked for.
-const t = (key, opts) => {
+const t: TFn = (key, opts) => {
   if (opts?.model) return `${key} model=${opts.model}`
   return key
 }
 
 // The measured controller serves FLAVOUR KEYS in selectable[] (KOIOS-MODEL-
 // VOCAB-1); the legacy raw-vendor-id fallback keeps its own dedicated test below.
-const models = {
+const models: KoiosModelsData = {
   active: 'slim',
   selectable: ['snel', 'slim', 'max'],
   options: [
@@ -37,11 +38,11 @@ const models = {
     { id: 'max', label: 'Max', hint: 'Krachtigst', cost_rank: 3 },
   ],
 }
-const modelsWithCostNote = {
+const modelsWithCostNote: KoiosModelsData = {
   ...models,
   cost_note: 'Kosten per token gelden volgens het tariefdocument.',
 }
-const legacyModels = {
+const legacyModels: KoiosModelsData = {
   active: 'claude-sonnet-5',
   selectable: ['claude-haiku-4-5', 'claude-sonnet-5', 'claude-opus-4-8'],
 }
@@ -113,7 +114,7 @@ describe('KoiosModelsCard', () => {
   // server `options` prop: rank 1 -> Zap, the highest listed rank -> Crown,
   // anything between -> Sparkles.
   it('maps flavour-key selectable + server options to icons by cost_rank', () => {
-    const flavourModels = {
+    const flavourModels: KoiosModelsData = {
       active: 'slim',
       selectable: ['snel', 'slim', 'max'],
       options: [

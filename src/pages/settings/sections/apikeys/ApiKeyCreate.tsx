@@ -12,6 +12,7 @@ import { Key } from 'lucide-react'
 import { createApiKey } from './apiKeysApi'
 import { KEY_TYPES } from './constants'
 import ScopeEditor from './ScopeEditor'
+import type { ScopeMap } from './ScopeEditor'
 import { useScopeEntityLevels } from './useScopeEntityLevels'
 import SearchSelect from '@/components/ui/SearchSelect'
 import OneTimeSecretReveal from '@/pages/settings/components/OneTimeSecretReveal'
@@ -20,20 +21,41 @@ import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
 import { Caption, formLabelStyle } from '@/components/ui/typography'
 import { useCreateForm } from '@/pages/settings/lib/useCreateForm'
+import type { ApiKeyRow } from './ApiKeyList'
+
+// The create form's own field state (all plain text except type, a KEY_TYPES member).
+interface ApiKeyCreateForm {
+  friendly_name: string
+  type: string
+  organisation: string
+  description: string
+  contact_name: string
+  contact_email: string
+}
+// hand-written: the spec carries no 2xx schema for POST /api-keys
+// The create response: the plaintext secret arrives exactly once, alongside the
+// full created row (same shape as the list/detail rows).
+interface CreatedApiKey extends ApiKeyRow {
+  secret: string
+}
+interface ApiKeyCreateProps {
+  onBack: () => void // return to the list without creating
+  onCreated?: (created: CreatedApiKey) => void // notify the parent list of the new row
+}
 
 // Two-phase inline view (see the module doc above): the create form, then the one-time secret reveal — no modal, so the whole overview stays readable.
-export default function ApiKeyCreate({ onBack, onCreated }) {
+export default function ApiKeyCreate({ onBack, onCreated }: ApiKeyCreateProps) {
   const { t } = useTranslation('settings')
   const levelsByEntity = useScopeEntityLevels()
-  const [form, setForm]     = useState({ friendly_name: '', type: 'additional', organisation: '', description: '', contact_name: '', contact_email: '' })
-  const [scopes, setScopes] = useState({})   // access grid, sent with the create call
-  const { saving, setSaving, error, setError, result, setResult } = useCreateForm()
-  const firstField          = useRef(null)
+  const [form, setForm]     = useState<ApiKeyCreateForm>({ friendly_name: '', type: 'additional', organisation: '', description: '', contact_name: '', contact_email: '' })
+  const [scopes, setScopes] = useState<ScopeMap>({})   // access grid, sent with the create call
+  const { saving, setSaving, error, setError, result, setResult } = useCreateForm<CreatedApiKey>()
+  const firstField          = useRef<HTMLInputElement>(null)
 
   // Focus the name field on open.
   useEffect(() => { firstField.current?.focus() }, [])
 
-  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
+  const set = (k: keyof ApiKeyCreateForm) => (e: { target: { value: string } }) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
   // Submit the form; on success move to the secret-reveal phase and notify the list.
   const submit = async () => {
@@ -41,7 +63,7 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
     setSaving(true)
     setError(false)
     try {
-      const created = await createApiKey({ ...form, friendly_name: form.friendly_name.trim(), scopes })
+      const created = await createApiKey({ ...form, friendly_name: form.friendly_name.trim(), scopes }) as CreatedApiKey
       setResult(created)
       onCreated?.(created)
     } catch {
@@ -54,7 +76,7 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
   // (one of only two 38px outliers on the whole platform; 34 is the majority).
   const inputStyle = fieldInputStyle
   // Shared FormLabel identity (12/500/muted) + this file's own layout (§4: identity from the atom, layout local).
-  const labelStyle = { ...formLabelStyle, marginBottom: 5, display: 'block' }
+  const labelStyle = { ...formLabelStyle, marginBottom: 5, display: 'block' as const }
   const fieldGrid = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }
 
   return (

@@ -9,12 +9,13 @@ import { render, screen, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import ApiKeyGeneralTab from './ApiKeyGeneralTab'
+import type { ApiKey } from './ApiKeyDetail'
 
-const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
+const st = (key: string, opts?: object) => i18n.t(key, { ns: 'settings', ...opts })
 
 afterEach(() => cleanup())
 
-const apiKey = (over = {}) => ({
+const apiKey = (over: Partial<ApiKey> = {}): ApiKey => ({
   id: 'k1', friendly_name: 'Backoffice key', type: 'additional', organisation: 'Yesway',
   description: '', guid: 'abcd1234-5678-90ab-cdef-1234567890ab',
   created_at: '2026-08-01T10:00:00Z', updated_at: '2026-08-01T10:00:00Z',

@@ -15,9 +15,16 @@ import { PermissionToggle } from '@/pages/settings/components/SettingsControls'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
 
+interface EventCatalogProps {
+  /** Controlled list of selected event keys. */
+  value?: string[]
+  /** Called with the full next selection whenever it changes. */
+  onChange: (next: string[]) => void
+}
+
 // Controlled event-picker for a webhook subscription: grouped pill toggles with
 // search and per-group/global select-all (see file docblock above).
-export default function EventCatalog({ value = [], onChange }) {
+export default function EventCatalog({ value = [], onChange }: EventCatalogProps) {
   const { t } = useTranslation('settings')
   const [query, setQuery] = useState('')
   const { groups: EVENT_GROUPS, isLoading, isFallback } = useWebhookEventCatalog()
@@ -27,8 +34,8 @@ export default function EventCatalog({ value = [], onChange }) {
 
   // Honest fallback: an unlisted server group (a live catalogue can add one at any
   // time) shows its raw key instead of a leaked i18n path.
-  const groupLabel  = (g) => t(`webhooks.events.groups.${g}`, { defaultValue: g })
-  const actionLabel = (a) => t(`webhooks.events.actions.${a}`, { defaultValue: a })
+  const groupLabel  = (g: string) => t(`webhooks.events.groups.${g}`, { defaultValue: g })
+  const actionLabel = (a: string) => t(`webhooks.events.actions.${a}`, { defaultValue: a })
 
   // Filter events by raw key, group label or action label.
   const q = query.trim().toLowerCase()
@@ -37,22 +44,22 @@ export default function EventCatalog({ value = [], onChange }) {
   const groups = useMemo(() => EVENT_GROUPS
     .map(({ group, events }) => ({
       group,
-      events: events.filter((ev) =>
-        !q || ev.toLowerCase().includes(q) || groupLabel(group).toLowerCase().includes(q) || actionLabel(actionOf(ev)).toLowerCase().includes(q)),
+      events: events.filter((ev: string) =>
+        !q || ev.toLowerCase().includes(q) || groupLabel(group).toLowerCase().includes(q) || actionLabel(actionOf(ev) ?? '').toLowerCase().includes(q)),
     }))
     .filter((g) => g.events.length > 0),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on q + EVENT_GROUPS only; groupLabel/actionLabel are recomputed on every render so they never go stale
     [q, EVENT_GROUPS])
 
   // Toggle a single event on/off.
-  const toggle = (ev) => {
+  const toggle = (ev: string) => {
     const next = new Set(selected)
     if (next.has(ev)) next.delete(ev); else next.add(ev)
     onChange([...next])
   }
 
   // Select-all / clear for a whole group (uses the group's full, unfiltered list).
-  const toggleGroup = (events) => {
+  const toggleGroup = (events: string[]) => {
     const allOn = events.every((e) => selected.has(e))
     const next = new Set(selected)
     events.forEach((e) => (allOn ? next.delete(e) : next.add(e)))
@@ -90,8 +97,8 @@ export default function EventCatalog({ value = [], onChange }) {
       {/* Grouped event list */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {groups.map(({ group, events }) => {
-          const fullGroup = EVENT_GROUPS.find((g) => g.group === group)?.events ?? []
-          const groupAllOn = fullGroup.every((e) => selected.has(e))
+          const fullGroup: string[] = EVENT_GROUPS.find((g) => g.group === group)?.events ?? []
+          const groupAllOn = fullGroup.every((e: string) => selected.has(e))
           return (
             <div key={group} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
               {/* Group header with a select-all toggle */}
@@ -99,14 +106,14 @@ export default function EventCatalog({ value = [], onChange }) {
                 <PermissionToggle checked={groupAllOn} onChange={() => toggleGroup(fullGroup)} />
                 <span onClick={() => toggleGroup(fullGroup)} style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', cursor: 'pointer' }}>{groupLabel(group)}</span>
                 <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>
-                  {fullGroup.filter((e) => selected.has(e)).length}/{fullGroup.length}
+                  {fullGroup.filter((e: string) => selected.has(e)).length}/{fullGroup.length}
                 </span>
               </div>
               {/* Events in the group */}
-              {events.map((ev) => (
+              {events.map((ev: string) => (
                 <div key={ev} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px', borderTop: '1px solid var(--border)' }}>
                   <PermissionToggle checked={selected.has(ev)} onChange={() => toggle(ev)} />
-                  <span onClick={() => toggle(ev)} style={{ fontSize: 13, color: 'var(--text)', cursor: 'pointer' }}>{actionLabel(actionOf(ev))}</span>
+                  <span onClick={() => toggle(ev)} style={{ fontSize: 13, color: 'var(--text)', cursor: 'pointer' }}>{actionLabel(actionOf(ev) ?? '')}</span>
                   <code style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>{ev}</code>
                 </div>
               ))}

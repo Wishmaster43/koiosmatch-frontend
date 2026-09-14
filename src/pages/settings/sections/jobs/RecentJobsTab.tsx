@@ -20,21 +20,36 @@ import { JobsRefreshButton, JobsErrorNotice } from './jobsShared'
 import { hhmmss } from '@/lib/localDate'
 import { useVisiblePoll } from '@/hooks/useVisiblePoll'
 
-const STATUS_COLOR = {
+const STATUS_COLOR: Record<string, string> = {
   completed: 'var(--color-success)', failed: 'var(--color-danger)',
   pending: 'var(--text-muted)', reserved: 'var(--color-warning)',
 }
 
 // Layout only — text identity (11px muted / mono) lives in the Caption/Mono
 // atoms rendered inside these cells (HUISSTIJL-1: identity never re-declared locally).
-const TH = { padding: '9px 12px', textAlign: 'left', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
+const TH = { padding: '9px 12px', textAlign: 'left' as const, borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' as const }
 const TD = { padding: '9px 12px', fontSize: 12.5, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
+
+// One row of the recent-jobs window — hand-written: the spec carries no 2xx
+// schema for GET /admin/jobs/recent.
+interface RecentJobRow {
+  id: string | number
+  completed_at?: string | null
+  job: string
+  queue: string
+  tenant?: string | null
+  requested_by?: string | null
+  subject?: { type: string; reference: string } | null
+  workflow?: string | null
+  status: string
+  runtime_ms?: number | null
+}
 
 // Superadmin view of the jobs Horizon just processed, filterable by tenant/job, polling while the tab stays visible.
 export default function RecentJobsTab() {
   const { t } = useTranslation('settings')
-  const [rows, setRows] = useState([])
-  const [phase, setPhase] = useState('loading')
+  const [rows, setRows] = useState<RecentJobRow[]>([])
+  const [phase, setPhase] = useState<'loading' | 'ready' | 'error'>('loading')
   const [tenant, setTenant] = useState('')
   const [jobSearch, setJobSearch] = useState('')
 
@@ -60,7 +75,7 @@ export default function RecentJobsTab() {
   useVisiblePoll(load, 15000)
 
   // Tenant options from the data itself — no extra endpoint needed.
-  const tenants = useMemo(() => [...new Set(rows.map(r => r.tenant).filter(Boolean))].sort(), [rows])
+  const tenants = useMemo(() => [...new Set(rows.map(r => r.tenant).filter((v): v is string => Boolean(v)))].sort(), [rows])
 
   return (
     <div>

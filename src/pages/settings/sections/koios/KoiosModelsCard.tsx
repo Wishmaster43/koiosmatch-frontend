@@ -20,37 +20,55 @@
  * only for an id the server didn't list.
  */
 import { useState, useMemo } from 'react'
-import { Zap, Sparkles, Crown, Check } from 'lucide-react'
+import { Zap, Sparkles, Crown, Check, type LucideIcon } from 'lucide-react'
 import { updateKoiosModel } from './koiosApi'
-import { tierKeyForModel, findModelOption, resolveModelLabel, resolveModelHint } from '@/lib/koiosModelTiers'
+import { tierKeyForModel, findModelOption, resolveModelLabel, resolveModelHint, type KoiosModelOption } from '@/lib/koiosModelTiers'
 import { useAuth } from '@/context/AuthContext'
-import SegmentedControl from '@/components/ui/SegmentedControl'
+import SegmentedControl, { type SegmentedControlOption } from '@/components/ui/SegmentedControl'
 import Button from '@/components/ui/Button'
 import SaveButton from '@/components/ui/SaveButton'
 import { SectionTitle, Caption, Mono } from '@/components/ui/typography'
+import type { TFn } from '@/types/koios'
 
 // Frozen empty lists so a missing payload keeps one stable identity (memo deps).
-const EMPTY_SELECTABLE = []
-const EMPTY_OPTIONS = []
+const EMPTY_SELECTABLE: string[] = []
+const EMPTY_OPTIONS: KoiosModelOption[] = []
 
 const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' }
 
 // Icon per option — presentation only, no vocabulary of its own. Picked by
 // relative COST RANK (1 = cheapest → Zap, the highest listed rank → Crown,
 // anything between → Sparkles) so it never depends on a specific flavour id/key.
-const TIER_ICON = { fast: Zap, smart: Sparkles, max: Crown }
-const iconForRank = (rank, maxRank) => (rank === 1 ? Zap : rank === maxRank ? Crown : Sparkles)
+const TIER_ICON: Record<string, LucideIcon> = { fast: Zap, smart: Sparkles, max: Crown }
+const iconForRank = (rank: number | undefined, maxRank: number): LucideIcon => (rank === 1 ? Zap : rank === maxRank ? Crown : Sparkles)
 
 // The three known flavour keys the server now serves as `selectable[]`/`options[]`
 // ids (KOIOS-MODEL-VOCAB-1) — mirrors lib/koiosModelTiers' FLAVOR_TIER_MAP.
 const FLAVOR_TIER_KEYS = ['fast', 'smart', 'max']
 
+// The settings payload's `models` block — hand-written: the spec carries no
+// 2xx schema for GET /ai/koios/settings (see koiosApi.ts's own module doc).
+export interface KoiosModelsData {
+  active?: string | null
+  selectable?: string[]
+  options?: KoiosModelOption[]
+  cost_note?: string | null
+}
+
+// Props: models is the settings payload's `models` block; onChanged notifies the
+// parent (and the floating panel's shared cache) once a pick actually persists.
+interface KoiosModelsCardProps {
+  models?: KoiosModelsData | null
+  t: TFn
+  onChanged?: (model: string) => void
+}
+
 // Tenant-facing model-tier picker (Snel/Slim/Max); the raw vendor id stays
 // super-admin-only (see the module doc comment above).
-export default function KoiosModelsCard({ models, t, onChanged }) {
+export default function KoiosModelsCard({ models, t, onChanged }: KoiosModelsCardProps) {
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState(null)
-  const [pendingPick, setPendingPick] = useState(null)
+  const [error, setError] = useState<string | null>(null)
+  const [pendingPick, setPendingPick] = useState<string | null>(null)
   // SETTINGS-INCON-B1b: transient "saved" flash after a successful persist (SaveButton,
   // §4 success pair) — mirrors the other settings screens' saved-state feedback.
   const [saved, setSaved] = useState(false)
@@ -70,11 +88,11 @@ export default function KoiosModelsCard({ models, t, onChanged }) {
   const activeUnknown = selectable.length > 0 && (active == null || !selectable.includes(active))
 
   // Find cost_rank for active and candidate models to compare.
-  const getModelCostRank = (model) => findModelOption(model, serverOptions)?.cost_rank ?? 1
+  const getModelCostRank = (model?: string | null): number => findModelOption(model, serverOptions)?.cost_rank ?? 1
   const activeCostRank = getModelCostRank(active)
 
   // Handle model selection with costlier-model warning logic.
-  const handleChange = (model) => {
+  const handleChange = (model: string) => {
     if (model === active || saving) return
     const candidateCostRank = getModelCostRank(model)
     // If the candidate model costs more, show a warning instead of picking immediately.
@@ -101,7 +119,7 @@ export default function KoiosModelsCard({ models, t, onChanged }) {
   }
 
   // Pick a tier — no optimism: wait for the server (it validates the whitelist).
-  const pick = async (model) => {
+  const pick = async (model: string) => {
     if (model === active || saving) return
     setSaving(true); setError(null)
     try {
@@ -128,7 +146,7 @@ export default function KoiosModelsCard({ models, t, onChanged }) {
   // tier copy for anyone else. Description folds in the hint, and the raw model
   // id in Mono style, ONLY for a super admin — the id is platform config, never a
   // tenant-visible fact.
-  const modelOptions = useMemo(() => selectable.map((m) => {
+  const modelOptions: SegmentedControlOption[] = useMemo(() => selectable.map((m) => {
     const option = findModelOption(m, serverOptions)
     const key = tierKeyForModel(m)
     const flavorTier = FLAVOR_TIER_KEYS.includes(m)

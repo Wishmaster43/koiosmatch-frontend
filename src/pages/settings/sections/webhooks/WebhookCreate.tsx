@@ -5,6 +5,7 @@
  * reveal. The secret is never persisted client-side.
  */
 import { useState, useRef, useEffect } from 'react'
+import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Webhook } from 'lucide-react'
 import { createSubscription } from './webhooksApi'
@@ -16,14 +17,31 @@ import Button from '@/components/ui/Button'
 import { formLabelStyle } from '@/components/ui/typography'
 import { useCreateForm } from '@/pages/settings/lib/useCreateForm'
 
+// hand-written: the spec carries no 2xx schema for POST /webhook-subscriptions
+interface WebhookSubscriptionCreated {
+  id: string
+  name?: string
+  url?: string
+  events?: string[]
+  signing_secret?: string
+  secret?: string
+}
+
+interface WebhookCreateProps {
+  /** Returns to the list view without creating anything. */
+  onBack: () => void
+  /** Called once the subscription is created, so the parent list can add the row. */
+  onCreated?: (created: WebhookSubscriptionCreated) => void
+}
+
 // Two-phase inline create view: the subscription form, then a one-time secret reveal that is never persisted client-side.
-export default function WebhookCreate({ onBack, onCreated }) {
+export default function WebhookCreate({ onBack, onCreated }: WebhookCreateProps) {
   const { t } = useTranslation('settings')
   const [name, setName]     = useState('')
   const [url, setUrl]       = useState('')
-  const [events, setEvents] = useState([])
-  const { saving, setSaving, error, setError, result, setResult } = useCreateForm()
-  const firstField          = useRef(null)
+  const [events, setEvents] = useState<string[]>([])
+  const { saving, setSaving, error, setError, result, setResult } = useCreateForm<WebhookSubscriptionCreated>()
+  const firstField          = useRef<HTMLInputElement>(null)
 
   // Focus the name field on open.
   useEffect(() => { firstField.current?.focus() }, [])
@@ -70,7 +88,7 @@ export default function WebhookCreate({ onBack, onCreated }) {
           // The backend returns the key as signing_secret; secret is a legacy fallback.
           <OneTimeSecretReveal
             title={t('webhooks.outgoing.secretOnce')}
-            secret={result.signing_secret ?? result.secret}
+            secret={result.signing_secret ?? result.secret ?? ''}
             hint={t('webhooks.outgoing.signingHint')}
             copyLabel={t('webhooks.outgoing.copySecret')}
             copiedLabel={t('common.copied')}
@@ -82,7 +100,7 @@ export default function WebhookCreate({ onBack, onCreated }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
               <label style={labelStyle} htmlFor="wh-name">{t('webhooks.outgoing.field.name')}</label>
-              <input id="wh-name" ref={firstField} value={name} onChange={(e) => setName(e.target.value)}
+              <input id="wh-name" ref={firstField} value={name} onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
                 placeholder={t('webhooks.outgoing.namePlaceholder')} style={inputStyle} />
             </div>
             <div>
@@ -90,7 +108,7 @@ export default function WebhookCreate({ onBack, onCreated }) {
               <input
                 id="wh-url"
                 value={url}
-                onChange={(e) => setUrl(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setUrl(e.target.value)}
                 placeholder={t('webhooks.outgoing.urlPlaceholder')}
                 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the input element itself must carry the font; the Mono atom renders a separate element and cannot apply to native input text
                 style={{ ...inputStyle, fontFamily: "'JetBrains Mono', monospace" }}

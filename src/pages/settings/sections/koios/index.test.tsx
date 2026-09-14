@@ -22,7 +22,7 @@ vi.mock('./KoiosFeedbackCard', () => ({ default: () => <div>feedback-card</div> 
 // proves the cards are wired, so it renders as an empty stand-in here.
 vi.mock('./KoiosBudgetCard', () => ({ default: () => null }))
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key) => key }),
+  useTranslation: () => ({ t: (key: string) => key }),
   // The budget card reaches @/lib/datetime (useLocale) whose i18n bootstrap needs this export.
   initReactI18next: { type: '3rdParty', init: () => {} },
 }))

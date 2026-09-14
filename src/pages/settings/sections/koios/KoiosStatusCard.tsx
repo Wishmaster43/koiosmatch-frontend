@@ -7,16 +7,25 @@
  * alone) for accessibility. `api_error` is a raw, untranslated backend string
  * (§5) — never rendered; only its ok/not-ok boolean drives the UI.
  */
-import { CheckCircle2, XCircle } from 'lucide-react'
+import { CheckCircle2, XCircle, type LucideIcon } from 'lucide-react'
+import type { TFn } from '@/types/koios'
 
 const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' }
 const cardTitle = { fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }
 const row = { display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', fontSize: 13 }
 
+// Props for one status line — label left, green/red icon + verdict right.
+interface IndicatorProps {
+  label: string // the connection aspect being reported
+  ok: boolean // whether that aspect is healthy
+  okText: string // translated verdict shown when ok
+  badText: string // translated verdict shown when not ok
+}
+
 // One status line: label left, green/red icon + verdict right.
-function Indicator({ label, ok, okText, badText }) {
+function Indicator({ label, ok, okText, badText }: IndicatorProps) {
   const color = ok ? 'var(--color-success)' : 'var(--color-danger)'
-  const Icon = ok ? CheckCircle2 : XCircle
+  const Icon: LucideIcon = ok ? CheckCircle2 : XCircle
   return (
     <div style={row}>
       <Icon size={16} color={color} style={{ flexShrink: 0 }} />
@@ -26,8 +35,23 @@ function Indicator({ label, ok, okText, badText }) {
   )
 }
 
+// The Koios connection status block — hand-written: the spec carries no 2xx
+// schema for GET /ai/koios/settings (see koiosApi.ts's own module doc).
+interface KoiosStatus {
+  claude_configured?: boolean
+  policy_loaded?: boolean
+  api_ok?: boolean
+  api_error?: string
+}
+
+// Props: status is the settings payload's `status` block; t is the koios namespace translator.
+interface KoiosStatusCardProps {
+  status?: KoiosStatus | null
+  t: TFn
+}
+
 // Renders the three connection indicators (see the module doc above): each uses icon + colour + text so status is never colour-only, and the raw api_error string is never rendered directly (§5).
-export default function KoiosStatusCard({ status, t }) {
+export default function KoiosStatusCard({ status, t }: KoiosStatusCardProps) {
   const s = status ?? {}
   return (
     <div style={card}>

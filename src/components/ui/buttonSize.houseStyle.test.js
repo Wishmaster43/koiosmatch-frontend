@@ -49,7 +49,7 @@ const MD_ALLOWLIST = {
   'src/config/buttonMetrics.ts': 1,
   // r8 MV-1 fix: the mobile settings category row — the search button pairs with
   // the FIELD_HEIGHT (34) picker beside it, the documented search-chrome case.
-  'src/pages/settings/SettingsPage.jsx': 1,
+  'src/pages/settings/SettingsPage.tsx': 1,
 }
 
 describe('Button size ratchet (maatwet)', () => {
@@ -107,11 +107,11 @@ const OFF_STANDARD_HEIGHT_ALLOWLIST = {
   'src/pages/customers/drawer/VacanciesTab.tsx': 1,
   'src/pages/customers/drawer/VacancySettingsTab.tsx': 1,
   'src/pages/planning/AddShiftModal.tsx': 1,
-  'src/pages/settings/components/SettingsControls.jsx': 2,
+  'src/pages/settings/components/SettingsControls.tsx': 2,
   'src/pages/settings/sections/actionrules/ActionRuleCell.tsx': 1,
-  'src/pages/settings/sections/CvTemplateSettings.jsx': 1,
+  'src/pages/settings/sections/CvTemplateSettings.tsx': 1,
   'src/pages/settings/sections/DashboardsSettings.tsx': 1,
-  'src/pages/settings/sections/IconPickerControl.jsx': 2,
+  'src/pages/settings/sections/IconPickerControl.tsx': 2,
   'src/pages/settings/sections/RoleDetail.tsx': 1,
   'src/pages/settings/sections/RolesSettings.tsx': 1,
   'src/pages/shiftmanager/CustomersInsightsRow.tsx': 1,

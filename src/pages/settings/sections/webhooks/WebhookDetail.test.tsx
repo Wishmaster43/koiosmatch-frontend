@@ -2,6 +2,7 @@
  * WebhookDetail — tests for the regenerate-secret flow, ensuring the
  * signing_secret response field is correctly extracted for the one-time reveal.
  */
+import type { ReactElement } from 'react'
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -17,17 +18,17 @@ vi.mock('@/lib/api', async () => {
 import api from '@/lib/api'
 
 // Resolve the active locale's own copy so assertions never hardcode a language.
-const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
+const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 
 // Fresh QueryClient per render — no cross-test cache bleed.
-function renderWithQueryClient(ui) {
+function renderWithQueryClient(ui: ReactElement) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>)
 }
 
 describe('WebhookDetail — secret regeneration', () => {
   beforeEach(() => {
-    api.get.mockResolvedValue({ data: {
+    vi.mocked(api.get).mockResolvedValue({ data: {
       id: 'wh-1',
       name: 'ATS integration',
       url: 'https://example.test/hook',
@@ -44,7 +45,7 @@ describe('WebhookDetail — secret regeneration', () => {
       name: 'ATS integration',
       url: 'https://example.test/hook',
       events: ['candidate.created'],
-      status: 'active',
+      status: 'active' as const,
     }
     renderWithQueryClient(
       <WebhookDetail
@@ -56,7 +57,7 @@ describe('WebhookDetail — secret regeneration', () => {
       />
     )
 
-    api.post.mockResolvedValue({ data: { signing_secret: 'sk_live_rotated_xyz123' } })
+    vi.mocked(api.post).mockResolvedValue({ data: { signing_secret: 'sk_live_rotated_xyz123' } })
 
     // Open the action menu and click regenerate.
     await waitFor(() => screen.getByRole('button', { name: st('webhooks.outgoing.action') }))
@@ -76,7 +77,7 @@ describe('WebhookDetail — secret regeneration', () => {
       name: 'ATS integration',
       url: 'https://example.test/hook',
       events: ['candidate.created'],
-      status: 'active',
+      status: 'active' as const,
     }
     renderWithQueryClient(
       <WebhookDetail
@@ -88,7 +89,7 @@ describe('WebhookDetail — secret regeneration', () => {
       />
     )
 
-    api.post.mockResolvedValue({ data: { secret: 'legacy_rotated_secret' } })
+    vi.mocked(api.post).mockResolvedValue({ data: { secret: 'legacy_rotated_secret' } })
 
     // Open the action menu and click regenerate.
     await waitFor(() => screen.getByRole('button', { name: st('webhooks.outgoing.action') }))
@@ -108,7 +109,7 @@ describe('WebhookDetail — secret regeneration', () => {
       name: 'ATS integration',
       url: 'https://example.test/hook',
       events: ['candidate.created'],
-      status: 'active',
+      status: 'active' as const,
     }
     const onPatch = vi.fn()
     renderWithQueryClient(
@@ -121,7 +122,7 @@ describe('WebhookDetail — secret regeneration', () => {
       />
     )
 
-    api.put.mockResolvedValue({ data: { status: 'disabled' } })
+    vi.mocked(api.put).mockResolvedValue({ data: { status: 'disabled' } })
 
     // Open the action menu and click the status toggle.
     await waitFor(() => screen.getByRole('button', { name: st('webhooks.outgoing.action') }))
