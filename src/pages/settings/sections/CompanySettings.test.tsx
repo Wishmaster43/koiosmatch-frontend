@@ -14,6 +14,12 @@ import { loadSettings, saveSettings } from '../lib/settingsApi'
 import CompanySettings from './CompanySettings'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
+// Mocked module functions carry their real call signature via vi.mocked so
+// `.mockResolvedValue`/`.mock.calls` stay type-checked against settingsApi.js/lib/api.
+const mockedLoadSettings = vi.mocked(loadSettings)
+const mockedSaveSettings = vi.mocked(saveSettings)
+const mockedApi = vi.mocked(api, true)
+
 // useLocaleOptions (I18N-1 lane I3) runs on React Query: every render gets a fresh client.
 const renderPage = () => render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><CompanySettings /></QueryClientProvider>)
 
@@ -29,7 +35,7 @@ vi.mock('@/lib/api', async () => {
 })
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
-const t = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
+const t = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 
 afterEach(() => vi.clearAllMocks())
 
@@ -38,39 +44,39 @@ afterEach(() => vi.clearAllMocks())
 // and company_banner_url is backend-owned (never in the settings-save payload).
 describe('CompanySettings — banner upload (BANNER-UPLOAD-1)', () => {
   it('uploads the picked file as multipart field "banner" and previews the returned signed URL', async () => {
-    loadSettings.mockResolvedValue({})
-    saveSettings.mockResolvedValue(undefined)
-    api.post.mockResolvedValue({ data: { banner_url: 'https://api.test/files/tenant-banner/t1?sig=x' } })
+    mockedLoadSettings.mockResolvedValue({})
+    mockedSaveSettings.mockResolvedValue(undefined)
+    mockedApi.post.mockResolvedValue({ data: { banner_url: 'https://api.test/files/tenant-banner/t1?sig=x' } })
     renderPage()
 
     await screen.findByRole('button', { name: t('common.upload') })
-    const input = document.querySelector('input[type="file"]')
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement
     const file = new File(['x'], 'banner.png', { type: 'image/png' })
     fireEvent.change(input, { target: { files: [file] } })
 
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings/banner', expect.any(FormData)))
-    const fd = api.post.mock.calls[0][1]
+    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/settings/banner', expect.any(FormData)))
+    const fd = mockedApi.post.mock.calls[0][1] as FormData
     expect(fd.get('banner')).toBe(file)
     await waitFor(() => expect(screen.getByRole('img')).toHaveAttribute('src', 'https://api.test/files/tenant-banner/t1?sig=x'))
   })
 
   it('surfaces the backend 422 message (bad type / SVG script-scan) via notifyError', async () => {
-    loadSettings.mockResolvedValue({})
-    saveSettings.mockResolvedValue(undefined)
-    api.post.mockRejectedValue({ response: { data: { message: 'SVG bevat scripts' } } })
+    mockedLoadSettings.mockResolvedValue({})
+    mockedSaveSettings.mockResolvedValue(undefined)
+    mockedApi.post.mockRejectedValue({ response: { data: { message: 'SVG bevat scripts' } } })
     const { notifyError } = await import('@/lib/notify')
     renderPage()
 
     await screen.findByRole('button', { name: t('common.upload') })
-    fireEvent.change(document.querySelector('input[type="file"]'), { target: { files: [new File(['x'], 'x.svg', { type: 'image/svg+xml' })] } })
+    fireEvent.change(document.querySelector('input[type="file"]') as HTMLInputElement, { target: { files: [new File(['x'], 'x.svg', { type: 'image/svg+xml' })] } })
 
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith('SVG bevat scripts'))
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
   })
 
   it('never renders a legacy blob: URL and never sends company_banner_url in the save payload', async () => {
-    loadSettings.mockResolvedValue({ company_banner_url: 'blob:http://localhost/legacy-broken' })
-    saveSettings.mockResolvedValue(undefined)
+    mockedLoadSettings.mockResolvedValue({ company_banner_url: 'blob:http://localhost/legacy-broken' })
+    mockedSaveSettings.mockResolvedValue(undefined)
     const user = userEvent.setup()
     renderPage()
 
@@ -80,8 +86,8 @@ describe('CompanySettings — banner upload (BANNER-UPLOAD-1)', () => {
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: t('common.save') }))
-    await waitFor(() => expect(saveSettings).toHaveBeenCalled())
-    expect(saveSettings.mock.calls[0][0].company_banner_url).toBeUndefined()
+    await waitFor(() => expect(mockedSaveSettings).toHaveBeenCalled())
+    expect(mockedSaveSettings.mock.calls[0][0].company_banner_url).toBeUndefined()
   })
 })
 
@@ -90,24 +96,24 @@ describe('CompanySettings — banner upload (BANNER-UPLOAD-1)', () => {
 // The screen now reads in three blocks — identity · address (in writing order) ·
 // preferences — and the country↔province cascade must survive country moving to
 // the BOTTOM of the address block (it drives a field rendered ABOVE it).
-const rowOf = (label) => screen.getByText(label).parentElement
-const precedes = (a, b) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)
+const rowOf = (label: string): HTMLElement => screen.getByText(label).parentElement as HTMLElement
+const precedes = (a: Element, b: Element): boolean => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)
 
 // TAAL-NAAM-1 (Danny 25-08: "bij Taal moet Nederlands staan en niet nl"): the
 // setting stores the locale CODE; the field always shows the language NAME, and
 // a legacy row that stored the name normalizes to the code (never a raw 'nl').
 describe('CompanySettings — language shows its name, stores its code (TAAL-NAAM-1)', () => {
   it('renders "Nederlands" for a stored code and never the raw code', async () => {
-    loadSettings.mockResolvedValue({ company_language: 'nl' })
-    saveSettings.mockResolvedValue(undefined)
+    mockedLoadSettings.mockResolvedValue({ company_language: 'nl' })
+    mockedSaveSettings.mockResolvedValue(undefined)
     renderPage()
     expect(await screen.findByText('Nederlands')).toBeInTheDocument()
     expect(screen.queryByText(/^nl$/)).not.toBeInTheDocument()
   })
 
   it('normalizes a legacy stored NAME to its code and still renders the name', async () => {
-    loadSettings.mockResolvedValue({ company_language: 'Deutsch' })
-    saveSettings.mockResolvedValue(undefined)
+    mockedLoadSettings.mockResolvedValue({ company_language: 'Deutsch' })
+    mockedSaveSettings.mockResolvedValue(undefined)
     renderPage()
     expect(await screen.findByText('Deutsch')).toBeInTheDocument()
   })
@@ -115,7 +121,7 @@ describe('CompanySettings — language shows its name, stores its code (TAAL-NAA
 
 describe('CompanySettings — field order & grouping (COMPANY-ORDER-1)', () => {
   it('renders identity → address (street…country) → preferences, each under its own heading', async () => {
-    loadSettings.mockResolvedValue({})
+    mockedLoadSettings.mockResolvedValue({})
     renderPage()
     await screen.findByRole('button', { name: t('common.upload') })
 
@@ -144,22 +150,22 @@ describe('CompanySettings — province cascade after the country move (COMPANY-O
   }
 
   beforeEach(() => {
-    api.get.mockImplementation((url) => {
+    mockedApi.get.mockImplementation((url: string) => {
       if (url === '/countries')  return Promise.resolve({ data: { data: [{ code: 'NL' }, { code: 'BE' }] } })
       if (url === '/industries') return Promise.resolve({ data: { data: ['Zorg'] } })
       const province = /^\/provinces\?country=([A-Z]{2})&active=1$/.exec(url)
-      if (province) return Promise.resolve({ data: { data: provincesByCountry[province[1]] ?? [] } })
+      if (province) return Promise.resolve({ data: { data: provincesByCountry[province[1] as keyof typeof provincesByCountry] ?? [] } })
       return new Promise(() => {})
     })
   })
 
   // Restore the file-level "forever pending" GET so later suites are unaffected.
-  afterEach(() => { api.get.mockImplementation(() => new Promise(() => {})) })
+  afterEach(() => { mockedApi.get.mockImplementation(() => new Promise(() => {})) })
 
   it('switching the country (now the LAST address row) refreshes the province options above it', async () => {
     // Empty province on purpose: the trigger then carries no accessible name, so a
     // province NAME in the tree can only be a menu option.
-    loadSettings.mockResolvedValue({ company_country: 'NL', company_province: '' })
+    mockedLoadSettings.mockResolvedValue({ company_country: 'NL', company_province: '' })
     const user = userEvent.setup()
     renderPage()
     await screen.findByRole('button', { name: t('common.upload') })
@@ -190,28 +196,28 @@ describe('CompanySettings — province cascade after the country move (COMPANY-O
 // lists (GET /settings/locale-options); a legacy row that stored the Dutch LABEL is
 // normalised to its code on load so the next save writes what the backend validates.
 const LOCALE_OPTIONS = { currencies: [{ code: 'EUR', label: 'Euro (€)' }, { code: 'GBP', label: 'Pond sterling (£)' }], timezones: [{ code: 'Europe/Amsterdam', label: 'Amsterdam' }], languages: [{ code: 'nl', label: 'Nederlands' }, { code: 'en', label: 'English' }] }
-const mockLocaleOptions = () => api.get.mockImplementation((url) => url === '/settings/locale-options' ? Promise.resolve({ data: { data: LOCALE_OPTIONS } }) : new Promise(() => {}))
+const mockLocaleOptions = () => mockedApi.get.mockImplementation((url) => url === '/settings/locale-options' ? Promise.resolve({ data: { data: LOCALE_OPTIONS } }) : new Promise(() => {}))
 
 describe('CompanySettings — locale codes (I18N-1 L4)', () => {
   it('shows the label of the stored currency code from /settings/locale-options', async () => {
     mockLocaleOptions()
-    loadSettings.mockResolvedValue({ company_currency: 'GBP', company_timezone: 'Europe/Amsterdam' })
+    mockedLoadSettings.mockResolvedValue({ company_currency: 'GBP', company_timezone: 'Europe/Amsterdam' })
     renderPage()
     expect(await screen.findByText('Pond sterling (£)')).toBeInTheDocument()
     expect(screen.queryByText(/^GBP$/)).not.toBeInTheDocument()
-    expect(api.get).toHaveBeenCalledWith('/settings/locale-options', expect.anything())
+    expect(mockedApi.get).toHaveBeenCalledWith('/settings/locale-options', expect.anything())
   })
 
   it('normalises a legacy stored label to its code and saves the code', async () => {
     const user = userEvent.setup()
     mockLocaleOptions()
-    loadSettings.mockResolvedValue({ company_currency: 'Euro (€)', company_timezone: 'Europa/Amsterdam' })
-    saveSettings.mockResolvedValue(undefined)
+    mockedLoadSettings.mockResolvedValue({ company_currency: 'Euro (€)', company_timezone: 'Europa/Amsterdam' })
+    mockedSaveSettings.mockResolvedValue(undefined)
     renderPage()
     expect(await screen.findByText('Euro (€)')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: t('common.save') }))
-    await waitFor(() => expect(saveSettings).toHaveBeenCalled())
-    const payload = saveSettings.mock.calls.at(-1)[0]
+    await waitFor(() => expect(mockedSaveSettings).toHaveBeenCalled())
+    const payload = mockedSaveSettings.mock.calls.at(-1)?.[0]
     expect(payload.company_currency).toBe('EUR')
     expect(payload.company_timezone).toBe('Europe/Amsterdam')
   })
@@ -222,10 +228,10 @@ describe('CompanySettings — locale codes (I18N-1 L4)', () => {
 // in the UI language, never the code.
 describe('CompanySettings — language names from the backend code list', () => {
   it('shows "Engels" for a backend option labelled "EN" and never the bare code', async () => {
-    api.get.mockImplementation((url) => url === '/settings/locale-options'
+    mockedApi.get.mockImplementation((url) => url === '/settings/locale-options'
       ? Promise.resolve({ data: { data: { currencies: [], timezones: [], languages: [{ code: 'nl', label: 'NL' }, { code: 'en', label: 'EN' }] } } })
       : new Promise(() => {}))
-    loadSettings.mockResolvedValue({ company_language: 'en' })
+    mockedLoadSettings.mockResolvedValue({ company_language: 'en' })
     renderPage()
     expect(await screen.findByText('Engels')).toBeInTheDocument()
     expect(screen.queryByText(/^EN$/)).not.toBeInTheDocument()

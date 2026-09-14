@@ -11,6 +11,11 @@ import { loadSettings, saveSettings } from '../lib/settingsApi'
 import BrandSettings from './BrandSettings'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
+// Mocked module functions carry their real call signature via vi.mocked so
+// `.mockResolvedValue`/`.mock.calls` stay type-checked against settingsApi.js.
+const mockedLoadSettings = vi.mocked(loadSettings)
+const mockedSaveSettings = vi.mocked(saveSettings)
+
 // New render wrapper for BrandSettings (like CompanySettings, uses QueryClient).
 const renderPage = () => render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><BrandSettings /></QueryClientProvider>)
 
@@ -21,18 +26,18 @@ vi.mock('../lib/settingsApi', () => ({
 
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
-const t = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
+const t = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 
 afterEach(() => vi.clearAllMocks())
 
 describe('BrandSettings — automatic text colour sends empty string, not null', () => {
   it('saves with brand_text_color: "" when automatic (empty) text colour is active', async () => {
-    loadSettings.mockResolvedValue({
+    mockedLoadSettings.mockResolvedValue({
       brand_color: 'rgb(59, 143, 212)',
       brand_text_color: '',
       company_name: 'Test Company',
     })
-    saveSettings.mockResolvedValue(undefined)
+    mockedSaveSettings.mockResolvedValue(undefined)
     const user = userEvent.setup()
     renderPage()
 
@@ -47,8 +52,8 @@ describe('BrandSettings — automatic text colour sends empty string, not null',
     await user.click(screen.getByRole('button', { name: t('common.save') }))
 
     // Assert the request carries brand_text_color: '' (not null).
-    await waitFor(() => expect(saveSettings).toHaveBeenCalled())
-    const payload = saveSettings.mock.calls[0][0]
+    await waitFor(() => expect(mockedSaveSettings).toHaveBeenCalled())
+    const payload = mockedSaveSettings.mock.calls[0][0]
     expect(payload.brand_text_color).toBe('')
     expect(payload.brand_text_color).not.toBe(null)
   })
@@ -56,15 +61,16 @@ describe('BrandSettings — automatic text colour sends empty string, not null',
 
 describe('BrandSettings — failed save shows error notice', () => {
   it('surfaces the backend error via notifyError when save rejects', async () => {
-    loadSettings.mockResolvedValue({
+    mockedLoadSettings.mockResolvedValue({
       brand_color: 'rgb(59, 143, 212)',
       brand_text_color: '',
       company_name: 'Test Company',
     })
-    saveSettings.mockRejectedValue({
+    mockedSaveSettings.mockRejectedValue({
       response: { data: { message: 'Kleur ongeldig' } },
     })
     const { notifyError } = await import('@/lib/notify')
+    const mockedNotifyError = vi.mocked(notifyError)
     const user = userEvent.setup()
     renderPage()
 
@@ -75,8 +81,8 @@ describe('BrandSettings — failed save shows error notice', () => {
     await user.click(screen.getByRole('button', { name: t('common.save') }))
 
     // Assert notifyError was called with the backend message.
-    await waitFor(() => expect(notifyError).toHaveBeenCalled())
-    const errorMsg = notifyError.mock.calls[0][0]
+    await waitFor(() => expect(mockedNotifyError).toHaveBeenCalled())
+    const errorMsg = mockedNotifyError.mock.calls[0][0]
     expect(errorMsg).toBe('Kleur ongeldig')
   })
 })

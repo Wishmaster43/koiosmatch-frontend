@@ -17,6 +17,7 @@
  * other migrated modal — NewUserModal/EditUserModal/AddCandidateModal), so this
  * file no longer arms its own useFocusTrap.
  */
+import type { CSSProperties, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { WIDE_MODAL_PANEL_SIZE } from '@/components/ui/wideModalPanelSize'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
@@ -29,21 +30,40 @@ import FieldNotice from '@/components/ui/FieldNotice'
 import Toggle from '@/components/ui/Toggle'
 import { BodyText, Caption } from '@/components/ui/typography'
 import { useIdentifierValidation } from '@/hooks/useIdentifierValidation'
+import type { IdentifierNotice } from '@/hooks/useIdentifierValidation'
 import IconPickerControl from '../IconPickerControl'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import ModalFooter from '@/components/ui/ModalFooter'
+import type { LocationForm } from '../LocationsSettings'
 
 // House field footprint (Danny 27-07 point D): 11px uppercase muted label above
 // each input, fontSize 13 / borderRadius 8 — mirrors match/styles.ts'
 // `lbl`/`input` exactly.
-const lbl = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 5 }
-const inp = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
+const lbl: CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 5 }
+const inp: CSSProperties = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
+
+// Props: the container (LocationsSettings) owns the form VALUE and mutation, this
+// modal only renders it and reports edits back through setForm.
+interface LocationFormModalProps {
+  editingId: string | null
+  form: LocationForm
+  setForm: Dispatch<SetStateAction<LocationForm>>
+  saving: boolean
+  onClose: () => void
+  onSubmit: () => void
+}
+
+// A lookup option shape shared by the searchable country/province pickers.
+interface SelectOption {
+  value: string
+  label: string
+}
 
 // The location create/edit modal, on the shared FloatingPanel shell.
-export default function LocationFormModal({ editingId, form, setForm, saving, onClose, onSubmit }) {
+export default function LocationFormModal({ editingId, form, setForm, saving, onClose, onSubmit }: LocationFormModalProps) {
   const { t } = useTranslation(['settings', 'common'])
 
-  const setF = (k) => (e) => setForm(x => ({ ...x, [k]: e.target.value }))
+  const setF = (k: keyof LocationForm) => (e: { target: { value: string } }) => setForm(x => ({ ...x, [k]: e.target.value }))
   // Called as a function (not <F/>) so inputs keep focus while typing.
   // ALWAYS-SEARCHABLE (CLAUDE.md §4, Danny 08-08): country and province are
   // lookup-driven searchable pickers here too — country feeds the province
@@ -52,19 +72,19 @@ export default function LocationFormModal({ editingId, form, setForm, saving, on
   const { provinces } = useProvinces(form.country || 'NL')
   const provinceOptions = (provinces ?? []).map(p => (typeof p === 'string' ? { value: p, label: p } : p))
 
-  const picker = (k, label, options, flex = 1) => (
+  const picker = (k: keyof LocationForm, label: string, options: SelectOption[], flex = 1) => (
     <div style={{ flex, minWidth: 0 }}>
       <div style={lbl}>{label}</div>
-      <CreatableSelect value={form[k] || null} onChange={v => setF(k)({ target: { value: v } })}
+      <CreatableSelect value={(form[k] as string) || null} onChange={(v: string) => setF(k)({ target: { value: v } })}
         options={options} allowCreate={false} clearable placeholder={label}
         style={{ padding: '8px 11px', borderRadius: 8, fontSize: 13 }} />
     </div>
   )
 
-  const field = (k, label, placeholder, type = 'text', flex = 1, notice = null) => (
+  const field = (k: keyof LocationForm, label: string, placeholder: string, type = 'text', flex = 1, notice: IdentifierNotice | null = null) => (
     <div style={{ flex, minWidth: 0 }}>
       <div style={lbl}>{label}</div>
-      <input type={type} value={form[k]} onChange={setF(k)} placeholder={placeholder} aria-label={label}
+      <input type={type} value={form[k] as string} onChange={setF(k)} placeholder={placeholder} aria-label={label}
         style={notice?.severity === 'error' ? { ...inp, borderColor: 'var(--color-danger)' } : inp} />
       <FieldNotice text={notice?.message} severity={notice?.severity} />
     </div>

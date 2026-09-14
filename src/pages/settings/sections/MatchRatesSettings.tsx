@@ -10,12 +10,19 @@
  * When absent, the field is hidden and the conversion_factor key is never PUT.
  */
 import { useState, useEffect } from 'react'
+import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { runAliveGuarded } from '@/lib/aliveGuard'
 import { PageTitle } from '@/components/ui/typography'
+
+// hand-written: /settings/matching carries no 2xx schema in the generated spec —
+// the field is stripped server-side for callers without billing.view (S-1).
+interface MatchingSettingsResponse {
+  conversion_factor?: number | string | null
+}
 
 // See the file's top doc above; the purchase-to-sale conversion factor, persisted to the shared tenant matching settings resource.
 export default function MatchRatesSettings() {
@@ -36,7 +43,7 @@ export default function MatchRatesSettings() {
   useEffect(() => {
     let alive = true
     runAliveGuarded(api.get('/settings/matching'), () => alive, (r) => {
-      const d = (unwrap(r)) ?? {}
+      const d = unwrap<MatchingSettingsResponse>(r) ?? {}
       // S-1: check if conversion_factor key is present in the response.
       const hasField = 'conversion_factor' in d
       setHasConversionFactorField(hasField)
@@ -54,8 +61,8 @@ export default function MatchRatesSettings() {
     if (!hasConversionFactorField) return // Hidden when not present; do not PUT.
     const trimmed = conversionFactor.trim()
     if (trimmed === savedFactor) return
-    const num = trimmed === '' ? null : Number(trimmed)
-    if (trimmed !== '' && (!isFinite(num) || num <= 0)) { setConversionFactor(savedFactor); return }
+    const num: number | null = trimmed === '' ? null : Number(trimmed)
+    if (num !== null && (!isFinite(num) || num <= 0)) { setConversionFactor(savedFactor); return }
     try { await api.put('/settings/matching', { conversion_factor: num }); setSavedFactor(trimmed) }
     catch { setConversionFactor(savedFactor); notifyError(t('matchRates.saveFailed')) }
   }
@@ -73,7 +80,7 @@ export default function MatchRatesSettings() {
       ) : hasConversionFactorField ? (
         // S-1: only render the input when conversion_factor is present in the response.
         <input type="number" step="0.01" min="0" value={conversionFactor}
-          onChange={e => setConversionFactor(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setConversionFactor(e.target.value)}
           onBlur={saveConversionFactor}
           placeholder={t('matchRates.placeholder')}
           aria-label={t('matchRates.title')}

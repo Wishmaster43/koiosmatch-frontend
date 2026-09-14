@@ -87,14 +87,18 @@ export function useSettingsListLoad(
  * already-shaped API payload (the caller decides its own flattening/mapping),
  * `emptyDraft` reseeds the create-card's local draft state on success.
  */
-export async function runSettingsListCreate<T>(opts: {
+// TItem = the record shape appended to the list (the API's created row); TDraft =
+// the create card's own local draft shape (defaults to TItem for callers where
+// they coincide). Two params because a caller's draft (e.g. a nested editor
+// shape) commonly differs from the flat/full record the API hands back.
+export async function runSettingsListCreate<TItem, TDraft = TItem>(opts: {
   name: string
   endpoint: string
   body: unknown
   setSaving: (v: string | number | null) => void
-  setList: (updater: (prev: T[]) => T[]) => void
-  setNewForm: (v: T) => void
-  emptyDraft: () => T
+  setList: (updater: (prev: TItem[]) => TItem[]) => void
+  setNewForm: (v: TDraft) => void
+  emptyDraft: () => TDraft
   setAdding: (v: boolean) => void
   errorMessage: string
 }) {
@@ -103,7 +107,7 @@ export async function runSettingsListCreate<T>(opts: {
   opts.setSaving('new')
   try {
     const res = await api.post(opts.endpoint, opts.body)
-    opts.setList((p) => [...p, unwrap(res)])
+    opts.setList((p) => [...p, unwrap<TItem>(res)])
     opts.setNewForm(opts.emptyDraft())
     opts.setAdding(false)
   } catch {

@@ -4,6 +4,7 @@
  * through useTenantTheme's CSS variable tokens (§4 per-tenant theming).
  */
 import { useState, useEffect, useRef } from 'react'
+import type { ChangeEvent } from 'react'
 import { contrastRatio, applyBrandTokens, clampedOnAccent } from '@/hooks/useTenantTheme'
 import { useTranslation } from 'react-i18next'
 import { Upload, X, AlertTriangle, RefreshCw } from 'lucide-react'
@@ -42,14 +43,14 @@ export default function BrandSettings() {
   // black/white from the brand's luminance, which is right for most tenants; an
   // explicit pick overrides it.
   const [textColor,    setTextColor]      = useState('')
-  const [logoPreview,  setLogoPreview]    = useState(null)
-  const [logoFile,     setLogoFile]       = useState(null)
+  const [logoPreview,  setLogoPreview]    = useState<string | null>(null)
+  const [logoFile,     setLogoFile]       = useState<File | null>(null)
   const [companyName,  setCompanyName]    = useState('')
   const { saved, setSaved, saving, setSaving, loading, setLoading, loadError, setLoadError, reloadKey, setReloadKey } = useSettingsSectionState()
   // Server-side upload error (422 — bad type/size, or the SVG-script-scan rejection) —
   // shown inline near the logo block instead of swallowed (was a silent catch {}).
-  const [logoError,    setLogoError]      = useState(null)
-  const fileRef = useRef(null)
+  const [logoError,    setLogoError]      = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   // Loads the persisted brand colour/text-colour/logo/company name once on mount.
   useEffect(() => {
@@ -67,13 +68,13 @@ export default function BrandSettings() {
   }, [reloadKey, setLoadError, setLoading])
 
   // Reads the picked logo file into a data-URL preview; the actual upload happens on save.
-  const handleLogoChange = (e) => {
+  const handleLogoChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     setLogoError(null) // a fresh pick clears any previous upload error
     setLogoFile(file)
     const reader = new FileReader()
-    reader.onload = ev => setLogoPreview(ev.target.result)
+    reader.onload = ev => setLogoPreview(ev.target?.result as string)
     reader.readAsDataURL(file)
   }
 
@@ -82,10 +83,10 @@ export default function BrandSettings() {
   // a save + reload let useTenantTheme recompute it. P2a (13-08): now shares the
   // ONE applyBrandTokens implementation with the hook, so the preview sets the
   // FULL token set (primary/-light/-bg/-text/on-accent) instead of a partial pair.
-  const applyAccentTokens = (color, text) => applyBrandTokens(color, text)
+  const applyAccentTokens = (color: string, text: string) => applyBrandTokens(color, text)
 
   // Swatch/hex pick: updates local state and pushes the live preview via applyAccentTokens.
-  const applyColor = (color) => {
+  const applyColor = (color: string) => {
     setPrimaryColor(color)
     setHexDraft(color)
     applyAccentTokens(color, textColor)
@@ -113,7 +114,8 @@ export default function BrandSettings() {
         } catch (err) {
           // 422 (bad type/size, or the SVG script-scan rejection) — show the
           // backend's own message; the rest of the form still saves below.
-          setLogoError(err?.response?.data?.message ?? t('brand.logoUploadError'))
+          const uploadErr = err as { response?: { data?: { message?: string } } }
+          setLogoError(uploadErr?.response?.data?.message ?? t('brand.logoUploadError'))
         }
       }
       await saveSettings(payload)

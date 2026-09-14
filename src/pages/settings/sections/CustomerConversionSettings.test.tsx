@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import { CustomerConversionSettings, CONVERT_DEFAULT_STATUS_KEY } from './CustomerConversionSettings'
 
-const st = key => i18n.t(key, { ns: 'settings' })
+const st = (key: string) => i18n.t(key, { ns: 'settings' })
 
 // Customer status lookup — plain values only; no requires_match/is_blacklist
 // flags exist on this axis (§3B defines those for the candidate axis only).
@@ -26,14 +26,14 @@ vi.mock('@/lib/useCustomerLookups', () => ({
 
 // Controllable settings blob + a spy on the save path (§13: assert the REQUEST).
 const mockSettings = vi.fn(() => ({}))
-const saveSettingsKeys = vi.fn(async () => {})
+const saveSettingsKeys = vi.fn(async (...args: unknown[]) => { void args })
 vi.mock('@/lib/settings/useAllSettings', () => ({
   useAllSettings: () => mockSettings(),
   // STALE-INIT-1: every test here assumes the settings blob has already resolved.
   useSettingsLoaded: () => true,
   // SETTINGS-LOAD-ERROR-1: the shared load-state hook the banner reads.
   useSettingsLoadState: () => ({ state: 'loaded', retry: () => {} }),
-  saveSettingsKeys: (...args) => saveSettingsKeys(...args),
+  saveSettingsKeys: (...args: unknown[]) => saveSettingsKeys(...args),
   invalidateAllSettingsCache: vi.fn(),
 }))
 

@@ -8,9 +8,12 @@ import SchemaSection from './SchemaSection'
 import type { Schema } from './SchemaSection'
 
 // A registry item — three mutually-exclusive render strategies (render/schema/component).
+// `schema` stays `unknown` here (registry.tsx's NavItem widens it the same way, since the
+// schema modules under ./schemas are still plain untyped .js) — this call site is where it
+// is narrowed to the real `Schema` shape, right before handing it to SchemaSection.
 export interface SettingItemData {
   render?: () => ReactNode
-  schema?: Schema
+  schema?: unknown
   component?: ComponentType
 }
 interface SettingItemProps { item?: SettingItemData | null }
@@ -19,7 +22,7 @@ interface SettingItemProps { item?: SettingItemData | null }
 export default function SettingItem({ item }: SettingItemProps) {
   if (!item) return null
   if (item.render)    return item.render()
-  if (item.schema)    return <SchemaSection schema={item.schema} />
+  if (item.schema)    return <SchemaSection schema={item.schema as Schema} />
   if (item.component) { const C = item.component; return <C /> }
   return null
 }

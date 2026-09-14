@@ -18,7 +18,7 @@ const LocationsMapView = lazy(() => import('./LocationsMapView'))
 
 // One bureau location as the API returns it (LocationResource) — a superset of
 // the editable form fields plus id/in_use, which the form never carries.
-interface LocationRow {
+export interface LocationRow {
   id: string
   name: string
   in_use?: boolean
@@ -28,7 +28,7 @@ interface LocationRow {
 }
 
 // The create/edit form's own draft shape — mirrors EMPTY_FORM's keys.
-type LocationForm = typeof EMPTY_FORM
+export type LocationForm = typeof EMPTY_FORM
 
 // Structured address — kept as separate fields so it can be matched/validated and
 // composed consistently. Falls back to a legacy `address`/`full_address` string.

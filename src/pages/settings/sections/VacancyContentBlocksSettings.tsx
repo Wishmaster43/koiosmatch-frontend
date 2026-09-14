@@ -15,6 +15,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
+import type { ChangeEvent } from 'react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import RichTextEditor from '@/components/ui/RichTextEditor'
@@ -29,33 +30,50 @@ import AddCardTrigger from '@/components/ui/AddCardTrigger'
 import ExpandableCardListItem from '../components/ExpandableCardListItem'
 
 const ENDPOINT = '/vacancy-content-blocks'
-const KINDS = ['intro', 'cta', 'legal']
+const KINDS = ['intro', 'cta', 'legal'] as const
+type BlockKind = typeof KINDS[number]
+
+// hand-written: the spec carries no 2xx schema for /vacancy-content-blocks — a
+// reusable vacancy-text block, optionally flagged in_use by a generation profile.
+interface ContentBlock {
+  id: string
+  name: string
+  kind: BlockKind
+  body: string
+  in_use?: boolean
+}
+// One block's create/edit draft (same three fields, id-less until created).
+interface BlockForm { name: string; kind: BlockKind; body: string }
 
 // A fresh draft for the create card / an opened edit card.
-const emptyDraft = () => ({ name: '', kind: 'intro', body: '' })
+const emptyDraft = (): BlockForm => ({ name: '', kind: 'intro', body: '' })
 
 // Expand-card CRUD for reusable vacancy-text blocks (see file docblock above);
 // degrades to a calm "not available yet" notice when the backend route 404s.
 export default function VacancyContentBlocksSettings() {
   const { t } = useTranslation('settings')
-  const [blocks, setBlocks] = useState([])
+  const [blocks, setBlocks] = useState<ContentBlock[]>([])
   // Four explicit UI states, plus 'unavailable' for a not-yet-deployed backend route.
-  const [phase, setPhase] = useState('loading') // loading | unavailable | error | ready
+  const [phase, setPhase] = useState<'loading' | 'unavailable' | 'error' | 'ready'>('loading')
   const { expanded, setExpanded, adding, setAdding, saving, setSaving, editForms, setEditForms } = useSettingsListUiState()
-  const [newForm, setNewForm] = useState(emptyDraft())
+  const [newForm, setNewForm] = useState<BlockForm>(emptyDraft())
   const { confirm, dialog } = useConfirm()
 
   // Load the reusable blocks once; a 404 means the backend route isn't live yet.
   useSettingsListLoad(async () => {
     const res = await api.get(ENDPOINT)
-    return () => setBlocks(unwrapList(res).rows)
+    return () => setBlocks(unwrapList<ContentBlock>(res).rows)
   }, setPhase)
 
-  const setEF = (id, k, v) => setEditForms(p => ({ ...p, [id]: { ...(p[id] ?? emptyDraft()), [k]: v } }))
-  const openEdit = (block) => { setEditForms(p => ({ ...p, [block.id]: { name: block.name, kind: block.kind, body: block.body ?? '' } })); setExpanded(block.id) }
+  const setEF = (id: string, k: keyof BlockForm, v: BlockForm[keyof BlockForm]) =>
+    setEditForms(p => ({ ...p, [id]: { ...((p[id] as BlockForm | undefined) ?? emptyDraft()), [k]: v } }))
+  const openEdit = (block: ContentBlock) => {
+    setEditForms(p => ({ ...p, [block.id]: { name: block.name, kind: block.kind, body: block.body ?? '' } as BlockForm }))
+    setExpanded(block.id)
+  }
 
   // Create a new reusable block.
-  const handleCreate = () => runSettingsListCreate({
+  const handleCreate = () => runSettingsListCreate<ContentBlock, BlockForm>({
     name: newForm.name,
     endpoint: ENDPOINT,
     body: { name: newForm.name.trim(), kind: newForm.kind, body: newForm.body },
@@ -64,14 +82,14 @@ export default function VacancyContentBlocksSettings() {
   })
 
   // Save an edit to an existing block.
-  const handleSave = async (block) => {
-    const form = editForms[block.id]
+  const handleSave = async (block: ContentBlock) => {
+    const form = editForms[block.id] as BlockForm | undefined
     if (!form?.name?.trim()) return
     setSaving(block.id)
     try {
       const payload = { name: form.name.trim(), kind: form.kind, body: form.body }
       const res = await api.put(`${ENDPOINT}/${block.id}`, payload)
-      const updated = unwrap(res)
+      const updated = unwrap<ContentBlock>(res)
       setBlocks(p => p.map(x => x.id === block.id ? updated : x))
       setExpanded(null)
     } catch {
@@ -80,7 +98,7 @@ export default function VacancyContentBlocksSettings() {
   }
 
   // Delete — blocked while a profile still references it (409 keeps the row, flags it).
-  const handleDelete = (block) => {
+  const handleDelete = (block: ContentBlock) => {
     if (block.in_use) return
     confirm(t('vacancyContentBlocksSettings.confirmDelete', { name: block.name }), async () => {
       setSaving(block.id)
@@ -89,7 +107,7 @@ export default function VacancyContentBlocksSettings() {
         setBlocks(p => p.filter(x => x.id !== block.id))
         if (expanded === block.id) setExpanded(null)
       } catch (e) {
-        if (e?.response?.status === 409) {
+        if ((e as { response?: { status?: number } })?.response?.status === 409) {
           setBlocks(p => p.map(x => x.id === block.id ? { ...x, in_use: true } : x))
           notifyError(t('vacancyContentBlocksSettings.deleteBlocked'))
         } else {
@@ -119,7 +137,7 @@ export default function VacancyContentBlocksSettings() {
 
       {blocks.map((block) => {
         const isOpen = expanded === block.id
-        const form = editForms[block.id] ?? {}
+        const form = (editForms[block.id] as BlockForm | undefined) ?? ({} as Partial<BlockForm>)
         return (
           <div key={block.id}>
             <ExpandableCardListItem
@@ -152,14 +170,14 @@ export default function VacancyContentBlocksSettings() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 160px', gap: 10 }}>
                 <div>
                   <label style={labelStyle}>{t('vacancyContentBlocksSettings.nameLabel')}</label>
-                  <input value={form.name ?? ''} onChange={e => setEF(block.id, 'name', e.target.value)} style={inputStyle} />
+                  <input value={form.name ?? ''} onChange={(e: ChangeEvent<HTMLInputElement>) => setEF(block.id, 'name', e.target.value)} style={inputStyle} />
                 </div>
                 <div>
                   <label style={labelStyle}>{t('vacancyContentBlocksSettings.kindLabel')}</label>
                   <SearchSelect
                     options={KINDS.map(k => ({ value: k, label: t(`vacancyContentBlocksSettings.kind.${k}`) }))}
                     selected={[form.kind ?? 'intro']}
-                    onToggle={v => setEF(block.id, 'kind', v)}
+                    onToggle={v => setEF(block.id, 'kind', v as BlockKind)}
                     closeOnToggle
                     searchable={false}
                     renderTrigger={toggle => (
@@ -191,7 +209,7 @@ export default function VacancyContentBlocksSettings() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 160px', gap: 10 }}>
               <div>
                 <label style={labelStyle}>{t('vacancyContentBlocksSettings.nameLabel')} *</label>
-                <input value={newForm.name} onChange={e => setNewForm(p => ({ ...p, name: e.target.value }))}
+                <input value={newForm.name} onChange={(e: ChangeEvent<HTMLInputElement>) => setNewForm(p => ({ ...p, name: e.target.value }))}
                   placeholder={t('vacancyContentBlocksSettings.namePlaceholder')} style={inputStyle} autoFocus />
               </div>
               <div>
@@ -199,7 +217,7 @@ export default function VacancyContentBlocksSettings() {
                 <SearchSelect
                   options={KINDS.map(k => ({ value: k, label: t(`vacancyContentBlocksSettings.kind.${k}`) }))}
                   selected={[newForm.kind]}
-                  onToggle={v => setNewForm(p => ({ ...p, kind: v }))}
+                  onToggle={v => setNewForm(p => ({ ...p, kind: v as BlockKind }))}
                   closeOnToggle
                   searchable={false}
                   renderTrigger={toggle => (

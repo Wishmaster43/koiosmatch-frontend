@@ -20,6 +20,7 @@ import { notifyError } from '@/lib/notify'
 import { useConfirm } from '@/hooks/useConfirm'
 import { DefaultToggle } from '../components/SettingsControls'
 import VacancyGenerationProfileEditor from './VacancyGenerationProfileEditor'
+import type { ProfileDraft } from './VacancyGenerationProfileEditor'
 import { Caption } from '@/components/ui/typography'
 import { toApiProfile, fromApiProfile } from './vacancyGeneration/profileShape'
 import EditorRowFooter from '@/components/ui/EditorRowFooter'
@@ -31,9 +32,50 @@ import { cardStyle, useSettingsListUiState, useSettingsListLoad, runSettingsList
 const ENDPOINT = '/vacancy-generation-profiles'
 const BLOCKS_ENDPOINT = '/vacancy-content-blocks'
 
+// hand-written: the spec carries no 2xx schema for /vacancy-generation-profiles —
+// the API mirrors both flat keys (backward compat) and nested matcher/content
+// (see profileShape.js's fromApiProfile/toApiProfile for the conversion).
+interface VacancyGenerationProfile {
+  id: string
+  name: string
+  is_default: boolean
+  priority: number
+  location_ids?: string[]
+  contract_types?: string[]
+  function_titles?: string[]
+  industries?: string[]
+  template?: string
+  tone_of_voice?: string
+  length?: string
+  language?: string
+  allow_emoji?: boolean
+  brand_instructions?: string
+  forbidden_words?: string[]
+  content_block_ids?: string[]
+  matcher?: {
+    location_ids: string[]
+    contract_types: string[]
+    function_titles: string[]
+    industries: string[]
+  }
+  content?: {
+    template: string
+    tone_of_voice: string
+    length: string
+    language: string
+    allow_emoji: boolean
+    brand_instructions: string
+    forbidden_words: string[]
+    content_block_ids: string[]
+  }
+}
+// A reusable content block from the sibling tab (id/name/kind) — mirrors
+// VacancyGenerationProfileEditor's own local ContentBlock shape.
+interface ContentBlockRow { id: string; name: string; kind: string }
+
 // A fresh draft for the create card / an opened edit card — matcher fields default
 // to "matches anything" (empty arrays); content defaults to the calmest settings.
-const emptyDraft = () => ({
+const emptyDraft = (): ProfileDraft => ({
   name: '', is_default: false, priority: 10,
   matcher: { location_ids: [], contract_types: [], function_titles: [], industries: [] },
   content: { template: '', tone_of_voice: 'neutral', length: 'medium', language: '', allow_emoji: false, brand_instructions: '', forbidden_words: [], content_block_ids: [] },
@@ -42,12 +84,12 @@ const emptyDraft = () => ({
 // Loads profiles + content blocks; a 404 on the not-yet-built backend endpoints degrades to a calm notice instead of a dead CRUD list.
 export default function VacancyGenerationProfilesList() {
   const { t } = useTranslation('settings')
-  const [profiles, setProfiles] = useState([])
-  const [contentBlocks, setContentBlocks] = useState([])
-  const [phase, setPhase] = useState('loading') // loading | unavailable | error | ready
+  const [profiles, setProfiles] = useState<VacancyGenerationProfile[]>([])
+  const [contentBlocks, setContentBlocks] = useState<ContentBlockRow[]>([])
+  const [phase, setPhase] = useState<'loading' | 'unavailable' | 'error' | 'ready'>('loading')
   const { expanded, setExpanded, adding, setAdding, saving, setSaving, editForms, setEditForms } = useSettingsListUiState()
-  const [settingDefaultId, setSettingDefaultId] = useState(null)
-  const [newForm, setNewForm] = useState(emptyDraft())
+  const [settingDefaultId, setSettingDefaultId] = useState<string | null>(null)
+  const [newForm, setNewForm] = useState<ProfileDraft>(emptyDraft())
   const { confirm, dialog } = useConfirm()
 
   // Load profiles + the reusable-blocks picker data. The blocks fetch is best-effort
@@ -58,23 +100,24 @@ export default function VacancyGenerationProfilesList() {
       api.get(BLOCKS_ENDPOINT).catch(() => ({ data: { data: [] } })),
     ])
     return () => {
-      setProfiles(unwrapList(pRes).rows)
-      setContentBlocks(unwrapList(bRes).rows)
+      setProfiles(unwrapList<VacancyGenerationProfile>(pRes).rows)
+      setContentBlocks(unwrapList<ContentBlockRow>(bRes).rows)
     }
   }, setPhase)
 
   // Shallow-merge a patch from the editor into one profile's draft (top-level keys;
   // the editor itself already rebuilds the full nested matcher/content object).
-  const patch = (id, p) => setEditForms(prev => ({ ...prev, [id]: { ...(prev[id] ?? emptyDraft()), ...p } }))
+  const patch = (id: string, p: Partial<ProfileDraft>) =>
+    setEditForms(prev => ({ ...prev, [id]: { ...((prev[id] as ProfileDraft | undefined) ?? emptyDraft()), ...p } }))
   // Seeds this profile's edit draft from its flat API values, converting to nested structure.
   // Backfills missing matcher/content keys from emptyDraft for profiles predating new fields.
-  const openEdit = (profile) => {
-    setEditForms(prev => ({ ...prev, [profile.id]: fromApiProfile(profile) }))
+  const openEdit = (profile: VacancyGenerationProfile) => {
+    setEditForms(prev => ({ ...prev, [profile.id]: fromApiProfile(profile) as ProfileDraft }))
     setExpanded(profile.id)
   }
 
   // Create a new profile, flattening the nested draft to the API's flat validation shape.
-  const handleCreate = () => runSettingsListCreate({
+  const handleCreate = () => runSettingsListCreate<VacancyGenerationProfile, ProfileDraft>({
     name: newForm.name,
     endpoint: ENDPOINT,
     body: toApiProfile(newForm),
@@ -83,13 +126,13 @@ export default function VacancyGenerationProfilesList() {
   })
 
   // Save an edit to an existing profile, flattening the nested draft to the API's flat shape.
-  const handleSave = async (profile) => {
-    const form = editForms[profile.id]
+  const handleSave = async (profile: VacancyGenerationProfile) => {
+    const form = editForms[profile.id] as ProfileDraft | undefined
     if (!form?.name?.trim()) return
     setSaving(profile.id)
     try {
       const res = await api.put(`${ENDPOINT}/${profile.id}`, toApiProfile(form))
-      const updated = unwrap(res)
+      const updated = unwrap<VacancyGenerationProfile>(res)
       setProfiles(p => p.map(x => x.id === profile.id ? updated : x))
       setExpanded(null)
     } catch {
@@ -100,7 +143,7 @@ export default function VacancyGenerationProfilesList() {
   // Delete a profile. SMZ-10: no backend in-use guard exists (nothing references a
   // profile — VacancyProfileResolver matches live, never stores a link), so the
   // confirm() dialog below is the real, and only, safeguard.
-  const handleDelete = (profile) => {
+  const handleDelete = (profile: VacancyGenerationProfile) => {
     confirm(t('vacancyGenerationSettings.confirmDelete', { name: profile.name }), async () => {
       setSaving(profile.id)
       try {
@@ -121,7 +164,7 @@ export default function VacancyGenerationProfilesList() {
   // `sometimes|boolean`, keepSingleDefault only acts when the flag turns ON, and the
   // resolver (VacancyProfileResolver.php) already falls back to the highest-priority
   // profile when no profile is default — so "no default" is a supported state.
-  const setDefault = async (profile) => {
+  const setDefault = async (profile: VacancyGenerationProfile) => {
     if (settingDefaultId) return
     const next = !profile.is_default
     const previous = profiles
@@ -156,7 +199,7 @@ export default function VacancyGenerationProfilesList() {
 
       {profiles.map((profile) => {
         const isOpen = expanded === profile.id
-        const form = editForms[profile.id]
+        const form = editForms[profile.id] as ProfileDraft | undefined
         return (
           <ExpandableCardListItem
             key={profile.id}

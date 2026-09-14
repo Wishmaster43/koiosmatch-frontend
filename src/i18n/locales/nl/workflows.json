@@ -383,6 +383,13 @@
     "versions": "{{count}} versie(s)",
     "loading": "Laden…",
     "emptyStart": "Nog niets. Klik + om te starten.",
+    "audience": {
+      "internal": "Intern",
+      "external": "Extern",
+      "both": "Beide",
+      "label": "Publiek",
+      "hint": "Intern = alleen medewerkers, Extern = kandidaten/klanten, Beide = iedereen."
+    },
     "field": {
       "name": "Naam",
       "content": "Inhoud"
@@ -523,13 +530,6 @@
       "inUse": "Deze flow is in gebruik en kan niet worden verwijderd.",
       "noPermission": "Je hebt geen rechten om flows te beheren.",
       "selectOrNew": "Kies een flow of maak een nieuwe."
-    },
-    "audience": {
-      "internal": "Intern",
-      "external": "Extern",
-      "both": "Beide",
-      "label": "Publiek",
-      "hint": "Intern = alleen medewerkers, Extern = kandidaten/klanten, Beide = iedereen."
     }
   },
   "canvas": {

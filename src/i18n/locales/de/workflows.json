@@ -322,6 +322,13 @@
     "versions": "{{count}} Version(en)",
     "loading": "Wird geladen…",
     "emptyStart": "Noch nichts. Klicken Sie auf +, um zu starten.",
+    "audience": {
+      "internal": "Intern",
+      "external": "Extern",
+      "both": "Beide",
+      "label": "Zielgruppe",
+      "hint": "Intern = nur Mitarbeitende, Extern = Kandidaten/Kunden, Beide = alle."
+    },
     "field": {
       "name": "Name",
       "content": "Inhalt"
@@ -462,13 +469,6 @@
       "inUse": "Dieser Flow wird verwendet und kann nicht gelöscht werden.",
       "noPermission": "Keine Berechtigung zum Verwalten von Flows.",
       "selectOrNew": "Flow wählen oder neu anlegen."
-    },
-    "audience": {
-      "internal": "Intern",
-      "external": "Extern",
-      "both": "Beide",
-      "label": "Zielgruppe",
-      "hint": "Intern = nur Mitarbeitende, Extern = Kandidaten/Kunden, Beide = alle."
     }
   },
   "filters": {

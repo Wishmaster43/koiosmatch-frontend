@@ -18,21 +18,21 @@ vi.mock('@/lib/api', async () => {
 })
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
 
-const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
+const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 
 afterEach(() => vi.clearAllMocks())
 
 describe('MatchRatesSettings', () => {
   it('loads the saved conversion factor from /settings/matching', async () => {
-    api.get.mockResolvedValue({ data: { data: { conversion_factor: 1.35 } } })
+    vi.mocked(api.get).mockResolvedValue({ data: { data: { conversion_factor: 1.35 } } })
     render(<MatchRatesSettings />)
     await waitFor(() => expect(screen.getByLabelText(st('matchRates.title'))).toHaveValue(1.35))
     expect(api.get).toHaveBeenCalledWith('/settings/matching')
   })
 
   it('saves a new factor on blur via a partial PUT', async () => {
-    api.get.mockResolvedValue({ data: { data: { conversion_factor: null } } })
-    api.put.mockResolvedValue({ data: { data: {} } })
+    vi.mocked(api.get).mockResolvedValue({ data: { data: { conversion_factor: null } } })
+    vi.mocked(api.put).mockResolvedValue({ data: { data: {} } })
     const user = userEvent.setup()
     render(<MatchRatesSettings />)
     const input = await screen.findByLabelText(st('matchRates.title'))
@@ -45,8 +45,8 @@ describe('MatchRatesSettings', () => {
   })
 
   it('an empty input persists null (clears the factor)', async () => {
-    api.get.mockResolvedValue({ data: { data: { conversion_factor: 1.35 } } })
-    api.put.mockResolvedValue({ data: { data: {} } })
+    vi.mocked(api.get).mockResolvedValue({ data: { data: { conversion_factor: 1.35 } } })
+    vi.mocked(api.put).mockResolvedValue({ data: { data: {} } })
     const user = userEvent.setup()
     render(<MatchRatesSettings />)
     const input = await screen.findByLabelText(st('matchRates.title'))
@@ -59,7 +59,7 @@ describe('MatchRatesSettings', () => {
   })
 
   it('a non-positive value is rejected locally and reverted — no request sent', async () => {
-    api.get.mockResolvedValue({ data: { data: { conversion_factor: 1.35 } } })
+    vi.mocked(api.get).mockResolvedValue({ data: { data: { conversion_factor: 1.35 } } })
     const user = userEvent.setup()
     render(<MatchRatesSettings />)
     const input = await screen.findByLabelText(st('matchRates.title'))
@@ -78,7 +78,7 @@ describe('MatchRatesSettings', () => {
 // input that reads as "no factor configured" (§3 — error is never the same as empty).
 describe('MatchRatesSettings — load failure', () => {
   it('shows an error notice instead of the input when GET /settings/matching fails', async () => {
-    api.get.mockRejectedValue(new Error('network down'))
+    vi.mocked(api.get).mockRejectedValue(new Error('network down'))
     render(<MatchRatesSettings />)
 
     expect(await screen.findByText(st('matchRates.loadError'))).toBeInTheDocument()
@@ -90,8 +90,8 @@ describe('MatchRatesSettings — load failure', () => {
 // GET resolves — a regression would surface as a React act()/state-update warning.
 describe('MatchRatesSettings — unmount safety (alive-guard)', () => {
   it('does not throw or warn when the GET resolves after unmount', async () => {
-    let resolveGet
-    api.get.mockReturnValue(new Promise(resolve => { resolveGet = resolve }))
+    let resolveGet: (value: unknown) => void = () => {}
+    vi.mocked(api.get).mockReturnValue(new Promise(resolve => { resolveGet = resolve }))
     const { unmount } = render(<MatchRatesSettings />)
     unmount()
 
@@ -104,7 +104,7 @@ describe('MatchRatesSettings — unmount safety (alive-guard)', () => {
 // When absent from the response, the input field is hidden and no PUT is sent.
 describe('MatchRatesSettings — S-1 absent field (no billing.view)', () => {
   it('hides the input when conversion_factor is absent from the response', async () => {
-    api.get.mockResolvedValue({ data: { data: {} } })
+    vi.mocked(api.get).mockResolvedValue({ data: { data: {} } })
     render(<MatchRatesSettings />)
 
     // Input never appears when the field is absent.
@@ -114,8 +114,8 @@ describe('MatchRatesSettings — S-1 absent field (no billing.view)', () => {
   })
 
   it('does not send a PUT when the field is absent (absence = no permission)', async () => {
-    api.get.mockResolvedValue({ data: { data: {} } })
-    api.put.mockResolvedValue({ data: { data: {} } })
+    vi.mocked(api.get).mockResolvedValue({ data: { data: {} } })
+    vi.mocked(api.put).mockResolvedValue({ data: { data: {} } })
     render(<MatchRatesSettings />)
 
     // Verify the input is not rendered.

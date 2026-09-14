@@ -383,6 +383,13 @@
     "versions": "{{count}} versione/i",
     "loading": "Caricamento…",
     "emptyStart": "Ancora nulla. Clicca + per iniziare.",
+    "audience": {
+      "internal": "Interno",
+      "external": "Esterno",
+      "both": "Entrambi",
+      "label": "Pubblico",
+      "hint": "Interno = solo personale, Esterno = candidati/clienti, Entrambi = tutti."
+    },
     "field": {
       "name": "Nome",
       "content": "Contenuto"
@@ -523,13 +530,6 @@
       "inUse": "Questo flusso è in uso e non può essere eliminato.",
       "noPermission": "Non hai i permessi per gestire i flussi.",
       "selectOrNew": "Seleziona un flusso o creane uno nuovo."
-    },
-    "audience": {
-      "internal": "Interno",
-      "external": "Esterno",
-      "both": "Entrambi",
-      "label": "Pubblico",
-      "hint": "Interno = solo personale, Esterno = candidati/clienti, Entrambi = tutti."
     }
   },
   "canvas": {

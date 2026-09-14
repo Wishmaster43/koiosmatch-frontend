@@ -26,11 +26,21 @@ vi.mock('@/lib/api', async () => {
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
-const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
+const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 // Same, for the shared ConfirmDialog's own labels (common namespace).
-const ct = (key, opts) => i18n.t(key, { ns: 'common', ...opts })
+const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'common', ...opts })
 
-const template = (over = {}) => ({
+// hand-written: matches MatchTemplatesSettings.tsx's own MatchTemplate shape (no 2xx schema in the spec).
+interface TemplateFixture {
+  id: string
+  name: string
+  weights: Record<string, number>
+  contract_types: string[]
+  function_title: string | null
+  linked_vacancies_count: number
+}
+
+const template = (over: Partial<TemplateFixture> = {}): TemplateFixture => ({
   id: 't1', name: 'Senior profile',
   weights: { qualifications: 4, technical_fit: 3, soft_skills: 3, cultural_alignment: 3, career_aspirations: 2, location: 5 },
   contract_types: [], function_title: null, linked_vacancies_count: 0,
@@ -60,7 +70,7 @@ describe('MatchTemplatesSettings', () => {
     // Only the templates fetch fails — the contract-type/function lookup hooks
     // (useContractTypes/useFunctions) hit different endpoints and must not be
     // rejected too, or their own unhandled-rejection surfaces as test noise.
-    api.get.mockImplementation((url) =>
+    vi.mocked(api.get).mockImplementation((url: string) =>
       url.includes('match-weight-templates')
         ? Promise.reject(new Error('network down'))
         : Promise.resolve({ data: { data: [] } }))
@@ -70,13 +80,13 @@ describe('MatchTemplatesSettings', () => {
   })
 
   it('shows the empty state when there are no templates', async () => {
-    api.get.mockResolvedValue({ data: { data: [] } })
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
     render(<MatchTemplatesSettings />)
     await waitFor(() => expect(screen.getByText(st('matchTemplatesSettings.empty'))).toBeInTheDocument())
   })
 
   it('renders the template list with its linked-vacancy count', async () => {
-    api.get.mockImplementation((url) =>
+    vi.mocked(api.get).mockImplementation((url: string) =>
       url.includes('match-weight-templates')
         ? Promise.resolve({ data: { data: [template({ linked_vacancies_count: 2 })] } })
         : Promise.resolve({ data: { data: [] } }))
@@ -86,7 +96,7 @@ describe('MatchTemplatesSettings', () => {
   })
 
   it('delete is blocked (disabled) while the template is still linked to a vacancy', async () => {
-    api.get.mockImplementation((url) =>
+    vi.mocked(api.get).mockImplementation((url: string) =>
       url.includes('match-weight-templates')
         ? Promise.resolve({ data: { data: [template({ linked_vacancies_count: 3 })] } })
         : Promise.resolve({ data: { data: [] } }))
@@ -100,12 +110,12 @@ describe('MatchTemplatesSettings', () => {
   })
 
   it('after saving an edit to a linked template, confirming re-applies to all linked vacancies', async () => {
-    api.get.mockImplementation((url) =>
+    vi.mocked(api.get).mockImplementation((url: string) =>
       url.includes('match-weight-templates')
         ? Promise.resolve({ data: { data: [template({ linked_vacancies_count: 1 })] } })
         : Promise.resolve({ data: { data: [] } }))
-    api.patch.mockResolvedValue({ data: { data: template({ linked_vacancies_count: 1 }) } })
-    api.post.mockResolvedValue({ data: { applied: ['v1'], skipped: [] } })
+    vi.mocked(api.patch).mockResolvedValue({ data: { data: template({ linked_vacancies_count: 1 }) } })
+    vi.mocked(api.post).mockResolvedValue({ data: { applied: ['v1'], skipped: [] } })
 
     const user = userEvent.setup()
     render(<MatchTemplatesSettings />)
@@ -120,11 +130,11 @@ describe('MatchTemplatesSettings', () => {
   })
 
   it('declining the apply prompt only saves the template, without calling apply', async () => {
-    api.get.mockImplementation((url) =>
+    vi.mocked(api.get).mockImplementation((url: string) =>
       url.includes('match-weight-templates')
         ? Promise.resolve({ data: { data: [template({ linked_vacancies_count: 1 })] } })
         : Promise.resolve({ data: { data: [] } }))
-    api.patch.mockResolvedValue({ data: { data: template({ linked_vacancies_count: 1 }) } })
+    vi.mocked(api.patch).mockResolvedValue({ data: { data: template({ linked_vacancies_count: 1 }) } })
 
     const user = userEvent.setup()
     render(<MatchTemplatesSettings />)
@@ -139,11 +149,11 @@ describe('MatchTemplatesSettings', () => {
   })
 
   it('a 409 on delete keeps the row and surfaces the in-use block instead of removing it', async () => {
-    api.get.mockImplementation((url) =>
+    vi.mocked(api.get).mockImplementation((url: string) =>
       url.includes('match-weight-templates')
         ? Promise.resolve({ data: { data: [template({ linked_vacancies_count: 0 })] } })
         : Promise.resolve({ data: { data: [] } }))
-    api.delete.mockRejectedValue({ response: { status: 409 } })
+    vi.mocked(api.delete).mockRejectedValue({ response: { status: 409 } })
 
     const user = userEvent.setup()
     render(<MatchTemplatesSettings />)
@@ -163,9 +173,9 @@ describe('MatchTemplatesSettings', () => {
   // is a searchable single-select fed from the candidate function lookup — neither
   // is a hardcoded option list (§3B). Both must persist in the create request body.
   it('Soort dienstverband checks multiple values and Functie is searchable; both persist in the create payload', async () => {
-    api.get.mockImplementation((url) =>
+    vi.mocked(api.get).mockImplementation((url: string) =>
       url.includes('match-weight-templates') ? Promise.resolve({ data: { data: [] } }) : mockLookupsEmpty())
-    api.post.mockResolvedValue({ data: { data: template({ id: 't2', name: 'Zorg profiel' }) } })
+    vi.mocked(api.post).mockResolvedValue({ data: { data: template({ id: 't2', name: 'Zorg profiel' }) } })
 
     const user = userEvent.setup()
     render(<MatchTemplatesSettings />)

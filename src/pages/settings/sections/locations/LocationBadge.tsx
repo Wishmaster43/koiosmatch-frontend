@@ -18,9 +18,17 @@ import { Building2 } from 'lucide-react'
 import { avatarColor } from '@/lib/avatarColor'
 import { resolveLocationIcon } from '@/lib/locationIcons'
 
+// Props: the row's display name (for the colour hash fallback) plus its own
+// optional colour/icon slug from the backend (VESTIGING-ICOON-1).
+interface LocationBadgeProps {
+  name: string
+  color?: string | null
+  icon?: string | null
+}
+
 // Renders a branch's own colour/icon when the backend has them (see file docblock
 // above), falling back to the shared deterministic hash for older rows without either.
-export default function LocationBadge({ name, color, icon }) {
+export default function LocationBadge({ name, color, icon }: LocationBadgeProps) {
   const resolvedColor = color || avatarColor(name)
   const Icon = icon ? resolveLocationIcon(icon) : Building2
   return (

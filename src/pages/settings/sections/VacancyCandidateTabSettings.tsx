@@ -24,12 +24,13 @@
  * itself as doing more than 'exact' does today.
  */
 import { useState } from 'react'
+import type { ChangeEvent } from 'react'
 import { Caption, SectionTitle } from '@/components/ui/typography'
 import { useTranslation } from 'react-i18next'
 import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { useLookups } from '@/context/LookupsContext'
 import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
-import { getCandidateTabDefaults } from '@/pages/vacancies/shared'
+import { getCandidateTabDefaults, type CandidateTabConfig } from '@/pages/vacancies/shared'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { Toggle } from '../components/SettingsKit'
 import LookupChipSelect from '../components/LookupChipSelect'
@@ -40,6 +41,18 @@ import { makeToggleIn } from '@/lib/selectionSet'
 // audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 const KEY = 'vacancy_candidate_tab'
+
+// LEADS-CRITERIA-1: the full stored shape — CandidateTabConfig's three tab-gate
+// arrays plus the leads-criteria fields the MatchCriteriaResolver also reads.
+interface FullVacancyCandidateTabConfig extends CandidateTabConfig {
+  default_radius_km?: number // search radius in km applied around the vacancy location
+  countable_vacancy_statuses?: string[] // vacancy statuses whose leads count toward the "leads" counter
+  apply_radius?: boolean // whether the radius filter is applied when resolving leads
+  function_match?: string // strictness: 'exact' or 'all' (a stored legacy 'category' falls back to 'exact', see FUNCTION_MATCH_OPTIONS above)
+  exclude_already_applied?: boolean // whether candidates with a live application to this vacancy are excluded from leads
+  include_expiring_placements?: boolean // whether placed-but-expiring-soon candidates count as leads
+  expiring_within_days?: number // days-until-expiry window used when include_expiring_placements is on
+}
 
 // Function-match strictness options — 'category' is GONE (FUNCTION-MATCH-CATEGORY-1:
 // it never really existed, behaved as 'exact', and the settings write now 422s on
@@ -55,7 +68,8 @@ const FUNCTION_MATCH_OPTIONS = [
 // layout stays identical across all three. The shared house Toggle (Danny 28-07:
 // "GEEN VINKJES MAAR TOGGLES!!!") replaces the raw checkbox; `ariaLabel` keeps the
 // switch's accessible name short (just the label, not label+hint concatenated).
-function CheckboxRow({ checked, onChange, label, hint }) {
+interface CheckboxRowProps { checked: boolean; onChange: () => void; label: string; hint: string }
+function CheckboxRow({ checked, onChange, label, hint }: CheckboxRowProps) {
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
       <Toggle checked={checked} onChange={onChange} ariaLabel={label} />
@@ -83,7 +97,7 @@ function VacancyCandidateTabSettingsInner() {
   const { statuses: candidateStatuses, candidateTypes } = useLookups()
   const { statuses: vacancyStatuses } = useVacancyLookups()
   const values = useAllSettings()
-  const stored = getJsonSetting(values, KEY, null)
+  const stored = getJsonSetting<FullVacancyCandidateTabConfig | null>(values, KEY, null)
   // Absent setting → show the real seed-based effective behaviour, never a blank form.
   const defaults = getCandidateTabDefaults(vacancyStatuses, candidateStatuses, candidateTypes)
   // RADIUS-SETTING-1 (Danny 25-07) + LEADS-CRITERIA-1 (Danny 25/26-07): every field
@@ -109,20 +123,28 @@ function VacancyCandidateTabSettingsInner() {
   // never the seeded defaults: spreading `cfg` wrote the FE 'available' status seed
   // into the setting on any unrelated toggle, re-narrowing the candidate tab below
   // the leads counter (LEADS-PARITY-1, Opus wave-B2).
-  const persist = (patch) => saveSettingsKeys({ [KEY]: { ...(stored ?? {}), ...patch } }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
-  const toggleIn = makeToggleIn(cfg, persist)
+  const persist = (patch: Partial<typeof cfg>) => saveSettingsKeys({ [KEY]: { ...(stored ?? {}), ...patch } }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
+  // makeToggleIn only needs the array-valued keys — the leads-criteria scalars
+  // (radius/booleans/function_match) are patched directly via persist() instead.
+  const arrayCfg = {
+    vacancy_statuses: cfg.vacancy_statuses,
+    candidate_statuses: cfg.candidate_statuses,
+    contract_forms: cfg.contract_forms,
+    countable_vacancy_statuses: cfg.countable_vacancy_statuses,
+  }
+  const toggleIn = makeToggleIn(arrayCfg, persist)
   // Flip one boolean leads-criteria key (apply_radius / exclude_already_applied /
   // include_expiring_placements) — same immediate full-object persist.
-  const toggleBool = (key) => () => persist({ [key]: !cfg[key] })
+  const toggleBool = (key: 'apply_radius' | 'exclude_already_applied' | 'include_expiring_placements') => () => persist({ [key]: !cfg[key] })
   // Clamp to the 1..500 range before persisting so a stray out-of-bounds value
   // (typed or pasted past the input's own min/max, which browsers don't hard-enforce)
   // never gets written.
-  const setRadius = (raw) => {
+  const setRadius = (raw: string) => {
     const n = Math.min(500, Math.max(1, Number(raw) || 1))
     persist({ default_radius_km: n })
   }
   // Same clamp discipline for the expiring-match lookahead window (1..365 days).
-  const setExpiringDays = (raw) => {
+  const setExpiringDays = (raw: string) => {
     const n = Math.min(365, Math.max(1, Number(raw) || 1))
     persist({ expiring_within_days: n })
   }
@@ -161,15 +183,15 @@ function VacancyCandidateTabSettingsInner() {
       <SubTabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
       <div style={{ marginTop: 14 }}>
         {activeTab === 'vacancy_statuses' && (
-          <LookupChipSelect items={vacancyStatuses} selected={cfg.vacancy_statuses} onToggle={toggleIn('vacancy_statuses')}
+          <LookupChipSelect items={vacancyStatuses} selected={cfg.vacancy_statuses} onToggle={(v) => toggleIn('vacancy_statuses')(String(v))}
             label={t('candidateTab.vacancyStatusesTitle')} ariaLabel={t('candidateTab.vacancyStatusesTitle')} />
         )}
         {activeTab === 'candidate_statuses' && (
-          <LookupChipSelect items={candidateStatuses} selected={cfg.candidate_statuses} onToggle={toggleIn('candidate_statuses')}
+          <LookupChipSelect items={candidateStatuses} selected={cfg.candidate_statuses} onToggle={(v) => toggleIn('candidate_statuses')(String(v))}
             label={t('candidateTab.candidateStatusesTitle')} ariaLabel={t('candidateTab.candidateStatusesTitle')} />
         )}
         {activeTab === 'contract_forms' && (
-          <LookupChipSelect items={candidateTypes} selected={cfg.contract_forms} onToggle={toggleIn('contract_forms')}
+          <LookupChipSelect items={candidateTypes} selected={cfg.contract_forms} onToggle={(v) => toggleIn('contract_forms')(String(v))}
             label={t('candidateTab.contractFormsTitle')} ariaLabel={t('candidateTab.contractFormsTitle')} />
         )}
 
@@ -182,7 +204,7 @@ function VacancyCandidateTabSettingsInner() {
             {/* countable_vacancy_statuses — which vacancy statuses count toward the
                 leads counter; reuses the same vacancy-status list + checkbox affordance
                 as the vacancy-statuses sub-tab. Empty selection = every status counts. */}
-            <LookupChipSelect items={vacancyStatuses} selected={cfg.countable_vacancy_statuses} onToggle={toggleIn('countable_vacancy_statuses')}
+            <LookupChipSelect items={vacancyStatuses} selected={cfg.countable_vacancy_statuses} onToggle={(v) => toggleIn('countable_vacancy_statuses')(String(v))}
               label={t('candidateTab.leadsCriteria.countableStatusesTitle')} hint={t('candidateTab.leadsCriteria.countableStatusesHint')} />
           </div>
         )}
@@ -208,7 +230,7 @@ function VacancyCandidateTabSettingsInner() {
                 <Caption as="p" style={{ marginBottom: 6 }}>{t('candidateTab.defaultRadiusHint')}</Caption>
                 <input id="vacancy-candidate-tab-radius" type="number" min={1} max={500} value={cfg.default_radius_km}
                   disabled={!cfg.apply_radius}
-                  onChange={e => setRadius(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setRadius(e.target.value)}
                   style={{ width: 100, padding: '6px 8px', borderRadius: 6, border: '1px solid var(--border)',
                     background: cfg.apply_radius ? 'var(--surface)' : 'var(--bg)', color: 'var(--text)', fontSize: 12,
                     opacity: cfg.apply_radius ? 1 : 0.55, cursor: cfg.apply_radius ? 'text' : 'not-allowed' }} />
@@ -260,7 +282,7 @@ function VacancyCandidateTabSettingsInner() {
                 <Caption as="p" style={{ marginBottom: 6 }}>{t('candidateTab.leadsCriteria.expiringWithinDaysHint')}</Caption>
                 <input id="vacancy-candidate-tab-expiring-days" type="number" min={1} max={365} value={cfg.expiring_within_days}
                   disabled={!cfg.include_expiring_placements}
-                  onChange={e => setExpiringDays(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setExpiringDays(e.target.value)}
                   style={{ width: 100, padding: '6px 8px', borderRadius: 6, border: '1px solid var(--border)',
                     background: cfg.include_expiring_placements ? 'var(--surface)' : 'var(--bg)', color: 'var(--text)', fontSize: 12,
                     opacity: cfg.include_expiring_placements ? 1 : 0.55, cursor: cfg.include_expiring_placements ? 'text' : 'not-allowed' }} />

@@ -14,7 +14,7 @@ import VacancyCandidateTabSettings from './VacancyCandidateTabSettings'
 
 // Real translations (no i18n provider in this render tree, so t() would
 // otherwise just echo the key) — mirrors ProposalSettings.test.jsx's pattern.
-const t = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
+const t = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 
 // Route the shared settings loader: the blob is controlled per test; saves go
 // through the REAL saveSettingsKeys so the api.post seam is asserted.

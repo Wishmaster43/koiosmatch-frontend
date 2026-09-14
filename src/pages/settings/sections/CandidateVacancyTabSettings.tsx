@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next'
 import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { useLookups } from '@/context/LookupsContext'
 import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
-import { getVacancyTabDefaults } from '@/pages/candidates/shared'
+import { getVacancyTabDefaults, type VacancyTabConfig } from '@/pages/candidates/shared'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import LookupChipSelect from '../components/LookupChipSelect'
 import { notifyError } from '@/lib/notify'
@@ -46,7 +46,7 @@ function CandidateVacancyTabSettingsInner() {
   const { phases, statuses, candidateTypes } = useLookups()
   const { statuses: vacancyStatuses } = useVacancyLookups()
   const values = useAllSettings()
-  const stored = getJsonSetting(values, KEY, null)
+  const stored = getJsonSetting<VacancyTabConfig | null>(values, KEY, null)
   // Absent setting → show the real seed-based effective behaviour, never a blank form.
   const defaults = getVacancyTabDefaults(phases, statuses, candidateTypes, vacancyStatuses)
   const cfg = {
@@ -59,7 +59,7 @@ function CandidateVacancyTabSettingsInner() {
   // Toggle one value in one of the four arrays; always persists the FULL current
   // config (all four keys explicit), never a partial write — immediate-save, no
   // separate save button (Danny confirmed).
-  const persist = (patch) => saveSettingsKeys({ [KEY]: { ...cfg, ...patch } }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
+  const persist = (patch: Partial<typeof cfg>) => saveSettingsKeys({ [KEY]: { ...cfg, ...patch } }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
   const toggleIn = makeToggleIn(cfg, persist)
 
   // Four sub-tabs — one per checkbox block, reusing the shared underline SubTabBar.
@@ -85,10 +85,10 @@ function CandidateVacancyTabSettingsInner() {
 
       <SubTabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
       <div style={{ marginTop: 14 }}>
-        {activeTab === 'phases' && <LookupChipSelect items={phases} selected={cfg.phases} onToggle={toggleIn('phases')} label={t('vacancyTab.phasesTitle')} ariaLabel={t('vacancyTab.phasesTitle')} />}
-        {activeTab === 'statuses' && <LookupChipSelect items={statuses} selected={cfg.hidden_statuses} onToggle={toggleIn('hidden_statuses')} label={t('vacancyTab.statusesTitle')} ariaLabel={t('vacancyTab.statusesTitle')} />}
-        {activeTab === 'types' && <LookupChipSelect items={candidateTypes} selected={cfg.candidate_types} onToggle={toggleIn('candidate_types')} label={t('vacancyTab.typesTitle')} ariaLabel={t('vacancyTab.typesTitle')} />}
-        {activeTab === 'vacancy_statuses' && <LookupChipSelect items={vacancyStatuses} selected={cfg.vacancy_statuses} onToggle={toggleIn('vacancy_statuses')} label={t('vacancyTab.vacancyStatusesTitle')} ariaLabel={t('vacancyTab.vacancyStatusesTitle')} />}
+        {activeTab === 'phases' && <LookupChipSelect items={phases} selected={cfg.phases} onToggle={(v) => toggleIn('phases')(String(v))} label={t('vacancyTab.phasesTitle')} ariaLabel={t('vacancyTab.phasesTitle')} />}
+        {activeTab === 'statuses' && <LookupChipSelect items={statuses} selected={cfg.hidden_statuses} onToggle={(v) => toggleIn('hidden_statuses')(String(v))} label={t('vacancyTab.statusesTitle')} ariaLabel={t('vacancyTab.statusesTitle')} />}
+        {activeTab === 'types' && <LookupChipSelect items={candidateTypes} selected={cfg.candidate_types} onToggle={(v) => toggleIn('candidate_types')(String(v))} label={t('vacancyTab.typesTitle')} ariaLabel={t('vacancyTab.typesTitle')} />}
+        {activeTab === 'vacancy_statuses' && <LookupChipSelect items={vacancyStatuses} selected={cfg.vacancy_statuses} onToggle={(v) => toggleIn('vacancy_statuses')(String(v))} label={t('vacancyTab.vacancyStatusesTitle')} ariaLabel={t('vacancyTab.vacancyStatusesTitle')} />}
       </div>
     </div>
   )

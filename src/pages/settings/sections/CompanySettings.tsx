@@ -5,6 +5,7 @@
  * comments — see the constants below).
  */
 import { useState, useEffect, useRef } from 'react'
+import type { ReactNode, ChangeEvent, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
 import api from '@/lib/api'
@@ -27,6 +28,7 @@ import { PageTitle } from '@/components/ui/typography'
 import { fieldSelectStyle, fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { postcodePlaceholder } from '@/lib/postcode'
 import CatalogSection from './CatalogSection'
+import Row from './settingsFormRow'
 
 // Option lists (data — kept as-is; only labels are translated). Industries and
 // countries are now backend-sourced (Settings → Personalisation → Industries;
@@ -36,29 +38,17 @@ import CatalogSection from './CatalogSection'
 // "Language must be Dutch, not nl").
 const LANGUAGES = APP_LANGUAGES.map(l => ({ value: l.value, label: l.label }))
 // Legacy rows stored the NAME; normalize either shape to the code.
-const toLanguageCode = v => APP_LANGUAGES.find(l => l.value === v || l.label === v)?.value ?? 'nl'
+const toLanguageCode = (v: string): string => APP_LANGUAGES.find(l => l.value === v || l.label === v)?.value ?? 'nl'
 // I18N-1 lane I3 (BE 5a109b00): currency and timezone are stored as CODES
 // (ISO-4217 / IANA, 422 outside the backend's closed lists) and the pickers read
 // those lists from GET /settings/locale-options (useLocaleOptions). Rows saved
 // before this change hold the old Dutch LABEL ('Euro (€)', 'Europa/Amsterdam');
 // these two maps normalise a stored label to its code on load, so the next save
 // writes the code the backend now validates.
-const LEGACY_CURRENCY = { 'Euro (€)': 'EUR', 'Dollar ($)': 'USD', 'Pond (£)': 'GBP' }
-const LEGACY_TIMEZONE = { 'Europa/Amsterdam': 'Europe/Amsterdam', 'Europa/Brussel': 'Europe/Brussels', 'Europa/Londen': 'Europe/London' }
-const toCurrencyCode = v => LEGACY_CURRENCY[v] ?? (v || 'EUR')
-const toTimezoneCode = v => LEGACY_TIMEZONE[v] ?? (v || 'Europe/Amsterdam')
-
-// Module-scope so they keep a stable identity across renders (otherwise text
-// inputs lose focus on every keystroke). `last` drops the divider on a block's
-// closing row so a titled card never ends on a dangling rule.
-function Row({ label, children, last = false }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', padding: '14px 0', borderBottom: last ? 'none' : '1px solid var(--hover-bg)', gap: 24 }}>
-      <div style={{ width: 200, flexShrink: 0, fontSize: 13, color: 'var(--text-muted)', paddingTop: 8 }}>{label}</div>
-      <div style={{ flex: 1 }}>{children}</div>
-    </div>
-  )
-}
+const LEGACY_CURRENCY: Record<string, string> = { 'Euro (€)': 'EUR', 'Dollar ($)': 'USD', 'Pond (£)': 'GBP' }
+const LEGACY_TIMEZONE: Record<string, string> = { 'Europa/Amsterdam': 'Europe/Amsterdam', 'Europa/Brussel': 'Europe/Brussels', 'Europa/Londen': 'Europe/London' }
+const toCurrencyCode = (v: string): string => LEGACY_CURRENCY[v] ?? (v || 'EUR')
+const toTimezoneCode = (v: string): string => LEGACY_TIMEZONE[v] ?? (v || 'Europe/Amsterdam')
 
 // The card chrome this screen already used for its single form block, hoisted so
 // all three blocks share one source (§11).
@@ -69,7 +59,7 @@ const GROUP_CARD = {
 // One titled block of rows — the settings-wide "titled card" idiom (shared
 // `cardHead` above a bordered surface, mirroring Settings → Vestigingen's
 // address/contact blocks), so the three groups read as one form, not three screens.
-function Group({ title, children }) {
+function Group({ title, children }: { title: ReactNode; children: ReactNode }) {
   return (
     <section>
       <h3 style={cardHead}>{title}</h3>
@@ -83,9 +73,15 @@ const baseInput = fieldInputStyle
 
 // Thin wrapper over the shared field style (baseInput) so a call-site can layer its
 // own override on top without re-declaring the canon face.
-function Input({ value, onChange, placeholder, style }) {
+interface InputProps {
+  value: string | undefined
+  onChange: (v: string) => void
+  placeholder?: string
+  style?: CSSProperties
+}
+function Input({ value, onChange, placeholder, style }: InputProps) {
   return (
-    <input value={value ?? ''} onChange={e => onChange(e.target.value)} placeholder={placeholder}
+    <input value={value ?? ''} onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)} placeholder={placeholder}
       style={{ ...baseInput, ...style }} />
   )
 }
@@ -96,8 +92,17 @@ function Input({ value, onChange, placeholder, style }) {
 // backend-sourced country codes) — the trigger always shows the resolved LABEL,
 // never a raw stored code (the bug this replaces: a stored 'NL' rendered as literal
 // "NL" because the old hardcoded list only matched on full English names).
-function Select({ value, onChange, options }) {
-  const opts = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
+interface SelectOption {
+  value: string
+  label: string
+}
+interface SelectProps {
+  value: string | undefined
+  onChange: (v: string) => void
+  options: Array<string | SelectOption>
+}
+function Select({ value, onChange, options }: SelectProps) {
+  const opts: SelectOption[] = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
   const selectedLabel = opts.find(o => o.value === value)?.label ?? value
   return (
     <SearchSelect
@@ -147,15 +152,15 @@ export default function CompanySettings() {
     : LANGUAGES
   // Backend-sourced operating-country codes, labelled in the current UI language.
   const { options: countryOptions } = useCountriesLookup()
-  const [form,       setForm]       = useState(EMPTY)
+  const [form,       setForm]       = useState<typeof EMPTY>(EMPTY)
   // Provinces cascade on the picked country (PROVINCES-1) — same hook the candidate
   // and vacancy address blocks use, so the tenant maintains one list.
   const { provinces } = useProvinces(form.company_country || 'NL')
   const provinceOptions = (provinces ?? []).map(p => (typeof p === 'string' ? { value: p, label: p } : p))
 
-  const [bannerUrl,  setBannerUrl]  = useState(null)
+  const [bannerUrl,  setBannerUrl]  = useState<string | null>(null)
   const { saved, setSaved, saving, setSaving, loading, setLoading, loadError, setLoadError, reloadKey, setReloadKey } = useSettingsSectionState()
-  const bannerRef = useRef(null)
+  const bannerRef = useRef<HTMLInputElement>(null)
 
   // Loads the saved company settings once on mount, migrating a legacy single-line
   // address into the street field and normalising the language code.
@@ -185,22 +190,24 @@ export default function CompanySettings() {
     }).catch(() => setLoadError(true)).finally(() => setLoading(false))
   }, [reloadKey, setLoadError, setLoading])
 
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+  const set = (k: keyof typeof EMPTY, v: string) => setForm(f => ({ ...f, [k]: v }))
 
   // BANNER-UPLOAD-1 (CMBE 23-07, mirrors /settings/logo): multipart POST persists
   // the private path server-side; GET /settings mints a fresh signed URL (12h TTL).
   // The response only feeds the preview — never store the signed URL in settings.
-  const handleBannerFile = async (e) => {
+  const handleBannerFile = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     const fd = new FormData()
     fd.append('banner', file)
     try {
-      const res = await api.post('/settings/banner', fd)
+      // hand-written: the spec carries no 2xx schema for /settings/banner.
+      const res = await api.post<{ banner_url?: string }>('/settings/banner', fd)
       if (res.data?.banner_url) setBannerUrl(res.data.banner_url)
     } catch (err) {
       // 422 = bad type/size or the SVG script-scan — show the backend's own message.
-      notifyError(err?.response?.data?.message ?? t('company.bannerUploadFailed'))
+      const uploadErr = err as { response?: { data?: { message?: string } } }
+      notifyError(uploadErr?.response?.data?.message ?? t('company.bannerUploadFailed'))
     } finally {
       e.target.value = ''
     }

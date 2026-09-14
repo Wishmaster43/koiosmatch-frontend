@@ -326,6 +326,13 @@
     "versions": "{{count}} version(s)",
     "loading": "Loading…",
     "emptyStart": "Nothing yet. Click + to start.",
+    "audience": {
+      "internal": "Internal",
+      "external": "External",
+      "both": "Both",
+      "label": "Audience",
+      "hint": "Internal = staff only, External = candidates/customers, Both = everyone."
+    },
     "field": {
       "name": "Name",
       "content": "Content"
@@ -466,13 +473,6 @@
       "inUse": "This flow is in use and cannot be deleted.",
       "noPermission": "You have no permission to manage flows.",
       "selectOrNew": "Select a flow or create a new one."
-    },
-    "audience": {
-      "internal": "Internal",
-      "external": "External",
-      "both": "Both",
-      "label": "Audience",
-      "hint": "Internal = staff only, External = candidates/customers, Both = everyone."
     }
   },
   "categories": {

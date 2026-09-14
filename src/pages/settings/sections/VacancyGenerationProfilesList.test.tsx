@@ -8,6 +8,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import type { ChangeEvent } from 'react'
 import i18n from '@/i18n'
 import api from '@/lib/api'
 import VacancyGenerationProfilesList from './VacancyGenerationProfilesList'
@@ -27,19 +28,42 @@ vi.mock('@/lib/useIndustries', () => ({ useIndustries: () => ({ industries: ['Zo
 vi.mock('@/lib/useLanguageLookups', () => ({ useLanguageLookups: () => ({ languages: ['Nederlands'], levels: [] }) }))
 // Tiptap's real editor is out of scope here — a plain textarea proves the wiring.
 vi.mock('@/components/ui/RichTextEditor', () => ({
-  default: ({ value, onChange }) => <textarea data-testid="rte" value={value ?? ''} onChange={e => onChange(e.target.value)} />,
+  default: ({ value, onChange }: { value?: string; onChange: (v: string) => void }) =>
+    <textarea data-testid="rte" value={value ?? ''} onChange={(e: ChangeEvent<HTMLTextAreaElement>) => onChange(e.target.value)} />,
 }))
 
-const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
+const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 // Resolve the shared ConfirmDialog's own labels (common namespace).
-const ct = (key, opts) => i18n.t(key, { ns: 'common', ...opts })
+const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'common', ...opts })
 
-// Profile fixture — FLAT keys as returned by the backend API (not nested).
-// Use this for mocking GET responses and API calls.
+// Profile fixture — FLAT keys as returned by the backend API (not nested), plus
+// the optional nested matcher/content mirrors a few tests attach or delete.
+// hand-written: matches VacancyGenerationProfilesList.tsx's own VacancyGenerationProfile shape.
 // SMZ-10: the API never emits `in_use` — nothing references a profile
 // (VacancyProfileResolver matches live, never stores a link) — so the fixture
 // carries no such field.
-const profile = (over = {}) => ({
+interface ProfileFixture {
+  id: string
+  name: string
+  is_default: boolean
+  priority: number
+  location_ids: string[]
+  contract_types: string[]
+  function_titles: string[]
+  industries: string[]
+  template: string
+  tone_of_voice: string
+  length: string
+  language: string
+  allow_emoji: boolean
+  brand_instructions: string
+  forbidden_words: string[]
+  content_block_ids: string[]
+  matcher?: { location_ids: string[]; contract_types: string[]; function_titles: string[]; industries: string[] }
+  content?: { template: string; tone_of_voice: string; length: string; language: string; allow_emoji: boolean; brand_instructions: string; forbidden_words: string[]; content_block_ids: string[] }
+}
+
+const profile = (over: Partial<ProfileFixture> = {}): ProfileFixture => ({
   id: 'p1', name: 'Zorg — ochtenddiensten', is_default: false, priority: 15,
   location_ids: ['loc1'],
   contract_types: ['ZZP Flex'],
@@ -57,11 +81,11 @@ const profile = (over = {}) => ({
 })
 
 // Route the mocked GET by URL — profiles vs. the reusable-blocks picker data.
-const mockGet = (profilesResult, blocksResult = { data: { data: [] } }) => {
-  api.get.mockImplementation((url) => {
-    if (url.includes('vacancy-generation-profiles')) return profilesResult
-    if (url.includes('vacancy-content-blocks')) return Promise.resolve(blocksResult)
-    return Promise.resolve({ data: { data: [] } })
+const mockGet = (profilesResult: Promise<unknown>, blocksResult: unknown = { data: { data: [] } }) => {
+  vi.mocked(api.get).mockImplementation((url: string) => {
+    if (url.includes('vacancy-generation-profiles')) return profilesResult as ReturnType<typeof api.get>
+    if (url.includes('vacancy-content-blocks')) return Promise.resolve(blocksResult) as ReturnType<typeof api.get>
+    return Promise.resolve({ data: { data: [] } }) as ReturnType<typeof api.get>
   })
 }
 
@@ -97,7 +121,7 @@ describe('VacancyGenerationProfilesList', () => {
 
   it('creating a profile POSTs the nested envelope {name, is_default, priority, matcher:{...}, content:{...}}', async () => {
     mockGet(Promise.resolve({ data: { data: [] } }))
-    api.post.mockResolvedValue({ data: { data: profile({ id: 'new1', name: 'New profile' }) } })
+    vi.mocked(api.post).mockResolvedValue({ data: { data: profile({ id: 'new1', name: 'New profile' }) } })
     const user = userEvent.setup()
     render(<VacancyGenerationProfilesList />)
 
@@ -132,7 +156,7 @@ describe('VacancyGenerationProfilesList', () => {
 
   it('saving an edited profile PUTs the nested envelope to the profile-specific route', async () => {
     mockGet(Promise.resolve({ data: { data: [profile()] } }))
-    api.put.mockResolvedValue({ data: { data: profile({ name: 'Renamed' }) } })
+    vi.mocked(api.put).mockResolvedValue({ data: { data: profile({ name: 'Renamed' }) } })
     const user = userEvent.setup()
     render(<VacancyGenerationProfilesList />)
 
@@ -172,7 +196,7 @@ describe('VacancyGenerationProfilesList', () => {
   // and a confirmed delete actually removes the row.
   it('the delete button is always enabled, and a confirmed delete removes the row', async () => {
     mockGet(Promise.resolve({ data: { data: [profile()] } }))
-    api.delete.mockResolvedValue({})
+    vi.mocked(api.delete).mockResolvedValue({})
     const user = userEvent.setup()
     render(<VacancyGenerationProfilesList />)
 
@@ -223,7 +247,7 @@ describe('VacancyGenerationProfilesList', () => {
   it('handles 422 validation error from nested field rejection', async () => {
     mockGet(Promise.resolve({ data: { data: [profile()] } }))
     // BE rejects an unknown field in the nested matcher with a 422.
-    api.put.mockRejectedValue({
+    vi.mocked(api.put).mockRejectedValue({
       response: {
         status: 422,
         data: { message: "Onbekend veld 'foo' in matcher.", errors: { 'matcher.foo': ["Onbekend veld 'foo' in matcher."] } },
@@ -261,7 +285,7 @@ describe('VacancyGenerationProfilesList — is_default undo', () => {
 
   it('clicking the active default PUTs {is_default:false} on the same per-id route', async () => {
     mockGet(Promise.resolve({ data: { data: [profile({ is_default: true })] } }))
-    api.put.mockResolvedValue({ data: { data: profile({ is_default: false }) } })
+    vi.mocked(api.put).mockResolvedValue({ data: { data: profile({ is_default: false }) } })
     const user = userEvent.setup()
     render(<VacancyGenerationProfilesList />)
 
@@ -276,7 +300,7 @@ describe('VacancyGenerationProfilesList — is_default undo', () => {
 
   it('reverts and notifies when the clear PUT fails', async () => {
     mockGet(Promise.resolve({ data: { data: [profile({ is_default: true })] } }))
-    api.put.mockRejectedValue(new Error('network down'))
+    vi.mocked(api.put).mockRejectedValue(new Error('network down'))
     const { notifyError } = await import('@/lib/notify')
     const user = userEvent.setup()
     render(<VacancyGenerationProfilesList />)

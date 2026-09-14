@@ -8,6 +8,7 @@
  * why this file has no api/notify imports — pulled out of that container (28-07)
  * so the container is left with loading, CRUD and the table↔map switch.
  */
+import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pencil, Trash2 } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
@@ -17,6 +18,19 @@ import Button from '@/components/ui/Button'
 import LocationBadge from './LocationBadge'
 import CopyIconButton from '@/components/ui/CopyIconButton'
 import SoftChip from '@/components/ui/SoftChip'
+import type { LocationRow } from '../LocationsSettings'
+
+// Props: the container owns data/paging/mutation state, this table is presentational.
+interface LocationsTableProps {
+  isLocked: (loc: LocationRow) => boolean
+  rows: LocationRow[]
+  page: number
+  totalPages: number
+  onPageChange: (page: number) => void
+  onEdit: (loc: LocationRow) => void
+  onDelete: (loc: LocationRow) => void
+  deletingId?: string | null
+}
 
 // NECESSITY: these are shared `<th>`/`<td>` cell styles (not standalone text), spread
 // across every column of this table. Migrating them to the Caption/BodyText atoms
@@ -25,24 +39,27 @@ import SoftChip from '@/components/ui/SoftChip'
 // fix; left as pre-existing debt (mirrors the documented allowlist in
 // typography.houseStyle.test.js for the same Caption/BodyText pattern elsewhere).
 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax
-const TH = { padding: '8px 14px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'left', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)' }
+const TH: CSSProperties = { padding: '8px 14px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'left', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)' }
 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax
-const TD = { padding: '12px 14px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
+const TD: CSSProperties = { padding: '12px 14px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
 
 // One address line from the structured fields, falling back to a legacy
 // `address`/`full_address` string the API may still send instead.
-function formatAddress(loc) {
-  if (loc.address)      return loc.address
-  if (loc.full_address) return loc.full_address
-  const streetLine = [loc.street, loc.house_number].filter(Boolean).join(' ')
-    + (loc.house_number_suffix ? ` ${loc.house_number_suffix}` : '')
-  const cityLine = [loc.postal_code, loc.city].filter(Boolean).join(' ')
-  const parts = [streetLine.trim(), cityLine.trim(), loc.country].filter(Boolean)
+function formatAddress(loc: LocationRow): string {
+  // LocationRow's extra address fields ride the index signature as `unknown` —
+  // narrow each to string here rather than widening the shared interface.
+  const s = (v: unknown): string => (typeof v === 'string' ? v : '')
+  if (s(loc.address))      return s(loc.address)
+  if (s(loc.full_address)) return s(loc.full_address)
+  const streetLine = [s(loc.street), s(loc.house_number)].filter(Boolean).join(' ')
+    + (s(loc.house_number_suffix) ? ` ${s(loc.house_number_suffix)}` : '')
+  const cityLine = [s(loc.postal_code), s(loc.city)].filter(Boolean).join(' ')
+  const parts = [streetLine.trim(), cityLine.trim(), s(loc.country)].filter(Boolean)
   return parts.length ? parts.join(', ') : '—'
 }
 
 // Settings locations table: paginated rows with edit/delete actions, disabled while isLocked (a delete in flight).
-export default function LocationsTable({ isLocked, rows, page, totalPages, onPageChange, onEdit, onDelete, deletingId }) {
+export default function LocationsTable({ isLocked, rows, page, totalPages, onPageChange, onEdit, onDelete, deletingId }: LocationsTableProps) {
   const { t } = useTranslation(['settings', 'common'])
   // DATUM-1: DD-MM-YYYY HH:mm in every app language, never a hardcoded locale.
   const { formatDateTime } = useDateFormat()
@@ -75,7 +92,7 @@ export default function LocationsTable({ isLocked, rows, page, totalPages, onPag
                     <LocationBadge name={loc.name} color={loc.color} icon={loc.icon} />
                     {loc.name}
                     {/* B-43: is_default badge — shows default location in the table. */}
-                    {loc.is_default && (
+                    {Boolean(loc.is_default) && (
                       <span style={{ marginLeft: 6 }}><SoftChip label={t('locations.defaultBadge')} color="var(--color-primary)" /></span>
                     )}
                   </div>
@@ -88,7 +105,7 @@ export default function LocationsTable({ isLocked, rows, page, totalPages, onPag
                   </span>
                 </td>
                 <td style={{ ...TD, color: 'var(--text-muted)', fontSize: 12 }}>
-                  {formatDateTime(loc.created_at)}
+                  {formatDateTime(loc.created_at as string)}
                 </td>
                 <td style={{ ...TD, textAlign: 'right' }}>
                   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>

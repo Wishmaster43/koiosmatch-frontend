@@ -12,7 +12,7 @@ export { deriveVacancyAdvice } from './data/vacancyAdvice'
 export { default as DescriptionTab } from './drawer/DescriptionTab'
 export { default as DetailsTab } from './drawer/DetailsTab'
 // useCustomerOptions moved to @/hooks (generic customer lookup, BARREL-DATETIME-LES).
-export { getCandidateTabDefaults } from './lib/candidateTabVisibility'
+export { getCandidateTabDefaults, type CandidateTabConfig } from './lib/candidateTabVisibility'
 export { default as VacancyDescriptionPopout } from './popout/VacancyDescriptionPopout'
 // APP-VAC-TAB-1: the remaining drawer tabs, re-exported so the application
 // drawer's Vacature tab can embed the REAL vacancy drill-down (all of

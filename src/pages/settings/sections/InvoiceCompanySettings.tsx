@@ -6,7 +6,7 @@
  * notice instead of pretending the platform is invoice-ready (§3 no fake
  * affordances). House pattern: load once, optimistic save on the Save button,
  * revert the whole form to the last server-confirmed snapshot on failure
- * (mirrors CompanySettings.jsx) — a partial PUT (only changed keys) per the
+ * (mirrors CompanySettings.tsx) — a partial PUT (only changed keys) per the
  * backend contract, so a blank field is never coerced to '' on the wire.
  * Contract: GET/PUT /admin/invoice-settings.
  */
@@ -22,6 +22,7 @@ import SaveButton from '@/components/ui/SaveButton'
 import { card, notice } from './usageCardStyles'
 import { PageTitle, SectionTitle } from '@/components/ui/typography'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import Row from './settingsFormRow'
 
 // The full settings shape (matches PUT /admin/invoice-settings request body 1:1).
 interface InvoiceSettingsForm {
@@ -53,16 +54,6 @@ const REQUIRED_KEYS: (keyof InvoiceSettingsForm)[] = [
 // Field faces come from fieldMetrics' canon (§4 2b) — never a local copy;
 // only the layout max-width stays local.
 const baseInput = { ...fieldInputStyle, maxWidth: 360 }
-
-// One labelled row — mirrors CompanySettings.jsx's Row so the two forms read as one family.
-function Row({ label, children, last = false }: { label: string; children: React.ReactNode; last?: boolean }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', padding: '14px 0', borderBottom: last ? 'none' : '1px solid var(--hover-bg)', gap: 24 }}>
-      <div style={{ width: 200, flexShrink: 0, fontSize: 13, color: 'var(--text-muted)', paddingTop: 8 }}>{label}</div>
-      <div style={{ flex: 1 }}>{children}</div>
-    </div>
-  )
-}
 
 export default function InvoiceCompanySettings() {
   const { t } = useTranslation('settings')
@@ -195,6 +186,6 @@ export default function InvoiceCompanySettings() {
   )
 }
 
-// Titled-card head style, hoisted (mirrors CompanySettings.jsx's cardHead import
+// Titled-card head style, hoisted (mirrors CompanySettings.tsx's cardHead import
 // usage — kept local since it is only two style objects, not worth a shared import here).
 const cardHead = { fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' as const, letterSpacing: '0.03em', margin: '0 0 8px 4px' }

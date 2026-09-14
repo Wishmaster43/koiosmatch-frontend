@@ -29,14 +29,14 @@ export default function MfaEnforcementSetting() {
   // Load the current tenant flag once ('1' = enforced; tolerate 'true' just in case).
   useEffect(() => {
     let alive = true
-    runAliveGuarded(loadSettings(), () => alive, (s) => {
+    runAliveGuarded(loadSettings(), () => alive, (s: Record<string, unknown> | undefined) => {
       setEnforced(['1', 'true'].includes(String(s?.[KEY])))
     }, setLoadError, setLoading)
     return () => { alive = false }
   }, [])
 
   // Optimistic save on toggle; revert and surface an error when the POST fails.
-  const toggle = async (next) => {
+  const toggle = async (next: boolean) => {
     if (loading || saving) return // ignore clicks until the current value is known/persisted
     setEnforced(next); setSaving(true); setError('')
     try { await saveSettings({ [KEY]: next ? '1' : '0' }) }

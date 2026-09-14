@@ -12,21 +12,21 @@ import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import VacancyDefaultStatusSettings, { VACANCY_DEFAULT_STATUS_KEY } from './VacancyDefaultStatusSettings'
 
-const st = key => i18n.t(key, { ns: 'settings' })
+const st = (key: string) => i18n.t(key, { ns: 'settings' })
 
 // Never resolves — VacancyLookupsProvider keeps its DEFAULT_VACANCY_STATUSES seed.
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn(() => new Promise(() => {})) } }))
 
 // Controllable settings blob + a spy on the save path (§13: assert the REQUEST).
 const mockSettings = vi.fn(() => ({}))
-const saveSettingsKeys = vi.fn(async () => {})
+const saveSettingsKeys = vi.fn(async (...args: unknown[]) => { void args })
 vi.mock('@/lib/settings/useAllSettings', () => ({
   useAllSettings: () => mockSettings(),
   // STALE-INIT-1: every test here assumes the settings blob has already resolved.
   useSettingsLoaded: () => true,
   // SETTINGS-LOAD-ERROR-1: the shared load-state hook the banner reads.
   useSettingsLoadState: () => ({ state: 'loaded', retry: () => {} }),
-  saveSettingsKeys: (...args) => saveSettingsKeys(...args),
+  saveSettingsKeys: (...args: unknown[]) => saveSettingsKeys(...args),
   invalidateAllSettingsCache: vi.fn(),
 }))
 

@@ -13,7 +13,6 @@
  * simple ones), no shell changes needed.
  */
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
-import type { ComponentType, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
 import type { AuthContextValue } from '@/context/AuthContext'
@@ -21,12 +20,11 @@ import { useAuth } from '@/context/AuthContext'
 import { useApps } from '@/context/AppsContext'
 import { canAccessPage } from '@/lib/access'
 import { useConfirm } from '@/hooks/useConfirm'
-import { NAV_GROUPS as NAV_GROUPS_UNTYPED } from './registry'
+import { NAV_GROUPS } from './registry'
 import { useNavigation } from '@/context/NavigationContext'
 import { MOVED_TO_PROFILE } from './movedToProfile'
 import { SettingsDirtyContext } from './lib/settingsDirty'
 import SettingItem from './components/SettingItem'
-import type { SettingItemData } from './components/SettingItem'
 import SettingsTabs from './components/SettingsTabs'
 import SettingsSearch from './components/SettingsSearch'
 import SettingsChangelogButton from './components/SettingsChangelogButton'
@@ -37,26 +35,6 @@ import Button from '@/components/ui/Button'
 import { PageTitle } from '@/components/ui/typography'
 import { FIELD_HEIGHT, FIELD_FONT_SIZE } from '@/components/forms/fieldMetrics'
 import { useSettingsNavColors } from './catalog/useSettingsNavColors'
-
-// registry.jsx stays untyped JS (not on this migration's list) — a nav item's shape
-// varies by which render strategy it uses (render/schema/component), so this shell
-// reads it through an explicit structural type instead of TS's own literal inference,
-// which breaks every time a registry entry's exact shape changes underneath it.
-interface RegistryNavItem extends SettingItemData {
-  id: string
-  icon?: ComponentType<{ size?: number; style?: CSSProperties }>
-  logName?: string
-  superAdminOnly?: boolean
-  requiresPage?: string
-  requiresModuleOrApp?: { module?: string; app?: string }
-  requiresPermission?: string
-}
-interface RegistryNavGroup {
-  key: string
-  icon?: ComponentType<{ size?: number; style?: CSSProperties }>
-  items: RegistryNavItem[]
-}
-const NAV_GROUPS = NAV_GROUPS_UNTYPED as RegistryNavGroup[]
 
 // SM-MODULE-TABS-1: a nav item may declare `requiresModuleOrApp: { module, app }` to
 // stay visible when EITHER the tenant module OR the app/koppeling flag is on (a plain
