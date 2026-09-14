@@ -1,6 +1,6 @@
 /**
  * Toggle — the ONE toggle-switch implementation in the app. Promoted out of
- * `pages/settings/components/SettingsKit.jsx` (2026-07-28) so non-settings
+ * `pages/settings/components/SettingsKit.tsx` (2026-07-28) so non-settings
  * screens (e.g. AddContactPersonModal's "primair contact" flag) can use it
  * without an entity page reaching into another entity page's internals
  * (CLAUDE.md §2). `SettingsKit` re-exports this component under its original
