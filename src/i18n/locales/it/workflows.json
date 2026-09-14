@@ -288,6 +288,7 @@
     "workflow": "Workflow",
     "whatsapp_inbound": "WhatsApp in entrata",
     "application_lookup": "Cerca candidatura",
+    "match_application_lookup": "Recuperare la candidatura tramite il match",
     "customer_locations": "Sedi",
     "customer_departments": "Reparti",
     "customer_contacts": "Referenti",

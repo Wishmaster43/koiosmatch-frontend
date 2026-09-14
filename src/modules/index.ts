@@ -20,6 +20,7 @@ import webhook           from './webhook'
 import system_events    from './system_events'
 import whatsapp_inbound  from './whatsapp_inbound'
 import application_lookup from './application_lookup'
+import match_application_lookup from './match_application_lookup'
 import sm_candidates     from './sm_candidates'
 import sm_customers      from './sm_customers'
 import sm_shifts         from './sm_shifts'
@@ -201,6 +202,7 @@ const MODULES: ModuleDef[] = [
   whatsapp_inbound,
   system_events,
   application_lookup,
+  match_application_lookup,
 ]
 
 export const MODULE_META = Object.fromEntries(

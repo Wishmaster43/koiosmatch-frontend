@@ -249,6 +249,7 @@
     "workflow": "Workflow",
     "whatsapp_inbound": "WhatsApp Eingehend",
     "application_lookup": "Bewerbung nachschlagen",
+    "match_application_lookup": "Bewerbung über den Match abrufen",
     "customer_locations": "Standorte",
     "customer_departments": "Abteilungen",
     "customer_contacts": "Ansprechpartner",

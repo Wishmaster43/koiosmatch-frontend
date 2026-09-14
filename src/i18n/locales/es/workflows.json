@@ -249,6 +249,7 @@
     "workflow": "Workflow",
     "whatsapp_inbound": "WhatsApp entrante",
     "application_lookup": "Buscar la candidatura",
+    "match_application_lookup": "Obtener la candidatura vía el match",
     "customer_locations": "Ubicaciones",
     "customer_departments": "Departamentos",
     "customer_contacts": "Contactos",

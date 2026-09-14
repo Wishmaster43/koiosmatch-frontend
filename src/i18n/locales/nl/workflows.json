@@ -288,6 +288,7 @@
     "workflow": "Workflow",
     "whatsapp_inbound": "WhatsApp Inkomend",
     "application_lookup": "Sollicitatie opzoeken",
+    "match_application_lookup": "Sollicitatie via match ophalen",
     "customer_locations": "Locaties",
     "customer_departments": "Afdelingen",
     "customer_contacts": "Contactpersonen",

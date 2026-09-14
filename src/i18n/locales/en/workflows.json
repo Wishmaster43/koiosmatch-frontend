@@ -253,6 +253,7 @@
     "workflow": "Workflow",
     "whatsapp_inbound": "WhatsApp Inbound",
     "application_lookup": "Look up application",
+    "match_application_lookup": "Fetch application via match",
     "customer_locations": "Locations",
     "customer_departments": "Departments",
     "customer_contacts": "Contacts",

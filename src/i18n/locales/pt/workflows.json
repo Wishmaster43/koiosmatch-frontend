@@ -288,6 +288,7 @@
     "workflow": "Workflow",
     "whatsapp_inbound": "WhatsApp Recebido",
     "application_lookup": "Consultar candidatura",
+    "match_application_lookup": "Obter a candidatura via match",
     "customer_locations": "Filiais",
     "customer_departments": "Departamentos",
     "customer_contacts": "Pessoas de contacto",
