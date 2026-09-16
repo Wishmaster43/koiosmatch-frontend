@@ -12,9 +12,18 @@ import { render, screen } from '@testing-library/react'
 import MatchConflictBanners from './MatchConflictBanners'
 import type { ExistingMatchRow } from './matchConflicts'
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (k: string, opts?: Record<string, unknown>) => (opts ? `${k}:${JSON.stringify(opts)}` : k) }),
-}))
+// Only override useTranslation (importOriginal keeps initReactI18next etc. real —
+// lib/formatters' useNumberFormat pulls in lib/datetime, which needs those intact,
+// DATETIME-IMPORT-LES). Locale unset under this mock (i18n?.language ?? '') —
+// useLocale falls back to 'nl-NL', so nl formatting ("," decimal separator) is
+// what these tests exercise.
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>()
+  return {
+    ...actual,
+    useTranslation: () => ({ t: (k: string, opts?: Record<string, unknown>) => (opts ? `${k}:${JSON.stringify(opts)}` : k) }),
+  }
+})
 
 const formatDate = (v: string) => v // identity — only the key/param selection is under test here
 
@@ -57,6 +66,13 @@ describe('MatchConflictBanners · hours-sum escalation', () => {
     // The combined sum (44) reaches the banner, not either side's individual hours.
     expect(banner.textContent).toContain('"hours":"44"')
     expect(screen.queryByText(/placement\.overlapWarning:/)).not.toBeInTheDocument()
+  })
+
+  it('formats a fractional hours sum with the locale decimal separator (GETALLEN-1), never a raw float', () => {
+    render(<MatchConflictBanners duplicateMatch={null} overlappingMatches={[row({ hoursPerWeek: 20 })]} formatDate={formatDate} draftHours={20.5} />)
+    const banner = screen.getByText(/placement\.overlapWarningHours:/)
+    // nl-NL fallback (this mock's i18n has no `language`): comma decimal, not "40.5".
+    expect(banner.textContent).toContain('"hours":"40,5"')
   })
 
   it('evaluates each overlapping row independently against the same draft hours', () => {

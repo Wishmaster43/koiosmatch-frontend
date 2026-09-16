@@ -2,14 +2,11 @@ import { useTranslation } from 'react-i18next'
 import { overlapHoursSum } from './matchConflicts'
 import type { ExistingMatchRow } from './matchConflicts'
 import { tintBg, tintBorder } from '@/lib/tint'
+import { useNumberFormat } from '@/lib/formatters'
 
 // One existing match's display label — vacancy title first, else the client name,
 // never a raw id (never surface an internal identifier to the recruiter).
 const labelOf = (m: ExistingMatchRow): string => m.vacancyTitle || m.client || '—'
-
-// Trim a decimal:2-cast hours sum to a clean display number — 40 instead of
-// "40.00", 36.5 stays "36.5" (never a raw floating-point tail).
-const formatHoursSum = (n: number): string => String(Math.round(n * 100) / 100)
 
 /**
  * MatchConflictBanners — the two calm, non-blocking warnings from the duplicate +
@@ -43,6 +40,8 @@ export default function MatchConflictBanners({
   draftHours?: number | null
 }) {
   const { t } = useTranslation('candidates')
+  // Locale-aware hours formatting (GETALLEN-1) — nl renders "36,5", en "36.5".
+  const { formatNumber } = useNumberFormat()
   if (!duplicateMatch && overlappingMatches.length === 0) return null
 
   return (
@@ -65,7 +64,7 @@ export default function MatchConflictBanners({
             color: 'var(--color-warning-text)', background: tintBg('var(--color-warning)'),
             border: tintBorder('var(--color-warning)') }}>
             {hoursSum != null
-              ? t('placement.overlapWarningHours', { label: labelOf(m), hours: formatHoursSum(hoursSum), period })
+              ? t('placement.overlapWarningHours', { label: labelOf(m), hours: formatNumber(hoursSum, 2), period })
               : t('placement.overlapWarning', { label: labelOf(m), period })}
           </div>
         )

@@ -24,7 +24,7 @@ vi.mock('@/lib/api', () => ({
 }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: vi.fn() }))
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => `fmt(${v})`, locale: 'nl-NL' }) }))
+vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => `fmt(${v})`, locale: 'nl-NL' }), useLocale: () => 'nl-NL' }))
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity, navigate: vi.fn() }) }))
 // The application form is a different file's scope (vacancy/stage/user lookups) —
 // stand in with a marker exposing `editApplicationId`, so punt 5's pencil wiring is
@@ -487,5 +487,34 @@ describe('WorkTab · Sollicitaties header/row share ONE column geometry (Danny 0
     expect(statusCell.style.width).toBe(statusHeader.style.width)
     expect(dateCell.style.width).toBe(dateHeader.style.width)
     expect(actionsCell.style.width).toBe(actionsHeader.style.width)
+  })
+})
+
+/**
+ * HUISSTIJL-1 — the applications pager renders via the shared Button atom
+ * (iconOnly, sm) instead of hand-painted 24px buttons, so it shares the exact
+ * same face and disabled treatment as every other prev/next pager in the app
+ * (mirrors ApplicantsTab.tsx's identical idiom).
+ */
+describe('WorkTab · applications pager uses the shared Button atom', () => {
+  const manyApps = Array.from({ length: 6 }, (_, i) => ({
+    id: `a${i}`, vacancy: { id: `v${i}`, title: `Vacature ${i}` }, created_at: '2026-07-01',
+  }))
+
+  it('renders prev disabled and next enabled on the first page', () => {
+    render(<WorkTab c={candidate(manyApps)} />)
+    const prev = screen.getByRole('button', { name: 'common:prevPage' })
+    const next = screen.getByRole('button', { name: 'common:nextPage' })
+    expect(prev).toBeDisabled()
+    expect(next).not.toBeDisabled()
+  })
+
+  it('advances to the next page and disables next once the last page is reached', async () => {
+    const user = userEvent.setup()
+    render(<WorkTab c={candidate(manyApps)} />)
+    const next = screen.getByRole('button', { name: 'common:nextPage' })
+    await user.click(next)
+    expect(screen.getByRole('button', { name: 'common:prevPage' })).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: 'common:nextPage' })).toBeDisabled()
   })
 })

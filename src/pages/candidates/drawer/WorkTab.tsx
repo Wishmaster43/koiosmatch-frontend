@@ -9,7 +9,8 @@
  *  `ApplicationRow` so this file stays the thin container it is meant to be. */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CalendarPlus, Search } from 'lucide-react'
+import { CalendarPlus, Search, ChevronLeft, ChevronRight } from 'lucide-react'
+import Button from '@/components/ui/Button'
 import MatchesTab from './MatchesTab'
 import PoolsSection from './PoolsSection'
 import DrawerAddButton from './DrawerAddButton'
@@ -244,8 +245,10 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
         {filteredApps.length > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8, marginTop: 8, fontSize: 12, color: 'var(--text-muted)' }}>
             <span>{(page - 1) * PER + 1}–{Math.min(page * PER, filteredApps.length)} {t('work.of')} {filteredApps.length}</span>
-            <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} aria-label={t('common:prevPage')} style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', borderRadius: 5, background: 'var(--bg)', cursor: page <= 1 ? 'default' : 'pointer', color: page <= 1 ? 'var(--border)' : 'var(--text-muted)' }}>‹</button>
-            <button onClick={() => setPage(p => Math.min(pages, p + 1))} disabled={page >= pages} aria-label={t('common:nextPage')} style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', borderRadius: 5, background: 'var(--bg)', cursor: page >= pages ? 'default' : 'pointer', color: page >= pages ? 'var(--border)' : 'var(--text-muted)' }}>›</button>
+            <Button variant="secondary" iconOnly size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}
+              title={t('common:prevPage')} aria-label={t('common:prevPage')}><ChevronLeft size={13} /></Button>
+            <Button variant="secondary" iconOnly size="sm" onClick={() => setPage(p => Math.min(pages, p + 1))} disabled={page >= pages}
+              title={t('common:nextPage')} aria-label={t('common:nextPage')}><ChevronRight size={13} /></Button>
           </div>
         )}
       </div>

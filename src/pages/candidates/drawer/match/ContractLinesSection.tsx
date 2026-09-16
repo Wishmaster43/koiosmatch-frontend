@@ -12,7 +12,9 @@ import { useId } from 'react'
 import { Trash2 } from 'lucide-react'
 import type { TFunction } from 'i18next'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import Button from '@/components/ui/Button'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import { monoStyle } from '@/components/ui/typography'
 import { lbl, input, pickerMenuWidth } from './styles'
 import type { MatchContractLine } from '@/types/match'
 
@@ -69,11 +71,10 @@ function ContractLineRow({ idx, line, functions, t, onChange, onRemove }: {
       </div>
       <input type="number" value={line.rate} onChange={e => onChange({ rate: e.target.value })}
         placeholder={t('placement.contractLines.rate')} aria-labelledby={rateLabelId}
-        style={{ ...input, width: 110, fontFamily: 'JetBrains Mono, monospace' }} />
-      <button type="button" onClick={onRemove} title={t('common:remove')} aria-label={t('common:remove')}
-        style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}>
+        style={{ ...input, width: 110, ...monoStyle }} />
+      <Button variant="ghost" iconOnly size="sm" onClick={onRemove} title={t('common:remove')} aria-label={t('common:remove')}>
         <Trash2 size={14} />
-      </button>
+      </Button>
     </div>
   )
 }
