@@ -6,8 +6,10 @@
     "records": "Registos subjacentes",
     "loading": "A carregar…",
     "noRecords": "Sem registos subjacentes.",
+    "rowsError": "Não foi possível carregar os registos subjacentes.",
     "koios": "Conselho Koios AI",
     "noAdvice": "A Koios ainda não tem conselhos para este número.",
+    "adviceError": "Não foi possível carregar o conselho da Koios.",
     "search": "Pesquisar…",
     "shownOf": "{{shown}} de {{total}} apresentados"
   },
@@ -536,7 +538,9 @@
       "custom": "Período personalizado"
     },
     "rangeSeparator": "até",
-    "previousValue": "anterior: {{value}}"
+    "previousValue": "anterior: {{value}}",
+    "compareLoading": "A carregar comparação…",
+    "compareError": "Não foi possível carregar a comparação."
   },
   "hub": {
     "attention": {

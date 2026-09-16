@@ -181,6 +181,38 @@ describe('ReportDrillDrawer — calm 403 degrade', () => {
   })
 })
 
+describe('ReportDrillDrawer — a real error is never the calm "no records"/"no advice" line', () => {
+  it('renders the rows error with a retry, wired to rowsRefetch', async () => {
+    const user = userEvent.setup()
+    const rowsRefetch = vi.fn()
+    mockUseReportDrill.mockReturnValue({
+      rows: [], rowsTotal: 0, rowsLoading: false, rowsForbidden: false, rowsError: true, rowsRefetch,
+      advice: 'Advice still renders.', adviceLoading: false,
+    })
+    render(<ReportDrillDrawer drill={baseDrill} onClose={() => {}} />)
+    expect(screen.queryByText('Geen onderliggende records.')).not.toBeInTheDocument()
+    expect(screen.getByText('Onderliggende records konden niet worden geladen.')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Probeer opnieuw' }))
+    expect(rowsRefetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders the advice error with a retry, wired to adviceRefetch, and hides the feedback widget', async () => {
+    const user = userEvent.setup()
+    const adviceRefetch = vi.fn()
+    mockUseReportDrill.mockReturnValue({
+      rows: [], rowsTotal: 0, rowsLoading: false, rowsForbidden: false,
+      advice: null, adviceLoading: false, adviceError: true, adviceRefetch, advicePromptLogId: 'log-123',
+    })
+    render(<ReportDrillDrawer drill={baseDrill} onClose={() => {}} />)
+    expect(screen.queryByText('Koios heeft nog geen advies voor dit getal.')).not.toBeInTheDocument()
+    expect(screen.getByText('Koios-advies kon niet worden geladen.')).toBeInTheDocument()
+    // Even with a fresh advicePromptLogId, the feedback widget must not mount on an error.
+    expect(screen.queryByRole('button', { name: 'Nuttig' })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Probeer opnieuw' }))
+    expect(adviceRefetch).toHaveBeenCalledTimes(1)
+  })
+})
+
 describe('ReportDrillDrawer — null advice with populated rows', () => {
   it('renders the rows normally and a degraded "no advice" copy', () => {
     mockUseReportDrill.mockReturnValue({

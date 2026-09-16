@@ -24,6 +24,7 @@ export interface CompareDataResult {
   compareData: unknown
   loading: boolean
   error: boolean
+  refetch: () => void
 }
 
 export function useReportCompareData(
@@ -44,10 +45,10 @@ export function useReportCompareData(
   const compareSlug = getCompareSlug(reportKey as unknown as Parameters<typeof getCompareSlug>[0], view)
 
   // Call the low-level hook with the built params.
-  const { data: compareData, loading, error } = useReportCompare(compareSlug, data?.from, data?.to, compare, compareBaseParams)
+  const { data: compareData, loading, error, refetch } = useReportCompare(compareSlug, data?.from, data?.to, compare, compareBaseParams)
 
   // Extract totalCompare when compare mode is active.
   const totalCompare = compare.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
 
-  return { totalCompare, compareData, loading, error }
+  return { totalCompare, compareData, loading, error, refetch: () => refetch() }
 }

@@ -6,8 +6,10 @@
     "records": "Zugrunde liegende Datensätze",
     "loading": "Wird geladen…",
     "noRecords": "Keine zugrunde liegenden Datensätze.",
+    "rowsError": "Zugrunde liegende Datensätze konnten nicht geladen werden.",
     "koios": "Koios KI-Rat",
     "noAdvice": "Koios hat noch keinen Rat zu dieser Zahl.",
+    "adviceError": "Koios-Rat konnte nicht geladen werden.",
     "search": "Suchen…",
     "shownOf": "{{shown}} von {{total}} angezeigt"
   },
@@ -536,7 +538,9 @@
       "custom": "Benutzerdefinierter Zeitraum"
     },
     "rangeSeparator": "bis",
-    "previousValue": "vorher: {{value}}"
+    "previousValue": "vorher: {{value}}",
+    "compareLoading": "Vergleich wird geladen…",
+    "compareError": "Vergleich konnte nicht geladen werden."
   },
   "hub": {
     "attention": {

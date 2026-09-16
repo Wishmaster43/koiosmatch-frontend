@@ -6,8 +6,10 @@
     "records": "Enregistrements sous-jacents",
     "loading": "Chargement…",
     "noRecords": "Aucun enregistrement sous-jacent.",
+    "rowsError": "Les enregistrements sous-jacents n'ont pas pu être chargés.",
     "koios": "Conseil Koios AI",
     "noAdvice": "Koios n'a pas encore de conseil pour ce chiffre.",
+    "adviceError": "Le conseil Koios n'a pas pu être chargé.",
     "search": "Rechercher…",
     "shownOf": "{{shown}} sur {{total}} affichés"
   },
@@ -536,7 +538,9 @@
       "custom": "Periode personnalisee"
     },
     "rangeSeparator": "au",
-    "previousValue": "precedent : {{value}}"
+    "previousValue": "precedent : {{value}}",
+    "compareLoading": "Chargement de la comparaison…",
+    "compareError": "La comparaison n'a pas pu être chargée."
   },
   "hub": {
     "attention": {

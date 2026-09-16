@@ -57,8 +57,14 @@ export function useReportDrill(drill: DrillSpec | null) {
     rowsTotal:     rowsQ.data?.total ?? 0,
     rowsLoading:   rowsQ.isLoading,
     rowsForbidden: isForbidden(rowsQ.error),
+    // A non-403 failure (500, network) is a real error, never the calm "no
+    // records" empty state — the drawer renders it explicitly with a retry.
+    rowsError:     rowsQ.isError && !isForbidden(rowsQ.error),
+    rowsRefetch:   rowsQ.refetch,
     advice:        adviceQ.data?.advice ?? null,
     adviceLoading: adviceQ.isLoading,
+    adviceError:   adviceQ.isError,
+    adviceRefetch: adviceQ.refetch,
     // Only a string (fresh generation) enables the feedback widget — a cached
     // answer has no prompt log to attach a vote to.
     advicePromptLogId: typeof adviceQ.data?.promptLogId === 'string' ? adviceQ.data.promptLogId : null,

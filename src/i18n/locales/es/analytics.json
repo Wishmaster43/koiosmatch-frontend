@@ -6,8 +6,10 @@
     "records": "Registros subyacentes",
     "loading": "Cargando…",
     "noRecords": "Sin registros subyacentes.",
+    "rowsError": "No se pudieron cargar los registros subyacentes.",
     "koios": "Consejo de Koios AI",
     "noAdvice": "Koios aún no tiene consejo para este número.",
+    "adviceError": "No se pudo cargar el consejo de Koios.",
     "search": "Buscar…",
     "shownOf": "{{shown}} de {{total}} mostrados"
   },
@@ -536,7 +538,9 @@
       "custom": "Rango personalizado"
     },
     "rangeSeparator": "hasta",
-    "previousValue": "anterior: {{value}}"
+    "previousValue": "anterior: {{value}}",
+    "compareLoading": "Cargando comparación…",
+    "compareError": "No se pudo cargar la comparación."
   },
   "hub": {
     "attention": {

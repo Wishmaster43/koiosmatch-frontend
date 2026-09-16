@@ -49,6 +49,8 @@ import { ReportDataWindow } from './components/ReportDataWindow'
 import { donutData, barData, ownerBarData } from './lib/chartData'
 import { segmentClick, ownerClick } from './lib/drillClick'
 import { reportWindowLabel } from './lib/reportWindowLabel'
+import { Caption } from '@/components/ui/typography'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 
 // The five drillable axes; `param` is the XOR query key the drill/advice endpoints expect.
 type Axis = 'status' | 'phase' | 'source' | 'owner' | 'branch'
@@ -104,7 +106,16 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
 
   // RAPPORT-COMPARE-2: the compare mode arrives from the right-hand filter
   // panel (ReportsPage). Same window + same filters as the plain report call.
-  const { totalCompare } = useReportCompareData(period, 'candidates', filters, data, compare, phaseFilter ? { phase: [phaseFilter] } : undefined, view)
+  const { totalCompare, loading: compareLoading, error: compareError, refetch: refetchCompare } =
+    useReportCompareData(period, 'candidates', filters, data, compare, phaseFilter ? { phase: [phaseFilter] } : undefined, view)
+  // An explicitly requested comparison must not fail silently (§3A four states) —
+  // a small honest state next to the window line when compare mode is active.
+  const compareActive = compare.kind !== 'off'
+  const compareStatus = compareActive && (compareLoading || compareError) ? (
+    compareLoading
+      ? <Caption style={{ display: 'inline-flex' }}>{t('compare.compareLoading')}</Caption>
+      : <ErrorBanner variant="subtle" onRetry={() => refetchCompare()} style={{ padding: 0 }}>{t('compare.compareError')}</ErrorBanner>
+  ) : null
 
   // Drill-down: one shared drawer for the whole page. Exactly one XOR param per
   // open drill, always layered on the report's own active filters, and every
@@ -232,6 +243,12 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
           isLeads={isLeads}
           totalCompare={!isLeads ? totalCompare : undefined}
         />
+      )}
+      {/* Compare loading/error — an explicitly requested comparison never fails
+          silently (§3A four states); shown once regardless of which position
+          (candidates window line / leads KPI sub) the delta would have landed on. */}
+      {!loading && !error && data && compareStatus && (
+        <div style={{ marginTop: -8, marginBottom: 12 }}>{compareStatus}</div>
       )}
 
       <ReportStateFlow

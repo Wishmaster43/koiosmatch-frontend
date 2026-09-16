@@ -6,8 +6,10 @@
     "records": "Record sottostanti",
     "loading": "Caricamento…",
     "noRecords": "Nessun record sottostante.",
+    "rowsError": "Impossibile caricare i record sottostanti.",
     "koios": "Consiglio Koios AI",
     "noAdvice": "Koios non ha ancora un consiglio per questo numero.",
+    "adviceError": "Impossibile caricare il consiglio di Koios.",
     "search": "Cerca…",
     "shownOf": "{{shown}} di {{total}} mostrati"
   },
@@ -536,7 +538,9 @@
       "custom": "Periodo personalizzato"
     },
     "rangeSeparator": "fino a",
-    "previousValue": "precedente: {{value}}"
+    "previousValue": "precedente: {{value}}",
+    "compareLoading": "Caricamento confronto…",
+    "compareError": "Impossibile caricare il confronto."
   },
   "hub": {
     "attention": {

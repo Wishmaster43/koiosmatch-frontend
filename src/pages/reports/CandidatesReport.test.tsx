@@ -341,6 +341,28 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
     await waitFor(() => expect(getSpy).toHaveBeenCalledWith('/reports/candidates/compare',
       expect.objectContaining({ params: expect.objectContaining({ compare: 'previous_period' }) })))
   })
+
+  // A requested comparison must not fail silently (§3A four states): when the
+  // compare endpoint rejects, the page shows an honest error + retry instead of
+  // simply never rendering the delta.
+  it('surfaces a compare fetch failure with a retry, instead of silently rendering nothing', async () => {
+    const user = userEvent.setup()
+    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
+    getSpy.mockImplementation(async (url: string) => {
+      if (url === '/reports/candidates/compare') throw new Error('Server error')
+      return { data: { data: [], meta: { total: 0 } } }
+    })
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <CandidatesReport period="month" compare={{ kind: 'previous_period' }} />
+      </QueryClientProvider>,
+    )
+    expect(await screen.findByText(i18n.t('compare.compareError', { ns: 'analytics' }))).toBeInTheDocument()
+    const retryBtn = screen.getByRole('button', { name: i18n.t('error.retry', { ns: 'common' }) })
+    getSpy.mockClear()
+    await user.click(retryBtn)
+    await waitFor(() => expect(getSpy).toHaveBeenCalledWith('/reports/candidates/compare', expect.anything()))
+  })
 })
 
 // RAPPORTEN-CONSOLIDATIE-1: the Kandidaten/Leads switch — a real server-side

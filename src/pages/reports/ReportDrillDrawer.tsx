@@ -15,6 +15,7 @@ import EntityLink from '@/components/ui/EntityLink'
 import { GroupLabel, BodyText, Caption } from '@/components/ui/typography'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import KoiosFeedback from '@/components/layout/koios/KoiosFeedback'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import { formatNumber } from '@/lib/formatters'
 import { initialsOf } from '@/lib/initials'
 
@@ -118,7 +119,7 @@ export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec
   // fall through to raw keys instead of the translated label.
   const { t: tCommon } = useTranslation('common')
   // Data layer: the underlying records + Koios advice for the open drill (§3).
-  const { rows, rowsTotal, rowsLoading, rowsForbidden, advice, adviceLoading, advicePromptLogId } = useReportDrill(drill)
+  const { rows, rowsTotal, rowsLoading, rowsForbidden, rowsError, rowsRefetch, advice, adviceLoading, adviceError, adviceRefetch, advicePromptLogId } = useReportDrill(drill)
 
   if (!drill) return null
 
@@ -158,10 +159,14 @@ export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec
             {drill.entityLabel ?? t('drill.records')}
           </GroupLabel>
           {rowsLoading && <div style={{ fontSize: 13, color: 'var(--text-muted)', padding: '8px 0' }}>{t('drill.loading')}</div>}
-          {!rowsLoading && rows.length === 0 && (
+          {/* A failed fetch is a real error, never the calm empty line (§3A four states) */}
+          {!rowsLoading && rowsError && (
+            <ErrorBanner variant="subtle" onRetry={() => rowsRefetch()}>{t('drill.rowsError')}</ErrorBanner>
+          )}
+          {!rowsLoading && !rowsError && rows.length === 0 && (
             <div style={{ fontSize: 13, color: 'var(--text-muted)', padding: '8px 0' }}>{t('drill.noRecords')}</div>
           )}
-          {!rowsLoading && rows.length > 0 && (
+          {!rowsLoading && !rowsError && rows.length > 0 && (
             <DrillRecordsList key={`${drill.title}-${JSON.stringify(drill.rowsParams ?? {})}`}
               rows={rows} rowsTotal={rowsTotal} entityPage={drill.entityPage} />
           )}
@@ -177,14 +182,19 @@ export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec
           <KoiosAiMark size={22} title={t('common:aiGeneratedHint', { defaultValue: 'Door Koios AI gegenereerd — controleer voor gebruik.' })} />
           <h4 style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>{t('drill.koios')}</h4>
         </div>
-        <BodyText as="div" style={{ background: 'var(--color-primary-bg)', borderRadius: 10, padding: '12px 14px', lineHeight: 1.5 }}>
-          {adviceLoading
-            ? t('drill.loading')
-            : advice ?? t('drill.noAdvice')}
-        </BodyText>
+        {/* A failed advice call is an error, never "no advice" (§3A four states) */}
+        {!adviceLoading && adviceError ? (
+          <ErrorBanner variant="subtle" onRetry={() => adviceRefetch()}>{t('drill.adviceError')}</ErrorBanner>
+        ) : (
+          <BodyText as="div" style={{ background: 'var(--color-primary-bg)', borderRadius: 10, padding: '12px 14px', lineHeight: 1.5 }}>
+            {adviceLoading
+              ? t('drill.loading')
+              : advice ?? t('drill.noAdvice')}
+          </BodyText>
+        )}
         {/* KOIOS-FEEDBACK-REPORT-ADVICE: only a fresh (non-cached) generation
             carries a prompt_log_id to vote on. */}
-        {!adviceLoading && advicePromptLogId && (
+        {!adviceLoading && !adviceError && advicePromptLogId && (
           <div style={{ marginTop: 8 }}>
             <KoiosFeedback promptLogId={advicePromptLogId} surface="report_advice" t={tCommon} />
           </div>

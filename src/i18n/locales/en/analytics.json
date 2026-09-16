@@ -6,8 +6,10 @@
     "records": "Underlying records",
     "loading": "Loading…",
     "noRecords": "No underlying records.",
+    "rowsError": "Underlying records could not be loaded.",
     "koios": "Koios AI advice",
     "noAdvice": "Koios has no advice for this number yet.",
+    "adviceError": "Koios advice could not be loaded.",
     "search": "Search…",
     "shownOf": "Showing {{shown}} of {{total}}"
   },
@@ -536,7 +538,9 @@
       "custom": "Custom range"
     },
     "rangeSeparator": "through",
-    "previousValue": "previous: {{value}}"
+    "previousValue": "previous: {{value}}",
+    "compareLoading": "Loading comparison…",
+    "compareError": "Comparison could not be loaded."
   },
   "hub": {
     "attention": {

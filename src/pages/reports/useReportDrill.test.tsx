@@ -139,6 +139,40 @@ describe('useReportDrill — advice degrades to null while rows are present', ()
   })
 })
 
+describe('useReportDrill — a non-403 failure is a real error, never the calm empty state', () => {
+  it('flags rowsError (not rowsForbidden) on a 500, and exposes rowsRefetch', async () => {
+    mockedGet.mockImplementation(async (url: string) => {
+      if (url === '/reports/flow/drill') {
+        const err = new Error('Server error') as Error & { response: { status: number } }
+        err.response = { status: 500 }
+        throw err
+      }
+      return { data: { advice: 'ok' } }
+    })
+    const drill: DrillSpec = {
+      title: 'x', value: 1,
+      rowsEndpoint: '/reports/flow/drill', rowsParams: { period: 'month' },
+    }
+    const { result } = renderHook(() => useReportDrill(drill), { wrapper: makeWrapper() })
+    await waitFor(() => expect(result.current.rowsError).toBe(true))
+    expect(result.current.rowsForbidden).toBe(false)
+    expect(result.current.rows).toEqual([])
+    expect(typeof result.current.rowsRefetch).toBe('function')
+  })
+
+  it('flags adviceError on a failed advice call, and exposes adviceRefetch', async () => {
+    mockedGet.mockRejectedValue(new Error('Network error'))
+    const drill: DrillSpec = {
+      title: 'x', value: 1,
+      adviceEndpoint: '/reports/flow/advice', adviceParams: { period: 'month' },
+    }
+    const { result } = renderHook(() => useReportDrill(drill), { wrapper: makeWrapper() })
+    await waitFor(() => expect(result.current.adviceError).toBe(true))
+    expect(result.current.advice).toBeNull()
+    expect(typeof result.current.adviceRefetch).toBe('function')
+  })
+})
+
 describe('useReportDrill — advicePromptLogId (KOIOS-FEEDBACK-REPORT-ADVICE)', () => {
   it('fresh advice carries a prompt_log_id string for the feedback widget', async () => {
     mockedGet.mockResolvedValue({ data: { advice: 'Fresh.', prompt_log_id: '11111111-2222-3333-4444-555555555555' } })

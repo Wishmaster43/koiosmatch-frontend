@@ -6,8 +6,10 @@
     "records": "Onderliggende records",
     "loading": "Laden…",
     "noRecords": "Geen onderliggende records.",
+    "rowsError": "Onderliggende records konden niet worden geladen.",
     "koios": "Koios AI-advies",
     "noAdvice": "Koios heeft nog geen advies voor dit getal.",
+    "adviceError": "Koios-advies kon niet worden geladen.",
     "search": "Zoeken…",
     "shownOf": "{{shown}} van {{total}} getoond"
   },
@@ -536,7 +538,9 @@
       "custom": "Aangepaste periode"
     },
     "rangeSeparator": "tot en met",
-    "previousValue": "vorige: {{value}}"
+    "previousValue": "vorige: {{value}}",
+    "compareLoading": "Vergelijking laden…",
+    "compareError": "Vergelijking kon niet worden geladen."
   },
   "hub": {
     "attention": {
