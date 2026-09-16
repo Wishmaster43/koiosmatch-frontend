@@ -18,6 +18,8 @@ import OpportunityDescriptionBlock from './OpportunityDescriptionBlock'
 import OpportunityKoiosBlock from './OpportunityKoiosBlock'
 import SharedBranchSection from '@/components/drawer/BranchSection'
 import { hasDescriptionText } from '../data/descriptionText'
+import { formatOpportunityValue } from '../data/opportunityValue'
+import { useNumberFormat, formatNumber } from '@/lib/formatters'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id, LookupOption } from '@/types/common'
 
@@ -33,12 +35,19 @@ export default function DetailsTab({ opportunity: o, onUpdate, stages = [] }: De
   const { t } = useTranslation(['opportunities', 'candidates'])
   const { serviceTypes }   = useOpportunityServiceTypes()
   const { agreementTypes } = useOpportunityAgreementTypes()
+  // GETALLEN-1: the read-mode value/hours cells render through the house number
+  // formatter on the active locale — same helper the table/board already use,
+  // so the drawer never disagrees with them on thousands separators or currency.
+  const { currency, locale } = useNumberFormat()
 
   // Editable deal fields. Service/agreement selects key on the slug; the id resolves on save.
   const dealFields: FieldRow[] = [
-    { key: 'value',        label: t('details.value'),        inputType: 'number', prefix: '€' },
+    { key: 'value',        label: t('details.value'),        inputType: 'number',
+      renderValue: v => formatOpportunityValue(
+        { value: v === '' || v == null ? null : Number(v), hours: null, dealTypeUnit: null }, t, currency, locale) },
     { key: 'currency',     label: t('details.currency') },
-    { key: 'hours',        label: t('details.hours'),        inputType: 'number' },
+    { key: 'hours',        label: t('details.hours'),        inputType: 'number',
+      renderValue: v => v === '' || v == null ? '-' : formatNumber(v as number, locale) },
     { key: 'hoursPeriod',  label: t('details.hoursPeriod'),  type: 'select',
       options: [
         { value: 'week',  label: t('details.periods.week') },

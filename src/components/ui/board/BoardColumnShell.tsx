@@ -1,10 +1,10 @@
 /**
  * BoardColumnShell — one kanban column: BoardColumnHeader (label/count/colour) +
  * a dashed-bordered empty box or the item loop, shared by MatchesBoard and
- * TasksBoard (DRY round 11, PAGES; identical DOM in both). ApplicationsBoard's
- * column has a different width/minHeight and no empty-state affordance, and
- * OpportunitiesBoard hand-rolls its own header — neither carries this shell
- * (measured difference, see the lane report). The row renderer is a render prop
+ * TasksBoard and OpportunitiesBoard (DRY round 11, PAGES; identical DOM).
+ * ApplicationsBoard's column has a different width/minHeight and no
+ * empty-state affordance, so it does not carry this shell (measured
+ * difference, see the lane report). The row renderer is a render prop
  * so this stays ignorant of each entity's own card component/props. The header
  * count is derived from `items` so a caller can never show a number that disagrees
  * with the rows below it (the counter-cell/drill-down population canon).

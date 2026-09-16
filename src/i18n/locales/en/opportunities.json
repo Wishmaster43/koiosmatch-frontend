@@ -18,7 +18,7 @@
     "value": "Value",
     "owner": "Owner",
     "date": "Created",
-    "hoursValue": "{{count}} h",
+    "hoursValue": "{{value}} h",
     "expectedClose": "Expected close",
     "startDate": "Start date",
     "endDate": "End date"
@@ -278,5 +278,8 @@
     "reasonPlaceholder": "Select a reason",
     "confirm": "Mark as lost",
     "reasonLabel": "Lost reason"
+  },
+  "board": {
+    "empty": "No opportunities"
   }
 }

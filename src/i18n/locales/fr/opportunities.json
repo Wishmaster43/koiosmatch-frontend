@@ -18,7 +18,7 @@
     "value": "Valeur",
     "owner": "Responsable",
     "date": "Créé",
-    "hoursValue": "{{count}} h",
+    "hoursValue": "{{value}} h",
     "expectedClose": "Clôture prévue",
     "startDate": "Date de début",
     "endDate": "Date de fin"
@@ -278,5 +278,8 @@
     "reasonPlaceholder": "Sélectionner un motif",
     "confirm": "Marquer comme perdue",
     "reasonLabel": "Motif de perte"
+  },
+  "board": {
+    "empty": "Aucune opportunité"
   }
 }

@@ -13,6 +13,7 @@ import i18n from '@/i18n'
 import api from '@/lib/api'
 import OpportunityDrawer from './OpportunityDrawer'
 import { mapOpportunity } from './data/mapOpportunity'
+import { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 
 // TRASH-OVERAL-2: api + the grace-window read serve the shared TrashLifecycleSection
 // (deletion-preview GET, mark/unmark POSTs) rendered via the `trash` prop.
@@ -158,5 +159,22 @@ describe('OpportunityDrawer · owner picker clear (DROPDOWN-CLEAR-1)', () => {
     render(<OpportunityDrawer opportunity={cleared} onClose={noop} onUpdate={vi.fn()} users={users} />)
     expect(screen.queryByRole('button', { name: /wissen$/ })).toBeNull()
     expect(screen.queryByRole('button', { name: /Anna de Vries/ })).toBeNull()
+  })
+})
+
+// §4: the header avatar's neutral-colour fallback reads the shared Avatar.tsx
+// NEUTRAL_AVATAR constant, never a re-typed local hex (§4 no ad-hoc hex).
+describe('OpportunityDrawer · header avatar colour (§4)', () => {
+  it('renders the avatar with the shared NEUTRAL_AVATAR fallback colour', () => {
+    const o = mapOpportunity({ id: 'o1', title: 'Deal A' })
+    const { container } = render(<OpportunityDrawer opportunity={o} onClose={noop} />)
+    // React normalises an inline hex colour to rgb() in the DOM — derive that
+    // from the shared constant itself, so this stays correct if the token value
+    // ever changes, and still fails if a local re-typed hex drifts from it.
+    const [r, g, b] = [1, 3, 5].map(i => parseInt(NEUTRAL_AVATAR.slice(i, i + 2), 16))
+    const rgb = `${r}, ${g}, ${b}`
+    const avatarBubble = Array.from(container.querySelectorAll('div')).find(
+      el => el.style.background?.includes(rgb) || el.style.backgroundColor?.includes(rgb))
+    expect(avatarBubble).not.toBeUndefined()
   })
 })

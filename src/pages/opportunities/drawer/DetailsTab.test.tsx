@@ -192,3 +192,27 @@ describe('DetailsTab · lost reason (OPP-LOST-FE-1)', () => {
     expect(screen.queryByText(i18n.t('lost.reasonLabel', { ns: 'opportunities' }))).toBeNull()
   })
 })
+
+// GETALLEN-1: the value/hours rows render through the house number formatter
+// (thousands separator on the active nl-NL locale), never a raw number next to
+// a hardcoded '€' — same formatter as OpportunitiesTable/OpportunitiesBoard.
+describe('DetailsTab · number formatting (GETALLEN-1)', () => {
+  it('renders the deal value with a thousands separator via the house formatter', () => {
+    const withValue = { ...baseOpportunity, value: 125000, currency: 'EUR' } as unknown as Opportunity
+    render(<DetailsTab opportunity={withValue} onUpdate={vi.fn()} />)
+    expect(screen.getByText('€ 125.000')).toBeInTheDocument()
+    expect(screen.queryByText('125000')).toBeNull()
+  })
+
+  it('renders hours with a thousands separator via the house formatter', () => {
+    const withHours = { ...baseOpportunity, hours: 1800 } as unknown as Opportunity
+    render(<DetailsTab opportunity={withHours} onUpdate={vi.fn()} />)
+    expect(screen.getByText('1.800')).toBeInTheDocument()
+    expect(screen.queryByText('1800')).toBeNull()
+  })
+
+  it('renders a dash for an unset value/hours instead of a bare "€"', () => {
+    render(<DetailsTab opportunity={baseOpportunity} onUpdate={vi.fn()} />)
+    expect(screen.getByText('—')).toBeInTheDocument()
+  })
+})

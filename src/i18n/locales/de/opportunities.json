@@ -18,7 +18,7 @@
     "value": "Wert",
     "owner": "Inhaber",
     "date": "Erstellt",
-    "hoursValue": "{{count}} Std.",
+    "hoursValue": "{{value}} Std.",
     "expectedClose": "Voraussichtlicher Abschluss",
     "startDate": "Startdatum",
     "endDate": "Enddatum"
@@ -278,5 +278,8 @@
     "reasonPlaceholder": "Grund auswählen",
     "confirm": "Als verloren markieren",
     "reasonLabel": "Verlustgrund"
+  },
+  "board": {
+    "empty": "Keine Chancen"
   }
 }

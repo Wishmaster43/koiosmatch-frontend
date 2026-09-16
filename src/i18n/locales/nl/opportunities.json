@@ -18,7 +18,7 @@
     "value": "Waarde",
     "owner": "Eigenaar",
     "date": "Aangemaakt",
-    "hoursValue": "{{count}} u",
+    "hoursValue": "{{value}} u",
     "expectedClose": "Verwachte sluiting",
     "startDate": "Startdatum",
     "endDate": "Einddatum"
@@ -278,5 +278,8 @@
     "reasonPlaceholder": "Selecteer reden",
     "confirm": "Als verloren markeren",
     "reasonLabel": "Verliesreden"
+  },
+  "board": {
+    "empty": "Geen kansen"
   }
 }

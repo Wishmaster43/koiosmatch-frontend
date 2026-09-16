@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X, Trash2 } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
+import { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import TrashLifecycleSection from '@/components/drawer/TrashLifecycleSection'
 import type { TrashSectionConfig } from '@/components/drawer/TrashLifecycleSection'
@@ -168,8 +169,7 @@ export default function OpportunityDrawer({
           // TITEL-CHIP-1 (Danny 19-08): the stage badge IS the title.
           label={<TitleBadge label={seedLabel('opportunityStages', { label: o.stage })} color={o.stageColor} />}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
-          // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors the shared Avatar.tsx NEUTRAL_AVATAR constant)
-          avatar={{ initials: o.initials, soft: true, color: '#9CA3AF' }}
+          avatar={{ initials: o.initials, soft: true, color: NEUTRAL_AVATAR }}
           renderTitle={renderTitle}
           titleActions={<>
             {/* Danny 27-07: the shared house ChangelogPopover shell (§3A(d)) — was a

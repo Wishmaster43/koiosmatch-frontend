@@ -5,7 +5,7 @@
  */
 import type { TFunction } from 'i18next'
 import type { Opportunity } from '@/types/opportunity'
-import { formatCurrency } from '@/lib/formatters'
+import { formatCurrency, formatNumber } from '@/lib/formatters'
 
 // Picks the raw numeric value (hours or euro) a row should sort/display by,
 // based on its own deal type unit (null/euro/hours/quote).
@@ -27,7 +27,10 @@ export function formatOpportunityValue(
 ): string {
   const v = opportunityValueOf(row)
   if (v == null) return '—'
-  // Money goes through the ONE house money formatter (lib/formatters §10) — whole
-  // amounts for opportunity values, never a third hand-rolled Intl instance.
-  return row.dealTypeUnit === 'hours' ? t('opportunities:cols.hoursValue', { count: v }) : formatCurrency(v, currency, locale, 0)
+  // Money and hours both go through the house number formatters (GETALLEN-1) —
+  // the hours branch pre-formats the number (thousands separator) before it
+  // reaches the i18n string, since i18next itself never formats {{count}}.
+  return row.dealTypeUnit === 'hours'
+    ? t('opportunities:cols.hoursValue', { count: v, value: formatNumber(v, locale) })
+    : formatCurrency(v, currency, locale, 0)
 }
