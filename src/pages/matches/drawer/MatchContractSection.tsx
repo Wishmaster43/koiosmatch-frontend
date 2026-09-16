@@ -187,7 +187,7 @@ export default function MatchContractSection({ matchId, onUpdate, archived }: Pr
       {canSeeFinancial && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, padding: '7px 11px', borderRadius: 8, marginTop: 8,
           background: 'var(--surface)', border: '1px solid var(--border)',
-          color: margin != null ? (margin >= 0 ? 'var(--color-success)' : 'var(--color-danger)') : 'var(--text-muted)' }}>
+          color: margin != null ? (margin >= 0 ? 'var(--color-success-text)' : 'var(--color-danger-text)') : 'var(--text-muted)' }}>
           <span style={{ color: 'var(--text-muted)' }}>{t('drawer.contract.margin')}</span>
           <Mono style={{ fontWeight: 700 }}>{margin != null ? formatCurrency(margin, undefined, 2) : '—'}</Mono>
         </div>

@@ -24,6 +24,7 @@ import type { MatchRow } from '@/types/match'
 import MatchConfirmFooter from './MatchConfirmFooter'
 import DictationTextarea from '@/components/forms/DictationTextarea'
 import { Caption } from '@/components/ui/typography'
+import { useNumberFormat } from '@/lib/formatters'
 
 // Canon field style (G33/fieldMetrics) — was its own padding-8/radius-8 copy;
 // fieldBox covers the single-line date input + the disabled-lookup notice;
@@ -53,6 +54,8 @@ interface Props {
 // posting the exact terminate contract and surfacing 422s inline per field.
 export default function TerminateMatchModal({ match, onClose, onUpdate }: Props) {
   const { t } = useTranslation(['matches', 'common'])
+  // Locale-aware thousands separator for the character counter (GETALLEN-1).
+  const { formatNumber } = useNumberFormat()
   // Reason lookup — tenant-managed, no seed (see useMatchStopReasons doc comment).
   const { reasons, loading: reasonsLoading } = useMatchStopReasons()
   const { terminate, saving } = useMatchTerminate(match.id, onUpdate)
@@ -114,7 +117,7 @@ export default function TerminateMatchModal({ match, onClose, onUpdate }: Props)
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
               <Caption>{t('drawer.terminate.noteLabel')}</Caption>
               {note.length > NOTE_COUNTER_FROM && (
-                <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{t('drawer.terminate.noteCounter', { count: note.length, max: NOTE_MAX })}</span>
+                <Caption as="span">{t('drawer.terminate.noteCounter', { count: formatNumber(note.length), max: formatNumber(NOTE_MAX) })}</Caption>
               )}
             </div>
             {/* POP-UPS 4: de toelichting krijgt de house-mic (plain-text dictatie) —

@@ -24,7 +24,7 @@ interface DonutChannel { label: string; value: ReactNode; color: string }
 // "label ✕"-chip and the donut dims the other segments — filtering on the biggest
 // segment previously LOOKED dead (rows already matched; Danny's "58% toont niks").
 export interface DonutSpec { key: string; title?: ReactNode; data: unknown[]; colors?: string[]; onPick?: (d: unknown) => void; active?: boolean; onClear?: () => void; picked?: string | null }
-export interface KpiSpec { key: string; label?: ReactNode; value?: number | string; sub?: ReactNode; color?: string; onClick?: () => void; active?: boolean; channels?: DonutChannel[]; render?: ReactNode }
+export interface KpiSpec { key: string; label?: ReactNode; value?: number | string | null; sub?: ReactNode; color?: string; onClick?: () => void; active?: boolean; channels?: DonutChannel[]; render?: ReactNode }
 
 const CARD: CSSProperties = {
   flex: '1 1 0', minWidth: 0, height: 96, boxSizing: 'border-box',
@@ -117,7 +117,8 @@ function KpiCard({ label, value, sub, color, onClick, active, channels, render, 
         {/* Custom card body (e.g. a mini stacked bar) overrides the value/channels. */}
         {render ?? <>
         <div style={{ fontSize: 24, fontWeight: 700, lineHeight: 1, color: color || 'var(--text)' }}>
-          {typeof value === 'number' ? formatNumber(value) : value}
+          {/* §3: a missing/loading count is a dash, never a blank tile or a fabricated 0. */}
+          {value == null ? '—' : typeof value === 'number' ? formatNumber(value) : value}
         </div>
         {channels ? (
           <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>

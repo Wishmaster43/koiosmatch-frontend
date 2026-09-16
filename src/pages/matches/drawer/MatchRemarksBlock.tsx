@@ -28,10 +28,12 @@ import { AlertCircle, ArrowRight } from 'lucide-react'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
 import SelectMenu from '@/components/ui/SelectMenu'
 import Button from '@/components/ui/Button'
+import { GroupLabel } from '@/components/ui/typography'
 import api from '@/lib/api'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { useNoteTypes } from '@/lib/useNoteTypes'
+import { tintBg, tintBorder } from '@/lib/tint'
 import type { MatchContract } from '../hooks/useMatchContract'
 import type { Id } from '@/types/common'
 
@@ -91,11 +93,11 @@ export default function MatchRemarksBlock({ remarks, loading, save, matchId, onO
   }
 
   const blockStyle = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' } as const
-  // Soft-tint notice (§4): warning-tinted surface, token icon, readable body text.
+  // Soft-tint notice (§4, via lib/tint): warning-tinted surface, token icon, readable body text.
   const noticeStyle = {
     display: 'flex', gap: 8, alignItems: 'flex-start', padding: '8px 12px',
-    background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
-    borderBottom: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)',
+    background: tintBg('var(--color-warning)'),
+    borderBottom: tintBorder('var(--color-warning)'),
     fontSize: 11, color: 'var(--text)', lineHeight: 1.5,
   } as const
 
@@ -106,7 +108,7 @@ export default function MatchRemarksBlock({ remarks, loading, save, matchId, onO
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 6 }}>
-        <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('drawer.remarks.title')}</span>
+        <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>{t('drawer.remarks.title')}</GroupLabel>
       </div>
       <div style={blockStyle}>
         {/* Honest, translated explanation that this field is going away (§3).

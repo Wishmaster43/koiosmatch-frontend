@@ -20,6 +20,9 @@ vi.mock('@/lib/settings/useAllSettings', () => ({
 // Identity date formatter — this file doesn't cover date rendering itself.
 vi.mock('@/lib/datetime', () => ({
   useDateFormat: () => ({ formatDate: (v: unknown) => (v == null ? '—' : String(v)), formatDateTime: (v: unknown) => String(v) }),
+  // ScorePill's useNumberFormat pulls this transitively (DATETIME-IMPORT-LES) — the
+  // score column renders on every row, so it must resolve here too.
+  useLocale: () => 'nl-NL',
 }))
 // Tenant app gate (JOB2 coupling column) — controlled per test, defaults to "off".
 const mockUseApps = vi.fn()

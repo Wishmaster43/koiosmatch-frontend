@@ -40,10 +40,18 @@ export function useMatchesDeepLink({ intent, rows, loading, selected, setSelecte
     // filters) — fetch it directly, like the candidates/vacancies openById paths.
     if (loading || fetchingOpenRef.current === String(pendingOpenId)) return
     fetchingOpenRef.current = String(pendingOpenId)
-    api.get(`/matches/${pendingOpenId}`, { params: { include_archived: 1 } })
-      .then(r => { setSelected(mapMatch(unwrap(r))); setPendingOpenId(null) })
-      .catch(() => { notifyError(t('page.openNotFound')); setPendingOpenId(null) })
+    // §9: guard against a stale response — if pendingOpenId switches to a newer
+    // target while this fetch is in flight, the late response must not overwrite it.
+    // The dedupe ref is reset in the cleanup (not just on settle) so a StrictMode
+    // or rows-identity re-run of this effect re-issues the fetch instead of getting
+    // stuck behind a ref that an aborted, never-settling promise would otherwise hold.
+    let alive = true
+    const ctrl = new AbortController()
+    api.get(`/matches/${pendingOpenId}`, { params: { include_archived: 1 }, signal: ctrl.signal })
+      .then(r => { if (!alive) return; setSelected(mapMatch(unwrap(r))); setPendingOpenId(null) })
+      .catch(() => { if (!alive) return; notifyError(t('page.openNotFound')); setPendingOpenId(null) })
       .finally(() => { fetchingOpenRef.current = null })
+    return () => { alive = false; ctrl.abort(); fetchingOpenRef.current = null }
   }, [pendingOpenId, rows, loading, t, setSelected])
   // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
   // through it and a copied link reopens the same match (NAV-BACK-1).

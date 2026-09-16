@@ -6,7 +6,7 @@ import Avatar from '@/components/ui/Avatar'
 import ScorePill from './ScorePill'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
-import { BoardCardShell, BoardColumnShell, BoardScrollArea, useBoardDrag } from '@/components/ui/board'
+import { BoardCardShell, BoardColumnShell, BoardScrollArea, BoardStateMessage, useBoardDrag } from '@/components/ui/board'
 
 export interface BoardColumn { key: string; label: string; color: string }
 
@@ -48,9 +48,13 @@ function BoardCard({ match, onDragStart, onClick, selected }: {
  * funnel-stage columns emptied out when the resource moved to `status`).
  * Presentational: the page owns the data and the status mutation (onMove).
  */
-export default function MatchesBoard({ rows, columns, onMove, onSelect, selectedId }: {
+export default function MatchesBoard({ rows, columns, onMove, onSelect, selectedId, loading, error }: {
   rows: MatchRow[]; columns: BoardColumn[]; onMove: (id: Id, stageKey: string) => void
   onSelect: (m: MatchRow) => void; selectedId?: Id | null
+  // §3 four UI states: the board renders off its own fetch — a still-loading or
+  // failed GET /matches must never look like "zero matches everywhere" (mirrors
+  // ApplicationsBoard's F3 fix).
+  loading?: boolean; error?: unknown
 }) {
   const { t } = useTranslation('matches')
   // Drag-and-drop wiring: ref for auto-scroll, handlers for start/over/drop, dragId ref.
@@ -59,6 +63,12 @@ export default function MatchesBoard({ rows, columns, onMove, onSelect, selected
   // A match's status may arrive as the lookup value or its label — match either.
   const norm = (s?: string) => String(s ?? '').trim().toLowerCase()
   const inColumn = (r: MatchRow, c: BoardColumn) => norm(r.status) === norm(c.key) || norm(r.status) === norm(c.label)
+
+  // Honest four-state board: a load or a failed fetch must never render as five
+  // empty-looking columns — show the same centred message the table shows.
+  if (loading || error) {
+    return <BoardStateMessage message={loading ? t('loading') : t('error')} />
+  }
 
   return (
     <BoardScrollArea scrollRef={boardScrollRef} onDragOver={boardAutoScroll}>

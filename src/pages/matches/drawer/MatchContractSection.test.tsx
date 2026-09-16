@@ -77,6 +77,25 @@ describe('MatchContractSection · financial permission gate', () => {
     expect(screen.getByText(/8,00/)).toBeInTheDocument()
   })
 
+  // §4 ink-twin tokens: a positive margin's ink is the success TEXT token, never
+  // the raw fill token (index.css: an AA contrast fail as plain text).
+  it('paints a positive margin with the success ink twin, never the raw fill token', () => {
+    setup()
+    const wrapper = screen.getByText(/8,00/).closest('div[style*="color"]')
+    expect(wrapper).not.toBeNull()
+    expect(wrapper?.getAttribute('style')).toContain('var(--color-success-text)')
+    expect(wrapper?.getAttribute('style')).not.toContain('var(--color-success);')
+  })
+
+  it('paints a negative margin with the danger ink twin', () => {
+    // margin is DERIVED from sell_rate - purchase_rate when both rates are
+    // present (see the component's own `hasRates` branch) — `margin` itself
+    // is only the fallback for when the rates aren't loaded yet.
+    setup({ purchase_rate: 20, sell_rate: 17 })
+    const wrapper = screen.getByText(/-3,00/).closest('div[style*="color"]')
+    expect(wrapper?.getAttribute('style')).toContain('var(--color-danger-text)')
+  })
+
   it('hides the purchase rate field and the margin block without the permission, keeps the sale rate', () => {
     mockHasPermission.mockImplementation(() => false)
     setup()

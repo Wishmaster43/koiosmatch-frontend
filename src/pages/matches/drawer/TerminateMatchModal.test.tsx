@@ -1,12 +1,19 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { MatchRow } from '@/types/match'
 
-// Key-echo t() (mirrors RejectionModal.test.tsx precedent) — a stable assertion
-// surface regardless of whether the reported i18n keys have landed in the
-// locale files yet (the manager applies them after this delivery).
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+// Key-echo t(), but with the interpolation VALUES appended so the GETALLEN-1
+// formatting test below can assert on the actual (formatted) values passed in.
+// Keeps the rest of the real module (initReactI18next etc.) — useNumberFormat's
+// own useLocale() transitively loads '@/i18n', which needs the real export.
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>()
+  return {
+    ...actual,
+    useTranslation: () => ({ t: (k: string, opts?: Record<string, unknown>) => (opts ? `${k}:${JSON.stringify(opts)}` : k) }),
+  }
+})
 
 const match = { id: 'm1', status: 'open' } as unknown as MatchRow
 const REASON_ROW = { value: 'end_of_contract', name: 'Einde contract' }
@@ -120,6 +127,17 @@ describe('TerminateMatchModal (MATCH-TERMINATE-1)', () => {
     await waitFor(() => expect(onUpdate).toHaveBeenCalledWith('m1', expect.objectContaining({ status: 'closed' })))
     expect(freshNotify.notifySuccess).toHaveBeenCalled()
     expect(onClose).toHaveBeenCalled()
+  })
+
+  // GETALLEN-1: the note counter renders locale-grouped numbers, never a raw
+  // digit string — asserts the actual values passed to t(), not the mocked key.
+  it('formats the note counter through the locale number formatter once over NOTE_COUNTER_FROM', async () => {
+    const { FreshModal } = await setup({ reasons: [REASON_ROW] })
+    render(<FreshModal match={match} onClose={vi.fn()} />)
+    const textarea = await screen.findByLabelText('drawer.terminate.noteLabel')
+    fireEvent.change(textarea, { target: { value: 'x'.repeat(1801) } })
+    expect(await screen.findByText(/drawer\.terminate\.noteCounter/)).toHaveTextContent('"count":"1.801"')
+    expect(screen.getByText(/drawer\.terminate\.noteCounter/)).toHaveTextContent('"max":"2.000"')
   })
 
   it('Annuleren closes without ever POSTing', async () => {

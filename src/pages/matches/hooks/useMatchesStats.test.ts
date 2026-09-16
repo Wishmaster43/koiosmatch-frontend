@@ -28,11 +28,21 @@ describe('useMatchesStats', () => {
     expect(mockedGet).toHaveBeenCalledWith('/matches/stats', { params: { include_archived: 1 } })
   })
 
-  it('falls back to 0 on a failing/missing endpoint, never a stale count', async () => {
-    mockedGet.mockRejectedValue(new Error('404'))
+  it('stays null (never a fabricated 0) and reports the error on a failing/missing endpoint (§3)', async () => {
+    const err = new Error('404')
+    mockedGet.mockRejectedValue(err)
     const { result } = renderHook(() => useMatchesStats())
     await waitFor(() => expect(mockedGet).toHaveBeenCalled())
-    await waitFor(() => expect(result.current.pendingApproval).toBe(0))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.pendingApproval).toBeNull()
+    expect(result.current.error).toBe(err)
+  })
+
+  it('is loading before the fetch resolves', () => {
+    mockedGet.mockReturnValue(new Promise(() => {}))
+    const { result } = renderHook(() => useMatchesStats())
+    expect(result.current.loading).toBe(true)
+    expect(result.current.pendingApproval).toBeNull()
   })
 
   it('refetches when refreshTick bumps', async () => {

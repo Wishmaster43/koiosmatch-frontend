@@ -12,6 +12,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import MatchRemarksBlock from './MatchRemarksBlock'
+import { tintBg, tintBorder } from '@/lib/tint'
 
 // Only the default client is stubbed; the note-type lookup falls back to its seed.
 vi.mock('@/lib/api', async () => {
@@ -107,5 +108,23 @@ describe('MatchRemarksBlock (retired field, read-only)', () => {
   it('disables the move when there is no match id (the notes route is per match) — no silent no-op', () => {
     render(<MatchRemarksBlock remarks={REMARK} loading={false} save={vi.fn()} />)
     expect(screen.getByRole('button', { name: /drawer\.remarks\.moveToNotes/ })).toBeDisabled()
+  })
+
+  // §4: the deprecation notice tint comes from lib/tint's canonical color-mix
+  // recipe, never an ad-hoc percentage hand-written per file.
+  it('tints the deprecation notice via the canonical §4 color-mix recipe', () => {
+    render(<MatchRemarksBlock remarks={REMARK} loading={false} save={vi.fn()} matchId="m1" />)
+    const notice = screen.getByRole('note')
+    expect(notice.getAttribute('style')).toContain(tintBg('var(--color-warning)'))
+    expect(notice.getAttribute('style')).toContain(tintBorder('var(--color-warning)').replace('1px solid ', ''))
+  })
+
+  // §4: the block heading uses the shared GroupLabel typography atom, never a
+  // locally hand-rolled 11px/600/uppercase span.
+  it('renders the block heading via the GroupLabel typography atom', () => {
+    render(<MatchRemarksBlock remarks={REMARK} loading={false} save={vi.fn()} matchId="m1" />)
+    const heading = screen.getByText('drawer.remarks.title')
+    expect(heading.tagName.toLowerCase()).toBe('span')
+    expect(heading.getAttribute('style')).toContain('text-transform: uppercase')
   })
 })

@@ -15,7 +15,7 @@ import { SectionTitle, Caption } from '@/components/ui/typography'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
 import { scoreColor } from '@/components/match/scoreColor'
-import { BoardCardShell, BoardColumnHeader, BoardScrollArea, useBoardDrag } from '@/components/ui/board'
+import { BoardCardShell, BoardColumnHeader, BoardScrollArea, BoardStateMessage, useBoardDrag } from '@/components/ui/board'
 
 export interface BoardPhase { key: string; label: string; color: string }
 
@@ -126,13 +126,7 @@ export default function ApplicationsBoard({ rows, phases, onMove, onSelect, sele
   // calm, centred message the table shows in its own loading/error/empty slot,
   // instead of silently rendering every phase column at count 0.
   if (loading || error || rows.length === 0) {
-    const message = loading ? t('loading') : error ? t('error') : t('empty')
-    return (
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: 40, fontSize: 13, color: 'var(--text-muted)' }}>
-        {message}
-      </div>
-    )
+    return <BoardStateMessage message={loading ? t('loading') : error ? t('error') : t('empty')} />
   }
 
   return (

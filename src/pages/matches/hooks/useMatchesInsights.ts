@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
+import { useNumberFormat } from '@/lib/formatters'
 import { buildMatchFilterGroups } from '../data/matchFilterGroups'
 import type { MatchDateRange, MatchListFilters } from '../data/matchFilterGroups'
 import type { MatchRow } from '@/types/match'
@@ -36,7 +37,8 @@ interface UseMatchesInsightsArgs extends MatchListFilters {
   // MATCH-APPROVAL-QUICKVIEW: server-aggregated count (GET /matches/stats.pending_approval)
   // — no longer derived from the loaded rows, which now narrow to pending-only
   // once the quick view itself is on (see useMatches' approvalStatus param).
-  pendingApprovalCount: number
+  // null while loading/on a failed fetch — never a fabricated zero (§3).
+  pendingApprovalCount: number | null
   registerFilters: (key: string, groups: FilterGroup[]) => void
   unregisterFilters: (key: string) => void
 }
@@ -52,6 +54,8 @@ export function useMatchesInsights(args: UseMatchesInsightsArgs) {
     pendingApprovalOnly, setPendingApprovalOnly, approvalReviewVisible, pendingApprovalCount,
     registerFilters, unregisterFilters,
   } = args
+  // Locale-aware percent (GETALLEN-1) — never a hand-built `${n}%`.
+  const { formatPercent } = useNumberFormat()
 
   // Donut click: toggle one value (second click clears).
   const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
@@ -193,7 +197,7 @@ export function useMatchesInsights(args: UseMatchesInsightsArgs) {
     // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
     { key: 'unscored', label: t('kpi.unscored'), value: unscoredCount, color: 'var(--color-warning)',
       onClick: () => setKpiScored(false) },
-    { key: 'avgScore', label: t('kpi.avgScore'), value: avgScore != null ? `${avgScore}%` : '—', color: 'var(--color-primary-text)',
+    { key: 'avgScore', label: t('kpi.avgScore'), value: avgScore != null ? formatPercent(avgScore) : '—', color: 'var(--color-primary-text)',
       onClick: () => setKpiScored(v => !v), active: kpiScored },
     // MATCH-APPROVAL-QUEUE-1: honesty-gated (goedkeuring-badge-eerlijk) — absent
     // entirely once the tenant's approval_mode is 'uit', never a permanent 0-tile.

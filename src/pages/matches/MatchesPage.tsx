@@ -348,7 +348,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
           id: 'board',
           render: () => (
             <MatchesBoard rows={boardRows} columns={stageColumns} onMove={handleMove}
-              onSelect={setSelected} selectedId={selected?.id} />
+              onSelect={setSelected} selectedId={selected?.id} loading={loading} error={error} />
           ),
         },
       ]} />

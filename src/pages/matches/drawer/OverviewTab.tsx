@@ -66,7 +66,6 @@ import SectionCard from '@/components/ui/SectionCard'
 import SharedBranchSection from '@/components/drawer/BranchSection'
 import { useDateFormat } from '@/lib/datetime'
 import { useAuth } from '@/context/AuthContext'
-import StatusPill from '@/components/ui/StatusPill'
 import EntityLink from '@/components/ui/EntityLink'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import { useMatchAdvice } from '@/lib/useMatchAdvice'
@@ -232,9 +231,9 @@ export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTa
               that can never be filled is dead weight, so the row only renders
               when a stage actually exists. */}
           {match.stage && (
-            <Field label={t('drawer.fields.stage')}>
-              <StatusPill label={match.stage} color={match.stageColor} />
-            </Field>
+            // SCHERMWAARHEID-1 canon: a drilldown field card holds plain text, never
+            // a chip — the stage chip face stays on MatchesTable's own column.
+            <Field label={t('drawer.fields.stage')}>{match.stage}</Field>
           )}
           <Field label={t('drawer.fields.created')}>{formatDate(match.date)}</Field>
           {/* MATCH-DRILL-2: a calm reason line after termination — the label

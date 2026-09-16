@@ -654,4 +654,15 @@ describe('OverviewTab · koiosAiAdvice prefers the detail fetch over the compact
     // Verdict chip renders straight away off the compact row (real i18n label).
     expect(screen.getByText(i18n.t('common:koios.advice.verdict.renew'))).toBeInTheDocument()
   })
+
+  // SCHERMWAARHEID-1 canon: drilldown field-card values are plain text, never a chip.
+  it('renders the stage as plain text, never a StatusPill chip', async () => {
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    const withStage: MatchRow = { ...baseMatch, stage: 'Actief' }
+    renderTab(withStage)
+    const stage = await screen.findByText('Actief')
+    // A StatusPill renders as a rounded/tinted pill span — a plain-text field
+    // value has no such wrapper around the text node's own parent.
+    expect(stage.tagName.toLowerCase()).not.toBe('span')
+  })
 })
