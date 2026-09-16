@@ -18,6 +18,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import SearchSelect from '@/components/ui/SearchSelect'
+import { tintBg, tintBorder } from '@/lib/tint'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 import type { Id } from '@/types/common'
@@ -55,8 +56,8 @@ export default function LocationBranchSection({ branchIds, branches, inherited, 
           <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 99, whiteSpace: 'nowrap',
             // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
             color: inherited ? 'var(--text-muted)' : 'var(--color-primary-text)',
-            background: inherited ? 'var(--bg)' : 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
-            border: `1px solid ${inherited ? 'var(--border)' : 'color-mix(in srgb, var(--color-primary) 35%, transparent)'}` }}>
+            background: inherited ? 'var(--bg)' : tintBg('var(--color-primary)'),
+            border: inherited ? '1px solid var(--border)' : tintBorder('var(--color-primary)') }}>
             {inherited ? t('locations.detail.branchInherited') : t('locations.detail.branchOwn')}
           </span>
           <SearchSelect triggerLabel={t('locations.detail.branchLink')} options={options} selected={selected}

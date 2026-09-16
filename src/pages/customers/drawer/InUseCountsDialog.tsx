@@ -18,6 +18,7 @@ import Spinner from '@/components/ui/Spinner'
 import { Z } from '@/lib/zIndexScale'
 import { Mono } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
 // Relation keys the backend's usageCounts() may send (location: 7 keys incl.
 // `departments`; department: same minus `departments` plus `tasks` — both
@@ -81,8 +82,8 @@ export default function InUseCountsDialog({ open, counts, onClose, onArchive, ar
               style, but the identity (height/radius/chrome) comes from Button. */}
           {onArchive ? (
             <Button variant="secondary" onClick={onArchive} disabled={archiving}
-              style={{ border: '1px solid color-mix(in srgb, var(--color-archive) 40%, transparent)',
-                background: 'color-mix(in srgb, var(--color-archive) 10%, transparent)', color: 'var(--color-archive)' }}>
+              style={{ border: tintBorder('var(--color-archive)'),
+                background: tintBg('var(--color-archive)'), color: chipInk('var(--color-archive)') }}>
               {archiving ? <Spinner size={13} /> : <Archive size={13} />}
               {t('inUse.archive')}
             </Button>

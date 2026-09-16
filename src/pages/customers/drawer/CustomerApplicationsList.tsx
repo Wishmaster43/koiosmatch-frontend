@@ -66,6 +66,7 @@ import Avatar from '@/components/ui/Avatar'
 import StatusPill from '@/components/ui/StatusPill'
 import EntityLink from '@/components/ui/EntityLink'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import Button from '@/components/ui/Button'
 import SearchStatusToolbar from '@/components/drawer/SearchStatusToolbar'
 import { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import { useNavigation } from '@/context/NavigationContext'
@@ -188,21 +189,21 @@ export default function CustomerApplicationsList(props: Props) {
       render: (r: Application) => (
         <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6 }} onClick={e => e.stopPropagation()}>
           {canManageApplications && r.id != null && (
-            <button type="button" onClick={() => { setEditCandidateId(r.candidateId ?? null); setEditApplicationId(r.id ?? null) }}
+            <Button variant="ghost" size="sm" iconOnly onClick={() => { setEditCandidateId(r.candidateId ?? null); setEditApplicationId(r.id ?? null) }}
               title={t('candidates:work.editApplication')} aria-label={t('candidates:work.editApplication')}
-              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, border: 'none', background: 'none', borderRadius: 5, cursor: 'pointer', color: 'var(--text-muted)' }}>
+              style={{ width: 22, height: 22 }}>
               <Pencil size={12} />
-            </button>
+            </Button>
           )}
           {canViewApplications && r.id != null && (
             <span style={{ position: 'relative', display: 'inline-flex' }}>
-              <button type="button" onClick={() => setExpandedId(x => x === r.id ? null : (r.id ?? null))}
+              <Button variant="ghost" size="sm" iconOnly onClick={() => setExpandedId(x => x === r.id ? null : (r.id ?? null))}
                 title={expandedId === r.id ? t('candidates:work.hideDetails') : t('candidates:work.showDetails')}
                 aria-label={expandedId === r.id ? t('candidates:work.hideDetails') : t('candidates:work.showDetails')}
                 aria-expanded={expandedId === r.id} aria-haspopup="dialog"
-                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, border: 'none', background: 'none', borderRadius: 5, cursor: 'pointer', color: 'var(--text-muted)' }}>
+                style={{ width: 22, height: 22 }}>
                 {expandedId === r.id ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-              </button>
+              </Button>
               {/* Lazy detail — the SAME candidate-drawer panel, only fetched on first expand (§8). */}
               <FloatingPanel open={expandedId === r.id} onClose={() => setExpandedId(null)}
                 ariaLabel={t('candidates:work.showDetails')} width={360} persistKey="customer-application-row"

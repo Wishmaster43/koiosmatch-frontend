@@ -17,6 +17,7 @@
 import { useTranslation } from 'react-i18next'
 import { RotateCcw } from 'lucide-react'
 import Toggle from '@/components/ui/Toggle'
+import Button from '@/components/ui/Button'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { Caption, GroupLabel } from '@/components/ui/typography'
 import type { Customer } from '@/types/customer'
@@ -66,13 +67,10 @@ export default function VacancySettingsTab({ c, onSave }: Props) {
                 </Caption>
               </div>
               {!followsDefault && (
-                <button onClick={() => onSave?.({ [f.key]: tenantDefault })} title={t('vacancySettings.resetToDefault')}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 5, height: 26, padding: '0 10px', flexShrink: 0,
-                    fontSize: 11.5, fontWeight: 500, borderRadius: 6, cursor: 'pointer', color: 'var(--color-primary-text)',
-                    background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
-                    border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)' }}>
+                <Button variant="secondary" size="sm" onClick={() => onSave?.({ [f.key]: tenantDefault })} title={t('vacancySettings.resetToDefault')}
+                  aria-label={t('vacancySettings.resetToDefault')}>
                   <RotateCcw size={12} /> {t('vacancySettings.resetToDefault')}
-                </button>
+                </Button>
               )}
             </div>
           )

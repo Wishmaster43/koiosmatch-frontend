@@ -12,7 +12,8 @@
  */
 import { useState, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MapPin, Search, Archive } from 'lucide-react'
+import { MapPin, Archive } from 'lucide-react'
+import DrawerSearchField from '@/components/drawer/DrawerSearchField'
 import { useAuth } from '@/context/AuthContext'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
@@ -40,19 +41,6 @@ const SoftChip = SoftChipJs as unknown as ComponentType<AnyProps>
 // Plain-text fallback style for a coloured column toggled off (CHIPKLEUR-INSTELBAAR-1) —
 // mirrors the `plainCell` convention in CandidatesTable/CustomersTable.
 const plainCell = { color: 'var(--text)', fontSize: 12 }
-
-// Mirrors SubEntityTab's search box, now owned directly here (see file header).
-// TOOLBAR-WIDTH-1 (Danny, live 04-08: "zelfde breedte houden" across Locaties/
-// Afdelingen/Contactpersonen) — minWidth 0, not 120: a flex child's implicit
-// min-width:auto would otherwise keep this box from shrinking to the SAME
-// footprint DepartmentsPanel/ContactsPanel already use, so the three toolbars
-// would drift out of lockstep the moment the panel got tight (mirrors the
-// ContactsPanel comment this now matches byte-for-byte).
-const searchWrap = {
-  display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0, padding: '6px 10px',
-  background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8,
-} as const
-const searchInput = { flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' } as const
 
 interface Props extends DepartmentCallbacks {
   customerId?: Id
@@ -181,11 +169,7 @@ export default function LocationsTab({
     <>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <div style={searchWrap}>
-            <Search size={13} color="var(--text-muted)" />
-            <input value={search} onChange={e => setSearch(e.target.value)}
-              placeholder={t('locations.searchPlaceholder')} aria-label={t('locations.searchPlaceholder')} style={searchInput} />
-          </div>
+          <DrawerSearchField value={search} onChange={setSearch} placeholder={t('locations.searchPlaceholder')} />
           <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={statuses} />
           {/* ARCHIVE-SUBENTITY-1: the shared quick-view toggle (§4) — never hand-rolled. */}
           <QuickViewToggle iconOnly active={showArchived} onToggle={() => setShowArchived(v => !v)}
