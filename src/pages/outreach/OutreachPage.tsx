@@ -39,6 +39,8 @@ import PaginationBar from '@/components/ui/PaginationBar'
 import TrashPreviewDialogSlot from '@/components/ui/TrashPreviewDialogSlot'
 import { useTrashFlow } from '@/hooks/useTrashFlow'
 import { ListPageShell } from '@/components/ui/ListPageShell'
+import ErrorBanner from '@/components/ui/ErrorBanner'
+import Spinner from '@/components/ui/Spinner'
 
 // Right-panel multi-toggle for a filter dimension.
 const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) =>
@@ -258,7 +260,19 @@ export default function OutreachPage({ intent }: { intent?: unknown } = {}) {
 
         {/* Content */}
         {view === 'board' ? (
-          <OutreachBoard rows={filtered} columns={columns} onMove={handleMove} />
+          // Four UI states (§13): a failed fetch is a real ErrorBanner, never
+          // three silently-empty kanban columns — mirrors the table branch below.
+          (showArchived || showTrash ? archError : error) ? (
+            <div style={{ padding: '32px 24px' }}>
+              <ErrorBanner onRetry={showArchived || showTrash ? refetchArchived : reload}>
+                {t('loadError')}
+              </ErrorBanner>
+            </div>
+          ) : (showArchived || showTrash ? archLoading : loading) && filtered.length === 0 ? (
+            <div style={{ padding: '32px 24px', display: 'flex', justifyContent: 'center' }}><Spinner /></div>
+          ) : (
+            <OutreachBoard rows={filtered} columns={columns} onMove={handleMove} />
+          )
         ) : (
           <>
           <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>

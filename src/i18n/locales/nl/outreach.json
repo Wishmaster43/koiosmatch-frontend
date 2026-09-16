@@ -70,7 +70,8 @@
     "poolHint": "Kies een talentenpool om de bellijst meteen met kandidaten te vullen.",
     "submit": "Bellijst aanmaken",
     "saving": "Aanmaken…",
-    "error": "Aanmaken is mislukt. Probeer het opnieuw."
+    "error": "Aanmaken is mislukt. Probeer het opnieuw.",
+    "poolsLoadError": "Bronpools laden is mislukt."
   },
   "page": {
     "searchPlaceholder": "Zoek bellijst, pool of kandidaat…"
@@ -89,7 +90,8 @@
       "targets": "Bellijst",
       "extra": "Extra",
       "stats": "Statistieken",
-      "timeline": "Tijdlijn"
+      "timeline": "Tijdlijn",
+      "information": "Informatie"
     },
     "loading": "Laden…",
     "error": "Bellijst laden is mislukt.",
@@ -99,7 +101,9 @@
       "todo": "Te doen",
       "contacted": "Benaderd",
       "answered": "Beantwoord",
-      "skipped": "Overgeslagen"
+      "skipped": "Overgeslagen",
+      "saveFailed": "Opslaan is mislukt. Probeer het opnieuw.",
+      "ownerSaveFailed": "Eigenaar wijzigen is mislukt. Probeer het opnieuw."
     },
     "action": {
       "contacted": "Markeer als benaderd",
@@ -162,6 +166,13 @@
         "one": "Eén persoon met deze rol"
       },
       "assignAllMatching": "Alles in deze selectie toewijzen ({{count}})"
+    },
+    "fields": {
+      "name": "Naam",
+      "channel": "Kanaal",
+      "pool": "Bronpool",
+      "createdAt": "Aangemaakt",
+      "saveFailed": "Opslaan is mislukt. Probeer het opnieuw."
     }
   },
   "changelog": {

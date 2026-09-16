@@ -14,6 +14,7 @@ import { initialsOf } from '@/lib/initials'
 import { useDateFormat } from '@/lib/datetime'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useCampaignAdvice } from '@/lib/useCampaignAdvice'
+import { useNumberFormat } from '@/lib/formatters'
 import type { Campaign } from './hooks/useOutreachCampaigns'
 import Button from '@/components/ui/Button'
 import { getChannelMeta } from './outreachChannelMeta'
@@ -36,6 +37,8 @@ export default function OutreachList({ campaigns, loading, error, onReload, onOp
   selectable, selectedIds, onToggleRow, onToggleAll }: Props) {
   const { t } = useTranslation('outreach')
   const { formatDate } = useDateFormat()
+  // GETALLEN-1: every visible number renders through the house formatter.
+  const { formatNumber } = useNumberFormat()
   // Tenant display settings (Settings → Bellijsten → Tabelweergave). Coloured chips
   // ON by default, mirrors candidates/applications/customers.
   const settings = useAllSettings()
@@ -73,7 +76,10 @@ export default function OutreachList({ campaigns, loading, error, onReload, onOp
         return colorStatus ? <StatusBadge status={r.status ?? 'draft'} map={statusMap} /> : <span style={{ color: 'var(--text)', fontSize: 12 }}>{s.label}</span>
       } },
     { key: 'targets', header: t('col.targets'), align: 'center',
-      render: (r: Campaign) => r.targets_count ?? r.target_count ?? '—' },
+      render: (r: Campaign) => {
+        const n = r.targets_count ?? r.target_count
+        return n != null ? formatNumber(n) : '—'
+      } },
     { key: 'created_at', header: t('col.created'), nowrap: true, sortable: true,
       sortValue: (r: Campaign) => r.created_at ?? '', render: (r: Campaign) => formatDate(r.created_at) },
     // Shared Koios column factory (Danny 05-08 consistency pass) — same header,

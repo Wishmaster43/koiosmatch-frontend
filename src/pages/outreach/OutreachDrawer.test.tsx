@@ -26,20 +26,22 @@ const statsTabLabel = (nlOutreach as { drawer: { tabs: { stats: string } } }).dr
 // The detail hook is the drawer's only data source — stub it and observe the id it gets.
 // `detailReturn` is a per-test mutable override so individual tests can supply a real
 // detail payload (e.g. reference_number) instead of the default null/loading stub.
-const { detailMock, detailReturn, setOwnerMock } = vi.hoisted(() => ({
+const { detailMock, detailReturn, setOwnerMock, setFieldsMock } = vi.hoisted(() => ({
   detailMock: vi.fn(),
   detailReturn: { current: null as Record<string, unknown> | null },
   // DROPDOWN-CLEAR-1: hoisted so the owner-clear test can assert the (id, null) call.
   setOwnerMock: vi.fn(),
+  // Information tab (DRILLDOWN-VOLGORDE-CANON): name/channel save.
+  setFieldsMock: vi.fn(),
 }))
 vi.mock('./hooks/useOutreachDetail', () => ({
   useOutreachDetail: (id: string | null) => {
     detailMock(id)
     return {
-      detail: detailReturn.current, loading: false, error: false,
+      detail: detailReturn.current, loading: false, error: false, reload: vi.fn(),
       setTargetStatus: vi.fn(), setTargetOutcome: vi.fn(), setOwner: setOwnerMock, setCustomFields: vi.fn(),
       // G29/G30: real functions so the prop-wiring test can assert their type.
-      setTargetNote: vi.fn(), assignTargets: vi.fn(),
+      setTargetNote: vi.fn(), assignTargets: vi.fn(), setFields: setFieldsMock,
     }
   },
 }))
@@ -150,6 +152,8 @@ describe('OutreachDrawer — G29/G30/G31 wiring (assign, note, stats filter)', (
 
   it('passes the assign/note mutations and recruiter options through to the Targets tab', () => {
     render(<OutreachDrawer id="c1" onClose={() => {}} />)
+    // DRILLDOWN-VOLGORDE-CANON: Information is now the default (first) tab.
+    fireEvent.click(screen.getByRole('tab', { name: nlOutreach.drawer.tabs.targets }))
     expect(targetsTabProps.current?.onAssignTargets).toBeTypeOf('function')
     expect(targetsTabProps.current?.onSetNote).toBeTypeOf('function')
     expect(targetsTabProps.current?.recruiters).toEqual([{ value: 'r1', label: 'Nora Recruiter' }])
@@ -206,9 +210,10 @@ describe('OutreachDrawer — G29/G30/G31 wiring (assign, note, stats filter)', (
     expect(statsTabProps.current?.filter).toEqual({ axis: 'status', value: 'contacted' })
 
     // A new entity id resets EntityDrawer's own activeTab to the first tab
-    // (Targets) too — read the filter back through that tab, which is the one
-    // still mounted on this render pass.
+    // (Information, DRILLDOWN-VOLGORDE-CANON) too — click into Targets to read
+    // the filter back through the tab that owns it.
     rerender(<OutreachDrawer id="c2" onClose={() => {}} />)
+    fireEvent.click(screen.getByRole('tab', { name: nlOutreach.drawer.tabs.targets }))
     expect(targetsTabProps.current?.filter).toBeNull()
   })
 })
@@ -230,6 +235,8 @@ describe('OutreachDrawer — table-identical Koios advice (KOIOS-ADVIES-OVERAL-1
     const expected = resolveVia(campaign)?.label
     expect(expected).toBeTruthy()
     render(<OutreachDrawer id="c1" onClose={() => {}} />)
+    // DRILLDOWN-VOLGORDE-CANON: Information is now the default (first) tab.
+    fireEvent.click(screen.getByRole('tab', { name: nlOutreach.drawer.tabs.targets }))
     expect(screen.getByText(aiTitle)).toBeInTheDocument()
     expect(screen.getByText(expected as string)).toBeInTheDocument()
   })
@@ -239,6 +246,7 @@ describe('OutreachDrawer — table-identical Koios advice (KOIOS-ADVIES-OVERAL-1
     expect(resolveVia(campaign)).toBeNull()
     detailReturn.current = { ...campaign, targets: [] }
     render(<OutreachDrawer id="c1" onClose={() => {}} />)
+    fireEvent.click(screen.getByRole('tab', { name: nlOutreach.drawer.tabs.targets }))
     expect(screen.queryByText(aiTitle)).not.toBeInTheDocument()
   })
 })

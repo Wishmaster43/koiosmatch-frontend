@@ -70,7 +70,8 @@
     "poolHint": "Choisissez un vivier de talents pour remplir la liste avec des candidats immédiatement.",
     "submit": "Créer la liste",
     "saving": "Création…",
-    "error": "Échec de la création. Veuillez réessayer."
+    "error": "Échec de la création. Veuillez réessayer.",
+    "poolsLoadError": "Le chargement des viviers de talents a échoué."
   },
   "page": {
     "searchPlaceholder": "Rechercher une liste d'appel, un pool ou un candidat…"
@@ -89,7 +90,8 @@
       "targets": "Liste d'appel",
       "extra": "Extra",
       "stats": "Statistiques",
-      "timeline": "Chronologie"
+      "timeline": "Chronologie",
+      "information": "Informations"
     },
     "loading": "Chargement…",
     "error": "Échec du chargement de la liste d'appel.",
@@ -99,7 +101,9 @@
       "todo": "À faire",
       "contacted": "Contacté",
       "answered": "Répondu",
-      "skipped": "Ignoré"
+      "skipped": "Ignoré",
+      "saveFailed": "L'enregistrement a échoué. Veuillez réessayer.",
+      "ownerSaveFailed": "Le changement de propriétaire a échoué. Veuillez réessayer."
     },
     "action": {
       "contacted": "Marquer contacté",
@@ -162,6 +166,13 @@
         "one": "Une personne ayant ce rôle"
       },
       "assignAllMatching": "Assigner tout dans cette sélection ({{count}})"
+    },
+    "fields": {
+      "name": "Nom",
+      "channel": "Canal",
+      "pool": "Pool source",
+      "createdAt": "Créé",
+      "saveFailed": "L'enregistrement a échoué. Veuillez réessayer."
     }
   },
   "changelog": {

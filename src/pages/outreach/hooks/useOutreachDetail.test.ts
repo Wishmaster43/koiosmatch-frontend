@@ -8,12 +8,15 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import { useOutreachDetail } from './useOutreachDetail'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
   return { ...actual, default: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() } }
 })
+
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
 const campaign = { id: 'c1', name: 'Bellijst Zorg', targets: [{ id: 't1', status: 'todo', note: null }] }
 
@@ -105,6 +108,55 @@ describe('useOutreachDetail · assignTargets (BELLIJST-ASSIGN-2)', () => {
   })
 })
 
+
+// D8: a failed target/owner PATCH must never revert silently — the recruiter
+// gets an honest notice, not just a chip that flips back with no explanation.
+describe('useOutreachDetail · honest failure feedback (D8)', () => {
+  it('notifies on a failed target status PATCH', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: campaign } })
+    vi.mocked(api.patch).mockRejectedValue(new Error('500'))
+    const { result } = renderHook(() => useOutreachDetail('c1'))
+    await waitFor(() => expect(result.current.detail).not.toBeNull())
+
+    await act(async () => { await result.current.setTargetStatus('t1', 'contacted') })
+    expect(notifyError).toHaveBeenCalled()
+    // Reverted, never left showing the failed change as if it saved.
+    expect(result.current.detail?.targets?.[0].status).toBe('todo')
+  })
+
+  it('notifies on a failed owner PATCH', async () => {
+    vi.mocked(api.patch).mockRejectedValueOnce(new Error('500'))
+    const { result } = renderHook(() => useOutreachDetail('camp-1'))
+    await act(async () => { await result.current.setOwner('camp-1', { id: 'u1', name: 'Sara' }) })
+    expect(notifyError).toHaveBeenCalled()
+  })
+})
+
+// Information tab (DRILLDOWN-VOLGORDE-CANON): name/channel PATCH via setFields.
+describe('useOutreachDetail · setFields (Information tab)', () => {
+  it('PATCHes /outreach-campaigns/{id} with the field patch, optimistically, and reverts on failure', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: campaign } })
+    vi.mocked(api.patch).mockRejectedValue(new Error('422'))
+    const { result } = renderHook(() => useOutreachDetail('c1'))
+    await waitFor(() => expect(result.current.detail).not.toBeNull())
+
+    await act(async () => { await result.current.setFields('c1', { name: 'Nieuwe naam' }) })
+    // THE SEAM: exact route + body.
+    expect(api.patch).toHaveBeenCalledWith('/outreach-campaigns/c1', { name: 'Nieuwe naam' })
+    expect(result.current.detail?.name).toBe('Bellijst Zorg')
+    expect(notifyError).toHaveBeenCalled()
+  })
+
+  it('keeps the optimistic field values once the PATCH succeeds', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: campaign } })
+    vi.mocked(api.patch).mockResolvedValue({ data: {} })
+    const { result } = renderHook(() => useOutreachDetail('c1'))
+    await waitFor(() => expect(result.current.detail).not.toBeNull())
+
+    await act(async () => { await result.current.setFields('c1', { channel: 'whatsapp' }) })
+    expect(result.current.detail?.channel).toBe('whatsapp')
+  })
+})
 
 // DRILL-REFRESH-AUDIT-1: every successful mutation reports upstream — owner as
 // a row delta (table shows it), target changes as a stale-list signal.

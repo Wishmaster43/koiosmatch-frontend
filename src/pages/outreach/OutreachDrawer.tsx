@@ -35,9 +35,9 @@ import { useCustomFields } from '@/lib/useCustomFields'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import type { EntityTab } from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
+import DrawerTitleRow from '@/components/drawer/DrawerTitleRow'
 import { MarkDeletionGlyphButton } from '@/components/drawer/DrawerGlyphButton'
 import TitleBadge from '@/components/drawer/TitleBadge'
-import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import { initialsOf } from '@/lib/initials'
@@ -45,6 +45,7 @@ import { useUsers } from '@/lib/queries'
 import { useOutreachDetail } from './hooks/useOutreachDetail'
 import type { Campaign } from './hooks/useOutreachCampaigns'
 import CampaignKoiosBlock from './drawer/CampaignKoiosBlock'
+import InformationTab from './drawer/InformationTab'
 import TargetsTab from './drawer/TargetsTab'
 import ChangelogTab from './drawer/ChangelogTab'
 import CampaignStatsTab from './drawer/CampaignStatsTab'
@@ -92,7 +93,7 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
   const { t } = useTranslation('outreach')
   const { formatDate, formatDateTime } = useDateFormat()
   // Always fetch: an archived campaign's detail now loads too (withTrashed show()).
-  const { detail, loading, error, setTargetStatus, setTargetOutcome, setTargetNote, applyTargetNote, assignTargets, setOwner, setCustomFields } = useOutreachDetail(id, onMutated)
+  const { detail, loading, error, reload, setTargetStatus, setTargetOutcome, setTargetNote, applyTargetNote, assignTargets, setOwner, setCustomFields, setFields } = useOutreachDetail(id, onMutated)
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   // The Extra tab only shows when the tenant has defined outreach-campaign custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('outreach_campaign')
@@ -152,6 +153,13 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
   // before Stats, which surfaces the by_status/by_outcome/by_assignee breakdown (G31)
   // and always stays LAST (canon: statistics closes every drilldown).
   const tabs: EntityTab[] = [
+    // DRILLDOWN-VOLGORDE-CANON (§3A): information cards come first — the
+    // campaign's own fields (name/channel editable, source pool + created-at
+    // read-only).
+    { id: 'information', label: t('drawer.tabs.information'), render: () => (
+      <InformationTab detail={detail} loading={loading} error={error} onRetry={reload}
+        onSave={patch => { if (id) setFields(id, patch) }} />
+    ) },
     { id: 'targets', label: t('drawer.tabs.targets'), render: () => (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {/* KOIOS-ADVIES-OVERAL-1: the SAME advice the table's Koios column shows.
@@ -188,7 +196,7 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
       // with the candidate/other drawers even when there is no right-side content).
       footer={
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, fontSize: 11, color: 'var(--text-muted)' }}>
-          <span>{t('drawer.createdAt', { date: formatDateTime(createdAt) })}</span>
+          <span>{t('drawer.createdAt', { date: formatDateTime(detail?.created_at ?? createdAt) })}</span>
           <span />
         </div>
       }
@@ -208,19 +216,12 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
             <MarkDeletionGlyphButton onMarkDeletion={onMarkDeletion} id={id} archived={archived} inTrash={inTrash} />
           </>}
           renderTitle={() => (
-            <>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{name}</span>
-                {/* NUMMER-3: the copy chip, right after the title and before the status badge (§3A). */}
-                <ReferenceNumberChip value={detail?.reference_number ?? ''} />
-              </div>
-              {/* W2 delivered: the detail (incl. targets) now loads for an archived
-                  campaign too, so the real progress shows regardless of archive state
-                  — the ArchivedBanner below already carries the archived signal. */}
-              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                {t('drawer.progress', { done, total })}
-              </div>
-            </>
+            // NUMMER-3 + W2: the shared DrawerTitleRow (§3A "same spot") composes the
+            // title, the reference-number copy chip and the progress subtitle — the
+            // real progress shows regardless of archive state (ArchivedBanner below
+            // already carries the archived signal).
+            <DrawerTitleRow title={name} referenceNumber={detail?.reference_number}
+              subtitle={t('drawer.progress', { done, total })} />
           )}
           expanded={expanded}
           onToggleExpand={onToggleExpand}

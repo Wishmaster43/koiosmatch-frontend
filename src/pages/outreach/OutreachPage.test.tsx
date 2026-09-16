@@ -37,8 +37,11 @@ vi.mock('@/context/AuthContext', () => ({
 // `currentCampaigns` is mutable so individual tests can swap in a row shape
 // (e.g. one carrying `pool_name`) without a second module-scope mock.
 let currentCampaigns: Campaign[] = CAMPAIGNS
+// D8: mutable so the board-error test can simulate a failed campaigns fetch.
+let currentError = false
+const reloadMock = vi.fn()
 vi.mock('./hooks/useOutreachCampaigns', () => ({
-  useOutreachCampaigns: () => ({ campaigns: currentCampaigns, loading: false, error: false, reload: vi.fn(), add: vi.fn(), patch: vi.fn(), drop: vi.fn() }),
+  useOutreachCampaigns: () => ({ campaigns: currentCampaigns, loading: false, error: currentError, reload: reloadMock, add: vi.fn(), patch: vi.fn(), drop: vi.fn() }),
   OUTREACH_MAX_PER_PAGE: 200,
 }))
 // Right panel — captures registerFilters so the derived filter-group config
@@ -67,13 +70,19 @@ vi.mock('@/lib/api', () => ({
 vi.mock('@/components/insights/InsightsRow', () => ({ default: () => null }))
 vi.mock('@/components/ui/HeaderSearch', () => ({ default: () => null }))
 vi.mock('@/components/ui/QuickViewToggle', () => ({ default: () => null }))
-vi.mock('@/components/ui/ViewModeToggle', () => ({ default: () => null }))
+// A real onChange-firing stub (instead of a bare null render) so the board-error
+// test below can switch views without any other test needing to interact with it.
+vi.mock('@/components/ui/ViewModeToggle', () => ({
+  default: ({ onChange }: { onChange: (v: string) => void }) =>
+    <button data-testid="view-toggle-board" onClick={() => onChange('board')} />,
+}))
 // The list stub captures its props so tests can drive a row selection (the bulk
 // bar only renders once ≥1 row is selected); the bulk-bar stub captures its props
 // so the archive-gate tests can read `canArchive` straight off the seam.
 let listProps: { onToggleRow?: (id: string) => void } | null = null
 vi.mock('./OutreachList', () => ({ default: (props: { onToggleRow?: (id: string) => void }) => { listProps = props; return <div data-testid="outreach-list-stub" /> } }))
-vi.mock('./OutreachBoard', () => ({ default: () => null }))
+let boardMounted = false
+vi.mock('./OutreachBoard', () => ({ default: () => { boardMounted = true; return null } }))
 let bulkBarProps: { canArchive?: boolean } | null = null
 vi.mock('./OutreachBulkBar', () => ({ default: (props: { canArchive?: boolean }) => { bulkBarProps = props; return <div data-testid="outreach-bulkbar-stub" /> } }))
 vi.mock('./OutreachDrawer', () => ({ default: () => null }))
@@ -82,7 +91,7 @@ vi.mock('./OutreachDrawer', () => ({ default: () => null }))
 // even though no test in this file asserts on the mock directly.
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
-beforeEach(() => { currentCampaigns = CAMPAIGNS; registerFilters.mockClear(); grantedPerms = 'all'; listProps = null; bulkBarProps = null })
+beforeEach(() => { currentCampaigns = CAMPAIGNS; currentError = false; reloadMock.mockClear(); registerFilters.mockClear(); grantedPerms = 'all'; listProps = null; bulkBarProps = null; boardMounted = false })
 
 describe('OutreachPage · target-group filter reads the real pool_name field', () => {
   it('derives the target-group option straight from pool_name, not a guessed shape', () => {
@@ -191,5 +200,30 @@ describe('OutreachPage · bulk archive gates on outreach.update (TRASH-OVERAL-2)
     act(() => listProps?.onToggleRow?.('c1'))
     expect(screen.getByTestId('outreach-bulkbar-stub')).toBeInTheDocument()
     expect(bulkBarProps?.canArchive).toBe(false)
+  })
+})
+
+// D8: a failed campaigns fetch on the board view must show a real error, never
+// three silently-empty kanban columns.
+describe('OutreachPage · board view honest error state (D8)', () => {
+  it('shows an ErrorBanner with a working retry instead of mounting the board on a failed fetch', async () => {
+    const user = userEvent.setup()
+    currentError = true
+    render(<OutreachPage />)
+    await user.click(screen.getByTestId('view-toggle-board'))
+
+    expect(screen.getByRole('alert')).toBeInTheDocument()
+    expect(boardMounted).toBe(false)
+
+    await user.click(screen.getByRole('button', { name: /opnieuw|retry/i }))
+    expect(reloadMock).toHaveBeenCalled()
+  })
+
+  it('mounts the board normally once the fetch succeeds', async () => {
+    const user = userEvent.setup()
+    render(<OutreachPage />)
+    await user.click(screen.getByTestId('view-toggle-board'))
+    expect(screen.queryByRole('alert')).toBeNull()
+    expect(boardMounted).toBe(true)
   })
 })

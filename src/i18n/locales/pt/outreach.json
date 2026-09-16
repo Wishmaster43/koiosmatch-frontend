@@ -70,7 +70,8 @@
     "poolHint": "Escolha um pool de talentos para preencher a lista de chamadas com candidatos de imediato.",
     "submit": "Criar lista de chamadas",
     "saving": "A criar…",
-    "error": "Falha ao criar. Tente novamente."
+    "error": "Falha ao criar. Tente novamente.",
+    "poolsLoadError": "Falha ao carregar os pools de talentos."
   },
   "page": {
     "searchPlaceholder": "Pesquisar lista de chamadas, pool ou candidato…"
@@ -89,7 +90,8 @@
       "targets": "Lista de chamadas",
       "extra": "Extra",
       "stats": "Estatísticas",
-      "timeline": "Cronologia"
+      "timeline": "Cronologia",
+      "information": "Informações"
     },
     "loading": "A carregar…",
     "error": "Falha ao carregar a lista de chamadas.",
@@ -99,7 +101,9 @@
       "todo": "Por fazer",
       "contacted": "Contactado",
       "answered": "Respondido",
-      "skipped": "Ignorado"
+      "skipped": "Ignorado",
+      "saveFailed": "Falha ao salvar. Tente novamente.",
+      "ownerSaveFailed": "Falha ao alterar o proprietário. Tente novamente."
     },
     "action": {
       "contacted": "Marcar como contactado",
@@ -162,6 +166,13 @@
         "one": "Uma pessoa com esta função"
       },
       "assignAllMatching": "Atribuir todos nesta seleção ({{count}})"
+    },
+    "fields": {
+      "name": "Nome",
+      "channel": "Canal",
+      "pool": "Pool de origem",
+      "createdAt": "Criado",
+      "saveFailed": "Falha ao salvar. Tente novamente."
     }
   },
   "changelog": {

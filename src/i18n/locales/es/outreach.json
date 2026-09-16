@@ -70,7 +70,8 @@
     "poolHint": "Elige una bolsa de talento para llenar la lista con candidatos de inmediato.",
     "submit": "Crear lista",
     "saving": "Creando…",
-    "error": "Error al crear. Inténtalo de nuevo."
+    "error": "Error al crear. Inténtalo de nuevo.",
+    "poolsLoadError": "No se pudieron cargar los pools de talento."
   },
   "page": {
     "searchPlaceholder": "Buscar lista de llamadas, pool o candidato…"
@@ -89,7 +90,8 @@
       "targets": "Lista de llamadas",
       "extra": "Extra",
       "stats": "Estadísticas",
-      "timeline": "Cronología"
+      "timeline": "Cronología",
+      "information": "Información"
     },
     "loading": "Cargando…",
     "error": "No se pudo cargar la lista de llamadas.",
@@ -99,7 +101,9 @@
       "todo": "Pendiente",
       "contacted": "Contactado",
       "answered": "Respondido",
-      "skipped": "Omitido"
+      "skipped": "Omitido",
+      "saveFailed": "El guardado falló. Inténtalo de nuevo.",
+      "ownerSaveFailed": "Cambiar el propietario falló. Inténtalo de nuevo."
     },
     "action": {
       "contacted": "Marcar contactado",
@@ -162,6 +166,13 @@
         "one": "Una persona con este rol"
       },
       "assignAllMatching": "Asignar todo en esta selección ({{count}})"
+    },
+    "fields": {
+      "name": "Nombre",
+      "channel": "Canal",
+      "pool": "Pool de origen",
+      "createdAt": "Creado",
+      "saveFailed": "El guardado falló. Inténtalo de nuevo."
     }
   },
   "changelog": {

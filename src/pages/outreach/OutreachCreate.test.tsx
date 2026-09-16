@@ -46,15 +46,47 @@ describe('OutreachCreate · shared wide-form frame', () => {
     expect(document.querySelector('select')).toBeNull()
   })
 
-  it('channel is a searchable CreatableSelect listing the fixed enum values', async () => {
+  // TITELBALK-PILLS (27-08): the fixed three-value channel enum moved from a
+  // body dropdown into the title-bar pill row (mirrors AddTaskModal).
+  it('shows the channel as a title-bar pill row, all three values visible with no dropdown to open', async () => {
+    render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
+    expect(await screen.findByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByRole('group', { name: 'create.channel' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'channel.call' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'channel.email' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'channel.whatsapp' })).toBeInTheDocument()
+  })
+
+  it('picking a pill updates the create payload channel', async () => {
     const user = userEvent.setup()
     render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
-    // FieldRow (§3A label-left canon) names the trigger after its field label
-    // ("create.channel"), not its current value — the searchable picker itself
-    // is unchanged, opening it still reveals the other two channel options.
-    await user.click(screen.getByRole('button', { name: 'create.channel' }))
-    expect(await screen.findByRole('button', { name: 'channel.email' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'channel.whatsapp' })).toBeInTheDocument()
+    await user.click(await screen.findByRole('button', { name: 'channel.whatsapp' }))
+    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Bellijst West')
+    await user.click(screen.getByRole('button', { name: 'create.submit' }))
+    await waitFor(() => expect(createCampaign).toHaveBeenCalledWith({ name: 'Bellijst West', channel: 'whatsapp' }))
+  })
+})
+
+// D8: a failed /pools load must never render as a healthy, empty picker.
+describe('OutreachCreate · pools load failure (D8)', () => {
+  it('shows an honest error with retry instead of a silently empty pool picker', async () => {
+    const api = (await import('@/lib/api')).default
+    vi.mocked(api.get).mockRejectedValueOnce(new Error('500'))
+    render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
+    expect(await screen.findByText('create.poolsLoadError')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'create.pool' })).toBeNull()
+  })
+
+  it('retries the /pools load and shows the picker once it succeeds', async () => {
+    const user = userEvent.setup()
+    const api = (await import('@/lib/api')).default
+    vi.mocked(api.get)
+      .mockRejectedValueOnce(new Error('500'))
+      .mockResolvedValueOnce({ data: [{ id: 'p1', name: 'Zorgpool Noord' }] })
+    render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
+    await screen.findByText('create.poolsLoadError')
+    await user.click(screen.getByRole('button', { name: /retry|opnieuw/i }))
+    expect(await screen.findByRole('button', { name: 'create.pool' })).toBeInTheDocument()
   })
 })
 

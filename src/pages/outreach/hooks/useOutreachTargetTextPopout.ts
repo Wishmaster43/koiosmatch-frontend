@@ -36,11 +36,18 @@ export function useOutreachTargetTextLite(campaignId: string | undefined, target
   const [error, setError] = useState(false)
 
   // Fetch the campaign detail and pick out this one target row (see file doc for why).
+  // §9: `alive` is a RUN-LOCAL flag (mirrors useOutreachDetail.ts's own `let alive`),
+  // not a shared ref — on a campaignId/targetId switch the effect's cleanup below
+  // fires before its new setup, so a shared ref would already read `false` when the
+  // PREVIOUS run's still-in-flight promise resolves, letting a stale response through
+  // undetected. Each call captures its own flag and only that run's cleanup flips it.
   const load = useCallback(() => {
-    if (!campaignId || !targetId) { setLoading(false); return }
+    if (!campaignId || !targetId) { setLoading(false); return () => {} }
+    let alive = true
     setLoading(true); setError(false)
     getCampaign(campaignId)
       .then(raw => {
+        if (!alive) return
         const campaign = raw as CampaignDetail
         const row = (campaign.targets ?? []).find(t => String(t.id) === targetId)
         if (!row) { setError(true); return }
@@ -48,13 +55,21 @@ export function useOutreachTargetTextLite(campaignId: string | undefined, target
           ?? ([row.candidate?.first_name, row.candidate?.last_name].filter(Boolean).join(' ') || '?')
         setTarget({ id: targetId, campaignId, candidateName: name, note: row.note ?? '' })
       })
-      .catch(() => setError(true))
-      .finally(() => setLoading(false))
+      .catch(() => { if (alive) setError(true) })
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
   }, [campaignId, targetId])
 
-  // Load once on mount (and whenever the campaign/target id pair changes).
-  useEffect(() => { load() }, [load])
-  return { target, loading, error, reload: load }
+  // Load once on mount and on every campaign/target id change; the returned
+  // cleanup cancels only THIS run's flag, never a shared one (see `load` doc).
+  useEffect(() => {
+    const cancel = load()
+    return cancel
+  }, [load])
+
+  // Manual retry (e.g. an ErrorBanner) — fire-and-forget; its own run manages its own flag.
+  const reload = useCallback(() => { load() }, [load])
+  return { target, loading, error, reload }
 }
 
 // Standalone PATCH /outreach-targets/{id} — the SAME route/body TargetsTab's

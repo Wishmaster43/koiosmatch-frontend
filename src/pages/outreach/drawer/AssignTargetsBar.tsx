@@ -95,10 +95,10 @@ export default function AssignTargetsBar({ selection, count, recruiters, onAssig
         <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-primary-text)' }}>
           {t('drawer.assign.selected', { count })}
         </span>
-        <button onClick={onDone} disabled={saving}
-          style={{ fontSize: 11, background: 'none', border: 'none', cursor: saving ? 'not-allowed' : 'pointer', color: 'var(--text-muted)' }}>
+        {/* HUISSTIJL-1: every action is Button — was a hand-styled raw <button>. */}
+        <Button variant="ghost" size="sm" onClick={onDone} disabled={saving}>
           {t('common:cancel')}
-        </button>
+        </Button>
       </div>
 
       <SegmentedControl size="compact" ariaLabel={t('drawer.assign.axisLabel')}

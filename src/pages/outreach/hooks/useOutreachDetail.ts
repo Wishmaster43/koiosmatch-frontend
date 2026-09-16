@@ -11,6 +11,8 @@
  */
 import { useState, useEffect, useCallback } from 'react'
 import { getCampaign, updateCampaign, updateTarget, assignTargets as assignTargetsApi } from '../data/outreachApi'
+import { notifyError } from '@/lib/notify'
+import { useTranslation } from 'react-i18next'
 import type { Campaign } from './useOutreachCampaigns'
 import type { TargetSelection, AssigneeAxes } from '../data/outreachApi'
 
@@ -43,11 +45,14 @@ export interface CampaignDetail extends Campaign { targets?: OutreachTarget[] }
 // or without one as a "list is stale" signal (target status/outcome/notes/
 // assignments change server-computed counts the drawer cannot derive).
 export function useOutreachDetail(id: string | null, onMutated?: (delta?: { owner?: { id: string; name: string } | null }) => void) {
+  const { t } = useTranslation('outreach')
   const [detail,  setDetail]  = useState<CampaignDetail | null>(null)
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState(false)
+  const [reloadToken, setReloadToken] = useState(0)
 
   // Load the campaign + its targets whenever the drawer opens on a new id.
+  // Exposed as `reload` (below) so a failed/stale load can be retried from the UI.
   useEffect(() => {
     if (!id) { setDetail(null); return }
     let alive = true
@@ -57,7 +62,10 @@ export function useOutreachDetail(id: string | null, onMutated?: (delta?: { owne
       .catch(() => { if (alive) setError(true) })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
-  }, [id])
+  }, [id, reloadToken])
+
+  // Bump this to re-run the load effect above — the ErrorBanner/Information-tab retry path.
+  const reload = useCallback(() => setReloadToken(n => n + 1), [])
 
   // Check off / update one target — optimistic, revert on failure.
   const setTargetStatus = useCallback(async (targetId: string, status: string) => {
@@ -67,8 +75,8 @@ export function useOutreachDetail(id: string | null, onMutated?: (delta?: { owne
       return d ? { ...d, targets: (d.targets ?? []).map(t => t.id === targetId ? { ...t, status } : t) } : d
     })
     try { await updateTarget(targetId, { status }); onMutated?.() }
-    catch { setDetail(d => (d && prev ? { ...d, targets: prev } : d)) }
-  }, [onMutated])
+    catch { setDetail(d => (d && prev ? { ...d, targets: prev } : d)); notifyError(t('drawer.target.saveFailed')) }
+  }, [onMutated, t])
 
   // Record the call OUTCOME for one target (OUTREACH-2) — optimistic, revert on failure
   // (the PATCH 422s until the backend ships the `outcome` column; the UI stays honest).
@@ -79,8 +87,8 @@ export function useOutreachDetail(id: string | null, onMutated?: (delta?: { owne
       return d ? { ...d, targets: (d.targets ?? []).map(t => t.id === targetId ? { ...t, outcome } : t) } : d
     })
     try { await updateTarget(targetId, { outcome }); onMutated?.() }
-    catch { setDetail(d => (d && prev ? { ...d, targets: prev } : d)) }
-  }, [onMutated])
+    catch { setDetail(d => (d && prev ? { ...d, targets: prev } : d)); notifyError(t('drawer.target.saveFailed')) }
+  }, [onMutated, t])
 
   // Save a target's per-candidate note (G30, max:2000 plain string on the backend —
   // no rich-text storage, so no optimistic-revert is needed beyond the same pattern
@@ -127,8 +135,20 @@ export function useOutreachDetail(id: string | null, onMutated?: (delta?: { owne
       return d ? { ...d, owner } : d
     })
     try { await updateCampaign(campaignId, { owner_id: owner?.id ?? null }); onMutated?.({ owner }) }
-    catch { setDetail(d => (d ? { ...d, owner: prev ?? null } : d)) }
-  }, [onMutated])
+    catch { setDetail(d => (d ? { ...d, owner: prev ?? null } : d)); notifyError(t('drawer.target.ownerSaveFailed')) }
+  }, [onMutated, t])
+
+  // Save the Information tab's own fields (name/channel) — optimistic, revert on
+  // failure (mirrors setOwner; DRILLDOWN-VOLGORDE-CANON's information card).
+  const setFields = useCallback(async (campaignId: string, patch: Partial<Pick<CampaignDetail, 'name' | 'channel'>>) => {
+    let prev: Partial<CampaignDetail> | undefined
+    setDetail(d => {
+      prev = d ? { name: d.name, channel: d.channel } : undefined
+      return d ? { ...d, ...patch } : d
+    })
+    try { await updateCampaign(campaignId, patch); onMutated?.() }
+    catch { setDetail(d => (d && prev ? { ...d, ...prev } : d)); notifyError(t('drawer.fields.saveFailed')) }
+  }, [onMutated, t])
 
   // Save the Extra tab's tenant custom fields (§3B) — optimistic, merges the partial
   // patch into the full map so the backend persists it whole; reverts on failure.
@@ -143,5 +163,5 @@ export function useOutreachDetail(id: string | null, onMutated?: (delta?: { owne
     catch { setDetail(d => (d ? { ...d, custom_fields: prev } : d)) }
   }, [detail, onMutated])
 
-  return { detail, loading, error, setTargetStatus, setTargetOutcome, setTargetNote, applyTargetNote, assignTargets, setOwner, setCustomFields }
+  return { detail, loading, error, reload, setTargetStatus, setTargetOutcome, setTargetNote, applyTargetNote, assignTargets, setOwner, setCustomFields, setFields }
 }

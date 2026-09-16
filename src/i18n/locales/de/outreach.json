@@ -70,7 +70,8 @@
     "poolHint": "Wählen Sie einen Talentpool, um die Anrufliste sofort mit Kandidaten zu füllen.",
     "submit": "Anrufliste erstellen",
     "saving": "Wird erstellt…",
-    "error": "Erstellung fehlgeschlagen. Bitte erneut versuchen."
+    "error": "Erstellung fehlgeschlagen. Bitte erneut versuchen.",
+    "poolsLoadError": "Talentpools konnten nicht geladen werden."
   },
   "page": {
     "searchPlaceholder": "Anrufliste, Pool oder Kandidat suchen…"
@@ -89,7 +90,8 @@
       "targets": "Anrufliste",
       "extra": "Extra",
       "stats": "Statistiken",
-      "timeline": "Verlauf"
+      "timeline": "Verlauf",
+      "information": "Informationen"
     },
     "loading": "Wird geladen…",
     "error": "Anrufliste konnte nicht geladen werden.",
@@ -99,7 +101,9 @@
       "todo": "Offen",
       "contacted": "Kontaktiert",
       "answered": "Beantwortet",
-      "skipped": "Übersprungen"
+      "skipped": "Übersprungen",
+      "saveFailed": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+      "ownerSaveFailed": "Eigentümer ändern fehlgeschlagen. Bitte erneut versuchen."
     },
     "action": {
       "contacted": "Als kontaktiert markieren",
@@ -162,6 +166,13 @@
         "one": "Eine Person mit dieser Rolle"
       },
       "assignAllMatching": "Alle in dieser Auswahl zuweisen ({{count}})"
+    },
+    "fields": {
+      "name": "Name",
+      "channel": "Kanal",
+      "pool": "Quellpool",
+      "createdAt": "Erstellt",
+      "saveFailed": "Speichern fehlgeschlagen. Bitte erneut versuchen."
     }
   },
   "changelog": {

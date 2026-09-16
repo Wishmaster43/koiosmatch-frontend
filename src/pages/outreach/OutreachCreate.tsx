@@ -28,11 +28,15 @@ import { createCampaign } from './data/outreachApi'
 import type { Campaign } from './hooks/useOutreachCampaigns'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { WIDE_MODAL_PANEL_SIZE } from '@/components/ui/wideModalPanelSize'
-import { cardHead, cardBox, row2, cardPair } from '@/components/ui/modalCards'
+import { cardHead, cardBox, cardPair } from '@/components/ui/modalCards'
 import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import ModalFooter from '@/components/ui/ModalFooter'
 import { Caption } from '@/components/ui/typography'
+import ErrorBanner from '@/components/ui/ErrorBanner'
+import TitleBarPills from '@/components/ui/TitleBarPills'
+import ModalTitleBarPillsRow from '@/components/forms/ModalTitleBarPillsRow'
+import { CHANNEL_META } from './outreachChannelMeta'
 
 // Fixed backend enum (not a tenant lookup) — labels via i18n, values stay literal.
 const CHANNELS = ['call', 'email', 'whatsapp'] as const
@@ -47,13 +51,19 @@ export default function OutreachCreate({ onClose, onCreated }: Props) {
   const [channel, setChannel] = useState<string>('call')
   const [poolId, setPoolId] = useState('')
   const [pools, setPools]   = useState<Pool[]>([])
+  const [poolsError, setPoolsError] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError]   = useState(false)
 
-  // Load talent pools for the optional source picker (shared /pools resource).
-  useEffect(() => {
-    api.get('/pools', { params: { active: 1 } }).then((r) => { const d = r.data; setPools(Array.isArray(d) ? d : (d?.data ?? [])) }).catch(() => {})
-  }, [])
+  // Load talent pools for the optional source picker (shared /pools resource) —
+  // an honest error state, never a silently empty "this tenant has no pools" list.
+  const loadPools = () => {
+    setPoolsError(false)
+    api.get('/pools', { params: { active: 1 } })
+      .then((r) => { const d = r.data; setPools(Array.isArray(d) ? d : (d?.data ?? [])) })
+      .catch(() => setPoolsError(true))
+  }
+  useEffect(() => { loadPools() }, [])
 
   const canSubmit = name.trim().length > 0
 
@@ -81,40 +91,46 @@ export default function OutreachCreate({ onClose, onCreated }: Props) {
   const poolOptions = [{ value: '', label: t('create.poolNone') }, ...pools.map((p) => ({ value: p.id, label: p.name }))]
 
   return (
-    <FloatingPanel open onClose={onClose} ariaLabel={title} title={title}
+    <FloatingPanel open onClose={onClose} ariaLabel={title}
       persistKey="outreach-create" scrollBody={false}
-      {...WIDE_MODAL_PANEL_SIZE}>
+      {...WIDE_MODAL_PANEL_SIZE}
+      header={
+        // TITELBALK-PILLS (Danny 27-08): the channel is a short, colour-carrying
+        // three-value enum — the exact shape the canon puts in the title bar,
+        // mirroring AddTaskModal's activity-type pills. Required field, so no
+        // `clearable`: the active pill always stays picked.
+        <ModalTitleBarPillsRow title={title}>
+          <TitleBarPills
+            options={CHANNELS.map((c) => ({ value: c, label: t(`channel.${c}`), color: CHANNEL_META[c].color }))}
+            value={channel} onChange={setChannel} ariaLabel={t('create.channel')} />
+        </ModalTitleBarPillsRow>
+      }>
       <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {/* Two titled cards side by side: Algemeen (name + channel) and Bron
-            (optional pool) — the shared cardPair grid (§11), not a stack
-            of lonely inputs. */}
+        {/* Two titled cards side by side: Algemeen (name) and Bron (optional pool)
+            — the shared cardPair grid (§11), not a stack of lonely inputs. */}
         <div style={cardPair}>
           <div>
             <div style={cardHead}>{t('create.generalCard')}</div>
             <div style={cardBox}>
-              <div style={row2}>
-                <FieldRow label={t('create.name')} required>
-                  {/* Enter-to-submit (restored SPLITS-R2 regression): the old bare input
-                      had this before the FieldRow/TextField conversion. */}
-                  <TextField value={name} onChange={setName} placeholder={t('create.namePlaceholder')}
-                    onKeyDown={e => e.key === 'Enter' && submit()} />
-                </FieldRow>
-                <FieldRow label={t('create.channel')}>
-                  {/* Searchable picker (Danny 27-07) — same fixed enum values, only
-                      the affordance changes from a bare <select>. */}
-                  <CreatableSelect value={channel} onChange={setChannel} allowCreate={false}
-                    options={CHANNELS.map((c) => ({ value: c, label: t(`channel.${c}`) }))} />
-                </FieldRow>
-              </div>
+              <FieldRow label={t('create.name')} required>
+                {/* Enter-to-submit (restored SPLITS-R2 regression): the old bare input
+                    had this before the FieldRow/TextField conversion. */}
+                <TextField value={name} onChange={setName} placeholder={t('create.namePlaceholder')}
+                  onKeyDown={e => e.key === 'Enter' && submit()} />
+              </FieldRow>
             </div>
           </div>
 
           <div>
             <div style={cardHead}>{t('create.sourceCard')}</div>
             <div style={cardBox}>
-              <FieldRow label={t('create.pool')}>
-                <CreatableSelect value={poolId} onChange={setPoolId} allowCreate={false} options={poolOptions} />
-              </FieldRow>
+              {poolsError ? (
+                <ErrorBanner variant="subtle" onRetry={loadPools}>{t('create.poolsLoadError')}</ErrorBanner>
+              ) : (
+                <FieldRow label={t('create.pool')}>
+                  <CreatableSelect value={poolId} onChange={setPoolId} allowCreate={false} options={poolOptions} />
+                </FieldRow>
+              )}
               {/* Caption atom (§4 typography) — was an inline 11px muted <p>. */}
               <Caption as="p" style={{ margin: 0 }}>{t('create.poolHint')}</Caption>
             </div>

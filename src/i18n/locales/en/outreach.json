@@ -70,7 +70,8 @@
     "poolHint": "Pick a talent pool to seed the call list with candidates right away.",
     "submit": "Create call list",
     "saving": "Creating…",
-    "error": "Creating failed. Please try again."
+    "error": "Creating failed. Please try again.",
+    "poolsLoadError": "Loading talent pools failed."
   },
   "page": {
     "searchPlaceholder": "Search call list, pool or candidate…"
@@ -89,7 +90,8 @@
       "targets": "Call list",
       "extra": "Extra",
       "stats": "Stats",
-      "timeline": "Timeline"
+      "timeline": "Timeline",
+      "information": "Information"
     },
     "loading": "Loading…",
     "error": "Failed to load the call list.",
@@ -99,7 +101,9 @@
       "todo": "To do",
       "contacted": "Contacted",
       "answered": "Answered",
-      "skipped": "Skipped"
+      "skipped": "Skipped",
+      "saveFailed": "Saving failed. Please try again.",
+      "ownerSaveFailed": "Changing the owner failed. Please try again."
     },
     "action": {
       "contacted": "Mark contacted",
@@ -162,6 +166,13 @@
         "one": "One person with this role"
       },
       "assignAllMatching": "Assign everyone in this selection ({{count}})"
+    },
+    "fields": {
+      "name": "Name",
+      "channel": "Channel",
+      "pool": "Source pool",
+      "createdAt": "Created",
+      "saveFailed": "Saving failed. Please try again."
     }
   },
   "changelog": {
