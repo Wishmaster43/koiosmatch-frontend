@@ -21,6 +21,9 @@ export interface SchemaField {
   format?: string
   // CATALOG-GROUPS-1: the block this field renders in.
   group?: string
+  // O23 UNIT-NAAST-BEDRAG-1: a select that renders inline right of the number field
+  // it names, never as its own row — the value is that field's key.
+  unitOf?: string
 }
 
 // One titled block on the screen (CATALOG-GROUPS-1): slug, label key and lucide icon name.

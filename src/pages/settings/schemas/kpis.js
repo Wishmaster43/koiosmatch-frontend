@@ -5,12 +5,17 @@
  * `kpis.fields.<key>` i18n; each sub-tab's title comes from `titleI18n`.
  * Add a KPI = add a line to the right category + its i18n strings.
  */
+// O23 UNIT-NAAST-BEDRAG-1: the unit picker that renders inline right of a
+// time-window amount field, built once and adopted by every schema below.
+import { unitFieldFor } from '../components/windowUnitOptions'
+
 const base = { i18nKey: 'kpis' }
 
 // Shared "no-contact alert" block — a months threshold + a never-contacted toggle.
 // Feeds the dashboard stale/never KPIs so the 6-month rule is tenant-configurable.
 const noContactAlert = [
   { key: 'no_contact_alert_months', type: 'number', default: 6, min: 1, max: 60 },
+  unitFieldFor('no_contact_alert_months', 'windows', 'months'),
   { key: 'never_contacted_alert', type: 'toggle', default: true },
 ]
 
@@ -29,10 +34,12 @@ export const kpisCandidates = {
     // Active-conversation window (CONV-DRILLDOWN-FE): drives the drawer's
     // is_active badge AND the "actieve gesprekken" KPI (same server derivation).
     { key: 'conversation_active_weeks', type: 'number', default: 4, min: 1, max: 52 },
+    unitFieldFor('conversation_active_weeks', 'windows', 'weeks'),
     // No-followup window (walkthrough 21-08): workdays without an open task,
     // appointment or contact before the "geen opvolging" KPI counts a candidate —
     // server-derived (default 5, clamped 1-60); this is its one settings surface.
     { key: 'candidate_no_followup_workdays', type: 'number', default: 5, min: 1, max: 60 },
+    unitFieldFor('candidate_no_followup_workdays', 'windows', 'workdays'),
     ...noContactAlert,
   ],
 }
@@ -107,7 +114,9 @@ export const kpisOpportunities = {
   fields: [
     // Default aligns with OpportunityStaleWindow::DEFAULT_DAYS (backend).
     { key: 'opportunity_stale_days', type: 'number', default: 14, min: 1, max: 365 },
+    unitFieldFor('opportunity_stale_days', 'windows'),
     { key: 'opportunity_closing_soon_days', type: 'number', default: 14, min: 1, max: 365 },
+    unitFieldFor('opportunity_closing_soon_days', 'windows'),
   ],
 }
 
@@ -120,5 +129,6 @@ export const kpisVacancies = {
   ...base, titleI18n: 'nav.kpis_vacancies', subtitleI18n: 'kpis.vacanciesSubtitle',
   fields: [
     { key: 'vacancy_closing_soon_days', type: 'number', default: 7, min: 1, max: 365 },
+    unitFieldFor('vacancy_closing_soon_days', 'windows'),
   ],
 }

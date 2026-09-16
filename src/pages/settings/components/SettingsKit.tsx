@@ -225,12 +225,17 @@ interface SelectFieldProps {
   options: SelectOption[]
   ariaLabel?: string
   disabled?: boolean
+  // DROPDOWN-CLEAR-1 default is on; a field whose value must never be empty
+  // (a required select that always persists) passes clearable={false} with a
+  // written reason directly above the call site.
+  clearable?: boolean
 }
-export function SelectField({ value, onChange, options, ariaLabel, disabled = false }: SelectFieldProps) {
+export function SelectField({ value, onChange, options, ariaLabel, disabled = false, clearable = true }: SelectFieldProps) {
   const current = options.find(o => o.value === value)
   return (
     <SearchSelect
       closeOnToggle
+      clearable={clearable}
       options={options}
       selected={[value]}
       onToggle={next => { if (next !== value) onChange(next) }}

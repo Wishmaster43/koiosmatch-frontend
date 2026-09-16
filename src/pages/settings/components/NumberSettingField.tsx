@@ -36,10 +36,14 @@ export interface NumberSettingFieldProps {
   bordered?: boolean
   // Layout-only overrides from the call site (e.g. flexShrink in a flex column).
   style?: CSSProperties
+  // O23 UNIT-NAAST-BEDRAG-1: an optional companion control (a unit picker) rendered
+  // inline right of the number input — this screen's own honest equivalent of the
+  // SchemaSection/RetentionSettings pairing, since this field persists independently.
+  unit?: import('react').ReactNode
 }
 
 export default function NumberSettingField({
-  id, settingsKey, title, hint, label, saveFailedMessage, defaultValue, min, max, bordered = true, style,
+  id, settingsKey, title, hint, label, saveFailedMessage, defaultValue, min, max, bordered = true, style, unit,
 }: NumberSettingFieldProps) {
   const settings = useAllSettings()
   const loaded = useSettingsLoaded()
@@ -78,12 +82,15 @@ export default function NumberSettingField({
       <Caption as="label" htmlFor={id} style={{ display: 'block', marginBottom: 4 }}>
         {label}
       </Caption>
-      <input id={id} type="number" min={min} max={max}
-        value={value} disabled={!loaded}
-        onChange={e => setDraft(Number(e.target.value))}
-        onBlur={e => commit(Number(e.target.value))}
-        style={{ width: 100, height: 32, padding: '0 8px', borderRadius: 6, border: '1px solid var(--border)',
-          background: 'var(--surface)', color: 'var(--text)', fontSize: 12 }} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <input id={id} type="number" min={min} max={max}
+          value={value} disabled={!loaded}
+          onChange={e => setDraft(Number(e.target.value))}
+          onBlur={e => commit(Number(e.target.value))}
+          style={{ width: 100, height: 32, padding: '0 8px', borderRadius: 6, border: '1px solid var(--border)',
+            background: 'var(--surface)', color: 'var(--text)', fontSize: 12 }} />
+        {unit}
+      </div>
     </div>
   )
 }

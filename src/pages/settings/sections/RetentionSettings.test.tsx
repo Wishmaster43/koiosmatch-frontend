@@ -82,6 +82,7 @@ describe('RetentionSettings — save', () => {
       retention_months_never_placed: '36', retention_months_ever_placed: '60', retention_consent_months: '24',
       retention_contact_months: '36', retention_warning_days: '30', retention_escalation_days: '14',
       deletion_grace_days: '30',
+      retention_warning_days_unit: 'days', retention_escalation_days_unit: 'days', deletion_grace_days_unit: 'days',
     }))
   })
 
@@ -98,6 +99,7 @@ describe('RetentionSettings — save', () => {
       retention_months_never_placed: '12', retention_months_ever_placed: '60', retention_consent_months: '0',
       retention_contact_months: '36', retention_warning_days: '30', retention_escalation_days: '14',
       deletion_grace_days: '30',
+      retention_warning_days_unit: 'days', retention_escalation_days_unit: 'days', deletion_grace_days_unit: 'days',
     }))
   })
 
@@ -116,7 +118,18 @@ describe('RetentionSettings — save', () => {
       retention_months_never_placed: '12', retention_months_ever_placed: '60', retention_consent_months: '24',
       retention_contact_months: '36', retention_warning_days: '30', retention_escalation_days: '14',
       deletion_grace_days: '45',
+      retention_warning_days_unit: 'days', retention_escalation_days_unit: 'days', deletion_grace_days_unit: 'days',
     }))
+  })
+
+  // O23 UNIT-NAAST-BEDRAG-1: the unit pickers render inline right of their amount,
+  // named by their own label, and their chosen value posts alongside the amount.
+  it('renders the three window-unit pickers named by their own label', async () => {
+    render(<RetentionSettings />)
+    await screen.findByDisplayValue('12')
+    expect(screen.getByRole('button', { name: t('settings.retention.retention_warning_days_unit.label') })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: t('settings.retention.retention_escalation_days_unit.label') })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: t('settings.retention.deletion_grace_days_unit.label') })).toBeInTheDocument()
   })
 })
 

@@ -28,10 +28,15 @@ import { useTranslation } from 'react-i18next'
 import { PageTitle } from '@/components/ui/typography'
 import NumberSettingField from '../components/NumberSettingField'
 import SettingsLoadBanner from '../components/SettingsLoadBanner'
+import { SelectField } from '../components/SettingsKit'
+import { WINDOW_UNIT_OPTIONS } from '../components/windowUnitOptions'
+import { useAllSettings, useSettingsLoaded, saveSettingsKeys, invalidateAllSettingsCache, getStringSetting } from '@/lib/settings/useAllSettings'
 
 // Tenant-setting keys — the generic /settings key/value store. Defaults mirror
 // the fallback numbers vacancyAdvice.ts/matchAdvice.ts's callers already use.
 export const VACANCY_ADVICE_STALE_DAYS_KEY = 'vacancy_advice_stale_days'
+// O23 UNIT-NAAST-BEDRAG-1: the unit vacancy_advice_stale_days is expressed in.
+export const VACANCY_ADVICE_STALE_DAYS_UNIT_KEY = 'vacancy_advice_stale_days_unit'
 export const MATCH_ADVICE_RENEW_DAYS_KEY = 'match_advice_renew_days'
 export const APPLICATION_STAGE_STALE_DAYS_KEY = 'application_stage_stale_days'
 const VACANCY_STALE_DEFAULT = 14
@@ -39,6 +44,33 @@ const MATCH_RENEW_DEFAULT = 30
 const APPLICATION_STAGE_STALE_DEFAULT = 14
 const DAYS_MIN = 1
 const DAYS_MAX = 365
+
+// O23 UNIT-NAAST-BEDRAG-1: the vacancy-advice-stale unit picker — this screen persists
+// independently of useSettingsForm (STALE-INIT-1), so it writes through the same
+// generic /settings store its own NumberSettingField already uses, rather than
+// borrowing a form the screen does not have.
+function VacancyAdviceStaleUnitField() {
+  const { t } = useTranslation('settings')
+  const settings = useAllSettings()
+  const loaded = useSettingsLoaded()
+  const value = getStringSetting(settings, VACANCY_ADVICE_STALE_DAYS_UNIT_KEY, 'days') ?? 'days'
+  const options = WINDOW_UNIT_OPTIONS.map(o => ({ value: o.value, label: t(o.label) }))
+  const onChange = async (v: string) => {
+    if (!loaded) return
+    try {
+      await saveSettingsKeys({ [VACANCY_ADVICE_STALE_DAYS_UNIT_KEY]: v })
+      invalidateAllSettingsCache()
+    } catch {
+      // Silent revert: the SelectField re-reads `value` from the settings cache,
+      // which stays at its last-confirmed value on a failed write.
+    }
+  }
+  return (
+    // DROPDOWN-CLEAR-1: this unit pairs with a required amount and must never persist empty.
+    <SelectField value={value} onChange={onChange} options={options}
+      ariaLabel={t('settings.windows.vacancy_advice_stale_days_unit.label')} disabled={!loaded} clearable={false} />
+  )
+}
 
 /** Koios advice thresholds — vacancy staleness, match renewal, application stage staleness. */
 export default function KoiosAdviceSettings() {
@@ -55,7 +87,8 @@ export default function KoiosAdviceSettings() {
       <NumberSettingField id="vacancy-advice-stale-days" settingsKey={VACANCY_ADVICE_STALE_DAYS_KEY}
         title={t('koiosAdvice.vacancyStaleTitle')} hint={t('koiosAdvice.vacancyStaleHint')}
         label={t('koiosAdvice.vacancyStaleLabel')} saveFailedMessage={t('koiosAdvice.vacancyStaleSaveFailed')}
-        defaultValue={VACANCY_STALE_DEFAULT} min={DAYS_MIN} max={DAYS_MAX} />
+        defaultValue={VACANCY_STALE_DEFAULT} min={DAYS_MIN} max={DAYS_MAX}
+        unit={<VacancyAdviceStaleUnitField />} />
       {/* How many days before (or past) a match's end date counts as "approaching"
           (MatchesTable.tsx's Koios column, "Renew?"). */}
       <NumberSettingField id="match-advice-renew-days" settingsKey={MATCH_ADVICE_RENEW_DAYS_KEY}

@@ -17,6 +17,7 @@ import i18n from '@/i18n'
 import api from '@/lib/api'
 import SchemaSection from '../components/SchemaSection'
 import type { Schema } from '../components/SchemaSection'
+import { WINDOW_UNIT_OPTIONS } from '../components/windowUnitOptions'
 import {
   kpisCandidates as kpisCandidatesRaw,
   kpisApplications as kpisApplicationsRaw,
@@ -57,16 +58,22 @@ beforeEach(() => {
 // Field shape + defaults pinned as data — exactly the two backend-confirmed
 // keys, number 1..365, nothing more/less.
 describe('kpisOpportunities / kpisVacancies — field shape pinned', () => {
-  it('kpisOpportunities carries the two pipeline thresholds, number 1..365', () => {
+  it('kpisOpportunities carries the two pipeline thresholds, number 1..365, each with an inline unit companion', () => {
     expect(kpisOpportunities.fields).toEqual([
       { key: 'opportunity_stale_days', type: 'number', default: 14, min: 1, max: 365 },
+      { key: 'opportunity_stale_days_unit', type: 'select', unitOf: 'opportunity_stale_days', default: 'days',
+        options: WINDOW_UNIT_OPTIONS, labelKey: 'settings.windows.opportunity_stale_days_unit.label' },
       { key: 'opportunity_closing_soon_days', type: 'number', default: 14, min: 1, max: 365 },
+      { key: 'opportunity_closing_soon_days_unit', type: 'select', unitOf: 'opportunity_closing_soon_days', default: 'days',
+        options: WINDOW_UNIT_OPTIONS, labelKey: 'settings.windows.opportunity_closing_soon_days_unit.label' },
     ])
   })
 
-  it('kpisVacancies carries only the closing-soon threshold, number 1..365 (staleness lives on the Koios-advice screen)', () => {
+  it('kpisVacancies carries only the closing-soon threshold, number 1..365, with its unit companion (staleness lives on the Koios-advice screen)', () => {
     expect(kpisVacancies.fields).toEqual([
       { key: 'vacancy_closing_soon_days', type: 'number', default: 7, min: 1, max: 365 },
+      { key: 'vacancy_closing_soon_days_unit', type: 'select', unitOf: 'vacancy_closing_soon_days', default: 'days',
+        options: WINDOW_UNIT_OPTIONS, labelKey: 'settings.windows.vacancy_closing_soon_days_unit.label' },
     ])
   })
 })
@@ -186,5 +193,35 @@ describe('Dead KPI keys · all removed from schemas', () => {
   it('overdue_warning_threshold is absent from kpisTasks', () => {
     const keys = kpisTasks.fields.map((f) => f.key)
     expect(keys).not.toContain('overdue_warning_threshold')
+  })
+})
+
+// O23 UNIT-NAAST-BEDRAG-1: kpisCandidates' two windows each carry their own inline
+// unit companion, and the shared noContactAlert block's window does too.
+describe('kpisCandidates · window amounts carry an inline unit companion', () => {
+  // `defaultUnit` mirrors the BE catalogue default per amount (weeks/workdays/months rows keep their own unit).
+  const unitField = (amountKey: string, section = 'windows', defaultUnit = 'days') =>
+    ({ key: `${amountKey}_unit`, type: 'select', unitOf: amountKey, default: defaultUnit,
+      options: WINDOW_UNIT_OPTIONS, labelKey: `settings.${section}.${amountKey}_unit.label` })
+
+  it('conversation_active_weeks is immediately followed by its unit field', () => {
+    const keys = kpisCandidates.fields.map((f) => f.key)
+    const i = keys.indexOf('conversation_active_weeks')
+    expect(keys[i + 1]).toBe('conversation_active_weeks_unit')
+    expect(kpisCandidates.fields[i + 1]).toEqual(unitField('conversation_active_weeks', 'windows', 'weeks'))
+  })
+
+  it('candidate_no_followup_workdays is immediately followed by its unit field', () => {
+    const keys = kpisCandidates.fields.map((f) => f.key)
+    const i = keys.indexOf('candidate_no_followup_workdays')
+    expect(keys[i + 1]).toBe('candidate_no_followup_workdays_unit')
+    expect(kpisCandidates.fields[i + 1]).toEqual(unitField('candidate_no_followup_workdays', 'windows', 'workdays'))
+  })
+
+  it('the shared no_contact_alert_months window carries its unit field too', () => {
+    const keys = kpisCandidates.fields.map((f) => f.key)
+    const i = keys.indexOf('no_contact_alert_months')
+    expect(keys[i + 1]).toBe('no_contact_alert_months_unit')
+    expect(kpisCandidates.fields[i + 1]).toEqual(unitField('no_contact_alert_months', 'windows', 'months'))
   })
 })

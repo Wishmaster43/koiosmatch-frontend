@@ -8,6 +8,9 @@
  * itself always keeps each workflow's single most recent run regardless of age,
  * so this field never risks a workflow reading "never ran".
  */
+// O23 UNIT-NAAST-BEDRAG-1: the unit picker rendering inline right of the amount.
+import { unitFieldFor } from '../components/windowUnitOptions'
+
 export default {
   i18nKey: 'workflowRunHistory',
   // Reuse the nav label as the section title (mirrors the kpis.js schemas) —
@@ -15,5 +18,6 @@ export default {
   titleI18n: 'nav.workflow_run_history',
   fields: [
     { key: 'workflow_run_retention_days', type: 'number', default: 31, min: 1, max: 31 },
+    unitFieldFor('workflow_run_retention_days', 'retention'),
   ],
 }

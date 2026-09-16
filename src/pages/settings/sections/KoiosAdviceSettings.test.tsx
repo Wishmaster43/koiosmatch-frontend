@@ -6,10 +6,13 @@
  * failed save. Mirrors WhatsAppLog.test.tsx's ConversationMemoryField coverage.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
-import KoiosAdviceSettings, { VACANCY_ADVICE_STALE_DAYS_KEY, MATCH_ADVICE_RENEW_DAYS_KEY, APPLICATION_STAGE_STALE_DAYS_KEY } from './KoiosAdviceSettings'
+import KoiosAdviceSettings, {
+  VACANCY_ADVICE_STALE_DAYS_KEY, MATCH_ADVICE_RENEW_DAYS_KEY, APPLICATION_STAGE_STALE_DAYS_KEY,
+  VACANCY_ADVICE_STALE_DAYS_UNIT_KEY,
+} from './KoiosAdviceSettings'
 
 const st = (key: string) => i18n.t(key, { ns: 'settings' })
 
@@ -107,6 +110,27 @@ describe('KoiosAdviceSettings — saves on blur', () => {
     await user.tab()
 
     await waitFor(() => expect(saveSettingsKeys).toHaveBeenCalledWith({ [APPLICATION_STAGE_STALE_DAYS_KEY]: 5 }))
+  })
+})
+
+// O23 UNIT-NAAST-BEDRAG-1: the vacancy-stale unit picker renders inline right of
+// the amount, named by its own label, and its chosen value persists on its own key.
+describe('KoiosAdviceSettings — vacancy stale unit picker', () => {
+  it('renders the unit picker named by its own label, defaulting to days', () => {
+    mockSettings.mockReturnValue({})
+    render(<KoiosAdviceSettings />)
+    expect(screen.getByRole('button', { name: st('settings.windows.vacancy_advice_stale_days_unit.label') }))
+      .toHaveTextContent(st('settings.options.window_unit.days'))
+  })
+
+  it('persists a chosen unit under vacancy_advice_stale_days_unit', async () => {
+    mockSettings.mockReturnValue({})
+    const user = userEvent.setup()
+    render(<KoiosAdviceSettings />)
+    await user.click(screen.getByRole('button', { name: st('settings.windows.vacancy_advice_stale_days_unit.label') }))
+    await user.click(await screen.findByText(st('settings.options.window_unit.weeks')))
+
+    await waitFor(() => expect(saveSettingsKeys).toHaveBeenCalledWith({ [VACANCY_ADVICE_STALE_DAYS_UNIT_KEY]: 'weeks' }))
   })
 })
 

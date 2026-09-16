@@ -17,8 +17,15 @@
  */
 import { useTranslation } from 'react-i18next'
 import { useSettingsForm } from '../lib/useSettingsForm'
-import { SettingsScaffold, SettingCardList, SettingRow, NumberField } from '../components/SettingsKit'
+import { SettingsScaffold, SettingCardList, SettingRow, NumberField, SelectField } from '../components/SettingsKit'
+import { WINDOW_UNIT_OPTIONS } from '../components/windowUnitOptions'
 import CatalogSection from './CatalogSection'
+
+// O23 UNIT-NAAST-BEDRAG-1: window-unit options translated for the SelectField shape.
+function useWindowUnitOptions() {
+  const { t } = useTranslation('settings')
+  return WINDOW_UNIT_OPTIONS.map(o => ({ value: o.value, label: t(o.label) }))
+}
 
 // Tenant-wide AVG retention windows editor (see the module doc above): the only screen that edits the policy the backend derives retention_expires_at from.
 export default function RetentionSettings() {
@@ -42,7 +49,13 @@ export default function RetentionSettings() {
     // and days an auto-archived dossier waits before daily escalation to the manager.
     retention_warning_days: 30,
     retention_escalation_days: 14,
+    // O23 UNIT-NAAST-BEDRAG-1: the unit each of the three day-window amounts above
+    // is expressed in — rendered inline right of the amount, never its own row.
+    retention_warning_days_unit: 'days',
+    retention_escalation_days_unit: 'days',
+    deletion_grace_days_unit: 'days',
   })
+  const unitOptions = useWindowUnitOptions()
 
   return (
     <>
@@ -70,24 +83,48 @@ export default function RetentionSettings() {
             onChange={v => form.set('retention_contact_months', v)}
             min={1} max={120} unit={t('retention.unit')} />
         </SettingRow>
-        {/* Days before retention term expires that the "due soon" notification fires. */}
+        {/* Days before retention term expires that the "due soon" notification fires;
+            its unit picker sits inline right of the amount (O23 UNIT-NAAST-BEDRAG-1). */}
         <SettingRow label={t('retention.warningDays.label')} description={t('retention.warningDays.description')}>
-          <NumberField value={form.values.retention_warning_days}
-            onChange={v => form.set('retention_warning_days', v)}
-            min={0} max={365} unit={t('escalation.daysUnit')} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <NumberField value={form.values.retention_warning_days}
+              onChange={v => form.set('retention_warning_days', v)}
+              min={0} max={365} />
+            {/* DROPDOWN-CLEAR-1: this unit pairs with a required amount and must
+                never persist empty. */}
+            <SelectField value={form.values.retention_warning_days_unit}
+              onChange={v => form.set('retention_warning_days_unit', v)}
+              options={unitOptions} ariaLabel={t('settings.retention.retention_warning_days_unit.label')}
+              clearable={false} />
+          </div>
         </SettingRow>
         {/* Days an auto-archived dossier waits before daily escalation to the recruiter_manager role. */}
         <SettingRow label={t('retention.escalationDays.label')} description={t('retention.escalationDays.description')}>
-          <NumberField value={form.values.retention_escalation_days}
-            onChange={v => form.set('retention_escalation_days', v)}
-            min={0} max={365} unit={t('escalation.daysUnit')} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <NumberField value={form.values.retention_escalation_days}
+              onChange={v => form.set('retention_escalation_days', v)}
+              min={0} max={365} />
+            {/* DROPDOWN-CLEAR-1: this unit pairs with a required amount and must
+                never persist empty. */}
+            <SelectField value={form.values.retention_escalation_days_unit}
+              onChange={v => form.set('retention_escalation_days_unit', v)}
+              options={unitOptions} ariaLabel={t('settings.retention.retention_escalation_days_unit.label')}
+              clearable={false} />
+          </div>
         </SettingRow>
-        {/* Trash grace window in DAYS (unit borrowed from escalation.daysUnit — §11:
-            never a fresh label for something already named elsewhere). */}
+        {/* Trash grace window: amount plus its own unit picker (O23 UNIT-NAAST-BEDRAG-1). */}
         <SettingRow label={t('retention.graceDays.label')} description={t('retention.graceDays.description')}>
-          <NumberField value={form.values.deletion_grace_days}
-            onChange={v => form.set('deletion_grace_days', v)}
-            min={7} max={365} unit={t('escalation.daysUnit')} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <NumberField value={form.values.deletion_grace_days}
+              onChange={v => form.set('deletion_grace_days', v)}
+              min={7} max={365} />
+            {/* DROPDOWN-CLEAR-1: this unit pairs with a required amount and must
+                never persist empty. */}
+            <SelectField value={form.values.deletion_grace_days_unit}
+              onChange={v => form.set('deletion_grace_days_unit', v)}
+              options={unitOptions} ariaLabel={t('settings.retention.deletion_grace_days_unit.label')}
+              clearable={false} />
+          </div>
         </SettingRow>
       </SettingCardList>
     </SettingsScaffold>

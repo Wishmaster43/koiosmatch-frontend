@@ -42,6 +42,9 @@ export interface SchemaField {
   group?: string
   labelKey?: string
   helpKey?: string
+  // O23 UNIT-NAAST-BEDRAG-1: a select that renders inline right of the number field
+  // it names (the value here is that field's key), never as its own SettingRow.
+  unitOf?: string
 }
 // One grouped block of fields (CATALOG-GROUPS-1), headed by its own icon + label.
 export interface SchemaGroup { key: string; icon?: string | null; labelKey: string }
@@ -77,8 +80,11 @@ interface FieldControlProps {
   base: string
   label: string
   disabled: boolean
+  // O23: a companion unit picker sits beside this number field — omit the static
+  // unit suffix text then, the picker itself already says the unit.
+  hideUnit?: boolean
 }
-function FieldControl({ field, value, onChange, t, base, label, disabled }: FieldControlProps) {
+function FieldControl({ field, value, onChange, t, base, label, disabled, hideUnit }: FieldControlProps) {
   switch (field.type) {
     case 'toggle':
       // Accessible name (§6): the row's own label text is only visually adjacent,
@@ -89,7 +95,10 @@ function FieldControl({ field, value, onChange, t, base, label, disabled }: Fiel
         typeof opt === 'string'
           ? { value: opt, label: t(`${base}.options.${opt}`, opt) }
           : { value: opt.value, label: t(opt.label, opt.value) })
-      return <SelectField value={String(value)} onChange={onChange} options={options} ariaLabel={label} disabled={disabled} />
+      // DROPDOWN-CLEAR-1: a companion unit field (unitOf) pairs with a required
+      // amount and must never persist empty — non-clearable, unlike a plain select.
+      return <SelectField value={String(value)} onChange={onChange} options={options} ariaLabel={label}
+        disabled={disabled} clearable={!field.unitOf} />
     }
     case 'text':
       return <TextField value={value as string} onChange={onChange} placeholder={optionalT(t, `${base}.placeholder`)} disabled={disabled} />
@@ -110,7 +119,8 @@ function FieldControl({ field, value, onChange, t, base, label, disabled }: Fiel
     default:
       return (
         <NumberField value={value as number} onChange={onChange} ariaLabel={label}
-          min={field.min} max={field.max} step={field.step} unit={optionalT(t, `${base}.unit`)} disabled={disabled} />
+          min={field.min} max={field.max} step={field.step}
+          unit={hideUnit ? undefined : optionalT(t, `${base}.unit`)} disabled={disabled} />
       )
   }
 }
@@ -146,15 +156,28 @@ export default function SchemaSection({ schema, embedded = false }: SchemaSectio
   const gatedForm = canEdit ? { ...form, save: embedded && !form.dirty ? undefined : saveEditable } : { ...form, save: undefined }
 
   // One row per field; the label/help keys come from the field (catalogue rows) or the folder convention.
+  // O23 UNIT-NAAST-BEDRAG-1: a companion unit field (`unitOf` pointing back at this
+  // one) never gets its own row — it renders inline right of the amount instead.
   const renderRow = (field: SchemaField) => {
+    if (field.unitOf) return null
     const base = `${k}.fields.${field.key}`
     const label = t(field.labelKey ?? `${base}.label`)
+    const unitField = schema.fields.find(f => f.unitOf === field.key)
     return (
       <SettingRow key={field.key}
         label={label}
         description={opt(field.helpKey ?? `${base}.help`)}>
-        <FieldControl field={field} value={form.values[field.key]}
-          onChange={v => form.set(field.key, v)} t={t} base={base} label={label} disabled={!canEdit} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <FieldControl field={field} value={form.values[field.key]}
+            onChange={v => form.set(field.key, v)} t={t} base={base} label={label}
+            disabled={!canEdit} hideUnit={!!unitField} />
+          {unitField && (
+            <FieldControl field={unitField} value={form.values[unitField.key]}
+              onChange={v => form.set(unitField.key, v)} t={t} base={`${k}.fields.${unitField.key}`}
+              label={t(unitField.labelKey ?? `${k}.fields.${unitField.key}.label`)}
+              disabled={!canEdit} />
+          )}
+        </div>
       </SettingRow>
     )
   }
