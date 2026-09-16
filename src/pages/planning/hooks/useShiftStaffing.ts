@@ -82,6 +82,30 @@ const mapSchedule = (r: RawSchedule): PlanningScheduleRow => ({
   cancellationReason: r.cancellation_reason,
 })
 
+// ── Standalone assignment call — POST /planning/shifts/{shift}/assignments.
+// Its own hook (not only wrapped inside useShiftStaffingMutations) so a caller
+// that only has a just-created shift id (AddShiftModal, before the drawer's
+// own shiftId-scoped hook applies) can reach the exact same route/body without
+// re-implementing it inline (§10, API calls live in the api/hooks layer).
+// 409 = already on this shift, 422 = the double-booking/availability/blacklist
+// guard (names the clashing shift in its message) — left for the caller to
+// read via extractApiError, never swallowed or generalised here.
+export function useAssignShiftCandidate() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (vars: { shiftId: string; candidateId: string }) => {
+      const res = await api.post(`/planning/shifts/${vars.shiftId}/assignments`, { candidate_id: vars.candidateId })
+      return mapSchedule(unwrap<RawSchedule>(res))
+    },
+    // Refreshes the board (assigned/open counts) and this shift's own
+    // eligible-candidate list, mirroring useShiftStaffingMutations' invalidate.
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['planning', 'board'] })
+      qc.invalidateQueries({ queryKey: ['planning', 'shift-candidates', vars.shiftId] })
+    },
+  })
+}
+
 // ── Mutations. Every one invalidates the board query (assigned/open counts live
 // there) plus this shift's own eligible-candidate list (a newly-assigned or freed
 // candidate must drop out of / back into the pool without a manual refresh). ──
@@ -95,17 +119,18 @@ export function useShiftStaffingMutations(shiftId: string | null) {
     qc.invalidateQueries({ queryKey: ['planning', 'shift-candidates', shiftId] })
   }
 
-  // Assign — POST /planning/shifts/{shift}/assignments. 409 = already on this
-  // shift, 422 = the double-booking/availability/blacklist guard (names the
-  // clashing shift in its message) — both left for the caller to read via
-  // extractApiError, never swallowed or generalised here.
-  const assign = useMutation({
-    mutationFn: async (candidateId: string) => {
-      const res = await api.post(`/planning/shifts/${shiftId}/assignments`, { candidate_id: candidateId })
-      return mapSchedule(unwrap<RawSchedule>(res))
-    },
-    onSuccess: invalidate,
-  })
+  // Assign — delegates to the standalone useAssignShiftCandidate so both
+  // call sites (this drawer-scoped hook and AddShiftModal's create-then-assign
+  // chain) hit exactly one implementation of the route/body. Options (onError/
+  // onSuccess) forwarded through so callers keep their own per-call handlers.
+  const assignMutation = useAssignShiftCandidate()
+  const assign = {
+    ...assignMutation,
+    mutateAsync: (candidateId: string, options?: Parameters<typeof assignMutation.mutateAsync>[1]) =>
+      assignMutation.mutateAsync({ shiftId: shiftId as string, candidateId }, options),
+    mutate: (candidateId: string, options?: Parameters<typeof assignMutation.mutate>[1]) =>
+      assignMutation.mutate({ shiftId: shiftId as string, candidateId }, options),
+  }
 
   // Un-assign — DELETE /planning/schedules/{id} (soft delete, frees the spot).
   const unassign = useMutation({

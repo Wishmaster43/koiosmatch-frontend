@@ -20,6 +20,7 @@ import Button from '@/components/ui/Button'
 import { Caption } from '@/components/ui/typography'
 import { tintBg } from '@/lib/tint'
 import { useDateFormat } from '@/lib/datetime'
+import { useNumberFormat } from '@/lib/formatters'
 import { extractApiError } from '@/lib/extractApiError'
 import { useShiftEligibleCandidates, usePlanningCancellationReasons, useShiftStaffingMutations } from './hooks/useShiftStaffing'
 import type { PlanningBoardShift } from './hooks/usePlanningBoard'
@@ -38,6 +39,9 @@ interface Props { shift: PlanningBoardShift; onClose: () => void }
 export default function ShiftStaffingDrawer({ shift, onClose }: Props) {
   const { t } = useTranslation('planning')
   const { formatDateTime } = useDateFormat()
+  // GETALLEN-1 (Danny 08-09): the server-computed hours figure renders through
+  // the locale-aware formatter, not a raw number, so nl reads "7,5 uur".
+  const { formatNumber } = useNumberFormat()
   const { candidates: eligible, loading: eligibleLoading, error: eligibleError } = useShiftEligibleCandidates(shift.id)
   const { reasons, loading: reasonsLoading } = usePlanningCancellationReasons()
   const { assign, unassign, cancel, checkout } = useShiftStaffingMutations(shift.id)
@@ -125,7 +129,7 @@ export default function ShiftStaffingDrawer({ shift, onClose }: Props) {
 
       {/* ── Assigned roster ── */}
       <div style={{ marginBottom: 18 }}>
-        <div style={cardHead}>{t('staffing.assigned')} ({active.length}/{shift.numberPersons})</div>
+        <div style={cardHead}>{t('staffing.assigned')} ({formatNumber(active.length)}/{formatNumber(shift.numberPersons)})</div>
         <div style={cardBox}>
           {shift.assigned.length === 0 && (
             <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic', padding: '8px 0' }}>{t('staffing.noneAssigned')}</div>
@@ -196,7 +200,7 @@ export default function ShiftStaffingDrawer({ shift, onClose }: Props) {
               {/* Server-computed total after checkout — never a client-side recompute. */}
               {lastCheckout?.scheduleId === a.scheduleId && lastCheckout.hours != null && (
                 <div style={{ fontSize: 12, color: 'var(--color-success-text)', marginTop: 6 }}>
-                  {t('staffing.checkoutSaved', { hours: lastCheckout.hours })}
+                  {t('staffing.checkoutSaved', { hours: formatNumber(lastCheckout.hours, 2) })}
                 </div>
               )}
             </div>

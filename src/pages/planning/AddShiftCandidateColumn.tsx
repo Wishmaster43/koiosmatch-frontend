@@ -4,6 +4,7 @@ import { Search } from 'lucide-react'
 import { CandidateRow } from './AddShiftModalFields'
 import { INPUT } from './addShiftFieldStyles'
 import type { ShiftCandidateOption } from './hooks/useShiftLookups'
+import { GroupLabel } from '@/components/ui/typography'
 
 // Loose translate-function shape (avoids pulling in i18next's full generic TFunction).
 type TFunction = (key: string, opts?: Record<string, unknown>) => string
@@ -30,10 +31,9 @@ export default function AddShiftCandidateColumn({
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '10px 10px' }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.07em',
-          textTransform: 'uppercase', marginBottom: 6 }}>
-          {t('common:nav.candidates')}
-        </div>
+        {/* D9 fix: the group-label identity comes from the shared typography
+            atom (§4), not a locally re-picked fontSize/weight/letterSpacing. */}
+        <GroupLabel as="div" style={{ marginBottom: 6 }}>{t('common:nav.candidates')}</GroupLabel>
 
         {/* Four UI states — no fabricated favourite/distance ranking (see
             ./hooks/useShiftLookups header): just what the search returns. */}

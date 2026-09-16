@@ -12,7 +12,8 @@ import { interactive } from '@/lib/a11y'
 import Button from '@/components/ui/Button'
 import type { Shift } from '@/types/planning'
 import { tintBg, chipInk } from '@/lib/tint'
-import { GroupLabel, Caption, SectionTitle } from '@/components/ui/typography'
+import { GroupLabel, Caption, SectionTitle, PageTitle, BodyText } from '@/components/ui/typography'
+import { useAuth } from '@/context/AuthContext'
 
 // onShiftClick (SHIFT-STAFF-1): opens the real staffing drawer for that one
 // shift — optional so every view keeps working before it's wired everywhere.
@@ -20,7 +21,24 @@ import { GroupLabel, Caption, SectionTitle } from '@/components/ui/typography'
 // not a fresh useLocale() import here, so this purely presentational file stays
 // free of @/lib/datetime's i18n-bootstrap side effect (mirrors MatchModal's
 // mocking precedent: the ONE useDateFormat() call site carries the locale).
-interface ViewProps { current: Date; shifts: Shift[]; today: Date; locale: string; onDayClick: (date: Date) => void; onShiftClick?: (id: Shift['id']) => void }
+// D8 fix (RIGHTS-GATE-OPENERS-1): `onDayClick` is now optional, and each view
+// below gates it locally through its own useCanCreateShift() check (not a prop
+// PlanningPage decides) — PlanningPage's own wiring is unchanged, it always
+// passes the same handler; the permission check lives HERE because a day
+// cell, the empty-state button, the dashed add row and the list header button
+// all reach the same create modal one click later, same idiom as OrdersPanel's
+// own canCreate gate.
+interface ViewProps { current: Date; shifts: Shift[]; today: Date; locale: string; onDayClick?: (date: Date) => void; onShiftClick?: (id: Shift['id']) => void }
+
+// D8 fix (RIGHTS-GATE-OPENERS-1): every add affordance below is a self-contained
+// permission check, mirroring PlanningPage's own toolbar gate and OrdersPanel's
+// canCreate — checked HERE (not only hidden on the toolbar) since a day cell,
+// the empty-state button, the dashed add row and the list header button all
+// reach the same create modal one click later.
+function useCanCreateShift() {
+  const auth = useAuth()
+  return auth?.hasPermission?.('planning.create') ?? false
+}
 
 // ── Shift pill ────────────────────────────────────────────────────────────────
 function ShiftPill({ shift, small, onClick }: { shift: Shift; small?: boolean; onClick?: (e: MouseEvent) => void }) {
@@ -52,6 +70,8 @@ function ShiftPill({ shift, small, onClick }: { shift: Shift; small?: boolean; o
 // ── Month view ────────────────────────────────────────────────────────────────
 export function MonthView({ current, shifts, today, locale, onDayClick, onShiftClick }: ViewProps) {
   const { t } = useTranslation('planning')
+  const canCreate = useCanCreateShift()
+  const gatedDayClick = canCreate ? onDayClick : undefined
   const year  = current.getFullYear()
   const month = current.getMonth()
   const first = new Date(year, month, 1)
@@ -96,11 +116,12 @@ export function MonthView({ current, shifts, today, locale, onDayClick, onShiftC
               const dayShifts = shifts.filter(s => isSameDay(s.date, date))
               return (
                 <div key={di}
-                  // Keyboard path (heraudit r4): the day cell is clickable chrome too.
-                  {...interactive(() => onDayClick(date))}
+                  // Keyboard path (heraudit r4): the day cell is clickable chrome too —
+                  // only while onDayClick exists (D8 fix: gated on planning.create).
+                  {...interactive(gatedDayClick ? () => gatedDayClick(date) : undefined)}
                   style={{ borderRight: di < 6 ? '1px solid var(--border)' : 'none',
                     padding: '6px 6px 4px', background: outside ? 'var(--bg)' : 'var(--surface)',
-                    cursor: 'pointer', minHeight: 110, position: 'relative' }}
+                    cursor: gatedDayClick ? 'pointer' : 'default', minHeight: 110, position: 'relative' }}
                   onMouseEnter={e => { if (!isToday) e.currentTarget.style.background = 'var(--hover-bg)' }}
                   onMouseLeave={e => e.currentTarget.style.background = outside ? 'var(--bg)' : 'var(--surface)' }>
                   <div style={{
@@ -130,6 +151,8 @@ export function MonthView({ current, shifts, today, locale, onDayClick, onShiftC
 
 // ── Week view ─────────────────────────────────────────────────────────────────
 export function WeekView({ current, shifts, today, locale, onDayClick, onShiftClick }: ViewProps) {
+  const canCreate = useCanCreateShift()
+  const gatedDayClick = canCreate ? onDayClick : undefined
   const startOfWeek = new Date(current)
   const dow = (current.getDay() + 6) % 7
   startOfWeek.setDate(current.getDate() - dow)
@@ -157,7 +180,7 @@ export function WeekView({ current, shifts, today, locale, onDayClick, onShiftCl
                   {d.getDate()}
                 </div>
               </div>
-              <div {...interactive(() => onDayClick(d))} style={{ minHeight: 300, cursor: 'pointer', padding: '2px' }}
+              <div {...interactive(gatedDayClick ? () => gatedDayClick(d) : undefined)} style={{ minHeight: 300, cursor: gatedDayClick ? 'pointer' : 'default', padding: '2px' }}
                 onMouseEnter={e => e.currentTarget.style.background = 'var(--hover-bg)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                 {shifts.filter(s => isSameDay(s.date, d)).map(s => (
@@ -175,27 +198,34 @@ export function WeekView({ current, shifts, today, locale, onDayClick, onShiftCl
 // ── Day view ──────────────────────────────────────────────────────────────────
 export function DayView({ current, shifts, today, locale, onDayClick, onShiftClick }: ViewProps) {
   const { t } = useTranslation('planning')
+  const canCreate = useCanCreateShift()
+  const gatedDayClick = canCreate ? onDayClick : undefined
   const dayShifts = shifts.filter(s => isSameDay(s.date, current))
   const isToday = isSameDay(current, today)
 
   return (
     <div style={{ flex: 1, overflow: 'auto', padding: '0 24px' }}>
       <div style={{ padding: '16px 0', borderBottom: '1px solid var(--border)', marginBottom: 16 }}>
-        <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>
+        {/* D9 fix: the house PageTitle atom (§4), not a locally re-picked 16/700 step. */}
+        <PageTitle>
           {isToday && <span style={{ color: 'var(--color-primary-text)', marginRight: 8 }}>{t('today')} —</span>}
           {formatDate(current, locale)}
-        </div>
+        </PageTitle>
       </div>
 
       {dayShifts.length === 0
         ? (
           <div style={{ textAlign: 'center', padding: '60px 0' }}>
             <div style={{ fontSize: 32, marginBottom: 12 }}>📅</div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>{t('noShiftsPlanned')}</div>
-            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>{t('addHint')}</div>
-            <Button variant="primary" onClick={() => onDayClick(current)}>
-              + {t('addShift')}
-            </Button>
+            {/* D9 fix: house atoms (§4), not locally re-picked fontSize/fontWeight. */}
+            <SectionTitle as="div" style={{ marginBottom: 6 }}>{t('noShiftsPlanned')}</SectionTitle>
+            <BodyText as="div" style={{ color: 'var(--text-muted)', marginBottom: 20 }}>{t('addHint')}</BodyText>
+            {/* D8 fix: hidden without planning.create (RIGHTS-GATE-OPENERS-1), same idiom as the toolbar's own gate. */}
+            {gatedDayClick && (
+              <Button variant="primary" onClick={() => gatedDayClick(current)}>
+                + {t('addShift')}
+              </Button>
+            )}
           </div>
         )
         : (
@@ -205,7 +235,8 @@ export function DayView({ current, shifts, today, locale, onDayClick, onShiftCli
                 border: '1px solid var(--border)', borderLeft: `4px solid ${s.color}`,
                 borderRadius: 10, marginBottom: 10, background: 'var(--surface)', cursor: onShiftClick ? 'pointer' : 'default' }}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>{s.title}</div>
+                  {/* D9 fix: the shared SectionTitle atom, not a locally re-picked 14/600. */}
+                  <SectionTitle as="div" style={{ marginBottom: 6 }}>{s.title}</SectionTitle>
                   <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-muted)' }}>
                       <Clock size={12} /> {s.start} – {s.end}
@@ -226,13 +257,16 @@ export function DayView({ current, shifts, today, locale, onDayClick, onShiftCli
             ))}
             {/* HUISSTIJL-1: left hand-styled — the dashed border is a distinct
                 "add row" placeholder chrome with no Button variant equivalent.
-                Block form: the style attr sits a line into the tag. */}
+                Block form: the style attr sits a line into the tag.
+                D8 fix: hidden without planning.create — was ungated before. */}
             {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
-            <button onClick={() => onDayClick(current)}
-              style={{ width: '100%', padding: '9px', fontSize: 13, border: '1px dashed var(--border)',
-                borderRadius: 8, background: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginTop: 4 }}>
-              + {t('addShift')}
-            </button>
+            {gatedDayClick && (
+              <button onClick={() => gatedDayClick(current)}
+                style={{ width: '100%', padding: '9px', fontSize: 13, border: '1px dashed var(--border)',
+                  borderRadius: 8, background: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginTop: 4 }}>
+                + {t('addShift')}
+              </button>
+            )}
             {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
           </>
         )
@@ -244,6 +278,8 @@ export function DayView({ current, shifts, today, locale, onDayClick, onShiftCli
 // ── List view ─────────────────────────────────────────────────────────────────
 export function ListView({ shifts, today, locale, onDayClick, onShiftClick }: Omit<ViewProps, 'current'>) {
   const { t } = useTranslation('planning')
+  const canCreate = useCanCreateShift()
+  const gatedDayClick = canCreate ? onDayClick : undefined
   const sorted = [...shifts].sort((a, b) => a.date.getTime() - b.date.getTime())
   const grouped: Record<string, { date: Date; shifts: Shift[] }> = {}
   sorted.forEach(s => {
@@ -270,9 +306,12 @@ export function ListView({ shifts, today, locale, onDayClick, onShiftClick }: Om
                 color: isToday ? 'var(--color-primary-text)' : 'var(--text)' }}>
                 {isToday ? `${t('today')} — ` : ''}{formatDate(date, locale)}
               </span>
-              <Button variant="secondary" size="sm" onClick={() => onDayClick(date)} style={{ marginLeft: 'auto' }}>
-                + {t('add')}
-              </Button>
+              {/* D8 fix: hidden without planning.create. */}
+              {gatedDayClick && (
+                <Button variant="secondary" size="sm" onClick={() => gatedDayClick(date)} style={{ marginLeft: 'auto' }}>
+                  + {t('add')}
+                </Button>
+              )}
             </div>
             {ds.map(s => (
               <div key={s.id} {...interactive(onShiftClick ? () => onShiftClick(s.id) : undefined)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',

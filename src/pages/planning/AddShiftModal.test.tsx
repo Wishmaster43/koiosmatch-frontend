@@ -47,6 +47,17 @@ vi.mock('./hooks/usePlanningShifts', () => ({
   useCreatePlanningShift: () => ({ mutateAsync: mockMutateAsync, isPending: false }),
 }))
 
+// D8 fix regression: the picked candidate now assigns right after create,
+// through the shared useAssignShiftCandidate hook (./hooks/useShiftStaffing)
+// — the same one ShiftStaffingDrawer's own assign mutation delegates to
+// (verifier fixronde: no more inline api.post). Mocked here so this file
+// stays about the modal's own request-building behaviour (the route itself
+// is covered in ./hooks/useShiftStaffing.test.tsx).
+const mockAssignMutateAsync = vi.fn().mockResolvedValue({ id: 'sched1' })
+vi.mock('./hooks/useShiftStaffing', () => ({
+  useAssignShiftCandidate: () => ({ mutateAsync: mockAssignMutateAsync, isPending: false }),
+}))
+
 // A QueryClientProvider is required by usePlanningShifts' useMutation — every
 // render in this file goes through it.
 function renderModal(ui: ReactElement) {
@@ -91,7 +102,6 @@ const jobtypeTrigger  = () => screen.getByRole('button', { name: 'fJobtype' })
 describe('AddShiftModal · no hardcoded demo defaults (PLAN-LOOKUP-1)', () => {
   it('starts every wired field empty — no "Dagdienst"/"Stichting Rivas Zorggroep" default', () => {
     renderModal(<AddShiftModal date={new Date('2026-07-20')} onClose={noop} onAdd={noop} />)
-    expect(screen.getByLabelText('fShiftName')).toHaveValue('')
     expect(customerTrigger()).toBeInTheDocument()
     expect(jobtypeTrigger()).toBeInTheDocument()
     expect(screen.queryByText('Stichting Rivas Zorggroep')).not.toBeInTheDocument()
@@ -102,11 +112,9 @@ describe('AddShiftModal · no hardcoded demo defaults (PLAN-LOOKUP-1)', () => {
 })
 
 describe('AddShiftModal · titled cards (Danny 27-07 house frame)', () => {
-  it('groups the order/location/colour fields into titled cards', () => {
+  it('groups the order/shift-detail fields into titled cards', () => {
     renderModal(<AddShiftModal date={new Date()} onClose={noop} onAdd={noop} />)
     expect(screen.getByText('sectionOrder')).toBeInTheDocument()
-    expect(screen.getByText('sectionLocation')).toBeInTheDocument()
-    expect(screen.getByText('sectionColor')).toBeInTheDocument()
     expect(screen.getByText('shift1')).toBeInTheDocument()
   })
 
@@ -288,6 +296,48 @@ describe('AddShiftModal · candidate search (SUGGESTIES mock removed)', () => {
 
     expect(onAdd).not.toHaveBeenCalled()
     expect(mockMutateAsync).not.toHaveBeenCalled()
+  })
+
+  // D8 fix: the picked candidate used to be a dead end (no request anywhere) —
+  // Save now POSTs the real assignment right after the shift is created.
+  it('POSTs a real assignment for the picked candidate once an order is picked and Save is clicked', async () => {
+    mockCandidates.mockReturnValue({ candidates: [{ id: 'k1', name: 'Ismail Eddahchouri', functionTitle: 'IG-Verzorging' }], loading: false, error: false })
+    mockOrders.mockReturnValue({ orders: [{ id: 'o1', subject: 'ICU dayshift', status: 'open', shifts_count: 0 }], loading: false, error: false })
+    const user = userEvent.setup()
+    renderModal(<AddShiftModal date={new Date('2026-07-20')} onClose={noop} onAdd={noop} />)
+
+    await user.click(screen.getByRole('button', { name: 'order.listTitle' }))
+    await user.click(screen.getByRole('button', { name: 'ICU dayshift' }))
+    await user.click(screen.getByText('Ismail Eddahchouri'))
+    await user.click(screen.getByText('common:save').closest('button') as HTMLButtonElement)
+
+    expect(mockMutateAsync).toHaveBeenCalled()
+    expect(mockAssignMutateAsync).toHaveBeenCalledWith({ shiftId: 's1', candidateId: 'k1' })
+  })
+
+  // Verifier fixronde: create-succeeds-but-assignment-fails must never re-POST
+  // /planning/shifts on retry — the modal remembers the created shift's id and
+  // only re-runs the assignment.
+  it('retries only the assignment (never re-creates the shift) after create succeeds but assignment fails', async () => {
+    mockCandidates.mockReturnValue({ candidates: [{ id: 'k1', name: 'Ismail Eddahchouri', functionTitle: 'IG-Verzorging' }], loading: false, error: false })
+    mockOrders.mockReturnValue({ orders: [{ id: 'o1', subject: 'ICU dayshift', status: 'open', shifts_count: 0 }], loading: false, error: false })
+    mockAssignMutateAsync.mockRejectedValueOnce(new Error('assignment failed'))
+    const user = userEvent.setup()
+    renderModal(<AddShiftModal date={new Date('2026-07-20')} onClose={noop} onAdd={noop} />)
+
+    await user.click(screen.getByRole('button', { name: 'order.listTitle' }))
+    await user.click(screen.getByRole('button', { name: 'ICU dayshift' }))
+    await user.click(screen.getByText('Ismail Eddahchouri'))
+    const saveButton = screen.getByText('common:save').closest('button') as HTMLButtonElement
+    await user.click(saveButton)
+    expect(await screen.findByRole('alert')).toHaveTextContent('staffing.assignError')
+    expect(mockMutateAsync).toHaveBeenCalledTimes(1)
+
+    // Retry: the assignment is re-run, the shift is NOT re-created.
+    await user.click(saveButton)
+    expect(mockMutateAsync).toHaveBeenCalledTimes(1)
+    expect(mockAssignMutateAsync).toHaveBeenCalledTimes(2)
+    expect(mockAssignMutateAsync).toHaveBeenLastCalledWith({ shiftId: 's1', candidateId: 'k1' })
   })
 })
 

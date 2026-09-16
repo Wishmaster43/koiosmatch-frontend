@@ -151,3 +151,23 @@ describe('OrdersPanel · create gate (RIGHTS-GATE-OPENERS-1)', () => {
     expect(screen.getByRole('button', { name: 'order.addOrder' })).toBeInTheDocument()
   })
 })
+
+// D9 fix (§4 SOFT-CHIP CONVENTION): the status chip's colour must carry the
+// status's own meaning — never the same tenant accent for open/filled/cancelled.
+describe('OrdersPanel · status chip colour (§4 soft-chip convention)', () => {
+  it('gives open/filled/cancelled distinct semantic colours, not one shared accent', () => {
+    mockOrders.mockReturnValue({ orders: [
+      { ...ROW, id: 'o1', status: 'open' },
+      { ...ROW, id: 'o2', status: 'filled' },
+      { ...ROW, id: 'o3', status: 'cancelled' },
+    ], loading: false, error: false })
+    render(<OrdersPanel />)
+    const chips = screen.getAllByText(/order\.status\./)
+    const inks = chips.map(c => (c.closest('span') as HTMLElement).style.color)
+    // Each status reads its own token, never var(--color-primary) for all three.
+    expect(inks[0]).toContain('var(--color-warning)')
+    expect(inks[1]).toContain('var(--color-success)')
+    expect(inks[2]).toContain('var(--color-danger)')
+    expect(new Set(inks).size).toBe(3)
+  })
+})

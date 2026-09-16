@@ -1,5 +1,5 @@
 /**
- * AddShiftModal — the "plan a shift" dialog: order/location/colour, shift times,
+ * AddShiftModal — the "plan a shift" dialog: order, shift times,
  * candidate search and notes. Its Field/Avatar/CandidateRow presentational
  * helpers live in ./AddShiftModalFields (CLAUDE.md §3 size split, 28-07). Extracted from
  * PlanningPage. PLAN-LOOKUP-1 (2026-07-16): the customer/department/job-title
@@ -9,8 +9,8 @@
  *
  * Widened to the house WIDE_MODAL constant and every SectionHead regrouped into
  * a titled bordered card (Danny 27-07: "+ dienst ook nalopen" — every create
- * modal must share +Match/+Kandidaat's footprint); customer/department/jobtype/
- * open-dienst are now searchable CreatableSelects, never a bare `<select>`. This
+ * modal must share +Match/+Kandidaat's footprint); customer/department/jobtype
+ * are searchable CreatableSelects, never a bare `<select>`. This
  * is a genuinely different screen from the single-form modals — a live
  * 3-column planner (order info / shift details / candidate search), not a form
  * — so the column widths and the 92vw responsive wrapper stay unchanged; only
@@ -55,6 +55,14 @@
  * number — `Number('')` is `0`, not `NaN`, so the old numeric state silently
  * turned "cleared" into a fake valid `0`; `personCountValid` gates both Save
  * and the submitted body.
+ *
+ * PLANNING-PERSIST-1-staart verifier fixronde (2026-09-16): the create-then-
+ * assign chain (see handleSave) moved to the shared `useAssignShiftCandidate`
+ * hook (./hooks/useShiftStaffing) instead of an inline `api.post` — the same
+ * unit ShiftStaffingDrawer's own assign mutation delegates to (§10, API calls
+ * live in the hook/api layer, never inline in a component). It also now
+ * remembers the created shift's id in state, so a retry after an assignment
+ * failure re-runs only the assignment, never a second `POST /planning/shifts`.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -66,6 +74,7 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useShiftCustomers, useShiftDepartments, useShiftCandidateSearch } from './hooks/useShiftLookups'
 import { usePlanningOrdersList } from './hooks/usePlanningOrders'
 import { useCreatePlanningShift } from './hooks/usePlanningShifts'
+import { useAssignShiftCandidate } from './hooks/useShiftStaffing'
 import type { ShiftCandidateOption } from './hooks/useShiftLookups'
 import { extractApiError } from '@/lib/extractApiError'
 import { Field, Avatar, colorFor, getInitials } from './AddShiftModalFields'
@@ -79,6 +88,7 @@ import Button from '@/components/ui/Button'
 import type { ShiftInput } from '@/types/planning'
 import { tint } from '@/lib/tint'
 import { Caption, SectionTitle } from '@/components/ui/typography'
+import DictationTextarea from '@/components/forms/DictationTextarea'
 
 // ── Add Shift Modal ───────────────────────────────────────────────────────────
 export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; onClose: () => void; onAdd: (shift: ShiftInput) => void }) {
@@ -86,31 +96,21 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
   // Active app locale (DATUM-1/LANE-B) — this modal is its own useDateFormat()
   // call site, so the header date follows the tenant's app language, not Dutch.
   const { locale } = useDateFormat()
-  const [title,       setTitle]       = useState('')
   const [start,       setStart]       = useState('07:00')
   const [end,         setEnd]         = useState('15:00')
   const [jobType,     setJobType]     = useState('')
   const [orderId,     setOrderId]     = useState('')
   const [customerId,  setCustomerId]  = useState('')
   const [departmentId,setDepartmentId]= useState('')
-  const [address,     setAddress]     = useState('')
   // Raw input text, not a number — Number('') is 0, not NaN, so a numeric
   // state var would silently turn "cleared" into a fake valid value; keeping
   // the raw string lets canSave/handleSave tell "empty" from "a real number".
   const [personCount, setPersonCount] = useState('1')
   const [candidate,   setCandidate]   = useState<ShiftCandidateOption | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
-  const [color,       setColor]       = useState('var(--color-success)')
   // Backend accepts a plain notes string (PlanningShiftController) — controlled
   // so typed text survives into the payload instead of being silently dropped.
   const [notes,       setNotes]       = useState('')
-  // "Open dienst" mode — was a fully decorative, unwired `<select>` before (no
-  // value/onChange at all); now a controlled searchable picker for the same
-  // three labels, still LOCAL UI state only (never part of the onAdd payload —
-  // behaviour stays identical to what this modal submitted before).
-  const [openShiftMode, setOpenShiftMode] = useState('all')
-  // eslint-disable-next-line no-restricted-syntax -- DATA: shift-colour picker palette, not UI element styling
-  const COLORS = ['var(--color-success)','var(--color-primary)','var(--color-warning)','var(--color-danger)','var(--color-secondary)','#8B5CF6']
 
   // Real lookups (PLAN-LOOKUP-1) — see ./hooks/useShiftLookups for sourcing.
   const { customers, loading: customersLoading, error: customersError } = useShiftCustomers()
@@ -129,7 +129,14 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
   const { candidates, loading: candidatesLoading, error: candidatesError } = useShiftCandidateSearch(searchQuery)
   // PLANNING-PERSIST-1-staart: the real create mutation — POST /planning/shifts.
   const createShift = useCreatePlanningShift()
+  // Shared with ShiftStaffingDrawer's own assign action (§10) — never a raw
+  // inline api.post here.
+  const assignCandidate = useAssignShiftCandidate()
   const [saveError, setSaveError] = useState<string | null>(null)
+  // Verifier fixronde: once create succeeds this remembers the shift's id, so
+  // a retry after an assignment failure only re-runs the assignment — never a
+  // second POST /planning/shifts (which would leave an orphan duplicate shift).
+  const [createdShiftId, setCreatedShiftId] = useState<string | null>(null)
 
   const customerName = customers.find(c => String(c.id) === customerId)?.name ?? ''
 
@@ -151,12 +158,16 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
   // The order is the ONE field PlanningShiftController requires beyond
   // start_time (always filled, default '07:00') — Save stays disabled until
   // it is picked, an honest gate instead of the old permanent notice. The
-  // person-count field must also hold a real value, not be mid-clear.
-  const canSave = Boolean(orderId) && personCountValid && !createShift.isPending
+  // person-count field must also hold a real value, not be mid-clear. Once
+  // create has already succeeded (createdShiftId set) the order/person-count
+  // gate no longer matters — a retry only re-runs the assignment.
+  const canSave = createdShiftId
+    ? !assignCandidate.isPending
+    : Boolean(orderId) && personCountValid && !createShift.isPending
 
-  const handleSave = async () => {
-    if (!canSave) return
-    setSaveError(null)
+  // Runs the create POST, remembering the new shift's id so a later retry
+  // (after an assignment failure) never re-creates the shift.
+  const runCreate = async (): Promise<string> => {
     // Exactly the fields PlanningShiftController::validated() accepts —
     // combining the calendar date with the picked start/end time strings.
     const body = {
@@ -168,14 +179,42 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
       number_persons: personCountNum,
       notes: notes || null,
     }
+    const created = await createShift.mutateAsync(body)
+    setCreatedShiftId(created.id)
+    return created.id
+  }
+
+  const handleSave = async () => {
+    if (!canSave) return
+    setSaveError(null)
     try {
-      await createShift.mutateAsync(body)
+      // Verifier fixronde: a remembered createdShiftId means a PREVIOUS click
+      // already created the shift and only the assignment failed — retry the
+      // assignment alone, never POST /planning/shifts a second time.
+      const shiftId = createdShiftId ?? await runCreate()
+      // D8 fix: a picked candidate used to feed only local decoration (the
+      // "scheduled worker" card + the onAdd echo) with no POST anywhere — the
+      // real assignment route only exists once the shift has an id, so it
+      // chains here, right after create, through the same shared
+      // useAssignShiftCandidate hook ShiftStaffingDrawer's own assign
+      // mutation delegates to (§10).
+      if (candidate) {
+        try {
+          await assignCandidate.mutateAsync({ shiftId, candidateId: String(candidate.id) })
+        } catch (assignErr) {
+          setSaveError(extractApiError(assignErr, t('staffing.assignError')))
+          return
+        }
+      }
       // Relays the created shift's local echo to the caller. The calendar
       // itself already refreshes on its own: useCreatePlanningShift's onSuccess
       // invalidates the ['planning','board'] query, so PlanningPage's usePlanningBoard
       // refetches without this callback's help — onAdd exists only so a future/other
       // caller can react to a create without reaching into react-query's cache.
-      onAdd({ title, location: customerName, candidate: candidate?.name || '', start, end, color, date, orderId, notes })
+      // The calendar itself derives a shift's colour from its open/filled state
+      // (PlanningPage's mapBoardShift, §4) — this echo is never rendered, so an
+      // empty string satisfies ShiftInput's `color` field without inventing a UI ink.
+      onAdd({ title: '', location: customerName, candidate: candidate?.name || '', start, end, color: '', date, orderId, notes })
       onClose()
     } catch (err) {
       setSaveError(extractApiError(err, t('common:errorGeneric')))
@@ -202,8 +241,8 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
                 while the required order picker is empty, or while the request is
                 in flight — an honest gate, not a permanent notice. */}
             <Button variant="primary" onClick={handleSave} disabled={!canSave}
-              title={!orderId ? t('pickOrderFirst') : undefined}>
-              <Save size={13} /> {createShift.isPending ? t('common:saving') : t('common:save')}
+              title={!orderId && !createdShiftId ? t('pickOrderFirst') : undefined}>
+              <Save size={13} /> {(createShift.isPending || assignCandidate.isPending) ? t('common:saving') : t('common:save')}
             </Button>
           </div>
         </div>
@@ -231,21 +270,17 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
               customersLoading={customersLoading} customersError={customersError}
               departmentId={departmentId} setDepartmentId={setDepartmentId} departments={departments}
               departmentsLoading={departmentsLoading} departmentsError={departmentsError} departmentCustomerId={departmentCustomerId}
-              address={address} setAddress={setAddress} color={color} setColor={setColor} colors={COLORS}
             />
 
-            {/* ── Midden: dienst details — same titled-card treatment; jobtype/open
-                dienst are now searchable CreatableSelects. Each cardHead+cardBox
-                pair is its own flex item (gap:16), same reasoning as the left column. ── */}
+            {/* ── Midden: dienst details — same titled-card treatment; jobtype is a
+                searchable CreatableSelect. Each cardHead+cardBox pair is its own
+                flex item (gap:16), same reasoning as the left column. ── */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '14px 20px',
               display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div>
                 <div style={cardHead}>{t('shift1')}</div>
                 <div style={cardBox}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 10 }}>
-                    <Field label={t('fShiftName')}>
-                      <input style={INPUT} value={title} onChange={e => setTitle(e.target.value)} />
-                    </Field>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
                     <Field label={t('fStart')}>
                       <input type="time" style={INPUT} value={start} onChange={e => setStart(e.target.value)} />
                     </Field>
@@ -258,23 +293,10 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
                     </Field>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                    <Field label={t('fJobtype')}>
-                      <CreatableSelect value={jobType || null} onChange={setJobType} allowCreate={false}
-                        placeholder={t('common:select')} options={functions} />
-                    </Field>
-                    <Field label={t('fOpenShift')}>
-                      {/* Placeholder given even though a default is always selected — it
-                          becomes the search box's accessible label once opened (§6). */}
-                      <CreatableSelect value={openShiftMode} onChange={setOpenShiftMode} allowCreate={false}
-                        placeholder={t('fOpenShift')}
-                        options={[
-                          { value: 'all', label: t('openAll') },
-                          { value: 'favorites', label: t('openFavorites') },
-                          { value: 'fixed', label: t('openFixed') },
-                        ]} />
-                    </Field>
-                  </div>
+                  <Field label={t('fJobtype')}>
+                    <CreatableSelect value={jobType || null} onChange={setJobType} allowCreate={false}
+                      placeholder={t('common:select')} options={functions} />
+                  </Field>
                 </div>
               </div>
 
@@ -308,7 +330,11 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
               <div>
                 <div style={cardHead}>{t('notes')}</div>
                 <div style={cardBox}>
-                  <textarea style={{ ...INPUT, height: 70, resize: 'none' }} value={notes} onChange={e => setNotes(e.target.value)}
+                  {/* D9 fix: user-facing prose goes through the house dictation textarea
+                      (§3A RICH-TEXT-FREE-TEXT), not a bare <textarea> — mirrors
+                      AddOrderModal's own notes field (plain-text storage, so
+                      DictationTextarea, not the HTML-producing RichTextEditor). */}
+                  <DictationTextarea value={notes} onChange={setNotes} rows={3} style={{ resize: 'none' }}
                     placeholder={t('notePlaceholder')} aria-label={t('notePlaceholder')} />
                 </div>
               </div>

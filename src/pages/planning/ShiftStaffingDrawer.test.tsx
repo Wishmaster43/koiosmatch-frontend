@@ -14,7 +14,12 @@ import ShiftStaffingDrawer from './ShiftStaffingDrawer'
 import type { PlanningBoardShift } from './hooks/usePlanningBoard'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: Record<string, unknown>) => (opts?.hours != null ? `${k}:${opts.hours}` : k) }) }))
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, formatTime: (v: string) => v, locale: 'nl-NL' }) }))
+// GETALLEN-1 fix: ShiftStaffingDrawer now also imports useNumberFormat, which
+// itself calls @/lib/datetime's useLocale — added to the existing full-module mock.
+vi.mock('@/lib/datetime', () => ({
+  useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, formatTime: (v: string) => v, locale: 'nl-NL' }),
+  useLocale: () => 'nl-NL',
+}))
 
 const assignMutate   = vi.fn()
 const unassignMutate = vi.fn()
@@ -136,6 +141,15 @@ describe('ShiftStaffingDrawer', () => {
     const user = userEvent.setup()
     await user.click(screen.getByTitle('staffing.checkout'))
     await user.click(screen.getByRole('button', { name: /staffing.confirmCheckout/ }))
-    expect(await screen.findByText('staffing.checkoutSaved:7.5')).toBeInTheDocument()
+    // GETALLEN-1 fix: the hours figure now renders through the nl-NL number
+    // formatter (comma decimal), never the raw JS number.
+    expect(await screen.findByText('staffing.checkoutSaved:7,5')).toBeInTheDocument()
+  })
+
+  // GETALLEN-1: the roster counter also goes through the locale formatter, not
+  // a raw template-literal number (matters once counts pass 999).
+  it('renders the roster counter through the number formatter', () => {
+    render(<ShiftStaffingDrawer shift={baseShift({ numberPersons: 2000, assigned: [] })} onClose={vi.fn()} />)
+    expect(screen.getByText(/0\/2\.000/)).toBeInTheDocument()
   })
 })

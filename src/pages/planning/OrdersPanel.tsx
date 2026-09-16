@@ -24,6 +24,16 @@ import { PageTitle, SectionTitle, Caption } from '@/components/ui/typography'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { tintBorder } from '@/lib/tint'
 
+// D9 fix (§4 SOFT-CHIP CONVENTION): colour carries the STATUS's meaning, not the
+// tenant accent — the fixed three-value backend enum (AddOrderModal.tsx's
+// ORDER_STATUSES) maps onto the same semantic tokens the rest of the app uses
+// for open/filled/cancelled-shaped states.
+const ORDER_STATUS_COLOR: Record<string, string> = {
+  open: 'var(--color-warning)',
+  filled: 'var(--color-success)',
+  cancelled: 'var(--color-danger)',
+}
+
 // Planning orders list + create/edit/delete, entirely real data (see the module doc comment above).
 export default function OrdersPanel() {
   const { t } = useTranslation('planning')
@@ -93,7 +103,7 @@ export default function OrdersPanel() {
                     {[o.client, o.location, o.department].filter(Boolean).join(' — ') || '—'}
                   </Caption>
                 </div>
-                <SoftChip label={t(`order.status.${o.status}`, o.status)} color="var(--color-primary)" />
+                <SoftChip label={t(`order.status.${o.status}`, o.status)} color={ORDER_STATUS_COLOR[o.status]} />
                 <Caption>
                   {t('order.shiftsCount', { count: o.shifts_count ?? 0 })}
                 </Caption>

@@ -8,14 +8,15 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
-import { useShiftEligibleCandidates } from './useShiftStaffing'
+import { useShiftEligibleCandidates, useAssignShiftCandidate } from './useShiftStaffing'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
-  return { ...actual, default: { get: vi.fn() } }
+  return { ...actual, default: { get: vi.fn(), post: vi.fn() } }
 })
 import api from '@/lib/api'
 const mockGet = vi.mocked(api.get)
+const mockPost = vi.mocked(api.post)
 afterEach(() => vi.clearAllMocks())
 
 const wrapper = ({ children }: { children: ReactNode }) => (
@@ -37,5 +38,16 @@ describe('useShiftEligibleCandidates', () => {
     const { result } = renderHook(() => useShiftEligibleCandidates(null), { wrapper })
     expect(result.current.candidates).toEqual([])
     expect(mockGet).not.toHaveBeenCalled()
+  })
+})
+
+// The seam AddShiftModal relies on (§13: a mutation test asserts the REQUEST):
+// assigning a candidate posts exactly this route and body.
+describe('useAssignShiftCandidate', () => {
+  it('POSTs /planning/shifts/{shift}/assignments with the candidate id', async () => {
+    mockPost.mockResolvedValue({ data: { data: { id: 'sched1', shift_id: 's1', candidate_id: 'k1', status: 'assigned' } } })
+    const { result } = renderHook(() => useAssignShiftCandidate(), { wrapper })
+    await result.current.mutateAsync({ shiftId: 's1', candidateId: 'k1' }).catch(() => undefined)
+    expect(mockPost).toHaveBeenCalledWith('/planning/shifts/s1/assignments', { candidate_id: 'k1' })
   })
 })

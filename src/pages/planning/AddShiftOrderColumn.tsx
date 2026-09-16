@@ -1,9 +1,12 @@
-// Extracted from AddShiftModal (SIZE-SPLIT-B, zero behaviour change): the left
-// column — order/customer/department pickers, location, colour swatches.
+// Extracted from AddShiftModal (SIZE-SPLIT-B): the left column — order/customer/
+// department pickers. D8 fix (2026-09): the free-text assignment/contact fields,
+// the address textarea and the colour swatches used to render here with no
+// state/onChange/payload destination at all (NO-FAKE-AFFORDANCE, §3) — dropped
+// rather than wired, since none of them map onto a PlanningShiftController field
+// (location/colour are derived server-side from the order/open-spot signal).
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 import { Field } from './AddShiftModalFields'
-import { INPUT } from './addShiftFieldStyles'
 import type { ShiftLookupOption } from './hooks/useShiftLookups'
 import type { PlanningOrderRow } from './hooks/usePlanningOrders'
 
@@ -14,7 +17,6 @@ export default function AddShiftOrderColumn({
   t, orderId, handleOrderChange, orders, ordersLoading, ordersError,
   customerId, handleCustomerChange, customers, customersLoading, customersError,
   departmentId, setDepartmentId, departments, departmentsLoading, departmentsError, departmentCustomerId,
-  address, setAddress, color, setColor, colors,
 }: {
   t: TFunction; orderId: string; handleOrderChange: (id: string) => void
   orders: PlanningOrderRow[]; ordersLoading: boolean; ordersError: boolean
@@ -22,8 +24,6 @@ export default function AddShiftOrderColumn({
   customers: ShiftLookupOption[]; customersLoading: boolean; customersError: boolean
   departmentId: string; setDepartmentId: (id: string) => void
   departments: ShiftLookupOption[]; departmentsLoading: boolean; departmentsError: boolean; departmentCustomerId: string
-  address: string; setAddress: (v: string) => void
-  color: string; setColor: (c: string) => void; colors: string[]
 }) {
   return (
     <div style={{ width: 220, flexShrink: 0, borderRight: '1px solid var(--border)',
@@ -59,37 +59,6 @@ export default function AddShiftOrderColumn({
                 : t('common:select')}
               options={!departmentCustomerId ? [] : departments.map(d => ({ value: String(d.id), label: d.name }))} />
           </Field>
-          <Field label={t('fAssignment')}><input style={INPUT} /></Field>
-          <Field label={t('fContact')}><input style={INPUT} placeholder={t('contactPlaceholder')} /></Field>
-        </div>
-      </div>
-
-      <div>
-        <div style={cardHead}>{t('sectionLocation')}</div>
-        <div style={cardBox}>
-          <Field label={t('fAddress')}>
-            <textarea style={{ ...INPUT, resize: 'none', height: 56 }}
-              value={address} onChange={e => setAddress(e.target.value)} />
-          </Field>
-        </div>
-      </div>
-
-      <div>
-        <div style={cardHead}>{t('sectionColor')}</div>
-        <div style={cardBox}>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {/* Icon-only swatch buttons need a real aria-label (§6) — the CSS
-                value itself isn't meaningful to a screen reader, so number them.
-                HUISSTIJL-1: left hand-styled — each swatch's fill IS the picked
-                colour value (data), not a Button identity. */}
-            {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
-            {colors.map((c, i) => (
-              <button key={c} type="button" onClick={() => setColor(c)} aria-label={`${t('sectionColor')} ${i + 1}`}
-                style={{ width: 28, height: 28, borderRadius: '50%', background: c, border: 'none',
-                  cursor: 'pointer', outline: color === c ? `2px solid ${c}` : 'none', outlineOffset: 2 }} />
-            ))}
-            {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
-          </div>
         </div>
       </div>
     </div>
