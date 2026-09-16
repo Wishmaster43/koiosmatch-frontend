@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next'
 import { LogOut, ShieldAlert } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import MfaSetupWizard from '@/components/auth/MfaSetupWizard'
+import Button from '@/components/ui/Button'
+import { PageTitle, BodyText } from '@/components/ui/typography'
 
 export default function MfaEnrollmentGate() {
   const { t } = useTranslation('auth')
@@ -28,11 +30,11 @@ export default function MfaEnrollmentGate() {
                           display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <ShieldAlert size={22} style={{ color: 'var(--color-primary-text)' }} />
             </div>
-            <h1 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>{t('mfaGate.title')}</h1>
+            <PageTitle as="h1">{t('mfaGate.title')}</PageTitle>
           </div>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 24 }}>
+          <BodyText style={{ color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 24 }}>
             {t('mfaGate.desc')}
-          </p>
+          </BodyText>
 
           {/* The shared enrollment wizard; finishing refreshes /auth/me which lifts the gate. */}
           <MfaSetupWizard setupMfa={setupMfa} confirmMfa={confirmMfa}
@@ -41,11 +43,9 @@ export default function MfaEnrollmentGate() {
 
         {/* Signing out is the only other allowed action while enforcement blocks the app. */}
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
-          <button onClick={() => void logout()}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--text-muted)',
-                     background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px' }}>
+          <Button variant="ghost" size="sm" onClick={() => void logout()}>
             <LogOut size={13} /> {t('mfaGate.signOut')}
-          </button>
+          </Button>
         </div>
       </main>
     </div>

@@ -6,7 +6,8 @@
  */
 import type { ComponentType, CSSProperties, ReactNode } from 'react'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
-import { FormLabel } from '@/components/ui/typography'
+import { FormLabel, SectionTitle } from '@/components/ui/typography'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
 type IconComp = ComponentType<{ size?: number }>
 
@@ -56,15 +57,16 @@ export const ROLE_META: Record<string, { color: string; bg: string }> = {
 // plus the border-color transition this screen already had on focus/hover).
 export const inputStyle: CSSProperties = { ...fieldInputStyle, transition: 'border-color 0.15s' }
 
-// Small coloured chip — used for roles and linked locations. Border uses
-// color-mix (not a hex-alpha string suffix) so it stays valid once `color` is a
-// CSS var() token, and stays correct across light/dark automatically.
-export function Pill({ label, color = 'var(--text-muted)', bg = 'color-mix(in srgb, var(--text-muted) 12%, transparent)', icon: Icon }: {
+// Small coloured chip — used for roles and linked locations. Fill/border/ink
+// come from the house §4 tint helpers (lib/tint) — bg may still be overridden
+// with an existing design-system token (ROLE_META), but the ink is always the
+// AA-safe chipInk twin, never the raw colour on its own tint (herhaal-slotaudit).
+export function Pill({ label, color = 'var(--text-muted)', bg, icon: Icon }: {
   label: ReactNode; color?: string; bg?: string; icon?: IconComp
 }) {
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: bg, color,
-                   border: `1px solid color-mix(in srgb, ${color} 30%, transparent)`, borderRadius: 999, padding: '3px 10px',
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: bg ?? tintBg(color), color: chipInk(color),
+                   border: tintBorder(color), borderRadius: 999, padding: '3px 10px',
                    fontSize: 12, fontWeight: 500 }}>
       {Icon && <Icon size={11} />}{label}
     </span>
@@ -78,10 +80,10 @@ export function Section({ title, children }: { title: ReactNode; children: React
       background: 'var(--surface)', border: '1px solid var(--border)',
       borderRadius: 12, padding: 24, marginBottom: 20,
     }}>
-      <h3 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
+      <SectionTitle as="h3" style={{ color: 'var(--text-muted)', textTransform: 'uppercase',
                    letterSpacing: '0.05em', marginBottom: 18 }}>
         {title}
-      </h3>
+      </SectionTitle>
       {children}
     </div>
   )

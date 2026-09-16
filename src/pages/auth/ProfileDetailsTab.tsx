@@ -12,6 +12,7 @@ import { Caption } from '@/components/ui/typography'
 import Spinner from '@/components/ui/Spinner'
 import SaveButton from '@/components/ui/SaveButton'
 import SelectMenu from '@/components/ui/SelectMenu'
+import CalloutBox from '@/components/ui/CalloutBox'
 import { useProfileBranches } from './useProfileBranches'
 
 interface ProfileForm { firstname: string; lastname: string; email: string; phone: string }
@@ -40,7 +41,9 @@ export default function ProfileDetailsTab({ form, onField, onSave, saving, saved
   const { t: tUsers } = useTranslation('users')
 
   // Load the user's linked branches + set default preference (X-13).
-  const { branches, defaultBranchId, loading: branchesLoading, setDefault } = useProfileBranches()
+  // Only the LOAD error hides the picker — a save failure keeps the working
+  // picker visible (the hook's own notifyError toast already reports it).
+  const { branches, defaultBranchId, loading: branchesLoading, loadError: branchesLoadError, setDefault } = useProfileBranches()
 
   // Read-only access info from /auth/me — roles + (one or more) linked locations.
   const roles     = user?.roles ?? []
@@ -133,6 +136,9 @@ export default function ProfileDetailsTab({ form, onField, onSave, saving, saved
         <Field label={t('profile.defaultBranch')}>
           {branchesLoading ? (
             <Caption as="div"><Spinner size={12} /> {t('profile.loading')}</Caption>
+          ) : branchesLoadError ? (
+            // A failed load must never render as the honest "no couplings" empty state (§0 four UI states).
+            <CalloutBox variant="danger">{branchesLoadError}</CalloutBox>
           ) : branches.length === 0 ? (
             // An unrestricted user (no couplings) cannot pick a default here — honest notice, no picker (§3).
             <Caption as="div">{t('profile.noBranchCouplings')}</Caption>

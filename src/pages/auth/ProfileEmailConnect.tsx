@@ -24,7 +24,8 @@ import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import SegmentedControl from '@/components/ui/SegmentedControl'
-import { SectionTitle, formLabelStyle } from '@/components/ui/typography'
+import CalloutBox from '@/components/ui/CalloutBox'
+import { SectionTitle, Mono, formLabelStyle } from '@/components/ui/typography'
 
 const PROVIDERS = [
   { id: 'office', label: 'Office 365' },
@@ -41,7 +42,7 @@ const labelStyle: CSSProperties = { ...formLabelStyle, marginBottom: 5, display:
 export default function ProfileEmailConnect() {
   const { t } = useTranslation('auth')
   // Data layer: connection state + the OAuth/SMTP connect flows and disconnect (§3).
-  const { status, info, busy, connectOauth, saveSmtp, disconnect } = useEmailConnection()
+  const { status, info, busy, connectOauth, saveSmtp, disconnect, reload } = useEmailConnection()
   const [choice,   setChoice]   = useState('office')
   const [showPass, setShowPass] = useState(false)
   const [smtp, setSmtp] = useState<SmtpForm>({ host: '', port: '587', user: '', pass: '', secure: 'tls', from_name: '', from_email: '' })
@@ -64,6 +65,16 @@ export default function ProfileEmailConnect() {
         </div>
       )}
 
+      {/* A failed load is a real error, never the 'disconnected' chooser (§0 four UI states) — with a retry. */}
+      {status === 'error' && (
+        <CalloutBox variant="danger">
+          {t('profile.email.loadError')}
+          <div style={{ marginTop: 8 }}>
+            <Button variant="secondary" size="sm" onClick={() => void reload()}>{t('common:error.retry')}</Button>
+          </div>
+        </CalloutBox>
+      )}
+
       {status === 'connected' && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px',
                       background: 'var(--input-bg)', border: '1px solid var(--border)', borderRadius: 10 }}>
@@ -75,7 +86,7 @@ export default function ProfileEmailConnect() {
             <SectionTitle as="div">
               {t('profile.email.connected')}{info.provider ? ` · ${PROVIDERS.find(p => p.id === info.provider)?.label ?? info.provider}` : ''}
             </SectionTitle>
-            {info.email && <div style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'monospace', marginTop: 2 }}>{info.email}</div>}
+            {info.email && <Mono as="div" style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{info.email}</Mono>}
           </div>
           <Button variant="secondary" onClick={disconnect} disabled={busy}>
             {t('profile.email.disconnect')}

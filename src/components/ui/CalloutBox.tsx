@@ -23,6 +23,10 @@ interface CalloutBoxProps {
   // Optional dismiss control below the content (the apikeys/webhooks reveal boxes).
   onDismiss?: () => void
   dismissLabel?: string
+  // Override the default role/live-region (warning+danger default to role="alert",
+  // an assertive interruption). A notice that re-renders on a tick (a countdown)
+  // must announce politely instead, or a screen reader gets interrupted every second.
+  live?: 'polite' | 'off'
 }
 
 // One CSS-var token per variant — background/border derive from it via color-mix (§4),
@@ -50,10 +54,15 @@ const TOKEN_INK: Record<CalloutBoxVariant, string> = {
 }
 
 // See the file's top doc above for why this is the one inline banner component; renders as role=alert for the warning/danger variants.
-export default function CalloutBox({ variant, title, children, onDismiss, dismissLabel }: CalloutBoxProps) {
+export default function CalloutBox({ variant, title, children, onDismiss, dismissLabel, live }: CalloutBoxProps) {
   const token = TOKEN[variant]
+  // `live="polite"` swaps the assertive alert for a polite status region (a ticking
+  // countdown); `live="off"` drops the live region entirely; default keeps the
+  // existing alert-on-warning/danger behaviour.
+  const role = live === 'polite' ? 'status' : live === 'off' ? undefined
+    : (variant === 'danger' || variant === 'warning' ? 'alert' : undefined)
   return (
-    <div role={variant === 'danger' || variant === 'warning' ? 'alert' : undefined}
+    <div role={role} aria-live={live === 'polite' ? 'polite' : undefined}
       style={{
         background: TOKEN_BG[variant],
         border: `1px solid ${tint(token, 40)}`,

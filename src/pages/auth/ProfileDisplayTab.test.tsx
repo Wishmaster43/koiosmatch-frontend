@@ -32,18 +32,23 @@ vi.mock('@/lib/api', async () => {
 })
 
 describe('ProfileDisplayTab · language picker', () => {
-  it('renders every language autonym via t(), never a hardcoded label', async () => {
+  it('renders every language autonym via t(), never a hardcoded label — via the shared searchable SelectMenu', async () => {
     const user = userEvent.setup()
     render(<ProfileDisplayTab form={{ firstname: '', lastname: '', email: '', phone: '' }} setForm={vi.fn()}
       theme="light" setTheme={vi.fn()} language="en" setLanguage={vi.fn()} />)
 
-    // Closed state shows the current language's autonym next to its flag.
-    expect(screen.getByText(/English/)).toBeInTheDocument()
+    // Closed state shows the current language's autonym next to its flag, and the
+    // trigger is the shared SelectMenu (a searchable listbox), not a hand-rolled dropdown.
+    const trigger = screen.getByRole('button', { expanded: false, name: /English/ })
+    expect(trigger).toBeInTheDocument()
 
-    // Opening the list shows every configured language by its own autonym.
-    await user.click(screen.getByText(/English/))
+    // Opening the list shows every configured language by its own autonym, plus a search box (DROPDOWN-CLEAR-1 sibling: the searchable-everywhere rule).
+    await user.click(trigger)
+    expect(screen.getByPlaceholderText('search')).toBeInTheDocument()
     for (const name of Object.values(LANGUAGE_NAMES)) {
-      expect(screen.getByText(name)).toBeInTheDocument()
+      // The trigger keeps showing the CURRENT selection while open, so a language
+      // that is also the current one appears twice (trigger + menu row) — assert presence, not uniqueness.
+      expect(screen.getAllByText(new RegExp(name)).length).toBeGreaterThan(0)
     }
   })
 })
@@ -56,13 +61,13 @@ describe('ProfileDisplayTab · Koios AI mode (K0)', () => {
       theme="light" setTheme={vi.fn()} language="en" setLanguage={vi.fn()} />,
   )
 
-  it('keeps the auto_messages checkbox disabled while wizard is active (the default)', async () => {
+  it('keeps the auto_messages Toggle disabled while wizard is active (the default)', async () => {
     renderTab()
-    const checkbox = await screen.findByRole('checkbox', { name: 'profile.koiosMode.autoMessagesHint' })
-    expect(checkbox).toBeDisabled()
+    const toggle = await screen.findByRole('switch', { name: 'profile.koiosMode.autoMessages' })
+    expect(toggle).toBeDisabled()
   })
 
-  it('PUTs { mode: "auto", auto_messages: false } and enables the checkbox when Auto is picked', async () => {
+  it('PUTs { mode: "auto", auto_messages: false } and enables the Toggle when Auto is picked', async () => {
     vi.mocked(api.put).mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     renderTab()
@@ -70,7 +75,16 @@ describe('ProfileDisplayTab · Koios AI mode (K0)', () => {
     await user.click(await screen.findByRole('button', { name: 'profile.koiosMode.auto' }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/settings/my-koios-mode', { mode: 'auto', auto_messages: false }))
-    expect(screen.getByRole('checkbox', { name: 'profile.koiosMode.autoMessagesHint' })).not.toBeDisabled()
+    expect(screen.getByRole('switch', { name: 'profile.koiosMode.autoMessages' })).not.toBeDisabled()
+  })
+
+  it('a failed GET never shows the editor seeded with the hard-coded default as the loaded truth (§0 four UI states)', async () => {
+    vi.mocked(api.get).mockRejectedValueOnce(new Error('500'))
+    renderTab()
+
+    // The error surface renders instead of the mode pills — never a silent wizard default.
+    expect(await screen.findByText('profile.koiosMode.loadError')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'profile.koiosMode.wizard' })).not.toBeInTheDocument()
   })
 })
 

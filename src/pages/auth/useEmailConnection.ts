@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 
-export type EmailStatus = 'loading' | 'disconnected' | 'connected' | 'unavailable'
+export type EmailStatus = 'loading' | 'disconnected' | 'connected' | 'unavailable' | 'error'
 export interface EmailInfo { provider: string | null; email: string | null }
 export interface SmtpForm {
   host: string; port: string; user: string; pass: string
@@ -31,14 +31,16 @@ export function useEmailConnection() {
   const [info,   setInfo]   = useState<EmailInfo>({ provider: null, email: null })
   const [busy,   setBusy]   = useState(false)
 
-  // Load the current personal-mailbox state (404 → feature unavailable).
+  // Load the current personal-mailbox state (404 → feature unavailable, any
+  // other failure → a real error state — never fall into 'disconnected', which
+  // would invite a user whose mailbox IS connected to connect it again, §0 four UI states).
   const load = async () => {
     try {
       const d = (await api.get('/profile/email')).data
       setStatus(d?.status ?? 'disconnected')
       setInfo({ provider: d?.provider ?? null, email: d?.email ?? null })
     } catch (e) {
-      setStatus(statusOf(e) === 404 ? 'unavailable' : 'disconnected')
+      setStatus(statusOf(e) === 404 ? 'unavailable' : 'error')
     }
   }
   useEffect(() => { load() }, [])
@@ -90,5 +92,5 @@ export function useEmailConnection() {
     setBusy(false)
   }
 
-  return { status, info, busy, connectOauth, saveSmtp, disconnect }
+  return { status, info, busy, connectOauth, saveSmtp, disconnect, reload: load }
 }

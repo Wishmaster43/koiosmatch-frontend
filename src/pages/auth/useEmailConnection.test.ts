@@ -19,6 +19,28 @@ vi.mock('@/lib/api', () => ({ default: { get: vi.fn(), post: vi.fn() } }))
 describe('useEmailConnection', () => {
   beforeEach(() => vi.clearAllMocks())
 
+  it('load: a non-404 GET failure sets an error status, never disconnected (§0 four UI states)', async () => {
+    vi.mocked(api.get).mockRejectedValueOnce({ response: { status: 500 } })
+    const { result } = renderHook(() => useEmailConnection())
+    await waitFor(() => expect(result.current.status).toBe('error'))
+  })
+
+  it('load: a 404 GET failure still degrades to the calm unavailable state', async () => {
+    vi.mocked(api.get).mockRejectedValueOnce({ response: { status: 404 } })
+    const { result } = renderHook(() => useEmailConnection())
+    await waitFor(() => expect(result.current.status).toBe('unavailable'))
+  })
+
+  it('reload: re-runs the GET (used by the error state\'s retry button)', async () => {
+    vi.mocked(api.get).mockRejectedValueOnce({ response: { status: 500 } })
+    const { result } = renderHook(() => useEmailConnection())
+    await waitFor(() => expect(result.current.status).toBe('error'))
+
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { status: 'disconnected' } })
+    await act(async () => { await result.current.reload() })
+    expect(result.current.status).toBe('disconnected')
+  })
+
   it('disconnect: only flips to disconnected once the server confirms', async () => {
     vi.mocked(api.get).mockResolvedValueOnce({ data: { status: 'connected', provider: 'gmail', email: 'a@b.nl' } })
     vi.mocked(api.post).mockResolvedValueOnce({ data: {} })

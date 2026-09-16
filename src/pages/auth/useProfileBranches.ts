@@ -33,13 +33,17 @@ export function useProfileBranches() {
   const [defaultBranchId, setDefaultBranchId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  // Load and save failures are DIFFERENT states (verifier finding): a failed PUT
+  // must never replace the working picker with a danger callout — only a failed
+  // GET should hide the list. Kept as two fields so callers never conflate them.
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   // Load the user's branch list + current default once (on mount).
   useEffect(() => {
     let cancelled = false
     setLoading(true)
-    setError(null)
+    setLoadError(null)
     api.get('/profile/branches')
       .then(res => {
         if (!cancelled) {
@@ -52,7 +56,7 @@ export function useProfileBranches() {
         if (!cancelled) {
           // A failed LOAD is a load error, never the save wording.
           const message = extractApiError(err, t('common:error.loadFailed'))
-          setError(message)
+          setLoadError(message)
           notifyError(message)
         }
       })
@@ -62,7 +66,7 @@ export function useProfileBranches() {
 
   // Set the default branch; null clears it (promotes the first remaining).
   const setDefault = async (locationId: string | null) => {
-    setSaving(true); setError(null)
+    setSaving(true); setSaveError(null)
     try {
       const res = await api.put('/profile/default-branch', { location_id: locationId })
       const data = res.data as ProfileBranchesResponse
@@ -73,12 +77,12 @@ export function useProfileBranches() {
       notifySuccess(t('profile.defaultBranchSaved'))
     } catch (err) {
       const msg = extractApiError(err, t('profile.defaultBranchSaveFailed'))
-      setError(msg)
+      setSaveError(msg)
       notifyError(msg)
     } finally {
       setSaving(false)
     }
   }
 
-  return { branches, defaultBranchId, loading, saving, error, setDefault }
+  return { branches, defaultBranchId, loading, saving, loadError, saveError, setDefault }
 }

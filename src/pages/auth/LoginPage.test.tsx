@@ -79,3 +79,22 @@ describe('LoginPage · 429 throttle countdown', () => {
     expect(screen.getByRole('button', { name: nlAuth.login.signIn })).toBeEnabled()
   })
 })
+
+// §4 tokens only — the login card used to hand-paint Tailwind text-gray-900/
+// bg-white/text-amber-700 regardless of theme; in dark theme (ThemeProvider
+// wraps /login) that read near-black text on white inputs inside a dark card.
+describe('LoginPage · §4 tokens, no ad-hoc Tailwind greys', () => {
+  it('renders the title, inputs and session-expired notice without hardcoded grey/white/amber classes', () => {
+    sessionStorage.setItem('km_session_expired', '1')
+    renderLogin()
+
+    const html = document.body.innerHTML
+    expect(html).not.toMatch(/text-gray-\d/)
+    expect(html).not.toMatch(/bg-white/)
+    expect(html).not.toMatch(/amber-\d/)
+
+    // The session-expired notice renders through the shared CalloutBox (role=alert).
+    expect(screen.getByRole('alert')).toHaveTextContent(nlAuth.login.sessionExpired)
+    sessionStorage.removeItem('km_session_expired')
+  })
+})

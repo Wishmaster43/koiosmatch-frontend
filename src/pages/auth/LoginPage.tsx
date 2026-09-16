@@ -16,6 +16,9 @@ import { useAuth } from '@/context/AuthContext'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
+import CalloutBox from '@/components/ui/CalloutBox'
+import { PageTitle, BodyText, FormLabel } from '@/components/ui/typography'
+import { FIELD_FONT_SIZE } from '@/components/forms/fieldMetrics'
 // DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
 import { extractApiError } from '@/lib/extractApiError'
 
@@ -142,34 +145,34 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
 
   return (
     <>
-      <h1 className="mb-1 text-2xl font-semibold text-gray-900">{t('login.title')}</h1>
-      <p className="mb-8 text-sm text-gray-500">{t('login.subtitle')}</p>
+      <PageTitle as="h1" style={{ marginBottom: 4 }}>{t('login.title')}</PageTitle>
+      <BodyText style={{ color: 'var(--text-muted)', marginBottom: 32 }}>{t('login.subtitle')}</BodyText>
 
       {expired && !error && (
-        <div className="mb-4 rounded-lg px-3 py-2.5 text-sm text-amber-700 bg-amber-50 border border-amber-200">
-          {t('login.sessionExpired')}
+        <div style={{ marginBottom: 16 }}>
+          <CalloutBox variant="warning">{t('login.sessionExpired')}</CalloutBox>
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
-          <label htmlFor="login-email" className="block text-xs font-medium text-gray-700 mb-1.5">{t('login.email')}</label>
+          <FormLabel htmlFor="login-email" style={{ display: 'block', marginBottom: 6 }}>{t('login.email')}</FormLabel>
           <input id="login-email" type="email" value={email} onChange={e => setEmail(e.target.value)}
             placeholder={t('login.emailPlaceholder')} required autoFocus
-            className="w-full text-sm text-gray-900 bg-white rounded-lg"
-            style={{ padding: '10px 12px', border: '1px solid var(--border)', outline: 'none' }}
+            className="w-full rounded-lg"
+            style={{ padding: '10px 12px', border: '1px solid var(--border)', outline: 'none', fontSize: FIELD_FONT_SIZE, color: 'var(--text)', background: 'var(--input-bg)' }}
             onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
             onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
         </div>
 
         <div>
-          <label htmlFor="login-password" className="block text-xs font-medium text-gray-700 mb-1.5">{t('login.password')}</label>
+          <FormLabel htmlFor="login-password" style={{ display: 'block', marginBottom: 6 }}>{t('login.password')}</FormLabel>
           <div className="relative">
             <input id="login-password" type={showPw ? 'text' : 'password'} value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder={t('login.password')} required
-              className="w-full text-sm text-gray-900 bg-white rounded-lg"
-              style={{ padding: '10px 40px 10px 12px', border: '1px solid var(--border)', outline: 'none' }}
+              className="w-full rounded-lg"
+              style={{ padding: '10px 40px 10px 12px', border: '1px solid var(--border)', outline: 'none', fontSize: FIELD_FONT_SIZE, color: 'var(--text)', background: 'var(--input-bg)' }}
               onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
               onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
             {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- field-internal chrome (BUTTON-GRENS): the eye lives INSIDE the input's box; Button's 28px square would not sit in the field padding */}
@@ -185,11 +188,13 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
 
         {error && <ErrorBanner>{error}</ErrorBanner>}
 
-        {/* Throttle notice — calm (expected state, not an error), with a LIVE countdown. */}
+        {/* Throttle notice — calm (expected state, not an error), with a LIVE countdown.
+            `live="polite"` so the per-second re-render announces politely, not as an
+            assertive interruption every tick (§6). */}
         {throttled && (
-          <div role="status" className="rounded-lg px-3 py-2.5 text-sm text-amber-700 bg-amber-50 border border-amber-200">
+          <CalloutBox variant="warning" live="polite">
             {t('login.throttled', { seconds: retryAfter })}
-          </div>
+          </CalloutBox>
         )}
 
         <Button type="submit" variant="soft" size="md" disabled={loading || throttled}
@@ -252,8 +257,8 @@ function MfaForm({ mfaToken, onBack }: { mfaToken: string; onBack: () => void })
           <ShieldCheck size={22} style={{ color: 'var(--color-primary-text)' }} />
         </div>
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">{t('mfa.title')}</h1>
-          <p className="text-sm text-gray-500">{t('mfa.openApp')}</p>
+          <PageTitle as="h1">{t('mfa.title')}</PageTitle>
+          <BodyText style={{ color: 'var(--text-muted)' }}>{t('mfa.openApp')}</BodyText>
         </div>
       </div>
 
@@ -263,12 +268,12 @@ function MfaForm({ mfaToken, onBack }: { mfaToken: string; onBack: () => void })
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
-          <label htmlFor="mfa-code" className="block text-xs font-medium text-gray-700 mb-1.5">{t('mfa.codeLabel')}</label>
+          <FormLabel htmlFor="mfa-code" style={{ display: 'block', marginBottom: 6 }}>{t('mfa.codeLabel')}</FormLabel>
           <input id="mfa-code" ref={inputRef} type="text" inputMode="numeric" pattern="\d{6}"
             value={code} onChange={handleChange}
             placeholder="123456" maxLength={6} required
-            className="w-full text-sm text-gray-900 bg-white rounded-lg"
-            style={{ padding: '12px 14px', border: '1px solid var(--border)', outline: 'none',
+            className="w-full rounded-lg"
+            style={{ padding: '12px 14px', border: '1px solid var(--border)', outline: 'none', background: 'var(--input-bg)', color: 'var(--text)',
                      fontSize: 20, letterSpacing: '0.25em', textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}
             onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
             onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
