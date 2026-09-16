@@ -11,6 +11,27 @@
 export interface ReportTimeseries { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
 export interface ReportKpiCard { key: string; label?: string; count: number | null; unit?: 'pct' | 'ratio' | 'euro' | 'days' }
 
+// One tenant-defined KPI card (KPI-BUILDER-1) riding a report envelope's
+// `custom_kpis[]`. Hand-written (§10: no 2xx schema for this route yet) from
+// the served demo shape (KPI-BUILDER-FE-1 §0.2) — `dimension_value`/`dimension_label`
+// are null for an "all" (no fan-out) definition, `target`/`warn` null when unset,
+// `comparison` 'none' when the tenant configured no threshold.
+export interface CustomKpiCard {
+  id: string
+  entity: string
+  metric_key: string
+  label: string
+  dimension: string
+  dimension_value: string | null
+  dimension_label: string | null
+  value: number | null
+  unit: 'count' | 'percent' | 'currency' | 'hours' | 'minutes' | 'days' | 'workdays' | 'weeks' | 'months'
+  target: number | null
+  warn: number | null
+  comparison: 'gte' | 'lte' | 'none'
+  status: 'ok' | 'warn' | 'alert' | 'none'
+}
+
 // One funnel stage in the flow report. `reached_count` = cohort (distinct
 // applications that ever reached this stage → the real funnel); `current_count` =
 // pipeline-now occupancy (the FE fallback while the cohort is still filling).
@@ -115,6 +136,8 @@ export interface VacanciesReportData {
   // matches/opportunities/tasks) — optional: a cached pre-suite envelope omits
   // it, and the strip renders the house dash with no drill for a missing key.
   kpis?: ReportKpiCard[]
+  // KPI-BUILDER-FE-1: tenant-defined KPI cards for this entity, rendered as a second band row.
+  custom_kpis?: CustomKpiCard[]
 }
 
 // ── Matches report (GET /reports/matches) ────────────────────────────────────
@@ -166,6 +189,8 @@ export interface MatchesReportData {
   // enum). Optional so a cached pre-update response still parses. Server sends a
   // `label` per card too — deliberately ignored (§5: labels come from i18n).
   kpis?: ReportKpiCard[]
+  // KPI-BUILDER-FE-1: tenant-defined KPI cards for this entity, rendered as a second band row.
+  custom_kpis?: CustomKpiCard[]
 }
 
 // ── Intakes report (GET /reports/intakes, C-22) ──────────────────────────────
@@ -223,6 +248,8 @@ export interface OutreachReportData {
   campaign_timeseries?: { campaign_id: string; name: string; series: { date: string; count: number }[] }[]
   // Sparse: only cells with attempts>0. weekday is ISO (1=Mon); rate is PERCENT.
   best_contact_heatmap?: { weekday: number; part: 'ochtend' | 'middag' | 'avond'; attempts: number; reached: number; rate: number }[]
+  // KPI-BUILDER-FE-1: tenant-defined KPI cards for this entity, rendered as a second band row.
+  custom_kpis?: CustomKpiCard[]
 }
 
 // ── WhatsApp report (GET /reports/whatsapp, RAPPORTEN-WHATSAPP-FE-1) ────────────
@@ -255,6 +282,8 @@ export interface WhatsappReportData {
   // enum values, zero-filled — optional so an older envelope keeps rendering.
   by_channel?: WhatsappSegment[]
   top_conversations: WhatsappTopConversation[]
+  // KPI-BUILDER-FE-1: tenant-defined KPI cards for this entity, rendered as a second band row.
+  custom_kpis?: CustomKpiCard[]
 }
 
 // ── Candidates/leads inflow report (GET /reports/candidates, RAPPORTEN-SUITE-1) ─
@@ -283,6 +312,8 @@ export interface CandidatesReportData {
   by_source: CandidateSegment[]
   by_owner: CandidateOwnerSegment[]
   by_branch: CandidateSegment[]
+  // KPI-BUILDER-FE-1: tenant-defined KPI cards for this entity, rendered as a second band row.
+  custom_kpis?: CustomKpiCard[]
 }
 
 // ── Applications report (GET /reports/applications, RAPPORTEN-SUITE-1 "portie 2") ─
@@ -344,6 +375,8 @@ export interface ApplicationsReportData {
   by_stage_duration: ApplicationStageDurationSegment[]
   kpis: ApplicationKpiCard[]
   intakes: ApplicationIntakesBlock
+  // KPI-BUILDER-FE-1: tenant-defined KPI cards for this entity, rendered as a second band row.
+  custom_kpis?: CustomKpiCard[]
 }
 
 // ── Customers report (GET /reports/customers, RAPPORTEN-SUITE-1 "portie 3") ──
@@ -379,6 +412,8 @@ export interface CustomersReportData {
   churn_trend?: { month: string; churned: number }[]
   // 6 trailing months, fixed window (ignores this report's period).
   by_owner_x_period?: { owner_id: string | null; name: string; months: { month: string; count: number }[] }[]
+  // KPI-BUILDER-FE-1: tenant-defined KPI cards for this entity, rendered as a second band row.
+  custom_kpis?: CustomKpiCard[]
 }
 
 // One concentration row (≤5 + a synthetic 'others' row with customer_id null).
@@ -460,6 +495,8 @@ export interface OpportunitiesReportData {
   by_branch: ApplicationTopSegment[]
   forecast: OpportunityForecastRow[]
   stale: { untouched_days: number; untouched: number; overdue: number }
+  // KPI-BUILDER-FE-1: tenant-defined KPI cards for this entity, rendered as a second band row.
+  custom_kpis?: CustomKpiCard[]
 }
 
 // ── Tasks report (GET /reports/tasks, RAPPORTEN-SUITE-1 "portie 6") ──────────
@@ -497,6 +534,8 @@ export interface TasksReportData {
   // enum). Optional so a cached pre-update response still parses. Server sends a
   // `label` per card too — deliberately ignored (§5: labels come from i18n).
   kpis?: ReportKpiCard[]
+  // KPI-BUILDER-FE-1: tenant-defined KPI cards for this entity, rendered as a second band row.
+  custom_kpis?: CustomKpiCard[]
 }
 
 // ── Sources report (GET /reports/sources, REPORTS-2 fase 2) ──────────────────
