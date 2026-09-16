@@ -209,12 +209,16 @@ export default function ApplicationRow({ candidateId, row, appointment, canManag
               <Unlink size={12} />
             </button>
           )}
-          {/* The vacancy's OWN public URL (tenant-entered, isSafeUrl-gated) — unchanged. */}
+          {/* The vacancy's OWN public URL (tenant-entered, isSafeUrl-gated) — now the
+              house Button (HUISSTIJL-1 rule 3: a link that looks like a button
+              renders via Button's polymorphic `href`), matching the join-meeting
+              Button a few lines below instead of a hand-styled <a>. */}
           {url && (
-            <a href={url} target="_blank" rel="noopener noreferrer" title={t('work.openVacancy')} aria-label={t('work.openVacancy')}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: 5, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-muted)', flexShrink: 0 }}>
+            <Button href={url} target="_blank" rel="noopener noreferrer" variant="secondary" size="sm" iconOnly
+              title={t('work.openVacancy')} aria-label={t('work.openVacancy')}
+              style={{ width: 24, height: 24, padding: 0, borderRadius: 5, flexShrink: 0 }}>
               <ExternalLink size={12} />
-            </a>
+            </Button>
           )}
           {/* The explicit, keyboard-reachable disclosure (the row click is only a
               mouse convenience on top of it) — same chevron pair as MatchCard. */}

@@ -28,6 +28,7 @@ import type { ComponentType } from 'react'
 import { BadgeCheck } from 'lucide-react'
 import AddableSectionJs from '@/components/forms/AddableSection'
 import SoftChip from '@/components/ui/SoftChip'
+import Button from '@/components/ui/Button'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import DrawerAddButton from './DrawerAddButton'
 import { useRelationSort } from '@/components/forms/useRelationSort'
@@ -239,14 +240,11 @@ export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onV
                     </span>
                   } />
                 ) : (onVerify && isPersisted(r.id)) ? (
-                  <button type="button" onClick={() => onVerify(i)}
-                    title={t('references.verify', { defaultValue: 'Verifiëren' })}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'none',
-                      border: '1px solid var(--border)', borderRadius: 6, padding: '3px 8px', fontSize: 11,
-                      color: 'var(--text-muted)', cursor: 'pointer' }}>
+                  <Button type="button" variant="secondary" size="sm" onClick={() => onVerify(i)}
+                    title={t('references.verify', { defaultValue: 'Verifiëren' })}>
                     <BadgeCheck size={12} />
                     {t('references.verify', { defaultValue: 'Verifiëren' })}
-                  </button>
+                  </Button>
                 ) : null}
               </div>
             </div>

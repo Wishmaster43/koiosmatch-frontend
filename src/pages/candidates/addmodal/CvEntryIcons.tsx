@@ -10,12 +10,14 @@
  * bordered icon idiom (ProfileTab's own pop-out affordance).
  */
 import { useRef, useState } from 'react'
-import type { ChangeEvent, CSSProperties } from 'react'
+import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FileUp, ClipboardPaste } from 'lucide-react'
 import { CV_ACCEPT_ATTR, CV_TEXT_MIN_CHARS, CV_TEXT_MAX_CHARS } from './useCvParse'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 import { useClickOutside } from '@/hooks/useClickOutside'
+import Button from '@/components/ui/Button'
+import { tintBg, tintBorder } from '@/lib/tint'
 
 interface CvEntryIconsProps {
   onFile: (file: File) => void
@@ -23,15 +25,14 @@ interface CvEntryIconsProps {
 }
 
 // Tenant-tinted icon buttons (Danny 14-08 "icons in kleur van tenant zoals de
-// knoppen"): the §4 soft-tint recipe the shared buttons wear — primary tint,
-// primary border, AA primary text — slightly larger than the muted 26px idiom.
-const iconBtn: CSSProperties = {
-  width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center',
-  borderRadius: 8, cursor: 'pointer',
-  background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
-  border: '1px solid color-mix(in srgb, var(--color-primary) 40%, transparent)',
+// knoppen"): the §4 soft-tint recipe (lib/tint's house 10/33-16/50 pair, never
+// an ad-hoc color-mix percentage), slightly larger than the muted 26px idiom.
+const iconBtnStyle = (active = false) => ({
+  width: 30, height: 30, padding: 0, borderRadius: 8,
+  background: tintBg('var(--color-primary)', active),
+  border: tintBorder('var(--color-primary)', active),
   color: 'var(--color-primary-text)',
-}
+})
 
 // Two compact icon buttons for starting a candidate from a CV: upload (file
 // picker) and paste (a small popover feeding the same parse flow).
@@ -68,24 +69,22 @@ export default function CvEntryIcons({ onFile, onSubmitText }: CvEntryIconsProps
 
   return (
     <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 6 }}>
-      <button type="button" onClick={() => inputRef.current?.click()}
-        title={t('modal.cv.uploadButton')} aria-label={t('modal.cv.uploadButton')} style={iconBtn}>
+      <Button type="button" iconOnly onClick={() => inputRef.current?.click()}
+        title={t('modal.cv.uploadButton')} aria-label={t('modal.cv.uploadButton')} style={iconBtnStyle()}>
         <FileUp size={14} />
-      </button>
+      </Button>
       {/* The real input: labelled for assistive tech, kept out of the tab order and
           out of sight — the visible button is what drives it (§6). */}
       <input ref={inputRef} type="file" accept={CV_ACCEPT_ATTR} onChange={handleChange}
         aria-label={t('modal.cv.choose')} tabIndex={-1}
         style={{ position: 'absolute', width: 0, height: 0, opacity: 0, border: 0, padding: 0 }} />
 
-      <button type="button" onClick={() => setPasteOpen(o => !o)} aria-expanded={pasteOpen}
+      {/* Open = the stronger active tint (§4: active is a stronger tint + weight). */}
+      <Button type="button" iconOnly onClick={() => setPasteOpen(o => !o)} aria-expanded={pasteOpen} aria-pressed={pasteOpen}
         title={t('modal.cvPaste.openButton')} aria-label={t('modal.cvPaste.openButton')}
-        style={{ ...iconBtn,
-          // Open = the stronger active tint (§4: active is a stronger tint + weight).
-          background: pasteOpen ? 'color-mix(in srgb, var(--color-primary) 16%, transparent)' : iconBtn.background,
-          borderColor: pasteOpen ? 'color-mix(in srgb, var(--color-primary) 50%, transparent)' : undefined }}>
+        style={iconBtnStyle(pasteOpen)}>
         <ClipboardPaste size={14} />
-      </button>
+      </Button>
 
       {pasteOpen && (
         <div ref={popoverRef}
@@ -98,14 +97,9 @@ export default function CvEntryIcons({ onFile, onSubmitText }: CvEntryIconsProps
             style={{ minHeight: 90, resize: 'vertical', fontSize: 12, color: 'var(--text)',
               background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 6, padding: '8px 10px' }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <button type="button" disabled={!canSubmit} onClick={submit}
-              style={{ height: 26, padding: '0 12px', fontSize: 12, borderRadius: 8,
-                cursor: canSubmit ? 'pointer' : 'not-allowed',
-                border: '1px solid color-mix(in srgb, var(--color-primary) 45%, transparent)',
-                background: 'color-mix(in srgb, var(--color-primary) 8%, transparent)', color: 'var(--color-primary-text)',
-                fontWeight: 600, opacity: canSubmit ? 1 : 0.5 }}>
+            <Button type="button" variant="primary" size="sm" disabled={!canSubmit} onClick={submit}>
               {t('modal.cvPaste.submit')}
-            </button>
+            </Button>
             {tooShort && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('modal.cvPaste.tooShort', { min: CV_TEXT_MIN_CHARS })}</span>}
           </div>
         </div>

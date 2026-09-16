@@ -52,6 +52,7 @@ import { useTranslation } from 'react-i18next'
 import { ListChecks, Pencil, Search } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import SectionCard from '@/components/ui/SectionCard'
+import SoftChip from '@/components/ui/SoftChip'
 import EntityLink from '@/components/ui/EntityLink'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import DrawerAddButton from './DrawerAddButton'
@@ -145,8 +146,7 @@ function CandidateTasksBody({ candidateId }: { candidateId: Id }) {
     const label = typeof v === 'object' ? v?.label ?? v?.value : v
     const color = (typeof v === 'object' ? v?.color : null) ?? 'var(--text-muted)'
     if (!label) return null
-    return <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 7px', borderRadius: 99, color, whiteSpace: 'nowrap',
-      background: `color-mix(in srgb, ${color} 12%, transparent)`, border: `1px solid color-mix(in srgb, ${color} 35%, transparent)` }}>{label}</span>
+    return <SoftChip size={10} label={label} color={color} round />
   }
 
   // Status filter (Danny live review, 04-08, final shape) — the tenant's real

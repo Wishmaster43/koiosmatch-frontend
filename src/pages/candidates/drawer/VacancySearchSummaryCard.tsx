@@ -9,7 +9,7 @@ import EntityLink from '@/components/ui/EntityLink'
 import StatusPill from '@/components/ui/StatusPill'
 import SearchSummaryCardFrame from '@/components/drawer/SearchSummaryCardFrame'
 import DrawerAddButton from './DrawerAddButton'
-import { useNumberFormat, formatDistanceKm } from '@/lib/formatters'
+import { useNumberFormat } from '@/lib/formatters'
 import { Mono, Caption } from '@/components/ui/typography'
 import { formatRange } from './vacancySearchFormat'
 import type { VacancySearchRow } from '../hooks/useVacancySearch'
@@ -44,8 +44,10 @@ export default function VacancySearchSummaryCard({
   statusMeta: (status?: string | null) => VacancyLookupItem
 }) {
   const { t } = useTranslation('candidates')
-  // Tenant currency + app locale for the salary range (I18N-1 L5).
-  const { formatCurrency } = useNumberFormat()
+  // Tenant currency + app locale for the salary range (I18N-1 L5); the distance
+  // uses the same active-locale hook (GETALLEN-1) instead of the pure formatter's
+  // nl-NL default, so an en-GB tenant sees "12.5 km" next to "£1,200".
+  const { formatCurrency, formatDistanceKm } = useNumberFormat()
 
   // Chip row: distance + status + (when present) the employment-type badge and
   // the hours-per-week readout — already-fetched search-row fields, no extra request.

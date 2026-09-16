@@ -12,7 +12,7 @@ import type { Column } from '@/components/ui/DataTable'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import SoftChip from '@/components/ui/SoftChip'
 import EntityLink from '@/components/ui/EntityLink'
-import { BodyText, Caption } from '@/components/ui/typography'
+import { BodyText, Caption, PageTitle } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import { useCouplingErrors, type CouplingErrorRow } from './hooks/useCouplingErrors'
 
@@ -70,8 +70,8 @@ export default function CouplingErrorsPage() {
   return (
     <div className="flex flex-col h-full p-6">
       <div style={{ marginBottom: 16 }}>
-        <h1 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>{t('couplingErrors.title')}</h1>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>{t('couplingErrors.subtitle')}</p>
+        <PageTitle as="h1">{t('couplingErrors.title')}</PageTitle>
+        <Caption as="p" style={{ marginTop: 2 }}>{t('couplingErrors.subtitle')}</Caption>
       </div>
 
       {/* Explicit error state (§3): the fetch itself failed, distinct from an empty result. */}

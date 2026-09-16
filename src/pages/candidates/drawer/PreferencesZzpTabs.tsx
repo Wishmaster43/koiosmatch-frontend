@@ -205,13 +205,15 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
     { key: 'driver_licenses',       label: t('preferences.license'),       group: t('preferences.groupTravel'), type: 'chips', chipOptions: licenseOptions,
       renderValue: (v: unknown) => chipRowValue(v, x => {
         const icon = licenseIconOf(x)
+        // SoftChip — the ONE chip component (§4, HUISSTIJL-1); same recipe as the
+        // contract-form chips above instead of a hand-rolled full-strength pill.
         return (
-          <span key={x}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 9px', borderRadius: 999, fontSize: 11, fontWeight: 500,
-            background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', border: '1px solid var(--color-primary)' }}>
-            {icon && <LookupIcon icon={icon} size={11} />}
-            {x}
-          </span>
+          <SoftChip key={x} color="var(--color-primary)" round label={
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              {icon && <LookupIcon icon={icon} size={11} />}
+              {x}
+            </span>
+          } />
         )
       }) },
     { key: 'wage_tax',      label: t('preferences.wageTax'),       group: t('preferences.groupPayroll'), type: 'checkbox' },

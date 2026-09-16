@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next'
 import { CalendarClock } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
 import CalloutBox from '@/components/ui/CalloutBox'
+import Button from '@/components/ui/Button'
 import { deriveAvailableFrom, toNoticeWeeks } from './noticePeriod'
 
 interface NoticePeriodHintProps {
@@ -55,13 +56,11 @@ export default function NoticePeriodHint({ weeks, availableFrom, onApply, canApp
         <span style={{ flex: 1, minWidth: 160, fontSize: 12 }}>
           {t('preferences.noticePeriodDerivedHint', { count: toNoticeWeeks(weeks), date: formatDate(derived) })}
         </span>
-        {/* A real bordered button, never coloured text posing as a link (Danny 08-08). */}
+        {/* A real house Button, never coloured text posing as a link (Danny 08-08). */}
         {canApply && onApply && (
-          <button type="button" onClick={() => onApply(derived)}
-            style={{ flexShrink: 0, padding: '5px 11px', fontSize: 12, fontWeight: 600, borderRadius: 7, cursor: 'pointer',
-              color: 'var(--text)', background: 'var(--surface)', border: '1px solid var(--border)' }}>
+          <Button type="button" variant="secondary" size="sm" onClick={() => onApply(derived)} style={{ flexShrink: 0 }}>
             {t('preferences.noticePeriodApply')}
-          </button>
+          </Button>
         )}
       </div>
     </CalloutBox>

@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
 import api from '@/lib/api'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import { BodyText } from '@/components/ui/typography'
+import { BodyText, PageTitle, Mono } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
 
@@ -53,7 +53,7 @@ export default function DeletionPreviewModal({ candidateId, candidateName, onClo
       header={
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center', background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}><AlertTriangle size={16} /></span>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('erase.confirmTitle')}</span>
+          <PageTitle as="span" style={{ fontWeight: 700 }}>{t('erase.confirmTitle')}</PageTitle>
         </div>
       }>
 
@@ -71,7 +71,7 @@ export default function DeletionPreviewModal({ candidateId, candidateName, onClo
               <div key={r.k} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 12px', fontSize: 12.5,
                 borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none', color: 'var(--text)' }}>
                 <span>{t(`erase.item.${r.k}`)}</span>
-                <span style={{ fontWeight: 600, fontFamily: 'JetBrains Mono, monospace' }}>{r.n}</span>
+                <Mono style={{ fontWeight: 600 }}>{r.n}</Mono>
               </div>
             ))}
           </div>
