@@ -54,37 +54,18 @@ import ModalFooter from '@/components/ui/ModalFooter'
 import ModalScrollBody from '@/components/forms/ModalScrollBody'
 import { tintBg, tintBorder } from '@/lib/tint'
 import type { DrawerAddApplicationModalProps } from '../AddApplicationModal'
+// CLONE-BY-CONSTRUCTION-1 (§16): fieldRow/fieldControl + the ApplicationFieldRow
+// wrapper used to be defined locally here (and, identically, in
+// PageAddApplicationModal/SearchPickField) — now the one shared unit.
+import { ApplicationFieldRow } from './ApplicationFieldRow'
+import { fieldRow, fieldControl } from './applicationFieldRowStyles'
 
-// Label-left canon (P32, batch 5): label column fixed at CANON_LABEL_WIDTH, control fills the rest.
-const fieldRow: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10 }
-const fieldControl: React.CSSProperties = { flex: 1, minWidth: 0 }
 // Consistent searchable-menu width (mirrors PlanIntakeModal/MatchModal's vacancy picker).
 const pickerMenuWidth = 340
 // S24c (Danny 24-07): the exact "+ Kandidaat toevoegen" combobox footprint
 // (mirrors addmodal/fields.tsx's CreatableSelect wrapper) — every searchable
 // picker in this modal must render at the same height as the reference modal.
 const fieldFootprint: React.CSSProperties = { padding: '8px 11px', borderRadius: 8, fontSize: 13 }
-
-// ApplicationFieldRow — the shared label-left row + inline required-error line
-// used by the phase/owner/source pickers below (each keeps its own domain
-// comment and CreatableSelect at the call site; this only carries the markup).
-function ApplicationFieldRow({ fieldId, label, required, error, errorText, children }: {
-  fieldId: string; label: React.ReactNode; required?: boolean; error?: boolean; errorText: React.ReactNode; children: React.ReactNode
-}) {
-  return (
-    <div style={{ marginBottom: 14 }}>
-      <div style={fieldRow}>
-        <div id={`${fieldId}-label`} style={CANON_LABEL_STYLE}>{label}{required && requiredMark}</div>
-        <div style={fieldControl}>{children}</div>
-      </div>
-      {error && (
-        <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>
-          {errorText}
-        </div>
-      )}
-    </div>
-  )
-}
 
 // Create-or-edit modal for one candidate's application: wires the tenant lookups
 // (vacancies/stages/users/sources/settings/custom fields) and the AXIS-MATRIX

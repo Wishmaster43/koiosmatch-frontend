@@ -46,6 +46,12 @@ import Button from '@/components/ui/Button'
 import ModalFooter from '@/components/ui/ModalFooter'
 import { BodyText } from '@/components/ui/typography'
 import { tintBorder } from '@/lib/tint'
+import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
+// LABEL-LEFT-1 (§3A: modals mirror the drill-down — label LEFT of the field,
+// canon label width ~120px). CLONE-BY-CONSTRUCTION-1 (§16): the row layout is
+// the ONE shared unit, not a third local copy (this file's twin,
+// DrawerAddApplicationModal, and its sibling SearchPickField import the same).
+import { fieldRow, fieldControl } from './applicationFieldRowStyles'
 
 type AnyProps = Record<string, unknown>
 const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
@@ -96,12 +102,14 @@ function PickField({ label, style, value, ariaRequired, ...rest }: { label: Reac
   // prefixes aria-labelledby with the label, so it now reads "Recruiter, Piet Recruiter".
   const labelId = useId()
   return (
-    <div>
-      <div id={labelId} style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{label}</div>
+    <div style={fieldRow}>
+      <div id={labelId} style={CANON_LABEL_STYLE}>{label}</div>
       {/* REQUIRED-A11Y-4: forward the required-ness to CreatableSelect's own
           'aria-required' prop, which already places it on the trigger button. */}
-      <CreatableSelect allowCreate={false} menuWidth={320} aria-labelledby={labelId} aria-required={ariaRequired || undefined}
-        value={value || null} style={{ width: '100%', ...style }} {...rest} />
+      <div style={fieldControl}>
+        <CreatableSelect allowCreate={false} menuWidth={320} aria-labelledby={labelId} aria-required={ariaRequired || undefined}
+          value={value || null} style={{ width: '100%', ...style }} {...rest} />
+      </div>
     </div>
   )
 }
@@ -288,9 +296,9 @@ export default function PageAddApplicationModal({ onClose, onCreated, lockedVaca
               </Button>
             </div>
             {lockedVacancy ? (
-              <div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('add.vacancy')}</div>
-                <div style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)' }}>
+              <div style={fieldRow}>
+                <div style={CANON_LABEL_STYLE}>{t('add.vacancy')}</div>
+                <div style={{ ...fieldControl, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)' }}>
                   <BodyText as="span">
                     {lockedVacancy.client ? `${lockedVacancy.title} · ${lockedVacancy.client}` : lockedVacancy.title}
                   </BodyText>
@@ -349,17 +357,23 @@ export default function PageAddApplicationModal({ onClose, onCreated, lockedVaca
               same style as the pickers above. Clearable unless the tenant requires it
               (APP-REQUIRED-FE-1, VAC-CLEAR-1: no clear-cross once required). */}
           <div>
-            <label id={`${sourceFieldId}-label`} htmlFor={sourceFieldId} style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>
-              {t('drawer.source')}{sourceRequired && requiredMark}
-            </label>
-            <CreatableSelectJs id={sourceFieldId} aria-labelledby={`${sourceFieldId}-label`} aria-required={sourceRequired}
-              value={source} options={sourceOptions} onChange={setSource}
-              allowCreate={sourceAllowFreeEntry} placeholder={t('drawer.source')}
-              clearable={!sourceRequired} clearLabel={t('drawer.source')}
-              style={{ width: '100%', padding: '6px 10px', fontSize: 12, borderRadius: 6,
-                border: `1px solid ${errors.source ? 'var(--color-danger)' : 'var(--border)'}`,
-                background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box' }} />
+            <div style={fieldRow}>
+              <label id={`${sourceFieldId}-label`} htmlFor={sourceFieldId} style={CANON_LABEL_STYLE}>
+                {t('drawer.source')}{sourceRequired && requiredMark}
+              </label>
+              <div style={fieldControl}>
+                <CreatableSelectJs id={sourceFieldId} aria-labelledby={`${sourceFieldId}-label`} aria-required={sourceRequired}
+                  value={source} options={sourceOptions} onChange={setSource}
+                  allowCreate={sourceAllowFreeEntry} placeholder={t('drawer.source')}
+                  clearable={!sourceRequired} clearLabel={t('drawer.source')}
+                  style={{ width: '100%', padding: '6px 10px', fontSize: 12, borderRadius: 6,
+                    border: `1px solid ${errors.source ? 'var(--color-danger)' : 'var(--border)'}`,
+                    background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box' }} />
+              </div>
+            </div>
             {errors.source && !source.trim() && sourceRequired && (
+              // No label-column indent — mirrors the owner/vacancy/phase error
+              // rows above (x=0) and the twin's ApplicationFieldRow.
               <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }}>
                 {t('common:errors.fieldRequired', { field: t('drawer.source') })}
               </div>

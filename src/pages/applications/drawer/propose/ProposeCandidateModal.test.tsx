@@ -187,6 +187,20 @@ describe('ProposeCandidateModal · sender', () => {
   })
 })
 
+// D8: a failed contacts fetch must render an honest error state, never the
+// "no contacts" empty-state copy (contactsError is a distinct flag from an
+// actually-empty options list).
+describe('ProposeCandidateModal · contacts fetch error', () => {
+  afterEach(() => { formFixture.contactsError = false })
+
+  it('shows the contactsError message, not the empty-state copy, when the contacts fetch fails', () => {
+    formFixture.contactsError = true
+    render(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
+    expect(screen.getByRole('alert')).toHaveTextContent('propose.contactsError')
+    expect(screen.queryByText('propose.noContacts')).toBeNull()
+  })
+})
+
 // While the tenant users are still loading, a preselected default must not be shown as "self".
 describe('ProposeCandidateModal · sender picker while users load', () => {
   it('shows the loading caption instead of the picker (never "self" for a preselected id)', () => {

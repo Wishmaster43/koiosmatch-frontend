@@ -81,6 +81,15 @@ describe('RejectionSummary', () => {
     expect(screen.getByRole('button', { name: 'rejection.correctAction' })).toBeInTheDocument()
   })
 
+  // HUISSTIJL-1: the pencil is the shared Button atom (ghost/iconOnly), never a
+  // hand-painted <button> with its own footprint.
+  it('renders the correction pencil via the house Button (type="button", no ad-hoc size)', () => {
+    render(<RejectionSummary application={app({ bucket: 'rejected', rejection: undefined })} />)
+    const pencil = screen.getByRole('button', { name: 'rejection.correctAction' })
+    expect(pencil).toHaveAttribute('type', 'button')
+    expect(pencil.getAttribute('title')).toBe('rejection.correctAction')
+  })
+
   it('shows the reason, "verstuurd op" and the channel when all are present', () => {
     render(<RejectionSummary application={app({
       rejection: { reason_label: 'Niet gekwalificeerd', sent_at: '2026-07-20T10:00:00Z', channel: 'email' },

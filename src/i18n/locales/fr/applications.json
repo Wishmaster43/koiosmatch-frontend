@@ -467,6 +467,7 @@
     "recipientPlaceholder": "Sélectionner un contact",
     "recipientMissingEmail": "Ce contact n'a pas d'adresse e-mail.",
     "noContacts": "Aucun contact trouvé pour ce client.",
+"contactsError": "Impossible de charger les contacts. Veuillez réessayer.",
     "documents": "Documents",
     "cvHouseStyle": "CV aux couleurs de l'entreprise",
     "motivationLetter": "Joindre la lettre de motivation du candidat",

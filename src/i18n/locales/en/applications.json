@@ -487,6 +487,7 @@
     "recipientPlaceholder": "Select a contact",
     "recipientMissingEmail": "This contact has no e-mail address.",
     "noContacts": "No contacts found for this customer.",
+"contactsError": "Could not load contacts. Please try again.",
     "documents": "Documents",
     "cvHouseStyle": "CV in house style",
     "motivationLetter": "Include the candidate's motivation letter",

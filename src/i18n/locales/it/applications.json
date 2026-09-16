@@ -487,6 +487,7 @@
     "recipientPlaceholder": "Seleziona un referente",
     "recipientMissingEmail": "Questo referente non ha un indirizzo e-mail.",
     "noContacts": "Nessun referente trovato per questo cliente.",
+"contactsError": "Impossibile caricare i referenti. Riprova.",
     "documents": "Documenti",
     "cvHouseStyle": "CV con lo stile aziendale",
     "motivationLetter": "Includi la lettera di motivazione del candidato",

@@ -21,3 +21,17 @@ describe('SearchPickField · aria-required', () => {
     expect(screen.getByRole('button', { name: /Pick a vacancy/ })).not.toHaveAttribute('aria-required')
   })
 })
+
+// HUISSTIJL-1: the search-error retry action is the shared Button atom, never a
+// hand-styled <button> — clicking it calls onRetry.
+describe('SearchPickField · search-error retry', () => {
+  it('renders the retry action as a real button and calls onRetry when clicked', async () => {
+    const onRetry = vi.fn()
+    const user = (await import('@testing-library/user-event')).default.setup()
+    render(<SearchPickField label="Vacancy" placeholder="Pick a vacancy" value={null} options={[]}
+      onPick={vi.fn()} onSearch={vi.fn()} onRetry={onRetry} searchError="network" />)
+    const retryBtn = screen.getByRole('button', { name: /error\.retry|retry/i })
+    await user.click(retryBtn)
+    expect(onRetry).toHaveBeenCalledTimes(1)
+  })
+})

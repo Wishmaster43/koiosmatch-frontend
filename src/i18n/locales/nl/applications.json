@@ -487,6 +487,7 @@
     "recipientPlaceholder": "Selecteer een contactpersoon",
     "recipientMissingEmail": "Deze contactpersoon heeft geen e-mailadres.",
     "noContacts": "Geen contactpersonen gevonden bij deze klant.",
+"contactsError": "Contactpersonen konden niet worden geladen. Probeer het opnieuw.",
     "documents": "Documenten",
     "cvHouseStyle": "CV in huisstijl",
     "motivationLetter": "Motivatiebrief van de kandidaat meesturen",

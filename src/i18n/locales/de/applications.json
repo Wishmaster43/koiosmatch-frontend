@@ -467,6 +467,7 @@
     "recipientPlaceholder": "Ansprechpartner auswählen",
     "recipientMissingEmail": "Dieser Ansprechpartner hat keine E-Mail-Adresse.",
     "noContacts": "Keine Ansprechpartner bei diesem Kunden gefunden.",
+"contactsError": "Ansprechpartner konnten nicht geladen werden. Bitte erneut versuchen.",
     "documents": "Dokumente",
     "cvHouseStyle": "Lebenslauf im Hausdesign",
     "motivationLetter": "Motivationsschreiben des Kandidaten mitschicken",

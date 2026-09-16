@@ -13,6 +13,7 @@ import type { ActionRuleDecision } from '@/components/actionrules'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import ReasonModalHeader from '@/components/ui/ReasonModalHeader'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { contactOptionLabel } from '@/lib/contactLabel'
 import { Caption, sectionTitleStyle } from '@/components/ui/typography'
@@ -125,6 +126,10 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
             <div style={sectionTitle}>{t('propose.recipient')}</div>
             {form.contactsLoading ? (
               <Caption as="div">{t('propose.loading')}</Caption>
+            ) : form.contactsError ? (
+              // D8: an honest error state — never read as "this customer has no contacts".
+              // The shared calm-inline variant (§4 typography, no local fontSize/colour).
+              <ErrorBanner variant="subtle">{t('propose.contactsError')}</ErrorBanner>
             ) : contactOptions.length === 0 && !form.recipient ? (
               <Caption as="div">{t('propose.noContacts')}</Caption>
             ) : (
@@ -235,14 +240,14 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
             borderRadius: 8, fontSize: 11, color: 'var(--color-on-success-bg)',
             background: 'var(--color-success-bg)', border: '1px solid var(--color-success)' }}>
             <span style={{ flex: 1 }}>{t('propose.recorded')}</span>
-            <button type="button" onClick={form.copyShareLink}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- state-carrying success-outline copy action: confirms the just-recorded share link, Button has no success variant
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 4, height: 26, padding: '0 8px', fontSize: 11,
-                borderRadius: 6, border: '1px solid var(--color-success)', background: 'transparent',
-                color: 'var(--color-on-success-bg)', cursor: 'pointer' }}>
+            {/* PRIMAIR-VLAK-1 (19-08): a copy action is secondary, not a completion —
+                `variant="success"` is reserved for positive-completion actions
+                (Button.tsx), and this file's own copyMessage button below already
+                uses secondary for the same kind of affordance. */}
+            <Button variant="secondary" size="sm" onClick={form.copyShareLink}>
               {form.shareLinkCopied ? <Check size={11} /> : <Copy size={11} />}
               {form.shareLinkCopied ? t('propose.copied') : t('propose.copyLink')}
-            </button>
+            </Button>
           </div>
         )}
 

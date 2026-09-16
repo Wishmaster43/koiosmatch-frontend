@@ -27,21 +27,16 @@ import { extractApiError } from '@/lib/extractApiError'
 import { useDateFormat } from '@/lib/datetime'
 import SafeHtml from '@/components/ui/SafeHtml'
 import { Caption } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
+import { tintBg, tintBorder } from '@/lib/tint'
 import RejectionModal from './RejectionModal'
 import type { RejectPayload } from './RejectionModal'
 import type { ApplicationDetail } from '@/types/application'
 
-// Soft-tint danger card (§4 recipe) — a colour-tinted card, never a solid fill.
+// Soft-tint danger card (§4 house pair, via lib/tint — never an ad-hoc color-mix %).
 const card = {
-  borderRadius: 10, border: '1px solid color-mix(in srgb, var(--color-danger) 35%, transparent)',
-  background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)', padding: '12px 14px',
-} as const
-
-// Icon-only pencil — a compact 22x22 footprint (this card is small; mirrors the
-// note-editor pencils elsewhere in RejectionModal at the same visual weight).
-const pencilBtn = {
-  width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center',
-  borderRadius: 6, cursor: 'pointer', background: 'none', border: 'none', color: 'var(--color-danger-text)', flexShrink: 0,
+  borderRadius: 10, border: tintBorder('var(--color-danger)'),
+  background: tintBg('var(--color-danger)'), padding: '12px 14px',
 } as const
 
 // The rejected-outcome card, with a permission-gated
@@ -100,10 +95,10 @@ export default function RejectionSummary({ application: a }: { application: Appl
   }
 
   const correctPencil = canManage && (
-    <button type="button" onClick={() => setCorrectionOpen(true)} style={pencilBtn}
+    <Button variant="ghost" iconOnly size="sm" onClick={() => setCorrectionOpen(true)}
       title={t('rejection.correctAction')} aria-label={t('rejection.correctAction')}>
-      <Edit2 size={12} />
-    </button>
+      <Edit2 size={13} />
+    </Button>
   )
 
   if (!rejection) {

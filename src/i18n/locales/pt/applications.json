@@ -487,6 +487,7 @@
     "recipientPlaceholder": "Selecione uma pessoa de contacto",
     "recipientMissingEmail": "Esta pessoa de contacto não tem endereço de e-mail.",
     "noContacts": "Não foram encontradas pessoas de contacto para este cliente.",
+"contactsError": "Não foi possível carregar as pessoas de contacto. Tente novamente.",
     "documents": "Documentos",
     "cvHouseStyle": "CV com a identidade visual da empresa",
     "motivationLetter": "Incluir a carta de motivação do candidato",
