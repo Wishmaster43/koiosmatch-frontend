@@ -6,17 +6,18 @@
  * Ink via chipInk — the raw colour on its own tint reads 2.4-3.0:1, AA fail
  * (repeat closing-audit round, finding r3.5).
  */
-import { tintBg, tintBorder, chipInk } from '@/lib/tint'
+import SoftChip from '@/components/ui/SoftChip'
+import { Mono } from '@/components/ui/typography'
+import { useNumberFormat } from '@/lib/formatters'
+import { scoreColor } from './scoreColor'
 
 // Compact score chip, tinted success/warning/danger by the same thresholds as MatchScoreBlock's ring.
 export default function ScorePill({ score }: { score: number }) {
-  const color = score >= 75 ? 'var(--color-success)' : score >= 50 ? 'var(--color-warning)' : 'var(--color-danger)'
+  const { formatPercent } = useNumberFormat()
+  const color = scoreColor(score)
   return (
-    <span style={{
-      fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 600, flexShrink: 0,
-      color: chipInk(color), background: tintBg(color),
-      border: tintBorder(color),
-      borderRadius: 99, padding: '1px 7px',
-    }}>{Math.round(score)}%</span>
+    <span style={{ flexShrink: 0 }}>
+      <SoftChip round size={11} color={color} label={<Mono style={{ fontWeight: 600 }}>{formatPercent(Math.round(score))}</Mono>} />
+    </span>
   )
 }
