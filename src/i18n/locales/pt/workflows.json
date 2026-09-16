@@ -343,7 +343,8 @@
     "relationsCalls_one": "chama {{count}} workflow",
     "relationsCalls_other": "chama {{count}} workflows",
     "relationsCalledBy_one": "chamada {{count}}×",
-    "relationsCalledBy_other": "chamada {{count}}×"
+    "relationsCalledBy_other": "chamada {{count}}×",
+    "noSteps": "Ainda sem módulos"
   },
   "page": {
     "notRun": "Ainda não executado",
@@ -372,6 +373,7 @@
     "archiveConfirm": "Arquivar a workflow \"{{name}}\"? As execuções em curso são fechadas de imediato.",
     "archiveSuccess": "Workflow arquivada.",
     "restoreSuccess": "Workflow restaurada.",
+    "runStarted": "Workflow iniciado.",
     "viewWorkflows": "Workflows",
     "viewManagement": "Gestão",
     "runBulkStarted_one": "Fluxo de trabalho iniciado para {{count}} registo.",

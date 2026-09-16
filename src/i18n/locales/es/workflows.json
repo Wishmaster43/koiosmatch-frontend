@@ -282,7 +282,8 @@
     "relationsCalls_one": "llama a {{count}} workflow",
     "relationsCalls_other": "llama a {{count}} workflows",
     "relationsCalledBy_one": "llamado {{count}} vez",
-    "relationsCalledBy_other": "llamado {{count}} veces"
+    "relationsCalledBy_other": "llamado {{count}} veces",
+    "noSteps": "Todavía no hay módulos"
   },
   "page": {
     "notRun": "Aún no ejecutado",
@@ -311,6 +312,7 @@
     "archiveConfirm": "¿Archivar el flujo de trabajo \"{{name}}\"? Las ejecuciones abiertas se cierran de inmediato.",
     "archiveSuccess": "Flujo de trabajo archivado.",
     "restoreSuccess": "Flujo de trabajo restaurado.",
+    "runStarted": "Flujo de trabajo iniciado.",
     "viewWorkflows": "Flujos de trabajo",
     "viewManagement": "Gestión",
     "runBulkStarted_one": "Flujo de trabajo iniciado para {{count}} registro.",

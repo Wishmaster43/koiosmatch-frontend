@@ -71,6 +71,24 @@ describe('WorkflowCard · archived (TRASH-OVERAL-1b)', () => {
   })
 })
 
+// AW-6 D8 re-audit: a step whose type is missing from MODULE_META used to render
+// nothing at all (StepPill returned null) — the exact silent disappearance AW-6
+// exists to prevent. Now it renders a neutral HelpCircle pill with the raw type.
+describe('WorkflowCard · unknown step type never disappears (AW-6)', () => {
+  it('renders an honest fallback pill for a step type absent from the module registry', () => {
+    const wf: Workflow = { ...baseWorkflow, steps: [{ type: 'not_a_real_module_type' }] }
+    render(<WorkflowCard workflow={wf} onRun={vi.fn()} onEdit={vi.fn()} />)
+    expect(screen.getByText('not_a_real_module_type')).toBeInTheDocument()
+  })
+
+  it('renders an honest, translated hint instead of a blank strip or an unknown-type pill when the graph has no steps', () => {
+    const wf: Workflow = { ...baseWorkflow, steps: [] }
+    render(<WorkflowCard workflow={wf} onRun={vi.fn()} onEdit={vi.fn()} />)
+    expect(screen.getByText(i18n.t('workflows:list.noSteps'))).toBeInTheDocument()
+    expect(screen.queryByText('?')).not.toBeInTheDocument()
+  })
+})
+
 // LOOKUP-I18N-1 (round 2 pin): a workflow that still carries its seeded Dutch name
 // renders in the user language; a tenant rename/creation stays exactly as typed.
 describe('WorkflowCard · seeded workflow name i18n (LOOKUP-I18N-1)', () => {

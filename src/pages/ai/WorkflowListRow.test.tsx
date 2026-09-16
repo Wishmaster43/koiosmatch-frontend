@@ -35,12 +35,14 @@ describe('WorkflowListRow', () => {
     expect(onEdit).not.toHaveBeenCalled()
   })
 
-  it('the run button runs without opening the editor (stopPropagation)', () => {
+  it('the run button runs without opening the editor (stopPropagation)', async () => {
     const onEdit = vi.fn()
     const onRun = vi.fn()
     render(<WorkflowListRow workflow={baseWorkflow} onRun={onRun} onEdit={onEdit} onToggleStatus={vi.fn()} />)
     // Real i18n is active here (WorkflowListRow pulls in useDateFormat → src/i18n); default language is nl.
-    fireEvent.click(screen.getByRole('button', { name: 'Uitvoeren' }))
+    // handleRun awaits onRun then clears `running` in a finally — await it so the
+    // state update lands inside act() (D8 re-audit: dropped the fixed setTimeout).
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Uitvoeren' })) })
     expect(onRun).toHaveBeenCalledWith('wf-1')
     expect(onEdit).not.toHaveBeenCalled()
   })

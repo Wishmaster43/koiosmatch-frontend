@@ -5,7 +5,7 @@
  */
 import type { MouseEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AlertCircle, ArchiveRestore, CheckCircle, MoreHorizontal, Play, Trash2, Zap } from 'lucide-react'
+import { AlertCircle, ArchiveRestore, CheckCircle, HelpCircle, MoreHorizontal, Play, Trash2, Zap } from 'lucide-react'
 // Shared module registry — every module type (label/Icon/colours), so no step chip
 // silently disappears (AW-6). The local 6-type map is gone.
 import { MODULE_META } from '@/modules/index'
@@ -17,6 +17,8 @@ import { triggerKeyForType } from './data/workflowTrigger'
 import { buildTrashNote } from '@/hooks/useTrashFlow'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
+import SoftChip from '@/components/ui/SoftChip'
+import { SectionTitle } from '@/components/ui/typography'
 
 // One workflow card's props — mirrors WorkflowListRow's archive/restore lifecycle
 // (TRASH-OVERAL-1b, same gates/handlers, no fork): the shared lifecycle shape,
@@ -33,17 +35,20 @@ const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string }> 
   inactive: { bg: 'var(--color-warning-bg)', color: 'var(--color-on-warning-bg)', dot: '#F97316' },
 }
 
-// One small pill for a workflow step's module type, with its icon and translated label; renders nothing for an unknown/missing type.
-function StepPill({ type }: { type?: string }) {
+// One small pill for a workflow step's module type, with its icon and translated label.
+// AW-6: an unknown/missing type never disappears silently — it renders with a neutral
+// HelpCircle icon and its raw type as the label, mirroring WorkflowListRow's StepIconStack.
+function StepPill({ type }: { type: string }) {
   const { t } = useTranslation('workflows')
-  const meta = type ? MODULE_META[type] : undefined
-  if (!meta) return null
-  const Icon = meta.Icon
-  const label = t(`modules.${type}`, { defaultValue: meta.label ?? type })
+  const meta = MODULE_META[type]
+  const Icon = meta?.Icon ?? HelpCircle
+  const label = t(`modules.${type}`, { defaultValue: meta?.label ?? type })
   return (
     <div
       className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
-      style={{ background: meta.bg, color: meta.color }}
+      // No-hex fallback: a missing registry entry falls back to the muted text token,
+      // not a hand-picked hex — the whole module registry itself uses tokens only.
+      style={{ background: meta?.bg ?? 'var(--hover-bg)', color: meta?.color ?? 'var(--text-muted)' }}
       title={label}
     >
       <Icon size={11} />
@@ -70,8 +75,13 @@ export default function WorkflowCard({ workflow, onRun, canRun = true, onEdit, c
   const handleRun = async (e: MouseEvent) => {
     e.stopPropagation()
     setRunning(true)
-    await onRun(workflow.id)
-    setTimeout(() => setRunning(false), 2000)
+    // The hook's onRun now notifies + refetches the list on success (LIST-FRESH-1)
+    // and toasts on failure — no fixed cosmetic delay needed to "feel" done.
+    try {
+      await onRun(workflow.id)
+    } finally {
+      setRunning(false)
+    }
   }
 
   // Restore is a distinct async action — keep the card responsive while it lands.
@@ -98,21 +108,17 @@ export default function WorkflowCard({ workflow, onRun, canRun = true, onEdit, c
             <Zap size={16} color="var(--color-primary)" />
           </div>
           <div className="min-w-0">
-            <div className="font-medium text-[var(--text)] truncate" style={{ fontSize: 14 }}>
+            <SectionTitle as="div" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {displayName}
-            </div>
+            </SectionTitle>
             <div className="text-xs text-[var(--text-muted)] mt-0.5">{t(triggerKeyForType(workflow.trigger_type))}</div>
           </div>
         </div>
         {archived ? (
-          /* Archived soft chip (§4 soft-chip convention) — mirrors WorkflowListRow */
-          <span className="flex-shrink-0 rounded-full px-2.5 py-1" style={{
-            fontSize: 11, fontWeight: 600, color: 'var(--color-danger-text)',
-            background: 'color-mix(in srgb, var(--color-danger) 12%, transparent)',
-            border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)',
-          }}>
-            {t('list.archivedBadge')}
-          </span>
+          /* Archived soft chip (§4 tint via lib/tint) — mirrors WorkflowListRow */
+          <div className="flex-shrink-0">
+            <SoftChip round label={t('list.archivedBadge')} color="var(--color-danger)" />
+          </div>
         ) : (
           <div
             className="flex items-center gap-1.5 rounded-full px-2.5 py-1 flex-shrink-0"
@@ -124,8 +130,16 @@ export default function WorkflowCard({ workflow, onRun, canRun = true, onEdit, c
         )}
       </div>
 
-      <div className="flex flex-wrap gap-1.5">
-        {workflow.steps.map((step, i) => <StepPill key={i} type={step.type} />)}
+      <div className="flex flex-wrap gap-1.5 items-center">
+        {workflow.steps.length === 0
+          // Honest, translated hint instead of a blank strip or an "unknown module" pill.
+          ? (
+            <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs" style={{ background: 'var(--hover-bg)', color: 'var(--text-muted)' }}>
+              <Zap size={11} />
+              <span>{t('list.noSteps')}</span>
+            </div>
+          )
+          : workflow.steps.map((step, i) => <StepPill key={i} type={step.type ?? ''} />)}
       </div>
 
       <div className="flex items-center justify-between pt-3" style={{ borderTop: '1px solid var(--hover-bg)' }}>

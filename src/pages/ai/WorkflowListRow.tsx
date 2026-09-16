@@ -20,6 +20,8 @@ import { triggerKeyForType } from './data/workflowTrigger'
 import Toggle from '@/components/ui/Toggle'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
+import SoftChip from '@/components/ui/SoftChip'
+import { SectionTitle } from '@/components/ui/typography'
 import type { WorkflowStep } from '@/types/workflow'
 
 // One workflow row's props — the shared lifecycle shape (mirrors WorkflowCard),
@@ -62,8 +64,9 @@ function StepIconStack({ steps }: { steps: WorkflowStep[] }) {
         const meta = step.type ? MODULE_META[step.type] : undefined
         const Icon = (meta?.Icon ?? HelpCircle) as unknown as LucideIcon
         const label = t(`modules.${step.type}`, { defaultValue: meta?.label ?? step.type })
-        // eslint-disable-next-line no-restricted-syntax -- DATA: fallback mirrors the module registry's own colour when a step type is missing from it, not UI styling
-        return <StepBubble key={step.id ?? i} Icon={Icon} color={meta?.color ?? '#64748B'} bg={meta?.bg ?? 'var(--hover-bg)'} offset={i} title={label} />
+        // No-hex fallback: a missing registry entry falls back to the muted text token,
+        // not a hand-picked hex — the whole module registry itself uses tokens only.
+        return <StepBubble key={step.id ?? i} Icon={Icon} color={meta?.color ?? 'var(--text-muted)'} bg={meta?.bg ?? 'var(--hover-bg)'} offset={i} title={label} />
       })}
       {extra > 0 && (
         <div style={{
@@ -129,8 +132,13 @@ export default function WorkflowListRow({ workflow, folderName, onRun, canRun = 
   const handleRun = async (e: MouseEvent) => {
     e.stopPropagation()
     setRunning(true)
-    await onRun(workflow.id)
-    setTimeout(() => setRunning(false), 2000)
+    // The hook's onRun now notifies + refetches the list on success (LIST-FRESH-1)
+    // and toasts on failure — no fixed cosmetic delay needed to "feel" done.
+    try {
+      await onRun(workflow.id)
+    } finally {
+      setRunning(false)
+    }
   }
 
   return (
@@ -141,7 +149,7 @@ export default function WorkflowListRow({ workflow, folderName, onRun, canRun = 
       <StepIconStack steps={workflow.steps} />
 
       <div className="min-w-0 flex-1">
-        <div className="font-semibold text-[var(--text)] truncate" style={{ fontSize: 13 }}>{displayName}</div>
+        <SectionTitle as="div" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</SectionTitle>
         <div className="flex items-center gap-1 text-xs text-[var(--text-muted)] truncate">
           {workflow.last_run && (workflow.last_run.ok
             ? <CheckCircle size={11} color="var(--color-success)" className="flex-shrink-0" />
@@ -166,14 +174,10 @@ export default function WorkflowListRow({ workflow, folderName, onRun, canRun = 
             </span>
           )}
 
-          {/* Archived soft chip (§4 soft-chip convention) — read-only, no run/toggle for a deleted workflow */}
-          <span className="flex-shrink-0 rounded-full px-2 py-1" style={{
-            fontSize: 11, fontWeight: 600, color: 'var(--color-danger-text)',
-            background: 'color-mix(in srgb, var(--color-danger) 12%, transparent)',
-            border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)',
-          }}>
-            {t('list.archivedBadge')}
-          </span>
+          {/* Archived soft chip (§4 tint via lib/tint) — read-only, no run/toggle for a deleted workflow */}
+          <div className="flex-shrink-0">
+            <SoftChip round label={t('list.archivedBadge')} color="var(--color-danger)" />
+          </div>
 
           {/* Restore — settings.update-gated (mirrors deleteFolder's guard); the
               trashed row unmarks first (below) instead of restoring straight to active. */}

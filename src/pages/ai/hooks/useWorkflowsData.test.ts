@@ -6,6 +6,11 @@
  * instead of routing it through the shared extractApiError helper (§10 — never
  * leak a raw server/axios string to the UI). `unwrap`/`unwrapList` stay the real
  * (pure) implementations; only the axios-like client is mocked.
+ *
+ * D8 re-audit (14-09): handleSave/the add-module guard used window.alert() —
+ * a blocking native dialog instead of the house toast every other mutation in
+ * this hook uses; handleRun's success path was empty (no feedback, no refetch);
+ * and the list-load effect had no alive guard. All three fixed below.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
@@ -23,7 +28,7 @@ vi.mock('@/hooks/useConfirm', () => ({
   useConfirm: () => ({ confirm: (_msg: string, onConfirm: () => void) => onConfirm(), dialog: null }),
 }))
 // Minimal i18n stub that still interpolates {{msg}}-style options so handleSave's
-// alert(t('page.saveFailed', { msg })) stays inspectable in the assertions below.
+// notifyError(t('page.saveFailed', { msg })) stays inspectable in the assertions below.
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string, opts?: Record<string, unknown>) => (opts?.msg ? `${key}::${opts.msg}` : key) }),
 }))
@@ -80,7 +85,6 @@ describe('useWorkflowsData · moveToFolder failure feedback', () => {
 describe('useWorkflowsData · handleSave error message (never raw axios/network text)', () => {
   it('falls back through extractApiError + i18n fallback for a network-style failure', async () => {
     seedList()
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
     mockedPut.mockRejectedValue(new Error('Request failed with status code 500'))
     const { result } = renderHook(() => useWorkflowsData(false))
     await waitFor(() => expect(result.current.loading).toBe(false))
@@ -89,14 +93,13 @@ describe('useWorkflowsData · handleSave error message (never raw axios/network 
       await result.current.handleSave({ id: 'wf-1', name: 'Welcome flow', status: 'active', steps: [{ id: 's1', type: 'email_send' }] })
     })
 
-    // The raw axios message ("Request failed with status code 500") must never reach the user.
-    expect(alertSpy).toHaveBeenCalledWith('page.saveFailed::common:actionFailed')
-    alertSpy.mockRestore()
+    // The raw axios message ("Request failed with status code 500") must never reach the user,
+    // and it goes through the house toast (notifyError), never a blocking window.alert (D8 re-audit).
+    expect(notifyError).toHaveBeenCalledWith('page.saveFailed::common:actionFailed')
   })
 
   it('still surfaces the specific 422 validation detail (WF-R2 functional flow preserved)', async () => {
     seedList()
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
     mockedPut.mockRejectedValue({ response: { data: { message: 'The given data was invalid.', errors: { steps: ['Step 2 has no connection.'] } } } })
     const { result } = renderHook(() => useWorkflowsData(false))
     await waitFor(() => expect(result.current.loading).toBe(false))
@@ -105,13 +108,11 @@ describe('useWorkflowsData · handleSave error message (never raw axios/network 
       await result.current.handleSave({ id: 'wf-1', name: 'Welcome flow', status: 'active', steps: [{ id: 's1', type: 'email_send' }] })
     })
 
-    expect(alertSpy).toHaveBeenCalledWith('page.saveFailed::Step 2 has no connection.')
-    alertSpy.mockRestore()
+    expect(notifyError).toHaveBeenCalledWith('page.saveFailed::Step 2 has no connection.')
   })
 
   it('surfaces a flat 422 message (no errors bag) verbatim — X-22 webhook_send validation', async () => {
     seedList()
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
     mockedPut.mockRejectedValue({ response: { data: { message: "Stap 2 ('Stuur naar Elanza'): De webhook-URL mag niet naar een intern of privé-adres wijzen." } } })
     const { result } = renderHook(() => useWorkflowsData(false))
     await waitFor(() => expect(result.current.loading).toBe(false))
@@ -120,8 +121,24 @@ describe('useWorkflowsData · handleSave error message (never raw axios/network 
       await result.current.handleSave({ id: 'wf-1', name: 'Welcome flow', status: 'active', steps: [{ id: 's1', type: 'webhook_send' }] })
     })
 
-    expect(alertSpy).toHaveBeenCalledWith("page.saveFailed::Stap 2 ('Stuur naar Elanza'): De webhook-URL mag niet naar een intern of privé-adres wijzen.")
-    alertSpy.mockRestore()
+    expect(notifyError).toHaveBeenCalledWith("page.saveFailed::Stap 2 ('Stuur naar Elanza'): De webhook-URL mag niet naar een intern of privé-adres wijzen.")
+  })
+
+  // D8 re-audit: the empty-graph guard used window.alert() too — now the house
+  // 'info' toast, matching every other non-error notice in this hook.
+  it('the empty-graph guard notifies via the house toast, not window.alert', async () => {
+    seedList()
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    let saved: boolean | undefined
+    await act(async () => {
+      saved = await result.current.handleSave({ id: 'wf-1', name: 'Welcome flow', status: 'active', steps: [] })
+    })
+
+    expect(saved).toBe(false)
+    expect(notify).toHaveBeenCalledWith('info', 'page.addModuleAlert')
+    expect(mockedPut).not.toHaveBeenCalled()
   })
 })
 
@@ -212,6 +229,73 @@ describe('useWorkflowsData · handleRun (K-3 workflow-execution base URL)', () =
       '/workflows/wf-1/run', undefined,
       { quietStatuses: [409], baseURL: expect.any(String) },
     )
+  })
+
+  // D8 re-audit: a successful run used to give no feedback at all and never
+  // refresh the row — the last-run stamp stayed stale until Cmd+R.
+  it('on success: notifies and refetches the list (so the last-run stamp updates)', async () => {
+    seedList()
+    mockedPost.mockResolvedValue({ data: {} })
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    const getCallsBefore = mockedGet.mock.calls.length
+
+    await act(async () => { await result.current.handleRun('wf-1') })
+
+    expect(notify).toHaveBeenCalledWith('success', 'page.runStarted')
+    await waitFor(() => expect(mockedGet.mock.calls.length).toBeGreaterThan(getCallsBefore))
+  })
+
+  it('on failure: notifies the specific backend reason, no refetch bump', async () => {
+    seedList()
+    mockedPost.mockRejectedValue({ response: { status: 422, data: { message: 'Workflow is niet actief' } } })
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => { await result.current.handleRun('wf-1') })
+
+    expect(notifyError).toHaveBeenCalledWith('Workflow is niet actief')
+    expect(notify).not.toHaveBeenCalled()
+  })
+})
+
+// D8 re-audit: the workflows+folders load effect had no alive/abort guard, so a
+// stale response from a slower earlier fetch could overwrite a faster later one
+// (fast showArchived toggling) and setState could fire after unmount.
+describe('useWorkflowsData · list load effect alive guard', () => {
+  it('a slower FIRST fetch never overwrites a faster LATER one after showArchived flips', async () => {
+    let resolveFirst!: (v: unknown) => void
+    const first = new Promise(res => { resolveFirst = res })
+    mockedGet.mockImplementationOnce((url: string) =>
+      url === '/workflows' ? first : Promise.resolve({ data: { data: [] } }))
+
+    const { result, rerender } = renderHook(({ archived }) => useWorkflowsData(archived), { initialProps: { archived: false } })
+
+    // Flip before the first (slow) fetch resolves — seeds the second, faster fetch.
+    seedList()
+    rerender({ archived: true })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.workflows.map(w => w.id)).toEqual(['wf-1'])
+
+    // The stale first response resolves late — must be ignored (alive guard).
+    resolveFirst({ data: { data: [{ id: 'stale-wf', name: 'Stale', status: 'active', steps: [] }] } })
+    await Promise.resolve()
+    expect(result.current.workflows.map(w => w.id)).toEqual(['wf-1'])
+  })
+
+  it('does not setState after unmount', async () => {
+    let resolveGet!: (v: unknown) => void
+    const pending = new Promise(res => { resolveGet = res })
+    mockedGet.mockImplementation((url: string) => (url === '/workflows' ? pending : Promise.resolve({ data: { data: [] } })))
+
+    const { unmount } = renderHook(() => useWorkflowsData(false))
+    unmount()
+
+    // Resolving after unmount must not throw an act()/setState-after-unmount warning.
+    await act(async () => {
+      resolveGet({ data: { data: [{ id: 'wf-1', name: 'Welcome flow', status: 'active', steps: [] }] } })
+      await Promise.resolve()
+    })
   })
 })
 

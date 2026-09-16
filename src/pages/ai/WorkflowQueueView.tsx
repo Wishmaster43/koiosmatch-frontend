@@ -174,7 +174,7 @@ export default function WorkflowQueueView({ workflowId }: { workflowId?: string 
                   {' · '}{t('queue.retrying.nextAttemptApprox', { date: formatDateTime(row.next_attempt_at) })}
                 </Caption>
                 {row.last_error && (
-                  <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 2 }}>{row.last_error}</div>
+                  <Caption as="div" style={{ color: 'var(--color-danger-text)', marginTop: 2 }}>{row.last_error}</Caption>
                 )}
               </QueueRow>
             )} />

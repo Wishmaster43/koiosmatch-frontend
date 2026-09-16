@@ -21,6 +21,7 @@ import type { Workflow } from '@/types/workflow'
 import type { WorkflowFolder, FolderId } from './hooks/useWorkflowsData'
 import type { ViewMode } from './hooks/useWorkflowsFilters'
 import Button from '@/components/ui/Button'
+import { BodyText } from '@/components/ui/typography'
 
 // The handler subset workflowRowActions needs — a slice of WorkflowsListPanelProps
 // (declared below), named here so the function signature never re-spells it.
@@ -54,9 +55,9 @@ function workflowRowActions(wf: Workflow, {
 // spans every column (`gridColumn`, absent in the list).
 function WorkflowsEmptyState({ label, gridColumn }: { label: string; gridColumn?: string }) {
   return (
-    <div style={{ gridColumn, textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)', fontSize: 14 }}>
+    <BodyText as="div" style={{ gridColumn, textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
       {label}
-    </div>
+    </BodyText>
   )
 }
 

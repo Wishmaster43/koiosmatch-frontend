@@ -343,7 +343,8 @@
     "relationsCalls_one": "richiama {{count}} workflow",
     "relationsCalls_other": "richiama {{count}} workflow",
     "relationsCalledBy_one": "richiamata {{count}} volta",
-    "relationsCalledBy_other": "richiamata {{count}} volte"
+    "relationsCalledBy_other": "richiamata {{count}} volte",
+    "noSteps": "Nessun modulo ancora"
   },
   "page": {
     "notRun": "Non ancora eseguito",
@@ -372,6 +373,7 @@
     "archiveConfirm": "Archiviare la workflow \"{{name}}\"? Le esecuzioni aperte verranno chiuse immediatamente.",
     "archiveSuccess": "Workflow archiviata.",
     "restoreSuccess": "Workflow ripristinata.",
+    "runStarted": "Workflow avviato.",
     "viewWorkflows": "Workflow",
     "viewManagement": "Gestione",
     "runBulkStarted_one": "Flusso di lavoro avviato per {{count}} record.",

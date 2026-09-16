@@ -343,7 +343,8 @@
     "relationsCalls_one": "roept {{count}} workflow aan",
     "relationsCalls_other": "roept {{count}} workflows aan",
     "relationsCalledBy_one": "{{count}}× aangeroepen",
-    "relationsCalledBy_other": "{{count}}× aangeroepen"
+    "relationsCalledBy_other": "{{count}}× aangeroepen",
+    "noSteps": "Nog geen modules"
   },
   "page": {
     "notRun": "Nog niet uitgevoerd",
@@ -372,6 +373,7 @@
     "archiveConfirm": "Workflow \"{{name}}\" archiveren? Openstaande runs worden direct gesloten.",
     "archiveSuccess": "Workflow gearchiveerd.",
     "restoreSuccess": "Workflow hersteld.",
+    "runStarted": "Workflow gestart.",
     "viewWorkflows": "Workflows",
     "viewManagement": "Beheer",
     "runBulkStarted_one": "Workflow gestart voor {{count}} record.",

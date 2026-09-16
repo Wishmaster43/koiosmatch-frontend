@@ -282,7 +282,8 @@
     "relationsCalls_one": "ruft {{count}} Workflow auf",
     "relationsCalls_other": "ruft {{count}} Workflows auf",
     "relationsCalledBy_one": "{{count}}× aufgerufen",
-    "relationsCalledBy_other": "{{count}}× aufgerufen"
+    "relationsCalledBy_other": "{{count}}× aufgerufen",
+    "noSteps": "Noch keine Module"
   },
   "page": {
     "notRun": "Noch nicht ausgeführt",
@@ -311,6 +312,7 @@
     "archiveConfirm": "Workflow \"{{name}}\" archivieren? Laufende Ausführungen werden sofort geschlossen.",
     "archiveSuccess": "Workflow archiviert.",
     "restoreSuccess": "Workflow wiederhergestellt.",
+    "runStarted": "Workflow gestartet.",
     "viewWorkflows": "Workflows",
     "viewManagement": "Verwaltung",
     "runBulkStarted_one": "Workflow für {{count}} Datensatz gestartet.",

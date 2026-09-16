@@ -12,6 +12,7 @@ import { Zap, Folder, FolderPlus, Trash2 } from 'lucide-react'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import { useTextPrompt } from '@/hooks/useTextPrompt'
 import Button from '@/components/ui/Button'
+import { GroupLabel } from '@/components/ui/typography'
 import type { WorkflowFolder, FolderId } from './hooks/useWorkflowsData'
 
 // One row in the folder sidebar (built-in "All"/"Unassigned" or a tenant folder).
@@ -83,7 +84,7 @@ export default function WorkflowFolderSidebar({
   return (
     <div style={{ width: 220, flexShrink: 0, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', background: 'var(--surface)' }}>
       <div style={{ padding: '16px 16px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>{t('page.folders')}</span>
+        <GroupLabel as="span">{t('page.folders')}</GroupLabel>
         {canManageFolders && (
           // Standalone header action, not a row/chip/trigger — the house Button (§4).
           <Button variant="ghost" size="sm" iconOnly onClick={() => {

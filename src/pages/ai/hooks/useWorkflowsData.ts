@@ -67,11 +67,16 @@ export function useWorkflowsData(showArchived: boolean) {
 
   useEffect(() => {
     // Archived view asks the backend for soft-deleted rows too (C-27-workflow).
+    // Alive guard (mirrors useWorkflowQueue/useWorkflowQueueBadge in this same folder):
+    // a fast showArchived toggle or retry must never let a stale response win, and no
+    // setState may fire after unmount.
+    let alive = true
     setLoading(true); setError(false)
     Promise.allSettled([
       api.get('/workflows', { params: showArchived ? { include_archived: 1 } : {} }),
       api.get('/workflow-folders'),
     ]).then(([wfResult, folderResult]) => {
+      if (!alive) return
       if (wfResult.status === 'rejected') {
         // The primary list failed to load — a real error, not "no workflows yet".
         setError(true)
@@ -96,7 +101,8 @@ export function useWorkflowsData(showArchived: boolean) {
       }
       // Folders are secondary (sidebar-only) — a failure there still degrades quietly.
       setFolders(folderResult.status === 'fulfilled' ? unwrapList<WorkflowFolder>(folderResult.value).rows : [])
-    }).finally(() => setLoading(false))
+    }).finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
   }, [showArchived, fetchTick])
 
   // Manual retry — bumps the tick so the load effect above re-runs.
@@ -149,6 +155,10 @@ export function useWorkflowsData(showArchived: boolean) {
       // K-3: this is a workflow-EXECUTION call — route it through the
       // configurable engine base URL, same as every other run/cancel/logs call.
       await api.post(`/workflows/${id}/run`, undefined, { quietStatuses: [409], baseURL: resolveWorkflowBaseURL() })
+      // Success feedback + refetch, mirroring archive/restore below — otherwise the
+      // last-run stamp stays stale until the user reloads the page.
+      notify('success', t('page.runStarted'))
+      setFetchTick(v => v + 1)
     } catch (err) {
       const e = err as { response?: { status?: number; data?: { run_id?: string | number } } }
       // RUN-CONTROL-1 single-flight 409: this workflow already has a live run —
@@ -231,7 +241,7 @@ export function useWorkflowsData(showArchived: boolean) {
   // server refused) so the editor's save-then-run never runs a stale graph.
   const handleSave = async (updated: Workflow, closeAfter = true): Promise<boolean> => {
     if (!updated.steps || updated.steps.length === 0) {
-      alert(t('page.addModuleAlert'))
+      notify('info', t('page.addModuleAlert'))
       return false
     }
     const isNew = !updated.id || !workflows.some(w => w.id === updated.id)
@@ -260,7 +270,7 @@ export function useWorkflowsData(showArchived: boolean) {
       // WF-R2 saves validate the graph server-side (loop / disconnected step): surface
       // the SPECIFIC 422 detail via the shared extractApiError helper — never a raw
       // axios/network string in the user-facing message (§10).
-      alert(t('page.saveFailed', { msg: extractApiError(err, t('common:actionFailed')) }))
+      notifyError(t('page.saveFailed', { msg: extractApiError(err, t('common:actionFailed')) }))
       return false
     }
   }
