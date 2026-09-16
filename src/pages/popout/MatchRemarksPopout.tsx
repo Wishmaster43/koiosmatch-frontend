@@ -12,7 +12,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import RichTextEditor from '@/components/ui/RichTextEditor'
-import { GroupLabel } from '@/components/ui/typography'
+import { GroupLabel, BodyText } from '@/components/ui/typography'
 import { useTextPopoutSync } from '@/hooks/useTextPopoutSync'
 import { textPopoutTopic } from '@/lib/secondScreen'
 import { useCandidateLite } from './hooks/useCandidateLite'
@@ -50,8 +50,9 @@ export default function MatchRemarksPopout({ id }: { id: string | undefined }) {
   // instead of a silently non-functional editor (§3).
   if (!id) {
     return (
-      <div style={{ padding: 24, fontSize: 13, color: 'var(--text-muted)' }}>
-        {t('common:popout.unknownEntity')}
+      // Typography atom (§4): BodyText carries the 13/400 identity, only the muted colour is a caller override.
+      <div style={{ padding: 24 }}>
+        <BodyText style={{ color: 'var(--text-muted)' }}>{t('common:popout.unknownEntity')}</BodyText>
       </div>
     )
   }

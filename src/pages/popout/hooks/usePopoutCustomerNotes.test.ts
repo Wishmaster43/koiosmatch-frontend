@@ -35,6 +35,20 @@ describe('usePopoutCustomerNotes', () => {
     expect(apiGet).not.toHaveBeenCalled()
   })
 
+  // §8/§9: a failed notes GET surfaces as an honest error flag, never a silent empty list.
+  it('sets error (not just an empty list) when the notes GET fails, and clears it on a successful reload', async () => {
+    apiGet.mockRejectedValueOnce(new Error('network'))
+    const { result } = renderHook(() => usePopoutCustomerNotes('cust-1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.error).toBe(true)
+    expect(result.current.notes).toHaveLength(0)
+
+    apiGet.mockResolvedValueOnce({ data: { data: [{ id: 'n1', type: 'general', body: 'Hello', created_at: '2026-08-01T10:00:00Z' }] } })
+    act(() => { result.current.reload() })
+    await waitFor(() => expect(result.current.notes).toHaveLength(1))
+    expect(result.current.error).toBe(false)
+  })
+
   it('posts the exact add-note request and reloads the list on success', async () => {
     apiGet.mockResolvedValue({ data: { data: [] } })
     apiPost.mockResolvedValue({ data: { data: {} } })

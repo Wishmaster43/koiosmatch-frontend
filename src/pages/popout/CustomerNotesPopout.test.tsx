@@ -11,7 +11,12 @@ import CustomerNotesPopout from './CustomerNotesPopout'
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, formatTime: (v: string) => v, locale: 'nl-NL' }) }))
 vi.mock('@/lib/useNoteTypes', () => ({ useNoteTypes: () => ({ types: [], writableTypes: [] }), SYSTEM_NOTE_TYPES: new Set() }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => false }) }))
-vi.mock('./hooks/usePopoutCustomerNotes', () => ({ usePopoutCustomerNotes: () => ({ notes: [], addNote: vi.fn() }) }))
+// Mutable per-test notes state (vi.hoisted so the mock factory can read it) — the
+// popout's retry reloads the notes too, so the mock must carry `reload` and `error`.
+const { notesState } = vi.hoisted(() => ({
+  notesState: { notes: [] as unknown[], addNote: vi.fn(), editNote: vi.fn(), deleteNote: vi.fn(), loading: false, error: false, reload: vi.fn() },
+}))
+vi.mock('./hooks/usePopoutCustomerNotes', () => ({ usePopoutCustomerNotes: () => notesState }))
 
 // Mutable per-test customer-lite state (vi.hoisted so the mock factory can read it).
 const { liteState } = vi.hoisted(() => ({
@@ -26,6 +31,8 @@ describe('CustomerNotesPopout', () => {
     liteState.loading = false
     liteState.error = false
     liteState.reload = vi.fn()
+    notesState.error = false
+    notesState.reload = vi.fn()
   })
   afterEach(() => { document.title = previousTitle })
 
@@ -42,6 +49,17 @@ describe('CustomerNotesPopout', () => {
     expect(screen.getByText('popout.loadError')).toBeInTheDocument()
     await user.click(screen.getByText('common:error.retry'))
     expect(liteState.reload).toHaveBeenCalledTimes(1)
+    expect(notesState.reload).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows the error row (never an empty list) when the notes GET fails, and retry reloads the notes', async () => {
+    const user = userEvent.setup()
+    liteState.customer = { id: 'customer-1', name: 'Test', initials: 'T' }
+    notesState.error = true
+    render(<CustomerNotesPopout id="customer-1" />)
+    expect(screen.getByText('popout.loadError')).toBeInTheDocument()
+    await user.click(screen.getByText('common:error.retry'))
+    expect(notesState.reload).toHaveBeenCalledTimes(1)
   })
 
   it('renders the customer name + the shared notes surface on success', () => {

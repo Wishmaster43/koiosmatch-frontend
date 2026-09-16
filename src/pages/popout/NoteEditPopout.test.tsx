@@ -45,7 +45,7 @@ vi.mock('./hooks/useCandidateLite', () => ({ useCandidateLite: () => liteState }
 // mocks above, one-to-one, so both branches of the dispatcher are exercised the
 // same way.
 const { appNotesState } = vi.hoisted(() => ({
-  appNotesState: { notes: [] as Array<Record<string, unknown>>, editNote: vi.fn() },
+  appNotesState: { notes: [] as Array<Record<string, unknown>>, loading: false, error: false, reload: vi.fn(), editNote: vi.fn() },
 }))
 vi.mock('./hooks/usePopoutApplicationNotes', () => ({ usePopoutApplicationNotes: () => appNotesState }))
 const { appLiteState } = vi.hoisted(() => ({
@@ -185,6 +185,19 @@ describe('NoteEditPopout · application branch (A-popout-1)', () => {
     expect(screen.getByText('common:popout.noteNotFound')).toBeInTheDocument()
     expect(screen.queryByLabelText('body')).toBeNull()
   })
+
+  // Regression (§8/§9): usePopoutApplicationNotes fires its OWN GET, separate
+  // from the identity fetch — its own loading/error now gates notFound, so a
+  // failed notes load never reads as "not found".
+  it('shows the honest load-error row — never "not found" — when the notes request itself failed', () => {
+    appNotesState.loading = false
+    appNotesState.error = true
+    appNotesState.notes = []
+    renderAt('/popout/notes/application/a1/ontbreekt')
+    expect(screen.getByText('common:popout.loadError')).toBeInTheDocument()
+    expect(screen.queryByText('common:popout.noteNotFound')).toBeNull()
+    appNotesState.error = false
+  })
 })
 
 // POPOUT-PARITEIT-1 (27-08): the generic branch — proves a non-candidate/
@@ -232,5 +245,28 @@ describe('NoteEditPopout · generic branch (match, POPOUT-PARITEIT-1)', () => {
     useEntityNotesSpy.mockClear()
     renderAt('/popout/notes/opportunity/o1/n2')
     expect(useEntityNotesSpy).toHaveBeenCalledWith(expect.objectContaining({ basePath: '/opportunities/o1', updateMethod: 'put' }))
+  })
+
+  // Regression (§8/§9): the identity fetch settling must never be read as "the
+  // notes thread settled too" — the generic branch fires its OWN GET via
+  // useEntityNotes, and that request's own loading/error now gates notFound.
+  it('shows the skeleton — never a premature "not found" — while the identity has loaded but the notes request is still in flight', () => {
+    entityNotesState.notes = []
+    entityNotesState.loading = true
+    entityNotesState.error = false
+    renderAt('/popout/notes/match/m1/ontbreekt')
+    expect(screen.getByText('common:loading')).toBeInTheDocument()
+    expect(screen.queryByText('common:popout.noteNotFound')).toBeNull()
+    entityNotesState.loading = false
+  })
+
+  it('shows the honest load-error row — never "not found" — when the notes request itself failed', () => {
+    entityNotesState.notes = []
+    entityNotesState.loading = false
+    entityNotesState.error = true
+    renderAt('/popout/notes/match/m1/ontbreekt')
+    expect(screen.getByText('common:popout.loadError')).toBeInTheDocument()
+    expect(screen.queryByText('common:popout.noteNotFound')).toBeNull()
+    entityNotesState.error = false
   })
 })

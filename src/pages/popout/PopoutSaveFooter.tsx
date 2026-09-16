@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next'
 import { useConfirm } from '@/hooks/useConfirm'
 import { Save, X } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import { captionStyle } from '@/components/ui/typography'
 
 interface PopoutSaveFooterProps {
   // Unsaved-changes marker — drives the state text AND every guard here.
@@ -70,9 +71,9 @@ export default function PopoutSaveFooter({ dirty, onSave }: PopoutSaveFooterProp
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexShrink: 0 }}>
       {confirmDialog}
-      {/* Honest, announced save state — never a silent "did that land?" window. */}
+      {/* Honest, announced save state — never a silent "did that land?" window. Typography atom identity (§4): captionStyle carries 11/400/--text-muted, aria-live/data-testid need the raw style object, not the Caption element (r6). */}
       <span aria-live="polite" data-testid="text-popout-state"
-        style={{ fontSize: 11, color: dirty ? 'var(--color-warning-text)' : 'var(--text-muted)' }}>
+        style={{ ...captionStyle, color: dirty ? 'var(--color-warning-text)' : captionStyle.color }}>
         {dirty ? t('unsavedChanges') : t('allChangesSaved')}
       </span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

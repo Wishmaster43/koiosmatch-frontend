@@ -8,7 +8,7 @@
  * A-popout-1, `PATCH …/notes/{note}` (edit) both exist — no DELETE route, so no
  * delete affordance is offered here (§3, no fake affordance).
  */
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
@@ -28,20 +28,30 @@ interface RawApplicationNotes { notes?: Array<{ id?: Id; author?: string; author
 export function usePopoutApplicationNotes(applicationId: Id | undefined) {
   const { t } = useTranslation()
   const [notes, setNotes] = useState<PopoutApplicationNote[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+  // Freshness guard (§9): a monotonic request id (mirrors @/hooks/useEntityNotes)
+  // so an out-of-order response from an earlier mount/reload can never overwrite
+  // a later one's result.
+  const requestIdRef = useRef(0)
 
   // One loader — the effect uses it, and a successful add/edit re-fetches so the
   // real id/author/timestamp show (mirrors usePopoutVacancyNotes' reload pattern).
   const load = useCallback(() => {
-    if (!applicationId) { setNotes([]); return }
+    if (!applicationId) { setNotes([]); setLoading(false); return }
+    const requestId = ++requestIdRef.current
+    setLoading(true); setError(false)
     api.get(`/applications/${applicationId}`)
       .then(res => {
+        if (requestIdRef.current !== requestId) return
         const raw = unwrap<RawApplicationNotes>(res)
         setNotes((raw.notes ?? []).map(n => ({
           id: n.id, author: n.author ?? '', author_id: n.author_id ?? null, type: n.type ?? '',
           title: n.title ?? '', text: n.text ?? '', language: n.language ?? '', created_at: n.created_at ?? '',
         })))
       })
-      .catch(() => setNotes([]))
+      .catch(() => { if (requestIdRef.current === requestId) setError(true) })
+      .finally(() => { if (requestIdRef.current === requestId) setLoading(false) })
   }, [applicationId])
 
   useEffect(() => { load() }, [load])
@@ -79,5 +89,5 @@ export function usePopoutApplicationNotes(applicationId: Id | undefined) {
       })
   }, [applicationId, notes, load, t])
 
-  return { notes, addNote, editNote }
+  return { notes, loading, error, reload: load, addNote, editNote }
 }

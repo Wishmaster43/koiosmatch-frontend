@@ -14,7 +14,7 @@
 import { landedWrite } from './popoutNoteWrite'
 import { actionItemsWire } from '@/components/drawer/tabs/notes/notesTabTypes'
 import type { NoteActionItemWire } from '@/components/drawer/tabs/NotesTab'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
@@ -34,14 +34,23 @@ interface NotePayload { type: string; title: string; body: string; language?: st
 export function usePopoutCustomerNotes(customerId: string | undefined) {
   const { t } = useTranslation()
   const [notes, setNotes] = useState<CustomerNote[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+  // Freshness guard (§9): a monotonic request id (mirrors @/hooks/useEntityNotes)
+  // so an out-of-order response from an earlier mount/reload can never overwrite
+  // a later one's result.
+  const requestIdRef = useRef(0)
 
   // One loader — the effect uses it, and a successful add re-fetches so the real
   // id/author/timestamp show (mirrors useCandidateNotes' reload-after-write pattern).
   const load = useCallback(() => {
-    if (!customerId) { setNotes([]); return }
+    if (!customerId) { setNotes([]); setLoading(false); return }
+    const requestId = ++requestIdRef.current
+    setLoading(true); setError(false)
     api.get(`/customers/${customerId}/notes`, { params: { rollup: 1 } })
-      .then(res => setNotes(unwrapList<ApiCustomerNoteRow>(res).rows.map(mapCustomerNoteRow)))
-      .catch(() => setNotes([]))
+      .then(res => { if (requestIdRef.current === requestId) setNotes(unwrapList<ApiCustomerNoteRow>(res).rows.map(mapCustomerNoteRow)) })
+      .catch(() => { if (requestIdRef.current === requestId) setError(true) })
+      .finally(() => { if (requestIdRef.current === requestId) setLoading(false) })
   }, [customerId])
 
   useEffect(() => { load() }, [load])
@@ -92,5 +101,5 @@ export function usePopoutCustomerNotes(customerId: string | undefined) {
       })
   }, [customerId, notes, t])
 
-  return { notes, addNote, editNote, deleteNote }
+  return { notes, loading, error, reload: load, addNote, editNote, deleteNote }
 }

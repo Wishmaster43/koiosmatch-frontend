@@ -30,7 +30,7 @@ export default function VacancyNotesPopout({ id }: { id: string | undefined }) {
   // same 'Koios' default the drawer's NotesTab.tsx uses.
   const auth = useAuth()
   const authorName = auth?.user?.name ?? 'Koios'
-  const { notes, addNote, editNote, deleteNote } = usePopoutVacancyNotes(id, authorName)
+  const { notes, addNote, editNote, deleteNote, loading: notesLoading, error: notesError, reload: reloadNotes } = usePopoutVacancyNotes(id, authorName)
   // Note categories from the tenant lookup, scoped to 'vacancy' (NOTE-TYPES-2/3).
   const { writableTypes: noteTypes } = useNoteTypes('vacancy')
   const initials = initialsOf(authorName)
@@ -52,7 +52,7 @@ export default function VacancyNotesPopout({ id }: { id: string | undefined }) {
 
   return (
     <PopoutShell
-      loading={loading} error={error || !vacancy} onRetry={reload}
+      loading={loading || notesLoading} error={error || notesError || !vacancy} onRetry={() => { reload(); reloadNotes() }}
       loadingLabel={t('common:loading')} errorLabel={t('popout.loadError')} retryLabel={t('common:error.retry')}
       name={vacancy?.name ?? ''} initials={vacancy?.initials ?? ''} subtitle={t('notes.title')}
       // VAC-NOTES-CALM-1 (PDF-VACATURES point 28): no repeated vacancy name in

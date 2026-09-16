@@ -10,13 +10,13 @@ import type { ReactNode } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import Button from '@/components/ui/Button'
-import { BodyText, Caption, GroupLabel } from '@/components/ui/typography'
+import { BodyText, Caption, GroupLabel, SectionTitle } from '@/components/ui/typography'
 
 interface PopoutShellProps {
   loading: boolean
-  // True when the entity identity itself failed to load (bad/stale id, network).
-  // Notes themselves degrade quietly inside the notes hook — this state means
-  // "we don't even know whose notes these are", so it blocks the whole surface.
+  // True when the entity identity failed to load OR the notes request itself
+  // failed (bad/stale id, network, or a failed notes GET) — either blocks the
+  // whole surface, and the caller's onRetry re-fires both requests.
   error: boolean
   loadingLabel: string
   errorLabel: string
@@ -93,9 +93,10 @@ export default function PopoutShell({ loading, error, loadingLabel, errorLabel, 
           borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <Avatar initials={initials} soft size={32} />
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {/* Typography atom (§4): identity comes from SectionTitle, layout (ellipsis) stays on style. */}
+            <SectionTitle style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {name}
-            </div>
+            </SectionTitle>
             <Caption>{subtitle}</Caption>
           </div>
         </header>

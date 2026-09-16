@@ -34,6 +34,20 @@ describe('usePopoutVacancyNotes', () => {
     expect(apiGet).not.toHaveBeenCalled()
   })
 
+  // §8/§9: a failed notes GET surfaces as an honest error flag, never a silent empty list.
+  it('sets error (not just an empty list) when the notes GET fails, and clears it on a successful reload', async () => {
+    apiGet.mockRejectedValueOnce(new Error('network'))
+    const { result } = renderHook(() => usePopoutVacancyNotes('vac-1', 'Koios'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.error).toBe(true)
+    expect(result.current.notes).toHaveLength(0)
+
+    apiGet.mockResolvedValueOnce({ data: { data: [{ id: 'n1', type: 'general', body: 'Hello', author: 'Anne' }] } })
+    act(() => { result.current.reload() })
+    await waitFor(() => expect(result.current.notes).toHaveLength(1))
+    expect(result.current.error).toBe(false)
+  })
+
   it('posts the exact add-note request (payload forwarded as-is) and reloads on success', async () => {
     apiGet.mockResolvedValue({ data: { data: [] } })
     apiPost.mockResolvedValue({ data: { data: {} } })

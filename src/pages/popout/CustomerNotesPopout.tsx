@@ -32,7 +32,7 @@ export default function CustomerNotesPopout({ id }: { id: string | undefined }) 
   const { t } = useTranslation('customers')
   const { customer, loading, error, reload } = useCustomerLite(id)
   // K15NOTES: edit/delete now exist alongside add — mirrors CandidateNotesPopout's wiring.
-  const { notes, addNote, editNote, deleteNote } = usePopoutCustomerNotes(id)
+  const { notes, addNote, editNote, deleteNote, loading: notesLoading, error: notesError, reload: reloadNotes } = usePopoutCustomerNotes(id)
   // Fallback avatar for a freshly-added note before the server's real author comes
   // back — the SIGNED-IN user's initials, exactly like CustomerDrawer's own
   // `authorInitials` (never the customer's own initials — that would misattribute
@@ -80,7 +80,7 @@ export default function CustomerNotesPopout({ id }: { id: string | undefined }) 
 
   return (
     <PopoutShell
-      loading={loading} error={error || !customer} onRetry={reload}
+      loading={loading || notesLoading} error={error || notesError || !customer} onRetry={() => { reload(); reloadNotes() }}
       loadingLabel={t('common:loading')} errorLabel={t('popout.loadError')} retryLabel={t('common:error.retry')}
       name={customer?.name ?? ''} initials={customer?.initials ?? ''} subtitle={t('notes.notes')}
     >

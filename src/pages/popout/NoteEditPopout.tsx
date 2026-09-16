@@ -47,6 +47,7 @@ import type { NoteLinkHost, NoteLinkItem } from '@/components/drawer/tabs/notes/
 import { useNoteFields } from '@/components/drawer/tabs/notes/useNoteFields'
 import { canManageNote, isSystemNote } from '@/components/drawer/tabs/notes/noteRights'
 import SafeHtml from '@/components/ui/SafeHtml'
+import CalloutBox from '@/components/ui/CalloutBox'
 import { bodyTextStyle } from '@/components/ui/typography'
 import { useAuth } from '@/context/AuthContext'
 import { useNoteTypes } from '@/lib/useNoteTypes'
@@ -161,9 +162,14 @@ function CandidateNoteEditPopout() {
 // GenericNoteEditPopout) — only the record/name/subtitle/permission differ.
 // Candidate/customer stay their own branches: they use their OWN i18n namespace's
 // popout keys (not `common:`) and pass a `links` prop these two never do.
-function SimpleNotePopoutShell({ loading, error, record, reload, name, initials, subtitle, note, noteId, onSave, managePermission, writableTypes, t }: {
+function SimpleNotePopoutShell({ loading, error, notesLoading = false, notesError = false, record, reload, name, initials, subtitle, note, noteId, onSave, managePermission, writableTypes, t }: {
   loading: boolean
   error: unknown
+  // The NOTES request's own settled state (§8/§9) — separate from the identity
+  // fetch above, since a fast identity load must never claim "note not found"
+  // while the actual notes list is still loading or failed.
+  notesLoading?: boolean
+  notesError?: boolean
   record: unknown
   reload: () => void
   name: string
@@ -178,12 +184,14 @@ function SimpleNotePopoutShell({ loading, error, record, reload, name, initials,
   writableTypes: NoteType[]
   t: (k: string, o?: Record<string, unknown>) => string
 }) {
-  const notFound = !loading && !error && (!note || isSystemNote(note))
+  const combinedLoading = loading || notesLoading
+  const combinedError = Boolean(error) || notesError
+  const notFound = !combinedLoading && !combinedError && (!note || isSystemNote(note))
   const labels: NotesLabels = { type: t('notes.type'), notePlaceholder: () => t('notes.placeholder') }
   return (
     <PopoutShell
-      loading={loading}
-      error={Boolean(error) || !record || notFound}
+      loading={combinedLoading}
+      error={combinedError || !record || notFound}
       onRetry={reload}
       loadingLabel={t('common:loading')}
       errorLabel={notFound ? t('common:popout.noteNotFound') : t('common:popout.loadError')}
@@ -204,12 +212,12 @@ function ApplicationNoteEditPopout() {
   const { id, noteId } = useParams()
   const { t } = useTranslation('applications')
   const { application, loading, error, reload } = useApplicationLite(id)
-  const { notes, editNote } = usePopoutApplicationNotes(id)
+  // usePopoutApplicationNotes fires its OWN GET /applications/{id} (§9) — its
+  // loading/error are passed through separately so "note not found" only shows
+  // once the notes request itself has actually settled.
+  const { notes, loading: notesLoading, error: notesError, reload: reloadNotes, editNote } = usePopoutApplicationNotes(id)
   const { writableTypes } = useNoteTypes('application')
-  // No standalone GET for application notes (see usePopoutApplicationNotes'
-  // own docblock) — "loaded" (loading/error settled) is the same signal that
-  // also gates the note list itself (both ride the same request); computed
-  // inside SimpleNotePopoutShell from the loading/error passed below.
+  const retry = () => { reload(); reloadNotes() }
 
   const noteIndex = notes.findIndex(n => String(n.id) === String(noteId))
   const note = noteIndex >= 0 ? (notes[noteIndex] as PopoutApplicationNote) : null
@@ -218,7 +226,7 @@ function ApplicationNoteEditPopout() {
   usePopoutWindowTitle(application, t('common:popout.windowTitle', { name: application?.candidateName }))
 
   return (
-    <SimpleNotePopoutShell loading={loading} error={error} record={application} reload={reload}
+    <SimpleNotePopoutShell loading={loading} error={error} notesLoading={notesLoading} notesError={notesError} record={application} reload={retry}
       name={application?.candidateName ?? ''} initials={application?.initials ?? ''} subtitle={application?.vacancyTitle}
       note={note} noteId={noteId} onSave={payload => editNote(noteIndex, payload)}
       managePermission="applications.notes.manage_all" writableTypes={writableTypes} t={t} />
@@ -234,9 +242,13 @@ function CustomerNoteEditPopout() {
   const { id, noteId } = useParams()
   const { t } = useTranslation('customers')
   const { customer, loading, error, reload } = useCustomerLite(id)
-  const { notes, editNote } = usePopoutCustomerNotes(id)
+  // usePopoutCustomerNotes fires its OWN GET /customers/{id}/notes (§9) —
+  // "loaded" is gated on THAT request settling, not the separate identity fetch.
+  const { notes, loading: notesLoading, error: notesError, reload: reloadNotes, editNote } = usePopoutCustomerNotes(id)
   const { writableTypes } = useNoteTypes('customer')
-  const loaded = !loading && !error
+  const combinedLoading = loading || notesLoading
+  const loaded = !combinedLoading && !error && !notesError
+  const retry = () => { reload(); reloadNotes() }
 
   const noteIndex = notes.findIndex(n => String(n.id) === String(noteId))
   const note = noteIndex >= 0 ? (notes[noteIndex] as EditableNote) : null
@@ -249,9 +261,9 @@ function CustomerNoteEditPopout() {
 
   return (
     <PopoutShell
-      loading={loading}
-      error={Boolean(error) || !customer || notFound}
-      onRetry={reload}
+      loading={combinedLoading}
+      error={Boolean(error) || notesError || !customer || notFound}
+      onRetry={retry}
       loadingLabel={t('common:loading')}
       errorLabel={notFound ? t('common:popout.noteNotFound') : t('common:popout.loadError')}
       retryLabel={t('common:error.retry')}
@@ -291,8 +303,12 @@ function GenericNoteEditPopout<R extends { loading: boolean; error: boolean; rel
   const { loading, error, reload } = lite
   // Explicit per-entity API route + update method — never derived from the i18n
   // namespace (a coincidental coupling), and opportunities' route is PUT-only.
-  const { notes, editNote } = useEntityNotes({ id, basePath: `${ENTITY_API_BASE[entity]}/${id}`, updateMethod: entity === 'opportunity' ? 'put' : 'patch' })
+  // useEntityNotes fires its OWN GET `${basePath}/notes` (§9) — its loading/error
+  // are read here (not discarded) so "note not found" only shows once the notes
+  // request itself has actually settled, not just the identity fetch.
+  const { notes, loading: notesLoading, error: notesError, fetchNotes, editNote } = useEntityNotes({ id, basePath: `${ENTITY_API_BASE[entity]}/${id}`, updateMethod: entity === 'opportunity' ? 'put' : 'patch' })
   const { writableTypes } = useNoteTypes(entity)
+  const retry = () => { reload(); fetchNotes() }
 
   const noteIndex = notes.findIndex(n => String(n.id) === String(noteId))
   const note = noteIndex >= 0 ? (notes[noteIndex] as EditableNote) : null
@@ -301,7 +317,7 @@ function GenericNoteEditPopout<R extends { loading: boolean; error: boolean; rel
   usePopoutWindowTitle(record, t('common:popout.windowTitle', { name }))
 
   return (
-    <SimpleNotePopoutShell loading={loading} error={error} record={record} reload={reload}
+    <SimpleNotePopoutShell loading={loading} error={error} notesLoading={notesLoading} notesError={notesError} record={record} reload={retry}
       name={name} initials={initials} subtitle={subtitle}
       note={note} noteId={noteId} onSave={payload => editNote(noteIndex, payload)}
       managePermission="candidates.notes.manage_all" writableTypes={writableTypes} t={t} />
@@ -349,10 +365,8 @@ function NoteEditor({ note, onSave, noteTypes, channels, managePermission, label
   if (!editable) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <div role="note" style={{ padding: '10px 14px', borderRadius: 8, fontSize: 12,
-          background: 'var(--hover-bg)', border: '1px solid var(--border)', color: 'var(--text-muted)' }}>
-          {readOnlyCopy}
-        </div>
+        {/* Typography/notice atom (§4): the one inline banner is CalloutBox — no local fontSize/border/background. */}
+        <CalloutBox variant="info">{readOnlyCopy}</CalloutBox>
         <SafeHtml style={{ ...bodyTextStyle, color: 'var(--text)', lineHeight: 1.6 }} html={String(note.body ?? note.text ?? '')} />
       </div>
     )
