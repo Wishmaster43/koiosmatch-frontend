@@ -9,6 +9,7 @@
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import { SectionTitle, Caption, GroupLabel } from '@/components/ui/typography'
 import { fieldLabel } from '../lib/fieldLabels'
 import { SKIP, missingRequiredColumns, unmappedSourceColumns, type ColumnMapping } from '../lib/mapping'
 import Button from '@/components/ui/Button'
@@ -36,12 +37,10 @@ export default function MapColumnsStep({ entity, headers, targetColumns, mapping
   return (
     <div>
       <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>
-          {t('import.wizard.mapping.title')}
-        </div>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+        <SectionTitle>{t('import.wizard.mapping.title')}</SectionTitle>
+        <Caption as="div" style={{ marginTop: 2 }}>
           {t('import.wizard.mapping.subtitle')}
-        </div>
+        </Caption>
       </div>
 
       {headers.length === 0 ? (
@@ -50,10 +49,9 @@ export default function MapColumnsStep({ entity, headers, targetColumns, mapping
         </p>
       ) : (
         <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-          <div style={{ display: 'flex', padding: '8px 12px', background: 'var(--hover-bg)', fontSize: 11,
-            fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-            <span style={{ flex: 1 }}>{t('import.wizard.mapping.sourceColumn')}</span>
-            <span style={{ flex: 1 }}>{t('import.wizard.mapping.targetField')}</span>
+          <div style={{ display: 'flex', padding: '8px 12px', background: 'var(--hover-bg)' }}>
+            <GroupLabel as="span" style={{ flex: 1 }}>{t('import.wizard.mapping.sourceColumn')}</GroupLabel>
+            <GroupLabel as="span" style={{ flex: 1 }}>{t('import.wizard.mapping.targetField')}</GroupLabel>
           </div>
           {headers.map((header) => {
             // Repeated-row control — each column's picker needs its OWN accessible
@@ -78,7 +76,7 @@ export default function MapColumnsStep({ entity, headers, targetColumns, mapping
                   <CreatableSelect
                     aria-labelledby={rowLabelId}
                     value={mapping[header] ?? SKIP}
-                    onChange={(value) => onChangeMapping(header, value)}
+                    onChange={(value) => onChangeMapping(header, value || SKIP)}
                     allowCreate={false}
                     options={options}
                     style={SELECT_STYLE}

@@ -16,6 +16,7 @@
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { PageTitle, Caption } from '@/components/ui/typography'
 import { ImportEntityNav } from '@/pages/settings/shared'
 import { useImportTemplates, useDefaultImportSelection } from '@/pages/settings/shared'
 import { groupTemplates, importPermissionsFor } from '@/pages/settings/shared'
@@ -59,8 +60,8 @@ export default function ImportWizardPage({ intent }: ImportWizardPageProps = {})
   return (
     <div style={{ padding: 24, height: '100%', overflowY: 'auto' }}>
       <div style={{ marginBottom: 20 }}>
-        <h1 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>{t('import.title')}</h1>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>{t('import.subtitle')}</p>
+        <PageTitle as="h1">{t('import.title')}</PageTitle>
+        <Caption as="p" style={{ marginTop: 2 }}>{t('import.subtitle')}</Caption>
       </div>
 
       <div style={{ display: 'flex', gap: 0, minHeight: 400 }}>

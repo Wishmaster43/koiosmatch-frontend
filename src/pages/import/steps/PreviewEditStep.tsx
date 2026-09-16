@@ -17,6 +17,13 @@ import type { ColumnMapping } from '../lib/mapping'
 import type { ImportRunResult } from '../api'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import { SectionTitle, Caption } from '@/components/ui/typography'
+
+// A dense grid cell: the canonical field face (fieldMetrics), overridden only for
+// this compact table density (height/font/radius/minWidth) — never a re-declared
+// background, which is exactly what let --surface drift in here (§4 field canon).
+const GRID_CELL_STYLE = { ...fieldInputStyle, height: 28, fontSize: 12, borderRadius: 6, minWidth: 120 }
 
 type AsyncStatus = 'idle' | 'loading' | 'error' | 'success'
 
@@ -51,17 +58,15 @@ export default function PreviewEditStep({
   // A row of the LAST successful dry-run, keyed by line number (header = line 1, so
   // the first data row is line 2) — correlates the server's own verdict with the row
   // the user is editing, exactly as ImportResultPanel shows it elsewhere.
-  const outcomeFor = (rowIndex: number) => previewResult?.rows.find((row) => row.row === rowIndex + 2)
+  const outcomeFor = (rowIndex: number) => (dirty ? undefined : previewResult?.rows.find((row) => row.row === rowIndex + 2))
 
   return (
     <div>
       <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>
-          {t('import.wizard.preview.title')}
-        </div>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+        <SectionTitle>{t('import.wizard.preview.title')}</SectionTitle>
+        <Caption as="div" style={{ marginTop: 2 }}>
           {t('import.wizard.preview.subtitle')}
-        </div>
+        </Caption>
       </div>
 
       {editableRows.length === 0 ? (
@@ -94,8 +99,7 @@ export default function PreviewEditStep({
                       <td key={column} style={{ padding: '3px 6px' }}>
                         <input value={row[column] ?? ''} onChange={(e) => onEditCell(rowIndex, column, e.target.value)}
                           aria-label={fieldLabel(t, entity, column)}
-                          style={{ width: '100%', minWidth: 120, height: 28, padding: '0 8px', fontSize: 12,
-                                   border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)', color: 'var(--text)' }} />
+                          style={GRID_CELL_STYLE} />
                       </td>
                     ))}
                     <td style={{ padding: '4px 10px', color: outcome?.action === 'error' ? 'var(--color-danger)' : 'var(--text-muted)', whiteSpace: 'nowrap' }}>
