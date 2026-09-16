@@ -5,6 +5,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import { CalendarClock } from 'lucide-react'
+import { useNumberFormat } from '@/lib/formatters'
 import { KpiCard } from '../DashboardPrimitives'
 import type { OppAgingBucket } from '@/types/dashboard'
 
@@ -15,6 +16,8 @@ const BUCKET_ORDER: OppAgingBucket['bucket'][] = ['0-7', '8-30', '31-90', '90+']
 // Opportunity-ageing tiles in a fixed bucket order (so the row never reflows); renders nothing when the feed is absent (see file header).
 export default function OppAging({ rows }: { rows: OppAgingBucket[] }) {
   const { t } = useTranslation('dashboard')
+  // Locale-aware tile counts (GETALLEN-1) — the local KpiCard prints value verbatim.
+  const { formatNumber } = useNumberFormat()
   if (!rows.length) return null
   const byBucket = new Map(rows.map(r => [r.bucket, r.count]))
 
@@ -25,7 +28,7 @@ export default function OppAging({ rows }: { rows: OppAgingBucket[] }) {
   return (
     <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
       {BUCKET_ORDER.filter(b => byBucket.has(b)).map(b => (
-        <KpiCard key={b} label={t(`oppAging.bucket.${b}`)} value={byBucket.get(b)}
+        <KpiCard key={b} label={t(`oppAging.bucket.${b}`)} value={formatNumber(byBucket.get(b) ?? 0)}
           sub={t('oppAging.sub')} color="var(--color-secondary)" bg="var(--color-secondary-bg)" Icon={CalendarClock} />
       ))}
     </div>

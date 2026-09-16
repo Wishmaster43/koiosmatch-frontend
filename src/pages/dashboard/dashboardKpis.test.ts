@@ -177,3 +177,24 @@ describe('buildDashboardKpis · DASH-V3-UITROL-1 tiles', () => {
     expect(kpis.candidatesAvailable.value).toBe('18')
   })
 })
+
+// GETALLEN-1 regression: fillRate/occupancy must run their raw server number
+// through the house `num` formatter, mirroring the oppsWinRate tile, not a
+// hand-built `${n}%` template literal.
+describe('buildDashboardKpis · GETALLEN-1 percent tiles use the house formatter', () => {
+  it('fillRate renders through num(), not a raw template literal', () => {
+    const onNavigate = vi.fn()
+    const num = vi.fn((v?: number | null) => (v == null ? '—' : `fmt(${v})`))
+    const kpis = buildDashboardKpis({ ...baseArgs({ fill_rate: 82.5 }, onNavigate), num })
+    expect(kpis.fillRate.value).toBe('fmt(82.5)%')
+    expect(num).toHaveBeenCalledWith(82.5)
+  })
+
+  it('occupancy renders through num(), not a raw template literal', () => {
+    const onNavigate = vi.fn()
+    const num = vi.fn((v?: number | null) => (v == null ? '—' : `fmt(${v})`))
+    const kpis = buildDashboardKpis({ ...baseArgs({ occupancy: 63.1 }, onNavigate), num })
+    expect(kpis.occupancy.value).toBe('fmt(63.1)%')
+    expect(num).toHaveBeenCalledWith(63.1)
+  })
+})
