@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Search, X, Download, Trash2 } from 'lucide-react'
 import { useDocumentSelection } from '@/hooks/useDocumentSelection'
 import type { VacancyDetail } from '@/types/vacancy'
-import { useEntityDocuments } from '@/hooks/useEntityDocuments'
+import { useEntityDocuments, fmtSize } from '@/hooks/useEntityDocuments'
 import { useDocumentTypes } from '@/lib/useDocumentTypes'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
@@ -90,7 +90,10 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
     if (pendingUrlRef.current) URL.revokeObjectURL(pendingUrlRef.current)
     const objectUrl = URL.createObjectURL(file)
     pendingUrlRef.current = objectUrl
-    setPending({ file, objectUrl, name: file.name, size: Math.round(file.size / 1024) + ' KB', type: docTypes[0]?.value ?? '' })
+    // CLONE-BY-CONSTRUCTION-1: the staged card's size string now comes from the same
+    // fmtSize the hook applies to every persisted row (useEntityDocuments), so a
+    // small file never shows a different size while pending vs. once uploaded.
+    setPending({ file, objectUrl, name: file.name, size: fmtSize(file.size), type: docTypes[0]?.value ?? '' })
     e.target.value = ''
   }
   // Confirm the staged file — upload with its picked type, then clear the queue.

@@ -15,9 +15,15 @@ import type { VacancyDetail } from '@/types/vacancy'
 // Resolve the active locale's own copy so assertions never guess/hardcode a string.
 const t = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'vacancies', ...opts })
 
-vi.mock('@/hooks/useEntityDocuments', () => ({
-  useEntityDocuments: vi.fn(() => ({ docs: [], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })),
-}))
+// `fmtSize` is a pure formatter (no fetch/state) — kept REAL in the mock so the
+// staged-upload size assertion below exercises the actual house formatter, not a stub.
+vi.mock('@/hooks/useEntityDocuments', async importOriginal => {
+  const actual = await importOriginal<typeof import('@/hooks/useEntityDocuments')>()
+  return {
+    ...actual,
+    useEntityDocuments: vi.fn(() => ({ docs: [], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })),
+  }
+})
 // A fixed 2-type tenant lookup, entity-scoped 'vacancy' — the real hook's fetch/
 // cache plumbing is irrelevant here, only that DocumentsTab reads it and passes
 // the picked value through to upload().
@@ -80,6 +86,17 @@ describe('DocumentsTab (vacancy) · document type', () => {
 
     await clickConfirm()
     expect(upload).toHaveBeenCalledWith(file, 'Contract', 'contract.pdf', 'blob:contract.pdf')
+  })
+
+  // GETALLEN-1 / CLONE-BY-CONSTRUCTION-1: the staged file's size chip renders through
+  // useEntityDocuments' exported `fmtSize` (the same formatter the hook applies to every
+  // persisted row), never a hand-rounded "N KB" literal that ignores the active locale.
+  it('shows the staged file size via the shared fmtSize formatter', () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    const bigFile = new File([new Uint8Array(2 * 1024 * 1024)], 'big.pdf', { type: 'application/pdf' })
+    const { container } = render(<DocumentsTab vacancy={vacancy} />)
+    fireEvent.change(getFileInput(container), { target: { files: [bigFile] } })
+    expect(screen.getByText('(2 MB)')).toBeInTheDocument()
   })
 
   it('lets the user pick a different type before confirming the upload', async () => {
