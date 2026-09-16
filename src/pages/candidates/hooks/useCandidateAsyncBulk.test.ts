@@ -40,16 +40,19 @@ describe('useCandidateAsyncBulk · bulkGeocode', () => {
     expect(api.post).toHaveBeenCalledWith('/candidates/bulk/geocode', { candidate_ids: ['c2', 'c3'] })
   })
 
-  it('does nothing when every selected candidate already has coordinates', () => {
+  it('reports an honest no-op instead of silently doing nothing (D8)', () => {
     const setSelectedIds = vi.fn()
+    const notify = vi.fn()
     const { result } = renderHook(() => useCandidateAsyncBulk({
       selectedIds: new Set(['c1']),
       setSelectedIds,
-      notify: vi.fn(),
+      notify,
       t: ((k: string) => k) as unknown as import('i18next').TFunction,
       candidates,
     }))
     act(() => { result.current.bulkGeocode() })
     expect(api.post).not.toHaveBeenCalled()
+    expect(notify).toHaveBeenCalledWith('info', 'bulk.geocodeNothingToDo')
+    expect(setSelectedIds).not.toHaveBeenCalled()
   })
 })

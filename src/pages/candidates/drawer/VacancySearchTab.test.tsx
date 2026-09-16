@@ -23,6 +23,7 @@ import i18n from '@/i18n'
 import VacancySearchTab from './VacancySearchTab'
 import api from '@/lib/api'
 import nl from '@/i18n/locales/nl/candidates.json'
+import nlCommon from '@/i18n/locales/nl/common.json'
 import type { Candidate } from '@/types/candidate'
 
 // The new filter keys (contractForm/hoursPerWeek/…/functionNotInLookup, Danny
@@ -91,7 +92,7 @@ vi.mock('@/hooks/useApplicationStages', () => ({
 }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [{ id: 'u1', name: 'Piet Recruiter' }] }) }))
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'u1', name: 'Piet Recruiter' } }) }))
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'u1', name: 'Piet Recruiter' }, hasPermission: () => true }) }))
 vi.mock('@/components/actionrules', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/components/actionrules')>()),
   useActionRulePreflight: () => ({ decision: null, loading: false, error: false }),
@@ -294,6 +295,17 @@ describe('VacancySearchTab · no location (degrades, never dead-ends)', () => {
     // …but the filters and the real results are still there (the actual bug).
     expect(screen.getByText(nl.vacancySearch.statuses)).toBeInTheDocument()
     await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
+  })
+
+  // D8: mapCandidate.ts writes '-' as the display placeholder for a missing
+  // address, which is truthy — the geocode trigger's disabled gate must treat
+  // it as empty too, not just a genuinely falsy value.
+  it('keeps the geocode trigger disabled for the mapper\'s "-" address placeholder', async () => {
+    stubApi({ matches: () => Promise.resolve({ data: { data: rawMatchRows } }) })
+    render(<VacancySearchTab candidate={{ ...candidateNoLocation, address: '-' } as unknown as Candidate} />)
+
+    await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
+    for (const btn of screen.getAllByLabelText(nlCommon.geocode.refresh)) expect(btn).toBeDisabled()
   })
 })
 

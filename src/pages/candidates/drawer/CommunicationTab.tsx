@@ -22,6 +22,7 @@ import CandidateTasks from './CandidateTasks'
 import ConversationsSection from '@/components/drawer/ConversationsSection'
 import DrawerAddButton from './DrawerAddButton'
 import StartConversationModal from './StartConversationModal'
+import { hasValue } from './constants'
 import { useNoteTypes } from '@/lib/useNoteTypes'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import { useSeedLabel } from '@/lib/useSeedLabel'
@@ -327,8 +328,8 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
             headerAction={
               canStartConversation && (
                 <DrawerAddButton onClick={() => setShowStartModal(true)} icon={MessageCircle}
-                  label={t('conversations.start')} disabled={!c.mobile}
-                  title={c.mobile ? t('conversations.start') : t('conversations.startNoMobile')} />
+                  label={t('conversations.start')} disabled={!hasValue(c.mobile)}
+                  title={hasValue(c.mobile) ? t('conversations.start') : t('conversations.startNoMobile')} />
               )
             } />
         </>

@@ -52,6 +52,7 @@ import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import { selectedTemplateTexts, type WaTemplateOption } from '@/components/layout/workflow/whatsappTemplate'
 import type { ConversationSubject } from '@/components/drawer/useWhatsAppTemplateSend'
 import type { Id } from '@/types/common'
@@ -118,6 +119,10 @@ export default function StartConversationModal({ candidateId, subject, onClose, 
   const [numbers, setNumbers] = useState<PhoneNumberOption[]>([])
   const [agents, setAgents] = useState<AgentOption[]>([])
   const [loading, setLoading] = useState(true)
+  // Four UI states (D8): a failed templates/numbers fetch must render as a
+  // retryable error, never collapse into the "0 rows configured" ConfigNotice.
+  const [loadError, setLoadError] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   const [templateName, setTemplateName] = useState('')
   const [phoneNumberId, setPhoneNumberId] = useState('')
   const [agentId, setAgentId] = useState('')
@@ -145,6 +150,8 @@ export default function StartConversationModal({ candidateId, subject, onClose, 
   // hiccup there degrades to an empty (optional) picker, never blocks the modal.
   useEffect(() => {
     let alive = true
+    setLoading(true)
+    setLoadError(false)
     Promise.all([
       api.get('/whatsapp-templates').then(r => unwrapList<WaTemplateOption>(r).rows),
       api.get('/whatsapp-phone-numbers').then(r => unwrapList<PhoneNumberOption>(r).rows),
@@ -156,9 +163,9 @@ export default function StartConversationModal({ candidateId, subject, onClose, 
       setAgents(ags.map(a => ({ value: String(a.id ?? ''), label: a.name ?? '' })))
       // Exactly one active sender → pick it silently, nothing to ask the recruiter.
       if (nums.length === 1) setPhoneNumberId(nums[0].value)
-    }).catch(() => {}).finally(() => { if (alive) setLoading(false) })
+    }).catch(() => { if (alive) setLoadError(true) }).finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
-  }, [])
+  }, [reloadKey])
 
   const { selected, texts } = selectedTemplateTexts(templates, templateName)
   const hasPreview = Boolean(texts.header || texts.body || texts.footer)
@@ -231,6 +238,15 @@ export default function StartConversationModal({ candidateId, subject, onClose, 
 
         {(loading || devicesLoading) && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{t('common:loading')}</div>}
 
+        {/* The templates/numbers/agents load only feeds the waba branch (wa_web reads
+            devices via useWaWebSendDevices instead), so a failed load must never hide
+            the working wa_web path behind a template-flavoured error banner. */}
+        {!loading && loadError && channel === 'waba' && (
+          <ErrorBanner onRetry={() => setReloadKey(k => k + 1)} style={{ marginBottom: 14 }}>
+            {t('conversations.loadError')}
+          </ErrorBanner>
+        )}
+
         {/* WA-SEND-1: WhatsApp Web — free text over a linked device, no template, no agent field. */}
         {!devicesLoading && channel === 'wa_web' && (
           <>
@@ -265,7 +281,7 @@ export default function StartConversationModal({ candidateId, subject, onClose, 
           </>
         )}
 
-        {!loading && channel === 'waba' && (
+        {!loading && !loadError && channel === 'waba' && (
           <>
             {/* Template — searchable pick-only combobox: approved templates only, never a typed name. */}
             <div style={{ marginBottom: 14 }}>

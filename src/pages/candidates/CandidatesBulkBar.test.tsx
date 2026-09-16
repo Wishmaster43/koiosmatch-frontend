@@ -47,6 +47,16 @@ describe('CandidatesBulkBar', () => {
     expect(screen.getByText('bulk.scopeUseSelection')).toBeInTheDocument()
   })
 
+  // D9 (PRIMAIR-VLAK-1): the active scope toggle reads the shared button trio
+  // tokens, never the raw --color-primary/--color-on-accent it used to paint.
+  it('paints the active scope toggle with the button-trio tokens, not raw --color-primary', () => {
+    render(<CandidatesBulkBar {...baseProps()} anyFilterActive bulkScope="filtered" />)
+    const toggle = screen.getByText('bulk.scopeUseSelection')
+    expect(toggle.style.background).toBe('var(--button-fill)')
+    expect(toggle.style.color).toBe('var(--button-ink)')
+    expect(toggle.style.border).toContain('var(--button-border)')
+  })
+
   it('hides Archive unless the user may delete', async () => {
     const user = userEvent.setup()
     render(<CandidatesBulkBar {...baseProps()} canArchive={false} />)

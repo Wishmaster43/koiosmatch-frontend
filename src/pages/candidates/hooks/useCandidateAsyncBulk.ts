@@ -39,7 +39,9 @@ export function useCandidateAsyncBulk({ selectedIds, setSelectedIds, notify, t, 
       const c = byId.get(id)
       return !c || c.lat == null || c.lng == null
     })
-    if (!ids.length) return
+    // No silent no-op (D8): a full selection that already has coordinates still
+    // reports its outcome, rather than a click that visibly does nothing.
+    if (!ids.length) { notify('info', t('bulk.geocodeNothingToDo')); return }
     setSelectedIds(new Set())
     api.post('/candidates/bulk/geocode', { candidate_ids: ids })
       .then(() => notify('success', t('common:geocode.started')))

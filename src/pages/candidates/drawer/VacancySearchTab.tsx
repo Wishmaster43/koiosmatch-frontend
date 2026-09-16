@@ -27,6 +27,7 @@ import { useVacancySearch } from '../hooks/useVacancySearch'
 import { useFunctions } from '@/lib/useFunctions'
 import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { toCoord } from '@/lib/coords'
+import { hasValue } from './constants'
 import type { Candidate } from '@/types/candidate'
 
 // Snippet length cap (2-3 lines of plain text) — a short teaser, not the full description.
@@ -150,7 +151,7 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
   const mapPane: ReactNode = noLocation ? (
     <GeocodeMissingRow message={t('vacancySearch.noLocation')}
       endpoint={`/candidates/${candidate.id}/geocode`} permission="candidates.update"
-      disabled={!candidate.address} />
+      disabled={!hasValue(candidate.address)} />
   ) : (
     <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
       <RadiusMap points={points} center={center} radiusKm={radiusKm} height="100%"
@@ -184,7 +185,7 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
       noLocationMessage={t('vacancySearch.noLocationResults')}
       noLocationButton={
         <GeocodeButton endpoint={`/candidates/${candidate.id}/geocode`} permission="candidates.update"
-          variant="row" disabled={!candidate.address} />
+          variant="row" disabled={!hasValue(candidate.address)} />
       }
       selectedId={selectedId}
       onSelect={selectId}

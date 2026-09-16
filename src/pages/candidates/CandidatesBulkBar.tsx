@@ -179,13 +179,13 @@ export default function CandidatesBulkBar({
       {/* BULK-FILTERSET-1: only offered when a filter narrows the list — an empty
           filter set is never sent as "all" (the backend 422s it too, see the hook). */}
       {anyFilterActive && (
-        /* eslint-disable huisstijlLegacy/no-restricted-syntax -- state-carrying scope toggle: filled=bulkScope 'filtered', outline=bulkScope 'selected'; Button has no toggle face */
+        /* eslint-disable huisstijlLegacy/no-restricted-syntax -- state-carrying toolbar scope toggle (PRIMAIR-VLAK-1 2a: toolbar-toggles keep the button trio, not chip tint); Button has no toggle face */
         <button
           onClick={() => onSetBulkScope(bulkScope === 'filtered' ? 'selected' : 'filtered')}
           style={{ display: 'flex', alignItems: 'center', height: BTN_H_SM, padding: '0 10px', fontSize: 12, fontWeight: 500,
-            border: '1px solid var(--color-primary)', borderRadius: 7, cursor: 'pointer',
-            background: bulkScope === 'filtered' ? 'var(--color-primary)' : 'transparent',
-            color: bulkScope === 'filtered' ? 'var(--color-on-accent)' : 'var(--color-primary-text)' }}>
+            border: bulkScope === 'filtered' ? '1px solid var(--button-border)' : '1px solid var(--color-primary)', borderRadius: 7, cursor: 'pointer',
+            background: bulkScope === 'filtered' ? 'var(--button-fill)' : 'transparent',
+            color: bulkScope === 'filtered' ? 'var(--button-ink)' : 'var(--color-primary-text)' }}>
           {bulkScope === 'filtered' ? t('bulk.scopeUseSelection') : t('bulk.scopeUseFilters', { count: filteredTotal })}
         </button>
         /* eslint-enable huisstijlLegacy/no-restricted-syntax */

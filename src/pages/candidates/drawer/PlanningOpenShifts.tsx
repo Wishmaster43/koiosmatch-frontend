@@ -10,6 +10,8 @@ import { useTranslation } from 'react-i18next'
 import { Heart, Ban } from 'lucide-react'
 import { sectionBlock, softPill } from './constants'
 import ErrorBanner from '@/components/ui/ErrorBanner'
+import Button from '@/components/ui/Button'
+import CalloutBox from '@/components/ui/CalloutBox'
 import { useFunctions } from '@/lib/useFunctions'
 // ALWAYS-SEARCHABLE-1 (Danny 08-08): the house searchable combobox replaces the
 // native <select> that used to render the distance/level filter pickers below.
@@ -54,12 +56,17 @@ export default function PlanningOpenShifts({ openShifts, loading, error, onReloa
     const has = f.shiftTypes.includes(dt)
     return { ...f, shiftTypes: has ? f.shiftTypes.filter(x => x !== dt) : [...f.shiftTypes, dt] }
   })
-  const toggleScheduled = (id: Id) => setScheduledIds(prev => {
-    const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n
-  })
+  // No fake affordance (D8): no scheduling endpoint exists yet, so the button
+  // below never calls this — it only reads `scheduledIds` for display, which
+  // therefore stays permanently empty until the planning module ships a save path.
+  void setScheduledIds
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {/* No persistence path yet (D8/PlanningTab precedent): a visible calm notice, not
+          only a tooltip on a disabled button — a keyboard/screen-reader user never
+          focuses a disabled control, so the title alone would never reach them (§6). */}
+      <CalloutBox variant="info" live="off">{t('planning.notPersistedYet')}</CalloutBox>
       {/* Filter bar */}
       <div style={{ ...sectionBlock, padding: '12px 16px' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'flex-end' }}>
@@ -150,14 +157,12 @@ export default function PlanningOpenShifts({ openShifts, loading, error, onReloa
                   ))}
                 </div>
               </div>
-              <button onClick={() => toggleScheduled(d.id)} disabled={isBlockedCustomer || isBlockedLocation}
-                style={{ flexShrink: 0, padding: '5px 10px', fontSize: 11, fontWeight: 600, borderRadius: 7,
-                  cursor: isBlockedCustomer || isBlockedLocation ? 'not-allowed' : 'pointer', minWidth: 90,
-                  border: isScheduled ? '1px solid var(--color-success)' : '1px solid var(--color-primary)',
-                  background: isScheduled ? 'var(--color-success-bg)' : 'var(--color-primary)',
-                  color: isScheduled ? 'var(--color-success)' : 'white' }}>
+              {/* No persistence path yet (D8): always disabled, honest tooltip
+                  instead of a click that would silently change nothing. */}
+              <Button variant={isScheduled ? 'success' : 'secondary'} disabled
+                title={t('planning.notPersistedYet')} style={{ flexShrink: 0, minWidth: 90 }}>
                 {isScheduled ? `✓ ${t('planning.scheduled')}` : t('planning.schedule')}
-              </button>
+              </Button>
             </div>
           )
         })}

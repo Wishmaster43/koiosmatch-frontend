@@ -8,6 +8,7 @@
  */
 import type { CSSProperties } from 'react'
 import { groupLabelStyle } from '@/components/ui/typography'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 import type { Id } from '@/types/common'
 
 // Dutch provinces — a fixed real-world list, not tenant-configurable (so kept literal).
@@ -21,20 +22,24 @@ export const sectionBlock: CSSProperties = { border: '1px solid var(--border)', 
 // the block-level marginBottom is added here because Planning renders it as a bare span.
 export const sectionTitle: CSSProperties = { ...groupLabelStyle, letterSpacing: '0.04em', display: 'block', marginBottom: 8 }
 
-// Soft-tint selectable pill (§4 color-mix formula, mirrors ApplicationsPage's bucket
-// tabs) — shared by the planning family (Availability / roles-pools chips / open-shift
-// filters) so the same solid-primary+white-text selection pill can't drift back into
-// three separate hand-rolled copies.
+// Soft-tint selectable pill (CHIP-TINT-1, Danny 20-08: a selected CHOICE chip —
+// day/shift-type/planning filters — wears the active 16/50 tint, never a solid
+// fill; the button trio is reserved for actual buttons/toolbars). Built on the
+// shared lib/tint recipe so it never drifts into its own percentage.
 export const softPill = (active: boolean, color: string = 'var(--color-primary)'): CSSProperties => ({
-  color: active ? (color === 'var(--color-primary)' ? 'var(--button-ink)' : 'var(--color-on-accent)') : 'var(--text-muted)',
+  color: active ? chipInk(color) : 'var(--text-muted)',
   fontWeight: active ? 600 : 400,
-  // PRIMAIR-VLAK-1 (Danny 19-08): a SELECTED pill paints the solid colour with
-  // on-accent ink — tints stay the language of unselected/status surfaces.
-  // Accent selections read the button trio; DATA colours stay themselves.
-  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- softPill IS the canonical shared selection-pill factory (§3A, mirrored by AvailabilityEditor/PlanningScheduling/PlanningFavorites), not a per-element copy of Button
-  background: active ? (color === 'var(--color-primary)' ? 'var(--button-fill)' : color) : 'transparent',
-  border: active ? '1px solid var(--button-border)' : '1px solid var(--border)',
+  background: active ? tintBg(color, true) : 'transparent',
+  border: active ? tintBorder(color, true) : '1px solid var(--border)',
 })
+
+// Real emptiness for a mapped candidate field — mapCandidate.ts writes '-' (and
+// archiveGuard.ts writes '—') as the display placeholder for a missing
+// mobile/address, both truthy and would silently defeat a `!field`
+// disabled-gate (D8 no-fake-affordance). Single source: adopted by
+// candidateAiInsights.ts's completeness check instead of a second copy
+// (CLONE-BY-CONSTRUCTION-1).
+export const hasValue = (v: unknown): boolean => Boolean(v) && v !== '-' && v !== '—'
 
 // Return-tab memory (NAV-BACK-1 tab-remember): candidate→Match cross-navigation
 // (MatchesTab's "open match" icon) stashes which drawer subtab was active so

@@ -276,3 +276,50 @@ describe('StartConversationModal · WhatsApp Web channel (WA-SEND-1)', () => {
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith('Geen WhatsApp-toestemming voor deze kandidaat.'))
   })
 })
+
+// D8: a failed templates/numbers GET must render as a retryable error, never
+// collapse into the "0 rows configured" ConfigNotice — that told the recruiter
+// to go configure something that was already configured.
+describe('StartConversationModal · failed lookup load (four UI states)', () => {
+  it('shows an error banner with retry instead of the configuration notices', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/ai/agents') return Promise.resolve({ data: { data: [] } })
+      if (url === '/profile/whatsapp-web') return Promise.resolve({ data: { data: [] } })
+      if (url === '/whatsapp-web-numbers?scope=usable') return Promise.resolve({ data: { data: [] } })
+      return Promise.reject(new Error('network error'))
+    })
+    render(<StartConversationModal candidateId="cand-1" onClose={noop} onStarted={noop} />)
+    expect(await screen.findByText('conversations.loadError')).toBeInTheDocument()
+    expect(screen.queryByText('conversations.templatesEmpty')).not.toBeInTheDocument()
+    expect(screen.queryByText('conversations.numbersEmpty')).not.toBeInTheDocument()
+  })
+
+  it('retries the load on demand', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/ai/agents') return Promise.resolve({ data: { data: [] } })
+      if (url === '/profile/whatsapp-web') return Promise.resolve({ data: { data: [] } })
+      if (url === '/whatsapp-web-numbers?scope=usable') return Promise.resolve({ data: { data: [] } })
+      return Promise.reject(new Error('network error'))
+    })
+    render(<StartConversationModal candidateId="cand-1" onClose={noop} onStarted={noop} />)
+    await screen.findByText('conversations.loadError')
+
+    mockLookups()
+    await user.click(screen.getByRole('button', { name: 'error.retry' }))
+    expect(await screen.findByText('conversations.pickTemplate')).toBeInTheDocument()
+  })
+
+  it('never hides the working wa_web textarea/device-picker behind the templates/numbers error banner — that GET is waba-only', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/profile/whatsapp-web') return Promise.resolve({ data: { data: [OWN_DEVICE] } })
+      if (url === '/whatsapp-web-numbers?scope=usable') return Promise.resolve({ data: { data: [OWN_OPTION] } })
+      // Templates/numbers/agents all fail — wa_web needs none of them.
+      return Promise.reject(new Error('network error'))
+    })
+    render(<StartConversationModal candidateId="cand-1" onClose={noop} onStarted={noop} />)
+    // Own device present → channel preselects to wa_web (Danny Q4).
+    expect(await screen.findByPlaceholderText('conversations.messagePlaceholder')).toBeInTheDocument()
+    expect(screen.queryByText('conversations.loadError')).not.toBeInTheDocument()
+  })
+})

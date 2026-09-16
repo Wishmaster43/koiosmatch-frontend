@@ -403,6 +403,15 @@ describe('CommunicationTab · WhatsApp start trigger (WHATSAPP-COMPOSE-1)', () =
     expect(screen.getByRole('button', { name: 'conversations.start' })).not.toBeDisabled()
   })
 
+  // D8: mapCandidate.ts writes '-' as the display placeholder for a missing
+  // mobile number, which is truthy — the gate must treat it as empty too.
+  it('disables the trigger for the mapper\'s "-" placeholder, not just a falsy value', async () => {
+    const user = userEvent.setup()
+    render(<CommunicationTab c={candidate({}, { mobile: '-' })} />)
+    await goToConversations(user)
+    expect(screen.getByTitle('conversations.startNoMobile')).toBeDisabled()
+  })
+
   it('opens the start-conversation modal on click', async () => {
     const user = userEvent.setup()
     render(<CommunicationTab c={candidate({}, { mobile: '+31612345678' })} />)

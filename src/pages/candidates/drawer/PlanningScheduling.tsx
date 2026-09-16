@@ -9,6 +9,8 @@ import { useTranslation } from 'react-i18next'
 import { Mail, Clock, MapPin, Heart, X, Check } from 'lucide-react'
 import { sectionBlock, sectionTitle } from './constants'
 import ErrorBanner from '@/components/ui/ErrorBanner'
+import Button from '@/components/ui/Button'
+import CalloutBox from '@/components/ui/CalloutBox'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 import type { OpenShift, RosterShift, ScheduleFavorites } from './planningTypes'
@@ -54,6 +56,11 @@ export default function PlanningScheduling({
   const mailHref    = `mailto:${c?.email ?? ''}?subject=Jouw%20rooster&body=Hallo%20${encodeURIComponent(firstName)}%2C%0A%0AHierbij%20je%20rooster%3A%0A%0A${rosterBody}%0A%0AMet%20vriendelijke%20groet`
 
   return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {/* No persistence path yet (D8/PlanningTab precedent): a visible calm notice, not
+          only a tooltip on a disabled button — a keyboard/screen-reader user never
+          focuses a disabled control, so the title alone would never reach them (§6). */}
+      <CalloutBox variant="info" live="off">{t('planning.notPersistedYet')}</CalloutBox>
     <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
       {/* List */}
       <div style={{ ...sectionBlock, flex: scheduleSelected ? '0 0 265px' : '1', minWidth: 0, padding: '12px 14px' }}>
@@ -110,18 +117,13 @@ export default function PlanningScheduling({
       {scheduleSelected && (() => {
         const d = scheduleSelected
         const fav = scheduleFavorites[d.date + d.client] ?? d.favorite
-        const toggleFav = () => setScheduleFavorites(p => ({ ...p, [d.date + d.client]: !fav }))
-        const baseIdx = baseShifts.indexOf(d)
-        // Remove this shift from the roster (open-shift pick vs. base shift differ).
-        const handleUnschedule = () => {
-          const openId = d._openId
-          if (openId != null) {
-            setScheduledIds(prev => { const n = new Set(prev); n.delete(openId); return n })
-          } else if (baseIdx !== -1) {
-            setUnscheduledIdx(prev => { const n = new Set(prev); n.add(baseIdx); return n })
-          }
-          setScheduleSelected(null)
-        }
+        // No fake affordance (D8): no scheduling endpoint exists yet, so favourite
+        // and unschedule stay permanently disabled below instead of mutating this
+        // local-only state — `setScheduleFavorites`/`setScheduledIds`/`setUnscheduledIdx`
+        // are kept as props for the parent's shape but are never called here.
+        void setScheduleFavorites
+        void setScheduledIds
+        void setUnscheduledIdx
         return (
           <div style={{ flex: 1, minWidth: 0, border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', background: 'var(--surface)' }}>
             <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', background: 'var(--bg)', display: 'flex', alignItems: 'flex-start', gap: 8 }}>
@@ -131,11 +133,11 @@ export default function PlanningScheduling({
                 {/* HUISSTIJL-1: identical 11/400/var(--text-muted) render as a div. */}
                 <Caption as="div">{d.function}</Caption>
               </div>
-              <button onClick={toggleFav} title={fav ? t('planning.removeFavorite') : t('planning.favorite')}
-                aria-label={fav ? t('planning.removeFavorite') : t('planning.favorite')} aria-pressed={fav}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, color: fav ? 'var(--color-danger)' : 'var(--text-muted)', display: 'flex' }}>
+              {/* No persistence path yet (D8): always disabled, honest tooltip. */}
+              <Button iconOnly variant="ghost" disabled title={t('planning.notPersistedYet')}
+                aria-label={fav ? t('planning.removeFavorite') : t('planning.favorite')}>
                 <Heart size={15} fill={fav ? 'var(--color-danger)' : 'none'} />
-              </button>
+              </Button>
               <button onClick={() => setScheduleSelected(null)} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 3, display: 'flex' }}>
                 <X size={14} />
               </button>
@@ -167,15 +169,16 @@ export default function PlanningScheduling({
               </div>
             ) : null}
             <div style={{ padding: '10px 14px' }}>
-              <button onClick={handleUnschedule}
-                style={{ width: '100%', padding: '7px 0', fontSize: 12, fontWeight: 600, borderRadius: 7, cursor: 'pointer',
-                  border: '1px solid var(--color-danger)', background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}>
+              {/* No persistence path yet (D8): always disabled, honest tooltip
+                  instead of a click that would silently change nothing. */}
+              <Button variant="dangerSoft" disabled title={t('planning.notPersistedYet')} style={{ width: '100%' }}>
                 {t('planning.unschedule')}
-              </button>
+              </Button>
             </div>
           </div>
         )
       })()}
+    </div>
     </div>
   )
 }

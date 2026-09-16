@@ -9,6 +9,7 @@ import type { Candidate } from '@/types/candidate'
 import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
 import { ADVICE_META, type KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import { completenessInsight } from '@/components/ai/completenessInsight'
+import { hasValue } from './constants'
 
 // A bound-namespace translate function (the caller already resolved the namespace).
 type Tx = (key: string, opts?: Record<string, unknown>) => string
@@ -17,8 +18,9 @@ export function buildCandidateAdviceInsights(c: Candidate, t: Tx, formatDate: (v
   // Dash placeholders ('-'/'—') are the mapper's EMPTY fallback (e.g. address) —
   // truthy, so a naive Boolean() counted them as filled and the advice said
   // "profiel compleet" ("profile complete") while the profile visibly had gaps
-  // (Danny point 47).
-  const filled = (v: unknown) => Boolean(v) && v !== '-' && v !== '—'
+  // (Danny point 47). Single shared predicate (constants.ts hasValue), not a
+  // second copy of the same check.
+  const filled = hasValue
   const coreFields = [c.email, c.phone, c.dob, c.address, c.gender, c.nationality, c.summary]
 
   // Same advice as the table's "Koios" column — resolved once via useCandidateAdvice.
