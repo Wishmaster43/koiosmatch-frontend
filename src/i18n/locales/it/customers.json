@@ -541,6 +541,8 @@
     "overviewTitle": "Panoramica"
   },
   "documents": {
+    "loading": "Caricamento documenti…",
+    "loadError": "Caricamento documenti non riuscito.",
     "empty": "Ancora nessun documento.",
     "add": "Documento",
     "search": "Cerca",
@@ -861,6 +863,7 @@
     "searchPlaceholder": "Cerca per nome, numero o città…",
     "searching": "Ricerca…",
     "noResults": "Nessun cliente trovato.",
+    "searchError": "Ricerca non riuscita. Riprova.",
     "staysLabel": "Rimane (questo record)",
     "duplicateLabel": "Verrà unito",
     "warning": "Le sedi, i reparti, i referenti, le posizioni, i match e gli altri dati di {{source}} passano a {{target}}. {{source}} viene quindi eliminato. Questa azione non può essere annullata.",

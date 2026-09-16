@@ -103,8 +103,12 @@ export default function LocationSubTabPanels({ subTab, location: l, customerId, 
               honestly read-only rather than firing a /customers/undefined/… 404 (§3).
               HelloFlex/Shiftmanager gate themselves on the tenant's connector apps,
               which is why Yesway sees Shiftmanager and not HelloFlex. */}
+          {/* GEO-POLL-1: fetchEndpoint is the per-location READ route the poll
+              re-fetches until the queued geocode lands — without it the card
+              never learns the result and needs a manual reload (the CMD+R bug). */}
           <GeocodeCard lat={l.lat} lng={l.lng} permission="customers.update"
             endpoint={customerId ? `/customers/${customerId}/locations/${l.id}/geocode` : undefined}
+            fetchEndpoint={customerId ? `/customers/${customerId}/locations/${l.id}` : undefined}
             disabled={!l.city} />
         </BackofficeLinksTab>
       )}

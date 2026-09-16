@@ -468,3 +468,30 @@ describe('DocumentsTab · "gekoppeld aan" upload picker (DOCS-LOC-DEPT-1)', () =
     expect(screen.queryByText('notes.linkedTo')).not.toBeInTheDocument()
   })
 })
+
+// §3 four UI states: a pending/failed fetch must never render the same as an
+// honestly empty list.
+describe('DocumentsTab · loading/error states never look like "no documents" (§3)', () => {
+  it('shows a loading row, not the empty state, while the list fetch is pending', () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: true, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    render(<DocumentsTab customerId="cust-1" />)
+
+    expect(screen.getByText('documents.loading')).toBeInTheDocument()
+    expect(screen.queryByText('documents.empty')).not.toBeInTheDocument()
+  })
+
+  it('shows an error row, not the empty state, when the list fetch fails', () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: true, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    render(<DocumentsTab customerId="cust-1" />)
+
+    expect(screen.getByText('documents.loadError')).toBeInTheDocument()
+    expect(screen.queryByText('documents.empty')).not.toBeInTheDocument()
+  })
+
+  it('shows the honest empty state once loading finishes with no error and no docs', () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    render(<DocumentsTab customerId="cust-1" />)
+
+    expect(screen.getByText('documents.empty')).toBeInTheDocument()
+  })
+})

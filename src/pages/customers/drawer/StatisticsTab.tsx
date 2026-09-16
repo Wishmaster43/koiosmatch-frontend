@@ -13,6 +13,7 @@
 import { useTranslation } from 'react-i18next'
 import StatsTab from '@/components/drawer/tabs/StatsTab'
 import { useNavigation } from '@/context/NavigationContext'
+import { useNumberFormat } from '@/lib/formatters'
 import { useCustomerStats } from '../hooks/useCustomerDrawerData'
 import type { Customer } from '@/types/customer'
 
@@ -22,12 +23,15 @@ export default function StatisticsTab({ c, onGoToVacancies }: { c: Customer; onG
   const { t } = useTranslation('customers')
   const stats = useCustomerStats(c?.id)
   const { navigate } = useNavigation()
+  const { formatPercent } = useNumberFormat()
 
   // Prefer server stats; fall back to the counts already on the record.
   const matchesTotal  = stats?.matches_total  ?? (c as { matchesTotal?: number }).matchesTotal ?? 0
   const activeMatches = stats?.active_matches  ?? c.activeMatchesCount ?? 0
   const openVacancies = stats?.open_vacancies  ?? c.openVacanciesCount ?? 0
-  const fillRate      = stats?.fill_rate != null ? `${stats.fill_rate}%` : '—'
+  // GETALLEN-1: locale-aware percent formatting (house formatter already
+  // returns '—' for a null value), never a hand-built `${n}%` string.
+  const fillRate       = formatPercent(stats?.fill_rate ?? null)
 
   const kpis = [
     { label: t('statistics.matchesTotal'),  value: matchesTotal,  sub: t('statistics.matchesTotalSub'),  color: 'var(--color-primary-text)', onClick: () => navigate('matches') },

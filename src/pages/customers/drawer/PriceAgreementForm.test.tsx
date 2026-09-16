@@ -66,3 +66,14 @@ describe('PriceAgreementForm · financial permission gate', () => {
     expect(isDraftValid(draft, false)).toBe(true)
   })
 })
+
+// §3A field layout: label LEFT of the field (FieldRow), never label-above — a
+// labelled input proves the shared kit's aria wiring (htmlFor/aria-labelledby),
+// not a local label div with no association.
+describe('PriceAgreementForm · label-left field layout (shared forms kit)', () => {
+  it('associates the Scale input with its own label via the shared FieldRow/TextField kit', () => {
+    render(<PriceAgreementForm draft={emptyDraft()} onChange={vi.fn()} onSave={vi.fn()} onCancel={vi.fn()} saveLabel="save" />)
+    expect(screen.getByLabelText('priceAgreements.scale')).toBeInTheDocument()
+    expect(screen.getByLabelText('priceAgreements.validFrom')).toBeInTheDocument()
+  })
+})

@@ -171,7 +171,6 @@ export default function CustomerDrawer({
     targetPhase, isEntryPhase, doConvertPhase,
     ownerOptions, ownerValue, onOwnerChange,
     headerEditing, headerName, setHeaderName, startHeaderEdit, saveHeader, setHeaderEditing,
-    logoUrl, setLogoUrl,
     requestDelete, deleteDialog,
     showMerge, setShowMerge,
     setTags,
@@ -262,14 +261,16 @@ export default function CustomerDrawer({
         render: (setActiveTab?: (id: string) => void) => renderTab(tab.id, setActiveTab),
       }))}
       header={() => (
+        // TITEL-CHIP-1 (Danny 19-08: "net zoals bij kandidaat"): the phase chip IS
+        // the title; static word only while no phase is known.
+        // No fake affordance (§3): the customer entity has no logo upload route
+        // (unlike the location's own, see LocationLogoAvatar), so `avatar` omits
+        // onPhotoChange/photoLabels — PhotoAvatar then renders its own read-only
+        // branch instead of wiring the menu to unpersisted state.
         <EntityHeader
-          // TITEL-CHIP-1 (Danny 19-08: "net zoals bij kandidaat"): the phase chip IS
-          // the title; static word only while no phase is known.
           label={currentPhase ? <SoftChip label={phaseInfo.label} color={phaseInfo.color} round /> : t('drawer.entityLabel')}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
-          avatar={{ initials: c.initials, photo: logoUrl ?? c.logo, soft: true }}
-          onPhotoChange={setLogoUrl}
-          photoLabels={{ upload: t('drawer.photoUpload'), remove: t('drawer.photoRemove'), change: t('drawer.photoChange') }}
+          avatar={{ initials: c.initials, photo: c.logo, soft: true }}
           renderTitle={renderTitle}
           titleActions={<>
             {/* Danny 27-07: the shared house ChangelogPopover shell (§3A(d)) — was a

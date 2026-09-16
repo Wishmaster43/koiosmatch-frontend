@@ -38,10 +38,11 @@
  */
 import { useState, useRef, useId } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, X, Download, Trash2 } from 'lucide-react'
+import { Search, X, Download, Trash2, AlertTriangle } from 'lucide-react'
 import { useDocumentTypes, resolveDocTypeIcon } from '@/lib/useDocumentTypes'
 import { useDateFormat } from '@/lib/datetime'
 import { sectionBlock } from '@/components/ui/SectionCard'
+import Spinner from '@/components/ui/Spinner'
 import { useEntityDocuments, type EntityDoc } from '@/hooks/useEntityDocuments'
 import { useBulkDocumentDelete } from '@/hooks/useBulkDocumentDelete'
 import { useDocumentSelection } from '@/hooks/useDocumentSelection'
@@ -89,7 +90,9 @@ export default function DocumentsTab({ customerId, locations = [], departments =
   const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor, iconOf: docTypeIcon } = useDocumentTypes(docTypeScope)
   // List + optimistic upload/rename/delete against /customers/{id}/documents —
   // DOCS-LOC-DEPT-1: `listUrl` overrides the GET endpoint for a scoped drill-down.
-  const { docs, upload, rename, remove } = useEntityDocuments('customers', customerId, listUrl)
+  // loading/error are the list fetch's own state (L8-docs-1) so a pending or
+  // failed GET never renders the same as a genuinely empty list.
+  const { docs, loading, error, upload, rename, remove } = useEntityDocuments('customers', customerId, listUrl)
   // DOCS-LOC-DEPT-1: the upload's "gekoppeld aan" picker state + derived options
   // (own hook, §3 — kept this file from crossing the ~400-line split trigger).
   const { uploadLink, setUploadLink, linkOptions, showLinkPicker, uploadExtraFields } =
@@ -199,8 +202,20 @@ export default function DocumentsTab({ customerId, locations = [], departments =
             showLinkPicker={showLinkPicker} uploadLink={uploadLink} setUploadLink={setUploadLink} linkOptions={linkOptions}
           />
         )}
-        {docs.length === 0 && pending.length === 0 && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('documents.empty')}</div>}
-        {docs.length > 0 && (
+        {/* Loading state — never the same "no documents" line as a genuinely empty list. */}
+        {loading && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>
+            <Spinner size={13} /> {t('documents.loading')}
+          </div>
+        )}
+        {/* Error state — a failed fetch is never rendered as an honest empty result. */}
+        {!loading && error && (
+          <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 16, fontSize: 12, color: 'var(--color-danger-text)' }}>
+            <AlertTriangle size={13} /> <span>{t('documents.loadError')}</span>
+          </div>
+        )}
+        {!loading && !error && docs.length === 0 && pending.length === 0 && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('documents.empty')}</div>}
+        {!loading && !error && docs.length > 0 && (
           <div style={{ display: 'grid', gridTemplateColumns: DOC_GRID_COLUMNS, alignItems: 'center', padding: '4px 10px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 4 }}>
             {/* Select-all operates on the currently filtered, downloadable rows only. */}
             <input type="checkbox" aria-label={t('documents.selectAll')} checked={allFilteredSelected} onChange={toggleSelectAll}

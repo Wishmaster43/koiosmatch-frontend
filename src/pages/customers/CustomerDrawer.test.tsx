@@ -112,6 +112,15 @@ describe('CustomerDrawer · lifecycle phase badge (KLANT-FASE-1)', () => {
   })
 })
 
+describe('CustomerDrawer · avatar has no fake photo-upload affordance', () => {
+  it('renders the avatar read-only — no photo-change menu trigger, since the customer entity has no logo upload route', () => {
+    render(<CustomerDrawer customer={customer} onClose={() => {}} statuses={statuses} />)
+    // §3 no fake affordance: without onPhotoChange, EntityHeader's PhotoAvatar
+    // falls back to its own read-only branch (plain Avatar, no clickable menu).
+    expect(screen.queryByRole('button', { name: ct('drawer.photoChange') })).toBeNull()
+  })
+})
+
 describe('CustomerDrawer · Status picker hidden in the entry phase (Danny 02-08)', () => {
   it('hides the Status meta picker for a customer still in the ENTRY phase — mirrors the candidate: not deployable yet', () => {
     const entryCustomer = { ...customer, phase: 'interesse' } as Customer

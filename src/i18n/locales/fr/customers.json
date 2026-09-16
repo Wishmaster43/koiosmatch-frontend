@@ -541,6 +541,8 @@
     "overviewTitle": "Aperçu"
   },
   "documents": {
+    "loading": "Chargement des documents…",
+    "loadError": "Échec du chargement des documents.",
     "empty": "Aucun document pour le moment.",
     "add": "Document",
     "search": "Rechercher",
@@ -861,6 +863,7 @@
     "searchPlaceholder": "Rechercher par nom, numéro ou ville…",
     "searching": "Recherche…",
     "noResults": "Aucun client trouvé.",
+    "searchError": "Échec de la recherche. Veuillez réessayer.",
     "staysLabel": "Reste (cette fiche)",
     "duplicateLabel": "Fusionné et supprimé",
     "warning": "Les sites, départements, contacts, offres d'emploi, matches et autres données de {{source}} sont transférés vers {{target}}. {{source}} est ensuite supprimé. Cette action est irréversible.",

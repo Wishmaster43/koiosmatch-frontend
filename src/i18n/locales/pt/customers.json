@@ -541,6 +541,8 @@
     "overviewTitle": "Visão geral"
   },
   "documents": {
+    "loading": "A carregar documentos…",
+    "loadError": "Falha ao carregar documentos.",
     "empty": "Ainda sem documentos.",
     "add": "Documento",
     "search": "Pesquisar",
@@ -861,6 +863,7 @@
     "searchPlaceholder": "Pesquisar por nome, número ou localidade…",
     "searching": "A pesquisar…",
     "noResults": "Nenhum cliente encontrado.",
+    "searchError": "A pesquisa falhou. Tente novamente.",
     "staysLabel": "Permanece (este registo)",
     "duplicateLabel": "Será unido e eliminado",
     "warning": "As filiais, departamentos, pessoas de contacto, vagas, matches e outros dados de {{source}} passam para {{target}}. {{source}} é depois eliminado. Esta ação não pode ser anulada.",

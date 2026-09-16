@@ -541,6 +541,8 @@
     "overviewTitle": "Overzicht"
   },
   "documents": {
+    "loading": "Documenten laden…",
+    "loadError": "Documenten laden mislukt.",
     "empty": "Nog geen documenten.",
     "add": "Document",
     "search": "Zoeken",
@@ -861,6 +863,7 @@
     "searchPlaceholder": "Zoek op naam, nummer of plaats…",
     "searching": "Zoeken…",
     "noResults": "Geen klanten gevonden.",
+    "searchError": "Zoeken is mislukt. Probeer het opnieuw.",
     "staysLabel": "Blijft (dit dossier)",
     "duplicateLabel": "Wordt samengevoegd",
     "warning": "De vestigingen, afdelingen, contactpersonen, vacatures, matches en overige gegevens van {{source}} gaan over naar {{target}}. {{source}} wordt daarna verwijderd. Dit kan niet ongedaan worden gemaakt.",

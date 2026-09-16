@@ -1,9 +1,10 @@
 /**
  * CustomerLocationTextPopout — K3/K4c (pop-out parity): a customer LOCATION's
  * omschrijving on a second screen, the same TEKST-POPOUT-1 recipe as
- * CustomerCompanyTextPopout. Unlike the department variant, a standalone
- * `GET/PATCH /locations/{id}` route exists (LocationController), so `id` is the
- * location's own id — no composite parsing needed.
+ * CustomerCompanyTextPopout. The location's own read/write route is nested
+ * under its customer, so `id` carries the COMPOSITE `<customerId>:<locationId>`
+ * (see `locationPopoutId`/`parseLocationPopoutId`); the plain location id is
+ * only ever used for the Koios generate call, never the raw composite string.
  *
  * customers.json (lane-A owned) has no `popout.locationTextWindowTitle` key —
  * this reuses the generic `common:popout.windowTitle` fallback instead of
@@ -53,9 +54,10 @@ export default function CustomerLocationTextPopout({ id }: { id: string | undefi
       loadingLabel={t('common:loading')} errorLabel={t('popout.loadError')} retryLabel={t('common:error.retry')}
       name={location?.name ?? ''} initials="" subtitle={t('locations.detail.description')}
     >
-      {/* KOIOS-GENERATE-1: 'location' is already a known /ai/koios/generate entity. */}
+      {/* KOIOS-GENERATE-1: 'location' is already a known /ai/koios/generate entity —
+          the generate call takes the location's OWN id, never the composite pop-out id. */}
       <TextPopoutEditor value={text ?? ''} onChange={change} onSave={save} dirty={dirty}
-        generate={id ? { entity: 'location', id } : undefined} />
+        generate={parsed ? { entity: 'location', id: parsed.locationId } : undefined} />
     </PopoutShell>
   )
 }

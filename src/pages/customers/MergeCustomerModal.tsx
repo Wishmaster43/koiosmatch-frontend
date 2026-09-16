@@ -30,8 +30,10 @@ import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
+import { isAbortError } from '@/lib/abortError'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { Z } from '@/lib/zIndexScale'
+import { tintBorder } from '@/lib/tint'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { Caption, Mono } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
@@ -65,6 +67,7 @@ export default function MergeCustomerModal({ current, onClose, onMerged }: {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<LiteCustomer[]>([])
   const [searching, setSearching] = useState(false)
+  const [searchError, setSearchError] = useState(false)
   const [duplicate, setDuplicate] = useState<LiteCustomer | null>(null)
   const [merging, setMerging] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
@@ -78,9 +81,11 @@ export default function MergeCustomerModal({ current, onClose, onMerged }: {
     const ctrl = new AbortController()
     debounceRef.current = setTimeout(() => {
       setSearching(true)
+      setSearchError(false)
       api.get('/customers', { params: { search: q, per_page: 8 }, signal: ctrl.signal })
         .then(res => setResults((unwrapList(res).rows as ApiRow[]).map(rowToLite).filter(c => String(c.id) !== String(current.id))))
-        .catch(() => {})
+        // A real failure (not an abort) surfaces as an honest error line, never the "no results" empty state.
+        .catch(e => { if (!isAbortError(e)) setSearchError(true) })
         .finally(() => setSearching(false))
     }, 300)
     return () => { clearTimeout(debounceRef.current); ctrl.abort() }
@@ -138,7 +143,10 @@ export default function MergeCustomerModal({ current, onClose, onMerged }: {
             <MergeSearchInputBox query={query} onQueryChange={setQuery} placeholder={t('merge.searchPlaceholder')} inputStyle={inputStyle} />
             <div style={{ maxHeight: 220, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
               {searching && <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: 6 }}>{t('merge.searching')}</div>}
-              {!searching && query.trim().length >= 2 && results.length === 0 && (
+              {!searching && searchError && (
+                <div role="alert" style={{ fontSize: 12, color: 'var(--color-danger-text)', padding: 6 }}>{t('merge.searchError')}</div>
+              )}
+              {!searching && !searchError && query.trim().length >= 2 && results.length === 0 && (
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic', padding: 6 }}>{t('merge.noResults')}</div>
               )}
               {results.map(c => (
@@ -160,7 +168,7 @@ export default function MergeCustomerModal({ current, onClose, onMerged }: {
               {infoCard(current, true)}
               {infoCard(duplicate, false)}
             </div>
-            <div style={{ fontSize: 12, color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)', border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', borderRadius: 8, padding: '8px 10px', lineHeight: 1.5, marginBottom: 12 }}>
+            <div style={{ fontSize: 12, color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)', border: tintBorder('var(--color-danger)'), borderRadius: 8, padding: '8px 10px', lineHeight: 1.5, marginBottom: 12 }}>
               {t('merge.warning', { source: duplicate.name, target: current.name })}
             </div>
           </>

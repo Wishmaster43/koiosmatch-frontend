@@ -7,10 +7,10 @@
  * financial field layout of MatchModal.
  */
 import { useState } from 'react'
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import SelectMenu from '@/components/ui/SelectMenu'
 import RichTextEditor from '@/components/ui/RichTextEditor'
+import { FieldRow, TextField } from '@/components/forms/fields'
 import { useFunctions } from '@/lib/useFunctions'
 import { useCao } from '@/lib/useCao'
 import { useAuth } from '@/context/AuthContext'
@@ -71,15 +71,6 @@ export const draftToPayload = (d: PriceAgreementDraft): PriceAgreementPayload =>
 export const isDraftValid = (d: PriceAgreementDraft, requirePurchaseRate = true): boolean =>
   (!requirePurchaseRate || d.purchaseRate.trim() !== '') && d.validFrom.trim() !== ''
 
-const lbl: CSSProperties = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }
-const input: CSSProperties = { width: '100%', height: 34, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
-const row2: CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }
-
-// A labelled field wrapper — mirrors MatchModal's F().
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <div><div style={lbl}>{label}</div>{children}</div>
-}
-
 interface PriceAgreementFormProps {
   draft: PriceAgreementDraft
   onChange: (patch: Partial<PriceAgreementDraft>) => void
@@ -111,50 +102,47 @@ export default function PriceAgreementForm({ draft, onChange, onSave, onCancel, 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={row2}>
-        <Field label={t('priceAgreements.function')}>
-          <SelectMenu value={draft.functionTitle} onChange={v => onChange({ functionTitle: v })} options={functionOptions} placeholder={t('priceAgreements.any')} />
-        </Field>
-        <Field label={t('priceAgreements.cao')}>
-          <SelectMenu value={draft.cao} onChange={v => onChange({ cao: v })} options={caoOptions} placeholder={t('priceAgreements.any')} />
-        </Field>
-      </div>
-      <div style={row2}>
-        <Field label={t('priceAgreements.scale')}>
-          <input value={draft.scale} onChange={e => onChange({ scale: e.target.value })} style={input} placeholder={t('priceAgreements.any')} />
-        </Field>
-        <Field label={t('priceAgreements.step')}>
-          <input value={draft.step} onChange={e => onChange({ step: e.target.value })} style={input} placeholder={t('priceAgreements.any')} />
-        </Field>
-      </div>
+      {/* Single-column FieldRows: this form renders in a COMPACT panel (480px modal,
+          20px padding → 440px content), where a row2 two-column grid leaves only
+          ~84px for each control after the fixed 120px canon label — unusable for
+          the date/number/select inputs below (measured against PlanIntakeModal's
+          580px single-column precedent). */}
+      <FieldRow label={t('priceAgreements.function')}>
+        <SelectMenu value={draft.functionTitle} onChange={v => onChange({ functionTitle: v })} options={functionOptions} placeholder={t('priceAgreements.any')} />
+      </FieldRow>
+      <FieldRow label={t('priceAgreements.cao')}>
+        <SelectMenu value={draft.cao} onChange={v => onChange({ cao: v })} options={caoOptions} placeholder={t('priceAgreements.any')} />
+      </FieldRow>
+      <FieldRow label={t('priceAgreements.scale')}>
+        <TextField value={draft.scale} onChange={v => onChange({ scale: v })} placeholder={t('priceAgreements.any')} />
+      </FieldRow>
+      <FieldRow label={t('priceAgreements.step')}>
+        <TextField value={draft.step} onChange={v => onChange({ step: v })} placeholder={t('priceAgreements.any')} />
+      </FieldRow>
       {/* MATCH-FIN-GATE-1: purchase rate omitted entirely without the permission —
-          hidden, not disabled. Sale rate keeps its own full-width row so the layout
-          never leaves a visible empty half where the purchase field used to be. */}
-      <div style={canSeeFinancial ? row2 : undefined}>
-        {canSeeFinancial && (
-          <Field label={t('priceAgreements.purchaseRate')}>
-            <input type="number" step="0.01" min={0} value={draft.purchaseRate} onChange={e => onChange({ purchaseRate: e.target.value })} style={{ ...input, fontFamily: 'JetBrains Mono, monospace' }} placeholder={t('priceAgreements.purchaseRateExample')} />
-          </Field>
-        )}
-        <Field label={t('priceAgreements.saleRate')}>
-          <input type="number" step="0.01" min={0} value={draft.saleRate} onChange={e => onChange({ saleRate: e.target.value })} style={{ ...input, fontFamily: 'JetBrains Mono, monospace' }} placeholder={t('priceAgreements.saleRateExample')} />
-        </Field>
-      </div>
-      <div style={row2}>
-        <Field label={t('priceAgreements.validFrom')}>
-          <input type="date" value={draft.validFrom} onChange={e => onChange({ validFrom: e.target.value })} style={input} />
-        </Field>
-        <Field label={t('priceAgreements.validUntil')}>
-          <input type="date" value={draft.validUntil} onChange={e => onChange({ validUntil: e.target.value })} style={input} />
-        </Field>
-      </div>
+          hidden, not disabled. RATE-EENHEID-1: both rates are decimal(10,2) money
+          (€/hour), so step=0.01 keeps the native spinner and validation honest. */}
+      {canSeeFinancial && (
+        <FieldRow label={t('priceAgreements.purchaseRate')}>
+          <TextField type="number" min={0} step={0.01} value={draft.purchaseRate} onChange={v => onChange({ purchaseRate: v })} style={{ fontFamily: 'JetBrains Mono, monospace' }} placeholder={t('priceAgreements.purchaseRateExample')} />
+        </FieldRow>
+      )}
+      <FieldRow label={t('priceAgreements.saleRate')}>
+        <TextField type="number" min={0} step={0.01} value={draft.saleRate} onChange={v => onChange({ saleRate: v })} style={{ fontFamily: 'JetBrains Mono, monospace' }} placeholder={t('priceAgreements.saleRateExample')} />
+      </FieldRow>
+      <FieldRow label={t('priceAgreements.validFrom')}>
+        <TextField type="date" value={draft.validFrom} onChange={v => onChange({ validFrom: v })} />
+      </FieldRow>
+      <FieldRow label={t('priceAgreements.validUntil')}>
+        <TextField type="date" value={draft.validUntil} onChange={v => onChange({ validUntil: v })} />
+      </FieldRow>
       {/* Rich-text prose (Danny 2026-07-14 house rule) — the editor IS the form
           field here (form context), no separate pencil; SafeHtml renders it
           read-only wherever the agreement is shown (PriceAgreementRow). */}
-      <Field label={t('priceAgreements.remarks')}>
+      <FieldRow label={t('priceAgreements.remarks')}>
         <RichTextEditor value={draft.remarks} onChange={v => onChange({ remarks: v })}
           expanded={remarksExpanded} onToggleExpand={() => setRemarksExpanded(v => !v)} />
-      </Field>
+      </FieldRow>
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 2 }}>
         <Button variant="secondary" size="sm" onClick={onCancel}>
           {t('drawer.cancel')}

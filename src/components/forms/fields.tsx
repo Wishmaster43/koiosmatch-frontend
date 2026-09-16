@@ -116,7 +116,7 @@ const requiredAttrs = ({ required, 'aria-required': ariaRequired }: RequiredProp
 // Single-line text input on the shared field style, with an optional error-border variant.
 // `onKeyDown` is an optional passthrough (e.g. Enter-to-submit on a name field) — the kit
 // used to destructure a fixed prop set and silently drop it (regression found on OutreachCreate).
-export function TextField({ id, value, onChange, placeholder, type = 'text', error, style, onKeyDown, autoComplete, min, max, 'aria-labelledby': labelledBy, ...req }: {
+export function TextField({ id, value, onChange, placeholder, type = 'text', error, style, onKeyDown, autoComplete, min, max, step, 'aria-labelledby': labelledBy, ...req }: {
   id?: string; value?: string; onChange: (v: string) => void; placeholder?: string; type?: string; error?: boolean; style?: CSSProperties
   onKeyDown?: (e: KeyboardEvent<HTMLInputElement>) => void
   // Password-manager hint (current-password / new-password / off) — forwarded, never dropped.
@@ -125,6 +125,10 @@ export function TextField({ id, value, onChange, placeholder, type = 'text', err
   // server's per-field maxima) — forwarded onto the input, never dropped.
   min?: number
   max?: number
+  // Numeric step for type="number" (RATE-EENHEID-1: money fields are decimal(10,2),
+  // so a caller passes step={0.01} — forwarded, never dropped, else the native
+  // spinner steps by 1 and a fractional value reads as a stepMismatch).
+  step?: number
   'aria-labelledby'?: string
 } & RequiredProps) {
   // LABEL-WINS-1 (04-09, measured on the user modals): a Field/FieldRow names the input
@@ -133,7 +137,7 @@ export function TextField({ id, value, onChange, placeholder, type = 'text', err
   // visible label and the field would be announced as its example value ("Jan").
   const labelled = Boolean(labelledBy || id)
   return (
-    <input id={id} type={type} value={value ?? ''} placeholder={placeholder} autoComplete={autoComplete} min={min} max={max}
+    <input id={id} type={type} value={value ?? ''} placeholder={placeholder} autoComplete={autoComplete} min={min} max={max} step={step}
       aria-labelledby={labelledBy} aria-label={labelled ? undefined : placeholder} {...requiredAttrs(req)}
       onChange={e => onChange(e.target.value)} onKeyDown={onKeyDown}
       // The error state replaces the whole `border` shorthand rather than only its

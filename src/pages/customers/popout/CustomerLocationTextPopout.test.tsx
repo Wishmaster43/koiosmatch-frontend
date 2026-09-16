@@ -10,10 +10,15 @@ import userEvent from '@testing-library/user-event'
 import CustomerLocationTextPopout from './CustomerLocationTextPopout'
 import api from '@/lib/api'
 
+// Captures `assistGenerate` (TextPopoutEditor's `generate` passed straight
+// through) — the regression under test is which id (composite vs the
+// location's own) reaches this prop.
+const { generateArgs } = vi.hoisted(() => ({ generateArgs: { last: undefined as unknown } }))
 vi.mock('@/components/ui/RichTextEditor', () => ({
-  default: ({ value, onChange }: { value: string; onChange: (html: string) => void }) => (
-    <textarea aria-label="editor" value={value} onChange={e => onChange(e.target.value)} />
-  ),
+  default: ({ value, onChange, assistGenerate }: { value: string; onChange: (html: string) => void; assistGenerate?: unknown }) => {
+    generateArgs.last = assistGenerate
+    return <textarea aria-label="editor" value={value} onChange={e => onChange(e.target.value)} />
+  },
 }))
 vi.mock('@/lib/api', () => ({
   default: { patch: vi.fn(() => Promise.resolve({ data: {} })), get: vi.fn() },
@@ -51,6 +56,12 @@ describe('CustomerLocationTextPopout', () => {
     render(<CustomerLocationTextPopout id="not-composite" />)
     expect(liteArgs.last).toEqual([undefined, undefined])
     expect(screen.getByRole('button')).toBeInTheDocument()
+  })
+
+  it('hands the Koios generate call the LOCATION\'s own id, never the composite pop-out id', () => {
+    liteState.location = { id: 'loc-1', name: 'Vestiging Noord', description: 'a' }
+    render(<CustomerLocationTextPopout id="cust-1:loc-1" />)
+    expect(generateArgs.last).toEqual({ entity: 'location', id: 'loc-1' })
   })
 
   it('PATCHes /customers/{cid}/locations/{id} with the edited description and then closes the window', async () => {

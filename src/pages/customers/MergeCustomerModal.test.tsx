@@ -24,6 +24,7 @@ vi.mock('@/lib/api', () => ({
   unwrapList: (res: { data: { data: unknown[] } }) => ({ rows: res.data.data, total: res.data.data.length, lastPage: 1 }),
 }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
+vi.mock('@/lib/abortError', () => ({ isAbortError: () => false }))
 
 const current = { id: 'aaa', name: 'Acme Actueel', code: 'D-1', city: 'Utrecht' }
 const dupRow = { id: 'bbb', name: 'Acme Dubbel', reference_number: 'D-2', city: 'Amsterdam' }
@@ -86,5 +87,14 @@ describe('MergeCustomerModal', () => {
     // The API returned exactly one row (the open record itself); the in-memory self-filter
     // must drop it, leaving the empty-results state rather than an offerable self-merge.
     await screen.findByText('merge.noResults', undefined, { timeout: 2000 })
+  })
+
+  // §3 four UI states: a failed search must never render the same as "no results".
+  it('shows an honest error line, not "no results", when the duplicate search fails', async () => {
+    mount()
+    getMock.mockRejectedValue(new Error('network down'))
+    fireEvent.change(screen.getByPlaceholderText('merge.searchPlaceholder'), { target: { value: 'acme' } })
+    await screen.findByText('merge.searchError', undefined, { timeout: 2000 })
+    expect(screen.queryByText('merge.noResults')).toBeNull()
   })
 })

@@ -541,6 +541,8 @@
     "overviewTitle": "Resumen"
   },
   "documents": {
+    "loading": "Cargando documentos…",
+    "loadError": "No se pudieron cargar los documentos.",
     "empty": "Aún no hay documentos.",
     "add": "Documento",
     "search": "Buscar",
@@ -861,6 +863,7 @@
     "searchPlaceholder": "Buscar por nombre, número o ciudad…",
     "searching": "Buscando…",
     "noResults": "No se encontraron clientes.",
+    "searchError": "Error en la búsqueda. Inténtalo de nuevo.",
     "staysLabel": "Permanece (este registro)",
     "duplicateLabel": "Se fusiona y elimina",
     "warning": "Las ubicaciones, departamentos, contactos, vacantes, matches y demás datos de {{source}} pasan a {{target}}. Luego se elimina {{source}}. Esta acción no se puede deshacer.",

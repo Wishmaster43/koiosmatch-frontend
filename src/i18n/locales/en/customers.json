@@ -541,6 +541,8 @@
     "overviewTitle": "Overview"
   },
   "documents": {
+    "loading": "Loading documents…",
+    "loadError": "Failed to load documents.",
     "empty": "No documents yet.",
     "add": "Document",
     "search": "Search",
@@ -861,6 +863,7 @@
     "searchPlaceholder": "Search by name, number or city…",
     "searching": "Searching…",
     "noResults": "No customers found.",
+    "searchError": "Search failed. Please try again.",
     "staysLabel": "Stays (this record)",
     "duplicateLabel": "Merged away",
     "warning": "{{source}}'s locations, departments, contacts, vacancies, matches and other data move to {{target}}. {{source}} is then deleted. This cannot be undone.",

@@ -541,6 +541,8 @@
     "overviewTitle": "Übersicht"
   },
   "documents": {
+    "loading": "Dokumente werden geladen…",
+    "loadError": "Dokumente konnten nicht geladen werden.",
     "empty": "Noch keine Dokumente.",
     "add": "Dokument",
     "search": "Suchen",
@@ -861,6 +863,7 @@
     "searchPlaceholder": "Suche nach Name, Nummer oder Ort…",
     "searching": "Suche läuft…",
     "noResults": "Keine Kunden gefunden.",
+    "searchError": "Suche fehlgeschlagen. Bitte erneut versuchen.",
     "staysLabel": "Bleibt (dieser Datensatz)",
     "duplicateLabel": "Wird zusammengeführt",
     "warning": "Die Standorte, Abteilungen, Kontakte, Vakanzen, Matches und weiteren Daten von {{source}} werden zu {{target}} verschoben. {{source}} wird anschließend gelöscht. Dies kann nicht rückgängig gemacht werden.",
