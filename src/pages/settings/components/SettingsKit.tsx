@@ -226,7 +226,7 @@ interface SelectFieldProps {
   ariaLabel?: string
   disabled?: boolean
   // DROPDOWN-CLEAR-1 default is on; a field whose value must never be empty
-  // (a required select that always persists) passes clearable={false} with a
+  // (a required select that always persists) opts out with a false `clearable` and a
   // written reason directly above the call site.
   clearable?: boolean
 }

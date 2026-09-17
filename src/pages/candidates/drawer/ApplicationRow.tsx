@@ -216,7 +216,7 @@ export default function ApplicationRow({ candidateId, row, appointment, canManag
           {url && (
             <Button href={url} target="_blank" rel="noopener noreferrer" variant="secondary" size="sm" iconOnly
               title={t('work.openVacancy')} aria-label={t('work.openVacancy')}
-              style={{ width: 24, height: 24, padding: 0, borderRadius: 5, flexShrink: 0 }}>
+              style={{ flexShrink: 0 }}>
               <ExternalLink size={12} />
             </Button>
           )}

@@ -403,7 +403,7 @@ export function AgentForm({ agent, prompts, faqs, knowledgeItems, onSaved, onDel
                       style={{ ...inputStyle, paddingRight: 36 }} />
                     <Button variant="ghost" size="sm" iconOnly onClick={() => setShowApiKey(s => !s)}
                       aria-label={showApiKey ? t('ai.agent.hideApiKey') : t('ai.agent.showApiKey')}
-                      style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', height: 24, width: 24 }}>
+                      style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)' }}>
                       {showApiKey ? <EyeOff size={14} /> : <Eye size={14} />}
                     </Button>
                   </div>

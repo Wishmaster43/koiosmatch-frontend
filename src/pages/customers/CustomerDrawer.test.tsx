@@ -82,9 +82,9 @@ const mockUseAuth = vi.fn((): MockAuthValue => ({ user: { name: 'Test User' }, h
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
 vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: () => ({ fields: [] }) }))
 // Sub-entity CRUD hooks fire their own GETs — stub them to empty, static results.
-vi.mock('./hooks/useCustomerLocations', () => ({ useCustomerLocations: () => ({ locations: [] }) }))
-vi.mock('./hooks/useCustomerDepartments', () => ({ useCustomerDepartments: () => ({ departments: [] }) }))
-vi.mock('./hooks/useCustomerContacts', () => ({ useCustomerContacts: () => ({ contacts: [] }) }))
+vi.mock('./hooks/useCustomerLocations', () => ({ useCustomerLocations: () => ({ locations: [] }), LOCATIONS_CHANGED_EVENT: 'km:locations-changed' }))
+vi.mock('./hooks/useCustomerDepartments', () => ({ useCustomerDepartments: () => ({ departments: [] }), DEPARTMENTS_CHANGED_EVENT: 'km:departments-changed' }))
+vi.mock('./hooks/useCustomerContacts', () => ({ useCustomerContacts: () => ({ contacts: [] }), CONTACTS_CHANGED_EVENT: 'km:contacts-changed' }))
 // Only the ACTIVE tab renders (EntityDrawer) — stub it so this stays a header test.
 vi.mock('./drawer/OverviewTab', () => ({ default: () => <div>overview stub</div> }))
 

@@ -103,8 +103,8 @@ export default function ProfileDisplayTab({ form, setForm, onPickPageSize, theme
           options={LANGUAGES.map(l => ({ value: l.value, label: `${l.flag} ${langLabel(l.value)}` }))}
           value={language}
           onChange={v => { if (v) setLanguage(v) }}
-          clearable={false}
           // DROPDOWN-CLEAR-1: the UI language is always set (never "no language"), so clearing would leave an invalid, unrenderable state.
+          clearable={false}
         />
       </Field>
     </Section>

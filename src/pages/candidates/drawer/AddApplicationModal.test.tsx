@@ -126,7 +126,7 @@ describe('AddApplicationModal · searchable pickers (S24b)', () => {
   it('the vacancy picker is a typeable searchable combobox', async () => {
     const user = userEvent.setup()
     render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
+    await user.click(screen.getByRole('button', { name: /work\.vacancy/ }))
     expect(screen.getByPlaceholderText('work.pickVacancy')).toBeInTheDocument()
   })
 
@@ -142,7 +142,7 @@ describe('AddApplicationModal · submits application_stage_id (S24b bug fix)', (
     const user = userEvent.setup()
     render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
 
-    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
+    await user.click(screen.getByRole('button', { name: /work\.vacancy/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
     await user.click(screen.getByRole('button', { name: 'work.createApplication' }))
 
@@ -156,7 +156,7 @@ describe('AddApplicationModal · submits application_stage_id (S24b bug fix)', (
     const user = userEvent.setup()
     render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
 
-    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
+    await user.click(screen.getByRole('button', { name: /work\.vacancy/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
     await user.click(screen.getByRole('button', { name: /Gesolliciteerd/ }))
     await user.click(await screen.findByRole('button', { name: /Uitgenodigd\/Intake/ }))
@@ -204,7 +204,7 @@ describe('AddApplicationModal · AXIS-MATRIX-2 preflight (CMFE audit R1)', () =>
     expect(banner).toHaveAttribute('data-effect', 'warn')
     expect(screen.getByText('Piet is tijdelijk niet inzetbaar (ziek).')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
+    await user.click(screen.getByRole('button', { name: /work\.vacancy/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
     expect(screen.getByRole('button', { name: 'work.createApplication' })).toBeEnabled()
   })
@@ -218,7 +218,7 @@ describe('AddApplicationModal · AXIS-MATRIX-2 preflight (CMFE audit R1)', () =>
 
     expect(screen.getByTestId('action-rule-banner')).toHaveAttribute('data-effect', 'block')
 
-    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
+    await user.click(screen.getByRole('button', { name: /work\.vacancy/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
     expect(screen.getByRole('button', { name: 'work.createApplication' })).toBeDisabled()
   })
@@ -240,7 +240,7 @@ describe('AddApplicationModal · OWNER-DEVIATION-1 recruiter default', () => {
   it('the POST carries the chosen owner_id', async () => {
     const user = userEvent.setup()
     render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
+    await user.click(screen.getByRole('button', { name: /work\.vacancy/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
     await user.click(screen.getByRole('button', { name: 'work.createApplication' }))
     expect(api.post).toHaveBeenCalledWith('/applications', expect.objectContaining({ owner_id: 'u1' }))
@@ -265,7 +265,7 @@ describe('AddApplicationModal · OWNER-DEVIATION-1 deviation notice (soft warnin
     expect(screen.queryByText('work.ownerDeviationVacancy')).not.toBeInTheDocument()
 
     // Never a block (Danny: "wel een melding") — Create stays enabled once a vacancy is picked.
-    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
+    await user.click(screen.getByRole('button', { name: /work\.vacancy/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
     expect(screen.getByRole('button', { name: 'work.createApplication' })).toBeEnabled()
   })
@@ -275,7 +275,7 @@ describe('AddApplicationModal · OWNER-DEVIATION-1 deviation notice (soft warnin
     const user = userEvent.setup()
     render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
 
-    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
+    await user.click(screen.getByRole('button', { name: /work\.vacancy/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
     // Auto-seeded to the vacancy's own recruiter (u3) — no deviation yet.
     expect(screen.queryByText('work.ownerDeviationVacancy')).not.toBeInTheDocument()
@@ -292,7 +292,7 @@ describe('AddApplicationModal · OWNER-DEVIATION-1 deviation notice (soft warnin
     const user = userEvent.setup()
     render(<AddApplicationModal candidateId="cand-1" candidateOwnerId="u2" candidateOwnerName="Klaas Anders" onClose={noop} onCreated={noop} />)
 
-    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
+    await user.click(screen.getByRole('button', { name: /work\.vacancy/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
 
     // Manually override to a THIRD user — differs from both record owners.
@@ -308,7 +308,7 @@ describe('AddApplicationModal · OWNER-DEVIATION-1 deviation notice (soft warnin
     const user = userEvent.setup()
     render(<AddApplicationModal candidateId="cand-1" candidateOwnerId="u1" candidateOwnerName="Piet Recruiter" onClose={noop} onCreated={noop} />)
 
-    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
+    await user.click(screen.getByRole('button', { name: /work\.vacancy/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
 
     expect(screen.queryByText('work.ownerDeviationCandidate')).not.toBeInTheDocument()
@@ -330,7 +330,7 @@ describe('AddApplicationModal · APP-OWNER-1 recruiter derivation chain', () => 
     const user = userEvent.setup()
     render(<AddApplicationModal candidateId="cand-1" candidateOwnerId="u2" candidateOwnerName="Klaas Anders" onClose={noop} onCreated={noop} />)
 
-    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
+    await user.click(screen.getByRole('button', { name: /work\.vacancy/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
 
     // The vacancy's own recruiter (u3) wins over the candidate's own owner (u2).
@@ -361,7 +361,7 @@ describe('AddApplicationModal · APP-OWNER-1 recruiter derivation chain', () => 
 
     // Picking the vacancy afterwards must NOT reseed the manual pick, even though
     // the vacancy's own recruiter (u3) would otherwise outrank it.
-    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
+    await user.click(screen.getByRole('button', { name: /work\.vacancy/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
     expect(screen.getByRole('button', { name: /Piet Recruiter/ })).toBeInTheDocument()
 
@@ -562,12 +562,12 @@ describe('AddApplicationModal · APP-REQUIRED-FE-1 (tenant-configurable required
   // this pins aria-required on the real vacancy trigger.
   it('marks the vacancy trigger aria-required once required, and not otherwise', () => {
     const { unmount } = render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    expect(screen.getByRole('button', { name: /work\.pickVacancy/ })).not.toHaveAttribute('aria-required')
+    expect(screen.getByRole('button', { name: /work\.vacancy/ })).not.toHaveAttribute('aria-required')
     unmount()
 
     settingsRef.current = { application_required_fields: ['vacancy_id'] }
     render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    expect(screen.getByRole('button', { name: /work\.pickVacancy/ })).toHaveAttribute('aria-required', 'true')
+    expect(screen.getByRole('button', { name: /work\.vacancy/ })).toHaveAttribute('aria-required', 'true')
   })
 })
 
@@ -582,7 +582,7 @@ describe('AddApplicationModal · W30 (search + source/custom_fields)', () => {
     const user = userEvent.setup()
     render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
 
-    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
+    await user.click(screen.getByRole('button', { name: /work\.vacancy/ }))
     await user.type(screen.getByPlaceholderText('work.pickVacancy'), 'zorg')
 
     await new Promise(r => setTimeout(r, 300))
@@ -602,7 +602,7 @@ describe('AddApplicationModal · W30 (search + source/custom_fields)', () => {
         : [{ value: 'vac-near', label: 'Dichtbij' }]) as never)
     render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
 
-    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
+    await user.click(screen.getByRole('button', { name: /work\.vacancy/ }))
     await user.type(screen.getByPlaceholderText('work.pickVacancy'), 'far')
     await new Promise(r => setTimeout(r, 300))
     await user.click(await screen.findByText('Verre Vacature'))

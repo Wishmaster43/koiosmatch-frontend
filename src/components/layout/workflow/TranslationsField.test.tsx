@@ -14,6 +14,7 @@ import { MESSAGING_LANGUAGES } from '@/modules/messagingLanguages'
 // Key-echo t() + fixed UI locale — mirrors the sibling workflow-field test idiom
 // (LogsPanel.test.tsx), with i18n.language read directly by languageDisplayName.
 vi.mock('react-i18next', () => ({
+  initReactI18next: { type: '3rdParty', init: () => {} },
   useTranslation: () => ({ t: (k: string, o?: Record<string, unknown>) => (o ? `${k}:${JSON.stringify(o)}` : k), i18n: { language: 'nl' } }),
 }))
 

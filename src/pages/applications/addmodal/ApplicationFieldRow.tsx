@@ -23,9 +23,11 @@ export function ApplicationFieldRow({ fieldId, label, required, error, errorText
   return (
     <div style={{ marginBottom: spacing === 'none' ? 0 : 14 }}>
       <div style={fieldRow}>
-        {/* A real <label for> (the modal's original markup): the picker trigger is labelable, and
-            the accessible name then reads the label once instead of label + trigger text. */}
-        <label id={`${fieldId}-label`} htmlFor={fieldId} style={CANON_LABEL_STYLE}>{label}{required && requiredMark}</label>
+        {/* A plain labelled <div>, never a <label for>: the select atoms reference it through
+            aria-labelledby together with their own trigger, so the accessible name reads
+            "label + current value" (a screen reader hears what is picked). A <label for>
+            makes the name computation drop that self-reference and the value goes silent. */}
+        <div id={`${fieldId}-label`} style={CANON_LABEL_STYLE}>{label}{required && requiredMark}</div>
         <div style={fieldControl}>{children}</div>
       </div>
       {error && (

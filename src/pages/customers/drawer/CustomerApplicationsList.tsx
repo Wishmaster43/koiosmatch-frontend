@@ -191,7 +191,7 @@ export default function CustomerApplicationsList(props: Props) {
           {canManageApplications && r.id != null && (
             <Button variant="ghost" size="sm" iconOnly onClick={() => { setEditCandidateId(r.candidateId ?? null); setEditApplicationId(r.id ?? null) }}
               title={t('candidates:work.editApplication')} aria-label={t('candidates:work.editApplication')}
-              style={{ width: 22, height: 22 }}>
+              >
               <Pencil size={12} />
             </Button>
           )}
@@ -201,7 +201,7 @@ export default function CustomerApplicationsList(props: Props) {
                 title={expandedId === r.id ? t('candidates:work.hideDetails') : t('candidates:work.showDetails')}
                 aria-label={expandedId === r.id ? t('candidates:work.hideDetails') : t('candidates:work.showDetails')}
                 aria-expanded={expandedId === r.id} aria-haspopup="dialog"
-                style={{ width: 22, height: 22 }}>
+                >
                 {expandedId === r.id ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
               </Button>
               {/* Lazy detail — the SAME candidate-drawer panel, only fetched on first expand (§8). */}

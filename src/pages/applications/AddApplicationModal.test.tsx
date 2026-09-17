@@ -517,7 +517,7 @@ describe('AddApplicationModal · source (S-SOURCE-1, supersedes CMBE 5961c673)',
     render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
     expect(document.querySelector('select')).toBeNull()
     expect(document.querySelector('input[maxlength]')).toBeNull()
-    const trigger = screen.getAllByRole('button', { name: 'drawer.source' })[0]
+    const trigger = screen.getAllByRole('button', { name: /drawer\.source/ })[0]
     await userEvent.setup().click(trigger)
     expect(screen.getByPlaceholderText('drawer.source')).toBeInTheDocument()
   })
@@ -525,7 +525,7 @@ describe('AddApplicationModal · source (S-SOURCE-1, supersedes CMBE 5961c673)',
   it('POSTs a source picked from the searchable list', async () => {
     const user = userEvent.setup()
     render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
-    await user.click(screen.getAllByRole('button', { name: 'drawer.source' })[0])
+    await user.click(screen.getAllByRole('button', { name: /drawer\.source/ })[0])
     await user.click(screen.getByRole('button', { name: 'Indeed' }))
     await pickCandidateAndVacancy(user)
     await user.click(screen.getByRole('button', { name: 'add.create' }))
@@ -538,7 +538,7 @@ describe('AddApplicationModal · source (S-SOURCE-1, supersedes CMBE 5961c673)',
   it('POSTs a newly typed source (free entry — no tenant lookup blocks an unseen value), trimmed', async () => {
     const user = userEvent.setup()
     render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
-    await user.click(screen.getAllByRole('button', { name: 'drawer.source' })[0])
+    await user.click(screen.getAllByRole('button', { name: /drawer\.source/ })[0])
     await user.type(screen.getByPlaceholderText('drawer.source'), '  Website  ')
     await user.click(await screen.findByRole('button', { name: /Website/ }))
     await pickCandidateAndVacancy(user)
@@ -552,7 +552,7 @@ describe('AddApplicationModal · source (S-SOURCE-1, supersedes CMBE 5961c673)',
   it('picks then clears the source picker back to unset (optional field, VAC-CLEAR-1)', async () => {
     const user = userEvent.setup()
     render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
-    await user.click(screen.getAllByRole('button', { name: 'drawer.source' })[0])
+    await user.click(screen.getAllByRole('button', { name: /drawer\.source/ })[0])
     await user.click(screen.getByRole('button', { name: 'Indeed' }))
     // The trigger's accessible name is label-driven (aria-labelledby self-reference),
     // so it stays "drawer.source" after picking — assert the pick via its VISIBLE
@@ -692,7 +692,7 @@ describe('AddApplicationModal · APP-REQUIRED-FE-1 (tenant-configurable required
     await pickCandidateAndVacancy(user)
     await user.click(screen.getByRole('button', { name: 'add.create' }))
 
-    const sourceTrigger = await screen.findByRole('button', { name: 'drawer.source' })
+    const sourceTrigger = await screen.findByRole('button', { name: /drawer\.source/ })
     await waitFor(() => expect(sourceTrigger.getAttribute('style')).toContain('var(--color-danger)'))
   })
 
