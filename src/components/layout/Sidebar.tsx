@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { useAuth } from '@/context/AuthContext'
 import type { AuthContextValue } from '@/context/AuthContext'
-import { canAccessPage } from '@/lib/access'
+import { canAccessPage, hasKoiosAiModule } from '@/lib/access'
 import { REPORT_IDS } from '@/pages/reports/shared'
 import TenantSwitcher from './TenantSwitcher'
 import {
@@ -50,15 +50,14 @@ function resolveVisibleNavItems(items: NavItemData[], auth: AuthContextValue | n
     })
 }
 
-// Koios entitlement (cosmetic only — the backend still enforces 403). Fail-open:
-// hide the toggle only when the auth payload explicitly excludes the `koios_ai`
-// module or the `koios.use` permission, mirroring the "absence = open" convention
-// in lib/access.js so Koios isn't hidden before the payload carries these.
+// Koios entitlement (cosmetic only — the backend still enforces 403). The MODULE half is
+// strict since KOIOS-CARDS-MODULE-GATE-1 (17-09, CMBE: default deny, consistent with the
+// dashboard cards): the tenant from /auth/me must carry `koios_ai`, super admins included —
+// a super admin parked on a Core tenant otherwise opened a panel that only 403s. The
+// PERMISSION half keeps the "absence = open" convention (hide only when the payload
+// explicitly lacks `koios.use`).
 function canUseKoios(auth: AuthContextValue | null): boolean {
-  if (auth?.isSuperAdmin?.()) return true
-  const mods = (auth?.activeTenant ?? auth?.user?.tenant)?.modules
-  const moduleOk = !Array.isArray(mods) ||
-    mods.some(m => (typeof m === 'string' ? m : m?.key ?? m?.name) === 'koios_ai')
+  const moduleOk = hasKoiosAiModule(auth)
   const perms = auth?.user?.permissions
   const permOk = !Array.isArray(perms) ||
     perms.some(p => (typeof p === 'string' ? p : p?.name) === 'koios.use')
