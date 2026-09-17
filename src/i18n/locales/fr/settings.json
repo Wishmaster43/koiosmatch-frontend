@@ -1354,7 +1354,8 @@
       "candidate_educations": "Formations de candidat",
       "candidate_references": "Références de candidat",
       "company": "Entreprise",
-      "users": "Utilisateurs"
+      "users": "Utilisateurs",
+      "noLevelOffered": "Aucun niveau disponible pour ce type"
     }
   },
   "webhooks": {
@@ -1463,7 +1464,8 @@
       "status": {
         "active": "Actif",
         "disabled": "Désactivé"
-      }
+      },
+      "regenerateConfirm": "Régénérer le secret ? Le secret actuel cessera de fonctionner immédiatement."
     },
     "events": {
       "search": "Rechercher des événements…",
@@ -1485,7 +1487,8 @@
         "customers": "Clients",
         "leads": "Prospects",
         "interviews": "Entretiens",
-        "opportunities": "Opportunités"
+        "opportunities": "Opportunités",
+        "settings": "Paramètres"
       },
       "actions": {
         "created": "Créé",
@@ -1532,7 +1535,12 @@
         "unavailable_overdue": "Période d'indisponibilité dépassée",
         "upcoming": "À venir",
         "vacancy_stale": "Offre en ligne depuis longtemps",
-        "webhook_received": "Webhook reçu"
+        "webhook_received": "Webhook reçu",
+        "approval_pending": "En attente d'approbation",
+        "approval_overdue": "Approbation en retard",
+        "approved": "Approuvé",
+        "rejected": "Rejeté",
+        "blank_fallback": "Paramètre revenu à sa valeur par défaut"
       }
     },
     "meta": {

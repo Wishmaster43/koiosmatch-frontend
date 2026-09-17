@@ -1613,7 +1613,8 @@
       "candidate_educations": "Educazioni candidato",
       "candidate_references": "Riferimenti candidato",
       "company": "Azienda",
-      "users": "Utenti"
+      "users": "Utenti",
+      "noLevelOffered": "Nessun livello disponibile per questo tipo"
     }
   },
   "webhooks": {
@@ -1722,7 +1723,8 @@
       "status": {
         "active": "Attivo",
         "disabled": "Disattivato"
-      }
+      },
+      "regenerateConfirm": "Rigenerare il secret? Il secret attuale smette di funzionare immediatamente."
     },
     "events": {
       "search": "Cerca eventi…",
@@ -1744,7 +1746,8 @@
         "customers": "Clienti",
         "leads": "Lead",
         "interviews": "Colloqui",
-        "opportunities": "Opportunità"
+        "opportunities": "Opportunità",
+        "settings": "Impostazioni"
       },
       "actions": {
         "created": "Creato",
@@ -1791,7 +1794,12 @@
         "unavailable_overdue": "Periodo non disponibile scaduto",
         "upcoming": "In arrivo",
         "vacancy_stale": "Posizione online da tempo",
-        "webhook_received": "Webhook ricevuto"
+        "webhook_received": "Webhook ricevuto",
+        "approval_pending": "In attesa di approvazione",
+        "approval_overdue": "Approvazione in ritardo",
+        "approved": "Approvato",
+        "rejected": "Rifiutato",
+        "blank_fallback": "Impostazione tornata al valore predefinito"
       }
     },
     "meta": {

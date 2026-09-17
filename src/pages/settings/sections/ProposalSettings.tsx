@@ -10,7 +10,7 @@ import type { CSSProperties, ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Info, Save } from 'lucide-react'
 import { useAllSettings, getJsonSetting, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
-import { useUsers } from '@/lib/queries'
+import { useUserOptions } from '@/lib/queries'
 import { useAuth } from '@/context/AuthContext'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SegmentedControl from '@/components/ui/SegmentedControl'
@@ -63,7 +63,7 @@ export default function ProposalSettings() {
   const values = useAllSettings()
   const stored = getJsonSetting<Partial<ProposalSettingsBlob>>(values, SETTINGS_KEY, {})
   const persisted: ProposalSettingsBlob = { ...DEFAULTS, ...stored }
-  const { data: usersData, isSuccess, isPlaceholderData } = useUsers()
+  const { data: usersData, isSuccess, isPlaceholderData } = useUserOptions()
   const users = (usersData ?? []) as User[]
   // Measured (query-core 5.101): placeholderData forces status 'success' while the GET is
   // still pending, so isSuccess alone is true throughout the load window — the list only

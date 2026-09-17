@@ -1613,7 +1613,8 @@
       "candidate_educations": "Kandidaat-opleidingen",
       "candidate_references": "Kandidaat-referenties",
       "company": "Bedrijf",
-      "users": "Gebruikers"
+      "users": "Gebruikers",
+      "noLevelOffered": "Geen niveau beschikbaar voor dit type"
     }
   },
   "webhooks": {
@@ -1722,7 +1723,8 @@
       "status": {
         "active": "Actief",
         "disabled": "Uitgeschakeld"
-      }
+      },
+      "regenerateConfirm": "Secret opnieuw genereren? De huidige secret stopt direct met werken."
     },
     "events": {
       "search": "Zoek events…",
@@ -1744,7 +1746,8 @@
         "customers": "Klanten",
         "leads": "Leads",
         "interviews": "Interviews",
-        "opportunities": "Kansen"
+        "opportunities": "Kansen",
+        "settings": "Instellingen"
       },
       "actions": {
         "created": "Aangemaakt",
@@ -1791,7 +1794,12 @@
         "unavailable_overdue": "Periode niet beschikbaar verstreken",
         "upcoming": "Nadert",
         "vacancy_stale": "Vacature staat lang online",
-        "webhook_received": "Webhook ontvangen"
+        "webhook_received": "Webhook ontvangen",
+        "approval_pending": "Wacht op goedkeuring",
+        "approval_overdue": "Goedkeuring te laat",
+        "approved": "Goedgekeurd",
+        "rejected": "Afgewezen",
+        "blank_fallback": "Instelling teruggevallen op standaard"
       }
     },
     "meta": {

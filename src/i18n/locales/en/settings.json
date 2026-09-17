@@ -1613,7 +1613,8 @@
       "candidate_educations": "Candidate educations",
       "candidate_references": "Candidate references",
       "company": "Company",
-      "users": "Users"
+      "users": "Users",
+      "noLevelOffered": "No level available for this type"
     }
   },
   "webhooks": {
@@ -1722,7 +1723,8 @@
       "status": {
         "active": "Active",
         "disabled": "Disabled"
-      }
+      },
+      "regenerateConfirm": "Regenerate the secret? The current secret stops working immediately."
     },
     "events": {
       "search": "Search events…",
@@ -1744,7 +1746,8 @@
         "customers": "Customers",
         "leads": "Leads",
         "interviews": "Interviews",
-        "opportunities": "Opportunities"
+        "opportunities": "Opportunities",
+        "settings": "Settings"
       },
       "actions": {
         "created": "Created",
@@ -1791,7 +1794,12 @@
         "unavailable_overdue": "Unavailable period overdue",
         "upcoming": "Upcoming",
         "vacancy_stale": "Stale-online vacancy",
-        "webhook_received": "Webhook received"
+        "webhook_received": "Webhook received",
+        "approval_pending": "Awaiting approval",
+        "approval_overdue": "Approval overdue",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "blank_fallback": "Setting fell back to its default"
       }
     },
     "meta": {

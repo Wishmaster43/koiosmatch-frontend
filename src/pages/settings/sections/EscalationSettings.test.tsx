@@ -35,7 +35,7 @@ vi.mock('@/context/AuthContext', () => ({
 // Network-backed hooks mocked directly (mirrors RolesSettings.test.tsx) so this
 // test needs no real QueryClientProvider.
 vi.mock('@/lib/queries', () => ({
-  useUsers: () => ({ data: [{ id: 'u-1', name: 'Jan Jansen' }] }),
+  useUserOptions: () => ({ data: [{ id: 'u-1', name: 'Jan Jansen' }] }),
 }))
 vi.mock('@/pages/users/hooks/useAssignableRoles', () => ({
   useAssignableRoles: () => ({ roles: [{ id: 'r-1', name: 'recruiter' }], loading: false }),

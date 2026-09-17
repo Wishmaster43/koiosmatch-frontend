@@ -36,7 +36,7 @@ vi.mock('@/lib/api', async () => {
 })
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
 vi.mock('@/lib/notify', () => ({ notifyError }))
-vi.mock('@/lib/queries', () => ({ useUsers: () => usersFixture }))
+vi.mock('@/lib/queries', () => ({ useUserOptions: () => usersFixture }))
 
 afterEach(() => {
   vi.clearAllMocks()

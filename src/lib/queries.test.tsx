@@ -22,7 +22,7 @@ vi.mock('./api', async () => {
 })
 
 import api, { getActiveTenantId } from './api'
-import { useUsers } from './queries'
+import { useUsers, useUserOptions } from './queries'
 
 const mockedGet = vi.mocked(api.get)
 const mockedTenantId = vi.mocked(getActiveTenantId)
@@ -81,5 +81,18 @@ describe('useUsers · tenant scoping', () => {
     expect(mockedGet).toHaveBeenCalledTimes(2) // a real second GET, not a cache hit
     const namesForB = (forTenantB.result.current.data as Array<{ name: string }> | undefined) ?? []
     expect(namesForB.some(u => u.name.includes('tenant A'))).toBe(false)
+  })
+})
+
+// DL-08/WFB-11: the narrow settings-only picker requests /users/options, not /users.
+describe('useUserOptions', () => {
+  it('requests GET /users/options', async () => {
+    mockedTenantId.mockReturnValue('tenant-a')
+    mockedGet.mockResolvedValue({ data: [{ id: 'u-1', name: 'Jan Jansen' }] })
+
+    const wrapper = makeWrapper()
+    const { result } = renderHook(() => useUserOptions(), { wrapper })
+    await waitFor(() => expect(result.current.data).toHaveLength(1))
+    expect(mockedGet).toHaveBeenCalledWith('/users/options', expect.anything())
   })
 })

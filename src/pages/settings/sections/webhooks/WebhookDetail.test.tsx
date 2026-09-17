@@ -4,7 +4,7 @@
  */
 import type { ReactElement } from 'react'
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import i18n from '@/i18n'
@@ -19,6 +19,18 @@ import api from '@/lib/api'
 
 // Resolve the active locale's own copy so assertions never hardcode a language.
 const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
+const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'common', ...opts })
+
+// AUDIT-BE-1-15: regenerate now stages the house ConfirmDialog (never native
+// window.confirm) before rotating the secret — open the menu, click regenerate,
+// then resolve the dialog by clicking Confirm or Cancel inside it.
+const clickRegenerate = async (user: ReturnType<typeof userEvent.setup>, { accept = true }: { accept?: boolean } = {}) => {
+  await waitFor(() => screen.getByRole('button', { name: st('webhooks.outgoing.action') }))
+  await user.click(screen.getByRole('button', { name: st('webhooks.outgoing.action') }))
+  await user.click(screen.getByRole('menuitem', { name: st('webhooks.outgoing.regenerate') }))
+  const dialog = await screen.findByRole('dialog', { name: st('webhooks.outgoing.regenerateConfirm') })
+  await user.click(within(dialog).getByRole('button', { name: accept ? ct('confirm') : ct('cancel') }))
+}
 
 // Fresh QueryClient per render — no cross-test cache bleed.
 function renderWithQueryClient(ui: ReactElement) {
@@ -59,15 +71,36 @@ describe('WebhookDetail — secret regeneration', () => {
 
     vi.mocked(api.post).mockResolvedValue({ data: { signing_secret: 'sk_live_rotated_xyz123' } })
 
-    // Open the action menu and click regenerate.
-    await waitFor(() => screen.getByRole('button', { name: st('webhooks.outgoing.action') }))
-    await user.click(screen.getByRole('button', { name: st('webhooks.outgoing.action') }))
-    await user.click(screen.getByRole('menuitem', { name: st('webhooks.outgoing.regenerate') }))
+    await clickRegenerate(user)
 
     await waitFor(() => {
       const secretDisplay = screen.getByText('sk_live_rotated_xyz123')
       expect(secretDisplay).toBeInTheDocument()
     })
+  })
+
+  it('declining the confirm dialog never rotates the secret', async () => {
+    const user = userEvent.setup()
+    const listRow = {
+      id: 'wh-1',
+      name: 'ATS integration',
+      url: 'https://example.test/hook',
+      events: ['candidate.created'],
+      status: 'active' as const,
+    }
+    renderWithQueryClient(
+      <WebhookDetail
+        subId="wh-1"
+        listRow={listRow}
+        onBack={vi.fn()}
+        onPatch={vi.fn()}
+        onDelete={vi.fn()}
+      />
+    )
+
+    await clickRegenerate(user, { accept: false })
+
+    expect(api.post).not.toHaveBeenCalled()
   })
 
   it('falls back to legacy secret field when signing_secret is absent in regenerate response', async () => {
@@ -91,10 +124,7 @@ describe('WebhookDetail — secret regeneration', () => {
 
     vi.mocked(api.post).mockResolvedValue({ data: { secret: 'legacy_rotated_secret' } })
 
-    // Open the action menu and click regenerate.
-    await waitFor(() => screen.getByRole('button', { name: st('webhooks.outgoing.action') }))
-    await user.click(screen.getByRole('button', { name: st('webhooks.outgoing.action') }))
-    await user.click(screen.getByRole('menuitem', { name: st('webhooks.outgoing.regenerate') }))
+    await clickRegenerate(user)
 
     await waitFor(() => {
       const secretDisplay = screen.getByText('legacy_rotated_secret')

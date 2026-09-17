@@ -30,3 +30,20 @@ export function useUsers() {
     placeholderData: EMPTY_USERS,
   })
 }
+
+/**
+ * Narrow id+name staff lookup for settings-only screens (DL-08/WFB-11).
+ *
+ * GET /users itself is gated `page.users`+`users.view` (full staff rows), which a
+ * genuinely settings-only CUSTOM role lacks — `GET /users/options` inherits the
+ * smaller `users.view,settings.view` (ANY-of) gate, so a settings picker (owner/
+ * assignee/recipient) keeps working for that role. Entity pages keep useUsers().
+ */
+export function useUserOptions() {
+  const tenantId = getActiveTenantId() ?? 'none'
+  return useQuery({
+    queryKey: ['users-options', tenantId],
+    queryFn: async ({ signal }) => unwrapList(await api.get('/users/options', { signal })).rows,
+    placeholderData: EMPTY_USERS,
+  })
+}

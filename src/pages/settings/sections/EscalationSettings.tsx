@@ -44,7 +44,7 @@ import { SettingsScaffold, SettingRow } from '../components/SettingsKit'
 import { SETTINGS_MAX_W_WIDE } from '@/pages/settings/components/settingsMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import SearchSelect from '@/components/ui/SearchSelect'
-import { useUsers } from '@/lib/queries'
+import { useUserOptions } from '@/lib/queries'
 import { useAssignableRoles } from '@/pages/users/shared'
 import { Caption, SectionTitle } from '@/components/ui/typography'
 import ErrorBanner from '@/components/ui/ErrorBanner'
@@ -279,7 +279,7 @@ function EscalationForm({ signals, catalogFailed, onRetry }: { signals: readonly
   // Target options: tenant users (value = uuid) and assignable roles (value =
   // role name) in one searchable list, each labelled which kind it is so the
   // uuid-vs-name ambiguity never shows up as a bare string in the picker.
-  const usersQuery = useUsers()
+  const usersQuery = useUserOptions()
   const { roles } = useAssignableRoles()
   const users = (usersQuery.data ?? []) as Array<{ id?: string | number; name?: string; firstname?: string; lastname?: string; email?: string }>
   // Combines tenant users and assignable roles into one searchable target list,

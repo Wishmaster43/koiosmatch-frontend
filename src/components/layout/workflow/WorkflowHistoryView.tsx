@@ -41,7 +41,12 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
 }) {
   const { t } = useTranslation('reports')
   // Runs are scoped to this workflow; the drawer opens above the editor overlay.
-  const { rows, loading } = useReportList<RunRow>(workflowId != null ? `/workflows/${workflowId}/runs` : '/workflow-runs', resolveWorkflowBaseURL())
+  // AUDIT-BE-1-16: request the page size explicitly (server default is now 25,
+  // clamped 1-100) instead of relying on an unstated server default.
+  const { rows, loading } = useReportList<RunRow>(
+    workflowId != null ? `/workflows/${workflowId}/runs?per_page=25` : '/workflow-runs?per_page=25',
+    resolveWorkflowBaseURL()
+  )
   // App-wide active locale (§5) — never a hardcoded 'nl-NL' toLocale*String call.
   const { formatDate, formatTime } = useDateFormat()
   const [drill, setDrill] = useState<RunRow | null>(null)

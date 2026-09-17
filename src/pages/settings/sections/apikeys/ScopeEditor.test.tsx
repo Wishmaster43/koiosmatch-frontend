@@ -98,3 +98,38 @@ describe('ScopeEditor · offered levels (SCOPE-LEVEL-READONLY-1)', () => {
     expect(screen.getByRole('button', { name: st('apiKeys.scopes.company') })).toBeInTheDocument()
   })
 })
+
+// SCOPE-LEVEL-READONLY-2: a hint key present with an EMPTY array means "no level offered
+// at all" (no partner route yet) — distinct from an absent key, which keeps every level.
+describe('ScopeEditor · empty hint disables the row (SCOPE-LEVEL-READONLY-2)', () => {
+  it('disables the toggle and never posts the entity when the hint is []', async () => {
+    const onChange = vi.fn()
+    const user = userEvent.setup()
+    render(<ScopeEditor value={{}} onChange={onChange} levelsByEntity={{ documents: [] }} />)
+
+    const switches = screen.getAllByRole('switch')
+    const documentsSwitch = switches.find((s) => s.closest('div')?.textContent?.includes(st('apiKeys.scopes.documents')))
+    expect(documentsSwitch).toBeDisabled()
+
+    await user.click(documentsSwitch!)
+    expect(onChange).not.toHaveBeenCalled()
+    expect(screen.getByLabelText(st('apiKeys.scopes.documents'))).toHaveTextContent(st('apiKeys.scopes.noLevelOffered'))
+    // Other rows keep their picker.
+    expect(screen.getByRole('button', { name: st('apiKeys.scopes.candidates') })).toBeInTheDocument()
+  })
+
+  it('keeps a stored grant revocable even after the hint drops to []', async () => {
+    const onChange = vi.fn()
+    const user = userEvent.setup()
+    render(<ScopeEditor value={{ documents: 'read' }} onChange={onChange} levelsByEntity={{ documents: [] }} />)
+
+    const switches = screen.getAllByRole('switch')
+    const documentsSwitch = switches.find((s) => s.closest('div')?.textContent?.includes(st('apiKeys.scopes.documents')))
+    // The toggle stays ON and ENABLED, so the existing grant can be revoked.
+    expect(documentsSwitch).toBeChecked()
+    expect(documentsSwitch).not.toBeDisabled()
+
+    await user.click(documentsSwitch!)
+    expect(onChange).toHaveBeenCalledWith(expect.not.objectContaining({ documents: expect.anything() }))
+  })
+})

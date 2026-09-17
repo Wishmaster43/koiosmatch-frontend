@@ -43,6 +43,9 @@ export const CUSTOMER_FIELDS: RequiredFieldDef[] = [
   { key: 'phone', labelKey: 'customers:overview.phone' },
   { key: 'cost_center', labelKey: 'customers:overview.costCenter' },
   { key: 'billing_email', labelKey: 'customers:overview.billingEmail' },
+  // AUDIT-BE-1-18: `tags` is a real input (the drawer header's tag editor) and is
+  // now on the BE whitelist (CatalogRows) — reuses the drawer's own label.
+  { key: 'tags', labelKey: 'customers:drawer.tags' },
 ]
 
 // Contactpersoon (flat) — FlatRequiredFieldsGuard('customer_contact') reads `customer_contact_required_fields`.

@@ -48,6 +48,15 @@ describe('WorkflowHistoryView', () => {
     expect(await screen.findByText('runs.editorEmpty')).toBeInTheDocument()
   })
 
+  // AUDIT-BE-1-16: the run history requests its page size explicitly (server
+  // default is now 25, clamped 1-100) instead of relying on an unstated default.
+  it('requests the run list with per_page=25', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: [] })
+    render(<WorkflowHistoryView workflowId={1} />)
+    await screen.findByText('runs.editorEmpty')
+    expect(api.get).toHaveBeenCalledWith('/workflows/1/runs?per_page=25', expect.anything())
+  })
+
   it('renders a run row and opens the drawer on click', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: [run] })
     render(<WorkflowHistoryView workflowId={1} />)

@@ -40,9 +40,11 @@ export default {
     { key: 'role',       label: 'Rol',        type: 'lookup_select', endpoint: '/roles', valueKey: 'name',
       showIf: { key: 'recipients', value: 'role' } },
     // WF-BUILDER-VELDEN-1: explicit user picks — only reachable when recipients==='users'
-    // (resolveRecipients' default branch). Live GET /users, same lookup as the app's own
-    // owner pickers (lib/queries.ts useUsers) — never a hardcoded id list.
-    { key: 'user_ids',   label: 'Gebruikers', type: 'multiselect', endpoint: '/users',
+    // (resolveRecipients' default branch). DL-08/WFB-11: the builder runs on settings.view,
+    // which a genuinely settings-only role lacks alongside users.view — GET /users/options
+    // (id+name only, gated users.view OR settings.view) resolves the same picker without
+    // requiring the full staff-list permission GET /users needs.
+    { key: 'user_ids',   label: 'Gebruikers', type: 'multiselect', endpoint: '/users/options',
       showIf: { key: 'recipients', value: 'users' } },
     // NOTIF-TYPE-WHITELIST-1/NOTIF-TYPES-FE-1: closed vocabulary, now mirroring
     // NotificationSendModule::VALID_TYPES exactly (measured 27-08, 37 values) —

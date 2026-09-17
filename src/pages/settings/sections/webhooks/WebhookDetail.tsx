@@ -101,8 +101,14 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
   }
 
   // Header actions.
+  // AUDIT-BE-1-15: confirm first — regenerating rotates the signing secret, so the
+  // OLD one stops working immediately for anyone still using it.
   // The backend returns the key as signing_secret; secret is a legacy fallback.
-  const regenerate = async () => { try { const res: RegenerateSecretResponse = await regenerateSecret(subId); setSecret(res?.signing_secret ?? res?.secret ?? null) } catch { /* noop */ } }
+  const regenerate = () => {
+    confirm(t('webhooks.outgoing.regenerateConfirm'), async () => {
+      try { const res: RegenerateSecretResponse = await regenerateSecret(subId); setSecret(res?.signing_secret ?? res?.secret ?? null) } catch { /* noop */ }
+    }, { danger: true })
+  }
   const toggleStatus = () => applyUpdate({ status: (sub?.status ?? 'active') === 'active' ? 'disabled' : 'active' }).catch((err: unknown) => notifyError(extractApiError(err, t('common:actionFailed'))))
   // Confirms then deletes the subscription, bubbling the removal back to the list.
   const remove = () => {
