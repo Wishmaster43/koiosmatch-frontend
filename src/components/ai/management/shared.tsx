@@ -12,6 +12,7 @@ import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
 import SoftChip from '@/components/ui/SoftChip'
 import SegmentedControl from '@/components/ui/SegmentedControl'
+import { groupLabelStyle, monoStyle } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import { notifySuccess } from '@/lib/notify'
 import { fieldInputStyle, fieldTextareaStyle } from '@/components/forms/fieldMetrics'
@@ -32,7 +33,7 @@ export function Field({ label, children }: { label?: ReactNode; children: ReactN
   const child = isValidElement(children) ? cloneElement(children as ReactElement<{ id?: string }>, { id }) : children
   return (
     <div style={{ marginBottom: 13 }}>
-      <label htmlFor={id} style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+      <label htmlFor={id} style={{ ...groupLabelStyle, display: 'block', marginBottom: 5 }}>
         {label}
       </label>
       {child}
@@ -115,7 +116,7 @@ export function CopyableValue({ value, copyLabel, copiedMessage }: { value: stri
   }
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <code style={{ flex: 1, fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--text)', wordBreak: 'break-all' }}>{value}</code>
+      <code style={{ ...monoStyle, flex: 1, fontSize: 11, color: 'var(--text)', wordBreak: 'break-all' }}>{value}</code>
       <Button variant="ghost" iconOnly onClick={copy} title={copyLabel} aria-label={copyLabel}>
         {copied ? <Check size={12} color="var(--color-success)" /> : <Copy size={12} />}
       </Button>

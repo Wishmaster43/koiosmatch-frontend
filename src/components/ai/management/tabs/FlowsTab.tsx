@@ -2,7 +2,7 @@
  * FlowsTab — interview flow CRUD (AI-AGENTS-3, live BE contract 2026-08-28).
  * Unchanged from the pre-split AIManagementTabs.tsx.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
@@ -35,14 +35,19 @@ export function FlowsTab() {
   // full editable flow lives behind show. Selecting fetches it; editing a lean
   // row would render empty fields and PUT those empties over the stored flow.
   const [detailLoading, setDetailLoading] = useState(false)
+  // Tracks the most recently requested flow id so a fast pick-then-pick can't let
+  // an earlier flow's detail response overwrite the newer selection (§9 alive guard).
+  const requestedIdRef = useRef<string | number | null>(null)
   const pickFlow = (f: InterviewFlow | null) => {
     setSelected(f)
+    requestedIdRef.current = f?.id ?? null
     if (!f?.id) return
+    const reqId = f.id
     setDetailLoading(true)
     api.get(`/ai/interview-flows/${f.id}`)
-      .then(r => setSelected(unwrap<InterviewFlow>(r)))
+      .then(r => { if (requestedIdRef.current === reqId) setSelected(unwrap<InterviewFlow>(r)) })
       .catch(() => notifyError(t('common:actionFailed')))
-      .finally(() => setDetailLoading(false))
+      .finally(() => { if (requestedIdRef.current === reqId) setDetailLoading(false) })
   }
 
   // Load the flow list on mount and preselect the first entry.
@@ -69,10 +74,13 @@ export function FlowsTab() {
       setFlows(prev => (selected?.id ? prev.map(f => (f.id === updated.id ? updated : f)) : [updated, ...prev]))
       setSelected(updated)
       invalidatePickers()
+      setSaving(false)
+      return true
     } catch {
       notifyError(t('common:actionFailed'))
+      setSaving(false)
+      return false
     }
-    setSaving(false)
   }
 
   // Deleting a flow asks first; a 409 means it is still bound to a vacancy/application

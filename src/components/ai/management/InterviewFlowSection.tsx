@@ -9,19 +9,13 @@
  * read-only summary embedded in AgentForm, mirroring which flow that agent uses.
  */
 import { useState } from 'react'
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown } from 'lucide-react'
+import Button from '@/components/ui/Button'
 import SoftChip from '@/components/ui/SoftChip'
+import { GroupLabel, SectionTitle, monoStyle } from '@/components/ui/typography'
 import { translateInterviewStatus } from '@/lib/interviewStatus'
-import { Badge } from './shared'
 import type { InterviewFlow } from '@/types/ai'
-
-// Shared uppercase micro-label style, matching Field's label look.
-const sectionLabelStyle: CSSProperties = {
-  fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5,
-  textTransform: 'uppercase', letterSpacing: '0.04em',
-}
 
 // A dossier field's declared type may not always be a plain string — render safely.
 const renderFieldType = (value: unknown): string => (typeof value === 'string' ? value : JSON.stringify(value))
@@ -48,31 +42,27 @@ export function InterviewFlowSection({ flow }: { flow?: InterviewFlow | null }) 
     <div style={{ marginBottom: 13, padding: 12, borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg)' }}>
       {/* Name + active/inactive badge */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{flow.name}</span>
-        <Badge
+        <SectionTitle as="span">{flow.name}</SectionTitle>
+        <SoftChip round
           label={t(flow.active ? 'ai.agent.interviewFlow.active' : 'ai.agent.interviewFlow.inactive')}
           color={flow.active ? 'var(--color-success)' : 'var(--text-muted)'}
-          bg={flow.active
-            ? 'color-mix(in srgb, var(--color-success) 14%, transparent)'
-            : 'color-mix(in srgb, var(--text-muted) 14%, transparent)'}
         />
       </div>
 
       {/* Intro message — the first template message a session sends */}
       {flow.intro_template && (
         <div style={{ marginBottom: 10 }}>
-          <div style={sectionLabelStyle}>{t('ai.agent.interviewFlow.introLabel')}</div>
+          <GroupLabel style={{ marginBottom: 5 }}>{t('ai.agent.interviewFlow.introLabel')}</GroupLabel>
           <p style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5, margin: 0, whiteSpace: 'pre-wrap' }}>{flow.intro_template}</p>
         </div>
       )}
 
       {/* System prompt — collapsed by default (mirrors VersionList's toggle) */}
       <div style={{ marginBottom: 10 }}>
-        <button type="button" onClick={() => setShowPrompt(o => !o)}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+        <Button variant="ghost" size="sm" onClick={() => setShowPrompt(o => !o)}>
           {showPrompt ? t('ai.agent.interviewFlow.hidePrompt') : t('ai.agent.interviewFlow.showPrompt')}
           <ChevronDown size={10} style={{ transform: showPrompt ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
-        </button>
+        </Button>
         {showPrompt && (
           <pre style={{ marginTop: 6, padding: 10, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)',
             fontSize: 11, lineHeight: 1.6, color: 'var(--text)', whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxHeight: 220, overflowY: 'auto' }}>
@@ -88,7 +78,7 @@ export function InterviewFlowSection({ flow }: { flow?: InterviewFlow | null }) 
           InterviewStatusCard/ApplicationStatusStrip instead of a third copy. */}
       {statuses.length > 0 && (
         <div style={{ marginBottom: 10 }}>
-          <div style={sectionLabelStyle}>{t('ai.agent.interviewFlow.statusesLabel')}</div>
+          <GroupLabel style={{ marginBottom: 5 }}>{t('ai.agent.interviewFlow.statusesLabel')}</GroupLabel>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
             {statuses.map(s => <SoftChip key={s} label={translateInterviewStatus(t, s)} color="var(--color-primary)" />)}
           </div>
@@ -98,11 +88,11 @@ export function InterviewFlowSection({ flow }: { flow?: InterviewFlow | null }) 
       {/* Dossier/output fields — vertical list (mirrors the candidate skills convention) */}
       {Object.keys(outputFields).length > 0 && (
         <div>
-          <div style={sectionLabelStyle}>{t('ai.agent.interviewFlow.outputFieldsLabel')}</div>
+          <GroupLabel style={{ marginBottom: 5 }}>{t('ai.agent.interviewFlow.outputFieldsLabel')}</GroupLabel>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {Object.entries(outputFields).map(([key, type]) => (
               <div key={key} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, padding: '2px 0' }}>
-                <span style={{ color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace' }}>{key}</span>
+                <span style={{ ...monoStyle, color: 'var(--text)' }}>{key}</span>
                 <span style={{ color: 'var(--text-muted)' }}>{renderFieldType(type)}</span>
               </div>
             ))}

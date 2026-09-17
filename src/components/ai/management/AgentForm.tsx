@@ -24,7 +24,7 @@ import type { AiAgent, AiItem, AiKnowledgeLookupItem, ChatMessage } from '@/type
 // picker (GET /whatsapp-templates) instead of re-declaring it (§11 — one truth).
 import type { WaTemplateOption } from '@/components/layout/workflow/whatsappTemplate'
 import Button from '@/components/ui/Button'
-import { groupLabelStyle } from '@/components/ui/typography'
+import { groupLabelStyle, Caption } from '@/components/ui/typography'
 import { useAuth } from '@/context/AuthContext'
 import { canDo } from '@/lib/access'
 
@@ -85,19 +85,13 @@ function ChatTest({ agent, onClose }: { agent: AiAgent; onClose?: () => void }) 
       <div style={{ padding: '9px 13px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
         <MessageSquare size={13} color="var(--color-primary)" />
         <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', flex: 1 }}>{t('ai.chat.test')} — {agent.name}</span>
-        {/* Pre-existing bespoke-size (no fixed height, 11px) inline test-panel controls —
-            out of this ink/tint task's scope; not converted to avoid a size regression. */}
-        <button onClick={() => setMessages([])}
-          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
-          style={{ fontSize: 11, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>
+        <Button variant="ghost" size="sm" onClick={() => setMessages([])}>
           {t('ai.chat.clear')}
-        </button>
+        </Button>
         {onClose && (
-          <button onClick={onClose} aria-label={t('common:close')}
-            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
-            style={{ fontSize: 11, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>
+          <Button variant="ghost" size="sm" iconOnly aria-label={t('common:close')} onClick={onClose}>
             ✕
-          </button>
+          </Button>
         )}
       </div>
       <div style={{ flex: 1, overflowY: 'auto', padding: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -111,11 +105,11 @@ function ChatTest({ agent, onClose }: { agent: AiAgent; onClose?: () => void }) 
             <div style={{
               maxWidth: '80%', padding: '7px 11px', fontSize: 12, lineHeight: 1.5,
               borderRadius: m.role === 'user' ? '10px 10px 2px 10px' : '10px 10px 10px 2px',
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chat-bubble fill (own-message accent), not an action button
-              background: m.role === 'user' ? 'var(--color-primary)' : m.error ? 'var(--color-danger-bg)' : 'var(--bg)',
+              background: m.role === 'user' ? 'var(--button-fill)' : m.error ? 'var(--color-danger-bg)' : 'var(--bg)',
               // Error ink is --color-on-danger-bg — the raw danger colour reads only
-              // 3.95:1 on its own pastel, AA fail (Opus r3.5).
-              color: m.role === 'user' ? 'white' : m.error ? 'var(--color-on-danger-bg)' : 'var(--text)',
+              // 3.95:1 on its own pastel, AA fail (Opus r3.5). Own-message ink is the
+              // paired --button-ink (PRIMAIR-VLAK-1), never a literal 'white'.
+              color: m.role === 'user' ? 'var(--button-ink)' : m.error ? 'var(--color-on-danger-bg)' : 'var(--text)',
               border: m.role === 'user' ? 'none' : '1px solid var(--border)',
             }}>
               {m.content}
@@ -205,12 +199,16 @@ export function AgentForm({ agent, prompts, faqs, knowledgeItems, onSaved, onDel
   // picker MUST offer only these, never free text or a hardcoded name.
   const [waTemplates, setWaTemplates] = useState<WaTemplateOption[]>([])
   const [waLoading,   setWaLoading]   = useState(true)
-  // Loads the tenant's real synced WhatsApp templates for the intro picker (WA_INTRO_TEMPLATE-1); an alive guard drops the result if the form unmounts first, and a failed/absent connection just leaves the empty-state below.
+  // A real fetch failure must not render the same "no templates" copy a tenant
+  // with zero synced templates would honestly see (R8) — tracked separately from
+  // the "no WhatsApp connection yet" empty case.
+  const [waError,     setWaError]     = useState(false)
+  // Loads the tenant's real synced WhatsApp templates for the intro picker (WA_INTRO_TEMPLATE-1); an alive guard drops the result if the form unmounts first.
   useEffect(() => {
     let alive = true
     api.get('/whatsapp-templates')
       .then(r => { if (alive) setWaTemplates(unwrapList<WaTemplateOption>(r).rows) })
-      .catch(() => { /* no WhatsApp connection yet — empty state below */ })
+      .catch(() => { if (alive) setWaError(true) })
       .finally(() => { if (alive) setWaLoading(false) })
     return () => { alive = false }
   }, [])
@@ -280,26 +278,20 @@ export function AgentForm({ agent, prompts, faqs, knowledgeItems, onSaved, onDel
         )}
         rightActions={<>
           {!isNew && (
-            // Pre-existing bespoke toggle-state control (own on/off fill), out of this
-            // ink/tint task's scope; not converted to avoid a size/identity regression.
-            <button onClick={() => setChatOpen(o => !o)} disabled={!canRunAgent}
-              title={canRunAgent ? undefined : t('ai.agent.runNoPermission')}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
-              style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px', fontSize: 12, fontWeight: 500,
-                borderRadius: 8, border: '1px solid var(--border)',
-                background: chatOpen ? 'var(--color-primary-bg)' : 'var(--surface)',
-                // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-                color: chatOpen ? 'var(--color-primary-text)' : 'var(--text-muted)', cursor: 'pointer' }}>
+            // A toggle-state control that must also honour the WORKFLOW-PERMS-1
+            // permission gate (disabled) — QuickViewToggle has no `disabled`, so this
+            // stays Button with a variant that reflects the open/closed state.
+            <Button variant={chatOpen ? 'soft' : 'secondary'} size="sm" onClick={() => setChatOpen(o => !o)}
+              disabled={!canRunAgent} title={canRunAgent ? undefined : t('ai.agent.runNoPermission')}>
               <MessageSquare size={12} /> {t('ai.chat.test')}
-            </button>
+            </Button>
           )}
           {!isNew && (
-            <button onClick={() => agent && onDelete(agent)} disabled={!canDeleteAgent}
-              aria-label={t('common:delete')} title={canDeleteAgent ? t('common:delete') : t('ai.agent.deleteNoPermission')}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- pre-existing bespoke-size icon button, out of this ink/tint task's scope
-              style={{ padding: '5px 8px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--color-danger-text)', cursor: 'pointer', display: 'flex' }}>
+            <Button variant="dangerSoft" size="sm" iconOnly aria-label={t('common:delete')}
+              title={canDeleteAgent ? t('common:delete') : t('ai.agent.deleteNoPermission')}
+              disabled={!canDeleteAgent} onClick={() => agent && onDelete(agent)}>
               <Trash2 size={12} />
-            </button>
+            </Button>
           )}
           <SaveBar saving={saving} saved={saved} onSave={save} disabled={!canSaveAgent} />
         </>}
@@ -352,7 +344,9 @@ export function AgentForm({ agent, prompts, faqs, knowledgeItems, onSaved, onDel
             <label id={waTemplateLabelId} style={fieldLabelStyle}>{t('ai.agent.waIntroTemplate')}</label>
             {waLoading
               ? <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{t('wa.templateLoading')}</p>
-              : waTemplates.length === 0
+              : waError
+                ? <Caption as="p" style={{ color: 'var(--color-danger-text)', margin: 0 }}>{t('common:actionFailed')}</Caption>
+                : waTemplates.length === 0
                 ? <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{t('wa.templateEmpty')}</p>
                 : (
                   <CreatableSelect value={form.wa_intro_template || null} allowCreate={false} clearable
@@ -380,15 +374,10 @@ export function AgentForm({ agent, prompts, faqs, knowledgeItems, onSaved, onDel
           {/* Custom API override — rare BYO-endpoint escape hatch; collapsed by
               default (calm by default), no longer gated behind a model picker. */}
           <div style={{ marginBottom: 13 }}>
-            {/* Pre-existing bespoke collapsible-section header control, out of this
-                ink/tint task's scope; not converted to avoid a size/identity regression. */}
-            <button type="button" onClick={() => setShowCustomApi(o => !o)}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
-              style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
-                textTransform: 'uppercase', letterSpacing: '0.04em', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+            <Button variant="ghost" size="sm" onClick={() => setShowCustomApi(o => !o)}>
               {t('ai.agent.customApiSection')}
               <ChevronDown size={10} style={{ transform: showCustomApi ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
-            </button>
+            </Button>
             {showCustomApi && (
               <div style={{ marginTop: 8 }}>
                 <Field label={t('ai.agent.apiEndpoint')}>
@@ -412,14 +401,11 @@ export function AgentForm({ agent, prompts, faqs, knowledgeItems, onSaved, onDel
                       onChange={e => set('custom_api_key', e.target.value)}
                       placeholder={hasCustomApiKey ? t('ai.agent.apiKeyKeepPlaceholder') : 'sk-...'}
                       style={{ ...inputStyle, paddingRight: 36 }} />
-                    {/* Pre-existing bespoke show/hide-password affordance absolutely
-                        positioned inside the input, out of this ink/tint task's scope. */}
-                    <button type="button" onClick={() => setShowApiKey(s => !s)}
+                    <Button variant="ghost" size="sm" iconOnly onClick={() => setShowApiKey(s => !s)}
                       aria-label={showApiKey ? t('ai.agent.hideApiKey') : t('ai.agent.showApiKey')}
-                      // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
-                      style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                      style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', height: 24, width: 24 }}>
                       {showApiKey ? <EyeOff size={14} /> : <Eye size={14} />}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>

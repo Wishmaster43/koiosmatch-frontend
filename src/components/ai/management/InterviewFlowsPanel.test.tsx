@@ -79,4 +79,17 @@ describe('FlowsTab — interview-flow CRUD (live BE contract /ai/interview-flows
     await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/ai/interview-flows/f1'))
     expect(screen.getByDisplayValue('Zorgintake')).toBeTruthy()
   })
+
+  // §3 no fake affordance: a save the server REJECTS must never flash the green
+  // "Opgeslagen!" checkmark — only a confirmed PUT/POST may show it.
+  it('does not show the saved checkmark when the PUT fails', async () => {
+    vi.mocked(api.put).mockRejectedValue(new Error('server error'))
+    renderWithQuery()
+    await waitFor(() => expect(screen.getByDisplayValue('Zorgintake')).toBeTruthy())
+
+    fireEvent.click(screen.getByRole('button', { name: /opslaan/i }))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledTimes(1))
+    expect(screen.queryByText('Opgeslagen!')).toBeNull()
+  })
 })

@@ -9,7 +9,8 @@
  */
 import { useState, useId } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Brain, Plus, X, Trash2 } from 'lucide-react'
+import { Brain, X, Trash2 } from 'lucide-react'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import Toggle from '@/components/ui/Toggle'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { DragList } from '@/pages/settings/shared'
@@ -48,7 +49,10 @@ const toFormState = (flow: InterviewFlow | null): FlowFormState => ({
 
 export function InterviewFlowsPanel({ flow, onSaved, onDelete, saving }: {
   flow: InterviewFlow | null
-  onSaved: (payload: Record<string, unknown>) => void
+  // Returns whether the save actually succeeded (false/rejected on a server
+  // error) — the "saved" checkmark below only fires once the caller confirms
+  // it, never on hand-off alone (§3: no fake affordance).
+  onSaved: (payload: Record<string, unknown>) => void | boolean | Promise<void | boolean>
   onDelete?: (flow: InterviewFlow) => void
   saving?: boolean
 }) {
@@ -76,10 +80,14 @@ export function InterviewFlowsPanel({ flow, onSaved, onDelete, saving }: {
   const cleanStatuses = form.statuses.map(s => s.value.trim()).filter(Boolean)
   const canSave = Boolean(form.name.trim()) && Boolean(form.system_prompt.trim()) && cleanStatuses.length > 0
 
-  // Builds the API payload (statuses/output_fields collapse back to the wire shapes) and hands it to the caller, which does the actual POST/PUT.
-  const save = () => {
+  // Builds the API payload (statuses/output_fields collapse back to the wire shapes)
+  // and hands it to the caller, which does the actual POST/PUT — the "saved" tick
+  // only shows once that call has actually confirmed success (§3 no fake affordance);
+  // a rejection or an explicit `false` leaves it off, so only the caller's own
+  // notifyError toast speaks for a failure.
+  const save = async () => {
     if (!canSave) return
-    onSaved({
+    const result = await onSaved({
       name: form.name,
       ai_agent_id: form.ai_agent_id || null,
       channel: 'whatsapp',
@@ -89,7 +97,9 @@ export function InterviewFlowsPanel({ flow, onSaved, onDelete, saving }: {
       intro_template: form.intro_template || null,
       active: form.active,
     })
-    setSaved(true); setTimeout(() => setSaved(false), 2500)
+    if (result !== false) {
+      setSaved(true); setTimeout(() => setSaved(false), 2500)
+    }
   }
 
   return (
@@ -153,9 +163,7 @@ export function InterviewFlowsPanel({ flow, onSaved, onDelete, saving }: {
               </div>
             )} />
         )}
-        <Button variant="ghost" onClick={addStatus} style={{ marginTop: 6 }}>
-          <Plus size={12} /> {t('ai.flows.addStatus')}
-        </Button>
+        <DrawerAddButton onClick={addStatus} label={t('ai.flows.addStatus')} />
       </div>
 
       {/* Dossier/output fields — honest minimal editor: a key + its declared type
@@ -176,9 +184,7 @@ export function InterviewFlowsPanel({ flow, onSaved, onDelete, saving }: {
             </Button>
           </div>
         ))}
-        <Button variant="ghost" onClick={addOutputField}>
-          <Plus size={12} /> {t('ai.flows.addOutputField')}
-        </Button>
+        <DrawerAddButton onClick={addOutputField} label={t('ai.flows.addOutputField')} />
       </div>
 
       <Field label={t('ai.flows.introTemplateLabel')}>

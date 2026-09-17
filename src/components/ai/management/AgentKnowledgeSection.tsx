@@ -57,7 +57,7 @@ export function AgentKnowledgeSection({
           the visible caption only. */}
       <Field label={t('ai.agent.selectFaqs')}>
         {faqs.length === 0
-          ? <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{t('ai.agent.noFaqs')}</p>
+          ? <Caption as="p" style={{ margin: 0 }}>{t('ai.agent.noFaqs')}</Caption>
           : (
             <ChipMultiSelect
               options={faqs.map(f => ({ value: String(f.id), label: f.name ?? '' }))}
@@ -72,7 +72,7 @@ export function AgentKnowledgeSection({
           silent fallback to the full tenant knowledge base. */}
       <Field label={t('ai.agent.knowledgeItems')}>
         {knowledgeItems.length === 0
-          ? <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{t('ai.agent.noKnowledgeItems')}</p>
+          ? <Caption as="p" style={{ margin: 0 }}>{t('ai.agent.noKnowledgeItems')}</Caption>
           : (
             <ChipMultiSelect
               options={knowledgeItems}
