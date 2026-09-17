@@ -17,6 +17,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useUserPreference } from '@/hooks/useUserPreference'
+import { useVisiblePoll } from '@/hooks/useVisiblePoll'
 import api, { unwrapList } from '@/lib/api'
 import { notify } from '@/lib/notify'
 import { playNotificationChime } from '@/lib/notificationSound'
@@ -126,12 +127,11 @@ export function useNotifications(pollMs = 60000) {
       .catch(() => setItems([]))
   }, [t, pollMs])
 
-  // Poll on an interval, skipping ticks while the tab is hidden; clean up on unmount.
-  useEffect(() => {
-    load()
-    const id = setInterval(() => { if (shouldPollNotifications()) load() }, pollMs)
-    return () => clearInterval(id)
-  }, [load, pollMs])
+  // Initial load stays at the call site; the recurring visibility-gated poll
+  // reuses the shared useVisiblePoll hook (DRY — it hand-rolled the identical
+  // "skip while the tab is hidden" interval before).
+  useEffect(() => { load() }, [load])
+  useVisiblePoll(load, pollMs)
 
   const unseen = items.filter(n => !n.seen).length
 

@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrapList, unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { formatFileSizeMb, formatNumber } from '@/lib/formatters'
+import { useLocale } from '@/lib/datetime'
 import type { Id } from '@/types/common'
 
 export interface EntityDoc {
@@ -70,6 +71,10 @@ export const fmtSize = (s: string | number | undefined, locale: string = 'nl-NL'
 // each optimistic row with the server's real id once it lands.
 export function useEntityDocuments(prefix: string, parentId: Id | undefined, listUrl?: string) {
   const { t } = useTranslation()
+  // GETALLEN-1: fmtSize's own default is nl-NL for non-React call sites only —
+  // this hook resolves the ACTIVE locale and passes it explicitly, so a de/fr/es
+  // tenant sees its own thousand separator in the file-size column, not Dutch.
+  const locale = useLocale()
   const [docs, setDocs] = useState<EntityDoc[]>([])
   // L8-docs-1: the list fetch's own loading/error state, exposed so consumers can
   // render the four honest UI states (§3) instead of a fetch failure silently
@@ -85,11 +90,11 @@ export function useEntityDocuments(prefix: string, parentId: Id | undefined, lis
     setLoading(true)
     setError(false)
     api.get(listUrl ?? `/${prefix}/${parentId}/documents`)
-      .then(res => { if (alive) setDocs(unwrapList<EntityDoc>(res).rows.map(d => ({ ...d, size: fmtSize(d.size) }))) })
+      .then(res => { if (alive) setDocs(unwrapList<EntityDoc>(res).rows.map(d => ({ ...d, size: fmtSize(d.size, locale) }))) })
       .catch(() => { if (alive) { setDocs([]); setError(true) } })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
-  }, [prefix, parentId, listUrl])
+  }, [prefix, parentId, listUrl, locale])
 
   // Upload (multipart) — optimistic row with a temp id, swapped for the server doc.
   // DOCS-LOC-DEPT-1: `extraFields` (e.g. `{ customer_location_id: '...' }`) rides
@@ -98,16 +103,16 @@ export function useEntityDocuments(prefix: string, parentId: Id | undefined, lis
   const upload = useCallback((file: File, type: string, name: string, objectUrl: string, extraFields?: Record<string, string>) => {
     if (!parentId) return
     const tmpId = `tmp-${Date.now()}-${++tempDocSeq}`
-    setDocs(d => [{ id: tmpId, name, type, size: fmtSize(file.size), objectUrl }, ...d])
+    setDocs(d => [{ id: tmpId, name, type, size: fmtSize(file.size, locale), objectUrl }, ...d])
     const fd = new FormData()
     fd.append('file', file); fd.append('type', type); fd.append('name', name)
     Object.entries(extraFields ?? {}).forEach(([k, v]) => fd.append(k, v))
     api.post(`/${prefix}/${parentId}/documents`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
       // Audit R1 🔴: the optimistic row's object URL leaked on every upload — revoke it
       // the moment the server doc replaces (or the failure drops) the temp row.
-      .then(res => { const saved = unwrap<EntityDoc>(res); if (objectUrl) URL.revokeObjectURL(objectUrl); setDocs(d => d.map(x => x.id === tmpId ? { ...saved, size: fmtSize(saved.size) } : x)) })
+      .then(res => { const saved = unwrap<EntityDoc>(res); if (objectUrl) URL.revokeObjectURL(objectUrl); setDocs(d => d.map(x => x.id === tmpId ? { ...saved, size: fmtSize(saved.size, locale) } : x)) })
       .catch(() => { if (objectUrl) URL.revokeObjectURL(objectUrl); setDocs(d => d.filter(x => x.id !== tmpId)); notifyError(t('common:actionFailed')) })
-  }, [prefix, parentId, t])
+  }, [prefix, parentId, t, locale])
 
   // Rename — optimistic, reverts on failure. A temp (not-yet-persisted) row skips the PATCH.
   const rename = useCallback((id: Id | undefined, name: string) => {

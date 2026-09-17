@@ -58,6 +58,21 @@ describe('useCustomerCascade', () => {
     expect(result.current.locations).toEqual([])
   })
 
+  // D8: a failed fetch must be distinguishable from a genuinely empty customer.
+  it('exposes error=true on a failed fetch, distinct from a genuinely empty customer', async () => {
+    vi.mocked(api.get).mockRejectedValueOnce(new Error('network'))
+    const { result } = renderHook(() => useCustomerCascade('cust-err'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.error).toBe(true)
+  })
+
+  it('clears loading/error once a fetch succeeds', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: customerFixture } })
+    const { result } = renderHook(() => useCustomerCascade('cust-1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.error).toBe(false)
+  })
+
   it('refetch re-fetches the same customer id (e.g. after inline-creating a contact)', async () => {
     vi.mocked(api.get).mockResolvedValueOnce({ data: { data: customerFixture } })
     const { result } = renderHook(() => useCustomerCascade('cust-1'))

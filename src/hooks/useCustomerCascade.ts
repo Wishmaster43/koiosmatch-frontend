@@ -62,20 +62,28 @@ export interface CustomerCascadeDetail {
 // One shared customer→location→department→contact cascade fetch, exposing the full detail payload so callers needing takeover-default fields don't need their own fetch (see file header).
 export function useCustomerCascade(customerId: string) {
   const [detail, setDetail] = useState<CustomerCascadeDetail | null>(null)
+  // D8: loading/error surfaced alongside detail so a caller can tell a failed
+  // fetch apart from a customer that genuinely has no locations/contacts,
+  // instead of both resolving to the same empty-looking shape.
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(false)
 
   // Re-fetch the customer detail whenever the picked customer changes; clear it
   // (never stale data from a previous customer) when no customer is picked. The
   // `alive` guard drops a response that resolves after a newer id was picked.
   useEffect(() => {
-    if (!customerId) { setDetail(null); return }
+    if (!customerId) { setDetail(null); setLoading(false); setError(false); return }
     // Clear immediately on a customer SWITCH too — the old customer's detail
     // (and its branch) must never keep banners/pickers alive while the new
     // detail is still loading (Danny 24-07: stale vestiging-melding).
     setDetail(null)
     let alive = true
+    setLoading(true)
+    setError(false)
     api.get(`/customers/${customerId}`)
       .then(r => { if (alive) setDetail((unwrap(r)) as CustomerCascadeDetail) })
-      .catch(() => { if (alive) setDetail(null) })
+      .catch(() => { if (alive) { setDetail(null); setError(true) } })
+      .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
   }, [customerId])
 
@@ -83,15 +91,20 @@ export function useCustomerCascade(customerId: string) {
   // "add contact" needs the fresh contact list before selecting the new one.
   const refetch = () => {
     if (!customerId) return Promise.resolve()
+    setLoading(true)
+    setError(false)
     return api.get(`/customers/${customerId}`)
       .then(r => { setDetail((unwrap(r)) as CustomerCascadeDetail) })
-      .catch(() => { setDetail(null) })
+      .catch(() => { setDetail(null); setError(true) })
+      .finally(() => { setLoading(false) })
   }
 
   return {
     detail,
     locations: detail?.locations ?? [],
     contacts: detail?.contacts ?? [],
+    loading,
+    error,
     refetch,
   }
 }

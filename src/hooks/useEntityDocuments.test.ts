@@ -13,7 +13,11 @@ vi.mock('@/lib/api', async () => {
   return { ...actual, default: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() } }
 })
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+// DATETIME-IMPORT-LES: the hook now resolves the active locale via
+// @/lib/datetime (useLocale), whose module import drags the real i18n init
+// (initReactI18next) along — stub that export too, or the flat mock above
+// leaves i18n.use(initReactI18next) undefined and the suite throws on setup.
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }), initReactI18next: { type: '3rdParty', init: () => {} } }))
 vi.mock('@/lib/formatters', () => ({ formatFileSizeMb: (bytes: number) => String(Math.round(bytes / 1048576 * 10) / 10), formatNumber: (n: number) => String(n) }))
 
 const mockGet = api.get as unknown as ReturnType<typeof vi.fn>

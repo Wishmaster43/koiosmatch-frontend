@@ -30,15 +30,16 @@ vi.mock('@/hooks/useEntityNotes', () => ({
   }),
 }))
 
+// vi.fn() so the fallback-branch test below can reconfigure the auth user
+// per-test (mockReturnValueOnce) instead of every test sharing one fixed name.
+const useAuthMock = vi.fn(() => ({ user: { name: 'Test User' as string | undefined } }))
 vi.mock('@/context/AuthContext', () => ({
-  useAuth: () => ({
-    user: { name: 'Test User' },
-  }),
+  useAuth: () => useAuthMock(),
 }))
 
 vi.mock('@/lib/initials', () => ({
-  initialsOf: (name?: string) => {
-    if (!name) return 'K'
+  initialsOf: (name?: string, fallback = '?') => {
+    if (!name) return fallback
     return name
       .split(' ')
       .map((w) => w[0])
@@ -94,9 +95,10 @@ describe('useNotesTabSetup', () => {
   })
 
   it('falls back to Koios when auth user has no name', () => {
-    // Test that fallback works by verifying the initials are defined
+    // Put the auth mock in the actual no-name state, then assert the real fallback text.
+    useAuthMock.mockReturnValueOnce({ user: { name: undefined } })
     const { result } = renderHook(() => useNotesTabSetup('match', 'id', '/path', 'ns'))
 
-    expect(result.current.initials).toBeDefined()
+    expect(result.current.initials).toBe('Koios')
   })
 })
