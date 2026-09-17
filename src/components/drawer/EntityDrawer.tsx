@@ -55,8 +55,16 @@ export default function EntityDrawer({
 
   // Auto-expand for flagged tabs; restore when leaving.
   const autoExpandedRef = useRef(false)
+  // AUTO-EXPAND-ONCE (Danny 17-09, the vacancy "Kandidaten zoeken" tab opened narrow from
+  // the Leads deep-link): onToggleExpand is a TOGGLE and StrictMode runs a mount effect
+  // twice with the same closure, so the second run toggled the drawer straight back to
+  // narrow. The tab handled last lives in a ref (refs survive the double-invoke), so the
+  // side effect fires exactly once per tab switch — the ref is written inside the effect.
+  const autoExpandHandledTabRef = useRef<string | undefined>(undefined)
   // An effect (not derived state) because it must fire the SIDE EFFECT (onToggleExpand) exactly once per tab switch, not recompute a value every render.
   useEffect(() => {
+    if (autoExpandHandledTabRef.current === activeTab) return
+    autoExpandHandledTabRef.current = activeTab
     if (active?.autoExpand && !expanded) { autoExpandedRef.current = true; onToggleExpand?.() }
     else if (autoExpandedRef.current && expanded && !active?.autoExpand) { autoExpandedRef.current = false; onToggleExpand?.() }
   }, [activeTab]) // eslint-disable-line react-hooks/exhaustive-deps

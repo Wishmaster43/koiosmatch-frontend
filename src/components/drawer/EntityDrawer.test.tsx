@@ -5,7 +5,7 @@
  * now carries) — this test drives that through the REAL EntityHeader, not a stub,
  * so a future edit to either file that breaks the wiring fails here too.
  */
-import { useState } from 'react'
+import { useState, StrictMode } from 'react'
 import { describe, it, expect, vi } from 'vitest'
 import { render, fireEvent, screen } from '@testing-library/react'
 import EntityDrawer from './EntityDrawer'
@@ -98,5 +98,26 @@ describe('EntityDrawer · Escape-to-close (SWEEP-ESC)', () => {
         tabs={[{ id: 't1', label: 'Tab 1', render: () => <div>content</div> }]} />
     )
     expect(() => fireEvent.keyDown(screen.getByText('content'), { key: 'Escape' })).not.toThrow()
+  })
+})
+
+// AUTO-EXPAND-ONCE (Danny 17-09, the vacancy "Kandidaten zoeken" tab opened narrow from
+// the Leads deep-link): onToggleExpand is a TOGGLE and StrictMode runs the mount effect
+// twice with the same closure, so the drawer opened and closed again in one tick. The
+// effect must fire the side effect exactly once per tab switch.
+describe('EntityDrawer · autoExpand fires once under StrictMode (AUTO-EXPAND-ONCE)', () => {
+  it('toggles the drawer open exactly once when it mounts on an autoExpand tab', () => {
+    const onToggleExpand = vi.fn()
+    render(
+      <StrictMode>
+        <EntityDrawer entity={{ id: 1 }} expanded={false} onToggleExpand={onToggleExpand} initialTab="search"
+          header={() => <EntityHeader label="Test" title="Entity" onClose={() => {}} />}
+          tabs={[
+            { id: 'details', label: 'Details', render: () => <div>details</div> },
+            { id: 'search', label: 'Search', autoExpand: true, render: () => <div>search</div> },
+          ]} />
+      </StrictMode>
+    )
+    expect(onToggleExpand).toHaveBeenCalledTimes(1)
   })
 })

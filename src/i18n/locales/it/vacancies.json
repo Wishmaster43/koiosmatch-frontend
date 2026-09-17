@@ -602,22 +602,6 @@
   "cellLinks": {
     "openCustomer": "Apri cliente"
   },
-  "leadsExpand": {
-    "expandLabel": "Mostra lead",
-    "collapseLabel": "Nascondi lead",
-    "loading": "Caricamento lead…",
-    "empty": "Nessun lead trovato.",
-    "error": "Impossibile caricare i lead.",
-    "colName": "Nome",
-    "colPhase": "Fase",
-    "colSource": "Origine",
-    "colCreated": "Creato il",
-    "recountBtn": "Aggiorna suggerimenti",
-    "recountQueued": "In coda, l'elenco verrà aggiornato tra pochi minuti",
-    "recountThrottled": "Si prega di attendere, richiesta già in corso",
-    "recountFailed": "L'aggiornamento non è riuscito",
-    "recountInfo": "Ricalcola i suggerimenti di candidati dell'IA per questo annuncio; può richiedere alcuni minuti."
-  },
   "appointments": {
     "joinMeeting": "Partecipa alla riunione"
   }

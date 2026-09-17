@@ -139,7 +139,6 @@ const ALLOWLIST: string[] = [
   'es/settings:lookups.phases.title',
   'es/settings:nav.candidate_phases',
   'es/vacancies:applicants.phase',
-  'es/vacancies:leadsExpand.colPhase',
   'es/workflows:fieldLabels.Fase',
 
   // Italian/Portuguese "fase" = "phase"/"stage" (identical spelling, shared Latin root — same
@@ -183,7 +182,6 @@ const ALLOWLIST: string[] = [
   'it/settings:opportunityDisplay.fields.opportunity_table_color_stage.label',
   'it/vacancies:applicants.phase',
   'it/vacancies:applicants.byPhase',
-  'it/vacancies:leadsExpand.colPhase',
   'it/workflows:fieldLabels.Fase',
   'pt/analytics:candidates.axes.phase',
   'pt/analytics:applications.axes.stage',
@@ -223,7 +221,6 @@ const ALLOWLIST: string[] = [
   'pt/settings:audit.field.phase',
   'pt/settings:opportunityDisplay.fields.opportunity_table_color_stage.label',
   'pt/vacancies:applicants.phase',
-  'pt/vacancies:leadsExpand.colPhase',
   'pt/workflows:fieldLabels.Fase',
 
   // German "Ja" = "yes"

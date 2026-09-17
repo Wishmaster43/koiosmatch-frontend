@@ -602,22 +602,6 @@
   "cellLinks": {
     "openCustomer": "Open customer"
   },
-  "leadsExpand": {
-    "expandLabel": "Show leads",
-    "collapseLabel": "Hide leads",
-    "loading": "Loading leads…",
-    "empty": "No leads found.",
-    "error": "Couldn't load leads.",
-    "colName": "Name",
-    "colPhase": "Phase",
-    "colSource": "Source",
-    "colCreated": "Created",
-    "recountBtn": "Refresh suggestions",
-    "recountQueued": "Queued, the list will refresh within a few minutes",
-    "recountThrottled": "Please wait, request already in progress",
-    "recountFailed": "Refresh failed",
-    "recountInfo": "Recomputes the AI candidate suggestions for this vacancy; this can take a few minutes."
-  },
   "appointments": {
     "joinMeeting": "Join meeting"
   }
