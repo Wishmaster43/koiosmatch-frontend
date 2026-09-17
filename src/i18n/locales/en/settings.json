@@ -1699,6 +1699,7 @@
         "sent": "Sent",
         "stage_changed": "Stage changed",
         "stage_stale": "Stuck in stage too long",
+        "stale": "No stage change",
         "stale_online": "Stale online (no applications)",
         "started": "Started",
         "status_stale": "Status stale",
@@ -3556,14 +3557,14 @@
   },
   "customerConversion": {
     "title": "Default status after conversion",
-    "subtitle": "The status a customer gets right after converting from Prospect to Customer. No setting configured leaves the status empty. Pick a status to apply it automatically.",
-    "none": "None (set manually)",
+    "subtitle": "The status a customer gets right after converting from Prospect to Customer. Without a setting the customer gets the status Active. Pick a status to apply it automatically.",
+    "none": "Default (Active)",
     "saveFailed": "Saving failed"
   },
   "vacancyDefaultStatus": {
     "title": "Default status on create",
-    "subtitle": "The status a new vacancy gets when none is specified. No setting configured leaves the status empty. Pick a status to apply it automatically.",
-    "none": "None (set manually)",
+    "subtitle": "The status a new vacancy gets when none is specified. Without a setting the default status from the status list applies. Pick a status to apply it automatically.",
+    "none": "Default from the status list",
     "saveFailed": "Saving failed"
   },
   "nationalities": {

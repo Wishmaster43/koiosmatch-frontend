@@ -13,8 +13,8 @@ import { describe, it, expect } from 'vitest'
 import { EVENT_GROUPS, ALL_EVENTS, actionOf } from './webhookEvents'
 
 // Manual mirror of config/webhooks.php's `events` array (koiosmatch-api) — hand-
-// counted 2026-09-04: 59 rows, 13 groups. Re-verify by re-grepping
-// `'key' => '...'` in that file if this ever needs updating.
+// counted 2026-09-17: 61 rows, 13 groups (opportunity.closing_soon/stale added).
+// Re-verify by re-grepping `'key' => '...'` in that file if this ever needs updating.
 const BACKEND_WEBHOOK_EVENTS = [
   'candidate.created', 'candidate.updated', 'candidate.status_changed', 'candidate.reactivated',
   'candidate.archived', 'candidate.document_expiring', 'candidate.availability_changed',
@@ -38,7 +38,7 @@ const BACKEND_WEBHOOK_EVENTS = [
   'customer.vacancy_stale',
   'facebook.lead_received',
   'interview.started', 'interview.completed', 'interview.disqualified',
-  'opportunity.created', 'opportunity.updated',
+  'opportunity.created', 'opportunity.updated', 'opportunity.closing_soon', 'opportunity.stale',
 ]
 
 // Every shipped locale's settings.json, loaded like localeParity.test.ts does.
@@ -46,9 +46,9 @@ const settingsLocales = import.meta.glob('../../../../i18n/locales/*/settings.js
 const LOCALES = ['nl', 'en', 'de', 'fr', 'es', 'it', 'pt']
 
 describe('EVENT_GROUPS · backend parity (REPAIR N6)', () => {
-  it('mirrors exactly 59 backend webhook events', () => {
-    expect(BACKEND_WEBHOOK_EVENTS.length).toBe(59)
-    expect(ALL_EVENTS.length).toBe(59)
+  it('mirrors exactly 61 backend webhook events', () => {
+    expect(BACKEND_WEBHOOK_EVENTS.length).toBe(61)
+    expect(ALL_EVENTS.length).toBe(61)
   })
 
   it('contains every event the backend catalogue has (no missing subscription option)', () => {

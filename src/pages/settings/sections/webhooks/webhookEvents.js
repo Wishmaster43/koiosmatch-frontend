@@ -75,7 +75,9 @@ export const EVENT_GROUPS = [
   { group: 'interviews', events: ['interview.started', 'interview.completed', 'interview.disqualified'] },
   // S1 A3: Opportunity dispatched zero events before this bundle — no tenant
   // could ever subscribe a webhook to a sales deal.
-  { group: 'opportunities', events: ['opportunity.created', 'opportunity.updated'] },
+  { group: 'opportunities', events: [
+    'opportunity.created', 'opportunity.updated', 'opportunity.closing_soon', 'opportunity.stale',
+  ] },
 ]
 
 // Flat list of every event key (e.g. for "select all" and validation).

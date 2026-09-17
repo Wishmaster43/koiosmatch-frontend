@@ -580,5 +580,17 @@
       }
     },
     "openReport": "Rapport openen"
+  },
+  "customKpi": {
+    "bandTitle": "Eigen KPI's",
+    "labelWithDimension": "{{label}} · {{dimension}}",
+    "valueWithUnit": "{{value}} {{unit}}",
+    "target": "doel {{value}}",
+    "warn": "let op {{value}}",
+    "status": {
+      "ok": "op doel",
+      "warn": "bijna buiten doel",
+      "alert": "buiten doel"
+    }
   }
 }

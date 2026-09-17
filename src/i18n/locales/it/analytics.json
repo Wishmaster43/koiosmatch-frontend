@@ -580,5 +580,17 @@
       }
     },
     "openReport": "Apri report"
+  },
+  "customKpi": {
+    "bandTitle": "KPI personalizzati",
+    "labelWithDimension": "{{label}} · {{dimension}}",
+    "valueWithUnit": "{{value}} {{unit}}",
+    "target": "obiettivo {{value}}",
+    "warn": "attenzione {{value}}",
+    "status": {
+      "ok": "nell'obiettivo",
+      "warn": "vicino all'obiettivo",
+      "alert": "fuori obiettivo"
+    }
   }
 }

@@ -1440,6 +1440,7 @@
         "sent": "Envoyé",
         "stage_changed": "Étape modifiée",
         "stage_stale": "Bloqué à l'étape",
+        "stale": "Aucun changement de phase",
         "stale_online": "En ligne depuis longtemps (sans candidatures)",
         "started": "Démarré",
         "status_stale": "Statut bloqué",
@@ -3556,14 +3557,14 @@
   },
   "customerConversion": {
     "title": "Statut par défaut après conversion",
-    "subtitle": "Le statut attribué à un client juste après la conversion de Prospect en Client. Sans configuration, le statut reste vide. Choisissez un statut pour l'appliquer automatiquement.",
-    "none": "Aucun (définir manuellement)",
+    "subtitle": "Le statut attribué à un client juste après la conversion de Prospect en Client. Sans configuration, le client reçoit le statut Actif. Choisissez un statut pour l'appliquer automatiquement.",
+    "none": "Par défaut (Actif)",
     "saveFailed": "Échec de l'enregistrement"
   },
   "vacancyDefaultStatus": {
     "title": "Statut par défaut à la création",
-    "subtitle": "Le statut attribué à un nouveau poste lorsqu'aucun n'est précisé. Sans configuration, le statut reste vide. Choisissez un statut pour l'appliquer automatiquement.",
-    "none": "Aucun (définir manuellement)",
+    "subtitle": "Le statut attribué à un nouveau poste lorsqu'aucun n'est précisé. Sans configuration, le statut par défaut de la liste des statuts s'applique. Choisissez un statut pour l'appliquer automatiquement.",
+    "none": "Par défaut (liste des statuts)",
     "saveFailed": "Échec de l'enregistrement"
   },
   "nationalities": {

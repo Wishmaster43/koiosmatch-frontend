@@ -1440,6 +1440,7 @@
         "sent": "Enviado",
         "stage_changed": "Etapa cambiada",
         "stage_stale": "Estancada en la etapa",
+        "stale": "Sin cambio de fase",
         "stale_online": "Mucho tiempo en línea (sin candidaturas)",
         "started": "Iniciado",
         "status_stale": "Estado estancado",
@@ -3556,14 +3557,14 @@
   },
   "customerConversion": {
     "title": "Estado predeterminado tras la conversión",
-    "subtitle": "El estado que recibe un cliente justo después de convertir de Prospecto a Cliente. Sin configuración, el estado queda vacío. Elija un estado para aplicarlo automáticamente.",
-    "none": "Ninguno (establecer manualmente)",
+    "subtitle": "El estado que recibe un cliente justo después de convertir de Prospecto a Cliente. Sin configuración, el cliente recibe el estado Activo. Elija un estado para aplicarlo automáticamente.",
+    "none": "Predeterminado (Activo)",
     "saveFailed": "Error al guardar"
   },
   "vacancyDefaultStatus": {
     "title": "Estado predeterminado al crear",
-    "subtitle": "El estado que recibe una nueva vacante cuando no se indica ninguno. Sin configuración, el estado queda vacío. Elija un estado para aplicarlo automáticamente.",
-    "none": "Ninguno (establecer manualmente)",
+    "subtitle": "El estado que recibe una nueva vacante cuando no se indica ninguno. Sin configuración se aplica el estado predeterminado de la lista de estados. Elija un estado para aplicarlo automáticamente.",
+    "none": "Predeterminado de la lista de estados",
     "saveFailed": "Error al guardar"
   },
   "nationalities": {

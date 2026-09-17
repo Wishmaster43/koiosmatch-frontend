@@ -1699,6 +1699,7 @@
         "sent": "Verzonden",
         "stage_changed": "Fase gewijzigd",
         "stage_stale": "Vastgelopen in fase",
+        "stale": "Geen fasewijziging",
         "stale_online": "Lang online (geen sollicitaties)",
         "started": "Gestart",
         "status_stale": "Status vastgelopen",
@@ -3556,14 +3557,14 @@
   },
   "customerConversion": {
     "title": "Standaardstatus na conversie",
-    "subtitle": "De status die een klant direct krijgt na conversie van Prospect naar Klant. Een ontbrekende instelling laat de status leeg. Kies een status om die automatisch toe te passen.",
-    "none": "Geen (handmatig instellen)",
+    "subtitle": "De status die een klant direct krijgt na conversie van Prospect naar Klant. Zonder instelling krijgt de klant de status Actief. Kies een status om die automatisch toe te passen.",
+    "none": "Standaard (Actief)",
     "saveFailed": "Opslaan mislukt"
   },
   "vacancyDefaultStatus": {
     "title": "Standaardstatus bij aanmaken",
-    "subtitle": "De status die een nieuwe vacature krijgt wanneer er geen status wordt meegegeven. Een ontbrekende instelling laat de status leeg. Kies een status om die automatisch toe te passen.",
-    "none": "Geen (handmatig instellen)",
+    "subtitle": "De status die een nieuwe vacature krijgt wanneer er geen status wordt meegegeven. Zonder instelling geldt de standaardstatus uit de statuslijst. Kies een status om die automatisch toe te passen.",
+    "none": "Standaard uit de statuslijst",
     "saveFailed": "Opslaan mislukt"
   },
   "nationalities": {

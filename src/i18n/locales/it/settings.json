@@ -1699,6 +1699,7 @@
         "sent": "Inviato",
         "stage_changed": "Fase cambiata",
         "stage_stale": "Bloccata nella fase",
+        "stale": "Nessun cambio di fase",
         "stale_online": "Online da tempo (senza candidature)",
         "started": "Avviato",
         "status_stale": "Stato bloccato",
@@ -3557,14 +3558,14 @@
   },
   "customerConversion": {
     "title": "Stato predefinito dopo la conversione",
-    "subtitle": "Lo stato che un cliente riceve subito dopo la conversione da Prospect a Cliente. Un'impostazione mancante lascia lo stato vuoto. Scegli uno stato per applicarlo automaticamente.",
-    "none": "Nessuno (impostazione manuale)",
+    "subtitle": "Lo stato che un cliente riceve subito dopo la conversione da Prospect a Cliente. Senza impostazione il cliente riceve lo stato Attivo. Scegli uno stato per applicarlo automaticamente.",
+    "none": "Predefinito (Attivo)",
     "saveFailed": "Salvataggio non riuscito"
   },
   "vacancyDefaultStatus": {
     "title": "Stato predefinito alla creazione",
-    "subtitle": "Lo stato che riceve una nuova posizione quando non ne viene specificato uno. Un'impostazione mancante lascia lo stato vuoto. Scegli uno stato per applicarlo automaticamente.",
-    "none": "Nessuno (impostazione manuale)",
+    "subtitle": "Lo stato che riceve una nuova posizione quando non ne viene specificato uno. Senza impostazione vale lo stato predefinito dell'elenco stati. Scegli uno stato per applicarlo automaticamente.",
+    "none": "Predefinito dall'elenco stati",
     "saveFailed": "Salvataggio non riuscito"
   },
   "nationalities": {

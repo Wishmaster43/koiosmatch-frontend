@@ -1699,6 +1699,7 @@
         "sent": "Enviado",
         "stage_changed": "Fase alterada",
         "stage_stale": "Estagnada na fase",
+        "stale": "Sem mudança de fase",
         "stale_online": "Há muito tempo online (sem candidaturas)",
         "started": "Iniciado",
         "status_stale": "Estado estagnado",
@@ -3557,14 +3558,14 @@
   },
   "customerConversion": {
     "title": "Estado padrão após conversão",
-    "subtitle": "O estado que um cliente recebe imediatamente após a conversão de Prospeto para Cliente. Sem uma definição configurada, o estado fica vazio. Escolha um estado para o aplicar automaticamente.",
-    "none": "Nenhum (definir manualmente)",
+    "subtitle": "O estado que um cliente recebe imediatamente após a conversão de Prospeto para Cliente. Sem definição, o cliente recebe o estado Ativo. Escolha um estado para o aplicar automaticamente.",
+    "none": "Predefinição (Ativo)",
     "saveFailed": "Falha ao guardar"
   },
   "vacancyDefaultStatus": {
     "title": "Estado padrão ao criar",
-    "subtitle": "O estado que uma nova vaga recebe quando não é indicado nenhum estado. Sem uma definição configurada, o estado fica vazio. Escolha um estado para o aplicar automaticamente.",
-    "none": "Nenhum (definir manualmente)",
+    "subtitle": "O estado que uma nova vaga recebe quando não é indicado nenhum estado. Sem definição aplica-se o estado predefinido da lista de estados. Escolha um estado para o aplicar automaticamente.",
+    "none": "Predefinido da lista de estados",
     "saveFailed": "Falha ao guardar"
   },
   "nationalities": {
