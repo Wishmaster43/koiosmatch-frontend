@@ -73,6 +73,7 @@
     "candidate_custom_fields": "Campos personalizados",
     "driver_licenses": "Cartas de condução",
     "kpis": "KPIs",
+    "kpi_builder": "Criador de KPI",
     "kpis_leads": "Leads",
     "kpis_candidates": "Candidatos",
     "kpis_applications": "Candidaturas",
@@ -346,6 +347,86 @@
         "description": "Número de dias antes do prazo de candidatura de uma vaga a partir do qual esta conta como 'fecho iminente'",
         "unit": "dias"
       }
+    }
+  },
+  "kpiBuilder": {
+    "title": "Criador de KPI",
+    "subtitle": "Crie os seus próprios KPI por entidade, com o seu próprio objetivo e unidade.",
+    "entities": {
+      "application": "Candidaturas",
+      "candidate": "Candidatos",
+      "task": "Tarefas",
+      "match": "Matches",
+      "vacancy": "Vagas",
+      "opportunity": "Oportunidades",
+      "outreach": "Listas de chamadas",
+      "whatsapp": "WhatsApp",
+      "customer": "Clientes"
+    },
+    "addBtn": "Adicionar KPI",
+    "editTitle": "Editar KPI",
+    "field": {
+      "metric": "Métrica",
+      "dimension": "Divisão",
+      "dimensionValue": "Valor",
+      "label": "Nome próprio",
+      "target": "Objetivo",
+      "warn": "Aviso",
+      "comparison": "Avaliação",
+      "unit": "Unidade",
+      "surfaces": "Mostrado em",
+      "active": "Ativo"
+    },
+    "dimensionAll": "Total",
+    "dimension": {
+      "application_stage": "Por etapa",
+      "task_type": "Por tipo de tarefa",
+      "match_contract_form": "Por forma de contrato",
+      "match_contract_type": "Por tipo de contrato"
+    },
+    "placeholder": {
+      "metric": "Escolha uma métrica",
+      "dimensionValue": "Todos os valores",
+      "label": "Nome próprio da métrica"
+    },
+    "hint": {
+      "dimensionValue": "Deixe vazio para um cartão por valor.",
+      "unitFixed": "Esta métrica tem uma unidade fixa: {{unit}}.",
+      "label": "Vazio significa: o nome próprio da métrica."
+    },
+    "comparison": {
+      "gte": "Mais alto é melhor",
+      "lte": "Mais baixo é melhor",
+      "none": "Sem objetivo"
+    },
+    "surface": {
+      "report": "Relatório",
+      "dashboard": "Painel"
+    },
+    "count": {
+      "entity": "{{count}} de {{max}} para esta entidade",
+      "tenant": "{{count}} de {{max}} no total"
+    },
+    "capReached": "Foi atingido o máximo de {{max}} KPI ativos. Desative um ou elimine um.",
+    "loading": "A carregar KPI…",
+    "loadError": "Não foi possível carregar os KPI.",
+    "registryError": "Não foi possível carregar as métricas.",
+    "empty": "Ainda não há KPI próprios para esta entidade.",
+    "saveFailed": "Não foi possível guardar.",
+    "deleteFailed": "Não foi possível eliminar.",
+    "restoreFailed": "Não foi possível restaurar.",
+    "orderFailed": "A nova ordem não foi guardada.",
+    "confirmDelete": "Eliminar '{{name}}'?",
+    "deletedUndo": "'{{name}}' foi eliminado.",
+    "restoreBtn": "Restaurar",
+    "fanOutBadge": "Por valor",
+    "targetBadge": "objetivo {{value}}",
+    "activeAria": "KPI ativo",
+    "noPermission": "Não tem permissões para alterar os KPI.",
+    "unit": {
+      "count": "contagem",
+      "percent": "percentagem",
+      "currency": "montante"
     }
   },
   "driverLicenseSettings": {
@@ -4104,7 +4185,8 @@
         "workdays": "dias úteis",
         "weeks": "semanas",
         "months": "meses",
-        "hours": "horas"
+        "hours": "horas",
+        "minutes": "minutos"
       }
     }
   },

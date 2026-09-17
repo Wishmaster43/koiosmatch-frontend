@@ -73,6 +73,7 @@
     "candidate_custom_fields": "Custom fields",
     "driver_licenses": "Driving licences",
     "kpis": "KPIs",
+    "kpi_builder": "KPI builder",
     "kpis_leads": "Leads",
     "kpis_candidates": "Candidates",
     "kpis_applications": "Applications",
@@ -346,6 +347,86 @@
         "description": "Number of days before a vacancy's application deadline at which it counts as closing soon",
         "unit": "days"
       }
+    }
+  },
+  "kpiBuilder": {
+    "title": "KPI builder",
+    "subtitle": "Build your own KPIs per entity, with your own target and unit.",
+    "entities": {
+      "application": "Applications",
+      "candidate": "Candidates",
+      "task": "Tasks",
+      "match": "Matches",
+      "vacancy": "Vacancies",
+      "opportunity": "Opportunities",
+      "outreach": "Call lists",
+      "whatsapp": "WhatsApp",
+      "customer": "Customers"
+    },
+    "addBtn": "Add KPI",
+    "editTitle": "Edit KPI",
+    "field": {
+      "metric": "Metric",
+      "dimension": "Breakdown",
+      "dimensionValue": "Value",
+      "label": "Own name",
+      "target": "Target",
+      "warn": "Warning",
+      "comparison": "Judgement",
+      "unit": "Unit",
+      "surfaces": "Shown on",
+      "active": "Active"
+    },
+    "dimensionAll": "Total",
+    "dimension": {
+      "application_stage": "Per stage",
+      "task_type": "Per task type",
+      "match_contract_form": "Per contract form",
+      "match_contract_type": "Per contract type"
+    },
+    "placeholder": {
+      "metric": "Choose a metric",
+      "dimensionValue": "All values",
+      "label": "The metric's own name"
+    },
+    "hint": {
+      "dimensionValue": "Leave empty for one card per value.",
+      "unitFixed": "This metric has a fixed unit: {{unit}}.",
+      "label": "Empty means: the metric's own name."
+    },
+    "comparison": {
+      "gte": "Higher is better",
+      "lte": "Lower is better",
+      "none": "No target"
+    },
+    "surface": {
+      "report": "Report",
+      "dashboard": "Dashboard"
+    },
+    "count": {
+      "entity": "{{count}} of {{max}} for this entity",
+      "tenant": "{{count}} of {{max}} in total"
+    },
+    "capReached": "The maximum of {{max}} active KPIs is reached. Switch one off or delete one.",
+    "loading": "Loading KPIs…",
+    "loadError": "The KPIs could not be loaded.",
+    "registryError": "The metrics could not be loaded.",
+    "empty": "No own KPIs for this entity yet.",
+    "saveFailed": "Saving failed.",
+    "deleteFailed": "Deleting failed.",
+    "restoreFailed": "Restoring failed.",
+    "orderFailed": "The new order was not saved.",
+    "confirmDelete": "Delete '{{name}}'?",
+    "deletedUndo": "'{{name}}' has been deleted.",
+    "restoreBtn": "Restore",
+    "fanOutBadge": "Per value",
+    "targetBadge": "target {{value}}",
+    "activeAria": "KPI active",
+    "noPermission": "You have no rights to change KPIs.",
+    "unit": {
+      "count": "count",
+      "percent": "percent",
+      "currency": "amount"
     }
   },
   "driverLicenseSettings": {
@@ -4103,7 +4184,8 @@
         "workdays": "workdays",
         "weeks": "weeks",
         "months": "months",
-        "hours": "hours"
+        "hours": "hours",
+        "minutes": "minutes"
       }
     }
   },

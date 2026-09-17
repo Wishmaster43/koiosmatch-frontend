@@ -72,6 +72,7 @@
     "candidate_custom_fields": "Campos personalizados",
     "driver_licenses": "Permisos de conducir",
     "kpis": "KPI",
+    "kpi_builder": "Creador de KPI",
     "kpis_leads": "Leads",
     "kpis_candidates": "Candidatos",
     "kpis_applications": "Candidaturas",
@@ -346,6 +347,86 @@
         "description": "Número de días antes del plazo de solicitud de una vacante a partir del cual cuenta como próxima a cerrarse",
         "unit": "días"
       }
+    }
+  },
+  "kpiBuilder": {
+    "title": "Creador de KPI",
+    "subtitle": "Crea tus propios KPI por entidad, con tu propio objetivo y unidad.",
+    "entities": {
+      "application": "Solicitudes",
+      "candidate": "Candidatos",
+      "task": "Tareas",
+      "match": "Matches",
+      "vacancy": "Vacantes",
+      "opportunity": "Oportunidades",
+      "outreach": "Listas de llamadas",
+      "whatsapp": "WhatsApp",
+      "customer": "Clientes"
+    },
+    "addBtn": "Añadir KPI",
+    "editTitle": "Editar KPI",
+    "field": {
+      "metric": "Métrica",
+      "dimension": "Desglose",
+      "dimensionValue": "Valor",
+      "label": "Nombre propio",
+      "target": "Objetivo",
+      "warn": "Advertencia",
+      "comparison": "Valoración",
+      "unit": "Unidad",
+      "surfaces": "Se muestra en",
+      "active": "Activo"
+    },
+    "dimensionAll": "Total",
+    "dimension": {
+      "application_stage": "Por etapa",
+      "task_type": "Por tipo de tarea",
+      "match_contract_form": "Por forma de contrato",
+      "match_contract_type": "Por tipo de contrato"
+    },
+    "placeholder": {
+      "metric": "Elige una métrica",
+      "dimensionValue": "Todos los valores",
+      "label": "Nombre propio de la métrica"
+    },
+    "hint": {
+      "dimensionValue": "Deja vacío para una tarjeta por valor.",
+      "unitFixed": "Esta métrica tiene una unidad fija: {{unit}}.",
+      "label": "Vacío significa: el nombre propio de la métrica."
+    },
+    "comparison": {
+      "gte": "Más alto es mejor",
+      "lte": "Más bajo es mejor",
+      "none": "Sin objetivo"
+    },
+    "surface": {
+      "report": "Informe",
+      "dashboard": "Panel"
+    },
+    "count": {
+      "entity": "{{count}} de {{max}} para esta entidad",
+      "tenant": "{{count}} de {{max}} en total"
+    },
+    "capReached": "Se ha alcanzado el máximo de {{max}} KPI activos. Desactiva uno o elimina uno.",
+    "loading": "Cargando KPI…",
+    "loadError": "No se pudieron cargar los KPI.",
+    "registryError": "No se pudieron cargar las métricas.",
+    "empty": "Todavía no hay KPI propios para esta entidad.",
+    "saveFailed": "No se pudo guardar.",
+    "deleteFailed": "No se pudo eliminar.",
+    "restoreFailed": "No se pudo restaurar.",
+    "orderFailed": "El nuevo orden no se guardó.",
+    "confirmDelete": "¿Eliminar '{{name}}'?",
+    "deletedUndo": "'{{name}}' se ha eliminado.",
+    "restoreBtn": "Restaurar",
+    "fanOutBadge": "Por valor",
+    "targetBadge": "objetivo {{value}}",
+    "activeAria": "KPI activo",
+    "noPermission": "No tienes permisos para modificar los KPI.",
+    "unit": {
+      "count": "cantidad",
+      "percent": "porcentaje",
+      "currency": "importe"
     }
   },
   "driverLicenseSettings": {
@@ -4103,7 +4184,8 @@
         "workdays": "días laborables",
         "weeks": "semanas",
         "months": "meses",
-        "hours": "horas"
+        "hours": "horas",
+        "minutes": "minutos"
       }
     }
   },

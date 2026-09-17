@@ -336,6 +336,15 @@ const ALLOWLIST: string[] = [
   'es/settings:vacancyTab.tabs.phases',
   'it/settings:vacancyTab.tabs.phases',
   'pt/settings:vacancyTab.tabs.phases',
+
+  // KPI-BUILDER-FE-1 batch B3: German "Kandidaten" = "candidates" (identical loanword, same
+  // cognate family as the entries above), French "Rapport" = "report" (identical French/Dutch
+  // spelling; sibling key kpiBuilder.field.metric translates differently in this same file,
+  // proving the identical spelling here is deliberate), Italian "Per fase" = "per stage"
+  // ("fase" is the identical Italian/Dutch cognate for "phase/stage")
+  'de/settings:kpiBuilder.entities.candidate',
+  'fr/settings:kpiBuilder.surface.report',
+  'it/settings:kpiBuilder.dimension.application_stage',
 ]
 
 describe('i18n house style — no smuggled Dutch copies in translated locales', () => {

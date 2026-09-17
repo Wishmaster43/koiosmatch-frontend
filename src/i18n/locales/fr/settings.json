@@ -72,6 +72,7 @@
     "candidate_custom_fields": "Champs personnalisés",
     "driver_licenses": "Permis de conduire",
     "kpis": "KPI",
+    "kpi_builder": "Générateur de KPI",
     "kpis_leads": "Leads",
     "kpis_candidates": "Candidats",
     "kpis_applications": "Candidatures",
@@ -346,6 +347,86 @@
         "description": "Nombre de jours avant la date limite de candidature d'un poste à partir duquel il compte comme proche de la clôture",
         "unit": "jours"
       }
+    }
+  },
+  "kpiBuilder": {
+    "title": "Générateur de KPI",
+    "subtitle": "Créez vos propres KPI par entité, avec votre propre objectif et unité.",
+    "entities": {
+      "application": "Candidatures",
+      "candidate": "Candidats",
+      "task": "Tâches",
+      "match": "Matchs",
+      "vacancy": "Offres d'emploi",
+      "opportunity": "Opportunités",
+      "outreach": "Listes d'appels",
+      "whatsapp": "WhatsApp",
+      "customer": "Clients"
+    },
+    "addBtn": "Ajouter un KPI",
+    "editTitle": "Modifier le KPI",
+    "field": {
+      "metric": "Indicateur",
+      "dimension": "Répartition",
+      "dimensionValue": "Valeur",
+      "label": "Nom personnalisé",
+      "target": "Objectif",
+      "warn": "Avertissement",
+      "comparison": "Évaluation",
+      "unit": "Unité",
+      "surfaces": "Affiché sur",
+      "active": "Actif"
+    },
+    "dimensionAll": "Total",
+    "dimension": {
+      "application_stage": "Par étape",
+      "task_type": "Par type de tâche",
+      "match_contract_form": "Par forme de contrat",
+      "match_contract_type": "Par type de contrat"
+    },
+    "placeholder": {
+      "metric": "Choisir un indicateur",
+      "dimensionValue": "Toutes les valeurs",
+      "label": "Nom propre de l'indicateur"
+    },
+    "hint": {
+      "dimensionValue": "Laissez vide pour une carte par valeur.",
+      "unitFixed": "Cet indicateur a une unité fixe : {{unit}}.",
+      "label": "Vide signifie : le nom propre de l'indicateur."
+    },
+    "comparison": {
+      "gte": "Plus haut est mieux",
+      "lte": "Plus bas est mieux",
+      "none": "Pas d'objectif"
+    },
+    "surface": {
+      "report": "Rapport",
+      "dashboard": "Tableau de bord"
+    },
+    "count": {
+      "entity": "{{count}} sur {{max}} pour cette entité",
+      "tenant": "{{count}} sur {{max}} au total"
+    },
+    "capReached": "Le maximum de {{max}} KPI actifs est atteint. Désactivez-en un ou supprimez-en un.",
+    "loading": "Chargement des KPI…",
+    "loadError": "Les KPI n'ont pas pu être chargés.",
+    "registryError": "Les indicateurs n'ont pas pu être chargés.",
+    "empty": "Pas encore de KPI propre pour cette entité.",
+    "saveFailed": "L'enregistrement a échoué.",
+    "deleteFailed": "La suppression a échoué.",
+    "restoreFailed": "La restauration a échoué.",
+    "orderFailed": "Le nouvel ordre n'a pas été enregistré.",
+    "confirmDelete": "Supprimer '{{name}}' ?",
+    "deletedUndo": "'{{name}}' a été supprimé.",
+    "restoreBtn": "Restaurer",
+    "fanOutBadge": "Par valeur",
+    "targetBadge": "objectif {{value}}",
+    "activeAria": "KPI actif",
+    "noPermission": "Vous n'avez pas les droits pour modifier les KPI.",
+    "unit": {
+      "count": "nombre",
+      "percent": "pourcentage",
+      "currency": "montant"
     }
   },
   "driverLicenseSettings": {
@@ -4103,7 +4184,8 @@
         "workdays": "jours ouvrés",
         "weeks": "semaines",
         "months": "mois",
-        "hours": "heures"
+        "hours": "heures",
+        "minutes": "minutes"
       }
     }
   },

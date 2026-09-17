@@ -73,6 +73,7 @@
     "candidate_custom_fields": "Eigen velden",
     "driver_licenses": "Rijbewijzen",
     "kpis": "KPI's",
+    "kpi_builder": "KPI-bouwer",
     "kpis_leads": "Leads",
     "kpis_candidates": "Kandidaten",
     "kpis_applications": "Sollicitaties",
@@ -346,6 +347,86 @@
         "description": "Aantal dagen vóór de sollicitatietermijn van een vacature waarop deze als 'sluit binnenkort' telt",
         "unit": "dagen"
       }
+    }
+  },
+  "kpiBuilder": {
+    "title": "KPI-bouwer",
+    "subtitle": "Maak je eigen KPI's per onderdeel, met je eigen doel en eenheid.",
+    "entities": {
+      "application": "Sollicitaties",
+      "candidate": "Kandidaten",
+      "task": "Taken",
+      "match": "Matches",
+      "vacancy": "Vacatures",
+      "opportunity": "Kansen",
+      "outreach": "Bellijsten",
+      "whatsapp": "WhatsApp",
+      "customer": "Klanten"
+    },
+    "addBtn": "KPI toevoegen",
+    "editTitle": "KPI aanpassen",
+    "field": {
+      "metric": "Metriek",
+      "dimension": "Uitsplitsing",
+      "dimensionValue": "Waarde",
+      "label": "Eigen naam",
+      "target": "Doel",
+      "warn": "Waarschuwing",
+      "comparison": "Beoordeling",
+      "unit": "Eenheid",
+      "surfaces": "Waar zichtbaar",
+      "active": "Actief"
+    },
+    "dimensionAll": "Totaal",
+    "dimension": {
+      "application_stage": "Per fase",
+      "task_type": "Per taaktype",
+      "match_contract_form": "Per contractvorm",
+      "match_contract_type": "Per contracttype"
+    },
+    "placeholder": {
+      "metric": "Kies een metriek",
+      "dimensionValue": "Alle waarden",
+      "label": "Naam van de metriek"
+    },
+    "hint": {
+      "dimensionValue": "Laat leeg voor één kaart per waarde.",
+      "unitFixed": "Deze metriek heeft een vaste eenheid: {{unit}}.",
+      "label": "Leeg betekent: de naam van de metriek."
+    },
+    "comparison": {
+      "gte": "Hoger is beter",
+      "lte": "Lager is beter",
+      "none": "Geen doel"
+    },
+    "surface": {
+      "report": "Rapport",
+      "dashboard": "Dashboard"
+    },
+    "count": {
+      "entity": "{{count}} van {{max}} voor dit onderdeel",
+      "tenant": "{{count}} van {{max}} in totaal"
+    },
+    "capReached": "Het maximum van {{max}} actieve KPI's is bereikt. Zet er een uit of verwijder er een.",
+    "loading": "KPI's laden…",
+    "loadError": "De KPI's konden niet geladen worden.",
+    "registryError": "De metrieken konden niet geladen worden.",
+    "empty": "Nog geen eigen KPI's voor dit onderdeel.",
+    "saveFailed": "Opslaan is niet gelukt.",
+    "deleteFailed": "Verwijderen is niet gelukt.",
+    "restoreFailed": "Herstellen is niet gelukt.",
+    "orderFailed": "De nieuwe volgorde is niet opgeslagen.",
+    "confirmDelete": "'{{name}}' verwijderen?",
+    "deletedUndo": "'{{name}}' is verwijderd.",
+    "restoreBtn": "Herstellen",
+    "fanOutBadge": "Per waarde",
+    "targetBadge": "doel {{value}}",
+    "activeAria": "KPI actief",
+    "noPermission": "Je hebt geen rechten om KPI's te wijzigen.",
+    "unit": {
+      "count": "aantal",
+      "percent": "procent",
+      "currency": "bedrag"
     }
   },
   "driverLicenseSettings": {
@@ -4103,7 +4184,8 @@
         "workdays": "werkdagen",
         "weeks": "weken",
         "months": "maanden",
-        "hours": "uren"
+        "hours": "uren",
+        "minutes": "minuten"
       }
     }
   },

@@ -73,6 +73,7 @@
     "candidate_custom_fields": "Campi personalizzati",
     "driver_licenses": "Patenti di guida",
     "kpis": "KPI",
+    "kpi_builder": "Generatore KPI",
     "kpis_leads": "Lead",
     "kpis_candidates": "Candidati",
     "kpis_applications": "Candidature",
@@ -346,6 +347,86 @@
         "description": "Numero di giorni prima della scadenza di candidatura di una posizione in cui questa conta come 'chiusura imminente'",
         "unit": "giorni"
       }
+    }
+  },
+  "kpiBuilder": {
+    "title": "Generatore KPI",
+    "subtitle": "Crea i tuoi KPI per ogni entità, con un obiettivo e un'unità personalizzati.",
+    "entities": {
+      "application": "Candidature",
+      "candidate": "Candidati",
+      "task": "Attività",
+      "match": "Match",
+      "vacancy": "Posizioni aperte",
+      "opportunity": "Opportunità",
+      "outreach": "Liste di chiamata",
+      "whatsapp": "WhatsApp",
+      "customer": "Clienti"
+    },
+    "addBtn": "Aggiungi KPI",
+    "editTitle": "Modifica KPI",
+    "field": {
+      "metric": "Metrica",
+      "dimension": "Suddivisione",
+      "dimensionValue": "Valore",
+      "label": "Nome personalizzato",
+      "target": "Obiettivo",
+      "warn": "Avviso",
+      "comparison": "Valutazione",
+      "unit": "Unità",
+      "surfaces": "Visibile su",
+      "active": "Attivo"
+    },
+    "dimensionAll": "Totale",
+    "dimension": {
+      "application_stage": "Per fase",
+      "task_type": "Per tipo di attività",
+      "match_contract_form": "Per forma contrattuale",
+      "match_contract_type": "Per tipo di contratto"
+    },
+    "placeholder": {
+      "metric": "Scegli una metrica",
+      "dimensionValue": "Tutti i valori",
+      "label": "Nome proprio della metrica"
+    },
+    "hint": {
+      "dimensionValue": "Lascia vuoto per una scheda per valore.",
+      "unitFixed": "Questa metrica ha un'unità fissa: {{unit}}.",
+      "label": "Vuoto significa: il nome proprio della metrica."
+    },
+    "comparison": {
+      "gte": "Più alto è meglio",
+      "lte": "Più basso è meglio",
+      "none": "Nessun obiettivo"
+    },
+    "surface": {
+      "report": "Report",
+      "dashboard": "Dashboard"
+    },
+    "count": {
+      "entity": "{{count}} di {{max}} per questa entità",
+      "tenant": "{{count}} di {{max}} in totale"
+    },
+    "capReached": "È stato raggiunto il massimo di {{max}} KPI attivi. Disattivane uno o eliminane uno.",
+    "loading": "Caricamento KPI…",
+    "loadError": "Non è stato possibile caricare i KPI.",
+    "registryError": "Non è stato possibile caricare le metriche.",
+    "empty": "Ancora nessun KPI proprio per questa entità.",
+    "saveFailed": "Salvataggio non riuscito.",
+    "deleteFailed": "Eliminazione non riuscita.",
+    "restoreFailed": "Ripristino non riuscito.",
+    "orderFailed": "Il nuovo ordine non è stato salvato.",
+    "confirmDelete": "Eliminare '{{name}}'?",
+    "deletedUndo": "'{{name}}' è stato eliminato.",
+    "restoreBtn": "Ripristina",
+    "fanOutBadge": "Per valore",
+    "targetBadge": "obiettivo {{value}}",
+    "activeAria": "KPI attivo",
+    "noPermission": "Non hai i permessi per modificare i KPI.",
+    "unit": {
+      "count": "conteggio",
+      "percent": "percentuale",
+      "currency": "importo"
     }
   },
   "driverLicenseSettings": {
@@ -4104,7 +4185,8 @@
         "workdays": "giorni lavorativi",
         "weeks": "settimane",
         "months": "mesi",
-        "hours": "ore"
+        "hours": "ore",
+        "minutes": "minuti"
       }
     }
   },
