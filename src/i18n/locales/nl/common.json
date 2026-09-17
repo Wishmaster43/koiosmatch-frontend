@@ -126,6 +126,8 @@
     "button": "Filter",
     "toggleActive": "Filters tonen/verbergen ({{count}} actief)",
     "noBranch": "Zonder vestiging",
+    "dateFrom": "Vanaf datum",
+    "dateTo": "Tot datum",
     "valueMin": "Minimumwaarde",
     "valueMax": "Maximumwaarde"
   },
@@ -188,6 +190,7 @@
     "welcome": "Hoi {{name}}, wat kan ik voor je doen?",
     "newChatStarted": "Nieuwe chat gestart. Hoe kan ik je helpen?",
     "stepsToggle": "Details ({{count}})",
+    "typing": "Koios stelt een antwoord op",
     "refusedOrg": "Niet toegestaan binnen je organisatie.",
     "refusedRights": "Je hebt onvoldoende rechten voor deze actie.",
     "stopRefused": "Geweigerd",

@@ -6,9 +6,9 @@
  * useKoiosContextChips. A type the backend can't resolve yet (koiosContextTypes)
  * still renders as a chip (the pin stays visible) but dashed + tooltipped — it
  * is pinned client-side ONLY and never sent in the outgoing context[] (unchanged
- * KOIOS-CTX-1 convention). The remove control is the real Button (iconOnly,
- * ghost) shrunk via its own `style` escape hatch (§3: layout via style, identity
- * never) — small enough to nest inside the pill without a second chrome face.
+ * KOIOS-CTX-1 convention). The remove control is a raw button with a documented
+ * necessity exception (§14 r7): Button's fixed sm footprint cannot sit inside
+ * the dense chip, so it stays hand-rolled (mirrors MultiSelectField's chip-remove).
  */
 import { X } from 'lucide-react'
 import { tint, tintBg, TINT_BORDER } from '@/lib/tint'

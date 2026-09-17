@@ -15,6 +15,7 @@ import type { Tenant } from '@/types/api'
 // tenant's --color-on-accent token (which only reflects the active tenant).
 import { readableOn } from '@/hooks/useTenantTheme'
 import Spinner from '@/components/ui/Spinner'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 import { useClickOutside } from '@/hooks/useClickOutside'
 import { initialsOf } from '@/lib/initials'
@@ -60,6 +61,8 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
   const [page,      setPage]      = useState(1)
   const [lastPage,  setLastPage]  = useState(1)
   const [loading,   setLoading]   = useState(false)
+  const [loadError, setLoadError] = useState(false)
+  const [retryTick, setRetryTick] = useState(0)
   const [switching, setSwitching] = useState<string | number | null>(null)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -78,16 +81,23 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
     if (!open || !canSwitch) return
     const ctrl = new AbortController()
     setLoading(true)
+    setLoadError(false)
     api.get('/tenants', { params: { search: debounced || undefined, per_page: 25, page }, signal: ctrl.signal })
       .then(res => {
         const { rows, lastPage: lp } = unwrapList<Tenant>(res)
         setResults(prev => (page === 1 ? rows : [...prev, ...rows]))
         setLastPage(lp)
       })
-      .catch(err => { if ((err as { code?: string }).code !== 'ERR_CANCELED' && page === 1) setResults([]) })
+      .catch(err => {
+        if ((err as { code?: string }).code === 'ERR_CANCELED') return
+        // A failed fetch is NOT the same as a genuine zero-result search (§3 four states):
+        // record the failure so the render below shows an honest error, not "no agencies".
+        if (page === 1) setResults([])
+        setLoadError(true)
+      })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
-  }, [open, canSwitch, debounced, page])
+  }, [open, canSwitch, debounced, page, retryTick])
 
   // Close on outside click (DRY round 11, LAYOUT).
   useClickOutside([ref], open, () => setOpen(false), { ignoreDropdownPortal: true })
@@ -214,7 +224,12 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
                 <Spinner size={13} /> {t('loading')}
               </div>
             )}
-            {!loading && results.length === 0 && (
+            {!loading && loadError && (
+              <ErrorBanner style={{ margin: 4 }} onRetry={() => setRetryTick(n => n + 1)}>
+                {t('error.loadFailed')}
+              </ErrorBanner>
+            )}
+            {!loading && !loadError && results.length === 0 && (
               <div style={{ padding: '12px 10px', fontSize: 12, color: 'var(--text-muted)' }}>{t('noAgencies')}</div>
             )}
           </div>

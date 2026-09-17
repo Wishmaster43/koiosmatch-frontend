@@ -126,6 +126,8 @@
     "button": "Filtrer",
     "toggleActive": "Afficher/masquer les filtres ({{count}} actifs)",
     "noBranch": "Sans filiale",
+    "dateFrom": "Date de début",
+    "dateTo": "Date de fin",
     "valueMin": "Valeur minimale",
     "valueMax": "Valeur maximale"
   },
@@ -188,6 +190,7 @@
     "welcome": "Bonjour {{name}}, que puis-je faire pour toi ?",
     "newChatStarted": "Nouveau chat démarré. Comment puis-je aider ?",
     "stepsToggle": "Détails ({{count}})",
+    "typing": "Koios rédige une réponse",
     "refusedOrg": "Non autorisé au sein de votre organisation.",
     "refusedRights": "Vous n'avez pas les droits suffisants pour cette action.",
     "stopRefused": "Refusé",

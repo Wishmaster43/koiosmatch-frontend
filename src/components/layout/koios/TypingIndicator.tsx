@@ -4,12 +4,17 @@
  * KOIOSPANEL-SPLIT-1); shares the assistant-avatar GRADIENT with KoiosMessage.
  */
 import { Bot } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { GRADIENT } from './koiosMessageParts'
 
 // ── Typing indicator ──────────────────────────────────────────────────────────
+// Purely visual pulse plus an sr-only aria-live label, so a screen-reader user
+// also gets the "reply is coming" state (§6, no state change by animation alone).
 export default function TypingIndicator() {
+  const { t } = useTranslation('common')
   return (
-    <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+    <div role="status" aria-live="polite" style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+      <span className="sr-only">{t('koios.typing')}</span>
       <div style={{ width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
         background: GRADIENT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Bot size={13} color="var(--color-on-accent)" />

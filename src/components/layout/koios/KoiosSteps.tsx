@@ -9,7 +9,7 @@ import { ChevronDown, ChevronRight, Check, Ban, ShieldX } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { KoiosStep, TFn } from '@/types/koios'
 import Button from '@/components/ui/Button'
-import { Caption } from '@/components/ui/typography'
+import { Caption, Mono } from '@/components/ui/typography'
 
 // reason → colour + icon + i18n label. Falls back to the organisational style.
 const REFUSAL: Record<string, { color: string; Icon: LucideIcon; labelKey: string }> = {
@@ -41,7 +41,7 @@ export default function KoiosSteps({ steps, t }: { steps?: KoiosStep[]; t: TFn }
               <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 11 }}>
                 <Icon size={13} color={color} style={{ flexShrink: 0, marginTop: 1 }} />
                 <div style={{ minWidth: 0 }}>
-                  <span style={{ fontFamily: 'monospace', color: 'var(--text)' }}>{s.tool}</span>
+                  <Mono style={{ color: 'var(--text)' }}>{s.tool}</Mono>
                   {meta && <div style={{ color, marginTop: 1 }}>{t(meta.labelKey)}</div>}
                 </div>
               </div>

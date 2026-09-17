@@ -12,6 +12,7 @@ import { useNavigation } from '@/context/NavigationContext'
 import { entityIconEl } from './koiosEntityIcons'
 import { pageForResultRef, tabForChildRef } from './koiosResultLinks'
 import { humanizeIsoDates } from '@/lib/localDate'
+import { useNumberFormat } from '@/lib/formatters'
 import { Caption, GroupLabel } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import type { KoiosSearchResultsGrouped, KoiosResultRef } from './koiosTypes'
@@ -101,6 +102,7 @@ export default function KoiosResultCards({
   compact?: boolean
 }) {
   const { t: tk } = useTranslation('koios')
+  const { formatNumber } = useNumberFormat()
   // Support both the old refs prop and the new groups prop.
   const { groups: actualGroups } = groups || { groups: refs && refs.length > 0 ? groupRefsByType(refs) : [] }
   const { skipped: actualSkipped } = groups || { skipped: [] }
@@ -139,7 +141,7 @@ export default function KoiosResultCards({
             {/* Group label with entity name and count (skipped in compact mode). */}
             {!compact && (
               <GroupLabel style={{ marginBottom: 6 }}>
-                {entityLabel} ({unique.length})
+                {entityLabel} ({formatNumber(unique.length)})
               </GroupLabel>
             )}
             {/* Cards for this group. */}

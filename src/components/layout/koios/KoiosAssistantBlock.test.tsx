@@ -17,6 +17,11 @@ vi.mock('@/lib/api', async () => {
 const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
 const mockPost = api.post as unknown as ReturnType<typeof vi.fn>
 
+// lib/formatters re-exports datetime's useLocale at module scope (DATETIME-IMPORT-LES,
+// see KoiosResultCards -> @/lib/formatters); this suite asserts raw i18n keys under an
+// uninitialised i18next instance, so real i18n resources would break those assertions.
+vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatNumber: (n: number) => String(n) }) }))
+
 // openEntity spy for the ref deep-link assertion (KoiosResultCards reads useNavigation()).
 const openEntity = vi.fn()
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity, navigate: vi.fn() }) }))

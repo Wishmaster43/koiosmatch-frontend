@@ -40,7 +40,7 @@ export default function KoiosModelPicker({ models, options, value, onChange, t }
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <button onClick={() => setOpen((o) => !o)}
+      <button onClick={() => setOpen((o) => !o)} aria-haspopup="listbox" aria-expanded={open}
         // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- dropdown TRIGGER = form-field face (§4), not an action button; its compact 11/600 pill label rides with that face, not document typography
         style={{ display: 'flex', alignItems: 'center', gap: 4, maxWidth: 130, padding: '4px 9px',
                  borderRadius: 999, border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: 600,
@@ -51,7 +51,7 @@ export default function KoiosModelPicker({ models, options, value, onChange, t }
 
       {open && (
         // HUISSTIJL-1: dropdown menu — z-popover ladder tier, shadow-float role.
-        <div style={{ position: 'absolute', bottom: '100%', left: 0, marginBottom: 6, minWidth: 170,
+        <div role="listbox" style={{ position: 'absolute', bottom: '100%', left: 0, marginBottom: 6, minWidth: 170,
                       background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
                       boxShadow: 'var(--shadow-float)', overflow: 'hidden', zIndex: 'var(--z-popover)' }}>
           {models.map((m) => {
@@ -59,7 +59,7 @@ export default function KoiosModelPicker({ models, options, value, onChange, t }
             // translated for a known flavour, the server's own hint otherwise.
             const hint = resolveModelHint(m, options, t)
             return (
-              <button key={m} onClick={() => { onChange(m); setOpen(false) }}
+              <button key={m} role="option" aria-selected={m === value} onClick={() => { onChange(m); setOpen(false) }}
                 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- menu OPTION row: selected-list-row idiom (§4 PRIMAIR-VLAK-1, tint/hover language), a face Button deliberately does not model
                 style={{ width: '100%', display: 'flex', alignItems: 'flex-start', gap: 8, textAlign: 'left',
                          padding: '8px 10px', border: 'none', background: 'none', cursor: 'pointer',

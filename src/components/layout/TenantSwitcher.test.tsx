@@ -52,4 +52,15 @@ describe('TenantSwitcher', () => {
     await userEvent.click(input)
     expect(screen.getByPlaceholderText('nav.switchTenant')).toBeInTheDocument()
   })
+
+  // A failed GET /tenants must render an honest error, never the same
+  // "no agencies" copy a true empty result shows (§3 four UI states).
+  it('shows an error notice (not the empty-state copy) when the tenant fetch fails', async () => {
+    mockedGet.mockRejectedValue(new Error('network down'))
+    render(<TenantSwitcher expanded />)
+
+    await userEvent.click(screen.getByText('Yesway Flex B.V.'))
+    await waitFor(() => expect(screen.getByText('error.loadFailed')).toBeInTheDocument())
+    expect(screen.queryByText('noAgencies')).not.toBeInTheDocument()
+  })
 })

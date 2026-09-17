@@ -126,6 +126,8 @@
     "button": "Filtro",
     "toggleActive": "Mostrar/ocultar filtros ({{count}} ativo(s))",
     "noBranch": "Sem filial",
+    "dateFrom": "Data de",
+    "dateTo": "Data até",
     "valueMin": "Valor mínimo",
     "valueMax": "Valor máximo"
   },
@@ -188,6 +190,7 @@
     "welcome": "Olá {{name}}, o que posso fazer por ti?",
     "newChatStarted": "Nova conversa iniciada. Como posso ajudar?",
     "stepsToggle": "Detalhes ({{count}})",
+    "typing": "Koios está a preparar uma resposta",
     "refusedOrg": "Não permitido dentro da sua organização.",
     "refusedRights": "Não tem permissões suficientes para esta ação.",
     "stopRefused": "Recusado",

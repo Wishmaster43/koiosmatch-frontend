@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next'
 import { CalendarCheck, Clock, UserX, CalendarX, MessageCircle, CheckSquare } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { tintBg, chipInk } from '@/lib/tint'
+import { useNumberFormat } from '@/lib/formatters'
 import KoiosCardFrame from './KoiosCardFrame'
 import { useKoiosRadarSignals } from './useKoiosRadarSignals'
 import { useKoiosRadarCollapse } from './useKoiosRadarCollapse'
@@ -47,6 +48,7 @@ const SIGNAL_META: Record<RadarSignalId, { Icon: LucideIcon; labelKey: string; c
 // The Koios panel's landing-state content: candidate attention signals as clickable deep-links, collapsible via a persisted per-user choice.
 export default function KoiosRadar({ onNavigate, onClose }: { onNavigate?: (page: string, intent?: unknown) => void; onClose?: () => void }) {
   const { t } = useTranslation(['common', 'candidates'])
+  const { formatNumber } = useNumberFormat()
   const { signals, loading, error } = useKoiosRadarSignals()
   // Persisted per-user collapse choice (Danny 22-08) — default OPEN.
   const { collapsed, setCollapsed } = useKoiosRadarCollapse()
@@ -77,7 +79,7 @@ export default function KoiosRadar({ onNavigate, onClose }: { onNavigate?: (page
             return (
               <button key={s.id} type="button"
                 onClick={() => onNavigate?.('candidates', { attention: s.id })}
-                aria-label={`${label}: ${s.count}`}
+                aria-label={`${label}: ${formatNumber(s.count)}`}
                 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- full-width clickable list row with an imperative hover swap (structural, not an action button), pre-existing and out of this ink/tint task's scope
                 style={{
                   display: 'flex', alignItems: 'center', gap: 10, width: '100%',
@@ -99,7 +101,7 @@ export default function KoiosRadar({ onNavigate, onClose }: { onNavigate?: (page
                   {label}
                 </span>
                 <span style={{ fontSize: 12.5, fontWeight: 600, color: meta.color, fontFamily: 'var(--font-mono, monospace)' }}>
-                  {s.count}
+                  {formatNumber(s.count)}
                 </span>
               </button>
             )
