@@ -2732,7 +2732,17 @@
   "applicationRequiredFields": {
     "title": "Pflichtfelder",
     "subtitle": "Legen Sie fest, welche Felder beim Anlegen einer neuen Bewerbung Pflicht sind.",
-    "hint": "Dies wird beim Anlegen einer neuen Bewerbung geprüft."
+    "hint": "Dies wird beim Anlegen einer neuen Bewerbung geprüft.",
+    "fieldLabels": {
+      "candidateId": "Kandidat",
+      "newCandidate": "Neuer Kandidat (inline angelegt)",
+      "rejectionReason": "Ablehnungsgrund",
+      "interviewFlow": "Interview-Flow",
+      "interviewWorkflow": "Interview-Workflow",
+      "matchScore": "Match-Score",
+      "matchCriteria": "Match-Kriterien",
+      "phaseKey": "Phase (System)"
+    }
   },
   "vacancyTab": {
     "title": "Stellen-Tab bei Kandidaten",

@@ -2754,7 +2754,17 @@
   "applicationRequiredFields": {
     "title": "Campos obrigatórios",
     "subtitle": "Determine quais os campos obrigatórios ao criar uma nova candidatura.",
-    "hint": "Isto é verificado ao criar uma nova candidatura."
+    "hint": "Isto é verificado ao criar uma nova candidatura.",
+    "fieldLabels": {
+      "candidateId": "Candidato",
+      "newCandidate": "Novo candidato (criado em linha)",
+      "rejectionReason": "Motivo de rejeição",
+      "interviewFlow": "Fluxo de entrevista",
+      "interviewWorkflow": "Fluxo de trabalho de entrevista",
+      "matchScore": "Pontuação de correspondência",
+      "matchCriteria": "Critérios de correspondência",
+      "phaseKey": "Fase (sistema)"
+    }
   },
   "vacancyTab": {
     "title": "Separador Vagas nos candidatos",

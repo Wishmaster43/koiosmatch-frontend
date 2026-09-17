@@ -2,10 +2,9 @@
  * useFieldInventory — the ONE React Query wrapper around
  * `GET /settings/field-inventory?entity=<entity>` (VERPLICHTE-VELDEN-INVENTARIS-1,
  * CONTRACT-CHANGELOG 17-09). This is the intended single source for the required-fields
- * screens and the backend's write-time 422. As of FIELDS-2-FE-1/2 (17-09) the candidate
- * and customer screens are wired onto this hook, with their catalogues folded down to
- * `key -> labelKey` maps; the application screen's adoption is tracked follow-up work,
- * not done here.
+ * screens and the backend's write-time 422. As of FIELDS-2-FE-1/2/3 (17-09) all three
+ * screens are wired onto this hook (candidate, the customer family, application), with
+ * their catalogues folded down to `key -> labelKey` maps.
  *
  * The generated `operations['getSettingsFieldInventory']` types the query as a JSON
  * request body (an openapi-typescript quirk for a GET route documented with query

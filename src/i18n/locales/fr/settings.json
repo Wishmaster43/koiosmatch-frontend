@@ -2732,7 +2732,17 @@
   "applicationRequiredFields": {
     "title": "Champs obligatoires",
     "subtitle": "Déterminez quels champs sont obligatoires lors de la création d'une nouvelle candidature.",
-    "hint": "Ceci est vérifié lors de la création d'une nouvelle candidature."
+    "hint": "Ceci est vérifié lors de la création d'une nouvelle candidature.",
+    "fieldLabels": {
+      "candidateId": "Candidat",
+      "newCandidate": "Nouveau candidat (créé en ligne)",
+      "rejectionReason": "Motif de refus",
+      "interviewFlow": "Flux d'entretien",
+      "interviewWorkflow": "Workflow d'entretien",
+      "matchScore": "Score de correspondance",
+      "matchCriteria": "Critères de correspondance",
+      "phaseKey": "Phase (système)"
+    }
   },
   "vacancyTab": {
     "title": "Onglet Postes chez les candidats",

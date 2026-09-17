@@ -2754,7 +2754,17 @@
   "applicationRequiredFields": {
     "title": "Campi obbligatori",
     "subtitle": "Stabilisci quali campi sono obbligatori alla creazione di una nuova candidatura.",
-    "hint": "Questo viene verificato alla creazione di una nuova candidatura."
+    "hint": "Questo viene verificato alla creazione di una nuova candidatura.",
+    "fieldLabels": {
+      "candidateId": "Candidato",
+      "newCandidate": "Nuovo candidato (creato inline)",
+      "rejectionReason": "Motivo del rifiuto",
+      "interviewFlow": "Flusso del colloquio",
+      "interviewWorkflow": "Workflow del colloquio",
+      "matchScore": "Punteggio di corrispondenza",
+      "matchCriteria": "Criteri di corrispondenza",
+      "phaseKey": "Fase (sistema)"
+    }
   },
   "vacancyTab": {
     "title": "Scheda Posizioni sui candidati",

@@ -2754,7 +2754,17 @@
   "applicationRequiredFields": {
     "title": "Required fields",
     "subtitle": "Decide which fields are required when creating a new application.",
-    "hint": "This is checked when a new application is created."
+    "hint": "This is checked when a new application is created.",
+    "fieldLabels": {
+      "candidateId": "Candidate",
+      "newCandidate": "New candidate (created inline)",
+      "rejectionReason": "Rejection reason",
+      "interviewFlow": "Interview flow",
+      "interviewWorkflow": "Interview workflow",
+      "matchScore": "Match score",
+      "matchCriteria": "Match criteria",
+      "phaseKey": "Phase (system)"
+    }
   },
   "vacancyTab": {
     "title": "Vacancies tab on candidates",

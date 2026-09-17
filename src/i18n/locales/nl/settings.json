@@ -2754,7 +2754,17 @@
   "applicationRequiredFields": {
     "title": "Verplichte velden",
     "subtitle": "Bepaal welke velden verplicht zijn bij het aanmaken van een nieuwe sollicitatie.",
-    "hint": "Dit wordt gecontroleerd bij het aanmaken van een nieuwe sollicitatie."
+    "hint": "Dit wordt gecontroleerd bij het aanmaken van een nieuwe sollicitatie.",
+    "fieldLabels": {
+      "candidateId": "Kandidaat",
+      "newCandidate": "Nieuwe kandidaat (inline aangemaakt)",
+      "rejectionReason": "Afwijsreden",
+      "interviewFlow": "Interviewflow",
+      "interviewWorkflow": "Interview-workflow",
+      "matchScore": "Matchscore",
+      "matchCriteria": "Matchcriteria",
+      "phaseKey": "Fase (systeem)"
+    }
   },
   "vacancyTab": {
     "title": "Vacatures-tabblad bij kandidaten",

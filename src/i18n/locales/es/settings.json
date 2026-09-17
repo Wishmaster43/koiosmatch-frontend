@@ -2732,7 +2732,17 @@
   "applicationRequiredFields": {
     "title": "Campos obligatorios",
     "subtitle": "Determine qué campos son obligatorios al crear una nueva solicitud.",
-    "hint": "Esto se comprueba al crear una nueva solicitud."
+    "hint": "Esto se comprueba al crear una nueva solicitud.",
+    "fieldLabels": {
+      "candidateId": "Candidato",
+      "newCandidate": "Candidato nuevo (creado en línea)",
+      "rejectionReason": "Motivo de rechazo",
+      "interviewFlow": "Flujo de entrevista",
+      "interviewWorkflow": "Flujo de trabajo de entrevista",
+      "matchScore": "Puntuación de coincidencia",
+      "matchCriteria": "Criterios de coincidencia",
+      "phaseKey": "Fase (sistema)"
+    }
   },
   "vacancyTab": {
     "title": "Pestaña Vacantes en candidatos",
