@@ -69,6 +69,13 @@ import type { LookupOption, Id } from '@/types/common'
 // branch picker, same useLocations() source so all three read one list).
 import { useLocations } from '@/lib/useLocations'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import SubEntityDuplicateNotice from './addmodal/SubEntityDuplicateNotice'
+import { useSubEntityDuplicateGuard } from './addmodal/useSubEntityDuplicateGuard'
+
+// ADOPT-A2 row 81: which three fields the live create-time dedupe probe watches —
+// name + coc_number are the strongest identity signal, email a contact-level
+// fallback (mirrors useCustomerDuplicateProbe's own 3-of-5 choice).
+const LOCATION_DUP_KEYS = ['name', 'coc_number', 'email'] as const
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 // No billing_email entry (Danny 2026-07-22): that field has no input here anymore
@@ -95,7 +102,7 @@ const EMAIL_ERROR_KEYS = { email: 'validation.emailFormat' }
 
 // Create/edit modal for a customer location: address + contact fields, an optional CSV import path, and the province-cascade guard below.
 export default function AddLocationModal({
-  onClose, onCreate, onImported, onAddContact, customerId, customerName, statuses = [], initial, existingContacts = [],
+  onClose, onCreate, onImported, onAddContact, customerId, customerName, statuses = [], initial, existingContacts = [], onOpenExisting,
 }: {
   onClose: () => void
   onCreate?: (v: LocationPayload) => Promise<Location | void> | void
@@ -115,6 +122,8 @@ export default function AddLocationModal({
   // `useCustomerContacts().add`, threaded down from CustomerDrawer, resolves with
   // the saved row so its id can be coupled as this location's primary below.
   onAddContact?: (payload: ContactPayload) => Promise<Contact | void> | void
+  // ADOPT-A2 row 81: opens the existing duplicate row in the parent tab (e.g. LocationsTab's own setOpenId).
+  onOpenExisting?: (id: Id, archived?: boolean) => void
 }) {
   const { t } = useTranslation(['customers', 'common'])
   const { canViewImportTemplate, canRunImport } = useSubEntityImportPermissions()
@@ -187,11 +196,17 @@ export default function AddLocationModal({
   const cocNotice = identifiers.notice('coc', form.cocNumber, form.country)
   const vatNotice = identifiers.notice('vat', form.vatNumber, form.country)
   const hasIdentifierError = cocNotice?.severity === 'error' || vatNotice?.severity === 'error'
+  // ADOPT-A2 row 81 (verify-fix): live per-customer dedupe probe over name/coc/email,
+  // advisory only. customerId is withheld on edit — the form is pre-filled from
+  // `initial` there, so probing would just match the record against itself (§8/§9).
+  const dup = useSubEntityDuplicateGuard('locations', isEdit ? undefined : customerId, LOCATION_DUP_KEYS, form.name, form.cocNumber, form.email, onOpenExisting,
+    { restoreFailed: t('duplicate.locations.restoreFailed'), restoreForbidden: t('duplicate.locations.restoreForbidden') })
 
   const set = <K extends keyof LocationPayload>(k: K, v: LocationPayload[K]) => {
     setForm(f => ({ ...f, [k]: v }))
     if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
     setCreateError(null)
+    dup.clearOnEdit()
   }
 
   // PROVINCIE-1: province list cascades on the picked country (shared hook, same
@@ -295,6 +310,8 @@ export default function AddLocationModal({
       iconColor="var(--color-secondary)"
       iconBg="var(--color-secondary-bg)"
     >
+      {/* ADOPT-A2 row 81: live per-customer dedupe probe, create-only (edit already IS the record). */}
+      {!isEdit && <SubEntityDuplicateNotice keyPrefix="locations" dup={dup} />}
       {/* Two-column section split (Danny 03-08 A+D decision): six cards stacked
           in ONE column left half the wide 1060px frame idle and forced a
           scroll — the required core (Algemeen/Adres) now sits left, the

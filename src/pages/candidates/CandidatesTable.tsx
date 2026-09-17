@@ -91,7 +91,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
   // block now read the SAME source, so they can no longer disagree.
   const adviceOf = useCandidateAdvice()
   const { colorOf: genderColor } = useGenders()
-  const { labelOf: lastContactLabel, iconOf: lastContactIcon } = useLastContactTypes()
+  const { labelOf: lastContactLabel, iconOf: lastContactIcon } = useLastContactTypes('candidate')
   // Tenant display settings (Settings → Candidate → Table display). All default off.
   const settings = useAllSettings()
   // Coloured chips vs. plain text — one flag PER column. KPI row keeps colours regardless.

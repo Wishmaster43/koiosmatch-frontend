@@ -27,6 +27,10 @@ interface Props {
   contacts?: Contact[]
   locations?: { id: Id; name: string }[]
   statuses?: LookupOption[]
+  // AUDIT-NAFIX-1 (§3 four UI states): passed straight through to DepartmentsPanel.
+  loading?: boolean
+  error?: boolean
+  onRetry?: () => void
   // EXTRACT-1: the caller's own customers.update permission check, threaded down
   // to the Koppelingen sub-tab's "Koppelen" buttons (§7 — UI gate, backend re-checks).
   canLinkBackoffice?: boolean
@@ -43,6 +47,7 @@ interface Props {
 // Thin host that owns which department is open and passes it to the one shared DepartmentsPanel, which renders everything else (see file header).
 export default function DepartmentsTab({
   customerId, customerName, departments = [], contacts = [], locations = [], statuses = [], canLinkBackoffice = false,
+  loading, error, onRetry,
   contactStatuses = [], onAdd, onUpdate, onRemove, onAddContact, onUpdateContact, onRemoveContact,
 }: Props) {
   // The host owns "which department is open" — the panel is controlled (see its docblock).
@@ -51,6 +56,7 @@ export default function DepartmentsTab({
     <DepartmentsPanel
       scope="customer" openId={openId} onOpenChange={setOpenId}
       customerId={customerId} customerName={customerName}
+      loading={loading} error={error} onRetry={onRetry}
       departments={departments} contacts={contacts} locations={locations} statuses={statuses}
       contactStatuses={contactStatuses} canLinkBackoffice={canLinkBackoffice}
       onAdd={onAdd} onUpdate={onUpdate} onRemove={onRemove}

@@ -1,10 +1,7 @@
 /**
- * dashboardFormat — locale-aware formatting regression (FINISH audit, 2026-08).
- * fmtWhen/eur used to hardcode 'nl-NL' in their Intl calls; both now accept an
- * explicit `locale` param (defaulting to 'nl-NL' for the one call site,
- * useDashboardViewModel, that doesn't thread the active locale through yet —
- * mirrors lib/formatters.ts's own non-React default). This covers both: the
- * default keeps a Dutch user's output identical, and an explicit locale changes it.
+ * dashboardFormat — locale-aware formatting regression (FINISH audit, 2026-08;
+ * AUDIT-NAFIX-1 17-09 made eur()'s locale REQUIRED, mirroring fmtWhen — a
+ * default silently rendered nl-NL grouping on an English tenant's screen).
  */
 import { describe, it, expect } from 'vitest'
 import { fmtWhen, eur } from './dashboardFormat'
@@ -36,8 +33,8 @@ describe('fmtWhen · locale param', () => {
 })
 
 describe('eur · locale param', () => {
-  it('defaults to nl-NL grouping (dot thousands, comma-less symbol placement)', () => {
-    expect(eur(12500)).toBe('€ 12.500')
+  it('renders nl-NL grouping (dot thousands, comma-less symbol placement)', () => {
+    expect(eur(12500, 'nl-NL')).toBe('€ 12.500')
   })
 
   it('follows an explicit English locale for grouping (currency stays EUR, not GBP)', () => {
@@ -45,6 +42,6 @@ describe('eur · locale param', () => {
   })
 
   it('treats a missing/invalid value as 0', () => {
-    expect(eur(undefined)).toBe('€ 0')
+    expect(eur(undefined, 'nl-NL')).toBe('€ 0')
   })
 })

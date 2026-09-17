@@ -36,6 +36,7 @@ import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import PanelLoadState from './PanelLoadState'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import { DEPARTMENTS_CHANGED_EVENT } from '../hooks/useCustomerDepartments'
 // ARCHIVE-SUBENTITY-1: the archived-only sub-fetch behind the "Gearchiveerd"
@@ -79,6 +80,11 @@ interface Props {
   locations: { id: Id; name: string }[]
   /** Customer-wide contacts — powers the contact-count column and DepartmentDetail's own Contactpersonen sub-tab. */
   contacts: Contact[]
+  // AUDIT-NAFIX-1 (§3 four UI states): the customer-scope list's own loading/error
+  // (undefined from a nested scope="location" caller, which has none of its own yet).
+  loading?: boolean
+  error?: boolean
+  onRetry?: () => void
   statuses: LookupOption[]
   contactStatuses?: LookupOption[]
   canLinkBackoffice?: boolean
@@ -101,6 +107,7 @@ interface Props {
 // One panel for both scopes (see the module doc above): the same department list drills into DepartmentDetail without navigating away, keeping membership narrowing in this one place.
 export default function DepartmentsPanel({
   departments, scope, scopeId, scopeName, customerId, customerName, locations, contacts, statuses,
+  loading = false, error = false, onRetry,
   contactStatuses = [], canLinkBackoffice = false, openId, onOpenChange, trail = [],
   onAdd, onUpdate, onRemove, onAddContact, onUpdateContact, onRemoveContact,
 }: Props) {
@@ -209,16 +216,18 @@ export default function DepartmentsPanel({
         {canAddDepartment && <DrawerAddButton onClick={() => setAdding(true)} label={t('departments.add')} short />}
       </div>
 
-      {/* Horizontal scroll owned here, same as ContactsPanel — neither DataTable nor the
-          drawer shell wraps the table. */}
-      <div style={{ overflowX: 'auto' }}>
-        <DataTable columns={columns} rows={visible} onRowClick={d => onOpenChange(d.id as Id)} emptyText={t('departments.empty')} />
-      </div>
+      {/* Four UI states (§3): a failed GET must never read as "no departments". */}
+      <PanelLoadState error={error} onRetry={onRetry}>
+        <DataTable columns={columns} rows={visible} loading={loading} loadingText={t('page.loading')} onRowClick={d => onOpenChange(d.id as Id)} emptyText={t('departments.empty')} />
+      </PanelLoadState>
 
       {adding && (
         <AddDepartmentModal locations={locations} statuses={statuses}
           lockLocationId={scope === 'location' ? scopeId : undefined}
           customerName={scope === 'location' ? scopeName : undefined}
+          // ADOPT-A2 verify-fix: flip the archived quick-view first, or an archived
+          // hit's id is absent from the loaded rows and the "open" click does nothing.
+          customerId={customerId} onOpenExisting={(id, archived) => { setAdding(false); if (archived) setShowArchived(true); onOpenChange(id) }}
           onCreate={payload => onAdd(payload, locations.find(l => String(l.id) === String(payload.locationId))?.name)}
           // An import creates any number of rows at once, so there is nothing to prepend
           // optimistically — the list simply reloads. Without this the modal closed over

@@ -24,10 +24,11 @@ export const fmtWhen = (iso: string | undefined, locale: string) => {
     : d.toLocaleDateString(locale, { day: 'numeric', month: 'short' })
 }
 
-// Euro formatting for the pipeline-value KPI (no decimals). Same locale-default
-// convention as fmtWhen above — EUR stays the fixed currency (tenant's business
-// currency, not language-dependent); only the grouping/decimal separator follows locale.
-export const eur = (v?: unknown, locale: string = 'nl-NL') =>
+// Euro formatting for the pipeline-value KPI (no decimals). `locale` is required,
+// same convention as fmtWhen above (GETALLEN-1/AUDIT-NAFIX-1) — a default silently
+// rendered nl-NL grouping on an English screen; EUR itself stays the fixed
+// currency (tenant's business currency, not language-dependent).
+export const eur = (v: unknown, locale: string) =>
   formatCurrency(Number(v) || 0, 'EUR', locale, 0)
 
 // Extract the filter value from a clicked chart datum (sector or legend item).

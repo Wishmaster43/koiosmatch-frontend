@@ -1290,6 +1290,9 @@
     "candidate_contact_moment": {
       "registered": "Momento de contacto registrado"
     },
+    "customer_contact_moment": {
+      "registered": "Momento de contacto registrado"
+    },
     "candidate_cv_parse_proposal": {
       "accepted": "Análisis de CV aceptado",
       "rejected": "Análisis de CV rechazado"

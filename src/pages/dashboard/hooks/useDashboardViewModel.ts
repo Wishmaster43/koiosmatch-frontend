@@ -213,7 +213,9 @@ export function useDashboardViewModel({
   // K-173 fase 2 — dash.drills flows straight through so each tile can resolve its
   // own onClick against the server's exact list filters (see buildDashboardKpis).
   const kpiById = buildDashboardKpis({
-    t, kpis, drills: dash?.drills, num, eur, opp, onNavigate,
+    // AUDIT-NAFIX-1: eur() now requires a locale — bind it here instead of
+    // letting the builder default to nl-NL on an English tenant.
+    t, kpis, drills: dash?.drills, num, eur: (v?: unknown) => eur(v, locale), opp, onNavigate,
   })
   // MODULE-gated tiles render NOTHING when their server key is ABSENT: K-168
   // only omits a key when the tenant lacks the module behind it (workflows /

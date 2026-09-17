@@ -134,10 +134,12 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
       ?? candidates.filter(c => c.lastContactAt && new Date(c.lastContactAt).getTime() > convCutoff).length
   , [stats, candidates, convCutoff])
   // Open candidate-linked tasks (server total from stats.attention.tasks).
-  const tasksCount = stats?.attention?.tasks ?? 0
-  // Retention consent expiring within 30 and 60 days (server totals).
-  const retentionExpiring30Count = stats?.attention?.retention_expiring_30 ?? 0
-  const retentionExpiring60Count = stats?.attention?.retention_expiring_60 ?? 0
+  // STATS-HONEST-1 (AUDIT-NAFIX-1): null (not 0) when the stats endpoint has no
+  // value yet — a real zero and "we don't know" must never read the same.
+  const tasksCount = stats?.attention?.tasks ?? null
+  // Retention consent expiring within 30 and 60 days (server totals); same rule.
+  const retentionExpiring30Count = stats?.attention?.retention_expiring_30 ?? null
+  const retentionExpiring60Count = stats?.attention?.retention_expiring_60 ?? null
 
   return {
     statusOptions, funnelOptions, typeOptions, ownerOptions,

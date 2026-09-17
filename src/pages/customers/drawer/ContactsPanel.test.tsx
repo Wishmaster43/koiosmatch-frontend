@@ -570,3 +570,24 @@ describe('ContactsPanel · couple/add gate (RIGHTS-GATE-OPENERS-1)', () => {
     expect(screen.getByRole('button', { name: ct('contacts.add') })).toBeInTheDocument()
   })
 })
+
+/**
+ * AUDIT-NAFIX-1 (§3 four UI states) — a failed GET must render an error banner
+ * with a retry, never the empty-list state.
+ */
+describe('ContactsPanel · loading/error states (AUDIT-NAFIX-1)', () => {
+  it('shows an error banner with retry instead of the empty state when the load failed', () => {
+    const onRetry = vi.fn()
+    render(<ContactsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" contacts={[]} error onRetry={onRetry} />)
+    expect(screen.getByRole('alert')).toBeInTheDocument()
+    expect(screen.queryByText(ct('contacts.empty'))).not.toBeInTheDocument()
+  })
+
+  it('calls the passed reload on retry click', async () => {
+    const user = userEvent.setup()
+    const onRetry = vi.fn()
+    render(<ContactsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" contacts={[]} error onRetry={onRetry} />)
+    await user.click(screen.getByRole('button', { name: cm('error.retry') }))
+    expect(onRetry).toHaveBeenCalledTimes(1)
+  })
+})

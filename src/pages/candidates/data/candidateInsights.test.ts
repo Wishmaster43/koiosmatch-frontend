@@ -72,7 +72,7 @@ describe('buildCandidateInsights — retention expiring KPI card', () => {
       },
     })
     const card = kpis.find((k: { key: string }) => k.key === 'retentionExpiring')
-    card!.onClick()
+    card!.onClick?.()
     expect(toggleAttention).toHaveBeenCalledWith('retentionExpiring60')
   })
 
@@ -95,5 +95,57 @@ describe('buildCandidateInsights — retention expiring KPI card', () => {
     })
     const card = kpis.find((k: { key: string }) => k.key === 'retentionExpiring')
     expect(card!.active).toBe(true)
+  })
+})
+
+/**
+ * AUDIT-NAFIX-1 (STATS-HONEST-1) — tasks/retentionExpiring counts are null (not
+ * 0) when the stats endpoint has no value; the card must show the house dash
+ * and drop its click-through rather than reading as a confident zero.
+ */
+describe('buildCandidateInsights — STATS-HONEST-1 null counts', () => {
+  const argsWithCounts = (counts: Parameters<typeof buildCandidateInsights>[0]['counts']) => ({
+    t,
+    statusData: [], funnelData: [], rcData: [],
+    pickStatus: vi.fn(), pickFunnel: vi.fn(), pickOwner: vi.fn(), pickPhase: vi.fn(),
+    entryPhase: 'lead',
+    selectedStatus: [], setSelectedStatus: vi.fn(),
+    selectedPhase: [], setSelectedPhase: vi.fn(),
+    selectedFunnel: [], setSelectedFunnel: vi.fn(),
+    selectedOwner: [], setSelectedOwner: vi.fn(),
+    attentionFilter: null, toggleAttention: vi.fn(),
+    staleMonths: 6,
+    counts,
+  })
+
+  it('renders the house dash and no onClick for a null tasks count', () => {
+    const { kpis } = buildCandidateInsights(argsWithCounts({
+      stale: 10, neverContacted: 5, noFollowup: null, intake: 3, activeConv: 2, tasks: null,
+      retentionExpiring30: 7, retentionExpiring60: 15,
+    }))
+    const card = kpis.find((k: { key: string }) => k.key === 'tasks')
+    expect(card!.value).toBe('—')
+    expect(card!.onClick).toBeUndefined()
+  })
+
+  it('renders the house dash and no onClick for a null retentionExpiring60 count', () => {
+    const { kpis } = buildCandidateInsights(argsWithCounts({
+      stale: 10, neverContacted: 5, noFollowup: null, intake: 3, activeConv: 2, tasks: 1,
+      retentionExpiring30: null, retentionExpiring60: null,
+    }))
+    const card = kpis.find((k: { key: string }) => k.key === 'retentionExpiring')
+    expect(card!.value).toBe('—')
+    expect(card!.sub).toBeUndefined()
+    expect(card!.onClick).toBeUndefined()
+  })
+
+  it('still clicks through and shows the real value for a non-null count', () => {
+    const { kpis } = buildCandidateInsights(argsWithCounts({
+      stale: 10, neverContacted: 5, noFollowup: null, intake: 3, activeConv: 2, tasks: 4,
+      retentionExpiring30: 7, retentionExpiring60: 15,
+    }))
+    const tasksCard = kpis.find((k: { key: string }) => k.key === 'tasks')
+    expect(tasksCard!.value).toBe(4)
+    expect(typeof tasksCard!.onClick).toBe('function')
   })
 })

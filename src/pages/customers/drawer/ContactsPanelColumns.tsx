@@ -48,7 +48,7 @@ interface Params {
 // the location/department column that would be redundant inside that own scope.
 export function useContactsPanelColumns({ scope, scopeId, locationScope, locations, departments, onUpdate }: Params): Column<Contact>[] {
   const { t } = useTranslation('customers')
-  const { labelOf: lastContactLabel, iconOf: lastContactIcon } = useLastContactTypes()
+  const { labelOf: lastContactLabel, iconOf: lastContactIcon } = useLastContactTypes('contact')
   const { formatDate } = useDateFormat()
   // Tenant-configurable chip colours (CHIPKLEUR-INSTELBAAR-1) — falls back to today's
   // hardcoded colours until a tenant saves an override in Settings.

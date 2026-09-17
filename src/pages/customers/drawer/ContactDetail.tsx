@@ -43,6 +43,11 @@ import ContactTextSection from './ContactTextSection'
 // CONTACT-CONSENT-AS-1 (K-262): the shared retention consent block (mirrored from candidates).
 import RetentionConsentBlock from '@/components/drawer/RetentionConsentBlock'
 import { emailValue, phoneValue, linkedinValue, LinkedinMark } from '@/components/drawer/contactLinks'
+// LAATSTE-CONTACT-SCOPE-1: the candidate B15-flow's confirm-after-mailto-click
+// banner, mirrored for a contact person's own e-mail field.
+import ContactMomentConfirmBanner from '@/components/drawer/ContactMomentConfirmBanner'
+import { useContactMomentConfirm } from '../hooks/useContactMomentConfirm'
+import { CONTACTS_CHANGED_EVENT } from '../hooks/useCustomerContacts'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { useBackofficeLinksVisible } from '@/components/drawer/useBackofficeLinksVisible'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
@@ -127,6 +132,14 @@ export default function ContactDetail({ contact, locations, departments, statuse
   const canMerge = (auth?.hasPermission ?? (() => false))('customers.update')
   const [merging, setMerging] = useState(false)
 
+  // B15-flow mirror (LAATSTE-CONTACT-SCOPE-1): confirming re-broadcasts the
+  // shared contacts-changed event so this panel's own list refetch (which
+  // already listens for it) pulls the server's fresh last_contact stamp —
+  // never a local "email + now" guess.
+  const contactMoment = useContactMomentConfirm(contact.id, () => {
+    window.dispatchEvent(new CustomEvent(CONTACTS_CHANGED_EVENT))
+  })
+
   // Location/department are no longer in this table — see the Koppeling block
   // below (file header BUG FIX 28-07): a chip-select field can't cascade off
   // another field's live draft value, so they need their own cascading picker.
@@ -168,7 +181,18 @@ export default function ContactDetail({ contact, locations, departments, statuse
       } },
     { key: 'role', label: t('contacts.detail.role'), type: 'creatable', options: contactFunctions, allowCreate: allowFreeEntry },
     { key: 'email', label: t('contacts.detail.email'), type: 'text',
-      renderValue: v => emailValue(v, t('contacts.detail.email')) },
+      renderValue: v => (
+        <div>
+          {/* The stamp route is customers.update-gated (routes/api/tenant/customers.php), so a
+              view-only user gets the plain mailto without a prompt that would only 403 (§3). */}
+          {emailValue(v, t('contacts.detail.email'), canMerge ? () => contactMoment.prompt('email') : undefined)}
+          {/* B15-flow: non-blocking confirm banner, only after THIS field's mailto click. */}
+          {canMerge && contactMoment.pending === 'email' && (
+            <ContactMomentConfirmBanner channel="email" saving={contactMoment.saving}
+              onConfirm={contactMoment.confirm} onDismiss={contactMoment.dismiss} />
+          )}
+        </div>
+      ) },
     // The WhatsApp shortcut belongs to the MOBILE number only — a landline cannot hold a
     // conversation, so offering it there would be a control that goes nowhere.
     { key: 'mobile', label: t('contacts.detail.mobile'), type: 'text',

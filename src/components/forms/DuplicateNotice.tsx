@@ -52,16 +52,24 @@ interface DuplicateNoticeProps {
   /** SHARED-DUP-1: which locale namespace's `duplicate.*` keys to read. Defaults to
    * 'candidates', the original owner, so that one call site needs no change. */
   ns?: string
+  /** ADOPT-A2-VERIFY-FIX: reads `duplicate.<keyPrefix>.*` instead of `duplicate.*` —
+   * lets several entities within one namespace (e.g. a customer's locations vs
+   * departments vs contacts) each keep their OWN wording, mirroring what the `ns`
+   * prop already does across namespaces (§5 screen truth: never show "customer"
+   * copy over a location/department/contact duplicate). */
+  keyPrefix?: string
 }
 
 // The duplicate-notice panel itself: shows who the existing record is and its archived state, with open/restore actions — never a merge affordance.
-export default function DuplicateNotice({ match, variant, canRestore, restoring, onOpen, onRestore, onDismiss, ns = 'candidates' }: DuplicateNoticeProps) {
+export default function DuplicateNotice({ match, variant, canRestore, restoring, onOpen, onRestore, onDismiss, ns = 'candidates', keyPrefix }: DuplicateNoticeProps) {
   const { t } = useTranslation(ns)
+  // Resolve a `duplicate.*` key, optionally scoped under keyPrefix.
+  const dk = (suffix: string) => keyPrefix ? `duplicate.${keyPrefix}.${suffix}` : `duplicate.${suffix}`
   const blocked = variant === 'blocked'
   // A refused create is danger; a live probe hit is a warning — tokens only (§4).
   const tone = blocked ? 'var(--color-danger)' : 'var(--color-warning)'
   const archived = match.archived === true
-  const name = (match.name ?? '').trim() || t('duplicate.unnamed')
+  const name = (match.name ?? '').trim() || t(dk('unnamed'))
 
   // Colour-carrying tint actions in the notice's own tone (danger/warning) — the
   // §4 house tint via lib/tint (active pair: this panel IS a live verdict).
@@ -80,38 +88,38 @@ export default function DuplicateNotice({ match, variant, canRestore, restoring,
       {/* Headline: what happened, in the user's language — never the server sentence. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: tone, fontSize: 12, fontWeight: 600 }}>
         <AlertTriangle size={14} aria-hidden="true" />
-        {blocked ? t('duplicate.blockedTitle') : t('duplicate.warningTitle')}
+        {blocked ? t(dk('blockedTitle')) : t(dk('warningTitle'))}
       </div>
       <div style={{ fontSize: 12, color: 'var(--text)', marginTop: 4, lineHeight: 1.5 }}>
-        {blocked ? t('duplicate.blockedBody') : t('duplicate.warningBody')}
+        {blocked ? t(dk('blockedBody')) : t(dk('warningBody'))}
       </div>
 
       {/* The duplicate itself: name + state chip, nothing more (§8 data minimisation). */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
         <SectionTitle as="span">{name}</SectionTitle>
         <SoftChip color={archived ? 'var(--color-warning)' : 'var(--color-success)'}
-          label={archived ? t('duplicate.stateArchived') : t('duplicate.stateActive')} />
+          label={archived ? t(dk('stateArchived')) : t(dk('stateActive'))} />
       </div>
       {archived && (
-        <Caption as="div" style={{ marginTop: 4 }}>{t('duplicate.archivedHint')}</Caption>
+        <Caption as="div" style={{ marginTop: 4 }}>{t(dk('archivedHint'))}</Caption>
       )}
 
       {/* Real actions only — every button below has a route behind it. */}
       <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
         {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- colour-carrying tint action in the notice's own tone (danger OR warning); Button has no warning-soft tone (§14 r7 necessity) */}
         <button type="button" onClick={onOpen} style={actionBtn}>
-          <ExternalLink size={13} aria-hidden="true" /> {t('duplicate.open')}
+          <ExternalLink size={13} aria-hidden="true" /> {t(dk('open'))}
         </button>
         {archived && canRestore && (
           // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- colour-carrying tint action in the notice's own tone (danger OR warning); Button has no warning-soft tone (§14 r7 necessity)
           <button type="button" onClick={onRestore} disabled={restoring} style={{ ...actionBtn, cursor: restoring ? 'not-allowed' : 'pointer', opacity: restoring ? 0.6 : 1 }}>
             {restoring ? <Spinner size={13} /> : <RotateCcw size={13} aria-hidden="true" />}
-            {restoring ? t('duplicate.restoring') : t('duplicate.restoreAndOpen')}
+            {restoring ? t(dk('restoring')) : t(dk('restoreAndOpen'))}
           </button>
         )}
         {/* Neutral dismiss — plain secondary identity, so the shared Button owns it. */}
         <Button variant="secondary" size="sm" onClick={onDismiss}>
-          {t('duplicate.editData')}
+          {t(dk('editData'))}
         </Button>
       </div>
     </div>

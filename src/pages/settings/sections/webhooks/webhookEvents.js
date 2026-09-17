@@ -8,7 +8,7 @@
  * stays a faithful stand-in; `webhookEvents.test.js` guards that parity.
  *
  * REPAIR N6 (2026-09-04): re-verified every key against config/webhooks.php by
- * hand (59 events). Five groups this file used to carry — `location`, `contact_person`,
+ * hand (59 events; 66 after ADOPT-A2's five-key catch-up, 17-09). Five groups this file used to carry — `location`, `contact_person`,
  * `order`, `shift`, `shift.scheduling.*` — have NO backend catalogue entry at all
  * (grepped the whole backend: no dispatcher, no config row); subscribing to any of
  * them would 422 against `WebhookSubscription::eventKeys()`. Removed as a fake
@@ -51,6 +51,9 @@ export const EVENT_GROUPS = [
   ] },
   { group: 'matches', events: [
     'match.created', 'match.updated', 'match.deleted', 'match.terminated', 'match.expiring',
+    // ADOPT-A2 addendum (SETTINGS-INCONSISTENCIES-BE-1): the approval lifecycle,
+    // MATCH-APPROVAL-PROCES — ids only, no rejection reason (§9).
+    'match.approval_pending', 'match.approval_overdue', 'match.approved', 'match.rejected',
   ] },
   { group: 'vacancies', events: [
     'vacancy.created', 'vacancy.status_changed', 'vacancy.published', 'vacancy.updated',
@@ -78,6 +81,9 @@ export const EVENT_GROUPS = [
   { group: 'opportunities', events: [
     'opportunity.created', 'opportunity.updated', 'opportunity.closing_soon', 'opportunity.stale',
   ] },
+  // ADOPT-A2 addendum: RETENTION-CONSENT-BLANK-1 — a tenant setting fell back to
+  // its default (key/section/label only, never a stored value, §6).
+  { group: 'settings', events: ['settings.blank_fallback'] },
 ]
 
 // Flat list of every event key (e.g. for "select all" and validation).

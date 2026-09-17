@@ -28,6 +28,7 @@ import { useAuth } from '@/context/AuthContext'
 import DataTable from '@/components/ui/DataTable'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import PanelLoadState from './PanelLoadState'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import DrillBreadcrumb from '@/components/drawer/DrillBreadcrumb'
 import type { Crumb } from '@/components/drawer/DrillBreadcrumb'
@@ -65,6 +66,11 @@ interface Props {
   locations: { id: Id; name: string }[]
   departments: Department[]
   statuses: LookupOption[]
+  // AUDIT-NAFIX-1 (§3 four UI states): the customer-scope list's own loading/error
+  // (undefined from a nested location/department scope, which has none of its own yet).
+  loading?: boolean
+  error?: boolean
+  onRetry?: () => void
   canLinkBackoffice?: boolean
   /**
    * Which contact is open — CONTROLLED by the host. The host owns it because it must know
@@ -85,6 +91,7 @@ interface Props {
 // clicking a row swaps this panel's own body instead of navigating away.
 export default function ContactsPanel({
   contacts, scope, scopeId, scopeName, customerId, locations, departments, statuses,
+  loading = false, error = false, onRetry,
   canLinkBackoffice = false, openId, onOpenChange, trail = [], onAdd, onUpdate, onRemove,
 }: Props) {
   const { t } = useTranslation('customers')
@@ -202,12 +209,10 @@ export default function ContactsPanel({
         {canAddContact && <DrawerAddButton onClick={() => setModal('add')} label={t('contacts.add')} short />}
       </div>
 
-      {/* Horizontal scroll owned here: neither DataTable nor the drawer shell wraps the
-          table, and the panel clips at 548px — without this the right-hand columns would
-          be silently cut off instead of reachable. */}
-      <div style={{ overflowX: 'auto' }}>
-        <DataTable columns={columns} rows={visible} onRowClick={c => onOpenChange(c.id as Id)} emptyText={t('contacts.empty')} />
-      </div>
+      {/* Four UI states (§3): a failed GET must never read as "no contacts". */}
+      <PanelLoadState error={error} onRetry={onRetry}>
+        <DataTable columns={columns} rows={visible} loading={loading} loadingText={t('page.loading')} onRowClick={c => onOpenChange(c.id as Id)} emptyText={t('contacts.empty')} />
+      </PanelLoadState>
 
       {modal === 'couple' && (
         <ContactLinkPicker candidates={candidates} locations={locations} departments={departments} note={coupleNote}
@@ -222,6 +227,9 @@ export default function ContactsPanel({
           lockLocationId={scope === 'location' ? scopeId : undefined}
           lockDepartmentId={scope === 'department' ? scopeId : undefined}
           customerName={scopeName}
+          // ADOPT-A2 verify-fix: flip the archived quick-view first, or an archived
+          // hit's id is absent from the loaded rows and the "open" click does nothing.
+          customerId={effectiveCustomerId} onOpenExisting={(id, archived) => { setModal(null); if (archived) setShowArchived(true); onOpenChange(id) }}
           onCreate={onAdd} onClose={() => setModal(null)}
           // A CSV import creates rows in bulk, so there is no single record to splice in —
           // announce it on the channel the owning hook already listens to and let it refetch.

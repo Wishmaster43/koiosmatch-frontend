@@ -19,6 +19,7 @@ import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import PanelLoadState from './PanelLoadState'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import { useAllSettings, useSettingsLoaded, getBoolSetting, getStringSetting } from '@/lib/settings/useAllSettings'
 import LocationDetail from './LocationDetail'
@@ -48,6 +49,12 @@ interface Props extends DepartmentCallbacks {
   locations?: Location[]
   departments?: Department[]
   contacts?: Contact[]
+  // AUDIT-NAFIX-1 (§3 four UI states): the live GET's own loading/error, so a
+  // failed fetch never reads as "no locations". Both default false so a caller
+  // that doesn't thread them yet (a nested drill-down) keeps today's behaviour.
+  loading?: boolean
+  error?: boolean
+  onRetry?: () => void
   statuses?: LookupOption[]
   departmentStatuses?: LookupOption[]
   contactStatuses?: LookupOption[]
@@ -69,6 +76,7 @@ interface Props extends DepartmentCallbacks {
 // the editable LocationDetail, and this tab owns which one is open (for the pager).
 export default function LocationsTab({
   customerId, customerName, locations = [], departments = [], contacts = [], statuses = [], departmentStatuses = [], contactStatuses = [],
+  loading = false, error = false, onRetry,
   canLinkBackoffice = false,
   onAddLocation, onSaveLocation, onDeleteLocation, onAddDepartment, onUpdateDepartment, onRemoveDepartment, onAddContact, onUpdateContact,
   onRemoveContact,
@@ -177,7 +185,10 @@ export default function LocationsTab({
           {/* DRAWER-ADD-SHORT-1 (Danny 05-08): short in this drawer sub-tab's toolbar. */}
           {canAddLocation && <DrawerAddButton onClick={() => setAdding(true)} label={t('locations.add')} short />}
         </div>
-        <DataTable columns={columns} rows={visible} onRowClick={l => setOpenId(l.id as Id)} emptyText={t('locations.empty')} />
+        {/* Four UI states (§3): a failed GET must never read as "no locations". */}
+        <PanelLoadState error={error} onRetry={onRetry}>
+          <DataTable columns={columns} rows={visible} loading={loading} loadingText={t('page.loading')} onRowClick={l => setOpenId(l.id as Id)} emptyText={t('locations.empty')} />
+        </PanelLoadState>
       </div>
       {adding && (
         // customerId + existingContacts (CONTACT-PRIMAIR-LOCATIE-1) and onAddContact
@@ -186,7 +197,10 @@ export default function LocationsTab({
         // offer this customer's real contacts, couple a PICKED one as this new location's
         // primary contact after create, or CREATE a brand-new one first when the typed
         // name matches nobody, then couple that.
+        // ADOPT-A2 verify-fix: an archived hit is absent from the live rows (showArchived
+        // defaults off) — flip the quick-view first so the click actually opens it.
         <AddLocationModal customerName={customerName} customerId={customerId} statuses={statuses} existingContacts={contacts}
+          onOpenExisting={(id, archived) => { setAdding(false); if (archived) setShowArchived(true); setOpenId(id) }}
           onCreate={onAddLocation} onAddContact={onAddContact} onClose={() => setAdding(false)} />
       )}
     </>

@@ -10,6 +10,11 @@
  *
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
+ *
+ * LAATSTE-CONTACT-SCOPE-1: an optional `applies_to` scope ('candidate' | 'contact')
+ * narrows the list to that entity's global + tagged rows via the `?applies_to=`
+ * query param — a distinct URL, so it caches in its own useCachedLookup slot,
+ * separate from the unscoped Settings "Algemeen" list. No scope = unchanged.
  */
 import { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -34,10 +39,14 @@ const mapLastContactTypes = (res: AxiosResponse): LookupOption[] | null => {
   return d.length ? d : null
 }
 
+export type LastContactScope = 'candidate' | 'contact'
+
 // The last-contact-type tenant lookup, translating seeded defaults into the user language while a tenant's own value stays exactly as typed.
-export function useLastContactTypes() {
+// `scope` narrows the list to that entity's global + tagged rows (LAATSTE-CONTACT-SCOPE-1).
+export function useLastContactTypes(scope?: LastContactScope) {
   const { t } = useTranslation('common')
-  const { data: rawTypes } = useCachedLookup('/last-contact-types?active=1', mapLastContactTypes, DEFAULT_LAST_CONTACT_TYPES)
+  const url = scope ? `/last-contact-types?active=1&applies_to=${scope}` : '/last-contact-types?active=1'
+  const { data: rawTypes } = useCachedLookup(url, mapLastContactTypes, DEFAULT_LAST_CONTACT_TYPES)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const types = useMemo(() => translateSeedList(t, 'lastContactTypes', rawTypes), [rawTypes, t])
 

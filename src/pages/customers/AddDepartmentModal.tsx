@@ -40,10 +40,16 @@ import SubEntityModalFrame from './addmodal/SubEntityModalFrame'
 import { subEntityFrameProps } from './addmodal/subEntityFrameProps'
 import CreateErrorAlert from '@/components/forms/CreateErrorAlert'
 import { useSubEntitySave } from './hooks/useSubEntitySave'
+import SubEntityDuplicateNotice from './addmodal/SubEntityDuplicateNotice'
+import { useSubEntityDuplicateGuard } from './addmodal/useSubEntityDuplicateGuard'
 import type { DepartmentPayload } from './hooks/useCustomerDepartments'
 import type { Department } from '@/types/customer'
 import type { Id } from '@/types/common'
 import type { LookupOption } from '@/types/common'
+
+// ADOPT-A2 row 81: name + location is the department's identity — the create
+// form has no billing_email input, so the third slot stays unused (empty string).
+const DEPARTMENT_DUP_KEYS = ['name', 'location_id', 'billing_email'] as const
 
 interface LocationOption { id: Id; name: string }
 
@@ -55,7 +61,7 @@ const API_TO_FORM: Record<string, string> = {
 
 // Create/edit modal for a customer department, with an in-header CSV import path
 // (mirrors AddCustomerModal) that closes this modal once a real import lands rows.
-export default function AddDepartmentModal({ onClose, onCreate, onImported, locations = [], customerName, statuses = [], initial, lockLocationId }: {
+export default function AddDepartmentModal({ onClose, onCreate, onImported, locations = [], customerName, statuses = [], initial, lockLocationId, customerId, onOpenExisting }: {
   onClose: () => void
   onCreate?: (v: DepartmentPayload) => void
   /** Called once a real CSV import lands at least one record — the parent refreshes its list. */
@@ -66,6 +72,9 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
   initial?: Department | null
   // Pre-select + lock the location (creating "at this location" from the location detail).
   lockLocationId?: Id
+  // ADOPT-A2 row 81: scopes the live dedupe probe; onOpenExisting opens the hit in the parent panel (setOpenId).
+  customerId?: Id
+  onOpenExisting?: (id: Id, archived?: boolean) => void
 }) {
   const { t } = useTranslation(['customers', 'common'])
   const { canViewImportTemplate, canRunImport } = useSubEntityImportPermissions()
@@ -87,9 +96,15 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
     statusId: initial?.statusId ?? (statuses[0]?.id as string | undefined) ?? null,
     customFields: initial?.customFields ?? {},
   })
+  // ADOPT-A2 row 81 (verify-fix): live per-customer dedupe probe over name/location,
+  // advisory only. customerId is withheld on edit (see AddLocationModal's own note).
+  const dup = useSubEntityDuplicateGuard('departments', isEdit ? undefined : customerId, DEPARTMENT_DUP_KEYS, form.name, String(form.locationId ?? ''), '', onOpenExisting,
+    { restoreFailed: t('duplicate.departments.restoreFailed'), restoreForbidden: t('duplicate.departments.restoreForbidden') })
+
   const set = <K extends keyof DepartmentPayload>(k: K, v: DepartmentPayload[K]) => {
     setForm(f => ({ ...f, [k]: v }))
     if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
+    dup.clearOnEdit()
   }
   // COLLAPSIBLE-TEXT-1: Omschrijving's own collapsed/editing state.
   const [descExpanded, setDescExpanded] = useState(false)
@@ -148,6 +163,8 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
       iconColor="var(--color-violet)"
       iconBg="var(--color-violet-bg)"
     >
+      {/* ADOPT-A2 row 81: live per-customer dedupe probe, create-only. */}
+      {!isEdit && <SubEntityDuplicateNotice keyPrefix="departments" dup={dup} />}
       {/* Algemeen — name, locatie (searchable, hidden when locked), status.
           Location+status pair in one row when both show; status alone stays
           constrained to ~a third of the width (row3Even) rather than

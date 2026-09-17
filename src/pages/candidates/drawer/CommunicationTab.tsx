@@ -72,8 +72,8 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   const seedLabel = useSeedLabel()
   // Note categories from the tenant lookup, scoped to 'candidate' (NOTE-TYPES-2/3).
   const { types: allNoteTypes, writableTypes } = useNoteTypes('candidate')
-  // Contact channels (last_contact_types) — picking one on a note stamps last_contact_at/_type/_by.
-  const { types: channels } = useLastContactTypes()
+  // Contact channels (last_contact_types), scoped to candidate — picking one on a note stamps last_contact_at/_type/_by.
+  const { types: channels } = useLastContactTypes('candidate')
   // Notes persist via the API (G-1) — add/edit/delete hit /candidates/{id}/notes.
   const { notes, error: notesError, addNote, editNote, deleteNote, reload: reloadNotes, fetchPreviousVersion, restorePreviousVersion } = useCandidateNotes(c.id, { onContactStamped: () => onRefresh?.(c.id) })
 

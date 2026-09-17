@@ -16,9 +16,14 @@ import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { useSubEntitySave } from './hooks/useSubEntitySave'
 // DRY-1: one shared 422-bag mapper (field flags + server message text).
 import { extractFormErrorsWithMessages } from '@/lib/extractFormErrors'
+import { useSubEntityDuplicateGuard } from './addmodal/useSubEntityDuplicateGuard'
 import type { ContactPayload } from './hooks/useCustomerContacts'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
+
+// ADOPT-A2 row 81: email/phone/mobile — the server probe also catches an ARCHIVED
+// duplicate the local `existing` list (loaded rows only) never sees.
+const CONTACT_DUP_KEYS = ['email', 'phone', 'mobile'] as const
 
 // Normalize an email for duplicate comparison — trimmed, case-insensitive; empty never matches.
 const normalizeEmail = (v: string) => v.trim().toLowerCase()
@@ -50,6 +55,7 @@ const EMAIL_ERROR_KEYS = { email: 'validation.emailFormat' }
 
 export function useAddContactPersonForm({
   onCreate, onClose, onImported, departments, statuses, initial, lockLocationId, lockDepartmentId, existing, t,
+  customerId, onOpenExisting,
 }: {
   onCreate?: (v: ContactPayload) => void
   onClose: () => void
@@ -61,6 +67,9 @@ export function useAddContactPersonForm({
   lockDepartmentId?: Id
   existing: Contact[]
   t: TFunction
+  // ADOPT-A2 row 81: scopes the live dedupe probe; onOpenExisting opens the hit in the parent panel (setOpenId).
+  customerId?: Id
+  onOpenExisting?: (id: Id, archived?: boolean) => void
 }) {
   const { confirm, dialog } = useConfirm()
   // Shared state/error management (DRY-SUBENTITY-1): isEdit, import wizard +
@@ -93,11 +102,17 @@ export function useAddContactPersonForm({
   // setFieldMessages below, always wins over a live check).
   const { fieldMessages, setFieldMessages, markTouched, fieldMessage, clearFieldMessage, touchInvalidFields, hasFormatError } =
     useLiveFieldValidation(form, t, EMAIL_VALIDATORS, EMAIL_ERROR_KEYS)
+  // ADOPT-A2 row 81 (verify-fix): live per-customer dedupe probe over email/phone/
+  // mobile, advisory only. customerId is withheld on edit (see AddLocationModal's own note).
+  const dup = useSubEntityDuplicateGuard('contacts', isEdit ? undefined : customerId, CONTACT_DUP_KEYS, form.email, form.phone, form.mobile, onOpenExisting,
+    { restoreFailed: t('duplicate.contacts.restoreFailed'), restoreForbidden: t('duplicate.contacts.restoreForbidden') })
+
   const set = <K extends keyof ContactPayload>(k: K, v: ContactPayload[K]) => {
     setForm(f => ({ ...f, [k]: v }))
     if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
     clearFieldMessage(k)
     setCreateError(null)
+    dup.clearOnEdit()
   }
 
   // The contact who currently holds the primary flag (excluding the one being
@@ -214,6 +229,6 @@ export function useAddContactPersonForm({
     isEdit, importWizard, importOpen, setImportOpen, form, set, errors, createError, dialog,
     markTouched, emailDup, phoneDup, mobileDup, submit, canSubmit,
     departmentOptions, departmentPlaceholder, showLocationPicker, showDepartmentPicker,
-    emailMessage, phoneMessage, mobileMessage, handlePrimaryToggle,
+    emailMessage, phoneMessage, mobileMessage, handlePrimaryToggle, dup,
   }
 }

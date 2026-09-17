@@ -49,14 +49,19 @@ function ExternalLinkSpan({ href, displayText, openLabel, hoverColor, icon }: {
   )
 }
 
-/** Mailto link + a mail shortcut icon. `sendLabel` is the already-translated tooltip. */
-export function emailValue(v: unknown, sendLabel: string): ReactNode {
+/**
+ * Mailto link + a mail shortcut icon. `sendLabel` is the already-translated tooltip.
+ * `onClick` (LAATSTE-CONTACT-SCOPE-1) is optional — the candidate/customer-contact
+ * drawers pass it to open the B15-flow contact-moment confirm banner; it fires
+ * on both anchors (text + icon), never the request itself.
+ */
+export function emailValue(v: unknown, sendLabel: string, onClick?: () => void): ReactNode {
   const value = typeof v === 'string' ? v.trim() : ''
   if (!value) return dash()
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-      <a href={`mailto:${value}`} style={linkStyle}>{value}</a>
-      <a href={`mailto:${value}`} title={sendLabel} aria-label={sendLabel} style={iconStyle} {...hover('var(--color-info)')}>
+      <a href={`mailto:${value}`} style={linkStyle} onClick={onClick}>{value}</a>
+      <a href={`mailto:${value}`} title={sendLabel} aria-label={sendLabel} style={iconStyle} onClick={onClick} {...hover('var(--color-info)')}>
         <Mail size={13} />
       </a>
     </span>

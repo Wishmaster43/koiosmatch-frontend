@@ -11,6 +11,7 @@ import type { Column } from '@/components/ui/DataTable'
 import { Block } from '@/pages/dashboard/DashboardPrimitives'
 import { Mono } from '@/components/ui/typography'
 import { eur } from '@/pages/dashboard/dashboardFormat'
+import { useDateFormat } from '@/lib/datetime'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { OppStalledRow } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
@@ -24,6 +25,7 @@ export default function OppsStalledTable({ rows, onNavigate }: {
   const { t } = useTranslation('dashboard')
   // LOOKUP-I18N-1: the seeded stage label renders in the user's language.
   const seedLabel = useSeedLabel()
+  const { locale } = useDateFormat()
 
   // Column set: opportunity, customer, owner, stage, days stalled, value.
   const columns: Column<OppStalledRow>[] = useMemo(() => [
@@ -32,8 +34,8 @@ export default function OppsStalledTable({ rows, onNavigate }: {
     { key: 'owner', header: t('feed.col.owner'), render: r => r.owner },
     { key: 'stage_label', header: t('feed.col.stage'), render: r => r.stage_label ? seedLabel('opportunityStages', { label: r.stage_label }) : '—' },
     { key: 'days_still', header: t('feed.col.daysStill'), align: 'right', render: r => <Mono>{r.days_still}</Mono> },
-    { key: 'value', header: t('feed.col.value'), align: 'right', render: r => r.value == null ? '—' : eur(r.value) },
-  ], [t, seedLabel])
+    { key: 'value', header: t('feed.col.value'), align: 'right', render: r => r.value == null ? '—' : eur(r.value, locale) },
+  ], [t, seedLabel, locale])
 
   if (!rows.length) return null
 

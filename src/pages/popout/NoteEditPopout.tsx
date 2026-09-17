@@ -123,7 +123,7 @@ function CandidateNoteEditPopout() {
   const { candidate, loading, error, reload } = useCandidateLite(id)
   const { notes, loaded, editNote } = useCandidateNotes(id)
   const { writableTypes } = useNoteTypes('candidate')
-  const { types: channels } = useLastContactTypes()
+  const { types: channels } = useLastContactTypes('candidate')
 
   const noteIndex = notes.findIndex(n => String(n.id) === String(noteId))
   const note = noteIndex >= 0 ? (notes[noteIndex] as CandidateNote) : null

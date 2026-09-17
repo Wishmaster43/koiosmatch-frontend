@@ -35,9 +35,10 @@ interface Args {
   attentionFilter: string | null
   toggleAttention: (key: string) => void
   staleMonths: number
-  // noFollowup is null when the stats endpoint is unavailable: that rule cannot be
-  // computed from list rows, so the card shows a dash rather than a wrong number.
-  counts: { stale: number; neverContacted: number; noFollowup: number | null; intake: number; activeConv: number; tasks: number; retentionExpiring30: number; retentionExpiring60: number }
+  // noFollowup/tasks/retentionExpiring* are null when the stats endpoint has no
+  // value (STATS-HONEST-1): that rule cannot be computed from list rows, so the
+  // card shows a dash rather than a wrong number, and the click-through is dropped.
+  counts: { stale: number; neverContacted: number; noFollowup: number | null; intake: number; activeConv: number; tasks: number | null; retentionExpiring30: number | null; retentionExpiring60: number | null }
 }
 
 // Pure builder for the candidates KPI/insights strip (see file docblock above) —
@@ -79,12 +80,15 @@ export function buildCandidateInsights({
     // so the counter and the list share one definition.
     { key: 'conversations', label: t('analytics.conversations'), value: counts.activeConv, color: 'var(--color-success-text)',
       onClick: () => toggleAttention('activeConv'), active: attentionFilter === 'activeConv' },
-    { key: 'tasks', label: t('kpi.tasks'), value: counts.tasks, sub: t('kpi.tasksSub'), color: TASKS_ACCENT,
-      onClick: () => toggleAttention('hasTasks'), active: attentionFilter === 'hasTasks' },
+    // STATS-HONEST-1: a null server count shows the house dash and drops the
+    // click-through (no onClick), instead of silently reading as a real zero.
+    { key: 'tasks', label: t('kpi.tasks'), value: counts.tasks ?? '—', sub: t('kpi.tasksSub'), color: TASKS_ACCENT,
+      onClick: counts.tasks == null ? undefined : () => toggleAttention('hasTasks'), active: attentionFilter === 'hasTasks' },
     // Retention consent expiring: show 60-day count as value, 30-day as sub-line.
     // Click filters on retention_expiring_days=60 server param (RETENTIE-KLIK-1).
-    { key: 'retentionExpiring', label: t('insights.retentionExpiring'), value: counts.retentionExpiring60, sub: t('insights.retentionExpiringSub', { count: counts.retentionExpiring30 }), color: 'var(--color-warning-text)',
-      onClick: () => toggleAttention('retentionExpiring60'), active: attentionFilter === 'retentionExpiring60' },
+    { key: 'retentionExpiring', label: t('insights.retentionExpiring'), value: counts.retentionExpiring60 ?? '—',
+      sub: counts.retentionExpiring30 == null ? undefined : t('insights.retentionExpiringSub', { count: counts.retentionExpiring30 }), color: 'var(--color-warning-text)',
+      onClick: counts.retentionExpiring60 == null ? undefined : () => toggleAttention('retentionExpiring60'), active: attentionFilter === 'retentionExpiring60' },
   ]
   return { donuts, kpis }
 }

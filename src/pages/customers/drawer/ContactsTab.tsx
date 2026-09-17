@@ -26,6 +26,10 @@ interface Props {
   // fetch. Optional — ContactsPanel falls back to a live contact's own customerId
   // when absent, so an as-yet-unthreaded caller still works for a non-empty list.
   customerId?: Id
+  // AUDIT-NAFIX-1 (§3 four UI states): passed straight through to ContactsPanel.
+  loading?: boolean
+  error?: boolean
+  onRetry?: () => void
   // EXTRACT-1: the caller's own customers.update permission check, threaded down
   // to the Koppelingen sub-tab's "Koppelen" buttons (§7 — UI gate, backend re-checks).
   canLinkBackoffice?: boolean
@@ -37,6 +41,7 @@ interface Props {
 // See the file's top doc above; a thin host around the one shared ContactsPanel, owning only which contact is open.
 export default function ContactsTab({
   contacts = [], locations = [], departments = [], statuses = [], customerId, canLinkBackoffice = false,
+  loading, error, onRetry,
   onAdd, onUpdate, onRemove,
 }: Props) {
   // The host owns "which contact is open" — the panel is controlled (see its docblock).
@@ -45,6 +50,7 @@ export default function ContactsTab({
     <ContactsPanel
       scope="customer" openId={openContactId} onOpenChange={setOpenContactId}
       contacts={contacts} locations={locations} departments={departments} statuses={statuses} customerId={customerId}
+      loading={loading} error={error} onRetry={onRetry}
       canLinkBackoffice={canLinkBackoffice}
       onAdd={onAdd} onUpdate={onUpdate} onRemove={onRemove}
     />

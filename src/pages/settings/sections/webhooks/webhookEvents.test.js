@@ -13,7 +13,8 @@ import { describe, it, expect } from 'vitest'
 import { EVENT_GROUPS, ALL_EVENTS, actionOf } from './webhookEvents'
 
 // Manual mirror of config/webhooks.php's `events` array (koiosmatch-api) — hand-
-// counted 2026-09-17: 61 rows, 13 groups (opportunity.closing_soon/stale added).
+// counted 2026-09-17: 66 rows, 14 groups (ADOPT-A2 addendum added the match
+// approval lifecycle + the new `settings` group's `settings.blank_fallback`).
 // Re-verify by re-grepping `'key' => '...'` in that file if this ever needs updating.
 const BACKEND_WEBHOOK_EVENTS = [
   'candidate.created', 'candidate.updated', 'candidate.status_changed', 'candidate.reactivated',
@@ -25,6 +26,7 @@ const BACKEND_WEBHOOK_EVENTS = [
   'application.created', 'application.updated', 'application.stage_changed',
   'application.proposal_sent', 'application.stage_stale',
   'match.created', 'match.updated', 'match.deleted', 'match.terminated', 'match.expiring',
+  'match.approval_pending', 'match.approval_overdue', 'match.approved', 'match.rejected',
   'vacancy.created', 'vacancy.status_changed', 'vacancy.published', 'vacancy.updated',
   'vacancy.stale_online', 'vacancy.closing_soon',
   'task.created', 'task.overdue',
@@ -39,6 +41,7 @@ const BACKEND_WEBHOOK_EVENTS = [
   'facebook.lead_received',
   'interview.started', 'interview.completed', 'interview.disqualified',
   'opportunity.created', 'opportunity.updated', 'opportunity.closing_soon', 'opportunity.stale',
+  'settings.blank_fallback',
 ]
 
 // Every shipped locale's settings.json, loaded like localeParity.test.ts does.
@@ -46,9 +49,9 @@ const settingsLocales = import.meta.glob('../../../../i18n/locales/*/settings.js
 const LOCALES = ['nl', 'en', 'de', 'fr', 'es', 'it', 'pt']
 
 describe('EVENT_GROUPS · backend parity (REPAIR N6)', () => {
-  it('mirrors exactly 61 backend webhook events', () => {
-    expect(BACKEND_WEBHOOK_EVENTS.length).toBe(61)
-    expect(ALL_EVENTS.length).toBe(61)
+  it('mirrors exactly 66 backend webhook events', () => {
+    expect(BACKEND_WEBHOOK_EVENTS.length).toBe(66)
+    expect(ALL_EVENTS.length).toBe(66)
   })
 
   it('contains every event the backend catalogue has (no missing subscription option)', () => {

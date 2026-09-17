@@ -9,7 +9,7 @@ import { eur } from '@/pages/dashboard/dashboardFormat'
 import type { PipelineValuePoint } from '@/types/dashboard'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: () => '01-06' }) }))
+vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: () => '01-06', locale: 'nl-NL' }) }))
 
 let captured: { data?: { name: string; value: number }[]; onItemClick?: unknown; formatValue?: (v: number) => string } = {}
 vi.mock('@/components/charts/LineChartCard', () => ({
@@ -36,9 +36,9 @@ describe('PipelineValueLine', () => {
     expect(onNavigate).toHaveBeenCalledWith('reports', { report: 'opportunities' })
   })
 
-  it('passes the shared eur() formatter as formatValue', () => {
+  it('passes the shared eur() formatter (bound to the active locale) as formatValue', () => {
     render(<PipelineValueLine rows={rows} />)
     expect(typeof captured.formatValue).toBe('function')
-    expect(captured.formatValue!(5000)).toBe(eur(5000))
+    expect(captured.formatValue!(5000)).toBe(eur(5000, 'nl-NL'))
   })
 })

@@ -68,6 +68,7 @@ export default function CustomerDrawerTabPanels({
     case 'locations':     return (
       <LocationsTab
         customerId={c.id} customerName={c.name} locations={locationsApi.locations} departments={departmentsApi.departments} contacts={contactsApi.contacts}
+        loading={locationsApi.loading} error={locationsApi.error} onRetry={locationsApi.reload}
         statuses={locationStatuses} departmentStatuses={departmentStatuses} contactStatuses={contactStatuses}
         canLinkBackoffice={canLinkBackoffice}
         onAddLocation={locationsApi.add}
@@ -81,6 +82,7 @@ export default function CustomerDrawerTabPanels({
     case 'departments':   return (
       <DepartmentsTab
         customerId={c.id} customerName={c.name} departments={departmentsApi.departments} contacts={contactsApi.contacts} locations={locationOptions} statuses={departmentStatuses}
+        loading={departmentsApi.loading} error={departmentsApi.error} onRetry={departmentsApi.reload}
         canLinkBackoffice={canLinkBackoffice}
         onAdd={departmentsApi.add} onUpdate={departmentsApi.update} onRemove={departmentsApi.remove}
         contactStatuses={contactStatuses}
@@ -90,6 +92,7 @@ export default function CustomerDrawerTabPanels({
     case 'contacts':      return (
       <ContactsTab
         contacts={contactsApi.contacts} locations={locationOptions} departments={departmentsApi.departments} statuses={contactStatuses}
+        loading={contactsApi.loading} error={contactsApi.error} onRetry={contactsApi.reload}
         canLinkBackoffice={canLinkBackoffice}
         onAdd={contactsApi.add} onUpdate={contactsApi.update} onRemove={contactsApi.remove}
       />

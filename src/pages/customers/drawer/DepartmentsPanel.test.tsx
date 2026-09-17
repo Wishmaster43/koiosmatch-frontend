@@ -343,3 +343,24 @@ describe('DepartmentsPanel · add gate (RIGHTS-GATE-OPENERS-1)', () => {
     expect(screen.getByRole('button', { name: ct('departments.add') })).toBeInTheDocument()
   })
 })
+
+/**
+ * AUDIT-NAFIX-1 (§3 four UI states) — a failed GET must render an error banner
+ * with a retry, never the empty-list state.
+ */
+describe('DepartmentsPanel · loading/error states (AUDIT-NAFIX-1)', () => {
+  it('shows an error banner with retry instead of the empty state when the load failed', () => {
+    const onRetry = vi.fn()
+    render(<Host {...base} scope="customer" departments={[]} error onRetry={onRetry} />)
+    expect(screen.getByRole('alert')).toBeInTheDocument()
+    expect(screen.queryByText(ct('departments.empty'))).not.toBeInTheDocument()
+  })
+
+  it('calls the passed reload on retry click', async () => {
+    const user = userEvent.setup()
+    const onRetry = vi.fn()
+    render(<Host {...base} scope="customer" departments={[]} error onRetry={onRetry} />)
+    await user.click(screen.getByRole('button', { name: cm('error.retry') }))
+    expect(onRetry).toHaveBeenCalledTimes(1)
+  })
+})

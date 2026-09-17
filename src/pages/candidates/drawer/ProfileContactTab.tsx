@@ -13,7 +13,7 @@ import { useProfileEditState } from './useProfileEditState'
 import { useProfileRequiredKeys } from './useProfileRequiredKeys'
 import { isValidEmailFormat, isValidPhoneFormat, isValidLinkedinFormat } from '../lib/contactFieldValidation'
 import { useContactMomentConfirm } from '../hooks/useContactMomentConfirm'
-import ContactMomentConfirmBanner from './ContactMomentConfirmBanner'
+import ContactMomentConfirmBanner from '@/components/drawer/ContactMomentConfirmBanner'
 import type { Candidate } from '@/types/candidate'
 
 // The fields this sub-tab owns — split out of the old combined ProfileTab

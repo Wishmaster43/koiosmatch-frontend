@@ -27,7 +27,7 @@ export default function CandidateNotesPopout({ id }: { id: string | undefined })
   // Note categories + contact channels — the same tenant lookups the drawer's
   // Communication tab reads (NOTE-TYPES-2/3 / last-contact-types).
   const { types: allNoteTypes, writableTypes } = useNoteTypes('candidate')
-  const { types: channels } = useLastContactTypes()
+  const { types: channels } = useLastContactTypes('candidate')
   // Notes persist via the API — same hook, same host as CommunicationTab.
   const { notes, addNote, editNote, deleteNote } = useCandidateNotes(id)
   // NOTES-THREAD-1: user vs. system notes + the filtered-index remap, shared with

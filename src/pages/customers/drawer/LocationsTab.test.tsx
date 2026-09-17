@@ -226,3 +226,32 @@ describe('LocationsTab · Gearchiveerd quick-view (ARCHIVE-SUBENTITY-1)', () => 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/customers/cust-1/locations', expect.objectContaining({ params: { include_archived: 1 } })))
   })
 })
+
+/**
+ * AUDIT-NAFIX-1 (§3 four UI states) — a failed GET must render an error banner
+ * with a retry, never the empty-list state; a loading fetch shows the table's
+ * own skeleton instead of a blank list.
+ */
+describe('LocationsTab · loading/error states (AUDIT-NAFIX-1)', () => {
+  it('shows an error banner with retry instead of the empty state when the load failed', () => {
+    const onRetry = vi.fn()
+    render(<LocationsTab {...base} locations={[]} error onRetry={onRetry} />)
+
+    expect(screen.getByRole('alert')).toBeInTheDocument()
+    expect(screen.queryByText(ct('locations.empty'))).not.toBeInTheDocument()
+  })
+
+  it('calls the passed reload on retry click', async () => {
+    const user = userEvent.setup()
+    const onRetry = vi.fn()
+    render(<LocationsTab {...base} locations={[]} error onRetry={onRetry} />)
+
+    await user.click(screen.getByRole('button', { name: cm('error.retry') }))
+    expect(onRetry).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders no error banner while loading (aria-busy signals the fetch instead)', () => {
+    render(<LocationsTab {...base} loading />)
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+})

@@ -1290,6 +1290,9 @@
     "candidate_contact_moment": {
       "registered": "Contactmoment geregistreerd"
     },
+    "customer_contact_moment": {
+      "registered": "Contactmoment geregistreerd"
+    },
     "candidate_cv_parse_proposal": {
       "accepted": "CV-parse voorstel geaccepteerd",
       "rejected": "CV-parse voorstel afgewezen"

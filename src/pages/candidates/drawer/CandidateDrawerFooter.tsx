@@ -24,7 +24,7 @@ export default function CandidateDrawerFooter({ c }: { c: Candidate }) {
   const { formatDate } = useDateFormat() as {
     formatDate: (d?: string | null, opts?: Intl.DateTimeFormatOptions) => string
   }
-  const { labelOf: lastContactLabel } = useLastContactTypes()
+  const { labelOf: lastContactLabel } = useLastContactTypes('candidate')
 
   return (
     <Caption as="div" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12 }}>

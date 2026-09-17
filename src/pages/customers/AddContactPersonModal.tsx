@@ -70,6 +70,7 @@ import ContactIdentityCard from './addmodal/ContactIdentityCard'
 import ContactDetailsCard from './addmodal/ContactDetailsCard'
 import ContactLinkCard from './ContactLinkCard'
 import { useAddContactPersonForm } from './useAddContactPersonForm'
+import SubEntityDuplicateNotice from './addmodal/SubEntityDuplicateNotice'
 import type { ContactPayload } from './hooks/useCustomerContacts'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
@@ -81,6 +82,7 @@ interface OptionRow { id: Id; name: string }
 // orchestration) to the presentational cards.
 export default function AddContactPersonModal({
   onClose, onCreate, onImported, customerName, locations = [], departments = [], statuses = [], initial, lockLocationId, lockDepartmentId, existing = [],
+  customerId, onOpenExisting,
 }: {
   onClose: () => void
   onCreate?: (v: ContactPayload) => void
@@ -98,6 +100,9 @@ export default function AddContactPersonModal({
   // The customer's OTHER already-loaded contacts — drives the primary-replace
   // confirmation and the email/phone/mobile duplicate check below.
   existing?: Contact[]
+  // ADOPT-A2 row 81: scopes the live dedupe probe; onOpenExisting opens the hit in the parent panel (onOpenChange).
+  customerId?: Id
+  onOpenExisting?: (id: Id, archived?: boolean) => void
 }) {
   const { t } = useTranslation(['customers', 'common'])
   const hasPermission = useSafePermission()
@@ -120,8 +125,8 @@ export default function AddContactPersonModal({
     isEdit, importWizard, importOpen, setImportOpen, form, set, errors, createError, dialog,
     markTouched, emailDup, phoneDup, mobileDup, submit, canSubmit,
     departmentOptions, departmentPlaceholder, showLocationPicker, showDepartmentPicker,
-    emailMessage, phoneMessage, mobileMessage, handlePrimaryToggle,
-  } = useAddContactPersonForm({ onCreate, onClose, onImported, departments, statuses, initial, lockLocationId, lockDepartmentId, existing, t })
+    emailMessage, phoneMessage, mobileMessage, handlePrimaryToggle, dup,
+  } = useAddContactPersonForm({ onCreate, onClose, onImported, departments, statuses, initial, lockLocationId, lockDepartmentId, existing, t, customerId, onOpenExisting })
 
   // Contact-function/gender option rows for ContactIdentityCard.
   const genderOptions = genders.map(g => ({ value: g.value, label: g.label }))
@@ -205,6 +210,10 @@ export default function AddContactPersonModal({
           />
         </div>
       </div>
+
+      {/* ADOPT-A2 row 81: live per-customer dedupe probe (catches an ARCHIVED duplicate the
+          local email/phone/mobile check above never sees), create-only. */}
+      {!isEdit && <SubEntityDuplicateNotice keyPrefix="contacts" dup={dup} />}
 
       {/* useConfirm's staged dialog — a fixed-position overlay (FloatingPanel), so its
           position in this tree doesn't affect where it renders on screen. */}
