@@ -3,16 +3,15 @@
  * REAL InterviewSession (APP-INTERVIEW-HISTORY-1), with its outcome chip and the
  * full transcript. Empty state when there are none.
  */
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MessageCircle, FileText } from 'lucide-react'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import StatusPill from '@/components/ui/StatusPill'
 import { GroupLabel } from '@/components/ui/typography'
 import Spinner from '@/components/ui/Spinner'
-import ConversationsSection from '@/components/drawer/ConversationsSection'
 import { useAuth } from '@/context/AuthContext'
-import api, { unwrap, unwrapList } from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { useDateFormat } from '@/lib/datetime'
@@ -156,63 +155,11 @@ function StartInterviewAction({ applicationId, onStarted }: { applicationId: Id 
 }
 
 
-// Which /conversations query the live panel below should render — never both at
-// once, so the panel below stays a single, unambiguous ConversationsSection call.
-type ConversationScope = { params: Record<string, Id> } | null
-
-/**
- * useConversationScope — CONV-APPLICATION-ID-1 (re-verified live 08-08 AFTER the
- * backend landing, on S-00001/Noud van Leeuwen): InterviewEngine::startForApplication()
- * now sets Conversation.application_id going forward (read in InterviewEngine.php), so
- * GET /conversations?application_id=<id> is the PRECISE per-application thread — no
- * longer mixes in another application's interview for the same candidate. But the fix
- * is code-forward only: the live re-measurement still shows S-00001's own thread
- * answering 0 rows for that scoped query — its Conversation row predates the write.
- * The model also keeps exactly ONE Conversation row per candidate
- * (`firstOrCreate(['candidate_id' => …])`), so an OLDER application's thread can later
- * get its application_id repointed at a newer interview on the same candidate — the
- * exact "mixes in threads from OTHER applications" bug this tab used to have with the
- * candidate_id-only link. So: try the precise application scope first; fall back to the
- * candidate-wide scope (the previous, honest link) ONLY when that precise read comes
- * back empty, never the other way around. Skips the network call entirely when there is
- * no candidate at all (`enabled` false, or no candidateId) — no conversation can exist.
- */
-function useConversationScope(enabled: boolean, applicationId: Id | undefined, candidateId: Id | null): { scope: ConversationScope; resolved: boolean } {
-  const [state, setState] = useState<{ scope: ConversationScope; resolved: boolean }>({ scope: null, resolved: false })
-  // Resolves which conversation scope to use, per the precise-then-fallback strategy
-  // in the file header; the `alive` guard drops a stale response after unmount or
-  // a changed application/candidate id.
-  useEffect(() => {
-    let alive = true
-    // No candidate at all, or the panel isn't offered — never was a conversation
-    // possible; skip the round-trip and let the caller show its own honest notice.
-    if (!enabled || candidateId == null) { setState({ scope: null, resolved: true }); return () => { alive = false } }
-    // No application id (shouldn't happen on a real drawer) — the always-safe
-    // candidate-wide scope, no preflight needed.
-    if (applicationId == null) { setState({ scope: { params: { candidate_id: candidateId } }, resolved: true }); return () => { alive = false } }
-    setState({ scope: null, resolved: false })
-    api.get('/conversations', { params: { application_id: applicationId } })
-      .then(r => {
-        if (!alive) return
-        const { rows } = unwrapList<{ id: Id }>(r)
-        setState({
-          scope: rows.length > 0 ? { params: { application_id: applicationId } } : { params: { candidate_id: candidateId } },
-          resolved: true,
-        })
-      })
-      .catch(() => {
-        // The preflight itself failed — fall back to the candidate-wide scope (the
-        // previously-working link) rather than blocking the panel on it entirely;
-        // ConversationsSection still has its own error state for ITS OWN fetch.
-        if (alive) setState({ scope: { params: { candidate_id: candidateId } }, resolved: true })
-      })
-    return () => { alive = false }
-  }, [enabled, applicationId, candidateId])
-  return state
-}
-
-// The application drawer's interviews tab: schedule/history + the linked
-// conversation thread, using useConversationScope's precise-then-fallback link.
+// The application drawer's interviews tab: schedule/history only. The live
+// conversation thread moved to its own Gesprekken tab (GESPREK-CONSISTENT-1-FE,
+// ApplicationConversationsSection) — ONE reader per drawer, never two copies,
+// and reading/starting a conversation now works identically on every screen
+// that shows the person, not scoped to this one application.
 export default function InterviewsTab({ application: a, detailPhase }: { application: ApplicationDetail; detailPhase?: 'idle' | 'loading' | 'ready' | 'error' }) {
   const { t } = useTranslation('applications')
 
@@ -232,13 +179,6 @@ export default function InterviewsTab({ application: a, detailPhase }: { applica
   // NEW interview there makes no sense (bucket is the same flag-derived outcome
   // used across the tab).
   const canStartNew = !interview && a.bucket !== 'rejected' && a.bucket !== 'matched'
-  // I2 (Danny 08-08 screenshot): only offer the live conversation panel once this
-  // application has ever run an interview (a live session, or at least one row in
-  // the history below) — this tab is interview-scoped, not general communication.
-  const hasAnyInterviewActivity = Boolean(interview) || interviews.length > 0
-  // CONV-APPLICATION-ID-1: resolve the precise vs. fallback scope (see the hook's
-  // own doc comment above) — only ever runs the preflight while the panel is offered.
-  const { scope, resolved } = useConversationScope(hasAnyInterviewActivity, a.id, a.candidateId)
 
   // The list row carries no interviews[] (detail-only) and a deep-link opens on a
   // bare {id}: while the detail fetch runs — or after it FAILED — an empty state
@@ -270,34 +210,6 @@ export default function InterviewsTab({ application: a, detailPhase }: { applica
         hasInterviewWorkflowField={a.hasInterviewWorkflowField}
       />
       {canStartNew && <StartInterviewAction applicationId={a.id} onStarted={setStartedOverride} />}
-
-      {/* I2/CONV-APPLICATION-ID-1: the actual live WhatsApp dialogue, scoped to THIS
-          application when the backend's per-application link resolves to a real
-          thread, falling back to the candidate-wide link otherwise (see
-          useConversationScope's doc comment for the full re-verification). Reuses
-          the shared ConversationsSection exactly like the candidate drawer does.
-          INTERVIEW-TAB-COHERENTIE-1 point 4: this composition already surfaces the
-          shared 24h WA session-window countdown — ConversationsSection itself reads
-          components/drawer/sessionWindow.ts and renders the "time left" line above
-          its composer on the open thread, so the interview tab shows the SAME
-          countdown component the candidate drawer's conversation tab uses, not a
-          second copy. When there is no conversation (or none has ever run), the
-          honest states below (loading / noCandidate / no panel at all) already
-          render nothing in its place. */}
-      {hasAnyInterviewActivity && (
-        <div>
-          <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 8 }}>{t('interview.conversation.title')}</GroupLabel>
-          {!resolved ? (
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('common:loading')}</span>
-          ) : scope ? (
-            <ConversationsSection threadsUrl="/conversations" threadsParams={scope.params} />
-          ) : (
-            <span style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>
-              {t('interview.conversation.noCandidate')}
-            </span>
-          )}
-        </div>
-      )}
 
       {/* ONE "nothing yet" message, never two (Danny 22-08, screenshot): while no
           live session exists either, the status card above already says so — the

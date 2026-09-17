@@ -562,3 +562,33 @@ describe('ConversationsSection · channel badge (K-193)', () => {
     expect(screen.queryByText(/conversations\.channel\./)).not.toBeInTheDocument()
   })
 })
+
+// GESPREK-CONSISTENT-1-FE: badgeApplicationId highlights the one thread stamped
+// with the caller's application id — never a filter on the (still candidate-wide) list.
+describe('ConversationsSection · badgeApplicationId (GESPREK-CONSISTENT-1-FE)', () => {
+  const ROWS = [
+    { id: 'conv-1', wa_number: '+31612345678', last_message_at: '2026-07-17T09:00:00Z', is_active: true, escalated: false, application_id: 'app-1' },
+    { id: 'conv-2', wa_number: '+31699999999', last_message_at: '2026-06-01T09:00:00Z', is_active: false, escalated: false, application_id: 'app-2' },
+  ]
+
+  beforeEach(() => {
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/conversations') return Promise.resolve({ data: { data: ROWS } })
+      if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: [] } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+  })
+
+  it('renders the chip only for the row whose application_id matches badgeApplicationId', async () => {
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} badgeApplicationId="app-1" />)
+    await screen.findByText('+31612345678')
+    const chips = screen.getAllByText('conversations.thisApplication')
+    expect(chips).toHaveLength(1)
+  })
+
+  it('renders no chip at all when badgeApplicationId is not given', async () => {
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    await screen.findByText('+31612345678')
+    expect(screen.queryByText('conversations.thisApplication')).toBeNull()
+  })
+})

@@ -1284,6 +1284,7 @@
     "loadingMessages": "Cargando mensajes…",
     "noMessages": "No hay mensajes en esta conversación",
     "unknownContact": "Contacto desconocido",
+    "thisApplication": "Esta candidatura",
     "delivery": {
       "sent": "Enviado",
       "delivered": "Entregado",

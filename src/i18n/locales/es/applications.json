@@ -113,6 +113,7 @@
       "vacancy": "Vacante",
       "interviews": "Entrevista",
       "appointments": "Citas",
+      "conversations": "Conversaciones",
       "timeline": "Cronología",
       "notes": "Notas",
       "changelog": "Cambios",
@@ -347,7 +348,6 @@
       "DISQUALIFIED": "Descalificado"
     },
     "conversation": {
-      "title": "Conversación",
       "noCandidate": "Ningún candidato vinculado. Nada que mostrar."
     },
     "loadingDetail": "Cargando datos de la entrevista…",

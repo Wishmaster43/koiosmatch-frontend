@@ -24,6 +24,7 @@ import CandidateTab from './drawer/CandidateTab'
 import VacancyTab from './drawer/VacancyTab'
 import InterviewsTab from './drawer/InterviewsTab'
 import AppointmentsTab from './drawer/AppointmentsTab'
+import ApplicationConversationsSection from './drawer/ApplicationConversationsSection'
 import NotesTab from './drawer/NotesTab'
 import Timeline from './drawer/Timeline'
 import DetachReasonModal from './drawer/DetachReasonModal'
@@ -46,7 +47,7 @@ import EntityLink from '@/components/ui/EntityLink'
 // mirroring MatchDrawer's statistics tab, pages/matches/MatchDrawer.tsx):
 // a read-only summary, never a working tab. 'extra' (§3A(f)) is appended
 // below only when the tenant has ≥1 active application custom field.
-const TAB_IDS = ['application', 'candidate', 'vacancy', 'interviews', 'appointments', 'notes', 'timeline', 'statistics']
+const TAB_IDS = ['application', 'candidate', 'vacancy', 'interviews', 'appointments', 'conversations', 'notes', 'timeline', 'statistics']
 
 interface ApplicationDrawerProps extends ApplicationLinkSourceProps {
   // Detail-fetch phase from the drawer hook — tabs gate their empty states on it.
@@ -162,6 +163,12 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
       case 'vacancy':      return <VacancyTab application={a} onLinkVacancy={onLinkVacancy} />
       case 'interviews':   return <InterviewsTab application={a} detailPhase={detailPhase} />
       case 'appointments': return <AppointmentsTab application={a} />
+      // GESPREK-CONSISTENT-1-FE: the person's own conversations, never scoped to
+      // this application. ApplicationDetailResource carries the candidate's `phone`
+      // but no `mobile` field (measured — see the lane's declined list), so
+      // candidateMobile stays unset and the start trigger relies on the server's
+      // own 422 reason instead of a locally guessed disable.
+      case 'conversations': return <ApplicationConversationsSection candidateId={a.candidateId} applicationId={a.id} />
       // Tijdlijn TAB (real lifecycle activity: funnel transitions, appointments,
       // notes, AI-interviews — ApplicationTimeline on the backend) is intentionally
       // distinct from the changelog ICON in the title row (raw field-change audit,

@@ -1284,6 +1284,7 @@
     "loadingMessages": "Loading messages…",
     "noMessages": "No messages in this conversation",
     "unknownContact": "Unknown contact",
+    "thisApplication": "This application",
     "delivery": {
       "sent": "Sent",
       "delivered": "Delivered",

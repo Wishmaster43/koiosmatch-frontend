@@ -113,6 +113,7 @@
       "vacancy": "Vacancy",
       "interviews": "Interview",
       "appointments": "Appointments",
+      "conversations": "Conversations",
       "timeline": "Timeline",
       "notes": "Notes",
       "changelog": "Changelog",
@@ -347,7 +348,6 @@
       "DISQUALIFIED": "Disqualified"
     },
     "conversation": {
-      "title": "Conversation",
       "noCandidate": "No candidate linked. Nothing to show."
     },
     "loadingDetail": "Loading interview details…",

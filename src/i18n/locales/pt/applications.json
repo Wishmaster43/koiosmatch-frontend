@@ -113,6 +113,7 @@
       "vacancy": "Vaga",
       "interviews": "Entrevista",
       "appointments": "Marcações",
+      "conversations": "Conversas",
       "timeline": "Cronologia",
       "notes": "Notas",
       "changelog": "Alterações",
@@ -347,7 +348,6 @@
       "DISQUALIFIED": "Rejeitado"
     },
     "conversation": {
-      "title": "Conversa",
       "noCandidate": "Nenhum candidato associado. Nada a mostrar."
     },
     "loadingDetail": "A carregar dados da entrevista…",

@@ -113,6 +113,7 @@
       "vacancy": "Vacature",
       "interviews": "Interview",
       "appointments": "Afspraken",
+      "conversations": "Gesprekken",
       "timeline": "Tijdlijn",
       "notes": "Notities",
       "changelog": "Wijzigingen",
@@ -347,7 +348,6 @@
       "DISQUALIFIED": "Afgewezen"
     },
     "conversation": {
-      "title": "Gesprek",
       "noCandidate": "Geen kandidaat gekoppeld. Niets om te tonen."
     },
     "loadingDetail": "Interviewgegevens laden…",

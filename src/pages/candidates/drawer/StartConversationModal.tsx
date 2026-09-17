@@ -100,13 +100,18 @@ function ConfigNotice({ text, t, style }: { text: string; t: (k: string, o?: Rec
   )
 }
 
-export default function StartConversationModal({ candidateId, subject, onClose, onStarted }: {
+export default function StartConversationModal({ candidateId, subject, applicationId, onClose, onStarted }: {
   // DEPRECATED legacy shape — kept so the existing candidate call site
   // (CommunicationTab.tsx) stays byte-compatible. Prefer `subject`.
   candidateId?: Id
   // CONTACT-CONVERSATION-START: the thread owner to start for — a candidate or a
   // customer contact.
   subject?: ConversationSubject
+  // GESPREK-CONSISTENT-1-FE: tags the new thread with the application it was
+  // started from — sent forward-compatibly for a candidate subject only; the
+  // BE controller does not read this key yet (confirm the landing with CMBE
+  // before relying on the server stamping the thread with it).
+  applicationId?: Id
   onClose: () => void
   // Fired after a successful send so the host can refresh its threads list.
   onStarted: () => void
@@ -189,15 +194,19 @@ export default function StartConversationModal({ candidateId, subject, onClose, 
     const owner = resolvedSubject.kind === 'customer_contact'
       ? { customer_contact_id: resolvedSubject.id }
       : { candidate_id: resolvedSubject.id }
+    // GESPREK-CONSISTENT-1-FE: application_id only ever rides along for a candidate
+    // owner, sent forward-compatibly — the BE does not read/stamp it yet (confirm
+    // the landing with CMBE before treating this as an adopted contract).
+    const appTag = applicationId && resolvedSubject.kind === 'candidate' ? { application_id: applicationId } : {}
     try {
       if (channel === 'wa_web') {
         // WA-SEND-1: the queued outbox path — 202 { outbox_id, status: 'queued' }: the toast
         // says scheduled, never sent; the thread shows the outbox status (WA-SEND-STATUS-1).
-        await api.post('/conversations/start', { ...owner, channel: 'wa_web', message: trimmedMessage, whatsapp_number_id: deviceId })
+        await api.post('/conversations/start', { ...owner, ...appTag, channel: 'wa_web', message: trimmedMessage, whatsapp_number_id: deviceId })
         notifySuccess(t('conversations.queued'))
       } else {
         await api.post('/conversations/start', {
-          ...owner,
+          ...owner, ...appTag,
           phone_number_id: phoneNumberId, template_name: templateName,
           language: selected?.language,
           ...(agentId ? { agent_id: agentId } : {}),

@@ -323,3 +323,62 @@ describe('StartConversationModal · failed lookup load (four UI states)', () => 
     expect(screen.queryByText('conversations.loadError')).not.toBeInTheDocument()
   })
 })
+
+// GESPREK-CONSISTENT-1-FE: application_id is sent forward-compatibly on both the
+// waba and wa_web POST bodies for a candidate subject only, never for a
+// customer_contact subject; the BE controller does not read the key until
+// KLEIN-BE-2 lands (measured on api main 4b81fed9), so this pins the FE body shape.
+describe('StartConversationModal · applicationId (GESPREK-CONSISTENT-1-FE)', () => {
+  it('includes application_id on the waba template POST when given', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { conversation_id: 'conv-1', status: 'sent' } })
+    const user = userEvent.setup()
+    render(<StartConversationModal candidateId="cand-1" applicationId="app-1" onClose={noop} onStarted={noop} />)
+
+    await user.click(await screen.findByRole('button', { name: 'conversations.templatePlaceholder' }))
+    await user.click(await screen.findByRole('button', { name: /welkom \(nl\)/ }))
+    await user.click(screen.getByRole('button', { name: 'conversations.start' }))
+
+    expect(api.post).toHaveBeenCalledWith('/conversations/start', {
+      candidate_id: 'cand-1', application_id: 'app-1', phone_number_id: 'PN-1', template_name: 'welkom', language: 'nl',
+    })
+  })
+
+  it('omits application_id on the waba template POST when not given', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { conversation_id: 'conv-1', status: 'sent' } })
+    const user = userEvent.setup()
+    render(<StartConversationModal candidateId="cand-1" onClose={noop} onStarted={noop} />)
+
+    await user.click(await screen.findByRole('button', { name: 'conversations.templatePlaceholder' }))
+    await user.click(await screen.findByRole('button', { name: /welkom \(nl\)/ }))
+    await user.click(screen.getByRole('button', { name: 'conversations.start' }))
+
+    const body = vi.mocked(api.post).mock.calls[0][1] as Record<string, unknown>
+    expect(body).not.toHaveProperty('application_id')
+  })
+
+  it('includes application_id on the wa_web POST when given', async () => {
+    mockLookups([TEMPLATE], [NUMBER], [], [OWN_DEVICE], [OWN_OPTION])
+    vi.mocked(api.post).mockResolvedValue({ status: 202, data: { outbox_id: 'ob-1', status: 'queued' } })
+    render(<StartConversationModal candidateId={7} applicationId="app-1" onClose={noop} onStarted={noop} />)
+    const field = await screen.findByPlaceholderText('conversations.messagePlaceholder')
+    fireEvent.change(field, { target: { value: 'Hoi Niels, kun je morgen?' } })
+    fireEvent.click(screen.getByRole('button', { name: 'conversations.send' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/conversations/start', {
+      candidate_id: 7, application_id: 'app-1', channel: 'wa_web', message: 'Hoi Niels, kun je morgen?', whatsapp_number_id: 'd-own',
+    }))
+  })
+
+  it('never sends application_id for a customer_contact subject, even when given', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { conversation_id: 'conv-1', status: 'sent' } })
+    const user = userEvent.setup()
+    render(<StartConversationModal subject={{ kind: 'customer_contact', id: 'contact-1' }} applicationId="app-1" onClose={noop} onStarted={noop} />)
+
+    await user.click(await screen.findByRole('button', { name: 'conversations.templatePlaceholder' }))
+    await user.click(await screen.findByRole('button', { name: /welkom \(nl\)/ }))
+    await user.click(screen.getByRole('button', { name: 'conversations.start' }))
+
+    const body = vi.mocked(api.post).mock.calls[0][1] as Record<string, unknown>
+    expect(body).not.toHaveProperty('application_id')
+    expect(body).toHaveProperty('customer_contact_id', 'contact-1')
+  })
+})

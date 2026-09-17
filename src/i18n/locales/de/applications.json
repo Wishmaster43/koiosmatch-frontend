@@ -113,6 +113,7 @@
       "vacancy": "Stelle",
       "interviews": "Interview",
       "appointments": "Termine",
+      "conversations": "Gespräche",
       "timeline": "Verlauf",
       "notes": "Notizen",
       "changelog": "Änderungen",
@@ -347,7 +348,6 @@
       "DISQUALIFIED": "Disqualifiziert"
     },
     "conversation": {
-      "title": "Gespräch",
       "noCandidate": "Kein Kandidat verknüpft. Nichts anzuzeigen."
     },
     "loadingDetail": "Interviewdaten werden geladen…",

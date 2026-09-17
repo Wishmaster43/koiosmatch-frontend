@@ -113,6 +113,7 @@
       "vacancy": "Posizione",
       "interviews": "Colloquio",
       "appointments": "Appuntamenti",
+      "conversations": "Conversazioni",
       "timeline": "Cronologia",
       "notes": "Note",
       "changelog": "Modifiche",
@@ -347,7 +348,6 @@
       "DISQUALIFIED": "Respinto"
     },
     "conversation": {
-      "title": "Conversazione",
       "noCandidate": "Nessun candidato collegato. Niente da mostrare."
     },
     "loadingDetail": "Caricamento dati del colloquio…",

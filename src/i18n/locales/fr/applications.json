@@ -113,6 +113,7 @@
       "vacancy": "Poste",
       "interviews": "Entretien",
       "appointments": "Rendez-vous",
+      "conversations": "Conversations",
       "timeline": "Chronologie",
       "notes": "Notes",
       "changelog": "Modifications",
@@ -347,7 +348,6 @@
       "DISQUALIFIED": "Disqualifié"
     },
     "conversation": {
-      "title": "Conversation",
       "noCandidate": "Aucun candidat lié. Rien à afficher."
     },
     "loadingDetail": "Chargement des données d’entretien…",

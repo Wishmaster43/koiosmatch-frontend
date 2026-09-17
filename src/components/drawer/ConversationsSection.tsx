@@ -86,6 +86,10 @@ interface ConversationRow {
   channel_label?: string | null
   // PUNT-2: "last turn" semantics — owner of the last message (including the inbound stamp).
   last_handled_by?: string | null
+  // GESPREK-CONSISTENT-1-FE (KLEIN-BE-2, hand-written — the spec carries no 2xx
+  // schema for GET /conversations yet): the application this thread was started
+  // from, or was stamped with by an in-window interview send. Nullable context.
+  application_id?: Id | null
 }
 
 // Prefer the candidate's real name over the raw WhatsApp number for the thread heading.
@@ -115,7 +119,7 @@ const rowSubject = (row: ConversationRow): ConversationSubject | null => {
 // the candidate, so the composer is ON for every caller.
 const SESSION_COMPOSER_ENABLED = true
 
-export default function ConversationsSection({ threadsUrl, threadsParams, headerAction, composerEnabled = SESSION_COMPOSER_ENABLED }: {
+export default function ConversationsSection({ threadsUrl, threadsParams, headerAction, badgeApplicationId, composerEnabled = SESSION_COMPOSER_ENABLED }: {
   // The list request the caller wants — candidate scope passes '/conversations' +
   // { candidate_id }, the contact variant passes its nested contact-conversations route.
   threadsUrl: string
@@ -127,6 +131,10 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
   // SectionCard's own action slot so this stays a candidate-only affordance without
   // the shared component knowing WHY (a customer-contact thread has none).
   headerAction?: ReactNode
+  // GESPREK-CONSISTENT-1-FE: marks the one thread (if any) that carries this
+  // application's id with an extra chip — the reader stays the candidate-wide
+  // list, this only highlights which row belongs to the caller's application.
+  badgeApplicationId?: Id
 }) {
   // thread UI strings live in the candidates ns — ONE source, both dossiers reuse them
   const { t, i18n } = useTranslation('candidates')
@@ -314,6 +322,11 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
                 )}
               </span>
               {channelChip(row.primary_channel, row.channel_label)}
+              {/* GESPREK-CONSISTENT-1-FE: marks the one thread stamped with the
+                  caller's own application id — never a filter, just a highlight. */}
+              {badgeApplicationId != null && row.application_id === badgeApplicationId && (
+                <SoftChip label={t('conversations.thisApplication')} color="var(--color-primary)" />
+              )}
               {row.escalated && (
                 <SoftChip label={t('conversations.escalated')} color="var(--color-warning)" />
               )}
