@@ -15,14 +15,10 @@ import type { AvailStatus, DayPart } from '../hooks/useCandidatePlanning'
 import type { Id } from '@/types/common'
 // G34: the house searchable dropdown replaces the native day-part <select>.
 import CreatableSelect from '@/components/ui/CreatableSelect'
+// DATUM-1: the house date-only formatter (pure, no i18n-init side effect) — never a local ISO splitter.
+import { formatDateOnly } from '@/lib/localDate'
 
 const PARTS: DayPart[] = ['day', 'morning', 'afternoon', 'evening']
-
-// yyyy-mm-dd → dd-mm-yyyy (nl display per domain rule §3B).
-function dmy(iso: string): string {
-  const [y, m, d] = iso.split('-')
-  return y && m && d ? `${d}-${m}-${y}` : iso
-}
 
 // Sub-tab for date+day-part availability exceptions (see the module doc above): the real API-backed hook drives add/remove, this file only renders the list and the add row.
 export default function AvailabilityEditor({ candidateId }: { candidateId?: Id }) {
@@ -98,7 +94,7 @@ export default function AvailabilityEditor({ candidateId }: { candidateId?: Id }
         const unavailable = e.status === 'unavailable'
         return (
           <div key={String(e.id)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', width: 92, flexShrink: 0, fontFamily: 'var(--font-mono, monospace)' }}>{dmy(e.date)}</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', width: 92, flexShrink: 0, fontFamily: 'var(--font-mono, monospace)' }}>{formatDateOnly(e.date)}</span>
             <span style={{ fontSize: 10, padding: '1px 7px', borderRadius: 3, background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text-muted)', fontWeight: 600, flexShrink: 0 }}>{partLabel(e.part)}</span>
             {/* Status = icon + text + colour (never colour alone, §6). */}
             <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, flexShrink: 0,

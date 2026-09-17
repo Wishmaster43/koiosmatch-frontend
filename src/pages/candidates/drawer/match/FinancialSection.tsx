@@ -13,6 +13,7 @@
 import { X } from 'lucide-react'
 import type { TFunction } from 'i18next'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import Button from '@/components/ui/Button'
 import { useAuth } from '@/context/AuthContext'
 import { useNumberFormat } from '@/lib/formatters'
 import { RateProposalHint } from '../RateProposalNotice'
@@ -38,8 +39,9 @@ export default function FinancialSection({
   costCenter: string; setCostCenter: (v: string) => void; setCostCenterDirty: (v: boolean) => void
   billingEmails: string[]; setBillingEmails: (fn: (p: string[]) => string[]) => void; setBillingDirty: (v: boolean) => void
 }) {
-  // Margin is a calculated number with 2 decimal places (locale-aware formatting).
-  const { formatNumber } = useNumberFormat()
+  // Margin is a calculated number with 2 decimal places (locale-aware formatting);
+  // GETALLEN-1 also covers example placeholders, so the rate hints below use it too.
+  const { formatNumber, formatFixed } = useNumberFormat()
   // MATCH-FIN-GATE-1 (Danny 14-08): the match create/edit form is the third
   // surface carrying purchase rate + margin — gated on `matches.financial.view`,
   // same as MatchContractSection/PriceAgreementForm. Sell rate stays visible;
@@ -61,11 +63,11 @@ export default function FinancialSection({
       <div style={canSeeFinancial ? pairRow : undefined}>
         {canSeeFinancial && (
           <F label={t('placement.purchaseRate')} error={errors.purchase}>
-            {(labelId: string) => <input type="number" step="0.01" value={purchase} onChange={e => setPurchase(e.target.value)} style={input} placeholder="22,18" aria-labelledby={labelId} />}
+            {(labelId: string) => <input type="number" step="0.01" value={purchase} onChange={e => setPurchase(e.target.value)} style={input} placeholder={formatFixed(22.18, 2)} aria-labelledby={labelId} />}
           </F>
         )}
         <F label={t('placement.sellRate')} error={errors.sell}>
-          {(labelId: string) => <input type="number" step="0.01" value={sell} onChange={e => setSell(e.target.value)} style={input} placeholder="62,10" aria-labelledby={labelId} />}
+          {(labelId: string) => <input type="number" step="0.01" value={sell} onChange={e => setSell(e.target.value)} style={input} placeholder={formatFixed(62.10, 2)} aria-labelledby={labelId} />}
         </F>
       </div>
       {/* Margin — derived, never entered; its own full-width row (compact box, not
@@ -106,8 +108,11 @@ export default function FinancialSection({
                 <input type="email" value={em} placeholder={i === 0 ? t('placement.billingEmailMain') : t('placement.billingEmailExtra')}
                   onChange={e => { setBillingDirty(true); setBillingEmails(p => p.map((x, j) => j === i ? e.target.value : x)) }} style={input} />
                 {billingEmails.length > 1 && (
-                  <button onClick={() => { setBillingDirty(true); setBillingEmails(p => p.filter((_, j) => j !== i)) }} aria-label={t('common:close')}
-                    style={{ flexShrink: 0, width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={13} /></button>
+                  <Button variant="ghost" iconOnly size="sm"
+                    onClick={() => { setBillingDirty(true); setBillingEmails(p => p.filter((_, j) => j !== i)) }}
+                    aria-label={t('common:close')}>
+                    <X size={13} />
+                  </Button>
                 )}
               </div>
             ))}

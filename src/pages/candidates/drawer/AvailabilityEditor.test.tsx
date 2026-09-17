@@ -39,3 +39,15 @@ describe('AvailabilityEditor · day-part picker is the house CreatableSelect, no
     expect(add).toHaveBeenCalledWith({ date: '2026-08-20', part: 'morning', status: 'available', reason: undefined })
   })
 })
+
+describe('AvailabilityEditor · date rendering (DATUM-1)', () => {
+  it('renders an entry date via the house DD-MM-YYYY formatter, not a raw ISO string', () => {
+    vi.mocked(useCandidateAvailability).mockReturnValue({
+      entries: [{ id: '1', date: '2026-08-20', part: 'morning', status: 'available' }],
+      loading: false, error: false, add: vi.fn(), remove: vi.fn(), reload: vi.fn(),
+    })
+    render(<AvailabilityEditor candidateId="cand-1" />)
+    expect(screen.getByText('20-08-2026')).toBeInTheDocument()
+    expect(screen.queryByText('2026-08-20')).toBeNull()
+  })
+})

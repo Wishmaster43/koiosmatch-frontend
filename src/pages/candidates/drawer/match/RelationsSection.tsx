@@ -201,12 +201,13 @@ export default function RelationsSection({
               <div style={rowField}>
               {creatingContact ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, border: '1px solid var(--border)', borderRadius: 8, padding: 8, background: 'var(--bg)' }}>
+                  {/* §6: an inline sub-form's fields still need a real accessible name — placeholder alone isn't one once typed into. */}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                    <input value={nc.first_name} onChange={e => setNc(p => ({ ...p, first_name: e.target.value }))} placeholder={t('placement.firstName')} style={{ ...input, height: 30 }} />
-                    <input value={nc.last_name} onChange={e => setNc(p => ({ ...p, last_name: e.target.value }))} placeholder={t('placement.lastName')} style={{ ...input, height: 30 }} />
+                    <input value={nc.first_name} onChange={e => setNc(p => ({ ...p, first_name: e.target.value }))} placeholder={t('placement.firstName')} aria-label={t('placement.firstName')} style={{ ...input, height: 30 }} />
+                    <input value={nc.last_name} onChange={e => setNc(p => ({ ...p, last_name: e.target.value }))} placeholder={t('placement.lastName')} aria-label={t('placement.lastName')} style={{ ...input, height: 30 }} />
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                    <input value={nc.email} onChange={e => setNc(p => ({ ...p, email: e.target.value }))} placeholder={t('placement.email')} style={{ ...input, height: 30 }} />
+                    <input value={nc.email} onChange={e => setNc(p => ({ ...p, email: e.target.value }))} placeholder={t('placement.email')} aria-label={t('placement.email')} style={{ ...input, height: 30 }} />
                     {/* Functie — searchable/creatable per the tenant's contact-function
                         lookup (Danny 24-07 addendum), mirrors AddContactPersonModal. */}
                     <CreatableSelect value={nc.function || null} onChange={v => setNc(p => ({ ...p, function: v }))}
@@ -214,8 +215,8 @@ export default function RelationsSection({
                       options={contactFunctions} />
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                    <input type="tel" value={nc.phone} onChange={e => setNc(p => ({ ...p, phone: e.target.value }))} placeholder={t('placement.phone')} style={{ ...input, height: 30 }} />
-                    <input type="tel" value={nc.mobile} onChange={e => setNc(p => ({ ...p, mobile: e.target.value }))} placeholder={t('placement.mobile')} style={{ ...input, height: 30 }} />
+                    <input type="tel" value={nc.phone} onChange={e => setNc(p => ({ ...p, phone: e.target.value }))} placeholder={t('placement.phone')} aria-label={t('placement.phone')} style={{ ...input, height: 30 }} />
+                    <input type="tel" value={nc.mobile} onChange={e => setNc(p => ({ ...p, mobile: e.target.value }))} placeholder={t('placement.mobile')} aria-label={t('placement.mobile')} style={{ ...input, height: 30 }} />
                   </div>
                   {/* Duplicate-contact preflight (Danny 24-07): blocks the save, names the
                       existing match — the backend enforces no uniqueness on these fields. */}

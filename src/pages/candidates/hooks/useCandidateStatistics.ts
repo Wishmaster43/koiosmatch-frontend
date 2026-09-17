@@ -10,7 +10,9 @@ import { useMemo } from 'react'
 import type { Candidate } from '@/types/candidate'
 import type { AppRow, Appt } from '@/pages/candidates/drawer/applicationRowModel'
 import type { CandidateNote } from '@/pages/candidates/hooks/useCandidateNotes'
-import { daysSince } from '@/lib/datetime'
+// DATETIME-IMPORT-LES (CLAUDE.md §2): daysSince is a pure, locale-free helper —
+// import it from localDate directly, never through datetime.ts's i18n-init side effect.
+import { daysSince } from '@/lib/localDate'
 
 // One funnel-stage bucket with its live count — grouped by the row's own stable
 // key (stageKey, falling back to the translated label) so a tenant renaming a
