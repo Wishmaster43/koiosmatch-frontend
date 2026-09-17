@@ -11,8 +11,10 @@
  */
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
+import { archivedCheckboxGroup } from '@/lib/filterGroups/common'
 
 interface Opt { value: string | number; label: string; count?: number }
+// Match's toggle carries string|number (client ids), unlike the shared string-only Tog.
 type Tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string | number) => void
 
 export interface MatchDateRange { from: string; to: string }
@@ -83,7 +85,7 @@ export function buildMatchFilterGroups({
       onFromChange: (v: string) => setDateRange({ from: v, to: dateRange?.to ?? '' }),
       onToChange:   (v: string) => setDateRange({ from: dateRange?.from ?? '', to: v }),
     },
-    { key: 'archived', type: 'checkbox', category: catDisplay, label: t('filters.archived'), selected: showArchived ? ['archived'] : [], options: [{ value: 'archived', label: t('filters.archived') }], onToggle: () => setShowArchived(v => !v) },
+    archivedCheckboxGroup(t, catDisplay, showArchived, setShowArchived),
     ...(setPendingApprovalOnly ? [{ key: 'pendingApproval', type: 'checkbox' as const, category: catDisplay, label: t('quickView.pendingApproval'), selected: pendingApprovalOnly ? ['pendingApproval'] : [], options: [{ value: 'pendingApproval', label: t('quickView.pendingApproval') }], onToggle: () => setPendingApprovalOnly(v => !v) }] : []),
   ]
 }

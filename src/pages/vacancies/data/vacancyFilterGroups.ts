@@ -10,6 +10,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import { pickAgentSegment } from './insightPicks'
 import { filterCategoryLabels } from '@/lib/filterGroups/categories'
+import { archivedCheckboxGroup } from '@/lib/filterGroups/common'
 
 interface Opt { value?: string | number; label?: string; count?: number; color?: string }
 
@@ -78,8 +79,6 @@ export function buildVacancyFilterGroups({ t, filters: f, options: o, org }: Bui
     // VESTIGING-2: values limited to the user's own branch scope (page-measured).
     { key: 'branch',   type: 'search-select', category: catOrg, label: t('common:filters.branch'), selected: org.branch.selected, options: org.branch.options, onToggle: org.branch.onToggle },
     // Archived mirrors the quick-view toggle; both share the showArchived state.
-    { key: 'archived', type: 'checkbox', category: catDisplay, label: t('filters.archived'),
-      selected: f.showArchived ? ['archived'] : [], options: [{ value: 'archived', label: t('page.archivedView') }],
-      onToggle: () => f.setShowArchived(v => !v) },
+    archivedCheckboxGroup(t, catDisplay, f.showArchived, f.setShowArchived, 'filters.archived', 'page.archivedView'),
   ]
 }

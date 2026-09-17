@@ -20,7 +20,7 @@ describe('Shared filter-group builders', () => {
       'filters.trash': 'Trash',
       'filters.periodCreated': 'Created Period',
       'page.archivedView': 'Archived View',
-      'view.archived': 'Archived',
+      'view.archived': 'Archived items',
     }
     return map[key] || key
   }
@@ -89,6 +89,35 @@ describe('Shared filter-group builders', () => {
 
       group.onToggle?.()
       expect(setState).toHaveBeenCalled()
+    })
+
+    // A locale can inflect the checkbox-option form differently from the
+    // group heading (it/fr/es/pt) — optionLabelKey lets a caller pass both
+    // keys while every single-key caller keeps its identical group/option label.
+    it('uses optionLabelKey for the option label when it differs from labelKey', () => {
+      const group = archivedCheckboxGroup(
+        t,
+        'Weergave',
+        false,
+        vi.fn(),
+        'filters.archived',
+        'view.archived',
+      )
+      expect(group.label).toBe('Archived')
+      expect(group.options[0].label).toBe('Archived items')
+      expect(group.label).not.toBe(group.options[0].label)
+    })
+
+    it('defaults optionLabelKey to labelKey when omitted', () => {
+      const group = archivedCheckboxGroup(
+        t,
+        'Weergave',
+        false,
+        vi.fn(),
+        'page.archivedView',
+      )
+      expect(group.label).toBe('Archived View')
+      expect(group.options[0].label).toBe('Archived View')
     })
   })
 

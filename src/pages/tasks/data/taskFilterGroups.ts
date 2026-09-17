@@ -8,8 +8,8 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import type { Aggregate } from '../hooks/useTaskOptions'
 import type { DueRangeFilter } from '../hooks/useTaskFilters'
+import { Tog, archivedCheckboxGroup } from '@/lib/filterGroups/common'
 
-type Tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => void
 interface Opt { value: string | number; label: string; count?: number }
 
 // Aggregate donut data → filter-panel option rows (value/label/count).
@@ -65,6 +65,6 @@ export function buildTaskFilterGroups({
       onFromChange: (v: string) => setDueRange({ from: v, to: dueRange?.to ?? '' }),
       onToChange:   (v: string) => setDueRange({ from: dueRange?.from ?? '', to: v }),
     },
-    { key: 'archived', type: 'checkbox', category: catDisplay, label: t('filters.archived'), selected: showArchived ? ['archived'] : [], options: [{ value: 'archived', label: t('view.archived') }], onToggle: () => setShowArchived(v => !v) },
+    archivedCheckboxGroup(t, catDisplay, showArchived, setShowArchived, 'filters.archived', 'view.archived'),
   ]
 }

@@ -42,6 +42,10 @@ export const fmtD = (s: string) => {
  * "Archived" option that toggles the showArchived boolean state.
  * `category` is the i18n-translated group label (e.g. catDisplay).
  * `labelKey` allows per-entity label i18n keys (default 'filters.archived').
+ * `optionLabelKey` lets the option row use a grammatically distinct key from
+ * the group label (some locales inflect the checkbox-option form differently
+ * from the group heading, e.g. it/fr/es/pt plural-vs-singular); defaults to
+ * `labelKey` so every existing single-key caller keeps its exact output.
  */
 export function archivedCheckboxGroup(
   t: (key: string) => string,
@@ -49,15 +53,15 @@ export function archivedCheckboxGroup(
   showArchived: boolean,
   setShowArchived: (fn: (v: boolean) => boolean) => void,
   labelKey = 'filters.archived',
+  optionLabelKey: string = labelKey,
 ) {
-  const label = t(labelKey)
   return {
     key: 'archived',
     type: 'checkbox',
     category,
-    label,
+    label: t(labelKey),
     selected: showArchived ? ['archived'] : [],
-    options: [{ value: 'archived', label }],
+    options: [{ value: 'archived', label: t(optionLabelKey) }],
     onToggle: () => setShowArchived((v) => !v),
   }
 }

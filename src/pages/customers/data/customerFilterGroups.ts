@@ -6,10 +6,8 @@
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import { NO_STATUS_KEY } from './customerInsights'
-import { Opt, archivedCheckboxGroup, periodCreatedGroup } from '@/lib/filterGroups/common'
+import { Opt, Tog, archivedCheckboxGroup, periodCreatedGroup } from '@/lib/filterGroups/common'
 import { filterCategoryLabels } from '@/lib/filterGroups/categories'
-
-type Tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => void
 
 export interface CustomerDateRange { param: 'created_between'; from: string; to: string }
 export interface CustomerGeoFilter { q: string; km: number; lat: number; lng: number; label: string }

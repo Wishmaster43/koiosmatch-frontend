@@ -13,9 +13,9 @@ import type { TFunction } from 'i18next'
 import type { WaMessageType } from '@/types/whatsapp'
 import type { WaTemplateOption } from '@/components/layout/workflow/whatsappTemplate'
 import type { WaPhoneNumberOption, WaMessagePurposeOption } from '../hooks/useWaFilterOptions'
+import { Tog } from '@/lib/filterGroups/common'
 
 interface Opt { value: string; label: string; count?: number }
-type Tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => void
 
 export interface WaDateRange { from: string; to: string }
 

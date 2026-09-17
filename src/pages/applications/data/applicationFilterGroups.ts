@@ -8,11 +8,10 @@
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import type { AppDateRangeFilter } from '../hooks/useApplicationFilters'
-import { Opt, archivedCheckboxGroup, trashCheckboxGroup, periodCreatedGroup } from '@/lib/filterGroups/common'
+import { Opt, Tog, archivedCheckboxGroup, trashCheckboxGroup, periodCreatedGroup } from '@/lib/filterGroups/common'
 import { filterCategoryLabels } from '@/lib/filterGroups/categories'
 
 type SetBucket = Dispatch<SetStateAction<string>>
-type Tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => void
 
 export type CvFilter = 'with' | 'without' | null
 
