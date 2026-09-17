@@ -194,9 +194,9 @@ export default function StartConversationModal({ candidateId, subject, applicati
     const owner = resolvedSubject.kind === 'customer_contact'
       ? { customer_contact_id: resolvedSubject.id }
       : { candidate_id: resolvedSubject.id }
-    // GESPREK-CONSISTENT-1-FE: application_id only ever rides along for a candidate
-    // owner, sent forward-compatibly — the BE does not read/stamp it yet (confirm
-    // the landing with CMBE before treating this as an adopted contract).
+    // GESPREK-CONSISTENT-1: application_id only ever rides along for a candidate
+    // owner (KLEIN-BE-2: the server 422s it on a contact owner and stamps the thread
+    // only when it carried no application yet).
     const appTag = applicationId && resolvedSubject.kind === 'candidate' ? { application_id: applicationId } : {}
     try {
       if (channel === 'wa_web') {
