@@ -15,6 +15,8 @@ function Harness() {
     <>
       <div data-testid="prompts-count">{h.prompts.length}</div>
       <div data-testid="knowledge-count">{h.knowledgeItems.length}</div>
+      <div data-testid="faqs-error">{String(h.faqsError)}</div>
+      <div data-testid="knowledge-error">{String(h.knowledgeError)}</div>
     </>
   )
 }
@@ -40,5 +42,23 @@ describe('useAgentsData — requests /ai/agents plus the /ai/prompts, /ai/faqs a
     expect(api.get).toHaveBeenCalledWith('/ai/prompts')
     expect(api.get).toHaveBeenCalledWith('/ai/faqs')
     expect(api.get).toHaveBeenCalledWith('/ai/knowledge/lookup')
+    expect(screen.getByTestId('faqs-error')).toHaveTextContent('false')
+    expect(screen.getByTestId('knowledge-error')).toHaveTextContent('false')
+  })
+
+  // R8: a failed secondary (e.g. /ai/faqs down) must surface its own error flag
+  // instead of silently degrading to the same "empty list" state as no FAQs.
+  it('exposes faqsError when the /ai/faqs request rejects, without blocking agents/knowledge', async () => {
+    vi.mocked(api.get).mockReset()
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/ai/agents') return Promise.resolve({ data: [{ id: 'a1', name: 'Kelly' }] })
+      if (url === '/ai/faqs') return Promise.reject(new Error('network error'))
+      if (url === '/ai/knowledge/lookup') return Promise.resolve({ data: [{ value: 'k1', label: 'CAO regels' }] })
+      return Promise.resolve({ data: [] })
+    })
+    render(<Harness />)
+    await waitFor(() => expect(screen.getByTestId('faqs-error')).toHaveTextContent('true'))
+    expect(screen.getByTestId('knowledge-error')).toHaveTextContent('false')
+    expect(screen.getByTestId('knowledge-count')).toHaveTextContent('1')
   })
 })

@@ -25,6 +25,11 @@ interface AgentKnowledgeSectionProps {
   // KNOWLEDGE-SCOPE-1: true once the 200-id contract cap is reached (guard lives
   // in AgentForm's toggle handler; this only decides whether to show the notice).
   atMax: boolean
+  // R8: a failed secondary fetch renders as an honest error line, never the
+  // same "no items yet" empty copy a genuinely empty list shows. Optional so
+  // an untouched caller keeps rendering exactly as before (defaults to false).
+  faqsError?: boolean
+  knowledgeItemsError?: boolean
 }
 
 // Renders the FAQ picker (existing) and the knowledge-item picker (KNOWLEDGE-SCOPE-1)
@@ -33,6 +38,7 @@ interface AgentKnowledgeSectionProps {
 export function AgentKnowledgeSection({
   useKnowledge, onUseKnowledgeChange, faqs, faqIds, onToggleFaq,
   knowledgeItems, knowledgeIds, onToggleKnowledgeItem, atMax,
+  faqsError = false, knowledgeItemsError = false,
 }: AgentKnowledgeSectionProps) {
   const { t } = useTranslation('workflows')
   return (
@@ -56,7 +62,9 @@ export function AgentKnowledgeSection({
           PackagesCard.tsx), for both pickers below. Field's own <label> stays for
           the visible caption only. */}
       <Field label={t('ai.agent.selectFaqs')}>
-        {faqs.length === 0
+        {faqsError
+          ? <Caption as="p" style={{ margin: 0, color: 'var(--color-danger-text)' }}>{t('ai.agent.faqsLoadError')}</Caption>
+          : faqs.length === 0
           ? <Caption as="p" style={{ margin: 0 }}>{t('ai.agent.noFaqs')}</Caption>
           : (
             <ChipMultiSelect
@@ -71,7 +79,9 @@ export function AgentKnowledgeSection({
           chat/test/interview — the hint says so explicitly rather than implying a
           silent fallback to the full tenant knowledge base. */}
       <Field label={t('ai.agent.knowledgeItems')}>
-        {knowledgeItems.length === 0
+        {knowledgeItemsError
+          ? <Caption as="p" style={{ margin: 0, color: 'var(--color-danger-text)' }}>{t('ai.agent.knowledgeItemsLoadError')}</Caption>
+          : knowledgeItems.length === 0
           ? <Caption as="p" style={{ margin: 0 }}>{t('ai.agent.noKnowledgeItems')}</Caption>
           : (
             <ChipMultiSelect

@@ -7,11 +7,12 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import api, { unwrapList } from '@/lib/api'
 
 // A secondary endpoint loaded alongside the primary list (e.g. AgentsTab's
-// prompts/faqs option lists) — failures are swallowed to an empty list so a
-// broken option source never blocks the primary resource from rendering.
+// prompts/faqs option lists) — a failed secondary never blocks the primary
+// resource from rendering, but the caller still learns it failed (`failed`)
+// so its empty state never masquerades as a genuinely empty list (R8/§3).
 export interface SecondaryResource<T> {
   endpoint: string
-  onLoaded: (rows: T[]) => void
+  onLoaded: (rows: T[], failed: boolean) => void
 }
 
 export interface UseAiListResourceOptions<T> {
@@ -43,10 +44,15 @@ export function useAiListResource<T>({ endpoint, onLoaded, secondary = [] }: Use
     const secondaries = secondaryRef.current
     Promise.all([
       api.get(endpoint),
-      ...secondaries.map(s => api.get(s.endpoint).catch(() => ({ data: [] }))),
+      // Each secondary reports its own failure alongside the (empty) fallback
+      // rows, instead of swallowing it — R8: a failed source must never render
+      // the same "nothing here" copy as a genuinely empty list.
+      ...secondaries.map(s => api.get(s.endpoint)
+        .then(res => ({ res, failed: false }))
+        .catch(() => ({ res: { data: [] }, failed: true }))),
     ]).then(([primary, ...rest]) => {
       onLoadedRef.current(unwrapList<T>(primary).rows)
-      rest.forEach((res, i) => secondaries[i].onLoaded(unwrapList<unknown>(res).rows))
+      rest.forEach((r, i) => secondaries[i].onLoaded(unwrapList<unknown>(r.res).rows, r.failed))
     }).catch(() => setLoadError(true)).finally(() => setLoading(false))
   }, [endpoint])
 

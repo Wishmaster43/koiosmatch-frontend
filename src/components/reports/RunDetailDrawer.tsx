@@ -10,6 +10,8 @@ import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import { useTranslation } from 'react-i18next'
 import { Zap, Clock, Users } from 'lucide-react'
 import { formatDT, formatDuration, StatusBadge, DryRunBanner } from './runFormat'
+// GETALLEN-1: formatDuration's own seconds path is locale-aware — pass the active locale.
+import { useLocale } from '@/lib/datetime'
 import { blockedReason } from './blockedReason'
 import ReportDrawerChrome from './ReportDrawerChrome'
 import { DrawerErrorBlock } from './DrawerErrorBlock'
@@ -31,6 +33,7 @@ export default function RunDetailDrawer({ run, onClose, zIndex }: {
   zIndex?: number
 }) {
   const { t } = useTranslation('reports')
+  const locale = useLocale()
   // Live view (WF-R3): while the run is RUNNING/WAITING, poll its workflow's run
   // list every 3s so pending/running step states and attempts update in place.
   const [live, setLive] = useState<RunRow | null>(null)
@@ -138,7 +141,7 @@ export default function RunDetailDrawer({ run, onClose, zIndex }: {
       <ReportStatStrip cellPadding="10px 0" style={{ borderBottom: '1px solid var(--border)', margin: '-16px -20px 20px -20px', paddingLeft: 20, paddingRight: 20 }}
         items={[
           { label: t('runs.drawer.candidates'), value: shown.candidates_count ?? shown.candidates ?? '—', icon: Users },
-          { label: t('runs.drawer.duration'),   value: formatDuration(shown.duration_ms ?? shown.duration), icon: Clock },
+          { label: t('runs.drawer.duration'),   value: formatDuration(shown.duration_ms ?? shown.duration, locale), icon: Clock },
         ]} />
 
       {/* WF-DRYRUN-FE-1: dry-run banner — only when the RUN-LEVEL flag says so

@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import type { ReportFilterGroup } from '@/types/reports'
 import SelectAllRow from '@/components/ui/SelectAllRow'
 import { useBatchToggle } from '@/hooks/useBatchToggle'
+import { FILTER_CHECKBOX_INPUT_STYLE, checkboxRowHoverHandlers } from './filterCheckboxRow'
 
 // One collapsible searchable multi-select filter group (see file docblock above),
 // rendering directly off the group's own options/selected/onToggle contract.
@@ -98,12 +99,11 @@ export default function SearchSelectGroup({ group }: { group: ReportFilterGroup 
                 <label key={opt.value}
                   style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '4px 10px',
                            cursor: 'pointer', background: checked ? 'var(--color-primary-bg)' : 'transparent' }}
-                  onMouseEnter={e => { if (!checked) e.currentTarget.style.background = 'var(--hover-bg)' }}
-                  onMouseLeave={e => { if (!checked) e.currentTarget.style.background = 'transparent' }}
+                  {...checkboxRowHoverHandlers(checked)}
                 >
                   <input type="checkbox" checked={checked}
                     onChange={() => group.onToggle?.(opt.value)}
-                    style={{ accentColor: 'var(--color-primary)', width: 12, height: 12, flexShrink: 0 }} />
+                    style={FILTER_CHECKBOX_INPUT_STYLE} />
                   {/* Text-colour accent uses the AA-contrast text token, not the raw brand primary. */}
                   <span style={{ fontSize: 12, color: checked ? 'var(--color-primary-text)' : 'var(--text)',
                                  fontWeight: checked ? 500 : 400, overflow: 'hidden',

@@ -19,6 +19,10 @@ export function useAgentsData() {
   // KNOWLEDGE-SCOPE-1 (K-276): the pickable knowledge-item options for the
   // agent's own knowledge_ids coupling (GET /ai/knowledge/lookup, {value,label}).
   const [knowledgeItems, setKnowledgeItems] = useState<AiKnowledgeLookupItem[]>([])
+  // R8: a failed secondary load must render as an honest error, never as the
+  // same "no items yet" copy a real empty list shows (AgentKnowledgeSection).
+  const [faqsError, setFaqsError] = useState(false)
+  const [knowledgeError, setKnowledgeError] = useState(false)
   // House confirmation dialog (§0 leftover debt) — replaces the native window.confirm() below.
   const { confirm, dialog } = useConfirm()
 
@@ -29,8 +33,8 @@ export function useAgentsData() {
     onLoaded: list => { setAgents(list); if (list.length) setSelected(list[0]) },
     secondary: [
       { endpoint: '/ai/prompts', onLoaded: rows => setPrompts(rows as AiItem[]) },
-      { endpoint: '/ai/faqs', onLoaded: rows => setFaqs(rows as AiItem[]) },
-      { endpoint: '/ai/knowledge/lookup', onLoaded: rows => setKnowledgeItems(rows as AiKnowledgeLookupItem[]) },
+      { endpoint: '/ai/faqs', onLoaded: (rows, failed) => { setFaqs(rows as AiItem[]); setFaqsError(failed) } },
+      { endpoint: '/ai/knowledge/lookup', onLoaded: (rows, failed) => { setKnowledgeItems(rows as AiKnowledgeLookupItem[]); setKnowledgeError(failed) } },
     ],
   })
 
@@ -73,5 +77,5 @@ export function useAgentsData() {
     }, { danger: true })
   }
 
-  return { agents, selected, setSelected, prompts, faqs, knowledgeItems, loading, loadError, reload, onSaved, onDelete, dialog }
+  return { agents, selected, setSelected, prompts, faqs, faqsError, knowledgeItems, knowledgeError, loading, loadError, reload, onSaved, onDelete, dialog }
 }

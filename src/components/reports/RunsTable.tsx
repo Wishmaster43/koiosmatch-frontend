@@ -13,7 +13,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Zap } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
-import { useDateFormat } from '@/lib/datetime'
+import { useDateFormat, useLocale } from '@/lib/datetime'
 import DataTable from '../ui/DataTable'
 import type { Column } from '../ui/DataTable'
 import { useReportList } from './useReportList'
@@ -89,6 +89,7 @@ export default function RunsTable() {
   const { rows, loading, error } = useReportList<RunRow>(runsUrl, resolveWorkflowBaseURL())
   // App-wide active locale (§5) — never a hardcoded 'nl-NL' toLocale*String call.
   const { formatDate, formatTime } = useDateFormat()
+  const locale = useLocale()
   const [search,  setSearch]  = useState('')
   const [drill,   setDrill]   = useState<RunRow | null>(null)
 
@@ -162,13 +163,13 @@ export default function RunsTable() {
     {
       key: 'duration_ms', header: t('runs.cols.duration'), sortable: true,
       sortValue: r => r.duration_ms ?? r.duration ?? null,
-      render: r => <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{formatDuration(r.duration_ms ?? r.duration)}</span>,
+      render: r => <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{formatDuration(r.duration_ms ?? r.duration, locale)}</span>,
     },
     {
       key: 'trigger', header: t('runs.cols.trigger'),
       render: r => <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{r.trigger ?? r.trigger_type ?? <span style={{ color: 'var(--border)' }}>—</span>}</span>,
     },
-  ], [t, formatDate, formatTime])
+  ], [t, formatDate, formatTime, locale])
 
   // Build the right-panel filter groups (status + workflow), each option carrying
   // a live count against the unfiltered run list.

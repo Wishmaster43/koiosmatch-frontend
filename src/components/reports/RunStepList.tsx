@@ -102,7 +102,13 @@ function StepMessages({ messages, counters }: { messages: RunStepMessage[]; coun
 
 // One collapsible step card with its status, meta and expandable I/O bundles.
 function StepCard({ step, index, catalog }: { step: RunStep; index: number; catalog: Parameters<typeof StepOutputSlice>[0]['catalog'] }) {
-  const { t } = useTranslation('reports')
+  // DATETIME-IMPORT-LES: `@/lib/datetime`'s useLocale drags the i18n singleton
+  // init along (this file's own test flat-mocks react-i18next), so the active
+  // language comes straight off the already-imported useTranslation() instead —
+  // Intl accepts the bare BCP-47 language tag with the same grouping/decimal
+  // behaviour as the fuller LOCALE_BY_LANG tag for formatDuration's own use.
+  const { t, i18n } = useTranslation('reports')
+  const locale = i18n.language
   const [open, setOpen] = useState(false)
   const hasIO = step.input != null || step.output != null
   const title = step.label ?? step.type ?? t('runs.drawer.step', { n: index + 1 })
@@ -133,7 +139,7 @@ function StepCard({ step, index, catalog }: { step: RunStep; index: number; cata
         )}
         {step.duration_ms != null && (
           <Caption style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-            <Clock size={10} />{formatDuration(step.duration_ms)}
+            <Clock size={10} />{formatDuration(step.duration_ms, locale)}
           </Caption>
         )}
         <StepStatusBadge status={step.status} ok={step.ok} />

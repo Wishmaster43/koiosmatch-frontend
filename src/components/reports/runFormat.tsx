@@ -18,7 +18,11 @@ import MetadataBadge, { type BadgeMeta } from '@/components/ui/MetadataBadge'
 export const formatDT = formatDateTimeStr
 
 // Format a millisecond duration as ms / s / m s (or em-dash if empty).
-// Caller passes locale (DATUM-1/LANE-B) for locale-aware second formatting.
+// GETALLEN-1: `locale` has no hardcoded default here — every caller in THIS
+// file's own folder passes the active locale via useLocale()/useDateFormat();
+// the default is kept only so the handful of callers outside this bucket
+// (workflow editor's runs panel, settings jobs tabs) keep compiling unchanged
+// until they are touched for another reason.
 // eslint-disable-next-line react-refresh/only-export-components -- shared formatter every run table/drawer in this file imports; HMR-nicety warning only
 export function formatDuration(ms?: number | null, locale: string = 'nl-NL') {
   if (ms == null) return '—'

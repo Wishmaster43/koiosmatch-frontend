@@ -4,6 +4,7 @@
  * open-dropdown-then-click; shows the lookup colour as a soft dot + the count.
  */
 import type { ReportFilterGroup } from '@/types/reports'
+import { FILTER_CHECKBOX_INPUT_STYLE, checkboxRowHoverHandlers } from './filterCheckboxRow'
 
 // Always-visible checkbox list for a small fixed lookup, so a filter toggles in one click instead of open-dropdown-then-click (see file header).
 export default function OpenCheckGroup({ group }: { group: ReportFilterGroup }) {
@@ -19,10 +20,9 @@ export default function OpenCheckGroup({ group }: { group: ReportFilterGroup }) 
             style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '3px 6px',
                      borderRadius: 6, cursor: 'pointer',
                      background: checked ? 'var(--color-primary-bg)' : 'transparent' }}
-            onMouseEnter={e => { if (!checked) e.currentTarget.style.background = 'var(--hover-bg)' }}
-            onMouseLeave={e => { if (!checked) e.currentTarget.style.background = 'transparent' }}>
+            {...checkboxRowHoverHandlers(checked)}>
             <input type="checkbox" checked={checked} onChange={() => group.onToggle?.(opt.value)}
-              style={{ accentColor: 'var(--color-primary)', width: 12, height: 12, flexShrink: 0 }} />
+              style={FILTER_CHECKBOX_INPUT_STYLE} />
             {/* Soft colour dot for semantic lookups (status/funnel/…). */}
             {opt.color && (
               <span aria-hidden style={{ width: 8, height: 8, borderRadius: 999, flexShrink: 0,

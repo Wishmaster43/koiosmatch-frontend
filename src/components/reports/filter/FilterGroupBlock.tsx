@@ -14,6 +14,7 @@ import OpenCheckGroup from './OpenCheckGroup'
 import GeoRadiusGroup from './GeoRadiusGroup'
 import CountBadge from '@/components/ui/CountBadge'
 import { tint } from '@/lib/tint'
+import { FILTER_CHECKBOX_INPUT_STYLE } from './filterCheckboxRow'
 
 // One collapsible right-panel filter block: chevron+label header (count chip
 // always visible, even collapsed) plus the group's own body, dispatched by type.
@@ -152,7 +153,7 @@ export default function FilterGroupBlock({
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
                       <input type="checkbox" checked={checked}
                         onChange={() => group.onToggle?.(opt.value)}
-                        style={{ accentColor: 'var(--color-primary)', width: 12, height: 12, flexShrink: 0 }} />
+                        style={FILTER_CHECKBOX_INPUT_STYLE} />
                       <span style={{ fontSize: 12, color: checked ? 'var(--text)' : 'var(--text-muted)',
                                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {opt.label}
