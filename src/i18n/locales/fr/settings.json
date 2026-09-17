@@ -758,7 +758,8 @@
     "defaultSenderTitle": "Expéditeur par défaut",
     "defaultSenderSubtitle": "L'utilisateur au nom duquel les propositions sont envoyées par défaut ; vide = le recruteur qui propose.",
     "defaultSenderSelf": "Le recruteur",
-    "defaultSenderStale": "L'expéditeur par défaut enregistré n'existe plus ; les propositions partent désormais au nom du recruteur. Choisissez un nouvel expéditeur ou videz le champ."
+    "defaultSenderStale": "L'expéditeur par défaut enregistré n'existe plus ; les propositions partent désormais au nom du recruteur. Choisissez un nouvel expéditeur ou videz le champ.",
+    "usersUnavailable": "Liste des utilisateurs indisponible. Réessayez plus tard."
   },
   "cvTemplate": {
     "title": "Modèle de CV",
@@ -1044,7 +1045,8 @@
     "missingTargetHint": "Choisissez une personne ou un rôle vers qui escalader, ou videz « Escalader après » pour désactiver.",
     "daysUnit": "jours",
     "catalogUnavailable": "Le catalogue des signaux n’a pas pu être chargé. Seuls les quatre signaux par défaut sont affichés.",
-    "groupOther": "Autre"
+    "groupOther": "Autre",
+    "usersUnavailable": "Liste des utilisateurs indisponible : choisissez plutôt un rôle."
   },
   "billing": {
     "usage": {
@@ -1420,7 +1422,12 @@
           "noResponse": "Aucune réponse enregistrée.",
           "copy": "Copier"
         }
-      }
+      },
+      "secretOnce": "Copiez le secret de signature maintenant. Il ne sera plus affiché.",
+      "copySecret": "Copier le secret",
+      "done": "Terminé",
+      "regenerate": "Régénérer le secret",
+      "regenerateConfirm": "Régénérer le secret ? Le secret actuel cessera de fonctionner immédiatement."
     },
     "outgoing": {
       "title": "Webhooks sortants",
@@ -3052,7 +3059,11 @@
     "isIntake": "Est un entretien",
     "isIntakeDesc": "Les types avec cet indicateur comptent comme un entretien.",
     "isDefault": "Par défaut",
-    "isDefaultForApplication": "Par défaut pour candidature"
+    "isDefaultForApplication": "Par défaut pour candidature",
+    "isForCandidates": "Pour les candidats",
+    "isForCandidatesDesc": "Ce type peut être planifié pour un rendez-vous candidat.",
+    "isForContacts": "Pour les contacts",
+    "isForContactsDesc": "Ce type peut être planifié pour un rendez-vous contact client."
   },
   "appointmentLocations": {
     "title": "Lieux de rendez-vous",
@@ -4208,7 +4219,14 @@
     "colCountry": "Pays",
     "colCoc": "Numéro de registre",
     "colVat": "Numéro de TVA",
-    "unknownCountryHint": "Pour les pays sans règle ci-dessus, rien n'est bloqué. Vous recevez tout au plus une indication discrète."
+    "unknownCountryHint": "Pour les pays sans règle ci-dessus, rien n'est bloqué. Vous recevez tout au plus une indication discrète.",
+    "listTitle": "Numéros d'identifiant personnalisés",
+    "listSubtitle": "Gérez les numéros d'identifiant (SIREN, TVA, IBAN, …) que Koios Match vérifie lors de l'enregistrement d'un client.",
+    "colKey": "Clé",
+    "colLabel": "Libellé",
+    "colPattern": "Motif",
+    "colActive": "Actif",
+    "addRow": "Ajouter une ligne"
   },
   "platformPricing": {
     "title": "Tarification de la plateforme",

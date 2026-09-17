@@ -316,6 +316,12 @@ function EscalationForm({ signals, catalogFailed, onRetry }: { signals: readonly
           {t('escalation.catalogUnavailable')}
         </ErrorBanner>
       )}
+      {/* DL-08/WFB-11: GET /users/options failed — role targets stay pickable, user targets do not. */}
+      {usersQuery.isError && (
+        <ErrorBanner variant="subtle" onRetry={() => { void usersQuery.refetch() }} style={{ marginBottom: 12 }}>
+          {t('escalation.usersUnavailable')}
+        </ErrorBanner>
+      )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         {groups.map(group => (
           <section key={group.key} aria-labelledby={`escalation-group-${group.key}`}>

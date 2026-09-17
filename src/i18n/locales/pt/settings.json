@@ -930,7 +930,8 @@
     "defaultSenderTitle": "Remetente predefinido",
     "defaultSenderSubtitle": "O utilizador em nome de quem as propostas são enviadas por predefinição; vazio = o recrutador que propõe.",
     "defaultSenderSelf": "O próprio recrutador",
-    "defaultSenderStale": "O remetente predefinido guardado já não existe; as propostas saem agora em nome do recrutador. Escolha um novo remetente ou limpe o campo."
+    "defaultSenderStale": "O remetente predefinido guardado já não existe; as propostas saem agora em nome do recrutador. Escolha um novo remetente ou limpe o campo.",
+    "usersUnavailable": "Lista de utilizadores indisponível. Tente novamente mais tarde."
   },
   "assessment": {
     "title": "Critérios de avaliação",
@@ -1303,7 +1304,8 @@
     "missingTargetHint": "Escolha uma pessoa ou função para escalar, ou limpe 'Escalar após' para desligar.",
     "daysUnit": "dias",
     "catalogUnavailable": "Não foi possível carregar o catálogo de sinais. Apenas os quatro sinais padrão são apresentados.",
-    "groupOther": "Outro"
+    "groupOther": "Outro",
+    "usersUnavailable": "Lista de utilizadores indisponível: escolha antes um cargo."
   },
   "billing": {
     "usage": {
@@ -1679,7 +1681,12 @@
           "noResponse": "Nenhuma response registada.",
           "copy": "Copiar"
         }
-      }
+      },
+      "secretOnce": "Copie o signing secret agora. Não voltará a ser mostrado.",
+      "copySecret": "Copiar secret",
+      "done": "Concluído",
+      "regenerate": "Regenerar secret",
+      "regenerateConfirm": "Regenerar o secret? O secret atual deixa de funcionar imediatamente."
     },
     "outgoing": {
       "title": "Webhooks de saída",
@@ -3052,7 +3059,11 @@
     "isIntake": "É um intake",
     "isIntakeDesc": "Os tipos com este sinalizador contam como intake (aciona \"intake planeado\").",
     "isDefault": "Predefinido",
-    "isDefaultForApplication": "Predefinido para candidatura"
+    "isDefaultForApplication": "Predefinido para candidatura",
+    "isForCandidates": "Para candidatos",
+    "isForCandidatesDesc": "Este tipo pode ser planeado para um compromisso de candidato.",
+    "isForContacts": "Para contactos",
+    "isForContactsDesc": "Este tipo pode ser planeado para um compromisso de contacto de cliente."
   },
   "appointmentLocations": {
     "title": "Locais de marcação",
@@ -4209,7 +4220,14 @@
     "colCountry": "País",
     "colCoc": "Número de registo comercial",
     "colVat": "Número de IVA",
-    "unknownCountryHint": "Para países sem regra acima nada é bloqueado. No máximo recebe uma sugestão discreta."
+    "unknownCountryHint": "Para países sem regra acima nada é bloqueado. No máximo recebe uma sugestão discreta.",
+    "listTitle": "Números de identificação personalizados",
+    "listSubtitle": "Gerir quais os números de identificação (NIF, IBAN, …) que o Koios Match verifica ao guardar um cliente.",
+    "colKey": "Chave",
+    "colLabel": "Etiqueta",
+    "colPattern": "Padrão",
+    "colActive": "Ativo",
+    "addRow": "Adicionar linha"
   },
   "platformPricing": {
     "title": "Preços da plataforma",

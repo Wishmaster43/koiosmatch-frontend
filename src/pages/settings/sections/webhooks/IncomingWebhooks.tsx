@@ -7,15 +7,17 @@
  * the per-webhook request log (WebhookRequestsPanel) — the per-webhook drill-in
  * Danny asked for ("waar is mijn log wat er binnen zou moeten komen").
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, Copy, Inbox, Plus, Trash2, Edit2, Save, X } from 'lucide-react'
+import { Check, Copy, Inbox, KeyRound, Plus, Trash2, Edit2, Save, X } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { useConfirm } from '@/hooks/useConfirm'
 import Button from '@/components/ui/Button'
 import { PageTitle, SectionTitle, Caption, Mono } from '@/components/ui/typography'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import WebhookRequestsPanel from '@/components/webhooks/WebhookRequestsPanel'
+// OneTimeSecretReveal: the shared one-time-secret idiom (DL-02/WFB-06 adoption, ADOPT-A3b item 20).
+import OneTimeSecretReveal from '@/pages/settings/components/OneTimeSecretReveal'
 // DATUM-1: every user-visible date rides the house formatter, never toLocaleDateString.
 import { useDateFormat } from '@/lib/datetime'
 import { publicApiUrl } from '@/lib/publicApiUrl'
@@ -24,12 +26,21 @@ import { extractApiError } from '@/lib/extractApiError'
 // audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 // hand-written: the spec carries no 2xx schema for GET/POST /webhooks (responses: never).
+// DL-02/WFB-06: POST /webhooks now returns the plaintext signing_secret once (require_signature
+// defaults true), and POST /webhooks/{id}/regenerate-secret returns a fresh one the same way.
 interface Webhook {
   id: string
   name: string
   description?: string | null
   token: string
   last_triggered_at?: string | null
+  signing_secret?: string
+}
+
+// The one-time secret currently on screen (from create or from a regenerate) — never persisted beyond this state.
+interface SecretReveal {
+  title: string
+  secret: string
 }
 
 // Which webhook's request log is open — the drill-in target.
@@ -57,6 +68,11 @@ export default function IncomingWebhooks() {
   const [editDesc, setEditDesc] = useState('')
   // Which webhook's request log is open ({ id, name }) — the new drill-in.
   const [requestsFor, setRequestsFor] = useState<RequestsTarget | null>(null)
+  // The one-time signing-secret banner (from create or "Secret vernieuwen") — cleared on Done.
+  const [reveal, setReveal] = useState<SecretReveal | null>(null)
+  // Verifier fix: the reveal renders above the list, off-screen from a regenerate click
+  // further down the page — scroll it into view and move focus so it is never missed.
+  const revealRef = useRef<HTMLDivElement>(null)
   // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
   const { confirm, dialog } = useConfirm()
 
@@ -80,17 +96,45 @@ export default function IncomingWebhooks() {
     // `t` is stable per language; a language switch re-runs the load, which is harmless.
   }, [t])
 
-  // Create a new inbound webhook (name + optional description).
+  // Verifier fix: whenever a secret reveal appears (create or regenerate), scroll it
+  // into view and focus it — the trigger for a regenerate is a row further down the list.
+  useEffect(() => {
+    if (reveal) { revealRef.current?.scrollIntoView?.({ block: 'center' }); revealRef.current?.focus() }
+  }, [reveal])
+
+  // Create a new inbound webhook (name + optional description). DL-02/WFB-06: the
+  // response carries the plaintext signing_secret exactly once — surface it now,
+  // since a missed reveal previously meant a webhook created dead (no way to sign).
   const create = async () => {
     if (!name.trim()) return
     setCreating(true)
     try {
       const res = await api.post('/webhooks', { name: name.trim(), description: desc.trim() || null })
-      setWebhooks((prev) => [...prev, unwrap<Webhook>(res)])
+      const created = unwrap<Webhook>(res)
+      setWebhooks((prev) => [...prev, created])
+      if (created.signing_secret) setReveal({ title: t('webhooks.incoming.secretOnce'), secret: created.signing_secret })
       setName('')
       setDesc('')
     } catch { /* noop */ }
     setCreating(false)
+  }
+
+  // "Secret vernieuwen" — rotates the signing secret via the recovery route
+  // (DL-02/WFB-06): a webhook created dead (the one-time reveal was lost) gets a
+  // fresh secret. Confirms first — the old secret stops working immediately.
+  const regenerateSecret = (id: string) => {
+    confirm(t('webhooks.incoming.regenerateConfirm'), async () => {
+      try {
+        const res = await api.post(`/webhooks/${id}/regenerate-secret`)
+        const secret = unwrap<Webhook>(res)?.signing_secret
+        // Verifier fix: the server has already rotated the secret by the time it responds —
+        // a 200 without the field must not read as "nothing happened" and leave it unknown.
+        if (secret) setReveal({ title: t('webhooks.incoming.secretOnce'), secret })
+        else notifyError(t('common:actionFailed'))
+      } catch (err) {
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      }
+    }, { danger: true })
   }
 
   // User asked to delete a webhook: confirms first (destructive), then removes it.
@@ -112,6 +156,20 @@ export default function IncomingWebhooks() {
     <div style={{ maxWidth: 700 }}>
       <PageTitle style={{ marginBottom: 4 }}>{t('webhooks.incoming.title')}</PageTitle>
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 20 }}>{t('webhooks.incoming.subtitle')}</p>
+
+      {/* One-time signing-secret reveal — from create or "Secret vernieuwen" (DL-02/WFB-06) */}
+      {reveal && (
+        <div ref={revealRef} tabIndex={-1} role="status" aria-live="polite" style={{ marginBottom: 24, outline: 'none' }}>
+          <OneTimeSecretReveal
+            title={reveal.title}
+            secret={reveal.secret}
+            copyLabel={t('webhooks.incoming.copySecret')}
+            copiedLabel={t('common.copied')}
+            doneLabel={t('webhooks.incoming.done')}
+            onDone={() => setReveal(null)}
+          />
+        </div>
+      )}
 
       {/* New webhook */}
       <div style={{ background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 24 }}>
@@ -179,6 +237,11 @@ export default function IncomingWebhooks() {
                       <Button variant="secondary" size="sm" iconOnly onClick={() => startEdit(wh)}
                         aria-label={t('common.edit')} title={t('common.edit')}>
                         <Edit2 size={12} />
+                      </Button>
+                      {/* DL-02/WFB-06: recovery path for a webhook created dead (secret reveal lost). */}
+                      <Button variant="secondary" size="sm" iconOnly onClick={() => regenerateSecret(wh.id)}
+                        aria-label={t('webhooks.incoming.regenerate')} title={t('webhooks.incoming.regenerate')}>
+                        <KeyRound size={12} />
                       </Button>
                     </>
                   )}

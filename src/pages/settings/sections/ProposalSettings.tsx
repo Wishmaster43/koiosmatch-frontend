@@ -16,6 +16,7 @@ import RichTextEditor from '@/components/ui/RichTextEditor'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import CalloutBox from '@/components/ui/CalloutBox'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import { Toggle } from '../components/SettingsKit'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
@@ -63,7 +64,7 @@ export default function ProposalSettings() {
   const values = useAllSettings()
   const stored = getJsonSetting<Partial<ProposalSettingsBlob>>(values, SETTINGS_KEY, {})
   const persisted: ProposalSettingsBlob = { ...DEFAULTS, ...stored }
-  const { data: usersData, isSuccess, isPlaceholderData } = useUserOptions()
+  const { data: usersData, isSuccess, isPlaceholderData, isError: usersFailed, refetch: refetchUsers } = useUserOptions()
   const users = (usersData ?? []) as User[]
   // Measured (query-core 5.101): placeholderData forces status 'success' while the GET is
   // still pending, so isSuccess alone is true throughout the load window — the list only
@@ -231,6 +232,12 @@ export default function ProposalSettings() {
           <div style={{ marginTop: 8 }}>
             <CalloutBox variant="warning">{t('proposal.defaultSenderStale')}</CalloutBox>
           </div>
+        )}
+        {/* DL-08/WFB-11: GET /users/options failed — the picker stays but the list is empty/stale. */}
+        {usersFailed && (
+          <ErrorBanner variant="subtle" onRetry={() => { void refetchUsers() }} style={{ marginTop: 8 }}>
+            {t('proposal.usersUnavailable')}
+          </ErrorBanner>
         )}
       </div>
     </div>

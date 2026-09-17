@@ -930,7 +930,8 @@
     "defaultSenderTitle": "Standaardafzender",
     "defaultSenderSubtitle": "De gebruiker uit wiens naam voorstellen standaard worden verstuurd; leeg = de recruiter die het voorstel doet.",
     "defaultSenderSelf": "Recruiter zelf",
-    "defaultSenderStale": "De opgeslagen standaardafzender bestaat niet meer; voorstellen gaan nu uit naam van de recruiter zelf. Kies een nieuwe afzender of maak het veld leeg."
+    "defaultSenderStale": "De opgeslagen standaardafzender bestaat niet meer; voorstellen gaan nu uit naam van de recruiter zelf. Kies een nieuwe afzender of maak het veld leeg.",
+    "usersUnavailable": "Gebruikerslijst niet beschikbaar. Probeer het later opnieuw."
   },
   "assessment": {
     "title": "Beoordelingscriteria",
@@ -1303,7 +1304,8 @@
     "missingTargetHint": "Kies een persoon of rol om te escaleren, of laat 'Escaleer na' leeg om uit te zetten.",
     "daysUnit": "dagen",
     "catalogUnavailable": "De signaalcatalogus kon niet worden geladen. Alleen de vier standaardsignalen worden getoond.",
-    "groupOther": "Overig"
+    "groupOther": "Overig",
+    "usersUnavailable": "Gebruikerslijst niet beschikbaar: kies een rol."
   },
   "billing": {
     "usage": {
@@ -1679,7 +1681,12 @@
           "noResponse": "Geen response vastgelegd.",
           "copy": "Kopiëren"
         }
-      }
+      },
+      "secretOnce": "Kopieer de signing-secret nu. Hij wordt niet meer getoond.",
+      "copySecret": "Kopieer secret",
+      "done": "Klaar",
+      "regenerate": "Secret opnieuw genereren",
+      "regenerateConfirm": "Secret opnieuw genereren? De huidige secret stopt direct met werken."
     },
     "outgoing": {
       "title": "Uitgaande webhooks",
@@ -3052,7 +3059,11 @@
     "isIntake": "Is een intake",
     "isIntakeDesc": "Types met deze vlag gelden als intake (drijft \"intake gepland\").",
     "isDefault": "Standaard",
-    "isDefaultForApplication": "Standaard bij sollicitatie"
+    "isDefaultForApplication": "Standaard bij sollicitatie",
+    "isForCandidates": "Voor kandidaten",
+    "isForCandidatesDesc": "Dit type kan gepland worden voor een kandidaatafspraak.",
+    "isForContacts": "Voor contactpersonen",
+    "isForContactsDesc": "Dit type kan gepland worden voor een klantcontactafspraak."
   },
   "appointmentLocations": {
     "title": "Afspraaklocaties",
@@ -4208,7 +4219,14 @@
     "colCountry": "Land",
     "colCoc": "KvK-nummer",
     "colVat": "Btw-nummer",
-    "unknownCountryHint": "Voor landen zonder regel hierboven wordt niets geblokkeerd. Je krijgt hooguit een zachte hint."
+    "unknownCountryHint": "Voor landen zonder regel hierboven wordt niets geblokkeerd. Je krijgt hooguit een zachte hint.",
+    "listTitle": "Aangepaste identifiernummers",
+    "listSubtitle": "Beheer welke identifiernummers (KvK, btw, IBAN, …) Koios Match controleert bij het opslaan van een klant.",
+    "colKey": "Sleutel",
+    "colLabel": "Label",
+    "colPattern": "Patroon",
+    "colActive": "Actief",
+    "addRow": "Regel toevoegen"
   },
   "platformPricing": {
     "title": "Platformprijzen",

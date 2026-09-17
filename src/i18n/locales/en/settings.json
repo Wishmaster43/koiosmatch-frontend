@@ -930,7 +930,8 @@
     "defaultSenderTitle": "Default sender",
     "defaultSenderSubtitle": "The user in whose name proposals are sent by default; empty = the recruiter who proposes.",
     "defaultSenderSelf": "The recruiter",
-    "defaultSenderStale": "The stored default sender no longer exists; proposals now go out in the recruiter's own name. Pick a new sender or clear the field."
+    "defaultSenderStale": "The stored default sender no longer exists; proposals now go out in the recruiter's own name. Pick a new sender or clear the field.",
+    "usersUnavailable": "User list unavailable. Try again later."
   },
   "assessment": {
     "title": "Assessment criteria",
@@ -1303,7 +1304,8 @@
     "missingTargetHint": "Choose a person or role to escalate to, or clear 'Escalate after' to turn it off.",
     "daysUnit": "days",
     "catalogUnavailable": "The signal catalogue could not be loaded. Only the four default signals are shown.",
-    "groupOther": "Other"
+    "groupOther": "Other",
+    "usersUnavailable": "User list unavailable: choose a role instead."
   },
   "billing": {
     "usage": {
@@ -1679,7 +1681,12 @@
           "noResponse": "No response recorded.",
           "copy": "Copy"
         }
-      }
+      },
+      "secretOnce": "Copy the signing secret now. It will not be shown again.",
+      "copySecret": "Copy secret",
+      "done": "Done",
+      "regenerate": "Regenerate secret",
+      "regenerateConfirm": "Regenerate the secret? The current secret stops working immediately."
     },
     "outgoing": {
       "title": "Outgoing webhooks",
@@ -3052,7 +3059,11 @@
     "isIntake": "Is an intake",
     "isIntakeDesc": "Types with this flag count as an intake (drives \"intake planned\").",
     "isDefault": "Default",
-    "isDefaultForApplication": "Default for application"
+    "isDefaultForApplication": "Default for application",
+    "isForCandidates": "For candidates",
+    "isForCandidatesDesc": "This type can be planned for a candidate appointment.",
+    "isForContacts": "For contacts",
+    "isForContactsDesc": "This type can be planned for a customer contact appointment."
   },
   "appointmentLocations": {
     "title": "Appointment locations",
@@ -4208,7 +4219,14 @@
     "colCountry": "Country",
     "colCoc": "Company register number",
     "colVat": "VAT number",
-    "unknownCountryHint": "For countries without a rule above nothing is blocked. You only get a soft hint."
+    "unknownCountryHint": "For countries without a rule above nothing is blocked. You only get a soft hint.",
+    "listTitle": "Custom identifier numbers",
+    "listSubtitle": "Manage which identifier numbers (KvK, VAT, IBAN, …) Koios Match checks when saving a customer.",
+    "colKey": "Key",
+    "colLabel": "Label",
+    "colPattern": "Pattern",
+    "colActive": "Active",
+    "addRow": "Add row"
   },
   "platformPricing": {
     "title": "Platform pricing",

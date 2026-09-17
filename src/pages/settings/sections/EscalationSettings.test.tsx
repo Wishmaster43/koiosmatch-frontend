@@ -33,9 +33,15 @@ vi.mock('@/context/AuthContext', () => ({
 }))
 
 // Network-backed hooks mocked directly (mirrors RolesSettings.test.tsx) so this
-// test needs no real QueryClientProvider.
+// test needs no real QueryClientProvider. Mutable so the isError-branch test
+// (ADOPT-A3b item 21) can flip it per test without a fresh module mock.
+const usersOptionsFixture = vi.hoisted(() => ({
+  data: [{ id: 'u-1', name: 'Jan Jansen' }] as Array<{ id: string; name: string }>,
+  isError: false,
+  refetch: vi.fn(),
+}))
 vi.mock('@/lib/queries', () => ({
-  useUserOptions: () => ({ data: [{ id: 'u-1', name: 'Jan Jansen' }] }),
+  useUserOptions: () => usersOptionsFixture,
 }))
 vi.mock('@/pages/users/hooks/useAssignableRoles', () => ({
   useAssignableRoles: () => ({ roles: [{ id: 'r-1', name: 'recruiter' }], loading: false }),
@@ -71,6 +77,8 @@ const rowFor = (signal: string) => within(screen.getByTestId(`escalation-row-${s
 
 beforeEach(() => {
   vi.clearAllMocks()
+  usersOptionsFixture.data = [{ id: 'u-1', name: 'Jan Jansen' }]
+  usersOptionsFixture.isError = false
   // By default, mock the signal-catalog endpoint to return all 15 signals.
   ;vi.mocked(api.get).mockImplementation((url) => {
     if (url === '/settings/signal-catalog') {
@@ -109,6 +117,19 @@ describe('EscalationSettings', () => {
     // Fallback: only the 4 seed signals render.
     const daysInputs = await screen.findAllByLabelText(t('escalation.afterDaysLabel'), { selector: 'input' })
     expect(daysInputs).toHaveLength(4)
+  })
+
+  // DL-08/WFB-11 (ADOPT-A3b item 21): a rejected GET /users/options must surface a
+  // notice with a working retry — role targets stay pickable, user targets do not.
+  it('shows the users-unavailable notice with a retry when GET /users/options errors', async () => {
+    usersOptionsFixture.isError = true
+    renderPage()
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/settings'))
+
+    expect(await screen.findByText(t('escalation.usersUnavailable'))).toBeInTheDocument()
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: i18n.t('error.retry', { ns: 'common' }) }))
+    expect(usersOptionsFixture.refetch).toHaveBeenCalled()
   })
 
   it('loads honest empty/off state for every signal (no days, no target)', async () => {

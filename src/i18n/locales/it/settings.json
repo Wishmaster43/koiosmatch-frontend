@@ -930,7 +930,8 @@
     "defaultSenderTitle": "Mittente predefinito",
     "defaultSenderSubtitle": "L'utente a nome del quale le proposte vengono inviate per impostazione predefinita; vuoto = il recruiter che propone.",
     "defaultSenderSelf": "Il recruiter stesso",
-    "defaultSenderStale": "Il mittente predefinito salvato non esiste più; le proposte partono ora a nome del recruiter. Scegli un nuovo mittente o svuota il campo."
+    "defaultSenderStale": "Il mittente predefinito salvato non esiste più; le proposte partono ora a nome del recruiter. Scegli un nuovo mittente o svuota il campo.",
+    "usersUnavailable": "Elenco utenti non disponibile. Riprova più tardi."
   },
   "assessment": {
     "title": "Criteri di valutazione",
@@ -1303,7 +1304,8 @@
     "missingTargetHint": "Scegli una persona o un ruolo a cui escalare, oppure svuota 'Escala dopo' per disattivare.",
     "daysUnit": "giorni",
     "catalogUnavailable": "Impossibile caricare il catalogo dei segnali. Vengono mostrati solo i quattro segnali predefiniti.",
-    "groupOther": "Altro"
+    "groupOther": "Altro",
+    "usersUnavailable": "Elenco utenti non disponibile: scegli invece un ruolo."
   },
   "billing": {
     "usage": {
@@ -1679,7 +1681,12 @@
           "noResponse": "Nessuna response registrata.",
           "copy": "Copia"
         }
-      }
+      },
+      "secretOnce": "Copia subito il signing secret. Non verrà più mostrato.",
+      "copySecret": "Copia secret",
+      "done": "Fatto",
+      "regenerate": "Rigenera secret",
+      "regenerateConfirm": "Rigenerare il secret? Il secret attuale smette di funzionare immediatamente."
     },
     "outgoing": {
       "title": "Webhook in uscita",
@@ -3052,7 +3059,11 @@
     "isIntake": "È un intake",
     "isIntakeDesc": "I tipi con questo flag contano come intake (determina \"intake pianificato\").",
     "isDefault": "Predefinito",
-    "isDefaultForApplication": "Predefinito per la candidatura"
+    "isDefaultForApplication": "Predefinito per la candidatura",
+    "isForCandidates": "Per i candidati",
+    "isForCandidatesDesc": "Questo tipo può essere pianificato per un appuntamento candidato.",
+    "isForContacts": "Per i contatti",
+    "isForContactsDesc": "Questo tipo può essere pianificato per un appuntamento con un contatto cliente."
   },
   "appointmentLocations": {
     "title": "Luoghi degli appuntamenti",
@@ -4209,7 +4220,14 @@
     "colCountry": "Paese",
     "colCoc": "Numero di registro imprese",
     "colVat": "Partita IVA",
-    "unknownCountryHint": "Per i paesi senza una regola qui sopra non viene bloccato nulla. Al massimo ricevi un avviso leggero."
+    "unknownCountryHint": "Per i paesi senza una regola qui sopra non viene bloccato nulla. Al massimo ricevi un avviso leggero.",
+    "listTitle": "Numeri identificativi personalizzati",
+    "listSubtitle": "Gestisci quali numeri identificativi (P.IVA, IBAN, …) Koios Match controlla al salvataggio di un cliente.",
+    "colKey": "Chiave",
+    "colLabel": "Etichetta",
+    "colPattern": "Pattern",
+    "colActive": "Attivo",
+    "addRow": "Aggiungi riga"
   },
   "platformPricing": {
     "title": "Prezzi piattaforma",

@@ -66,3 +66,83 @@ describe('IncomingWebhooks — a failed delete tells the admin', () => {
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith(expect.any(String)))
   })
 })
+
+// DL-02/WFB-06 (ADOPT-A3b item 20): the one-time signing-secret reveal on create.
+describe('IncomingWebhooks — one-time signing-secret reveal', () => {
+  it('reveals the signing_secret POST /webhooks returns on create', async () => {
+    mockedApi.get.mockResolvedValue({ data: [] })
+    mockedApi.post.mockResolvedValueOnce({ data: { id: 'wh-2', name: 'New hook', token: 'tok-2', signing_secret: 'shh-secret' } })
+    const user = userEvent.setup()
+    render(<IncomingWebhooks />)
+    await waitFor(() => expect(screen.getByText(st('webhooks.incoming.empty'))).toBeInTheDocument())
+
+    await user.type(screen.getByPlaceholderText(st('webhooks.incoming.namePlaceholder')), 'New hook')
+    await user.click(screen.getByRole('button', { name: st('webhooks.incoming.create') }))
+
+    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/webhooks', { name: 'New hook', description: null }))
+    expect(screen.getByText('shh-secret')).toBeInTheDocument()
+    expect(screen.getByText(st('webhooks.incoming.secretOnce'))).toBeInTheDocument()
+  })
+
+  it('does not reveal anything when create returns no signing_secret', async () => {
+    mockedApi.get.mockResolvedValue({ data: [] })
+    mockedApi.post.mockResolvedValueOnce({ data: { id: 'wh-3', name: 'Quiet hook', token: 'tok-3' } })
+    const user = userEvent.setup()
+    render(<IncomingWebhooks />)
+    await waitFor(() => expect(screen.getByText(st('webhooks.incoming.empty'))).toBeInTheDocument())
+
+    await user.type(screen.getByPlaceholderText(st('webhooks.incoming.namePlaceholder')), 'Quiet hook')
+    await user.click(screen.getByRole('button', { name: st('webhooks.incoming.create') }))
+
+    await waitFor(() => expect(screen.getByText('Quiet hook')).toBeInTheDocument())
+    expect(screen.queryByText(st('webhooks.incoming.secretOnce'))).toBeNull()
+  })
+})
+
+// DL-02/WFB-06 (ADOPT-A3b item 20): "Secret vernieuwen" — recovery path for a
+// webhook created dead (the one-time reveal was lost).
+describe('IncomingWebhooks — Secret vernieuwen (regenerate)', () => {
+  it('POSTs the regenerate-secret route after confirm and reveals the new secret', async () => {
+    mockedApi.get.mockResolvedValue({ data: [{ id: 'wh-1', name: 'ATS integration', token: 'tok-1' }] })
+    mockedApi.post.mockResolvedValueOnce({ data: { id: 'wh-1', signing_secret: 'fresh-secret' } })
+    const user = userEvent.setup()
+    render(<IncomingWebhooks />)
+    await waitFor(() => expect(screen.getByText('ATS integration')).toBeInTheDocument())
+
+    await user.click(screen.getByRole('button', { name: st('webhooks.incoming.regenerate') }))
+    await user.click(screen.getByRole('button', { name: i18n.t('confirm') }))
+
+    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/webhooks/wh-1/regenerate-secret'))
+    expect(screen.getByText('fresh-secret')).toBeInTheDocument()
+  })
+
+  it('calls notifyError when the regenerate POST rejects', async () => {
+    mockedApi.get.mockResolvedValue({ data: [{ id: 'wh-1', name: 'ATS integration', token: 'tok-1' }] })
+    mockedApi.post.mockRejectedValueOnce(new Error('boom'))
+    const user = userEvent.setup()
+    render(<IncomingWebhooks />)
+    await waitFor(() => expect(screen.getByText('ATS integration')).toBeInTheDocument())
+
+    await user.click(screen.getByRole('button', { name: st('webhooks.incoming.regenerate') }))
+    await user.click(screen.getByRole('button', { name: i18n.t('confirm') }))
+
+    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/webhooks/wh-1/regenerate-secret'))
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(expect.any(String)))
+  })
+
+  // Verifier fix: a 200 without signing_secret must not read as "nothing happened" —
+  // the server already rotated the secret, so a silent no-op would strand the webhook.
+  it('calls notifyError when the regenerate POST resolves without a signing_secret', async () => {
+    mockedApi.get.mockResolvedValue({ data: [{ id: 'wh-1', name: 'ATS integration', token: 'tok-1' }] })
+    mockedApi.post.mockResolvedValueOnce({ data: { id: 'wh-1' } })
+    const user = userEvent.setup()
+    render(<IncomingWebhooks />)
+    await waitFor(() => expect(screen.getByText('ATS integration')).toBeInTheDocument())
+
+    await user.click(screen.getByRole('button', { name: st('webhooks.incoming.regenerate') }))
+    await user.click(screen.getByRole('button', { name: i18n.t('confirm') }))
+
+    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/webhooks/wh-1/regenerate-secret'))
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(expect.any(String)))
+  })
+})

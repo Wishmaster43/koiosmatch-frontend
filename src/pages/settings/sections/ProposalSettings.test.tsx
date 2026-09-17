@@ -24,6 +24,8 @@ const usersFixture = vi.hoisted(() => ({
   data: [{ id: 'u1', name: 'Danny' }, { id: 'u2', name: 'Sara Demo' }],
   isSuccess: true,
   isPlaceholderData: false,
+  isError: false,
+  refetch: vi.fn(),
 }))
 
 vi.mock('@/lib/settings/useAllSettings', async () => {
@@ -43,6 +45,7 @@ afterEach(() => {
   usersFixture.data = [{ id: 'u1', name: 'Danny' }, { id: 'u2', name: 'Sara Demo' }]
   usersFixture.isSuccess = true
   usersFixture.isPlaceholderData = false
+  usersFixture.isError = false
 })
 
 describe('ProposalSettings · default sender', () => {
@@ -102,6 +105,17 @@ describe('ProposalSettings · default sender', () => {
     mockSettings.mockReturnValue({ proposal_default_sender_user_id: 'u2' })
     render(<ProposalSettings />)
     expect(screen.getByText(st('proposal.defaultSenderStale'))).toBeInTheDocument()
+  })
+
+  // DL-08/WFB-11 (ADOPT-A3b item 21): a rejected GET /users/options must surface a
+  // notice with a working retry, not fail silently as before.
+  it('shows the users-unavailable notice with a retry when the options query errors', async () => {
+    usersFixture.isError = true
+    render(<ProposalSettings />)
+    expect(screen.getByText(st('proposal.usersUnavailable'))).toBeInTheDocument()
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: i18n.t('error.retry', { ns: 'common' }) }))
+    expect(usersFixture.refetch).toHaveBeenCalled()
   })
 })
 

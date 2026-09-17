@@ -758,7 +758,8 @@
     "defaultSenderTitle": "Standardabsender",
     "defaultSenderSubtitle": "Der Benutzer, in dessen Namen Vorschläge standardmäßig gesendet werden; leer = der vorschlagende Recruiter.",
     "defaultSenderSelf": "Der Recruiter selbst",
-    "defaultSenderStale": "Der gespeicherte Standardabsender existiert nicht mehr; Vorschläge gehen jetzt im Namen des Recruiters. Wählen Sie einen neuen Absender oder leeren Sie das Feld."
+    "defaultSenderStale": "Der gespeicherte Standardabsender existiert nicht mehr; Vorschläge gehen jetzt im Namen des Recruiters. Wählen Sie einen neuen Absender oder leeren Sie das Feld.",
+    "usersUnavailable": "Benutzerliste nicht verfügbar. Bitte versuchen Sie es später erneut."
   },
   "cvTemplate": {
     "title": "Lebenslauf-Vorlage",
@@ -1044,7 +1045,8 @@
     "missingTargetHint": "Wählen Sie eine Person oder Rolle zum Eskalieren, oder leeren Sie \"Eskalieren nach\", um es auszuschalten.",
     "daysUnit": "Tage",
     "catalogUnavailable": "Der Signalkatalog konnte nicht geladen werden. Nur die vier Standardsignale werden angezeigt.",
-    "groupOther": "Sonstiges"
+    "groupOther": "Sonstiges",
+    "usersUnavailable": "Benutzerliste nicht verfügbar: wählen Sie stattdessen eine Rolle."
   },
   "billing": {
     "usage": {
@@ -1420,7 +1422,12 @@
           "noResponse": "Keine Antwort erfasst.",
           "copy": "Kopieren"
         }
-      }
+      },
+      "secretOnce": "Kopieren Sie das Signing-Secret jetzt. Es wird nicht erneut angezeigt.",
+      "copySecret": "Secret kopieren",
+      "done": "Fertig",
+      "regenerate": "Secret neu erzeugen",
+      "regenerateConfirm": "Secret neu generieren? Das aktuelle Secret funktioniert sofort nicht mehr."
     },
     "outgoing": {
       "title": "Ausgehende Webhooks",
@@ -3052,7 +3059,11 @@
     "isIntake": "Ist ein Intake",
     "isIntakeDesc": "Arten mit diesem Flag gelten als Intake.",
     "isDefault": "Standard",
-    "isDefaultForApplication": "Standard bei Bewerbung"
+    "isDefaultForApplication": "Standard bei Bewerbung",
+    "isForCandidates": "Für Kandidaten",
+    "isForCandidatesDesc": "Dieser Typ kann für einen Kandidatentermin geplant werden.",
+    "isForContacts": "Für Kontakte",
+    "isForContactsDesc": "Dieser Typ kann für einen Kundenkontakttermin geplant werden."
   },
   "appointmentLocations": {
     "title": "Terminorte",
@@ -4208,7 +4219,14 @@
     "colCountry": "Land",
     "colCoc": "Handelsregisternummer",
     "colVat": "USt-IdNr.",
-    "unknownCountryHint": "Für Länder ohne obige Regel wird nichts blockiert. Es erscheint höchstens ein dezenter Hinweis."
+    "unknownCountryHint": "Für Länder ohne obige Regel wird nichts blockiert. Es erscheint höchstens ein dezenter Hinweis.",
+    "listTitle": "Benutzerdefinierte Kennnummern",
+    "listSubtitle": "Verwalten Sie, welche Kennnummern (Handelsregister, USt-IdNr., IBAN, …) Koios Match beim Speichern eines Kunden prüft.",
+    "colKey": "Schlüssel",
+    "colLabel": "Bezeichnung",
+    "colPattern": "Muster",
+    "colActive": "Aktiv",
+    "addRow": "Zeile hinzufügen"
   },
   "platformPricing": {
     "title": "Plattformpreise",
