@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import CandidatesReport from './CandidatesReport'
@@ -445,5 +445,73 @@ describe('CandidatesReport — Kandidaten/Leads switch (RAPPORTEN-CONSOLIDATIE-1
       </QueryClientProvider>,
     )
     expect(screen.getByRole('radio', { name: 'Leads' })).toHaveAttribute('aria-checked', 'true')
+  })
+})
+
+// KPI-BUILDER-FE-1 §3.9/§3.11: tenant-defined KPI cards ride a second band row,
+// customBase strips phase_filter (the definition drill route doesn't know it),
+// and a click hits the definition route with only the accepted params.
+describe('CandidatesReport — tenant-defined KPI cards (KPI-BUILDER-1)', () => {
+  afterEach(() => {
+    getSpy.mockReset()
+    getSpy.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
+    mockSettings.mockReturnValue({})
+    mockUseReportKpiSelection.mockReset()
+    mockUseReportKpiSelection.mockImplementation(() => ({ data: suiteCards.map(c => c.key), isLoading: false }))
+  })
+
+  const customKpiData: CandidatesReportData = {
+    ...data,
+    custom_kpis: [{
+      id: 'kd-1', entity: 'candidate', metric_key: 'new_in_period', label: 'Nieuwe kandidaten',
+      dimension: 'all', dimension_value: null, dimension_label: null,
+      value: 14, unit: 'count', target: 15, warn: null, comparison: 'gte', status: 'alert',
+    }],
+  }
+
+  it('renders the tenant card in a second band row with a formatted value, target caption and band title', () => {
+    mockUseCandidatesReport.mockReturnValue({ data: customKpiData, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText("Eigen KPI's")).toBeInTheDocument()
+    expect(screen.getByText('Nieuwe kandidaten')).toBeInTheDocument()
+    expect(screen.getByText('14')).toBeInTheDocument()
+    expect(screen.getByText('buiten doel · doel 15')).toBeInTheDocument()
+  })
+
+  it('clicking the tenant card hits the definition drill route with only the accepted params (never phase_filter/kpi/date)', async () => {
+    const user = userEvent.setup()
+    mockUseCandidatesReport.mockReturnValue({ data: customKpiData, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText('Nieuwe kandidaten'))
+    const call = getSpy.mock.calls.find(c => c[0] === '/reports/kpi-definitions/kd-1/drill')
+    expect(call).toBeDefined()
+    const params = call?.[1]?.params as Record<string, unknown>
+    expect(params.period).toBe('month')
+    expect(params.kpi).toBeUndefined()
+    expect(params.date).toBeUndefined()
+    expect(params.phase_filter).toBeUndefined()
+  })
+
+  it('a null value renders a dash and stays unclickable (no request)', async () => {
+    const nullValueData: CandidatesReportData = {
+      ...data,
+      custom_kpis: [{ ...customKpiData.custom_kpis![0], value: null }],
+    }
+    mockUseCandidatesReport.mockReturnValue({ data: nullValueData, loading: false, error: false })
+    renderReport()
+    const label = screen.getByText('Nieuwe kandidaten')
+    const card = label.parentElement as HTMLElement
+    expect(within(card).getByText('—')).toBeInTheDocument()
+    await userEvent.click(card)
+    expect(getSpy.mock.calls.find(c => c[0] === '/reports/kpi-definitions/kd-1/drill')).toBeUndefined()
+  })
+
+  it('an envelope without custom_kpis renders exactly as today (no extra band, no console.error)', () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.queryByText("Eigen KPI's")).not.toBeInTheDocument()
+    expect(errorSpy).not.toHaveBeenCalled()
+    errorSpy.mockRestore()
   })
 })

@@ -85,6 +85,7 @@ describe('makeOpenCustomKpiDrill', () => {
     expect(setDrill).toHaveBeenCalledWith({
       title: 'Nieuwe matches', value: 14, subtitle: 'Sep 2026', entityPage: 'matches',
       rowsEndpoint: '/reports/kpi-definitions/kd-1/drill', rowsParams: { period: 'month' },
+      rowFields: ['client', 'status', 'end_date'],
     })
     const params = setDrill.mock.calls[0][0].rowsParams
     expect(params).not.toHaveProperty('kpi')

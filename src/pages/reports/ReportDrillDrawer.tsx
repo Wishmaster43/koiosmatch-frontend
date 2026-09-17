@@ -18,6 +18,8 @@ import KoiosFeedback from '@/components/layout/koios/KoiosFeedback'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import { formatNumber } from '@/lib/formatters'
 import { initialsOf } from '@/lib/initials'
+import { useDateFormat } from '@/lib/datetime'
+import { pickDrillFields } from './lib/customKpiDrillFields'
 
 // A drill descriptor built by each report for a clicked KPI/segment.
 export interface DrillSpec {
@@ -34,6 +36,10 @@ export interface DrillSpec {
   // name opens in-app, icon opens a new tab). Only set where the drill's rows
   // unambiguously ARE that entity and carry an `id` — else rows stay plain text.
   entityPage?: string
+  // KPI-BUILDER-FE-1 §3.9: per-entity row fields for a tenant-defined KPI's
+  // drill (CUSTOM_KPI_DRILL_FIELDS) — when set, rowSub shows these instead of
+  // the fixed per-report field guesses below.
+  rowFields?: string[]
 }
 
 // One underlying record — shape varies per report, read defensively. Module-
@@ -41,7 +47,19 @@ export interface DrillSpec {
 // the drawer is the only row renderer left.
 type DrillRow = Record<string, unknown>
 const rowTitle = (r: DrillRow) => String(r.name ?? r.label ?? r.title ?? r.full_name ?? r.id ?? '—')
-const rowSub = (r: DrillRow) => {
+// Date-shaped field names (DATUM-1: never a raw ISO string in JSX) — the caller
+// passes its own `formatDate` so this stays a pure name-based check.
+const isDateField = (field: string) => /(_date|_at)$/.test(field)
+const rowSub = (r: DrillRow, rowFields: string[] | undefined, formatDate: (v: string) => string) => {
+  // KPI-BUILDER-FE-1 §3.9: a tenant-defined KPI's drill names its own row
+  // fields (CUSTOM_KPI_DRILL_FIELDS) — prefer those when present.
+  if (rowFields && rowFields.length > 0) {
+    const presentFields = rowFields.filter(f => r[f] != null)
+    const values = pickDrillFields(r, rowFields)
+    const bits = values.map((v, i) => (isDateField(presentFields[i]) && typeof v === 'string') ? formatDate(v) : String(v))
+    if (bits.length > 0) return bits.slice(0, 2).join(' · ')
+  }
+  // Fallback = today's fixed per-report field guesses, byte-identical.
   // `customer` = the opportunities drill's customer-name field (portie 5);
   // `assignee` = the tasks drill's assignee-name field (portie 6);
   // `wa_number` = the whatsapp KPI-drill's SERVER-MASKED number (§8/§9 — rendered
@@ -56,11 +74,13 @@ const rowSub = (r: DrillRow) => {
 // footer, and (when entityPage is set) the EntityLink click-through: name opens
 // the record in-app, the trailing icon opens it in a new tab. Mounted with a
 // per-drill key so the search resets when a different drill opens.
-function DrillRecordsList({ rows, rowsTotal, entityPage }: { rows: DrillRow[]; rowsTotal: number; entityPage?: string }) {
+function DrillRecordsList({ rows, rowsTotal, entityPage, rowFields, formatDate }: {
+  rows: DrillRow[]; rowsTotal: number; entityPage?: string; rowFields?: string[]; formatDate: (v: string) => string
+}) {
   const { t } = useTranslation('analytics')
   const [search, setSearch] = useState('')
   const q = search.trim().toLowerCase()
-  const filtered = q ? rows.filter(r => `${rowTitle(r)} ${rowSub(r)}`.toLowerCase().includes(q)) : rows
+  const filtered = q ? rows.filter(r => `${rowTitle(r)} ${rowSub(r, rowFields, formatDate)}`.toLowerCase().includes(q)) : rows
 
   return (
     <>
@@ -81,7 +101,7 @@ function DrillRecordsList({ rows, rowsTotal, entityPage }: { rows: DrillRow[]; r
         )}
         {filtered.map((r, i) => {
           const title = rowTitle(r)
-          const sub = rowSub(r)
+          const sub = rowSub(r, rowFields, formatDate)
           const id = r.id != null ? String(r.id) : null
           return (
             <div key={id ?? i} style={{ padding: '8px 12px', borderTop: i ? '1px solid var(--border)' : 'none',
@@ -118,6 +138,7 @@ export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec
   // — the combined `t` above defaults to 'analytics' first and would silently
   // fall through to raw keys instead of the translated label.
   const { t: tCommon } = useTranslation('common')
+  const { formatDate } = useDateFormat()
   // Data layer: the underlying records + Koios advice for the open drill (§3).
   const { rows, rowsTotal, rowsLoading, rowsForbidden, rowsError, rowsRefetch, advice, adviceLoading, adviceError, adviceRefetch, advicePromptLogId } = useReportDrill(drill)
 
@@ -168,7 +189,7 @@ export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec
           )}
           {!rowsLoading && !rowsError && rows.length > 0 && (
             <DrillRecordsList key={`${drill.title}-${JSON.stringify(drill.rowsParams ?? {})}`}
-              rows={rows} rowsTotal={rowsTotal} entityPage={drill.entityPage} />
+              rows={rows} rowsTotal={rowsTotal} entityPage={drill.entityPage} rowFields={drill.rowFields} formatDate={formatDate} />
           )}
         </section>
       )}

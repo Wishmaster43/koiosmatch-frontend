@@ -16,6 +16,7 @@ import { gateDrillClick } from '../reportDrillGate'
 import type { DrillableReport } from '../reportDrillGate'
 import type { DrillSpec } from '../ReportDrillDrawer'
 import type { CustomKpiCard } from '@/types/analytics'
+import { CUSTOM_KPI_DRILL_FIELDS } from './customKpiDrillFields'
 
 export interface OpenKpiDrillOpts {
   report: DrillableReport
@@ -87,5 +88,9 @@ export function makeOpenCustomKpiDrill(o: OpenCustomKpiDrillOpts) {
     ...(o.entityPage ? { entityPage: o.entityPage } : {}),
     rowsEndpoint: `/reports/kpi-definitions/${card.id}/drill`,
     rowsParams: { ...o.baseParams, ...(card.dimension_value != null ? { dimension_value: card.dimension_value } : {}) },
+    // §3.9: the drawer's row list shows this entity's own field set instead of
+    // the fixed per-report guesses — undefined for an entity with no mapping
+    // (rowSub then falls back to today's behaviour, byte-identical).
+    rowFields: CUSTOM_KPI_DRILL_FIELDS[card.entity],
   })
 }

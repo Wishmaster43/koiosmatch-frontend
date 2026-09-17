@@ -262,3 +262,41 @@ describe('ReportDrillDrawer — advice feedback (KOIOS-FEEDBACK-REPORT-ADVICE)',
     expect(screen.queryByRole('button', { name: 'Nuttig' })).not.toBeInTheDocument()
   })
 })
+
+// KPI-BUILDER-FE-1 §3.9: a tenant-defined KPI's drill names its own row fields
+// (rowFields) — rowSub prefers them over the fixed per-report field guesses,
+// and formats a date-shaped field (DATUM-1: never a raw ISO string).
+describe('ReportDrillDrawer — custom-KPI rowFields (KPI-BUILDER-1)', () => {
+  it('shows the drill-named fields instead of the default guesses, dates formatted DD-MM-YYYY', () => {
+    mockUseReportDrill.mockReturnValue({
+      rows: [{ id: 'm-1', name: 'Match 1', client: 'Acme', status: 'active', end_date: '2026-09-30', owner: 'Should not show' }],
+      rowsTotal: 1, rowsLoading: false, rowsForbidden: false,
+      advice: null, adviceLoading: false,
+    })
+    render(<ReportDrillDrawer drill={{ ...baseDrill, rowFields: ['client', 'status', 'end_date'] }} onClose={() => {}} />)
+    // Only the first two present fields render (slice(0, 2)) — end_date never shows here.
+    expect(screen.getByText('Acme · active')).toBeInTheDocument()
+    expect(screen.queryByText('Should not show')).not.toBeInTheDocument()
+  })
+
+  it('formats a date-shaped field when it is one of the first two shown', () => {
+    mockUseReportDrill.mockReturnValue({
+      rows: [{ id: 'm-1', name: 'Match 1', client: 'Acme', end_date: '2026-09-30' }],
+      rowsTotal: 1, rowsLoading: false, rowsForbidden: false,
+      advice: null, adviceLoading: false,
+    })
+    render(<ReportDrillDrawer drill={{ ...baseDrill, rowFields: ['client', 'end_date'] }} onClose={() => {}} />)
+    expect(screen.getByText('Acme · 30-09-2026')).toBeInTheDocument()
+    expect(screen.queryByText(/2026-09-30/)).not.toBeInTheDocument()
+  })
+
+  it('falls back to the default field guesses when the drill carries no rowFields', () => {
+    mockUseReportDrill.mockReturnValue({
+      rows: [{ id: 'm-1', name: 'Match 1', client: 'Acme', status: 'active' }],
+      rowsTotal: 1, rowsLoading: false, rowsForbidden: false,
+      advice: null, adviceLoading: false,
+    })
+    render(<ReportDrillDrawer drill={baseDrill} onClose={() => {}} />)
+    expect(screen.getByText('active · Acme')).toBeInTheDocument()
+  })
+})
