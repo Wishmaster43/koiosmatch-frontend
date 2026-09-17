@@ -11,6 +11,7 @@
 // (SmSyncBaseModule::configSchema() + dry_run) exactly.
 import ShiftManagerMark from '../components/ui/ShiftManagerMark'
 import { tintBg } from '@/lib/tint'
+import { SM_CONNECTION_FIELD, smLimitField } from './_smFields'
 
 export default {
   type:  'sm_employee_create',
@@ -21,9 +22,9 @@ export default {
   color: 'var(--module-shiftmanager)',
   bg:    tintBg('var(--module-shiftmanager)'),
   schema: [
-    { key: 'connection_id', label: 'Shiftmanager-account', type: 'lookup_select', endpoint: '/planning-connections' },
+    SM_CONNECTION_FIELD,
     { key: 'dry_run', label: 'Proefdraaien (dry-run)', type: 'boolean', default: true,
       help: 'Eerst proefdraaien: rapporteert WIE er aangemaakt zou worden (incl. payload), schrijft niets. Zet expliciet uit om echt in Shiftmanager aan te maken.' },
-    { key: 'limit', label: 'Max. items', type: 'number', default: 500, placeholder: '500' },
+    smLimitField(500),
   ],
 }

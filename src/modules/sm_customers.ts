@@ -1,5 +1,6 @@
 // sm_customers module — sync customers from Shiftmanager into the mirror.
 import ShiftManagerMark from '../components/ui/ShiftManagerMark'
+import { SM_CONNECTION_FIELD, smLimitField } from './_smFields'
 
 export default {
   type:  'sm_customers',
@@ -12,7 +13,7 @@ export default {
   bg:    'color-mix(in srgb, var(--module-shiftmanager) 8%, transparent)',
   // Only fields the sync actually reads (search/status were dead leftovers).
   schema: [
-    { key: 'connection_id', label: 'Shiftmanager-account', type: 'lookup_select', endpoint: '/planning-connections' },
-    { key: 'limit',  label: 'Max. items',  type: 'number', default: 500, placeholder: '500' },
+    SM_CONNECTION_FIELD,
+    smLimitField(500),
   ],
 }

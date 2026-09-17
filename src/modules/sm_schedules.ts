@@ -2,6 +2,7 @@
 // dynamic date at run time). One pipeline bundle per schedule with a derived
 // `daypart` (day/evening/night) so a Router splits on it (ShiftReminder flow).
 import ShiftManagerMark from '../components/ui/ShiftManagerMark'
+import { SM_CONNECTION_FIELD, smLimitField } from './_smFields'
 
 export default {
   type:  'sm_schedules',
@@ -14,10 +15,10 @@ export default {
   color: 'var(--module-shiftmanager)',
   bg:    'color-mix(in srgb, var(--module-shiftmanager) 8%, transparent)',
   schema: [
-    { key: 'connection_id', label: 'Shiftmanager-account', type: 'lookup_select', endpoint: '/planning-connections' },
+    SM_CONNECTION_FIELD,
     // Window in days relative to the run day: 0 = today, 1 = tomorrow, etc.
     { key: 'offset_from', label: 'Vanaf (dagen vanaf vandaag)', type: 'number', default: 0, placeholder: '0' },
     { key: 'offset_to',   label: 'T/m (dagen vanaf vandaag)',   type: 'number', default: 0, placeholder: '0' },
-    { key: 'limit', label: 'Max. items', type: 'number', default: 500, placeholder: '500' },
+    smLimitField(500),
   ],
 }
