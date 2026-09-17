@@ -16,14 +16,19 @@ export interface LookupLoadSpec<T> {
 }
 
 // Fetches every spec in parallel; a failed/empty response keeps that list's own seed fallback (never breaks the others).
+// onDone receives the URLs that failed (empty when everything loaded) so a consumer CAN surface "showing defaults" instead
+// of silently rendering the seed with loading:false — existing callers with a zero-arg onDone stay compatible (D8).
 export function loadTenantLookups<T>(
   specs: LookupLoadSpec<T>[],
   normalize: (raw: unknown, fallback: T, pinId: boolean) => T,
-  onDone: () => void,
+  onDone: (failedUrls: string[]) => void,
 ): void {
+  const failedUrls: string[] = []
   Promise.allSettled(
     specs.map(({ url, fallback, set, pinId }) =>
-      api.get(url).then(r => set(normalize(unwrap(r), fallback, pinId ?? false))).catch(() => {}),
+      api.get(url)
+        .then(r => set(normalize(unwrap(r), fallback, pinId ?? false)))
+        .catch(() => { failedUrls.push(url) }),
     ),
-  ).finally(onDone)
+  ).finally(() => onDone(failedUrls))
 }

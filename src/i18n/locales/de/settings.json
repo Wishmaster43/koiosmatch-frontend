@@ -4495,6 +4495,10 @@
     "vat": "USt-IdNr. über den europäischen VIES-Dienst prüfen.",
     "voys": "Niederländische VoIP-Telefonanlage (VoIPGRID): Klick-to-Call und Anrufverlauf."
   },
+  "appsCatalogLabels": {
+    "kvk": "KvK / Handelsregister",
+    "vat": "USt-ID-Validierung (VIES)"
+  },
   "integrations": {
     "tabs": {
       "connection": "Verbindung",

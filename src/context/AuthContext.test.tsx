@@ -159,3 +159,36 @@ describe('AuthContext · isSuperAdmin() never fires on a profile that merely omi
     expect(b.result.current?.isSuperAdmin()).toBe(true)
   })
 })
+
+// D8 fix: a failed /tenants call (super-admin tenant list) must be distinguishable from "no tenants" so the switcher can render an honest error.
+describe('AuthContext · tenantsError surfaces a failed super-admin /tenants fetch', () => {
+  it('sets tenantsError and leaves tenants empty when GET /tenants rejects', async () => {
+    localStorage.setItem('km_session', '1')
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/auth/me') return Promise.resolve({ data: { user: { id: 'sa', is_super_admin: true, roles: [] } } })
+      if (url === '/tenants') return Promise.reject(new Error('network error'))
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+
+    const { result } = renderHook(() => useAuth(), { wrapper })
+
+    await waitFor(() => expect(result.current?.loading).toBe(false))
+    expect(result.current?.tenantsError).toBe(true)
+    expect(result.current?.tenants).toEqual([])
+  })
+
+  it('clears tenantsError on a successful /tenants fetch', async () => {
+    localStorage.setItem('km_session', '1')
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/auth/me') return Promise.resolve({ data: { user: { id: 'sa', is_super_admin: true, roles: [] } } })
+      if (url === '/tenants') return Promise.resolve({ data: [{ id: 't1', name: 'Tenant One' }] })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+
+    const { result } = renderHook(() => useAuth(), { wrapper })
+
+    await waitFor(() => expect(result.current?.loading).toBe(false))
+    expect(result.current?.tenantsError).toBe(false)
+    expect(result.current?.tenants).toEqual([{ id: 't1', name: 'Tenant One' }])
+  })
+})

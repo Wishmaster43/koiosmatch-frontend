@@ -43,6 +43,8 @@ export interface AuthContextValue {
   // HARD MFA signal seen mid-session (403 mfa_enrollment_required); see App.tsx's gate.
   mfaBlocked: boolean
   tenants: Tenant[]
+  // Set when the super-admin /tenants list failed to load (TENANT-HEADER-1); lets the tenant switcher tell "failed to load" apart from "no tenants".
+  tenantsError: boolean
   activeTenant: Tenant | null
   setActiveTenant: (tenant: Tenant) => Promise<void>
   login: (email: string, password: string) => Promise<LoginResult>
@@ -77,6 +79,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user,          setUser]              = useState<AuthUser | null>(null)
   const [loading,       setLoading]           = useState(true)
   const [tenants,       setTenants]           = useState<Tenant[]>([])
+  // Tracks a failed /tenants fetch so the switcher can render an honest error instead of an empty list (D8).
+  const [tenantsError,  setTenantsError]      = useState(false)
   const [activeTenant,  setActiveTenantState] = useState<Tenant | null>(null)
   // Pages the backend says this user may open (single source of truth for
   // gated pages — see lib/access.js). Memory only: the cookie flow keeps
@@ -169,6 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // the backend then falls back to the FIRST tenant (demo-data-in-yesway).
       await api.get('/tenants')
         .then(res => {
+          setTenantsError(false)
           const list = unwrapList<Tenant>(res).rows
           if (Array.isArray(list) && list.length) {
             setTenants(list)
@@ -179,7 +184,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
           }
         })
-        .catch(() => {})
+        .catch(() => { setTenantsError(true) })
     } else {
       const tenant = u?.tenant
       if (tenant) {
@@ -374,13 +379,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // so this object's reference only changes on a genuine auth event.
   const value = useMemo<AuthContextValue>(() => ({
     user, loading, accessiblePages, mfaBlocked,
-    tenants, activeTenant, setActiveTenant,
+    tenants, tenantsError, activeTenant, setActiveTenant,
     login, logout, refreshUser,
     verifyMfa, setupMfa, confirmMfa, disableMfa,
     hasRole, hasPermission, isAdmin, isSuperAdmin, hasModule, dashboardType,
   }), [
     user, loading, accessiblePages, mfaBlocked,
-    tenants, activeTenant, setActiveTenant,
+    tenants, tenantsError, activeTenant, setActiveTenant,
     login, logout, refreshUser,
     verifyMfa, setupMfa, confirmMfa, disableMfa,
     hasRole, hasPermission, isAdmin, isSuperAdmin, hasModule, dashboardType,

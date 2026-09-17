@@ -210,8 +210,11 @@ export function LookupsProvider({ children }: { children: ReactNode }) {
     // No session yet → keep the seeds and stay quiet (no pre-login 401 in the console);
     // the effect re-runs the moment the user logs in (or switches tenant).
     if (!user) { setLoading(false); return }
+    // Alive guard: a response from a previous session/tenant must not overwrite the new tenant's lookups after an in-SPA 401/re-login (§8 AVG isolation).
+    let alive = true
     api.get('/settings/candidate-lookups?active=1')
       .then(res => {
+        if (!alive) return
         const d = res.data ?? {}
         setCandidateTypes(normalize(d.candidate_types, DEFAULT_CANDIDATE_TYPES))
         setPhases(normalize(d.phases, DEFAULT_PHASES))
@@ -219,10 +222,11 @@ export function LookupsProvider({ children }: { children: ReactNode }) {
         setStatuses(normalize(d.statuses, DEFAULT_STATUSES))
       })
       .catch(() => {})
-      .finally(() => setLoading(false))
+      .finally(() => { if (alive) setLoading(false) })
     // C-39: availability was merged into the status axis (v2) and the
     // /availability-options endpoint was removed backend-side — keep the seed
     // default and stop fetching (kills the 404). Full removal of the axis is C-39.
+    return () => { alive = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch per login/tenant-switch
   }, [user?.id])
 

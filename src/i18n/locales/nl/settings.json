@@ -4495,6 +4495,10 @@
     "vat": "BTW-nummer valideren via de Europese VIES-dienst.",
     "voys": "Nederlandse VoIP-centrale (VoIPGRID): klikken-om-te-bellen en gesprekshistorie."
   },
+  "appsCatalogLabels": {
+    "kvk": "KvK / Handelsregister",
+    "vat": "BTW-validatie (VIES)"
+  },
   "integrations": {
     "tabs": {
       "connection": "Koppeling",

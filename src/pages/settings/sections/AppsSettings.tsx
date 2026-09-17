@@ -99,6 +99,8 @@ export default function AppsSettings() {
         {AVAILABLE_APPS.filter(app => app.group === tab).map(app => {
           const on = draft.includes(app.id)
           const soon = !!app.comingSoon
+          // Descriptive labels (verificatie group prose) route through i18n like description already does; brand names fall back to the raw catalogue label.
+          const appLabel = t(`appsCatalogLabels.${app.id}`, { defaultValue: app.label })
           return (
             <div key={app.id} style={{
               display: 'flex', alignItems: 'center', gap: 16,
@@ -116,17 +118,17 @@ export default function AppsSettings() {
                 {app.Mark
                   ? <app.Mark size={34} />
                   : app.image
-                    ? <img src={app.image} alt={app.label} width={34} height={34} style={{ objectFit: 'contain' }} />
+                    ? <img src={app.image} alt={appLabel} width={34} height={34} style={{ objectFit: 'contain' }} />
                     // Letter badge sits on the app's own fixed brand colour (AVAILABLE_APPS
                     // data, not the tenant accent) — some of those swatches are light enough
                     // that a hardcoded white fails contrast, so pick per-app like TenantSwitcher does.
                     : <span style={{ fontSize: 15, fontWeight: 800, color: readableOn(app.color), letterSpacing: '0.02em' }}>
-                        {app.label.slice(0, 2).toUpperCase()}
+                        {appLabel.slice(0, 2).toUpperCase()}
                       </span>}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{app.label}</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{appLabel}</span>
                   {on && (
                     <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-on-success-bg)',
                                    background: 'var(--color-success-bg)', borderRadius: 999, padding: '1px 7px' }}>

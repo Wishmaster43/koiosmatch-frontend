@@ -68,8 +68,11 @@ describe('AppsSettings', () => {
     render(<AppsSettings />)
     fireEvent.click(screen.getByRole('tab', { name: 'apps.tabVerificatie' }))
 
-    expect(screen.getByText('KvK / Handelsregister')).toBeInTheDocument()
-    expect(screen.getByText('BTW-validatie (VIES)')).toBeInTheDocument()
+    // D5 fix: the descriptive kvk/vat labels now route through i18n (appsCatalogLabels.*)
+    // the same way description already does — this file's naive t = k => k mock surfaces
+    // the raw key instead of the Dutch catalogue string.
+    expect(screen.getByText('appsCatalogLabels.kvk')).toBeInTheDocument()
+    expect(screen.getByText('appsCatalogLabels.vat')).toBeInTheDocument()
     // Every toggle on this tab is titled "coming soon", never "enable" — the
     // switch itself stays disabled so clicking it can never PUT the app on.
     expect(screen.queryAllByTitle('apps.enable')).toHaveLength(0)

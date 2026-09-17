@@ -4496,6 +4496,10 @@
     "vat": "Convalida del numero di partita IVA tramite il servizio europeo VIES.",
     "voys": "Centralino VoIP olandese (VoIPGRID): clicca per chiamare e cronologia delle chiamate."
   },
+  "appsCatalogLabels": {
+    "kvk": "KvK / Registro delle imprese",
+    "vat": "Convalida IVA (VIES)"
+  },
   "integrations": {
     "tabs": {
       "connection": "Connessione",

@@ -391,14 +391,19 @@ export function AppsProvider({ children }: { children: ReactNode }) {
     // No session yet → cached/default apps and stay quiet (no pre-login 401);
     // the effect re-runs the moment the user logs in (or switches tenant).
     if (!user) { setLoading(false); return }
+    // Alive guard: a late response from a previous session/tenant must not overwrite state or poison the shared localStorage cache (mirrors LookupsContext).
+    let alive = true
     api.get('/settings/apps')
       .then(res => {
+        if (!alive) return
         const list = res.data?.enabled ?? res.data ?? []
-        setEnabled(Array.isArray(list) ? list : [])
-        localStorage.setItem('enabled_apps', JSON.stringify(list))
+        const normalized = Array.isArray(list) ? list : []
+        setEnabled(normalized)
+        localStorage.setItem('enabled_apps', JSON.stringify(normalized))
       })
       .catch(() => {})
-      .finally(() => setLoading(false))
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch per login/tenant-switch
   }, [user?.id])
 

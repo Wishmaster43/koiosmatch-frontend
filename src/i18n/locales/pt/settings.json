@@ -4496,6 +4496,10 @@
     "vat": "Validar um número de IVA através do serviço europeu VIES.",
     "voys": "Central VoIP neerlandesa (VoIPGRID): clicar para ligar e histórico de chamadas."
   },
+  "appsCatalogLabels": {
+    "kvk": "KvK / Registo comercial",
+    "vat": "Validação de IVA (VIES)"
+  },
   "integrations": {
     "tabs": {
       "connection": "Ligação",

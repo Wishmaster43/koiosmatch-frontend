@@ -4495,6 +4495,10 @@
     "vat": "Validate a VAT number through the European VIES service.",
     "voys": "Dutch VoIP exchange (VoIPGRID): click to call and call history."
   },
+  "appsCatalogLabels": {
+    "kvk": "KvK / Company register",
+    "vat": "VAT validation (VIES)"
+  },
   "integrations": {
     "tabs": {
       "connection": "Connection",
