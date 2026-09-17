@@ -1,5 +1,6 @@
 // sm_candidates module — fetch candidates from Shiftmanager.
 import ShiftManagerMark from '../components/ui/ShiftManagerMark'
+import { tintBg } from '@/lib/tint'
 
 export default {
   type:  'sm_candidates',
@@ -9,7 +10,8 @@ export default {
   label: 'Kandidaten',
   Icon:  ShiftManagerMark,
   color: 'var(--module-shiftmanager)',
-  bg:    'color-mix(in srgb, var(--module-shiftmanager) 8%, transparent)',
+  // §4 house tint (HUISSTIJL-1): the shared helper, not a hand-rolled color-mix literal.
+  bg:    tintBg('var(--module-shiftmanager)'),
   schema: [
     // Which Shiftmanager link to sync from (tenant-scoped options from the API).
     { key: 'connection_id', label: 'Shiftmanager-account', type: 'lookup_select', endpoint: '/planning-connections' },
