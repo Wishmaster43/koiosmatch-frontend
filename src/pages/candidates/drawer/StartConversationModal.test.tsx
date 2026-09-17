@@ -324,10 +324,9 @@ describe('StartConversationModal · failed lookup load (four UI states)', () => 
   })
 })
 
-// GESPREK-CONSISTENT-1-FE: application_id is sent forward-compatibly on both the
-// waba and wa_web POST bodies for a candidate subject only, never for a
-// customer_contact subject; the BE controller does not read the key until
-// KLEIN-BE-2 lands (measured on api main 4b81fed9), so this pins the FE body shape.
+// GESPREK-CONSISTENT-1: application_id travels on both the waba and wa_web POST
+// bodies for a candidate subject only, never for a customer_contact subject
+// (KLEIN-BE-2, api b046655f: 422 on a contact owner, stamp only on a thread without one).
 describe('StartConversationModal · applicationId (GESPREK-CONSISTENT-1-FE)', () => {
   it('includes application_id on the waba template POST when given', async () => {
     vi.mocked(api.post).mockResolvedValueOnce({ data: { conversation_id: 'conv-1', status: 'sent' } })

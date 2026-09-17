@@ -107,10 +107,10 @@ export default function StartConversationModal({ candidateId, subject, applicati
   // CONTACT-CONVERSATION-START: the thread owner to start for — a candidate or a
   // customer contact.
   subject?: ConversationSubject
-  // GESPREK-CONSISTENT-1-FE: tags the new thread with the application it was
-  // started from — sent forward-compatibly for a candidate subject only; the
-  // BE controller does not read this key yet (confirm the landing with CMBE
-  // before relying on the server stamping the thread with it).
+  // GESPREK-CONSISTENT-1: tags the new thread with the application it was
+  // started from — candidate subject only (KLEIN-BE-2, api b046655f: the server
+  // 422s it for a customer_contact owner and stamps the started-or-reused thread
+  // only when it carried no application yet: context, never ownership).
   applicationId?: Id
   onClose: () => void
   // Fired after a successful send so the host can refresh its threads list.

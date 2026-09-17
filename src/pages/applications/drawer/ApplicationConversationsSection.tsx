@@ -7,12 +7,11 @@
  * ContactConversationsSection exactly: same start-trigger gate, same shared
  * ConversationsSection, but pointed at the candidate-wide thread list — never
  * filtered down to this one application (a hidden thread is the bug this
- * rule kills). `applicationId` travels forward-compatibly on the start body
- * (StartConversationModal's optional `applicationId` prop; the BE stamps the
- * thread with it only once KLEIN-BE-2 lands, measured absent on api main
- * 4b81fed9) and marks which row belongs to THIS application in the reader
- * (ConversationsSection's `badgeApplicationId`, live: ConversationResource
- * already emits application_id).
+ * rule kills). `applicationId` travels on the start body (StartConversationModal's
+ * optional `applicationId` prop; KLEIN-BE-2, api b046655f, stamps the started-or-
+ * reused thread only when it carried no application yet) and marks which row belongs
+ * to THIS application in the reader (ConversationsSection's `badgeApplicationId`;
+ * ConversationResource emits application_id).
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
