@@ -2742,7 +2742,14 @@
     "customHint": "Os campos personalizados guardam a sua obrigatoriedade na própria definição do campo, não nesta definição.",
     "customEmpty": "Ainda não existem campos personalizados para candidatos. Assim que criar um, ele aparece aqui e pode torná-lo obrigatório por fase.",
     "customAlwaysRequired": "Sempre obrigatório, em todas as fases",
-    "customSaveFailed": "Não foi possível guardar a definição do campo. Tente novamente."
+    "customSaveFailed": "Não foi possível guardar a definição do campo. Tente novamente.",
+    "inventoryLoadFailed": "Não foi possível carregar o inventário de campos. Tente novamente.",
+    "inventoryEmpty": "Não há campos para mostrar.",
+    "fieldLabels": {
+      "initials": "Iniciais",
+      "facebookLeadsId": "Facebook Lead ID",
+      "cvParseToken": "Importação de CV"
+    }
   },
   "applicationRequiredFields": {
     "title": "Campos obrigatórios",
@@ -3654,7 +3661,21 @@
       "contact": "Pessoa de contacto"
     },
     "phaseHint": "Isto é verificado na criação e numa transição de fase real. Uma edição normal que não altera a fase nunca é bloqueada. Independentemente de que outros campos ainda estejam em falta.",
-    "flatHint": "Isto é totalmente verificado na criação. Na edição, só são verificados os campos que a própria alteração toca. Um registo já incompleto continua livremente editável nos restantes campos."
+    "empty": "Ainda não há campos para gerir neste separador.",
+    "flatHint": "Isto é totalmente verificado na criação. Na edição, só são verificados os campos que a própria alteração toca. Um registo já incompleto continua livremente editável nos restantes campos.",
+    "fieldLabels": {
+      "contractTypes": "Restrição de tipo de contrato",
+      "contractEndDate": "Data de término do acordo de colaboração",
+      "locationIds": "Localizações (múltiplas)",
+      "departmentIds": "Departamentos (múltiplos)",
+      "isPrimary": "Contacto principal",
+      "whatsappConsentAt": "Consentimento do WhatsApp (data)",
+      "emailConsentAt": "Consentimento de e-mail (data)",
+      "newsletterConsentAt": "Consentimento de newsletter (data)",
+      "retentionConsentAt": "Consentimento de retenção (data)",
+      "retentionWarnedAt": "Aviso de retenção enviado em",
+      "state": "Estado (formato dos EUA)"
+    }
   },
   "customerConversion": {
     "title": "Estado padrão após conversão",
@@ -4206,6 +4227,27 @@
         "months": "meses",
         "hours": "horas",
         "minutes": "minutos"
+      }
+    },
+    "fieldInventory": {
+      "groups": {
+        "candidate": {
+          "identity": "Identidade",
+          "function": "Função",
+          "personal": "Pessoal",
+          "contact": "Contacto",
+          "address": "Morada",
+          "work": "Trabalho",
+          "availability": "Disponibilidade",
+          "dossier": "Dossiê"
+        }
+      },
+      "reason": {
+        "consent": "Ainda não obrigatório. O consentimento continua opcional.",
+        "financial": "Dados financeiros, ocultos para utilizadores sem permissão; um IBAN obrigatório bloquearia colegas que não conseguem vê-lo.",
+        "relation": "Ainda não disponível para tornar obrigatório. Este campo será adicionado numa fase posterior.",
+        "webhookStamped": "Preenchido automaticamente por um sistema externo. Não existe um campo de introdução para tornar obrigatório.",
+        "customFields": "Os campos personalizados têm a sua própria definição de obrigatoriedade na própria definição do campo."
       }
     }
   },

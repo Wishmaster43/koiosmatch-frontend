@@ -2742,7 +2742,14 @@
     "customHint": "Custom fields store their requirement on the field definition itself, not in this setting.",
     "customEmpty": "There are no custom candidate fields yet. As soon as you create one, it appears here and you can make it required per phase.",
     "customAlwaysRequired": "Always required, in every phase",
-    "customSaveFailed": "Saving the field definition failed. Please try again."
+    "customSaveFailed": "Saving the field definition failed. Please try again.",
+    "inventoryLoadFailed": "Loading the field inventory failed. Please try again.",
+    "inventoryEmpty": "There are no fields to show.",
+    "fieldLabels": {
+      "initials": "Initials",
+      "facebookLeadsId": "Facebook Lead ID",
+      "cvParseToken": "CV import"
+    }
   },
   "applicationRequiredFields": {
     "title": "Required fields",
@@ -3653,7 +3660,21 @@
       "contact": "Contact person"
     },
     "phaseHint": "This is checked on create and on a genuine phase transition. An ordinary edit that doesn't change the phase is never blocked. However incomplete the record already is on other fields.",
-    "flatHint": "This is checked in full on create. On edit, only the fields the change itself touches are checked. An already-incomplete record stays freely editable on its other fields."
+    "empty": "There are no fields to manage yet for this tab.",
+    "flatHint": "This is checked in full on create. On edit, only the fields the change itself touches are checked. An already-incomplete record stays freely editable on its other fields.",
+    "fieldLabels": {
+      "contractTypes": "Contract-form restriction",
+      "contractEndDate": "Collaboration agreement end date",
+      "locationIds": "Locations (multiple)",
+      "departmentIds": "Departments (multiple)",
+      "isPrimary": "Primary contact",
+      "whatsappConsentAt": "WhatsApp consent (date)",
+      "emailConsentAt": "Email consent (date)",
+      "newsletterConsentAt": "Newsletter consent (date)",
+      "retentionConsentAt": "Retention consent (date)",
+      "retentionWarnedAt": "Retention warning sent on",
+      "state": "State (US-style)"
+    }
   },
   "customerConversion": {
     "title": "Default status after conversion",
@@ -4205,6 +4226,27 @@
         "months": "months",
         "hours": "hours",
         "minutes": "minutes"
+      }
+    },
+    "fieldInventory": {
+      "groups": {
+        "candidate": {
+          "identity": "Identity",
+          "function": "Function",
+          "personal": "Personal",
+          "contact": "Contact",
+          "address": "Address",
+          "work": "Work",
+          "availability": "Availability",
+          "dossier": "Dossier"
+        }
+      },
+      "reason": {
+        "consent": "Not required yet. Consent stays optional.",
+        "financial": "Financial data, hidden from users without permission; a required IBAN would block colleagues who cannot see it.",
+        "relation": "Not available to require yet. This field is added in a later phase.",
+        "webhookStamped": "Filled in automatically by an external system. There is no input to require.",
+        "customFields": "Custom fields carry their own required setting on the field definition itself."
       }
     }
   },

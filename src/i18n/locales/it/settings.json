@@ -2742,7 +2742,14 @@
     "customHint": "I campi personalizzati conservano la loro obbligatorietà sulla definizione del campo stesso, non in questa impostazione.",
     "customEmpty": "Non ci sono ancora campi personalizzati per i candidati. Non appena ne crei uno, comparirà qui e potrai renderlo obbligatorio per fase.",
     "customAlwaysRequired": "Sempre obbligatorio, in ogni fase",
-    "customSaveFailed": "Salvataggio della definizione del campo non riuscito. Riprova."
+    "customSaveFailed": "Salvataggio della definizione del campo non riuscito. Riprova.",
+    "inventoryLoadFailed": "Il caricamento dell'inventario dei campi non è riuscito. Riprova.",
+    "inventoryEmpty": "Non ci sono campi da mostrare.",
+    "fieldLabels": {
+      "initials": "Iniziali",
+      "facebookLeadsId": "Facebook Lead ID",
+      "cvParseToken": "Importazione CV"
+    }
   },
   "applicationRequiredFields": {
     "title": "Campi obbligatori",
@@ -3654,7 +3661,21 @@
       "contact": "Referente"
     },
     "phaseHint": "Questo viene controllato alla creazione e a un passaggio di fase effettivo. Una modifica ordinaria che non cambia la fase non viene mai bloccata. Indipendentemente da quali altri campi manchino ancora.",
-    "flatHint": "Questo viene controllato interamente alla creazione. In modifica vengono controllati solo i campi che la modifica stessa tocca. Un record già incompleto resta liberamente modificabile sugli altri campi."
+    "empty": "Non ci sono ancora campi da gestire per questa scheda.",
+    "flatHint": "Questo viene controllato interamente alla creazione. In modifica vengono controllati solo i campi che la modifica stessa tocca. Un record già incompleto resta liberamente modificabile sugli altri campi.",
+    "fieldLabels": {
+      "contractTypes": "Restrizione forma contrattuale",
+      "contractEndDate": "Data di fine dell'accordo di collaborazione",
+      "locationIds": "Sedi (multiple)",
+      "departmentIds": "Reparti (multipli)",
+      "isPrimary": "Contatto principale",
+      "whatsappConsentAt": "Consenso WhatsApp (data)",
+      "emailConsentAt": "Consenso e-mail (data)",
+      "newsletterConsentAt": "Consenso newsletter (data)",
+      "retentionConsentAt": "Consenso di conservazione (data)",
+      "retentionWarnedAt": "Avviso di conservazione inviato il",
+      "state": "Stato (formato USA)"
+    }
   },
   "customerConversion": {
     "title": "Stato predefinito dopo la conversione",
@@ -4206,6 +4227,27 @@
         "months": "mesi",
         "hours": "ore",
         "minutes": "minuti"
+      }
+    },
+    "fieldInventory": {
+      "groups": {
+        "candidate": {
+          "identity": "Identità",
+          "function": "Funzione",
+          "personal": "Personale",
+          "contact": "Contatto",
+          "address": "Indirizzo",
+          "work": "Lavoro",
+          "availability": "Disponibilità",
+          "dossier": "Fascicolo"
+        }
+      },
+      "reason": {
+        "consent": "Non ancora obbligatorio. Il consenso resta facoltativo.",
+        "financial": "Dati finanziari, nascosti agli utenti senza permesso; un IBAN obbligatorio bloccherebbe i colleghi che non possono vederlo.",
+        "relation": "Non ancora disponibile da rendere obbligatorio. Questo campo sarà aggiunto in una fase successiva.",
+        "webhookStamped": "Compilato automaticamente da un sistema esterno. Non esiste un campo di inserimento da rendere obbligatorio.",
+        "customFields": "I campi personalizzati hanno una propria impostazione di obbligatorietà sulla definizione del campo stesso."
       }
     }
   },

@@ -11,7 +11,11 @@ import type { CSSProperties } from 'react'
 import { PermissionToggle } from '@/pages/settings/components/SettingsControls'
 import { REQUIRED_FIELDS_CELL } from './requiredFieldsMatrixStyles'
 
-interface Field { key: string; labelKey: string }
+// `requirable`/`reason` are optional so existing callers (a field the guard always
+// enforces) are unaffected; a field-inventory row that is not requirable (consent /
+// financial / relation / webhook-stamped) renders disabled with its reason visible,
+// never hidden (VERPLICHTE-VELDEN-INVENTARIS-1 — Danny wants to SEE what he can't require).
+interface Field { key: string; labelKey: string; requirable?: boolean; reason?: string | null }
 interface PhaseColumn { value: string; label: string }
 
 export function RequiredFieldsMatrixTable({ fields, phases, isRequired, onToggle, disabled, headerRowStyle }: {
@@ -34,17 +38,24 @@ export function RequiredFieldsMatrixTable({ fields, phases, isRequired, onToggle
         </tr>
       </thead>
       <tbody>
-        {fields.map(f => (
-          <tr key={f.key}>
-            <td style={{ ...REQUIRED_FIELDS_CELL, textAlign: 'left', color: 'var(--text)' }}>{t(f.labelKey)}</td>
-            {phases.map(p => (
-              <td key={p.value} style={REQUIRED_FIELDS_CELL}>
-                <PermissionToggle checked={isRequired(p.value, f.key)} onChange={() => onToggle(p.value, f.key)}
-                  disabled={disabled} aria-label={`${t(f.labelKey)} — ${p.label}`} />
+        {fields.map(f => {
+          // A non-requirable inventory row stays visible but every cell is inert;
+          // its reason renders as a hover title on the label cell, never a dot (§16).
+          const rowDisabled = disabled || f.requirable === false
+          return (
+            <tr key={f.key}>
+              <td style={{ ...REQUIRED_FIELDS_CELL, textAlign: 'left', color: 'var(--text)' }} title={f.requirable === false ? f.reason ?? undefined : undefined}>
+                {t(f.labelKey)}
               </td>
-            ))}
-          </tr>
-        ))}
+              {phases.map(p => (
+                <td key={p.value} style={REQUIRED_FIELDS_CELL}>
+                  <PermissionToggle checked={isRequired(p.value, f.key)} onChange={() => onToggle(p.value, f.key)}
+                    disabled={rowDisabled} aria-label={`${t(f.labelKey)} — ${p.label}`} />
+                </td>
+              ))}
+            </tr>
+          )
+        })}
       </tbody>
     </table>
   )

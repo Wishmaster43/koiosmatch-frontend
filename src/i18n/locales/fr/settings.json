@@ -2720,7 +2720,14 @@
     "customHint": "Les champs personnalisés enregistrent leur caractère obligatoire sur la définition du champ elle-même, et non dans ce paramètre.",
     "customEmpty": "Il n'y a pas encore de champs personnalisés pour les candidats. Dès que vous en créez un, il apparaît ici et vous pouvez le rendre obligatoire par phase.",
     "customAlwaysRequired": "Toujours obligatoire, à chaque phase",
-    "customSaveFailed": "L'enregistrement de la définition du champ a échoué. Veuillez réessayer."
+    "customSaveFailed": "L'enregistrement de la définition du champ a échoué. Veuillez réessayer.",
+    "inventoryLoadFailed": "Le chargement de l'inventaire des champs a échoué. Veuillez réessayer.",
+    "inventoryEmpty": "Il n'y a aucun champ à afficher.",
+    "fieldLabels": {
+      "initials": "Initiales",
+      "facebookLeadsId": "Facebook Lead ID",
+      "cvParseToken": "Import CV"
+    }
   },
   "applicationRequiredFields": {
     "title": "Champs obligatoires",
@@ -3653,7 +3660,21 @@
       "contact": "Contact"
     },
     "phaseHint": "Ceci est vérifié à la création et lors d'une véritable transition de phase. Une modification ordinaire qui ne change pas la phase n'est jamais bloquée. Quels que soient les autres champs encore manquants.",
-    "flatHint": "Ceci est entièrement vérifié à la création. Lors d'une modification, seuls les champs que la modification touche réellement sont vérifiés. Un enregistrement déjà incomplet reste librement modifiable sur ses autres champs."
+    "empty": "Il n'y a pas encore de champs à gérer pour cet onglet.",
+    "flatHint": "Ceci est entièrement vérifié à la création. Lors d'une modification, seuls les champs que la modification touche réellement sont vérifiés. Un enregistrement déjà incomplet reste librement modifiable sur ses autres champs.",
+    "fieldLabels": {
+      "contractTypes": "Restriction de forme de contrat",
+      "contractEndDate": "Date de fin de l'accord de collaboration",
+      "locationIds": "Sites (plusieurs)",
+      "departmentIds": "Services (plusieurs)",
+      "isPrimary": "Contact principal",
+      "whatsappConsentAt": "Consentement WhatsApp (date)",
+      "emailConsentAt": "Consentement e-mail (date)",
+      "newsletterConsentAt": "Consentement newsletter (date)",
+      "retentionConsentAt": "Consentement de conservation (date)",
+      "retentionWarnedAt": "Avertissement de conservation envoyé le",
+      "state": "État (format américain)"
+    }
   },
   "customerConversion": {
     "title": "Statut par défaut après conversion",
@@ -4205,6 +4226,27 @@
         "months": "mois",
         "hours": "heures",
         "minutes": "minutes"
+      }
+    },
+    "fieldInventory": {
+      "groups": {
+        "candidate": {
+          "identity": "Identité",
+          "function": "Fonction",
+          "personal": "Personnel",
+          "contact": "Contact",
+          "address": "Adresse",
+          "work": "Travail",
+          "availability": "Disponibilité",
+          "dossier": "Dossier"
+        }
+      },
+      "reason": {
+        "consent": "Pas encore obligatoire. Le consentement reste optionnel.",
+        "financial": "Données financières, masquées aux utilisateurs sans autorisation ; un IBAN obligatoire bloquerait les collègues qui ne peuvent pas le voir.",
+        "relation": "Pas encore disponible à rendre obligatoire. Ce champ sera ajouté à une phase ultérieure.",
+        "webhookStamped": "Rempli automatiquement par un système externe. Il n'existe aucun champ de saisie à rendre obligatoire.",
+        "customFields": "Les champs personnalisés ont leur propre réglage d'obligation sur la définition du champ."
       }
     }
   },

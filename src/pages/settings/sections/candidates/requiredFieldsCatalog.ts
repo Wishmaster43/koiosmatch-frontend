@@ -163,6 +163,39 @@ export const CANDIDATE_FIELD_GROUPS: CandidateRequiredFieldGroup[] = [
 /** Every catalog key, flat — used for the legacy-key sweep and by the tests. */
 export const CANDIDATE_FIELD_KEYS: string[] = CANDIDATE_FIELD_GROUPS.flatMap(g => g.fields.map(f => f.key))
 
+/**
+ * FIELDS-2-FE-1: the field → labelKey map the required-fields screen now reads, since
+ * rows/groups come from `GET /settings/field-inventory` (VERPLICHTE-VELDEN-INVENTARIS-1)
+ * while the LABEL still reuses whatever i18n key already labels that field elsewhere —
+ * this screen never mints a second translated copy of e.g. "Mobiel". Built from the
+ * groups above plus `bank_document_id` (new on the inventory response, labelled
+ * identically to the create modal's proof-of-account field). A key the inventory serves
+ * that is missing here renders its raw key as a fallback label (see
+ * CandidateRequiredFieldsSettings) — `initials` is the one measured example (contract
+ * entry names it newly-requirable but no i18n label for it exists yet anywhere in the app).
+ */
+export const CANDIDATE_FIELD_LABEL_KEYS: Record<string, string> = {
+  ...Object.fromEntries(CANDIDATE_FIELD_KEYS.map(key => [key, CANDIDATE_FIELD_GROUPS.flatMap(g => g.fields).find(f => f.key === key)!.labelKey])),
+  bank_document_id: 'candidates:preferences.bankDocument',
+  // Verifier fix (17-09): these are genuinely served by the live inventory (all
+  // `requirable:false` except `initials`, which the backend made requirable the same
+  // day) but never had a toggle before, so the old catalog never labelled them. Reused
+  // labels come from where each field is already shown elsewhere in the app; the three
+  // with no existing label get a dedicated `requiredFields.fieldLabels.*` key.
+  initials: 'settings:requiredFields.fieldLabels.initials',
+  candidate_types: 'candidates:columns.contractForm',
+  freelance: 'candidates:zzp.title',
+  facebook_leads_id: 'settings:requiredFields.fieldLabels.facebookLeadsId',
+  location_ids: 'candidates:modal.fields.branches',
+  cv_parse_token: 'settings:requiredFields.fieldLabels.cvParseToken',
+  custom_fields: 'candidates:drawer.customFields',
+  preferences: 'candidates:preferences.title',
+}
+
+// The inventory's raw `reason` prose → i18n key lives in ONE shared module (the customer
+// family adopted it first; CLONE-BY-CONSTRUCTION-1 forbids a second copy here).
+export { reasonI18nKey } from '@/pages/settings/requiredFieldsReason'
+
 // The legacy-key fold lives in lib (the create modal folds the same keys); re-exported for the tests and this screen.
 export { LEGACY_FIELD_KEY_ALIASES, normalizeRequiredFieldKeys } from '@/lib/requiredFieldKeys'
 

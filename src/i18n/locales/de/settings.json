@@ -2720,7 +2720,14 @@
     "customHint": "Eigene Felder speichern ihre Pflichtangabe in der Felddefinition selbst, nicht in dieser Einstellung.",
     "customEmpty": "Es gibt noch keine eigenen Kandidatenfelder. Sobald du eines anlegst, erscheint es hier und kann je Phase als Pflichtfeld gesetzt werden.",
     "customAlwaysRequired": "Immer erforderlich, in jeder Phase",
-    "customSaveFailed": "Das Speichern der Felddefinition ist fehlgeschlagen. Bitte versuche es erneut."
+    "customSaveFailed": "Das Speichern der Felddefinition ist fehlgeschlagen. Bitte versuche es erneut.",
+    "inventoryLoadFailed": "Das Laden des Feldinventars ist fehlgeschlagen. Bitte versuche es erneut.",
+    "inventoryEmpty": "Es gibt keine Felder anzuzeigen.",
+    "fieldLabels": {
+      "initials": "Initialen",
+      "facebookLeadsId": "Facebook Lead ID",
+      "cvParseToken": "Lebenslauf-Import"
+    }
   },
   "applicationRequiredFields": {
     "title": "Pflichtfelder",
@@ -3653,7 +3660,21 @@
       "contact": "Ansprechpartner"
     },
     "phaseHint": "Dies wird beim Anlegen und bei einem echten Phasenwechsel geprüft. Eine normale Bearbeitung, die die Phase nicht ändert, wird nie blockiert. Unabhängig davon, welche anderen Felder noch fehlen.",
-    "flatHint": "Dies wird beim Anlegen vollständig geprüft. Beim Bearbeiten werden nur die Felder geprüft, die die Änderung selbst betrifft. Ein bereits unvollständiger Datensatz bleibt bei den anderen Feldern frei bearbeitbar."
+    "empty": "Für diesen Tab gibt es noch keine Felder zu verwalten.",
+    "flatHint": "Dies wird beim Anlegen vollständig geprüft. Beim Bearbeiten werden nur die Felder geprüft, die die Änderung selbst betrifft. Ein bereits unvollständiger Datensatz bleibt bei den anderen Feldern frei bearbeitbar.",
+    "fieldLabels": {
+      "contractTypes": "Vertragsform-Einschränkung",
+      "contractEndDate": "Enddatum der Zusammenarbeitsvereinbarung",
+      "locationIds": "Standorte (mehrere)",
+      "departmentIds": "Abteilungen (mehrere)",
+      "isPrimary": "Hauptansprechpartner",
+      "whatsappConsentAt": "WhatsApp-Einwilligung (Datum)",
+      "emailConsentAt": "E-Mail-Einwilligung (Datum)",
+      "newsletterConsentAt": "Newsletter-Einwilligung (Datum)",
+      "retentionConsentAt": "Aufbewahrungs-Einwilligung (Datum)",
+      "retentionWarnedAt": "Aufbewahrungswarnung gesendet am",
+      "state": "Bundesstaat (US-Format)"
+    }
   },
   "customerConversion": {
     "title": "Standardstatus nach Konvertierung",
@@ -4205,6 +4226,27 @@
         "months": "Monate",
         "hours": "Stunden",
         "minutes": "Minuten"
+      }
+    },
+    "fieldInventory": {
+      "groups": {
+        "candidate": {
+          "identity": "Identität",
+          "function": "Funktion",
+          "personal": "Persönlich",
+          "contact": "Kontakt",
+          "address": "Adresse",
+          "work": "Arbeit",
+          "availability": "Verfügbarkeit",
+          "dossier": "Dossier"
+        }
+      },
+      "reason": {
+        "consent": "Noch nicht verpflichtend. Einwilligung bleibt optional.",
+        "financial": "Finanzdaten, für Nutzer ohne Berechtigung ausgeblendet; eine Pflicht-IBAN würde Kollegen ohne diese Berechtigung blockieren.",
+        "relation": "Noch nicht verpflichtend wählbar. Dieses Feld wird in einer späteren Phase ergänzt.",
+        "webhookStamped": "Wird automatisch von einem externen System befüllt. Es gibt kein Eingabefeld, das verpflichtend gemacht werden kann.",
+        "customFields": "Eigene Felder haben ihre eigene Pflichteinstellung direkt an der Felddefinition."
       }
     }
   },

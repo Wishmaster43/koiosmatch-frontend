@@ -2742,7 +2742,14 @@
     "customHint": "Eigen velden bewaren hun verplichting op de velddefinitie zelf, niet in deze instelling.",
     "customEmpty": "Er zijn nog geen eigen velden voor kandidaten. Zodra je er een aanmaakt, verschijnt hij hier en kun je hem per fase verplicht maken.",
     "customAlwaysRequired": "Altijd verplicht, in elke fase",
-    "customSaveFailed": "Opslaan van de velddefinitie is mislukt. Probeer het opnieuw."
+    "customSaveFailed": "Opslaan van de velddefinitie is mislukt. Probeer het opnieuw.",
+    "inventoryLoadFailed": "Ophalen van de veldinventaris is mislukt. Probeer het opnieuw.",
+    "inventoryEmpty": "Er zijn geen velden om te tonen.",
+    "fieldLabels": {
+      "initials": "Voorletters",
+      "facebookLeadsId": "Facebook Lead ID",
+      "cvParseToken": "CV-import"
+    }
   },
   "applicationRequiredFields": {
     "title": "Verplichte velden",
@@ -3653,7 +3660,21 @@
       "contact": "Contactpersoon"
     },
     "phaseHint": "Dit wordt gecontroleerd bij het aanmaken en bij een echte fase-overgang. Een gewone wijziging die de fase niet aanpast, wordt nooit geblokkeerd. Ongeacht welke andere velden nog ontbreken.",
-    "flatHint": "Dit wordt volledig gecontroleerd bij het aanmaken. Bij bewerken wordt alleen gekeken naar de velden die de wijziging zelf aanraakt. Een al onvolledig record blijft op de andere velden gewoon bewerkbaar."
+    "empty": "Er zijn nog geen velden om te beheren voor dit tabblad.",
+    "flatHint": "Dit wordt volledig gecontroleerd bij het aanmaken. Bij bewerken wordt alleen gekeken naar de velden die de wijziging zelf aanraakt. Een al onvolledig record blijft op de andere velden gewoon bewerkbaar.",
+    "fieldLabels": {
+      "contractTypes": "Contractvorm-restrictie",
+      "contractEndDate": "Einddatum samenwerkingsovereenkomst",
+      "locationIds": "Locaties (meerdere)",
+      "departmentIds": "Afdelingen (meerdere)",
+      "isPrimary": "Primair contact",
+      "whatsappConsentAt": "WhatsApp-toestemming (datum)",
+      "emailConsentAt": "E-mailtoestemming (datum)",
+      "newsletterConsentAt": "Nieuwsbrieftoestemming (datum)",
+      "retentionConsentAt": "Bewaartermijn-toestemming (datum)",
+      "retentionWarnedAt": "Bewaartermijn-waarschuwing verzonden op",
+      "state": "State (VS-notatie)"
+    }
   },
   "customerConversion": {
     "title": "Standaardstatus na conversie",
@@ -4205,6 +4226,27 @@
         "months": "maanden",
         "hours": "uren",
         "minutes": "minuten"
+      }
+    },
+    "fieldInventory": {
+      "groups": {
+        "candidate": {
+          "identity": "Identiteit",
+          "function": "Functie",
+          "personal": "Persoonlijk",
+          "contact": "Contact",
+          "address": "Adres",
+          "work": "Werk",
+          "availability": "Beschikbaarheid",
+          "dossier": "Dossier"
+        }
+      },
+      "reason": {
+        "consent": "Nog niet verplicht te stellen. Toestemming blijft optioneel.",
+        "financial": "Financiële gegevens, verborgen voor gebruikers zonder rechten; een verplicht IBAN zou collega's zonder die rechten blokkeren.",
+        "relation": "Nog niet beschikbaar om verplicht te stellen. Dit veld wordt in een latere fase toegevoegd.",
+        "webhookStamped": "Wordt automatisch ingevuld door een extern systeem. Er is geen invoerveld om te verplichten.",
+        "customFields": "Eigen velden hebben hun eigen verplichtingsinstelling op de velddefinitie zelf."
       }
     }
   },

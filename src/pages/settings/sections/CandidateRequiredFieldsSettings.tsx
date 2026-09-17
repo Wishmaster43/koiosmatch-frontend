@@ -20,15 +20,28 @@
  * "everything off" is the honestly-enforced state (same call as the customer matrix).
  * Thin container — the blocks, the matrix and the custom-field writes live in
  * sections/candidates/ (§3 size discipline).
+ *
+ * ── FIELDS-2-FE-1 (17-09): rows/groups now come from `GET /settings/field-inventory`
+ * (VERPLICHTE-VELDEN-INVENTARIS-1) via `useFieldInventory('candidate')`, never the static
+ * catalog — the endpoint is the one source both this screen and the write-time 422 read
+ * from. Labels still come from `requiredFieldsCatalog.ts`'s existing `labelKey` map (kept
+ * as that map only — see CANDIDATE_FIELD_LABEL_KEYS); a key the map lacks falls back to
+ * rendering its raw key. A `requires_permission` field is hidden without that permission;
+ * a `requirable:false` field stays visible but disabled with its reason (RequiredFieldsGroup).
  */
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAllSettings, useSettingsLoaded, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { useLookups } from '@/context/LookupsContext'
+import { useAuth } from '@/context/AuthContext'
 import CandidateCustomRequiredFields from './candidates/CandidateCustomRequiredFields'
-import RequiredFieldsGroup, { type PhaseColumn } from './candidates/RequiredFieldsGroup'
-import { CANDIDATE_FIELD_GROUPS, normalizeRequiredFieldKeys } from './candidates/requiredFieldsCatalog'
+import RequiredFieldsGroup, { type InventoryFieldGroup, type PhaseColumn } from './candidates/RequiredFieldsGroup'
+import { CANDIDATE_FIELD_LABEL_KEYS, normalizeRequiredFieldKeys, reasonI18nKey } from './candidates/requiredFieldsCatalog'
+import { useFieldInventory } from '../hooks/useFieldInventory'
 import Button from '@/components/ui/Button'
+import Spinner from '@/components/ui/Spinner'
+import ErrorBanner from '@/components/ui/ErrorBanner'
+import { BodyText } from '@/components/ui/typography'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import SettingsLoadBanner from '../components/SettingsLoadBanner'
@@ -36,50 +49,95 @@ import SettingsLoadBanner from '../components/SettingsLoadBanner'
 
 const KEY = 'candidate_required_fields'
 
-// Thin container over the full field catalog + custom fields (see the module doc above for the two separate storage paths — built-in fields in the settings blob, custom fields on their own definition).
+// Thin container over the field inventory + custom fields (see the module doc above for the two separate storage paths — built-in fields in the settings blob, custom fields on their own definition).
 export default function CandidateRequiredFieldsSettings() {
   const { t } = useTranslation(['settings', 'candidates'])
   const { phases } = useLookups()
+  const auth = useAuth()
+  const hasPermission = auth?.hasPermission ?? (() => false)
   const values = useAllSettings()
   // REQFIELDS-TOGGLE-RACE-1: a click before GET /settings resolves would rebuild
   // the WHOLE phase-keyed map from the {} fallback and wipe every phase's list.
   const loaded = useSettingsLoaded()
   const cfg = getJsonSetting<Record<string, string[]>>(values, KEY, {})
+  const { groups: invGroups, fields: invFields, isLoading, isError, refetch } = useFieldInventory('candidate')
 
   // Phase columns come from the tenant lookup; LookupsContext already seeds lead/candidate.
   const cols: PhaseColumn[] = phases.map(p => ({ value: String(p.value), label: String(p.label) }))
 
+  // requires_permission rows are hidden entirely for a caller without that permission
+  // (the financial block, gated on candidates.financial.view) — never shown-disabled.
+  const visibleFields = invFields.filter(f => !f.requires_permission || hasPermission(f.requires_permission))
+
+  // Keys the inventory currently marks non-requirable — used both to translate the
+  // reason and to strip any stored no-op value from the saved setting (see toggle()).
+  const nonRequirableKeys = new Set(invFields.filter(f => !f.requirable).map(f => f.key))
+
+  // Groups/order come straight from the inventory; a key the label map lacks falls back
+  // to its raw key rather than crashing the screen on a not-yet-labelled field. The raw
+  // English reason (relation/consent/financial/webhook-stamped/custom-fields) is mapped
+  // to its i18n key here — a reason the map doesn't recognise falls back to the raw text
+  // rather than hiding it.
+  const groups: InventoryFieldGroup[] = invGroups
+    .map(g => ({
+      id: g.key,
+      titleKey: g.label_key,
+      fields: visibleFields
+        .filter(f => f.group === g.key)
+        .map(f => {
+          const reasonKey = f.reason ? reasonI18nKey(f.reason) : null
+          return {
+            key: f.key, labelKey: CANDIDATE_FIELD_LABEL_KEYS[f.key] ?? f.key, requirable: f.requirable,
+            reason: f.reason ? (reasonKey ? t(reasonKey) : f.reason) : null,
+          }
+        }),
+    }))
+    .filter(g => g.fields.length > 0)
+
   // Membership is read through the alias fold, so a legacy `postal_code`/`linkedin` entry
   // still shows as its working key instead of silently reading as "not required".
-  const isRequired = (phase: string, field: string) =>
-    normalizeRequiredFieldKeys(cfg[phase] ?? []).includes(field)
+  const isRequired = useCallback((phase: string, field: string) =>
+    normalizeRequiredFieldKeys(cfg[phase] ?? []).includes(field), [cfg])
 
   // Persist the whole phase-keyed map. Every phase is folded onto guard-readable keys on
   // the way out: the aliases can never be satisfied, so leaving one in place would block
   // every save for that phase — folding keeps the tenant's intent on a key that works.
+  // A key the inventory currently marks non-requirable is dropped on every save (never
+  // added by a click either, since the shared table disables its toggle): a stored
+  // no-op would otherwise ride along invisibly while the admin can no longer see or
+  // clear it (§3 no fake affordance).
   const toggle = (phase: string, field: string) => {
-    if (!loaded) return
+    if (!loaded || nonRequirableKeys.has(field)) return
     const next: Record<string, string[]> = {}
-    for (const [p, list] of Object.entries(cfg)) next[p] = normalizeRequiredFieldKeys(list ?? [])
+    for (const [p, list] of Object.entries(cfg)) {
+      next[p] = normalizeRequiredFieldKeys(list ?? []).filter(k => !nonRequirableKeys.has(k))
+    }
     const current = next[phase] ?? []
     next[phase] = current.includes(field) ? current.filter(x => x !== field) : [...current, field]
     saveSettingsKeys({ [KEY]: next }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
   }
 
-  // Open the blocks that already have something required (computed once, on mount), so a
-  // ~30-field screen opens on what matters instead of on a wall of collapsed bars.
-  const [openIds, setOpenIds] = useState<string[]>(() => {
-    const withRequired = CANDIDATE_FIELD_GROUPS
+  // Open the blocks that already have something required, initialised once the inventory's
+  // groups actually arrive (the inventory is async, unlike the old static catalog) — a
+  // later refetch never re-collapses a block the admin has since opened/closed by hand.
+  const [openIds, setOpenIds] = useState<string[]>([])
+  const [openInitialised, setOpenInitialised] = useState(false)
+  useEffect(() => {
+    if (openInitialised || groups.length === 0) return
+    const withRequired = groups
       .filter(g => g.fields.some(f => cols.some(c => isRequired(c.value, f.key))))
       .map(g => g.id)
-    return withRequired.length ? withRequired : [CANDIDATE_FIELD_GROUPS[0].id]
-  })
+    setOpenIds(withRequired.length ? withRequired : [groups[0].id])
+    setOpenInitialised(true)
+    // Full deps on purpose: the `openInitialised` guard above makes every re-run after the
+    // first a no-op, so re-including cols/isRequired never re-opens/closes anything by hand.
+  }, [groups, cols, isRequired, openInitialised])
   const toggleOpen = (id: string) => setOpenIds(ids => ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id])
 
-  // Real state, not a fixed label: only once every built-in group is open does the button
-  // offer to collapse — a mixed or fully-closed state always offers to expand (opening wins).
-  const allGroupsOpen = CANDIDATE_FIELD_GROUPS.every(g => openIds.includes(g.id))
-  const toggleAllGroups = () => setOpenIds(allGroupsOpen ? [] : CANDIDATE_FIELD_GROUPS.map(g => g.id))
+  // Real state, not a fixed label: only once every group is open does the button offer to
+  // collapse — a mixed, fully-closed or not-yet-loaded state always offers to expand.
+  const allGroupsOpen = groups.length > 0 && groups.every(g => openIds.includes(g.id))
+  const toggleAllGroups = () => setOpenIds(allGroupsOpen ? [] : groups.map(g => g.id))
 
   return (
     <div style={{ maxWidth: 760 }}>
@@ -93,13 +151,21 @@ export default function CandidateRequiredFieldsSettings() {
             CandidateCustomRequiredFields keeps its own open state). The label always
             names the action that reveals more: "expand" while anything is closed,
             "collapse" only once everything is already open. */}
-        <Button variant="secondary" size="sm" onClick={toggleAllGroups}>
+        <Button variant="secondary" size="sm" onClick={toggleAllGroups} disabled={groups.length === 0}>
           {allGroupsOpen ? t('requiredFields.collapseAll') : t('requiredFields.expandAll')}
         </Button>
       </div>
 
-      {/* Built-in fields — one collapsible block per card of the candidate screens. */}
-      {CANDIDATE_FIELD_GROUPS.map(group => (
+      {/* Four explicit states (§3): loading the inventory, a failed fetch with retry,
+          an (unexpected but honest) empty inventory, and the real matrix. */}
+      {isLoading && <Spinner />}
+      {!isLoading && isError && (
+        <ErrorBanner onRetry={() => refetch()}>{t('requiredFields.inventoryLoadFailed')}</ErrorBanner>
+      )}
+      {!isLoading && !isError && groups.length === 0 && (
+        <BodyText style={{ color: 'var(--text-muted)' }}>{t('requiredFields.inventoryEmpty')}</BodyText>
+      )}
+      {!isLoading && !isError && groups.map(group => (
         <RequiredFieldsGroup key={group.id} group={group} phases={cols}
           isRequired={isRequired} onToggle={toggle} disabled={!loaded}
           open={openIds.includes(group.id)} onOpenToggle={() => toggleOpen(group.id)} />
