@@ -49,6 +49,13 @@ describe('house token pairs stay readable (defaults, light theme)', () => {
     }
   })
 
+  // KpiDefinitionRow's InfoChip (KPI-BUILDER-FE-1 fix): a neutral info chip
+  // uses --hover-bg as its fill with Caption (text-muted) ink — pin that new
+  // text-on-fill pair here so a future token nudge fails CI instead of a screen.
+  it('text-muted clears 4.5:1 on hover-bg (KpiDefinitionRow InfoChip fill)', () => {
+    expect(ratio(token('text-muted'), token('hover-bg'))).toBeGreaterThanOrEqual(4.5)
+  })
+
   it('the default on-accent ink clears the audited 3:1 button floor on the default fill', () => {
     // Button labels are bold UI-component text; the runtime clamps tenant picks
     // at the same floor (ON_ACCENT_EXPLICIT_FLOOR) — the DEFAULT pair must too.

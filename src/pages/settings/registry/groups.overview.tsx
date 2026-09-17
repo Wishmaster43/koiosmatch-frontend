@@ -4,7 +4,7 @@
 import {
   Target, Users, ClipboardList, Building2, MapPin, ListChecks, Phone, Sparkles, Briefcase,
   Palette, Hash, Shield, Globe, BookOpen, MessageSquare, Clock, Scale, Languages, BarChart2,
-  MessageCircle, Factory,
+  MessageCircle, Factory, Wrench,
 } from 'lucide-react'
 import type { NavGroup } from './types'
 
@@ -36,12 +36,17 @@ import {
   kpisDepartments, kpisContacts, kpisTasks, kpisCalllists, kpisMatches,
   kpisOpportunities, kpisVacancies,
 } from '../schemas/kpis'
+import KpiBuilderSettings from '../sections/kpiBuilder/KpiBuilderSettings'
 
 // KPIs, Company, Koios AI and Personalisation groups, in original NAV_GROUPS order.
 export const overviewGroups: NavGroup[] = [
   {
     key: 'kpis', icon: Target,
     items: [
+      // KPI-BUILDER-FE-1: tenant-defined KPI cards (own metric/target/unit) per
+      // entity, first in the group. `kpi_definitions` is not one of the audited
+      // tables in AUDIT-LOG-NAMES.md, hence logName: null (registry.logNames guard).
+      { id: 'kpi_builder', icon: Wrench, component: KpiBuilderSettings, requiresPage: 'reports', logName: null },
       // Sub-tabs per KPI area; labels via nav.<id>, fields share the `kpis.*` i18n.
       { id: 'kpis_leads', icon: Target, schema: kpisLeads },
       { id: 'kpis_candidates', icon: Users, schema: kpisCandidates },
