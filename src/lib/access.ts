@@ -205,6 +205,20 @@ export function canAccessPage(pageId: string, auth?: AuthLike | null): boolean {
 }
 
 /**
+ * hasKoiosAiModule — KOIOS-CARDS-MODULE-GATE-1 (17-09): the STRICT tenant-module gate for
+ * a koios_ai surface that calls the module-gated routes itself (the dashboard's
+ * "Koios AI performance" and "Koios did this for you" cards hit /ai/koios/performance and
+ * /ai/koios/for-you, both EnsureTenantModule:koios_ai on the server). No super-admin
+ * bypass on purpose: a super admin parked on a Core tenant (AENF) got a 403 per card
+ * (measured 17-09); the module gate applies to everyone (Danny 2026-07-02, same rule
+ * as PAGE_REQUIRED_MODULE above). Reads the explicit `modules` list from /auth/me, or
+ * the package fallback when the payload carries none.
+ */
+export function hasKoiosAiModule(auth?: AuthLike | null): boolean {
+  return hasModule('koios_ai', auth?.activeTenant ?? auth?.user?.tenant)
+}
+
+/**
  * canUseKoiosAssist — PRIJSMODEL-C (30-08): Core tenants get a THIN Koios Assist
  * scope (notes assist, entity generate, cv parse) via the `koios_assist`
  * module, without the full `koios_ai` module (chat/agents/interviews). This is

@@ -7,6 +7,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
+import { hasKoiosAiModule } from '@/lib/access'
 import { useLookups } from '@/context/LookupsContext'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import Spinner from '@/components/ui/Spinner'
@@ -66,6 +67,9 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   // tenant has the module (Danny 2026-07-04, verbatim: "Planning staat uit en ik zie
   // DIENSTEN??" — "Planning is off and I still see SHIFTS??").
   const hasPlanning = (auth?.hasModule ?? (() => false))('plan')
+  // KOIOS-CARDS-MODULE-GATE-1: the Koios cards call koios_ai-gated routes, so a tenant
+  // without the module gets no card at all (no 403 in the console, no empty card).
+  const hasKoiosAi = hasKoiosAiModule(auth)
 
   // Topbar filter selections (single-value per dimension server-side) — UI state
   // stays here; ALL server state lives in useDashboardData (audit item 21).
@@ -193,7 +197,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
           {/* DASHBOARD-MGMT-1 (Danny 23-08): on the management/admin view, "Koios AI
               performance" (left) and "Koios did this for you" (right) sit side by
               side — other roles keep KoiosForYouCard full-width, unpaired. */}
-          {vis('block.koiosPerformance') && (activeType === 'admin' || activeType === 'management') ? (
+          {hasKoiosAi && (vis('block.koiosPerformance') && (activeType === 'admin' || activeType === 'management') ? (
             // Equal footprint (Danny 27-08: "blokken even groot") — cells stretch, cards fill.
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
               <KoiosPerformanceCard fill />
@@ -204,7 +208,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
             /* "Koios deed dit voor jou" (K0-D noordster) — self-contained card, own
                loading/error/empty/success handling; fetches its own 7/30-day report. */
             <KoiosForYouCard scopeToggle={activeType === 'recruitment_manager' || activeType === 'sales_manager'} />
-          )}
+          ))}
 
           <DistributionCharts vis={vis} statusData={statusData} funnelData={funnelData} recruiterData={recruiterData} oppStageData={oppStageData} opp={opp} onNavigate={onNavigate} />
 

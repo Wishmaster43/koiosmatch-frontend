@@ -11,8 +11,10 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import Dashboard from './Dashboard'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+// KOIOS-CARDS-MODULE-GATE-1: the tenant's module list is per test — the gate tests below flip it.
+let tenantModules: string[] = ['ats', 'koios_ai']
 vi.mock('@/context/AuthContext', () => ({
-  useAuth: () => ({ activeTenant: { id: 't1' }, dashboardType: () => 'management', hasModule: () => false }),
+  useAuth: () => ({ activeTenant: { id: 't1', modules: tenantModules }, dashboardType: () => 'management', hasModule: () => false }),
 }))
 vi.mock('@/context/LookupsContext', () => ({
   useLookups: () => ({ statusMeta: () => ({ label: '', color: '#000' }), funnelMeta: () => ({ label: '', color: '#000' }), funnelTypes: [] }),
@@ -48,8 +50,8 @@ vi.mock('./blocks/FeedTileGrid', () => ({ default: () => null }))
 vi.mock('./blocks/ShiftsSummary', () => ({ default: () => null }))
 // Own useQuery call (own test file) — mocked here so this container test never
 // needs a QueryClientProvider in the tree.
-vi.mock('./KoiosForYouCard', () => ({ default: () => null }))
-vi.mock('./blocks/KoiosPerformanceCard', () => ({ default: () => null }))
+vi.mock('./KoiosForYouCard', () => ({ default: () => <div data-testid="koios-for-you" /> }))
+vi.mock('./blocks/KoiosPerformanceCard', () => ({ default: () => <div data-testid="koios-performance" /> }))
 
 const dashboardDataMock = vi.fn()
 vi.mock('./hooks/useDashboardData', () => ({ useDashboardData: (...args: unknown[]) => dashboardDataMock(...args) }))
@@ -79,5 +81,26 @@ describe('Dashboard · four UI states (re-audit finding)', () => {
     render(<Dashboard />)
     expect(screen.queryByText('page.loading')).not.toBeInTheDocument()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+})
+
+// KOIOS-CARDS-MODULE-GATE-1: both Koios cards call koios_ai-gated routes, so they render
+// only for a tenant that has the module (a super admin parked on a Core tenant got 403s).
+describe('Dashboard · Koios cards follow the tenant koios_ai module', () => {
+  it('renders the Koios card when the tenant has koios_ai', () => {
+    tenantModules = ['ats', 'koios_ai']
+    dashboardDataMock.mockReturnValue({ ...baseData, loading: false, error: false, retry: vi.fn() })
+    render(<Dashboard />)
+    // The performance card additionally sits behind the role template (vis), which the
+    // view-model mock does not grant; the for-you card renders on every branch.
+    expect(screen.getByTestId('koios-for-you')).toBeInTheDocument()
+  })
+
+  it('renders neither Koios card when the tenant lacks koios_ai (no 403 round-trips)', () => {
+    tenantModules = ['ats', 'koios_assist']
+    dashboardDataMock.mockReturnValue({ ...baseData, loading: false, error: false, retry: vi.fn() })
+    render(<Dashboard />)
+    expect(screen.queryByTestId('koios-performance')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('koios-for-you')).not.toBeInTheDocument()
   })
 })
