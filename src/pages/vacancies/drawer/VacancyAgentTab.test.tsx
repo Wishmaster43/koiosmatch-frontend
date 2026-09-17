@@ -7,12 +7,13 @@
  * are routed by URL.
  *
  * Unlike sibling tab tests (e.g. MatchingTab.test.tsx), assertions here use the
- * REAL nl copy, not the raw t() key: this component pulls in InterviewFlowSection
- * → shared.tsx → lib/datetime → '../i18n', and that module's import.meta.glob
- * side-effect-initialises the real i18next singleton (default lng 'nl') the first
- * time anything in that chain is imported — mirrors AgentForm.test.tsx, which hits
- * the same chain and asserts real Dutch strings ('Opslaan', 'Openingstijden').
+ * REAL nl copy, not the raw t() key, so the i18next singleton (default lng 'nl') is
+ * initialised EXPLICITLY below. It used to arrive as a side effect of the import chain
+ * InterviewFlowSection → shared.tsx → lib/datetime → '../i18n'; the audit round-1 ai
+ * bucket (648c7f0b) cut that chain and the suite went red on main (DATETIME-IMPORT-LES:
+ * a test never relies on a transitive side effect for its own setup).
  */
+import '@/i18n'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'

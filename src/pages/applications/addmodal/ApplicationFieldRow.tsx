@@ -23,7 +23,9 @@ export function ApplicationFieldRow({ fieldId, label, required, error, errorText
   return (
     <div style={{ marginBottom: spacing === 'none' ? 0 : 14 }}>
       <div style={fieldRow}>
-        <div id={`${fieldId}-label`} style={CANON_LABEL_STYLE}>{label}{required && requiredMark}</div>
+        {/* A real <label for> (the modal's original markup): the picker trigger is labelable, and
+            the accessible name then reads the label once instead of label + trigger text. */}
+        <label id={`${fieldId}-label`} htmlFor={fieldId} style={CANON_LABEL_STYLE}>{label}{required && requiredMark}</label>
         <div style={fieldControl}>{children}</div>
       </div>
       {error && (
