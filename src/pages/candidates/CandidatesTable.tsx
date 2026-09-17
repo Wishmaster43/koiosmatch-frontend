@@ -179,17 +179,11 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
         render: c => {
           if (c.lifecycle === 'pending_erase') return <SoftChip label={t('lifecycle.pendingErase')} color="var(--color-danger)" round />
           if (c.lifecycle === 'archived') return <SoftChip label={t('lifecycle.archived')} color="var(--text-muted)" round />
-          // LOOKUP-ICON-1 (batch 12, P22-30): the tenant status lookup can carry an icon
-          // (lucide slug or emoji) — shown next to the chip, same passthrough pattern as
-          // the last-contact column above. CandidateStatusChip itself stays icon-less
-          // (used on many entities without this lookup shape); the icon rides alongside it.
-          const statusIcon = c.status ? statusMeta(c.status).icon : null
-          const chip = (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-              {statusIcon && <LookupIcon icon={statusIcon} size={12} />}
-              <CandidateStatusChip status={c.status} phase={c.phase} plain={!colorStatus} round />
-            </span>
-          )
+          // TABEL-ICOON-WEG (Danny 17-09, screenshot of this column: "ICONS WEG in de
+          // TABEL!!! Nooit om gevraagd!!!"): the status lookup's icon is NOT rendered in
+          // the table — the cell is the chip alone. The icon stays a lookup property for
+          // the drawer header, pickers and settings, never for a table cell.
+          const chip = <CandidateStatusChip status={c.status} phase={c.phase} plain={!colorStatus} round />
           // requires_match -> Matches, requires_reason/expects_return_date/is_blacklist ->
           // Voorkeuren ("Preferences", where the status window + edit pencil live); no
           // flag -> plain click.

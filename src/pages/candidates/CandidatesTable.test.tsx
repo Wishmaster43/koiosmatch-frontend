@@ -246,13 +246,14 @@ describe('CandidatesTable · Koios column (Danny 05-08)', () => {
   })
 })
 
-// LOOKUP-ICON-1 control-round regression: the status icon must actually REACH the
-// row — the earlier mock bypassed normalize() and hid that the icon was dropped.
-it('renders the status lookup icon in the row when the lookup carries one', () => {
+// TABEL-ICOON-WEG (Danny 17-09: "ICONS WEG in de TABEL!!! Nooit om gevraagd!!!"): the
+// status lookup may carry an icon, but the table cell renders the chip ALONE — the icon
+// must never reach the row (it supersedes the LOOKUP-ICON-1 row regression of 13-08).
+it('renders the status chip without the lookup icon even when the lookup carries one', () => {
   const row = { ...baseCandidate, id: 99, status: 'placed' }
   const { container } = render(<CandidatesTable rows={[row]} onOpenTab={vi.fn()} />)
-  // LookupIcon renders a lucide svg for the curated 'briefcase' key.
-  expect(container.querySelector('svg.lucide-briefcase, svg[class*="briefcase"]')).toBeTruthy()
+  expect(screen.getByText('Geplaatst')).toBeInTheDocument()
+  expect(container.querySelector('svg.lucide-briefcase, svg[class*="briefcase"]')).toBeNull()
 })
 
 // Danny 07-09: the missing-appointment flag no longer renders in the name cell (it moved
