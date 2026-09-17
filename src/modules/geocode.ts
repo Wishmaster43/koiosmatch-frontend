@@ -27,7 +27,9 @@ export default {
     // Single-record path: the trigger supplies the entity; bulk leaves this
     // empty. NO placeholder (Danny 23-07 ×2): grey example text reads as a set
     // value — the empty field is the real "all records from the previous step".
-    { key: 'candidate_id', label: 'Kandidaat', type: 'text', help: '{{kandidaat.id}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook). Voor één kandidaat: {{trigger.candidate_id}} (drill-down-knop of adreswijziging).' },
+    // D9: label/help are entity-agnostic — this same field carries a candidate,
+    // customer, customer_location or vacancy id depending on the 'entity' select above.
+    { key: 'candidate_id', label: 'Record-ID', type: 'text', help: '{{record.id}} = draait per record (van het gekozen soort) uit de vorige stap (bulk; leeg werkt ook). Voor één record: {{trigger.<soort>_id}} (drill-down-knop of adreswijziging).' },
     // Bulk safety: skip records that already carry coordinates (protects OpenCage quota).
     { key: 'only_missing', label: 'Alleen zonder coördinaten', type: 'boolean', help: 'Sla records over die al coördinaten hebben; aan te raden bij bulk.' },
     // GEO-GEOCODE-ENTITY-1: the bulk source set for customer/location/vacancy

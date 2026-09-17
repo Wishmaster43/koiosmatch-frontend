@@ -34,6 +34,9 @@ import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import Toggle from '@/components/ui/Toggle'
 import { TranslationsField } from './TranslationsField'
 import { PANEL_INPUT_STYLE } from './panelInputStyle'
+// D8 fake-affordance fix: a registry field that only describes fixed module
+// behaviour (no real effect) renders as a read-only note, never an editable input.
+import CalloutBox from '@/components/ui/CalloutBox'
 
 // Dispatches one schema field type to its control; the data-fetching/nested field types delegate to fieldControls, this file only holds the plain inline ones (see the module doc above).
 // Plain panel textarea + the enlarge popup (Danny 31-08). Kept beside FieldInput so
@@ -172,6 +175,10 @@ export function FieldInput({ field, value, onChange, variables, config, instruct
     // shift_score's functie_matrix (OL:13 + AF:module-schema-reconcile-9) — a nested
     // record mapping position-name -> {primary: string[], secondary: string[]}.
     return <FunctionMatrixField value={value} onChange={onChange} fieldKey={field.key} />
+  }
+  if (field.type === 'help_text') {
+    // D8: static behaviour description — nothing to type, nothing gets saved.
+    return <CalloutBox variant="info">{fieldPlaceholder(t, field.placeholder)}</CalloutBox>
   }
   if (field.type === 'keyvalue') {
     const pairs = (Array.isArray(value) ? value : []) as Array<{ name?: string; value?: string }>

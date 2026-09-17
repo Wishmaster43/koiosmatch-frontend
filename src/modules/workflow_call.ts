@@ -30,7 +30,7 @@ export default {
     { key: 'fail_on_child_error', label: 'Stop bij mislukt kind (sync)', type: 'boolean', default: true,
       hint: 'Alleen bij direct uitvoeren: een mislukte kind-workflow laat deze stap mislukken. Uit = doorgaan; de uitkomst staat in child_run_status.',
       showIf: { key: 'mode', value: 'sync' } },
-    { key: 'pass_bundle', label: 'Huidige records meesturen', type: 'boolean',
+    { key: 'pass_bundle', label: 'Huidige records meesturen', type: 'boolean', default: true,
       hint: 'Standaard aan: de kandidaten/records van deze stap reizen mee als context van het kind.' },
     { key: 'payload', label: 'Extra gegevens', type: 'keyvalue',
       hint: 'Extra sleutel/waarde-paren voor het kind ({{trigger.*}} wordt hier al opgelost).' },
