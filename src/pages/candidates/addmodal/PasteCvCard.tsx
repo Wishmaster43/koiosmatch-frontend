@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { CheckCircle2, AlertTriangle, RotateCcw } from 'lucide-react'
 import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
 import Spinner from '@/components/ui/Spinner'
-import { ghostBtn } from './cvCardStyles'
+import Button from '@/components/ui/Button'
 import type { CvCardBaseProps } from './useCvParse'
 import { CvCardShell } from './CvCardShell'
 
@@ -30,7 +30,7 @@ export default function PasteCvCard({ phase, errorKey, summary, onReset }: Paste
           <div role="status" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-muted)' }}>
             <Spinner size={14} />
             {phase === 'uploading' ? t('modal.cv.uploading') : t('modal.cv.reading')}
-            <button type="button" onClick={onReset} style={{ ...ghostBtn, marginLeft: 'auto' }}>{t('common:cancel')}</button>
+            <Button type="button" variant="secondary" size="sm" onClick={onReset} style={{ marginLeft: 'auto' }}>{t('common:cancel')}</Button>
           </div>
         )}
 
@@ -52,9 +52,9 @@ export default function PasteCvCard({ phase, errorKey, summary, onReset }: Paste
           <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <AlertTriangle size={15} color="var(--color-danger)" />
             <span style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t(errorKey ?? 'modal.cv.error.generic')}</span>
-            <button type="button" onClick={onReset} style={{ ...ghostBtn, marginLeft: 'auto' }}>
+            <Button type="button" variant="secondary" size="sm" onClick={onReset} style={{ marginLeft: 'auto' }}>
               <RotateCcw size={13} /> {t('modal.cv.retry')}
-            </button>
+            </Button>
           </div>
         )}
     </CvCardShell>

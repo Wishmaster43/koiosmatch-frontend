@@ -25,14 +25,14 @@ const baseForm = {
   firstName: '', middleName: '', lastName: '', dateOfBirth: '', gender: '',
 } as unknown as FormState
 
-function setup() {
+function setup(errors: Record<string, boolean> = {}) {
   const set = vi.fn()
   render(
     <I18nextProvider i18n={i18n}>
       <CvFilledContext.Provider value={new Set()}>
         <PersonalCard
           form={baseForm}
-          errors={{}}
+          errors={errors}
           set={set as (k: keyof FormState, v: string) => void}
           isReq={() => false}
           genderOptions={[{ value: 'male', label: 'Man' }]}
@@ -69,5 +69,14 @@ describe('PersonalCard layout', () => {
     expect(set).toHaveBeenCalledWith('firstName', 'J')
     await user.type(screen.getByPlaceholderText('placeholders.lastName'), 'D')
     expect(set).toHaveBeenCalledWith('lastName', 'D')
+  })
+
+  // D1 (CLAUDE.md §11 adoption): the required-field error renders through the shared
+  // FieldNotice (role=alert), not a silent hand-rolled <div> — mirrors ContactCard.tsx.
+  it('surfaces required-field errors via the shared FieldNotice (role=alert)', () => {
+    setup({ firstName: true, lastName: true })
+    const alerts = screen.getAllByRole('alert')
+    expect(alerts).toHaveLength(2)
+    alerts.forEach(a => expect(a).toHaveTextContent('required'))
   })
 })

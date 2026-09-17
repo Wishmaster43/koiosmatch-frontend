@@ -78,18 +78,19 @@ describe('ProfilePage — WhatsApp Web tab gating', () => {
 // Row 32 (Danny 09-09): Mijn meldingen is a personal preference — a profile tab, and the
 // moved settings deep link opens it through the navigation intent.
 describe('ProfilePage — Mijn meldingen tab (row 32)', () => {
-  it('lists the notifications tab and opens the per-user override screen on click', () => {
+  it('lists the notifications tab and opens the per-user override screen on click', async () => {
     hasModuleImpl = () => false
     permissions = []
     render(<ProfilePage />)
     expect(screen.queryByText('my-notifications-panel')).not.toBeInTheDocument()
     fireEvent.click(screen.getByText('profile.tabs.notifications'))
-    expect(screen.getByText('my-notifications-panel')).toBeInTheDocument()
+    // Lazy-loaded (settings/shared.ts, BARREL-DATETIME-LES) — resolves on a microtask.
+    expect(await screen.findByText('my-notifications-panel')).toBeInTheDocument()
   })
 
-  it('opens the notifications tab directly from a navigation intent', () => {
+  it('opens the notifications tab directly from a navigation intent', async () => {
     render(<ProfilePage intent={{ tab: 'notifications' }} />)
-    expect(screen.getByText('my-notifications-panel')).toBeInTheDocument()
+    expect(await screen.findByText('my-notifications-panel')).toBeInTheDocument()
   })
 
   it('ignores an unknown intent tab and stays on the profile tab', () => {

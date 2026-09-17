@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next'
 import { CheckCircle2, AlertTriangle, RotateCcw } from 'lucide-react'
 import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
 import Spinner from '@/components/ui/Spinner'
-import { ghostBtn } from './cvCardStyles'
+import Button from '@/components/ui/Button'
 import type { CvCardBaseProps } from './useCvParse'
 import { CvCardShell } from './CvCardShell'
 
@@ -46,7 +46,7 @@ export default function CvUploadCard({ phase, errorKey, fileName, summary, onRes
                 {phase === 'processing' ? t('modal.cv.readingHint') : fileName}
               </div>
             </div>
-            <button type="button" onClick={onReset} style={{ ...ghostBtn, marginLeft: 'auto' }}>{t('modal.cv.cancel')}</button>
+            <Button type="button" variant="secondary" size="sm" onClick={onReset} style={{ marginLeft: 'auto' }}>{t('modal.cv.cancel')}</Button>
           </div>
         )}
 
@@ -60,9 +60,9 @@ export default function CvUploadCard({ phase, errorKey, fileName, summary, onRes
                   ? t('modal.cv.filled', { count: summary.filled.length })
                   : t('modal.cv.none')}
               </span>
-              <button type="button" onClick={onReset} style={{ ...ghostBtn, marginLeft: 'auto' }}>
+              <Button type="button" variant="secondary" size="sm" onClick={onReset} style={{ marginLeft: 'auto' }}>
                 <RotateCcw size={13} /> {t('modal.cv.another')}
-              </button>
+              </Button>
             </div>
             {summary.filled.length > 0 && (
               <>
@@ -93,7 +93,7 @@ export default function CvUploadCard({ phase, errorKey, fileName, summary, onRes
           <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <AlertTriangle size={15} color="var(--color-danger)" />
             <span style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t(errorKey ?? 'modal.cv.error.generic')}</span>
-            <button type="button" onClick={onReset} style={{ ...ghostBtn, marginLeft: 'auto' }}>{t('modal.cv.retry')}</button>
+            <Button type="button" variant="secondary" size="sm" onClick={onReset} style={{ marginLeft: 'auto' }}>{t('modal.cv.retry')}</Button>
           </div>
         )}
     </CvCardShell>

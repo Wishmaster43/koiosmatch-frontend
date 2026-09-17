@@ -65,6 +65,7 @@ export default function ProfileDisplayTab({ form, setForm, onPickPageSize, theme
             return (
               <button key={n}
                 onClick={() => { setForm(f => ({ ...f, default_per_page: n })); onPickPageSize?.(n) }}
+                aria-pressed={active}
                 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- §4 soft-tint multi-option toggle pill (selected/unselected identity Button's variants don't express), not a Button copy
                 style={{ ...choiceChipStyle(active), padding: '7px 16px' }}>
                 {n}
@@ -85,6 +86,7 @@ export default function ProfileDisplayTab({ form, setForm, onPickPageSize, theme
             { value: 'dark',  icon: <Moon size={14} />, label: t('profile.dark') },
           ].map(opt => (
             <button key={opt.value} onClick={() => setTheme(opt.value)}
+              aria-pressed={theme === opt.value}
               // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- §4 soft-tint multi-option toggle pill (selected/unselected identity Button's variants don't express), not a Button copy
               style={{ ...choiceChipStyle(theme === opt.value), flex: 1, padding: '10px 0',
                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>

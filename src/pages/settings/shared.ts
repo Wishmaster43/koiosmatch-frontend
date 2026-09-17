@@ -18,3 +18,12 @@ export type { ImportRowAction, ImportRowResult, ImportRunResult, ImportSummary, 
 export { groupTemplates, importPermissionsFor, isWholeTreeTemplate, orderedTemplates } from './sections/import/importTemplateShape'
 export { useImportTemplates, useDefaultImportSelection } from './sections/import/useImportTemplates'
 export { useImportWizard } from './sections/import/useImportWizard'
+// Reused as profile tabs by pages/auth/ProfilePage (§2 barrel decision: the
+// cross-entity import goes through this alias, never a deep relative path).
+// Lazy (not a plain re-export): this barrel is loaded eagerly by 17 consumers,
+// and these two screens transitively pull in lib/datetime -> i18n/index (which
+// calls i18n.init() at module load) — BARREL-DATETIME-LES / DATETIME-IMPORT-LES
+// (§2, 25-08/10-09). Keeping them lazy keeps the barrel's own module graph flat.
+import { lazy } from 'react'
+export const SecuritySettings = lazy(() => import('./sections/SecuritySettings'))
+export const MyNotificationsSettings = lazy(() => import('./sections/MyNotificationsSettings'))

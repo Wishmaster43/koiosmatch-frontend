@@ -102,3 +102,25 @@ describe('ProfileDisplayTab · page-size pick persists on its own (X-15)', () =>
     expect(setForm).toHaveBeenCalledTimes(1)
   })
 })
+
+// D6 (§6 WCAG 2.2 AA): a choice-chip's selected state must be exposed to assistive
+// tech via aria-pressed, not colour/weight alone — mirrors the Koios-mode pills below.
+describe('ProfileDisplayTab · choice-chip aria-pressed (§6)', () => {
+  it('exposes aria-pressed on the page-size pills, reflecting the active option', async () => {
+    render(<ProfileDisplayTab form={{ firstname: '', lastname: '', email: '', phone: '', default_per_page: 50 }} setForm={vi.fn()}
+      theme="light" setTheme={vi.fn()} language="en" setLanguage={vi.fn()} />)
+    expect(screen.getByRole('button', { name: '50' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: '100' })).toHaveAttribute('aria-pressed', 'false')
+    // Flush the Koios-mode GET (own effect on mount) so its state update lands
+    // inside act() before the test body returns.
+    await waitFor(() => expect(api.get).toHaveBeenCalled())
+  })
+
+  it('exposes aria-pressed on the theme pills, reflecting the active theme', async () => {
+    render(<ProfileDisplayTab form={{ firstname: '', lastname: '', email: '', phone: '' }} setForm={vi.fn()}
+      theme="dark" setTheme={vi.fn()} language="en" setLanguage={vi.fn()} />)
+    expect(screen.getByRole('button', { name: /profile\.dark/ })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: /profile\.light/ })).toHaveAttribute('aria-pressed', 'false')
+    await waitFor(() => expect(api.get).toHaveBeenCalled())
+  })
+})

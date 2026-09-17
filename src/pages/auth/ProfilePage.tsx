@@ -4,7 +4,7 @@
  * each tab to its own component. The header avatar is uploadable. Tabs:
  * Profile / Email / Display / WhatsApp Web / Security.
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useTranslation }      from 'react-i18next'
 import { User, Mail, Sun, Camera, Shield, MessageCircle, Bell } from 'lucide-react'
 import { useTheme }           from '@/context/ThemeContext'
@@ -16,8 +16,8 @@ import CalloutBox             from '@/components/ui/CalloutBox'
 import { mfaSignals }         from '@/lib/mfaGate'
 import ProfileEmailConnect    from './ProfileEmailConnect'
 import ProfileWhatsAppWeb      from './ProfileWhatsAppWeb'
-import SecuritySettings        from '../settings/sections/SecuritySettings'
-import MyNotificationsSettings from '../settings/sections/MyNotificationsSettings'
+// §2 barrel decision: cross-entity reuse goes through settings/shared.ts, never a deep relative path.
+import { SecuritySettings, MyNotificationsSettings } from '@/pages/settings/shared'
 import { Section, ProfileTabs } from './profileParts'
 import ProfileDetailsTab       from './ProfileDetailsTab'
 import ProfileDisplayTab       from './ProfileDisplayTab'
@@ -140,7 +140,9 @@ export default function ProfilePage({ intent = null }: { intent?: { tab?: string
         </Section>
       )}
 
-      {tab === 'notifications' && <MyNotificationsSettings />}
+      {tab === 'notifications' && (
+        <Suspense fallback={<Spinner />}><MyNotificationsSettings /></Suspense>
+      )}
 
       {tab === 'whatsapp' && showWhatsAppWeb && (
         <Section title={t('profile.whatsappWeb.title')}>
@@ -155,7 +157,7 @@ export default function ProfilePage({ intent = null }: { intent?: { tab?: string
 
       {tab === 'security' && (
         <Section title={tSettings('nav.security')}>
-          <SecuritySettings />
+          <Suspense fallback={<Spinner />}><SecuritySettings /></Suspense>
         </Section>
       )}
     </div>

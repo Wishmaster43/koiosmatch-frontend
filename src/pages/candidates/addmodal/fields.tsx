@@ -8,6 +8,7 @@ import type { ComponentType, CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FieldRow, TextField as TextFieldJs, SelectField as SelectFieldJs } from '@/components/forms/fields'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
+import { tintBg, tintBorder } from '@/lib/tint'
 import { CvFilledContext } from './cvFilledContext'
 
 // THE RECIPE (Danny 14-08): every field is a label-LEFT row, mirroring the
@@ -33,9 +34,10 @@ export interface FieldOption { value: string; label: string }
 const cvBadge: CSSProperties = {
   fontSize: 9, fontWeight: 700, letterSpacing: '0.06em', lineHeight: 1.6,
   padding: '0 5px', borderRadius: 999, textTransform: 'uppercase',
-  background: 'color-mix(in srgb, var(--color-primary) 14%, transparent)',
+  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- tintBg/tintBorder ARE the canonical §4 tint helpers; the primary token here is only their argument, not a hand-painted fill
+  background: tintBg('var(--color-primary)'),
   color: 'var(--color-primary-text)',
-  border: '1px solid color-mix(in srgb, var(--color-primary) 40%, transparent)',
+  border: tintBorder('var(--color-primary)'),
 }
 
 /**
