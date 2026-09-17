@@ -18,14 +18,19 @@
  */
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { KpiSpec, DonutSpec } from '@/components/insights/InsightsRow'
+import { GroupLabel } from '@/components/ui/typography'
 
 // The one nine-card KPI strip every report opens with — cards sit directly on
 // the page background (no wrapping surface), a dev-only guard flags a wrong count.
-export default function ReportKpiBand({ kpis, donuts, clearTitle, notice }: {
+export default function ReportKpiBand({ kpis, donuts, clearTitle, notice, extraKpis, extraTitle }: {
   kpis?: KpiSpec[]
   donuts?: DonutSpec[]
   clearTitle?: string
   notice?: string
+  // Tenant-defined KPI cards (KPI-BUILDER-1): a SECOND row below the fixed nine,
+  // same atom/footprint, own horizontal scroll — never squeezed into the fixed strip.
+  extraKpis?: KpiSpec[]
+  extraTitle?: string
 }) {
   // Dev-time guard for the nine-card promise (Danny, twice): every report's
   // strip must be exactly nine cards in every data state — a card whose value
@@ -48,6 +53,14 @@ export default function ReportKpiBand({ kpis, donuts, clearTitle, notice }: {
           the reader can always tell WHAT the number counts. */}
       <InsightsRow kpis={kpis} donuts={donuts} padding="0 0 0 0" wrapLabels
         clearTitle={clearTitle} notice={notice} />
+      {/* Tenant-defined KPI cards ride a second row, only when the tenant has any —
+          same InsightsRow atom and footprint, so they read as MORE of the same strip. */}
+      {extraKpis?.length ? (
+        <>
+          <GroupLabel as="h3" style={{ margin: '12px 0 6px' }}>{extraTitle}</GroupLabel>
+          <InsightsRow kpis={extraKpis} padding="0 0 0 0" wrapLabels />
+        </>
+      ) : null}
     </div>
   )
 }

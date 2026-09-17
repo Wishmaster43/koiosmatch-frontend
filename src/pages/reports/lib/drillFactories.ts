@@ -15,6 +15,7 @@
 import { gateDrillClick } from '../reportDrillGate'
 import type { DrillableReport } from '../reportDrillGate'
 import type { DrillSpec } from '../ReportDrillDrawer'
+import type { CustomKpiCard } from '@/types/analytics'
 
 export interface OpenKpiDrillOpts {
   report: DrillableReport
@@ -62,4 +63,29 @@ export function makeOpenSegment(o: OpenSegmentOpts) {
       rowsEndpoint: o.rowsEndpoint, rowsParams: { ...o.baseParams, ...xorParam },
       adviceEndpoint: o.adviceEndpoint, adviceParams: { ...o.baseParams, ...xorParam },
     })
+}
+
+export interface OpenCustomKpiDrillOpts {
+  baseParams: object
+  windowSub: () => string
+  setDrill: (spec: DrillSpec | null) => void
+  entityPage?: string
+}
+
+// Builds the "open this tenant-defined KPI card's drill" handler (KPI-BUILDER-1):
+// the definition route accepts only the panel-filter vocabulary baseParams already
+// carries (§0.2) plus an optional `dimension_value` for a fan-out card — never
+// `kpi`/`date`/`phase_filter`. Not wrapped in gateDrillClick (comment: the route
+// exists for every entity; a 403 renders the drawer's own calm rowsForbidden path).
+// Takes the DISPLAY label/value the card already renders (dimension-aware label,
+// unit-formatted value) rather than re-deriving them from the raw card — mirrors
+// kpiSpecs.ts's makeOpenKpiDrill, so the drawer title/value never disagree with
+// the card the user just clicked (EENHEID-LES, §14).
+export function makeOpenCustomKpiDrill(o: OpenCustomKpiDrillOpts) {
+  return (card: CustomKpiCard, label: string, value: string | number) => o.setDrill({
+    title: label, value, subtitle: o.windowSub(),
+    ...(o.entityPage ? { entityPage: o.entityPage } : {}),
+    rowsEndpoint: `/reports/kpi-definitions/${card.id}/drill`,
+    rowsParams: { ...o.baseParams, ...(card.dimension_value != null ? { dimension_value: card.dimension_value } : {}) },
+  })
 }

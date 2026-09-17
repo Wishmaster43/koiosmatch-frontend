@@ -4,7 +4,8 @@
  * (§13: a test that does not touch the seam proves nothing about the seam).
  */
 import { describe, it, expect, vi } from 'vitest'
-import { makeOpenKpiDrill, makeOpenSegment } from './drillFactories'
+import { makeOpenKpiDrill, makeOpenSegment, makeOpenCustomKpiDrill } from './drillFactories'
+import type { CustomKpiCard } from '@/types/analytics'
 
 describe('makeOpenKpiDrill', () => {
   it('defaults entityPage to the report id and layers the kpi XOR param on baseParams', () => {
@@ -65,5 +66,46 @@ describe('makeOpenSegment', () => {
     })
     open({ label: 'Channel', count: 2 }, { channel: 'whatsapp' })
     expect(setDrill.mock.calls[0][0]).not.toHaveProperty('entityPage')
+  })
+})
+
+describe('makeOpenCustomKpiDrill', () => {
+  const baseCard: CustomKpiCard = {
+    id: 'kd-1', entity: 'match', metric_key: 'new_in_period', label: 'Nieuwe matches',
+    dimension: 'all', dimension_value: null, dimension_label: null,
+    value: 14, unit: 'count', target: null, warn: null, comparison: 'gte', status: 'ok',
+  }
+
+  it('hits the kpi-definitions drill route with baseParams and no kpi/date/phase_filter', () => {
+    const setDrill = vi.fn()
+    const open = makeOpenCustomKpiDrill({
+      baseParams: { period: 'month' }, windowSub: () => 'Sep 2026', setDrill, entityPage: 'matches',
+    })
+    open(baseCard, 'Nieuwe matches', 14)
+    expect(setDrill).toHaveBeenCalledWith({
+      title: 'Nieuwe matches', value: 14, subtitle: 'Sep 2026', entityPage: 'matches',
+      rowsEndpoint: '/reports/kpi-definitions/kd-1/drill', rowsParams: { period: 'month' },
+    })
+    const params = setDrill.mock.calls[0][0].rowsParams
+    expect(params).not.toHaveProperty('kpi')
+    expect(params).not.toHaveProperty('date')
+    expect(params).not.toHaveProperty('phase_filter')
+  })
+
+  it('layers dimension_value on rowsParams for a fan-out card', () => {
+    const setDrill = vi.fn()
+    const card = { ...baseCard, dimension: 'contract_form', dimension_value: 'freelance', dimension_label: 'ZZP' }
+    const open = makeOpenCustomKpiDrill({ baseParams: {}, windowSub: () => 'W', setDrill })
+    open(card, 'Nieuwe matches · ZZP', 14)
+    expect(setDrill.mock.calls[0][0].rowsParams).toEqual({ dimension_value: 'freelance' })
+  })
+
+  it('omits dimension_value for an "all" definition and falls back to the house dash on a null value', () => {
+    const setDrill = vi.fn()
+    const open = makeOpenCustomKpiDrill({ baseParams: {}, windowSub: () => 'W', setDrill })
+    open({ ...baseCard, value: null }, 'Nieuwe matches', '—')
+    expect(setDrill.mock.calls[0][0]).not.toHaveProperty('adviceEndpoint')
+    expect(setDrill.mock.calls[0][0].value).toBe('—')
+    expect(setDrill.mock.calls[0][0].rowsParams).toEqual({})
   })
 })
