@@ -96,3 +96,81 @@ export const CUSTOMER_DEPARTMENT_FIELDS: RequiredFieldDef[] = [
   { key: 'cost_center', labelKey: 'customers:departments.detail.costCenter' },
   { key: 'billing_email', labelKey: 'customers:overview.billingEmail' },
 ]
+
+/** Build a full `key -> labelKey` map from a catalog array + extra key/labelKey pairs. */
+function labelMap(base: RequiredFieldDef[], extra: Record<string, string>): Record<string, string> {
+  return { ...Object.fromEntries(base.map(f => [f.key, f.labelKey])), ...extra }
+}
+
+/**
+ * Verifier fix (17-09): the live `GET /settings/field-inventory?entity=customer` serves
+ * 20 writable keys the static CUSTOMER_FIELDS array above never had a row for (measured
+ * against `RequiredFieldVocabulary::fieldsFor('customer')`), so the raw key fell back to
+ * rendering verbatim on the Klant tab (§5 half-translated copy). Every entry below either
+ * REUSES an existing label already shown elsewhere for that exact field (the invoice
+ * address block carries its OWN "Factuuradres: …" labels, because a row must never
+ * read identically to its visiting-address twin — verifier 17-09) or, where no existing label exists anywhere in
+ * the app, adds a dedicated `customerRequiredFields.fieldLabels.*` key.
+ */
+export const CUSTOMER_FIELD_LABEL_KEYS: Record<string, string> = labelMap(CUSTOMER_FIELDS, {
+  address_line_2: 'customers:address.addressLine2',
+  billing_po_box: 'customers:overview.billingAddress.poBox',
+  billing_street: 'settings:customerRequiredFields.fieldLabels.billing_street',
+  billing_house_number: 'settings:customerRequiredFields.fieldLabels.billing_house_number',
+  billing_house_number_suffix: 'settings:customerRequiredFields.fieldLabels.billing_house_number_suffix',
+  billing_address_line_2: 'settings:customerRequiredFields.fieldLabels.billing_address_line_2',
+  billing_postcode: 'settings:customerRequiredFields.fieldLabels.billing_postcode',
+  billing_city: 'settings:customerRequiredFields.fieldLabels.billing_city',
+  billing_province: 'settings:customerRequiredFields.fieldLabels.billing_province',
+  billing_country: 'settings:customerRequiredFields.fieldLabels.billing_country',
+  billing_branch_id: 'settings:customerRequiredFields.fieldLabels.billing_branch_id',
+  branch_ids: 'settings:customerRequiredFields.fieldLabels.branch_ids',
+  source: 'customers:overview.source',
+  has_career_page: 'customers:overview.hasCareerPage',
+  hide_company_name: 'customers:vacancySettings.fields.hideCompanyName',
+  show_in_my_vacancies: 'customers:vacancySettings.fields.showInVacancies',
+  exclude_from_sourcing: 'customers:vacancySettings.fields.excludeFromSourcing',
+  custom_fields: 'candidates:drawer.customFields',
+  // No existing screen names these two yet (KLANTVOORKEUR-CONTRACT-1 / KD10) — new keys.
+  contract_types: 'settings:customerRequiredFields.fieldLabels.contractTypes',
+  contract_end_date: 'settings:customerRequiredFields.fieldLabels.contractEndDate',
+})
+
+/** Verifier fix (17-09): 16 fields the inventory serves for `customer_contact` (WORKLIST row 34). */
+export const CUSTOMER_CONTACT_FIELD_LABEL_KEYS: Record<string, string> = labelMap(CUSTOMER_CONTACT_FIELDS, {
+  location_ids: 'settings:customerRequiredFields.fieldLabels.locationIds',
+  department_ids: 'settings:customerRequiredFields.fieldLabels.departmentIds',
+  linkedin_slug: 'candidates:modal.fields.linkedin',
+  preferred_language: 'candidates:modal.fields.preferredLanguage',
+  description: 'customers:overview.description',
+  is_primary: 'settings:customerRequiredFields.fieldLabels.isPrimary',
+  custom_fields: 'candidates:drawer.customFields',
+  whatsapp_consent: 'candidates:communication.consentWhatsapp',
+  email_consent: 'candidates:communication.consentEmail',
+  newsletter_consent: 'candidates:communication.consentNewsletter',
+  retention_consent: 'candidates:communication.consentRetentionOptIn',
+  // The four evidentiary timestamps the consent flags stamp (write-`prohibited`, but
+  // still a top-level Form Request rule key, so the live inventory serves them too).
+  whatsapp_consent_at: 'settings:customerRequiredFields.fieldLabels.whatsappConsentAt',
+  email_consent_at: 'settings:customerRequiredFields.fieldLabels.emailConsentAt',
+  newsletter_consent_at: 'settings:customerRequiredFields.fieldLabels.newsletterConsentAt',
+  retention_consent_at: 'settings:customerRequiredFields.fieldLabels.retentionConsentAt',
+  retention_warned_at: 'settings:customerRequiredFields.fieldLabels.retentionWarnedAt',
+})
+
+/** Verifier fix (17-09): ~5 fields the inventory serves for `customer_location`. */
+export const CUSTOMER_LOCATION_FIELD_LABEL_KEYS: Record<string, string> = labelMap(CUSTOMER_LOCATION_FIELDS, {
+  address_line_2: 'customers:address.addressLine2',
+  branch_id: 'customers:overview.branchField',
+  branch_ids: 'customers:overview.branch',
+  custom_fields: 'candidates:drawer.customFields',
+  state: 'settings:customerRequiredFields.fieldLabels.state',
+})
+
+/** Verifier fix (17-09): 1 field (`custom_fields`) the inventory serves for `customer_department`. */
+export const CUSTOMER_DEPARTMENT_FIELD_LABEL_KEYS: Record<string, string> = labelMap(CUSTOMER_DEPARTMENT_FIELDS, {
+  custom_fields: 'candidates:drawer.customFields',
+})
+
+// The shared reason-text -> i18n-key translation, re-exported for this screen and its tests.
+export { reasonI18nKey } from '@/pages/settings/requiredFieldsReason'

@@ -7,6 +7,11 @@
  *
  * No hardcoded seed defaults: an absent setting means the guard's `builtInRequired()`
  * returns `[]`, i.e. genuinely nothing enforced — every toggle starts off, honestly.
+ *
+ * `fields` now comes from the live field-inventory (VERPLICHTE-VELDEN-INVENTARIS-1) via the
+ * container (CustomerRequiredFieldsSettings) rather than the static whitelist directly — a row
+ * can carry `requirable:false` (rendered disabled with its `reason` as a hover title, never
+ * hidden — Danny wants to SEE what he can't require) alongside the always-requirable ones.
  */
 import { useTranslation } from 'react-i18next'
 import { useAllSettings, useSettingsLoaded, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
@@ -20,8 +25,8 @@ import SettingsLoadBanner from '@/pages/settings/components/SettingsLoadBanner'
 export default function FlatRequiredFieldsToggleList({ settingKey, fields, hintKey }: {
   /** The tenant setting key, e.g. `customer_location_required_fields`. */
   settingKey: string
-  /** The whitelist for this entity (requiredFieldsCatalog.ts). */
-  fields: RequiredFieldDef[]
+  /** Rows to render — labels resolved against the catalogue, `requirable`/`reason` optional. */
+  fields: (RequiredFieldDef & { requirable?: boolean; reason?: string | null })[]
   /** i18n key for the create/update-semantics helper line above the list. */
   hintKey: string
 }) {
@@ -35,11 +40,18 @@ export default function FlatRequiredFieldsToggleList({ settingKey, fields, hintK
   const loaded = useSettingsLoaded()
   const list = getJsonSetting<string[]>(values, settingKey, [])
 
+  // Keys the inventory currently marks non-requirable — stripped from the stored array
+  // on every save, so a key that was required before the inventory turned it off never
+  // rides along as a dead "required" the admin can no longer clear (§3 no fake affordance).
+  const nonRequirableKeys = new Set(fields.filter(f => f.requirable === false).map(f => f.key))
+
   // Toggle one field in/out of the flat required-fields array and persist it whole.
-  // Ignored while the stored blob hasn't loaded yet — see the race note above.
+  // Ignored while the stored blob hasn't loaded yet, or for a row the inventory marks
+  // not requirable (no working guard key — a save would be a documented no-op, §3).
   const toggle = (field: string) => {
-    if (!loaded) return
-    const next = list.includes(field) ? list.filter(x => x !== field) : [...list, field]
+    if (!loaded || nonRequirableKeys.has(field)) return
+    const cleaned = list.filter(x => !nonRequirableKeys.has(x))
+    const next = cleaned.includes(field) ? cleaned.filter(x => x !== field) : [...cleaned, field]
     saveSettingsKeys({ [settingKey]: next }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
   }
 
@@ -50,12 +62,15 @@ export default function FlatRequiredFieldsToggleList({ settingKey, fields, hintK
       {/* Explains the create/update semantics — full check on create, touched-fields-only on update. */}
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{t(hintKey)}</p>
       <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-        {fields.map((f, i) => (
-          <div key={f.key} style={i === fields.length - 1 ? { ...row, borderBottom: 'none' } : row}>
-            <span style={{ color: 'var(--text)' }}>{t(f.labelKey)}</span>
-            <PermissionToggle checked={list.includes(f.key)} onChange={() => toggle(f.key)} aria-label={t(f.labelKey)} disabled={!loaded} />
-          </div>
-        ))}
+        {fields.map((f, i) => {
+          const rowDisabled = !loaded || f.requirable === false
+          return (
+            <div key={f.key} style={i === fields.length - 1 ? { ...row, borderBottom: 'none' } : row}>
+              <span style={{ color: 'var(--text)' }} title={f.requirable === false ? f.reason ?? undefined : undefined}>{t(f.labelKey)}</span>
+              <PermissionToggle checked={list.includes(f.key)} onChange={() => toggle(f.key)} aria-label={t(f.labelKey)} disabled={rowDisabled} />
+            </div>
+          )
+        })}
       </div>
     </div>
   )

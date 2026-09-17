@@ -45,20 +45,12 @@ interface InventorySourceField {
 }
 
 /**
- * Build the row list both customer required-fields screens render (verifier fix 17-09,
- * extracted to close the DRY-ceiling clone between CustomerPhaseRequiredFieldsMatrix and
- * CustomerRequiredFieldsSettings): filters out fields the caller lacks permission for,
- * resolves the label through the given catalogue map (raw key as fallback), and
- * translates the raw English `reason` through `reasonI18nKey` (raw text as fallback for
- * an unrecognised reason).
- */
-/**
  * Flip one field's required-membership for one phase inside a phase-keyed
  * `{ <phase>: [field_keys] }` map, stripping every currently-non-requirable key from
  * EVERY phase on the way out (§3 no fake affordance — a stale "required" key the admin
- * can no longer clear would otherwise ride along invisibly forever). Shared by
- * CandidateRequiredFieldsSettings and CustomerPhaseRequiredFieldsMatrix, whose toggle()
- * bodies were byte-identical here (DRY-ceiling clone, verifier fix 17-09).
+ * can no longer clear would otherwise ride along invisibly forever). Used by
+ * CustomerPhaseRequiredFieldsMatrix; the candidate screen keeps its own toggle (its
+ * config is keyed differently) and strips the same set on save.
  */
 export function togglePhaseKeyedField(
   cfg: Record<string, string[]>,
@@ -75,6 +67,14 @@ export function togglePhaseKeyedField(
   return next
 }
 
+/**
+ * Build the row list both customer required-fields screens render (verifier fix 17-09,
+ * extracted to close the DRY-ceiling clone between CustomerPhaseRequiredFieldsMatrix and
+ * CustomerRequiredFieldsSettings): filters out fields the caller lacks permission for,
+ * resolves the label through the given catalogue map (raw key as fallback), and
+ * translates the raw English `reason` through `reasonI18nKey` (raw text as fallback for
+ * an unrecognised reason).
+ */
 export function buildInventoryRows(
   fields: InventorySourceField[],
   labelKeys: Record<string, string>,
