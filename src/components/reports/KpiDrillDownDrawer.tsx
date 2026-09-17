@@ -8,7 +8,7 @@ import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { PageTitle, BodyText, Caption, GroupLabel } from '@/components/ui/typography'
 import DrawerCloseButton from '@/components/drawer/DrawerCloseButton'
 import DrawerBackdrop from '@/components/drawer/DrawerBackdrop'
-import StatusPill from '@/components/ui/StatusPill'
+import StatusBadge from './RecordStatusBadge'
 import { tint, tintBorder } from '@/lib/tint'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
@@ -20,28 +20,12 @@ import type { ReportCandidate } from '@/types/reports'
 // App-wide active locale + the house DD-MM-YYYY date formatter (DATUM-1/LANE-B).
 import { useLocale, useDateFormat } from '@/lib/datetime'
 import { formatMonthName } from '@/lib/localDate'
-import { SM_STATUS, normalizeSmStatus } from '@/lib/smStatus'
 
 // Locale-aware full month name for index 0–11; `locale` is required (a pure
 // module-scope helper never hardcodes nl-NL or imports i18n).
 const monthName = (locale: string, i: number) => formatMonthName(new Date(2000, i, 1), locale, 'long')
 
-// A colour-tinted status pill for a drilldown row, via the shared SoftChip/StatusPill
-// (KPIDRILL-CHROME-1) — the tint/ink pairing (incl. the danger-on-danger AA fix) now
-// lives once in SoftChip/chipInk instead of a local hand-rolled bg/color map.
-function StatusBadge({ status }: { status?: string }) {
-  const { t } = useTranslation('reports')
-  const colors: Record<string, string> = {
-    [SM_STATUS.ACTIVE]: 'var(--color-success)',
-    [SM_STATUS.INACTIVE]: 'var(--color-warning)',
-    [SM_STATUS.EXTERNAL]: 'var(--color-secondary)',
-    [SM_STATUS.INTAKE]: 'var(--color-violet)',
-    [SM_STATUS.DELETED]: 'var(--color-danger)',
-  }
-  const key = normalizeSmStatus(status)
-  const label = status ? t(`candidates.status.${key}`, { defaultValue: status }) : t('candidates.unknown')
-  return <StatusPill label={label} color={colors[key]} />
-}
+
 
 // ── Candidate list (New / Deregistered) ───────────────────────────────────────
 

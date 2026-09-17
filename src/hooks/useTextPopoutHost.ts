@@ -52,6 +52,12 @@ export function useTextPopoutHost({ entity, id, field, value, dirty, onDraft, on
   // per render, so it must read the current callback without re-subscribing.
   const onClosedRef = useRef(onClosed)
   useEffect(() => { onClosedRef.current = onClosed })
+  // Guards the win.closed poll below against writing into a DEAD hook instance:
+  // the popout window intentionally outlives a host tab switch (registry-owned,
+  // KLANTEN 5 above), so the poll itself is deliberately not torn down on
+  // unmount — but once this instance is gone, it must stop touching its state.
+  const aliveRef = useRef(true)
+  useEffect(() => { aliveRef.current = true; return () => { aliveRef.current = false } }, [])
   // Latest draft + its saved state for the `hello` reply — refs so the message
   // handler never answers with a stale closure; assigned in an effect, not in render.
   const valueRef = useRef(value)
@@ -91,6 +97,7 @@ export function useTextPopoutHost({ entity, id, field, value, dirty, onDraft, on
     const poll = window.setInterval(() => {
       if (!win.closed) return
       window.clearInterval(poll)
+      if (!aliveRef.current) return
       setActive(false)
       onClosedRef.current?.()
     }, 500)

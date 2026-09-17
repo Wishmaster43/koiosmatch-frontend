@@ -17,7 +17,9 @@ import CalloutBox from '@/components/ui/CalloutBox'
 import RunStepList from './RunStepList'
 import RunLineage from './RunLineage'
 import { StopRunButton, CANCELLABLE } from '@/components/layout/workflow/runControl'
-import { Caption, GroupLabel } from '@/components/ui/typography'
+import { GroupLabel, Mono } from '@/components/ui/typography'
+import ReportStatStrip from './ReportStatStrip'
+import CopyIconButton from '@/components/ui/CopyIconButton'
 import type { RunRow } from '@/types/reports'
 
 // Slide-over for one workflow run: header/status/metrics, a timeline of run
@@ -133,21 +135,11 @@ export default function RunDetailDrawer({ run, onClose, zIndex }: {
       onClose={onClose}
     >
       {/* Metrics */}
-      <div style={{ display: 'flex', gap: 1, background: 'var(--hover-bg)',
-                    borderBottom: '1px solid var(--border)', margin: '-16px -20px 20px -20px', paddingLeft: 20, paddingRight: 20 }}>
-        {[
-          { label: t('runs.drawer.candidates'), value: shown.candidates_count ?? shown.candidates ?? '—', Icon: Users },
-          { label: t('runs.drawer.duration'),   value: formatDuration(shown.duration_ms ?? shown.duration), Icon: Clock },
-        ].map(b => (
-          <div key={b.label} style={{ flex: 1, padding: '10px 0', textAlign: 'center', background: 'var(--surface)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
-              <b.Icon size={12} color="var(--text-muted)" />
-              <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>{b.value}</span>
-            </div>
-            <Caption as="div" style={{ marginTop: 1 }}>{b.label}</Caption>
-          </div>
-        ))}
-      </div>
+      <ReportStatStrip cellPadding="10px 0" style={{ borderBottom: '1px solid var(--border)', margin: '-16px -20px 20px -20px', paddingLeft: 20, paddingRight: 20 }}
+        items={[
+          { label: t('runs.drawer.candidates'), value: shown.candidates_count ?? shown.candidates ?? '—', icon: Users },
+          { label: t('runs.drawer.duration'),   value: formatDuration(shown.duration_ms ?? shown.duration), icon: Clock },
+        ]} />
 
       {/* WF-DRYRUN-FE-1: dry-run banner — only when the RUN-LEVEL flag says so
           (never derived from context, which mutates step-to-step). */}
@@ -175,16 +167,14 @@ export default function RunDetailDrawer({ run, onClose, zIndex }: {
                                       borderBottom: '1px solid var(--hover-bg)' }}>
             <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 140, flexShrink: 0 }}>{r.label}</span>
             {'mono' in r && r.mono ? (
-              // Inline monospace copy-id affordance styled as plain text,
-              // pre-existing and out of this ink/tint task's scope.
-              <button type="button" title={t('runs.drawer.copyId')}
-                onClick={() => { void navigator.clipboard?.writeText(String(r.value)) }}
-                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
-                style={{ fontSize: 11.5, color: 'var(--text)', fontFamily: "'JetBrains Mono', monospace",
-                         background: 'none', border: 'none', padding: 0, cursor: 'copy',
-                         textAlign: 'left', wordBreak: 'break-all' }}>
-                {r.value}
-              </button>
+              // Shared CopyIconButton (already used elsewhere in this folder for
+              // address copy) — replaces the old raw <button> whose disable reason
+              // was "out of this task's scope", which r7 rules out as a necessity reason.
+              <CopyIconButton value={String(r.value)} label={t('runs.drawer.copyId')}
+                copiedLabel={t('runs.drawer.copiedId')}
+                style={{ fontSize: 11.5, color: 'var(--text)', wordBreak: 'break-all' }}>
+                <Mono>{r.value}</Mono>
+              </CopyIconButton>
             ) : (
               <span style={{ fontSize: 12, color: 'var(--text)' }}>{r.value}</span>
             )}

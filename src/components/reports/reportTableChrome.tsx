@@ -105,7 +105,7 @@ export function ReportTableToolbar({ title, summary, searchValue, onSearchChange
             <input> can't wrap the BodyText atom, so its typography rides the same
             raw identity via spread — mirrors RunsTable's own search input exactly. */}
         <input value={searchValue} onChange={e => onSearchChange(e.target.value)}
-          placeholder={searchPlaceholder}
+          placeholder={searchPlaceholder} aria-label={searchPlaceholder}
           style={{ ...bodyTextStyle, height: 34, width: 260, paddingLeft: 32, paddingRight: 12,
                    border: '1px solid var(--border)', borderRadius: 8, outline: 'none' }} />
       </div>

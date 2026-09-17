@@ -170,6 +170,7 @@
     "historyDesc": "Todos los turnos trabajados por {{name}}"
   },
   "customerDrawer": {
+    "untitled": "Cliente",
     "debtorNumber": "N.º de deudor",
     "accountManager": "Gestor de cuenta",
     "locations": "Ubicaciones",
@@ -186,6 +187,7 @@
     "call": "Llamar"
   },
   "departmentDrawer": {
+    "untitled": "Departamento",
     "info": "Datos del departamento",
     "name": "Nombre del departamento"
   },
@@ -403,6 +405,7 @@
       "nextAttempt": "Próximo intento a las {{time}}",
       "runId": "ID de ejecución",
       "copyId": "Haz clic para copiar el ID",
+      "copiedId": "ID copiado",
       "processed": "Procesado",
       "lineage": "Origen",
       "parentRunId": "ID de la ejecución superior",

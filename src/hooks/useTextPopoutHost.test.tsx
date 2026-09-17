@@ -72,4 +72,24 @@ describe('useTextPopoutHost — drawer-scoped popout close (KLANTEN 5)', () => {
     unmount()
     expect(win.close).not.toHaveBeenCalled()
   })
+
+  it('the win.closed poll never calls onClosed on a DEAD instance after unmount (r1-hooks-b)', () => {
+    vi.useFakeTimers()
+    try {
+      const win = { closed: false, close: vi.fn() }
+      openTextPopout.mockReturnValue(win)
+      const onClosed = vi.fn()
+      const { result, unmount } = renderHook(() => useTextPopoutHost({ ...HOST_OPTS, onClosed }))
+      result.current.open()
+      unmount()
+      // The window closes AFTER the host has already unmounted (e.g. a tab
+      // switch elsewhere kept it alive via the drawer registry, then the user
+      // closes it) — the orphaned poll must not touch the dead instance.
+      win.closed = true
+      vi.advanceTimersByTime(600)
+      expect(onClosed).not.toHaveBeenCalled()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
 })

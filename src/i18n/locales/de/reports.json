@@ -170,6 +170,7 @@
     "historyDesc": "Alle geleisteten Einsätze von {{name}}"
   },
   "customerDrawer": {
+    "untitled": "Kunde",
     "debtorNumber": "Debitor-Nr.",
     "accountManager": "Kundenbetreuer",
     "locations": "Standorte",
@@ -186,6 +187,7 @@
     "call": "Anrufen"
   },
   "departmentDrawer": {
+    "untitled": "Abteilung",
     "info": "Abteilungsdaten",
     "name": "Abteilungsname"
   },
@@ -403,6 +405,7 @@
       "nextAttempt": "Nächster Versuch um {{time}}",
       "runId": "Run-ID",
       "copyId": "Zum Kopieren der ID klicken",
+      "copiedId": "ID kopiert",
       "processed": "Verarbeitet",
       "lineage": "Herkunft",
       "parentRunId": "Übergeordnete Run-ID",

@@ -7,6 +7,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { I18nextProvider } from 'react-i18next'
 import i18n from '@/i18n'
 import api from '@/lib/api'
@@ -124,6 +125,30 @@ describe('RunDetailDrawer — run detail fetch', () => {
   )
     // i18n is initialized; the key translates to Dutch "Kind-runs"
     expect(await screen.findByText('Kind-runs')).toBeInTheDocument()
+  })
+})
+
+// D2 audit fix: the run-id timeline row uses the shared CopyIconButton, not a
+// raw <button> excused with an "out of scope" lint suppression (the ceiling counts that literal).
+describe('RunDetailDrawer — run id copy control', () => {
+  beforeEach(() => {
+    vi.mocked(api.get).mockReset()
+    vi.mocked(api.post).mockReset()
+  })
+
+  it('copies the run id to the clipboard via the shared CopyIconButton', async () => {
+    // userEvent.setup() installs its own in-memory clipboard stub (jsdom ships
+    // none) — spy AFTER setup so the spy wraps that stub (mirrors CopyIconButton.test.tsx).
+    const user = userEvent.setup()
+    const writeTextSpy = vi.spyOn(navigator.clipboard, 'writeText')
+    render(
+      <I18nextProvider i18n={i18n}>
+        <RunDetailDrawer run={{ ...baseRun, status: 'success' }} onClose={() => {}} />
+      </I18nextProvider>,
+    )
+    const copyButton = screen.getByRole('button', { name: 'Klik om het ID te kopiëren' })
+    await user.click(copyButton)
+    expect(writeTextSpy).toHaveBeenCalledWith('5')
   })
 })
 

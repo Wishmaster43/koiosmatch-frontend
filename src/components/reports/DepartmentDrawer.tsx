@@ -31,7 +31,7 @@ export default function DepartmentDrawer({ department, onClose }: { department: 
   )
 
   return (
-    <ReportDrawerChrome title={department.name ?? 'Department'} onClose={onClose} headerIcon={headerIcon} headerMeta={headerMeta}>
+    <ReportDrawerChrome title={department.name ?? t('departmentDrawer.untitled')} onClose={onClose} headerIcon={headerIcon} headerMeta={headerMeta}>
       <GroupLabel style={{ marginBottom: 8 }}>
         {t('departmentDrawer.info')}
       </GroupLabel>

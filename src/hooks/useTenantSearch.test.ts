@@ -35,6 +35,13 @@ describe('useTenantSearch', () => {
     expect(result.current.options[0]).toEqual({ value: 't1', label: 'Yesway Flex' })
   })
 
+  it('sets error=true on a failed search instead of silently reporting an empty option list', async () => {
+    vi.mocked(api.get).mockRejectedValue(new Error('network'))
+    const { result } = renderHook(() => useTenantSearch())
+    await waitFor(() => expect(result.current.error).toBe(true))
+    expect(result.current.options).toEqual([])
+  })
+
   it('debounces a keystroke burst into one request for the final term (~250 ms, mirrors TenantSwitcher)', async () => {
     vi.useFakeTimers()
     try {

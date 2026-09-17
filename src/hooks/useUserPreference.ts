@@ -37,6 +37,7 @@ export function useUserPreference<T>(key: string, fallback: T): [T, (next: T) =>
 
   const update = useCallback((next: T) => {
     // Optimistic + final: the UI never waits on the network, and a rejection
+    // never reverts the local value (see the module doc comment above).
     setValue(next)
     const merged = { ...((user?.ui_preferences as Record<string, unknown> | null | undefined) ?? {}), [key]: next }
     api.put('/auth/me', { ui_preferences: merged })

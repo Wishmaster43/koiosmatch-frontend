@@ -170,6 +170,7 @@
     "historyDesc": "Tutti i turni lavorati da {{name}}"
   },
   "customerDrawer": {
+    "untitled": "Cliente",
     "debtorNumber": "N. debitore",
     "accountManager": "Account manager",
     "locations": "Sedi",
@@ -186,6 +187,7 @@
     "call": "Chiama"
   },
   "departmentDrawer": {
+    "untitled": "Reparto",
     "info": "Dati del reparto",
     "name": "Nome del reparto"
   },
@@ -403,6 +405,7 @@
       "nextAttempt": "Prossimo tentativo alle {{time}}",
       "runId": "ID esecuzione",
       "copyId": "Clicca per copiare l'ID",
+      "copiedId": "ID copiato",
       "processed": "Elaborati",
       "lineage": "Origine",
       "parentRunId": "ID esecuzione padre",

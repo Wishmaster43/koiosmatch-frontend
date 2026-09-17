@@ -170,6 +170,7 @@
     "historyDesc": "All shifts worked by {{name}}"
   },
   "customerDrawer": {
+    "untitled": "Customer",
     "debtorNumber": "Debtor no.",
     "accountManager": "Account manager",
     "locations": "Locations",
@@ -186,6 +187,7 @@
     "call": "Call"
   },
   "departmentDrawer": {
+    "untitled": "Department",
     "info": "Department details",
     "name": "Department name"
   },
@@ -403,6 +405,7 @@
       "nextAttempt": "Next attempt at {{time}}",
       "runId": "Run ID",
       "copyId": "Click to copy the ID",
+      "copiedId": "ID copied",
       "processed": "Processed",
       "lineage": "Lineage",
       "parentRunId": "Parent run ID",

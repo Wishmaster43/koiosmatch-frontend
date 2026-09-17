@@ -15,33 +15,10 @@ import Button from '@/components/ui/Button'
 import { PageTitle } from '@/components/ui/typography'
 import { navigateToPage } from '@/lib/navigate'
 import type { ReportCandidate } from '@/types/reports'
-import { SM_STATUS, normalizeSmStatus } from '@/lib/smStatus'
 import DrawerPanelShell from '@/components/drawer/DrawerPanelShell'
+import StatusBadge from './RecordStatusBadge'
 
-// Colored status pill (actief / nietactief / extern / ...) for a record.
-function StatusBadge({ status }: { status?: string }) {
-  const { t } = useTranslation('reports')
-  /* eslint-disable no-restricted-syntax -- fixed status→colour mapping (DATA), mirrors the lookup-colour pattern used elsewhere; these shades have no exact token equivalent */
-  const styles: Record<string, { bg: string; color: string }> = {
-    [SM_STATUS.ACTIVE]:   { bg: 'var(--color-success-bg)', color: 'var(--color-success-text)' },
-    [SM_STATUS.INACTIVE]: { bg: 'var(--color-warning-bg)', color: '#C2410C' },
-    [SM_STATUS.EXTERNAL]:                { bg: 'var(--color-secondary-bg)', color: '#1D4ED8' },
-    [SM_STATUS.INTAKE]:   { bg: '#FAF5FF', color: 'var(--color-violet)' },
-    // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1 on its
-    // own pastel, AA fail (Opus r3.5).
-    [SM_STATUS.DELETED]:  { bg: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' },
-  }
-  /* eslint-enable no-restricted-syntax */
-  const key = normalizeSmStatus(status)
-  const s = styles[key] || { bg: 'var(--hover-bg)', color: 'var(--text-muted)' }
-  const label = status ? t(`candidates.status.${key}`, { defaultValue: status }) : t('candidates.unknown')
-  return (
-    <span className="rounded-full px-2 py-0.5 text-xs font-medium flex-shrink-0"
-      style={{ background: s.bg, color: s.color }}>
-      {label}
-    </span>
-  )
-}
+
 
 
 // One icon+label+value line; renders nothing at all when the value is empty, so a drilldown card never shows a dangling label with no data.

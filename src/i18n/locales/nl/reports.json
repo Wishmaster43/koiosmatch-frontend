@@ -170,6 +170,7 @@
     "historyDesc": "Alle gewerkte diensten van {{name}}"
   },
   "customerDrawer": {
+    "untitled": "Klant",
     "debtorNumber": "Debiteur-nr",
     "accountManager": "Accountmanager",
     "locations": "Locaties",
@@ -186,6 +187,7 @@
     "call": "Bellen"
   },
   "departmentDrawer": {
+    "untitled": "Afdeling",
     "info": "Afdelingsgegevens",
     "name": "Afdelingsnaam"
   },
@@ -403,6 +405,7 @@
       "nextAttempt": "Volgende poging om {{time}}",
       "runId": "Run-ID",
       "copyId": "Klik om het ID te kopiëren",
+      "copiedId": "ID gekopieerd",
       "processed": "Verwerkt",
       "lineage": "Herkomst",
       "parentRunId": "Ouder-run-ID",

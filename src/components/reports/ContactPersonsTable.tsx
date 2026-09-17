@@ -4,12 +4,14 @@
  * come from RightPanelContext, page size from the user's preference.
  */
 import { useState, useEffect, useMemo } from 'react'
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, Mail, Phone, MessageCircle, Building2 } from 'lucide-react'
+import { Mail, Phone, Building2 } from 'lucide-react'
 import { useRightPanel }      from '@/context/RightPanelContext'
 import ContactPersonDrawer    from './ContactPersonDrawer'
 import PaginationBar          from '../ui/PaginationBar'
+import Avatar                 from '../ui/Avatar'
+import { TH, TD, ReportTableToolbar, ReportRow } from './reportTableChrome'
+import PlanningContactPill    from './PlanningContactPill'
 import { usePersistedPageSize } from '@/hooks/usePersistedPageSize'
 import { useSmCustomerTree }  from '@/hooks/useSmCustomerTree'
 import type { ReportContact, ReportFilterGroup } from '@/types/reports'
@@ -109,35 +111,18 @@ export default function ContactPersonsTable() {
     return () => unregisterFilters('contact-persons')
   }, [filterGroups, registerFilters, unregisterFilters])
 
-  const TH: CSSProperties = { padding: '10px 14px', textAlign: 'left', fontSize: 11, fontWeight: 600,
-               color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
-               whiteSpace: 'nowrap', textTransform: 'uppercase', letterSpacing: '0.04em' }
-  const TD: CSSProperties = { padding: '10px 14px', borderBottom: '1px solid var(--hover-bg)', verticalAlign: 'middle' }
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
 
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-        <div>
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.2px' }}>
-            {t('contacts.title')}
-          </h2>
-          {!loading && (
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-              {t('contacts.summary', { shown: filtered.length, total: contacts.length })}
-            </p>
-          )}
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px',
-                      background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, width: 260 }}>
-          <Search size={13} color="var(--text-muted)" />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder={t('contacts.search')}
-            style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none',
-                     fontSize: 12, color: 'var(--text)' }} />
-        </div>
-      </div>
+      {/* Header — shared ReportTableToolbar (D1 audit fix), same as every other
+          report table in this folder instead of hand-duplicated title+search chrome. */}
+      <ReportTableToolbar
+        title={t('contacts.title')}
+        summary={loading ? t('common.loadingShort') : t('contacts.summary', { shown: filtered.length, total: contacts.length })}
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder={t('contacts.search')}
+      />
 
       {/* Table */}
       <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', overflow: 'hidden', flex: 1 }}>
@@ -170,12 +155,7 @@ export default function ContactPersonsTable() {
                 const isPlanning = Boolean(c.scheduled_order_contact)
 
                 return (
-                  <tr key={c.id ?? i}
-                    style={{ transition: 'background 0.1s', cursor: 'pointer' }}
-                    onClick={() => setDrill(c)}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'none')}
-                  >
+                  <ReportRow key={c.id ?? i} onClick={() => setDrill(c)}>
                     {/* Customer — first column */}
                     <td style={{ ...TD, minWidth: 140 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -189,12 +169,7 @@ export default function ContactPersonsTable() {
                     {/* Name */}
                     <td style={{ ...TD, minWidth: 160 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
-                                      background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)',
-                                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                      fontSize: 10, fontWeight: 600 }}>
-                          {initials || '?'}
-                        </div>
+                        <Avatar initials={initials || '?'} size={28} color="var(--color-primary)" soft />
                         <div>
                           <div style={{ fontWeight: 500, color: 'var(--text)' }}>{name}</div>
                           {c.function_title && (
@@ -224,21 +199,11 @@ export default function ContactPersonsTable() {
                         : <span style={{ color: 'var(--border)' }}>—</span>}
                     </td>
 
-                    {/* Planning contact */}
+                    {/* Planning contact — shared pill (D1 audit fix) */}
                     <td style={TD}>
-                      <span style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 5,
-                        borderRadius: 999, padding: '3px 10px', fontSize: 11, fontWeight: 500,
-                        background: isPlanning ? 'var(--color-success-bg)' : 'var(--hover-bg)',
-                        color:      isPlanning ? 'var(--color-on-success-bg)' : 'var(--text-muted)',
-                        border:     `1px solid ${isPlanning ? 'var(--color-success)' : 'var(--border)'}`,
-                      }}>
-                        {isPlanning
-                          ? <><MessageCircle size={10} /> {t('contacts.yes')}</>
-                          : <><span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--border)' }} /> {t('contacts.no')}</>}
-                      </span>
+                      <PlanningContactPill active={isPlanning} label={isPlanning ? t('contacts.yes') : t('contacts.no')} />
                     </td>
-                  </tr>
+                  </ReportRow>
                 )
               })}
             </tbody>

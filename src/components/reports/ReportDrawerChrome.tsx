@@ -17,6 +17,11 @@ interface ReportDrawerChromeProps {
   headerIcon?: ReactNode
   headerMeta?: ReactNode
   children: ReactNode
+  // Panel width in px — the house 420 by default; a caller with wider body
+  // content (e.g. a customer's locations/departments list) can widen it.
+  width?: number
+  // Optional footer slot (border-top + hover-bg band), e.g. a single Close action.
+  footer?: ReactNode
 }
 
 export default function ReportDrawerChrome({
@@ -26,6 +31,8 @@ export default function ReportDrawerChrome({
   headerMeta,
   children,
   zIndex = 'var(--z-drawer)',
+  width = 420,
+  footer,
 }: ReportDrawerChromeProps) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation()
@@ -36,7 +43,7 @@ export default function ReportDrawerChrome({
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}
         className="fixed top-0 bottom-0 right-0 flex flex-col bg-[var(--surface)]"
-        style={{ width: 420, zIndex, boxShadow: 'var(--shadow-drawer)' }}>
+        style={{ width, zIndex, boxShadow: 'var(--shadow-drawer)' }}>
 
         {/* Header */}
         <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
@@ -57,6 +64,14 @@ export default function ReportDrawerChrome({
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
           {children}
         </div>
+
+        {/* Optional footer slot */}
+        {footer && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px 18px',
+                        borderTop: '1px solid var(--border)', background: 'var(--hover-bg)', flexShrink: 0 }}>
+            {footer}
+          </div>
+        )}
       </div>
     </>
   )

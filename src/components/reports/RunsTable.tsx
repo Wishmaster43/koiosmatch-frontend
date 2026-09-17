@@ -11,7 +11,7 @@
  */
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, Zap } from 'lucide-react'
+import { Zap } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useDateFormat } from '@/lib/datetime'
 import DataTable from '../ui/DataTable'
@@ -23,7 +23,8 @@ import { blockedReason } from './blockedReason'
 import RunDetailDrawer from './RunDetailDrawer'
 import { buildStatusGroup, buildWorkflowGroup } from './reportFilterDefs'
 import { distinctSortedValues } from './distinctSortedValues'
-import { Caption, bodyTextStyle } from '@/components/ui/typography'
+import { Caption } from '@/components/ui/typography'
+import { ReportTableToolbar } from './reportTableChrome'
 import type { RunRow, ReportFilterGroup } from '@/types/reports'
 
 // Display status → backend enum (WFB-14): RunPresenter maps its 'completed'
@@ -201,26 +202,15 @@ export default function RunsTable() {
   return (
     <div className="flex flex-col h-full">
 
-      {/* Header */}
-      <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 16 }}>
-        <div>
-          <h1 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>{t('runs.title')}</h1>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
-            {loading ? t('common.loadingShort') : t('runs.summary', { shown: filtered.length, total: rows.length })}
-          </p>
-        </div>
-        <div className="relative">
-          <Search size={14} style={{ position: 'absolute', left: 10, top: '50%',
-                                     transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-          {/* bodyTextStyle spread (not a hand-picked fontSize/color pair): a native
-              <input> can't wrap the BodyText atom, so its typography rides the same
-              raw identity via spread — see typography.tsx's own style-object note. */}
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder={t('runs.search')} aria-label={t('runs.search')}
-            style={{ ...bodyTextStyle, height: 34, width: 260, paddingLeft: 32, paddingRight: 12,
-                     border: '1px solid var(--border)', borderRadius: 8, outline: 'none' }} />
-        </div>
-      </div>
+      {/* Header — shared ReportTableToolbar (D1 audit fix), same as every other
+          report table in this folder instead of a hand-duplicated title+search box. */}
+      <ReportTableToolbar
+        title={t('runs.title')}
+        summary={loading ? t('common.loadingShort') : t('runs.summary', { shown: filtered.length, total: rows.length })}
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder={t('runs.search')}
+      />
 
       <div className="flex flex-1 min-h-0 overflow-hidden bg-[var(--surface)] rounded-xl"
         style={{ border: '1px solid var(--border)' }}>

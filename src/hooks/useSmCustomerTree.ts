@@ -3,8 +3,8 @@
  * Shiftmanager customer → location → department → contact tree: the SM report
  * pages (Customers/Locations/Departments) and the reports tables. Fetches
  * /sm_customers once; each screen derives its own flattened view via useMemo.
- * Cancels on unmount. A missing endpoint is an empty tree, not an error — the
- * consumer renders the four UI states (§3).
+ * Cancels on unmount. A failed fetch is reported via `error`, not folded into
+ * an empty tree — the consumer renders the four UI states (§3).
  */
 import { useState, useEffect } from 'react'
 import api from '@/lib/api'
@@ -14,6 +14,7 @@ import type { ReportCustomer } from '@/types/reports'
 export function useSmCustomerTree() {
   const [customers, setCustomers] = useState<ReportCustomer[]>([])
   const [loading,   setLoading]   = useState(true)
+  const [error,     setError]     = useState(false)
 
   // Loads the tree once on mount; the alive flag drops a late response after unmount instead of writing stale state.
   useEffect(() => {
@@ -24,10 +25,10 @@ export function useSmCustomerTree() {
         const data = res.data
         setCustomers(Array.isArray(data) ? data : (data?.data ?? []))
       })
-      .catch(() => {})
+      .catch(() => { if (active) setError(true) })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [])
 
-  return { customers, loading }
+  return { customers, loading, error }
 }

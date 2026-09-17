@@ -118,8 +118,8 @@ export default function LocationsTable() {
         rows={paged}
         renderRow={(r, i) => (
           <ReportRow key={r.id ?? i} onClick={() => setDrill(r)}>
-            <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>{r.name}</td>
             <td style={TD}>{r.customer_name}</td>
+            <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>{r.name}</td>
             <td style={{ ...TD, color: 'var(--text-muted)', fontSize: 12 }}>
               {r.address ? (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>

@@ -170,6 +170,7 @@
     "historyDesc": "Toutes les missions effectuées par {{name}}"
   },
   "customerDrawer": {
+    "untitled": "Client",
     "debtorNumber": "N° de débiteur",
     "accountManager": "Responsable de compte",
     "locations": "Sites",
@@ -186,6 +187,7 @@
     "call": "Appeler"
   },
   "departmentDrawer": {
+    "untitled": "Département",
     "info": "Détails du département",
     "name": "Nom du département"
   },
@@ -403,6 +405,7 @@
       "nextAttempt": "Prochaine tentative à {{time}}",
       "runId": "ID d'exécution",
       "copyId": "Cliquez pour copier l'ID",
+      "copiedId": "ID copié",
       "processed": "Traité",
       "lineage": "Origine",
       "parentRunId": "ID de l'exécution parente",

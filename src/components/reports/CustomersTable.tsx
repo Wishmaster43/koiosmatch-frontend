@@ -13,6 +13,7 @@ import PaginationBar          from '../ui/PaginationBar'
 import { useReportPaging }    from './useReportPaging'
 import useNumericColumnSort   from '@/hooks/useNumericColumnSort'
 import { TD, SortableTableHead, ReportTableToolbar, ReportRow, ReportTableFrame } from './reportTableChrome'
+import ErrorBanner from '../ui/ErrorBanner'
 import { distinctSortedValues } from './distinctSortedValues'
 import { useReportTableFilter } from './useReportTableFilter'
 import { useReportCustomers } from './useReportCustomers'
@@ -96,16 +97,9 @@ export default function CustomersTable() {
         searchPlaceholder={t('customers.search')}
       />
 
-      {error && (
-        <div style={{ padding: '10px 14px', marginBottom: 12, fontSize: 13,
-                      // Ink is --color-on-danger-bg — the raw danger colour reads only
-                      // 3.95:1 on its own pastel, AA fail (Opus r3.5).
-                      color: 'var(--color-on-danger-bg)',
-                      // eslint-disable-next-line no-restricted-syntax -- DATA: danger-border companion colour paired with the danger-bg tokens above; no exact token match for this specific soft-border shade
-                      background: 'var(--color-danger-bg)', border: '1px solid #FECACA', borderRadius: 8 }}>
-          {t('customers.loadError')}
-        </div>
-      )}
+      {/* Shared ErrorBanner atom (§4) — replaces the old hand-rolled danger block
+          with its own eslint-disable for a "no exact token" border. */}
+      {error && <ErrorBanner style={{ marginBottom: 12 }}>{t('customers.loadError')}</ErrorBanner>}
 
       {/* Table */}
       <ReportTableFrame
