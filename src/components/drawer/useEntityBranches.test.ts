@@ -50,6 +50,14 @@ describe('useEntityBranches · fetchOnMount hydration (customers)', () => {
     renderHook(() => useEntityBranches({ prefix: 'customers', id: 'cust1', options, fetchOnMount: false, initialBranches: [branchB] }))
     expect(apiGet).not.toHaveBeenCalled()
   })
+
+  // D8: a failed membership fetch is a load error, distinct from a genuinely empty list.
+  it('sets loadError (not just an empty list) when the membership GET fails', async () => {
+    apiGet.mockRejectedValue({ response: { status: 500 } })
+    const { result } = renderHook(() => useEntityBranches({ prefix: 'customers', id: 'cust1', options, fetchOnMount: true }))
+    await waitFor(() => expect(result.current.loadError).toBe(true))
+    expect(result.current.selectedIds).toEqual([])
+  })
 })
 
 describe('useEntityBranches · toggle add', () => {

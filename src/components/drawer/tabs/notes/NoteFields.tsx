@@ -17,6 +17,7 @@
  * bridge, which only make sense for a note.
  */
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import { Caption, bodyTextStyle } from '@/components/ui/typography'
 import RichTextAssistBar from '@/components/ui/RichTextAssistBar'
@@ -56,6 +57,9 @@ interface NoteFieldsProps {
 
 // Purely presentational note form (see the module doc above): renders the shared five fields from useNoteFields, so the drill-down composer and the per-note popout window never drift apart.
 export default function NoteFields({ fields, noteTypes, channels, labels, editorLabels, noteId, titleExtra, editorMinHeight = 160, onItems, knownItems }: NoteFieldsProps) {
+  // D6: generic fallback accessible name for the title input when the host
+  // gave no note-specific placeholder builder (labels.notePlaceholder).
+  const { t } = useTranslation('common')
   const { type, setType, channel, setChannel, title, setTitle, body, setBody, language, setLanguage } = fields
   const typeLabel = noteTypes.find(n => n.value === type)?.label ?? ''
 
@@ -132,6 +136,7 @@ export default function NoteFields({ fields, noteTypes, channels, labels, editor
         {/* Native input: typography identity via the bodyTextStyle spread (the
             documented escape for native form controls). */}
         <input value={title} onChange={e => setTitle(e.target.value)} placeholder={labels.notePlaceholder?.(typeLabel)}
+          aria-label={labels.notePlaceholder?.(typeLabel) ?? t('titleField')}
           style={{ ...bodyTextStyle, flex: 1, minWidth: 0, padding: '8px 12px', fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', boxSizing: 'border-box', outline: 'none' }} />
         {titleExtra}
       </div>

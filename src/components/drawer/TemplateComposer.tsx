@@ -24,8 +24,8 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Clock, Send } from 'lucide-react'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useWhatsAppTemplateSend, type ConversationSubject } from './useWhatsAppTemplateSend'
-import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import { Caption } from '@/components/ui/typography'
 
 // Shared field footprint for both pickers — one look, never two drifting inputs.
@@ -45,10 +45,7 @@ function ConfigNotice({ text }: { text: string }) {
   )
 }
 
-export default function TemplateComposer({ candidateId, subject, windowKnown, onSent }: {
-  // DEPRECATED legacy shape — kept so existing candidate-only call sites/tests stay
-  // byte-compatible. Prefer `subject`, which also covers a customer-contact thread.
-  candidateId?: Id | null
+export default function TemplateComposer({ subject, windowKnown, onSent }: {
   // CONTACT-CONVERSATION-START: the thread's owner ({kind,id}) — null only when
   // neither a candidate nor a customer contact is known for this thread at all.
   subject?: ConversationSubject | null
@@ -60,13 +57,11 @@ export default function TemplateComposer({ candidateId, subject, windowKnown, on
   const { t } = useTranslation('candidates')
   const templateLabelId = useId()
   const numberLabelId = useId()
-  // Prefer the explicit subject; fall back to the legacy bare candidate id.
-  const resolvedSubject: ConversationSubject | null =
-    subject ?? (candidateId ? { kind: 'candidate', id: candidateId } : null)
+  const resolvedSubject: ConversationSubject | null = subject ?? null
   const {
     loading, templates, numbers, templateName, pickTemplate,
     phoneNumberId, setPhoneNumberId, texts, variableCount,
-    sending, error, canSend, submit,
+    sending, error, canSend, submit, loadError, reload,
   } = useWhatsAppTemplateSend(resolvedSubject, onSent)
 
   const hasPreview = Boolean(texts.header || texts.body || texts.footer)
@@ -86,6 +81,9 @@ export default function TemplateComposer({ candidateId, subject, windowKnown, on
         <Caption as="div" style={{ marginTop: 6 }}>{t('conversations.templateNeedsCandidate')}</Caption>
       ) : loading ? (
         <Caption as="div" style={{ marginTop: 6 }}>{t('conversations.templateLoading')}</Caption>
+      ) : loadError ? (
+        // D8: a failed fetch is a load error, never the "not configured" notice.
+        <ErrorBanner onRetry={reload} style={{ marginTop: 6 }}>{t('conversations.loadError')}</ErrorBanner>
       ) : (
         <>
           {/* Template — searchable, pick-only: approved templates only, never a typed name. */}

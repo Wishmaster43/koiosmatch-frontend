@@ -55,7 +55,7 @@ const pickTemplate = async (user: ReturnType<typeof userEvent.setup>, label: Reg
 
 describe('TemplateComposer · the closed-window answer', () => {
   it('explains why free text is not the way and offers the approved templates', async () => {
-    const { container } = render(<TemplateComposer candidateId="cand-1" windowKnown onSent={vi.fn()} />)
+    const { container } = render(<TemplateComposer subject={{ kind: 'candidate', id: 'cand-1' }} windowKnown onSent={vi.fn()} />)
     expect(await screen.findByText('conversations.sessionClosedHint')).toBeInTheDocument()
     // The picker is the shared searchable combobox — a native <select> is a finding (§4).
     expect(await templateTrigger()).toBeInTheDocument()
@@ -63,14 +63,14 @@ describe('TemplateComposer · the closed-window answer', () => {
   })
 
   it('says the window state is UNKNOWN rather than claiming it is closed', async () => {
-    render(<TemplateComposer candidateId="cand-1" windowKnown={false} onSent={vi.fn()} />)
+    render(<TemplateComposer subject={{ kind: 'candidate', id: 'cand-1' }} windowKnown={false} onSent={vi.fn()} />)
     expect(await screen.findByText('conversations.windowUnknown')).toBeInTheDocument()
     expect(screen.queryByText('conversations.sessionClosedHint')).not.toBeInTheDocument()
   })
 
   it('previews the picked template exactly as the candidate receives it', async () => {
     const user = userEvent.setup()
-    render(<TemplateComposer candidateId="cand-1" windowKnown onSent={vi.fn()} />)
+    render(<TemplateComposer subject={{ kind: 'candidate', id: 'cand-1' }} windowKnown onSent={vi.fn()} />)
     await pickTemplate(user, /hello_world/)
     expect(screen.getByText('Hello World')).toBeInTheDocument()
   })
@@ -81,7 +81,7 @@ describe('TemplateComposer · POST /conversations/start', () => {
     vi.mocked(api.post).mockResolvedValueOnce({ data: { conversation_id: 'conv-1', status: 'sent' } })
     const onSent = vi.fn()
     const user = userEvent.setup()
-    render(<TemplateComposer candidateId="cand-1" windowKnown onSent={onSent} />)
+    render(<TemplateComposer subject={{ kind: 'candidate', id: 'cand-1' }} windowKnown onSent={onSent} />)
 
     await pickTemplate(user, /hello_world/)
     await user.click(screen.getByRole('button', { name: /conversations\.sendTemplate/ }))
@@ -96,7 +96,7 @@ describe('TemplateComposer · POST /conversations/start', () => {
   it('409: shows the sender\'s own reason inline and never toasts', async () => {
     vi.mocked(api.post).mockRejectedValueOnce({ response: { status: 409, data: { message: 'Kandidaat heeft zich afgemeld.' } } })
     const user = userEvent.setup()
-    render(<TemplateComposer candidateId="cand-1" windowKnown onSent={vi.fn()} />)
+    render(<TemplateComposer subject={{ kind: 'candidate', id: 'cand-1' }} windowKnown onSent={vi.fn()} />)
 
     await pickTemplate(user, /hello_world/)
     await user.click(screen.getByRole('button', { name: /conversations\.sendTemplate/ }))
@@ -108,7 +108,7 @@ describe('TemplateComposer · POST /conversations/start', () => {
   it('502: shows our own honest gateway copy, not the raw server body', async () => {
     vi.mocked(api.post).mockRejectedValueOnce({ response: { status: 502, data: { message: 'raw upstream' } } })
     const user = userEvent.setup()
-    render(<TemplateComposer candidateId="cand-1" windowKnown onSent={vi.fn()} />)
+    render(<TemplateComposer subject={{ kind: 'candidate', id: 'cand-1' }} windowKnown onSent={vi.fn()} />)
 
     await pickTemplate(user, /hello_world/)
     await user.click(screen.getByRole('button', { name: /conversations\.sendTemplate/ }))
@@ -121,7 +121,7 @@ describe('TemplateComposer · POST /conversations/start', () => {
 describe('TemplateComposer · honest gates (no button that silently fails)', () => {
   it('blocks a template with {{n}} variables and says why — the endpoint carries none', async () => {
     const user = userEvent.setup()
-    render(<TemplateComposer candidateId="cand-1" windowKnown onSent={vi.fn()} />)
+    render(<TemplateComposer subject={{ kind: 'candidate', id: 'cand-1' }} windowKnown onSent={vi.fn()} />)
     await pickTemplate(user, /welkom/)
     expect(screen.getByText('conversations.templateVarsUnsupported')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /conversations\.sendTemplate/ })).toBeDisabled()
@@ -129,14 +129,14 @@ describe('TemplateComposer · honest gates (no button that silently fails)', () 
   })
 
   it('a thread with no known owner at all gets a notice, not a dead picker', async () => {
-    render(<TemplateComposer candidateId={null} windowKnown onSent={vi.fn()} />)
+    render(<TemplateComposer subject={null} windowKnown onSent={vi.fn()} />)
     expect(await screen.findByText('conversations.templateNeedsCandidate')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /conversations\.templatePlaceholder/ })).toBeNull()
   })
 
   it('zero approved templates is a configuration state with the fix one click away', async () => {
     mockLookups([], [NUMBER])
-    render(<TemplateComposer candidateId="cand-1" windowKnown onSent={vi.fn()} />)
+    render(<TemplateComposer subject={{ kind: 'candidate', id: 'cand-1' }} windowKnown onSent={vi.fn()} />)
     expect(await screen.findByText('conversations.templatesEmpty')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'conversations.configureWhatsapp' })).toHaveAttribute('href', '#settings/whatsapp/whatsapp')
   })
@@ -144,7 +144,7 @@ describe('TemplateComposer · honest gates (no button that silently fails)', () 
   it('no sender number configured: honest notice and Send stays disabled', async () => {
     mockLookups([NO_VARS], [])
     const user = userEvent.setup()
-    render(<TemplateComposer candidateId="cand-1" windowKnown onSent={vi.fn()} />)
+    render(<TemplateComposer subject={{ kind: 'candidate', id: 'cand-1' }} windowKnown onSent={vi.fn()} />)
     await pickTemplate(user, /hello_world/)
     expect(screen.getByText('conversations.numbersEmpty')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /conversations\.sendTemplate/ })).toBeDisabled()
@@ -152,7 +152,7 @@ describe('TemplateComposer · honest gates (no button that silently fails)', () 
 
   it('asks WHICH sender number only when the tenant actually has a choice', async () => {
     mockLookups([NO_VARS], [NUMBER, { value: 'PN-2', label: 'Kelly | Yesway (+31628890488)' }])
-    render(<TemplateComposer candidateId="cand-1" windowKnown onSent={vi.fn()} />)
+    render(<TemplateComposer subject={{ kind: 'candidate', id: 'cand-1' }} windowKnown onSent={vi.fn()} />)
     expect(await screen.findByText('conversations.pickNumber')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /conversations\.sendTemplate/ })).toBeDisabled()
   })
@@ -182,5 +182,23 @@ describe('TemplateComposer · customer-contact subject (CONTACT-CONVERSATION-STA
     const body = vi.mocked(api.post).mock.calls[0][1] as Record<string, unknown>
     expect(body).not.toHaveProperty('candidate_id')
     expect(onSent).toHaveBeenCalledTimes(1)
+  })
+})
+
+// D8: a failed lookup fetch is a load error, never the "0 configured" ConfigNotice.
+describe('TemplateComposer · load error (D8)', () => {
+  it('shows a retryable error banner, not the ConfigNotice, when the lookups GET fails', async () => {
+    vi.mocked(api.get).mockReset()
+    vi.mocked(api.get).mockRejectedValue(new Error('network'))
+    const user = userEvent.setup()
+    render(<TemplateComposer subject={{ kind: 'candidate', id: 'cand-1' }} windowKnown onSent={vi.fn()} />)
+
+    expect(await screen.findByText('conversations.loadError')).toBeInTheDocument()
+    expect(screen.queryByText('conversations.templatesEmpty')).not.toBeInTheDocument()
+
+    // Retry re-fires both lookups.
+    mockLookups()
+    await user.click(screen.getByRole('button', { name: /error\.retry/ }))
+    expect(await templateTrigger()).toBeInTheDocument()
   })
 })

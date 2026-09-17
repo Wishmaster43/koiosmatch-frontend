@@ -59,24 +59,33 @@ export function useWhatsAppTemplateSend(subject: ConversationSubject | null | un
   // The inline failure text next to the picker — never a toast, so the chosen
   // template stays on screen and a retry is just pressing send again.
   const [error, setError] = useState<string | null>(null)
+  // D8 (mirrors StartConversationModal's own templates/numbers load): a failed
+  // fetch must render as a retryable error, never collapse into the "0 rows
+  // configured" ConfigNotice — reloadKey drives the retry.
+  const [loadError, setLoadError] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
+  const reload = useCallback(() => setReloadKey(k => k + 1), [])
 
-  // Load approved templates + active sender numbers once. Both are configuration:
-  // an empty list is an honest "not set up yet", not a crash.
+  // Load approved templates + active sender numbers. Either request failing is a
+  // load error; a genuinely empty list from the server stays the "not set up
+  // yet" ConfigNotice.
   useEffect(() => {
     let alive = true
     setLoading(true)
+    setLoadError(false)
     Promise.all([
-      api.get('/whatsapp-templates').then(r => unwrapList<WaTemplateOption>(r).rows).catch(() => [] as WaTemplateOption[]),
-      api.get('/whatsapp-phone-numbers').then(r => unwrapList<PhoneNumberOption>(r).rows).catch(() => [] as PhoneNumberOption[]),
+      api.get('/whatsapp-templates').then(r => unwrapList<WaTemplateOption>(r).rows),
+      api.get('/whatsapp-phone-numbers').then(r => unwrapList<PhoneNumberOption>(r).rows),
     ]).then(([tpls, nums]) => {
       if (!alive) return
       setTemplates(tpls)
       setNumbers(nums)
       // Exactly one active sender → pick it silently, nothing to ask the recruiter.
       if (nums.length === 1) setPhoneNumberId(nums[0].value)
-    }).finally(() => { if (alive) setLoading(false) })
+    }).catch(() => { if (alive) setLoadError(true) })
+      .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
-  }, [])
+  }, [reloadKey])
 
   // Resolve the picked template's full definition, from which the variable-slot count below is derived.
   const selected = useMemo(() => templates.find(tpl => tpl.value === templateName), [templates, templateName])
@@ -127,6 +136,6 @@ export function useWhatsAppTemplateSend(subject: ConversationSubject | null | un
   return {
     loading, templates, numbers, templateName, pickTemplate,
     phoneNumberId, setPhoneNumberId, texts, variableCount,
-    sending, error, canSend, submit,
+    sending, error, canSend, submit, loadError, reload,
   }
 }

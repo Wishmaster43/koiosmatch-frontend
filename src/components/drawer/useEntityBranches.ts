@@ -35,14 +35,19 @@ interface UseEntityBranchesArgs {
 export function useEntityBranches({ prefix, id, options, fetchOnMount = false, initialBranches = [] }: UseEntityBranchesArgs) {
   const { t } = useTranslation('common')
   const [branches, setBranches] = useState<EntityBranch[]>(initialBranches)
+  // D8: a failed membership fetch is a load error, not "no branches" — exposed
+  // separately so a consumer can render an honest error state instead of the
+  // empty-membership copy.
+  const [loadError, setLoadError] = useState(false)
 
   // Hydrate the current membership once for entities with no embedded field.
   useEffect(() => {
     if (!fetchOnMount || !id) return
     let alive = true
+    setLoadError(false)
     api.get(`/${prefix}/${id}/branches`)
       .then(res => { if (alive) setBranches(unwrapList<EntityBranch>(res).rows) })
-      .catch(() => { if (alive) setBranches([]) })
+      .catch(() => { if (alive) { setBranches([]); setLoadError(true) } })
     return () => { alive = false }
   }, [fetchOnMount, prefix, id])
 
@@ -72,5 +77,5 @@ export function useEntityBranches({ prefix, id, options, fetchOnMount = false, i
     }
   }
 
-  return { branches, selectedIds, toggle }
+  return { branches, selectedIds, toggle, loadError }
 }
