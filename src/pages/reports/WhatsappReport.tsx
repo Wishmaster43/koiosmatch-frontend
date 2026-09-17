@@ -47,8 +47,7 @@ import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
 import { camelKpiSpecs } from './lib/kpiSpecs'
 import { reportWindowLabel } from './lib/reportWindowLabel'
-import { makeOpenCustomKpiDrill } from './lib/drillFactories'
-import { useCustomKpiCards } from './hooks/useCustomKpiCards'
+import { useReportCustomKpis } from './hooks/useReportCustomKpis'
 
 // Semantic colour per server key, applied only when the count is non-zero (§4:
 // colour carries meaning — a calm zero stays uncoloured). avg_first_response_
@@ -181,16 +180,16 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
   // row, sharing the same drawer state as the KPI/axis drills above. No
   // entityPage: WhatsApp rows carry masked numbers, no single record page (§8).
   const customBase = buildReportQueryParams(period, 'whatsapp', filters ?? EMPTY_REPORT_FILTERS)
-  const activeCustomKpiId = kpiDrill?.rowsEndpoint?.match(/kpi-definitions\/([^/]+)\/drill/)?.[1]
-  const openCustomKpi = makeOpenCustomKpiDrill({ baseParams: customBase, windowSub, setDrill: setKpiDrill })
-  const customKpis = useCustomKpiCards({ cards: data?.custom_kpis ?? [], activeId: activeCustomKpiId, onOpen: openCustomKpi })
+  const { customKpis, extraTitle: customKpiTitle } = useReportCustomKpis({
+    data, drill: kpiDrill, baseParams: customBase, windowSub, setDrill: setKpiDrill,
+  })
 
   return (
     <div>
       {/* KPI strip — above the charts (candidate-page order: KPIs first) */}
       {hasData && (
         <ReportKpiBand kpis={kpis} notice={fellBack ? t('whatsapp.kpiOrderFellBack') : undefined}
-          extraKpis={customKpis} extraTitle={t('customKpi.bandTitle')} />
+          extraKpis={customKpis} extraTitle={customKpiTitle} />
       )}
 
       {/* The report's data window, rendered prominently from the RESPONSE —

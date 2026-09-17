@@ -41,6 +41,7 @@ import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
 import { reportWindowLabel } from './lib/reportWindowLabel'
 import { makeOpenKpiDrill, makeOpenSegment } from './lib/drillFactories'
+import { useReportCustomKpis } from './hooks/useReportCustomKpis'
 
 // The three plain single-value XOR axes; `owner` has its own D2 shape below.
 type Axis = 'stage' | 'customer' | 'branch'
@@ -132,11 +133,20 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
   // has vanished — RAPPORT-KPI-INSTELBAAR).
   const { kpis, fellBack } = useOrderedReportKpis('opportunities', kpiByKey)
 
+  // KPI-BUILDER-FE-1: tenant-defined KPI cards ride a second band row, opening
+  // the shared definition-drill route (never `kpi`/`date`/`phase_filter`); the
+  // shared hook also renames this page's own `customer_id[]` to the route's
+  // `customer_ids[]` so card and drawer keep one population.
+  const { customKpis, extraTitle: customKpiTitle } = useReportCustomKpis({
+    data, drill, baseParams, windowSub, setDrill, entityPage: 'opportunities',
+  })
+
   return (
     <div>
       {/* KPI strip — pipeline health, above the tabs (candidate-page order) */}
       {hasData && (
-        <ReportKpiBand kpis={kpis} notice={fellBack ? t('opportunities.kpiOrderFellBack') : undefined} />
+        <ReportKpiBand kpis={kpis} extraKpis={customKpis} extraTitle={customKpiTitle}
+          notice={fellBack ? t('opportunities.kpiOrderFellBack') : undefined} />
       )}
 
       {/* The report's data window, rendered prominently — DD-MM-YYYY (never ISO, §3B). */}

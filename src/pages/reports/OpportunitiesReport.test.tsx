@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import OpportunitiesReport from './OpportunitiesReport'
@@ -511,6 +511,89 @@ describe('OpportunitiesReport (kpi catalogue, KPI-OPP-1)', () => {
   // panel (ReportsPage) — the page itself renders NO inline compare control.
   it('renders no inline compare control (moved to the right filter panel)', () => {
     expect(screen.queryByText('Vergelijk met')).not.toBeInTheDocument()
+  })
+})
+
+// KPI-BUILDER-FE-1: tenant-defined KPI cards ride a second band row, opening
+// the shared /reports/kpi-definitions/{id}/drill route.
+describe('OpportunitiesReport (custom KPI band, KPI-BUILDER-FE-1)', () => {
+  it('renders a tenant-defined card with label, formatted value, target caption and band title', () => {
+    mockUseOpportunitiesReport.mockReturnValue({
+      data: { ...data, custom_kpis: [
+        { id: 'kd-1', entity: 'opportunity', metric_key: 'open_count', label: 'Openstaande kansen', dimension: 'all', dimension_value: null, dimension_label: null, value: 6, unit: 'count', target: 10, warn: null, comparison: 'gte', status: 'alert' },
+      ] },
+      loading: false, error: false,
+    })
+    renderReport()
+    expect(screen.getByText('Eigen KPI\'s')).toBeInTheDocument()
+    expect(screen.getByText('Openstaande kansen')).toBeInTheDocument()
+    expect(screen.getByText('6')).toBeInTheDocument()
+    expect(screen.getByText(/doel 10/)).toBeInTheDocument()
+  })
+
+  it('opens the definition drill route with only the accepted params on click', async () => {
+    const user = userEvent.setup()
+    mockUseOpportunitiesReport.mockReturnValue({
+      data: { ...data, custom_kpis: [
+        { id: 'kd-1', entity: 'opportunity', metric_key: 'open_count', label: 'Openstaande kansen', dimension: 'all', dimension_value: null, dimension_label: null, value: 6, unit: 'count', target: 10, warn: null, comparison: 'gte', status: 'alert' },
+      ] },
+      loading: false, error: false,
+    })
+    renderReport()
+    await user.click(screen.getByText('Openstaande kansen'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/kpi-definitions/kd-1/drill', expect.anything())
+    const [, opts] = getSpy.mock.calls.find(c => c[0] === '/reports/kpi-definitions/kd-1/drill')!
+    const params = (opts as { params: Record<string, unknown> }).params
+    expect(params.period).toBe('month')
+    expect(params.kpi).toBeUndefined()
+    expect(params.date).toBeUndefined()
+    expect(params.phase_filter).toBeUndefined()
+  })
+
+  it('renders a dash and no request for a null-value card', async () => {
+    mockUseOpportunitiesReport.mockReturnValue({
+      data: { ...data, custom_kpis: [
+        { id: 'kd-2', entity: 'opportunity', metric_key: 'idle', label: 'Leeg', dimension: 'all', dimension_value: null, dimension_label: null, value: null, unit: 'count', target: null, warn: null, comparison: 'none', status: 'ok' },
+      ] },
+      loading: false, error: false,
+    })
+    renderReport()
+    expect(screen.getByText('Leeg')).toBeInTheDocument()
+    const card = screen.getByText('Leeg').parentElement!
+    expect(within(card).getByText('—')).toBeInTheDocument()
+    const user = userEvent.setup()
+    await user.click(screen.getByText('Leeg'))
+    expect(getSpy).not.toHaveBeenCalledWith('/reports/kpi-definitions/kd-2/drill', expect.anything())
+  })
+
+  it('renders exactly as today when the envelope carries no custom_kpis', () => {
+    mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.queryByText('Eigen KPI\'s')).not.toBeInTheDocument()
+  })
+
+  // CUSTOM-KPI-HOOK-1 verifier fix: the shared hook renames this page's own
+  // `customer_id[]` panel filter to the definition-drill route's `customer_ids[]`
+  // (the route never accepts the singular key, per openapi.yaml) — pin the
+  // request shape, not just that a click fires.
+  it('renames the active customer_id panel filter to customer_ids on the definition drill', async () => {
+    const user = userEvent.setup()
+    const filters = { ...EMPTY_REPORT_FILTERS, customerId: ['c-1'] }
+    mockUseOpportunitiesReport.mockReturnValue({
+      data: { ...data, custom_kpis: [
+        { id: 'kd-1', entity: 'opportunity', metric_key: 'open_count', label: 'Openstaande kansen', dimension: 'all', dimension_value: null, dimension_label: null, value: 6, unit: 'count', target: 10, warn: null, comparison: 'gte', status: 'alert' },
+      ] },
+      loading: false, error: false,
+    })
+    render(<QueryClientProvider client={new QueryClient()}><OpportunitiesReport period="month" filters={filters} /></QueryClientProvider>)
+    await user.click(screen.getByText('Openstaande kansen'))
+    // Match on the LAST call, not the first — earlier tests in this file also
+    // hit kd-1's drill route with different params (module-level getSpy is not
+    // reset between describe blocks).
+    const [, opts] = getSpy.mock.calls.filter(c => c[0] === '/reports/kpi-definitions/kd-1/drill').at(-1)!
+    const params = (opts as { params: Record<string, unknown> }).params
+    expect(params.customer_ids).toEqual(['c-1'])
+    expect(params.customer_id).toBeUndefined()
   })
 })
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import TasksReport from './TasksReport'
@@ -491,5 +491,64 @@ describe('TasksReport — kaartdrills eerlijk ontkoppeld', () => {
   // panel (ReportsPage) — the page itself renders NO inline compare control.
   it('renders no inline compare control (moved to the right filter panel)', () => {
     expect(screen.queryByText('Vergelijk met')).not.toBeInTheDocument()
+  })
+})
+
+// KPI-BUILDER-FE-1: tenant-defined KPI cards ride a second band row, opening
+// the shared /reports/kpi-definitions/{id}/drill route.
+describe('TasksReport (custom KPI band, KPI-BUILDER-FE-1)', () => {
+  it('renders a tenant-defined card with label, formatted value, target caption and band title', () => {
+    mockUseTasksReport.mockReturnValue({
+      data: { ...data, custom_kpis: [
+        { id: 'kd-1', entity: 'task', metric_key: 'open_count', label: 'Openstaande taken', dimension: 'all', dimension_value: null, dimension_label: null, value: 8, unit: 'count', target: 15, warn: null, comparison: 'gte', status: 'alert' },
+      ] },
+      loading: false, error: false,
+    })
+    renderReport()
+    expect(screen.getByText('Eigen KPI\'s')).toBeInTheDocument()
+    expect(screen.getByText('Openstaande taken')).toBeInTheDocument()
+    expect(screen.getByText('8')).toBeInTheDocument()
+    expect(screen.getByText(/doel 15/)).toBeInTheDocument()
+  })
+
+  it('opens the definition drill route with only the accepted params on click', async () => {
+    const user = userEvent.setup()
+    mockUseTasksReport.mockReturnValue({
+      data: { ...data, custom_kpis: [
+        { id: 'kd-1', entity: 'task', metric_key: 'open_count', label: 'Openstaande taken', dimension: 'all', dimension_value: null, dimension_label: null, value: 8, unit: 'count', target: 15, warn: null, comparison: 'gte', status: 'alert' },
+      ] },
+      loading: false, error: false,
+    })
+    renderReport()
+    await user.click(screen.getByText('Openstaande taken'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/kpi-definitions/kd-1/drill', expect.anything())
+    const [, opts] = getSpy.mock.calls.find(c => c[0] === '/reports/kpi-definitions/kd-1/drill')!
+    const params = (opts as { params: Record<string, unknown> }).params
+    expect(params.period).toBe('month')
+    expect(params.kpi).toBeUndefined()
+    expect(params.date).toBeUndefined()
+    expect(params.phase_filter).toBeUndefined()
+  })
+
+  it('renders a dash and no request for a null-value card', async () => {
+    mockUseTasksReport.mockReturnValue({
+      data: { ...data, custom_kpis: [
+        { id: 'kd-2', entity: 'task', metric_key: 'idle', label: 'Leeg', dimension: 'all', dimension_value: null, dimension_label: null, value: null, unit: 'count', target: null, warn: null, comparison: 'none', status: 'ok' },
+      ] },
+      loading: false, error: false,
+    })
+    renderReport()
+    expect(screen.getByText('Leeg')).toBeInTheDocument()
+    const card = screen.getByText('Leeg').parentElement!
+    expect(within(card).getByText('—')).toBeInTheDocument()
+    const user = userEvent.setup()
+    await user.click(screen.getByText('Leeg'))
+    expect(getSpy).not.toHaveBeenCalledWith('/reports/kpi-definitions/kd-2/drill', expect.anything())
+  })
+
+  it('renders exactly as today when the envelope carries no custom_kpis', () => {
+    mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.queryByText('Eigen KPI\'s')).not.toBeInTheDocument()
   })
 })

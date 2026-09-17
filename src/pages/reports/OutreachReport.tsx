@@ -35,6 +35,7 @@ import { segmentClick, ownerClick } from './lib/drillClick'
 import { serverKpiSpecs } from './lib/kpiSpecs'
 import { makeOpenKpiDrill, makeOpenSegment } from './lib/drillFactories'
 import { totalCompareSubFor } from './lib/kpiCompareSub'
+import { useReportCustomKpis } from './hooks/useReportCustomKpis'
 import BarChartCard from '@/components/charts/BarChartCard'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
@@ -130,11 +131,17 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
   // has vanished — RAPPORT-KPI-INSTELBAAR).
   const { kpis, fellBack } = useOrderedReportKpis('outreach', kpiByKey)
 
+  // KPI-BUILDER-FE-1: tenant-defined KPI cards ride a second band row, opening
+  // the shared definition-drill route (never `kpi`/`date`/`phase_filter`). No
+  // entityPage: outreach drill rows are call-list targets, not one entity page.
+  const { customKpis, extraTitle: customKpiTitle } = useReportCustomKpis({ data, drill, baseParams, windowSub, setDrill })
+
   return (
     <div>
       {/* KPI strip — above the tabs (candidate-page order: KPIs first) */}
       {hasData && (
-        <ReportKpiBand kpis={kpis} notice={fellBack ? t('outreach.kpiOrderFellBack') : undefined} />
+        <ReportKpiBand kpis={kpis} extraKpis={customKpis} extraTitle={customKpiTitle}
+          notice={fellBack ? t('outreach.kpiOrderFellBack') : undefined} />
       )}
 
       {/* The report's data window, rendered prominently from the RESPONSE —

@@ -40,6 +40,7 @@ import { makeOpenKpiDrill, makeOpenSegment } from './lib/drillFactories'
 import { totalCompareSubFor } from './lib/kpiCompareSub'
 import { segmentClick, ownerClick } from './lib/drillClick'
 import { reportWindowLabel } from './lib/reportWindowLabel'
+import { useReportCustomKpis } from './hooks/useReportCustomKpis'
 
 // The plain single-value XOR axes; `assignee` has its own D2 shape below.
 type Axis = 'status' | 'type' | 'priority' | 'team' | 'branch'
@@ -126,11 +127,18 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, co
   // has vanished — RAPPORT-KPI-INSTELBAAR).
   const { kpis, fellBack } = useOrderedReportKpis('tasks', kpiByKey)
 
+  // KPI-BUILDER-FE-1: tenant-defined KPI cards ride a second band row, opening
+  // the shared definition-drill route (never `kpi`/`date`/`phase_filter`).
+  const { customKpis, extraTitle: customKpiTitle } = useReportCustomKpis({
+    data, drill, baseParams, windowSub, setDrill, entityPage: 'tasks',
+  })
+
   return (
     <div>
       {/* KPI strip — workload health, above the tabs (candidate-page order) */}
       {hasData && (
-        <ReportKpiBand kpis={kpis} notice={fellBack ? t('tasks.kpiOrderFellBack') : undefined} />
+        <ReportKpiBand kpis={kpis} extraKpis={customKpis} extraTitle={customKpiTitle}
+          notice={fellBack ? t('tasks.kpiOrderFellBack') : undefined} />
       )}
 
       {/* The report's data window, rendered prominently from the RESPONSE —

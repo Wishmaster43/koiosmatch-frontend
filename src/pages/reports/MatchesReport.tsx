@@ -25,6 +25,7 @@ import type { ReportFilterState } from './reportFilterParams'
 import PieChartCard from '@/components/charts/PieChartCard'
 import { donutData } from './lib/chartData'
 import { unitAwareServerKpiSpecs } from './lib/kpiSpecs'
+import { useReportCustomKpis } from './hooks/useReportCustomKpis'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateTimeseriesPoint, CandidateSegment, MatchTerminationReasonSegment } from '@/types/analytics'
@@ -186,11 +187,18 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
   // has vanished — RAPPORT-KPI-INSTELBAAR).
   const { kpis, fellBack } = useOrderedReportKpis('matches', kpiByKey)
 
+  // KPI-BUILDER-FE-1: tenant-defined KPI cards ride a second band row, opening
+  // the shared definition-drill route (never `kpi`/`date`/`phase_filter`).
+  const { customKpis, extraTitle: customKpiTitle } = useReportCustomKpis({
+    data, drill, baseParams, windowSub, setDrill, entityPage: 'matches',
+  })
+
   return (
     <div>
       {/* KPI strip — above the tabs (candidate-page order: KPIs first) */}
       {!loading && !error && !isEmpty && data && (
-        <ReportKpiBand kpis={kpis} notice={fellBack ? t('matches.kpiOrderFellBack') : undefined} />
+        <ReportKpiBand kpis={kpis} extraKpis={customKpis} extraTitle={customKpiTitle}
+          notice={fellBack ? t('matches.kpiOrderFellBack') : undefined} />
       )}
 
       {/* The report's data window, rendered prominently from the RESPONSE —

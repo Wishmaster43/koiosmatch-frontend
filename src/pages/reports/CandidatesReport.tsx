@@ -51,8 +51,7 @@ import { segmentClick, ownerClick } from './lib/drillClick'
 import { reportWindowLabel } from './lib/reportWindowLabel'
 import { Caption } from '@/components/ui/typography'
 import ErrorBanner from '@/components/ui/ErrorBanner'
-import { useCustomKpiCards } from './hooks/useCustomKpiCards'
-import { makeOpenCustomKpiDrill } from './lib/drillFactories'
+import { useReportCustomKpis } from './hooks/useReportCustomKpis'
 
 // The five drillable axes; `param` is the XOR query key the drill/advice endpoints expect.
 type Axis = 'status' | 'phase' | 'source' | 'owner' | 'branch'
@@ -158,15 +157,12 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
   // Tenant-defined KPI cards (KPI-BUILDER-1, §3.9): the definition drill route
   // accepts only the panel-filter vocabulary — never phase_filter (candidates/
   // leads is a client-side view switch, not a filter the definition route knows).
-  const customBase = buildReportQueryParams(period, 'candidates', filters)
-  const openCustomKpi = makeOpenCustomKpiDrill({
-    baseParams: customBase,
+  const { customKpis, extraTitle: customKpiTitle } = useReportCustomKpis({
+    data, drill, baseParams,
     windowSub: () => reportWindowLabel(formatDate, data?.from, data?.to),
     setDrill,
     entityPage: 'candidates',
   })
-  const activeCustomKpiId = drill?.rowsEndpoint?.match(/kpi-definitions\/([^/]+)\/drill/)?.[1] ?? null
-  const customKpis = useCustomKpiCards({ cards: data?.custom_kpis ?? [], activeId: activeCustomKpiId, onOpen: openCustomKpi })
 
   // Chart datum builders — the donut wears each lookup value's OWN colour with
   // the shared series as fallback; rankings get the plain house series.
@@ -245,7 +241,7 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
       {/* KPI strip — the real suite (Kandidaten) / axis cards (Leads) */}
       {hasData && (
         <ReportKpiBand kpis={kpis} notice={fellBack ? t(isLeads ? 'leads.kpiOrderFellBack' : 'candidates.kpiOrderFellBack') : undefined}
-          extraKpis={customKpis} extraTitle={t('customKpi.bandTitle')} />
+          extraKpis={customKpis} extraTitle={customKpiTitle} />
       )}
 
       {/* The report's data window, DD-MM-YYYY (§3B DATUM-1), with the compare

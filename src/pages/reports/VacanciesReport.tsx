@@ -40,8 +40,8 @@ import { unitAwareServerKpiSpecs, thresholdCaption } from './lib/kpiSpecs'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
 import { reportWindowLabel } from './lib/reportWindowLabel'
-import { makeOpenSegment, makeOpenKpiDrill, makeOpenCustomKpiDrill } from './lib/drillFactories'
-import { useCustomKpiCards } from './hooks/useCustomKpiCards'
+import { makeOpenSegment, makeOpenKpiDrill } from './lib/drillFactories'
+import { useReportCustomKpis } from './hooks/useReportCustomKpis'
 
 // Number cell: emphasised when > 0, muted when zero (mirrors the SM entity tables).
 const numCell = (n: number) => (
@@ -168,9 +168,9 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
 
   // KPI-BUILDER-FE-1 (slice 3): tenant-defined KPI cards ride a second strip
   // row below the fixed nine — same drill drawer, own definition-scoped route.
-  const activeCustomKpiId = drill?.rowsEndpoint?.match(/kpi-definitions\/([^/]+)\/drill/)?.[1]
-  const openCustomKpi = makeOpenCustomKpiDrill({ baseParams, windowSub, setDrill, entityPage: 'vacancies' })
-  const customKpis = useCustomKpiCards({ cards: data?.custom_kpis ?? [], activeId: activeCustomKpiId, onOpen: openCustomKpi })
+  const { customKpis, extraTitle: customKpiTitle } = useReportCustomKpis({
+    data, drill, baseParams, windowSub, setDrill, entityPage: 'vacancies',
+  })
 
   // Columns — soft chips for status/filled (§4), numeric cols right-aligned + sortable.
   const columns: Column<VacancyReportRow>[] = [
@@ -211,7 +211,7 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
       {/* KPI strip — above the tabs (candidate-page order: KPIs first) */}
       {hasData && rows.length > 0 && (
         <ReportKpiBand kpis={kpis} notice={fellBack ? t('vacancies.kpiOrderFellBack') : undefined}
-          extraKpis={customKpis} extraTitle={t('customKpi.bandTitle')} />
+          extraKpis={customKpis} extraTitle={customKpiTitle} />
       )}
 
       {/* The report's data window, rendered prominently — DD-MM-YYYY (never ISO, §3B). */}

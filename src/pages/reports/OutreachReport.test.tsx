@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import OutreachReport from './OutreachReport'
@@ -457,5 +457,64 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     await user.click(screen.getAllByText('Interested').at(-1)!)
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
       expect.objectContaining({ params: { outcome: 'interested', period: 'month' } }))
+  })
+})
+
+// KPI-BUILDER-FE-1: tenant-defined KPI cards ride a second band row, opening
+// the shared /reports/kpi-definitions/{id}/drill route.
+describe('OutreachReport (custom KPI band, KPI-BUILDER-FE-1)', () => {
+  it('renders a tenant-defined card with label, formatted value, target caption and band title', () => {
+    mockUseOutreachReport.mockReturnValue({
+      data: { ...data, custom_kpis: [
+        { id: 'kd-1', entity: 'outreach', metric_key: 'reached_count', label: 'Tenant bereikt', dimension: 'all', dimension_value: null, dimension_label: null, value: 40, unit: 'count', target: 60, warn: null, comparison: 'gte', status: 'alert' },
+      ] },
+      loading: false, error: false,
+    })
+    renderReport()
+    expect(screen.getByText('Eigen KPI\'s')).toBeInTheDocument()
+    expect(screen.getByText('Tenant bereikt')).toBeInTheDocument()
+    expect(screen.getByText('40')).toBeInTheDocument()
+    expect(screen.getByText(/doel 60/)).toBeInTheDocument()
+  })
+
+  it('opens the definition drill route with only the accepted params on click', async () => {
+    const user = userEvent.setup()
+    mockUseOutreachReport.mockReturnValue({
+      data: { ...data, custom_kpis: [
+        { id: 'kd-1', entity: 'outreach', metric_key: 'reached_count', label: 'Tenant bereikt', dimension: 'all', dimension_value: null, dimension_label: null, value: 40, unit: 'count', target: 60, warn: null, comparison: 'gte', status: 'alert' },
+      ] },
+      loading: false, error: false,
+    })
+    renderReport()
+    await user.click(screen.getByText('Tenant bereikt'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/kpi-definitions/kd-1/drill', expect.anything())
+    const [, opts] = getSpy.mock.calls.find(c => c[0] === '/reports/kpi-definitions/kd-1/drill')!
+    const params = (opts as { params: Record<string, unknown> }).params
+    expect(params.period).toBe('month')
+    expect(params.kpi).toBeUndefined()
+    expect(params.date).toBeUndefined()
+    expect(params.phase_filter).toBeUndefined()
+  })
+
+  it('renders a dash and no request for a null-value card', async () => {
+    mockUseOutreachReport.mockReturnValue({
+      data: { ...data, custom_kpis: [
+        { id: 'kd-2', entity: 'outreach', metric_key: 'idle', label: 'Leeg', dimension: 'all', dimension_value: null, dimension_label: null, value: null, unit: 'count', target: null, warn: null, comparison: 'none', status: 'ok' },
+      ] },
+      loading: false, error: false,
+    })
+    renderReport()
+    expect(screen.getByText('Leeg')).toBeInTheDocument()
+    const card = screen.getByText('Leeg').parentElement!
+    expect(within(card).getByText('—')).toBeInTheDocument()
+    const user = userEvent.setup()
+    await user.click(screen.getByText('Leeg'))
+    expect(getSpy).not.toHaveBeenCalledWith('/reports/kpi-definitions/kd-2/drill', expect.anything())
+  })
+
+  it('renders exactly as today when the envelope carries no custom_kpis', () => {
+    mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.queryByText('Eigen KPI\'s')).not.toBeInTheDocument()
   })
 })
