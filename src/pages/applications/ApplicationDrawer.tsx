@@ -69,9 +69,9 @@ interface ApplicationDrawerProps extends ApplicationLinkSourceProps {
   canManage?: boolean
   // Save the Extra tab's tenant custom fields (§3B) — a partial patch, merged by the caller.
   onUpdateCustomFields?: (id: Id | undefined, patch: Record<string, unknown>) => void
-  // Deep-link: open on this tab (mirrors CandidateDrawer's own prop, currently unused
-  // by any caller — kept for parity/future deep-links; the return-tab memory below
-  // covers the NAV-BACK-1 case this drawer actually needs today).
+  // Deep-link: open on this tab (mirrors CandidateDrawer's own prop). Fed by
+  // ApplicationsPage via useApplicationDrawerActions.selectApplication, so a
+  // table cell (e.g. Vacature/Interview) can open the drawer straight on its tab.
   initialTab?: string
   // Danny 2026-07-25: header pencil edits the CANDIDATE's name/function from the
   // application drill-down — reported so the page can merge the rename across
@@ -87,7 +87,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
   const { t } = useTranslation('applications')
   const { formatDate, formatDateTime } = useDateFormat()
   // RIGHTS-GATE-OPENERS-1: mirrors applications.update permission (backend: applications-matches.php:35 POST/DELETE /applications/{id}/*).
-  const canManageApplication = (useAuth() as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('applications.update') ?? false
+  const canManageApplication = useAuth()?.hasPermission?.('applications.update') ?? false
   // S15: the reason-required detach confirm modal (footer "Ontkoppelen").
   const [detachModalOpen, setDetachModalOpen] = useState(false)
   // APP-REJECT-GUARD-1: the reject confirm modal — opened either from the
@@ -140,7 +140,10 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
     { key: 'phase', label: t('drawer.phase'), value: a.phaseKey,
       options: funnelTypes.map(f => ({ value: f.value, label: f.label })),
       onChange: (v: string) => { if (v === rejectedFunnelValue) setRejectModalOpen(true); else onPhaseChange?.(a.id, v) },
-      menuWidth: 170, width: 160 },
+      menuWidth: 170, width: 160,
+      // DROPDOWN-CLEAR-1: the funnel stage is required per application (§3B) —
+      // clearing it would leave the application with no phase.
+      clearable: false },
     { key: 'owner', label: t('drawer.owner'), value: ownerValue, options: ownerOptions,
       onChange: (v: string) => { if (v !== '__current') onOwnerChange?.(a.id, v || null) }, menuWidth: 200, width: 190,
       placeholder: t('insights.noOwner'), clearable: true, clearLabel: t('drawer.owner') },

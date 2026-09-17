@@ -46,12 +46,10 @@ import Button from '@/components/ui/Button'
 import ModalFooter from '@/components/ui/ModalFooter'
 import { BodyText } from '@/components/ui/typography'
 import { tintBorder } from '@/lib/tint'
-import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 // LABEL-LEFT-1 (§3A: modals mirror the drill-down — label LEFT of the field,
-// canon label width ~120px). CLONE-BY-CONSTRUCTION-1 (§16): the row layout is
-// the ONE shared unit, not a third local copy (this file's twin,
-// DrawerAddApplicationModal, and its sibling SearchPickField import the same).
-import { fieldRow, fieldControl } from './applicationFieldRowStyles'
+// canon label width ~120px). CLONE-BY-CONSTRUCTION-1 (§16): the shared row shell
+// (this file's twin, DrawerAddApplicationModal, and SearchPickField all adopt it).
+import { ApplicationFieldRow } from './ApplicationFieldRow'
 
 type AnyProps = Record<string, unknown>
 const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
@@ -100,17 +98,19 @@ function PickField({ label, style, value, ariaRequired, ...rest }: { label: Reac
   // §6: a <button> trigger cannot be labelled by a bare <div>, so the picker used to
   // announce only its value ("Piet Recruiter") with no field name. CreatableSelect
   // prefixes aria-labelledby with the label, so it now reads "Recruiter, Piet Recruiter".
-  const labelId = useId()
+  const fieldId = useId()
+  // CLONE-BY-CONSTRUCTION-1: the shared ApplicationFieldRow shell, same as the
+  // twin's (DrawerAddApplicationModal) phase/owner/source rows.
   return (
-    <div style={fieldRow}>
-      <div id={labelId} style={CANON_LABEL_STYLE}>{label}</div>
+    // spacing="none": this row always sits inside a parent that already owns the
+    // vertical gap (ownerField's own wrapper row, or the owner|phase grid — both
+    // 16px gap); the row shell's own 14px margin would double up (verifier finding).
+    <ApplicationFieldRow fieldId={fieldId} label={label} spacing="none">
       {/* REQUIRED-A11Y-4: forward the required-ness to CreatableSelect's own
           'aria-required' prop, which already places it on the trigger button. */}
-      <div style={fieldControl}>
-        <CreatableSelect allowCreate={false} menuWidth={320} aria-labelledby={labelId} aria-required={ariaRequired || undefined}
-          value={value || null} style={{ width: '100%', ...style }} {...rest} />
-      </div>
-    </div>
+      <CreatableSelect allowCreate={false} menuWidth={320} aria-labelledby={`${fieldId}-label`} aria-required={ariaRequired || undefined}
+        value={value || null} style={{ width: '100%', ...style }} {...rest} />
+    </ApplicationFieldRow>
   )
 }
 
@@ -225,6 +225,7 @@ export default function PageAddApplicationModal({ onClose, onCreated, lockedVaca
   // useApplicationSources' doc comment for the full backend contract).
   const [source, setSource] = useState('')
   const sourceFieldId = useId()
+  const lockedVacancyFieldId = useId()
   const { sources: sourceOptions, allowFreeEntry: sourceAllowFreeEntry } = useApplicationSources()
   // K-277: the picked option's stable key rides along with the name (null for free entry).
   const sourceKey = (sourceOptions.find(o => o.value === source) as { key?: string | null } | undefined)?.key ?? null
@@ -296,14 +297,16 @@ export default function PageAddApplicationModal({ onClose, onCreated, lockedVaca
               </Button>
             </div>
             {lockedVacancy ? (
-              <div style={fieldRow}>
-                <div style={CANON_LABEL_STYLE}>{t('add.vacancy')}</div>
-                <div style={{ ...fieldControl, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)' }}>
+              // CLONE-BY-CONSTRUCTION-1: the shared field-row shell, read-only content.
+              // spacing="none": this cell sits in the candidate|vacancy grid (16px gap owns
+              // the vertical rhythm) — the row shell's own margin would double up.
+              <ApplicationFieldRow fieldId={lockedVacancyFieldId} label={t('add.vacancy')} spacing="none">
+                <div style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)' }}>
                   <BodyText as="span">
                     {lockedVacancy.client ? `${lockedVacancy.title} · ${lockedVacancy.client}` : lockedVacancy.title}
                   </BodyText>
                 </div>
-              </div>
+              </ApplicationFieldRow>
             ) : (
               // VACATURE-OPTIONEEL: labelled optional so the field's own placement never
               // reads as a required step — an open application (no vacancy yet) is real.
@@ -356,29 +359,18 @@ export default function PageAddApplicationModal({ onClose, onCreated, lockedVaca
               ApplicationDetailsCard's own Bron picker byte-for-byte. Own full-width row,
               same style as the pickers above. Clearable unless the tenant requires it
               (APP-REQUIRED-FE-1, VAC-CLEAR-1: no clear-cross once required). */}
-          <div>
-            <div style={fieldRow}>
-              <label id={`${sourceFieldId}-label`} htmlFor={sourceFieldId} style={CANON_LABEL_STYLE}>
-                {t('drawer.source')}{sourceRequired && requiredMark}
-              </label>
-              <div style={fieldControl}>
-                <CreatableSelectJs id={sourceFieldId} aria-labelledby={`${sourceFieldId}-label`} aria-required={sourceRequired}
-                  value={source} options={sourceOptions} onChange={setSource}
-                  allowCreate={sourceAllowFreeEntry} placeholder={t('drawer.source')}
-                  clearable={!sourceRequired} clearLabel={t('drawer.source')}
-                  style={{ width: '100%', padding: '6px 10px', fontSize: 12, borderRadius: 6,
-                    border: `1px solid ${errors.source ? 'var(--color-danger)' : 'var(--border)'}`,
-                    background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box' }} />
-              </div>
-            </div>
-            {errors.source && !source.trim() && sourceRequired && (
-              // No label-column indent — mirrors the owner/vacancy/phase error
-              // rows above (x=0) and the twin's ApplicationFieldRow.
-              <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }}>
-                {t('common:errors.fieldRequired', { field: t('drawer.source') })}
-              </div>
-            )}
-          </div>
+          {/* CLONE-BY-CONSTRUCTION-1: same shell as the twin's (DrawerAddApplicationModal) source row. */}
+          <ApplicationFieldRow fieldId={sourceFieldId} label={t('drawer.source')} required={sourceRequired}
+            error={!!errors.source && !source.trim() && sourceRequired}
+            errorText={t('common:errors.fieldRequired', { field: t('drawer.source') })}>
+            <CreatableSelectJs id={sourceFieldId} aria-labelledby={`${sourceFieldId}-label`} aria-required={sourceRequired}
+              value={source} options={sourceOptions} onChange={setSource}
+              allowCreate={sourceAllowFreeEntry} placeholder={t('drawer.source')}
+              clearable={!sourceRequired} clearLabel={t('drawer.source')}
+              style={{ width: '100%', padding: '6px 10px', fontSize: 12, borderRadius: 6,
+                border: `1px solid ${errors.source ? 'var(--color-danger)' : 'var(--border)'}`,
+                background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box' }} />
+          </ApplicationFieldRow>
 
           {/* W30 / §3A(f): the "Extra" section — tenant custom fields for applications,
               rendered only once ≥1 active def exists. */}

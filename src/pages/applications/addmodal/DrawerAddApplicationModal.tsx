@@ -48,8 +48,6 @@ import { ActionRuleBanner } from '@/components/actionrules'
 import { useApplicationModalLookups } from '../hooks/useApplicationModalLookups'
 import { useAddApplicationForm } from '../hooks/useAddApplicationForm'
 import CustomFieldsSection from './CustomFieldsSection'
-import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
-import { requiredMark } from '@/components/forms/fields'
 import ModalFooter from '@/components/ui/ModalFooter'
 import ModalScrollBody from '@/components/forms/ModalScrollBody'
 import { tintBg, tintBorder } from '@/lib/tint'
@@ -58,7 +56,6 @@ import type { DrawerAddApplicationModalProps } from '../AddApplicationModal'
 // wrapper used to be defined locally here (and, identically, in
 // PageAddApplicationModal/SearchPickField) — now the one shared unit.
 import { ApplicationFieldRow } from './ApplicationFieldRow'
-import { fieldRow, fieldControl } from './applicationFieldRowStyles'
 
 // Consistent searchable-menu width (mirrors PlanIntakeModal/MatchModal's vacancy picker).
 const pickerMenuWidth = 340
@@ -122,40 +119,31 @@ export default function DrawerAddApplicationModal({ candidateId, candidateOwnerI
             APP-VACANCY-OPTIONAL-1: the label says "(optioneel)" honestly — an open
             application without a vacancy is a real backend flow now. W30: server-
             searched via onSearch, so a >100-vacancy tenant can still find anything. */}
-        <div style={{ marginBottom: 14 }}>
-          <div style={fieldRow}>
-            <div id={`${vacancyFieldId}-label`} style={CANON_LABEL_STYLE}>
-              {t(vacancyRequired ? 'work.vacancy' : 'work.vacancyOptional')}
-              {vacancyRequired && requiredMark}
-            </div>
-            <div style={fieldControl}>
-              {/* Clearable (Danny 13-08 'hier ook niet — eenmaal gekozen blijft hij
-                  staan'): an OPTIONAL vacancy must be releasable back to an open
-                  application — VAC-CLEAR-1 cross, same as the intake modal. No cross
-                  once the tenant made it required (APP-REQUIRED-FE-1). */}
-              <CreatableSelect id={vacancyFieldId} aria-labelledby={`${vacancyFieldId}-label`} aria-required={vacancyRequired}
-                value={vacancyId || null} onChange={setVacancyId} onSearch={setVacancySearch}
-                placeholder={t('work.pickVacancy')} clearable={!vacancyRequired} clearLabel={t('work.vacancyOptional')}
-                allowCreate={false} menuWidth={pickerMenuWidth} style={fieldFootprint}
-                options={(() => {
-                  // Pin the picked row into the list: after a pick the query resets and
-                  // the refreshed top-100 may not contain it — the trigger label and the
-                  // open menu must keep showing the actual pick (golf-1 verify).
-                  const rows = vacancyOptions.some(v => String(v.value) === String(vacancyId)) || !pickedVacancy
-                    ? vacancyOptions : [pickedVacancy, ...vacancyOptions]
-                  return rows.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label }))
-                })()} />
-              {/* The badge lives exactly as long as the suggestion holds — cleared
-                  or repicked means the value is the recruiter's own again. */}
-              {suggestedVacancyId != null && String(vacancyId) === String(suggestedVacancyId) && !editApplicationId && <KoiosSuggestionBadge />}
-            </div>
-          </div>
-          {errors.vacancyId && (
-            <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>
-              {!vacancyId && vacancyRequired ? t('common:errors.fieldRequired', { field: t('work.vacancy') }) : t('work.applicationFailed')}
-            </div>
-          )}
-        </div>
+        {/* CLONE-BY-CONSTRUCTION-1: same ApplicationFieldRow shell the phase/owner/
+            source rows below use, instead of a hand-rolled fourth fieldRow/fieldControl copy. */}
+        <ApplicationFieldRow fieldId={vacancyFieldId} label={t(vacancyRequired ? 'work.vacancy' : 'work.vacancyOptional')}
+          required={vacancyRequired} error={!!errors.vacancyId}
+          errorText={!vacancyId && vacancyRequired ? t('common:errors.fieldRequired', { field: t('work.vacancy') }) : t('work.applicationFailed')}>
+          {/* Clearable (Danny 13-08 'hier ook niet — eenmaal gekozen blijft hij
+              staan'): an OPTIONAL vacancy must be releasable back to an open
+              application — VAC-CLEAR-1 cross, same as the intake modal. No cross
+              once the tenant made it required (APP-REQUIRED-FE-1). */}
+          <CreatableSelect id={vacancyFieldId} aria-labelledby={`${vacancyFieldId}-label`} aria-required={vacancyRequired}
+            value={vacancyId || null} onChange={setVacancyId} onSearch={setVacancySearch}
+            placeholder={t('work.pickVacancy')} clearable={!vacancyRequired} clearLabel={t('work.vacancyOptional')}
+            allowCreate={false} menuWidth={pickerMenuWidth} style={fieldFootprint}
+            options={(() => {
+              // Pin the picked row into the list: after a pick the query resets and
+              // the refreshed top-100 may not contain it — the trigger label and the
+              // open menu must keep showing the actual pick (golf-1 verify).
+              const rows = vacancyOptions.some(v => String(v.value) === String(vacancyId)) || !pickedVacancy
+                ? vacancyOptions : [pickedVacancy, ...vacancyOptions]
+              return rows.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label }))
+            })()} />
+          {/* The badge lives exactly as long as the suggestion holds — cleared
+              or repicked means the value is the recruiter's own again. */}
+          {suggestedVacancyId != null && String(vacancyId) === String(suggestedVacancyId) && !editApplicationId && <KoiosSuggestionBadge />}
+        </ApplicationFieldRow>
         {/* Fase — searchable pick-only combobox; now submits the real stage id (S24b).
             No clear cross here (never had one): unlike vacancy/source this field
             never carried a VAC-CLEAR-1 affordance, and retrofitting one is a

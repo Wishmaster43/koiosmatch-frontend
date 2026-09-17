@@ -63,17 +63,11 @@ describe('normalizeWorkflow', () => {
     expect(wf.steps[0].next).toEqual([{ target: null, filters: null }, { target: undefined, filters: null }])
   })
 
-  // BUG (src/pages/ai/data/workflowMap.ts, normalizeWorkflow's `next:` map, ~L28-32):
-  // only `target` and `filters` are copied off each raw connection — `source_handle`,
-  // `target_handle` and `label` are silently dropped, even though StepConnection
-  // (types/workflow.ts) and stepsToFlow (serialization.ts L44) both read those fields
-  // to reconstruct a Router's OR-branches and edge labels. Today this is masked by the
-  // C-27 workaround in WorkflowsPage.tsx (a workflow whose server steps already carry a
-  // graph is trusted wholesale; the localStorage-cached graph is used verbatim otherwise),
-  // but the moment the backend starts returning source_handle/label per connection through
-  // this path, every reload will silently collapse each Router branch to the default
-  // out/in handle and drop its label. This test encodes the CORRECT (expected) behaviour;
-  // it currently fails against the real code — kept skipped until the mapper is fixed.
+  // Regression pin (test-wave find, 16-07): normalizeWorkflow's `next:` map carries
+  // source_handle/target_handle/label off each raw connection (workflowMap.ts, next
+  // mapper) so a Router's OR-branches and edge labels survive a reload — StepConnection
+  // (types/workflow.ts) and stepsToFlow (serialization.ts) both read those fields. This
+  // test runs (not skipped) and passes against the current mapper.
   it('preserves source_handle/target_handle/label on each connection (Router branch contract)', () => {
     const raw: RawWorkflow = {
       steps: [{ id: 'a', type: 'router', next: [

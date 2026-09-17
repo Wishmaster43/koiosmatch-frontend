@@ -90,7 +90,7 @@ export default function CvProposalCard({
           header mark carries the disclosure hint always, so a decided proposal
           (no intro line) still discloses its AI origin on hover. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <KoiosAiMark size={22} title={t('common:aiGeneratedHint', { defaultValue: 'Door Koios AI gegenereerd — controleer voor gebruik.' })} />
+        <KoiosAiMark size={22} title={t('common:aiGeneratedHint')} />
         <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{t('cvProposal.cardTitle')}</span>
         <SoftChip label={t(`cvProposal.status.${proposal.status}`)} color={STATUS_COLOR[proposal.status]} />
         {proposal.createdAt && (

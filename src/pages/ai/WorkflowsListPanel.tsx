@@ -15,6 +15,7 @@ import WorkflowQueueView from './WorkflowQueueView'
 import AIManagementView from './AIManagementView'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import Spinner from '@/components/ui/Spinner'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { Workflow } from '@/types/workflow'
@@ -180,10 +181,8 @@ export default function WorkflowsListPanel({
           <Spinner size={14} /> {t('page.loading')}
         </div>
       ) : error ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--color-danger-text)', fontSize: 13, padding: '24px 0' }}>
-          <span>{t('page.error')}</span>
-          <Button variant="secondary" onClick={retryLoad}>{t('common:error.retry')}</Button>
-        </div>
+        // Shared error atom (§4) — same as this folder's own WorkflowQueueView.
+        <ErrorBanner onRetry={retryLoad}>{t('page.error')}</ErrorBanner>
       ) : viewMode === 'grid' ? (
         <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))' }}>
           {visibleWorkflows.map(wf => (

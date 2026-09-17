@@ -1,13 +1,13 @@
 /**
  * useApplicationNotes — internal notes on ONE application
  * (POST /applications/{id}/notes, ApplicationController::storeNote). There is
- * still no GET/DELETE route for application notes, so this hook seeds from the
+ * still no GET route for application notes, so this hook seeds from the
  * application detail payload passed in by the drawer, not its own fetch — but
  * A-popout-1 (verified live in routes/api/tenant/applications-matches.php,
  * 14-08) added `PATCH /applications/{id}/notes/{note}`
  * (ApplicationController::updateNote), so `editNote` below is real: an
- * optimistic in-place update, then the PATCH, reverted on failure. Still no
- * delete affordance (§3, no route to back it).
+ * optimistic in-place update, then the PATCH, reverted on failure. `deleteNote`
+ * is real too — the route exists since CMBE 1049413a (destroyNote).
  *
  * TIMESTAMP-1 (07-08): mapApplicationDetail's notes carry the date under `time`
  * (matching the rest of ApplicationDetail's sub-lists, e.g. `timeline`), but the
