@@ -53,8 +53,9 @@ import { ReportStateFlow } from './components/ReportStateFlow'
 import { useNavigation } from '@/context/NavigationContext'
 import CustomerDepthSections from './depth/CustomerDepthSections'
 import { barData, ownerBarData } from './lib/chartData'
-import { makeOpenSegment } from './lib/drillFactories'
+import { makeOpenSegment, makeOpenCustomKpiDrill } from './lib/drillFactories'
 import { segmentClick, ownerClick } from './lib/drillClick'
+import { useCustomKpiCards } from './hooks/useCustomKpiCards'
 
 // The four plain axes; `param` is the XOR query key the drill/advice endpoints expect.
 // Deliberately no 'source' — see the header comment.
@@ -127,6 +128,15 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
   // params above keep `phase` (the report endpoint's own array contract).
   const baseParams = { ...buildReportQueryParams(period, 'customers', filters), ...(phaseFilter ? { phase_filter: [phaseFilter] } : {}) }
   const openSegment = makeOpenSegment({ entityPage: 'customers', rowsEndpoint: '/reports/customers/drill', adviceEndpoint: '/reports/customers/advice', baseParams, windowSub, setDrill })
+
+  // KPI-BUILDER-FE-1: the definition drill route (§0.2) accepts only the panel-
+  // filter vocabulary — never `phase_filter` (a switch-bar param this report
+  // invents, not a documented drill/advice param) — so tenant KPI cards use a
+  // separate base without it, unlike baseParams above.
+  const customBase = buildReportQueryParams(period, 'customers', filters)
+  const activeCustomKpiId = drill?.rowsEndpoint?.match(/kpi-definitions\/([^/]+)\/drill/)?.[1]
+  const openCustomKpi = makeOpenCustomKpiDrill({ baseParams: customBase, windowSub, setDrill, entityPage: 'customers' })
+  const customKpis = useCustomKpiCards({ cards: data?.custom_kpis ?? [], activeId: activeCustomKpiId, onOpen: openCustomKpi })
   const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
     title: pt.label, value: pt.value, subtitle: windowSub(),
     // A week bar's `date` is the point's own key; the drawer then counts the WHOLE
@@ -246,7 +256,8 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
 
       {/* KPI strip — total inflow, above the tabs (candidate-page order) */}
       {hasData && (
-        <ReportKpiBand kpis={kpis} notice={fellBack ? t(isProspects ? 'prospects.kpiOrderFellBack' : 'customers.kpiOrderFellBack') : undefined} />
+        <ReportKpiBand kpis={kpis} notice={fellBack ? t(isProspects ? 'prospects.kpiOrderFellBack' : 'customers.kpiOrderFellBack') : undefined}
+          extraKpis={customKpis} extraTitle={t('customKpi.bandTitle')} />
       )}
 
       {/* The report's data window, rendered prominently — DD-MM-YYYY (never ISO, §3B). */}

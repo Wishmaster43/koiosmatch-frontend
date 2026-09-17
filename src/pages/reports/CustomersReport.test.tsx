@@ -487,3 +487,45 @@ describe('CustomersReport — Klanten/Prospects switch (RAPPORTEN-CONSOLIDATIE-1
     expect(screen.getByText('Status: Actief')).toBeInTheDocument()
   })
 })
+
+// KPI-BUILDER-FE-1 slice 3: tenant-defined KPI cards ride a second band row.
+// customBase deliberately omits the switch's own phase_filter (§0.2 the
+// definition drill route accepts only the documented panel-filter vocabulary).
+describe('CustomersReport · tenant custom KPI cards (KPI-BUILDER-FE-1)', () => {
+  afterEach(() => { getSpy.mockClear(); mockSettings.mockReturnValue({}) })
+
+  const customKpi = {
+    id: 'kd-3', entity: 'customer' as const, metric_key: 'inflow', label: 'Eigen instroom',
+    dimension: 'all', dimension_value: null, dimension_label: null, value: 21, unit: 'count' as const,
+    target: 25, warn: null, comparison: 'gte' as const, status: 'warn' as const,
+  }
+
+  it('renders the tenant card with its label/value/target caption and the band title', () => {
+    mockUseCustomersReport.mockReturnValue({ data: { ...data, custom_kpis: [customKpi] }, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText("Eigen KPI's")).toBeInTheDocument()
+    expect(screen.getByText('Eigen instroom')).toBeInTheDocument()
+    expect(screen.getByText(/doel 25/)).toBeInTheDocument()
+  })
+
+  it('clicking the tenant card opens the definition drill without phase_filter/kpi/date', async () => {
+    const user = userEvent.setup()
+    mockUseCustomersReport.mockReturnValue({ data: { ...data, custom_kpis: [customKpi] }, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByTitle('Eigen instroom'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/kpi-definitions/kd-3/drill', expect.objectContaining({ params: expect.objectContaining({ period: 'month' }) }))
+    const call = getSpy.mock.calls.find(c => c[0] === '/reports/kpi-definitions/kd-3/drill')
+    expect(call?.[1].params).not.toHaveProperty('phase_filter')
+    expect(call?.[1].params).not.toHaveProperty('kpi')
+    expect(call?.[1].params).not.toHaveProperty('date')
+  })
+
+  it('renders a dash with no click for a null-value tenant card', async () => {
+    const user = userEvent.setup()
+    mockUseCustomersReport.mockReturnValue({ data: { ...data, custom_kpis: [{ ...customKpi, value: null }] }, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Eigen instroom')).toBeInTheDocument()
+    await user.click(screen.getByTitle('Eigen instroom'))
+    expect(getSpy.mock.calls.some(c => c[0] === '/reports/kpi-definitions/kd-3/drill')).toBe(false)
+  })
+})

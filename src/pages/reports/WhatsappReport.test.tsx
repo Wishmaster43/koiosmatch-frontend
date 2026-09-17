@@ -352,3 +352,44 @@ describe('WhatsappReport (RAPPORTEN-WHATSAPP-FE-1)', () => {
     expect(escalatedCard).not.toBeNull()
   })
 })
+
+// KPI-BUILDER-FE-1 slice 3: tenant-defined KPI cards ride a second band row,
+// sharing the report's one drawer state. No entityPage: rows carry masked
+// numbers, no single record page (§8).
+describe('WhatsappReport · tenant custom KPI cards (KPI-BUILDER-FE-1)', () => {
+  afterEach(() => { getSpy.mockClear(); mockSettings.mockReturnValue({}) })
+
+  const customKpi = {
+    id: 'kd-4', entity: 'whatsapp' as const, metric_key: 'inbound_in_period', label: 'Eigen inkomend',
+    dimension: 'all', dimension_value: null, dimension_label: null, value: 19, unit: 'count' as const,
+    target: 20, warn: null, comparison: 'gte' as const, status: 'warn' as const,
+  }
+
+  it('renders the tenant card with its label/value/target caption and the band title', () => {
+    mockUseWhatsappReport.mockReturnValue({ data: { ...data, custom_kpis: [customKpi] }, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText("Eigen KPI's")).toBeInTheDocument()
+    expect(screen.getByText('Eigen inkomend')).toBeInTheDocument()
+    expect(screen.getByText(/doel 20/)).toBeInTheDocument()
+  })
+
+  it('clicking the tenant card opens the definition drill with only the accepted params', async () => {
+    const user = userEvent.setup()
+    mockUseWhatsappReport.mockReturnValue({ data: { ...data, custom_kpis: [customKpi] }, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByTitle('Eigen inkomend'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/kpi-definitions/kd-4/drill', expect.objectContaining({ params: expect.objectContaining({ period: 'month' }) }))
+    const call = getSpy.mock.calls.find(c => c[0] === '/reports/kpi-definitions/kd-4/drill')
+    expect(call?.[1].params).not.toHaveProperty('kpi')
+    expect(call?.[1].params).not.toHaveProperty('date')
+  })
+
+  it('renders a dash with no click for a null-value tenant card', async () => {
+    const user = userEvent.setup()
+    mockUseWhatsappReport.mockReturnValue({ data: { ...data, custom_kpis: [{ ...customKpi, value: null }] }, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Eigen inkomend')).toBeInTheDocument()
+    await user.click(screen.getByTitle('Eigen inkomend'))
+    expect(getSpy.mock.calls.some(c => c[0] === '/reports/kpi-definitions/kd-4/drill')).toBe(false)
+  })
+})

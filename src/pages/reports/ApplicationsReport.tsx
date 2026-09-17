@@ -44,10 +44,11 @@ import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
 
 import { camelKpiSpecs } from './lib/kpiSpecs'
-import { makeOpenKpiDrill, makeOpenSegment } from './lib/drillFactories'
+import { makeOpenKpiDrill, makeOpenSegment, makeOpenCustomKpiDrill } from './lib/drillFactories'
 import { reportWindowLabel } from './lib/reportWindowLabel'
 import { segmentClick, ownerClick } from './lib/drillClick'
 import { barData, ownerBarData } from './lib/chartData'
+import { useCustomKpiCards } from './hooks/useCustomKpiCards'
 // The nine fixed KPI keys the live backend returns (ApplicationKpisReport::CARDS,
 // RAPPORT-APPS-VERDIEPING-1) in camelCase label form (applications.kpi.*) — the
 // server's own `label` is intentionally ignored (§5). Mirrors WhatsappReport's
@@ -109,6 +110,12 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
   const windowSub = () => reportWindowLabel(formatDate, data?.from, data?.to)
   const baseParams = buildReportQueryParams(period, 'applications', filters)
   const openKpiDrill = makeOpenKpiDrill({ report: 'applications', rowsEndpoint: '/reports/applications/kpis/drill', baseParams, windowSub, setDrill })
+
+  // KPI-BUILDER-FE-1 (slice 3): tenant-defined KPI cards ride a second strip
+  // row below the fixed nine — same drill drawer, own definition-scoped route.
+  const activeCustomKpiId = drill?.rowsEndpoint?.match(/kpi-definitions\/([^/]+)\/drill/)?.[1]
+  const openCustomKpi = makeOpenCustomKpiDrill({ baseParams, windowSub, setDrill, entityPage: 'applications' })
+  const customKpis = useCustomKpiCards({ cards: data?.custom_kpis ?? [], activeId: activeCustomKpiId, onOpen: openCustomKpi })
 
   // Every XOR param per open drill is ALWAYS layered on top of the report's own
   // active filters (`baseParams`), never just `period`, so the drawer counts the
@@ -222,7 +229,8 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
     <div>
       {/* KPI strip — total inflow, above the tabs (candidate-page order) */}
       {hasData && (
-        <ReportKpiBand kpis={kpis} notice={fellBack ? t('applications.kpiOrderFellBack') : undefined} />
+        <ReportKpiBand kpis={kpis} notice={fellBack ? t('applications.kpiOrderFellBack') : undefined}
+          extraKpis={customKpis} extraTitle={t('customKpi.bandTitle')} />
       )}
 
       {/* The report's data window, rendered prominently — DD-MM-YYYY (never ISO, §3B). */}

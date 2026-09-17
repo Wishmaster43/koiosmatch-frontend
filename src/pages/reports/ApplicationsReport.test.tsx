@@ -481,3 +481,44 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     expect(screen.queryByText('Vergelijk met')).not.toBeInTheDocument()
   })
 })
+
+// KPI-BUILDER-FE-1 slice 3: tenant-defined KPI cards ride a second band row.
+describe('ApplicationsReport · tenant custom KPI cards (KPI-BUILDER-FE-1)', () => {
+  afterEach(() => { getSpy.mockClear() })
+
+  const customKpi = {
+    id: 'kd-1', entity: 'application' as const, metric_key: 'new_in_period', label: 'Nieuwe sollicitaties',
+    dimension: 'all', dimension_value: null, dimension_label: null, value: 14, unit: 'count' as const,
+    target: 15, warn: null, comparison: 'gte' as const, status: 'alert' as const,
+  }
+
+  it('renders the tenant card with its label/value/target caption and the band title', () => {
+    mockUseApplicationsReport.mockReturnValue({ data: { ...data, custom_kpis: [customKpi] }, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText("Eigen KPI's")).toBeInTheDocument()
+    expect(screen.getByText('Nieuwe sollicitaties')).toBeInTheDocument()
+    expect(screen.getByText('14')).toBeInTheDocument()
+    expect(screen.getByText(/doel 15/)).toBeInTheDocument()
+  })
+
+  it('clicking the tenant card opens the definition drill with the accepted params only', async () => {
+    const user = userEvent.setup()
+    mockUseApplicationsReport.mockReturnValue({ data: { ...data, custom_kpis: [customKpi] }, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByTitle('Nieuwe sollicitaties'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/kpi-definitions/kd-1/drill', expect.objectContaining({ params: expect.objectContaining({ period: 'month' }) }))
+    const call = getSpy.mock.calls.find(c => c[0] === '/reports/kpi-definitions/kd-1/drill')
+    expect(call?.[1].params).not.toHaveProperty('kpi')
+    expect(call?.[1].params).not.toHaveProperty('date')
+    expect(call?.[1].params).not.toHaveProperty('phase_filter')
+  })
+
+  it('renders a dash with no click for a null-value tenant card', async () => {
+    const user = userEvent.setup()
+    mockUseApplicationsReport.mockReturnValue({ data: { ...data, custom_kpis: [{ ...customKpi, value: null }] }, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Nieuwe sollicitaties')).toBeInTheDocument()
+    await user.click(screen.getByTitle('Nieuwe sollicitaties'))
+    expect(getSpy.mock.calls.some(c => c[0] === '/reports/kpi-definitions/kd-1/drill')).toBe(false)
+  })
+})
