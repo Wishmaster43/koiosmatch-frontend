@@ -17,15 +17,23 @@
  * `GET /settings` unchanged), the same path every other tenant flag on this
  * screen family uses. There is no dedicated endpoint and none is needed.
  */
-import type { CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { SettingRow, SelectField } from '@/pages/settings/components/SettingsKit'
-import { useAllSettings, saveSettingsKeys } from '@/lib/settings/useAllSettings'
+import { Trash2 } from 'lucide-react'
+import { SettingRow, SelectField, TextField, Toggle } from '@/pages/settings/components/SettingsKit'
+import { useAllSettings, useSettingsLoaded, saveSettingsKeys, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
 import { getCountryName } from '@/lib/countries'
+import Button from '@/components/ui/Button'
+import SaveButton from '@/components/ui/SaveButton'
+import Spinner from '@/components/ui/Spinner'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import { GroupLabel } from '@/components/ui/typography'
 import {
   IDENTIFIER_VALIDATION_SETTING, SUPPORTED_IDENTIFIER_COUNTRIES,
   identifierExample, parseIdentifierValidationMode,
+  IDENTIFIER_LIST_SETTING, DEFAULT_IDENTIFIER_LIST,
+  type IdentifierValidationRule,
 } from '@/lib/companyIdentifiers'
 
 // Read-only rules table cell — mono for the format examples (§4: numbers/IDs).
@@ -91,6 +99,103 @@ export default function IdentifierValidationSettings() {
           </table>
         </div>
         <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>{t('identifierValidation.unknownCountryHint')}</p>
+      </div>
+
+      {/* Row 48: the server-ENFORCED list (add/edit/remove KvK, BTW, IBAN, …). */}
+      <div style={{ marginTop: 28 }}>
+        <IdentifierRuleListEditor />
+      </div>
+    </div>
+  )
+}
+
+/**
+ * The editable list behind `customer_identifier_validation` (row 48) — a
+ * server-guarded whitelist of `{key, label, pattern, active}` rows, distinct
+ * from the read-only per-country reference table above. Saves the WHOLE array
+ * back verbatim (R2: the server normalises an array `type: json` value to its
+ * own JSON text), never a per-row endpoint.
+ */
+function IdentifierRuleListEditor() {
+  const { t } = useTranslation('settings')
+  const settings = useAllSettings()
+  // Load gate: until GET /settings resolves the blob is empty and the fallback would
+  // seed the draft; a click in that window would freeze the fallback as "dirty" and
+  // a later save would overwrite the tenant's stored list (verifier finding).
+  const loaded = useSettingsLoaded()
+  const stored = getJsonSetting<IdentifierValidationRule[]>(settings, IDENTIFIER_LIST_SETTING, DEFAULT_IDENTIFIER_LIST)
+  const [rows, setRows] = useState<IdentifierValidationRule[]>(stored)
+  const [saving, setSaving] = useState(false)
+  const [dirty, setDirty] = useState(false)
+
+  // A stored value that changes under us (another tab, a reload of the blob)
+  // only re-seeds the local draft while the user has not touched it yet.
+  if (!dirty && stored !== rows && JSON.stringify(stored) !== JSON.stringify(rows)) setRows(stored)
+
+  const updateRow = (idx: number, patch: Partial<IdentifierValidationRule>) => {
+    setRows(rs => rs.map((r, i) => i === idx ? { ...r, ...patch } : r))
+    setDirty(true)
+  }
+  const removeRow = (idx: number) => { setRows(rs => rs.filter((_, i) => i !== idx)); setDirty(true) }
+  const addRow = () => { setRows(rs => [...rs, { key: '', label: '', pattern: '', active: true }]); setDirty(true) }
+
+  // POST the array back verbatim under the catalogue key; the server re-validates
+  // pattern/key shape, so a failed save surfaces the shared generic error toast.
+  const save = () => {
+    setSaving(true)
+    saveSettingsKeys({ [IDENTIFIER_LIST_SETTING]: rows })
+      .then(() => setDirty(false))
+      .catch(() => notifyError(t('common:actionFailed')))
+      .finally(() => setSaving(false))
+  }
+
+  // Loading is a real state (§3): no editable rows until the tenant's own list is in.
+  if (!loaded) return <Spinner />
+
+  return (
+    <div>
+      <GroupLabel style={{ marginBottom: 6 }}>{t('identifierValidation.listTitle')}</GroupLabel>
+      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>{t('identifierValidation.listSubtitle')}</p>
+      <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <caption style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>
+            {t('identifierValidation.listTitle')}
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col" style={headCell}>{t('identifierValidation.colKey')}</th>
+              <th scope="col" style={headCell}>{t('identifierValidation.colLabel')}</th>
+              <th scope="col" style={headCell}>{t('identifierValidation.colPattern')}</th>
+              <th scope="col" style={headCell}>{t('identifierValidation.colActive')}</th>
+              <th scope="col" style={headCell}><span className="sr-only">{t('common:remove')}</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, idx) => (
+              <tr key={idx} style={{ borderTop: '1px solid var(--border)' }}>
+                {/* Row-scoped aria-labels — a column header is not an accessible name for its inputs (§6). */}
+                <td style={cell}><TextField value={row.key} onChange={v => updateRow(idx, { key: v })} width={100}
+                  ariaLabel={`${t('identifierValidation.colKey')} ${idx + 1}`} /></td>
+                <td style={cell}><TextField value={row.label} onChange={v => updateRow(idx, { label: v })} width={160}
+                  ariaLabel={`${t('identifierValidation.colLabel')} ${idx + 1}`} /></td>
+                <td style={monoCell}><TextField value={row.pattern} onChange={v => updateRow(idx, { pattern: v })} width={180}
+                  ariaLabel={`${t('identifierValidation.colPattern')} ${idx + 1}`} /></td>
+                <td style={cell}><Toggle checked={row.active} onChange={v => updateRow(idx, { active: v })}
+                  ariaLabel={`${t('identifierValidation.colActive')} ${row.label || idx + 1}`} /></td>
+                <td style={cell}>
+                  <Button variant="dangerSoft" iconOnly aria-label={t('common:remove')} title={t('common:remove') as string}
+                    onClick={() => removeRow(idx)}>
+                    <Trash2 size={14} />
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
+        <DrawerAddButton onClick={addRow} label={t('identifierValidation.addRow')} />
+        <SaveButton onClick={save} disabled={!dirty || saving} saving={saving} />
       </div>
     </div>
   )

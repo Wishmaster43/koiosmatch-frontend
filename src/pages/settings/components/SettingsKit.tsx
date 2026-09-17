@@ -180,11 +180,13 @@ interface TextFieldProps {
   width?: number | string
   disabled?: boolean
   type?: string
+  // §6: pass whenever the adjacent visible text (a column header, an icon) is not a real <label>.
+  ariaLabel?: string
 }
-export function TextField({ value, onChange, placeholder, width = 220, disabled = false, type = 'text' }: TextFieldProps) {
+export function TextField({ value, onChange, placeholder, width = 220, disabled = false, type = 'text', ariaLabel }: TextFieldProps) {
   return (
     <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} disabled={disabled}
-      style={{ ...inputStyle, width }} />
+      aria-label={ariaLabel} style={{ ...inputStyle, width }} />
   )
 }
 

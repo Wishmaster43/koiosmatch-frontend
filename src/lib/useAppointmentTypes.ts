@@ -34,15 +34,20 @@ interface AppointmentType {
   // Second singleton (APPT-1): the tenant's preferred type when planning FROM an
   // application — read by usePlanIntakeForm, configured in Settings → Afspraken.
   is_default_for_application: boolean
+  // Audience split (rows 2/102): which subject this type can be planned for.
+  is_for_candidates: boolean
+  is_for_contacts: boolean
 }
+
+export type AppointmentAudience = 'candidate' | 'contact'
 
 // Seed defaults — mirror the intended backend seed; slugs stable, labels tenant-facing.
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 const DEFAULT_APPOINTMENT_TYPES: AppointmentType[] = [
-  { value: 'intake_flex', label: 'Intake Flex',       color: '#6E8FD6', icon: '📋', default_duration_min: 30, default_modality: 'office', is_intake: true, is_default: true, is_default_for_application: false },
-  { value: 'intake_deta', label: 'Intake Detachering', color: '#8B5CF6', icon: '📋', default_duration_min: 45, default_modality: 'office', is_intake: true, is_default: false, is_default_for_application: false },
-  { value: 'intake_online', label: 'Intake online',    color: '#19A5CA', icon: '💻', default_duration_min: 30, default_modality: 'remote', is_intake: true, is_default: false, is_default_for_application: false },
-  { value: 'followup',    label: 'Vervolggesprek',     color: '#79B58E', icon: '🔁', default_duration_min: 30, default_modality: 'office', is_intake: false, is_default: false, is_default_for_application: false },
+  { value: 'intake_flex', label: 'Intake Flex',       color: '#6E8FD6', icon: '📋', default_duration_min: 30, default_modality: 'office', is_intake: true, is_default: true, is_default_for_application: false, is_for_candidates: true, is_for_contacts: false },
+  { value: 'intake_deta', label: 'Intake Detachering', color: '#8B5CF6', icon: '📋', default_duration_min: 45, default_modality: 'office', is_intake: true, is_default: false, is_default_for_application: false, is_for_candidates: true, is_for_contacts: false },
+  { value: 'intake_online', label: 'Intake online',    color: '#19A5CA', icon: '💻', default_duration_min: 30, default_modality: 'remote', is_intake: true, is_default: false, is_default_for_application: false, is_for_candidates: true, is_for_contacts: false },
+  { value: 'followup',    label: 'Vervolggesprek',     color: '#79B58E', icon: '🔁', default_duration_min: 30, default_modality: 'office', is_intake: false, is_default: false, is_default_for_application: false, is_for_candidates: true, is_for_contacts: false },
 ]
 /* eslint-enable no-restricted-syntax */
 
@@ -57,6 +62,8 @@ const toType = (r: Record<string, unknown>): AppointmentType => ({
   is_intake: Boolean(r.is_intake),
   is_default: Boolean(r.is_default),
   is_default_for_application: Boolean(r.is_default_for_application),
+  is_for_candidates: Boolean(r.is_for_candidates),
+  is_for_contacts: Boolean(r.is_for_contacts),
 })
 
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
@@ -66,10 +73,13 @@ const mapAppointmentTypes = (res: AxiosResponse): AppointmentType[] | null => {
 }
 
 // Cached tenant appointment-types lookup with translated seed labels (see the module doc above for the duration/modality/intake/default flags each type carries).
-export function useAppointmentTypes() {
+// `audience` narrows the server list to types plannable for that subject (rows
+// 2/102: GET /appointment-types?audience=candidate|contact); omitted = unfiltered.
+export function useAppointmentTypes(audience?: AppointmentAudience) {
   const { t } = useTranslation('common')
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
-  const { data: rawTypes } = useCachedLookup('/appointment-types?active=1', mapAppointmentTypes, DEFAULT_APPOINTMENT_TYPES)
+  const url = audience ? `/appointment-types?active=1&audience=${audience}` : '/appointment-types?active=1'
+  const { data: rawTypes } = useCachedLookup(url, mapAppointmentTypes, DEFAULT_APPOINTMENT_TYPES)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const types = useMemo(() => translateSeedList(t, 'appointmentTypes', rawTypes), [rawTypes, t])
 

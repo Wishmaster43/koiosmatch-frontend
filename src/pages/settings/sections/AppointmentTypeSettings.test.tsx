@@ -34,3 +34,21 @@ it('AppointmentTypeSettings: create POST to /appointment-types carries the slugg
   await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/appointment-types',
     expect.objectContaining({ name: 'Intake gesprek', value: 'intake_gesprek' })))
 })
+
+it('AppointmentTypeSettings: create POST carries the audience split flags (rows 2/102)', async () => {
+  mockedApi.get.mockResolvedValue({ data: [] })
+  mockedApi.post.mockResolvedValue({ data: { id: 'x2', name: 'Klantbezoek' } })
+  const user = userEvent.setup()
+  render(<AppointmentTypeSettings />)
+
+  await user.click(await screen.findByRole('button', { name: st('appointmentTypes.add') }))
+  await user.type(screen.getByPlaceholderText(st('statusList.namePlaceholder')), 'Klantbezoek')
+  // Both audience flags default true (BE requires at least one audience, so a
+  // create with neither toggled must still serve at least one); flip contacts off,
+  // leaving candidates at its untouched default.
+  await user.click(screen.getByLabelText(st('appointmentTypes.isForContacts')))
+  await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
+
+  await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/appointment-types',
+    expect.objectContaining({ is_for_candidates: true, is_for_contacts: false })))
+})

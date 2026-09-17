@@ -192,3 +192,29 @@ export function parseIdentifierValidationMode(raw: unknown): IdentifierValidatio
 export function identifierExample(kind: IdentifierKind, countryCode: string): string | null {
   return COUNTRY_RULES[countryCode]?.[kind].example ?? null
 }
+
+/**
+ * `customer_identifier_validation` (row 48, CONTRACT-CHANGELOG "Row 48 —
+ * customer_identifier_validation editable") — a SEPARATE, server-ENFORCED tenant
+ * list of `{key, label, pattern, active}` rows (add/edit/remove KvK, BTW, IBAN, …),
+ * guarded server-side by CustomerIdentifierValidationGuard. Distinct from the
+ * `company_identifier_validation` warn/block MODE above, which only governs the
+ * FE's own format heuristic. Not editable per row-editor endpoint — the FE posts
+ * the whole array back verbatim to `POST /settings` (R2: the server normalises an
+ * array value on this key to JSON text itself).
+ */
+export interface IdentifierValidationRule { key: string; label: string; pattern: string; active: boolean }
+
+/** Settings key holding the list (generic key/value store, POST /settings). */
+export const IDENTIFIER_LIST_SETTING = 'customer_identifier_validation'
+
+/**
+ * Client-side fallback when nothing is stored yet — mirrors the server's own
+ * published default (R3: CustomerIdentifierValidationGuard falls back to
+ * CompanyIdentifier::defaultIdentifierRows(), the NL KvK/BTW pair) so the editor
+ * never opens empty on a fresh tenant.
+ */
+export const DEFAULT_IDENTIFIER_LIST: IdentifierValidationRule[] = [
+  { key: 'coc_number', label: 'KvK-nummer', pattern: '/^\\d{8}$/', active: true },
+  { key: 'vat_number', label: 'BTW-nummer', pattern: '/^NL\\d{9}B\\d{2}$/', active: true },
+]

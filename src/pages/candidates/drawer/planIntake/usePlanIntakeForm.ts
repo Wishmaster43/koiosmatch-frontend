@@ -65,7 +65,8 @@ export function usePlanIntakeForm({
   suggestedVacancyId = null, candidateOwnerId = null, mode = 'intake',
 }: PlanIntakeFormOptions) {
   const { t } = useTranslation(['candidates', 'common'])
-  const { types, intakeTypes, metaOf } = useAppointmentTypes()
+  // This form always plans a CANDIDATE appointment — scope the type list to that audience.
+  const { types, intakeTypes, metaOf } = useAppointmentTypes('candidate')
   const { locations: appointmentLocations, defaultLocation } = useAppointmentLocations()
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   const { user: me } = useAuth() as unknown as { user: { id?: Id; name?: string } | null }

@@ -17,6 +17,11 @@ const APPOINTMENT_TYPE_ICON_NAMES = ['calendar', 'phone', 'video', 'map-pin', 'b
  * AppointmentTypeController.php:34) is the default used specifically when planning
  * an intake from an application context — both are backend-enforced singletons,
  * each with its own pill so flipping one never touches the other.
+ * Audience split (rows 2/102, api CONTRACT-CHANGELOG "appointment types split by
+ * audience"): `is_for_candidates`/`is_for_contacts` gate which subject a type can
+ * be planned for (GET /appointment-types?audience=candidate|contact); rendered as
+ * two independent behaviour flags through the same flagFields mechanism the funnel
+ * stage editor uses for is_applicant/requires_appointment.
  */
 export function AppointmentTypeSettings() {
   const { t } = useTranslation('settings')
@@ -33,7 +38,11 @@ export function AppointmentTypeSettings() {
             { value: 'remote', label: t('appointmentTypes.remote') },
             { value: 'phone',  label: t('appointmentTypes.phone') },
           ] }}
-        flagField={{ key: 'is_intake', label: t('appointmentTypes.isIntake'), description: t('appointmentTypes.isIntakeDesc') }}
+        flagFields={[
+          { key: 'is_intake', label: t('appointmentTypes.isIntake'), description: t('appointmentTypes.isIntakeDesc') },
+          { key: 'is_for_candidates', label: t('appointmentTypes.isForCandidates'), description: t('appointmentTypes.isForCandidatesDesc'), default: true },
+          { key: 'is_for_contacts', label: t('appointmentTypes.isForContacts'), description: t('appointmentTypes.isForContactsDesc'), default: true },
+        ]}
         defaultFields={[
           { field: 'is_default', labelKey: 'appointmentTypes.isDefault' },
           { field: 'is_default_for_application', labelKey: 'appointmentTypes.isDefaultForApplication' },
