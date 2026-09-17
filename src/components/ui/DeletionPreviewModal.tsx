@@ -6,12 +6,13 @@
  */
 import { useEffect, useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import {  } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import Button from '@/components/ui/Button'
+import { Mono } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
+import { useNumberFormat } from '@/lib/formatters'
 import { Z } from '@/lib/zIndexScale'
-import { BTN_H } from '@/config/buttonMetrics'
 import type { DeletionPreview } from '@/types/deletion'
 import Spinner from './Spinner'
 
@@ -33,18 +34,13 @@ export interface DeletionPreviewModalProps {
   graceDays?: number | null
 }
 
-// Shared button box (mirrors ConfirmDialog): fixed height, label never clipped.
-const btnBase = {
-  height: BTN_H, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-  gap: 6, fontSize: 13, borderRadius: 8, whiteSpace: 'nowrap', flexShrink: 0,
-} as const
-
 // Purely presentational shared trash-confirm dialog (see the module doc above): renders the loading/error/blocked/confirm states from props, owning only the local transfer-picker choice and the projected erase date.
 export default function DeletionPreviewModal({
   open, onClose, entityLabel, preview, loading, error, users, onConfirm, busy, blocked, graceDays = null,
 }: DeletionPreviewModalProps) {
   const { t } = useTranslation('common')
   const { formatDate } = useDateFormat()
+  const { formatNumber } = useNumberFormat()
   const transferLabelId = useId()
   // Locally held transfer choice; reset on every open so a previous pick never leaks.
   const [transferTo, setTransferTo] = useState('')
@@ -101,7 +97,7 @@ export default function DeletionPreviewModal({
               {blockers.map(b => (
                 <div key={b.type} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 13, color: 'var(--text)' }}>
                   <span>{t(`trash.blockers.${b.type}`, { defaultValue: b.label })}</span>
-                  <span style={{ fontWeight: 600, fontFamily: 'JetBrains Mono, monospace' }}>{b.count}</span>
+                  <Mono style={{ fontWeight: 600 }}>{formatNumber(b.count)}</Mono>
                 </div>
               ))}
             </div>
@@ -129,19 +125,14 @@ export default function DeletionPreviewModal({
       {/* Footer: the projected erase moment + the two answers. */}
       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{eraseLine}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 8 }}>
-        <button type="button" onClick={onClose}
-          style={{ ...btnBase, padding: '0 16px', border: '1px solid var(--border)',
-            background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
+        <Button variant="secondary" onClick={onClose}>
           {t('trash.modal.cancel')}
-        </button>
-        <button type="button" disabled={confirmDisabled}
-          onClick={() => onConfirm(transferTo ? transferTo : null)}
-          style={{ ...btnBase, padding: '0 18px', fontWeight: 600, border: 'none',
-            background: 'var(--color-danger)', color: 'var(--color-on-danger)',
-            cursor: confirmDisabled ? 'not-allowed' : 'pointer', opacity: confirmDisabled ? 0.6 : 1 }}>
+        </Button>
+        <Button variant="danger" disabled={confirmDisabled}
+          onClick={() => onConfirm(transferTo ? transferTo : null)}>
           {busy && <Spinner size={13} />}
           {t('trash.modal.confirm')}
-        </button>
+        </Button>
       </div>
     </FloatingPanel>
   )

@@ -523,6 +523,10 @@
       "draftMessage": "Conceptbericht",
       "proposedTime": "Voorgestelde tijd",
       "budgetExceeded": "Workflow-staffel vol",
+      "budgetUnits": {
+        "workflow_run": "Workflow-tokens",
+        "koios_ai_token": "Koios AI-tokens"
+      },
       "budgetLine": "{{used}}/{{allowance}} {{unit}}",
       "upgradeHint": "Upgrade naar {{tier}}"
     },

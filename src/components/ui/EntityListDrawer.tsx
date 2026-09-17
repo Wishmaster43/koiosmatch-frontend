@@ -44,9 +44,9 @@ export default function EntityListDrawer({ title, items, onClose }: EntityListDr
       <DrawerBackdrop onClick={onClose} />
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} tabIndex={-1}
-           className="fixed top-0 bottom-0 right-0 flex flex-col bg-white"
+           className="fixed top-0 bottom-0 right-0 flex flex-col"
            // HUISSTIJL-1: aria-modal dialog panel — shadow-modal role.
-           style={{ zIndex: 'var(--z-drawer)',  width: 480, boxShadow: 'var(--shadow-drawer)' }}>
+           style={{ zIndex: 'var(--z-drawer)', width: 480, background: 'var(--surface)', boxShadow: 'var(--shadow-drawer)' }}>
 
         {/* Header — DRY round 10, DRAWERSHELLS: shared via DrawerHeaderRow with
             ShiftsDrillDownDrawer (clone [6]). */}

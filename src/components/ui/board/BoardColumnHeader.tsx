@@ -7,6 +7,7 @@
 import type { ReactNode } from 'react'
 import { SectionTitle } from '@/components/ui/typography'
 import { tintBg, chipInk } from '@/lib/tint'
+import { useNumberFormat } from '@/lib/formatters'
 
 export interface BoardColumnHeaderProps {
   label: ReactNode
@@ -19,16 +20,21 @@ export interface BoardColumnHeaderProps {
 export default function BoardColumnHeader({ label, count, color, showDot = true }: BoardColumnHeaderProps) {
   // Token fallback keeps the pill on the design system when a column has no colour.
   const pillColor = color || 'var(--text-muted)'
+  // GETALLEN-1: every user-visible number through the locale formatter.
+  const { formatNumber } = useNumberFormat()
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
       {showDot && color && (
         <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
       )}
       <SectionTitle as="span">{label}</SectionTitle>
-      <span style={{ fontSize: 11, fontWeight: 600, padding: '1px 7px', borderRadius: 99,
-        background: tintBg(pillColor, true), color: chipInk(pillColor) }}>
-        {count}
-      </span>
+      {/* §14 canon: a count badge never renders "0" — empty column, no pill. */}
+      {count > 0 && (
+        <span style={{ fontSize: 11, fontWeight: 600, padding: '1px 7px', borderRadius: 99,
+          background: tintBg(pillColor, true), color: chipInk(pillColor) }}>
+          {formatNumber(count)}
+        </span>
+      )}
     </div>
   )
 }

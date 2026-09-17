@@ -36,4 +36,11 @@ describe('BoardColumnHeader', () => {
     expect(pill.getAttribute('style')).toContain('var(--text-muted)')
     expect(pill.getAttribute('style')).not.toMatch(/#[0-9a-f]{3,6}/i)
   })
+
+  // §14 canon "a count badge never renders '0'" — an empty column shows no pill at all.
+  it('renders no count pill when count is 0', () => {
+    render(<BoardColumnHeader label="Applied" count={0} />)
+    expect(screen.getByText('Applied')).toBeInTheDocument()
+    expect(screen.queryByText('0')).not.toBeInTheDocument()
+  })
 })

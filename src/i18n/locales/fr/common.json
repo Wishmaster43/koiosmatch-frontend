@@ -523,6 +523,10 @@
       "draftMessage": "Brouillon de message",
       "proposedTime": "Heure proposée",
       "budgetExceeded": "Palier workflow atteint",
+      "budgetUnits": {
+        "workflow_run": "Jetons de workflow",
+        "koios_ai_token": "Jetons Koios IA"
+      },
       "budgetLine": "{{used}}/{{allowance}} {{unit}}",
       "upgradeHint": "Passer à {{tier}}"
     },

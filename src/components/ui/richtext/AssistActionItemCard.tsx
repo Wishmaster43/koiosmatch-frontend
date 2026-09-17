@@ -156,7 +156,12 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
           {item.budget?.used != null && item.budget?.allowance != null && (
             <Caption as="span">
               {t('notesAssist.execute.budgetLine', {
-                used: formatNumber(item.budget.used), allowance: formatNumber(item.budget.allowance), unit: item.budget.unit ?? '',
+                used: formatNumber(item.budget.used), allowance: formatNumber(item.budget.allowance),
+                // K-242: the backend enum key ('workflow_run'/'koios_ai_token') never
+                // reaches the tenant raw — translate it through budgetUnits first.
+                unit: item.budget.unit
+                  ? t(`notesAssist.execute.budgetUnits.${item.budget.unit}`, { defaultValue: item.budget.unit })
+                  : '',
                 defaultValue: '{{used}}/{{allowance}} {{unit}}',
               })}
             </Caption>

@@ -26,15 +26,15 @@ export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconC
   const isNeutral  = delta === 0 || delta === undefined
   // Locale-aware grouping (§ FMT-GETAL-1) — a raw number value gets thousands
   // separators for free; callers that already pass a formatted string are untouched.
-  const { formatNumber } = useNumberFormat()
+  const { formatNumber, formatPercent } = useNumberFormat()
   const displayValue = typeof value === 'number' ? formatNumber(value) : value
 
   if (loading) {
     return (
       <div className="p-5 bg-[var(--surface)] rounded-xl" style={{ border: '1px solid var(--border)' }}>
-        <div className="w-10 h-10 mb-4 bg-gray-100 rounded-lg animate-pulse" />
-        <div className="w-16 mb-1 bg-gray-100 rounded h-7 animate-pulse" />
-        <div className="h-4 bg-gray-100 rounded w-28 animate-pulse" />
+        <div className="w-10 h-10 mb-4 rounded-lg animate-pulse" style={{ background: 'var(--hover-bg)' }} />
+        <div className="w-16 mb-1 rounded h-7 animate-pulse" style={{ background: 'var(--hover-bg)' }} />
+        <div className="h-4 rounded w-28 animate-pulse" style={{ background: 'var(--hover-bg)' }} />
       </div>
     )
   }
@@ -67,7 +67,7 @@ export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconC
             style={{ background: isPositive ? 'var(--color-success-bg)' : 'var(--color-danger-bg)', color: isPositive ? 'var(--color-on-success-bg)' : 'var(--color-on-danger-bg)' }}>
             {isPositive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
             <span style={{ fontSize: 11, fontWeight: 600 }}>
-              {isPositive ? `+${delta}` : delta}%
+              {isPositive ? '+' : ''}{formatPercent(delta)}
             </span>
           </div>
         )}

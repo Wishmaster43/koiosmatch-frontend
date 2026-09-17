@@ -8,6 +8,7 @@ import { useId } from 'react'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useNumberFormat } from '@/lib/formatters'
+import Button from './Button'
 import SelectMenu from './SelectMenu'
 
 export const PAGE_SIZE_OPTIONS = [50, 100, 200, 300, 400, 500]
@@ -41,14 +42,9 @@ export default function PaginationBar({ page, totalPages, totalRows, pageSize, o
   const to   = Math.min(page * pageSize, totalRows)
 
   const btn = (onClick: () => void, disabled: boolean, children: ReactNode, title: string) => (
-    <button type="button" onClick={onClick} disabled={disabled} title={title} aria-label={title} style={{
-      width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-      border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)',
-      color: disabled ? 'var(--border)' : 'var(--text-muted)', cursor: disabled ? 'default' : 'pointer',
-      transition: 'all 0.1s',
-    }}>
+    <Button variant="secondary" iconOnly size="sm" onClick={onClick} disabled={disabled} title={title} aria-label={title}>
       {children}
-    </button>
+    </Button>
   )
 
   return (

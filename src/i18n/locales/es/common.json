@@ -523,6 +523,10 @@
       "draftMessage": "Borrador del mensaje",
       "proposedTime": "Hora propuesta",
       "budgetExceeded": "Nivel de workflow completo",
+      "budgetUnits": {
+        "workflow_run": "Tokens de workflow",
+        "koios_ai_token": "Tokens de Koios IA"
+      },
       "budgetLine": "{{used}}/{{allowance}} {{unit}}",
       "upgradeHint": "Actualizar a {{tier}}"
     },

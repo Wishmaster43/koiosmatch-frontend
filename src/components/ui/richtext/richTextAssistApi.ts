@@ -141,7 +141,10 @@ export async function assistRichText(
 // ENTITIES map 1:1. Kept as its OWN type (not folded into RichTextAssistMode):
 // generate is a different request shape entirely (entity+id, never text+mode).
 // 'department' + 'vacancy' verified live in KoiosEntityGenerateController::ENTITIES (13-08).
-export type GenerateEntity = 'candidate' | 'customer' | 'location' | 'match' | 'department' | 'vacancy'
+// 'opportunity' widened in per the same backend map (13-09, KANSEN fase B) — wiring
+// `assistGenerate` into OpportunityDescriptionBlock is a separate, not-yet-decided
+// step (out of this file's scope), mirroring the match/department precedent above.
+export type GenerateEntity = 'candidate' | 'customer' | 'location' | 'match' | 'department' | 'vacancy' | 'opportunity'
 
 // KOIOS-FEEDBACK-FE-1 (measured, KoiosEntityGenerateController): this arm also
 // returns prompt_log_id — tolerant optional so an older cached response still maps.

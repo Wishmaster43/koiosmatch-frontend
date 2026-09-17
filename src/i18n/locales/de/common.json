@@ -523,6 +523,10 @@
       "draftMessage": "Nachrichtenentwurf",
       "proposedTime": "Vorgeschlagene Zeit",
       "budgetExceeded": "Workflow-Staffel voll",
+      "budgetUnits": {
+        "workflow_run": "Workflow-Tokens",
+        "koios_ai_token": "Koios KI-Tokens"
+      },
       "budgetLine": "{{used}}/{{allowance}} {{unit}}",
       "upgradeHint": "Upgrade auf {{tier}}"
     },

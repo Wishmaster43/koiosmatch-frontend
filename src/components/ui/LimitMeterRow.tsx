@@ -26,7 +26,7 @@ const WARNING_PERCENT = 80
 
 export default function LimitMeterRow({ meter }: { meter: LimitMeter }) {
   const { t } = useTranslation('settings')
-  const { formatNumber } = useNumberFormat()
+  const { formatNumber, formatPercent } = useNumberFormat()
   const unlimited = meter.cap === null
   const percent = Math.max(0, meter.percent ?? 0)
 
@@ -56,7 +56,7 @@ export default function LimitMeterRow({ meter }: { meter: LimitMeter }) {
         <Caption>
           {formatNumber(meter.used)}{unlimited ? '' : ` / ${formatNumber(meter.cap ?? 0)}`} · {t(`limits.window.${meter.window}`)}
         </Caption>
-        {!unlimited && <Caption>{percent}%</Caption>}
+        {!unlimited && <Caption>{formatPercent(percent)}</Caption>}
       </div>
     </div>
   )

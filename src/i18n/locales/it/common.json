@@ -523,6 +523,10 @@
       "draftMessage": "Bozza messaggio",
       "proposedTime": "Orario proposto",
       "budgetExceeded": "Scaglione workflow esaurito",
+      "budgetUnits": {
+        "workflow_run": "Token workflow",
+        "koios_ai_token": "Token Koios AI"
+      },
       "budgetLine": "{{used}}/{{allowance}} {{unit}}",
       "upgradeHint": "Passa a {{tier}}"
     },
