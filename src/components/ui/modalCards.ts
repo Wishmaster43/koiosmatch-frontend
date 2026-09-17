@@ -45,3 +45,11 @@ export const cardPair = { display: 'grid' as const, gridTemplateColumns: '1fr 1f
 export const modalColumns = (ratio = '1fr 1fr'): CSSProperties => ({
   display: 'grid', gridTemplateColumns: ratio, gap: 24, alignItems: 'start',
 })
+
+// FIELD-HEIGHT-1: the picker/creatable-select footprint that matches TextField's
+// own height exactly (8px/11px padding, 8px radius, 13px font) — a picker sitting
+// next to a plain text input must line up with it pixel for pixel. Round-11 DRY
+// finding: this literal had drifted into 4 separate addmodal/ cards, each with a
+// "kept local, only file that needs it" comment that did not hold up against its
+// siblings — one shared constant now.
+export const fieldHeightStyle = { padding: '8px 11px', borderRadius: 8, fontSize: 13 } as const

@@ -61,7 +61,7 @@ import { useCustomFields } from '@/lib/useCustomFields'
 import { handleSubEntityDelete } from '../hooks/subEntityDelete'
 // Shared SubTabBar tab-list shape, joined by DepartmentDetail/ContactDetail (DRY round 11, CUSTDETAIL).
 // scopedSubEntityTabs: the ten scoped entries, joined by DepartmentDetail (DRY round 11, CUSTTABS2).
-import { buildSubEntityTabs, scopedSubEntityTabs } from '../hooks/subEntityTabs'
+import { buildSubEntityTabs, scopedSubEntityTabs, subEntityTailTabs } from '../hooks/subEntityTabs'
 // Shared merge-modal onClose/onMerged wiring, joined by DepartmentDetail (DRY round 11, CUSTDETAIL).
 // Shared department-mutation callback prop shape, also used by LocationsTab (DRY round 11, CUSTDETAIL).
 import type { DepartmentCallbacks } from '../hooks/departmentCallbacks'
@@ -281,12 +281,9 @@ export default function LocationDetail({
         tabs={buildSubEntityTabs({
           first: { id: 'address', label: t('locations.detail.addressTitle') },
           scoped: [{ id: 'departments', label: t('drawer.tabs.departments') }, ...scopedSubEntityTabs(t, customFieldDefs)],
-          // TIJDLIJN-SUBDRILL-1/DD-FE-6: see buildSubEntityTabs' own doc comment.
-          timeline: { show: customerId != null, label: t('drawer.tabs.timeline') },
-          // EXTRACT-1: this location shows Koppelingen ALWAYS (§3A/§11) — the shared
-          // common:backofficeLinks.tabLabel key, not this file's own labels — unlike
-          // Department/ContactDetail, which hide it without a connector app.
-          links: { show: true, label: t('common:backofficeLinks.tabLabel') },
+          // TIJDLIJN-SUBDRILL-1/DD-FE-6: the shared tail. EXTRACT-1: a location shows
+          // Koppelingen ALWAYS (§3A/§11), unlike Department/ContactDetail.
+          ...subEntityTailTabs(t, { hasCustomer: customerId != null, showLinks: true }),
         })}
         active={subTab}
         onChange={id => setSubTab(id as typeof subTab)}

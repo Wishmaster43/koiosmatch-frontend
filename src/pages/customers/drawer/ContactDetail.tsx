@@ -29,19 +29,16 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Trash2, Edit2, Save, X, GitMerge, Archive } from 'lucide-react'
-import EditableFieldTable from '@/components/forms/EditableFieldTable'
+import { Trash2, GitMerge, Archive } from 'lucide-react'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
-import CreatableSelect from '@/components/ui/CreatableSelect'
-import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import Button from '@/components/ui/Button'
-import TitleBadge from '@/components/drawer/TitleBadge'
 import DrillPager, { type DrillPagerProps } from '@/components/drawer/DrillPager'
-import ContactLinkSection from './ContactLinkSection'
-// CONTACT-TEKST-1: the free-text block (canon order: info → text → koios → branch, §3A).
-import ContactTextSection from './ContactTextSection'
-// CONTACT-CONSENT-AS-1 (K-262): the shared retention consent block (mirrored from candidates).
-import RetentionConsentBlock from '@/components/drawer/RetentionConsentBlock'
+// DRY round 11: the shared title-row status badge + inline picker, same one
+// Location/DepartmentDetail already adopted (see that component's own docblock).
+import SubEntityStatusTitleRow from './SubEntityStatusTitleRow'
+// §0.3 split: the "Gegevens" sub-tab body (field table, free text, retention
+// consent, Vestiging coupling) — mirrors DepartmentDataTab/LocationAddressTab.
+import ContactDataTab from './ContactDataTab'
 import { emailValue, phoneValue, linkedinValue, LinkedinMark } from '@/components/drawer/contactLinks'
 // LAATSTE-CONTACT-SCOPE-1: the candidate B15-flow's confirm-after-mailto-click
 // banner, mirrored for a contact person's own e-mail field.
@@ -60,7 +57,7 @@ import MergeContactModal from './MergeContactModal'
 // LocationSubTabPanels were split off their own details.
 import ContactSubTabPanels from './ContactSubTabPanels'
 // Shared SubTabBar tab-list shape, joined by Department/LocationDetail (DRY round 11, CUSTDETAIL).
-import { buildSubEntityTabs } from '../hooks/subEntityTabs'
+import { buildSubEntityTabs, subEntityTailTabs } from '../hooks/subEntityTabs'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useContactFunctions } from '@/lib/useContactFunctions'
 import { useGenders } from '@/lib/useGenders'
@@ -257,11 +254,11 @@ export default function ContactDetail({ contact, locations, departments, statuse
     commit(Boolean(v.isPrimary))
   }
 
-  // Status lives in the title row and saves on its own, independent of the field card.
-  const [editingStatus, setEditingStatus] = useState(false)
-  const [statusDraft, setStatusDraft] = useState('')
-  const startEditStatus = () => { setStatusDraft(contact.statusId != null ? String(contact.statusId) : ''); setEditingStatus(true) }
-  const saveStatus = () => { onSave(contact.id as Id, { statusId: statusDraft || null }); setEditingStatus(false) }
+  // Status lives in the title row and saves on its own, independent of the field card —
+  // the shared SubEntityStatusTitleRow (DRY round 11: this used to be a third hand-rolled
+  // copy of exactly the block Location/DepartmentDetail already share) owns its own
+  // editing/draft state; this file only builds the status options.
+  const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
 
   const remove = () => confirm(t('contacts.deleteConfirm'), () => { onDelete(contact.id as Id); close() }, { danger: true })
 
@@ -303,27 +300,13 @@ export default function ContactDetail({ contact, locations, departments, statuse
           contactpersoon staat status in de tabel en niet naast de naam zoals bij
           locaties, we moeten het consistent houden". */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
-          {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- frozen customer-drawer zone (Danny 08-08): this title is 15/700 where PageTitle is 15/600 — converting is a visible restyle, so it waits for the drawer revisit, not a sweep */}
-          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{contact.name}</div>
-          <ReferenceNumberChip value={contact.referenceNumber} />
-          {editingStatus ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 170 }}>
-                <CreatableSelect value={statusDraft} onChange={setStatusDraft} allowCreate={false} menuWidth={180}
-                  placeholder={t('locations.detail.status')}
-                  options={statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))} />
-              </div>
-              <Button variant="primary" iconOnly size="sm" onClick={saveStatus} title={t('common:save')} aria-label={t('common:save')}><Save size={13} /></Button>
-              <Button variant="secondary" iconOnly size="sm" onClick={() => setEditingStatus(false)} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={13} /></Button>
-            </div>
-          ) : (
-            <>
-              <TitleBadge label={contact.statusLabel} color={contact.statusColor} />
-              <Button variant="secondary" iconOnly size="sm" onClick={startEditStatus} title={t('locations.detail.changeStatus')} aria-label={t('locations.detail.changeStatus')}><Edit2 size={13} /></Button>
-            </>
-          )}
-        </div>
+        {/* DRY round 11: the title now renders via the shared SubEntityStatusTitleRow,
+            which carries the exact same 15/700 inline style this frozen customer-drawer
+            zone (Danny 08-08) used locally — byte-identical, no eslint-disable needed
+            here any more (the local style literal moved with it). */}
+        <SubEntityStatusTitleRow id={contact.id as Id} name={contact.name} referenceNumber={contact.referenceNumber}
+          statusId={contact.statusId} statusLabel={contact.statusLabel} statusColor={contact.statusColor}
+          statusOptions={statusOptions} onSave={onSave} />
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
           {/* Prev/next through the list this contact was opened from (DRILL-PAGER-1) —
               before the merge/delete actions, same corner as every other detail pager. */}
@@ -389,51 +372,22 @@ export default function ContactDetail({ contact, locations, departments, statuse
             // K-288: linked-notes feed's own sub-tab, right after Notities.
             { id: 'linkedNotes', label: t('notes.linkedNotes') },
           ],
-          // TIJDLIJN-SUBDRILL-1/DD-FE-6: see buildSubEntityTabs' own doc comment.
-          // DRY: this timeline/links pair + the SubTabBar wiring below already runs
-          // through the shared buildSubEntityTabs() — the remaining resemblance to
-          // Department/LocationDetail's own call is each detail's own condition
-          // (contact.customerId vs department/location's customerId) and its own
-          // `subTab` state type, not extractable without coupling three unrelated
-          // state shapes together.
-          timeline: { show: contact.customerId != null, label: t('drawer.tabs.timeline') },
-          links: { show: showKoppelingen, label: t('common:backofficeLinks.tabLabel') },
+          // TIJDLIJN-SUBDRILL-1/DD-FE-6: the shared tail (Tijdlijn + Koppelingen) with this contact's own conditions.
+          ...subEntityTailTabs(t, { hasCustomer: contact.customerId != null, showLinks: showKoppelingen }),
         })}
         active={subTab}
         onChange={id => setSubTab(id as typeof subTab)}
       />
 
+      {/* §0.3 split: the "Gegevens" sub-tab body, mirroring DepartmentDataTab/
+          LocationAddressTab — mechanical extraction, no behaviour change. */}
       {subTab === 'data' && (
-        <>
-          {/* CANON-DIVIDER-1 (Danny 05-08): candidate ProfileTab canon — no line
-              between rows, 11px labels. */}
-          {/* Canon width (fieldRowCanon, 05-08): EditableFieldTable's own default now matches. */}
-          <EditableFieldTable key={tableEpoch} title={t('contacts.detail.infoTitle')} fields={fields} value={values} onSave={save}
-            editing={editing} onStartEdit={() => setEditing(true)} onCancel={() => setEditing(false)} />
-
-          {/* CONTACT-TEKST-1: the free-text block, canon-ordered directly under the
-              field card and above the Vestiging (location/department) coupling. */}
-          <ContactTextSection contactId={contact.id as Id} customerId={contact.customerId}
-            value={contact.description ?? ''} onSave={html => onSave(contact.id as Id, { description: html })} />
-
-          {/* CONTACT-CONSENT-AS-1 (K-262): retention consent block, added to the data
-              tab as an additive section. Uses namespace='customers' and viewPermission=
-              'customers.update' (the same gate as other edits on this contact). */}
-          <RetentionConsentBlock
-            optIn={contact.retentionConsent ?? false}
-            consentAt={contact.retentionConsentAt ?? null}
-            // RETENTION-CONSENT-BLANK-1 (Danny 08-09 B): the derived deadline renders the "bewaren tot" line; null = no line.
-            expiresAt={contact.retentionExpiresAt ?? null}
-            onToggle={val => onSave(contact.id as Id, { retentionConsent: val })}
-            namespace="customers"
-            viewPermission="customers.update"
-          />
-
-          {/* Koppeling — same shape and behaviour as "+ Vestiging" (Danny 28-07). */}
-          <ContactLinkSection locationIds={linkedLocationIds} departmentIds={linkedDepartmentIds}
-            locations={locations} departments={departments} onChange={saveLink} />
-
-        </>
+        <ContactDataTab contact={contact} tableEpoch={tableEpoch} fields={fields} values={values} onSaveFields={save}
+          editing={editing} onStartEdit={() => setEditing(true)} onCancel={() => setEditing(false)}
+          onSaveDescription={html => onSave(contact.id as Id, { description: html })}
+          onToggleRetentionConsent={val => onSave(contact.id as Id, { retentionConsent: val })}
+          locations={locations} departments={departments}
+          linkedLocationIds={linkedLocationIds} linkedDepartmentIds={linkedDepartmentIds} onLinkChange={saveLink} t={t} />
       )}
 
       {/* §0.3 split (K-SIZE-SPLIT-A): opportunities/tasks/conversations/extra/

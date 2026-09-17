@@ -69,3 +69,16 @@ export function scopedSubEntityTabs(t: TFunction, customFieldDefs: CustomFieldDe
     ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
   ]
 }
+
+/**
+ * The two conditional tail entries every sub-entity drilldown appends — Tijdlijn when the
+ * record belongs to a customer, Koppelingen when the caller says so (a connector app is
+ * enabled, or always for a location). CLONE-BY-CONSTRUCTION-1: Contact/Department/
+ * LocationDetail spelled the same two entries out; they now pass only their own conditions.
+ */
+export function subEntityTailTabs(t: TFunction, { hasCustomer, showLinks }: { hasCustomer: boolean; showLinks: boolean }): { timeline: ConditionalTab; links: ConditionalTab } {
+  return {
+    timeline: { show: hasCustomer, label: t('drawer.tabs.timeline') },
+    links: { show: showLinks, label: t('common:backofficeLinks.tabLabel') },
+  }
+}

@@ -69,7 +69,7 @@ import type { DepartmentSubTab } from './DepartmentSubTabPanels'
 import { handleSubEntityDelete } from '../hooks/subEntityDelete'
 // Shared SubTabBar tab-list shape, joined by LocationDetail/ContactDetail (DRY round 11, CUSTDETAIL).
 // scopedSubEntityTabs: the ten scoped entries, joined by LocationDetail (DRY round 11, CUSTTABS2).
-import { buildSubEntityTabs, scopedSubEntityTabs } from '../hooks/subEntityTabs'
+import { buildSubEntityTabs, scopedSubEntityTabs, subEntityTailTabs } from '../hooks/subEntityTabs'
 // Shared merge-modal onClose/onMerged wiring, joined by LocationDetail (DRY round 11, CUSTDETAIL).
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -268,10 +268,8 @@ export default function DepartmentDetail({ department, locations, statuses, cont
         tabs={buildSubEntityTabs({
           first: { id: 'data', label: t('departments.detail.subtabs.data') },
           scoped: scopedSubEntityTabs(t, customFieldDefs),
-          // TIJDLIJN-SUBDRILL-1/DD-FE-6: see buildSubEntityTabs' own doc comment.
-          timeline: { show: customerId != null, label: t('drawer.tabs.timeline') },
-          // EXTRACT-1: hidden without an enabled connector app (DD-FE-6).
-          links: { show: showKoppelingen, label: t('common:backofficeLinks.tabLabel') },
+          // TIJDLIJN-SUBDRILL-1/DD-FE-6 + EXTRACT-1: the shared tail; Koppelingen hides without a connector app.
+          ...subEntityTailTabs(t, { hasCustomer: customerId != null, showLinks: showKoppelingen }),
         })}
         active={subTab}
         onChange={id => setSubTab(id as typeof subTab)}

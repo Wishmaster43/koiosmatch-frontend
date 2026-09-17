@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildSubEntityTabs, scopedSubEntityTabs } from './subEntityTabs'
+import { buildSubEntityTabs, scopedSubEntityTabs, subEntityTailTabs } from './subEntityTabs'
 import type { TFunction } from 'i18next'
 import type { CustomFieldDef } from '@/lib/useCustomFields'
 
@@ -56,5 +56,21 @@ describe('scopedSubEntityTabs', () => {
       'contacts', 'vacancies', 'applications', 'notes', 'linkedNotes',
       'documents', 'matches', 'opportunities', 'tasks', 'extra',
     ])
+  })
+})
+
+// The shared tail: Tijdlijn follows the customer link, Koppelingen follows the caller's flag.
+describe('subEntityTailTabs', () => {
+  const t = ((k: string) => k) as unknown as Parameters<typeof subEntityTailTabs>[0]
+  it('shows both tails when the record has a customer and links are allowed', () => {
+    expect(subEntityTailTabs(t, { hasCustomer: true, showLinks: true })).toEqual({
+      timeline: { show: true, label: 'drawer.tabs.timeline' },
+      links: { show: true, label: 'common:backofficeLinks.tabLabel' },
+    })
+  })
+  it('hides the timeline without a customer and the links without a connector', () => {
+    const tail = subEntityTailTabs(t, { hasCustomer: false, showLinks: false })
+    expect(tail.timeline.show).toBe(false)
+    expect(tail.links.show).toBe(false)
   })
 })

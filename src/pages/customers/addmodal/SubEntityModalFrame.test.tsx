@@ -22,8 +22,6 @@ describe('SubEntityModalFrame', () => {
     importOpen: false,
     setImportOpen: vi.fn(),
     importButtonTitle: 'Import CSV departments',
-    canViewImportTemplate: true,
-    canRunImport: true,
     onCancel: vi.fn(),
     onSubmit: vi.fn(),
     cancelLabel: 'Cancel',

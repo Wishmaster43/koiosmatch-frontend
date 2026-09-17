@@ -13,12 +13,8 @@
 import { useTranslation } from 'react-i18next'
 import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import { cardHead, cardBox, row2, row } from '@/components/ui/modalCards'
+import { cardHead, cardBox, row2, row, fieldHeightStyle } from '@/components/ui/modalCards'
 import { postcodePlaceholder } from '@/lib/postcode'
-
-// FIELD-HEIGHT-1: same literal as the parent modal's own `pickerStyle` (kept
-// local since this is the only field in this card that needs it).
-const pickerStyle = { padding: '8px 11px', borderRadius: 8, fontSize: 13 } as const
 
 // Weighted rows for the address block (mirrors the candidate AddressCard's own
 // street/postcode ratios — the same real-world field, same proportions).
@@ -73,7 +69,7 @@ export default function LocationAddressCard({
                 the saved state, never silently dropped. */}
             <CreatableSelect value={state || null} onChange={onStateChange} allowCreate={false}
               clearable clearLabel={t('subModal.state')}
-              placeholder={t('common:select')} options={provinces} menuWidth={260} style={pickerStyle} />
+              placeholder={t('common:select')} options={provinces} menuWidth={260} style={fieldHeightStyle} />
           </FieldRow>
           {/* `country` stays free text on purpose — see file header comment. */}
           <FieldRow label={t('subModal.country')}><TextField value={country} onChange={onCountryChange} /></FieldRow>

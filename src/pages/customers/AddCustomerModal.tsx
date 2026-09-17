@@ -6,7 +6,6 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Building2, Upload, CheckCircle2 } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 // DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
 import { extractApiError } from '@/lib/extractApiError'
@@ -40,10 +39,10 @@ import CreateErrorAlert from '@/components/forms/CreateErrorAlert'
 import EntityImportCard from '@/components/import/EntityImportCard'
 import { useEntityImportCard } from '@/components/import/useEntityImportCard'
 import type { Id, LookupOption } from '@/types/common'
-import Button from '@/components/ui/Button'
 import ModalFooter from '@/components/ui/ModalFooter'
-import ModalHeaderIconBadge from '@/components/forms/ModalHeaderIconBadge'
-import TitleBarPills from '@/components/ui/TitleBarPills'
+// DUP-11 (round 11 DRY audit): the shared AddModalHeader wrapper, mirroring
+// candidates'/vacancies' own addmodal/ModalHeader.tsx — never a fourth hand-rolled copy.
+import ModalHeader from './addmodal/ModalHeader'
 
 // The ONE backend importer that builds a whole customer tree (customer + locations +
 // departments + contacts) from one flat file — verified against koiosmatch-api's
@@ -256,8 +255,6 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
   // result) — never let the manual form fire a SECOND create while the import is
   // mid-decision or has just written its own records.
   const canSubmit = !!form.name.trim() && !saving && importWizard.step === 'upload' && !hasFormatError
-  // The phase the title names — the pills below are the only way to change it.
-  const selectedPhase = phases.find(p => String(p.value) === String(form.phase))
   const userOptions = users.map(u => ({ value: String(u.id), label: u.name }))
 
   return (
@@ -265,42 +262,22 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
     // draggable FloatingPanel; the bespoke header (icon + phase-in-title + phase
     // pills) rides along inside the drag handle via the `header` slot.
     <FloatingPanel open onClose={onClose} ariaLabel={t('modal.title')}
-      persistKey="customer-add" scrollBody={false}
+      persistKey="customer-add" scrollBody={false} hideClose
       {...WIDE_MODAL_PANEL_SIZE}
       header={
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
-          <ModalHeaderIconBadge>
-            <Building2 size={16} color="var(--color-primary)" />
-          </ModalHeaderIconBadge>
-          <div>
-            {/* The chosen phase is in the TITLE, exactly as the candidate modal reads
-                "Nieuwe — Lead" ("New — Lead") (Danny 02-08: "die fase moet zijn zoals
-                + nieuwe kandidaat" — "that phase should be like + new candidate").
-                A phase buried in a card is a phase nobody notices. */}
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>
-              {selectedPhase ? `${t('modal.title')} — ${selectedPhase.label}` : t('modal.title')}
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('modal.subtitle')}</div>
-          </div>
-          {/* Phase choice — the ONE title-bar pill row (TITELBALK-PILLS, Danny
-              27-08): same atom as the candidate/vacancy/match/task popups. */}
-          <div style={{ marginLeft: 'auto', marginRight: 12, flexShrink: 0 }}>
-            <TitleBarPills
-              options={phases.map(ph => ({ value: String(ph.value), label: ph.label, color: ph.color ?? 'var(--color-primary)' }))}
-              value={String(form.phase ?? '')}
-              onChange={(v) => set('phase', v)}
-              ariaLabel={t('modal.title')} />
-          </div>
-          {/* KLANT-LAYOUT-3 (Danny 14-08): the import affordance lives top-right in the
-              header, via the house Button (HUISSTIJL-1) — never a repainted fill/border.
-              A picked file (paused import) stays visible through the ICON swap instead
-              (upload → check), so the "paused import" signal survives without a second
-              identity paint on the button chrome. */}
-          <Button type="button" variant="primary" onClick={() => setImportOpen(v => !v)} aria-expanded={importOpen}
-            title={t('modal.import.title')} style={{ marginRight: 12, flexShrink: 0 }}>
-            {importWizard.file ? <CheckCircle2 size={13} /> : <Upload size={13} />}
-            {t('modal.import.title')}
-          </Button>
+        // The chosen phase is in the TITLE, exactly as the candidate modal reads
+        // "Nieuwe — Lead" ("New — Lead") (Danny 02-08: "die fase moet zijn zoals
+        // + nieuwe kandidaat" — "that phase should be like + new candidate").
+        // Phase pills = the shared TitleBarPills atom (TITELBALK-PILLS, Danny
+        // 27-08); import toggle mirrors KLANT-LAYOUT-3 (Danny 14-08: icon swaps
+        // upload → check once a file is picked, never a border repaint).
+        // The wrapper fills the drag handle edge-to-edge via negative margins
+        // (mirrors candidates'/vacancies' own header wrapper) so the header's own
+        // X sits at the panel's right edge, not at the row's 50% midpoint.
+        <div style={{ flex: 1, margin: '-12px -16px -13px' }}>
+          <ModalHeader phase={form.phase} phases={phases} onSelectPhase={v => set('phase', v)} onClose={onClose}
+            importOpen={importOpen} onToggleImport={() => setImportOpen(v => !v)}
+            hasFile={!!importWizard.file} />
         </div>
       }>
 

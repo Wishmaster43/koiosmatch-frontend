@@ -7,12 +7,8 @@
 import { useTranslation } from 'react-i18next'
 import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import { cardHead, cardBox, row2, row3Even } from '@/components/ui/modalCards'
-
-// Matches the TextField input footprint exactly (padding/font-size/radius) — the
-// CreatableSelect trigger otherwise renders smaller (6px/12px vs 8px/13px), the
-// same mismatch already fixed once in `pages/candidates/addmodal/fields.tsx`.
-const CREATABLE_STYLE = { padding: '8px 11px', borderRadius: 8, fontSize: 13 }
+import { cardHead, cardBox, row2, row3Even, fieldHeightStyle } from '@/components/ui/modalCards'
+import FieldNotice from '@/components/ui/FieldNotice'
 
 interface OptionRow { value: string; label: string }
 
@@ -57,7 +53,7 @@ export default function ContactIdentityCard({
             <TextField value={lastName} onChange={onLastNameChange} error={lastNameError} />
           </FieldRow>
         </div>
-        {(firstNameError || lastNameError) && <div style={{ fontSize: 11, color: 'var(--color-danger-text)' }}>{t('subModal.required')}</div>}
+        {(firstNameError || lastNameError) && <FieldNotice text={t('subModal.required')} />}
         {/* Function is a searchable/creatable tenant lookup (contact-function
             vocabulary, honours the tenant's free-entry setting). It sits in the same
             two-column grid as the names so it lines up under Voornaam instead of
@@ -70,7 +66,7 @@ export default function ContactIdentityCard({
                 column accepts) — so clearable, independent of the create/strict toggle. */}
             <CreatableSelect value={role} onChange={onRoleChange} options={contactFunctions}
               allowCreate={allowFreeEntry} clearable clearLabel={t('subModal.role')}
-              placeholder={t('common:select')} style={CREATABLE_STYLE} />
+              placeholder={t('common:select')} style={fieldHeightStyle} />
           </FieldRow>
           {/* Geslacht: options come from the tenant /genders lookup and the field
               stores the VALUE SLUG the backend validates with exists:candidate_genders,value.
@@ -78,7 +74,7 @@ export default function ContactIdentityCard({
           <FieldRow label={t('subModal.gender')}>
             <CreatableSelect value={gender || null} onChange={onGenderChange} allowCreate={false}
               clearable clearLabel={t('subModal.gender')}
-              placeholder={t('subModal.noneOption')} style={CREATABLE_STYLE} options={genders} />
+              placeholder={t('subModal.noneOption')} style={fieldHeightStyle} options={genders} />
           </FieldRow>
         </div>
         {/* AVG-RET-2-TAAL-1: optional, clearable — empty means agency default. */}
@@ -86,7 +82,7 @@ export default function ContactIdentityCard({
           <FieldRow label={t('subModal.preferredLanguage')}>
             <CreatableSelect value={preferredLanguage || null} onChange={onPreferredLanguageChange} allowCreate={false}
               clearable clearLabel={t('subModal.preferredLanguage')}
-              placeholder={t('subModal.preferredLanguageDefault')} style={CREATABLE_STYLE} options={languageOptions} />
+              placeholder={t('subModal.preferredLanguageDefault')} style={fieldHeightStyle} options={languageOptions} />
           </FieldRow>
         </div>
       </div>
