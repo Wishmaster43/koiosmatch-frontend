@@ -1,6 +1,7 @@
 /**
  * chartData.test — unit tests for chart datum builders (donut, bar, ownerBar).
  */
+import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
 import { describe, it, expect } from 'vitest'
 import { donutData, barData, ownerBarData } from './chartData'
 
@@ -33,7 +34,7 @@ describe('chartData builders', () => {
       const result = donutData(segs)
 
       // First segment uses fallback[0], second uses its own color
-      expect(result.colors[0]).toBe('var(--color-chart-1)')
+      expect(result.colors[0]).toBe(CHART_SERIES_COLORS[0])
       expect(result.colors[1]).toBe('var(--color-primary)')
     })
   })
@@ -68,5 +69,16 @@ describe('chartData builders', () => {
         { name: 'Bob', value: 45, key: 'user-2' },
       ])
     })
+  })
+})
+
+// CHART-FALLBACK-1: the fallback series is the ONE house palette from chartTypes and never
+// references a token that no stylesheet defines (that is how the donuts painted black).
+describe('donutData fallback palette', () => {
+  it('uses the shared chartTypes series, with no undefined --color-chart token', () => {
+    const segs = Array.from({ length: 8 }, (_, i) => ({ label: `s${i}`, count: 1, value: `v${i}`, color: null }))
+    const { colors } = donutData(segs)
+    colors.forEach((c, i) => expect(c).toBe(CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]))
+    expect(colors.some(c => c.includes('--color-chart'))).toBe(false)
   })
 })

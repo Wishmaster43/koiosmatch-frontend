@@ -3,16 +3,13 @@
  * segment arrays into ChartDatum arrays with integrated colours.
  * Adopted by CandidatesReport, CustomersReport, VacancyReportAxes.
  */
+import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
 import type { ChartDatum } from '@/components/charts/chartTypes'
 
-const CHART_SERIES_COLORS = [
-  'var(--color-chart-1)',
-  'var(--color-chart-2)',
-  'var(--color-chart-3)',
-  'var(--color-chart-4)',
-  'var(--color-chart-5)',
-  'var(--color-chart-6)',
-]
+// CHART-FALLBACK-1 (Danny 17-09, "donut is zwart" on #reports.matches and #reports.outreach):
+// this file used to carry its OWN fallback palette of `var(--color-chart-1..6)` tokens that
+// no stylesheet defines, so every slice without a lookup colour painted an invalid fill
+// (black). The one house series lives in components/charts/chartTypes; never a second copy.
 
 export interface DonutSegment {
   label: string
