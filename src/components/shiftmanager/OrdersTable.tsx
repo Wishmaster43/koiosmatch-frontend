@@ -13,7 +13,7 @@ import { useRightPanel } from '@/context/RightPanelContext'
 // App-wide active locale (DATUM-1/LANE-B) — feeds the month-dropdown labels.
 import { useLocale } from '@/lib/datetime'
 import { formatMonthName } from '@/lib/localDate'
-import { Caption } from '@/components/ui/typography'
+import { Caption, PageTitle } from '@/components/ui/typography'
 import PaginationBar     from '../ui/PaginationBar'
 // Searchable combobox replaces the bare native <select> (Danny 08-08, §4) — same
 // fixed-vocabulary picker convention as ReportsPage's period picker.
@@ -39,7 +39,7 @@ export default function OrdersTable() {
   const [sort,             setSort]             = useState<{ key: string; dir: 'asc' | 'desc' }>({ key: 'start_date', dir: 'desc' })
   const [selected,         setSelected]         = useState<EnrichedOrderRow | null>(null)
 
-  const { rows, loading, total, lastPage, page, setPage, pageSize, handlePageSizeChange, statusOptions, sorted } =
+  const { rows, loading, total, lastPage, error, page, setPage, pageSize, handlePageSizeChange, statusOptions, sorted } =
     useOrdersTable({ selectedMonth, search, selectedStatuses, sort })
 
   const { registerFilters, unregisterFilters } = useRightPanel()
@@ -91,10 +91,10 @@ export default function OrdersTable() {
       {/* Header */}
       <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 16 }}>
         <div>
-          <h1 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>{t('orders.title')}</h1>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
+          <PageTitle as="h1">{t('orders.title')}</PageTitle>
+          <Caption as="p" style={{ marginTop: 2 }}>
             {loading ? t('charts.loading') : t('orders.count', { count: total })}
-          </p>
+          </Caption>
         </div>
         <div className="flex items-center gap-2">
           <span id={monthLabelId} className="sr-only">{t('orders.filterMonth')}</span>
@@ -138,12 +138,18 @@ export default function OrdersTable() {
                   {t('orders.loading')}
                 </td></tr>
               )}
-              {!loading && sorted.length === 0 && (
+              {/* A failed fetch renders as an explicit error row, never the ordinary empty state (§3). */}
+              {error && !loading && (
+                <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 48, color: 'var(--color-danger-text)', fontSize: 13 }}>
+                  {t('orders.loadError')}
+                </td></tr>
+              )}
+              {!loading && !error && sorted.length === 0 && (
                 <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 48, color: 'var(--text-muted)', fontSize: 13 }}>
                   {t('orders.empty')}
                 </td></tr>
               )}
-              {!loading && sorted.map((r, i) => (
+              {!loading && !error && sorted.map((r, i) => (
                 <tr key={r.id ?? i}
                   onClick={() => setSelected(r)}
                   style={{ cursor: 'pointer', background: selected?.id === r.id ? 'var(--color-secondary-bg)' : undefined }}
@@ -166,10 +172,10 @@ export default function OrdersTable() {
                   <td style={TD}>{formatTime(r.start_time)}</td>
                   <td style={TD}>{formatTime(r.end_time)}</td>
                   <td style={{ ...TD, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
-                    {formatHours(r.worked_hours_candidate)}
+                    {formatHours(r.worked_hours_candidate, locale)}
                   </td>
                   <td style={{ ...TD, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
-                    {formatHours(r.worked_hours_customer)}
+                    {formatHours(r.worked_hours_customer, locale)}
                   </td>
                   <td style={TD}><Caption as="span">{dash(r.cost_center_candidate)}</Caption></td>
                   <td style={TD}><Caption as="span">{dash(r.cost_center_customer)}</Caption></td>

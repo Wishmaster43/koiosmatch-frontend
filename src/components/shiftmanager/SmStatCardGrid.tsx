@@ -5,6 +5,7 @@
  */
 import React from 'react'
 import { Caption } from '@/components/ui/typography'
+import { useNumberFormat } from '@/lib/formatters'
 
 interface StatCard {
   label: string
@@ -19,6 +20,8 @@ interface SmStatCardGridProps {
 }
 
 export default function SmStatCardGrid({ cards }: SmStatCardGridProps) {
+  // GETALLEN-1: a numeric value gets locale-aware thousands separators; a pre-formatted string passes through untouched.
+  const { formatNumber } = useNumberFormat()
   return (
     <div
       style={{
@@ -67,7 +70,7 @@ export default function SmStatCardGrid({ cards }: SmStatCardGridProps) {
                 lineHeight: 1,
               }}
             >
-              {s.value}
+              {typeof s.value === 'number' ? formatNumber(s.value) : s.value}
             </div>
             <Caption as="div" style={{ marginTop: 2 }}>
               {s.label}

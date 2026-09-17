@@ -11,7 +11,8 @@ import { useDefaultPageSize } from '@/lib/usePageSize'
 import type { OrderRow, EnrichedOrderRow } from '@/types/shiftmanager'
 
 // The request lifecycle held by the reducer (replaced wholesale per dispatch).
-interface OrdersState { rows: OrderRow[]; loading: boolean; total: number; lastPage: number }
+// `error` carries a failed fetch so the UI never renders it as the ordinary empty state (§3).
+interface OrdersState { rows: OrderRow[]; loading: boolean; total: number; lastPage: number; error: boolean }
 
 // Data layer for OrdersTable: server paging + row loading, plus the derived
 // enrich/filter/sort pipeline over the loaded page (see file docblock above).
@@ -24,9 +25,9 @@ export function useOrdersTable({ selectedMonth, search, selectedStatuses, sort }
   const defaultPageSize = useDefaultPageSize()
   const { refreshUser } = useAuth() ?? {}
 
-  const [{ rows, loading, total, lastPage }, dispatch] = useReducer(
+  const [{ rows, loading, total, lastPage, error }, dispatch] = useReducer(
     (_: OrdersState, a: OrdersState) => a,
-    { rows: [], loading: true, total: 0, lastPage: 1 } as OrdersState
+    { rows: [], loading: true, total: 0, lastPage: 1, error: false } as OrdersState
   )
   const [page,     setPage]     = useState(1)
   const [pageSize, setPageSize] = useState(defaultPageSize)
@@ -39,7 +40,7 @@ export function useOrdersTable({ selectedMonth, search, selectedStatuses, sort }
   // stale page overwrite the one the user is looking at.
   useEffect(() => {
     let alive = true
-    dispatch({ rows: [], loading: true, total: 0, lastPage: 1 })
+    dispatch({ rows: [], loading: true, total: 0, lastPage: 1, error: false })
     api.get('/sm_reports/shifts-per-month/detail', {
       params: {
         ...(selectedMonth ? { month: selectedMonth } : {}),
@@ -54,9 +55,11 @@ export function useOrdersTable({ selectedMonth, search, selectedStatuses, sort }
           loading:  false,
           total:    body?.meta?.total ?? body?.total ?? 0,
           lastPage: body?.meta?.last_page ?? body?.last_page ?? 1,
+          error:    false,
         })
       })
-      .catch(() => { if (alive) dispatch({ rows: [], loading: false, total: 0, lastPage: 1 }) })
+      // A failed fetch is a real error, never the ordinary empty state (§3 four UI states).
+      .catch(() => { if (alive) dispatch({ rows: [], loading: false, total: 0, lastPage: 1, error: true }) })
     return () => { alive = false }
   }, [selectedMonth, page, pageSize])
 
@@ -115,5 +118,5 @@ export function useOrdersTable({ selectedMonth, search, selectedStatuses, sort }
     })
   }, [filtered, sort])
 
-  return { rows, loading, total, lastPage, page, setPage, pageSize, handlePageSizeChange, statusOptions, sorted }
+  return { rows, loading, total, lastPage, error, page, setPage, pageSize, handlePageSizeChange, statusOptions, sorted }
 }

@@ -13,8 +13,9 @@ import { useTranslation } from "react-i18next"
 import ErrorBoundary from "../ui/ErrorBoundary"
 import { YEAR_OPACITY } from "./shiftsChartsConfig"
 import type { ShiftsChartDatum, ShiftBar } from '@/types/shiftmanager'
-import { formatNumber } from '@/lib/formatters'
-import { captionStyle } from '@/components/ui/typography'
+import { formatNumber, formatPercent, formatRatio, useNumberFormat } from '@/lib/formatters'
+import { captionStyle, SectionTitle, Caption } from '@/components/ui/typography'
+import SegmentedControl from '@/components/ui/SegmentedControl'
 
 // Grouped bar chart for shift counts by year/series; onBarClick drills a bar into its underlying rows.
 export function BarChartWidget({ data, bars, onBarClick }: {
@@ -110,8 +111,10 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear,
   // (there is no Totaal column to divide by once only one metric is on screen).
   deltaMode?: boolean
 }) {
-  const fmt = (v: unknown) => formatNumber(Number(v) || 0)
-  const fmtDelta = (d: number) => `${d > 0 ? '+' : ''}${d}%`
+  // GETALLEN-1: locale-aware formatters, active tenant locale — no hand-built `${n}%`.
+  const { locale } = useNumberFormat()
+  const fmt = (v: unknown) => formatNumber(Number(v) || 0, locale)
+  const fmtDelta = (d: number) => `${d > 0 ? '+' : ''}${formatPercent(d, locale)}`
   const totals = bars.map(b => data.reduce((s, r) => s + (Number(r[b.dataKey]) || 0), 0))
   // Per year the "Totaal" series is the 100% baseline; every other series is a share of it
   // (Danny: "Totaal = 100%, de rest is afleiding daarvan"). Map year → its Totaal column.
@@ -134,7 +137,7 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear,
       return prevVal ? fmtDelta(Math.round((curVal - prevVal) / prevVal * 100)) : '—'
     }
     const denom = Number(row[totaalKeyByYear.get(b.year) ?? '']) || 0
-    return denom ? `${Math.round((Number(row[b.dataKey]) || 0) / denom * 100)}%` : '—'
+    return denom ? formatRatio((Number(row[b.dataKey]) || 0) / denom, locale) : '—'
   }
   // Same value/Δ/% logic as `cell` above, but for the totals row at the bottom of the table.
   const totalCell = (b: ShiftBar, colTotal: number, idx: number) => {
@@ -145,7 +148,7 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear,
       return prevTotal ? fmtDelta(Math.round((colTotal - prevTotal) / prevTotal * 100)) : '—'
     }
     const denom = totaalTotalByYear.get(b.year) ?? 0
-    return denom ? `${Math.round(colTotal / denom * 100)}%` : '—'
+    return denom ? formatRatio(colTotal / denom, locale) : '—'
   }
   // Table header cell: Caption's raw identity (r6 style-object context) plus 600 weight for a header.
   const th: CSSProperties = { ...captionStyle, fontWeight: 600, padding: '7px 10px', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
@@ -200,16 +203,17 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear,
 // `deltaMode` (SM-2YR) relabels the right pill "Δ" (year-over-year) instead of "%".
 export function PctToggle({ pct, onChange, deltaMode = false }: { pct: boolean; onChange: (v: boolean) => void; deltaMode?: boolean }) {
   const { t } = useTranslation('shiftmanager')
+  // HUISSTIJL-1: the shared compact SegmentedControl (§4 CHIP-TINT-1), never a
+  // third hand-rolled pill pair — this file already uses it for the Uren/Diensten toggle.
   return (
-    <div style={{ display: 'inline-flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
-      {([[false, t('charts.asValues')], [true, deltaMode ? t('charts.asDelta') : t('charts.asPct')]] as const).map(([val, label]) => (
-        <button key={String(val)} type="button" onClick={() => onChange(val)}
-          style={{ padding: '3px 10px', fontSize: 11, fontWeight: pct === val ? 600 : 400, border: 'none', cursor: 'pointer',
-            background: pct === val ? 'var(--color-primary-bg)' : 'transparent',
-            // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-            color: pct === val ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>{label}</button>
-      ))}
-    </div>
+    <SegmentedControl size="compact" ariaLabel={t('charts.pctToggleLabel')}
+      options={[
+        { value: 'values', label: t('charts.asValues') },
+        { value: 'pct', label: deltaMode ? t('charts.asDelta') : t('charts.asPct') },
+      ]}
+      value={pct ? 'pct' : 'values'}
+      onChange={v => onChange(v === 'pct')}
+    />
   )
 }
 
@@ -231,8 +235,9 @@ export function ChartCard({ title, subtitle, action, loading, error, children }:
         {/* Title + subtitle on one line; optional action (e.g. Waarden|%) on the right (Danny). */}
         <div className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-baseline gap-2 min-w-0">
-            <h3 className="text-base font-semibold text-[var(--text)]">{title}</h3>
-            {subtitle && <span className="text-xs text-[var(--text-muted)]">· {subtitle}</span>}
+            {/* House typography atoms (§4) instead of a locally invented Tailwind heading. */}
+            <SectionTitle as="h3">{title}</SectionTitle>
+            {subtitle && <Caption as="span">· {subtitle}</Caption>}
           </div>
           {action}
         </div>

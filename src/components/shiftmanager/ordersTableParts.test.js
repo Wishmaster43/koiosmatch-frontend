@@ -26,13 +26,18 @@ describe('formatTime', () => {
 })
 
 describe('formatHours', () => {
-  it('renders two decimals (incl. zero)', () => {
-    expect(formatHours(8.5)).toBe('8,5')
-    expect(formatHours(0)).toBe('0')
-    expect(formatHours('7.25')).toBe('7,25')
+  it('renders two decimals (incl. zero) on the nl-NL locale', () => {
+    expect(formatHours(8.5, 'nl-NL')).toBe('8,5')
+    expect(formatHours(0, 'nl-NL')).toBe('0')
+    expect(formatHours('7.25', 'nl-NL')).toBe('7,25')
   })
   it('dashes null/undefined', () => {
-    expect(formatHours(null)).toBe('—')
-    expect(formatHours(undefined)).toBe('—')
+    expect(formatHours(null, 'nl-NL')).toBe('—')
+    expect(formatHours(undefined, 'nl-NL')).toBe('—')
+  })
+  // GETALLEN-1 regression: the locale is never a hardcoded default — an en-GB
+  // tenant reads a dot decimal separator, not the nl-NL comma.
+  it('renders on the ACTIVE locale, not a hardcoded default', () => {
+    expect(formatHours(8.5, 'en-GB')).toBe('8.5')
   })
 })

@@ -44,6 +44,7 @@
     "count": "{{count}} missions",
     "loading": "Chargement des missions…",
     "empty": "Aucune mission trouvée",
+    "loadError": "Impossible de charger les missions.",
     "allMonths": "Tous les mois",
     "search": "Rechercher par ID ext., réf. commande, client…",
     "status": {
@@ -181,6 +182,7 @@
     "inHours": "En heures",
     "inShifts": "En services",
     "unitToggleLabel": "Unité : heures ou services",
+    "pctToggleLabel": "Affichage : valeurs ou pourcentage",
     "colHours": "Heures",
     "colShifts": "Services",
     "lastSync": "Dernière synchro : {{time}}",
@@ -194,7 +196,7 @@
       "failed": "Échec de la synchronisation",
       "tooManyRequests": "Trop de tentatives, réessayez dans {{secs}}s"
     },
-    "empty": "—"
+    "empty": "Aucun poste dans cette sélection"
   },
   "customersReport": {
     "title": "Rapport clients",

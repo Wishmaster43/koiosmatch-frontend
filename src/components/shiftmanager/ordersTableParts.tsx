@@ -10,6 +10,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import SortCaret from '@/components/ui/SortCaret'
 import { formatDateOnly } from '@/lib/localDate'
 import { formatNumber } from '@/lib/formatters'
+import { GroupLabel } from '@/components/ui/typography'
 
 export const NOW = new Date()
 export const PAD = (n: number) => String(n).padStart(2, '0')
@@ -51,16 +52,17 @@ export const TD: CSSProperties = { padding: '9px 12px', fontSize: 12, color: 'va
 // Date-only via the ONE shared formatter (heraudit I18N-2); time stays local.
 export const formatDate   = formatDateOnly
 export const formatTime   = (dt?: string | number | Date | null) => { if (!dt) return '—'; const d = new Date(dt); return `${PAD(d.getHours())}:${PAD(d.getMinutes())}` }
-// Locale-aware hours formatting with 2 decimals (DATUM-1/LANE-B).
-export const formatHours  = (h?: number | string | null, locale: string = 'nl-NL') => h != null ? formatNumber(Number(h), locale, 2) : '—'
+// Locale-aware hours formatting with 2 decimals (DATUM-1/LANE-B). GETALLEN-1: no
+// default locale — a caller MUST pass the tenant's active locale (useNumberFormat().locale).
+export const formatHours  = (h: number | string | null | undefined, locale: string) => h != null ? formatNumber(Number(h), locale, 2) : '—'
 export const dash         = (v: unknown): ReactNode => v ? (v as ReactNode) : <span style={{ color: 'var(--border)' }}>—</span>
 
 // Section card with an uppercase title — used by the detail drawer.
 export function Section({ title, children }: { title: ReactNode; children: ReactNode }) {
   return (
     <div>
-      <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase',
-                  letterSpacing: '0.07em', marginBottom: 10 }}>{title}</p>
+      {/* House GroupLabel atom (§4) instead of a locally invented uppercase heading. */}
+      <GroupLabel as="p" style={{ marginBottom: 10 }}>{title}</GroupLabel>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10,
                     padding: '12px 14px', background: 'var(--bg)',
                     borderRadius: 10, border: '1px solid var(--border)' }}>

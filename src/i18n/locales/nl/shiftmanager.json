@@ -44,6 +44,7 @@
     "count": "{{count}} diensten",
     "loading": "Diensten ophalen…",
     "empty": "Geen diensten gevonden",
+    "loadError": "Kon diensten niet laden.",
     "allMonths": "Alle maanden",
     "search": "Zoek op ext. ID, order ref, klant…",
     "status": {
@@ -181,6 +182,7 @@
     "inHours": "In uren",
     "inShifts": "In diensten",
     "unitToggleLabel": "Eenheid: uren of diensten",
+    "pctToggleLabel": "Weergave: waarden of percentage",
     "colHours": "Uren",
     "colShifts": "Diensten",
     "lastSync": "Laatste sync: {{time}}",
@@ -194,7 +196,7 @@
       "failed": "Synchroniseren mislukt",
       "tooManyRequests": "Te veel pogingen, probeer over {{secs}}s opnieuw"
     },
-    "empty": "—"
+    "empty": "Geen diensten in deze selectie"
   },
   "customersReport": {
     "title": "Klanten rapport",

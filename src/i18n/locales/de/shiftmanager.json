@@ -44,6 +44,7 @@
     "count": "{{count}} Einsätze",
     "loading": "Einsätze werden geladen…",
     "empty": "Keine Einsätze gefunden",
+    "loadError": "Einsätze konnten nicht geladen werden.",
     "allMonths": "Alle Monate",
     "search": "Nach ext. ID, Auftragsref., Kunde suchen…",
     "status": {
@@ -181,6 +182,7 @@
     "inHours": "In Stunden",
     "inShifts": "In Diensten",
     "unitToggleLabel": "Einheit: Stunden oder Dienste",
+    "pctToggleLabel": "Ansicht: Werte oder Prozent",
     "colHours": "Stunden",
     "colShifts": "Dienste",
     "lastSync": "Letzte Sync: {{time}}",
@@ -194,7 +196,7 @@
       "failed": "Synchronisierung fehlgeschlagen",
       "tooManyRequests": "Zu viele Versuche, in {{secs}}s erneut versuchen"
     },
-    "empty": "—"
+    "empty": "Keine Schichten in dieser Auswahl"
   },
   "customersReport": {
     "title": "Kundenbericht",

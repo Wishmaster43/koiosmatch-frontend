@@ -7,24 +7,27 @@ import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { useLocale } from '@/lib/datetime'
 import { Section, formatDate, formatTime, formatHours } from './ordersTableParts'
 import type { OrderRow } from '@/types/shiftmanager'
 import { BodyText, Caption } from '@/components/ui/typography'
 import CopyIconButton from '@/components/ui/CopyIconButton'
+import { CanonFieldRow } from '@/components/drawer/CanonFieldRow'
 
 // Labelled value, dash when empty — module scope (props-only), so React never
 // recreates the component type per render (react-hooks/static-components).
+// DRILLDOWN-VOLGORDE-CANON: label LEFT / value RIGHT via the shared CanonFieldRow.
 const Field = ({ label, value }: { label: ReactNode; value?: ReactNode }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-    <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
+  <CanonFieldRow label={label}>
     <BodyText as="span">{value || '—'}</BodyText>
-  </div>
+  </CanonFieldRow>
 )
 
 // Read-only slide-in detail panel for one Shiftmanager order; renders nothing without a row (see file header).
 export default function OrderDetailDrawer({ row, onClose }: { row: OrderRow | null; onClose: () => void }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('shiftmanager')
+  const locale = useLocale()
   if (!row) return null
 
   const loc      = row.order?.customerLocation
@@ -86,8 +89,8 @@ export default function OrderDetailDrawer({ row, onClose }: { row: OrderRow | nu
           </Section>
 
           <Section title={t('orders.drawer.hours')}>
-            <Field label={t('orders.drawer.hoursCand')}    value={formatHours(row.worked_hours_candidate ?? row.hours_worked)} />
-            <Field label={t('orders.drawer.hoursCust')}    value={formatHours(row.worked_hours_customer  ?? row.billed_hours)} />
+            <Field label={t('orders.drawer.hoursCand')}    value={formatHours(row.worked_hours_candidate ?? row.hours_worked, locale)} />
+            <Field label={t('orders.drawer.hoursCust')}    value={formatHours(row.worked_hours_customer  ?? row.billed_hours, locale)} />
             <Field label={t('orders.drawer.ccCand')}       value={row.cost_center_candidate ?? row.cost_center} />
             <Field label={t('orders.drawer.ccCust')}       value={row.cost_center_customer  ?? row.order?.cost_center} />
           </Section>

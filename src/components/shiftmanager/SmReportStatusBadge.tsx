@@ -2,6 +2,7 @@
  * SmReportStatusBadge — reusable inline status badge for report headers showing
  * a count and label. Renders as a pill with optional coloured dot and background.
  */
+import { useNumberFormat } from '@/lib/formatters'
 
 interface SmReportStatusBadgeProps {
   count: number
@@ -20,6 +21,8 @@ export default function SmReportStatusBadge({
   withDot = true,
   withBg = true,
 }: SmReportStatusBadgeProps) {
+  // GETALLEN-1: the count renders through the active-locale formatter, not raw interpolation.
+  const { formatNumber } = useNumberFormat()
   return (
     <span
       style={{
@@ -46,7 +49,7 @@ export default function SmReportStatusBadge({
           }}
         />
       )}
-      {count} {label}
+      {formatNumber(count)} {label}
     </span>
   )
 }

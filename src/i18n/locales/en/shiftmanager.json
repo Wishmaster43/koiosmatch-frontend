@@ -44,6 +44,7 @@
     "count": "{{count}} shifts",
     "loading": "Loading shifts…",
     "empty": "No shifts found",
+    "loadError": "Could not load shifts.",
     "allMonths": "All months",
     "search": "Search by ext. ID, order ref, customer…",
     "status": {
@@ -181,6 +182,7 @@
     "inHours": "In hours",
     "inShifts": "In shifts",
     "unitToggleLabel": "Unit: hours or shifts",
+    "pctToggleLabel": "Display: values or percentage",
     "colHours": "Hours",
     "colShifts": "Shifts",
     "lastSync": "Last sync: {{time}}",
@@ -194,7 +196,7 @@
       "failed": "Sync failed",
       "tooManyRequests": "Too many attempts, try again in {{secs}}s"
     },
-    "empty": "—"
+    "empty": "No shifts in this selection"
   },
   "customersReport": {
     "title": "Customers report",

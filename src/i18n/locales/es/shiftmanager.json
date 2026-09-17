@@ -44,6 +44,7 @@
     "count": "{{count}} turnos",
     "loading": "Cargando turnos…",
     "empty": "No se encontraron turnos",
+    "loadError": "No se pudieron cargar los turnos.",
     "allMonths": "Todos los meses",
     "search": "Buscar por ID ext., ref. pedido, cliente…",
     "status": {
@@ -181,6 +182,7 @@
     "inHours": "En horas",
     "inShifts": "En turnos",
     "unitToggleLabel": "Unidad: horas o turnos",
+    "pctToggleLabel": "Vista: valores o porcentaje",
     "colHours": "Horas",
     "colShifts": "Turnos",
     "lastSync": "Última sinc.: {{time}}",
@@ -194,7 +196,7 @@
       "failed": "Error al sincronizar",
       "tooManyRequests": "Demasiados intentos, vuelve a intentarlo en {{secs}}s"
     },
-    "empty": "—"
+    "empty": "No hay turnos en esta selección"
   },
   "customersReport": {
     "title": "Informe de clientes",

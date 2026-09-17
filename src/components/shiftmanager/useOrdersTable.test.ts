@@ -12,7 +12,7 @@ vi.mock('@/lib/api', async () => {
   return { ...actual, default: { get: vi.fn(), patch: vi.fn(async () => ({ data: {} })), put: vi.fn(async () => ({ data: {} })) } }
 })
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ refreshUser: vi.fn() }) }))
-vi.mock('@/lib/useDefaultPageSize', () => ({ useDefaultPageSize: () => 25 }))
+vi.mock('@/lib/usePageSize', () => ({ useDefaultPageSize: () => 25 }))
 
 afterEach(() => vi.clearAllMocks())
 
@@ -32,5 +32,15 @@ describe('useOrdersTable · stale responses never win', () => {
     await act(async () => { resolveSecond({ data: { data: [{ id: 'p2' }], meta: { total: 2, last_page: 2 } } }) })
     await act(async () => { resolveFirst({ data: { data: [{ id: 'p1' }], meta: { total: 2, last_page: 2 } } }) })
     expect(result.current.rows.map(r => String((r as unknown as { id: string }).id))).toEqual(['p2'])
+  })
+})
+
+describe('useOrdersTable · error state', () => {
+  it('exposes error=true on a failed fetch, distinct from the ordinary empty state', async () => {
+    vi.mocked(api.get).mockRejectedValueOnce(new Error('network down'))
+    const { result } = renderHook(() => useOrdersTable({ selectedMonth: '2026-09', search: '', selectedStatuses: [], sort: { key: 'date', dir: 'desc' } }))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.error).toBe(true)
+    expect(result.current.rows).toEqual([])
   })
 })
