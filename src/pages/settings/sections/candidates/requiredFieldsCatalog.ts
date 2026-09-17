@@ -3,10 +3,11 @@
  * declare required per phase, grouped the way the candidate screens already group them
  * (Persoonlijk · Contact · Adres · Werk · Overig). Mirrors the customer catalog's shape
  * (sections/customers/requiredFieldsCatalog.ts) so both required-fields editors read the
- * same way, with ONE difference: the candidate backend has NO whitelist — the guard
- * (`App\Services\Candidate\RequiredFieldsGuard`) simply reads the tenant setting and
- * checks `optional($candidate)->{$field}`. So the limit is ours, and this file IS the
- * limit: it must list every field a recruiter can actually fill in, and nothing else.
+ * same way. The backend DOES whitelist the field names (`RequiredFieldsCatalog::FIELDS`
+ * in the api repo; `SettingController` answers 422 "Onbekend veld" for anything else,
+ * measured 17-09 on api 1ef615ed), so this list must stay key-for-key equal to that
+ * whitelist: a field the recruiter can fill in but the whitelist lacks is a backend
+ * request (WORKLIST rows 34/52/89 → fields-2's field inventory), never an FE-only add.
  *
  * `labelKey` is a fully-qualified `namespace:path` key REUSED from where that same field
  * is already labelled today (create modal / drawer / profile) — this screen never mints a
