@@ -70,5 +70,9 @@ export function useShiftsBreakdown(queryString: string) {
     activeCustomers:    noTest((activeCustomersQ.data ?? []) as BreakdownRow[]).length,
     plannedCustomers:   noTest((plannedCustomersQ.data ?? []) as BreakdownRow[]).length,
     customersWithOpen:  customerRows.length,
+    // Own loading/error state (OR of the four queries), so a caller never has
+    // to borrow another query's state for this data (§3 four UI states).
+    isLoading: customerQ.isLoading || functionQ.isLoading || activeCustomersQ.isLoading || plannedCustomersQ.isLoading,
+    isError:   customerQ.isError   || functionQ.isError   || activeCustomersQ.isError   || plannedCustomersQ.isError,
   }
 }

@@ -15,6 +15,8 @@ import type { LucideIcon } from 'lucide-react'
 import type { ShiftRow } from '@/types/shiftmanager'
 import { captionStyle, SectionTitle } from '@/components/ui/typography'
 import { useNumberFormat } from '@/lib/formatters'
+import { totalsTableHeaderStyle, totalsTableCellStyle } from './totalsTableStyle'
+import SegmentedControl from '@/components/ui/SegmentedControl'
 
 // Per-location display meta (name + owning customer) keyed by location id.
 export type LocationMeta = Map<string, { name?: string; customer?: string }>
@@ -33,12 +35,14 @@ function groupSum(shifts: ShiftRow[], keyFn: (s: ShiftRow) => string, valFn: (s:
 }
 
 // One titled totals table: label · value · share-of-total.
-function GroupTable({ icon: Icon, title, rows, total, valueCol, totalRow, fmt }: {
+function GroupTable({ icon: Icon, title, rows, total, valueCol, totalRow, fmt, fmtPercent }: {
   icon: LucideIcon; title: string; rows: [string, number][]; total: number; valueCol: string; totalRow: string; fmt: (n: number) => string
+  fmtPercent: (ratio: number) => string
 }) {
-  // Table header cell: Caption's raw identity (r6 style-object context) plus 600 weight for a header.
-  const th: CSSProperties = { ...captionStyle, fontWeight: 600, padding: '6px 10px', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
-  const td: CSSProperties = { padding: '6px 10px', fontSize: 12, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)', fontVariantNumeric: 'tabular-nums' }
+  // Shared header/body cell LAYOUT (D1: was hand-rolled here and in ShiftsBreakdownCharts) —
+  // Caption's raw identity (r6 style-object context) plus 600 weight stays local to this table.
+  const th: CSSProperties = { ...captionStyle, fontWeight: 600, ...totalsTableHeaderStyle() }
+  const td: CSSProperties = totalsTableCellStyle()
 
   return (
     <div style={{ marginBottom: 18 }}>
@@ -60,14 +64,14 @@ function GroupTable({ icon: Icon, title, rows, total, valueCol, totalRow, fmt }:
               <td style={{ ...td, textAlign: 'left' }}>{label}</td>
               <td style={{ ...td, textAlign: 'right', fontWeight: 500 }}>{fmt(n)}</td>
               <td style={{ ...td, textAlign: 'right', color: 'var(--text-muted)' }}>
-                {total ? `${Math.round((n / total) * 100)}%` : '—'}
+                {total ? fmtPercent((n / total) * 100) : '—'}
               </td>
             </tr>
           ))}
           <tr>
             <td style={{ ...td, textAlign: 'left', fontWeight: 700, borderBottom: 'none' }}>{totalRow}</td>
             <td style={{ ...td, textAlign: 'right', fontWeight: 700, borderBottom: 'none' }}>{fmt(total)}</td>
-            <td style={{ ...td, textAlign: 'right', fontWeight: 700, borderBottom: 'none' }}>{total ? '100%' : '—'}</td>
+            <td style={{ ...td, textAlign: 'right', fontWeight: 700, borderBottom: 'none' }}>{total ? fmtPercent(100) : '—'}</td>
           </tr>
         </tbody>
       </table>
@@ -80,7 +84,7 @@ export default function ShiftsDrillDownTotals({ shifts, locationMeta }: {
   shifts: ShiftRow[]; locationMeta: LocationMeta
 }) {
   const { t } = useTranslation('shiftmanager')
-  const { formatNumber } = useNumberFormat()
+  const { formatNumber, formatPercent } = useNumberFormat()
   const unknown = t('shiftsDrawer.unknown')
   // Switch the aggregated value between number of shifts and worked hours —
   // defaults to hours (Danny, verbatim: "drill down moet altijd op uren
@@ -116,23 +120,19 @@ export default function ShiftsDrillDownTotals({ shifts, locationMeta }: {
 
   return (
     <div style={{ padding: '14px 16px' }}>
-      {/* Services / hours switch */}
+      {/* Services / hours switch — the shared compact SegmentedControl (§4 CHIP-TINT-1),
+          never a hand-rolled pill button (mirrors ShiftsChartsBlock's own unit toggle). */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
-        <div style={{ display: 'inline-flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-          {(['count', 'hours'] as const).map(u => (
-            <button key={u} type="button" onClick={() => setUnit(u)}
-              style={{ padding: '4px 12px', fontSize: 11, fontWeight: unit === u ? 600 : 400, border: 'none', cursor: 'pointer',
-                background: unit === u ? 'var(--color-primary-bg)' : 'transparent',
-                // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-                color: unit === u ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
-              {u === 'count' ? t('shiftsDrawer.countCol') : t('shiftsDrawer.byHours')}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl size="compact" ariaLabel={t('charts.unitToggleLabel')}
+          value={unit} onChange={v => setUnit(v as 'count' | 'hours')}
+          options={[
+            { value: 'count', label: t('shiftsDrawer.countCol') },
+            { value: 'hours', label: t('shiftsDrawer.byHours') },
+          ]} />
       </div>
-      <GroupTable icon={Building2} title={t('shiftsDrawer.byCustomer')} rows={byCustomer} total={total} valueCol={valueCol} totalRow={t('shiftsDrawer.totalRow')} fmt={fmt} />
-      <GroupTable icon={Briefcase} title={t('shiftsDrawer.byFunction')} rows={byFunction} total={total} valueCol={valueCol} totalRow={t('shiftsDrawer.totalRow')} fmt={fmt} />
-      <GroupTable icon={MapPin}    title={t('shiftsDrawer.byLocation')} rows={byLocation} total={total} valueCol={valueCol} totalRow={t('shiftsDrawer.totalRow')} fmt={fmt} />
+      <GroupTable icon={Building2} title={t('shiftsDrawer.byCustomer')} rows={byCustomer} total={total} valueCol={valueCol} totalRow={t('shiftsDrawer.totalRow')} fmt={fmt} fmtPercent={formatPercent} />
+      <GroupTable icon={Briefcase} title={t('shiftsDrawer.byFunction')} rows={byFunction} total={total} valueCol={valueCol} totalRow={t('shiftsDrawer.totalRow')} fmt={fmt} fmtPercent={formatPercent} />
+      <GroupTable icon={MapPin}    title={t('shiftsDrawer.byLocation')} rows={byLocation} total={total} valueCol={valueCol} totalRow={t('shiftsDrawer.totalRow')} fmt={fmt} fmtPercent={formatPercent} />
     </div>
   )
 }

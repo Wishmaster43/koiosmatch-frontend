@@ -15,6 +15,7 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
+import { useNumberFormat } from '@/lib/formatters'
 import { useDrillDownShifts } from './hooks/useDrillDownShifts'
 import DrillTabs from '@/components/ui/DrillTabs'
 import ShiftsDrillDownTotals from './ShiftsDrillDownTotals'
@@ -72,6 +73,8 @@ function CandidateBlock({ invite }: { invite: ShiftInvite }) {
   const { t } = useTranslation('shiftmanager')
   // House DD-MM-YYYY HH:mm formatter (DATUM-1) — never a hardcoded locale/format string.
   const { formatDateTime } = useDateFormat()
+  // GETALLEN-1: worked hours render on the active locale, not raw i18next interpolation.
+  const { formatNumber } = useNumberFormat()
   const c   = (invite.candidate ?? {}) as Record<string, unknown>
   // Tolerant name: accept first_name/last_name OR firstname/lastname; fall back to the
   // email local-part so a nameless mirror row no longer reads "Onbekend".
@@ -99,7 +102,7 @@ function CandidateBlock({ invite }: { invite: ShiftInvite }) {
         {email       && <Row icon={User}         label={t('shiftsDrawer.fields.email')}       value={email} />}
         {typeof c.mobile === 'string' && c.mobile && <Row icon={User} label={t('shiftsDrawer.fields.mobile')} value={c.mobile} />}
         {invite.scheduled_at     && <Row icon={CalendarCheck} label={t('shiftsDrawer.fields.scheduled')}   value={formatDateTime(invite.scheduled_at)} />}
-        {invite.total_time_worked && <Row icon={Timer}        label={t('shiftsDrawer.fields.workedHours')} value={t('shiftsDrawer.hoursUnit', { n: invite.total_time_worked })} />}
+        {invite.total_time_worked && <Row icon={Timer}        label={t('shiftsDrawer.fields.workedHours')} value={t('shiftsDrawer.hoursUnit', { n: formatNumber(invite.total_time_worked) })} />}
         {invite.contract_type    && <Row icon={Hash}          label={t('shiftsDrawer.fields.contract')}    value={invite.contract_type} />}
       </div>
     </div>
@@ -123,6 +126,8 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, 
   const { t } = useTranslation('shiftmanager')
   // House DD-MM-YYYY / HH:mm formatters (DATUM-1) — never a hardcoded locale/format string.
   const { formatDate, formatTime } = useDateFormat()
+  // GETALLEN-1: money renders through the house currency formatter, not a raw string.
+  const { formatCurrency } = useNumberFormat()
   const [search, setSearch] = useState('')
   // Default to grouped totals (Danny: "geen orderlijsten maar totalen"); Details stays reachable.
   const [view, setView] = useState<'totals' | 'details'>('totals')
@@ -133,7 +138,8 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, 
   const { shifts, loading, error } = useDrillDownShifts(buildUrl(currentMetric, currentPeriod))
   const periodIdx = periods.findIndex(p => p.key === currentPeriod)
   const goPeriod = (delta: number) => { const i = periodIdx + delta; if (i >= 0 && i < periods.length) setCurrentPeriod(periods[i].key) }
-  const metricTabs = metricOptions.map(o => ({ key: o.value, label: o.label, count: countFor(o.value, currentPeriod) }))
+  // A counter badge never renders "0" (§16 canon) — an empty series shows only its label.
+  const metricTabs = metricOptions.map(o => ({ key: o.value, label: o.label, count: countFor(o.value, currentPeriod) || undefined }))
 
   const filtered = shifts.filter(s => {
     if (!search) return true
@@ -296,7 +302,7 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, 
 
                   {/* Rate */}
                   {shift.customer_rate &&
-                    <Row icon={Timer} label={t('shiftsDrawer.fields.rate')} value={`€ ${shift.customer_rate}`} />}
+                    <Row icon={Timer} label={t('shiftsDrawer.fields.rate')} value={formatCurrency(shift.customer_rate)} />}
 
                   {/* Pickup location */}
                   {shift.pickup_place &&

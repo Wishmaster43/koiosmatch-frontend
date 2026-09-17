@@ -11,14 +11,17 @@ import { useTranslation } from 'react-i18next'
 import { ChartCard } from './shiftsChartsWidgets'
 import { BREAKDOWN_PALETTE } from './useShiftsBreakdown'
 import type { BreakdownRow } from './useShiftsBreakdown'
-import { formatNumber } from '@/lib/formatters'
+import { useNumberFormat } from '@/lib/formatters'
 import { groupLabelStyle } from '@/components/ui/typography'
+import { totalsTableHeaderStyle, totalsTableCellStyle } from './totalsTableStyle'
 
 // Both breakdown charts share one fixed height so the labels line up nicely (Danny).
 const CHART_HEIGHT = 340
 
 // One horizontal ranked bar chart (top 8 by value) — each bar its own colour (Danny).
 function HBars({ rows, unit, offset, empty }: { rows: BreakdownRow[]; unit: 'hours' | 'count'; offset: number; empty: string }) {
+  // GETALLEN-1: format on the active locale, not the pure helper's nl-NL default.
+  const { formatNumber } = useNumberFormat()
   const data = [...rows]
     .map(r => ({ label: r.label || '—', value: unit === 'hours' ? Number(r.hours) || 0 : Number(r.count) || 0 }))
     .sort((a, b) => b.value - a.value)
@@ -48,12 +51,15 @@ function HBars({ rows, unit, offset, empty }: { rows: BreakdownRow[]; unit: 'hou
 // Small numbers table under a chart: name · hours · shifts (top 8 by hours).
 function MiniTable({ rows, nameCol }: { rows: BreakdownRow[]; nameCol: string }) {
   const { t } = useTranslation('shiftmanager')
+  // GETALLEN-1: format on the active locale, not the pure helper's nl-NL default.
+  const { formatNumber } = useNumberFormat()
   const fmt = (v: unknown) => formatNumber(Number(v) || 0)
   const top = [...rows].sort((a, b) => (Number(b.hours) || 0) - (Number(a.hours) || 0)).slice(0, 8)
   if (top.length === 0) return null
-  // groupLabelStyle raw identity (§4 typography) — layout (padding/border) stays local.
-  const th: React.CSSProperties = { ...groupLabelStyle, padding: '5px 8px', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
-  const td: React.CSSProperties = { padding: '5px 8px', fontSize: 12, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)', fontVariantNumeric: 'tabular-nums' }
+  // groupLabelStyle raw identity (§4 typography) layered on the shared cell layout
+  // (D1: was hand-rolled here and in ShiftsDrillDownTotals's GroupTable).
+  const th: React.CSSProperties = { ...groupLabelStyle, ...totalsTableHeaderStyle(true) }
+  const td: React.CSSProperties = totalsTableCellStyle(true)
   return (
     <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 10 }}>
       <thead><tr>
@@ -88,11 +94,11 @@ export default function ShiftsBreakdownCharts({ customerRows, functionRows, unit
   return (
     <div className="grid grid-cols-1 gap-4 mt-4 lg:grid-cols-2">
       <ChartCard title={t('charts.byCustomerTitle')} subtitle={sub} loading={loading} error={error}>
-        <HBars rows={customerRows} unit={unit} offset={0} empty={t('charts.empty', { defaultValue: '—' })} />
+        <HBars rows={customerRows} unit={unit} offset={0} empty={t('charts.empty')} />
         <MiniTable rows={customerRows} nameCol={t('shiftsDrawer.byCustomer')} />
       </ChartCard>
       <ChartCard title={t('charts.byFunctionTitle')} subtitle={sub} loading={loading} error={error}>
-        <HBars rows={functionRows} unit={unit} offset={3} empty={t('charts.empty', { defaultValue: '—' })} />
+        <HBars rows={functionRows} unit={unit} offset={3} empty={t('charts.empty')} />
         <MiniTable rows={functionRows} nameCol={t('shiftsDrawer.byFunction')} />
       </ChartCard>
     </div>
