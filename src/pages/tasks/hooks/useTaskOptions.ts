@@ -2,8 +2,14 @@
  * useTaskOptions — donut/option/KPI derivations for TasksPage (§0.3 size
  * split): status/priority/type counts (feeding both the insights donuts and
  * the right-panel filter options), the assignee filter options, and the
- * open/overdue/due-today/completed KPI counts — all derived from the
- * decorated task list.
+ * open/overdue/due-today/completed/unassigned KPI counts — all derived from
+ * the decorated task list. KPI-RIJ-9-1 (O22, verifier fix): `unassigned` is a
+ * client-side count over the LOADED page(s), not GET /tasks/stats (this page
+ * never fetches that endpoint — every donut/KPI here is already derived from
+ * the loaded list, capped by useTasksData's page loop) — an open task with no
+ * assignee, no team AND no role (assignee_role, TaskListResource.php:65-66,
+ * mapped via mapTask's assigneeRole). A role-assigned task is queued for
+ * "whoever has this role" and must not read as unassigned.
  */
 import { useMemo } from 'react'
 import { isTaskOverdue } from '../data/mapTask'
@@ -40,6 +46,13 @@ export function useTaskOptions({ all, statuses, priorities, types }: UseTaskOpti
     return Object.values(m)
   }, [all])
 
+  // KPI-RIJ-9-1: the 4th insights donut ("per medewerker") — same shape as
+  // assigneeOptions, just as an Aggregate for the donut/legend renderer.
+  const assigneeData: Aggregate[] = useMemo(
+    () => assigneeOptions.map(o => ({ name: o.label, key: o.value, value: o.count })),
+    [assigneeOptions],
+  )
+
   // TEAM-1: team filter options (value/label/count) — the internal department a
   // task waits at. Derived from the loaded rows, never a hardcoded list.
   const teamOptions = useMemo(() => {
@@ -61,6 +74,8 @@ export function useTaskOptions({ all, statuses, priorities, types }: UseTaskOpti
   const dueToday = all.filter(x => x.due && !x.statusIsDone && new Date(x.due).toDateString() === todayStart().toDateString()).length
   const openCount = all.filter(x => !x.statusIsDone).length
   const completedCount = all.filter(x => x.statusIsDone).length
+  // KPI-RIJ-9-1: unassigned — open task with no assignee, no team AND no role (see file docblock).
+  const unassigned = all.filter(x => !x.statusIsDone && !x.assignee?.name && !x.team?.name && !x.assigneeRole?.name).length
 
-  return { statusData, priorityData, typeData, assigneeOptions, teamOptions, linkTypeOptions, overdue, dueToday, openCount, completedCount }
+  return { statusData, priorityData, typeData, assigneeOptions, assigneeData, teamOptions, linkTypeOptions, overdue, dueToday, openCount, completedCount, unassigned }
 }

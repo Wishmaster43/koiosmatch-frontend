@@ -367,8 +367,10 @@
       "noWaTemplate": "No template",
       "selectFaqs": "Select FAQs",
       "noFaqs": "No FAQs created",
+      "faqsLoadError": "Failed to load FAQs.",
       "knowledgeItems": "Knowledge items",
       "noKnowledgeItems": "No knowledge items created",
+      "knowledgeItemsLoadError": "Failed to load knowledge items.",
       "knowledgeItemsHint": "Only linked knowledge items are available to this agent. Empty = no knowledge.",
       "knowledgeItemsCount": "{{count}} knowledge item(s) linked",
       "knowledgeItemsMax": "{{max}} knowledge items is the maximum.",
@@ -1268,7 +1270,7 @@
     "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk": "Skip records that already have a link with this system. Recommended for bulk.",
     "Leeg = geen contactfilter (alle kandidaten komen mee)": "Empty = no contact filter (all candidates are included).",
     "{{kandidaatid}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook) Voor één kandidaat {{triggercandidate_id}} (drill-down-knop of adreswijziging)": "{{kandidaat.id}} = runs per candidate from the previous step (bulk; empty works too). For a single candidate: {{trigger.candidate_id}} (drill-down button or address change).",
-    "{{recordid}} = draait per record (van het gekozen soort) uit de vorige stap (bulk; leeg werkt ook) Voor \u00e9\u00e9n record {{trigger<soort>_id}} (drill-down-knop of adreswijziging)": "{{record.id}} = runs per record (of the chosen type) from the previous step (bulk; empty works too). For a single record: {{trigger.<type>_id}} (drill-down button or address change).",
+    "{{recordid}} = draait per record (van het gekozen soort) uit de vorige stap (bulk; leeg werkt ook) Voor één record {{trigger<soort>_id}} (drill-down-knop of adreswijziging)": "{{record.id}} = runs per record (of the chosen type) from the previous step (bulk; empty works too). For a single record: {{trigger.<type>_id}} (drill-down button or address change).",
     "Leeg = geen toewijzing (bureau)": "Empty = no assignment (agency).",
     "Ondersteunt {maand} voor de huidige maandnaam": "Supports {maand} for the current month name.",
     "De tenant-instelling webhook_endpoint_<slug> bepaalt de URL": "The tenant setting webhook_endpoint_<slug> determines the URL.",
@@ -1381,7 +1383,16 @@
       "customer_task_overdue": "Customer task overdue",
       "customer_match_ending": "Customer match ending soon",
       "customer_vacancy_stale": "Customer vacancy stale online",
-      "task_overdue": "Task overdue"
+      "task_overdue": "Task overdue",
+      "opportunity_closing_soon": "Opportunity closing date approaching",
+      "opportunity_stale": "Opportunity stalled in stage",
+      "vacancy_closing_soon": "Vacancy closing date approaching",
+      "vacancy_stale_online": "Vacancy stale online",
+      "match_approval_pending": "Match awaiting approval",
+      "match_approval_overdue": "Match approval overdue",
+      "match_approved": "Match approved",
+      "match_rejected": "Match rejected",
+      "settings_blank_fallback": "Setting blank, fallback used"
     }
   },
   "templateLibrary": {

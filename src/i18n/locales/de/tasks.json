@@ -27,13 +27,15 @@
     "open": "Offen",
     "overdue": "Überfällig",
     "dueToday": "Heute fällig",
-    "completed": "Abgeschlossen"
+    "completed": "Abgeschlossen",
+    "unassigned": "Nicht zugewiesen"
   },
   "insights": {
     "status": "Status",
     "priority": "Priorität",
     "type": "Typ",
-    "clearFilter": "Filter zurücksetzen"
+    "clearFilter": "Filter zurücksetzen",
+    "assignee": "Nach Mitarbeiter"
   },
   "board": {
     "empty": "Aufgaben hierher ziehen"

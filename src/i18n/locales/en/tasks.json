@@ -27,13 +27,15 @@
     "open": "Open",
     "overdue": "Overdue",
     "dueToday": "Due today",
-    "completed": "Completed"
+    "completed": "Completed",
+    "unassigned": "Unassigned"
   },
   "insights": {
     "status": "Status",
     "priority": "Priority",
     "type": "Type",
-    "clearFilter": "Clear filter"
+    "clearFilter": "Clear filter",
+    "assignee": "By assignee"
   },
   "board": {
     "empty": "Drag tasks here"

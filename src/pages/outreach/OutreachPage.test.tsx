@@ -44,6 +44,10 @@ vi.mock('./hooks/useOutreachCampaigns', () => ({
   useOutreachCampaigns: () => ({ campaigns: currentCampaigns, loading: false, error: currentError, reload: reloadMock, add: vi.fn(), patch: vi.fn(), drop: vi.fn() }),
   OUTREACH_MAX_PER_PAGE: 200,
 }))
+// KPI-RIJ-9-1: the fleet-wide stats hook is react-query-backed — mocked here
+// (page wiring only, this file has no QueryClientProvider) so it resolves to
+// "not loaded yet" rather than throwing "No QueryClient set".
+vi.mock('./hooks/useOutreachFleetStats', () => ({ useOutreachFleetStats: () => null }))
 // Right panel — captures registerFilters so the derived filter-group config
 // (target-group options in particular) can be asserted directly.
 const registerFilters = vi.fn()

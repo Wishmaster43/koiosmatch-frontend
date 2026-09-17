@@ -1,8 +1,16 @@
 /**
- * buildCustomerInsightsConfig — the customer page's KPI strip (2 donuts + 6 KPI
- * cards) as a pure config builder. Extracted from CustomersPage once it crossed
- * the ~400-line split trigger (§0.3) — mirrors buildVacancyInsightsConfig; no new
- * behaviour, the page only wires state in and renders the result.
+ * buildCustomerInsightsConfig — the customer page's KPI strip (2 donuts + 7 KPI
+ * cards, KPI-RIJ-9-1: 9 total) as a pure config builder. Extracted from
+ * CustomersPage once it crossed the ~400-line split trigger (§0.3) — mirrors
+ * buildVacancyInsightsConfig; no new behaviour beyond the O22 9th card, the
+ * page only wires state in and renders the result.
+ *
+ * TOTALS-NESTING-1 (measured 17-09 against GET /customers/stats on demo): the
+ * six counts live under a `totals` object (`{ total, by_status, by_owner,
+ * totals: { locations, departments, … } }`), never top-level — this file used
+ * to read `stats?.locations` etc directly, so it silently fell through to the
+ * page-derived fallback sum on every real response. Fixed here alongside the
+ * 9th card (same file, same root cause).
  */
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
@@ -13,10 +21,14 @@ import { pickKey, toggleOneValue } from '@/lib/chartSelection'
 // Single-select toggle: clicking the active segment clears it again.
 const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (v: string | undefined) => { if (v != null) toggleOneValue(set, v) }
 
-// The server-wide stats aggregate (fallback: sum the loaded page).
+// The server-wide stats aggregate (fallback: sum the loaded page) — see
+// TOTALS-NESTING-1 above: the real counts sit under `totals`.
 interface StatsLike {
-  locations?: number; departments?: number; contacts?: number
-  open_vacancies?: number; active_matches?: number; without_contact?: number
+  totals?: {
+    locations?: number; departments?: number; contacts?: number
+    open_vacancies?: number; active_matches?: number; without_contact?: number
+    open_opportunities?: number
+  }
 }
 interface RowCounts {
   locationsCount: number; departmentsCount: number; contactsCount: number
@@ -46,12 +58,16 @@ export function buildCustomerInsightsConfig({
   kpiFilter, toggleKpi,
 }: Args): { donuts: DonutSpec[]; kpis: KpiSpec[] } {
   // Server-wide totals first; the loaded page is only the honest fallback.
-  const totalLocations   = stats?.locations       ?? customers.reduce((s, c) => s + c.locationsCount, 0)
-  const totalDepartments = stats?.departments     ?? customers.reduce((s, c) => s + c.departmentsCount, 0)
-  const totalContacts    = stats?.contacts        ?? customers.reduce((s, c) => s + c.contactsCount, 0)
-  const totalOpenVac     = stats?.open_vacancies  ?? customers.reduce((s, c) => s + c.openVacanciesCount, 0)
-  const totalActive      = stats?.active_matches  ?? customers.reduce((s, c) => s + c.activeMatchesCount, 0)
-  const noContactCount   = stats?.without_contact ?? customers.filter(c => c.contactsCount === 0).length
+  // TOTALS-NESTING-1: the real counts live under stats.totals (see file docblock).
+  const totalLocations   = stats?.totals?.locations       ?? customers.reduce((s, c) => s + c.locationsCount, 0)
+  const totalDepartments = stats?.totals?.departments     ?? customers.reduce((s, c) => s + c.departmentsCount, 0)
+  const totalContacts    = stats?.totals?.contacts        ?? customers.reduce((s, c) => s + c.contactsCount, 0)
+  const totalOpenVac     = stats?.totals?.open_vacancies  ?? customers.reduce((s, c) => s + c.openVacanciesCount, 0)
+  const totalActive      = stats?.totals?.active_matches  ?? customers.reduce((s, c) => s + c.activeMatchesCount, 0)
+  const noContactCount   = stats?.totals?.without_contact ?? customers.filter(c => c.contactsCount === 0).length
+  // KPI-RIJ-9-1 (8 → 9): open_opportunities has no per-row field to fall back
+  // to — null (not a fabricated 0) while stats have not loaded yet (STATS-HONEST-1).
+  const openOpportunities = stats?.totals?.open_opportunities ?? null
 
   const donuts: DonutSpec[] = [
     // Danny 02-08: the '__none' segment is the entry-phase (Prospect) bucket — its
@@ -80,6 +96,12 @@ export function buildCustomerInsightsConfig({
     kpiCard('openVac',     t('insights.openVacancies'), totalOpenVac,     t('insights.openVacanciesSub'), 'var(--color-warning)'),
     kpiCard('active',      t('insights.activeMatches'), totalActive,      t('insights.activeMatchesSub'), 'var(--color-success)'),
     kpiCard('noContact',   t('insights.noContact'),     noContactCount,   t('insights.noContactSub'),     'var(--color-danger)'),
+    // KPI-RIJ-9-1 (9th card): a PLAIN count, not built via kpiCard(), because
+    // there is no per-row openOpportunitiesCount to filter the loaded page by
+    // (unlike the six cards above) — a click-to-filter here with no matching
+    // KPI_PRED entry would filter every row out, a fake affordance (§3).
+    { key: 'openOpportunities', label: t('insights.openOpportunities'), value: openOpportunities,
+      sub: t('insights.openOpportunitiesSub'), color: 'var(--color-info)' },
   ]
   return { donuts, kpis }
 }

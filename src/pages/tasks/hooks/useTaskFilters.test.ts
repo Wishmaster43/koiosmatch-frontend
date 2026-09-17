@@ -73,3 +73,17 @@ describe('useTaskFilters · reference-number query (NUMMER-1)', () => {
     expect(result.current.refQuery).toBeNull()
   })
 })
+
+describe('useTaskFilters · KPI-RIJ-9-1 "unassigned" tile', () => {
+  it('matches only an open task with no assignee, no team AND no role', () => {
+    const { result } = renderHook(() => useTaskFilters())
+    act(() => result.current.setKpiFilter('unassigned'))
+    expect(result.current.matchesFilters({ statusIsDone: false, assignee: null, team: null })).toBe(true)
+    expect(result.current.matchesFilters({ statusIsDone: false, assignee: { name: 'Nora' }, team: null })).toBe(false)
+    expect(result.current.matchesFilters({ statusIsDone: false, assignee: null, team: { name: 'Backoffice' } })).toBe(false)
+    expect(result.current.matchesFilters({ statusIsDone: true, assignee: null, team: null })).toBe(false)
+    // TAAK-ROL-1 verifier fix: a role-assigned open task must not count as unassigned.
+    expect(result.current.matchesFilters({ statusIsDone: false, assignee: null, team: null, assigneeRole: { name: 'Recruiter' } })).toBe(false)
+    act(() => result.current.setKpiFilter(null))
+  })
+})

@@ -120,7 +120,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   })
 
   // Donut/filter/KPI derivations from the decorated list (§0.3 split → hook).
-  const { statusData, priorityData, typeData, assigneeOptions, teamOptions, linkTypeOptions, overdue, dueToday, openCount, completedCount } =
+  const { statusData, priorityData, typeData, assigneeOptions, assigneeData, teamOptions, linkTypeOptions, overdue, dueToday, openCount, completedCount, unassigned } =
     useTaskOptions({ all, statuses, priorities, types })
 
   // Register the right-panel filters (status/priority/type/assignee/team/linked
@@ -198,9 +198,10 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   // ── Insights strip: 3 donuts (filterable) + 4 KPI cards, equal footprint — pure builder (§0.3 split) ──
   const toggleKpi = (k: string) => setKpiFilter(p => p === k ? null : k)
   const { donuts: insightDonuts, kpis: insightKpis } = buildTaskInsights({
-    t, statusData, priorityData, typeData,
+    t, statusData, priorityData, typeData, assigneeData,
     selectedStatus, setSelectedStatus, selectedPriority, setSelectedPriority, selectedType, setSelectedType,
-    kpiFilter, toggleKpi, openCount, overdue, dueToday, completedCount,
+    selectedAssignee, setSelectedAssignee,
+    kpiFilter, toggleKpi, openCount, overdue, dueToday, completedCount, unassigned,
   })
 
   return (

@@ -424,8 +424,10 @@
       "noWaTemplate": "Geen template",
       "selectFaqs": "FAQ's selecteren",
       "noFaqs": "Geen FAQ's aangemaakt",
+      "faqsLoadError": "FAQ's laden mislukt.",
       "knowledgeItems": "Kennisitems",
       "noKnowledgeItems": "Geen kennisitems aangemaakt",
+      "knowledgeItemsLoadError": "Kennisitems laden mislukt.",
       "knowledgeItemsHint": "Alleen gekoppelde kennisitems zijn voor deze agent beschikbaar. Leeg = geen kennis.",
       "knowledgeItemsCount": "{{count}} kennisitem(s) gekoppeld",
       "knowledgeItemsMax": "{{max}} kennisitems is het maximum.",
@@ -1266,7 +1268,7 @@
     "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk": "Sla records over die al een koppeling met dit systeem hebben. Aan te raden bij bulk.",
     "Leeg = geen contactfilter (alle kandidaten komen mee)": "Leeg = geen contactfilter (alle kandidaten komen mee).",
     "{{kandidaatid}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook) Voor één kandidaat {{triggercandidate_id}} (drill-down-knop of adreswijziging)": "{{kandidaat.id}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook). Voor één kandidaat: {{trigger.candidate_id}} (drill-down-knop of adreswijziging).",
-    "{{recordid}} = draait per record (van het gekozen soort) uit de vorige stap (bulk; leeg werkt ook) Voor \u00e9\u00e9n record {{trigger<soort>_id}} (drill-down-knop of adreswijziging)": "{{record.id}} = draait per record (van het gekozen soort) uit de vorige stap (bulk; leeg werkt ook). Voor \u00e9\u00e9n record: {{trigger.<soort>_id}} (drill-down-knop of adreswijziging).",
+    "{{recordid}} = draait per record (van het gekozen soort) uit de vorige stap (bulk; leeg werkt ook) Voor één record {{trigger<soort>_id}} (drill-down-knop of adreswijziging)": "{{record.id}} = draait per record (van het gekozen soort) uit de vorige stap (bulk; leeg werkt ook). Voor één record: {{trigger.<soort>_id}} (drill-down-knop of adreswijziging).",
     "Leeg = geen toewijzing (bureau)": "Leeg = geen toewijzing (bureau).",
     "Ondersteunt {maand} voor de huidige maandnaam": "Ondersteunt {maand} voor de huidige maandnaam.",
     "De tenant-instelling webhook_endpoint_<slug> bepaalt de URL": "De tenant-instelling webhook_endpoint_<slug> bepaalt de URL.",
@@ -1379,7 +1381,16 @@
       "customer_task_overdue": "Taak klant verstreken",
       "customer_match_ending": "Match klant loopt bijna af",
       "customer_vacancy_stale": "Vacature klant staat lang online",
-      "task_overdue": "Taak verstreken"
+      "task_overdue": "Taak verstreken",
+      "opportunity_closing_soon": "Sluitingsdatum kans nadert",
+      "opportunity_stale": "Kans vastgelopen in fase",
+      "vacancy_closing_soon": "Sluitingsdatum vacature nadert",
+      "vacancy_stale_online": "Vacature staat lang online",
+      "match_approval_pending": "Match wacht op goedkeuring",
+      "match_approval_overdue": "Goedkeuring match verlopen",
+      "match_approved": "Match goedgekeurd",
+      "match_rejected": "Match afgekeurd",
+      "settings_blank_fallback": "Instelling leeg, terugval gebruikt"
     }
   },
   "templateLibrary": {

@@ -13,9 +13,10 @@ import { WORKFLOW_EVENT_KEYS, eventKeyToI18nKey } from './eventCatalog'
 // Manual mirror of TriggerModule::configSchema()'s `event.options` (koiosmatch-api,
 // app/Workflow/Modules/TriggerModule.php ~L68-135) — every key here has a real
 // WorkflowDispatcher::dispatch() call site backing it. REPAIR N5 (2026-09-04):
-// re-counted the backend's FULL options array by hand — 57 keys, this list now
-// carries all 57 (was 37/57) — the two tests below make this an exact bidirectional
-// mirror (no missing key, no fake affordance), not just a "contains" check.
+// re-counted the backend's FULL options array by hand — 66 keys (57 + 4 added by
+// TRIGGER-VOCAB-1, KLEIN-BE-1 + the 5 approval/blank-fallback keys) — this list carries all 66; the two tests below
+// make this an exact bidirectional mirror (no missing key, no fake affordance),
+// not just a "contains" check.
 const BACKEND_DISPATCHED_EVENTS = [
   'application.created', 'application.stage_changed', 'match.created', 'match.expiring', 'match.terminated',
   'candidate.created', 'candidate.birthday', 'candidate.address_changed', 'candidate.reactivated',
@@ -38,6 +39,9 @@ const BACKEND_DISPATCHED_EVENTS = [
   'candidate.leave_ending_soon', 'candidate.leave_overdue',
   'candidate.unavailable_ending_soon', 'candidate.unavailable_overdue',
   'application.proposal_sent', 'candidate.archived', 'candidate.missing_cv', 'contact.retention_due',
+  // TRIGGER-VOCAB-1 (KLEIN-BE-1, CONTRACT-CHANGELOG 2026-09-17).
+  'opportunity.closing_soon', 'opportunity.stale', 'vacancy.closing_soon', 'vacancy.stale_online',
+  'match.approval_pending', 'match.approval_overdue', 'match.approved', 'match.rejected', 'settings.blank_fallback',
 ]
 
 // Every shipped locale's workflows.json, loaded eagerly like registryI18n.test.ts does.
@@ -61,12 +65,12 @@ describe('WORKFLOW_EVENT_KEYS · backend parity', () => {
     expect(new Set(WORKFLOW_EVENT_KEYS).size).toBe(WORKFLOW_EVENT_KEYS.length)
   })
 
-  // REPAIR N5: an explicit count pins the FULL mirror (57/57), not just "no
-  // diff either way" — a future backend addition that also updates
-  // BACKEND_DISPATCHED_EVENTS but not this number would still be caught.
-  it('mirrors exactly 57 backend-dispatched events', () => {
-    expect(BACKEND_DISPATCHED_EVENTS.length).toBe(57)
-    expect(WORKFLOW_EVENT_KEYS.length).toBe(57)
+  // REPAIR N5 / TRIGGER-VOCAB-1: an explicit count pins the FULL mirror
+  // (66/66), not just "no diff either way" — a future backend addition that
+  // also updates BACKEND_DISPATCHED_EVENTS but not this number would still be caught.
+  it('mirrors exactly 66 backend-dispatched events', () => {
+    expect(BACKEND_DISPATCHED_EVENTS.length).toBe(66)
+    expect(WORKFLOW_EVENT_KEYS.length).toBe(66)
   })
 })
 

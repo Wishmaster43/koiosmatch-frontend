@@ -45,7 +45,15 @@
     "active": "Aktiv",
     "activeSub": "laufende Anruflisten",
     "targets": "Ziele",
-    "targetsSub": "Kandidaten gesamt"
+    "targetsSub": "Kandidaten gesamt",
+    "calledToday": "Heute angerufen",
+    "calledTodaySub": "Kontaktmomente heute",
+    "toCall": "Noch anzurufen",
+    "toCallSub": "offene Ziele",
+    "reachedPct": "Erreicht",
+    "reachedPctSub": "Prozent erreicht",
+    "overdue": "Überfällig",
+    "overdueSub": "geplanter Rückruf verstrichen"
   },
   "bulk": {
     "selected": "{{count}} ausgewählt",

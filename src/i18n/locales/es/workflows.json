@@ -363,8 +363,10 @@
       "noWaTemplate": "Sin plantilla",
       "selectFaqs": "Seleccionar FAQ",
       "noFaqs": "No se han creado FAQ",
+      "faqsLoadError": "No se pudieron cargar las FAQ.",
       "knowledgeItems": "Elementos de conocimiento",
       "noKnowledgeItems": "No se han creado elementos de conocimiento",
+      "knowledgeItemsLoadError": "No se pudieron cargar los elementos de conocimiento.",
       "knowledgeItemsHint": "Solo los elementos de conocimiento vinculados están disponibles para este agente. Vacío = sin conocimiento.",
       "knowledgeItemsCount": "{{count}} elemento(s) de conocimiento vinculado(s)",
       "knowledgeItemsMax": "{{max}} elementos de conocimiento es el máximo.",
@@ -1268,7 +1270,7 @@
     "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk": "Omitir registros que ya tienen un enlace con este sistema. Recomendado en bulk.",
     "Leeg = geen contactfilter (alle kandidaten komen mee)": "Vacío = sin filtro de contacto (se incluyen todos los candidatos).",
     "{{kandidaatid}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook) Voor één kandidaat {{triggercandidate_id}} (drill-down-knop of adreswijziging)": "{{kandidaat.id}} = se ejecuta por candidato del paso anterior (bulk; vacío también funciona). Para un solo candidato: {{trigger.candidate_id}} (botón de detalle o cambio de dirección).",
-    "{{recordid}} = draait per record (van het gekozen soort) uit de vorige stap (bulk; leeg werkt ook) Voor \u00e9\u00e9n record {{trigger<soort>_id}} (drill-down-knop of adreswijziging)": "{{record.id}} = se ejecuta por registro (del tipo elegido) del paso anterior (bulk; vac\u00edo tambi\u00e9n funciona). Para un solo registro: {{trigger.<tipo>_id}} (bot\u00f3n de detalle o cambio de direcci\u00f3n).",
+    "{{recordid}} = draait per record (van het gekozen soort) uit de vorige stap (bulk; leeg werkt ook) Voor één record {{trigger<soort>_id}} (drill-down-knop of adreswijziging)": "{{record.id}} = se ejecuta por registro (del tipo elegido) del paso anterior (bulk; vacío también funciona). Para un solo registro: {{trigger.<tipo>_id}} (botón de detalle o cambio de dirección).",
     "Leeg = geen toewijzing (bureau)": "Vacío = sin asignación (agencia).",
     "Ondersteunt {maand} voor de huidige maandnaam": "Admite {maand} para el nombre del mes actual.",
     "De tenant-instelling webhook_endpoint_<slug> bepaalt de URL": "El ajuste del tenant webhook_endpoint_<slug> determina la URL.",
@@ -1381,7 +1383,16 @@
       "customer_task_overdue": "Tarea del cliente vencida",
       "customer_match_ending": "Match del cliente termina pronto",
       "customer_vacancy_stale": "Vacante del cliente lleva tiempo en línea",
-      "task_overdue": "Tarea vencida"
+      "task_overdue": "Tarea vencida",
+      "opportunity_closing_soon": "Fecha de cierre de la oportunidad próxima",
+      "opportunity_stale": "Oportunidad estancada en la etapa",
+      "vacancy_closing_soon": "Fecha de cierre de la vacante próxima",
+      "vacancy_stale_online": "Vacante lleva mucho tiempo en línea",
+      "match_approval_pending": "Match pendiente de aprobación",
+      "match_approval_overdue": "Aprobación del match vencida",
+      "match_approved": "Match aprobado",
+      "match_rejected": "Match rechazado",
+      "settings_blank_fallback": "Ajuste vacío, valor de reserva usado"
     }
   },
   "templateLibrary": {

@@ -21,6 +21,8 @@ interface FilterableTask {
   assignee?: { name?: string } | null
   // TEAM-1: the internal department the task waits at — its own filter axis.
   team?: { name?: string } | null
+  // TAAK-ROL-1: the role axis — a task queued for "whoever has this role".
+  assigneeRole?: { name?: string } | null
   statusIsDone?: boolean
   due?: string | null
   // TASK-DUE-TIME-1: read by isTaskOverdue for the time-aware 'overdue' KPI tile.
@@ -105,6 +107,9 @@ export function useTaskFilters() {
     if (kpiFilter === 'open')      return !x.statusIsDone
     if (kpiFilter === 'overdue')   return isTaskOverdue(x)
     if (kpiFilter === 'dueToday')  return !!(due && !x.statusIsDone && due.toDateString() === todayStart().toDateString())
+    // KPI-RIJ-9-1: unassigned — mirrors useTaskOptions' unassigned count (open,
+    // no assignee, no team AND no role).
+    if (kpiFilter === 'unassigned') return !x.statusIsDone && !x.assignee?.name && !x.team?.name && !x.assigneeRole?.name
     return true
   }, [selectedStatus, selectedPriority, selectedType, selectedAssignee, selectedTeam, selectedLinkType, dueRange, kpiFilter, query, refQuery])
 

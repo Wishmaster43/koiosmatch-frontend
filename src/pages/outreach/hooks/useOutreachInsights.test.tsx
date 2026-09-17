@@ -94,6 +94,39 @@ describe('useOutreachInsights · KPI cards', () => {
   })
 })
 
+describe('useOutreachInsights · KPI-RIJ-9-1 (9 cards, 4 from the server aggregate)', () => {
+  it('renders 2 donuts + 7 KPI cards (9 total)', () => {
+    const { result } = build({ stats: { called_today: 3, to_call: 2, reached_pct: 66.7, overdue: 1 } })
+    expect(result.current.insightDonuts).toHaveLength(2)
+    expect(result.current.insightKpis).toHaveLength(7)
+  })
+
+  it('the 4 new cards read the server aggregate, plain (no click-to-filter)', () => {
+    const { result } = build({ stats: { called_today: 3, to_call: 2, reached_pct: 66.7, overdue: 1 } })
+    const calledToday = result.current.insightKpis.find((k) => k.key === 'calledToday')
+    const toCall = result.current.insightKpis.find((k) => k.key === 'toCall')
+    const reachedPct = result.current.insightKpis.find((k) => k.key === 'reachedPct')
+    const overdue = result.current.insightKpis.find((k) => k.key === 'overdue')
+    expect(calledToday).toMatchObject({ value: 3 })
+    expect(calledToday?.onClick).toBeUndefined()
+    expect(toCall).toMatchObject({ value: 2 })
+    expect(reachedPct?.value).toBe('66,7%') // formatPercent on nl-NL, a VALUE not a share (EENHEID-LES)
+    expect(overdue).toMatchObject({ value: 1 })
+    expect(overdue?.onClick).toBeUndefined()
+  })
+
+  it('shows null (house dash), never a fabricated 0, while stats have not loaded', () => {
+    const { result } = build({ stats: undefined })
+    expect(result.current.insightKpis.find((k) => k.key === 'calledToday')?.value).toBeNull()
+    expect(result.current.insightKpis.find((k) => k.key === 'reachedPct')?.value).toBeNull()
+  })
+
+  it('a null reached_pct (nothing attempted yet) renders the dash, not 0%', () => {
+    const { result } = build({ stats: { called_today: 0, to_call: 0, reached_pct: null, overdue: 0 } })
+    expect(result.current.insightKpis.find((k) => k.key === 'reachedPct')?.value).toBe('—')
+  })
+})
+
 describe('useOutreachInsights · click-to-filter', () => {
   it('the status donut onPick sets a single value, then clears on a repeated click of the same value', () => {
     const setSelectedStatus = vi.fn()

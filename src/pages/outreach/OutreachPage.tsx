@@ -28,6 +28,7 @@ import type { Campaign } from './hooks/useOutreachCampaigns'
 import { useOutreachArchivedCampaigns } from './hooks/useOutreachArchivedCampaigns'
 import { useOutreachFilters } from './hooks/useOutreachFilters'
 import { useOutreachInsights } from './hooks/useOutreachInsights'
+import { useOutreachFleetStats } from './hooks/useOutreachFleetStats'
 import { updateCampaign, deleteCampaign, restoreCampaign } from './data/outreachApi'
 import OutreachToolbar from './parts/OutreachToolbar'
 import OutreachList from './OutreachList'
@@ -107,9 +108,14 @@ export default function OutreachPage({ intent }: { intent?: unknown } = {}) {
     selectedOwner, setSelectedOwner, selectedTargetGroup, setSelectedTargetGroup,
     kpiTargets, setKpiTargets, query, filtered } = filters
 
+  // KPI-RIJ-9-1: the fleet-wide server aggregate (4 extra KPI cards, own hook so
+  // useOutreachInsights stays a pure, hook-free derivation — see its docblock).
+  const outreachStats = useOutreachFleetStats()
+
   // Insights row (donuts + KPIs), board columns and the owner/target-group filter options.
   const { columns, statusData, channelData, ownerOptions, targetGroupOptions, insightDonuts, insightKpis } = useOutreachInsights({
     campaigns, selectedStatus, setSelectedStatus, selectedChannel, setSelectedChannel, kpiTargets, setKpiTargets,
+    stats: outreachStats,
   })
 
   // Register the right-panel filters (status/channel/owner/target-group/archived).

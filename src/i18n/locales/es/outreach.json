@@ -45,7 +45,15 @@
     "active": "Activo",
     "activeSub": "listas en curso",
     "targets": "Objetivos",
-    "targetsSub": "total candidatos"
+    "targetsSub": "total candidatos",
+    "calledToday": "Llamados hoy",
+    "calledTodaySub": "contactos hoy",
+    "toCall": "Por llamar",
+    "toCallSub": "objetivos abiertos",
+    "reachedPct": "Contactados",
+    "reachedPctSub": "porcentaje contactado",
+    "overdue": "Atrasado",
+    "overdueSub": "devolución de llamada vencida"
   },
   "bulk": {
     "selected": "{{count}} seleccionado(s)",

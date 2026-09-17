@@ -108,6 +108,22 @@ export const WORKFLOW_EVENT_KEYS = [
   'candidate.missing_cv',
   // K-247 Lane C: customer-contact retention review signal.
   'contact.retention_due',
+  // TRIGGER-VOCAB-1 (KLEIN-BE-1, CONTRACT-CHANGELOG 2026-09-17): four dispatch
+  // sites (opportunities:attention-due / vacancies:attention-due) that already
+  // had a real WorkflowDispatcher producer and are used by seeded templates, but
+  // were never PICKABLE here.
+  'opportunity.closing_soon',
+  'opportunity.stale',
+  'vacancy.closing_soon',
+  'vacancy.stale_online',
+  // O22-FE lens (17-09): TriggerModule::configSchema() offers 66 keys; these five
+  // (LIMIET-BEHEER-1 approval flow + SETTINGS-CATALOG blank fallback) were in the
+  // webhook catalogue and the API enum but never pickable here.
+  'match.approval_pending',
+  'match.approval_overdue',
+  'match.approved',
+  'match.rejected',
+  'settings.blank_fallback',
 ] as const
 
 export type WorkflowEventKey = (typeof WORKFLOW_EVENT_KEYS)[number]

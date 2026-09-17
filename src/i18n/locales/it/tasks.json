@@ -27,13 +27,15 @@
     "open": "Aperte",
     "overdue": "In ritardo",
     "dueToday": "Scadenza oggi",
-    "completed": "Completate"
+    "completed": "Completate",
+    "unassigned": "Non assegnato"
   },
   "insights": {
     "status": "Stato",
     "priority": "Priorità",
     "type": "Tipo",
-    "clearFilter": "Cancella filtro"
+    "clearFilter": "Cancella filtro",
+    "assignee": "Per collaboratore"
   },
   "board": {
     "empty": "Trascina qui le attività"

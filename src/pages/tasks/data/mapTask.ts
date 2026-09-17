@@ -61,6 +61,10 @@ export function mapTask(t: ApiTask = {}): Task {
     team: t.assignee_team
       ? { id: t.assignee_team.id ?? '', name: t.assignee_team.name ?? '', color: t.assignee_team.color ?? null }
       : null,
+    // TAAK-ROL-1: the role axis, mirrors the team pair above.
+    assigneeRole: t.assignee_role
+      ? { id: t.assignee_role.id ?? '', name: t.assignee_role.name ?? '', mode: t.assignee_role.mode ?? null }
+      : null,
     // TASK-LOCATION-READ-1: branch (vestiging), null = none set. Mirrors the
     // assignee shape above (id + a display object) for the same reason — the
     // drawer picker reads `location`, the PATCH body key stays `locationId`.

@@ -27,13 +27,15 @@
     "open": "Abiertas",
     "overdue": "Vencidas",
     "dueToday": "Vencen hoy",
-    "completed": "Completadas"
+    "completed": "Completadas",
+    "unassigned": "Sin asignar"
   },
   "insights": {
     "status": "Estado",
     "priority": "Prioridad",
     "type": "Tipo",
-    "clearFilter": "Borrar filtro"
+    "clearFilter": "Borrar filtro",
+    "assignee": "Por responsable"
   },
   "board": {
     "empty": "Arrastra las tareas aquí"

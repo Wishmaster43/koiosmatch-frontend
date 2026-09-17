@@ -45,7 +45,15 @@
     "active": "Actief",
     "activeSub": "lopende bellijsten",
     "targets": "Doelen",
-    "targetsSub": "totaal kandidaten"
+    "targetsSub": "totaal kandidaten",
+    "calledToday": "Vandaag gebeld",
+    "calledTodaySub": "contactmomenten vandaag",
+    "toCall": "Nog te bellen",
+    "toCallSub": "openstaande doelen",
+    "reachedPct": "Bereikt",
+    "reachedPctSub": "percentage bereikt",
+    "overdue": "Te laat",
+    "overdueSub": "gepland terugbelmoment verstreken"
   },
   "bulk": {
     "selected": "{{count}} geselecteerd",

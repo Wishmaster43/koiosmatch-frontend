@@ -22,11 +22,16 @@ import { mapCustomer } from '../data/mapCustomer'
 import type { Customer, ApiCustomer } from '@/types/customer'
 import type { Id } from '@/types/common'
 
+// TOTALS-NESTING-1 (measured 17-09): the counts sit under `totals`, never
+// top-level (see customerInsightsConfig.ts's docblock for the read-side fix).
 export interface PageStats {
   by_status?: Array<{ value?: string; status?: string; count?: number }>
   by_owner?: Array<{ id?: Id; owner_id?: Id; name?: string; count?: number }>
-  locations?: number; departments?: number; contacts?: number
-  open_vacancies?: number; active_matches?: number; without_contact?: number
+  totals?: {
+    locations?: number; departments?: number; contacts?: number
+    open_vacancies?: number; active_matches?: number; without_contact?: number
+    open_opportunities?: number
+  }
 }
 
 interface Args { filterParams: Record<string, unknown>; page: number; pageSize: number; t: TFunction }

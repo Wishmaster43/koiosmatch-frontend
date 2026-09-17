@@ -45,7 +45,15 @@
     "active": "Active",
     "activeSub": "ongoing call lists",
     "targets": "Targets",
-    "targetsSub": "total candidates"
+    "targetsSub": "total candidates",
+    "calledToday": "Called today",
+    "calledTodaySub": "contact moments today",
+    "toCall": "Still to call",
+    "toCallSub": "open targets",
+    "reachedPct": "Reached",
+    "reachedPctSub": "percentage reached",
+    "overdue": "Overdue",
+    "overdueSub": "scheduled callback in the past"
   },
   "bulk": {
     "selected": "{{count}} selected",

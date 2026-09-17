@@ -71,7 +71,9 @@
     "activeMatchesSub": "matches activos",
     "noContact": "Sin contacto",
     "noContactSub": "sin contacto vinculado",
-    "noStatus": "Sin estado"
+    "noStatus": "Sin estado",
+    "openOpportunities": "Oportunidades abiertas",
+    "openOpportunitiesSub": "oportunidades de venta abiertas"
   },
   "drawer": {
     "entityLabel": "Cliente",

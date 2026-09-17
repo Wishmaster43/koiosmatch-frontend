@@ -71,7 +71,9 @@
     "activeMatchesSub": "actieve matches",
     "noContact": "Zonder contactpersoon",
     "noContactSub": "geen contact gekoppeld",
-    "noStatus": "Geen status"
+    "noStatus": "Geen status",
+    "openOpportunities": "Open kansen",
+    "openOpportunitiesSub": "openstaande verkoopkansen"
   },
   "drawer": {
     "entityLabel": "Klant",

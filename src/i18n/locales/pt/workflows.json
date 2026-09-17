@@ -424,8 +424,10 @@
       "noWaTemplate": "Sem modelo",
       "selectFaqs": "Selecionar FAQs",
       "noFaqs": "Nenhuma FAQ criada",
+      "faqsLoadError": "Falha ao carregar as FAQ.",
       "knowledgeItems": "Itens de conhecimento",
       "noKnowledgeItems": "Nenhum item de conhecimento criado",
+      "knowledgeItemsLoadError": "Falha ao carregar os itens de conhecimento.",
       "knowledgeItemsHint": "Apenas os itens de conhecimento vinculados estão disponíveis para este agente. Vazio = nenhum conhecimento.",
       "knowledgeItemsCount": "{{count}} item(ns) de conhecimento vinculado(s)",
       "knowledgeItemsMax": "{{max}} itens de conhecimento é o máximo.",
@@ -1268,7 +1270,7 @@
     "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk": "Ignora registos que já têm uma ligação com este sistema. Recomendado em massa.",
     "Leeg = geen contactfilter (alle kandidaten komen mee)": "Vazio = sem filtro de contacto (todos os candidatos são incluídos).",
     "{{kandidaatid}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook) Voor één kandidaat {{triggercandidate_id}} (drill-down-knop of adreswijziging)": "{{kandidaat.id}} = executa por candidato a partir do passo anterior (em massa; vazio também funciona). Para um único candidato: {{trigger.candidate_id}} (botão de drill-down ou alteração de morada).",
-    "{{recordid}} = draait per record (van het gekozen soort) uit de vorige stap (bulk; leeg werkt ook) Voor \u00e9\u00e9n record {{trigger<soort>_id}} (drill-down-knop of adreswijziging)": "{{record.id}} = executa por registo (do tipo escolhido) a partir do passo anterior (em massa; vazio tamb\u00e9m funciona). Para um \u00fanico registo: {{trigger.<tipo>_id}} (bot\u00e3o de drill-down ou altera\u00e7\u00e3o de morada).",
+    "{{recordid}} = draait per record (van het gekozen soort) uit de vorige stap (bulk; leeg werkt ook) Voor één record {{trigger<soort>_id}} (drill-down-knop of adreswijziging)": "{{record.id}} = executa por registo (do tipo escolhido) a partir do passo anterior (em massa; vazio também funciona). Para um único registo: {{trigger.<tipo>_id}} (botão de drill-down ou alteração de morada).",
     "Leeg = geen toewijzing (bureau)": "Vazio = sem atribuição (agência).",
     "Ondersteunt {maand} voor de huidige maandnaam": "Suporta {maand} para o nome do mês atual.",
     "De tenant-instelling webhook_endpoint_<slug> bepaalt de URL": "A definição do tenant webhook_endpoint_<slug> determina o URL.",
@@ -1381,7 +1383,16 @@
       "customer_task_overdue": "Tarefa do cliente vencida",
       "customer_match_ending": "Match do cliente a terminar em breve",
       "customer_vacancy_stale": "Vaga do cliente há muito tempo online",
-      "task_overdue": "Tarefa vencida"
+      "task_overdue": "Tarefa vencida",
+      "opportunity_closing_soon": "Data de fecho da oportunidade próxima",
+      "opportunity_stale": "Oportunidade estagnada na fase",
+      "vacancy_closing_soon": "Data de fecho da vaga próxima",
+      "vacancy_stale_online": "Vaga online há muito tempo",
+      "match_approval_pending": "Match a aguardar aprovação",
+      "match_approval_overdue": "Aprovação do match atrasada",
+      "match_approved": "Match aprovado",
+      "match_rejected": "Match rejeitado",
+      "settings_blank_fallback": "Definição vazia, valor de reserva usado"
     }
   },
   "templateLibrary": {

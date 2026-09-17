@@ -38,6 +38,11 @@ export interface Task {
   // origin is never lost. Optional so pre-existing Task fixtures keep type-checking.
   teamId?: Id | null
   team?: { id: Id; name: string; color: string | null } | null
+  // TAAK-ROL-1 (BE assignee_role_id/assigneeRoleModel): the ROLE axis — a task
+  // queued for "whoever has this role", distinct from a named assignee/team.
+  // KPI-RIJ-9-1 verifier fix: read so 'unassigned' never counts a role-assigned
+  // open task as unassigned.
+  assigneeRole?: { id: Id; name: string; mode: string | null } | null
   // TASK-LOCATION-READ-1: the branch (vestiging) the task sits under, id + display
   // name (null = no branch). Optional so pre-existing Task fixtures across the
   // codebase (constructed before this field existed) keep type-checking.
@@ -104,6 +109,8 @@ export interface ApiTask {
   // both emit `assignee_team {id,name,color}`; null = no internal department.
   assignee_team?: { id?: Id; name?: string; color?: string | null } | null
   assignee_team_id?: Id
+  // TAAK-ROL-1: mirrors assignee_team above — the role axis (TaskListResource.php:65-66).
+  assignee_role?: { id?: Id; name?: string; mode?: string | null } | null
   // TASK-LOCATION-READ-1 (BE golf 2a/2b, 2026-08-08): TaskListResource/
   // TaskDetailResource now emit this after `priority`; null = no branch set.
   location?: { id?: Id; name?: string } | null
