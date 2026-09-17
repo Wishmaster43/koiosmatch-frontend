@@ -22,6 +22,7 @@ import { tint } from '@/lib/tint'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import { useNumberFormat } from '@/lib/formatters'
 
 // PICKER-INTERSECT: trigger-role modules (registry category 'Triggers' — webhook,
 // applicant_event, gateway_mail_hook) start a workflow run rather than execute as an
@@ -43,6 +44,9 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
   const [dropOver, setDropOver] = useState(false)
   const dragRef = useRef(false)
   const { t } = useTranslation('workflows')
+  // GETALLEN-1: the node's live/processed counter badge renders through the
+  // house number formatter on the active locale, never a raw JS number.
+  const { formatNumber } = useNumberFormat()
   const rawType = data.type as string | undefined
   const knownMeta = rawType ? MODULE_META[rawType] : undefined
   // Unknown module type → neutral fallback node, NEVER null: an unrendered node has
@@ -187,7 +191,9 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
             leesbaar"): the wide START pill overhangs BOTH top corners of the 72px
             circle and the run button owns bottom-right — bottom-left is the only
             corner that is free on every node. */}
-        {badgeCount != null && (
+        {/* A counter badge must never render "0" (§16 CANON-CHECKLIST) — gate on
+            truthiness, not a null-check, so a zero-progress step shows no badge. */}
+        {!!badgeCount && (
           // Soft-tint chip (§4) instead of a solid meta.color fill with hardcoded white text:
           // the module palette varies from dark (module-teal-strong) to pale (module-mauve,
           // module-periwinkle), so a fixed white foreground fails contrast on the lighter
@@ -199,7 +205,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
                          background: meta.bg, color: meta.color, fontSize: 10, fontWeight: 700,
                          ...monoStyle, lineHeight: '14px',
                          border: '2px solid var(--surface)', whiteSpace: 'nowrap' }}>
-            {badgeCount}
+            {formatNumber(badgeCount)}
           </span>
         )}
         <div style={{

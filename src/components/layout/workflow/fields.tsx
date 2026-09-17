@@ -6,7 +6,6 @@
  * Extracted from WorkflowCanvasEditor.
  */
 import { useId, useState } from 'react'
-import { X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { WorkflowField, EdgeFilters, WorkflowVarGroup } from '@/types/workflow'
 import { FaqSelectField } from './fieldControls/FaqSelectField'
@@ -19,7 +18,7 @@ import { OrderedListField } from './fieldControls/OrderedListField'
 import { InstructionListField } from './fieldControls/InstructionListField'
 import type { InstructionOutputField } from './filterFieldCatalog'
 import type { OnChange } from './fieldControls/types'
-import { KeyValueField } from './groupKeyValueFields'
+import { KeyValueField, RowRemoveButton } from './groupKeyValueFields'
 import { FunctionMatrixField } from './fieldControls/FunctionMatrixField'
 import { TextExpandControl } from './fieldControls/TextExpandControl'
 import { TextFieldWithVars } from './VariablePicker'
@@ -187,11 +186,7 @@ export function FieldInput({ field, value, onChange, variables, config, instruct
               style={{ flex: 1, padding: '5px 7px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
             <input value={p.value} onChange={e => update(i, 'value', e.target.value)} placeholder={t('fields.keyValue')} aria-label={t('fields.keyValue')}
               style={{ flex: 1, padding: '5px 7px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
-            <button type="button" onClick={() => remove(i)} aria-label={t('common:remove')} title={t('common:remove')}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- dense inline row-remove inside a ~26px input row; Button sm's fixed 28px footprint breaks the row height (§14 r7 necessity)
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger-text)', padding: '0 4px' }}>
-              <X size={12} />
-            </button>
+            <RowRemoveButton onClick={() => remove(i)} label={t('common:remove')} />
           </div>
         ))}
         {/* HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A). */}

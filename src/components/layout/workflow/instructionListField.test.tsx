@@ -9,6 +9,18 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { InstructionListField } from './fieldControls/InstructionListField'
 
+// GETALLEN-1 fix pulled in useNumberFormat (@/lib/formatters -> @/lib/datetime ->
+// @/i18n), which self-initializes the real i18next singleton as a module side
+// effect (DATETIME-IMPORT-LES) — mocking the hook here keeps this file's raw-key
+// assertions honest (mirrors configPanelRequired.test.tsx).
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k, i18n: { language: 'nl' } }),
+}))
+// @/i18n self-initializes real i18next as a side effect on import (its own
+// `i18n.use(initReactI18next).init(...)`), which crashes under the mock above
+// (no initReactI18next export) — see lib/countries.ts's file-header note.
+vi.mock('@/i18n', () => ({ LOCALE_BY_LANG: { nl: 'nl-NL', en: 'en-GB' } }))
+
 const rows = [
   { id: 'a', text: '<p>Wat is je naam?</p>', required: true },
   { id: 'b', text: '<p>Wanneer kun je starten?</p>', output_field: 'start_date' },

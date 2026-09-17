@@ -30,6 +30,7 @@ import type { WorkflowVarGroup } from '@/types/workflow'
 import type { InstructionOutputField } from '../filterFieldCatalog'
 import { useInstructionList } from './useInstructionList'
 import type { OnChange } from './types'
+import { useNumberFormat } from '@/lib/formatters'
 
 // CMBE-accepted caps (INTERVIEW-WORKFLOW-1 Appendix C) — see file docblock.
 const MAX_ROWS = 50
@@ -52,6 +53,8 @@ export function InstructionListField({ value, onChange, fieldKey, variables = []
   outputFields?: InstructionOutputField[]
 }) {
   const { t } = useTranslation('workflows')
+  // GETALLEN-1: the character counters render through the house number formatter.
+  const { formatNumber } = useNumberFormat()
   const { rows, add, remove, duplicate, move, update, insertVar } = useInstructionList(value, onChange, fieldKey)
   // One row at a time may be enlarged (Danny 31-08: the small editor is unreadable).
   const [expandedId, setExpandedId] = useState<string | null>(null)
@@ -80,7 +83,7 @@ export function InstructionListField({ value, onChange, fieldKey, variables = []
                 aria-label={t('fields.instructionTitle')} placeholder={t('fields.instructionTitlePlaceholder')}
                 style={{ flex: 1, minWidth: 60, padding: '3px 7px', border: '1px solid var(--border)', borderRadius: 6, fontSize: 12, color: 'var(--text)', background: 'var(--surface)', outline: 'none' }} />
               <Caption as="span" style={{ color: overRowLimit ? 'var(--color-danger-text)' : undefined }}>
-                {t('fields.instructionCharCount', { count: rowChars, max: MAX_CHARS_PER_ROW })}
+                {t('fields.instructionCharCount', { count: formatNumber(rowChars), max: formatNumber(MAX_CHARS_PER_ROW) })}
               </Caption>
               <Button iconOnly variant="ghost" size="sm" onClick={() => move(row.id, -1)} disabled={i === 0}
                 aria-label={t('fields.moveUp')} title={t('fields.moveUp')}>
@@ -138,7 +141,7 @@ export function InstructionListField({ value, onChange, fieldKey, variables = []
         </div>
         {atRowCap && <Caption as="span">{t('fields.instructionMaxReached', { max: MAX_ROWS })}</Caption>}
         <Caption as="span" style={{ color: totalChars > MAX_TOTAL_CHARS ? 'var(--color-danger-text)' : undefined }}>
-          {t('fields.instructionTotalChars', { count: totalChars, max: MAX_TOTAL_CHARS })}
+          {t('fields.instructionTotalChars', { count: formatNumber(totalChars), max: formatNumber(MAX_TOTAL_CHARS) })}
         </Caption>
       </div>
     </div>

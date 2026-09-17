@@ -23,6 +23,19 @@ vi.mock('@/lib/api', async importOriginal => ({
   ] }) },
 }))
 
+// D1 fix (shared useLookupOptions) now transitively pulls FieldInput's other
+// field controls into this test's module graph, one of which (InstructionListField)
+// imports useNumberFormat (@/lib/formatters -> @/lib/datetime -> @/i18n), which
+// self-initializes the real i18next singleton (DATETIME-IMPORT-LES) — mocking the
+// hook here keeps this file's raw-key assertions honest (see the comment below).
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k, i18n: { language: 'nl' } }),
+}))
+// @/i18n self-initializes real i18next as a side effect on import (its own
+// `i18n.use(initReactI18next).init(...)`), which crashes under the mock above
+// (no initReactI18next export) — see lib/countries.ts's file-header note.
+vi.mock('@/i18n', () => ({ LOCALE_BY_LANG: { nl: 'nl-NL', en: 'en-GB' } }))
+
 describe('WorkflowSelectField', () => {
   beforeEach(() => vi.clearAllMocks())
 
@@ -98,6 +111,28 @@ describe('WorkflowSelectField · WF-PICKER-ERROR-1 error state', () => {
     await waitFor(() => expect(api.get).toHaveBeenCalledTimes(2))
     fireEvent.click(await screen.findByRole('button'))
     expect(await screen.findByText('Heractivering')).toBeInTheDocument()
+  })
+})
+
+describe('WorkflowSelectField · loading state', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  // A pending GET /workflows must read as loading, never as the honest-empty
+  // "no workflows yet" copy — the same D8 four-UI-states defect fixed for the
+  // error branch above (WF-PICKER-ERROR-1's loading counterpart).
+  it('shows loading copy, not the empty-state copy, while the fetch is in flight', async () => {
+    const api = (await import('@/lib/api')).default
+    let resolveGet: (v: { data: unknown[] }) => void = () => {}
+    vi.mocked(api.get).mockReturnValueOnce(new Promise(res => { resolveGet = res }))
+    const onChange = vi.fn()
+    render(<WorkflowSelectField value={undefined} onChange={onChange} fieldKey="workflow_id" />)
+
+    expect(await screen.findByText('fields.workflowLoading')).toBeInTheDocument()
+    expect(screen.queryByText('fields.workflowEmpty')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+
+    resolveGet({ data: [{ id: 'wf-1', name: 'Heractivering', archived: false }] })
+    expect(await screen.findByRole('button')).toBeInTheDocument()
   })
 })
 

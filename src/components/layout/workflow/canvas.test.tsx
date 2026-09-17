@@ -25,6 +25,19 @@ vi.mock('@xyflow/react', () => ({
   Position: { Left: 'left', Right: 'right' },
 }))
 
+// Real i18n is not initialized here (mirrors configPanelRequired.test.tsx) so `t()`
+// returns the raw key/defaultValue. ModuleNode now also pulls in useNumberFormat
+// (@/lib/formatters -> @/lib/datetime -> @/i18n), which self-initializes the real
+// i18next singleton as a module side effect (DATETIME-IMPORT-LES) — mocking the
+// hook here keeps this file's raw-key assertions honest regardless of that import.
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k, i18n: { language: 'nl' } }),
+}))
+// @/i18n self-initializes real i18next as a side effect on import (its own
+// `i18n.use(initReactI18next).init(...)`), which crashes under the mock above
+// (no initReactI18next export) — see lib/countries.ts's file-header note.
+vi.mock('@/i18n', () => ({ LOCALE_BY_LANG: { nl: 'nl-NL', en: 'en-GB' } }))
+
 // The catalog the mocked hook hands back — each test sets it before rendering.
 let mockCatalog: ModuleCatalog = {}
 // Realistic non-empty catalog: the engine map carries ~40 types, and the
@@ -90,6 +103,23 @@ describe('ModuleNode · WF-MODULE-RECONCILE-FE-1 (no more "Onbekende module")', 
     // label; an unresolved one would render the literal key 'canvas.unknownModule'.
     expect(screen.getByText(MODULE_META[type].label)).toBeInTheDocument()
     expect(screen.queryByText('canvas.unknownModule')).not.toBeInTheDocument()
+  })
+})
+
+// D8 audit fix: the Make-style counter badge must never render a literal "0"
+// (§16 CANON-CHECKLIST "a counter badge never renders '0'") and must run the
+// value through the house number formatter (GETALLEN-1).
+describe('ModuleNode · counter badge never shows "0"', () => {
+  it('renders no badge when a finished step processed zero items', () => {
+    mockCatalog = realCatalog('candidates')
+    render(<ModuleNode id="n1" data={{ type: 'candidates', status: 'success', itemsTotal: 0 } as unknown as FlowNodeData} />)
+    expect(screen.queryByText('0')).not.toBeInTheDocument()
+  })
+
+  it('renders the formatted count when a finished step processed items', () => {
+    mockCatalog = realCatalog('candidates')
+    render(<ModuleNode id="n1" data={{ type: 'candidates', status: 'success', itemsTotal: 1234 } as unknown as FlowNodeData} />)
+    expect(screen.getByText('1.234')).toBeInTheDocument()
   })
 })
 

@@ -16,6 +16,7 @@ import { blockedReason } from '@/components/reports/blockedReason'
 import RunDetailDrawer from '@/components/reports/RunDetailDrawer'
 import { PageTitle, Caption, GroupLabel, captionStyle, bodyTextStyle } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 // RUN-HIST-EXPAND-1 (batch 4, P39): the chevron opens an inline row reusing the
 // drawer's own step viewer — no forked step-rendering, no extra fetch.
 import RunStepList from '@/components/reports/RunStepList'
@@ -43,7 +44,7 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
   // Runs are scoped to this workflow; the drawer opens above the editor overlay.
   // AUDIT-BE-1-16: request the page size explicitly (server default is now 25,
   // clamped 1-100) instead of relying on an unstated server default.
-  const { rows, loading } = useReportList<RunRow>(
+  const { rows, loading, error } = useReportList<RunRow>(
     workflowId != null ? `/workflows/${workflowId}/runs?per_page=25` : '/workflow-runs?per_page=25',
     resolveWorkflowBaseURL()
   )
@@ -96,8 +97,15 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
             </div>
           )}
 
+          {/* Error — a failed fetch must never read as "no runs yet" (§3A four UI states) */}
+          {!loading && error && (
+            <div style={{ padding: 24 }}>
+              <ErrorBanner>{t('runs.loadError')}</ErrorBanner>
+            </div>
+          )}
+
           {/* Empty */}
-          {!loading && rows.length === 0 && (
+          {!loading && !error && rows.length === 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                           gap: 10, padding: 48, textAlign: 'center' }}>
               <History size={28} color="var(--border)" />
@@ -106,7 +114,7 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
           )}
 
           {/* Success */}
-          {!loading && rows.length > 0 && (
+          {!loading && !error && rows.length > 0 && (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr>

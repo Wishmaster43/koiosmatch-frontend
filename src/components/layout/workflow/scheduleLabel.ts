@@ -120,7 +120,9 @@ export function scheduleLabel(t: TFunction, locale: string, trigger?: string, cf
   }
   if (frequency === 'monthly')   return t('scheduleModal.label.monthlyAt', { day: monthday, time })
   if (frequency === 'quarterly') return t('scheduleModal.label.quarterlyAt', { day: monthday, time })
-  if (frequency === 'yearly')    return t('scheduleModal.label.yearlyAt', { month, day: monthday, time })
+  // DATUM-1: a localized short month name, mirroring the recurrence picker's
+  // own vocabulary — month is stored 1-12, monthName expects 0-based.
+  if (frequency === 'yearly')    return t('scheduleModal.label.yearlyAt', { month: monthName(locale, month - 1), day: monthday, time })
   return t('scheduleModal.label.dailyAt', { time })
 }
 

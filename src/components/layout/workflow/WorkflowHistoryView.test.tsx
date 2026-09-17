@@ -48,6 +48,15 @@ describe('WorkflowHistoryView', () => {
     expect(await screen.findByText('runs.editorEmpty')).toBeInTheDocument()
   })
 
+  // D8 audit fix: a failed runs fetch must read as an error, never as the
+  // "no runs yet" empty state (§3A four UI states).
+  it('shows an error banner, not the empty state, when the runs fetch fails', async () => {
+    vi.mocked(api.get).mockRejectedValue(new Error('network'))
+    render(<WorkflowHistoryView workflowId={1} />)
+    expect(await screen.findByText('runs.loadError')).toBeInTheDocument()
+    expect(screen.queryByText('runs.editorEmpty')).not.toBeInTheDocument()
+  })
+
   // AUDIT-BE-1-16: the run history requests its page size explicitly (server
   // default is now 25, clamped 1-100) instead of relying on an unstated default.
   it('requests the run list with per_page=25', async () => {

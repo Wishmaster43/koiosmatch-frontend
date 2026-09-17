@@ -5,11 +5,12 @@
  * to one workflow (Make-style). Split out of the former fieldControls.tsx monolith (§3 400-line split trigger).
  */
 import { useState, useEffect, useId } from 'react'
-import { Plus, X, Check, Copy } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { unwrap, unwrapList } from '@/lib/api'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import Button from '@/components/ui/Button'
+import CopyIconButton from '@/components/ui/CopyIconButton'
 import { Caption, Mono } from '@/components/ui/typography'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import Spinner from '@/components/ui/Spinner'
@@ -28,7 +29,6 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
   const [creating, setCreating] = useState(false)
   const [showNew,  setShowNew]  = useState(false)
   const [newName,  setNewName]  = useState('')
-  const [copied,   setCopied]   = useState(false)
   // CreatableSelect's trigger is a <button>, which a plain aria-label cannot
   // name — a sr-only span + aria-labelledby names it instead (§4).
   const webhookLabelId = useId()
@@ -57,13 +57,6 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
       setNewName(''); setShowNew(false)
     } catch { setError(true) }
     setCreating(false)
-  }
-
-  // Copy the receiving URL — the address external systems POST to.
-  const copy = () => {
-    if (!selected?.token) return
-    navigator.clipboard.writeText(`${WEBHOOK_BASE}/${selected.token}`)
-    setCopied(true); setTimeout(() => setCopied(false), 2000)
   }
 
   if (loading) return <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '4px 0' }}>{t('fields.webhookLoading')}</div>
@@ -110,11 +103,10 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
             <Mono as="code" style={{ flex: 1, fontSize: 10, background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 6, padding: '6px 8px', color: 'var(--text)', wordBreak: 'break-all' }}>
               {WEBHOOK_BASE}/{selected.token}
             </Mono>
-            <button type="button" onClick={copy} title={t('fields.copyUrl')} aria-label={t('fields.copyUrl')}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- copied-state success-feedback face (bg/ink pair swaps on state), matches no fixed Button variant; ChangelogPopover precedent
-              style={{ padding: '6px 8px', background: copied ? 'var(--color-success-bg)' : 'var(--hover-bg)', color: copied ? 'var(--color-on-success-bg)' : 'var(--text-muted)', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', display: 'flex' }}>
-              {copied ? <Check size={12} /> : <Copy size={12} />}
-            </button>
+            {/* ADRES-KOPIEER generalisation: the ONE inline copy affordance (§16 CANON-CHECKLIST) */}
+            <CopyIconButton value={`${WEBHOOK_BASE}/${selected.token}`} label={t('fields.copyUrl')}
+              copiedLabel={t('fields.webhookUrlCopied')}
+              style={{ padding: '6px 8px', background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 6 }} />
           </div>
           <Caption as="div">{t('fields.webhookHint')}</Caption>
         </div>

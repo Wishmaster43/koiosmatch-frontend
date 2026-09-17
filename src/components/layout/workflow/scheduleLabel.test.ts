@@ -35,8 +35,8 @@ describe('scheduleLabel · reference wording per frequency (nl)', () => {
     expect(tr({ frequency: 'quarterly', monthday: 1, times: ['09:00'] })).toBe('Per kwartaal dag 1 09:00')
   })
 
-  it('yearly', () => {
-    expect(tr({ frequency: 'yearly', month: 2, monthday: 1, times: ['09:00'] })).toBe('Jaarlijks 2-1 09:00')
+  it('yearly renders a localized short month name in DD-month order, never a raw numeric pair (DATUM-1)', () => {
+    expect(tr({ frequency: 'yearly', month: 2, monthday: 1, times: ['09:00'] })).toBe('Jaarlijks 1 feb 09:00')
   })
 
   it('interval', () => {
