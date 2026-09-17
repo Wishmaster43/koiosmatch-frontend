@@ -136,18 +136,16 @@ export default function MatchesTable({
       sortValue: r => r.origin === 'application' ? t('type.application') : r.origin === 'direct' ? t('type.direct') : '',
       render: r => {
         if (r.origin === undefined) return <span style={{ color: 'var(--text-muted)' }}>—</span>
-        // CEL-DOORKLIK-CANON: "Via sollicitatie" links to that application's own
-        // drilldown (default overview tab); "Direct" has no source record to open.
-        if (r.origin === 'application' && r.applicationId != null) {
-          return (
-            <Button variant="ghost" size="sm"
-              onClick={e => { e.stopPropagation(); openEntity('applications', r.applicationId) }}
-              style={{ padding: 0, height: 'auto' }}>
-              <SoftChip label={t('type.application')} />
-            </Button>
-          )
-        }
-        return <SoftChip label={r.origin === 'application' ? t('type.application') : t('type.direct')} />
+        // CEL-DOORKLIK-CANON, Danny 17-09 20:5x on the 22-08 question: the Type cell
+        // opens THIS match's drilldown (Overzicht tab) for both origins — the origin
+        // is a property of the match, so the match is the record behind the cell.
+        return (
+          <Button variant="ghost" size="sm"
+            onClick={e => { e.stopPropagation(); openEntity('matches', r.id) }}
+            style={{ padding: 0 }}>
+            <SoftChip label={r.origin === 'application' ? t('type.application') : t('type.direct')} />
+          </Button>
+        )
       } },
     { key: 'score',   header: t('cols.score'), align: 'right', sortable: true,
       sortValue: r => r.score ?? -1, render: r => <ScorePill value={r.score} /> },

@@ -4610,11 +4610,6 @@
         "automatic": "Automatisch ablehnen"
       }
     },
-    "bookingLink": {
-      "label": "Standard-Buchungslink",
-      "description": "Rückfall, wenn der Eigentümer keinen eigenen Buchungslink hat; pro Eigentümer im Profil einstellbar.",
-      "placeholder": "https://calendly.com/unternehmen"
-    },
     "recruiterPhone": {}
   },
   "koiosmodels": {

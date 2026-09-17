@@ -4610,11 +4610,6 @@
         "automatic": "Automatisch afwijzen"
       }
     },
-    "bookingLink": {
-      "label": "Standaard boekingslink",
-      "description": "Terugval wanneer de eigenaar geen eigen boekingslink heeft; per eigenaar instelbaar op het profiel.",
-      "placeholder": "https://calendly.com/bedrijf"
-    },
     "recruiterPhone": {}
   },
   "koiosmodels": {

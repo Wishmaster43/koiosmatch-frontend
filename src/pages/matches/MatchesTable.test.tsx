@@ -179,8 +179,8 @@ describe('MatchesTable · type column (MATCH-ORIGIN-1)', () => {
 
 // TYPE-KOLOM-ROUTE (Danny GO 23-08): "Via sollicitatie" deep-links to the
 // source application's own drilldown; "Direct" has nothing to link to.
-describe('MatchesTable · type column deep-link (TYPE-KOLOM-ROUTE)', () => {
-  it('clicking the "Via sollicitatie" chip opens the application drilldown, not the match row', async () => {
+describe('MatchesTable · type column deep-link (TYPE-KOLOM-ROUTE, Danny 17-09: the Type cell opens THIS match)', () => {
+  it('clicking the "Via sollicitatie" chip opens the match drilldown, not the row handler and not the application', async () => {
     const user = userEvent.setup()
     const onRowClick = vi.fn()
     const viaApplication = { ...baseRow, id: 90, origin: 'application' as const, applicationId: 'app-1' }
@@ -189,16 +189,20 @@ describe('MatchesTable · type column deep-link (TYPE-KOLOM-ROUTE)', () => {
     const chipButton = screen.getByText('Via sollicitatie').closest('button') as HTMLElement
     await user.click(chipButton)
 
-    expect(mockOpenEntity).toHaveBeenCalledWith('applications', 'app-1')
+    expect(mockOpenEntity).toHaveBeenCalledWith('matches', 90)
+    expect(mockOpenEntity).not.toHaveBeenCalledWith('applications', 'app-1')
     expect(onRowClick).not.toHaveBeenCalled()
   })
 
-  it('renders "Direct" as a plain, unclickable chip', () => {
+  it('clicking the "Direct" chip opens the match drilldown as well (same gateway for both origins)', async () => {
+    const user = userEvent.setup()
     const direct = { ...baseRow, id: 91, origin: 'direct' as const }
     render(<MatchesTable rows={[direct]} />)
 
-    expect(screen.getByText('Direct')).toBeInTheDocument()
-    expect(screen.getByText('Direct').closest('button')).toBeNull()
+    const chipButton = screen.getByText('Direct').closest('button') as HTMLElement
+    await user.click(chipButton)
+
+    expect(mockOpenEntity).toHaveBeenCalledWith('matches', 91)
   })
 })
 

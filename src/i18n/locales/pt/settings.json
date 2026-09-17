@@ -4611,11 +4611,6 @@
         "automatic": "Rejeitar automaticamente"
       }
     },
-    "bookingLink": {
-      "label": "Link de marcação predefinido",
-      "description": "Alternativa quando o proprietário não tem link próprio; definido por proprietário no perfil.",
-      "placeholder": "https://calendly.com/empresa"
-    },
     "recruiterPhone": {}
   },
   "koiosmodels": {

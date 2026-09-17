@@ -4610,11 +4610,6 @@
         "automatic": "Rechazar automáticamente"
       }
     },
-    "bookingLink": {
-      "label": "Enlace de reserva predeterminado",
-      "description": "Alternativa cuando el propietario no tiene su propio enlace; se ajusta por propietario en el perfil.",
-      "placeholder": "https://calendly.com/empresa"
-    },
     "recruiterPhone": {}
   },
   "koiosmodels": {

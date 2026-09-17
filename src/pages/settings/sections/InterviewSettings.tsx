@@ -1,23 +1,21 @@
 /**
- * InterviewSettings (X-12) — the tenant-wide AI-interview configuration:
- * rejection mode (Koios proposes vs. automatic), booking link (where candidates
- * schedule interviews), and recruiter phone (fallback contact for interview
- * invitations). All three keys POST through the same /settings form path, with
- * the backend validating interview_rejection_mode against the enum, booking_link
- * as a URL; the recruiter phone is a per-agent field (Danny 09-09), not a tenant key (was E.164 here, normalized by
- * PhoneNumber::toE164).
+ * InterviewSettings (X-12) — the tenant-wide AI-interview configuration: the
+ * rejection mode (Koios proposes vs. automatic), POSTed through the shared
+ * /settings form path with the backend validating it against the enum. The
+ * recruiter phone is a per-agent field (Danny 09-09), and the booking link left
+ * this screen on Danny's row 53 (17-09: "kan weg") — the tenant key stays on the
+ * backend under career_site/personal (measured: no reader), so nothing else changes.
  */
 import { useTranslation } from 'react-i18next'
 import { useSettingsForm } from '../lib/useSettingsForm'
-import { SettingsScaffold, SettingCardList, SettingRow, TextField, SelectField } from '../components/SettingsKit'
+import { SettingsScaffold, SettingCardList, SettingRow, SelectField } from '../components/SettingsKit'
 
-// AI-interview settings editor: rejection mode, booking link, and recruiter phone.
+// AI-interview settings editor: the rejection mode.
 export default function InterviewSettings() {
   const { t } = useTranslation('settings')
-  // Tenant defaults: proposal mode (default), empty booking link and recruiter phone.
+  // Tenant default: proposal mode.
   const form = useSettingsForm({
     interview_rejection_mode: 'proposal',
-    booking_link: '',
   })
 
   // Rejection mode options: proposal (Koios proposes, recruiter confirms) or automatic (direct rejection).
@@ -39,17 +37,6 @@ export default function InterviewSettings() {
           />
         </SettingRow>
 
-        {/* Booking link: URL where candidates schedule their interview (sent by Koios). */}
-        <SettingRow label={t('interview.bookingLink.label')} description={t('interview.bookingLink.description')}>
-          <TextField
-            value={form.values.booking_link}
-            onChange={v => form.set('booking_link', v)}
-            placeholder={t('interview.bookingLink.placeholder')}
-            width={280}
-          />
-        </SettingRow>
-
-        {/* Recruiter phone: fallback E.164 number Koios sends when there is no per-user owner phone. */}
       </SettingCardList>
     </SettingsScaffold>
   )
