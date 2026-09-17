@@ -13,30 +13,30 @@ import MetadataBadge, { type BadgeMeta } from '@/components/ui/MetadataBadge'
 // eslint-disable-next-line react-refresh/only-export-components -- shared formatter every message table/drawer in this file imports; HMR-nicety warning only
 export const formatDT = formatDateTimeStr
 
-// Channel → colour + icon. Label = t('messages.channel.<key>').
-/* eslint-disable no-restricted-syntax -- fixed channel→colour mapping (DATA), mirrors the lookup-colour pattern used elsewhere; these shades have no exact token equivalent */
+// Channel → colour + icon. Label = t('messages.channel.<key>'). All-token now:
+// whatsapp/sms previously carried raw hex duplicating tokens already used by
+// sibling entries in this same map (D9 audit finding) — no lint suppression needed.
 // eslint-disable-next-line react-refresh/only-export-components -- shared meta map every message table/drawer in this file imports; HMR-nicety warning only
 export const CHANNEL_META: Record<string, BadgeMeta> = {
-  whatsapp: { bg: '#ECFDF5', color: '#059669', Icon: MessageCircle },
+  whatsapp: { bg: 'var(--color-success-bg)', color: 'var(--color-success-text)', Icon: MessageCircle },
   email:    { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)', Icon: Mail },
-  sms:      { bg: '#F5F3FF', color: '#6D28D9', Icon: Phone },
+  sms:      { bg: 'var(--color-violet-bg)', color: 'var(--color-violet)', Icon: Phone },
 }
-/* eslint-enable no-restricted-syntax */
 
 // Status → colour + icon. Label = t('messages.status.<key>').
-/* eslint-disable no-restricted-syntax -- fixed status→colour mapping (DATA), mirrors the lookup-colour pattern used elsewhere; these shades have no exact token equivalent */
 // eslint-disable-next-line react-refresh/only-export-components -- shared meta map every message table/drawer in this file imports; HMR-nicety warning only
 export const STATUS_META: Record<string, BadgeMeta> = {
   sent:       { bg: 'var(--color-success-bg)', color: 'var(--color-success-text)', Icon: CheckCheck  },
-  delivered:  { bg: '#ECFDF5', color: '#059669', Icon: CheckCheck  },
+  delivered:  { bg: 'var(--color-success-bg)', color: 'var(--color-success-text)', Icon: CheckCheck  },
   read:       { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)', Icon: CheckCheck  },
   // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1 on its
   // own pastel, AA fail (Opus r3.5).
   failed:     { bg: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)', Icon: XCircle     },
   pending:    { bg: 'var(--hover-bg)', color: 'var(--text-muted)', Icon: Clock     },
-  bounced:    { bg: 'var(--color-warning-bg)', color: '#C2410C', Icon: AlertTriangle },
+  // Ink is --color-on-warning-bg (mirrors runFormat.tsx's `running`/`blocked`
+  // pair) — was a raw hex duplicating this same warning hue (D9 audit finding).
+  bounced:    { bg: 'var(--color-warning-bg)', color: 'var(--color-on-warning-bg)', Icon: AlertTriangle },
 }
-/* eslint-enable no-restricted-syntax */
 
 export function ChannelBadge({ channel }: { channel?: string }) {
   const { t } = useTranslation('reports')

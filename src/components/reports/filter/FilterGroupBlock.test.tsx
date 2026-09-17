@@ -44,3 +44,29 @@ describe('FilterGroupBlock — untyped group defaults to search-select', () => {
     expect(onToggle).toHaveBeenCalledWith('u1')
   })
 })
+
+describe('FilterGroupBlock — date-range group', () => {
+  it('names each date input so a screen-reader user can tell from/to apart (D6 audit)', () => {
+    const group: ReportFilterGroup = {
+      key: 'period', label: 'Period', type: 'date-range',
+      from: '', to: '', onFromChange: vi.fn(), onToChange: vi.fn(),
+    }
+    render(<FilterGroupBlock group={group} collapsed={false} count={0} onToggle={vi.fn()} />)
+    expect(screen.getByLabelText('filters.dateFrom')).toBeInTheDocument()
+    expect(screen.getByLabelText('filters.dateTo')).toBeInTheDocument()
+  })
+})
+
+describe('FilterGroupBlock — radio group', () => {
+  it('carries radiogroup/radio roles so the selected option is programmatically exposed (D6 audit)', () => {
+    const group: ReportFilterGroup = {
+      key: 'mode', label: 'Mode', type: 'radio',
+      selected: ['a'], options: [{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }],
+      onToggle: vi.fn(),
+    }
+    render(<FilterGroupBlock group={group} collapsed={false} count={0} onToggle={vi.fn()} />)
+    expect(screen.getByRole('radiogroup')).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: 'A' })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('radio', { name: 'B' })).toHaveAttribute('aria-checked', 'false')
+  })
+})

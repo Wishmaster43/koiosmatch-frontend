@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { Save, Trash2, Star } from 'lucide-react'
 import type { ReportFilterGroup } from '@/types/reports'
 import Button from '@/components/ui/Button'
+import { GroupLabel } from '@/components/ui/typography'
 
 // One saved set — state is opaque to this component.
 interface SavedSet { id: string; name: string; state: unknown; isDefault?: boolean }
@@ -36,10 +37,11 @@ export default function SavedFiltersGroup({ group }: { group: ReportFilterGroup 
 
   return (
     <div>
-      <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
-                    letterSpacing: '0.05em', marginBottom: 6 }}>
+      {/* Dense panel size (10px/0.05em) matches the filter-group headers this
+          block sits beside (FilterGroupBlock) — override via style, identity via the atom. */}
+      <GroupLabel style={{ fontSize: 10, letterSpacing: '0.05em', marginBottom: 6 }}>
         {t('savedFilters.title')}
-      </div>
+      </GroupLabel>
 
       {/* Name + save */}
       <div style={{ display: 'flex', gap: 6, marginBottom: saved.length ? 8 : 0 }}>

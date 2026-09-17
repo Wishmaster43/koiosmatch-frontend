@@ -81,9 +81,11 @@ export default function FilterGroupBlock({
             // Two date inputs for a from/to range filter (e.g. audit log).
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <input type="date" value={group.from ?? ''} onChange={e => group.onFromChange?.(e.target.value)}
+                aria-label={t('filters.dateFrom')}
                 style={{ height: 30, padding: '0 8px', fontSize: 12, border: '1px solid var(--border)',
                          borderRadius: 6, color: 'var(--text)', outline: 'none', width: '100%' }} />
               <input type="date" value={group.to ?? ''} onChange={e => group.onToChange?.(e.target.value)}
+                aria-label={t('filters.dateTo')}
                 style={{ height: 30, padding: '0 8px', fontSize: 12, border: '1px solid var(--border)',
                          borderRadius: 6, color: 'var(--text)', outline: 'none', width: '100%' }} />
             </div>
@@ -114,15 +116,17 @@ export default function FilterGroupBlock({
             // filter-parity pass exists to close (§0 shared fix).
             <SearchSelectGroup group={group} />
           ) : group.type === 'radio' ? (
-            <div style={{ display: 'flex', background: 'var(--border)', borderRadius: 7, padding: 2, gap: 2 }}>
+            <div role="radiogroup" aria-label={group.label} style={{ display: 'flex', background: 'var(--border)', borderRadius: 7, padding: 2, gap: 2 }}>
               {(group.options ?? []).map(opt => {
                 const active = (group.selected ?? []).includes(opt.value)
                 return (
                   // Segmented pill option, not a standalone action — mirrors
                   // SegmentedControl's own compact-pill exemption; the raised
                   // "active" shadow is a status-ring class (deliberately excepted).
+                  // role="radio"/aria-checked mirrors the SegmentedControl atom's
+                  // own contract for a single-choice picker (D6 audit finding).
                   /* eslint-disable huisstijlLegacy/no-restricted-syntax */
-                  <button key={opt.value} onClick={() => group.onToggle?.(opt.value)}
+                  <button key={opt.value} type="button" role="radio" aria-checked={active} onClick={() => group.onToggle?.(opt.value)}
                     style={{
                       flex: 1, padding: '4px 0', borderRadius: 5, fontSize: 11,
                       fontWeight: active ? 600 : 400, cursor: 'pointer',
