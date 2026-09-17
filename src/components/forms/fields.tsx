@@ -11,6 +11,7 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { fieldInputStyle } from './fieldMetrics'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
+import { groupLabelStyle } from '@/components/ui/typography'
 import { toLocalIsoDate } from '@/lib/localDate'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
@@ -63,10 +64,11 @@ export function parseDate(value?: string | number | Date | null): Date | null {
 }
 
 // Field label with the shared muted/uppercase style and a required-asterisk suffix.
+// Identity comes from the GroupLabel atom's own style object (components/ui/typography)
+// — only the layout-only display/marginBottom properties are added here.
 export function Label({ children, required, htmlFor, id }: { children: ReactNode; required?: boolean; htmlFor?: string; id?: string }) {
   return (
-    <label id={id} htmlFor={htmlFor} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block',
-      marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+    <label id={id} htmlFor={htmlFor} style={{ ...groupLabelStyle, display: 'block', marginBottom: 5 }}>
       {children}{required && requiredMark}
     </label>
   )

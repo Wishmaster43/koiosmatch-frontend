@@ -27,7 +27,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
-import { BTN_H } from '@/config/buttonMetrics'
+import { BTN_H_SM } from '@/config/buttonMetrics'
 import { Caption, SectionTitle } from '@/components/ui/typography'
 
 // What the UI is allowed to know about a duplicate: WHO and WHICH STATE. The 409
@@ -73,9 +73,11 @@ export default function DuplicateNotice({ match, variant, canRestore, restoring,
 
   // Colour-carrying tint actions in the notice's own tone (danger/warning) — the
   // §4 house tint via lib/tint (active pair: this panel IS a live verdict).
+  // Height/radius match Button's sm size (28/6) so this row's Open/Restore
+  // controls don't drift from the Dismiss Button sitting beside them.
   const actionBtn = {
-    display: 'inline-flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px',
-    fontSize: 12, fontWeight: 600, borderRadius: 8, cursor: 'pointer',
+    display: 'inline-flex', alignItems: 'center', gap: 6, height: BTN_H_SM, padding: '0 12px',
+    fontSize: 12, fontWeight: 600, borderRadius: 6, cursor: 'pointer',
     border: tintBorder(tone, true), background: tintBg(tone, true), color: chipInk(tone),
   } as const
 

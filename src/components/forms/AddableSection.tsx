@@ -89,14 +89,14 @@ export default function AddableSection({
       : { position: 'absolute', top: 8, right: 0 }) }}>
       {onEdit && (
         <button onClick={() => setEditingIdx(i)} title={t('edit', { defaultValue: 'Bewerken' })}
-          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- pre-existing bespoke 24x24 icon control (ctrlBtn), out of this ink/tint task's scope
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- this control renders inside the FROZEN candidate drawer (Experience/Education/Certifications/Skills/References/Background tabs, Danny 08-08); Button's iconOnly sm is 28x28 vs this canon 24x24 — swapping would visibly resize a frozen screen
           style={{ ...ctrlBtn, background: 'var(--bg)', color: 'var(--text-muted)' }}><Edit2 size={11} /></button>
       )}
       {onRemove && (
         // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1 on
         // its own pastel, AA fail (Opus r3.5).
         <button onClick={() => onRemove(i)} title={t('remove', { defaultValue: 'Verwijderen' })}
-          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- pre-existing bespoke 24x24 icon control (ctrlBtn), out of this ink/tint task's scope
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- this control renders inside the FROZEN candidate drawer (Experience/Education/Certifications/Skills/References/Background tabs, Danny 08-08); Button's iconOnly sm is 28x28 vs this canon 24x24 — swapping would visibly resize a frozen screen
           style={{ ...ctrlBtn, background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}><Trash2 size={11} /></button>
       )}
     </div>

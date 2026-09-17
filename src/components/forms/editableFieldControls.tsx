@@ -65,7 +65,11 @@ export function renderFieldControl(f: FieldRow, ctx: {
       clearable={f.clearable} clearLabel={typeof f.label === 'string' ? f.label : undefined} />
   }
   if (f.type === 'date') return <DateField value={v as string | undefined} onChange={val => setF(f.key, val)} style={compact} />
-  if (f.type === 'textarea') return <textarea value={(v as string) ?? ''} onChange={e => setF(f.key, e.target.value)} rows={3} style={{ ...compact, resize: 'vertical' }} />
+  // The row's visible label is a plain <span> (EditableFieldTable), not a <label
+  // htmlFor> — pass it through as aria-label so the control keeps an accessible
+  // name (§6: every input needs one).
+  if (f.type === 'textarea') return <textarea value={(v as string) ?? ''} onChange={e => setF(f.key, e.target.value)} rows={3}
+    aria-label={typeof f.label === 'string' ? f.label : undefined} style={{ ...compact, resize: 'vertical' }} />
   if (f.type === 'chips') {
     const arr = (Array.isArray(v) ? v : []).map(String)
     return <ChipMultiSelect options={f.chipOptions ?? []} selected={arr}
@@ -103,7 +107,8 @@ export function renderFieldControl(f: FieldRow, ctx: {
     return <RichTextEditor value={(v as string) ?? ''} onChange={val => setF(f.key, val)}
       expanded={!!richExpanded[f.key]} onToggleExpand={() => setRichExpanded(p => ({ ...p, [f.key]: !p[f.key] }))} />
   }
-  // Numbers/IDs render in mono (§4) — rates, cost codes, etc.
+  // Numbers/IDs render in mono (§4) — rates, cost codes, etc. Same accessible-name
+  // wiring as the textarea branch above.
   return <input value={(v as string) ?? ''} type={f.inputType} step={f.step} onChange={e => setF(f.key, e.target.value)}
-    style={f.mono ? { ...compact, ...monoStyle } : compact} />
+    aria-label={typeof f.label === 'string' ? f.label : undefined} style={f.mono ? { ...compact, ...monoStyle } : compact} />
 }
