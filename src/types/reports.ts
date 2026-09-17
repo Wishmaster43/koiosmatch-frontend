@@ -5,7 +5,6 @@
  * and keeps a `[key: string]: unknown` index signature for the dynamic,
  * key-based sorting the tables do.
  */
-import type { ReactNode } from 'react'
 
 // One selectable value in a report filter group (count shown as a small badge).
 interface FilterOption {
@@ -286,16 +285,6 @@ export interface MessageRow {
   body?: string
   error_message?: string
   [key: string]: unknown
-}
-
-// A sortable, renderable column descriptor for the candidate report table.
-export interface ReportColumn {
-  key: string
-  label: string
-  type?: string
-  align?: 'left' | 'right'
-  value: (c: ReportCandidate) => string | number | null
-  render: (c: ReportCandidate) => ReactNode
 }
 
 // Sort state shared by the report tables.

@@ -32,19 +32,7 @@ export interface CustomKpiCard {
   status: 'ok' | 'warn' | 'alert' | 'none'
 }
 
-// One funnel stage in the flow report. `reached_count` = cohort (distinct
-// applications that ever reached this stage → the real funnel); `current_count` =
-// pipeline-now occupancy (the FE fallback while the cohort is still filling).
-export interface FlowPhase {
-  key: string
-  label: string
-  current_count: number
-  reached_count: number
-  conversion_rate: number | null
-  avg_days_in_phase: number | null
-}
-
-// One stage tally for a recruiter (key matches FlowPhase.key — shared map).
+// One stage tally for a recruiter.
 interface RecruiterPhaseCount { key: string; label: string; count: number }
 
 // ── Vacancies report (GET /reports/vacancies) ────────────────────────────────
@@ -537,19 +525,6 @@ export interface TasksReportData {
   // KPI-BUILDER-FE-1: tenant-defined KPI cards for this entity, rendered as a second band row.
   custom_kpis?: CustomKpiCard[]
 }
-
-// ── Sources report (GET /reports/sources, REPORTS-2 fase 2) ──────────────────
-// Hand-written from the backend Service (no 2xx schema in the generated spec yet,
-// §10) — mirrors App\Services\Report\SourcesReport::run() exactly.
-
-// ── Thin reports (RAPPORTEN-SUITE-2) ─────────────────────────────────────────
-// Hand-written from the backend contract entry (the generated spec carries request
-// shapes + 401 only, no 2xx schema — §10). All five follow the shared portie recipe:
-// period echo + from/to + total + timeseries, axes of {value,label,count} that each
-// sum to `total`, and (except AI) a drill/advice pair per bar.
-
-// One axis bar, shared by the five thin reports.
-export interface ThinSegment { value: string; label: string; count: number; color?: string | null }
 
 // ── Reports hub (GET /reports, REPORTS-HUB-1) ────────────────────────────────
 // Hand-written from the backend Service (App\Services\Report\ReportsHubService) —

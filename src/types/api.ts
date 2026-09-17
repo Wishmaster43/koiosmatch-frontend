@@ -96,26 +96,9 @@ export interface ListResult<T = unknown> {
   perPage: number
 }
 
-/** Laravel API-Resource envelope ({ data, meta }). */
-export interface ResourceEnvelope<T = unknown> {
-  data: T
-  meta?: PaginationMeta
-}
-
 export interface PaginationMeta {
   total?: number
   per_page?: number
   current_page?: number
   last_page?: number
-}
-
-/** Rate-limit (429) and async-sync (202) response bodies. */
-export interface RateLimitBody {
-  message?: string
-  retry_after?: number
-}
-
-export interface AsyncSyncBody {
-  message?: string
-  status?: 'queued' | string
 }

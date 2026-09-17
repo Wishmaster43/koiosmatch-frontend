@@ -26,20 +26,6 @@ export interface CandidateFieldCardProps {
   autoEditSignal?: number
 }
 
-/** A tenant-defined custom field definition (GET /custom-fields?entity_type=candidate). */
-export interface CandidateCustomFieldDef {
-  id: string | number
-  key: string
-  label: string
-  label_i18n?: Record<string, string>
-  type: 'text' | 'number' | 'date' | 'select' | 'boolean' | 'textarea'
-  options?: string[]
-  required_for?: string[]
-  sort_order: number
-  active: boolean
-  has_data: boolean
-}
-
 /** Server-wide candidate stats (/candidates/stats) — totals across the filtered set. */
 export interface CandidateStats {
   by_status?: Array<{ value?: string; status?: string; count?: number }>

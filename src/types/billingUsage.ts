@@ -65,21 +65,6 @@ export interface KoiosUsageResponse {
   forecast?: KoiosUsageForecast | null
 }
 
-// GET /ai/koios/usage/daily?period=today|month — day x category series for the graph.
-// BREAKING (CREDITS-1): series[].cost -> series[].amount.
-export interface KoiosUsageDailyResponse {
-  series?: Array<{ date: string; category?: string; amount?: number }>
-  currency?: string
-}
-
-// GET /ai/koios/usage/summary?period=today|month — period totals + per-category.
-// BREAKING (CREDITS-1): total_cost -> total_amount; by_category[].cost -> amount.
-export interface KoiosUsageSummaryResponse {
-  total_amount?: number
-  currency?: string
-  by_category?: Array<{ category: string; amount?: number }>
-}
-
 // GET /billing/usage?period=month|prev_month&from=&to= (billing.view permission,
 // the new #settings/billing/billing_usage screen). Sale-price only — no purchase/
 // margin here, that lives on the superadmin tenant-usage screen only.
