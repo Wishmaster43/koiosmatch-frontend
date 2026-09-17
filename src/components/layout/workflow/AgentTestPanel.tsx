@@ -7,7 +7,7 @@
  */
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Send, Trash2, X, Bot, User, Zap } from 'lucide-react'
+import { Send, Trash2, X, Bot, User } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { formatSeconds } from '@/lib/formatters'
 import Button from '@/components/ui/Button'
@@ -47,7 +47,6 @@ export default function AgentTestPanel({ config }: {
   const [input,      setInput]      = useState('')
   const [variables,  setVariables]  = useState<Variable[]>([])
   const [loading,    setLoading]    = useState(false)
-  const [totalTokens, setTotalTokens] = useState(0)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   // Scroll to bottom whenever a new message arrives
@@ -97,7 +96,6 @@ export default function AgentTestPanel({ config }: {
         model:       data.model,
       }
       setMessages(prev => [...prev, assistantMsg])
-      if (assistantMsg.tokens) setTotalTokens(t => t + assistantMsg.tokens!)
     } catch {
       // Show a friendly error bubble instead of crashing
       setMessages(prev => [...prev, {
@@ -109,7 +107,7 @@ export default function AgentTestPanel({ config }: {
     }
   }
 
-  const clearChat = () => { setMessages([]); setTotalTokens(0) }
+  const clearChat = () => setMessages([])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 0 }}>
@@ -162,8 +160,9 @@ export default function AgentTestPanel({ config }: {
                   ? <User size={11} color="var(--color-primary)" />
                   : <Bot size={11} color="var(--color-success)" />}
               </div>
+              {/* GEEN USAGE IN DE CHAT (§14 canon): model/tokens are internal, never shown here. */}
               <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-                {msg.role === 'user' ? t('agentTest.you') : (msg.model ?? t('agentTest.agent'))}
+                {msg.role === 'user' ? t('agentTest.you') : t('agentTest.agent')}
               </span>
             </div>
             {/* Bubble */}
@@ -177,11 +176,10 @@ export default function AgentTestPanel({ config }: {
             }}>
               {msg.content}
             </div>
-            {/* Stats under assistant bubble */}
-            {msg.role === 'assistant' && (msg.tokens || msg.duration_ms) && (
+            {/* Stats under assistant bubble — latency only; tokens are internal usage (GEEN USAGE IN DE CHAT). */}
+            {msg.role === 'assistant' && msg.duration_ms && (
               <div style={{ display: 'flex', gap: 8, fontSize: 10, color: 'var(--text-muted)', paddingLeft: 4 }}>
-                {msg.tokens && <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}><Zap size={9} />{t('agentTest.tokens', { count: msg.tokens })}</span>}
-                {msg.duration_ms && <span>{fmtMs(msg.duration_ms)}</span>}
+                <span>{fmtMs(msg.duration_ms)}</span>
               </div>
             )}
           </div>
@@ -195,12 +193,10 @@ export default function AgentTestPanel({ config }: {
         <div ref={bottomRef} />
       </div>
 
-      {/* Stats bar */}
-      {totalTokens > 0 && (
-        <div style={{ padding: '4px 14px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-          <span style={{ fontSize: 10, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
-            <Zap size={9} /> {t('agentTest.tokensTotal', { count: totalTokens })}
-          </span>
+      {/* Clear bar — no usage/tokens shown here (GEEN USAGE IN DE CHAT); gated on
+          message presence instead of the now-unused totalTokens counter. */}
+      {messages.length > 0 && (
+        <div style={{ padding: '4px 14px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>
           <Button variant="ghost" size="sm" onClick={clearChat} style={{ gap: 4 }}>
             <Trash2 size={10} /> {t('agentTest.clear')}
           </Button>

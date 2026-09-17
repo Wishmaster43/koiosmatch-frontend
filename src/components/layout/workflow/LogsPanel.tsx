@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react'
 import { X, List, ChevronDown, History } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
+import { useNumberFormat } from '@/lib/formatters'
 import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import { StatusBadge, StepStatusBadge, DryRunBanner, formatDT, formatDuration } from '@/components/reports/runFormat'
 import { CANCELLABLE, StopRunButton } from './runControl'
@@ -41,6 +42,7 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
   onOpenHistory?: (run: RunRow) => void
 }) {
   const { t } = useTranslation('reports')
+  const { formatNumber } = useNumberFormat()
   // New run-control strings live in the workflows namespace (this wave's keys).
   const { t: tw } = useTranslation('workflows')
   const [runs,     setRuns]     = useState<RunRow[]>([])
@@ -150,8 +152,11 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
                           poll re-renders this) instead of "—" until it finishes. */}
                       {/* "Verwerkt" (neutral — a shifts sync has no candidates; Danny 25-07):
                           the run counter, else the LIVE items from a paged step. */}
-                      {t('runs.drawer.processed')}: {(run.candidates_count ?? run.candidates)
-                        || Math.max(0, ...steps.map(s => s.progress?.items ?? 0)) || '—'} · {t('runs.drawer.duration')}: {
+                      {t('runs.drawer.processed')}: {(() => {
+                        const processed = (run.candidates_count ?? run.candidates)
+                          || Math.max(0, ...steps.map(s => s.progress?.items ?? 0))
+                        return processed ? formatNumber(processed) : '—'
+                      })()} · {t('runs.drawer.duration')}: {
                         formatDuration(run.duration_ms ?? run.duration
                           ?? (CANCELLABLE.has(String(run.status)) && (run.started_at ?? run.created_at)
                             ? nowTick - new Date(String(run.started_at ?? run.created_at)).getTime()
@@ -228,7 +233,7 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
                                     two routes to one target are two lines. `overruled` marks a branch
                                     whose match was superseded. */}
                                 → {r.handle ? <Mono style={{ fontSize: 11 }}>[{r.handle}] </Mono> : null}
-                                <span style={{ fontWeight: 600, color: 'var(--text)' }}>{r.to_label ?? '—'}</span>: {r.matched ?? 0}/{r.total ?? 0}
+                                <span style={{ fontWeight: 600, color: 'var(--text)' }}>{r.to_label ?? '—'}</span>: {formatNumber(r.matched ?? 0)}/{formatNumber(r.total ?? 0)}
                                 {r.overruled ? <span style={{ color: 'var(--text-muted)' }}> · {t('runs.routingOverruled')}</span> : null}
                               </Caption>
                             ))}

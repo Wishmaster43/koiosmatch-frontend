@@ -111,15 +111,9 @@ export function resolveNotificationTarget(n: AppNotification): NotificationTarge
   const rawId = (meta.id as string | number | undefined) ?? (n as { entity_id?: string | number }).entity_id
   const page = type ? ENTITY_PAGE[type] : undefined
   if (page && rawId != null) return { page, id: String(rawId) }
-  // Fall back to a same-app hash link the backend already resolved, e.g. "#tasks?open=42".
-  const link = n.link
-  if (link && link.startsWith('#')) {
-    const raw = link.replace(/^#/, '')
-    const [p, q] = raw.split('?')
-    const id = q ? new URLSearchParams(q).get('open') : null
-    if (p && id) return { page: p, id }
-  }
-  return null
+  // Fall back to a same-app hash link the backend already resolved, e.g. "#tasks?open=42" —
+  // reuses parseHashTarget so both paths genuinely share the parse (D1 audit fix).
+  return n.link ? parseHashTarget(n.link) : null
 }
 
 // Impure: navigate to a resolved target via the shell's own hash-history

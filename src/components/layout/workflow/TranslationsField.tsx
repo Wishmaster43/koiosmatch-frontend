@@ -23,7 +23,7 @@ import type { WorkflowField } from '@/types/workflow'
 import type { OnChange } from './fieldControls/types'
 import { ExpandableTextarea } from './fields'
 import { PANEL_INPUT_STYLE } from './panelInputStyle'
-import { SectionTitle, Caption, BodyText, monoStyle } from '@/components/ui/typography'
+import { SectionTitle, Caption, BodyText, monoStyle, groupLabelStyle } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import CreatableSelect from '@/components/ui/CreatableSelect'
@@ -32,9 +32,9 @@ import { languageDisplayName, ADDABLE_LANGUAGE_CODES } from '@/lib/languageNames
 // The nested value shape this field persists: language code -> sub-field -> text.
 type TranslationsValue = Record<string, Record<string, string>>
 
-// Mirrors ConfigPanel's own field-label look (10px uppercase muted) so a
+// The shared house GroupLabel identity (ConfigPanel's own field-label look) so a
 // sub-field label inside a language block reads identically to the main tab.
-const SUB_LABEL_STYLE = { display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: 6 }
+const SUB_LABEL_STYLE = { ...groupLabelStyle, display: 'block', marginBottom: 6 }
 
 export function TranslationsField({ field, value, onChange, config }: {
   field: WorkflowField

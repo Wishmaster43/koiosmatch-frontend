@@ -9,7 +9,7 @@ import { useState } from 'react'
 import { ChevronRight, Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
-import { Caption } from '@/components/ui/typography'
+import { Caption, monoStyle } from '@/components/ui/typography'
 
 // Cap what we render client-side so a huge (already BE-capped) list stays snappy.
 const MAX_ROWS = 100
@@ -47,9 +47,9 @@ function LeafRow({ label, value, depth }: { label: string; value: unknown; depth
   const str = formatValue(value)
   return (
     <div style={{ display: 'flex', gap: 8, alignItems: 'baseline', padding: '3px 4px', paddingLeft: 4 + depth * 14 }}>
-      <Caption style={{ fontFamily: 'monospace', flexShrink: 0 }}>{label}:</Caption>
+      <Caption style={{ ...monoStyle, flexShrink: 0 }}>{label}:</Caption>
       <span title={typeof value === 'string' && value.length > 140 ? value : undefined}
-        style={{ fontSize: 11, fontFamily: 'monospace', color: 'var(--text)', wordBreak: 'break-word',
+        style={{ ...monoStyle, fontSize: 11, color: 'var(--text)', wordBreak: 'break-word',
                  fontStyle: value == null ? 'italic' : 'normal' }}>
         {str}
       </span>
@@ -79,7 +79,7 @@ function BranchNode({ label, value, depth, defaultOpen, hint, query, t }: {
         onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
         <ChevronRight size={11} color="var(--text-muted)"
           style={{ flexShrink: 0, transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.12s' }} />
-        <span style={{ fontSize: 11, fontWeight: 600, fontFamily: 'monospace', color: 'var(--text)' }}>{label}</span>
+        <span style={{ ...monoStyle, fontSize: 11, fontWeight: 600, color: 'var(--text)' }}>{label}</span>
         <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
           {hint ?? (isArr ? t('tree.items', { n: count }) : '')}
         </span>

@@ -165,9 +165,11 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
                           placeholder={t('fields.valuePlaceholder')} aria-label={t('fields.valuePlaceholder')}
                           style={{ flex: 1, padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
                       ))}
-                      <button onClick={() => delCond(gi, ci)} aria-label={t('canvas.deleteCondition')} title={t('canvas.deleteCondition')}
-                        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- danger-ink ghost icon: no Button tone carries danger ink on a bare face (ProfileTab precedent)
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger-text)', padding: 4 }}><Trash2 size={12} /></button>
+                      {/* HUISSTIJL-1: same delete action as the group-delete Button above — dangerSoft carries this ink. */}
+                      <Button variant="dangerSoft" size="sm" iconOnly onClick={() => delCond(gi, ci)}
+                        aria-label={t('canvas.deleteCondition')} title={t('canvas.deleteCondition')}>
+                        <Trash2 size={12} />
+                      </Button>
                     </div>
                     {hint && (
                       <div style={{ fontSize: 10, color: 'var(--text-muted)', fontStyle: 'italic', marginLeft: 34, marginTop: 2 }}>{hint}</div>

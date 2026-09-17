@@ -10,7 +10,7 @@ import { Zap, Trash2, Play } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
-import { SectionTitle, Caption, BodyText } from '@/components/ui/typography'
+import { SectionTitle, Caption, BodyText, groupLabelStyle } from '@/components/ui/typography'
 import { requiredMark } from '@/components/forms/fields'
 import Button from '@/components/ui/Button'
 import DrawerTabs from '@/components/drawer/DrawerTabs'
@@ -141,6 +141,16 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
   const schema = MODULE_SCHEMAS[type] || []
   const Icon   = meta?.Icon as unknown as LucideIcon | undefined
   const output = node.data.output
+  // The execution tab's own count suffix — never append "(0)" for a truthy-but-empty
+  // output array (D8: a counter badge must never render "0"). Not routed through
+  // useNumberFormat: that hook's import chain (lib/formatters -> lib/datetime ->
+  // src/i18n) has a real-instance i18n-init side effect (DATETIME-IMPORT-LES, §2)
+  // that breaks the three ConfigPanel test suites mocking a bare 'react-i18next';
+  // this small step-count badge never realistically reaches four digits.
+  const outputCount = Array.isArray(output) ? output.length : (output ? 1 : 0)
+  const executionTabLabel = outputCount > 0
+    ? `${t('config.tabExecution')} (${outputCount})`
+    : t('config.tabExecution')
   const config = node.data.config as Record<string, unknown> | undefined
   // ai_agent's instruction-list output_field allow-list, when the backend serves
   // one for this step's module type; undefined/empty means the InstructionListField
@@ -218,7 +228,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
                 no htmlFor and FieldInput takes no id, so aria-required cannot be
                 wired here — that needs FieldInput itself (out of this file's scope). */}
             {!isTranslations && (
-              <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
+              <label style={{ ...groupLabelStyle, display: 'block', marginBottom: 6 }}>
                 {fieldLabel(t, field.label as string | undefined)}
                 {isRequired && requiredMark}
               </label>
@@ -278,7 +288,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
             { id: 'instructions', label: t('config.tabInstructions') },
             { id: 'advanced', label: t('config.tabAdvanced') },
             { id: 'testing',      label: `▶ ${t('config.tabTest')}` },
-            { id: 'execution',  label: output ? `${t('config.tabExecution')} (${Array.isArray(output) ? output.length : 1})` : t('config.tabExecution') },
+            { id: 'execution',  label: executionTabLabel },
           ] : [
             { id: 'settings', label: t('config.tabSettings') },
             // WEBHOOK-LOG-FE-2: the Webhook Trigger step gets its own "Verzoeken"
@@ -293,7 +303,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
             ...(translationsFieldCount > 0
               ? [{ id: 'translations', label: t('config.tabTranslations') }]
               : []),
-            { id: 'execution',   label: output ? `${t('config.tabExecution')} (${Array.isArray(output) ? output.length : 1})` : t('config.tabExecution') },
+            { id: 'execution',   label: executionTabLabel },
           ]}
           active={activeTab} onChange={switchTab} />
       </div>
@@ -334,7 +344,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
                 <div key={field.key}>
                   {/* REQUIRED-A11Y-1: shared house asterisk (fields.tsx); see the
                       renderFields comment above for why aria-required stays a gap here. */}
-                  <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
+                  <label style={{ ...groupLabelStyle, display: 'block', marginBottom: 6 }}>
                     {fieldLabel(t, field.label as string | undefined)}
                     {isRequired && requiredMark}
                   </label>
@@ -379,7 +389,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {Object.entries(config).map(([k, v]) => (
                   <div key={k}>
-                    <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{k}</label>
+                    <label style={{ ...groupLabelStyle, display: 'block', marginBottom: 6 }}>{k}</label>
                     <BodyText style={{ wordBreak: 'break-word' }}>
                       {typeof v === 'object' ? JSON.stringify(v) : String(v ?? '—')}
                     </BodyText>

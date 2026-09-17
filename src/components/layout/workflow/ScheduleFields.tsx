@@ -12,6 +12,7 @@ import type { ScheduleForm } from './useScheduleForm'
 // stack and is equally safe inside a trapped dialog.
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import Button from '@/components/ui/Button'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
 // Hoisted OUTSIDE the style objects: the accent-fill lint selector walks
@@ -154,10 +155,8 @@ export function ScheduleFields({ form }: { form: ScheduleForm }) {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
             <label style={fieldLabelInline}>{t('scheduleModal.times')}</label>
-            <Button variant="ghost" onClick={addTime} disabled={times.length >= 12}
-              style={{ fontSize: 11, color: times.length >= 12 ? undefined : 'var(--color-primary-text)', fontWeight: 600, padding: 0 }}>
-              {t('scheduleModal.addTime')}
-            </Button>
+            {/* HUISSTIJL-1: the shared "+ add" affordance, never coloured text with a plus. */}
+            <DrawerAddButton onClick={addTime} label={t('scheduleModal.addTime')} disabled={times.length >= 12} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {times.map((tm, i) => (

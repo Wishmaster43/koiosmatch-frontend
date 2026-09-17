@@ -22,6 +22,7 @@ import { unwrapList } from '@/lib/api'
 // <select> for the template picker below.
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { Caption } from '@/components/ui/typography'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 
 // ── Preview rendering ────────────────────────────────────────────────────────────
 
@@ -98,6 +99,10 @@ export default function WhatsappTemplateField({ value, onChange, config, variabl
   const { t } = useTranslation('workflows')
   const [templates, setTemplates] = useState<WaTemplateOption[]>([])
   const [loading, setLoading] = useState(true)
+  // FAILURE-STATE FIX (mirrors WebhookAgentSelect in this folder): a fetch error is
+  // NOT the same as "this tenant has zero approved templates" — a swallowed catch
+  // would render the misleading empty-state copy on a real backend failure.
+  const [loadError, setLoadError] = useState(false)
   // CreatableSelect's trigger is a <button>, which a plain aria-label cannot
   // name — a sr-only span + aria-labelledby names it instead (§4).
   const templateLabelId = useId()
@@ -107,7 +112,7 @@ export default function WhatsappTemplateField({ value, onChange, config, variabl
     let alive = true
     import('@/lib/api').then(m => m.default.get('/whatsapp-templates'))
       .then(r => { if (alive) setTemplates((unwrapList(r).rows) as WaTemplateOption[]) })
-      .catch(() => {})
+      .catch(() => { if (alive) setLoadError(true) })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
   }, [])
@@ -176,9 +181,13 @@ export default function WhatsappTemplateField({ value, onChange, config, variabl
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {/* Template select (approved templates only) */}
+      {/* Template select (approved templates only) — failure is a distinct state from
+          "no templates yet" (four UI states, §3): a fetch error means we don't actually
+          know whether the tenant has templates, so never claim the empty copy. */}
       {loading
         ? <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('wa.templateLoading')}</div>
+        : loadError
+        ? <ErrorBanner variant="subtle">{t('common:actionFailed')}</ErrorBanner>
         : (
           <>
             <span id={templateLabelId} className="sr-only">{t('wa.template')}</span>
@@ -188,7 +197,7 @@ export default function WhatsappTemplateField({ value, onChange, config, variabl
               style={{ width: '100%', padding: '7px 9px', fontSize: 13 }} />
           </>
         )}
-      {!loading && templates.length === 0 && (
+      {!loading && !loadError && templates.length === 0 && (
         <Caption>{t('wa.templateEmpty')}</Caption>
       )}
 
