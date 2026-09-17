@@ -35,6 +35,7 @@ import { ShieldCheck, ShieldAlert, HelpCircle } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import Toggle from '@/components/ui/Toggle'
 import { GroupLabel, Caption, BodyText } from '@/components/ui/typography'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 import { useDateFormat } from '@/lib/datetime'
 import { useAuth } from '@/context/AuthContext'
 import { resolveRetentionConsent, useRetentionConsentMonths } from '@/pages/candidates/shared'
@@ -106,13 +107,12 @@ export default function RetentionConsentBlock({ optIn, consentAt, expiresAt, onT
       </div>
 
       {/* Validity of the consent itself — the line that stops a lapsed consent from
-          reading as active. Soft-tinted per §4, never a solid fill. Dynamic status.tone
-          color requires inline color-mix; the tint helpers cannot handle runtime-computed
-          colors (mirrors candidate RetentionConsentBlock). */}
+          reading as active. Soft-tinted per §4 via the lib/tint house helpers, which
+          work for hex AND runtime var() tokens (status.tone included) — never a solid fill. */}
       <div id={statusId} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 8,
-        fontSize: 12, fontWeight: 600, color: status.tone,
-        background: `color-mix(in srgb, ${status.tone} 10%, transparent)`,
-        border: `1px solid color-mix(in srgb, ${status.tone} 35%, transparent)` }}>
+        fontSize: 12, fontWeight: 600, color: chipInk(status.tone),
+        background: tintBg(status.tone),
+        border: tintBorder(status.tone) }}>
         {status.Icon && <status.Icon size={14} aria-hidden="true" style={{ flexShrink: 0 }} />}
         <span>{status.text}</span>
       </div>
@@ -125,9 +125,9 @@ export default function RetentionConsentBlock({ optIn, consentAt, expiresAt, onT
       </Caption>
 
       {canViewRetention && (
-        <div style={{ marginTop: 10, padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, color: dossier.tone,
-          background: `color-mix(in srgb, ${dossier.tone} 10%, transparent)`,
-          border: `1px solid color-mix(in srgb, ${dossier.tone} 35%, transparent)` }}>
+        <div style={{ marginTop: 10, padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, color: chipInk(dossier.tone),
+          background: tintBg(dossier.tone),
+          border: tintBorder(dossier.tone) }}>
           {dossier.label}
         </div>
       )}

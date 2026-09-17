@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDocumentTypes, resolveDocTypeIcon } from '@/lib/useDocumentTypes'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import { SectionTitle, Caption } from '@/components/ui/typography'
 import PdfPreview from './PdfPreview'
 import { getActiveTenantId } from '@/lib/api'
 
@@ -182,8 +183,8 @@ export default function DocPreviewModal({ doc, onClose, docTypeScope = 'candidat
             <DocIcon size={13} color="var(--color-on-accent)" />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</div>
-            {doc.type && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{typeLabel}</div>}
+            <SectionTitle as="div" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</SectionTitle>
+            {doc.type && <Caption as="div">{typeLabel}</Caption>}
           </div>
         </div>
       )}>

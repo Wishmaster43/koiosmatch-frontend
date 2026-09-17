@@ -1282,6 +1282,8 @@
     "escalated": "Escalato",
     "escalatedHint": "Una chat escalata è stata presa in carico da un collaboratore.",
     "loadingMessages": "Caricamento messaggi…",
+    "messagesError": "Impossibile caricare i messaggi",
+    "messagesRetry": "Riprova",
     "noMessages": "Nessun messaggio in questa conversazione",
     "unknownContact": "Contatto sconosciuto",
     "thisApplication": "Questa candidatura",

@@ -9,15 +9,17 @@ import type { MouseEventHandler, ReactNode } from 'react'
 // Tone → ink colour (frozen calm-header glyph control, Danny 08-08): muted for the
 // merge icon, danger for archive/delete — opacity travels separately since it
 // differs per call site (0.8 merge, 0.7 archive, none on the trash mark-deletion icon).
-const TONE_COLOR: Record<'muted' | 'danger', string> = {
+// 'archive' added for ArchivedBanner's restore glyph, same shape, own token.
+const TONE_COLOR: Record<'muted' | 'danger' | 'archive', string> = {
   muted: 'var(--text-muted)',
   danger: 'var(--color-danger-text)',
+  archive: 'var(--color-archive)',
 }
 
 interface DrawerGlyphButtonProps {
   onClick: MouseEventHandler<HTMLButtonElement>
   title: string
-  tone: 'muted' | 'danger'
+  tone: 'muted' | 'danger' | 'archive'
   opacity?: number
   children: ReactNode
 }

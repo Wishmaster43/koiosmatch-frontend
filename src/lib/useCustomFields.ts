@@ -77,6 +77,12 @@ export function useCustomFields(entityType: CustomFieldEntityType) {
   const cached = cacheByEntity.get(tenantEntityKey(entityType))
   const [raw,     setRaw]     = useState<RawDef[]>(cached ?? [])
   const [loading, setLoading] = useState(!cached)
+  // Distinct from an empty-defs tenant (§8 D8: a swallowed fetch error must never
+  // render the same blank state as a genuine "no active custom fields" tenant).
+  const [error,   setError]   = useState(false)
+  // Bumped by refetch() below so a caller can force a re-run of the load effect
+  // (a retry button) without waiting for entityType to change.
+  const [retryNonce, setRetryNonce] = useState(0)
 
   // Fetch once per tenant+entity type; a cache hit (from an earlier hook instance —
   // settings editor + drawer both mount this) skips the request entirely. The key
@@ -86,12 +92,12 @@ export function useCustomFields(entityType: CustomFieldEntityType) {
     const key = tenantEntityKey(entityType)
     const hit = cacheByEntity.get(key)
     if (hit) { setRaw(hit); setLoading(false); return }
-    setLoading(true)
+    setLoading(true); setError(false)
     api.get('/custom-fields', { params: { entity_type: entityType } })
       .then(r => { const list = (unwrapList(r).rows) as RawDef[]; cacheByEntity.set(key, list); setRaw(list) })
-      .catch(() => {})
+      .catch(() => setError(true))
       .finally(() => setLoading(false))
-  }, [entityType])
+  }, [entityType, retryNonce])
 
   // Map the generic defs to CustomFieldDef in the active language.
   const allFields = useMemo<CustomFieldDef[]>(() => raw
@@ -112,9 +118,11 @@ export function useCustomFields(entityType: CustomFieldEntityType) {
   // mutation (create/update/delete/reorder) refetches on the next mount, other
   // entities/tenants untouched.
   const invalidate = () => { cacheByEntity.delete(tenantEntityKey(entityType)) }
+  // Clears the cache AND forces an immediate re-fetch — the retry action for a failed load.
+  const refetch = () => { invalidate(); setRetryNonce(n => n + 1) }
 
   // fields = what the entity's Extra tab renders and gates on: active AND
   // visible_in_ui. A field kept active-but-API-only stays reachable via the API/
   // imports (settings still lists it in allFields) while disappearing from the UI.
-  return { fields: allFields.filter(f => f.active && f.visible_in_ui), allFields, loading, invalidate }
+  return { fields: allFields.filter(f => f.active && f.visible_in_ui), allFields, loading, error, invalidate, refetch }
 }

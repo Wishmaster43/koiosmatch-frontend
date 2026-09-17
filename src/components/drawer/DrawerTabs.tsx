@@ -9,6 +9,10 @@ import { useRovingTabs } from '@/hooks/useRovingTabs'
 
 export interface DrawerTabItem { id: string; label: ReactNode; badge?: string | number }
 
+// A badge never renders for an empty count — undefined/null/0/'0' all hide it (SCHERMWAARHEID-1).
+const hasBadge = (badge: DrawerTabItem['badge']): boolean =>
+  badge != null && badge !== 0 && badge !== '0'
+
 // The tab strip itself: renders each tab as a roving-tabindex button, active state driven entirely by the caller.
 export default function DrawerTabs({ tabs = [], active, onChange }: {
   tabs?: DrawerTabItem[]
@@ -28,7 +32,7 @@ export default function DrawerTabs({ tabs = [], active, onChange }: {
             // Active tab text uses the text-contrast token, not the raw brand color (readability on tinted primaries).
             color: active === tab.id ? 'var(--color-primary-text)' : 'var(--text-muted)',
             fontWeight: active === tab.id ? 600 : 400, cursor: 'pointer', marginBottom: -1 }}>
-          {tab.label}{tab.badge != null ? ` ${tab.badge}` : ''}
+          {tab.label}{hasBadge(tab.badge) ? ` ${tab.badge}` : ''}
         </button>
       ))}
     </div>

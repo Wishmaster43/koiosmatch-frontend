@@ -9,6 +9,8 @@
  */
 import type { ReactNode } from 'react'
 import { ArchiveRestore } from 'lucide-react'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
+import DrawerGlyphButton from './DrawerGlyphButton'
 import type { Id } from '@/types/common'
 
 interface ArchivedBannerProps {
@@ -29,14 +31,13 @@ interface ArchivedBannerProps {
 export default function ArchivedBanner({ id, message, onRestore, restoreLabel }: ArchivedBannerProps) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, padding: '7px 10px', borderRadius: 8, fontSize: 12,
-      color: 'var(--color-archive)', background: 'color-mix(in srgb, var(--color-archive) 8%, transparent)',
-      border: '1px solid color-mix(in srgb, var(--color-archive) 28%, transparent)' }}>
+      color: chipInk('var(--color-archive)'), background: tintBg('var(--color-archive)'),
+      border: tintBorder('var(--color-archive)') }}>
       <span style={{ flex: 1, minWidth: 0 }}>{message}</span>
       {onRestore && (
-        <button onClick={() => onRestore(id)} title={restoreLabel} aria-label={restoreLabel}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, display: 'flex', color: 'var(--color-archive)' }}>
+        <DrawerGlyphButton onClick={() => onRestore(id)} title={restoreLabel} tone="archive">
           <ArchiveRestore size={14} />
-        </button>
+        </DrawerGlyphButton>
       )}
     </div>
   )

@@ -14,7 +14,7 @@
 import { useTranslation } from 'react-i18next'
 import { humanizeIsoDates } from '@/lib/localDate'
 import AssistTextPreview from '@/components/ui/richtext/AssistTextPreview'
-import { Caption } from '@/components/ui/typography'
+import { Caption, GroupLabel } from '@/components/ui/typography'
 import { AlignLeft, ListChecks, Check } from 'lucide-react'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import Spinner from '@/components/ui/Spinner'
@@ -64,9 +64,9 @@ export default function ConversationAssistSection({ conversationId, hasMessages,
     <div style={{ marginTop: 4, marginBottom: 6 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
         <KoiosAiMark size={14} />
-        <span style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>
+        <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>
           {t('conversations.assist.title')}
-        </span>
+        </GroupLabel>
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginBottom: 4 }}>
         {MODES.map(({ mode: m, icon: Icon }) => (

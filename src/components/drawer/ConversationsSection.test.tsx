@@ -592,3 +592,38 @@ describe('ConversationsSection · badgeApplicationId (GESPREK-CONSISTENT-1-FE)',
     expect(screen.queryByText('conversations.thisApplication')).toBeNull()
   })
 })
+
+// §8 D8: a swallowed per-thread message-fetch failure must never render as the
+// same "no messages yet" text as a genuinely empty thread — it gets its own
+// alert row with a working retry that re-issues the request.
+describe('ConversationsSection · message fetch failure + retry (§8 D8)', () => {
+  it('shows an alert row (not the empty-messages text) on a rejected fetch, and retry re-issues the GET', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/conversations') return Promise.resolve({ data: { data: THREADS } })
+      if (url === '/conversations/conv-1/messages') return Promise.reject(new Error('network down'))
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+
+    expect(await screen.findByText('conversations.messagesError')).toBeInTheDocument()
+    expect(screen.queryByText('conversations.noMessages')).toBeNull()
+
+    const firstCallCount = vi.mocked(api.get).mock.calls.filter(c => c[0] === '/conversations/conv-1/messages').length
+    expect(firstCallCount).toBe(1)
+
+    // Retry fires a SECOND GET for the same thread (assert the request, §13).
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/conversations') return Promise.resolve({ data: { data: THREADS } })
+      if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: MESSAGES } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    await user.click(screen.getByRole('button', { name: 'error.retry' }))
+
+    await waitFor(() => {
+      const callCount = vi.mocked(api.get).mock.calls.filter(c => c[0] === '/conversations/conv-1/messages').length
+      expect(callCount).toBe(2)
+    })
+    expect(await screen.findByText('Ja! We plannen een intake.')).toBeInTheDocument()
+  })
+})

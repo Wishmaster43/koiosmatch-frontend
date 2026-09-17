@@ -1282,6 +1282,8 @@
     "escalated": "Geëscaleerd",
     "escalatedHint": "Een geëscaleerd gesprek is overgenomen door een medewerker.",
     "loadingMessages": "Berichten laden…",
+    "messagesError": "Berichten laden mislukt",
+    "messagesRetry": "Opnieuw proberen",
     "noMessages": "Geen berichten in dit gesprek",
     "unknownContact": "Onbekend contact",
     "thisApplication": "Deze sollicitatie",

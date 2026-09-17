@@ -26,6 +26,7 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import SectionCard, { sectionBlock } from '@/components/ui/SectionCard'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import { GroupLabel } from '@/components/ui/typography'
 
 // Canon field style (G33/fieldMetrics) — was its own padding-6/font-12/radius-6 copy.
@@ -105,7 +106,7 @@ interface Props {
 export default function CustomFieldsTab({ entityType, values, onSave }: Props) {
   const { t } = useTranslation('common')
   const { formatDate } = useDateFormat()
-  const { fields, loading } = useCustomFields(entityType)
+  const { fields, loading, error, refetch } = useCustomFields(entityType)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft]     = useState<Record<string, unknown>>({})
   // Base id for each select-type field's label — CreatableSelect's trigger is a
@@ -115,8 +116,14 @@ export default function CustomFieldsTab({ entityType, values, onSave }: Props) {
   const labelBaseId = useId()
 
   // The drawer only mounts this tab once ≥1 active def exists; still, guard the
-  // brief window before the defs load or a stale gate (never render half a grid).
-  if (loading || fields.length === 0) return null
+  // brief window before the defs load. A failed load is its OWN honest state
+  // (§8 D8) — never the same silent blank the "no active defs" case renders.
+  if (loading) return null
+  if (error) {
+    // CLONE-BY-CONSTRUCTION-1: same face as ConversationsSection's per-thread error row.
+    return <ErrorBanner variant="subtle" onRetry={refetch}>{t('error.loadFailed')}</ErrorBanner>
+  }
+  if (fields.length === 0) return null
 
   const simpleFields = fields.filter(f => f.type !== 'textarea')
   const textFields   = fields.filter(f => f.type === 'textarea')

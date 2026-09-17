@@ -1282,6 +1282,8 @@
     "escalated": "Escalated",
     "escalatedHint": "An escalated chat has been taken over by a staff member.",
     "loadingMessages": "Loading messages…",
+    "messagesError": "Could not load messages",
+    "messagesRetry": "Try again",
     "noMessages": "No messages in this conversation",
     "unknownContact": "Unknown contact",
     "thisApplication": "This application",

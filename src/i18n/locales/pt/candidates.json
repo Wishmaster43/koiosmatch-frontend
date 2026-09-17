@@ -1282,6 +1282,8 @@
     "escalated": "Escalado",
     "escalatedHint": "Uma conversa escalada foi assumida por um colaborador.",
     "loadingMessages": "A carregar mensagens…",
+    "messagesError": "Não foi possível carregar as mensagens",
+    "messagesRetry": "Tentar novamente",
     "noMessages": "Nenhuma mensagem nesta conversa",
     "unknownContact": "Contacto desconhecido",
     "thisApplication": "Esta candidatura",

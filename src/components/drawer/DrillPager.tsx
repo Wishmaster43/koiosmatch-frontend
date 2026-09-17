@@ -20,6 +20,7 @@
  */
 import { ChevronUp, ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import Button from '@/components/ui/Button'
 
 export interface DrillPagerProps {
   /** 1-based position of the open record within the caller's own filtered rows. */
@@ -30,15 +31,6 @@ export interface DrillPagerProps {
   onNext?: () => void
 }
 
-// Mirrors the drawer detail title-row icon button (28px, var(--border)/var(--bg)) —
-// see ContactDetail/LocationDetail's own merge/delete buttons.
-const btnStyle = (disabled: boolean) => ({
-  width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-  borderRadius: 7, border: '1px solid var(--border)', background: 'var(--bg)',
-  color: disabled ? 'var(--border)' : 'var(--text-muted)',
-  cursor: disabled ? 'default' : 'pointer',
-} as const)
-
 // Purely rendered up/down stepper (see the module doc above): buttons disable themselves whenever the caller has no onPrev/onNext, never wrapping around.
 export default function DrillPager({ index, total, onPrev, onNext }: DrillPagerProps) {
   const { t } = useTranslation('common')
@@ -46,15 +38,21 @@ export default function DrillPager({ index, total, onPrev, onNext }: DrillPagerP
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
       {/* Arrows only — Danny 03-08 ("drillPager.position — weg die txt") killed the
           visible "x van y" counter; the position lives on as the buttons' hover title
-          so the info stays reachable without the visual noise. */}
-      <button type="button" onClick={onPrev} disabled={!onPrev}
-        title={t('drillPager.prevAt', { index, total })} aria-label={t('drillPager.prev')} style={btnStyle(!onPrev)}>
+          so the info stays reachable without the visual noise. NOT visually a no-op:
+          Button variant="secondary" size="sm" paints bg var(--surface) vs the old
+          var(--bg), ink var(--text) vs var(--text-muted), radius 6 vs 7, and its
+          disabled recipe fills solid var(--border) with no border instead of the old
+          bordered pale-chevron box. This renders inside the FROZEN candidate/customer
+          drilldowns (ContactDetail.tsx, SubEntityTitleActions.tsx,
+          candidates/drawer/ApplicationRow.tsx) — flagged to Danny for those screens. */}
+      <Button variant="secondary" iconOnly size="sm" onClick={onPrev} disabled={!onPrev}
+        title={t('drillPager.prevAt', { index, total })} aria-label={t('drillPager.prev')}>
         <ChevronUp size={14} />
-      </button>
-      <button type="button" onClick={onNext} disabled={!onNext}
-        title={t('drillPager.nextAt', { index, total })} aria-label={t('drillPager.next')} style={btnStyle(!onNext)}>
+      </Button>
+      <Button variant="secondary" iconOnly size="sm" onClick={onNext} disabled={!onNext}
+        title={t('drillPager.nextAt', { index, total })} aria-label={t('drillPager.next')}>
         <ChevronDown size={14} />
-      </button>
+      </Button>
     </div>
   )
 }

@@ -68,4 +68,11 @@ describe('DrawerTabs · tablist keyboard model (§6 WCAG 2.2 AA)', () => {
     render(<DrawerTabs tabs={[{ id: 'a', label: 'Alpha', badge: 3 }]} active="a" onChange={() => {}} />)
     expect(screen.getByRole('tab', { name: 'Alpha 3' })).toBeInTheDocument()
   })
+
+  // SCHERMWAARHEID-1: a zero count is not a badge — `badge: 0`/`'0'` renders no digit.
+  it('never renders a zero badge', () => {
+    render(<DrawerTabs tabs={[{ id: 'a', label: 'Alpha', badge: 0 }, { id: 'b', label: 'Bravo', badge: '0' }]} active="a" onChange={() => {}} />)
+    expect(screen.getByRole('tab', { name: 'Alpha' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Bravo' })).toBeInTheDocument()
+  })
 })

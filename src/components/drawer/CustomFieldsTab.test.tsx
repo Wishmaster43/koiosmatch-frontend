@@ -18,15 +18,27 @@ afterEach(() => vi.clearAllMocks())
 
 describe('CustomFieldsTab', () => {
   it('renders nothing while loading', () => {
-    mockedUseCustomFields.mockReturnValue({ fields: [], allFields: [], loading: true, invalidate: vi.fn() })
+    mockedUseCustomFields.mockReturnValue({ fields: [], allFields: [], loading: true, error: false, invalidate: vi.fn(), refetch: vi.fn() })
     const { container } = render(<CustomFieldsTab entityType="task" values={{}} onSave={vi.fn()} />)
     expect(container).toBeEmptyDOMElement()
   })
 
   it('renders nothing when there are no active defs (no defs → no tab content)', () => {
-    mockedUseCustomFields.mockReturnValue({ fields: [], allFields: [], loading: false, invalidate: vi.fn() })
+    mockedUseCustomFields.mockReturnValue({ fields: [], allFields: [], loading: false, error: false, invalidate: vi.fn(), refetch: vi.fn() })
     const { container } = render(<CustomFieldsTab entityType="task" values={{}} onSave={vi.fn()} />)
     expect(container).toBeEmptyDOMElement()
+  })
+
+  // §8 D8: a failed load must render its OWN honest error+retry state, never the
+  // same silent blank the "no active defs" case renders.
+  it('renders an error row with a retry action on a failed load, distinct from the empty-defs blank', async () => {
+    const refetch = vi.fn()
+    mockedUseCustomFields.mockReturnValue({ fields: [], allFields: [], loading: false, error: true, invalidate: vi.fn(), refetch })
+    render(<CustomFieldsTab entityType="task" values={{}} onSave={vi.fn()} />)
+    expect(screen.getByRole('alert')).toBeInTheDocument()
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: /opnieuw|try again/i }))
+    expect(refetch).toHaveBeenCalledTimes(1)
   })
 
   it('renders the field label + current value once ≥1 active def exists', () => {
@@ -34,7 +46,9 @@ describe('CustomFieldsTab', () => {
       fields: [{ key: 'budget', label: 'Budget', type: 'number', sort_order: 0, active: true, has_data: false, visible_in_ui: true }],
       allFields: [],
       loading: false,
+      error: false,
       invalidate: vi.fn(),
+      refetch: vi.fn(),
     })
     render(<CustomFieldsTab entityType="task" values={{ budget: 500 }} onSave={vi.fn()} />)
     expect(screen.getByText('Budget')).toBeInTheDocument()
@@ -49,7 +63,9 @@ describe('CustomFieldsTab', () => {
       fields: [{ key: 'region', label: 'Regio', type: 'select', options: ['Noord', 'Zuid'], sort_order: 0, active: true, has_data: false, visible_in_ui: true }],
       allFields: [],
       loading: false,
+      error: false,
       invalidate: vi.fn(),
+      refetch: vi.fn(),
     })
     const onSave = vi.fn()
     const user = userEvent.setup()
@@ -73,7 +89,9 @@ describe('CustomFieldsTab', () => {
       fields: [{ key: 'budget', label: 'Budget', type: 'number', sort_order: 0, active: true, has_data: false, visible_in_ui: true }],
       allFields: [],
       loading: false,
+      error: false,
       invalidate: vi.fn(),
+      refetch: vi.fn(),
     })
     render(<CustomFieldsTab entityType="task" values={{ budget: 500 }} onSave={vi.fn()} />)
     // The group title sits above the card, mirroring the Persoonlijk/Contact cards.

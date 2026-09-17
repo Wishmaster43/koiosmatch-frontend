@@ -41,6 +41,7 @@ import type { ConversationSubject } from './useWhatsAppTemplateSend'
 import { sessionWindow, windowLeftParts } from './sessionWindow'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import { Caption } from '@/components/ui/typography'
 
 // How often the "time left in the window" line re-reads the clock. One minute is
@@ -146,6 +147,9 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
   const [openId, setOpenId] = useState<Id | null>(null)
   const [messages, setMessages] = useState<Record<string, MessageRow[]>>({})
   const [msgLoading, setMsgLoading] = useState(false)
+  // Per-thread message-load failure, distinct from the empty-array "genuinely no
+  // messages yet" state (§8 D8: a swallowed fetch error must never render as empty).
+  const [msgError, setMsgError] = useState<Record<string, boolean>>({})
   // WHATSAPP-COMPOSE-1: the session composer's draft text + in-flight state — a
   // single shared slot is enough since the accordion only ever has one open thread.
   const [composerText, setComposerText] = useState('')
@@ -192,18 +196,26 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
     setOpenId(prev => (prev === id ? null : id))
   }, [])
 
+  // Bumped by the retry button below so the load effect re-runs for a thread whose
+  // messages are still unset after a failed fetch (openId alone wouldn't change).
+  const [msgRetryNonce, setMsgRetryNonce] = useState(0)
+  const retryMessages = useCallback((id: Id) => {
+    setMsgError(e => ({ ...e, [String(id)]: false }))
+    setMsgRetryNonce(n => n + 1)
+  }, [])
+
   // Fetch a thread's messages once it becomes the open one (auto-expand triggers this on mount too).
   useEffect(() => {
     if (openId === null || messages[String(openId)]) return
     let alive = true
-    setMsgLoading(true)
+    setMsgLoading(true); setMsgError(e => ({ ...e, [String(openId)]: false }))
     api.get(`/conversations/${openId}/messages`)
       .then(r => { if (alive) setMessages(m => ({ ...m, [String(openId)]: unwrapList<MessageRow>(r).rows })) })
-      .catch(() => { if (alive) setMessages(m => ({ ...m, [String(openId)]: [] })) })
+      .catch(() => { if (alive) setMsgError(e => ({ ...e, [String(openId)]: true })) })
       .finally(() => { if (alive) setMsgLoading(false) })
     return () => { alive = false }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- messages read only to skip a duplicate fetch, not a re-trigger
-  }, [openId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- messages read only to skip a duplicate fetch, not a re-trigger; msgRetryNonce IS the re-trigger for a manual retry
+  }, [openId, msgRetryNonce])
 
   // A newly opened thread starts with a clean draft — never leaks the previous
   // thread's unsent text (or its stale send error) into the one now expanded.
@@ -347,7 +359,14 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
                 {msgLoading && !messages[String(row.id)] && (
                   <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('conversations.loadingMessages')}</div>
                 )}
-                {messages[String(row.id)] && msgs.length === 0 && (
+                {/* A failed load is never shown as the same text as a genuinely empty thread (§8 D8).
+                    Shared ErrorBanner subtle variant — same face as CustomFieldsTab's error row. */}
+                {!msgLoading && msgError[String(row.id)] && (
+                  <ErrorBanner variant="subtle" onRetry={() => retryMessages(row.id)}>
+                    {t('conversations.messagesError')}
+                  </ErrorBanner>
+                )}
+                {!msgError[String(row.id)] && messages[String(row.id)] && msgs.length === 0 && (
                   <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('conversations.noMessages')}</div>
                 )}
                 {msgs.map(m => (

@@ -1282,6 +1282,8 @@
     "escalated": "Eskaliert",
     "escalatedHint": "Ein eskaliertes Gespräch wurde von einem Mitarbeiter übernommen.",
     "loadingMessages": "Nachrichten werden geladen…",
+    "messagesError": "Nachrichten konnten nicht geladen werden",
+    "messagesRetry": "Erneut versuchen",
     "noMessages": "Keine Nachrichten in diesem Gespräch",
     "unknownContact": "Unbekannter Kontakt",
     "thisApplication": "Diese Bewerbung",

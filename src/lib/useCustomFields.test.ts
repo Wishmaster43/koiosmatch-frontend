@@ -8,7 +8,7 @@
  * same class of gap fixed on useCachedLookup — see its test file).
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { renderHook, waitFor } from '@testing-library/react'
+import { renderHook, waitFor, act } from '@testing-library/react'
 import '@/i18n'
 import { useCustomFields } from './useCustomFields'
 import api, { getActiveTenantId } from '@/lib/api'
@@ -113,6 +113,24 @@ describe('useCustomFields', () => {
     // fields (what the Extra tab renders + gates on) drops the API-only one.
     expect(result.current.fields).toHaveLength(1)
     expect(result.current.fields[0].key).toBe('shown')
+  })
+
+  // A swallowed fetch failure must expose `error`, distinct from the "genuinely
+  // empty defs" case (§8 D8), and refetch() must force a real second GET that
+  // clears it on success.
+  it('exposes error on a failed fetch, and refetch() clears it via a real second GET', async () => {
+    mockedGet.mockRejectedValueOnce(new Error('network down'))
+    const { result } = renderHook(() => useCustomFields('candidate'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.error).toBe(true)
+    expect(result.current.fields).toHaveLength(0)
+
+    mockedGet.mockResolvedValueOnce({ data: { data: [{ id: '1', key: 'ok', type: 'text', active: true }] } })
+    act(() => { result.current.refetch() })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    await waitFor(() => expect(result.current.error).toBe(false))
+    expect(result.current.fields[0].key).toBe('ok')
+    expect(mockedGet).toHaveBeenCalledTimes(2)
   })
 
   // A field with no visible_in_ui key at all (older seed data) defaults to visible —
