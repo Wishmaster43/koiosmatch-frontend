@@ -72,6 +72,9 @@ export interface AiAgent {
   interview_flow?: InterviewFlow | null
   interview_flow_id?: string | number | null
   webhook_url?: string | null
+  // AUDIT-BE-1 L02-01 (api 6a51e25c): the aiagents.view list always sends webhook_url null;
+  // this boolean says a token exists, the real URL only rides on the POST/PUT response.
+  has_webhook_token?: boolean
   _new?: boolean
   [k: string]: unknown
 }

@@ -312,9 +312,15 @@ export function AgentForm({ agent, prompts, faqs, knowledgeItems, onSaved, onDel
           <InterviewFlowSection flow={agent?.interview_flow} />
 
           <Field label={t('ai.agent.webhookLabel')}>
+            {/* AUDIT-BE-1 L02-01 (api 6a51e25c): the list row never carries the URL any more
+                (webhook_url null for every caller); it arrives on the save response only. A
+                list-loaded agent with has_webhook_token says "present, URL after saving"
+                instead of pretending no webhook exists. */}
             {agent?.webhook_url
               ? <CopyableValue value={agent.webhook_url} copyLabel={t('ai.agent.webhookCopy')} copiedMessage={t('ai.agent.webhookCopied')} />
-              : <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{t('ai.agent.webhookEmpty')}</p>}
+              : agent?.has_webhook_token
+                ? <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{t('ai.agent.webhookConfigured')}</p>
+                : <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{t('ai.agent.webhookEmpty')}</p>}
             {/* PUNT-2 (BE 0a8521df): inbound-verwerkingsstempels — read-only, DD-MM-YYYY HH:mm. */}
             {agent?.last_inbound_at && (
               <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '6px 0 0' }}>

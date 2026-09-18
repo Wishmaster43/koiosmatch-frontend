@@ -379,6 +379,7 @@
       "selectOrNew": "Sélectionnez un agent ou cliquez sur +",
       "webhookLabel": "URL du webhook",
       "webhookEmpty": "Aucun webhook configuré",
+      "webhookConfigured": "Jeton de webhook présent. L'URL apparaît ici après l'enregistrement.",
       "webhookCopy": "Copier l'URL du webhook",
       "webhookCopied": "URL du webhook copiée",
       "customApiSection": "API personnalisée (optionnel)",

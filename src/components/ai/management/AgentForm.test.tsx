@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import api from '@/lib/api'
 import { AgentForm } from './AgentForm'
 import type { AiAgent, AiItem } from '@/types/ai'
+import nl from '@/i18n/locales/nl/workflows.json'
 
 // AgentForm fetches the tenant's WhatsApp templates on mount and PUTs the whole form
 // on save — stub the whole default client (keep unwrap/unwrapList real), mirrors the
@@ -330,5 +331,28 @@ describe('AgentForm · WORKFLOW-PERMS-1', () => {
     expect(screen.getByTitle(i18n.t('ai.agent.runNoPermission', { ns: 'workflows' }))).toBeDisabled()
     expect(screen.getByRole('button', { name: i18n.t('save', { ns: 'common' }) })).toBeDisabled()
     mockAuth.mockReturnValue(null)
+  })
+})
+
+// AUDIT-BE-1 L02-01 (api 6a51e25c): GET /ai/agents sends webhook_url null for every caller plus
+// has_webhook_token; only the POST/PUT response carries the URL. The form must say "present,
+// URL after saving" for a list-loaded agent and never render a copy control for a null URL.
+describe('AgentForm — webhook field on has_webhook_token (AUDIT-BE-1 L02-01)', () => {
+  it('shows the token-present copy without a copy control when the list row has no URL', () => {
+    render(<AgentForm agent={{ ...mockAgent, webhook_url: null, has_webhook_token: true }} prompts={[]} faqs={mockFaqs} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    expect(screen.getByText(nl.ai.agent.webhookConfigured)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: nl.ai.agent.webhookCopy })).toBeNull()
+    expect(screen.queryByText(nl.ai.agent.webhookEmpty)).toBeNull()
+  })
+
+  it('renders the copyable URL when the (save) response carries webhook_url', () => {
+    render(<AgentForm agent={{ ...mockAgent, webhook_url: 'https://api.test/webhooks/agent/a1', has_webhook_token: true }} prompts={[]} faqs={mockFaqs} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    expect(screen.getByText('https://api.test/webhooks/agent/a1')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: nl.ai.agent.webhookCopy })).toBeInTheDocument()
+  })
+
+  it('keeps the empty copy when neither a URL nor a token exists', () => {
+    render(<AgentForm agent={{ ...mockAgent, webhook_url: null, has_webhook_token: false }} prompts={[]} faqs={mockFaqs} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    expect(screen.getByText(nl.ai.agent.webhookEmpty)).toBeInTheDocument()
   })
 })

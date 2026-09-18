@@ -440,6 +440,7 @@
       "selectOrNew": "Selecione um agente ou clique em +",
       "webhookLabel": "URL do webhook",
       "webhookEmpty": "Nenhum webhook configurado",
+      "webhookConfigured": "Token de webhook presente. O URL aparece aqui após guardar.",
       "webhookCopy": "Copiar URL do webhook",
       "webhookCopied": "URL do webhook copiado",
       "customApiSection": "API personalizada (opcional)",

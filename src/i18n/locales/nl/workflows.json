@@ -440,6 +440,7 @@
       "selectOrNew": "Selecteer een agent of klik +",
       "webhookLabel": "Webhook-URL",
       "webhookEmpty": "Geen webhook geconfigureerd",
+      "webhookConfigured": "Webhook-token aanwezig. De URL verschijnt hier na opslaan.",
       "webhookCopy": "Kopieer webhook-URL",
       "webhookCopied": "Webhook-URL gekopieerd",
       "customApiSection": "Aangepaste API (optioneel)",
