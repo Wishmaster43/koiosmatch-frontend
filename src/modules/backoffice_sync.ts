@@ -7,6 +7,9 @@ import { Link2 } from 'lucide-react'
 
 export default {
   type:     'backoffice_sync',
+  // SM-WRITE-GATE-1 (api d36a4406, WorkflowWriter::MODULE_REQUIRES): saving a workflow with this
+  // step 422s for a tenant without the sm package — the picker shows it as "requires Shiftmanager".
+  module: 'sm',
   label:    'Backoffice koppelen',
   category: 'Kandidaten',
   Icon:     Link2,

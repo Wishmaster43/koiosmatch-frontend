@@ -15,6 +15,9 @@ import { SM_CONNECTION_FIELD, smLimitField } from './_smFields'
 
 export default {
   type:  'sm_employee_create',
+  // SM-WRITE-GATE-1 (api d36a4406, WorkflowWriter::MODULE_REQUIRES): saving a workflow with this
+  // step 422s for a tenant without the sm package — the picker shows it as "requires Shiftmanager".
+  module: 'sm',
   app:   'shiftmanager',
   category: 'Shiftmanager',
   label: 'SM medewerker aanmaken',
