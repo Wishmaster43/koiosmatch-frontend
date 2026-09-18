@@ -515,6 +515,8 @@
       "viewRun": "Bekijk workflow-run",
       "confirm": "Bevestigen",
       "confirmFailed": "Bevestigen mislukt",
+      "confirmSessionExpired": "Sessie verlopen: log opnieuw in en bevestig nogmaals",
+      "confirmNotApplied": "De server nam de bevestiging niet aan, probeer het nogmaals",
       "forbidden": "Geen rechten",
       "unsupported": "Nog niet ondersteund",
       "forbiddenReason": {

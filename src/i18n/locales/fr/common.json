@@ -515,6 +515,8 @@
       "viewRun": "Voir l'exécution du workflow",
       "confirm": "Confirmer",
       "confirmFailed": "Échec de la confirmation",
+      "confirmSessionExpired": "Session expirée : reconnectez-vous et confirmez à nouveau",
+      "confirmNotApplied": "Le serveur n'a pas appliqué la confirmation, veuillez réessayer",
       "forbidden": "Aucun droit",
       "unsupported": "Pas encore pris en charge",
       "forbiddenReason": {

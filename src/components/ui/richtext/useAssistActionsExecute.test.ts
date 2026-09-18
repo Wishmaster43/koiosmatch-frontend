@@ -102,7 +102,50 @@ describe('useAssistActionsExecute', () => {
     await act(async () => { await result.current.confirm(0) })
 
     expect(result.current.items?.[0].confirmError).toBe(true)
+    expect(result.current.items?.[0].confirmErrorKind).toBe('failed')
     expect(result.current.items?.[0].confirming).toBe(false)
+  })
+
+  // CONFIRM-EERLIJK-1: the two silent failure shapes measured on 18-09 — a session the
+  // server no longer accepts, and a 2xx that still answers pending after confirmed:true.
+  it('names an expired session (401/419) on a rejected confirm', async () => {
+    vi.mocked(executeRichTextActions).mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'pending' }])
+    const { result } = renderHook(() => useAssistActionsExecute({ note_id: 'note-1' }))
+    await act(async () => { await result.current.preview([suggested[0]]) })
+
+    vi.mocked(executeRichTextActions).mockRejectedValueOnce({ response: { status: 419 } })
+    await act(async () => { await result.current.confirm(0) })
+
+    expect(result.current.items?.[0].confirmError).toBe(true)
+    expect(result.current.items?.[0].confirmErrorKind).toBe('sessionExpired')
+    expect(result.current.items?.[0].status).toBe('pending')
+  })
+
+  it('flags a confirm the server answered with pending again as not applied', async () => {
+    vi.mocked(executeRichTextActions).mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'pending' }])
+    const { result } = renderHook(() => useAssistActionsExecute({ note_id: 'note-1' }))
+    await act(async () => { await result.current.preview([suggested[0]]) })
+
+    vi.mocked(executeRichTextActions).mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'pending' }])
+    await act(async () => { await result.current.confirm(0) })
+
+    expect(result.current.items?.[0].confirmError).toBe(true)
+    expect(result.current.items?.[0].confirmErrorKind).toBe('notApplied')
+    expect(result.current.items?.[0].confirming).toBe(false)
+  })
+
+  it('clears the error flags when a later confirm succeeds', async () => {
+    vi.mocked(executeRichTextActions).mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'pending' }])
+    const { result } = renderHook(() => useAssistActionsExecute({ note_id: 'note-1' }))
+    await act(async () => { await result.current.preview([suggested[0]]) })
+    vi.mocked(executeRichTextActions).mockRejectedValueOnce({ response: { status: 401 } })
+    await act(async () => { await result.current.confirm(0) })
+    vi.mocked(executeRichTextActions).mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'executed', run_id: 'r9' }])
+    await act(async () => { await result.current.confirm(0) })
+
+    expect(result.current.items?.[0].status).toBe('executed')
+    expect(result.current.items?.[0].confirmError).toBe(false)
+    expect(result.current.items?.[0].confirmErrorKind).toBeUndefined()
   })
 
   it('surfaces an honest error and stays idle-items on a failed preview', async () => {

@@ -125,7 +125,11 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
           title={item.status === 'wizard_required' ? item.reason : undefined}>
           {item.confirmError && (
             <span style={{ fontSize: 10, color: 'var(--color-danger-text)' }}>
-              {t('notesAssist.execute.confirmFailed', { defaultValue: 'Bevestigen mislukt' })}
+              {item.confirmErrorKind === 'sessionExpired'
+                ? t('notesAssist.execute.confirmSessionExpired', { defaultValue: 'Sessie verlopen: log opnieuw in en bevestig nogmaals' })
+                : item.confirmErrorKind === 'notApplied'
+                  ? t('notesAssist.execute.confirmNotApplied', { defaultValue: 'De server nam de bevestiging niet aan, probeer het nogmaals' })
+                  : t('notesAssist.execute.confirmFailed', { defaultValue: 'Bevestigen mislukt' })}
             </span>
           )}
           <Button variant="primary" size="sm" onClick={onConfirm} disabled={item.confirming} style={{ flexShrink: 0 }}>

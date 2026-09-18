@@ -515,6 +515,8 @@
       "viewRun": "Workflow-Lauf ansehen",
       "confirm": "Bestätigen",
       "confirmFailed": "Bestätigung fehlgeschlagen",
+      "confirmSessionExpired": "Sitzung abgelaufen: erneut anmelden und noch einmal bestätigen",
+      "confirmNotApplied": "Der Server hat die Bestätigung nicht übernommen, bitte erneut versuchen",
       "forbidden": "Keine Berechtigung",
       "unsupported": "Noch nicht unterstützt",
       "forbiddenReason": {

@@ -515,6 +515,8 @@
       "viewRun": "Visualizza run workflow",
       "confirm": "Conferma",
       "confirmFailed": "Conferma fallita",
+      "confirmSessionExpired": "Sessione scaduta: accedi di nuovo e conferma ancora",
+      "confirmNotApplied": "Il server non ha applicato la conferma, riprova",
       "forbidden": "Nessun permesso",
       "unsupported": "Non ancora supportato",
       "forbiddenReason": {

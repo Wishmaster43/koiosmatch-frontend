@@ -148,11 +148,11 @@ api.interceptors.response.use(
     // cookie after a long-idle tab) — the request never executed, so one retry
     // after re-priming the cookie is safe for every method (audit LOW item).
     if (status === 419 && !config._retried419) {
-      config._retried419 = true
-      try {
-        await primeCsrf()
-        return api(config)
-      } catch { /* cookie refresh failed — fall through to normal error handling */ }
+      // The retry flag is set only once the cookie was really re-primed: a failed prime is a
+      // network problem, not a lost session, and must not trip the session-gone branch below.
+      let primed = false
+      try { await primeCsrf(); primed = true } catch { /* cookie refresh failed — fall through to normal error handling */ }
+      if (primed) { config._retried419 = true; return api(config) }
     }
 
     if (status === 429 && method === 'get' && !config._retried429) {
@@ -219,7 +219,12 @@ api.interceptors.response.use(
     }
 
     const isAuthCall = url.includes('/auth/login') || url.includes('/auth/me')
-    if (status === 401 && !isAuthCall) {
+    // CONFIRM-EERLIJK-1 (18-09, measured on a 12-hour session that ran out mid-note): a 419
+    // that comes back AGAIN after the CSRF re-prime means the session behind the cookie is
+    // gone, not the token — treat it exactly like a 401 so the app routes to login instead
+    // of leaving every later request red in a tab that still looks signed in.
+    const sessionGone = status === 401 || (status === 419 && config._retried419 === true)
+    if (sessionGone && !isAuthCall) {
       localStorage.removeItem('auth_token')
       localStorage.removeItem('auth_user')
       localStorage.removeItem('active_tenant')

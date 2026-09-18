@@ -37,6 +37,11 @@ export interface ExecItem extends RichTextAssistActionItem {
   budget?: ActionBudget
   confirming?: boolean
   confirmError?: boolean
+  // CONFIRM-EERLIJK-1 (Danny 18-09 19:5x, a card that stayed on "Wacht op bevestiging" with
+  // no message): WHY the confirm did not land — a rejected request (failed), a session the
+  // server no longer accepts (401/419 → sessionExpired), or a 2xx that still answers
+  // pending/wizard_required after confirmed:true (notApplied). The card names each.
+  confirmErrorKind?: 'failed' | 'sessionExpired' | 'notApplied'
 }
 
 // `source` links the batch back to where the items came from — today only an
@@ -94,10 +99,17 @@ export function useAssistActionsExecute(source: ExecuteSource = {}) {
     try {
       const [result] = await executeRichTextActions([toExecuteItem(target, true)], source)
       if (!aliveRef.current) return
-      setItems(prev => prev?.map((it, i) => i === index ? { ...it, ...result, confirming: false } : it) ?? null)
-    } catch {
+      // A 2xx that still says pending/wizard_required after confirmed:true is NOT progress —
+      // the server did not apply the confirm; say so instead of silently re-arming the button.
+      const notApplied = !result || result.status === 'pending' || result.status === 'wizard_required'
+      setItems(prev => prev?.map((it, i) => i === index
+        ? { ...it, ...(result ?? {}), confirming: false, confirmError: notApplied, confirmErrorKind: notApplied ? 'notApplied' : undefined }
+        : it) ?? null)
+    } catch (err) {
       if (!aliveRef.current) return
-      setItems(prev => prev?.map((it, i) => i === index ? { ...it, confirming: false, confirmError: true } : it) ?? null)
+      const status = (err as { response?: { status?: number } })?.response?.status
+      const kind = status === 401 || status === 419 ? 'sessionExpired' : 'failed'
+      setItems(prev => prev?.map((it, i) => i === index ? { ...it, confirming: false, confirmError: true, confirmErrorKind: kind } : it) ?? null)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, source.note_id])

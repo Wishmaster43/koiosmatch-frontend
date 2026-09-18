@@ -515,6 +515,8 @@
       "viewRun": "Ver ejecución del workflow",
       "confirm": "Confirmar",
       "confirmFailed": "Error al confirmar",
+      "confirmSessionExpired": "Sesión caducada: vuelve a iniciar sesión y confirma de nuevo",
+      "confirmNotApplied": "El servidor no aplicó la confirmación, inténtalo de nuevo",
       "forbidden": "Sin permisos",
       "unsupported": "Aún no compatible",
       "forbiddenReason": {

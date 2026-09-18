@@ -56,3 +56,16 @@ describe('AssistActionItemCard — budget_exceeded unit label', () => {
     expect(screen.getByText('5/5 some_future_unit')).toBeInTheDocument()
   })
 })
+
+// CONFIRM-EERLIJK-1: the pending card names why a confirm did not land.
+describe('AssistActionItemCard — confirm error copy per kind', () => {
+  it('says the session expired on a 401/419 confirm', () => {
+    render(<AssistActionItemCard item={{ ...BASE_ITEM, status: 'pending', confirmError: true, confirmErrorKind: 'sessionExpired' }} onConfirm={() => {}} />)
+    expect(screen.getByText('Sessie verlopen: log opnieuw in en bevestig nogmaals')).toBeInTheDocument()
+  })
+
+  it('says the server did not apply the confirm when it answered pending again', () => {
+    render(<AssistActionItemCard item={{ ...BASE_ITEM, status: 'pending', confirmError: true, confirmErrorKind: 'notApplied' }} onConfirm={() => {}} />)
+    expect(screen.getByText('De server nam de bevestiging niet aan, probeer het nogmaals')).toBeInTheDocument()
+  })
+})
