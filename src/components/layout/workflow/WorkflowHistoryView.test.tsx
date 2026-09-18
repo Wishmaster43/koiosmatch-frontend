@@ -140,3 +140,23 @@ describe('WorkflowHistoryView', () => {
     expect(screen.queryByText('runs.dryRun.banner')).not.toBeInTheDocument()
   })
 })
+
+// VAC-RUNS-TAB-1: the vacancy mode reads the vacancy-filtered run list and names the workflow per row.
+describe('WorkflowHistoryView · vacancyId mode', () => {
+  beforeEach(() => { vi.mocked(api.get).mockReset() })
+
+  it('requests /workflow-runs?vacancy_id= and renders a workflow column with the run\'s workflow name', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [{ ...run, workflow_name: 'Leads herberekenen (één vacature)' }] } })
+    render(<WorkflowHistoryView vacancyId="v-1" />)
+    expect(await screen.findByText('Leads herberekenen (één vacature)')).toBeInTheDocument()
+    expect(screen.getByText('runs.cols.workflow')).toBeInTheDocument()
+    expect(screen.getByText('runs.vacancyTitle')).toBeInTheDocument()
+    expect(vi.mocked(api.get).mock.calls[0][0]).toBe('/workflow-runs?vacancy_id=v-1&per_page=25')
+  })
+
+  it('shows the vacancy-specific empty copy when the vacancy has no runs', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
+    render(<WorkflowHistoryView vacancyId="v-1" />)
+    expect(await screen.findByText('runs.vacancyEmpty')).toBeInTheDocument()
+  })
+})

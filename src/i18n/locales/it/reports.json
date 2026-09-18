@@ -345,6 +345,8 @@
     "loadError": "Impossibile caricare le esecuzioni.",
     "editorTitle": "Esecuzioni",
     "editorEmpty": "Ancora nessuna esecuzione per questo workflow",
+    "vacancyTitle": "Esecuzioni per questa posizione",
+    "vacancyEmpty": "Ancora nessuna esecuzione per questa posizione",
     "editorCount_one": "{{count}} esecuzione",
     "editorCount_other": "{{count}} esecuzioni",
     "cols": {

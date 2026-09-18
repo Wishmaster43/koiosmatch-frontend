@@ -345,6 +345,8 @@
     "loadError": "No se pudieron cargar las ejecuciones.",
     "editorTitle": "Ejecuciones",
     "editorEmpty": "Aún no hay ejecuciones para este flujo",
+    "vacancyTitle": "Ejecuciones de esta vacante",
+    "vacancyEmpty": "Aún no hay ejecuciones para esta vacante",
     "editorCount_one": "{{count}} ejecución",
     "editorCount_other": "{{count}} ejecuciones",
     "cols": {

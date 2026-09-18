@@ -345,6 +345,8 @@
     "loadError": "Não foi possível carregar as execuções.",
     "editorTitle": "Execuções",
     "editorEmpty": "Ainda não há execuções para este workflow",
+    "vacancyTitle": "Execuções desta vaga",
+    "vacancyEmpty": "Ainda não há execuções para esta vaga",
     "editorCount_one": "{{count}} execução",
     "editorCount_other": "{{count}} execuções",
     "cols": {

@@ -345,6 +345,8 @@
     "loadError": "Ausführungen konnten nicht geladen werden.",
     "editorTitle": "Ausführungen",
     "editorEmpty": "Noch keine Ausführungen für diesen Workflow",
+    "vacancyTitle": "Ausführungen für diese Stelle",
+    "vacancyEmpty": "Noch keine Ausführungen für diese Stelle",
     "editorCount_one": "{{count}} Ausführung",
     "editorCount_other": "{{count}} Ausführungen",
     "cols": {

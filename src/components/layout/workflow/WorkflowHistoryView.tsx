@@ -32,9 +32,13 @@ const TH: CSSProperties = { ...captionStyle, padding: '10px 16px', textAlign: 'l
 const TD: CSSProperties = { ...bodyTextStyle, padding: '12px 16px',
   borderBottom: '1px solid var(--hover-bg)' }
 
-// Run history table (list + optional per-run drawer); scoped to one workflow or the global list depending on whether workflowId is given.
-export default function WorkflowHistoryView({ workflowId, initialRun }: {
+// Run history table (list + optional per-run drawer); scoped to one workflow, to one vacancy, or the global list.
+// VAC-RUNS-TAB-1 (Danny 18-09 20:0x: "als ik voor 1 vacature advies ververs dan wil ik dat ook
+// terugzien in de log"): `vacancyId` lists the runs stamped with this vacancy as context
+// (GET /workflow-runs?vacancy_id=, api b618a1ce) — every workflow, so each row names its workflow.
+export default function WorkflowHistoryView({ workflowId, vacancyId, initialRun }: {
   workflowId?: string | number
+  vacancyId?: string | number
   // LOGS-DRILL-1: arriving from the Logs panel's history-jump — auto-open this
   // run's drawer. A fresh wrapper object per jump (compared by identity), so the
   // same run re-opens on a second jump while a closed drawer never self-reopens.
@@ -45,9 +49,12 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
   // AUDIT-BE-1-16: request the page size explicitly (server default is now 25,
   // clamped 1-100) instead of relying on an unstated server default.
   const { rows, loading, error } = useReportList<RunRow>(
-    workflowId != null ? `/workflows/${workflowId}/runs?per_page=25` : '/workflow-runs?per_page=25',
+    workflowId != null ? `/workflows/${workflowId}/runs?per_page=25`
+      : vacancyId != null ? `/workflow-runs?vacancy_id=${encodeURIComponent(String(vacancyId))}&per_page=25`
+      : '/workflow-runs?per_page=25',
     resolveWorkflowBaseURL()
   )
+  const forVacancy = vacancyId != null
   // App-wide active locale (§5) — never a hardcoded 'nl-NL' toLocale*String call.
   const { formatDate, formatTime } = useDateFormat()
   const [drill, setDrill] = useState<RunRow | null>(null)
@@ -79,7 +86,7 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
           <History size={16} color="var(--color-primary)" />
-          <PageTitle>{t('runs.editorTitle')}</PageTitle>
+          <PageTitle>{t(forVacancy ? 'runs.vacancyTitle' : 'runs.editorTitle')}</PageTitle>
           {!loading && (
             <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
               {t('runs.editorCount', { count: rows.length })}
@@ -109,7 +116,7 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                           gap: 10, padding: 48, textAlign: 'center' }}>
               <History size={28} color="var(--border)" />
-              <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>{t('runs.editorEmpty')}</p>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>{t(forVacancy ? 'runs.vacancyEmpty' : 'runs.editorEmpty')}</p>
             </div>
           )}
 
@@ -119,6 +126,7 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
               <thead>
                 <tr>
                   <th style={{ ...TH, width: 32 }} aria-hidden="true" />
+                  {forVacancy && <th style={TH}>{t('runs.cols.workflow')}</th>}
                   <th style={TH}>{t('runs.cols.started')}</th>
                   <th style={TH}>{t('runs.cols.trigger')}</th>
                   <th style={TH}>{t('runs.cols.status')}</th>
@@ -146,6 +154,7 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
                         {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                       </Button>
                     </td>
+                    {forVacancy && <td style={{ ...TD, fontWeight: 500 }}>{r.workflow_name ?? '—'}</td>}
                     <td style={{ ...TD, whiteSpace: 'nowrap' }}>
                       <div style={{ fontWeight: 500 }}>{formatDate(r.started_at)}</div>
                       <Caption as="div">{formatTime(r.started_at)}</Caption>
@@ -170,7 +179,7 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
                       like the drawer does; reopening the row refreshes it from the list. */}
                   {isOpen && (
                     <tr>
-                      <td colSpan={5} style={{ ...TD, background: 'var(--hover-bg)', padding: '14px 16px 18px 44px' }}>
+                      <td colSpan={forVacancy ? 6 : 5} style={{ ...TD, background: 'var(--hover-bg)', padding: '14px 16px 18px 44px' }}>
                         <div style={{ display: 'flex', gap: 1, marginBottom: 14, maxWidth: 320 }}>
                           {[
                             { label: t('runs.drawer.candidates'), value: r.candidates_count ?? r.candidates ?? '—', Icon: Users },

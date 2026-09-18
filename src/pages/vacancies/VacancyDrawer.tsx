@@ -35,6 +35,7 @@ import VacancyAgentTab from './drawer/VacancyAgentTab'
 import PublishingTab from './drawer/PublishingTab'
 import DocumentsTab from './drawer/DocumentsTab'
 import TimelineTab from './drawer/TimelineTab'
+import WorkflowHistoryView from '@/components/layout/workflow/WorkflowHistoryView'
 import NotesTab from './drawer/NotesTab'
 import VacancyTasksTab from './drawer/VacancyTasksTab'
 import StatisticsTab from './drawer/StatisticsTab'
@@ -116,6 +117,9 @@ const TABS: { id: string; tKey: string; autoExpand?: boolean; render: (v: Vacanc
   // icon = veldwijzigingen ("field changes"). Live: VacancyDetailResource::timelineFor() feeds note/
   // application/match record events with link targets plus created/published/
   // updated lifecycle moments, newest-first.
+  // VAC-RUNS-TAB-1: every workflow run stamped with this vacancy, right before the timeline
+  // (TIJDLIJN-OVERAL keeps Tijdlijn second-to-last and Statistieken last).
+  { id: 'runs',       tKey: 'runs',       render: v => <WorkflowHistoryView vacancyId={v.id} /> },
   { id: 'timeline',   tKey: 'timeline',   render: v => <TimelineTab vacancy={v} /> },
   // Statistieken ("Statistics") last (Danny 28-07) — a read-only summary, not a
   // working tab.

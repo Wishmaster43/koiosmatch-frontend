@@ -345,6 +345,8 @@
     "loadError": "Could not load runs.",
     "editorTitle": "Runs",
     "editorEmpty": "No runs yet for this workflow",
+    "vacancyTitle": "Runs for this vacancy",
+    "vacancyEmpty": "No runs for this vacancy yet",
     "editorCount_one": "{{count}} run",
     "editorCount_other": "{{count}} runs",
     "cols": {
