@@ -369,7 +369,10 @@
     "shownOf": "Showing the {{shown}} closest of {{total}} candidates",
     "centerVacancy": "Vacancy location",
     "refreshAdvice": "Refresh Koios advice",
-    "adviceQueued": "Advice is being calculated. The list will refresh shortly.",
+    "rematchStarted": "Koios is matching the candidates again; the list refreshes as soon as the workflow finishes.",
+    "rematchBusy": "A recalculation is already running for this vacancy.",
+    "rematchMissing": "The workflow \"Recount leads (single vacancy)\" is off or missing. Switch it on under Workflows.",
+    "rematchBudget": "The workflow tier is used up. The recalculation did not start.",
     "aiAdvised": "Advised by Koios"
   },
   "statistics": {

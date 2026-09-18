@@ -369,7 +369,10 @@
     "shownOf": "Zeigt die {{shown}} nächstgelegenen von {{total}} Kandidaten",
     "centerVacancy": "Standort der Stelle",
     "refreshAdvice": "Koios-Empfehlung aktualisieren",
-    "adviceQueued": "Die Empfehlung wird berechnet. Die Liste aktualisiert sich gleich.",
+    "rematchStarted": "Koios gleicht die Kandidaten erneut ab; die Liste wird aktualisiert, sobald der Workflow fertig ist.",
+    "rematchBusy": "Für diese Stelle läuft bereits eine Neuberechnung.",
+    "rematchMissing": "Der Workflow \"Leads neu berechnen (eine Stelle)\" ist aus oder fehlt. Aktivieren Sie ihn unter Workflows.",
+    "rematchBudget": "Das Workflow-Kontingent ist aufgebraucht. Die Neuberechnung wurde nicht gestartet.",
     "aiAdvised": "Von Koios empfohlen"
   },
   "statistics": {

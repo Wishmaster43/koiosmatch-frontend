@@ -18,6 +18,8 @@ import type { CandidateTabConfig } from '../lib/candidateTabVisibility'
 import type { Criterion } from '@/components/match/MatchScoreBlock'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
+import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
+import { TERMINAL } from '@/components/layout/workflow/useWorkflowRun'
 
 // LEADS-CIRKEL-1 (BE 3d6a92b1): the criteria block the server ACTUALLY applied,
 // served alongside the paginator — the tab displays these instead of guessing
@@ -67,6 +69,10 @@ interface RawMatchRow {
 
 // Owns the live scored candidate-match search for one vacancy: filter state (with
 // tenant defaults), the abortable fetch, and the Koios advice-refresh side channel.
+// The seeded manual template the rematch button runs (VAC-LEADS-RECOUNT-BUTTON-1, REMATCH-KNOP-1).
+export const REMATCH_TEMPLATE_KEY = 'vacancy_leads_recount_single'
+export type RematchOutcome = 'started' | 'busy' | 'missing' | 'budget' | 'failed'
+
 export function useCandidateSearch(vacancy: VacancyDetail) {
   const { statuses, candidateTypes } = useLookups()
 
@@ -163,7 +169,7 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
   const lng = toCoord(vacancy.lng)
   const noLocation = lat == null || lng == null
 
-  // Pending "refetch after a queued advice refresh" timer (~10s) — a ref so it
+  // Pending rematch poll timer — a ref so it
   // survives re-renders and can be cancelled both from refreshAdvice() (a second
   // click) and the fetch effect's own cleanup below (unmount, or a param change
   // that already triggers a fresh fetch of its own).
@@ -257,21 +263,60 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
     }
   }, [noLocation, vacancy.id, radiusKm, radiusTouched, functionsState, functionsTouched, statusSel, contractForms, reloadKey])
 
-  // Queue a batched Koios advice refresh (fase 3) for this vacancy's best
-  // matches. Resolves true on the server's 202 ack, false on any failure
-  // (throttle 429 included) — a 202 only ever means "queued", never "done"
-  // (§3 honesty: works live only once Anthropic credit is configured).
-  const refreshAdvice = async (): Promise<boolean> => {
+  // REMATCH-KNOP-1 (Danny 18-09 19:3x, on this tab's refresh button: the workflow he expects is
+  // "Leads herberekenen (één vacature)"). Measured before the change: the old refresh-advice route
+  // started koios_advice_vacancy (an AI call on real credits) and the seeded single-vacancy recount
+  // template had never run once. The button now starts THAT template with this vacancy as subject
+  // (POST /workflows/{id}/run, the S1 subject contract; step 1 is Ophalen with from_trigger), then
+  // polls the run until it is terminal and reloads the list — GEO-POLL-1: until the result lands or
+  // an honest cap, with backoff. The AI advice stays reachable from the Workflows page
+  // (koios_advice_vacancy manual / bulk / on_update).
+  // The tenant's active row of the seeded template, by template_key on the list row.
+  const findRematchWorkflowId = async (): Promise<string | 'missing' | 'failed'> => {
     try {
-      await api.post(`/vacancies/${vacancy.id}/candidate-matches/refresh-advice`)
-      // One auto-refetch ~10s later so a landed ai_advised verdict surfaces
-      // without the recruiter having to manually retry.
-      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current)
-      refreshTimerRef.current = setTimeout(() => setReloadKey(k => k + 1), 10000)
-      return true
+      const list = await api.get('/workflows', { params: { per_page: 200 } })
+      const rows = (list?.data?.data ?? []) as Array<{ id: string | number; template_key?: string | null; status?: string | null; active?: boolean }>
+      const wf = rows.find(w => w.template_key === REMATCH_TEMPLATE_KEY && (w.status === 'active' || w.active === true))
+      return wf ? String(wf.id) : 'missing'
     } catch {
-      return false
+      return 'failed'
     }
+  }
+
+  const rematch = async (): Promise<RematchOutcome> => {
+    const workflowId = await findRematchWorkflowId()
+    if (workflowId === 'missing' || workflowId === 'failed') return workflowId
+    let runId: string | number | undefined
+    try {
+      const res = await api.post(`/workflows/${workflowId}/run`,
+        { subject: { entity_type: 'vacancy', entity_id: String(vacancy.id) } },
+        { quietStatuses: [409, 422], baseURL: resolveWorkflowBaseURL() })
+      runId = (res?.data?.run?.id ?? res?.data?.data?.id ?? res?.data?.id) as string | number | undefined
+    } catch (e) {
+      const err = e as { response?: { status?: number; data?: { status?: string } } }
+      if (err?.response?.status === 409) return 'busy'
+      if (err?.response?.status === 422 && err.response.data?.status === 'budget_exceeded') return 'budget'
+      return 'failed'
+    }
+    // Poll the run with backoff (≈90 s cap); a terminal status or the cap reloads the list once.
+    // Same ref the effect cleanup clears, so a filter change or unmount cancels the poll.
+    const delays = [2000, 3000, 5000, 8000, 13000, 20000, 20000, 20000]
+    let step = 0
+    const tick = async () => {
+      let done = step >= delays.length || runId == null
+      if (!done) {
+        try {
+          const run = await api.get(`/workflow-runs/${runId}`, { baseURL: resolveWorkflowBaseURL() })
+          const status = (run?.data?.data ?? run?.data)?.status as string | undefined
+          done = !!status && TERMINAL.has(status)
+        } catch { done = true }
+      }
+      if (done) { refreshTimerRef.current = null; setReloadKey(k => k + 1); return }
+      refreshTimerRef.current = setTimeout(tick, delays[step++])
+    }
+    if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current)
+    refreshTimerRef.current = setTimeout(tick, delays[step++])
+    return 'started'
   }
 
   // Radius display mirrors the same rule: untouched -> the server's applied
@@ -287,7 +332,7 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
     statuses: statusSel, setStatuses: setStatusSel,
     contractForms, setContractForms,
     noLocation,
-    refreshAdvice,
+    rematch,
     eligibleTotal,
   }
 }

@@ -359,24 +359,57 @@ describe('CandidateSearchTab · error + retry', () => {
   })
 })
 
-describe('CandidateSearchTab · refresh-advice button', () => {
-  it('POSTs the refresh-advice route and shows the queued toast on a 202', async () => {
-    mockGet.mockResolvedValue({ data: { data: rawRows } })
-    mockPost.mockResolvedValueOnce({ data: { status: 'queued' }, status: 202 })
+describe('CandidateSearchTab · rematch button (REMATCH-KNOP-1)', () => {
+  const wfB = { id: 'wf-b', name: 'Leads herberekenen (één vacature)', template_key: 'vacancy_leads_recount_single', status: 'active', active: true }
+  const wfA = { id: 'wf-a', name: 'Leads-telling vacatures', template_key: 'vacancy_leads_recount', status: 'active', active: true }
+  const getByUrl = (workflows: unknown[]) => (url: string) =>
+    url === '/workflows' ? Promise.resolve({ data: { data: workflows } })
+      : url.startsWith('/workflow-runs/') ? Promise.resolve({ data: { data: { id: 'r1', status: 'success' } } })
+      : Promise.resolve({ data: { data: rawRows } })
+
+  it('runs the single-vacancy recount workflow with this vacancy as subject and shows the started toast', async () => {
+    mockGet.mockImplementation(getByUrl([wfA, wfB]))
+    mockPost.mockResolvedValueOnce({ data: { run: { id: 'r1' } }, status: 202 })
     render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
     await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
 
     await userEvent.click(screen.getByRole('button', { name: nl.candidateSearch.refreshAdvice }))
 
-    await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/vacancies/v1/candidate-matches/refresh-advice'))
-    await waitFor(() => expect(notify).toHaveBeenCalledWith('info', nl.candidateSearch.adviceQueued))
+    // The request is the contract: the manual template's id (never the hourly all-vacancies one)
+    // and the S1 subject shape; the retired refresh-advice route is never called.
+    await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/workflows/wf-b/run',
+      { subject: { entity_type: 'vacancy', entity_id: 'v1' } }, expect.objectContaining({ quietStatuses: [409, 422] })))
+    expect(mockPost).not.toHaveBeenCalledWith(expect.stringContaining('refresh-advice'))
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('info', nl.candidateSearch.rematchStarted))
   })
 
-  it('shows the generic error toast when the refresh POST fails (e.g. throttled)', async () => {
-    mockGet.mockResolvedValue({ data: { data: [] } })
-    mockPost.mockRejectedValueOnce(new Error('throttled'))
+  it('says a recalculation is already running on a 409', async () => {
+    mockGet.mockImplementation(getByUrl([wfB]))
+    mockPost.mockRejectedValueOnce({ response: { status: 409, data: { message: 'busy', run_id: 'r0' } } })
     render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
-    await waitFor(() => expect(mockGet).toHaveBeenCalled())
+    await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
+
+    await userEvent.click(screen.getByRole('button', { name: nl.candidateSearch.refreshAdvice }))
+
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('info', nl.candidateSearch.rematchBusy))
+  })
+
+  it('names the missing workflow when the tenant has no active single-vacancy recount template', async () => {
+    mockGet.mockImplementation(getByUrl([wfA]))
+    render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
+    await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
+
+    await userEvent.click(screen.getByRole('button', { name: nl.candidateSearch.refreshAdvice }))
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(nl.candidateSearch.rematchMissing))
+    expect(mockPost).not.toHaveBeenCalled()
+  })
+
+  it('shows the generic error toast when the run POST fails for another reason', async () => {
+    mockGet.mockImplementation(getByUrl([wfB]))
+    mockPost.mockRejectedValueOnce(new Error('network'))
+    render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
+    await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
 
     await userEvent.click(screen.getByRole('button', { name: nl.candidateSearch.refreshAdvice }))
 

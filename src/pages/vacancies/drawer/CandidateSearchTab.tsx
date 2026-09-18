@@ -65,7 +65,7 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
     functions: selectedFunctions, setFunctions,
     statuses: selectedStatuses, setStatuses,
     contractForms: selectedContractForms, setContractForms,
-    noLocation, refreshAdvice, eligibleTotal,
+    noLocation, rematch, eligibleTotal,
   } = useCandidateSearch(vacancy)
 
   // A row/marker pick SELECTS a candidate (summary card) instead of navigating
@@ -93,15 +93,17 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
   const toggleContractForm = (value: string) =>
     setContractForms(selectedContractForms.includes(value) ? selectedContractForms.filter(c => c !== value) : [...selectedContractForms, value])
 
-  // Queue a batched Koios advice refresh; the hook auto-refetches once ~10s later.
-  const handleRefreshAdvice = async () => {
+  // REMATCH-KNOP-1: one button, one workflow — the toast names the measured outcome, never a
+  // hopeful "queued" (STATUS LIEGT NIET): started / already running / template off / tier full.
+  const handleRematch = async () => {
     if (refreshing) return
     setRefreshing(true)
-    const queued = await refreshAdvice()
+    const outcome = await rematch()
     setRefreshing(false)
-    // 'info' (not 'success'): a 202 only means "queued" — it never guarantees the
-    // advice actually lands (§3 honesty; no Anthropic credit configured = a silent no-op).
-    if (queued) notify('info', t('candidateSearch.adviceQueued'))
+    if (outcome === 'started') notify('info', t('candidateSearch.rematchStarted'))
+    else if (outcome === 'busy') notify('info', t('candidateSearch.rematchBusy'))
+    else if (outcome === 'missing') notifyError(t('candidateSearch.rematchMissing'))
+    else if (outcome === 'budget') notifyError(t('candidateSearch.rematchBudget'))
     else notifyError(t('common:actionFailed'))
   }
 
@@ -299,7 +301,7 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
   // GeoSearchShell's `actions` slot, right-aligned beside the radius controls
   // (was a stray button above the summary card) — same handler, same button.
   const refreshButton = (
-    <Button variant="soft" onClick={handleRefreshAdvice} disabled={refreshing}>
+    <Button variant="soft" onClick={handleRematch} disabled={refreshing}>
       <RefreshCw size={13} className={refreshing ? 'animate-spin' : ''} />
       {t('candidateSearch.refreshAdvice')}
     </Button>

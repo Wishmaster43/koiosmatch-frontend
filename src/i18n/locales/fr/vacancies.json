@@ -369,7 +369,10 @@
     "shownOf": "Affiche les {{shown}} plus proches sur {{total}} candidats",
     "centerVacancy": "Lieu du poste",
     "refreshAdvice": "Actualiser l'avis Koios",
-    "adviceQueued": "L'avis est en cours de calcul. La liste va s'actualiser sous peu.",
+    "rematchStarted": "Koios refait la correspondance des candidats ; la liste se rafraîchit dès que le workflow est terminé.",
+    "rematchBusy": "Un recalcul est déjà en cours pour ce poste.",
+    "rematchMissing": "Le workflow « Recalculer les leads (un poste) » est désactivé ou absent. Activez-le dans Workflows.",
+    "rematchBudget": "Le forfait de workflows est épuisé. Le recalcul n'a pas démarré.",
     "aiAdvised": "Recommandé par Koios"
   },
   "statistics": {

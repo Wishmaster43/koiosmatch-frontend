@@ -369,7 +369,10 @@
     "shownOf": "Muestra los {{shown}} candidatos más cercanos de {{total}} en total",
     "centerVacancy": "Ubicación de la vacante",
     "refreshAdvice": "Actualizar el consejo de Koios",
-    "adviceQueued": "El consejo se está calculando. La lista se actualizará en breve.",
+    "rematchStarted": "Koios vuelve a emparejar a los candidatos; la lista se actualiza en cuanto termine el flujo de trabajo.",
+    "rematchBusy": "Ya hay un recálculo en curso para esta vacante.",
+    "rematchMissing": "El flujo \"Recalcular leads (una vacante)\" está desactivado o no existe. Actívalo en Flujos de trabajo.",
+    "rematchBudget": "El paquete de flujos de trabajo está agotado. El recálculo no se ha iniciado.",
     "aiAdvised": "Recomendado por Koios"
   },
   "statistics": {

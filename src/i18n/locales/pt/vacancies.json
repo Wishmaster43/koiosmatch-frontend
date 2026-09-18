@@ -369,7 +369,10 @@
     "shownOf": "A mostrar os {{shown}} mais próximos de {{total}} candidatos",
     "centerVacancy": "Localização da vaga",
     "refreshAdvice": "Atualizar conselho do Koios",
-    "adviceQueued": "O conselho está a ser calculado. A lista atualiza-se em breve.",
+    "rematchStarted": "A Koios está a voltar a combinar os candidatos; a lista atualiza-se assim que o workflow terminar.",
+    "rematchBusy": "Já está a decorrer um recálculo para esta vaga.",
+    "rematchMissing": "O workflow \"Recalcular leads (uma vaga)\" está desligado ou em falta. Ative-o em Workflows.",
+    "rematchBudget": "O plano de workflows está esgotado. O recálculo não foi iniciado.",
     "aiAdvised": "Aconselhado pelo Koios"
   },
   "statistics": {

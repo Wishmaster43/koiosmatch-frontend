@@ -369,7 +369,10 @@
     "shownOf": "Toont de {{shown}} dichtstbijzijnden van {{total}} kandidaten",
     "centerVacancy": "Vacaturelocatie",
     "refreshAdvice": "Koios-advies verversen",
-    "adviceQueued": "Advies wordt berekend. De lijst ververst zo.",
+    "rematchStarted": "Koios matcht de kandidaten opnieuw; de lijst ververst zodra de workflow klaar is.",
+    "rematchBusy": "Er loopt al een herberekening voor deze vacature.",
+    "rematchMissing": "De workflow \"Leads herberekenen (één vacature)\" staat uit of ontbreekt. Zet hem aan bij Workflows.",
+    "rematchBudget": "De workflow-staffel is vol. De herberekening is niet gestart.",
     "aiAdvised": "Door Koios geadviseerd"
   },
   "statistics": {
