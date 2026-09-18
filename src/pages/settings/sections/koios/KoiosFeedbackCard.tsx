@@ -4,7 +4,8 @@
  * (API-CREDITS-1) — the endpoint is pure reporting over already-stored rows.
  * Measured against KoiosFeedbackController::index(): {summary{total,up,down,
  * down_pct,reasons{}}, data[{id,surface,rating,reasons[],comment,user,
- * prompt_excerpt,created_at}], total, per_page, current_page, last_page}.
+ * created_at}], total, per_page, current_page, last_page}. prompt_excerpt left the list on
+ * AUDIT-BE-1 SEC2-MINI (api d36a4406): a prompt is the user's own text, never listed to others.
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -31,7 +32,6 @@ interface FeedbackRow {
   reasons: string[]
   comment: string | null
   user: { id: string; name: string } | null
-  prompt_excerpt: string | null
   created_at: string
 }
 interface FeedbackSummary { total: number; up: number; down: number; down_pct: number; reasons: Record<string, number> }
@@ -130,7 +130,6 @@ export default function KoiosFeedbackCard() {
                     )}
                     <Caption style={{ marginLeft: 'auto' }}>{row.user?.name ?? '—'} · {formatDateTime(row.created_at)}</Caption>
                   </div>
-                  {row.prompt_excerpt && <Caption>{row.prompt_excerpt}</Caption>}
                   <BodyText as="p">{row.comment || <span style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>{t('feedbackAdmin.noComment')}</span>}</BodyText>
                 </li>
               ))}

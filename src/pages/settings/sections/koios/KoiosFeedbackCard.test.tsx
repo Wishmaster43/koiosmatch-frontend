@@ -24,11 +24,11 @@ const page1 = {
   data: [
     {
       id: 'f1', surface: 'chat', rating: 'down', reasons: ['inaccurate'], comment: 'Wrong shift date',
-      user: { id: 'u1', name: 'Danny' }, prompt_excerpt: 'What shifts run tomorrow?', created_at: '2026-08-20T10:15:00Z',
+      user: { id: 'u1', name: 'Danny' }, created_at: '2026-08-20T10:15:00Z',
     },
     {
       id: 'f2', surface: 'generate', rating: 'up', reasons: [], comment: null,
-      user: { id: 'u2', name: 'Anna' }, prompt_excerpt: null, created_at: '2026-08-21T09:00:00Z',
+      user: { id: 'u2', name: 'Anna' }, created_at: '2026-08-21T09:00:00Z',
     },
   ],
   total: 2, per_page: 25, current_page: 1, last_page: 1,
@@ -56,7 +56,8 @@ describe('KoiosFeedbackCard', () => {
     expect(screen.getAllByText(/koios\.feedback\.reasons\.inaccurate/).length).toBeGreaterThan(0)
 
     // Row content: excerpt + comment for the down row, empty-comment notice for the up row.
-    expect(screen.getByText('What shifts run tomorrow?')).toBeInTheDocument()
+    // SEC2-MINI (api d36a4406): the list no longer carries prompt_excerpt — nothing of the prompt renders.
+    expect(screen.queryByText('What shifts run tomorrow?')).toBeNull()
     expect(screen.getByText('Wrong shift date')).toBeInTheDocument()
     expect(screen.getByText('feedbackAdmin.noComment')).toBeInTheDocument()
   })
