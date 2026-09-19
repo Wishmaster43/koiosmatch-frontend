@@ -242,14 +242,14 @@ export default function MatchCard({
         </button>
       )}
       {helloflexGuid ? (
-        <span title={t('matchesView.backofficeLinked')} style={{ display: 'flex', color: 'var(--color-primary-text)' }}><Link2 size={13} /></span>
+        <span role="img" aria-label={t('matchesView.backofficeLinked')} title={t('matchesView.backofficeLinked')} style={{ display: 'flex', color: 'var(--color-primary-text)' }}><Link2 size={13} aria-hidden="true" /></span>
       ) : null}
       {(showHelloflex || showShiftmanager) && (
         <BackofficeCouplingIndicator helloflexLink={helloflexLink} shiftmanagerLink={shiftmanagerLink}
           showHelloflex={showHelloflex} showShiftmanager={showShiftmanager} />
       )}
       {isSafeUrl(vacancyUrl) ? (
-        <a href={vacancyUrl ?? undefined} target="_blank" rel="noopener noreferrer" title={t('work.openVacancy')}
+        <a href={vacancyUrl ?? undefined} target="_blank" rel="noopener noreferrer" title={t('work.openVacancy')} aria-label={t('work.openVacancy')}
           // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact match-card glyph control: deliberate bare 12–14px icon in a dense row; Button iconOnly’s 28px chrome would break the card metrics
           style={{ display: 'flex', color: 'var(--text-muted)' }}><ExternalLink size={12} /></a>
       ) : null}

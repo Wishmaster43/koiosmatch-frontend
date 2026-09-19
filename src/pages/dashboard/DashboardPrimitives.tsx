@@ -9,7 +9,7 @@ import { interactive } from '@/lib/a11y'
 import type { LucideIcon } from 'lucide-react'
 import SharedAvatar from '@/components/ui/Avatar'
 import { SectionTitle, Caption } from '@/components/ui/typography'
-import { tintBg, chipInk } from '@/lib/tint'
+import StatusPill from '@/components/ui/StatusPill'
 
 // A single KPI tile (label/value/sub + icon chip); onClick makes it act as a click-to-filter affordance when the caller passes one.
 export function KpiCard({ label, value, sub, color, bg, Icon, onClick }: {
@@ -64,8 +64,10 @@ export function Avatar({ initials, size = 28 }: { initials: string; size?: numbe
   return <SharedAvatar initials={initials} size={size} />
 }
 
-// A small colour-tinted status pill for dashboard rows (§4 soft-chip convention).
+// The dashboard's status pill IS the shared one (JOINT-DEEP-AUDIT-1 slice A, D2, Opus-confirmed):
+// the old local span hand-rolled the tint, dropped the §4 border and used the ACTIVE 16/50 tint
+// that CHIP-TINT-1 reserves for selected choice chips. StatusPill → SoftChip is the one place
+// every entity's status chip is painted; this thin wrapper only keeps the dashboard's import name.
 export function StatusBadge({ label, color }: { label?: ReactNode; color: string }) {
-  return <span style={{ fontSize: 10, fontWeight: 500, padding: '2px 7px', borderRadius: 99,
-    background: tintBg(color, true), color: chipInk(color), whiteSpace: 'nowrap' }}>{label}</span>
+  return <StatusPill label={label} color={color} />
 }

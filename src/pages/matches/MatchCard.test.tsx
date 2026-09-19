@@ -195,3 +195,12 @@ describe('MatchCard · flatRow column split (Danny 09-08 second look)', () => {
     expect(screen.getByText('Voorgesteld')).toBeInTheDocument()
   })
 })
+
+// JOINT-DEEP-AUDIT-1 slice A (D6): the two icon-only glyphs carry an accessible name, not only a title.
+describe('MatchCard · icon-only glyphs have accessible names', () => {
+  it('names the open-vacancy link and the backoffice-linked glyph', () => {
+    render(<MatchCard {...base} vacancyUrl="https://example.com/vacatures/1" helloflexGuid="hf-1" />)
+    expect(screen.getByRole('link', { name: 'Vacature openen' })).toHaveAttribute('href', 'https://example.com/vacatures/1')
+    expect(screen.getByRole('img', { name: 'Gekoppeld met backoffice (HelloFlex)' })).toBeInTheDocument()
+  })
+})
