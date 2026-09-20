@@ -716,6 +716,9 @@ describe('ConversationsSection · WA-THREAD-UX-1', () => {
       fireEvent.change(input, { target: { value: 'Nog een berichtje' } })
       fireEvent.click(screen.getByRole('button', { name: 'common:send' }))
       await waitFor(() => expect(api.post).toHaveBeenCalled())
+      // The refresh timer is scheduled when the 202 lands and the pending bubble renders —
+      // wait for the bubble, or a loaded machine advances the clock before the timer exists.
+      await screen.findByText('conversations.delivery.queued')
       const callsBeforeTimer = getCount
 
       // The 60s drainer-cadence timer refetches this thread's messages.
@@ -751,6 +754,9 @@ describe('ConversationsSection · WA-THREAD-UX-1', () => {
       fireEvent.change(input, { target: { value: 'Wachtrij-bericht' } })
       fireEvent.click(screen.getByRole('button', { name: 'common:send' }))
       await waitFor(() => expect(api.post).toHaveBeenCalled())
+      // The refresh timer is scheduled when the 202 lands and the pending bubble renders —
+      // wait for the bubble, or a loaded machine advances the clock before the timer exists.
+      await screen.findByText('conversations.delivery.queued')
       const callsBeforeTimer = getCount
 
       // First backoff step (60s): the refetch resolves without the queued row.
