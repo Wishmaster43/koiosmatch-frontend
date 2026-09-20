@@ -2357,7 +2357,7 @@
     "isApplicantHint": "Les candidats avec ce statut affichent le funnel de candidature. Généralement un seul statut (p. ex. « Candidat »).",
     "applicantBadge": "Funnel",
     "valueField": "Slug (valeur)",
-    "valueHint": "Clé stable ; laissez vide pour en générer une à partir du libellé.",
+    "valueHint": "Clé stable, {{max}} caractères maximum ; laisser vide pour en générer une à partir du libellé.",
     "valueImmutable": "Le slug ne peut plus être modifié après la création.",
     "candidate_types": {
       "title": "Types de contrat",

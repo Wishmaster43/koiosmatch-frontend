@@ -20,6 +20,9 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 import ModalFooter from '@/components/ui/ModalFooter'
 import { Caption, BodyText, SectionTitle } from '@/components/ui/typography'
 
+// The backend's `value` rule on every candidate lookup (CandidateGenderController and its siblings: max:50).
+const LOOKUP_VALUE_MAX = 50
+
 // The full add/edit modal state — one shared shape across every candidate-lookup
 // block (statuses/funnel-types/phases/candidate-types); each block only reads/writes
 // the flags relevant to it (isStatusBlock/isFunnelBlock/… below), the rest ride along.
@@ -100,15 +103,18 @@ export default function CandidateLookupItemModal({
 
         <div style={{ marginBottom: 14 }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('lookups.valueField')}</div>
-          <input value={modal.value}
+          {/* LOOKUP-VALUE-MAX-1 (Danny 19-09, 422 "Het veld value mag niet meer dan 50 tekens bevatten"
+              on the gender lookup): the backend caps every lookup value at 50 characters, so the
+              input stops there and the hint says so — the server's own message never has to. */}
+          <input value={modal.value} maxLength={LOOKUP_VALUE_MAX}
             disabled={modal.mode === 'edit'}
-            onChange={e => setModal(m => m && ({ ...m, value: e.target.value }))}
+            onChange={e => setModal(m => m && ({ ...m, value: e.target.value.slice(0, LOOKUP_VALUE_MAX) }))}
             placeholder={modal.label ? slugify(modal.label) : 'slug'}
             style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, fontFamily: 'monospace',
                      border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box',
                      background: modal.mode === 'edit' ? 'var(--hover-bg)' : 'var(--surface)', color: modal.mode === 'edit' ? 'var(--text-muted)' : 'var(--text)' }} />
           <Caption as="div" style={{ marginTop: 4 }}>
-            {modal.mode === 'edit' ? t('lookups.valueImmutable') : t('lookups.valueHint')}
+            {modal.mode === 'edit' ? t('lookups.valueImmutable') : t('lookups.valueHint', { max: LOOKUP_VALUE_MAX })}
           </Caption>
         </div>
 

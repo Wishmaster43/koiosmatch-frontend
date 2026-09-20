@@ -724,7 +724,7 @@
     "labelField": "Etichetta",
     "labelPlaceholder": "Nome visualizzato",
     "valueField": "Slug (valore)",
-    "valueHint": "Chiave stabile; lascia vuoto per generarne una dall'etichetta.",
+    "valueHint": "Chiave stabile, massimo {{max}} caratteri; lascia vuoto per generarla dall'etichetta.",
     "valueImmutable": "Lo slug non può essere modificato dopo la creazione.",
     "colorField": "Colore",
     "confirmDelete": "Eliminare \"{{name}}\"? Se è in uso, verrà archiviato.",

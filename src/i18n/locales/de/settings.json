@@ -2357,7 +2357,7 @@
     "isApplicantHint": "Kandidaten mit diesem Status zeigen den Bewerbungs-Funnel. Normalerweise ein Status (z. B. \"Bewerber\").",
     "applicantBadge": "Funnel",
     "valueField": "Slug (Wert)",
-    "valueHint": "Stabiler Schlüssel; leer lassen, um einen aus dem Label zu generieren.",
+    "valueHint": "Stabiler Schlüssel, höchstens {{max}} Zeichen; leer lassen erzeugt einen aus dem Label.",
     "valueImmutable": "Der Slug kann nach der Erstellung nicht mehr geändert werden.",
     "candidate_types": {
       "title": "Vertragsarten",

@@ -724,7 +724,7 @@
     "labelField": "Etiqueta",
     "labelPlaceholder": "Nome de exibição",
     "valueField": "Slug (valor)",
-    "valueHint": "Chave estável; deixe em branco para gerar uma a partir da etiqueta.",
+    "valueHint": "Chave estável, no máximo {{max}} caracteres; deixe vazio para a gerar a partir do rótulo.",
     "valueImmutable": "O slug não pode ser alterado após a criação.",
     "colorField": "Cor",
     "confirmDelete": "Eliminar \"{{name}}\"? Se estiver em utilização, será arquivado.",

@@ -724,7 +724,7 @@
     "labelField": "Label",
     "labelPlaceholder": "Display name",
     "valueField": "Slug (value)",
-    "valueHint": "Stable key; leave empty to generate one from the label.",
+    "valueHint": "Stable key, at most {{max}} characters; leave empty to generate one from the label.",
     "valueImmutable": "The slug cannot be changed after creation.",
     "colorField": "Colour",
     "confirmDelete": "Delete \"{{name}}\"? If it is in use it will be archived.",

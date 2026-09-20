@@ -724,7 +724,7 @@
     "labelField": "Label",
     "labelPlaceholder": "Weergavenaam",
     "valueField": "Slug (waarde)",
-    "valueHint": "Stabiele sleutel; leeg laten genereert er een uit het label.",
+    "valueHint": "Stabiele sleutel, maximaal {{max}} tekens; leeg laten genereert er een uit het label.",
     "valueImmutable": "De slug kan na aanmaken niet meer gewijzigd worden.",
     "colorField": "Kleur",
     "confirmDelete": "\"{{name}}\" verwijderen? Als deze in gebruik is, wordt hij gearchiveerd.",
