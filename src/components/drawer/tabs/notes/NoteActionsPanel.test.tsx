@@ -136,3 +136,61 @@ describe('NoteActionsPanel · nothing to show', () => {
     expect(container).toBeEmptyDOMElement()
   })
 })
+
+// NOTE-CONFIRM-HANG-2 (Danny 19-09, "blijft hangen"): the dossier's candidate rides on every
+// execute call, and a confirm the server answers with "pending" again (or rejects) clears the
+// spinner and names why instead of spinning forever.
+describe('NoteActionsPanel · candidate on the call and an honest confirm outcome', () => {
+  it('sends source.candidate_id on preview and on confirm when the panel knows the candidate', async () => {
+    const user = userEvent.setup()
+    vi.mocked(executeRichTextActions)
+      .mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'pending' }])
+      .mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'executed', run_id: 'run-3' }])
+    render(<Controlled initial={[baseItem()]} candidateId="cand-7" />)
+    await user.click(screen.getByRole('button', { name: 'Uitvoeren' }))
+    expect(executeRichTextActions).toHaveBeenCalledWith(expect.anything(), { candidate_id: 'cand-7' })
+    await user.click(await screen.findByRole('button', { name: 'Bevestigen' }))
+    expect(executeRichTextActions).toHaveBeenLastCalledWith(
+      [expect.objectContaining({ confirmed: true })], { candidate_id: 'cand-7' })
+  })
+
+  it('clears the spinner and says the server did not apply the confirm when it answers pending again', async () => {
+    const user = userEvent.setup()
+    vi.mocked(executeRichTextActions)
+      .mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'pending' }])
+      .mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'pending' }])
+    render(<Controlled initial={[baseItem()]} candidateId="cand-7" />)
+    await user.click(screen.getByRole('button', { name: 'Uitvoeren' }))
+    await user.click(await screen.findByRole('button', { name: 'Bevestigen' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('De server nam de bevestiging niet aan, probeer het nogmaals')
+    expect(screen.getByRole('button', { name: 'Bevestigen' })).not.toBeDisabled()
+  })
+
+  it('names an expired session when the confirm is rejected with 401', async () => {
+    const user = userEvent.setup()
+    vi.mocked(executeRichTextActions)
+      .mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'pending' }])
+      .mockRejectedValueOnce({ response: { status: 401 } })
+    render(<Controlled initial={[baseItem()]} candidateId="cand-7" />)
+    await user.click(screen.getByRole('button', { name: 'Uitvoeren' }))
+    await user.click(await screen.findByRole('button', { name: 'Bevestigen' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('Sessie verlopen: log opnieuw in en bevestig nogmaals')
+  })
+})
+
+// NOTE-CONFIRM-HANG-2, the case Danny hit: the note was saved and reopened, its item is already
+// "pending" from the server, and Bevestigen is the FIRST call of this mount — it must send the
+// confirm (with the persisted item id) instead of doing nothing behind a spinner.
+describe('NoteActionsPanel · confirm on a persisted pending item without a preview', () => {
+  it('sends confirmed:true with note_action_item_id and shows Uitgevoerd on an executed answer', async () => {
+    const user = userEvent.setup()
+    vi.mocked(executeRichTextActions).mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'executed', run_id: 'run-5', created: { type: 'task', id: 't-1' } }])
+    render(<Controlled initial={[baseItem({ status: 'pending', noteActionItemId: 'nai-1' })]} noteId="note-1" candidateId="cand-7" />)
+    await user.click(screen.getByRole('button', { name: 'Bevestigen' }))
+    expect(executeRichTextActions).toHaveBeenCalledTimes(1)
+    expect(executeRichTextActions).toHaveBeenCalledWith(
+      [expect.objectContaining({ title: 'Bel terug', confirmed: true, note_action_item_id: 'nai-1' })],
+      { note_id: 'note-1', candidate_id: 'cand-7' })
+    expect(await screen.findByText('Uitgevoerd')).toBeInTheDocument()
+  })
+})

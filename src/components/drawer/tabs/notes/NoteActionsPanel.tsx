@@ -51,6 +51,12 @@ export interface NoteActionPanelItem {
   budget?: ActionBudget
   run_id?: string
   created?: { type: 'appointment' | 'task' | 'calllist'; id: string } | null
+  // NOTE-CONFIRM-HANG-2: the per-item confirm state comes from the execute hook, never from a
+  // card-local flag — a confirm the server answered with "pending" again used to leave the
+  // card's own spinner on forever because nothing about the item changed.
+  confirming?: boolean
+  confirmError?: boolean
+  confirmErrorKind?: 'failed' | 'sessionExpired' | 'notApplied'
   // K-159 task extras (edit-before-execute): who the task is for and one
   // optional entity link — executed verbatim; labels are display-only.
   assignee_user_id?: string
@@ -135,16 +141,16 @@ function ActionItemCard({ item, index, onEdit, onConfirm, candidateId, formatNum
 }) {
   const { t } = useTranslation('common')
   const [editing, setEditing] = useState(false)
-  const [confirming, setConfirming] = useState(false)
-  // Clear the local spinner once the confirm response has actually landed.
-  useEffect(() => { setConfirming(false) }, [item.status])
+  // The spinner is the hook's own `confirming` flag (via the sync effect) — it clears on every
+  // response, including a "pending" answer or a rejected request (NOTE-CONFIRM-HANG-2).
+  const confirming = Boolean(item.confirming)
   const Icon = TYPE_ICON[item.type] ?? ListChecks
   const dateField = item.type === 'appointment' ? item.start : item.due_date
   const link = item.status === 'executed' ? createdLink(item.created, candidateId) : undefined
 
   // Fired once; cleared once the item's own status moves on (the confirm
   // response landed and NoteActionsPanel's sync effect updated this prop).
-  const confirm = () => { setConfirming(true); onConfirm(index) }
+  const confirm = () => onConfirm(index)
 
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -207,6 +213,15 @@ function ActionItemCard({ item, index, onEdit, onConfirm, candidateId, formatNum
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
         <StatusChip status={item.status} />
         {(item.status === 'failed' || item.status === 'pending' || item.status === 'budget_exceeded') && item.reason && <Caption as="span" title={item.reason}>{item.reason}</Caption>}
+        {item.status === 'pending' && item.confirmError && (
+          <span role="alert"><Caption as="span" style={{ color: 'var(--color-danger-text)' }}>
+            {item.confirmErrorKind === 'sessionExpired'
+              ? t('notesAssist.execute.confirmSessionExpired', { defaultValue: 'Sessie verlopen: log opnieuw in en bevestig nogmaals' })
+              : item.confirmErrorKind === 'notApplied'
+                ? t('notesAssist.execute.confirmNotApplied', { defaultValue: 'De server nam de bevestiging niet aan, probeer het nogmaals' })
+                : t('notesAssist.execute.confirmFailed', { defaultValue: 'Bevestigen mislukt' })}
+          </Caption></span>
+        )}
         {item.status === 'pending' && (
           <Button variant="soft" size="sm" onClick={confirm} disabled={confirming}>
             {confirming ? <Spinner size={11} /> : null} {t('notesAssist.panel.confirm', { defaultValue: 'Bevestigen' })}
@@ -241,7 +256,10 @@ function ActionItemCard({ item, index, onEdit, onConfirm, candidateId, formatNum
 export default function NoteActionsPanel({ items, onItemsChange, noteId, candidateId, autoRun }: NoteActionsPanelProps) {
   const { t } = useTranslation('common')
   const { formatNumber } = useNumberFormat()
-  const exec = useAssistActionsExecute(noteId ? { note_id: noteId } : {})
+  // The dossier's candidate rides on every execute call (NOTE-CONFIRM-HANG-2): the note may not
+  // be saved yet, so note_id alone can be absent — candidate_id is what makes the created
+  // appointment/task land on THIS person.
+  const exec = useAssistActionsExecute({ ...(noteId ? { note_id: noteId } : {}), ...(candidateId ? { candidate_id: candidateId } : {}) })
   const hasProposed = items.some(it => it.status === 'proposed')
   // Always-current panel items for the sync effect below (avoids re-running
   // it — and re-merging — on every panel item edit, only on exec's own
@@ -271,7 +289,8 @@ export default function NoteActionsPanel({ items, onItemsChange, noteId, candida
         : (r.status === 'failed' || r.status === 'forbidden' || r.status === 'unsupported' ? 'failed' : 'pending')
       return { ...it, status, reason: r.reason, run_id: r.run_id, execIndex,
         budget: r.budget ?? it.budget,
-        created: r.created ?? it.created ?? null }
+        created: r.created ?? it.created ?? null,
+        confirming: r.confirming, confirmError: r.confirmError, confirmErrorKind: r.confirmErrorKind }
     })
     onItemsChange(next)
     // onItemsChange is the caller's setter (stable identity in practice); the
@@ -309,11 +328,13 @@ export default function NoteActionsPanel({ items, onItemsChange, noteId, candida
   // Sends the PANEL's current item (late edits included) at the exec index
   // stamped during the merge — a title edit no longer breaks the lookup and
   // the confirm can never resend a stale pre-edit copy (r2 punt-7 gat).
+  // A persisted pending item (note reopened, no preview in this mount) confirms too: the hook
+  // seeds its own list from the override when it has none (NOTE-CONFIRM-HANG-2).
   const confirmOne = (index: number) => {
     const target = items[index]
-    if (!target || !exec.items) return
-    const execIndex = target.execIndex ?? exec.items.findIndex(r => r.title === target.title && r.type === target.type)
-    if (execIndex >= 0) exec.confirm(execIndex, target)
+    if (!target) return
+    const execIndex = target.execIndex ?? (exec.items ? exec.items.findIndex(r => r.title === target.title && r.type === target.type) : -1)
+    exec.confirm(execIndex >= 0 ? execIndex : 0, target)
   }
 
   // Inline edit — applies a patch to one item's local fields (title/date),

@@ -86,33 +86,39 @@ export function useAssistActionsExecute(source: ExecuteSource = {}) {
     // source is a plain object the caller rebuilds each render from a
     // primitive (note_id) — depending on that primitive is safe.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [t, source.note_id])
+  }, [t, source.note_id, source.candidate_id])
 
   // Per-item confirm — re-sends ONLY that one item with confirmed:true, so an
   // already-executed/forbidden sibling in the same batch is never re-run.
   // `override` lets the caller send ITS current copy (late edits at the
   // pending stage — r2 punt-7 gat: the hook's own array held the pre-edit item).
   const confirm = useCallback(async (index: number, override?: RichTextAssistActionItem) => {
-    setItems(prev => prev?.map((it, i) => i === index ? { ...it, confirming: true, confirmError: false } : it) ?? null)
     const target = override ?? items?.[index]
     if (!target) return
+    // NOTE-CONFIRM-HANG-2 (measured 19-09): a persisted "pending" item confirmed after the note
+    // was reopened has NO preview in this mount, so the hook's list is still null — the old
+    // code then updated nothing and sent nothing while the card kept spinning. Seed the list
+    // with the confirmed item so the same merge path applies (index 0 in the seeded list).
+    const place = (prev: ExecItem[] | null): { base: ExecItem[]; i: number } =>
+      prev ? { base: prev, i: index } : { base: [target as ExecItem], i: 0 }
+    setItems(prev => { const { base, i } = place(prev); return base.map((it, k) => k === i ? { ...it, confirming: true, confirmError: false } : it) })
     try {
       const [result] = await executeRichTextActions([toExecuteItem(target, true)], source)
       if (!aliveRef.current) return
       // A 2xx that still says pending/wizard_required after confirmed:true is NOT progress —
       // the server did not apply the confirm; say so instead of silently re-arming the button.
       const notApplied = !result || result.status === 'pending' || result.status === 'wizard_required'
-      setItems(prev => prev?.map((it, i) => i === index
+      setItems(prev => { const { base, i } = place(prev); return base.map((it, k) => k === i
         ? { ...it, ...(result ?? {}), confirming: false, confirmError: notApplied, confirmErrorKind: notApplied ? 'notApplied' : undefined }
-        : it) ?? null)
+        : it) })
     } catch (err) {
       if (!aliveRef.current) return
       const status = (err as { response?: { status?: number } })?.response?.status
       const kind = status === 401 || status === 419 ? 'sessionExpired' : 'failed'
-      setItems(prev => prev?.map((it, i) => i === index ? { ...it, confirming: false, confirmError: true, confirmErrorKind: kind } : it) ?? null)
+      setItems(prev => { const { base, i } = place(prev); return base.map((it, k) => k === i ? { ...it, confirming: false, confirmError: true, confirmErrorKind: kind } : it) })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items, source.note_id])
+  }, [items, source.note_id, source.candidate_id])
 
   // Back to idle — the "Klaar" close on the results panel; a fresh "Uitvoeren"
   // click starts a new preview from scratch.

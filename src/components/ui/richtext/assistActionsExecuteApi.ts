@@ -95,6 +95,10 @@ export interface ExecuteSource {
   // Present when composing over an EXISTING note (edit mode); omitted for a
   // new, unsaved note OR any non-note field — no linkage exists there yet.
   note_id?: string
+  // NOTE-CONFIRM-HANG-2 (19-09, measured with CMBE): the wizard runs on the DRAFT note, so
+  // without this the server had no subject and created the appointment with candidate_id
+  // NULL (invisible on the dossier). Always the dossier's candidate; the server scopes it.
+  candidate_id?: string
 }
 
 // Narrow a RichTextAssistActionItem down to exactly the fields the execute
