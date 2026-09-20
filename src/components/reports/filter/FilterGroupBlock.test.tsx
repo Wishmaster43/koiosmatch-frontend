@@ -69,4 +69,36 @@ describe('FilterGroupBlock — radio group', () => {
     expect(screen.getByRole('radio', { name: 'A' })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('radio', { name: 'B' })).toHaveAttribute('aria-checked', 'false')
   })
+
+  it('moves and selects with ArrowRight, and only the active option is a tab stop (D6 keyboard audit)', () => {
+    const onToggle = vi.fn()
+    const group: ReportFilterGroup = {
+      key: 'mode', label: 'Mode', type: 'radio',
+      selected: ['a'], options: [{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }],
+      onToggle,
+    }
+    render(<FilterGroupBlock group={group} collapsed={false} count={0} onToggle={vi.fn()} />)
+    const optionA = screen.getByRole('radio', { name: 'A' })
+    const optionB = screen.getByRole('radio', { name: 'B' })
+    expect(optionA).toHaveAttribute('tabIndex', '0')
+    expect(optionB).toHaveAttribute('tabIndex', '-1')
+    fireEvent.keyDown(optionA, { key: 'ArrowRight' })
+    expect(onToggle).toHaveBeenCalledWith('b')
+  })
+
+  it('keeps exactly one tab stop (the first option) when nothing is selected (D6 verifier follow-up)', () => {
+    // WhatsAppPage/reportPanelGroups radio groups start with an empty `selected`
+    // array — every option must not go tabIndex -1, or the group becomes
+    // keyboard-unreachable (mirrors SegmentedControl's own empty-value clause).
+    const group: ReportFilterGroup = {
+      key: 'mode', label: 'Mode', type: 'radio',
+      selected: [], options: [{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }],
+      onToggle: vi.fn(),
+    }
+    render(<FilterGroupBlock group={group} collapsed={false} count={0} onToggle={vi.fn()} />)
+    const optionA = screen.getByRole('radio', { name: 'A' })
+    const optionB = screen.getByRole('radio', { name: 'B' })
+    expect(optionA).toHaveAttribute('tabIndex', '0')
+    expect(optionB).toHaveAttribute('tabIndex', '-1')
+  })
 })

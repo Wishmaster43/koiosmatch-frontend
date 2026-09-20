@@ -6,6 +6,8 @@
  * Extracted from ReportFilterSidebar to keep that file a thin composer.
  */
 import { ChevronRight } from 'lucide-react'
+import { useRef } from 'react'
+import type { KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ReportFilterGroup } from '@/types/reports'
 import SearchSelectGroup from './SearchSelectGroup'
@@ -23,6 +25,22 @@ export default function FilterGroupBlock({
 }: { group: ReportFilterGroup; collapsed: boolean; count: number; onToggle: () => void }) {
   const { t } = useTranslation('common')
   const bodyId = `filter-group-body-${group.key}`
+
+  // The 'radio' group's roving-tabindex keyboard handler (D6 finding): a real
+  // ARIA radiogroup must let arrow keys move AND select, mirroring
+  // SegmentedControl's own roving-tabindex contract.
+  const radioRefs = useRef<Array<HTMLButtonElement | null>>([])
+  const onRadioKeyDown = (e: KeyboardEvent<HTMLButtonElement>, idx: number, options: NonNullable<ReportFilterGroup['options']>) => {
+    let next: number | null = null
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (idx + 1) % options.length
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (idx - 1 + options.length) % options.length
+    else if (e.key === 'Home') next = 0
+    else if (e.key === 'End') next = options.length - 1
+    if (next === null) return
+    e.preventDefault()
+    group.onToggle?.(options[next].value)
+    radioRefs.current[next]?.focus()
+  }
 
   return (
     // Subtle primary-tinted background (§4 color-mix, not a loud fill) so the
@@ -118,16 +136,25 @@ export default function FilterGroupBlock({
             <SearchSelectGroup group={group} />
           ) : group.type === 'radio' ? (
             <div role="radiogroup" aria-label={group.label} style={{ display: 'flex', background: 'var(--border)', borderRadius: 7, padding: 2, gap: 2 }}>
-              {(group.options ?? []).map(opt => {
+              {(group.options ?? []).map((opt, i) => {
                 const active = (group.selected ?? []).includes(opt.value)
                 return (
                   // Segmented pill option, not a standalone action — mirrors
                   // SegmentedControl's own compact-pill exemption; the raised
                   // "active" shadow is a status-ring class (deliberately excepted).
-                  // role="radio"/aria-checked mirrors the SegmentedControl atom's
-                  // own contract for a single-choice picker (D6 audit finding).
+                  // role="radio"/aria-checked + roving tabindex mirrors
+                  // SegmentedControl's own contract for a single-choice picker (D6).
+                  // D6 follow-up: with nothing selected every option got tabIndex -1,
+                  // making the group unreachable by keyboard — worse than the gap
+                  // being fixed (WhatsAppPage filters and reportPanelGroups' escalated
+                  // radio both start empty). Mirrors SegmentedControl's own clause:
+                  // the first option is a tab stop when no option is checked.
                   /* eslint-disable huisstijlLegacy/no-restricted-syntax */
-                  <button key={opt.value} type="button" role="radio" aria-checked={active} onClick={() => group.onToggle?.(opt.value)}
+                  <button key={opt.value} type="button" role="radio" aria-checked={active}
+                    tabIndex={active || ((group.selected ?? []).length === 0 && i === 0) ? 0 : -1}
+                    ref={el => { radioRefs.current[i] = el }}
+                    onClick={() => group.onToggle?.(opt.value)}
+                    onKeyDown={e => onRadioKeyDown(e, i, group.options ?? [])}
                     style={{
                       flex: 1, padding: '4px 0', borderRadius: 5, fontSize: 11,
                       fontWeight: active ? 600 : 400, cursor: 'pointer',

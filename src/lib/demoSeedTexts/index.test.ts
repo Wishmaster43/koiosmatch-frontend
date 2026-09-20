@@ -62,6 +62,22 @@ describe('useSeedText', () => {
     const { result } = renderHook(() => useSeedText(undefined))
     expect(result.current).toBe('')
   })
+
+  // DEMO-TAAL: Italian and Portuguese are shipped UI locales too (src/i18n/locales),
+  // so they must resolve a real catalogue, not silently fall through to Dutch.
+  it('returns the seeded translation for Italian', async () => {
+    mockedTenantId.mockReturnValue('demo')
+    mockLanguage = 'it'
+    const { result } = renderHook(() => useSeedText(SEEDED_NL))
+    await waitFor(() => expect(result.current).toBe('Amira ha esperienza nella logistica e viene da Amsterdam.'))
+  })
+
+  it('returns the seeded translation for Portuguese', async () => {
+    mockedTenantId.mockReturnValue('demo')
+    mockLanguage = 'pt'
+    const { result } = renderHook(() => useSeedText(SEEDED_NL))
+    await waitFor(() => expect(result.current).toBe('Amira tem experiência em logística e vem de Amsterdam.'))
+  })
 })
 
 

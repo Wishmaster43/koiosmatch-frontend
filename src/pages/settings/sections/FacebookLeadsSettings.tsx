@@ -11,12 +11,13 @@
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Eye, EyeOff, Copy, Check, Save, AlertTriangle, RefreshCw } from 'lucide-react'
+import { Eye, EyeOff, Save, AlertTriangle, RefreshCw } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { notifyError } from '@/lib/notify'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
+import CopyIconButton from '@/components/ui/CopyIconButton'
 import { PageTitle, formLabelStyle } from '@/components/ui/typography'
 import { publicApiUrl } from '@/lib/publicApiUrl'
 
@@ -86,7 +87,6 @@ export default function FacebookLeadsSettings() {
   const [reloadKey, setReloadKey] = useState(0)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [copied, setCopied] = useState(false)
 
   // Load the tenant's current values once; secrets arrive as the MASK (never the real value).
   useEffect(() => {
@@ -132,13 +132,6 @@ export default function FacebookLeadsSettings() {
 
   // This tenant's own webhook URL — paste target for the Facebook app dashboard.
   const webhookUrl = activeTenant?.id ? publicApiUrl(`/facebook/webhook/${activeTenant.id}`) : null
-  // Copies this tenant's webhook URL to the clipboard and flashes a copied confirmation for 2 seconds.
-  const copyUrl = () => {
-    if (!webhookUrl) return
-    navigator.clipboard.writeText(webhookUrl)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
 
   if (loading) return <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>
 
@@ -196,12 +189,10 @@ export default function FacebookLeadsSettings() {
             border: '1px solid var(--border)', borderRadius: 6, padding: '6px 10px', color: 'var(--text)', wordBreak: 'break-all' }}>
             {webhookUrl ?? '—'}
           </code>
-          <button onClick={copyUrl} disabled={!webhookUrl}
-            style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', fontSize: 11, fontWeight: 500,
-              background: copied ? 'var(--color-success-bg)' : 'var(--hover-bg)', color: copied ? 'var(--color-success)' : 'var(--text)',
-              border: 'none', borderRadius: 6, cursor: webhookUrl ? 'pointer' : 'not-allowed', whiteSpace: 'nowrap' }}>
-            {copied ? <Check size={11} /> : <Copy size={11} />} {copied ? t('common.copied') : t('facebookLeads.copyUrl')}
-          </button>
+          <CopyIconButton value={webhookUrl} label={t('facebookLeads.copyUrl')} copiedLabel={t('common.copied')}
+            style={{ padding: '6px 10px', background: 'var(--hover-bg)', borderRadius: 6, fontSize: 11, fontWeight: 500 }}>
+            {t('facebookLeads.copyUrl')}
+          </CopyIconButton>
         </div>
       </div>
     </div>

@@ -342,9 +342,8 @@ const REPORT_KPI_DEFAULT_LENGTH = 9
 // FULL catalogue length as before.
 const REPORT_KPI_AXIS_DEFAULT_LENGTH: Partial<Record<ReportKpiScopeId, number>> = {
   // 'customers' moved to the fixed family (KPI-CUSTOMERS-SIGNALS-1) — its old
-  // axis-cap entry is gone with it; 'candidates' is fixed-family too (dead
-  // leftover from before that move, untouched here — out of this lane's scope).
-  candidates: 5,
+  // axis-cap entry is gone with it. 'candidates' is fixed-family too (see
+  // REPORT_KPI_FAMILY above) so it is never read here — no entry for it.
   leads: 5,
 }
 

@@ -50,9 +50,9 @@ import SoftChip from '@/components/ui/SoftChip'
 import { useNavigation } from '@/context/NavigationContext'
 import { useAuth } from '@/context/AuthContext'
 import { useOpportunityStages } from '@/lib/useOpportunityStages'
-import { formatCurrency } from '@/lib/formatters'
+import { useNumberFormat } from '@/lib/formatters'
 import { AddOpportunityModal } from '@/pages/opportunities/shared'
-import { mapOpportunity } from '@/pages/opportunities/shared'
+import { mapOpportunity, formatOpportunityValue, opportunityValueOf } from '@/pages/opportunities/shared'
 import ScopedListTab from './ScopedListTab'
 import type { ApiOpportunity, Opportunity } from '@/types/opportunity'
 import type { Id, LookupOption } from '@/types/common'
@@ -81,6 +81,8 @@ export default function ScopedOpportunitiesTab({ scope, id, customerId, customer
   // (OPENERS-HIDE-1, Danny 05-09).
   const canCreateOpportunity = auth?.hasPermission?.('opportunities.update') ?? false
   const { stages } = useOpportunityStages()
+  // GETALLEN-1: money renders via the active locale/tenant currency, never a hardcoded 'nl-NL'.
+  const { currency, locale } = useNumberFormat()
   const queryClient = useQueryClient()
   const paramName = scope === 'department' ? 'customer_department_id'
     : scope === 'location' ? 'customer_location_id'
@@ -98,12 +100,12 @@ export default function ScopedOpportunitiesTab({ scope, id, customerId, customer
       render: o => <EntityLink page="opportunities" id={o.id}>{o.title}</EntityLink> },
     { key: 'stage', header: t('opportunities.col.stage'), sortable: true, sortValue: o => o.stage,
       render: o => o.stage ? <SoftChip label={o.stage} color={o.stageColor} /> : '—' },
-    { key: 'value', header: t('opportunities.col.value'), align: 'right', sortable: true, sortValue: o => o.value ?? -1,
+    { key: 'value', header: t('opportunities.col.value'), align: 'right', sortable: true, sortValue: o => opportunityValueOf(o) ?? -1,
       // cellStyle is a raw CSSProperties object DataTable applies to the <td>
       // directly (no JSX slot for the <Mono> atom here) — the font-family comes
       // from the atom's own canonical style identity instead of a local literal.
       cellStyle: { color: 'var(--text)', fontSize: 12, ...monoStyle },
-      render: o => o.value != null ? formatCurrency(o.value, 'EUR', 'nl-NL', 0) : '—' },
+      render: o => formatOpportunityValue(o, t, currency, locale) },
   ]
 
   return (

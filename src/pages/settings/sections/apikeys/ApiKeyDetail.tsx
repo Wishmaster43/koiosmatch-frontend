@@ -13,6 +13,7 @@ import StatusBadge from '@/components/ui/StatusBadge'
 import Spinner from '@/components/ui/Spinner'
 import { CredentialActionMenu } from '@/pages/settings/components/CredentialActionMenu'
 import CalloutBox from '@/components/ui/CalloutBox'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { useConfirm } from '@/hooks/useConfirm'
 import { getApiKey, updateApiKey, deleteApiKey, regenerateApiKey, setApiKeyPrimary } from './apiKeysApi'
@@ -53,25 +54,36 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
   const [loading, setLoading] = useState(true)
   const [tab, setTab]         = useState('general')
   const [secret, setSecret]   = useState<string | null>(null)   // one-time secret after regenerate
+  const [detailError, setDetailError] = useState(false) // full-detail GET failed: scopes/ips/contact are unknown, not empty
   const { confirm, dialog } = useConfirm()
 
-  // Fetch full detail (scopes/ips/contact); fall back to the list row on failure.
+  // Fetch full detail (scopes/ips/contact); on failure keep showing the list row but
+  // flag it so the Access tab never mistakes "unknown" for "no scopes" (§3 no fake affordance).
+  // retryTick lets the retry button re-run this effect without duplicating the fetch logic.
+  const [retryTick, setRetryTick] = useState(0)
   useEffect(() => {
     let active = true
+    setDetailError(false)
     getApiKey(keyId)
       .then((full) => { if (active) setApiKey((prev) => ({ ...prev, ...(full as ApiKey) })) })
-      .catch(() => { /* keep listRow */ })
+      .catch(() => { if (active) setDetailError(true) })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
-  }, [keyId])
+  }, [keyId, retryTick])
 
-  // Persist a partial change and reflect it locally + in the parent list.
+  // Persist a partial change and reflect it locally + in the parent list; a failed
+  // save notifies the admin here so every tab's onSave can rely on the same contract.
   const applyUpdate = async (patch: ApiKeyPatch): Promise<ApiKey> => {
-    const updated = await updateApiKey(keyId, patch) as ApiKey
-    const merged = { ...apiKey, ...patch, ...updated } as ApiKey
-    setApiKey(merged)
-    onPatch?.(keyId, merged)
-    return merged
+    try {
+      const updated = await updateApiKey(keyId, patch) as ApiKey
+      const merged = { ...apiKey, ...patch, ...updated } as ApiKey
+      setApiKey(merged)
+      onPatch?.(keyId, merged)
+      return merged
+    } catch (err) {
+      notifyError(extractApiError(err, t('common:actionFailed')))
+      throw err
+    }
   }
 
   const statusMap = {
@@ -81,7 +93,12 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
 
   // Header actions.
   const regenerate = async () => {
-    try { const res = await regenerateApiKey(keyId) as { secret?: string }; setSecret(res?.secret ?? null) } catch { /* noop */ }
+    try {
+      const res = await regenerateApiKey(keyId) as { secret?: string }
+      setSecret(res?.secret ?? null)
+    } catch (err) {
+      notifyError(extractApiError(err, t('common:actionFailed')))
+    }
   }
   // Flip active ⇄ disabled and persist it immediately.
   const toggleStatus = () => {
@@ -91,7 +108,12 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
   // Confirm, then delete the key for real and let the parent list drop the row.
   const remove = () => {
     confirm(t('apiKeys.deleteConfirm', { name: apiKey?.friendly_name ?? '' }), async () => {
-      try { await deleteApiKey(keyId); onDelete?.(keyId) } catch { /* noop */ }
+      try {
+        await deleteApiKey(keyId)
+        onDelete?.(keyId)
+      } catch (err) {
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      }
     }, { danger: true })
   }
   // K-282: promote this key to primary after confirmation. The backend
@@ -171,10 +193,15 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
         {loading && <span style={{ color: 'var(--text-muted)', flexShrink: 0 }}><Spinner size={13} /></span>}
       </div>
 
-      {/* Active tab */}
-      {tab === 'general'
-        ? <ApiKeyGeneralTab apiKey={apiKey} onSave={applyUpdate} onMakePrimary={makePrimary} />
-        : <ApiKeyAccessTab scopes={apiKey.scopes ?? {}} onSave={(scopes) => applyUpdate({ scopes })} />}
+      {/* Failed detail fetch: scopes are UNKNOWN, not empty — block the Access tab
+          entirely rather than let a Save persist an empty map over real permissions. */}
+      {detailError && tab === 'access' ? (
+        <ErrorBanner onRetry={() => setRetryTick((n) => n + 1)}>{t('apiKeys.detailLoadError')}</ErrorBanner>
+      ) : tab === 'general' ? (
+        <ApiKeyGeneralTab apiKey={apiKey} onSave={applyUpdate} onMakePrimary={makePrimary} />
+      ) : (
+        <ApiKeyAccessTab scopes={apiKey.scopes ?? {}} onSave={(scopes) => applyUpdate({ scopes })} />
+      )}
       {dialog}
     </div>
   )

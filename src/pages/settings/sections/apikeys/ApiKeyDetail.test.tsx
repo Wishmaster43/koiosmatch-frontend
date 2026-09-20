@@ -97,3 +97,61 @@ describe('ApiKeyDetail — K-282 make-primary flow', () => {
     expect(screen.queryByRole('button', { name: st('apiKeys.makePrimary') })).not.toBeInTheDocument()
   })
 })
+
+describe('ApiKeyDetail — failed detail fetch (§3 no fake affordance)', () => {
+  it('blocks the Access tab with a retryable error instead of showing an empty scope map', async () => {
+    vi.mocked(api.get).mockRejectedValue(new Error('network'))
+    const user = userEvent.setup()
+
+    render(<ApiKeyDetail keyId="k1" listRow={listRow()} onBack={vi.fn()} onPatch={vi.fn()} onDelete={vi.fn()} />)
+    await screen.findByRole('heading', { name: 'Backoffice key' })
+
+    await user.click(screen.getByRole('tab', { name: st('apiKeys.tab.access') }))
+
+    // The error banner blocks the tab — no scope toggles are rendered as "off".
+    expect(await screen.findByText(st('apiKeys.detailLoadError'))).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: st('apiKeys.scopes.candidates') })).not.toBeInTheDocument()
+
+    // Retry re-fetches; once it succeeds the error clears and the tab renders normally.
+    vi.mocked(api.get).mockResolvedValue({ data: listRow() })
+    await user.click(screen.getByRole('button', { name: ct('error.retry') }))
+    await waitFor(() => expect(screen.queryByText(st('apiKeys.detailLoadError'))).not.toBeInTheDocument())
+  })
+})
+
+describe('ApiKeyDetail — regenerate/delete failures notify, never a silent no-op', () => {
+  it('a failed regenerate calls notifyError and never shows a secret', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: listRow() })
+    vi.mocked(api.post).mockRejectedValue(new Error('boom'))
+    const { notifyError } = await import('@/lib/notify')
+    const user = userEvent.setup()
+
+    render(<ApiKeyDetail keyId="k1" listRow={listRow()} onBack={vi.fn()} onPatch={vi.fn()} onDelete={vi.fn()} />)
+    await screen.findByRole('heading', { name: 'Backoffice key' })
+
+    await user.click(screen.getByRole('button', { name: st('apiKeys.action') }))
+    await user.click(await screen.findByRole('menuitem', { name: st('apiKeys.regenerate') }))
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalled())
+    expect(screen.queryByText(st('apiKeys.secretOnce'))).not.toBeInTheDocument()
+  })
+
+  it('a failed delete calls notifyError and never drops the row', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: listRow() })
+    vi.mocked(api.delete).mockRejectedValue(new Error('boom'))
+    const { notifyError } = await import('@/lib/notify')
+    const onDelete = vi.fn()
+    const user = userEvent.setup()
+
+    render(<ApiKeyDetail keyId="k1" listRow={listRow()} onBack={vi.fn()} onPatch={vi.fn()} onDelete={onDelete} />)
+    await screen.findByRole('heading', { name: 'Backoffice key' })
+
+    await user.click(screen.getByRole('button', { name: st('apiKeys.action') }))
+    await user.click(await screen.findByRole('menuitem', { name: st('apiKeys.delete') }))
+    const dialog = await screen.findByRole('dialog')
+    await user.click(within(dialog).getByRole('button', { name: ct('confirm') }))
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalled())
+    expect(onDelete).not.toHaveBeenCalled()
+  })
+})

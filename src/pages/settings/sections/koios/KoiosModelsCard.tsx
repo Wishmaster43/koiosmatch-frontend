@@ -207,7 +207,7 @@ export default function KoiosModelsCard({ models, t, onChanged }: KoiosModelsCar
         </div>
       )}
 
-      {error && <div style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 10 }}>{error}</div>}
+      {error && <div role="status" style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 10 }}>{error}</div>}
     </div>
   )
 }

@@ -83,4 +83,19 @@ describe('InvoiceCompanySettings', () => {
     await userEvent.click(saveBtn)
     await waitFor(() => expect(screen.getByDisplayValue('Yesway Flex B.V.')).toBeInTheDocument())
   })
+
+  // §6 — every field's visible label is a real <label htmlFor> tied to its input id.
+  it('associates every company/numbering field label to its input', async () => {
+    api.get.mockResolvedValueOnce({ data: {
+      invoice_company_name: 'Yesway Flex B.V.', invoice_address: 'Straat 1', invoice_postal_city: '1234 AB Stad',
+      invoice_coc_number: '12345678', invoice_vat_number: 'NL123456789B01', invoice_iban: 'NL00BANK0123456789',
+      invoice_email: 'facturen@yesway.nl', invoice_vat_percent: 21, invoice_number_prefix: 'KM-', invoice_auto_finalize: false,
+    } })
+    renderScreen()
+    await screen.findByText(i18n.t('invoiceSettings.title', { ns: 'settings' }))
+    expect(screen.getByLabelText(i18n.t('invoiceSettings.companyName', { ns: 'settings' }))).toBeInTheDocument()
+    expect(screen.getByLabelText(i18n.t('invoiceSettings.email', { ns: 'settings' }))).toBeInTheDocument()
+    expect(screen.getByLabelText(i18n.t('invoiceSettings.vatPercent', { ns: 'settings' }))).toBeInTheDocument()
+    expect(screen.getByLabelText(i18n.t('invoiceSettings.numberPrefix', { ns: 'settings' }))).toBeInTheDocument()
+  })
 })

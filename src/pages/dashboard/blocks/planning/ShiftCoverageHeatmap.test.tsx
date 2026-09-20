@@ -10,6 +10,7 @@ import ShiftCoverageHeatmap from './ShiftCoverageHeatmap'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: Record<string, unknown>) => opts ? `${k}:${JSON.stringify(opts)}` : k }) }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v }) }))
+vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatNumber: (n: number) => `nf(${n})` }) }))
 
 const rows = [
   { date: '2026-08-24', part: 'morning' as const, shifts: 4, filled: 4 },
@@ -21,16 +22,16 @@ describe('ShiftCoverageHeatmap', () => {
   it('renders filled/shifts counts and navigates with that cell\'s own date on click', () => {
     const onNavigate = vi.fn()
     render(<ShiftCoverageHeatmap rows={rows} onNavigate={onNavigate} />)
-    expect(screen.getByText('4/4')).toBeInTheDocument()
-    expect(screen.getByText('1/4')).toBeInTheDocument()
-    screen.getByText('4/4').closest('[role="button"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    expect(screen.getByText('nf(4)/nf(4)')).toBeInTheDocument()
+    expect(screen.getByText('nf(1)/nf(4)')).toBeInTheDocument()
+    screen.getByText('nf(4)/nf(4)').closest('[role="button"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
     expect(onNavigate).toHaveBeenCalledWith('planning', { date: '2026-08-24' })
   })
 
   it('defaults a missing cell to 0/0', () => {
     render(<ShiftCoverageHeatmap rows={rows} onNavigate={vi.fn()} />)
     // 2026-08-24 evening and 2026-08-25 morning/afternoon are absent from rows.
-    expect(screen.getAllByText('0/0').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('nf(0)/nf(0)').length).toBeGreaterThan(0)
   })
 
   it('renders the three part rows in morning/afternoon/evening order', () => {
@@ -41,8 +42,8 @@ describe('ShiftCoverageHeatmap', () => {
 
   it('tints a shifts===0 cell with the muted token, distinct from a filled cell', () => {
     render(<ShiftCoverageHeatmap rows={rows} onNavigate={vi.fn()} />)
-    const emptyCell = screen.getAllByText('0/0')[0].closest('div') as HTMLElement
-    const filledCell = screen.getByText('4/4').closest('div') as HTMLElement
+    const emptyCell = screen.getAllByText('nf(0)/nf(0)')[0].closest('div') as HTMLElement
+    const filledCell = screen.getByText('nf(4)/nf(4)').closest('div') as HTMLElement
     expect(emptyCell.style.background).not.toBe(filledCell.style.background)
   })
 

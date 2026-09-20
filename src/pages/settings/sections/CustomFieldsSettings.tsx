@@ -150,7 +150,7 @@ export default function CustomFieldsSettings({ entityType }: CustomFieldsSetting
     setFields(p => p.map(f => f.id === field.id ? patched : f))
     await api.patch(`/custom-fields/${field.id}`, { active: patched.active })
       .then(() => invalidate())
-      .catch(() => { setFields(p => p.map(f => f.id === field.id ? field : f)) })
+      .catch(() => { setFields(p => p.map(f => f.id === field.id ? field : f)); notifyError(t('statusList.saveFailed')) })
   }
 
   // Worklist #44: toggle visible_in_ui without opening the full edit card — the
@@ -162,7 +162,7 @@ export default function CustomFieldsSettings({ entityType }: CustomFieldsSetting
     setFields(p => p.map(f => f.id === field.id ? patched : f))
     await api.patch(`/custom-fields/${field.id}`, { visible_in_ui: patched.visible_in_ui })
       .then(() => invalidate())
-      .catch(() => { setFields(p => p.map(f => f.id === field.id ? field : f)) })
+      .catch(() => { setFields(p => p.map(f => f.id === field.id ? field : f)); notifyError(t('statusList.saveFailed')) })
   }
 
   // Create a new field.
@@ -195,7 +195,7 @@ export default function CustomFieldsSettings({ entityType }: CustomFieldsSetting
       setNewForm({ label: '', key: '', type: 'text', options: '', optionError: false })
       setAdding(false)
       invalidate()
-    } catch { /* noop */ } finally { setSaving(null) }
+    } catch { notifyError(t('statusList.saveFailed')) } finally { setSaving(null) }
   }
 
   // Save edits to an existing field.
@@ -227,7 +227,7 @@ export default function CustomFieldsSettings({ entityType }: CustomFieldsSetting
       setFields(p => p.map(f => f.id === field.id ? toField(d, i18n.language) : f))
       setExpanded(null)
       invalidate()
-    } catch { /* noop */ } finally { setSaving(null) }
+    } catch { notifyError(t('statusList.saveFailed')) } finally { setSaving(null) }
   }
 
   // Delete — blocked if has_data (409 from backend or has_data flag on item).

@@ -11,6 +11,7 @@ import { AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
 import type { QueueStatus } from './jobsApi'
 import { SectionTitle } from '@/components/ui/typography'
+import SoftChip from '@/components/ui/SoftChip'
 
 // 5-minute granularity per the contract — round down to whole minutes, never
 // fabricate sub-minute precision the backend doesn't actually measure.
@@ -19,17 +20,11 @@ function minutesAgo(seconds: number | null): number | null {
   return Math.floor(seconds / 60)
 }
 
-// One supervisor's live status as a small soft chip (never a solid fill — §4).
+// One supervisor's live status via the shared SoftChip atom (never a hand-rolled tint — §4).
 function SupervisorChip({ name, status }: { name: string; status: string }) {
   const ok = status === 'running' || status === 'active'
   const color = ok ? 'var(--color-success)' : 'var(--color-danger)'
-  return (
-    <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 999,
-      color, background: `color-mix(in srgb, ${color} 12%, transparent)`,
-      border: `1px solid color-mix(in srgb, ${color} 40%, transparent)` }}>
-      {name}: {status}
-    </span>
-  )
+  return <SoftChip color={color} round label={`${name}: ${status}`} />
 }
 
 // The queue/scheduler health strip (see file docblock above); renders nothing

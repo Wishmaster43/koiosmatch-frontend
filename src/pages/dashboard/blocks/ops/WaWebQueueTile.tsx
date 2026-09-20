@@ -3,8 +3,9 @@
  * Three headline figures (in queue / sending / failed, failed only colored
  * when > 0 per §12 "a count badge never renders on a plain zero" spirit),
  * an estimated-drain caption when a device is connected, and a compact
- * per-number breakdown. Clicking the tile deep-links to the WhatsApp
- * settings queue tab (registered by lane F1A).
+ * per-number breakdown. The Block header's action link deep-links to the
+ * WhatsApp settings queue tab; each headline figure is its own link,
+ * pre-filtered on that figure's status.
  */
 import { useTranslation } from 'react-i18next'
 import { Block } from '@/pages/dashboard/DashboardPrimitives'
@@ -14,14 +15,14 @@ import { useNumberFormat } from '@/lib/formatters'
 import type { WaWebQueueFeed } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
-// Ops tile (see the module doc above): renders the headline figures/breakdown; clicking it deep-links to the WhatsApp queue settings tab.
+// Ops tile (see the module doc above): renders the headline figures/breakdown; the header action link and each figure link deep-link to the WhatsApp queue settings tab.
 export default function WaWebQueueTile({ feed, onNavigate }: {
   feed: WaWebQueueFeed
   onNavigate?: FeedTileContext['onNavigate']
 }) {
   const { t } = useTranslation('dashboard')
   const { formatNumber } = useNumberFormat()
-  const onClick = onNavigate ? () => onNavigate('whatsapp', { tab: 'wa-web-queue' }) : undefined
+  const onOpenQueue = onNavigate ? () => onNavigate('whatsapp', { tab: 'wa-web-queue' }) : undefined
   // Each headline count deep-links pre-filtered on its own status — a click on
   // "failed: 2" must land on those 2 rows, never on the unfiltered queue.
   const onCount = (status: string) => onNavigate ? () => onNavigate('whatsapp', { tab: 'wa-web-queue', status }) : undefined
@@ -34,12 +35,15 @@ export default function WaWebQueueTile({ feed, onNavigate }: {
   ]
 
   return (
-    <Block title={t('block.waWebQueue')}>
-      <div {...interactive(onClick)} style={{ padding: '12px 16px', cursor: onClick ? 'pointer' : 'default' }}>
+    // The whole-tile "open queue" affordance lives in the Block header action
+    // link (mirrors ShiftCoverageHeatmap) rather than a role="button" wrapper —
+    // that wrapper used to nest three more role="button" figures inside it,
+    // an invalid nested-interactive pattern (§6).
+    <Block title={t('block.waWebQueue')} action={onOpenQueue ? t('action.all') : undefined} onAction={onOpenQueue}>
+      <div style={{ padding: '12px 16px' }}>
         <div style={{ display: 'flex', gap: 20, marginBottom: 10 }}>
           {figures.map(f => (
-            <div key={f.key} {...interactive(onCount(f.status))}
-              onClick={e => { e.stopPropagation(); onCount(f.status)?.() }}>
+            <div key={f.key} {...interactive(onCount(f.status))} style={{ cursor: onCount(f.status) ? 'pointer' : 'default' }}>
               {/* Headline figure shares the KpiCard 24/700 identity — no third headline size on the dashboard. */}
               <div style={{ fontSize: 24, fontWeight: 700, color: f.danger ? 'var(--color-danger-text)' : 'var(--text)' }}>
                 {formatNumber(f.value)}

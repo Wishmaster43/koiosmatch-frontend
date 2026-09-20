@@ -14,6 +14,7 @@ import MiniProgressBar from '@/components/ui/MiniProgressBar'
 import { BodyText, Caption, Mono } from '@/components/ui/typography'
 import { initialsOf } from '@/lib/initials'
 import { interactive } from '@/lib/a11y'
+import { useNumberFormat } from '@/lib/formatters'
 import type { ActivityByOwnerRow } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
@@ -24,6 +25,8 @@ export default function ActivityByOwnerList({ rows, onNavigate }: {
   onNavigate?: FeedTileContext['onNavigate']
 }) {
   const { t } = useTranslation('dashboard')
+  // Locale-aware tile count (GETALLEN-1).
+  const { formatNumber } = useNumberFormat()
   if (!rows.length) return null
 
   // The bar scales against the busiest owner — a share, not an absolute.
@@ -44,7 +47,7 @@ export default function ActivityByOwnerList({ rows, onNavigate }: {
                 <BodyText as="span" style={{ flex: 1, minWidth: 0, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {name}
                 </BodyText>
-                <Mono style={{ fontVariantNumeric: 'tabular-nums' }}>{r.activity}</Mono>
+                <Mono style={{ fontVariantNumeric: 'tabular-nums' }}>{formatNumber(r.activity)}</Mono>
               </div>
               <MiniProgressBar pct={pct} />
               <Caption as="span">{t('feed.activityCount', { count: r.activity })}</Caption>

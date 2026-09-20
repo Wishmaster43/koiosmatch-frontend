@@ -9,6 +9,7 @@ import ActivityByOwnerList from './ActivityByOwnerList'
 import type { ActivityByOwnerRow } from '@/types/dashboard'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { count?: number }) => opts ? `${k}:${opts.count}` : k }) }))
+vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatNumber: (n: number) => `nf(${n})` }) }))
 
 const rows: ActivityByOwnerRow[] = [
   { owner_id: '1', name: 'Alice', activity: 10 },
@@ -20,6 +21,8 @@ describe('ActivityByOwnerList', () => {
     render(<ActivityByOwnerList rows={rows} />)
     expect(screen.getByText('Alice')).toBeInTheDocument()
     expect(screen.getByText('feed.unassigned')).toBeInTheDocument()
+    // GETALLEN-1: the activity count goes through the locale formatter, never a raw number.
+    expect(screen.getByText('nf(10)')).toBeInTheDocument()
   })
 
   it('self-hides on an empty feed', () => {

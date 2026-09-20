@@ -5,7 +5,8 @@
  * ReportFilterSidebar.
  */
 import { RotateCcw } from 'lucide-react'
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
+import type { KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ReportFilterGroup } from '@/types/reports'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
@@ -74,6 +75,27 @@ export default function PeriodGroup({ group }: { group: ReportFilterGroup }) {
     fontSize: 11, fontWeight: 500, transition: 'all 0.1s',
   }
 
+  // Granularity options + a roving-tabindex keyboard handler (D6 finding): the
+  // toggle is a real single-choice radiogroup, so arrow keys must move AND
+  // select, mirroring SegmentedControl's own roving-tabindex contract.
+  const granOptions = [
+    { id: 'month',   label: t('filters.granMonth')   },
+    { id: 'quarter', label: t('filters.granQuarter') },
+    { id: 'year',    label: t('filters.granYear')    },
+  ]
+  const granRefs = useRef<Array<HTMLButtonElement | null>>([])
+  const onGranKeyDown = (e: KeyboardEvent<HTMLButtonElement>, idx: number) => {
+    let next: number | null = null
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (idx + 1) % granOptions.length
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (idx - 1 + granOptions.length) % granOptions.length
+    else if (e.key === 'Home') next = 0
+    else if (e.key === 'End') next = granOptions.length - 1
+    if (next === null) return
+    e.preventDefault()
+    setGranularity(granOptions[next].id)
+    granRefs.current[next]?.focus()
+  }
+
   // The five raw <button>s below are all STRUCTURAL: a granularity segment, the
   // year/month/quarter choice-chips (CHIP-TINT-1 tint language) and a text
   // micro-link — none is an action-Button copy; Button's sm footprint would
@@ -82,17 +104,15 @@ export default function PeriodGroup({ group }: { group: ReportFilterGroup }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
 
-      {/* Granularity toggle */}
-      <div style={{ display: 'flex', background: 'var(--border)', borderRadius: 7, padding: 2, gap: 2 }}>
-        {[
-          { id: 'month',   label: t('filters.granMonth')   },
-          { id: 'quarter', label: t('filters.granQuarter') },
-          { id: 'year',    label: t('filters.granYear')    },
-        ].map(g => {
+      {/* Granularity toggle — a real radiogroup (D6): role/aria-checked + roving tabindex. */}
+      <div role="radiogroup" aria-label={group.label} style={{ display: 'flex', background: 'var(--border)', borderRadius: 7, padding: 2, gap: 2 }}>
+        {granOptions.map((g, i) => {
           const active = granularity === g.id
           return (
-            <button key={g.id}
+            <button key={g.id} type="button" role="radio" aria-checked={active} tabIndex={active ? 0 : -1}
+              ref={el => { granRefs.current[i] = el }}
               onClick={() => setGranularity(g.id)}
+              onKeyDown={e => onGranKeyDown(e, i)}
               style={{ ...btnBase, flex: 1, padding: '4px 0',
                        border: active ? '1px solid var(--border)' : '1px solid transparent',
                        background: active ? 'var(--surface)' : 'transparent',

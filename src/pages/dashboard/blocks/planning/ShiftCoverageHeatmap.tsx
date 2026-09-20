@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { Block } from '@/pages/dashboard/DashboardPrimitives'
 import { Mono, Caption } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
+import { useNumberFormat } from '@/lib/formatters'
 import { tintBg } from '@/lib/tint'
 import { interactive } from '@/lib/a11y'
 import type { ShiftCoverageCell } from '@/types/dashboard'
@@ -24,6 +25,8 @@ export default function ShiftCoverageHeatmap({ rows, onNavigate }: {
 }) {
   const { t } = useTranslation('dashboard')
   const { formatDate } = useDateFormat()
+  // Locale-aware cell counts (GETALLEN-1).
+  const { formatNumber } = useNumberFormat()
 
   // Build the stable 7-date x 3-part matrix; missing cells default to 0/0.
   const dates = Array.from(new Set(rows.map(r => r.date))).sort()
@@ -56,10 +59,10 @@ export default function ShiftCoverageHeatmap({ rows, onNavigate }: {
                   <div key={`${d}|${part}`}
                     // Only wired when onNavigate is actually provided, mirroring OpenShiftsList.
                     {...(onNavigate ? interactive(goToDay) : {})}
-                    title={t('feed.coverage', { filled: cell.filled, shifts: cell.shifts })}
+                    title={t('feed.coverage', { filled: formatNumber(cell.filled), shifts: formatNumber(cell.shifts) })}
                     style={{ background: tintBg(token, true), borderRadius: 6, padding: '8px 4px',
                       textAlign: 'center', cursor: onNavigate ? 'pointer' : 'default' }}>
-                    <Mono style={{ fontSize: 11 }}>{cell.filled}/{cell.shifts}</Mono>
+                    <Mono style={{ fontSize: 11 }}>{formatNumber(cell.filled)}/{formatNumber(cell.shifts)}</Mono>
                   </div>
                 )
               })}

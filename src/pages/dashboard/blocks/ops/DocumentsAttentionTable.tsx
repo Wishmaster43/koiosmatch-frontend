@@ -34,7 +34,6 @@ export default function DocumentsAttentionTable({ rows, onNavigate }: {
       ),
     },
     { key: 'expires_at', header: t('feed.col.expiresAt'), render: r => r.expires_at ? formatDate(r.expires_at) : '—' },
-    // feed.col.daysLeft has no seeded key yet — used anyway, listed in MISSING_KEYS.
     { key: 'days_left', header: t('feed.col.daysLeft'), align: 'right',
       render: r => r.days_left == null ? '—' : <Mono>{t('kpi.daysValue', { count: r.days_left })}</Mono> },
   ], [t, formatDate])

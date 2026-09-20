@@ -13,6 +13,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Caption } from '@/components/ui/typography'
 import ReportKpiBand from './ReportKpiBand'
 import ReportGrid from './ReportGrid'
 import ReportChartCard from './ReportChartCard'
@@ -254,7 +255,7 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
                 ))}
               </div>
               {data.avg_placement_duration_days == null && (
-                <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 14 }}>{t('matches.durationNote')}</p>
+                <Caption as="p" style={{ marginTop: 14 }}>{t('matches.durationNote')}</Caption>
               )}
             </>
           } />

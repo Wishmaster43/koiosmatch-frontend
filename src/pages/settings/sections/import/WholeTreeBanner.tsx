@@ -17,6 +17,8 @@
  */
 import { useTranslation } from 'react-i18next'
 import { ArrowRight, Network } from 'lucide-react'
+import { tintBg, tintBorder } from '@/lib/tint'
+import Button from '@/components/ui/Button'
 
 // The four levels ONE row carries, reusing the entity labels the sub-nav already
 // shows so a level is never named twice in two ways.
@@ -33,8 +35,8 @@ export default function WholeTreeBanner({ separateEntity, onSelectEntity }: Whol
 
   return (
     <div style={{ padding: '12px 14px',
-      background: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
-      border: '1px solid color-mix(in srgb, var(--color-primary) 25%, transparent)',
+      background: tintBg('var(--color-primary)'),
+      border: tintBorder('var(--color-primary)'),
       borderRadius: 8, marginBottom: 16 }}>
       {/* Title + the levels one single row carries, left to right. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', fontSize: 12 }}>
@@ -61,11 +63,10 @@ export default function WholeTreeBanner({ separateEntity, onSelectEntity }: Whol
       {separateEntity && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginTop: 8, fontSize: 12 }}>
           <span style={{ color: 'var(--text-muted)' }}>{t('import.tree.separateAlternative')}</span>
-          <button type="button" onClick={() => onSelectEntity(separateEntity)}
-            style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-primary-text)', background: 'none',
-                     border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}>
+          {/* HUISSTIJL-1: the switch action is a real Button (ghostAccent), never a hand-painted link-button. */}
+          <Button variant="ghostAccent" onClick={() => onSelectEntity(separateEntity)} style={{ padding: 0, height: 'auto', fontWeight: 600 }}>
             {t('import.tree.switchToSeparate')}
-          </button>
+          </Button>
         </div>
       )}
     </div>

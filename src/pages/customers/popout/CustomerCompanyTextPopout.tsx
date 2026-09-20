@@ -8,11 +8,10 @@
  */
 import { useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { PopoutShell } from '@/pages/popout/shared'
-import { TextPopoutEditor } from '@/pages/popout/shared'
 import { useTextPopoutDraft } from '@/pages/popout/shared'
 import { useCustomerTextLite, patchCustomerText } from '../hooks/useCustomerTextPopout'
 import { textPopoutTopic } from '@/lib/secondScreen'
+import SharedTextPopoutBody from './SharedTextPopoutBody'
 
 // Second-screen editor for the customer's bedrijfstekst; a thin wire-up of identity/draft/persist hooks (TEKST-POPOUT-1 recipe).
 export default function CustomerCompanyTextPopout({ id }: { id: string | undefined }) {
@@ -41,15 +40,15 @@ export default function CustomerCompanyTextPopout({ id }: { id: string | undefin
   }, [customer, t])
 
   return (
-    <PopoutShell
+    // DRY-POPOUT-1: shared rendering via SharedTextPopoutBody (mirrors
+    // CustomerContactTextPopout/CustomerDepartmentTextPopout). KOIOS-GENERATE-1:
+    // entity 'customer' is already known to /ai/koios/generate — same review→Overnemen flow.
+    <SharedTextPopoutBody
       loading={loading} error={error || !customer} onRetry={reload}
       loadingLabel={t('common:loading')} errorLabel={t('popout.loadError')} retryLabel={t('common:error.retry')}
       name={customer?.name ?? ''} initials={customer?.initials ?? ''} subtitle={t('overview.companyText')}
-    >
-      {/* KOIOS-GENERATE-1 mirrors the drawer's own OverviewTab: entity 'customer'
-          is already known to /ai/koios/generate — same review→Overnemen flow. */}
-      <TextPopoutEditor value={text ?? ''} onChange={change} onSave={save} dirty={dirty}
-        generate={id ? { entity: 'customer', id } : undefined} />
-    </PopoutShell>
+      text={text} dirty={dirty} onChange={change} onSave={save}
+      generate={id ? { entity: 'customer', id } : undefined}
+    />
   )
 }

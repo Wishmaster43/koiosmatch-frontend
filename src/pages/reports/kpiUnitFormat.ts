@@ -4,8 +4,9 @@
  * displayed ×100 with a % sign) | 'euro' (currency) | 'days' (rounded day count)
  * | no unit = a plain count, left to the KpiCard's own number formatting. Pure
  * function, locale-aware via the house lib/formatters helpers — never manual
- * string building. Every strip that renders unit-carrying entries formats through this one file (matches today; opportunities/vacancies join with their suites) so a unit never gets two display treatments.
- * unit never gets two different display treatments across reports.
+ * string building. Every strip that renders unit-carrying entries formats
+ * through this one file (matches today; opportunities/vacancies join with
+ * their suites) so a unit never gets two different display treatments.
  */
 import { formatPercent, formatRatio, formatCurrency, formatNumber } from '@/lib/formatters'
 import type { CustomKpiCard } from '@/types/analytics'

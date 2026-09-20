@@ -43,7 +43,7 @@ type Phase = 'loading' | 'error' | 'ready'
 // The Koios learning report card: fetches once for the default 30-day window and renders four calm sub-blocks.
 export default function KoiosLearningCard() {
   const { t } = useTranslation('koios')
-  const { formatNumber } = useNumberFormat()
+  const { formatNumber, formatPercent } = useNumberFormat()
   const [data, setData] = useState<LearningData | null>(null)
   const [phase, setPhase] = useState<Phase>('loading')
 
@@ -90,7 +90,7 @@ export default function KoiosLearningCard() {
               {topQuestions.map((q, i) => (
                 <li key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 13 }}>
                   <span>{q.question}</span>
-                  <Mono style={{ color: 'var(--text-muted)', flexShrink: 0 }}>{q.count}</Mono>
+                  <Mono style={{ color: 'var(--text-muted)', flexShrink: 0 }}>{formatNumber(q.count)}</Mono>
                 </li>
               ))}
             </ul>
@@ -104,10 +104,10 @@ export default function KoiosLearningCard() {
           ? <p style={{ ...notice, marginTop: 8 }}>{t('learning.noFailures')}</p>
           : (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
-              <StatTile size="sm" label={t('learning.failureRefusal')} value={failure.refusal ?? 0} style={{ flex: '1 1 120px' }} />
-              <StatTile size="sm" label={t('learning.failureBudget')} value={failure.budget ?? 0} style={{ flex: '1 1 120px' }} />
-              <StatTile size="sm" label={t('learning.failureToolError')} value={failure.tool_error ?? 0} style={{ flex: '1 1 120px' }} />
-              <StatTile size="sm" label={t('learning.failureNoResult')} value={failure.no_result ?? 0} style={{ flex: '1 1 120px' }} />
+              <StatTile size="sm" label={t('learning.failureRefusal')} value={formatNumber(failure.refusal ?? 0)} style={{ flex: '1 1 120px' }} />
+              <StatTile size="sm" label={t('learning.failureBudget')} value={formatNumber(failure.budget ?? 0)} style={{ flex: '1 1 120px' }} />
+              <StatTile size="sm" label={t('learning.failureToolError')} value={formatNumber(failure.tool_error ?? 0)} style={{ flex: '1 1 120px' }} />
+              <StatTile size="sm" label={t('learning.failureNoResult')} value={formatNumber(failure.no_result ?? 0)} style={{ flex: '1 1 120px' }} />
             </div>
           )}
         {/* Honest flag: never render this as a zero — the backend does not track it yet. */}
@@ -122,7 +122,7 @@ export default function KoiosLearningCard() {
           : (
             <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 10 }}>
               <div style={{ fontSize: 13 }}>
-                {t('learning.downPct', { pct: feedback.down_pct == null ? '—' : `${formatNumber(feedback.down_pct)}%` })}
+                {t('learning.downPct', { pct: feedback.down_pct == null ? '—' : formatPercent(feedback.down_pct) })}
               </div>
               {feedback.top_reasons?.length > 0 && (
                 <ul style={{ display: 'flex', flexDirection: 'column', gap: 4, listStyle: 'none', padding: 0, fontSize: 12, color: 'var(--text-muted)' }}>

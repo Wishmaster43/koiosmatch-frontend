@@ -8,6 +8,7 @@
  * the payload sends and drills on the raw value, exactly like any other segment.
  */
 import type { CSSProperties } from 'react'
+import { useNumberFormat } from '@/lib/formatters'
 
 export interface SegmentBarItem {
   key: string
@@ -27,6 +28,9 @@ export default function SegmentBars({ items, max, onPick }: {
   max: number
   onPick?: (value: string) => void
 }) {
+  // GETALLEN-1: the row count is locale-formatted here so a thousands separator
+  // never disappears in any consumer of this shared bar renderer.
+  const { formatNumber } = useNumberFormat()
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '4px 2px' }}>
       {items.map((it) => {
@@ -52,7 +56,7 @@ export default function SegmentBars({ items, max, onPick }: {
                              background: `color-mix(in srgb, ${tint} 70%, transparent)`, borderRadius: 999 }} />
             </span>
             <span style={{ flex: '0 0 40px', textAlign: 'right', fontSize: 12, fontWeight: 600,
-                           fontVariantNumeric: 'tabular-nums', color: 'var(--text)' }}>{it.count}</span>
+                           fontVariantNumeric: 'tabular-nums', color: 'var(--text)' }}>{formatNumber(it.count)}</span>
           </div>
         )
       })}

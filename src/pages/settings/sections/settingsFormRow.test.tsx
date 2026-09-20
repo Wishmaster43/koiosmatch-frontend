@@ -17,6 +17,14 @@ describe('SettingsFormRow', () => {
     expect(row.style.borderBottomStyle).toBe('none')
   })
 
+  it('renders a real <label htmlFor> tied to the field id when htmlFor is passed (§6)', () => {
+    render(<SettingsFormRow label="Company name" htmlFor="company-name"><input id="company-name" /></SettingsFormRow>)
+    const label = screen.getByText('Company name')
+    expect(label.tagName).toBe('LABEL')
+    expect(label).toHaveAttribute('for', 'company-name')
+    expect(screen.getByLabelText('Company name')).toBeInTheDocument()
+  })
+
   it('keeps the bottom divider by default', () => {
     const { container } = render(<SettingsFormRow label="Company name">content</SettingsFormRow>)
     const row = container.firstElementChild as HTMLElement

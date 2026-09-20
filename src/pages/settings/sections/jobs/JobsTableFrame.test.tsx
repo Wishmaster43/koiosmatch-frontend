@@ -43,7 +43,7 @@ describe('JobsTableFrame', () => {
 
     render(
       <JobsTableFrame
-        phase="success"
+        phase="ready"
         columns={[{ key: 'job', header: 'Job' }]}
         rows={rows}
         emptyText="No jobs"
@@ -57,7 +57,7 @@ describe('JobsTableFrame', () => {
   it('shows empty text when no rows', () => {
     render(
       <JobsTableFrame
-        phase="success"
+        phase="ready"
         columns={[{ key: 'job', header: 'Job' }]}
         rows={[]}
         emptyText="No jobs"

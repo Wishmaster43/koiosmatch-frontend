@@ -809,6 +809,7 @@
     "errSetup": "Impossible de démarrer la configuration MFA.",
     "errInvalidRetry": "Code invalide. Veuillez réessayer.",
     "errInvalid": "Code invalide.",
+    "errFinish": "Impossible de terminer. Veuillez réessayer.",
     "retry": "Réessayer",
     "enforceSection": "Politique de l'organisation",
     "enforceTitle": "MFA obligatoire pour tout le monde",
@@ -1263,7 +1264,8 @@
   },
   "apiKeys": {
     "title": "Clés API",
-    "count": "{{count}} clés",
+    "count_one": "{{count}} clé",
+    "count_other": "{{count}} clés",
     "new": "Nouveau",
     "empty": "Aucune clé API créée pour le moment.",
     "loadError": "Impossible de charger les clés API.",
@@ -1358,7 +1360,8 @@
       "company": "Entreprise",
       "users": "Utilisateurs",
       "noLevelOffered": "Aucun niveau disponible pour ce type"
-    }
+    },
+    "detailLoadError": "Impossible de charger les détails complets. Les autorisations peuvent ne pas s'afficher correctement."
   },
   "webhooks": {
     "tab": {

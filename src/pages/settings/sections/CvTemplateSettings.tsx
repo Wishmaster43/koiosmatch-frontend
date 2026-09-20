@@ -19,7 +19,7 @@ import { PREVIEW_CANDIDATE } from './cvTemplate/previewCandidate'
 import CvHtmlPreview from './cvTemplate/CvHtmlPreview'
 import CvSectionList from './cvTemplate/CvSectionList'
 import Button from '@/components/ui/Button'
-import { Caption } from '@/components/ui/typography'
+import { Caption, PageTitle, BodyText } from '@/components/ui/typography'
 import { SETTINGS_MAX_W_WIDE } from '@/pages/settings/components/settingsMetrics'
 
 // Thin composer: colour pickers + section list on the left, live A4 preview on the right (see the module doc above for where each piece lives).
@@ -84,8 +84,8 @@ export default function CvTemplateSettings() {
     <div style={{ padding: '28px 32px', maxWidth: SETTINGS_MAX_W_WIDE }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <div>
-          <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)', margin: 0 }}>{t('cvTemplate.title')}</h2>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4, marginBottom: 0 }}>{t('cvTemplate.subtitle')}</p>
+          <PageTitle>{t('cvTemplate.title')}</PageTitle>
+          <BodyText style={{ color: 'var(--text-muted)', marginTop: 4 }}>{t('cvTemplate.subtitle')}</BodyText>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <Button variant="secondary" size="sm" onClick={handleDownloadPreview} disabled={generating}>

@@ -809,6 +809,7 @@
     "errSetup": "No se pudo iniciar la configuración de MFA.",
     "errInvalidRetry": "Código no válido. Inténtalo de nuevo.",
     "errInvalid": "Código no válido.",
+    "errFinish": "No se pudo finalizar. Inténtalo de nuevo.",
     "retry": "Intentar de nuevo",
     "enforceSection": "Política de la organización",
     "enforceTitle": "MFA obligatorio para todos",
@@ -1263,7 +1264,8 @@
   },
   "apiKeys": {
     "title": "Claves API",
-    "count": "{{count}} claves",
+    "count_one": "{{count}} clave",
+    "count_other": "{{count}} claves",
     "new": "Nuevo",
     "empty": "Aún no se han creado claves API.",
     "loadError": "No se pudieron cargar las claves API.",
@@ -1358,7 +1360,8 @@
       "company": "Empresa",
       "users": "Usuarios",
       "noLevelOffered": "Ningún nivel disponible para este tipo"
-    }
+    },
+    "detailLoadError": "No se pudieron cargar los detalles completos. Es posible que los permisos no se muestren correctamente."
   },
   "webhooks": {
     "tab": {

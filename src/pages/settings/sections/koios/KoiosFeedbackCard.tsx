@@ -51,7 +51,7 @@ export default function KoiosFeedbackCard() {
   const { t } = useTranslation('koios')
   const { t: tc } = useTranslation('common')
   const { formatDateTime } = useDateFormat()
-  const { formatNumber } = useNumberFormat()
+  const { formatNumber, formatPercent } = useNumberFormat()
   const [data, setData] = useState<FeedbackData | null>(null)
   const [phase, setPhase] = useState<Phase>('loading')
   const [page, setPage] = useState(1)
@@ -98,7 +98,7 @@ export default function KoiosFeedbackCard() {
           <StatTile size="sm" label={t('feedbackAdmin.total')} value={formatNumber(summary?.total ?? 0)} style={{ flex: '1 1 100px' }} />
           <StatTile size="sm" label={tc('koios.feedback.up')} value={formatNumber(summary?.up ?? 0)} style={{ flex: '1 1 100px' }} />
           <StatTile size="sm" label={tc('koios.feedback.down')} value={formatNumber(summary?.down ?? 0)} style={{ flex: '1 1 100px' }} />
-          <StatTile size="sm" label={t('feedbackAdmin.downPct')} value={`${formatNumber(summary?.down_pct ?? 0)}%`} style={{ flex: '1 1 100px' }} />
+          <StatTile size="sm" label={t('feedbackAdmin.downPct')} value={formatPercent(summary?.down_pct ?? 0)} style={{ flex: '1 1 100px' }} />
         </div>
         {topReasons.length > 0 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 12 }}>

@@ -5,10 +5,9 @@
  * onChange — the parent decides when/how to persist. Off = entity absent = no access.
  *
  * The permission-level picker uses the shared SearchSelect (audit finding, §4/§11 —
- * was a bare native <select>), mirroring ApiKeyGeneralTab's own type picker: single-
- * select via closeOnToggle + searchable={false}, disabled forwarded to BOTH
- * SearchSelect's own gate AND the renderTrigger button (mirrors CustomFieldsSettings'
- * field-type picker) so an off row's level control is fully inert, not just dimmed.
+ * was a bare native <select>): single-select via closeOnToggle + searchable={false},
+ * with `disabled` forwarded to SearchSelect's own default trigger face (no custom
+ * renderTrigger here) so an off row's level control is fully inert, not just dimmed.
  */
 import { useTranslation } from 'react-i18next'
 import { Toggle } from '@/pages/settings/components/SettingsKit'

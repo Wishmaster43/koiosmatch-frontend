@@ -10,6 +10,7 @@ import type { VacancyAttentionRow } from '@/types/dashboard'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => `fmt(${v})` }) }))
+vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatNumber: (n: number) => `nf(${n})` }) }))
 
 const rows: VacancyAttentionRow[] = [
   { vacancy_id: 'v1', title: 'Verpleegkundige', customer: 'Zorggroep A', days_open: 12, candidates_in_process: 3, last_application_at: '2026-08-20T10:00:00Z' },
@@ -24,6 +25,9 @@ describe('VacanciesAttentionTable', () => {
     // The formatted (not raw ISO) last-application value must appear.
     expect(screen.getByText('fmt(2026-08-20T10:00:00Z)')).toBeInTheDocument()
     expect(screen.getAllByText('—')).toHaveLength(2) // no customer + no last-application for v2
+    // GETALLEN-1: days_open/candidates_in_process go through the locale formatter, never a raw number.
+    expect(screen.getByText('nf(12)')).toBeInTheDocument()
+    expect(screen.getByText('nf(3)')).toBeInTheDocument()
   })
 
   it('navigates to the vacancy applicants tab on row click', async () => {

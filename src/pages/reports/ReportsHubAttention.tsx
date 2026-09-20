@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import { ChevronRight } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { Mono } from '@/components/ui/typography'
+import { useNumberFormat } from '@/lib/formatters'
 import ReportChartCard from './ReportChartCard'
 import ReportStateBlock from './ReportStateBlock'
 import { HubBlockBody, HubBlockTitle } from './hubLayout'
@@ -36,6 +37,8 @@ function resolveReportId(report: string, hasWhatsapp: boolean): ReportId | null 
 // The attention list block: only non-zero signals, each a real button row.
 export default function ReportsHubAttention() {
   const { t } = useTranslation('analytics')
+  // GETALLEN-1: signal counts render locale-formatted (a large tenant can pass 1.000).
+  const { formatNumber } = useNumberFormat()
   const { navigate } = useNavigation()
   const auth = useAuth()
   const hasWhatsapp = (auth?.hasModule ?? (() => false))('whatsapp')
@@ -56,7 +59,7 @@ export default function ReportsHubAttention() {
         const target = resolveReportId(s.report, hasWhatsapp)
         const body = (
           <span style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-            <Mono style={{ color: 'var(--color-warning-text)', fontWeight: 600, minWidth: 28, textAlign: 'right' }}>{s.count}</Mono>
+            <Mono style={{ color: 'var(--color-warning-text)', fontWeight: 600, minWidth: 28, textAlign: 'right' }}>{formatNumber(s.count)}</Mono>
             <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
           </span>
         )

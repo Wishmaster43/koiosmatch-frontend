@@ -8,11 +8,14 @@ import { useEffect, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { fetchJobMetrics, type JobMetrics, type JobMetricRow } from './jobsApi'
-import { SectionTitle } from '@/components/ui/typography'
+import { formatDuration } from '@/components/reports/runFormat'
+import { SectionTitle, Caption } from '@/components/ui/typography'
 import { JobsRefreshButton, JobsErrorNotice } from './jobsShared'
 import { useVisiblePoll } from '@/hooks/useVisiblePoll'
 
-const TH = { padding: '9px 12px', textAlign: 'left' as const, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' as const }
+// Layout only — text identity (11px muted) lives in the Caption atom rendered
+// inside these cells (HUISSTIJL-1: identity never re-declared locally).
+const TH = { padding: '9px 12px', textAlign: 'left' as const, borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' as const }
 const TD = { padding: '9px 12px', fontSize: 12.5, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
 
 // Props for one metrics table (jobs or queues) — same column shape either way.
@@ -30,16 +33,16 @@ function MetricsTable({ rows, nameHeader, t }: MetricsTableProps) {
     <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'auto', background: 'var(--surface)' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead><tr>
-          <th style={TH}>{nameHeader}</th>
-          <th style={TH}>{t('jobs.metrics.colThroughput')}</th>
-          <th style={TH}>{t('jobs.metrics.colRuntime')}</th>
+          <th style={TH}><Caption style={{ fontWeight: 600 }}>{nameHeader}</Caption></th>
+          <th style={TH}><Caption style={{ fontWeight: 600 }}>{t('jobs.metrics.colThroughput')}</Caption></th>
+          <th style={TH}><Caption style={{ fontWeight: 600 }}>{t('jobs.metrics.colRuntime')}</Caption></th>
         </tr></thead>
         <tbody>
           {rows.map((r) => (
             <tr key={r.name}>
               <td style={{ ...TD, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{r.name}</td>
               <td style={TD}>{r.throughput}</td>
-              <td style={TD}>{Math.round(r.runtime_ms_avg)} ms</td>
+              <td style={TD}>{formatDuration(Math.round(r.runtime_ms_avg))}</td>
             </tr>
           ))}
         </tbody>

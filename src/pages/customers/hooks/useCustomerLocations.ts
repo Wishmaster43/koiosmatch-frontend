@@ -242,17 +242,20 @@ export async function uploadLocationLogo(customerId: Id, id: Id, file: File): Pr
 export function useArchivedCustomerLocations(customerId: Id | undefined, active: boolean) {
   const [locations, setLocations] = useState<Location[]>([])
   const [loading, setLoading] = useState(false)
+  // §3 four UI states: a real fetch failure is distinct from "no archived rows".
+  const [error, setError] = useState(false)
 
   // Fetches only archived locations for the quick-view toggle; a no-op (and cleared list) while `active` is false or there is no customer yet, so the request is never made for nothing.
   const load = useCallback((signal?: AbortSignal) => {
-    if (!active || !customerId) { setLocations([]); return }
+    if (!active || !customerId) { setLocations([]); setError(false); return }
     setLoading(true)
+    setError(false)
     // TRASH-OVERAL-1b (14-08): include_archived=1 now returns ONLY soft-deleted rows
     // (semantics uniform across the customer sublists); the `.filter(archived)` below
     // is a harmless belt-and-braces guard, not a workaround for a mixed response.
     api.get(`/customers/${customerId}/locations`, { params: { include_archived: 1 }, signal })
       .then(res => { if (!signal?.aborted) setLocations(unwrapList<ApiLocation>(res).rows.map(mapLocation).filter(l => l.archived)) })
-      .catch(() => { /* the toggle simply shows nothing rather than crashing (§3) */ })
+      .catch(() => { if (!signal?.aborted) setError(true) })
       .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [customerId, active])
   // Loads once on mount/dependency change (aborting a stale in-flight request) and
@@ -261,5 +264,5 @@ export function useArchivedCustomerLocations(customerId: Id | undefined, active:
   // useCustomerDepartments (DRY round 11, CUSTTABS2).
   useAbortableListLoad(load, LOCATIONS_CHANGED_EVENT)
 
-  return { locations, loading }
+  return { locations, loading, error }
 }

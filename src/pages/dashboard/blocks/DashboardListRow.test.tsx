@@ -38,6 +38,16 @@ describe('DashboardListRow', () => {
     expect(screen.getByText('09:00')).toBeInTheDocument()
   })
 
+  it('renders the leading slot before the title, and adds no node when omitted', () => {
+    const { container, rerender } = render(<DashboardListRow title="Jan Jansen" isLast />)
+    // No leading prop: the row's first child is the flex:1 title wrapper directly.
+    const row = container.firstElementChild as HTMLDivElement
+    expect(row.children).toHaveLength(1)
+    rerender(<DashboardListRow leading={<span data-testid="avatar" />} title="Jan Jansen" isLast />)
+    expect(row.children).toHaveLength(2)
+    expect(row.firstElementChild).toBe(screen.getByTestId('avatar'))
+  })
+
   it('drops the bottom border on the last row only', () => {
     // jsdom's CSSOM re-serialises a bare `border-bottom: none` (drops the token
     // entirely), so the reliable signal is: the border TOKEN is present only on

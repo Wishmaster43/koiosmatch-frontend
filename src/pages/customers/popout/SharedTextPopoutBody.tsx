@@ -23,19 +23,22 @@ interface SharedTextPopoutBodyProps {
   retryLabel: string
   generate?: { entity: GenerateEntity; id: string }
   children?: ReactNode
+  // Optional avatar initials — most callers (Contact/Department) have none;
+  // Company/Location have a real record name to derive them from.
+  initials?: string
 }
 
 // Render the shared popout shell + editor for a text field. Extracted from
 // CustomerContactTextPopout and CustomerDepartmentTextPopout (0% behaviour change).
 export default function SharedTextPopoutBody({
   loading, error, onRetry, name, subtitle, text, dirty, onChange, onSave,
-  loadingLabel, errorLabel, retryLabel, generate, children,
+  loadingLabel, errorLabel, retryLabel, generate, children, initials = '',
 }: SharedTextPopoutBodyProps) {
   return (
     <PopoutShell
       loading={loading} error={error || (!name && !loading)} onRetry={onRetry}
       loadingLabel={loadingLabel} errorLabel={errorLabel} retryLabel={retryLabel}
-      name={name} initials="" subtitle={subtitle}
+      name={name} initials={initials} subtitle={subtitle}
     >
       <TextPopoutEditor value={text ?? ''} onChange={onChange} onSave={onSave} dirty={dirty}
         generate={generate} />

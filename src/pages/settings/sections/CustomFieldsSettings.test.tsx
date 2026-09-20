@@ -359,3 +359,40 @@ describe('CustomFieldsSettings — B-36 options field validation', () => {
     })))
   })
 })
+
+// A rejected create/save must never fail silently (§13) — the admin sees a notice,
+// the same statusList.saveFailed key the reorder failure already uses in this file.
+describe('CustomFieldsSettings — create/save failure notifies (§13)', () => {
+  it('notifies when the create POST fails', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [] } })
+    mockedPost.mockRejectedValue(new Error('server down'))
+    const { notifyError } = await import('@/lib/notify')
+    render(<CustomFieldsSettings entityType="vacancy" />)
+
+    await waitFor(() => expect(mockedGet).toHaveBeenCalled())
+    fireEvent.click(screen.getByText(st('customFieldsSettings.add')))
+    fireEvent.change(screen.getByPlaceholderText(st('customFieldsSettings.examples.text.label')), { target: { value: 'Name' } })
+    fireEvent.click(screen.getByRole('button', { name: st('customFieldsSettings.add') }))
+
+    await waitFor(() => expect(mockedPost).toHaveBeenCalled())
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('statusList.saveFailed')))
+  })
+
+  it('notifies when the save PATCH fails', async () => {
+    const textField = { id: '1', key: 'name', label_i18n: { en: 'Name' }, type: 'text', active: true, in_use: false, visible_in_ui: true, sort_order: 0 }
+    mockedGet.mockResolvedValue({ data: { data: [textField] } })
+    mockedPatch.mockRejectedValue(new Error('server down'))
+    const { notifyError } = await import('@/lib/notify')
+    render(<CustomFieldsSettings entityType="vacancy" />)
+
+    await waitFor(() => expect(screen.getByText('Name')).toBeInTheDocument())
+    const row = screen.getByText('Name').parentElement!.parentElement!
+    const buttons = within(row).getAllByRole('button')
+    fireEvent.click(buttons[buttons.length - 1]) // Expand
+    fireEvent.change(screen.getByDisplayValue('Name'), { target: { value: 'Full Name' } })
+    fireEvent.click(screen.getByRole('button', { name: st('common.save') }))
+
+    await waitFor(() => expect(mockedPatch).toHaveBeenCalled())
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('statusList.saveFailed')))
+  })
+})

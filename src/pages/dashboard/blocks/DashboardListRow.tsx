@@ -1,17 +1,19 @@
 /**
- * DashboardListRow — the clickable dashboard-tile list row shell (primary
- * title, optional secondary caption line, optional trailing content, bottom
- * border rule) shared by WidgetListBlock, CouplingErrorsList,
- * PlacementsTodayLists and TasksDueTodayList; this unit owns only the shell,
- * each host keeps its own row DATA and trailing content. Typography atoms carry
- * the identity; only layout lives in the style prop (HUISSTIJL r6).
- * (DRY round 11, LAYOUT.)
+ * DashboardListRow — the clickable dashboard-tile list row shell (optional
+ * leading slot, primary title, optional secondary caption line, optional
+ * trailing content, bottom border rule) shared by WidgetListBlock,
+ * CouplingErrorsList, PlacementsTodayLists, TasksDueTodayList and the five
+ * RecentLists tiles; this unit owns only the shell, each host keeps its own
+ * row DATA and leading/trailing content. Typography atoms carry the identity;
+ * only layout lives in the style prop (HUISSTIJL r6).
+ * (DRY round 11, LAYOUT; `leading` slot added DRY round 12 for RecentLists.)
  */
 import type { ReactNode } from 'react'
 import { interactive } from '@/lib/a11y'
 import { BodyText, Caption } from '@/components/ui/typography'
 
-export default function DashboardListRow({ title, subtitle, trailing, onClick, isLast }: {
+export default function DashboardListRow({ leading, title, subtitle, trailing, onClick, isLast }: {
+  leading?: ReactNode
   title: ReactNode
   subtitle?: ReactNode
   trailing?: ReactNode
@@ -22,6 +24,7 @@ export default function DashboardListRow({ title, subtitle, trailing, onClick, i
     <div {...interactive(onClick)}
       style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', cursor: onClick ? 'pointer' : 'default',
         borderBottom: isLast ? 'none' : '1px solid var(--border)' }}>
+      {leading}
       <div style={{ flex: 1, minWidth: 0 }}>
         <BodyText as="div" style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {title}

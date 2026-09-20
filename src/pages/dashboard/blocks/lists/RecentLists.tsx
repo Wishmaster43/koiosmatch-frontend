@@ -4,13 +4,15 @@
  * runs, recent conversations. Moved out of RecentListsRow/ActivityListsRow so
  * they pack in the ONE dashboard grid (and can be paired with a feed tile);
  * rows are the viewmodel-mapped rows (labels/colours from the tenant lookups).
+ * Each row composes the shared `DashboardListRow` shell (D1/D2 — the same
+ * shell WidgetListBlock uses one file over) instead of hand-rolling it.
  * Typography atoms carry the identity (HUISSTIJL r6), layout via style only.
  */
 import { useTranslation } from 'react-i18next'
 import { CheckCircle, AlertCircle } from 'lucide-react'
-import { interactive } from '@/lib/a11y'
 import { Block, Avatar, StatusBadge } from '@/pages/dashboard/DashboardPrimitives'
-import { BodyText, Caption } from '@/components/ui/typography'
+import { Caption } from '@/components/ui/typography'
+import DashboardListRow from '../DashboardListRow'
 import WidgetListBlock, { type WidgetRow } from '../WidgetListBlock'
 import type { FeedTileLists } from '../feedTileKit'
 
@@ -23,29 +25,21 @@ export function WidgetFeedList({ titleKey, rows }: { titleKey: string; rows: Wid
   return <WidgetListBlock title={t(titleKey)} rows={rows} />
 }
 
-// One list row: consistent padding/divider for every list below.
-const rowStyle = (clickable: boolean, last: boolean) => ({
-  display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
-  cursor: clickable ? 'pointer' : 'default',
-  borderBottom: last ? 'none' : '1px solid var(--border)',
-})
-
 // Recent-candidates dashboard tile; each row deep-links to that candidate when onNavigate is given.
 export function RecentCandidatesList({ rows, onNavigate }: { rows: FeedTileLists['recentCandidates']; onNavigate?: Nav }) {
   const { t } = useTranslation('dashboard')
   return (
     <Block title={t('block.recentCandidates')} action={onNavigate ? t('action.allCandidates') : undefined} onAction={onNavigate ? () => onNavigate('candidates') : undefined}>
       {rows.map((c, i) => (
-        <div key={i} {...interactive(c.id != null && onNavigate ? () => onNavigate('candidates', { open: c.id }) : undefined)}
-          style={rowStyle(c.id != null && !!onNavigate, i === rows.length - 1)}>
-          <Avatar initials={c.initials} size={28} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <BodyText as="div" style={{ fontWeight: 500 }}>{c.name}</BodyText>
-            <Caption as="div">{c.role}</Caption>
-          </div>
-          <StatusBadge label={c.status} color={c.statusColor} />
-          <Caption as="span" style={{ flexShrink: 0 }}>{c.time}</Caption>
-        </div>
+        <DashboardListRow key={i} isLast={i === rows.length - 1}
+          onClick={c.id != null && onNavigate ? () => onNavigate('candidates', { open: c.id }) : undefined}
+          leading={<Avatar initials={c.initials} size={28} />}
+          title={c.name}
+          subtitle={c.role}
+          trailing={<>
+            <StatusBadge label={c.status} color={c.statusColor} />
+            <Caption as="span" style={{ flexShrink: 0 }}>{c.time}</Caption>
+          </>} />
       ))}
     </Block>
   )
@@ -57,15 +51,14 @@ export function RecentApplicationsList({ rows, onNavigate }: { rows: FeedTileLis
   return (
     <Block title={t('block.recentApplications')} action={onNavigate ? t('action.allApplications') : undefined} onAction={onNavigate ? () => onNavigate('applications') : undefined}>
       {rows.map((a, i) => (
-        <div key={i} {...interactive(a.id != null && onNavigate ? () => onNavigate('applications', { open: a.id }) : undefined)}
-          style={rowStyle(a.id != null && !!onNavigate, i === rows.length - 1)}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <BodyText as="div" style={{ fontWeight: 500 }}>{a.candidate}</BodyText>
-            <Caption as="div" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.vacancy}</Caption>
-          </div>
-          <StatusBadge label={a.status} color={a.statusColor} />
-          <Caption as="span" style={{ flexShrink: 0 }}>{a.time}</Caption>
-        </div>
+        <DashboardListRow key={i} isLast={i === rows.length - 1}
+          onClick={a.id != null && onNavigate ? () => onNavigate('applications', { open: a.id }) : undefined}
+          title={a.candidate}
+          subtitle={a.vacancy}
+          trailing={<>
+            <StatusBadge label={a.status} color={a.statusColor} />
+            <Caption as="span" style={{ flexShrink: 0 }}>{a.time}</Caption>
+          </>} />
       ))}
     </Block>
   )
@@ -77,15 +70,14 @@ export function LeadsPipelineList({ rows, onNavigate }: { rows: FeedTileLists['r
   return (
     <Block title={t('block.leadsPipeline')} action={onNavigate ? t('action.allCustomers') : undefined} onAction={onNavigate ? () => onNavigate('customers') : undefined}>
       {rows.map((l, i) => (
-        <div key={i} {...interactive(l.id != null && onNavigate ? () => onNavigate('customers', { open: l.id }) : undefined)}
-          style={rowStyle(l.id != null && !!onNavigate, i === rows.length - 1)}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <BodyText as="div" style={{ fontWeight: 500 }}>{l.name}</BodyText>
-            <Caption as="div">{l.contact}</Caption>
-          </div>
-          <StatusBadge label={l.status} color={l.statusColor} />
-          <Caption as="span" style={{ flexShrink: 0 }}>{l.time}</Caption>
-        </div>
+        <DashboardListRow key={i} isLast={i === rows.length - 1}
+          onClick={l.id != null && onNavigate ? () => onNavigate('customers', { open: l.id }) : undefined}
+          title={l.name}
+          subtitle={l.contact}
+          trailing={<>
+            <StatusBadge label={l.status} color={l.statusColor} />
+            <Caption as="span" style={{ flexShrink: 0 }}>{l.time}</Caption>
+          </>} />
       ))}
     </Block>
   )
@@ -97,20 +89,19 @@ export function RecentRunsList({ rows, onNavigate }: { rows: FeedTileLists['runs
   return (
     <Block title={t('block.recentRuns')} action={onNavigate ? t('action.all') : undefined} onAction={onNavigate ? () => onNavigate('workflows') : undefined}>
       {rows.map((r, i) => (
-        <div key={i} {...interactive(onNavigate ? () => onNavigate('workflows') : undefined)}
-          style={rowStyle(!!onNavigate, i === rows.length - 1)}>
-          {/* Outcome icon + tint: success/danger tokens, and the caption states the outcome in words. */}
-          <div style={{ width: 28, height: 28, borderRadius: 8, flexShrink: 0,
-            background: r.ok ? 'var(--color-success-bg)' : 'var(--color-danger-bg)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {r.ok ? <CheckCircle size={13} color="var(--color-success)" /> : <AlertCircle size={13} color="var(--color-danger)" />}
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <BodyText as="div" style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</BodyText>
-            <Caption as="div">{r.ok ? t('run.processed', { count: r.n }) : r.err}</Caption>
-          </div>
-          <Caption as="span" style={{ flexShrink: 0 }}>{r.time}</Caption>
-        </div>
+        <DashboardListRow key={i} isLast={i === rows.length - 1}
+          onClick={onNavigate ? () => onNavigate('workflows') : undefined}
+          // Outcome icon + tint: success/danger tokens, and the caption states the outcome in words.
+          leading={
+            <div style={{ width: 28, height: 28, borderRadius: 8, flexShrink: 0,
+              background: r.ok ? 'var(--color-success-bg)' : 'var(--color-danger-bg)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {r.ok ? <CheckCircle size={13} color="var(--color-success)" /> : <AlertCircle size={13} color="var(--color-danger)" />}
+            </div>
+          }
+          title={r.name}
+          subtitle={r.ok ? t('run.processed', { count: r.n }) : r.err}
+          trailing={<Caption as="span" style={{ flexShrink: 0 }}>{r.time}</Caption>} />
       ))}
     </Block>
   )
@@ -122,15 +113,12 @@ export function RecentConversationsList({ rows, onNavigate }: { rows: FeedTileLi
   return (
     <Block title={t('block.recentConversations')} action={onNavigate ? t('action.all') : undefined} onAction={onNavigate ? () => onNavigate('whatsapp', { tab: 'messages' }) : undefined}>
       {rows.map((c, i) => (
-        <div key={i} {...interactive(onNavigate ? () => onNavigate('whatsapp', { tab: 'messages' }) : undefined)}
-          style={rowStyle(!!onNavigate, i === rows.length - 1)}>
-          <Avatar initials={c.name.split(' ').map(n => n[0]).join('')} size={28} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <BodyText as="div" style={{ fontWeight: 500 }}>{c.name}</BodyText>
-            <Caption as="div" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.msg}</Caption>
-          </div>
-          <Caption as="span" style={{ flexShrink: 0 }}>{c.time}</Caption>
-        </div>
+        <DashboardListRow key={i} isLast={i === rows.length - 1}
+          onClick={onNavigate ? () => onNavigate('whatsapp', { tab: 'messages' }) : undefined}
+          leading={<Avatar initials={c.name.split(' ').map(n => n[0]).join('')} size={28} />}
+          title={c.name}
+          subtitle={c.msg}
+          trailing={<Caption as="span" style={{ flexShrink: 0 }}>{c.time}</Caption>} />
       ))}
     </Block>
   )

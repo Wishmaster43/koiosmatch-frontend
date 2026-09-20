@@ -38,6 +38,8 @@ const catalogueLoaders: Record<string, () => Promise<{ default: Catalogue }>> = 
   fr: () => import('./fr'),
   es: () => import('./es'),
   en: () => import('./en'),
+  it: () => import('./it'),
+  pt: () => import('./pt'),
 }
 const catalogueCache = new Map<string, Catalogue>()
 const catalogueInflight = new Map<string, Promise<Catalogue>>()

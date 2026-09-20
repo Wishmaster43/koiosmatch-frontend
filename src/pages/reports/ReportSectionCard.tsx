@@ -7,16 +7,11 @@
  * change the look everywhere — never re-type the style literals per page.
  */
 import type { CSSProperties, ReactNode } from 'react'
+import { GroupLabel } from '@/components/ui/typography'
 
 // The one card shape every report section uses: surface bg, 12px radius, 1px border.
 export const reportCardStyle: CSSProperties = {
   background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)',
-}
-
-// The one section-heading shape used inside a section-card (uppercase muted label).
-export const reportSectionHeadStyle: CSSProperties = {
-  fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em',
-  color: 'var(--text-muted)', margin: 0,
 }
 
 // The outer card every report body renders into — holds the ReportStateBlock and,
@@ -39,7 +34,7 @@ export function ReportSectionCardBody({ children }: { children: ReactNode }) {
 export function ReportSection({ title, heading, children }: { title?: ReactNode; heading?: ReactNode; children: ReactNode }) {
   return (
     <section>
-      {heading ?? <h3 style={{ ...reportSectionHeadStyle, marginBottom: 10 }}>{title}</h3>}
+      {heading ?? <GroupLabel as="h3" style={{ marginBottom: 10 }}>{title}</GroupLabel>}
       {children}
     </section>
   )

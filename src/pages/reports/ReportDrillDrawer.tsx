@@ -201,7 +201,7 @@ export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec
       <section>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
           <KoiosAiMark size={22} title={t('common:aiGeneratedHint', { defaultValue: 'Door Koios AI gegenereerd — controleer voor gebruik.' })} />
-          <h4 style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>{t('drill.koios')}</h4>
+          <GroupLabel as="h4">{t('drill.koios')}</GroupLabel>
         </div>
         {/* A failed advice call is an error, never "no advice" (§3A four states) */}
         {!adviceLoading && adviceError ? (

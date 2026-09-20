@@ -10,6 +10,8 @@ import de from './de'
 import fr from './fr'
 import es from './es'
 import en from './en'
+import itCatalogue from './it'
+import pt from './pt'
 
 // Mirrors the normalize() in ./index.ts exactly — outer trim + inner whitespace collapse.
 function normalize(text: string): string {
@@ -28,9 +30,13 @@ describe('demoSeedTexts catalogue parity', () => {
     const frKeys = Object.keys(fr).sort()
     const esKeys = Object.keys(es).sort()
     const enKeys = Object.keys(en).sort()
+    const itKeys = Object.keys(itCatalogue).sort()
+    const ptKeys = Object.keys(pt).sort()
     expect(frKeys).toEqual(deKeys)
     expect(esKeys).toEqual(deKeys)
     expect(enKeys).toEqual(deKeys)
+    expect(itKeys).toEqual(deKeys)
+    expect(ptKeys).toEqual(deKeys)
   })
 
   it('every catalogue key is a normalized text present in the harvested inventory', () => {

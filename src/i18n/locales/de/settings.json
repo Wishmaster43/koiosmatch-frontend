@@ -809,6 +809,7 @@
     "errSetup": "MFA-Einrichtung konnte nicht gestartet werden.",
     "errInvalidRetry": "Ungültiger Code. Bitte erneut versuchen.",
     "errInvalid": "Ungültiger Code.",
+    "errFinish": "Abschluss fehlgeschlagen. Bitte erneut versuchen.",
     "retry": "Erneut versuchen",
     "enforceSection": "Organisationsrichtlinie",
     "enforceTitle": "MFA für alle verpflichtend",
@@ -1263,7 +1264,8 @@
   },
   "apiKeys": {
     "title": "API-Schlüssel",
-    "count": "{{count}} Schlüssel",
+    "count_one": "{{count}} Schlüssel",
+    "count_other": "{{count}} Schlüssel",
     "new": "Neu",
     "empty": "Noch keine API-Schlüssel erstellt.",
     "loadError": "API-Schlüssel konnten nicht geladen werden.",
@@ -1358,7 +1360,8 @@
       "company": "Unternehmen",
       "users": "Benutzer",
       "noLevelOffered": "Kein Level für diesen Typ verfügbar"
-    }
+    },
+    "detailLoadError": "Die vollständigen Daten konnten nicht geladen werden. Berechtigungen werden möglicherweise nicht korrekt angezeigt."
   },
   "webhooks": {
     "tab": {

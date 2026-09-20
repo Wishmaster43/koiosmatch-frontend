@@ -12,6 +12,7 @@ import type { Column } from '@/components/ui/DataTable'
 import { Mono } from '@/components/ui/typography'
 import { Block } from '@/pages/dashboard/DashboardPrimitives'
 import { useDateFormat } from '@/lib/datetime'
+import { useNumberFormat } from '@/lib/formatters'
 import type { VacancyAttentionRow } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
@@ -22,16 +23,18 @@ export default function VacanciesAttentionTable({ rows, onNavigate }: {
 }) {
   const { t } = useTranslation('dashboard')
   const { formatDate } = useDateFormat()
+  // Locale-aware tile counts (GETALLEN-1).
+  const { formatNumber } = useNumberFormat()
 
   // Column set mirrors the brief exactly: title, customer (dash placeholder), the
   // two Mono counts and a formatted last-application date, all right-aligned counts.
   const columns: Column<VacancyAttentionRow>[] = useMemo(() => [
     { key: 'title', header: t('feed.col.vacancy'), render: r => r.title },
     { key: 'customer', header: t('feed.col.customer'), render: r => r.customer || '—' },
-    { key: 'days_open', header: t('feed.col.daysOpen'), align: 'right', render: r => <Mono>{r.days_open}</Mono> },
-    { key: 'candidates_in_process', header: t('feed.col.inProcess'), align: 'right', render: r => <Mono>{r.candidates_in_process}</Mono> },
+    { key: 'days_open', header: t('feed.col.daysOpen'), align: 'right', render: r => <Mono>{formatNumber(r.days_open)}</Mono> },
+    { key: 'candidates_in_process', header: t('feed.col.inProcess'), align: 'right', render: r => <Mono>{formatNumber(r.candidates_in_process)}</Mono> },
     { key: 'last_application_at', header: t('feed.col.lastApplication'), render: r => r.last_application_at ? formatDate(r.last_application_at) : '—' },
-  ], [t, formatDate])
+  ], [t, formatDate, formatNumber])
 
   return (
     <Block title={t('block.vacanciesAttentionByCustomer')}>

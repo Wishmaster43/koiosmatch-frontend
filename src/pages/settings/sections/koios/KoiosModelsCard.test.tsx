@@ -220,4 +220,14 @@ describe('KoiosModelsCard', () => {
     fireEvent.click(screen.getByRole('radio', { name: /models\.tier\.fast/ })) // cheaper, immediate
     await waitFor(() => expect(screen.getByText('models.saved')).toBeInTheDocument())
   })
+
+  // A failed save must be announced to assistive tech, matching every other
+  // status line in this file (activeUnknown/pendingPick already carry role="status").
+  it('announces a failed save via role="status"', async () => {
+    mockUpdateKoiosModel.mockRejectedValue(new Error('boom'))
+    render(<KoiosModelsCard models={models} t={t} />)
+    fireEvent.click(screen.getByRole('radio', { name: /models\.tier\.fast/ })) // cheaper, immediate
+    await waitFor(() => expect(screen.getByText('models.saveError')).toBeInTheDocument())
+    expect(screen.getByText('models.saveError').closest('[role="status"]')).not.toBeNull()
+  })
 })

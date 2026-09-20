@@ -15,6 +15,8 @@ import type { BoardPhase } from '../ApplicationsBoard'
 // useApplicationsData's own header comment for the verified server contract.
 import type { AppStats } from '../hooks/useApplicationsData'
 import { pickOne as pickOneImpl } from '@/lib/insightsHelpers'
+// GETALLEN-1: every user-visible percentage renders through the shared formatter.
+import { formatPercent } from '@/lib/formatters'
 
 export interface Aggregate { name: string; key: string; color?: string; value: number }
 
@@ -133,9 +135,11 @@ export const asOptions = (data: Aggregate[]) => data.map(d => ({ value: d.key, l
 // Average match score across non-rejected applications (KPI, "—" when none scored).
 // W27: FALLBACK only now — `stats.avg_score` is the real server-wide figure; this
 // derives the same number from the wide sample when stats itself failed to load.
-export const computeAvgScore = (wideRows: Application[]): string => {
+export const computeAvgScore = (wideRows: Application[], locale: string = 'nl-NL'): string => {
   const scored = wideRows.filter(a => a.bucket !== 'rejected' && typeof a.score === 'number')
-  return scored.length ? Math.round(scored.reduce((s, a) => s + (a.score as number), 0) / scored.length) + '%' : '—'
+  if (!scored.length) return '—'
+  const avg = scored.reduce((s, a) => s + (a.score as number), 0) / scored.length
+  return formatPercent(avg, locale)
 }
 // Active applications that still carry an AI task (attention KPI). W27: FALLBACK
 // only — `stats.attention.ai_tasks` is the real server-wide figure.

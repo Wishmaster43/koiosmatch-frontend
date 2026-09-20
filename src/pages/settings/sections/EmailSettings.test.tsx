@@ -97,6 +97,22 @@ describe('EmailSettings · connection status (DL-10)', () => {
   })
 })
 
+// §6 — every manual-SMTP field's visible label is a real <label htmlFor> tied to its input id.
+describe('EmailSettings · field label association (§6)', () => {
+  it('associates sender/SMTP labels to their inputs for the manual provider', async () => {
+    loadSettings.mockResolvedValue({ email_klanten_provider: 'manual' })
+    mockedGet.mockResolvedValue({ data: { data: { context: 'klanten', connected: false, provider: null, address: null } } })
+    renderPanel('klanten')
+    await waitFor(() => expect(mockedGet).toHaveBeenCalled())
+    expect(screen.getByLabelText(st('email.senderName'))).toBeInTheDocument()
+    expect(screen.getByLabelText(st('email.fromAddress'))).toBeInTheDocument()
+    expect(screen.getByLabelText(st('email.smtpServer'))).toBeInTheDocument()
+    expect(screen.getByLabelText(st('email.port'))).toBeInTheDocument()
+    expect(screen.getByLabelText(st('email.username'))).toBeInTheDocument()
+    expect(screen.getByLabelText(st('email.password'))).toBeInTheDocument()
+  })
+})
+
 describe('EmailSettings · Koppelen (DL-10)', () => {
   it('fetches the consent URL and redirects the browser to it, never a bare navigation', async () => {
     loadSettings.mockResolvedValue({ email_klanten_provider: 'gmail' })

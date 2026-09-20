@@ -278,7 +278,7 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
                       {c.candidate || '—'}
                     </BodyText>
                     {c.last_message_at && <Caption style={{ whiteSpace: 'nowrap' }}>{formatDate(c.last_message_at)}</Caption>}
-                    <Mono style={{ fontWeight: 600 }}>{c.message_count}</Mono>
+                    <Mono style={{ fontWeight: 600 }}>{formatNumber(c.message_count)}</Mono>
                   </div>
                 )
               })}

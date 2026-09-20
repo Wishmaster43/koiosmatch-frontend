@@ -31,8 +31,8 @@ export function LanguageListSettings() {
 }
 
 /** Levels — the proficiency levels (spoken/written), its own sub-tab.
- * No withIcon/withColor: language_levels has neither column yet on the backend
- * (LOOKUP-ICONS-FE-2 round-4 hash, ±19:30 13-09) — revisit once that lands. */
+ * withIcon/withColor: language_levels gained both columns in ICONS-R3 round 4
+ * (13-09), same as the language list above. */
 export function LanguageLevelSettings() {
   const { t } = useTranslation('settings')
   return (

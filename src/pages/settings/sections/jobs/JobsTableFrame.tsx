@@ -3,7 +3,7 @@ import DataTable from '@/components/ui/DataTable'
 import type { Column, RowId } from '@/components/ui/DataTable'
 
 interface JobsTableFrameProps<Row> {
-  phase: 'loading' | 'error' | 'success' | 'ready'
+  phase: 'loading' | 'error' | 'ready'
   columns: Column<Row>[]
   rows: Row[]
   emptyText: string
@@ -11,7 +11,7 @@ interface JobsTableFrameProps<Row> {
 }
 /**
  * Shared table frame for both JobsTab and FailedJobsTab — error state + bordered div + DataTable.
- * Props: phase ('loading'|'error'|'success'), columns, rows, emptyText, getRowId.
+ * Props: phase ('loading'|'error'|'ready'), columns, rows, emptyText, getRowId.
  */
 export default function JobsTableFrame<Row>({ phase, columns, rows, emptyText, getRowId }: JobsTableFrameProps<Row>) {
   const { t } = useTranslation('settings')

@@ -13,6 +13,8 @@ import { groupTemplates } from './importTemplateShape'
 import { iconForTemplate } from './importEntityIcon'
 import type { ImportTemplateSummary } from './importApi'
 import Spinner from '@/components/ui/Spinner'
+import Button from '@/components/ui/Button'
+import { GroupLabel } from '@/components/ui/typography'
 import SubNavButton from '@/pages/settings/components/SubNavButton'
 
 interface ImportEntityNavProps {
@@ -41,12 +43,9 @@ export default function ImportEntityNav({ templates, phase, selected, onSelect, 
     )
   }
 
-  // One group heading — 11px muted caps, the settings sub-nav convention (§4).
+  // One group heading — the shared GroupLabel atom (§4), only padding is local layout.
   const renderHeading = (key: string) => (
-    <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase',
-      color: 'var(--text-muted)', padding: '10px 10px 4px' }}>
-      {t(key)}
-    </div>
+    <GroupLabel style={{ padding: '10px 10px 4px' }}>{t(key)}</GroupLabel>
   )
 
   return (
@@ -59,10 +58,10 @@ export default function ImportEntityNav({ templates, phase, selected, onSelect, 
       {phase === 'error' && (
         <div style={{ padding: '8px 10px' }}>
           <p style={{ fontSize: 12, color: 'var(--color-danger-text)', marginBottom: 8 }}>{t('import.loadTemplatesError')}</p>
-          <button type="button" onClick={onReload}
-            style={{ fontSize: 12, color: 'var(--color-primary-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+          {/* HUISSTIJL-1: the retry action is a real Button (ghostAccent), never a hand-painted link-button. */}
+          <Button variant="ghostAccent" onClick={onReload} style={{ padding: 0, height: 'auto' }}>
             {t('common:error.retry')}
-          </button>
+          </Button>
         </div>
       )}
       {phase === 'ready' && templates.length === 0 && (

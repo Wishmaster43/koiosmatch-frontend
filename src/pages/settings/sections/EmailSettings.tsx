@@ -343,12 +343,12 @@ export default function EmailSettings({ context = 'klanten' }: EmailSettingsProp
           <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 12 }}>{t('email.senderDetails')}</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
-              <label style={labelStyle}>{t('email.senderName')}</label>
-              <input value={fromName} onChange={e => setFromName(e.target.value)} placeholder={t('email.senderNamePlaceholder')} style={inputStyle} />
+              <label htmlFor="email-sender-name" style={labelStyle}>{t('email.senderName')}</label>
+              <input id="email-sender-name" value={fromName} onChange={e => setFromName(e.target.value)} placeholder={t('email.senderNamePlaceholder')} style={inputStyle} />
             </div>
             <div>
-              <label style={labelStyle}>{t('email.fromAddress')}</label>
-              <input type="email" value={fromEmail} onChange={e => setFromEmail(e.target.value)} placeholder={t('email.fromPlaceholder')} style={inputStyle} />
+              <label htmlFor="email-from-address" style={labelStyle}>{t('email.fromAddress')}</label>
+              <input id="email-from-address" type="email" value={fromEmail} onChange={e => setFromEmail(e.target.value)} placeholder={t('email.fromPlaceholder')} style={inputStyle} />
             </div>
           </div>
         </div>
@@ -359,28 +359,28 @@ export default function EmailSettings({ context = 'klanten' }: EmailSettingsProp
             <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 12 }}>{t('email.smtpConfig')}</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px', gap: 12, marginBottom: 12 }}>
               <div>
-                <label style={labelStyle}>{t('email.smtpServer')}</label>
-                <input value={smtpHost} onChange={e => setSmtpHost(e.target.value)} placeholder={t('email.smtpServerPlaceholder')} style={inputStyle} />
+                <label htmlFor="email-smtp-server" style={labelStyle}>{t('email.smtpServer')}</label>
+                <input id="email-smtp-server" value={smtpHost} onChange={e => setSmtpHost(e.target.value)} placeholder={t('email.smtpServerPlaceholder')} style={inputStyle} />
               </div>
               <div>
-                <label style={labelStyle}>{t('email.port')}</label>
-                <input type="number" value={smtpPort} onChange={e => setSmtpPort(e.target.value)} style={inputStyle} />
+                <label htmlFor="email-smtp-port" style={labelStyle}>{t('email.port')}</label>
+                <input id="email-smtp-port" type="number" value={smtpPort} onChange={e => setSmtpPort(e.target.value)} style={inputStyle} />
               </div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
               <div>
-                <label style={labelStyle}>{t('email.username')}</label>
-                <input value={smtpUser} onChange={e => setSmtpUser(e.target.value)} placeholder={t('email.usernamePlaceholder')} style={inputStyle} />
+                <label htmlFor="email-smtp-username" style={labelStyle}>{t('email.username')}</label>
+                <input id="email-smtp-username" value={smtpUser} onChange={e => setSmtpUser(e.target.value)} placeholder={t('email.usernamePlaceholder')} style={inputStyle} />
               </div>
               <div>
-                <label style={labelStyle}>
+                <label htmlFor="email-smtp-password" style={labelStyle}>
                   {t('email.password')}
                   {smtpPassSet && !smtpPass && (
                     <span style={{ marginLeft: 6, fontSize: 11, color: 'var(--color-success-text)', fontWeight: 400 }}>{t('email.passwordSet')}</span>
                   )}
                 </label>
                 <div style={{ position: 'relative' }}>
-                  <input type={showPass ? 'text' : 'password'} value={smtpPass}
+                  <input id="email-smtp-password" type={showPass ? 'text' : 'password'} value={smtpPass}
                     onChange={e => setSmtpPass(e.target.value)}
                     placeholder={smtpPassSet ? t('email.passwordKeepPlaceholder') : t('email.passwordPlaceholder')}
                     style={{ ...inputStyle, paddingRight: 36 }} />

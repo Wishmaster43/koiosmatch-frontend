@@ -20,7 +20,7 @@ import { useNumberFormat } from '@/lib/formatters'
 import type { ReactNode } from 'react'
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Trash2, Pencil, Search } from 'lucide-react'
+import { Trash2, Pencil } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useNavigation } from '@/context/NavigationContext'
 import { useDateFormat } from '@/lib/datetime'
@@ -29,6 +29,7 @@ import { notifyError } from '@/lib/notify'
 import api from '@/lib/api'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
+import EntityLink from '@/components/ui/EntityLink'
 import SoftChip from '@/components/ui/SoftChip'
 import Button from '@/components/ui/Button'
 import SectionCard from '@/components/ui/SectionCard'
@@ -36,6 +37,7 @@ import { useConfirm } from '@/hooks/useConfirm'
 // House "+ action" trigger (Danny 27-07: must be a button just like
 // on the candidate drill-down too) — replaces the bare text+Plus button below.
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import DrawerSearchField from '@/components/drawer/DrawerSearchField'
 import { AddOpportunityModal } from '@/pages/opportunities/shared'
 import { mapOpportunity } from '@/pages/opportunities/shared'
 import { useOpportunityStages } from '@/lib/useOpportunityStages'
@@ -140,9 +142,14 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
   const columns: Column<Opportunity>[] = [
     // Title cell truncates with ellipsis inside a max-width (K10a) — a long title used
     // to draw past the card edge instead of wrapping/scrolling with the rest of the row.
+    // Frozen customer drill-down: the EntityLink swap keeps the exact K10a truncation cap
+    // and drops the external-link icon so the render stays byte-identical to before.
     { key: 'title', header: t('opportunities.col.title'), sortable: true, sortValue: o => o.title,
-      render: o => <button onClick={() => openEntity('opportunities', o.id)} title={o.title}
-        style={{ padding: 0, background: 'none', border: 'none', font: 'inherit', color: 'var(--color-primary-text)', cursor: 'pointer', textAlign: 'left', display: 'block', maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o.title}</button> },
+      render: o => (
+        <div style={{ maxWidth: 260, minWidth: 0, overflow: 'hidden' }}>
+          <EntityLink page="opportunities" id={o.id} title={o.title} hideIcon>{o.title}</EntityLink>
+        </div>
+      ) },
     { key: 'stage', header: t('opportunities.col.stage'), sortable: true, sortValue: o => o.stage,
       render: o => !o.stage ? '—' : colorStage
         ? <SoftChip label={o.stage} color={o.stageColor} />
@@ -173,13 +180,7 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
           {/* Toolbar in the house order (mirrors Vacatures/Locaties/…): search
               left (growing), stage filter middle, add trigger last. */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, padding: '6px 10px',
-            background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
-            <Search size={13} color="var(--text-muted)" />
-            <input value={search} onChange={e => setSearch(e.target.value)}
-              placeholder={t('opportunities.searchPlaceholder')} aria-label={t('opportunities.searchPlaceholder')}
-              style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)', minWidth: 0 }} />
-          </div>
+          <DrawerSearchField value={search} onChange={setSearch} placeholder={t('opportunities.searchPlaceholder')} />
           {/* Options key on the stage VALUE slug (not the lookup's id) — an opportunity
               row only ever carries `stageValue`, never a stage id (§3B, no invented axis). */}
           <StatusFilterSelect value={stageFilter} onToggle={toggleStage} statuses={stages}

@@ -49,11 +49,21 @@ describe('WaWebQueueTile', () => {
     expect(queryByText(/feed.waWebQueue.estDrain/)).not.toBeInTheDocument()
   })
 
-  it('navigates to the WhatsApp queue tab on click', () => {
+  it('navigates to the WhatsApp queue tab via the header action link', () => {
     const onNavigate = vi.fn()
     render(<WaWebQueueTile feed={feed} onNavigate={onNavigate} />)
-    fireEvent.click(screen.getByText('+31 6 12345678'))
+    fireEvent.click(screen.getByText(/action\.all/))
     expect(onNavigate).toHaveBeenCalledWith('whatsapp', { tab: 'wa-web-queue' })
+  })
+
+  // §6: the header action link is the ONLY role="button" outside the three
+  // headline figures — no more role="button" wrapper nesting those figures.
+  it('never nests an interactive control inside another one', () => {
+    const { container } = render(<WaWebQueueTile feed={feed} onNavigate={vi.fn()} />)
+    const buttons = container.querySelectorAll('[role="button"]')
+    for (const btn of buttons) {
+      expect(btn.querySelector('[role="button"]')).toBeNull()
+    }
   })
 
   // Predecessor audit 57be1399: a count and its click-through must show the same

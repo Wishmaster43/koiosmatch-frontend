@@ -87,7 +87,7 @@ export default function FailedJobsTab() {
     ...jobColumns(t),
     // TAAKBEHEER-HORIZON-1b: the workflow:<key> tag off the failing job's payload, or a dash when it isn't a workflow run.
     { key: 'workflow', header: t('jobs.col.workflow'), nowrap: true, render: (r: FailedJobRow) => r.workflow ?? '—' },
-    // JOB-PROVENANCE-1: wie de job aanvroeg + over welk record hij ging.
+    // JOB-PROVENANCE-1: who requested it + which record it concerns.
     { key: 'requested_by', header: t('jobs.recent.colBy'), nowrap: true, render: (r: FailedJobRow) => r.requested_by ?? '—' },
     { key: 'subject', header: t('jobs.recent.colSubject'), nowrap: true,
       render: (r: FailedJobRow) => r.subject ? <Mono style={{ fontSize: 12 }}>{r.subject.type} {r.subject.reference}</Mono> : '—' },

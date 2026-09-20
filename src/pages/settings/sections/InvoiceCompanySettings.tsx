@@ -22,6 +22,7 @@ import SaveButton from '@/components/ui/SaveButton'
 import { card, notice } from './usageCardStyles'
 import { PageTitle, SectionTitle } from '@/components/ui/typography'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import { cardHead } from '@/components/ui/modalCards'
 import Row from './settingsFormRow'
 
 // The full settings shape (matches PUT /admin/invoice-settings request body 1:1).
@@ -135,26 +136,26 @@ export default function InvoiceCompanySettings() {
           <section>
             <h3 style={cardHead}>{t('invoiceSettings.sectionCompany')}</h3>
             <div style={card}>
-              <Row label={t('invoiceSettings.companyName')}>
-                <input value={form.invoice_company_name} onChange={(e) => set('invoice_company_name', e.target.value)} style={baseInput} />
+              <Row label={t('invoiceSettings.companyName')} htmlFor="invoice-company-name">
+                <input id="invoice-company-name" value={form.invoice_company_name} onChange={(e) => set('invoice_company_name', e.target.value)} style={baseInput} />
               </Row>
-              <Row label={t('invoiceSettings.address')}>
-                <input value={form.invoice_address} onChange={(e) => set('invoice_address', e.target.value)} style={baseInput} />
+              <Row label={t('invoiceSettings.address')} htmlFor="invoice-address">
+                <input id="invoice-address" value={form.invoice_address} onChange={(e) => set('invoice_address', e.target.value)} style={baseInput} />
               </Row>
-              <Row label={t('invoiceSettings.postalCity')}>
-                <input value={form.invoice_postal_city} onChange={(e) => set('invoice_postal_city', e.target.value)} style={baseInput} />
+              <Row label={t('invoiceSettings.postalCity')} htmlFor="invoice-postal-city">
+                <input id="invoice-postal-city" value={form.invoice_postal_city} onChange={(e) => set('invoice_postal_city', e.target.value)} style={baseInput} />
               </Row>
-              <Row label={t('invoiceSettings.cocNumber')}>
-                <input value={form.invoice_coc_number} onChange={(e) => set('invoice_coc_number', e.target.value)} style={baseInput} />
+              <Row label={t('invoiceSettings.cocNumber')} htmlFor="invoice-coc-number">
+                <input id="invoice-coc-number" value={form.invoice_coc_number} onChange={(e) => set('invoice_coc_number', e.target.value)} style={baseInput} />
               </Row>
-              <Row label={t('invoiceSettings.vatNumber')}>
-                <input value={form.invoice_vat_number} onChange={(e) => set('invoice_vat_number', e.target.value)} style={baseInput} />
+              <Row label={t('invoiceSettings.vatNumber')} htmlFor="invoice-vat-number">
+                <input id="invoice-vat-number" value={form.invoice_vat_number} onChange={(e) => set('invoice_vat_number', e.target.value)} style={baseInput} />
               </Row>
-              <Row label={t('invoiceSettings.iban')}>
-                <input value={form.invoice_iban} onChange={(e) => set('invoice_iban', e.target.value)} style={baseInput} />
+              <Row label={t('invoiceSettings.iban')} htmlFor="invoice-iban">
+                <input id="invoice-iban" value={form.invoice_iban} onChange={(e) => set('invoice_iban', e.target.value)} style={baseInput} />
               </Row>
-              <Row label={t('invoiceSettings.email')} last>
-                <input type="email" value={form.invoice_email} onChange={(e) => set('invoice_email', e.target.value)} style={baseInput} />
+              <Row label={t('invoiceSettings.email')} htmlFor="invoice-email" last>
+                <input id="invoice-email" type="email" value={form.invoice_email} onChange={(e) => set('invoice_email', e.target.value)} style={baseInput} />
               </Row>
             </div>
           </section>
@@ -162,13 +163,13 @@ export default function InvoiceCompanySettings() {
           <section>
             <h3 style={cardHead}>{t('invoiceSettings.sectionNumbering')}</h3>
             <div style={card}>
-              <Row label={t('invoiceSettings.vatPercent')}>
-                <input type="number" min={0} max={100} value={form.invoice_vat_percent}
+              <Row label={t('invoiceSettings.vatPercent')} htmlFor="invoice-vat-percent">
+                <input id="invoice-vat-percent" type="number" min={0} max={100} value={form.invoice_vat_percent}
                   onChange={(e) => set('invoice_vat_percent', Number(e.target.value))}
                   style={{ ...baseInput, maxWidth: 120 }} />
               </Row>
-              <Row label={t('invoiceSettings.numberPrefix')}>
-                <input value={form.invoice_number_prefix} maxLength={20}
+              <Row label={t('invoiceSettings.numberPrefix')} htmlFor="invoice-number-prefix">
+                <input id="invoice-number-prefix" value={form.invoice_number_prefix} maxLength={20}
                   onChange={(e) => set('invoice_number_prefix', e.target.value)}
                   style={{ ...baseInput, maxWidth: 160 }} />
               </Row>
@@ -185,7 +186,3 @@ export default function InvoiceCompanySettings() {
     </div>
   )
 }
-
-// Titled-card head style, hoisted (mirrors CompanySettings.tsx's cardHead import
-// usage — kept local since it is only two style objects, not worth a shared import here).
-const cardHead = { fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' as const, letterSpacing: '0.03em', margin: '0 0 8px 4px' }

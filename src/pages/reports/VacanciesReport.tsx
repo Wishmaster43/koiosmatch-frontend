@@ -15,12 +15,12 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { interactive } from '@/lib/a11y'
 import ReportKpiBand from './ReportKpiBand'
-import { reportCardStyle as card, reportSectionHeadStyle } from './ReportSectionCard'
+import { reportCardStyle as card } from './ReportSectionCard'
 import ReportGrid, { ReportGridItem } from './ReportGrid'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import SoftChip from '@/components/ui/SoftChip'
-import { Caption, Mono } from '@/components/ui/typography'
+import { Caption, Mono, groupLabelStyle } from '@/components/ui/typography'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import VacancyReportAxes from './VacancyReportAxes'
@@ -30,6 +30,7 @@ import { gateDrillClick } from './reportDrillGate'
 import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterParams'
 import type { ReportFilterState } from './reportFilterParams'
 import { useDateFormat } from '@/lib/datetime'
+import { useNumberFormat } from '@/lib/formatters'
 import type { ReportPeriod, VacancyReportRow, CandidateTimeseriesPoint } from '@/types/analytics'
 import { useOrderedReportKpis } from './hooks/useOrderedReportKpis'
 import { useReportCompareData } from './hooks/useReportCompareData'
@@ -44,14 +45,16 @@ import { makeOpenSegment, makeOpenKpiDrill } from './lib/drillFactories'
 import { useReportCustomKpis } from './hooks/useReportCustomKpis'
 
 // Number cell: emphasised when > 0, muted when zero (mirrors the SM entity tables).
-const numCell = (n: number) => (
-  <span style={{ fontWeight: n > 0 ? 600 : 400, color: n > 0 ? 'var(--text)' : 'var(--text-muted)' }}>{n}</span>
+// GETALLEN-1: the value is rendered through the caller's locale-aware formatNumber.
+const numCell = (n: number, formatNumber: (v: number) => string) => (
+  <span style={{ fontWeight: n > 0 ? 600 : 400, color: n > 0 ? 'var(--text)' : 'var(--text-muted)' }}>{formatNumber(n)}</span>
 )
 
 // Vacancies report: server-suite KPI strip (KPI-VAC-1) plus charts, scoped by period/filters/compare.
 export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS, compare = COMPARE_OFF }: { period: ReportPeriod; filters?: ReportFilterState; compare?: ReportCompareMode }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
+  const { formatNumber } = useNumberFormat()
   const { data, loading, error, refetch } = useVacanciesReport(period, filters)
   const rows    = data?.vacancies ?? []
   const hasData = !loading && !error && (data?.total ?? 0) > 0
@@ -192,8 +195,8 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
       key: 'status', header: t('vacancies.cols.status'), sortable: true, sortValue: v => v.status?.label ?? '',
       render: v => v.status?.label ? <SoftChip label={v.status.label} round /> : <span style={{ color: 'var(--text-muted)' }}>—</span>,
     },
-    { key: 'applications', header: t('vacancies.cols.applications'), align: 'right', sortable: true, sortValue: v => v.applications, render: v => numCell(v.applications) },
-    { key: 'matched',      header: t('vacancies.cols.matched'),      align: 'right', sortable: true, sortValue: v => v.matched,      render: v => numCell(v.matched) },
+    { key: 'applications', header: t('vacancies.cols.applications'), align: 'right', sortable: true, sortValue: v => v.applications, render: v => numCell(v.applications, formatNumber) },
+    { key: 'matched',      header: t('vacancies.cols.matched'),      align: 'right', sortable: true, sortValue: v => v.matched,      render: v => numCell(v.matched, formatNumber) },
     {
       key: 'filled', header: t('vacancies.cols.filled'), sortable: true, sortValue: v => (v.filled ? 1 : 0),
       render: v => <SoftChip label={v.filled ? t('vacancies.filledYes') : t('vacancies.filledNo')}
@@ -273,7 +276,7 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
               <div style={{ ...card, overflow: 'hidden' }}>
                 <div style={{ padding: '16px 20px 0' }}>
                   {/* Real keyboard-operable trigger: interactive() adds role/tabIndex/Enter-Space, the global :focus-visible ring makes it visible (§6) */}
-                  <h3 style={{ ...reportSectionHeadStyle, ...(zeroApplicationsDrillHandler ? { cursor: 'pointer' } : {}) }}
+                  <h3 style={{ ...groupLabelStyle, ...(zeroApplicationsDrillHandler ? { cursor: 'pointer' } : {}) }}
                     {...interactive(zeroApplicationsDrillHandler)}>
                     {t('vacancies.noApplicants.title', { count: zeroApplicantRows.length })}
                   </h3>

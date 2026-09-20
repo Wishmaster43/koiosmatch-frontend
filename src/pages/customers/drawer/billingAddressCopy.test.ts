@@ -21,13 +21,13 @@ import ptLoc from '@/i18n/locales/pt/customers.json'
 const USED = ['title', 'poBox', 'usesVisitAddress', 'visitEmpty', 'hint'] as const
 const LOCALES = { nl, en, de, fr, es, it: itLoc, pt: ptLoc } as Record<string, { overview?: { billingAddress?: Record<string, string> } }>
 
-describe('factuuradres — de teksten bestaan echt', () => {
+describe('invoice address — the copy really exists', () => {
   it.each(Object.keys(LOCALES))('%s carries every billingAddress string', locale => {
     const block = LOCALES[locale].overview?.billingAddress
-    expect(block, `overview.billingAddress ontbreekt in ${locale}`).toBeTruthy()
+    expect(block, `overview.billingAddress missing in ${locale}`).toBeTruthy()
     for (const key of USED) {
       const value = block?.[key]
-      expect(value, `overview.billingAddress.${key} ontbreekt in ${locale}`).toBeTruthy()
+      expect(value, `overview.billingAddress.${key} missing in ${locale}`).toBeTruthy()
       // A key that leaked into the value is the exact bug this guards against.
       expect(String(value)).not.toContain('billingAddress.')
     }
