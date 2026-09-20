@@ -19,7 +19,10 @@ function BarTooltip({ active, payload, label, total, showPercent, percentValues,
       style={{ background: 'var(--surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-float)' }}>
       <div className="mb-0.5 font-medium" style={{ fontSize: 12, color: 'var(--text)' }}>{label}</div>
       <div style={{ color: payload[0].fill, fontSize: 13, fontWeight: 500 }}>
-        {percentValues ? `${formatNumber(value)}%` : showPercent ? pct : formatNumber(value)}
+        {/* GETALLEN-1: percentValues are already a server percentage — through
+            formatPercent, never a hand-built `${formatNumber(x)}%` (that let
+            Intl's default fraction digits leak through, e.g. "45,882%"). */}
+        {percentValues ? fmt(value) : showPercent ? pct : formatNumber(value)}
       </div>
     </div>
   )
@@ -77,7 +80,7 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
           <YAxis
             tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
             allowDecimals={asPercent}
-            tickFormatter={v => asPercent ? `${v}%` : formatNumber(Number(v))}
+            tickFormatter={v => asPercent ? fmt(Number(v)) : formatNumber(Number(v))}
             domain={asPercent ? [0, 100] : undefined}
           />
           <Tooltip content={<BarTooltip total={rawTotal} showPercent={showPercent && !percentValues} percentValues={percentValues} formatNumber={formatNumber} formatPercent={fmt} />} />

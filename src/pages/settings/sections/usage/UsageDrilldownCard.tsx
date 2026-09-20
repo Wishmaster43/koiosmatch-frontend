@@ -4,8 +4,9 @@
  * figures that really exist on a merged DailyRow (workflow credits/EUR, AI
  * tokens-in/out/EUR, total) — no fabricated per-activity split for a single day
  * (§3 no fake affordances; the backend has no per-day×activity breakdown).
- * Keyboard-reachable close button; Escape also closes (handled by the parent via
- * the button's own focus — no global key listener needed for one dismiss control).
+ * Keyboard-reachable close button; the only dismiss path today is that button
+ * (there is no Escape/global key listener — the card is not a focus-trapping
+ * modal, so it never claims a keyboard shortcut it does not implement).
  */
 import { X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'

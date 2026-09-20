@@ -37,6 +37,7 @@ import AddTaskModal from '../AddTaskModal'
 import SubtaskQuickView from './SubtaskQuickView'
 import { useNavigation } from '@/context/NavigationContext'
 import { useAuth } from '@/context/AuthContext'
+import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { taskStatusMeta } from '../data/taskStatusMeta'
 import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
@@ -63,6 +64,9 @@ export default function SubtasksSection({ task, onSubtaskCreated }: {
 }) {
   const { t } = useTranslation('tasks')
   const { openEntity } = useNavigation()
+  // TASK-DISPLAY-DRILL-1: the status chip follows the table's colour toggle
+  // (mirrors RelatedTasks.tsx in the same drawer).
+  const colorStatus = getBoolSetting(useAllSettings(), 'task_table_color_status', true)
   // OPENERS-HIDE-1 (pass 5): POST /tasks (subtask create) is gated on tasks.create
   // (tasks-outreach.php:67) — hide the opener rather than let it 422 (§3).
   const auth = useAuth()
@@ -162,7 +166,7 @@ export default function SubtasksSection({ task, onSubtaskCreated }: {
                 <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {r.title ?? '—'}
                 </span>
-                {label && <SoftChip label={label} color={color} />}
+                {label && (colorStatus ? <SoftChip label={label} color={color} /> : <span style={{ color: 'var(--text)', fontSize: 12 }}>{label}</span>)}
               </button>
             )
           })}

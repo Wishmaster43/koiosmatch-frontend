@@ -26,7 +26,6 @@ export default function WebhooksSettings() {
 
   return (
     <div>
-      {/* Direction sub-tabs */}
       {/* Direction sub-tabs — the shared SubTabBar (DRY-1 O5); the wrapper keeps the old outer margin. */}
       <div style={{ marginBottom: 24 }}>
         <SubTabBar tabs={tabs} active={tab} onChange={(id) => setTab(id as WebhookDirectionTab)} />

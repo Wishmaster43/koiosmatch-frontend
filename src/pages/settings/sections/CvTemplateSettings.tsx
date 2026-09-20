@@ -164,7 +164,7 @@ export default function CvTemplateSettings() {
             <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{t('cvTemplate.preview')}</span>
             <Caption>{t('cvTemplate.previewHint')}</Caption>
           </div>
-          <CvHtmlPreview settings={settingsWithBrand} t={tCv} />
+          <CvHtmlPreview settings={settingsWithBrand} t={tCv} locale={locale} />
         </div>
 
       </div>

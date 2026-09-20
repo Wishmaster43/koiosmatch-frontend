@@ -17,18 +17,19 @@
  * other migrated modal — NewUserModal/EditUserModal/AddCandidateModal), so this
  * file no longer arms its own useFocusTrap.
  */
-import type { CSSProperties, Dispatch, SetStateAction } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { WIDE_MODAL_PANEL_SIZE } from '@/components/ui/wideModalPanelSize'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 import { LOCATION_ICON_NAMES, resolveLocationIcon, DEFAULT_LOCATION_COLOR } from '@/lib/locationIcons'
 import { ColorSwatch } from '@/pages/settings/components/SettingsControls'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import { FieldRow, TextField } from '@/components/forms/fields'
 import { useCountriesLookup } from '@/lib/useCountriesLookup'
 import { useProvinces } from '@/hooks/useProvinces'
 import FieldNotice from '@/components/ui/FieldNotice'
 import Toggle from '@/components/ui/Toggle'
-import { BodyText, Caption } from '@/components/ui/typography'
+import { BodyText, Caption, groupLabelStyle } from '@/components/ui/typography'
 import { useIdentifierValidation } from '@/hooks/useIdentifierValidation'
 import type { IdentifierNotice } from '@/hooks/useIdentifierValidation'
 import IconPickerControl from '../IconPickerControl'
@@ -36,11 +37,10 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 import ModalFooter from '@/components/ui/ModalFooter'
 import type { LocationForm } from '../LocationsSettings'
 
-// House field footprint (Danny 27-07 point D): 11px uppercase muted label above
-// each input, fontSize 13 / borderRadius 8 — mirrors match/styles.ts'
-// `lbl`/`input` exactly.
-const lbl: CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 5 }
-const inp: CSSProperties = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
+// Field layout canon (Danny 13-08, CLAUDE.md §3A): label LEFT of the field, via the
+// shared forms/fields kit — the ColorSwatch/IconPicker below stay label-above (they
+// are compact visual pickers, not FieldRow's label+single-input row shape).
+const swatchLbl = { ...groupLabelStyle, display: 'block', marginBottom: 5 }
 
 // Props: the container (LocationsSettings) owns the form VALUE and mutation, this
 // modal only renders it and reports edits back through setForm.
@@ -74,18 +74,20 @@ export default function LocationFormModal({ editingId, form, setForm, saving, on
 
   const picker = (k: keyof LocationForm, label: string, options: SelectOption[], flex = 1) => (
     <div style={{ flex, minWidth: 0 }}>
-      <div style={lbl}>{label}</div>
-      <CreatableSelect value={(form[k] as string) || null} onChange={(v: string) => setF(k)({ target: { value: v } })}
-        options={options} allowCreate={false} clearable placeholder={label}
-        style={{ padding: '8px 11px', borderRadius: 8, fontSize: 13 }} />
+      <FieldRow label={label}>
+        <CreatableSelect value={(form[k] as string) || null} onChange={(v: string) => setF(k)({ target: { value: v } })}
+          options={options} allowCreate={false} clearable placeholder={label}
+          style={{ padding: '8px 11px', borderRadius: 8, fontSize: 13 }} />
+      </FieldRow>
     </div>
   )
 
   const field = (k: keyof LocationForm, label: string, placeholder: string, type = 'text', flex = 1, notice: IdentifierNotice | null = null) => (
     <div style={{ flex, minWidth: 0 }}>
-      <div style={lbl}>{label}</div>
-      <input type={type} value={form[k] as string} onChange={setF(k)} placeholder={placeholder} aria-label={label}
-        style={notice?.severity === 'error' ? { ...inp, borderColor: 'var(--color-danger)' } : inp} />
+      <FieldRow label={label}>
+        <TextField value={form[k] as string} onChange={(v: string) => setF(k)({ target: { value: v } })}
+          placeholder={placeholder} type={type} error={notice?.severity === 'error'} />
+      </FieldRow>
       <FieldNotice text={notice?.message} severity={notice?.severity} />
     </div>
   )
@@ -122,11 +124,11 @@ export default function LocationFormModal({ editingId, form, setForm, saving, on
                   picker. Both ride along in the create/update payload. */}
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 20 }}>
                 <div>
-                  <div style={lbl}>{t('locations.color')}</div>
+                  <div style={swatchLbl}>{t('locations.color')}</div>
                   <ColorSwatch color={form.color} onChange={c => setForm(x => ({ ...x, color: c }))} />
                 </div>
                 <div>
-                  <div style={lbl}>{t('locations.icon')}</div>
+                  <div style={swatchLbl}>{t('locations.icon')}</div>
                   <IconPickerControl icons={LOCATION_ICON_NAMES} resolve={resolveLocationIcon}
                     value={form.icon} color={form.color || DEFAULT_LOCATION_COLOR}
                     label={t('locations.icon')} onPick={icon => setForm(x => ({ ...x, icon }))} />

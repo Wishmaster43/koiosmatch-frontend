@@ -672,6 +672,7 @@
   "discardChangesConfirm": "Du hast noch nicht gespeicherten Text. Ohne Speichern schließen?",
   "koiosSuggested": "Vorschlag von Koios AI auf Basis der Kandidatenhistorie",
   "koiosSuggestedOwnerAgent": "Vorschlag von Koios AI auf Basis des Inhabers der Stelle",
+  "koiosSuggestedBranch": "Vorschlag von Koios AI auf Basis des Kunden oder der eigenen Niederlassung",
   "koiosRejectAdvice": "Koios AI schlägt eine Absage vor. Den Grund wählen Sie selbst aus der Liste.",
   "dragList": {
     "moveUp": "Nach oben verschieben",

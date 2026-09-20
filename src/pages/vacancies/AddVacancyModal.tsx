@@ -226,6 +226,7 @@ export default function AddVacancyModal({
               postalCode={f.form.postalCode} city={f.form.city} province={f.form.province} country={f.form.country}
               onFieldChange={f.onAddressChange} provinces={f.provinces}
               branchId={f.form.branchId} onBranchChange={f.handleBranchChange} branchOptions={f.branchOptions}
+              showBranchSuggestion={f.showBranchSuggestion}
             />
             <RecruiterCard ownerId={f.form.ownerId} onOwnerChange={v => f.set('ownerId', v)} userOptions={f.userOptions} />
           </div>
@@ -273,9 +274,8 @@ export default function AddVacancyModal({
           )}
           <div style={{ display: activeTab === 'publication' ? 'block' : 'none' }}>
             <CollapsedCard title={f.t('modal.fields.cardPublication')}
-              filled={f.published || f.channels.some(c => c.published) || f.applicationSettingsTouched}>
-              <PublicationCard published={f.published} onPublishedChange={f.setPublished}
-                channels={f.channels} onToggleChannel={f.toggleChannel}
+              filled={f.published || f.applicationSettingsTouched}>
+              <PublicationCard channels={f.channels} onToggleChannel={f.toggleChannel}
                 applicationSettings={f.applicationSettings} onSettingChange={f.setApplicationSetting} />
             </CollapsedCard>
           </div>

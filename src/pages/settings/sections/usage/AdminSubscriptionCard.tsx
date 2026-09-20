@@ -11,7 +11,7 @@
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
 import { SectionTitle, BodyText, Caption, Mono } from '@/components/ui/typography'
-import { formatCurrency, formatNumber } from '@/lib/formatters'
+import { useNumberFormat } from '@/lib/formatters'
 import { card } from '../usageCardStyles'
 
 export interface AdminSubscription {
@@ -22,8 +22,9 @@ export interface AdminSubscription {
   total_amount?: number | null
 }
 
-// One row: label left, euro amount right in Mono (tabular money column).
-function MoneyRow({ label, amount, strong = false }: { label: string; amount: number | null | undefined; strong?: boolean }) {
+// One row: label left, euro amount right in Mono (tabular money column). The
+// formatter comes from the caller's useNumberFormat() so it honours the active locale.
+function MoneyRow({ label, amount, strong = false, formatCurrency }: { label: string; amount: number | null | undefined; strong?: boolean; formatCurrency: (n: number) => string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 0' }}>
       <BodyText as="span" style={strong ? { fontWeight: 600 } : undefined}>{label}</BodyText>
@@ -35,6 +36,8 @@ function MoneyRow({ label, amount, strong = false }: { label: string; amount: nu
 // The superadmin subscription split; renders nothing without the block (older BE).
 export default function AdminSubscriptionCard({ subscription }: { subscription?: AdminSubscription | null }) {
   const { t } = useTranslation('settings')
+  // GETALLEN-1: bind the formatters to the active locale, never the raw module defaults.
+  const { formatNumber, formatCurrency } = useNumberFormat()
   if (!subscription) return null
   const users = subscription.users ?? {}
   const overLimit = (users.extra ?? 0) > 0
@@ -45,7 +48,7 @@ export default function AdminSubscriptionCard({ subscription }: { subscription?:
       {subscription.package && (
         <Caption style={{ display: 'block', marginBottom: 8, textTransform: 'capitalize' }}>{subscription.package}</Caption>
       )}
-      <MoneyRow label={t('usage.subscription.base')} amount={subscription.base_amount} />
+      <MoneyRow label={t('usage.subscription.base')} amount={subscription.base_amount} formatCurrency={formatCurrency} />
       {/* The user split — counts as plain text, the surcharge as money. */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 0' }}>
         <BodyText as="span">
@@ -63,10 +66,10 @@ export default function AdminSubscriptionCard({ subscription }: { subscription?:
         </div>
       )}
       {(subscription.addons ?? []).map((a, i) => (
-        <MoneyRow key={a.key ?? i} label={t(`usage.subscription.addon.${a.key}`, { defaultValue: a.key ?? '—' })} amount={a.amount} />
+        <MoneyRow key={a.key ?? i} label={t(`usage.subscription.addon.${a.key}`, { defaultValue: a.key ?? '—' })} amount={a.amount} formatCurrency={formatCurrency} />
       ))}
       <div style={{ borderTop: '1px solid var(--border)', marginTop: 4 }}>
-        <MoneyRow label={t('usage.subscription.total')} amount={subscription.total_amount} strong />
+        <MoneyRow label={t('usage.subscription.total')} amount={subscription.total_amount} strong formatCurrency={formatCurrency} />
       </div>
     </div>
   )

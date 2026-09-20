@@ -8,6 +8,7 @@ import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
 import Button from '@/components/ui/Button'
 import { tint } from '@/lib/tint'
 import { BodyText, SectionTitle, Caption } from '@/components/ui/typography'
+import { useNumberFormat } from '@/lib/formatters'
 
 export interface Criterion { key?: string; label?: string; hard?: boolean; score: number; weight?: number; note?: string }
 
@@ -68,6 +69,8 @@ function HardBadge({ hardLabel, hardHint }: { hardLabel: string; hardHint: strin
 // One criterion: read = label + weight + ring + % + note; edit = label + weight + slider + %.
 function CriterionCard({ criterion, hardLabel, hardHint, weightTitle, editing, onScore }: { criterion: Criterion; hardLabel: string; hardHint: string; weightTitle: string; editing: boolean; onScore: (v: number) => void }) {
   const [open, setOpen] = useState(false)
+  // GETALLEN-1: through the house formatter, never a hand-built `${n}%`.
+  const { formatPercent } = useNumberFormat()
 
   if (editing) {
     return (
@@ -77,7 +80,7 @@ function CriterionCard({ criterion, hardLabel, hardHint, weightTitle, editing, o
           {criterion.hard && <HardBadge hardLabel={hardLabel} hardHint={hardHint} />}
           {criterion.weight != null && <WeightDots weight={criterion.weight} title={weightTitle} />}
           {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- DATA-coloured score value (scoreColor), not a title */}
-          <span style={{ fontSize: 13, fontWeight: 600, color: scoreColor(criterion.score), minWidth: 36, textAlign: 'right' }}>{criterion.score}%</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: scoreColor(criterion.score), minWidth: 36, textAlign: 'right' }}>{formatPercent(criterion.score)}</span>
         </div>
         <Slider value={criterion.score} max={100} step={5} onChange={onScore} color={scoreColor(criterion.score)} ariaLabel={criterion.label} />
       </div>
@@ -87,10 +90,11 @@ function CriterionCard({ criterion, hardLabel, hardHint, weightTitle, editing, o
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'var(--surface)' }}>
-        {/* Pre-existing bespoke flex-1 row-toggle (structural, not an action button)
-            and chevron affordance below, out of this ink/tint task's scope. */}
+        {/* BUTTON-GRENS-LES (§4): a row-toggle is structural, not an action —
+            it wraps the whole row (flex-1) to expand the note, unlike a Button
+            whose fixed sizing/whiteSpace would misshape this layout. */}
         <button onClick={() => setOpen(o => !o)}
-          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- structural row-toggle, not a Button-eligible action control (see comment above)
           style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
           <SectionTitle as="span">{criterion.label}</SectionTitle>
         </button>
@@ -98,8 +102,11 @@ function CriterionCard({ criterion, hardLabel, hardHint, weightTitle, editing, o
         {criterion.weight != null && <WeightDots weight={criterion.weight} title={weightTitle} />}
         <ScoreRing value={criterion.score} />
         {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- DATA-coloured score value (scoreColor), not a title */}
-          <span style={{ fontSize: 13, fontWeight: 600, color: scoreColor(criterion.score), minWidth: 36, textAlign: 'right' }}>{criterion.score}%</span>
-        {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above */}
+          <span style={{ fontSize: 13, fontWeight: 600, color: scoreColor(criterion.score), minWidth: 36, textAlign: 'right' }}>{formatPercent(criterion.score)}</span>
+        {/* Chrome-less disclosure chevron (no bg/border) mirroring the row-toggle
+            above — a Button's fill/border identity would look like a real
+            action here, when this only expands/collapses the note below. */}
+        {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome-less disclosure chevron, not a Button-eligible action control (see comment above) */}
         <button onClick={() => setOpen(o => !o)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
           {open ? <ChevronUp size={14} color="var(--text-muted)" /> : <ChevronDown size={14} color="var(--text-muted)" />}
         </button>
@@ -138,6 +145,8 @@ interface MatchScoreBlockProps {
  */
 export default function MatchScoreBlock({ score, criteria = [], summary, onSave, source, aiScore, showOverall = true }: MatchScoreBlockProps) {
   const { t } = useTranslation(['applications', 'common'])
+  // GETALLEN-1: through the house formatter, never a hand-built `${n}%`.
+  const { formatPercent } = useNumberFormat()
   const [editing, setEditing]   = useState(false)
   const [draftScore, setDraftScore]       = useState(0)
   const [draftCriteria, setDraftCriteria] = useState<Criterion[]>([])
@@ -173,18 +182,14 @@ export default function MatchScoreBlock({ score, criteria = [], summary, onSave,
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('matchScore.overall')}</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {(showOverall || editing) && <span style={{ fontSize: 12, fontWeight: 700, color: scoreColor(overall) }}>{overall}%</span>}
+            {(showOverall || editing) && <span style={{ fontSize: 12, fontWeight: 700, color: scoreColor(overall) }}>{formatPercent(overall)}</span>}
             {onSave && (editing ? (
               <>
                 <Button variant="primary" size="sm" onClick={save} title={t('matchScore.save')} style={{ width: 26 }}><Save size={13} /></Button>
-                {/* Pre-existing bespoke 26x26 cancel/edit controls (bg/ink combo not
-                    covered by a Button variant), out of this ink/tint task's scope. */}
-                {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above */}
-                <button onClick={cancel} title={t('matchScore.cancel')} aria-label={t('matchScore.cancel')} style={{ display: 'flex', width: 26, height: 26, alignItems: 'center', justifyContent: 'center', borderRadius: 6, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)', cursor: 'pointer' }}><X size={13} /></button>
+                <Button variant="mutedOutline" size="sm" iconOnly onClick={cancel} title={t('matchScore.cancel')} aria-label={t('matchScore.cancel')} style={{ width: 26 }}><X size={13} /></Button>
               </>
             ) : (
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- pre-existing bespoke 26x26 edit control (bg/ink combo not covered by a Button variant), out of this ink/tint task's scope
-              <button onClick={startEdit} title={t('matchScore.edit')} aria-label={t('matchScore.edit')} style={{ display: 'flex', width: 26, height: 26, alignItems: 'center', justifyContent: 'center', borderRadius: 6, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)', cursor: 'pointer' }}><Pencil size={12} /></button>
+              <Button variant="mutedOutline" size="sm" iconOnly onClick={startEdit} title={t('matchScore.edit')} aria-label={t('matchScore.edit')} style={{ width: 26 }}><Pencil size={12} /></Button>
             ))}
           </span>
         </div>

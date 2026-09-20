@@ -89,14 +89,16 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
     disabled: { label: t('webhooks.outgoing.status.disabled'), bg: 'var(--hover-bg)', color: 'var(--text-muted)' },
   }
 
-  // Save name + url (the editable card).
+  // Save name + url (the editable card). A rejected save must tell the admin (§0/§13).
   const saveDetails = async () => {
-    try { await applyUpdate({ name: form.name, url: form.url }); setEditing(false) } catch { /* noop */ }
+    try { await applyUpdate({ name: form.name, url: form.url }); setEditing(false) }
+    catch (err) { notifyError(extractApiError(err, t('common:actionFailed'))) }
   }
-  // Save the event filter.
+  // Save the event filter. A rejected save must tell the admin (§0/§13).
   const saveEvents = async () => {
     setSavingEv(true)
-    try { await applyUpdate({ events }); setSavedEv(true); setTimeout(() => setSavedEv(false), 1800) } catch { /* noop */ }
+    try { await applyUpdate({ events }); setSavedEv(true); setTimeout(() => setSavedEv(false), 1800) }
+    catch (err) { notifyError(extractApiError(err, t('common:actionFailed'))) }
     setSavingEv(false)
   }
 
@@ -106,14 +108,16 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
   // The backend returns the key as signing_secret; secret is a legacy fallback.
   const regenerate = () => {
     confirm(t('webhooks.outgoing.regenerateConfirm'), async () => {
-      try { const res: RegenerateSecretResponse = await regenerateSecret(subId); setSecret(res?.signing_secret ?? res?.secret ?? null) } catch { /* noop */ }
+      try { const res: RegenerateSecretResponse = await regenerateSecret(subId); setSecret(res?.signing_secret ?? res?.secret ?? null) }
+      catch (err) { notifyError(extractApiError(err, t('common:actionFailed'))) }
     }, { danger: true })
   }
   const toggleStatus = () => applyUpdate({ status: (sub?.status ?? 'active') === 'active' ? 'disabled' : 'active' }).catch((err: unknown) => notifyError(extractApiError(err, t('common:actionFailed'))))
   // Confirms then deletes the subscription, bubbling the removal back to the list.
   const remove = () => {
     confirm(t('webhooks.outgoing.deleteConfirm', { name: sub?.name ?? '' }), async () => {
-      try { await deleteSubscription(subId); onDelete?.(subId) } catch { /* noop */ }
+      try { await deleteSubscription(subId); onDelete?.(subId) }
+      catch (err) { notifyError(extractApiError(err, t('common:actionFailed'))) }
     }, { danger: true })
   }
 

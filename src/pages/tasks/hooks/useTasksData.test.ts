@@ -64,6 +64,24 @@ describe('useTasksData · error signalling (re-audit findings)', () => {
     expect(result.current.archivedTasks).toEqual([])
   })
 
+  it('reports loading while the archived fetch is in flight, not the empty state (§3 four UI states)', async () => {
+    let resolveArchived: (v: { data: { data: unknown[] } }) => void = () => {}
+    mockedGet.mockImplementation((_url: string, config?: Parameters<typeof api.get>[1]) => {
+      if ((config?.params as Record<string, unknown> | undefined)?.archived) {
+        return new Promise(resolve => { resolveArchived = resolve })
+      }
+      return Promise.resolve({ data: { data: [] } })
+    })
+    const { result } = renderHook(() => useTasksData({ showArchived: true, ...lookupProps }))
+    // The archived fetch is still pending: the view-scoped loading flag must be
+    // true, not the leftover (already-settled) active-list flag.
+    await waitFor(() => expect(result.current.loading).toBe(true))
+    expect(result.current.archivedTasks).toEqual([])
+    resolveArchived({ data: { data: [{ id: 'a1', title: 'Old task' }] } })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.archivedTasks).toHaveLength(1)
+  })
+
   it('does not report archivedError once the archived list loads successfully', async () => {
     mockedGet.mockImplementation((_url: string, config?: Parameters<typeof api.get>[1]) => {
       if ((config?.params as Record<string, unknown> | undefined)?.archived) return Promise.resolve({ data: { data: [{ id: 'a1', title: 'Old task' }] } })

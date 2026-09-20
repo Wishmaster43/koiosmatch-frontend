@@ -9,6 +9,7 @@ import { useState, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import { mergePatch } from '@/lib/mergePatch'
 import { mapVacancyDetail } from '../data/mapVacancy'
 import { initialsOf, buildVacancyPatch } from '../data/vacanciesShared'
@@ -48,7 +49,12 @@ export function useVacancyRecord({ setVacancies, setTotal, statusMeta, users, cu
     setSelected(v); setDetail(null); setDrawerExpanded(false)
     api.get(`/vacancies/${v.id}`)
       .then(r => { if (selectedIdRef.current === v.id) setDetail(mapVacancyDetail(unwrap(r))) })
-      .catch(() => {})
+      .catch(err => {
+        // Bug class fix: this was a completely empty catch — the worst variant, the
+        // drawer sat stuck on the light row forever with NO signal the detail load
+        // failed (mirrors the identical fix already shipped in useCustomerRecord).
+        if (selectedIdRef.current === v.id) notifyError(extractApiError(err, t('common:actionFailed')))
+      })
   }
 
   // A freshly created vacancy: prepend + open its drawer (modal close stays in the page).

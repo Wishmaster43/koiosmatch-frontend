@@ -7,6 +7,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import { Check, AlertTriangle, Ban, Lock, Info } from 'lucide-react'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 import type { Effect } from './types'
 
 // Icon + design-token colour per effect (never colour alone — icon differs too).
@@ -47,8 +48,8 @@ export default function ActionRuleCell({
         <button type="button" disabled aria-label={cellLabel} title={t('actionRules.lockedTitle')}
           style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600,
                    padding: '5px 10px', borderRadius: 6, cursor: 'not-allowed', minWidth: 100, justifyContent: 'center',
-                   background: `color-mix(in srgb, ${color} 10%, transparent)`, color,
-                   border: `1px solid color-mix(in srgb, ${color} 35%, transparent)`, opacity: 0.75 }}>
+                   background: tintBg(color), color: chipInk(color),
+                   border: tintBorder(color), opacity: 0.75 }}>
           <Icon size={12} />
           {effectLabel}
         </button>
@@ -62,8 +63,8 @@ export default function ActionRuleCell({
       <button type="button" onClick={onCycle} aria-label={cellLabel}
         style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600,
                  padding: '5px 10px', borderRadius: 6, cursor: 'pointer', minWidth: 100, justifyContent: 'center',
-                 background: `color-mix(in srgb, ${color} 14%, transparent)`, color,
-                 border: `1px solid color-mix(in srgb, ${color} 40%, transparent)` }}>
+                 background: tintBg(color, true), color: chipInk(color),
+                 border: tintBorder(color, true) }}>
         <Icon size={12} />
         {effectLabel}
       </button>

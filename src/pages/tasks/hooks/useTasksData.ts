@@ -66,6 +66,10 @@ export function useTasksData({
   // Dedicated signal for the archived (?archived=1) fetch, so a failure there
   // doesn't get swallowed as "no archived tasks" (audit finding: a 500 read as empty).
   const [archivedError, setArchivedError] = useState(false)
+  // Dedicated loading flag for the archived fetch — without it, toggling
+  // Gearchiveerd/Prullenbak rendered the (still-empty) archived list's empty
+  // state while its own request was still in flight (§3 four UI states).
+  const [archivedLoading, setArchivedLoading] = useState(false)
 
   // Resolve a task's status/type/priority label+colour from the lookups (de-hardcoded).
   const decorate = <T extends Task>(task: T): T => {
@@ -104,7 +108,7 @@ export function useTasksData({
   useEffect(() => {
     if (!showArchived) return
     const ctrl = new AbortController()
-    setArchivedError(false)
+    setArchivedError(false); setArchivedLoading(true)
     fetchAllTaskPages({ archived: 1 }, refQuery, ctrl.signal)
       .then(rows => setArchivedTasks(rows.map(mapTask).map(x => ({ ...x, archived: true }))))
       .catch(err => {
@@ -114,6 +118,7 @@ export function useTasksData({
         // params); every other failure (5xx, network) surfaces as a real error.
         if (err?.response?.status !== 404) setArchivedError(true)
       })
+      .finally(() => { if (!ctrl.signal.aborted) setArchivedLoading(false) })
     return () => ctrl.abort()
   }, [showArchived, refQuery])
 
@@ -123,6 +128,9 @@ export function useTasksData({
   // caller that only reads `error` (mirrors how TasksPage feeds it straight into
   // TasksTable) never shows a stale/wrong signal when the archived toggle flips.
   const visibleError = showArchived ? archivedError : error
+  // Same view-scoping as `visibleError`: the loading flag for whichever fetch
+  // backs the current toggle state.
+  const visibleLoading = showArchived ? archivedLoading : loading
 
-  return { tasks, setTasks, archivedTasks, setArchivedTasks, loading, error: visibleError, archivedError, all, decorate }
+  return { tasks, setTasks, archivedTasks, setArchivedTasks, loading: visibleLoading, error: visibleError, archivedError, all, decorate }
 }

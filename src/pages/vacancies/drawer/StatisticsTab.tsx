@@ -6,6 +6,7 @@ import { GroupLabel, monoStyle } from '@/components/ui/typography'
 import { useNavigation } from '@/context/NavigationContext'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useDateFormat } from '@/lib/datetime'
+import { useNumberFormat } from '@/lib/formatters'
 import { daysSince } from './vacancyAiInsights'
 import { pickKey } from '../data/vacanciesShared'
 import type { VacancyDetail } from '@/types/vacancy'
@@ -49,6 +50,7 @@ export default function StatisticsTab({ vacancy: v, onNavigateTab, navigableTabs
   const { navigate } = useNavigation()
   const { phases } = useVacancyLookups()
   const { formatDate, formatDateTime } = useDateFormat()
+  const { formatRatio } = useNumberFormat()
 
   const byPhase = (v.applicationsByPhase ?? {}) as Record<string, number>
   // "Gesolliciteerd → aangenomen" reads EVERYONE who applied against those hired —
@@ -62,7 +64,9 @@ export default function StatisticsTab({ vacancy: v, onNavigateTab, navigableTabs
   // conversion below would show a fake 100%/0% derived from fiction.
   const leads = v.leadsCount
   const leadsKnown = typeof leads === 'number'
-  const pct = (num: number, den: number) => (den > 0 ? `${Math.round((num / den) * 100)}%` : '—')
+  // GETALLEN-1: every user-visible percentage renders through the house
+  // formatter on the active locale, never a hand-built `${n}%`.
+  const pct = (num: number, den: number) => (den > 0 ? formatRatio(num / den) : '—')
 
   // Not enough data to show anything meaningful (an unknown lead count counts as
   // "no data" here too — it must never masquerade as a real 0).

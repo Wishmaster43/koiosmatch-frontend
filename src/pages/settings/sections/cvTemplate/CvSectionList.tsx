@@ -11,6 +11,7 @@ import { ChevronUp, ChevronDown } from 'lucide-react'
 import { CV_MOVABLE_SECTION_IDS } from '@/lib/useCvSettings'
 import { Toggle } from '@/pages/settings/components/SettingsKit'
 import SegmentedControl from '@/components/ui/SegmentedControl'
+import Button from '@/components/ui/Button'
 
 // Mirrors useCvSettings' own (unexported) CvSection shape.
 type CvSectionPlacement = 'sidebar' | 'main' | 'header'
@@ -117,18 +118,14 @@ export default function CvSectionList({ sections, onSave }: CvSectionListProps) 
                   <div style={{ width: 44 }} />
                 ) : (
                   <div style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
-                    <button onClick={() => handleSectionMove(sec.id, -1)} disabled={idx === 0}
-                      aria-label={t('cvTemplate.moveSectionUp', { section: label })}
-                      style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 4, cursor: idx === 0 ? 'not-allowed' : 'pointer',
-                        padding: '2px 5px', color: idx === 0 ? 'color-mix(in srgb, var(--text-muted) 55%, transparent)' : 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
+                    <Button variant="ghost" iconOnly size="sm" onClick={() => handleSectionMove(sec.id, -1)} disabled={idx === 0}
+                      aria-label={t('cvTemplate.moveSectionUp', { section: label })}>
                       <ChevronUp size={11} />
-                    </button>
-                    <button onClick={() => handleSectionMove(sec.id, 1)} disabled={idx === arr.length - 1}
-                      aria-label={t('cvTemplate.moveSectionDown', { section: label })}
-                      style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 4, cursor: idx === arr.length - 1 ? 'not-allowed' : 'pointer',
-                        padding: '2px 5px', color: idx === arr.length - 1 ? 'color-mix(in srgb, var(--text-muted) 55%, transparent)' : 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
+                    </Button>
+                    <Button variant="ghost" iconOnly size="sm" onClick={() => handleSectionMove(sec.id, 1)} disabled={idx === arr.length - 1}
+                      aria-label={t('cvTemplate.moveSectionDown', { section: label })}>
                       <ChevronDown size={11} />
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>

@@ -271,8 +271,8 @@ describe('LocationsSettings', () => {
     // Same `avatarColor` hash the rest of the app uses (Avatar / Shiftmanager
     // entities) — 'K'.charCodeAt(0) % 7 = 5 → AVATAR_COLORS[5]; 'V' → index 2.
     // eslint-disable-next-line no-restricted-syntax -- DATA: asserting the exact AVATAR_COLORS[5] palette entry, not an invented UI colour
-    expect(rotterdamBadge).toHaveStyle({ background: 'color-mix(in srgb, #8B5CF6 14%, transparent)' })
-    expect(utrechtBadge).toHaveStyle({ background: 'color-mix(in srgb, var(--color-success) 14%, transparent)' })
+    expect(rotterdamBadge).toHaveStyle({ background: 'color-mix(in srgb, #8B5CF6 16%, transparent)' })
+    expect(utrechtBadge).toHaveStyle({ background: 'color-mix(in srgb, var(--color-success) 16%, transparent)' })
     // Two different names must hash to two different colours — that is what makes
     // rows scannable instead of a uniform icon repeated on every row.
     expect(rotterdamBadge.style.background).not.toEqual(utrechtBadge.style.background)
@@ -287,7 +287,7 @@ describe('LocationsSettings', () => {
     const badge = screen.getByText('Kantoor Rotterdam').querySelector('span[aria-hidden="true"]') as HTMLElement
     // The row's OWN colour drives the tint — not the deterministic name hash.
     // eslint-disable-next-line no-restricted-syntax -- DATA: asserting the exact stored row colour, not an invented UI colour
-    expect(badge).toHaveStyle({ background: 'color-mix(in srgb, #059669 14%, transparent)' })
+    expect(badge).toHaveStyle({ background: 'color-mix(in srgb, #059669 16%, transparent)' })
     // The row's OWN icon renders — the 'store' slug, not the Building2 fallback.
     expect(badge.querySelector('svg.lucide-store')).toBeInTheDocument()
     expect(badge.querySelector('svg.lucide-building2')).not.toBeInTheDocument()

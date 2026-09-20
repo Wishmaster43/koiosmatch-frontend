@@ -7,6 +7,8 @@
  */
 import { useEffect } from 'react'
 import { MapContainer, TileLayer, Circle, CircleMarker, Tooltip, useMap, useMapEvents } from 'react-leaflet'
+import { DomEvent } from 'leaflet'
+import type { LeafletMouseEvent } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import './radiusMap.css'
 import type { Id } from '@/types/common'
@@ -24,6 +26,18 @@ function AttributionPrefixOff() {
 // Click-to-recentre helper (hooks must live inside MapContainer).
 function ClickToCenter({ onPick }: { onPick?: (lat: number, lng: number) => void }) {
   useMapEvents({ click: e => onPick?.(e.latlng.lat, e.latlng.lng) })
+  return null
+}
+
+// react-leaflet only applies MapContainer's `center` prop once, at map creation
+// (react-leaflet's own MapContainerComponent calls map.setView only inside its
+// creation effect) — a later host-driven recentre (e.g. a PDOK geocode result
+// via useApplyGeoFilter) would otherwise leave the viewport behind while the
+// circle/pins already moved. Keeps the current zoom so a recentre never resets
+// how far the user zoomed in.
+function RecenterOnChange({ lat, lng }: { lat: number; lng: number }) {
+  const map = useMap()
+  useEffect(() => { map.setView([lat, lng], map.getZoom()) }, [lat, lng, map])
   return null
 }
 
@@ -53,6 +67,7 @@ export default function RadiusMap({ center, radiusKm, points, onCenterChange, on
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <AttributionPrefixOff />
+        <RecenterOnChange lat={center.lat} lng={center.lng} />
         <ClickToCenter onPick={onCenterChange} />
         {/* The search radius around the chosen centre — the fixed, tenant-invariant map token (§4). */}
         <Circle center={[center.lat, center.lng]} radius={radiusKm * 1000}
@@ -68,7 +83,11 @@ export default function RadiusMap({ center, radiusKm, points, onCenterChange, on
         )}
         {points.map(p => (
           <CircleMarker key={String(p.id)} center={[p.lat, p.lng]} radius={7}
-            eventHandlers={onPickPoint ? { click: () => onPickPoint(p.id) } : undefined}
+            // Leaflet's vector layers bubble mouse events to the map by default
+            // (bubblingMouseEvents), so an un-stopped pin click also fires the
+            // map's own click-to-recentre handler above — opening a result would
+            // silently move the search origin too. Stop it explicitly.
+            eventHandlers={onPickPoint ? { click: (e: LeafletMouseEvent) => { DomEvent.stopPropagation(e); onPickPoint(p.id) } } : undefined}
             pathOptions={{ color: '#fff', weight: 1.5, fillColor: p.color ?? 'var(--color-map)', fillOpacity: 0.95 }}>
             <Tooltip direction="top" offset={[0, -6]}>
               <strong>{p.label}</strong>{p.sub ? <><br />{p.sub}</> : null}

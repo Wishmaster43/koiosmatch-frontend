@@ -109,7 +109,7 @@ export default function WaWebQueueLimits({ canManage }: { canManage: boolean }) 
                       onChange={v => handleChange(field, v)} placeholder="0" style={{ width: 120 }} />
                     <Caption>{t('whatsappWeb.queue.maxHint', { max: formatNumber(MAX[field]) })}</Caption>
                   </div>
-                : <Mono>{values[field] != null ? String(values[field]) : '—'}</Mono>}
+                : <Mono>{values[field] != null ? formatNumber(values[field]) : '—'}</Mono>}
             </FieldRow>
           ))}
           {canManage && error && <CalloutBox variant="danger">{error}</CalloutBox>}

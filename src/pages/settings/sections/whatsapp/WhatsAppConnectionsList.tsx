@@ -24,6 +24,7 @@ import { useLocations } from '@/lib/useLocations'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import SoftChip from '@/components/ui/SoftChip'
+import CalloutBox from '@/components/ui/CalloutBox'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { DefaultToggle } from '@/pages/settings/components/SettingsControls'
 import { PageTitle, SectionTitle, Caption, Mono } from '@/components/ui/typography'
@@ -129,10 +130,7 @@ export default function WhatsAppConnectionsList({
       {loading ? (
         <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('whatsapp.loading')}</p>
       ) : error ? (
-        <div style={{ padding: '16px 18px', background: 'var(--color-danger-bg)', border: '1px solid var(--color-danger)',
-                      borderRadius: 12, fontSize: 13, color: 'var(--color-danger-text)' }}>
-          {t('whatsapp.loadListFailed')}
-        </div>
+        <CalloutBox variant="danger">{t('whatsapp.loadListFailed')}</CalloutBox>
       ) : connections.length === 0 && formTarget !== 'create' ? (
         <div style={{ padding: '16px 18px', background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 12 }}>
           <SectionTitle as="div">{t('whatsapp.noConnections')}</SectionTitle>

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { Check, Save } from 'lucide-react'
 import SelectMenu from '@/components/ui/SelectMenu'
 import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
+import { VACANCY_APP_DEFAULTS_KEY, FALLBACK_APP_SETTINGS } from '@/lib/settings/vacancyApplicationDefaults'
 import StatusListEditor from './StatusListEditor'
 import { resolveGenericLookupIcon } from './lookupIcons'
 import SaveButton from '@/components/ui/SaveButton'
@@ -17,9 +18,9 @@ import Button from '@/components/ui/Button'
 const VACANCY_CHANNEL_ICON_NAMES = ['globe', 'briefcase', 'building', 'star', 'smartphone', 'mail']
 
 // Tenant default application settings — the fields + their 3-state values.
+// The default VALUES themselves are the one shared source (D1 fix) also used by
+// PublishingTab/PublicationCard, so this writer screen and the two readers never drift.
 const APP_FIELDS = ['cv', 'cover_letter', 'photo', 'remarks', 'interview_consent']
-const DEFAULT_APP_SETTINGS = { cv: 'required', cover_letter: 'optional', photo: 'optional', remarks: 'optional', interview_consent: 'hidden' }
-const VACANCY_APP_DEFAULTS_KEY = 'vacancy_default_application_settings'
 
 // The tenant default application-field settings (one 3-state value per field).
 type AppFieldValue = 'required' | 'optional' | 'hidden'
@@ -29,7 +30,7 @@ type AppFieldSettings = Record<string, AppFieldValue>
 export function VacancyApplicationDefaultsSettings() {
   const { t } = useTranslation('settings')
   const settings = useAllSettings()
-  const saved = getJsonSetting<AppFieldSettings>(settings, VACANCY_APP_DEFAULTS_KEY, DEFAULT_APP_SETTINGS as AppFieldSettings)
+  const saved = getJsonSetting<AppFieldSettings>(settings, VACANCY_APP_DEFAULTS_KEY, FALLBACK_APP_SETTINGS as AppFieldSettings)
   const [draft, setDraft] = useState(saved)
   // Re-seed when the settings blob arrives/changes (adjust state during render).
   const [prev, setPrev] = useState(JSON.stringify(saved))

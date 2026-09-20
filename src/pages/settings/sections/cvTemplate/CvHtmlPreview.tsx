@@ -12,6 +12,7 @@
 import type { TFunction } from 'i18next'
 import { groupCvSections } from '@/pages/candidates/shared'
 import { paletteFor } from '@/pages/candidates/shared'
+import { formatMonthYear } from '@/lib/localDate'
 import { PREVIEW_CANDIDATE } from './previewCandidate'
 
 // One tenant-configured CV section entry (id + enabled/placement flags).
@@ -24,10 +25,11 @@ interface CvPreviewSettings {
   logoUrl?: string
   companyName?: string
 }
-interface CvHtmlPreviewProps { settings: CvPreviewSettings; t: TFunction }
-// Live HTML mock of the PDF; `t` is the candidates translate fn (cv.* labels).
-// Print palette + accent defaults/presets are fixed CV data (mirrors the always-light PDF, independent of app theme) — hexes stay literal by design.
-export default function CvHtmlPreview({ settings, t }: CvHtmlPreviewProps) {
+interface CvHtmlPreviewProps { settings: CvPreviewSettings; t: TFunction; locale: string }
+// Live HTML mock of the PDF; `t` is the candidates translate fn (cv.* labels), `locale`
+// the active UI language — mirrors the real PDF's fmtDate so the "born" row never shows
+// a hardcoded Dutch date while the rest of the app is in another language (DATUM-1).
+export default function CvHtmlPreview({ settings, t, locale }: CvHtmlPreviewProps) {
   /* eslint-disable no-restricted-syntax -- DATA/fixed template design: this whole preview renders the always-light CV/PDF export
      (accent-colour defaults mirror the brand tokens; the rest is the document's own fixed print palette), so it must render
      identically regardless of the recruiter's own app light/dark theme — it intentionally does not follow --text/--color-* tokens. */
@@ -39,6 +41,12 @@ export default function CvHtmlPreview({ settings, t }: CvHtmlPreviewProps) {
   // The SAME grouping the generated PDF uses (CandidateCvTemplate.groupCvSections) —
   // so this preview and the real download can never disagree on layout.
   const groups = groupCvSections(secs)
+  // Same "mmm yyyy" formatting the generated PDF uses (cvLabels.fmtDate), inlined here
+  // to avoid a deep cross-entity import into candidates/cv/* (§2 barrel rule).
+  const born = (() => {
+    const dt = new Date(c.dob)
+    return isNaN(dt.getTime()) ? c.dob : formatMonthYear(dt, locale, 'short')
+  })()
 
   const A4_W = 794
   const A4_H = 1123
@@ -62,7 +70,7 @@ export default function CvHtmlPreview({ settings, t }: CvHtmlPreviewProps) {
   const renderContent = (id: string, palette: ReturnType<typeof paletteFor>) => {
     switch (id) {
       case 'contact':
-        return [[t('cv.email'), c.email], [t('cv.phone'), c.phone], [t('cv.residence'), c.address], [t('cv.born'), '15 mrt 1990']].map(([k, v]) => (
+        return [[t('cv.email'), c.email], [t('cv.phone'), c.phone], [t('cv.residence'), c.address], [t('cv.born'), born]].map(([k, v]) => (
           <div key={k} style={{ marginBottom: 5 }}>
             <div style={{ fontSize: 7, color: palette.label, marginBottom: 1 }}>{k}</div>
             <div style={{ fontSize: 8.5, color: palette.text, lineHeight: 1.3, wordBreak: 'break-all' }}>{v}</div>

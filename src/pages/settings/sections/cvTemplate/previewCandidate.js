@@ -6,28 +6,31 @@
  * identical content.
  */
 
+// PLACEHOLDER-GENERIEK-1: a general-staffing example (logistics), never a healthcare
+// framing — Koios Match is not sector-specific, so the one fixture every tenant sees
+// here must not read as "the product is for healthcare".
 export const PREVIEW_CANDIDATE = {
   name: 'Anouk de Vries',
-  title: 'Verzorgende IG',
+  title: 'Allround Magazijnmedewerker',
   email: 'anouk.devries@email.nl',
   phone: '06 12 34 56 78',
   address: 'Amsterdam',
   dob: '1990-03-15',
   nationality: 'Nederlands',
-  summary: 'Enthousiaste zorgprofessional met 8 jaar ervaring in de ouderenzorg en thuiszorg. Betrouwbaar, klantgericht en flexibel inzetbaar.',
+  summary: 'Ervaren logistiek medewerker met 8 jaar ervaring in transport en distributie. Betrouwbaar, klantgericht en flexibel inzetbaar.',
   // Sample data for the 'preferences' section — off by default, but a tenant
   // can enable + relocate it, so the preview needs something to actually show.
   preferredFunctions: ['Dagdienst', 'Avonddienst'],
   shiftType: ['Flexibel inzetbaar'],
   experiences: [
-    { title: 'Verzorgende IG', company: 'Thuiszorg Noord', start_date: '2020-01-01', description: 'Zelfstandige thuiszorgverlening, medicijnbeheer en rapportage.' },
-    { title: 'Helpende Plus',  company: 'Zorggroep West',  start_date: '2017-03-01', end_date: '2019-12-31' },
+    { title: 'Allround Magazijnmedewerker', company: 'Logistiek Noord', start_date: '2020-01-01', description: 'Orderpicking, voorraadbeheer en interne transportplanning.' },
+    { title: 'Heftruckchauffeur',           company: 'Transport West',  start_date: '2017-03-01', end_date: '2019-12-31' },
   ],
   educations: [
-    { title: 'MBO Verpleging & Verzorging niveau 3', school: 'ROC Amsterdam', start_year: 2015, end_year: 2017 },
-    { title: 'VMBO Zorg & Welzijn',                  school: 'Pieter Nieuwland College', start_year: 2011, end_year: 2015 },
+    { title: 'MBO Logistiek niveau 3', school: 'ROC Amsterdam', start_year: 2015, end_year: 2017 },
+    { title: 'VMBO Techniek',          school: 'Pieter Nieuwland College', start_year: 2011, end_year: 2015 },
   ],
   languages: [{ language: 'Nederlands', level: 'Moedertaal' }, { language: 'Engels', level: 'B2' }],
-  skills:    [{ name: 'Medicijnbeheer' }, { name: 'Rapportage' }, { name: 'Tilhulpmiddelen' }, { name: 'BHV' }],
-  certs:     [{ name: 'BIG-registratie' }, { name: 'VCA Basis' }],
+  skills:    [{ name: 'Orderpicken' }, { name: 'Voorraadbeheer' }, { name: 'Heftruckrijden' }, { name: 'BHV' }],
+  certs:     [{ name: 'Heftruckcertificaat' }, { name: 'VCA Basis' }],
 }

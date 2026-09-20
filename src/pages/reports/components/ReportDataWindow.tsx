@@ -12,12 +12,14 @@ export function ReportDataWindow({
   from,
   to,
   reportKey,
-  isLeads,
   totalCompare,
 }: {
   from?: string
   to?: string
   reportKey: string
+  // Kept for caller compatibility (CandidatesReport still passes it) — the
+  // window label already varies via `reportKey` ('leads' vs 'candidates'
+  // resolve to their own i18n keys), so this flag drives no branch here.
   isLeads?: boolean
   totalCompare?: CompareMetric
 }) {
@@ -25,7 +27,7 @@ export function ReportDataWindow({
 
   if (!from || !to) return null
 
-  const windowKey = isLeads ? `${reportKey}.window` : `${reportKey}.window`
+  const windowKey = `${reportKey}.window`
   const dateRange = t(windowKey, { from, to, defaultValue: `${from} – ${to}` })
 
   return (

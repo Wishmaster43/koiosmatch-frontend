@@ -11,6 +11,7 @@ import ActionRuleBanner from './ActionRuleBanner'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import type { ActionRuleDecision } from './actionRuleTypes'
 import Button from '@/components/ui/Button'
+import { SectionTitle } from '@/components/ui/typography'
 
 interface ActionRuleDialogProps {
   open: boolean
@@ -29,7 +30,7 @@ export default function ActionRuleDialog({ open, decision, onConfirm, onCancel }
   return (
     <FloatingPanel open={open} onClose={onCancel} ariaLabel={t('actionRules.title')}
       width={380} maxWidth="90vw" persistKey="action-rule" bodyStyle={{ padding: 16 }}
-      header={<span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{t('actionRules.title')}</span>}>
+      header={<SectionTitle as="span">{t('actionRules.title')}</SectionTitle>}>
       <ActionRuleBanner decision={decision} />
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>

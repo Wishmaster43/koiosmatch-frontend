@@ -672,6 +672,7 @@
   "discardChangesConfirm": "Je hebt tekst die nog niet is opgeslagen. Sluiten zonder opslaan?",
   "koiosSuggested": "Voorstel van Koios AI op basis van de kandidaatgeschiedenis",
   "koiosSuggestedOwnerAgent": "Voorstel van Koios AI op basis van de eigenaar van de vacature",
+  "koiosSuggestedBranch": "Voorstel van Koios AI op basis van de klant of eigen vestiging",
   "koiosRejectAdvice": "Koios AI stelt afwijzen voor. De reden kies je zelf uit de lijst.",
   "dragList": {
     "moveUp": "Omhoog verplaatsen",

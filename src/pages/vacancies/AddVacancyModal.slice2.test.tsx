@@ -373,8 +373,8 @@ describe('AddVacancyModal · Publicatie (punt 20)', () => {
 
     // A+D layout (03-08): Publicatie is a CollapsedCard, closed by default — open it first.
     await user.click(screen.getByRole('button', { name: 'modal.fields.cardPublication' }))
-    // Master published toggle (the table/insights "Gepubliceerd" bucket).
-    await user.click(screen.getByRole('switch', { name: 'columns.published' }))
+    // §3 no-fake-affordance fix: "Gepubliceerd" is now a derived, non-interactive
+    // read-out (no `switch` role any more) — only the channel toggle below persists.
     // One job-board channel toggle.
     await user.click(screen.getByRole('switch', { name: 'Indeed' }))
     // One application-setting change — the trigger is scoped to the CV row; the

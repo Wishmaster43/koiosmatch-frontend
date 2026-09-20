@@ -672,6 +672,7 @@
   "discardChangesConfirm": "Tienes texto sin guardar. ¿Cerrar sin guardar?",
   "koiosSuggested": "Propuesto por Koios AI según el historial del candidato",
   "koiosSuggestedOwnerAgent": "Propuesto por Koios AI según el propietario de la vacante",
+  "koiosSuggestedBranch": "Propuesto por Koios AI según el cliente o su propia sucursal",
   "koiosRejectAdvice": "Koios AI propone rechazar. Elige tú mismo el motivo de la lista.",
   "dragList": {
     "moveUp": "Mover hacia arriba",

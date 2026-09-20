@@ -672,6 +672,7 @@
   "discardChangesConfirm": "Tem texto que ainda não foi guardado. Fechar sem guardar?",
   "koiosSuggested": "Sugestão do Koios AI com base no histórico do candidato",
   "koiosSuggestedOwnerAgent": "Sugestão do Koios AI com base no responsável pela vaga",
+  "koiosSuggestedBranch": "Sugestão do Koios AI com base no cliente ou na sua própria filial",
   "koiosRejectAdvice": "O Koios AI sugere rejeitar. Escolha o motivo você mesmo na lista.",
   "dragList": {
     "moveUp": "Mover para cima",

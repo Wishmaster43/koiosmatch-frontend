@@ -13,6 +13,7 @@ import { renderHook, act, waitFor } from '@testing-library/react'
 import type { TFunction } from 'i18next'
 import { useVacancyRecord } from './useVacancyRecord'
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import type { Vacancy } from '@/types/vacancy'
 
 vi.mock('@/lib/api', async () => {
@@ -23,6 +24,7 @@ vi.mock('@/lib/notify', () => ({ notifySuccess: vi.fn(), notifyError: vi.fn() })
 
 const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
 const mockPatch = api.patch as unknown as ReturnType<typeof vi.fn>
+const mockNotifyError = notifyError as unknown as ReturnType<typeof vi.fn>
 
 const vacancyRow = { id: 'v1', title: 'Verpleegkundige' } as Vacancy
 const rawDetail = (over: Record<string, unknown> = {}) => ({ id: 'v1', title: 'Verpleegkundige', ai_agent: null, ...over })
@@ -35,7 +37,20 @@ const setup = () => {
   }))
 }
 
-beforeEach(() => { mockGet.mockReset(); mockPatch.mockReset() })
+beforeEach(() => { mockGet.mockReset(); mockPatch.mockReset(); mockNotifyError.mockReset() })
+
+describe('useVacancyRecord · selectVacancy detail-fetch error signal', () => {
+  it('a failed detail GET notifies the user instead of leaving a silent empty drawer', async () => {
+    mockGet.mockRejectedValue(new Error('boom'))
+    const { result: hook } = setup()
+    act(() => { hook.current.selectVacancy(vacancyRow) })
+
+    // Bug class fix regression: this used to be a completely empty catch — no
+    // signal at all, the drawer sat stuck on the light row forever.
+    await waitFor(() => expect(mockNotifyError).toHaveBeenCalled())
+    expect(hook.current.detail).toBeNull()
+  })
+})
 
 describe('useVacancyRecord · updateVacancy interview-workflow re-sync', () => {
   it('re-syncs interviewWorkflowId + the nested interviewWorkflow ref from the PATCH response, not the optimistic patch', async () => {

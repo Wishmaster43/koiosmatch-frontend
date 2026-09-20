@@ -57,6 +57,8 @@ describe('useVacancyBranchDefault', () => {
       expect(setBranchId).toHaveBeenCalledWith('customer-branch-1')
     })
     expect(result.current.handleBranchChange).toBeDefined()
+    // KOIOS-VOORSTEL-1: the badge flag is up while the proposal has not been touched.
+    expect(result.current.showBranchSuggestion).toBe(true)
   })
 
   it('falls back to the recruiter\'s first branch when customer has no branch_id', async () => {
@@ -97,6 +99,8 @@ describe('useVacancyBranchDefault', () => {
 
     // Verify setBranchId was not called again (no re-proposal after manual edit).
     expect(setBranchId).not.toHaveBeenCalled()
+    // The badge flag freezes off too, so a manual pick clears the Koios mark.
+    expect(result.current.showBranchSuggestion).toBe(false)
   })
 
   it('default_branch_id wins over branch_ids[0] when customer has no branch_id (K-284)', async () => {

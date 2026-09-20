@@ -6,6 +6,11 @@ import MatchScoreBlock from './MatchScoreBlock'
 // Deterministic key-echo (repo-wide precedent) — avoids depending on the real,
 // async-initialising i18n instance for this pure-component test.
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+// DATETIME-IMPORT-LES (CLAUDE.md §2): useNumberFormat pulls in useLocale from
+// lib/datetime, which imports the real i18n module — a side effect this test's
+// bare react-i18next mock can't satisfy (no initReactI18next export). Stub the
+// formatter directly instead; scores here are always whole numbers already.
+vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatPercent: (n: number | null) => n == null ? '—' : `${Math.round(n)}%` }) }))
 
 // V17 (Danny 25-07): ApplicationTab suppresses the plain overall %+bar (it
 // duplicated ApplicationStatusStrip's own match-score cell) via showOverall=false,

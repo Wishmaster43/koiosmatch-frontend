@@ -10,6 +10,7 @@ import { Check, Copy, ExternalLink } from 'lucide-react'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { useTranslation } from 'react-i18next'
+import Button from '@/components/ui/Button'
 // audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 interface UrlRowProps {
@@ -52,30 +53,31 @@ export default function UrlRow({ label, url, notice, disabledOpen, copyLabel, co
           {url}
         </code>
         {/* Real link (never a fake one) — disabled visually + non-navigating only while
-            the notice below already explains it currently 404s (§3). */}
-        {disabledOpen ? (
-          <span aria-disabled="true" title={notice} style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, flexShrink: 0,
-            borderRadius: 6, border: '1px solid var(--border)', color: 'var(--text-muted)', opacity: 0.5,
-          }}>
-            <ExternalLink size={12} />
-          </span>
-        ) : (
-          <a href={url} target="_blank" rel="noopener noreferrer" aria-label={openLabel} style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, flexShrink: 0,
-            borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)',
-          }}>
-            <ExternalLink size={12} />
-          </a>
-        )}
-        <button type="button" onClick={copy} style={{
-          display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', fontSize: 11, fontWeight: 500,
-          background: copied ? 'var(--color-success-bg)' : 'var(--hover-bg)',
-          color: copied ? 'var(--color-success)' : 'var(--text)',
-          border: 'none', borderRadius: 6, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-        }}>
+            the notice below already explains it currently 404s (§3). Both actions render
+            via the shared Button atom (href polymorphic variant for the open link). */}
+        <Button
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={openLabel}
+          title={disabledOpen ? notice : undefined}
+          disabled={disabledOpen}
+          variant="secondary"
+          size="sm"
+          iconOnly
+          style={{ flexShrink: 0 }}
+        >
+          <ExternalLink size={12} />
+        </Button>
+        <Button
+          type="button"
+          onClick={copy}
+          variant={copied ? 'success' : 'secondary'}
+          size="sm"
+          style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
+        >
           {copied ? <Check size={11} /> : <Copy size={11} />} {copied ? copiedLabel : copyLabel}
-        </button>
+        </Button>
       </div>
       {notice && (
         <div style={{ fontSize: 11, color: 'var(--color-warning-text)', marginTop: 6 }}>{notice}</div>

@@ -5,16 +5,10 @@
  */
 import { PieChart, Pie, Cell, Tooltip } from 'recharts'
 import type { ChartDatum, TipProps } from './chartTypes'
+import { CHART_SERIES_COLORS as DEFAULT_COLORS } from './chartTypes'
 import ErrorBoundary from '../ui/ErrorBoundary'
 import { useLocale } from '@/lib/datetime'
-import { formatNumber, formatNumberCompact } from '@/lib/formatters'
-
-/* eslint-disable no-restricted-syntax -- fixed chart colour series, not UI styling: needs more distinct hues than the semantic token set provides */
-const DEFAULT_COLORS = [
-  'var(--color-primary)', '#10B981', '#3B8FD4', 'var(--color-warning)',
-  'var(--color-danger)', '#8B5CF6', '#06B6D4', '#84CC16', '#F97316', '#EC4899',
-]
-/* eslint-enable no-restricted-syntax */
+import { formatNumber, formatNumberCompact, formatPercent } from '@/lib/formatters'
 
 // Exported (not just internal) so a unit test can render the tooltip content
 // directly — simulating a real recharts hover over the SVG is unreliable in jsdom.
@@ -26,12 +20,14 @@ export function MiniTooltip({ active, payload, total }: TipProps & { total?: num
   if (!active || !payload?.length) return null
   const item = payload[0]
   const val  = item.value ?? 0
-  const pct  = total ? Math.round((val / total) * 100) : 0
+  // GETALLEN-1: through the house formatter, never a hand-built `${n}%` — a
+  // zero total now renders the house dash instead of a fabricated "0%".
+  const pct  = total ? formatPercent((val / total) * 100, locale) : '—'
   return (
     <div style={{ padding: '5px 9px', fontSize: 11, background: 'var(--surface)', borderRadius: 8,
       border: '1px solid var(--border)', boxShadow: 'var(--shadow-float)', whiteSpace: 'nowrap' }}>
       <span style={{ fontWeight: 600, color: 'var(--text)' }}>{item.name}</span>
-      <span style={{ color: item.payload?.fill, marginLeft: 6 }}>{formatNumber(val, locale)} · {pct}%</span>
+      <span style={{ color: item.payload?.fill, marginLeft: 6 }}>{formatNumber(val, locale)} · {pct}</span>
     </div>
   )
 }

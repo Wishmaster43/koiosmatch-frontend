@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, ExternalLink, Save, X } from 'lucide-react'
-import { Field, SelectField, DateField, TextField } from '@/components/forms/fields'
+import { FieldRow, SelectField, DateField, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import Avatar from '@/components/ui/Avatar'
 import RichTextEditor from '@/components/ui/RichTextEditor'
@@ -211,28 +211,36 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
 
         {editing ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <Field label={t('details.type')}><SelectField value={draft.typeKey as string} onChange={v => setD('typeKey', v)} options={opts(types)} /></Field>
-            <Field label={t('details.status')}><SelectField value={draft.statusKey as string} onChange={v => setD('statusKey', v)} options={opts(statuses)} /></Field>
-            <Field label={t('details.priority')}><SelectField value={draft.priorityKey as string} onChange={v => setD('priorityKey', v)} options={opts(priorities)} /></Field>
+            {/* DROPDOWN-CLEAR-1: clearing here nulls the slug, and
+                useTaskDrawerActions.handleUpdate aborts the WHOLE patch
+                (due/assignee/team included) once one axis resolves to
+                nothing; status_id also cannot be nulled server-side
+                (UpdateTaskRequest). Cross stays off on all three. */}
+            <FieldRow label={t('details.type')}><SelectField value={draft.typeKey as string} onChange={v => setD('typeKey', v)} options={opts(types)} clearable={false} /></FieldRow>
+            {/* DROPDOWN-CLEAR-1: same whole-patch-abort gap as type above;
+                status_id cannot be nulled server-side either. */}
+            <FieldRow label={t('details.status')}><SelectField value={draft.statusKey as string} onChange={v => setD('statusKey', v)} options={opts(statuses)} clearable={false} /></FieldRow>
+            {/* DROPDOWN-CLEAR-1: same whole-patch-abort gap as type/status above. */}
+            <FieldRow label={t('details.priority')}><SelectField value={draft.priorityKey as string} onChange={v => setD('priorityKey', v)} options={opts(priorities)} clearable={false} /></FieldRow>
             {/* TASK-DUE-TIME-1: date + optional time-of-day, paired half-row. */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <Field label={t('details.due')}><DateField value={draft.due as string} onChange={v => setD('due', v)} /></Field>
-              <Field label={t('details.dueTime')}><TextField type="time" value={draft.dueTime as string} onChange={v => setD('dueTime', v)} /></Field>
+              <FieldRow label={t('details.due')}><DateField value={draft.due as string} onChange={v => setD('due', v)} /></FieldRow>
+              <FieldRow label={t('details.dueTime')}><TextField type="time" value={draft.dueTime as string} onChange={v => setD('dueTime', v)} /></FieldRow>
             </div>
             {/* T2: the house SEARCHABLE picker (allowCreate=false — assignee is a closed
                 tenant-user list, never a free-typed value), mirroring the drawer combobox
                 footprint elsewhere (S24c). "Bureau" (unassigned) is a real, pickable option
                 — value '' — same as before. */}
-            <Field label={t('details.assignee')}>
+            <FieldRow label={t('details.assignee')}>
               <CreatableSelect value={String(draft.assigneeId)} onChange={v => setD('assigneeId', v)} options={assigneeOpts} allowCreate={false} />
-            </Field>
+            </FieldRow>
             {/* TEAM-1: the INTERNAL department (Backoffice, Planning, …) — a second,
                 independent axis next to the person above, never a replacement for
                 it. Searchable + clearable, because "no department" really persists. */}
-            <Field label={t('details.team')}>
+            <FieldRow label={t('details.team')}>
               <CreatableSelect value={String(draft.teamId ?? '')} onChange={v => setD('teamId', v)} options={teamOpts}
                 allowCreate={false} clearable clearLabel={t('details.team')} placeholder={t('details.teamPlaceholder')} />
-            </Field>
+            </FieldRow>
           </div>
         ) : (
           <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)', padding: '6px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -333,7 +341,7 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
             </span>
           </RowField>
         ) : (
-          <Field label={t('details.location')}>
+          <FieldRow label={t('details.location')}>
             <CreatableSelect
               value={task.location?.id != null ? String(task.location.id) : ''}
               onChange={onLocationChange}
@@ -343,7 +351,7 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
               clearLabel={t('details.location')}
               placeholder={t('details.locationPlaceholder')}
             />
-          </Field>
+          </FieldRow>
         )}
       </div>
     </div>

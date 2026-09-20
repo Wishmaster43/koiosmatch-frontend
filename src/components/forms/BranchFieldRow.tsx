@@ -1,6 +1,8 @@
+import type { ReactNode } from 'react'
 import type { TFunction } from 'i18next'
 import { FieldRow } from './fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import { CANON_LABEL_WIDTH } from '@/components/drawer/fieldRowCanon'
 
 interface Option { value: string; label: string }
 
@@ -16,6 +18,8 @@ interface Props {
   clearLabel?: string
   /** The placeholder shown when no branch is picked yet — defaults to `t('common:select')`. */
   placeholder?: string
+  /** KOIOS-VOORSTEL-1: an optional suggestion marker rendered under the control column (never inside FieldRow's own child — that would break its id-cloning). */
+  suggestion?: ReactNode
 }
 
 /**
@@ -27,13 +31,17 @@ interface Props {
  * placeholder default from the caller's own `t` since both existing callers
  * share the same key names — pass them explicitly for a different string.
  */
-export default function BranchFieldRow({ t, label, branchId, onBranchChange, branchOptions, clearLabel, placeholder }: Props) {
+export default function BranchFieldRow({ t, label, branchId, onBranchChange, branchOptions, clearLabel, placeholder, suggestion }: Props) {
   const resolvedLabel = label ?? t('modal.fields.branch')
   return (
-    <FieldRow label={resolvedLabel}>
-      <CreatableSelect value={branchId || null} onChange={onBranchChange} allowCreate={false}
-        clearable clearLabel={clearLabel ?? resolvedLabel}
-        placeholder={placeholder ?? t('common:select')} options={branchOptions} />
-    </FieldRow>
+    <div>
+      <FieldRow label={resolvedLabel}>
+        <CreatableSelect value={branchId || null} onChange={onBranchChange} allowCreate={false}
+          clearable clearLabel={clearLabel ?? resolvedLabel}
+          placeholder={placeholder ?? t('common:select')} options={branchOptions} />
+      </FieldRow>
+      {/* Indented to sit under the control column, matching FieldRow's own label width (§3A canon). */}
+      {suggestion && <div style={{ marginLeft: CANON_LABEL_WIDTH + 10 }}>{suggestion}</div>}
+    </div>
   )
 }

@@ -43,10 +43,8 @@ function ResultRow({ status, label, ellipsis, error, retryLabel, onRetry }: {
       {status === 'error' && (
         <>
           <span style={{ fontSize: 11, color: 'var(--color-danger-text)' }}>{error}</span>
-          <button type="button" onClick={onRetry}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary-text)', fontSize: 11, fontWeight: 600 }}>
-            {retryLabel}
-          </button>
+          {/* HUISSTIJL-1: the retry action is a real Button, not a hand-painted text link. */}
+          <Button variant="ghost" size="sm" onClick={onRetry}>{retryLabel}</Button>
         </>
       )}
     </div>

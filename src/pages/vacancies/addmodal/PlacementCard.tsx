@@ -13,9 +13,11 @@ import { useTranslation } from 'react-i18next'
 import { FieldRow, TextField, DateField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import BranchFieldRow from '@/components/forms/BranchFieldRow'
+import KoiosSuggestionBadge from '@/components/ui/KoiosSuggestionBadge'
 import { getCountryOptions } from '@/lib/countries'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 import { postcodePlaceholder } from '@/lib/postcode'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
 interface CandidateType { value: string; label: string; color?: string }
 type AddressKey = 'street' | 'houseNumber' | 'houseNumberSuffix' | 'addressLine2' | 'postalCode' | 'city' | 'province' | 'country'
@@ -28,12 +30,14 @@ interface Props {
   provinces: string[]
   branchId: string; onBranchChange: (v: string) => void
   branchOptions: Array<{ value: string; label: string }>
+  /** KOIOS-VOORSTEL-1: true while `branchId` still holds the customer/recruiter-derived proposal (never after a manual pick/clear). */
+  showBranchSuggestion?: boolean
 }
 
 export default function PlacementCard({
   contractTypes, candidateTypes, onToggleType, startDate, endDate, onStartDateChange, onEndDateChange,
   street, houseNumber, houseNumberSuffix, addressLine2, postalCode, city, province, country, onFieldChange, provinces,
-  branchId, onBranchChange, branchOptions,
+  branchId, onBranchChange, branchOptions, showBranchSuggestion = false,
 }: Props) {
   const { t, i18n } = useTranslation(['vacancies', 'common'])
   const countryOptions = getCountryOptions(i18n.language)
@@ -48,13 +52,17 @@ export default function PlacementCard({
             {candidateTypes.map(ctype => {
               const on = contractTypes.includes(ctype.value)
               const c = ctype.color ?? 'var(--color-primary)'
+              // Interactive toggle chip via the house tint formula (CHIP-TINT-1, §4)
+              // — mirrors DetailsGeneralTab's identical edit-mode chip verbatim.
+              /* eslint-disable huisstijlLegacy/no-restricted-syntax */
               return (
                 <button key={ctype.value} type="button" onClick={() => onToggleType(ctype.value)} aria-pressed={on}
                   style={{ padding: '3px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer', fontWeight: on ? 600 : 400,
-                    background: on ? `color-mix(in srgb, ${c} 14%, transparent)` : 'var(--surface)',
-                    color: on ? c : 'var(--text-muted)',
-                    border: `1px solid ${on ? c : 'var(--border)'}` }}>{ctype.label}</button>
+                    background: on ? tintBg(c, true) : 'var(--surface)',
+                    color: on ? chipInk(c) : 'var(--text-muted)',
+                    border: on ? tintBorder(c, true) : '1px solid var(--border)' }}>{ctype.label}</button>
               )
+              /* eslint-enable huisstijlLegacy/no-restricted-syntax */
             })}
           </div>
         </FieldRow>
@@ -95,8 +103,11 @@ export default function PlacementCard({
             clearable clearLabel={t('details.country')} placeholder={t('common:select')} options={countryOptions} />
         </FieldRow>
         {/* Vestiging (bureau) — see this file's header comment for why this is a
-            DIFFERENT field from the klant location above. */}
-        <BranchFieldRow t={t} branchId={branchId} onBranchChange={onBranchChange} branchOptions={branchOptions} />
+            DIFFERENT field from the klant location above. KOIOS-VOORSTEL-1: the
+            field seeds itself from the customer's own branch, or the recruiter's
+            own — mark it a proposal, not a fact, until picked/cleared by hand. */}
+        <BranchFieldRow t={t} branchId={branchId} onBranchChange={onBranchChange} branchOptions={branchOptions}
+          suggestion={showBranchSuggestion && branchId ? <KoiosSuggestionBadge labelKey="koiosSuggestedBranch" /> : null} />
       </div>
     </div>
   )

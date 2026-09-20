@@ -56,11 +56,20 @@ export function useTaskBulkActions({
   }
   // BULK-WIRE-1: local patch keeps the SLUG (`statusKey`/`priorityKey` — the decorated
   // row's own display fields); the wire body sends the resolved uuid FK. An
-  // unresolved slug (lookup id map not loaded yet) sends `undefined`, which axios's
-  // JSON.stringify drops — the same "omit rather than guess" stance as the single-
-  // record PATCH paths (AddTaskModal/useTaskDrawerActions).
-  const bulkSetStatus   = (statusKey: string)   => runBulkPatch({ statusKey },   { status_id: lookupIds.status[statusKey] })
-  const bulkSetPriority = (priorityKey: string) => runBulkPatch({ priorityKey }, { priority_id: lookupIds.priority[priorityKey] })
+  // unresolved slug (lookup id map not loaded yet) means there is nothing safe to
+  // send — mirrors useTaskDrawerActions.handleUpdate's single-record guard: abort
+  // before any optimistic write, PATCH or success toast, rather than firing a body
+  // that serialises away to `{}` (200 OK, nothing actually changed).
+  const bulkSetStatus = (statusKey: string) => {
+    const resolved = lookupIds.status[statusKey]
+    if (!resolved) { notifyError(t('drawer.lookupNotReady')); return }
+    runBulkPatch({ statusKey }, { status_id: resolved })
+  }
+  const bulkSetPriority = (priorityKey: string) => {
+    const resolved = lookupIds.priority[priorityKey]
+    if (!resolved) { notifyError(t('drawer.lookupNotReady')); return }
+    runBulkPatch({ priorityKey }, { priority_id: resolved })
+  }
   // Resolves the picked user to a display-ready assignee shape for the local optimistic patch, while the wire body sends the raw user id (or null to unassign).
   const bulkSetAssignee = (userId: string) => {
     const sel = users.find(u => String(u.id) === String(userId))

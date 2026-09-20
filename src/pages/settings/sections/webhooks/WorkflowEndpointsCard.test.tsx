@@ -18,15 +18,6 @@ vi.mock('@/lib/settings/useAllSettings', async () => {
   }
 })
 
-vi.mock('@/lib/settings/useAllSettings', async () => {
-  const actual = await vi.importActual('@/lib/settings/useAllSettings')
-  return {
-    ...actual,
-    useAllSettings: vi.fn(),
-    saveSettingsKeys: vi.fn(),
-  }
-})
-
 vi.mock('react-i18next', async () => {
   const actual = await vi.importActual('react-i18next')
   const allTranslations: Record<string, string> = {

@@ -1,9 +1,15 @@
 /**
- * PublicationCard — punt 20: `published`, `published_channels` and
- * `application_settings` all accepted at create (measured). Mirrors the
- * drawer's PublishingTab controls verbatim, including its honest-state notice
- * (channels are not wired to real job-board feeds yet) — only the persistence
- * path differs: here every value just rides the create POST body, no PATCH.
+ * PublicationCard — punt 20: `published_channels` and `application_settings`
+ * accepted at create (measured). Mirrors the drawer's PublishingTab controls
+ * verbatim, including its honest-state notice (channels are not wired to real
+ * job-board feeds yet) — only the persistence path differs: here every value
+ * just rides the create POST body, no PATCH.
+ *
+ * §3 no-fake-affordance fix: `published` itself is server-DERIVED from
+ * `published_channels` and ignored on write (O-25) — the drawer's own
+ * PublishingTab has no master toggle for the same reason. The "Gepubliceerd"
+ * row here is therefore a non-interactive read-out of the channel state, never
+ * an editable control with no persistence path.
  */
 import { useTranslation } from 'react-i18next'
 import SelectMenu from '@/components/ui/SelectMenu'
@@ -17,15 +23,17 @@ export interface PublicationChannel { value: string; label: string; published: b
 const APP_FIELDS = ['cv', 'cover_letter', 'photo', 'remarks', 'interview_consent']
 
 interface Props {
-  published: boolean; onPublishedChange: (v: boolean) => void
   channels: PublicationChannel[]; onToggleChannel: (value: string, next: boolean) => void
   applicationSettings: Record<string, unknown>; onSettingChange: (field: string, value: unknown) => void
 }
 
-// The create-time publication card: published flag, per-channel toggles (honest
-// "not live yet" notice) and the application-form field-visibility settings.
-export default function PublicationCard({ published, onPublishedChange, channels, onToggleChannel, applicationSettings, onSettingChange }: Props) {
+// The create-time publication card: a derived published read-out, per-channel
+// toggles (honest "not live yet" notice) and the application-form field-visibility settings.
+export default function PublicationCard({ channels, onToggleChannel, applicationSettings, onSettingChange }: Props) {
   const { t } = useTranslation(['vacancies', 'common'])
+  // Derived, never edited directly here (see file header) — the master flag is
+  // simply "does at least one channel carry the intent to publish".
+  const published = channels.some(c => c.published)
 
   const valueOptions = [
     { value: 'required', label: t('publishing.values.required') },
@@ -37,15 +45,14 @@ export default function PublicationCard({ published, onPublishedChange, channels
   // title prop — this card renders only its own boxed body, no wrapper div.
   return (
     <div style={cardBox}>
-      {/* Master published flag — the table/insights "Gepubliceerd" bucket. */}
+      {/* Derived published read-out — the table/insights "Gepubliceerd" bucket.
+          Non-interactive: `published` has no own persistence path (see file
+          header), only the channel toggles below actually save anything. */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
         <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('columns.published')}</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 11, color: published ? 'var(--color-success)' : 'var(--text-muted)' }}>
-            {published ? t('publishedState.yes') : t('publishedState.no')}
-          </span>
-          <Toggle checked={published} onChange={onPublishedChange} ariaLabel={t('columns.published')} />
-        </div>
+        <span data-testid="publication-master-state" style={{ fontSize: 11, color: published ? 'var(--color-success)' : 'var(--text-muted)' }}>
+          {published ? t('publishedState.yes') : t('publishedState.no')}
+        </span>
       </div>
 
       {/* Application settings */}

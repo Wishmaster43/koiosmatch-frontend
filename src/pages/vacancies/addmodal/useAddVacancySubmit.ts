@@ -55,7 +55,8 @@ interface Args {
   aiAgentId: string
   // INTERVIEW-WORKFLOW-1 (Appendix D/E): an optional, ungated companion field.
   interviewWorkflowId: string
-  published: boolean
+  // `published` itself is never sent (O-25: server-derived from `channels`,
+  // ignored on write) — only `channels` below carries the actual intent.
   applicationSettings: Record<string, unknown>
   applicationSettingsTouched: boolean
   showAttachmentCards: boolean

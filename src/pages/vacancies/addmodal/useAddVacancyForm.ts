@@ -171,7 +171,7 @@ export function useAddVacancyForm({
   // VAC-VESTIGING-1: cosmetic branch (vestiging) proposal — the picked customer's
   // own mirrored branch, re-proposed on every customer switch while untouched
   // (see the hook's file header for the freeze-on-edit pattern).
-  const { handleBranchChange } = useVacancyBranchDefault(form.clientId, (v: string) => set('branchId', v))
+  const { handleBranchChange, showBranchSuggestion } = useVacancyBranchDefault(form.clientId, (v: string) => set('branchId', v))
   const { locationPicker, departmentPicker, contactPicker } = useCascadePickers({
     clientId: form.clientId,
     customerLocationId: cascade.customerLocationId,
@@ -223,10 +223,12 @@ export function useAddVacancyForm({
   // a silent guess (§0).
   const { handleAiAgentChange, showAgentSuggestion } = useVacancyAgentDefault(form.ownerId, aiAgents, setAiAgentId)
 
-  // Punt 20: Publicatie — published flag, per-channel publish state and the
-  // application-form settings (cv/cover_letter/photo/remarks/interview_consent).
-  const [published, setPublished] = useState(false)
+  // Punt 20: Publicatie — per-channel publish state and the application-form
+  // settings (cv/cover_letter/photo/remarks/interview_consent). §3 no-fake-
+  // affordance fix: `published` is DERIVED from the channels (O-25, server-side
+  // too) — never its own editable state, so there is no second value to drift.
   const [channels, setChannels] = useState<PublicationChannel[]>([])
+  const published = channels.some(c => c.published)
   useEffect(() => {
     // Seed the channel list once the tenant lookup resolves — never clobber a
     // recruiter's own toggles on a later re-render of the (rarely changing) lookup.
@@ -259,7 +261,7 @@ export function useAddVacancyForm({
   // The create submit/payload builder (§3 size split) — see the file header.
   const { saving, postCreatePhase, handleSubmit } = useAddVacancySubmit({
     setErrors, setCreateError,
-    form, cascade, skills, channels, matchWeightTemplateId, matchWeights, aiAgentId, interviewWorkflowId, published,
+    form, cascade, skills, channels, matchWeightTemplateId, matchWeights, aiAgentId, interviewWorkflowId,
     applicationSettings, applicationSettingsTouched, showAttachmentCards, attachments, onClose, onCreated, t,
   })
 
@@ -268,7 +270,7 @@ export function useAddVacancyForm({
   return {
     t, form, set, onAddressChange, onConditionsChange, errors, saving, createError, canSubmit, handleSubmit,
     statuses, statusOptions,
-    industries, functions, branchOptions, handleBranchChange, candidateTypes, toggleContractType,
+    industries, functions, branchOptions, handleBranchChange, showBranchSuggestion, candidateTypes, toggleContractType,
     seniorityLevels, educationLevels, provinces,
     customerOptions,
     userOptions,
@@ -283,7 +285,8 @@ export function useAddVacancyForm({
     // Punt 20 — applicationSettingsTouched is exposed so the assembler's
     // CollapsedCard `filled` indicator (A+D layout, Danny 03-08) can tell a
     // touched-but-unpublished settings edit apart from the untouched default.
-    published, setPublished, channels, toggleChannel, applicationSettings, setApplicationSetting, applicationSettingsTouched,
+    // `published` is the derived read-out (see above) — no setter, nothing to set.
+    published, channels, toggleChannel, applicationSettings, setApplicationSetting, applicationSettingsTouched,
     // Punten 21+22
     showAttachmentCards, postCreatePhase,
   }

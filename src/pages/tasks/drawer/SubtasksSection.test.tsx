@@ -4,6 +4,16 @@ import userEvent from '@testing-library/user-event'
 import SubtasksSection from './SubtasksSection'
 import type { TaskDetail } from '@/types/task'
 
+// TASK-DISPLAY-DRILL-1: flat settings mock (mirrors RelatedTasks.test.tsx in the
+// same drawer) — defaults on (mutable per-test flag, reset in beforeEach), so
+// existing assertions keep seeing coloured chips, and no /settings fetch reaches
+// the api mock below.
+let colorStatusOn = true
+vi.mock('@/lib/settings/useAllSettings', () => ({
+  useAllSettings: () => ({}),
+  getBoolSetting: (_s: unknown, _key: string, fallback: boolean) => (colorStatusOn ? fallback : false),
+}))
+
 // Mirrors RelatedTasks.test.tsx's own-fetch tab pattern — real unwrap/unwrapList
 // (importActual), only the default client stubbed.
 vi.mock('@/lib/api', async () => {
@@ -51,8 +61,12 @@ const task = (over: Partial<TaskDetail> = {}) => ({
   id: 't1', title: 'Bel kandidaat', parent: null, subtaskProgress: null, ...over,
 } as unknown as TaskDetail)
 
+// One subtask row shared by the fetch and colour-toggle cases (one fixture, one disable).
+// eslint-disable-next-line no-restricted-syntax -- test fixture lookup colour (DATA, not UI styling)
+const SUBTASK_ROW = { id: 's1', title: 'Bel terug', status: { label: 'Open', color: '#888888' } }
+
 describe('SubtasksSection (task drawer, SUBTASK-1)', () => {
-  beforeEach(() => { canCreateTask = true })
+  beforeEach(() => { canCreateTask = true; colorStatusOn = true })
 
   it('always shows the add-subtask affordance, even with no subtasks and no parent', () => {
     mockGet.mockClear()
@@ -63,14 +77,25 @@ describe('SubtasksSection (task drawer, SUBTASK-1)', () => {
 
   it('fetches the subtasks with ?parent_id= when the task has subtasks, and shows the progress tally', async () => {
     mockGet.mockClear()
-    mockGet.mockResolvedValueOnce({ data: [
-      // eslint-disable-next-line no-restricted-syntax -- test fixture lookup colour (DATA, not UI styling)
-      { id: 's1', title: 'Bel terug', status: { label: 'Open', color: '#888888' } },
-    ] })
+    mockGet.mockResolvedValueOnce({ data: [SUBTASK_ROW] })
     render(<SubtasksSection task={task({ subtaskProgress: { done: 2, total: 5 } })} />)
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/tasks', { params: { parent_id: 't1' } }))
     expect(await screen.findByText('Bel terug')).toBeInTheDocument()
     expect(screen.getByText('2/5')).toBeInTheDocument()
+  })
+
+  // TASK-DISPLAY-DRILL-1 re-audit fix: this row used to render the status chip
+  // unconditionally, ignoring the tenant's own colour toggle the sibling
+  // RelatedTasks list already honours.
+  it('renders the status as plain text (no chip) when task_table_color_status is off', async () => {
+    mockGet.mockClear()
+    colorStatusOn = false
+    mockGet.mockResolvedValueOnce({ data: [SUBTASK_ROW] })
+    render(<SubtasksSection task={task({ subtaskProgress: { done: 2, total: 5 } })} />)
+    const label = await screen.findByText('Open')
+    // SoftChip always paints a tinted background (tintBg); the plain-text
+    // fallback sets only colour/fontSize — no background at all.
+    expect(label.style.background).toBe('')
   })
 
   it('shows a distinct error state when the subtask load fails', async () => {

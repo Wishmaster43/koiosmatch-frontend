@@ -55,4 +55,13 @@ describe('BranchFieldRow', () => {
     render(<BranchFieldRow t={t} branchId="" onBranchChange={vi.fn()} branchOptions={OPTIONS} />)
     expect(screen.getByText('modal.fields.branch')).toBeInTheDocument()
   })
+
+  // KOIOS-VOORSTEL-1: the optional `suggestion` slot renders under the control
+  // (never inside FieldRow's own child, which would break its id-cloning).
+  it('renders the suggestion node when passed, and nothing when omitted', () => {
+    const { rerender } = render(<BranchFieldRow {...defaultProps} suggestion={<span>Koios proposal</span>} />)
+    expect(screen.getByText('Koios proposal')).toBeInTheDocument()
+    rerender(<BranchFieldRow {...defaultProps} suggestion={null} />)
+    expect(screen.queryByText('Koios proposal')).not.toBeInTheDocument()
+  })
 })

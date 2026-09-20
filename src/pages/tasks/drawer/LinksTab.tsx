@@ -17,6 +17,8 @@ import { TASK_LINK_PAGE } from '../links/taskLinkTypes'
 import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import Button from '@/components/ui/Button'
+import { GroupLabel } from '@/components/ui/typography'
 
 // Task drawer's polymorphic links tab: lists and adds/removes links to other entities via the shared AddLinkRow.
 export default function LinksTab({ task, onAddLink, onRemoveLink }: {
@@ -52,9 +54,7 @@ export default function LinksTab({ task, onAddLink, onRemoveLink }: {
                 <Link2 size={15} />
               </span>
               <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>
-                  {typeLabel(l.type)}
-                </div>
+                <GroupLabel as="div">{typeLabel(l.type)}</GroupLabel>
                 {/* Click through to the linked record's own drawer (intent navigation). */}
                 <div style={{ fontSize: 13, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   <EntityLink page={TASK_LINK_PAGE[l.type] ?? ''} id={TASK_LINK_PAGE[l.type] ? l.id : null} title={t('links.open')}>
@@ -62,11 +62,10 @@ export default function LinksTab({ task, onAddLink, onRemoveLink }: {
                   </EntityLink>
                 </div>
               </div>
-              <button onClick={() => onRemoveLink({ type: l.type, id: l.id })} title={t('links.remove')} aria-label={t('links.remove')}
-                style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                  background: 'var(--color-danger-bg)', border: 'none', borderRadius: 6, color: 'var(--color-on-danger-bg)', cursor: 'pointer' }}>
+              <Button type="button" variant="dangerSoft" iconOnly size="sm" onClick={() => onRemoveLink({ type: l.type, id: l.id })}
+                title={t('links.remove')} aria-label={t('links.remove')} style={{ flexShrink: 0 }}>
                 <X size={13} />
-              </button>
+              </Button>
             </div>
           ))}
         </div>

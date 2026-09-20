@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import { SelectField } from '@/components/forms/fields'
 import SearchSelectJs from '@/components/ui/SearchSelect'
+import Button from '@/components/ui/Button'
 import { usePrincipalSearch } from '@/hooks/usePrincipalSearch'
 import { TASK_LINK_ENDPOINTS, TASK_LINK_TYPES } from './taskLinkTypes'
 import type { LinkRow } from './taskLinkTypes'
@@ -64,18 +65,16 @@ export default function AddLinkRow({ existing, onAdd, onClose, types = TASK_LINK
         <SearchSelect triggerLabel={t('links.selectEntity')} options={options} selected={[]} onSearch={setQuery} selectAll={false}
           onToggle={(v: string) => { const r = rows.find(x => String(x.id) === v); onAdd({ type, id: v, label: r && cfg ? cfg.label(r) : '' }); onClose() }} />
         <div style={{ flex: 1 }} />
-        <button type="button" onClick={onClose} aria-label={t('modal.cancel')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 4 }}>
+        <Button type="button" variant="ghost" iconOnly size="sm" onClick={onClose} aria-label={t('modal.cancel')}>
           <X size={15} />
-        </button>
+        </Button>
       </div>
       {/* Load error (§3, four UI states): distinct from "no matches" so the
           recruiter knows the search itself failed and can retry it. */}
       {error && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--color-danger-text)' }}>
           <span>{t('links.loadError')}</span>
-          <button type="button" onClick={fetchOptions} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6,
-            padding: '2px 8px', cursor: 'pointer', color: 'var(--text)' }}>{t('common:error.retry')}</button>
+          <Button type="button" variant="secondary" size="sm" onClick={fetchOptions}>{t('common:error.retry')}</Button>
         </div>
       )}
     </div>

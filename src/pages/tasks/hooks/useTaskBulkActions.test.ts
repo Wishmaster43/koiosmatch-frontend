@@ -10,7 +10,7 @@ import { renderHook, act, waitFor } from '@testing-library/react'
 import { useState } from 'react'
 import { useTaskBulkActions } from './useTaskBulkActions'
 import api from '@/lib/api'
-import { notifySuccess } from '@/lib/notify'
+import { notifySuccess, notifyError } from '@/lib/notify'
 import type { Task, TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
 import type { Dispatch, SetStateAction } from 'react'
@@ -98,5 +98,37 @@ describe('useTaskBulkActions · bulkSetPriority', () => {
     await act(async () => { await r.result.current.actions.bulkSetPriority('high') })
 
     expect(mockedPatch).toHaveBeenCalledWith('/tasks/t1', { priority_id: 'prio-uuid-1' })
+  })
+})
+
+// Re-audit fix: an unresolved slug (lookup map not loaded yet) must abort BEFORE
+// any optimistic write, PATCH or success toast — never fire a body that
+// serialises away to `{}` (200 OK, nothing actually changed) while the row and a
+// success toast both claim it worked.
+describe('useTaskBulkActions · unresolved slug guard', () => {
+  it('bulkSetStatus sends no request, applies no optimistic patch and errors instead of succeeding', async () => {
+    seedLookupIds()
+    const r = harness([task({ id: 't1', statusKey: 'todo' })], new Set(['t1']))
+    await flush()
+
+    await act(async () => { await r.result.current.actions.bulkSetStatus('unknown-slug') })
+
+    expect(mockedPatch).not.toHaveBeenCalled()
+    expect(notifySuccess).not.toHaveBeenCalled()
+    expect(notifyError).toHaveBeenCalledWith('drawer.lookupNotReady')
+    expect(r.result.current.tasks[0].statusKey).toBe('todo')
+  })
+
+  it('bulkSetPriority sends no request, applies no optimistic patch and errors instead of succeeding', async () => {
+    seedLookupIds()
+    const r = harness([task({ id: 't1', priorityKey: 'normal' })], new Set(['t1']))
+    await flush()
+
+    await act(async () => { await r.result.current.actions.bulkSetPriority('unknown-slug') })
+
+    expect(mockedPatch).not.toHaveBeenCalled()
+    expect(notifySuccess).not.toHaveBeenCalled()
+    expect(notifyError).toHaveBeenCalledWith('drawer.lookupNotReady')
+    expect(r.result.current.tasks[0].priorityKey).toBe('normal')
   })
 })

@@ -115,7 +115,10 @@ export default function IncomingWebhooks() {
       if (created.signing_secret) setReveal({ title: t('webhooks.incoming.secretOnce'), secret: created.signing_secret })
       setName('')
       setDesc('')
-    } catch { /* noop */ }
+    } catch (err) {
+      // A failed create must tell the admin (§0/§13) — the api client's toast is DEV-only.
+      notifyError(extractApiError(err, t('common:actionFailed')))
+    }
     setCreating(false)
   }
 

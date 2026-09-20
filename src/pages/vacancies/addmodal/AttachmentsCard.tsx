@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { FileText, X } from 'lucide-react'
 import CollapsibleRichText from '@/components/ui/CollapsibleRichText'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import Button from '@/components/ui/Button'
 import { cardBox } from '@/components/ui/modalCards'
 // HUISSTIJL-1: the two uppercase 11px group labels are the shared GroupLabel atom.
 import { GroupLabel } from '@/components/ui/typography'
@@ -62,10 +63,10 @@ export default function AttachmentsCard({ files, onAddFile, onRemoveFile, noteTe
               <div key={f.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 10px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg)' }}>
                 <FileText size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
                 <span style={{ flex: 1, fontSize: 12, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.name}</span>
-                <button type="button" onClick={() => onRemoveFile(f.id)} title={t('common:remove')} aria-label={t('common:remove')}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
+                {/* HUISSTIJL-1: house Button (ghost, iconOnly) — never a hand-painted icon button. */}
+                <Button variant="ghost" iconOnly size="sm" onClick={() => onRemoveFile(f.id)} title={t('common:remove')} aria-label={t('common:remove')}>
                   <X size={13} />
-                </button>
+                </Button>
               </div>
             ))}
           </div>

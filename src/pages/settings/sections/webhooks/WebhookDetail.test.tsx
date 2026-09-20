@@ -15,6 +15,9 @@ vi.mock('@/lib/api', async () => {
   return { ...actual, default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }
 })
 
+const notifyError = vi.hoisted(() => vi.fn())
+vi.mock('@/lib/notify', () => ({ notifyError, notifySuccess: vi.fn(), notify: vi.fn() }))
+
 import api from '@/lib/api'
 
 // Resolve the active locale's own copy so assertions never hardcode a language.
@@ -162,5 +165,64 @@ describe('WebhookDetail — secret regeneration', () => {
     await waitFor(() => {
       expect(api.put).toHaveBeenCalledWith(expect.stringContaining('/wh-1'), { status: 'disabled' })
     })
+  })
+})
+
+// audit r2c-settings-a: saveDetails/saveEvents/regenerate/remove used to swallow
+// a rejected request with an empty catch, leaving the admin with no signal.
+describe('WebhookDetail — a rejected mutation tells the admin', () => {
+  const listRow = {
+    id: 'wh-1',
+    name: 'ATS integration',
+    url: 'https://example.test/hook',
+    events: ['candidate.created'],
+    status: 'active' as const,
+  }
+  beforeEach(() => {
+    vi.mocked(api.get).mockResolvedValue({ data: listRow })
+  })
+  afterEach(() => vi.clearAllMocks())
+
+  it('calls notifyError when saving the name/url card rejects', async () => {
+    const user = userEvent.setup()
+    renderWithQueryClient(<WebhookDetail subId="wh-1" listRow={listRow} onBack={vi.fn()} onPatch={vi.fn()} onDelete={vi.fn()} />)
+    await waitFor(() => screen.getByRole('button', { name: st('webhooks.outgoing.edit') }))
+    await user.click(screen.getByRole('button', { name: st('webhooks.outgoing.edit') }))
+    vi.mocked(api.put).mockRejectedValueOnce(new Error('boom'))
+    // Two "Save" buttons render at once (details card + event-filter SaveButton) —
+    // the details one is the first in DOM order.
+    await user.click(screen.getAllByRole('button', { name: st('common.save') })[0])
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(expect.any(String)))
+  })
+
+  it('calls notifyError when saving the event filter rejects', async () => {
+    const user = userEvent.setup()
+    renderWithQueryClient(<WebhookDetail subId="wh-1" listRow={listRow} onBack={vi.fn()} onPatch={vi.fn()} onDelete={vi.fn()} />)
+    await waitFor(() => screen.getByText(st('webhooks.outgoing.field.events')))
+    // Dirty the event filter via the catalog's own "select all" toggle.
+    await user.click(screen.getByRole('button', { name: st('webhooks.events.selectAll') }))
+    vi.mocked(api.put).mockRejectedValueOnce(new Error('boom'))
+    await user.click(screen.getByRole('button', { name: st('common.save') }))
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(expect.any(String)))
+  })
+
+  it('calls notifyError when regenerate rejects', async () => {
+    const user = userEvent.setup()
+    renderWithQueryClient(<WebhookDetail subId="wh-1" listRow={listRow} onBack={vi.fn()} onPatch={vi.fn()} onDelete={vi.fn()} />)
+    vi.mocked(api.post).mockRejectedValueOnce(new Error('boom'))
+    await clickRegenerate(user)
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(expect.any(String)))
+  })
+
+  it('calls notifyError when delete rejects', async () => {
+    const user = userEvent.setup()
+    renderWithQueryClient(<WebhookDetail subId="wh-1" listRow={listRow} onBack={vi.fn()} onPatch={vi.fn()} onDelete={vi.fn()} />)
+    vi.mocked(api.delete).mockRejectedValueOnce(new Error('boom'))
+    await waitFor(() => screen.getByRole('button', { name: st('webhooks.outgoing.action') }))
+    await user.click(screen.getByRole('button', { name: st('webhooks.outgoing.action') }))
+    await user.click(screen.getByRole('menuitem', { name: st('webhooks.outgoing.delete') }))
+    const dialog = await screen.findByRole('dialog', { name: st('webhooks.outgoing.deleteConfirm', { name: 'ATS integration' }) })
+    await user.click(within(dialog).getByRole('button', { name: ct('confirm') }))
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(expect.any(String)))
   })
 })

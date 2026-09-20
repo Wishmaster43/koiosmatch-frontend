@@ -97,6 +97,21 @@ describe('IncomingWebhooks — one-time signing-secret reveal', () => {
     await waitFor(() => expect(screen.getByText('Quiet hook')).toBeInTheDocument())
     expect(screen.queryByText(st('webhooks.incoming.secretOnce'))).toBeNull()
   })
+
+  // audit r2c-settings-a: a rejected POST /webhooks used to be swallowed silently.
+  it('calls notifyError when the create POST rejects', async () => {
+    mockedApi.get.mockResolvedValue({ data: [] })
+    mockedApi.post.mockRejectedValueOnce(new Error('boom'))
+    const user = userEvent.setup()
+    render(<IncomingWebhooks />)
+    await waitFor(() => expect(screen.getByText(st('webhooks.incoming.empty'))).toBeInTheDocument())
+
+    await user.type(screen.getByPlaceholderText(st('webhooks.incoming.namePlaceholder')), 'Broken hook')
+    await user.click(screen.getByRole('button', { name: st('webhooks.incoming.create') }))
+
+    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/webhooks', { name: 'Broken hook', description: null }))
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(expect.any(String)))
+  })
 })
 
 // DL-02/WFB-06 (ADOPT-A3b item 20): "Secret vernieuwen" — recovery path for a

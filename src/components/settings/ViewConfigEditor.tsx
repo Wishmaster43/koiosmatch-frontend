@@ -15,7 +15,7 @@ import SaveButton from '@/components/ui/SaveButton'
 import Button from '@/components/ui/Button'
 import Toggle from '@/components/ui/Toggle'
 import ErrorBanner from '@/components/ui/ErrorBanner'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, BodyText } from '@/components/ui/typography'
 
 interface Row { id: string; enabled: boolean }
 interface SavedRow { id: string; enabled?: boolean }
@@ -92,9 +92,9 @@ export default function ViewConfigEditor({ module }: { module: string }) {
               on the interpolated label: lowercasing a translated noun is wrong in
               German ("Kunden" → "kunden") and the sentences read fine capitalised. */}
           <PageTitle>{t('viewConfig.title', { label: t(mod.labelKey) })}</PageTitle>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+          <BodyText style={{ color: 'var(--text-muted)', marginTop: 2 }}>
             {t('viewConfig.description', { label: t(mod.labelKey) })}
-          </p>
+          </BodyText>
         </div>
         {/* SaveButton — the ONE saved-state save action (§4 success token pair). */}
         <SaveButton saved={saved} onClick={save} disabled={saving || loadState === 'failed'} aria-label={t('common.save')}>
@@ -117,7 +117,7 @@ export default function ViewConfigEditor({ module }: { module: string }) {
                   <Icon size={15} color={block.color} />
                 </div>
               )}
-              <span style={{ flex: 1, fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>{t(block.labelKey)}</span>
+              <BodyText as="span" style={{ flex: 1, fontWeight: 500 }}>{t(block.labelKey)}</BodyText>
 
               <Button variant="secondary" iconOnly onClick={() => move(i, -1)} disabled={i === 0} title={t('viewConfig.moveUp')} aria-label={t('viewConfig.moveUp')}>
                 <ArrowUp size={13} />

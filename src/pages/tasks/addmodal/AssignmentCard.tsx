@@ -35,16 +35,15 @@ import type { TFunction } from 'i18next'
 import { FieldRow } from '@/components/forms/fields'
 import Button from '@/components/ui/Button'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import { Caption, GroupLabel, BodyText, captionStyle } from '@/components/ui/typography'
 import { cardHead, cardBox, pickerStyle, PICKER_MENU_W } from './fields'
 import { UNASSIGNED_VALUE } from './assigneeOptions'
 import type { AssigneeOption } from './assigneeOptions'
 import type { TeamOption } from '@/lib/useTeams'
 import type { TaskForm } from '../AddTaskModal'
 
-// One muted helper/status line under a picker — one look for all four states.
-const noticeStyle = { marginTop: 6, fontSize: 11, lineHeight: 1.4, color: 'var(--text-muted)' } as const
-// The load-error line reuses that footprint and only swaps in the danger token.
-const errorNoticeStyle = { ...noticeStyle, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-danger-text)' } as const
+// The load-error line reuses the Caption footprint and only swaps in the danger token.
+const errorNoticeStyle = { ...captionStyle, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-danger-text)' } as const
 
 // The assignee/owner/team fields for the create-task modal, each with its own retry affordance on a failed lookup load.
 export default function AssignmentCard({
@@ -95,11 +94,11 @@ export default function AssignmentCard({
               {onRetryTeams && <Button type="button" variant="secondary" size="sm" onClick={onRetryTeams}>{t('common:error.retry')}</Button>}
             </div>
           ) : teamsLoading ? (
-            <div style={noticeStyle}>{t('common:loading')}</div>
+            <Caption as="div" style={{ marginTop: 6 }}>{t('common:loading')}</Caption>
           ) : teams.length === 0 ? (
-            <div style={noticeStyle}>{t('modal.teamEmpty')}</div>
+            <Caption as="div" style={{ marginTop: 6 }}>{t('modal.teamEmpty')}</Caption>
           ) : (
-            <div style={noticeStyle}>{t('modal.teamHint')}</div>
+            <Caption as="div" style={{ marginTop: 6 }}>{t('modal.teamHint')}</Caption>
           )}
         </div>
 
@@ -122,18 +121,18 @@ export default function AssignmentCard({
               {onRetryUsers && <Button type="button" variant="secondary" size="sm" onClick={onRetryUsers}>{t('common:error.retry')}</Button>}
             </div>
           ) : usersLoading ? (
-            <div style={noticeStyle}>{t('common:loading')}</div>
+            <Caption as="div" style={{ marginTop: 6 }}>{t('common:loading')}</Caption>
           ) : !hasColleagues ? (
-            <div style={noticeStyle}>{t('modal.assigneeEmpty')}</div>
+            <Caption as="div" style={{ marginTop: 6 }}>{t('modal.assigneeEmpty')}</Caption>
           ) : unassigned ? (
-            <div style={noticeStyle}>{t('modal.assigneeUnassignedHint')}</div>
+            <Caption as="div" style={{ marginTop: 6 }}>{t('modal.assigneeUnassignedHint')}</Caption>
           ) : null}
         </div>
 
         {/* Read-only creator — no picker, mirrors the old Details panel line. */}
         <div>
-          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 4 }}>{t('modal.owner')}</div>
-          <div style={{ fontSize: 13, color: 'var(--text)' }}>{ownerName || '—'}</div>
+          <GroupLabel as="div" style={{ marginBottom: 4 }}>{t('modal.owner')}</GroupLabel>
+          <BodyText as="div">{ownerName || '—'}</BodyText>
         </div>
       </div>
     </div>

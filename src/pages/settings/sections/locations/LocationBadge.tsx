@@ -17,6 +17,7 @@ import { Building2 } from 'lucide-react'
 // entities (§11: reuse, never a second hash).
 import { avatarColor } from '@/lib/avatarColor'
 import { resolveLocationIcon } from '@/lib/locationIcons'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
 // Props: the row's display name (for the colour hash fallback) plus its own
 // optional colour/icon slug from the backend (VESTIGING-ICOON-1).
@@ -34,8 +35,8 @@ export default function LocationBadge({ name, color, icon }: LocationBadgeProps)
   return (
     <span aria-hidden="true" style={{ width: 26, height: 26, flexShrink: 0, display: 'flex',
       alignItems: 'center', justifyContent: 'center', borderRadius: 7,
-      background: `color-mix(in srgb, ${resolvedColor} 14%, transparent)`,
-      border: `1px solid color-mix(in srgb, ${resolvedColor} 45%, transparent)`, color: resolvedColor }}>
+      background: tintBg(resolvedColor, true),
+      border: tintBorder(resolvedColor, true), color: chipInk(resolvedColor) }}>
       <Icon size={13} />
     </span>
   )

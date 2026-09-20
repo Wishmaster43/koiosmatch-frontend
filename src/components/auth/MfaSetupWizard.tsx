@@ -12,6 +12,7 @@ import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import RecoveryCodesPanel from '@/components/auth/RecoveryCodesPanel'
 import { tint } from '@/lib/tint'
+import { SectionTitle, BodyText, Caption } from '@/components/ui/typography'
 // DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
 import { extractApiError } from '@/lib/extractApiError'
 
@@ -75,10 +76,14 @@ export default function MfaSetupWizard({ setupMfa, confirmMfa, onConfirmed, onFi
     setBusy(false)
   }
 
-  // Close the wizard after the recovery codes were shown.
+  // Close the wizard after the recovery codes were shown. A reject here (e.g.
+  // the post-MFA profile refresh failing) must not look identical to success —
+  // surface it on the recovery-codes screen so Done stays retryable.
   const finish = async () => {
-    setBusy(true)
-    try { await onFinished() } finally { setBusy(false) }
+    setBusy(true); setError('')
+    try { await onFinished() }
+    catch (err) { setError(extractApiError(err, t('security.errFinish'))) }
+    finally { setBusy(false) }
   }
 
   // Loading / setup-failure view — spinner, or the error with a retry path.
@@ -113,17 +118,27 @@ export default function MfaSetupWizard({ setupMfa, confirmMfa, onConfirmed, onFi
 
   // Recovery codes view (shown once after a successful confirm).
   if (step === 'recovery') return (
-    <RecoveryCodesPanel codes={recoveryCodes} onDone={finish} busy={busy}
-      headline={
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px',
-                      background: 'var(--color-success-bg)', border: '1px solid var(--color-success)', borderRadius: 12, marginBottom: 24 }}>
-          <ShieldCheck size={18} color="var(--color-success)" style={{ flexShrink: 0, marginTop: 1 }} />
-          <div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-success-text)' }}>{t('security.enabledTitle')}</div>
-            <div style={{ fontSize: 12, color: 'var(--color-success-text)', marginTop: 2 }}>{t('security.enabledDesc')}</div>
-          </div>
+    <>
+      {/* Done failed (e.g. the post-MFA profile refresh) — same AA-checked
+          danger pair as the setup-failure banner above; Done stays clickable. */}
+      {error && (
+        <div role="alert" style={{ fontSize: 13, color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
+                       border: `1px solid ${tint('var(--color-danger)', 45)}`, borderRadius: 8, padding: '8px 12px', marginBottom: 12, maxWidth: 480 }}>
+          {error}
         </div>
-      } />
+      )}
+      <RecoveryCodesPanel codes={recoveryCodes} onDone={finish} busy={busy}
+        headline={
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px',
+                        background: 'var(--color-success-bg)', border: '1px solid var(--color-success)', borderRadius: 12, marginBottom: 24 }}>
+            <ShieldCheck size={18} color="var(--color-success)" style={{ flexShrink: 0, marginTop: 1 }} />
+            <div>
+              <SectionTitle as="div" style={{ color: 'var(--color-success-text)' }}>{t('security.enabledTitle')}</SectionTitle>
+              <div style={{ fontSize: 12, color: 'var(--color-success-text)', marginTop: 2 }}>{t('security.enabledDesc')}</div>
+            </div>
+          </div>
+        } />
+    </>
   )
 
   // QR + secret + first-code confirm view.
@@ -134,8 +149,8 @@ export default function MfaSetupWizard({ setupMfa, confirmMfa, onConfirmed, onFi
           <ArrowLeft size={13} /> {t('security.back')}
         </Button>
       )}
-      <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>{t('security.scanTitle')}</h3>
-      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20, lineHeight: 1.6 }}>{t('security.scanDesc')}</p>
+      <SectionTitle style={{ marginBottom: 6 }}>{t('security.scanTitle')}</SectionTitle>
+      <BodyText style={{ color: 'var(--text-muted)', marginBottom: 20, lineHeight: 1.6 }}>{t('security.scanDesc')}</BodyText>
       {otpauthUrl && (
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
           <div style={{ padding: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
@@ -147,9 +162,9 @@ export default function MfaSetupWizard({ setupMfa, confirmMfa, onConfirmed, onFi
         <div style={{ background: 'var(--hover-bg)', borderRadius: 8, padding: '10px 14px', marginBottom: 20,
                        textAlign: 'center', fontFamily: 'monospace', fontSize: 14, letterSpacing: '0.12em', color: 'var(--text)' }}>
           {secret}
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, fontFamily: 'inherit', letterSpacing: 0 }}>
+          <Caption as="div" style={{ marginTop: 4, fontFamily: 'inherit', letterSpacing: 0 }}>
             {t('security.manualEntry')}
-          </div>
+          </Caption>
         </div>
       )}
       <form onSubmit={e => void confirmSetup(e)} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

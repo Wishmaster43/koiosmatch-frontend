@@ -84,6 +84,7 @@ export default function EventCatalog({ value = [], onChange }: EventCatalogProps
         <div style={{ position: 'relative', flex: 1 }}>
           <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('webhooks.events.search')}
+            aria-label={t('webhooks.events.search')}
             style={{ width: '100%', height: 34, padding: '0 10px 0 32px', fontSize: 13, color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 8, outline: 'none', background: 'var(--surface)' }} />
         </div>
         <Button variant="secondary" size="sm" onClick={() => onChange(allSelected ? [] : [...ALL_EVENTS])}>

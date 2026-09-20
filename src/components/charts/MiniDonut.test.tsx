@@ -22,6 +22,14 @@ describe('MiniDonut', () => {
   // thousands separator at all — the one number in this file the center-label fix missed.
   it('groups the segment value in the hover tooltip (nl-NL)', () => {
     render(<MiniTooltip active payload={[{ value: 12345, name: 'A', payload: { fill: '#000' } }]} total={20000} />)
-    expect(screen.getByText('12.345 · 62%')).toBeInTheDocument()
+    // GETALLEN-1: through formatPercent (nl-NL, ≤1 decimal), not a hand-rounded whole number.
+    expect(screen.getByText('12.345 · 61,7%')).toBeInTheDocument()
+  })
+
+  // GETALLEN-1: a zero denominator is "nothing measured yet" — the house dash,
+  // never a fabricated "0%" (formatPercent's own contract).
+  it('renders the house dash instead of a fabricated 0% when total is zero', () => {
+    render(<MiniTooltip active payload={[{ value: 0, name: 'A', payload: { fill: '#000' } }]} total={0} />)
+    expect(screen.getByText('0 · —')).toBeInTheDocument()
   })
 })

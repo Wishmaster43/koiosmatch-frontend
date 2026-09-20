@@ -672,6 +672,7 @@
   "discardChangesConfirm": "Hai del testo non ancora salvato. Chiudere senza salvare?",
   "koiosSuggested": "Suggerito da Koios AI in base alla cronologia del candidato",
   "koiosSuggestedOwnerAgent": "Suggerito da Koios AI in base al responsabile della posizione",
+  "koiosSuggestedBranch": "Suggerito da Koios AI in base al cliente o alla propria filiale",
   "koiosRejectAdvice": "Koios AI suggerisce di respingere. Scegli tu il motivo dall'elenco.",
   "dragList": {
     "moveUp": "Sposta su",
