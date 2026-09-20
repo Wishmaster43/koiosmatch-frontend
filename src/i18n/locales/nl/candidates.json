@@ -1341,6 +1341,14 @@
     "messagesRegion": "Berichten",
     "sortOldestFirst": "Oudste eerst",
     "sortNewestFirst": "Nieuwste eerst",
+    "composer": {
+      "bold": "Vet",
+      "italic": "Cursief",
+      "strikethrough": "Doorhalen",
+      "emoji": "Emoji",
+      "emojiPanel": "Emojikiezer",
+      "closeEmoji": "Emojikiezer sluiten"
+    },
     "assist": {
       "title": "Koios assistent",
       "summarize": "Samenvatten",

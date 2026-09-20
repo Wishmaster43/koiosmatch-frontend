@@ -14,6 +14,7 @@ import { avatarColor } from '@/lib/avatarColor'
 import { tintBg, tintBorder } from '@/lib/tint'
 import type { Id } from '@/types/common'
 import { CHANNEL_COLORS, HANDLED_BY_COLORS } from './channelColors'
+import { renderWaMarkup } from './waMarkup'
 
 // The recruiter/agent behind an outbound message (e.g. Ravi, Kelly).
 interface SentBy {
@@ -85,10 +86,11 @@ export default function ConversationMessage({ message, formatDateTime }: {
       {/* Bubble fill is the sender's tint (§4, via lib/tint); the TEXT stays the
           neutral --text token on purpose — this is a message body, not a chip
           label, so it reads like ordinary prose regardless of sender colour. */}
+      {/* WA-COMPOSER-1: renders WhatsApp's own bold/italic/strikethrough markup and
+          keeps multi-line drafts' line breaks visible (pre-wrap). */}
       <div style={{ maxWidth: '85%', padding: '6px 10px', borderRadius: 10, fontSize: 12, color: 'var(--text)',
-        background: tintBg(color),
-        border: tintBorder(color) }}>
-        {message.message_content ?? '—'}
+        background: tintBg(color), border: tintBorder(color), whiteSpace: 'pre-wrap' }}>
+        {renderWaMarkup(message.message_content ?? '—')}
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
         {message.channel && CHANNEL_COLORS[message.channel] && (

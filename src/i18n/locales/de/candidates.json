@@ -1341,6 +1341,14 @@
     "messagesRegion": "Nachrichten",
     "sortOldestFirst": "Älteste zuerst",
     "sortNewestFirst": "Neueste zuerst",
+    "composer": {
+      "bold": "Fett",
+      "italic": "Kursiv",
+      "strikethrough": "Durchgestrichen",
+      "emoji": "Emoji",
+      "emojiPanel": "Emoji-Auswahl",
+      "closeEmoji": "Emoji-Auswahl schließen"
+    },
     "assist": {
       "title": "Koios-Assistent",
       "summarize": "Zusammenfassen",

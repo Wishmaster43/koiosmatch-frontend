@@ -240,6 +240,50 @@ describe('ConversationsSection · session composer (WHATSAPP-COMPOSE-1)', () => 
     // The input clears after a successful send.
     expect(input).toHaveValue('')
   })
+
+  // WA-COMPOSER-1: Shift+Enter inserts a newline into the draft, plain Enter sends
+  // the multi-line draft as-is — the request body carries the real newline (§13).
+  it('Shift+Enter adds a newline, a bare Enter sends the multi-line draft', async () => {
+    const recent = new Date(Date.now() - 60_000).toISOString()
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/conversations') return Promise.resolve({ data: { data: threadWith(recent) } })
+      if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: MESSAGES } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    vi.mocked(api.post).mockResolvedValueOnce({
+      data: { id: 'm4', direction: 'outbound', message_content: 'regel 1\nregel 2', sent_at: '2026-08-06T10:00:00Z' },
+    })
+    const user = userEvent.setup()
+    render(<ConversationsSection composerEnabled threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+
+    const input = await screen.findByPlaceholderText('conversations.composerPlaceholder')
+    await user.type(input, 'regel 1{Shift>}{Enter}{/Shift}regel 2')
+    expect(api.post).not.toHaveBeenCalled()
+    await user.type(input, '{Enter}')
+
+    expect(api.post).toHaveBeenCalledWith('/conversations/conv-1/messages', {
+      direction: 'outbound', message_content: 'regel 1\nregel 2',
+    })
+  })
+
+  // WA-COMPOSER-1: the Bold toolbar button wraps the selected draft text in `*`.
+  it('the Bold toolbar button wraps the selected text with *', async () => {
+    const recent = new Date(Date.now() - 60_000).toISOString()
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/conversations') return Promise.resolve({ data: { data: threadWith(recent) } })
+      if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: MESSAGES } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    const user = userEvent.setup()
+    render(<ConversationsSection composerEnabled threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+
+    const input = await screen.findByPlaceholderText('conversations.composerPlaceholder') as HTMLTextAreaElement
+    await user.type(input, 'urgent')
+    input.setSelectionRange(0, input.value.length)
+    await user.click(screen.getByRole('button', { name: 'conversations.composer.bold' }))
+
+    expect(input).toHaveValue('*urgent*')
+  })
 })
 
 

@@ -26,7 +26,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MessageCircle, AlertTriangle, ChevronDown, ChevronRight, Clock, Send } from 'lucide-react'
+import { MessageCircle, AlertTriangle, ChevronDown, ChevronRight, Clock } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
@@ -36,13 +36,13 @@ import SegmentedControl from '@/components/ui/SegmentedControl'
 import { useDateFormat } from '@/lib/datetime'
 import ConversationAssistSection from './ConversationAssistSection'
 import ConversationMessage, { type MessageRow } from './ConversationMessage'
+import ThreadComposer from './ThreadComposer'
 import { mergeLandedMessages, type PendingMessage } from './conversationThreadMerge'
 import { CHANNEL_COLORS, HANDLED_BY_COLORS } from './channelColors'
 import TemplateComposer from './TemplateComposer'
 import type { ConversationSubject } from './useWhatsAppTemplateSend'
 import { sessionWindow, windowLeftParts } from './sessionWindow'
 import type { Id } from '@/types/common'
-import Button from '@/components/ui/Button'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import { Caption } from '@/components/ui/typography'
 
@@ -550,17 +550,11 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
                         visibly rendered draft input (never an invisible/pending state). */}
                     <ConversationAssistSection conversationId={row.id} hasMessages={msgs.length > 0}
                       onApply={setComposerText} language={i18n.language} />
-                    <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
-                      <input value={composerText} onChange={e => setComposerText(e.target.value)}
-                        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(row.id) } }}
-                        placeholder={t('conversations.composerPlaceholder')} aria-label={t('conversations.composerPlaceholder')}
-                        style={{ flex: 1, minWidth: 0, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontSize: 12, color: 'var(--text)' }} />
-                      <Button variant="primary" onClick={() => sendMessage(row.id)} disabled={!composerText.trim() || sendingMsg}
-                        aria-label={t('common:send')} title={t('common:send')}
-                        style={{ width: 30 }}>
-                        <Send size={13} />
-                      </Button>
-                    </div>
+                    {/* WA-COMPOSER-1: the multi-line, auto-growing composer with the
+                        bold/italic/strikethrough + emoji toolbar (Danny's F5, 19-09) —
+                        Enter still sends, Shift+Enter still inserts a newline. */}
+                    <ThreadComposer value={composerText} onChange={setComposerText} onSend={() => sendMessage(row.id)}
+                      sending={sendingMsg} placeholder={t('conversations.composerPlaceholder')} />
                     {/* WA-SEND-TRANSPORT-1: the 409/502 inline explanation — role="alert" so
                         assistive tech announces it, icon + text so colour is never the only cue. */}
                     {sendError && (

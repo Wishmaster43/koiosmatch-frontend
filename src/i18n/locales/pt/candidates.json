@@ -1341,6 +1341,14 @@
     "messagesRegion": "Mensagens",
     "sortOldestFirst": "Mais antigas primeiro",
     "sortNewestFirst": "Mais recentes primeiro",
+    "composer": {
+      "bold": "Negrito",
+      "italic": "Itálico",
+      "strikethrough": "Rasurado",
+      "emoji": "Emoji",
+      "emojiPanel": "Seletor de emojis",
+      "closeEmoji": "Fechar o seletor de emojis"
+    },
     "assist": {
       "title": "Assistente Koios",
       "summarize": "Resumir",
