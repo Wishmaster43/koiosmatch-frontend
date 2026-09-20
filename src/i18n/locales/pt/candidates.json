@@ -1323,7 +1323,7 @@
     "pickAgent": "Agente de IA (opcional)",
     "agentPlaceholder": "Escolha um agente de IA…",
     "configureWhatsapp": "Configurar WhatsApp →",
-    "channel": "Canal",
+    "channelLabel": "Canal",
     "channelWaba": "WhatsApp Business (modelo)",
     "channelWaWeb": "WhatsApp Web",
     "message": "Mensagem",

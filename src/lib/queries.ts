@@ -7,6 +7,7 @@
  */
 import { useQuery } from '@tanstack/react-query'
 import api, { getActiveTenantId, unwrapList } from './api'
+import { useAuth } from '@/context/AuthContext'
 
 // Stable empty default. Without it, `data` is undefined while loading, and each
 // `const { data = [] } = useUsers()` call site would create a fresh [] every render —
@@ -22,13 +23,24 @@ const EMPTY_USERS: unknown[] = []
  * key itself must be tenant-scoped so this holds even if that safety net ever
  * changes).
  */
+// USERS-403-1 (Danny 19-09, console on #whatsapp and #candidates: "GET /users 403" for a
+// recruiter, followed by "Maximum update depth exceeded"): GET /users is gated users.view, so a
+// caller without it must not fire the query at all — and on any error `data` becomes undefined,
+// which turned every `const { data: users = [] }` call site into a fresh array per render and
+// looped the filter registration. Two guards: the query is enabled only with the permission,
+// and `data` is always the stable empty array when the server gave nothing.
 export function useUsers() {
   const tenantId = getActiveTenantId() ?? 'none'
-  return useQuery({
+  const auth = useAuth()
+  const allowed = typeof auth?.hasPermission === 'function' ? auth.hasPermission('users.view') : true
+  const query = useQuery({
     queryKey: ['users', tenantId],
     queryFn: async ({ signal }) => unwrapList(await api.get('/users', { signal })).rows,
     placeholderData: EMPTY_USERS,
+    enabled: allowed,
+    retry: false,
   })
+  return { ...query, data: query.data ?? EMPTY_USERS }
 }
 
 /**

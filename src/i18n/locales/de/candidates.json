@@ -1323,7 +1323,7 @@
     "pickAgent": "KI-Agent (optional)",
     "agentPlaceholder": "KI-Agent wählen…",
     "configureWhatsapp": "WhatsApp einrichten →",
-    "channel": "Kanal",
+    "channelLabel": "Kanal",
     "channelWaba": "WhatsApp Business (Vorlage)",
     "channelWaWeb": "WhatsApp Web",
     "message": "Nachricht",
