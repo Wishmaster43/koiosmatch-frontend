@@ -1,6 +1,5 @@
 /**
- * NoteComposer — the add/edit note POPUP (POPUP-SLEEP-1, Danny 06-08: "geen
- * popup, geen spellingchecker, geen vak voor de Koios AI verbeteringen" — "no
+ * NoteComposer — the add/edit note POPUP (POPUP-SLEEP-1, Danny 06-08: "no
  * popup, no spellchecker, no slot for the Koios AI improvements" — this
  * file is the fix for all three). Was an inline block inside NotesTab.tsx;
  * moved onto the shared FloatingPanel (draggable/resizable/position-remembered,
@@ -28,11 +27,9 @@
  * pinned outside the scroll area, and the whole content area still scrolls
  * (never clips) if the panel is smaller than everything put together.
  *
- * NOTITIE-VOICE-1 (Danny 06-08 "dictatietaal = editortaal" — "dictation language =
- * editor language"): the dictation mic rides the editor's own toolbar slot, next
+ * NOTITIE-VOICE-1 (Danny 06-08: "dictation language = editor language"): the dictation mic rides the editor's own toolbar slot, next
  * to the language picker, so one `language` state drives spellcheck AND the
- * recognition locale. Since KOIOS-ASSIST-TEXTFIELDS (Danny 08-08 "alle
- * omschrijvingen moeten ook een mic functionaliteit hebben en Koios AI" — "every
+ * recognition locale. Since KOIOS-ASSIST-TEXTFIELDS (Danny 08-08: "every
  * description field must also get mic functionality and Koios AI") that mic is
  * no longer wired by hand here: the shared `RichTextAssistBar` — the SAME component every other
  * description field now mounts — supplies it, including the escaped
@@ -96,8 +93,7 @@ interface NoteComposerProps {
   // is nothing worth keeping. Closing must never silently destroy typed work.
   onDraft?: (draft: NoteDraft | null) => void
   // True when initialDraft is a RESTORED concept (not a popout handoff) — the
-  // composer then shows the honest "hersteld, nog niet opgeslagen" ("restored,
-  // not saved") line.
+  // composer then shows the honest "restored, not saved" line.
   conceptRestored?: boolean
   // ASSIST-SIDEPANEEL-1: the candidate this note belongs to — the fallback
   // deep-link target for an executed appointment item in the side panel
@@ -174,6 +170,10 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
           ...(it.due_date ? { due_date: it.due_date } : {}),
           ...(it.start ? { start: it.start } : {}),
           ...(it.assignee_user_id ? { assignee_id: it.assignee_user_id } : {}),
+          // NOTE-BIRTH-STATUS-1: a wizard outcome reached on the draft rides along at birth, so a
+          // reopened note shows "Uitgevoerd" + the created record instead of "pending" again.
+          ...(!it.noteActionItemId && (it.status === 'executed' || it.status === 'failed') ? { status: it.status } : {}),
+          ...(!it.noteActionItemId && it.status === 'executed' && it.created ? { created: { type: it.created.type, id: it.created.id } } : {}),
           sort_order: i,
         })) }
     : fields.payload)

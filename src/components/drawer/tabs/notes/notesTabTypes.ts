@@ -69,6 +69,12 @@ export interface NoteActionItemWire {
   start?: string
   assignee_id?: string
   sort_order?: number
+  // NOTE-BIRTH-STATUS-1 (api 02755adc): a NEW item (no id) may be born with the outcome the
+  // wizard already reached before the note was saved — status executed|failed and the record
+  // it created; the server verifies `created.id` exists in the tenant and ignores both on an
+  // item that already has an id (the execute route stays the only writer there).
+  status?: 'pending' | 'executed' | 'failed'
+  created?: { type: 'appointment' | 'task' | 'calllist'; id: string }
 }
 export interface NotePayload { type: string; title: string; body: string; channel?: string; language?: string; action_items?: NoteActionItemWire[] }
 

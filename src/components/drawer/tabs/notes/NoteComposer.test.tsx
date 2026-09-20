@@ -433,6 +433,28 @@ describe('NOTE-ACTION-ITEMS-1 · items persist with the note (CMBE 173ffbf7)', (
     ])
   })
 
+  // NOTE-BIRTH-STATUS-1 (api 02755adc): a NEW item the wizard already executed on the draft is
+  // born with its status and created record; an item that has an id never carries them (the
+  // execute route stays the only writer there), and a pending/proposed item carries neither.
+  it('a new executed item is saved with status + created, a persisted one and a pending one without', () => {
+    const onSave = vi.fn()
+    render(<NoteComposer open initialNote={null} noteTypes={[]} channels={[]} labels={labels} editorLabels={{}}
+      initialDraft={{ type: 'general', channel: '', title: '', body: '', language: null,
+        items: [
+          { title: 'Bel over opdracht', type: 'appointment', start: '2026-09-22T12:00', due_date: null, note_excerpt: null, status: 'executed', created: { type: 'appointment', id: 'ap-9' } },
+          { title: 'Plan intake', type: 'appointment', start: '2026-09-02T10:00', due_date: null, note_excerpt: null, status: 'executed', noteActionItemId: 'ai-7', created: { type: 'appointment', id: 'ap-1' } },
+          { title: 'Stuur cv', type: 'task', due_date: '2026-09-03', note_excerpt: null, status: 'pending' },
+        ] } as never}
+      onSave={onSave} onCancel={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    const payload = onSave.mock.calls[0][0]
+    expect(payload.action_items).toEqual([
+      { title: 'Bel over opdracht', type: 'appointment', start: '2026-09-22T12:00', status: 'executed', created: { type: 'appointment', id: 'ap-9' }, sort_order: 0 },
+      { id: 'ai-7', title: 'Plan intake', type: 'appointment', start: '2026-09-02T10:00', sort_order: 1 },
+      { title: 'Stuur cv', type: 'task', due_date: '2026-09-03', sort_order: 2 },
+    ])
+  })
+
   it('a reopened saved note seeds the panel from action_items, executed status included', () => {
     render(<NoteComposer open noteTypes={[]} channels={[]} labels={labels} editorLabels={{}} initialDraft={null}
       initialNote={{ id: 'n1', type: 'general', body: '', action_items: [
