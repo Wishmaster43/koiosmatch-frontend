@@ -17,6 +17,16 @@ import { buildReportQueryParams, EMPTY_REPORT_FILTERS } from './reportFilterPara
 import type { ReportFilterState } from './reportFilterParams'
 import type { CandidatesReportData, ReportPeriod } from '@/types/analytics'
 
+// REPORT-DRILL-LEAD-1 safety net (20-09, smoke-measured): the contract promises the
+// 'none' sentinel for the unassigned owner bucket, but the envelope has shipped
+// `owner_id: null` — a null key then drops out of the drill params and the drill
+// answers 422. Fold null onto the sentinel once, here in the data layer, so every
+// consumer (axis cards, owner bars, drill) sees the contract shape either way.
+function normaliseOwnerSentinel(data: CandidatesReportData | null): CandidatesReportData | null {
+  if (!data?.by_owner) return data
+  return { ...data, by_owner: data.by_owner.map(row => ({ ...row, owner_id: row.owner_id ?? 'none' })) }
+}
+
 // Cached, cancellable candidates-report fetch; phaseFilter joins the query key so the Candidates and Leads populations never share a stale cache entry (see file header).
 export function useCandidatesReport(
   period: ReportPeriod,
@@ -26,7 +36,7 @@ export function useCandidatesReport(
   const params = { ...buildReportQueryParams(period, 'candidates', filters), ...(phaseFilter ? { phase: [phaseFilter] } : {}) }
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['reports', 'candidates', params],
-    queryFn: async ({ signal }) => ((await api.get('/reports/candidates', { params, signal })).data ?? null) as CandidatesReportData | null,
+    queryFn: async ({ signal }) => normaliseOwnerSentinel(((await api.get('/reports/candidates', { params, signal })).data ?? null) as CandidatesReportData | null),
   })
   return { data: data ?? null, loading: isLoading, error: isError, refetch }
 }

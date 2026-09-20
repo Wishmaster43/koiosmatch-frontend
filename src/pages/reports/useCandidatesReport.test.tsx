@@ -40,6 +40,16 @@ describe('useCandidatesReport — request shape', () => {
     }))
   })
 
+  it('folds a null unassigned-owner bucket onto the contract\'s \'none\' sentinel (REPORT-DRILL-LEAD-1 safety net) and leaves real owners alone', async () => {
+    getSpy.mockResolvedValueOnce({ data: { total: 3, by_owner: [
+      { owner_id: null, name: 'Niet toegewezen', count: 2 },
+      { owner_id: 'u1', name: 'Ravi', count: 1 },
+    ] } })
+    const { result } = renderHook(() => useCandidatesReport('month', undefined, 'lead'), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.data?.by_owner.map(r => r.owner_id)).toEqual(['none', 'u1'])
+  })
+
   it('caches Kandidaten and Leads separately — the phase filter is part of the query key', async () => {
     const { result, rerender } = renderHook(
       ({ phase }: { phase: string | null }) => useCandidatesReport('month', undefined, phase),
