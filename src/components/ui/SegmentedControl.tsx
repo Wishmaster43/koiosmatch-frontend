@@ -36,8 +36,7 @@ export interface SegmentedControlProps {
   // layout (e.g. CvSectionList's per-row sidebar⇄main switch). Default unchanged.
   size?: 'default' | 'compact'
   // Tint ONLY the selected option, leaving the rest neutral (Danny 11-08, on the
-  // package picker: "alleen het gekozen pakket moet groen zijn" — "only the
-  // chosen package should be green").
+  // package picker: "only the chosen package should be green").
   //
   // The §4 default — an inactive option keeps its own colour, just weaker — is right
   // when each option carries its OWN meaning (a status, a phase): the tint IS the

@@ -1,8 +1,8 @@
 /**
  * taskLinkTypes — the ONE task-link vocabulary (§11 one source). Was a private
  * const inside `drawer/LinksTab.tsx`; lifted here the moment a SECOND surface
- * needed it (Danny 08-08 punt 15: "een nieuwe taak moet ook aan een bedrijf,
- * locatie, afdeling of contactpersoon kunnen hangen" — the CREATE form now
+ * needed it (Danny 08-08 punt 15: "a new task should also be able to attach to
+ * a company, location, department or contact person" — the CREATE form now
  * offers the same couplings as the drawer tab, from this same table, never a
  * second hand-kept list that drifts).
  *

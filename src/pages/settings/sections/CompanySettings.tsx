@@ -34,8 +34,7 @@ import Row from './settingsFormRow'
 // countries are now backend-sourced (Settings → Personalisation → Industries;
 // GET /countries, COUNTRY-LOOKUP-1) — never a hardcoded list of either.
 // Value = locale CODE (what the setting stores and i18n understands), label =
-// the language NAME (Danny 25-08: "Taal moet Nederlands zijn, niet nl" —
-// "Language must be Dutch, not nl").
+// the language NAME (Danny 25-08: "Language must be Dutch, not nl").
 const LANGUAGES = APP_LANGUAGES.map(l => ({ value: l.value, label: l.label }))
 // Legacy rows stored the NAME; normalize either shape to the code.
 const toLanguageCode = (v: string): string => APP_LANGUAGES.find(l => l.value === v || l.label === v)?.value ?? 'nl'
@@ -143,7 +142,7 @@ export default function CompanySettings() {
   const { options: localeOptions } = useLocaleOptions()
   const currencyOptions = localeOptions.currencies.map(o => ({ value: o.code, label: o.label }))
   const timezoneOptions = localeOptions.timezones.map(o => ({ value: o.code, label: o.label }))
-  // TAAL-NAAM-1 (Danny 25-08: "Taal moet Nederlands zijn, niet nl"): the backend's
+  // TAAL-NAAM-1 (Danny 25-08: "Language must be Dutch, not nl"): the backend's
   // languages list labels its codes as bare codes ("EN", "DE" — measured on demo
   // 06-09), so the NAME comes from ICU in the current UI language; the backend label
   // is only the fallback when ICU does not know the code.

@@ -49,9 +49,8 @@ export default function CvSectionList({ sections, onSave }: CvSectionListProps) 
   }
 
   // Move a MOVABLE section to the other CV region (sidebar ⇄ main column,
-  // Danny 28-07, translated: "I also want to be able to determine the location
-  // of each section" — verbatim: "ik wil ook de locatie van elke sectie kunnen
-  // bepalen"); it
+  // Danny 28-07: "I also want to be able to determine the location of each
+  // section"); it
   // lands wherever its stored index puts it in the new region, adjustable
   // afterwards with the up/down arrows.
   const handleSectionPlacement = (id: string, placement: CvSectionPlacement) => {

@@ -1,8 +1,8 @@
 /**
  * BranchSection — candidate-side adapter onto the shared components/drawer/
  * BranchSection (§3A/§11: promoted so the customer drawer reuses the exact same
- * block instead of a second copy, Danny 28-07 "dit wil ik ook terug zien bij
- * klanten"). Data/mutation logic stays in useCandidateBranches — the candidate's
+ * block instead of a second copy, Danny 28-07: "I want to see this back on
+ * customers too"). Data/mutation logic stays in useCandidateBranches — the candidate's
  * own resource already embeds its branch membership (no GET route), unlike a
  * customer (VESTIGING-2 fase 4's dedicated endpoint, see useEntityBranches) — this
  * file only translates the labels and wires the toggle through.

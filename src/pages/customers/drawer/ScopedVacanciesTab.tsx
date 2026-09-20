@@ -13,7 +13,7 @@
  * the Vacancies PAGE, so opening the modal from any drawer without it throws
  * (caught live 28-07 on the customer-level tab this mirrors).
  *
- * STATUS FILTER (Danny 05-08 "ik mis de status naast het zoekveld?"): fetches
+ * STATUS FILTER (Danny 05-08: I'm missing the status next to the search field?): fetches
  * GET /vacancy-statuses directly, same as the customer-level VacanciesTab
  * (VacancyLookupsProvider is only mounted around the Vacancies PAGE) —
  * `resolved` gates handing the list to ScopedListTab so its shared

@@ -48,10 +48,10 @@ interface RichTextEditorProps {
   onLanguageChange?: (lang: string) => void
   showLanguage?: boolean
   // Host-supplied toolbar control(s) rendered next to the language picker —
-  // e.g. the note composer's dictation mic (Danny 08-08: "mic naast de taal").
+  // e.g. the note composer's dictation mic (Danny 08-08: "mic next to the language").
   toolbarExtra?: ReactNode
-  // KOIOS-ASSIST-TEXTFIELDS (Danny 08-08 "alle omschrijvingen moeten ook een mic
-  // functionaliteit hebben en Koios AI"): the shared RichTextAssistBar (mic +
+  // KOIOS-ASSIST-TEXTFIELDS (Danny 08-08 "every description field must also have
+  // mic functionality and Koios AI"): the shared RichTextAssistBar (mic +
   // Koios assist) mounts on EVERY editor by default. Mounted HERE rather than
   // hand-passed through `toolbarExtra` at ~30 call sites on purpose — that is
   // exactly the copy-per-screen drift §11 forbids, and it would have meant

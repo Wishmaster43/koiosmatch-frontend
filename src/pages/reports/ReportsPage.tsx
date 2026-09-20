@@ -5,8 +5,8 @@
  * active report from the route key handed down by appPages (#reports.<id>) and
  * renders it full-page.
  *
- * Right-hand filter panel (Danny 14-08: "elke pagina wordt een dashboardpagina
- * met filtermenu rechts"). Every report registers into the shared
+ * Right-hand filter panel (Danny 14-08: "every page becomes a dashboard page
+ * with a filter menu on the right"). Every report registers into the shared
  * `RightPanelContext` — the same panel DashboardLayout already renders for every
  * other page (§0 consistency): the always-present `period` group, plus (WAVE 1c,
  * 2026-08-25) status/owner/branch(+customer) and each report's own per-page
@@ -20,8 +20,8 @@
  * (extracted from this file, §3: > ~400 lines = split) — this page only resolves
  * the active report and renders it.
  *
- * RIGHTPANEL-FILTERS-1 (2026-08-14, Danny: "rode filters moeten naar rechts
- * filter menu"): the inline period `CreatableSelect` that used to travel down
+ * RIGHTPANEL-FILTERS-1 (2026-08-14, Danny: "the red filters must move to the
+ * right-hand filter menu"): the inline period `CreatableSelect` that used to travel down
  * through a `tabsSlot` prop into every report's own toolbar row is GONE — it was
  * an exact duplicate of the `period` group already registered by the panel hook
  * (both drove the same `period` state), the same "two doors, one room" pattern

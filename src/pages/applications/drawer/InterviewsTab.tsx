@@ -139,7 +139,7 @@ function StartInterviewAction({ applicationId, onStarted }: { applicationId: Id 
         <CreatableSelect value={agentId || null} onChange={setAgentId} allowCreate={false}
           placeholder={loading ? t('common:loading') : t('interview.start.agentPlaceholder')}
           options={options.map(o => ({ value: String(o.value), label: o.label }))} />
-        {/* House Button (Danny 20-08, pasted this pill: "Deze ook nog") — the 05-08
+        {/* House Button (Danny 20-08, pasted this pill: "this one too") — the 05-08
             soft-tint predates PRIMAIR-VLAK-1; an accent ACTION wears the solid trio
             via Button, at the drawer sm standard. */}
         <Button variant="primary" onClick={onStart} disabled={busy || unavailable}>

@@ -24,8 +24,7 @@
  * InterviewStatusCard: a disabled-looking button for an action the server will
  * refuse is a fake affordance (§3).
  *
- * EXPAND (Danny 09-08: "bij matches heb ik een pijltje om uit te klappen … bij
- * sollicitaties niet. Dat is niet consistent" — "with matches I have an arrow
+ * EXPAND (Danny 09-08: "with matches I have an arrow
  * to expand … not with applications. That's inconsistent") — the row now carries the SAME
  * disclosure MatchCard's `collapsible` mode has: collapsed by default, a trailing
  * chevron (ChevronRight → ChevronDown, no animation, exactly as there), a click on
@@ -61,7 +60,7 @@ import type { Id } from '@/types/common'
 
 // Row action icon (pencil / unlink) — the MatchCard idiom: bare icon button, muted
 // by default, the danger token only on the destructive one. Tokens only (§4).
-// `boxSizing: 'border-box'` (Danny 09-08: "de knoppen in één rij horen dezelfde
+// `boxSizing: 'border-box'` (Danny 09-08: the buttons in one row should share the same
 // afmeting te hebben" — "the buttons in one row should be the same size") —
 // the unlink button below adds a 1px border on TOP of
 // this same width/height; without border-box that border would grow it to

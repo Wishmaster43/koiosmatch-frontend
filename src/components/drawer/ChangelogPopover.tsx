@@ -1,16 +1,14 @@
 /**
  * ChangelogPopover — THE one shared record-history affordance for every entity
- * drawer (Danny 27-07, translated: "check the changelog icon in every drill-down,
- * it must match the candidate drill-down" — verbatim: "changelog icon in alle drill
- * downs nalopen, moet zijn zoals kandidaat drill down"; §3A(d): record history is a
+ * drawer (Danny 27-07: "check the changelog icon in every drill-down,
+ * it must match the candidate drill-down"; §3A(d): record history is a
  * changelog ICON-popover in the title row, never a tab). This shell owns only the
  * icon/open-close/outside-click/global-open-request chrome — each entity keeps its
  * OWN content (fetch + field-label mapping) and passes it as `children`, and its own
  * already-translated `label`.
  *
- * POPUP-SLEEP (Danny point 19, translated: "the changelog cannot be dragged; every
- * popup must be draggable" — verbatim: "wijzigingslog niet sleepbaar; elke popup
- * sleepbaar"): the hand-rolled fixed/centred panel is gone — the window IS the shared
+ * POPUP-SLEEP (Danny point 19: "the changelog cannot be dragged; every
+ * popup must be draggable"): the hand-rolled fixed/centred panel is gone — the window IS the shared
  * FloatingPanel now, so it inherits the one drag/resize/remember-my-spot engine
  * (useDraggablePanel) plus the focus trap, Escape-to-close and focus restore. It runs
  * MODELESS (`overlay={false}`): a changelog is a reference window you drag aside to

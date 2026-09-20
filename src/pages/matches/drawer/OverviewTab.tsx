@@ -25,8 +25,7 @@
  * OVERZICHT-DATA-1 (overzicht-data cluster follow-up wave): adds branch/
  * vestiging (M19, the DRILLDOWN-VOLGORDE-CANON's own last block, unchanged).
  *
- * MATCH-EDIT-1 (Danny 22-08, "waar is het potlootje bij een match? ik kan
- * niets wijzigen???", i.e. "where is the little pencil on a match? I can't
+ * MATCH-EDIT-1 (Danny 22-08: "where is the little pencil on a match? I can't
  * change anything???"): contract_type/start_date/end_date/hours_per_week
  * (M1/M2/M3) and cost_center/billing_emails (M28) are now EDITABLE here, in
  * one EditableFieldTable card (Contract/Financieel groups, mirroring the

@@ -1,9 +1,8 @@
 /**
  * ContactNameLink — a contact person's name rendered as a real link that opens THAT
- * contact's own drill-down on the Contactpersonen tab (Danny 28-07: "ik wil dat ik
- * vanuit de locatie ook door kan klikken op een contactpersoon en dat ik het scherm
- * krijg zoals … contactpersonen" — "I want to be able to click through from the
- * location to a contact person too, and get the same screen as … contacts").
+ * contact's own drill-down on the Contacts tab (Danny 28-07: I want to be able
+ * to click through from the location to a contact person too, and get the same
+ * screen as … contacts).
  *
  * Why a button and not an <a>: a contact has no page or deep link of its own — it lives
  * inside the customer drawer — so this is an in-app jump, not a URL. Styling it as a

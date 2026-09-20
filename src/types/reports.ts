@@ -71,7 +71,7 @@ export interface RunStep {
   finished_at?: string | null
   summary?: string
   items?: number
-  // Router step: the per-route distribution (Fase 2) — "→ Dagdienst: 12/40".
+  // Router step: the per-route distribution (Phase 2) — "→ Day shift: 12/40".
   routing?: Array<{ to_label?: string; matched?: number; total?: number; filtered?: number; handle?: string; overruled?: boolean }>
   // NODE-PROGRESS-1: live loop progress ({done,total}) for the canvas node ring;
   // null/absent = atomic step (the node shows an indeterminate spinner instead).
@@ -97,7 +97,7 @@ export interface RunStep {
   output?: unknown
   duration_ms?: number
   operations?: number
-  // RUN-MESSAGES-1 (Danny 10-09 12:30: "ik moet het bericht hier terug kunnen zien"): the
+  // RUN-MESSAGES-1 (Danny 10-09 12:30: "I need to be able to see the message back here"): the
   // messages a send step produced — recipient, channel, status (+ reason), a PII-gated
   // preview, and the record the thread belongs to for the deep link. Absent on older runs.
   messages?: RunStepMessage[] | null

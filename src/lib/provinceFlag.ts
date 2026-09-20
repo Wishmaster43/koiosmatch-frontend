@@ -1,6 +1,6 @@
 /**
  * provinceFlag — the flag asset for an ISO 3166-2 province code (Danny 13-09 row
- * 84: "Vlag van de provincie erbij"). Provinces have no emoji flag, so the 23 official
+ * 84: "add the province's flag"). Provinces have no emoji flag, so the 23 official
  * Dutch and Belgian flags ship as public-domain SVGs under public/flags/provinces/
  * (Wikimedia Commons, government symbols); a code outside that set resolves to null
  * and the row simply shows no flag. The BE serves `code` on the province lookup

@@ -109,8 +109,8 @@ export default function WorkflowFolderSidebar({
           />
         ))}
         <div style={{ height: 1, background: 'var(--border)', margin: '4px 12px' }} />
-        {/* FOLDER-SLOT-1 reversed (Danny 31-08 "moet je niet zien als de module niet
-            actief is"): a locked app-gated folder is not rendered at all — the server
+        {/* FOLDER-SLOT-1 reversed (Danny 31-08: "you shouldn't see it if the module
+            isn't active"): a locked app-gated folder is not rendered at all — the server
             stops listing them too, this filter keeps either landing order safe. */}
         {[...folders].filter(f => !f.locked).sort((a, b) => a.name.localeCompare(b.name, 'nl')).map(f => (
           <SidebarRow key={f.id} label={seedLabel('workflowFolders', { label: f.name })} icon={<Folder size={13} />}

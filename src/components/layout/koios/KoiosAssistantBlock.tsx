@@ -7,27 +7,27 @@
  *
  * Danny 09-09 (live review, evening): ONE compact row per suggestion — the deep-link
  * chip IS the title, the reason sits beside it, the actions on the same line; every
- * row wears the same two actions (Uitvoeren + a chat icon), never a filled button on
+ * row wears the same two actions (Execute + a chat icon), never a filled button on
  * one row and a link on the next; a confirmed action shows the record it created as
  * a chip (§0B), and the chat handoff carries the record ref + the reason, so Koios
- * knows who and why ("Koios snapt er niets van").
+ * knows who and why ("Koios has no idea what this is about").
  *
  * Danny 10-09 (live review, Kelly's panel): KOIOS-ROW-2 — the reason wraps to two lines
- * instead of being cut; Uitvoeren executes in ONE click when the tool registry does not
- * require a confirm (a descriptor stages and confirms in the same click — "waarom moet ik
- * na uitvoeren weer op bevestigen klikken?"), the two-step stays for confirm_required
- * tools; a tool switched off for the organisation or for this user renders Uitvoeren
+ * instead of being cut; Execute executes in ONE click when the tool registry does not
+ * require a confirm (a descriptor stages and confirms in the same click — "why do I
+ * have to click confirm again after executing?"), the two-step stays for confirm_required
+ * tools; a tool switched off for the organisation or for this user renders Execute
  * disabled with the reason and a link to the setting instead of a refusal after the
  * click; an executed search jumps to the record (the vacancy's candidate-search tab —
- * "gelukt maar er is niets gebeurd"); and the list plus the dashboard's "Koios deed dit
- * voor jou" refetch after every executed or cancelled action.
+ * "succeeded but nothing happened"); and the list plus the dashboard's "Koios did this
+ * for you" refetch after every executed or cancelled action.
  *
  * Danny 10-09 15:30 (second look at Kelly's panel): the row aligns on its centre line
- * again; a tool switched off for the organisation or the user gets NO Uitvoeren at all
- * ("uit voor jouw organisatie … toegevoegde waarde?" — a chip explaining a dead button
- * is worth nothing); the button wears the tool's own name from the capabilities
- * registry ("wat gaat uitvoeren doen?"); a no-contact row carries the message icon to
- * the person's Communicatie tab straight away; and the chat handoff asks a question
+ * again; a tool switched off for the organisation or the user gets NO Execute button at all
+ * ("off for your organisation … what does a chip next to a dead button add?" — a chip
+ * explaining a dead button is worth nothing); the button wears the tool's own name from
+ * the capabilities registry ("what will Execute do?"); a no-contact row carries the message
+ * icon to the person's Communication tab straight away; and the chat handoff asks a question
  * that fits the row's kind instead of "… Wat stel je voor?".
  */
 import { useTranslation } from 'react-i18next'
@@ -68,9 +68,9 @@ const KIND_META: Record<KoiosAssistantKind, { Icon: LucideIcon; color: string }>
   vacancy_zero_applications: { Icon: Briefcase,  color: 'var(--text-muted)' },
 }
 
-// Where an executed tool leaves the user (KOIOS-ROW-2, Danny: "je zou verwachten dat de
-// drilldown van de juiste vacature wordt geopend en tabblad kandidaten zoeken direct
-// getoond"): the row's ref of that type opens on that drawer tab. The confirm response
+// Where an executed tool leaves the user (KOIOS-ROW-2, Danny: "you would expect the
+// right vacancy's drilldown to open with the candidate-search tab shown right
+// away"): the row's ref of that type opens on that drawer tab. The confirm response
 // may also carry `data.navigate` {type,id,tab}; that wins when present.
 const TOOL_FOLLOW_UP: Record<string, { refType: string; tab: string }> = {
   zoek_kandidaten: { refType: 'vacancy', tab: 'candidateSearch' },
@@ -245,14 +245,14 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec, onDone }: {
   const { t } = useTranslation('common')
   const { openEntity } = useNavigation()
   // The tool registry's own word on this action: confirm_required decides one click or
-  // two, enabled_for_* decides whether Uitvoeren is offered at all (never a refusal after
+  // two, enabled_for_* decides whether Execute is offered at all (never a refusal after
   // the click when the answer is known before it).
   const { tools: capabilityTools, isLoading: capsLoading } = useKoiosToolCapabilities()
   const choices = choicesOf(suggestion)
   const primary: KoiosAssistantAction | undefined = choices[0]
   const capability: KoiosCapabilityTool | undefined = findToolCapability(capabilityTools, primary?.tool)
   // The button text says what the click DOES: the FE's own key, the server's human label,
-  // the registry's tool name ("Taak aanmaken", "Kandidaten zoeken"), and only then "Uitvoeren".
+  // the registry's tool name ("Create task", "Search candidates"), and only then "Execute".
   const actionLabel = (a: KoiosAssistantAction) => {
     const registryLabel = findToolCapability(capabilityTools, a.tool)?.label_nl
     const fallback = a.label || registryLabel || t('koios.assistant.execute')
@@ -366,8 +366,8 @@ export default function KoiosAssistantBlock({ onAskKoios, onClose }: { onAskKoio
   const { suggestions, loading, error, refetch } = useKoiosAssistant()
   const hasSuggestions = !loading && !error && suggestions.length > 0
   const queryClient = useQueryClient()
-  // After an executed or cancelled action the list and the dashboard's "Koios deed dit
-  // voor jou" read the server again (a resolved parked action must leave the list).
+  // After an executed or cancelled action the list and the dashboard's "Koios did this
+  // for you" read the server again (a resolved parked action must leave the list).
   const onDone = () => {
     void refetch()
     void queryClient.invalidateQueries({ queryKey: ['koios', 'for-you'] })

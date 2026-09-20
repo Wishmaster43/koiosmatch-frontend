@@ -1,12 +1,12 @@
 /**
- * AdminSubscriptionCard — BILLING-FACTUUR-1 slotstuk (superadmin): renders the
+ * AdminSubscriptionCard — BILLING-FACTUUR-1 final piece (superadmin): renders the
  * `subscription` block CMBE ships on GET /admin/tenants/{id}/usage (d6629eb4):
  * package + base price, the user split (included/active/extra + extra amount),
  * add-on modules and the month total — amounts arrive in EUROS, rendered via
  * the house formatCurrency (never cents, GEEN-KOSTEN applies to the CHAT only;
  * this is the superadmin billing surface where money is the point). When the
  * tenant sits ABOVE its included users, an honest warning line says so (Danny's
- * spec: "melding als een user buiten het pakket wordt aangemaakt").
+ * spec: "a notice when a user is created outside the package").
  */
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'

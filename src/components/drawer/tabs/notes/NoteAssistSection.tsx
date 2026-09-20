@@ -1,14 +1,14 @@
 /**
  * NoteAssistSection — the Koios AI assist block under the note editor
- * (NOTE-ASSIST-1 F3, Danny 06-08, translated: "no separate box for the Koios AI
- * improvements" — verbatim: "geen vak voor de Koios AI verbeteringen").
+ * (NOTE-ASSIST-1 F3, Danny 06-08: "no separate box for the Koios AI
+ * improvements").
  *
- * ASSIST-SIDEPANEEL-1 (Danny's 11-puntenvisie, K-155/K-157 live, 23-08):
+ * ASSIST-SIDEPANEEL-1 (Danny's 11-point vision, K-155/K-157 live, 23-08):
  * the old three-button improve/summarize/actions idiom is now TWO buttons —
- * "Verwerken" (mode `process`, rewrites the text) and "Samenvatten" (mode
+ * "Process" (mode `process`, rewrites the text) and "Summarize" (mode
  * `summarize_process`, condenses it) — each a SINGLE combined call that
  * returns the text AND the action items together. The TEXT half keeps the
- * existing review→Overnemen/Verwerpen idiom (AssistTextPreview,
+ * existing review→Accept/Reject idiom (AssistTextPreview,
  * process=replace/summarize_process=append, mirroring the old
  * improve/summarize semantics 1:1). The ITEMS half never touches the note
  * body any more: the moment a combined result lands, its items are handed

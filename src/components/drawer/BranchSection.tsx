@@ -34,8 +34,7 @@ interface BranchSectionProps {
  * BranchSection — links an entity (candidate, customer, …) to one or more of the
  * tenant's own establishments (branches): a searchable multi-select trigger plus
  * soft chips with a remove ×. Promoted from the candidate-only implementation
- * (§3A/§11 — Danny 28-07 "dit wil ik ook terug zien bij klanten" — "I want to
- * see this back with customers too"): ONE shared,
+ * (§3A/§11 — Danny 28-07: "I want to see this back with customers too"): ONE shared,
  * purely presentational component, adopted by every entity that links branches,
  * never a second hand-rolled copy. The membership fetch + optimistic add/remove
  * stays in each caller's own hook (useCandidateBranches for candidates —

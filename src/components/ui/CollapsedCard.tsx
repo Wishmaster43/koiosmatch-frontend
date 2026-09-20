@@ -35,7 +35,7 @@
  * CollapsedCard — a recruiter must never have to expand a section to satisfy
  * validation. Only secondary/optional content belongs here.
  *
- * CONTROLLED MODE (added for KoiosRadar, Danny 22-08 "moet sluitbaar zijn"):
+ * CONTROLLED MODE (added for KoiosRadar, Danny 22-08 "must be collapsible"):
  * pass BOTH `open` and `onOpenChange` to let the caller own the open/closed
  * state — e.g. so it can PERSIST the choice (localStorage) instead of losing it
  * on every remount. Omitting both keeps the original uncontrolled contract

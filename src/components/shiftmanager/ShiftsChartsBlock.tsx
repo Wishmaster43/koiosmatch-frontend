@@ -220,8 +220,7 @@ export default function ShiftsChartsBlock({
     setSelectedCustomers(s.selectedCustomers); setSelectedLocations(s.selectedLocations)
   }, [])
 
-  // Apply the default saved filter once on mount (Danny: "wordt niet default geladen?" —
-  // isn't it loaded by default?).
+  // Apply the default saved filter once on mount (Danny: "isn't it loaded by default?").
   const appliedDefaultRef = useRef(false)
   // Runs once: applies the saved default filter set the first time it becomes available,
   // guarded by the ref so a later defaultState change never re-applies it mid-session.

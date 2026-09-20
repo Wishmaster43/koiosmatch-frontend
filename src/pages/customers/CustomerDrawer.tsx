@@ -51,7 +51,7 @@ const TABS = [
   { id: 'matches',       tKey: 'matches' },
   { id: 'opportunities', tKey: 'opportunities' },
   { id: 'planning',      tKey: 'planning' },
-  // Danny 28-07: "Prijsafspraken hernoemen naar Financieel, met 2 subtabjes". The tab id
+  // Danny 28-07: rename Price agreements to Financial, with 2 sub-tabs. The tab id
   // stays `priceAgreements` — it is the deep-link token the count-cells and the URL use.
   { id: 'priceAgreements', tKey: 'financial' },
   // TAKEN-OP-KLANT-1: unblocked 28-07 — GET /tasks?customer={id} really filters now

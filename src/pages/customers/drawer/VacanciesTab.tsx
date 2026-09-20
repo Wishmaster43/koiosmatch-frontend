@@ -129,9 +129,8 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
   const { statusOptions, setStatusOptions, resolved, setResolved } = useSeedVacancyStatusOptions(t, SEED_STATUSES)
 
   // Load the tenant vacancy-status lookup once.
-  // BUG FIX (Danny 28-07: "Open maar staat niet aangevinkt?????" — "Open but it isn't
-  // checked??" — while the table said "Geen vacatures voor deze klant" — "No vacancies
-  // for this customer"): this mapped the option VALUE off `name`, but
+  // BUG FIX (Danny 28-07: "Open shows, but it isn't checked??" — while the table said
+  // "No vacancies for this customer"): this mapped the option VALUE off `name`, but
   // `GET /vacancy-statuses` returns no `value` at all — it returns `id` (a uuid) +
   // `name`. A vacancy row carries that UUID in `status.value`, so the filter compared
   // "Open" against a uuid, matched nothing, and silently hid every vacancy. The option

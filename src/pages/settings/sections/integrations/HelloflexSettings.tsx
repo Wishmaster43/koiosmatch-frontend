@@ -1,7 +1,7 @@
 /**
  * HelloflexSettings (INTEGRATIONS-SETTINGS-1) — the HelloFlex connector section:
- * Connection / Mapping / Contract map sub-tabs (Danny 31-08: "kopje integratie
- * en dan kopje ... met eigen subtabjes"). The contract-map screen moves in
+ * Connection / Mapping / Contract map sub-tabs (Danny 31-08: "an integrations
+ * heading and then a heading ... with its own sub-tabs"). The contract-map screen moves in
  * unchanged (HF-CONTRACTMAP-1); connection + mapping speak the live
  * INTEGRATIONS-CONTRACT endpoints. Domains per contract §Mappings v1.
  */

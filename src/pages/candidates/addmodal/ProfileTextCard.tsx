@@ -1,13 +1,13 @@
 /**
  * ProfileTextCard — the candidate's free-text "profile text" (summary), as a
- * collapsed ghost affordance (Danny 02-08, verbatim: "…moet altijd…" — a text
+ * collapsed ghost affordance (Danny 02-08: a text
  * field must always be present in the New candidate popup, exactly like we
  * have it on + Match). Reuses the candidate drawer's own `profile.summary`
  * label — never a second "profile text" key — and the shared
  * CollapsibleRichText block (components/ui) so this create form gets the
- * exact same low-height, always-present shape as the +Match "Opmerkingen"
- * ("Remarks") card. Sits LEFT on the branch row (Danny 05-08, verbatim:
- * "…profiel txt links…" — the profile text sits on one line with the
+ * exact same low-height, always-present shape as the +Match "Remarks"
+ * card. Sits LEFT on the branch row (Danny 05-08: the profile text
+ * sits on one line with the
  * branch, profile text on the left, just like on + Match) — no longer
  * full-width; the parent grid (AddCandidateModal, built via the shared
  * `modalColumns` convention) auto-places this card next to BranchesCard,

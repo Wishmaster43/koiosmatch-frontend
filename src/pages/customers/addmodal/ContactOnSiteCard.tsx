@@ -18,9 +18,8 @@
  * location/contact records, so it is container logic (§3: containers wire,
  * presentational components render), not something this card could own.
  *
- * CONTACT-PRIMAIR-LOCATIE-1/2 (Danny: "je typt Joost de Boer in en Joost weet er
- * niets van", i.e. "you type in Joost de Boer and Joost knows nothing about
- * it"): CREATE offers a real choice — pick one of this customer's
+ * CONTACT-PRIMAIR-LOCATIE-1/2 (Danny: you type in Joost de Boer and Joost knows
+ * nothing about it): CREATE offers a real choice — pick one of this customer's
  * existing contacts, OR type a brand-new name — both end in a real coupling
  * once the location exists (see AddLocationModal's submit()). EDIT keeps the
  * plain text field — the real per-site primary contact is already properly

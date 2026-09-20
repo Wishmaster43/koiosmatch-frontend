@@ -21,8 +21,8 @@
  * candidate); a block cell (an archived candidate) additionally disables "+ Taak"
  * itself — the calm explanation replaces opening a modal whose submit would just 422.
  *
- * TOOLBAR (Danny live review, 04-08, revised same day, verbatim: "…nog niet
- * goed" — i.e. "tasks isn't right yet" — the search + StatusFilterSelect first
+ * TOOLBAR (Danny live review, 04-08, revised same day: "tasks isn't right
+ * yet" — the search + StatusFilterSelect first
  * landed ALONGSIDE the old Open/Historie ("Open/History") toggles, which was
  * double filtering). Final shape: search → StatusFilterSelect → "+ Taak"
  * ("+ Task"), ONE line, nothing else — byte-identical toolbar shape to the

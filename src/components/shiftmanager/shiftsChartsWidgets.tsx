@@ -44,8 +44,8 @@ export function BarChartWidget({ data, bars, onBarClick }: {
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
         <XAxis dataKey="label" tick={{ fontSize: 12, fill: "var(--text-muted)" }} />
         <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "var(--text-muted)" }} />
-        {/* nl-NL thousands separator + force the series order (Totaal · Niet ingevuld · Geen
-            kandidaat · Prognose · Werkelijk) instead of recharts' default alphabetical sort. */}
+        {/* nl-NL thousands separator + force the series order (Total · Not filled · No
+            candidate · Forecast · Actual) instead of recharts' default alphabetical sort. */}
         <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid var(--border)", fontSize: 13 }}
           formatter={(value) => formatNumber(Number(value) || 0)}
           itemSorter={(item) => bars.findIndex(b => b.dataKey === (item as { dataKey?: unknown }).dataKey)} />
@@ -104,7 +104,7 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear,
   multiYear: boolean
   // Same drill-down as a chart bar: a cell click opens (row = datum, bar = series).
   onCellClick?: (row: ShiftsChartDatum, bar: ShiftBar) => void
-  // Waarden ↔ % (controlled — the toggle lives on the card title row for more space).
+  // Values ↔ % (controlled — the toggle lives on the card title row for more space).
   pct?: boolean
   // SM-2YR: when true, `bars` is one column per YEAR for a single metric, so the "%"
   // toggle means "Δ vs the previous selected year" instead of "% of that year's Totaal"
@@ -117,7 +117,7 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear,
   const fmtDelta = (d: number) => `${d > 0 ? '+' : ''}${formatPercent(d, locale)}`
   const totals = bars.map(b => data.reduce((s, r) => s + (Number(r[b.dataKey]) || 0), 0))
   // Per year the "Totaal" series is the 100% baseline; every other series is a share of it
-  // (Danny: "Totaal = 100%, de rest is afleiding daarvan"). Map year → its Totaal column.
+  // (Danny: "Totaal = 100%, the rest is derived from it"). Map year → its Totaal column.
   const totaalKeyByYear   = new Map<number, string>()
   const totaalTotalByYear = new Map<number, number>()
   bars.forEach((b, i) => {

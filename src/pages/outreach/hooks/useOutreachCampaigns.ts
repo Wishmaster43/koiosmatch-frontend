@@ -25,14 +25,13 @@ export interface Campaign {
   // TRASH-OVERAL-2: two-step trash lifecycle + the pending-erase stamp (list resource).
   lifecycle?: 'active' | 'archived' | 'pending_erase' | string
   pending_erase_at?: string | null
-  // Tenant custom-field values (§3B "Eigen velden").
+  // Tenant custom-field values (§3B "Custom fields").
   custom_fields?: Record<string, unknown>
   [key: string]: unknown
 }
 
 // OutreachCampaignController's filterRules() caps per_page at `between:1,200`. Fixed
-// 2026-08-05 (audit: "Bellijsten heeft niet eens een footer?? ... rows per page niet
-// overal toegepast" — "Call lists don't even have a footer?? ... rows per page not
+// 2026-08-05 (audit: "Call lists don't even have a footer?? ... rows per page not
 // applied everywhere"): this hook used to call GET /outreach-campaigns with NO per_page/
 // page at all, so the controller's own default (25) silently capped the whole list —
 // and OutreachPage had no PaginationBar at all to reveal the truncation (mirrors the

@@ -66,7 +66,7 @@ const FUNCTION_MATCH_OPTIONS = [
 // One label+hint toggle row, reused for every boolean leads-criteria toggle
 // (apply_radius / exclude_already_applied / include_expiring_placements) so the
 // layout stays identical across all three. The shared house Toggle (Danny 28-07:
-// "GEEN VINKJES MAAR TOGGLES!!!") replaces the raw checkbox; `ariaLabel` keeps the
+// "TOGGLES, NOT CHECKBOXES!!!") replaces the raw checkbox; `ariaLabel` keeps the
 // switch's accessible name short (just the label, not label+hint concatenated).
 interface CheckboxRowProps { checked: boolean; onChange: () => void; label: string; hint: string }
 function CheckboxRow({ checked, onChange, label, hint }: CheckboxRowProps) {
@@ -154,8 +154,8 @@ function VacancyCandidateTabSettingsInner() {
   // long always-visible list below a divider. Six sub-tabs, one per concern,
   // reusing the shared underline SubTabBar (mirrors every other settings screen).
   //
-  // TAB-STRIP-WIDTH-1 (Danny 13-09, verbatim: "de regel van de subtabjes kan
-  // breeder worden voor de titel"): the tab BAR used to reuse each section's long
+  // TAB-STRIP-WIDTH-1 (Danny 13-09: "the sub-tab bar can be made wider for the
+  // title"): the tab BAR used to reuse each section's long
   // descriptive sentence as its label (up to ~50 chars in nl/fr/es) — six of those
   // never fit a 720px strip, so most tabs sat scrolled off-screen behind only a
   // subtle edge-fade. Fix: the tab bar gets its OWN short 2-3 word name

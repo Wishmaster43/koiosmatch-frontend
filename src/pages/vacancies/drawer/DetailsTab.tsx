@@ -1,9 +1,9 @@
 /**
  * DetailsTab — thin container: wires useVacancyDetailsForm and stacks EVERY
  * field group as its own card on this ONE tab (VAC-ALGEMEEN-MERGE-1, Danny
- * 14-08 punt 9: "het Locatie-subtabblad verdwijnt: op het eerste tabblad
- * Algemeen staat ALLES in eigen blokjes"). The earlier Algemeen/Locatie/Eisen/
- * Voorwaarden SubTabBar (VAC-DETAILS-SPLIT-1) is gone — each Details<X>Tab
+ * 14-08 punt 9: "the Location sub-tab disappears: on the first tab, General,
+ * EVERYTHING sits in its own little blocks"). The earlier General/Location/Requirements/
+ * Conditions SubTabBar (VAC-DETAILS-SPLIT-1) is gone — each Details<X>Tab
  * still keeps its OWN pencil/save/cancel from its OWN hook section, so
  * editing one block never submits another's untouched draft; only the
  * navigation chrome around them (the sub-tab strip) was removed. No card/row
@@ -55,12 +55,12 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {/* Klant, locatie(vestiging)/afdeling/contactpersoon-cascade, contractvorm,
-          functie — the "Algemeen" block, first. */}
+      {/* Customer, location(branch)/department/contact-person cascade, contract form,
+          function — the "General" block, first. */}
       <DetailsGeneralTab vacancy={v} general={general} candidateTypes={candidateTypes} typeMeta={typeMeta}
         industries={industries} fnOptions={fnOptions} formatDate={formatDate} />
-      {/* Werkadres (straat/postcode/plaats/land/provincie) — the vacancy's own
-          bureau branch (vestiging, location_id) no longer lives on this card;
+      {/* Work address (street/postcode/city/country/province) — the vacancy's own
+          agency branch (location_id) no longer lives on this card;
           it is now the drill-down's own LAST block (VacancyBranchBlock, below). */}
       <DetailsLocationTab vacancy={v} location={location} />
       <DetailsRequirementsTab vacancy={v} requirements={requirements} seniorityLevels={seniorityLevels} educationLevels={educationLevels} />

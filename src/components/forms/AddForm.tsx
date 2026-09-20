@@ -175,12 +175,12 @@ export default function AddForm({ fields, onSave, onCancel, initial }: {
   // Fields whose hideWhen condition is active drop out entirely (pairing runs on what's left).
   const dis = (f: FieldDef) => !!(f.disabledWhen && values[f.disabledWhen])
   const visibleFields = fields.filter(f => !(f.hideWhen && values[f.hideWhen]))
-  // The checkbox field (examples: "Huidige functie" i.e. "Current position",
-  // "Nog in opleiding" i.e. "Still studying", "Altijd geldig" i.e. "Always
-  // valid") shares one line with the save/cancel buttons instead of its own row — wherever
-  // it sits in the field list, so every section puts it in the same compact spot
-  // (Danny 17-07, punten 1+2). Conditional fields around it (hideWhen/altLabel)
-  // keep working: they reference the field by key, not by position.
+  // The checkbox field (examples: "Current position",
+  // "Still studying", "Always valid") shares one line with the save/cancel
+  // buttons instead of its own row — wherever it sits in the field list, so
+  // every section puts it in the same compact spot (Danny 17-07, points 1+2).
+  // Conditional fields around it (hideWhen/altLabel) keep working: they
+  // reference the field by key, not by position.
   const cbIndex = visibleFields.findLastIndex(f => f.checkbox)
   const footerCheckbox = cbIndex >= 0 ? visibleFields[cbIndex] : null
   const rowFields = footerCheckbox ? visibleFields.filter((_, i) => i !== cbIndex) : visibleFields

@@ -3,8 +3,7 @@ import { MATCH_COL_STATUS, MATCH_COL_OTHER_PARTY, MATCH_COL_SCORE, MATCH_COL_ACT
 
 /**
  * MatchListHeaderBar — the ONE column-header bar above a flat MatchCard list
- * (KLANTEN 4, Danny 21-08 "Weergeven zoals bij de kandidaat" — "Display it like
- * on the candidate"): promoted from
+ * (KLANTEN 4, Danny 21-08: "Display it like on the candidate"): promoted from
  * candidates/drawer/MatchesTab.tsx so the customer and vacancy Matches tabs
  * render the identical bar instead of growing drifting copies (§11 — the
  * helper lands WITH adoption on the existing copy site). Column geometry comes

@@ -3,9 +3,8 @@
  * for the match form (job 21/22). The two fields follow DIFFERENT rules
  * (Danny 2026-07-22): cost-centre follows the customer→location→department
  * cascade's deepest picked level, while billing email is ALWAYS the customer's
- * own address regardless of the picked location/department ("facturatie blijft
- * het facturatie-adres dat aan de klant gekoppeld zit" — billing always stays
- * the billing address linked to the customer). Both still mirror
+ * own address regardless of the picked location/department (Danny 2026-07-22:
+ * billing always stays the billing address linked to the customer). Both still mirror
  * useRateProposal's "propose but never overwrite a manual edit" pattern: each
  * field freezes the instant the recruiter edits it (the *Dirty flag), so a later
  * customer/location/department pick never clobbers a manual value. Split out of

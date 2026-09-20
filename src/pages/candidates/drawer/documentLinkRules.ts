@@ -1,13 +1,11 @@
 /**
  * documentLinkRules — the ONE place that decides which documents / which entries a
- * "koppelen" ("link") picker may still offer (DOC-1-EIGENAAR-1, Danny 08-08, point 6).
+ * "link" picker may still offer (DOC-1-EIGENAAR-1, Danny 08-08, point 6).
  *
  * MEASURED live 08-08 against koiosmatch-api.test:
  *  - `PATCH /candidates/{id}/certifications/{cert}` with a `document_id` that already
- *    hangs on another entry answers **422** with, verbatim:
- *    `{"message":"Dit document is al aan een
- *    ander onderdeel gekoppeld.", errors:{document_id:[…]}}`
- *    (i.e. "This document is already linked to another item.")
+ *    hangs on another entry answers **422** whose message says the document is already
+ *    linked to another item (`errors.document_id` carries the same text).
  *    — the backend guard (Services/Candidate/DocumentOwnershipGuard) enforces "one
  *    document → at most one owner" across candidate_educations / _certifications /
  *    _languages / _skills / _references, and explicitly EXCLUDES the row being saved.

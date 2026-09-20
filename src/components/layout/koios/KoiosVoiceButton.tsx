@@ -23,8 +23,8 @@
  * will ALSO need to check that flag — today browser support is the only
  * gate; the host wires the tenant check once that setting lands.
  *
- * SECURE-CONTEXT GATE (Danny 08-08: "ik geef de mic toestemming maar tekst
- * komt niet in het blok"): the Web Speech API is spec-restricted to a SECURE
+ * SECURE-CONTEXT GATE (Danny 08-08: "I grant the mic permission but the text
+ * never lands in the box"): the Web Speech API is spec-restricted to a SECURE
  * CONTEXT (https or localhost). Served over plain http the constructor still
  * exists on `window`, so the mic looks live, but the browser silently blocks
  * recognition even after the user clicks "allow" on the permission prompt —
@@ -76,8 +76,8 @@ function useSpeechDictation({ onText, lang, onEnd }: { onText: (text: string) =>
   // browser's own silence-restarts) has emitted at least one final segment —
   // `onEnd` (the auto-send hook) only fires when there is real dictated text.
   const emittedAnyRef = useRef(false)
-  // VOICE-RESUME-1 (Danny 23-08: "opname met pauze overschrijft het eerste
-  // stuk"): the recognition handlers are wired ONCE per session, so calling
+  // VOICE-RESUME-1 (Danny 23-08: "recording with a pause overwrites the first
+  // part"): the recognition handlers are wired ONCE per session, so calling
   // `onText` directly froze the HOST's append-closure (and the editor value it
   // captured) at session start — after the browser's silence-restart the next
   // chunk appended onto the PRE-PAUSE text, overwriting everything dictated
@@ -135,7 +135,7 @@ function useSpeechDictation({ onText, lang, onEnd }: { onText: (text: string) =>
     // app's active UI locale — the chat composer's original behaviour.
     recognition.lang = RECOGNITION_LANG[lang ?? i18n.language] ?? 'en-US'
 
-    // FINAL-ONLY (Danny 08-08, live: "opname wordt niet voluit geschreven?" —
+    // FINAL-ONLY (Danny 08-08, live: "the recording isn't written out in full?" —
     // the note read "te / st / te / st" instead of "test test"). Interim results
     // are the recognizer THINKING OUT LOUD: it emits a guess ("te"), then revises
     // it ("test"), then finalises. Emitting every interim made each guess-fragment
@@ -271,7 +271,7 @@ export default function KoiosVoiceButton({ onText, t, lang, onEnd }: KoiosVoiceB
         aria-pressed={listening}
         className={listening ? 'km-koios-voice-pulse' : undefined}
         style={{
-          // Danny 20-08 ("hij valt niet op — een knopje van de mic maken"): the mic
+          // Danny 20-08 ("it doesn't stand out — make a proper mic button"): the mic
           // is a real trio chip at rest so it reads as a control; recording stays
           // a DANGER tint (his reconfirmed rule: destructive/warning keeps red).
           background: listening ? tintBg('var(--color-danger)', true) : 'var(--button-fill)',

@@ -1,7 +1,6 @@
 /**
  * MatchListBody — the shared header+empty+map shell for a flat MatchCard list
- * (KLANTEN 4, Danny 21-08 "Weergeven zoals bij de kandidaat" — "Display it like
- * on the candidate"): the SectionCard wrapper, the column-header bar
+ * (KLANTEN 4, Danny 21-08: "display it like on the candidate"): the SectionCard wrapper, the column-header bar
  * (MatchListHeaderBar) and the empty/populated branch were repeated verbatim
  * across the candidate, customer and vacancy drawer Matches tabs (DRY round 11,
  * MATCHLISTS). The per-row card body stays with each consumer as the `renderRow`
@@ -9,7 +8,7 @@
  * onEdit/vacancyUrl/helloflexGuid; customer/vacancy: helloflexLink/
  * shiftmanagerLink/contractForm), so unifying that part would collapse real
  * per-entity differences into one copy (rule B never applies here).
- * Column header bar: Danny 09-08 ("Match heeft geen titelbalk en sollicitaties wel") —
+ * Column header bar: Danny 09-08 ("Matches has no header bar and applications does") —
  * promoted to the shared MatchListHeaderBar (KLANTEN 4, 21-08); this shell renders it once
  * for every matches tab so the header can never drift per entity again.
  */

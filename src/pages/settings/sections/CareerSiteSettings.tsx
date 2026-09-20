@@ -5,9 +5,8 @@
  * backend's EnsureCareerSiteActive middleware enforces it on the public site
  * (list/detail/apply/feeds 404 while off), so this is a real control, not a
  * stored preference. Immediate save per toggle (house pattern for single
- * switches). Uses the shared SettingRow + Toggle (Danny 28-07, translated:
- * "must also become a toggle!!" — verbatim: "MOET OOK EEN
- * TOGGLE WORDEN!!") instead of a hand-rolled checkbox, so it matches every
+ * switches). Uses the shared SettingRow + Toggle (Danny 28-07:
+ * "must also become a toggle!!") instead of a hand-rolled checkbox, so it matches every
  * other on/off control in Settings; the stored value is still the same boolean.
  * Below it, PublicUrlsCard surfaces this tenant's own public site + job-board
  * feed URLs (the CAREER-1 contract: /site, /vacancies, /sitemap.xml, Indeed +

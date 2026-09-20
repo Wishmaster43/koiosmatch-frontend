@@ -79,7 +79,7 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
   const [refusedReason, setRefusedReason] = useState<string | null>(null)
   // KOIOS-CONFIRM-DECLINE-1 (PRIJSMODEL-C): the staffel stand on a budget-full decline.
   const [budget, setBudget] = useState<ActionBudget | null>(null)
-  // The record the tool created (§0B; Danny 09-09 "ik mis de hyperlinks bij de gemaakte taken").
+  // The record the tool created (§0B; Danny 09-09: "I'm missing the hyperlinks on created tasks").
   const [created, setCreated] = useState<KoiosContextRef | null>(null)
 
   // The tool's connection gate (KOIOS-AGENT-FE-1 rule 1): an integration tool with

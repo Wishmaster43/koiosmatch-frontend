@@ -1,11 +1,11 @@
 /**
  * TargetNoteField — per-target free-text note (G30), the SAME rich note as the
- * candidate drawer (Danny 14-08: "als je een notitie toevoegt dan moet deze
- * notitie wel hetzelfde zijn als nu een notitie, dus samenvatten verbeteren
- * actiepunten"). Reuses the shared building blocks a candidate note is built
+ * candidate drawer (Danny 14-08: "if you add a note, this note should be the
+ * same as a note is now, so improve/summarize/action-items too"). Reuses the
+ * shared building blocks a candidate note is built
  * from — `RichTextEditor` (assist off) + `RichTextAssistBar` (mic only, mirrors
- * `NoteFields`' own composition) + `NoteAssistSection` (Verbeteren / Samenvatten
- * / Actiepunten) — never a second hand-rolled assist block (§11). A bare
+ * `NoteFields`' own composition) + `NoteAssistSection` (Improve / Summarize
+ * / Action items) — never a second hand-rolled assist block (§11). A bare
  * type/channel picker is NOT added here: the outreach target's note has no
  * backing type/channel column on the backend (`UpdateOutreachTargetRequest`
  * only validates `note`), so those two fields of the candidate note shape would
@@ -21,8 +21,8 @@
  * In-place edit: pencil → editor + save/cancel (§3A convention), shown above
  * the block, never floating over the row.
  *
- * BELLIJST-NOTE-POPOUT-1 (Danny 14-08, looking at this exact editor: "dit moet
- * zeker een pop-out kunnen worden op een popup"): this is ONE field on ONE
+ * BELLIJST-NOTE-POPOUT-1 (Danny 14-08, looking at this exact editor: "this
+ * should definitely be able to become a pop-out on a popup"): this is ONE field on ONE
  * record, so it gets the candidate PROFILE TEXT's second-screen treatment
  * (TEKST-POPOUT-1) — a plain PATCH of one column, never the notes-thread
  * pop-out (that one risks a duplicate note on an add-only window, which does
@@ -175,7 +175,7 @@ export default function TargetNoteField({ note, onSave, targetId, campaignId, on
           <RichTextEditor value={draft} onChange={changeDraft} assist={false}
             toolbarExtra={<RichTextAssistBar value={draft} onChange={changeDraft} modes={[]} />}
             minHeight={80} />
-          {/* Koios AI assist — Verbeteren / Samenvatten / Actiepunten, byte-for-byte
+          {/* Koios AI assist — Improve / Summarize / Action items, byte-for-byte
               the candidate note's own block (§11 one source, no second copy). */}
           <NoteAssistSection body={draft} onApply={changeDraft} />
           {failed && <span style={{ fontSize: 10, color: 'var(--color-danger-text)' }}>{t('outreach:drawer.note.saveFailed')}</span>}

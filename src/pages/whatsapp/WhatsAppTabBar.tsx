@@ -29,7 +29,7 @@ export default function WhatsAppTabBar({
           const badge = id === 'escalations' ? escalationsCount : 0
           return (
             <button key={id} role="tab" aria-selected={active} onClick={() => setTab(id)}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- role="tab" NAVIGATIE-face (rustende tab = plaatsmarkering, PRIMAIR-VLAK-1): underline-actief, geen actieknop; Button modelleert geen tabblad
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- role="tab" NAVIGATION-face (a resting tab = a place marker, PRIMAIR-VLAK-1): underline-active, not an action button; Button does not model a tab
               style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 14px', border: 'none', background: 'transparent',
                 cursor: 'pointer', fontSize: 13, fontWeight: active ? 600 : 500,
                 // Text-colour accent uses the AA-contrast text token, not the raw brand primary.

@@ -1,8 +1,8 @@
 /**
  * CustomerStatusChip — THE chip for a customer's deployability status, wherever a
  * customer is referenced (customers table, drawers, …). Mirrors CandidateStatusChip
- * 1:1 (Danny 02-08: "Prospect heeft geen status, moet een - worden — kijk af bij
- * kandidaat"): a customer still in the ENTRY phase (Prospect — not yet a real
+ * 1:1 (Danny 02-08: "Prospect has no status, it must become a dash — copy the
+ * candidate behaviour"): a customer still in the ENTRY phase (Prospect — not yet a real
  * customer, mirrors "a Lead is not deployable") renders a dash instead of a chip.
  * The rule keys on the PHASE only, never on the literal status value — the backend
  * is mid-migration off a duplicate 'prospect' STATUS value (COORDINATION-LOG

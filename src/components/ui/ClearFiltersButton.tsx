@@ -1,9 +1,9 @@
 /**
- * ClearFiltersButton — one shared "wis alle filters" affordance for every list page.
+ * ClearFiltersButton — one shared "clear all filters" affordance for every list page.
  * Renders ONLY while something filters the view (search, donut/KPI picks, attention,
  * archived, …): page memory keeps filters alive across navigation (2026-07-06), so
  * without this a returning user could face an invisibly narrowed list (Danny's
- * "filters worden niet toegepast"-verwarring). One click = back to the default view.
+ * "filters aren't being applied" confusion). One click = back to the default view.
  * It also reports its active state to RightPanelContext, so the topbar filter icon
  * shows a dot while the page is filtered (Danny 2026-07-06) — no per-page wiring.
  */

@@ -22,7 +22,7 @@ export default {
     // expose fields (fields.tsx), so this reuses the SAME picker as every other text/
     // textarea field rather than a second variable-mapping UI.
     { key: 'body',                 label: 'Bericht',                type: 'textarea' },
-    // 02-09 (Danny, verbatim: "vertaling moet wel in de workflow staan"): per-language
+    // 02-09 (Danny: "the translation must live in the workflow"): per-language
     // overrides for subject + body, on their own "Vertalingen" tab (MODULE-FACE-BEVRIES —
     // main tab stays untouched). Empty per-field = falls back to subject/body (bureau language).
     { key: 'translations', label: 'Vertalingen', type: 'translations', tab: 'translations',

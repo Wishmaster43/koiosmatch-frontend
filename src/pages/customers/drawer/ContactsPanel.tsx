@@ -2,18 +2,16 @@
  * ContactsPanel — THE contact-person surface of the customer drawer. One component for
  * all three scopes: the customer's own Contactpersonen tab, a location's contact list and
  * a department's. Before this there were three hand-rolled variants (a full table, a
- * bordered row list and a bare SectionCard list) that agreed on nothing — Danny 28-07,
- * translated: "the contact-persons tab on location and department doesn't match the
- * main customer's" — verbatim: "het contactpersonen tabblad op locatie en afdeling
- * komt niet overeen met dat van de hoofdklant". Same columns, same chips, same
+ * bordered row list and a bare SectionCard list) that agreed on nothing — Danny 28-07:
+ * the contact-persons tab on location and department doesn't match the
+ * main customer's. Same columns, same chips, same
  * actions, same drill-down, everywhere.
  *
  * IT NEVER NAVIGATES. Clicking a row swaps THIS panel's body from the list to
  * ContactDetail and shows the shared breadcrumb trail. The host stays mounted, so a
  * location keeps its position, its sub-tab and its in-progress edits — the whole point of
- * Danny's report, translated: "if you then click back you're out of the location
- * or department???" — verbatim: "als je dan terug klikt ben je uit de vestiging
- * of afdeling???". The
+ * Danny's report: if you then click back you're out of the location
+ * or department???. The
  * old fix routed the click through the drawer's MAIN tab, which unmounted the locations
  * tab and destroyed exactly that state.
  *

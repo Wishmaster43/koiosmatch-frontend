@@ -10,8 +10,8 @@ import { GroupLabel, Caption } from '@/components/ui/typography'
 import type { Opportunity } from '@/types/opportunity'
 
 /**
- * ConversationTab — the opportunity drawer's Conversatie tab (Danny 24-08:
- * "EMAIL MOET ZIJN CONVERSATIE!! EN JE MOET DIT KUNNEN STARTEN EN TERUG LEZEN").
+ * ConversationTab — the opportunity drawer's Conversation tab (Danny 24-08:
+ * "EMAIL MUST BE A CONVERSATION!! AND YOU MUST BE ABLE TO START AND READ IT BACK").
  * Read-back works via the contact-scoped conversations endpoint (mirrors
  * ContactConversationsSection.tsx exactly, same shared ConversationsSection).
  *

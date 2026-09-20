@@ -26,10 +26,10 @@ import type { KoiosEffort } from './koiosTypes'
 import './koiosTypes' // module augmentation: KoiosChatMessage.pendingAction, KoiosStep.refs
 import type { KoiosChatTurn } from './koiosTypes'
 
-// KOIOS-MEMORY-1 (Danny 10-09, verbatim: "Koios AI heeft geen geschiedenis het lijkt wel
-// of elke bericht hij niet meer snapt wat het vorige bericht was"): measured, the chat
-// endpoint received only the new message, so "kan je hem een bericht sturen?" had no
-// "hem". Two carriers now: the last turns as text (history, read by the BE once its
+// KOIOS-MEMORY-1 (Danny 10-09: "Koios AI has no history, it seems like it doesn't
+// understand what the previous message was for every message"): measured, the chat
+// endpoint received only the new message, so "can you send him a message?" had no
+// "him". Two carriers now: the last turns as text (history, read by the BE once its
 // half lands) and the records the previous answer named, sent as context so the
 // follow-up resolves against them today. Bounded for data minimisation (§9).
 export const KOIOS_HISTORY_TURNS = 8

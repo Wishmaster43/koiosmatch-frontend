@@ -103,7 +103,7 @@ export default function CandidateLookupItemModal({
 
         <div style={{ marginBottom: 14 }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('lookups.valueField')}</div>
-          {/* LOOKUP-VALUE-MAX-1 (Danny 19-09, 422 "Het veld value mag niet meer dan 50 tekens bevatten"
+          {/* LOOKUP-VALUE-MAX-1 (Danny 19-09, a 422 saying the value may not exceed 50 characters
               on the gender lookup): the backend caps every lookup value at 50 characters, so the
               input stops there and the hint says so — the server's own message never has to. */}
           <input value={modal.value} maxLength={LOOKUP_VALUE_MAX}

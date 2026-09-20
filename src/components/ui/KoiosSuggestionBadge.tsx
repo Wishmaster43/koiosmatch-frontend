@@ -1,7 +1,6 @@
 /**
  * KoiosSuggestionBadge — the ONE marker for a value the system proposed
- * (KOIOS-VOORSTEL-1, Danny 13-08: "het moet voor de eindgebruiker duidelijk zijn
- * dat Koios dit voorstelt — ons eigen icon" — "it must be clear to the end user
+ * (KOIOS-VOORSTEL-1, Danny 13-08: "it must be clear to the end user
  * that Koios is proposing this — our own icon"). Koios is the face of EVERY system
  * suggestion, also plainly programmed heuristics — never a second marker.
  * Renders the shared KoiosAiMark + a translated "Koios AI" proposal line; the

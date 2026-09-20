@@ -211,16 +211,16 @@ export const MODULE_META = Object.fromEntries(
 
 // VERTREKMODULE-1: the types a workflow may START with — Koios entity nodes and
 // the inbound webhook. Everything else as first step is a finding (CLAUDE.md §10.5).
-// CMBE-antwoord 31-08: naast de isStart-gemarkeerde modules (entiteitsnodes +
-// webhook) zijn ook geldig: de SM-vertrekken, twee legacy-maar-geseede
-// ai_planner-vertrekken en het komende whatsapp_inbound-vertrek (kanaalkeuze
-// waba/waba_coex/wa_web). 'trigger' (oude generieke vertrek) blijft bewust
-// ONgeldig — de herseed faseert hem uit, de waarschuwing is daar terecht.
+// CMBE answer 31-08: besides the isStart-marked modules (entity nodes +
+// webhook), these are also valid: the SM start nodes, two legacy-but-seeded
+// ai_planner start nodes, and the upcoming whatsapp_inbound start node (channel
+// choice waba/waba_coex/wa_web). 'trigger' (the old generic start node) stays
+// deliberately INvalid — the reseed phases it out, so the warning there is correct.
 export const START_MODULE_TYPES = new Set([
   ...MODULES.filter(m => m.isStart).map(m => m.type),
   'sm_employees', 'sm_schedules',
-  // CMFE-besluit 31-08 (CMBE-vraag): de SM-sync-starts zijn dezelfde familie —
-  // de SM-spiegel IS het subject van die workflows (4 geseede templates).
+  // CMFE decision 31-08 (CMBE question): the SM sync starts are the same family —
+  // the SM mirror IS the subject of those workflows (4 seeded templates).
   'sm_candidates', 'sm_customers', 'sm_shifts',
   'candidate_filter', 'candidates_fetch',
   'whatsapp_inbound',

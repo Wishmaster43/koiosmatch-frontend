@@ -12,8 +12,8 @@
  * Lives in components/forms so both customers and opportunities can import it
  * directly without crossing an entity's page boundary. Mirrors
  * their common collapsed-ghost pattern. Born in the location/department modals
- * (Danny 02-08, verbatim: "bij locatie en afdeling moeten we ook een beschrijving
- * hebben") and extracted at the ~400-line split trigger (§0.3); the text VALUE and
+ * (Danny 02-08: "location and department should also get a description
+ * field") and extracted at the ~400-line split trigger (§0.3); the text VALUE and
  * its onChange come from the parent's form state, only expand/editing state is local.
  */
 import { useState } from 'react'

@@ -1,6 +1,6 @@
 /**
- * IbanDocumentSlot — DOC-BANK-2 (Danny 24-08: "een document kunnen koppelen aan
- * een IBAN en zakelijke ZZP-IBAN, met preview en download en change icon").
+ * IbanDocumentSlot — DOC-BANK-2 (Danny 24-08: "be able to link a document to
+ * an IBAN and a business ZZP-IBAN, with preview and download and change icon").
  * Completes the DOC-BANK-1 field mechanism: ONE shared slot for both bank
  * accounts — the private card writes `bank_document_id` on the candidate root,
  * the ZZP Facturatie card writes the same field on the freelance profile (both

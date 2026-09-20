@@ -1,8 +1,7 @@
 /**
- * StatisticsTab — Danny 22-08 ("Andere sollicitanten moet hier weg... eigen
- * tabje statistieken bij sollicitatie drill down en daar verplaatsen", i.e.
- * "Other applicants must move out of here... its own statistics tab on the
- * application drill-down, and move it there"): CompetitionBlock (the
+ * StatisticsTab — Danny 22-08 ("Other applicants must move out of here...
+ * its own statistics tab on the application drill-down, and move it
+ * there"): CompetitionBlock (the
  * vacancy's other applicants — funnel chip breakdown + expandable list,
  * SOLLICITANTEN-2) moves OFF the Sollicitatie tab onto its own Statistieken
  * tab, positioned SECOND (right after the first tab) — mirrors MatchDrawer's

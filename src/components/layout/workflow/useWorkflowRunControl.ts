@@ -37,14 +37,13 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
   const [activeRunId,    setActiveRunId]    = useState<string | number | null>(initialRunId)
   const liveRun = useWorkflowRun(activeRunId)
   // RUN-CONTROL-1: true after a 409 "already running" — the header shows the
-  // i18n "loopt al" ("already running") feedback while the logs panel points
+  // i18n "already running" feedback while the logs panel points
   // at that run.
   const [runConflict,    setRunConflict]    = useState(initialRunId != null)
 
-  // RUN-VISIBILITY-1 (Danny 24-07 "opnieuw open en je ziet niet dat hij nog bezig
-  // is" — "reopen it and you can't see that it's still busy"): on mount, ADOPT a
-  // run that is still live for this workflow — the poll, node rings, "Bezig"
-  // ("busy") status and the stop button resume as if never closed.
+  // RUN-VISIBILITY-1 (Danny 24-07 "reopen it and you can't see that it's still
+  // busy"): on mount, ADOPT a run that is still live for this workflow — the
+  // poll, node rings, "busy" status and the stop button resume as if never closed.
   const adopted = useRef(false)
   // On mount, adopt any run already live for this workflow so reopening the editor shows it as busy instead of idle.
   useEffect(() => {

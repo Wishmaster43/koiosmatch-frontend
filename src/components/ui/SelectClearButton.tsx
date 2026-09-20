@@ -1,6 +1,6 @@
 /**
  * SelectClearButton — the ONE "unset this value" affordance every shared picker
- * renders (DROPDOWN-CLEAR-1, Danny 08-09: "niet in elke zoekbare dropdown is een
+ * renders (DROPDOWN-CLEAR-1, Danny 08-09: "not every searchable dropdown has a
  * clear"). A SIBLING of the trigger, never a child: a <button> inside a <button>
  * is invalid HTML and browsers drop the inner one from the tab order. It is the
  * house ghost icon Button, absolutely positioned over the slot the trigger's value

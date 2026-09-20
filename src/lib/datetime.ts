@@ -60,7 +60,7 @@ export function useDateFormat() {
   // a fresh closure per render silently defeated the candidates row memoization.
   // Default to numeric DD-MM-YYYY (the app-wide standard, see CLAUDE.md §3B).
   // DATUM-1: the numeric default is DD-MM-YYYY in EVERY language (measured 25-08: en-GB
-  // rendered 25/08/2026, de-DE 25.08.2026). Only a caller asking for month names or a
+  // rendered 25/08/2026, German locale rendered 25.08.2026). Only a caller asking for month names or a
   // weekday gets the locale's own wording; digits never change shape per language.
   const formatDate = useCallback((value: DateInput, opts: Intl.DateTimeFormatOptions = NUMERIC_DATE): string => {
     if (!value) return '—'

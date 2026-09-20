@@ -1,13 +1,12 @@
 /**
  * AdditionalSkillsSection — the vacancy's required-skills list, brought onto the
  * SAME add/edit/remove interaction as the candidate drawer's (frozen canon)
- * SkillsTab (SectionTabs.tsx): a "+ Toevoegen"-style trigger reveals an inline
+ * SkillsTab (SectionTabs.tsx): a "+ Add"-style trigger reveals an inline
  * add form instead of an always-visible text+button row, and each row gets its
  * own pencil (edit-in-place, same list position) + trash (remove) — never
  * bare X-only removal with no way to rename a row. VACANCY-SKILLS-PARITY-1
- * (Danny 08-08): "Vereiste vaardigheden bij vacature werken anders dan
- * Vaardigheden bij kandidaten" (i.e. "Required skills on a vacancy work
- * differently than Skills on candidates") — this reuses the shared
+ * (Danny 08-08): "Required skills on a vacancy work
+ * differently than Skills on candidates" — this reuses the shared
  * `AddableSection` the candidate side already builds on (§3A: extend, never
  * duplicate).
  *

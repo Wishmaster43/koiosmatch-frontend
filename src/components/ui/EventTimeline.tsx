@@ -55,9 +55,8 @@ const timeStyle: CSSProperties = {
 }
 
 /**
- * EventTimeline — THE shared chronological activity list (Danny point 17,
- * translated: "the timeline doesn't look right yet" — verbatim: "tijdlijn
- * ziet er nog niet uit"). One calm row per event: a soft-tinted marker on a
+ * EventTimeline — THE shared chronological activity list (Danny point 17:
+ * "the timeline doesn't look right yet"). One calm row per event: a soft-tinted marker on a
  * continuous vertical axis, the time in mono, the event text at full contrast and
  * the author demoted to a muted meta line. Events are grouped per day under a
  * heading that reuses the shared `GroupLabel` atom, so the date is stated

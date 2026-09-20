@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
-// Danny 07-09 (last-contact screen): "geen checkboxen maar toggles" — each dedupe
+// Danny 07-09 (last-contact screen): "toggles, not checkboxes" — each dedupe
 // field is a Toggle atom with its title above the switch, never a checkbox list.
 import Toggle from '@/components/ui/Toggle'
 import { resolveGenericLookupIcon } from './lookupIcons'

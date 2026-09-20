@@ -1,5 +1,5 @@
-// leads_recount module (WF-LEADS-WORKFLOW-1, Danny 22-08: "moet wel een workflow
-// zijn") — queue the coded vacancy-leads recount from the tenant's own scheduled
+// leads_recount module (WF-LEADS-WORKFLOW-1, Danny 22-08: "this really has to
+// be a workflow") — queue the coded vacancy-leads recount from the tenant's own scheduled
 // workflow: the workflow decides THAT it runs and how often, the engine sweep
 // does the counting (§0.11 split). Field key/options mirror
 // App\Workflow\Modules\LeadsRecountModule::configSchema() exactly.

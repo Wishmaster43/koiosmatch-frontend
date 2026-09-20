@@ -33,8 +33,8 @@ const TD: CSSProperties = { ...bodyTextStyle, padding: '12px 16px',
   borderBottom: '1px solid var(--hover-bg)' }
 
 // Run history table (list + optional per-run drawer); scoped to one workflow, to one vacancy, or the global list.
-// VAC-RUNS-TAB-1 (Danny 18-09 20:0x: "als ik voor 1 vacature advies ververs dan wil ik dat ook
-// terugzien in de log"): `vacancyId` lists the runs stamped with this vacancy as context
+// VAC-RUNS-TAB-1 (Danny 18-09 20:0x: "when I refresh advice for 1 vacancy I also want to
+// see that reflected in the log"): `vacancyId` lists the runs stamped with this vacancy as context
 // (GET /workflow-runs?vacancy_id=, api b618a1ce) — every workflow, so each row names its workflow.
 export default function WorkflowHistoryView({ workflowId, vacancyId, initialRun }: {
   workflowId?: string | number

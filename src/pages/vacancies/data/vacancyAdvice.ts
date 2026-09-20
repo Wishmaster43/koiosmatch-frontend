@@ -36,7 +36,7 @@ export function deriveVacancyAdvice(v: Vacancy, opts: VacancyAdviceOptions): Vac
   if (!v.published) return NONE_RULE
 
   // Rule 3: published, zero applications, older than the stale threshold —
-  // Danny's own example rule ("geen sollicitaties + ouder dan X → Aandacht").
+  // Danny's own example rule ("no applications + older than X → Attention").
   // Clock parity with the BE stale_online stat (wave 2, 13-08): the server counts
   // from COALESCE(published_at, created_at) — measure from the same moment, or the
   // KPI tile and this row badge disagree on republished vacancies.

@@ -295,8 +295,8 @@ export default function RelationsSection({
         </F>
       ) : (
         <F label={t('placement.vacancyOptional')} error={errors.vacancyId}>
-          {/* CLEAR (point 1.8.4, Danny's ten-point round: "een misklik moet
-              herstelbaar zijn") — the shared CreatableSelect's own opt-in `clearable`
+          {/* CLEAR (point 1.8.4, Danny's ten-point round: "a mis-click must
+              be recoverable") — the shared CreatableSelect's own opt-in `clearable`
               X (VAC-CLEAR-1), never a hand-rolled button (CLAUDE.md §11: reuse, don't
               duplicate). Both a fresh pick AND this X funnel through the SAME
               `onChange`/`setVacancyId`, which reverts whatever the PREVIOUS vacancy

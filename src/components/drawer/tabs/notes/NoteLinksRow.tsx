@@ -46,8 +46,8 @@ interface NoteLinksRowProps {
   canManage: boolean
   // Seed from the note's own `links` read field (K-225 H2) — see file docblock for the reseed behaviour.
   initialLinks?: NoteLinkItem[]
-  // KOPPELEN-IN-POPOUT-1 (Danny 05-09, verbatim: "we hebben een knop erboven niet in de notitie
-  // zelf"): the note ROW only DISPLAYS its chips; adding and unlinking happen in the note's
+  // KOPPELEN-IN-POPOUT-1 (Danny 05-09: "we have a button above it, not in the note
+  // itself"): the note ROW only DISPLAYS its chips; adding and unlinking happen in the note's
   // second-screen editor, which mounts this row with mode 'edit'.
   mode?: 'display' | 'edit'
 }

@@ -1,6 +1,6 @@
 /**
- * Shiftmanager module settings — INTEGRATIONS-SETTINGS-1 (Danny 31-08: "onder
- * kopje integratie en dan kopje shiftmanager met eigen subtabjes"): the section
+ * Shiftmanager module settings — INTEGRATIONS-SETTINGS-1 (Danny 31-08: "under
+ * the integrations heading, then a Shiftmanager heading with its own sub-tabs"): the section
  * now fronts the CONNECTOR — Connection and Mapping speak the live
  * INTEGRATIONS-CONTRACT endpoints and are available on EITHER superadmin toggle
  * (module 'sm' OR app 'shiftmanager'), while the two original reporting

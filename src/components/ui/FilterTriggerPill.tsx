@@ -7,8 +7,7 @@
  * accidentally wore the add-affordance and lost its accessible name).
  *
  * Every filter trigger carries a filter GLYPH by default (Danny 20-08, pasted
- * the bare "Status" pill: "je ziet niet dat het een filterknopje is" — "you
- * can't tell it's a filter button") — a bare label doesn't read as a filter
+ * the bare "Status" pill: "you can't tell it's a filter button") — a bare label doesn't read as a filter
  * control. A caller with its own leading icon
  * passes it via `icon`; it replaces the default, never stacks.
  */

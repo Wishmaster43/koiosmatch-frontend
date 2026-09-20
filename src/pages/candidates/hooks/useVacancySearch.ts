@@ -201,9 +201,8 @@ export function useVacancySearch(candidate: Candidate) {
     setLoading(true); setError(false)
     api.get(`/candidates/${candidate.id}/vacancy-matches`, {
       params: {
-        // GEO-DEGRADE-1 (Danny 08-08, translated: "vacancy search no longer works +
-        // the filters disappear" — verbatim: "vacatures zoeken werkt niet meer + de
-        // filters verdwijnen"): an un-geocoded candidate used to bail out here, which killed
+        // GEO-DEGRADE-1 (Danny 08-08: vacancy search no longer works and the
+        // filters disappear): an un-geocoded candidate used to bail out here, which killed
         // the whole tab — filters, list and all. Measured against the live endpoint:
         // it happily scores and ranks WITHOUT an origin (9 rows, score 66, distance
         // null), so only the radius is dropped. The map/distance stay hidden (they

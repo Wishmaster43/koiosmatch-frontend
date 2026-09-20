@@ -120,8 +120,7 @@ export default function TerminateMatchModal({ match, onClose, onUpdate }: Props)
                 <Caption as="span">{t('drawer.terminate.noteCounter', { count: formatNumber(note.length), max: formatNumber(NOTE_MAX) })}</Caption>
               )}
             </div>
-            {/* POP-UPS 4: de toelichting krijgt de house-mic (plain-text dictatie) —
-                "the note field gets the house mic (plain-text dictation)". */}
+            {/* POP-UPS 4: the note field gets the house mic (plain-text dictation). */}
             <DictationTextarea value={note} rows={3} onChange={v => setNote(v.slice(0, NOTE_MAX))}
               placeholder={t('drawer.terminate.notePlaceholder')} aria-label={t('drawer.terminate.noteLabel')} />
             {fieldErrors.note && <div style={errorText}>{fieldErrors.note}</div>}

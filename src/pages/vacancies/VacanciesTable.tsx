@@ -38,8 +38,8 @@ const plainCell = { color: 'var(--text)', fontSize: 12 }
 // data first and a link second, so they take the SAME text colour as every other
 // number in the row. The affordance is the pointer cursor, the aria-label/title
 // and an underline on KEYBOARD focus only (§6 visible focus) — no hover underline
-// (Danny 17-09, on the Leads count: "er komt een streepje onder het getal, dat
-// hoeft niet").
+// (Danny 17-09, on the Leads count: "an underline appears under the number, it
+// doesn't need to").
 // Cell deep-link reset (HOUSE RECIPE, CandidatesTable.tsx) — no visual identity of
 const leadsBtn = { display: 'inline-flex', ...monoStyle, fontSize: 12,
   color: 'var(--text)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }

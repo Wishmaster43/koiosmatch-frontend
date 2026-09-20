@@ -138,8 +138,8 @@ function EscalationRow({ signal, days, target, onDays, onTarget, options, error,
                 onDays(String(Math.min(DAYS_MAX, Math.max(DAYS_MIN, Number(raw) || DAYS_MIN))))
               }}
               style={{ ...fieldInputStyle, width: 90, textAlign: 'right' }} />
-            {/* Unit suffix (Danny 13-08: "er staat niet bij wat het is, alleen een
-                getal") — the number is DAYS, and the field must say so itself. */}
+            {/* Unit suffix (Danny 13-08: "it doesn't say what it is, just a
+                number") — the number is DAYS, and the field must say so itself. */}
             <Caption>{t('escalation.daysUnit')}</Caption>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

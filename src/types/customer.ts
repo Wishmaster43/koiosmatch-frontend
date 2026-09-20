@@ -14,7 +14,7 @@ export interface Contact {
   id: Id | undefined
   // NUMMER-2: immutable human-readable display number (C-00042).
   referenceNumber?: string
-  // EXTRACT-1: the backoffice links (Koppelingen sub-tab), mapped from
+  // EXTRACT-1: the backoffice links (Links sub-tab), mapped from
   // backoffice_links[] — same shape/endpoint every entity shares.
   helloflexLink: BackofficeLink | null
   shiftmanagerLink: BackofficeLink | null
@@ -94,7 +94,7 @@ export interface Department {
   id: Id | undefined
   // NUMMER-1: human-readable reference number (A-001).
   referenceNumber?: string
-  // EXTRACT-1: the backoffice links (Koppelingen sub-tab).
+  // EXTRACT-1: the backoffice links (Links sub-tab).
   helloflexLink: BackofficeLink | null
   shiftmanagerLink: BackofficeLink | null
   name: string
@@ -129,7 +129,7 @@ export interface Location {
   id: Id | undefined
   // NUMMER-1: human-readable reference number (L-001).
   referenceNumber?: string
-  // EXTRACT-1: the backoffice links (Koppelingen sub-tab).
+  // EXTRACT-1: the backoffice links (Links sub-tab).
   helloflexLink: BackofficeLink | null
   shiftmanagerLink: BackofficeLink | null
   // K4BLOGO: this location's own logo — a fresh short-lived signed URL, never
@@ -242,7 +242,7 @@ export interface Customer {
   // location_id back, which the backend validates against real establishments.
   branchId: Id | null
   branchName: string
-  // EXTRACT-1: the backoffice links (Koppelingen tab) — same shape/endpoint every entity shares.
+  // EXTRACT-1: the backoffice links (Links tab) — same shape/endpoint every entity shares.
   helloflexLink: BackofficeLink | null
   shiftmanagerLink: BackofficeLink | null
   status: string | number
@@ -282,7 +282,7 @@ export interface Customer {
   // LANE-I1b: billing address line 2 + province (optional; billing_address folds them on the BE).
   billingAddressLine2: string
   billingProvince: string
-  // JOB-CONTACT-1 (Danny 28-07: "elke hoofdklant moet ... contactgegevens hebben") —
+  // JOB-CONTACT-1 (Danny 28-07: "every primary customer must ... have contact details") —
   // the customer's OWN e-mail/phone, distinct from a contact person's. The API
   // already sent these (CustomerDetailResource); only the FE mapper never read them.
   email: string

@@ -2,9 +2,8 @@
  * ContactsTab — the customer drawer's Contactpersonen tab. A thin host around the shared
  * ContactsPanel, which is now the ONE contact surface: the same table, chips, search,
  * actions and drill-down are rendered inside a location and a department too (Danny
- * 28-07: "het contactpersonen tabblad op locatie en afdeling komt niet overeen met dat
- * van de hoofdklant" — "the contact persons tab on location and department doesn't
- * match the one on the main customer").
+ * 28-07: the contact persons tab on location and department doesn't
+ * match the one on the main customer).
  *
  * Everything this file used to own — the column definitions, the singular-id fallback
  * resolver, the search shell, the add modal and the drill-in — moved into that panel, so

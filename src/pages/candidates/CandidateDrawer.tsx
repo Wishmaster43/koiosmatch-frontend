@@ -226,12 +226,12 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
             ...(account_holder_name !== undefined ? { accountHolderName: account_holder_name } : {}),
             // DOC-BANK-2: the proof-document link is a ROOT field too — it fell
             // into the preferences blob and never reached the real column
-            // (Danny 24-08 "werkt nog niet"). `!== undefined` keeps explicit
+            // (Danny 24-08: does not work yet). `!== undefined` keeps explicit
             // null (unlink) flowing through.
             ...(bank_document_id !== undefined ? { bankDocumentId: bank_document_id } : {}) })
         }}
         onTypesChange={(types: string[]) => onUpdate?.(c.id, { candidateTypes: types })}
-        // "Potlood op de statuswissel" (Danny 2026-07-20): reopen the status modal
+        // "Pencil on the status change" (Danny 2026-07-20): reopen the status modal
         // PREFILLED to fix a sick-note reason or return date — only offered when the
         // current status actually carries one (flag-driven, see useCandidateStatus).
         onEditStatus={status.canEditStatusReason ? status.openStatusEdit : undefined} />

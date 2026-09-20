@@ -1,7 +1,7 @@
 /**
  * RichTextAssistBar — the ONE toolbar add-on that gives EVERY free-text field
- * in the app dictation + Koios AI (Danny 08-08: "alle omschrijvingen moeten
- * ook een mic functionaliteit hebben en Koios AI"). It plugs into
+ * in the app dictation + Koios AI (Danny 08-08: "every description field must
+ * also have mic functionality and Koios AI"). It plugs into
  * RichTextEditor's toolbar and owns two affordances:
  *
  *  1. MIC — the shared `KoiosVoiceButton`, driven by the editor's OWN language
@@ -20,8 +20,7 @@
  *     (`AssistActionsResultsPanel`) — notes/ no longer keeps its own copy of
  *     any of the three (§11 one source).
  *
- * CMFE-KOIOS-CONSISTENCY-1 (Danny 09-08, verbatim: "…de icon Koios…de knoppen
- * er niet gelijk? Actiepunten auto en wizard ontbreekt!!" — i.e. "why does
+ * CMFE-KOIOS-CONSISTENCY-1 (Danny 09-08: "why does
  * the new-task icon have Koios while the buttons aren't aligned? Action
  * points auto and wizard are missing!!") — this file used to hide Verbeteren/Samenvatten behind
  * a click on the Koios mark AND lack the Actiepunten mode entirely, both
@@ -30,8 +29,7 @@
  * notes (§3: a disabled-with-reason button is honest, a hidden one is not) —
  * and 'actions' is a first-class third mode with the same execute wizard.
  *
- * ACTIONS-SCOPE-DEFAULT-FLIP (Danny 09-08, verbatim: "…uit een GESPREK, niet
- * uit een omschrijving…" — i.e. "action points follow from a CONVERSATION,
+ * ACTIONS-SCOPE-DEFAULT-FLIP (Danny 09-08: "action points follow from a CONVERSATION,
  * not from a description; most fields are descriptions, so the default
  * should be reversed"): the default `modes` below
  * is improve+summarize ONLY — Actiepunten no longer ships on a field unless the

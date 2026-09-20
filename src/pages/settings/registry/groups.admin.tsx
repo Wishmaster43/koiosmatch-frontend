@@ -101,8 +101,8 @@ export const adminGroups: NavGroup[] = [
     items: [
       { id: 'roles', icon: Shield, component: RolesSettings },
       { id: 'users', icon: Users, component: UsersPage },
-      // CATALOG-EMBED-1 (Danny 13-09: "hoort onderdeel te zijn bij alle
-      // instellingen"): the catalogue's "retention" section, system group —
+      // CATALOG-EMBED-1 (Danny 13-09: must be part of every settings screen):
+      // the catalogue's "retention" section, system group —
       // message/workflow-run/Koios-memory/AI-prompt-log retention windows, a
       // platform concern rather than any one entity's own screen.
       { id: 'system', icon: ShieldCheck, render: () => <CatalogSection section="retention" group="system" /> },

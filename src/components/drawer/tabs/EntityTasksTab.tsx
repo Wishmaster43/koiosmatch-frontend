@@ -1,20 +1,20 @@
 /**
  * EntityTasksTab — the ONE "Taken" tab body for every drawer that shows the tasks
  * linked to one record (contact, opportunity, customer, …). Toolbar mirrors the
- * Vacatures tab (Danny 03-08: "moet eruitzien zoals Vacatures: zoeken — Alle
- * statussen — + Nieuwe taak") — search, a status filter, the house "+ Nieuwe taak"
+ * Vacancies tab (Danny 03-08: "should look like Vacancies: search — All
+ * statuses — + New task") — search, a status filter, the house "+ New task"
  * trigger, all four UI states, and rows that click through to the task itself.
  *
  * TAKEN-TOOLBAR-2: the old Open/Historie QuickViewToggle switch was replaced by a
  * multi-select status filter keyed on the tenant's real task-status lookup (never a
- * literal open/history split) — "Alle statussen" (nothing picked) shows every task,
+ * literal open/history split) — "All statuses" (nothing picked) shows every task,
  * completed included, same as every other status-filtered list. It now lives inside
  * DrawerFilterMenu (TASK-FILTER-MENU-1 below) rather than the standalone
  * StatusFilterSelect trigger — this file still reuses that component's
  * `useStatusFilter` hook for the actual filtering logic, just not its UI.
  *
  * The status chip's colour respects `customer_task_table_color_status` (Settings →
- * Klanten → Weergave → Taken) when this tab renders inside the customer drawer —
+ * Customers → Display → Tasks) when this tab renders inside the customer drawer —
  * see the `colorStatus` comment below for why it is scoped to that one linkType.
  *
  * Promoted out of pages/opportunities/drawer/TasksTab.tsx (§3A/§11 — a second copy
@@ -27,8 +27,8 @@
  * NotesTab, which takes its labels the same way). Every string still comes from
  * t() at the call site — nothing is hardcoded here.
  *
- * TASK-FILTER-MENU-1 (Danny 08-08, "Notities dus zo overal met die filter en ook
- * taken doen"): status + the tenant TYPE ("Soort activiteit") and PRIORITY lookups
+ * TASK-FILTER-MENU-1 (Danny 08-08, "so notes everywhere with that filter and also
+ * do tasks"): status + the tenant TYPE ("activity type") and PRIORITY lookups
  * moved BEHIND the shared DrawerFilterMenu (search + add stay in the toolbar), all
  * as MULTI-select rows (mirrors useStatusFilter's own multi-value contract).
  * `type`/`priority` field labels come straight from the 'tasks' namespace, not the

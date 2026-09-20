@@ -51,9 +51,9 @@ export interface FieldRow {
   // expands to these loose child fields instead. Child keys are read straight off
   // the shared `values` object (street/houseNumber/houseNumberSuffix/postalCode/city).
   addressFields?: FieldRow[]
-  // 'name' composite — the sibling of 'address' above (Danny 05-08: "voornaam,
-  // tussenvoegsel en achternaam tonen als 1 regel; alleen bij het potloodje zijn
-  // het er 3"). Read mode composes ONE line ("Voornaam tussenvoegsel Achternaam",
+  // 'name' composite — the sibling of 'address' above (Danny 05-08: "show first name,
+  // middle name and last name as 1 line; only the pencil icon splits it into
+  // 3"). Read mode composes ONE line ("First name middle name last name",
   // skipping empty parts); editing expands to these loose child fields instead.
   // Same mechanism as 'address': child keys are read straight off the shared
   // `values` object (firstName/middleName/lastName), never a nested 'name' key.
@@ -239,7 +239,7 @@ export default function EditableFieldTable({
   // CANON-DIVIDER-1: the line between rows (and the row label's font size) are the two
   // knobs the candidate ProfileTab canon changes; both fall back to this table's
   // original look when the caller doesn't pass them.
-  // CHIP-INLINE-1 (Danny 05-08 "niet eronder maar ernaast"): chips READ as a normal
+  // CHIP-INLINE-1 (Danny 05-08: "next to it, not underneath"): chips READ as a normal
   // label-left row (they wrap in the value area); only while EDITING do they take the
   // full width — the option grid genuinely needs it (mirrors textarea/richtext).
   // readOnly fields always render their value, never the edit control (used for derived fields).

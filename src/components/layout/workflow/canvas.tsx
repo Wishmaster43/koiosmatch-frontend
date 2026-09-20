@@ -79,7 +79,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
   const failed = status === 'failed'
   const done   = status === 'success'
 
-  // NODE-PROGRESS-1 (Danny 23-07 "een rondje hoever hij is met lopen", Make-style):
+  // NODE-PROGRESS-1 (Danny 23-07 "a little ring showing how far along it is", Make-style):
   // a circular progress arc IN the glow ring + a counter badge. Determinate when the
   // step reports {done,total} loop progress; an indeterminate spinner otherwise. The
   // arc also keeps filling after step-success while a fan-out is still delivering.

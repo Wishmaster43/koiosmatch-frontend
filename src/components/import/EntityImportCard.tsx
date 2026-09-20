@@ -1,9 +1,8 @@
 /**
  * EntityImportCard — the "create these FROM A FILE" entry at the TOP of a create
- * modal, in CvUploadCard's exact compact footprint (Danny 02-08 live review: "+
- * nieuwe klant moet net zo groot zijn als + nieuwe kandidaat. Sleep csv import
- * bestand blok is te groot nu" — + new customer must be exactly as big as + new
- * candidate; the drag-CSV-import-file block is too big right now). Settings' own
+ * modal, in CvUploadCard's exact compact footprint (Danny 02-08 live review:
+ * "+ new customer must be exactly as big as + new candidate; the drag CSV
+ * import file block is too big right now"). Settings' own
  * UploadStep has a big dashed drop zone that is right for a full Settings page,
  * wrong above a create form the user came here to fill in — so THIS step-1 row
  * is hand-rolled to CvUploadCard's own
@@ -141,8 +140,8 @@ export default function EntityImportCard({ wizard, canView, canImport, entity, i
               title={canImport ? undefined : t('import.noImportPermission')} style={{ gap: 6 }}>
               <FileUp size={14} /> {t('import.selectCsv')}
             </Button>
-            {/* POP-UPS 3.5: de template-download is een KNOP met icoon — de oude
-                gekleurde tekstlink was precies het 08-08-anti-patroon. */}
+            {/* POP-UPS 3.5: the template download is a BUTTON with an icon — the old
+                coloured text link was exactly the 08-08 anti-pattern. */}
             <Button type="button" variant="secondary" onClick={handleDownloadTemplate} disabled={!canView}
               title={canView ? undefined : t('import.noViewPermission')} style={{ gap: 6 }}>
               <Download size={13} /> {t('import.downloadTemplate')}

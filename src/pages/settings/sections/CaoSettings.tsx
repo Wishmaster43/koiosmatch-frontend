@@ -1,6 +1,6 @@
 /**
  * CaoSettings — the CAO (collective labour agreement) lookup finally gets its
- * Settings home (Danny 24-07: "ik zie geen CAO's bij instellingen" — "I don't
+ * Settings home (Danny 24-07: "I don't
  * see any CAOs in Settings" — the /cao endpoint had full CRUD +
  * reorder + in-use 409 (via matches.cao) but no screen, same gap class as
  * provinces). Name-only list; drives the customer price agreements and the

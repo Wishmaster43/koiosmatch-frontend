@@ -1,7 +1,7 @@
 /**
  * booleanField — which workflow filter fields are yes/no, and how a stored boolean maps
  * onto the yes/no menu. Shared by the edge-filter panel (router lines) and the module
- * filters field (Danny 09-09: "filters moeten er zijn in de modules en op de lijntjes").
+ * filters field (Danny 09-09: "filters must exist in the modules and on the connector lines").
  * The module catalogue carries labels only, so the key names decide (consent flags,
  * is_/has_ predicates, enabled/active switches) until the catalogue publishes a type per
  * field (asked of CMBE with WORKFLOW-CONSENT-1).

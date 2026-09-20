@@ -165,8 +165,8 @@ export function VacancyChannelSettings() {
         flagFields={[
           { key: 'active', label: t('vacancy.channelActive'), description: t('vacancy.channelActiveDesc'), default: true },
           { key: 'default_enabled', label: t('vacancy.channelDefaultEnabled'), description: t('vacancy.channelDefaultEnabledDesc') },
-          // Row 36 (Danny 09-09, "welke zichtbaar moeten zijn en standaard aan moeten staan …
-          // 1 van de 2 altijd aan"): the third orthogonal flag, PUT /vacancy-channels/{id}
+          // Row 36 (Danny 09-09, "which ones must be visible and on by default …
+          // one of the two always on"): the third orthogonal flag, PUT /vacancy-channels/{id}
           // `locked_on` — the backend 422s it without `active` (ChannelPolicy).
           { key: 'locked_on', label: t('vacancy.channelLockedOn'), description: t('vacancy.channelLockedOnDesc') },
         ]} />

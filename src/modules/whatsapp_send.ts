@@ -80,11 +80,11 @@ export default {
     // Free-form session text — only shown (and sent) for the 'session' format.
     { key: 'session_text',        label: 'Berichttekst (sessie)',  type: 'textarea',
       placeholder: 'Hoi {{firstname}}, …', showIf: { key: 'message_type', value: 'session' } },
-    // 02-09 (Danny, verbatim: "vertaling moet wel in de workflow staan"): per-language
+    // 02-09 (Danny: "the translation must live in the workflow"): per-language
     // overrides for the session text, on their own "Vertalingen" tab (MODULE-FACE-BEVRIES —
     // main tab stays untouched). Empty per-field = falls back to session_text (bureau language).
-    // Only shown for the free-text session format (Danny 02-09: "Vertaling is
-    // alleen als het vrij tekst module is. Bij template kan dit niet.") — a
+    // Only shown for the free-text session format (Danny 02-09: "Translation is
+    // only for the free-text module. It can't apply to a template.") — a
     // template's variables come from Meta's approved template, not free text.
     { key: 'translations', label: 'Vertalingen', type: 'translations', tab: 'translations',
       fields: ['text'], languages: MESSAGING_LANGUAGES, mainFields: { text: 'session_text' },

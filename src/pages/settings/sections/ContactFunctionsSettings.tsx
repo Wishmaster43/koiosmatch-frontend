@@ -1,7 +1,7 @@
 /**
  * ContactFunctionsSettings — the contact-person job-title list (/contact-functions,
- * FUNCTIONS-SPLIT-1) + the free-entry toggle (Danny 24-07: "ook voor deze het blok
- * vrije invoer toestaan" — allow free entry for this block too). A thin config
+ * FUNCTIONS-SPLIT-1) + the free-entry toggle (Danny 24-07: allow free entry
+ * for this block too). A thin config
  * over the shared FreeEntryLookupSettings (see its own doc comment for the
  * dedicated-route reasoning), plus a `notFoundNotice` for tenants where this
  * lookup is not deployed yet.

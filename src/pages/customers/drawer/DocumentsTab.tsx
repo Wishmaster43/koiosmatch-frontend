@@ -14,10 +14,8 @@
  * triggers the attachment disposition, and renders it in-dialog. The separate
  * "download" bulk/row actions are untouched — they still open the real download route.
  *
- * DOCS-LOC-DEPT-1 (Danny, translated: "you need to know at which level [a
- * document] is linked: CUSTOMER, LOCATION, DEPARTMENT, CONTACT PERSON" —
- * verbatim: "je moet weten op welk niveau [een document] gekoppeld
- * wordt: KLANT, LOCATIE, AFDELING, CONTACTPERSOON"): a document may ALSO hang off
+ * DOCS-LOC-DEPT-1 (Danny: you need to know at which level [a
+ * document] is linked: CUSTOMER, LOCATION, DEPARTMENT, CONTACT PERSON): a document may ALSO hang off
  * one location or one department of this customer — `customer_documents` has no
  * `customer_contact_id` column (measured: EntityDocumentController::store/update
  * only validate customer_location_id/customer_department_id), so unlike notes the

@@ -1,7 +1,6 @@
 /**
  * popupCommands — THE one shortcut-key file for popups (walkthrough 21-08,
- * POP-UPS 3.2, verbatim: "een apart TSX voor sneltoetsen" — i.e. "a separate
- * TSX for shortcut keys"). Every key that a popup understands app-wide lives
+ * POP-UPS 3.2, verbatim: "a separate TSX for shortcut keys"). Every key that a popup understands app-wide lives
  * HERE — nowhere else. Consumers:
  *   - useFocusTrap (every FloatingPanel modal + the standalone trapped panels)
  *     routes its keydown through this for Tab-trap; Escape itself now goes

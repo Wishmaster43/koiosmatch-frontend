@@ -1,9 +1,9 @@
 /**
  * reportIds — the ordered list of analytical report sub-pages (RAPPORTEN-OMBOUW-1,
  * consolidated further in RAPPORTEN-CONSOLIDATIE-1 2026-08-14: Danny's sidebar
- * screenshot showed nineteen entries — "rapporten is nog steeds een veel te lange
- * lijst" — so five of those merged into ONE page each with a top-right switch,
- * mirroring the Shiftmanager dashboard's "In uren / In diensten" toggle).
+ * screenshot showed nineteen entries — "reports is still a far too long
+ * list" — so five of those merged into ONE page each with a top-right switch,
+ * mirroring the Shiftmanager dashboard's "In hours / In shifts" toggle).
  * One id per report; the first entry is the default report for a bare #reports hash.
  * Shared by the sidebar's Rapporten submenu and the ReportsPage router so the two
  * can never drift; ids double as the `reports.<id>` route keys and the
@@ -12,7 +12,7 @@
  *
  * What merged into what (every merge is a SWITCH, never a lost page — see each
  * report component's own doc comment for the server-side filter that backs it):
- *   - 'leads' (own page)              → a Kandidaten/Leads switch on 'candidates'.
+ *   - 'leads' (own page)              → a Candidates/Leads switch on 'candidates'.
  *   - 'sources' (own page)            → retired: 'source' was already one of
  *     'candidates'/Instroom's own five axes, so its own page added nothing a
  *     switch position could isolate that the axis bar doesn't already show.
@@ -24,16 +24,16 @@
  *     have conflated two different kinds of "switching"; ReportsPage's doc comment
  *     has the full reasoning).
  *   - 'ai' + 'workflows'              → a switch on the new 'usage' page.
- * 'customers' itself also grew a Klanten/Prospects switch (no id merge — Prospects
+ * 'customers' itself also grew a Customers/Prospects switch (no id merge — Prospects
  * never had its own route, this is new capability on an existing page).
  */
-// RAPPORTEN-DANNY10-1 (Danny 24-08, via CMBE-afstemming: exactly ten report
+// RAPPORTEN-DANNY10-1 (Danny 24-08, via CMBE alignment: exactly ten report
 // pages — hub + candidates/applications/customers/vacancies/opportunities/
-// tasks/matches/outreach/whatsapp — "DE REST MOET WEG"). The retired route ids
+// tasks/matches/outreach/whatsapp — "THE REST MUST GO"). The retired route ids
 // (customerstructure/flow/people/usage/intakes + their legacy aliases) resolve
 // to the hub root via appPages' stale-reports fallback, never a dead screen.
-// Danny 24-08 settled intakes: no own report page ("#reports.intakes hebben we
-// niet") — its numbers land as KPI's inside the applications report (CMBE);
+// Danny 24-08 settled intakes: no own report page ("we don't have
+// #reports.intakes") — its numbers land as KPIs inside the applications report (CMBE);
 // 'whatsapp' joins once its backend contract is registered.
 export const REPORT_IDS = [
   'candidates',

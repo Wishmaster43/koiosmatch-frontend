@@ -2,8 +2,7 @@
  * MatchContractLineRateSideSettings — Settings → Matches → which side of the
  * money a match's per-function rate line (CONTRACTREGELS, "CONTRACT LINES")
  * means (TARIEF-ZIJDE-1,
- * Danny 15-08: "via instellingen moet per tenant aangegeven worden welke de
- * klant wilt" — "settings must let each tenant indicate which one the customer
+ * Danny 15-08: "settings must let each tenant indicate which one the customer
  * wants"). Persists the tenant setting `match_contract_line_rate_side`
  * ('sale' | 'purchase') via the shared /settings key/value store.
  *

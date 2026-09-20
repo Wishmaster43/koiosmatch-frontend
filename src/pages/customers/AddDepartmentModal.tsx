@@ -109,8 +109,8 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
   // COLLAPSIBLE-TEXT-1: Omschrijving's own collapsed/editing state.
   const [descExpanded, setDescExpanded] = useState(false)
   const [descEditing, setDescEditing] = useState(false)
-  // STATUS-HIDDEN-1 (Danny 02-08, second round: "+ nieuwe afdeling ... status moet
-  // weg in de popup" — status must go from the popup): hidden unless the tenant
+  // STATUS-HIDDEN-1 (Danny 02-08, second round: status must go from the "+ new
+  // department" popup): hidden unless the tenant
   // marked it required — mirrors
   // AddLocationModal's own gate, same flat-array setting shape.
   const settings = useAllSettings()

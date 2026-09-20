@@ -134,7 +134,7 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
   const submit = (text?: string) => {
     const trimmed = (text ?? '').trim()
     if (!trimmed || loading) return
-    // A pasted app link (Danny 09-09: "Koios AI snapt de link niet") rides along as the
+    // A pasted app link (Danny 09-09: "Koios AI does not understand the link") rides along as the
     // record it points at — the same ref shape the @-mention and the ambient chip use.
     const linkRefs = refsFromAppLinks(trimmed).map(r => ({ ...r, label: t('koios.contextRecordFallback', { entity: t(`koios.mention.singular.${r.type}`), id: r.id }) }))
     send(trimmed, linkRefs.reduce((acc, r) => addContextRef(acc, r), outgoingContextRefs))
@@ -159,7 +159,7 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
     name: auth?.user?.firstname ?? auth?.user?.name?.split(' ')[0] ?? null,
     attentionCount: assistantSuggestions.length,
   }
-  // Danny 09-09 ("ben je een gesprek gestart dan zijn de icons weg"): the two blocks stay
+  // Danny 09-09 ("once a conversation has started the icons are gone"): the two blocks stay
   // summonable DURING a conversation too — session-only visibility there (the persisted
   // hidden flags keep governing the landing state), so a chat opens calm by default.
   const [chatAssistantOpen, setChatAssistantOpen] = useState(false)

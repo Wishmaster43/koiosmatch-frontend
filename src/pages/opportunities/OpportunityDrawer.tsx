@@ -108,7 +108,7 @@ export default function OpportunityDrawer({
     // KANSEN-A-3: this customer's OTHER opportunities (mirrors matches/drawer/StatisticsTab).
     { id: 'customer', label: t('drawer.tabs.customer'), render: () => <CustomerRelationTab opportunity={o} customers={customers} onUpdate={onUpdate} /> },
     { id: 'notes',   label: t('drawer.tabs.notes'),   render: () => <NotesTab opportunity={o} /> },
-    // Danny 24-08: "EMAIL MOET ZIJN CONVERSATIE!!" — the WhatsApp thread panel with
+    // Danny 24-08: "EMAIL MUST BE A CONVERSATION!!" — the WhatsApp thread panel with
     // the e-mail log kept below it (ConversationTab), replacing the e-mail-only tab.
     { id: 'conversation', label: t('drawer.tabs.conversation'), render: () => <ConversationTab opportunity={o} /> },
     { id: 'tasks',   label: t('drawer.tabs.tasks'),   render: () => <TasksTab opportunity={o} /> },

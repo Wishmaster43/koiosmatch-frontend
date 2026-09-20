@@ -24,7 +24,7 @@ interface CvEntryIconsProps {
   onSubmitText: (text: string) => void
 }
 
-// Tenant-tinted icon buttons (Danny 14-08 "icons in kleur van tenant zoals de
+// Tenant-tinted icon buttons (Danny 14-08: icons in the tenant's colour like the
 // knoppen"): the §4 soft-tint recipe (lib/tint's house 10/33-16/50 pair, never
 // an ad-hoc color-mix percentage), slightly larger than the muted 26px idiom.
 const iconBtnStyle = (active = false) => ({

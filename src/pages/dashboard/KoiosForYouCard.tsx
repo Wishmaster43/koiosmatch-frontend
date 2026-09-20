@@ -1,9 +1,9 @@
 /**
- * KoiosForYouCard — "Koios deed dit voor jou" (K0-D noordster report): the
+ * KoiosForYouCard — "Koios did this for you" (K0-D north-star report): the
  * tenant's Koios-TRIGGERED workflow runs over a chosen period. GET
  * /ai/koios/for-you?from=&to= (Y-m-d, wins over days) → { from, to, period,
  * actions_total, per_type, per_source, latest[], actions[<=200],
- * actions_truncated } — same telbron as the invoice's workflow-token ledger,
+ * actions_truncated } — same count source as the invoice's workflow-token ledger,
  * so this card and the billing screen always agree. A manual/event run never
  * counts.
  *

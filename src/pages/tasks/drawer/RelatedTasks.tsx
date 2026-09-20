@@ -11,8 +11,8 @@
  * through to that task's own drawer. Renders nothing when the task carries no
  * qualifying subject.
  *
- * TASK-FILTER-MENU-1 (Danny 08-08, "Notities dus zo overal met die filter en ook
- * taken doen" — "So Notes everywhere with that filter, and Tasks too"): status +
+ * TASK-FILTER-MENU-1 (Danny 08-08, "So Notes everywhere with that filter, and
+ * Tasks too"): status +
  * type + priority moved BEHIND the shared DrawerFilterMenu
  * (one "Filter" button, badge + panel — never removable chips under the toolbar,
  * see that component's own VISIBILITY CHOICE doc comment). Every row narrows the

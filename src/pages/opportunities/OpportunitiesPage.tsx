@@ -104,8 +104,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
 
   // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
   // through it and a copied link reopens the same opportunity (NAV-BACK-1 —
-  // Danny: "back knop vanuit kans → taak en dan back kom ik niet terug waar ik
-  // was" — "back button from opportunity → task and then back doesn't get me
+  // Danny: "back button from opportunity → task and then back doesn't get me
   // back to where I was").
   useDrawerUrl({ selectedId: selected?.id, openById: (id) => selectOpportunity({ id } as Parameters<typeof selectOpportunity>[0]), close: closeDrawer, intent })
   // Open an opportunity drawer when arriving via a cross-entity link ({ open: id }):
@@ -132,11 +131,11 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   const [client,   setClient]   = usePageMemory<string[]>('opps.client', []) // selected client names (panel)
   const [addOpen,  setAddOpen]  = useState(false)
 
-  // "Aflopend" ("Expiring") quick-filter (dashboard KPI). Definition MIRRORS the
-  // backend's expiring_opps exactly (DashboardService): close date TODAY t/m
-  // ("up to and including") +14 days,
-  // date-granular — anders wijkt de lijst af van het KPI-getal ("otherwise the
-  // list would diverge from the KPI number") (Danny: "1 vs 3").
+  // "Expiring" quick-filter (dashboard KPI). Definition MIRRORS the
+  // backend's expiring_opps exactly (DashboardService): close date TODAY up to
+  // and including +14 days,
+  // date-granular — otherwise the list would diverge from the KPI number
+  // (Danny: "1 vs 3").
   // Reference moment captured once per mount (purity rule — mirrors convCutoff).
   const [expiringOnly, setExpiringOnly] = useState(false)
   const [dayStart] = useState(() => new Date(new Date().setHours(0, 0, 0, 0)).getTime())

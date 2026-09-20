@@ -4,9 +4,9 @@
  * SchemaSection; dedicated rows stay on their own screens. Four states: loading
  * skeleton, error banner with retry, empty notice, and the form.
  *
- * CATALOG-EMBED-1 (Danny 13-09, rows 21-24: "Whatsapp hoort bij Whatsapp",
- * "Hoort bij kandidaten en systemen", "Hoort onderdeel te zijn bij alle
- * instellingen!!"): the four generic catalogue nav screens (windows/retention/
+ * CATALOG-EMBED-1 (Danny 13-09, rows 21-24: "WhatsApp belongs with WhatsApp",
+ * "belongs with candidates and systems", "must be part of every settings
+ * screen!!"): the four generic catalogue nav screens (windows/retention/
  * messaging/email) are gone — every group now renders under its own entity's
  * screen via the optional `group` prop, narrowing to one titled block instead of
  * the whole section. F1 (Opus review 13-09): that block is HEADLESS in page mode

@@ -129,7 +129,7 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, 
   // GETALLEN-1: money renders through the house currency formatter, not a raw string.
   const { formatCurrency } = useNumberFormat()
   const [search, setSearch] = useState('')
-  // Default to grouped totals (Danny: "geen orderlijsten maar totalen"); Details stays reachable.
+  // Default to grouped totals (Danny: "no order lists, only totals"); Details stays reachable.
   const [view, setView] = useState<'totals' | 'details'>('totals')
   // Series switcher (chips) + month pager (‹ aug › / ← →) — the standard for every drill.
   const [currentMetric, setCurrentMetric] = useState(metric)

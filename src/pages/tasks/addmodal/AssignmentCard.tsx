@@ -1,27 +1,30 @@
 /**
- * AssignmentCard — the "Toewijzing" card of AddTaskModal: WHERE the task waits
+ * AssignmentCard — the "Assignment" card of AddTaskModal: WHERE the task waits
  * (the internal-department picker), WHO is doing it (the assignee picker,
  * defaulting to the logged-in user when they are an assignable tenant user — see
  * AddTaskModal's `meIsAssignable` guard) and who created it (read-only). Split
- * out of the former combined LinkCard (Danny: "+ Nieuwe taak" brought in line
- * with +Match's calm four-card layout — Taak · Planning · Koppelingen ·
- * Toewijzing) so "what it links to" and "who owns it" read as two distinct
- * concerns, mirroring +Match's Contract/Financieel split. Pure presentational:
+ * out of the former combined LinkCard (Danny: "+ New task" brought in line
+ * with +Match's calm four-card layout — Task · Planning · Links ·
+ * Assignment) so "what it links to" and "who owns it" read as two distinct
+ * concerns, mirroring +Match's Contract/Financial split. Pure presentational:
  * form values in, `set()` out.
  *
- * TEAM-1 (Danny 09-08, "een nieuwe taak moet ook op een afdeling zoals Backoffice
- * kunnen"). The department picker sits NEXT TO the person picker, never instead
+ * TEAM-1 (Danny 09-08, "a new task must also be assignable to a department like
+ * Backoffice"). The department picker sits NEXT TO the person picker, never instead
  * of it — the two axes answer different questions and the backend keeps both:
  *  - `assignee_team_id` = where the task waits (Backoffice).
  *  - `assignee_id`      = who picked it up.
  * Measured 09-08: a PATCH carrying ONLY `assignee_id` comes back with the same
  * `assignee_team` — assigning a person does NOT clear the department, so the
- * origin of the task survives. "Openstaand bij Backoffice" is therefore
+ * origin of the task survives. "Open with Backoffice" (Dutch label: "Openstaand
+ * bij Backoffice") is therefore
  * department-set + person-empty, and both controls stay independently clearable.
  *
  * NAMING — the Dutch trap: this is the INTERNAL department (`tasks:modal.team`,
- * "Interne afdeling"). The `department` chip on the Koppelingen card is the
- * CUSTOMER's department ("Klantafdeling", `tasks:links.department`). Two
+ * Dutch label "Interne afdeling", i.e. "Internal department"). The `department`
+ * chip on the Links card is the
+ * CUSTOMER's department (Dutch label "Klantafdeling", i.e. "Customer department",
+ * `tasks:links.department`). Two
  * different entities, two different words, on purpose.
  *
  * Both lists render their four UI states honestly (§3): loading · load error +

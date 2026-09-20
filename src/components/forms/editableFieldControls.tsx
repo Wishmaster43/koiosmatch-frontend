@@ -28,13 +28,13 @@ export function renderFieldControl(f: FieldRow, ctx: {
 }) {
   const { form, setF, compact, t, richExpanded, setRichExpanded } = ctx
   const v = form[f.key]
-  // A boolean field is a TOGGLE, never a tick box (Danny: "GEEN VINKJES MAAR
+  // A boolean field is a TOGGLE, never a tick box (Danny: "NO CHECKBOXES, ONLY
   // TOGGLES!!", repeated 28-07 for the primary-contact flag). One shared switch, so
   // every boolean in every drawer reads the same.
   if (f.type === 'checkbox') return <Toggle checked={Boolean(v)} onChange={val => setF(f.key, val)} ariaLabel={typeof f.label === 'string' ? f.label : undefined} />
-  // Every drawer picker is SEARCHABLE (Danny 28-07: "status/land/provincie is geen
-  // zoekbare dropdown"). This one line covers status, land, provincie, branche en
-  // vestiging on every entity that uses this table — a native <select> forces you to
+  // Every drawer picker is SEARCHABLE (Danny 28-07: "status/country/province is not a
+  // searchable dropdown"). This one line covers status, country, province, industry and
+  // branch on every entity that uses this table — a native <select> forces you to
   // scroll a 200-item country list. allowCreate stays off: these are tenant lookups,
   // adding a value belongs in Settings, not in a record's edit row.
   if (f.type === 'select') return <CreatableSelect value={(v as string) ?? ''} onChange={val => setF(f.key, val)} options={selectOptions(f.options)} placeholder={t('select')} allowCreate={false} style={compact}

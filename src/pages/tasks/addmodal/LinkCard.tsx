@@ -1,13 +1,12 @@
 /**
- * LinkCard — the "Koppelingen" card of AddTaskModal: what the task relates to.
+ * LinkCard — the "Links" card of AddTaskModal: what the task relates to.
  * Pure presentational (Danny 27-07 popup redesign: split out of AddTaskModal.tsx
  * to keep the container under the file-size cap). The assignee picker + read-only
- * creator line moved to their own AssignmentCard/"Toewijzing" (Danny's four-card
- * layout mirroring +Match's Relaties/Contract/Financieel split) — a linked RECORD
+ * creator line moved to their own AssignmentCard/"Assignment" (Danny's four-card
+ * layout mirroring +Match's Relations/Contract/Financial split) — a linked RECORD
  * and WHO owns the task are different concerns.
  *
- * PUNT 15 (Danny 08-08: "een nieuwe taak moet ook aan een bedrijf, locatie,
- * afdeling of contactpersoon kunnen hangen" — "a new task should also be able
+ * PUNT 15 (Danny 08-08: "a new task should also be able
  * to attach to a company, location, department or contact"): the three fixed
  * pickers only ever
  * covered candidate/customer/contact, while the DRAWER's LinksTab could couple a

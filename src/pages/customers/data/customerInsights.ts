@@ -1,8 +1,7 @@
 /**
  * customerInsights — pure helpers for the customers page status donut (Danny
- * 02-08: "bij de status-donut tonen we prospect als status — kijk af bij
- * kandidaat" — "on the status donut we show prospect as status — take a cue
- * from candidate", mirrors src/pages/candidates/data/candidateInsights.tsx). The
+ * 02-08: on the status donut we show prospect as status — take a cue from
+ * candidate, mirrors src/pages/candidates/data/candidateInsights.tsx). The
  * '__none' bucket represents customers still in the ENTRY phase (Prospect) — no
  * deployability status yet — so clicking that segment must filter the PHASE
  * axis, never the status axis. Both helpers key on the PHASE, never on the

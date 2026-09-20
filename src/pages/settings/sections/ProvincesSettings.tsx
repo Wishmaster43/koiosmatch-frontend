@@ -180,8 +180,8 @@ export default function ProvincesSettings() {
           onReorder={setItems}
           renderItem={(item: ProvinceItem) => (
             <>
-              {/* LOOKUP-ONE-ELEMENT-1: one glyph per row (Danny 09-09, "Een vlag en een
-                  icon overkill") — a row with its own BE-served ISO 3166-2 flag shows
+              {/* LOOKUP-ONE-ELEMENT-1: one glyph per row (Danny 09-09, "a flag and an
+                  icon is overkill") — a row with its own BE-served ISO 3166-2 flag shows
                   ONLY the flag; the colour/icon mark is the fallback for a row without
                   a code, mirroring StatusListRow's per-item rowPrefix suppression. */}
               {provinceFlagSrc(item.code) ? (

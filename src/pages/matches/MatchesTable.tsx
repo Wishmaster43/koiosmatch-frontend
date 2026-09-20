@@ -85,8 +85,8 @@ export default function MatchesTable({
       render: r => {
         // Shared avatar+name cell (AVATAR-CHIP-1) — same identity chip as applications/customers.
         const content = <EntityNameCell name={r.candidate} initials={r.initials} size={24} maxWidth={150} textStyle={{ fontWeight: 500, fontSize: 13 }} />
-        // Danny 07-09 (verbatim: "bij de match tabel als je drukt op de kandidaat moet je
-        // toch de match openen"): the candidate identity cell is NOT a gateway here — the
+        // Danny 07-09 ("in the match table, clicking the candidate should still
+        // open the match"): the candidate identity cell is NOT a gateway here — the
         // row opens the match, and the candidate link lives inside the match drilldown.
         return content
       } },
@@ -119,8 +119,8 @@ export default function MatchesTable({
     { key: 'client',  header: t('cols.client'),  sortable: true, nowrap: true,
       render: r => {
         const content = <EntityNameCell name={r.client} textStyle={{ color: 'var(--text-muted)' }} />
-        // Danny 07-09 ("en klant moet ook de match openen"): the client cell is no gateway
-        // either — the row opens the match; the customer link lives in the match drilldown.
+        // Danny 07-09 ("the customer should also open the match"): the client cell is no
+        // gateway either — the row opens the match; the customer link lives in the match drilldown.
         return content
       } },
     // MATCH-SOORT-1: Contractvorm — the ONE shared chip, sortable on its label

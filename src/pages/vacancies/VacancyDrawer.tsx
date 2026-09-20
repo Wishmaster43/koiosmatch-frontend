@@ -55,7 +55,7 @@ interface DrawerUser { id: Id; name: string }
 
 // Tab list — config only; each renders one small component (one per tab/section).
 // Details is the FIRST tab (Danny 2026-07-04 — reverses R-7's pinned-above-the-tabs
-// layout: "Details moet gewoon eerste tabje zijn" — "Details should simply be the
+// layout: "Details should simply be the
 // first tab", the pinned editor crowded the drawer).
 // V-stats-1: render optionally receives the drawer's own setActiveTab so a tab
 // (Statistics) can deep-link into a sibling tab without route hacks.
@@ -222,7 +222,7 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
           <span />
         </Caption>
       }
-      // Koppelingen reads the SHARED common:backofficeLinks.tabLabel key (§3A/§11) so
+      // Links reads the SHARED common:backofficeLinks.tabLabel key (§3A/§11) so
       // every entity's tab shows the exact same word.
       tabs={visibleTabs.map(tab => ({
         id: tab.id,

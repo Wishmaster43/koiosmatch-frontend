@@ -57,12 +57,13 @@ function EditControls({ onSave, onCancel, saveLabel, cancelLabel }: { onSave: ()
  * /users; nothing is hardcoded. Owner is always read-only.
  *
  * TEAM-1 (Danny 09-08): a RUNNING task can still be hung on an internal
- * department. "Interne afdeling" rides the same pencil as the assignee — the two
+ * department. The internal department (Dutch label "Interne afdeling") rides the
+ * same pencil as the assignee — the two
  * belong together (where it waits · who picked it up) and are saved in one patch —
  * but they are INDEPENDENT values: picking a person leaves the department standing
  * (measured: a PATCH with only `assignee_id` returns the same `assignee_team`).
- * Not to be confused with the CUSTOMER department on the Koppelingen tab
- * ("Klantafdeling"); this one is the tenant's own Backoffice/Planning/… .
+ * Not to be confused with the CUSTOMER department on the Links tab
+ * (Dutch label "Klantafdeling"); this one is the tenant's own Backoffice/Planning/… .
  */
 export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
   task: TaskDetail
@@ -75,10 +76,9 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
   // uses — the advisory block below prepends its advice so the two never disagree.
   const resolveAdvice = useTaskAdvice()
   const { formatDate, formatDateTime } = useDateFormat()
-  // TASK-DISPLAY-DRILL-1 (Danny 24-08: "alleen de tabel wordt gekleurd en daar
-  // hebben we instellingen voor", i.e. "only the table gets coloured and we
-  // have settings for that" + 24-08: "geen chips in drill down, hebben we
-  // nergens", i.e. "no chips in the drill-down, we don't have that anywhere"):
+  // TASK-DISPLAY-DRILL-1 (Danny 24-08: "only the table gets coloured and we
+  // have settings for that" + 24-08: "no chips in the drill-down, we don't
+  // have that anywhere"):
   // field cards render PLAIN VALUES — colour and chips are a TABLE
   // face, driven by the task_table_color_* toggles over there; the drilldown
   // reads none of them.
@@ -318,7 +318,7 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
         insights={[...adviceInsightRows(resolveAdvice(task)), ...buildTaskAdviceInsights(task, t)]}
       />
 
-      {/* T3 / TASK-LOCATION-READ-1: the Vestiging (branch) picker, below the advice
+      {/* T3 / TASK-LOCATION-READ-1: the location (branch) picker, below the advice
           block per Danny's layout. Previously blocked (write-only field — the
           resource never serialised it, so a picker could set it but never confirm
           the saved value, a fake affordance §3) — now unblocked: TaskListResource/

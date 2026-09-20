@@ -1,6 +1,6 @@
 // application_lookup module — second node of the inbound chain (Danny 31-08,
-// Appendix H: "op basis van het nummer wordt de juiste sollicitant gezocht en
-// de status van het interview"). configSchema is {} BY CONTRACT (CMBE 31-08):
+// Appendix H: "the right applicant and the interview status are looked up
+// based on the number"). configSchema is {} BY CONTRACT (CMBE 31-08):
 // resolution is deterministic — an open interview session wins, else the
 // newest application — so there is nothing to configure; outputs carry
 // lookup_status/application_id/interview_session_id/intake_status.

@@ -1,8 +1,8 @@
 /**
  * ReportSwitchBar — the top-right population/entity switch every merged report
- * page renders (RAPPORTEN-CONSOLIDATIE-1, Danny's sidebar-shortening ask: "zoals
- * bij SM waar uren of diensten worden"). Placement + treatment mirror the
- * Shiftmanager dashboard's own "In uren / In diensten" toggle
+ * page renders (RAPPORTEN-CONSOLIDATIE-1, Danny's sidebar-shortening ask: "like
+ * on Shiftmanager, where it's hours or shifts"). Placement + treatment mirror the
+ * Shiftmanager dashboard's own "In hours / In shifts" toggle
  * (ShiftsChartsBlock: a compact pill row, right-aligned, above the KPI band) —
  * built from the shared `SegmentedControl` (`size="compact"`, `activeOnly`,
  * since the switch means "which population/entity am I looking at", the SAME

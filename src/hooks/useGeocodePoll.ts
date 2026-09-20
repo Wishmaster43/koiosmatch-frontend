@@ -1,10 +1,10 @@
 /**
- * useGeocodePoll (GEO-POLL-1, Danny 10-09 12:35, verbatim: "scherm moet zich zelf
- * verversen zodra de update klaar is zonder dat cmd r nodig is") — the ONE background
+ * useGeocodePoll (GEO-POLL-1, Danny 10-09 12:35, verbatim: "the screen must refresh
+ * itself once the update is done, without needing cmd+r") — the ONE background
  * poll behind every OpenCage card. A manual re-geocode answers 202 (queued: a workflow
  * run since GEO-WORKFLOW-ALL-1). Measured on yesway 10-09: the run called OpenCage ~15 s
  * after the click, while the candidate tab's own loop gave up after 11 s, so the card sat
- * on "Nog niet gegeocodeerd" until a reload. Rule: poll until the result lands or an
+ * on "Not geocoded yet" until a reload. Rule: poll until the result lands or an
  * honest cap, with backoff — never a window sized to yesterday's latency — and resume on
  * mount while a request is still open, so a tab switch never loses the update.
  *

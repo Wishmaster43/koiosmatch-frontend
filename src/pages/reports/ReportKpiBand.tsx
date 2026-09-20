@@ -1,6 +1,6 @@
 /**
  * ReportKpiBand — the ONE nine-card KPI strip every report page opens with
- * (Danny 14-08: "achtergrond is niet wit en bij rapporten wel", measured live on
+ * (Danny 14-08: "the background isn't white, and on reports it is", measured live on
  * #reports.matches).
  *
  * Why this component exists: all 17 reports plus the reports dashboard each

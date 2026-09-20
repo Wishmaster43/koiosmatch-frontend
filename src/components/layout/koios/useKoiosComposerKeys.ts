@@ -118,7 +118,7 @@ export function useKoiosComposerKeys({ input, setInput, addMentionRef, textareaR
       return true
     }
     // Tab completes the highlighted option while the menu is open (Danny 27-08:
-    // "met Tab moet je het kunnen afmaken") — space cannot (names contain
+    // "you must be able to finish it with Tab") — space cannot (names contain
     // spaces), and with the menu CLOSED Tab keeps its normal focus behaviour;
     // Shift+Tab always keeps reverse focus.
     if (e.key === 'Tab' && !e.shiftKey && showMention && mentionMenuRef.current?.pickHighlighted()) {
@@ -175,7 +175,7 @@ export function useKoiosComposerKeys({ input, setInput, addMentionRef, textareaR
     textareaRef.current?.focus()
   }
 
-  // Explicit cancel (Danny 27-08 "fix ook de canceled"): Escape removes the
+  // Explicit cancel (Danny 27-08 "also fix the canceled case"): Escape removes the
   // half-typed mention fragment ("@Kandidaten emma") instead of leaving it as
   // stray text; an outside click still only CLOSES (clicking away to do
   // something else must never eat typed text).

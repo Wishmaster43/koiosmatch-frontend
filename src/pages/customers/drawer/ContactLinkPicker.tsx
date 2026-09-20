@@ -4,7 +4,7 @@
  * customer_location_id) and a department's own nested contact list (patches
  * customer_department_id). The picker itself stays agnostic about WHICH field
  * the caller will patch — it only reports the picked contact via `onPick(id)`.
- * Widened (Danny 28-07: "de popup moet groter en breeder") from a narrow 380px
+ * Widened (Danny 28-07: the popup must be bigger and wider) from a narrow 380px
  * name list to the app's shared wide-modal footprint, with a search box and,
  * per contact, the locations/departments they are ALREADY linked to — so the
  * user can see what they are re-pointing before picking.

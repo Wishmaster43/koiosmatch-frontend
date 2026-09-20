@@ -68,7 +68,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // TRASH-OVERAL-2: the Prullenbak view (lifecycle pending_erase) — exclusive with
   // the archived view, mirrors the candidates page's three lifecycle views.
   const [showTrash, setShowTrash] = usePageMemory('matches.trash', false)
-  // MATCH-APPROVAL-QUEUE-1 (Danny: "geen lijst van te beoordelen matches" — the
+  // MATCH-APPROVAL-QUEUE-1 (Danny: "there's no list of matches to review" — the
   // manager review queue): a client-side toggle over the already-loaded rows,
   // exactly like kpiScored/kpiUnscored below, so the insights row, the donuts and
   // the right-panel option lists keep counting the full server-wide set (the

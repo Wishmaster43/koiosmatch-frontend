@@ -1,7 +1,7 @@
 /**
- * ApplicationConversationsSection — the application drawer's Gesprekken tab
- * (GESPREK-CONSISTENT-1-FE, Danny 17-09: "we moeten wel consistent zijn met
- * gesprek starten! en waar we de conversatie terug kunnen lezen!"). A
+ * ApplicationConversationsSection — the application drawer's Conversations tab
+ * (GESPREK-CONSISTENT-1-FE, Danny 17-09: "we must be consistent about
+ * starting a conversation, and where we can read the conversation back!"). A
  * conversation belongs to the PERSON (the candidate), never to the
  * application, so this is a thin wrapper mirroring
  * ContactConversationsSection exactly: same start-trigger gate, same shared

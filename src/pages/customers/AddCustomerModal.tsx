@@ -110,8 +110,7 @@ const EMAIL_ERROR_KEYS = { billingEmail: 'validation.emailFormat' }
  * success (C-18).
  *
  * Widened to the house WIDE_MODAL frame and regrouped into titled bordered cards
- * (Danny 27-07: "+ Klant is niet zo groot als + match en + nieuwe kandidaat EN
- * MIST HEEL VEEL INFORMATIE" — "+ Customer isn't as big as + match and + new
+ * (Danny 27-07: "+ Customer isn't as big as + match and + new
  * candidate AND IS MISSING A LOT OF INFORMATION"). Every dropdown is now a
  * searchable CreatableSelect.
  * Extended with the fields CustomerRequest::sharedRules already accepts on create
@@ -121,9 +120,8 @@ const EMAIL_ERROR_KEYS = { billingEmail: 'validation.emailFormat' }
  * fields already ride along; useCustomerRecord's handleCreate picks them up into
  * the actual POST body.
  *
- * Brought in line with AddCandidateModal (Danny 02-08, "de + nieuwe klant popup
- * moet lijken op + nieuwe kandidaat" — "the + new customer popup must look like
- * + new candidate"): the debtor number is no longer collected
+ * Brought in line with AddCandidateModal (Danny 02-08: the + new customer popup
+ * must look like + new candidate): the debtor number is no longer collected
  * here (it stays editable everywhere else — the customer's own accounting number,
  * rarely known yet for a new prospect); status is hidden (the phase pills already
  * carry the lifecycle choice, so status just rides along at its lookup default);
@@ -168,9 +166,8 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
   const { phases, defaultPhase } = useCustomerPhases()
   // The tenant's own establishments (GET /locations) — same source as OverviewTab's Vestiging ("Branch") picker.
   const branchOptions = useLocations().map(l => ({ value: String(l.value), label: l.label }))
-  // ACCOUNTMANAGER-DEFAULT-1 (Danny 02-08: "Accountmanager moet voorstel waarde zijn
-  // van de gebruiker die hem aanmaakt" — "Account manager should default to the
-  // value of the user creating it") — mirrors AddApplicationModal's identical
+  // ACCOUNTMANAGER-DEFAULT-1 (Danny 02-08: Account manager should default to the
+  // value of the user creating it) — mirrors AddApplicationModal's identical
   // owner-default guard: only propose the LOGGED-IN user when they actually appear
   // in the tenant's assignable `users` list, never a super-admin or non-tenant
   // account the server would 422 on (owner_id is validated against tenant users).
@@ -266,8 +263,7 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
       {...WIDE_MODAL_PANEL_SIZE}
       header={
         // The chosen phase is in the TITLE, exactly as the candidate modal reads
-        // "Nieuwe — Lead" ("New — Lead") (Danny 02-08: "die fase moet zijn zoals
-        // + nieuwe kandidaat" — "that phase should be like + new candidate").
+        // "New — Lead" (Danny 02-08: that phase should be like + new candidate).
         // Phase pills = the shared TitleBarPills atom (TITELBALK-PILLS, Danny
         // 27-08); import toggle mirrors KLANT-LAYOUT-3 (Danny 14-08: icon swaps
         // upload → check once a file is picked, never a border repaint).

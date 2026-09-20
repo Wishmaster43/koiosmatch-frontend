@@ -371,10 +371,10 @@ export function FunnelStagesSettings() {
   return <CandidateLookupSection typeKey="funnel_types" slug="funnel-types" />
 }
 
-// Candidate phase (relationship lifecycle: Lead → Kandidaat) — model v2 axis.
+// Candidate phase (relationship lifecycle: Lead → Candidate) — model v2 axis.
 export function CandidatePhasesSettings() {
-  // Lead/Kandidaat are SYSTEM values a screen depends on (Danny 23-07; Danny
-  // 13-09 rows 45/46: "Potlootje altijd grijs · Delete altijd grijs") — the
+  // Lead/Candidate are SYSTEM values a screen depends on (Danny 23-07; Danny
+  // 13-09 rows 45/46: "pencil always grey, delete always grey") — the
   // pencil/delete/add render disabled (grey, always present); colour/icon and
   // drag-reorder (unaffected here — see KANDIDATEN-13 above) stay editable.
   return <CandidateLookupSection typeKey="phases" slug="phases" readOnly />

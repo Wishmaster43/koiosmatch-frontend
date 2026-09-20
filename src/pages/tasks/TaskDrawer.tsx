@@ -180,8 +180,8 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
   const doneValue = doneStatusValues[0]
   const markDone = doneValue != null && !doneStatusValues.includes(String(task.statusKey)) && !task.archived
     ? (
-      // The house button in its success variant (§4 "aan/gelukt" pair, now a
-      // real Button variant — Danny 24-08: "moet huisstijl knop zijn").
+      // The house button in its success variant (§4 "on/succeeded" pair, now a
+      // real Button variant — Danny 24-08: "must be a house-style button").
       <Button variant="success" size="sm" onClick={() => onUpdate(task.id, { statusKey: doneValue })}>
         <CheckCircle2 size={12} /> {t('drawer.markDone')}
       </Button>

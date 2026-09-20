@@ -1,7 +1,6 @@
 /**
  * ReportsDashboard — the bare #reports overview (RAPPORTEN-DASHBOARD-1, Danny
- * 14-08: "#reports moet hoofddashboard worden met belangrijkste KPI's, wederom
- * negen KPI rows", i.e. "#reports must become the main dashboard with the most
+ * 14-08: "#reports must become the main dashboard with the most
  * important KPIs, again nine KPI rows"). Nine cards through the same shared
  * InsightsRow strip every report already uses, each number pulled from an
  * EXISTING report endpoint via its own use*Report hook (no new endpoint, no

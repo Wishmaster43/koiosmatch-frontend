@@ -13,7 +13,7 @@
  * bespoke toolbar per caller. The add trigger reads short ("Nieuw", DRAWER-ADD-
  * SHORT-1, Danny 05-08) — it lives in a drawer sub-tab, not a full page.
  *
- * STATUS FILTER (Danny 05-08: "ik mis de status naast het zoekveld?"): an optional
+ * STATUS FILTER (Danny 05-08: I'm missing the status next to the search field?): an optional
  * `statuses`/`statusOf` pair renders the shared StatusFilterSelect between the
  * search box and the add trigger, exactly like every other sub-entity list
  * (VacanciesTab.tsx). Absent (or empty, e.g. while the caller's own lookup is

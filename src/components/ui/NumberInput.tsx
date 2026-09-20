@@ -3,8 +3,8 @@
  * app shows every number (GETALLEN-1: thousands separators and the locale decimal, so
  * 1250 reads "1.250" in Dutch) and reads what the user types back through the
  * locale-aware parser. A native <input type="number"> cannot show a separator, which is
- * why the settings screens used to show "10000" (Danny 09-09: "zodra het een
- * duizendtal wordt wil ik overal … een . er tussen").
+ * why the settings screens used to show "10000" (Danny 09-09: "as soon as it
+ * becomes a thousand, I want a . in there everywhere").
  *
  * Behaviour: the field keeps the typed text while focused and re-formats on blur;
  * onChange fires with the parsed number (null when empty), clamped to min/max on blur.
@@ -55,7 +55,7 @@ export default function NumberInput({
   // Focus lives in a ref: the resting-text effect reads it without re-running on focus changes.
   const focusedRef = useRef(false)
   // A value the field had to clamp is SAID, never silently corrected (Danny 09-09 01:20:
-  // "als ik niet hoger mag dan 120 maanden dan moet er wel een melding komen").
+  // "if I can't go above 120 months, there should be a notice about it").
   const [notice, setNotice] = useState<string | null>(null)
 
   // A value change from outside (load, reset) replaces the resting text; while the

@@ -87,8 +87,7 @@ export default function ShiftsDrillDownTotals({ shifts, locationMeta }: {
   const { formatNumber, formatPercent } = useNumberFormat()
   const unknown = t('shiftsDrawer.unknown')
   // Switch the aggregated value between number of shifts and worked hours —
-  // defaults to hours (Danny, verbatim: "drill down moet altijd op uren
-  // tonen" — i.e. "the drill-down must always show hours").
+  // defaults to hours (Danny: "the drill-down must always show hours").
   const [unit, setUnit] = useState<'count' | 'hours'>('hours')
 
   // Resolve the location id once per row for the customer/location lookups.

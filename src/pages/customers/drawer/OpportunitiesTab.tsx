@@ -9,9 +9,8 @@
  * calls DELETE /opportunities/{id}. The open-flex-shifts section (Planning module)
  * is unrelated to Kansen and stays as its own section below.
  *
- * Same drill-down treatment as Locaties/Afdelingen/Contactpersonen (Danny,
- * translated: "on Opportunities I'm also still missing the statuses" — verbatim:
- * "bij Kansen mis ik ook nog de statussen"): a stage filter via the shared
+ * Same drill-down treatment as Locations/Departments/Contacts (Danny:
+ * on Opportunities I'm also still missing the statuses): a stage filter via the shared
  * StatusFilterSelect/useStatusFilter (an opportunity has no separate status axis,
  * only `stage` — the vocabulary this filter narrows on, never a status field the
  * API does not return) and a colour-on/off toggle for the stage chip, mirroring
@@ -34,9 +33,8 @@ import SoftChip from '@/components/ui/SoftChip'
 import Button from '@/components/ui/Button'
 import SectionCard from '@/components/ui/SectionCard'
 import { useConfirm } from '@/hooks/useConfirm'
-// House "+ action" trigger (Danny 27-07, translated: "must be a button just like
-// on the candidate drill-down too" — verbatim: "moet een knopje zijn zoals ook bij de
-// kandidaat drill down") — replaces the bare text+Plus button below.
+// House "+ action" trigger (Danny 27-07: must be a button just like
+// on the candidate drill-down too) — replaces the bare text+Plus button below.
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { AddOpportunityModal } from '@/pages/opportunities/shared'
 import { mapOpportunity } from '@/pages/opportunities/shared'

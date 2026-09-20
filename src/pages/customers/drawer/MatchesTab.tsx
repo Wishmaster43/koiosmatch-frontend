@@ -14,13 +14,11 @@
  * with `initialCustomerId` threaded into useMatchForm's cascade as an INITIAL
  * value (a prefill, never a lock — the recruiter can still change it).
  *
- * TOOLBAR (Danny 03-08: "bij Matches wil ik ook een zoekbalk en statussen
- * hebben", i.e. "on Matches I also want a search bar and statuses"): search
+ * TOOLBAR (Danny 03-08: on Matches I also want a search bar and statuses): search
  * (vacancy title + candidate name) + the shared StatusFilterSelect keyed on
- * the SAME match-status vocabulary the title's own fase already resolves via
- * useMatchStatuses. House order (Danny, live 04-08: "Nieuwe Match is
- * rechts!!! en status in het midden", i.e. "New Match is on the right!!! and
- * status in the middle"): search left, status filter middle, "+ Match" last —
+ * the SAME match-status vocabulary the title's own phase already resolves via
+ * useMatchStatuses. House order (Danny, live 04-08: New Match is on the
+ * right!!! and status in the middle): search left, status filter middle, "+ Match" last —
  * same left-to-right reading as every other sub-entity list (Locaties/
  * Afdelingen/Contactpersonen).
  *
@@ -92,7 +90,7 @@ export default function MatchesTab({ customerId }: { customerId?: Id }) {
           <DrawerAddButton onClick={() => setAdding(true)} label={t('customers:matches.add')} short />
         )}
       />
-      {/* KLANTEN 4 (Danny 21-08 "Weergeven zoals bij de kandidaat"): the shared
+      {/* KLANTEN 4 (Danny 21-08: display it like on the candidate): the shared
           MatchListBody shell (column-header bar + collapsed flat rows), same
           as the candidate/vacancy tabs (DRY round 11, MATCHLISTS). */}
       <MatchListBody

@@ -58,9 +58,8 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
   const panelRef = useRef<HTMLDivElement>(null)
   // null = centered via CSS (the pre-drag default every modal has today).
   // POSITION deliberately does NOT survive a close (walkthrough 21-08, POP-UPS
-  // 3.4, translated: "sometimes this opens high on your screen instead of in
-  // the middle" — verbatim: "soms opent deze hoog in je scherm en niet in het
-  // midden" — a panel once parked high reopened there forever). Every open starts centered; only
+  // 3.4: "sometimes this opens high on your screen instead of in
+  // the middle" — a panel once parked high reopened there forever). Every open starts centered; only
   // the user's chosen SIZE is restored, dragging works within the open panel.
   const [placement, setPlacement] = useState<PanelPlacement | null>(() => {
     if (!persistKey) return null

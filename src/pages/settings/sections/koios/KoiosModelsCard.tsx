@@ -4,8 +4,8 @@
  * language — Snel (Haiku) / Slim (Sonnet) / Max (Opus) — within the platform
  * whitelist. The backend endpoint validates + audits.
  *
- * KOIOS-MODEL-UI-1 (Danny 23-08, screenshot: "hoe kan ik nu zien welk model er
- * gekoppeld is? ... de klant kan alleen kiezen VAN het model"): two fixes.
+ * KOIOS-MODEL-UI-1 (Danny 23-08, screenshot: "how can I now see which model is
+ * linked? ... the customer can only choose FROM the model"): two fixes.
  * (1) the active tier now also carries an explicit check mark — SegmentedControl's
  * showActiveCheck is on by DEFAULT since SEGMENTED-CHECK-SWEEP-1, so this card no
  * longer passes it explicitly. (2) the raw

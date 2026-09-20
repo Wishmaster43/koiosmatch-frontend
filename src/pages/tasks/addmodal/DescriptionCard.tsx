@@ -1,16 +1,14 @@
 /**
- * DescriptionCard — the "Omschrijving" card of AddTaskModal.
+ * DescriptionCard — the "Description" card of AddTaskModal.
  *
- * PUNT 14 (Danny 08-08: "de omschrijving staat te hoog, die moet naar beneden",
- * i.e. "the description sits too high up, it needs to go down"):
+ * PUNT 14 (Danny 08-08: "the description sits too high up, it needs to go down"):
  * the free-text block used to sit INSIDE the first card, above planning /
  * assignment / links, so the biggest field came before every short field. It is
  * its own full-width card now, rendered LAST — below all the other fields — a
  * pure order change; the value still rides the same `form.description` key into
  * the same POST/PATCH body.
  *
- * PUNT 16 (Danny 08-08: "bij een nieuwe taak ontbreekt het spraak-icoon dat
- * notities wél hebben", i.e. "a new task is missing the voice icon that notes
+ * PUNT 16 (Danny 08-08: "a new task is missing the voice icon that notes
  * DO have"): the mic is ALREADY here — `RichTextEditor` mounts the
  * shared `RichTextAssistBar` (the same `KoiosVoiceButton` the note composer
  * uses, same append rule, same honest unsupported/insecure gates) on every
@@ -19,11 +17,11 @@
  * the per-screen copy §11 forbids. If the mic ever disappears here, fix the
  * shared bar — never re-add a local one.
  *
- * TASK-ASSIST-ACTIONS-1 (Danny 14-08: "bij nieuwe taak ook actiepunten en auto
- * en wizzard", i.e. "on a new task also action points and auto and wizard"):
+ * TASK-ASSIST-ACTIONS-1 (Danny 14-08: "on a new task also action points and
+ * auto and wizard"):
  * a new task's description is written as a briefing/conversation
  * note (subtasks come out of it), not a plain description — same shape as
- * +Match's Opmerkingen — so it opts INTO the third Koios mode via
+ * +Match's Notes — so it opts INTO the third Koios mode via
  * `assistModes={['improve', 'summarize', 'actions']}` (ACTIONS-SCOPE-DEFAULT-FLIP's
  * default is improve+summarize only). The Wizard/Auto switch Danny referenced is
  * the SAME per-user setting the note popup shows next to its own assist block

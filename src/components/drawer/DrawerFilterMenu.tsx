@@ -19,15 +19,15 @@ import { DrawerMultiFilterRow, DrawerRangeFilterRow, DrawerToggleFilterRow, Draw
 import type { DrawerFilterConfig } from './drawerFilterTypes'
 export type { DrawerFilterOption, DrawerFilterConfig, DrawerSingleFilterConfig, DrawerMultiFilterConfig, DrawerRangeFilterConfig, DrawerDateFilterConfig, DrawerToggleFilterConfig } from './drawerFilterTypes'
 
-// FILTER-WIDTH-1 (Danny 08-08, punt 13 "filter notities moet langer zijn" + punt 18
-// "filter bij documenten is te kort hierdoor kan je niet goed filteren"): the panel
+// FILTER-WIDTH-1 (Danny 08-08, point 13: "the notes filter must be longer" + point 18:
+// "the filter on documents is too short, making it hard to filter properly"): the panel
 // used to be 230px, so a real tenant lookup label ("Verklaring Omtrent het Gedrag",
 // "WhatsApp Business", "Intakegesprek ingepland") was cut off in the trigger AND in
 // the checklist — you could not tell two values apart before picking one. Sized ONCE
 // here so every drawer host (notes · documents · tasks, on candidates · customers ·
 // vacancies · tasks) widens at the same moment; never a per-page override (§4).
-// NARROW AND TALL (Danny 09-08, explicit: "het gaat niet om de breedte maar de
-// hoogte dus smaller maken en langer"). Earlier rounds kept widening this panel —
+// NARROW AND TALL (Danny 09-08, explicit: "it's not about the width, it's about the
+// height, so make it narrower and taller"). Earlier rounds kept widening this panel —
 // wrong axis. A filter list is scanned VERTICALLY: you want many values in view at
 // once, in a column that stays out of the way of the drawer content behind it.
 // So the panel is narrower than it ever was, and the list is more than twice as tall.
@@ -58,8 +58,8 @@ interface DrawerFilterMenuProps {
  * "badge count on the trigger" idiom, just anchored under the button instead of
  * docked to the page edge (a drawer sub-tab has no page edge to dock to).
  *
- * TASK-FILTER-MENU-1 (Danny 08-08, "Notities dus zo overal met die filter en ook
- * taken doen"): extended to also carry MULTI-select rows (task status/type/
+ * TASK-FILTER-MENU-1 (Danny 08-08: "so notes everywhere with that filter, and
+ * do tasks too"): extended to also carry MULTI-select rows (task status/type/
  * priority — EntityTasksTab, RelatedTasks), so one shell now serves both the
  * single-value dropdowns (notes/documents) and the multi-value checklists
  * (tasks) — see DrawerFilterConfig's two variants below.
@@ -81,8 +81,8 @@ interface DrawerFilterMenuProps {
  * panel (one click away) is where a filter is actually read or cleared. Identical
  * across every host — never a per-host restyle.
  *
- * FILTER-WIDTH-1 (Danny 08-08, punten 13 + 18: "filter notities moet langer zijn",
- * "filter bij documenten is te kort hierdoor kan je niet goed filteren"): the panel
+ * FILTER-WIDTH-1 (Danny 08-08, points 13 + 18: "the notes filter must be longer",
+ * "the filter on documents is too short, making it hard to filter properly"): the panel
  * and its controls are sized by the constants at the top of this file — widened
  * once HERE so notes, documents and tasks in every drawer (candidate · customer ·
  * vacancy · task) get it together, and long lookup labels wrap instead of being cut.

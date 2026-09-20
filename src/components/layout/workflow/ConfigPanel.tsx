@@ -294,11 +294,11 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
             // WEBHOOK-LOG-FE-2: the Webhook Trigger step gets its own "Verzoeken"
             // tab, reaching the same per-webhook request log Settings shows.
             ...(isWebhookTrigger ? [{ id: 'requests', label: t('config.tabRequests') }] : []),
-            // 02-09: a "Vertalingen" tab only when this module's schema actually
+            // 02-09: a "Translations" tab only when this module's schema actually
             // declares a translations-tab field AND its showIf currently passes
             // (e.g. whatsapp_send's translations field only applies to the
-            // free-text 'session' format, never to 'template' — Danny: "Bij
-            // template kan dit niet.") — never shown on modules/states with
+            // free-text 'session' format, never to 'template' — Danny: "not
+            // possible with a template.") — never shown on modules/states with
             // nothing to translate.
             ...(translationsFieldCount > 0
               ? [{ id: 'translations', label: t('config.tabTranslations') }]

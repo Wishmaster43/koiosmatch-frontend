@@ -203,8 +203,8 @@ export default function StatusFilterSelect({ value, onToggle, statuses, optionKe
       : t('common:filters.selectedCount', { count: value.length })
 
   return (
-    // TOOLBAR-WIDTH-1 → superseded (Danny 20-08, screenshot: "spacing tussen
-    // status en andere knopje is groter dan bij filter en nieuw"): the old
+    // TOOLBAR-WIDTH-1 → superseded (Danny 20-08, screenshot: "the spacing between
+    // the status button and the other button is bigger than for filter and new"): the old
     // minWidth 96 belonged to the CALM FIELD face, which filled its wrapper.
     // The trio pill sizes to its own content, so leftover wrapper width rendered
     // as phantom space beside the pill — the toolbar gap looked bigger than the

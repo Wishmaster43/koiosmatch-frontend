@@ -33,8 +33,8 @@ export const LOCAL_TO_SERVER: Record<string, string> = {
   expiringOpps:      'expiring_opps',
   tooLongInStage:    'app_too_long_in_stage',
   missingApptApps:   'app_missing_appointment',
-  // Full-vocabulary completion (Danny: "ik moet er 9 hebben, waar is de rest
-  // gebleven" — the server's default kpi_row carried keys this map did not know
+  // Full-vocabulary completion (Danny: "I should have 9, where did the rest go" —
+  // the server's default kpi_row carried keys this map did not know
   // and they fell out silently): every remaining K-168/K-173 key gets a tile.
   candidatesNew:     'candidates_new',
   noFollowup:        'no_followup',

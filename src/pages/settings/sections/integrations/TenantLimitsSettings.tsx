@@ -35,8 +35,8 @@ export default function TenantLimitsSettings() {
   const auth = useAuth()
   const apps = useApps()
 
-  // A connector the tenant does not have is not a meter it should see (Danny 09-09: "je hoort
-  // nergens shiftmanager en HelloFlex … te zien als deze niet aan staan"). Shiftmanager and
+  // A connector the tenant does not have is not a meter it should see (Danny 09-09: "you
+  // shouldn't see Shiftmanager and HelloFlex anywhere if they're not switched on"). Shiftmanager and
   // HelloFlex ride on their app switches, the WhatsApp meters on the WhatsApp page access.
   const visible = (row: TenantLimitRow) => {
     const key = row.key.toLowerCase()

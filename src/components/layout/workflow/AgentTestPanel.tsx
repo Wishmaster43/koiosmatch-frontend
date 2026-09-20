@@ -160,7 +160,7 @@ export default function AgentTestPanel({ config }: {
                   ? <User size={11} color="var(--color-primary)" />
                   : <Bot size={11} color="var(--color-success)" />}
               </div>
-              {/* GEEN USAGE IN DE CHAT (§14 canon): model/tokens are internal, never shown here. */}
+              {/* NO USAGE IN THE CHAT (§14 canon): model/tokens are internal, never shown here. */}
               <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
                 {msg.role === 'user' ? t('agentTest.you') : t('agentTest.agent')}
               </span>
@@ -176,7 +176,7 @@ export default function AgentTestPanel({ config }: {
             }}>
               {msg.content}
             </div>
-            {/* Stats under assistant bubble — latency only; tokens are internal usage (GEEN USAGE IN DE CHAT). */}
+            {/* Stats under assistant bubble — latency only; tokens are internal usage (NO USAGE IN THE CHAT). */}
             {msg.role === 'assistant' && msg.duration_ms && (
               <div style={{ display: 'flex', gap: 8, fontSize: 10, color: 'var(--text-muted)', paddingLeft: 4 }}>
                 <span>{fmtMs(msg.duration_ms)}</span>
@@ -193,7 +193,7 @@ export default function AgentTestPanel({ config }: {
         <div ref={bottomRef} />
       </div>
 
-      {/* Clear bar — no usage/tokens shown here (GEEN USAGE IN DE CHAT); gated on
+      {/* Clear bar — no usage/tokens shown here (NO USAGE IN THE CHAT); gated on
           message presence instead of the now-unused totalTokens counter. */}
       {messages.length > 0 && (
         <div style={{ padding: '4px 14px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>

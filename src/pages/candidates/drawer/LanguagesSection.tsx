@@ -55,8 +55,8 @@ interface LinkedDocument {
  * from the tenant-configurable lists (Settings → Languages) with a package default.
  * Same in-place pencil ↔ save/cancel pattern as the profile blocks.
  *
- * TAAL-DOC-LINK-1 (Danny 08-08, translated: "Languages: I still can't link a
- * document" — verbatim: "Talen: kan ik nog geen document koppelen"): a row
+ * TAAL-DOC-LINK-1 (Danny 08-08: "Languages: I still can't link a
+ * document"): a row
  * can now carry a proof document (a language certificate) — picked per row while editing,
  * previewed/downloaded from the read chip — mirroring what Opleiding /
  * Certificeringen / Vaardigheden / Referenties already offer.

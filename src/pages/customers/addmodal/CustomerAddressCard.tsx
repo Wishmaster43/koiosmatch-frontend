@@ -1,8 +1,7 @@
 /**
  * CustomerAddressCard — the customer's own visiting address (KLANT-ADRES-1), added
- * so the "+ Klant" create form mirrors "+ Kandidaat" 1:1 (Danny 02-08: "de + nieuwe
- * klant popup moet lijken op + nieuwe kandidaat" — "the + new customer popup should
- * look like + new candidate"). Full-width, three rows — street/
+ * so the "+ Customer" create form mirrors "+ Candidate" 1:1 (Danny 02-08: the + new
+ * customer popup should look like + new candidate). Full-width, three rows — street/
  * no/suffix, postcode/city, province/country — exactly like AddCandidateModal's own
  * AddressCard; the country/province cascade is the same shared useProvinces hook.
  * Labels reuse the customers namespace's existing `locations.detail.*` keys (the

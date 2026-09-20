@@ -261,8 +261,7 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     name: c.name ?? '—',
     initials: initialsOf(c.name),
     debtorNumber: c.debtor_number ?? c.debtorNumber ?? '',
-    // BRANCH-1 (Danny 27-07: "een klant moet gekoppeld worden aan een vestiging, maar
-    // ik mis vestiging in de drilldown" — a customer must be linked to a branch, but I'm
+    // BRANCH-1 (Danny 27-07: a customer must be linked to a branch, but I'm
     // missing the branch in the drilldown). The backend already delivers it — branch
     // {id,name} plus the flat branch_id/location_id — it was simply never mapped, so
     // the drawer could not show or edit it.

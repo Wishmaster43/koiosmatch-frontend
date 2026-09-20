@@ -1,7 +1,7 @@
 /**
  * CurrencyInput — a money field that shows EUROS and stores CENTS. The API keeps every
  * amount as an integer in cents (BE GETALLEN-1); the user never types cents (Danny
- * 09-09: "waarom kan dit niet gewoon in euro ik wil geen cent hebben"). Composes
+ * 09-09: "why can't this just be in euros, I don't want cents"). Composes
  * NumberInput with two decimals and the tenant currency symbol as prefix.
  */
 import type { ReactNode } from 'react'

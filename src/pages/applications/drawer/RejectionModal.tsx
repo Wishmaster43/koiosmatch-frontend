@@ -61,7 +61,7 @@ interface Props {
  * S34 (Danny 02-09): while Koios advises rejection and no reason is picked
  * yet, the shared KoiosSuggestionBadge sits under the reason field as a
  * visible PROPOSAL of the DECISION (reject) — the reason itself is never
- * pre-filled ("het systeem gokt nooit stil": no reliable mapping exists from
+ * pre-filled ("the system never guesses silently": no reliable mapping exists from
  * a failed criterion to the tenant's reason list). Picking a reason clears it.
  *
  * V-appdetail-4: the note already had an expand (`noteExpanded` +

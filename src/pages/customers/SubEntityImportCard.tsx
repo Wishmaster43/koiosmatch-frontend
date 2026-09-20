@@ -1,8 +1,8 @@
 /**
  * SubEntityImportCard — the "create these FROM A FILE" entry at the top of the
- * location/department/contact create modals (Danny 02-08, verbatim: "…moeten
- * ook een CSV-upload hebben" — i.e. "+ New department, + new location, + new
- * contact person ... must also get a CSV upload"). A thin parent-scoped wrapper
+ * location/department/contact create modals (Danny 02-08: "+ New department, + new
+ * location, + new contact person ... must also get a CSV upload"). A thin
+ * parent-scoped wrapper
  * around the shared EntityImportCard (same upload/preview/result steps every
  * other "create from file" card uses, CLAUDE.md §11) — this file only owns the
  * PARENT-mismatch concern the plain EntityImportCard has no notion of.

@@ -153,7 +153,7 @@ export default function BackgroundTab({ c, onLocalMerge, onJump }: { c: Candidat
   }
   // The fieldLabels map extractApiError consults ONLY when the raw server message
   // is Laravel's own untranslated "required" template — never overrides a crafted
-  // domain message (DOC-1-EIGENAAR-1's "Dit document is al aan een ander onderdeel
+  // domain message (DOC-1-EIGENAAR-1's "This document is already attached to another part
   // gekoppeld." — "This document is already linked to another item." — keeps
   // surfacing exactly as before).
   const requiredFieldLabels = (rel: string): Record<string, string> | undefined => {
@@ -171,7 +171,7 @@ export default function BackgroundTab({ c, onLocalMerge, onJump }: { c: Candidat
   // ORIGINAL index — never a whole-list snapshot, which would resurrect rows a
   // different in-flight call already removed successfully.
   // DOC-1-EIGENAAR-1 (Danny 08-08 point 5): a 422 on these routes is an EXPECTED,
-  // caller-handled outcome (e.g. "Dit document is al aan een ander onderdeel
+  // caller-handled outcome (e.g. "This document is already attached to another part
   // gekoppeld." — "This document is already linked to another item.") —
   // quietStatuses suppresses api.ts's generic dev diagnostic toast
   // ("API PATCH … → 422") so the server's own readable reason is what the user reads.

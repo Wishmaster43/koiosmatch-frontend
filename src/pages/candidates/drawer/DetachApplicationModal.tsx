@@ -68,7 +68,7 @@ export default function DetachApplicationModal({ label, onCancel, onConfirm, sub
         </BodyText>
         <Caption as="label" htmlFor="detach-application-reason" style={{ display: 'block', marginBottom: 5 }}>
           {t('work.detachReasonLabel')}</Caption>
-        {/* POP-UPS 4: de reden krijgt de house-mic (plain-text dictatie). */}
+        {/* POP-UPS 4: the reason field gets the house mic (plain-text dictation). */}
         <DictationTextarea id="detach-application-reason" autoFocus value={reason} rows={3}
           onChange={v => setReason(v.slice(0, REASON_MAX))} placeholder={t('work.detachReasonPlaceholder')} />
 

@@ -74,7 +74,7 @@ export function Label({ children, required, htmlFor, id }: { children: ReactNode
   )
 }
 
-// MODAL-CANON (Danny 13/14-08 "hou het met + Match aan"): the label-LEFT row for
+// MODAL-CANON (Danny 13/14-08: "keep it consistent with + Match"): the label-LEFT row for
 // every create-modal field — label on the canon column width (fieldRowCanon),
 // field takes the rest. Same id/aria-labelledby wiring as Field below; ONE
 // implementation, so no modal restyles it privately (§3A field-layout rule).
@@ -215,8 +215,8 @@ export function CheckboxField({ id, checked, onChange, disabled, ...req }: {
 }
 
 /**
- * AddButton — every "+ X toevoegen" affordance in a form/section. Danny 08-08:
- * "MOET EEN KNOP ZIJN" — it used to render as bare orange text with a plus,
+ * AddButton — every "+ Add X" affordance in a form/section. Danny 08-08:
+ * "MUST BE A BUTTON" — it used to render as bare orange text with a plus,
  * which does not read as clickable and drifted per screen. HUISSTIJL-1 (18-08):
  * this had its own hand-rolled 8%/32% tint recipe instead of the house 10%/33%
  * pair, so it now delegates straight to DrawerAddButton — the ONE "+ add"

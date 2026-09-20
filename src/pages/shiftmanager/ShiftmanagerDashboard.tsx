@@ -99,8 +99,8 @@ export default function ShiftmanagerDashboard() {
     return { newList, newCount, avg, active, inactive, all: list, bNever, bWorked, bPlanned, bIdle, attention }
   }, [candidates, useCandidateStats, candidateStats])
 
-  // One combined "Activiteit" donut over ACTIVE candidates (Gewerkt deze maand /
-  // Ingepland / Nooit gewerkt / Geen recente activiteit) — replaces 3 separate tiles.
+  // One combined "Activity" donut over ACTIVE candidates (Worked this month /
+  // Planned / Never worked / No recent activity) — replaces 3 separate tiles.
   const activityBuckets = useMemo(() => ([
     { key: 'worked',  label: t('dashboard.stats.workedThisMonth'), title: t('dashboard.stats.workedThisMonthHint'), list: derived.bWorked,  color: 'var(--color-success-text)' },
     { key: 'planned', label: t('dashboard.stats.planned'),         title: t('dashboard.stats.plannedHint'),         list: derived.bPlanned, color: 'var(--color-secondary)' },

@@ -2,8 +2,8 @@
  * contactLinks — how an e-mail address and a phone number are RENDERED in a drawer:
  * as real, actionable links with a shortcut icon, never as plain text.
  *
- * Promoted out of the candidate drawer (§3A/§11 — Danny 28-07: "e-mailadres van contact
- * weergeven zoals kandidaat drill down, zelfde geldt voor telefoon met icon blauw") so
+ * Promoted out of the candidate drawer (§3A/§11 — Danny 28-07: "show a contact's email
+ * address like the candidate drill-down, same for phone with a blue icon") so
  * the customer, and every entity after it, shows contact data the same way instead of
  * growing a second hand-rolled copy.
  *
@@ -108,7 +108,7 @@ export function websiteValue(v: unknown, openLabel: string): ReactNode {
 
 /**
  * A Chamber-of-Commerce number, linked through to the public KvK register (Danny 28-07:
- * "KVK moeten we ook gaan doorlinken"). Only digits are looked up — a free-text value
+ * "the KvK number should be linked through too"). Only digits are looked up — a free-text value
  * that is not a number is shown as-is rather than sent to a search that cannot resolve it.
  */
 export function kvkValue(v: unknown, openLabel: string): ReactNode {

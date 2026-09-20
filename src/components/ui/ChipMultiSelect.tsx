@@ -2,8 +2,8 @@
  * ChipMultiSelect — soft-chip multiselect (decision Danny 04-08), replacing raw
  * checkbox lookup-selection (preferred days, industries, driving licences, locations, …).
  *
- * CHIP-CONTRAST-1 (Danny 05-08: "je ziet niet duidelijk welke gekozen zijn" — "you
- * can't clearly see which ones are chosen"): in a SELECTION context every option
+ * CHIP-CONTRAST-1 (Danny 05-08: "you can't clearly see which ones are chosen"):
+ * in a SELECTION context every option
  * carrying its own tint made chosen vs unchosen a colour-nuance guessing game —
  * and colour was the ONLY signal (§6 violation). Now:
  * unchosen = neutral (muted text, plain border, no tint); chosen = the §4 soft tint
@@ -78,9 +78,8 @@ export default function ChipMultiSelect({ options, values, selected, onToggle, c
               // all, so the chosen state is unmistakable (and never colour-only, §6).
               fontWeight: isActive ? 600 : 400,
               // CHIP-TINT-1 (Danny 20-08, screenshot of the preference chips:
-              // "het oranje is te krachtig — de chips doen we in dat lichte rode,
-              // en dit geldt voor alle chips" — "the orange is too strong — we'll
-              // do the chips in that light red, and this applies to all chips"):
+              // "the orange is too strong — we'll do the chips in that light red,
+              // and this applies to all chips"):
               // supersedes the 19-08 solid order
               // FOR CHIPS ONLY — selected choice-chips wear the active 16/50 tint
               // with chipInk (readable on its own tint since r3); buttons, action

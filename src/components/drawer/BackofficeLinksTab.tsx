@@ -52,19 +52,19 @@ interface BackofficeLinksTabProps {
   children?: ReactNode
 }
 
-// Renders the koppelen tab: gates the HelloFlex/Shiftmanager cards on which connector apps are enabled, and owns the link/sync mutations below.
+// Renders the linking tab: gates the HelloFlex/Shiftmanager cards on which connector apps are enabled, and owns the link/sync mutations below.
 export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftmanagerLink, canLink, refetchUrl, children }: BackofficeLinksTabProps) {
   const { t } = useTranslation('common')
-  // GATING-MATRIX (Danny 23-07): the koppel-cards gate on the CONNECTOR APP ONLY —
-  // the sm/hf MODULE is the read/reports side and must NOT reveal the koppelen
+  // GATING-MATRIX (Danny 23-07): the link cards gate on the CONNECTOR APP ONLY —
+  // the sm/hf MODULE is the read/reports side and must NOT reveal the linking
   // surface (Yesway: hf module on, hf app off → no HelloFlex card).
   const apps = useApps()
   const isAppEnabled = apps?.isAppEnabled ?? (() => false)
   const showHelloflex = isAppEnabled('hf')
   const showShiftmanager = isAppEnabled('shiftmanager')
 
-  // KOPPELINGEN-REFRESH-1 (Danny 14-08: "hard refresh nodig ... tabje ververste
-  // zichzelf maar werkt nu niet meer"): self-contained refetch, so this tab always
+  // KOPPELINGEN-REFRESH-1 (Danny 14-08: a hard refresh was needed — the tab used
+  // to refresh itself but no longer did): self-contained refetch, so this tab always
   // updates after its own mutations regardless of whether the parent drawer wires an
   // onUpdate callback — the caller changed six times across entities and drifted.
   // Mirrors the alive-guard pattern from the candidate PDOK poll (IntegrationsTab):

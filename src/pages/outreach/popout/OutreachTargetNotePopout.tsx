@@ -1,12 +1,11 @@
 /**
  * OutreachTargetNotePopout — BELLIJST-NOTE-POPOUT-1 (Danny 14-08, looking at the
- * call-list target's note editor, translated: "this should definitely be able
- * to become a pop-out on a popup" — verbatim: "dit moet zeker een pop-out
- * kunnen worden op een popup"). This field is a NOTE, not a description field, so it renders the
+ * call-list target's note editor: "this should definitely be able
+ * to become a pop-out on a popup"). This field is a NOTE, not a description field, so it renders the
  * exact same editor stack TargetNoteField already composes on the row —
  * RichTextEditor (assist off) + RichTextAssistBar (mic only) + NoteAssistSection
- * (Verbeteren/Samenvatten/Actiepunten) — never popout/TextPopoutEditor's
- * "Genereer met Koios" composition, which is for a description-style field
+ * (Improve/Summarize/Action items) — never popout/TextPopoutEditor's
+ * "Generate with Koios" composition, which is for a description-style field
  * (§11: mirror the SOURCE field's own composition, never invent a third shape).
  *
  * Same recipe as CustomerDepartmentTextPopout one level deeper: `id` is the

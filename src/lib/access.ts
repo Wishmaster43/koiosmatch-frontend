@@ -234,8 +234,8 @@ export function canUseKoiosAssist(auth?: AuthLike | null): boolean {
 }
 
 /**
- * canDo — WORKFLOW-PERMS-1 (Danny 10-09, verbatim: "AI en workflow moet ook in een rol
- * zitten: weergeven, uitvoeren alleen, weergeven en uitvoeren, wijzigingen, verwijderen"):
+ * canDo — WORKFLOW-PERMS-1 (Danny 10-09, verbatim: "AI and workflow also need to
+ * fit in a role: view, execute-only, view and execute, change, delete"):
  * one verb-level check for a permission family (`workflows.*`, `aiagents.*`). Tolerant by
  * the same "absence = open" convention as the page.* whitelist above: a payload that
  * carries NO permission of that family comes from a backend that has not seeded the

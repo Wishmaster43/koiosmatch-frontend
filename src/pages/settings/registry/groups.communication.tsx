@@ -100,8 +100,8 @@ export const communicationGroups: NavGroup[] = [
       // Escalation (item 11, 3b): per stall signal, an optional day-threshold + target (user/role).
       { id: 'notif_escalation', icon: Bell, component: EscalationSettings },
       // The per-CALLER override (G28, MyNotificationsSettings) is a personal preference,
-      // not a tenant setting — it lives on the profile since row 32 (Danny 09-09: "Mijn
-      // meldingen maar staat bij instellingen en geldt voor iedereen???"). The old
+      // not a tenant setting — it lives on the profile since row 32 (Danny 09-09: "my
+      // notifications, but it's under settings and applies to everyone???"). The old
       // #settings/notifications/notif_my deep link redirects there (SettingsPage MOVED_TO_PROFILE).
     ],
   },

@@ -52,12 +52,12 @@ export interface TaskForm {
  * assignee/candidate/customer/contact are all real tenant/relational values, never
  * a free-text create).
  *
- * TASK-SMART-DEFAULTS-1 (Danny: "+ Nieuwe taak is minder mooi en intelligent dan +
- * match — de datum is netjes gevuld etc."): brought up to +Match's two-axis
- * standard. LOOK — a fourth card split off the old combined "Koppeling": Taak ·
- * Planning · Koppelingen (linked record) · Toewijzing (assignee + creator), laid
- * out full-width-then-paired exactly like +Match's Relaties-then-Contract/
- * Financieel (`cardPair`, shared with every other wide modal). INTELLIGENCE
+ * TASK-SMART-DEFAULTS-1 (Danny: "+ New task is less polished and intelligent than
+ * +match — the date is neatly filled in, etc."): brought up to +Match's two-axis
+ * standard. LOOK — a fourth card split off the old combined "Link": Task ·
+ * Planning · Links (linked record) · Assignment (assignee + creator), laid
+ * out full-width-then-paired exactly like +Match's Relations-then-Contract/
+ * Financial (`cardPair`, shared with every other wide modal). INTELLIGENCE
  * (create only — never overwrites a loaded edit record): the due date/time propose
  * today + the next round hour (`addmodal/defaults`, since +Match's own todayISO
  * start-date proposal has no time-of-day field to mirror and lives in another
@@ -87,7 +87,7 @@ export interface TaskForm {
  * form doesn't manage (e.g. an opportunity link) are carried over so the update's
  * full-replace `links` never silently drops them.
  *
- * PUNT 14/15/16 (Danny 08-08). 14: "Omschrijving" moved out of the FIRST card
+ * PUNT 14/15/16 (Danny 08-08). 14: "Description" moved out of the FIRST card
  * into its own DescriptionCard rendered LAST, under every short field — order
  * only, same key in the same body. 15: a create can now couple the task to the
  * WHOLE shared link vocabulary through the drawer's own `AddLinkRow` +
@@ -226,10 +226,10 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
         </ModalTitleBarPillsRow>
       }>
 
-        {/* Body: titled cards — Taak full-width, then Planning+Toewijzing (left,
-            stacked) paired against Koppelingen (right) — mirrors +Match's
-            Relaties-then-Contract/Financieel layout (`cardPair`, shared with every
-            other wide modal) — and finally the full-width Omschrijving (PUNT 14:
+        {/* Body: titled cards — Task full-width, then Planning+Assignment (left,
+            stacked) paired against Links (right) — mirrors +Match's
+            Relations-then-Contract/Financial layout (`cardPair`, shared with every
+            other wide modal) — and finally the full-width Description (PUNT 14:
             the free-text block sits UNDER every other field now, not above them).
             Or a loading placeholder while the edit-mode GET is in flight. */}
         {loadingTask ? (

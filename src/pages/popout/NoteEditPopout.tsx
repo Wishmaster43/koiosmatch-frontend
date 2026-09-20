@@ -1,15 +1,13 @@
 /**
  * NoteEditPopout — ONE existing note in a second-screen window of its own
- * (NOTITIE-POPOUT-URL-1, Danny 11-08: "zet het notitie-id in de URL" — put the
- * note id in the URL — + live 13-08: "zoals de pop-out van de profieltekst werkt
- * moeten ook de notities werken" — notes must work the same way the profile-text
- * pop-out works).
+ * (NOTITIE-POPOUT-URL-1, Danny 11-08: "put the note id in the URL" — + live
+ * 13-08: notes must work the same way the profile-text pop-out works).
  * Route: /popout/notes/:entity/:id/:noteId — the id in the URL is the whole
  * design: no BroadcastChannel handoff to resolve, no race against a thread
  * window's own loading, and re-opening the same note re-focuses its OS window.
  *
- * POPOUT-PARITEIT-1 (Danny 27-08, "de notities zoals ze zijn bij kandidaat
- * moeten ook bij de rest zo zijn … en pop-out"): generalised beyond candidate/
+ * POPOUT-PARITEIT-1 (Danny 27-08: "notes as they work for the candidate must
+ * work the same way for everything else … including pop-out"): generalised beyond candidate/
  * application to every entity whose notes route now really PATCHes a single
  * note (see NOTE_EDIT_POPOUT_ENTITIES's own docblock for the per-entity route
  * evidence) — customer, vacancy, task, match, opportunity. Four of those five

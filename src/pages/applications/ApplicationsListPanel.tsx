@@ -158,7 +158,7 @@ export default function ApplicationsListPanel({
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        {/* No status bucket tabs here (Danny 14-08, "moet een donut worden!!"):
+        {/* No status bucket tabs here (Danny 14-08: this must become a donut):
             the active/matched/rejected dimension moved to the insights-row
             donut and the right filter panel's bucket group — only the toolbar
             control was removed, the `bucket` state itself still lives on the page. */}

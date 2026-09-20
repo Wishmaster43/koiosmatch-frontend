@@ -29,8 +29,7 @@ const AI_TASKS_ACCENT = '#0D9488'
 export const pickOne = pickOneImpl
 
 // Bucket donut click → the SAME single-value bucket state the old toolbar tab
-// row drove (Danny 14-08: "de knoppenrij verdwijnt, dit wordt een donut",
-// i.e. "the button row disappears, this becomes a donut").
+// row drove (Danny 14-08: "the button row disappears, this becomes a donut").
 // Clicking the currently-active slice returns to the default ('active').
 export const pickBucket = (setBucket: Dispatch<SetStateAction<string>>, setShowArchived: Dispatch<SetStateAction<boolean>>) => (d: unknown) => {
   const o = d as { key?: string; name?: string; payload?: { key?: string } } | null | undefined

@@ -1,7 +1,7 @@
 /**
  * koiosToolResult — the record a confirmed Koios tool CREATED, as a deep-link ref
- * (§0B "a link to the record it created"; Danny 09-09: "Uitvoeren doet niets … ik mis
- * de hyperlinks bij de gemaakte taken"). Pure mapper over the tool's own result body
+ * (§0B "a link to the record it created"; Danny 09-09: "Execute does nothing … I'm
+ * missing the hyperlinks to the created tasks"). Pure mapper over the tool's own result body
  * (ToolExecutor::executePending hands the tool result back under `data`), so the
  * assistant block and the pending-action card render the SAME chip.
  */

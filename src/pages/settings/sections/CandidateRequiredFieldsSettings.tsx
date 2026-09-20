@@ -1,9 +1,9 @@
 /**
- * CandidateRequiredFieldsSettings — Settings → Kandidaat → Verplichte velden.
+ * CandidateRequiredFieldsSettings — Settings → Candidate → Required fields.
  *
- * Danny 09-08: "ik mis heel veel velden zoals mobiel. Ik wil dat ALLE velden hier staan
- * die bij de kandidaat staan. Maakt iemand een extra veld, dan moet die hier ook komen
- * als blokje en ook verplicht kunnen worden." This screen used to offer 18 hardcoded
+ * Danny 09-08: "I'm missing a lot of fields, like mobile. I want ALL the fields that
+ * belong to the candidate to show up here. If someone adds an extra field, it must show
+ * up here too as a block and be markable as required." This screen used to offer 18 hardcoded
  * fields — a self-imposed limit, since the backend guard has no whitelist at all. It now
  * renders the full catalog (requiredFieldsCatalog.ts, ~30 fields incl. `mobile`) in
  * collapsible blocks, plus the tenant's own custom fields in their own block.

@@ -1,9 +1,9 @@
 // Settings registry — CATALOG_GROUP_HOSTS: where a generic catalogue section (windows/
 // retention/messaging/email) is embedded, since the standalone catalogue nav screens
 // were retired in favour of hosting each section under its owning entity's own screen.
-// CATALOG-EMBED-1 (Danny 13-09, rows 21-24: "Whatsapp hoort bij Whatsapp · Inbox
-// mail hoort bij email instellingen", "Hoort bij kandidaten en systemen", "Hoort
-// bij email!", "Hoort onderdeel te zijn bij alle instellingen!!"): the four
+// CATALOG-EMBED-1 (Danny 13-09, rows 21-24: WhatsApp belongs with WhatsApp, Inbox
+// mail belongs with the email settings, "belongs with candidates and systems",
+// "belongs with email!", "must be part of every settings screen!!"): the four
 // generic catalogue nav screens (windows/retention/messaging/email — SETTINGS-
 // CATALOG-1) are RETIRED. Every catalogue group now renders under its own
 // entity's screen via <CatalogSection section group /> (page mode) or embedded

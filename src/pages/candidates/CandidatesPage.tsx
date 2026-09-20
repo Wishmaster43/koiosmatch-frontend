@@ -249,7 +249,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
   // through it and a copied link reopens the same candidate (NAV-BACK-1 — Danny
   // 2026-07-06, translated: "also doesn't reopen previous items" — verbatim:
-  // "opent ook niet vorige items"; supersedes the old memory-only remember).
+  // "also does not reopen previous items"; supersedes the old memory-only remember).
   const { markNextCloseReplace } = useDrawerUrl({ selectedId: selected?.id, openById: (id) => selectCandidate({ id } as Candidate), close: closeDrawer, intent })
   // Ref assignment in an effect, never during render (react-hooks/refs); the ref is
   // only read asynchronously inside the gone-fetch .then, after mount.

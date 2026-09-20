@@ -32,8 +32,8 @@
  * siblings sharing their grid row — mirrors the identical fix already applied in
  * `pages/candidates/addmodal/fields.tsx` for the same trigger-vs-input mismatch.
  *
- * STATUS-HIDDEN-1 (Danny 02-08, second round: "+ nieuwe contactpersoon ... status
- * moet weg in de popup"): the status picker (inside ContactLinkCard) is hidden by
+ * STATUS-HIDDEN-1 (Danny 02-08, second round: the status field must go from the
+ * "+ new contact person" popup): the status picker (inside ContactLinkCard) is hidden by
  * default — ContactsPanel's own status editor already covers create AND edit —
  * reappearing only when the tenant marked status_id required
  * (customer_contact_required_fields, FlatRequiredFieldsGuard catalog), mirrors

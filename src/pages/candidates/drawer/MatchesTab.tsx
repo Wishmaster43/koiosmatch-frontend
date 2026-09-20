@@ -13,21 +13,20 @@
  * carries neither (see MatchCard's own docblock) — a real backend gap, not
  * dropped here.
  *
- * TOOLBAR (Danny 03-08: "bij Matches wil ik ook een zoekbalk en statussen
- * hebben" — I also want a search bar and statuses on Matches — one look on
- * both the customer's and this card): search (vacancy title + client name) +
+ * TOOLBAR (Danny 03-08: "I also want a search bar and statuses on Matches" —
+ * one look on both the customer's and this card): search (vacancy title + client name) +
  * the shared StatusFilterSelect keyed on the SAME match-status vocabulary the
  * title's own phase resolves via useMatchStatuses().
  *
- * ONE-LINE TOOLBAR (Danny live review, 04-08: "Zoeken status en + match moet op
- * 1 lijn!!"): the optional `onAdd` renders the house DrawerAddButton at the END
+ * ONE-LINE TOOLBAR (Danny live review, 04-08: "search, status and + match
+ * must be on one line!!"): the optional `onAdd` renders the house DrawerAddButton at the END
  * of this SAME row — WorkTab used to render "+ Match" on its own flex-end row
  * ABOVE this component; that separate row is gone, `onAdd` is how WorkTab still
  * owns the modal-open callback without this read-only tab knowing about MatchModal.
  *
  * COMPACT ROWS + NEWEST-FIRST (Danny live review, 04-08: the per-match cards
- * "meer compact in een tabel weergegeven met de optie om het open te klappen …
- * gesorteerd op nieuwste match bovenaan"): every `MatchCard` renders with its
+ * should be "shown more compactly in a table, with the option to expand it …
+ * sorted by newest match on top"): every `MatchCard` renders with its
  * opt-in `collapsible` prop — one summary row per match, expanding in place —
  * and the list is sorted by `createdAt` descending before render (see the sort
  * comment below for the field's provenance).

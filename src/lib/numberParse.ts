@@ -1,8 +1,8 @@
 /**
  * numberParse — the inverse of lib/formatters.formatNumber: reads what a user typed in
  * the ACTIVE locale ("1.250", "1.250,50", "1250,5", "1,250.50") back into a number.
- * GETALLEN-1 (Danny 09-09: "zodra het een duizendtal wordt wil ik overal … een . er
- * tussen", also inside inputs): a locale-formatted input needs a locale-aware parser,
+ * GETALLEN-1 (Danny 09-09: "as soon as it becomes a thousand I want a . in
+ * between everywhere", also inside inputs): a locale-formatted input needs a locale-aware parser,
  * never Number() on the raw string.
  */
 import { localeSeparators } from '@/lib/formatters'

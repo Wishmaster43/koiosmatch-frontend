@@ -31,12 +31,11 @@ import applicationDisplay from '../schemas/applicationDisplay'
 // Candidate and Applications groups, in original NAV_GROUPS order.
 export const candidateGroups: NavGroup[] = [
   {
-    // Candidate-specific settings (Danny: "Kandidaat").
+    // Candidate-specific settings (Danny: "Candidate").
     key: 'candidate', icon: Users,
     items: [
-      // Candidate function list — moved INTO the candidate group (Danny 24-07,
-      // translated: "must go to the candidate and can just be called Functions"
-      // — verbatim: "moet naar de kandidaat en kan gewoon Functies heten"); contact-person
+      // Candidate function list — moved INTO the candidate group (Danny 24-07:
+      // must go to the candidate and can just be called Functions); contact-person
       // titles stay the separate contact_functions item under `contacts`.
       { id: 'functions', icon: Briefcase, component: FunctionsSettings, logName: 'job_functions' },
       { id: 'candidate_phases', icon: Target, component: CandidatePhasesSettings, logName: 'candidate_phases' },
@@ -49,8 +48,7 @@ export const candidateGroups: NavGroup[] = [
       // status "Blacklist" (§3B) needs its own reason vocabulary, distinct from the
       // generic status-reason free text; own icon so it reads as a flag, not a status.
       // Candidate half only — the customer vocabulary lives in the customers group
-      // (translated: "customer with customer, candidate with candidate" —
-      // verbatim: "klant bij klant, kandidaat bij kandidaat", Danny 2026-08-05).
+      // (Danny 2026-08-05: customer with customer, candidate with candidate).
       { id: 'blacklist_reasons', icon: ShieldOff, render: () => <BlacklistReasonsSettings entity="candidate" />, logName: 'candidate_blacklist_reasons' },
       { id: 'pools', icon: Star, component: PoolsSettings, logName: 'pools' },
       { id: 'cv_template', icon: FileText, component: CvTemplateSettings },
@@ -59,7 +57,7 @@ export const candidateGroups: NavGroup[] = [
       // entity the backend supports, not just the candidate, mirroring note_types.
       { id: 'driver_licenses', icon: Car, component: DriverLicenseSettings, logName: 'driver_licenses' },
       { id: 'candidate_display', icon: Palette, schema: candidateDisplay },
-      // Conversion behaviour: default deployability status after Lead → Kandidaat.
+      // Conversion behaviour: default deployability status after Lead → Candidate.
       { id: 'candidate_conversion', icon: UserCheck, component: CandidateConversionSettings },
       // Vacatures-tab visibility (Danny 23-07): per phase/status gate for the
       // drawer's vacancySearch tab — see CandidateVacancyTabSettings + vacancyTabVisibility.ts.
@@ -69,11 +67,11 @@ export const candidateGroups: NavGroup[] = [
       // sibling to the skill-level lookup above; distinct from the unrelated
       // vacancy_education item (a separate vacancy-side education REQUIREMENT lookup).
       { id: 'candidate_education_levels', icon: GraduationCap, component: EducationLevelsSettings, logName: 'education_levels' },
-      // Candidate custom fields moved to the shared "Eigen velden" group below
+      // Candidate custom fields moved to the shared "Custom fields" group below
       // (§3B custom-fields wave) — one CRUD implementation for every entity.
       { id: 'candidate_required_fields', icon: Flag, component: CandidateRequiredFieldsSettings },
-      // AVG-RET-2 (Danny 22-07 punt 8): tenant retention windows (never-placed /
-      // ever-placed) behind the candidate's read-only "Bewaren tot" derivation.
+      // AVG-RET-2 (Danny 22-07, point 8): tenant retention windows (never-placed /
+      // ever-placed) behind the candidate's read-only "Retain until" derivation.
       { id: 'candidate_retention', icon: Clock, component: RetentionSettings },
       // CATALOG-EMBED-1 (Danny 13-09): the catalogue's "windows" section, candidates
       // group — signal/alert day-windows scoped to the candidate, own page rather
@@ -82,7 +80,7 @@ export const candidateGroups: NavGroup[] = [
     ],
   },
   {
-    // Application (sollicitatie) lookups — funnel stages + rejection reasons live on the
+    // Application lookups — funnel stages + rejection reasons live on the
     // application, not the candidate (Danny). Rejection messaging is handled by workflows.
     key: 'applications', icon: ClipboardList,
     items: [
@@ -98,8 +96,8 @@ export const candidateGroups: NavGroup[] = [
       { id: 'rejection', icon: XCircle, component: RejectionSettings, logName: null },
       { id: 'application_proposal', icon: Mail, component: ProposalSettings },
       { id: 'application_display', icon: Palette, schema: applicationDisplay },
-      // APP-REQUIRED-FE-1: flat required-fields toggle list for the "nieuwe
-      // sollicitatie" popup (source / vacancy / owner / phase) — same Flag icon
+      // APP-REQUIRED-FE-1: flat required-fields toggle list for the "new
+      // application" popup (source / vacancy / owner / phase) — same Flag icon
       // as the candidate/customer required-fields items, so it reads as "the
       // same thing on another entity".
       { id: 'application_required_fields', icon: Flag, component: ApplicationRequiredFieldsSettings },

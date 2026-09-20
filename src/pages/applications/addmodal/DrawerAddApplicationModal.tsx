@@ -124,8 +124,8 @@ export default function DrawerAddApplicationModal({ candidateId, candidateOwnerI
         <ApplicationFieldRow fieldId={vacancyFieldId} label={t(vacancyRequired ? 'work.vacancy' : 'work.vacancyOptional')}
           required={vacancyRequired} error={!!errors.vacancyId}
           errorText={!vacancyId && vacancyRequired ? t('common:errors.fieldRequired', { field: t('work.vacancy') }) : t('work.applicationFailed')}>
-          {/* Clearable (Danny 13-08 'hier ook niet — eenmaal gekozen blijft hij
-              staan'): an OPTIONAL vacancy must be releasable back to an open
+          {/* Clearable (Danny 13-08: not here either, once chosen it stays
+              stuck): an OPTIONAL vacancy must be releasable back to an open
               application — VAC-CLEAR-1 cross, same as the intake modal. No cross
               once the tenant made it required (APP-REQUIRED-FE-1). */}
           <CreatableSelect id={vacancyFieldId} aria-labelledby={`${vacancyFieldId}-label`} aria-required={vacancyRequired}
@@ -191,7 +191,7 @@ export default function DrawerAddApplicationModal({ candidateId, candidateOwnerI
               customFieldValues={customFieldValues} setCustomField={setCustomField} />
           </div>
         )}
-        {/* Soft warning (never a block, Danny: "wel een melding") — mirrors the
+        {/* Soft warning (never a block, Danny: just a notice) — mirrors the
             AXIS-MATRIX banner's warn tint (ActionRuleBanner) so both notices in this
             modal read as the same idiom. Only fires once both sides of a comparison
             are a KNOWN owner (§ useBranchMismatch's "both sides nullable" rule). */}

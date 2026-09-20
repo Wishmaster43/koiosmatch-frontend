@@ -72,7 +72,7 @@ const LinkMatchButton = ({ label, onClick, busy }: { label: string; onClick: () 
  * LocationContactSection — CONTACT-LOCATION-PRIMARY-1, second round (Danny 02-08): "Contact
  * ter plaatse" and "Primaire contactpersoon" used to be two SEPARATE blocks that could disagree
  * — free text on the location's own columns vs. the real contact↔location coupling. Danny:
- * "contact ter plaatse is aangegeven als primaire contactpersoon van deze vestiging!!" — one
+ * the on-site contact is listed as the primary contact of this branch!! — one
  * person, told two contradicting ways on the same screen.
  *
  * ONE block now, and the coupling is the only thing it renders as a live record: a COUPLED
@@ -117,7 +117,7 @@ export default function LocationContactSection({
   // of offering a button that would 404 on /customers/undefined/….
   const canCouple = uniqueMatch != null && customerId != null
 
-  // ONE-CLICK-COUPLE-2 (Danny, third escalation: "Waarom staat dit er nog steeds!!") —
+  // ONE-CLICK-COUPLE-2 (Danny, third escalation: why is this still here!!) —
   // closes the case `canCouple` above leaves dead: typed text that names NOBODY in this
   // customer's contact list (a location mailbox email + a pool-generated name is the
   // common seeded shape). Offered only when there is an actual name to split into a
@@ -198,7 +198,7 @@ export default function LocationContactSection({
           {primaryContact.role && <Row label={t('contacts.detail.role')}><span style={{ fontSize: 12, color: 'var(--text)' }}>{primaryContact.role}</span></Row>}
           <Row label={t('locations.detail.email')}>{emailValue(primaryContact.email, t('overview.sendEmail'))}</Row>
           <Row label={t('locations.detail.phone')}>{phoneValue(primaryContact.phone || primaryContact.mobile, t('overview.callPhone'))}</Row>
-          {/* CONTACT-LINKEDIN-1 (Danny 05-08: "gewoon in het blok van de contactpersoon"):
+          {/* CONTACT-LINKEDIN-1 (Danny 05-08: just in the contact person's own block):
               the coupled contact's LinkedIn, only when set — no empty-dash row here. */}
           {primaryContact.linkedin && (
             <Row label={<><LinkedinMark size={12} />{t('contacts.detail.linkedin')}</>}>

@@ -5,8 +5,8 @@
  * card (SUBENTITY-IMPORT-1) pushed it past that mark — pure presentational,
  * every value and callback comes from the parent's own form state.
  *
- * STATUS-HIDDEN-1 (Danny 02-08, second round: "+ nieuwe contactpersoon ... status
- * moet weg in de popup"): the parent decides `showStatusPicker` (tenant setting
+ * STATUS-HIDDEN-1 (Danny 02-08, second round: status must go from the "+ new
+ * contact person" popup): the parent decides `showStatusPicker` (tenant setting
  * gate, mirrors AddLocationModal/AddDepartmentModal's own) and this card only
  * renders the field when true — an empty filler keeps the toggle's own row
  * layout unchanged when the picker is absent.

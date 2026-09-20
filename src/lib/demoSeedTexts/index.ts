@@ -1,6 +1,6 @@
 /**
- * demoSeedTexts — DEMO-SEED-TAAL-1 (Danny 27-08: "DEMO MOET IN ALLE TALEN GEGEVEN
- * KUNNEN WORDEN GELDT DUS VOOR ALLE DATA!!"). The demo tenant's seeded free texts
+ * demoSeedTexts — DEMO-SEED-TAAL-1 (Danny 27-08: "THE DEMO MUST BE ABLE TO BE
+ * GIVEN IN ALL LANGUAGES, SO THIS APPLIES TO ALL DATA!!"). The demo tenant's seeded free texts
  * (candidate profile summaries, vacancy descriptions, customer company texts) are
  * DUTCH prose in the database — translating them for real is a live AI call, and
  * API-CREDITS-1 forbids any FE/CMFE session from spending those. So this is a pure

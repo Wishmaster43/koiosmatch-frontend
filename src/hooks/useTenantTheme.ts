@@ -174,8 +174,8 @@ export function useTenantTheme(tenant?: { primary_color?: string | null; text_co
   // The Branding form saves settings.brand_color; some tenant payloads carry
   // primary_color. Read both — the tenant-facing Branding setting wins.
   const brand = (settings?.brand_color as string | undefined) ?? tenant?.primary_color
-  // BRAND-TEXT-COLOR-1 (Danny 08-08 "als ik geel kies moet de txt niet wit zijn" —
-  // "if I pick yellow the text shouldn't be white"): the text ON the accent is its
+  // BRAND-TEXT-COLOR-1 (Danny 08-08: "if I pick yellow the text shouldn't be
+  // white"): the text ON the accent is its
   // own token. Explicit pick wins (Branding form, or
   // tenant.text_color from /auth/me); otherwise it is derived from real contrast.
   const brandText = (settings?.brand_text_color as string | undefined) ?? tenant?.text_color ?? undefined
@@ -184,8 +184,8 @@ export function useTenantTheme(tenant?: { primary_color?: string | null; text_co
   useEffect(() => {
     const root = document.documentElement
 
-    // THEME-REACTIVE (Danny 08-08 "als ik nu dark of light theme kies moet het ook
-    // nog werken" — "if I now pick dark or light theme it still has to work"): the
+    // THEME-REACTIVE (Danny 08-08: "if I now pick dark or light theme it
+    // still has to work"): the
     // readable accent depends on the SURFACE it sits on, so this
     // recomputes on a theme flip too — not only when the brand changes.
     const apply = () => applyBrandTokens(brand, brandText)

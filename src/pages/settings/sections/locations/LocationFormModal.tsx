@@ -1,16 +1,16 @@
 /**
- * LocationFormModal — the "+ Vestiging" / edit-branch dialog: the shared
+ * LocationFormModal — the "+ Location" / edit-branch dialog: the shared
  * FloatingPanel shell (wide-form frame, draggable header, SE-resize, remembered
- * position) around the four titled cards (Algemeen incl. branding, Adres,
- * Zakelijk, Contact) plus its Cancel/Save footer.
+ * position) around the four titled cards (General incl. branding, Address,
+ * Business, Contact) plus its Cancel/Save footer.
  *
  * The form VALUE stays in LocationsSettings (it owns the create/update payload);
  * this component only renders it and reports edits back through `setForm`, so the
  * container keeps one source of truth.
  *
  * SETTINGS-INCON-B2 (Danny 13-09, verbatim on #settings/company/locations:
- * "Pop-up is niet de standaard!! Ik kan niet slepen/verplaatsen groter of
- * kleiner maken"): this was a hand-rolled `position:fixed` dialog with no
+ * "Pop-up is not the default!! I can't drag/move or make it bigger or
+ * smaller"): this was a hand-rolled `position:fixed` dialog with no
  * drag/resize — migrated onto the shared FloatingPanel (§4 HUISSTIJL-1), the
  * ONE popup shell every dialog in the app shares. The focus trap, Escape-to-
  * close and focus-restore now live inside FloatingPanel itself (mirrors every
@@ -101,15 +101,15 @@ export default function LocationFormModal({ editingId, form, setForm, saving, on
   return (
     // POPUP-SLEEP-1 / SETTINGS-INCON-B2: the shared draggable/resizable shell —
     // same wide-form footprint as AddCandidateModal/MatchModal (Danny 27-07:
-    // "+ vestiging... moet net zo breed en hoog worden als + match of + nieuwe
-    // kandidaat"), now also draggable and resizable like every other popup.
+    // "+ location... should end up just as wide and tall as + match or + new
+    // candidate"), now also draggable and resizable like every other popup.
     <FloatingPanel open onClose={onClose}
       title={editingId ? t('locations.editTitle') : t('locations.create')}
       persistKey="location-form" resizable scrollBody={false}
       {...WIDE_MODAL_PANEL_SIZE}>
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Algemeen — name, branding, and default flag (B-43).
+          {/* General — name, branding, and default flag (B-43).
               Titled-card chrome (Danny 27-07 point B: "kaders om elk blokje") via
               the shared cardHead/cardBox (CLAUDE.md §11: one source instead of a
               per-entity copy). */}

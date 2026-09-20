@@ -1,7 +1,6 @@
 /**
  * koiosAmbientContext — pure derivation of the AMBIENT @-context ref from the
- * URL hash (KOIOS-SELECTIE-CONTEXT-1, Danny: "als ik een taak of kandidaat
- * selecteer moet ik dit terugzien in Koios AI" — "when I select a task or
+ * URL hash (KOIOS-SELECTIE-CONTEXT-1, Danny: "when I select a task or
  * candidate I want to see that reflected in Koios AI"). Whichever record is currently
  * open in an entity page's drawer becomes an implicit context ref for the
  * Koios composer — derived with NO extra fetch and NO page wiring: the hash
@@ -49,7 +48,7 @@ export function deriveAmbientRef(hash: string): AmbientContextRef | null {
 
 // Every Koios Match deep link pasted into a message ("http://…/#candidates?open=<id>",
 // or a bare "#vacancies?open=<id>") → the record it points at, deduped. Pure: the
-// panel adds the chip label. Danny 09-09: "Koios AI snapt de link niet".
+// panel adds the chip label. Danny 09-09: "Koios AI does not understand the link".
 export function refsFromAppLinks(text: string): Array<{ type: string; id: string }> {
   const out: Array<{ type: string; id: string }> = []
   const seen = new Set<string>()

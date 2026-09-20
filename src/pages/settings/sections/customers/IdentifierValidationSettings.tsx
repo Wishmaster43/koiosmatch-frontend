@@ -1,10 +1,8 @@
 /**
- * IdentifierValidationSettings — Settings → Klanten → Nummervalidatie
- * (KVK/BTW-PER-LAND-1, Danny 2026-08-08 points 10 + 11: "KVK nummer check is 8
- * cijfers --> Check per land want BE, DE, FR is anders" — "the KvK number check
+ * IdentifierValidationSettings — Settings → Customers → Number validation
+ * (KVK/BTW-PER-LAND-1, Danny 2026-08-08 points 10 + 11: "the KvK number check
  * is 8 digits --> check per country because BE, DE, FR are different" — and
- * "BTW nummer voor NL begint met NL, moeten check instellen per klant -->
- * Instellingen" — "VAT number for NL starts with NL, need to configure the
+ * "VAT number for NL starts with NL, need to configure the
  * check per customer --> Settings").
  *
  * ONE tenant switch: does a number that does not match its country's format

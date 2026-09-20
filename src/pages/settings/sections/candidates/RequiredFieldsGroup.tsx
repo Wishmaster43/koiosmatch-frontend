@@ -63,7 +63,7 @@ export default function RequiredFieldsGroup({ group, phases, isRequired, onToggl
     <CollapsibleFieldsBlock title={t(group.titleKey)} requiredCount={requiredCount} total={totalCount}
       open={open} onToggle={onOpenToggle}>
       <div style={{ overflowX: 'auto' }}>
-        {/* Toggle, never a checkbox (Danny 28-07: "GEEN VINKJES MAAR TOGGLES!!!"). A
+        {/* Toggle, never a checkbox (Danny 28-07: "TOGGLES, NOT CHECKBOXES!!!"). A
             requirable:false row still renders here, disabled with its reason on hover —
             the shared table's own locked-row treatment, same as the customer screen. */}
         <RequiredFieldsMatrixTable fields={group.fields} phases={phases} isRequired={isRequired} onToggle={onToggle} disabled={disabled} />

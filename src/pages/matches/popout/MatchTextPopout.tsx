@@ -1,7 +1,7 @@
 /**
- * MatchTextPopout — DRILLDOWN-VOLGORDE-CANON (Danny 21-08): de matchtekst op
- * een tweede scherm, het exacte TEKST-POPOUT-1-recept dat CandidateSummary-,
- * CustomerCompanyText- en VacancyDescriptionPopout al volgen, toegepast op
+ * MatchTextPopout — DRILLDOWN-VOLGORDE-CANON (Danny 21-08): the match text on
+ * a second screen, the exact TEKST-POPOUT-1 recipe that CandidateSummary,
+ * CustomerCompanyText and VacancyDescriptionPopout already follow, applied to
  * `match_text`. Thin container (§3): identity from useMatchTextLite, draft/sync
  * from useTextPopoutDraft, persistence from patchMatchText — the SAME PATCH
  * /matches/{id} the drawer's own MatchTextBlock writes.

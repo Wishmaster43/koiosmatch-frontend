@@ -24,8 +24,8 @@ import SubEntityPanelWrapper from './SubEntityPanelWrapper'
 import { getCountryOptions } from '@/lib/countries'
 import { useProvinces } from '@/hooks/useProvinces'
 import { useDateFormat } from '@/lib/datetime'
-// JOB-STATUS-1 (Danny 28-07, verbatim: "…moet hier!!" — i.e. "location
-// status must be here!!") — the read-only title-row badge (§3A(c))
+// JOB-STATUS-1 (Danny 28-07: location status must be here!!) — the
+// read-only title-row badge (§3A(c))
 // + its own inline picker, extracted into a shared
 // component (§0.3 split, 2026-08-03 — see that file's own docblock).
 import SubEntityStatusTitleRow from './SubEntityStatusTitleRow'

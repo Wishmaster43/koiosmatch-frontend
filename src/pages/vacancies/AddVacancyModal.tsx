@@ -7,12 +7,11 @@
  * split trigger (§3). The landed prefill props (lockCustomerId/lockCustomerName,
  * initialCustomerLocationId/DepartmentId/Names) keep working exactly as before
  * — only `initialIndustry` is new (punt 4). SLICE 2 adds Matchprofiel/AI-agent/
- * Publicatie cards and (permission-gated) a Documenten+notitie card whose
+ * Publication cards and (permission-gated) a Documents+note card whose
  * uploads/note run AFTER create via the separate usePostCreateAttachments hook
  * — nothing pending keeps the exact pre-SLICE-2 immediate-close behaviour.
  *
- * EXCEL-VACATURES-1 (Danny 14-08, screenshot: "Excel importeren moet in de
- * pop-up + nieuwe vacature niet hier boven de tabel!!", i.e. "Excel import
+ * EXCEL-VACATURES-1 (Danny 14-08, screenshot: "Excel import
  * must be in the popup + new vacancy, not here above the table!!"): the Excel/CSV bulk
  * upload moved off the list toolbar into THIS modal — mirrors AddCustomerModal's
  * KLANT-LAYOUT-3 shape verbatim: a header toggle (ModalHeader), the import flow
@@ -58,7 +57,7 @@ interface ModalCustomer { id: Id; name: string }
 // never guessed from the entity's display name.
 const VACANCY_IMPORT_ENTITY = 'vacancies'
 
-// TABBLADEN-1 (Danny 27-08: "tabbladen zijn beter omdat je kan switchen") —
+// TABBLADEN-1 (Danny 27-08: "tabs are better because you can switch") —
 // maps every form field name (the useAddVacancyForm/useAddVacancySubmit
 // vocabulary) onto the tab that must become active when that field carries a
 // client- or server-side (422) validation error, so a failed submit always
@@ -167,8 +166,8 @@ export default function AddVacancyModal({
     // handle via negative margins, so the panel's built-in X is hidden.
     <FloatingPanel open onClose={onClose} ariaLabel={f.t('modal.title')}
       persistKey="add-vacancy" scrollBody={false} hideClose
-      // WIDER (Danny 08-08: "Nieuwe vacature mag breder zijn dus knoppen naar
-      // rechts", i.e. "New vacancy may be wider so buttons go to the right"):
+      // WIDER (Danny 08-08: "New vacancy may be wider so buttons go to the
+      // right"):
       // the shared 1060px cap squeezed the header so the title wrapped
       // onto two lines and the status pills sat right against it. This form has
       // three column groups, so it gets its own, wider cap — the shared

@@ -1,7 +1,7 @@
 /**
  * useApplicationCandidateEdit — the application-drawer header's candidate
- * name/function edit state (Danny 2026-07-25: "wijzig de naam en functie van
- * de kandidaat" from the application drill-down, mirroring the candidate
+ * name/function edit state (Danny 2026-07-25: "edit the candidate's name
+ * and function" from the application drill-down, mirroring the candidate
  * drawer's own header pencil). The ApplicationDetail only carries the
  * candidate's JOINED display name and function — never the separate first/
  * middle/last parts — so startEdit fetches the raw candidate record ONCE to

@@ -63,17 +63,15 @@ export interface MatchCardProps {
   // Gates the expiry chip (point 6) — a finished match never needs the nag.
   isClosed?: boolean
   archived?: boolean
-  // Opt-in COMPACT mode (Danny live review, 04-08, translated: "shown more
-  // compactly in a table with the option to expand it" — verbatim: "meer compact
-  // in een tabel weergegeven met de optie om het open te klappen"): collapses to ONE summary
+  // Opt-in COMPACT mode (Danny live review, 04-08: "shown more
+  // compactly in a table with the option to expand it"): collapses to ONE summary
   // row per match — title/stage, the other-party value, score, the open/edit
   // icons, and a chevron — expanding in place to the existing detail rows below.
   // Off by default so the customer drawer's own MatchesTab (and, in spirit, the
   // scoped Matches sub-tab) render byte-identical, unchanged.
   collapsible?: boolean
-  // Opt-in FLAT row background (Danny 09-08, candidate drawer consistency sweep,
-  // translated: "the background colour of Match and application don't match" —
-  // verbatim: "achtergrondkleur van Match en sollicitatie kloppen niet" — the collapsed
+  // Opt-in FLAT row background (Danny 09-08, candidate drawer consistency sweep:
+  // "the background colour of Match and application don't match" — the collapsed
   // summary line used the tinted `--bg` header tone while the candidate
   // drawer's own Sollicitaties rows are flat, so the two lists read as two
   // different components). When true, the header/summary line uses the plain
@@ -81,15 +79,14 @@ export interface MatchCardProps {
   // default: every OTHER caller (the customer drawer's own MatchesTab, which
   // never sets `collapsible` either) renders byte-identical.
   //
-  // SECOND LOOK (Danny 09-08, translated: "Open has no heading??" — verbatim:
-  // "Open heeft geen kopje??"): flatRow now ALSO
+  // SECOND LOOK (Danny 09-08: "Open has no heading??"): flatRow now ALSO
   // splits the stage and the score out of the merged title/icon cluster into
   // their own labeled columns (Status, Match) — see the render below and
   // matchRowColumns.ts. Only flatRow gets the split, since it is the only
   // variant with a header bar above it to line columns up against.
   flatRow?: boolean
-  // DRAWER-UX-1 (Danny, "Naam van de kandidaat mee beginnen" / "Te klein voor
-  // alle namen"): flatRow default leads the title column with the VACANCY.
+  // DRAWER-UX-1 (Danny: "start with the candidate's name" / "too small for
+  // all the names"): flatRow default leads the title column with the VACANCY.
   // Inside a vacancy/customer drawer the candidate is what the recruiter scans
   // for, so this swaps the title column to the candidate (otherParty) and
   // pushes the vacancy into the fixed column instead — full width for the name,

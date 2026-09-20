@@ -32,7 +32,7 @@ export default function WebhooksSettings() {
         <SubTabBar tabs={tabs} active={tab} onChange={(id) => setTab(id as WebhookDirectionTab)} />
       </div>
 
-      {/* Danny 2026-08-31 (verbatim, Dutch: "het Meta-adresblok hoort vindbaar bij de inkomende webhooks"): the Meta address block belongs findable next to incoming webhooks. */}
+      {/* Danny 2026-08-31: the Meta address block belongs findable next to incoming webhooks. */}
       {tab === 'outgoing' ? <OutgoingWebhooks /> : (<><WhatsAppMetaWebhookCard /><IncomingWebhooks /></>)}
     </div>
   )

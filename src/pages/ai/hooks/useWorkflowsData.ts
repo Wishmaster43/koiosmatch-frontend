@@ -59,7 +59,7 @@ export function useWorkflowsData(showArchived: boolean) {
   const [notFoundId,    setNotFoundId]    = useState<string | null>(null)
   // Folder navigation (sidebar selection + drag target) lives alongside the folder
   // CRUD below, since deleteFolder needs to clear the selection when it's the deleted one.
-  const [selectedFolder, setSelectedFolder] = useState<FolderId>(null)   // null = alle, 'unassigned' = geen folder, uuid = folder
+  const [selectedFolder, setSelectedFolder] = useState<FolderId>(null)   // null = all, 'unassigned' = no folder, uuid = a folder
   const [dragOverFolder, setDragOverFolder] = useState<FolderId>(null)
   const dragWf = useRef<string | number | null>(null)
   // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
@@ -139,7 +139,7 @@ export function useWorkflowsData(showArchived: boolean) {
   // Closes the canvas editor (or dismisses the not-found state) and clears the
   // 409 run focus with it; refetches the list (existing fetchTick) so the
   // last-run/updated columns show what just ran inside the builder (LIST-FRESH-1,
-  // Danny 24-07 "sync gedaan maar staat er niet").
+  // Danny 24-07: the sync completed but the list did not show it.
   const closeEditor = () => {
     setEditingWorkflow(null)
     setNotFoundId(null)

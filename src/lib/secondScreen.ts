@@ -136,10 +136,8 @@ export const NOTE_EDIT_POPOUT_ENTITIES: ReadonlySet<PopoutEntity> = new Set<Popo
 export const NOTES_THREAD_POPOUT_ENTITIES: ReadonlySet<string> = new Set(['candidate', 'customer', 'vacancy', 'application'])
 
 /**
- * NOTITIE-POPOUT-URL-1 (Danny 11-08, translated: "put the note id in the URL"
- * — verbatim: "zet het notitie-id in de URL"; live 13-08, translated: "like the
- * pop-out of the profile text" — verbatim: "zoals de pop-out van de
- * profieltekst"): ONE existing note edits in a window of
+ * NOTITIE-POPOUT-URL-1 (Danny 11-08: "put the note id in the URL"; live 13-08:
+ * "like the pop-out of the profile text"): ONE existing note edits in a window of
  * its OWN, addressed by URL — no channel handoff to resolve, no race against the
  * thread window's own loading, and re-opening the same note re-focuses its
  * window. Only entities in NOTE_EDIT_POPOUT_ENTITIES have this route (the window
@@ -177,9 +175,8 @@ export function openNoteEditPopout(entity: PopoutEntity, id: string | number, no
 // treatment as `departmentText` — a standalone `GET/PATCH /locations/{id}`
 // route exists (unlike departments, no customer prefix needed), so this field's
 // `id` is the location's OWN id, not a composite.
-// `targetNote` (BELLIJST-NOTE-POPOUT-1, Danny 14-08, translated: "this really
-// needs to be able to open as a pop-out window" — verbatim: "dit moet zeker een
-// pop-out kunnen worden op een popup"): a call-list (outreach) TARGET's own note — the
+// `targetNote` (BELLIJST-NOTE-POPOUT-1, Danny 14-08: "this really
+// needs to be able to open as a pop-out window"): a call-list (outreach) TARGET's own note — the
 // SAME single-column PATCH shape as the fields above (never a notes thread), so
 // it belongs on this list, not NOTE_EDIT_POPOUT_ENTITIES. Rides under entity
 // 'outreachTarget'; no standalone `GET /outreach-targets/{id}` exists (measured

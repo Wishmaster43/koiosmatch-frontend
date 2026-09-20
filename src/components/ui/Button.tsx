@@ -1,8 +1,7 @@
 /**
- * Button — THE house button (HUISSTIJL-1, Danny 18-08, translated: "no 427 objects
- * for the same thing, but one reusable element, configurable per tenant" —
- * verbatim: "geen 427 objecten voor hetzelfde maar één herbruikbaar element, per
- * tenant instelbaar"). Before this
+ * Button — THE house button (HUISSTIJL-1, Danny 18-08: "no 427 objects
+ * for the same thing, but one reusable element, configurable per tenant").
+ * Before this
  * component existed the app carried 1138 hand-styled <button> tags across 427
  * files with 565 distinct style signatures; the three variants below are the
  * de-facto styles those buttons already converged on (primary 162×, secondary
@@ -78,10 +77,9 @@ const VARIANTS: Record<ButtonVariant, CSSProperties> = {
   // sites don't churn. Tints remain the language of CHIPS/toggles/filters
   // (status meaning), never of primary actions.
   soft:       { background: 'var(--button-fill)', color: 'var(--button-ink)', border: '1px solid var(--button-border)', fontWeight: 600 },
-  // Positive completion action ("markeer afgerond") — the §4 "aan/gelukt"
+  // Positive completion action ("mark as done") — the §4 "on/succeeded"
   // success token pair as a REAL house variant, so no screen ever hand-paints
-  // the green again (Danny 24-08, translated: "must be a house-style button" —
-  // verbatim: "moet huisstijl knop zijn").
+  // the green again (Danny 24-08: "must be a house-style button").
   // SUCCESS-BUTTON-INK-1 (Danny 10-09): the solid success button reads its own fill/ink pair — darker green, white text — never the chip colour with dark ink.
   success:    { background: 'var(--color-success-fill)', color: 'var(--color-on-success-fill)', border: '1px solid var(--color-success-fill)', fontWeight: 600 },
   // Destructive main action. --color-on-danger is fixed white (4.83:1, audited).
@@ -104,11 +102,10 @@ const SIZES: Record<ButtonSize, { height: number; padding: string; fontSize: num
 }
 
 const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps | ButtonLinkProps>(function Button(
-  // DEFAULT = sm (Danny 19-08, translated: "drill-downs must all be the same —
-  // same goes for settings" — verbatim: "drill downs moeten allemaal zelfde zijn
-  // — zelfde geldt voor de instellingen"): ONE height everywhere, width follows the text.
-  // md is the explicit exception for the page toolbar's "+ Nieuw" beside 34px
-  // search chrome ("boven elke tabel groot mag").
+  // DEFAULT = sm (Danny 19-08: "drill-downs must all be the same —
+  // same goes for settings"): ONE height everywhere, width follows the text.
+  // md is the explicit exception for the page toolbar's "+ New" beside 34px
+  // search chrome ("bigger is allowed above every table").
   { variant = 'secondary', size = 'sm', iconOnly = false, disabled, style, children, ...rest }, ref,
 ) {
   const s = SIZES[size]

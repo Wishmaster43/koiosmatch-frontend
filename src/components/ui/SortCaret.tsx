@@ -1,6 +1,6 @@
 /**
- * SortCaret — the ONE sort indicator (HUISSTIJL-1, Danny 18-08: "sort knopje
- * soms wel soms niet gekleurd"). Measured before this existed: DataTable's
+ * SortCaret — the ONE sort indicator (HUISSTIJL-1, Danny 18-08: "the sort
+ * button is sometimes coloured, sometimes not"). Measured before this existed: DataTable's
  * active caret inherited the header text colour (read as grey) while the
  * Shiftmanager report tables coloured theirs --color-primary-text — two recipes
  * for the same signal. One recipe now: active = the readable accent twin,

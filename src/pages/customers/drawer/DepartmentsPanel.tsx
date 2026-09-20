@@ -2,10 +2,9 @@
  * DepartmentsPanel — THE department surface of the customer drawer. One component for
  * both scopes: the customer's own Afdelingen tab and a location's nested department
  * list. Before this there were two hand-rolled variants (a real DataTable-backed tab and
- * a bordered row list with pencil/bin buttons and NO drill-in) — Danny 28-07: "wat je nu
- * aan het doen bent voor de contactpersonen moet je ook nog doen voor de afdelingen op
- * een locatie", i.e. "what you are doing now for the contacts, you still need to do for
- * the departments on a location". Same columns, same chips, same actions, same drill-down, everywhere.
+ * a bordered row list with pencil/bin buttons and NO drill-in) — Danny 28-07: what you
+ * are doing now for the contacts, you still need to do for
+ * the departments on a location. Same columns, same chips, same actions, same drill-down, everywhere.
  *
  * IT NEVER NAVIGATES. Clicking a row swaps THIS panel's body from the list to
  * DepartmentDetail. The host stays mounted, so a location keeps its position and its

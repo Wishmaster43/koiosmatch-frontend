@@ -33,9 +33,8 @@ interface MatchScoreSectionProps {
 }
 
 /**
- * MatchScoreSection — Danny 21-08 ruling 1 (translated: "I like the match score
- * with that bar, but having it up top too is a duplicate" — verbatim: "Match
- * score met die balk vind ik mooi maar bovenin is dubbel"): the status strip's
+ * MatchScoreSection — Danny 21-08 ruling 1 ("I like the match score
+ * with that bar, but having it up top too is a duplicate"): the status strip's
  * own match-score CELL is
  * retired; this titled card is now the ONE score surface on the tab. Its title
  * row carries the two affordances the retired cell used to own — the quick

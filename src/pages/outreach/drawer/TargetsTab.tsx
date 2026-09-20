@@ -4,8 +4,7 @@
  * OUTCOME (Danny 2026-07-04): outcome chips from the /outreach-outcomes lookup +
  * follow-ups (new task pre-linked to the candidate · create a match on a
  * vacancy), tucked behind a per-row expand toggle so large lists stay scannable
- * (BELLIJST-SCALE-1, Danny 2026-08-14: "hoe moet een eindgebruiker de
- * onderliggende 400 kandidaten per persoon selecteren?", i.e. "how is an
+ * (BELLIJST-SCALE-1, Danny 2026-08-14: "how is an
  * end user supposed to select the underlying 400 candidates one by one?").
  * A name/status/outcome/
  * assignee search+filter bar narrows the already-loaded set client-side — no

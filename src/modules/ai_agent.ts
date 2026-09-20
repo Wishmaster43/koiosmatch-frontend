@@ -24,20 +24,20 @@ export default {
     { key: 'agent', label: 'AI-agent', type: 'lookup_select', endpoint: '/ai/agents', valueKey: 'name', tab: 'general' },
     { key: 'instruction', label: 'Instructietekst (agent-prompt)', type: 'textarea', tab: 'general', required: true,
       hint: 'De volledige, tenant-bewerkbare instructie voor de AI-agent: persona, staps-state-machine, harde regels. Het runtime-antwoordcontract wordt automatisch toegevoegd.' },
-    // Kennis-toggles — Danny's eigen opdracht (30-08 "2 toggles die op de module
-    // AI agent aan staan", herbevestigd 31-08 na MODULE-TERUG-1): terug op de module.
+    // Knowledge toggles — Danny's own instruction (30-08: "2 toggles that stay
+    // on the AI agent module", reconfirmed 31-08 after MODULE-TERUG-1): back on the module.
     { key: 'use_external_knowledge', label: 'Kennisbank in deze stap gebruiken', type: 'boolean', tab: 'general', default: true,
       hint: 'Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek. Werkt alleen als de agent zelf kennis beschikbaar heeft.' },
     { key: 'use_faq', label: "FAQ's gebruiken", type: 'boolean', tab: 'general', default: true,
       hint: 'Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek.' },
-    // KANAAL-NAAR-SEND-1 (Danny 31-08, verbatim: "KANAAL IS VOLGENDE STAP IN DE
-// WORKFLOW??? WAAROM IS DAT HIER?" + "Verzendnummer ... TEKST STAAT NERGENS
-// OP"): channel and phone_number_id are REMOVED from this module — the send
+    // KANAAL-NAAR-SEND-1 (Danny 31-08: "CHANNEL IS THE NEXT STEP IN THE
+// WORKFLOW??? WHY IS THAT HERE?" + "Send number ... TEXT APPEARS
+// NOWHERE"): channel and phone_number_id are REMOVED from this module — the send
 // channel + number live on the whatsapp_send step that follows the agent in
 // the flow; CMBE's engine patch reads them from that node.
-// MODULE-TERUG-1 (Danny 31-08, verbatim: "de AI agent moet terug komen zoals
-    // het was ik vroeg alleen om titel voor AI instructie, pop-out of popup voor
-    // de tekst en AI instructies op tabje"): the module is this pre-P1 schema
+// MODULE-TERUG-1 (Danny 31-08: "the AI agent must come back the way it
+    // was — I only asked for the title, AI instruction, pop-out or popup for
+    // the text and AI instructions on a tab"): the module is this pre-P1 schema
     // again, plus ONLY the AI-instructions list below on its own panel tab.
     { key: 'instructions', label: 'AI-instructies', type: 'instruction_list', tab: 'instructions',
       hint: 'De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips.' },

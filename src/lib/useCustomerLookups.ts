@@ -27,8 +27,8 @@ import { useMemo } from 'react'
  * the backend seeder or a real status silently fails to resolve once the API answers.
  *
  * Corrected 02-08 on two counts: the slugs were Dutch while the backend seeds English
- * ones, and `prospect` was in here as a STATUS. Prospect is a PHASE now (Danny: "een klant
- * kan een prospect zijn of een klant") — leaving it here would have kept the very value
+ * ones, and `prospect` was in here as a STATUS. Prospect is a PHASE now (Danny: "a
+ * customer can be a prospect or a customer") — leaving it here would have kept the very value
  * the split removes alive in every offline render.
  */
 const DEFAULT_CUSTOMER_STATUSES: LookupOption[] = [

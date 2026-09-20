@@ -193,19 +193,19 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
               management/admin (their '*' template lets any block id through). */}
           {/* Tenant-wide Koios performance is a MANAGEMENT surface (plan v3);
               recruitment_manager's '*' template must not inherit it — that role
-              gets "Koios deed dit voor jou" with the team scope instead. */}
+              gets "Koios did this for you" with the team scope instead. */}
           {/* DASHBOARD-MGMT-1 (Danny 23-08): on the management/admin view, "Koios AI
               performance" (left) and "Koios did this for you" (right) sit side by
               side — other roles keep KoiosForYouCard full-width, unpaired. */}
           {hasKoiosAi && (vis('block.koiosPerformance') && (activeType === 'admin' || activeType === 'management') ? (
-            // Equal footprint (Danny 27-08: "blokken even groot") — cells stretch, cards fill.
+            // Equal footprint (Danny 27-08: "blocks the same size") — cells stretch, cards fill.
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
               <KoiosPerformanceCard fill />
               {/* activeType is narrowed to admin/management here, neither of which uses the scope toggle. */}
               <KoiosForYouCard scopeToggle={false} fill />
             </div>
           ) : (
-            /* "Koios deed dit voor jou" (K0-D noordster) — self-contained card, own
+            /* "Koios did this for you" (K0-D north-star) — self-contained card, own
                loading/error/empty/success handling; fetches its own 7/30-day report. */
             <KoiosForYouCard scopeToggle={activeType === 'recruitment_manager' || activeType === 'sales_manager'} />
           ))}

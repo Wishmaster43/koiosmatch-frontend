@@ -69,8 +69,8 @@ export default function VacancySearchResultRow({ row, isSelected, onSelect }: {
         {row.distanceKm != null && (
           <Caption><Mono>{formatDistanceKm(row.distanceKm)} km</Mono></Caption>
         )}
-        {/* Expand affordance (Danny 05-08, point 2: "niet duidelijk dat je een
-            vacature kan openklappen") — a visible chevron on EVERY row, on top
+        {/* Expand affordance (Danny 05-08, point 2: "not clear that a vacancy
+            can be expanded") — a visible chevron on EVERY row, on top
             of the row's own cursor:pointer + hover background. Decorative only
             (the row itself already carries the click/keyboard semantics above).
             Bold + primary-orange (Danny 06-08 screenshot feedback) — same token

@@ -1,8 +1,8 @@
 /**
  * SettingsTabs — the sub-tab strip for the active category. Renders nothing when
  * a category has a single item (no point in a one-tab bar). Active tab carries a
- * primary-coloured underline. SETTINGS-TABS-OVERFLOW-1 (Danny 30-08, "tekst past
- * niet meer op het scherm" — the Super Admin group's 7 tabs clipped at narrower
+ * primary-coloured underline. SETTINGS-TABS-OVERFLOW-1 (Danny 30-08: the text no
+ * longer fits on screen — the Super Admin group's 7 tabs clipped at narrower
  * widths): the strip scrolls horizontally (wheel/keyboard/drag all just work via
  * native overflow-x), the active tab is always scrolled into view on
  * mount/change AND on viewport resize (a resize that shrinks the strip must not

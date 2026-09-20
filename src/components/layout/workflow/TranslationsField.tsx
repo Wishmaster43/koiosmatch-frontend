@@ -1,15 +1,15 @@
 /**
- * TranslationsField — the workflow config panel's "Vertalingen" tab editor.
- * Three Danny instructions (02-09, verbatim):
- * (1) "iemand moet in de module ook een extra taal kunnen toevoegen. Is de
- *     voorkeurstaal niet beschikbaar in de workflow module wordt dan de
- *     [taal] van bedrijf."
- * (2) "Vertaling is alleen als het vrij tekst module is. Bij template kan
- *     dit niet."
- * (3) "taal kunnen we toch alleen bedrijfstaal laten zien en met plusje kan
- *     je taal toevoegen. Net zoals kandidaat drilldown doen talen: een extra
- *     taal alleen dan taal toevoegen met tekst."
- * So this tab shows a read-only "Bedrijfstaal" reference card (the main-tab
+ * TranslationsField — the workflow config panel's "Translations" tab editor.
+ * Three Danny instructions (02-09, paraphrased):
+ * (1) "someone must also be able to add an extra language in the module. If the
+ *     preferred language is not available in the workflow module, it falls back
+ *     to the company's [language]."
+ * (2) "Translation only applies to the free-text module. Not possible with a
+ *     template."
+ * (3) "for language we can only show the company language, and with a plus you
+ *     can add a language. Do it the same way languages work in the candidate
+ *     drilldown: only add an extra language together with its text."
+ * So this tab shows a read-only "Company language" reference card (the main-tab
  * text(s), for context), then one row per language the user ADDED — nothing
  * is pre-rendered — plus an add affordance. Writes into `config.translations`
  * per the CMBE3 contract: `{ "<code>": { text?, subject?, body? } }` — any

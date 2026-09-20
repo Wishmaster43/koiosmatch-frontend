@@ -72,7 +72,7 @@ export default function OutreachPage({ intent }: { intent?: unknown } = {}) {
   const { registerFilters, unregisterFilters } = useRightPanel()
 
   const [view, setView] = useState<'table' | 'board'>('table')
-  // Pagination (audit 2026-08-05: "Bellijsten heeft niet eens een footer??") —
+  // Pagination (audit 2026-08-05: "Call lists don't even have a footer??") —
   // mirrors MatchesPage's wiring: useOutreachCampaigns already fetches the FULL
   // set client-side (page loop, see the hook), so this page only slices it for
   // display. Shared page-size hook seeds from user.default_per_page, clamps to

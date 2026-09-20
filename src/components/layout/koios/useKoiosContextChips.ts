@@ -109,8 +109,8 @@ export function useKoiosContextChips(): KoiosContextChips {
   const [dismissedSelectionKey, setDismissedSelectionKey] = useState<string | null>(null)
 
   // The open-drawer chip: the RECORD'S OWN NAME (Danny 27-08, screenshot of a
-  // raw application UUID in the chip: "mooier is de naam van de kandidaat en de
-  // vacature naam") — resolved with one cheap GET per open record; while it
+  // raw application UUID in the chip: "nicer is the candidate's name and the
+  // vacancy name") — resolved with one cheap GET per open record; while it
   // loads (or when it fails) the honest entity+id fallback stands.
   const raw = deriveAmbientRef(hash)
   const resolvedLabel = useAmbientRefLabel(raw?.type, raw?.id)

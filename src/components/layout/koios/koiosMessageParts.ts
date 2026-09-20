@@ -10,8 +10,9 @@ import type { KoiosChatMessage, TFn } from '@/types/koios'
 // Gradient used for the assistant avatar + user bubble (shared with TypingIndicator).
 export const GRADIENT = 'linear-gradient(135deg,var(--color-primary),var(--color-violet))'
 
-// What the welcome bubble knows about the reader (Danny 09-09: "Hoi Kelly wat kan ik
-// voor je doen" + "er zijn aandachtspunten voor je" — short, no feature list).
+// What the welcome bubble knows about the reader (Danny 09-09: a personal, short
+// greeting — "Hi Kelly, what can I do for you" plus "there are N attention points
+// for you" — no feature list).
 export interface KoiosGreeting { name?: string | null; attentionCount?: number }
 
 // Resolve a message to its display text + whether it's a calm system notice

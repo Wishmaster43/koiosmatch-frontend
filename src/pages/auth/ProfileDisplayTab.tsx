@@ -96,7 +96,7 @@ export default function ProfileDisplayTab({ form, setForm, onPickPageSize, theme
         </div>
       </Field>
 
-      {/* Language — the shared searchable SelectMenu (ALTIJD een zoekbare dropdown + DROPDOWN-CLEAR-1). */}
+      {/* Language — the shared searchable SelectMenu (ALWAYS a searchable dropdown + DROPDOWN-CLEAR-1). */}
       <Field label={t('profile.language')}>
         <SelectMenu
           leading={<Globe size={13} style={{ color: 'var(--text-muted)' }} />}

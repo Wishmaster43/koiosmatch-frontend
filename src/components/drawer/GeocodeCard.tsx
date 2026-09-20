@@ -1,8 +1,7 @@
 /**
  * GeocodeCard — the OpenCage geocoding card for every entity drawer's Koppelingen tab.
  * Geocoding is a backoffice link like any other, so it belongs in that tab and not as
- * a stray icon in the drawer title row (Danny 28-07: "FRESH PDOK moet tabblad zijn …
- * MOET OOK WEG BIJ KANDIDAAT DRILL DOWN, alleen bij koppelingen" — "geocoding must
+ * a stray icon in the drawer title row (Danny 28-07: "geocoding must
  * be a tab … it must also disappear from the candidate drill-down, only under
  * Links [Koppelingen]"). The candidate keeps its own richer card (provenance line,
  * record merge); this is the plain version, built on the SAME shared GeocodeButton so

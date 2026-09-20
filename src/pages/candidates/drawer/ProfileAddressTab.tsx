@@ -71,7 +71,7 @@ export default function ProfileAddressTab({ c, onSave, autoEditSignal }: {
   const cancel = () => { setForm(emptyForm()); setErrors({}); setEditing(false) }
 
   // Province/country are pick-only (allowCreate=false) type-to-filter dropdowns
-  // (Danny kandidaten-ronde-2, point A / "moet een zoekbare dropdown" — "must be
+  // (Danny candidates-round-2, point A / "must be a searchable dropdown" — "must be
   // a searchable dropdown") — never a
   // plain <select>: a long lookup list is easier to find by typing than scrolling.
   const renderInput = (key: AddressKey) => {

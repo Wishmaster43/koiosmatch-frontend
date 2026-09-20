@@ -1,7 +1,6 @@
 /**
- * DrillPager — prev/next stepper for a drawer drill-down (Danny 02-08: "moeten er
- * pijltjes komen zodat je vanuit één contactpersoon naar de volgende kan en terug" —
- * we need arrows so you can step from one contact to the next and back).
+ * DrillPager — prev/next stepper for a drawer drill-down (Danny 02-08: "we need
+ * arrows so you can step from one contact to the next and back").
  * ONE shared component for every entity's detail title row — contacts and locations
  * today, departments next (see that panel's own adoption note) — so browsing the
  * list the caller already filtered/sorted never needs a trip back to the list.
@@ -36,7 +35,7 @@ export default function DrillPager({ index, total, onPrev, onNext }: DrillPagerP
   const { t } = useTranslation('common')
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-      {/* Arrows only — Danny 03-08 ("drillPager.position — weg die txt") killed the
+      {/* Arrows only — Danny 03-08 ("drillPager.position — remove that text") killed the
           visible "x van y" counter; the position lives on as the buttons' hover title
           so the info stays reachable without the visual noise. NOT visually a no-op:
           Button variant="secondary" size="sm" paints bg var(--surface) vs the old

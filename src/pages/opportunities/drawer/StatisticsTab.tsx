@@ -1,5 +1,5 @@
 /**
- * StatisticsTab — the "Kans X van Y bij deze klant" ordinal for the opportunity
+ * StatisticsTab — the "Opportunity X of Y for this customer" ordinal for the opportunity
  * drawer, together with the OTHER opportunities at that same customer (mirrors
  * matches/drawer/StatisticsTab.tsx, STATS-HONEST-1): every number here is
  * DERIVED from allRows (the page's already-loaded tenant set, useOpportunitiesData's

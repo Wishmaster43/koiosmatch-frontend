@@ -1,6 +1,6 @@
 /**
  * TextExpandModal — the enlarge popup for a config-panel text field (Danny
- * 31-08: "de tekst is zo niet te lezen, popup of groter maken"). One big
+ * 31-08: "the text is unreadable like this, make it a popup or bigger"). One big
  * textarea over an overlay; edits flow through the SAME onChange as the inline
  * field, so closing loses nothing. Focus is trapped while open (§6).
  */

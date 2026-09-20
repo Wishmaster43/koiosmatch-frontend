@@ -1,12 +1,10 @@
 /**
  * OutreachCreate — "new call list" MODAL on the shared wide-form frame (Danny
- * 27-07, translated: "+ Call list isn't a popup???" / "every screen like
+ * 27-07: "+ Call list isn't a popup???" / "every screen like
  * + location must become just as wide and tall as + match or + new candidate.
- * Searchable dropdowns and frames around every block" — verbatim: "+ Bellijst
- * is geen popup???" / "elk scherm zoals + locatie moet net zo breed en hoog
- * worden als + match of + nieuwe kandidaat. Zoekbare dropdowns en kaders om
- * elk blokje"). Name + channel group into an "Algemeen" card, the optional
- * source pool into its own "Bron" card — both titled, bordered cards
+ * Searchable dropdowns and frames around every block"). Name + channel group
+ * into a "General" card, the optional
+ * source pool into its own "Source" card — both titled, bordered cards
  * mirroring the MatchModal/AddCandidateModal idiom instead of three lonely
  * full-width inputs. Channel and pool are searchable CreatableSelect pickers
  * (allowCreate=false — channel is a fixed backend enum, pool is a real
@@ -106,7 +104,7 @@ export default function OutreachCreate({ onClose, onCreated }: Props) {
         </ModalTitleBarPillsRow>
       }>
       <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {/* Two titled cards side by side: Algemeen (name) and Bron (optional pool)
+        {/* Two titled cards side by side: General (name) and Source (optional pool)
             — the shared cardPair grid (§11), not a stack of lonely inputs. */}
         <div style={cardPair}>
           <div>

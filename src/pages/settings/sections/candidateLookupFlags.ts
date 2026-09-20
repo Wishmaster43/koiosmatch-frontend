@@ -18,5 +18,5 @@ export interface CandidateLookupFlags {
   has_contract_lines?: boolean
 }
 
-// "Niet actief" ("Not active") → "niet_actief" — a stable English-ish slug suggestion.
+// "Not active" → "not_active" — a stable English-ish slug suggestion.
 export const slugify = (s: string): string => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')

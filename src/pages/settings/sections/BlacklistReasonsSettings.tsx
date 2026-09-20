@@ -14,7 +14,7 @@ type BlacklistEntity = 'candidate' | 'customer'
  * BlacklistReasonsSettings — blacklist-reason lookup for ONE entity that carries a
  * blacklist deployability status: candidate (candidates.blacklist_reason) or customer
  * (customers.blacklist_reason). Parameterized by `entity` and registered per owning
- * group ("klant bij klant, kandidaat bij kandidaat", Danny 2026-08-05) — the earlier
+ * group (customer with customer, candidate with candidate, Danny 2026-08-05) — the earlier
  * two-sub-tabs-under-candidates shape put customer config in the wrong menu.
  *
  * Endpoints (backend core-lookups.php): candidate uses the renamed

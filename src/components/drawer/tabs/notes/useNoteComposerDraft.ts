@@ -28,8 +28,8 @@ export function useNoteComposerDraft({
   draftEntity, editingIdx, setAdding, setEditingIdx, clearIncoming,
   onAddNote, onEditNote, onDeleteNote, confirm, deleteConfirmLabel,
 }: UseNoteComposerDraftArgs) {
-  // CONCEPT-NOTE-1 (Danny 24-08: "wegklikken en de tekst is weg is niet goed —
-  // als concept opslaan"): a cancelled NEW note survives as a session concept
+  // CONCEPT-NOTE-1 (Danny 24-08: "dismissing it and losing the text is not good —
+  // save it as a concept"): a cancelled NEW note survives as a session concept
   // and seeds the next new-note open; a successful save clears it. Session
   // scope is deliberate — note text is special-category data (§8), so it never
   // touches localStorage; durable concepts are the CMBE follow-up.

@@ -3,7 +3,7 @@
  * timeline + conversations. Entity-agnostic; data + labels via props so it works
  * for candidates, customers, vacancies, tasks alike.
  *
- * SEARCH (Danny 03-08: "bij notities wil ik ook een zoekbalk hebben") — added
+ * SEARCH (Danny 03-08: "I want a search bar on notes too") — added
  * HERE, in the shared component, so every host (candidates, customers,
  * opportunities, applications) gets it at once. Narrows on the note body TEXT
  * (HTML stripped first — this is a rich-text field, a raw substring match would
@@ -24,8 +24,8 @@
  * System notes never get these buttons regardless — see systemRow, which never
  * renders them.
  *
- * POPUP-SLEEP-1 / NOTE-ASSIST-1 / NOTE-TAAL-1 (Danny 06-08 "geen popup, geen
- * spellingchecker, geen vak voor de Koios AI verbeteringen"): the add/edit
+ * POPUP-SLEEP-1 / NOTE-ASSIST-1 / NOTE-TAAL-1 (Danny 06-08: "no popup, no
+ * spellchecker, no box for the Koios AI improvements"): the add/edit
  * composer moved out of this file into `notes/NoteComposer.tsx` — a FloatingPanel
  * popup (draggable/resizable) carrying the type/channel pickers, the RichText
  * editor (language picker + native spellcheck, TAAL-SPELL-1), and the Koios AI
@@ -201,8 +201,8 @@ export default function NotesTab({
     })
   }
 
-  // POPOUT-HANDOFF-1 (Danny 09-08: "moet bestaand venster sluiten en de pop-out
-  // direct openen in het versleepbare scherm, zoals bij profieltekst"). Popping out
+  // POPOUT-HANDOFF-1 (Danny 09-08: "must close the existing window and open the pop-out
+  // directly in the draggable panel, like the profile text"). Popping out
   // is a HANDOFF, not a second copy: two editors for one thread means whichever you
   // typed in last silently wins. Since -HANDOFF-1 the TEXT moves with it and the
   // closing waits for the receiving window's ack — handled in the hook, which calls

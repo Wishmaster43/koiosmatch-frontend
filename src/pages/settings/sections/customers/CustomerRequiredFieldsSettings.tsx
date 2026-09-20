@@ -1,13 +1,13 @@
 /**
- * CustomerRequiredFieldsSettings — Settings → Klanten → Verplichte velden (KLANT-VERPLICHT-1).
- * Danny: "ik zie ook nog geen verplichte velden bij klant en prospect … maar ook bij
- * Contactpersoon, locatie en afdeling." The backend already enforces this
+ * CustomerRequiredFieldsSettings — Settings → Customers → Required fields (KLANT-VERPLICHT-1).
+ * Danny: "I still don't see required fields for customer and prospect … but also for
+ * Contact, location and department." The backend already enforces this
  * (CustomerRequiredFieldsGuard + FlatRequiredFieldsGuard, wired into all four
  * controllers on create AND update) — only this editor was missing.
  *
- * Four sub-tabs, one per guarded entity: Klant is phase-aware
+ * Four sub-tabs, one per guarded entity: Customer is phase-aware
  * (CustomerPhaseRequiredFieldsMatrix, `customer_required_fields` = { phase: [field] });
- * Locatie/Afdeling/Contactpersoon have no phase axis, so they render the shared flat
+ * Location/Department/Contact have no phase axis, so they render the shared flat
  * toggle list against their own flat `{entity}_required_fields` array — mirrors
  * FlatRequiredFieldsGuard's "one class, three entity tokens" shape on the frontend.
  *

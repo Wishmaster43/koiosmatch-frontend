@@ -27,7 +27,7 @@ type QueueLimits = {
   new_weekly_limit?: number
 }
 const FIELDS: Array<keyof QueueLimits> = ['known_hourly_limit', 'new_hourly_limit', 'new_daily_limit', 'new_weekly_limit']
-// WA-WEB-CAPS-DEFAULT-1 (CMBE ae235dea, Danny 08-09 "dit moet veel lager"): the server's
+// WA-WEB-CAPS-DEFAULT-1 (CMBE ae235dea, Danny 08-09 "this must be much lower"): the server's
 // per-field ceilings (WhatsappQueueConfigController / SettingSchema) — mirrored on the
 // inputs and in the hint so a typo can no longer set a ban-inviting cap; the PUT 422s
 // above them regardless.

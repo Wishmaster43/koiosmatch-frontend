@@ -16,12 +16,12 @@
  * The vacancy-visibility flags (hideCompanyName/showInVacancies/excludeFromSourcing,
  * formerly the "Instellingen" ("Settings") group here) moved to their own
  * VacancySettingsTab
- * (Danny 27-07: "logischer een apart tabje toch?" — "more logical as its own
- * tab, right?") — see CustomerDrawer.tsx.
+ * (Danny 27-07: more logical as its own
+ * tab, right?) — see CustomerDrawer.tsx.
  *
- * BRANCH-LINKS-1 (Danny 28-07 "dit wil ik ook terug zien bij klanten" — "I want
- * to see this on customers too"): the
- * "Vestiging koppelen" ("Link branch") block at the bottom mirrors the candidate
+ * BRANCH-LINKS-1 (Danny 28-07: I want
+ * to see this on customers too): the
+ * "Link branch" block at the bottom mirrors the candidate
  * drawer's
  * BranchSection verbatim (shared component, §3A/§11) via useEntityBranches. This
  * is a DIFFERENT axis from the `branchId` field above: `branchId` (BRANCH-1,
@@ -33,13 +33,13 @@
  *
  * VESTIGING-2 (28-07): removing a customer's LAST linked branch does not just clear
  * a chip — it WIDENS visibility, since an unlinked customer is visible to every
- * branch again (COORDINATION-LOG 28-07 "Zonder koppeling = zichtbaar voor
- * iedereen" — "Without a link = visible to everyone"). That must never happen
+ * branch again (COORDINATION-LOG 28-07: without a link, visible to
+ * everyone). That must never happen
  * silently, so the last removal is confirmed via
  * the shared ConfirmDialog first. Only while `branch_authz_enabled` is actually ON —
  * while it's off nothing about who sees what changes either way, so no warning is
- * shown (matches "bouw geen UI op de aanname dat er gefilterd wordt" — "never
- * build UI on the assumption that filtering is happening").
+ * shown (matches: never
+ * build UI on the assumption that filtering is happening).
  */
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'

@@ -26,12 +26,11 @@
  * frame. Every field is now its own label-LEFT row (P33, `match/styles` +
  * `FormField`) — the label sits at the shared CANON_LABEL_WIDTH, the field
  * takes the rest, so a row reads left-to-right instead of stacking label-above-
- * field. The panel opens WIDE by default (1060px — Danny 14-08 "scherm moet
- * breder, anders past de klantnaam niet eens" — "screen must be wider,
- * otherwise the customer name doesn't even fit"; the brief 640px default
- * truncated every picker label) and the four
- * sections stack as single-column titled cards — Relaties, Contract,
- * Financieel, Opmerkingen ("Relations, Contract, Financial, Remarks") —
+ * field. The panel opens WIDE by default (1060px — Danny 14-08: "screen must
+ * be wider, otherwise the customer name doesn't even fit"; the brief 640px
+ * default truncated every picker label) and the four
+ * sections stack as single-column titled cards — Relations, Contract,
+ * Financial, Remarks —
  * mirroring PlanIntakeModal's own scrollBody={false}
  * + own scroll area (padding 22) + a pinned footer with borderTop, instead of
  * the previous inline-scrolling wide panel.
@@ -177,12 +176,11 @@ export default function MatchModal({
         <MatchConflictBanners duplicateMatch={form.duplicateMatch} overlappingMatches={form.overlappingMatches} formatDate={formatDate}
           draftHours={form.hours ? Number(form.hours) : null} />
 
-        {/* ── Titled card stack (Danny 13-08, "alles onder elkaar en niet naast
-            elkaar" — "everything stacked, not side by side"): Relaties / Contract
-            / Financieel / Opmerkingen, single
+        {/* Titled card stack (Danny 13-08: "everything stacked, not side by side"):
+            Relations / Contract / Financial / Notes, single
             column, each a bordered `cardBox` under an 11px uppercase `cardHead`
             — the addmodal card idiom, now stacked instead of paired columns.
-            Every field inside a card is its own label-LEFT row (P33). ── */}
+            Every field inside a card is its own label-LEFT row (P33). */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 4 }}>
           <div>
             <div style={cardHead}>{t('placement.relations')}</div>
@@ -278,7 +276,7 @@ export default function MatchModal({
           </div>
         )}
 
-        {/* Deviation guard (Danny's "weet je het zeker?" — "are you sure?"): the entered rates differ from a
+        {/* Deviation guard (Danny's "are you sure?"): the entered rates differ from a
             FOUND agreement proposal — calm inline confirm, one extra click, no hard block.
             MATCH-FIN-GATE-1: the banner prints the purchase rate, so it is gated the same
             as FinancialSection's purchase field/margin — never shown without the permission. */}

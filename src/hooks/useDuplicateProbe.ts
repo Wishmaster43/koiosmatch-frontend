@@ -63,7 +63,7 @@ interface UseRestoreArchivedDuplicateOptions {
 
 /**
  * useRestoreArchivedDuplicate — restore an archived duplicate via the per-id
- * route (§10: een record = de per-id-route), shared by candidates and
+ * route (§10: a record = the per-id route), shared by candidates and
  * customers (was two near-identical copies, DRY round 11). The list/stats
  * caches have no row for it yet, so invalidate them; the caller opens the
  * record afterwards.

@@ -1,10 +1,10 @@
 /**
- * OpportunityDescriptionCard — the "Kanstekst" card of AddOpportunityModal.
+ * OpportunityDescriptionCard — the "Opportunity text" card of AddOpportunityModal.
  * Adopts the shared ModalDescriptionCard with opportunity-specific label,
  * Koios assist modes, and the NoteKoiosModeToggle in the header.
  *
- * TASK-ASSIST-ACTIONS-1 (Danny 14-08, "ook bij nieuwe kans"): opts into Koios
- * assist modes — mirrors AddTaskModal's DescriptionCard so Actiepunten suggestions
+ * TASK-ASSIST-ACTIONS-1 (Danny 14-08: "also for a new opportunity"): opts into Koios
+ * assist modes — mirrors AddTaskModal's DescriptionCard so action-item suggestions
  * are available while drafting an opportunity's text.
  */
 import { useTranslation } from 'react-i18next'

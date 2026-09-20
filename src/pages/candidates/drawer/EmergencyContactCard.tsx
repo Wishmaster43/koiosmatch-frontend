@@ -5,9 +5,9 @@
  * preference keys (PREF-PENCIL-SPLIT-1 pattern) straight to the API shape the
  * backend expects.
  *
- * NOODCONTACT-SPLIT-1 (Danny 2026-08-08 live: "voornaam achternaam
- * tussenvoegsel mobiel en telefoonnummer ... zoekbare dropdown [voor] de
- * relatie"). CMBE shipped the split contract (commit 2b960523) — measured +
+ * NOODCONTACT-SPLIT-1 (Danny 2026-08-08 live: "first name, last name,
+ * middle name, mobile and phone number ... searchable dropdown [for] the
+ * relation"). CMBE shipped the split contract (commit 2b960523) — measured +
  * PROVEN live against koiosmatch-api (see the PATCH proof in the delivery
  * report): `candidate_preferences` now carries `emergency_contact_first_name` /
  * `_middle_name` / `_last_name` (mirrors candidates.first_name/middle_name/

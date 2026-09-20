@@ -25,7 +25,7 @@ export default {
     { key: 'mode', label: 'Uitvoering', type: 'select', options: ['queue', 'sync'],
       hint: 'queue (standaard) = wachtrij, deze stap wacht niet. sync = direct uitvoeren; de uitkomst van het kind komt terug in deze stap.' },
     // Only meaningful in sync mode — the backend's own description says so
-    // ("Alleen bij direct uitvoeren"), so the FE gates it on mode === 'sync'
+    // ("Only for direct execution"), so the FE gates it on mode === 'sync'
     // even though BE configSchema carries no show_if field (no fake affordance, §3).
     { key: 'fail_on_child_error', label: 'Stop bij mislukt kind (sync)', type: 'boolean', default: true,
       hint: 'Alleen bij direct uitvoeren: een mislukte kind-workflow laat deze stap mislukken. Uit = doorgaan; de uitkomst staat in child_run_status.',

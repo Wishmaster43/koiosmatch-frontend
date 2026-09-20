@@ -143,7 +143,7 @@ function SubNavItem({ item, active, onNavigate }: SubNavItemProps) {
       style={{
         gap: 8, padding: '6px 10px',
         background: active ? 'var(--color-primary-bg)' : hovered ? 'var(--sidebar-hover)' : 'transparent',
-        // SIDEBAR-CONTRAST-1 (Danny 08-08, "AENF is nog steeds niet leesbaar"): the
+        // SIDEBAR-CONTRAST-1 (Danny 08-08, "AENF is still not readable"): the
         // active label is the accent used AS TEXT on a near-white sidebar, so it must
         // read the theme-adjusted token, never the raw brand. Measured: AENF's yellow
         // #ffde00 on the white sidebar scores 1.1:1 — invisible.
