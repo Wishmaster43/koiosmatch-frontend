@@ -1288,6 +1288,7 @@
     "unknownContact": "Unbekannter Kontakt",
     "thisApplication": "Diese Bewerbung",
     "delivery": {
+      "queued": "In Warteschlange",
       "sent": "Gesendet",
       "delivered": "Zugestellt",
       "read": "Gelesen"
@@ -1335,6 +1336,11 @@
     "linkDevice": "Nummer verknüpfen →",
     "queued": "Nachricht eingeplant. Sie geht in Kürze raus.",
     "send": "Senden",
+    "waWebComposerHint": "Über WhatsApp Web (eigene Nummer): freier Text, wird über die Warteschlange gesendet",
+    "sortLabel": "Sortierung",
+    "messagesRegion": "Nachrichten",
+    "sortOldestFirst": "Älteste zuerst",
+    "sortNewestFirst": "Neueste zuerst",
     "assist": {
       "title": "Koios-Assistent",
       "summarize": "Zusammenfassen",

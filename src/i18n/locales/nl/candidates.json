@@ -1288,6 +1288,7 @@
     "unknownContact": "Onbekend contact",
     "thisApplication": "Deze sollicitatie",
     "delivery": {
+      "queued": "In wachtrij",
       "sent": "Verzonden",
       "delivered": "Afgeleverd",
       "read": "Gelezen"
@@ -1335,6 +1336,11 @@
     "linkDevice": "Nummer koppelen →",
     "queued": "Bericht ingepland. Het gaat binnenkort uit.",
     "send": "Versturen",
+    "waWebComposerHint": "Via WhatsApp Web (eigen nummer): vrij tekstbericht, wordt via de wachtrij verzonden",
+    "sortLabel": "Sorteren",
+    "messagesRegion": "Berichten",
+    "sortOldestFirst": "Oudste eerst",
+    "sortNewestFirst": "Nieuwste eerst",
     "assist": {
       "title": "Koios assistent",
       "summarize": "Samenvatten",

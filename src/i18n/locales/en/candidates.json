@@ -1288,6 +1288,7 @@
     "unknownContact": "Unknown contact",
     "thisApplication": "This application",
     "delivery": {
+      "queued": "Queued",
       "sent": "Sent",
       "delivered": "Delivered",
       "read": "Read"
@@ -1335,6 +1336,11 @@
     "linkDevice": "Link a number →",
     "queued": "Message scheduled. It goes out shortly.",
     "send": "Send",
+    "waWebComposerHint": "Via WhatsApp Web (own number): free-text message, sent through the outbound queue",
+    "sortLabel": "Sort order",
+    "messagesRegion": "Messages",
+    "sortOldestFirst": "Oldest first",
+    "sortNewestFirst": "Newest first",
     "assist": {
       "title": "Koios assist",
       "summarize": "Summarize",

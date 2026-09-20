@@ -1288,6 +1288,7 @@
     "unknownContact": "Contatto sconosciuto",
     "thisApplication": "Questa candidatura",
     "delivery": {
+      "queued": "In coda",
       "sent": "Inviato",
       "delivered": "Consegnato",
       "read": "Letto"
@@ -1335,6 +1336,11 @@
     "linkDevice": "Collega un numero →",
     "queued": "Messaggio pianificato. Parte a breve.",
     "send": "Invia",
+    "waWebComposerHint": "Tramite WhatsApp Web (numero personale): messaggio di testo libero, inviato tramite la coda in uscita",
+    "sortLabel": "Ordina",
+    "messagesRegion": "Messaggi",
+    "sortOldestFirst": "Prima i più vecchi",
+    "sortNewestFirst": "Prima i più recenti",
     "assist": {
       "title": "Assistente Koios",
       "summarize": "Riassumi",

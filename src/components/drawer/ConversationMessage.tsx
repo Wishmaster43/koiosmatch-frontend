@@ -8,7 +8,7 @@
  * named + coloured by its sender through the shared avatar colour picker.
  */
 import { useTranslation } from 'react-i18next'
-import { Check, CheckCheck } from 'lucide-react'
+import { Check, CheckCheck, Clock } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'
 import { avatarColor } from '@/lib/avatarColor'
 import { tintBg, tintBorder } from '@/lib/tint'
@@ -105,6 +105,13 @@ export default function ConversationMessage({ message, formatDateTime }: {
             color={HANDLED_BY_COLORS[message.handled_by]} />
         )}
         {message.sent_at && <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{formatDateTime(message.sent_at)}</span>}
+        {/* A bubble the server answered with 202 "queued" (wa_web outbox) says so until the
+            drainer's row lands — never a timestamp or a tick it has not earned. */}
+        {(message as { _pendingOutboxId?: unknown })._pendingOutboxId != null && (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 10, color: 'var(--text-muted)' }}>
+            <Clock size={10} aria-hidden="true" /> {t('conversations.delivery.queued')}
+          </span>
+        )}
         {out && <DeliveryTicks sentAt={message.sent_at} deliveredAt={message.delivered_at} readAt={message.read_at} />}
       </div>
     </div>

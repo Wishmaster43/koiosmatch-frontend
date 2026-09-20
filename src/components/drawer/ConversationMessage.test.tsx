@@ -6,7 +6,7 @@
  * resolves to the defaultValue — a distinct channel_label per case proves the
  * chip reads channel/channel_label off the message row.
  */
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import ConversationMessage from './ConversationMessage'
 
@@ -59,3 +59,16 @@ describe('ConversationMessage · handled_by chip (PUNT-2)', () => {
   })
 })
 
+
+// WA-THREAD-UX-1: a queued wa_web bubble (202 from the outbox) says "In wachtrij" and shows no
+// timestamp and no delivery tick until the drainer's row lands.
+describe('ConversationMessage · queued outbox stub', () => {
+  it('renders the queued marker and no sent tick or timestamp', () => {
+    const fmt = vi.fn((v: string) => `dt(${v})`)
+    const { container } = render(<ConversationMessage message={{ ...baseMessage, direction: 'outbound', sent_at: null, _pendingOutboxId: 77 } as never} formatDateTime={fmt} />)
+    // The i18n layer of this file may hand back keys or Dutch copy; both name the queued state.
+    expect(container.textContent).toMatch(/In wachtrij|delivery\.queued/)
+    expect(container.textContent).not.toMatch(/Verzonden|delivery\.sent/)
+    expect(fmt).not.toHaveBeenCalled()
+  })
+})

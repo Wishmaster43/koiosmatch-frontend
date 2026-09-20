@@ -1288,6 +1288,7 @@
     "unknownContact": "Contact inconnu",
     "thisApplication": "Cette candidature",
     "delivery": {
+      "queued": "En file d'attente",
       "sent": "Envoyé",
       "delivered": "Distribué",
       "read": "Lu"
@@ -1335,6 +1336,11 @@
     "linkDevice": "Lier un numéro →",
     "queued": "Message planifié. Il part sous peu.",
     "send": "Envoyer",
+    "waWebComposerHint": "Via WhatsApp Web (numéro personnel) : message libre, envoyé via la file d'attente",
+    "sortLabel": "Trier",
+    "messagesRegion": "Messages",
+    "sortOldestFirst": "Plus anciens d'abord",
+    "sortNewestFirst": "Plus récents d'abord",
     "assist": {
       "title": "Assistant Koios",
       "summarize": "Résumer",

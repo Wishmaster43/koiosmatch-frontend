@@ -1288,6 +1288,7 @@
     "unknownContact": "Contacto desconocido",
     "thisApplication": "Esta candidatura",
     "delivery": {
+      "queued": "En cola",
       "sent": "Enviado",
       "delivered": "Entregado",
       "read": "Leído"
@@ -1335,6 +1336,11 @@
     "linkDevice": "Vincular un número →",
     "queued": "Mensaje programado. Sale en breve.",
     "send": "Enviar",
+    "waWebComposerHint": "Vía WhatsApp Web (número propio): mensaje de texto libre, enviado mediante la cola de salida",
+    "sortLabel": "Ordenar",
+    "messagesRegion": "Mensajes",
+    "sortOldestFirst": "Más antiguos primero",
+    "sortNewestFirst": "Más recientes primero",
     "assist": {
       "title": "Asistente Koios",
       "summarize": "Resumir",

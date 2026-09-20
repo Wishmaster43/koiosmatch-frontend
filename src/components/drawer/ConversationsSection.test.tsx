@@ -9,9 +9,10 @@
  * WhatsApp-style delivery ticks and per-sender colour coding.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ConversationsSection from './ConversationsSection'
+import { mergeLandedMessages } from './conversationThreadMerge'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { avatarColor } from '@/lib/avatarColor'
@@ -625,5 +626,189 @@ describe('ConversationsSection · message fetch failure + retry (§8 D8)', () =>
       expect(callCount).toBe(2)
     })
     expect(await screen.findByText('Ja! We plannen een intake.')).toBeInTheDocument()
+  })
+})
+
+// WA-THREAD-UX-1: channel-aware composer + sort toggle + queued-status refresh.
+describe('ConversationsSection · WA-THREAD-UX-1', () => {
+  it('shows the free-text composer on a wa_web thread with a closed window, and posts the same request shape', async () => {
+    const stale = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString() // window closed
+    const waWebThread = [{ ...THREADS[0], primary_channel: 'wa_web', last_inbound_at: stale }]
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/conversations') return Promise.resolve({ data: { data: waWebThread } })
+      if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: MESSAGES } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    vi.mocked(api.post).mockResolvedValueOnce({ status: 202, data: { outbox_id: 'ob-1', status: 'queued' } })
+    const user = userEvent.setup()
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+
+    // Closed window, wa_web channel: still the free-text composer, never the template picker.
+    const input = await screen.findByPlaceholderText('conversations.composerPlaceholder')
+    expect(screen.queryByText('conversations.sessionClosedHint')).not.toBeInTheDocument()
+    expect(screen.getByText('conversations.waWebComposerHint')).toBeInTheDocument()
+
+    await user.type(input, 'Hoi daar!')
+    await user.click(screen.getByRole('button', { name: 'common:send' }))
+    // §13: the request's method/route/body — identical shape to the WABA session send.
+    expect(api.post).toHaveBeenCalledWith('/conversations/conv-1/messages', {
+      direction: 'outbound', message_content: 'Hoi daar!',
+    })
+  })
+
+  it('still shows the template picker on a waba thread with a closed window (unchanged)', async () => {
+    const stale = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString()
+    const wabaThread = [{ ...THREADS[0], primary_channel: 'waba', last_inbound_at: stale }]
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/conversations') return Promise.resolve({ data: { data: wabaThread } })
+      if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: MESSAGES } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    expect(await screen.findByText('conversations.sessionClosedHint')).toBeInTheDocument()
+    expect(screen.queryByPlaceholderText('conversations.composerPlaceholder')).not.toBeInTheDocument()
+  })
+
+  it('flips the render order with the sort toggle and persists the choice in localStorage', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/conversations') return Promise.resolve({ data: { data: THREADS } })
+      if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: MESSAGES } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    localStorage.removeItem('km:conversation-sort')
+    const user = userEvent.setup()
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    await screen.findByText(MESSAGES[0].message_content)
+
+    // Default: oldest first — the inbound message (08:00) renders before the outbound one (09:00).
+    let bubbles = screen.getAllByText(/ben ik nog nodig|We plannen een intake/)
+    expect(bubbles[0]).toHaveTextContent('ben ik nog nodig')
+
+    await user.click(screen.getByText('conversations.sortNewestFirst'))
+    bubbles = screen.getAllByText(/ben ik nog nodig|We plannen een intake/)
+    expect(bubbles[0]).toHaveTextContent('We plannen een intake')
+    expect(localStorage.getItem('km:conversation-sort')).toBe('newest')
+  })
+
+  // NOTE: uses fireEvent (not userEvent) under fake timers — userEvent's own
+  // internal delays fight vi's fake clock and hang the test.
+  it('refetches a wa_web thread with a queued send after the 60s drainer-cadence timer', async () => {
+    // shouldAdvanceTime keeps RTL's own real-timer polling (findBy*/waitFor) alive
+    // while still letting us fast-forward the 60s refresh timer deterministically.
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    try {
+      const waWebThread = [{ ...THREADS[0], primary_channel: 'wa_web' }]
+      // The refetch never resolves within the test, so the pending stub (and the
+      // effect's condition to keep polling) stays in place while we advance the clock.
+      let getCount = 0
+      vi.mocked(api.get).mockImplementation((url: string) => {
+        if (url === '/conversations') return Promise.resolve({ data: { data: waWebThread } })
+        if (url === '/conversations/conv-1/messages') {
+          getCount += 1
+          return getCount === 1 ? Promise.resolve({ data: { data: MESSAGES } }) : new Promise(() => {})
+        }
+        return Promise.reject(new Error(`unexpected GET ${url}`))
+      })
+      vi.mocked(api.post).mockResolvedValueOnce({ status: 202, data: { outbox_id: 'ob-2', status: 'queued' } })
+      render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+
+      const input = await screen.findByPlaceholderText('conversations.composerPlaceholder')
+      fireEvent.change(input, { target: { value: 'Nog een berichtje' } })
+      fireEvent.click(screen.getByRole('button', { name: 'common:send' }))
+      await waitFor(() => expect(api.post).toHaveBeenCalled())
+      const callsBeforeTimer = getCount
+
+      // The 60s drainer-cadence timer refetches this thread's messages.
+      await act(async () => { await vi.advanceTimersByTimeAsync(60_000) })
+      expect(getCount).toBeGreaterThan(callsBeforeTimer)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  // Verifier fix: a refetch that resolves BEFORE the drainer wrote the real row
+  // must not drop the just-sent bubble, and polling must keep going (never a
+  // one-shot poll that gives up the moment a read lands empty-handed).
+  it('keeps the pending bubble and keeps polling when a refetch resolves without the queued row yet', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    try {
+      const waWebThread = [{ ...THREADS[0], primary_channel: 'wa_web' }]
+      let getCount = 0
+      vi.mocked(api.get).mockImplementation((url: string) => {
+        if (url === '/conversations') return Promise.resolve({ data: { data: waWebThread } })
+        if (url === '/conversations/conv-1/messages') {
+          getCount += 1
+          // Every GET, including the post-timer refetch, still answers WITHOUT the
+          // queued send — the drainer has not written the row yet.
+          return Promise.resolve({ data: { data: MESSAGES } })
+        }
+        return Promise.reject(new Error(`unexpected GET ${url}`))
+      })
+      vi.mocked(api.post).mockResolvedValueOnce({ status: 202, data: { outbox_id: 'ob-4', status: 'queued' } })
+      render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+
+      const input = await screen.findByPlaceholderText('conversations.composerPlaceholder')
+      fireEvent.change(input, { target: { value: 'Wachtrij-bericht' } })
+      fireEvent.click(screen.getByRole('button', { name: 'common:send' }))
+      await waitFor(() => expect(api.post).toHaveBeenCalled())
+      const callsBeforeTimer = getCount
+
+      // First backoff step (60s): the refetch resolves without the queued row.
+      await act(async () => { await vi.advanceTimersByTimeAsync(60_000) })
+      expect(getCount).toBeGreaterThan(callsBeforeTimer)
+      // The pending bubble is still on screen — a bare replace would have dropped it.
+      expect(await screen.findByText('Wachtrij-bericht')).toBeInTheDocument()
+
+      // Second backoff step (still 60s, attempt index 1): polling continues.
+      const callsBeforeSecondTimer = getCount
+      await act(async () => { await vi.advanceTimersByTimeAsync(60_000) })
+      expect(getCount).toBeGreaterThan(callsBeforeSecondTimer)
+      expect(screen.getByText('Wachtrij-bericht')).toBeInTheDocument()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('refetches a wa_web thread with a queued send when the window regains focus', async () => {
+    const waWebThread = [{ ...THREADS[0], primary_channel: 'wa_web' }]
+    let getCount = 0
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/conversations') return Promise.resolve({ data: { data: waWebThread } })
+      if (url === '/conversations/conv-1/messages') {
+        getCount += 1
+        // The first (mount) fetch resolves with the queued stub still absent from the
+        // server yet; later refetches never resolve so the effect keeps its listener.
+        return getCount === 1 ? Promise.resolve({ data: { data: MESSAGES } }) : new Promise(() => {})
+      }
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    vi.mocked(api.post).mockResolvedValueOnce({ status: 202, data: { outbox_id: 'ob-3', status: 'queued' } })
+    const user = userEvent.setup()
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+
+    const input = await screen.findByPlaceholderText('conversations.composerPlaceholder')
+    await user.type(input, 'Focus test')
+    await user.click(screen.getByRole('button', { name: 'common:send' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalled())
+    const callsBeforeFocus = getCount
+
+    window.dispatchEvent(new Event('focus'))
+    await waitFor(() => expect(getCount).toBeGreaterThan(callsBeforeFocus))
+  })
+})
+
+// WA-THREAD-UX-1 verifier round 2: a queued stub is claimed only by a row the previous list did
+// not hold — an older outbound bubble with the same text must never swallow it.
+describe('mergeLandedMessages · a pre-existing identical outbound row never claims the stub', () => {
+  const older = { id: 'm9', direction: 'outbound', message_content: 'Top!', sent_at: '2026-07-17T08:00:00Z' }
+  const stub = { id: 'pending-77', direction: 'outbound', message_content: 'Top!', sent_at: null, _pendingOutboxId: 77 }
+  it('keeps the stub while the server list only holds the older twin', () => {
+    const merged = mergeLandedMessages([older] as never, [older, stub] as never)
+    expect(merged.map(m => m.id)).toEqual(['m9', 'pending-77'])
+  })
+  it('drops the stub once a NEW outbound row with that text lands', () => {
+    const landed = { id: 'm10', direction: 'outbound', message_content: 'Top!', sent_at: '2026-07-17T09:01:00Z' }
+    const merged = mergeLandedMessages([older, landed] as never, [older, stub] as never)
+    expect(merged.map(m => m.id)).toEqual(['m9', 'm10'])
   })
 })
