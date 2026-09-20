@@ -107,7 +107,7 @@ export default function ThreadComposer({ value, onChange, onSend, sending, place
             <div key={group} style={{ display: 'flex', flexWrap: 'wrap', gap: 2, marginBottom: 4 }}>
               {emoji.map(e => (
                 <Button key={e} variant="ghost" size="sm" iconOnly aria-label={e} title={e}
-                  onClick={() => pickEmoji(e)} style={{ width: 26, height: 26, padding: 0, fontSize: 14 }}>
+                  onClick={() => pickEmoji(e)} style={{ width: 28, padding: 0, fontSize: 14 }}>
                   {e}
                 </Button>
               ))}

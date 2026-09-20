@@ -5,7 +5,7 @@
  *   npm run smoke boards     → only flows whose name contains "boards"
  * Requires: Vite dev server on :5173 + Herd API + seeded dev DB.
  */
-import { boot, API } from './lib.mjs'
+import { boot, API, APP } from './lib.mjs'
 import { pagesRender, drillDowns } from './flows/nav.mjs'
 import { boardsDrag } from './flows/boards.mjs'
 import { statusWithReason, archiveAndFindBack, noteWithChannel, superSearch } from './flows/candidates.mjs'
@@ -59,6 +59,11 @@ for (const [name, fn] of FLOWS) {
   }
   // Reset error window between flows so one failure doesn't bleed into the next.
   ctx.errors.length = 0
+  // Reset PAGE state too (20-09: report-deeplink failed mid-flow with its drill
+  // drawer still open, and the next flow's sidebar click timed out behind it —
+  // a collateral red that read as a second finding). Escape closes any overlay,
+  // a fresh root navigation leaves no drawer, dialog or filter behind.
+  try { await ctx.page.keyboard.press('Escape'); await ctx.page.goto(APP, { waitUntil: 'networkidle' }) } catch { /* the next flow navigates itself anyway */ }
 }
 
 await ctx.browser.close()
