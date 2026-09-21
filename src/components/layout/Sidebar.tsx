@@ -59,8 +59,15 @@ function resolveVisibleNavItems(items: NavItemData[], auth: AuthContextValue | n
 function canUseKoios(auth: AuthContextValue | null): boolean {
   const moduleOk = hasKoiosAiModule(auth)
   const perms = auth?.user?.permissions
+  // KOIOS-NAV-SUPERADMIN-1 (Danny 21-09, on the audit base: "alleen bij super user is het
+  // weg en dat is niet goed"): /auth/me hands a super admin `permissions: ["*"]`, and a
+  // literal search for `koios.use` in that list hid the toggle for exactly the person who
+  // may do everything. The context's own hasPermission carries the super-admin bypass and
+  // the wildcard, so the permission half goes through it — never a private re-derivation.
   const permOk = !Array.isArray(perms) ||
-    perms.some(p => (typeof p === 'string' ? p : p?.name) === 'koios.use')
+    (typeof auth?.hasPermission === 'function'
+      ? auth.hasPermission('koios.use')
+      : perms.some(p => (typeof p === 'string' ? p : p?.name) === 'koios.use'))
   return moduleOk && permOk
 }
 

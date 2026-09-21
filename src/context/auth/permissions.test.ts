@@ -70,6 +70,16 @@ describe('extractDashboardTypes', () => {
 })
 
 describe('checkHasPermission', () => {
+  // KOIOS-NAV-SUPERADMIN-1: "*" is the backend's wildcard — it grants every name, on the user and on a role.
+  it('treats a "*" entry on the user as every permission', () => {
+    expect(checkHasPermission({ id: 'x', permissions: ['*'] } as unknown as AuthUser, 'koios.use', false)).toBe(true)
+  })
+  it('treats a "*" entry on a role as every permission', () => {
+    expect(checkHasPermission({ id: 'x', roles: [{ name: 'r', permissions: ['*'] }] } as unknown as AuthUser, 'users.view', false)).toBe(true)
+  })
+  it('still refuses an explicit list without the name and without the wildcard', () => {
+    expect(checkHasPermission({ id: 'x', permissions: ['candidates.view'] } as unknown as AuthUser, 'koios.use', false)).toBe(false)
+  })
   it('grants everything when isSuperAdmin is true', () => {
     expect(checkHasPermission({ id: 'x' } as AuthUser, 'anything', true)).toBe(true)
   })

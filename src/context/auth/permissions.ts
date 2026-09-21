@@ -56,14 +56,18 @@ export const checkHasPermission = (
   if (!user) return false
   if (isSuperAdmin) return true
 
+  // A "*" entry is the backend's wildcard (/auth/me hands it to super admins since 21-09):
+  // it grants every permission, so the name match accepts it next to the exact name.
+  const grants = (p: string | { name: string }) => { const n = typeof p === 'string' ? p : p.name; return n === '*' || n === permName }
+
   if (Array.isArray(user.permissions)) {
-    return user.permissions.some(p => (typeof p === 'string' ? p : p.name) === permName)
+    return user.permissions.some(grants)
   }
 
   const roles = user.roles ?? []
   for (const r of roles) {
     if (typeof r === 'object' && Array.isArray(r.permissions)) {
-      if (r.permissions.some(p => (typeof p === 'string' ? p : p.name) === permName)) return true
+      if (r.permissions.some(grants)) return true
     }
   }
 

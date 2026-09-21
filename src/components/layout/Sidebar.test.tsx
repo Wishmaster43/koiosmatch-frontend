@@ -8,10 +8,15 @@ import i18n from '@/i18n'
 // KOIOS-CARDS-MODULE-GATE-1: the tenant's module list is per test — the Koios gate tests flip it.
 let tenantModules: string[] | undefined
 let superAdmin = false
+// KOIOS-NAV-SUPERADMIN-1: the user's permission list is per test too (undefined = no user);
+// hasPermission mirrors the real context: super admins and the "*" wildcard grant everything.
+let userPerms: string[] | undefined
 vi.mock('@/context/AuthContext', () => ({
   useAuth: () => ({
     activeTenant: tenantModules ? { id: 't1', modules: tenantModules } : null,
-    user: null, isSuperAdmin: () => superAdmin, setActiveTenant: vi.fn(),
+    user: userPerms ? { id: 'u1', permissions: userPerms, is_super_admin: superAdmin } : null,
+    isSuperAdmin: () => superAdmin, setActiveTenant: vi.fn(),
+    hasPermission: (name: string) => superAdmin || (userPerms ?? []).includes('*') || (userPerms ?? []).includes(name),
   }),
 }))
 
@@ -55,5 +60,31 @@ describe('Sidebar — Koios toggle follows the tenant koios_ai module', () => {
     tenantModules = ['ats', 'koios_assist']; superAdmin = true
     render(<Sidebar {...baseProps} />)
     expect(screen.queryByRole('button', { name: 'Koios AI' })).toBeNull()
+  })
+})
+
+// KOIOS-NAV-SUPERADMIN-1 (Danny 21-09): /auth/me hands a super admin `permissions: ["*"]`;
+// the toggle must not vanish for the one user who may do everything, while an explicit
+// list without koios.use still hides it (least privilege on display).
+describe('Sidebar — Koios toggle and the permission half', () => {
+  it('shows the toggle for a super admin whose payload carries the "*" wildcard', () => {
+    tenantModules = ['ats', 'koios_ai']; superAdmin = true; userPerms = ['*']
+    render(<Sidebar {...baseProps} />)
+    expect(screen.getByRole('button', { name: 'Koios AI' })).toBeInTheDocument()
+    userPerms = undefined
+  })
+
+  it('shows the toggle for a regular user whose explicit list carries koios.use', () => {
+    tenantModules = ['ats', 'koios_ai']; superAdmin = false; userPerms = ['candidates.view', 'koios.use']
+    render(<Sidebar {...baseProps} />)
+    expect(screen.getByRole('button', { name: 'Koios AI' })).toBeInTheDocument()
+    userPerms = undefined
+  })
+
+  it('hides the toggle for a regular user whose explicit list lacks koios.use', () => {
+    tenantModules = ['ats', 'koios_ai']; superAdmin = false; userPerms = ['candidates.view']
+    render(<Sidebar {...baseProps} />)
+    expect(screen.queryByRole('button', { name: 'Koios AI' })).toBeNull()
+    userPerms = undefined
   })
 })
