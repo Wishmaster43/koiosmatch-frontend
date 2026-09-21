@@ -25,8 +25,11 @@ import type { ApplicationDetail } from '@/types/application'
 const expandCard = () => userEvent.click(screen.getByRole('button', { name: /matchScore\.title/ }))
 
 // Key-echo (repo-wide precedent) — honours defaultValue like the real t() does.
+// initReactI18next: MatchScoreBlock formats through lib/formatters since GETALLEN-1,
+// which rides on lib/datetime and thus on the i18n init (DATETIME-IMPORT-LES).
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k: string, o?: { defaultValue?: string }) => o?.defaultValue ?? k }),
+  initReactI18next: { type: '3rdParty', init: () => {} },
 }))
 
 const mockUseAuth = vi.fn()

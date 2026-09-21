@@ -77,7 +77,9 @@ vi.mock('@/components/ui/PaginationBar', () => ({ default: () => null }))
 vi.mock('@/components/ui/HeaderSearch', () => ({ default: () => null }))
 vi.mock('@/components/ui/ClearFiltersButton', () => ({ default: () => null }))
 vi.mock('@/components/ui/QuickViewToggle', () => ({ default: () => null }))
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+// initReactI18next: since GETALLEN-1 the insights helpers import lib/formatters, whose
+// locale hook rides on lib/datetime and thus on the i18n init (DATETIME-IMPORT-LES).
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }), initReactI18next: { type: '3rdParty', init: () => {} } }))
 
 describe('ApplicationsPage · D6 dashboard intent seam', () => {
   it('a tooLongInStage intent produces a too_long_in_stage=1 request', () => {
