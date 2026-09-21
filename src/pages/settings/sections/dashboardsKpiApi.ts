@@ -61,6 +61,9 @@ export const fetchDashboardKpisRole = (role: string, signal?: AbortSignal): Prom
 // (settings.update). Takes LOCAL tile ids; the wire gets server keys — an
 // unknown key would 422 (the exact B1 failure this seam exists to prevent).
 export const putDashboardKpisRole = (role: string, kpis: string[]): Promise<void> => {
-  const body: PutKpisBody = { kpis: localIdsToServer(kpis) }
+  // The spec (79e5d8e0) types `kpis` as a closed enum of the built-in keys, but the
+  // validator also accepts the KPI builder's `kpi:<uuid>` rows (KPI-BUILDER-DASH), which
+  // an OpenAPI enum cannot express — so the seam widens deliberately here, nowhere else.
+  const body: PutKpisBody = { kpis: localIdsToServer(kpis) as PutKpisBody['kpis'] }
   return api.put(`/dashboard/kpis/${role}`, body).then(() => undefined)
 }
