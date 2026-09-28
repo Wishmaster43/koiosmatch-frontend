@@ -38,6 +38,7 @@ import { useKoiosAssistant } from './koios/useKoiosAssistant'
 import { refsFromAppLinks } from './koios/koiosAmbientContext'
 import KoiosVoiceButton from './koios/KoiosVoiceButton'
 import { useKoiosConversationMode } from './koios/useKoiosConversationMode'
+import { notifySuccess } from '@/lib/notify'
 import type { KoiosContextRef } from '@/types/koios'
 
 // ── Main panel ────────────────────────────────────────────────────────────────
@@ -232,7 +233,16 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
     textareaRef.current?.focus()
   }
 
-  const newChat = () => { reset(); setInput(''); closeMentionMenu(); setContextRefs([]) }
+  // "+ Nieuw" always gives visible feedback (KOIOS-SUGGEST-COMPACT-2, Danny 28-09:
+  // "+ nieuw icon doet niets!!"): on the empty landing state there is nothing to
+  // visibly reset, so it focuses the composer and toasts instead; a real thread
+  // being reset is its own feedback (the panel visibly returns to the welcome state).
+  const newChat = () => {
+    const hadContent = !isLanding || input.trim().length > 0
+    reset(); setInput(''); closeMentionMenu(); setContextRefs([])
+    setTimeout(() => textareaRef.current?.focus(), 50)
+    if (!hadContent) notifySuccess(t('koios.newChatReady'))
+  }
 
   // CONNECT-1 (Danny 22-08): the header's disconnected indicator jumps straight
   // to the screen that configures this connection (Settings → AI → Koios,

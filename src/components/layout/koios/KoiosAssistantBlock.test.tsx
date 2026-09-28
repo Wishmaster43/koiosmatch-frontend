@@ -11,6 +11,13 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import KoiosAssistantBlock from './KoiosAssistantBlock'
 import api from '@/lib/api'
+import { notifySuccess } from '@/lib/notify'
+
+// KOIOS-SUGGEST-COMPACT-2 (Danny 28-09: "Create taak annuleren en blijft staan, geen
+// auto refresh"): the toast is the visible feedback once a row resolves — spy on it
+// instead of re-implementing the notify event plumbing here.
+vi.mock('@/lib/notify', () => ({ notifySuccess: vi.fn(), notifyError: vi.fn(), notify: vi.fn() }))
+const mockNotifySuccess = notifySuccess as unknown as ReturnType<typeof vi.fn>
 
 // GET /ai/koios/assistant + the golf-2 confirm/cancel POSTs — all mocked (API-CREDITS-1).
 vi.mock('@/lib/api', async () => {
@@ -56,6 +63,7 @@ beforeEach(() => {
   mockGet.mockReset()
   mockPost.mockReset()
   openEntity.mockReset()
+  mockNotifySuccess.mockReset()
   localStorage.clear()
 })
 
@@ -98,11 +106,11 @@ describe('KoiosAssistantBlock', () => {
     expect(mockGet).toHaveBeenNthCalledWith(2, '/ai/koios/assistant')
   })
 
-  // Golf 2 (contract CMBE-gepind): a parked action executes via the REAL seam,
-  // and the list plus the "for you" refetch fire after — a block-level smoke
-  // test; the row's own states (staged preview, budget hint, …) live in
-  // KoiosSuggestionRow.test.tsx.
-  it('confirms a parked action via POST /ai/koios/actions/{id}/confirm, shows the executed state and refetches', async () => {
+  // Golf 2 (contract CMBE-gepind), extended by KOIOS-SUGGEST-COMPACT-2 (Danny 28-09:
+  // "Create taak annuleren en blijft staan, geen auto refresh"): a parked action
+  // executes via the REAL seam, the row leaves the list immediately (never lingers
+  // with the "confirmed" text), a toast confirms, and the list + "for you" refetch fire.
+  it('confirms a parked action, drops the row immediately, toasts and refetches', async () => {
     givenSuggestions([
       { kind: 'pending_action', title: 'Parked', body: 'Ready', refs: [{ type: 'pending_action', id: 'pa-7', label: 'Parked' }] },
     ])
@@ -110,7 +118,9 @@ describe('KoiosAssistantBlock', () => {
     renderBlock()
     fireEvent.click(await screen.findByRole('button', { name: /pendingAction\.confirm/ }))
     await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/ai/koios/actions/pa-7/confirm'))
-    await screen.findByText(/pendingAction\.confirmed/)
+    await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith('koios.assistant.doneExecuted'))
+    // No lingering "Cancelled."/"Executed." row — it is dropped, not left in a terminal state.
+    await waitFor(() => expect(screen.queryByText('Parked')).toBeNull())
     await waitFor(() => expect(mockGet.mock.calls.filter(c => c[0] === '/ai/koios/assistant').length).toBeGreaterThanOrEqual(2))
   })
 
@@ -124,7 +134,7 @@ describe('KoiosAssistantBlock', () => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     render(<QueryClientProvider client={client}><KoiosAssistantBlock /></QueryClientProvider>)
     fireEvent.click(await screen.findByRole('button', { name: /pendingAction\.confirm/ }))
-    await screen.findByText(/pendingAction\.confirmed/)
+    await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith('koios.assistant.doneExecuted'))
     // The next fetch returns a DIFFERENT parked action in the same slot.
     givenSuggestions([
       { kind: 'pending_action', title: 'Tweede', body: 'b', refs: [{ type: 'pending_action', id: 'pa-y', label: 'Tweede' }] },
@@ -133,6 +143,26 @@ describe('KoiosAssistantBlock', () => {
     await screen.findAllByText('Tweede')
     expect(screen.getByRole('button', { name: /pendingAction\.confirm/ })).toBeInTheDocument()
     expect(screen.queryByText(/pendingAction\.confirmed/)).toBeNull()
+  })
+
+  // A suggestion the refetched list still returns reappears after the grace window
+  // (KOIOS-SUGGEST-COMPACT-2): the server is the truth, the dismiss is only a
+  // brief window so the row never lingers with stale terminal text.
+  it('a suggestion the refetch still returns reappears after the grace window', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    givenSuggestions([
+      { kind: 'pending_action', title: 'Nog steeds', body: 'a', refs: [{ type: 'pending_action', id: 'pa-z', label: 'Nog steeds' }] },
+    ])
+    mockPost.mockResolvedValueOnce({ data: { status: 'executed', data: {} } })
+    renderBlock()
+    fireEvent.click(await screen.findByRole('button', { name: /pendingAction\.confirm/ }))
+    await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalled())
+    await waitFor(() => expect(screen.queryByText('Nog steeds')).toBeNull())
+    await vi.advanceTimersByTimeAsync(1600)
+    // The server still lists it (the action confirm is unrelated to the suggestion feed
+    // in this fixture): it comes back, with fresh live buttons.
+    await waitFor(() => expect(screen.getAllByText('Nog steeds').length).toBeGreaterThan(0))
+    vi.useRealTimers()
   })
 
   it('a descriptor kind hands off to the chat: prefills via onAskKoios, never an API call', async () => {

@@ -22,6 +22,7 @@
  * the per-row rendering (icon, reason, actions) now lives in `KoiosSuggestionRow`;
  * this block is left as a thin list container so it never grows past ~300 lines again.
  */
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import KoiosCardFrame from './KoiosCardFrame'
 import { Caption } from '@/components/ui/typography'
@@ -32,8 +33,15 @@ import { useQueryClient } from '@tanstack/react-query'
 import KoiosSuggestionRow from './KoiosSuggestionRow'
 import type { AskKoios } from './KoiosSuggestionRow'
 import { suggestionKey } from './koiosSuggestionMeta'
+import { notifySuccess } from '@/lib/notify'
 
 export type { AskKoios }
+
+// A dismissed row reappears if the refetched list still carries it (KOIOS-SUGGEST-
+// COMPACT-2, Danny 28-09: "Create taak annuleren en blijft staan"): the server is the
+// truth, this is only a brief grace window so a resolved row never lingers with stale
+// "Cancelled."/"Executed." text while the refetch is in flight.
+const REAPPEAR_MS = 1500
 
 // The Koios panel's assistant block: server-side suggestions rendered in order, collapsible via a persisted per-user choice.
 export default function KoiosAssistantBlock({ onAskKoios, onClose }: { onAskKoios?: AskKoios; onClose?: () => void }) {
@@ -42,12 +50,22 @@ export default function KoiosAssistantBlock({ onAskKoios, onClose }: { onAskKoio
   const { suggestions, loading, error, refetch } = useKoiosAssistant()
   const hasSuggestions = !loading && !error && suggestions.length > 0
   const queryClient = useQueryClient()
-  // After an executed or cancelled action the list and the dashboard's "Koios did this
-  // for you" read the server again (a resolved parked action must leave the list).
-  const onDone = () => {
+  // Keys hidden from the list right after their action resolved, so a completed row
+  // never sits there with stale text waiting for the refetch to catch up.
+  const [dismissed, setDismissed] = useState<Set<string>>(new Set())
+  // After an executed or cancelled action: drop the row immediately, toast the result,
+  // and refetch the list + the dashboard's "Koios did this for you" (a resolved parked
+  // action must leave both). The dismiss is only a grace window — see REAPPEAR_MS.
+  const onDone = (key: string, result: 'executed' | 'cancelled') => {
+    setDismissed(prev => new Set(prev).add(key))
+    notifySuccess(t(result === 'executed' ? 'koios.assistant.doneExecuted' : 'koios.assistant.doneCancelled'))
     void refetch()
     void queryClient.invalidateQueries({ queryKey: ['koios', 'for-you'] })
+    setTimeout(() => {
+      setDismissed(prev => { const next = new Set(prev); next.delete(key); return next })
+    }, REAPPEAR_MS)
   }
+  const visibleSuggestions = suggestions.filter(s => !dismissed.has(suggestionKey(s)))
 
   return (
     <KoiosCardFrame title={t('koios.assistant.title')} filled={hasSuggestions} open={!collapsed}
@@ -61,14 +79,14 @@ export default function KoiosAssistantBlock({ onAskKoios, onClose }: { onAskKoio
           {t('error.body')}
         </ErrorBanner>
       )}
-      {!loading && !error && suggestions.length === 0 && (
+      {!loading && !error && visibleSuggestions.length === 0 && (
         <Caption style={{ display: 'block', margin: '6px 0 0' }}>{t('koios.assistant.emptyState')}</Caption>
       )}
-      {!loading && !error && suggestions.length > 0 && (
+      {!loading && !error && visibleSuggestions.length > 0 && (
         // The list scrolls inside the block (max ~half the panel) so the advice block
         // below stays reachable when the backend returns its full ten suggestions.
         <div style={{ margin: '4px 0 0', display: 'flex', flexDirection: 'column', maxHeight: '48vh', overflowY: 'auto' }}>
-          {suggestions.map(s => <KoiosSuggestionRow key={suggestionKey(s)} suggestion={s} onAskKoios={onAskKoios} onDone={onDone} />)}
+          {visibleSuggestions.map(s => <KoiosSuggestionRow key={suggestionKey(s)} suggestion={s} onAskKoios={onAskKoios} onDone={(result) => onDone(suggestionKey(s), result)} />)}
         </div>
       )}
     </KoiosCardFrame>

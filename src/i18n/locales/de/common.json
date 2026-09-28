@@ -183,6 +183,7 @@
   "koios": {
     "online": "Online",
     "newChat": "Neuer Chat",
+    "newChatReady": "Neuer Chat bereit, stelle deine Frage",
     "newChatShort": "Neu",
     "addContext": "Kontext hinzufügen",
     "taskPlaceholder": "Aufgabe eingeben",
@@ -286,6 +287,11 @@
       "call": "Anrufen",
       "email": "E-Mail",
       "message": "Nachricht senden",
+      "callPerson": "{{name}} anrufen",
+      "mailPerson": "E-Mail an {{name}} senden",
+      "messagePerson": "Nachricht an {{name}}",
+      "doneExecuted": "Erledigt",
+      "doneCancelled": "Abgebrochen",
       "reason": {
         "task_overdue_one": "{{count}} Tag überfällig",
         "task_overdue_other": "{{count}} Tage überfällig",

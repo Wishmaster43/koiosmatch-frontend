@@ -28,6 +28,8 @@ Element.prototype.scrollIntoView = vi.fn()
 // to its normal uninitialised-instance behaviour (t returns the key, and drops
 // interpolation options entirely since there is no template to fill them into).
 vi.mock('@/lib/datetime', () => ({ useLocale: () => 'nl-NL' }))
+// "+ Nieuw" feedback (KOIOS-SUGGEST-COMPACT-2) — spy on the toast, no real DOM event plumbing.
+vi.mock('@/lib/notify', () => ({ notifySuccess: vi.fn(), notifyError: vi.fn(), notify: vi.fn() }))
 
 // KoiosPanel's own hooks call these on open — stub them so the test never hits
 // the real network (useKoiosSettings fetches settings the moment `open` is true).
@@ -680,5 +682,37 @@ describe('KoiosPanel — composer footer (Danny 09-09: "weg met die tekst")', ()
     await screen.findByText('common:koios.radar.empty')
     expect(screen.queryByText('koios.inputHint')).toBeNull()
     expect(screen.queryByText('koios.aboutLink')).toBeNull()
+  })
+})
+
+// KOIOS-SUGGEST-COMPACT-2 (Danny 28-09: "+ nieuw icon doet niets!!"): "+ Nieuw"
+// always gives visible feedback — a toast on the empty landing state (nothing
+// to visibly reset), none once a real thread gets reset (the reset itself is
+// the feedback).
+describe('KoiosPanel · "+ Nieuw" always gives feedback', () => {
+  beforeEach(async () => { const { notifySuccess } = await import('@/lib/notify'); vi.mocked(notifySuccess).mockClear() })
+
+  it('toasts on the empty landing state (nothing to reset)', async () => {
+    const { notifySuccess } = await import('@/lib/notify')
+    renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    await screen.findByText('common:koios.radar.empty')
+    fireEvent.click(screen.getByRole('button', { name: 'koios.newChatShort' }))
+    expect(notifySuccess).toHaveBeenCalledWith('koios.newChatReady')
+    // The composer itself gets focus (setTimeout(50)) so typing can start right away.
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByPlaceholderText('koios.taskPlaceholder')))
+  })
+
+  it('fires no toast once a real thread gets reset (the reset itself is the feedback)', async () => {
+    const { notifySuccess } = await import('@/lib/notify')
+    vi.mocked(sendChat).mockResolvedValueOnce({ answer: 'Hoi!', steps: [] })
+    renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    await screen.findByText('common:koios.radar.empty')
+    const textarea = screen.getByPlaceholderText('koios.taskPlaceholder')
+    fireEvent.change(textarea, { target: { value: 'hallo' } })
+    fireEvent.keyDown(textarea, { key: 'Enter' })
+    await waitFor(() => expect(sendChat).toHaveBeenCalled())
+    await screen.findByText('Hoi!')
+    fireEvent.click(screen.getByRole('button', { name: 'koios.newChatShort' }))
+    expect(notifySuccess).not.toHaveBeenCalled()
   })
 })

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import KoiosResultCards from './KoiosResultCards'
+import KoiosResultCards, { KoiosRefChip } from './KoiosResultCards'
 import i18n from '@/i18n'
 import type { KoiosSearchResultsGrouped, KoiosResultRef } from './koiosTypes'
 
@@ -239,5 +239,26 @@ describe('KoiosResultCards — grouped results', () => {
     }
     render(<KoiosResultCards groups={groups} t={t} />)
     expect(screen.getByText('Verpleegkundige')).toBeInTheDocument()
+  })
+})
+
+// KOIOS-SUGGEST-COMPACT-2 (Danny 28-09: "2 icons links … lijken zelfde kleur"): a caller
+// can replace or hide the chip's default entity glyph so a row never shows two icons.
+describe('KoiosRefChip — icon prop', () => {
+  const ref: KoiosResultRef = { type: 'candidate', id: 'c1', label: 'Ahmed Vos' }
+
+  it('renders the default entity icon when no icon prop is passed', () => {
+    const { container } = render(<KoiosRefChip item={ref} />)
+    expect(container.querySelector('svg')).toBeInTheDocument()
+  })
+
+  it('renders no glyph at all when icon is explicitly null', () => {
+    const { container } = render(<KoiosRefChip item={ref} icon={null} />)
+    expect(container.querySelector('svg')).toBeNull()
+  })
+
+  it('renders the caller-supplied icon instead of the default entity glyph', () => {
+    render(<KoiosRefChip item={ref} icon={<span data-testid="custom-icon" />} />)
+    expect(screen.getByTestId('custom-icon')).toBeInTheDocument()
   })
 })

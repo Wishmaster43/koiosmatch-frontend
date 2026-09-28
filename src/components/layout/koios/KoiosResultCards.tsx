@@ -7,6 +7,7 @@
  * CHILD refs (appointment/note/document) route through their parent's drawer.
  */
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigation } from '@/context/NavigationContext'
 import { entityIconEl } from './koiosEntityIcons'
@@ -62,11 +63,17 @@ function dedupeRefs(refs: KoiosResultRef[]): KoiosResultRef[] {
 
 // One card for a referenced record — exported as KoiosRefChip so the assistant block's
 // compact rows and the pending-action card link the SAME way (deep-link, DATUM-1).
-export function KoiosRefChip({ item }: { item: KoiosResultRef }) {
+// `icon` (KOIOS-SUGGEST-COMPACT-2, Danny 28-09: "2 icons links … lijken zelfde kleur"):
+// an optional caller-supplied glyph that REPLACES the chip's own default entity icon —
+// `null` hides the glyph entirely, `undefined` (the default) keeps the entity icon. A
+// suggestion row uses this so the row shows exactly ONE icon (its typed kind/task icon),
+// never the chip's icon stacked next to it.
+export function KoiosRefChip({ item, icon }: { item: KoiosResultRef; icon?: ReactNode | null }) {
   const { openEntity } = useNavigation()
   const target = resolveTarget(item)
   const clickable = target != null
   const Tag: 'button' | 'div' = clickable ? 'button' : 'div'
+  const glyph = icon !== undefined ? icon : entityIconEl(item.type, { size: 13, color: 'var(--color-primary-text)' })
 
   return (
     <Tag key={`${item.type}:${item.id}`}
@@ -77,7 +84,7 @@ export function KoiosRefChip({ item }: { item: KoiosResultRef }) {
         background: 'var(--surface)', border: '1px solid var(--border)',
         cursor: clickable ? 'pointer' : 'default', textAlign: 'left',
       }}>
-      {entityIconEl(item.type, { size: 13, color: 'var(--color-primary-text)' })}
+      {glyph}
       <span>
         {/* DATUM-1: rewrite any embedded ISO date in a server-composed label to DD-MM-YYYY. */}
         {humanizeIsoDates(item.label)}

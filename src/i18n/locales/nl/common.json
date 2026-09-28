@@ -183,6 +183,7 @@
   "koios": {
     "online": "Online",
     "newChat": "Nieuwe chat",
+    "newChatReady": "Nieuw gesprek, typ je vraag",
     "newChatShort": "Nieuw",
     "addContext": "Context toevoegen",
     "taskPlaceholder": "Geef een taak op",
@@ -286,6 +287,11 @@
       "call": "Bellen",
       "email": "Mailen",
       "message": "Bericht sturen",
+      "callPerson": "Bel {{name}}",
+      "mailPerson": "Mail {{name}}",
+      "messagePerson": "Conversatie met {{name}}",
+      "doneExecuted": "Uitgevoerd",
+      "doneCancelled": "Geannuleerd",
       "reason": {
         "task_overdue_one": "{{count}} dag te laat",
         "task_overdue_other": "{{count}} dagen te laat",

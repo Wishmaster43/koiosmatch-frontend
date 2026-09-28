@@ -82,6 +82,24 @@ describe('KoiosSuggestionRow · short reason (KOIOS-SUGGEST-COMPACT-1)', () => {
   })
 })
 
+// KOIOS-SUGGEST-COMPACT-2 (Danny 28-09: "Ik heb nu 2 icons links staan"): a row with a
+// primary ref renders exactly ONE leading icon — its own kind/task-type glyph drawn INTO
+// the record chip, never the chip's default entity glyph stacked next to it.
+describe('KoiosSuggestionRow · one icon per row (KOIOS-SUGGEST-COMPACT-2)', () => {
+  it('renders exactly one leading icon (the task type glyph), never the chip default too', () => {
+    // A vacancy ref with no actions/contact so the row carries no OTHER icon (no
+    // conversation/channel/action/chat glyph) — the count below is unambiguous.
+    const suggestion = {
+      kind: 'task_overdue' as const, title: 'Bel Ahmed', body: 'x', refs: [{ type: 'vacancy', id: 'v1', label: 'Verzorgende IG' }],
+      params: { days_overdue: 2, task_type: { icon: 'phone', color: 'var(--color-info)', label: 'Belafspraak' } },
+    }
+    const { container } = render(<KoiosSuggestionRow suggestion={suggestion} />)
+    expect(container.querySelectorAll('svg').length).toBe(1)
+    // The one icon carries the task type's OWN colour (never a colourless fallback).
+    expect(container.querySelector('svg')).toHaveAttribute('stroke', 'var(--color-info)')
+  })
+})
+
 describe('KoiosSuggestionRow · icon-button actions (CMBE addendum action shape)', () => {
   // Under this suite's `t(key) => key` stub (see file header), a fixture with a
   // real `label` and no `label_key`/`tool_label_key` proves the icon+action
@@ -145,34 +163,34 @@ describe('KoiosSuggestionRow · icon-button actions (CMBE addendum action shape)
     expect(screen.getByRole('button', { name: 'koios.tools.wijzig_taak' })).toBeInTheDocument()
   })
 
-  it('call, mail and WhatsApp icons appear for a row whose ref carries contact data (no send_whatsapp action offered)', () => {
+  it('call and mail icons appear for a row whose ref carries contact data, named after the person (KOIOS-SUGGEST-COMPACT-2)', () => {
     const suggestion = {
       kind: 'opportunity_closing_soon' as const, title: 'Uitbreiding', body: 'x',
-      refs: [{ type: 'candidate', id: 'c7', label: 'Youssef Postma', contact: { mobile: '+31612345678', email: 'y@example.test', whatsapp: true } }],
+      refs: [{ type: 'contact', id: 'c7', label: 'Youssef Postma', contact: { mobile: '+31612345678', email: 'y@example.test', whatsapp: true } }],
       action: null,
     }
     render(<KoiosSuggestionRow suggestion={suggestion} />)
-    expect(screen.getByRole('link', { name: 'koios.assistant.call' })).toHaveAttribute('href', 'tel:+31612345678')
-    expect(screen.getByRole('link', { name: 'koios.assistant.email' })).toHaveAttribute('href', 'mailto:y@example.test')
-    fireEvent.click(screen.getByRole('button', { name: 'koios.assistant.message' }))
-    expect(openEntity).toHaveBeenCalledWith('candidates', 'c7', 'communication')
+    expect(screen.getByRole('link', { name: 'koios.assistant.callPerson' })).toHaveAttribute('href', 'tel:+31612345678')
+    expect(screen.getByRole('link', { name: 'koios.assistant.mailPerson' })).toHaveAttribute('href', 'mailto:y@example.test')
   })
 
-  // CMBE addendum: a contact WITHOUT a live WhatsApp channel (a contact person
-  // always has whatsapp:false) and no send_whatsapp action shows no WhatsApp icon at all.
-  it('shows NO WhatsApp icon when contact.whatsapp is false and no send_whatsapp action is offered', () => {
+  // KOIOS-SUGGEST-COMPACT-2 (Danny 28-09: "Bij kandidaat mis ik conversatie starten"):
+  // a candidate ref ALWAYS gets the conversation icon now — the old contact.whatsapp
+  // gate is gone — even when contact.whatsapp is false or absent.
+  it('shows the conversation icon for a candidate ref regardless of contact.whatsapp, opening the Communicatie tab', () => {
     const suggestion = {
       kind: 'candidate_no_contact' as const, title: 'Sanne', body: 'x',
       refs: [{ type: 'candidate', id: 'c1', label: 'Sanne', contact: { phone: '0612345678', whatsapp: false } }],
       action: { tool: 'maak_taak', input: {} },
     }
     render(<KoiosSuggestionRow suggestion={suggestion} />)
-    expect(screen.queryByRole('button', { name: 'koios.assistant.message' })).toBeNull()
-    // The call icon still renders — only the WhatsApp/message icon is gated.
-    expect(screen.getByRole('link', { name: 'koios.assistant.call' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'koios.assistant.messagePerson' }))
+    expect(openEntity).toHaveBeenCalledWith('candidates', 'c1', 'communication')
+    // The call icon still renders too.
+    expect(screen.getByRole('link', { name: 'koios.assistant.callPerson' })).toBeInTheDocument()
   })
 
-  it('shows the send_whatsapp action icon instead of the standalone WhatsApp icon when both are possible', () => {
+  it('shows the send_whatsapp action icon instead of the standalone conversation icon when both are possible', () => {
     const suggestion = {
       kind: 'candidate_no_contact' as const, title: 'Sanne', body: 'x',
       refs: [{ type: 'candidate', id: 'c1', label: 'Sanne', contact: { whatsapp: true } }],
@@ -181,10 +199,10 @@ describe('KoiosSuggestionRow · icon-button actions (CMBE addendum action shape)
     render(<KoiosSuggestionRow suggestion={suggestion} />)
     expect(screen.getByRole('button', { name: 'koios.assistant.actions.send_whatsapp' })).toBeInTheDocument()
     // The standalone conversation icon never doubles up with the send_whatsapp action.
-    expect(screen.queryByRole('button', { name: 'koios.assistant.message' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'koios.assistant.messagePerson' })).toBeNull()
   })
 
-  it('keeps a single extra action inline even past the four-icon threshold (task overdue always shows its action)', () => {
+  it('keeps a single extra action inline even past the six-icon threshold (task overdue always shows its action)', () => {
     const suggestion = {
       kind: 'task_overdue' as const, title: 'Ahmed', body: 'x',
       refs: [{ type: 'candidate', id: 'c1', label: 'Ahmed', contact: { mobile: '+31611111111', email: 'a@example.test', whatsapp: true } }],
@@ -194,10 +212,53 @@ describe('KoiosSuggestionRow · icon-button actions (CMBE addendum action shape)
       ],
     }
     render(<KoiosSuggestionRow suggestion={suggestion} />)
-    // 3 contact icons + primary + chat = 6 icons, past the 4-icon threshold — the
-    // one remaining extra action (Reschedule) still renders inline, never in ⋯.
+    // Call + mail + conversation + primary + chat = 5 icons already, plus the one
+    // remaining extra action (Reschedule) — it still renders inline, never in ⋯.
     expect(screen.getByRole('button', { name: 'koios.assistant.actions.complete_task' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'koios.assistant.actions.reschedule_task' })).toBeInTheDocument()
+  })
+
+  it('two person refs (candidate + contact) each get their own named call/mail icons', () => {
+    const suggestion = {
+      kind: 'opportunity_closing_soon' as const, title: 'Uitbreiding', body: 'x',
+      refs: [
+        { type: 'candidate', id: 'c1', label: 'Ahmed', contact: { mobile: '+31611111111', email: 'ahmed@example.test' } },
+        { type: 'contact', id: 'k1', label: 'Klant Contact', contact: { phone: '0201234567', email: 'klant@example.test' } },
+      ],
+      action: null,
+    }
+    render(<KoiosSuggestionRow suggestion={suggestion} />)
+    // Both people's channel buttons render (4 channel icons total), each carrying its own href.
+    expect(screen.getAllByRole('link', { name: 'koios.assistant.callPerson' })[0]).toHaveAttribute('href', 'tel:+31611111111')
+    expect(screen.getAllByRole('link', { name: 'koios.assistant.mailPerson' })[0]).toHaveAttribute('href', 'mailto:ahmed@example.test')
+    expect(screen.getAllByRole('link', { name: 'koios.assistant.callPerson' })[1]).toHaveAttribute('href', 'tel:0201234567')
+    expect(screen.getAllByRole('link', { name: 'koios.assistant.mailPerson' })[1]).toHaveAttribute('href', 'mailto:klant@example.test')
+  })
+
+  it('the extra action stays inline while a second person\'s channels fold into the overflow menu', () => {
+    const suggestion = {
+      kind: 'opportunity_closing_soon' as const, title: 'Uitbreiding', body: 'x',
+      refs: [
+        { type: 'candidate', id: 'c1', label: 'Ahmed', contact: { mobile: '+31611111111', email: 'ahmed@example.test' } },
+        { type: 'contact', id: 'k1', label: 'Klant Contact', contact: { phone: '0201234567', email: 'klant@example.test' } },
+      ],
+      actions: [
+        { key: 'search_candidates', tool: 'zoek_kandidaten', input: {}, label_key: 'koios.assistant.actions.search_candidates' },
+        { key: 'reschedule_task', tool: 'wijzig_taak', input: {}, label_key: 'koios.assistant.actions.reschedule_task' },
+      ],
+    }
+    render(<KoiosSuggestionRow suggestion={suggestion} />)
+    // Ahmed's own channels and the extra action stay inline.
+    expect(screen.getAllByRole('link', { name: 'koios.assistant.callPerson' })[0]).toHaveAttribute('href', 'tel:+31611111111')
+    expect(screen.getAllByRole('link', { name: 'koios.assistant.mailPerson' })[0]).toHaveAttribute('href', 'mailto:ahmed@example.test')
+    expect(screen.getByRole('button', { name: 'koios.assistant.actions.reschedule_task' })).toBeInTheDocument()
+    // The second person's channels are not rendered inline; only Ahmed's link shows.
+    expect(screen.getAllByRole('link', { name: 'koios.assistant.callPerson' })).toHaveLength(1)
+    const moreButton = screen.getByRole('button', { name: 'koios.assistant.moreActions' })
+    expect(moreButton).toBeInTheDocument()
+    fireEvent.click(moreButton)
+    expect(screen.getByText('koios.assistant.callPerson')).toBeInTheDocument()
+    expect(screen.getByText('koios.assistant.mailPerson')).toBeInTheDocument()
   })
 
   it('a tool switched off for the organisation or the user gets no button at all; the chat handoff stays', async () => {

@@ -7,9 +7,10 @@
  * not the whole sentence · the chat handoff. The staged/confirm leg (golf 3,
  * `KoiosSuggestionExec`) is UNCHANGED — moved here verbatim from KoiosAssistantBlock.
  */
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MessageSquare, Phone, Mail, MessageCircle } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import ActionMenu from '@/components/ui/ActionMenu'
@@ -31,6 +32,11 @@ import type { KoiosContextRef } from '@/types/koios'
 
 export type AskKoios = (text: string, refs: KoiosContextRef[]) => void
 type TFn = (key: string, opts?: Record<string, unknown>) => string
+// A context ref known to carry contact data (the `.filter(r => r.contact)` narrowing
+// TS can't infer through — see `personRefs` below).
+type KoiosContextRefWithContact = KoiosContextRef & { contact: NonNullable<KoiosContextRef['contact']> }
+// One person channel icon (call/mail), rendered inline or folded into the overflow menu.
+type ChannelIcon = { key: string; label: string; href: string; Icon: LucideIcon }
 
 // The refs the chat can use as context: real records, never the parked-action handle.
 const contextRefsOf = (s: KoiosAssistantSuggestion) => s.refs.filter(r => r.type !== 'pending_action')
@@ -78,8 +84,9 @@ function toolLabel(a: KoiosAssistantAction, t: TFn): string {
   return a.label_key ? t(a.label_key, { defaultValue: toolFallback }) : toolFallback
 }
 
-// One suggestion row: kind/task-type icon · record chip · short reason · icon actions · chat.
-export default function KoiosSuggestionRow({ suggestion, onAskKoios, onDone }: { suggestion: KoiosAssistantSuggestion; onAskKoios?: AskKoios; onDone?: () => void }) {
+// One suggestion row: kind/task-type icon (drawn INTO the record chip, never a second
+// glyph beside it) · record chip · short reason · icon actions · chat.
+export default function KoiosSuggestionRow({ suggestion, onAskKoios, onDone }: { suggestion: KoiosAssistantSuggestion; onAskKoios?: AskKoios; onDone?: (result: 'executed' | 'cancelled') => void }) {
   const { t } = useTranslation('common')
   const meta = KIND_META[suggestion.kind] ?? KIND_META.pending_action
   const Icon = meta.Icon
@@ -87,34 +94,56 @@ export default function KoiosSuggestionRow({ suggestion, onAskKoios, onDone }: {
   const [exec, setExec] = useState<ExecState>({ phase: 'idle' })
   // Task type carries its OWN icon+colour from the tenant lookup (Danny 24-09).
   const taskType = suggestion.params && 'task_type' in suggestion.params ? suggestion.params.task_type : null
+  const rowIcon = taskType?.icon
+    ? <LookupIcon icon={taskType.icon} size={13} color={taskType.color ?? meta.color} />
+    : <Icon size={13} color={taskType?.color ?? meta.color} />
+  // Report the terminal outcome to the block EXACTLY once (KOIOS-SUGGEST-COMPACT-2,
+  // Danny 28-09: "Create taak annuleren en blijft staan, geen auto refresh") — the block
+  // uses this to drop the row and toast, independent of which internal path (pending-action
+  // confirm/cancel or a staged descriptor) reached the terminal state. `onDone` is read via
+  // a ref updated in its own mount-effect (REFS-IN-EFFECTS-1) so the reporting effect below
+  // never needs the caller's fresh closure in its own dependency list.
+  const onDoneRef = useRef(onDone)
+  useEffect(() => { onDoneRef.current = onDone })
+  const reportedRef = useRef(false)
+  useEffect(() => {
+    if ((exec.phase === 'executed' || exec.phase === 'cancelled') && !reportedRef.current) {
+      reportedRef.current = true
+      onDoneRef.current?.(exec.phase)
+    }
+  }, [exec.phase])
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '6px 0', borderTop: '1px solid var(--border)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, width: 18, color: taskType?.color ?? meta.color }}>
-          {taskType?.icon ? <LookupIcon icon={taskType.icon} size={13} color={taskType.color ?? undefined} /> : <Icon size={13} />}
-        </span>
         {primaryRef
-          ? <span style={{ flexShrink: 0 }}><KoiosRefChip item={primaryRef} /></span>
-          : <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', flexShrink: 0 }}>{suggestion.title}</span>}
+          ? <span style={{ flexShrink: 0 }}><KoiosRefChip item={primaryRef} icon={rowIcon} /></span>
+          : (
+            <>
+              <span style={{ display: 'flex', flexShrink: 0, color: taskType?.color ?? meta.color }}>{rowIcon}</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', flexShrink: 0 }}>{suggestion.title}</span>
+            </>
+          )}
         {/* One line, never the server's raw prose — the full body stays the tooltip. */}
         <Caption title={suggestion.body} style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {reasonOf(suggestion, t)}
         </Caption>
         <span style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
-          <SuggestionActions suggestion={suggestion} onAskKoios={onAskKoios} exec={exec} setExec={setExec} onDone={onDone} />
+          <SuggestionActions suggestion={suggestion} onAskKoios={onAskKoios} exec={exec} setExec={setExec} />
         </span>
       </div>
       {choicesOf(suggestion).length > 0 && (exec.phase === 'staged' || (exec.phase === 'submitting' && exec.staged)) && (
-        <StagedPreview exec={exec} setExec={setExec} onDone={onDone} />
+        <StagedPreview exec={exec} setExec={setExec} />
       )}
     </div>
   )
 }
 
 // The action cluster on one row — every action an icon button (Danny: no "Execute"
-// word), plus the person's channels for any kind carrying a contactable ref.
-function SuggestionActions({ suggestion, onAskKoios, exec, setExec, onDone }: {
-  suggestion: KoiosAssistantSuggestion; onAskKoios?: AskKoios; exec: ExecState; setExec: (s: ExecState) => void; onDone?: () => void
+// word), plus the person's channels for any kind carrying a contactable ref. The row
+// itself (not this component) reports the terminal outcome up to the block, via the
+// shared `exec` state — see KoiosSuggestionRow's own effect.
+function SuggestionActions({ suggestion, onAskKoios, exec, setExec }: {
+  suggestion: KoiosAssistantSuggestion; onAskKoios?: AskKoios; exec: ExecState; setExec: (s: ExecState) => void
 }) {
   const { t } = useTranslation('common')
   const { openEntity } = useNavigation()
@@ -127,16 +156,27 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec, onDone }: {
     const c = findToolCapability(capabilityTools, tool)
     return c?.enabled_for_tenant !== false && c?.enabled_for_me !== false
   }
-  // Contact channels for ANY kind carrying a person ref — generalised (was
-  // candidate_no_contact only). CMBE addendum 28-09: candidate refs and the
-  // opportunity's contact-person ref both carry `contact.{phone,mobile,email,whatsapp}`.
-  const personRef = contextRefsOf(suggestion).find(r => r.type === 'candidate' || r.type === 'contact')
-  const contact = personRef?.contact
-  const personPage = personRef ? pageForResultRef(personRef.type) : null
-  // A send_whatsapp ACTION (stages through the tool) already renders its own icon —
-  // the standalone conversation icon only fills in when no such action is offered.
+  // Contact channels for EVERY person ref on the row (KOIOS-SUGGEST-COMPACT-2, Danny
+  // 28-09: "belafspraak/intake plannen mis ik snelle informatie icons") — not only the
+  // first. CMBE addendum 28-09: candidate refs and the opportunity's contact-person ref
+  // both carry `contact.{phone,mobile,email,whatsapp}`.
+  const personRefs = contextRefsOf(suggestion).filter(r => r.contact && (r.contact.mobile || r.contact.phone || r.contact.email))
+  const channelIconsFor = (ref: KoiosContextRefWithContact): ChannelIcon[] => {
+    const c = ref.contact
+    const items: ChannelIcon[] = []
+    if (c.mobile || c.phone) items.push({ key: `call:${ref.id}`, label: t('koios.assistant.callPerson', { name: ref.label }), href: `tel:${c.mobile || c.phone}`, Icon: Phone })
+    if (c.email) items.push({ key: `mail:${ref.id}`, label: t('koios.assistant.mailPerson', { name: ref.label }), href: `mailto:${c.email}`, Icon: Mail })
+    return items
+  }
+  const firstPersonChannels = personRefs[0] ? channelIconsFor(personRefs[0] as KoiosContextRefWithContact) : []
+  const restPersonChannels = personRefs.slice(1).flatMap(r => channelIconsFor(r as KoiosContextRefWithContact))
+  // A candidate ref always gets the conversation icon — no more `contact.whatsapp`
+  // gate (Danny 28-09: "Bij kandidaat mis ik conversatie starten") — UNLESS a
+  // send_whatsapp action is already offered, so the two never sit side by side.
+  const candidateRef = contextRefsOf(suggestion).find(r => r.type === 'candidate')
   const hasWhatsAppAction = choices.some(a => a.key === 'send_whatsapp' || a.tool === 'stuur_whatsapp')
-  const showStandaloneWhatsApp = Boolean(personRef && personPage && contact?.whatsapp === true && !hasWhatsAppAction)
+  const candidatePage = candidateRef ? pageForResultRef('candidate') : null
+  const showConversationIcon = Boolean(candidateRef && candidatePage && !hasWhatsAppAction)
   // A tool switched off for the organisation or for this user is simply not offered
   // (Danny 10-09: a chip beside a dead button adds nothing); the row keeps its other actions.
   const primaryOffered = Boolean(primary) && capability?.enabled_for_tenant !== false && capability?.enabled_for_me !== false
@@ -152,7 +192,8 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec, onDone }: {
     })() : undefined
     const page = ref ? pageForResultRef(ref.type) : null
     if (ref && page) openEntity(page, ref.id, ref.tab)
-    onDone?.()
+    // The row-level effect (watching `exec.phase`) reports the outcome to the block;
+    // this callback's only job left is the navigate-on-execute landing spot.
   }
   const run = useRun(setExec, landAfterExecute)
   const pendingRef = suggestion.kind === 'pending_action'
@@ -194,25 +235,32 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec, onDone }: {
   }
   if (primary && (exec.phase === 'staged' || exec.phase === 'submitting')) return null
   const extra = choices.slice(1).filter(a => toolAllowed(a.tool))
-  const contactIconCount = (contact?.mobile || contact?.phone ? 1 : 0) + (contact?.email ? 1 : 0) + (showStandaloneWhatsApp ? 1 : 0)
-  const iconTotal = contactIconCount + (primaryOffered ? 1 : 0) + extra.length + 1 // +1 chat icon
-  // A single extra action always stays inline: the ⋯ trigger takes the same icon
-  // slot, so hiding a lone action behind it saves no width and just adds a click
-  // (Danny: "taak overtijd moet actie bij staan").
-  const showExtraInline = iconTotal <= 4 || extra.length === 1
+  const iconTotal = firstPersonChannels.length + restPersonChannels.length + (showConversationIcon ? 1 : 0) + (primaryOffered ? 1 : 0) + extra.length + 1 // +1 chat icon
+  // Cap at six inline icons (Danny: "duidelijke icons"). The FIRST person's channels
+  // always stay inline; a second-or-later person's channels fold into ⋯ once the row
+  // passes six. Extra actions are judged WITHOUT those folded channels, so they only
+  // fold when the row overflows on its own, and a single extra action never folds
+  // (the ⋯ trigger takes the same slot, so hiding a lone action behind it saves no
+  // width and just adds a click — Danny: "taak overtijd moet actie bij staan").
+  const showRestInline = iconTotal <= 6
+  const showExtraInline = (iconTotal - restPersonChannels.length) <= 6 || extra.length === 1
+  const overflowActionItems = extra.map(a => ({ key: a.key ?? a.tool, label: toolLabel(a, t), onSelect: () => { void stage(a) } }))
+  const overflowChannelItems = restPersonChannels.map(c => ({ key: c.key, label: c.label, onSelect: () => { window.location.href = c.href } }))
   return (
     <>
-      {contact && (contact.mobile || contact.phone) && (
-        <Button size="sm" variant="ghost" iconOnly href={`tel:${contact.mobile || contact.phone}`}
-          aria-label={t('koios.assistant.call')} title={t('koios.assistant.call')}><Phone size={13} /></Button>
-      )}
-      {contact?.email && (
-        <Button size="sm" variant="ghost" iconOnly href={`mailto:${contact.email}`}
-          aria-label={t('koios.assistant.email')} title={t('koios.assistant.email')}><Mail size={13} /></Button>
-      )}
-      {showStandaloneWhatsApp && personRef && personPage && (
-        <Button size="sm" variant="ghost" iconOnly onClick={() => openEntity(personPage, personRef.id, 'communication')}
-          aria-label={t('koios.assistant.message')} title={t('koios.assistant.message')}><MessageCircle size={13} /></Button>
+      {firstPersonChannels.map(c => (
+        <Button key={c.key} size="sm" variant="ghost" iconOnly href={c.href}
+          aria-label={c.label} title={c.label}><c.Icon size={13} /></Button>
+      ))}
+      {restPersonChannels.length > 0 && showRestInline && restPersonChannels.map(c => (
+        <Button key={c.key} size="sm" variant="ghost" iconOnly href={c.href}
+          aria-label={c.label} title={c.label}><c.Icon size={13} /></Button>
+      ))}
+      {showConversationIcon && candidateRef && candidatePage && (
+        <Button size="sm" variant="ghost" iconOnly onClick={() => openEntity(candidatePage, candidateRef.id, 'communication')}
+          aria-label={t('koios.assistant.messagePerson', { name: candidateRef.label })} title={t('koios.assistant.messagePerson', { name: candidateRef.label })}>
+          <MessageCircle size={13} />
+        </Button>
       )}
       {primary && primaryOffered && (
         <Button size="sm" variant="secondary" iconOnly onClick={() => stage(primary)} disabled={exec.phase === 'staging' || capsLoading}
@@ -227,9 +275,9 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec, onDone }: {
             aria-label={toolLabel(a, t)} title={previewTitle(a) || toolLabel(a, t)}><Ico size={13} /></Button>
         )
       })}
-      {extra.length > 0 && !showExtraInline && (
+      {((!showExtraInline && extra.length > 0) || (!showRestInline && restPersonChannels.length > 0)) && (
         <ActionMenu iconOnly ariaLabel={t('koios.assistant.moreActions')} align="right" menuWidth={220}
-          items={extra.map(a => ({ key: a.key ?? a.tool, label: toolLabel(a, t), onSelect: () => { void stage(a) } }))} />
+          items={[...(showExtraInline ? [] : overflowActionItems), ...(showRestInline ? [] : overflowChannelItems)]} />
       )}
       <AskKoiosButton suggestion={suggestion} onAskKoios={onAskKoios} t={t} />
     </>

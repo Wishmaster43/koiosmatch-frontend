@@ -19,13 +19,18 @@ export function suggestionKey(s: KoiosAssistantSuggestion): string {
   return ref ? `pa:${ref.id}` : `${s.kind}:${s.title}`
 }
 
-// Icon + semantic-token colour per suggestion kind (§4: colour carries meaning, never decoration).
+// Icon + semantic-token colour per suggestion kind (§4: colour carries meaning, never
+// decoration). KOIOS-SUGGEST-COMPACT-2 (Danny 28-09: "email en kandidaat icons lijken
+// zelfde kleur"): every kind carries a colour distinct from its siblings AND from the
+// chip's own ink (`--color-primary-text`) — candidate_no_contact moves to the danger
+// token (a person going cold reads as a real warning), opportunity takes primary and
+// vacancy takes info; only pending_action shares primary, as the assistant's own colour.
 export const KIND_META: Record<KoiosAssistantKind, { Icon: LucideIcon; color: string }> = {
   pending_action:            { Icon: Sparkles,  color: 'var(--color-primary)' },
   task_overdue:              { Icon: Clock,      color: 'var(--color-warning-text)' },
-  candidate_no_contact:      { Icon: UserX,      color: 'var(--color-warning-text)' },
-  opportunity_closing_soon:  { Icon: Target,     color: 'var(--color-info)' },
-  vacancy_zero_applications: { Icon: Briefcase,  color: 'var(--text-muted)' },
+  candidate_no_contact:      { Icon: UserX,      color: 'var(--color-danger-text)' },
+  opportunity_closing_soon:  { Icon: Target,     color: 'var(--color-primary)' },
+  vacancy_zero_applications: { Icon: Briefcase,  color: 'var(--color-info)' },
 }
 
 // One icon per known ACTION key (the action's own verb, Danny: "elke type taak
