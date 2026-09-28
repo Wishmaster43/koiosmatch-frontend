@@ -476,3 +476,41 @@ describe('CommunicationTab · linkedNotes sub-tab (K-288)', () => {
     expect(screen.queryByTestId('linked-notes-tab')).not.toBeInTheDocument()
   })
 })
+
+// CONVERSATION-START-1: a Koios "message this person" deep link (tab:sub:action)
+// opens the start-conversation modal on mount instead of landing on plain Notes.
+describe('CommunicationTab · initialAction=start (CONVERSATION-START-1)', () => {
+  // The deep link only opens the modal when both trigger gates the '+ conversation'
+  // button itself enforces are satisfied (page.whatsapp + a real mobile number) —
+  // otherwise the render gate must keep it closed even with action=start (§3 no
+  // fake affordance: the Koios path opens the drawer on a stub candidate first).
+  beforeEach(() => {
+    mockUseAuth.mockReturnValue({ hasPermission: (p: string) => p === 'page.whatsapp' })
+  })
+
+  it('opens the start-conversation modal on mount when sub-tab is conversations and action is start', () => {
+    render(<CommunicationTab c={candidate({}, { mobile: '+31612345678' })} initialSubTab="conversations" initialAction="start" />)
+    expect(screen.getByRole('dialog', { name: 'conversations.startModalTitle' })).toBeInTheDocument()
+  })
+
+  it('does not open the modal without the action', () => {
+    render(<CommunicationTab c={candidate({}, { mobile: '+31612345678' })} initialSubTab="conversations" />)
+    expect(screen.queryByRole('dialog', { name: 'conversations.startModalTitle' })).not.toBeInTheDocument()
+  })
+
+  it('does not open the modal when the sub-tab is notes, even with action=start', () => {
+    render(<CommunicationTab c={candidate({}, { mobile: '+31612345678' })} initialSubTab="notes" initialAction="start" />)
+    expect(screen.queryByRole('dialog', { name: 'conversations.startModalTitle' })).not.toBeInTheDocument()
+  })
+
+  it('does not open the modal without page.whatsapp, even with action=start (dead-send gate)', () => {
+    mockUseAuth.mockReturnValue({ hasPermission: () => false })
+    render(<CommunicationTab c={candidate({}, { mobile: '+31612345678' })} initialSubTab="conversations" initialAction="start" />)
+    expect(screen.queryByRole('dialog', { name: 'conversations.startModalTitle' })).not.toBeInTheDocument()
+  })
+
+  it('does not open the modal without a mobile number, even with action=start (dead-send gate)', () => {
+    render(<CommunicationTab c={candidate()} initialSubTab="conversations" initialAction="start" />)
+    expect(screen.queryByRole('dialog', { name: 'conversations.startModalTitle' })).not.toBeInTheDocument()
+  })
+})

@@ -79,7 +79,11 @@ vi.mock('./drawer/VacancySearchTab', () => ({ default: () => null }))
 vi.mock('@/components/drawer/CustomFieldsTab', () => ({ default: () => null }))
 vi.mock('./drawer/PlanningPanel', () => ({ default: () => null }))
 vi.mock('./drawer/PreferencesZzpTabs', () => ({ PreferencesTab: () => null, ZzpTab: () => null }))
-vi.mock('./drawer/CommunicationTab', () => ({ default: () => null }))
+// CONVERSATION-START-1: a vi.fn() stub (not a plain arrow) so the deep-link-consume
+// test below can swap in a real implementation that exercises initialAction/
+// onInitialActionConsumed, while every other test keeps the inert `null` default.
+const mockCommunicationTab = vi.fn((props: unknown): unknown => { void props; return null })
+vi.mock('./drawer/CommunicationTab', () => ({ default: (props: unknown) => mockCommunicationTab(props) }))
 vi.mock('./drawer/DocumentsSection', () => ({ default: () => null }))
 vi.mock('./drawer/IntegrationsTab', () => ({ default: () => null }))
 vi.mock('./drawer/StatisticsTab', () => ({ default: () => null }))
@@ -172,4 +176,40 @@ it('renders the phase exactly once, as the title chip, never doubled beside the 
   await renderDrawer({ candidate: candidate() })
   expect(screen.getAllByText('Candidate')).toHaveLength(1)
 })
+})
+
+// CONVERSATION-START-1: the deep-link action must be consumed ONCE per drawer
+// open, not once per CommunicationTab mount. EntityDrawer remounts the active
+// tab's content on every tab switch, so without the actionDoneFor tracking the
+// modal would re-open every time the user tabs away from and back to Communicatie.
+describe('CandidateDrawer · deep-link action consumed once (CONVERSATION-START-1)', () => {
+  it('stops passing initialAction after onInitialActionConsumed fires, even after a tab-away-and-back remount', async () => {
+    // A minimal real implementation of the mocked CommunicationTab: renders a marker
+    // whenever it was handed a truthy initialAction, and a button that simulates the
+    // modal closing (which is what fires onInitialActionConsumed in the real component).
+    mockCommunicationTab.mockImplementation((props: unknown) => {
+      const p = props as { initialAction?: string; onInitialActionConsumed?: () => void }
+      return (
+        <div>
+          {p.initialAction && <div data-testid="action-marker">{p.initialAction}</div>}
+          <button type="button" onClick={() => p.onInitialActionConsumed?.()}>consume</button>
+        </div>
+      )
+    })
+    const user = userEvent.setup()
+    await renderDrawer({ candidate: candidate(), initialTab: 'communication:conversations:start' })
+
+    // Deep link lands on Communicatie with the action still pending.
+    expect(screen.getByTestId('action-marker')).toBeInTheDocument()
+
+    // Simulate the modal closing — CommunicationTab reports the action consumed.
+    await user.click(screen.getByRole('button', { name: 'consume' }))
+    expect(screen.queryByTestId('action-marker')).toBeNull()
+
+    // Tab away to Profiel and back to Communicatie — a real remount of the tab's
+    // content (EntityDrawer keys it by activeTab) — the action must stay consumed.
+    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.profile') }))
+    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.communication') }))
+    expect(screen.queryByTestId('action-marker')).toBeNull()
+  })
 })

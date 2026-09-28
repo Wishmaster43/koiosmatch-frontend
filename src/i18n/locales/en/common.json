@@ -323,6 +323,9 @@
       "messagePerson": "Message {{name}}",
       "doneExecuted": "Done",
       "doneCancelled": "Cancelled",
+      "rescheduleTitle": "New due date",
+      "rescheduleConfirm": "Reschedule",
+      "proposedDate": "Koios suggestion",
       "reason": {
         "task_overdue_one": "{{count}} day overdue",
         "task_overdue_other": "{{count}} days overdue",

@@ -323,6 +323,9 @@
       "messagePerson": "Nachricht an {{name}}",
       "doneExecuted": "Erledigt",
       "doneCancelled": "Abgebrochen",
+      "rescheduleTitle": "Neue Frist",
+      "rescheduleConfirm": "Verschieben",
+      "proposedDate": "Koios-Vorschlag",
       "reason": {
         "task_overdue_one": "{{count}} Tag überfällig",
         "task_overdue_other": "{{count}} Tage überfällig",

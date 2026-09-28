@@ -23,11 +23,12 @@ import { useKoiosToolCapabilities, findToolCapability } from './useKoiosToolCapa
 import type { KoiosCapabilityTool } from './useKoiosToolCapabilities'
 import { confirmPendingAction, cancelPendingAction, stagePendingAction } from './koiosApi'
 import { extractApiError } from '@/lib/extractApiError'
-import { KIND_META, TOOL_FOLLOW_UP, toolIcon, reasonKey, reasonShortKey } from './koiosSuggestionMeta'
+import { KIND_META, toolIcon, reasonKey, reasonShortKey } from './koiosSuggestionMeta'
 import { canonicalToolId } from './koiosToolIds'
 import { ExecErrorNotice, ExecutedNotice, StagedPreview } from './KoiosSuggestionExec'
-import { useRun, previewLine, isIdRow } from './koiosSuggestionRunner'
-import type { ExecState, StagedAction, NavigateHint } from './koiosSuggestionRunner'
+import RescheduleEditor from './RescheduleEditor'
+import { useRun, useStageAndConfirm, useLandAfterExecute, previewLine, isIdRow } from './koiosSuggestionRunner'
+import type { ExecState, StagedAction } from './koiosSuggestionRunner'
 import type { KoiosAssistantAction, KoiosAssistantSuggestion } from './useKoiosAssistant'
 import type { KoiosContextRef } from '@/types/koios'
 
@@ -101,6 +102,14 @@ export default function KoiosSuggestionRow({ suggestion, onAskKoios, onDone }: {
   const Icon = meta.Icon
   const primaryRef = contextRefsOf(suggestion)[0]
   const [exec, setExec] = useState<ExecState>({ phase: 'idle' })
+  // RESCHEDULE-EDIT-1: the one-step stage→confirm path for the reschedule editor's
+  // edited input, kept at the row level so the same wiring serves any future
+  // "adjust before it runs" action, not only the button cluster in SuggestionActions.
+  // Shares `landAfterExecute` with SuggestionActions' own `run` (verifier fix) so
+  // this path also lands on the server's navigate hint / the tool's follow-up tab.
+  const landAfterExecute = useLandAfterExecute(suggestion)
+  const run = useRun(setExec, landAfterExecute)
+  const stageAndConfirm = useStageAndConfirm(setExec, run)
   // Task type carries its OWN icon+colour from the tenant lookup (Danny 24-09).
   const taskType = suggestion.params && 'task_type' in suggestion.params ? suggestion.params.task_type : null
   const rowIcon = taskType?.icon
@@ -142,6 +151,13 @@ export default function KoiosSuggestionRow({ suggestion, onAskKoios, onDone }: {
       </div>
       {choicesOf(suggestion).length > 0 && (exec.phase === 'staged' || (exec.phase === 'submitting' && exec.staged)) && (
         <StagedPreview exec={exec} setExec={setExec} />
+      )}
+      {exec.phase === 'editing' && exec.editingAction && (
+        <RescheduleEditor
+          action={exec.editingAction}
+          onConfirm={(input) => { void stageAndConfirm(stagePendingAction, confirmPendingAction, exec.editingAction!.tool, input) }}
+          onCancel={() => setExec({ phase: 'idle' })}
+        />
       )}
     </div>
   )
@@ -190,20 +206,9 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec }: {
   // (Danny 10-09: a chip beside a dead button adds nothing); the row keeps its other actions.
   const primaryOffered = Boolean(primary) && capability?.enabled_for_tenant !== false && capability?.enabled_for_me !== false
   // After an executed action: the response's own landing spot, else the tool's follow-up
-  // on the row's record (a search opens the vacancy's candidate-search tab).
-  const landAfterExecute = (navigate?: NavigateHint) => {
-    const hint = navigate?.type && navigate.id ? navigate : undefined
-    const lead = choicesOf(suggestion)[0]
-    const follow = lead ? TOOL_FOLLOW_UP[canonicalToolId(lead.tool)] : undefined
-    const ref = hint ? { type: hint.type!, id: hint.id!, tab: hint.tab } : follow ? (() => {
-      const r = suggestion.refs.find(x => x.type === follow.refType)
-      return r ? { type: r.type, id: r.id, tab: follow.tab } : undefined
-    })() : undefined
-    const page = ref ? pageForResultRef(ref.type) : null
-    if (ref && page) openEntity(page, ref.id, ref.tab)
-    // The row-level effect (watching `exec.phase`) reports the outcome to the block;
-    // this callback's only job left is the navigate-on-execute landing spot.
-  }
+  // on the row's record (a search opens the vacancy's candidate-search tab) — shared with
+  // the row-level reschedule path via `useLandAfterExecute` (verifier fix, KOIOS-ROW-2).
+  const landAfterExecute = useLandAfterExecute(suggestion)
   const run = useRun(setExec, landAfterExecute)
   const pendingRef = suggestion.kind === 'pending_action'
     ? suggestion.refs.find(r => r.type === 'pending_action')
@@ -226,10 +231,19 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec }: {
       setExec({ phase: 'error', message: extractApiError(err, t('koios.pendingAction.error')) })
     }
   }
+  // RESCHEDULE-EDIT-1: an action whose input carries a `due_date` opens the inline
+  // editor instead of staging straight away — the user picks the new date first
+  // (CLAUDE.md §0B: "a way to adjust it before running"), never the raw proposal.
+  const isRescheduleInput = (a: KoiosAssistantAction) => typeof argsOf(a).due_date === 'string'
+  const runAction = (a: KoiosAssistantAction) => {
+    if (isRescheduleInput(a)) setExec({ phase: 'editing', editingAction: a })
+    else void stage(a)
+  }
 
   if (exec.phase === 'executed') return <ExecutedNotice created={exec.created} t={t} />
   if (exec.phase === 'cancelled') return <span role="status"><Caption>{t('koios.pendingAction.cancelled')}</Caption></span>
   if (exec.phase === 'error') return <ExecErrorNotice message={exec.message} budget={exec.budget} t={t} />
+  if (exec.phase === 'editing') return null
   if (pendingRef) {
     return (
       <>
@@ -253,7 +267,7 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec }: {
   // width and just adds a click — Danny: "taak overtijd moet actie bij staan").
   const showRestInline = iconTotal <= 6
   const showExtraInline = (iconTotal - restPersonChannels.length) <= 6 || extra.length === 1
-  const overflowActionItems = extra.map(a => ({ key: a.key ?? a.tool, label: toolLabel(a, t), onSelect: () => { void stage(a) } }))
+  const overflowActionItems = extra.map(a => ({ key: a.key ?? a.tool, label: toolLabel(a, t), onSelect: () => runAction(a) }))
   const overflowChannelItems = restPersonChannels.map(c => ({ key: c.key, label: c.label, onSelect: () => { window.location.href = c.href } }))
   return (
     <>
@@ -266,13 +280,16 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec }: {
           aria-label={c.label} title={c.label}><c.Icon size={13} /></Button>
       ))}
       {showConversationIcon && candidateRef && candidatePage && (
-        <Button size="sm" variant="ghost" iconOnly onClick={() => openEntity(candidatePage, candidateRef.id, 'communication')}
+        <Button size="sm" variant="ghost" iconOnly
+          // CONVERSATION-START-1: land on Conversations with the start-conversation
+          // modal already open — a bare 'communication' target lands on Notes.
+          onClick={() => openEntity(candidatePage, candidateRef.id, 'communication:conversations:start')}
           aria-label={t('koios.assistant.messagePerson', { name: candidateRef.label })} title={t('koios.assistant.messagePerson', { name: candidateRef.label })}>
           <MessageCircle size={13} />
         </Button>
       )}
       {primary && primaryOffered && (
-        <Button size="sm" variant="secondary" iconOnly onClick={() => stage(primary)} disabled={exec.phase === 'staging' || capsLoading}
+        <Button size="sm" variant="secondary" iconOnly onClick={() => runAction(primary)} disabled={exec.phase === 'staging' || capsLoading}
           aria-label={toolLabel(primary, t)} title={previewTitle(primary) || toolLabel(primary, t)}>
           {exec.phase === 'staging' ? <Spinner size={12} /> : (() => { const Ico = toolIcon(primary); return <Ico size={13} /> })()}
         </Button>
@@ -280,7 +297,7 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec }: {
       {extra.length > 0 && showExtraInline && extra.map(a => {
         const Ico = toolIcon(a)
         return (
-          <Button key={a.key ?? a.tool} size="sm" variant="ghost" iconOnly onClick={() => { void stage(a) }}
+          <Button key={a.key ?? a.tool} size="sm" variant="ghost" iconOnly onClick={() => runAction(a)}
             aria-label={toolLabel(a, t)} title={previewTitle(a) || toolLabel(a, t)}><Ico size={13} /></Button>
         )
       })}

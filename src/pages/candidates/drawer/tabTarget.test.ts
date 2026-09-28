@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { parseTabTarget } from './tabTarget'
 
-// Covers the shared deep-link contract: plain id, tab:sub, empty/null/undefined,
-// extra colons (split on first only), and unknown tabs (validation is the
+// Covers the shared deep-link contract: plain id, tab:sub, tab:sub:action,
+// empty/null/undefined, extra colons, and unknown tabs (validation is the
 // consumer's job, not the parser's).
 describe('parseTabTarget', () => {
   it('parses a plain tab id (NAV-BACK-1 rememberedTab shape)', () => {
@@ -23,8 +23,16 @@ describe('parseTabTarget', () => {
     expect(parseTabTarget(undefined)).toBeNull()
   })
 
-  it('splits on the first colon only', () => {
-    expect(parseTabTarget('work:matches:extra')).toEqual({ tab: 'work', sub: 'matches:extra' })
+  it('parses a tab:sub:action target (CONVERSATION-START-1)', () => {
+    expect(parseTabTarget('communication:conversations:start')).toEqual({ tab: 'communication', sub: 'conversations', action: 'start' })
+  })
+
+  it('leaves a two-segment target unchanged', () => {
+    expect(parseTabTarget('work:experience')).toEqual({ tab: 'work', sub: 'experience' })
+  })
+
+  it('folds extra colons beyond the third segment into action', () => {
+    expect(parseTabTarget('work:matches:extra:more')).toEqual({ tab: 'work', sub: 'matches', action: 'extra:more' })
   })
 
   it('parses an unknown tab id unchanged (validation is the consumer\'s job)', () => {

@@ -323,6 +323,9 @@
       "messagePerson": "Conversatie met {{name}}",
       "doneExecuted": "Uitgevoerd",
       "doneCancelled": "Geannuleerd",
+      "rescheduleTitle": "Nieuwe deadline",
+      "rescheduleConfirm": "Verzetten",
+      "proposedDate": "Voorstel van Koios",
       "reason": {
         "task_overdue_one": "{{count}} dag te laat",
         "task_overdue_other": "{{count}} dagen te laat",

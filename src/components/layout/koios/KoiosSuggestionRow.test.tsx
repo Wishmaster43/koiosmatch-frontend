@@ -39,6 +39,15 @@ vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatNumber: (n:
 const openEntity = vi.fn()
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity, navigate: vi.fn() }) }))
 
+// RESCHEDULE-EDIT-1: RescheduleEditor's shared DateField as a flat controlled
+// input — this suite is about the row's stage/editor wiring, not the picker
+// itself (covered by fields.test.tsx and RescheduleEditor.test.tsx).
+vi.mock('@/components/forms/fields', () => ({
+  DateField: ({ id, value, onChange }: { id?: string; value?: string; onChange: (v: string) => void }) => (
+    <input id={id} value={value ?? ''} onChange={(e) => onChange(e.target.value)} />
+  ),
+}))
+
 type CapTool = { name: string; label_nl: string; confirm_required: boolean; enabled_for_me: boolean; enabled_for_tenant: boolean; default_enabled: boolean; connection_active: boolean | null; connection: null }
 const capTool = (name: string, over: Partial<CapTool> = {}): CapTool =>
   ({ name, label_nl: '', confirm_required: true, enabled_for_me: true, enabled_for_tenant: true, default_enabled: true, connection_active: null, connection: null, ...over })
@@ -212,7 +221,7 @@ describe('KoiosSuggestionRow · icon-button actions (CMBE addendum action shape)
     }
     render(<KoiosSuggestionRow suggestion={suggestion} />)
     fireEvent.click(screen.getByRole('button', { name: 'koios.assistant.messagePerson' }))
-    expect(openEntity).toHaveBeenCalledWith('candidates', 'c1', 'communication')
+    expect(openEntity).toHaveBeenCalledWith('candidates', 'c1', 'communication:conversations:start')
     // The call icon still renders too.
     expect(screen.getByRole('link', { name: 'koios.assistant.callPerson' })).toBeInTheDocument()
   })
@@ -315,7 +324,9 @@ describe('KoiosSuggestionRow · staged/confirm leg (unchanged, moved from KoiosA
     render(<KoiosSuggestionRow suggestion={suggestion} />)
     fireEvent.click(screen.getByRole('button', { name: 'koios.tools.unknown' }))
     await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/ai/koios/actions/stage', { tool: 'wijzig_taak', input: { task_id: 't1' } }))
-    await screen.findByText(/Deadline · 26-08-2026 → 28-08-2026/)
+    // Shaped through pendingPreview (RESCHEDULE-EDIT-1): a translated field key,
+    // never the server's raw "Deadline" label or an untranslated ISO date.
+    await screen.findByText(/koios\.pendingAction\.fields\.due_date · 26-08-2026 → 28-08-2026/)
     mockPost.mockResolvedValueOnce({ data: { status: 'executed', data: {} } })
     fireEvent.click(screen.getByRole('button', { name: /pendingAction\.confirm/ }))
     await waitFor(() => expect(mockPost).toHaveBeenLastCalledWith('/ai/koios/actions/pa-77/confirm'))
@@ -332,7 +343,7 @@ describe('KoiosSuggestionRow · staged/confirm leg (unchanged, moved from KoiosA
     fireEvent.click(screen.getByRole('button', { name: 'koios.assistant.actions.complete_task' }))
     await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/ai/koios/actions/stage', { tool: 'wijzig_taak', input: { task_id: 't1' } }))
     // The row does not go blank once staging replaces the legacy `action` field.
-    await screen.findByText(/Status · open → done/)
+    await screen.findByText(/koios\.pendingAction\.fields\.status · open → done/)
   })
 
   it('a tool needing no confirm executes in one click and opens the vacancy on its candidate-search tab', async () => {
@@ -347,5 +358,101 @@ describe('KoiosSuggestionRow · staged/confirm leg (unchanged, moved from KoiosA
     fireEvent.click(screen.getByRole('button', { name: 'Kandidaten zoeken' }))
     await screen.findByText(/pendingAction\.confirmed/)
     expect(openEntity).toHaveBeenCalledWith('vacancies', 'v1', 'candidateSearch')
+  })
+})
+
+describe('KoiosSuggestionRow · reschedule editor (RESCHEDULE-EDIT-1)', () => {
+  it('clicking a reschedule action (input carries `due_date`) opens the editor and does NOT stage yet', () => {
+    const suggestion = {
+      kind: 'task_overdue' as const, title: 'Offerte opstellen', body: 'x', refs: [],
+      action: { key: 'reschedule_task', tool: 'update_task', input: { task_id: 't-1', due_date: '2026-09-29' }, label_key: 'koios.assistant.actions.reschedule_task' },
+    }
+    render(<KoiosSuggestionRow suggestion={suggestion} />)
+    fireEvent.click(screen.getByRole('button', { name: 'koios.assistant.actions.reschedule_task' }))
+    expect(mockPost).not.toHaveBeenCalled()
+    expect(screen.getAllByText('koios.assistant.rescheduleTitle').length).toBeGreaterThan(0)
+  })
+
+  it('confirming the edited date stages then confirms in one step with the edited ISO day, then shows the executed notice', async () => {
+    const suggestion = {
+      kind: 'task_overdue' as const, title: 'Offerte opstellen', body: 'x', refs: [],
+      action: { key: 'reschedule_task', tool: 'update_task', input: { task_id: 't-1', due_date: '2026-09-29' }, label_key: 'koios.assistant.actions.reschedule_task' },
+    }
+    mockPost.mockResolvedValueOnce({ data: { status: 'staged', action: { id: 'pa-1', title: 'Offerte opstellen', preview: [] } } })
+    mockPost.mockResolvedValueOnce({ data: { status: 'executed', data: {} } })
+    render(<KoiosSuggestionRow suggestion={suggestion} />)
+    fireEvent.click(screen.getByRole('button', { name: 'koios.assistant.actions.reschedule_task' }))
+    fireEvent.change(screen.getByDisplayValue('2026-09-29'), { target: { value: '2026-10-02' } })
+    fireEvent.click(screen.getByRole('button', { name: 'koios.assistant.rescheduleConfirm' }))
+    // ONE user click drives BOTH server round trips: stage with the edited input, then confirm.
+    await waitFor(() => expect(mockPost).toHaveBeenNthCalledWith(1, '/ai/koios/actions/stage', { tool: 'update_task', input: { task_id: 't-1', due_date: '2026-10-02' } }))
+    await waitFor(() => expect(mockPost).toHaveBeenNthCalledWith(2, '/ai/koios/actions/pa-1/confirm'))
+    await screen.findByText(/pendingAction\.confirmed/)
+  })
+
+  it('cancel closes the editor without any request', () => {
+    const suggestion = {
+      kind: 'task_overdue' as const, title: 'Offerte opstellen', body: 'x', refs: [],
+      action: { key: 'reschedule_task', tool: 'update_task', input: { task_id: 't-1', due_date: '2026-09-29' }, label_key: 'koios.assistant.actions.reschedule_task' },
+    }
+    render(<KoiosSuggestionRow suggestion={suggestion} />)
+    fireEvent.click(screen.getByRole('button', { name: 'koios.assistant.actions.reschedule_task' }))
+    fireEvent.click(screen.getByRole('button', { name: 'koios.pendingAction.cancel' }))
+    expect(mockPost).not.toHaveBeenCalled()
+    expect(screen.queryAllByText('koios.assistant.rescheduleTitle').length).toBe(0)
+  })
+
+  it('a complete_task click (no `due_date` in its input) still stages directly, no editor, and shapes the preview through pendingPreview', async () => {
+    const suggestion = {
+      kind: 'task_overdue' as const, title: 'Offerte opstellen', body: 'x', refs: [],
+      action: { key: 'complete_task', tool: 'update_task', input: { task_id: 't-1' }, label_key: 'koios.assistant.actions.complete_task' },
+    }
+    mockPost.mockResolvedValueOnce({
+      data: {
+        status: 'staged', action: {
+          id: 'pa-2', title: 'Offerte opstellen',
+          preview: [{ label: 'task_id', text: 't-1' }, { label: 'title', text: 'Offerte opstellen' }, { label: 'due_date', text: '2026-09-29' }],
+        },
+      },
+    })
+    render(<KoiosSuggestionRow suggestion={suggestion} />)
+    fireEvent.click(screen.getByRole('button', { name: 'koios.assistant.actions.complete_task' }))
+    await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/ai/koios/actions/stage', { tool: 'update_task', input: { task_id: 't-1' } }))
+    expect(screen.queryAllByText('koios.assistant.rescheduleTitle').length).toBe(0)
+    // A translated field label + the date shaped DD-MM-YYYY (DATUM-1) reaches the screen…
+    expect(screen.getByText(/koios\.pendingAction\.fields\.title: Offerte opstellen/)).toBeInTheDocument()
+    expect(screen.getByText(/29-09-2026/)).toBeInTheDocument()
+    // …never the raw parameter key, its ISO date, or the id row's own value.
+    expect(screen.queryByText(/2026-09-29/)).toBeNull()
+    expect(screen.queryByText(/t-1/)).toBeNull()
+  })
+})
+
+describe('KoiosSuggestionRow · useStageAndConfirm error branch (SHARED-UNIT-TEST-1)', () => {
+  it('shows the error notice and never confirms when the stage POST itself rejects', async () => {
+    const suggestion = {
+      kind: 'task_overdue' as const, title: 'Offerte opstellen', body: 'x', refs: [],
+      action: { key: 'reschedule_task', tool: 'update_task', input: { task_id: 't-1', due_date: '2026-09-29' }, label_key: 'koios.assistant.actions.reschedule_task' },
+    }
+    mockPost.mockRejectedValueOnce(new Error('network down'))
+    render(<KoiosSuggestionRow suggestion={suggestion} />)
+    fireEvent.click(screen.getByRole('button', { name: 'koios.assistant.actions.reschedule_task' }))
+    fireEvent.click(screen.getByRole('button', { name: 'koios.assistant.rescheduleConfirm' }))
+    await screen.findByRole('alert')
+    expect(mockPost).toHaveBeenCalledTimes(1)
+    expect(mockPost).toHaveBeenCalledWith('/ai/koios/actions/stage', { tool: 'update_task', input: { task_id: 't-1', due_date: '2026-09-29' } })
+  })
+
+  it('shows the error notice and never confirms when the stage call resolves without `staged`', async () => {
+    const suggestion = {
+      kind: 'task_overdue' as const, title: 'Offerte opstellen', body: 'x', refs: [],
+      action: { key: 'reschedule_task', tool: 'update_task', input: { task_id: 't-1', due_date: '2026-09-29' }, label_key: 'koios.assistant.actions.reschedule_task' },
+    }
+    mockPost.mockResolvedValueOnce({ data: { status: 'error', message: 'budget exceeded' } })
+    render(<KoiosSuggestionRow suggestion={suggestion} />)
+    fireEvent.click(screen.getByRole('button', { name: 'koios.assistant.actions.reschedule_task' }))
+    fireEvent.click(screen.getByRole('button', { name: 'koios.assistant.rescheduleConfirm' }))
+    await screen.findByText('budget exceeded')
+    expect(mockPost).toHaveBeenCalledTimes(1)
   })
 })

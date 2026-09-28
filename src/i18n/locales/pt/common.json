@@ -323,6 +323,9 @@
       "messagePerson": "Mensagem para {{name}}",
       "doneExecuted": "Concluído",
       "doneCancelled": "Cancelado",
+      "rescheduleTitle": "Novo prazo",
+      "rescheduleConfirm": "Reagendar",
+      "proposedDate": "Sugestão do Koios",
       "reason": {
         "task_overdue_one": "{{count}} dia em atraso",
         "task_overdue_other": "{{count}} dias em atraso",

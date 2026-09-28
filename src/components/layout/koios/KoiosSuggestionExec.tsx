@@ -11,7 +11,8 @@ import Spinner from '@/components/ui/Spinner'
 import { Caption } from '@/components/ui/typography'
 import { KoiosRefChip } from './KoiosResultCards'
 import { confirmPendingAction, cancelPendingAction } from './koiosApi'
-import { previewLine, isIdRow, useRun } from './koiosSuggestionRunner'
+import { previewLine, useRun } from './koiosSuggestionRunner'
+import { shapePreviewRows } from './pendingPreview'
 import type { ExecState } from './koiosSuggestionRunner'
 import type { KoiosContextRef } from '@/types/koios'
 import type { ActionBudget } from '@/types/actionBudget'
@@ -39,14 +40,21 @@ export function ExecutedNotice({ created, t }: { created?: KoiosContextRef | nul
   )
 }
 
-// The preview + confirm/cancel of a staged descriptor action.
+// The preview + confirm/cancel of a staged descriptor action. Rows go through
+// `shapePreviewRows` (KOIOS-PENDING-CARD-FACE-1) — translated labels, DD-MM-YYYY
+// dates, id/UUID rows hidden — so a raw parameter key or an ISO date never
+// reaches the screen (RESCHEDULE-EDIT-1, DATUM-1).
 export function StagedPreview({ exec, setExec, onDone }: { exec: ExecState; setExec: (s: ExecState) => void; onDone?: () => void }) {
   const { t } = useTranslation('common')
   const st = exec.staged
   const run = useRun(setExec, onDone)
+  const shaped = shapePreviewRows(st?.preview ?? [], t)
   return (
     <div style={{ marginLeft: 26, display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <Caption style={{ display: 'block' }}>{(st?.preview ?? []).filter(row => !isIdRow(row)).map(previewLine).join(' · ')}</Caption>
+      <Caption style={{ display: 'block' }}>{shaped.rows.map(previewLine).join(' · ')}</Caption>
+      {shaped.confidence && (
+        <Caption>{t('koios.pendingAction.confidence.label')}: {shaped.confidence}</Caption>
+      )}
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
         <Button size="sm" onClick={() => st && run(st.id, confirmPendingAction, 'executed', st.title)} disabled={exec.phase === 'submitting'}>
           {exec.phase === 'submitting' ? <Spinner size={12} /> : null} {t('koios.pendingAction.confirm')}

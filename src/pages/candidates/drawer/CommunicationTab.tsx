@@ -51,7 +51,7 @@ function matchContext(ev: Record<string, unknown>): Record<string, unknown> | nu
 // K-288: 'linkedNotes' added after 'notes' — the linked-notes feed's own sub-tab.
 const KNOWN_SUB_TABS = ['conversations', 'notes', 'linkedNotes', 'tasks', 'timeline', 'consent'] as const
 
-export default function CommunicationTab({ c, onSave, onEditStatusEvent, initialSubTab, onRefresh }: { c: Candidate; onSave?: (consent: Record<string, unknown>) => void
+export default function CommunicationTab({ c, onSave, onEditStatusEvent, initialSubTab, initialAction, onInitialActionConsumed, onRefresh }: { c: Candidate; onSave?: (consent: Record<string, unknown>) => void
   // Optional (Danny 2026-07-20, job A): forwarded to the shared NotesTab so the
   // Tijdlijn "Statuswissel" row gets an edit pencil — only when the host (CandidateDrawer)
   // resolves the current status as reason/date-carrying. Additive prop, see NotesTab.
@@ -60,7 +60,14 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   // stamps last_contact server-side; this pulls the fresh stamp into the drawer.
   onRefresh?: (id: Candidate['id']) => Promise<void> | void
   // Deep-link sub-tab target (table cell click); validated below against KNOWN_SUB_TABS.
-  initialSubTab?: string }) {
+  initialSubTab?: string
+  // CONVERSATION-START-1: deep-link action — 'start' opens the start-conversation
+  // modal on mount when the initial sub-tab is 'conversations' (Koios "message
+  // this person" icon), so one click leads all the way to sending.
+  initialAction?: string
+  // CONVERSATION-START-1: tells the host the deep-link action has been consumed,
+  // so the host can avoid re-passing it on a later tab remount (see CandidateDrawer).
+  onInitialActionConsumed?: () => void }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   // OPENERS-HIDE-1 (pass 5): POST /conversations/start is gated on page.whatsapp
@@ -85,15 +92,22 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   // Active sub-tab — notes is the daily surface, consent/tasks/timeline one click away.
   // Deep-link default: an unknown/stale target falls back to Notities rather than
   // blanking the tab — this component is the sub-tab validator.
-  const [subTab, setSubTab] = useState(
+  const resolvedSubTab =
     initialSubTab && (KNOWN_SUB_TABS as readonly string[]).includes(initialSubTab) ? initialSubTab : 'notes'
-  )
+  const [subTab, setSubTab] = useState(resolvedSubTab)
 
   // WHATSAPP-COMPOSE-1: "Conversatie starten" modal + a remount key that forces
   // ConversationsSection's own load effect to refetch once a new thread exists
   // (the shared component owns its fetch; a fresh key is the simplest "reload" a
   // caller can ask for without adding a second refetch contract to it).
-  const [showStartModal, setShowStartModal] = useState(false)
+  // CONVERSATION-START-1: a lazy initializer opens it ONCE on mount when the deep
+  // link asked for 'start' on the conversations sub-tab — never an effect, so a
+  // later re-render of THIS mount never re-opens it. The host (CandidateDrawer)
+  // stops passing initialAction once onInitialActionConsumed fires, which is what
+  // actually prevents a re-open on a later remount (e.g. tab away and back).
+  const [showStartModal, setShowStartModal] = useState(
+    () => initialAction === 'start' && resolvedSubTab === 'conversations'
+  )
   const [convRefreshKey, setConvRefreshKey] = useState(0)
   // AVG-RET-2-TAAL-1: the agency default backs a candidate without an own preferred language.
   const settingsValues = useAllSettings()
@@ -319,10 +333,16 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
       {subTab === 'conversations' && (
         <>
           {/* WHATSAPP-COMPOSE-1: no mobile number → an honest disabled trigger, never
-              a dead send (a cold-start template requires a real recipient number). */}
-          {showStartModal && (
-            <StartConversationModal candidateId={c.id} onClose={() => setShowStartModal(false)}
-              onStarted={() => setConvRefreshKey(k => k + 1)} />
+              a dead send (a cold-start template requires a real recipient number).
+              CONVERSATION-START-1: the deep-link modal must never open for a user
+              without page.whatsapp or a candidate without a mobile number — the
+              Koios path opens the drawer on a stub { id } first, so the render
+              gate (not the lazy initializer) is what actually enforces this once
+              the full candidate record lands on the second mount. */}
+          {showStartModal && canStartConversation && hasValue(c.mobile) && (
+            <StartConversationModal candidateId={c.id}
+              onClose={() => { setShowStartModal(false); onInitialActionConsumed?.() }}
+              onStarted={() => { setConvRefreshKey(k => k + 1); onInitialActionConsumed?.() }} />
           )}
           <ConversationsSection key={convRefreshKey} threadsUrl="/conversations" threadsParams={{ candidate_id: c.id }}
             headerAction={

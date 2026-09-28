@@ -148,6 +148,12 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   // after browser BACK — lazy init so it's picked up on the very first render, not
   // only on a later id-change (see the file comment on peekReturnTab/clearReturnTab).
   const [rememberedTab, setRememberedTab] = useState<string | null>(() => (c?.id != null ? peekReturnTab(c.id) : null))
+  // CONVERSATION-START-1: the deep-link 'start' action must fire ONCE per drawer
+  // open, not once per CommunicationTab mount — EntityDrawer remounts the active
+  // tab on every tab switch (key=activeTab), so without this the modal would pop
+  // open again every time the user returns to Communicatie. Tracks which initialTab
+  // string the action has already been consumed for.
+  const [actionDoneFor, setActionDoneFor] = useState<string | undefined>(undefined)
 
   // Phase/status axis (convert, requires_match/reason prompts, info line) — §0.3 hook.
   const status = useCandidateStatus({ c, onUpdate,
@@ -161,6 +167,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     setPrevId(c?.id)
     setRecruiter(null); setTags(null); setProfileEdits(null); setPhotoUrl(null)
     setRememberedTab(c?.id != null ? peekReturnTab(c.id) : null)
+    setActionDoneFor(undefined)
   }
   // Consume the remembered tab once it has been used, so a later, unrelated re-open
   // of the same candidate defaults back to Profile (destructive — effect-only, see
@@ -239,7 +246,13 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       case 'communication':  return <CommunicationTab c={c} onSave={(p: unknown) => onUpdate?.(c.id, { consent: p })}
         onRefresh={onRefresh}
         onEditStatusEvent={status.canEditStatusReason ? status.openStatusEdit : undefined}
-        initialSubTab={deepLink?.tab === 'communication' ? deepLink.sub : undefined} />
+        initialSubTab={deepLink?.tab === 'communication' ? deepLink.sub : undefined}
+        // CONVERSATION-START-1: a Koios "message this person" deep link asks the
+        // Conversations sub-tab to open the start-conversation modal on mount —
+        // but only once per drawer open (initialTab is stable while the drawer
+        // stays open, so a tab-away-and-back must not re-trigger it).
+        initialAction={deepLink?.tab === 'communication' && initialTab !== actionDoneFor ? deepLink.action : undefined}
+        onInitialActionConsumed={() => setActionDoneFor(initialTab)} />
       // DOC-ENTRY-LINK-1: onRefresh re-pulls the whole candidate after an upload+link,
       // so a later Achtergrond-tab mount (tabs remount fresh — EntityDrawer only ever
       // renders the ACTIVE tab) shows the new document_id instead of stale props.
