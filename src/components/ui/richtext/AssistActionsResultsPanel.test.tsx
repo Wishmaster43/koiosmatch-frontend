@@ -93,8 +93,8 @@ describe('AssistActionsResultsPanel · Uitvoeren', () => {
       ],
       { note_id: 'note-1' },
     )
-    expect(await screen.findByText('Uitgevoerd')).toBeInTheDocument()
-    expect(screen.getByText('Bevestigen')).toBeInTheDocument()
+    expect(await screen.findByText('notesAssist.execute.executed')).toBeInTheDocument()
+    expect(screen.getByText('notesAssist.execute.confirm')).toBeInTheDocument()
   })
 
   it('a pending item\'s Bevestigen re-POSTs just that item with confirmed:true', async () => {
@@ -102,16 +102,16 @@ describe('AssistActionsResultsPanel · Uitvoeren', () => {
     const user = userEvent.setup()
     render(<AssistActionsResultsPanel items={[items[0]]} source={source} onApplyAsText={vi.fn()} onDiscard={vi.fn()} />)
     await user.click(screen.getByText('Uitvoeren'))
-    await screen.findByText('Bevestigen')
+    await screen.findByText('notesAssist.execute.confirm')
 
     vi.mocked(executeRichTextActions).mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'executed', run_id: 'r9' }])
-    await user.click(screen.getByText('Bevestigen'))
+    await user.click(screen.getByText('notesAssist.execute.confirm'))
 
     expect(executeRichTextActions).toHaveBeenLastCalledWith(
       [{ title: 'Bel terug', type: 'task', due_date: null, note_excerpt: null, message: null, start: null, confirmed: true }],
       { note_id: 'note-1' },
     )
-    expect(await screen.findByText('Uitgevoerd')).toBeInTheDocument()
+    expect(await screen.findByText('notesAssist.execute.executed')).toBeInTheDocument()
   })
 
   it('a forbidden item shows the honest why-tooltip, with no confirm button', async () => {
@@ -121,8 +121,8 @@ describe('AssistActionsResultsPanel · Uitvoeren', () => {
     await user.click(screen.getByText('Uitvoeren'))
 
     const forbidden = await screen.findByText('Geen rechten')
-    expect(forbidden.closest('span')).toHaveAttribute('title', expect.stringContaining('WhatsApp'))
-    expect(screen.queryByText('Bevestigen')).not.toBeInTheDocument()
+    expect(forbidden.closest('span')).toHaveAttribute('title', 'notesAssist.execute.forbiddenReason.whatsapp')
+    expect(screen.queryByText('notesAssist.execute.confirm')).not.toBeInTheDocument()
   })
 
   // CMBE 5961c673: a server-supplied reason wins over the FE's static fallback.
@@ -156,7 +156,7 @@ describe('AssistActionsResultsPanel · Uitvoeren', () => {
     // hint blocks are wired to item.budget rather than silently dropped.
     expect(screen.getByText('{{used}}/{{allowance}} {{unit}}')).toBeInTheDocument()
     expect(screen.getByText('Upgrade naar {{tier}}')).toBeInTheDocument()
-    expect(screen.queryByText('Bevestigen')).not.toBeInTheDocument()
+    expect(screen.queryByText('notesAssist.execute.confirm')).not.toBeInTheDocument()
   })
 
   // wizard_required is a K3 selection-decision status not reachable from a
@@ -170,7 +170,7 @@ describe('AssistActionsResultsPanel · Uitvoeren', () => {
     render(<AssistActionsResultsPanel items={[items[0]]} source={source} onApplyAsText={vi.fn()} onDiscard={vi.fn()} />)
     await user.click(screen.getByText('Uitvoeren'))
 
-    const confirmBtn = await screen.findByText('Bevestigen')
+    const confirmBtn = await screen.findByText('notesAssist.execute.confirm')
     expect(confirmBtn.closest('span')).toHaveAttribute('title', expect.stringContaining('Selectiebeslissing'))
   })
 
@@ -193,7 +193,7 @@ describe('AssistActionsResultsPanel · Uitvoeren', () => {
     render(<AssistActionsResultsPanel items={[items[0]]} source={source} onApplyAsText={vi.fn()} onDiscard={vi.fn()} />)
     await user.click(screen.getByText('Uitvoeren'))
     expect(await screen.findByText('Nog niet ondersteund')).toBeInTheDocument()
-    expect(screen.queryByText('Bevestigen')).not.toBeInTheDocument()
+    expect(screen.queryByText('notesAssist.execute.confirm')).not.toBeInTheDocument()
   })
 
   it('an executed item opens the shared RunDetailDrawer via a fresh GET /workflow-runs/{id}', async () => {
@@ -202,7 +202,7 @@ describe('AssistActionsResultsPanel · Uitvoeren', () => {
     const user = userEvent.setup()
     render(<AssistActionsResultsPanel items={[items[0]]} source={source} onApplyAsText={vi.fn()} onDiscard={vi.fn()} />)
     await user.click(screen.getByText('Uitvoeren'))
-    await user.click(await screen.findByText('Uitgevoerd'))
+    await user.click(await screen.findByText('notesAssist.execute.executed'))
 
     expect(fetchWorkflowRun).toHaveBeenCalledWith('r1')
     await waitFor(() => expect(screen.getByTestId('run-drawer')).toHaveAttribute('data-run-id', 'r1'))
@@ -214,11 +214,11 @@ describe('AssistActionsResultsPanel · Uitvoeren', () => {
     const user = userEvent.setup()
     render(<AssistActionsResultsPanel items={[items[0]]} source={source} onApplyAsText={vi.fn()} onDiscard={vi.fn()} />)
     await user.click(screen.getByText('Uitvoeren'))
-    await screen.findByText('Bevestigen')
+    await screen.findByText('notesAssist.execute.confirm')
 
     await user.click(screen.getByText('Klaar'))
     expect(screen.getByText('Uitvoeren')).toBeInTheDocument()
-    expect(screen.queryByText('Bevestigen')).not.toBeInTheDocument()
+    expect(screen.queryByText('notesAssist.execute.confirm')).not.toBeInTheDocument()
   })
 
   it('works with no source at all (a field with no linkage, e.g. a task/match description)', () => {

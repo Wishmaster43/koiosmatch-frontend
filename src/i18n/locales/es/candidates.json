@@ -930,6 +930,9 @@
     "adviceNoneLabel": "No se requiere ninguna acción"
   },
   "cv": {
+    "preview": {
+      "summary": "Trabajador logístico con experiencia y 8 años de trayectoria en transporte y distribución. Fiable, orientado al cliente y flexible."
+    },
     "contact": "Contacto",
     "summary": "Resumen",
     "languages": "Idiomas",

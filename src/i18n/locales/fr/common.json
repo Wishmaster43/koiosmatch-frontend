@@ -353,6 +353,10 @@
       "maak_taak": "Créer une tâche",
       "stuur_whatsapp": "Envoyer WhatsApp",
       "zoek_kandidaten": "Chercher des candidats",
+      "update_task": "Mettre à jour la tâche",
+      "create_task": "Créer une tâche",
+      "send_whatsapp": "Envoyer WhatsApp",
+      "search_candidates": "Chercher des candidats",
       "unknown": "Exécuter"
     },
     "feedback": {
@@ -360,6 +364,7 @@
       "down": "Pas utile",
       "thanks": "Merci pour votre retour",
       "reasonsLabel": "Raison",
+      "reasonRequired": "Choisissez au moins une raison",
       "commentPlaceholder": "Commentaire (optionnel)",
       "send": "Envoyer",
       "error": "L’envoi du retour a échoué. Veuillez réessayer.",

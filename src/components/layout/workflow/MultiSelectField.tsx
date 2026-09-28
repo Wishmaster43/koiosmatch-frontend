@@ -106,7 +106,7 @@ export default function MultiSelectField({ field, value, onChange }: {
                                  borderRadius: 999, fontSize: 12, background: 'var(--color-primary-bg)',
                                  color: 'var(--color-primary-text)' }}>
             {labelFor(v)}
-            <button type="button" aria-label={t('common:remove', { defaultValue: 'Verwijderen' })}
+            <button type="button" aria-label={t('common:remove')}
               onClick={e => { e.stopPropagation(); remove(v) }}
               // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- dense inline chip-remove icon inside a 2px/8px pill (fieldControls/ row-remove precedent); a 28px Button breaks the chip height
               style={{ display: 'flex', background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0 }}>
@@ -114,7 +114,7 @@ export default function MultiSelectField({ field, value, onChange }: {
             </button>
           </span>
         ))}
-        <input value={search} placeholder={selected.length === 0 ? t('fields.multiselectSearch', { defaultValue: 'Zoeken…' }) : ''}
+        <input value={search} placeholder={selected.length === 0 ? t('fields.multiselectSearch') : ''}
           onChange={e => { setSearch(e.target.value); setOpen(true) }}
           onKeyDown={e => {
             // Free-entry (no option list): Enter adds the typed value as a chip.

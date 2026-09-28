@@ -45,8 +45,7 @@ import AssistTextPreview from '@/components/ui/richtext/AssistTextPreview'
 import { AssistDiscardButton, AssistFeedbackSlot } from '@/components/drawer/AssistResultFooter'
 import NoteKoiosModeToggle from './NoteKoiosModeToggle'
 import { Caption, GroupLabel } from '@/components/ui/typography'
-import { ACTION_TYPE_LABEL_NL } from './noteAssistApi'
-import type { AssistCombinedMode, AssistActionItem, AssistActionType, AssistKnownItem } from './noteAssistApi'
+import type { AssistCombinedMode, AssistActionItem, AssistKnownItem } from './noteAssistApi'
 
 interface NoteAssistSectionProps {
   // The editor's CURRENT html body — the text the assist call runs over, and
@@ -108,7 +107,7 @@ export default function NoteAssistSection({ body, onApply, language, onItems, kn
   // appends — see richTextAssistApply), then clear the suggestion.
   const handleApply = () => {
     if (!result || !mode || mode === 'generate') return
-    onApply(applyAssistResult(body, mode, result, (type) => t(`notesAssist.actionTypes.${type}`, { defaultValue: ACTION_TYPE_LABEL_NL[type as AssistActionType] ?? type })))
+    onApply(applyAssistResult(body, mode, result, (type) => t(`notesAssist.actionTypes.${type}`)))
     discard()
   }
 
@@ -124,7 +123,7 @@ export default function NoteAssistSection({ body, onApply, language, onItems, kn
         {MODES.map(({ mode: m, icon: Icon }) => (
           <Button key={m} variant={m === 'process' ? 'primary' : 'soft'} size="sm"
             onClick={() => run(m, body, knownItems ?? (localItems.length ? localItems.map(it => ({ title: it.title, type: it.type })) : undefined))} disabled={loading || !hasText}
-            title={hasText ? undefined : t('notesAssist.needsText', { defaultValue: 'Schrijf eerst tekst in de notitie' })}>
+            title={hasText ? undefined : t('notesAssist.needsText')}>
             {loading && mode === m ? <Spinner size={12} /> : <Icon size={12} />}
             {t(`notesAssist.${m === 'process' ? 'process' : 'summarizeProcess'}`, { defaultValue: MODE_LABEL_NL[m] })}
           </Button>
@@ -132,7 +131,7 @@ export default function NoteAssistSection({ body, onApply, language, onItems, kn
       </div>
       {!hasText && (
         <Caption as="div" style={{ marginBottom: 8 }}>
-          {t('notesAssist.needsText', { defaultValue: 'Schrijf eerst tekst in de notitie' })}
+          {t('notesAssist.needsText')}
         </Caption>
       )}
 
@@ -150,7 +149,7 @@ export default function NoteAssistSection({ body, onApply, language, onItems, kn
           <Suspense fallback={null}>
             <AssistActionsResultsPanel
               items={localItems}
-              onApplyAsText={() => onApply(applyAssistResult(body, 'actions', { kind: 'actions', items: localItems }, (type) => t(`notesAssist.actionTypes.${type}`, { defaultValue: ACTION_TYPE_LABEL_NL[type as AssistActionType] ?? type })))}
+              onApplyAsText={() => onApply(applyAssistResult(body, 'actions', { kind: 'actions', items: localItems }, (type) => t(`notesAssist.actionTypes.${type}`)))}
               onDiscard={() => setLocalItems([])} />
           </Suspense>
         </div>

@@ -353,6 +353,10 @@
       "maak_taak": "Crear tarea",
       "stuur_whatsapp": "Enviar WhatsApp",
       "zoek_kandidaten": "Buscar candidatos",
+      "update_task": "Actualizar tarea",
+      "create_task": "Crear tarea",
+      "send_whatsapp": "Enviar WhatsApp",
+      "search_candidates": "Buscar candidatos",
       "unknown": "Ejecutar"
     },
     "feedback": {
@@ -360,6 +364,7 @@
       "down": "No útil",
       "thanks": "Gracias por tu opinión",
       "reasonsLabel": "Motivo",
+      "reasonRequired": "Elige al menos un motivo",
       "commentPlaceholder": "Comentario (opcional)",
       "send": "Enviar",
       "error": "No se pudo enviar la opinión. Inténtalo de nuevo.",

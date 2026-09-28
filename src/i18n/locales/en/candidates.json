@@ -953,6 +953,9 @@
     "adviceNoneLabel": "No action needed"
   },
   "cv": {
+    "preview": {
+      "summary": "Experienced logistics worker with 8 years of experience in transport and distribution. Reliable, customer-focused and flexibly deployable."
+    },
     "contact": "Contact",
     "summary": "Profile text",
     "languages": "Languages",

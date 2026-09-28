@@ -99,7 +99,7 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
   // next to search — filtering behaviour is unchanged, only where it lives changed.
   const filterRows: DrawerFilterConfig[] = docTypes.length > 0 ? [{
     type: 'single', key: 'docType', label: t('documents.type'), value: docTypeFilter, onChange: setDocTypeFilter,
-    allLabel: t('documents.allTypes', { defaultValue: 'Alle types' }),
+    allLabel: t('documents.allTypes'),
     options: docTypes.map(dt => ({ value: String(dt.value ?? dt.name ?? ''), label: docTypeLabel(String(dt.value ?? dt.name ?? '')) })),
   }] : []
 

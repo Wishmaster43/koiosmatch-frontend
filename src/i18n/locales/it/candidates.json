@@ -953,6 +953,9 @@
     "adviceNoneLabel": "Nessuna azione necessaria"
   },
   "cv": {
+    "preview": {
+      "summary": "Lavoratore logistico esperto con 8 anni di esperienza in trasporti e distribuzione. Affidabile, orientato al cliente e flessibile."
+    },
     "contact": "Contatto",
     "summary": "Testo del profilo",
     "languages": "Lingue",

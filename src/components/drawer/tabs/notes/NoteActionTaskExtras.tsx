@@ -67,8 +67,8 @@ export default function NoteActionTaskExtras({ item, index, onEdit }: {
           </Caption>
           <Button variant="ghost" size="sm" iconOnly
             onClick={() => onEdit(index, { link_type: undefined, link_id: undefined, link_label: undefined })}
-            aria-label={t('notesAssist.panel.linkClear', { defaultValue: 'Koppeling verwijderen' })}
-            title={t('notesAssist.panel.linkClear', { defaultValue: 'Koppeling verwijderen' })}>
+            aria-label={t('notesAssist.panel.linkClear')}
+            title={t('notesAssist.panel.linkClear')}>
             <X size={12} />
           </Button>
         </div>

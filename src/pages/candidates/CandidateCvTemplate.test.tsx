@@ -109,7 +109,7 @@ describe('resolveCvName', () => {
   })
 
   it('falls back to the label for a genuinely nameless candidate (composed name is an empty string, not nullish)', () => {
-    expect(resolveCvName({}, L)).toBe('Naam')
-    expect(resolveCvName(undefined, L)).toBe('Naam')
+    expect(resolveCvName({}, L)).toBe('Name')
+    expect(resolveCvName(undefined, L)).toBe('Name')
   })
 })

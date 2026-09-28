@@ -18,7 +18,6 @@ import { fetchWorkflowRun } from './assistActionsExecuteApi'
 import type { ExecuteSource } from './assistActionsExecuteApi'
 import { useAssistActionsExecute } from './useAssistActionsExecute'
 import AssistActionItemCard from './AssistActionItemCard'
-import { ACTION_TYPE_LABEL_NL } from './richTextAssistApi'
 import type { RichTextAssistActionItem } from './richTextAssistApi'
 import type { RunRow } from '@/types/reports'
 import { humanizeIsoDates } from '@/lib/localDate'
@@ -80,7 +79,7 @@ export default function AssistActionsResultsPanel({ items, source, onApplyAsText
             <li key={i}>
               <strong>{it.title}</strong>{' '}
               <span style={{ color: 'var(--text-muted)' }}>
-                ({t(`notesAssist.actionTypes.${it.type}`, { defaultValue: ACTION_TYPE_LABEL_NL[it.type] })}{it.due_date ? ` · ${humanizeIsoDates(it.due_date)}` : ''})
+                ({t(`notesAssist.actionTypes.${it.type}`)}{it.due_date ? ` · ${humanizeIsoDates(it.due_date)}` : ''})
               </span>
             </li>
           ))}

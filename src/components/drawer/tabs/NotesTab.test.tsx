@@ -281,8 +281,8 @@ describe('NotesTab · type/channel filter menu (NOTE-FILTERS-1)', () => {
     render(<NotesTab notes={[note()]} labels={filterLabels} noteTypes={noteTypes} channels={channels}
       showTimeline={false} showConversations={false} />)
     // The old inline placeholders are gone from the toolbar row entirely.
-    expect(screen.queryByText('Alle types')).toBeNull()
-    expect(screen.queryByText('Alle kanalen')).toBeNull()
+    expect(screen.queryByText('notes.allTypes')).toBeNull()
+    expect(screen.queryByText('notes.allChannels')).toBeNull()
     expect(screen.getByRole('button', { name: 'Filter' })).toBeInTheDocument()
   })
 
@@ -295,7 +295,7 @@ describe('NotesTab · type/channel filter menu (NOTE-FILTERS-1)', () => {
     expect(screen.getByText('Mailnotitie')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Filter' }))
-    await user.click(screen.getByRole('button', { name: 'Alle types' }))
+    await user.click(screen.getByRole('button', { name: 'notes.allTypes' }))
     await user.click(screen.getByRole('button', { name: 'Bellen' }))
 
     expect(screen.getByText('Belnotitie')).toBeInTheDocument()
@@ -309,7 +309,7 @@ describe('NotesTab · type/channel filter menu (NOTE-FILTERS-1)', () => {
       labels={filterLabels} noteTypes={noteTypes} channels={channels} showTimeline={false} showConversations={false} />)
 
     await user.click(screen.getByRole('button', { name: 'Filter' }))
-    await user.click(screen.getByRole('button', { name: 'Alle kanalen' }))
+    await user.click(screen.getByRole('button', { name: 'notes.allChannels' }))
     await user.click(screen.getByRole('button', { name: 'WhatsApp' }))
 
     expect(screen.getByText('WA-notitie')).toBeInTheDocument()
@@ -325,9 +325,9 @@ describe('NotesTab · type/channel filter menu (NOTE-FILTERS-1)', () => {
     // Picking a value keeps the panel OPEN (so a second filter can be set in the
     // same visit) — no need to re-click "Filter" between the two picks below.
     await user.click(screen.getByRole('button', { name: 'Filter' }))
-    await user.click(screen.getByRole('button', { name: 'Alle types' }))
+    await user.click(screen.getByRole('button', { name: 'notes.allTypes' }))
     await user.click(screen.getByRole('button', { name: 'Bellen' }))
-    await user.click(screen.getByRole('button', { name: 'Alle kanalen' }))
+    await user.click(screen.getByRole('button', { name: 'notes.allChannels' }))
     await user.click(screen.getByRole('button', { name: 'Telefoon' }))
     expect(screen.getByText('Match')).toBeInTheDocument()
     expect(screen.queryByText('NoMatch')).toBeNull()

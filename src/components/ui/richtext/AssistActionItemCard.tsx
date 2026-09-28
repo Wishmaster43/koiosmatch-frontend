@@ -25,7 +25,6 @@ import { useTranslation } from 'react-i18next'
 import { CheckSquare, MessageCircle, Mail, CalendarClock, Bell, Check, Clock, ShieldAlert, HelpCircle, ExternalLink, AlertTriangle } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat } from '@/lib/formatters'
-import { ACTION_TYPE_LABEL_NL } from './richTextAssistApi'
 import type { RichTextAssistActionType } from './richTextAssistApi'
 import type { ExecItem } from './useAssistActionsExecute'
 import Spinner from '../Spinner'
@@ -35,16 +34,6 @@ import Spinner from '../Spinner'
 // have no channel equivalent, and the icon choice is presentational only).
 const TYPE_ICON: Record<RichTextAssistActionType, typeof CheckSquare> = {
   task: CheckSquare, whatsapp: MessageCircle, email: Mail, appointment: CalendarClock, notification: Bell,
-}
-
-// Rights-matrix explanation per type (mirrors KoiosActionBridge::TYPE_MAP's
-// permission — phrased for a recruiter, never the raw permission slug).
-const FORBIDDEN_REASON_NL: Record<RichTextAssistActionType, string> = {
-  task: 'Je hebt geen rechten om taken aan te maken.',
-  whatsapp: 'Je hebt geen rechten om WhatsApp-berichten te versturen.',
-  email: 'Je hebt geen rechten om deze actie namens de kandidaat uit te voeren.',
-  appointment: 'Je hebt geen rechten om deze actie namens de kandidaat uit te voeren.',
-  notification: 'Je hebt geen rechten om deze actie uit te voeren.',
 }
 
 const cardStyle: CSSProperties = {
@@ -71,7 +60,7 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
   const { formatDateTime } = useDateFormat()
   const { formatNumber } = useNumberFormat()
   const Icon = TYPE_ICON[item.type]
-  const typeLabel = t(`notesAssist.actionTypes.${item.type}`, { defaultValue: ACTION_TYPE_LABEL_NL[item.type] })
+  const typeLabel = t(`notesAssist.actionTypes.${item.type}`)
   // Only whatsapp/email items carry a draft message; only appointment items
   // carry a proposed start — both optional (older/synthetic items lack them).
   const isMessageType = item.type === 'whatsapp' || item.type === 'email'
@@ -105,11 +94,11 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
             // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- status-coloured inline link-chip: success ink is the state signal (§4), Button's tones have no success ink variant
             style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500,
               color: 'var(--color-success-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-            <Check size={13} /> {t('notesAssist.execute.executed', { defaultValue: 'Uitgevoerd' })} <ExternalLink size={11} />
+            <Check size={13} /> {t('notesAssist.execute.executed')} <ExternalLink size={11} />
           </button>
         ) : (
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-success-text)' }}>
-            <Check size={13} /> {t('notesAssist.execute.executed', { defaultValue: 'Uitgevoerd' })}
+            <Check size={13} /> {t('notesAssist.execute.executed')}
           </span>
         )
       )}
@@ -126,15 +115,15 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
           {item.confirmError && (
             <span style={{ fontSize: 10, color: 'var(--color-danger-text)' }}>
               {item.confirmErrorKind === 'sessionExpired'
-                ? t('notesAssist.execute.confirmSessionExpired', { defaultValue: 'Sessie verlopen: log opnieuw in en bevestig nogmaals' })
+                ? t('notesAssist.execute.confirmSessionExpired')
                 : item.confirmErrorKind === 'notApplied'
                   ? t('notesAssist.execute.confirmNotApplied', { defaultValue: 'De server nam de bevestiging niet aan, probeer het nogmaals' })
-                  : t('notesAssist.execute.confirmFailed', { defaultValue: 'Bevestigen mislukt' })}
+                  : t('notesAssist.execute.confirmFailed')}
             </span>
           )}
           <Button variant="primary" size="sm" onClick={onConfirm} disabled={item.confirming} style={{ flexShrink: 0 }}>
             {item.confirming ? <Spinner size={12} /> : <Clock size={12} />}
-            {t('notesAssist.execute.confirm', { defaultValue: 'Bevestigen' })}
+            {t('notesAssist.execute.confirm')}
           </Button>
         </span>
       )}
@@ -143,7 +132,7 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
           server's own exception message when present, the static per-type map
           only as fallback), no fake retry button (retrying would 403 again). */}
       {item.status === 'forbidden' && (
-        <span title={item.reason ?? t(`notesAssist.execute.forbiddenReason.${item.type}`, { defaultValue: FORBIDDEN_REASON_NL[item.type] })}
+        <span title={item.reason ?? t(`notesAssist.execute.forbiddenReason.${item.type}`)}
           style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-danger-text)', cursor: 'help' }}>
           <ShieldAlert size={13} /> {t('notesAssist.execute.forbidden', { defaultValue: 'Geen rechten' })}
         </span>

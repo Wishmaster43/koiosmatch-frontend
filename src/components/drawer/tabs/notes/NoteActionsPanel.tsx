@@ -82,7 +82,7 @@ interface NoteActionsPanelProps {
   autoRun?: boolean
 }
 
-// One icon per action-item type — mirrors ACTION_TYPE_LABEL_NL's vocabulary.
+// One icon per action-item type — mirrors the common:notesAssist.actionTypes.* vocabulary.
 const TYPE_ICON: Record<AssistActionType, typeof ListChecks> = {
   task: ListChecks, whatsapp: MessageCircle, email: Mail, appointment: Calendar, notification: Bell,
 }
@@ -108,17 +108,13 @@ const STATUS_TONE: Record<NoteActionPanelItem['status'], string> = {
 // Renders one action's lifecycle status as a soft-tinted chip, coloured by STATUS_TONE.
 function StatusChip({ status }: { status: NoteActionPanelItem['status'] }) {
   const { t } = useTranslation('common')
-  const STATUS_LABEL_NL: Record<NoteActionPanelItem['status'], string> = {
-    proposed: 'Voorgesteld', pending: 'Wacht op bevestiging', executed: 'Uitgevoerd', failed: 'Mislukt',
-    budget_exceeded: 'Staffel vol',
-  }
   // camelCase i18n key per status — budget_exceeded needs its own mapping,
   // the bare charAt-capitalize scheme would produce an invalid statusBudget_exceeded key.
   const STATUS_LABEL_KEY: Record<NoteActionPanelItem['status'], string> = {
     proposed: 'statusProposed', pending: 'statusPending', executed: 'statusExecuted', failed: 'statusFailed',
     budget_exceeded: 'statusBudgetExceeded',
   }
-  const label = t(`notesAssist.panel.${STATUS_LABEL_KEY[status]}`, { defaultValue: STATUS_LABEL_NL[status] })
+  const label = t(`notesAssist.panel.${STATUS_LABEL_KEY[status]}`)
   const color = STATUS_TONE[status]
   return (
     <span style={{ fontSize: 10.5, fontWeight: 600, padding: '2px 7px', borderRadius: 99,
@@ -159,7 +155,7 @@ function ActionItemCard({ item, index, onEdit, onConfirm, candidateId, formatNum
         <div style={{ flex: 1, minWidth: 0 }}>
           {editing ? (
             <input value={item.title} onChange={e => onEdit(index, { title: e.target.value })}
-              aria-label={t('notesAssist.panel.editTitle', { defaultValue: 'Titel' })}
+              aria-label={t('notesAssist.panel.editTitle')}
               style={{ width: '100%', boxSizing: 'border-box', padding: '4px 6px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }} />
           ) : (
             <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--text)', wordBreak: 'break-word' }}>{item.title}</div>
@@ -205,7 +201,7 @@ function ActionItemCard({ item, index, onEdit, onConfirm, candidateId, formatNum
             decision moment before the confirm sends it (visie punt 7, r2). */}
         {(item.status === 'proposed' || item.status === 'pending') && (
           <Button variant="ghost" size="sm" iconOnly onClick={() => setEditing(v => !v)}
-            aria-label={t('notesAssist.panel.edit', { defaultValue: 'Bewerken' })} title={t('notesAssist.panel.edit', { defaultValue: 'Bewerken' })}>
+            aria-label={t('notesAssist.panel.edit')} title={t('notesAssist.panel.edit')}>
             <Pencil size={12} />
           </Button>
         )}
@@ -216,15 +212,15 @@ function ActionItemCard({ item, index, onEdit, onConfirm, candidateId, formatNum
         {item.status === 'pending' && item.confirmError && (
           <span role="alert"><Caption as="span" style={{ color: 'var(--color-danger-text)' }}>
             {item.confirmErrorKind === 'sessionExpired'
-              ? t('notesAssist.execute.confirmSessionExpired', { defaultValue: 'Sessie verlopen: log opnieuw in en bevestig nogmaals' })
+              ? t('notesAssist.execute.confirmSessionExpired')
               : item.confirmErrorKind === 'notApplied'
                 ? t('notesAssist.execute.confirmNotApplied', { defaultValue: 'De server nam de bevestiging niet aan, probeer het nogmaals' })
-                : t('notesAssist.execute.confirmFailed', { defaultValue: 'Bevestigen mislukt' })}
+                : t('notesAssist.execute.confirmFailed')}
           </Caption></span>
         )}
         {item.status === 'pending' && (
           <Button variant="soft" size="sm" onClick={confirm} disabled={confirming}>
-            {confirming ? <Spinner size={11} /> : null} {t('notesAssist.panel.confirm', { defaultValue: 'Bevestigen' })}
+            {confirming ? <Spinner size={11} /> : null} {t('notesAssist.panel.confirm')}
           </Button>
         )}
         {/* Budget exceeded (PRIJSMODEL-C 30-08) — no confirm button, retrying
@@ -243,8 +239,8 @@ function ActionItemCard({ item, index, onEdit, onConfirm, candidateId, formatNum
         )}
         {item.status === 'executed' && link && (
           <Button href={link} target="_blank" rel="noopener noreferrer" variant="ghost" size="sm"
-            aria-label={t('notesAssist.panel.openNew', { defaultValue: 'Open in nieuw scherm' })} title={t('notesAssist.panel.openNew', { defaultValue: 'Open in nieuw scherm' })}>
-            <ExternalLink size={11} /> {t('notesAssist.panel.openNew', { defaultValue: 'Open in nieuw scherm' })}
+            aria-label={t('notesAssist.panel.openNew')} title={t('notesAssist.panel.openNew')}>
+            <ExternalLink size={11} /> {t('notesAssist.panel.openNew')}
           </Button>
         )}
       </div>

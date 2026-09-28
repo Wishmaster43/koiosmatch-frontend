@@ -47,17 +47,17 @@ const CRUD_ACTIONS = ['view', 'create', 'update', 'delete']
 
 // Full-permission-name label overrides — for names the generic "action segment"
 // split can't label cleanly: three-segment names (a.b.c, e.g. candidates.documents
-// .manage — segment[1] is a sub-resource, not a verb) and verbs with no existing
-// roles.actions.* entry yet (archive, the page.details rename). Each carries its
-// own defaultValue so the row reads correctly even before the key is seeded
-// (i18n is applied centrally — see CLAUDE.md working agreement).
-const PERMISSION_LABEL: Record<string, { key: string; defaultValue: string }> = {
-  'candidates.archive':          { key: 'roles.actions.archive',                  defaultValue: 'Archiveren' },
-  'candidates.documents.manage': { key: 'roles.actions.candidatesDocumentsManage', defaultValue: 'Documenten beheren' },
-  'candidates.notes.manage_all': { key: 'roles.actions.candidatesNotesManageAll',  defaultValue: 'Alle notities beheren' },
+// .manage — segment[1] is a sub-resource, not a verb) and verbs with no dedicated
+// roles.actions.* entry from the CRUD/other chains (archive, the page.details
+// rename). All four keys are shipped in all seven locales, so the override key
+// is the only source (§5: no defaultValue next to a live key).
+const PERMISSION_LABEL: Record<string, { key: string }> = {
+  'candidates.archive':          { key: 'roles.actions.archive' },
+  'candidates.documents.manage': { key: 'roles.actions.candidatesDocumentsManage' },
+  'candidates.notes.manage_all': { key: 'roles.actions.candidatesNotesManageAll' },
   // "Details" read as a generic/ambiguous nav label — this page is actually the
   // Shiftmanager/AI reporting-detail landing group.
-  'page.details':                { key: 'roles.actions.details',                  defaultValue: 'Rapportdetails (SM/AI)' },
+  'page.details':                { key: 'roles.actions.details' },
 }
 
 // Per-permission tooltip overrides — a hint that explains WHAT gets synced when
@@ -132,7 +132,7 @@ export function PermissionMatrix({ groups, hasPermission, onToggle, onSetMany }:
     const override = PERMISSION_LABEL[perm.name]
     const action = perm.name.split('.')[1] ?? perm.name
     const label = override
-      ? t(override.key, { defaultValue: override.defaultValue })
+      ? t(override.key)
       : CRUD_ACTIONS.includes(action) ? actionLabel(action) : otherLabel(action)
     return group === 'page' ? t('roles.pageAccess', { label, defaultValue: `Pagina: ${label}` }) : label
   }

@@ -135,10 +135,10 @@ export const DEFAULT_STATUSES: LookupItem[] = [
 // "Sollicitant" and "Ziek" at once). Backed by /availability-options.
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 const DEFAULT_AVAILABILITY: LookupItem[] = [
-  { value: 'available',   label: 'Beschikbaar',      color: '#79B58E' },
-  { value: 'unavailable', label: 'Niet beschikbaar', color: '#8A94A6' },
-  { value: 'sick',        label: 'Ziek',             color: '#D98A8A' },
-  { value: 'leave',       label: 'Verlof',           color: '#6FA8C4' },
+  { value: 'available',   label: 'Available',   color: '#79B58E' },
+  { value: 'unavailable', label: 'Unavailable', color: '#8A94A6' },
+  { value: 'sick',        label: 'Sick',         color: '#D98A8A' },
+  { value: 'leave',       label: 'Leave',        color: '#6FA8C4' },
 ]
 /* eslint-enable no-restricted-syntax */
 
@@ -189,7 +189,7 @@ function normalize(raw: unknown, fallback: LookupItem[]): LookupItem[] {
 // as a frozen seed that never fetches), so it stays on its own local key lookup
 // rather than the shared translateSeedList helper.
 function translateSeedLabels(t: TFunction, lookupName: string, items: LookupItem[]): LookupItem[] {
-  return items.map(it => ({ ...it, label: t(`lookupSeeds.${lookupName}.${it.value}`, { defaultValue: it.label }) }))
+  return items.map(it => ({ ...it, label: t(`lookupSeeds.${lookupName}.${it.value}`) }))
 }
 
 const LookupsContext = createContext<LookupsValue | null>(null)

@@ -42,8 +42,8 @@ export default function StatusListRow({
           onMouseDown={e => e.stopPropagation()}
           onBlur={e => commitRank(item, e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') e.currentTarget.blur() }}
-          aria-label={t('statusList.priorityRank', { defaultValue: 'Prioriteit (1 = eerst verstuurd)' })}
-          title={t('statusList.priorityRank', { defaultValue: 'Prioriteit (1 = eerst verstuurd)' })}
+          aria-label={t('statusList.priorityRank')}
+          title={t('statusList.priorityRank')}
           style={{ width: 40, height: 24, textAlign: 'center', padding: 0,
                    fontSize: 11, fontWeight: 700, ...monoStyle,
                    color: 'var(--text)', background: 'var(--surface)', border: '1px solid var(--border)',

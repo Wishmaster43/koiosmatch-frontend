@@ -144,7 +144,7 @@ export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onV
     // own header already notes it "mirrors the old `name` requiredness").
     { key: 'last_name',   label: t('addFields.referenceLastName', { defaultValue: 'Achternaam' }), half: true, required: true },
     { key: 'middle_name', label: t('addFields.referenceMiddleName', { defaultValue: 'Tussenvoegsel' }), half: true },
-    { key: 'function',    label: t('addFields.referenceFunction', { defaultValue: 'Functie' }), half: true },
+    { key: 'function',    label: t('addFields.referenceFunction'), half: true },
     // Relation TO the candidate (manager/collega/klant/…) — a SEPARATE tenant
     // lookup from `function` (the referent's own role), sent by id.
     { key: 'relation_id', label: t('addFields.relation', { defaultValue: 'Relatie' }), options: relationOptions },
@@ -177,7 +177,7 @@ export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onV
   const { order, control, isOwnOrder } = useRelationSort(items, {
     storageKey: 'references',
     functionOf: (raw: RelItem) => raw.function as string | undefined,
-    functionLabel: t('addFields.referenceFunction', { defaultValue: 'Functie' }),
+    functionLabel: t('addFields.referenceFunction'),
     ownOrder: true,
   })
   return (

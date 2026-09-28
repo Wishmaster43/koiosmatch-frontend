@@ -353,6 +353,10 @@
       "maak_taak": "Taak maken",
       "stuur_whatsapp": "WhatsApp sturen",
       "zoek_kandidaten": "Kandidaten zoeken",
+      "update_task": "Taak bijwerken",
+      "create_task": "Taak aanmaken",
+      "send_whatsapp": "WhatsApp versturen",
+      "search_candidates": "Kandidaten zoeken",
       "unknown": "Uitvoeren"
     },
     "feedback": {
@@ -360,6 +364,7 @@
       "down": "Niet nuttig",
       "thanks": "Bedankt voor je feedback",
       "reasonsLabel": "Reden",
+      "reasonRequired": "Kies minstens \u00e9\u00e9n reden",
       "commentPlaceholder": "Toelichting (optioneel)",
       "send": "Versturen",
       "error": "Feedback versturen is niet gelukt. Probeer het opnieuw.",

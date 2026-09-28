@@ -353,6 +353,10 @@
       "maak_taak": "Create task",
       "stuur_whatsapp": "Send WhatsApp",
       "zoek_kandidaten": "Search candidates",
+      "update_task": "Update task",
+      "create_task": "Create task",
+      "send_whatsapp": "Send WhatsApp",
+      "search_candidates": "Search candidates",
       "unknown": "Run"
     },
     "feedback": {
@@ -360,6 +364,7 @@
       "down": "Not helpful",
       "thanks": "Thanks for your feedback",
       "reasonsLabel": "Reason",
+      "reasonRequired": "Choose at least one reason",
       "commentPlaceholder": "Comment (optional)",
       "send": "Send",
       "error": "Sending feedback failed. Please try again.",

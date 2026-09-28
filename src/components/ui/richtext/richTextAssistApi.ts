@@ -81,12 +81,6 @@ export interface RichTextAssistActionItem {
   link_id?: string
   link_label?: string
 }
-// Dutch fallback label per action-item type — the common:notesAssist.actionTypes.*
-// keys are already shipped in all five locales; this map only backstops an
-// unexpected type value the closed vocabulary above should never produce.
-export const ACTION_TYPE_LABEL_NL: Record<RichTextAssistActionType, string> = {
-  task: 'Taak', whatsapp: 'WhatsApp', email: 'E-mail', appointment: 'Afspraak', notification: 'Melding',
-}
 // improve/summarize return prose; actions returns structured items; the two
 // combined modes return BOTH in one response — one discriminated result so
 // the caller never has to guess the shape by mode alone.

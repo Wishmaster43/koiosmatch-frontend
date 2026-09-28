@@ -35,7 +35,8 @@ export default function CvHtmlPreview({ settings, t, locale }: CvHtmlPreviewProp
      identically regardless of the recruiter's own app light/dark theme — it intentionally does not follow --text/--color-* tokens. */
   const color1  = settings.primaryColor   ?? '#19A5CA'
   const color2  = settings.secondaryColor ?? '#1B60A9'
-  const c       = PREVIEW_CANDIDATE
+  // Summary is user-facing prose (DEMO-TAAL) — resolved through i18n, never the fixture's own text.
+  const c       = { ...PREVIEW_CANDIDATE, summary: t('cv.preview.summary') }
   const secs    = settings.sections ?? []
   const enabled = (id: string) => secs.length === 0 || (secs.find(s => s.id === id)?.enabled !== false)
   // The SAME grouping the generated PDF uses (CandidateCvTemplate.groupCvSections) —

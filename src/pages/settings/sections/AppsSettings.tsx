@@ -149,8 +149,8 @@ export default function AppsSettings() {
                     </span>
                   )}
                 </div>
-                {/* The catalogue keeps the Dutch source as the fallback; the copy itself is translated. */}
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>{t(`appsCatalog.${app.id}`, { defaultValue: app.description })}</div>
+                {/* Every catalogue entry's description lives in i18n (appsCatalog.<id>), the only source (§5). */}
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>{t(`appsCatalog.${app.id}`)}</div>
               </div>
               {/* Shared house Toggle (audit finding, 05-08) — replaces the hand-rolled
                   44x24 success-green pill so every on/off control looks the same. */}

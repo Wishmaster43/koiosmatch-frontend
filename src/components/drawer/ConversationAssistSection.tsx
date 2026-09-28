@@ -23,8 +23,7 @@ import Button from '@/components/ui/Button'
 import { AssistDiscardButton, AssistFeedbackSlot } from './AssistResultFooter'
 import { useConversationAssist } from './useConversationAssist'
 import { formatAssistResultForDraft } from './conversationAssistApply'
-import { ACTION_TYPE_LABEL_NL } from './conversationAssistApi'
-import type { ConversationAssistMode, ConversationAssistActionType } from './conversationAssistApi'
+import type { ConversationAssistMode } from './conversationAssistApi'
 import type { Id } from '@/types/common'
 
 interface ConversationAssistSectionProps {
@@ -49,6 +48,8 @@ const MODES: { mode: ConversationAssistMode; icon: typeof AlignLeft }[] = [
 // The Koios assist panel over a WhatsApp thread's own messages.
 export default function ConversationAssistSection({ conversationId, hasMessages, onApply, language }: ConversationAssistSectionProps) {
   const { t } = useTranslation('candidates')
+  // KoiosFeedback's keys live in common.json — the feedback slot needs the common-bound t, not this file's candidates one.
+  const { t: tCommon } = useTranslation('common')
   const { mode, status, result, errorMessage, tone, run, discard } = useConversationAssist(language)
   const loading = status === 'loading'
 
@@ -56,7 +57,7 @@ export default function ConversationAssistSection({ conversationId, hasMessages,
   // clear the suggestion so a stale result can never be applied twice.
   const handleApply = () => {
     if (!result) return
-    onApply(formatAssistResultForDraft(result, (type) => t(`conversations.assist.actionTypes.${type}`, { defaultValue: ACTION_TYPE_LABEL_NL[type as ConversationAssistActionType] ?? type })))
+    onApply(formatAssistResultForDraft(result, (type) => t(`conversations.assist.actionTypes.${type}`)))
     discard()
   }
 
@@ -71,7 +72,7 @@ export default function ConversationAssistSection({ conversationId, hasMessages,
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginBottom: 4 }}>
         {MODES.map(({ mode: m, icon: Icon }) => (
           <Button key={m} variant="soft" size="sm" onClick={() => run(m, conversationId)} disabled={loading || !hasMessages}
-            title={hasMessages ? undefined : t('conversations.assist.needsMessages', { defaultValue: 'Dit gesprek heeft nog geen berichten' })}>
+            title={hasMessages ? undefined : t('conversations.assist.needsMessages')}>
             {loading && mode === m ? <Spinner size={12} /> : <Icon size={12} />}
             {t(`conversations.assist.${m}`, { defaultValue: MODE_LABEL_NL[m] })}
           </Button>
@@ -80,7 +81,7 @@ export default function ConversationAssistSection({ conversationId, hasMessages,
       {/* Honest, VISIBLE reason the buttons are disabled — never a hover-only title (§3). */}
       {!hasMessages && (
         <Caption as="div" style={{ marginBottom: 6 }}>
-          {t('conversations.assist.needsMessages', { defaultValue: 'Dit gesprek heeft nog geen berichten' })}
+          {t('conversations.assist.needsMessages')}
         </Caption>
       )}
 
@@ -111,7 +112,7 @@ export default function ConversationAssistSection({ conversationId, hasMessages,
                   <strong>{it.title}</strong>
                   {' '}
                   <span style={{ color: 'var(--text-muted)' }}>
-                    ({t(`conversations.assist.actionTypes.${it.type}`, { defaultValue: ACTION_TYPE_LABEL_NL[it.type] })}
+                    ({t(`conversations.assist.actionTypes.${it.type}`)}
                     {it.due_date ? ` · ${humanizeIsoDates(it.due_date)}` : ''})
                   </span>
                 </li>
@@ -133,7 +134,7 @@ export default function ConversationAssistSection({ conversationId, hasMessages,
 
       {/* KOIOS-FEEDBACK-FE-1, second surface: mount when result has promptLogId. */}
       {status === 'success' && result?.promptLogId && (
-        <AssistFeedbackSlot promptLogId={result.promptLogId} surface="conversation_assist" t={t} />
+        <AssistFeedbackSlot promptLogId={result.promptLogId} surface="conversation_assist" t={tCommon} />
       )}
     </div>
   )

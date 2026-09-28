@@ -54,7 +54,7 @@ describe('NoteActionTaskExtras', () => {
     expect(onEdit).toHaveBeenCalledWith(1, { link_type: 'vacancy', link_id: 'v9', link_label: 'Verzorgende IG' })
 
     rerender(<NoteActionTaskExtras item={item({ link_type: 'vacancy', link_id: 'v9', link_label: 'Verzorgende IG' })} index={1} onEdit={onEdit} />)
-    await user.click(screen.getByRole('button', { name: 'Koppeling verwijderen' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.panel.linkClear' }))
     expect(onEdit).toHaveBeenLastCalledWith(1, { link_type: undefined, link_id: undefined, link_label: undefined })
   })
 })

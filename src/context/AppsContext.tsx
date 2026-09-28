@@ -39,7 +39,6 @@ import pivotonLogo from '@/assets/integrations/pivoton.png'
 interface AppDef {
   id: string
   label: string
-  description: string
   icon: string
   color: string
   bg: string
@@ -88,7 +87,6 @@ export const AVAILABLE_APPS: AppDef[] = [
   {
     id:          'shiftmanager',
     label:       'Shiftmanager',
-    description: 'Koppeling met Shiftmanager voor diensten, planning en kandidaten.',
     icon:        '🗂️',
     image:       shiftmanagerLogo,
     group:       'planning',
@@ -100,7 +98,6 @@ export const AVAILABLE_APPS: AppDef[] = [
   {
     id:          'aelio',
     label:       'Aelio',
-    description: 'Koppeling met Aelio voor dienstenbeheer en personeelsplanning.',
     icon:        '🗓️',
     group:       'planning',
     image:       aelioLogo,
@@ -112,7 +109,6 @@ export const AVAILABLE_APPS: AppDef[] = [
   {
     id:          'intus',
     label:       'Intus',
-    description: 'Koppeling met Intus planning voor het ophalen van diensten en kandidaten.',
     icon:        '📅',
     group:       'planning',
     image:       intusLogo,
@@ -124,7 +120,6 @@ export const AVAILABLE_APPS: AppDef[] = [
   {
     id:          'sdb',
     label:       'SDB planning',
-    description: 'Koppeling met SDB planning voor diensten en roosters.',
     icon:        '🗓️',
     group:       'planning',
     image:       sdbLogo,
@@ -137,7 +132,6 @@ export const AVAILABLE_APPS: AppDef[] = [
   {
     id:          'elanza',
     label:       'Elanza',
-    description: 'Koppeling met Elanza voor diensten en kandidaatbeheer.',
     icon:        '📋',
     group:       'planning',
     image:       elanzaLogo,
@@ -149,7 +143,6 @@ export const AVAILABLE_APPS: AppDef[] = [
   {
     id:          'ons',
     label:       'ONS',
-    description: 'Koppeling met ONS (Nedap) voor planning en roosters.',
     icon:        '📆',
     group:       'planning',
     image:       onsLogo,
@@ -166,7 +159,6 @@ export const AVAILABLE_APPS: AppDef[] = [
     // module flag both use the §10 hf-slug; 'helloflex' 422'd on every toggle.
     id:          'hf',
     label:       'HelloFlex',
-    description: 'Backoffice-koppeling met HelloFlex (verloning, facturatie, contracten).',
     icon:        '🟡',
     image:       helloflexLogo,
     group:       'backoffice',
@@ -178,7 +170,6 @@ export const AVAILABLE_APPS: AppDef[] = [
   {
     id:          'easyflex',
     label:       'EasyFlex',
-    description: 'Backoffice-koppeling met EasyFlex (verloning en facturatie).',
     icon:        '💶',
     group:       'backoffice',
     image:       easyflexLogo,
@@ -191,7 +182,6 @@ export const AVAILABLE_APPS: AppDef[] = [
   {
     id:          'afas',
     label:       'AFAS',
-    description: 'Backoffice-koppeling met AFAS (HRM, verloning en facturatie).',
     icon:        '🧾',
     group:       'backoffice',
     image:       afasLogo,
@@ -205,7 +195,6 @@ export const AVAILABLE_APPS: AppDef[] = [
   {
     id:          'clevergig',
     label:       'Clevergig',
-    description: 'Planning-koppeling met Clevergig (zorg-flex diensten en pools).',
     icon:        '🩺',
     group:       'planning',
     image:       clevergigLogo,
@@ -218,7 +207,6 @@ export const AVAILABLE_APPS: AppDef[] = [
   {
     id:          'fleks',
     label:       'Fleks',
-    description: 'Planning-koppeling met Fleks voor flexpools en dienstenbeheer.',
     icon:        '🧩',
     group:       'planning',
     image:       fleksLogo,
@@ -233,7 +221,6 @@ export const AVAILABLE_APPS: AppDef[] = [
   {
     id:          'nocore',
     label:       'Nocore',
-    description: 'Backoffice-koppeling met Nocore Flex (verloning en facturatie).',
     icon:        '🏢',
     group:       'backoffice',
     image:       nocoreLogo,
@@ -246,7 +233,6 @@ export const AVAILABLE_APPS: AppDef[] = [
   {
     id:          'pivoton',
     label:       'Pivoton',
-    description: 'Backoffice-koppeling met Pivoton (flex-administratie en verloning).',
     icon:        '🔄',
     group:       'backoffice',
     image:       pivotonLogo,
@@ -264,7 +250,6 @@ export const AVAILABLE_APPS: AppDef[] = [
   {
     id:          'threecx',
     label:       '3CX',
-    description: 'Telefonie-koppeling met 3CX: klikken-om-te-bellen en gesprekslog op het kandidaatdossier.',
     icon:        '📞',
     group:       'telefonie',
     image:       threecxLogo,
@@ -277,7 +262,6 @@ export const AVAILABLE_APPS: AppDef[] = [
   {
     id:          'teams',
     label:       'Microsoft Teams',
-    description: 'Bellen via Teams Phone en gespreksnotities terug op het dossier.',
     icon:        '💬',
     group:       'telefonie',
     image:       teamsLogo,
@@ -290,7 +274,6 @@ export const AVAILABLE_APPS: AppDef[] = [
   {
     id:          'voys',
     label:       'Voys',
-    description: 'Nederlandse VoIP-centrale (VoIPGRID): klikken-om-te-bellen en gesprekshistorie.',
     icon:        '☎️',
     group:       'telefonie',
     image:       voysLogo,
@@ -303,7 +286,6 @@ export const AVAILABLE_APPS: AppDef[] = [
   {
     id:          'aircall',
     label:       'Aircall',
-    description: 'Cloud-telefonie voor recruitmentteams: bellen, opnames en dossier-sync.',
     icon:        '📱',
     group:       'telefonie',
     image:       aircallLogo,
@@ -320,7 +302,6 @@ export const AVAILABLE_APPS: AppDef[] = [
     id:          'ai_planner',
     Mark:        AiPlannerMark,
     label:       'AI Planner',
-    description: 'AI-planner: diensten aanbieden, reminders, gewerkte diensten en statuswijzigingen. Toont de map "AI Planner" in Workflows.',
     icon:        '🤖',
     group:       'koios_ai',
     color:       '#7C3AED',
@@ -332,7 +313,6 @@ export const AVAILABLE_APPS: AppDef[] = [
     id:          'ai_recruiter',
     Mark:        AiRecruiterMark,
     label:       'AI Recruiter',
-    description: 'AI-recruiter: kennismaking en automatische reacties op kandidaat-berichten. Toont de map "AI Recruiter" in Workflows.',
     icon:        '🎯',
     group:       'koios_ai',
     color:       '#DB2777',
@@ -350,7 +330,6 @@ export const AVAILABLE_APPS: AppDef[] = [
     id:          'kvk',
     Mark:        KvkMark,
     label:       'KvK / Handelsregister',
-    description: 'Handelsregister-opzoeking: KvK-nummer geeft naam, adres en status terug.',
     icon:        '🏛️',
     group:       'verificatie',
     color:       '#0C4A6E',
@@ -363,7 +342,6 @@ export const AVAILABLE_APPS: AppDef[] = [
     id:          'vat',
     Mark:        VatMark,
     label:       'BTW-validatie (VIES)',
-    description: 'BTW-nummer valideren via de Europese VIES-dienst.',
     icon:        '🇪🇺',
     group:       'verificatie',
     color:       '#1E3A8A',

@@ -119,7 +119,7 @@ export function useCandidatesData({ filterParams, page, pageSize, t, setActionMs
   const total      = listQuery.data?.total ?? 0
   const lastPage   = listQuery.data?.lastPage ?? 1
   const loading    = listQuery.isLoading
-  const error      = listQuery.isError ? t('page.loadError', { defaultValue: 'Kandidaten laden is mislukt.' }) : null
+  const error      = listQuery.isError ? t('page.loadError') : null
 
   // SELECT-RACE-1 (REFRESH-FIX-2): bump epoch only when settled row-id set changes.
   const rowsEpoch = useRowsEpoch(listQuery.isFetching, listQuery.data?.candidates)

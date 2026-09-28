@@ -189,14 +189,14 @@ export default function NotesTab({
   if ((chipTypes ?? noteTypes).length > 0) {
     filterRows.push({
       type: 'single', key: 'type', label: labels.type, value: typeFilter, onChange: setTypeFilter,
-      allLabel: t('notes.allTypes', { defaultValue: 'Alle types' }),
+      allLabel: t('notes.allTypes'),
       options: (chipTypes ?? noteTypes).map(nt => ({ value: String(nt.value), label: String(nt.label ?? nt.value) })),
     })
   }
   if (channels.length > 0) {
     filterRows.push({
       type: 'single', key: 'channel', label: labels.channel, value: channelFilter, onChange: setChannelFilter,
-      allLabel: t('notes.allChannels', { defaultValue: 'Alle kanalen' }),
+      allLabel: t('notes.allChannels'),
       options: channels.map(ch => ({ value: String(ch.value), label: String(ch.label ?? ch.value) })),
     })
   }

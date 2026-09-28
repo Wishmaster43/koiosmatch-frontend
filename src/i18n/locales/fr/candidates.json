@@ -930,6 +930,9 @@
     "adviceNoneLabel": "Aucune action nécessaire"
   },
   "cv": {
+    "preview": {
+      "summary": "Ouvrier logistique expérimenté avec 8 ans d'expérience en transport et distribution. Fiable, orienté client et flexible."
+    },
     "contact": "Contact",
     "summary": "Résumé",
     "languages": "Langues",

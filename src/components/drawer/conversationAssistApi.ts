@@ -24,14 +24,6 @@ export interface ConversationAssistActionItem {
   due_date: string | null
   note_excerpt: string | null
 }
-// Dutch fallback label per action-item type (mirrors noteAssistApi's
-// ACTION_TYPE_LABEL_NL, minus "email" — the conversation vocabulary has no
-// email item). DEFAULT-VALUE-1 pattern: this lane never edits locale JSON, so
-// every t() call carries this as its defaultValue until the reported
-// `candidates:conversations.assist.actionTypes.*` keys land.
-export const ACTION_TYPE_LABEL_NL: Record<ConversationAssistActionType, string> = {
-  task: 'Taak', whatsapp: 'WhatsApp', appointment: 'Afspraak', notification: 'Melding',
-}
 // summarize returns prose; actions returns structured items — one discriminated
 // result so the caller never has to guess the shape by mode alone. Both carry
 // promptLogId (KOIOS-FEEDBACK-FE-1) so KoiosFeedback can vote on this answer.

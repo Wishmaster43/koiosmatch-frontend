@@ -177,7 +177,7 @@ export default function KoiosResultCards({
         <div style={{ marginTop: actualGroups.length > 0 ? 4 : 0 }}>
           {actualSkipped.map((skip) => (
             <Caption key={skip.entity} style={{ display: 'block', marginTop: 4 }}>
-              {tk('results.skipped', { defaultValue: 'Overgeslagen: {{reason}}', reason: skip.reden })}
+              {tk('results.skipped', { reason: skip.reden })}
             </Caption>
           ))}
         </div>

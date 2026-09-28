@@ -19,24 +19,25 @@ export function fmtDate(d?: string | number | null, locale = 'nl-NL'): string {
   return formatMonthYear(dt, locale, 'short')
 }
 
-// Dutch fallback for the section labels — used when no `t` is supplied (the PDF is
-// rendered outside the React tree, so the caller passes its translate fn in).
-const CV_NL: Record<string, string> = {
-  contact: 'Contact', languages: 'Talen', skills: 'Vaardigheden', certificates: 'Certificaten',
-  experience: 'Werkervaring', education: 'Opleiding', preferences: 'Voorkeuren',
-  email: 'E-mail', phone: 'Tel.', residence: 'Woonplaats', born: 'Geboren', nationality: 'Nationaliteit',
-  present: 'heden', nameFallback: 'Naam', madeBy: 'Opgemaakt door {{company}}', madeVia: 'Opgemaakt via KoiosMatch',
+// English fallback for the section labels (FILES-EN-1: source text is English-only,
+// even a fallback) — used when no `t` is supplied (the PDF is rendered outside the
+// React tree, so the caller passes its translate fn in). Mirrors en candidates.json's cv.*.
+const CV_EN: Record<string, string> = {
+  contact: 'Contact', languages: 'Languages', skills: 'Skills', certificates: 'Certificates',
+  experience: 'Work experience', education: 'Education', preferences: 'Preferences',
+  email: 'Email', phone: 'Phone', residence: 'Residence', born: 'Born', nationality: 'Nationality',
+  present: 'present', nameFallback: 'Name', madeBy: 'Created by {{company}}', madeVia: 'Created with KoiosMatch',
 }
 
-// Minimal {{var}} interpolation for the Dutch fallback (i18next handles it when `t` is set).
+// Minimal {{var}} interpolation for the English fallback (i18next handles it when `t` is set).
 const interp = (str: string, opts: Record<string, unknown> = {}) => str.replace(/\{\{(\w+)\}\}/g, (_, k) => String(opts[k] ?? ''))
 
 // Resolves one CV label key: through the caller's `t` under the `cv.` namespace
-// when available, otherwise through the Dutch seed above.
+// when available, otherwise through the English seed above.
 export type CvLabelFn = (key: string, opts?: Record<string, unknown>) => string
-// Returns a label resolver bound once to the caller's t, falling back to the Dutch seed dictionary when none is supplied.
+// Returns a label resolver bound once to the caller's t, falling back to the English seed dictionary when none is supplied.
 export function makeCvLabeller(t?: TranslateFn): CvLabelFn {
-  return (k, opts) => (t ? t(`cv.${k}`, opts) : interp(CV_NL[k] ?? k, opts))
+  return (k, opts) => (t ? t(`cv.${k}`, opts) : interp(CV_EN[k] ?? k, opts))
 }
 
 // A date formatter already bound to the document's locale — passed to the

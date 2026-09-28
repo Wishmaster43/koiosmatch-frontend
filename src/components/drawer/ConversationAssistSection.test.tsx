@@ -23,11 +23,31 @@ vi.mock('./conversationAssistApi', async (importOriginal) => {
   return { ...actual, assistConversation: vi.fn() }
 })
 
+// Tag each translator function with the namespace it was bound to (react-i18next's
+// real useTranslation, wrapped) so a namespace-mismatch regression (the
+// candidates-bound t reaching KoiosFeedback instead of the common-bound one its
+// `koios.feedback.*` keys live under) is visible on the `t` object itself,
+// not just on its (identical, defaultValue-less) string output.
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>()
+  return {
+    ...actual,
+    useTranslation: (ns?: string) => {
+      const real = actual.useTranslation(ns)
+      const tagged = Object.assign((...args: Parameters<typeof real.t>) => real.t(...args), { __ns: ns })
+      return { ...real, t: tagged }
+    },
+  }
+})
+
 // Stub KoiosFeedback so we only assert it RENDERS, not its internal logic
-// (which has its own dedicated test suite).
+// (which has its own dedicated test suite) — but DOES capture the `t` prop's
+// tagged namespace, so a namespace mismatch fails here (verifier fix).
 vi.mock('@/components/layout/koios/KoiosFeedback', () => ({
-  default: ({ promptLogId, surface }: { promptLogId?: string; surface: string }) =>
-    promptLogId ? <div data-testid={`koios-feedback-${surface}`} data-prompt-log-id={promptLogId} /> : null,
+  default: ({ promptLogId, surface, t }: { promptLogId?: string; surface: string; t: { __ns?: string } }) =>
+    promptLogId ? (
+      <div data-testid={`koios-feedback-${surface}`} data-prompt-log-id={promptLogId} data-t-ns={t.__ns} />
+    ) : null,
 }))
 
 describe('ConversationAssistSection · request per mode', () => {
@@ -54,7 +74,7 @@ describe('ConversationAssistSection · request per mode', () => {
     render(<ConversationAssistSection conversationId="conv-1" hasMessages onApply={vi.fn()} />)
     expect(screen.getByRole('button', { name: 'Samenvatten' })).toBeEnabled()
     expect(screen.getByRole('button', { name: 'Actiepunten' })).toBeEnabled()
-    expect(screen.queryByText('Dit gesprek heeft nog geen berichten')).toBeNull()
+    expect(screen.queryByText('conversations.assist.needsMessages')).toBeNull()
   })
 
   it('disables both mode buttons when the thread has no messages, with a VISIBLE (non-hover-only) reason', () => {
@@ -62,7 +82,7 @@ describe('ConversationAssistSection · request per mode', () => {
     render(<ConversationAssistSection conversationId="conv-1" hasMessages={false} onApply={vi.fn()} />)
     expect(screen.getByRole('button', { name: 'Samenvatten' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Actiepunten' })).toBeDisabled()
-    expect(screen.getByText('Dit gesprek heeft nog geen berichten')).toBeInTheDocument()
+    expect(screen.getByText('conversations.assist.needsMessages')).toBeInTheDocument()
   })
 })
 
@@ -98,7 +118,7 @@ describe('ConversationAssistSection · Overnemen (apply into the composer draft)
     await user.click(screen.getByRole('button', { name: 'Actiepunten' }))
     await screen.findByText('Bel terug')
     await user.click(screen.getByRole('button', { name: 'Overnemen' }))
-    expect(onApply).toHaveBeenCalledWith('Bel terug (Taak · 10-08-2026); Stuur bevestiging (WhatsApp)')
+    expect(onApply).toHaveBeenCalledWith('Bel terug (conversations.assist.actionTypes.task · 10-08-2026); Stuur bevestiging (conversations.assist.actionTypes.whatsapp)')
   })
 
   it('actions with zero items shows a calm "no items" notice and no apply button', async () => {
@@ -159,6 +179,9 @@ describe('ConversationAssistSection · KoiosFeedback mounting (KOIOS-FEEDBACK-FE
     await screen.findByText('Summary.')
     expect(screen.getByTestId('koios-feedback-conversation_assist')).toBeInTheDocument()
     expect(screen.getByTestId('koios-feedback-conversation_assist')).toHaveAttribute('data-prompt-log-id', 'pl-conv-1')
+    // Regression: KoiosFeedback's keys live in common.json — it must receive
+    // the common-bound t, never this section's candidates-bound one.
+    expect(screen.getByTestId('koios-feedback-conversation_assist')).toHaveAttribute('data-t-ns', 'common')
   })
 
   it('does NOT mount KoiosFeedback when result has no promptLogId', async () => {

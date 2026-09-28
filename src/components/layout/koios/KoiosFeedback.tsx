@@ -89,13 +89,13 @@ export default function KoiosFeedback({ promptLogId, surface, t }: KoiosFeedback
           <ChipMultiSelect
             options={REASONS.map((r) => ({ value: r, label: t(`koios.feedback.reasons.${r}`, { defaultValue: r }) }))}
             values={reasons} onToggle={toggleReason} selectAll={false}
-            ariaLabel={t('koios.feedback.reasonsLabel', { defaultValue: 'Reden' })} />
+            ariaLabel={t('koios.feedback.reasonsLabel')} />
           <input type="text" value={comment} onChange={(e) => setComment(e.target.value)} maxLength={500}
             placeholder={t('koios.feedback.commentPlaceholder', { defaultValue: 'Toelichting (optioneel)' })}
             aria-label={t('koios.feedback.commentPlaceholder', { defaultValue: 'Toelichting (optioneel)' })}
             style={fieldInputStyle} />
           <Button variant="primary" size="sm" disabled={status !== 'reasoning' || reasons.length === 0}
-            title={reasons.length === 0 ? t('koios.feedback.reasonRequired', { defaultValue: 'Kies minstens één reden' }) : undefined}
+            title={reasons.length === 0 ? t('koios.feedback.reasonRequired') : undefined}
             onClick={() => submit('down', { reasons, comment })}>
             {t('koios.feedback.send', { defaultValue: 'Versturen' })}
           </Button>
@@ -104,7 +104,7 @@ export default function KoiosFeedback({ promptLogId, surface, t }: KoiosFeedback
 
       {status === 'error' && (
         <CalloutBox variant="danger">
-          {t('koios.feedback.error', { defaultValue: 'Feedback versturen is niet gelukt. Probeer het opnieuw.' })}
+          {t('koios.feedback.error')}
         </CalloutBox>
       )}
       {status === 'error' && rating && (

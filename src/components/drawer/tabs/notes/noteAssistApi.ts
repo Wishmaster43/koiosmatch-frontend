@@ -4,11 +4,11 @@
  * shared RichTextAssistBar hit the exact same POST /ai/koios/notes/assist
  * contract now (all three modes) — this file keeps the note domain's existing
  * `AssistMode` / `AssistActionType` / `AssistActionItem` / `AssistResult` /
- * `assistNote` / `ACTION_TYPE_LABEL_NL` names stable for its own importers
- * (NoteAssistSection, noteAssistApply, their tests) without a second
- * implementation living behind them.
+ * `assistNote` names stable for its own importers (NoteAssistSection,
+ * noteAssistApply, their tests) without a second implementation living
+ * behind them.
  */
-export { assistRichText as assistNote, ACTION_TYPE_LABEL_NL } from '@/components/ui/richtext/richTextAssistApi'
+export { assistRichText as assistNote } from '@/components/ui/richtext/richTextAssistApi'
 export type {
   RichTextAssistMode as AssistMode,
   RichTextAssistCombinedMode as AssistCombinedMode,

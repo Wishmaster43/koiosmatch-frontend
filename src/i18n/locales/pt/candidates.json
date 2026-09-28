@@ -953,6 +953,9 @@
     "adviceNoneLabel": "Nenhuma ação necessária"
   },
   "cv": {
+    "preview": {
+      "summary": "Trabalhador de logística experiente, com 8 anos de experiência em transporte e distribuição. Fiável, orientado para o cliente e flexível."
+    },
     "contact": "Contacto",
     "summary": "Texto de perfil",
     "languages": "Idiomas",

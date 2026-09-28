@@ -63,7 +63,7 @@ describe('NoteAssistSection · request per mode', () => {
     render(<NoteAssistSection body="<p>Real note text</p>" onApply={vi.fn()} />)
     expect(screen.getByRole('button', { name: 'Verwerken' })).toBeEnabled()
     expect(screen.getByRole('button', { name: 'Samenvatten' })).toBeEnabled()
-    expect(screen.queryByText('Schrijf eerst tekst in de notitie')).toBeNull()
+    expect(screen.queryByText('notesAssist.needsText')).toBeNull()
   })
 
   it('disables both mode buttons while the note body is empty, with a VISIBLE (non-hover-only) reason', () => {
@@ -71,7 +71,7 @@ describe('NoteAssistSection · request per mode', () => {
     render(<NoteAssistSection body="" onApply={vi.fn()} />)
     expect(screen.getByRole('button', { name: 'Verwerken' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Samenvatten' })).toBeDisabled()
-    expect(screen.getByText('Schrijf eerst tekst in de notitie')).toBeInTheDocument()
+    expect(screen.getByText('notesAssist.needsText')).toBeInTheDocument()
   })
 })
 

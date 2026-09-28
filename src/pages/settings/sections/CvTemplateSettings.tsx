@@ -65,7 +65,9 @@ export default function CvTemplateSettings() {
   const handleDownloadPreview = async () => {
     setGenerating(true)
     try {
-      const blob = await pdf(<CvDocument c={PREVIEW_CANDIDATE} settings={settingsWithBrand} locale={locale} t={tCv} />).toBlob()
+      // Summary is user-facing prose (DEMO-TAAL) — resolved through i18n, never the fixture's own text.
+      const previewCandidate = { ...PREVIEW_CANDIDATE, summary: tCv('cv.preview.summary') }
+      const blob = await pdf(<CvDocument c={previewCandidate} settings={settingsWithBrand} locale={locale} t={tCv} />).toBlob()
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url; a.download = 'CV-preview.pdf'

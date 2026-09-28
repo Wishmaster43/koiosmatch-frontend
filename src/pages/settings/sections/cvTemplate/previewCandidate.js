@@ -17,7 +17,9 @@ export const PREVIEW_CANDIDATE = {
   address: 'Amsterdam',
   dob: '1990-03-15',
   nationality: 'Nederlands',
-  summary: 'Ervaren logistiek medewerker met 8 jaar ervaring in transport en distributie. Betrouwbaar, klantgericht en flexibel inzetbaar.',
+  // `summary` is NOT here — it is user-facing prose shown to every tenant (DEMO-TAAL),
+  // so it is resolved through i18n (candidates:cv.preview.summary) by each consumer
+  // (CvHtmlPreview.tsx / CvTemplateSettings.tsx), never a hardcoded fallback string.
   // Sample data for the 'preferences' section — off by default, but a tenant
   // can enable + relocate it, so the preview needs something to actually show.
   preferredFunctions: ['Dagdienst', 'Avonddienst'],

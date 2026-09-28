@@ -925,7 +925,7 @@ describe('DocumentsSection · document-type filter menu (DOC-TYPE-FILTER-1)', ()
 
   it('the toolbar no longer renders the type dropdown inline — only ONE Filter button', () => {
     render(<DocumentsSection c={withTypedDocs()} />)
-    expect(screen.queryByText('Alle types')).toBeNull()
+    expect(screen.queryByText('documents.allTypes')).toBeNull()
     expect(screen.getByRole('button', { name: 'Filter' })).toBeInTheDocument()
   })
 
@@ -936,7 +936,7 @@ describe('DocumentsSection · document-type filter menu (DOC-TYPE-FILTER-1)', ()
     expect(screen.getByText('diploma.pdf')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Filter' }))
-    await user.click(screen.getByRole('button', { name: 'Alle types' }))
+    await user.click(screen.getByRole('button', { name: 'documents.allTypes' }))
     await user.click(screen.getByRole('button', { name: 'CV' }))
 
     expect(screen.getByText('cv.pdf')).toBeInTheDocument()
@@ -947,7 +947,7 @@ describe('DocumentsSection · document-type filter menu (DOC-TYPE-FILTER-1)', ()
     const user = userEvent.setup()
     render(<DocumentsSection c={withTypedDocs()} />)
     await user.click(screen.getByRole('button', { name: 'Filter' }))
-    await user.click(screen.getByRole('button', { name: 'Alle types' }))
+    await user.click(screen.getByRole('button', { name: 'documents.allTypes' }))
     await user.click(screen.getByRole('button', { name: 'CV' }))
     expect(screen.queryByText('diploma.pdf')).toBeNull()
     expect(screen.getByText('1')).toBeInTheDocument()
