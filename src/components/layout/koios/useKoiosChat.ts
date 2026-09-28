@@ -18,6 +18,7 @@
  * the backend proposes a guarded write instead of executing it — dormant/undefined
  * until that half ships; KoiosPanel only renders the confirmation card when present.
  */
+import { uiLocale } from '@/lib/uiLocale'
 import { useCallback, useState } from 'react'
 import { sendChat } from './koiosApi'
 import { apiErrorKey } from '@/lib/extractApiError'
@@ -104,7 +105,7 @@ export function useKoiosChat() {
     setMessages((prev) => [...prev, { role: 'user', content: trimmed }])
     setLoading(true)
     try {
-      const data = await sendChat(trimmed, model, mergedContext, flavor, effort, voiceMode, history.length ? history : undefined)
+      const data = await sendChat(trimmed, model, mergedContext, flavor, effort, voiceMode, history.length ? history : undefined, uiLocale())
       setMessages((prev) => [...prev, {
         role:       'assistant',
         answer:     data?.answer ?? '',

@@ -30,6 +30,7 @@ import { normalizeFlavorKey } from '@/lib/koiosModelTiers'
 // `effort` are optional per-message overrides; `voiceMode` (VOICE-MODE-1) is
 // sent as `voice_mode: true` only while conversation mode is on — never
 // `false`/null, so an older backend that ignores the field sees nothing extra.
+// `locale` is the UI language (2-letter) the answer must be written in.
 export const sendChat = (
   message: string,
   model?: string | null,
@@ -38,9 +39,13 @@ export const sendChat = (
   effort?: KoiosEffort | null,
   voiceMode?: boolean,
   history?: KoiosChatTurn[],
+  locale?: string,
 ) => {
   const body: Record<string, unknown> = { message }
   if (history?.length) body.history = history
+  // KOIOS-LOCALE-1 (Danny 28-09: Dutch answers for an English user): the user's UI
+  // language rides along so the server prompts the model to answer in it.
+  if (locale) body.locale = locale
   if (model) body.model = model
   if (flavor) body.flavor = flavor
   if (effort) body.effort = effort

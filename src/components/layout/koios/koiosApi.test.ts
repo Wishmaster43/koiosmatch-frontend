@@ -96,6 +96,21 @@ describe('sendChat', () => {
   })
 
   // VOICE-MODE-1: voice_mode is only ever sent as `true` — never `false`/null.
+  // KOIOS-LOCALE-1: the request carries the UI language; absent when unknown.
+  it('includes locale in body when provided', async () => {
+    mockPost.mockResolvedValueOnce({ data: {} })
+    await sendChat('hello', null, [], null, null, false, undefined, 'en')
+    const [, body] = mockPost.mock.calls[0]
+    expect(body).toEqual({ message: 'hello', locale: 'en' })
+  })
+
+  it('omits locale from body when not provided', async () => {
+    mockPost.mockResolvedValueOnce({ data: {} })
+    await sendChat('hello', null, [], null, null, false, undefined, undefined)
+    const [, body] = mockPost.mock.calls[0]
+    expect(body).toEqual({ message: 'hello' })
+  })
+
   it('includes voice_mode: true in body when voiceMode is true', async () => {
     mockPost.mockResolvedValueOnce({ data: { answer: 'test', steps: [] } })
     await sendChat('hello', null, [], null, null, true)
