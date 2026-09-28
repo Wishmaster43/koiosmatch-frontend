@@ -20,8 +20,8 @@ import { tint } from '@/lib/tint'
 
 export default {
   type:     'koios_advice',
-  category: 'AI',
-  label:    'Koios-advies',
+  category: 'ai',
+  label:    'Koios advice',
   Icon:     Sparkles,
   color:    'var(--color-violet)',
   bg:       tint('var(--color-violet)', 6),

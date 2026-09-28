@@ -3,8 +3,8 @@ import { Regex } from 'lucide-react'
 
 export default {
   type:     'advanced_parser',
-  category: 'Tekst & Parsing',
-  label:    'Geavanceerde verwerker',
+  category: 'text',
+  label:    'Advanced parser',
   Icon:     Regex,
   color:    'var(--color-violet)',
   bg:       'var(--color-violet-bg)',

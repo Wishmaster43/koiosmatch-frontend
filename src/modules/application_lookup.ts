@@ -9,8 +9,8 @@ import { tint } from '@/lib/tint'
 
 export default {
   type:     'application_lookup',
-  category: 'Sollicitaties',
-  label:    'Sollicitatie opzoeken',
+  category: 'applications',
+  label:    'Look up application',
   Icon:     SearchCheck,
   color:    'var(--color-map)',
   bg:       tint('var(--color-map)', 9),

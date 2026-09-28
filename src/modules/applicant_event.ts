@@ -6,8 +6,8 @@ import { Zap } from 'lucide-react'
 
 export default {
   type:  'applicant_event',
-  category: 'Triggers',
-  label: 'Sollicitatie-event',
+  category: 'triggers',
+  label: 'Applicant event',
   Icon:  Zap,
   color: 'var(--module-info)',
   bg:    'var(--color-info-bg)',

@@ -9,8 +9,8 @@ import { Webhook } from 'lucide-react'
 
 export default {
   type:  'webhook_send',
-  category: 'Communicatie',
-  label: 'Webhook versturen',
+  category: 'communication',
+  label: 'Send webhook',
   Icon:  Webhook,
   color: 'var(--module-info)',
   bg:    'var(--color-info-bg)',

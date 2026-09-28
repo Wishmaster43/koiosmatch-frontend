@@ -10,8 +10,8 @@ import { MESSAGING_LANGUAGES } from './messagingLanguages'
 
 export default {
   type:  'email_send',
-  category: 'Communicatie',
-  label: 'E-mail Sturen',
+  category: 'communication',
+  label: 'Send email',
   Icon:  Mail,
   color: 'var(--module-brown)',
   bg:    tintBg('var(--module-brown)'),

@@ -8,8 +8,8 @@ import { tintBg } from '@/lib/tint'
 
 export default {
   type:  'calendar_invite',
-  category: 'Planning',
-  label: 'Agenda-uitnodiging (Google Meet)',
+  category: 'planning',
+  label: 'Calendar invite (Google Meet)',
   Icon:  Video,
   color: 'var(--module-teal-strong)',
   bg:    tintBg('var(--module-teal-strong)'),

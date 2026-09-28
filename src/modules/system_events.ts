@@ -9,8 +9,8 @@ import { tint } from '@/lib/tint'
 
 export default {
   type:     'system_events',
-  category: 'Triggers',
-  label:    'Systeemgebeurtenis',
+  category: 'triggers',
+  label:    'System event',
   Icon:     BellRing,
   color:    'var(--module-warmgrey)',
   bg:       tint('var(--module-warmgrey)', 16),

@@ -3,8 +3,8 @@ import { AlignLeft } from 'lucide-react'
 
 export default {
   type:     'text_aggregator',
-  category: 'Flow beheer',
-  label:    'Tekst samenvoegen',
+  category: 'flow',
+  label:    'Text aggregator',
   Icon:     AlignLeft,
   color:    'var(--module-info)',
   bg:       'var(--color-info-bg)',

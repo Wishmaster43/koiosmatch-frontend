@@ -3,8 +3,8 @@ import { Database } from 'lucide-react'
 
 export default {
   type:  'feeder',
-  category: 'Flow beheer',
-  label: 'Data Invoer',
+  category: 'flow',
+  label: 'Data input',
   Icon:  Database,
   color: 'var(--module-slate)',
   bg:    'color-mix(in srgb, var(--module-slate) 8%, transparent)',

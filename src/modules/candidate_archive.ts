@@ -7,8 +7,8 @@ import { Archive } from 'lucide-react'
 
 export default {
   type:  'candidate_archive',
-  category: 'Kandidaten',
-  label: 'Kandidaat archiveren',
+  category: 'candidates',
+  label: 'Archive candidate',
   // §4: the same token/icon pair the Archived quick-view toggle already uses
   // (CandidatesToolbar) — one "archived" identity across the app.
   Icon:  Archive,

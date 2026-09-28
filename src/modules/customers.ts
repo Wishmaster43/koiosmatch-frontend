@@ -5,8 +5,8 @@ import makeEntityModule from './_entityModule'
 
 export default makeEntityModule({
   type:     'customers',
-  label:    'Klanten',
-  category: 'Klanten',
+  label:    'Customers',
+  category: 'customers',
   Icon:     Building2,
   color:    'var(--module-slate)',
   bg:       'color-mix(in srgb, var(--module-slate) 8%, transparent)',

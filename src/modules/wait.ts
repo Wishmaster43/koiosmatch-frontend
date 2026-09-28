@@ -10,8 +10,8 @@ import { tintBg } from '@/lib/tint'
 
 export default {
   type:  'wait',
-  category: 'Flow beheer',
-  label: 'Wachten',
+  category: 'flow',
+  label: 'Wait',
   Icon:  Clock,
   color: 'var(--module-warmgrey)',
   bg:    tintBg('var(--module-warmgrey)'),

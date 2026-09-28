@@ -11,8 +11,8 @@ import { tint } from '@/lib/tint'
 
 export default {
   type:     'match_application_lookup',
-  category: 'Sollicitaties',
-  label:    'Sollicitatie via match ophalen',
+  category: 'applications',
+  label:    'Fetch application via match',
   Icon:     SearchCheck,
   color:    'var(--color-map)',
   bg:       tint('var(--color-map)', 9),

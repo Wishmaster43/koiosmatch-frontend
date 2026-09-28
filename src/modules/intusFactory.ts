@@ -14,7 +14,7 @@ export function makeIntusModule(type: string, label: string, bg: string, urlPlac
   return {
     type,
     app: 'intus',
-    category: 'Intus',
+    category: 'intus',
     label,
     Icon: IntusMark,
     color: 'var(--module-intus)',

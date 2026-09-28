@@ -13,8 +13,8 @@ import { tintBg } from '@/lib/tint'
 
 export default {
   type:  'workflow_call',
-  category: 'Flow beheer',
-  label: 'Workflow aanroepen',
+  category: 'flow',
+  label: 'Call workflow',
   Icon:  WorkflowIcon,
   color: 'var(--module-purple)',
   bg:    tintBg('var(--module-purple)'),

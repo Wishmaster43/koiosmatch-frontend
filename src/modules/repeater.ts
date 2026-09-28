@@ -3,7 +3,7 @@ import { RefreshCw } from 'lucide-react'
 
 export default {
   type:     'repeater',
-  category: 'Flow beheer',
+  category: 'flow',
   label:    'Repeater',
   Icon:     RefreshCw,
   color:    'var(--module-purple)',

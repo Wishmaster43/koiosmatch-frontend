@@ -12,8 +12,8 @@ import { Briefcase } from 'lucide-react'
 
 export default {
   type:  'experience_add',
-  category: 'Kandidaten',
-  label: 'Werkervaring toevoegen',
+  category: 'candidates',
+  label: 'Add work experience',
   Icon:  Briefcase,
   color: 'var(--color-secondary)',
   bg:    'var(--color-secondary-bg)',

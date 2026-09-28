@@ -5,8 +5,8 @@ import makeEntityModule from './_entityModule'
 
 export default makeEntityModule({
   type:     'tasks',
-  label:    'Taken',
-  category: 'Taken',
+  label:    'Tasks',
+  category: 'tasks',
   Icon:     ListChecks,
   color:    'var(--module-periwinkle)',
   bg:       'color-mix(in srgb, var(--module-periwinkle) 16%, transparent)',

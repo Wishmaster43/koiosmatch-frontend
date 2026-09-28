@@ -3,8 +3,8 @@ import { CheckCircle2 } from 'lucide-react'
 
 export default {
   type:     'error_commit',
-  category: 'Flow beheer',
-  label:    'Vastleggen (Commit)',
+  category: 'flow',
+  label:    'Commit',
   Icon:     CheckCircle2,
   color:    'var(--color-secondary)',
   bg:       'var(--color-secondary-bg)',

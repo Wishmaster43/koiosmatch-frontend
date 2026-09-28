@@ -9,8 +9,8 @@ export default {
   // step 422s for a tenant without the sm package — the picker shows it as "requires Shiftmanager".
   module: 'sm',
   app:   'shiftmanager',
-  category: 'Shiftmanager',
-  label: 'SM status bijwerken',
+  category: 'shiftmanager',
+  label: 'Update SM status',
   Icon:  ShiftManagerMark,
   color: 'var(--module-shiftmanager)',
   bg:    'color-mix(in srgb, var(--module-shiftmanager) 8%, transparent)',

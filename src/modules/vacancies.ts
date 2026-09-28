@@ -6,8 +6,8 @@ import { tintBg } from '@/lib/tint'
 
 export default makeEntityModule({
   type:     'vacancies',
-  label:    'Vacatures',
-  category: 'Vacatures',
+  label:    'Vacancies',
+  category: 'vacancies',
   Icon:     Briefcase,
   color:    'var(--color-violet)',
   // House tint (lib/tint, 10%) — distinct from --color-violet-bg (the AI/parser

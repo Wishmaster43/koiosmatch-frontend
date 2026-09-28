@@ -8,8 +8,8 @@ import { tintBg } from '@/lib/tint'
 
 export default {
   type:     'leads_recount',
-  category: 'Vacatures',
-  label:    'Leads-telling vacatures',
+  category: 'vacancies',
+  label:    'Vacancy leads count',
   Icon:     RefreshCw,
   // Same violet family as the Vacatures entity module — one category, one hue.
   color:    'var(--color-violet)',

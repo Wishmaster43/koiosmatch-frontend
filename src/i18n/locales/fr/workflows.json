@@ -193,6 +193,7 @@
     "feeder": "Saisie de données",
     "filter": "Filtre",
     "gateway_mail_hook": "Mail Hook",
+    "geocode": "Géocoder l'adresse (OpenCage)",
     "get_variable": "Obtenir une variable",
     "get_variables": "Obtenir des variables",
     "hf_candidates": "Candidats",

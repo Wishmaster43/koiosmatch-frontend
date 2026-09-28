@@ -232,6 +232,7 @@
     "feeder": "Data Invoer",
     "filter": "Filter",
     "gateway_mail_hook": "Mail Hook",
+    "geocode": "Adres geocoderen (OpenCage)",
     "get_variable": "Variabele ophalen",
     "get_variables": "Variabelen ophalen",
     "hf_candidates": "Kandidaten",

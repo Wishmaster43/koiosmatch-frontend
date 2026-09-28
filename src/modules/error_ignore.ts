@@ -3,8 +3,8 @@ import { EyeOff } from 'lucide-react'
 
 export default {
   type:     'error_ignore',
-  category: 'Flow beheer',
-  label:    'Negeren',
+  category: 'flow',
+  label:    'Ignore',
   Icon:     EyeOff,
   color:    'var(--module-neutral)',
   bg:       'color-mix(in srgb, var(--module-neutral) 8%, transparent)',

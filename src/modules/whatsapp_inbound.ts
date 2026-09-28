@@ -10,8 +10,8 @@ import { tint } from '@/lib/tint'
 
 export default {
   type:     'whatsapp_inbound',
-  category: 'Triggers',
-  label:    'WhatsApp Inkomend',
+  category: 'triggers',
+  label:    'WhatsApp Inbound',
   Icon:     Webhook,
   color:    'var(--module-green)',
   bg:       tint('var(--module-green)', 9),

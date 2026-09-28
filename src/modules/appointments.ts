@@ -8,8 +8,8 @@ import makeEntityModule from './_entityModule'
 
 export default makeEntityModule({
   type:     'appointments',
-  label:    'Afspraken',
-  category: 'Planning',
+  label:    'Appointments',
+  category: 'planning',
   Icon:     CalendarDays,
   color:    'var(--module-teal-strong)',
   bg:       tintBg('var(--module-teal-strong)'),

@@ -11,8 +11,8 @@ import { tint } from '@/lib/tint'
 
 export default {
   type:  'status_set',
-  category: 'Kandidaten',
-  label: 'Status zetten',
+  category: 'candidates',
+  label: 'Set status',
   Icon:  UserCheck,
   color: 'var(--module-teal-strong)',
   bg:    tint('var(--module-teal-strong)', 4),

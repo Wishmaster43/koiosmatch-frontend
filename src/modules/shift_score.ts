@@ -6,8 +6,8 @@ export default {
   type:  'shift_score',
   // GET/read side: gated on the reports MODULE 'sm' (Danny 23-07); the connector app only gates the POST/PATCH linking side.
   module: 'sm',
-  category: 'Shiftmanager',
-  label: 'Diensten scoren',
+  category: 'shiftmanager',
+  label: 'Score shifts',
   Icon:  ShiftManagerMark,
   color: 'var(--module-shiftmanager)',
   bg:    'color-mix(in srgb, var(--module-shiftmanager) 8%, transparent)',

@@ -232,6 +232,7 @@
     "feeder": "Inserimento dati",
     "filter": "Filtro",
     "gateway_mail_hook": "Mail Hook",
+    "geocode": "Geocodifica indirizzo (OpenCage)",
     "get_variable": "Recupera variabile",
     "get_variables": "Recupera variabili",
     "hf_candidates": "Candidati",

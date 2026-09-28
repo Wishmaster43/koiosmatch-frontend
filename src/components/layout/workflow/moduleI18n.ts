@@ -1,18 +1,7 @@
-/**
- * moduleI18n — maps a module's registry category (Dutch source value) to its i18n
- * slug, so ModulePicker/ConfigPanel can render `t('workflows:categories.<slug>')`
- * while the filtering/grouping keeps matching on the raw registry category.
- */
-const CATEGORY_SLUG: Record<string, string> = {
-  'Alle': 'all', 'Triggers': 'triggers', 'Kandidaten': 'candidates', 'Sollicitaties': 'applications',
-  'Vacatures': 'vacancies', 'Matches': 'matches', 'Kansen': 'opportunities', 'Taken': 'tasks',
-  'Klanten': 'customers', 'Planning': 'planning', 'Communicatie': 'communication', 'AI': 'ai',
-  'Shiftmanager': 'shiftmanager', 'HelloFlex': 'helloflex', 'Intus': 'intus', 'Facebook': 'facebook', 'Flow beheer': 'flow',
-  'Tekst & Parsing': 'text', 'Overig': 'other',
-  'Bellijsten': 'outreach',
-}
-
-export const categorySlug = (cat?: string) => CATEGORY_SLUG[cat ?? ''] ?? 'other'
+// The module registry's `category` field IS the i18n slug already (ENGLISH-CODE-1:
+// MODULE-CATEGORY-EN-1 dropped the old Dutch source values), so this is now
+// identity + a safe fallback. Kept as a function so callers never need to change.
+export const categorySlug = (cat?: string) => cat || 'other'
 
 /**
  * Field-label / option translation for the module registry (§5: the workflow editor is

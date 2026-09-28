@@ -6,8 +6,8 @@ import { Users } from 'lucide-react'
 
 export default {
   type:     'candidates_fetch',
-  label:    'Koios Match kandidaten',
-  category: 'Kandidaten',
+  label:    'Koios Match candidates',
+  category: 'candidates',
   Icon:     Users,
   color:    'var(--color-secondary)',
   bg:       'var(--color-secondary-bg)',

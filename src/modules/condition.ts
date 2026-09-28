@@ -3,8 +3,8 @@ import { GitBranch } from 'lucide-react'
 
 export default {
   type:  'condition',
-  category: 'Flow beheer',
-  label: 'Voorwaarde / vertakking',
+  category: 'flow',
+  label: 'Condition / branch',
   Icon:  GitBranch,
   color: 'var(--module-teal)',
   bg:    'color-mix(in srgb, var(--module-teal) 15%, transparent)',

@@ -8,8 +8,8 @@ import makeEntityModule from './_entityModule'
 
 export default makeEntityModule({
   type:     'customer_departments',
-  label:    'Afdelingen',
-  category: 'Klanten',
+  label:    'Departments',
+  category: 'customers',
   Icon:     Network,
   color:    'var(--module-warmgrey)',
   bg:       tint('var(--module-warmgrey)', 16),

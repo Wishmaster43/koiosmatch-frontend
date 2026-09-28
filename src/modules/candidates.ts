@@ -9,8 +9,8 @@ import makeEntityModule from './_entityModule'
 
 export default makeEntityModule({
   type:     'candidates',
-  label:    'Kandidaten',
-  category: 'Kandidaten',
+  label:    'Candidates',
+  category: 'candidates',
   Icon:     Users,
   color:    'var(--color-secondary)',
   bg:       'var(--color-secondary-bg)',

@@ -24,11 +24,11 @@ import Button from '@/components/ui/Button'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { useNumberFormat } from '@/lib/formatters'
 
-// PICKER-INTERSECT: trigger-role modules (registry category 'Triggers' — webhook,
+// PICKER-INTERSECT: trigger-role modules (registry category 'triggers' — webhook,
 // applicant_event, gateway_mail_hook) start a workflow run rather than execute as an
 // engine action step, so the backend engine's action map never lists them by design —
 // they stay exempt from the "not executable" marker below regardless of the catalog.
-const TRIGGER_CATEGORY = 'Triggers'
+const TRIGGER_CATEGORY = 'triggers'
 
 // ── Custom node ───────────────────────────────────────────────────────────────
 
@@ -54,7 +54,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
   // the step becomes invisible/uneditable. --module-neutral (index.css) instead of
   // raw hex, so the fallback swatch stays theme-aware too.
   const meta = knownMeta
-    ?? { label: rawType ?? '', Icon: HelpCircle, color: 'var(--module-neutral)', bg: tint('var(--module-neutral)', 8), category: 'Overig' }
+    ?? { label: rawType ?? '', Icon: HelpCircle, color: 'var(--module-neutral)', bg: tint('var(--module-neutral)', 8), category: 'other' }
   // nodeColor is TOTAL: a registry entry may omit color, and the old hex-concat
   // silently rendered "undefined40" for such a module (r8).
   const nodeColor = meta.color ?? 'var(--color-primary)'

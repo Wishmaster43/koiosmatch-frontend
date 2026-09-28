@@ -9,8 +9,8 @@ import { tintBg } from '@/lib/tint'
 
 export default {
   type:  'notification_send',
-  category: 'Communicatie',
-  label: 'Melding versturen',
+  category: 'communication',
+  label: 'Send notification',
   Icon:  Bell,
   color: 'var(--module-brown)',
   bg:    tintBg('var(--module-brown)'),

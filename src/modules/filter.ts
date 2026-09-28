@@ -3,7 +3,7 @@ import { Filter } from 'lucide-react'
 
 export default {
   type:  'filter',
-  category: 'Flow beheer',
+  category: 'flow',
   label: 'Filter',
   Icon:  Filter,
   color: 'var(--color-violet)',

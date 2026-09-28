@@ -14,8 +14,8 @@ const looksLikePhoneNumber = (value: unknown): string | null =>
 export default {
   type:  'whatsapp_send',
   module: 'whatsapp',
-  category: 'Communicatie',
-  label: 'WhatsApp Sturen',
+  category: 'communication',
+  label: 'Send WhatsApp',
   Icon:  MessageCircle,
   color: 'var(--module-green)',
   bg:    tint('var(--module-green)', 12),

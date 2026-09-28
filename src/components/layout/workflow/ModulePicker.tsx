@@ -16,13 +16,13 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 // One [type, meta] pair from the module registry (used by the picker rows).
 type ModuleMetaEntry = [string, (typeof MODULE_META)[string]]
 
-const CATEGORY_ORDER = ['Alle', 'Triggers', 'Kandidaten', 'Sollicitaties', 'Vacatures', 'Matches', 'Kansen', 'Taken', 'Klanten', 'Planning', 'Communicatie', 'AI', 'Shiftmanager', 'HelloFlex', 'Intus', 'Facebook', 'Flow beheer', 'Tekst & Parsing']
+const CATEGORY_ORDER = ['all', 'triggers', 'candidates', 'applications', 'vacancies', 'matches', 'opportunities', 'tasks', 'customers', 'planning', 'communication', 'ai', 'shiftmanager', 'helloflex', 'intus', 'facebook', 'flow', 'text']
 
-// PICKER-INTERSECT: trigger-role modules (registry category 'Triggers' — webhook,
+// PICKER-INTERSECT: trigger-role modules (registry category 'triggers' — webhook,
 // applicant_event, gateway_mail_hook) start a workflow run rather than execute as an
 // engine action step, so the backend engine's action map never lists them by design —
 // they stay exempt from the executability gate below regardless of the catalog.
-const TRIGGER_CATEGORY = 'Triggers'
+const TRIGGER_CATEGORY = 'triggers'
 
 // Searchable, categorised, app/module-gated grid of every workflow module;
 // picking a tile inserts it after the given edge (or appends it) and closes.
@@ -33,7 +33,7 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
 }) {
   const { t } = useTranslation('workflows')
   const [search, setSearch] = useState('')
-  const [tab,    setTab]    = useState('Alle')
+  const [tab,    setTab]    = useState('all')
   const { isAppEnabled } = useApps() ?? {}
   const { hasModule } = (useAuth() as unknown as { hasModule?: (m: string) => boolean }) ?? {}
   // PICKER-INTERSECT: GET /workflows/modules, keyed by type — the backend engine's
@@ -78,14 +78,14 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
 
   const visible = allEntries.filter(([type, m]) => {
     const matchSearch = !search || modLabel(type, m.label).toLowerCase().includes(search.toLowerCase())
-    const matchTab    = tab === 'Alle' || m.category === tab
+    const matchTab    = tab === 'all' || m.category === tab
     return matchSearch && matchTab
   })
 
   // Count per category
   const counts: Record<string, number> = {}
   allEntries.forEach(([, m]) => {
-    const c = m.category ?? 'Overig'
+    const c = m.category ?? 'other'
     counts[c] = (counts[c] ?? 0) + 1
   })
 
@@ -118,15 +118,15 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
     </div>
   )
 
-  // In "Alle" tab (or search), render with category dividers
+  // In "all" tab (or search), render with category dividers
   const renderGrouped = () => {
     const groups: Record<string, ModuleMetaEntry[]> = {}
     visible.forEach(entry => {
-      const cat = entry[1].category ?? 'Overig'
+      const cat = entry[1].category ?? 'other'
       if (!groups[cat]) groups[cat] = []
       groups[cat].push(entry)
     })
-    const orderedCats = CATEGORY_ORDER.filter(c => c !== 'Alle' && groups[c])
+    const orderedCats = CATEGORY_ORDER.filter(c => c !== 'all' && groups[c])
     const remaining = Object.keys(groups).filter(c => !CATEGORY_ORDER.includes(c))
     return [...orderedCats, ...remaining].map((cat, i) => (
       <div key={cat}>
@@ -151,7 +151,7 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
 
       {/* Tabs */}
       <div style={{ display: 'flex', flexWrap: 'wrap', borderBottom: '1px solid var(--border)', flexShrink: 0, padding: '0 8px' }}>
-        {CATEGORY_ORDER.filter(c => c === 'Alle' || counts[c]).map(cat => (
+        {CATEGORY_ORDER.filter(c => c === 'all' || counts[c]).map(cat => (
           <button key={cat} type="button" onClick={() => { setTab(cat); }}
             // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- rustende categorie-TAB (plaatsmarkering, PRIMAIR-VLAK-1): underline-actief, geen actieknop
             style={{
@@ -171,7 +171,7 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
         {visible.length === 0 && (
           <p style={{ padding: '32px 16px', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>{t('picker.empty')}</p>
         )}
-        {visible.length > 0 && (tab === 'Alle' || search)
+        {visible.length > 0 && (tab === 'all' || search)
           ? renderGrouped()
           : renderGrid(visible)
         }

@@ -193,6 +193,7 @@
     "feeder": "Dateneingabe",
     "filter": "Filter",
     "gateway_mail_hook": "Mail Hook",
+    "geocode": "Adresse geocodieren (OpenCage)",
     "get_variable": "Variable abrufen",
     "get_variables": "Variablen abrufen",
     "hf_candidates": "Kandidaten",

@@ -16,8 +16,8 @@ export default {
   // from the picker so nobody grabs the wrong one. Existing nodes keep rendering;
   // CMBE retires the engine/seed side in the re-provision round.
   hidden:   true,
-  category: 'AI',
-  label:    'AI-interview starten',
+  category: 'ai',
+  label:    'Start AI interview',
   Icon:     BotMessageSquare,
   color:    'var(--color-violet)',
   bg:       'var(--color-violet-bg)',

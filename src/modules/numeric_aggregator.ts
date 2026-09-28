@@ -3,8 +3,8 @@ import { Calculator } from 'lucide-react'
 
 export default {
   type:     'numeric_aggregator',
-  category: 'Flow beheer',
-  label:    'Numeriek samenvoegen',
+  category: 'flow',
+  label:    'Numeric aggregator',
   Icon:     Calculator,
   color:    'var(--module-info)',
   bg:       'var(--color-info-bg)',

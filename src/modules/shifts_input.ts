@@ -4,8 +4,8 @@ import { ClipboardList } from 'lucide-react'
 export default {
   type:  'shifts_input',
   app:   ['shiftmanager','intus','aelio','elanza'],
-  category: 'Planning',
-  label: 'Diensten Plakken',
+  category: 'planning',
+  label: 'Paste shifts',
   Icon:  ClipboardList,
   color: 'var(--color-archive)',
   bg:    'var(--color-warning-bg)',

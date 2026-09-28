@@ -3,8 +3,8 @@ import { StickyNote } from 'lucide-react'
 
 export default {
   type:     'set_variables',
-  category: 'Flow beheer',
-  label:    'Variabelen instellen',
+  category: 'flow',
+  label:    'Set variables',
   Icon:     StickyNote,
   // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
   color:    'var(--color-warning)',

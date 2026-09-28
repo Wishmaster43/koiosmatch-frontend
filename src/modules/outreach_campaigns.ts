@@ -8,8 +8,8 @@ import makeEntityModule from './_entityModule'
 
 export default makeEntityModule({
   type:     'outreach_campaigns',
-  label:    'Bellijsten',
-  category: 'Bellijsten',
+  label:    'Call lists',
+  category: 'outreach',
   Icon:     PhoneCall,
   color:    'var(--module-purple)',
   bg:       tint('var(--module-purple)', 16),

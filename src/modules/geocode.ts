@@ -13,8 +13,8 @@ import { tint } from '@/lib/tint'
 
 export default {
   type:     'geocode',
-  label:    'Adres geocoderen (OpenCage)',
-  category: 'Kandidaten',
+  label:    'Geocode address (OpenCage)',
+  category: 'candidates',
   Icon:     OpenCageMark,
   color:    'var(--module-geocode)',
   bg:       tint('var(--module-geocode)', 8),

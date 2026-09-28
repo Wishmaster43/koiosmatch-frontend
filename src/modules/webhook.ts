@@ -7,7 +7,7 @@ export default {
   type:  'webhook',
   // VERTREKMODULE-1 + Appendix H: the inbound webhook is a valid point of origin.
   isStart: true,
-  category: 'Triggers',
+  category: 'triggers',
   label: 'Webhook Trigger',
   Icon:  Webhook,
   color: 'var(--module-info)',

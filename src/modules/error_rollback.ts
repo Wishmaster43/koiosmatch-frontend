@@ -3,8 +3,8 @@ import { RotateCcw } from 'lucide-react'
 
 export default {
   type:     'error_rollback',
-  category: 'Flow beheer',
-  label:    'Terugdraaien (Rollback)',
+  category: 'flow',
+  label:    'Rollback',
   Icon:     RotateCcw,
   // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
   color:    'var(--color-warning)',

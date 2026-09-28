@@ -5,8 +5,8 @@ import makeEntityModule from './_entityModule'
 
 export default makeEntityModule({
   type:     'opportunities',
-  label:    'Kansen',
-  category: 'Kansen',
+  label:    'Opportunities',
+  category: 'opportunities',
   Icon:     Target,
   // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
   color:    'var(--color-warning)',

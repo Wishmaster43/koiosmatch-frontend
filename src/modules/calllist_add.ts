@@ -6,8 +6,8 @@ import { PhoneCall } from 'lucide-react'
 
 export default {
   type:  'calllist_add',
-  category: 'Kandidaten',
-  label: 'Toevoegen aan bellijst',
+  category: 'candidates',
+  label: 'Add to call list',
   Icon:  PhoneCall,
   color: 'var(--module-cyan)',
   bg:    'var(--color-info-bg)',

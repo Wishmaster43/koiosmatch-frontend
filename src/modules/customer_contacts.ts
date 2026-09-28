@@ -8,8 +8,8 @@ import makeEntityModule from './_entityModule'
 
 export default makeEntityModule({
   type:     'customer_contacts',
-  label:    'Contactpersonen',
-  category: 'Klanten',
+  label:    'Contacts',
+  category: 'customers',
   Icon:     Contact,
   color:    'var(--module-mauve)',
   bg:       tint('var(--module-mauve)', 16),

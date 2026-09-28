@@ -9,8 +9,8 @@ import { Megaphone } from 'lucide-react'
 
 export default {
   type:  'facebook_send',
-  category: 'Facebook',
-  label: 'Facebook terugkoppeling',
+  category: 'facebook',
+  label: 'Facebook feedback',
   Icon:  Megaphone,
   // Token colours (§4): secondary blue keeps this visually distinct from the
   // generic webhook (info) and AI (violet) categories — no ad-hoc hex.

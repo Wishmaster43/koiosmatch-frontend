@@ -5,8 +5,8 @@ import makeEntityModule from './_entityModule'
 
 export default makeEntityModule({
   type:     'applications',
-  label:    'Sollicitaties',
-  category: 'Sollicitaties',
+  label:    'Applications',
+  category: 'applications',
   Icon:     ClipboardList,
   color:    'var(--color-map)',
   bg:       'color-mix(in srgb, var(--color-map) 9%, transparent)',

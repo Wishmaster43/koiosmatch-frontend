@@ -206,7 +206,7 @@ const MODULES: ModuleDef[] = [
 ]
 
 export const MODULE_META = Object.fromEntries(
-  MODULES.map(m => [m.type, { label: m.label, Icon: m.Icon, color: m.color, bg: m.bg, category: m.category ?? 'Overig', hidden: m.hidden }])
+  MODULES.map(m => [m.type, { label: m.label, Icon: m.Icon, color: m.color, bg: m.bg, category: m.category ?? 'other', hidden: m.hidden }])
 )
 
 // VERTREKMODULE-1: the types a workflow may START with — Koios entity nodes and

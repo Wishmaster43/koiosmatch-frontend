@@ -3,8 +3,8 @@ import { PlayCircle } from 'lucide-react'
 
 export default {
   type:     'error_resume',
-  category: 'Flow beheer',
-  label:    'Hervatten (Resume)',
+  category: 'flow',
+  label:    'Resume',
   Icon:     PlayCircle,
   // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
   color:    'var(--color-success)',

@@ -8,8 +8,8 @@ import makeEntityModule from './_entityModule'
 
 export default makeEntityModule({
   type:     'customer_locations',
-  label:    'Locaties',
-  category: 'Klanten',
+  label:    'Locations',
+  category: 'customers',
   Icon:     MapPin,
   color:    'var(--module-cyan)',
   bg:       tint('var(--module-cyan)', 16),

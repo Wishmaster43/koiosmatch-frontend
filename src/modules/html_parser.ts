@@ -3,8 +3,8 @@ import { FileCode2 } from 'lucide-react'
 
 export default {
   type:     'html_parser',
-  category: 'Tekst & Parsing',
-  label:    'HTML Verwerker',
+  category: 'text',
+  label:    'HTML parser',
   Icon:     FileCode2,
   color:    'var(--color-violet)',
   bg:       'var(--color-violet-bg)',

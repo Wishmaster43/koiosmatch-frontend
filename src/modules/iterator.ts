@@ -3,7 +3,7 @@ import { Repeat } from 'lucide-react'
 
 export default {
   type:  'iterator',
-  category: 'Flow beheer',
+  category: 'flow',
   label: 'Iterator',
   Icon:  Repeat,
   color: 'var(--module-purple)',

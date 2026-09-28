@@ -4,8 +4,8 @@ import { Sparkles } from 'lucide-react'
 export default {
   type:  'ai_match',
   module: 'aiagents',
-  category: 'Matches',
-  label: 'AI-kandidaatvoorstellen',
+  category: 'matches',
+  label: 'AI candidate suggestions',
   Icon:  Sparkles,
   color: 'var(--module-mauve)',
   bg:    'color-mix(in srgb, var(--module-mauve) 16%, transparent)',

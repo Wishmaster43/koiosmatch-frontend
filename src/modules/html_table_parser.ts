@@ -3,8 +3,8 @@ import { TableProperties } from 'lucide-react'
 
 export default {
   type:     'html_table_parser',
-  category: 'Tekst & Parsing',
-  label:    'HTML-tabel verwerker',
+  category: 'text',
+  label:    'HTML table parser',
   Icon:     TableProperties,
   color:    'var(--color-violet)',
   bg:       'var(--color-violet-bg)',

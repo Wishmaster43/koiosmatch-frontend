@@ -7,8 +7,8 @@ import { tintBg } from '@/lib/tint'
 
 export default {
   type:  'applicant_message',
-  category: 'Communicatie',
-  label: 'Bericht naar sollicitant',
+  category: 'communication',
+  label: 'Message to applicant',
   Icon:  Send,
   color: 'var(--module-green)',
   bg:    tintBg('var(--module-green)'),

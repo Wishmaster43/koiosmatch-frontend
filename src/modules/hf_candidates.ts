@@ -5,8 +5,8 @@ export default {
   type:  'hf_candidates',
   // GET/read side: gated on the reports MODULE 'hf' (Danny 23-07); 'helloflex' was moreover never a valid app key.
   module: 'hf',
-  category: 'HelloFlex',
-  label: 'Kandidaten',
+  category: 'helloflex',
+  label: 'Candidates',
   Icon:  HelloFlexMark,
   color: 'var(--module-helloflex)',
   bg:    'color-mix(in srgb, var(--module-helloflex) 12%, transparent)',

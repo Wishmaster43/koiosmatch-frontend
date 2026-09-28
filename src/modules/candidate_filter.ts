@@ -9,8 +9,8 @@ import { tint } from '@/lib/tint'
 export default {
   type:  'candidate_filter',
   app:   'shiftmanager',
-  category: 'Shiftmanager',
-  label: 'Kandidaten ophalen',
+  category: 'shiftmanager',
+  label: 'Fetch candidates',
   Icon:  ShiftManagerMark,
   color: 'var(--module-shiftmanager)',
   bg:    tint('var(--module-shiftmanager)', 8),

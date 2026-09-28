@@ -3,8 +3,8 @@ import { Table2 } from 'lucide-react'
 
 export default {
   type:     'table_aggregator',
-  category: 'Flow beheer',
-  label:    'Tabel samenvoegen',
+  category: 'flow',
+  label:    'Table aggregator',
   Icon:     Table2,
   color:    'var(--module-info)',
   bg:       'var(--color-info-bg)',

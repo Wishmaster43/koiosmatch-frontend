@@ -3,8 +3,8 @@ import { FileText } from 'lucide-react'
 
 export default {
   type:     'html_to_text',
-  category: 'Tekst & Parsing',
-  label:    'HTML naar tekst',
+  category: 'text',
+  label:    'HTML to text',
   Icon:     FileText,
   color:    'var(--color-violet)',
   bg:       'var(--color-violet-bg)',

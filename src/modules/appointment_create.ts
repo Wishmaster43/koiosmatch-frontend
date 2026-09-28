@@ -9,8 +9,8 @@ import { tintBg } from '@/lib/tint'
 
 export default {
   type:  'appointment_create',
-  category: 'Kandidaten',
-  label: 'Afspraak/intake plannen',
+  category: 'candidates',
+  label: 'Schedule appointment/intake',
   Icon:  CalendarPlus,
   color: 'var(--module-teal-strong)',
   bg:    tintBg('var(--module-teal-strong)'),

@@ -4,8 +4,8 @@ import { BookOpen } from 'lucide-react'
 export default {
   type:  'knowledge_search',
   module: 'aiagents',
-  category: 'AI',
-  label: 'Kennisbank Zoeken',
+  category: 'ai',
+  label: 'Knowledge base search',
   Icon:  BookOpen,
   color: 'var(--module-teal-strong)',
   bg:    'color-mix(in srgb, var(--module-teal-strong) 10%, transparent)',

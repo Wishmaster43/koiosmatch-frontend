@@ -6,7 +6,7 @@ import makeEntityModule from './_entityModule'
 export default makeEntityModule({
   type:     'matches',
   label:    'Matches',
-  category: 'Matches',
+  category: 'matches',
   Icon:     Handshake,
   color:    'var(--module-pink)',
   bg:       'color-mix(in srgb, var(--module-pink) 10%, transparent)',

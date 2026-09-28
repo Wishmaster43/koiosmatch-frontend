@@ -12,6 +12,6 @@ describe('match_application_lookup module card', () => {
   it('is registered under the engine type with an empty config schema, like application_lookup', () => {
     expect(MODULES.find(m => m.type === 'match_application_lookup')).toBe(card)
     expect(MODULE_SCHEMAS.match_application_lookup).toEqual([])
-    expect(MODULE_META.match_application_lookup).toMatchObject({ category: 'Sollicitaties' })
+    expect(MODULE_META.match_application_lookup).toMatchObject({ category: 'applications' })
   })
 })

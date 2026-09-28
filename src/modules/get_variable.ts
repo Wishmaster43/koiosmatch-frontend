@@ -3,8 +3,8 @@ import { BookMarked } from 'lucide-react'
 
 export default {
   type:     'get_variable',
-  category: 'Flow beheer',
-  label:    'Variabele ophalen',
+  category: 'flow',
+  label:    'Get variable',
   Icon:     BookMarked,
   color:    'var(--module-info)',
   bg:       'var(--color-info-bg)',

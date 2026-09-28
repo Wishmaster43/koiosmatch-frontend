@@ -6,8 +6,8 @@ export default {
   type:  'sm_shifts',
   // GET/read side: gated on the reports MODULE 'sm' (Danny 23-07); the connector app only gates the POST/PATCH coupling side.
   module: 'sm',
-  category: 'Shiftmanager',
-  label: 'Diensten',
+  category: 'shiftmanager',
+  label: 'Shifts',
   Icon:  ShiftManagerMark,
   color: 'var(--module-shiftmanager)',
   bg:    'color-mix(in srgb, var(--module-shiftmanager) 8%, transparent)',

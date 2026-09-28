@@ -3,7 +3,7 @@ import { Combine } from 'lucide-react'
 
 export default {
   type:  'aggregator',
-  category: 'Flow beheer',
+  category: 'flow',
   label: 'Aggregator',
   Icon:  Combine,
   color: 'var(--module-info)',

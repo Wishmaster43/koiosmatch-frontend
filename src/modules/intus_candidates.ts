@@ -2,4 +2,4 @@
 // Uses the shared Intus module factory; differs only in type and label.
 import { makeIntusModule } from './intusFactory'
 
-export default makeIntusModule('intus_candidates', 'Kandidaten', 'color-mix(in srgb, var(--module-intus) 9%, transparent)', 'https://api.intus.example/candidates')
+export default makeIntusModule('intus_candidates', 'Candidates', 'color-mix(in srgb, var(--module-intus) 9%, transparent)', 'https://api.intus.example/candidates')

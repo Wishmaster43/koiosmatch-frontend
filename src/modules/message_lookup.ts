@@ -7,8 +7,8 @@ export default {
   // SM-WRITE-GATE-1 (api d36a4406, WorkflowWriter::MODULE_REQUIRES): saving a workflow with this
   // step 422s for a tenant without the sm package — the picker shows it as "requires Shiftmanager".
   module: 'sm',
-  category: 'Communicatie',
-  label: 'Berichtstatus',
+  category: 'communication',
+  label: 'Message status',
   Icon:  MessageCircle,
   // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
   color: 'var(--color-success)',

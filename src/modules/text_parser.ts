@@ -3,8 +3,8 @@ import { ScanText } from 'lucide-react'
 
 export default {
   type:     'text_parser',
-  category: 'Tekst & Parsing',
-  label:    'Tekst verwerker',
+  category: 'text',
+  label:    'Text parser',
   Icon:     ScanText,
   color:    'var(--color-violet)',
   bg:       'var(--color-violet-bg)',

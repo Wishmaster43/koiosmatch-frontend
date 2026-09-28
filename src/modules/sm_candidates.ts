@@ -7,8 +7,8 @@ export default {
   type:  'sm_candidates',
   // GET/read side: gated on the reports MODULE 'sm' (Danny 23-07); the connector app only gates the POST/PATCH coupling side.
   module: 'sm',
-  category: 'Shiftmanager',
-  label: 'Kandidaten',
+  category: 'shiftmanager',
+  label: 'Candidates',
   Icon:  ShiftManagerMark,
   color: 'var(--module-shiftmanager)',
   // §4 house tint (HUISSTIJL-1): the shared helper, not a hand-rolled color-mix literal.

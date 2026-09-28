@@ -5,8 +5,8 @@ import { GitBranch } from 'lucide-react'
 export default {
   type:  'scenario',
   module: 'whatsapp',
-  category: 'Communicatie',
-  label: 'Scenario / Situatie',
+  category: 'communication',
+  label: 'Scenario / Situation',
   Icon:  GitBranch,
   color: 'var(--module-green)',
   bg:    'color-mix(in srgb, var(--module-green) 12%, transparent)',

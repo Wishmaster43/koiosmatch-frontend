@@ -3,8 +3,8 @@ import { OctagonX } from 'lucide-react'
 
 export default {
   type:     'error_break',
-  category: 'Flow beheer',
-  label:    'Stoppen (Break)',
+  category: 'flow',
+  label:    'Stop (Break)',
   Icon:     OctagonX,
   // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
   color:    'var(--color-danger)',

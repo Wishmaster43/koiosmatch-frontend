@@ -10,8 +10,8 @@ import { tintBg } from '@/lib/tint'
 
 export default {
   type:  'task_create',
-  category: 'Taken',
-  label: 'Taak aanmaken',
+  category: 'tasks',
+  label: 'Create task',
   Icon:  ListPlus,
   color: 'var(--module-periwinkle)',
   // Active-strength tint (16%, matches the flagship `tasks` module's own bg).

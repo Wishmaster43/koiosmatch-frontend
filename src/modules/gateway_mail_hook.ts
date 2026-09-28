@@ -7,7 +7,7 @@ export default {
   // audit module-schema-reconcile-4 (CMBE 03-09, grep 0): no engine class and no inbound
   // route exist for this card, so it cannot be added any more; saved nodes still render.
   hidden:   true,
-  category: 'Triggers',
+  category: 'triggers',
   label:    'Mail Hook',
   Icon:     Mail,
   color:    'var(--module-info)',

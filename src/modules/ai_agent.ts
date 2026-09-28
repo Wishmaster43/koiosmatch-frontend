@@ -12,7 +12,7 @@ import { tint } from '@/lib/tint'
 export default {
   type:     'ai_agent',
   // No `app` property → always visible in the module picker
-  category: 'AI',
+  category: 'ai',
   label:    'AI Agents',
   Icon:     Bot,
   color:    'var(--color-violet)',
