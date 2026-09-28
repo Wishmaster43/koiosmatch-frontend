@@ -83,7 +83,7 @@ export default function ContactPersonsTable() {
     const groups: ReportFilterGroup[] = []
     if (customerOptions.length > 0) {
       groups.push({
-        key: 'klant', label: t('contacts.filters.customer'), type: 'search-select',
+        key: 'customer', label: t('contacts.filters.customer'), type: 'search-select',
         selected: selectedCustomers,
         options: customerOptions.map(c => ({
           value: c, label: c,
@@ -93,7 +93,7 @@ export default function ContactPersonsTable() {
       })
     }
     groups.push({
-      key: 'berichten', label: t('contacts.filters.planningContact'),
+      key: 'planning_contact', label: t('contacts.filters.planningContact'),
       selected: selectedReceives,
       options: [
         { value: 'ja',  label: t('contacts.planningYes'), count: contacts.filter(c => Boolean(c.scheduled_order_contact)).length },

@@ -19,13 +19,13 @@
       "wegvallend": "Wegfallend",
       "daling": "Starker Rückgang",
       "opkomend": "Aufkommend",
-      "nieuw_inactief": "Neu & inaktiv"
+      "newly_inactive": "Neu & inaktiv"
     },
     "kpi": {
       "wegvallend": "Wegfallend",
       "daling": "Starker Rückgang",
       "opkomend": "Aufkommend",
-      "nieuwInactief": "Neu & inaktiv"
+      "newlyInactive": "Neu & inaktiv"
     },
     "plannedTitle": "Geplante UZK pro Monat",
     "matrixTitle": "Pro Kandidat pro Monat",

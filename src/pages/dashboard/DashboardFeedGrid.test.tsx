@@ -38,7 +38,7 @@ vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatNumber: (n:
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: unknown) => String(v) }) }))
 vi.mock('./hooks/useDashboardFilterState', () => ({
   useDashboardFilterState: () => ({
-    selPeriode: 'month', setSelPeriode: vi.fn(), selVestiging: null, setSelVestiging: vi.fn(),
+    selPeriod: 'month', setSelPeriod: vi.fn(), selBranch: null, setSelBranch: vi.fn(),
     selStatus: null, setSelStatus: vi.fn(), dashFilterParams: {},
   }),
 }))

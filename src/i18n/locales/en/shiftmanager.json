@@ -19,13 +19,13 @@
       "wegvallend": "Dropping off",
       "daling": "Strong decline",
       "opkomend": "Rising",
-      "nieuw_inactief": "New & inactive"
+      "newly_inactive": "New & inactive"
     },
     "kpi": {
       "wegvallend": "Dropping off",
       "daling": "Strong decline",
       "opkomend": "Rising",
-      "nieuwInactief": "New & inactive"
+      "newlyInactive": "New & inactive"
     },
     "plannedTitle": "Planned UZK per month",
     "matrixTitle": "Per candidate per month",

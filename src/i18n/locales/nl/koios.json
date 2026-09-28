@@ -172,10 +172,10 @@
   },
   "results": {
     "group": {
-      "kandidaten": "Kandidaten",
-      "vacatures": "Vacatures",
-      "klanten": "Klanten",
-      "kansen": "Kansen",
+      "candidates": "Kandidaten",
+      "vacancies": "Vacatures",
+      "customers": "Klanten",
+      "opportunities": "Kansen",
       "matches": "Matches"
     },
     "showMore": "Toon meer",

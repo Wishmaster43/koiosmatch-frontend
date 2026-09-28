@@ -5,7 +5,7 @@
  * picking a flagged Contractvorm hides Klant/Locatie/Afdeling/Contactpersoon,
  * disables submit until Vestiging is filled, and switching back restores the
  * fields. The exact POST-body seam (which keys ride/don't ride) is covered at
- * the hook level in useMatchForm.klantloos.test.ts — this file only proves the
+ * the hook level in useMatchForm.customerless.test.ts — this file only proves the
  * DOM the recruiter actually sees.
  */
 import { describe, it, expect, vi } from 'vitest'
@@ -14,8 +14,8 @@ import userEvent from '@testing-library/user-event'
 import MatchModal from './MatchModal'
 
 const CANDIDATE_TYPES = [
-  { value: 'zzp', label: 'ZZP', color: '#6E8FD6', customer_not_applicable: true },
-  { value: 'temp_agency', label: 'Uitzend', color: '#9CA3AF', customer_not_applicable: false },
+  { value: 'zzp', label: 'ZZP', color: 'var(--color-primary)', customer_not_applicable: true },
+  { value: 'temp_agency', label: 'Uitzend', color: 'var(--text-muted)', customer_not_applicable: false },
 ]
 
 vi.mock('@/context/LookupsContext', () => ({ useLookups: () => ({ candidateTypes: CANDIDATE_TYPES }) }))

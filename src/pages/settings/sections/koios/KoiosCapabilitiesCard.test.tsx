@@ -184,8 +184,8 @@ describe('KoiosCapabilitiesCard', () => {
 
     // candidates tab is active by default; maak_kandidaat is its second row (write section).
     const toggles = screen.getAllByRole('switch')
-    const kandidaatToggle = toggles[1] // zoek_kandidaten (read, index 0) then maak_kandidaat (write, index 1)
-    fireEvent.click(kandidaatToggle) // maak_kandidaat: false -> true
+    const createCandidateToggle = toggles[1] // zoek_kandidaten (read, index 0) then maak_kandidaat (write, index 1)
+    fireEvent.click(createCandidateToggle) // maak_kandidaat: false -> true
     await waitFor(() => expect(mockPatch).toHaveBeenCalledWith('/ai/koios/capabilities/tools',
       { tools: { maak_kandidaat: true } }))
     // StrictMode-guard: ONE patch per click, never a double write (Opus-vondst).

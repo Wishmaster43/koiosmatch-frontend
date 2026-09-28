@@ -172,10 +172,10 @@
   },
   "results": {
     "group": {
-      "kandidaten": "Kandidaten",
-      "vacatures": "Stellen",
-      "klanten": "Kunden",
-      "kansen": "Chancen",
+      "candidates": "Kandidaten",
+      "vacancies": "Stellen",
+      "customers": "Kunden",
+      "opportunities": "Chancen",
       "matches": "Übereinstimmungen"
     },
     "showMore": "Mehr anzeigen",

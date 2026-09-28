@@ -14,9 +14,9 @@ const AVG_WINDOW_MONTHS   = 3
 const DROPOFF_PCT         = 0.5
 const WEGVALLEND_MIN_HRS  = 8
 const OPKOMEND_MIN_HRS    = 8
-const NIEUW_INACTIEF_DAYS = 30
+const NEWLY_INACTIVE_DAYS = 30
 
-export type ShiftAlarm = 'wegvallend' | 'daling' | 'opkomend' | 'nieuw_inactief' | null
+export type ShiftAlarm = 'wegvallend' | 'daling' | 'opkomend' | 'newly_inactive' | null
 
 export interface ShiftAnalysisRow {
   id: string
@@ -71,7 +71,7 @@ function toRow(r: RawRow, nowKey: string, nowMs: number): ShiftAnalysisRow {
 
   // First matching rule wins (attention → drop-off → strong drop → rising).
   let alarm: ShiftAlarm = null
-  if (regDays > NIEUW_INACTIEF_DAYS && worked === 0)                     alarm = 'nieuw_inactief'
+  if (regDays > NEWLY_INACTIVE_DAYS && worked === 0)                     alarm = 'newly_inactive'
   else if (avgHours >= WEGVALLEND_MIN_HRS && upcoming === 0)             alarm = 'wegvallend'
   else if (avgHours > 0 && upcoming < avgHours * (1 - DROPOFF_PCT))      alarm = 'daling'
   else if (avgHours < 1 && upcoming >= OPKOMEND_MIN_HRS)                 alarm = 'opkomend'

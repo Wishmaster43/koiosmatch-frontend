@@ -22,21 +22,21 @@ import type { KoiosSearchResultsGrouped, KoiosResultRef } from './koiosTypes'
 // type without a key falls back to the raw type so a new backend type never renders
 // as an untranslated dotted key.
 const ENTITY_LABELS: Record<string, string> = {
-  candidate: 'kandidaten',
-  vacancy: 'vacatures',
-  customer: 'klanten',
-  opportunity: 'kansen',
+  candidate: 'candidates',
+  vacancy: 'vacancies',
+  customer: 'customers',
+  opportunity: 'opportunities',
   match: 'matches',
 }
 // Legacy `refs` prop (assistant suggestions): bucket by the ref's own type, in first-seen order.
-function groupRefsByType(refs: KoiosResultRef[]): Array<{ entity: string; refs: KoiosResultRef[]; aantal: number; meer: boolean }> {
+function groupRefsByType(refs: KoiosResultRef[]): Array<{ entity: string; refs: KoiosResultRef[]; count: number; more: boolean }> {
   const order: string[] = []
   const byType: Record<string, KoiosResultRef[]> = {}
   for (const r of refs) {
     if (!byType[r.type]) { byType[r.type] = []; order.push(r.type) }
     byType[r.type].push(r)
   }
-  return order.map(entity => ({ entity, refs: byType[entity], aantal: byType[entity].length, meer: false }))
+  return order.map(entity => ({ entity, refs: byType[entity], count: byType[entity].length, more: false }))
 }
 // Resolves the click target for one ref: a direct page for a mapped type, or
 // (for a child ref) the parent's page + measured sub-tab; null when neither applies.
@@ -177,7 +177,7 @@ export default function KoiosResultCards({
         <div style={{ marginTop: actualGroups.length > 0 ? 4 : 0 }}>
           {actualSkipped.map((skip) => (
             <Caption key={skip.entity} style={{ display: 'block', marginTop: 4 }}>
-              {tk('results.skipped', { reason: skip.reden })}
+              {tk('results.skipped', { reason: skip.reason })}
             </Caption>
           ))}
         </div>

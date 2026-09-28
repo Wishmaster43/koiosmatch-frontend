@@ -66,8 +66,8 @@ function groupSearchResults(step: Record<string, unknown>, refs: KoiosResultRef[
       groups.push({
         entity: entityType,
         refs: entityRefs,
-        aantal: entityRefs.length,
-        meer: false,
+        count: entityRefs.length,
+        more: false,
       })
     }
   }
@@ -80,7 +80,7 @@ function groupSearchResults(step: Record<string, unknown>, refs: KoiosResultRef[
     const reason = pick<string>(entry, 'reason', 'reden')
     if (isSkipped && typeof reason === 'string') {
       const entityType = ENTITY_TYPE_MAP[key] || key
-      skipped.push({ entity: entityType, reden: reason })
+      skipped.push({ entity: entityType, reason })
     }
   }
 
@@ -102,10 +102,10 @@ export default function KoiosMessage({ msg, isNew, t, greeting }: { msg: KoiosCh
   // Then, try to find a search_all step and group results by entity with metadata
   // (KOIOS-EN-1 phase A: tool ids are English; canonicalToolId still resolves a
   // not-yet-updated 'zoek_alles').
-  const zoekAllesStep = (msg.steps ?? []).find((s) => s.tool && canonicalToolId(s.tool) === 'search_all')
-  const groupedResults: KoiosSearchResultsGrouped = zoekAllesStep
-    ? groupSearchResults(zoekAllesStep, resultRefs)
-    : { groups: resultRefs.length > 0 ? [{ entity: 'candidate', refs: resultRefs, aantal: resultRefs.length, meer: false }] : [], skipped: [] }
+  const searchAllStep = (msg.steps ?? []).find((s) => s.tool && canonicalToolId(s.tool) === 'search_all')
+  const groupedResults: KoiosSearchResultsGrouped = searchAllStep
+    ? groupSearchResults(searchAllStep, resultRefs)
+    : { groups: resultRefs.length > 0 ? [{ entity: 'candidate', refs: resultRefs, count: resultRefs.length, more: false }] : [], skipped: [] }
 
   return (
     <div style={{ display: 'flex', gap: 8, flexDirection: isKoios ? 'row' : 'row-reverse',

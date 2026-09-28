@@ -74,7 +74,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   // Topbar filter selections (single-value per dimension server-side) — UI state
   // stays here; ALL server state lives in useDashboardData (audit item 21).
   const {
-    selPeriode, setSelPeriode, selVestiging, setSelVestiging, selStatus, setSelStatus, dashFilterParams,
+    selPeriod, setSelPeriod, selBranch, setSelBranch, selStatus, setSelStatus, dashFilterParams,
   } = useDashboardFilterState()
 
   // K-173 ?preview_role: a super-view user switching the dashboard to another
@@ -129,7 +129,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
 
   // Registers this page's right-panel filter groups (period/location/status options).
   useDashboardFilterPanel({
-    dash, t, selPeriode, setSelPeriode, selVestiging, setSelVestiging, selStatus, setSelStatus,
+    dash, t, selPeriod, setSelPeriod, selBranch, setSelBranch, selStatus, setSelStatus,
   })
 
   return (

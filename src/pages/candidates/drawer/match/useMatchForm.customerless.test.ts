@@ -13,8 +13,8 @@ import { useMatchForm } from './useMatchForm'
 // Two Contractvorm rows: only 'zzp' is klant-loos — flag-driven, never a
 // hardcoded slug check.
 const CANDIDATE_TYPES = [
-  { value: 'zzp', label: 'ZZP', color: '#6E8FD6', customer_not_applicable: true },
-  { value: 'temp_agency', label: 'Uitzend', color: '#9CA3AF', customer_not_applicable: false },
+  { value: 'zzp', label: 'ZZP', color: 'var(--color-primary)', customer_not_applicable: true },
+  { value: 'temp_agency', label: 'Uitzend', color: 'var(--text-muted)', customer_not_applicable: false },
 ]
 
 vi.mock('@/context/LookupsContext', () => ({ useLookups: () => ({ candidateTypes: CANDIDATE_TYPES }) }))

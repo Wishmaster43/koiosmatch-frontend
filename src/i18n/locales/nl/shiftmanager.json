@@ -19,13 +19,13 @@
       "wegvallend": "Wegvallend",
       "daling": "Sterke daling",
       "opkomend": "Opkomend",
-      "nieuw_inactief": "Nieuw & inactief"
+      "newly_inactive": "Nieuw & inactief"
     },
     "kpi": {
       "wegvallend": "Wegvallend",
       "daling": "Sterke daling",
       "opkomend": "Opkomend",
-      "nieuwInactief": "Nieuw & inactief"
+      "newlyInactive": "Nieuw & inactief"
     },
     "plannedTitle": "Geplande UZK per maand",
     "matrixTitle": "Per kandidaat per maand",

@@ -48,15 +48,15 @@ export type KoiosResultRef = KoiosContextRef
 // When present, the step includes this alongside refs[].
 export interface KoiosSearchResultGroup {
   entity: 'candidate' | 'vacancy' | 'customer' | 'opportunity' | 'match'
-  aantal?: number      // Total matching count before truncation
-  meer?: boolean       // True if truncated (>5 results)
-  overgeslagen?: { reden: string } | null  // When entity was skipped
+  count?: number       // Total matching count before truncation
+  more?: boolean       // True if truncated (>5 results)
+  skipped?: { reason: string } | null  // When entity was skipped
 }
 
 // Grouped search results per entity, extracted from a zoek_alles step.
 export interface KoiosSearchResultsGrouped {
   groups: Array<KoiosSearchResultGroup & { refs: KoiosResultRef[] }>
-  skipped: Array<{ entity: string; reden: string }>
+  skipped: Array<{ entity: string; reason: string }>
 }
 
 // POST /ai/koios/actions/{id}/confirm response (KOIOS-CONFIRM-DECLINE-1,

@@ -118,10 +118,10 @@ export default function ShiftmanagerDashboard() {
   // Open the drill-down defaulted to whichever activity bucket currently has the most candidates.
   const openActivityDrill = () => {
     const biggest = [...activityBuckets].sort((a, b) => b.list.length - a.list.length)[0]
-    setDrill({ mode: 'nieuw', title: '', candidates: [], tabs: activityTabs, initialTab: biggest?.key })
+    setDrill({ mode: 'new', title: '', candidates: [], tabs: activityTabs, initialTab: biggest?.key })
   }
   // Aandachtskandidaten drill: the "nieuw & niet ingepland" list (X/actief).
-  const openAttentionDrill = () => openDrill('nieuw', t('dashboard.stats.attnNewNotPlanned'), derived.attention)
+  const openAttentionDrill = () => openDrill('new', t('dashboard.stats.attnNewNotPlanned'), derived.attention)
 
   // Candidate cards (NOT filter-driven) — passed into ShiftsChartsBlock, which adds the
   // filter-driven shift cards → one combined 9-card row. Activiteit is a clearer channels

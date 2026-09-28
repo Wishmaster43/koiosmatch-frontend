@@ -44,8 +44,8 @@ describe('KoiosMessage — search results grouping', () => {
   it('groups refs by entity type from a zoek_alles step', () => {
     const mockT = (key: string) => {
       const map: Record<string, string> = {
-        'koios.results.group.kandidaten': 'Candidates',
-        'koios.results.group.vacatures': 'Vacancies',
+        'koios.results.group.candidates': 'Candidates',
+        'koios.results.group.vacancies': 'Vacancies',
       }
       return map[key] || key
     }
@@ -74,8 +74,8 @@ describe('KoiosMessage — search results grouping', () => {
   it('groups refs by entity type from a search_all step (English tool id)', () => {
     const mockT = (key: string) => {
       const map: Record<string, string> = {
-        'koios.results.group.kandidaten': 'Candidates',
-        'koios.results.group.vacatures': 'Vacancies',
+        'koios.results.group.candidates': 'Candidates',
+        'koios.results.group.vacancies': 'Vacancies',
       }
       return map[key] || key
     }

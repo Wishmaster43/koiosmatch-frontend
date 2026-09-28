@@ -36,7 +36,7 @@ export default function ContactsPage() {
 
   // Builds the customer/planning-contact filter definitions, with live counts, handed to the shared right-panel filter UI.
   const filterGroups = useMemo(() => [
-    { key: 'klant', label: t('contactsPage.cols.customer'),
+    { key: 'customer', label: t('contactsPage.cols.customer'),
       options: customerOptions.map(k => ({ value: k, label: k, count: contacts.filter(c => c.customer === k).length })),
       selected: selCustomers, onToggle: (val: string) => setSelCustomers(prev => toggleInList(prev, val)) },
     { key: 'planning', label: t('contactsPage.planningContact'),
@@ -49,8 +49,8 @@ export default function ContactsPage() {
 
   // Registers this page's filter groups with the shared right panel, and unregisters them on unmount so they do not leak into another page.
   useEffect(() => {
-    registerFilters('klanten-contacts', filterGroups)
-    return () => unregisterFilters('klanten-contacts')
+    registerFilters('customer-contacts', filterGroups)
+    return () => unregisterFilters('customer-contacts')
   }, [filterGroups, registerFilters, unregisterFilters])
 
   // Applies the active customer/planning-contact filters plus the free-text search (name/customer/email) in one pass.

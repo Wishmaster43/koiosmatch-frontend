@@ -19,15 +19,15 @@ const PERIOD_VALUES = ['vandaag', 'week', 'maand', 'kwartaal', 'jaar'] as const
 interface UseDashboardFilterPanelArgs {
   dash: DashData | null
   t: (key: string) => string
-  selPeriode: string[]; setSelPeriode: Dispatch<SetStateAction<string[]>>
-  selVestiging: Array<string | number>; setSelVestiging: Dispatch<SetStateAction<Array<string | number>>>
+  selPeriod: string[]; setSelPeriod: Dispatch<SetStateAction<string[]>>
+  selBranch: Array<string | number>; setSelBranch: Dispatch<SetStateAction<Array<string | number>>>
   selStatus: string[]; setSelStatus: Dispatch<SetStateAction<string[]>>
 }
 
 // Assembles and registers the dashboard's right-panel filter groups; see the module
 // doc comment above for where each dimension's options come from.
 export function useDashboardFilterPanel({
-  dash, t, selPeriode, setSelPeriode, selVestiging, setSelVestiging, selStatus, setSelStatus,
+  dash, t, selPeriod, setSelPeriod, selBranch, setSelBranch, selStatus, setSelStatus,
 }: UseDashboardFilterPanelArgs) {
   // Translate the stable period slugs into labels here (hook scope has t()).
   const periodOptions = useMemo(() =>
@@ -38,19 +38,19 @@ export function useDashboardFilterPanel({
 
   // Three filter groups (period/branch/status) in the shape the shared right panel expects.
   const filterGroups = useMemo(() => [
-    { key: 'period', label: t('filters.periodLabel'), selected: selPeriode,
+    { key: 'period', label: t('filters.periodLabel'), selected: selPeriod,
       options: periodOptions,
-      onToggle: (v: string) => setSelPeriode(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
-    { key: 'vestiging', label: t('filters.locationLabel'), selected: selVestiging,
+      onToggle: (v: string) => setSelPeriod(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
+    { key: 'branch', label: t('filters.locationLabel'), selected: selBranch,
       options: branchOptions,
-      onToggle: (v: string | number) => setSelVestiging(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
+      onToggle: (v: string | number) => setSelBranch(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
     { key: 'kandidaatstatus', label: t('filters.statusLabel'), selected: selStatus,
       options: (dash?.filters?.statuses ?? []).map(s => ({ value: s.value, label: s.label })),
       onToggle: (v: string) => setSelStatus(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
     // Setters are stable (useState identity) but are now received as params rather than
     // declared locally, so React's exhaustive-deps can no longer infer that — list them
     // explicitly; harmless since their identity never changes across renders.
-  ], [selPeriode, selVestiging, selStatus, dash, periodOptions, branchOptions, t, setSelPeriode, setSelVestiging, setSelStatus])
+  ], [selPeriod, selBranch, selStatus, dash, periodOptions, branchOptions, t, setSelPeriod, setSelBranch, setSelStatus])
 
   const { registerFilters, unregisterFilters } = useRightPanel()
   // Register this page's filter groups with the shared right panel; unregister on

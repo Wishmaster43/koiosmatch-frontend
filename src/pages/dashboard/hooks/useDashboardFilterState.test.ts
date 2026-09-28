@@ -11,7 +11,7 @@ import { useDashboardFilterState } from './useDashboardFilterState'
 describe('useDashboardFilterState · K-173 fase 3 branch_id[]', () => {
   it('sends branch_id as an array of the selected branches, never location_id', () => {
     const { result } = renderHook(() => useDashboardFilterState())
-    act(() => result.current.setSelVestiging(['1', 'none']))
+    act(() => result.current.setSelBranch(['1', 'none']))
     expect(result.current.dashFilterParams).toEqual({ branch_id: ['1', 'none'] })
     expect(result.current.dashFilterParams).not.toHaveProperty('location_id')
   })
@@ -24,9 +24,9 @@ describe('useDashboardFilterState · K-173 fase 3 branch_id[]', () => {
   it('combines branch_id with period/status when all three are set', () => {
     const { result } = renderHook(() => useDashboardFilterState())
     act(() => {
-      result.current.setSelPeriode(['week'])
+      result.current.setSelPeriod(['week'])
       result.current.setSelStatus(['available'])
-      result.current.setSelVestiging(['2'])
+      result.current.setSelBranch(['2'])
     })
     expect(result.current.dashFilterParams).toEqual({ period: 'week', status: 'available', branch_id: ['2'] })
   })

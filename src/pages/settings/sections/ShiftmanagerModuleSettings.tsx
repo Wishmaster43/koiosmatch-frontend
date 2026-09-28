@@ -29,7 +29,7 @@ export default function ShiftmanagerModuleSettings() {
   const appOn = isAppEnabled ? isAppEnabled('shiftmanager') : false
 
   // Active sub-tab: the connection tab is the connector's front door.
-  const [activeTab, setActiveTab] = useState('koppeling')
+  const [activeTab, setActiveTab] = useState('connection')
 
   // Deep-link guard: with neither flag on there is nothing to show (the
   // registry hides the nav item; this is the defensive fallback only).
@@ -39,7 +39,7 @@ export default function ShiftmanagerModuleSettings() {
 
   // Connection + mapping ride on either flag; KPI/display stay reporting-module-only.
   const tabs = [
-    { id: 'koppeling', label: t('integrations.tabs.connection') },
+    { id: 'connection', label: t('integrations.tabs.connection') },
     { id: 'mapping', label: t('integrations.tabs.mapping') },
     ...(moduleOn ? [
       { id: 'kpis', label: t('smKpis.title') },
@@ -51,7 +51,7 @@ export default function ShiftmanagerModuleSettings() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <SubTabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
-      {activeTab === 'koppeling' && <IntegrationConnectionCard connector="shiftmanager" />}
+      {activeTab === 'connection' && <IntegrationConnectionCard connector="shiftmanager" />}
       {activeTab === 'mapping' && <IntegrationMappingsTable connector="shiftmanager" domains={['functie']} />}
       {/* The .js schema literals are untyped and only structurally close to Schema — cast, don't retype the shared .js source (out of this task's scope). */}
       {moduleOn && activeTab === 'kpis' && <SchemaSection schema={smKpisSchema as Schema} />}

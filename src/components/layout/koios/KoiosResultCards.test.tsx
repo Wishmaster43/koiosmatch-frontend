@@ -14,10 +14,10 @@ vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEnti
 
 const t = (key: string, opts?: Record<string, unknown>) => {
   const map: Record<string, string> = {
-    'koios.results.group.kandidaten': 'Candidates',
-    'koios.results.group.vacatures': 'Vacancies',
-    'koios.results.group.klanten': 'Customers',
-    'koios.results.group.kansen': 'Opportunities',
+    'koios.results.group.candidates': 'Candidates',
+    'koios.results.group.vacancies': 'Vacancies',
+    'koios.results.group.customers': 'Customers',
+    'koios.results.group.opportunities': 'Opportunities',
     'koios.results.group.matches': 'Matches',
     'koios.results.showMore': 'Toon meer',
     'koios.results.showLess': 'Toon minder',
@@ -42,7 +42,7 @@ describe('KoiosResultCards — grouped results', () => {
       { type: 'candidate', id: 'c2', label: 'Maria García' },
     ]
     const groups: KoiosSearchResultsGrouped = {
-      groups: [{ entity: 'candidate', refs, aantal: 2, meer: false }],
+      groups: [{ entity: 'candidate', refs, count: 2, more: false }],
       skipped: [],
     }
     render(<KoiosResultCards groups={groups} t={t} />)
@@ -59,7 +59,7 @@ describe('KoiosResultCards — grouped results', () => {
       label: `Candidate ${i + 1}`,
     }))
     const groups: KoiosSearchResultsGrouped = {
-      groups: [{ entity: 'candidate', refs, aantal: 7, meer: true }],
+      groups: [{ entity: 'candidate', refs, count: 7, more: true }],
       skipped: [],
     }
     render(<KoiosResultCards groups={groups} t={t} />)
@@ -80,7 +80,7 @@ describe('KoiosResultCards — grouped results', () => {
       label: `Candidate ${i + 1}`,
     }))
     const groups: KoiosSearchResultsGrouped = {
-      groups: [{ entity: 'candidate', refs, aantal: 7, meer: true }],
+      groups: [{ entity: 'candidate', refs, count: 7, more: true }],
       skipped: [],
     }
     render(<KoiosResultCards groups={groups} t={t} />)
@@ -105,8 +105,8 @@ describe('KoiosResultCards — grouped results', () => {
     ]
     const groups: KoiosSearchResultsGrouped = {
       groups: [
-        { entity: 'candidate', refs: candidateRefs, aantal: 1, meer: false },
-        { entity: 'vacancy', refs: vacancyRefs, aantal: 1, meer: false },
+        { entity: 'candidate', refs: candidateRefs, count: 1, more: false },
+        { entity: 'vacancy', refs: vacancyRefs, count: 1, more: false },
       ],
       skipped: [],
     }
@@ -124,7 +124,7 @@ describe('KoiosResultCards — grouped results', () => {
       { type: 'candidate', id: 'c1', label: 'Ahmed Vos' },
     ]
     const groups: KoiosSearchResultsGrouped = {
-      groups: [{ entity: 'candidate', refs, aantal: 2, meer: false }],
+      groups: [{ entity: 'candidate', refs, count: 2, more: false }],
       skipped: [],
     }
     render(<KoiosResultCards groups={groups} t={t} />)
@@ -135,7 +135,7 @@ describe('KoiosResultCards — grouped results', () => {
   it('renders a notice for each skipped entity', () => {
     const groups: KoiosSearchResultsGrouped = {
       groups: [],
-      skipped: [{ entity: 'vacancy', reden: 'Geen rechten voor vacatures.' }],
+      skipped: [{ entity: 'vacancy', reason: 'Geen rechten voor vacatures.' }],
     }
     render(<KoiosResultCards groups={groups} t={t} />)
     expect(screen.getByText(/Overgeslagen: Geen rechten voor vacatures/)).toBeInTheDocument()
@@ -148,7 +148,7 @@ describe('KoiosResultCards — grouped results', () => {
       { type: 'candidate', id: 'c1', label: 'Ahmed Vos' },
     ]
     const groups: KoiosSearchResultsGrouped = {
-      groups: [{ entity: 'candidate', refs, aantal: 1, meer: false }],
+      groups: [{ entity: 'candidate', refs, count: 1, more: false }],
       skipped: [],
     }
     render(<KoiosResultCards groups={groups} t={t} />)
@@ -164,7 +164,7 @@ describe('KoiosResultCards — grouped results', () => {
       { type: 'appointment', id: 'a1', label: 'intake · 02-09-2026', parent: { type: 'candidate', id: 'c1' } },
     ]
     const groups: KoiosSearchResultsGrouped = {
-      groups: [{ entity: 'candidate', refs, aantal: 1, meer: false }],
+      groups: [{ entity: 'candidate', refs, count: 1, more: false }],
       skipped: [],
     }
     render(<KoiosResultCards groups={groups} t={t} />)
@@ -188,11 +188,11 @@ describe('KoiosResultCards — grouped results', () => {
 
     const groups: KoiosSearchResultsGrouped = {
       groups: [
-        { entity: 'candidate', refs: candidateRefs, aantal: 7, meer: true },
-        { entity: 'vacancy', refs: vacancyRefs, aantal: 2, meer: false },
+        { entity: 'candidate', refs: candidateRefs, count: 7, more: true },
+        { entity: 'vacancy', refs: vacancyRefs, count: 2, more: false },
       ],
       skipped: [
-        { entity: 'customer', reden: 'Geen rechten.' },
+        { entity: 'customer', reason: 'Geen rechten.' },
       ],
     }
     render(<KoiosResultCards groups={groups} t={t} />)
@@ -220,7 +220,7 @@ describe('KoiosResultCards — grouped results', () => {
       { type: 'candidate', id: 'c1', label: 'intake · 2026-09-02' },
     ]
     const groups: KoiosSearchResultsGrouped = {
-      groups: [{ entity: 'candidate', refs, aantal: 1, meer: false }],
+      groups: [{ entity: 'candidate', refs, count: 1, more: false }],
       skipped: [],
     }
     render(<KoiosResultCards groups={groups} t={t} />)
@@ -234,7 +234,7 @@ describe('KoiosResultCards — grouped results', () => {
       { type: 'candidate', id: 'c1', label: 'Ahmed Vos', subtitle: 'Verpleegkundige' },
     ]
     const groups: KoiosSearchResultsGrouped = {
-      groups: [{ entity: 'candidate', refs, aantal: 1, meer: false }],
+      groups: [{ entity: 'candidate', refs, count: 1, more: false }],
       skipped: [],
     }
     render(<KoiosResultCards groups={groups} t={t} />)

@@ -39,7 +39,7 @@ export default function ShiftAnalysisPage() {
 
   // Alarm counts drive the KPI cards.
   const counts = useMemo(() => {
-    const c = { wegvallend: 0, daling: 0, opkomend: 0, nieuw_inactief: 0 }
+    const c = { wegvallend: 0, daling: 0, opkomend: 0, newly_inactive: 0 }
     for (const r of rows) if (r.alarm) c[r.alarm] += 1
     return c
   }, [rows])
@@ -91,7 +91,7 @@ export default function ShiftAnalysisPage() {
               icon={TrendingDown} iconBg="var(--color-warning-bg)" iconColor="var(--color-warning)" />
             <KpiCard label={t('shiftAnalysis.kpi.opkomend')} value={counts.opkomend}
               icon={TrendingUp} iconBg="var(--color-success-bg)" iconColor="var(--color-success)" />
-            <KpiCard label={t('shiftAnalysis.kpi.nieuwInactief')} value={counts.nieuw_inactief}
+            <KpiCard label={t('shiftAnalysis.kpi.newlyInactive')} value={counts.newly_inactive}
               icon={UserX} iconBg="var(--color-warning-bg)" iconColor="var(--color-warning)" />
           </div>
 

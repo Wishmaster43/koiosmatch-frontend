@@ -19,13 +19,13 @@
       "wegvallend": "In calo",
       "daling": "Forte calo",
       "opkomend": "In crescita",
-      "nieuw_inactief": "Nuovo e inattivo"
+      "newly_inactive": "Nuovo e inattivo"
     },
     "kpi": {
       "wegvallend": "In calo",
       "daling": "Forte calo",
       "opkomend": "In crescita",
-      "nieuwInactief": "Nuovo e inattivo"
+      "newlyInactive": "Nuovo e inattivo"
     },
     "plannedTitle": "UZK pianificate al mese",
     "matrixTitle": "Per candidato al mese",

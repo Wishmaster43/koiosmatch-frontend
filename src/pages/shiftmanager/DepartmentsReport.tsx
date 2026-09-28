@@ -46,7 +46,7 @@ export default function DepartmentsReport() {
   // Single search-select filter group (customer), in the shape the shared right
   // panel expects; empty until the customer tree has loaded.
   const filterGroups = useMemo(() => uniqueCustomers.length === 0 ? [] : [{
-    key: 'klant', label: t('departmentsReport.filterCustomer'), type: 'search-select',
+    key: 'customer', label: t('departmentsReport.filterCustomer'), type: 'search-select',
     selected: selectedCustomers,
     options: uniqueCustomers.map(c => ({
       value: c, label: c,

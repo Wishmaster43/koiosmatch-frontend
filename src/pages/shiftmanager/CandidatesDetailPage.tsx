@@ -107,7 +107,7 @@ export default function CandidatesDetailPage() {
       // Status axis in the drawer too (Danny 24-07) — multi-toggle onto the same
       // statusFilter the KPI/donut picks drive (labels via the reports status map).
       { key: 'status', label: t('candidates.filters.status'), options: statuses.map(st => ({ value: st, label: t(`candidates.status.${(st || '').toLowerCase().replace(/\s+/g, '')}`, { defaultValue: st }) })), selected: statusFilter, onToggle: toggle(setStatusFilter) },
-      { key: 'functie', label: t('candidates.filters.position'), options: positions.map(p => ({ value: p, label: p })), selected: selectedPositions, onToggle: toggle(setSelectedPositions) },
+      { key: 'position', label: t('candidates.filters.position'), options: positions.map(p => ({ value: p, label: p })), selected: selectedPositions, onToggle: toggle(setSelectedPositions) },
       { key: 'kenmerken', label: t('candidates.filters.features'), options: features.map(k => ({ value: k, label: k })), selected: selectedFeatures, onToggle: toggle(setSelectedFeatures) },
     ]
   }, [t, allCandidates, candidates, selectedYears, statusFilter, selectedPositions, selectedFeatures])

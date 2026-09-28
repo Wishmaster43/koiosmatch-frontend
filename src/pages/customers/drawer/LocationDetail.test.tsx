@@ -631,7 +631,7 @@ describe('LocationDetail · Adres & gegevens section order (mirrors the Bedrijf 
     // single-branch field, LocationBranchField) — same translated word, different
     // field/concept (see that test's own describe block). The multi-branch section
     // title below is still the first of the two in DOM order.
-    const vestiging = screen.getAllByText(ct('locations.detail.branchTitle'))[0]
+    const branchSection = screen.getAllByText(ct('locations.detail.branchTitle'))[0]
 
     // DOCUMENT_POSITION_FOLLOWING on `b` relative to `a` means `a` sits first in DOM order.
     const isBefore = (a: HTMLElement, b: HTMLElement) =>
@@ -641,7 +641,7 @@ describe('LocationDetail · Adres & gegevens section order (mirrors the Bedrijf 
     expect(isBefore(adres, contact)).toBe(true)
     expect(isBefore(contact, omschrijving)).toBe(true)
     expect(isBefore(omschrijving, koios)).toBe(true)
-    expect(isBefore(koios, vestiging)).toBe(true)
+    expect(isBefore(koios, branchSection)).toBe(true)
   })
 })
 
