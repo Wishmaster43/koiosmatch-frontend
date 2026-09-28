@@ -35,7 +35,7 @@ const TOKEN_DOMAIN: Record<string, CapabilityDomain> = {
   klant: 'customers', klanten: 'customers', customer: 'customers', customers: 'customers',
   match: 'matches', matches: 'matches',
   taak: 'tasks', taken: 'tasks', task: 'tasks', tasks: 'tasks',
-  bellijst: 'calllists', bellijsten: 'calllists', calllist: 'calllists', calllists: 'calllists',
+  bellijst: 'calllists', bellijsten: 'calllists', calllist: 'calllists', calllists: 'calllists', call: 'calllists',
   notitie: 'notes', notities: 'notes', note: 'notes', notes: 'notes',
   rapport: 'reports', rapporten: 'reports', report: 'reports', reports: 'reports',
   afspraak: 'appointments', afspraken: 'appointments', appointment: 'appointments', appointments: 'appointments',

@@ -163,6 +163,33 @@ describe('KoiosSuggestionRow · icon-button actions (CMBE addendum action shape)
     expect(screen.getByRole('button', { name: 'koios.tools.wijzig_taak' })).toBeInTheDocument()
   })
 
+  // KOIOS-EN-1 phase B: when tool_label_key itself does not resolve (a stale
+  // Dutch-id key the locale no longer carries), toolLabel falls through to
+  // `koios.tools.<canonicalToolId(tool)>` — proven with a `t` mock that mimics
+  // real i18next's unresolved-key + defaultValue behaviour, unlike this file's
+  // key-echo stub used everywhere else (see file header).
+  it('falls back to koios.tools.<canonicalToolId> when tool_label_key itself does not resolve', async () => {
+    vi.resetModules()
+    vi.doMock('react-i18next', async (importOriginal) => ({
+      ...(await importOriginal<typeof import('react-i18next')>()),
+      useTranslation: () => ({
+        t: (key: string, opts?: Record<string, unknown>) => {
+          if (key === 'koios.tools.missing_x') return (opts?.defaultValue as string) ?? key
+          return key
+        },
+      }),
+    }))
+    const { default: FreshRow } = await import('./KoiosSuggestionRow')
+    const suggestion = {
+      kind: 'task_overdue' as const, title: 'Lieke', body: 'x', refs: [],
+      action: { tool: 'wijzig_taak', input: {}, tool_label_key: 'koios.tools.missing_x' },
+    }
+    render(<FreshRow suggestion={suggestion} />)
+    expect(screen.getByRole('button', { name: 'koios.tools.update_task' })).toBeInTheDocument()
+    vi.doUnmock('react-i18next')
+    vi.resetModules()
+  })
+
   it('call and mail icons appear for a row whose ref carries contact data, named after the person (KOIOS-SUGGEST-COMPACT-2)', () => {
     const suggestion = {
       kind: 'opportunity_closing_soon' as const, title: 'Uitbreiding', body: 'x',

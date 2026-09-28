@@ -11,6 +11,7 @@
 import type { KoiosEffort } from './koiosTypes'
 import { useQuery } from '@tanstack/react-query'
 import api, { unwrap } from '@/lib/api'
+import { canonicalToolId } from './koiosToolIds'
 
 // One tool entry — the full measured contract (settings card needs every field).
 export interface KoiosCapabilityTool {
@@ -88,6 +89,9 @@ export function useKoiosToolCapabilities() {
   }
 }
 
-// Convenience: one tool's entry, or undefined while unknown.
+// Convenience: one tool's entry, or undefined while unknown. Compares canonical
+// (English) ids so a still-Dutch caller id (a stored pending action, an older
+// response) still finds the capability the English-id payload carries (KOIOS-EN-1
+// phase B) — without this, a tool disabled for the tenant/user stayed offered.
 export const findToolCapability = (tools: KoiosCapabilityTool[], name: string | undefined) =>
-  name ? tools.find((t) => t.name === name) : undefined
+  name ? tools.find((t) => canonicalToolId(t.name) === canonicalToolId(name)) : undefined

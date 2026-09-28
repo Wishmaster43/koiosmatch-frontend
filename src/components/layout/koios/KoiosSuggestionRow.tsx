@@ -24,6 +24,7 @@ import type { KoiosCapabilityTool } from './useKoiosToolCapabilities'
 import { confirmPendingAction, cancelPendingAction, stagePendingAction } from './koiosApi'
 import { extractApiError } from '@/lib/extractApiError'
 import { KIND_META, TOOL_FOLLOW_UP, toolIcon, reasonKey, reasonShortKey } from './koiosSuggestionMeta'
+import { canonicalToolId } from './koiosToolIds'
 import { ExecErrorNotice, ExecutedNotice, StagedPreview } from './KoiosSuggestionExec'
 import { useRun, previewLine, isIdRow } from './koiosSuggestionRunner'
 import type { ExecState, StagedAction, NavigateHint } from './koiosSuggestionRunner'
@@ -65,8 +66,9 @@ function AskKoiosButton({ suggestion, onAskKoios, t }: { suggestion: KoiosAssist
 function reasonOf(suggestion: KoiosAssistantSuggestion, t: TFn): string {
   const p = suggestion.params
   if (p) {
-    // A pending_action's short verb: the registry tool's own word, else the generic "Run".
-    if ('tool' in p) return t(`koios.tools.${p.tool}`, { defaultValue: t('koios.tools.unknown') })
+    // A pending_action's short verb: the registry tool's own word (canonical
+    // English id, so an old Dutch id still resolves), else the generic "Run".
+    if ('tool' in p) return t(`koios.tools.${canonicalToolId(p.tool)}`, { defaultValue: t('koios.tools.unknown') })
     if ('days_overdue' in p) return t(reasonKey(suggestion.kind), { count: p.days_overdue })
     if ('days_since_contact' in p) return p.days_since_contact == null ? t(reasonShortKey(suggestion.kind)) : t(reasonKey(suggestion.kind), { count: p.days_since_contact })
     if ('days_to_close' in p) return t(reasonKey(suggestion.kind), { count: p.days_to_close })
@@ -76,11 +78,18 @@ function reasonOf(suggestion: KoiosAssistantSuggestion, t: TFn): string {
 }
 
 // One action's accessible name (CMBE addendum 28-09): the action's own word
-// (`koios.assistant.actions.<key>`), then the registry tool's word
-// (`koios.tools.<tool>`), then the server's NL label — never a bare "Execute".
+// (`koios.assistant.actions.<key>`), then the server's `tool_label_key` — and
+// (KOIOS-EN-1 phase B) when THAT key itself is missing (a stale Dutch id the
+// locale no longer carries), `koios.tools.<canonicalToolId(tool)>` instead —
+// then the server's NL label, never a bare "Execute".
 function toolLabel(a: KoiosAssistantAction, t: TFn): string {
   const nlFallback = a.label || t('koios.tools.unknown')
-  const toolFallback = a.tool_label_key ? t(a.tool_label_key, { defaultValue: nlFallback }) : nlFallback
+  const MISSING = '__koios_tool_label_missing__'
+  let toolFallback = nlFallback
+  if (a.tool_label_key) {
+    const resolved = t(a.tool_label_key, { defaultValue: MISSING })
+    toolFallback = resolved === MISSING ? t(`koios.tools.${canonicalToolId(a.tool)}`, { defaultValue: nlFallback }) : resolved
+  }
   return a.label_key ? t(a.label_key, { defaultValue: toolFallback }) : toolFallback
 }
 
@@ -174,7 +183,7 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec }: {
   // gate (Danny 28-09: "Bij kandidaat mis ik conversatie starten") — UNLESS a
   // send_whatsapp action is already offered, so the two never sit side by side.
   const candidateRef = contextRefsOf(suggestion).find(r => r.type === 'candidate')
-  const hasWhatsAppAction = choices.some(a => a.key === 'send_whatsapp' || a.tool === 'stuur_whatsapp')
+  const hasWhatsAppAction = choices.some(a => a.key === 'send_whatsapp' || canonicalToolId(a.tool) === 'send_whatsapp')
   const candidatePage = candidateRef ? pageForResultRef('candidate') : null
   const showConversationIcon = Boolean(candidateRef && candidatePage && !hasWhatsAppAction)
   // A tool switched off for the organisation or for this user is simply not offered
@@ -185,7 +194,7 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec }: {
   const landAfterExecute = (navigate?: NavigateHint) => {
     const hint = navigate?.type && navigate.id ? navigate : undefined
     const lead = choicesOf(suggestion)[0]
-    const follow = lead ? TOOL_FOLLOW_UP[lead.tool] : undefined
+    const follow = lead ? TOOL_FOLLOW_UP[canonicalToolId(lead.tool)] : undefined
     const ref = hint ? { type: hint.type!, id: hint.id!, tab: hint.tab } : follow ? (() => {
       const r = suggestion.refs.find(x => x.type === follow.refType)
       return r ? { type: r.type, id: r.id, tab: follow.tab } : undefined

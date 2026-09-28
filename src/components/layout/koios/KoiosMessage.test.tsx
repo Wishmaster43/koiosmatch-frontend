@@ -68,4 +68,32 @@ describe('KoiosMessage — search results grouping', () => {
     expect(screen.getByText('Kandidaten (2)')).toBeInTheDocument()
     expect(screen.getByText('Vacatures (1)')).toBeInTheDocument()
   })
+
+  // KOIOS-EN-1 phase A: the tool id is now English (search_all) — canonicalToolId
+  // still detects the step, so grouping keeps working unchanged.
+  it('groups refs by entity type from a search_all step (English tool id)', () => {
+    const mockT = (key: string) => {
+      const map: Record<string, string> = {
+        'koios.results.group.kandidaten': 'Candidates',
+        'koios.results.group.vacatures': 'Vacancies',
+      }
+      return map[key] || key
+    }
+    const msg: KoiosChatMessage = {
+      role: 'assistant',
+      answer: 'Found some results',
+      steps: [
+        {
+          tool: 'search_all',
+          refs: [
+            { type: 'candidate', id: 'c1', label: 'Ahmed Vos' },
+            { type: 'vacancy', id: 'v1', label: 'Verpleegkundige' },
+          ],
+        },
+      ],
+    }
+    render(<KoiosMessage msg={msg} t={mockT} />)
+    expect(screen.getByText('Kandidaten (1)')).toBeInTheDocument()
+    expect(screen.getByText('Vacatures (1)')).toBeInTheDocument()
+  })
 })

@@ -16,15 +16,22 @@ import KoiosFeedback from './KoiosFeedback'
 import type { KoiosResultRef, KoiosSearchResultsGrouped } from './koiosTypes'
 import type { KoiosChatMessage, TFn } from '@/types/koios'
 import { GRADIENT, resolveMessage, type KoiosGreeting } from './koiosMessageParts'
+import { canonicalToolId, pick } from './koiosToolIds'
 
 // ── Group search results by entity type ────────────────────────────────────────
-// Maps backend entity keys to FE ref types.
+// Maps backend entity keys to FE ref types. KOIOS-EN-1 phase B: the search_all
+// result's per-entity keys move to English plurals; both generations are kept
+// during the alias period (a not-yet-updated payload still groups correctly).
 const ENTITY_TYPE_MAP: Record<string, 'candidate' | 'vacancy' | 'customer' | 'opportunity' | 'match'> = {
   kandidaten: 'candidate',
   vacatures: 'vacancy',
   klanten: 'customer',
   kansen: 'opportunity',
   matches: 'match',
+  candidates: 'candidate',
+  vacancies: 'vacancy',
+  customers: 'customer',
+  opportunities: 'opportunity',
 }
 
 // Extracts per-entity search metadata and groups refs by entity type.
@@ -34,9 +41,11 @@ function groupSearchResults(step: Record<string, unknown>, refs: KoiosResultRef[
   const groups: KoiosSearchResultsGrouped['groups'] = []
   const skipped: KoiosSearchResultsGrouped['skipped'] = []
 
-  // Try to extract per-entity metadata from the step if present
-  // (backend may include raw tool output as { zoekterm, resultaten: {...} })
-  const resultaten = (step.resultaten ?? step.results) as Record<string, unknown> | undefined
+  // Try to extract per-entity metadata from the step if present (backend may
+  // include raw tool output as { query, result: {...} } — KOIOS-EN-1 phase B:
+  // English-first `result`, Dutch fallback `resultaten`, plus the pre-existing
+  // `results` alias — during the dual-key period).
+  const resultaten = (pick<Record<string, unknown>>(step, 'result', 'resultaten') ?? step.results) as Record<string, unknown> | undefined
   const resultaatPerEntity = resultaten || {}
 
   // Group refs by entity type in the canonical order
@@ -63,12 +72,15 @@ function groupSearchResults(step: Record<string, unknown>, refs: KoiosResultRef[
     }
   }
 
-  // Collect skipped entities from the step's per-entity metadata
+  // Collect skipped entities from the step's per-entity metadata (English-first
+  // `skipped`/`reason`, Dutch fallback `overgeslagen`/`reden`).
   for (const [key, value] of Object.entries(resultaatPerEntity)) {
     const entry = value as Record<string, unknown>
-    if (entry.overgeslagen === true && typeof entry.reden === 'string') {
+    const isSkipped = pick<boolean>(entry, 'skipped', 'overgeslagen') === true
+    const reason = pick<string>(entry, 'reason', 'reden')
+    if (isSkipped && typeof reason === 'string') {
       const entityType = ENTITY_TYPE_MAP[key] || key
-      skipped.push({ entity: entityType, reden: entry.reden })
+      skipped.push({ entity: entityType, reden: reason })
     }
   }
 
@@ -87,8 +99,10 @@ export default function KoiosMessage({ msg, isNew, t, greeting }: { msg: KoiosCh
   // Job 3: Group search results by entity type, with per-entity metadata.
   // First, flatten all refs from all steps.
   const resultRefs: KoiosResultRef[] = (msg.steps ?? []).flatMap((s) => s.refs ?? [])
-  // Then, try to find a zoek_alles step and group results by entity with metadata.
-  const zoekAllesStep = (msg.steps ?? []).find((s) => s.tool === 'zoek_alles')
+  // Then, try to find a search_all step and group results by entity with metadata
+  // (KOIOS-EN-1 phase A: tool ids are English; canonicalToolId still resolves a
+  // not-yet-updated 'zoek_alles').
+  const zoekAllesStep = (msg.steps ?? []).find((s) => s.tool && canonicalToolId(s.tool) === 'search_all')
   const groupedResults: KoiosSearchResultsGrouped = zoekAllesStep
     ? groupSearchResults(zoekAllesStep, resultRefs)
     : { groups: resultRefs.length > 0 ? [{ entity: 'candidate', refs: resultRefs, aantal: resultRefs.length, meer: false }] : [], skipped: [] }

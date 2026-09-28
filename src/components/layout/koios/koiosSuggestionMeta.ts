@@ -10,6 +10,7 @@
 import { Clock, UserX, Target, Briefcase, Sparkles, Check, CalendarClock, ListPlus, Search, MessageCircle, Play } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { KoiosAssistantKind, KoiosAssistantSuggestion } from './useKoiosAssistant'
+import { canonicalToolId } from './koiosToolIds'
 
 // Stable row identity (Opus golf-2 verify): the pending-action id when present,
 // else kind+title — never the array index, which glued one action's terminal
@@ -43,19 +44,22 @@ export const TOOL_ICONS: Record<string, LucideIcon> = {
   search_candidates: Search,
 }
 
-// Fallback by the registry TOOL name, for an action whose `key` isn't (yet)
-// one of the five above — e.g. an older payload that only sends `tool`.
+// Fallback by the registry TOOL name (KOIOS-EN-1 phase B: keyed by the English
+// tool id, resolved via canonicalToolId so an old Dutch id still lands), for
+// an action whose `key` isn't (yet) one of the five above — e.g. an older
+// payload that only sends `tool`.
 const TOOL_NAME_ICONS: Record<string, LucideIcon> = {
-  wijzig_taak: CalendarClock,
-  maak_taak: ListPlus,
-  stuur_whatsapp: MessageCircle,
-  zoek_kandidaten: Search,
+  update_task: CalendarClock,
+  create_task: ListPlus,
+  send_whatsapp: MessageCircle,
+  search_candidates: Search,
 }
 
 // The action's icon: its own `key` glyph, else the `tool` glyph, else the generic fallback.
 export function toolIcon(action: { key?: string | null; tool?: string } | undefined): LucideIcon {
   if (!action) return Play
-  return (action.key && TOOL_ICONS[action.key]) || (action.tool && TOOL_NAME_ICONS[action.tool]) || Play
+  const tool = action.tool ? canonicalToolId(action.tool) : undefined
+  return (action.key && TOOL_ICONS[action.key]) || (tool && TOOL_NAME_ICONS[tool]) || Play
 }
 
 // Where an executed tool leaves the user (KOIOS-ROW-2, Danny: "you would expect the
@@ -63,7 +67,7 @@ export function toolIcon(action: { key?: string | null; tool?: string } | undefi
 // away"): the row's ref of that type opens on that drawer tab. The confirm response
 // may also carry `data.navigate` {type,id,tab}; that wins when present.
 export const TOOL_FOLLOW_UP: Record<string, { refType: string; tab: string }> = {
-  zoek_kandidaten: { refType: 'vacancy', tab: 'candidateSearch' },
+  search_candidates: { refType: 'vacancy', tab: 'candidateSearch' },
 }
 
 // The short-reason i18n key when `params` is present (an ICU-plural key), and the

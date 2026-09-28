@@ -6,16 +6,21 @@
  * assistant block and the pending-action card render the SAME chip.
  */
 import type { KoiosContextRef } from '@/types/koios'
+import { pick } from './koiosToolIds'
 
 // A tool result → the created record's ref, or null when the tool created nothing
 // we can link (search tools, refusals, older shapes).
 export function createdRefFromToolResult(data: unknown, fallbackLabel: string): KoiosContextRef | null {
   if (!data || typeof data !== 'object') return null
   const d = data as Record<string, unknown>
-  if (d.gelukt === false) return null
-  // maak_taak → { gelukt, taak_id, titel, deadline }
-  if (d.taak_id != null && d.taak_id !== '') {
-    return { type: 'task', id: String(d.taak_id), label: typeof d.titel === 'string' && d.titel ? d.titel : fallbackLabel }
+  const ok = pick<boolean>(d, 'ok', 'gelukt')
+  if (ok === false) return null
+  // create_task → { ok, task_id, title, due_date } (KOIOS-EN-1 phase B: English-first,
+  // Dutch fallback — { gelukt, taak_id, titel, deadline } — during the dual-key period).
+  const taskId = pick<unknown>(d, 'task_id', 'taak_id')
+  if (taskId != null && taskId !== '') {
+    const title = pick<string>(d, 'title', 'titel')
+    return { type: 'task', id: String(taskId), label: typeof title === 'string' && title ? title : fallbackLabel }
   }
   return null
 }

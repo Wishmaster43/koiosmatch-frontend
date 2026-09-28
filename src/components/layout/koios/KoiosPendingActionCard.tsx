@@ -30,6 +30,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import { useNumberFormat } from '@/lib/formatters'
 import { confirmPendingAction, cancelPendingAction } from './koiosApi'
 import { createdRefFromToolResult } from './koiosToolResult'
+import { pick } from './koiosToolIds'
 import { KoiosRefChip } from './KoiosResultCards'
 import type { KoiosContextRef } from '@/types/koios'
 import { entityIconEl } from './koiosEntityIcons'
@@ -117,25 +118,33 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
         // tool itself refuses (consent fail-closed, not-found, …) — the refusal
         // rides in `data.fout` / `data.reden` (VoorstelSollicitatie/StartInterview
         // shape), never a 4xx. Surface it honestly instead of a false "confirmed".
-        // REFUSAL-CONVENTION-1 (gap-map, definitive): `gelukt` is the ONLY
-        // discriminator; `onthouden[]` marks a PARTIAL execution (deliberately
-        // skipped sub-actions); `reden` is the translated carrier — the slug is
-        // always present on refusal AND on every withholding; `fout` is only the
-        // human fallback (and the path for the ~67 not-yet-normalised tools).
-        const data = (res as { data?: { fout?: string; gelukt?: boolean; reden?: string; onthouden?: string[] } })?.data
-        const translateReason = (reden?: string, fout?: string) => {
-          if (!reden) return fout ?? null
-          const slugKey = `koios.pendingAction.reasons.${reden}`
+        // REFUSAL-CONVENTION-1 (gap-map, definitive): `ok`/`gelukt` is the ONLY
+        // discriminator; `remembered`/`onthouden[]` marks a PARTIAL execution
+        // (deliberately skipped sub-actions); `reason`/`reden` is the translated
+        // carrier — the slug is always present on refusal AND on every
+        // withholding; `error`/`fout` is only the human fallback (and the path
+        // for the ~67 not-yet-normalised tools). KOIOS-EN-1 phase B: the tool
+        // result carries BOTH keys for one release — English-first, Dutch
+        // fallback via `pick`, so a not-yet-updated payload still resolves.
+        const data = (res as { data?: Record<string, unknown> })?.data
+        const ok = pick<boolean>(data, 'ok', 'gelukt')
+        const reason = pick<string>(data, 'reason', 'reden')
+        const error = pick<string>(data, 'error', 'fout')
+        const remembered = pick<string[]>(data, 'remembered', 'onthouden')
+        const translateReason = (reasonSlug?: string, errorText?: string) => {
+          if (!reasonSlug) return errorText ?? null
+          const slugKey = `koios.pendingAction.reasons.${reasonSlug}`
           const translated = t(slugKey)
-          return translated === slugKey ? (fout ?? reden) : translated
+          return translated === slugKey ? (errorText ?? reasonSlug) : translated
         }
-        if (data?.gelukt === false || (!('gelukt' in (data ?? {})) && (data?.reden || data?.fout))) {
-          setRefusedReason(translateReason(data?.reden, data?.fout))
+        const hasOkKey = data != null && ('ok' in data || 'gelukt' in data)
+        if (ok === false || (!hasOkKey && (reason || error))) {
+          setRefusedReason(translateReason(reason, error))
           setStatus('refused')
           return
         }
-        if (data?.onthouden?.length || data?.reden) {
-          setRefusedReason(translateReason(data?.reden, data?.fout))
+        if (remembered?.length || reason) {
+          setRefusedReason(translateReason(reason, error))
           setStatus('partial')
           return
         }

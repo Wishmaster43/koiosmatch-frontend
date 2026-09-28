@@ -246,6 +246,17 @@ describe('KoiosPendingActionCard', () => {
     expect(screen.queryByText('koios.pendingAction.confirmed')).not.toBeInTheDocument()
   })
 
+  // KOIOS-EN-1 phase B: an English-only refusal shape ({ ok: false, reason, error })
+  // resolves exactly like its Dutch twin (English-first, Dutch-fallback `pick`).
+  it('renders refused on an English-only ok=false + reason shape', async () => {
+    mockConfirm.mockResolvedValue({ status: 'executed', data: { ok: false, reason: 'customer_blocked', error: 'Customer is blocked.' } })
+    const user = userEvent.setup()
+    renderCard(action())
+    await user.click(screen.getByText('koios.pendingAction.confirm'))
+    await waitFor(() => expect(screen.getByTestId('koios-pending-action')).toHaveAttribute('data-status', 'refused'))
+    expect(screen.queryByText('koios.pendingAction.confirmed')).not.toBeInTheDocument()
+  })
+
   // NOTE-TITLE-1: proposal_not_allowed refusal slug for blocked/archived candidates
   it('renders refused on proposal_not_allowed slug', async () => {
     mockConfirm.mockResolvedValue({ status: 'executed', data: { gelukt: false, reden: 'proposal_not_allowed' } })

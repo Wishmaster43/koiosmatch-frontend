@@ -353,9 +353,9 @@
       "maak_taak": "Taak maken",
       "stuur_whatsapp": "WhatsApp sturen",
       "zoek_kandidaten": "Kandidaten zoeken",
-      "update_task": "Taak bijwerken",
-      "create_task": "Taak aanmaken",
-      "send_whatsapp": "WhatsApp versturen",
+      "update_task": "Taak wijzigen",
+      "create_task": "Taak maken",
+      "send_whatsapp": "WhatsApp sturen",
       "search_candidates": "Kandidaten zoeken",
       "unknown": "Uitvoeren"
     },
