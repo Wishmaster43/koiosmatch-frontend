@@ -14,8 +14,13 @@
  * Types below are hand-written (CLAUDE.md §10 type-gen rule): the integrations
  * routes are not yet in src/types/api-generated.ts (backend lands them
  * alongside this lane) — replace with generated types once the spec ships them.
+ *
+ * SM-CREDS-2 (CONTRACT-CHANGELOG.md): Shiftmanager's `company_api` credential
+ * group (company + auth_token) only renders once the GET response carries
+ * `has_auth_token` — FEATURE DETECTION, so the card looks exactly as it did
+ * before until the backend half lands (protocol: nothing fake ever shows).
  */
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw } from 'lucide-react'
 import Button from '@/components/ui/Button'
@@ -24,10 +29,12 @@ import Toggle from '@/components/ui/Toggle'
 import SelectMenu from '@/components/ui/SelectMenu'
 import CalloutBox from '@/components/ui/CalloutBox'
 import Spinner from '@/components/ui/Spinner'
-import { PageTitle, Caption, BodyText, captionStyle } from '@/components/ui/typography'
+import { PageTitle, Caption, BodyText, GroupLabel, captionStyle } from '@/components/ui/typography'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import IntegrationTestResults, { type TestOutcome } from './IntegrationTestResults'
+import { FIELD_SPEC, type FieldSpecEntry } from './connectionFieldSpec'
 import {
   getIntegrationSettings,
   putIntegrationSettings,
@@ -46,40 +53,15 @@ type SecretState = string | null | undefined
 // than re-deriving connector-specific narrowing everywhere.
 interface WorkingSettings {
   two_way: boolean
+  subdomain?: string | null
   base_url?: string | null
   client_id?: string | null
   environment?: 'uat' | 'live'
   has_api_key?: boolean
   has_client_secret?: boolean
+  company?: string | null
+  has_auth_token?: boolean
   connected_as: string | null
-}
-
-// The 422 test-failure shape, plus the locally-synthesised fallback for a
-// network/unknown error that never reached the server with a structured body.
-type TestOutcome = { ok: true; connected_as: string } | TestFailure
-
-interface FieldSpecEntry {
-  key: 'two_way' | 'base_url' | 'api_key' | 'client_id' | 'client_secret' | 'environment'
-  kind: 'toggle' | 'text' | 'secret' | 'select'
-}
-
-// Per-connector field layout — the single source that drives which inputs render.
-const FIELD_SPEC: Record<ConnectorId, FieldSpecEntry[]> = {
-  shiftmanager: [
-    { key: 'two_way', kind: 'toggle' },
-    { key: 'base_url', kind: 'text' },
-    { key: 'api_key', kind: 'secret' },
-  ],
-  // Question 119 (Danny 08-09, A): HelloFlex and Werkzoeken have no push-sync yet, so
-  // their two_way switch stays hidden until one exists; Shiftmanager keeps it.
-  helloflex: [
-    { key: 'environment', kind: 'select' },
-    { key: 'client_id', kind: 'text' },
-    { key: 'client_secret', kind: 'secret' },
-  ],
-  werkzoeken: [
-    { key: 'api_key', kind: 'secret' },
-  ],
 }
 
 // Field-label identity from the typography atom (stijlfabriek clause) — layout only here.
@@ -88,13 +70,13 @@ const labelStyle = { ...captionStyle, marginBottom: 4, display: 'block' as const
 // The single secret-field UI (state line + password input + clear ghost button),
 // shared by every connector's api_key/client_secret row.
 function SecretField({ fieldKey, hasSecret, value, onChange, t }: {
-  fieldKey: 'api_key' | 'client_id' | 'client_secret'
+  fieldKey: 'api_key' | 'client_id' | 'client_secret' | 'auth_token'
   hasSecret: boolean
   value: SecretState
   onChange: (v: SecretState) => void
   t: (k: string) => string
 }) {
-  const labelKey = fieldKey === 'client_secret' ? 'clientSecret' : 'apiKey'
+  const labelKey = fieldKey === 'client_secret' ? 'clientSecret' : fieldKey === 'auth_token' ? 'authToken' : 'apiKey'
   const inputId = `integration-secret-${fieldKey}`
   return (
     <div>
@@ -119,6 +101,34 @@ function SecretField({ fieldKey, hasSecret, value, onChange, t }: {
       </div>
     </div>
   )
+}
+
+// Renders the visible field list, inserting a GroupLabel + optional hint once
+// before a group's first field — but ONLY once SM-CREDS-2 has landed
+// (`hasGroups`); before that, a grouped field (api_key today) renders plain,
+// exactly as it always has, so the old-shape face never shifts by a pixel.
+function renderFieldsWithGroups(
+  fields: FieldSpecEntry[],
+  hasGroups: boolean,
+  t: (k: string) => string,
+  renderField: (f: FieldSpecEntry) => ReactNode,
+) {
+  let lastGroupId: string | undefined
+  const nodes: ReactNode[] = []
+  fields.forEach((field) => {
+    const groupId = hasGroups ? field.group?.id : undefined
+    if (groupId && groupId !== lastGroupId) {
+      nodes.push(
+        <div key={`group-${groupId}`} style={{ marginTop: lastGroupId ? 4 : 0 }}>
+          <GroupLabel style={{ marginBottom: 4 }}>{t(field.group!.titleKey)}</GroupLabel>
+          {field.group!.hintKey && <Caption as="p" style={{ marginTop: -2, marginBottom: 6 }}>{t(field.group!.hintKey)}</Caption>}
+        </div>,
+      )
+    }
+    lastGroupId = groupId
+    nodes.push(renderField(field))
+  })
+  return nodes
 }
 
 // The connection tab for one connector: load-once with alive guard, dirty check,
@@ -165,7 +175,20 @@ export default function IntegrationConnectionCard({ connector }: { connector: Co
   }, [connector, loadTick])
 
   const spec = FIELD_SPEC[connector]
-  const secretKeys = spec.filter((f) => f.kind === 'secret').map((f) => f.key)
+  // SM-CREDS-2 feature detection: the token_api group (subdomain) only shows once
+  // the GET response actually carried that key — a BE that has not landed the
+  // change yet omits it, and the card renders exactly as it did before (old face).
+  const hasSmCreds2 = !!initial && Object.prototype.hasOwnProperty.call(initial, 'subdomain')
+  const visibleSpec = spec.filter((f) => {
+    if (f.key === 'base_url') return !!initial?.base_url
+    if (f.key === 'subdomain') return hasSmCreds2
+    // Feature detection, not value detection: the GET carrying the flag key at
+    // all (even false) proves the BE half landed, so an as-yet-empty company/
+    // auth_token pair still shows and can be filled in for the first time.
+    if (f.requiresFlag) return !!initial && Object.prototype.hasOwnProperty.call(initial, f.requiresFlag)
+    return true
+  })
+  const secretKeys = visibleSpec.filter((f) => f.kind === 'secret').map((f) => f.key)
   const dirty =
     JSON.stringify(settings) !== JSON.stringify(initial) ||
     secretKeys.some((k) => secrets[k] !== undefined)
@@ -187,8 +210,11 @@ export default function IntegrationConnectionCard({ connector }: { connector: Co
     // settings spread (that PUT server-derived has_*/connected_as back, and a
     // test's connected_as made Save enable itself; verify finding, confirmed).
     const body: Record<string, unknown> = {}
-    spec.forEach((f) => {
+    visibleSpec.forEach((f) => {
       if (f.kind === 'secret') return
+      // base_url is a super-admin override: an unchanged value must never ride
+      // the PUT (the BE rejects a tenant PUT that carries it, 422 prohibited).
+      if (f.key === 'base_url' && settings.base_url === initial?.base_url) return
       body[f.key] = (settings as unknown as Record<string, unknown>)[f.key]
     })
     secretKeys.forEach((k) => {
@@ -255,13 +281,14 @@ export default function IntegrationConnectionCard({ connector }: { connector: Co
       {/* The freshest identity wins: a passed test's connected_as over the loaded one. */}
       <Caption>
         {(() => {
-          const name = (testResult?.ok === true ? testResult.connected_as : null) ?? settings.connected_as
+          const legacyOk = testResult && 'connected_as' in testResult && testResult.ok === true
+          const name = (legacyOk ? testResult.connected_as : null) ?? settings.connected_as
           return name ? t('integrations.connection.connectedAs', { name }) : t('integrations.connection.notConnected')
         })()}
       </Caption>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16, margin: '16px 0 20px' }}>
-        {spec.map((field) => {
+        {renderFieldsWithGroups(visibleSpec, hasSmCreds2, t, (field) => {
           if (field.kind === 'toggle') {
             return (
               <div key={field.key} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -274,7 +301,9 @@ export default function IntegrationConnectionCard({ connector }: { connector: Co
             )
           }
           if (field.kind === 'text') {
-            const labelKey = field.key === 'base_url' ? 'baseUrl' : 'clientId'
+            const labelKey = field.key === 'base_url' ? 'baseUrl'
+              : field.key === 'subdomain' ? 'subdomain'
+                : field.key === 'company' ? 'company' : 'clientId'
             const val = (settings as unknown as Record<string, unknown>)[field.key]
             return (
               <div key={field.key}>
@@ -282,6 +311,9 @@ export default function IntegrationConnectionCard({ connector }: { connector: Co
                 <input id={`integration-${field.key}`} value={typeof val === 'string' ? val : ''}
                   onChange={(e) => setField({ [field.key]: e.target.value } as Partial<WorkingSettings>)}
                   style={fieldInputStyle} />
+                {field.key === 'subdomain' && (
+                  <Caption as="p" style={{ marginTop: 4 }}>{t('integrations.connection.subdomainHint')}</Caption>
+                )}
               </div>
             )
           }
@@ -302,11 +334,12 @@ export default function IntegrationConnectionCard({ connector }: { connector: Co
               </div>
             )
           }
-          // Secret field (api_key / client_secret).
-          const hasKey = field.key === 'client_secret' ? 'has_client_secret' : 'has_api_key'
+          // Secret field (api_key / client_secret / auth_token).
+          const hasKey = field.key === 'client_secret' ? 'has_client_secret'
+            : field.key === 'auth_token' ? 'has_auth_token' : 'has_api_key'
           return (
             <SecretField key={field.key}
-              fieldKey={field.key as 'api_key' | 'client_secret'}
+              fieldKey={field.key as 'api_key' | 'client_secret' | 'auth_token'}
               hasSecret={!!(settings as unknown as Record<string, unknown>)[hasKey]}
               value={secrets[field.key]}
               onChange={(v) => setSecrets((prev) => ({ ...prev, [field.key]: v }))}
@@ -319,19 +352,11 @@ export default function IntegrationConnectionCard({ connector }: { connector: Co
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
         <Button variant="secondary" onClick={runTest} disabled={testing}>
           {testing && <Spinner size={12} />}
-          {testing ? t('integrations.connection.testing') : t('integrations.connection.test')}
+          {testing ? t('integrations.connection.testing') : t(hasSmCreds2 ? 'integrations.connection.testBoth' : 'integrations.connection.test')}
         </Button>
       </div>
 
-      {testResult?.ok === true && (
-        <CalloutBox variant="success">{t('integrations.connection.testOk', { name: testResult.connected_as })}</CalloutBox>
-      )}
-      {testResult && testResult.ok === false && (
-        <CalloutBox variant="danger" title={t([`integrations.reason.${testResult.reason_code}`, 'integrations.connection.testFailed'])}>
-          <p style={{ margin: 0 }}>{testResult.message}</p>
-          <Caption>{t('integrations.connection.correlation', { id: testResult.correlation_id })}</Caption>
-        </CalloutBox>
-      )}
+      {testResult && <IntegrationTestResults result={testResult} t={t} />}
 
       <div style={{ marginTop: 16 }}>
         <SaveButton onClick={save} saved={saved} disabled={saving || !dirty}>

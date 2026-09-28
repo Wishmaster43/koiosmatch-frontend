@@ -12,10 +12,18 @@ import api, { unwrap, unwrapList } from '@/lib/api'
 export type ConnectorId = 'shiftmanager' | 'helloflex' | 'werkzoeken'
 
 // Per-connector GET /integrations/{connector}/settings shapes (contract §2).
+// SM-CREDS-2 (CONTRACT-CHANGELOG.md): Shiftmanager carries TWO credential sets —
+// the tenant API (subdomain + api_key, Bearer) and the open API (company +
+// auth_token). `subdomain`/`company`/`has_auth_token` are optional: a BE that
+// has not landed SM-CREDS-2 yet returns the old shape without them, and the
+// card feature-detects their absence to keep the old face.
 export interface ShiftmanagerSettings {
   two_way: boolean
+  subdomain?: string | null
   base_url: string | null
   has_api_key: boolean
+  company?: string | null
+  has_auth_token?: boolean
   connected_as: string | null
 }
 
@@ -44,7 +52,7 @@ export interface ConnectorSettingsMap {
 // '' leaves the secret unchanged; explicit null clears it (contract §2, PUT).
 export type ConnectorSettingsUpdate<C extends ConnectorId> = ConnectorSettingsMap[C] &
   (C extends 'shiftmanager'
-    ? { api_key?: string | null }
+    ? { api_key?: string | null; auth_token?: string | null }
     : C extends 'helloflex'
       ? { client_secret?: string | null }
       : { api_key?: string | null })
@@ -57,6 +65,8 @@ export type TestReasonCode =
   | 'rate_limited'
   | 'invalid_config'
   | 'scope_missing'
+  | 'not_configured'
+  | 'not_found'
 
 export interface TestSuccess {
   ok: true
@@ -71,7 +81,24 @@ export interface TestFailure {
   correlation_id: string
 }
 
-export type TestResult = TestSuccess
+// SM-CREDS-2: one outcome per credential set, tested separately. `not_configured`
+// is a new reason (the company API's credentials were never filled in).
+export interface DualTestOutcome {
+  ok: boolean
+  connected_as?: string
+  message?: string
+  reason_code?: TestReasonCode
+}
+
+export interface DualTestResult {
+  ok: boolean
+  results: { token_api: DualTestOutcome; company_api: DualTestOutcome }
+  correlation_id?: string
+}
+
+// The OLD single-outcome shape stays valid until the BE lands SM-CREDS-2's
+// dual `results` shape on this route (contract: both are accepted).
+export type TestResult = TestSuccess | DualTestResult
 
 // A single tenant mapping row (contract "Mappings").
 export interface MappingRow {

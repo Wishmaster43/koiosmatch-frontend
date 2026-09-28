@@ -4610,6 +4610,14 @@
       "apiKey": "Chave de API",
       "clientId": "ID de cliente",
       "clientSecret": "Client secret",
+      "subdomain": "Subdomínio",
+      "subdomainHint": "yesway → yesway.shiftmanager.pro",
+      "company": "Empresa",
+      "authToken": "Token de autenticação",
+      "tokenApiTitle": "API de token",
+      "companyApiTitle": "API da empresa",
+      "tokenApiHint": "Para sincronizações e a criação de funcionários (API do tenant).",
+      "companyApiHint": "Para a API aberta (turnos abertos).",
       "environment": "Ambiente",
       "envUat": "UAT (teste)",
       "envLive": "Produção",
@@ -4618,6 +4626,7 @@
       "secretPlaceholder": "Deixe em branco para manter inalterado",
       "clearSecret": "Limpar chave",
       "test": "Testar ligação",
+      "testBoth": "Testar ambas",
       "testing": "A testar…",
       "testOk": "Ligado como {{name}}",
       "testFailed": "O teste falhou",
@@ -4633,7 +4642,9 @@
       "timeout": "Tempo limite excedido",
       "rate_limited": "Demasiados pedidos",
       "invalid_config": "Configuração incompleta",
-      "scope_missing": "Permissões em falta"
+      "scope_missing": "Permissões em falta",
+      "not_configured": "Ainda não configurado",
+      "not_found": "Não encontrado"
     },
     "mappings": {
       "title": "Mapeamento",

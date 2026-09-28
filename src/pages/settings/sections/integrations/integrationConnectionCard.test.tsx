@@ -184,7 +184,23 @@ describe('states', () => {
     const [, body] = mockPut.mock.calls[0]
     expect(body).not.toHaveProperty('has_api_key')
     expect(body).not.toHaveProperty('connected_as')
-    expect(Object.keys(body).sort()).toEqual(['base_url', 'two_way'])
+    // base_url is unchanged, so it never rides the PUT (super-admin-only override).
+    expect(Object.keys(body).sort()).toEqual(['two_way'])
+  })
+
+  // base_url IS sent when the user actually edits it.
+  it('sends base_url when it was actually edited', async () => {
+    mockGet.mockResolvedValue({ two_way: true, base_url: 'https://sm.example', has_api_key: true, connected_as: 'Bureau X' })
+    mockPut.mockResolvedValue({ two_way: true, base_url: 'https://sm2.example', has_api_key: true, connected_as: 'Bureau X' })
+    const user = userEvent.setup()
+    await renderCard('shiftmanager')
+    const baseUrlInput = screen.getByDisplayValue('https://sm.example')
+    await user.clear(baseUrlInput)
+    await user.type(baseUrlInput, 'https://sm2.example')
+    await user.click(screen.getByRole('button', { name: t('common.save') }))
+    await waitFor(() => expect(mockPut).toHaveBeenCalled())
+    const [, body] = mockPut.mock.calls[0]
+    expect(body.base_url).toBe('https://sm2.example')
   })
 
   // Regression (verify finding): a successful test never makes the form dirty.
@@ -208,5 +224,147 @@ describe('states', () => {
     await user.click(screen.getByRole('button', { name: t('integrations.connection.undoClear') }))
     expect(screen.queryByText(t('integrations.connection.secretPendingClear'))).not.toBeInTheDocument()
     expect(screen.getByText(t('integrations.connection.secretSet'))).toBeInTheDocument()
+  })
+})
+
+// SM-CREDS-2: both Shiftmanager credential sets on one card, feature-detected
+// on `subdomain`/`has_auth_token` so a BE that has not landed it yet leaves the
+// card exactly as tested above (old face, old PUT body).
+describe('SM-CREDS-2 dual credentials', () => {
+  // (b) new GET shape → both groups render.
+  it('renders both credential groups once the GET carries subdomain + has_auth_token', async () => {
+    mockGet.mockResolvedValue({
+      two_way: true, subdomain: 'yesway', base_url: null, has_api_key: true,
+      company: 'yesway-nl', has_auth_token: true, connected_as: 'Bureau X',
+    })
+    await renderCard('shiftmanager')
+    expect(screen.getByText(t('integrations.connection.tokenApiTitle'))).toBeInTheDocument()
+    expect(screen.getByText(t('integrations.connection.companyApiTitle'))).toBeInTheDocument()
+    expect(screen.getByDisplayValue('yesway')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('yesway-nl')).toBeInTheDocument()
+    expect(screen.getByText(t('integrations.connection.authToken'))).toBeInTheDocument()
+  })
+
+  // Feature detection: has_auth_token key ABSENT → company_api group stays hidden
+  // (the BE half genuinely has not landed that field yet).
+  it('hides the company_api group when has_auth_token is absent entirely', async () => {
+    mockGet.mockResolvedValue({
+      two_way: true, subdomain: 'yesway', base_url: null, has_api_key: true, connected_as: null,
+    })
+    await renderCard('shiftmanager')
+    expect(screen.getByText(t('integrations.connection.tokenApiTitle'))).toBeInTheDocument()
+    expect(screen.queryByText(t('integrations.connection.companyApiTitle'))).not.toBeInTheDocument()
+  })
+
+  // Feature detection is on the KEY, not the value: has_auth_token: false still
+  // shows the group (Yesway's first save, before any auth_token was ever set).
+  it('shows the company_api group when has_auth_token is present but false', async () => {
+    mockGet.mockResolvedValue({
+      two_way: true, subdomain: 'yesway', base_url: null, has_api_key: true,
+      company: null, has_auth_token: false, connected_as: null,
+    })
+    await renderCard('shiftmanager')
+    expect(screen.getByText(t('integrations.connection.companyApiTitle'))).toBeInTheDocument()
+    expect(screen.getByLabelText(t('integrations.connection.company'))).toBeInTheDocument()
+    expect(screen.getByLabelText(t('integrations.connection.authToken'))).toBeInTheDocument()
+  })
+
+  // Save body carries subdomain/company/auth_token exactly, secrets only when dirty.
+  it('saves subdomain + company + both typed secrets in one PUT body', async () => {
+    mockGet.mockResolvedValue({
+      two_way: true, subdomain: 'old-sub', base_url: null, has_api_key: true,
+      company: 'old-co', has_auth_token: true, connected_as: null,
+    })
+    mockPut.mockResolvedValue({
+      two_way: true, subdomain: 'new-sub', base_url: null, has_api_key: true,
+      company: 'new-co', has_auth_token: true, connected_as: null,
+    })
+    const user = userEvent.setup()
+    await renderCard('shiftmanager')
+
+    const subdomainInput = screen.getByLabelText(t('integrations.connection.subdomain'))
+    await user.clear(subdomainInput)
+    await user.type(subdomainInput, 'new-sub')
+    const companyInput = screen.getByLabelText(t('integrations.connection.company'))
+    await user.clear(companyInput)
+    await user.type(companyInput, 'new-co')
+    const apiKeyInput = screen.getByLabelText(t('integrations.connection.apiKey'))
+    await user.type(apiKeyInput, 'new-api-key')
+    const authTokenInput = screen.getByLabelText(t('integrations.connection.authToken'))
+    await user.type(authTokenInput, 'new-auth-token')
+    await user.click(screen.getByRole('button', { name: t('common.save') }))
+
+    await waitFor(() => expect(mockPut).toHaveBeenCalled())
+    const [connectorArg, body] = mockPut.mock.calls[0]
+    expect(connectorArg).toBe('shiftmanager')
+    // Exact body: no extra key (base_url, a has_* leak, …) rides along.
+    expect(body).toEqual({
+      two_way: true,
+      subdomain: 'new-sub',
+      api_key: 'new-api-key',
+      company: 'new-co',
+      auth_token: 'new-auth-token',
+    })
+  })
+
+  // Clearing auth_token sends null, distinct from an untouched api_key.
+  it('sends auth_token: null on explicit clear, and never sends an untouched secret', async () => {
+    mockGet.mockResolvedValue({
+      two_way: true, subdomain: 'yesway', base_url: null, has_api_key: true,
+      company: 'yesway-nl', has_auth_token: true, connected_as: null,
+    })
+    mockPut.mockResolvedValue({
+      two_way: true, subdomain: 'yesway', base_url: null, has_api_key: true,
+      company: 'yesway-nl', has_auth_token: false, connected_as: null,
+    })
+    const user = userEvent.setup()
+    await renderCard('shiftmanager')
+    // Both api_key and auth_token are "Set" here, so two clear buttons render —
+    // auth_token's is the second (it follows api_key in the token_api/company_api order).
+    const clearButtons = screen.getAllByRole('button', { name: t('integrations.connection.clearSecret') })
+    await user.click(clearButtons[1])
+    await user.click(screen.getByRole('button', { name: t('common.save') }))
+    await waitFor(() => expect(mockPut).toHaveBeenCalled())
+    const [, body] = mockPut.mock.calls[0]
+    expect(body.auth_token).toBeNull()
+    expect(body).not.toHaveProperty('api_key')
+    // The group stays visible after save even though has_auth_token is now
+    // false — the field key is still present, so it can be re-entered.
+    expect(screen.getByText(t('integrations.connection.companyApiTitle'))).toBeInTheDocument()
+  })
+
+  // Test with dual results → two lines, one ok one failed with the translated reason.
+  it('renders two result lines for a dual test outcome', async () => {
+    mockGet.mockResolvedValue({
+      two_way: true, subdomain: 'yesway', base_url: null, has_api_key: true,
+      company: 'yesway-nl', has_auth_token: true, connected_as: null,
+    })
+    mockTest.mockResolvedValue({
+      ok: false,
+      results: {
+        token_api: { ok: true, connected_as: 'Bureau X' },
+        company_api: { ok: false, reason_code: 'not_configured', message: 'No auth token set.' },
+      },
+      correlation_id: 'corr-9',
+    })
+    const user = userEvent.setup()
+    await renderCard('shiftmanager')
+    await user.click(screen.getByRole('button', { name: t('integrations.connection.testBoth') }))
+    await screen.findByText(t('integrations.connection.testOk', { name: 'Bureau X' }))
+    expect(screen.getByText(new RegExp(t('integrations.reason.not_configured')))).toBeInTheDocument()
+  })
+
+  // Test with a legacy result (BE has not landed the dual shape) → single callout, unchanged.
+  it('renders the legacy single callout for a legacy test outcome', async () => {
+    mockGet.mockResolvedValue({
+      two_way: true, subdomain: 'yesway', base_url: null, has_api_key: true,
+      company: 'yesway-nl', has_auth_token: true, connected_as: null,
+    })
+    mockTest.mockResolvedValue({ ok: true, connected_as: 'Bureau Z', details: {} })
+    const user = userEvent.setup()
+    await renderCard('shiftmanager')
+    await user.click(screen.getByRole('button', { name: t('integrations.connection.testBoth') }))
+    const matches = await screen.findAllByText(t('integrations.connection.testOk', { name: 'Bureau Z' }))
+    expect(matches.length).toBeGreaterThan(0)
   })
 })
