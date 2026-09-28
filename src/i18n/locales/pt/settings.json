@@ -3908,6 +3908,15 @@
       "outcomeAdd": "Adicionar resultado"
     },
     "windows": {
+      "koios_suggest_task_overdue": { "label": "Sugestão: tarefa atrasada" },
+      "koios_suggest_task_overdue_days": { "label": "Tarefa atrasada após (dias depois do prazo)" },
+      "koios_suggest_task_overdue_days_unit": { "label": "Tarefa atrasada: unidade" },
+      "koios_suggest_no_contact": { "label": "Sugestão: candidato sem contacto" },
+      "koios_suggest_closing_soon": { "label": "Sugestão: oportunidade a fechar em breve" },
+      "koios_suggest_vacancy_zero": { "label": "Sugestão: vaga sem candidaturas" },
+      "koios_suggest_vacancy_open_days": { "label": "Vaga sem candidaturas após (dias em aberto)" },
+      "koios_suggest_vacancy_open_days_unit": { "label": "Vaga sem candidaturas: unidade" },
+      "koios_suggest_max": { "label": "Número máximo de sugestões" },
       "proposal_link_ttl_days": {
         "label": "Validade do link de proposta (dias)"
       },
@@ -4182,6 +4191,7 @@
       }
     },
     "groups": {
+      "koios_suggest": "Sugestões",
       "identity": "Identidade",
       "address": "Morada",
       "region": "Região e moeda",

@@ -3907,6 +3907,15 @@
       "outcomeAdd": "Ergebnis hinzufügen"
     },
     "windows": {
+      "koios_suggest_task_overdue": { "label": "Vorschlag: Aufgabe überfällig" },
+      "koios_suggest_task_overdue_days": { "label": "Aufgabe überfällig nach (Tage nach Fälligkeit)" },
+      "koios_suggest_task_overdue_days_unit": { "label": "Aufgabe überfällig: Einheit" },
+      "koios_suggest_no_contact": { "label": "Vorschlag: Kandidat ohne Kontakt" },
+      "koios_suggest_closing_soon": { "label": "Vorschlag: Chance schließt bald" },
+      "koios_suggest_vacancy_zero": { "label": "Vorschlag: Vakanz ohne Bewerbungen" },
+      "koios_suggest_vacancy_open_days": { "label": "Vakanz ohne Bewerbungen nach (Tage offen)" },
+      "koios_suggest_vacancy_open_days_unit": { "label": "Vakanz ohne Bewerbungen: Einheit" },
+      "koios_suggest_max": { "label": "Maximale Anzahl Vorschläge" },
       "proposal_link_ttl_days": {
         "label": "Gültigkeit Vorschlagslink (Tage)"
       },
@@ -4181,6 +4190,7 @@
       }
     },
     "groups": {
+      "koios_suggest": "Vorschläge",
       "identity": "Identität",
       "address": "Adresse",
       "region": "Region & Währung",

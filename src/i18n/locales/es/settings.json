@@ -3907,6 +3907,15 @@
       "outcomeAdd": "Añadir resultado"
     },
     "windows": {
+      "koios_suggest_task_overdue": { "label": "Sugerencia: tarea atrasada" },
+      "koios_suggest_task_overdue_days": { "label": "Tarea atrasada tras (días después del vencimiento)" },
+      "koios_suggest_task_overdue_days_unit": { "label": "Tarea atrasada: unidad" },
+      "koios_suggest_no_contact": { "label": "Sugerencia: candidato sin contacto" },
+      "koios_suggest_closing_soon": { "label": "Sugerencia: oportunidad a punto de cerrar" },
+      "koios_suggest_vacancy_zero": { "label": "Sugerencia: vacante sin candidaturas" },
+      "koios_suggest_vacancy_open_days": { "label": "Vacante sin candidaturas tras (días abierta)" },
+      "koios_suggest_vacancy_open_days_unit": { "label": "Vacante sin candidaturas: unidad" },
+      "koios_suggest_max": { "label": "Número máximo de sugerencias" },
       "proposal_link_ttl_days": {
         "label": "Validez del enlace de propuesta (días)"
       },
@@ -4181,6 +4190,7 @@
       }
     },
     "groups": {
+      "koios_suggest": "Sugerencias",
       "identity": "Identidad",
       "address": "Dirección",
       "region": "Región y moneda",

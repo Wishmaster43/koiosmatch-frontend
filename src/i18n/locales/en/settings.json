@@ -3907,6 +3907,15 @@
       "outcomeAdd": "Add outcome"
     },
     "windows": {
+      "koios_suggest_task_overdue": { "label": "Suggestion: task overdue" },
+      "koios_suggest_task_overdue_days": { "label": "Task overdue after (days past due date)" },
+      "koios_suggest_task_overdue_days_unit": { "label": "Task overdue: unit" },
+      "koios_suggest_no_contact": { "label": "Suggestion: candidate without contact" },
+      "koios_suggest_closing_soon": { "label": "Suggestion: opportunity closing soon" },
+      "koios_suggest_vacancy_zero": { "label": "Suggestion: vacancy without applications" },
+      "koios_suggest_vacancy_open_days": { "label": "Vacancy without applications after (days open)" },
+      "koios_suggest_vacancy_open_days_unit": { "label": "Vacancy without applications: unit" },
+      "koios_suggest_max": { "label": "Maximum number of suggestions" },
       "proposal_link_ttl_days": {
         "label": "Proposal link validity (days)"
       },
@@ -4181,6 +4190,7 @@
       }
     },
     "groups": {
+      "koios_suggest": "Suggestions",
       "identity": "Identity",
       "address": "Address",
       "region": "Region & currency",

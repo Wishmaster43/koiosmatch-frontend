@@ -29,6 +29,7 @@ import { PageTitle } from '@/components/ui/typography'
 import NumberSettingField from '../components/NumberSettingField'
 import SettingsLoadBanner from '../components/SettingsLoadBanner'
 import { SelectField } from '../components/SettingsKit'
+import CatalogSection from './CatalogSection'
 import { WINDOW_UNIT_OPTIONS } from '../components/windowUnitOptions'
 import { useAllSettings, useSettingsLoaded, saveSettingsKeys, invalidateAllSettingsCache, getStringSetting } from '@/lib/settings/useAllSettings'
 
@@ -102,6 +103,13 @@ export default function KoiosAdviceSettings() {
         title={t('koiosAdvice.applicationStaleTitle')} hint={t('koiosAdvice.applicationStaleHint')}
         label={t('koiosAdvice.applicationStaleLabel')} saveFailedMessage={t('koiosAdvice.applicationStaleSaveFailed')}
         defaultValue={APPLICATION_STAGE_STALE_DEFAULT} min={DAYS_MIN} max={DAYS_MAX} bordered={false} />
+      {/* KOIOS-SUGGEST-COMPACT-2 (Danny 28-09: "waar is instelbaar welke suggesties er
+          komen en wanneer iets te laat is?"): the "Koios suggests" block's own switches
+          and day windows live in the settings catalogue (section windows, group
+          koios_suggest — per kind on/off, the overdue and vacancy windows with their
+          unit, the row maximum); embedded here as one titled block so the thresholds
+          the assistant reads sit next to the advice thresholds, never on a second screen. */}
+      <div style={{ marginTop: 24 }}><CatalogSection section="windows" group="koios_suggest" headedBy="group" embedded /></div>
     </div>
   )
 }

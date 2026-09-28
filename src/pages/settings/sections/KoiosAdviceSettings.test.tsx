@@ -7,6 +7,7 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import KoiosAdviceSettings, {
@@ -36,6 +37,24 @@ vi.mock('@/lib/settings/useAllSettings', async () => {
   }
 })
 vi.mock('@/lib/notify', () => ({ notifyError }))
+vi.mock('@/lib/api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/api')>()
+  return { ...actual, default: { ...actual.default, get: vi.fn(async () => ({ data: {} })), post: vi.fn(async () => ({ data: {} })) } }
+})
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
+// KOIOS-SUGGEST-COMPACT-2: the "Koios suggests" switches/windows are catalogue rows
+// (section windows, group koios_suggest) embedded on this screen — the catalogue hook is
+// stubbed with one row of that group so the embed's presence is provable without the API.
+vi.mock('@/pages/settings/catalog/useSettingsCatalog', () => ({
+  useSettingsCatalog: () => ({
+    isLoading: false, isError: false, refetch: vi.fn(),
+    sections: [{ id: 'windows', keys: [
+      { key: 'koios_suggest_max', section: 'windows', type: 'integer', rules: ['integer', 'min:1', 'max:50'], default: 10, aliases: [],
+        label_key: 'settings.windows.koios_suggest_max.label', ui: 'generic', fe_screen: 'windows', constraints: { min: 1, max: 50 },
+        group: 'koios_suggest', group_label_key: 'settings.groups.koios_suggest' },
+    ] }],
+  }),
+}))
 
 afterEach(() => vi.clearAllMocks())
 
@@ -148,5 +167,17 @@ describe('KoiosAdviceSettings — save failure reverts', () => {
 
     await waitFor(() => expect(input).toHaveValue(30))
     expect(notifyError).toHaveBeenCalledWith(st('koiosAdvice.matchRenewSaveFailed'))
+  })
+})
+
+// KOIOS-SUGGEST-COMPACT-2 (Danny 28-09): the suggestions group renders on this screen,
+// headed by its own group label, so the thresholds the assistant reads sit beside the advice ones.
+describe('KoiosAdviceSettings — embedded koios_suggest catalogue group', () => {
+  it('renders the suggestions group with its label next to the advice thresholds', async () => {
+    mockSettings.mockReturnValue({})
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(<QueryClientProvider client={client}><KoiosAdviceSettings /></QueryClientProvider>)
+    expect(await screen.findByText(st('settings.groups.koios_suggest'))).toBeInTheDocument()
+    expect(screen.getByText(st('settings.windows.koios_suggest_max.label'))).toBeInTheDocument()
   })
 })

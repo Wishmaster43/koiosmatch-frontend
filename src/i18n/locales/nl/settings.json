@@ -3907,6 +3907,15 @@
       "outcomeAdd": "Uitkomst toevoegen"
     },
     "windows": {
+      "koios_suggest_task_overdue": { "label": "Suggestie: taak te laat" },
+      "koios_suggest_task_overdue_days": { "label": "Taak te laat na (dagen na vervaldatum)" },
+      "koios_suggest_task_overdue_days_unit": { "label": "Taak te laat: eenheid" },
+      "koios_suggest_no_contact": { "label": "Suggestie: kandidaat zonder contact" },
+      "koios_suggest_closing_soon": { "label": "Suggestie: kans sluit binnenkort" },
+      "koios_suggest_vacancy_zero": { "label": "Suggestie: vacature zonder sollicitaties" },
+      "koios_suggest_vacancy_open_days": { "label": "Vacature zonder sollicitaties na (dagen open)" },
+      "koios_suggest_vacancy_open_days_unit": { "label": "Vacature zonder sollicitaties: eenheid" },
+      "koios_suggest_max": { "label": "Maximaal aantal suggesties" },
       "proposal_link_ttl_days": {
         "label": "Geldigheid voorstel-link (dagen)"
       },
@@ -4181,6 +4190,7 @@
       }
     },
     "groups": {
+      "koios_suggest": "Suggesties",
       "identity": "Identiteit",
       "address": "Adres",
       "region": "Regio & valuta",
