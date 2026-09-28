@@ -285,7 +285,38 @@
       "moreActions": "Meer acties",
       "call": "Bellen",
       "email": "Mailen",
-      "message": "Bericht sturen"
+      "message": "Bericht sturen",
+      "reason": {
+        "task_overdue_one": "{{count}} dag te laat",
+        "task_overdue_other": "{{count}} dagen te laat",
+        "candidate_no_contact_one": "{{count}} dag geen contact",
+        "candidate_no_contact_other": "{{count}} dagen geen contact",
+        "opportunity_closing_soon_one": "Sluit over {{count}} dag",
+        "opportunity_closing_soon_other": "Sluit over {{count}} dagen",
+        "vacancy_zero_applications_one": "Geen sollicitaties, {{count}} dag open",
+        "vacancy_zero_applications_other": "Geen sollicitaties, {{count}} dagen open"
+      },
+      "reasonShort": {
+        "task_overdue": "Te laat",
+        "candidate_no_contact": "Geen contact",
+        "opportunity_closing_soon": "Sluit binnenkort",
+        "vacancy_zero_applications": "Geen sollicitaties",
+        "pending_action": "Voorstel"
+      },
+      "actions": {
+        "complete_task": "Afronden",
+        "reschedule_task": "Verzetten",
+        "send_whatsapp": "WhatsApp sturen",
+        "create_task": "Taak maken",
+        "search_candidates": "Kandidaten zoeken"
+      }
+    },
+    "tools": {
+      "wijzig_taak": "Taak wijzigen",
+      "maak_taak": "Taak maken",
+      "stuur_whatsapp": "WhatsApp sturen",
+      "zoek_kandidaten": "Kandidaten zoeken",
+      "unknown": "Uitvoeren"
     },
     "feedback": {
       "up": "Nuttig",

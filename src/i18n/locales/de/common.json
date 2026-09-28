@@ -285,7 +285,38 @@
       "moreActions": "Weitere Aktionen",
       "call": "Anrufen",
       "email": "E-Mail",
-      "message": "Nachricht senden"
+      "message": "Nachricht senden",
+      "reason": {
+        "task_overdue_one": "{{count}} Tag überfällig",
+        "task_overdue_other": "{{count}} Tage überfällig",
+        "candidate_no_contact_one": "{{count}} Tag ohne Kontakt",
+        "candidate_no_contact_other": "{{count}} Tage ohne Kontakt",
+        "opportunity_closing_soon_one": "Schließt in {{count}} Tag",
+        "opportunity_closing_soon_other": "Schließt in {{count}} Tagen",
+        "vacancy_zero_applications_one": "Keine Bewerbungen, {{count}} Tag offen",
+        "vacancy_zero_applications_other": "Keine Bewerbungen, {{count}} Tage offen"
+      },
+      "reasonShort": {
+        "task_overdue": "Überfällig",
+        "candidate_no_contact": "Kein Kontakt",
+        "opportunity_closing_soon": "Schließt bald",
+        "vacancy_zero_applications": "Keine Bewerbungen",
+        "pending_action": "Vorschlag"
+      },
+      "actions": {
+        "complete_task": "Abschließen",
+        "reschedule_task": "Verschieben",
+        "send_whatsapp": "WhatsApp senden",
+        "create_task": "Aufgabe erstellen",
+        "search_candidates": "Kandidaten suchen"
+      }
+    },
+    "tools": {
+      "wijzig_taak": "Aufgabe bearbeiten",
+      "maak_taak": "Aufgabe erstellen",
+      "stuur_whatsapp": "WhatsApp senden",
+      "zoek_kandidaten": "Kandidaten suchen",
+      "unknown": "Ausführen"
     },
     "feedback": {
       "up": "Hilfreich",

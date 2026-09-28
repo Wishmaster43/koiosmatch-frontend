@@ -65,7 +65,9 @@ export interface KoiosContextRef {
   parent?: { type: string; id: string }
   // KOIOS-PANEL-2 (Danny 10-09: "contact is contact — bellen, mailen of whatsapp"): the
   // person's channels, present only when the caller may see them (candidates.view).
-  contact?: { phone?: string | null; mobile?: string | null; email?: string | null } | null
+  // `whatsapp` (KOIOS-SUGGEST-COMPACT-1, contract proposed 28-09) flags whether the
+  // person has a WhatsApp-capable number — optional until the backend half ships.
+  contact?: { phone?: string | null; mobile?: string | null; email?: string | null; whatsapp?: boolean } | null
 }
 
 // Minimal translate signature for the Koios subcomponents.

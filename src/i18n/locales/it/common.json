@@ -285,7 +285,38 @@
       "moreActions": "Altre azioni",
       "call": "Chiama",
       "email": "E-mail",
-      "message": "Invia un messaggio"
+      "message": "Invia un messaggio",
+      "reason": {
+        "task_overdue_one": "{{count}} giorno di ritardo",
+        "task_overdue_other": "{{count}} giorni di ritardo",
+        "candidate_no_contact_one": "{{count}} giorno senza contatto",
+        "candidate_no_contact_other": "{{count}} giorni senza contatto",
+        "opportunity_closing_soon_one": "Si chiude tra {{count}} giorno",
+        "opportunity_closing_soon_other": "Si chiude tra {{count}} giorni",
+        "vacancy_zero_applications_one": "Nessuna candidatura, {{count}} giorno aperta",
+        "vacancy_zero_applications_other": "Nessuna candidatura, {{count}} giorni aperta"
+      },
+      "reasonShort": {
+        "task_overdue": "In ritardo",
+        "candidate_no_contact": "Nessun contatto",
+        "opportunity_closing_soon": "Si chiude presto",
+        "vacancy_zero_applications": "Nessuna candidatura",
+        "pending_action": "Suggerimento"
+      },
+      "actions": {
+        "complete_task": "Completa",
+        "reschedule_task": "Rinvia",
+        "send_whatsapp": "Invia WhatsApp",
+        "create_task": "Crea attività",
+        "search_candidates": "Cerca candidati"
+      }
+    },
+    "tools": {
+      "wijzig_taak": "Modifica attività",
+      "maak_taak": "Crea attività",
+      "stuur_whatsapp": "Invia WhatsApp",
+      "zoek_kandidaten": "Cerca candidati",
+      "unknown": "Esegui"
     },
     "feedback": {
       "up": "Utile",

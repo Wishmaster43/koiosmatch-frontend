@@ -28,6 +28,24 @@ describe('C1 assistant/learning i18n keys resolve', () => {
     expect(i18n.t('koios.assistant.askKoios', { ns: 'common', lng: 'de' })).toBe('Im Chat abschließen')
   })
 
+  // KOIOS-SUGGEST-COMPACT-1 (CMBE addendum 28-09): the row's action icon buttons
+  // read their accessible name from these keys — pinned against REAL EN copy,
+  // since the component suite itself only proves the KEY was requested.
+  it('resolves the compact-suggestion action + tool + reason keys', () => {
+    expect(i18n.t('koios.assistant.actions.complete_task', { ns: 'common', lng: 'en' })).toBe('Complete')
+    expect(i18n.t('koios.assistant.actions.reschedule_task', { ns: 'common', lng: 'en' })).toBe('Reschedule')
+    expect(i18n.t('koios.assistant.actions.send_whatsapp', { ns: 'common', lng: 'en' })).toBe('Send WhatsApp')
+    expect(i18n.t('koios.assistant.actions.create_task', { ns: 'common', lng: 'en' })).toBe('Create task')
+    expect(i18n.t('koios.assistant.actions.search_candidates', { ns: 'common', lng: 'en' })).toBe('Search candidates')
+    for (const tool of ['wijzig_taak', 'maak_taak', 'stuur_whatsapp', 'zoek_kandidaten', 'unknown']) {
+      expect(i18n.exists(`koios.tools.${tool}`, { ns: 'common', lng: 'en' }), tool).toBe(true)
+    }
+    // A day count runs the real ICU plural (i18next _one/_other), not the raw key.
+    expect(i18n.t('koios.assistant.reason.task_overdue', { ns: 'common', lng: 'en', count: 1 })).toBe('1 day overdue')
+    expect(i18n.t('koios.assistant.reason.task_overdue', { ns: 'common', lng: 'en', count: 4 })).toBe('4 days overdue')
+    expect(i18n.t('koios.assistant.reasonShort.pending_action', { ns: 'common', lng: 'en' })).toBe('Suggestion')
+  })
+
   it('resolves the learning card + tab keys from the koios namespace', () => {
     expect(i18n.t('learning.topQuestions', { ns: 'koios', lng: 'nl' })).toBe('Meest gestelde vragen')
     expect(i18n.t('tabs.learning', { ns: 'koios', lng: 'de' })).toBe('Lernbericht')

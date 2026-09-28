@@ -14,13 +14,19 @@ import type { KoiosPreviewRow } from './koiosTypes'
 // One tool call the model proposes for a suggestion. Golf 2: parked actions
 // (pending_action + ref) confirm/cancel via koiosApi; descriptor kinds hand
 // their intent to the chat composer.
+// KOIOS-SUGGEST-COMPACT-1 (CMBE addendum, landed 28-09): `key` is the ACTION
+// identity (complete_task, reschedule_task, send_whatsapp, create_task,
+// search_candidates — several share one registry `tool`); `label_key` reads
+// `koios.assistant.actions.<key>`, `tool_label_key` reads `koios.tools.<tool>`.
 export interface KoiosAssistantAction {
   tool: string
+  key?: string | null
   input?: Record<string, unknown>
   // KOIOS-PANEL-2 (CMBE spec): a human label (NL) plus an optional i18n key the FE
   // resolves first, the tool's args and the preview rows — all read tolerantly.
   label?: string | null
   label_key?: string | null
+  tool_label_key?: string | null
   args?: Record<string, unknown>
   preview?: KoiosPreviewRow[]
 }
@@ -32,6 +38,18 @@ export type KoiosAssistantKind =
   | 'opportunity_closing_soon'
   | 'vacancy_zero_applications'
 
+// KOIOS-SUGGEST-COMPACT-1 (CMBE addendum, landed 28-09): per-kind typed data
+// for the SHORT reason line, so the row never has to parse the server's Dutch
+// prose. Hand-written — the spec carries no 2xx schema yet. Still optional:
+// the row renders honestly on an older payload without it.
+export interface KoiosSuggestionTaskType { key?: string; label?: string; color?: string | null; icon?: string | null }
+export type KoiosSuggestionParams =
+  | { days_overdue: number; due_at?: string | null; task_type?: KoiosSuggestionTaskType | null }
+  | { days_since_contact: number | null; last_contact_at?: string | null }
+  | { days_to_close: number; close_at?: string | null }
+  | { days_open: number }
+  | { tool: string }
+
 export interface KoiosAssistantSuggestion {
   kind: KoiosAssistantKind
   title: string
@@ -41,6 +59,8 @@ export interface KoiosAssistantSuggestion {
   // is the primary button, the rest sit in the row's menu. Absent → `action` as before.
   actions?: KoiosAssistantAction[] | null
   refs: KoiosContextRef[]
+  // KOIOS-SUGGEST-COMPACT-1: typed per-kind data driving the short reason line.
+  params?: KoiosSuggestionParams | null
 }
 
 interface AssistantResponse { suggestions: KoiosAssistantSuggestion[] }

@@ -285,7 +285,38 @@
       "moreActions": "More actions",
       "call": "Call",
       "email": "Email",
-      "message": "Send a message"
+      "message": "Send a message",
+      "reason": {
+        "task_overdue_one": "{{count}} day overdue",
+        "task_overdue_other": "{{count}} days overdue",
+        "candidate_no_contact_one": "{{count}} day since contact",
+        "candidate_no_contact_other": "{{count}} days since contact",
+        "opportunity_closing_soon_one": "Closes in {{count}} day",
+        "opportunity_closing_soon_other": "Closes in {{count}} days",
+        "vacancy_zero_applications_one": "No applications, {{count}} day open",
+        "vacancy_zero_applications_other": "No applications, {{count}} days open"
+      },
+      "reasonShort": {
+        "task_overdue": "Overdue",
+        "candidate_no_contact": "No contact",
+        "opportunity_closing_soon": "Closing soon",
+        "vacancy_zero_applications": "No applications",
+        "pending_action": "Suggestion"
+      },
+      "actions": {
+        "complete_task": "Complete",
+        "reschedule_task": "Reschedule",
+        "send_whatsapp": "Send WhatsApp",
+        "create_task": "Create task",
+        "search_candidates": "Search candidates"
+      }
+    },
+    "tools": {
+      "wijzig_taak": "Update task",
+      "maak_taak": "Create task",
+      "stuur_whatsapp": "Send WhatsApp",
+      "zoek_kandidaten": "Search candidates",
+      "unknown": "Run"
     },
     "feedback": {
       "up": "Helpful",

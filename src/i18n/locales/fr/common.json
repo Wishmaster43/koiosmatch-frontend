@@ -285,7 +285,38 @@
       "moreActions": "Plus d’actions",
       "call": "Appeler",
       "email": "E-mail",
-      "message": "Envoyer un message"
+      "message": "Envoyer un message",
+      "reason": {
+        "task_overdue_one": "{{count}} jour de retard",
+        "task_overdue_other": "{{count}} jours de retard",
+        "candidate_no_contact_one": "{{count}} jour sans contact",
+        "candidate_no_contact_other": "{{count}} jours sans contact",
+        "opportunity_closing_soon_one": "Se termine dans {{count}} jour",
+        "opportunity_closing_soon_other": "Se termine dans {{count}} jours",
+        "vacancy_zero_applications_one": "Aucune candidature, {{count}} jour ouverte",
+        "vacancy_zero_applications_other": "Aucune candidature, {{count}} jours ouverte"
+      },
+      "reasonShort": {
+        "task_overdue": "En retard",
+        "candidate_no_contact": "Sans contact",
+        "opportunity_closing_soon": "Se termine bientôt",
+        "vacancy_zero_applications": "Aucune candidature",
+        "pending_action": "Suggestion"
+      },
+      "actions": {
+        "complete_task": "Terminer",
+        "reschedule_task": "Reporter",
+        "send_whatsapp": "Envoyer WhatsApp",
+        "create_task": "Créer une tâche",
+        "search_candidates": "Chercher des candidats"
+      }
+    },
+    "tools": {
+      "wijzig_taak": "Modifier la tâche",
+      "maak_taak": "Créer une tâche",
+      "stuur_whatsapp": "Envoyer WhatsApp",
+      "zoek_kandidaten": "Chercher des candidats",
+      "unknown": "Exécuter"
     },
     "feedback": {
       "up": "Utile",
