@@ -59,7 +59,8 @@ import type { Id } from '@/types/common'
 import type { AiAgent } from '@/types/ai'
 import Button from '@/components/ui/Button'
 import TitleBarPills from '@/components/ui/TitleBarPills'
-import { PageTitle } from '@/components/ui/typography'
+import ModalTitleBarPillsRow from '@/components/forms/ModalTitleBarPillsRow'
+import { CHANNEL_COLORS } from '@/components/drawer/channelColors'
 import { TextArea } from '@/components/forms/fields'
 import { useWaWebSendDevices } from './useWaWebSendDevices'
 
@@ -235,14 +236,17 @@ export default function StartConversationModal({ candidateId, subject, applicati
     <FloatingPanel open onClose={onClose} title={t('conversations.startModalTitle')} ariaLabel={t('conversations.startModalTitle')}
       persistKey="start-conversation" width={420} maxWidth="92vw" bodyStyle={{ padding: 22 }}
       header={
-        // TITELBALK-PILLS: the channel is the short choice in the title bar, one shared pill row.
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minWidth: 0 }}>
-          <PageTitle as="span">{t('conversations.startModalTitle')}</PageTitle>
-          <div style={{ marginLeft: 'auto', flexShrink: 0 }}>
-            <TitleBarPills value={channel} onChange={v => { setChannel(v as StartChannel); setChannelChosen(true) }} ariaLabel={t('conversations.channel')}
-              options={[{ value: 'waba', label: t('conversations.channelWaba') }, { value: 'wa_web', label: t('conversations.channelWaWeb') }]} />
-          </div>
-        </div>
+        // TITELBALK-PILLS (Danny 28-09: "chips zoals bij + candidate", the title written out
+        // on one line): the shared title-bar row — nowrap title, the channel as coloured
+        // pills (the channel colours the thread badges already wear), same idiom as
+        // MatchModal/AddTaskModal — never a hand-rolled flex row that let the title wrap.
+        <ModalTitleBarPillsRow title={t('conversations.startModalTitle')}>
+          <TitleBarPills value={channel} onChange={v => { setChannel(v as StartChannel); setChannelChosen(true) }} ariaLabel={t('conversations.channel')}
+            options={[
+              { value: 'waba', label: t('conversations.channelWaba'), color: CHANNEL_COLORS.waba },
+              { value: 'wa_web', label: t('conversations.channelWaWeb'), color: CHANNEL_COLORS.wa_web },
+            ]} />
+        </ModalTitleBarPillsRow>
       }>
 
         {(loading || devicesLoading) && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{t('common:loading')}</div>}
