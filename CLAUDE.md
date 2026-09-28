@@ -40,6 +40,16 @@ compliant alternative.
    slug is a deliberate migration (old deep-links must keep resolving via a
    redirect/alias), never an ad-hoc rename. The user-visible LABEL stays translated
    via i18n — only the identifier underneath is English.
+   **FILES-EN-1 (Danny 2026-09-28, verbatim: "Niets mag in NL zijn maar moet in Engels zijn
+   alle files!! Loop echt alle bestanden na niet alleen van Koios maar alles … dit geldt voor
+   FE en BE. Zet in claude.md dat bestanden altijd in het engels zijn voor zowel BE en FE!!!"):**
+   every FILE NAME, component, hook, function, variable, type, object key, enum/string id,
+   Koios tool id and i18n KEY NAME is English, in both repos. Dutch exists only as translated
+   TEXT VALUES inside the locale files (and in verbatim Danny quotes in comments/docs).
+   Product and proper names (Werkzoeken.nl, HelloFlex, Shiftmanager) are not Dutch words.
+   Contract keys that the BE sends (tool ids, tool input/output keys such as `gelukt`,
+   `reden`, `kandidaat_id`) move with the BE's KOIOS-EN-1 mapping, FE in lockstep; a NEW
+   Dutch identifier or key name is a finding. Mirrored in backend-CLAUDE.md.
 2. **One short English comment per logical block** — above each meaningful
    block (function, hook, effect, handler, mapping), write a single concise
    line describing _what it does and why_. The developer learns by reading.

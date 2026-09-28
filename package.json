@@ -20,7 +20,8 @@
     "test:career": "vitest run --config careersite/vite.config.ts",
     "huisstijl:ceiling": "node scripts/huisstijl-ceiling.mjs",
     "security:audit": "audit-ci --config audit-ci.jsonc",
-    "dry:ceiling": "node scripts/dry-ceiling.mjs"
+    "dry:ceiling": "node scripts/dry-ceiling.mjs",
+    "english:ceiling": "node scripts/english-code-count.mjs"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.5.1",
