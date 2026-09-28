@@ -34,6 +34,7 @@ import { KoiosRefChip } from './KoiosResultCards'
 import type { KoiosContextRef } from '@/types/koios'
 import { entityIconEl } from './koiosEntityIcons'
 import { useKoiosToolCapabilities, findToolCapability, KOIOS_CONNECTION_HASH } from './useKoiosToolCapabilities'
+import { shapePreviewRows, type ShapedPreviewRow } from './pendingPreview'
 import type { KoiosPendingAction, KoiosPreviewRow } from './koiosTypes'
 import type { ActionBudget } from '@/types/actionBudget'
 
@@ -56,7 +57,7 @@ function secondsLeft(expiresAt: string): number {
 }
 
 // One preview row: "label · before → after" or "label: text".
-function PreviewRow({ row }: { row: KoiosPreviewRow }) {
+function PreviewRow({ row }: { row: ShapedPreviewRow }) {
   return (
     <div style={{ display: 'flex', gap: 6, fontSize: 12, padding: '3px 0' }}>
       <span style={{ color: 'var(--text-muted)', flexShrink: 0 }}>{row.label}</span>
@@ -169,28 +170,49 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
   }
 
   const owner = findOwner(action.preview) ?? action.entity_ref.owner
+  // Row shaping: translated labels, humanised dates, id/UUID rows hidden, the
+  // model's confidence pulled out into its own caption (KOIOS-PENDING-CARD-FACE-1).
+  const { rows: previewRows, confidence } = shapePreviewRows(action.preview, t)
+  // No duplicate header: when the entity chip would repeat the title verbatim,
+  // render the title once and fold the owner suffix into that single line.
+  const chipDuplicatesTitle = action.entity_ref.label.trim() === action.title.trim()
+  // Countdown text switches from a developer-facing seconds tick (still ticking
+  // every second underneath, to drive the auto-expire) to a minutes display —
+  // "Expires within a minute" below 60s, otherwise a rounded-up minute count.
+  const countdownText = remaining < 60
+    ? t('koios.pendingAction.expiresSoon')
+    : t('koios.pendingAction.expiresIn', { count: Math.ceil(remaining / 60) })
 
   return (
     <div data-testid="koios-pending-action" data-status={status}
       style={{ marginTop: 8, padding: 12, borderRadius: 10, background: 'var(--surface)',
         border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 8 }}>
 
-      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{action.title}</div>
-
-      {/* Entity chip + owner */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
-        <span style={{ width: 22, height: 22, borderRadius: '50%', flexShrink: 0, display: 'flex',
-          alignItems: 'center', justifyContent: 'center', background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)' }}>
-          {entityIconEl(action.entity_ref.type, { size: 12 })}
-        </span>
-        <span style={{ fontWeight: 500, color: 'var(--text)' }}>{action.entity_ref.label}</span>
-        {owner && <span style={{ color: 'var(--text-muted)' }}>· {t('koios.pendingAction.owner', { name: owner })}</span>}
+      {/* Title, with the owner suffix folded in when the chip below would only
+          repeat this same text (KOIOS-PENDING-CARD-FACE-1: no duplicate header). */}
+      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
+        {action.title}
+        {chipDuplicatesTitle && owner && (
+          <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}> · {t('koios.pendingAction.owner', { name: owner })}</span>
+        )}
       </div>
 
-      {/* Preview / diff rows */}
-      {action.preview.length > 0 && (
+      {/* Entity chip + owner — skipped when it would only repeat the title above. */}
+      {!chipDuplicatesTitle && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
+          <span style={{ width: 22, height: 22, borderRadius: '50%', flexShrink: 0, display: 'flex',
+            alignItems: 'center', justifyContent: 'center', background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)' }}>
+            {entityIconEl(action.entity_ref.type, { size: 12 })}
+          </span>
+          <span style={{ fontWeight: 500, color: 'var(--text)' }}>{action.entity_ref.label}</span>
+          {owner && <span style={{ color: 'var(--text-muted)' }}>· {t('koios.pendingAction.owner', { name: owner })}</span>}
+        </div>
+      )}
+
+      {/* Preview / diff rows — id/UUID rows hidden, dates humanised, labels translated */}
+      {previewRows.length > 0 && (
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: 6 }}>
-          {action.preview.map((row, i) => <PreviewRow key={i} row={row} />)}
+          {previewRows.map((row, i) => <PreviewRow key={i} row={row} />)}
         </div>
       )}
 
@@ -260,8 +282,11 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
           <Button variant="secondary" size="sm" onClick={cancel} disabled={status === 'submitting'}>
             {status === 'confirming' ? t('koios.pendingAction.back') : t('koios.pendingAction.cancel')}
           </Button>
-          <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text-muted)' }}>
-            {t('koios.pendingAction.expiresIn', { seconds: remaining })}
+          <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+            {confidence && (
+              <Caption>{t('koios.pendingAction.confidence.label')}: {confidence}</Caption>
+            )}
+            <Caption>{countdownText}</Caption>
           </span>
         </div>
       )}

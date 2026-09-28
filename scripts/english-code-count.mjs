@@ -50,9 +50,14 @@ const stripComments = (src) => src.replace(/\/\*[\s\S]*?\*\//g, m => m.replace(/
 const tokensOf = (ident) => ident.replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase().split(/[^a-z]+/).filter(Boolean)
 
 const hits = { identifiers: [], strings: [] }
+const ignored = []
 for (const file of files) {
   const rel = relative(ROOT, file)
-  const src = stripComments(readFileSync(file, 'utf8'))
+  const raw = readFileSync(file, 'utf8')
+  // A file whose head carries `english-code-ignore:` is a deliberate Dutch→English alias map
+  // for a contract transition (KOIOS-EN-1); it is listed apart and never ratcheted.
+  if (/english-code-ignore:/.test(raw.slice(0, 800))) { ignored.push(rel); continue }
+  const src = stripComments(raw)
   const lines = src.split('\n')
   lines.forEach((line, i) => {
     // string literals first, then identifiers on the line with the literals blanked out
@@ -84,6 +89,7 @@ if (args.has('--list')) {
 const perFile = {}
 for (const k of ['identifiers', 'strings']) for (const h of hits[k]) perFile[h.file] = (perFile[h.file] || 0) + 1
 const top = Object.entries(perFile).sort((a, b) => b[1] - a[1]).slice(0, 15)
+if (ignored.length) console.log(`legacy alias files skipped (english-code-ignore): ${ignored.join(', ')}`)
 console.log(`english-code: ${totals.identifiers} Dutch identifier tokens; Dutch string literals: ${totals.strings_src} in source, ${totals.strings_tests} in tests/probes, ${totals.strings_catalogue} in text catalogues (${totals.files} files)`)
 if (args.has('--top')) for (const [f, n] of top) console.log(`  ${String(n).padStart(4)}  ${f}`)
 if (args.has('--write')) { writeFileSync(CEIL, JSON.stringify(totals, null, 2) + '\n'); console.log(`ceiling written: ${CEIL}`); process.exit(0) }

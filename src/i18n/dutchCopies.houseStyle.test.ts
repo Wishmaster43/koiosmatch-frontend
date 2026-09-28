@@ -342,6 +342,15 @@ const ALLOWLIST: string[] = [
   'de/settings:kpiBuilder.entities.candidate',
   'fr/settings:kpiBuilder.surface.report',
   'it/settings:kpiBuilder.dimension.application_stage',
+
+  // KOIOS-PENDING-CARD-FACE-1: "Fase" is the identical Italian/Portuguese/Dutch
+  // cognate for "phase" (same reasoning as the fase/settings entries above); Spanish
+  // "Fase" = "phase" is the same identical cognate, and German "Datum" = "date"
+  // (identical spelling, same reasoning as the workflows Datum entries above).
+  'it/common:koios.pendingAction.fields.phase',
+  'pt/common:koios.pendingAction.fields.phase',
+  'es/common:koios.pendingAction.fields.phase',
+  'de/common:koios.pendingAction.fields.date',
 ]
 
 describe('i18n house style — no smuggled Dutch copies in translated locales', () => {

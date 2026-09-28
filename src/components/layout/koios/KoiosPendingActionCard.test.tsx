@@ -10,7 +10,7 @@ import type { KoiosPendingAction } from './koiosTypes'
 vi.mock('./koiosApi', () => ({ confirmPendingAction: vi.fn(), cancelPendingAction: vi.fn() }))
 // useKoiosToolCapabilities fetches GET /ai/koios/capabilities directly via the axios client.
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn() }, unwrap: (r: { data: unknown }) => r.data }))
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k }) }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string; count?: number }) => opts?.defaultValue ?? (opts?.count != null ? `${k}|${opts.count}` : k) }) }))
 vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatNumber: (n: number) => String(n) }) }))
 const mockConfirm = confirmPendingAction as unknown as ReturnType<typeof vi.fn>
 const mockCancel = cancelPendingAction as unknown as ReturnType<typeof vi.fn>
@@ -146,6 +146,44 @@ describe('KoiosPendingActionCard', () => {
     renderCard(action({ expires_at: new Date(Date.now() + 2000).toISOString() }))
     await act(async () => { await vi.advanceTimersByTimeAsync(2100) })
     expect(screen.getByTestId('koios-pending-action')).toHaveAttribute('data-status', 'expired')
+  })
+
+  // KOIOS-PENDING-CARD-FACE-1: the seconds countdown is a developer face
+  // (Danny 28-09: "Hoezo expires in zoveel seconden?") — the card shows minutes.
+  it('shows the countdown in minutes, rounded up (891s → 15 min)', () => {
+    vi.useFakeTimers()
+    renderCard(action({ expires_at: new Date(Date.now() + 891_000).toISOString() }))
+    expect(screen.getByText('koios.pendingAction.expiresIn|15')).toBeInTheDocument()
+  })
+
+  it('shows "expires within a minute" under 60s left', () => {
+    vi.useFakeTimers()
+    renderCard(action({ expires_at: new Date(Date.now() + 45_000).toISOString() }))
+    expect(screen.getByText('koios.pendingAction.expiresSoon')).toBeInTheDocument()
+  })
+
+  it('renders the title once when the entity chip would only repeat it', () => {
+    renderCard(action({ title: 'Taak aanmaken: Belafspraak Bas Koster', entity_ref: { type: 'candidate', id: 'c1', label: 'Taak aanmaken: Belafspraak Bas Koster' } }))
+    expect(screen.getAllByText('Taak aanmaken: Belafspraak Bas Koster')).toHaveLength(1)
+  })
+
+  it('hides id/UUID rows, humanises the date and shows the confidence caption', () => {
+    renderCard(action({
+      title: 'Taak aanmaken: Belafspraak Bas Koster',
+      entity_ref: { type: 'candidate', id: 'c1', label: 'Taak aanmaken: Belafspraak Bas Koster' },
+      preview: [
+        { label: 'titel', text: 'Belafspraak Bas Koster' },
+        { label: 'deadline', text: '2026-09-29' },
+        { label: 'kandidaat_id', text: '67742906-cb41-43d0-9a59-320c80da0923' },
+        { label: 'kandidaat', text: 'Bas Koster' },
+        { label: 'omschrijving', text: 'Belafspraak inplannen' },
+        { label: 'zekerheid', text: 'hoog' },
+      ],
+    }))
+    expect(screen.queryByText(/kandidaat_id/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/67742906-cb41-43d0-9a59-320c80da0923/)).not.toBeInTheDocument()
+    expect(screen.getByText('29-09-2026')).toBeInTheDocument()
+    expect(screen.getByText(/koios\.pendingAction\.confidence\.label/)).toBeInTheDocument()
   })
 
   it('disables Confirm and shows a connection-needed notice when the tool\'s connection is inactive', async () => {
