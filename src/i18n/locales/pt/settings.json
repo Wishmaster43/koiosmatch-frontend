@@ -3917,6 +3917,8 @@
       "koios_suggest_vacancy_zero": { "label": "Sugestão: vaga sem candidaturas" },
       "koios_suggest_vacancy_open_days": { "label": "Vaga sem candidaturas após (dias em aberto)" },
       "koios_suggest_vacancy_open_days_unit": { "label": "Vaga sem candidaturas: unidade" },
+      "koios_suggest_interview_stalled": { "label": "Sugestão: entrevista a aguardar o candidato" },
+      "koios_suggest_interview_stalled_hours": { "label": "Entrevista a aguardar o candidato após (horas)" },
       "koios_suggest_max": { "label": "Número máximo de sugestões" },
       "proposal_link_ttl_days": {
         "label": "Validade do link de proposta (dias)"

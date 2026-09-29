@@ -3916,6 +3916,8 @@
       "koios_suggest_vacancy_zero": { "label": "Vorschlag: Vakanz ohne Bewerbungen" },
       "koios_suggest_vacancy_open_days": { "label": "Vakanz ohne Bewerbungen nach (Tage offen)" },
       "koios_suggest_vacancy_open_days_unit": { "label": "Vakanz ohne Bewerbungen: Einheit" },
+      "koios_suggest_interview_stalled": { "label": "Vorschlag: Interview wartet auf Bewerber" },
+      "koios_suggest_interview_stalled_hours": { "label": "Interview wartet auf Bewerber nach (Stunden)" },
       "koios_suggest_max": { "label": "Maximale Anzahl Vorschläge" },
       "proposal_link_ttl_days": {
         "label": "Gültigkeit Vorschlagslink (Tage)"

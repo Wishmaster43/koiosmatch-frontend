@@ -330,6 +330,8 @@
       "createTaskConfirm": "Taak maken",
       "noDueDate": "Geen deadline",
       "reason": {
+        "interview_stalled_one": "{{count}} uur geen reactie",
+        "interview_stalled_other": "{{count}} uur geen reactie",
         "task_overdue_one": "{{count}} dag te laat",
         "task_overdue_other": "{{count}} dagen te laat",
         "candidate_no_contact_one": "{{count}} dag geen contact",
@@ -340,6 +342,7 @@
         "vacancy_zero_applications_other": "Geen sollicitaties, {{count}} dagen open"
       },
       "reasonShort": {
+        "interview_stalled": "Wacht op sollicitant",
         "task_overdue": "Te laat",
         "candidate_no_contact": "Geen contact",
         "opportunity_closing_soon": "Sluit binnenkort",

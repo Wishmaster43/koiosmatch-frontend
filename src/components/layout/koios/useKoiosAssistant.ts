@@ -35,6 +35,7 @@ export type KoiosAssistantKind =
   | 'pending_action'
   | 'task_overdue'
   | 'candidate_no_contact'
+  | 'interview_stalled'
   | 'opportunity_closing_soon'
   | 'vacancy_zero_applications'
 

@@ -7,7 +7,7 @@
  * 28-09: keyed by the action's `key`, falling back to the registry `tool`
  * name, then a generic "run" glyph for anything neither table lists).
  */
-import { Clock, UserX, Target, Briefcase, Sparkles, Check, CalendarClock, ListPlus, Search, MessageCircle, Play } from 'lucide-react'
+import { Clock, UserX, Target, Briefcase, Sparkles, Check, CalendarClock, ListPlus, Search, MessageCircle, Play, MessageSquareDashed } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { KoiosAssistantKind, KoiosAssistantSuggestion } from './useKoiosAssistant'
 import { canonicalToolId } from './koiosToolIds'
@@ -32,6 +32,8 @@ export const KIND_META: Record<KoiosAssistantKind, { Icon: LucideIcon; color: st
   candidate_no_contact:      { Icon: UserX,      color: 'var(--color-danger-text)' },
   opportunity_closing_soon:  { Icon: Target,     color: 'var(--color-primary)' },
   vacancy_zero_applications: { Icon: Briefcase,  color: 'var(--color-info)' },
+  // INTERVIEW-VISIBILITY-1: an AI interview waiting on the applicant (BE 04fe3a2a) — warning, like an overdue task.
+  interview_stalled:         { Icon: MessageSquareDashed, color: 'var(--color-warning-text)' },
 }
 
 // One icon per known ACTION key (the action's own verb, Danny: "elke type taak

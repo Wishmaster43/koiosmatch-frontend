@@ -330,6 +330,8 @@
       "createTaskConfirm": "Create task",
       "noDueDate": "No due date",
       "reason": {
+        "interview_stalled_one": "{{count}} hour without a reply",
+        "interview_stalled_other": "{{count}} hours without a reply",
         "task_overdue_one": "{{count}} day overdue",
         "task_overdue_other": "{{count}} days overdue",
         "candidate_no_contact_one": "{{count}} day since contact",
@@ -340,6 +342,7 @@
         "vacancy_zero_applications_other": "No applications, {{count}} days open"
       },
       "reasonShort": {
+        "interview_stalled": "Waiting on applicant",
         "task_overdue": "Overdue",
         "candidate_no_contact": "No contact",
         "opportunity_closing_soon": "Closing soon",

@@ -3916,6 +3916,8 @@
       "koios_suggest_vacancy_zero": { "label": "Suggestie: vacature zonder sollicitaties" },
       "koios_suggest_vacancy_open_days": { "label": "Vacature zonder sollicitaties na (dagen open)" },
       "koios_suggest_vacancy_open_days_unit": { "label": "Vacature zonder sollicitaties: eenheid" },
+      "koios_suggest_interview_stalled": { "label": "Suggestie: interview wacht op sollicitant" },
+      "koios_suggest_interview_stalled_hours": { "label": "Interview wacht op sollicitant na (uren)" },
       "koios_suggest_max": { "label": "Maximaal aantal suggesties" },
       "proposal_link_ttl_days": {
         "label": "Geldigheid voorstel-link (dagen)"

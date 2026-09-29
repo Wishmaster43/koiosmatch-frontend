@@ -330,6 +330,8 @@
       "createTaskConfirm": "Aufgabe erstellen",
       "noDueDate": "Kein Fälligkeitsdatum",
       "reason": {
+        "interview_stalled_one": "{{count}} Stunde ohne Antwort",
+        "interview_stalled_other": "{{count}} Stunden ohne Antwort",
         "task_overdue_one": "{{count}} Tag überfällig",
         "task_overdue_other": "{{count}} Tage überfällig",
         "candidate_no_contact_one": "{{count}} Tag ohne Kontakt",
@@ -340,6 +342,7 @@
         "vacancy_zero_applications_other": "Keine Bewerbungen, {{count}} Tage offen"
       },
       "reasonShort": {
+        "interview_stalled": "Wartet auf Bewerber",
         "task_overdue": "Überfällig",
         "candidate_no_contact": "Kein Kontakt",
         "opportunity_closing_soon": "Schließt bald",

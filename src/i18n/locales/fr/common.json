@@ -330,6 +330,8 @@
       "createTaskConfirm": "Créer la tâche",
       "noDueDate": "Aucune échéance",
       "reason": {
+        "interview_stalled_one": "{{count}} heure sans réponse",
+        "interview_stalled_other": "{{count}} heures sans réponse",
         "task_overdue_one": "{{count}} jour de retard",
         "task_overdue_other": "{{count}} jours de retard",
         "candidate_no_contact_one": "{{count}} jour sans contact",
@@ -340,6 +342,7 @@
         "vacancy_zero_applications_other": "Aucune candidature, {{count}} jours ouverte"
       },
       "reasonShort": {
+        "interview_stalled": "En attente du candidat",
         "task_overdue": "En retard",
         "candidate_no_contact": "Sans contact",
         "opportunity_closing_soon": "Se termine bientôt",
