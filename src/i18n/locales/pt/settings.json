@@ -3809,6 +3809,7 @@
     "add": "Adicionar nível"
   },
   "koiosAdvice": {
+    "tabs": { "thresholds": "Limites", "suggestions": "Sugestões" },
     "title": "Limiares de aconselhamento Koios",
     "subtitle": "As janelas de dias por trás do sinalizador de atenção Koios em vagas e matches.",
     "vacancyStaleTitle": "Envelhecimento da vaga",

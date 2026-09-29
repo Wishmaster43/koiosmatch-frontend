@@ -3808,6 +3808,7 @@
     "add": "Niveau toevoegen"
   },
   "koiosAdvice": {
+    "tabs": { "thresholds": "Drempels", "suggestions": "Suggesties" },
     "title": "Koios-adviesdrempels",
     "subtitle": "De dagvensters achter de Koios-aandachtsvlag op vacatures en matches.",
     "vacancyStaleTitle": "Vacature-veroudering",

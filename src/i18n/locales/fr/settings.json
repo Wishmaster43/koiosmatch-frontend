@@ -3808,6 +3808,7 @@
     "add": "Ajouter un niveau"
   },
   "koiosAdvice": {
+    "tabs": { "thresholds": "Seuils", "suggestions": "Suggestions" },
     "title": "Seuils des conseils Koios",
     "subtitle": "Les fenêtres en jours derrière le signal d'attention Koios sur les vacatures et les matches.",
     "vacancyStaleTitle": "Ancienneté de la vacature",

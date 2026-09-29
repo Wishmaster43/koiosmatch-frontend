@@ -3808,6 +3808,7 @@
     "add": "Add level"
   },
   "koiosAdvice": {
+    "tabs": { "thresholds": "Thresholds", "suggestions": "Suggestions" },
     "title": "Koios advice thresholds",
     "subtitle": "The day windows behind the Koios attention flag on vacancies and matches.",
     "vacancyStaleTitle": "Vacancy staleness",

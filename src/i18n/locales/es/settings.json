@@ -3808,6 +3808,7 @@
     "add": "Añadir nivel"
   },
   "koiosAdvice": {
+    "tabs": { "thresholds": "Umbrales", "suggestions": "Sugerencias" },
     "title": "Umbrales de aviso de Koios",
     "subtitle": "Las ventanas de días detrás de la marca de atención de Koios en vacantes y matches.",
     "vacancyStaleTitle": "Antigüedad de la vacante",

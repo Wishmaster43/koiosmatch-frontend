@@ -134,6 +134,27 @@ describe('KoiosAdviceSettings — saves on blur', () => {
 
 // O23 UNIT-NAAST-BEDRAG-1: the vacancy-stale unit picker renders inline right of
 // the amount, named by its own label, and its chosen value persists on its own key.
+// KOIOS-ADVICE-SUBTABS-1: thresholds and the suggestion switches live on two sub-tabs.
+describe('KoiosAdviceSettings — sub-tabs', () => {
+  const renderWithClient = () => {
+    mockSettings.mockReturnValue({})
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(<QueryClientProvider client={client}><KoiosAdviceSettings /></QueryClientProvider>)
+  }
+  it('opens on the thresholds tab and shows the day fields, not the suggestions group', async () => {
+    renderWithClient()
+    expect(await screen.findByRole('tab', { name: st('koiosAdvice.tabs.thresholds') })).toBeInTheDocument()
+    expect(document.getElementById('vacancy-advice-stale-days')).not.toBeNull()
+    expect(screen.queryByText(st('settings.windows.koios_suggest_max.label'))).not.toBeInTheDocument()
+  })
+  it('switches to the suggestions tab: the catalogue group renders and the day fields leave', async () => {
+    renderWithClient()
+    await userEvent.click(await screen.findByRole('tab', { name: st('koiosAdvice.tabs.suggestions') }))
+    expect(await screen.findByText(st('settings.windows.koios_suggest_max.label'))).toBeInTheDocument()
+    expect(document.getElementById('vacancy-advice-stale-days')).toBeNull()
+  })
+})
+
 describe('KoiosAdviceSettings — vacancy stale unit picker', () => {
   it('renders the unit picker named by its own label, defaulting to days', () => {
     mockSettings.mockReturnValue({})
@@ -177,7 +198,8 @@ describe('KoiosAdviceSettings — embedded koios_suggest catalogue group', () =>
     mockSettings.mockReturnValue({})
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     render(<QueryClientProvider client={client}><KoiosAdviceSettings /></QueryClientProvider>)
-    expect(await screen.findByText(st('settings.groups.koios_suggest'))).toBeInTheDocument()
-    expect(screen.getByText(st('settings.windows.koios_suggest_max.label'))).toBeInTheDocument()
+    await userEvent.click(await screen.findByRole('tab', { name: st('koiosAdvice.tabs.suggestions') }))
+    expect(await screen.findByText(st('settings.windows.koios_suggest_max.label'))).toBeInTheDocument()
+    expect(screen.getAllByText(st('settings.groups.koios_suggest')).length).toBeGreaterThanOrEqual(2)
   })
 })

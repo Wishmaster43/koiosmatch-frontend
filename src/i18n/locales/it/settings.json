@@ -3809,6 +3809,7 @@
     "add": "Aggiungi livello"
   },
   "koiosAdvice": {
+    "tabs": { "thresholds": "Soglie", "suggestions": "Suggerimenti" },
     "title": "Soglie di consiglio Koios",
     "subtitle": "Le finestre in giorni dietro il flag di attenzione Koios su posizioni e match.",
     "vacancyStaleTitle": "Invecchiamento della posizione",

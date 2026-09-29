@@ -3808,6 +3808,7 @@
     "add": "Stufe hinzufügen"
   },
   "koiosAdvice": {
+    "tabs": { "thresholds": "Schwellenwerte", "suggestions": "Vorschläge" },
     "title": "Koios-Hinweisschwellenwerte",
     "subtitle": "Die Tagesfenster hinter der Koios-Aufmerksamkeitsmarkierung bei Vakaturen und Matches.",
     "vacancyStaleTitle": "Vakatur-Veralterung",

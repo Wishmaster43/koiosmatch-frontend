@@ -24,7 +24,9 @@
  * no dispatcher, no Notifier::send call site) — only the threshold half is real
  * today; do not read the presence of this field as "notifications are wired".
  */
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import SubTabBar from '@/components/drawer/SubTabBar'
 import { PageTitle } from '@/components/ui/typography'
 import NumberSettingField from '../components/NumberSettingField'
 import SettingsLoadBanner from '../components/SettingsLoadBanner'
@@ -74,8 +76,14 @@ function VacancyAdviceStaleUnitField() {
 }
 
 /** Koios advice thresholds — vacancy staleness, match renewal, application stage staleness. */
+// KOIOS-ADVICE-SUBTABS-1 (Danny 29-09: "sub-tabjes voor alles, zo houden we het
+// overzichtelijk"): the screen splits into the advice thresholds and the "Koios
+// suggests" switches — one shared SubTabBar, local state like ModulesSettings.
+type AdviceSubTab = 'thresholds' | 'suggestions'
+
 export default function KoiosAdviceSettings() {
   const { t } = useTranslation('settings')
+  const [subTab, setSubTab] = useState<AdviceSubTab>('thresholds')
   return (
     <div style={{ maxWidth: 640 }}>
       <SettingsLoadBanner />
@@ -83,6 +91,13 @@ export default function KoiosAdviceSettings() {
         <PageTitle>{t('koiosAdvice.title')}</PageTitle>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('koiosAdvice.subtitle')}</p>
       </div>
+      <div style={{ marginBottom: 20 }}>
+        <SubTabBar active={subTab} onChange={(id) => setSubTab(id as AdviceSubTab)} tabs={[
+          { id: 'thresholds', label: t('koiosAdvice.tabs.thresholds') },
+          { id: 'suggestions', label: t('koiosAdvice.tabs.suggestions') },
+        ]} />
+      </div>
+      {subTab === 'thresholds' && (<>
       {/* How many days without an application before a published vacancy counts as
           "stale" (VacanciesTable.tsx's Koios column). */}
       <NumberSettingField id="vacancy-advice-stale-days" settingsKey={VACANCY_ADVICE_STALE_DAYS_KEY}
@@ -103,13 +118,13 @@ export default function KoiosAdviceSettings() {
         title={t('koiosAdvice.applicationStaleTitle')} hint={t('koiosAdvice.applicationStaleHint')}
         label={t('koiosAdvice.applicationStaleLabel')} saveFailedMessage={t('koiosAdvice.applicationStaleSaveFailed')}
         defaultValue={APPLICATION_STAGE_STALE_DEFAULT} min={DAYS_MIN} max={DAYS_MAX} bordered={false} />
+      </>)}
       {/* KOIOS-SUGGEST-COMPACT-2 (Danny 28-09: "waar is instelbaar welke suggesties er
           komen en wanneer iets te laat is?"): the "Koios suggests" block's own switches
           and day windows live in the settings catalogue (section windows, group
           koios_suggest — per kind on/off, the overdue and vacancy windows with their
-          unit, the row maximum); embedded here as one titled block so the thresholds
-          the assistant reads sit next to the advice thresholds, never on a second screen. */}
-      <div style={{ marginTop: 24 }}><CatalogSection section="windows" group="koios_suggest" headedBy="group" embedded /></div>
+          unit, the row maximum); its own sub-tab next to the advice thresholds. */}
+      {subTab === 'suggestions' && <CatalogSection section="windows" group="koios_suggest" headedBy="group" embedded />}
     </div>
   )
 }
