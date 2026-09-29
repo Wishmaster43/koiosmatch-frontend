@@ -37,14 +37,12 @@
  *
  * REFERENCE-LINK-1 (BE api during-onix 51ef5812, 29-09): `reference` is a
  * DEPENDENT token — a candidate's references have no tenant-wide list route,
- * only `GET /candidates/{id}/references`, so its entry carries `urlFor`
- * instead of a fixed `url` and `useReferenceLinkAvailable` below probes that
- * per-candidate route (quiet 404) before it is ever offered in a type picker.
+ * only `GET /candidates/{id}/references` (the light picker list, live since BE
+ * f48feb90, INTERVIEW-VISIBILITY-1b), so its entry carries `urlFor` instead of a
+ * fixed `url` and a picker offers it only once a candidate is linked.
  */
-import { useEffect, useState } from 'react'
 import type { Id } from '@/types/common'
 import { contactOptionLabel, type ContactLike } from '@/lib/contactLabel'
-import api from '@/lib/api'
 
 // The shape the pickers read from each list endpoint (every field optional —
 // the endpoints differ, the label function below picks what exists).
@@ -122,23 +120,6 @@ export function resolveLinkUrl(type: string, candidateId: string | null | undefi
   if (!cfg) return undefined
   if (cfg.url) return cfg.url
   return cfg.urlFor && candidateId ? cfg.urlFor(candidateId) : undefined
-}
-
-// REFERENCE-LINK-1: probes `GET /candidates/{id}/references` once per candidate
-// (quiet 404 — the light route is still rolling out, CMBE INTERVIEW-VISIBILITY-1b)
-// so the `reference` token is only ever offered once the route truly answers. No
-// candidate yet → not available; never a fake affordance (§3).
-export function useReferenceLinkAvailable(candidateId: string | null | undefined): boolean {
-  const [available, setAvailable] = useState(false)
-  useEffect(() => {
-    if (!candidateId) { setAvailable(false); return }
-    let alive = true
-    api.get(`/candidates/${candidateId}/references`, { params: { per_page: 1 }, quietStatuses: [404] })
-      .then(() => { if (alive) setAvailable(true) })
-      .catch(() => { if (alive) setAvailable(false) })
-    return () => { alive = false }
-  }, [candidateId])
-  return available
 }
 
 // Link type → the page that honours the { open: id } intent (click-through, Danny

@@ -24,7 +24,7 @@ import { SelectField } from '@/components/forms/fields'
 import SearchSelectJs from '@/components/ui/SearchSelect'
 import Button from '@/components/ui/Button'
 import { usePrincipalSearch } from '@/hooks/usePrincipalSearch'
-import { TASK_LINK_ENDPOINTS, TASK_LINK_TYPES, resolveLinkUrl, useReferenceLinkAvailable } from './taskLinkTypes'
+import { TASK_LINK_ENDPOINTS, TASK_LINK_TYPES, resolveLinkUrl } from './taskLinkTypes'
 import type { LinkRow } from './taskLinkTypes'
 import type { Id } from '@/types/common'
 
@@ -44,12 +44,11 @@ export default function AddLinkRow({ existing, onAdd, onClose, types = TASK_LINK
   candidateId?: string | null
 }) {
   const { t } = useTranslation(['tasks', 'common'])
-  // `reference` only ever appears once a candidate is linked and its light
-  // references route truly answers (quiet 404 while CMBE's route is rolling out).
-  const referenceAvailable = useReferenceLinkAvailable(candidateId)
-  const offeredTypes = types.filter(k => k !== 'reference' || referenceAvailable)
+  // `reference` only ever appears once a candidate is linked (its light route,
+  // GET /candidates/{id}/references, is live since BE f48feb90).
+  const offeredTypes = types.filter(k => k !== 'reference' || !!candidateId)
   const [pickedType, setPickedType] = useState(offeredTypes[0] ?? '')
-  // The availability probe resolves after mount, so `reference` can appear (or the
+  // The linked candidate can arrive after mount, so `reference` can appear (or the
   // whole list can start empty when the caller narrowed to just that token) — fall
   // onto the first offered type on RENDER whenever the picked one drops out, no
   // effect needed (derived state, not a copy of it).

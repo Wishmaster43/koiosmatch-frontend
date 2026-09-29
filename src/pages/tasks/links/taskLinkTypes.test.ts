@@ -6,13 +6,8 @@
  * list endpoint does not exist must NOT be offered (§3 — no picker that cannot
  * fill itself).
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderHook, waitFor } from '@testing-library/react'
-import { TASK_LINK_ENDPOINTS, TASK_LINK_TYPES, TASK_LINK_PAGE, resolveLinkUrl, useReferenceLinkAvailable } from './taskLinkTypes'
-import api from '@/lib/api'
-
-vi.mock('@/lib/api', () => ({ default: { get: vi.fn() } }))
-const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
+import { describe, it, expect } from 'vitest'
+import { TASK_LINK_ENDPOINTS, TASK_LINK_TYPES, TASK_LINK_PAGE, resolveLinkUrl } from './taskLinkTypes'
 
 // The backend's own vocabulary, copied from TaskLinkResolver::MODELS (14-08, final: 14 tokens)
 // + `reference` (REFERENCE-LINK-1, BE api during-onix 51ef5812, 29-09).
@@ -104,30 +99,6 @@ describe('taskLinkTypes', () => {
       expect(resolveLinkUrl('candidate', null)).toBe('/candidates')
       expect(resolveLinkUrl('reference', null)).toBeUndefined()
       expect(resolveLinkUrl('reference', 'cand-1')).toBe('/candidates/cand-1/references')
-    })
-  })
-
-  describe('useReferenceLinkAvailable', () => {
-    beforeEach(() => { mockGet.mockReset() })
-
-    it('is false with no candidate id — never probes', () => {
-      const { result } = renderHook(() => useReferenceLinkAvailable(null))
-      expect(result.current).toBe(false)
-      expect(mockGet).not.toHaveBeenCalled()
-    })
-
-    it('probes the light route quietly and flips true on 200', async () => {
-      mockGet.mockResolvedValue({ data: [] })
-      const { result } = renderHook(() => useReferenceLinkAvailable('cand-1'))
-      await waitFor(() => expect(result.current).toBe(true))
-      expect(mockGet).toHaveBeenCalledWith('/candidates/cand-1/references', { params: { per_page: 1 }, quietStatuses: [404] })
-    })
-
-    it('stays false on a quiet 404 — the route is not live for this tenant yet', async () => {
-      mockGet.mockRejectedValue({ response: { status: 404 } })
-      const { result } = renderHook(() => useReferenceLinkAvailable('cand-1'))
-      await waitFor(() => expect(mockGet).toHaveBeenCalled())
-      expect(result.current).toBe(false)
     })
   })
 })
