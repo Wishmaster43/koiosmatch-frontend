@@ -346,6 +346,22 @@ describe('useTaskDrawerActions · handleRemoveLink', () => {
     await waitFor(() => expect(notifyError).not.toHaveBeenCalled())
   })
 
+  // REFERENCE-LINK-1: the `reference` token is type-agnostic in this hook — add/remove
+  // send exactly the same {type,id} body as every other link type.
+  it('POSTs and DELETEs a reference link with the same {type,id} body as any other token', async () => {
+    mockedPost.mockResolvedValue({ data: { id: 't1', links: [{ type: 'reference', id: 'ref-1', label: 'Referentie A' }] } })
+    const r = harness([task({ id: 't1' })])
+    act(() => { r.result.current.actions.setSelected(taskDetail({ id: 't1', links: [] })) })
+    act(() => { r.result.current.actions.handleAddLink('t1', { type: 'reference', id: 'ref-1', label: 'Referentie A' }) })
+    expect(mockedPost).toHaveBeenCalledWith('/tasks/t1/links', { type: 'reference', id: 'ref-1' })
+    await waitFor(() => expect(r.result.current.actions.selected?.links).toHaveLength(1))
+
+    mockedDelete.mockResolvedValue({ data: { id: 't1', links: [] } })
+    act(() => { r.result.current.actions.handleRemoveLink('t1', { type: 'reference', id: 'ref-1' }) })
+    expect(mockedDelete).toHaveBeenCalledWith('/tasks/t1/links', { data: { type: 'reference', id: 'ref-1' } })
+    await waitFor(() => expect(r.result.current.actions.selected?.links).toHaveLength(0))
+  })
+
   it('reverts the removed link and reports failure when the DELETE fails', async () => {
     mockedDelete.mockRejectedValue({ response: { status: 500 } })
     const r = harness([task({ id: 't1' })])

@@ -321,6 +321,7 @@
       "callPerson": "{{name}} anrufen",
       "mailPerson": "E-Mail an {{name}} senden",
       "messagePerson": "Nachricht an {{name}}",
+      "referenceOf": "Referenz des Kandidaten",
       "doneExecuted": "Erledigt",
       "doneCancelled": "Abgebrochen",
       "rescheduleTitle": "Neue Frist",

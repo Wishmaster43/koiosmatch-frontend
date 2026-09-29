@@ -321,6 +321,7 @@
       "callPerson": "Appeler {{name}}",
       "mailPerson": "Envoyer un e-mail à {{name}}",
       "messagePerson": "Message à {{name}}",
+      "referenceOf": "Référence du candidat",
       "doneExecuted": "Effectué",
       "doneCancelled": "Annulé",
       "rescheduleTitle": "Nouvelle échéance",

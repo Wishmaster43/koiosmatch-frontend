@@ -34,9 +34,17 @@
  *    (WhatsApp-gesprek) → GET /conversations, `task` (een andere taak) →
  *    GET /tasks — all three are real, already-used global list routes elsewhere
  *    in the app, so they round-trip the same way the original eleven do.
+ *
+ * REFERENCE-LINK-1 (BE api during-onix 51ef5812, 29-09): `reference` is a
+ * DEPENDENT token — a candidate's references have no tenant-wide list route,
+ * only `GET /candidates/{id}/references`, so its entry carries `urlFor`
+ * instead of a fixed `url` and `useReferenceLinkAvailable` below probes that
+ * per-candidate route (quiet 404) before it is ever offered in a type picker.
  */
+import { useEffect, useState } from 'react'
 import type { Id } from '@/types/common'
 import { contactOptionLabel, type ContactLike } from '@/lib/contactLabel'
+import api from '@/lib/api'
 
 // The shape the pickers read from each list endpoint (every field optional —
 // the endpoints differ, the label function below picks what exists).
@@ -50,12 +58,17 @@ export interface LinkRow extends ContactLike {
   title?: string
   phone_number?: string
   customer_name?: string
+  // Reference rows (GET /candidates/{id}/references): optional relation label.
+  relation?: { id?: Id; label?: string } | null
   [k: string]: unknown
 }
 
 export interface LinkEndpoint {
-  // Where to search entities of this type.
-  url: string
+  // Where to search entities of this type — undefined for a DEPENDENT type
+  // (reference), which builds its url from the host's candidate instead.
+  url?: string
+  // Dependent type only: builds the per-candidate list url.
+  urlFor?: (candidateId: string) => string
   // Human label for one row of that endpoint.
   label: (r: LinkRow) => string
 }
@@ -92,10 +105,41 @@ export const TASK_LINK_ENDPOINTS: Record<string, LinkEndpoint> = {
     return candName || r.phone_number || `#${r.id}`
   } },
   task: { url: '/tasks', label: r => r.title || r.name || `#${r.id}` },
+  // Dependent on the task's linked candidate — see the file header (REFERENCE-LINK-1).
+  reference: { urlFor: (candidateId: string) => `/candidates/${candidateId}/references`, label: r => {
+    const name = r.name || `#${r.id}`
+    return r.relation?.label ? `${name} · ${r.relation.label}` : name
+  } },
 }
 
 // Every offered token, in menu order.
 export const TASK_LINK_TYPES: string[] = Object.keys(TASK_LINK_ENDPOINTS)
+
+// Resolves the search url for a picker's current type: a fixed url, or (for the
+// dependent `reference` token) the per-candidate url once a candidate id is known.
+export function resolveLinkUrl(type: string, candidateId: string | null | undefined): string | undefined {
+  const cfg = TASK_LINK_ENDPOINTS[type]
+  if (!cfg) return undefined
+  if (cfg.url) return cfg.url
+  return cfg.urlFor && candidateId ? cfg.urlFor(candidateId) : undefined
+}
+
+// REFERENCE-LINK-1: probes `GET /candidates/{id}/references` once per candidate
+// (quiet 404 — the light route is still rolling out, CMBE INTERVIEW-VISIBILITY-1b)
+// so the `reference` token is only ever offered once the route truly answers. No
+// candidate yet → not available; never a fake affordance (§3).
+export function useReferenceLinkAvailable(candidateId: string | null | undefined): boolean {
+  const [available, setAvailable] = useState(false)
+  useEffect(() => {
+    if (!candidateId) { setAvailable(false); return }
+    let alive = true
+    api.get(`/candidates/${candidateId}/references`, { params: { per_page: 1 }, quietStatuses: [404] })
+      .then(() => { if (alive) setAvailable(true) })
+      .catch(() => { if (alive) setAvailable(false) })
+    return () => { alive = false }
+  }, [candidateId])
+  return available
+}
 
 // Link type → the page that honours the { open: id } intent (click-through, Danny
 // 2026-07-04). Types without a drill-down surface yet (contact/location/…) render

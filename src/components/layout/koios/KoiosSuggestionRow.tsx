@@ -135,7 +135,14 @@ export default function KoiosSuggestionRow({ suggestion, onAskKoios, onDone }: {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '6px 0', borderTop: '1px solid var(--border)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
         {primaryRef
-          ? <span style={{ flexShrink: 0 }}><KoiosRefChip item={primaryRef} icon={rowIcon} /></span>
+          ? (
+            <span style={{ flexShrink: 0 }}>
+              {/* REFERENCE-LINK-1: a reference ref has no page of its own (koiosResultLinks),
+                  so its chip stays non-interactive but names what it is on hover. */}
+              <KoiosRefChip item={primaryRef} icon={rowIcon}
+                title={primaryRef.type === 'reference' ? t('koios.assistant.referenceOf') : undefined} />
+            </span>
+          )
           : (
             <>
               <span style={{ display: 'flex', flexShrink: 0, color: taskType?.color ?? meta.color }}>{rowIcon}</span>

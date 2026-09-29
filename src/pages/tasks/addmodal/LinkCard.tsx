@@ -112,7 +112,7 @@ export default function LinkCard({ t, form, set, candidates, customers, contacts
             {!adding && <DrawerAddButton onClick={() => setAdding(true)} label={t('links.add')} />}
           </div>
           {adding && (
-            <AddLinkRow types={EXTRA_TYPES} existing={extraLinks}
+            <AddLinkRow types={EXTRA_TYPES} existing={extraLinks} candidateId={form.candidateId || null}
               onAdd={onAddExtra} onClose={() => setAdding(false)} />
           )}
           {/* Staged couplings — each removable until the task is saved. */}

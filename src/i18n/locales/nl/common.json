@@ -321,6 +321,7 @@
       "callPerson": "Bel {{name}}",
       "mailPerson": "Mail {{name}}",
       "messagePerson": "Conversatie met {{name}}",
+      "referenceOf": "Referentie van de kandidaat",
       "doneExecuted": "Uitgevoerd",
       "doneCancelled": "Geannuleerd",
       "rescheduleTitle": "Nieuwe deadline",

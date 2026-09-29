@@ -8,7 +8,7 @@ import { createElement } from 'react'
 import type { CSSProperties, ReactElement } from 'react'
 import {
   Users, FileText, Briefcase, Handshake, Target, ListChecks, PhoneCall,
-  Building2, MessageCircle, Brain, User, Calendar, StickyNote,
+  Building2, MessageCircle, Brain, User, Calendar, StickyNote, UserCheck,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -32,6 +32,9 @@ export const ENTITY_ICONS: Record<string, LucideIcon> = {
   appointment: Calendar,
   note: StickyNote,
   document: FileText,
+  // REFERENCE-LINK-1: a task_overdue row's linked reference is a person, but a
+  // distinct glyph from `contact` so it never reads as the candidate's own contact.
+  reference: UserCheck,
 }
 
 // Resolves the shared icon for an entity type, falling back to a generic person

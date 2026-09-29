@@ -128,6 +128,7 @@
     "opportunity": "Opportunity",
     "outreach_campaign": "Call list",
     "conversation": "Conversation",
+    "reference": "Reference",
     "task": "Task"
   },
   "modal": {

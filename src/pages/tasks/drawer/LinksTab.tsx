@@ -9,7 +9,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link2, X } from 'lucide-react'
+import { Link2, UserCheck, X } from 'lucide-react'
 import EntityLink from '@/components/ui/EntityLink'
 import AddLinkRow from '../links/AddLinkRow'
 import type { NewLink } from '../links/AddLinkRow'
@@ -28,12 +28,18 @@ export default function LinksTab({ task, onAddLink, onRemoveLink }: {
   const [adding, setAdding] = useState(false)
   const links = task.links ?? []
   const typeLabel = (type: string) => t(`links.${type}`, { defaultValue: type })
+  // REFERENCE-LINK-1: the dependent `reference` token reads its options off THIS
+  // task's own candidate link — no candidate link, no reference token offered.
+  const candidateLinkId = links.find(l => l.type === 'candidate')?.id
+  const candidateId = candidateLinkId != null ? String(candidateLinkId) : null
+  // A reference link reads as a person (UserCheck), every other link keeps Link2.
+  const rowIcon = (type: string) => (type === 'reference' ? UserCheck : Link2)
 
   return (
     <div>
       {/* Add control */}
       {adding ? (
-        <AddLinkRow existing={links} onAdd={onAddLink} onClose={() => setAdding(false)} />
+        <AddLinkRow existing={links} candidateId={candidateId} onAdd={onAddLink} onClose={() => setAdding(false)} />
       ) : (
         // HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A).
         <div style={{ marginBottom: 12 }}>
@@ -46,12 +52,14 @@ export default function LinksTab({ task, onAddLink, onRemoveLink }: {
         <div style={{ padding: '24px 0', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>{t('links.empty')}</div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {links.map((l, i) => (
+          {links.map((l, i) => {
+            const RowIcon = rowIcon(l.type)
+            return (
             <div key={`${l.type}-${l.id}-${i}`} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
               background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10 }}>
               <span style={{ width: 30, height: 30, borderRadius: 8, flexShrink: 0, display: 'flex',
                 alignItems: 'center', justifyContent: 'center', background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)' }}>
-                <Link2 size={15} />
+                <RowIcon size={15} />
               </span>
               <div style={{ minWidth: 0, flex: 1 }}>
                 <GroupLabel as="div">{typeLabel(l.type)}</GroupLabel>
@@ -67,7 +75,8 @@ export default function LinksTab({ task, onAddLink, onRemoveLink }: {
                 <X size={13} />
               </Button>
             </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>

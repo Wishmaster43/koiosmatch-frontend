@@ -58,3 +58,64 @@ describe('LinksTab — add-link entity picker (audit finding 2026-08-05: four UI
     expect(screen.queryByText('links.loadError')).toBeNull()
   })
 })
+
+describe('LinksTab — REFERENCE-LINK-1 (dependent on the task\'s own candidate link)', () => {
+  const linkedTask = task({ links: [{ type: 'candidate', id: 'cand-1', label: 'Ahmed' }] })
+
+  it('add: picking a reference for a candidate-linked task POSTs { type: "reference", id } exactly', async () => {
+    mockGet.mockReset()
+    mockGet.mockImplementation((url: string) => url === '/candidates/cand-1/references'
+      ? Promise.resolve({ data: [{ id: 'ref-1', name: 'Referentie A' }] })
+      : Promise.resolve({ data: [] }))
+    const onAddLink = vi.fn()
+    const user = userEvent.setup()
+    render(<LinksTab task={linkedTask} onAddLink={onAddLink} onRemoveLink={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: 'links.add' }))
+    // The probe confirms the route before `reference` shows in the type dropdown.
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/candidates/cand-1/references', { params: { per_page: 1 }, quietStatuses: [404] }))
+    // Open the type picker (its trigger shows the default type's label) and pick "reference".
+    await user.click(screen.getByRole('button', { name: /links\.candidate/ }))
+    await user.click(await screen.findByText('links.reference'))
+    await user.click(screen.getByRole('button', { name: /select/i }))
+    await user.click(await screen.findByText('Referentie A'))
+    expect(onAddLink).toHaveBeenCalledWith({ type: 'reference', id: 'ref-1', label: 'Referentie A' })
+  })
+
+  it('is NOT offered when the light references route 404s', async () => {
+    mockGet.mockReset()
+    mockGet.mockImplementation((url: string) => url === '/candidates/cand-1/references'
+      ? Promise.reject({ response: { status: 404 } })
+      : Promise.resolve({ data: [] }))
+    const user = userEvent.setup()
+    render(<LinksTab task={linkedTask} onAddLink={vi.fn()} onRemoveLink={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: 'links.add' }))
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/candidates/cand-1/references', { params: { per_page: 1 }, quietStatuses: [404] }))
+    expect(screen.queryByText('links.reference')).toBeNull()
+  })
+
+  it('is NOT offered when the task has no candidate link', async () => {
+    mockGet.mockReset()
+    mockGet.mockResolvedValue({ data: [] })
+    const user = userEvent.setup()
+    render(<LinksTab task={task()} onAddLink={vi.fn()} onRemoveLink={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: 'links.add' }))
+    expect(mockGet).not.toHaveBeenCalledWith('/candidates/undefined/references', expect.anything())
+    expect(screen.queryByText('links.reference')).toBeNull()
+  })
+
+  it('renders an existing reference link with its own icon and removes it with the same body', async () => {
+    mockGet.mockReset()
+    mockGet.mockResolvedValue({ data: [] })
+    const onRemoveLink = vi.fn()
+    const withRef = task({ links: [
+      { type: 'candidate', id: 'cand-1', label: 'Ahmed' },
+      { type: 'reference', id: 'ref-1', label: 'Referentie A' },
+    ] })
+    const user = userEvent.setup()
+    render(<LinksTab task={withRef} onAddLink={vi.fn()} onRemoveLink={onRemoveLink} />)
+    expect(screen.getByText('Referentie A')).toBeInTheDocument()
+    const rows = screen.getAllByRole('button', { name: 'links.remove' })
+    await user.click(rows[rows.length - 1])
+    expect(onRemoveLink).toHaveBeenCalledWith({ type: 'reference', id: 'ref-1' })
+  })
+})

@@ -517,4 +517,20 @@ describe('KoiosSuggestionRow · create_task editor (TASK-CREATE-EDIT-1)', () => 
     expect(mockPost).not.toHaveBeenCalled()
     expect(screen.queryByText('koios.assistant.createTaskTitle')).toBeNull()
   })
+
+  it('REFERENCE-LINK-1: a task_overdue row with a reference ref shows call + mail for the reference, no conversation icon, and a non-interactive chip', () => {
+    const suggestion = {
+      kind: 'task_overdue' as const, title: 'Bel Karim', body: 'x',
+      refs: [{ type: 'reference', id: 'r1', label: 'Referentie A', contact: { mobile: '+31699999999', email: 'ref@example.test', whatsapp: false } }],
+    }
+    render(<KoiosSuggestionRow suggestion={suggestion} />)
+    expect(screen.getByRole('link', { name: 'koios.assistant.callPerson' })).toHaveAttribute('href', 'tel:+31699999999')
+    expect(screen.getByRole('link', { name: 'koios.assistant.mailPerson' })).toHaveAttribute('href', 'mailto:ref@example.test')
+    // No conversation icon — that stays gated to a `candidate` ref only.
+    expect(screen.queryByRole('button', { name: 'koios.assistant.messagePerson' })).toBeNull()
+    // The reference chip has no page of its own (koiosResultLinks) — it renders as a
+    // non-interactive <div>, not a <button>.
+    expect(screen.getByText('Referentie A').closest('div')).toHaveAttribute('title', 'koios.assistant.referenceOf')
+    expect(screen.queryByRole('button', { name: 'Referentie A' })).toBeNull()
+  })
 })

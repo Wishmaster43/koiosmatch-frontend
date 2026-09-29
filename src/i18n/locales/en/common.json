@@ -321,6 +321,7 @@
       "callPerson": "Call {{name}}",
       "mailPerson": "Email {{name}}",
       "messagePerson": "Message {{name}}",
+      "referenceOf": "Reference of the candidate",
       "doneExecuted": "Done",
       "doneCancelled": "Cancelled",
       "rescheduleTitle": "New due date",

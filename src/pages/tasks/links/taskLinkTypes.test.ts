@@ -6,14 +6,20 @@
  * list endpoint does not exist must NOT be offered (§3 — no picker that cannot
  * fill itself).
  */
-import { describe, it, expect } from 'vitest'
-import { TASK_LINK_ENDPOINTS, TASK_LINK_TYPES, TASK_LINK_PAGE } from './taskLinkTypes'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { renderHook, waitFor } from '@testing-library/react'
+import { TASK_LINK_ENDPOINTS, TASK_LINK_TYPES, TASK_LINK_PAGE, resolveLinkUrl, useReferenceLinkAvailable } from './taskLinkTypes'
+import api from '@/lib/api'
 
-// The backend's own vocabulary, copied from TaskLinkResolver::MODELS (14-08, final: 14 tokens).
+vi.mock('@/lib/api', () => ({ default: { get: vi.fn() } }))
+const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
+
+// The backend's own vocabulary, copied from TaskLinkResolver::MODELS (14-08, final: 14 tokens)
+// + `reference` (REFERENCE-LINK-1, BE api during-onix 51ef5812, 29-09).
 const BACKEND_TOKENS = [
   'candidate', 'application', 'vacancy', 'match', 'customer', 'opportunity',
   'location', 'customer_location', 'department', 'contact', 'workflow',
-  'outreach_campaign', 'conversation', 'task',
+  'outreach_campaign', 'conversation', 'task', 'reference',
 ]
 
 describe('taskLinkTypes', () => {
@@ -36,10 +42,11 @@ describe('taskLinkTypes', () => {
     expect(TASK_LINK_ENDPOINTS.customer_location.label({ id: '1' })).toBe('#1')
   })
 
-  it('gives every offered token a real endpoint and label function', () => {
+  it('gives every offered token a real endpoint (fixed url, or urlFor for a dependent token) and label function', () => {
     TASK_LINK_TYPES.forEach(token => {
       const cfg = TASK_LINK_ENDPOINTS[token]
-      expect(cfg.url.startsWith('/')).toBe(true)
+      if (cfg.url) expect(cfg.url.startsWith('/')).toBe(true)
+      else expect(cfg.urlFor?.('cand-1').startsWith('/')).toBe(true)
       expect(cfg.label({ id: 'x' })).toBeTruthy()
     })
   })
@@ -79,5 +86,48 @@ describe('taskLinkTypes', () => {
     expect(TASK_LINK_TYPES).toContain('location')
     expect(TASK_LINK_TYPES).toContain('customer_location')
     expect(TASK_LINK_ENDPOINTS.location.url).not.toBe(TASK_LINK_ENDPOINTS.customer_location.url)
+  })
+
+  describe('reference (REFERENCE-LINK-1, dependent on the task\'s linked candidate)', () => {
+    it('is a dependent token: no fixed url, but a per-candidate urlFor', () => {
+      expect(TASK_LINK_ENDPOINTS.reference.url).toBeUndefined()
+      expect(TASK_LINK_ENDPOINTS.reference.urlFor?.('cand-1')).toBe('/candidates/cand-1/references')
+    })
+
+    it('labels a reference row "Name · Relation", falling back to the name then the id', () => {
+      expect(TASK_LINK_ENDPOINTS.reference.label({ id: 'r1', name: 'Karim', relation: { label: 'Partner' } })).toBe('Karim · Partner')
+      expect(TASK_LINK_ENDPOINTS.reference.label({ id: 'r1', name: 'Karim' })).toBe('Karim')
+      expect(TASK_LINK_ENDPOINTS.reference.label({ id: 'r1' })).toBe('#r1')
+    })
+
+    it('resolveLinkUrl: a fixed-url token ignores candidateId; the dependent token needs one', () => {
+      expect(resolveLinkUrl('candidate', null)).toBe('/candidates')
+      expect(resolveLinkUrl('reference', null)).toBeUndefined()
+      expect(resolveLinkUrl('reference', 'cand-1')).toBe('/candidates/cand-1/references')
+    })
+  })
+
+  describe('useReferenceLinkAvailable', () => {
+    beforeEach(() => { mockGet.mockReset() })
+
+    it('is false with no candidate id — never probes', () => {
+      const { result } = renderHook(() => useReferenceLinkAvailable(null))
+      expect(result.current).toBe(false)
+      expect(mockGet).not.toHaveBeenCalled()
+    })
+
+    it('probes the light route quietly and flips true on 200', async () => {
+      mockGet.mockResolvedValue({ data: [] })
+      const { result } = renderHook(() => useReferenceLinkAvailable('cand-1'))
+      await waitFor(() => expect(result.current).toBe(true))
+      expect(mockGet).toHaveBeenCalledWith('/candidates/cand-1/references', { params: { per_page: 1 }, quietStatuses: [404] })
+    })
+
+    it('stays false on a quiet 404 — the route is not live for this tenant yet', async () => {
+      mockGet.mockRejectedValue({ response: { status: 404 } })
+      const { result } = renderHook(() => useReferenceLinkAvailable('cand-1'))
+      await waitFor(() => expect(mockGet).toHaveBeenCalled())
+      expect(result.current).toBe(false)
+    })
   })
 })

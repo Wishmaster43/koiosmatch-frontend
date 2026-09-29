@@ -10,6 +10,11 @@
  * `types` narrows the offered vocabulary for a host that already exposes some
  * tokens as dedicated fields (the create modal keeps candidate/customer/contact
  * as their own pickers, so it passes the remaining tokens here).
+ *
+ * REFERENCE-LINK-1: `reference` is a DEPENDENT token — its options come from the
+ * task's linked candidate (`candidateId`), so the caller passes that id and this
+ * row hides `reference` from the type list until a candidate is linked AND the
+ * per-candidate route answers (no fake affordance, §3).
  */
 import { useState } from 'react'
 import type { ComponentType } from 'react'
@@ -19,7 +24,7 @@ import { SelectField } from '@/components/forms/fields'
 import SearchSelectJs from '@/components/ui/SearchSelect'
 import Button from '@/components/ui/Button'
 import { usePrincipalSearch } from '@/hooks/usePrincipalSearch'
-import { TASK_LINK_ENDPOINTS, TASK_LINK_TYPES } from './taskLinkTypes'
+import { TASK_LINK_ENDPOINTS, TASK_LINK_TYPES, resolveLinkUrl, useReferenceLinkAvailable } from './taskLinkTypes'
 import type { LinkRow } from './taskLinkTypes'
 import type { Id } from '@/types/common'
 
@@ -28,27 +33,38 @@ const SearchSelect = SearchSelectJs as unknown as ComponentType<AnyProps>
 
 export interface NewLink { type: string; id: string; label: string }
 
-export default function AddLinkRow({ existing, onAdd, onClose, types = TASK_LINK_TYPES }: {
+export default function AddLinkRow({ existing, onAdd, onClose, types = TASK_LINK_TYPES, candidateId }: {
   // Already-coupled records — filtered out of the entity picker per type.
   existing: Array<{ type: string; id: Id | null }>
   onAdd: (link: NewLink) => void
   onClose: () => void
   // Offered link tokens; defaults to the full shared vocabulary.
   types?: string[]
+  // The host's linked candidate — required for the dependent `reference` token.
+  candidateId?: string | null
 }) {
   const { t } = useTranslation(['tasks', 'common'])
-  const [type, setType] = useState(types[0] ?? '')
+  // `reference` only ever appears once a candidate is linked and its light
+  // references route truly answers (quiet 404 while CMBE's route is rolling out).
+  const referenceAvailable = useReferenceLinkAvailable(candidateId)
+  const offeredTypes = types.filter(k => k !== 'reference' || referenceAvailable)
+  const [pickedType, setPickedType] = useState(offeredTypes[0] ?? '')
+  // The availability probe resolves after mount, so `reference` can appear (or the
+  // whole list can start empty when the caller narrowed to just that token) — fall
+  // onto the first offered type on RENDER whenever the picked one drops out, no
+  // effect needed (derived state, not a copy of it).
+  const type = offeredTypes.includes(pickedType) ? pickedType : (offeredTypes[0] ?? '')
   const [query, setQuery] = useState('')
   // Server-searched, capped, requestId-guarded fetch for the chosen type — a
   // failed load surfaces its OWN error line (audit finding 2026-08-05: this used
   // to silently swallow the failure, indistinguishable from "no matches"); see
   // usePrincipalSearch's own doc for the ENT2-01 empty-query rule.
-  const { rows, error, fetchOptions } = usePrincipalSearch<LinkRow>(TASK_LINK_ENDPOINTS[type]?.url, query)
+  const { rows, error, fetchOptions } = usePrincipalSearch<LinkRow>(resolveLinkUrl(type, candidateId), query)
 
   const cfg = TASK_LINK_ENDPOINTS[type]
   const linked = new Set(existing.filter(l => l.type === type).map(l => String(l.id)))
   const options = cfg ? rows.filter(r => !linked.has(String(r.id))).map(r => ({ value: String(r.id), label: cfg.label(r) })) : []
-  const typeOptions = types.map(k => ({ value: k, label: t(`links.${k}`) }))
+  const typeOptions = offeredTypes.map(k => ({ value: k, label: t(`links.${k}`) }))
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '10px 12px',
@@ -58,7 +74,7 @@ export default function AddLinkRow({ existing, onAdd, onClose, types = TASK_LINK
           {/* `placeholder` names the search box inside the popover (the trigger
               itself always shows a real type, so it never renders as placeholder
               text) — the picker had NO accessible name at all before (§6). */}
-          <SelectField value={type} onChange={v => { setType(v); setQuery('') }} options={typeOptions} placeholder={t('links.linkType')} />
+          <SelectField value={type} onChange={v => { setPickedType(v); setQuery('') }} options={typeOptions} placeholder={t('links.linkType')} />
         </div>
         {/* selectAll={false}: this picker adds ONE link and closes — a select-all
             over a server-searched entity list has no meaning here (§3). */}
