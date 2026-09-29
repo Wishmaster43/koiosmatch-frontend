@@ -8,7 +8,9 @@
  * AddableSection/AddForm chain never import `@/i18n`), so every `t()` call
  * echoes either its bare key or its `defaultValue` — see the exact strings
  * asserted below (verified against the real, uninitialized react-i18next
- * fallback behaviour, not guessed).
+ * fallback behaviour, not guessed). Since DEFAULTVALUE-NL-1 (2a89dabc) the row
+ * pencil/trash carry no Dutch fallback any more, so their titles echo the bare
+ * keys `edit` / `remove` (AddableSection.tsx) — red on HEAD until 29-09.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -20,8 +22,8 @@ describe('AdditionalSkillsSection · list rendering (§3B: vertical list, never 
     render(<AdditionalSkillsSection skills={['Triage', 'Wondzorg']} onAddSkill={vi.fn()} onEditSkill={vi.fn()} onRemoveSkill={vi.fn()} />)
     expect(screen.getByText('Triage')).toBeInTheDocument()
     expect(screen.getByText('Wondzorg')).toBeInTheDocument()
-    expect(screen.getAllByTitle('Bewerken')).toHaveLength(2)
-    expect(screen.getAllByTitle('Verwijderen')).toHaveLength(2)
+    expect(screen.getAllByTitle('edit')).toHaveLength(2)
+    expect(screen.getAllByTitle('remove')).toHaveLength(2)
   })
 
   it('shows the empty-state text and the add trigger when there are no skills yet', () => {
@@ -66,7 +68,7 @@ describe('AdditionalSkillsSection · per-row edit (real rename, not remove+re-ad
   it('the row pencil opens the SAME form prefilled with that row\'s value', async () => {
     const user = userEvent.setup()
     render(<AdditionalSkillsSection skills={['Triage', 'Wondzorg']} onAddSkill={vi.fn()} onEditSkill={vi.fn()} onRemoveSkill={vi.fn()} />)
-    await user.click(screen.getAllByTitle('Bewerken')[1])
+    await user.click(screen.getAllByTitle('edit')[1])
     expect(screen.getByPlaceholderText('details.addSkill')).toHaveValue('Wondzorg')
   })
 
@@ -75,7 +77,7 @@ describe('AdditionalSkillsSection · per-row edit (real rename, not remove+re-ad
     const onEditSkill = vi.fn()
     const onRemoveSkill = vi.fn()
     render(<AdditionalSkillsSection skills={['Triage', 'Wondzorg']} onAddSkill={vi.fn()} onEditSkill={onEditSkill} onRemoveSkill={onRemoveSkill} />)
-    await user.click(screen.getAllByTitle('Bewerken')[1])
+    await user.click(screen.getAllByTitle('edit')[1])
     const input = screen.getByPlaceholderText('details.addSkill')
     await user.clear(input)
     await user.type(input, 'Wondverzorging')
@@ -91,7 +93,7 @@ describe('AdditionalSkillsSection · per-row remove', () => {
     const user = userEvent.setup()
     const onRemoveSkill = vi.fn()
     render(<AdditionalSkillsSection skills={['Triage', 'Wondzorg']} onAddSkill={vi.fn()} onEditSkill={vi.fn()} onRemoveSkill={onRemoveSkill} />)
-    await user.click(screen.getAllByTitle('Verwijderen')[1])
+    await user.click(screen.getAllByTitle('remove')[1])
     expect(onRemoveSkill).toHaveBeenCalledWith('Wondzorg')
   })
 })
