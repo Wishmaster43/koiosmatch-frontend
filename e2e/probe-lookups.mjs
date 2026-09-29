@@ -4,6 +4,15 @@
  * instead of on the frontend's own seed constants. Read-only GETs through a real
  * logged-in session; never touches an AI endpoint (API-CREDITS-1).
  *   node e2e/probe-lookups.mjs > lookups.json
+ *
+ * SEED-KEYS-EN-1 regeneration rule: when this dump feeds a new/changed row into
+ * src/lib/lookupSeedCatalogue.ts's SEED_LABELS for a LABEL_KEYED family, also add the
+ * matching entry to src/lib/lookupSeedCatalogueKeys.ts's SEED_LABEL_KEYS — keyed by the
+ * Dutch seed label, value = labelKey(<the EN translation of that seed from
+ * src/i18n/locales/en/common.json>). A collision (two Dutch labels sharing one English
+ * translation) is broken by seed order: the first entry keeps the base key, later ones
+ * get `_2`, `_3`. This keeps the generator and lookupSeedI18n.ts's runtime lookup rule
+ * in agreement, same as the catalogue header's own promise for SEED_LABELS/LABEL_KEYED.
  */
 import { chromium } from 'playwright'
 import { CREDS } from './lib.mjs'

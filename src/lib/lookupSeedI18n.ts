@@ -14,7 +14,7 @@
  * every consumer's test tree, the barrel lesson of 25-08). The caller hands in `t` and
  * memoises the result, because these arrays land in dependency arrays (SEED-IDENTITY-1).
  */
-import { LABEL_KEYED, SEED_LABELS } from './lookupSeedCatalogue'
+import { LABEL_KEYED, SEED_LABELS, SEED_LABEL_KEYS } from './lookupSeedCatalogue'
 
 // The shape every lookup row shares: a stable-ish value plus the label the server sent.
 export interface SeedTranslatable { value?: string | null; label?: string | null }
@@ -42,11 +42,22 @@ export function seedKeyFor(family: string, item: SeedTranslatable): string | nul
   const seeds = SEED_LABELS[family]
   const label = item?.label ?? ''
   if (!seeds || !label) return null
-  const key = LABEL_KEYED.has(family) ? labelKey(label) : String(item?.value ?? '')
-  const seeded = key ? seeds[key] : undefined
+  // SEED_LABELS itself still carries the OLD (Dutch-derived) key — that catalogue is
+  // the "is this still exactly what we seeded" check and never renames. `catalogueKey`
+  // is ONLY used to verify against it; the i18n KEY returned to the caller is the
+  // SEED-KEYS-EN-1 English one (`SEED_LABEL_KEYS`), falling back to the catalogue key
+  // itself for a label outside that map (a family added after it was generated).
+  const catalogueKey = LABEL_KEYED.has(family) ? labelKey(label) : String(item?.value ?? '')
+  const seeded = catalogueKey ? seeds[catalogueKey] : undefined
+  // Look the English key up by the CANONICAL seed label (the exact text the catalogue
+  // stores), not the raw row label — a row that matches through normalise() but is not
+  // byte-identical (accents, case, outer spaces) must still resolve, not fall back to
+  // the retired Dutch key.
+  const canonicalLabel = seeded ?? label
+  const i18nKey = LABEL_KEYED.has(family) ? (SEED_LABEL_KEYS[family]?.[canonicalLabel] ?? catalogueKey) : catalogueKey
   // Slug families need the label check (the value survives a rename); label families get
   // it for free, since a renamed label simply does not resolve to a catalogue key.
-  if (seeded !== undefined) return normalise(seeded) === normalise(label) ? key : null
+  if (seeded !== undefined) return normalise(seeded) === normalise(label) ? i18nKey : null
   // Records often embed only the flat label the server rendered (application.phaseLabel,
   // candidate.stageLabel), with no lookup value alongside. Match on the seeded label
   // instead — equally safe, because an unchanged label is what makes a row translatable.

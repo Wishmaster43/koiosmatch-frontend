@@ -12,7 +12,19 @@ describe('useSeedVacancyStatusOptions', () => {
 
     expect(result.current.statusOptions.map(o => o.label)).toEqual(['Open', 'Gesloten'])
     expect(t).toHaveBeenCalledWith('lookupSeeds.vacancyStatuses.open', { defaultValue: 'Open' })
+    // SEED-KEYS-EN-1 regression: this used to interpolate `s.value` ('closed') directly,
+    // which happened to match by luck; 'paused'/'closed' must resolve via the LABEL.
+    expect(t).toHaveBeenCalledWith('lookupSeeds.vacancyStatuses.closed', { defaultValue: 'Gesloten' })
     expect(result.current.resolved).toBe(false)
+  })
+
+  it('resolves a Dutch seed label to its renamed English key, not the raw value (SEED-KEYS-EN-1)', () => {
+    // Before the rename, `s.value` ('concept') matched the OLD catalogue key by
+    // coincidence; the actual English key is 'draft'.
+    const seed = [{ value: 'concept', label: 'Concept' }]
+    renderHook(() => useSeedVacancyStatusOptions(t, seed))
+
+    expect(t).toHaveBeenCalledWith('lookupSeeds.vacancyStatuses.draft', { defaultValue: 'Concept' })
   })
 
   it('carries the caller-own extra field (isClosed) through untouched — rule B, VacanciesTab shape', () => {

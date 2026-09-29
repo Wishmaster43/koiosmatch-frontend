@@ -87,7 +87,8 @@ interface StatusOpt { value: string; label: string; isClosed: boolean }
 
 // Seed fallback (mirrors VacancyLookupsContext's DEFAULT_VACANCY_STATUSES) — used
 // only until GET /vacancy-statuses answers or if it is unavailable; labels translate
-// at use (lookupSeeds.vacancyStatuses.<value>), the Dutch text is the defaultValue.
+// at use (lookupSeeds.vacancyStatuses.<key>, resolved from the LABEL via translateSeedLabel —
+// SEED-KEYS-EN-1), the Dutch text is the defaultValue.
 const SEED_STATUSES: StatusOpt[] = [
   { value: 'open', label: 'Open', isClosed: false }, { value: 'online', label: 'Online', isClosed: false },
   { value: 'concept', label: 'Concept', isClosed: false }, { value: 'paused', label: 'Gepauzeerd', isClosed: false },

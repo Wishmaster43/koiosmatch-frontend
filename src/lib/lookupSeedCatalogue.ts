@@ -17,6 +17,9 @@
  */
 
 import { WORKFLOW_SEED_LABELS } from './lookupSeedCatalogueWorkflows'
+// SEED-KEYS-EN-1: English key names for the LABEL_KEYED families, re-exported so every
+// consumer keeps importing from this one catalogue module.
+export { SEED_LABEL_KEYS } from './lookupSeedCatalogueKeys'
 
 // Families whose rows have no stable value; their key is derived from the seed label.
 export const LABEL_KEYED: ReadonlySet<string> = new Set([

@@ -9,15 +9,18 @@
  */
 import { useState } from 'react'
 import type { TFunction } from 'i18next'
+import { translateSeedLabel } from '@/lib/lookupSeedI18n'
 
 interface SeedStatus { value: string; label: string }
 
-// Translate every seed label in the LAZY state initialiser (per-value key, Dutch
-// literal as fallback) so a failed/empty lookup never leaves a Dutch island in the
-// status filter, and the map runs once instead of on every render.
+// Translate every seed label in the LAZY state initialiser via the shared catalogue
+// helper (SEED-KEYS-EN-1: `vacancyStatuses` is LABEL_KEYED, so the i18n key is derived
+// from the LABEL, not `s.value` — the seed's placeholder slug never lines up with the
+// catalogue's English key), Dutch literal as fallback so a failed/empty lookup never
+// leaves an island, and the map runs once instead of on every render.
 export function useSeedVacancyStatusOptions<T extends SeedStatus>(t: TFunction, seedStatuses: T[]) {
   const [statusOptions, setStatusOptions] = useState<T[]>(() =>
-    seedStatuses.map(s => ({ ...s, label: t(`lookupSeeds.vacancyStatuses.${s.value}`, { defaultValue: s.label }) })))
+    seedStatuses.map(s => ({ ...s, label: translateSeedLabel(t, 'vacancyStatuses', s) })))
   // Has the REAL lookup answered? The seed list must never decide the default
   // selection (uuid vs seed-slug mismatch — see VacanciesTab's own BUG FIX note).
   const [resolved, setResolved] = useState(false)

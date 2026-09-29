@@ -302,7 +302,9 @@ const ALLOWLIST: string[] = [
   'pt/common:lookupSeeds.driverLicenses.de',
 
   // German "Kandidaten" = "candidates" (identical spelling), workflow-folder family
-  'de/common:lookupSeeds.workflowFolders.kandidaten',
+  // (SEED-KEYS-EN-1 29-09: key renamed from the Dutch `kandidaten` to the English
+  // `candidates` — value unchanged, path updated here to match)
+  'de/common:lookupSeeds.workflowFolders.candidates',
 
   // German "Kandidaten" = "candidates" (identical spelling), import-entity label
   'de/settings:import.entities.candidates.label',
