@@ -34,6 +34,8 @@ import { SelectField } from '../components/SettingsKit'
 import CatalogSection from './CatalogSection'
 import { WINDOW_UNIT_OPTIONS } from '../components/windowUnitOptions'
 import { useAllSettings, useSettingsLoaded, saveSettingsKeys, invalidateAllSettingsCache, getStringSetting } from '@/lib/settings/useAllSettings'
+import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 
 // Tenant-setting keys — the generic /settings key/value store. Defaults mirror
 // the fallback numbers vacancyAdvice.ts/matchAdvice.ts's callers already use.
@@ -63,9 +65,11 @@ function VacancyAdviceStaleUnitField() {
     try {
       await saveSettingsKeys({ [VACANCY_ADVICE_STALE_DAYS_UNIT_KEY]: v })
       invalidateAllSettingsCache()
-    } catch {
-      // Silent revert: the SelectField re-reads `value` from the settings cache,
-      // which stays at its last-confirmed value on a failed write.
+    } catch (err) {
+      // ADVICE-UNIT-FEEDBACK-1 (Danny 29-09: "ik kan geen andere kiezen dan days"): a failed
+      // write is SAID, never swallowed — the SelectField re-reads `value` from the settings
+      // cache (last-confirmed value) and the toast names the reason (403/422/…).
+      notifyError(extractApiError(err, t('koiosAdvice.vacancyStaleSaveFailed')))
     }
   }
   return (

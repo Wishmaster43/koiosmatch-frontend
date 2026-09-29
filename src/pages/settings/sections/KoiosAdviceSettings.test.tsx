@@ -163,6 +163,18 @@ describe('KoiosAdviceSettings — vacancy stale unit picker', () => {
       .toHaveTextContent(st('settings.options.window_unit.days'))
   })
 
+  // ADVICE-UNIT-FEEDBACK-1: a rejected unit save is said, never swallowed, and the field keeps the last-confirmed value.
+  it('toasts the server reason when the unit save is rejected and keeps the last-confirmed unit', async () => {
+    mockSettings.mockReturnValue({})
+    saveSettingsKeys.mockRejectedValueOnce({ response: { status: 403, data: { message: 'This action is unauthorized.' } } })
+    const user = userEvent.setup()
+    render(<KoiosAdviceSettings />)
+    await user.click(screen.getByRole('button', { name: st('settings.windows.vacancy_advice_stale_days_unit.label') }))
+    await user.click(await screen.findByText(st('settings.options.window_unit.weeks')))
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(expect.stringContaining('unauthorized')))
+    expect(screen.getByRole('button', { name: st('settings.windows.vacancy_advice_stale_days_unit.label') }))
+      .toHaveTextContent(st('settings.options.window_unit.days'))
+  })
   it('persists a chosen unit under vacancy_advice_stale_days_unit', async () => {
     mockSettings.mockReturnValue({})
     const user = userEvent.setup()
