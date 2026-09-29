@@ -229,7 +229,7 @@ describe('useNotifications attention toasts', () => {
 
 // NOTIF-I18N-1: remove one row (optimistic, reverted on failure) and mark all
 // read via the dedicated route.
-describe('useNotifications · remove + read-all (NOTIF-I18N-1)', () => {
+describe('useNotifications · remove (NOTIF-I18N-1)', () => {
   const row = (id: number, seen: boolean) => ({ id, title: `Row ${id}`, body: 'body', seen })
 
   beforeEach(() => {

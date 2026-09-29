@@ -55,7 +55,8 @@ export default function NotificationBell() {
   const { items, unseen, markAllSeen, removeNotification } = useNotifications()
   // NOTIF-I18N-1: feature-detect the new payload shape — a row carrying `record`
   // or `title_key` (present, even null) means the backend sends the new fields,
-  // so the trash/read-all affordances are real; an older backend never shows them.
+  // so the per-row trash is a real affordance; an older backend never shows it.
+  // (No header "mark all read": opening the bell already marks every row seen.)
   const newShape = items.some(n => Object.hasOwn(n, 'record') || Object.hasOwn(n, 'title_key'))
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)

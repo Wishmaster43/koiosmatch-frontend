@@ -378,9 +378,9 @@ describe('NotificationBell · X-31 "ask Koios" action', () => {
 })
 
 // NOTIF-I18N-1: a new-shape row (record/title_key/actions present) renders the
-// translated title, the record chip, the executable actions, and offers trash +
-// header read-all; an old-shape row (neither field present) renders exactly as
-// before — no trash, no read-all.
+// translated title, the record chip, the executable actions, and offers a trash;
+// an old-shape row (neither field present) renders exactly as before, no trash.
+// There is no header "mark all read": opening the bell already marks all seen.
 describe('NotificationBell · NOTIF-I18N-1 (bell speaks the user\'s language, names the record, undo, remove)', () => {
   it('renders the record chip for a candidate.retention_due row and opens its drawer on click', () => {
     vi.spyOn(useNotificationsModule, 'useNotifications').mockReturnValue({
