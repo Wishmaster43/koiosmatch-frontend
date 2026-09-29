@@ -326,6 +326,9 @@
       "rescheduleTitle": "Neue Frist",
       "rescheduleConfirm": "Verschieben",
       "proposedDate": "Koios-Vorschlag",
+      "createTaskTitle": "Neue Aufgabe",
+      "createTaskConfirm": "Aufgabe erstellen",
+      "noDueDate": "Kein Fälligkeitsdatum",
       "reason": {
         "task_overdue_one": "{{count}} Tag überfällig",
         "task_overdue_other": "{{count}} Tage überfällig",

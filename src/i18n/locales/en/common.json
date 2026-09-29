@@ -326,6 +326,9 @@
       "rescheduleTitle": "New due date",
       "rescheduleConfirm": "Reschedule",
       "proposedDate": "Koios suggestion",
+      "createTaskTitle": "New task",
+      "createTaskConfirm": "Create task",
+      "noDueDate": "No due date",
       "reason": {
         "task_overdue_one": "{{count}} day overdue",
         "task_overdue_other": "{{count}} days overdue",

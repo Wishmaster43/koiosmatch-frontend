@@ -326,6 +326,9 @@
       "rescheduleTitle": "Nouvelle échéance",
       "rescheduleConfirm": "Reporter",
       "proposedDate": "Suggestion de Koios",
+      "createTaskTitle": "Nouvelle tâche",
+      "createTaskConfirm": "Créer la tâche",
+      "noDueDate": "Aucune échéance",
       "reason": {
         "task_overdue_one": "{{count}} jour de retard",
         "task_overdue_other": "{{count}} jours de retard",

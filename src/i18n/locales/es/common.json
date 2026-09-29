@@ -326,6 +326,9 @@
       "rescheduleTitle": "Nueva fecha límite",
       "rescheduleConfirm": "Reprogramar",
       "proposedDate": "Sugerencia de Koios",
+      "createTaskTitle": "Nueva tarea",
+      "createTaskConfirm": "Crear tarea",
+      "noDueDate": "Sin fecha límite",
       "reason": {
         "task_overdue_one": "{{count}} día de retraso",
         "task_overdue_other": "{{count}} días de retraso",

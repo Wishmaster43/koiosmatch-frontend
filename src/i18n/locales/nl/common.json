@@ -326,6 +326,9 @@
       "rescheduleTitle": "Nieuwe deadline",
       "rescheduleConfirm": "Verzetten",
       "proposedDate": "Voorstel van Koios",
+      "createTaskTitle": "Nieuwe taak",
+      "createTaskConfirm": "Taak maken",
+      "noDueDate": "Geen deadline",
       "reason": {
         "task_overdue_one": "{{count}} dag te laat",
         "task_overdue_other": "{{count}} dagen te laat",

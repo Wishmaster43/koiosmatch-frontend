@@ -326,6 +326,9 @@
       "rescheduleTitle": "Novo prazo",
       "rescheduleConfirm": "Reagendar",
       "proposedDate": "Sugestão do Koios",
+      "createTaskTitle": "Nova tarefa",
+      "createTaskConfirm": "Criar tarefa",
+      "noDueDate": "Sem prazo",
       "reason": {
         "task_overdue_one": "{{count}} dia em atraso",
         "task_overdue_other": "{{count}} dias em atraso",

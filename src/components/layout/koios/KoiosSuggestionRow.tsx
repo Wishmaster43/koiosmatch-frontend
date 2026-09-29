@@ -26,7 +26,8 @@ import { extractApiError } from '@/lib/extractApiError'
 import { KIND_META, toolIcon, reasonKey, reasonShortKey } from './koiosSuggestionMeta'
 import { canonicalToolId } from './koiosToolIds'
 import { ExecErrorNotice, ExecutedNotice, StagedPreview } from './KoiosSuggestionExec'
-import RescheduleEditor from './RescheduleEditor'
+import SuggestionEditor from './SuggestionEditor'
+import { editorFieldsForAction } from './suggestionEditorSpec'
 import { useRun, useStageAndConfirm, useLandAfterExecute, previewLine, isIdRow } from './koiosSuggestionRunner'
 import type { ExecState, StagedAction } from './koiosSuggestionRunner'
 import type { KoiosAssistantAction, KoiosAssistantSuggestion } from './useKoiosAssistant'
@@ -153,7 +154,7 @@ export default function KoiosSuggestionRow({ suggestion, onAskKoios, onDone }: {
         <StagedPreview exec={exec} setExec={setExec} />
       )}
       {exec.phase === 'editing' && exec.editingAction && (
-        <RescheduleEditor
+        <SuggestionEditor
           action={exec.editingAction}
           onConfirm={(input) => { void stageAndConfirm(stagePendingAction, confirmPendingAction, exec.editingAction!.tool, input) }}
           onCancel={() => setExec({ phase: 'idle' })}
@@ -231,12 +232,14 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec }: {
       setExec({ phase: 'error', message: extractApiError(err, t('koios.pendingAction.error')) })
     }
   }
-  // RESCHEDULE-EDIT-1: an action whose input carries a `due_date` opens the inline
-  // editor instead of staging straight away — the user picks the new date first
-  // (CLAUDE.md §0B: "a way to adjust it before running"), never the raw proposal.
-  const isRescheduleInput = (a: KoiosAssistantAction) => typeof argsOf(a).due_date === 'string'
+  // TASK-CREATE-EDIT-1 (generalises RESCHEDULE-EDIT-1): an action whose KEY has a
+  // known editor spec (reschedule_task, create_task) opens the inline editor instead
+  // of staging straight away — the user adjusts the fields first (CLAUDE.md §0B: "a
+  // way to adjust it before running"). An unrecognised key with a string `due_date`
+  // still falls back to the date-only editor (the pre-existing reschedule behaviour).
   const runAction = (a: KoiosAssistantAction) => {
-    if (isRescheduleInput(a)) setExec({ phase: 'editing', editingAction: a })
+    const hasEditor = Boolean(editorFieldsForAction(a.key, typeof argsOf(a).due_date === 'string'))
+    if (hasEditor) setExec({ phase: 'editing', editingAction: a })
     else void stage(a)
   }
 

@@ -39,13 +39,28 @@ vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatNumber: (n:
 const openEntity = vi.fn()
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity, navigate: vi.fn() }) }))
 
-// RESCHEDULE-EDIT-1: RescheduleEditor's shared DateField as a flat controlled
-// input — this suite is about the row's stage/editor wiring, not the picker
-// itself (covered by fields.test.tsx and RescheduleEditor.test.tsx).
+// RESCHEDULE-EDIT-1 / TASK-CREATE-EDIT-1: SuggestionEditor's shared DateField/
+// TextField as flat controlled inputs — this suite is about the row's
+// stage/editor wiring, not the pickers themselves (covered by fields.test.tsx,
+// RescheduleEditor.test.tsx and SuggestionEditor.test.tsx).
 vi.mock('@/components/forms/fields', () => ({
   DateField: ({ id, value, onChange }: { id?: string; value?: string; onChange: (v: string) => void }) => (
     <input id={id} value={value ?? ''} onChange={(e) => onChange(e.target.value)} />
   ),
+  TextField: ({ id, value, onChange }: { id?: string; value?: string; onChange: (v: string) => void }) => (
+    <input id={id} value={value ?? ''} onChange={(e) => onChange(e.target.value)} />
+  ),
+}))
+
+// TASK-CREATE-EDIT-1: the tenant priority lookup, real shape (value/label/is_default).
+const priorities = [
+  { value: 'low', label: 'Low', color: 'var(--color-info)', is_default: false },
+  { value: 'normal', label: 'Normal', color: 'var(--color-primary)', is_default: true },
+  { value: 'high', label: 'High', color: 'var(--text-muted)', is_default: false },
+]
+vi.mock('@/context/TaskLookupsContext', () => ({
+  useTaskLookups: () => ({ priorities, defaultPriority: 'normal' }),
+  TaskLookupsProvider: ({ children }: { children: import('react').ReactNode }) => children,
 }))
 
 type CapTool = { name: string; label_nl: string; confirm_required: boolean; enabled_for_me: boolean; enabled_for_tenant: boolean; default_enabled: boolean; connection_active: boolean | null; connection: null }
@@ -454,5 +469,52 @@ describe('KoiosSuggestionRow · useStageAndConfirm error branch (SHARED-UNIT-TES
     fireEvent.click(screen.getByRole('button', { name: 'koios.assistant.rescheduleConfirm' }))
     await screen.findByText('budget exceeded')
     expect(mockPost).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('KoiosSuggestionRow · create_task editor (TASK-CREATE-EDIT-1)', () => {
+  it('clicking create_task opens the editor and does NOT stage', () => {
+    const suggestion = {
+      kind: 'candidate_no_contact' as const, title: 'Koen Timmermans', body: 'x', refs: [],
+      action: { key: 'create_task', tool: 'create_task', input: { candidate_id: 'c-1', title: 'Bel Koen Timmermans' }, label_key: 'koios.assistant.actions.create_task' },
+    }
+    render(<KoiosSuggestionRow suggestion={suggestion} />)
+    fireEvent.click(screen.getByRole('button', { name: 'koios.assistant.actions.create_task' }))
+    expect(mockPost).not.toHaveBeenCalled()
+    expect(screen.getByText('koios.assistant.createTaskTitle')).toBeInTheDocument()
+  })
+
+  it('confirming a typed title + picked date + picked priority stages then confirms the exact request', async () => {
+    const suggestion = {
+      kind: 'candidate_no_contact' as const, title: 'Koen Timmermans', body: 'x', refs: [],
+      action: { key: 'create_task', tool: 'create_task', input: { candidate_id: 'c-1', title: 'Bel Koen Timmermans' }, label_key: 'koios.assistant.actions.create_task' },
+    }
+    mockPost.mockResolvedValueOnce({ data: { status: 'staged', action: { id: 'pa-1', title: 'Bel Koen Timmermans', preview: [] } } })
+    mockPost.mockResolvedValueOnce({ data: { status: 'executed', data: {} } })
+    render(<KoiosSuggestionRow suggestion={suggestion} />)
+    fireEvent.click(screen.getByRole('button', { name: 'koios.assistant.actions.create_task' }))
+    fireEvent.change(screen.getByDisplayValue(''), { target: { value: '2026-10-02' } })
+    // Priority: the tenant default ("Normal") is preselected — open and pick "High".
+    // ROLE-PICKER-LEFT-1: the trigger's accessible name is its label, not the current value.
+    fireEvent.click(screen.getByRole('button', { name: 'koios.pendingAction.fields.priority' }))
+    fireEvent.click(screen.getByRole('button', { name: /^High$/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'koios.assistant.createTaskConfirm' }))
+    await waitFor(() => expect(mockPost).toHaveBeenNthCalledWith(1, '/ai/koios/actions/stage', {
+      tool: 'create_task', input: { candidate_id: 'c-1', title: 'Bel Koen Timmermans', due_date: '2026-10-02', priority: 'high' },
+    }))
+    await waitFor(() => expect(mockPost).toHaveBeenNthCalledWith(2, '/ai/koios/actions/pa-1/confirm'))
+    await screen.findByText(/pendingAction\.confirmed/)
+  })
+
+  it('cancel closes the create_task editor without any request', () => {
+    const suggestion = {
+      kind: 'candidate_no_contact' as const, title: 'Koen Timmermans', body: 'x', refs: [],
+      action: { key: 'create_task', tool: 'create_task', input: { candidate_id: 'c-1', title: 'Bel Koen Timmermans' }, label_key: 'koios.assistant.actions.create_task' },
+    }
+    render(<KoiosSuggestionRow suggestion={suggestion} />)
+    fireEvent.click(screen.getByRole('button', { name: 'koios.assistant.actions.create_task' }))
+    fireEvent.click(screen.getByRole('button', { name: 'koios.pendingAction.cancel' }))
+    expect(mockPost).not.toHaveBeenCalled()
+    expect(screen.queryByText('koios.assistant.createTaskTitle')).toBeNull()
   })
 })
