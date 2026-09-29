@@ -96,4 +96,59 @@ describe('KoiosMessage — search results grouping', () => {
     expect(screen.getByText('Kandidaten (1)')).toBeInTheDocument()
     expect(screen.getByText('Vacatures (1)')).toBeInTheDocument()
   })
+
+  // FIND-1: search_all's buckets widened past the original five — a contact/task/
+  // location ref groups into its own labelled card, never dropped.
+  it('groups contact/task/location refs into their own English buckets', () => {
+    const msg: KoiosChatMessage = {
+      role: 'assistant',
+      answer: 'Found some results',
+      steps: [
+        {
+          tool: 'search_all',
+          refs: [
+            { type: 'contact', id: 'ct1', label: 'Fleur Smit', parent: { type: 'customer', id: 'cu1' } },
+            { type: 'task', id: 'tk1', label: 'Bellen' },
+            { type: 'location', id: 'lo1', label: 'Vestiging Zuid', parent: { type: 'customer', id: 'cu1' } },
+          ],
+        },
+      ],
+    }
+    render(<KoiosMessage msg={msg} t={t} />)
+    expect(screen.getByText(`${t('koios:results.group.contacts')} (1)`)).toBeInTheDocument()
+    expect(screen.getByText(`${t('koios:results.group.tasks')} (1)`)).toBeInTheDocument()
+    expect(screen.getByText(`${t('koios:results.group.locations')} (1)`)).toBeInTheDocument()
+  })
+
+  // FIND-1: a Dutch dual-key bucket (contactpersonen/taken/locaties, phase-B window)
+  // groups identically to the English key.
+  it('groups Dutch dual-key buckets the same as English ones', () => {
+    const msg: KoiosChatMessage = {
+      role: 'assistant',
+      answer: 'Found some results',
+      steps: [
+        {
+          tool: 'search_all',
+          result: { 'contactpersonen': { count: 1 } },
+          refs: [{ type: 'contact', id: 'ct1', label: 'Fleur Smit', parent: { type: 'customer', id: 'cu1' } }],
+        } as unknown as Record<string, unknown>,
+      ],
+    }
+    render(<KoiosMessage msg={msg} t={t} />)
+    expect(screen.getByText(`${t('koios:results.group.contacts')} (1)`)).toBeInTheDocument()
+  })
+
+  // FIND-1: a bucket type this FE has never mapped keeps its own group instead
+  // of being silently dropped — falls back to the raw type as its label.
+  it('keeps an unknown bucket type as its own group', () => {
+    const msg: KoiosChatMessage = {
+      role: 'assistant',
+      answer: 'Found some results',
+      steps: [
+        { tool: 'search_all', refs: [{ type: 'reference', id: 'rf1', label: 'Some reference' }] },
+      ],
+    }
+    render(<KoiosMessage msg={msg} t={t} />)
+    expect(screen.getByText('reference (1)')).toBeInTheDocument()
+  })
 })

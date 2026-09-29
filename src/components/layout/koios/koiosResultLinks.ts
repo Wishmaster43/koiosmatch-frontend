@@ -11,7 +11,10 @@
  * `workflow` → the AI & Workflows page. `appointment`/`note`/`document` are
  * CHILD refs (they carry a `parent:{type,id}` instead of their own page) and
  * route through their PARENT's page + drawer sub-tab via CHILD_REF_TAB below —
- * never a route of their own.
+ * never a route of their own. FIND-1: `location`/`customer_location`/`contact`/
+ * `department` have no page of their own either — they route the same way,
+ * through the customer's drawer, on its `locations`/`contacts`/`departments` tab
+ * (measured CustomerDrawer.tsx TAB_IDS).
  */
 export const RESULT_REF_PAGE: Record<string, string> = {
   candidate: 'candidates',
@@ -54,6 +57,12 @@ const CHILD_REF_TAB: Record<string, Record<string, string>> = {
   appointment: { candidate: 'planning', customer: 'planning', vacancy: 'appointments', application: 'appointments' },
   note: { candidate: 'communication', customer: 'communication', vacancy: 'notes', application: 'notes', opportunity: 'notes' },
   document: { candidate: 'documents', customer: 'documents', vacancy: 'documents' },
+  // FIND-1: location/customer_location/contact/department are customer sub-records
+  // with no page of their own — route to the customer's matching drawer tab.
+  location: { customer: 'locations' },
+  customer_location: { customer: 'locations' },
+  contact: { customer: 'contacts' },
+  department: { customer: 'departments' },
 }
 
 // Resolves the drawer sub-tab a child ref's parent should open on; undefined when that parent has no matching tab.

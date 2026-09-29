@@ -177,7 +177,10 @@
       "vacancies": "Vacatures",
       "customers": "Klanten",
       "opportunities": "Kansen",
-      "matches": "Matches"
+      "matches": "Matches",
+      "contacts": "Contactpersonen",
+      "tasks": "Taken",
+      "locations": "Locaties"
     },
     "showMore": "Toon meer",
     "showLess": "Toon minder",

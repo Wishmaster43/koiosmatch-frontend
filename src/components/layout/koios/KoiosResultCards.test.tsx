@@ -262,3 +262,55 @@ describe('KoiosRefChip — icon prop', () => {
     expect(screen.getByTestId('custom-icon')).toBeInTheDocument()
   })
 })
+
+// FIND-1: contact/task/location groups render with their own translated label and,
+// for a child ref (contact/location), deep-link through the parent customer's tab.
+describe('KoiosResultCards — FIND-1 new buckets', () => {
+  beforeEach(() => { openEntity.mockClear() })
+
+  it('renders the contacts group label with real i18n (nl)', () => {
+    const refs: KoiosResultRef[] = [
+      { type: 'contact', id: 'ct1', label: 'Fleur Smit', parent: { type: 'customer', id: 'cu1' } },
+    ]
+    const groups: KoiosSearchResultsGrouped = { groups: [{ entity: 'contact', refs, count: 1, more: false }], skipped: [] }
+    render(<KoiosResultCards groups={groups} />)
+    expect(screen.getByText(`${i18n.t('koios:results.group.contacts')} (1)`)).toBeInTheDocument()
+    expect(screen.getByText('Fleur Smit')).toBeInTheDocument()
+  })
+
+  it('deep-links a contact ref to its parent customer on the contacts tab', async () => {
+    const user = userEvent.setup()
+    const refs: KoiosResultRef[] = [
+      { type: 'contact', id: 'ct1', label: 'Fleur Smit', parent: { type: 'customer', id: 'cu1' } },
+    ]
+    const groups: KoiosSearchResultsGrouped = { groups: [{ entity: 'contact', refs, count: 1, more: false }], skipped: [] }
+    render(<KoiosResultCards groups={groups} />)
+    await user.click(screen.getByText('Fleur Smit'))
+    expect(openEntity).toHaveBeenCalledWith('customers', 'cu1', 'contacts')
+  })
+
+  it('renders a location ref as a non-interactive chip when it carries no parent', () => {
+    const refs: KoiosResultRef[] = [{ type: 'location', id: 'lo1', label: 'Vestiging Zuid' }]
+    const groups: KoiosSearchResultsGrouped = { groups: [{ entity: 'location', refs, count: 1, more: false }], skipped: [] }
+    render(<KoiosResultCards groups={groups} />)
+    const chip = screen.getByText('Vestiging Zuid').closest('div, button')
+    expect(chip?.tagName).toBe('DIV')
+  })
+
+  it('prefers phase_label/status_label over subtitle for a candidate ref', () => {
+    const refs: KoiosResultRef[] = [
+      { type: 'candidate', id: 'c1', label: 'Ahmed Vos', subtitle: 'oude subtitel', phase_label: 'Kandidaat', status_label: 'Beschikbaar' },
+    ]
+    const groups: KoiosSearchResultsGrouped = { groups: [{ entity: 'candidate', refs, count: 1, more: false }], skipped: [] }
+    render(<KoiosResultCards groups={groups} t={t} />)
+    expect(screen.getByText('Kandidaat · Beschikbaar')).toBeInTheDocument()
+    expect(screen.queryByText('oude subtitel')).not.toBeInTheDocument()
+  })
+
+  it('falls back to the plain subtitle when phase_label/status_label are absent', () => {
+    const refs: KoiosResultRef[] = [{ type: 'candidate', id: 'c1', label: 'Ahmed Vos', subtitle: 'Verpleegkundige' }]
+    const groups: KoiosSearchResultsGrouped = { groups: [{ entity: 'candidate', refs, count: 1, more: false }], skipped: [] }
+    render(<KoiosResultCards groups={groups} t={t} />)
+    expect(screen.getByText('Verpleegkundige')).toBeInTheDocument()
+  })
+})

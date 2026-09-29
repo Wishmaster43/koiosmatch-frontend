@@ -177,7 +177,10 @@
       "vacancies": "Vacancies",
       "customers": "Customers",
       "opportunities": "Opportunities",
-      "matches": "Matches"
+      "matches": "Matches",
+      "contacts": "Contacts",
+      "tasks": "Tasks",
+      "locations": "Locations"
     },
     "showMore": "Show more",
     "showLess": "Show less",

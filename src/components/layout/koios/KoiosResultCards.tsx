@@ -27,6 +27,9 @@ const ENTITY_LABELS: Record<string, string> = {
   customer: 'customers',
   opportunity: 'opportunities',
   match: 'matches',
+  contact: 'contacts',
+  task: 'tasks',
+  location: 'locations',
 }
 // Legacy `refs` prop (assistant suggestions): bucket by the ref's own type, in first-seen order.
 function groupRefsByType(refs: KoiosResultRef[]): Array<{ entity: string; refs: KoiosResultRef[]; count: number; more: boolean }> {
@@ -68,15 +71,23 @@ function dedupeRefs(refs: KoiosResultRef[]): KoiosResultRef[] {
 // `null` hides the glyph entirely, `undefined` (the default) keeps the entity icon. A
 // suggestion row uses this so the row shows exactly ONE icon (its typed kind/task icon),
 // never the chip's icon stacked next to it.
-export function KoiosRefChip({ item, icon }: { item: KoiosResultRef; icon?: ReactNode | null }) {
+// `title` (REFERENCE-LINK-1): an optional hover hint for a NON-clickable ref — the
+// reference chip has no page of its own, so a title explains what it is instead.
+export function KoiosRefChip({ item, icon, title }: { item: KoiosResultRef; icon?: ReactNode | null; title?: string }) {
   const { openEntity } = useNavigation()
   const target = resolveTarget(item)
   const clickable = target != null
   const Tag: 'button' | 'div' = clickable ? 'button' : 'div'
   const glyph = icon !== undefined ? icon : entityIconEl(item.type, { size: 13, color: 'var(--color-primary-text)' })
+  // FIND-1: a candidate ref from search_candidates carries phase_label/status_label —
+  // prefer them for the subtitle line; tolerant fallback to the plain subtitle for
+  // every other ref shape or when the backend has not sent them yet.
+  const subtitle = item.type === 'candidate' && (item.phase_label || item.status_label)
+    ? [item.phase_label, item.status_label].filter(Boolean).join(' · ')
+    : item.subtitle
 
   return (
-    <Tag key={`${item.type}:${item.id}`}
+    <Tag key={`${item.type}:${item.id}`} title={title}
       {...(clickable ? { type: 'button' as const, onClick: () => (target!.tab ? openEntity(target!.page, target!.id, target!.tab) : openEntity(target!.page, target!.id)) } : {})}
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px',
@@ -89,7 +100,7 @@ export function KoiosRefChip({ item, icon }: { item: KoiosResultRef; icon?: Reac
         {/* DATUM-1: rewrite any embedded ISO date in a server-composed label to DD-MM-YYYY. */}
         {humanizeIsoDates(item.label)}
         {/* Optional caption line under the label — backend guarantees no PII, so it renders as plain text. */}
-        {item.subtitle && <Caption style={{ display: 'block' }}>{humanizeIsoDates(item.subtitle)}</Caption>}
+        {subtitle && <Caption style={{ display: 'block' }}>{humanizeIsoDates(subtitle)}</Caption>}
       </span>
     </Tag>
   )

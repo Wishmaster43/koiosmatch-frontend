@@ -44,10 +44,12 @@ export interface KoiosPendingAction {
 // A result-card deep link, attached to a tool step's read output (Job 3).
 export type KoiosResultRef = KoiosContextRef
 
-// Per-entity grouping metadata for search results (ZoekAlles tool).
-// When present, the step includes this alongside refs[].
+// Per-entity grouping metadata for search results (search_all tool). FIND-1 widened
+// the buckets past the original five to contacts/tasks/locations — `entity` stays a
+// string (not a closed union) so an unknown future bucket still groups instead of
+// being silently dropped (groupSearchResults in KoiosMessage.tsx).
 export interface KoiosSearchResultGroup {
-  entity: 'candidate' | 'vacancy' | 'customer' | 'opportunity' | 'match'
+  entity: string
   count?: number       // Total matching count before truncation
   more?: boolean       // True if truncated (>5 results)
   skipped?: { reason: string } | null  // When entity was skipped
@@ -76,6 +78,12 @@ declare module '@/types/koios' {
   }
   interface KoiosStep {
     refs?: KoiosResultRef[]
+  }
+  // FIND-1: search_candidates rows carry these alongside the existing subtitle;
+  // KoiosRefChip prefers them for the candidate card's second line when present.
+  interface KoiosContextRef {
+    phase_label?: string | null
+    status_label?: string | null
   }
 }
 

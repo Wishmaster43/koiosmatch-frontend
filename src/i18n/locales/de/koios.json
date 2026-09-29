@@ -177,7 +177,10 @@
       "vacancies": "Stellen",
       "customers": "Kunden",
       "opportunities": "Chancen",
-      "matches": "Übereinstimmungen"
+      "matches": "Übereinstimmungen",
+      "contacts": "Kontaktpersonen",
+      "tasks": "Aufgaben",
+      "locations": "Standorte"
     },
     "showMore": "Mehr anzeigen",
     "showLess": "Weniger anzeigen",

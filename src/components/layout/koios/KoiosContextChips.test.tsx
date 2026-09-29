@@ -18,12 +18,13 @@ describe('KoiosContextChips', () => {
     expect(onRemove).toHaveBeenCalledTimes(1)
   })
 
-  // A type the backend cannot resolve yet (koiosContextTypes: only 'candidate'
-  // today) renders dashed + tooltipped, never solid — the pin stays visible but
-  // honest about not being sent.
-  // 'task' is not in ContextRefResolver::TYPES (candidate/vacancy/customer/match/opportunity are).
+  // A type the backend cannot resolve yet (koiosContextTypes.RESOLVABLE_CONTEXT_TYPES)
+  // renders dashed + tooltipped, never solid — the pin stays visible but honest about
+  // not being sent. FIND-1 (BE api during-onix 66b2745a/4463bdbe) widened the whitelist
+  // to 15 tokens, so 'task' now resolves; 'calllist' (the outreach alias, never in
+  // ContextRefResolver::TYPES) is the still-unresolvable case here.
   it('renders an unresolvable type as a dashed, tooltipped chip', () => {
-    render(<KoiosContextChips chips={[{ ref: { type: 'task', id: 't1', label: 'Verpleegkundige' }, onRemove: vi.fn() }]} t={t} />)
+    render(<KoiosContextChips chips={[{ ref: { type: 'calllist', id: 't1', label: 'Verpleegkundige' }, onRemove: vi.fn() }]} t={t} />)
     const chip = screen.getByText('Verpleegkundige').closest('span')
     expect(chip).toHaveAttribute('title', 'koios.contextPending')
     // jsdom can't resolve var() inside the `border` shorthand for toHaveStyle's
@@ -34,6 +35,14 @@ describe('KoiosContextChips', () => {
   it('renders a resolvable type without the pending tooltip/dashing', () => {
     render(<KoiosContextChips chips={[{ ref: { type: 'candidate', id: 'c1', label: 'Ahmed Vos' }, onRemove: vi.fn() }]} t={t} />)
     const chip = screen.getByText('Ahmed Vos').closest('span')
+    expect(chip).not.toHaveAttribute('title')
+    expect(chip?.getAttribute('style')).toContain('solid')
+  })
+
+  // FIND-1: task/contact/location now resolve too (were dashed before this change).
+  it('renders a contact chip without the pending tooltip/dashing (FIND-1)', () => {
+    render(<KoiosContextChips chips={[{ ref: { type: 'contact', id: 'ct1', label: 'Fleur Smit' }, onRemove: vi.fn() }]} t={t} />)
+    const chip = screen.getByText('Fleur Smit').closest('span')
     expect(chip).not.toHaveAttribute('title')
     expect(chip?.getAttribute('style')).toContain('solid')
   })

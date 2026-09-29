@@ -17,21 +17,24 @@ import type { KoiosResultRef, KoiosSearchResultsGrouped } from './koiosTypes'
 import type { KoiosChatMessage, TFn } from '@/types/koios'
 import { GRADIENT, resolveMessage, type KoiosGreeting } from './koiosMessageParts'
 import { canonicalToolId, pick } from './koiosToolIds'
+import { LEGACY_RESULT_BUCKET_TYPES } from './koiosResultBucketAliases'
 
 // ── Group search results by entity type ────────────────────────────────────────
 // Maps backend entity keys to FE ref types. KOIOS-EN-1 phase B: the search_all
-// result's per-entity keys move to English plurals; both generations are kept
-// during the alias period (a not-yet-updated payload still groups correctly).
-const ENTITY_TYPE_MAP: Record<string, 'candidate' | 'vacancy' | 'customer' | 'opportunity' | 'match'> = {
-  kandidaten: 'candidate',
-  vacatures: 'vacancy',
-  klanten: 'customer',
-  kansen: 'opportunity',
+// result's per-entity keys move to English plurals; the Dutch generation is kept
+// during the alias period via LEGACY_RESULT_BUCKET_TYPES (a not-yet-updated
+// payload still groups correctly). FIND-1 (BE FIND-1/FIND-1b) widened
+// `search_all`'s buckets past the original five to contacts/tasks/locations.
+const ENTITY_TYPE_MAP: Record<string, string> = {
+  ...LEGACY_RESULT_BUCKET_TYPES,
   matches: 'match',
   candidates: 'candidate',
   vacancies: 'vacancy',
   customers: 'customer',
   opportunities: 'opportunity',
+  contacts: 'contact',
+  tasks: 'task',
+  locations: 'location',
 }
 
 // Extracts per-entity search metadata and groups refs by entity type.
@@ -56,13 +59,19 @@ function groupSearchResults(step: Record<string, unknown>, refs: KoiosResultRef[
     refsByEntity.set(ref.type, list)
   }
 
-  // Render groups in entity order: candidates, vacancies, customers, opportunities, matches
-  const entityOrder: Array<'candidate' | 'vacancy' | 'customer' | 'opportunity' | 'match'> = [
-    'candidate', 'vacancy', 'customer', 'opportunity', 'match',
-  ]
-  for (const entityType of entityOrder) {
+  // Render groups in a canonical order, then anything else the backend sent
+  // (FIND-1: a bucket key this FE has never seen still gets its own group,
+  // never silently dropped — the raw key is the fallback entity label).
+  const entityOrder = ['candidate', 'vacancy', 'customer', 'opportunity', 'match', 'contact', 'task', 'location']
+  const seen = new Set<string>()
+  const bucketEntityTypes = Object.keys(resultaatPerEntity).map((key) => ENTITY_TYPE_MAP[key] || key)
+  const refEntityTypes = Array.from(refsByEntity.keys())
+  for (const entityType of [...entityOrder, ...bucketEntityTypes, ...refEntityTypes]) {
+    if (seen.has(entityType)) continue
+    seen.add(entityType)
     const entityRefs = refsByEntity.get(entityType) || []
-    if (entityRefs.length > 0 || resultaatPerEntity[entityType]) {
+    const bucketKey = Object.keys(resultaatPerEntity).find((key) => (ENTITY_TYPE_MAP[key] || key) === entityType)
+    if (entityRefs.length > 0 || (bucketKey && resultaatPerEntity[bucketKey])) {
       groups.push({
         entity: entityType,
         refs: entityRefs,

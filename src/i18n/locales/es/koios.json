@@ -177,7 +177,10 @@
       "vacancies": "Vacantes",
       "customers": "Clientes",
       "opportunities": "Oportunidades",
-      "matches": "Coincidencias"
+      "matches": "Coincidencias",
+      "contacts": "Contactos",
+      "tasks": "Tareas",
+      "locations": "Ubicaciones"
     },
     "showMore": "Mostrar más",
     "showLess": "Mostrar menos",
