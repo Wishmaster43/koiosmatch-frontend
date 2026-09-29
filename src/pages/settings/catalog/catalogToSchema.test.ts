@@ -80,6 +80,46 @@ describe('catalogToSchema', () => {
   })
 })
 
+// SETTINGS-UNIT-PAIRS-1: `unit_of` → SchemaField.unitOf, `window_keys` → windowKeys,
+// and a `string` row that still carries `options` (an older BE shape) renders as a select.
+describe('catalogToSchema · SETTINGS-UNIT-PAIRS-1', () => {
+  const baseRow = (overrides: Record<string, unknown>) => ({
+    key: 'x', section: 'windows', type: 'integer', rules: [], default: 1, aliases: [],
+    label_key: 'settings.windows.x.label', ui: 'generic', fe_screen: null, ...overrides,
+  }) as Parameters<typeof catalogToSchema>[1][number]
+
+  it('maps unit_of to the schema field\'s unitOf', () => {
+    const row = { key: 'candidate_no_contact_days_unit', section: 'windows', type: 'enum', rules: [], default: 'days', aliases: [],
+      label_key: 'settings.windows.candidate_no_contact_days_unit.label', ui: 'generic', fe_screen: null,
+      options: ['days', 'weeks'], unit_of: 'candidate_no_contact_days' } as Parameters<typeof catalogToSchema>[1][number]
+    const schema = catalogToSchema('windows', [row])
+    expect(schema.fields[0].type).toBe('select')
+    expect(schema.fields[0].unitOf).toBe('candidate_no_contact_days')
+  })
+
+  it('maps window_keys to the schema field\'s windowKeys', () => {
+    const row = { key: 'koios_suggest_task_overdue', section: 'windows', type: 'boolean', rules: [], default: false, aliases: [],
+      label_key: 'settings.windows.koios_suggest_task_overdue.label', ui: 'generic', fe_screen: null,
+      window_keys: ['koios_suggest_task_overdue_days', 'koios_suggest_task_overdue_days_unit'] } as Parameters<typeof catalogToSchema>[1][number]
+    const schema = catalogToSchema('windows', [row])
+    expect(schema.fields[0].type).toBe('toggle')
+    expect(schema.fields[0].windowKeys).toEqual(['koios_suggest_task_overdue_days', 'koios_suggest_task_overdue_days_unit'])
+  })
+
+  it('renders a `string` row with options as a select, same as an `enum` row', () => {
+    const row = baseRow({ type: 'string', default: 'days', options: [{ value: 'days', label_key: 'settings.options.window_unit.days' }] })
+    const schema = catalogToSchema('windows', [row])
+    expect(schema.fields[0].type).toBe('select')
+    expect(schema.fields[0].options).toEqual([{ value: 'days', label: 'settings.options.window_unit.days' }])
+  })
+
+  it('a plain `string` row with no options still renders as text', () => {
+    const row = baseRow({ type: 'string', default: '' })
+    const schema = catalogToSchema('windows', [row])
+    expect(schema.fields[0].type).toBe('text')
+  })
+})
+
 // SETTINGS-CATALOG-1 (measured 10-09): pattern rows and bare string options.
 describe('catalogToSchema · landed envelope', () => {
   it('skips a pattern row (a key family, no single field) and reads a bare string option as its own label', () => {
@@ -152,5 +192,53 @@ describe('catalogToSchema · single-group narrowing (CATALOG-EMBED-1)', () => {
     const schema = catalogToSchema('windows', rows, { group: 'opportunities', sectionIcon: 'clock' })
     expect(schema.fields).toEqual([])
     expect(schema.groups).toBeUndefined()
+  })
+
+  // SETTINGS-UNIT-PAIRS-1: a switch in the narrowed group names a window pair that
+  // lives in a DIFFERENT group (BE CatalogRows.php: candidate_no_contact_days sits
+  // in group 'candidates', not 'koios_suggest') — both companions still ride along.
+  it('pulls in a window pair\'s companion rows even when they sit in a different group', () => {
+    const toggle = {
+      key: 'koios_suggest_no_contact', section: 'windows', type: 'boolean' as const, rules: [], default: false, aliases: [],
+      label_key: 'settings.windows.koios_suggest_no_contact.label', ui: 'generic' as const, fe_screen: null,
+      group: 'koios_suggest', group_label_key: 'settings.groups.koios_suggest',
+      window_keys: ['candidate_no_contact_days', 'candidate_no_contact_days_unit'] as [string, string],
+    }
+    const amount = {
+      key: 'candidate_no_contact_days', section: 'windows', type: 'integer' as const, rules: [], default: 14, aliases: [],
+      label_key: 'settings.windows.candidate_no_contact_days.label', ui: 'generic' as const, fe_screen: null, group: 'candidates',
+    }
+    // The unit is `dedicated` on purpose (measured 29-09: the opportunity_closing_soon pair
+    // is dedicated on the BE and the switch lost its window) — a companion rides along whatever its `ui`.
+    const unit = {
+      key: 'candidate_no_contact_days_unit', section: 'windows', type: 'enum' as const, rules: [], default: 'days', aliases: [],
+      label_key: 'settings.windows.candidate_no_contact_days_unit.label', ui: 'dedicated' as const, fe_screen: null, group: 'candidates',
+      options: ['days', 'weeks'], unit_of: 'candidate_no_contact_days',
+    }
+    // A row of an unrelated group must NOT leak in.
+    const unrelated = {
+      key: 'opportunity_closing_soon_days', section: 'windows', type: 'integer' as const, rules: [], default: 7, aliases: [],
+      label_key: 'settings.windows.opportunity_closing_soon_days.label', ui: 'generic' as const, fe_screen: null, group: 'opportunities',
+    }
+    const schema = catalogToSchema('windows', [toggle, amount, unit, unrelated], { group: 'koios_suggest' })
+    expect(schema.fields.map(f => f.key)).toEqual(['koios_suggest_no_contact', 'candidate_no_contact_days', 'candidate_no_contact_days_unit'])
+  })
+
+  // A one-key window ([amount] without a unit row, the interview_stalled hours) keeps its amount
+  // as the switch's inline companion; nothing else is pulled in.
+  it('keeps a one-key window\'s amount as the companion of its switch', () => {
+    const toggle = {
+      key: 'koios_suggest_interview_stalled', section: 'windows', type: 'boolean' as const, rules: [], default: true, aliases: [],
+      label_key: 'settings.windows.koios_suggest_interview_stalled.label', ui: 'generic' as const, fe_screen: null,
+      group: 'koios_suggest', group_label_key: 'settings.groups.koios_suggest',
+      window_keys: ['koios_suggest_interview_stalled_hours'],
+    }
+    const hours = {
+      key: 'koios_suggest_interview_stalled_hours', section: 'windows', type: 'integer' as const, rules: [], default: 24, aliases: [],
+      label_key: 'settings.windows.koios_suggest_interview_stalled_hours.label', ui: 'generic' as const, fe_screen: null, group: 'koios_suggest',
+    }
+    const schema = catalogToSchema('windows', [toggle, hours], { group: 'koios_suggest' })
+    expect(schema.fields.map(f => f.key)).toEqual(['koios_suggest_interview_stalled', 'koios_suggest_interview_stalled_hours'])
+    expect(schema.fields[0].windowKeys).toEqual(['koios_suggest_interview_stalled_hours'])
   })
 })

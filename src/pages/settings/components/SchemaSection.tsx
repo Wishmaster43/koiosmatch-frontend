@@ -28,6 +28,7 @@ import {
 } from './SettingsKit'
 import JsonField from './JsonField'
 import type { JsonFormat } from '../catalog/jsonFormat'
+import StageWindowMapField from './StageWindowMapField'
 
 // One field in a declarative schema — `type` selects the FieldControl widget below.
 export interface SchemaField {
@@ -45,6 +46,9 @@ export interface SchemaField {
   // O23 UNIT-NAAST-BEDRAG-1: a select that renders inline right of the number field
   // it names (the value here is that field's key), never as its own SettingRow.
   unitOf?: string
+  // SETTINGS-UNIT-PAIRS-1: a toggle's own [amountKey, unitKey] pair, rendered inline
+  // right of the toggle instead of as two separate standalone rows.
+  windowKeys?: string[]
 }
 // One grouped block of fields (CATALOG-GROUPS-1), headed by its own icon + label.
 export interface SchemaGroup { key: string; icon?: string | null; labelKey: string }
@@ -85,6 +89,10 @@ interface FieldControlProps {
   hideUnit?: boolean
 }
 function FieldControl({ field, value, onChange, t, base, label, disabled, hideUnit }: FieldControlProps) {
+  // A catalogue row's secondary texts (unit, placeholder) live next to its own `label_key`
+  // (settings.windows.<key>.unit), the folder convention's next to `${base}` — measured
+  // 29-09: the hours row's "uur" never rendered because only the folder path was read.
+  const sibling = (suffix: string) => field.labelKey ? field.labelKey.replace(/\.label$/, `.${suffix}`) : `${base}.${suffix}`
   switch (field.type) {
     case 'toggle':
       // Accessible name (§6): the row's own label text is only visually adjacent,
@@ -101,26 +109,31 @@ function FieldControl({ field, value, onChange, t, base, label, disabled, hideUn
         disabled={disabled} clearable={!field.unitOf} />
     }
     case 'text':
-      return <TextField value={value as string} onChange={onChange} placeholder={optionalT(t, `${base}.placeholder`)} disabled={disabled} />
+      return <TextField value={value as string} onChange={onChange} placeholder={optionalT(t, sibling('placeholder'))} disabled={disabled} />
     case 'secret':
       // A secret arrives masked (§1 '••••••••') and is typed blind; an unchanged mask is
       // never posted back (see the save wrapper below).
-      return <TextField type="password" value={value as string} onChange={onChange} placeholder={optionalT(t, `${base}.placeholder`)} disabled={disabled} />
+      return <TextField type="password" value={value as string} onChange={onChange} placeholder={optionalT(t, sibling('placeholder'))} disabled={disabled} />
     case 'color':
       // Free-text validated colour (CHIPKLEUR-INSTELBAAR-1) — the field itself shows
       // the backend's validation message so a tenant gets a useful error, not a 422.
       return <ColorField value={value as string | undefined} onChange={onChange}
         invalidLabel={t('common.invalidColorValue')} ariaLabel={label} disabled={disabled} />
     case 'json':
+      // STAGE-STALE-PER-PHASE-1: the per-application-stage staleness map renders as
+      // its own table, never as a raw JSON textarea — the same component mounts here
+      // (the generic catalogue renderer) and directly on the Koios-advice screen, so
+      // the row reads identically wherever it appears.
+      if (field.format === 'stage_window_map') return <StageWindowMapField disabled={disabled} />
       // Structured value edited as text per its catalogue format (jsonFormat).
       return <JsonField value={value} onChange={onChange} format={field.format as JsonFormat} ariaLabel={label}
-        placeholder={optionalT(t, `${base}.placeholder`)} invalidLabel={t('catalog.invalidJson')} disabled={disabled} />
+        placeholder={optionalT(t, sibling('placeholder'))} invalidLabel={t('catalog.invalidJson')} disabled={disabled} />
     case 'number':
     default:
       return (
         <NumberField value={value as number} onChange={onChange} ariaLabel={label}
           min={field.min} max={field.max} step={field.step}
-          unit={hideUnit ? undefined : optionalT(t, `${base}.unit`)} disabled={disabled} />
+          unit={hideUnit ? undefined : optionalT(t, sibling('unit'))} disabled={disabled} />
       )
   }
 }
@@ -143,11 +156,15 @@ export default function SchemaSection({ schema, embedded = false }: SchemaSectio
   // never the raw key. `opt` delegates to the same optionalT the field placeholders/units use.
   const opt = (key: string) => optionalT(t, key)
 
-  // Persist every field except a secret the user did not touch: its value is the
-  // server's mask, and writing that back would replace the real secret with dots.
+  // Persist every field except: a secret the user did not touch (its value is the
+  // server's mask, and writing that back would replace the real secret with dots),
+  // and a `stage_window_map` field — StageWindowMapField persists ITSELF per-row on
+  // its own key the instant an override changes, so the section's own Save posting
+  // the form's stale mount-time JSON would silently overwrite those live edits.
   const saveEditable = () => form.save(
     schema.fields
       .filter(f => f.type !== 'secret' || form.values[f.key] !== form.initial[f.key])
+      .filter(f => f.format !== 'stage_window_map')
       .map(f => f.key),
   )
   // When user lacks permissions, hide Save and disable all fields.
@@ -155,14 +172,36 @@ export default function SchemaSection({ schema, embedded = false }: SchemaSectio
   // stays the one button at rest, so a second "Opslaan" never sits next to it unasked.
   const gatedForm = canEdit ? { ...form, save: embedded && !form.dirty ? undefined : saveEditable } : { ...form, save: undefined }
 
+  // SETTINGS-UNIT-PAIRS-1: keys of amount/unit fields already shown inline next to a
+  // toggle's own windowKeys pair — those never get a standalone row of their own too.
+  const windowKeyedFields = new Set(
+    schema.fields.filter(f => f.windowKeys).flatMap(f => f.windowKeys as string[]),
+  )
+
+  // Renders a companion field (an amount's unit, or a toggle's amount/unit) inline —
+  // shared by both branches of renderRow below so the two never drift into two copies.
+  const renderCompanion = (field: SchemaField, hideUnit = false) => (
+    <FieldControl key={field.key} field={field} value={form.values[field.key]}
+      onChange={v => form.set(field.key, v)} t={t} base={`${k}.fields.${field.key}`}
+      label={t(field.labelKey ?? `${k}.fields.${field.key}.label`)}
+      disabled={!canEdit} hideUnit={hideUnit} />
+  )
+
   // One row per field; the label/help keys come from the field (catalogue rows) or the folder convention.
   // O23 UNIT-NAAST-BEDRAG-1: a companion unit field (`unitOf` pointing back at this
   // one) never gets its own row — it renders inline right of the amount instead.
   const renderRow = (field: SchemaField) => {
     if (field.unitOf) return null
+    if (windowKeyedFields.has(field.key) && !field.windowKeys) return null
     const base = `${k}.fields.${field.key}`
     const label = t(field.labelKey ?? `${base}.label`)
-    const unitField = schema.fields.find(f => f.unitOf === field.key)
+    // SETTINGS-UNIT-PAIRS-1: a toggle carrying `windowKeys` renders its amount + unit
+    // inline right of its own label, so the switch and its window read as one line.
+    // A one-key window ([amount]) shows the amount with its own unit suffix instead.
+    const unitField = field.windowKeys
+      ? schema.fields.find(f => f.key === field.windowKeys![1])
+      : schema.fields.find(f => f.unitOf === field.key)
+    const amountField = field.windowKeys ? schema.fields.find(f => f.key === field.windowKeys![0]) : undefined
     return (
       <SettingRow key={field.key}
         label={label}
@@ -170,13 +209,9 @@ export default function SchemaSection({ schema, embedded = false }: SchemaSectio
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <FieldControl field={field} value={form.values[field.key]}
             onChange={v => form.set(field.key, v)} t={t} base={base} label={label}
-            disabled={!canEdit} hideUnit={!!unitField} />
-          {unitField && (
-            <FieldControl field={unitField} value={form.values[unitField.key]}
-              onChange={v => form.set(unitField.key, v)} t={t} base={`${k}.fields.${unitField.key}`}
-              label={t(unitField.labelKey ?? `${k}.fields.${unitField.key}.label`)}
-              disabled={!canEdit} />
-          )}
+            disabled={!canEdit} hideUnit={!field.windowKeys && !!unitField} />
+          {amountField && renderCompanion(amountField, !!unitField)}
+          {unitField && renderCompanion(unitField)}
         </div>
       </SettingRow>
     )

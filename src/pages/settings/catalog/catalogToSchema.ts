@@ -24,6 +24,9 @@ export interface SchemaField {
   // O23 UNIT-NAAST-BEDRAG-1: a select that renders inline right of the number field
   // it names, never as its own row — the value is that field's key.
   unitOf?: string
+  // SETTINGS-UNIT-PAIRS-1: a toggle's own [amountKey, unitKey] pair, rendered inline
+  // right of the toggle's label instead of as separate standalone rows.
+  windowKeys?: string[]
 }
 
 // One titled block on the screen (CATALOG-GROUPS-1): slug, label key and lucide icon name.
@@ -71,9 +74,23 @@ export interface SchemaSectionMeta {
 }
 
 export function catalogToSchema(sectionId: string, rows: CatalogRow[], meta: SchemaSectionMeta = {}): Schema {
-  // Generic rows only, never a pattern row, and — when the caller narrows to one
-  // group (CATALOG-EMBED-1) — only that group's rows.
-  const genericRows = rows.filter(row => row.ui === 'generic' && !row.pattern && (!meta.group || row.group === meta.group))
+  // Generic rows only, never a pattern row. When the caller narrows to one group
+  // (CATALOG-EMBED-1), keep that group's rows AND — SETTINGS-UNIT-PAIRS-1 — any row
+  // OUTSIDE the group that a kept row's `window_keys` names: a switch's amount/unit
+  // pair can live in a different BE group (e.g. koios_suggest vs candidates), and
+  // without this the companion fields would come back undefined in the narrowed schema.
+  // A companion rides along whatever its own `ui` says (measured 29-09: the
+  // opportunity_closing_soon pair is `dedicated`, so the switch lost its window): the
+  // switch renders it inline, it never becomes a standalone generic row here.
+  const allGeneric = rows.filter(row => row.ui === 'generic' && !row.pattern)
+  const genericRows = meta.group
+    ? (() => {
+        const inGroup = allGeneric.filter(row => row.group === meta.group)
+        const companionKeys = new Set(inGroup.flatMap(row => row.window_keys ?? []))
+        const companions = rows.filter(row => !row.pattern && row.group !== meta.group && companionKeys.has(row.key))
+        return [...inGroup, ...companions]
+      })()
+    : allGeneric
 
   const fields: SchemaField[] = genericRows.map(row => {
     let fieldType: SchemaField['type'] = 'text'
@@ -95,7 +112,15 @@ export function catalogToSchema(sectionId: string, rows: CatalogRow[], meta: Sch
         if (row.constraints?.step !== undefined) step = row.constraints.step
         break
       case 'string':
-        fieldType = 'text'
+        // SETTINGS-UNIT-PAIRS-1: a `string` row that still carries `options` (an older
+        // BE shape, pre-dating the `enum` type) renders as a select too — it was falling
+        // through to plain text and losing its dropdown.
+        if (row.options && row.options.length > 0) {
+          fieldType = 'select'
+          options = (row.options ?? []).map(opt => typeof opt === 'string' ? { value: opt, label: opt } : { value: opt.value, label: opt.label_key })
+        } else {
+          fieldType = 'text'
+        }
         break
       case 'secret':
         fieldType = 'secret'
@@ -129,6 +154,8 @@ export function catalogToSchema(sectionId: string, rows: CatalogRow[], meta: Sch
       ...(options && { options }),
       ...(format && { format }),
       ...(row.group && { group: row.group }),
+      ...(row.unit_of && { unitOf: row.unit_of }),
+      ...(row.window_keys && { windowKeys: row.window_keys }),
     }
 
     return field

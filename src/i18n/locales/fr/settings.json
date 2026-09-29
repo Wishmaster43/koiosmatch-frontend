@@ -3822,7 +3822,12 @@
     "applicationStaleTitle": "Stagnation de la candidature en phase",
     "applicationStaleHint": "Au bout de combien de jours dans la même phase de l'entonnoir une candidature est signalée par Koios comme trop longue en phase.",
     "applicationStaleLabel": "Jours (1-365)",
-    "applicationStaleSaveFailed": "Échec de l'enregistrement de la fenêtre de phase de la candidature."
+    "applicationStaleSaveFailed": "Échec de l'enregistrement de la fenêtre de phase de la candidature.",
+    "byPhaseTitle": "Par phase",
+    "byPhaseHint": "Définissez une fenêtre distincte par phase de candidature ; une phase sans valeur propre utilise la fenêtre ci-dessus.",
+    "byPhaseDefault": "Par défaut : {{amount}} {{unit}}",
+    "byPhaseReset": "Utiliser la valeur par défaut",
+    "byPhaseSaveFailed": "Échec de l'enregistrement de la fenêtre de phase."
   },
   "koiosModelsAdmin": {
     "tabs": {
@@ -3917,7 +3922,7 @@
       "koios_suggest_vacancy_open_days": { "label": "Poste sans candidatures après (jours ouverts)" },
       "koios_suggest_vacancy_open_days_unit": { "label": "Poste sans candidatures : unité" },
       "koios_suggest_interview_stalled": { "label": "Suggestion : entretien en attente du candidat" },
-      "koios_suggest_interview_stalled_hours": { "label": "Entretien en attente du candidat après (heures)" },
+      "koios_suggest_interview_stalled_hours": { "label": "Entretien en attente du candidat après", "unit": "heures" },
       "koios_suggest_max": { "label": "Nombre maximal de suggestions" },
       "proposal_link_ttl_days": {
         "label": "Validité du lien de proposition (jours)"
@@ -4047,6 +4052,9 @@
       },
       "application_stage_stale_days_unit": {
         "label": "Candidature trop longtemps dans l’étape : unité"
+      },
+      "application_stage_stale_by_phase": {
+        "label": "Candidature bloquée en phase : par étape"
       },
       "candidate_phase_stale_days_unit": {
         "label": "Candidat trop longtemps dans la phase : unité"

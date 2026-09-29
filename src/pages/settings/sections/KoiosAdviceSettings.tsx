@@ -24,60 +24,31 @@
  * no dispatcher, no Notifier::send call site) — only the threshold half is real
  * today; do not read the presence of this field as "notifications are wired".
  */
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { PageTitle } from '@/components/ui/typography'
 import NumberSettingField from '../components/NumberSettingField'
 import SettingsLoadBanner from '../components/SettingsLoadBanner'
-import { SelectField } from '../components/SettingsKit'
 import CatalogSection from './CatalogSection'
-import { WINDOW_UNIT_OPTIONS } from '../components/windowUnitOptions'
-import { useAllSettings, useSettingsLoaded, saveSettingsKeys, invalidateAllSettingsCache, getStringSetting } from '@/lib/settings/useAllSettings'
-import { notifyError } from '@/lib/notify'
-import { extractApiError } from '@/lib/extractApiError'
+import WindowUnitField from '../components/WindowUnitField'
+import StageWindowMapField from '../components/StageWindowMapField'
+import { useSettingsCatalog } from '../catalog/useSettingsCatalog'
+import {
+  VACANCY_ADVICE_STALE_DAYS_KEY, VACANCY_ADVICE_STALE_DAYS_UNIT_KEY, MATCH_ADVICE_RENEW_DAYS_KEY,
+  APPLICATION_STAGE_STALE_DAYS_KEY, APPLICATION_STAGE_STALE_DAYS_UNIT_KEY, APPLICATION_STAGE_STALE_BY_PHASE_KEY,
+} from './koiosAdviceKeys'
 
-// Tenant-setting keys — the generic /settings key/value store. Defaults mirror
-// the fallback numbers vacancyAdvice.ts/matchAdvice.ts's callers already use.
-export const VACANCY_ADVICE_STALE_DAYS_KEY = 'vacancy_advice_stale_days'
-// O23 UNIT-NAAST-BEDRAG-1: the unit vacancy_advice_stale_days is expressed in.
-export const VACANCY_ADVICE_STALE_DAYS_UNIT_KEY = 'vacancy_advice_stale_days_unit'
-export const MATCH_ADVICE_RENEW_DAYS_KEY = 'match_advice_renew_days'
-export const APPLICATION_STAGE_STALE_DAYS_KEY = 'application_stage_stale_days'
+// Re-exported for call sites/tests that import the keys from this screen module.
+export {
+  VACANCY_ADVICE_STALE_DAYS_KEY, VACANCY_ADVICE_STALE_DAYS_UNIT_KEY, MATCH_ADVICE_RENEW_DAYS_KEY,
+  APPLICATION_STAGE_STALE_DAYS_KEY, APPLICATION_STAGE_STALE_DAYS_UNIT_KEY, APPLICATION_STAGE_STALE_BY_PHASE_KEY,
+}
 const VACANCY_STALE_DEFAULT = 14
 const MATCH_RENEW_DEFAULT = 30
 const APPLICATION_STAGE_STALE_DEFAULT = 14
 const DAYS_MIN = 1
 const DAYS_MAX = 365
-
-// O23 UNIT-NAAST-BEDRAG-1: the vacancy-advice-stale unit picker — this screen persists
-// independently of useSettingsForm (STALE-INIT-1), so it writes through the same
-// generic /settings store its own NumberSettingField already uses, rather than
-// borrowing a form the screen does not have.
-function VacancyAdviceStaleUnitField() {
-  const { t } = useTranslation('settings')
-  const settings = useAllSettings()
-  const loaded = useSettingsLoaded()
-  const value = getStringSetting(settings, VACANCY_ADVICE_STALE_DAYS_UNIT_KEY, 'days') ?? 'days'
-  const options = WINDOW_UNIT_OPTIONS.map(o => ({ value: o.value, label: t(o.label) }))
-  const onChange = async (v: string) => {
-    if (!loaded) return
-    try {
-      await saveSettingsKeys({ [VACANCY_ADVICE_STALE_DAYS_UNIT_KEY]: v })
-      invalidateAllSettingsCache()
-    } catch (err) {
-      // ADVICE-UNIT-FEEDBACK-1 (Danny 29-09: "ik kan geen andere kiezen dan days"): a failed
-      // write is SAID, never swallowed — the SelectField re-reads `value` from the settings
-      // cache (last-confirmed value) and the toast names the reason (403/422/…).
-      notifyError(extractApiError(err, t('koiosAdvice.vacancyStaleSaveFailed')))
-    }
-  }
-  return (
-    // DROPDOWN-CLEAR-1: this unit pairs with a required amount and must never persist empty.
-    <SelectField value={value} onChange={onChange} options={options}
-      ariaLabel={t('settings.windows.vacancy_advice_stale_days_unit.label')} disabled={!loaded} clearable={false} />
-  )
-}
 
 /** Koios advice thresholds — vacancy staleness, match renewal, application stage staleness. */
 // KOIOS-ADVICE-SUBTABS-1 (Danny 29-09: "sub-tabjes voor alles, zo houden we het
@@ -88,6 +59,14 @@ type AdviceSubTab = 'thresholds' | 'suggestions'
 export default function KoiosAdviceSettings() {
   const { t } = useTranslation('settings')
   const [subTab, setSubTab] = useState<AdviceSubTab>('thresholds')
+  // STAGE-STALE-PER-PHASE-1: the per-phase table renders only once the catalogue
+  // lists its own key (feature detection — an older BE has no such row yet, and
+  // this screen must render exactly as before then, §3B "no hardcoded lookup").
+  const { sections: catalogSections } = useSettingsCatalog()
+  const hasStageByPhase = useMemo(
+    () => catalogSections.some(section => section.keys.some(row => row.key === APPLICATION_STAGE_STALE_BY_PHASE_KEY)),
+    [catalogSections],
+  )
   return (
     <div style={{ maxWidth: 640 }}>
       <SettingsLoadBanner />
@@ -108,7 +87,9 @@ export default function KoiosAdviceSettings() {
         title={t('koiosAdvice.vacancyStaleTitle')} hint={t('koiosAdvice.vacancyStaleHint')}
         label={t('koiosAdvice.vacancyStaleLabel')} saveFailedMessage={t('koiosAdvice.vacancyStaleSaveFailed')}
         defaultValue={VACANCY_STALE_DEFAULT} min={DAYS_MIN} max={DAYS_MAX}
-        unit={<VacancyAdviceStaleUnitField />} />
+        unit={<WindowUnitField settingsKey={VACANCY_ADVICE_STALE_DAYS_UNIT_KEY}
+          ariaLabel={t('settings.windows.vacancy_advice_stale_days_unit.label')}
+          saveFailedMessage={t('koiosAdvice.vacancyStaleSaveFailed')} />} />
       {/* How many days before (or past) a match's end date counts as "approaching"
           (MatchesTable.tsx's Koios column, "Renew?"). */}
       <NumberSettingField id="match-advice-renew-days" settingsKey={MATCH_ADVICE_RENEW_DAYS_KEY}
@@ -117,11 +98,21 @@ export default function KoiosAdviceSettings() {
         defaultValue={MATCH_RENEW_DEFAULT} min={DAYS_MIN} max={DAYS_MAX} />
       {/* How many days an application can sit in its current funnel stage before
           Koios flags it "too long in stage" (ApplicationsTable/ApplicationsPage
-          attention KPI). No trailing border: currently the last field in the list. */}
+          attention KPI). match_advice_renew_days has no reader/unit row (BE
+          worklist) — the vacancy and application-stage windows are the only two
+          with a unit picker. */}
       <NumberSettingField id="application-stage-stale-days" settingsKey={APPLICATION_STAGE_STALE_DAYS_KEY}
         title={t('koiosAdvice.applicationStaleTitle')} hint={t('koiosAdvice.applicationStaleHint')}
         label={t('koiosAdvice.applicationStaleLabel')} saveFailedMessage={t('koiosAdvice.applicationStaleSaveFailed')}
-        defaultValue={APPLICATION_STAGE_STALE_DEFAULT} min={DAYS_MIN} max={DAYS_MAX} bordered={false} />
+        defaultValue={APPLICATION_STAGE_STALE_DEFAULT} min={DAYS_MIN} max={DAYS_MAX}
+        bordered={hasStageByPhase}
+        unit={<WindowUnitField settingsKey={APPLICATION_STAGE_STALE_DAYS_UNIT_KEY}
+          ariaLabel={t('settings.windows.application_stage_stale_days_unit.label')}
+          saveFailedMessage={t('koiosAdvice.applicationStaleSaveFailed')} />} />
+      {/* STAGE-STALE-PER-PHASE-1 (Danny 29-09: "Intake 3 dagen, voorgesteld 2
+          werkdagen"): per-stage overrides of the window above — only once the
+          catalogue carries the key (feature detection, older BE renders nothing here). */}
+      {hasStageByPhase && <StageWindowMapField />}
       </>)}
       {/* KOIOS-SUGGEST-COMPACT-2 (Danny 28-09: "waar is instelbaar welke suggesties er
           komen en wanneer iets te laat is?"): the "Koios suggests" block's own switches

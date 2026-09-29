@@ -3822,7 +3822,12 @@
     "applicationStaleTitle": "Bewerbungsstillstand in Phase",
     "applicationStaleHint": "Nach wie vielen Tagen in derselben Funnel-Phase eine Bewerbung von Koios als zu lange in Phase markiert wird.",
     "applicationStaleLabel": "Tage (1-365)",
-    "applicationStaleSaveFailed": "Speichern des Bewerbungs-Phasenfensters fehlgeschlagen."
+    "applicationStaleSaveFailed": "Speichern des Bewerbungs-Phasenfensters fehlgeschlagen.",
+    "byPhaseTitle": "Pro Phase",
+    "byPhaseHint": "Legen Sie pro Bewerbungsphase ein eigenes Fenster fest; eine Phase ohne eigenen Wert verwendet das obige Fenster.",
+    "byPhaseDefault": "Standard: {{amount}} {{unit}}",
+    "byPhaseReset": "Standard verwenden",
+    "byPhaseSaveFailed": "Speichern des Phasenfensters fehlgeschlagen."
   },
   "koiosModelsAdmin": {
     "tabs": {
@@ -3917,7 +3922,7 @@
       "koios_suggest_vacancy_open_days": { "label": "Vakanz ohne Bewerbungen nach (Tage offen)" },
       "koios_suggest_vacancy_open_days_unit": { "label": "Vakanz ohne Bewerbungen: Einheit" },
       "koios_suggest_interview_stalled": { "label": "Vorschlag: Interview wartet auf Bewerber" },
-      "koios_suggest_interview_stalled_hours": { "label": "Interview wartet auf Bewerber nach (Stunden)" },
+      "koios_suggest_interview_stalled_hours": { "label": "Interview wartet auf Bewerber nach", "unit": "Stunden" },
       "koios_suggest_max": { "label": "Maximale Anzahl Vorschläge" },
       "proposal_link_ttl_days": {
         "label": "Gültigkeit Vorschlagslink (Tage)"
@@ -4047,6 +4052,9 @@
       },
       "application_stage_stale_days_unit": {
         "label": "Bewerbung zu lange in Phase: Einheit"
+      },
+      "application_stage_stale_by_phase": {
+        "label": "Bewerbung zu lange in Phase: pro Phase"
       },
       "candidate_phase_stale_days_unit": {
         "label": "Kandidat zu lange in Phase: Einheit"

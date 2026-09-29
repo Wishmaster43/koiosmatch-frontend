@@ -3822,7 +3822,12 @@
     "applicationStaleTitle": "Sollicitatie-stilstand in fase",
     "applicationStaleHint": "Na hoeveel dagen in dezelfde funnelfase een sollicitatie door Koios als te lang in fase wordt gemarkeerd.",
     "applicationStaleLabel": "Dagen (1-365)",
-    "applicationStaleSaveFailed": "Opslaan van het sollicitatie-fasevenster is mislukt."
+    "applicationStaleSaveFailed": "Opslaan van het sollicitatie-fasevenster is mislukt.",
+    "byPhaseTitle": "Per fase",
+    "byPhaseHint": "Stel per sollicitatiefase een eigen venster in; een fase zonder eigen waarde gebruikt het venster hierboven.",
+    "byPhaseDefault": "Standaard: {{amount}} {{unit}}",
+    "byPhaseReset": "Standaard gebruiken",
+    "byPhaseSaveFailed": "Opslaan van het fasevenster is mislukt."
   },
   "koiosModelsAdmin": {
     "tabs": {
@@ -3917,7 +3922,7 @@
       "koios_suggest_vacancy_open_days": { "label": "Vacature zonder sollicitaties na (dagen open)" },
       "koios_suggest_vacancy_open_days_unit": { "label": "Vacature zonder sollicitaties: eenheid" },
       "koios_suggest_interview_stalled": { "label": "Suggestie: interview wacht op sollicitant" },
-      "koios_suggest_interview_stalled_hours": { "label": "Interview wacht op sollicitant na (uren)" },
+      "koios_suggest_interview_stalled_hours": { "label": "Interview wacht op sollicitant na", "unit": "uur" },
       "koios_suggest_max": { "label": "Maximaal aantal suggesties" },
       "proposal_link_ttl_days": {
         "label": "Geldigheid voorstel-link (dagen)"
@@ -4047,6 +4052,9 @@
       },
       "application_stage_stale_days_unit": {
         "label": "Sollicitatie te lang in fase: eenheid"
+      },
+      "application_stage_stale_by_phase": {
+        "label": "Sollicitatie te lang in fase: per fase"
       },
       "candidate_phase_stale_days_unit": {
         "label": "Kandidaat te lang in fase: eenheid"

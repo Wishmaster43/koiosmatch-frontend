@@ -3822,7 +3822,12 @@
     "applicationStaleTitle": "Application stage staleness",
     "applicationStaleHint": "How many days an application can sit in its current funnel stage before Koios flags it as too long in stage.",
     "applicationStaleLabel": "Days (1-365)",
-    "applicationStaleSaveFailed": "Saving the application stage staleness window failed."
+    "applicationStaleSaveFailed": "Saving the application stage staleness window failed.",
+    "byPhaseTitle": "Per stage",
+    "byPhaseHint": "Set a separate window per application stage; a stage with no override uses the window above.",
+    "byPhaseDefault": "Default: {{amount}} {{unit}}",
+    "byPhaseReset": "Use default",
+    "byPhaseSaveFailed": "Saving the stage window failed."
   },
   "koiosModelsAdmin": {
     "tabs": {
@@ -3917,7 +3922,7 @@
       "koios_suggest_vacancy_open_days": { "label": "Vacancy without applications after (days open)" },
       "koios_suggest_vacancy_open_days_unit": { "label": "Vacancy without applications: unit" },
       "koios_suggest_interview_stalled": { "label": "Suggestion: interview waiting on applicant" },
-      "koios_suggest_interview_stalled_hours": { "label": "Interview waiting on applicant after (hours)" },
+      "koios_suggest_interview_stalled_hours": { "label": "Interview waiting on applicant after", "unit": "hours" },
       "koios_suggest_max": { "label": "Maximum number of suggestions" },
       "proposal_link_ttl_days": {
         "label": "Proposal link validity (days)"
@@ -4047,6 +4052,9 @@
       },
       "application_stage_stale_days_unit": {
         "label": "Application too long in stage: unit"
+      },
+      "application_stage_stale_by_phase": {
+        "label": "Application stuck in stage: per stage"
       },
       "candidate_phase_stale_days_unit": {
         "label": "Candidate too long in phase: unit"

@@ -3823,7 +3823,12 @@
     "applicationStaleTitle": "Stallo della candidatura in fase",
     "applicationStaleHint": "Dopo quanti giorni nella stessa fase del funnel una candidatura viene segnalata da Koios come rimasta troppo a lungo in fase.",
     "applicationStaleLabel": "Giorni (1-365)",
-    "applicationStaleSaveFailed": "Salvataggio della finestra di fase della candidatura non riuscito."
+    "applicationStaleSaveFailed": "Salvataggio della finestra di fase della candidatura non riuscito.",
+    "byPhaseTitle": "Per fase della candidatura",
+    "byPhaseHint": "Imposta una finestra propria per ogni fase della candidatura; una fase senza valore proprio usa la finestra sopra.",
+    "byPhaseDefault": "Predefinito: {{amount}} {{unit}}",
+    "byPhaseReset": "Usa predefinito",
+    "byPhaseSaveFailed": "Salvataggio della finestra di fase non riuscito."
   },
   "koiosModelsAdmin": {
     "tabs": {
@@ -3918,7 +3923,7 @@
       "koios_suggest_vacancy_open_days": { "label": "Posizione senza candidature dopo (giorni aperta)" },
       "koios_suggest_vacancy_open_days_unit": { "label": "Posizione senza candidature: unità" },
       "koios_suggest_interview_stalled": { "label": "Suggerimento: colloquio in attesa del candidato" },
-      "koios_suggest_interview_stalled_hours": { "label": "Colloquio in attesa del candidato dopo (ore)" },
+      "koios_suggest_interview_stalled_hours": { "label": "Colloquio in attesa del candidato dopo", "unit": "ore" },
       "koios_suggest_max": { "label": "Numero massimo di suggerimenti" },
       "proposal_link_ttl_days": {
         "label": "Validità del link di proposta (giorni)"
@@ -4048,6 +4053,9 @@
       },
       "application_stage_stale_days_unit": {
         "label": "Candidatura troppo a lungo nella fase: unità"
+      },
+      "application_stage_stale_by_phase": {
+        "label": "Candidatura bloccata in fase: per fase"
       },
       "candidate_phase_stale_days_unit": {
         "label": "Candidato troppo a lungo nella fase: unità"
