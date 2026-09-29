@@ -234,7 +234,7 @@ export default function StartConversationModal({ candidateId, subject, applicati
     // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
     // remembered position; same 420px footprint as the old panel.
     <FloatingPanel open onClose={onClose} title={t('conversations.startModalTitle')} ariaLabel={t('conversations.startModalTitle')}
-      persistKey="start-conversation" width={420} maxWidth="92vw" bodyStyle={{ padding: 22 }}
+      persistKey="start-conversation" width={560} maxWidth="92vw" bodyStyle={{ padding: 22 }}
       header={
         // TITELBALK-PILLS (Danny 28-09: "chips zoals bij + candidate", the title written out
         // on one line): the shared title-bar row — nowrap title, the channel as coloured
