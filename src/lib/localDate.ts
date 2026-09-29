@@ -136,3 +136,17 @@ export function parseDiffMs(value: DateInput, now: Date = new Date()): number | 
   if (isNaN(d.getTime())) return null
   return now.getTime() - d.getTime()
 }
+
+/**
+ * formatHoursSince — the compact "waiting X" duration for INTERVIEW-VISIBILITY-1's
+ * table/board cells: under 48 hours renders the hour count, else the day count.
+ * Pure and `now`/`t`-injectable like daysSince above — the caller supplies its own
+ * t() so this module never imports the i18n singleton (see the file doc header).
+ */
+export function formatHoursSince(value: DateInput, now: Date, t: (key: string, opts?: Record<string, unknown>) => string): string | null {
+  const diffMs = parseDiffMs(value, now)
+  if (diffMs === null || diffMs < 0) return null
+  const hours = Math.floor(diffMs / 3600000)
+  if (hours < 48) return t('common:duration.hoursShort', { count: hours })
+  return t('common:duration.daysShort', { count: Math.floor(hours / 24) })
+}

@@ -286,6 +286,7 @@
       "unavailable": "Interview starten is nog niet beschikbaar. Wacht op de backend-koppeling.",
       "noAgentChosen": "Kies eerst een AI-agent.",
       "loadError": "AI-agenten laden is mislukt.",
+      "viaWorkflow": "Start via {{workflow}} ({{agent}})",
       "reasons": {
         "no_mobile_or_consent": "Kandidaat heeft geen mobiel nummer of geen WhatsApp-toestemming.",
         "no_active_connection": "Geen actieve WhatsApp-koppeling voor deze vacature.",
@@ -293,7 +294,8 @@
         "placed_stage": "Deze sollicitatie is al geplaatst. Er kan geen interview gestart worden.",
         "no_active_flow": "De gekozen AI-agent heeft geen actieve interviewflow.",
         "no_candidate": "Geen kandidaat gekoppeld aan deze sollicitatie.",
-        "send_failed": "Verzenden is mislukt. Probeer het opnieuw."
+        "send_failed": "Verzenden is mislukt. Probeer het opnieuw.",
+        "no_agent": "Geen interview-workflow of AI-agent beschikbaar."
       }
     },
     "status": {
@@ -329,7 +331,10 @@
       "flowOverrideLabel": "Gebruik vacature-standaard",
       "flowOverridePlaceholder": "Afwijkende interviewflow…",
       "flowOverrideSaved": "Interviewflow bijgewerkt.",
-      "workflowOverrideSaved": "Interview-workflow bijgewerkt."
+      "workflowOverrideSaved": "Interview-workflow bijgewerkt.",
+      "vacancyDefault": "Standaard van vacature: {{workflow}} · {{agent}}",
+      "editInVacancy": "Wijzigen in vacature → AI-agent",
+      "noWorkflow": "Geen interview-workflow: kies er een hierboven of stel de vacature-standaard in."
     },
     "history": {
       "status": {

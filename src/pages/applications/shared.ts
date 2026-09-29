@@ -9,3 +9,6 @@ export { default as AddApplicationModal } from './AddApplicationModal'
 export type { DrawerAddApplicationModalProps } from './AddApplicationModal'
 export { mapApplication, mapInterview } from './data/mapApplication'
 export { default as InterviewStatusCard } from './drawer/InterviewStatusCard'
+// INTERVIEW-VISIBILITY-1: the shared interview-progress cell (table + vacancy
+// drawer's Applicants tab) — see the component's own doc comment.
+export { default as InterviewProgressCell } from './InterviewProgressCell'

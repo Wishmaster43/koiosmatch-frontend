@@ -286,6 +286,7 @@
       "unavailable": "Iniciar uma entrevista ainda não está disponível. A aguardar a ligação com o backend.",
       "noAgentChosen": "Escolha primeiro um agente de IA.",
       "loadError": "Não foi possível carregar os agentes de IA.",
+      "viaWorkflow": "Iniciar via {{workflow}} ({{agent}})",
       "reasons": {
         "no_mobile_or_consent": "O candidato não tem número de telemóvel ou não deu consentimento para o WhatsApp.",
         "no_active_connection": "Não há ligação WhatsApp ativa para esta vaga.",
@@ -293,7 +294,8 @@
         "placed_stage": "Esta candidatura já foi colocada. Não é possível iniciar uma entrevista.",
         "no_active_flow": "O agente de IA escolhido não tem um fluxo de entrevista ativo.",
         "no_candidate": "Nenhum candidato associado a esta candidatura.",
-        "send_failed": "O envio falhou. Tente novamente."
+        "send_failed": "O envio falhou. Tente novamente.",
+        "no_agent": "Nenhum workflow de entrevista ou agente de IA disponível."
       }
     },
     "status": {
@@ -329,7 +331,10 @@
       "flowOverrideLabel": "Usar predefinição da vaga",
       "flowOverridePlaceholder": "Fluxo de entrevista alternativo…",
       "flowOverrideSaved": "Fluxo de entrevista atualizado.",
-      "workflowOverrideSaved": "Workflow de entrevista atualizado."
+      "workflowOverrideSaved": "Workflow de entrevista atualizado.",
+      "vacancyDefault": "Padrão da vaga: {{workflow}} · {{agent}}",
+      "editInVacancy": "Alterar na vaga → agente de IA",
+      "noWorkflow": "Nenhum workflow de entrevista: escolha um acima ou defina o padrão da vaga."
     },
     "history": {
       "status": {

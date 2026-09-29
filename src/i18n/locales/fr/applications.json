@@ -286,6 +286,7 @@
       "unavailable": "Démarrer un entretien n'est pas encore disponible. En attente de la liaison backend.",
       "noAgentChosen": "Choisissez d'abord un agent IA.",
       "loadError": "Impossible de charger les agents IA.",
+      "viaWorkflow": "Démarrer via {{workflow}} ({{agent}})",
       "reasons": {
         "no_mobile_or_consent": "Le candidat n'a pas de numéro de mobile ou de consentement WhatsApp.",
         "no_active_connection": "Aucune connexion WhatsApp active pour cette offre.",
@@ -293,7 +294,8 @@
         "placed_stage": "Cette candidature est déjà placée. Impossible de démarrer un entretien.",
         "no_active_flow": "L'agent IA choisi n'a aucun flux d'entretien actif.",
         "no_candidate": "Aucun candidat associé à cette candidature.",
-        "send_failed": "L'envoi a échoué. Réessayez."
+        "send_failed": "L'envoi a échoué. Réessayez.",
+        "no_agent": "Aucun workflow d’entretien ni agent IA disponible."
       }
     },
     "status": {
@@ -329,7 +331,10 @@
       "flowOverrideLabel": "Utiliser le défaut de l’offre",
       "flowOverridePlaceholder": "Flux d’entretien spécifique…",
       "flowOverrideSaved": "Flux d’entretien mis à jour.",
-      "workflowOverrideSaved": "Workflow d’entretien mis à jour."
+      "workflowOverrideSaved": "Workflow d’entretien mis à jour.",
+      "vacancyDefault": "Défaut de l’offre : {{workflow}} · {{agent}}",
+      "editInVacancy": "Modifier sur l’offre → agent IA",
+      "noWorkflow": "Aucun workflow d’entretien : choisissez-en un ci-dessus ou définissez le défaut de l’offre."
     },
     "history": {
       "status": {

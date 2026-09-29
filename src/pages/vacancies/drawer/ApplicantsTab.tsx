@@ -42,14 +42,27 @@ import { Caption } from '@/components/ui/typography'
 import type { DrillPagerProps } from '@/components/drawer/DrillPager'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useAuth } from '@/context/AuthContext'
+import { useNavigation } from '@/context/NavigationContext'
 import { notifyError } from '@/lib/notify'
 import { useDetachApplication } from '@/hooks/useDetachApplication'
+import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
+import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import CountBadge from '@/components/ui/CountBadge'
+// INTERVIEW-VISIBILITY-1: the applications feature's own shared interview cell
+// (§2 barrel — this tab already reuses several applications-side modals below).
+import { InterviewProgressCell } from '@/pages/applications/shared'
 import { mapVacancyDetail } from '../data/mapVacancy'
 import type { VacancyDetail } from '@/types/vacancy'
+import type { ApplicationInterview } from '@/types/application'
 import type { Id } from '@/types/common'
 
 // One coupled application row, as shaped by mapVacancy.ts.
-interface ApplicantRow { id?: Id; candidateId?: Id | null; candidateName?: string; candidateInitials?: string; phaseValue?: string | number | null; phaseLabel?: string | null; phaseColor?: string | null; source?: string; created?: string }
+interface ApplicantRow {
+  id?: Id; candidateId?: Id | null; candidateName?: string; candidateInitials?: string
+  phaseValue?: string | number | null; phaseLabel?: string | null; phaseColor?: string | null; source?: string; created?: string
+  // INTERVIEW-VISIBILITY-1: the same interview-progress shape the applications table renders.
+  interview?: ApplicationInterview | null
+}
 
 // Rows shown per page (mirrors WorkTab's own PER on the candidate side).
 const PER = 5
@@ -84,6 +97,7 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
   const { t } = useTranslation(['vacancies', 'common'])
   const { phases, phaseMeta } = useVacancyLookups()
   const auth = useAuth()
+  const { openEntity } = useNavigation()
   // The one permission the backend requires for PATCH + DELETE /applications/{id}
   // (mirrors WorkTab) — a viewer without it never sees pencil/unlink at all (§3).
   const canManageApplications = auth?.hasPermission?.('applications.update') ?? false
@@ -135,11 +149,41 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
   const { value: phaseFilter, toggle: togglePhase, filtered: phaseFiltered } =
     useStatusFilter(applications, phases, a => String(a.phaseValue ?? ''))
   const q = search.trim().toLowerCase()
-  const filteredApplications = q ? phaseFiltered.filter(a => (a.candidateName ?? '').toLowerCase().includes(q)) : phaseFiltered
+  const searchFiltered = q ? phaseFiltered.filter(a => (a.candidateName ?? '').toLowerCase().includes(q)) : phaseFiltered
 
-  // Reset to page 1 whenever the search/phase filter narrows the list, so a filter
-  // change never strands the view on a now out-of-range page.
-  useEffect(() => { setPage(1) }, [search, phaseFilter])
+  // INTERVIEW-VISIBILITY-1 (Danny 29-09: "per vacature makkelijk zien welke
+  // sollicitanten nog geen agent hebben of vastzitten"): two quick-view toggles
+  // on top of search/phase. "No agent" = no session AND the vacancy itself has
+  // no default workflow (nothing would ever start one); "Stalled" = the
+  // candidate is on turn and has been waiting longer than the tenant's own
+  // Koios-suggestion window — same threshold the interview_stalled suggestion
+  // uses, so this toggle previews exactly what Koios would flag.
+  const settings = useAllSettings()
+  const stalledHours = getNumberSetting(settings, 'koios_suggest_interview_stalled_hours', 24)
+  const hasWaitingSinceField = applications.some(a => a.interview?.waitingSince != null)
+  // Feature detection (mirrors hasWaitingSinceField above): a backend that
+  // doesn't send the `interview` key at all yet must not be counted as "no
+  // agent" on every row — the toggle only shows once at least one row actually
+  // carries the key (undefined vs. explicit null, §3 presence-gating).
+  const hasInterviewField = applications.some(a => a.interview !== undefined)
+  const [filterNoAgent, setFilterNoAgent] = useState(false)
+  const [filterStalled, setFilterStalled] = useState(false)
+  const now = new Date()
+  const isStalled = (a: ApplicantRow) => {
+    if (a.interview?.turn !== 'candidate' || !a.interview.waitingSince) return false
+    const waitingMs = now.getTime() - new Date(a.interview.waitingSince).getTime()
+    return waitingMs >= stalledHours * 3600000
+  }
+  const isNoAgent = (a: ApplicantRow) => !a.interview && v.interviewWorkflowId == null
+  const noAgentCount = applications.filter(isNoAgent).length
+  const stalledCount = applications.filter(isStalled).length
+  const filteredApplications = searchFiltered
+    .filter(a => !filterNoAgent || isNoAgent(a))
+    .filter(a => !filterStalled || isStalled(a))
+
+  // Reset to page 1 whenever the search/phase/quick-view filter narrows the
+  // list, so a filter change never strands the view on a now out-of-range page.
+  useEffect(() => { setPage(1) }, [search, phaseFilter, filterNoAgent, filterStalled])
   const pages = Math.max(1, Math.ceil(filteredApplications.length / PER))
   const slice = filteredApplications.slice((page - 1) * PER, page * PER)
 
@@ -201,10 +245,27 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
       {/* House toolbar: search (grows) → phase filter → "+ Sollicitatie" (short —
           the sub-tab already names the entity, DRAWER-ADD-SHORT-1). No heading
           above it: the tab bar already says "Sollicitaties" (Danny 20-08, dubbel). */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
         {/* Toolbar search frame — the shared DrawerSearchField (DRY round 11, MATCHLISTS). */}
         <DrawerSearchField value={search} onChange={setSearch} placeholder={t('applicants.searchPlaceholder')} minWidth={120} />
         <StatusFilterSelect value={phaseFilter} onToggle={togglePhase} statuses={phases} optionKey={s => s.value} />
+        {/* INTERVIEW-VISIBILITY-1: "which applicants still have no agent / are
+            stuck" (Danny 29-09) — both toggles only appear once the list
+            actually carries their respective field (feature detection). */}
+        {hasInterviewField && (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            <QuickViewToggle active={filterNoAgent} onToggle={() => setFilterNoAgent(x => !x)}
+              label={t('applicants.filterNoAgent')} color="var(--color-warning)" />
+            {noAgentCount > 0 && <CountBadge count={noAgentCount} />}
+          </span>
+        )}
+        {hasWaitingSinceField && (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            <QuickViewToggle active={filterStalled} onToggle={() => setFilterStalled(x => !x)}
+              label={t('applicants.filterStalled')} color="var(--color-danger)" />
+            {stalledCount > 0 && <CountBadge count={stalledCount} />}
+          </span>
+        )}
         {v.id != null && canCreateApplication && (
           <DrawerAddButton onClick={() => setAddOpen(true)} label={t('applicants.addApplication')} short />
         )}
@@ -227,6 +288,12 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
                     <EntityLink page="candidates" id={a.candidateId} title={a.candidateName}>{a.candidateName}</EntityLink>
                   </div>
                   {a.source && <Caption as="div">{a.source}</Caption>}
+                  {/* INTERVIEW-VISIBILITY-1: the shared progress cell, deep-linking
+                      to this application's own Interview tab (CEL-DOORKLIK-CANON). */}
+                  {a.interview !== undefined && (
+                    <InterviewProgressCell interview={a.interview ?? null}
+                      onClick={a.id != null ? () => openEntity('applications', a.id, 'interviews') : undefined} />
+                  )}
                   {/* Book an intake for this applicant — matches candidate + vacancy + application. */}
                   {a.candidateId != null && (
                     <Button variant="secondary" iconOnly size="sm" onClick={() => setIntakeFor({ applicationId: a.id ?? null, candidateId: a.candidateId as Id })}

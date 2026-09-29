@@ -357,6 +357,8 @@
     "searchPlaceholder": "Nach Kandidatenname suchen…",
     "noMatch": "Keine Bewerbungen innerhalb dieser Filter gefunden.",
     "of": "von",
+    "filterNoAgent": "Ohne Agent",
+    "filterStalled": "Stockend",
     "detachDone": "Bewerbung entkoppelt"
   },
   "candidateSearch": {

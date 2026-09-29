@@ -20,8 +20,10 @@ import Button from '@/components/ui/Button'
 import { tintBg, tintBorder } from '@/lib/tint'
 import { Caption } from '@/components/ui/typography'
 import { useAiAgents } from '../hooks/useAiAgents'
+import { useInterviewWorkflows } from '@/hooks/useInterviewWorkflows'
 import InterviewStatusCard from './InterviewStatusCard'
 import { mapInterview } from '../data/mapApplication'
+import { resolveEffectiveInterviewWorkflow, type EffectiveInterviewWorkflow } from '../data/interviewWorkflowEffective'
 import type { ApplicationDetail, ApplicationInterview, ApiApplication } from '@/types/application'
 import type { Id } from '@/types/common'
 
@@ -32,7 +34,7 @@ type TranscriptMsg = ApplicationDetail['interviews'][number]['transcript'][numbe
 // an unknown/future code falls back to the generic action-failed notice (§3).
 const START_INTERVIEW_REASONS = [
   'no_mobile_or_consent', 'no_active_connection', 'rejected_stage',
-  'placed_stage', 'no_active_flow', 'no_candidate', 'send_failed',
+  'placed_stage', 'no_active_flow', 'no_candidate', 'send_failed', 'no_agent',
 ] as const
 type StartInterviewReason = (typeof START_INTERVIEW_REASONS)[number]
 const isStartInterviewReason = (v: unknown): v is StartInterviewReason =>
@@ -72,23 +74,42 @@ function TranscriptBubble({ msg }: { msg: TranscriptMsg }) {
 
 /**
  * StartInterviewAction — INTERVIEW-PERAPP-1 (now LIVE, contract-complete
- * 22-07): lets a recruiter pick an AI agent and kick off a fresh interview
- * session for THIS application, when none is running yet. Hidden entirely
- * without applications.update (mirrors InterviewStatusCard's canManage gate —
- * same permission, same source). Response handling per the confirmed
- * contract: 201 = started, 200 = an idempotent dup on THIS SAME application
- * (existing session returned — still success, own toast so "started" is
- * never claimed for a session already running), 409 already_has_session = an
- * OPEN session on a DIFFERENT application (specific message, not the generic
- * fallback), 422 = a guard skip with one of 7 known reasons (own message
- * each, unknown reasons fall back to the generic notice). The 404 honest-gate
- * stays as a safety net (§3) though it should no longer be hit in practice.
+ * 22-07): kicks off a fresh interview session for THIS application, when none
+ * is running yet. Hidden entirely without applications.update (mirrors
+ * InterviewStatusCard's canManage gate — same permission, same source).
+ *
+ * INTERVIEW-VISIBILITY-1 (Danny 29-09): when a workflow is IN EFFECT (this
+ * application's own override, or the vacancy's default), the agent is DERIVED
+ * from it — no picker, the card just says which workflow/agent will run and
+ * posts that agent id straight away. The manual agent picker below is now only
+ * the FALLBACK path, for an application with no workflow in effect at all.
+ * Response handling per the confirmed contract: 201 = started, 200 = an
+ * idempotent dup on THIS SAME application (existing session returned — still
+ * success, own toast so "started" is never claimed for a session already
+ * running), 409 already_has_session = an OPEN session on a DIFFERENT
+ * application (specific message, not the generic fallback), 422 = a guard
+ * skip with one of the known reasons (own message each, unknown reasons fall
+ * back to the generic notice; `no_agent` covers a BE still on the OLD contract
+ * with neither a workflow nor a chosen agent). The 404 honest-gate stays as a
+ * safety net (§3) though it should no longer be hit in practice.
  */
-function StartInterviewAction({ applicationId, onStarted }: { applicationId: Id | undefined; onStarted: (iv: ApplicationInterview) => void }) {
+function StartInterviewAction({ applicationId, effective, onStarted }: {
+  applicationId: Id | undefined
+  // INTERVIEW-VISIBILITY-1: the resolved workflow in effect, or null when none —
+  // computed once by the parent (InterviewsTab) so this card and the status
+  // card's own caption always agree on the same resolution.
+  effective: EffectiveInterviewWorkflow | null
+  onStarted: (iv: ApplicationInterview) => void
+}) {
   const { t } = useTranslation('applications')
   const auth = useAuth()
   const canManage = auth?.hasPermission?.('applications.update') ?? false
-  const { options, loading, error } = useAiAgents(canManage)
+  // A workflow "in effect" only replaces the picker when it actually resolved an
+  // agent — a workflow without one still needs the manual picker, otherwise
+  // this card would offer nothing but a dead "no agent chosen" error (§3).
+  const derived = effective?.agentId != null ? effective : null
+  // The manual picker only needs to load when no workflow is in effect.
+  const { options, loading, error } = useAiAgents(canManage && !derived)
   const [agentId, setAgentId] = useState('')
   const [busy, setBusy] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
@@ -101,11 +122,12 @@ function StartInterviewAction({ applicationId, onStarted }: { applicationId: Id 
   // notably 422 send_failed, where the backend rolls the session back so a
   // simple re-click of this same button IS the retry (§3, no fake affordance).
   const onStart = async () => {
-    if (!agentId) { notifyError(t('interview.start.noAgentChosen')); return }
+    const chosenAgentId = derived?.agentId ?? agentId
+    if (!chosenAgentId) { notifyError(t('interview.start.noAgentChosen')); return }
     if (busy || applicationId == null) return
     setBusy(true)
     try {
-      const res = await api.post(`/applications/${applicationId}/interview`, { agent_id: agentId })
+      const res = await api.post(`/applications/${applicationId}/interview`, { agent_id: chosenAgentId })
       const raw = unwrap<NonNullable<ApiApplication['interview']>>(res)
       const iv = mapInterview(raw)
       if (iv) onStarted(iv)
@@ -136,9 +158,14 @@ function StartInterviewAction({ applicationId, onStarted }: { applicationId: Id 
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '10px 12px',
       background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <CreatableSelect value={agentId || null} onChange={setAgentId} allowCreate={false}
-          placeholder={loading ? t('common:loading') : t('interview.start.agentPlaceholder')}
-          options={options.map(o => ({ value: String(o.value), label: o.label }))} />
+        {/* A workflow is in effect AND resolved an agent: no picker needed. */}
+        {derived ? (
+          <Caption>{t('interview.start.viaWorkflow', { workflow: derived.workflowName, agent: derived.agentName })}</Caption>
+        ) : (
+          <CreatableSelect value={agentId || null} onChange={setAgentId} allowCreate={false}
+            placeholder={loading ? t('common:loading') : t('interview.start.agentPlaceholder')}
+            options={options.map(o => ({ value: String(o.value), label: o.label }))} />
+        )}
         {/* House Button (Danny 20-08, pasted this pill: "this one too") — the 05-08
             soft-tint predates PRIMAIR-VLAK-1; an accent ACTION wears the solid trio
             via Button, at the drawer sm standard. */}
@@ -146,7 +173,7 @@ function StartInterviewAction({ applicationId, onStarted }: { applicationId: Id 
           {t('interview.start.label')}
         </Button>
       </div>
-      {error && <span style={{ fontSize: 11, color: 'var(--color-danger-text)' }}>{t('interview.start.loadError')}</span>}
+      {!derived && error && <span style={{ fontSize: 11, color: 'var(--color-danger-text)' }}>{t('interview.start.loadError')}</span>}
       {unavailable && (
         <Caption style={{ fontStyle: 'italic' }}>{t('interview.start.unavailable')}</Caption>
       )}
@@ -180,6 +207,22 @@ export default function InterviewsTab({ application: a, detailPhase }: { applica
   // used across the tab).
   const canStartNew = !interview && a.bucket !== 'rejected' && a.bucket !== 'matched'
 
+  // INTERVIEW-VISIBILITY-1: the ONE workflow resolution (own override, else the
+  // vacancy default), shared by the start card and InterviewStatusCard's own
+  // vacancy-default caption so they never disagree. The BE today only emits
+  // `interview_workflow_id` on the application (no embedded `interview_workflow`
+  // object yet), so the own workflow is looked up by id — same order as
+  // `linkedWorkflow` in useInterviewOverrides — falling back to a.interviewWorkflow
+  // for whichever contract version is actually live.
+  const { byId: ownWorkflowById } = useInterviewWorkflows(a.hasInterviewWorkflowField)
+  const listedOwnWorkflow = a.interviewWorkflowId != null ? ownWorkflowById.get(String(a.interviewWorkflowId)) : undefined
+  // Normalise the tenant-list Workflow shape into the same InterviewWorkflowRef
+  // shape as a.interviewWorkflow, mirroring useInterviewOverrides' own build.
+  const ownWorkflow = listedOwnWorkflow
+    ? { id: listedOwnWorkflow.id ?? '', name: listedOwnWorkflow.name ?? '', agent: listedOwnWorkflow.agent ?? null }
+    : a.interviewWorkflow
+  const effectiveWorkflow = resolveEffectiveInterviewWorkflow(ownWorkflow, a.vacancyInterviewWorkflow)
+
   // The list row carries no interviews[] (detail-only) and a deep-link opens on a
   // bare {id}: while the detail fetch runs — or after it FAILED — an empty state
   // would be a lie about data that simply is not here (yet). Honest states first.
@@ -205,11 +248,14 @@ export default function InterviewsTab({ application: a, detailPhase }: { applica
           history; this is "where things stand right now"). Always rendered —
           shows its own honest placeholder when there is no session at all. */}
       <InterviewStatusCard
-        interview={interview} applicationId={a.id} interviewFlowId={a.interviewFlowId}
+        interview={interview} applicationId={a.id}
         interviewWorkflowId={a.interviewWorkflowId} interviewWorkflow={a.interviewWorkflow}
         hasInterviewWorkflowField={a.hasInterviewWorkflowField}
+        vacancyId={a.vacancy?.id} vacancyInterviewWorkflow={a.vacancyInterviewWorkflow}
       />
-      {canStartNew && <StartInterviewAction applicationId={a.id} onStarted={setStartedOverride} />}
+      {canStartNew && (
+        <StartInterviewAction applicationId={a.id} effective={effectiveWorkflow} onStarted={setStartedOverride} />
+      )}
 
       {/* ONE "nothing yet" message, never two (Danny 22-08, screenshot): while no
           live session exists either, the status card above already says so — the

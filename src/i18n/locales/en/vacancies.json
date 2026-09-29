@@ -357,6 +357,8 @@
     "searchPlaceholder": "Search by candidate name…",
     "noMatch": "No applications found within these filters.",
     "of": "of",
+    "filterNoAgent": "No agent",
+    "filterStalled": "Stalled",
     "detachDone": "Application detached"
   },
   "candidateSearch": {

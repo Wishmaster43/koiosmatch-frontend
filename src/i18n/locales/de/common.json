@@ -1725,5 +1725,9 @@
   "field": {
     "maxNotice": "Maximal {{max}}",
     "minNotice": "Mindestens {{min}}"
+  },
+  "duration": {
+    "hoursShort": "{{count}}Std",
+    "daysShort": "{{count}}T"
   }
 }

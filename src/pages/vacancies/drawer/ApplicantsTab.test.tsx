@@ -16,7 +16,9 @@ const PHASES = [
 vi.mock('@/context/VacancyLookupsContext', () => ({
   useVacancyLookups: () => ({ phases: PHASES, phaseMeta: () => ({ label: null, color: null }) }),
 }))
-vi.mock('@/lib/api', () => ({ default: { get: vi.fn(() => Promise.resolve({ data: { data: {} } })) }, unwrap: (r: unknown) => r }))
+// INTERVIEW-VISIBILITY-1: the toggles' useAllSettings() reads getActiveTenantId
+// off this same module — an omitted export throws before the component renders.
+vi.mock('@/lib/api', () => ({ default: { get: vi.fn(() => Promise.resolve({ data: { data: {} } })) }, unwrap: (r: unknown) => r, getActiveTenantId: () => 't1' }))
 // Default: a TARGETED per-permission flag (mirrors ScopedMatchesTab.test.tsx:30),
 // not a blanket () => true — a mis-wire to the wrong permission key would fail
 // this default too, not just the dedicated gate tests below. Grants exactly the
@@ -34,7 +36,7 @@ vi.mock('@/pages/candidates/drawer/DetachApplicationModal', () => ({ default: ()
 // Reused row (S-vacapp-1) pulls in useDateFormat, which pulls in the real i18n
 // init — mocked out exactly like WorkTab.test.tsx so this file stays on the
 // same "untranslated raw key" test convention as the rest of this suite.
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => `fmt(${v})`, locale: 'nl-NL' }) }))
+vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => `fmt(${v})`, formatDateTime: (v: string) => `dt(${v})`, locale: 'nl-NL' }) }))
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- raw API-shaped fixture, mapVacancyDetail's own input type
 const vacancy = (applications: any[]) => mapVacancyDetail({ id: 'v1', title: 'Verpleegkundige', applications, applicationsByPhase: {} })
@@ -181,5 +183,85 @@ describe('ApplicantsTab · reuses the candidate drawer ApplicationRow (S-vacapp-
     await userEvent.click(screen.getByRole('button', { name: 'common:nextPage' }))
     expect(screen.getByText('Candidate 5')).toBeInTheDocument()
     expect(screen.queryByText('Candidate 0')).toBeNull()
+  })
+})
+
+// INTERVIEW-VISIBILITY-1 (Danny 29-09: "per vacature makkelijk zien welke
+// sollicitanten nog geen agent hebben of vastzitten"): the two quick-view
+// toggles above the list.
+describe('ApplicantsTab · interview visibility toggles (INTERVIEW-VISIBILITY-1)', () => {
+  it('shows the no-agent toggle with a count, filters to applicants without a session when the vacancy has no default workflow', async () => {
+    render(<ApplicantsTab vacancy={vacancy([
+      { id: 'a1', candidate_id: 'c1', candidate_name: 'Jan Jansen', phase: { value: 'applied' }, interview: null },
+      { id: 'a2', candidate_id: 'c2', candidate_name: 'Piet Pietersen', phase: { value: 'applied' }, interview: { category: 'busy' } },
+    ])} />)
+    const toggle = screen.getByText('applicants.filterNoAgent')
+    expect(screen.getByText('1')).toBeInTheDocument() // CountBadge
+    await userEvent.click(toggle)
+    expect(screen.getByText('Jan Jansen')).toBeInTheDocument()
+    expect(screen.queryByText('Piet Pietersen')).toBeNull()
+  })
+
+  it('never counts a session-less applicant as "no agent" once the vacancy itself carries a default workflow', () => {
+    const v = mapVacancyDetail({
+      id: 'v1', title: 'Verpleegkundige', applicationsByPhase: {},
+      applications: [{ id: 'a1', candidate_id: 'c1', candidate_name: 'Jan Jansen', phase: { value: 'applied' }, interview: null }],
+      interview_workflow_id: 'wf-1',
+    })
+    render(<ApplicantsTab vacancy={v} />)
+    // The toggle still renders (feature is available), but its count is zero —
+    // a tellerbadge never renders "0" (CLAUDE.md §16 canon).
+    expect(screen.getByText('applicants.filterNoAgent')).toBeInTheDocument()
+    expect(screen.queryByText('1')).toBeNull()
+  })
+
+  it('hides the stalled toggle entirely when no row carries a waiting-duration field (feature detection)', () => {
+    render(<ApplicantsTab vacancy={vacancy([
+      { id: 'a1', candidate_id: 'c1', candidate_name: 'Jan Jansen', phase: { value: 'applied' }, interview: null },
+    ])} />)
+    expect(screen.queryByText('applicants.filterStalled')).toBeNull()
+  })
+
+  it('hides the no-agent toggle entirely when the backend does not send the `interview` key on any row (feature detection)', () => {
+    render(<ApplicantsTab vacancy={vacancy([
+      { id: 'a1', candidate_id: 'c1', candidate_name: 'Jan Jansen', phase: { value: 'applied' } },
+    ])} />)
+    expect(screen.queryByText('applicants.filterNoAgent')).toBeNull()
+  })
+
+  it('shows the stalled toggle once a row carries waiting_since, and filters to it', async () => {
+    const staleIso = new Date(Date.now() - 30 * 3600000).toISOString() // 30h ago > default 24h window
+    render(<ApplicantsTab vacancy={vacancy([
+      { id: 'a1', candidate_id: 'c1', candidate_name: 'Jan Jansen', phase: { value: 'applied' }, interview: { category: 'busy', turn: 'candidate', waiting_since: staleIso } },
+      { id: 'a2', candidate_id: 'c2', candidate_name: 'Piet Pietersen', phase: { value: 'applied' }, interview: { category: 'busy', turn: 'agent', waiting_since: null } },
+    ])} />)
+    const toggle = screen.getByText('applicants.filterStalled')
+    await userEvent.click(toggle)
+    expect(screen.getByText('Jan Jansen')).toBeInTheDocument()
+    expect(screen.queryByText('Piet Pietersen')).toBeNull()
+  })
+
+  it('reads the stalled window from the tenant setting, not the hardcoded default', async () => {
+    // A tenant-configured 48h window: 30h-waiting is NOT stalled (default 24h
+    // would have flagged it — proves the setting, not the fallback, is read).
+    vi.resetModules()
+    vi.doMock('@/lib/settings/useAllSettings', () => ({
+      useAllSettings: () => ({ koios_suggest_interview_stalled_hours: 48 }),
+      getNumberSetting: (v: Record<string, unknown> | null | undefined, k: string, fallback: number) => {
+        const raw = v?.[k]
+        return typeof raw === 'number' ? raw : fallback
+      },
+    }))
+    const { default: WindowedTab } = await import('./ApplicantsTab')
+    const staleIso30h = new Date(Date.now() - 30 * 3600000).toISOString()
+    const staleIso50h = new Date(Date.now() - 50 * 3600000).toISOString()
+    render(<WindowedTab vacancy={vacancy([
+      { id: 'a1', candidate_id: 'c1', candidate_name: 'Jan Jansen', phase: { value: 'applied' }, interview: { category: 'busy', turn: 'candidate', waiting_since: staleIso30h } },
+      { id: 'a2', candidate_id: 'c2', candidate_name: 'Piet Pietersen', phase: { value: 'applied' }, interview: { category: 'busy', turn: 'candidate', waiting_since: staleIso50h } },
+    ])} />)
+    const toggle = screen.getByText('applicants.filterStalled')
+    await userEvent.click(toggle)
+    expect(screen.queryByText('Jan Jansen')).toBeNull()
+    expect(screen.getByText('Piet Pietersen')).toBeInTheDocument()
   })
 })

@@ -357,6 +357,8 @@
     "searchPlaceholder": "Zoek op kandidaatnaam…",
     "noMatch": "Geen sollicitaties gevonden binnen deze filters.",
     "of": "van",
+    "filterNoAgent": "Zonder agent",
+    "filterStalled": "Vastzittend",
     "detachDone": "Sollicitatie ontkoppeld"
   },
   "candidateSearch": {

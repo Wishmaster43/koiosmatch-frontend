@@ -91,8 +91,13 @@ export function mapInterview(raw?: ApiApplication['interview']): ApplicationInte
     // `last_sent_at` and `completed_at`. There is no `last_message_at`/`ended_at`
     // column and the backend never sent either, so mapping those spellings kept both
     // fields permanently null and left the duration fallback dead code (measured 01-08).
-    lastMessageAt: raw.last_sent_at ?? null,
+    // INTERVIEW-VISIBILITY-1: `last_message_at` is the newer spelling — fall
+    // back to `last_sent_at` on a backend still on the older column.
+    lastMessageAt: raw.last_message_at ?? raw.last_sent_at ?? null,
     endedAt: raw.completed_at ?? null,
+    // INTERVIEW-VISIBILITY-1: only set while `turn` is 'candidate' (the backend's
+    // own invariant) — absent on an older payload stays null, never fabricated.
+    waitingSince: raw.waiting_since ?? null,
     // Wall-clock seconds from session creation to completion (or to now while live) —
     // detail-only. NOT talk time: nights and weekends are inside it, so every label
     // built on it must say "elapsed since start", never "conversation duration".
@@ -379,5 +384,19 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
         }
       : null,
     hasInterviewWorkflowField: 'interview_workflow_id' in raw,
+    // INTERVIEW-VISIBILITY-1: the vacancy's OWN default workflow, nested on the
+    // application's `vacancy` block — a separate field from this application's
+    // own override above. Presence-gated: `undefined` when the backend doesn't
+    // send the key at all yet (today's contract), so callers never claim "the
+    // vacancy has no workflow" when it simply wasn't reported.
+    vacancyInterviewWorkflow: 'interview_workflow' in vac
+      ? (vac.interview_workflow
+        ? {
+            id: vac.interview_workflow.id ?? '',
+            name: vac.interview_workflow.name ?? '',
+            agent: vac.interview_workflow.agent ? { id: vac.interview_workflow.agent.id ?? '', name: vac.interview_workflow.agent.name ?? '' } : null,
+          }
+        : null)
+      : undefined,
   }
 }

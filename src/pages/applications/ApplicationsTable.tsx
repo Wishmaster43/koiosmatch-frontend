@@ -16,17 +16,16 @@ import SoftChip from '@/components/ui/SoftChip'
 import CandidateStatusChip from '@/components/ui/CandidateStatusChip'
 import { makeKoiosColumn } from '@/components/ui/koiosColumn'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
-// HUISSTIJL-1: the interview step count rides the Caption atom's own 11px/muted
-// identity, with the raw monoStyle identity layered on for JetBrains Mono digits;
-// the two plain mono cellStyle objects below reuse the same raw identity.
-import { Caption, monoStyle } from '@/components/ui/typography'
+// HUISSTIJL-1: the raw monoStyle identity, layered on for JetBrains Mono digits
+// on the two plain mono cellStyle objects below.
+import { monoStyle } from '@/components/ui/typography'
+import InterviewProgressCell from './InterviewProgressCell'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useApplicationAdvice } from '@/lib/useApplicationAdvice'
 import { useDateFormat, daysSince } from '@/lib/datetime'
 import { useNavigation } from '@/context/NavigationContext'
-import { interviewCategoryColor } from './data/applicationsShared'
 import { APPLICATION_SORT_KEYS } from './hooks/useApplicationsData'
 
 // Plain-text cell style (used when a colour toggle is off).
@@ -179,22 +178,10 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
     // + "step X of Y" within its own flow — em-dash when no session exists.
     // PDF point 7 (14-08): clicking this cell jumps straight to the drawer's
     // own Interview tab instead of just opening the row on its default tab.
+    // INTERVIEW-VISIBILITY-1: extracted into the shared InterviewProgressCell
+    // (also used by the vacancy drawer's Applicants tab) — never a second copy.
     { key: 'interview', header: t('cols.interview'), sortable: true, sortValue: r => r.interview?.category ?? '',
-      render: r => r.interview ? (
-        // ONE row (Danny 08-08: "Bezig 2/12 1 regel geen 2 regels") — chip and
-        // progress sit side by side; the compact "2/12" form keeps the column
-        // narrow where the drawer can afford the spelled-out "Stap 2 van 12".
-        <span onClick={e => { stopPropagation(e); onSelect?.(r, 'interviews') }}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap', cursor: 'pointer' }}>
-          <StatusPill label={t(`interview.category.${r.interview.category}`)} color={interviewCategoryColor(r.interview.category)} />
-          {r.interview.total > 0 && (
-            <Caption as="span" style={monoStyle}
-              title={t('interview.stepOf', { step: r.interview.step ?? '–', total: r.interview.total })}>
-              {r.interview.step ?? '–'}/{r.interview.total}
-            </Caption>
-          )}
-        </span>
-      ) : <span style={{ color: 'var(--text-muted)' }}>—</span> },
+      render: r => <InterviewProgressCell interview={r.interview} onClick={() => onSelect?.(r, 'interviews')} /> },
     // PDF-SOLLICITATIES point 8 (14-08): plain day count in the CURRENT phase —
     // the header carries the unit, the cell is bare digits (mirrors the vacancies
     // "age" column). Real field: ApplicationListResource::currentStageEnteredAt

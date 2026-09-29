@@ -286,6 +286,7 @@
       "unavailable": "Starting an interview isn't available yet. Waiting on the backend link.",
       "noAgentChosen": "Choose an AI agent first.",
       "loadError": "Failed to load AI agents.",
+      "viaWorkflow": "Start via {{workflow}} ({{agent}})",
       "reasons": {
         "no_mobile_or_consent": "The candidate has no mobile number or no WhatsApp consent.",
         "no_active_connection": "No active WhatsApp connection for this vacancy.",
@@ -293,7 +294,8 @@
         "placed_stage": "This application is already placed. An interview can't be started.",
         "no_active_flow": "The chosen AI agent has no active interview flow.",
         "no_candidate": "No candidate linked to this application.",
-        "send_failed": "Sending failed. Try again."
+        "send_failed": "Sending failed. Try again.",
+        "no_agent": "No interview workflow or AI agent available."
       }
     },
     "status": {
@@ -329,7 +331,10 @@
       "flowOverrideLabel": "Use vacancy default",
       "flowOverridePlaceholder": "Override interview flow…",
       "flowOverrideSaved": "Interview flow updated.",
-      "workflowOverrideSaved": "Interview workflow updated."
+      "workflowOverrideSaved": "Interview workflow updated.",
+      "vacancyDefault": "Vacancy default: {{workflow}} · {{agent}}",
+      "editInVacancy": "Change on the vacancy → AI agent",
+      "noWorkflow": "No interview workflow: pick one above or set the vacancy default."
     },
     "history": {
       "status": {

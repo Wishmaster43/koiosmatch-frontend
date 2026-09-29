@@ -357,6 +357,8 @@
     "searchPlaceholder": "Pesquisar por nome do candidato…",
     "noMatch": "Não foram encontradas candidaturas dentro destes filtros.",
     "of": "de",
+    "filterNoAgent": "Sem agente",
+    "filterStalled": "Estagnado",
     "detachDone": "Candidatura desassociada"
   },
   "candidateSearch": {

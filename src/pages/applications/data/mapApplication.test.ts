@@ -115,7 +115,7 @@ describe('mapApplication', () => {
         category: 'busy', currentStatus: 'ACTIVE_IN_CARE', step: 2, total: 12,
         id: null, agent: null, flowName: null, flowId: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null,
         questionStepIndex: null, questionStepsTotal: 0, sessionScope: 'application',
-        pausedAt: null, pausedBy: null,
+        pausedAt: null, pausedBy: null, waitingSince: null,
       })
     })
 
@@ -140,7 +140,7 @@ describe('mapApplication', () => {
         category: 'busy', currentStatus: null, step: null, total: 0,
         id: null, agent: null, flowName: null, flowId: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null,
         questionStepIndex: null, questionStepsTotal: 0, sessionScope: 'application',
-        pausedAt: null, pausedBy: null,
+        pausedAt: null, pausedBy: null, waitingSince: null,
       })
     })
   })
@@ -212,6 +212,24 @@ describe('mapApplication', () => {
       })
       const bare = mapApplication({ id: 26, interview: { category: 'busy' } })
       expect(bare.interview).toMatchObject({ startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, id: null, turn: null, flowName: null, agent: null })
+    })
+
+    // INTERVIEW-VISIBILITY-1 (29-09): the newer `last_message_at`/`waiting_since`
+    // spellings, tolerated on BOTH list and detail — `last_message_at` wins over
+    // the older `last_sent_at` column when both are present.
+    it('prefers last_message_at over last_sent_at when both are present', () => {
+      const mapped = mapApplication({
+        id: 30,
+        interview: { category: 'busy', last_message_at: '2026-09-29T09:00:00Z', last_sent_at: '2026-09-29T08:00:00Z' },
+      })
+      expect(mapped.interview?.lastMessageAt).toBe('2026-09-29T09:00:00Z')
+    })
+
+    it('maps waiting_since, absent → null (never fabricated)', () => {
+      const withWaiting = mapApplication({ id: 31, interview: { category: 'busy', turn: 'candidate', waiting_since: '2026-09-29T09:00:00Z' } })
+      expect(withWaiting.interview?.waitingSince).toBe('2026-09-29T09:00:00Z')
+      const bare = mapApplication({ id: 32, interview: { category: 'busy' } })
+      expect(bare.interview?.waitingSince).toBeNull()
     })
   })
 })
@@ -333,6 +351,31 @@ describe('mapApplicationDetail', () => {
 
     it('is false when the key is absent entirely (a payload that predates the field)', () => {
       expect(mapApplicationDetail({ id: 19 }).hasContactField).toBe(false)
+    })
+  })
+
+  // INTERVIEW-VISIBILITY-1 (29-09): the vacancy's OWN default workflow, nested on
+  // the application's `vacancy` block — a separate field from this application's
+  // own `interview_workflow` override one level up.
+  describe('vacancyInterviewWorkflow (INTERVIEW-VISIBILITY-1)', () => {
+    it('maps the nested vacancy.interview_workflow when present', () => {
+      const detail = mapApplicationDetail({
+        id: 20,
+        vacancy: { id: 'v-1', interview_workflow: { id: 'wf-1', name: 'Zorg workflow', agent: { id: 'a-1', name: 'Kelly' } } },
+      })
+      expect(detail.vacancyInterviewWorkflow).toEqual({ id: 'wf-1', name: 'Zorg workflow', agent: { id: 'a-1', name: 'Kelly' } })
+    })
+
+    it('is null when the vacancy explicitly has no default workflow', () => {
+      expect(mapApplicationDetail({ id: 21, vacancy: { id: 'v-2', interview_workflow: null } }).vacancyInterviewWorkflow).toBeNull()
+    })
+
+    // Presence-gated (§3): the backend not sending the `interview_workflow` key
+    // at all on the vacancy block is a DIFFERENT claim than an explicit null —
+    // undefined must never be read as "the vacancy has none" downstream.
+    it('is undefined (not null) when the vacancy block omits the interview_workflow key entirely', () => {
+      expect(mapApplicationDetail({ id: 22, vacancy: { id: 'v-2' } }).vacancyInterviewWorkflow).toBeUndefined()
+      expect(mapApplicationDetail({ id: 23 }).vacancyInterviewWorkflow).toBeUndefined()
     })
   })
 
@@ -537,6 +580,7 @@ describe('mapInterview · the real InterviewSessionResource payload', () => {
         questionStepIndex: null, questionStepsTotal: 0, sessionScope: 'application',
       pausedAt: null,
       pausedBy: null,
+      waitingSince: null,
     })
   })
 

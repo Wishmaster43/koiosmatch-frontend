@@ -6,6 +6,9 @@
 import type { Id, Loose } from './common'
 import type { InterviewWorkflow } from './interviewWorkflow'
 import type { ApiKoiosAiAdvice, KoiosAiAdvice } from '@/lib/koiosAdviceMap'
+// INTERVIEW-VISIBILITY-1: type-only, so no runtime circular-import risk with
+// application.ts (which itself type-imports InterviewWorkflowRef from here).
+import type { ApplicationInterview } from './application'
 
 /** VACANCY-LEADS-COUNT-1: provenance of `leadsCount` — the 15-min/nightly worker's
  * last run + why the number might not fully reflect reality right now. */
@@ -219,6 +222,12 @@ export interface VacancyDetail extends Vacancy {
   applications: Array<{
     id: Id | undefined; candidateId: Id | null; candidateName: string; candidateInitials: string
     phaseValue: string | number | null; phaseLabel: string; phaseColor: string; source: string; created: string
+    // INTERVIEW-VISIBILITY-1: the same interview-progress shape the applications
+    // table renders, null when this applicant carries no session. Optional so
+    // every existing fixture across the codebase that builds this row shape by
+    // hand (VacancyDetail['applications'][number]) keeps compiling — feature-
+    // detected the same way InterviewProgressCell renders it (§9).
+    interview?: ApplicationInterview | null
   }>
   customFields: Array<{ id: Id | undefined; name: string; value: unknown }>
   // Per-vacancy custom-field values keyed by field key (for the Extra tab).
@@ -360,6 +369,9 @@ export interface ApiVacancy {
     id?: Id; candidate?: { id?: Id; name?: string; initials?: string }; candidate_name?: string; candidate_id?: Id
     phase?: { value?: string | number; label?: string; color?: string }; phase_key?: string; stage?: string
     phase_label?: string; phase_color?: string; source?: string; created_at?: string
+    // INTERVIEW-VISIBILITY-1: optional — tolerant of a backend that doesn't
+    // attach the interview block to a vacancy's own applicants list yet.
+    interview?: { category?: string; current_status?: string | null; step?: number | null; total?: number; turn?: string | null; waiting_since?: string | null } | null
   }>
   custom_fields?: Array<{ id?: Id; name?: string; label?: string; value?: unknown }>
   documents?: Array<{ id?: Id; name?: string; size?: unknown }>

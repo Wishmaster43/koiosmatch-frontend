@@ -30,15 +30,13 @@ const mockGet = vi.fn()
 const mockPatch = vi.fn()
 const mockNotifySuccess = vi.fn()
 const mockNotifyError = vi.fn()
+const mockOpenEntity = vi.fn()
 
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
-// INTERVIEW-FLOW-BINDING-1: a flat mock, not a QueryClientProvider — mirrors the
-// other useAiAgents mocks repo-wide (e.g. AddVacancyModal.slice2.test.tsx).
-vi.mock('@/hooks/useInterviewFlows', () => ({
-  useInterviewFlows: () => ({ options: [{ value: 'f1', label: 'Zorgintake (9 stappen)' }], flows: [], loading: false, error: false }),
-}))
-// INTERVIEW-WORKFLOW-1: same flat-object idiom as useInterviewFlows above — this
-// suite has no QueryClientProvider, so the real react-query hook cannot mount.
+vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: mockOpenEntity, navigate: vi.fn() }) }))
+// INTERVIEW-WORKFLOW-1: same flat-object idiom as useAiAgents mocks repo-wide
+// (e.g. AddVacancyModal.slice2.test.tsx) — this suite has no QueryClientProvider,
+// so the real react-query hook cannot mount.
 const mockWorkflowById = new Map([
   ['wf-1', { id: 'wf-1', name: 'Kelly-Helpende', agent: { id: 'a1', name: 'Kelly' } }],
 ])
@@ -92,6 +90,7 @@ beforeEach(() => {
   vi.resetAllMocks()
   // resetAllMocks drops mockT's implementation too — restore the default key-echo.
   mockT.mockImplementation((k: string) => k)
+  mockOpenEntity.mockReset()
   mockUseAuth.mockReturnValue({ hasPermission: () => true })
   mockPatch.mockResolvedValue({ data: {} })
   // Default refetch answer; individual tests override it when they assert on it.
@@ -570,36 +569,19 @@ describe('InterviewStatusCard · fresh prop wins', () => {
   })
 })
 
-// INTERVIEW-FLOW-BINDING-1: the application-level flow override picker —
-// pick → clear → placeholder (VAC-CLEAR-1), and PATCHes the exact request.
-describe('InterviewStatusCard · flow override picker', () => {
-  it('picking a flow PATCHes interview_flow_id, and clearing it back sends null', async () => {
-    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" interviewFlowId={null} />)
-    const user = userEvent.setup()
-
-    const trigger = screen.getByRole('button', { name: 'interview.status.flowOverridePlaceholder' })
-    await user.click(trigger)
-    await user.click(screen.getByRole('button', { name: 'Zorgintake (9 stappen)' }))
-    expect(mockPatch).toHaveBeenCalledWith('/applications/app-1', { interview_flow_id: 'f1' })
-
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Zorgintake (9 stappen)' })).toBeInTheDocument())
-    await user.click(screen.getByTitle('clearField'))
-    await waitFor(() => expect(mockPatch).toHaveBeenCalledWith('/applications/app-1', { interview_flow_id: null }))
-    await waitFor(() => expect(screen.getByRole('button', { name: 'interview.status.flowOverridePlaceholder' })).toBeInTheDocument())
-  })
-})
-
 // INTERVIEW-WORKFLOW-1 (Appendix D/E): the application-level workflow override,
 // presence-gated on `hasInterviewWorkflowField` — never inferred from the value.
+// INTERVIEW-VISIBILITY-1 (29-09): the old flow-override picker is GONE — this
+// workflow picker is now the ONE override.
 describe('InterviewStatusCard · workflow override picker (INTERVIEW-WORKFLOW-1)', () => {
   it('presence gate absent: renders disabled with the honest notice, no PATCH on interaction', () => {
-    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" interviewFlowId={null} interviewWorkflowId={null} hasInterviewWorkflowField={false} />)
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" interviewWorkflowId={null} hasInterviewWorkflowField={false} />)
     expect(screen.getByText('vacancies:aiagent.workflow.unavailable')).toBeInTheDocument()
     expect(mockPatch).not.toHaveBeenCalled()
   })
 
   it('presence gate present: picking a workflow PATCHes exactly { interview_workflow_id }, clearing sends null', async () => {
-    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" interviewFlowId={null} interviewWorkflowId={null} hasInterviewWorkflowField />)
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" interviewWorkflowId={null} hasInterviewWorkflowField />)
     const user = userEvent.setup()
 
     const trigger = screen.getByRole('button', { name: 'aiagent.workflow.placeholder' })
@@ -612,21 +594,51 @@ describe('InterviewStatusCard · workflow override picker (INTERVIEW-WORKFLOW-1)
     await waitFor(() => expect(mockPatch).toHaveBeenCalledWith('/applications/app-1', { interview_workflow_id: null }))
   })
 
-  // Verdict finding 3 (MEDIUM, fixed): once a workflow is linked, the FLOW
-  // override picker becomes a read-only derived line (mirrors VacancyAgentTab's
-  // own `isWorkflowLinked` — the workflow resolves its own agent+flow, so a
-  // second interactive flow picker would contradict it), and the workflow
-  // picker's own "no workflows configured" notice never shows while a value is set.
-  it('flow override becomes read-only derived display once a workflow is linked, and the empty notice never fires alongside a set value', () => {
-    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" interviewFlowId="f1" interviewWorkflowId="wf-1" hasInterviewWorkflowField />)
-    // The flow override's interactive picker is gone…
-    expect(screen.queryByRole('button', { name: 'interview.status.flowOverridePlaceholder' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Zorgintake (9 stappen)' })).not.toBeInTheDocument()
-    // …replaced by the derived line, resolved from the fetched workflow list.
-    expect(screen.getByText('vacancies:aiagent.workflow.derivedFrom')).toBeInTheDocument()
-    // The workflow picker itself stays interactive (it is the source of truth,
-    // not something resolved by anything else) and never claims "no workflows".
+  it('the workflow picker resolves the linked workflow from the fetched list, own name/agent shown', () => {
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" interviewWorkflowId="wf-1" hasInterviewWorkflowField />)
     expect(screen.getByRole('button', { name: 'Kelly · Kelly-Helpende' })).toBeInTheDocument()
     expect(screen.queryByText('aiagent.workflow.empty')).not.toBeInTheDocument()
+  })
+})
+
+// INTERVIEW-VISIBILITY-1 (Danny 29-09): once this application has NO own
+// workflow, an honest caption names the vacancy's default (or says there is
+// none) instead of a second interactive picker — plus a button to go set it.
+describe('InterviewStatusCard · vacancy-default block (INTERVIEW-VISIBILITY-1)', () => {
+  const VACANCY_WF = { id: 'wf-vac', name: 'Vacancy workflow', agent: { id: 'a-vac', name: 'Vacancy agent' } }
+
+  it('shows the vacancy default caption + a button to the vacancy when the application has none of its own', () => {
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" interviewWorkflowId={null} hasInterviewWorkflowField
+      vacancyId="v-1" vacancyInterviewWorkflow={VACANCY_WF} />)
+    expect(screen.getByText('interview.status.vacancyDefault')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'interview.status.editInVacancy' })).toBeInTheDocument()
+  })
+
+  it('opens the vacancy drawer on the aiagent tab when the button is clicked', async () => {
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" interviewWorkflowId={null} hasInterviewWorkflowField
+      vacancyId="v-1" vacancyInterviewWorkflow={VACANCY_WF} />)
+    await userEvent.click(screen.getByRole('button', { name: 'interview.status.editInVacancy' }))
+    expect(mockOpenEntity).toHaveBeenCalledWith('vacancies', 'v-1', 'aiagent')
+  })
+
+  it('shows the honest "no workflow" caption when neither the application nor the vacancy has one', () => {
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" interviewWorkflowId={null} hasInterviewWorkflowField
+      vacancyId="v-1" vacancyInterviewWorkflow={null} />)
+    expect(screen.getByText('interview.status.noWorkflow')).toBeInTheDocument()
+  })
+
+  it('hides the vacancy-default block once the application has its own linked workflow', () => {
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" interviewWorkflowId="wf-1" hasInterviewWorkflowField
+      vacancyId="v-1" vacancyInterviewWorkflow={VACANCY_WF} />)
+    expect(screen.queryByText('interview.status.vacancyDefault')).not.toBeInTheDocument()
+    expect(screen.queryByText('interview.status.noWorkflow')).not.toBeInTheDocument()
+  })
+
+  it('says nothing (no false "no workflow" claim) when the backend does not report the vacancy workflow key at all, but still shows the edit button', () => {
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" interviewWorkflowId={null} hasInterviewWorkflowField
+      vacancyId="v-1" vacancyInterviewWorkflow={undefined} />)
+    expect(screen.queryByText('interview.status.noWorkflow')).not.toBeInTheDocument()
+    expect(screen.queryByText('interview.status.vacancyDefault')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'interview.status.editInVacancy' })).toBeInTheDocument()
   })
 })

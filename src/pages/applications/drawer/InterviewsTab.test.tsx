@@ -27,11 +27,12 @@ const mockNotifySuccess = vi.fn()
 const mockNotifyError = vi.fn()
 
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
+vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: vi.fn(), navigate: vi.fn() }) }))
 vi.mock('@/lib/notify', () => ({ notifySuccess: (...a: unknown[]) => mockNotifySuccess(...a), notifyError: (...a: unknown[]) => mockNotifyError(...a) }))
-// INTERVIEW-FLOW-BINDING-1: flat mock — InterviewStatusCard's flow-override
+// INTERVIEW-WORKFLOW-1: flat mock — InterviewStatusCard's workflow-override
 // picker has its own fetch, kept out of the shared mockGet queue below.
-vi.mock('@/hooks/useInterviewFlows', () => ({
-  useInterviewFlows: () => ({ options: [], flows: [], loading: false, error: false }),
+vi.mock('@/hooks/useInterviewWorkflows', () => ({
+  useInterviewWorkflows: () => ({ options: [], workflows: [], byId: new Map(), describe: () => null, loading: false, error: false }),
 }))
 // Keep the real unwrap (importActual) — only the default client (get/post) is stubbed.
 vi.mock('@/lib/api', async () => {
@@ -44,11 +45,11 @@ const mockPost = api.post as unknown as ReturnType<typeof vi.fn>
 
 const AGENT = { id: 'a1', name: 'Kelly' }
 
-// The 7 known 422 guard-skip reasons (mirrors the component's own list) — used
+// The 8 known 422 guard-skip reasons (mirrors the component's own list) — used
 // to parametrize "every reason maps to its own message" below (§13).
 const KNOWN_START_REASONS = [
   'no_mobile_or_consent', 'no_active_connection', 'rejected_stage',
-  'placed_stage', 'no_active_flow', 'no_candidate', 'send_failed',
+  'placed_stage', 'no_active_flow', 'no_candidate', 'send_failed', 'no_agent',
 ] as const
 
 // A minimal ApplicationDetail — mapApplicationDetail is defensive, so only the
@@ -184,6 +185,71 @@ describe('InterviewsTab · start-interview action (Flow B)', () => {
   // INTERVIEW-SIBLING-1: a session borrowed from a sibling application of the same
   // candidate is a real session (interview truthy), so the start row already hides
   // via the existing !interview gate — the honest note comes from InterviewStatusCard.
+  // INTERVIEW-VISIBILITY-1 (Danny 29-09): a workflow in effect derives the agent
+  // — no picker, straight POST with the derived agent id.
+  describe('effective workflow (INTERVIEW-VISIBILITY-1)', () => {
+    const OWN_WF = { id: 'wf-own', name: 'Own workflow', agent: { id: 'a-own', name: 'Own agent' } }
+    const VACANCY_WF = { id: 'wf-vac', name: 'Vacancy workflow', agent: { id: 'a-vac', name: 'Vacancy agent' } }
+
+    it('renders no agent picker and shows the via-workflow caption when the application has its own workflow', async () => {
+      renderTab(app({ interviewWorkflow: OWN_WF }))
+      await waitFor(() => expect(screen.getByText('interview.start.viaWorkflow')).toBeInTheDocument())
+      expect(screen.queryByRole('button', { name: 'interview.start.agentPlaceholder' })).toBeNull()
+    })
+
+    it('POSTs the derived agent id straight away — own workflow wins over the vacancy default', async () => {
+      mockPost.mockResolvedValueOnce({ status: 201, data: { data: { category: 'busy', id: 'iv-9' } } })
+      renderTab(app({ interviewWorkflow: OWN_WF, vacancyInterviewWorkflow: VACANCY_WF }))
+      await waitFor(() => screen.getByRole('button', { name: 'interview.start.label' }))
+      await userEvent.click(screen.getByRole('button', { name: 'interview.start.label' }))
+      expect(mockPost).toHaveBeenCalledWith('/applications/app-1/interview', { agent_id: 'a-own' })
+    })
+
+    it('falls back to the vacancy default when the application has no workflow of its own', async () => {
+      mockPost.mockResolvedValueOnce({ status: 201, data: { data: { category: 'busy', id: 'iv-9' } } })
+      renderTab(app({ vacancyInterviewWorkflow: VACANCY_WF }))
+      await waitFor(() => screen.getByRole('button', { name: 'interview.start.label' }))
+      await userEvent.click(screen.getByRole('button', { name: 'interview.start.label' }))
+      expect(mockPost).toHaveBeenCalledWith('/applications/app-1/interview', { agent_id: 'a-vac' })
+    })
+
+    it('keeps the manual agent picker when neither the application nor the vacancy has a workflow', async () => {
+      renderTab(app())
+      await waitFor(() => expect(screen.getByRole('button', { name: 'interview.start.agentPlaceholder' })).toBeInTheDocument())
+      expect(screen.queryByText('interview.start.viaWorkflow')).toBeNull()
+    })
+
+    // Today's BE only emits `interview_workflow_id` on the application (no
+    // embedded `interview_workflow` object — ApplicationDetailResource.php:87),
+    // so the own workflow must be resolved by id from the tenant's workflow
+    // list, same order as `linkedWorkflow` in useInterviewOverrides.
+    it('resolves the own workflow by interviewWorkflowId from the tenant workflow list when no embedded object is sent', async () => {
+      vi.resetModules()
+      vi.doMock('@/hooks/useInterviewWorkflows', () => ({
+        useInterviewWorkflows: () => ({
+          options: [], workflows: [], loading: false, error: false, describe: () => null,
+          byId: new Map([['wf-1', { id: 'wf-1', name: 'Listed workflow', agent: { id: 'a-own', name: 'Listed agent' } }]]),
+        }),
+      }))
+      const { default: TabWithById } = await import('./InterviewsTab')
+      mockPost.mockResolvedValueOnce({ status: 201, data: { data: { category: 'busy', id: 'iv-9' } } })
+      const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      render(<QueryClientProvider client={qc}><TabWithById application={app({ interviewWorkflowId: 'wf-1', hasInterviewWorkflowField: true })} /></QueryClientProvider>)
+      await waitFor(() => screen.getByRole('button', { name: 'interview.start.label' }))
+      expect(screen.queryByRole('button', { name: 'interview.start.agentPlaceholder' })).toBeNull()
+      await userEvent.click(screen.getByRole('button', { name: 'interview.start.label' }))
+      expect(mockPost).toHaveBeenCalledWith('/applications/app-1/interview', { agent_id: 'a-own' })
+    })
+
+    // A workflow that resolved but carries NO agent must not hide the picker —
+    // otherwise the Start button only ever fires the dead "no agent chosen" error.
+    it('shows the manual agent picker when a workflow is in effect but resolves no agent', async () => {
+      renderTab(app({ interviewWorkflow: { id: 'wf-no-agent', name: 'No-agent workflow', agent: null } }))
+      await waitFor(() => expect(screen.getByRole('button', { name: 'interview.start.agentPlaceholder' })).toBeInTheDocument())
+      expect(screen.queryByText('interview.start.viaWorkflow')).toBeNull()
+    })
+  })
+
   it('hides the start row and shows the borrowed-session note when sessionScope is candidate', () => {
     renderTab(app({
       interview: {

@@ -286,6 +286,7 @@
       "unavailable": "Interview starten ist noch nicht verfügbar. Wartet auf die Backend-Anbindung.",
       "noAgentChosen": "Wählen Sie zuerst einen KI-Agenten.",
       "loadError": "KI-Agenten konnten nicht geladen werden.",
+      "viaWorkflow": "Start über {{workflow}} ({{agent}})",
       "reasons": {
         "no_mobile_or_consent": "Der Kandidat hat keine Mobilnummer oder keine WhatsApp-Zustimmung.",
         "no_active_connection": "Keine aktive WhatsApp-Verbindung für diese Stelle.",
@@ -293,7 +294,8 @@
         "placed_stage": "Diese Bewerbung ist bereits platziert. Es kann kein Interview gestartet werden.",
         "no_active_flow": "Der gewählte KI-Agent hat keinen aktiven Interview-Flow.",
         "no_candidate": "Kein Kandidat mit dieser Bewerbung verknüpft.",
-        "send_failed": "Versand fehlgeschlagen. Bitte erneut versuchen."
+        "send_failed": "Versand fehlgeschlagen. Bitte erneut versuchen.",
+        "no_agent": "Kein Interview-Workflow oder KI-Agent verfügbar."
       }
     },
     "status": {
@@ -329,7 +331,10 @@
       "flowOverrideLabel": "Stellen-Standard verwenden",
       "flowOverridePlaceholder": "Abweichender Interviewflow…",
       "flowOverrideSaved": "Interviewflow aktualisiert.",
-      "workflowOverrideSaved": "Interview-Workflow aktualisiert."
+      "workflowOverrideSaved": "Interview-Workflow aktualisiert.",
+      "vacancyDefault": "Standard der Stelle: {{workflow}} · {{agent}}",
+      "editInVacancy": "In der Stelle ändern → KI-Agent",
+      "noWorkflow": "Kein Interview-Workflow: wählen Sie oben einen aus oder legen Sie den Stellen-Standard fest."
     },
     "history": {
       "status": {

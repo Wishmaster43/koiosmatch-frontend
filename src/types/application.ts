@@ -116,6 +116,13 @@ export interface ApplicationInterview {
   lastMessageAt: string | null
   // Backed by `completed_at` — there is no `ended_at` column.
   endedAt: string | null
+  // INTERVIEW-VISIBILITY-1 (KOIOS-ROW-2 window): the moment `turn` flipped to
+  // 'candidate' — null on every other turn. Present on BOTH list and detail once
+  // the backend ships it (tolerant: absent on an older payload → null → the
+  // waiting-duration cell renders nothing extra, never a fabricated value).
+  // Optional (mirrors questionStepIndex above) so existing fixtures across the
+  // codebase that build an ApplicationInterview literal by hand keep compiling.
+  waitingSince?: string | null
   // ELAPSED wall-clock seconds since the session started (nights and weekends
   // included), NOT time spent conversing. Detail-only; label it accordingly.
   durationSeconds: number | null
@@ -319,6 +326,14 @@ export interface ApplicationDetail extends Application {
   interviewWorkflowId: Id | null
   interviewWorkflow: InterviewWorkflowRef | null
   hasInterviewWorkflowField: boolean
+  // INTERVIEW-VISIBILITY-1: the VACANCY's own default interview workflow (never
+  // this application's own override above) — presence-gated (§3): `undefined`
+  // means the backend does not send this key at all yet (no honest claim either
+  // way, so no "no workflow" caption), `null` means the key exists and the
+  // vacancy really has none. Drives the "Standaard van vacature" caption + the
+  // "start via workflow" derived agent when this application carries no
+  // override of its own.
+  vacancyInterviewWorkflow: InterviewWorkflowRef | null | undefined
 }
 
 /** A raw candidate as the API nests it under an application. */
@@ -339,6 +354,10 @@ export interface ApiAppVacancy {
   status_label?: string; status?: string; employment_type?: string; location?: string
   salary?: string; hours?: string; experience?: string; seniority?: string; education?: string
   branch?: string; industry?: string; category?: string; skills?: unknown[]; tags?: unknown[]
+  // INTERVIEW-VISIBILITY-1: the vacancy's own default interview workflow, nested
+  // on the application's `vacancy` block — optional, a backend that doesn't send
+  // it yet leaves the caption/button hidden rather than showing a guess.
+  interview_workflow?: InterviewWorkflow | null
   [k: string]: unknown
 }
 
@@ -453,6 +472,11 @@ export interface ApiApplication {
     interview_session_scope?: 'application' | 'candidate'
     completed_at?: string | null
     last_sent_at?: string | null
+    // INTERVIEW-VISIBILITY-1: the newer spellings the backend may ship on BOTH
+    // list and detail — tolerant fallbacks alongside the existing columns above,
+    // never a second source of truth (mapInterview prefers these when present).
+    last_message_at?: string | null
+    waiting_since?: string | null
     disqualified_reason?: string | null
     agent?: { id?: Id; name?: string } | null
     // The flow's own id (InterviewSessionResource.php:81) — detail-only.

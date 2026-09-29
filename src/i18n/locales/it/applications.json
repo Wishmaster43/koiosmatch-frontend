@@ -286,6 +286,7 @@
       "unavailable": "L'avvio del colloquio non è ancora disponibile. In attesa del collegamento con il backend.",
       "noAgentChosen": "Scegli prima un agente AI.",
       "loadError": "Impossibile caricare gli agenti AI.",
+      "viaWorkflow": "Avvia tramite {{workflow}} ({{agent}})",
       "reasons": {
         "no_mobile_or_consent": "Il candidato non ha un numero di cellulare o non ha dato il consenso a WhatsApp.",
         "no_active_connection": "Nessun collegamento WhatsApp attivo per questa posizione.",
@@ -293,7 +294,8 @@
         "placed_stage": "Questa candidatura è già stata collocata. Non è possibile avviare un colloquio.",
         "no_active_flow": "L'agente AI scelto non ha un flusso di colloquio attivo.",
         "no_candidate": "Nessun candidato collegato a questa candidatura.",
-        "send_failed": "Invio non riuscito. Riprova."
+        "send_failed": "Invio non riuscito. Riprova.",
+        "no_agent": "Nessun workflow di colloquio o agente IA disponibile."
       }
     },
     "status": {
@@ -329,7 +331,10 @@
       "flowOverrideLabel": "Usa il flusso predefinito della posizione",
       "flowOverridePlaceholder": "Flusso di colloquio alternativo…",
       "flowOverrideSaved": "Flusso di colloquio aggiornato.",
-      "workflowOverrideSaved": "Workflow di colloquio aggiornato."
+      "workflowOverrideSaved": "Workflow di colloquio aggiornato.",
+      "vacancyDefault": "Predefinito della posizione: {{workflow}} · {{agent}}",
+      "editInVacancy": "Modifica nella posizione → agente IA",
+      "noWorkflow": "Nessun workflow di colloquio: scegline uno sopra o imposta il predefinito della posizione."
     },
     "history": {
       "status": {

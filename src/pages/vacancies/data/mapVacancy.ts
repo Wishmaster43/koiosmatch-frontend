@@ -7,6 +7,40 @@ import { toCoord } from '@/lib/coords'
 import { mapKoiosAiAdvice } from '@/lib/koiosAdviceMap'
 import type { Id, Loose } from '@/types/common'
 import type { ApiVacancy, MatchCountState, Vacancy, VacancyDetail } from '@/types/vacancy'
+import type { ApplicationInterview } from '@/types/application'
+
+/**
+ * INTERVIEW-VISIBILITY-1: the SAME turn/category normalisation as the
+ * applications feature's own mapInterview (data/mapApplication.ts) — kept as
+ * its own small copy here rather than a cross-entity import: that module lives
+ * behind the applications `shared.ts` barrel (§2), which eagerly pulls in
+ * AddApplicationModal/InterviewStatusCard and would drag their weight (and any
+ * side-effecting import inside them) into every consumer of this pure mapper,
+ * including its own unit tests (BARREL-DATETIME-LES). Only the fields the
+ * shared InterviewProgressCell actually renders are normalised here.
+ */
+// A NEW field on a NEW (still speculative) BE contract — English-only 'candidate'/
+// 'agent' is what INTERVIEW-VISIBILITY-1 promises here (unlike the older session
+// `turn` column mapApplication.ts normalises, this surface has no legacy Dutch
+// spelling to tolerate), so no alias table is needed.
+function mapApplicantInterview(raw?: {
+  category?: string; current_status?: string | null; step?: number | null; total?: number
+  turn?: string | null; waiting_since?: string | null
+} | null): ApplicationInterview | null {
+  if (!raw) return null
+  const turn = raw.turn === 'candidate' || raw.turn === 'agent' ? raw.turn : null
+  return {
+    category: (raw.category ?? 'busy') as ApplicationInterview['category'],
+    currentStatus: raw.current_status ?? null,
+    step: raw.step ?? null,
+    total: raw.total ?? 0,
+    questionStepIndex: null, questionStepsTotal: 0, sessionScope: 'application',
+    id: null, agent: null, flowName: null, flowId: null, turn,
+    startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null,
+    pausedAt: null, pausedBy: null,
+    waitingSince: raw.waiting_since ?? null,
+  }
+}
 
 // VACANCY-LEADS-COUNT-1: normalise the raw match-count provenance object,
 // defensively — a missing/null state means "never computed", not "fresh".
@@ -301,6 +335,11 @@ export function mapVacancyDetail(raw: ApiVacancy = {}): VacancyDetail {
         phaseColor: phase.color ?? a.phase_color ?? '#9CA3AF',
         source: a.source ?? '',
         created: a.created_at ?? '',
+        // INTERVIEW-VISIBILITY-1: presence-gated (§3) — `undefined` when the
+        // backend doesn't send the `interview` key on this applicant row at
+        // all yet, vs. explicit `null` meaning "no session". Absent the key,
+        // rendering a dash would falsely read as "no session" on every row.
+        interview: 'interview' in a ? mapApplicantInterview(a.interview) : undefined,
       }
     }),
     customFields: (Array.isArray(raw.custom_fields) ? raw.custom_fields : []).map(f => ({ id: f.id, name: f.name ?? f.label ?? '', value: f.value ?? '' })),
