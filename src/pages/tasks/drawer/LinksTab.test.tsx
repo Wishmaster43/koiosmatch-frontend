@@ -71,8 +71,6 @@ describe('LinksTab — REFERENCE-LINK-1 (dependent on the task\'s own candidate 
     const user = userEvent.setup()
     render(<LinksTab task={linkedTask} onAddLink={onAddLink} onRemoveLink={vi.fn()} />)
     await user.click(screen.getByRole('button', { name: 'links.add' }))
-    // The probe confirms the route before `reference` shows in the type dropdown.
-    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/candidates/cand-1/references', { params: { per_page: 1 }, quietStatuses: [404] }))
     // Open the type picker (its trigger shows the default type's label) and pick "reference".
     await user.click(screen.getByRole('button', { name: /links\.candidate/ }))
     await user.click(await screen.findByText('links.reference'))
@@ -81,16 +79,17 @@ describe('LinksTab — REFERENCE-LINK-1 (dependent on the task\'s own candidate 
     expect(onAddLink).toHaveBeenCalledWith({ type: 'reference', id: 'ref-1', label: 'Referentie A' })
   })
 
-  it('is NOT offered when the light references route 404s', async () => {
+  // INTERVIEW-VISIBILITY-1b (BE f48feb90): the light references route is live, so the
+  // token is offered on the candidate link alone — no availability probe is sent first.
+  it('is offered as soon as the task has a candidate link, without a probe request', async () => {
     mockGet.mockReset()
-    mockGet.mockImplementation((url: string) => url === '/candidates/cand-1/references'
-      ? Promise.reject({ response: { status: 404 } })
-      : Promise.resolve({ data: [] }))
+    mockGet.mockResolvedValue({ data: [] })
     const user = userEvent.setup()
     render(<LinksTab task={linkedTask} onAddLink={vi.fn()} onRemoveLink={vi.fn()} />)
     await user.click(screen.getByRole('button', { name: 'links.add' }))
-    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/candidates/cand-1/references', { params: { per_page: 1 }, quietStatuses: [404] }))
-    expect(screen.queryByText('links.reference')).toBeNull()
+    await user.click(screen.getByRole('button', { name: /links\.candidate/ }))
+    expect(await screen.findByText('links.reference')).toBeInTheDocument()
+    expect(mockGet).not.toHaveBeenCalledWith('/candidates/cand-1/references', expect.objectContaining({ params: { per_page: 1 } }))
   })
 
   it('is NOT offered when the task has no candidate link', async () => {

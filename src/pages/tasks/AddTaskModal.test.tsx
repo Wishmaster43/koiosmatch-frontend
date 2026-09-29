@@ -171,7 +171,7 @@ vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: authState.user
 // raw lookup lists) resolve their own fixtures; FAIL_ID exercises the load-error path.
 // Mutable so the link-picker load-failure test can make ONE endpoint reject and
 // then heal it again to prove the retry actually re-fetches.
-const { apiState } = vi.hoisted(() => ({ apiState: { candidatesFail: false, referencesUnavailable: false } }))
+const { apiState } = vi.hoisted(() => ({ apiState: { candidatesFail: false } }))
 // /contacts rows, reset to empty per test in beforeEach; the seam test below
 // overrides it before rendering to check the function shows in the picker.
 // vi.hoisted (like apiState) so the mock factory below — itself hoisted above
@@ -187,13 +187,8 @@ vi.mock('@/lib/api', async (importOriginal) => {
     if (url === '/task-priorities')  return Promise.resolve({ data: PRIORITY_ROWS })
     if (url === '/candidates')       return apiState.candidatesFail ? Promise.reject(new Error('boom')) : Promise.resolve({ data: { data: CANDIDATE_ROWS } })
     if (url === '/departments')      return Promise.resolve({ data: { data: DEPARTMENT_ROWS } })
-    // REFERENCE-LINK-1: candidate cand-1's light references route (probe + picker);
-    // `apiState.referencesUnavailable` flips it to a quiet 404 (BE route not live yet).
-    if (url === '/candidates/cand-1/references') {
-      return apiState.referencesUnavailable
-        ? Promise.reject({ response: { status: 404 } })
-        : Promise.resolve({ data: { data: REFERENCE_ROWS } })
-    }
+    // REFERENCE-LINK-1: candidate cand-1's light references route (the picker list; live since BE f48feb90).
+    if (url === '/candidates/cand-1/references') return Promise.resolve({ data: { data: REFERENCE_ROWS } })
     // /contacts defaults empty; the CONTACT-PICKER-FUNCTION-1 seam test overrides
     // `contactState.rows` to exercise the rendered option label.
     if (url === '/contacts')         return Promise.resolve({ data: { data: contactState.rows } })
@@ -218,7 +213,6 @@ beforeEach(() => {
   teamsState.rows = ORIGINAL_TEAMS
   teamsState.isError = false
   apiState.candidatesFail = false
-  apiState.referencesUnavailable = false
   contactState.rows = []
 })
 // Blanket safety net for the fixed-clock tests below: if one of them fails/throws
@@ -803,20 +797,6 @@ describe('AddTaskModal · REFERENCE-LINK-1 — a task can couple to one of the l
 
     await user.click(screen.getByRole('button', { name: 'links.add' }))
     await user.click(screen.getByRole('button', { name: 'links.application' }))
-    expect(screen.queryByRole('button', { name: 'links.reference' })).toBeNull()
-  })
-
-  it('offers no reference token when the light references route 404s (route not live yet)', async () => {
-    apiState.referencesUnavailable = true
-    const user = userEvent.setup()
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-
-    await user.click(screen.getByRole('button', { name: /modal\.candidate/ }))
-    await user.click(await screen.findByRole('button', { name: 'Piet Jansen' }))
-    await user.click(screen.getByRole('button', { name: 'links.add' }))
-    await user.click(screen.getByRole('button', { name: 'links.application' }))
-    const api = (await import('@/lib/api')).default
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/candidates/cand-1/references', { params: { per_page: 1 }, quietStatuses: [404] }))
     expect(screen.queryByRole('button', { name: 'links.reference' })).toBeNull()
   })
 })
