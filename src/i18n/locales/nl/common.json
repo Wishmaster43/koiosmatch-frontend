@@ -355,7 +355,8 @@
         "reschedule_task": "Verzetten",
         "send_whatsapp": "WhatsApp sturen",
         "create_task": "Taak maken",
-        "search_candidates": "Kandidaten zoeken"
+        "search_candidates": "Kandidaten zoeken",
+        "restore_candidate": "Terugzetten"
       }
     },
     "tools": {
@@ -367,14 +368,15 @@
       "create_task": "Taak maken",
       "send_whatsapp": "WhatsApp sturen",
       "search_candidates": "Kandidaten zoeken",
-      "unknown": "Uitvoeren"
+      "unknown": "Uitvoeren",
+      "restore_candidate": "Terugzetten"
     },
     "feedback": {
       "up": "Nuttig",
       "down": "Niet nuttig",
       "thanks": "Bedankt voor je feedback",
       "reasonsLabel": "Reden",
-      "reasonRequired": "Kies minstens \u00e9\u00e9n reden",
+      "reasonRequired": "Kies minstens één reden",
       "commentPlaceholder": "Toelichting (optioneel)",
       "send": "Versturen",
       "error": "Feedback versturen is niet gelukt. Probeer het opnieuw.",
@@ -461,7 +463,10 @@
       "auto_processing": "Wordt automatisch verwerkt.",
       "check_followup_task": "Bekijk de aangemaakte vervolgtaak."
     },
-    "askKoios": "Vraag Koios"
+    "askKoios": "Vraag Koios",
+    "remove": "Verwijderen",
+    "removed": "Melding verwijderd",
+    "removeFailed": "Verwijderen mislukt"
   },
   "activeFilters": "Actieve filters",
   "clearAll": "Alles wissen",

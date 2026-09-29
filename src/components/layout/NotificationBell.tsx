@@ -18,23 +18,25 @@
  * SAME mapping) — re-exported here so existing imports/tests are unaffected.
  * A row that resolves to a target also renders the EntityLink-style trailing
  * new-tab icon, opening that record's deep link in a new tab.
+ *
+ * NOTIF-I18N-1 (Danny 29-09, bell review as Kelly, EN): each row now renders in
+ * the VIEWING USER's language, names the record it is about, offers the same
+ * executable actions a Koios suggestion row does, and can be removed — see
+ * `./NotificationRow`. The per-row trash button and the header "mark all read"
+ * button render only once the backend payload is the new shape (feature
+ * detection on `record`/`title_key`/`actions`), so an older backend never shows
+ * a dead affordance.
  */
 import { useState, useRef } from 'react'
-import type { MouseEvent as ReactMouseEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
-import { Bell, ExternalLink } from 'lucide-react'
+import { Bell } from 'lucide-react'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useClickOutside } from '@/hooks/useClickOutside'
-import { askKoios } from '@/lib/koiosBridge'
-import { SectionTitle, BodyText, Caption } from '@/components/ui/typography'
-import KoiosAiMark from '@/components/ui/KoiosAiMark'
-import Button from '@/components/ui/Button'
-import {
-  resolveNotificationTarget, navigateToNotificationTarget, buildNotificationDeepLink, resolveActionLine,
-  resolveNotificationHref, koiosPromptOf,
-} from './notificationTarget'
+import { SectionTitle } from '@/components/ui/typography'
+import NotificationRow from './NotificationRow'
+import { resolveNotificationTarget } from './notificationTarget'
 import type { NotificationTarget } from './notificationTarget'
 
 // Re-exported for backward compatibility (existing imports/tests reach these
@@ -50,7 +52,11 @@ export default function NotificationBell() {
   // hand-built toLocaleString (naronde wave-B1; the local fmt helper is gone).
   const { formatDateTime } = useDateFormat()
   const fmt = (iso?: string) => (iso ? formatDateTime(iso) : '')
-  const { items, unseen, markAllSeen } = useNotifications()
+  const { items, unseen, markAllSeen, removeNotification } = useNotifications()
+  // NOTIF-I18N-1: feature-detect the new payload shape — a row carrying `record`
+  // or `title_key` (present, even null) means the backend sends the new fields,
+  // so the trash/read-all affordances are real; an older backend never shows them.
+  const newShape = items.some(n => Object.hasOwn(n, 'record') || Object.hasOwn(n, 'title_key'))
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const panelRef = useFocusTrap<HTMLDivElement>(() => setOpen(false))
@@ -108,71 +114,28 @@ export default function NotificationBell() {
           background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12,
           boxShadow: 'var(--shadow-float)',
         }}>
-          <SectionTitle style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)' }}>
-            {t('notifications.title')}
-          </SectionTitle>
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '12px 16px', borderBottom: '1px solid var(--border)',
+          }}>
+            <SectionTitle>{t('notifications.title')}</SectionTitle>
+          </div>
           {items.length === 0 ? (
             <div style={{ padding: '20px 16px', fontSize: 13, fontStyle: 'italic', color: 'var(--text-muted)', textAlign: 'center' }}>
               {t('notifications.empty')}
             </div>
           ) : (
-            items.map((n, i) => {
-              // A row navigates only when it carries a real, resolvable target;
-              // a zip-ready row carries an external signed URL instead of a record.
-              const target = resolveNotificationTarget(n)
-              const href = target == null ? resolveNotificationHref(n) : null
-              const clickable = target != null || href != null
-              // NOTIF-PAYLOAD: a workflow-run row also shows its status + next step.
-              const action = resolveActionLine(n)
-              const koiosPrompt = koiosPromptOf(n)
-              return (
-                <div
-                  key={n.id ?? i}
-                  role={clickable ? 'button' : undefined}
-                  tabIndex={clickable ? 0 : -1}
-                  onClick={clickable ? () => { if (target) navigateToNotificationTarget(target); else window.open(href!, '_blank', 'noopener,noreferrer'); setOpen(false) } : undefined}
-                  onKeyDown={clickable ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (target) navigateToNotificationTarget(target); else window.open(href!, '_blank', 'noopener,noreferrer'); setOpen(false) } } : undefined}
-                  style={{
-                    padding: '10px 16px', borderBottom: i < items.length - 1 ? '1px solid var(--border)' : 'none',
-                    display: 'flex', alignItems: 'flex-start', gap: 8,
-                    cursor: clickable ? 'pointer' : 'default',
-                  }}
-                >
-                  <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <BodyText style={{ fontWeight: n.seen ? 400 : 600 }}>{n.title || '—'}</BodyText>
-                    {n.body && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{n.body}</div>}
-                    {action && (
-                      // K-192: next_action is a KEY, rendered only for the two known
-                      // keys — an unknown/null key shows the status line alone.
-                      <Caption>
-                        {t(`notifications.actionStatus.${action.status}`)}{action.nextAction ? ` ${t(`notifications.nextAction.${action.nextAction}`)}` : ''}
-                      </Caption>
-                    )}
-                    <Caption>{fmt(n.created_at)}</Caption>
-                    {/* X-31: "ask Koios" prefills the panel with the row's prompt (never auto-sent,
-                        API-CREDITS-1) — rendered only when the row carries one. */}
-                    {koiosPrompt && (
-                      <div style={{ marginTop: 4 }}>
-                        <Button variant="ghost" size="sm"
-                          onClick={(e: ReactMouseEvent) => { e.stopPropagation(); askKoios(koiosPrompt); setOpen(false) }}>
-                          <KoiosAiMark tone="soft" size={12} /> {t('notifications.askKoios')}
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                  {/* EntityLink idiom: the row name navigates in-app, this icon opens
-                      the same record's deep link in a new browser tab. */}
-                  {clickable && (
-                    <Button href={target ? buildNotificationDeepLink(target) : href!} target="_blank" rel="noopener noreferrer"
-                      onClick={(e: ReactMouseEvent) => e.stopPropagation()} variant="ghost" iconOnly size="sm"
-                      title={t('openInNewTab')} aria-label={t('openInNewTab')}
-                      style={{ flexShrink: 0, opacity: 0.65, marginTop: 2 }}>
-                      <ExternalLink size={12} />
-                    </Button>
-                  )}
-                </div>
-              )
-            })
+            items.map((n, i) => (
+              <NotificationRow
+                key={n.id ?? i}
+                n={n}
+                isLast={i === items.length - 1}
+                fmt={fmt}
+                showRemove={newShape}
+                onRemove={removeNotification}
+                onClose={() => setOpen(false)}
+              />
+            ))
           )}
         </div>
       )}

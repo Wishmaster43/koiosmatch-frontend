@@ -1,0 +1,119 @@
+{
+  "application": {
+    "created": {
+      "title": "Nieuwe sollicitatie"
+    },
+    "rejection_not_sent": {
+      "title": "Afwijzing niet verstuurd, bel de kandidaat zelf",
+      "body": "Een afgewezen kandidaat heeft geen WhatsApp- of e-mailtoestemming. Geef de uitslag telefonisch door. ({{workflow}})"
+    }
+  },
+  "opportunity": {
+    "won": {
+      "title": "Kans gewonnen"
+    },
+    "lost": {
+      "title": "Kans verloren"
+    }
+  },
+  "conversation": {
+    "escalated": {
+      "title": "WhatsApp-gesprek geëscaleerd",
+      "body": "Een gesprek heeft menselijke opvolging nodig."
+    },
+    "inbound": {
+      "title": "Nieuw WhatsApp-bericht"
+    }
+  },
+  "security": {
+    "mfa_reset": {
+      "title": "Je MFA is gereset door een beheerder"
+    }
+  },
+  "sync": {
+    "failed": {
+      "title": "Koppeling-sync mislukt"
+    }
+  },
+  "match": {
+    "approval_pending": {
+      "title": "Match wacht op goedkeuring",
+      "body": "Een match wijkt af van de prijsafspraak of vereist altijd goedkeuring. Beoordeel hem."
+    },
+    "expiring": {
+      "title": "Match verloopt binnenkort"
+    }
+  },
+  "customer": {
+    "no_contact": {
+      "title": "Klant lang geen contact",
+      "body": "Geen recent contact geregistreerd."
+    },
+    "match_ending": {
+      "title": "Match bij klant loopt af"
+    },
+    "task_overdue": {
+      "title": "Openstaande taak bij klant verlopen"
+    },
+    "contract_ending": {
+      "title": "Samenwerkingsovereenkomst loopt af"
+    },
+    "vacancy_stale": {
+      "title": "Vacature bij klant staat lang stil"
+    }
+  },
+  "candidate": {
+    "reactivated": {
+      "title": "Kandidaat weer beschikbaar"
+    },
+    "phase_stale": {
+      "title": "Lead staat stil",
+      "body": "Deze lead staat al {{days}} werkdagen in fase {{phase}}, zonder geplande afspraak of openstaande taak."
+    },
+    "retention_due_escalation": {
+      "title": "ESCALATIE: dossier staat te lang gearchiveerd (AVG)",
+      "body": "Dit kandidaatdossier is gearchiveerd en staat langer open dan de ingestelde escalatietermijn. Beoordeel of het definitief verwijderd kan worden. Dat blijft altijd een handmatige actie."
+    }
+  },
+  "retention": {
+    "entity_erase_blocked": {
+      "title": "Verwijdering overgeslagen: nog in gebruik"
+    }
+  },
+  "workflow": {
+    "not_informed": {
+      "title": "Kandidaat niet geïnformeerd",
+      "body_one": "Deze kandidaat heeft geen WhatsApp- of e-mailtoestemming. Neem zelf contact op. ({{workflow}})",
+      "body_other": "{{count}} kandidaten hebben geen WhatsApp- of e-mailtoestemming. Neem zelf contact op. ({{workflow}})"
+    },
+    "not_informed_whatsapp": {
+      "title": "Kandidaat kon niet geïnformeerd worden",
+      "body_one": "Deze kandidaat heeft geen WhatsApp-toestemming voor het \"hoe gaat het\"-berichtje. Benader diegene zelf. ({{workflow}})",
+      "body_other": "{{count}} kandidaten hebben geen WhatsApp-toestemming voor het \"hoe gaat het\"-berichtje. Benader ze zelf. ({{workflow}})"
+    },
+    "not_informed_email": {
+      "title": "Kandidaat kon niet geïnformeerd worden",
+      "body": "Deze kandidaat heeft geen e-mailtoestemming om de videolink van de afspraak te ontvangen. Deel de link zelf. ({{workflow}})"
+    },
+    "not_informed_retention_consent": {
+      "title": "Kandidaat kon niet geïnformeerd worden",
+      "body": "Deze kandidaat heeft geen WhatsApp- of e-mailtoestemming voor de bewaartermijn-vraag. Benader diegene zelf. ({{workflow}})"
+    },
+    "stale_digest": {
+      "title_one": "{{count}} kandidaat zonder recent contact en zonder toestemming",
+      "title_other": "{{count}} kandidaten zonder recent contact en zonder toestemming",
+      "body_one": "{{count}} kandidaat gevonden zonder recent contact en zonder toestemming. Neem zelf contact op:",
+      "body_other": "{{count}} kandidaten gevonden zonder recent contact en zonder toestemming. Neem zelf contact op:"
+    }
+  },
+  "connector": {
+    "limit_blocked": {
+      "title": "Limiet bereikt: {{label}}",
+      "body": "{{label}} heeft de ingestelde limiet bereikt. Aanvragen worden nu geblokkeerd of in de wachtrij gezet. Vraag een verhoging aan via Instellingen."
+    },
+    "limit_blocked_platform": {
+      "title": "Limiet bereikt: {{label}}",
+      "body": "{{label}} heeft de ingestelde limiet bereikt voor een tenant. Keur een verhoging goed via het beheerscherm."
+    }
+  }
+}

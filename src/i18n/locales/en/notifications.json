@@ -1,0 +1,119 @@
+{
+  "application": {
+    "created": {
+      "title": "New application"
+    },
+    "rejection_not_sent": {
+      "title": "Rejection not sent, call the candidate yourself",
+      "body": "A rejected candidate has no WhatsApp or e-mail consent. Give the result by phone. ({{workflow}})"
+    }
+  },
+  "opportunity": {
+    "won": {
+      "title": "Deal won"
+    },
+    "lost": {
+      "title": "Deal lost"
+    }
+  },
+  "conversation": {
+    "escalated": {
+      "title": "WhatsApp conversation escalated",
+      "body": "A conversation needs human follow-up."
+    },
+    "inbound": {
+      "title": "New WhatsApp message"
+    }
+  },
+  "security": {
+    "mfa_reset": {
+      "title": "Your MFA was reset by an administrator"
+    }
+  },
+  "sync": {
+    "failed": {
+      "title": "Integration sync failed"
+    }
+  },
+  "match": {
+    "approval_pending": {
+      "title": "Match awaiting approval",
+      "body": "A match deviates from the pricing agreement or always requires approval. Please review it."
+    },
+    "expiring": {
+      "title": "Match expiring soon"
+    }
+  },
+  "customer": {
+    "no_contact": {
+      "title": "Customer without recent contact",
+      "body": "No recent contact recorded."
+    },
+    "match_ending": {
+      "title": "Customer match ending"
+    },
+    "task_overdue": {
+      "title": "Customer task overdue"
+    },
+    "contract_ending": {
+      "title": "Cooperation agreement ending"
+    },
+    "vacancy_stale": {
+      "title": "Customer vacancy stalled"
+    }
+  },
+  "candidate": {
+    "reactivated": {
+      "title": "Candidate available again"
+    },
+    "phase_stale": {
+      "title": "Lead stalled",
+      "body": "This lead has been in phase {{phase}} for {{days}} workdays, without a planned appointment or open task."
+    },
+    "retention_due_escalation": {
+      "title": "ESCALATION: dossier archived too long (AVG)",
+      "body": "This candidate dossier is archived and has been open longer than the configured escalation term. Review whether it can be permanently deleted. That always stays a manual action."
+    }
+  },
+  "retention": {
+    "entity_erase_blocked": {
+      "title": "Deletion skipped: still in use"
+    }
+  },
+  "workflow": {
+    "not_informed": {
+      "title": "Candidate not informed",
+      "body_one": "This candidate has no WhatsApp or e-mail consent. Reach out yourself. ({{workflow}})",
+      "body_other": "{{count}} candidates have no WhatsApp or e-mail consent. Reach out yourself. ({{workflow}})"
+    },
+    "not_informed_whatsapp": {
+      "title": "Could not inform candidate",
+      "body_one": "This candidate has no WhatsApp consent for the \"how are you\" check-in message. Reach out yourself. ({{workflow}})",
+      "body_other": "{{count}} candidates have no WhatsApp consent for the \"how are you\" check-in message. Reach out to them yourself. ({{workflow}})"
+    },
+    "not_informed_email": {
+      "title": "Could not inform candidate",
+      "body": "This candidate has no e-mail consent to receive the appointment video link. Share the link yourself. ({{workflow}})"
+    },
+    "not_informed_retention_consent": {
+      "title": "Could not inform candidate",
+      "body": "This candidate has no WhatsApp or e-mail consent for the retention question. Reach out yourself. ({{workflow}})"
+    },
+    "stale_digest": {
+      "title_one": "{{count}} candidate without recent contact and without consent",
+      "title_other": "{{count}} candidates without recent contact and without consent",
+      "body_one": "{{count}} candidate found without recent contact and without consent. Reach out yourself:",
+      "body_other": "{{count}} candidates found without recent contact and without consent. Reach out yourself:"
+    }
+  },
+  "connector": {
+    "limit_blocked": {
+      "title": "Limit reached: {{label}}",
+      "body": "{{label}} has reached its configured limit. Requests are now blocked or queued. Request an increase via Settings."
+    },
+    "limit_blocked_platform": {
+      "title": "Limit reached: {{label}}",
+      "body": "{{label}} has reached its configured limit for a tenant. Approve an increase via the admin screen."
+    }
+  }
+}

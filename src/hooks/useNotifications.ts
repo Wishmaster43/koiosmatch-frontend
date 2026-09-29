@@ -42,7 +42,28 @@ export interface AppNotification {
   next_action?: string | null
   // X-31: ready-made natural-language prompt for the "ask Koios" action.
   koios_action?: { prompt: string } | null
+  // NOTIF-I18N-1 (CMBE 2e388fe7): the lang-catalogue key that produced title/body
+  // ("notifications.<type>.title", null on a free-typed send) + its interpolation
+  // params, the resolved record the row is about, and zero or more executable
+  // actions — same shape as a Koios assistant suggestion's actions[].
+  title_key?: string | null
+  body_key?: string | null
+  params?: Record<string, unknown>
+  // label is null when the record is unresolved (cross-tenant or deleted).
+  record?: { type: string; id: string; label: string | null } | null
+  actions?: NotificationAction[]
   [k: string]: unknown
+}
+
+// One executable action on a notification row (NOTIF-I18N-1) — the same shape
+// AssistantSuggestions::action() returns, run through the SAME stage/confirm
+// runner (§0B: "Wizard and Auto are the SAME machinery").
+export interface NotificationAction {
+  key: string
+  tool: string
+  input: Record<string, unknown>
+  label_key: string
+  tool_label_key: string
 }
 
 const MAX_INDIVIDUAL_TOASTS = 3
@@ -141,5 +162,17 @@ export function useNotifications(pollMs = 60000) {
     api.post('/notifications/seen').catch(() => {})
   }, [])
 
-  return { items, unseen, markAllSeen, reload: load }
+  // NOTIF-I18N-1: remove one notification — optimistic, reverted with a toast on
+  // failure (the shared shape every list-row delete in the app already uses).
+  const removeNotification = useCallback((id: string | number) => {
+    const removed = items.find(n => n.id === id)
+    const index = items.findIndex(n => n.id === id)
+    setItems(prev => prev.filter(n => n.id !== id))
+    api.delete(`/notifications/${id}`).catch(() => {
+      if (removed) setItems(prev => { const next = [...prev]; next.splice(index, 0, removed); return next })
+      notify('error', t('notifications.removeFailed'))
+    })
+  }, [items, t])
+
+  return { items, unseen, markAllSeen, removeNotification, reload: load }
 }

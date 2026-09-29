@@ -355,7 +355,8 @@
         "reschedule_task": "Reagendar",
         "send_whatsapp": "Enviar WhatsApp",
         "create_task": "Criar tarefa",
-        "search_candidates": "Procurar candidatos"
+        "search_candidates": "Procurar candidatos",
+        "restore_candidate": "Restaurar"
       }
     },
     "tools": {
@@ -367,7 +368,8 @@
       "create_task": "Criar tarefa",
       "send_whatsapp": "Enviar WhatsApp",
       "search_candidates": "Procurar candidatos",
-      "unknown": "Executar"
+      "unknown": "Executar",
+      "restore_candidate": "Restaurar"
     },
     "feedback": {
       "up": "Útil",
@@ -461,7 +463,10 @@
       "auto_processing": "Será processado automaticamente.",
       "check_followup_task": "Consulte a tarefa de seguimento criada."
     },
-    "askKoios": "Pergunte ao Koios"
+    "askKoios": "Pergunte ao Koios",
+    "remove": "Remover",
+    "removed": "Notificação removida",
+    "removeFailed": "Falha ao remover"
   },
   "activeFilters": "Filtros ativos",
   "clearAll": "Limpar tudo",

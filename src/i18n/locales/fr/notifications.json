@@ -1,0 +1,119 @@
+{
+  "application": {
+    "created": {
+      "title": "Nouvelle candidature"
+    },
+    "rejection_not_sent": {
+      "title": "Refus non envoyé, appelez le candidat vous-même",
+      "body": "Un candidat refusé n'a pas de consentement WhatsApp ni e-mail. Communiquez le résultat par téléphone. ({{workflow}})"
+    }
+  },
+  "opportunity": {
+    "won": {
+      "title": "Opportunité gagnée"
+    },
+    "lost": {
+      "title": "Opportunité perdue"
+    }
+  },
+  "conversation": {
+    "escalated": {
+      "title": "Conversation WhatsApp escaladée",
+      "body": "Une conversation nécessite un suivi humain."
+    },
+    "inbound": {
+      "title": "Nouveau message WhatsApp"
+    }
+  },
+  "security": {
+    "mfa_reset": {
+      "title": "Votre MFA a été réinitialisé par un administrateur"
+    }
+  },
+  "sync": {
+    "failed": {
+      "title": "Échec de la synchronisation de l'intégration"
+    }
+  },
+  "match": {
+    "approval_pending": {
+      "title": "Match en attente d'approbation",
+      "body": "Un match s'écarte de l'accord tarifaire ou nécessite toujours une approbation. Veuillez le vérifier."
+    },
+    "expiring": {
+      "title": "Match expire bientôt"
+    }
+  },
+  "customer": {
+    "no_contact": {
+      "title": "Client sans contact récent",
+      "body": "Aucun contact récent enregistré."
+    },
+    "match_ending": {
+      "title": "Match chez le client se termine"
+    },
+    "task_overdue": {
+      "title": "Tâche ouverte chez le client en retard"
+    },
+    "contract_ending": {
+      "title": "Accord de collaboration se termine"
+    },
+    "vacancy_stale": {
+      "title": "Poste chez le client stagne"
+    }
+  },
+  "candidate": {
+    "reactivated": {
+      "title": "Candidat à nouveau disponible"
+    },
+    "phase_stale": {
+      "title": "Lead stagnant",
+      "body": "Ce lead est dans la phase {{phase}} depuis {{days}} jours ouvrés, sans rendez-vous planifié ni tâche ouverte."
+    },
+    "retention_due_escalation": {
+      "title": "ESCALADE : dossier archivé trop longtemps (RGPD)",
+      "body": "Ce dossier candidat est archivé et ouvert depuis plus longtemps que le délai d'escalade configuré. Vérifiez s'il peut être définitivement supprimé. Cela reste toujours une action manuelle."
+    }
+  },
+  "retention": {
+    "entity_erase_blocked": {
+      "title": "Suppression ignorée : encore utilisé"
+    }
+  },
+  "workflow": {
+    "not_informed": {
+      "title": "Candidat non informé",
+      "body_one": "Ce candidat n'a pas de consentement WhatsApp ni e-mail. Contactez-le vous-même. ({{workflow}})",
+      "body_other": "{{count}} candidats n'ont pas de consentement WhatsApp ni e-mail. Contactez-les vous-même. ({{workflow}})"
+    },
+    "not_informed_whatsapp": {
+      "title": "Candidat n'a pas pu être informé",
+      "body_one": "Ce candidat n'a pas de consentement WhatsApp pour le message \"comment allez-vous\". Contactez-le vous-même. ({{workflow}})",
+      "body_other": "{{count}} candidats n'ont pas de consentement WhatsApp pour le message \"comment allez-vous\". Contactez-les vous-même. ({{workflow}})"
+    },
+    "not_informed_email": {
+      "title": "Candidat n'a pas pu être informé",
+      "body": "Ce candidat n'a pas de consentement e-mail pour recevoir le lien vidéo du rendez-vous. Partagez le lien vous-même. ({{workflow}})"
+    },
+    "not_informed_retention_consent": {
+      "title": "Candidat n'a pas pu être informé",
+      "body": "Ce candidat n'a pas de consentement WhatsApp ni e-mail pour la question de conservation. Contactez-le vous-même. ({{workflow}})"
+    },
+    "stale_digest": {
+      "title_one": "{{count}} candidat sans contact récent et sans consentement",
+      "title_other": "{{count}} candidats sans contact récent et sans consentement",
+      "body_one": "{{count}} candidat trouvé sans contact récent et sans consentement. Contactez-le vous-même :",
+      "body_other": "{{count}} candidats trouvés sans contact récent et sans consentement. Contactez-les vous-même :"
+    }
+  },
+  "connector": {
+    "limit_blocked": {
+      "title": "Limite atteinte : {{label}}",
+      "body": "{{label}} a atteint sa limite configurée. Les demandes sont désormais bloquées ou mises en file d'attente. Demandez une augmentation via Paramètres."
+    },
+    "limit_blocked_platform": {
+      "title": "Limite atteinte : {{label}}",
+      "body": "{{label}} a atteint sa limite configurée pour un tenant. Approuvez une augmentation via l'écran d'administration."
+    }
+  }
+}

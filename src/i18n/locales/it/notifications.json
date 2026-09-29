@@ -1,0 +1,119 @@
+{
+  "application": {
+    "created": {
+      "title": "Nuova candidatura"
+    },
+    "rejection_not_sent": {
+      "title": "Rifiuto non inviato, chiamare il candidato personalmente",
+      "body": "Un candidato rifiutato non ha consenso WhatsApp né e-mail. Comunicare l'esito per telefono. ({{workflow}})"
+    }
+  },
+  "opportunity": {
+    "won": {
+      "title": "Opportunità vinta"
+    },
+    "lost": {
+      "title": "Opportunità persa"
+    }
+  },
+  "conversation": {
+    "escalated": {
+      "title": "Conversazione WhatsApp escalata",
+      "body": "Una conversazione richiede un follow-up umano."
+    },
+    "inbound": {
+      "title": "Nuovo messaggio WhatsApp"
+    }
+  },
+  "security": {
+    "mfa_reset": {
+      "title": "La tua MFA è stata reimpostata da un amministratore"
+    }
+  },
+  "sync": {
+    "failed": {
+      "title": "Sincronizzazione dell'integrazione non riuscita"
+    }
+  },
+  "match": {
+    "approval_pending": {
+      "title": "Match in attesa di approvazione",
+      "body": "Un match si discosta dall'accordo tariffario o richiede sempre approvazione. Esaminarlo."
+    },
+    "expiring": {
+      "title": "Match in scadenza a breve"
+    }
+  },
+  "customer": {
+    "no_contact": {
+      "title": "Cliente senza contatto recente",
+      "body": "Nessun contatto recente registrato."
+    },
+    "match_ending": {
+      "title": "Match presso il cliente in scadenza"
+    },
+    "task_overdue": {
+      "title": "Attività aperta presso il cliente scaduta"
+    },
+    "contract_ending": {
+      "title": "Accordo di collaborazione in scadenza"
+    },
+    "vacancy_stale": {
+      "title": "Posizione presso il cliente ferma da tempo"
+    }
+  },
+  "candidate": {
+    "reactivated": {
+      "title": "Candidato di nuovo disponibile"
+    },
+    "phase_stale": {
+      "title": "Lead fermo",
+      "body": "Questo lead è nella fase {{phase}} da {{days}} giorni lavorativi, senza appuntamento pianificato o attività aperta."
+    },
+    "retention_due_escalation": {
+      "title": "ESCALATION: fascicolo archiviato troppo a lungo (GDPR)",
+      "body": "Questo fascicolo candidato è archiviato ed è aperto da più tempo del termine di escalation configurato. Valutare se può essere eliminato definitivamente. Resta sempre un'azione manuale."
+    }
+  },
+  "retention": {
+    "entity_erase_blocked": {
+      "title": "Eliminazione saltata: ancora in uso"
+    }
+  },
+  "workflow": {
+    "not_informed": {
+      "title": "Candidato non informato",
+      "body_one": "Questo candidato non ha consenso WhatsApp né e-mail. Contattalo personalmente. ({{workflow}})",
+      "body_other": "{{count}} candidati non hanno consenso WhatsApp né e-mail. Contattali personalmente. ({{workflow}})"
+    },
+    "not_informed_whatsapp": {
+      "title": "Impossibile informare il candidato",
+      "body_one": "Questo candidato non ha consenso WhatsApp per il messaggio \"come stai\". Contattalo personalmente. ({{workflow}})",
+      "body_other": "{{count}} candidati non hanno consenso WhatsApp per il messaggio \"come stai\". Contattali personalmente. ({{workflow}})"
+    },
+    "not_informed_email": {
+      "title": "Impossibile informare il candidato",
+      "body": "Questo candidato non ha consenso e-mail per ricevere il link video dell'appuntamento. Condividi il link personalmente. ({{workflow}})"
+    },
+    "not_informed_retention_consent": {
+      "title": "Impossibile informare il candidato",
+      "body": "Questo candidato non ha consenso WhatsApp né e-mail per la domanda sulla conservazione. Contattalo personalmente. ({{workflow}})"
+    },
+    "stale_digest": {
+      "title_one": "{{count}} candidato senza contatto recente e senza consenso",
+      "title_other": "{{count}} candidati senza contatto recente e senza consenso",
+      "body_one": "{{count}} candidato trovato senza contatto recente e senza consenso. Contattalo personalmente:",
+      "body_other": "{{count}} candidati trovati senza contatto recente e senza consenso. Contattali personalmente:"
+    }
+  },
+  "connector": {
+    "limit_blocked": {
+      "title": "Limite raggiunto: {{label}}",
+      "body": "{{label}} ha raggiunto il limite configurato. Le richieste vengono ora bloccate o messe in coda. Richiedi un aumento tramite Impostazioni."
+    },
+    "limit_blocked_platform": {
+      "title": "Limite raggiunto: {{label}}",
+      "body": "{{label}} ha raggiunto il limite configurato per un tenant. Approva un aumento tramite la schermata di amministrazione."
+    }
+  }
+}

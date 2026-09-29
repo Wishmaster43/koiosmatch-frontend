@@ -355,7 +355,8 @@
         "reschedule_task": "Verschieben",
         "send_whatsapp": "WhatsApp senden",
         "create_task": "Aufgabe erstellen",
-        "search_candidates": "Kandidaten suchen"
+        "search_candidates": "Kandidaten suchen",
+        "restore_candidate": "Wiederherstellen"
       }
     },
     "tools": {
@@ -367,14 +368,15 @@
       "create_task": "Aufgabe erstellen",
       "send_whatsapp": "WhatsApp senden",
       "search_candidates": "Kandidaten suchen",
-      "unknown": "Ausführen"
+      "unknown": "Ausführen",
+      "restore_candidate": "Wiederherstellen"
     },
     "feedback": {
       "up": "Hilfreich",
       "down": "Nicht hilfreich",
       "thanks": "Danke für dein Feedback",
       "reasonsLabel": "Grund",
-      "reasonRequired": "W\u00e4hle mindestens einen Grund",
+      "reasonRequired": "Wähle mindestens einen Grund",
       "commentPlaceholder": "Anmerkung (optional)",
       "send": "Senden",
       "error": "Feedback senden fehlgeschlagen. Bitte erneut versuchen.",
@@ -461,7 +463,10 @@
       "auto_processing": "Wird automatisch verarbeitet.",
       "check_followup_task": "Prüfen Sie die erstellte Folgeaufgabe."
     },
-    "askKoios": "Koios fragen"
+    "askKoios": "Koios fragen",
+    "remove": "Entfernen",
+    "removed": "Benachrichtigung entfernt",
+    "removeFailed": "Entfernen fehlgeschlagen"
   },
   "activeFilters": "Aktive Filter",
   "clearAll": "Alle löschen",

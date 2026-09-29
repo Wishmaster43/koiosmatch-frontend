@@ -1,0 +1,119 @@
+{
+  "application": {
+    "created": {
+      "title": "Neue Bewerbung"
+    },
+    "rejection_not_sent": {
+      "title": "Absage nicht gesendet, kontaktieren Sie den Kandidaten selbst",
+      "body": "Ein abgelehnter Kandidat hat keine WhatsApp- oder E-Mail-Zustimmung. Teilen Sie das Ergebnis telefonisch mit. ({{workflow}})"
+    }
+  },
+  "opportunity": {
+    "won": {
+      "title": "Chance gewonnen"
+    },
+    "lost": {
+      "title": "Chance verloren"
+    }
+  },
+  "conversation": {
+    "escalated": {
+      "title": "WhatsApp-Gespräch eskaliert",
+      "body": "Ein Gespräch benötigt menschliche Nachbearbeitung."
+    },
+    "inbound": {
+      "title": "Neue WhatsApp-Nachricht"
+    }
+  },
+  "security": {
+    "mfa_reset": {
+      "title": "Ihre MFA wurde von einem Administrator zurückgesetzt"
+    }
+  },
+  "sync": {
+    "failed": {
+      "title": "Integrations-Synchronisierung fehlgeschlagen"
+    }
+  },
+  "match": {
+    "approval_pending": {
+      "title": "Match wartet auf Genehmigung",
+      "body": "Ein Match weicht von der Preisvereinbarung ab oder erfordert immer eine Genehmigung. Bitte prüfen."
+    },
+    "expiring": {
+      "title": "Match läuft bald ab"
+    }
+  },
+  "customer": {
+    "no_contact": {
+      "title": "Kunde ohne aktuellen Kontakt",
+      "body": "Kein aktueller Kontakt erfasst."
+    },
+    "match_ending": {
+      "title": "Match beim Kunden endet"
+    },
+    "task_overdue": {
+      "title": "Offene Aufgabe beim Kunden überfällig"
+    },
+    "contract_ending": {
+      "title": "Zusammenarbeitsvereinbarung endet"
+    },
+    "vacancy_stale": {
+      "title": "Stelle beim Kunden stagniert"
+    }
+  },
+  "candidate": {
+    "reactivated": {
+      "title": "Kandidat wieder verfügbar"
+    },
+    "phase_stale": {
+      "title": "Lead stagniert",
+      "body": "Dieser Lead befindet sich seit {{days}} Werktagen in Phase {{phase}}, ohne geplanten Termin oder offene Aufgabe."
+    },
+    "retention_due_escalation": {
+      "title": "ESKALATION: Dossier zu lange archiviert (DSGVO)",
+      "body": "Dieses Kandidatendossier ist archiviert und seit länger als die eingestellte Eskalationsfrist offen. Prüfen Sie, ob es dauerhaft gelöscht werden kann. Das bleibt immer eine manuelle Aktion."
+    }
+  },
+  "retention": {
+    "entity_erase_blocked": {
+      "title": "Löschung übersprungen: noch in Verwendung"
+    }
+  },
+  "workflow": {
+    "not_informed": {
+      "title": "Kandidat nicht informiert",
+      "body_one": "Dieser Kandidat hat keine WhatsApp- oder E-Mail-Zustimmung. Nehmen Sie selbst Kontakt auf. ({{workflow}})",
+      "body_other": "{{count}} Kandidaten haben keine WhatsApp- oder E-Mail-Zustimmung. Nehmen Sie selbst Kontakt auf. ({{workflow}})"
+    },
+    "not_informed_whatsapp": {
+      "title": "Kandidat konnte nicht informiert werden",
+      "body_one": "Dieser Kandidat hat keine WhatsApp-Zustimmung für die \"Wie geht es dir\"-Nachricht. Kontaktieren Sie ihn selbst. ({{workflow}})",
+      "body_other": "{{count}} Kandidaten haben keine WhatsApp-Zustimmung für die \"Wie geht es dir\"-Nachricht. Kontaktieren Sie sie selbst. ({{workflow}})"
+    },
+    "not_informed_email": {
+      "title": "Kandidat konnte nicht informiert werden",
+      "body": "Dieser Kandidat hat keine E-Mail-Zustimmung, um den Video-Link des Termins zu erhalten. Teilen Sie den Link selbst. ({{workflow}})"
+    },
+    "not_informed_retention_consent": {
+      "title": "Kandidat konnte nicht informiert werden",
+      "body": "Dieser Kandidat hat keine WhatsApp- oder E-Mail-Zustimmung für die Aufbewahrungsfrage. Nehmen Sie selbst Kontakt auf. ({{workflow}})"
+    },
+    "stale_digest": {
+      "title_one": "{{count}} Kandidat ohne aktuellen Kontakt und ohne Zustimmung",
+      "title_other": "{{count}} Kandidaten ohne aktuellen Kontakt und ohne Zustimmung",
+      "body_one": "{{count}} Kandidat gefunden ohne aktuellen Kontakt und ohne Zustimmung. Nehmen Sie selbst Kontakt auf:",
+      "body_other": "{{count}} Kandidaten gefunden ohne aktuellen Kontakt und ohne Zustimmung. Nehmen Sie selbst Kontakt auf:"
+    }
+  },
+  "connector": {
+    "limit_blocked": {
+      "title": "Limit erreicht: {{label}}",
+      "body": "{{label}} hat das eingestellte Limit erreicht. Anfragen werden nun blockiert oder in die Warteschlange gestellt. Beantragen Sie eine Erhöhung über Einstellungen."
+    },
+    "limit_blocked_platform": {
+      "title": "Limit erreicht: {{label}}",
+      "body": "{{label}} hat das eingestellte Limit für einen Mandanten erreicht. Genehmigen Sie eine Erhöhung über den Admin-Bildschirm."
+    }
+  }
+}

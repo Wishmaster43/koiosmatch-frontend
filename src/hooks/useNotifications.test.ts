@@ -17,7 +17,7 @@ import { playNotificationChime } from '@/lib/notificationSound'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
-  return { ...actual, default: { get: vi.fn(), post: vi.fn() } }
+  return { ...actual, default: { get: vi.fn(), post: vi.fn(), delete: vi.fn() } }
 })
 // Sound gate: mocked so tests never touch real Web Audio (API-CREDITS-1 — no real
 // side effects — and Web Audio has no meaning under jsdom anyway).
@@ -224,5 +224,49 @@ describe('useNotifications attention toasts', () => {
     const detail = (onToast.mock.calls[0][0] as CustomEvent).detail
     expect(detail.actionLine).toBeUndefined()
     window.removeEventListener('km:toast', onToast)
+  })
+})
+
+// NOTIF-I18N-1: remove one row (optimistic, reverted on failure) and mark all
+// read via the dedicated route.
+describe('useNotifications · remove + read-all (NOTIF-I18N-1)', () => {
+  const row = (id: number, seen: boolean) => ({ id, title: `Row ${id}`, body: 'body', seen })
+
+  beforeEach(() => {
+    vi.mocked(api.get).mockReset()
+    vi.mocked(api.post).mockReset()
+    vi.mocked(api.delete).mockReset()
+  })
+
+  // A large pollMs (never fires within the test) + unmount() at the end stops the
+  // background poll so a slow waitFor can never race a second, unmocked api.get call.
+  it('removeNotification DELETEs /notifications/{id} and drops the row optimistically', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [row(1, false), row(2, false)] } })
+    vi.mocked(api.delete).mockResolvedValueOnce({ data: {} })
+    const { result, unmount } = renderHook(() => useNotifications(999999))
+    await waitFor(() => expect(result.current.items).toHaveLength(2))
+    act(() => { result.current.removeNotification(1) })
+    expect(result.current.items.map(n => n.id)).toEqual([2])
+    await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/notifications/1'))
+    unmount()
+  })
+
+  it('removeNotification restores the row (at its original position) and toasts an error when the DELETE fails', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [row(1, false), row(2, false)] } })
+    vi.mocked(api.delete).mockRejectedValueOnce(new Error('boom'))
+    // notify() dispatches 'km:toast' — same pattern the attention-toast tests
+    // above use — so the revert case also proves the user is actually told.
+    const onToast = vi.fn()
+    window.addEventListener('km:toast', onToast)
+    const { result, unmount } = renderHook(() => useNotifications(999999))
+    await waitFor(() => expect(result.current.items).toHaveLength(2))
+    act(() => { result.current.removeNotification(1) })
+    expect(result.current.items.map(n => n.id)).toEqual([2])
+    await waitFor(() => expect(result.current.items.map(n => n.id)).toEqual([1, 2]))
+    await waitFor(() => expect(onToast).toHaveBeenCalled())
+    const detail = (onToast.mock.calls[0][0] as CustomEvent).detail
+    expect(detail).toMatchObject({ type: 'error', message: 'notifications.removeFailed' })
+    window.removeEventListener('km:toast', onToast)
+    unmount()
   })
 })

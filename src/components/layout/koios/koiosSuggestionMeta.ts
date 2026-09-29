@@ -7,7 +7,7 @@
  * 28-09: keyed by the action's `key`, falling back to the registry `tool`
  * name, then a generic "run" glyph for anything neither table lists).
  */
-import { Clock, UserX, Target, Briefcase, Sparkles, Check, CalendarClock, ListPlus, Search, MessageCircle, Play, MessageSquareDashed } from 'lucide-react'
+import { Clock, UserX, Target, Briefcase, Sparkles, Check, CalendarClock, ListPlus, Search, MessageCircle, Play, MessageSquareDashed, RotateCcw } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { KoiosAssistantKind, KoiosAssistantSuggestion } from './useKoiosAssistant'
 import { canonicalToolId } from './koiosToolIds'
@@ -44,6 +44,8 @@ export const TOOL_ICONS: Record<string, LucideIcon> = {
   send_whatsapp: MessageCircle,
   create_task: ListPlus,
   search_candidates: Search,
+  // NOTIF-I18N-1: the "undo" on a notification's candidate.retention_due row.
+  restore_candidate: RotateCcw,
 }
 
 // Fallback by the registry TOOL name (KOIOS-EN-1 phase B: keyed by the English
@@ -55,6 +57,7 @@ const TOOL_NAME_ICONS: Record<string, LucideIcon> = {
   create_task: ListPlus,
   send_whatsapp: MessageCircle,
   search_candidates: Search,
+  restore_candidate: RotateCcw,
 }
 
 // The action's icon: its own `key` glyph, else the `tool` glyph, else the generic fallback.
