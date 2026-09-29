@@ -115,7 +115,8 @@
       "whatsapp": "WhatsApp",
       "shiftmanager": "ShiftManager",
       "helloflex": "HelloFlex",
-      "other": "Outros"
+      "other": "Outros",
+      "opencage": "Geocodificação"
     },
     "kindRead": "Ler",
     "kindWrite": "Editar",

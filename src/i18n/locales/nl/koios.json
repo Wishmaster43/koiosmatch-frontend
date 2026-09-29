@@ -135,7 +135,8 @@
       "whatsapp": "WhatsApp",
       "shiftmanager": "ShiftManager",
       "helloflex": "HelloFlex",
-      "other": "Overig"
+      "other": "Overig",
+      "opencage": "Geocoderen"
     },
     "kindRead": "Lezen",
     "kindWrite": "Bewerken",

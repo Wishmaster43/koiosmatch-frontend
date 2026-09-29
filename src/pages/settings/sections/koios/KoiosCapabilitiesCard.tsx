@@ -39,6 +39,9 @@ import HeaderSearch from '@/components/ui/HeaderSearch'
 import { SectionTitle, GroupLabel, Caption, BodyText, bodyTextStyle } from '@/components/ui/typography'
 import KoiosCapabilityFacts from './KoiosCapabilityFacts'
 
+// A BE tool group the locale does not know yet (a new connector) reads as a humanised name, never as a raw key (Danny 29-09: "capabilities.groups.opencage").
+const humaniseGroupId = (id: string) => id.replace(/[_-]+/g, ' ').replace(/^./, (c) => c.toUpperCase())
+
 const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' }
 const row = { display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 0', borderTop: '1px solid var(--border)' } as const
 // Two-line label clamp — the "compact by default" half of the KOIOS-TOOL-MATRIX-FE-2
@@ -194,7 +197,7 @@ export default function KoiosCapabilitiesCard() {
           {groups.length > 1 && (
             <div style={{ margin: '10px 0 4px' }}>
               <SubTabBar active={activeId ?? groups[0].id} onChange={(id) => setActiveId(id as typeof activeId)}
-                tabs={groups.map((g) => ({ id: g.id, label: `${t(`capabilities.groups.${g.id}`)} (${g.tools.length})` }))} />
+                tabs={groups.map((g) => ({ id: g.id, label: `${t(`capabilities.groups.${g.id}`, { defaultValue: humaniseGroupId(g.id) })} (${g.tools.length})` }))} />
             </div>
           )}
           <KindSection kind="read" tools={kindsOf('read')} t={t} onToggle={onToggle} onReset={onReset} />

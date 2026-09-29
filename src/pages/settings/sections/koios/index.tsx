@@ -28,6 +28,9 @@ import SubTabBar from '@/components/drawer/SubTabBar'
 import { invalidateKoiosSettings } from '@/components/layout/koios/useKoiosSettings'
 import { SETTINGS_MAX_W_WIDE } from '@/pages/settings/components/settingsMetrics'
 
+// The tool matrix reads best around 1600px: room for the tool text, the group tabs and the toggle.
+const TOOL_MATRIX_MAX_W = 1600
+
 const notice = { fontSize: 13, color: 'var(--text-muted)' }
 
 // The full settings payload — hand-written: the spec carries no 2xx schema for
@@ -63,7 +66,9 @@ export default function KoiosSettings() {
   return (
     // SETTINGS-INCON-B1b: house-wide container (matches the widest settings screen,
     // CvTemplateSettings) — 640 was cramped for the models/mode/effort/budget cards.
-    <div style={{ maxWidth: SETTINGS_MAX_W_WIDE }}>
+    // AI-SETTINGS-FACE-1 (Danny 29-09: "tool matrix breder maken"): the matrix tab widens to the
+    // matrix width; the other tabs keep the shared wide settings width.
+    <div style={{ maxWidth: tab === 'capabilities' ? TOOL_MATRIX_MAX_W : SETTINGS_MAX_W_WIDE }}>
       <div className="mb-6">
         <PageTitle>{t('title')}</PageTitle>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('subtitle')}</p>
