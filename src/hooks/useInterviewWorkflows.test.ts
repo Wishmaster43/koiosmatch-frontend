@@ -28,6 +28,17 @@ const workflows = [
 beforeEach(() => vi.clearAllMocks())
 
 describe('useInterviewWorkflows · active-only options (mirrors useInterviewFlows r2 C1)', () => {
+  // INTERVIEW-403-1: a recruiter without the workflow right gets `forbidden`, never `error`,
+  // and the request itself carries quietStatuses so the client never logs it as a fault.
+  it('reports a 403 as forbidden (not error) and asks the client to stay quiet on it', async () => {
+    vi.mocked(api.get).mockRejectedValue({ response: { status: 403 } } as never)
+    const { result } = renderHook(() => useInterviewWorkflows(true), { wrapper })
+    await waitFor(() => expect(result.current.forbidden).toBe(true))
+    expect(result.current.error).toBe(false)
+    expect(result.current.options).toEqual([])
+    expect(api.get).toHaveBeenCalledWith('/workflows', expect.objectContaining({ params: { kind: 'interview' }, quietStatuses: [403] }))
+  })
+
   it('excludes an inactive workflow from the pickable options', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { data: workflows } } as never)
     const { result } = renderHook(() => useInterviewWorkflows(true), { wrapper })

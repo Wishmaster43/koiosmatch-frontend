@@ -109,12 +109,15 @@ function StartInterviewAction({ applicationId, effective, onStarted }: {
   // this card would offer nothing but a dead "no agent chosen" error (§3).
   const derived = effective?.agentId != null ? effective : null
   // The manual picker only needs to load when no workflow is in effect.
-  const { options, loading, error } = useAiAgents(canManage && !derived)
+  const { options, loading, error, forbidden } = useAiAgents(canManage && !derived)
   const [agentId, setAgentId] = useState('')
   const [busy, setBusy] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
 
   if (!canManage) return null
+  // INTERVIEW-403-1: the agent list is a role answer (403) and no workflow resolved an
+  // agent, so nothing here can start — say so calmly instead of a dead button (§3).
+  if (!derived && forbidden) return <Caption style={{ fontStyle: 'italic' }}>{t('interview.start.forbidden')}</Caption>
 
   // Real POST against the now-live contract — see the doc comment above for the
   // full 200/201/409/422 breakdown. A 404 (safety net only) disables the action

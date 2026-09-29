@@ -36,7 +36,7 @@ export function useInterviewOverrides({
   const { openEntity } = useNavigation()
 
   // INTERVIEW-WORKFLOW-1: this application's own workflow override — the ONE path.
-  const { options: workflowOptions, byId: workflowById, describe: describeWorkflow, loading: workflowsLoading, error: workflowsError } = useInterviewWorkflows(hasInterviewWorkflowField)
+  const { options: workflowOptions, byId: workflowById, describe: describeWorkflow, loading: workflowsLoading, error: workflowsError, forbidden: workflowsForbidden } = useInterviewWorkflows(hasInterviewWorkflowField)
   const [workflowOverride, setWorkflowOverride] = useState<Id | null | undefined>(undefined)
   const currentWorkflowId = workflowOverride !== undefined ? workflowOverride : interviewWorkflowId ?? null
   const isWorkflowLinked = hasInterviewWorkflowField && currentWorkflowId != null
@@ -68,8 +68,9 @@ export function useInterviewOverrides({
       options={workflowOptions}
       loading={workflowsLoading}
       error={workflowsError}
-      disabled={!hasInterviewWorkflowField}
-      notice={hasInterviewWorkflowField ? undefined : t('vacancies:aiagent.workflow.unavailable')}
+      disabled={!hasInterviewWorkflowField || workflowsForbidden}
+      // INTERVIEW-403-1: the list is a role answer — an inert picker with a calm notice, never a red load error.
+      notice={workflowsForbidden ? t('interview.status.pickerForbidden') : hasInterviewWorkflowField ? undefined : t('vacancies:aiagent.workflow.unavailable')}
       linkedRef={interviewWorkflow}
       describe={describeWorkflow}
     />

@@ -286,6 +286,7 @@
       "unavailable": "L'avvio del colloquio non è ancora disponibile. In attesa del collegamento con il backend.",
       "noAgentChosen": "Scegli prima un agente AI.",
       "loadError": "Impossibile caricare gli agenti AI.",
+      "forbidden": "Avviare un colloquio non è disponibile per il tuo ruolo. Chiedi a un amministratore di collegare un workflow di colloquio alla posizione.",
       "viaWorkflow": "Avvia tramite {{workflow}} ({{agent}})",
       "reasons": {
         "no_mobile_or_consent": "Il candidato non ha un numero di cellulare o non ha dato il consenso a WhatsApp.",
@@ -333,6 +334,7 @@
       "flowOverrideSaved": "Flusso di colloquio aggiornato.",
       "workflowOverrideSaved": "Workflow di colloquio aggiornato.",
       "vacancyDefault": "Predefinito della posizione: {{workflow}} · {{agent}}",
+      "pickerForbidden": "La scelta di un workflow di colloquio non è disponibile per il tuo ruolo.",
       "editInVacancy": "Modifica nella posizione → agente IA",
       "noWorkflow": "Nessun workflow di colloquio: scegline uno sopra o imposta il predefinito della posizione."
     },

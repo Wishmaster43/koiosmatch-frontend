@@ -286,6 +286,7 @@
       "unavailable": "Starting an interview isn't available yet. Waiting on the backend link.",
       "noAgentChosen": "Choose an AI agent first.",
       "loadError": "Failed to load AI agents.",
+      "forbidden": "Starting an interview is not available for your role. Ask an administrator to link an interview workflow to the vacancy.",
       "viaWorkflow": "Start via {{workflow}} ({{agent}})",
       "reasons": {
         "no_mobile_or_consent": "The candidate has no mobile number or no WhatsApp consent.",
@@ -333,6 +334,7 @@
       "flowOverrideSaved": "Interview flow updated.",
       "workflowOverrideSaved": "Interview workflow updated.",
       "vacancyDefault": "Vacancy default: {{workflow}} · {{agent}}",
+      "pickerForbidden": "Choosing an interview workflow is not available for your role.",
       "editInVacancy": "Change on the vacancy → AI agent",
       "noWorkflow": "No interview workflow: pick one above or set the vacancy default."
     },

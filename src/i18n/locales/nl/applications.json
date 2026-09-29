@@ -286,6 +286,7 @@
       "unavailable": "Interview starten is nog niet beschikbaar. Wacht op de backend-koppeling.",
       "noAgentChosen": "Kies eerst een AI-agent.",
       "loadError": "AI-agenten laden is mislukt.",
+      "forbidden": "Een interview starten is niet beschikbaar voor jouw rol. Vraag een beheerder om een interview-workflow aan de vacature te koppelen.",
       "viaWorkflow": "Start via {{workflow}} ({{agent}})",
       "reasons": {
         "no_mobile_or_consent": "Kandidaat heeft geen mobiel nummer of geen WhatsApp-toestemming.",
@@ -333,6 +334,7 @@
       "flowOverrideSaved": "Interviewflow bijgewerkt.",
       "workflowOverrideSaved": "Interview-workflow bijgewerkt.",
       "vacancyDefault": "Standaard van vacature: {{workflow}} · {{agent}}",
+      "pickerForbidden": "Interview-workflows kiezen is niet beschikbaar voor jouw rol.",
       "editInVacancy": "Wijzigen in vacature → AI-agent",
       "noWorkflow": "Geen interview-workflow: kies er een hierboven of stel de vacature-standaard in."
     },

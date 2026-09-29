@@ -286,6 +286,7 @@
       "unavailable": "Démarrer un entretien n'est pas encore disponible. En attente de la liaison backend.",
       "noAgentChosen": "Choisissez d'abord un agent IA.",
       "loadError": "Impossible de charger les agents IA.",
+      "forbidden": "Démarrer un entretien n’est pas disponible pour votre rôle. Demandez à un administrateur de lier un workflow d’entretien à l’offre.",
       "viaWorkflow": "Démarrer via {{workflow}} ({{agent}})",
       "reasons": {
         "no_mobile_or_consent": "Le candidat n'a pas de numéro de mobile ou de consentement WhatsApp.",
@@ -333,6 +334,7 @@
       "flowOverrideSaved": "Flux d’entretien mis à jour.",
       "workflowOverrideSaved": "Workflow d’entretien mis à jour.",
       "vacancyDefault": "Défaut de l’offre : {{workflow}} · {{agent}}",
+      "pickerForbidden": "Le choix d’un workflow d’entretien n’est pas disponible pour votre rôle.",
       "editInVacancy": "Modifier sur l’offre → agent IA",
       "noWorkflow": "Aucun workflow d’entretien : choisissez-en un ci-dessus ou définissez le défaut de l’offre."
     },

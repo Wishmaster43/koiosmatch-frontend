@@ -90,6 +90,16 @@ describe('InterviewsTab · start-interview action (Flow B)', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: 'interview.start.label' })).toBeInTheDocument())
   })
 
+  // INTERVIEW-403-1 (measured 29-09 as Sara, role planner on Demo): the agent list answers
+  // 403 and no workflow resolved an agent — a calm role notice, no dead start button, no red load line.
+  it('renders the calm role notice and no start button when the agent list is forbidden (403)', async () => {
+    mockGet.mockRejectedValue({ response: { status: 403 } })
+    renderTab(app())
+    await waitFor(() => expect(screen.getByText('interview.start.forbidden')).toBeInTheDocument())
+    expect(screen.queryByRole('button', { name: 'interview.start.label' })).toBeNull()
+    expect(screen.queryByText('interview.start.loadError')).toBeNull()
+  })
+
   it('hides the action entirely without applications.update', () => {
     mockUseAuth.mockReturnValue({ hasPermission: () => false })
     renderTab(app())

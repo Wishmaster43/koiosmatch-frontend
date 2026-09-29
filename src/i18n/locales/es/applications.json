@@ -286,6 +286,7 @@
       "unavailable": "Iniciar una entrevista aún no está disponible. A la espera de la conexión con el backend.",
       "noAgentChosen": "Elige primero un agente IA.",
       "loadError": "No se pudieron cargar los agentes IA.",
+      "forbidden": "Iniciar una entrevista no está disponible para tu rol. Pide a un administrador que vincule un flujo de entrevista a la vacante.",
       "viaWorkflow": "Iniciar mediante {{workflow}} ({{agent}})",
       "reasons": {
         "no_mobile_or_consent": "El candidato no tiene número de móvil o consentimiento de WhatsApp.",
@@ -333,6 +334,7 @@
       "flowOverrideSaved": "Flujo de entrevista actualizado.",
       "workflowOverrideSaved": "Flujo de trabajo de entrevista actualizado.",
       "vacancyDefault": "Predeterminado de la vacante: {{workflow}} · {{agent}}",
+      "pickerForbidden": "Elegir un flujo de entrevista no está disponible para tu rol.",
       "editInVacancy": "Cambiar en la vacante → agente IA",
       "noWorkflow": "No hay flujo de entrevista: elige uno arriba o define el predeterminado de la vacante."
     },

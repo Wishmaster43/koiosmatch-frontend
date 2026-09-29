@@ -260,6 +260,12 @@ export function isServiceUnavailable(error: unknown): boolean {
 type ResponseLike = AxiosResponse | { data: unknown }
 
 /** Unwrap a single resource to its payload (handles { data } or a bare object). */
+// A 403 answer: the caller's role lacks the right, not a transient fault — a picker
+// says so calmly and never retries (INTERVIEW-403-1, measured 29-09 as a recruiter).
+export function isForbidden(error: unknown): boolean {
+  return (error as { response?: { status?: number } } | null)?.response?.status === 403
+}
+
 export function unwrap<T = unknown>(res: ResponseLike): T {
   const body = (res as { data?: unknown })?.data ?? res
   if (body && typeof body === 'object' && !Array.isArray(body) && 'data' in body) {

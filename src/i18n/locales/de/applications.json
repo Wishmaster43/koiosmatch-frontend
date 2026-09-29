@@ -286,6 +286,7 @@
       "unavailable": "Interview starten ist noch nicht verfügbar. Wartet auf die Backend-Anbindung.",
       "noAgentChosen": "Wählen Sie zuerst einen KI-Agenten.",
       "loadError": "KI-Agenten konnten nicht geladen werden.",
+      "forbidden": "Ein Interview zu starten ist für Ihre Rolle nicht verfügbar. Bitten Sie einen Administrator, einen Interview-Workflow mit der Stelle zu verknüpfen.",
       "viaWorkflow": "Start über {{workflow}} ({{agent}})",
       "reasons": {
         "no_mobile_or_consent": "Der Kandidat hat keine Mobilnummer oder keine WhatsApp-Zustimmung.",
@@ -333,6 +334,7 @@
       "flowOverrideSaved": "Interviewflow aktualisiert.",
       "workflowOverrideSaved": "Interview-Workflow aktualisiert.",
       "vacancyDefault": "Standard der Stelle: {{workflow}} · {{agent}}",
+      "pickerForbidden": "Die Auswahl eines Interview-Workflows ist für Ihre Rolle nicht verfügbar.",
       "editInVacancy": "In der Stelle ändern → KI-Agent",
       "noWorkflow": "Kein Interview-Workflow: wählen Sie oben einen aus oder legen Sie den Stellen-Standard fest."
     },

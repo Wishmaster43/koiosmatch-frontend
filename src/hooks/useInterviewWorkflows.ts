@@ -11,8 +11,9 @@
  * fallback — never a second endpoint, never a silent "show everything".
  */
 import { useMemo } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import api, { unwrapList } from '@/lib/api'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import api, { unwrapList, isForbidden } from '@/lib/api'
+import { retryUnless, clientRetry } from '@/lib/queryRetry'
 import type { Workflow } from '@/types/workflow'
 import type { Id } from '@/types/common'
 
@@ -30,11 +31,15 @@ const isInterviewKind = (w: Workflow): boolean => w.kind === 'interview' || w.ta
 // The tenant's interview-workflow picker options + a byId lookup, one cached
 // react-query entry shared across every consumer.
 export function useInterviewWorkflows(enabled: boolean = true) {
-  const { data, isLoading, isError } = useQuery({
+  const client = useQueryClient()
+  const { data, isLoading, isError, error: queryError } = useQuery({
     queryKey: ['interview-workflows'],
     enabled,
+    // INTERVIEW-403-1: a 403 is a role answer, never retried and never logged as a fault;
+    // every other failure keeps the client's own retry policy.
+    retry: retryUnless(isForbidden, clientRetry(client)),
     queryFn: async ({ signal }) => {
-      const { rows } = unwrapList<Workflow>(await api.get('/workflows', { params: { kind: 'interview' }, signal }))
+      const { rows } = unwrapList<Workflow>(await api.get('/workflows', { params: { kind: 'interview' }, signal, quietStatuses: [403] }))
       // Fallback filter: only engages when the payload actually carries a
       // kind/tag field AND none of the rows match — a backend that already
       // honours ?kind=interview server-side returns an all-matching list, so
@@ -71,5 +76,8 @@ export function useInterviewWorkflows(enabled: boolean = true) {
     return { label: w.name ?? '', inactive: w.status === 'inactive' }
   }
 
-  return { options, workflows, byId, describe, loading: isLoading, error: isError }
+  // `forbidden` (403) is reported apart from `error`, so a consumer renders a calm
+  // "not for your role" notice instead of a red load-failure line.
+  const forbidden = isForbidden(queryError)
+  return { options, workflows, byId, describe, loading: isLoading, error: isError && !forbidden, forbidden }
 }
