@@ -19,8 +19,7 @@ import { isReversedInterviewRange } from '../data/interviewRange'
 import Button from '@/components/ui/Button'
 import { tintBg, tintBorder } from '@/lib/tint'
 import { Caption } from '@/components/ui/typography'
-import { useAiAgents } from '../hooks/useAiAgents'
-import { useInterviewWorkflows } from '@/hooks/useInterviewWorkflows'
+import { useInterviewOptions } from '@/hooks/useInterviewOptions'
 import InterviewStatusCard from './InterviewStatusCard'
 import { mapInterview } from '../data/mapApplication'
 import { resolveEffectiveInterviewWorkflow, type EffectiveInterviewWorkflow } from '../data/interviewWorkflowEffective'
@@ -109,7 +108,10 @@ function StartInterviewAction({ applicationId, effective, onStarted }: {
   // this card would offer nothing but a dead "no agent chosen" error (§3).
   const derived = effective?.agentId != null ? effective : null
   // The manual picker only needs to load when no workflow is in effect.
-  const { options, loading, error, forbidden } = useAiAgents(canManage && !derived)
+  // INTERVIEW-PICKER-AUTHZ-FE: the agent half of the same narrow endpoint the
+  // workflow picker reads below — ONE request for the tab, not two (react-query
+  // dedupes the shared `['interview-options']` key across both call sites).
+  const { agentOptions: options, loading, error, forbidden } = useInterviewOptions(canManage && !derived)
   const [agentId, setAgentId] = useState('')
   const [busy, setBusy] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
@@ -217,7 +219,7 @@ export default function InterviewsTab({ application: a, detailPhase }: { applica
   // object yet), so the own workflow is looked up by id — same order as
   // `linkedWorkflow` in useInterviewOverrides — falling back to a.interviewWorkflow
   // for whichever contract version is actually live.
-  const { byId: ownWorkflowById } = useInterviewWorkflows(a.hasInterviewWorkflowField)
+  const { workflowById: ownWorkflowById } = useInterviewOptions(a.hasInterviewWorkflowField)
   const listedOwnWorkflow = a.interviewWorkflowId != null ? ownWorkflowById.get(String(a.interviewWorkflowId)) : undefined
   // Normalise the tenant-list Workflow shape into the same InterviewWorkflowRef
   // shape as a.interviewWorkflow, mirroring useInterviewOverrides' own build.

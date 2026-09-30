@@ -34,16 +34,16 @@ const mockOpenEntity = vi.fn()
 
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: mockOpenEntity, navigate: vi.fn() }) }))
-// INTERVIEW-WORKFLOW-1: same flat-object idiom as useAiAgents mocks repo-wide
+// INTERVIEW-PICKER-AUTHZ-FE: same flat-object idiom as useAiAgents mocks repo-wide
 // (e.g. AddVacancyModal.slice2.test.tsx) — this suite has no QueryClientProvider,
 // so the real react-query hook cannot mount.
 const mockWorkflowById = new Map([
   ['wf-1', { id: 'wf-1', name: 'Kelly-Helpende', agent: { id: 'a1', name: 'Kelly' } }],
 ])
-vi.mock('@/hooks/useInterviewWorkflows', () => ({
-  useInterviewWorkflows: () => ({
-    options: [{ value: 'wf-1', label: 'Kelly · Kelly-Helpende' }], workflows: [], byId: mockWorkflowById,
-    describe: () => null, loading: false, error: false,
+vi.mock('@/hooks/useInterviewOptions', () => ({
+  useInterviewOptions: () => ({
+    workflowOptions: [{ value: 'wf-1', label: 'Kelly · Kelly-Helpende' }], workflowById: mockWorkflowById,
+    describeWorkflow: () => null, agentOptions: [], agents: [], loading: false, error: false, forbidden: false,
   }),
 }))
 // `unwrap` mirrors the real implementation (data → data.data) so the assertions

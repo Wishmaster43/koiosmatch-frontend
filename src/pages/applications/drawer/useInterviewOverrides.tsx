@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
-import { useInterviewWorkflows } from '@/hooks/useInterviewWorkflows'
+import { useInterviewOptions } from '@/hooks/useInterviewOptions'
 import InterviewWorkflowPicker from '@/components/drawer/InterviewWorkflowPicker'
 import { useNavigation } from '@/context/NavigationContext'
 import { resolveEffectiveInterviewWorkflow } from '../data/interviewWorkflowEffective'
@@ -36,7 +36,10 @@ export function useInterviewOverrides({
   const { openEntity } = useNavigation()
 
   // INTERVIEW-WORKFLOW-1: this application's own workflow override — the ONE path.
-  const { options: workflowOptions, byId: workflowById, describe: describeWorkflow, loading: workflowsLoading, error: workflowsError, forbidden: workflowsForbidden } = useInterviewWorkflows(hasInterviewWorkflowField)
+  // INTERVIEW-PICKER-AUTHZ-FE (30-09): reads the narrow `applications.update`-gated
+  // endpoint, not the `workflows.view`-gated management list, so a planner/
+  // recruitermanager can pick a workflow without that right.
+  const { workflowOptions, workflowById, describeWorkflow, loading: workflowsLoading, error: workflowsError, forbidden: workflowsForbidden } = useInterviewOptions(hasInterviewWorkflowField)
   const [workflowOverride, setWorkflowOverride] = useState<Id | null | undefined>(undefined)
   const currentWorkflowId = workflowOverride !== undefined ? workflowOverride : interviewWorkflowId ?? null
   const isWorkflowLinked = hasInterviewWorkflowField && currentWorkflowId != null

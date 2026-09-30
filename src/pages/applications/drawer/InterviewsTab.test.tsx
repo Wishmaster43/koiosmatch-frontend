@@ -29,10 +29,12 @@ const mockNotifyError = vi.fn()
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: vi.fn(), navigate: vi.fn() }) }))
 vi.mock('@/lib/notify', () => ({ notifySuccess: (...a: unknown[]) => mockNotifySuccess(...a), notifyError: (...a: unknown[]) => mockNotifyError(...a) }))
-// INTERVIEW-WORKFLOW-1: flat mock — InterviewStatusCard's workflow-override
-// picker has its own fetch, kept out of the shared mockGet queue below.
-vi.mock('@/hooks/useInterviewWorkflows', () => ({
-  useInterviewWorkflows: () => ({ options: [], workflows: [], byId: new Map(), describe: () => null, loading: false, error: false }),
+// INTERVIEW-PICKER-AUTHZ-FE: flat mock for the ONE narrow picker hook — both the
+// workflow-override picker (InterviewStatusCard) and the agent picker
+// (StartInterviewAction) read this same hook now, controlled per test.
+const mockUseInterviewOptions = vi.fn()
+vi.mock('@/hooks/useInterviewOptions', () => ({
+  useInterviewOptions: (...args: unknown[]) => mockUseInterviewOptions(...args),
 }))
 // Keep the real unwrap (importActual) — only the default client (get/post) is stubbed.
 vi.mock('@/lib/api', async () => {
@@ -44,6 +46,11 @@ const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
 const mockPost = api.post as unknown as ReturnType<typeof vi.fn>
 
 const AGENT = { id: 'a1', name: 'Kelly' }
+const defaultOptionsResult = () => ({
+  agentOptions: [{ value: AGENT.id, label: AGENT.name }], agents: [AGENT],
+  workflowOptions: [], workflowById: new Map(), describeWorkflow: () => null,
+  loading: false, error: false, forbidden: false,
+})
 
 // The 8 known 422 guard-skip reasons (mirrors the component's own list) — used
 // to parametrize "every reason maps to its own message" below (§13).
@@ -80,7 +87,8 @@ beforeEach(() => {
   // the 200-vs-201 case below found (both call notifySuccess, different message).
   mockGet.mockReset(); mockPost.mockReset()
   mockNotifySuccess.mockReset(); mockNotifyError.mockReset()
-  mockGet.mockResolvedValue({ data: [AGENT] })
+  mockUseInterviewOptions.mockReset()
+  mockUseInterviewOptions.mockReturnValue(defaultOptionsResult())
   mockUseAuth.mockReturnValue({ hasPermission: () => true })
 })
 
@@ -93,7 +101,7 @@ describe('InterviewsTab · start-interview action (Flow B)', () => {
   // INTERVIEW-403-1 (measured 29-09 as Sara, role planner on Demo): the agent list answers
   // 403 and no workflow resolved an agent — a calm role notice, no dead start button, no red load line.
   it('renders the calm role notice and no start button when the agent list is forbidden (403)', async () => {
-    mockGet.mockRejectedValue({ response: { status: 403 } })
+    mockUseInterviewOptions.mockReturnValue({ ...defaultOptionsResult(), agentOptions: [], agents: [], forbidden: true })
     renderTab(app())
     await waitFor(() => expect(screen.getByText('interview.start.forbidden')).toBeInTheDocument())
     expect(screen.queryByRole('button', { name: 'interview.start.label' })).toBeNull()
@@ -103,7 +111,9 @@ describe('InterviewsTab · start-interview action (Flow B)', () => {
   it('hides the action entirely without applications.update', () => {
     mockUseAuth.mockReturnValue({ hasPermission: () => false })
     renderTab(app())
-    expect(mockGet).not.toHaveBeenCalled()
+    // The picker hook itself is mocked here, so mockGet proves nothing — assert
+    // on the real seam: the start action never enables the options hook.
+    expect(mockUseInterviewOptions.mock.calls.some(([enabled]) => enabled === true)).toBe(false)
     expect(screen.queryByRole('button', { name: 'interview.start.label' })).toBeNull()
   })
 
@@ -235,10 +245,10 @@ describe('InterviewsTab · start-interview action (Flow B)', () => {
     // list, same order as `linkedWorkflow` in useInterviewOverrides.
     it('resolves the own workflow by interviewWorkflowId from the tenant workflow list when no embedded object is sent', async () => {
       vi.resetModules()
-      vi.doMock('@/hooks/useInterviewWorkflows', () => ({
-        useInterviewWorkflows: () => ({
-          options: [], workflows: [], loading: false, error: false, describe: () => null,
-          byId: new Map([['wf-1', { id: 'wf-1', name: 'Listed workflow', agent: { id: 'a-own', name: 'Listed agent' } }]]),
+      vi.doMock('@/hooks/useInterviewOptions', () => ({
+        useInterviewOptions: () => ({
+          agentOptions: [{ value: AGENT.id, label: AGENT.name }], agents: [AGENT], loading: false, error: false, forbidden: false, describeWorkflow: () => null,
+          workflowOptions: [], workflowById: new Map([['wf-1', { id: 'wf-1', name: 'Listed workflow', agent: { id: 'a-own', name: 'Listed agent' } }]]),
         }),
       }))
       const { default: TabWithById } = await import('./InterviewsTab')
@@ -257,6 +267,22 @@ describe('InterviewsTab · start-interview action (Flow B)', () => {
       renderTab(app({ interviewWorkflow: { id: 'wf-no-agent', name: 'No-agent workflow', agent: null } }))
       await waitFor(() => expect(screen.getByRole('button', { name: 'interview.start.agentPlaceholder' })).toBeInTheDocument())
       expect(screen.queryByText('interview.start.viaWorkflow')).toBeNull()
+    })
+
+    // INTERVIEW-PICKER-AUTHZ-FE: the tab's two hook call sites (agent picker +
+    // own-workflow-by-id lookup) share one real GET — the request-path proof
+    // has to run against the REAL hook, not the flat mock every other test uses.
+    it('requests /applications/interview-options exactly once, never the old /workflows or /ai/agents routes', async () => {
+      vi.resetModules()
+      vi.doUnmock('@/hooks/useInterviewOptions')
+      const { default: TabReal } = await import('./InterviewsTab')
+      mockGet.mockResolvedValueOnce({ data: { workflows: [], agents: [AGENT] } })
+      const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      render(<QueryClientProvider client={qc}><TabReal application={app({ hasInterviewWorkflowField: true })} /></QueryClientProvider>)
+      await waitFor(() => expect(screen.getByRole('button', { name: 'interview.start.agentPlaceholder' })).toBeInTheDocument())
+      expect(mockGet).toHaveBeenCalledTimes(1)
+      expect(mockGet).toHaveBeenCalledWith('/applications/interview-options', expect.anything())
+      expect(mockGet.mock.calls.some(([url]) => url === '/workflows' || url === '/ai/agents')).toBe(false)
     })
   })
 
