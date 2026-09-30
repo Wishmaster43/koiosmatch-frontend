@@ -89,12 +89,12 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
       sticky: true, width: 200, nowrap: true,
       render: r => {
         // Shared avatar+name cell (AVATAR-CHIP-1) — same identity chip as matches/customers.
-        const content = <EntityNameCell name={r.candidateName} initials={r.candidateInitials} size={24} maxWidth={150} textStyle={{ fontWeight: 500, fontSize: 13 }} />
-        // LABEL-GUARD (K-292 O1): no id, or an id with no visible name, renders plain.
-        if (r.candidateId == null || !r.candidateName) return content
-        // CEL-DOORKLIK-CANON: candidate identity cell deep-links to the candidate drilldown.
-        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own identity content via the shared cellButton reset (§14 r7 necessity)
-        return <button type="button" onClick={e => { e.stopPropagation(); openEntity('candidates', r.candidateId as Id) }} aria-label={r.candidateName ? `${t('drawer.openCandidate')}: ${r.candidateName}` : t('drawer.openCandidate')} style={cellButton}>{content}</button>
+        // ROW-OPENS-APPLICATION-1 (Danny 30-09, live: "de drilldown wordt niet geopend maar
+        // verspringt naar kandidaten"): the identity cell is the ROW's own entity, so a click
+        // here opens the APPLICATION drawer through the row click, like the candidates table's
+        // name cell opens the candidate. The candidate deep link lives in the drawer's
+        // Kandidaat tab; only the client cell keeps its cross-entity deep link.
+        return <EntityNameCell name={r.candidateName} initials={r.candidateInitials} size={24} maxWidth={150} textStyle={{ fontWeight: 500, fontSize: 13 }} />
       } },
     {
       // Human-readable reference number (S-00042) — an identifier, so it sits right

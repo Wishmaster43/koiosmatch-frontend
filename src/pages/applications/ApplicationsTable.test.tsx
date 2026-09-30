@@ -316,19 +316,22 @@ describe('ApplicationsTable · score source marking', () => {
   })
 })
 
-// CEL-DOORKLIK-CANON: candidate identity cell + client cell deep-link to their
-// own drilldown, and never let that click also open the row's own detail drawer.
+// CEL-DOORKLIK-CANON: the client cell deep-links to the customer drilldown and never
+// also opens the row; the candidate identity cell is the row's OWN entity, so it
+// opens the application drawer through the row click (ROW-OPENS-APPLICATION-1,
+// Danny 30-09: a name click jumped to the candidates page instead of the drilldown).
 describe('ApplicationsTable · cell deep-links (CEL-DOORKLIK-CANON)', () => {
-  it('opens the candidate drilldown from the candidate cell, without triggering the row select', async () => {
+  it('opens the application (row select) from the candidate cell, never the candidate drilldown', async () => {
     const user = userEvent.setup()
     const onSelect = vi.fn()
     const row = { ...baseRow, id: 80, candidateId: 'cand-8' } as unknown as Application
     render(<ApplicationsTable rows={[row]} onSelect={onSelect} />)
 
-    await user.click(screen.getByRole('button', { name: /Kandidaat openen/ }))
+    expect(screen.queryByRole('button', { name: /Kandidaat openen/ })).toBeNull()
+    await user.click(screen.getByText(baseRow.candidateName as string))
 
-    expect(mockOpenEntity).toHaveBeenCalledWith('candidates', 'cand-8')
-    expect(onSelect).not.toHaveBeenCalled()
+    expect(onSelect).toHaveBeenCalledTimes(1)
+    expect(mockOpenEntity).not.toHaveBeenCalledWith('candidates', expect.anything())
   })
 
   it('opens the customer drilldown from the client cell', async () => {
