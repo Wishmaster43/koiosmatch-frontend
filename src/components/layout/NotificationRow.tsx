@@ -109,10 +109,12 @@ export default function NotificationRow({ n, isLast, fmt, showRemove, onRemove, 
           </span>
         )}
         {action && (
-          // K-192: next_action is a KEY, rendered only for the two known
-          // keys — an unknown/null key shows the status line alone.
+          // K-192: next_action is a KEY, rendered only for the known keys. When one
+          // is present it says the most, so it replaces the bare status sentence
+          // (Danny 30-09: "Wordt verwerkt. Wordt automatisch verwerkt." read doubled);
+          // an unknown/null key shows the status line alone.
           <Caption>
-            {t(`notifications.actionStatus.${action.status}`)}{action.nextAction ? ` ${t(`notifications.nextAction.${action.nextAction}`)}` : ''}
+            {action.nextAction ? t(`notifications.nextAction.${action.nextAction}`) : t(`notifications.actionStatus.${action.status}`)}
           </Caption>
         )}
         <Caption>{fmt(n.created_at)}</Caption>

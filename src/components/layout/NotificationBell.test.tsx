@@ -214,6 +214,8 @@ describe('NotificationBell row click-through', () => {
     render(<NotificationBell />)
     fireEvent.click(screen.getByRole('button', { name: /notificat/i }))
     expect(screen.getByText(/Bekijk de aangemaakte vervolgtaak\./)).toBeInTheDocument()
+    // Danny 30-09: the next-action sentence REPLACES the bare status, never doubles it.
+    expect(screen.queryByText(/Mislukt\./)).not.toBeInTheDocument()
   })
 
   // K-192: an unknown next_action key must never render the raw key.
@@ -228,6 +230,8 @@ describe('NotificationBell row click-through', () => {
     render(<NotificationBell />)
     fireEvent.click(screen.getByRole('button', { name: /notificat/i }))
     expect(screen.queryByText(/some_unknown_key/)).not.toBeInTheDocument()
+    // With no known follow-up, the status sentence still shows on its own.
+    expect(screen.getByText(/Mislukt\./)).toBeInTheDocument()
   })
 
   it('renders no action-status line for a plain row', () => {
