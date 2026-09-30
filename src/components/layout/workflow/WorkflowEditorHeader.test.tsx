@@ -71,13 +71,13 @@ describe('WorkflowEditorHeader · interview-workflow toggle (INTERVIEW-FLAG-1)',
   it('reflects isInterview via aria-pressed and calls onToggleInterview on click', () => {
     const onToggleInterview = vi.fn()
     const { rerender } = render(<WorkflowEditorHeader {...baseProps} isInterview={false} onToggleInterview={onToggleInterview} />)
-    const toggle = screen.getByText('editor.interviewWorkflow').closest('button')
+    const toggle = screen.getByRole('button', { name: 'editor.interviewWorkflow' })
     expect(toggle).toHaveAttribute('aria-pressed', 'false')
     toggle?.click()
     expect(onToggleInterview).toHaveBeenCalledTimes(1)
 
     rerender(<WorkflowEditorHeader {...baseProps} isInterview onToggleInterview={onToggleInterview} />)
-    expect(screen.getByText('editor.interviewWorkflow').closest('button')).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: 'editor.interviewWorkflow' })).toHaveAttribute('aria-pressed', 'true')
   })
 })
 

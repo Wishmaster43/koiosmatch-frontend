@@ -194,9 +194,13 @@ export default function WorkflowEditorHeader({
       {/* INTERVIEW-FLAG-1 (Danny 30-09, point 4): the maker marks this workflow as
           an interview workflow so it — and only it — shows in an application's or
           vacancy's interview picker; the shared toolbar-toggle, no new affordance. */}
-      <QuickViewToggle active={isInterview} onToggle={onToggleInterview}
+      {/* HEADER-FIT-1 (measured 30-09 right after landing: with a labelled toggle the
+          packed toolbar overflowed at 1280px and pushed Save out of the viewport, the
+          smoke flow could no longer click it): icon-only, the name lives in aria-label
+          and the tooltip; the pressed accent fill still says "interview workflow". */}
+      <QuickViewToggle active={isInterview} onToggle={onToggleInterview} iconOnly
         label={t('editor.interviewWorkflow')} icon={MessageSquare}
-        title={t('editor.interviewWorkflowHint')} />
+        title={`${t('editor.interviewWorkflow')}: ${t('editor.interviewWorkflowHint')}`} />
 
       <div style={{ flex: 1 }} />
 
