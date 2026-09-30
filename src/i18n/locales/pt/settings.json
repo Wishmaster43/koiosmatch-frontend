@@ -4042,6 +4042,9 @@
       "vacancy_advice_stale_days_unit": {
         "label": "Conselho de vaga desatualizado: unidade"
       },
+      "match_advice_renew_days_unit": {
+        "label": "Conselho de renovação de match: unidade"
+      },
       "vacancy_koios_advice_stale_days": {
         "label": "Conselho Koios de vaga desatualizado (dias)"
       },

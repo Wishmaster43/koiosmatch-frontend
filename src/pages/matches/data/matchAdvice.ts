@@ -6,6 +6,7 @@
  * R-1b) — no new fetch, no invented data.
  */
 import type { MatchRow } from '@/types/match'
+import { windowDays, windowBoundaryAfter, type WindowUnit } from '@/lib/windowUnit'
 
 export type MatchAdviceAction = 'renew' | 'none'
 
@@ -22,6 +23,10 @@ export interface MatchAdviceOptions {
   // How many days before (or past) the end date counts as "approaching"
   // (tenant-configurable, mirrors vacancies' staleDays).
   renewWithinDays: number
+  // WINDOW-UNIT-READERS-1: the unit `renewWithinDays` is expressed in (mirrors
+  // the backend's WindowUnit) — defaults to 'days' so an untenanted/legacy
+  // caller behaves exactly as before.
+  renewUnit?: WindowUnit
   now?: Date
 }
 
@@ -45,7 +50,15 @@ export function deriveMatchAdvice(m: MatchRow, opts: MatchAdviceOptions): MatchA
   if (Number.isNaN(end.getTime())) return NONE_RULE
   const now = opts.now ?? new Date()
   const daysUntilEnd = Math.floor((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-  if (daysUntilEnd <= opts.renewWithinDays) {
+  // Boundary comparison honours the tenant's unit (weeks/months/workdays), but
+  // stays behaviour-neutral for the `days` unit: the OLD rule compared at DAY
+  // granularity (`daysUntilEnd <= renewWithinDays`). windowDays() re-derives the
+  // window in whole days from the boundary (round for days/weeks/months, whose
+  // gap is N days give or take a DST hour; floor for the start-of-day workdays
+  // walk), so `days` reproduces the exact old truth in every timezone.
+  const unit = opts.renewUnit ?? 'days'
+  const boundary = windowBoundaryAfter(now, opts.renewWithinDays, unit)
+  if (daysUntilEnd <= windowDays(now, boundary, unit)) {
     return { action: 'renew', reasonKey: 'koios.reasons.endDateApproaching', reasonParams: { days: daysUntilEnd } }
   }
 

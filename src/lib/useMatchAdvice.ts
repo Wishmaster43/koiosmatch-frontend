@@ -7,7 +7,8 @@
  */
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
+import { useAllSettings } from '@/lib/settings/useAllSettings'
+import { readWindowSetting } from '@/lib/settings/readWindowSetting'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { deriveMatchAdvice } from '@/pages/matches/shared'
 import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
@@ -18,15 +19,17 @@ export function useMatchAdvice(): (m: MatchRow) => KoiosAdvice | null {
   // Match lifecycle lookup (R-1b) — a closed match has nothing left to renew.
   const { metaOf: statusMeta } = useMatchStatuses()
   // How many days before (or past) the end date counts as "approaching" — tenant-
-  // configurable, mirrors vacancies' staleDays.
+  // configurable, mirrors vacancies' staleDays. WINDOW-UNIT-READERS-1: the
+  // amount's unit follows the tenant's `match_advice_renew_days_unit` setting
+  // (tolerantly: absent/unrecognised → days, until the BE catalogue carries the row).
   const settings = useAllSettings()
-  const renewWithinDays = getNumberSetting(settings, 'match_advice_renew_days', 30)
+  const { amount: renewWithinDays, unit: renewUnit } = readWindowSetting(settings, 'match_advice_renew_days', 30)
 
   // Stable identity: the table's memoized columns depend on this resolver.
   return useCallback((m: MatchRow): KoiosAdvice | null => {
     // Honest rule engine: an open match whose end date is approaching or passed
     // fires; closed, open-ended or comfortable-runway rows stay an em-dash.
-    const rule = deriveMatchAdvice(m, { isClosed: Boolean(statusMeta(m.status)?.is_closed), renewWithinDays })
+    const rule = deriveMatchAdvice(m, { isClosed: Boolean(statusMeta(m.status)?.is_closed), renewWithinDays, renewUnit })
     if (rule.action === 'none') return null
     return {
       action: rule.action,
@@ -34,5 +37,5 @@ export function useMatchAdvice(): (m: MatchRow) => KoiosAdvice | null {
       reason: t(rule.reasonKey, { ...rule.reasonParams, defaultValue: 'The contract end date is approaching.' }),
       source: 'rules',
     }
-  }, [t, statusMeta, renewWithinDays])
+  }, [t, statusMeta, renewWithinDays, renewUnit])
 }

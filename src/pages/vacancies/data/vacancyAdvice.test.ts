@@ -39,6 +39,28 @@ describe('deriveVacancyAdvice', () => {
   })
 })
 
+describe('deriveVacancyAdvice — window units (WINDOW-UNIT-READERS-1)', () => {
+  it('weeks: a 13-day-old vacancy is not stale under a 2-week window, a 15-day-old one is', () => {
+    const notStale = { published: true, archived: false, applicationsCount: 0, publishedAt: '2026-07-22T12:00:00Z' } // 13 days old
+    const stale = { published: true, archived: false, applicationsCount: 0, publishedAt: '2026-07-20T12:00:00Z' } // 15 days old
+    expect(deriveVacancyAdvice(notStale as never, { staleDays: 2, staleUnit: 'weeks', now: NOW }).action).toBe('none')
+    expect(deriveVacancyAdvice(stale as never, { staleDays: 2, staleUnit: 'weeks', now: NOW }).action).toBe('attention')
+  })
+
+  it('workdays: 5 workdays across a weekend', () => {
+    // NOW is 2026-08-04 (Tuesday). 5 workdays before: Mon 03, Fri 31, Thu 30, Wed 29, Tue 28-07.
+    const notStale = { published: true, archived: false, applicationsCount: 0, publishedAt: '2026-07-29T00:00:00Z' }
+    const stale = { published: true, archived: false, applicationsCount: 0, publishedAt: '2026-07-27T00:00:00Z' }
+    expect(deriveVacancyAdvice(notStale as never, { staleDays: 5, staleUnit: 'workdays', now: NOW }).action).toBe('none')
+    expect(deriveVacancyAdvice(stale as never, { staleDays: 5, staleUnit: 'workdays', now: NOW }).action).toBe('attention')
+  })
+
+  it('days (default unit): unchanged behaviour', () => {
+    const rule = deriveVacancyAdvice(makeVacancy(), { staleDays: 14, now: NOW })
+    expect(rule.action).toBe('attention')
+  })
+})
+
 // Wave-2 clock parity: a vacancy created long ago but (re)published RECENTLY is
 // not stale — the server counts from COALESCE(published_at, created_at) and so do we.
 it('measures staleness from publishedAt when present, falling back to created', () => {

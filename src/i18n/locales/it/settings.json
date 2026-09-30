@@ -4042,6 +4042,9 @@
       "vacancy_advice_stale_days_unit": {
         "label": "Consiglio per la posizione obsoleto: unità"
       },
+      "match_advice_renew_days_unit": {
+        "label": "Consiglio di rinnovo match: unità"
+      },
       "vacancy_koios_advice_stale_days": {
         "label": "Consiglio Koios per la posizione obsoleto (giorni)"
       },

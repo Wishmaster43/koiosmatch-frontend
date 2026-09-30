@@ -218,6 +218,31 @@ describe('KoiosAdviceSettings — application-stage unit picker', () => {
   })
 })
 
+// WINDOW-UNIT-READERS-1: the match-renewal unit picker renders only once the
+// BE catalogue lists match_advice_renew_days_unit (feature detection — an
+// older BE has no such row yet and must render exactly as before then).
+describe('KoiosAdviceSettings — match renewal unit picker (WINDOW-UNIT-READERS-1)', () => {
+  it('renders no unit picker when the catalogue lacks the key', () => {
+    mockSettings.mockReturnValue({})
+    renderKAS()
+    expect(screen.queryByRole('button', { name: st('settings.windows.match_advice_renew_days_unit.label') })).not.toBeInTheDocument()
+  })
+
+  it('renders the unit picker once the catalogue lists the key, and persists a chosen unit', async () => {
+    catalogSections = [{ id: 'windows', keys: [
+      { key: 'match_advice_renew_days_unit', section: 'windows', type: 'select', default: 'days', aliases: [],
+        label_key: 'settings.windows.match_advice_renew_days_unit.label', ui: 'generic', fe_screen: 'windows' },
+    ] }]
+    mockSettings.mockReturnValue({})
+    const user = userEvent.setup()
+    renderKAS()
+    await user.click(screen.getByRole('button', { name: st('settings.windows.match_advice_renew_days_unit.label') }))
+    await user.click(await screen.findByText(st('settings.options.window_unit.weeks')))
+
+    await waitFor(() => expect(saveSettingsKeys).toHaveBeenCalledWith({ match_advice_renew_days_unit: 'weeks' }))
+  })
+})
+
 describe('KoiosAdviceSettings — save failure reverts', () => {
   it('reverts the match field and notifies on a failed save', async () => {
     mockSettings.mockReturnValue({ [MATCH_ADVICE_RENEW_DAYS_KEY]: 30 })

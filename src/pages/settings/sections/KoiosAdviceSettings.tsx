@@ -36,12 +36,14 @@ import StageWindowMapField from '../components/StageWindowMapField'
 import { useSettingsCatalog } from '../catalog/useSettingsCatalog'
 import {
   VACANCY_ADVICE_STALE_DAYS_KEY, VACANCY_ADVICE_STALE_DAYS_UNIT_KEY, MATCH_ADVICE_RENEW_DAYS_KEY,
+  MATCH_ADVICE_RENEW_DAYS_UNIT_KEY,
   APPLICATION_STAGE_STALE_DAYS_KEY, APPLICATION_STAGE_STALE_DAYS_UNIT_KEY, APPLICATION_STAGE_STALE_BY_PHASE_KEY,
 } from './koiosAdviceKeys'
 
 // Re-exported for call sites/tests that import the keys from this screen module.
 export {
   VACANCY_ADVICE_STALE_DAYS_KEY, VACANCY_ADVICE_STALE_DAYS_UNIT_KEY, MATCH_ADVICE_RENEW_DAYS_KEY,
+  MATCH_ADVICE_RENEW_DAYS_UNIT_KEY,
   APPLICATION_STAGE_STALE_DAYS_KEY, APPLICATION_STAGE_STALE_DAYS_UNIT_KEY, APPLICATION_STAGE_STALE_BY_PHASE_KEY,
 }
 const VACANCY_STALE_DEFAULT = 14
@@ -65,6 +67,12 @@ export default function KoiosAdviceSettings() {
   const { sections: catalogSections } = useSettingsCatalog()
   const hasStageByPhase = useMemo(
     () => catalogSections.some(section => section.keys.some(row => row.key === APPLICATION_STAGE_STALE_BY_PHASE_KEY)),
+    [catalogSections],
+  )
+  // WINDOW-UNIT-READERS-1: the match-renewal unit picker renders only once the
+  // BE catalogue lists this key (an older BE would 422 on the write otherwise).
+  const hasMatchUnitRow = useMemo(
+    () => catalogSections.some(section => section.keys.some(row => row.key === MATCH_ADVICE_RENEW_DAYS_UNIT_KEY)),
     [catalogSections],
   )
   return (
@@ -91,16 +99,20 @@ export default function KoiosAdviceSettings() {
           ariaLabel={t('settings.windows.vacancy_advice_stale_days_unit.label')}
           saveFailedMessage={t('koiosAdvice.vacancyStaleSaveFailed')} />} />
       {/* How many days before (or past) a match's end date counts as "approaching"
-          (MatchesTable.tsx's Koios column, "Renew?"). */}
+          (MatchesTable.tsx's Koios column, "Renew?"). WINDOW-UNIT-READERS-1: the
+          FE reads match_advice_renew_days through the same readWindowSetting
+          helper as the other two windows; the unit picker itself renders only
+          once the BE catalogue lists the row (feature detection, hasMatchUnitRow). */}
       <NumberSettingField id="match-advice-renew-days" settingsKey={MATCH_ADVICE_RENEW_DAYS_KEY}
         title={t('koiosAdvice.matchRenewTitle')} hint={t('koiosAdvice.matchRenewHint')}
         label={t('koiosAdvice.matchRenewLabel')} saveFailedMessage={t('koiosAdvice.matchRenewSaveFailed')}
-        defaultValue={MATCH_RENEW_DEFAULT} min={DAYS_MIN} max={DAYS_MAX} />
+        defaultValue={MATCH_RENEW_DEFAULT} min={DAYS_MIN} max={DAYS_MAX}
+        unit={hasMatchUnitRow ? <WindowUnitField settingsKey={MATCH_ADVICE_RENEW_DAYS_UNIT_KEY}
+          ariaLabel={t('settings.windows.match_advice_renew_days_unit.label')}
+          saveFailedMessage={t('koiosAdvice.matchRenewSaveFailed')} /> : undefined} />
       {/* How many days an application can sit in its current funnel stage before
           Koios flags it "too long in stage" (ApplicationsTable/ApplicationsPage
-          attention KPI). match_advice_renew_days has no reader/unit row (BE
-          worklist) — the vacancy and application-stage windows are the only two
-          with a unit picker. */}
+          attention KPI). */}
       <NumberSettingField id="application-stage-stale-days" settingsKey={APPLICATION_STAGE_STALE_DAYS_KEY}
         title={t('koiosAdvice.applicationStaleTitle')} hint={t('koiosAdvice.applicationStaleHint')}
         label={t('koiosAdvice.applicationStaleLabel')} saveFailedMessage={t('koiosAdvice.applicationStaleSaveFailed')}

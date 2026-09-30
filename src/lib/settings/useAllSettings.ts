@@ -17,7 +17,7 @@ import { useState, useEffect } from 'react'
 import api, { getActiveTenantId } from '../api'
 import { invalidateKpiCache } from '../useKpiSettings'
 
-type SettingsBlob = Record<string, unknown>
+export type SettingsBlob = Record<string, unknown>
 
 // SETTINGS-LOAD-ERROR-1: load state per tenant, exposed via useSettingsLoadState()
 // so a consumer can tell "still loading" apart from "the GET actually failed" —

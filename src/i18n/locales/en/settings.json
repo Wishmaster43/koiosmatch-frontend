@@ -4041,6 +4041,9 @@
       "vacancy_advice_stale_days_unit": {
         "label": "Vacancy advice stale: unit"
       },
+      "match_advice_renew_days_unit": {
+        "label": "Match advice renewal: unit"
+      },
       "vacancy_koios_advice_stale_days": {
         "label": "Koios vacancy advice stale (days)"
       },

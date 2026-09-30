@@ -7,7 +7,8 @@
  */
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
+import { useAllSettings } from '@/lib/settings/useAllSettings'
+import { readWindowSetting } from '@/lib/settings/readWindowSetting'
 import { deriveVacancyAdvice } from '@/pages/vacancies/shared-core'
 import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import type { Vacancy } from '@/types/vacancy'
@@ -17,14 +18,16 @@ export function useVacancyAdvice(): (v: Vacancy) => KoiosAdvice | null {
   const { t } = useTranslation(['vacancies', 'common'])
   // How many days without an application counts as "stale" (mirrors candidates'
   // no_contact_alert_months threshold) — tenant-configurable, sensible default.
+  // WINDOW-UNIT-READERS-1: the amount's unit (days/workdays/weeks/months)
+  // follows the tenant's `vacancy_advice_stale_days_unit` setting.
   const settings = useAllSettings()
-  const staleDays = getNumberSetting(settings, 'vacancy_advice_stale_days', 14)
+  const { amount: staleDays, unit: staleUnit } = readWindowSetting(settings, 'vacancy_advice_stale_days', 14)
 
   // Stable identity: the table's memoized columns depend on this resolver.
   return useCallback((v: Vacancy): KoiosAdvice | null => {
     // Honest rule engine: published + zero applications + past the stale
     // threshold fires; everything else stays an em-dash.
-    const rule = deriveVacancyAdvice(v, { staleDays })
+    const rule = deriveVacancyAdvice(v, { staleDays, staleUnit })
     if (rule.action === 'none') return null
     return {
       action: rule.action,
@@ -32,5 +35,5 @@ export function useVacancyAdvice(): (v: Vacancy) => KoiosAdvice | null {
       reason: t(rule.reasonKey, { ...rule.reasonParams, defaultValue: 'No applications yet, posted {{days}} days ago.' }),
       source: 'rules',
     }
-  }, [t, staleDays])
+  }, [t, staleDays, staleUnit])
 }

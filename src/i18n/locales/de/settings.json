@@ -4041,6 +4041,9 @@
       "vacancy_advice_stale_days_unit": {
         "label": "Stellenempfehlung veraltet: Einheit"
       },
+      "match_advice_renew_days_unit": {
+        "label": "Match-Empfehlung Verlängerung: Einheit"
+      },
       "vacancy_koios_advice_stale_days": {
         "label": "Koios-Stellenempfehlung veraltet (Tage)"
       },

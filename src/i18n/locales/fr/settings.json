@@ -4041,6 +4041,9 @@
       "vacancy_advice_stale_days_unit": {
         "label": "Conseil de poste obsolète : unité"
       },
+      "match_advice_renew_days_unit": {
+        "label": "Conseil de renouvellement de match : unité"
+      },
       "vacancy_koios_advice_stale_days": {
         "label": "Conseil Koios de poste obsolète (jours)"
       },
