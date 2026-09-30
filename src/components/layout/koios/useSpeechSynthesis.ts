@@ -41,11 +41,22 @@ export function useSpeechSynthesis() {
   }, [])
 
   // Cancel any running utterance, then queue a fresh one for text/lang.
-  const speak = useCallback((text: string, lang: string) => {
+  // `voiceName` (VOICE-SETTINGS-1): applied only when it names a voice CURRENTLY
+  // present in getVoices() — a stale/remote name (tenant switched browsers, or the
+  // picked voice is no longer local) falls back to the first LOCAL voice for this
+  // language (never a remote one — §8: the read-aloud path must never risk sending
+  // text to a server-side voice), and only when none exists is utterance.voice left
+  // unset (true, unpickable browser default).
+  const speak = useCallback((text: string, lang: string, voiceName?: string | null) => {
     if (!supported || !text || !window.speechSynthesis) return
     window.speechSynthesis.cancel()
     const utterance = new SpeechSynthesisUtterance(text)
     utterance.lang = lang
+    const voices = window.speechSynthesis.getVoices?.() ?? []
+    const named = voiceName ? voices.find(v => v.name === voiceName && v.localService === true) : undefined
+    const langPrefix = lang.split('-')[0]
+    const localFallback = named ?? voices.find(v => v.localService === true && v.lang?.split('-')[0] === langPrefix)
+    if (localFallback) utterance.voice = localFallback
     utterance.onstart = () => setSpeaking(true)
     utterance.onend = () => setSpeaking(false)
     utterance.onerror = () => setSpeaking(false)

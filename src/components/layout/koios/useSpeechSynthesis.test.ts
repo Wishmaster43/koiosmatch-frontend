@@ -68,6 +68,38 @@ describe('useSpeechSynthesis', () => {
     expect(result.current.speaking).toBe(false)
   })
 
+  it('applies the named voice when it is a currently available local voice', () => {
+    const local = { name: 'Google NL', lang: 'nl-NL', localService: true } as SpeechSynthesisVoice
+    ;(window.speechSynthesis as unknown as { getVoices: () => SpeechSynthesisVoice[] }).getVoices = () => [local]
+    const { result } = renderHook(() => useSpeechSynthesis())
+    act(() => { result.current.speak('hi', 'nl-NL', 'Google NL') })
+    const utterance = speak.mock.calls[0][0] as FakeUtterance & { voice?: SpeechSynthesisVoice }
+    expect(utterance.voice).toBe(local)
+  })
+
+  it('ignores a voice name that is remote or no longer available', () => {
+    const remote = { name: 'Cloud NL', lang: 'nl-NL', localService: false } as SpeechSynthesisVoice
+    ;(window.speechSynthesis as unknown as { getVoices: () => SpeechSynthesisVoice[] }).getVoices = () => [remote]
+    const { result } = renderHook(() => useSpeechSynthesis())
+    act(() => { result.current.speak('hi', 'nl-NL', 'Cloud NL') })
+    let utterance = speak.mock.calls[0][0] as FakeUtterance & { voice?: SpeechSynthesisVoice }
+    expect(utterance.voice).toBeUndefined()
+
+    act(() => { result.current.speak('hi', 'nl-NL', 'Unknown Voice') })
+    utterance = speak.mock.calls[1][0] as FakeUtterance & { voice?: SpeechSynthesisVoice }
+    expect(utterance.voice).toBeUndefined()
+  })
+
+  it('falls back to the first local voice for the language when no name is given', () => {
+    const local = { name: 'Google NL', lang: 'nl-NL', localService: true } as SpeechSynthesisVoice
+    const remote = { name: 'Cloud NL', lang: 'nl-NL', localService: false } as SpeechSynthesisVoice
+    ;(window.speechSynthesis as unknown as { getVoices: () => SpeechSynthesisVoice[] }).getVoices = () => [remote, local]
+    const { result } = renderHook(() => useSpeechSynthesis())
+    act(() => { result.current.speak('hi', 'nl-NL') })
+    const utterance = speak.mock.calls[0][0] as FakeUtterance & { voice?: SpeechSynthesisVoice }
+    expect(utterance.voice).toBe(local)
+  })
+
   it('cancel() stops speech immediately and resets speaking', () => {
     const { result } = renderHook(() => useSpeechSynthesis())
     act(() => { result.current.speak('hi', 'nl-NL') })

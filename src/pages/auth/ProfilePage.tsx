@@ -6,7 +6,7 @@
  */
 import { useEffect, useState, Suspense } from 'react'
 import { useTranslation }      from 'react-i18next'
-import { User, Mail, Sun, Camera, Shield, MessageCircle, Bell } from 'lucide-react'
+import { User, Mail, Sun, Camera, Shield, MessageCircle, Bell, Mic } from 'lucide-react'
 import { useTheme }           from '@/context/ThemeContext'
 import { useAuth }            from '@/context/AuthContext'
 import Avatar                 from '@/components/ui/Avatar'
@@ -21,6 +21,7 @@ import { SecuritySettings, MyNotificationsSettings } from '@/pages/settings/shar
 import { Section, ProfileTabs } from './profileParts'
 import ProfileDetailsTab       from './ProfileDetailsTab'
 import ProfileDisplayTab       from './ProfileDisplayTab'
+import ProfileVoiceTab         from './ProfileVoiceTab'
 import { useProfileForm }      from './useProfileForm'
 
 // Role/user page.whatsapp permission whitelist, mirroring the role-level check
@@ -40,7 +41,7 @@ function hasWhatsappWebPagePermission(auth: ReturnType<typeof useAuth>): boolean
 }
 
 // The tab ids a navigation intent may open (row 32: the moved Mijn meldingen deep link).
-const PROFILE_TABS = ['profile', 'email', 'display', 'notifications', 'whatsapp', 'security']
+const PROFILE_TABS = ['profile', 'email', 'display', 'voice', 'notifications', 'whatsapp', 'security']
 const tabFromIntent = (intent?: { tab?: string } | null): string =>
   intent?.tab && PROFILE_TABS.includes(intent.tab) ? intent.tab : 'profile'
 
@@ -63,11 +64,15 @@ export default function ProfilePage({ intent = null }: { intent?: { tab?: string
   // whatsapp_web module AND the role's page.whatsapp permission allows it
   // (matches the BE route gate exactly — see hasWhatsappWebPagePermission above).
   const showWhatsAppWeb = !!auth?.hasModule('whatsapp_web') && hasWhatsappWebPagePermission(auth)
+  // VOICE-SETTINGS-1: the voice tab only shows when the tenant carries the `speech` add-on
+  // (same conditional-spread idiom as WhatsApp Web above).
+  const showVoice = !!auth?.hasModule?.('speech')
 
   const tabs = [
     { id: 'profile',  label: t('profile.tabs.profile'), icon: User },
     { id: 'email',    label: t('profile.tabs.email'),   icon: Mail },
     { id: 'display',  label: t('profile.tabs.display'), icon: Sun },
+    ...(showVoice ? [{ id: 'voice', label: t('profile.tabs.voice'), icon: Mic }] : []),
     // Row 32 (Danny 09-09): the caller's own notification overrides are a personal
     // preference, so they live here and not under the tenant settings.
     { id: 'notifications', label: t('profile.tabs.notifications'), icon: Bell },
@@ -154,6 +159,8 @@ export default function ProfilePage({ intent = null }: { intent?: { tab?: string
         <ProfileDisplayTab form={form} setForm={setForm} onPickPageSize={savePageSize}
           theme={theme} setTheme={setTheme} language={language} setLanguage={setLanguage} />
       )}
+
+      {tab === 'voice' && showVoice && <ProfileVoiceTab />}
 
       {tab === 'security' && (
         <Section title={tSettings('nav.security')}>

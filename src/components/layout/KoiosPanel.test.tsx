@@ -64,7 +64,17 @@ const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
 // stub shape as KoiosMentionMenu.test.tsx's own auth stub.
 // SPEECH-1: the `speech` add-on gates the mic + conversation mode; switchable per test.
 const speechModule = vi.hoisted(() => ({ enabled: true }))
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true, hasModule: (m: string) => (m === 'speech' ? speechModule.enabled : true) }) }))
+// VOICE-SETTINGS-1: the user's own ui_preferences.koios_voice blob, switchable per test
+// (useKoiosVoicePreference reads this via the real useUserPreference, off `user`).
+const voicePrefModule = vi.hoisted(() => ({ ui_preferences: null as Record<string, unknown> | null }))
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: () => ({
+    hasPermission: () => true,
+    hasModule: (m: string) => (m === 'speech' ? speechModule.enabled : true),
+    user: { ui_preferences: voicePrefModule.ui_preferences },
+    refreshUser: () => {},
+  }),
+}))
 
 // Landing state (Danny 21/7): the radar REPLACES the old feature-list welcome, and only
 // while no real conversation has started yet. Danny 09-09 (point 1): the one-line
@@ -632,6 +642,25 @@ describe('KoiosPanel · conversation mode (VOICE-MODE-1)', () => {
       expect(screen.queryByRole('button', { name: 'voice.conversationMode' })).toBeNull()
       expect(screen.queryByRole('button', { name: /voice\.(start|stop|dictate)/ })).toBeNull()
     } finally { speechModule.enabled = true }
+  })
+
+  // VOICE-SETTINGS-1: the mic is hidden entirely once the user's own
+  // preference switches input off, independent of browser support.
+  it('hides the mic when the user switched off speech input in their preference', async () => {
+    stubVoiceApis()
+    voicePrefModule.ui_preferences = { koios_voice: { input: false } }
+    try {
+      renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+      await screen.findByText('common:koios.radar.empty')
+      expect(screen.queryByRole('button', { name: /voice\.(start|stop)/ })).toBeNull()
+    } finally { voicePrefModule.ui_preferences = null }
+  })
+
+  it('renders the mic with default preferences (no ui_preferences saved yet)', async () => {
+    stubVoiceApis()
+    renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    await screen.findByText('common:koios.radar.empty')
+    expect(screen.getByRole('button', { name: /voice\.(start|stop)/ })).toBeInTheDocument()
   })
 
   // (c) switching the toggle on and sending a message sends voice_mode: true.

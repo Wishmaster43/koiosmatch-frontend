@@ -38,6 +38,7 @@ import { useKoiosAssistant } from './koios/useKoiosAssistant'
 import { refsFromAppLinks } from './koios/koiosAmbientContext'
 import KoiosVoiceButton from './koios/KoiosVoiceButton'
 import { useKoiosConversationMode } from './koios/useKoiosConversationMode'
+import { useKoiosVoicePreference } from '@/hooks/useKoiosVoicePreference'
 import { notifySuccess } from '@/lib/notify'
 import type { KoiosContextRef } from '@/types/koios'
 
@@ -146,10 +147,18 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
     setTimeout(() => textareaRef.current?.focus(), 50)
   }
 
+  // VOICE-SETTINGS-1: the user's own mic/read-aloud/voice preference (ProfileVoiceTab).
+  const [voicePref] = useKoiosVoicePreference()
+
   // VOICE-MODE-1: conversation-mode wiring (feature gate, auto-send-after-
   // dictation, speak-the-latest-answer) — split into its own hook, see its docblock.
+  // readAloud/voiceName (VOICE-SETTINGS-1) let Koios speak answers without the
+  // hands-free voiceMode toggle, using the user's own picked local voice.
   const { available: conversationModeAvailable, speaking: koiosSpeaking, onDictationEnd } =
-    useKoiosConversationMode({ voiceMode, open, locale, input, submit, messages })
+    useKoiosConversationMode({
+      voiceMode, open, locale, input, submit, messages,
+      readAloud: voicePref.readAloud, voiceName: voicePref.voiceName,
+    })
   // SPEECH-1 (BE bundle MISC Lane D): dictation + conversation mode are the `speech`
   // add-on — the mic and the speaker button render only when the tenant carries it.
   const auth = useAuth()
@@ -428,8 +437,13 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
               </Button>
             )}
 
-            {/* Voice dictation (SPEECH-1) — renders nothing without browser support or the speech add-on */}
-            {speechEnabled && <KoiosVoiceButton onText={appendVoiceText} t={t} onEnd={onDictationEnd} />}
+            {/* Voice dictation (SPEECH-1) — renders nothing without browser support or the speech add-on.
+                VOICE-SETTINGS-1: hidden entirely when the user switched mic input off; `lang` follows the
+                user's dictation-language preference ('auto' -> undefined, i.e. the active UI locale). */}
+            {speechEnabled && voicePref.input && (
+              <KoiosVoiceButton onText={appendVoiceText} t={t} onEnd={onDictationEnd}
+                lang={voicePref.language === 'auto' ? undefined : voicePref.language} />
+            )}
 
             {/* Send */}
             <button

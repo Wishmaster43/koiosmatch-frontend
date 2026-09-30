@@ -22,6 +22,13 @@ interface UseKoiosConversationModeArgs {
   input: string
   submit: (text?: string) => void
   messages: KoiosChatMessage[]
+  // VOICE-SETTINGS-1: the user's own "read aloud" preference, independent of
+  // the hands-free conversation-mode toggle — reading answers aloud must
+  // NEVER also auto-send the next dictation (that stays tied to voiceMode).
+  readAloud?: boolean
+  // Picked local voice name (or null for the browser default); passed straight
+  // through to useSpeechSynthesis.speak.
+  voiceName?: string | null
 }
 
 // Wires the feature gate, auto-send-on-dictation-end, and speak-the-latest-
@@ -29,7 +36,7 @@ interface UseKoiosConversationModeArgs {
 // held as one `tts` object) so `speak`/`cancel` — stable useCallback
 // references inside useSpeechSynthesis — can sit directly in dependency
 // arrays below, with no exhaustive-deps disable needed.
-export function useKoiosConversationMode({ voiceMode, open, locale, input, submit, messages }: UseKoiosConversationModeArgs) {
+export function useKoiosConversationMode({ voiceMode, open, locale, input, submit, messages, readAloud = false, voiceName = null }: UseKoiosConversationModeArgs) {
   const { supported, speaking, speak, cancel } = useSpeechSynthesis()
   // The toggle is only offered when BOTH browser APIs exist.
   const available = isDictationSupported() && supported
@@ -48,23 +55,29 @@ export function useKoiosConversationMode({ voiceMode, open, locale, input, submi
   // Speak the newest assistant answer once, tracked by message index so a
   // re-render never repeats it and switching the mode back on mid-conversation
   // never replays an answer that was already read out (or never spoken at all).
+  // VOICE-SETTINGS-1: runs on EITHER voiceMode OR the user's own readAloud
+  // preference — the auto-send-after-dictation behaviour above stays tied to
+  // voiceMode alone (readAloud must never start auto-sending).
   const spokenIndexRef = useRef(-1)
   useEffect(() => {
-    if (!voiceMode) return
+    // Never speak into a closed panel — mark the current message as already
+    // "spoken" so a later re-open never plays a stale answer out of turn.
+    if (!open) { spokenIndexRef.current = messages.length - 1; return }
+    if (!voiceMode && !readAloud) return
     const lastIndex = messages.length - 1
     const last = messages[lastIndex]
     if (!last || last.role !== 'assistant' || !last.answer) return
     if (spokenIndexRef.current === lastIndex) return
     spokenIndexRef.current = lastIndex
     const lang = RECOGNITION_LANG[locale.split('-')[0]] ?? 'en-US'
-    speak(toSpeakableText(last.answer), lang)
-  }, [messages, voiceMode, locale, speak])
+    speak(toSpeakableText(last.answer), lang, voiceName)
+  }, [messages, voiceMode, readAloud, locale, speak, voiceName, open])
 
-  // Cancel any running speech the moment the panel closes or the mode is
-  // switched off — Koios must never keep talking into a closed/silent panel.
+  // Cancel any running speech the moment the panel closes or both speech
+  // sources are switched off — Koios must never keep talking into a closed/silent panel.
   useEffect(() => {
-    if (!open || !voiceMode) cancel()
-  }, [open, voiceMode, cancel])
+    if (!open || (!voiceMode && !readAloud)) cancel()
+  }, [open, voiceMode, readAloud, cancel])
 
   return { available, speaking, onDictationEnd }
 }
