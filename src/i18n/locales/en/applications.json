@@ -279,15 +279,15 @@
     "filterBusy": "In interview",
     "start": {
       "label": "Start interview",
-      "agentPlaceholder": "Choose an AI agent",
+      "needsWorkflow": "Pick an interview workflow above first, or set the default on the vacancy.",
       "started": "Interview started.",
       "alreadyRunning": "Interview already running. Showing the existing session.",
       "alreadyHasSession": "This candidate already has an open interview on another application.",
       "unavailable": "Starting an interview isn't available yet. Waiting on the backend link.",
-      "noAgentChosen": "Choose an AI agent first.",
       "loadError": "Failed to load AI agents.",
       "forbidden": "Starting an interview is not available for your role. Ask an administrator to link an interview workflow to the vacancy.",
       "viaWorkflow": "Start via {{workflow}} ({{agent}})",
+      "viaWorkflowNoAgent": "Start via {{workflow}}",
       "reasons": {
         "no_mobile_or_consent": "The candidate has no mobile number or no WhatsApp consent.",
         "no_active_connection": "No active WhatsApp connection for this vacancy.",
@@ -296,7 +296,11 @@
         "no_active_flow": "The chosen AI agent has no active interview flow.",
         "no_candidate": "No candidate linked to this application.",
         "send_failed": "Sending failed. Try again.",
-        "no_agent": "No interview workflow or AI agent available."
+        "no_agent": "No interview workflow or AI agent available.",
+        "no_interview_workflow": "No interview workflow is linked to this application or vacancy.",
+        "workflow_inactive": "The linked interview workflow is not active.",
+        "budget_exceeded": "The interview-start budget has been used up.",
+        "workflow_failed": "The interview workflow failed. Please try again."
       }
     },
     "status": {

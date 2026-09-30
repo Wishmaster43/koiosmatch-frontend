@@ -6,7 +6,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MessageCircle, FileText } from 'lucide-react'
-import CreatableSelect from '@/components/ui/CreatableSelect'
 import StatusPill from '@/components/ui/StatusPill'
 import { GroupLabel } from '@/components/ui/typography'
 import Spinner from '@/components/ui/Spinner'
@@ -28,12 +27,17 @@ import type { Id } from '@/types/common'
 
 type TranscriptMsg = ApplicationDetail['interviews'][number]['transcript'][number]
 
-// The 7 guard-skip reasons the 422 response carries for INTERVIEW-PERAPP-1
-// (COORDINATION-LOG r22-07 audit round) — each maps to its own i18n message;
-// an unknown/future code falls back to the generic action-failed notice (§3).
+// The guard-skip reasons the 422 response carries for INTERVIEW-PERAPP-1
+// (COORDINATION-LOG r22-07 audit round), extended by INTERVIEW-FLAG-1 with the
+// no-linked-workflow/inactive/budget/engine-failure reasons — each maps to its
+// own i18n message; an unknown/future code falls back to the generic
+// action-failed notice (§3).
 const START_INTERVIEW_REASONS = [
   'no_mobile_or_consent', 'no_active_connection', 'rejected_stage',
   'placed_stage', 'no_active_flow', 'no_candidate', 'send_failed', 'no_agent',
+  'no_interview_workflow', 'workflow_inactive', 'budget_exceeded', 'workflow_failed',
+  // 'already_running' reads its own existing alreadyRunning message (see onStart), not a reasons.* key.
+  'already_running',
 ] as const
 type StartInterviewReason = (typeof START_INTERVIEW_REASONS)[number]
 const isStartInterviewReason = (v: unknown): v is StartInterviewReason =>
@@ -77,49 +81,38 @@ function TranscriptBubble({ msg }: { msg: TranscriptMsg }) {
  * is running yet. Hidden entirely without applications.update (mirrors
  * InterviewStatusCard's canManage gate — same permission, same source).
  *
- * INTERVIEW-VISIBILITY-1 (Danny 29-09): when a workflow is IN EFFECT (this
- * application's own override, or the vacancy's default), the agent is DERIVED
- * from it — no picker, the card just says which workflow/agent will run and
- * posts that agent id straight away. The manual agent picker below is now only
- * the FALLBACK path, for an application with no workflow in effect at all.
- * Response handling per the confirmed contract: 201 = started, 200 = an
- * idempotent dup on THIS SAME application (existing session returned — still
- * success, own toast so "started" is never claimed for a session already
- * running), 409 already_has_session = an OPEN session on a DIFFERENT
- * application (specific message, not the generic fallback), 422 = a guard
- * skip with one of the known reasons (own message each, unknown reasons fall
- * back to the generic notice; `no_agent` covers a BE still on the OLD contract
- * with neither a workflow nor a chosen agent). The 404 honest-gate stays as a
- * safety net (§3) though it should no longer be hit in practice.
+ * INTERVIEW-FLAG-1 (Danny 30-09, points 1-3: "Workflow is genoeg toch?" /
+ * "Start interview moet wel kunnen maar dan start dus onderwater de
+ * workflow"): the manual agent picker is GONE — the card is ONE line (the
+ * effective workflow's caption) plus a single "Start interview" button, which
+ * POSTs with NO body; the backend derives the agent from the effective
+ * workflow (this application's own override, else the vacancy default) and
+ * refuses with `no_interview_workflow` when nothing is linked. So the button
+ * is only ENABLED when an effective workflow resolved at all (regardless of
+ * whether it carries a known agent name) — never a dead affordance (§3).
+ * Response handling: 201 = started, 200 = an idempotent dup on THIS SAME
+ * application (existing session returned — still success, own toast so
+ * "started" is never claimed for a session already running), 409
+ * already_has_session = an OPEN session on a DIFFERENT application (specific
+ * message), 422 = a guard skip with one of the known reasons (own message
+ * each, unknown reasons fall back to the generic notice). The 404 honest-gate
+ * stays as a safety net (§3) though it should no longer be hit in practice.
  */
 function StartInterviewAction({ applicationId, effective, onStarted }: {
   applicationId: Id | undefined
-  // INTERVIEW-VISIBILITY-1: the resolved workflow in effect, or null when none —
-  // computed once by the parent (InterviewsTab) so this card and the status
-  // card's own caption always agree on the same resolution.
+  // The resolved workflow in effect, or null when none — computed once by the
+  // parent (InterviewsTab) so this card and the status card's own caption
+  // always agree on the same resolution.
   effective: EffectiveInterviewWorkflow | null
   onStarted: (iv: ApplicationInterview) => void
 }) {
   const { t } = useTranslation('applications')
   const auth = useAuth()
   const canManage = auth?.hasPermission?.('applications.update') ?? false
-  // A workflow "in effect" only replaces the picker when it actually resolved an
-  // agent — a workflow without one still needs the manual picker, otherwise
-  // this card would offer nothing but a dead "no agent chosen" error (§3).
-  const derived = effective?.agentId != null ? effective : null
-  // The manual picker only needs to load when no workflow is in effect.
-  // INTERVIEW-PICKER-AUTHZ-FE: the agent half of the same narrow endpoint the
-  // workflow picker reads below — ONE request for the tab, not two (react-query
-  // dedupes the shared `['interview-options']` key across both call sites).
-  const { agentOptions: options, loading, error, forbidden } = useInterviewOptions(canManage && !derived)
-  const [agentId, setAgentId] = useState('')
   const [busy, setBusy] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
 
   if (!canManage) return null
-  // INTERVIEW-403-1: the agent list is a role answer (403) and no workflow resolved an
-  // agent, so nothing here can start — say so calmly instead of a dead button (§3).
-  if (!derived && forbidden) return <Caption style={{ fontStyle: 'italic' }}>{t('interview.start.forbidden')}</Caption>
 
   // Real POST against the now-live contract — see the doc comment above for the
   // full 200/201/409/422 breakdown. A 404 (safety net only) disables the action
@@ -127,12 +120,12 @@ function StartInterviewAction({ applicationId, effective, onStarted }: {
   // notably 422 send_failed, where the backend rolls the session back so a
   // simple re-click of this same button IS the retry (§3, no fake affordance).
   const onStart = async () => {
-    const chosenAgentId = derived?.agentId ?? agentId
-    if (!chosenAgentId) { notifyError(t('interview.start.noAgentChosen')); return }
-    if (busy || applicationId == null) return
+    if (busy || applicationId == null || !effective) return
     setBusy(true)
     try {
-      const res = await api.post(`/applications/${applicationId}/interview`, { agent_id: chosenAgentId })
+      // INTERVIEW-FLAG-1: no body — the server derives the agent from the
+      // effective workflow, so the client no longer chooses or sends one.
+      const res = await api.post(`/applications/${applicationId}/interview`)
       const raw = unwrap<NonNullable<ApiApplication['interview']>>(res)
       const iv = mapInterview(raw)
       if (iv) onStarted(iv)
@@ -149,6 +142,8 @@ function StartInterviewAction({ applicationId, effective, onStarted }: {
         // A DIFFERENT application already has an open session for this candidate —
         // distinct from the 404 gate and from a generic failure (specific, actionable copy).
         notifyError(t('interview.start.alreadyHasSession'))
+      } else if (reason === 'already_running') {
+        notifyError(t('interview.start.alreadyRunning'))
       } else if (status === 422 && isStartInterviewReason(reason)) {
         notifyError(t(`interview.start.reasons.${reason}`))
       } else {
@@ -163,22 +158,26 @@ function StartInterviewAction({ applicationId, effective, onStarted }: {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '10px 12px',
       background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        {/* A workflow is in effect AND resolved an agent: no picker needed. */}
-        {derived ? (
-          <Caption>{t('interview.start.viaWorkflow', { workflow: derived.workflowName, agent: derived.agentName })}</Caption>
-        ) : (
-          <CreatableSelect value={agentId || null} onChange={setAgentId} allowCreate={false}
-            placeholder={loading ? t('common:loading') : t('interview.start.agentPlaceholder')}
-            options={options.map(o => ({ value: String(o.value), label: o.label }))} />
+        {/* The effective workflow's caption — the agent name only when the
+            resolution actually carries one (a workflow without an embedded
+            agent still starts; the server derives it). */}
+        {effective && (
+          <Caption>
+            {effective.agentName
+              ? t('interview.start.viaWorkflow', { workflow: effective.workflowName, agent: effective.agentName })
+              : t('interview.start.viaWorkflowNoAgent', { workflow: effective.workflowName })}
+          </Caption>
         )}
         {/* House Button (Danny 20-08, pasted this pill: "this one too") — the 05-08
             soft-tint predates PRIMAIR-VLAK-1; an accent ACTION wears the solid trio
             via Button, at the drawer sm standard. */}
-        <Button variant="primary" onClick={onStart} disabled={busy || unavailable}>
+        <Button variant="primary" onClick={onStart} disabled={busy || unavailable || !effective}
+          title={!effective ? t('interview.start.needsWorkflow') : undefined}>
           {t('interview.start.label')}
         </Button>
       </div>
-      {!derived && error && <span style={{ fontSize: 11, color: 'var(--color-danger-text)' }}>{t('interview.start.loadError')}</span>}
+      {/* No effective workflow at all: disabled button + an honest reason (§3). */}
+      {!effective && <Caption style={{ fontStyle: 'italic' }}>{t('interview.start.needsWorkflow')}</Caption>}
       {unavailable && (
         <Caption style={{ fontStyle: 'italic' }}>{t('interview.start.unavailable')}</Caption>
       )}

@@ -63,6 +63,9 @@ export interface Workflow {
   // object (only `folder_id`), so no `folder` field belongs here.
   kind?: string
   tag?: string
+  // INTERVIEW-FLAG-1: maker-set flag, persisted verbatim (never derived); `kind`
+  // above is now DERIVED from this on the backend, not from an ai_agent step.
+  is_interview?: boolean
   agent?: { id: string | number; name: string } | null
   steps: WorkflowStep[]
   last_run?: WorkflowLastRun | null

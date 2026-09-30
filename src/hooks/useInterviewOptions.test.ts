@@ -18,20 +18,19 @@ vi.mock('@/lib/api', async (importOriginal) => {
 const wrapper = ({ children }: { children: ReactNode }) =>
   createElement(QueryClientProvider, { client: new QueryClient({ defaultOptions: { queries: { retry: false } } }) }, children)
 
+// INTERVIEW-FLAG-1: the `agents` list is gone from the contract — workflows only.
 const payload = {
   workflows: [{ id: 'wf-1', name: 'Kelly-Helpende', agent: { id: 'ag-1', name: 'Kelly' } }],
-  agents: [{ id: 'ag-1', name: 'Kelly' }, { id: 'ag-2', name: 'Sam' }],
 }
 
 beforeEach(() => vi.clearAllMocks())
 
 describe('useInterviewOptions · the narrow interview-options endpoint', () => {
-  it('maps workflows and agents to picker options', async () => {
+  it('maps workflows to picker options', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: payload } as never)
     const { result } = renderHook(() => useInterviewOptions(true), { wrapper })
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.workflowOptions).toEqual([{ value: 'wf-1', label: 'Kelly-Helpende' }])
-    expect(result.current.agentOptions).toEqual([{ value: 'ag-1', label: 'Kelly' }, { value: 'ag-2', label: 'Sam' }])
     expect(api.get).toHaveBeenCalledWith('/applications/interview-options', expect.objectContaining({ quietStatuses: [403] }))
   })
 
@@ -51,6 +50,5 @@ describe('useInterviewOptions · the narrow interview-options endpoint', () => {
     await waitFor(() => expect(result.current.forbidden).toBe(true))
     expect(result.current.error).toBe(false)
     expect(result.current.workflowOptions).toEqual([])
-    expect(result.current.agentOptions).toEqual([])
   })
 })

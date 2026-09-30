@@ -111,13 +111,16 @@ export function deriveStartTrigger(steps: Array<{ type?: string; config?: Record
 export function computeWorkflowSnapshot(
   nodes: FlowNode[], edges: FlowEdge[], name: string | undefined, trigger: string | undefined,
   scheduleConfig: ScheduleConfig | null, webhookId: string | number | null, status: string,
+  // INTERVIEW-FLAG-1: the maker-set flag travels verbatim in the snapshot too,
+  // so toggling it alone (no graph/name/status change) still reads as dirty.
+  isInterview = false,
 ): string {
   const steps = flowToSteps(nodes, edges)
   // A webhook/applicant_event start card overrides the header trigger (see deriveStartTrigger).
   const start = deriveStartTrigger(steps)
-  if (start) return JSON.stringify({ name, trigger: start.trigger, trigger_config: start.triggerConfig, status, steps })
+  if (start) return JSON.stringify({ name, trigger: start.trigger, trigger_config: start.triggerConfig, status, steps, is_interview: isInterview })
   const triggerConfig = buildHeaderTriggerConfig(trigger, scheduleConfig, webhookId)
-  return JSON.stringify({ name, trigger, trigger_config: triggerConfig, status, steps })
+  return JSON.stringify({ name, trigger, trigger_config: triggerConfig, status, steps, is_interview: isInterview })
 }
 
 // The header trigger's persisted trigger_config, shared by handleSave and the

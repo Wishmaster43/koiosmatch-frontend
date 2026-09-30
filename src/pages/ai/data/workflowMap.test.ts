@@ -182,6 +182,18 @@ describe('denormalizeWorkflow', () => {
     ])
   })
 
+  it('INTERVIEW-FLAG-1: carries is_interview verbatim through normalize -> denormalize (LABEL-NOOIT-TERUGPARSEN)', () => {
+    const wfTrue = normalizeWorkflow({ steps: [], is_interview: true } as Partial<RawWorkflow>)
+    expect(denormalizeWorkflow(wfTrue)).toEqual(expect.objectContaining({ is_interview: true }))
+    const wfFalse = normalizeWorkflow({ steps: [], is_interview: false } as Partial<RawWorkflow>)
+    expect(denormalizeWorkflow(wfFalse)).toEqual(expect.objectContaining({ is_interview: false }))
+  })
+
+  it('INTERVIEW-FLAG-1: omits is_interview from the payload when the workflow never carried the field (never resets a stored true)', () => {
+    const payload = denormalizeWorkflow(base({}))
+    expect(payload).not.toHaveProperty('is_interview')
+  })
+
   it('does not itself append folder_id — callers add it explicitly (WorkflowsPage.tsx spreads `{ ...denormalizeWorkflow(wf), folder_id }`)', () => {
     const payload = denormalizeWorkflow(base({ folder_id: 'f1' }))
     expect(payload).not.toHaveProperty('folder_id')

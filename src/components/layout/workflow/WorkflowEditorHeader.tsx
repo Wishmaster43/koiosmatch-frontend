@@ -9,7 +9,7 @@
  * Everything it shows arrives as props and every control reports upward, so the
  * editor keeps all state in `useWorkflowEditor` and this file stays presentational.
  */
-import { X, Save, Play, Zap, List, Clock, Workflow as WorkflowIcon, History, FlaskConical, GitBranch } from 'lucide-react'
+import { X, Save, Play, Zap, List, Clock, Workflow as WorkflowIcon, History, FlaskConical, GitBranch, MessageSquare } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { scheduleLabel } from './ScheduleModal'
 import { StopRunButton } from './runControl'
@@ -35,6 +35,7 @@ export default function WorkflowEditorHeader({
   view, onViewChange,
   trigger, scheduleConfig, onOpenSchedule,
   status, onToggleStatus, statusUnsaved = false,
+  isInterview, onToggleInterview,
   showLogs, onToggleLogs,
   runError, runBudget, onRunError, runConflict,
   liveRunActive, activeRunId, onStopped,
@@ -60,6 +61,11 @@ export default function WorkflowEditorHeader({
   // RUN-SAVES-FIRST-1: true while the local status differs from the server's —
   // the pill says so, and Run announces that it saves first.
   statusUnsaved?: boolean
+  // INTERVIEW-FLAG-1: the maker-set flag that puts this workflow into the
+  // interview picker (application/vacancy interview tab) — a toolbar toggle,
+  // never a hand-painted button (the toolbar-toggle canon).
+  isInterview: boolean
+  onToggleInterview: () => void
   showLogs: boolean
   onToggleLogs: () => void
   // VERTREKMODULE-1: true when the first step is not a Koios entity/webhook.
@@ -184,6 +190,13 @@ export default function WorkflowEditorHeader({
         {statusUnsaved && <span style={{ fontWeight: 400 }}>{t('status.unsaved')}</span>}
       </button>
       {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
+
+      {/* INTERVIEW-FLAG-1 (Danny 30-09, point 4): the maker marks this workflow as
+          an interview workflow so it — and only it — shows in an application's or
+          vacancy's interview picker; the shared toolbar-toggle, no new affordance. */}
+      <QuickViewToggle active={isInterview} onToggle={onToggleInterview}
+        label={t('editor.interviewWorkflow')} icon={MessageSquare}
+        title={t('editor.interviewWorkflowHint')} />
 
       <div style={{ flex: 1 }} />
 

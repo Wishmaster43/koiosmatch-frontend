@@ -279,15 +279,15 @@
     "filterBusy": "In colloquio",
     "start": {
       "label": "Avvia colloquio",
-      "agentPlaceholder": "Scegli un agente AI",
+      "needsWorkflow": "Scegli prima un flusso di colloquio qui sopra, oppure imposta quello predefinito sulla posizione.",
       "started": "Colloquio avviato.",
       "alreadyRunning": "Il colloquio è già in corso. Viene mostrata la sessione esistente.",
       "alreadyHasSession": "Questo candidato ha già un colloquio aperto su un'altra candidatura.",
       "unavailable": "L'avvio del colloquio non è ancora disponibile. In attesa del collegamento con il backend.",
-      "noAgentChosen": "Scegli prima un agente AI.",
       "loadError": "Impossibile caricare gli agenti AI.",
       "forbidden": "Avviare un colloquio non è disponibile per il tuo ruolo. Chiedi a un amministratore di collegare un workflow di colloquio alla posizione.",
       "viaWorkflow": "Avvia tramite {{workflow}} ({{agent}})",
+      "viaWorkflowNoAgent": "Avvia tramite {{workflow}}",
       "reasons": {
         "no_mobile_or_consent": "Il candidato non ha un numero di cellulare o non ha dato il consenso a WhatsApp.",
         "no_active_connection": "Nessun collegamento WhatsApp attivo per questa posizione.",
@@ -296,7 +296,11 @@
         "no_active_flow": "L'agente AI scelto non ha un flusso di colloquio attivo.",
         "no_candidate": "Nessun candidato collegato a questa candidatura.",
         "send_failed": "Invio non riuscito. Riprova.",
-        "no_agent": "Nessun workflow di colloquio o agente IA disponibile."
+        "no_agent": "Nessun workflow di colloquio o agente IA disponibile.",
+        "no_interview_workflow": "Nessun flusso di colloquio è collegato a questa candidatura o posizione.",
+        "workflow_inactive": "Il flusso di colloquio collegato non è attivo.",
+        "budget_exceeded": "Il budget per avviare colloqui è esaurito.",
+        "workflow_failed": "Il flusso di colloquio non è riuscito. Riprova."
       }
     },
     "status": {

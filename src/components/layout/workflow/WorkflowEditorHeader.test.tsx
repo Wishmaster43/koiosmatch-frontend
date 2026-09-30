@@ -24,6 +24,8 @@ const baseProps = {
   onOpenSchedule: vi.fn(),
   status: 'inactive',
   onToggleStatus: vi.fn(),
+  isInterview: false,
+  onToggleInterview: vi.fn(),
   showLogs: false,
   onToggleLogs: vi.fn(),
   runError: null,
@@ -59,6 +61,23 @@ describe('WorkflowEditorHeader · a11y (BUG 5)', () => {
   it('a single-flight run conflict is announced (role="status"), not a silent bare span', () => {
     render(<WorkflowEditorHeader {...baseProps} runConflict />)
     expect(screen.getByText('runControl.alreadyRunning')).toHaveAttribute('role', 'status')
+  })
+})
+
+// INTERVIEW-FLAG-1 (Danny 30-09, point 4): the maker-set toggle that puts this
+// workflow into the interview picker — the shared QuickViewToggle, aria-pressed
+// reflects `isInterview` and a click reports upward via `onToggleInterview`.
+describe('WorkflowEditorHeader · interview-workflow toggle (INTERVIEW-FLAG-1)', () => {
+  it('reflects isInterview via aria-pressed and calls onToggleInterview on click', () => {
+    const onToggleInterview = vi.fn()
+    const { rerender } = render(<WorkflowEditorHeader {...baseProps} isInterview={false} onToggleInterview={onToggleInterview} />)
+    const toggle = screen.getByText('editor.interviewWorkflow').closest('button')
+    expect(toggle).toHaveAttribute('aria-pressed', 'false')
+    toggle?.click()
+    expect(onToggleInterview).toHaveBeenCalledTimes(1)
+
+    rerender(<WorkflowEditorHeader {...baseProps} isInterview onToggleInterview={onToggleInterview} />)
+    expect(screen.getByText('editor.interviewWorkflow').closest('button')).toHaveAttribute('aria-pressed', 'true')
   })
 })
 

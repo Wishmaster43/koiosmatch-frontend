@@ -49,7 +49,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
   const {
     edges, onNodesChange, onEdgesChange, onConnect, nodesWithFirst, selectedNode, setSelectedNodeId,
     name, setName, trigger, setTrigger, scheduleConfig, setScheduleConfig, status, setStatus,
-    serverStatus, saved, running, runError, runBudget, setRunError, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
+    serverStatus, isInterview, setIsInterview, saved, running, runError, runBudget, setRunError, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
     liveRun, activeRunId, liveRunActive, runConflict, handleStopped,
     pickerState, setPickerState, filterState, setFilterState, outputState, setOutputState,
     firstNodeId, setStartNodeId, startInvalid, getUpstreamVariables,
@@ -130,6 +130,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
           // stays a draft), so a double flip reads clean instead of "(niet opgeslagen)".
           status={status} onToggleStatus={() => setStatus(s => s === 'active' ? (serverStatus === 'active' ? 'inactive' : serverStatus) : 'active')}
           statusUnsaved={status !== serverStatus}
+          isInterview={isInterview} onToggleInterview={() => setIsInterview(v => !v)}
           startInvalid={startInvalid}
           showLogs={showLogs} onToggleLogs={() => setShowLogs(s => !s)}
           runError={runError} runBudget={runBudget} onRunError={setRunError} runConflict={runConflict}

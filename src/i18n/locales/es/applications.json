@@ -279,15 +279,15 @@
     "filterBusy": "En entrevista",
     "start": {
       "label": "Iniciar entrevista",
-      "agentPlaceholder": "Elegir un agente IA",
+      "needsWorkflow": "Elige primero un flujo de entrevista arriba, o define el predeterminado en la vacante.",
       "started": "Entrevista iniciada.",
       "alreadyRunning": "La entrevista ya está en curso. Mostrando la sesión existente.",
       "alreadyHasSession": "Este candidato ya tiene una entrevista abierta en otra solicitud.",
       "unavailable": "Iniciar una entrevista aún no está disponible. A la espera de la conexión con el backend.",
-      "noAgentChosen": "Elige primero un agente IA.",
       "loadError": "No se pudieron cargar los agentes IA.",
       "forbidden": "Iniciar una entrevista no está disponible para tu rol. Pide a un administrador que vincule un flujo de entrevista a la vacante.",
       "viaWorkflow": "Iniciar mediante {{workflow}} ({{agent}})",
+      "viaWorkflowNoAgent": "Iniciar mediante {{workflow}}",
       "reasons": {
         "no_mobile_or_consent": "El candidato no tiene número de móvil o consentimiento de WhatsApp.",
         "no_active_connection": "No hay conexión activa de WhatsApp para esta vacante.",
@@ -296,7 +296,11 @@
         "no_active_flow": "El agente IA elegido no tiene un flujo de entrevista activo.",
         "no_candidate": "No hay ningún candidato vinculado a esta solicitud.",
         "send_failed": "El envío falló. Inténtalo de nuevo.",
-        "no_agent": "No hay flujo de entrevista ni agente IA disponible."
+        "no_agent": "No hay flujo de entrevista ni agente IA disponible.",
+        "no_interview_workflow": "No hay ningún flujo de entrevista vinculado a esta solicitud o vacante.",
+        "workflow_inactive": "El flujo de entrevista vinculado no está activo.",
+        "budget_exceeded": "Se ha agotado el presupuesto para iniciar entrevistas.",
+        "workflow_failed": "El flujo de entrevista ha fallado. Inténtalo de nuevo."
       }
     },
     "status": {

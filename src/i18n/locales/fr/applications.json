@@ -279,15 +279,15 @@
     "filterBusy": "En entretien",
     "start": {
       "label": "Démarrer l'entretien",
-      "agentPlaceholder": "Choisir un agent IA",
+      "needsWorkflow": "Choisissez d'abord un workflow d'entretien ci-dessus, ou définissez celui par défaut sur l'offre.",
       "started": "Entretien démarré.",
       "alreadyRunning": "L'entretien est déjà en cours. La session existante s'affiche.",
       "alreadyHasSession": "Ce candidat a déjà un entretien ouvert sur une autre candidature.",
       "unavailable": "Démarrer un entretien n'est pas encore disponible. En attente de la liaison backend.",
-      "noAgentChosen": "Choisissez d'abord un agent IA.",
       "loadError": "Impossible de charger les agents IA.",
       "forbidden": "Démarrer un entretien n’est pas disponible pour votre rôle. Demandez à un administrateur de lier un workflow d’entretien à l’offre.",
       "viaWorkflow": "Démarrer via {{workflow}} ({{agent}})",
+      "viaWorkflowNoAgent": "Démarrer via {{workflow}}",
       "reasons": {
         "no_mobile_or_consent": "Le candidat n'a pas de numéro de mobile ou de consentement WhatsApp.",
         "no_active_connection": "Aucune connexion WhatsApp active pour cette offre.",
@@ -296,7 +296,11 @@
         "no_active_flow": "L'agent IA choisi n'a aucun flux d'entretien actif.",
         "no_candidate": "Aucun candidat associé à cette candidature.",
         "send_failed": "L'envoi a échoué. Réessayez.",
-        "no_agent": "Aucun workflow d’entretien ni agent IA disponible."
+        "no_agent": "Aucun workflow d’entretien ni agent IA disponible.",
+        "no_interview_workflow": "Aucun workflow d'entretien n'est lié à cette candidature ou à cette offre.",
+        "workflow_inactive": "Le workflow d'entretien lié n'est pas actif.",
+        "budget_exceeded": "Le budget de démarrage d'entretien est épuisé.",
+        "workflow_failed": "Le workflow d'entretien a échoué. Réessayez."
       }
     },
     "status": {

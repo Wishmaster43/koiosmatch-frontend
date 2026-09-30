@@ -77,4 +77,16 @@ describe('computeWorkflowSnapshot', () => {
     const s = computeWorkflowSnapshot(nodes, [], 'wf', 'Webhook', { agent: 'Michelle' } as never, 'wh1', 'draft')
     expect(JSON.parse(s).trigger_config).toEqual({ agent: 'Michelle' })
   })
+
+  // INTERVIEW-FLAG-1: the maker-set flag participates in the dirty-check, defaults
+  // to false so every pre-existing call above (7 args) keeps reading as unchanged.
+  it('changes when isInterview flips, and defaults to false when omitted', () => {
+    const nodes: FlowNode[] = [node('a')]
+    const omitted = computeWorkflowSnapshot(nodes, [], 'wf', 'Manual', null, null, 'draft')
+    const off     = computeWorkflowSnapshot(nodes, [], 'wf', 'Manual', null, null, 'draft', false)
+    const on      = computeWorkflowSnapshot(nodes, [], 'wf', 'Manual', null, null, 'draft', true)
+    expect(omitted).toBe(off)
+    expect(on).not.toBe(off)
+    expect(JSON.parse(on).is_interview).toBe(true)
+  })
 })

@@ -269,8 +269,14 @@ export function useWorkflowsData(showArchived: boolean) {
     } catch (err) {
       // WF-R2 saves validate the graph server-side (loop / disconnected step): surface
       // the SPECIFIC 422 detail via the shared extractApiError helper — never a raw
-      // axios/network string in the user-facing message (§10).
-      notifyError(t('page.saveFailed', { msg: extractApiError(err, t('common:actionFailed')) }))
+      // axios/network string in the user-facing message (§10). INTERVIEW-FLAG-1: the
+      // BE's fixed-key 422 (is_interview without an agent step) is translated to its
+      // own i18n key instead of showing the raw backend message.
+      const rawMsg = extractApiError(err, t('common:actionFailed'))
+      const msg = rawMsg === 'workflow.interview_requires_agent_step'
+        ? t('editor.interviewRequiresAgentStep')
+        : rawMsg
+      notifyError(t('page.saveFailed', { msg }))
       return false
     }
   }

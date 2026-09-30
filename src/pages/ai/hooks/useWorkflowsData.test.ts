@@ -124,6 +124,36 @@ describe('useWorkflowsData · handleSave error message (never raw axios/network 
     expect(notifyError).toHaveBeenCalledWith("page.saveFailed::Stap 2 ('Stuur naar Elanza'): De webhook-URL mag niet naar een intern of privé-adres wijzen.")
   })
 
+  // INTERVIEW-FLAG-1: the BE's fixed-key 422 (is_interview without an agent step)
+  // maps to its own i18n key, never showing the raw backend message.
+  it('maps the workflow.interview_requires_agent_step 422 to its own i18n key', async () => {
+    seedList()
+    mockedPut.mockRejectedValue({ response: { data: { message: 'workflow.interview_requires_agent_step' } } })
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => {
+      await result.current.handleSave({ id: 'wf-1', name: 'Welcome flow', status: 'active', is_interview: true, steps: [{ id: 's1', type: 'email_send' }] })
+    })
+
+    expect(notifyError).toHaveBeenCalledWith('page.saveFailed::editor.interviewRequiresAgentStep')
+  })
+
+  // INTERVIEW-FLAG-1: is_interview rides verbatim in the PUT body at the real seam
+  // (denormalizeWorkflow -> api.put), not only one layer up in the onSave argument.
+  it('sends is_interview in the PUT body when the workflow carries it', async () => {
+    seedList()
+    mockedPut.mockResolvedValue({ data: { data: { id: 'wf-1' } } })
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => {
+      await result.current.handleSave({ id: 'wf-1', name: 'Welcome flow', status: 'active', is_interview: true, steps: [{ id: 's1', type: 'email_send' }] })
+    })
+
+    expect(mockedPut).toHaveBeenCalledWith('/workflows/wf-1', expect.objectContaining({ is_interview: true }))
+  })
+
   // D8 re-audit: the empty-graph guard used window.alert() too — now the house
   // 'info' toast, matching every other non-error notice in this hook.
   it('the empty-graph guard notifies via the house toast, not window.alert', async () => {

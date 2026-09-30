@@ -279,15 +279,15 @@
     "filterBusy": "Im Interview",
     "start": {
       "label": "Interview starten",
-      "agentPlaceholder": "KI-Agenten auswählen",
+      "needsWorkflow": "Wähle zuerst oben einen Interview-Workflow, oder lege den Standard auf der Stelle fest.",
       "started": "Interview gestartet.",
       "alreadyRunning": "Interview läuft bereits. Bestehende Sitzung wird angezeigt.",
       "alreadyHasSession": "Dieser Kandidat hat bereits ein offenes Interview bei einer anderen Bewerbung.",
       "unavailable": "Interview starten ist noch nicht verfügbar. Wartet auf die Backend-Anbindung.",
-      "noAgentChosen": "Wählen Sie zuerst einen KI-Agenten.",
       "loadError": "KI-Agenten konnten nicht geladen werden.",
       "forbidden": "Ein Interview zu starten ist für Ihre Rolle nicht verfügbar. Bitten Sie einen Administrator, einen Interview-Workflow mit der Stelle zu verknüpfen.",
       "viaWorkflow": "Start über {{workflow}} ({{agent}})",
+      "viaWorkflowNoAgent": "Start über {{workflow}}",
       "reasons": {
         "no_mobile_or_consent": "Der Kandidat hat keine Mobilnummer oder keine WhatsApp-Zustimmung.",
         "no_active_connection": "Keine aktive WhatsApp-Verbindung für diese Stelle.",
@@ -296,7 +296,11 @@
         "no_active_flow": "Der gewählte KI-Agent hat keinen aktiven Interview-Flow.",
         "no_candidate": "Kein Kandidat mit dieser Bewerbung verknüpft.",
         "send_failed": "Versand fehlgeschlagen. Bitte erneut versuchen.",
-        "no_agent": "Kein Interview-Workflow oder KI-Agent verfügbar."
+        "no_agent": "Kein Interview-Workflow oder KI-Agent verfügbar.",
+        "no_interview_workflow": "Für diese Bewerbung oder Stelle ist kein Interview-Workflow verknüpft.",
+        "workflow_inactive": "Der verknüpfte Interview-Workflow ist nicht aktiv.",
+        "budget_exceeded": "Das Budget für Interview-Starts ist ausgeschöpft.",
+        "workflow_failed": "Der Interview-Workflow ist fehlgeschlagen. Bitte versuchen Sie es erneut."
       }
     },
     "status": {

@@ -114,6 +114,9 @@ export function denormalizeWorkflow(wf: Workflow) {
     trigger_config: wf.schedule ? { ...trigger_config, schedule: wf.schedule } : trigger_config,
     active:         wf.status === 'active',
     status:         wf.status ?? 'draft',
+    // INTERVIEW-FLAG-1: only send is_interview when present, so a list row without
+    // the field (never fetched with it) can never reset a stored true to false.
+    ...(wf.is_interview !== undefined ? { is_interview: wf.is_interview } : {}),
     steps:          (wf.steps ?? []).map((s, i) => ({
       // WFB-10: `sometimes|uuid` skips an ABSENT key but 422s on a present
       // null — emit `id` only when the step already has one (a brand-new

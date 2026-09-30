@@ -61,6 +61,9 @@ export function useWorkflowTrigger({ workflow, nodes, edges, initialNodes, initi
   const [scheduleConfig, setScheduleConfig] = useState<ScheduleConfig | null>(initialScheduleConfig)
   const [webhookId]                         = useState<string | number | null>(triggerConfig?.webhook_id ?? null)
   const [status,         setStatus]         = useState(workflow.status || 'draft')
+  // INTERVIEW-FLAG-1: the maker-set flag that puts a workflow into the interview
+  // picker — travels verbatim, never derived from steps/trigger.
+  const [isInterview,    setIsInterview]    = useState(workflow.is_interview ?? false)
   // RUN-SAVES-FIRST-1: the status the SERVER holds — the pill reads "(niet
   // opgeslagen)" while the local toggle differs from it, so a flipped-but-unsaved
   // workflow can never look active (Danny 10-09: a 422 on Run nobody understood).
@@ -72,7 +75,8 @@ export function useWorkflowTrigger({ workflow, nodes, edges, initialNodes, initi
   // reads as dirty from a round-trip shape mismatch. Updated after every save.
   const savedSnapshotRef = useRef(
     computeWorkflowSnapshot(initialNodes, initialEdges, workflow.name, workflow.trigger,
-      initialScheduleConfig, triggerConfig?.webhook_id ?? null, workflow.status || 'draft'),
+      initialScheduleConfig, triggerConfig?.webhook_id ?? null, workflow.status || 'draft',
+      workflow.is_interview ?? false),
   )
 
   // Serialize the graph back into workflow.steps and persist it; also refreshes
@@ -92,12 +96,12 @@ export function useWorkflowTrigger({ workflow, nodes, edges, initialNodes, initi
     // The ONE builder the dirty-check snapshot uses too (workflowEditorUtils).
     const nextTriggerConfig = start ? start.triggerConfig : buildHeaderTriggerConfig(trigger, scheduleConfig, webhookId)
     const nextTrigger = start ? start.trigger : trigger
-    const result = onSave({ ...workflow, name, trigger: nextTrigger, trigger_config: nextTriggerConfig, status, steps }, closeAfter)
+    const result = onSave({ ...workflow, name, trigger: nextTrigger, trigger_config: nextTriggerConfig, status, steps, is_interview: isInterview }, closeAfter)
     // Moves the baseline, the server status and the "saved" flash only on success.
     const finish = (ok: boolean): boolean => {
       if (!ok) return false
       // A save just persisted the current state — it's the new dirty-check baseline.
-      savedSnapshotRef.current = computeWorkflowSnapshot(nodes, edges, name, trigger, scheduleConfig, webhookId, status)
+      savedSnapshotRef.current = computeWorkflowSnapshot(nodes, edges, name, trigger, scheduleConfig, webhookId, status, isInterview)
       setServerStatus(status)
       if (!closeAfter) {
         setSaved(true)
@@ -109,18 +113,18 @@ export function useWorkflowTrigger({ workflow, nodes, edges, initialNodes, initi
       return (result as Promise<void | boolean>).then(r => finish(r !== false), () => false)
     }
     return finish(result !== false)
-  }, [nodes, edges, workflow, name, trigger, scheduleConfig, webhookId, status, onSave])
+  }, [nodes, edges, workflow, name, trigger, scheduleConfig, webhookId, status, isInterview, onSave])
 
-  // Dirty-check (item 19): true when the live graph/name/trigger/schedule/status
-  // differ from the last-saved baseline — serialize-compare via the shared
-  // computeWorkflowSnapshot so it stays cheap and never drifts from handleSave.
+  // Dirty-check (item 19): true when the live graph/name/trigger/schedule/status/
+  // interview-flag differ from the last-saved baseline — serialize-compare via
+  // the shared computeWorkflowSnapshot so it stays cheap and never drifts from handleSave.
   const isDirty = useCallback(
-    () => computeWorkflowSnapshot(nodes, edges, name, trigger, scheduleConfig, webhookId, status) !== savedSnapshotRef.current,
-    [nodes, edges, name, trigger, scheduleConfig, webhookId, status],
+    () => computeWorkflowSnapshot(nodes, edges, name, trigger, scheduleConfig, webhookId, status, isInterview) !== savedSnapshotRef.current,
+    [nodes, edges, name, trigger, scheduleConfig, webhookId, status, isInterview],
   )
 
   return {
     name, setName, trigger, setTrigger, scheduleConfig, setScheduleConfig, webhookId, status, setStatus,
-    serverStatus, saved, handleSave, isDirty,
+    isInterview, setIsInterview, serverStatus, saved, handleSave, isDirty,
   }
 }

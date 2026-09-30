@@ -279,15 +279,15 @@
     "filterBusy": "In interview",
     "start": {
       "label": "Interview starten",
-      "agentPlaceholder": "Kies een AI-agent",
+      "needsWorkflow": "Kies eerst een interview-workflow hierboven, of stel de standaard op de vacature in.",
       "started": "Interview gestart.",
       "alreadyRunning": "Interview loopt al. Bestaande sessie getoond.",
       "alreadyHasSession": "Deze kandidaat heeft al een open interview op een andere sollicitatie.",
       "unavailable": "Interview starten is nog niet beschikbaar. Wacht op de backend-koppeling.",
-      "noAgentChosen": "Kies eerst een AI-agent.",
       "loadError": "AI-agenten laden is mislukt.",
       "forbidden": "Een interview starten is niet beschikbaar voor jouw rol. Vraag een beheerder om een interview-workflow aan de vacature te koppelen.",
       "viaWorkflow": "Start via {{workflow}} ({{agent}})",
+      "viaWorkflowNoAgent": "Start via {{workflow}}",
       "reasons": {
         "no_mobile_or_consent": "Kandidaat heeft geen mobiel nummer of geen WhatsApp-toestemming.",
         "no_active_connection": "Geen actieve WhatsApp-koppeling voor deze vacature.",
@@ -296,7 +296,11 @@
         "no_active_flow": "De gekozen AI-agent heeft geen actieve interviewflow.",
         "no_candidate": "Geen kandidaat gekoppeld aan deze sollicitatie.",
         "send_failed": "Verzenden is mislukt. Probeer het opnieuw.",
-        "no_agent": "Geen interview-workflow of AI-agent beschikbaar."
+        "no_agent": "Geen interview-workflow of AI-agent beschikbaar.",
+        "no_interview_workflow": "Er is geen interview-workflow gekoppeld aan deze sollicitatie of vacature.",
+        "workflow_inactive": "De gekoppelde interview-workflow is niet actief.",
+        "budget_exceeded": "Het budget voor het starten van interviews is op.",
+        "workflow_failed": "De interview-workflow is mislukt. Probeer het opnieuw."
       }
     },
     "status": {

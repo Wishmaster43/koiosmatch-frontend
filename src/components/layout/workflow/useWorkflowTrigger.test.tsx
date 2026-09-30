@@ -45,6 +45,27 @@ describe('useWorkflowTrigger · handleSave payload (denormalized per trigger)', 
   })
 })
 
+// INTERVIEW-FLAG-1: the maker-set flag seeds from workflow.is_interview, travels
+// in the save payload and participates in the dirty-check.
+describe('useWorkflowTrigger · isInterview (INTERVIEW-FLAG-1)', () => {
+  it('seeds from workflow.is_interview, defaulting to false', () => {
+    const onSave = vi.fn()
+    const { result } = renderHook(() => useWorkflowTrigger({ workflow: wf(), nodes, edges, initialNodes: nodes, initialEdges: edges, onSave }))
+    expect(result.current.isInterview).toBe(false)
+  })
+
+  it('toggling isInterview flips the save payload and rises the dirty flag', () => {
+    const onSave = vi.fn()
+    const { result } = renderHook(() => useWorkflowTrigger({ workflow: wf({ is_interview: false }), nodes, edges, initialNodes: nodes, initialEdges: edges, onSave }))
+    expect(result.current.isDirty()).toBe(false)
+    act(() => result.current.setIsInterview(true))
+    expect(result.current.isDirty()).toBe(true)
+    act(() => result.current.handleSave())
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ is_interview: true }), false)
+    expect(result.current.isDirty()).toBe(false)
+  })
+})
+
 describe('useWorkflowTrigger · isDirty (dirty-check baseline)', () => {
   it('is clean on load, dirty after a field change, clean again after handleSave', () => {
     const onSave = vi.fn()
