@@ -6,6 +6,11 @@
  * (bold/italic/strikethrough via WhatsApp's own markup + a curated emoji
  * panel) and the existing Send button — Enter still sends, Shift+Enter still
  * inserts a newline, exactly like the input it replaces.
+ * COMPOSER-SHARED-1 (Danny 30-09 on the start-conversation popup: "ik mis hier
+ * ook nog steeds bold, cursief en emoticons en het tekstveld is veel te klein"):
+ * the same composer serves a popup that owns its own footer — pass no `onSend`
+ * and it renders no Send button, Enter inserts a newline, and `minRows` sets
+ * a taller field. One composer, never a second copy (§11).
  */
 import { useCallback, useRef, useState, type KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -18,18 +23,23 @@ import { COMPOSER_EMOJI } from './composerEmoji'
 export interface ThreadComposerProps {
   value: string
   onChange: (text: string) => void
-  onSend: () => void
-  sending: boolean
+  // Absent when the host owns its own Send (a popup footer): no Send button, Enter = newline.
+  onSend?: () => void
+  sending?: boolean
   placeholder: string
+  // Rows the field starts at (default 2, the thread); the cap grows with it so a
+  // taller popup field still auto-grows. The thread keeps its 2..6 rule.
+  minRows?: number
 }
 
-// Auto-grow rule from the brief: rows = min(6, max(2, newline count + 1)).
-function rowsFor(text: string): number {
+// Auto-grow rule from the brief: rows = min(cap, max(minRows, newline count + 1)),
+// the thread's own numbers being min 2 / cap 6.
+function rowsFor(text: string, minRows: number): number {
   const lines = text.split('\n').length
-  return Math.min(6, Math.max(2, lines))
+  return Math.min(Math.max(6, minRows + 4), Math.max(minRows, lines))
 }
 
-export default function ThreadComposer({ value, onChange, onSend, sending, placeholder }: ThreadComposerProps) {
+export default function ThreadComposer({ value, onChange, onSend, sending = false, placeholder, minRows = 2 }: ThreadComposerProps) {
   const { t } = useTranslation('candidates')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [emojiOpen, setEmojiOpen] = useState(false)
@@ -54,9 +64,10 @@ export default function ThreadComposer({ value, onChange, onSend, sending, place
     el?.focus()
   }, [value, applyResult])
 
-  // Enter sends, Shift+Enter inserts a newline — same contract as the input it replaces.
+  // Enter sends, Shift+Enter inserts a newline — same contract as the input it
+  // replaces. Without an `onSend` (popup host) Enter simply inserts a newline.
   const onTextareaKeyDown = useCallback((e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (onSend && e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       onSend()
     }
@@ -118,13 +129,15 @@ export default function ThreadComposer({ value, onChange, onSend, sending, place
 
       <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end' }}>
         <textarea ref={textareaRef} value={value} onChange={e => onChange(e.target.value)} onKeyDown={onTextareaKeyDown}
-          rows={rowsFor(value)} placeholder={placeholder} aria-label={placeholder}
+          rows={rowsFor(value, minRows)} placeholder={placeholder} aria-label={placeholder}
           style={{ ...bodyTextStyle, flex: 1, minWidth: 0, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border)',
             background: 'var(--surface)', resize: 'none', fontFamily: 'inherit', lineHeight: 1.4 }} />
-        <Button variant="primary" onClick={onSend} disabled={!value.trim() || sending}
-          aria-label={t('common:send')} title={t('common:send')} style={{ width: 30, flexShrink: 0 }}>
-          <Send size={13} />
-        </Button>
+        {onSend && (
+          <Button variant="primary" onClick={onSend} disabled={!value.trim() || sending}
+            aria-label={t('common:send')} title={t('common:send')} style={{ width: 30, flexShrink: 0 }}>
+            <Send size={13} />
+          </Button>
+        )}
       </div>
     </div>
   )

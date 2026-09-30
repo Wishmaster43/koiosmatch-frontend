@@ -60,3 +60,20 @@ describe('ThreadComposer', () => {
     expect(onSend).toHaveBeenCalledTimes(1)
   })
 })
+
+// COMPOSER-SHARED-1: hosted by a popup that owns its own Send (StartConversationModal).
+describe('ThreadComposer · popup host without onSend', () => {
+  it('renders no Send button, lets Enter insert a newline, and starts at minRows', async () => {
+    const onChange = vi.fn()
+    render(<ThreadComposer value="" onChange={onChange} placeholder="Type…" minRows={8} />)
+    expect(screen.queryByRole('button', { name: 'common:send' })).toBeNull()
+    const field = screen.getByPlaceholderText('Type…') as HTMLTextAreaElement
+    expect(field.rows).toBe(8)
+    // Formatting and emoji stay: the bold button wraps the (empty) selection with WhatsApp markup.
+    await userEvent.click(screen.getByRole('button', { name: 'conversations.composer.bold' }))
+    expect(onChange).toHaveBeenCalledWith('**')
+    const keyEvent = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })
+    field.dispatchEvent(keyEvent)
+    expect(keyEvent.defaultPrevented).toBe(false)
+  })
+})

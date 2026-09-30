@@ -59,9 +59,9 @@ import type { Id } from '@/types/common'
 import type { AiAgent } from '@/types/ai'
 import Button from '@/components/ui/Button'
 import TitleBarPills from '@/components/ui/TitleBarPills'
+import ThreadComposer from '@/components/drawer/ThreadComposer'
 import ModalTitleBarPillsRow from '@/components/forms/ModalTitleBarPillsRow'
 import { CHANNEL_COLORS } from '@/components/drawer/channelColors'
-import { TextArea } from '@/components/forms/fields'
 import { useWaWebSendDevices } from './useWaWebSendDevices'
 
 // The two start channels — WABA's template send and WA Web's free text (WA-SEND-1).
@@ -265,9 +265,11 @@ export default function StartConversationModal({ candidateId, subject, applicati
           <>
             <div style={{ marginBottom: 14 }}>
               <div style={fieldLabel}>{t('conversations.message')}</div>
-              {/* Plain text on purpose: a WhatsApp message travels as text, never HTML (the
-                  reply composer on the thread is the same plain field). */}
-              <TextArea value={message} onChange={setMessage} placeholder={t('conversations.messagePlaceholder')} rows={4} style={fieldFootprint} />
+              {/* COMPOSER-SHARED-1 (Danny 30-09): the thread's own composer — bold/italic/
+                  strikethrough in WhatsApp markup + emoji, a tall auto-growing field — with
+                  no Send of its own (the popup footer sends). Plain text on purpose: a
+                  WhatsApp message travels as text, never HTML. */}
+              <ThreadComposer value={message} onChange={setMessage} placeholder={t('conversations.messagePlaceholder')} minRows={8} />
               <div style={{ fontSize: 11, color: trimmedMessage.length > WA_WEB_MESSAGE_MAX ? 'var(--color-danger-text)' : 'var(--text-muted)', marginTop: 3, textAlign: 'right' }}>
                 {/* GETALLEN-1 through i18next's own number formatting ({{n, number}}) — lib/formatters
                     would drag lib/datetime and the i18n init into every consumer of this modal
